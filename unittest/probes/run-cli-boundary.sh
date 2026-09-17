@@ -1406,5 +1406,4 @@ printf '%s\n' '#define WHICH "first"' >"$SCRIPT/search/first/config.h"
 : >"$SCRIPT/search/second/optional.h"
 [[ $(pick) == 'first optional' ]]
 
-echo "CLI, dependency, build, run, script, manifest, and state probes:" \
-  "144 passed"
+echo "CLI, dependency, build, run, script, manifest, and state probes passed"

@@ -66,4 +66,4 @@ check_case update \
   $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((op +)) location=\n((file "../../lib/varops.x") (line <line>) (function "Var_update"))\nx2c error floor: code 0xb3d24fbe0: non-returning error was not caught'
 check_case postfix \
   $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((op ++)) location=\n((file "../../lib/varops.x") (line <line>) (function "Var_postfix"))\nx2c error floor: code 0xb3d24fbe0: non-returning error was not caught'
-echo "Var fatal probes: 8 passed"
+echo "Var fatal probes passed"

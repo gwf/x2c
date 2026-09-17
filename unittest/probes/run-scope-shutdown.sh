@@ -137,4 +137,4 @@ test ! -s "$BUILD/completed-thread.stdout"
 test "$(head -1 "$BUILD/completed-thread.stderr")" = \
   "Thread: 1 worker(s) still live at shutdown"
 
-echo "Scope lifecycle probes: 19 passed"
+echo "Scope lifecycle probes passed"
