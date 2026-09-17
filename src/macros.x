@@ -2706,6 +2706,11 @@ static List _parse_target_definition(
   Symbol kind = definition.assoc(<kind>);
   Symbol target_kind = definition.assoc(<target>);
   const MacroPos *place = _position(position);
+  /* A block decorator standing before a file-scope function decorates that
+     function's body, so one spelling covers a statement and a whole
+     function. */
+  int body_target =
+    kind == <decorator> && target_kind == <block> && position == AST_UNIT;
   if (kind != <decorator>) {
     if (kind != place.kind &&
         !(kind == <decl-unit> && position == AST_UNIT)) {
@@ -2718,7 +2723,7 @@ static List _parse_target_definition(
     }
     return _invoke_definition(c, definition, invocation, position);
   }
-  if (_result_kind(definition) != place.kind) {
+  if (!body_target && _result_kind(definition) != place.kind) {
     String spelling = name.str();
     c.report_error(
       <macro>,
@@ -2752,7 +2757,12 @@ static List _parse_target_definition(
         invocation, %(${_definition_note(definition)}));
     }
     target_start = c.token;
-    if (target_kind == <function>) target = c.parse_function_target();
+    List decorated = NULL;
+    if (body_target) {
+      decorated = c.parse_function_definition();
+      match (decorated) case %(function ? ? ?body): target = body;
+    }
+    else if (target_kind == <function>) target = c.parse_function_target();
     else if (target_kind == <named-type>) target = c.parse_named_type();
     else switch (position) {
       case AST_UNIT:       target = c.parse_top_level(); break;
@@ -2796,7 +2806,13 @@ static List _parse_target_definition(
       transaction.commit();
       return %(seq $node);
     }
-    List result = c.bind_syntax(node, position, c.return_type);
+    List result = c.bind_syntax(
+      node, body_target ? AST_BLOCK : position, c.return_type);
+    if (body_target) {
+      List items = result.car() == <seq> ? result.cdr() : %($result);
+      match (decorated) case %(function ?rtype ?declarator ?):
+        result = %(seq (function $rtype $declarator (block @items)));
+    }
     $let(c.token, invocation) {
       transaction.commit();
     }
