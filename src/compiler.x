@@ -509,8 +509,6 @@ String Compiler.emitted_binding_name(Compiler compiler, List binding) {
   return binding_identity_spelling(binding);
 }
 
-static Token _next_code(Token token);
-
 /* The macros whose presence x2c output never sees: it is compiled as C by
    a GNU-style compiler, never as C++ and never by MSVC. */
 static int _never_defined(Token token) =>
@@ -1348,8 +1346,6 @@ static void _shallow_parse_unit_macro(Compiler compiler) {
   }
 }
 
-static void _note_object_macro(Compiler c, String content);
-
 static void _shallow_parse_loop(Compiler c) {
   c.rebuild_protocols(NULL);
   c.conforms = {};
@@ -1904,8 +1900,6 @@ List Compiler.cache_cons_cell(Compiler compiler, List head, List tail) {
   List cached = compiler.cache(%(cons $head_cache $tail_cache));
   return %(expr ("List") $cached);
 }
-
-static List _cache_literal_list(Compiler compiler, List values);
 
 static List _cache_literal_var(Compiler compiler, Var value) {
   if (value is <list>) {

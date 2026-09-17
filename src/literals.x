@@ -56,9 +56,6 @@ static List _parse_variable_reference(Compiler compiler) {
   return expr;
 }
 
-static List _parse_typed_capture(Compiler compiler);
-static List _atom_literal(Compiler c, String text);
-
 static List _parse_literal_element(Compiler compiler) {
   switch (compiler.peek(0)) {
     case <"?(">:     return _parse_typed_capture(compiler);

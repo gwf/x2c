@@ -393,8 +393,6 @@ static List _func_argument_locals(
   return locals.list_free();
 }
 
-static List _helper_body(Compiler compiler, List body, List setup);
-
 /* One emitted FuncAdapter ABI. Callers order context setup around argument
    locals; the ordinary helper body owner boxes results and normalizes Null. */
 static void _publish_func_adapter(
@@ -1106,9 +1104,6 @@ static List _cell_value(List cell, Type type) => %(
         (expr $type (op * ${_cell_reference(cell, type)})))
   );
 
-static List _rewrite_lambda_cells(
-  Compiler compiler, List ast, Map cells);
-
 static List _cell_declaration(
   Compiler compiler, List cell, Type type, List initializer) {
   Type pointer = type.reference();
@@ -1216,9 +1211,6 @@ static List _rewrite_lambda_cells(
   return Ast.rewrite_children(
     ast, %!(List child) => _rewrite_lambda_cells(compiler, child, cells));
 }
-
-static List _prepare_lambda_region(
-  Compiler compiler, List entries, List body);
 
 /* Nested bodies own their local cells; their construction expressions still
    execute in the enclosing region. Capture resolution has already assigned

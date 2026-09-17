@@ -11,6 +11,10 @@ $(import "../lib/private-keywords.xmacro")
 #include "compiler.x"
 #include "type.x"
 
+typedef struct PrintfFn {
+  const char *name, int fmt_arg, first_arg, unresolved;
+} PrintfFn;
+
 #pragma private
 #include "parse.x"
 #include "literals.x"
@@ -177,7 +181,32 @@ static void _note_explicit_converter(
     %($call $method ${c.token_location(origin)});
 }
 
-int Compiler.printf_variadic_start(Compiler compiler, List callee);
+static const PrintfFn printf_family_info[] = {
+  { "printf",        0, 1, 1 },
+  { "fprintf",       1, 2, 1 },
+  { "sprintf",       1, 2, 1 },
+  { "snprintf",      2, 3, 1 },
+  { "String_printf", 0, 1, 0 },
+  { "File_printf",   1, 2, 0 },
+  { "Buffer_printf", 1, 2, 0 }
+};
+
+/** Returns the printf-family entry a callee names, or `NULL`. A resolved
+    user function that happens to use a libc spelling is not one. */
+const PrintfFn *List.printf_family(List callee) {
+  match (callee)
+    case %(expr ?type (ident ?binding)): {
+      String name = binding_identity_spelling(binding);
+      int count = sizeof(printf_family_info) / sizeof(printf_family_info[0]);
+      for (int i = 0; i < count; i++) {
+        const PrintfFn *info = &printf_family_info[i];
+        if (!String.equal(name, (String) info->name)) continue;
+        if (info->unresolved && type.list()) return NULL;
+        return info;
+      }
+    }
+  return NULL;
+}
 
 /* Each argument of a call spelled in source is checked against its declared
    parameter type. A method receiver selects the method and is not a
@@ -201,8 +230,9 @@ static void _check_explicit_converter_arguments(
     _check_noted_converter(compiler, car(n), argument, expected, 0);
   }
   // A printf-family format converts each Var value it consumes.
-  int first = compiler.printf_variadic_start(callee), index = 0;
-  if (first < 0) return;
+  const PrintfFn *info = callee.printf_family();
+  if (!info) return;
+  int first = info->first_arg, index = 0;
   for (List a = arguments, n = notes; a; a = cdr(a), n = cdr(n)) {
     if (index++ >= first && car(a) is <list>)
       _check_noted_converter(

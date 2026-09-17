@@ -49,10 +49,6 @@ static List _truthy_expression(Compiler compiler, List expr) {
 
 // call and binding passes
 
-typedef struct PrintfFn {
-  const char *name, int fmt_arg, first_arg, unresolved;
-} PrintfFn;
-
 typedef enum PrintfLength {
   _printf_default,
   _printf_hh,
@@ -64,41 +60,6 @@ typedef enum PrintfLength {
   _printf_t,
   _printf_L
 } PrintfLength;
-
-static const PrintfFn printf_family_info[] = {
-  { "printf",        0, 1, 1 },
-  { "fprintf",       1, 2, 1 },
-  { "sprintf",       1, 2, 1 },
-  { "snprintf",      2, 3, 1 },
-  { "String_printf", 0, 1, 0 },
-  { "File_printf",   1, 2, 0 },
-  { "Buffer_printf", 1, 2, 0 }
-};
-
-// Identify printf-family calls without claiming a resolved user function
-// that happens to use a libc spelling.
-static const PrintfFn *_printf_family(List callee) {
-  match (callee)
-    case %(expr ?type (ident ?binding)): {
-      String name = binding_identity_spelling(binding);
-      int count = sizeof(printf_family_info) / sizeof(printf_family_info[0]);
-      for (int i = 0; i < count; i++) {
-        const PrintfFn *info = &printf_family_info[i];
-        if (!String.equal(name, (String) info->name)) continue;
-        if (info->unresolved && type.list()) return NULL;
-        return info;
-      }
-    }
-  return NULL;
-}
-
-/** Returns the index of the first value argument a printf-family `callee`
-    converts by its format, or -1 for any other callee.
-*/
-int Compiler.printf_variadic_start(Compiler compiler, List callee) {
-  const PrintfFn *info = _printf_family(callee);
-  return info ? info->first_arg : -1;
-}
 
 static int _iter_immediate_consumer(String name) =>
   name == "Iter_try_next" || name == "Iter_next" ||
@@ -231,7 +192,7 @@ static void _lower_printf_star(
 // enough to preserve native arguments around the safe automatic subset.
 static List _lower_printf_vars(Compiler c, List ast) {
   (List callee, List args_node) = ast.cdr();
-  const PrintfFn *info = _printf_family(callee);
+  const PrintfFn *info = callee.printf_family();
   if (!info) return ast;
   List args = args_node.cdr();
   if (!_printf_has_var(c, args, info->first_arg)) return ast;

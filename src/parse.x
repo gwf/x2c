@@ -246,8 +246,6 @@ static List _finish_declaration(
    storage class, or to an attribute, such as an export annotation, still
    precedes a declaration. It contributes its recorded storage, if any, and
    no other syntax. */
-static int _is_type_words(List words);
-
 static int _skip_prefix_macro(Compiler compiler, List *storage) {
   Var definition;
   if (compiler.peek(0) != <ident> ||

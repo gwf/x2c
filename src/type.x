@@ -74,9 +74,6 @@ List Type.declaration_ast(Type type, List binding) {
   return %(declare $base (bindings (bind $binding $mods)));
 }
 
-// Defined below; the two forms reach each other through `&` and `*`.
-String ast_direct_identifier(Var value);
-
 /** Returns the name whose address an expression takes, or `NULL`. */
 String ast_addressed_identifier(Var value) {
   if (value is not <list>) return NULL;
@@ -858,16 +855,14 @@ int Type.is_extern(Type type) => !!type.match(%(* extern *));
 /** Returns whether `type` carries the `threaded` storage class. */
 int Type.is_threaded(Type type) => !!type.match(%(* threaded *));
 
-/* Private version can take any internal node of a declaration AST.  It
-   will also apply modifications to inline sub-types (i.e., a struct field
-   that's a pointer). */
-static List _from_ast(List ast, List context);
-
 static List _from_ast_items(List items, List context) {
   List child;
   $ast.rewrite_children(items, child, _from_ast(child, context));
 }
 
+/* Private version can take any internal node of a declaration AST.  It
+   will also apply modifications to inline sub-types (i.e., a struct field
+   that's a pointer). */
 static List _from_ast(List ast, List context) {
   if (!ast) return ast;
   // Initializers do not contribute to the declared Type.
