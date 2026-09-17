@@ -1100,8 +1100,12 @@ static int _right_operand_level(Symbol operator) {
   return operator.is_assignment_op() ? level : level + 1;
 }
 
+/* A node already stored as a List enters its own dispatch directly. Wrapping
+   it in a one-element sequence would emit the same tokens through two more
+   frames per operand, which the pinned chain stack budgets cannot spend. */
 static List Emitter._operand(Emitter e, Var node, int level) {
-  List code = e._emit(%($node));
+  List code = node is <list> && !node.is_nil()
+            ? e._emit(node) : e._emit(%($node));
   if (_emitted_precedence(node) < level) return _parens(code);
   return code;
 }
