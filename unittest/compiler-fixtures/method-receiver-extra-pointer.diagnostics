@@ -1,0 +1,10 @@
+unittest/compiler-fixtures/method-receiver-extra-pointer.x:13:51: type: method receiver (* "List") is a pointer to ("List")
+  static int first(List *values) { return values.car().int(); }
+                                                    ^
+  note: '.' reaches one pointer level; write (*receiver).method()
+
+unittest/compiler-fixtures/method-receiver-extra-pointer.x:15:50: type: method receiver (* "Point") is a pointer to ("Point")
+  static int total(Point *point) { return point.sum(); }
+                                                   ^
+  note: '.' reaches one pointer level; write (*receiver).method()
+

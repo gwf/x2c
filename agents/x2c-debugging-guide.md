@@ -40,11 +40,12 @@ struct, including a C header it reads. C pointer member access with `->` is
 also accepted, and it is required for a layout x2c never sees, such as a
 system header or a third-party header reached through an include x2c does not
 resolve: there `.` is emitted verbatim and the C compiler rejects it. It is
-also required for a member of an anonymous aggregate and inside a `#define`
-body. The dot covers method calls, so avoid naming struct fields the same as
+also required inside a `#define` body. The dot covers method calls, so avoid
+naming struct fields the same as
 type methods to prevent ambiguity; a function-pointer field whose name is also
 a method must be called through `->`. `.` walks one pointer level, so a
-pointer to a pointer typedef keeps `(*p).field`.
+pointer to a pointer typedef keeps `(*p).field`, and a method receiver that is
+a pointer to the declared parameter is rejected with that spelling as the fix.
 
 ---
 

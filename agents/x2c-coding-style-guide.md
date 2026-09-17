@@ -1126,19 +1126,17 @@ Write `.` wherever x2c parsed the struct, whether the receiver is a value, a
 static, or a macro hole. This includes a C header x2c reads, so a native
 record declared in a header on the include path takes `.` like any other.
 
-Keep `->` in four places, where the compiler cannot select the operator:
+Keep `->` in three places, where the compiler cannot select the operator:
 
 - a pointer to a struct whose layout x2c never sees, such as one from a system
   header or a third-party header reached through an include x2c does not
   resolve; `.` there is emitted verbatim and the C compiler rejects it;
-- a member of an anonymous union or struct through a pointer;
 - a call through a function-pointer field whose name is also a method, where
   `.` selects the method;
 - inside a `#define` body, which is preprocessor text and is never lowered.
 
 Keep `(*p).field` where one `.` cannot reach: `.` walks a single pointer
-level, so writing `cursor.car()` for a `List *` compiles to a call on the
-wrong pointer and aborts at runtime.
+level, so `cursor.car()` for a `List *` is a type error naming that spelling.
 
 ### Status results
 
