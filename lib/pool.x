@@ -2,9 +2,8 @@
 
     Copyright (c) 2026 Gary William Flake
 
-    A Pool pairs a control `Scope` and canonical `Map` with
-    size-class regions for
-    small objects. Regions reuse losing intern candidates and lease backing
+    A Pool pairs a control `Scope` and canonical `Map` with size-class regions
+    for small objects. Regions reuse losing intern candidates and lease backing
     blocks from one process-wide depot; large objects retain `Scope` ownership.
 
     Lookup walks outward. An ancestor hit retains that ancestor's ownership;
@@ -12,6 +11,12 @@
     blocks to the depot and transfers promoted survivors to the parent without
     changing object pointers. Pools form a stack rather than a tree, preserving
     one canonical pointer per equal value across the active chain.
+
+    `String` and `List` allocate into one such stack per thread.
+    `Pool.open` and `Pool.close` bracket a level of it, so temporary canonical
+    values are reclaimed together; `Pool.current` names the level in force.
+    `Context` is the aggregate that pairs such a bracket with a `Scope` and
+    with `Error` and `Match` state.
 */
 
 #pragma once
