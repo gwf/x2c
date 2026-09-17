@@ -48,8 +48,8 @@ cmp "$BUILD/run.help" "$BUILD/run-short.help"
 cmp "$BUILD/script.help" "$BUILD/script-short.help"
 cmp "$BUILD/bootstrap.help" "$BUILD/bootstrap-short.help"
 cmp "$BUILD/help.help" "$BUILD/help-short.help"
-[[ $("$X2C" --version) == "x2c 0.13.0" ]]
-[[ $("$X2C" -V) == "x2c 0.13.0" ]]
+[[ $("$X2C" --version) == "x2c 0.14.0" ]]
+[[ $("$X2C" -V) == "x2c 0.14.0" ]]
 "$X2C" build -q --help >"$BUILD/build-short-quiet.help"
 "$X2C" build --compile-only --help >"$BUILD/build-long-compile.help"
 "$X2C" build -j 1 --help >"$BUILD/build-short-jobs.help"
