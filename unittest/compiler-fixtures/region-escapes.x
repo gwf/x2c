@@ -4,6 +4,7 @@ typedef struct Node { struct Node *next; Var value; } *Node;
 
 static Node global_node;
 static Map registry = NULL;
+static List saved = NULL;
 
 static Array _fresh_array(void) {
   Array a = [];
@@ -66,10 +67,67 @@ static void escaping_through_callee(Node holder) {
   }
 }
 
+// A String pointer block is region storage, not a canonical String.
+static String *escaping_string_block(void) {
+  $scope() {
+    String *names = Scope.calloc(4, sizeof(String));
+    return names;
+  }
+  return NULL;
+}
+
+// A cons cell holding a region-born Array is stored into a static.
+static void escaping_static_cons(void) {
+  $scope() {
+    Array a = [];
+    saved = cons(a, saved);
+  }
+}
+
+// The node moves into a Scope this function destroys before returning it.
+static Node escaping_destroyed_slot(void) {
+  Scope keep = NULL;
+  Node n = NULL;
+  $scope() {
+    n = _fresh_node();
+    Scope.move(n, &keep);
+  }
+  Scope.destroy(keep);
+  return n;
+}
+
+// Either arm of a conditional can be returned.
+static Array escaping_conditional(int flag) {
+  $scope() {
+    Array a = [];
+    return flag ? a : NULL;
+  }
+  return NULL;
+}
+
+// A List cell outlives the region of the Array it holds.
+static List escaping_list_literal(void) {
+  $scope() {
+    Array a = [];
+    return %($a);
+  }
+  return NULL;
+}
+
+// A closure that captures an $auto Array is returned.
+static Func escaping_closure(void) {
+  Array a = $auto([]);
+  return %!() => a.len();
+}
+
 int main(void) {
   escaping_static();
   escaping_pooled();
   escaping_through_callee(global_node);
+  escaping_static_cons();
   return escaping_auto() != NULL && escaping_outer_local() != NULL &&
-         use_after_free();
+         use_after_free() && escaping_string_block() != NULL &&
+         escaping_destroyed_slot() != NULL &&
+         escaping_conditional(1) != NULL &&
+         escaping_list_literal() != NULL && escaping_closure() != NULL;
 }

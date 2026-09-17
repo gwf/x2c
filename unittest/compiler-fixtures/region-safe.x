@@ -38,10 +38,56 @@ static int auto_local(void) {
   return (int) a.len();
 }
 
+static void queue_push(Node holder, Node item) {
+  (void) holder, (void) item;
+}
+
+static void node_close(Node node) { (void) node; }
+
+// A function named like a container store stores nothing.
+static void named_push(Node holder) {
+  $scope() {
+    Node n = _fresh_node();
+    queue_push(holder, n);
+  }
+}
+
+// A function named like a cleanup does not own its argument.
+static Node named_close(void) {
+  Node n = _fresh_node();
+  defer node_close(n);
+  return n;
+}
+
+// A freed pointer that is assigned again is live.
+static int freed_then_cleared(void) {
+  char *p = Scope.malloc(4);
+  Scope.free(p);
+  p = NULL;
+  return p == NULL;
+}
+
+// A release on an early exit leaves the region open for the fall-through.
+static int early_release(int stop) {
+  Scope.retain();
+  Node holder = _fresh_node();
+  Node n = _fresh_node();
+  if (stop) {
+    Scope.release();
+    return 0;
+  }
+  holder.next = n;
+  Scope.release();
+  return 1;
+}
+
 int main(void) {
   Scope keep = NULL;
   Scope.push(&keep);
   defer Scope.pop();
+  named_push(NULL);
   return moved_out(&keep) != NULL && canonical_result() != NULL &&
-         caller_owned() != NULL && auto_local() == 1;
+         caller_owned() != NULL && auto_local() == 1 &&
+         named_close() != NULL && freed_then_cleared() &&
+         early_release(0);
 }
