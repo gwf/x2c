@@ -1070,18 +1070,17 @@ enum {
    grouping and adds no parentheses that C does not require. */
 static int _emitted_precedence(Var node) {
   match (node) {
-    case %(at ? ?inner):        return _emitted_precedence(inner);
-    case %(expr ? ?content):    return _emitted_precedence(content);
+    case %(at ? ?inner):         return _emitted_precedence(inner);
+    case %(expr ? ?content):     return _emitted_precedence(content);
     case %(op ?operator ? ?): {
       int level = _operator_precedence(operator);
       return level ? level : EMIT_PRIMARY;
     }
-    case %(op ? ?):             return EMIT_UNARY;
-    case %(op ? ? ? ?):         return EMIT_CONDITIONAL;
-    case %((!or cast sizeof) *):
-      return EMIT_UNARY;
-    case %(postfix ? ?):        return EMIT_POSTFIX;
-    case %(commas *):           return 1;
+    case %(op ? ?):              return EMIT_UNARY;
+    case %(op ? ? ? ?):          return EMIT_CONDITIONAL;
+    case %((!or cast sizeof) *): return EMIT_UNARY;
+    case %(postfix ? ?):         return EMIT_POSTFIX;
+    case %(commas *):            return 1;
   }
   return EMIT_PRIMARY;
 }
