@@ -633,16 +633,23 @@ static List _read_lock(String path) {
   return install_rows(text);
 }
 
+/* The lockfile row that pins `entry` at its version, or NULL when the
+   lockfile has none and the index has to resolve it. */
+static List _locked_row(List rows, ProjectDependency entry) {
+  List found = NULL;
+  foreach (List row, rows)
+    if (row.car() == entry.name && row.cdr().car() == entry.version)
+      found = row;
+  return found;
+}
+
 /* Every dependency is locked at its pinned version and already installed at
    that version, so the build needs no index and no network. */
 static int _lock_satisfies(Project project, List rows) {
   if (!rows) return 0;
   for (ProjectDependency entry = project.dependencies; entry;
        entry = entry.next) {
-    List found = NULL;
-    foreach (List row, rows)
-      if (row.car() == entry.name) found = row;
-    if (!found || found.cdr().car() != entry.version) return 0;
+    if (!_locked_row(rows, entry)) return 0;
     if (install_version(entry.name) != entry.version) return 0;
   }
   return 1;
@@ -658,10 +665,13 @@ static void _write_lock(String path, List rows) {
 }
 
 /* Installs whatever the manifest pins that the home does not already hold,
-   then records what was resolved beside the manifest. A manifest with no
-   pins has nothing to reproduce, so a lockfile left from an earlier
-   `[dependencies]` section goes. The editor reads a source view and never
-   installs, and a dry run creates nothing. */
+   then records what was resolved beside the manifest. A pin the lockfile
+   already covers is installed from the archive the lockfile recorded, which
+   is what makes a later build reproduce the same packages; only a pin the
+   lockfile does not cover reaches the index. A manifest with no pins has
+   nothing to reproduce, so a lockfile left from an earlier `[dependencies]`
+   section goes. The editor reads a source view and never installs, and a dry
+   run creates nothing. */
 static void _resolve_dependencies(Project project, CliRequest request) {
   if (project.sources || request.dry_run) return;
   String path = %"${project.root}/x2c.lock";
@@ -675,7 +685,8 @@ static void _resolve_dependencies(Project project, CliRequest request) {
   Array rows = [];
   for (ProjectDependency entry = project.dependencies; entry;
        entry = entry.next)
-    rows.push(install_require(request, entry.name, entry.version));
+    rows.push(install_require(
+      request, entry.name, entry.version, _locked_row(locked, entry)));
   _write_lock(path, rows.list_free());
 }
 
@@ -781,6 +792,6 @@ int main(int argc, char **argv) {
     dir.join(".gitignore").write_text(".x2c-build/\n");
   }
   catch %(io-fail *detail): x2c_host_error(detail);
-  if (!request.quiet) printf("x2c: created %s\n", dir);
+  if (!request.quiet) fprintf(stderr, "x2c: created %s\n", dir);
   return 0;
 }

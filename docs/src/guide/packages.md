@@ -341,7 +341,9 @@ it unless `--force`, because a bundle carries no ABI promise across releases.
 A source package is a `<name>/src/<name>.x` tree with no `dependency*.json`.
 The compiler translates it in package mode and archives it, the same two
 commands `packages/package.mk` runs, and records the origin and digest in
-`SOURCE.json`. A source package with native dependencies is refused; publish
+`SOURCE.json`. A directory or archive carries no version of its own, so
+installing one over an installed package keeps the version that package
+recorded and a first install records none, which `x2c list` shows as `-`. A source package with native dependencies is refused; publish
 its bundle instead.
 
 Installed packages are not owned by the compiler's install inventory, so a
@@ -368,8 +370,9 @@ pcre2 = "10.48"
 `x2c build` and `x2c run` install anything missing through the index before
 planning the build, then write `x2c.lock` beside the manifest recording what
 they resolved. Commit that file. A later build whose lockfile is already
-satisfied by the installed packages reads no index, so it works offline and
-gives everyone the same packages.
+satisfied by the installed packages reads no index, so it works offline, and
+one that has to reinstall a package takes it from the archive the lockfile
+recorded, so everyone gets the same packages.
 
 To change a version, edit the manifest and build again; the lockfile is
 rewritten. `x2c remove` still deletes an installed package, and the next

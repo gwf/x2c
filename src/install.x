@@ -21,8 +21,34 @@ $(import "../lib/private-keywords.xmacro")
 #include "digest.x"
 #include "json.x"
 
+/* The packages lock this process holds, and the staging directory it is
+   filling. `x2c_driver_error` exits without running deferred cleanup, so
+   every failing exit below releases both first. */
+static int _packages_lock = -1;
+static String _staging = NULL;
+
+/* Removes the staging directory and then releases the lock, so a waiting
+   install never meets a half-removed directory. Both are absent after a
+   successful command, which makes this safe to repeat. */
+static void _release_packages(void) {
+  String work = _staging;
+  _staging = NULL;
+  if (work) {
+    try Path.remove_tree(work);
+    catch: {}
+  }
+  if (_packages_lock >= 0) close(_packages_lock);
+  _packages_lock = -1;
+}
+
 static void _error(const char *message) {
+  _release_packages();
   x2c_driver_error(%"install: $message");
+}
+
+static void _host_error(List detail) {
+  _release_packages();
+  x2c_host_error(detail);
 }
 
 // host
@@ -127,9 +153,22 @@ static String _unpack(String tarball, String work) {
   return %"$extracted/${top.car()}";
 }
 
+/* The string `field` of the JSON object at `path`, or NULL when the file is
+   absent, is not readable JSON, is not an object, or records no such string.
+   A damaged marker refuses its command instead of aborting it. */
+static String _marker_string(String path, String field) {
+  Var marker = NULL;
+  try marker = Json.read_file(path);
+  catch: return NULL;
+  if (!(marker is <map>)) return NULL;
+  Var value = marker[field];
+  return value is <string> ? value : NULL;
+}
+
 static void _check_bundle(CliRequest request, String package, String name) {
-  String built = Json.read_file(%"$package/BUNDLE.json")["x2c_version"];
+  String built = _marker_string(%"$package/BUNDLE.json", "x2c_version");
   String current = cli_version();
+  if (!built) _error(%"bundle $name has no readable BUNDLE.json version");
   if (built != current && !request.force)
     _error(
       %"bundle $name was built for '$built', not '$current'; use --force");
@@ -141,14 +180,20 @@ static void _check_bundle(CliRequest request, String package, String name) {
    its public names carry the `<name>__` prefix, then archives. It is the
    same pair of commands `packages/package.mk` runs. */
 static void _build_source(String package, String name, String spec) {
-  List units = _files_with(%"$package/src", ".x");
+  List units = NULL;
+  try units = _files_with(%"$package/src", ".x");
+  catch %(not-found *): {}
   if (!units.contains(%"$package/src/$name.x"))
     _error(%"$spec has no src/$name.x entry unit");
   foreach (String manifest, _files_with(package, ".json"))
     if (manifest.endswith("dependency.json") ||
         Path.stem(manifest).startswith("dependency-"))
       _error(%"$name needs native dependencies; install its bundle");
+  // Only what this compiler builds belongs in the installed package, so a
+  // builds directory the source tree carried is not archived with it.
   Path builds = %"$package/builds", String x2c = x2c_get_executable();
+  try builds.remove_tree();
+  catch %(io-fail *detail): _host_error(detail);
   builds.make_dirs();
   _run(%( $x2c "translate" "--out-dir" $builds
           "--x-include-dir" "$package/src"
@@ -172,28 +217,30 @@ static String _installed_kind(String package) =>
 static String _installed_version(String package) {
   String kind = _installed_kind(package);
   if (!kind) return NULL;
-  Var marker = Json.read_file(%"$package/${kind.upper()}.json");
-  Var version = marker[kind == "bundle" ? "dependency_version" : "version"];
-  return version is <string> ? version : NULL;
+  return _marker_string(
+    %"$package/${kind.upper()}.json",
+    kind == "bundle" ? "dependency_version" : "version");
 }
 
-/* Returns the home's packages directory, created and locked until the
-   process exits, so another install or removal waits for this one to finish
-   and, unless `quiet`, says so. */
+/* Returns the home's packages directory, created and locked for this
+   install or removal, so another one waits for it to finish and, unless
+   `quiet`, says so. `_release_packages` drops the lock as soon as the
+   packages are in place; a `run` that installed a dependency must not hold
+   it while the program runs. */
 static String _locked_packages(String command, int quiet) {
-  static int locked = 0;
   Path packages = _home_packages(command), lock = %"$packages/.lock";
-  if (locked) return packages;
+  if (_packages_lock >= 0) return packages;
   try packages.make_dirs();
-  catch %(io-fail *detail): x2c_host_error(detail);
-  if (file_lock(lock, 0) < 0) {
+  catch %(io-fail *detail): _host_error(detail);
+  int held = file_lock(lock, 0);
+  if (held < 0) {
     if (!quiet)
       fprintf(
         stderr, "x2c: waiting for another install or removal in %s\n",
         packages);
-    file_lock(lock, 1);
+    held = file_lock(lock, 1);
   }
-  locked = 1;
+  _packages_lock = held;
   return packages;
 }
 
@@ -218,6 +265,7 @@ static String _work_directory(String packages) {
     if (name.startswith(".install.")) Path.remove_tree(%"$packages/$name");
   Path work = %"$packages/.install.%ld".printf((long) getpid());
   work.make_dirs();
+  _staging = work;
   return work;
 }
 
@@ -236,19 +284,26 @@ static String _install(
   if (!name.is_identifier()) _error(%"'$name' is not a package name");
   String staged = %"$work/$name";
   try Path.copy_tree(package, staged);
-  catch %(io-fail *detail): x2c_host_error(detail);
+  catch %(io-fail *detail): _host_error(detail);
   if (Path.exists(%"$staged/BUNDLE.json"))
     _check_bundle(request, staged, name);
   else {
     _build_source(staged, name, spec);
+    // A local path carries no version of its own. The package it replaces
+    // recorded one, and a project pin matches a name and a version, so
+    // dropping it would send the next build back to the index.
+    if (!version) version = _installed_version(%"$packages/$name");
     Map record = {
-      "package": name, "version": version, "source": url ? url : spec,
-      "sha256": sha256, "x2c_version": cli_version()
+      "package": name, "source": url ? url : Path.absolute(spec),
+      "x2c_version": cli_version()
     };
+    if (version) record["version"] = version;
+    if (sha256) record["sha256"] = sha256;
     Path.write_text(%"$staged/SOURCE.json", %"${Var.pretty_json(record)}\n");
   }
   _publish(staged, packages, name);
-  if (!request.quiet) printf("x2c: installed %s/%s\n", packages, name);
+  if (!request.quiet)
+    fprintf(stderr, "x2c: installed %s/%s\n", packages, name);
   return name;
 }
 
@@ -262,7 +317,7 @@ int install_command(CliRequest request) {
   String spec = request.inputs.car();
   String packages = _locked_packages("install", request.quiet);
   Path work = _work_directory(packages);
-  defer work.remove_tree();
+  defer _release_packages();
   String source = NULL, sha256 = request.sha256, version = NULL, url = NULL;
   if (_remote(spec)) {
     if (!sha256) _error("a URL needs --sha256 <hex>");
@@ -287,16 +342,19 @@ int install_command(CliRequest request) {
 String install_version(String name) =>
   _installed_version(%"${_home_packages("install")}/$name");
 
-/** Returns the index row for `name`, installing it under the x2c home first
-    unless an installed package already records `version`. The row has the
-    `install_rows` shape. An already satisfied dependency reaches no network.
-    Failures exit with status 2.
+/** Returns the row that records `name` at `version`, installing the package
+    under the x2c home first unless one already records that version.
+    `locked` is the lockfile row to reproduce, so a package a lockfile pins
+    comes from the archive that lockfile recorded; NULL resolves the index
+    instead. The row has the `install_rows` shape, and an already satisfied
+    dependency reaches no network. Failures exit with status 2.
 */
-List install_require(CliRequest request, String name, String version) {
+List install_require(
+  CliRequest request, String name, String version, List locked) {
   String packages = _locked_packages("install", request.quiet);
   Path work = _work_directory(packages);
-  defer work.remove_tree();
-  List row = _index_row(request, name, work);
+  defer _release_packages();
+  List row = locked ? locked : _index_row(request, name, work);
   String resolved = row.nth_cdr(1).car();
   if (resolved != version)
     _error(%"the index has $name $resolved, not the pinned $version");
@@ -307,21 +365,33 @@ List install_require(CliRequest request, String name, String version) {
   return row;
 }
 
+/* Refuses a removal that has nothing to remove, naming which case it is. */
+static void _check_removable(String target, String name) {
+  if (!Path.exists(target))
+    x2c_driver_error(%"remove: no installed package '$name'");
+  if (!_installed_kind(target))
+    x2c_driver_error(
+      %"remove: $target is not an installed package; remove it by hand");
+}
+
 /** Removes the installed package named by the request's one operand.
     A directory without an install marker is left alone. Returns 0.
 */
 int remove_command(CliRequest request) {
   String name = request.inputs.car();
   String target = %"${_home_packages("remove")}/$name";
-  if (!name.is_identifier() || !Path.exists(target))
+  if (!name.is_identifier())
     x2c_driver_error(%"remove: no installed package '$name'");
-  if (!_installed_kind(target))
-    x2c_driver_error(
-      %"remove: $target is not an installed package; remove it by hand");
+  // A removal with nothing to remove refuses without taking the lock, and
+  // the same decision is made again under it, since another removal may
+  // have taken the package while this one waited.
+  _check_removable(target, name);
   _locked_packages("remove", request.quiet);
+  defer _release_packages();
+  _check_removable(target, name);
   try Path.remove_tree(target);
-  catch %(io-fail *detail): x2c_host_error(detail);
-  if (!request.quiet) printf("x2c: removed %s\n", target);
+  catch %(io-fail *detail): _host_error(detail);
+  if (!request.quiet) fprintf(stderr, "x2c: removed %s\n", target);
   return 0;
 }
 

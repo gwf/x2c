@@ -476,10 +476,13 @@ lockfile left beside it is removed.
 
 A build whose lockfile already covers every pinned package, at the pinned
 version and installed in the home, reads no index and makes no network
-request. Any other state re-resolves through the index and rewrites the
-lockfile. A version the index cannot supply stops the build with an error
-that includes both versions. A dry run installs nothing and writes no
-lockfile, and the editor adapter never installs.
+request. A pin the lockfile covers but the home does not hold is installed
+from the url and sha256 that lockfile recorded, not from the index, so the
+archive is the one the lockfile pinned however the index has changed. Only a
+pin the lockfile does not cover reaches the index. The lockfile is then
+rewritten to the manifest's pins. A version the index cannot supply stops the
+build with an error that includes both versions. A dry run installs nothing
+and writes no lockfile, and the editor adapter never installs.
 
 ## Include and tool ownership
 
@@ -509,8 +512,12 @@ one operand: a local directory, a local `.tar.gz`, a URL with `--sha256
 <hex>`, or a name resolved through the index (`--index <url-or-path>`
 overrides the default). `--force` accepts a bundle built by another x2c
 version. `remove` takes one installed name; `list` prints `name version
-kind` lines. Refusals exit with status 2 and leave the installed set as it
-was.
+kind` lines on standard output, and the install and removal receipts go to
+standard error with the other action output. Refusals, including a package
+whose sources or install marker are damaged, exit with status 2 and leave
+the installed set as it was. One install or removal in a home runs at a
+time; the lock is released once the packages are in place, so a `run` that
+installed a dependency does not hold it while the program runs.
 
 A project manifest can pin packages instead of installing them by hand; see
 [pinned packages](#pinned-packages).
