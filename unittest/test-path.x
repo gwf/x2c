@@ -22,6 +22,12 @@ static void path_parts_examine_text(void) {
   EXPECT_STR_EQ(Path.basename("a//b//"), "b");
   EXPECT_STR_EQ(Path.stem(".bashrc"), ".bashrc");
   EXPECT_NULL(Path.extension(".bashrc"));
+  EXPECT_NULL(Path.extension(".."));
+  EXPECT_STR_EQ(Path.stem(".."), "..");
+  EXPECT_NULL(Path.extension("/x/.."));
+  EXPECT_STR_EQ(Path.stem("/x/.."), "..");
+  EXPECT_NULL(Path.extension("notes."));
+  EXPECT_STR_EQ(Path.stem("notes."), "notes.");
   EXPECT_STR_EQ(Path.join("a", "b"), "a/b");
   EXPECT_STR_EQ(Path.join("a/", "b"), "a/b");
   EXPECT_STR_EQ(Path.join("a", "/b"), "/b");

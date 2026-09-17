@@ -69,20 +69,27 @@ Self Path.basename(Self path) {
   return slash < 0 ? trimmed : trimmed[slash + 1:];
 }
 
+// The last dot of `base` starts an extension unless it begins or ends it.
+static int _extension_dot(String base) {
+  int dot = base.rfind(".");
+  return dot > 0 && dot < base.len() - 1 ? dot : -1;
+}
+
 /** Returns the extension of `path`'s last component, including its dot, or
-    NULL when there is none. A leading dot does not start an extension.
+    NULL when there is none. A leading or trailing dot does not start an
+    extension, so `..` and `notes.` have none.
 */
 String Path.extension(Path path) {
   String base = path.basename();
-  int dot = base.rfind(".");
-  return dot > 0 ? base[dot:] : NULL;
+  int dot = _extension_dot(base);
+  return dot < 0 ? NULL : base[dot:];
 }
 
 /** Returns `path`'s last component without its extension. */
 String Path.stem(Path path) {
   String base = path.basename();
-  int dot = base.rfind(".");
-  return dot > 0 ? base[:dot] : base;
+  int dot = _extension_dot(base);
+  return dot < 0 ? base : base[:dot];
 }
 
 /** Returns an absolute form of `path` with symbolic links resolved.
