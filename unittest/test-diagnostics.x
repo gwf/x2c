@@ -86,21 +86,7 @@ static void diagnostics_reset_clears_state(void) {
 
 }
 
-static void diagnostics_ignores_repeated_report(void) {
-  $test.scoped();
-
-  Diagnostics diag = Diagnostics.new(NULL, NULL, 0);
-  List location = %( (file "unit.x") (line 3) );
-  diag.report(<type>, "same", location, NULL);
-  diag.report(<type>, "same", location, NULL);
-  diag.report(<type>, "other", location, NULL);
-
-  EXPECT_INT_EQ(2, diag.count);
-  EXPECT_INT_EQ(diag.entries().len(), 2);
-}
-
 void diagnostics_suite(void) {
   $test.run(diagnostics_records_entries);
   $test.run(diagnostics_reset_clears_state);
-  $test.run(diagnostics_ignores_repeated_report);
 }

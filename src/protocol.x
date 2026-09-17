@@ -491,9 +491,13 @@ static List Compiler._publish_protocol_adoption(
   }
   c._install_protocol_adoption(
     base, participant, storage, representation, tag, tag_expression, location);
+  // An adoption resolved when the parse began has reported its failures.
+  int resolved = c.conforms.contains(%($base $participant));
   c.conforms.del(%($base $participant));
   c.proto_cache = {};
-  if (!c.shallow) _resolve_declared_adoption(c, base, participant, location);
+  if (!c.shallow)
+    _resolve_declared_adoption(
+      c, base, participant, resolved ? NULL : location);
   List published = _adoption_node(
     base, participant, storage, representation, tag_expression, location);
   c._retain_protocol_source_node(published, storage, location);

@@ -1471,10 +1471,10 @@ static List _raise(
       compiler.diagnostics.report(
         <type>, message, location,
         %("use a numeric value, enum, Symbol, Atom, String, List, or Var"));
+      // Null replaces the reported detail, so a later pass never sees it.
+      value = %(expr ("Var") (call "Var_null" (args)));
     }
-    // Converting a rejected detail would report the same value again.
-    List converted =
-      invalid ? value : compiler.convert_expression(value, %("Var"));
+    List converted = compiler.convert_expression(value, %("Var"));
     if (converted != value) changed = 1;
     values.push(converted);
     index++;

@@ -141,8 +141,7 @@ static void _publish_limit_notice(Diagnostics diag) {
 }
 
 /** Records and synchronously emits one diagnostic unless already limited.
-    Entries retain publication order. NULL `code` becomes `<driver>`. A report
-    equal to a stored entry is ignored. Reaching
+    Entries retain publication order. NULL `code` becomes `<driver>`. Reaching
     a limit greater than one publishes a following `<limit>` notice; a limit
     of one stops after the first error. Later reports are ignored. Supplied
     message, location, and notes are shared; their canonical-value pools must
@@ -158,10 +157,7 @@ void Diagnostics.report(
     return;
   }
 
-  /* Protocol adoption is checked before and while parsing its declaration,
-     so a failed adoption is submitted twice. */
   List entry = _build_entry(code, <error>, message, location, notes);
-  if (diag.entries.contains(entry)) return;
   diag.entries.push(entry);
   diag.count += 1;
   _emit_entry(diag, entry);
@@ -183,11 +179,10 @@ static void Diagnostics._warn(
 
 // diagnostics & error reporting
 
-static void _emit_note_summaries(List notes) {
-  if (!notes) return;
+/* A diagnostic's text notes form one line, such as `token: ; kind: ;`. */
+static String _note_line(List notes) {
   List strings = notes.filter(%!(entry) => entry is <string>);
-  if (!strings) return;
-  fprintf(stderr, "  note: %s\n", " ".join(strings));
+  return strings ? " ".join(strings) : NULL;
 }
 
 /** Sends every later printed diagnostic to `path` as JSON Lines.
@@ -235,12 +230,8 @@ static void Compiler._write_json(Compiler compiler, List entry) {
     else out.printf("%d", value.int());
   }
   out.write(",\"notes\":[");
-  int comma = 0;
-  foreach (Var note, notes) {
-    if (note is not <string>) continue;
-    if (comma++) out.write_char(',');
-    report_json_string(out, note);
-  }
+  String note = _note_line(notes);
+  if (note) report_json_string(out, note);
   out.write("]}\n");
   while (write(diagnostics_json, out.content.bytes, out.content.length) < 0 &&
          errno == EINTR) {}
@@ -275,7 +266,8 @@ void Compiler.print_diagnostic(Compiler compiler, List entry) {
     compiler._show_source_context(location);
   }
   else fprintf(stderr, "%s: %s\n", code.str(), message);
-  _emit_note_summaries(notes);
+  String note = _note_line(notes);
+  if (note) fprintf(stderr, "  note: %s\n", note);
   fprintf(stderr, "\n");
   fflush(stderr);
 }

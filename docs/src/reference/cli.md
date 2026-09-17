@@ -577,8 +577,8 @@ no diagnostics leaves it empty. Each line is one JSON object:
 - `line` and `column` are one-based, `length` is the token width in bytes,
   and `position` is its zero-based byte offset. All five location fields are
   `null` for a diagnostic without a location.
-- `notes` holds the text notes in order. On standard error, the notes are
-  joined with spaces.
+- `notes` holds the note line that standard error shows, the text notes
+  joined with spaces, or nothing when the diagnostic has no notes.
 
 Compile-time Lisp and macros may print to standard output and standard error,
 so neither stream contains JSON. Parallel translation workers share the file;
