@@ -1269,7 +1269,8 @@ static int _expression_is_addressable(Compiler c, List expression) {
 
 /* Whether a method receiver is a pointer to the declared parameter. `.` binds
    a receiver by identity or by one address-of, so such a call would pass the
-   wrong pointer; with a pointer typedef C only warns and the program aborts. */
+   wrong pointer; with a pointer typedef C only warns and the program
+   aborts. */
 static int _receiver_points_to(Type source, Type declared) {
   while (source.is_pointer()) {
     source = source.dereference();
