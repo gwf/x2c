@@ -984,6 +984,13 @@ to the header when a later public prototype names it. Every translated header
 starts with `#pragma once` and also carries a conventional include guard, so
 `.x` programs do not need to write either one.
 
+A file that includes another sees what that file's header declares: everything
+above its `#pragma private` and the functions with external linkage it defines
+below it. Its private types, enumerators, objects, and static functions belong
+to that file, and naming one of them is an error in the including unit. An
+`#include` below `#pragma private` still splices, because the including file
+may call the functions it declares.
+
 The advanced `--cpp-symbols` and `--live-symbols` modes run the host
 preprocessor over raw `.x` include graphs. A module used with those modes needs
 a source-level `#pragma once` only when its own `.x` includes form a cycle.
@@ -1124,8 +1131,8 @@ An import exposes:
 
 - every public declaration, type, and aggregate above `#pragma private`;
 - protocol declarations and adoptions the package makes; and
-- any header the package's public part includes, such as a vendored foreign
-  header it publishes.
+- any header or runtime module the package's public part includes, such as a
+  vendored foreign header it publishes.
 
 It does not expose macros, `.xmacro` definitions, private declarations, or the
 package's own imports. Packages have no re-exports or hierarchy. One program
@@ -1136,7 +1143,9 @@ header directly. A package renames what it declares, not what it includes.
 
 An unprefixed public declaration from an x2c file outside the package directory
 would enter the consumer's namespace unchanged. The compiler rejects it as
-`package 'geo' exposes unprefixed top-level declaration '...'`. A consumer that
+`package 'geo' exposes unprefixed top-level declaration '...'`. Including that
+file below `#pragma private` keeps it out of the package's surface, and a
+runtime module, like a C header, crosses unprefixed. A consumer that
 declares a name in an imported package's `geo__` space is reported as `'geo__x'
 is reserved for imported package 'geo'`.
 
@@ -3132,8 +3141,8 @@ instead of the container binding.
 Iterator sources and lazy operations take a final `Iter` destination pointer.
 That argument may be omitted for calls nested in an iterator expression that
 is consumed immediately by `try_next`, `next`, `done`, `list`, `array`,
-`reduce`, `foldl`, `any`, `all`, `find`, `count`, `sum`, `product`, `min`,
-`max`, or `foreach`.
+`foldl`, `any`, `all`, `find`, `count`, `sum`, `product`, `min`, `max`, or
+`foreach`.
 
 For every missing destination, x2c passes a distinct zero-initialized
 `struct Iter` compound literal. Its automatic lifetime is the enclosing block,

@@ -17,7 +17,7 @@ Single-pass pull iterators.
 | [`Iter.enumerate`](#Iter.enumerate) | Returns a lazy iterator over `(index value)` `List`s starting at `start`. |
 | [`Iter.filter`](#Iter.filter) | Returns a lazy iterator over elements accepted by `func`'s `Var` truthiness. |
 | [`Iter.find`](#Iter.find) | Returns the first element accepted by `pred`'s `Var` truthiness, else `void`. |
-| [`Iter.foldl`](#Iter.foldl) | Folds `fn` over `iter` from `seed`, left to right. |
+| [`Iter.foldl`](#Iter.foldl) | Folds `fn` over `iter` from `seed`, left to right, and returns the final accumulator. |
 | [`Iter.head`](#Iter.head) | Returns a lazy iterator over at most `count` leading source values. |
 | [`Iter.iter`](#Iter.iter) | Returns `iter` unchanged as its own iterator. |
 | [`Iter.map`](#Iter.map) | Returns a lazy iterator over `func` applied to each element of `iter`. |
@@ -25,7 +25,6 @@ Single-pass pull iterators.
 | [`Iter.max`](#Iter.max) | Returns the largest remaining element, or `void` when there is none. |
 | [`Iter.min`](#Iter.min) | Returns the smallest remaining element, or `void` when there is none. |
 | [`Iter.product`](#Iter.product) | Returns the product of the remaining elements, consuming `iter`. |
-| [`Iter.reduce`](#Iter.reduce) | Folds `func` over `iter` and returns the final accumulator. |
 | [`Iter.repeat`](#Iter.repeat) | Returns a lazy iterator that yields `value` at most `count` times. |
 | [`Iter.scan`](#Iter.scan) | Returns a lazy iterator over every new accumulator of `fn`. |
 | [`Iter.sum`](#Iter.sum) | Returns the sum of the remaining elements, consuming `iter`. |
@@ -69,7 +68,7 @@ values and the result uses ordinary `Var` truthiness.
 **Raises:** whatever the source, `Func.apply`, or `pred` raises. A null `pred`
 answers 1 for an empty iterator and 0 for any other.
 
-Source: `lib/iter.x:780`
+Source: `lib/iter.x:772`
 
 <a id="Iter.any"></a>
 #### Iter.any
@@ -85,7 +84,7 @@ truthiness.
 **Raises:** whatever the source, `Func.apply`, or `pred` raises. A null
 `pred` answers 0.
 
-Source: `lib/iter.x:764`
+Source: `lib/iter.x:756`
 
 <a id="Iter.chain"></a>
 #### Iter.chain
@@ -114,7 +113,7 @@ fit in `int`.
 **Raises:** `<void-op>` for a source callback that yields `void`, plus any
 cause raised by that callback.
 
-Source: `lib/iter.x:815`
+Source: `lib/iter.x:807`
 
 <a id="Iter.enumerate"></a>
 #### Iter.enumerate
@@ -166,21 +165,25 @@ unambiguous because no iterator may yield `void`.
 Elements are passed as values. Raises: whatever the source, `Func.apply`,
 or `pred` raises. A null `pred` returns `void`.
 
-Source: `lib/iter.x:799`
+Source: `lib/iter.x:791`
 
 <a id="Iter.foldl"></a>
 #### Iter.foldl
 
 `Var Iter.foldl(Iter iter, Var seed, Func fn)`
 
-Folds `fn` over `iter` from `seed`, left to right.
-`Iter.reduce(fn, seed)` with the seed first and the combining function
-second. Every rule of `Iter.reduce` applies, including the `void` seed
-rule.
+Folds `fn` over `iter` from `seed`, left to right, and returns the final
+accumulator.
+Consumes the whole iterator. A `void` `seed` means "use the first
+element as the seed", so folding an empty iterator from `void` returns
+`void`; any other `seed` is returned unchanged when there is nothing to
+fold. A null `fn` drains the iterator and returns the seed.
+The accumulator and elements are passed as values. Empty input, or one
+element with a `void` seed, does not invoke or check `fn`.
 
 **Raises:** whatever the source, `Func.apply`, or `fn` raises.
 
-Source: `lib/iter.x:754`
+Source: `lib/iter.x:729`
 
 <a id="Iter.head"></a>
 #### Iter.head
@@ -204,7 +207,7 @@ Source: `lib/iter.x:535`
 Returns `iter` unchanged as its own iterator.
 `dest` is ignored; ownership and remaining traversal state are unchanged.
 
-Source: `lib/iter.x:879`
+Source: `lib/iter.x:871`
 
 <a id="Iter.map"></a>
 #### Iter.map
@@ -268,7 +271,7 @@ of any tie.
 **Raises:** `<void-op>` for a source callback that yields `void`, plus any
 cause from the source or `Var.compare`.
 
-Source: `lib/iter.x:855`
+Source: `lib/iter.x:847`
 
 <a id="Iter.min"></a>
 #### Iter.min
@@ -283,7 +286,7 @@ of any tie.
 **Raises:** `<void-op>` for a source callback that yields `void`, plus any
 cause from the source or `Var.compare`.
 
-Source: `lib/iter.x:869`
+Source: `lib/iter.x:861`
 
 <a id="Iter.product"></a>
 #### Iter.product
@@ -298,25 +301,7 @@ an expression. Integer results wrap to `Var.binary`'s promoted type width.
 **Raises:** any cause from the source or `Var.binary` while multiplying an
 element into the running product.
 
-Source: `lib/iter.x:842`
-
-<a id="Iter.reduce"></a>
-#### Iter.reduce
-
-`Var Iter.reduce(Iter iter, Func func, Var initial)`
-
-Folds `func` over `iter` and returns the final accumulator.
-Consumes the whole iterator. A `void` `initial` means "use the first
-element as the seed", so a reduce over an empty iterator returns `void`;
-any other `initial` is the seed and is returned unchanged when there is
-nothing to fold. A null `func` drains the iterator and returns the
-seed.
-The accumulator and elements are passed as values. Empty input, or one
-element with a `void` initial value, does not invoke or check `func`.
-
-**Raises:** whatever the source, `Func.apply`, or `func` raises.
-
-Source: `lib/iter.x:729`
+Source: `lib/iter.x:834`
 
 <a id="Iter.repeat"></a>
 #### Iter.repeat
@@ -378,7 +363,7 @@ iterator sums to 0. Use `Iter.accumulate` for the running totals.
 **Raises:** any cause from the source or `Var.binary` while adding an element
 to the running total.
 
-Source: `lib/iter.x:829`
+Source: `lib/iter.x:821`
 
 <a id="Iter.try_next"></a>
 #### Iter.try_next

@@ -462,7 +462,7 @@ Public functions:
 `Array.insert`, `Array.remove`, `Array.copy`, `Array.getslice`,
 `Array.setslice`, `Array.remslice`, `Array.splice`, `Array.find`,
 `Array.contains`, `Array.count`, `Array.indexof`, `Array.concat`,
-`Array.reverse`, `Array.map`, `Array.map2`, `Array.reduce`, `Array.compare`,
+`Array.reverse`, `Array.map`, `Array.map2`, `Array.foldl`, `Array.compare`,
 `Array.sort`, `Array.sort_with`, `Array.sort_by`, `Array.heap_push`,
 `Array.heap_pop`, `Array.heapify`, `Array.join`, `Array.equal`,
 `Array.write_repr`, `Array.write_str`, `Array.str`, `Array.repr`,
@@ -666,8 +666,8 @@ Public functions:
 `Iter.init`, `Iter.try_next`, `Iter.next`, `range`, `Iter.filter`, `Iter.map`,
 `Iter.zip`, `Iter.zip_with`, `Iter.map2`, `Iter.chain`, `Iter.enumerate`,
 `Iter.repeat`, `Iter.head`, `Iter.accumulate`, `Iter.scan`, `Iter.unique`,
-`Iter.unzip`, `Iter.reduce`, `Iter.foldl`, `Iter.any`, `Iter.all`, `Iter.find`,
-`Iter.count`, `Iter.sum`, `Iter.product`, `Iter.max`, `Iter.min`, `Iter.iter`
+`Iter.unzip`, `Iter.foldl`, `Iter.any`, `Iter.all`, `Iter.find`, `Iter.count`,
+`Iter.sum`, `Iter.product`, `Iter.max`, `Iter.min`, `Iter.iter`
 
 ### [lib/json.x](../lib/json.x)
 
@@ -739,14 +739,12 @@ linked list with `Var` elements.
 
 Public functions:
 
-`List.cons_in`, `List.pool_current`, `List.initialize`,
-`List.thread_initialize`, `List.shutdown`, `List.pool_retain_named`,
-`List.pool_retain`, `List.pool_release`, `List.pool_detach`, `List.promote`,
-`List.try_own`, `cons`, `List.cons`, `Var.cons`, `car`, `cdr`, `List.car`,
-`List.cdr`, `List.caar`, `List.cadr`, `List.cddr`, `List.caddr`, `Var.car`,
-`Var.cdr`, `Var.caar`, `Var.cadr`, `Var.cddr`, `Var.caddr`, `List.append`,
-`List.concat_n`, `List.list_n`, `List.reverse`, `List.last`, `List.index`,
-`List.contains`, `List.len`, `List.map`, `List.foldl`, `List.reduce`,
+`List.cons_in`, `List.initialize`, `List.thread_initialize`, `List.shutdown`,
+`List.promote`, `List.try_own`, `cons`, `List.cons`, `Var.cons`, `car`, `cdr`,
+`List.car`, `List.cdr`, `List.caar`, `List.cadr`, `List.cddr`, `List.caddr`,
+`Var.car`, `Var.cdr`, `Var.caar`, `Var.cadr`, `Var.cddr`, `Var.caddr`,
+`List.append`, `List.concat_n`, `List.list_n`, `List.reverse`, `List.last`,
+`List.index`, `List.contains`, `List.len`, `List.map`, `List.foldl`,
 `List.find`, `List.any`, `List.all`, `List.sort`, `List.sort_with`,
 `List.sort_by`, `Array.list`, `Array.list_free`, `List.array`, `List.unique`,
 `List.zip_with`, `List.map2`, `List.sublis`, `List.flatten`,
@@ -1268,5 +1266,5 @@ Public functions:
 `x2c_var_update_u32`, `x2c_var_update_long`, `x2c_var_update_ulong`,
 `x2c_var_update_long_long`, `x2c_var_update_ulong_long`, `x2c_var_update_f32`,
 `x2c_var_update_f64`, `x2c_var_update_long_double`, `Var.fallback_truth`,
-`Var.truth`, `Var.truthy`, `Var.add`, `Var.sub`, `Var.mul`, `Var.matmul`,
-`Var.div`, `Var.mod`, `Var.neg`, `Var.binary`, `Var.update`, `Var.postfix`
+`Var.truth`, `Var.add`, `Var.sub`, `Var.mul`, `Var.matmul`, `Var.div`,
+`Var.mod`, `Var.neg`, `Var.binary`, `Var.update`, `Var.postfix`
