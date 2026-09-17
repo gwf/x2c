@@ -2172,8 +2172,8 @@ instead of the container binding.
 Iterator sources and lazy operations take a final `Iter` destination pointer.
 That argument may be omitted for calls nested in an iterator expression that
 is consumed immediately by `try_next`, `next`, `done`, `list`, `array`,
-`reduce`, `foldl`, `any`, `all`, `find`, `count`, `sum`, `product`, `min`,
-`max`, or `foreach`.
+`foldl`, `any`, `all`, `find`, `count`, `sum`, `product`, `min`, `max`, or
+`foreach`.
 
 For every missing destination, x2c passes a distinct zero-initialized
 `struct Iter` compound literal. Its automatic lifetime is the enclosing block,

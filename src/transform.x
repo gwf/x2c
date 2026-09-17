@@ -64,7 +64,6 @@ typedef enum PrintfLength {
 static int _iter_immediate_consumer(String name) =>
   name == "Iter_try_next" || name == "Iter_next" ||
          name == "Iter_list" || name == "Iter_array" ||
-         name == "Iter_reduce" ||
          name == "Iter_foldl" || name == "Iter_any" ||
          name == "Iter_all" || name == "Iter_find" ||
          name == "Iter_count" || name == "Iter_sum" ||

@@ -482,22 +482,27 @@ Array Array.map2(Array a, Array b, Func func) {
   return result = output;
 }
 
-/** Left-folds a nonempty `Array`, or returns `void` when it is empty.
-    Elements are passed as values. An empty or one-element `Array` does not
-    invoke or check `func`. Otherwise the callback receives the accumulator
-    then each remaining element, runs front to back, and is not retained. It
-    must not structurally mutate `array` during the walk. Any cause from
-    `Func.apply` or `func` propagates without changing `array` itself.
+/** Folds `fn` over `array` from `seed`, front to back.
+    A `void` seed means "no seed": the first element becomes the accumulator
+    and the fold starts at the second, so folding an empty `Array` that way
+    returns `void`. Elements are passed as values. Input with nothing left to
+    fold does not invoke or check `fn`. The callback receives the accumulator
+    then the next element and is not retained. It must not structurally mutate
+    `array` during the walk. Any cause from `Func.apply` or `fn` propagates
+    without changing `array`.
 */
-Var Array.reduce(Array array, Func func) {
-  size_t n = array.len();
-  if (n == 0) return void;
-  Var acc = array[0];
-  for (size_t i = 1; i < n; i++) {
+Var Array.foldl(Array array, Var seed, Func fn) {
+  size_t n = array.len(), i = 0;
+  Var acc = seed;
+  if (acc is void) {
+    if (n == 0) return void;
+    acc = array[i++];
+  }
+  for (; i < n; i++) {
     FuncArg arguments[2] = {
       FuncArg.value(acc), FuncArg.value(array[i])
     };
-    acc = func.apply(2, arguments);
+    acc = fn.apply(2, arguments);
   }
   return acc;
 }

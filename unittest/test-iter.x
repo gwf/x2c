@@ -190,8 +190,8 @@ static void iter_func_callbacks(void) {
 
   EXPECT_TRUE(range(1, 3, 1).scan(0, binary_pointer).list() == %(1 3 6));
   EXPECT_TRUE(range(1, 3, 1).scan(0, captured_binary).list() == %(2 5 9));
-  EXPECT_INT_EQ(range(1, 3, 1).reduce(binary_pointer, void).int(), 6);
-  EXPECT_INT_EQ(range(1, 3, 1).reduce(captured_binary, void).int(), 8);
+  EXPECT_INT_EQ(range(1, 3, 1).foldl(void, binary_pointer).int(), 6);
+  EXPECT_INT_EQ(range(1, 3, 1).foldl(void, captured_binary).int(), 8);
   EXPECT_INT_EQ(range(1, 3, 1).foldl(0, binary_pointer).int(), 6);
   EXPECT_INT_EQ(range(1, 3, 1).foldl(0, captured_binary).int(), 9);
 
@@ -218,8 +218,6 @@ static void iter_func_failures_and_empty_sources(void) {
   catch %(bad-arity *): arity_caught++;
   try range(1, 2, 1).scan(0, wrong_arity).next();
   catch %(bad-arity *): arity_caught++;
-  try range(1, 2, 1).reduce(wrong_arity, void);
-  catch %(bad-arity *): arity_caught++;
   try range(1, 2, 1).foldl(0, wrong_arity);
   catch %(bad-arity *): arity_caught++;
   try range(1, 2, 1).any(wrong_arity);
@@ -228,7 +226,7 @@ static void iter_func_failures_and_empty_sources(void) {
   catch %(bad-arity *): arity_caught++;
   try range(1, 2, 1).find(wrong_arity);
   catch %(bad-arity *): arity_caught++;
-  EXPECT_INT_EQ(arity_caught, 10);
+  EXPECT_INT_EQ(arity_caught, 9);
 
   EXPECT_TRUE(range(1, 0, 1).map(wrong_arity).next() is void);
   EXPECT_TRUE(range(1, 0, 1).filter(wrong_arity).next() is void);
@@ -237,7 +235,7 @@ static void iter_func_failures_and_empty_sources(void) {
   EXPECT_TRUE(
     range(1, 0, 1).map2(range(1, 2, 1), wrong_arity).next() is void);
   EXPECT_TRUE(range(1, 0, 1).scan(0, wrong_arity).next() is void);
-  EXPECT_TRUE(range(1, 0, 1).reduce(wrong_arity, void) is void);
+  EXPECT_TRUE(range(1, 0, 1).foldl(void, wrong_arity) is void);
   EXPECT_INT_EQ(range(1, 0, 1).foldl(7, wrong_arity).int(), 7);
   EXPECT_FALSE(range(1, 0, 1).any(wrong_arity));
   EXPECT_TRUE(range(1, 0, 1).all(wrong_arity));
@@ -250,11 +248,11 @@ static void iter_func_failures_and_empty_sources(void) {
   int reference_caught = 0, conversion_caught = 0;
   try range(1, 2, 1).map(reference_unary).next();
   catch %(bad-types *): reference_caught++;
-  try range(1, 2, 1).reduce(reference_binary, void);
+  try range(1, 2, 1).foldl(void, reference_binary);
   catch %(bad-types *): reference_caught++;
   try %("text").iter().map(numeric_unary).next();
   catch %(no-convert *): conversion_caught++;
-  try %("text" "more").iter().reduce(numeric_binary, void);
+  try %("text" "more").iter().foldl(void, numeric_binary);
   catch %(no-convert *): conversion_caught++;
   EXPECT_INT_EQ(reference_caught, 2);
   EXPECT_INT_EQ(conversion_caught, 2);
@@ -495,15 +493,15 @@ static void iter_accumulate_and_aggregates(void) {
   EXPECT_TRUE(running.double() == 6.5);
   EXPECT_TRUE(floats.next() is void);
 
-  struct Iter reduce_storage;
-  Iter reduce_iter = range(1, 5, 1, &reduce_storage);
-  Var reduced = reduce_iter.reduce(add_values, void);
+  struct Iter fold_storage;
+  Iter fold_iter = range(1, 5, 1, &fold_storage);
+  Var reduced = fold_iter.foldl(void, add_values);
   EXPECT_INT_EQ(reduced.int(), 15);
 
   Var ten = 10;
-  struct Iter reduce_init_storage;
-  Iter reduce_init_iter = range(1, 5, 1, &reduce_init_storage);
-  Var reduced_with_init = reduce_init_iter.reduce(add_values, ten);
+  struct Iter fold_seed_storage;
+  Iter fold_seed_iter = range(1, 5, 1, &fold_seed_storage);
+  Var reduced_with_init = fold_seed_iter.foldl(ten, add_values);
   EXPECT_INT_EQ(reduced_with_init.int(), 25);
 
   struct Iter sum_storage;
@@ -527,9 +525,9 @@ static void iter_accumulate_and_aggregates(void) {
   EXPECT_INT_EQ(min_iter.min().int(), 1);
 
   Array empty = [];
-  struct Iter empty_reduce_storage;
-  Iter empty_reduce = empty.iter(&empty_reduce_storage);
-  EXPECT_TRUE(empty_reduce.reduce(add_values, void) is void);
+  struct Iter empty_fold_storage;
+  Iter empty_fold = empty.iter(&empty_fold_storage);
+  EXPECT_TRUE(empty_fold.foldl(void, add_values) is void);
   struct Iter arr_sum_storage, arr_prod_storage, arr_count_storage,
                arr_max_storage, arr_min_storage;
   EXPECT_INT_EQ(empty.iter(&arr_sum_storage).sum().int(), 0);

@@ -716,42 +716,34 @@ Iter Iter.unzip(Iter iter, UnzipShared *shared, Iter dest) {
   return dest.init((UnzipSharedRef) shared, _unzip_next, 0);
 }
 
-/** Folds `func` over `iter` and returns the final accumulator.
-    Consumes the whole iterator. A `void` `initial` means "use the first
-    element as the seed", so a reduce over an empty iterator returns `void`;
-    any other `initial` is the seed and is returned unchanged when there is
-    nothing to fold. A null `func` drains the iterator and returns the
-    seed.
+/** Folds `fn` over `iter` from `seed`, left to right, and returns the final
+    accumulator.
+    Consumes the whole iterator. A `void` `seed` means "use the first
+    element as the seed", so folding an empty iterator from `void` returns
+    `void`; any other `seed` is returned unchanged when there is nothing to
+    fold. A null `fn` drains the iterator and returns the seed.
     The accumulator and elements are passed as values. Empty input, or one
-    element with a `void` initial value, does not invoke or check `func`.
-    Raises: whatever the source, `Func.apply`, or `func` raises.
+    element with a `void` seed, does not invoke or check `fn`.
+    Raises: whatever the source, `Func.apply`, or `fn` raises.
 */
-Var Iter.reduce(Iter iter, Func func, Var initial) {
-  Var acc = initial, item;
+Var Iter.foldl(Iter iter, Var seed, Func fn) {
+  Var acc = seed, item;
   int has_item = iter.try_next(&item);
   if (acc is void) {
     if (!has_item) return void;
     acc = item;
     has_item = iter.try_next(&item);
   }
-  if (!func) {
+  if (!fn) {
     while (has_item) has_item = iter.try_next(&item);
     return acc;
   }
   while (has_item) {
-    acc = _apply2(func, acc, item);
+    acc = _apply2(fn, acc, item);
     has_item = iter.try_next(&item);
   }
   return acc;
 }
-
-/** Folds `fn` over `iter` from `seed`, left to right.
-    `Iter.reduce(fn, seed)` with the seed first and the combining function
-    second. Every rule of `Iter.reduce` applies, including the `void` seed
-    rule.
-    Raises: whatever the source, `Func.apply`, or `fn` raises.
-*/
-Var Iter.foldl(Iter iter, Var seed, Func fn) => iter.reduce(fn, seed);
 
 /** Reports whether any remaining element satisfies `pred`.
     Stops at the first element the predicate accepts, so the iterator is left

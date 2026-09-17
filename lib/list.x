@@ -385,14 +385,6 @@ Var List.foldl(List lst, Var seed, Func fn) {
   return acc;
 }
 
-/** Folds `fn` over `lst` using its first element as the seed.
-    A one-element `List` returns its head and `nil` returns `void`. A null `fn`
-    returns the first element without visiting the rest.
-
-    Any cause raised by `fn` propagates.
-*/
-Var List.reduce(List lst, Func fn) => lst.cdr().foldl(lst.car(), fn);
-
 /** Returns the first element `pred` accepts by ordinary `Var` truthiness, or
     `void`.
 

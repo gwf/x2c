@@ -48,7 +48,7 @@ replace the executable paths below with absolute paths too:
 - [Strings](love/strings.x): transform, slice, parse, interpolate, and iterate text.
 - [Symbols](love/symbols.x): a named state and an ordered vocabulary.
 - [Lists](love/lists.x): shared tails, transformations, and nested templates.
-- [Arrays](love/arrays.x): update scores, copy and rank them, then reduce a slice.
+- [Arrays](love/arrays.x): update scores, copy and rank them, then fold a slice.
 - [Maps](love/maps.x): stock quantities, missing keys, and stored zero values.
 - [Literals](love/literals.x): describe a workshop with nested collections.
 - [Files](love/files.x): read a whole file, then stream and total its rows.

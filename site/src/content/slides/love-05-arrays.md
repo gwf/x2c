@@ -19,7 +19,7 @@ assert(scores == [7, 4, 9, 5] && scores !== ranked);
 // Slices and map create new Arrays.
 Array top = ranked[:2];
 Array boosted = top.map(%!(score) => score + 1);
-Var total = boosted.reduce(%!(a, b) => a + b);
+Var total = boosted.foldl(0, %!(a, b) => a + b);
 printf("scores: %s; ranked: %s\n", scores.repr(), ranked.repr());
 
 // Use indexed access or iterate over the resulting values.

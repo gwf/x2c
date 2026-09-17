@@ -432,11 +432,13 @@ static void array_equal_hash_and_compare_nested(void) {
 
 }
 
-static void array_reduce_uses_first_value_once(void) {
+static void array_foldl_seeds_with_first_value_once(void) {
   $test.scoped();
   Array values = [2, 3, 4];
-  EXPECT_INT_EQ(values.reduce(add_array_values).int(), 9);
-  EXPECT_TRUE(Array.reduce([], add_array_values) is void);
+  EXPECT_INT_EQ(values.foldl(void, add_array_values).int(), 9);
+  EXPECT_INT_EQ(values.foldl(10, add_array_values).int(), 19);
+  EXPECT_TRUE(Array.foldl([], void, add_array_values) is void);
+  EXPECT_INT_EQ(Array.foldl([], 7, add_array_values).int(), 7);
 }
 
 static void array_func_callbacks(void) {
@@ -455,12 +457,12 @@ static void array_func_callbacks(void) {
   EXPECT_TRUE(values.map2(right, _array_add_pair).list() == %(11 22));
   EXPECT_TRUE(values.map2(right, binary_pointer).list() == %(11 22));
   EXPECT_TRUE(values.map2(right, captured_binary).list() == %(12 23));
-  EXPECT_INT_EQ(values.reduce(add_array_values).integer(), 6);
-  EXPECT_INT_EQ(values.reduce(binary_pointer).integer(), 6);
-  EXPECT_INT_EQ(values.reduce(captured_binary).integer(), 8);
+  EXPECT_INT_EQ(values.foldl(void, add_array_values).integer(), 6);
+  EXPECT_INT_EQ(values.foldl(void, binary_pointer).integer(), 6);
+  EXPECT_INT_EQ(values.foldl(void, captured_binary).integer(), 8);
 
   ScopeStats before = Scope.stats();
-  EXPECT_INT_EQ(values.reduce(add_array_values).integer(), 6);
+  EXPECT_INT_EQ(values.foldl(void, add_array_values).integer(), 6);
   ScopeStats after = Scope.stats();
   EXPECT_INT_EQ(after.allocation_calls, before.allocation_calls);
 }
@@ -486,8 +488,8 @@ static void array_func_rejects_invalid_callbacks_on_invocation(void) {
   EXPECT_INT_EQ(empty.map(wrong_arity).len(), 0);
   EXPECT_INT_EQ(empty.map2(values, wrong_arity).len(), 0);
   EXPECT_INT_EQ(values.map2(empty, wrong_arity).len(), 0);
-  EXPECT_TRUE(empty.reduce(wrong_arity) is void);
-  EXPECT_TRUE([1].reduce(wrong_arity) == 1);
+  EXPECT_TRUE(empty.foldl(void, wrong_arity) is void);
+  EXPECT_TRUE([1].foldl(void, wrong_arity) == 1);
 }
 
 
@@ -629,7 +631,7 @@ void array_suite(void) {
   $test.run(array_heap_ops_lists);
   $test.run(array_sort_nested_values);
   $test.run(array_equal_hash_and_compare_nested);
-  $test.run(array_reduce_uses_first_value_once);
+  $test.run(array_foldl_seeds_with_first_value_once);
   $test.run(array_func_callbacks);
   $test.run(array_func_rejects_invalid_callbacks_on_invocation);
 }

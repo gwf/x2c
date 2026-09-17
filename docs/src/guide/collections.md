@@ -816,7 +816,7 @@ printf("%s top=%s len=%zu\n", stack.repr(), top.repr(), stack.len());
 
 The positional operations are `push`, `take_last`, `shift`, `unshift`,
 `insert`, `remove`, and `splice`; searching is `find` / `indexof`,
-`contains`, and `count`; and there are `map`, `map2`, `reduce`, `sort`,
+`contains`, and `count`; and there are `map`, `map2`, `foldl`, `sort`,
 `reverse`, `concat`, `copy`, and `join`.
 
 Use `sort_by` to order by a computed key, or `sort_with` for a comparator.
@@ -845,7 +845,7 @@ or comparison fails, the Array keeps its original element order. Callback
 side effects are not undone. Empty inputs call neither callback; a singleton
 calls its key once but never calls a comparator.
 
-`Array.map`, `Array.map2`, and `Array.reduce` accept the same `Func` values
+`Array.map`, `Array.map2`, and `Array.foldl` accept the same `Func` values
 as the `List` operations and pass elements by value. `String.filter` and
 `String.map` do the same for bytes. Each byte is boxed from `char`,
 predicates use `Var` truthiness, and `String.map` converts the result to

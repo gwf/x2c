@@ -246,8 +246,8 @@ int main(void) {
 x2c inserts a distinct `struct Iter` compound literal for each missing final
 destination. Those objects have automatic storage and remain alive through
 the enclosing block. Completion applies only when the chain ends in
-`try_next`, `next`, `done`, `list`, `array`, `reduce`, `foldl`, `any`, `all`,
-`find`, `count`, `sum`, `product`, `min`, `max`, or `foreach`.
+`try_next`, `next`, `done`, `list`, `array`, `foldl`, `any`, `all`, `find`,
+`count`, `sum`, `product`, `min`, `max`, or `foreach`.
 
 It does not apply when an iterator is assigned, returned, or passed as an
 argument. Then declare one `struct Iter` for each stage:
@@ -358,11 +358,10 @@ printf("first over two = %s\n",
 
 `iter.list()` and `iter.array()` build a fresh `List` or `Array` under the
 current scope. The aggregates are `count`, `sum`, `product`, `min`, `max`,
-`reduce`, `foldl`, `any`, `all`, and `find`. `sum` and `product` use `Var`
-arithmetic promotion. `min` and `max` use total `Var` ordering and keep the
-first of equal values. `min`, `max`, and `find` return `void` when there is
-nothing to return, and `reduce` given a `void` initial value uses the first
-element as its seed.
+`foldl`, `any`, `all`, and `find`. `sum` and `product` use `Var` arithmetic
+promotion. `min` and `max` use total `Var` ordering and keep the first of
+equal values. `min`, `max`, and `find` return `void` when there is nothing to
+return, and `foldl` given a `void` seed uses the first element as its seed.
 
 ## Handing a pipeline to foreach
 

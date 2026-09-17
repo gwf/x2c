@@ -217,9 +217,7 @@ static void list_fold_and_predicates(void) {
   EXPECT_TRUE(numbers.find(NULL) is void);
   EXPECT_INT_EQ(numbers.foldl(99, NULL).integer(), 99);
   EXPECT_INT_EQ(numbers.foldl(void, NULL).integer(), 1);
-  EXPECT_INT_EQ(numbers.reduce(NULL).integer(), 1);
   EXPECT_TRUE(empty.foldl(void, sum_pair) is void);
-  EXPECT_TRUE(empty.reduce(sum_pair) is void);
 }
 
 /* All five predicate APIs accept the same named int-returning function. */
@@ -323,8 +321,8 @@ static void list_func_callbacks(void) {
   EXPECT_TRUE(values.map(captured_unary) == %(3 4 5 6));
   EXPECT_INT_EQ(values.foldl(0, binary_pointer).integer(), 10);
   EXPECT_INT_EQ(values.foldl(0, captured_binary).integer(), 18);
-  EXPECT_INT_EQ(values.reduce(binary_pointer).integer(), 10);
-  EXPECT_INT_EQ(values.reduce(captured_binary).integer(), 16);
+  EXPECT_INT_EQ(values.foldl(void, binary_pointer).integer(), 10);
+  EXPECT_INT_EQ(values.foldl(void, captured_binary).integer(), 16);
   EXPECT_INT_EQ(values.find(predicate_pointer).integer(), 3);
   EXPECT_INT_EQ(values.find(captured_predicate).integer(), 3);
   EXPECT_TRUE(values.any(predicate_pointer));
@@ -377,8 +375,8 @@ static void list_func_rejects_invalid_callbacks_on_invocation(void) {
 
   EXPECT_NULL(empty.map(wrong_arity));
   EXPECT_INT_EQ(empty.foldl(7, wrong_arity).integer(), 7);
-  EXPECT_TRUE(empty.reduce(wrong_arity) is void);
-  EXPECT_TRUE(%(1).reduce(wrong_arity) == 1);
+  EXPECT_TRUE(empty.foldl(void, wrong_arity) is void);
+  EXPECT_TRUE(%(1).foldl(void, wrong_arity) == 1);
   EXPECT_TRUE(empty.find(wrong_arity) is void);
   EXPECT_FALSE(empty.any(wrong_arity));
   EXPECT_TRUE(empty.all(wrong_arity));
