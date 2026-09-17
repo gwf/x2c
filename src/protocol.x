@@ -115,7 +115,7 @@ static List _occurrence_location(List occurrence) => occurrence.caddr();
 
 static Symbol _adoption_storage(List adoption) => adoption.cddr().cadr();
 
-// Snapshots written before representation sharing have five-field rows.
+// A row without a representation or a tag has five fields.
 static Type _adoption_representation(List adoption) {
   match (adoption) {
     case %(adopt ? ? ? (tag ?) ?): return NULL;
@@ -1388,8 +1388,8 @@ static void _dump_conformance_row(
 
 /** Prints stable conformance rows for typedefs in `globs`.
     Rows are ordered by participant and protocol and identify whether each
-    adoption is owned by this unit, making the output suitable for comparing
-    live and artifact symbol modes.
+    adoption is owned by this unit, so prelude and live symbol modes can be
+    compared.
 */
 void Compiler.dump_conformance(Compiler compiler, Map globs) {
   Array names = [];

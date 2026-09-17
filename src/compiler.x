@@ -37,7 +37,10 @@ typedef struct ScriptUnit {
     the compiler rather than constructing or freeing it. `next_binding` is
     the last binding identity issued in the translation unit: collection,
     shadow, package, and full-parse compilers all draw from it, so a binding
-    number names one declaration across every symbol table in the unit.
+    number names one live declaration across every symbol table in the unit.
+    Rows replayed from an interface keep that interface's own numbering,
+    which starts at 1, so their numbers identify declarations only within
+    their own rows.
 */
 typedef struct GenNames {
   Map counters, adapters;
@@ -893,15 +896,7 @@ void Compiler.skip_script_statement(Compiler c) {
       c.skip_macro_lisp();
       continue;
     }
-    switch (token) {
-      case <(>: case <"?(">: case <[>: case <"{">: case <"%(">:
-      case <"%[">: case <"%{">: case <"${">: case <"@{">:
-        depth++;
-        break;
-      case <)>: case <]>: case <"}">:
-        depth--;
-        break;
-    }
+    depth += _delimiter_step(token);
     c.next();
     if (depth <= 0 && (token == <;> || token == <"}">)) return;
   }
@@ -968,7 +963,7 @@ static List _declaration_macro(Compiler compiler, List rows, int thaw) {
   return %(macrodef @{result.list_free()});
 }
 
-/** Retains declaration syntax across source segments and snapshot lifetimes.
+/** Retains declaration syntax across source segments and cached interfaces.
     Tokens and origin indices become portable source data; marker-shaped user
     Lists are escaped so thawing preserves their values.
 */
@@ -2784,7 +2779,7 @@ List Sym.declare(Sym sym, List context, List key, List ast) {
   }
   Type ctxkey = %( @context @key ), type = ast.type_from_ast();
   Type declared_type = type;
-  // Track file-local globals so the symbol snapshot can exclude them. The
+  // Track file-local globals for protocol and static initializer checks. The
   // storage class is only visible here, before canonicalization strips it.
   if ((int) sym.scopes.len() == sym.base_scopes && !context) {
     if (ast.type().is_static()) sym.statics[(List) ctxkey] = 1;

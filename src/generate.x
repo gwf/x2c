@@ -203,11 +203,10 @@ static int _is_protocol_bootstrap_function(String spelling) =>
   spelling == "x2c_register_builtin_descriptor" ||
   spelling == "x2c_try_register_tagged_descriptor";
 
-/* A binding number names one declaration across the whole unit. */
-static String _cache_function_key(Var identity) => %"${identity.integer()}";
-
+/* Functions are keyed by binding number, which names one live declaration
+   in the unit. */
 static void _collect_cache_function_refs(
-  Var value, String caller, Map callers, int *uses_cache) {
+  Var value, Var caller, Map callers, int *uses_cache) {
   if (value is not <list>) return;
   List node = value;
   match (node) {
@@ -216,9 +215,8 @@ static void _collect_cache_function_refs(
       return;
     }
     case %(ident (binding ?callee ?)): {
-      String key = _cache_function_key(callee);
-      List found = callers.contains(key) ? callers[key] : NULL;
-      callers[key] = cons(caller, found);
+      List found = callers.contains(callee) ? callers[callee] : NULL;
+      callers[callee] = cons(caller, found);
       return;
     }
   }
@@ -236,13 +234,13 @@ static Map _cache_reachable_function_ids(List source) {
     match (func)
       case %(!set ?definition
              (function ? (bind (binding ?identity ?) ?) ?)): {
-        String key = _cache_function_key(identity);
         int uses_cache = 0;
-        _collect_cache_function_refs(definition, key, callers, &uses_cache);
-        if (uses_cache) queue.push(key);
+        _collect_cache_function_refs(
+          definition, identity, callers, &uses_cache);
+        if (uses_cache) queue.push(identity);
       }
   for (int i = 0; i < queue.len(); i++) {
-    String key = queue[i];
+    Var key = queue[i];
     if (reachable.contains(key)) continue;
     reachable[key] = 1;
     if (callers.contains(key))
@@ -286,7 +284,6 @@ static List _file_init(Compiler c, List source) {
                (!set ?declarator
                (bind (binding ?identity ?spelling) ?))
                (block *statements))): {
-        String function_key = _cache_function_key(identity);
         if (!inserted) {
           result = _prepend_init_prelude(result, init_guard, init_func);
           inserted = 1;
@@ -302,7 +299,7 @@ static List _file_init(Compiler c, List source) {
         else if (!type.type().is_static() &&
                  !_is_protocol_bootstrap_function(name) &&
                  (!cache_only ||
-                  cache_reachable_ids.contains(function_key)))
+                  cache_reachable_ids.contains(identity)))
           function = _patch_func_with_init(
             type, declarator, statements, initializer_name, guard);
         item = function;
