@@ -95,7 +95,7 @@ supplies Lisp bindings, source location, and recursion checks; the
 definition's fresh rows allocate invocation-local names. This method does
 not begin a semantic transaction.
 
-Source: `src/macros.x:2532`
+Source: `src/macros.x:2478`
 
 <a id="Compiler.install_builtin_macros"></a>
 #### Compiler.install_builtin_macros
@@ -179,7 +179,7 @@ Resolves a stored macro invocation marker to its source token.
 Nested template markers use the active expansion's invocation; unresolved
 markers return NULL.
 
-Source: `src/macros.x:2509`
+Source: `src/macros.x:2455`
 
 <a id="Compiler.macro_lisp_starts_declaration"></a>
 #### Compiler.macro_lisp_starts_declaration
@@ -190,7 +190,7 @@ Returns whether tokens after the current Lisp form continue a declaration.
 The balanced form and following trivia are inspected without moving the
 compiler cursor.
 
-Source: `src/macros.x:1870`
+Source: `src/macros.x:1817`
 
 <a id="Compiler.macro_starts_target_at"></a>
 #### Compiler.macro_starts_target_at
@@ -212,7 +212,7 @@ Reports whether the macro invocation at the cursor produces file-scope
 syntax, directly or through the target it decorates. A script unit keeps
 such an invocation at file scope. This query does not consume tokens.
 
-Source: `src/macros.x:2337`
+Source: `src/macros.x:2283`
 
 <a id="Compiler.parse_keyword_definition"></a>
 #### Compiler.parse_keyword_definition
@@ -223,7 +223,7 @@ Parses and installs one source-local `keyword` alias.
 The named macro must already be visible; the alias captures that definition
 and consumes its terminating semicolon.
 
-Source: `src/macros.x:2303`
+Source: `src/macros.x:2249`
 
 <a id="Compiler.parse_macro_definition"></a>
 #### Compiler.parse_macro_definition
@@ -234,7 +234,7 @@ Parses the macro definition at the current token into a `macrodef` `List`.
 A source-level definition is published immediately; a definition inside a
 template remains syntax for later binding at its expansion site.
 
-Source: `src/macros.x:2004`
+Source: `src/macros.x:1951`
 
 <a id="Compiler.parse_macro_lisp_expression"></a>
 #### Compiler.parse_macro_lisp_expression
@@ -277,7 +277,7 @@ Source: `src/macros.x:1112`
 Returns the registered hole descriptor at the current `$NAME`.
 Returns NULL without consuming tokens when the spelling is not a hole.
 
-Source: `src/macros.x:1799`
+Source: `src/macros.x:1746`
 
 <a id="Compiler.publish_macro_definition_node"></a>
 #### Compiler.publish_macro_definition_node
@@ -287,7 +287,7 @@ Source: `src/macros.x:1799`
 Publishes a canonical `macrodef` in source order and returns `node`.
 A later definition with the same name affects only later invocations.
 
-Source: `src/macros.x:2281`
+Source: `src/macros.x:2227`
 
 <a id="Compiler.skip_macro_invocation"></a>
 #### Compiler.skip_macro_invocation
@@ -307,7 +307,7 @@ Source: `src/macros.x:632`
 Consumes a NamedType target already projected by owning-source collection.
 CPP scanning does not produce the declaration or parse its fields again.
 
-Source: `src/macros.x:2347`
+Source: `src/macros.x:2293`
 
 <a id="Compiler.try_parse_macro_expression"></a>
 #### Compiler.try_parse_macro_expression
@@ -318,7 +318,7 @@ Parses and resolves a direct or keyword-alias expression macro.
 Returns NULL without consuming an identifier that is not an applicable
 alias; a direct `$` invocation must resolve to a visible expression form.
 
-Source: `src/macros.x:2726`
+Source: `src/macros.x:2672`
 
 <a id="Compiler.try_parse_macro_slot"></a>
 #### Compiler.try_parse_macro_slot
@@ -330,7 +330,7 @@ Returns role-shaped syntax containing `(macro-bind ...)` or
 `(macro-slot ...)`, or NULL when ordinary grammar owns the current tokens;
 successful parsing advances the cursor.
 
-Source: `src/macros.x:1887`
+Source: `src/macros.x:1834`
 
 <a id="Compiler.try_parse_macro_target_at"></a>
 #### Compiler.try_parse_macro_target_at
@@ -343,7 +343,7 @@ Returns NULL without consuming a macro hole or an invocation that
 deferred `(seq (macro-invoke ...))`, and ordinary parsing returns the bound
 expansion.
 
-Source: `src/macros.x:2845`
+Source: `src/macros.x:2791`
 
 ## Design notes
 

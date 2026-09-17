@@ -26,7 +26,7 @@ Warns about values that can outlive the region that allocated them.
 lowering rewrites its `defer` and region forms. The call adds warnings to
 `c` and does not change `ast`.
 
-Source: `src/regions.x:784`
+Source: `src/regions.x:802`
 
 ## Design notes
 
