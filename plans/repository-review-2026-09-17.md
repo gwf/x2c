@@ -362,6 +362,7 @@ parenthesis" pointing at a parameter name.
 | --- | --- | --- | --- |
 | A bare-binder template left unbound by a successful match raises, then aborts. | `%(outer (b)).search_replace(%(!or (a *x) (b)), <"*x">)` raises `<void-op>` from `List.cons` on both engines, and the process then aborts with "raise re-entered or after shutdown" although both raises were caught. `try_match_replace` writes `void` for the same input. Predates Group 9. | `_apply_capture_template` and the reference's `bindings.assoc(template)`. | agent |
 | A forward `class` declaration never followed by a definition disappears silently. | `class Color;` produces no registration and no diagnostic. It is the documented forward form, so this may be intentional. | `etc/builtin-macros.xmacro` class decorator. | agent |
+| `binder?` misses binders of ten or more characters, so `match-case` silently does not bind them. | A long name reads as an `lsym`, and `symbol?` is false for it, while `match` binds it. Found by the AST-to-Lisp spike, which reverted its own fix because it broke that spike's translation in a way it could not explain. | `etc/init.xlisp`. Note the checked-in bootstrap compiler reads that file during stage 0, so a change there needs a bootstrap round. | agent |
 | `Build._place_unit_headers` copies generated headers into shared paths without an atomic publish. | Not reproduced; 48 parallel two-source builds stayed green. A latent version of the concurrent-build row Group 11 fixed. | `src/build.x`. | agent |
 
 ## Group 19: gaps found while fixing Groups 3, 5, and 7
