@@ -2491,7 +2491,8 @@ from `Map`, and likewise for `Array`; for any other destination, including
 `Var`, it is the native zero initializer. The same holds in a `?:` arm, where a
 brace that remains an initializer becomes a compound literal of the
 destination: `Map m = ready ? {} : NULL;` builds a Map, and
-`Var v = ready ? {} : NULL;` is Null either way.
+`Var v = ready ? {} : NULL;` is Null either way. An anonymous struct or union
+destination has no compound-literal spelling and is rejected.
 
 The percent forms `%[...]` and `%{...}` below keep their quoted grammar. The
 bare forms differ only in evaluating elements, values, and non-identifier
