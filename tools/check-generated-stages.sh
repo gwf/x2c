@@ -30,6 +30,10 @@ list_generated() {
 
 list_generated "$left" >"$scratch/left.files"
 list_generated "$right" >"$scratch/right.files"
+if [[ ! -s "$scratch/left.files" ]]; then
+  echo "generated-stage comparison: no C/H files under $left" >&2
+  exit 1
+fi
 if ! diff -u "$scratch/left.files" "$scratch/right.files"; then
   echo "generated-stage comparison: file sets differ" >&2
   exit 1

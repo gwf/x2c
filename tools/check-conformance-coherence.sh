@@ -25,26 +25,31 @@ snap=$(mktemp)
 live=$(mktemp)
 trap 'rm -f "$snap" "$live"' EXIT
 
-filter='^\((unit|conformance owned)'
-{
-  "$x2c" translate --dump-conformance "${lib_units[@]}"
-  "$x2c" translate --dump-conformance "${src_units[@]}"
-} | grep -E "$filter" > "$snap" || true
-{
-  "$x2c" translate --live-symbols --dump-conformance "${lib_units[@]}"
-  "$x2c" translate --live-symbols --dump-conformance "${src_units[@]}"
-} | grep -E "$filter" > "$live" || true
+# Capture whole dumps first, so a compiler failure stops the check.
+dump() {
+  "$x2c" translate "$@" --dump-conformance "${lib_units[@]}"
+  "$x2c" translate "$@" --dump-conformance "${src_units[@]}"
+}
+dump >"$snap"
+dump --live-symbols >"$live"
 
-if ! diff -u "$snap" "$live" > /dev/null; then
+units=$(grep -c '^(unit ' "$snap" || true)
+if [[ $units -eq 0 ]]; then
+  echo "conformance coherence failure: $x2c dumped no units" >&2
+  exit 1
+fi
+
+filter='^\((unit|conformance owned)'
+if ! difference=$(diff -u <(grep -E "$filter" "$snap") \
+                         <(grep -E "$filter" "$live")); then
   echo "conformance coherence failure:" \
        "owned conformance rows differ by symbol mode." >&2
   echo "--- prelude symbols / +++ live symbols" >&2
-  diff -u "$snap" "$live" | tail -n +3 >&2 || true
+  printf '%s\n' "$difference" | tail -n +3 >&2
   echo "Generated adapters would depend on the build mode." \
        "Investigate before publishing artifacts" \
        "(a stale stage usually means: make build)." >&2
   exit 1
 fi
-units=$(grep -c '^(unit ' "$snap" || true)
 echo "conformance: owned rows agree between prelude and live symbol modes" \
      "($units units)"
