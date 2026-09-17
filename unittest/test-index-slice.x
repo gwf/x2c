@@ -165,6 +165,29 @@ static void slice_negative_step_at_length(void) {
   EXPECT_INT_EQ(b[1].int(), 20);
 }
 
+/* An empty range with a step wider than one used to count one element,
+   because the shared span arithmetic truncated toward zero. Array, List, and
+   String all read from that phantom position. */
+static void empty_stepped_slice_is_empty(void) {
+  $test.scoped();
+  Array array = [0, 1, 2, 3, 4, 5];
+  String string = "abcdef";
+  List list = %(a b c d);
+
+  EXPECT_INT_EQ((int) array[2:2:2].len(), 0);
+  EXPECT_INT_EQ(string[2:2:2].len(), 0);
+  EXPECT_INT_EQ(list[1:1:3].len(), 0);
+
+  EXPECT_INT_EQ((int) array[4:4:-2].len(), 0);
+  EXPECT_INT_EQ(string[4:4:-2].len(), 0);
+  EXPECT_INT_EQ(list[2:2:-3].len(), 0);
+
+  // a start past the end and a start clamped below zero both select nothing
+  String three = "abc", digits = "01234";
+  EXPECT_INT_EQ(three[3:3:2].len(), 0);
+  EXPECT_INT_EQ(digits[-100::-2].len(), 0);
+  EXPECT_INT_EQ((int) array[-100::-2].len(), 0);
+}
 
 void index_slice_suite(void) {
   $test.run(normalization_failures_transfer);
@@ -173,4 +196,5 @@ void index_slice_suite(void) {
   $test.run(collection_slice_syntax);
   $test.run(slice_stop_beyond_length_clamps);
   $test.run(slice_negative_step_at_length);
+  $test.run(empty_stepped_slice_is_empty);
 }

@@ -860,9 +860,13 @@ int x2c_normalize_slice(int *start, int *stop, int step, int length) {
   if (*stop < -1) *stop = -1;
   if (step > 0 && *stop > length) *stop = length;
   if (step < 0 && *stop > length) *stop = length;
+  /* The span must be strictly positive before it is counted. C division
+     truncates toward zero, so an empty or reversed range would otherwise
+     count one element and the caller would read a position outside the
+     value. */
   int newlen = 0;
-  if (step < 0 && *start >= *stop) newlen = (*start - *stop - 1) / (-step) + 1;
-  else if (step > 0 && *start <= *stop)
+  if (step < 0 && *start > *stop) newlen = (*start - *stop - 1) / (-step) + 1;
+  else if (step > 0 && *start < *stop)
     newlen = (*stop - *start - 1) / step + 1;
   return newlen;
 }
