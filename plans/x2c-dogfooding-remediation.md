@@ -382,11 +382,13 @@ which keeps this out of a gallery redesign. `make examples` stays optional.
    re-indents the entire body. Logger's private `synchronized` decorator is
    the precedent for a function-target decorator. This is language surface and
    must not be slipped into a cleanup pass. It decides Phase 4's scope.
-2. **Should `SymbolSet` participate in `in`?** The style guide recommends
-   `SymbolSet` for a closed vocabulary and `in` for membership, and today they
-   do not compose: `in` resolves through `Var(T)`'s `contains` and `SymbolSet`
-   adopts no protocol. It decides 17 sites and whether `collections.md` can
-   change. A `not in` spelling is a separate question and is not proposed.
+2. **Should `SymbolSet` participate in `in`?** Decided yes by Gary and done.
+   `in` resolves a `contains` member from any protocol the receiver adopts, so
+   the change is a library one: a one-member `Contains(T)` protocol beside
+   `Cleanup(T)` and `Iter(T)`, adopted by `SymbolSet`. No descriptor row, no
+   boxing, no compiler change. Nine membership tests in `src/` and `lib/` now
+   read as `in`, and the book no longer says the two do not compose. A
+   `not in` spelling remains a separate question and is not proposed.
 
 ## Plan review
 

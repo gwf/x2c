@@ -467,7 +467,7 @@ static const SymbolSet error_nonreturning_causes =
   $error.nonreturning.causes();
 
 static int _never_returns(Symbol code) =>
-  error_nonreturning_causes.contains(code);
+  code in error_nonreturning_causes;
 
 static void _initialize_policies(void) {
   foreach (Symbol code, error_nonreturning_causes)

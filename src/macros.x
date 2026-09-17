@@ -1701,7 +1701,7 @@ static Symbol _author_kind(String spelling) {
   if (kind == <statement>) return <block>;
   if (kind == <entry>) return <map-entry>;
   if (kind == <namedtype>) return <named-type>;
-  return author_kinds.contains(kind) ? kind : 0;
+  return kind in author_kinds ? kind : 0;
 }
 
 static const SymbolSet value_kinds = %<<expr name literal>>;
@@ -1709,7 +1709,7 @@ static const SymbolSet value_kinds = %<<expr name literal>>;
 static int _kind_accepts_role(Symbol kind, Symbol role) {
   Symbol expected = role == <statement> ? <block> : role;
   if (expected == <expression> || expected == <argument>)
-    return value_kinds.contains(kind);
+    return kind in value_kinds;
   return kind == expected ||
     (expected == <field> && kind == <decl>) ||
     (expected == <block> && kind == <decl>) ||
@@ -1857,7 +1857,7 @@ List Compiler.try_parse_macro_slot(Compiler c, Symbol role) {
   if (!c.macro_holes) return NULL;
   if (c.peek(0) == <"$(">) {
     int splice = _lisp_splice_follows(c);
-    if (declaration_roles.contains(role) && !splice)
+    if (role in declaration_roles && !splice)
       return NULL;
     if (role == <block> && c.macro_lisp_starts_declaration()) return NULL;
     if (role == <statement>) return NULL;

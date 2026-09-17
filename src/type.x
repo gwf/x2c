@@ -185,18 +185,18 @@ static const SymbolSet number_types =
 static const SymbolSet tagged_types = %<<struct union enum>>;
 
 /** Returns whether `sym` is a storage-class specifier. */
-int Symbol.is_storage_class(Symbol sym) => storage_classes.contains(sym);
+int Symbol.is_storage_class(Symbol sym) => sym in storage_classes;
 
 /** Returns whether `sym` is the `inline` function specifier. */
 int Symbol.is_inline(Symbol sym) => sym == <inline>;
 
 /** Returns whether `sym` is `const`, `restrict`, or `volatile`. */
-int Symbol.is_type_qualifier(Symbol sym) => type_qualifiers.contains(sym);
+int Symbol.is_type_qualifier(Symbol sym) => sym in type_qualifiers;
 
 /** Returns whether `sym` modifies the width or signedness of a scalar. */
-int Symbol.is_type_modifier(Symbol sym) => type_modifiers.contains(sym);
+int Symbol.is_type_modifier(Symbol sym) => sym in type_modifiers;
 
-static int Symbol._is_number_type(Symbol sym) => number_types.contains(sym);
+static int Symbol._is_number_type(Symbol sym) => sym in number_types;
 
 static int Symbol._is_tagged(Symbol sym) => tagged_types.contains(sym);
 

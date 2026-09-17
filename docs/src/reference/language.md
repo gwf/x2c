@@ -1981,8 +1981,10 @@ A `Map` tests its keys, a `List` or `Array` its elements, and a `String` a
 substring. The left operand converts to the member's parameter type, so a
 `Var` holding the key works as well as a literal. A receiver whose type does
 not implement a `contains` member is rejected with
-`operator 'in' requires an implemented contains member`; `SymbolSet` is one
-such type today and uses `set.contains(name)`. There is no `not in`
+`operator 'in' requires an implemented contains member`. The member comes
+from a protocol the receiver adopts: `Var(T)` declares one, and the
+one-member `Contains(T)` protocol gives membership to a type that holds
+members without boxing them, as `SymbolSet` does. There is no `not in`
 spelling; write `!(name in ages)`.
 
 `in` is a keyword only between two operands, so `struct buffer *in` and

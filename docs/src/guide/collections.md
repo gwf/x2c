@@ -295,9 +295,10 @@ compile-time duplicate error.
 nonmember. `contains` is the corresponding membership test. `getindex` maps an
 integer back to its `Symbol`, accepts negative indexes, and returns zero when
 out of range. A `SymbolSet` also supports `foreach(Symbol value, colors)` in
-source order. Write the membership test as `colors.contains(<blue>)`: the
-[`in` operator](../reference/language.md#membership-with-in) resolves through
-the `Var(T)` protocol, which a `SymbolSet` does not join.
+source order. `<blue> in colors` is the operator spelling of that test: a
+`SymbolSet` adopts the one-member `Contains(T)` protocol, so the
+[`in` operator](../reference/language.md#membership-with-in) reaches it
+without the set becoming a boxed `Var` container.
 
 The compiler generates a perfect hash and the ordered `Symbol` table as one
 read-only byte string. A lookup computes one candidate index and checks the
