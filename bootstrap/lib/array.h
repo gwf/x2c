@@ -68,7 +68,7 @@ Array Array_map(Array array, Func func);
 
 Array Array_map2(Array a, Array b, Func func);
 
-Var Array_reduce(Array array, Func func);
+Var Array_foldl(Array array, Var seed, Func fn);
 
 int Array_compare(Array a, Array b);
 

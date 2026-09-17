@@ -265,7 +265,8 @@ static int _escape_sequence_status(char * s, Symbol * status){
     case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : n ++;
     if(s[n] >= '0' && s[n] <= '7') n ++;
     if(s[n] >= '0' && s[n] <= '7') n ++;
-    return n;
+    if(n < 4 || s[1] <= '3') return n;
+    break;
   }
   if(status) * status = 28682226919752;
   return - 1;
@@ -292,7 +293,8 @@ static int _c_escape_sequence_status(char * s, Symbol * status){
     case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : n ++;
     if(s[n] >= '0' && s[n] <= '7') n ++;
     if(s[n] >= '0' && s[n] <= '7') n ++;
-    return n;
+    if(n < 4 || s[1] <= '3') return n;
+    break;
     case 'x' : case 'X' : n ++;
     if(! s[n]){
       if(status) * status = 664344300629258;
@@ -529,10 +531,17 @@ int scan_number_typed(char * s, Symbol * type){
       if(n < 0) return - 1;
       n += 2;
       break;
-      case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : n = _radix_integer(number + 2, 8, 1);
-      if(n < 0) return - 1;
-      n += 2;
-      break;
+      case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' :{
+        char after = number[_digits(number, 10)];
+        if(after == '.' || after == 'e' || after == 'E'){
+          n = _decimal_number(number, & found);
+          break;
+        }
+        n = _radix_integer(number + 2, 8, 1);
+        if(n < 0) return - 1;
+        n += 2;
+        break;
+      }
       default: n = _decimal_number(number, & found);
       break;
     }

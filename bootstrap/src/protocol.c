@@ -1038,19 +1038,13 @@ int String_truth(String);
 
 int String_getindex(String, int);
 
-int String_equal(String, String);
-
 String Compiler_display_path(Compiler, String);
 
 static String _normalize_file(Compiler compiler, String file){
   char path[PATH_MAX];
-  String result = file, root = compiler -> root_dir;
-  if(String_truth(root) && String_truth(file) && String_getindex(file, 0) != '/'){
-    String rooted = String_join(NULL, cons(String_var(root), cons(String_var(_0), cons(String_var(file), NULL))));
-    if(realpath(rooted, path)) result = String_join(NULL, cons(String_var(String_new(path)), NULL));
-  }
-  if(String_equal(result, file) && realpath(file, path)) result = String_join(NULL, cons(String_var(String_new(path)), NULL));
-  return Compiler_display_path(compiler, result);
+  String root = compiler -> root_dir;
+  if(realpath(file, path) ||(String_truth(root) && String_getindex(file, 0) != '/' && realpath(String_join(NULL, cons(String_var(root), cons(String_var(_0), cons(String_var(file), NULL)))), path))) file = String_join(NULL, cons(String_var(String_new(path)), NULL));
+  return Compiler_display_path(compiler, file);
 }
 
 int Map_try_get(Map, Var, Var *);
@@ -1289,6 +1283,7 @@ static List _adoption_row(Compiler compiler, Type base, Type participant, Symbol
   String path = _path(compiler);  List key = storage == 1317118534 ? cons(List_var(base), cons(List_var(participant), cons(String_var(path), NULL))) : cons(List_var(base), cons(List_var(participant), NULL));  Var stored;  return Map_try_get(compiler -> adoptions, List_var(key), & stored) ? Var_list(stored) : NULL;
 }
 
+int String_equal(String, String);
 static Symbol _adoption_visibility(Compiler compiler, Type base, Type participant){
   List external = _adoption_row(compiler, base, participant, 396490862680);  List local = _adoption_row(compiler, base, participant, 1317118534);  if(List_truth(external) && List_truth(local)){
     if(String_equal(_canonical_file(compiler, _adoption_location(external)), _canonical_file(compiler, _adoption_location(local)))) return 1317118534;  return 27902280;

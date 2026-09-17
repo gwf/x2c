@@ -69,8 +69,6 @@ Iter Iter_unique(Iter iter, Iter dest);
 
 Iter Iter_unzip(Iter iter, UnzipShared * shared, Iter dest);
 
-Var Iter_reduce(Iter iter, Func func, Var initial);
-
 Var Iter_foldl(Iter iter, Var seed, Func fn);
 
 int Iter_any(Iter iter, Func pred);

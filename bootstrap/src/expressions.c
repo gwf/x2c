@@ -3928,10 +3928,7 @@ break;
 
     }
   }
-if(! String_truth(text) || String_getindex(text, 0) < '0' || String_getindex(text, 0) > '9') return 0;  char * end, * digits = text;  int base = 0;  if(String_getindex(text, 0) == '0' &&(String_getindex(text, 1) == 'b' || String_getindex(text, 1) == 'B')){
-  digits += 2;  base = 2;
-}
-unsigned long long decoded = strtoull(digits, & end, base);  while(* end == 'u' || * end == 'U' || * end == 'l' || * end == 'L') end ++;  if(* end) return 0;  * value = decoded;  return 1;
+if(! String_truth(text) || String_getindex(text, 0) < '0' || String_getindex(text, 0) > '9') return 0;  char * end, * digits = text;  int base = 0;  if(String_getindex(text, 0) == '0' &&(String_getindex(text, 1) == 'b' || String_getindex(text, 1) == 'B')) base = 2;  if(String_getindex(text, 0) == '0' &&(String_getindex(text, 1) == 'o' || String_getindex(text, 1) == 'O')) base = 8;  if(base) digits += 2;  unsigned long long decoded = strtoull(digits, & end, base);  while(* end == 'u' || * end == 'U' || * end == 'l' || * end == 'L') end ++;  if(* end) return 0;  * value = decoded;  return 1;
 }
 
 List Type_declaration_ast(Type, List);

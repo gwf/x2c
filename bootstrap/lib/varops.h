@@ -39,8 +39,6 @@ int Var_fallback_truth(Var value);
 
 int Var_truth(Var value);
 
-int Var_truthy(Var value);
-
 Var Var_add(Var lhs, Var rhs);
 
 Var Var_sub(Var lhs, Var rhs);

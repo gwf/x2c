@@ -15,21 +15,11 @@ typedef struct List{
 
 List List_cons_in(Pool pool, Var head, List tail);
 
-Pool List_pool_current(void);
-
 void List_initialize(void);
 
 void List_thread_initialize(void);
 
 void List_shutdown(void);
-
-Pool List_pool_retain_named(const char * name);
-
-Pool List_pool_retain(void);
-
-void List_pool_release(void);
-
-Pool List_pool_detach(void);
 
 List List_promote(List lst);
 
@@ -112,8 +102,6 @@ int List_len(List lst);
 List List_map(List lst, Func fn);
 
 Var List_foldl(List lst, Var seed, Func fn);
-
-Var List_reduce(List lst, Func fn);
 
 Var List_find(List lst, Func pred);
 

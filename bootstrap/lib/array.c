@@ -693,16 +693,19 @@ Array Array_map2(Array a, Array b, Func func){
 }
 }
 
-Var Array_reduce(Array array, Func func){
-  size_t n = Array_len(array);
-  if(n == 0) return((void) 0, Void);
-  Var acc = Array_getindex(array, 0);
-  for(size_t i = 1;  i < n;  i ++){
+Var Array_foldl(Array array, Var seed, Func fn){
+  size_t n = Array_len(array), i = 0;
+  Var acc = seed;
+  if(Var_is_void(acc)){
+    if(n == 0) return((void) 0, Void);
+    acc = Array_getindex(array, i ++);
+  }
+  for(;  i < n;  i ++){
     FuncArg arguments[2] ={
       FuncArg_value(acc), FuncArg_value(Array_getindex(array, i))
     }
     ;
-    acc = Func_apply(func, 2, arguments);
+    acc = Func_apply(fn, 2, arguments);
   }
   return acc;
 }

@@ -233,13 +233,6 @@ List List_cons_in(Pool pool, Var head, List tail){
   return Var_list(Pool_intern(pool, List_var(cell), cell));
 }
 
-Pool x2c_pool_values_current(void);
-
-Pool List_pool_current(void){
-  if(! _init_guard_) List_initialize();
-  return x2c_pool_values_current();
-}
-
 void x2c_pool_values_initialize(void);
 
 void List_initialize(void){
@@ -263,50 +256,6 @@ void List_shutdown(void){
   x2c_pool_values_shutdown();
 }
 
-Pool x2c_pool_values_retain_named(const char *);
-
-Pool List_pool_retain_named(const char * name){
-  if(! _init_guard_) List_initialize();
-  return x2c_pool_values_retain_named(name);
-}
-
-Pool x2c_pool_values_retain(void);
-
-Pool List_pool_retain(void){
-  if(! _init_guard_) List_initialize();
-  return x2c_pool_values_retain();
-}
-
-Var Symbol_var(Symbol);
-
-Var String_var(String);
-
-void x2c_pool_values_release(void);
-
-void List_pool_release(void){
-  if(! _init_guard_) List_initialize();
-  Pool pool = x2c_pool_values_current();
-  if(! pool -> up){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/list.x",.function = "List_pool_release",.line = 150};
-    x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.pool_release")), NULL))));
-    __builtin_unreachable();
-  }
-  x2c_pool_values_release();
-}
-
-Pool x2c_pool_values_detach(void);
-
-Pool List_pool_detach(void){
-  if(! _init_guard_) List_initialize();
-  Pool pool = x2c_pool_values_current();
-  if(! pool -> up){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/list.x",.function = "List_pool_detach",.line = 164};
-    x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.pool_detach")), NULL))));
-    __builtin_unreachable();
-  }
-  return x2c_pool_values_detach();
-}
-
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 String String_promote(String);
@@ -320,6 +269,8 @@ Atom Atom_promote(Atom);
 int List_truth(List);
 
 int Pool_promote(Pool, Var, void *);
+
+Pool x2c_pool_values_current(void);
 
 static void _promote_node(Var node){
   if(Var_is_row(node, 11, 7, 1)){
@@ -367,13 +318,17 @@ int List_try_own(List lst){
   return ! List_truth(lst) || _try_own_node(List_var(lst));
 }
 
+Var Symbol_var(Symbol);
+
+Var String_var(String);
+
 Var Pool_lookup(Pool, Var);
 
 List cons(Var head, List tail){
   if(! _init_guard_) List_initialize();
   if(Var_is_void(head)){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/list.x",.function = "cons",.line = 243};
-    x2c_error_raise_n(& _x2c_error_site_2, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.cons")), NULL))));
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/list.x",.function = "cons",.line = 176};
+    x2c_error_raise_n(& _x2c_error_site_0, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.cons")), NULL))));
     __builtin_unreachable();
   }
   Pool pool = x2c_pool_values_current();
@@ -477,8 +432,8 @@ Var unsigned_var(unsigned);
 
 static List _concat_n_va(unsigned list_count, va_list ap){
   if(list_count > INT_MAX){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/list.x",.function = "_concat_n_va",.line = 332};
-    x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.concat_n")), NULL))), Symbol_var(7318440), unsigned_var(list_count));
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/list.x",.function = "_concat_n_va",.line = 265};
+    x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.concat_n")), NULL))), Symbol_var(7318440), unsigned_var(list_count));
     __builtin_unreachable();
   }
   Array lists = Array_new();
@@ -530,8 +485,8 @@ static List _n_va(unsigned element_count, va_list ap){
     for(unsigned i = 0;  i < element_count;  i ++){
       Var value = va_arg(ap, Var);
       if(Var_is_void(value)){
-        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/list.x",.function = "_n_va",.line = 358};
-        x2c_error_raise_n(& _x2c_error_site_4, 48270474208, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.list_n")), NULL))), Symbol_var(19800432), unsigned_var(i));
+        static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/list.x",.function = "_n_va",.line = 291};
+        x2c_error_raise_n(& _x2c_error_site_2, 48270474208, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.list_n")), NULL))), Symbol_var(19800432), unsigned_var(i));
         __builtin_unreachable();
       }
       Array_push(values, value);
@@ -687,11 +642,6 @@ Var List_foldl(List lst, Var seed, Func fn){
 
   }
   return acc;
-}
-
-Var List_reduce(List lst, Func fn){
-  if(! _init_guard_) List_initialize();
-  return List_foldl(List_cdr(lst), List_car(lst), fn);
 }
 
 int Var_truth(Var);
@@ -1337,8 +1287,8 @@ int x2c_normalize_slice(int *, int *, int, int);
 List List_subseq(List list, int start, int stop, int step){
   if(! _init_guard_) List_initialize();
   if(step < 1){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/list.x",.function = "List_subseq",.line = 804};
-    x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.subseq")), NULL))), Symbol_var(1286496), int_var(step));
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/list.x",.function = "List_subseq",.line = 729};
+    x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.subseq")), NULL))), Symbol_var(1286496), int_var(step));
     __builtin_unreachable();
   }
   int span = x2c_normalize_slice(& start, & stop, step, List_len(list));
@@ -1348,8 +1298,8 @@ List List_subseq(List list, int start, int stop, int step){
 List List_getslice(List list, int start, int stop, int step){
   if(! _init_guard_) List_initialize();
   if(! step){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/list.x",.function = "List_getslice",.line = 818};
-    x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.getslice")), NULL))), Symbol_var(1286496), int_var(step));
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/list.x",.function = "List_getslice",.line = 743};
+    x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.getslice")), NULL))), Symbol_var(1286496), int_var(step));
     __builtin_unreachable();
   }
   int len = List_len(list), span = x2c_normalize_slice(& start, & stop, step, len);
@@ -1399,8 +1349,8 @@ List List_getslice(List list, int start, int stop, int step){
 
 static int _unpack_n_va(List src, unsigned destination_count, va_list ap, int list_outputs){
   if(destination_count > INT_MAX){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/list.x",.function = "_unpack_n_va",.line = 833};
-    x2c_error_raise_n(& _x2c_error_site_7, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.unpack_n")), NULL))), Symbol_var(7318440), unsigned_var(destination_count));
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/list.x",.function = "_unpack_n_va",.line = 758};
+    x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.unpack_n")), NULL))), Symbol_var(7318440), unsigned_var(destination_count));
     __builtin_unreachable();
   }
   int count = 0;

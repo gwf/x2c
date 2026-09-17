@@ -243,7 +243,6 @@ int Var_compare(Var a, Var b);
 int Var_fallback_compare(Var a, Var b);
 Var Var_convert(Var value, Symbol target);
 int Var_truth(Var value);
-int Var_truthy(Var value);
 int Var_fallback_truth(Var value);
 Iter Var_fallback_iter(Var value, Iter dest);
 int Var_contains(Var value, Var needle);

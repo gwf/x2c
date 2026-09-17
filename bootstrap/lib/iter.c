@@ -531,27 +531,23 @@ Iter Iter_unzip(Iter iter, UnzipShared * shared, Iter dest){
   return Iter_init(dest, UnzipSharedRef_var((UnzipSharedRef) shared), _unzip_next, int_var(0));
 }
 
-Var Iter_reduce(Iter iter, Func func, Var initial){
-  Var acc = initial, item;
+Var Iter_foldl(Iter iter, Var seed, Func fn){
+  Var acc = seed, item;
   int has_item = Iter_try_next(iter, & item);
   if(Var_is_void(acc)){
     if(! has_item) return((void) 0, Void);
     acc = item;
     has_item = Iter_try_next(iter, & item);
   }
-  if(! func){
+  if(! fn){
     while(has_item) has_item = Iter_try_next(iter, & item);
     return acc;
   }
   while(has_item){
-    acc = _apply2(func, acc, item);
+    acc = _apply2(fn, acc, item);
     has_item = Iter_try_next(iter, & item);
   }
   return acc;
-}
-
-Var Iter_foldl(Iter iter, Var seed, Func fn){
-  return Iter_reduce(iter, fn, seed);
 }
 
 int Iter_any(Iter iter, Func pred){

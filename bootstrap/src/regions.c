@@ -226,9 +226,9 @@ __attribute__((constructor)) static void _file_init_(void){
   _73 = String_new("Scope_release");
   _74 = Symbol_var(7109834);
   _75 = cons(_74, _71);
-  _76 = String_new("List_pool_retain");
+  _76 = String_new("String_pool_retain");
   _77 = cons(_69, _22);
-  _78 = String_new("List_pool_release");
+  _78 = String_new("String_pool_release");
   _79 = cons(_74, _22);
   _80 = String_new("Scope_push");
   _81 = cons(_69, _15);
