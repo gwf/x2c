@@ -5,12 +5,12 @@
 ###############################################################################
 SOURCE 		 ?= .
 BUILD		   ?= build
-include ../etc/build-config.mk
+include $(dir $(lastword $(MAKEFILE_LIST)))build-config.mk
 ###############################################################################
 STAGE       = 0
-X2CPATH     = ../builds/$(STAGE)
+X2CPATH     = $(REPO_ROOT)/builds/$(STAGE)
 X2C         = $(X2CPATH)/x2c
-INCLUDE     = ../include/x2c
+INCLUDE     = $(REPO_ROOT)/include/x2c
 LDFLAGS    += -L$(X2CPATH) -lx2c -lm
 LDFLAGS    += $(BUILD_LDFLAGS)
 CFLAGS     += $(BUILD_CFLAGS)
@@ -52,7 +52,7 @@ $(BUILD):
 # retranslation; a missing generated .c/.h/.xi forces its source back into
 # the batch (self-healing).
 ifneq ($(strip $(X_FILES)),)
-X2C_TRANSLATE_DEPS = $(X2C) $(wildcard ../lib/*.x)
+X2C_TRANSLATE_DEPS = $(X2C) $(wildcard $(REPO_ROOT)/lib/*.x)
 MISSING_GENERATED = $(filter-out \
 	$(wildcard $(BUILD)/*.c $(BUILD)/*.h $(BUILD)/*.xi), \
 	$(C_FILES) $(H_FILES) $(XI_FILES))
