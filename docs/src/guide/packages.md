@@ -347,16 +347,17 @@ Installed packages are not owned by the compiler's install inventory, so a
 compiler upgrade keeps them and `x2c remove` is the way to delete one. A
 directory under `<home>/packages` without `BUNDLE.json` or `SOURCE.json` is
 never replaced or removed. Installs and removals in one home run one at a
-time; a second one waits, and says so unless `-q`, until the first finishes.
+time. A second one waits until the first finishes and, unless `-q` is given,
+prints a message while it waits.
 
-Each release publishes the index `x2c install <name>` reads, listing the
-bundles built by that release's compiler. A bundle refuses a different
-compiler version, so upgrade x2c before installing packages by name.
+Upgrade x2c before installing packages by name. Each release publishes the
+index that `x2c install <name>` reads, which lists the bundles built by that
+release's compiler, and a bundle rejects a different compiler version.
 
 ## Pin packages in a project
 
-A project manifest can name the packages it needs, so a build installs them
-instead of asking you to. Each entry pins one exact version:
+A project manifest can list the packages it needs, and a build installs
+them. Each entry pins one exact version:
 
 ```toml
 [dependencies]
@@ -366,14 +367,13 @@ pcre2 = "10.48"
 `x2c build` and `x2c run` install anything missing through the index before
 planning the build, then write `x2c.lock` beside the manifest recording what
 they resolved. Commit that file. A later build whose lockfile is already
-satisfied by the installed packages reads no index at all, so it works
-offline and gives everyone the same packages.
+satisfied by the installed packages reads no index, so it works offline and
+gives everyone the same packages.
 
 To change a version, edit the manifest and build again; the lockfile is
 rewritten. `x2c remove` still deletes an installed package, and the next
 build reinstalls it. See
-[project manifests](../reference/cli.md#pinned-packages) for the exact rules.
-
+[project manifests](../reference/cli.md#pinned-packages) for the rules.
 
 ## Movable native bundles
 
@@ -401,15 +401,15 @@ A bundle is specific to its host platform, architecture, native profile, and
 matching x2c compiler/runtime. `BUNDLE.json` records those build identities.
 Native dependency toolchain information comes from its existing cache receipt
 when available; an explicit external prefix may have no receipt. A bundle
-does not promise an ABI across compiler releases, cross-platform execution, or
-automatic dependency resolution. Native system libraries and frameworks remain
-supplied by the host.
+provides no stable ABI across compiler releases, no cross-platform execution,
+and no automatic dependency resolution. Native system libraries and frameworks
+remain supplied by the host.
 
-Most bundles link statically. torch cannot: libtorch is a set of shared
-libraries. Its bundle carries those libraries under `native/lib`, and a
-program built against it records a run-time search path to that directory.
-Such a program is not self-contained. It loads libtorch from the installed
-package, so moving or removing that package breaks the program.
+Most bundles link statically. libtorch is a set of shared libraries, so the
+torch bundle contains those libraries under `native/lib`, and a program built
+against it records a run-time search path to that directory. The program
+loads libtorch from the installed package, so moving or removing that package
+breaks the program.
 
 Bundles carry `builds/<name>.native.rsp`. The compiler reads its quoted native
 arguments, expands the literal `{package}` to the resolved package directory,
@@ -475,8 +475,8 @@ and directories with the existing `copies` shape and ordered native arguments:
 
 Copy sources expand `{prefix}` to the prepared native prefix and `{package}`
 to the producer package. Destinations are relative to the bundle. An optional
-`archive_objects` list names objects the package compiles outside
-`x2c build`, such as torch's C++ shim; they join the bundled
+`archive_objects` list holds objects the package compiles outside
+`x2c build`, such as torch's C++ shim; they are added to the bundled
 `lib<name>.a`, so a consumer links them with no further input. Native
 arguments retain `{package}` for consumer-time expansion. An optional
 `platform_args` object appends arguments keyed by the producer's platform
@@ -486,8 +486,8 @@ the native profile owner.
 
 Accepted options are native include directories (`-I`, `--c-include-dir`,
 `--c-system-dir`), `-D`, `-U`, `-L`, `-l`, `--rpath`, archive inputs,
-`-pthread`, and `-framework <name>`. A bundle of shared libraries names its
-library directory with `-L` and `--rpath` together, both under `{package}`.
+`-pthread`, and `-framework <name>`. A bundle of shared libraries passes its
+library directory to both `-L` and `--rpath`, under `{package}`.
 Keep native archives in dependency order after the wrapper archive. Options
 that replace the consumer's output, command, or tools and unrestricted
 compiler/linker escape options are not package metadata.

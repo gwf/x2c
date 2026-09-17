@@ -277,8 +277,8 @@ and redirections also apply to the program; its output is not held until exit.
 
 ## Run a script
 
-`script` runs one source file and builds it only when needed. The file is
-named with `.x`, or with any name when its first line is a shebang:
+`script` runs one source file and builds it only when needed. The file name
+ends in `.x`, or may be any name when the first line is a shebang:
 
 ```sh
 ./x2c script tools/report.x -- first --second
@@ -289,17 +289,17 @@ start that executable directly, in a few milliseconds, until one of these
 changes: the script, a file it includes or imports, a header its generated C
 includes, a package archive it links, the compiler, the runtime archive, the
 C compiler, the script's options, or the `CPATH`, `C_INCLUDE_PATH`,
-`LIBRARY_PATH`, and `SDKROOT` environment variables. The cache also watches
+`LIBRARY_PATH`, and `SDKROOT` environment variables. The cache also records
 the directories the build searched: include directories, `-L` directories,
 the C compiler's header and library search paths, and the directory of each
 file the build read. Adding or removing a file in one of them rebuilds the
-script, so a header that now shadows an included one, a `__has_include`
-whose answer changed, and a `-l` library that now resolves elsewhere are all
-noticed. `--rebuild` builds regardless.
+script. This covers a header that now shadows an included one, a
+`__has_include` whose result changed, and a `-l` library that now resolves
+elsewhere. `--rebuild` builds regardless.
 
 Options come before the script file, and every word after it is passed to
 the program unchanged, including `--` and words that begin with `-` or `@`.
-A response file named before the script supplies options. `script` accepts
+A response file given before the script supplies options. `script` accepts
 the translation, C compiler, and linker options of `run`, plus `-v`, `-###`,
 `--plain`, `--color`, `--debug`, `-j`, `--source-map`, `--rebuild`, and
 `--clean`. It does not read a project manifest.
@@ -399,8 +399,8 @@ debug = false
 The manifest lists the sources of each target and how the targets depend on
 each other. Relative paths start at the manifest directory. Its `*`, `?`,
 and bracket patterns stay within a path component; `**` recurses. As in a
-shell, a name that begins with a dot matches only where the pattern spells
-the dot. Matches are deduplicated and bytewise sorted. Unmatched patterns,
+shell, a name that begins with a dot matches only where the pattern has a
+literal dot. Matches are deduplicated and bytewise sorted. Unmatched patterns,
 unknown targets, and dependency cycles are errors before any action runs.
 
 A target may also set defines, C flags, library directories, libraries, link
@@ -413,19 +413,19 @@ defaults. `--target <name>` builds the named manifest target and `--profile
 ### Pinned packages
 
 A `[dependencies]` section pins packages by exact version. Each key is a
-package name in the index and each value is the version that index row
-carries:
+package name in the index and each value is the version in that index
+row:
 
 ```toml
 [dependencies]
 pcre2 = "10.48"
 ```
 
-This is separate from a target's `dependencies` field, which names other
+This is separate from a target's `dependencies` field, which lists other
 targets in the same manifest.
 
-`build` and `run` resolve the section before planning. A pinned package the
-x2c home does not already hold at that version is installed through the
+`build` and `run` resolve the section before planning. A pinned package
+missing from the x2c home at that version is installed through the
 index, the same way [`x2c install <name>`](#packages) does, and `--index`
 selects another index. The resolution is then written to `x2c.lock` beside
 the manifest, one `name version kind platform url sha256` row per package.
@@ -433,9 +433,10 @@ Keep that file with the manifest so a later build reproduces the same
 packages.
 
 A build whose lockfile already covers every pinned package, at the pinned
-version and installed in the home, reads no index and reaches no network.
-Any other state re-resolves through the index and rewrites the lockfile. A
-version the index cannot supply stops the build and names both versions. The
+version and installed in the home, reads no index and makes no network
+request. Any other state re-resolves through the index and rewrites the
+lockfile. A version the index cannot supply stops the build with an error
+that includes both versions. The
 editor adapter never installs.
 
 ## Include and tool ownership
@@ -478,7 +479,7 @@ A project manifest can pin packages instead of installing them by hand; see
 archive, prelude interface, package roots, C compiler, archiver, and script
 cache root as `name = value` lines. The prelude is the runtime `x2c.xi`
 interface the compiler replays for the runtime declarations; an empty value
-means it walks `lib/x2c.x` cold once per process.
+means the compiler reads `lib/x2c.x` from source once per process.
 `x2c env <name>` prints one value; `--package-dir`, `--cc`, and `--ar` show
 their effect on the report.
 
@@ -498,7 +499,7 @@ There is no lowercase `-i`. `-D` and `-U` reach requested x2c preprocessing
 and C compilation. Optimization, debug, and `-Xcc` are compile-only; `-L`,
 `-l`, `--rpath`, `-Wl,`, and `-Xlinker` are link-only. Unknown options are
 rejected. `--rpath <dir>` records `<dir>` in the program as a place to find
-shared libraries when it runs; a package bundle may carry it.
+shared libraries when it runs; a package bundle may include it.
 
 The C compiler selection order is `--cc`, `X2C_CC`, `CC`, the installed
 toolchain record, then `cc`. The archiver follows `--ar`, `X2C_AR`, `AR`, the
@@ -534,18 +535,19 @@ no diagnostics leaves it empty. Each line is one JSON object:
 - `code` is the diagnostic category, such as `parse`, `type`, `macro`,
   `protocol`, `xform`, `region`, `warning`, or `limit`.
 - `severity` is `error`, `warning`, or `note`. It records how the report was
-  submitted, so a category that reports both, such as `region` or `literal`,
-  carries the right severity on each entry. The `limit` notice is a `note`.
+  submitted, so each entry in a category with both severities, such as
+  `region` or `literal`, has its own severity. The `limit` notice is a
+  `note`.
 - `file` is relative to the working directory for a source inside it and
   absolute otherwise. A pseudo-source such as `<stdin>` keeps its name.
 - `line` and `column` are one-based, `length` is the token width in bytes,
   and `position` is its zero-based byte offset. All five location fields are
   `null` for a diagnostic without a location.
-- `notes` holds the text notes in order; standard error joins them with
-  spaces.
+- `notes` holds the text notes in order. On standard error, the notes are
+  joined with spaces.
 
 Compile-time Lisp and macros may print to standard output and standard error,
-so neither stream carries JSON. Parallel translation workers share the file;
+so neither stream contains JSON. Parallel translation workers share the file;
 each diagnostic is one appended write, so lines never interleave. A diagnostic
 is written when it is reported, and the file is complete when the command
 exits, including after a failed unit. Command-line, host preprocessor, C

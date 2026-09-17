@@ -76,8 +76,8 @@ as `%()` x2c literals. It never emits the legal but noncanonical `<"name">`
 spelling; adding the percent prefix is the only list-syntax difference. The
 reader reads exactly one form and does not evaluate its content. A stage
 build leaves the runtime's interfaces under `builds/N/lib`, and `lib/x2c.xi`
-there is the prelude every later translation replays; they are build output,
-not tracked files.
+there is the prelude every later translation replays. These interfaces are
+untracked build output.
 
 Native `Func` bindings use canonical function `Type` `List`s, for example
 `((func (("String"))) "String")`. Structural words are lowercase `Symbol`s,

@@ -301,8 +301,9 @@ The main translation steps are:
 Global type information reaches the parser outside that
 pipeline. `src/collect.x` gathers global symbol types by shallow-parsing raw
 source and splicing quote-includes in preprocessor order, replays the
-runtime prelude from the runtime `x2c.xi` interface, and writes each unit's interface beside
-its generated C through the Lisp data writer in `src/snapshot.x`.
+runtime prelude from the runtime `x2c.xi` interface, and writes each unit's
+interface beside its generated C through the Lisp data writer in
+`src/snapshot.x`.
 
 `src/compiler.x` owns compiler state and symbol scopes. `src/diagnostics.x`
 owns structured errors. `src/utils.x` owns host-environment and process

@@ -45,15 +45,14 @@ A script unit is a source file whose first line begins with `#!`, usually
 `#!/usr/bin/env -S x2c script` so that [`x2c script`](cli.md#run-a-script)
 runs it. The compiler reads that first line as `#include "scripting.x"`,
 which brings in `args.x`, `diff.x`, `digest.x`, `path.x`, `process.x`, and
-`regex.x`. Every other
-line keeps its line number.
+`regex.x`. Every other line keeps its line number.
 
 A script unit takes one of two forms, chosen by whether it defines a
 function named `main` at file scope:
 
 - **With `main`**, it is an ordinary program. Its declarations, including
   initialized ones such as `int count = 0;`, stay at file scope and `main`
-  runs. Adding a shebang line is enough to turn a program into a script.
+  runs. Adding a shebang line turns a program into a script.
 - **Without `main`**, its top-level statements run in order as the program.
 
 A script unit that defines `main` and also has a top-level statement, such
@@ -77,9 +76,9 @@ in source order, become the body of a function that the generated `main`
 calls with `argc`, `argv`, and `args`, a `List` of the argument `String`s
 after `argv[0]`. Statements can call the script's functions wherever they
 are defined, and those functions can call one another. The declarations
-among the statements are locals of that body, so functions cannot name
-them, although lambdas capture them as usual. Write `static` for a variable
-that functions share.
+among the statements are locals of that body, so functions cannot refer to
+them. Lambdas capture them as usual. Write `static` for a variable that
+functions share.
 
 Falling off the end of the statements returns zero, and `return` among them
 sets the exit status. A `<cmd-fail>` that no statement catches prints the
@@ -539,11 +538,11 @@ List names = %(a b c);
 int length = _Generic(count, size_t: names, default: NULL).len();
 ```
 
-x2c gives a selection a static type only when it knows the association C
-selects. Where x2c's model of the controlling type can differ from C's, the
-expression has no static type and the native compiler chooses alone, as C
-does. The selection is always emitted unchanged, and the native compiler
-reports its constraint errors.
+x2c gives a selection a static type only when it can determine the
+association C selects. Where x2c's model of the controlling type can differ
+from C's, the expression has no static type and the native compiler makes
+the selection, as in C. The selection is always emitted unchanged, and the
+native compiler reports its constraint errors.
 
 The controlling type is compared after C's lvalue conversion: top-level
 qualifiers are dropped and an array or function decays to a pointer. A
@@ -560,7 +559,7 @@ These controlling expressions stay untyped:
   implementation-defined, and arithmetic on one;
 - a bitfield, whose type C compilers treat differently;
 - `sizeof`, `offsetof`, and a pointer difference, whose `size_t` and
-  `ptrdiff_t` identities x2c does not know;
+  `ptrdiff_t` identities x2c does not model;
 - a system typedef without a collected declaration, which x2c otherwise
   models by width, such as `int64_t`, which is `long` on Linux and
   `long long` on macOS;
@@ -1541,9 +1540,9 @@ String name = "ada";
 Map ages = {ada: 36, grace: n + 41, "text": 1, <sym>: 2, (name): 3};
 ```
 
-The literal recognizes the entry by its first `:` that is outside nested
-brackets and belongs to no `?:` conditional. A brace without such an entry
-remains a C initializer. Inside an initializer, a bracketed index followed by
+A Map entry is identified by its first `:` that is outside nested brackets
+and belongs to no `?:` conditional. A brace without such an entry remains a
+C initializer. Inside an initializer, a bracketed index followed by
 `=`, `.`, or `[` remains a designator; any other bracket is an `Array`
 literal. Both literals build a fresh object at each evaluation, as `%[]` and
 `%{}` do, and a declared typed `Array` or `Map` family builds its own
@@ -1590,7 +1589,7 @@ an identifier, as in a function header, `foreach`, `with`, or a decorator. A
 compound literal or initializer brace follows an operator or a cast, so `%`
 after it stays modulo: `(int){9} %(4)` is `1`.
 
-The tokenizer does not know type names, so it cannot distinguish a cast from a
+The tokenizer has no type information, so it cannot distinguish a cast from a
 parenthesized operand. After any other `)`, `%(`, `%{`, and `%!` are modulo,
 as in `(a) %(b)`. Parenthesize such a literal after a cast:
 `(List) (%(echo done))`.
@@ -1701,11 +1700,12 @@ comments or newlines. Their separate escape boundaries are preserved:
 `"\\x41" "B"` contains `A` followed by `B`. The result keeps ordinary C string
 typing and converts to `String` when its context requires it. A context whose
 type is a `class` or `typedef` alias reaching `String`, such as
-`class Path String;`, requires the same conversion. A literal that receives a
-method with no `char *` definition converts to `String` first, so
-`"hello".len()` is `5`. `foreach` iterates such a literal as that `String`,
-and a raise detail accepts it as an immutable `String`. This adjacency rule does not combine percent strings or
-change quoted collection syntax.
+`class Path String;`, requires the same conversion. A literal used as the
+receiver of a method with no `char *` definition converts to `String` first,
+so `"hello".len()` is `5`. `foreach` iterates such a literal as that
+`String`, and a raise detail accepts it as an immutable `String`. This
+adjacency rule does not combine percent strings or change quoted collection
+syntax.
 
 Immutable literal construction is cached for the process lifetime. This
 includes an ordinary C string literal when its context promotes it to `String`,
@@ -2502,9 +2502,9 @@ Selecting a filtered arm consumes the errors accumulated since that arm was
 registered and transfers through each intervening cleanup frame. Its
 `finally` and `defer` cleanup runs before the selected arm. A `finally` body
 may not define a label, because its statements are repeated on each path that
-leaves the region. The transferring
-registration is removed before the arm executes, so raising a replacement
-`Error` continues outward instead of re-entering the same arm. When no arm
+leaves the region. The transferring registration is removed before the arm
+executes, so raising a replacement `Error` continues outward instead of
+re-entering the same arm. When no arm
 matches, the `Error` continues outward unchanged. Catch bindings are borrowed
 through the selected arm and must be copied with `Error.snapshot` to outlive
 it.
@@ -2684,16 +2684,16 @@ scope, and its braces are not emitted. Any string literal is accepted as the
 linkage name. `extern "C"` before a single declaration is read as `extern`.
 
 A unit or a collected header may place a macro before or among a
-declaration's specifiers. The macro's definition decides what the name
+declaration's specifiers. The macro's definition determines what the name
 contributes: nothing for an empty body or an attribute (`#define RLAPI`,
 `#define WEAK __attribute__((weak))`), its storage class for `static`,
 `extern`, or `inline` (`#define JSMN_API static`), builtin type words for a
-body such as `signed int`, and another prefix macro's reading for a body that
-names one. A function-like macro whose body is its parameter amid such
-prefixes wraps a type: `CJSON_PUBLIC(const char *) f(void);` reads the type
-inside the parentheses. Where a name is defined differently in several
-conditional branches, a `static` definition wins, then any other prefix. A
-name defined to any other text is a typedef name, as before.
+body such as `signed int`, and, for a body that is the name of another prefix
+macro, that macro's reading. A function-like macro whose body is its parameter
+amid such prefixes wraps a type: in `CJSON_PUBLIC(const char *) f(void);` the
+type is the one inside the parentheses. Where a name is defined differently
+in several conditional branches, a `static` definition takes precedence,
+then any other prefix. A name defined to any other text is a typedef name.
 
 A GNU attribute or a function-like attribute macro after a declarator or
 parameter, `int a __attribute__((unused)) = 1, b = 2;` or
@@ -2709,15 +2709,16 @@ standard keywords.
 `in` and `match` are keywords only where their x2c forms can occur: `in`
 between two operands, and `match` as `match (...)` followed by `case` or
 `{`. Elsewhere both are identifiers. A field of a foreign struct whose type
-x2c does not know can be indexed; C alone types the result.
+x2c cannot resolve can be indexed; the C compiler alone types the result.
 
 A public `struct tag { ... } name;` publishes the tag body and
 `extern struct tag name;` in the header and defines `name` in the source.
-A public prototype naming `struct tag` is preceded in the header by
+A public prototype that uses `struct tag` is preceded in the header by
 `struct tag;` when the header has not declared the tag. A function body that
-follows the declarations keeps the conditional arm it was written in. It
-stays ahead of a later `#undef` and of any conditional group containing
-one, so it sees the macro definitions in effect where it was written.
+follows the declarations keeps the conditional arm it was written in. It is
+emitted before a later `#undef` and before any conditional group that
+contains one, so the macro definitions in effect where it was written apply
+to it.
 
 A failed host preprocess prints its captured stderr, reports a structured x2c
 driver diagnostic at the first directive, and exits nonzero. Partial host
@@ -2730,7 +2731,7 @@ Command-line options, including the dump flags that expose an individual
 phase and the include and output directory switches, are listed in
 [compiler options](cli.md).
 
-By default each translation unit reports up to 20 errors, then emits a
+By default translation reports up to 20 errors per unit, then emits a
 `<limit>` diagnostic and stops; `--max-errors` changes the bound. Parsing
 recovers at top-level declarations. A rejected declaration is skipped whole
 and parsing resumes at the next one, so independent errors in separate
@@ -2757,9 +2758,9 @@ Each is a warning: translation continues and the program still compiles.
 | `unbalanced` | A region is opened in one block and released in another. |
 | `after-free` | A local is read after `Scope.free` or `Array.list_free` consumed it. |
 
-The check reads regions lexically and summarizes each function within its
-own unit, so the same unit reports the same warnings whatever else is
-translated with it. Calls into another unit are understood only for the
-runtime operations the check knows by name. It makes no claim about storage
-from plain `malloc` or a C library, raw pointer arithmetic, values reached
-through a field of a stack `struct`, callbacks, or `Context` regions.
+The check analyzes regions lexically and summarizes each function within its
+own unit, so a unit gets the same warnings whatever else is translated with
+it. For calls into another unit, the check uses only a fixed table of runtime
+operations. It does not cover storage from plain `malloc` or a C library,
+raw pointer arithmetic, values reached through a field of a stack `struct`,
+callbacks, or `Context` regions.

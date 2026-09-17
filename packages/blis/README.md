@@ -166,12 +166,12 @@ configuration, pinned by `dependency.json`. Every other platform uses
 portable `generic` kernels, pinned by `dependency-generic.json`, and needs no
 Apple silicon instructions. Threading stays disabled throughout.
 
-The archive's member count and the symbols it leaves undefined follow the
-kernel set, so each platform has its own `PROFILE-<system>-<machine>.json`:
+Each platform has its own `PROFILE-<system>-<machine>.json`, because the
+archive's member count and undefined symbols depend on the kernel set:
 `PROFILE-darwin-arm64.json`, `PROFILE-darwin-x86_64.json`,
-`PROFILE-linux-x86_64.json`, and `PROFILE-linux-aarch64.json`. Record one for
-a further platform with `tools/record-blis-profile.sh`, running it on that
-machine. `LICENSES/` records the incorporated notices.
+`PROFILE-linux-x86_64.json`, and `PROFILE-linux-aarch64.json`. To add a
+platform, run `tools/record-blis-profile.sh` on that machine. `LICENSES/`
+records the incorporated notices.
 
 x2c preserves imported C qualifiers and rejects conversions that silently
 drop them. `bli_info_get_version_str` returns `const char *`;

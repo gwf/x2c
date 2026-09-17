@@ -333,9 +333,9 @@ corrupting the allocator, or appearing to work until it does not.
 runtime that a value has stopped being used. The same applies to a boxed wide
 `Var`: if you keep the `Var`, you must keep the scope that allocated the box.
 
-The compiler does warn about this one, because the escape is visible in the
+The compiler warns about this example because the escape is visible in the
 source: `label` is allocated between a retain and its release and read after
-it. The next section describes what the check sees and what it cannot see.
+it. The next section describes what the check covers and what it does not.
 
 Three habits keep this out of your code. Return a canonical value, a
 `String`, a `List`, or a `Symbol`, when a result must cross a scope boundary.
@@ -345,11 +345,11 @@ visible where it was chosen.
 
 ## Warnings when a value outlives its region
 
-A region is a `$scope()` block, a `Scope.retain` and `Scope.release` pair, a
-`$scope(&slot)` push, a `List.pool_retain` bracket, or an `$auto` local.
 Translation warns when a value allocated inside a region can still be reached
-after the region ends. The warning names the value, the line that opened its
-region, and the way the value leaves:
+after the region ends. A region is a `$scope()` block, a `Scope.retain` and
+`Scope.release` pair, a `$scope(&slot)` push, a `List.pool_retain` bracket, or
+an `$auto` local. The warning includes the value's name, the line that opened
+its region, and the way the value leaves:
 
 - returned;
 - assigned to a local declared outside the region;
@@ -358,11 +358,11 @@ region, and the way the value leaves:
 - handed to a function that stores it in one of those places.
 
 Two more warnings come from the same pass. `unbalanced` reports a region
-opened in one block and released in another, which is the shape the other
-warnings cannot follow. `after-free` reports a local read after `Scope.free`
-or `Array.list_free` consumed it.
+opened in one block and released in another, a shape the other warnings
+cannot track. `after-free` reports a local read after `Scope.free` or
+`Array.list_free` consumed it.
 
-Code that stays inside the pattern the chapter teaches compiles silently:
+Code that follows the patterns in this chapter compiles without warnings:
 
 ```x2c
 ~typedef struct Entry { int id; } *Entry;
@@ -387,22 +387,21 @@ static String label(void) {
 }
 ```
 
-`Scope.move` hands the storage to a scope the caller owns, and `Buffer.str`
-produces a canonical `String` that its pool owns rather than the region.
+`Scope.move` moves the storage into a scope the caller owns, and `Buffer.str`
+produces a canonical `String` owned by its pool.
 `Context.export` and `List.promote` end tracking the same way.
 
-These warnings are a report on the lexical pattern, not a memory-safety
-claim. They say nothing about storage from plain `malloc` or a C library,
-raw pointer arithmetic and casts, values reached through a field of a stack
-`struct`, callbacks and function pointers, entry points a Lisp binding calls,
-or `Context` regions. Every one of those can still produce a dangling
-pointer that translates silently. Linking a program against `libx2c.a` with
-`cc -fsanitize=address,undefined` remains the way to observe the dangling
-read itself.
+These warnings cover the lexical pattern only. They do not cover storage
+from plain `malloc` or a C library, raw pointer arithmetic and casts, values
+reached through a field of a stack `struct`, callbacks and function
+pointers, entry points a Lisp binding calls, or `Context` regions. Each of
+those can still produce a dangling pointer that translates without a
+warning. To observe the dangling read itself, link the program against
+`libx2c.a` and compile with `cc -fsanitize=address,undefined`.
 
-Translation continues after a warning, so a program the compiler cannot
-prove safe still compiles. When a warning describes a lifetime you have
-arranged some other way, the departure is yours to keep.
+Translation continues after a warning, and the program still compiles. When
+a warning describes a lifetime you have arranged some other way, you may
+keep the code as written.
 
 ## Ordinary C storage still works
 

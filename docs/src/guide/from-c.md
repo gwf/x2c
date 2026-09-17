@@ -71,13 +71,12 @@ header provides and keeps the directive in the generated C, where the native
 compiler reads the header itself. An `.x` file is a translation unit, for
 which x2c writes its own C file and header.
 
-x2c parses the original source rather than preprocessor output, so every
-branch of an `#ifdef` that C could compile must parse. Three branches never
-reach C, because x2c output is compiled as C by a GNU-style compiler: the
+x2c parses the source as written, before preprocessing, so every branch of an
+`#ifdef` that C could compile must parse. x2c output is compiled as C by a
+GNU-style compiler, so x2c skips three branches that never reach C: the
 branch under `#ifdef __cplusplus` or `#if defined(__cplusplus)`, the branch
-under `#ifdef _MSC_VER`, and `#if 0`. x2c skips those branches, so the usual
-guard for C++ callers, a C++ `template`, or MSVC inline assembly in its own
-branch needs no change:
+under `#ifdef _MSC_VER`, and `#if 0`. The usual guard for C++ callers, a C++
+`template`, or MSVC inline assembly in its own branch needs no change:
 
 ```x2c
 #ifdef __cplusplus
@@ -101,7 +100,7 @@ such as `signed int` reads as that text: `JSMN_API void jsmn_init(...)`,
 function-like macro that wraps its parameter in attributes,
 `CJSON_PUBLIC(const char *) cJSON_Version(void)`, reads as the type inside.
 An attribute after a declarator or parameter,
-`int a __attribute__((cleanup(release))) = 1, b = 2;`, stays with that
+`int a __attribute__((cleanup(release))) = 1, b = 2;`, is written after that
 declarator in the generated C. The GNU spellings `__inline`, `__inline__`,
 `__restrict`, and `__restrict__` mean the standard keywords.
 
@@ -112,18 +111,19 @@ ordinary names, so `struct buffer *in` and `int match = 0` compile.
 
 `struct tag { ... } name;` at file scope publishes the type and an `extern`
 declaration of `name` in the generated header and defines `name` in the C
-file. A public function whose prototype names a `struct` that the file
+file. A public function whose prototype uses a `struct` that the file
 defines privately gets a forward declaration of the tag in the header first.
 
 A macro invocation that supplies grammar, such as a `for`-loop macro or a
 call without a trailing semicolon, still needs adjustment.
 
-A C11 generic selection has a static type in x2c when x2c knows which
-association C selects. The compiler selects that association from the
+A C11 generic selection has a static type in x2c when x2c can determine
+which association C selects. The compiler selects that association from the
 controlling expression's type and gives the whole expression its type. The
 selection reaches the generated C unchanged, so the native compiler makes the
 same choice. Where x2c's types can differ from C's, such as for an enum or a
-bitfield, the selection has no static type and C alone chooses:
+bitfield, the selection has no static type and only the C compiler selects
+an association:
 
 ```x2c
 ~

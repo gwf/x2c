@@ -199,20 +199,21 @@ unresolved angle includes are system headers the generated C re-includes
 anyway; unresolved quote includes are driver errors. Each file is spliced once
 by real path, so include cycles terminate.
 
-A file's contribution is collected once per process. Every translated unit
+A file's contribution is collected once per process. Translating a unit
 also writes it beside the generated C as a unit interface, `<stem>.xi`: the
 ordered declaration maps and include placeholders, the source content hash,
 function definitions, and the macro, Lisp, and embedded-text files the walk
-read with their hashes. Before walking a file cold, collection looks for its
-interface in the output directory, then in the directory that mirrors the
-file's home-relative path under the compiler's stage directory (or under an
-installed home), then in a package's `builds/`. An interface is used only
-when its recorded path and every hash still match; otherwise the file is
-walked cold. The prelude is the runtime `x2c.xi` interface from the library batch, so a stage
-build produces the prelude the next batch and the next stage replay, and no
-tracked file is both an input and an output of a build. `x2c env prelude`
-prints the interface a compiler would replay; an empty value means it walks
-`lib/x2c.x` cold, which costs about a quarter of a second per process.
+read with their hashes. Before walking a file's source, collection looks for
+its interface in the output directory, then in the directory that mirrors
+the file's home-relative path under the compiler's stage directory (or under
+an installed home), then in a package's `builds/`. An interface is used only
+when its recorded path and every hash still match; otherwise collection
+walks the source. The prelude is the runtime `x2c.xi` interface from the
+library batch, so a stage build produces the prelude the next batch and the
+next stage replay, and no tracked file is both an input and an output of a
+build. `x2c env prelude` prints the interface a compiler would replay; an
+empty value means the compiler walks the source of `lib/x2c.x`, which costs
+about a quarter of a second per process.
 
 `--cpp-symbols` and `--live-symbols` discover symbols through the host C
 preprocessor: the toolchain force-loads `lib/x2c.x` and runs `cc -E -P` as a
@@ -316,16 +317,17 @@ compiler-owned early-declaration queue, are driven to a fixed point themselves,
 and are appended to the unit.
 
 `src/cleanup.x` runs once after that fixed point, over each function on its
-own. It names the runtime record of every `defer` and `try` region, builds the
-statements that leave the region, and runs them wherever control leaves it:
+own. It assigns a name to the runtime record of every `defer` and `try`
+region, builds the statements that leave the region, and runs them wherever
+control leaves it:
 the region's own end, a `return` -- after saving the value, since cleanup may
 change what the expression read -- a `break` or `continue` that leaves the
-construct that bounds it, and an outward `goto`. Entering a region a jump did
-not open is rejected here, including the region a static local's runtime
-initializer opens over the rest of its block. The pass also marks the locals
+construct that bounds it, and an outward `goto`. The pass rejects a jump into
+a region, including the region a static local's runtime initializer opens
+over the rest of its block. The pass also marks the locals
 and parameters a `try` writes as `volatile`, which C requires of automatic
 state changed across `sigsetjmp`. Because it rewrites transfers, it runs after
-the driver settles rather than inside it.
+the driver reaches its fixed point.
 
 ```sh
 ./builds/0/x2c translate --dump-transforms greet.x

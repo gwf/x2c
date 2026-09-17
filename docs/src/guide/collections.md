@@ -48,9 +48,9 @@ A symbol value is written `<public>`, and a computed key is parenthesized, as
 in `{(host): port}`. `[]` is always a fresh `Array`. `{}` is a fresh `Map`
 when it initializes or is assigned to a `Map`; a `Var` initialized with `{}`
 is `Null`, as in C. A plain string literal is a `String` wherever one is
-expected, and it receives `String` methods directly: `"x2c".len()` is `3`.
+expected, and `String` methods apply to it directly: `"x2c".len()` is `3`.
 
-The percent forms below quote their contents instead. They suit symbolic data
+The percent forms below quote their contents. Use them for symbolic data
 such as ASTs, patterns, and configuration trees, where the names are the
 content.
 

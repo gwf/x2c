@@ -16,12 +16,12 @@ A conversion through a converter function copies the value, so
 ## Declared types and lookup types
 
 `Sym.declare` stores `Type.declared()`. Both `declared` and `canonicalize`
-drop storage classes and `inline`, which describe where a declaration lives;
+drop storage classes and `inline`, which describe the declaration itself;
 only `canonicalize` drops qualifiers. Function return conversion, identity
 bindings in `Sym.bind_identity`, and the `_Generic` signature asserted by a
 foreign alias preserve declared qualifiers.
 
-Type lookup uses the unqualified form: a `const` receiver names the same
+Type lookup uses the unqualified form: a `const` receiver has the same
 aggregate, fields, methods, protocol conformance, and `Var` tag as its
 unqualified type. The func-landing thunk in `src/emit.x` also uses an
 unqualified result type because it declares a result variable and assigns to
@@ -51,18 +51,19 @@ results, globals, and fields. `qualifier-void-pointer` and
 `foreign-alias-pointer-result` cover the corresponding pointer conversions
 and aliases.
 
-Collection reads headers unexpanded. A macro before or among a
-declaration's specifiers reads as its definition: nothing, a storage class,
-an attribute, builtin type words, or a type-wrapping function-like macro,
-and a trailing attribute macro is kept as text. A header whose declarations
+Collection reads headers without expanding macros. A macro before or among
+a declaration's specifiers is read as its definition: nothing, a storage
+class, an attribute, builtin type words, or a type-wrapping function-like
+macro. A trailing attribute macro is kept as text. A header whose declarations
 depend on other macro expansion, such as a macro that supplies grammar, is
 not collected correctly.
 
 ## Package source
 
-Packages keep upstream headers and raw function names authoritative and
-spell upstream qualifiers faithfully in client source. Do not introduce
-renamed pointer types, copied records, casts, or forwarding functions to work
-around a qualifier: they obscure the upstream API. Assign an imported
-`const` result, global, or field to a pointer that preserves its qualifier,
-or use a converter that copies the value when ownership is needed.
+Packages treat upstream headers and raw function names as authoritative,
+and client source spells upstream qualifiers exactly as upstream does. Do
+not introduce renamed pointer types, copied records, casts, or forwarding
+functions to work around a qualifier: they obscure the upstream API. Assign
+an imported `const` result, global, or field to a pointer that preserves its
+qualifier, or use a converter that copies the value when ownership is
+needed.

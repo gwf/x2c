@@ -247,8 +247,8 @@ intervening cleanup frame runs before control reaches the selected `catch`.
 
 A `finally` body cannot define a label. Its statements run on every path
 that leaves the region, so the generated C repeats them, and a label among
-them would be defined more than once. x2c reports that at the label. A
-`goto` that leaves the region is fine, and so is one inside the `try` body.
+them would be defined more than once. x2c reports an error at the label. A
+`goto` that leaves the region is allowed, as is one inside the `try` body.
 
 ### Raising during cleanup
 

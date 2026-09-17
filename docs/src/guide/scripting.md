@@ -17,9 +17,10 @@ The modules are optional in ordinary programs. Include the ones a file uses:
 
 ## Write a script
 
-A source file whose first line is a shebang is a script. It includes the
-command, path, argument, environment, and checksum modules automatically and
-may put statements at file scope, which run in order as the program:
+A source file whose first line is a shebang is a script. It includes
+`args.x`, `diff.x`, `digest.x`, `path.x`, `process.x`, and `regex.x`
+automatically and may put statements at file scope, which run in order as
+the program:
 
 ```x2c
 #!/usr/bin/env -S x2c script
@@ -48,15 +49,16 @@ x2c script tools/release-notes.x v0.12.0
 ```
 
 A script can include its own local `.x` modules, which `x2c script` builds
-and links with it. With an executable mode, the shebang runs it by name.
-Every argument after the file reaches the program unchanged. The [command
-reference](../reference/cli.md#run-a-script) describes the cache and exactly
-what makes a script build again.
+and links with it. A script with an executable mode runs by name through its
+shebang line. Every argument after the file reaches the program unchanged.
+The [command reference](../reference/cli.md#run-a-script) describes the cache
+and the changes that make a script build again.
 
 ## Commands
 
-Each element of a command `List` becomes one argument. No shell reads the
-words, so a value inserted with `$` stays one argument whatever it contains:
+Each element of a command `List` becomes one argument. The words reach the
+program without a shell, so a value inserted with `$` stays one argument
+whatever it contains:
 
 ```x2c
 ~#include "process.x"
@@ -68,15 +70,15 @@ String message = %"it's two words";
 ```
 
 Bare words in a command are x2c atoms, so most flags and names need no
-quotes. Write a word as a string when it contains punctuation that collection
-syntax reads differently: a comma, `$`, `@`, or a redirection such as `2>&1`.
-Inside a string, `$` still interpolates; write `\$` for a literal dollar
-sign.
+quotes. Write a word as a string when it contains punctuation with another
+meaning in collection syntax: a comma, `$`, `@`, or a redirection such as
+`2>&1`. Inside a string, `$` still interpolates; write `\$` for a literal
+dollar sign.
 
-`job` turns a command into a `Job`. Making a job does not start the program.
-The first result you ask for starts it, waits for it, and records what it
-did. Every later request reads that same record, so a job runs exactly once
-however many results you take from it.
+`job` turns a command into a `Job`. The first request for a result starts
+the program, waits for it, and records what it did. Every later request
+reads that same record, so a job runs exactly once however many results you
+take from it.
 
 ### Reading results
 
@@ -90,8 +92,8 @@ however many results you take from it.
 | `run()` | shows output live, waits, and raises when the status is not zero |
 
 By default a job captures standard output and passes standard error through
-to the terminal, the way the shell's `$(...)` does. A script gets the output
-to work with, and error messages still reach the person running it.
+to the terminal, the way the shell's `$(...)` does. The script receives the
+output, and error messages appear on the terminal.
 
 ```x2c
 ~#include "process.x"
@@ -105,9 +107,9 @@ if (diff.status() == 0)
 
 ### Showing output live
 
-A command whose output belongs on the terminal, such as a build or a test
-run, calls `live` before it starts. A live job does not capture standard
-output, so `output` and `lines` return NULL. `run` is the short form of
+Call `live` before a job starts to show its output on the terminal, as for a
+build or a test run. A live job does not capture standard output, so
+`output` and `lines` return NULL. `run` is the short form of
 `live().check()`:
 
 ```x2c
@@ -123,11 +125,11 @@ if (%(make test).job().live().status())
 ### Failures
 
 `check`, `run`, `output`, and `lines` raise `<cmd-fail>` when the status is
-not zero. The detail carries `command` and `status`, plus `output` and
-`errors` when they were captured. `status` and `errors` never raise, so a
-script can read standard error after a failure. A program that cannot start
-raises `<not-found>` for a missing program or directory, and `<io-fail>` for
-anything else:
+not zero. The detail has `command` and `status` entries, plus `output` and
+`errors` entries when they were captured. `status` and `errors` never raise,
+so a script can read standard error after a failure. When a program cannot
+start, the job raises `<not-found>` for a missing program or directory, and
+`<io-fail>` for anything else:
 
 ```x2c
 ~#include "process.x"
@@ -158,8 +160,8 @@ List same = %(git ls-files).job().pipe(%(grep "\\.x\$")).lines();
 ~}
 ```
 
-The job's status is the status of its last failing stage, so an early
-failure is not hidden by a later stage that succeeds.
+The job's status is the status of its last failing stage, so a failure in
+an early stage sets the status even when a later stage succeeds.
 
 ### Options
 
@@ -185,17 +187,16 @@ String upper = %(tr a-z A-Z).job().options({input: "quiet"}).output();
 | `stderr` | `inherit` (the default), `capture`, `stdout` to merge, or a file path |
 
 `stdout` applies to the last stage of a pipeline, and `stderr` to every
-stage. `live()` is the same as `options(%{stdout: inherit})`. An unknown key
-raises `<bad-arg>`, so a misspelled `dir` cannot silently run a command
-somewhere else. Changing options or adding a stage after the job has started
-also raises `<bad-arg>`.
+stage. `live()` is the same as `options(%{stdout: inherit})`. An unknown key,
+such as a misspelled `dir`, raises `<bad-arg>`. Changing options or adding a
+stage after the job has started also raises `<bad-arg>`.
 
 ### Background jobs
 
 `start` begins a job without waiting and returns the job. `ready` reports
 whether a started job has finished. `Job.wait_any` removes and returns the
-first finished job from an `Array`, which is enough to bound how many run at
-once:
+first finished job from an `Array`. This loop uses it to bound how many jobs
+run at once:
 
 ```x2c
 ~#include "process.x"
@@ -227,7 +228,7 @@ including when an error leaves the block:
 
 ## Paths
 
-A `Path` is a `String` that names a filesystem location. A literal or a
+A `Path` is a `String` that holds a filesystem location. A literal or a
 `String` converts to a `Path` wherever one is expected, and a `Path` passes
 wherever a `String` parameter is expected. Only a `Path` has the file
 methods.
@@ -256,15 +257,15 @@ foreach (Path unit, Path.glob("src/**/*.x"))
 
 ### Examining a path
 
-`join`, `dirname`, `basename`, `stem`, `extension`, and `glob_match` only
-examine text. `stem` and `extension` return a `String`; the others that
+`join`, `dirname`, `basename`, `stem`, `extension`, and `glob_match` operate
+on the text alone. `stem` and `extension` return a `String`; the others that
 return text return a `Path`. `absolute` resolves a path against the working
 directory.
 
 ### Asking about a path
 
 `exists`, `is_dir`, `is_file`, `is_executable`, `size`, and `modified_time`
-ask the filesystem. `modified_time` keeps the fraction of a second that the
+query the filesystem. `modified_time` keeps the fraction of a second that the
 filesystem records.
 
 ### Listing
@@ -294,7 +295,7 @@ work.remove_tree();
 ```
 
 A missing path raises `<not-found>`, and any other failure raises
-`<io-fail>`. Both name the operation and the path.
+`<io-fail>`. Both details have `operation` and `path` entries.
 
 `+` joins a `Path` with a `String`, another `Path`, or a C string literal and
 produces a `String`, as in `path + ".o"`. Slicing is a `String` operation.
@@ -365,13 +366,12 @@ Every name in the spec is present in the result. A flag holds the number of
 times it appeared, a `repeated` row holds a `List`, and any other row holds
 its last value as a `String`. A row that was not given holds its default, or
 else zero, an empty `List`, or a NULL `String`, all of which test false.
-Values stay `String`s; convert one to a number where the script needs it.
+Values stay `String`s; convert one to a number where a number is needed.
 
 An unknown option, a missing or unexpected value, an extra operand, or a
 missing `required` row raises `<bad-arg>` with `why` and the offending
-`option` or `operand`. Nothing exits on the script's behalf, so the script
-chooses the message and the status. `Args.usage` returns help text generated
-from the same spec:
+`option` or `operand`. The script chooses the message and the exit status.
+`Args.usage` returns help text generated from the same spec:
 
 ```x2c
 ~#include "args.x"
@@ -411,7 +411,7 @@ which `make install` runs, works this way.
 `digest.x` computes SHA-256 digests, spelled as the lowercase hexadecimal
 `String` that `shasum -a 256` prints. `String.sha256` hashes the text of a
 `String`. `File.sha256` hashes the raw bytes from a stream's position to its
-end, so it also works on binary files that `read_text` refuses:
+end, so it also works on binary files that `read_text` rejects:
 
 ```x2c
 ~#include "digest.x"
@@ -463,13 +463,12 @@ A pattern is text with these forms. Anything else matches itself.
 | `\.` `\\` `\t` `\n` `\r` | a literal byte |
 | `(?i)` `(?m)` `(?s)` | at the start: ignore ASCII case, let `^` and `$` match at line breaks, let `.` match newline |
 
-Matching is byte by byte, so `.` and `\w` see a multi-byte character as
+Matching is byte by byte, so `.` and `\w` treat a multi-byte character as
 several bytes, and `(?i)` folds only ASCII letters. There is no lookahead,
 lookbehind, or backreference. The
 [`pcre2` package](https://github.com/gwf/x2c/blob/main/packages/pcre2/README.md)
-has all of those and Unicode; its `Regexp` has the same methods, so a
-program moves to it by importing the package and adding the options
-argument to `compile`.
+has all of those and Unicode. Its `Regexp` has the same methods; to switch
+to it, import the package and add the options argument to `compile`.
 
 A pattern that does not parse raises `<bad-arg>` with `why`, the `pattern`,
 and the zero-based byte `offset` of the problem.
@@ -481,7 +480,7 @@ at a byte offset. `find_all` returns every non-overlapping match as a
 `List`. A `RegexMatch` is indexed by capture number, or by a name as a
 `Symbol` or `String`. The whole match is capture 0. A capture that did not
 take part is NULL, and so is one that matched no bytes, since an empty
-`String` is NULL; `matched` tells them apart:
+`String` is NULL; `matched` distinguishes the two:
 
 ```x2c
 ~#include "regex.x"
@@ -530,8 +529,8 @@ set, such as `\w*`, matches any length, but a repeated group such as
 `diff.x` compares two texts line by line. `Diff.unified` returns the
 difference the way `diff -u` prints it, with the two names in the header
 and three lines of context around each change, or NULL when the texts are
-the same line for line. A check that keeps expected output in a file
-reports a mismatch with it:
+the same line for line. This check compares a command's output with
+expected output stored in a file:
 
 ```x2c
 ~#include "diff.x"
@@ -548,7 +547,7 @@ if (report) Stderr.printf("%s", report);
 
 `Diff.lines` returns the edits themselves: a `List` of `(same line)`,
 `(delete line)`, and `(insert line)` forms in order, with line endings
-removed, for a program that wants to act on them:
+removed:
 
 ```x2c
 ~#include "diff.x"
@@ -578,10 +577,9 @@ A script that reads or writes JSON includes `json.x` itself:
 #include "json.x"
 ```
 
-It is not included automatically because its names match the converting
-surface of the
-[`yyjson` package](https://github.com/gwf/x2c/blob/main/packages/yyjson/README.md),
-so a script moves to the package by replacing that line with
+The names in `json.x` match the converting surface of the
+[`yyjson` package](https://github.com/gwf/x2c/blob/main/packages/yyjson/README.md).
+To switch a script to the package, replace that line with
 `import "yyjson" with Json;`.
 
 `Json.parse` reads JSON text and `Json.read_file` reads a JSON file. The
@@ -611,7 +609,7 @@ are written in byte order, so equal values always produce the same text, and
 the indented layout is the one Python's `json.dumps` produces with
 `indent=2` and `sort_keys=True`. A bare key in a `%{}` literal is a `Symbol`,
 which is written as a string, and `Json.bool` makes a boolean. A `Map` or
-`Array` variable reaches the writers through `Var`:
+`Array` variable passes to the writers as a `Var`:
 
 ```x2c
 ~#include "json.x"
@@ -625,9 +623,9 @@ Json.write_file(report, "/tmp/report.json");
 
 Text that is not JSON raises `<bad-arg>` with `why`, a zero-based byte
 `offset`, and one-based `line` and `column` details; `Json.read_file` adds
-the `path`. The same cause rejects nesting deeper than 512 arrays and
-objects, a number too large for a `double`, an unpaired surrogate escape,
-and `\u0000`, which a `String` cannot hold:
+the `path`. Parsing raises the same cause for nesting deeper than 512 arrays
+and objects, a number too large for a `double`, an unpaired surrogate
+escape, and `\u0000`, which a `String` cannot hold:
 
 ```x2c
 ~#include "json.x"
@@ -647,5 +645,5 @@ or an infinity.
 The package keeps what a `Map` cannot: object order, duplicate names, and
 whether a number was signed, unsigned, or real. Its converted integers are
 `long long` or `unsigned long long` values, which do not compare equal to an
-`int` literal such as the 5 in `%{n: 5}`, and malformed text raises
-`<malformed>` rather than `<bad-arg>`.
+`int` literal such as the 5 in `%{n: 5}`. The package raises `<malformed>`
+for malformed text.

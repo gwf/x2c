@@ -81,13 +81,12 @@ header provides and keeps the directive in the generated C, where the native
 compiler reads the header itself. An `.x` file is a translation unit, for
 which x2c writes its own C file and header.
 
-x2c parses the original source rather than preprocessor output, so every
-branch of an `#ifdef` that C could compile must parse. Three branches never
-reach C, because x2c output is compiled as C by a GNU-style compiler: the
+x2c parses the source as written, before preprocessing, so every branch of an
+`#ifdef` that C could compile must parse. x2c output is compiled as C by a
+GNU-style compiler, so x2c skips three branches that never reach C: the
 branch under `#ifdef __cplusplus` or `#if defined(__cplusplus)`, the branch
-under `#ifdef _MSC_VER`, and `#if 0`. x2c skips those branches, so the usual
-guard for C++ callers, a C++ `template`, or MSVC inline assembly in its own
-branch needs no change:
+under `#ifdef _MSC_VER`, and `#if 0`. The usual guard for C++ callers, a C++
+`template`, or MSVC inline assembly in its own branch needs no change:
 
 ```x2c
 #ifdef __cplusplus
@@ -111,7 +110,7 @@ such as `signed int` reads as that text: `JSMN_API void jsmn_init(...)`,
 function-like macro that wraps its parameter in attributes,
 `CJSON_PUBLIC(const char *) cJSON_Version(void)`, reads as the type inside.
 An attribute after a declarator or parameter,
-`int a __attribute__((cleanup(release))) = 1, b = 2;`, stays with that
+`int a __attribute__((cleanup(release))) = 1, b = 2;`, is written after that
 declarator in the generated C. The GNU spellings `__inline`, `__inline__`,
 `__restrict`, and `__restrict__` mean the standard keywords.
 
@@ -122,18 +121,19 @@ ordinary names, so `struct buffer *in` and `int match = 0` compile.
 
 `struct tag { ... } name;` at file scope publishes the type and an `extern`
 declaration of `name` in the generated header and defines `name` in the C
-file. A public function whose prototype names a `struct` that the file
+file. A public function whose prototype uses a `struct` that the file
 defines privately gets a forward declaration of the tag in the header first.
 
 A macro invocation that supplies grammar, such as a `for`-loop macro or a
 call without a trailing semicolon, still needs adjustment.
 
-A C11 generic selection has a static type in x2c when x2c knows which
-association C selects. The compiler selects that association from the
+A C11 generic selection has a static type in x2c when x2c can determine
+which association C selects. The compiler selects that association from the
 controlling expression's type and gives the whole expression its type. The
 selection reaches the generated C unchanged, so the native compiler makes the
 same choice. Where x2c's types can differ from C's, such as for an enum or a
-bitfield, the selection has no static type and C alone chooses:
+bitfield, the selection has no static type and only the C compiler selects
+an association:
 
 ```x2c
 
@@ -1009,15 +1009,14 @@ A script unit is a source file whose first line begins with `#!`, usually
 `#!/usr/bin/env -S x2c script` so that [`x2c script`](https://x2c-lang.dev/docs/reference/cli.html#run-a-script)
 runs it. The compiler reads that first line as `#include "scripting.x"`,
 which brings in `args.x`, `diff.x`, `digest.x`, `path.x`, `process.x`, and
-`regex.x`. Every other
-line keeps its line number.
+`regex.x`. Every other line keeps its line number.
 
 A script unit takes one of two forms, chosen by whether it defines a
 function named `main` at file scope:
 
 - **With `main`**, it is an ordinary program. Its declarations, including
   initialized ones such as `int count = 0;`, stay at file scope and `main`
-  runs. Adding a shebang line is enough to turn a program into a script.
+  runs. Adding a shebang line turns a program into a script.
 - **Without `main`**, its top-level statements run in order as the program.
 
 A script unit that defines `main` and also has a top-level statement, such
@@ -1041,9 +1040,9 @@ in source order, become the body of a function that the generated `main`
 calls with `argc`, `argv`, and `args`, a `List` of the argument `String`s
 after `argv[0]`. Statements can call the script's functions wherever they
 are defined, and those functions can call one another. The declarations
-among the statements are locals of that body, so functions cannot name
-them, although lambdas capture them as usual. Write `static` for a variable
-that functions share.
+among the statements are locals of that body, so functions cannot refer to
+them. Lambdas capture them as usual. Write `static` for a variable that
+functions share.
 
 Falling off the end of the statements returns zero, and `return` among them
 sets the exit status. A `<cmd-fail>` that no statement catches prints the
@@ -1503,11 +1502,11 @@ List names = %(a b c);
 int length = _Generic(count, size_t: names, default: NULL).len();
 ```
 
-x2c gives a selection a static type only when it knows the association C
-selects. Where x2c's model of the controlling type can differ from C's, the
-expression has no static type and the native compiler chooses alone, as C
-does. The selection is always emitted unchanged, and the native compiler
-reports its constraint errors.
+x2c gives a selection a static type only when it can determine the
+association C selects. Where x2c's model of the controlling type can differ
+from C's, the expression has no static type and the native compiler makes
+the selection, as in C. The selection is always emitted unchanged, and the
+native compiler reports its constraint errors.
 
 The controlling type is compared after C's lvalue conversion: top-level
 qualifiers are dropped and an array or function decays to a pointer. A
@@ -1524,7 +1523,7 @@ These controlling expressions stay untyped:
   implementation-defined, and arithmetic on one;
 - a bitfield, whose type C compilers treat differently;
 - `sizeof`, `offsetof`, and a pointer difference, whose `size_t` and
-  `ptrdiff_t` identities x2c does not know;
+  `ptrdiff_t` identities x2c does not model;
 - a system typedef without a collected declaration, which x2c otherwise
   models by width, such as `int64_t`, which is `long` on Linux and
   `long long` on macOS;
@@ -2505,9 +2504,9 @@ String name = "ada";
 Map ages = {ada: 36, grace: n + 41, "text": 1, <sym>: 2, (name): 3};
 ```
 
-The literal recognizes the entry by its first `:` that is outside nested
-brackets and belongs to no `?:` conditional. A brace without such an entry
-remains a C initializer. Inside an initializer, a bracketed index followed by
+A Map entry is identified by its first `:` that is outside nested brackets
+and belongs to no `?:` conditional. A brace without such an entry remains a
+C initializer. Inside an initializer, a bracketed index followed by
 `=`, `.`, or `[` remains a designator; any other bracket is an `Array`
 literal. Both literals build a fresh object at each evaluation, as `%[]` and
 `%{}` do, and a declared typed `Array` or `Map` family builds its own
@@ -2554,7 +2553,7 @@ an identifier, as in a function header, `foreach`, `with`, or a decorator. A
 compound literal or initializer brace follows an operator or a cast, so `%`
 after it stays modulo: `(int){9} %(4)` is `1`.
 
-The tokenizer does not know type names, so it cannot distinguish a cast from a
+The tokenizer has no type information, so it cannot distinguish a cast from a
 parenthesized operand. After any other `)`, `%(`, `%{`, and `%!` are modulo,
 as in `(a) %(b)`. Parenthesize such a literal after a cast:
 `(List) (%(echo done))`.
@@ -2665,11 +2664,12 @@ comments or newlines. Their separate escape boundaries are preserved:
 `"\\x41" "B"` contains `A` followed by `B`. The result keeps ordinary C string
 typing and converts to `String` when its context requires it. A context whose
 type is a `class` or `typedef` alias reaching `String`, such as
-`class Path String;`, requires the same conversion. A literal that receives a
-method with no `char *` definition converts to `String` first, so
-`"hello".len()` is `5`. `foreach` iterates such a literal as that `String`,
-and a raise detail accepts it as an immutable `String`. This adjacency rule does not combine percent strings or
-change quoted collection syntax.
+`class Path String;`, requires the same conversion. A literal used as the
+receiver of a method with no `char *` definition converts to `String` first,
+so `"hello".len()` is `5`. `foreach` iterates such a literal as that
+`String`, and a raise detail accepts it as an immutable `String`. This
+adjacency rule does not combine percent strings or change quoted collection
+syntax.
 
 Immutable literal construction is cached for the process lifetime. This
 includes an ordinary C string literal when its context promotes it to `String`,
@@ -3466,9 +3466,9 @@ Selecting a filtered arm consumes the errors accumulated since that arm was
 registered and transfers through each intervening cleanup frame. Its
 `finally` and `defer` cleanup runs before the selected arm. A `finally` body
 may not define a label, because its statements are repeated on each path that
-leaves the region. The transferring
-registration is removed before the arm executes, so raising a replacement
-`Error` continues outward instead of re-entering the same arm. When no arm
+leaves the region. The transferring registration is removed before the arm
+executes, so raising a replacement `Error` continues outward instead of
+re-entering the same arm. When no arm
 matches, the `Error` continues outward unchanged. Catch bindings are borrowed
 through the selected arm and must be copied with `Error.snapshot` to outlive
 it.
@@ -3648,16 +3648,16 @@ scope, and its braces are not emitted. Any string literal is accepted as the
 linkage name. `extern "C"` before a single declaration is read as `extern`.
 
 A unit or a collected header may place a macro before or among a
-declaration's specifiers. The macro's definition decides what the name
+declaration's specifiers. The macro's definition determines what the name
 contributes: nothing for an empty body or an attribute (`#define RLAPI`,
 `#define WEAK __attribute__((weak))`), its storage class for `static`,
 `extern`, or `inline` (`#define JSMN_API static`), builtin type words for a
-body such as `signed int`, and another prefix macro's reading for a body that
-names one. A function-like macro whose body is its parameter amid such
-prefixes wraps a type: `CJSON_PUBLIC(const char *) f(void);` reads the type
-inside the parentheses. Where a name is defined differently in several
-conditional branches, a `static` definition wins, then any other prefix. A
-name defined to any other text is a typedef name, as before.
+body such as `signed int`, and, for a body that is the name of another prefix
+macro, that macro's reading. A function-like macro whose body is its parameter
+amid such prefixes wraps a type: in `CJSON_PUBLIC(const char *) f(void);` the
+type is the one inside the parentheses. Where a name is defined differently
+in several conditional branches, a `static` definition takes precedence,
+then any other prefix. A name defined to any other text is a typedef name.
 
 A GNU attribute or a function-like attribute macro after a declarator or
 parameter, `int a __attribute__((unused)) = 1, b = 2;` or
@@ -3673,15 +3673,16 @@ standard keywords.
 `in` and `match` are keywords only where their x2c forms can occur: `in`
 between two operands, and `match` as `match (...)` followed by `case` or
 `{`. Elsewhere both are identifiers. A field of a foreign struct whose type
-x2c does not know can be indexed; C alone types the result.
+x2c cannot resolve can be indexed; the C compiler alone types the result.
 
 A public `struct tag { ... } name;` publishes the tag body and
 `extern struct tag name;` in the header and defines `name` in the source.
-A public prototype naming `struct tag` is preceded in the header by
+A public prototype that uses `struct tag` is preceded in the header by
 `struct tag;` when the header has not declared the tag. A function body that
-follows the declarations keeps the conditional arm it was written in. It
-stays ahead of a later `#undef` and of any conditional group containing
-one, so it sees the macro definitions in effect where it was written.
+follows the declarations keeps the conditional arm it was written in. It is
+emitted before a later `#undef` and before any conditional group that
+contains one, so the macro definitions in effect where it was written apply
+to it.
 
 A failed host preprocess prints its captured stderr, reports a structured x2c
 driver diagnostic at the first directive, and exits nonzero. Partial host
@@ -3694,7 +3695,7 @@ Command-line options, including the dump flags that expose an individual
 phase and the include and output directory switches, are listed in
 [compiler options](https://x2c-lang.dev/docs/reference/cli.html).
 
-By default each translation unit reports up to 20 errors, then emits a
+By default translation reports up to 20 errors per unit, then emits a
 `<limit>` diagnostic and stops; `--max-errors` changes the bound. Parsing
 recovers at top-level declarations. A rejected declaration is skipped whole
 and parsing resumes at the next one, so independent errors in separate
@@ -3721,12 +3722,12 @@ Each is a warning: translation continues and the program still compiles.
 | `unbalanced` | A region is opened in one block and released in another. |
 | `after-free` | A local is read after `Scope.free` or `Array.list_free` consumed it. |
 
-The check reads regions lexically and summarizes each function within its
-own unit, so the same unit reports the same warnings whatever else is
-translated with it. Calls into another unit are understood only for the
-runtime operations the check knows by name. It makes no claim about storage
-from plain `malloc` or a C library, raw pointer arithmetic, values reached
-through a field of a stack `struct`, callbacks, or `Context` regions.
+The check analyzes regions lexically and summarizes each function within its
+own unit, so a unit gets the same warnings whatever else is translated with
+it. For calls into another unit, the check uses only a fixed table of runtime
+operations. It does not cover storage from plain `malloc` or a C library,
+raw pointer arithmetic, values reached through a field of a stack `struct`,
+callbacks, or `Context` regions.
 
 <!-- https://x2c-lang.dev/docs/reference/cli.html -->
 
@@ -4009,8 +4010,8 @@ and redirections also apply to the program; its output is not held until exit.
 
 ## Run a script
 
-`script` runs one source file and builds it only when needed. The file is
-named with `.x`, or with any name when its first line is a shebang:
+`script` runs one source file and builds it only when needed. The file name
+ends in `.x`, or may be any name when the first line is a shebang:
 
 ```sh
 ./x2c script tools/report.x -- first --second
@@ -4021,17 +4022,17 @@ start that executable directly, in a few milliseconds, until one of these
 changes: the script, a file it includes or imports, a header its generated C
 includes, a package archive it links, the compiler, the runtime archive, the
 C compiler, the script's options, or the `CPATH`, `C_INCLUDE_PATH`,
-`LIBRARY_PATH`, and `SDKROOT` environment variables. The cache also watches
+`LIBRARY_PATH`, and `SDKROOT` environment variables. The cache also records
 the directories the build searched: include directories, `-L` directories,
 the C compiler's header and library search paths, and the directory of each
 file the build read. Adding or removing a file in one of them rebuilds the
-script, so a header that now shadows an included one, a `__has_include`
-whose answer changed, and a `-l` library that now resolves elsewhere are all
-noticed. `--rebuild` builds regardless.
+script. This covers a header that now shadows an included one, a
+`__has_include` whose result changed, and a `-l` library that now resolves
+elsewhere. `--rebuild` builds regardless.
 
 Options come before the script file, and every word after it is passed to
 the program unchanged, including `--` and words that begin with `-` or `@`.
-A response file named before the script supplies options. `script` accepts
+A response file given before the script supplies options. `script` accepts
 the translation, C compiler, and linker options of `run`, plus `-v`, `-###`,
 `--plain`, `--color`, `--debug`, `-j`, `--source-map`, `--rebuild`, and
 `--clean`. It does not read a project manifest.
@@ -4131,8 +4132,8 @@ debug = false
 The manifest lists the sources of each target and how the targets depend on
 each other. Relative paths start at the manifest directory. Its `*`, `?`,
 and bracket patterns stay within a path component; `**` recurses. As in a
-shell, a name that begins with a dot matches only where the pattern spells
-the dot. Matches are deduplicated and bytewise sorted. Unmatched patterns,
+shell, a name that begins with a dot matches only where the pattern has a
+literal dot. Matches are deduplicated and bytewise sorted. Unmatched patterns,
 unknown targets, and dependency cycles are errors before any action runs.
 
 A target may also set defines, C flags, library directories, libraries, link
@@ -4145,19 +4146,19 @@ defaults. `--target <name>` builds the named manifest target and `--profile
 ### Pinned packages
 
 A `[dependencies]` section pins packages by exact version. Each key is a
-package name in the index and each value is the version that index row
-carries:
+package name in the index and each value is the version in that index
+row:
 
 ```toml
 [dependencies]
 pcre2 = "10.48"
 ```
 
-This is separate from a target's `dependencies` field, which names other
+This is separate from a target's `dependencies` field, which lists other
 targets in the same manifest.
 
-`build` and `run` resolve the section before planning. A pinned package the
-x2c home does not already hold at that version is installed through the
+`build` and `run` resolve the section before planning. A pinned package
+missing from the x2c home at that version is installed through the
 index, the same way [`x2c install <name>`](https://x2c-lang.dev/docs/reference/cli.html#packages) does, and `--index`
 selects another index. The resolution is then written to `x2c.lock` beside
 the manifest, one `name version kind platform url sha256` row per package.
@@ -4165,9 +4166,10 @@ Keep that file with the manifest so a later build reproduces the same
 packages.
 
 A build whose lockfile already covers every pinned package, at the pinned
-version and installed in the home, reads no index and reaches no network.
-Any other state re-resolves through the index and rewrites the lockfile. A
-version the index cannot supply stops the build and names both versions. The
+version and installed in the home, reads no index and makes no network
+request. Any other state re-resolves through the index and rewrites the
+lockfile. A version the index cannot supply stops the build with an error
+that includes both versions. The
 editor adapter never installs.
 
 ## Include and tool ownership
@@ -4210,7 +4212,7 @@ A project manifest can pin packages instead of installing them by hand; see
 archive, prelude interface, package roots, C compiler, archiver, and script
 cache root as `name = value` lines. The prelude is the runtime `x2c.xi`
 interface the compiler replays for the runtime declarations; an empty value
-means it walks `lib/x2c.x` cold once per process.
+means the compiler reads `lib/x2c.x` from source once per process.
 `x2c env <name>` prints one value; `--package-dir`, `--cc`, and `--ar` show
 their effect on the report.
 
@@ -4230,7 +4232,7 @@ There is no lowercase `-i`. `-D` and `-U` reach requested x2c preprocessing
 and C compilation. Optimization, debug, and `-Xcc` are compile-only; `-L`,
 `-l`, `--rpath`, `-Wl,`, and `-Xlinker` are link-only. Unknown options are
 rejected. `--rpath <dir>` records `<dir>` in the program as a place to find
-shared libraries when it runs; a package bundle may carry it.
+shared libraries when it runs; a package bundle may include it.
 
 The C compiler selection order is `--cc`, `X2C_CC`, `CC`, the installed
 toolchain record, then `cc`. The archiver follows `--ar`, `X2C_AR`, `AR`, the
@@ -4266,18 +4268,19 @@ no diagnostics leaves it empty. Each line is one JSON object:
 - `code` is the diagnostic category, such as `parse`, `type`, `macro`,
   `protocol`, `xform`, `region`, `warning`, or `limit`.
 - `severity` is `error`, `warning`, or `note`. It records how the report was
-  submitted, so a category that reports both, such as `region` or `literal`,
-  carries the right severity on each entry. The `limit` notice is a `note`.
+  submitted, so each entry in a category with both severities, such as
+  `region` or `literal`, has its own severity. The `limit` notice is a
+  `note`.
 - `file` is relative to the working directory for a source inside it and
   absolute otherwise. A pseudo-source such as `<stdin>` keeps its name.
 - `line` and `column` are one-based, `length` is the token width in bytes,
   and `position` is its zero-based byte offset. All five location fields are
   `null` for a diagnostic without a location.
-- `notes` holds the text notes in order; standard error joins them with
-  spaces.
+- `notes` holds the text notes in order. On standard error, the notes are
+  joined with spaces.
 
 Compile-time Lisp and macros may print to standard output and standard error,
-so neither stream carries JSON. Parallel translation workers share the file;
+so neither stream contains JSON. Parallel translation workers share the file;
 each diagnostic is one appended write, so lines never interleave. A diagnostic
 is written when it is reported, and the file is complete when the command
 exits, including after a failed unit. Command-line, host preprocessor, C
