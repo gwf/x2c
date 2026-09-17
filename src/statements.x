@@ -25,11 +25,21 @@ static List _keyword_paren_expr(Compiler compiler, Symbol keyword) {
   return expr;
 }
 
+/* The statement a control keyword governs, with any directives written
+   between the keyword and the statement kept in front of it. A `(group
+   DIRECTIVE... STATEMENT)` emits without braces, so a `#endif` between
+   `else` and its `if` stays where C read it. */
+static List _sub_statement(Compiler c) {
+  List directives = c.leading_preproc();
+  List statement = c.parse_statement();
+  return directives ? %(group @directives $statement) : statement;
+}
+
 static List _if_statement(Compiler compiler) {
   List cond = _keyword_paren_expr(compiler, <if>);
-  List ontrue = compiler.parse_statement();
+  List ontrue = _sub_statement(compiler);
   if (compiler.test(<else>)) {
-    List onfalse = compiler.parse_statement();
+    List onfalse = _sub_statement(compiler);
     return %(if $cond $ontrue $onfalse);
   }
   return %(if $cond $ontrue);
@@ -37,7 +47,7 @@ static List _if_statement(Compiler compiler) {
 
 static List _while_statement(Compiler compiler) {
   List cond = _keyword_paren_expr(compiler, <while>);
-  List body = compiler.parse_statement();
+  List body = _sub_statement(compiler);
   return %(while $cond $body);
 }
 
@@ -64,13 +74,16 @@ static List _for_statement(Compiler c) {
   if (c.peek(0) == <)>) inc = NULL;
   else inc = c.parse_expression();
   c.expect(<)>);
-  body = c.parse_statement();
+  body = _sub_statement(c);
   return %(for $init $cond $inc $body);
 }
 
 static List _do_statement(Compiler compiler) {
   compiler.expect(<do>);
-  List body = compiler.parse_statement();
+  List body = _sub_statement(compiler);
+  // A directive between the body and `while` closes one written before it.
+  List trailing = compiler.leading_preproc();
+  if (trailing) body = %(group $body @trailing);
   List cond = _keyword_paren_expr(compiler, <while>);
   return %(do $body $cond);
 }

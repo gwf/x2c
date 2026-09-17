@@ -115,9 +115,8 @@ declaration of `name` in the generated header and defines `name` in the C
 file. A public function whose prototype names a `struct` that the file
 defines privately gets a forward declaration of the tag in the header first.
 
-A directive between `else` and its statement, and a macro invocation that
-supplies grammar, such as a `for`-loop macro or a call without a trailing
-semicolon, still need adjustment.
+A macro invocation that supplies grammar, such as a `for`-loop macro or a
+call without a trailing semicolon, still needs adjustment.
 
 A C11 generic selection has a static type in x2c when x2c knows which
 association C selects. The compiler selects that association from the

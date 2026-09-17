@@ -1352,6 +1352,7 @@ static List Emitter._emit(Emitter e, List ast, List context) {
     case <fields>:     return e._emit(cdr(ast), NULL);
     // Expressions
     case <block>:      return e._block(ast);
+    case <group>:      return e._emit(cdr(ast), context);
     case <parens>:     return %("(" @{e._emit(cdr(ast), NULL)} ")");
     case <sizeof>: return %("sizeof" @{e._emit(cdr(ast), context)});
     // Statements

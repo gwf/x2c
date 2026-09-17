@@ -2650,7 +2650,9 @@ context.
 The active preprocessed stream is shallow-parsed only to establish the global
 environment. Full parsing, diagnostics, and emitted source still come from the
 original token stream. Directives remain AST nodes in source order at top level
-and inside compound statements, including a trailing directive before `}`.
+and inside compound statements, including a trailing directive before `}`
+and a directive between `if (...)`, `else`, `while (...)`, `for (...)`, or
+`do` and the statement it governs.
 
 An include that x2c cannot resolve remains in the emitted C. Translation
 without host preprocessing can therefore succeed with an active missing

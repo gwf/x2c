@@ -65,7 +65,7 @@ short units and are part of this change:
 
 | Unit | Cause | Standing |
 | --- | --- | --- |
-| kdtree, termbox2 | a directive between `else` and its statement (`else` / `#endif` / `stmt`) is dropped from the body | documented adjustment; a statement-level directive slot is a separate change |
+| kdtree, termbox2 | a directive between `else` and its statement (`else` / `#endif` / `stmt`) was dropped from the body | fixed 2026-09-16: `_sub_statement` in `src/statements.x` keeps the directives in a `(group ...)` node that emits without braces; fixture `c-body-directive` |
 | cJSON, sds, stb_sprintf | macro invocations that supply grammar (`cJSON_ArrayForEach(a, b) {`, `test_cond(...)` without `;`, `STBSP__UNALIGNED(while ...)`) | documented adjustment |
 | tinycthread, mongoose, stb_image | arms for other platforms or libraries (`NTAPI` under `_WIN32`, OpenSSL `STACK_OF`, `__stdcall` under `_WIN32`) that C on this host also skips but x2c parses | documented rule; `_WIN32` is real on MSYS2 and cannot be hidden |
 | tinyexpr | `TE_FUN(double)(M(0))`, a type as a macro argument in an expression | documented adjustment |
@@ -202,7 +202,7 @@ unless noted:
 
 Corpus proof, not gated: translate all 22 units with
 `builds/0/x2c translate u_NAME.x --out-dir DIR` and compile each result
-with `cc -c -iquote include/x2c`; 12 of 22 pass on 2026-09-16. The corpus is 5.4 MB of
+with `cc -c -iquote include/x2c`; 14 of 22 pass on 2026-09-16. The corpus is 5.4 MB of
 third-party source and stays under `.context/`, not in the repository.
 
 Focused checks during work: `make x2c` and the fixtures above. Publication
