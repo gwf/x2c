@@ -313,8 +313,9 @@ static Compiler _new(Compiler owner) {
     _.inits = [];
     _.early_decls = [];
     _.collect_protocols = 1;
-    _.diagnostics = Diagnostics.new(_, owner ? owner.diagnostics.limit : 1);
-    if (owner && !owner.diagnostics.printer) _.diagnostics.printer = NULL;
+    _.diagnostics = Diagnostics.new(
+      owner && owner.diagnostics.printer ? _ : NULL,
+      owner ? owner.diagnostics.limit : 1);
     _.braces = [];
     _.import_stack = [];
     _.origins = [];

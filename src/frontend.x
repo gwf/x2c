@@ -232,7 +232,6 @@ int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) {
     compiler.source_declarations = {};
     compiler.source_texts = {};
   }
-  compiler.diagnostics.printer = NULL;
   compiler.recovery_depth++;
   try {
     _configure_package(compiler, frontend.request, filename);
