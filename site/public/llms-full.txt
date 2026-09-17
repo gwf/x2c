@@ -3756,7 +3756,7 @@ Each is a warning: translation continues and the program still compiles.
 
 | Code | Reported for |
 | --- | --- |
-| `region` | A value allocated inside a region is reachable after the region ends. The notes give the line that opened the region and the way the value leaves. |
+| `region` | A value allocated inside a region is reachable after the region ends. The message gives the way the value leaves, and the note gives the line that opened the region. |
 | `unbalanced` | A region is opened in one block and released in another. |
 | `after-free` | A local is read after `Scope.free` or `Array.list_free` consumed it. |
 

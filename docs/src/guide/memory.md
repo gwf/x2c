@@ -347,16 +347,19 @@ visible where it was chosen.
 
 Translation warns when a value allocated inside a region can still be reached
 after the region ends. A region is a `$scope()` block, a `Scope.retain` and
-`Scope.release` pair, a `$scope(&slot)` push, a `List.pool_retain` bracket, or
-an `$auto` local. The warning includes the value's name, the line that opened
-its region, and the way the value leaves:
+`Scope.release` pair, a `$scope(&slot)` push, a `List.pool_retain` bracket, an
+`$auto` local, or a `Scope` local that `Scope.destroy` ends. The warning
+includes the value's name and the way the value leaves, and its note gives
+the line that opened the region:
 
 - returned;
 - assigned to a local declared outside the region;
 - stored through a parameter, through an unknown pointer, or into a static;
 - stored into an object that belongs to another region;
+- held by a List cell, as in `cons(a, rest)` or `%($a)`, or captured by a
+  closure that leaves;
 - handed to a function in the same unit, or to a runtime operation such as
-  `cons`, that stores it in one of those places.
+  `Array.push`, that stores it in one of those places.
 
 Two more warnings come from the same pass. `unbalanced` reports a region
 opened in one block and released in another, a shape the other warnings
@@ -395,7 +398,8 @@ produces a canonical `String` owned by its pool.
 These warnings cover the lexical pattern only. They do not cover storage
 from plain `malloc` or a C library, raw pointer arithmetic and casts, values
 reached through a field of a stack `struct`, callbacks and function
-pointers, entry points a Lisp binding calls, or `Context` regions. Each of
+pointers, entry points a Lisp binding calls, `Context` regions, or `$auto`
+cleanups of types other than the runtime's containers and `Scope`. Each of
 those can still produce a dangling pointer that translates without a
 warning. To observe the dangling read itself, link the program against
 `libx2c.a` and compile with `cc -fsanitize=address,undefined`.

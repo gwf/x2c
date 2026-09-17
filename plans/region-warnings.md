@@ -4,8 +4,11 @@
 > `$let` taught to the pass. Summaries no longer cross units: a summary
 > recorded during transform and read back from interfaces made warnings
 > depend on input order, `-j`, and earlier `.xi` files, so each unit now
-> uses its own summaries and the runtime role table. Open: the false
-> positives, missed escapes, and cleanup from the 2026-09-17 merge review.
+> uses its own summaries and the runtime table. The false positives and
+> missed escapes from the 2026-09-17 merge review are fixed, and
+> `src/regions.x` was rewritten from 1,195 lines to under 800 on typed
+> records and one runtime table. Open: `Context` regions are not modeled,
+> so the `lifetime-escapes` command in `tools/x2c-graph` still serves them.
 > Decided by the Scope memory safety spike
 > (`.context/scope-memory-safety-spike.md` in worktree
 > frosty-jang-06431e). A Python prototype over `--dump-ast` found 0 real
@@ -17,8 +20,9 @@
 
 The compiler warns when a value allocated inside a region can outlive it.
 A region is a `$scope()` block, a retain and release pair, a `$scope(&slot)`
-push, a `List.pool_retain` bracket, or an `$auto` local. The warning names
-the value, the region it was born in, and the way it leaves: returned,
+push, a `List.pool_retain` bracket, an `$auto` local, or a Scope local that
+`Scope.destroy` ends. The warning names the value, the region it was born
+in, and the way it leaves: returned,
 assigned to a variable declared outside the region, stored through a
 parameter, a static, an object of an outer region, or an unknown pointer,
 or handed to a callee that stores it in one of those places. The compiler
@@ -41,30 +45,38 @@ callbacks, or storage the runtime did not allocate.
   `$scope`, `$auto`, and `foreach` have expanded and before cleanup
   lowering, so regions are still visible as `Scope_retain`, `defer
   Scope_release`, `Scope_push`, `List_pool_retain`, and `defer X_cleanup`.
-- **Per-function summaries stay within the unit.** A summary is three
-  facts: allocates into the caller's active region; returns fresh storage;
-  and for each parameter, where it is sunk (returned, into another
-  parameter's object, into a static, through an unknown pointer). A unit's
-  functions are summarized to a fixpoint. A call into another unit has a
-  summary only through the runtime role table. Publishing summaries in the
+- **Per-function summaries stay within the unit.** A summary is two
+  facts: returns fresh storage; and for each parameter, where it is sunk
+  (returned, into another parameter's object, into a static, through an
+  unknown pointer). A unit's functions are summarized to a fixpoint, and
+  the first round that changes no summary reports. A call into another
+  unit has a summary only through the runtime table, which lists each
+  allocator, pool constructor, container store, wrapper, free, and region
+  call by C name. The shipped pass also recorded whether a function
+  allocates into the caller's active region; no decision read that fact,
+  and it was removed. Publishing summaries in the
   `.xi` interface was shipped and removed on 2026-09-17: dependents collect
   interfaces before the summarized unit is transformed, so the warnings
   depended on translation order.
 - **Ownership sources.** A value is region-born when it comes from
   `Scope.malloc` and family, `Block.new`, `Bytes.new`, `Array.new`,
   `Map.new`, `Buffer.new`, `String.malloc`, an array or map literal, `cons`
-  inside a pool bracket, or a callee whose summary returns fresh storage;
-  the region is the innermost open scope or pushed slot at the call. A
-  bare `$auto` Scope is not the active region. A slot-born value lives with
-  its Scope: `Scope.pop` does not end it, `Scope.destroy` or the slot's
-  `$auto` cleanup does.
+  inside a pool bracket, a closure, or a callee whose summary returns fresh
+  storage; the region is the innermost open scope or pushed slot at the
+  call. A closure lives in the region of a captured value when it has one.
+  A bare `$auto` Scope is not the active region. A slot-born value lives
+  with its Scope: `Scope.pop` does not end it, `Scope.destroy` or the
+  slot's `$auto` cleanup does. Types are classified by the compiler's `Var`
+  tag, so a typedef of `List` is canonical and a `List *` is not.
 - **Exits that end tracking.** `Scope.move` to a parameter slot or a slot the
   function does not destroy, `Context.export`, `List.promote`, and a typed
   conversion to `List`, `String`, or `Symbol`. Canonical-typed values are
   never region-born except inside a pool bracket.
 - **Rules the prototype needed**, each a false positive found on the
   corpus and each part of the specification: deferred and branch-only frees
-  do not kill the fall-through; a store into a struct local is a stack
+  and releases do not kill the fall-through; an assignment ends a free; a
+  store that reports an escape into an outer local does not report again
+  when that local is used; a store into a struct local is a stack
   store, a store through a pointer local is a heap store, and `&local`
   names the local; a parameter moved with `Scope.move` before being stored
   is not a sink; owned locals may be swapped within their own block;
@@ -89,12 +101,11 @@ callbacks, or storage the runtime did not allocate.
    local pointer assigned from `&x`, dead after a consuming call). The walk
    follows the prototype in `.context/regions-spike.py`; every rule above
    has a direct counterpart there.
-2. Summaries: a fixpoint over the unit's functions, then publication of
-   public summaries into the `.xi` writer in `src/collect.x` and reading
-   them back where dependency interfaces are replayed.
-3. Diagnostics: one warning code, `<region-escape>`, with the value name,
-   the birth line, and the exit kind as notes; `<region-unbalanced>` for a
-   non-lexical region; `<use-after-free>` for a dead local.
+2. Summaries: a fixpoint over the unit's functions. The round that changes
+   no summary submits its warnings.
+3. Diagnostics: one warning code, `region`, with the value name and the
+   exit kind in the message and the birth line as a note; `unbalanced` for
+   a non-lexical region; `after-free` for a dead local.
 4. Corpus: teach `$let` or rewrite it; leave the torch conditional pool
    retain and the libuv raw-calloc stores as the documented departures, or
    fix them if their authors prefer.
@@ -109,9 +120,9 @@ callbacks, or storage the runtime did not allocate.
    warnings implement (raw C storage, pointer arithmetic and casts,
    callbacks, `Scope.free` and `Scope.realloc`, stores through fields of
    stack structs, Contexts until covered); how the check works in two
-   paragraphs (the three-fact summary per function, its travel in the
-   interface file, and the consequence that a callee change can surface a
-   warning in a caller); and one factual paragraph each placing the design
+   paragraphs (the summary per function and the consequence that a callee
+   change can surface a warning in a caller in the same unit); and one
+   factual paragraph each placing the design
    beside the ML Kit and Cyclone as ancestors, Rust and Swift as the
    annotate-and-check-locally choice, and Go's escape analysis and Infer as
    summary-based relatives. No measurements, no false-positive catalog, and
@@ -120,10 +131,8 @@ callbacks, or storage the runtime did not allocate.
 
 ## Compatibility
 
-No generated C changes. The `.xi` format gains a field and its version
-number moves, so interfaces are regenerated on the first build, as the
-existing determinism rules already require. Programs that trip a warning
-still compile.
+No generated C changes, and the `.xi` interface carries no summaries.
+Programs that trip a warning still compile.
 
 ## Validation
 
@@ -132,9 +141,11 @@ still compile.
   four safe idioms producing none.
 - Translation of src, lib, and examples produces zero warnings; packages
   produce the five known reports, or zero after their authors act.
-- Self-translation time before and after the pass; the prototype's walk is
-  linear in the AST and the fixpoint is per unit, so the cost should sit in
-  the noise of `make build`. Record the number.
+- Self-translation time with and without the pass. Measured 2026-09-17 on
+  main a1d763e, `translate -q -j1 src/*.x`, user time, median of seven
+  alternating runs: 3.92 s without the `check_regions` call, 4.25 s with
+  the shipped pass (+8.5%), and 4.09 s with the rewritten pass (+4.3%).
+  Runs of one binary vary by about 3%.
 - `tools/gate-state.py ensure agent-pr-check`.
 
 ## Plan review
@@ -143,20 +154,19 @@ still compile.
   expression types come from the typing pass; the pass reads them and adds
   no second resolver. Region open and close forms are the ones the macros
   emit; the pass matches those forms and does not track lifetimes at
-  runtime. Which functions allocate is derived once per unit into the
-  summary and read back from the interface, never recomputed by callers.
+  runtime. Where a function sinks its parameters is derived once per unit
+  into its summary, never recomputed by callers.
 - **Reuse and deletion.** `Compiler.report_warning`, the transform-stage
-  walk, the `.xi` writer and reader, and the match forms are all reused.
+  walk, the compiler's `Var` tag resolution, and the match forms are all
+  reused.
   The `lifetime-escapes` command in `tools/x2c-graph` overlaps on returns
   from explicit scopes and Contexts; once the pass covers Contexts the
   command should be deleted rather than kept as a second implementation.
-  The new mechanisms are one pass and one interface field; both are
-  necessary because no existing pass sees regions and no existing artifact
-  carries per-function allocation facts across units.
+  The one new mechanism is the pass; no existing pass sees regions.
 - **Idiomatic x2c.** The pass is a Match walk over canonical forms with a
-  Map of binding facts, the same shape as `cleanup.x`, not a dataflow
-  framework: no lattice, no worklist beyond the per-unit fixpoint, no
-  annotations on signatures.
-- **Validators and negative fixtures.** The seven fixtures each protect
+  Map from binding to a small record, the same shape as `cleanup.x`, not a
+  dataflow framework: no lattice, no worklist beyond the per-unit fixpoint,
+  no annotations on signatures.
+- **Validators and negative fixtures.** The fixtures each protect
   deliberate public behavior: the warning text a user relies on. No
   validator rejects legal syntax; a warning never stops translation.

@@ -19,34 +19,32 @@ Values that can outlive the region that allocated them.
 <a id="Compiler.check_regions"></a>
 #### Compiler.check_regions
 
-`void Compiler.check_regions(Compiler compiler, List ast)`
+`void Compiler.check_regions(Compiler c, List ast)`
 
 Warns about values that can outlive the region that allocated them.
 `ast` must be the bound and typed top-level unit, before transform
 lowering rewrites its `defer` and region forms. The call adds warnings to
-`compiler` and does not change `ast`.
+`c` and does not change `ast`.
 
-Source: `src/regions.x:1162`
+Source: `src/regions.x:784`
 
 ## Design notes
 
 A region is a `$scope()` block, a `Scope.retain` and `Scope.release`
-pair, a `$scope(&slot)` push, a `List.pool_retain` bracket, or an `$auto`
-local. The pass reads the typed forms the parser produced, before the
-transform driver rewrites them, so a region is still the call that opens
-it and the `defer` beside it that closes it. It warns when a value born
-in a region reaches storage that outlives the region, when a region is
-opened without its close in the same block, and when a local is read
-after it was freed.
+pair, a `$scope(&slot)` push, a `List.pool_retain` bracket, an `$auto`
+local, or a Scope local that `Scope.destroy` ends. The pass reads the
+typed forms the parser produced, before the transform driver rewrites
+them, so a region is still the call that opens it and the `defer` beside
+it that closes it. It warns when a value born in a region reaches storage
+that outlives the region, when a region is opened without its close in
+the same block, and when a local is read after it was freed.
 
-A function's summary is three facts: it allocates into the caller's
-active region, it returns fresh storage, and where each parameter is
-sunk. The unit's functions reach a fixpoint over their summaries. A call
-into another unit has a summary only through the runtime role table, so
-a unit's warnings do not depend on which units were translated before
-it. The walk's records are ordinary Maps in the translation's own Scope,
-so a diagnostic's canonical text outlives them.
+A function's summary is two facts: whether it returns fresh storage, and
+where each parameter is sunk. The unit's functions reach a fixpoint over
+their summaries. A call into another unit has a summary only through the
+runtime table, so a unit's warnings do not depend on which units were
+translated before it.
 
-The warnings name departures from the lexical pattern, not memory safety:
-raw C stores, pointer arithmetic, callbacks, and storage the runtime did
-not allocate stay outside them.
+The warnings name departures from the lexical pattern. Raw C stores,
+pointer arithmetic, callbacks, and storage the runtime did not allocate
+stay outside them.
