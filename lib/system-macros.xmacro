@@ -47,9 +47,11 @@ macro Statement $unreachable() => {
 /* Checks an invariant and reports the failing expression as it was written.
    Unlike C `assert` this transfers to a catch and is not compiled out. */
 macro Statement $assert(Expr $check) => {
-  if (!($check)) {
-    raise %(invariant
-      (check ${$(x2c.literal.string (x2c.source.text $check))})
-      (at ${$(x2c.literal.string (macros.location))}));
+  {
+    if (!($check)) {
+      raise %(invariant
+        (check ${$(x2c.literal.string (x2c.source.text $check))})
+        (at ${$(x2c.literal.string (macros.location))}));
+    }
   }
 }

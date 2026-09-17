@@ -547,6 +547,26 @@ static void string_padding_removal_and_partition(void) {
 
 $(import "test-macros.xmacro")
 
+static void string_dedent_normalizes_written_indentation(void) {
+  String block = %"
+    alpha
+      beta
+    gamma
+  ";
+  EXPECT_TRUE(block.dedent() == "alpha\n  beta\ngamma\n");
+  EXPECT_TRUE(%"
+    one
+
+    two
+  ".dedent() == "one\n\ntwo\n");
+  EXPECT_TRUE("\n\tkeyed\n\t\tdeeper\n".dedent() == "keyed\n\tdeeper\n");
+  EXPECT_TRUE("\r\n  first\r\n  second\r\n".dedent() == "first\r\nsecond\r\n");
+  EXPECT_TRUE("\n  held\nflush\n".dedent() == "held\nflush\n");
+  String plain = "no prefix here";
+  EXPECT_TRUE(plain.dedent() === plain);
+  EXPECT_NULL(String.dedent(NULL));
+}
+
 void string_suite(void) {
   $test.run(string_canonical_identity);
   $test.run(string_empty_is_native_zero);
@@ -570,4 +590,5 @@ void string_suite(void) {
   $test.run(string_func_rejects_invalid_callbacks_on_invocation);
   $test.run(string_byte_escaping);
   $test.run(string_padding_removal_and_partition);
+  $test.run(string_dedent_normalizes_written_indentation);
 }

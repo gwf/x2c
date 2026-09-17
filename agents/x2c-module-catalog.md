@@ -1009,14 +1009,15 @@ Public functions:
 `String.getindex`, `String.contains`, `String.startswith`, `String.endswith`,
 `String.add`, `String.repeat`, `String.withindex`, `String.getslice`,
 `String.lower`, `String.upper`, `String.capitalize`, `String.lstrip`,
-`String.rstrip`, `String.strip`, `String.filter`, `String.map`, `String.keep`,
-`String.reject`, `String.squeeze`, `String.pad_left`, `String.pad_right`,
-`String.pad_center`, `String.remove_prefix`, `String.remove_suffix`,
-`String.partition`, `String.rpartition`, `String.join`, `String.replace_n`,
-`String.replace`, `String.printf`, `String.unescape`, `String.escape`,
-`String.str`, `String.repr`, `String.write_str`, `String.write_repr`,
-`String.parse_char`, `String.symbol`, `String.parse`, `String.hash`,
-`String.equal`, `String.compare`, `String.try_next`, `String.iter`
+`String.rstrip`, `String.strip`, `String.dedent`, `String.filter`,
+`String.map`, `String.keep`, `String.reject`, `String.squeeze`,
+`String.pad_left`, `String.pad_right`, `String.pad_center`,
+`String.remove_prefix`, `String.remove_suffix`, `String.partition`,
+`String.rpartition`, `String.join`, `String.replace_n`, `String.replace`,
+`String.printf`, `String.unescape`, `String.escape`, `String.str`,
+`String.repr`, `String.write_str`, `String.write_repr`, `String.parse_char`,
+`String.symbol`, `String.parse`, `String.hash`, `String.equal`,
+`String.compare`, `String.try_next`, `String.iter`
 
 ### [lib/symbol.x](../lib/symbol.x)
 

@@ -384,6 +384,7 @@ usually supplied by `#include "x2c.x"`.
 | `$auto` | Shipped expression macro | Attach cleanup to an initialized local |
 | `foreach` | Shipped keyword alias | Traverse through the ordinary Iter protocol |
 | `with` | Contextual grammar | Substitute a source expression within a block |
+| `$switch`, `$dedent`, `$assert`, `$todo`, `$unreachable`, `$time` | Shipped, explicit import | Remove boilerplate C leaves to every caller |
 | Project macros | Explicit import | Supply project-specific syntax and policy |
 
 Only `class` and `foreach` have bare keyword aliases. Use the `$` spelling for
@@ -740,6 +741,117 @@ Only an initialized automatic local that is a compound-statement item accepts
 threaded storage, fields, assignment, returns, call arguments, for-header
 declarations, and wrappers nested inside arithmetic or conditionals do not
 supply this enclosing-block lifetime.
+
+## Import the rest of the set
+
+`class`, `foreach`, `$scope`, `$let`, `$lock`, and `$auto` need no import. A
+second set ships in `lib/system-macros.xmacro` and becomes available with one
+line:
+
+<!-- ignore: the import alone is not a translation unit -->
+```x2c,ignore
+$(import "system-macros.xmacro")
+```
+
+### Give every case its own block and its own break
+
+C makes you write the block and the `break` yourself, and forgetting either is
+a familiar defect. `$switch` takes the condition and the body, keeps each run
+of `case` and `default` labels where you wrote it, and turns the statements
+after a run into one block carrying that run's `break`:
+
+```x2c
+$(import "system-macros.xmacro")
+int main(void) {
+  int code = 2;
+  String reached = "none";
+  $switch(code)
+  {
+    case 1:
+    case 2:
+      String shared = "low";
+      reached = shared;
+    case 3:
+      String shared = "three";
+      reached = shared;
+    default:
+      reached = "other";
+  }
+  return reached == "low" ? 0 : 1;
+}
+```
+
+Both cases declare `shared`, which plain C rejects without hand-written
+braces. A run that already transfers gets no added `break`, so a case ending
+in `return` stays free of unreachable code. Items that are not labels pass
+through untouched, including a declaration before the first case, a `goto`
+label, and a preprocessor directive. Deliberate fallthrough is written by
+nesting an ordinary `switch`.
+
+### Write indented text without indenting the text
+
+`$dedent` removes the indentation a block of text was written with. The prefix
+is the run of spaces and tabs opening the first content line, after one leading
+newline is dropped, so indentation past that prefix survives and the block
+renormalizes as a unit:
+
+```x2c
+$(import "system-macros.xmacro")
+int main(void) {
+  String usage = $dedent(%"
+    usage: report [options]
+      --verbose   explain each step
+      --quiet     report only failures
+  ");
+  return usage.startswith("usage:") ? 0 : 1;
+}
+```
+
+A literal whose spelling carries no escape and no interpolation hole is
+dedented during translation and reaches C as a finished constant. Every other
+form calls `String.dedent` at run time, so an interpolated block means the same
+thing and costs one call. Use `String.dedent` directly on text that arrives
+from a file or an argument.
+
+### Report the check you actually wrote
+
+`$assert` raises `<invariant>` carrying the failing expression as written and
+the source line it was written on. It transfers to a catch like any other x2c
+error, and `NDEBUG` does not remove it:
+
+```x2c
+$(import "system-macros.xmacro")
+int main(void) {
+  int limit = 50;
+  String written = NULL;
+  try $assert(limit > 0 && limit < 10);
+  catch %(invariant (check ?check) (at ?where)): written = check;
+  return written == "limit > 0 && limit < 10" ? 0 : 1;
+}
+```
+
+`$todo` and `$unreachable` mark a path that is unwritten or excluded by the
+surrounding logic. Both raise `<invariant>` with a note and the same location
+detail, so an unfinished path reports where it is rather than returning
+something plausible.
+
+### Measure a statement in place
+
+`$time` wraps its target in a monotonic clock pair and reports the duration on
+stderr. The caller includes `<time.h>`:
+
+```x2c
+#include <time.h>
+$(import "system-macros.xmacro")
+int main(void) {
+  long total = 0;
+  $time("sum")
+  {
+    for (int i = 0; i < 1000; i++) total += i;
+  }
+  return total == 499500 ? 0 : 1;
+}
+```
 
 ## A complete resource-using program
 

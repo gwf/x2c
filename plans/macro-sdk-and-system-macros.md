@@ -1,11 +1,14 @@
 # Compile-time Lisp SDK completion and system-wide macros
 
-> Status: active - 2026-09-17. `String.dedent`, `$dedent`, `$time`, and
-> `$switch` are built and working on this branch, unpublished, as a proof of
-> the design. The proof removed most of Phase 2: `$switch` needed no new SDK
-> operation at all. One defect an independent review reproduced stands
-> uncorrected in the design and is fixed above: Phase 1's rename breaks the
-> checked-in bootstrap and needs a compatibility step. Scoped 2026-09-17 from a read of
+> Status: active - 2026-09-17. Phase 3 and most of Phase 4 are shipped:
+> `String.dedent`, `$dedent`, `$switch`, `$assert`, `$todo`, `$unreachable`,
+> and `$time`, with unit coverage in `unittest/test-system-macros.x` and a
+> chapter section in `docs/src/guide/system-macros.md`. Building them removed
+> most of Phase 2, because `$switch` needed no new SDK operation at all.
+> Phase 1 is not started and carries a correction an independent review
+> reproduced: its rename breaks the checked-in bootstrap and needs a
+> compatibility step. `$table` and the enum readers remain.
+> Scoped 2026-09-17 from a read of
 > `etc/compiler-sdk.xlisp`, `etc/lisp-bindings.xlisp`, `etc/builtin-macros.xlisp`,
 > the 33 `$lisp.bind` calls at `src/macros.x:894`, and the shipped generator in
 > `lib/varops.x` + `lib/varops.xlisp`. The macro direction follows the
@@ -185,7 +188,12 @@ anything in Phase 3 or 4 calls it.
 - `$todo` and `$unreachable` - expand to a raise carrying file, line, and
   column from the existing `x2c.invocation.*`.
 - `$time` - `Statement` target decorator wrapping the target in a timing pair.
-- `$show` - field-by-field debug print from `x2c.type.fields`.
+- `$assert` - raises `<invariant>` carrying the failing check as written, from
+  `x2c.source.text`, and the caller's source line.
+
+`$show`, a field-by-field debug print from `x2c.type.fields`, was dropped:
+`class` already generates a string method from a type's `write_` members
+(`etc/builtin-macros.xlisp:363`), so it would duplicate shipped behavior.
 
 ## Phase 4 - switch and table
 
@@ -205,9 +213,10 @@ Resource-management macros are out of scope; `$auto`, `$scope`, `$lock`, and
 
 ## Proof: what a working implementation showed
 
-`String.dedent`, `$dedent`, `$time`, and `$switch` are implemented and building
-on this branch, as a test of whether the proposed API can express them. They
-are not published.
+Seven operations are implemented, tested, and documented: `String.dedent`,
+`$dedent`, `$switch`, `$assert`, `$todo`, `$unreachable`, and `$time`. Building
+them was the test of whether the proposed API can express them, and it changed
+the plan more than the plan changed the implementation.
 
 `$switch` needed no new SDK operation. A switch body is a flat item list whose
 labels and statements form a regular pattern, so `match-case` over `car` and
@@ -248,8 +257,9 @@ Five things the implementation settled:
 
 ## Validation
 
-Per phase: `make x2c` plus the macro fixtures under `unittest/`, and the
-executable examples that exercise macros. Phase 3 and 4 each add a fixture for
+Per phase: `make build` plus `unittest/test-system-macros.x`, which covers
+every shipped macro, and `make doc-examples`, which compiles the chapter's
+samples. Phase 3 and 4 each add a fixture for
 the new macro's expansion and one for its rejection case. Publication uses
 `tools/gate-state.py ensure agent-pr-check`.
 
