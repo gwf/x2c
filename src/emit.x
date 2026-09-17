@@ -760,12 +760,21 @@ static List _flat_match_condition(Symbol head, List tags) {
   return condition.list_free();
 }
 
-/* Lower each match case to a conditional, in source order. */
+/* Lower each match case to a conditional, in source order. A label stays in
+   front of the conditional groups around its arm, so the switch still
+   reaches later arms when the preprocessor removes that arm. */
 
 static List Emitter._match_if(
   Emitter e, List ast, List context, int *dispatched) {
-  Array values = [], heads = [], int labelling = 1;
+  Array values = [], heads = [], int labelling = 1, opening = 0;
+  List arms = NULL;
   foreach (List rec, ast) {
+    if (rec.car() == <preproc>) {
+      if (!arms) opening = values.len();
+      arms = preproc_track_arms(arms, rec.cadr());
+      values.push(e._emit(rec, context));
+      continue;
+    }
     List (binders, pattern_ast, body_ast) = rec;
     List implicit_break = %("break;");
     match (body_ast)
@@ -780,7 +789,7 @@ static List Emitter._match_if(
     List pattern = e._emit(pattern_ast, context);
     List body = e._emit(body_ast, context);
     List label = _match_arm_label(e, pattern_ast, heads, &labelling);
-    if (label) values.push(label);
+    if (label) values.insert(arms ? opening++ : values.len(), label);
     if (pattern === %(*)) values.push(%($body @implicit_break));
     else if (flat_head) {
       List condition = _flat_match_condition(flat_head, flat_tags);
@@ -825,7 +834,7 @@ static List Emitter._match_cases(Emitter e, List ast, List context) {
   expr = e._emit(expr, context);
   int max_binders = 0;
   foreach (List rec, cases) {
-    List binders = rec.car(), int count = binders.len();
+    int count = rec.car() == <preproc> ? 0 : rec.car().list().len();
     if (count > max_binders) max_binders = count;
   }
   // An arm reads only the values it bound, so the buffer names the two

@@ -2373,6 +2373,10 @@ List Compiler.bind_syntax(
         if (!statement_position) goto construction_error;
         Array bound = [];
         foreach (List row, cases.list()) {
+          if (row.car() == <preproc>) {
+            bound.push(row);
+            continue;
+          }
           List pattern = row.car();
           int binds = pattern !== %(*);
           if (binds) pattern = _.resolve_expression(pattern, _.token);

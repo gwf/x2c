@@ -324,17 +324,21 @@ error:
     c.token, %( "token:" ${c.token.text} ));
 }
 
-static List _match_cases(Compiler compiler) {
-  Array cases = [], Symbol peek = compiler.peek(0), int saw_default = 0;
-  while (peek == <case> || peek == <default>) {
+static List _match_cases(Compiler c) {
+  Array cases = [], Symbol peek = c.peek(0), int saw_default = 0;
+  loop {
+    // Directives around whole arms stay between them as `preproc` rows.
+    if (c.token != c.directives_taken)
+      foreach (Var directive, c.leading_preproc()) cases.push(directive);
+    if (peek != <case> && peek != <default>) break;
     if (saw_default)
-      compiler.report_error(
+      c.report_error(
         <parse>, "match default arm must be last",
-        compiler.token, %("move default after every case arm"));
+        c.token, %("move default after every case arm"));
     if (peek == <default>) saw_default = 1;
-    List mcase = _match_case(compiler);
+    List mcase = _match_case(c);
     cases.push(mcase);
-    peek = compiler.peek(0);
+    peek = c.peek(0);
   }
   return cases.list_free();
 }

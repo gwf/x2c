@@ -592,8 +592,9 @@ static List _match_cases(Compiler compiler, List ast) {
   expr = compiler.convert_expression(expr, %("List"));
   Array values = [];
   foreach (List rec, cases) {
-    List binders = compiler.match_pattern_binders(rec.car(), NULL);
-    values.push(%($binders @rec));
+    if (rec.car() == <preproc>) values.push(rec);
+    else
+      values.push(%(${compiler.match_pattern_binders(rec.car(), NULL)} @rec));
   }
   List result = values.list_free();
   return %(matchcases $expr $result);
@@ -1541,9 +1542,11 @@ static List _cast(Compiler compiler, List ast) {
 static List _match_records(Compiler compiler, List records) {
   Array transformed = [];
   foreach (List record, records)
-    match (record)
+    match (record) {
+      case %(preproc ?): transformed.push(record);
       case %(*prefix ?body):
         transformed.push(%(@prefix ${_node(compiler, body)}));
+    }
   return transformed.list_free();
 }
 
