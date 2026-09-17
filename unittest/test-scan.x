@@ -215,6 +215,11 @@ static void scan_malformed_numbers(void) {
 static void scan_symbols(void) {
   EXPECT_INT_EQ(scan_atom("alpha rest"), 5);
   EXPECT_INT_EQ(scan_atom("alpha\\ beta)"), 11);
+  /* A backslash in the first byte escapes the next one, as it does later. */
+  EXPECT_INT_EQ(scan_atom("\\(abc"), 5);
+  EXPECT_INT_EQ(scan_atom("x\\(abc"), 6);
+  EXPECT_INT_EQ(scan_atom("\\\\"), 2);
+  EXPECT_INT_EQ(scan_atom("\\ beta rest"), 6);
   EXPECT_INT_EQ(scan_atom("\\"), -1);
   EXPECT_INT_EQ(scan_atom("alpha\\"), -1);
   EXPECT_INT_EQ(scan_atom("alpha,beta"), 5);
