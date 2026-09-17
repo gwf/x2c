@@ -351,6 +351,31 @@ static void process_failed_starts_close_descriptors(void) {
   EXPECT_INT_EQ(_open_descriptors(), before);
 }
 
+static void process_child_stdio_without_parent_stdio(void) {
+  $test.scoped();
+  int saved[3];
+  fflush(NULL);
+  for (int fd = 0; fd < 3; fd++) saved[fd] = fcntl(fd, F_DUPFD, 3);
+  for (int fd = 0; fd < 3; fd++) close(fd);
+  String output = NULL, errors = NULL, merged = NULL;
+  try {
+    output = %(cat).job().options({input: "in"}).output();
+    errors = %(sh -c "echo err >&2").job().options({stderr: <capture>})
+      .errors();
+    merged = %(sh -c "cat; echo err >&2").job()
+      .options({input: "in\n", stderr: <stdout>}).output();
+  }
+  finally {
+    for (int fd = 0; fd < 3; fd++) {
+      dup2(saved[fd], fd);
+      close(saved[fd]);
+    }
+  }
+  EXPECT_STR_EQ(output, "in");
+  EXPECT_STR_EQ(errors, "err\n");
+  EXPECT_STR_EQ(merged, "in\nerr\n");
+}
+
 static void process_jobs_wait_kill_and_clean_up(void) {
   $test.scoped();
   Array jobs = [];
@@ -431,4 +456,5 @@ void process_suite(void) {
   $test.run(process_empty_input_is_empty_stdin);
   $test.run(process_nul_capture_keeps_the_record);
   $test.run(process_failed_starts_close_descriptors);
+  $test.run(process_child_stdio_without_parent_stdio);
 }

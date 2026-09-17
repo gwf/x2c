@@ -146,11 +146,22 @@ static char **_argv(List stage) {
   return argv;
 }
 
+/* A parent with its standard streams closed can hold a launch descriptor at
+   0, 1, or 2, where an earlier `dup2` would overwrite it and a `dup2` onto
+   its own number would leave it close-on-exec. The copy closes on exec. */
+static int _above_stdio(int fd) =>
+  fd >= 0 && fd <= STDERR_FILENO ?
+    fcntl(fd, F_DUPFD_CLOEXEC, STDERR_FILENO + 1) : fd;
+
 /* The report pipe is close-on-exec: a successful `execvp` closes it without
    writing, and a failed step writes which step failed and its errno. */
 static void _child(
   char **argv, _Launch *launch, int stdin_fd, int stdout_fd, int stderr_fd,
   int report) {
+  stdin_fd = _above_stdio(stdin_fd);
+  stdout_fd = _above_stdio(stdout_fd);
+  stderr_fd = _above_stdio(stderr_fd);
+  report = _above_stdio(report);
   if (stdin_fd >= 0) dup2(stdin_fd, STDIN_FILENO);
   if (stdout_fd >= 0) dup2(stdout_fd, STDOUT_FILENO);
   if (launch.errors_to_output) dup2(STDOUT_FILENO, STDERR_FILENO);
