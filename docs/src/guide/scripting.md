@@ -395,7 +395,7 @@ catch %(bad-arg *detail): {
 ~}
 ```
 
-```text
+```text,status=2
 Usage:
   install.x [options]
 

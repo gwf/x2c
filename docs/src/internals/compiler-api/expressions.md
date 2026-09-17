@@ -74,7 +74,7 @@ Source: `src/expressions.x:51`
 
 Keeps a compound literal's native type definition at its original scope.
 
-Source: `src/expressions.x:3643`
+Source: `src/expressions.x:3642`
 
 <a id="Compiler.convert_expression"></a>
 #### Compiler.convert_expression
@@ -88,7 +88,7 @@ performs the conversion implicitly; an unsupported x2c conversion reports
 a type error through `c`. Synthesized operations may add generated
 bindings or immutable literal entries to compiler state.
 
-Source: `src/expressions.x:3687`
+Source: `src/expressions.x:3686`
 
 <a id="Compiler.convert_initializer"></a>
 #### Compiler.convert_initializer
@@ -98,7 +98,7 @@ Source: `src/expressions.x:3687`
 Converts an initializer using its declared native object for array
 bounds.
 
-Source: `src/expressions.x:3638`
+Source: `src/expressions.x:3637`
 
 <a id="Compiler.convert_segment_to_string"></a>
 #### Compiler.convert_segment_to_string
@@ -117,7 +117,7 @@ not equivalent: it
 extracts only a `String` payload and yields empty `String` for every other
 tag.
 
-Source: `src/expressions.x:3960`
+Source: `src/expressions.x:3959`
 
 <a id="Compiler.initializer_native_types"></a>
 #### Compiler.initializer_native_types
@@ -128,7 +128,7 @@ Returns native definition/reference types for a compound literal.
 Macro expansion stays in the original cast; named tags let later sizeof
 expressions reuse that exact layout without a new scope.
 
-Source: `src/expressions.x:2783`
+Source: `src/expressions.x:2782`
 
 <a id="Compiler.initializer_rows"></a>
 #### Compiler.initializer_rows
@@ -141,7 +141,7 @@ walk. Scalar runs map their ordinal through the native dimensions; other
 inputs retain possible cursor continuations. A NULL condition is
 unconditional, and a NULL destination is excess.
 
-Source: `src/expressions.x:3230`
+Source: `src/expressions.x:3229`
 
 <a id="Compiler.initializer_slot"></a>
 #### Compiler.initializer_slot
@@ -150,7 +150,7 @@ Source: `src/expressions.x:3230`
 
 Selects a native subobject without evaluating it when used by sizeof.
 
-Source: `src/expressions.x:2910`
+Source: `src/expressions.x:2909`
 
 <a id="Compiler.parse_assignment"></a>
 #### Compiler.parse_assignment

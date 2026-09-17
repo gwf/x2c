@@ -109,8 +109,11 @@ grep -Fq -- "-MMD -MP -MF" "$BUILD/tool-dry.stderr"
 grep -Fq -- "-MT" "$BUILD/tool-dry.stderr"
 grep -Fq -- "-O2 -g" "$BUILD/tool-dry.stderr"
 grep -Fq -- "-D FEATURE=1 -U OLD" "$BUILD/tool-dry.stderr"
-! grep -Fq "$BUILD/x only" \
-  <(grep 'x2c: compile ' "$BUILD/tool-dry.stderr")
+if grep 'x2c: compile ' "$BUILD/tool-dry.stderr" |
+    grep -Fq "$BUILD/x only"; then
+  echo "the dry run compiled with the unit-only include" >&2
+  exit 1
+fi
 [[ $(grep 'x2c: compile ' "$BUILD/tool-dry.stderr" |
       grep -o -- '-MMD' | wc -l | tr -d ' ') == 1 ]]
 

@@ -16,6 +16,9 @@ authority for language and library semantics. Keep repository workflow in
   them; readers can expand them.
 - Tag an intentionally non-compiling block `x2c,ignore` and precede it with
   `<!-- ignore: reason -->`. Keep real x2c samples in checked x2c fences.
+- Show a sample's output in a `text` fence. `make doc-outputs` runs the sample
+  and compares it, and the sample must exit 0; tag the fence `text,status=N`
+  when the sample exits with N on purpose.
 - `make doc-build` renders generated, untracked `docs/book/`;
   `make doc-serve` serves it with live reload.
 

@@ -93,7 +93,10 @@ unknown_status=$?
 set -e
 [[ $unknown_status == 2 ]]
 grep -Fxq "x2c: error: unknown option '-not-a-real-option'" "$BUILD/unknown.stderr"
-! grep -Fq 'note:' "$BUILD/unknown.stderr"
+if grep -Fq 'note:' "$BUILD/unknown.stderr"; then
+  echo "unknown option printed a note" >&2
+  exit 1
+fi
 
 # An omitted output directory writes beside the invocation, not the source.
 (cd "$BUILD" && "$X2C" translate "$BUILD/space dir/quoted.x")
@@ -1301,7 +1304,12 @@ cp "$SCRIPT/args.x" "$SCRIPT/greet"
 [[ $(PATH="$SCRIPT/bin:$PATH" X2C_CACHE_DIR="$SCRIPT/cache" \
      "$SCRIPT/greet" there) == 'hello [there]' ]]
 run_script -v "$SCRIPT/args.x" >/dev/null 2>"$SCRIPT/warm.stderr"
-! grep -Eq '^x2c: (translate|preprocess|compile|link) ' "$SCRIPT/warm.stderr"
+# A warm run still preprocesses for the depfile and links the run image; it
+# must not translate or compile again.
+if grep -Eq '^x2c: (translate|compile) ' "$SCRIPT/warm.stderr"; then
+  echo "a warm script run translated or compiled again" >&2
+  exit 1
+fi
 grep -q '^x2c: run ' "$SCRIPT/warm.stderr"
 printf '%s\n' 'macro Expression $greeting() => ("changed")' \
   >"$SCRIPT/greeting.xmacro"
@@ -1336,9 +1344,15 @@ run_script "$SCRIPT/doomed.x" >/dev/null
 compgen -G "$SCRIPT/cache/scripts/doomed-*" >/dev/null
 rm "$SCRIPT/doomed.x"
 run_script --rebuild "$SCRIPT/args.x" >/dev/null
-! compgen -G "$SCRIPT/cache/scripts/doomed-*" >/dev/null
+if compgen -G "$SCRIPT/cache/scripts/doomed-*" >/dev/null; then
+  echo "a removed script kept its cache entry" >&2
+  exit 1
+fi
 [[ -z $(run_script --clean "$SCRIPT/args.x") ]]
-! compgen -G "$SCRIPT/cache/scripts/args-*" >/dev/null
+if compgen -G "$SCRIPT/cache/scripts/args-*" >/dev/null; then
+  echo "--clean left the cache entry behind" >&2
+  exit 1
+fi
 run_script --clean "$SCRIPT/args.x"
 
 cat >"$SCRIPT/unit.x" <<'EOF'
