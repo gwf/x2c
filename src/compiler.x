@@ -1501,7 +1501,7 @@ static Var _macro_prefix(Compiler c, Token token, String param) {
     else if (type != <ident>) return 1;
     else if (word == "__attribute__" || word == "__declspec" ||
              (c.object_macros.try_get(word, &definition) &&
-              Var.equal(definition, <annotation>))) {
+              definition.equal(<annotation>))) {
       // The attribute's parenthesized text contributes nothing.
       if (next.type != <(>) return 1;
       next = _after_parens(next);
@@ -1510,7 +1510,7 @@ static Var _macro_prefix(Compiler c, Token token, String param) {
     else if (!c.object_macros.try_get(word, &definition)) return 1;
     else if (definition is <list>)
       storage = storage ? (storage).append(definition) : definition;
-    else if (!Var.equal(definition, <empty>)) return 1;
+    else if (!definition.equal(<empty>)) return 1;
     token = next;
   }
   return wrapped ? <wrapper> : storage ? storage : <empty>;
@@ -1521,7 +1521,7 @@ static Var _macro_prefix(Compiler c, Token token, String param) {
    a definition from the header, so it wins; other text loses to any
    prefix. */
 static int _prefix_rank(Var definition) {
-  if (Var.equal(definition, <empty>)) return 1;
+  if (definition.equal(<empty>)) return 1;
   if (definition is <list>)
     return List.match(definition, %(* static *)) ? 3 : 2;
   return 0;
@@ -1549,8 +1549,8 @@ static void _note_object_macro(Compiler c, String content) {
     if (first.type == <ident> && _next_code(first).type == <)>)
       param = first.text;
     Var kind = _macro_prefix(c, after, param);
-    if (Var.equal(kind, <empty>)) c.object_macros[name] = <annotation>;
-    else if (Var.equal(kind, <wrapper>)) c.object_macros[name] = <wrapper>;
+    if (kind.equal(<empty>)) c.object_macros[name] = <annotation>;
+    else if (kind.equal(<wrapper>)) c.object_macros[name] = <wrapper>;
     return;
   }
   Var definition = _macro_prefix(c, _next_code(token), NULL), existing;
@@ -2925,11 +2925,11 @@ static int _alternative_arms(Compiler c, List binding) {
   if (!c.semantic_binding_facts().try_get(%(arms $binding), &stored))
     return 0;
   List prior = stored, current = c.arms.list();
-  for (; prior && current; prior = cdr(prior), current = cdr(current)) {
-    Var (prior_id, prior_arm) = car(prior);
-    Var (id, arm) = car(current);
-    if (!Var.equal(prior_id, id)) return 0;
-    if (!Var.equal(prior_arm, arm)) return 1;
+  for (; prior && current; prior = prior.cdr(), current = current.cdr()) {
+    Var (prior_id, prior_arm) = prior.car();
+    Var (id, arm) = current.car();
+    if (!prior_id.equal(id)) return 0;
+    if (!prior_arm.equal(arm)) return 1;
   }
   return 0;
 }

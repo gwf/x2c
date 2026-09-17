@@ -418,7 +418,8 @@ static int _partition_tagged_object(
   Array header, Array source, Type type, List bindings) {
   Type core = type.base_type();
   String tag = NULL;
-  match (core) case %((!or struct union enum) ?(String found) (*)): tag = found;
+  match (core)
+    case %((!or struct union enum) ?(String found) (*)): tag = found;
   if (!tag || !_declares_object(bindings)) return 0;
   List tagged = type.list()[:type.len() - core.len()]
                   .append(%(${core.car()} $tag));
