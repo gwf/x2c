@@ -334,6 +334,9 @@ String string = %"value $name ${compute()}";
 //                            ^^ punctuation.definition.interpolation.expression.begin.x2c
 SymbolSet symbols = %<<alpha beta>>;
 //                  ^^^ punctuation.definition.literal.symbol-set.begin.x2c
+SymbolSet shifts = %<<"<<=" ">>=">>;
+//                          ^^^^^ constant.other.symbol.quoted.x2c.symbol-set
+//                               ^^ punctuation.definition.literal.symbol-set.end.x2c
 Lambda lambda = %!(int value) => value + 1;
 //              ^^ punctuation.definition.literal.lambda.x2c
 //                            ^^ keyword.operator.arrow.x2c

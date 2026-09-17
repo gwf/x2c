@@ -4189,6 +4189,14 @@
 			"patterns": [
 				{ "include": "#comments" },
 				{ "include": "#x2c_current_symbol_literal" },
+				{
+					"name": "constant.other.symbol.quoted.x2c.symbol-set",
+					"begin": "\"",
+					"end": "\"",
+					"patterns": [
+						{ "include": "#string_escaped_char" }
+					]
+				},
 				{ "match": "[$@]", "name": "invalid.illegal.symbol-set.dynamic.x2c" },
 				{ "match": "(?:\\\\.|(?!(?:>>|[$@\\s])).)+", "name": "constant.other.symbol.x2c.symbol-set" }
 			]
