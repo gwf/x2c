@@ -152,6 +152,20 @@ static void error_handler_transfer_runs_pending_cleanup(void) {
   EXPECT_INT_EQ(caught, 3);
 }
 
+/* A snapshot of a wide value lands in the caller's active slot even when that
+   slot is still empty, so the box has an owner the caller can destroy. */
+static void error_snapshot_wide_fills_an_empty_slot(void) {
+  Error.initialize();
+  Var wide = Var.box_long_double(2.5L);
+  Scope slot = NULL;
+  Scope.push(&slot);
+  Var kept = Error.snapshot(wide);
+  Scope.pop();
+  EXPECT_NOT_NULL(slot);
+  EXPECT_PTR_EQ(kept.wide_owner(), slot);
+  Scope.destroy(slot);
+}
+
 static void error_decline_walks_outward(void) {
   Error.initialize();
   Symbol collect = <collect>, code = <error-prob>;
@@ -457,6 +471,7 @@ void error_suite(void) {
   $test.run(error_transferring_registration_is_reclaimed);
   $test.run(error_catch_arm_leaves_its_registration);
   $test.run(error_handler_transfer_runs_pending_cleanup);
+  $test.run(error_snapshot_wide_fills_an_empty_slot);
   $test.run(error_decline_walks_outward);
   $test.run(error_pop_truncates_declined_slice);
   $test.run(error_nested_pop_truncates_exact_watermark);

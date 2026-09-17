@@ -679,18 +679,25 @@ int Error.count(void) => Error.ready() ? (int) _thread().stack.length : 0;
 */
 int Error.mark(void) => Error.count();
 
+/* A wide box belongs to the outermost `Scope` of the caller's active slot, so
+   a nested release cannot reclaim it. An empty slot has no such `Scope` yet;
+   allocate through the slot itself, which then owns the `Scope` the box
+   creates. */
+static Var _snapshot_wide(Var v) {
+  Scope owner = *Scope.top();
+  if (!owner) return v.clone_wide();
+  while (owner.down) owner = owner.down;
+  Scope.push(&owner);
+  Var copy = v.clone_wide();
+  Scope.pop();
+  return copy;
+}
+
 static Var _snapshot_value(Var v) {
   if (v is void)
     _floor(<bad-types>, "void is not an admissible error snapshot");
   if (v.is_null() || v.is_nil() || v is <symbol>) return v;
-  if (v.is_wide()) {
-    Scope owner = *Scope.top();
-    while (owner && owner.down) owner = owner.down;
-    Scope.push(&owner);
-    Var copy = v.clone_wide();
-    Scope.pop();
-    return copy;
-  }
+  if (v.is_wide()) return _snapshot_wide(v);
   if (v.is_integer() || v.is_floating()) return v;
   if (v is <string>) {
     String source = v, copy = String.new_len(source, source.len());
