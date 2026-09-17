@@ -1,13 +1,24 @@
 #!/bin/sh
 # Install a released x2c into a dedicated prefix.
-#
-#   curl -fsSL https://x2c-lang.dev/install.sh | sh
-#   curl -fsSL https://x2c-lang.dev/install.sh | sh -s -- --version 0.14.0
-#
-# X2C_PREFIX selects the prefix (default $HOME/.local/x2c). X2C_RELEASES
-# selects the download base; it defaults to the GitHub release assets.
-# X2C_VERSION_URL names the file holding the current version; it defaults
-# to the one the site publishes. Re-running the script upgrades in place.
+usage() {
+  cat <<'EOF_USAGE'
+Install a released x2c into a dedicated prefix.
+
+  curl -fsSL https://x2c-lang.dev/install.sh | sh
+  curl -fsSL https://x2c-lang.dev/install.sh | sh -s -- --version 0.14.0
+
+Options:
+  --version VERSION  install VERSION instead of the latest release
+  --prefix DIR       install into DIR instead of $HOME/.local/x2c
+  -h, --help         show this help
+
+X2C_VERSION and X2C_PREFIX set the same defaults as the options. X2C_RELEASES
+selects the download base; it defaults to the GitHub release assets.
+X2C_VERSION_URL names the file holding the latest version; it defaults to
+the one the site publishes. Re-running the script upgrades in place and keeps
+installed packages.
+EOF_USAGE
+}
 set -eu
 
 prefix="${X2C_PREFIX:-$HOME/.local/x2c}"
@@ -19,9 +30,7 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --version) version="$2"; shift 2 ;;
     --prefix) prefix="$2"; shift 2 ;;
-    -h|--help)
-      sed -n '2,9p' "$0" 2>/dev/null || true
-      exit 0 ;;
+    -h|--help) usage; exit 0 ;;
     *) echo "x2c: unknown option '$1'" >&2; exit 2 ;;
   esac
 done
@@ -82,18 +91,27 @@ if [ -e "$prefix" ] && [ ! -f "$prefix/.x2c-install-manifest" ]; then
   fail "$prefix exists and is not an x2c installation"
 fi
 mkdir -p "$(dirname "$prefix")"
+# Stage beside the prefix so replacing it is a pair of renames. Nothing that
+# holds installed packages is removed until they are in the new tree.
+staged="$prefix.new.$$"
+previous="$prefix.previous.$$"
+trap 'rm -rf "$work" "$staged"' EXIT
+mv "$extracted" "$staged"
 if [ -d "$prefix" ]; then
-  # Keep installed packages; replace everything the previous release owned.
   if [ -d "$prefix/packages" ]; then
-    mv "$prefix/packages" "$extracted/packages.keep"
-    rm -rf "$extracted/packages"
-    mv "$extracted/packages.keep" "$extracted/packages"
+    rm -rf "$staged/packages"
   fi
-  mv "$prefix" "$prefix.previous.$$"
-  mv "$extracted" "$prefix"
-  rm -rf "$prefix.previous.$$"
+  mv "$prefix" "$previous"
+  if ! { mv "$staged" "$prefix" &&
+         { [ ! -d "$previous/packages" ] ||
+           mv "$previous/packages" "$prefix/packages"; }; }; then
+    [ ! -d "$prefix" ] || mv "$prefix" "$staged"
+    mv "$previous" "$prefix"
+    fail "cannot replace $prefix"
+  fi
+  rm -rf "$previous"
 else
-  mv "$extracted" "$prefix"
+  mv "$staged" "$prefix"
 fi
 
 echo "x2c: installed $("$prefix/bin/x2c" --version) at $prefix"
