@@ -110,7 +110,7 @@ Source: `src/cli.x:1162`
 <a id="CliRequest"></a>
 ### CliRequest
 
-`typedef struct CliRequest { Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args; List cc_args, ld_args, String out_dir, dep_file, dep_target, manifest; String target, profile, output, build_dir, temps_dir, label, state_seed; String prefix, cc, ar, compile_commands, sha256, index, Symbol kind; String diagnostics_file; Symbol color_mode; Symbol dump; int jobs, debugging, verbose, dry_run, quiet, plain, nested, no_deps; int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp; int max_errors; int source_map, source_facts, live_symbols, cpp_symbols, force, rebuild, clean; SourceView sources; } *CliRequest`
+`typedef struct CliRequest { Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args; List cc_args, ld_args, String out_dir, dep_file, dep_target, manifest; String target, profile, output, build_dir, temps_dir, label, state_seed; String prefix, cc, ar, compile_commands, sha256, index, Symbol kind; String diagnostics_file; Symbol color_mode; Symbol dump; int jobs, debugging, verbose, dry_run, quiet, plain, no_deps; int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp; int max_errors; int source_map, source_facts, live_symbols, cpp_symbols, force, rebuild, clean; SourceView sources; } *CliRequest`
 
 Holds one compiler command and its command-specific inputs and options.
 `List`s produced by `cli_parse` preserve CLI order. Copies are shallow:

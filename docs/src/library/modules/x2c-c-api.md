@@ -11,8 +11,6 @@ prefix.
 
 | Function | Source | Signature |
 | --- | --- | --- |
-| [`x2c_array_updateindex_from_array`](varops.md#x2c_array_updateindex_from_array) | `lib/varops.x` | `Var x2c_array_updateindex_from_array( Array dst, int dst_index, Symbol op, Array src, int src_index)` |
-| [`x2c_array_updateindex_from_map`](varops.md#x2c_array_updateindex_from_map) | `lib/varops.x` | `Var x2c_array_updateindex_from_map( Array dst, int dst_index, Symbol op, Map src, Var src_key)` |
 | `x2c_canonical_root` | `src/utils.x` | `String x2c_canonical_root(void)` |
 | [`x2c_cleanup_leave`](exception.md#x2c_cleanup_leave) | `lib/exception.x` | `void x2c_cleanup_leave(X2CCleanup *record)` |
 | [`x2c_cleanup_push`](exception.md#x2c_cleanup_push) | `lib/exception.x` | `void x2c_cleanup_push(X2CCleanup *record)` |
@@ -54,8 +52,6 @@ prefix.
 | [`x2c_initialize`](common.md#x2c_initialize) | `lib/common.x` | `void x2c_initialize(void)` |
 | `x2c_initialize_environment` | `src/utils.x` | `void x2c_initialize_environment(const char *argv0)` |
 | [`x2c_initialize_protocols`](common.md#x2c_initialize_protocols) | `lib/common.x` | `void x2c_initialize_protocols(void)` |
-| [`x2c_map_updateindex_from_array`](varops.md#x2c_map_updateindex_from_array) | `lib/varops.x` | `Var x2c_map_updateindex_from_array( Map dst, Var dst_key, Symbol op, Array src, int src_index)` |
-| [`x2c_map_updateindex_from_map`](varops.md#x2c_map_updateindex_from_map) | `lib/varops.x` | `Var x2c_map_updateindex_from_map( Map dst, Var dst_key, Symbol op, Map src, Var src_key)` |
 | [`x2c_match_initialize`](match.md#x2c_match_initialize) | `lib/match.x` | `void x2c_match_initialize(void)` |
 | [`x2c_match_pattern_retainable`](match.md#x2c_match_pattern_retainable) | `lib/match.x` | `int x2c_match_pattern_retainable(Var pattern)` |
 | [`x2c_match_site_match`](match.md#x2c_match_site_match) | `lib/match.x` | `List x2c_match_site_match(MatchCaptureSite *site, List input, Var pat)` |
@@ -101,4 +97,4 @@ prefix.
 | [`x2c_var_update_ulong`](varops.md#x2c_var_update_ulong) | `lib/varops.x` | `ulong x2c_var_update_ulong( volatile ulong *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long( volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 
-Total: 89 functions.
+Total: 85 functions.

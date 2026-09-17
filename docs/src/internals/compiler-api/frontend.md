@@ -29,7 +29,7 @@ Configured compiler sessions and sequential source units.
 
 Loads process-owned collection support before units.
 
-Source: `src/frontend.x:70`
+Source: `src/frontend.x:69`
 
 <a id="Frontend.new"></a>
 #### Frontend.new
@@ -40,7 +40,7 @@ Borrows a configured request for sequential units. The request and this
 session must outlive its units. Initialize process support above any
 temporary command Context before creating a session inside that Context.
 
-Source: `src/frontend.x:78`
+Source: `src/frontend.x:77`
 
 <a id="Frontend.open"></a>
 #### Frontend.open
@@ -50,7 +50,7 @@ Source: `src/frontend.x:78`
 Runs the source stages. On either result, the caller must close the
 unit.
 
-Source: `src/frontend.x:320`
+Source: `src/frontend.x:279`
 
 <a id="Frontend.start"></a>
 #### Frontend.start
@@ -62,7 +62,7 @@ A failed unit remains open so its diagnostics can be inspected. Close
 it before opening the next unit; Type and collection caches are
 process-global.
 
-Source: `src/frontend.x:249`
+Source: `src/frontend.x:216`
 
 ### `ParsedUnit`
 
@@ -74,7 +74,7 @@ Source: `src/frontend.x:249`
 Releases the unit after its caller has inspected or exported its
 results.
 
-Source: `src/frontend.x:327`
+Source: `src/frontend.x:286`
 
 <a id="ParsedUnit.collect"></a>
 #### ParsedUnit.collect
@@ -84,7 +84,7 @@ Source: `src/frontend.x:327`
 Collects symbols and retains preprocessor outputs for adapter
 inspection.
 
-Source: `src/frontend.x:281`
+Source: `src/frontend.x:247`
 
 <a id="ParsedUnit.parse"></a>
 #### ParsedUnit.parse
@@ -94,7 +94,7 @@ Source: `src/frontend.x:281`
 Parses a collected unit, retaining both its AST and unsuccessful
 reports.
 
-Source: `src/frontend.x:302`
+Source: `src/frontend.x:268`
 
 ## Public types
 

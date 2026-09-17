@@ -36,7 +36,7 @@ Numeric promotion, failure, and result ownership follow `Var.binary`;
 `String` addition returns a canonical concatenation, and a protocol result
 keeps the ownership chosen by its callback.
 
-Source: `lib/varops.x:465`
+Source: `lib/varops.x:400`
 
 <a id="Var.binary"></a>
 #### Var.binary
@@ -58,7 +58,7 @@ or `<bad-shift>`, and `String` concatenation or wide boxing may raise
 `<size-limit>`, `<alloc-fail>`, or `<bad-enc>`.
 A selected protocol, truth, or comparison callback may raise its own cause.
 
-Source: `lib/varops.x:537`
+Source: `lib/varops.x:472`
 
 <a id="Var.div"></a>
 #### Var.div
@@ -70,7 +70,7 @@ Numeric integer zero divisors raise; floating division uses host infinity
 and NaN behavior. Other promotion, failure, and ownership follow
 `Var.binary`.
 
-Source: `lib/varops.x:491`
+Source: `lib/varops.x:426`
 
 <a id="Var.fallback_truth"></a>
 #### Var.fallback_truth
@@ -84,7 +84,7 @@ supported built-ins are true. Container-specific truth comes from dispatch.
 **Raises:** `<bad-enc>` for invalid `Var` bits, `<void-op>` for `void`, or
 `<bad-types>` when no truthiness rule exists.
 
-Source: `lib/varops.x:385`
+Source: `lib/varops.x:320`
 
 <a id="Var.matmul"></a>
 #### Var.matmul
@@ -95,7 +95,7 @@ Multiplies matrices through a registered `matmul` behavior.
 `@` has no numeric meaning, so numeric operands raise `<bad-op>`; a
 protocol result keeps the ownership chosen by its callback.
 
-Source: `lib/varops.x:483`
+Source: `lib/varops.x:418`
 
 <a id="Var.mod"></a>
 #### Var.mod
@@ -107,7 +107,7 @@ Numeric operands use the common promoted integer type and reject a zero
 divisor; floating operands are not accepted. Other failure and ownership
 follow `Var.binary`.
 
-Source: `lib/varops.x:498`
+Source: `lib/varops.x:433`
 
 <a id="Var.mul"></a>
 #### Var.mul
@@ -118,7 +118,7 @@ Multiplies dynamic values through numeric or registered `mul` behavior.
 Numeric promotion, failure, and result ownership follow `Var.binary`; a
 protocol result keeps the ownership chosen by its callback.
 
-Source: `lib/varops.x:477`
+Source: `lib/varops.x:412`
 
 <a id="Var.neg"></a>
 #### Var.neg
@@ -133,7 +133,7 @@ promotion and wrapping, so a narrow integer promotes before negation.
 for an object without `neg`, or any cause from protocol or numeric
 subtraction.
 
-Source: `lib/varops.x:507`
+Source: `lib/varops.x:442`
 
 <a id="Var.postfix"></a>
 #### Var.postfix
@@ -150,7 +150,7 @@ bits, `<void-op>` for `void`, `<bad-op>` for an operator other than
 `++` or `--`, or any cause from `Var.update`. These failures leave the
 stored value unchanged.
 
-Source: `lib/varops.x:625`
+Source: `lib/varops.x:560`
 
 <a id="Var.sub"></a>
 #### Var.sub
@@ -161,7 +161,7 @@ Subtracts dynamic values through numeric or registered `sub` behavior.
 Numeric promotion, failure, and result ownership follow `Var.binary`; a
 protocol result keeps the ownership chosen by its callback.
 
-Source: `lib/varops.x:471`
+Source: `lib/varops.x:406`
 
 <a id="Var.truth"></a>
 #### Var.truth
@@ -179,7 +179,7 @@ return false independently of object state. The call does not retain
 `<bad-types>` when no truthiness rule exists, plus any cause raised by a
 selected descriptor callback.
 
-Source: `lib/varops.x:422`
+Source: `lib/varops.x:357`
 
 <a id="Var.truthy"></a>
 #### Var.truthy
@@ -188,7 +188,7 @@ Source: `lib/varops.x:422`
 
 Returns `value.truth()`.
 
-Source: `lib/varops.x:430`
+Source: `lib/varops.x:365`
 
 <a id="Var.update"></a>
 #### Var.update
@@ -206,16 +206,12 @@ returns `void`, the function leaves the destination unchanged.
 `Var.binary` and `Var.convert`. These failures leave the stored value
 unchanged.
 
-Source: `lib/varops.x:593`
+Source: `lib/varops.x:528`
 
 ## Advanced and interop API
 
 | Function | Summary |
 | --- | --- |
-| [`x2c_array_updateindex_from_array`](#x2c_array_updateindex_from_array) | Updates an `Array` element after capturing one source `Array` element. |
-| [`x2c_array_updateindex_from_map`](#x2c_array_updateindex_from_map) | Updates an `Array` element after capturing one source `Map` value. |
-| [`x2c_map_updateindex_from_array`](#x2c_map_updateindex_from_array) | Updates a `Map` value after capturing one source `Array` element. |
-| [`x2c_map_updateindex_from_map`](#x2c_map_updateindex_from_map) | Updates a `Map` value after capturing one source `Map` value. |
 | [`x2c_var_update_f32`](#x2c_var_update_f32) | Applies a dynamic compound `op` to a native `float` lvalue. |
 | [`x2c_var_update_f64`](#x2c_var_update_f64) | Applies a dynamic compound `op` to a native `double` lvalue. |
 | [`x2c_var_update_i16`](#x2c_var_update_i16) | Applies a dynamic compound `op` to a native `short` lvalue. |
@@ -232,61 +228,6 @@ Source: `lib/varops.x:593`
 | [`x2c_var_update_ulong_long`](#x2c_var_update_ulong_long) | Applies a dynamic compound `op` to a native `unsigned long long` lvalue. |
 
 ### Functions
-
-#### x2c_array_updateindex_from_array
-
-`Var x2c_array_updateindex_from_array( Array dst, int dst_index, Symbol op, Array src, int src_index)`
-
-Updates an `Array` element after capturing one source `Array` element.
-The source read completes before the destination update, including when
-both arguments name the same `Array` and slot. Result, mutation, bounds,
-conversion, and failure behavior then follow `Array.updateindex`.
-
-**Raises:** `<bad-arg>` for a null source, plus any cause from the source read
-or destination update. A transferring failure leaves the destination
-unchanged.
-
-Source: `lib/varops.x:98`
-
-#### x2c_array_updateindex_from_map
-
-`Var x2c_array_updateindex_from_map( Array dst, int dst_index, Symbol op, Map src, Var src_key)`
-
-Updates an `Array` element after capturing one source `Map` value.
-The source lookup completes before the destination update, including when
-the containers share stored objects. A missing source key supplies `void`,
-which the destination rejects without mutation. Other result and failure
-behavior follows `Map.getindex` and `Array.updateindex`.
-
-Source: `lib/varops.x:114`
-
-#### x2c_map_updateindex_from_array
-
-`Var x2c_map_updateindex_from_array( Map dst, Var dst_key, Symbol op, Array src, int src_index)`
-
-Updates a `Map` value after capturing one source `Array` element.
-The source read completes before lookup or mutation of the destination.
-An out-of-range source supplies `void`, which the destination rejects.
-Other result and failure behavior follows `Array.getindex` and
-`Map.updateindex`.
-
-**Raises:** `<bad-arg>` for a null source, plus any cause from either
-operation.
-
-Source: `lib/varops.x:130`
-
-#### x2c_map_updateindex_from_map
-
-`Var x2c_map_updateindex_from_map( Map dst, Var dst_key, Symbol op, Map src, Var src_key)`
-
-Updates a `Map` value after capturing one source `Map` value.
-The source lookup completes before the destination update, including a
-same-`Map`, same-key update. A missing source supplies `void`, which the
-destination rejects. Other result and failure behavior follows the two
-`Map`
-operations.
-
-Source: `lib/varops.x:147`
 
 #### x2c_var_update_f32
 

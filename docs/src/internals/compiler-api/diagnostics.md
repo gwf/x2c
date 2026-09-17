@@ -26,12 +26,12 @@ Structured compiler diagnostics collection.
 | [`Compiler.report_warning_at`](#Compiler.report_warning_at) | Records and emits a warning at a location built earlier by `Compiler.token_location`, for a report raised after its token has been consumed. |
 | [`Compiler.token_location`](#Compiler.token_location) | Builds the diagnostic location for `token` or the current token. |
 | [`Diagnostics.entries`](#Diagnostics.entries) | Returns an immutable `List` snapshot in publication order. |
-| [`Diagnostics.has_emitter`](#Diagnostics.has_emitter) | Returns whether `diag` currently has an emitter. |
-| [`Diagnostics.new`](#Diagnostics.new) | Creates an empty diagnostic store with an optional emitter. |
+| [`Diagnostics.hold`](#Diagnostics.hold) | Stops streaming until `Diagnostics.release` and records the current entries, count, and limit state. |
+| [`Diagnostics.new`](#Diagnostics.new) | Creates an empty diagnostic store that streams through `printer`. |
 | [`Diagnostics.reached_limit`](#Diagnostics.reached_limit) | Returns whether counted reports have reached the positive limit. |
+| [`Diagnostics.release`](#Diagnostics.release) | Restores the streaming saved by `hold`. |
 | [`Diagnostics.report`](#Diagnostics.report) | Records and synchronously emits one diagnostic unless already limited. |
 | [`Diagnostics.reset`](#Diagnostics.reset) | Clears stored entries and limit state while preserving configuration. |
-| [`Diagnostics.set_emitter`](#Diagnostics.set_emitter) | Replaces the borrowed emitter and owner without replaying stored entries. |
 
 ### Functions
 
@@ -45,7 +45,7 @@ forked translation workers sharing the descriptor never interleave lines,
 and a line is complete before any exit. Returns zero when `path` cannot be
 opened.
 
-Source: `src/diagnostics.x:195`
+Source: `src/diagnostics.x:208`
 
 ### `Compiler`
 
@@ -58,7 +58,7 @@ Returns a report-order snapshot of all collected diagnostics.
 Snapshot cells are canonicalized through the active pool hierarchy and
 share entry values; each retains its actual producing-pool lifetime.
 
-Source: `src/diagnostics.x:438`
+Source: `src/diagnostics.x:451`
 
 <a id="Compiler.display_path"></a>
 #### Compiler.display_path
@@ -68,7 +68,7 @@ Source: `src/diagnostics.x:438`
 Returns a physical source path for semantic facts, otherwise a path
 relative to the compiler root. Pseudo paths and NULL stay unchanged.
 
-Source: `src/diagnostics.x:301`
+Source: `src/diagnostics.x:314`
 
 <a id="Compiler.dump_cache"></a>
 #### Compiler.dump_cache
@@ -77,7 +77,7 @@ Source: `src/diagnostics.x:301`
 
 Prints each cached numeric identifier and its key to stdout.
 
-Source: `src/diagnostics.x:474`
+Source: `src/diagnostics.x:487`
 
 <a id="Compiler.dump_symbol_table"></a>
 #### Compiler.dump_symbol_table
@@ -86,7 +86,7 @@ Source: `src/diagnostics.x:474`
 
 Prints every entry in `map` to stdout in `Map` iteration order.
 
-Source: `src/diagnostics.x:469`
+Source: `src/diagnostics.x:482`
 
 <a id="Compiler.dump_tokens"></a>
 #### Compiler.dump_tokens
@@ -96,7 +96,7 @@ Source: `src/diagnostics.x:469`
 Prints every non-EOF token with its position and visible content.
 `Compiler.tokenize` must have populated the compiler's tokenizer.
 
-Source: `src/diagnostics.x:459`
+Source: `src/diagnostics.x:472`
 
 <a id="Compiler.error_count"></a>
 #### Compiler.error_count
@@ -106,7 +106,7 @@ Source: `src/diagnostics.x:459`
 Returns the number of counted diagnostics accepted since the last reset.
 Warnings and the generated limit notice are excluded.
 
-Source: `src/diagnostics.x:432`
+Source: `src/diagnostics.x:445`
 
 <a id="Compiler.origin_location"></a>
 #### Compiler.origin_location
@@ -120,7 +120,7 @@ location cells are canonicalized through the active pool hierarchy and
 retain their actual producing-pool lifetime. They share the recorded
 filename, which retains its own producing-pool lifetime.
 
-Source: `src/diagnostics.x:276`
+Source: `src/diagnostics.x:289`
 
 <a id="Compiler.print_diagnostic"></a>
 #### Compiler.print_diagnostic
@@ -132,7 +132,7 @@ one JSON line after `diagnostics_write_json`.
 NULL is ignored. A present location supplies `file`, one-based `line` and
 `column`, and token `length`; `String` notes are joined into one note line.
 
-Source: `src/diagnostics.x:239`
+Source: `src/diagnostics.x:252`
 
 <a id="Compiler.report_error"></a>
 #### Compiler.report_error
@@ -146,7 +146,7 @@ before the current token. NULL message defaults to `"compiler error"`.
 **Raises:** `<malformed>` with the supplied category while a recovery boundary
 is active. Without one, exits the process with status 1.
 
-Source: `src/diagnostics.x:349`
+Source: `src/diagnostics.x:362`
 
 <a id="Compiler.report_warning"></a>
 #### Compiler.report_warning
@@ -158,7 +158,7 @@ Location selection matches `Compiler.report_error`; NULL code becomes
 `<warning>` and NULL message becomes `"compiler warning"`. This operation
 returns without raising or changing the process exit status.
 
-Source: `src/diagnostics.x:365`
+Source: `src/diagnostics.x:378`
 
 <a id="Compiler.report_warning_at"></a>
 #### Compiler.report_warning_at
@@ -169,7 +169,7 @@ Records and emits a warning at a location built earlier by
 `Compiler.token_location`, for a report raised after its token has been
 consumed. Defaults match `Compiler.report_warning`.
 
-Source: `src/diagnostics.x:374`
+Source: `src/diagnostics.x:387`
 
 <a id="Compiler.token_location"></a>
 #### Compiler.token_location
@@ -185,7 +185,7 @@ are canonicalized through the active pool hierarchy and retain their actual
 producing-pool lifetimes; an unchanged filename retains the compiler's
 producing-pool lifetime.
 
-Source: `src/diagnostics.x:320`
+Source: `src/diagnostics.x:333`
 
 ### `Diagnostics`
 
@@ -200,27 +200,28 @@ retain their actual producing-pool lifetime. They share the stored entry
 `List`s. The snapshot includes warnings and the limit notice; changing or
 resetting `diag` does not change it.
 
-Source: `src/diagnostics.x:96`
+Source: `src/diagnostics.x:112`
 
-<a id="Diagnostics.has_emitter"></a>
-#### Diagnostics.has_emitter
+<a id="Diagnostics.hold"></a>
+#### Diagnostics.hold
 
-`int Diagnostics.has_emitter(Diagnostics diag)`
+`DiagnosticsHold Diagnostics.hold(Diagnostics diag)`
 
-Returns whether `diag` currently has an emitter.
+Stops streaming until `Diagnostics.release` and records the current
+entries, count, and limit state.
 
-Source: `src/diagnostics.x:102`
+Source: `src/diagnostics.x:80`
 
 <a id="Diagnostics.new"></a>
 #### Diagnostics.new
 
-`Diagnostics Diagnostics.new(DiagnosticEmitter emit, void *owner, int limit)`
+`Diagnostics Diagnostics.new(Compiler printer, int limit)`
 
-Creates an empty diagnostic store with an optional emitter.
-A negative `limit` is treated as zero; zero collects without a stopping
-threshold. The emitter and `owner` are borrowed.
+Creates an empty diagnostic store that streams through `printer`.
+A NULL `printer` does not stream. A negative `limit` is treated as zero;
+zero collects without a stopping threshold. The printer is borrowed.
 
-Source: `src/diagnostics.x:61`
+Source: `src/diagnostics.x:60`
 
 <a id="Diagnostics.reached_limit"></a>
 #### Diagnostics.reached_limit
@@ -230,7 +231,18 @@ Source: `src/diagnostics.x:61`
 Returns whether counted reports have reached the positive limit.
 A zero limit never reports that it has been reached.
 
-Source: `src/diagnostics.x:107`
+Source: `src/diagnostics.x:120`
+
+<a id="Diagnostics.release"></a>
+#### Diagnostics.release
+
+`void Diagnostics.release(Diagnostics diag, DiagnosticsHold hold, int keep)`
+
+Restores the streaming saved by `hold`. When `keep` is set, entries
+published since the hold remain and stream now; otherwise they are
+discarded with the count and limit state they changed.
+
+Source: `src/diagnostics.x:92`
 
 <a id="Diagnostics.report"></a>
 #### Diagnostics.report
@@ -244,7 +256,7 @@ of one stops after the first error. Later reports are ignored. Supplied
 message, location, and notes are shared; their canonical-value pools must
 outlive the store and its snapshots.
 
-Source: `src/diagnostics.x:151`
+Source: `src/diagnostics.x:164`
 
 <a id="Diagnostics.reset"></a>
 #### Diagnostics.reset
@@ -253,53 +265,41 @@ Source: `src/diagnostics.x:151`
 
 Clears stored entries and limit state while preserving configuration.
 
-Source: `src/diagnostics.x:73`
-
-<a id="Diagnostics.set_emitter"></a>
-#### Diagnostics.set_emitter
-
-`void Diagnostics.set_emitter( Diagnostics diag, DiagnosticEmitter emit, void *owner)`
-
-Replaces the borrowed emitter and owner without replaying stored entries.
-A NULL emitter disables streaming.
-
-Source: `src/diagnostics.x:82`
+Source: `src/diagnostics.x:71`
 
 ## Public types
 
 | Type | Kind | Summary |
 | --- | --- | --- |
-| [`DiagnosticEmitter`](#DiagnosticEmitter) | callback | Receives one borrowed diagnostic entry when the store publishes it. |
 | [`Diagnostics`](#Diagnostics) | struct | Collects diagnostic entries and optionally streams them. |
-
-<a id="DiagnosticEmitter"></a>
-### DiagnosticEmitter
-
-`typedef void (*DiagnosticEmitter)(void *owner, List entry)`
-
-Receives one borrowed diagnostic entry when the store publishes it.
-`Diagnostics` retains the callback and borrowed `owner`, invokes the
-callback synchronously, and never releases `owner`.
-
-Source: `src/diagnostics.x:21`
+| [`DiagnosticsHold`](#DiagnosticsHold) | struct | Records where `Diagnostics.hold` stopped streaming. |
 
 <a id="Diagnostics"></a>
 ### Diagnostics
 
-`typedef struct Diagnostics { Array entries; DiagnosticEmitter emit; void *owner; int limit; int count, limit_notified; } *Diagnostics`
+`typedef struct Diagnostics { Array entries; Compiler printer; int limit; int count, limit_notified; } *Diagnostics`
 
 Collects diagnostic entries and optionally streams them.
 A value is valid after `Diagnostics.new`. The store and backing `Array` are
 `Scope`-owned; entry `List`s and immutable children retain the lifetime of
-their producing canonical-value pools. A borrowed `owner` must remain valid
-while its emitter is installed.
+their producing canonical-value pools. A borrowed `printer` must remain
+valid while it is installed.
 
-Source: `src/diagnostics.x:29`
+Source: `src/diagnostics.x:24`
+
+<a id="DiagnosticsHold"></a>
+### DiagnosticsHold
+
+`typedef struct DiagnosticsHold { Compiler printer; int entries, count, limit_notified; } DiagnosticsHold`
+
+Records where `Diagnostics.hold` stopped streaming.
+
+Source: `src/diagnostics.x:32`
 
 ## Design notes
 
 Maintains a bounded, ordered collection of compiler diagnostics with
-optional streaming to one emitter.
+optional streaming to one compiler's printer.
 
 Entries are stored chronologically and exposed as immutable `List`
 snapshots.

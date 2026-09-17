@@ -151,8 +151,8 @@ structured compiler diagnostics collection.
 
 Public functions:
 
-`Diagnostics.new`, `Diagnostics.reset`, `Diagnostics.set_emitter`,
-`Diagnostics.entries`, `Diagnostics.has_emitter`, `Diagnostics.reached_limit`,
+`Diagnostics.new`, `Diagnostics.reset`, `Diagnostics.hold`,
+`Diagnostics.release`, `Diagnostics.entries`, `Diagnostics.reached_limit`,
 `Diagnostics.report`, `diagnostics_write_json`, `Compiler.print_diagnostic`,
 `Compiler.origin_location`, `Compiler.display_path`, `Compiler.token_location`,
 `Compiler.report_error`, `Compiler.report_warning`,
@@ -248,13 +248,12 @@ Public functions:
 `Compiler.typed_match_pattern`, `Compiler.parse_list_literal`,
 `Compiler.symbol_set_expression`, `Compiler.parse_symbol_set_literal`,
 `Compiler.parse_raise_literal`, `Compiler.parse_catch_pattern_literal`,
-`Compiler.parse_array_literal`, `Compiler.map_entry_macro_follows`,
-`Compiler.parse_map_entry`, `Compiler.parse_map_entries`,
-`Compiler.parse_map_literal`, `Compiler.parse_string_literal`,
-`Compiler.lambda_capture_required`, `Compiler.begin_lambda_captures`,
-`Compiler.end_lambda_captures`, `Compiler.capture_lambda_identifier`,
-`Compiler.bind_lambda_expression`, `Compiler.parse_lambda_literal`,
-`Compiler.parse_atomic_literal`
+`Compiler.parse_array_literal`, `Compiler.parse_map_entry`,
+`Compiler.parse_map_entries`, `Compiler.parse_map_literal`,
+`Compiler.parse_string_literal`, `Compiler.lambda_capture_required`,
+`Compiler.begin_lambda_captures`, `Compiler.end_lambda_captures`,
+`Compiler.capture_lambda_identifier`, `Compiler.bind_lambda_expression`,
+`Compiler.parse_lambda_literal`, `Compiler.parse_atomic_literal`
 
 ### [src/macros.x](../src/macros.x)
 
@@ -274,9 +273,7 @@ Public functions:
 `Compiler.peek_macro_hole`, `Compiler.macro_lisp_starts_declaration`,
 `Compiler.try_parse_macro_slot`, `Compiler.parse_macro_definition`,
 `Compiler.publish_macro_definition_node`, `Compiler.parse_keyword_definition`,
-`Compiler.macro_targets_unit`, `Compiler.keyword_alias_starts_target_at`,
-`Compiler.keyword_alias_needs_shallow_expansion`,
-`Compiler.skip_keyword_alias`, `Compiler.skip_named_type_declaration`,
+`Compiler.macro_targets_unit`, `Compiler.skip_named_type_declaration`,
 `Compiler.macro_invocation_site`, `Compiler.expand_macro_invocation_node`,
 `Compiler.try_parse_macro_expression`, `Compiler.try_parse_macro_target_at`
 
@@ -330,9 +327,9 @@ Public functions:
 `Compiler.protocol_members_for`, `Compiler.protocol_rejects_direct_member`,
 `Compiler.operator_member`, `Compiler.dump_conformance`,
 `Compiler.derived_member`, `Compiler.resolve_protocol_member`,
-`Compiler.resolve_protocol_method`, `Compiler.protocol_update_helper`,
-`Compiler.discard_helper`, `Compiler.protocol_discard_helper`,
-`Compiler.generate_protocol_adapters`, `Compiler.parse_protocol_declaration`
+`Compiler.protocol_update_helper`, `Compiler.discard_helper`,
+`Compiler.protocol_discard_helper`, `Compiler.generate_protocol_adapters`,
+`Compiler.parse_protocol_declaration`
 
 ### [src/regions.x](../src/regions.x)
 
@@ -1270,9 +1267,6 @@ Public functions:
 `x2c_var_update_i16`, `x2c_var_update_u16`, `x2c_var_update_i32`,
 `x2c_var_update_u32`, `x2c_var_update_long`, `x2c_var_update_ulong`,
 `x2c_var_update_long_long`, `x2c_var_update_ulong_long`, `x2c_var_update_f32`,
-`x2c_var_update_f64`, `x2c_var_update_long_double`,
-`x2c_array_updateindex_from_array`, `x2c_array_updateindex_from_map`,
-`x2c_map_updateindex_from_array`, `x2c_map_updateindex_from_map`,
-`Var.fallback_truth`, `Var.truth`, `Var.truthy`, `Var.add`, `Var.sub`,
-`Var.mul`, `Var.matmul`, `Var.div`, `Var.mod`, `Var.neg`, `Var.binary`,
-`Var.update`, `Var.postfix`
+`x2c_var_update_f64`, `x2c_var_update_long_double`, `Var.fallback_truth`,
+`Var.truth`, `Var.truthy`, `Var.add`, `Var.sub`, `Var.mul`, `Var.matmul`,
+`Var.div`, `Var.mod`, `Var.neg`, `Var.binary`, `Var.update`, `Var.postfix`
