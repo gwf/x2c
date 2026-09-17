@@ -575,12 +575,14 @@ int String.count(String str, String sub) {
     yields a byte value rather than a one-byte `String`. A negative `index`
     counts from the end, so -1 is the last byte.
 
-    An `index` at or beyond the length is out of range.
+    The byte is unsigned, so the result is 0 through 255 on every platform and
+    -1 means out of range and nothing else. An `index` at or beyond the length
+    is out of range.
 */
 int String.getindex(String str, int index) {
   index = x2c_normalize_index(index, str.len());
   if (index < 0) return -1;
-  return *(str + index);
+  return (unsigned char) *(str + index);
 }
 
 /** Reports whether the bytes of `sub` occur anywhere in `str`.

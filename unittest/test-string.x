@@ -323,6 +323,23 @@ going");
   EXPECT_TRUE(continued_first.string() == %"keepgoing");
 }
 
+/* A byte above 127 reads as an unsigned value on every platform, so only an
+   out-of-range index gives -1 and `foreach` never yields a negative byte. */
+static void string_high_bytes_read_unsigned(void) {
+  String text = String.new("\xff\xc3");
+  EXPECT_INT_EQ(text.len(), 2);
+  EXPECT_INT_EQ(text.getindex(0), 255);
+  EXPECT_INT_EQ(text.getindex(1), 195);
+  EXPECT_INT_EQ(text.getindex(-1), 195);
+  EXPECT_INT_EQ(text.getindex(2), -1);
+  EXPECT_INT_EQ(text.getindex(5), -1);
+  int seen[2] = {0, 0}, index = 0;
+  foreach (int byte, text) if (index < 2) seen[index++] = byte;
+  EXPECT_INT_EQ(index, 2);
+  EXPECT_INT_EQ(seen[0], 255);
+  EXPECT_INT_EQ(seen[1], 195);
+}
+
 static void string_boundary_behavior(void) {
   String text = "abc";
   EXPECT_INT_EQ(text.getindex(3), -1);
@@ -591,6 +608,7 @@ void string_suite(void) {
   $test.run(string_escape_sequences);
   $test.run(string_multiline_literals);
   $test.run(string_boundary_behavior);
+  $test.run(string_high_bytes_read_unsigned);
   $test.run(string_constructor_invariants);
   $test.run(string_empty_search_contract);
   $test.run(string_search_and_replace);
