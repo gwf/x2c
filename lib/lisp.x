@@ -358,8 +358,16 @@ static Symbol _malformed(String source, unsigned at) {
   raise %(malformed (source $source) (line $line) (column $column));
 }
 
+/* A form's elements are read in a loop, so only nesting costs a frame.
+   The reader fences that nesting instead of exhausting the C stack, which
+   on a worker thread is a fraction of the main thread's. */
+#define LISP_READ_DEPTH_MAX 1024
+
 static Symbol _read_token_list(
-  Tokenizer tokenizer, char *source, unsigned base, unsigned *end, Var *out) {
+  Tokenizer tokenizer, char *source, unsigned base, unsigned *end, Var *out,
+  int depth) {
+  if (depth >= LISP_READ_DEPTH_MAX)
+    raise %(size-limit (operation "Lisp.read") (depth $depth));
   Array elements = [], Symbol status = <value>;
   loop {
     Token token = tokenizer.next();
@@ -372,7 +380,8 @@ static Symbol _read_token_list(
       break;
     }
     Var element = void;
-    status = _read_token_form(tokenizer, token, source, base, end, &element);
+    status =
+      _read_token_form(tokenizer, token, source, base, end, &element, depth);
     if (status != <value>) break;
     elements.push(element);
   }
@@ -422,7 +431,7 @@ static Symbol _read_token_atom(
 
 static Symbol _read_token_form(
   Tokenizer tokenizer, Token token, char *source, unsigned base, unsigned *end,
-  Var *out) {
+  Var *out, int depth) {
   if (!token || token.type == <eof>) return <incomplete>;
   Var prefix = void;
   switch (token.type) {
@@ -430,7 +439,8 @@ static Symbol _read_token_form(
       if (tokenizer.status() == <incomplete>) return <incomplete>;
       return _malformed(source, base + token.pos);
     case <")">: return _malformed(source, base + token.pos);
-    case <"(">: return _read_token_list(tokenizer, source, base, end, out);
+    case <"(">:
+      return _read_token_list(tokenizer, source, base, end, out, depth + 1);
     case <"'">:  prefix = lsym_quote;      break;
     case <"`">:  prefix = lsym_quasiquote; break;
     case <",">:  prefix = lsym_unquote;    break;
@@ -439,7 +449,7 @@ static Symbol _read_token_form(
   if (prefix is not void) {
     Var inner = void;
     Symbol status = _read_token_form(
-      tokenizer, tokenizer.next(), source, base, end, &inner);
+      tokenizer, tokenizer.next(), source, base, end, &inner, depth + 1);
     if (status == <value>) *out = %($prefix $inner);
     return status;
   }
@@ -460,7 +470,7 @@ static Symbol _read_tokenizer(
   unsigned end = 0;
   Var value = void;
   Symbol status = _read_token_form(
-    tokenizer, token, source, base, &end, &value);
+    tokenizer, token, source, base, &end, &value, 0);
   if (status == <value>) {
     if (out) *out = value;
     *cursor = base + end;
@@ -582,6 +592,28 @@ static Var _bool(int x) {
 /** Returns Lisp true unless `value` is a nonempty `List`. */
 Var lisp_atom(Var value) => _bool(value is not <list> || value.is_nil());
 
+/* `Var.car` and `Var.cdr` read the raw payload as a cell, which is the right
+   contract for a caller that already typed the value. Lisp applies these to
+   whatever the program evaluated, so the tag is checked here first. */
+
+/** Returns the first element of `value`, or `void` when it is `nil`.
+    A nonlist operand raises `<bad-types>`.
+*/
+Var lisp_car(Var value) {
+  if (value is not <list>)
+    raise %(bad-types (operation "car") (kind ${value.kind()}));
+  return value.car();
+}
+
+/** Returns the tail of `value`, or `nil` when it is `nil`.
+    A nonlist operand raises `<bad-types>`.
+*/
+Var lisp_cdr(Var value) {
+  if (value is not <list>)
+    raise %(bad-types (operation "cdr") (kind ${value.kind()}));
+  return value.cdr();
+}
+
 /** Returns Lisp true when `a` and `b` are equal by `Var.equal`. */
 Var lisp_eq(Var a, Var b) => _bool(a == b);
 
@@ -608,7 +640,37 @@ Var lisp_symbol(Var value) => _bool(value.kind() == <symbol>);
 /** Returns Lisp true when `value` is a native function or Lambda. */
 Var lisp_procedure(Var value) => _bool(value is <func> || value is <lambda>);
 
-/** Compares Lisp numbers and returns a boxed negative, zero, or positive.
+/* Orders the four number classes the total order uses:
+   -inf < finite < +inf < NaN. */
+static int _number_class(Var value, long double magnitude) {
+  Symbol tag = value.tag();
+  if (tag == <-inf>) return 0;
+  if (tag == <+inf>) return 2;
+  if (tag == <nan> || magnitude != magnitude) return 3;
+  if (magnitude == 1.0L / 0.0L) return 2;
+  if (magnitude == -1.0L / 0.0L) return 0;
+  return 1;
+}
+
+/* `Var.compare` is a total order over every value, so it separates two
+   encodings of the same number by rank to give each one its own place in a
+   sort. Lisp `=`, `<`, and `<=` answer about numbers, so 1 and 1.0 are one
+   number here and comparison stops at the value. */
+static int _number_compare(Var a, Var b) {
+  Symbol ak = a.kind(), bk = b.kind();
+  long double da = ak == <floating> ? a.long_double() : 0.0L;
+  long double db = bk == <floating> ? b.long_double() : 0.0L;
+  int ca = _number_class(a, da), cb = _number_class(b, db);
+  if (ca != cb) return ca < cb ? -1 : 1;
+  if (ca != 1) return 0;
+  if (ak == <integer> && bk == <integer>) return a.integer_compare(b);
+  if (ak == <integer>) return a.integer_floating_compare(b);
+  if (bk == <integer>) return -b.integer_floating_compare(a);
+  return da < db ? -1 : da > db ? 1 : 0;
+}
+
+/** Compares Lisp numbers by value and returns a boxed negative, zero, or
+    positive. Integer and floating encodings of one number compare equal.
     A nonnumeric operand raises `<bad-types>`.
 */
 Var lisp_compare(Var a, Var b) {
@@ -616,7 +678,7 @@ Var lisp_compare(Var a, Var b) {
     raise %(bad-types (operation "lisp_compare")
                        (left-kind ${a.kind()})
                        (right-kind ${b.kind()}));
-  return a.compare(b);
+  return _number_compare(a, b);
 }
 /** Returns the runtime tag of `value`. */
 Symbol lisp_type(Var value) => value.tag();
@@ -772,8 +834,8 @@ Var lisp_write_file(String path, String text) {
 // read each signature from the declared prototype.
 $(import "../etc/lisp-bindings.xlisp")
 $(def lisp.native.target.rows '(
-  (Var_car)
-  (Var_cdr)
+  (lisp_car (as Var_car))
+  (lisp_cdr (as Var_cdr))
   (Var_cons)
   (lisp_atom)
   (lisp_pair)

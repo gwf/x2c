@@ -586,6 +586,63 @@ static void lisp_default_session_is_ready(void) {
   lisp.destroy();
 }
 
+/* `car` and `cdr` reach whatever the program evaluated, so the tag decides
+   before a cell is read. Without the check `(cdr "x")` reads raw memory. */
+static void lisp_car_and_cdr_check_the_operand_tag(void) {
+  Lisp lisp = Lisp.new();
+  if (!EXPECT_NOT_NULL(lisp)) return;
+  EXPECT_INT_EQ(_raised_code(lisp, "(car \"x\")"), <bad-types>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(cdr \"x\")"), <bad-types>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(car 5)"), <bad-types>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(cdr 5)"), <bad-types>);
+  EXPECT_INT_EQ(_raised_code(lisp, "(cdr 'name)"), <bad-types>);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(car '(1 2))")), 1);
+  EXPECT_VAR_EQ(_ev(lisp, "(cdr '(1 2))"), %(2).var());
+  EXPECT_TRUE(_ev(lisp, "(cdr ())").is_nil());
+  lisp.destroy();
+}
+
+
+/* Numeric comparison answers about numbers, so the integer and floating
+   encodings of one value compare equal rather than by the Var total order,
+   which orders them by rank to keep every value sortable. */
+static void lisp_numeric_comparison_reads_the_value(void) {
+  Lisp lisp = Lisp.new();
+  if (!EXPECT_NOT_NULL(lisp)) return;
+  EXPECT_VAR_EQ(_ev(lisp, "(= 1 1.0)"), <true>.var());
+  EXPECT_VAR_EQ(_ev(lisp, "(= 5 (- 3000000005 3000000000))"), <true>.var());
+  EXPECT_VAR_EQ(_ev(lisp, "(<= 1 1.0)"), <true>.var());
+  EXPECT_VAR_EQ(_ev(lisp, "(>= 1.0 1)"), <true>.var());
+  EXPECT_TRUE(_ev(lisp, "(< 1.0 1)").is_nil());
+  EXPECT_TRUE(_ev(lisp, "(< 1 1.0)").is_nil());
+  EXPECT_TRUE(_ev(lisp, "(= 1 2)").is_nil());
+  EXPECT_VAR_EQ(_ev(lisp, "(< 1 1.5 2)"), <true>.var());
+  EXPECT_VAR_EQ(_ev(lisp, "(> 2 1.5 1)"), <true>.var());
+  EXPECT_INT_EQ(_raised_code(lisp, "(= 1 \"x\")"), <bad-types>);
+  lisp.destroy();
+}
+
+
+/* Only nesting costs the reader a frame, and past the fence it reports a
+   size rather than exhausting the C stack. */
+static void lisp_read_fences_nesting_depth(void) {
+  Lisp lisp = Lisp.kernel();
+  Buffer deep = $auto(Buffer.new(0));
+  for (int i = 0; i < 20000; i++) deep.write("(");
+  for (int i = 0; i < 20000; i++) deep.write(")");
+  Symbol code = 0;
+  unsigned cursor = 0;
+  Var out = void;
+  try lisp.read(deep, &cursor, &out);
+  catch %(size-limit *): code = <size-limit>;
+  EXPECT_INT_EQ(code, <size-limit>);
+  Symbol status;
+  EXPECT_TRUE(_read1(lisp, "((((((((((x))))))))))", &status) is <list>);
+  EXPECT_INT_EQ(status, <value>);
+  lisp.destroy();
+}
+
+
 static void lisp_pattern_matching_operations(void) {
   Lisp lisp = Lisp.new();
   if (!EXPECT_NOT_NULL(lisp)) return;
@@ -1060,6 +1117,9 @@ void lisp_suite(void) {
   $test.run(lisp_eval_strips_locals);
   $test.run(lisp_eval_bind_native);
   $test.run(lisp_default_session_is_ready);
+  $test.run(lisp_car_and_cdr_check_the_operand_tag);
+  $test.run(lisp_numeric_comparison_reads_the_value);
+  $test.run(lisp_read_fences_nesting_depth);
   $test.run(lisp_pattern_matching_operations);
   $test.run(lisp_match_case_dispatch);
   $test.run(lisp_bare_session_has_only_primitives);

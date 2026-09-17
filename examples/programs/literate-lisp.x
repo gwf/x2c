@@ -541,6 +541,19 @@ static int _is_number(Var v) {
 }
 
 static Var _bool(int x)      => x ? <true>.var() : %().var();                   // Explicit Var branches; => returns.
+
+static Var _car(Var v) {                                                        // Lisp applies car to any value, so the
+  if (v is not <list>)                                                          // tag decides before the cell is read.
+    $fail(<bad-types>, "car", <kind>, v.kind());                                // Macro emits the error record.
+  return v.car();                                                               // Receiver form of the List accessor.
+}
+
+static Var _cdr(Var v) {                                                        // The tail accessor takes the same check.
+  if (v is not <list>)                                                          // A String or number has no cell to read.
+    $fail(<bad-types>, "cdr", <kind>, v.kind());                                // Same cause as car reports.
+  return v.cdr();                                                               // List result boxes back into a Var.
+}
+
 static Var _atom(Var v)      => _bool(v is not <list> || v.is_nil());           // Runtime tag plus receiver predicate.
 static Var _pair(Var v)      => _bool(v is <list> && !v.is_nil());              // C logic over Var predicates.
 static Var _list(Var v)      => _bool(v is <list>);                             // Constant-time Var tag inspection.
@@ -640,8 +653,8 @@ macro Expression $rest(Expr $fn) =>                                             
 
 static void _install_natives(Interp *self) {
   List natives = %(                                                             // Rows: Lisp name, bind name, Func.
-    (car             "Var_car"              ${Func.var(Var.car)})               // Function infers native signature.
-    (cdr             "Var_cdr"              ${Func.var(Var.cdr)})               // ${...} evaluates a full expression.
+    (car             "Var_car"              ${Func.var(_car)})                  // Function infers native signature.
+    (cdr             "Var_cdr"              ${Func.var(_cdr)})                  // ${...} evaluates a full expression.
     (cons            "Var_cons"             ${Func.var(Var.cons)})              // Direct function caches Func wrapper.
     (atom?           "lisp_atom"            ${Func.var(_atom)})                 // Nested quoted text is x2c String.
     (pair?           "lisp_pair"            ${Func.var(_pair)})

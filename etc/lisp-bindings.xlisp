@@ -93,17 +93,23 @@
           nil))
     (map (lambda (row) (lisp.binding.call lisp row)) rows))))
 
-(defun lisp.native._target (name maker)
-  `(,(lisp.native.call "String_var" (x2c.literal.string name))
+(defun lisp.native._target (bind-name name maker)
+  `(,(lisp.native.call "String_var" (x2c.literal.string bind-name))
     ,(lisp.native.call "Func_var" (lisp.native.call maker
        (x2c.expr.ident (x2c.ident name))
        (lisp.native.signature (lisp.native.name-signature name))))))
 
-// A row with a trailing marker binds a target that takes every argument
-// as one List, so it is built with Func_new_rest instead.
+// A row names the C target. A trailing marker binds a target that takes
+// every argument as one List, so it is built with Func_new_rest instead.
+// (as name) publishes the target under the bind name its callers already
+// write, which is how an implementation moves between C functions without
+// every program that binds it changing at the same time.
 (defun lisp.native.target (row) (match-case row
-  ((?name) (lisp.native._target (str ?name) "Func_new"))
-  ((?name ?marker) (lisp.native._target (str ?name) "Func_new_rest"))))
+  ((?name (as ?bind))
+   (lisp.native._target (str ?bind) (str ?name) "Func_new"))
+  ((?name) (lisp.native._target (str ?name) (str ?name) "Func_new"))
+  ((?name ?marker)
+   (lisp.native._target (str ?name) (str ?name) "Func_new_rest"))))
 
 (defun lisp.native.targets (rows)
   (apply lisp.native.call
