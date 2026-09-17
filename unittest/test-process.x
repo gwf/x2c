@@ -289,6 +289,44 @@ static void process_start_failures_raise(void) {
   EXPECT_INT_EQ(after, before);
 }
 
+static int _open_descriptors(void) {
+  int count = 0;
+  for (int fd = 0; fd < 1024; fd++) count += fcntl(fd, F_GETFD) != -1;
+  return count;
+}
+
+static void process_empty_input_is_empty_stdin(void) {
+  $test.scoped();
+  int saved = dup(STDIN_FILENO), link[2];
+  if (!EXPECT_INT_EQ(pipe(link), 0)) return;
+  EXPECT_INT_EQ(write(link[1], "parent\n", 7), 7);
+  close(link[1]);
+  dup2(link[0], STDIN_FILENO);
+  close(link[0]);
+  String output = "unset";
+  try output = %(cat).job().options({input: ""}).output();
+  finally {
+    dup2(saved, STDIN_FILENO);
+    close(saved);
+  }
+  EXPECT_NULL(output);
+}
+
+static void process_failed_starts_close_descriptors(void) {
+  $test.scoped();
+  int before = _open_descriptors(), caught = 0;
+  for (int i = 0; i < 16; i++) {
+    try %(cat).job().options({input: "x", stdout: "/x2c-missing/out"})
+      .check();
+    catch %(io-fail *): caught++;
+    try %(cat).job().options({input: "x", stderr: "/x2c-missing/err"})
+      .output();
+    catch %(io-fail *): caught++;
+  }
+  EXPECT_INT_EQ(caught, 32);
+  EXPECT_INT_EQ(_open_descriptors(), before);
+}
+
 static void process_jobs_wait_kill_and_clean_up(void) {
   $test.scoped();
   Array jobs = [];
@@ -366,4 +404,6 @@ void process_suite(void) {
   $test.run(process_changes_after_start_raise);
   $test.run(process_start_failures_raise);
   $test.run(process_jobs_wait_kill_and_clean_up);
+  $test.run(process_empty_input_is_empty_stdin);
+  $test.run(process_failed_starts_close_descriptors);
 }

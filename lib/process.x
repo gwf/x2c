@@ -59,7 +59,7 @@ extern char **environ;
    duplicates descriptors, changes directory, and calls `execvp`. */
 typedef struct _Launch {
   String dir, input, stdout_path, stderr_path;
-  int capture_output, capture_errors, errors_to_output;
+  int has_input, capture_output, capture_errors, errors_to_output;
   char **environment;
 } _Launch;
 
@@ -212,15 +212,19 @@ static void Job._start(Job job) {
   job.statuses = Scope.calloc(job.count, sizeof(int));
   // A stage the launch never reaches reports 127.
   for (int i = 0; i < job.count; i++) job.statuses[i] = 127;
-  int input = -1, output = -1, errors = -1, launched = 0;
+  int previous = -1, output = -1, errors = -1, launched = 0;
   defer if (!launched) job.cleanup();
-  if (launch.input) {
-    File file = _capture_file();
+  defer {
+    _close(previous);
+    if (!job.output_file) _close(output);
+    if (!job.errors_file) _close(errors);
+  }
+  if (launch.has_input) {
+    File file = $auto(_capture_file());
     file.write_all(launch.input, launch.input.len());
     file.rewind();
-    input = dup(file.fileno());
-    file.close();
-    _close_on_exec(input);
+    previous = dup(file.fileno());
+    _close_on_exec(previous);
   }
   if (launch.capture_output) {
     job.output_file = _capture_file();
@@ -233,25 +237,18 @@ static void Job._start(Job job) {
   }
   else if (launch.stderr_path) errors = _open_output(launch.stderr_path);
   fflush(NULL);
-  int previous = input, index = 0, last = job.count - 1;
-  {
-    defer {
-      _close(previous);
-      if (!job.output_file) _close(output);
-      if (!job.errors_file) _close(errors);
+  int index = 0, last = job.count - 1;
+  foreach (List stage, job.stages) {
+    int link[2] = { -1, -1 };
+    if (index < last) _pipe(link);
+    {
+      defer _close(link[1]);
+      job._spawn(index, stage, previous, index < last ? link[1] : output,
+                 errors);
     }
-    foreach (List stage, job.stages) {
-      int link[2] = { -1, -1 };
-      if (index < last) _pipe(link);
-      {
-        defer _close(link[1]);
-        job._spawn(index, stage, previous, index < last ? link[1] : output,
-                   errors);
-      }
-      _close(previous);
-      previous = link[0];
-      index++;
-    }
+    _close(previous);
+    previous = link[0];
+    index++;
   }
   launched = 1;
 }
@@ -345,6 +342,7 @@ Job Job.options(Job job, Map options) {
         break;
       case <input>:
         launch.input = value;
+        launch.has_input = 1;
         break;
       case <stdout>:
         launch.capture_output = _is(value, <capture>);
