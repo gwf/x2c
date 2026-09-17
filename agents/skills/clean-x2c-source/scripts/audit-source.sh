@@ -24,7 +24,7 @@ narration_pattern+='write|copy|find|determine|update|open|close)\b'
 prose_pattern='load[ -]bearing|it is important to note|note that|keep in mind|'
 prose_pattern+='in order to|serves to|\b(leverage|utilize|robust|powerful|'
 prose_pattern+='seamless|comprehensive|elegant|clearly|simply|obviously|'
-prose_pattern+='just)\b|'
+prose_pattern+='just|deliberately|honest|honestly|on purpose|rather than)\b|'
 prose_pattern+='this ensures|as mentioned above|we can see|not only.*but also'
 legacy_is_not_pattern='!\([^;]*[[:space:]]is[[:space:]]'
 
