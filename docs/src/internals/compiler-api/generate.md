@@ -32,7 +32,7 @@ Both files are closed before individual renames replace their
 destinations; failure can leave only the header replaced, but never a
 partial file. Failures are reported as `emit` diagnostics.
 
-Source: `src/generate.x:1041`
+Source: `src/generate.x:1042`
 
 ## Design notes
 

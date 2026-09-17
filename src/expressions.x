@@ -11,6 +11,10 @@ $(import "../lib/private-keywords.xmacro")
 #include "compiler.x"
 #include "type.x"
 
+/** A printf-family function: its name, the indexes of its format and first
+    value arguments, and whether only a spelling no declaration resolves
+    names it.
+*/
 typedef struct PrintfFn {
   const char *name, int fmt_arg, first_arg, unresolved;
 } PrintfFn;

@@ -14,7 +14,6 @@ X2c AST transformation pipeline.
 | --- | --- |
 | [`transform_array_literal`](#transform_array_literal) | Converts an `(array ...)` or `(varray ...)` node to source-ordered `(varray ...)` form, converting every typed element to `Var`. |
 | [`transform_map_literal`](#transform_map_literal) | Converts a `(map ...)` or `(vmap ...)` node to source-ordered `(vmap (vpair ...))` form, converting every typed key and value to `Var`. |
-| [`Compiler.printf_variadic_start`](#Compiler.printf_variadic_start) | Returns the index of the first value argument a printf-family `callee` converts by its format, or -1 for any other callee. |
 | [`Compiler.transform`](#Compiler.transform) | Lowers a bound and typed top-level AST to the normalized form consumed by emission. |
 
 ### Functions
@@ -26,7 +25,7 @@ X2c AST transformation pipeline.
 Converts an `(array ...)` or `(varray ...)` node to source-ordered
 `(varray ...)` form, converting every typed element to `Var`.
 
-Source: `src/transform.x:1111`
+Source: `src/transform.x:1079`
 
 #### transform_map_literal
 
@@ -36,19 +35,9 @@ Converts a `(map ...)` or `(vmap ...)` node to source-ordered
 `(vmap (vpair ...))` form, converting every typed key and value to
 `Var`.
 
-Source: `src/transform.x:1125`
+Source: `src/transform.x:1090`
 
 ### `Compiler`
-
-<a id="Compiler.printf_variadic_start"></a>
-#### Compiler.printf_variadic_start
-
-`int Compiler.printf_variadic_start(Compiler compiler, List callee)`
-
-Returns the index of the first value argument a printf-family `callee`
-converts by its format, or -1 for any other callee.
-
-Source: `src/transform.x:98`
 
 <a id="Compiler.transform"></a>
 #### Compiler.transform
@@ -61,7 +50,7 @@ state. The call drives the input and synthesized early declarations to
 identity fixed points, appends those declarations after the input units,
 and may add generated origins or diagnostics to `compiler`.
 
-Source: `src/transform.x:1882`
+Source: `src/transform.x:1844`
 
 ## Design notes
 

@@ -102,22 +102,22 @@ Public functions:
 `Compiler.record_source_declaration`, `Compiler.record_source_reference`,
 `Compiler.semantic_binding_facts`, `Compiler.macro_definition_locals`,
 `Compiler.fresh_name`, `Compiler.emitted_binding_name`, `Compiler.tokenize`,
-`Compiler.skip_trivia_from`, `Compiler.peek`, `Compiler.expect`,
-`Compiler.next`, `Compiler.test`, `Compiler.record_origin`,
-`Compiler.anchor_origin`, `Compiler._at_function_arrow`,
-`Compiler._skip_shallow_expression`, `Compiler.skip_script_statement`,
-`Compiler.freeze_declaration_syntax`, `Compiler.thaw_declaration_syntax`,
-`Compiler.queue_declaration_effect`, `Compiler.run_declaration_effects`,
-`Compiler.select_declaration_defaults`, `Compiler.shallow_parse`,
-`Compiler.shallow_parse_overlay`, `Compiler.leading_preproc`,
-`Compiler.update_source_visibility`, `Compiler.full_parse`, `Compiler.cache`,
-`Compiler.cache_cons_cell`, `Compiler.cache_literal_list`,
-`Compiler.match_pattern_value`, `Compiler.match_pattern_is_static`,
-`Compiler.match_pattern_head_symbol`, `Compiler.match_pattern_flat_head`,
-`Compiler.match_pattern_binders`, `Compiler.define_match_binders`,
-`Compiler.add_early`, `Compiler.add_init`, `Compiler.init_statements`,
-`Compiler.begin_semantic_transaction`, `SymTxn.commit`,
-`SymTxn.local_macros_changed`, `SymTxn.rollback`, `Sym.reset`,
+`Compiler.skip_trivia_from`, `Symbol.group_step`, `Token.group_close`,
+`Token.after_group`, `Compiler.peek`, `Compiler.expect`, `Compiler.next`,
+`Compiler.test`, `Compiler.record_origin`, `Compiler.anchor_origin`,
+`Compiler._at_function_arrow`, `Compiler._skip_shallow_expression`,
+`Compiler.skip_script_statement`, `Compiler.freeze_declaration_syntax`,
+`Compiler.thaw_declaration_syntax`, `Compiler.queue_declaration_effect`,
+`Compiler.run_declaration_effects`, `Compiler.select_declaration_defaults`,
+`Compiler.shallow_parse`, `Compiler.shallow_parse_overlay`,
+`Compiler.leading_preproc`, `Compiler.update_source_visibility`,
+`Compiler.full_parse`, `Compiler.cache`, `Compiler.cache_cons_cell`,
+`Compiler.cache_literal_list`, `Compiler.match_pattern_value`,
+`Compiler.match_pattern_is_static`, `Compiler.match_pattern_head_symbol`,
+`Compiler.match_pattern_flat_head`, `Compiler.match_pattern_binders`,
+`Compiler.define_match_binders`, `Compiler.add_early`, `Compiler.add_init`,
+`Compiler.init_statements`, `Compiler.begin_semantic_transaction`,
+`SymTxn.commit`, `SymTxn.local_macros_changed`, `SymTxn.rollback`, `Sym.reset`,
 `Sym.global_symbols`, `Sym.base_symbols`, `Sym.file_statics`,
 `Sym.mark_static`, `Sym.current_symbols`, `Sym.current_binding`,
 `Sym.enumerator_owner`, `Sym.declare_enumerator`, `Sym.define_macro`,
@@ -181,8 +181,9 @@ x2c expression parsing.
 
 Public functions:
 
-`Compiler.complete_iter_chain`, `Compiler.resolve_postfix_member`,
-`Compiler.parse_macro_expression_target`, `Compiler.check_explicit_converter`,
+`Compiler.complete_iter_chain`, `List.printf_family`,
+`Compiler.resolve_postfix_member`, `Compiler.parse_macro_expression_target`,
+`Compiler.promote_string_literal`, `Compiler.check_explicit_converter`,
 `Compiler.require_var_tag`, `Compiler.var_tag_expression`,
 `Compiler.resolve_map_entry`, `Compiler.resolve_expression`,
 `Compiler.parse_variable`, `Compiler.parse_conditional`,
@@ -247,12 +248,13 @@ Public functions:
 `Compiler.typed_match_pattern`, `Compiler.parse_list_literal`,
 `Compiler.symbol_set_expression`, `Compiler.parse_symbol_set_literal`,
 `Compiler.parse_raise_literal`, `Compiler.parse_catch_pattern_literal`,
-`Compiler.parse_array_literal`, `Compiler.parse_map_entry`,
-`Compiler.parse_map_entries`, `Compiler.parse_map_literal`,
-`Compiler.parse_string_literal`, `Compiler.lambda_capture_required`,
-`Compiler.begin_lambda_captures`, `Compiler.end_lambda_captures`,
-`Compiler.capture_lambda_identifier`, `Compiler.bind_lambda_expression`,
-`Compiler.parse_lambda_literal`, `Compiler.parse_atomic_literal`
+`Compiler.parse_array_literal`, `Compiler.map_entry_macro_follows`,
+`Compiler.parse_map_entry`, `Compiler.parse_map_entries`,
+`Compiler.parse_map_literal`, `Compiler.parse_string_literal`,
+`Compiler.lambda_capture_required`, `Compiler.begin_lambda_captures`,
+`Compiler.end_lambda_captures`, `Compiler.capture_lambda_identifier`,
+`Compiler.bind_lambda_expression`, `Compiler.parse_lambda_literal`,
+`Compiler.parse_atomic_literal`
 
 ### [src/macros.x](../src/macros.x)
 
@@ -264,16 +266,15 @@ Public functions:
 `Compiler.local_macro_form_is_definition`,
 `Compiler.keyword_form_is_definition`, `Compiler.skip_macro_invocation`,
 `Compiler.macro_invocation_needs_shallow_expansion`,
-`Compiler.macro_starts_target_at`, `Compiler.skip_macro_lisp`,
-`Compiler.parse_macro_lisp_top_level`, `Compiler.evaluate_declaration_effect`,
-`Compiler.parse_macro_lisp_shallow`, `Compiler.lift_macro_lisp_expression`,
-`Compiler.parse_macro_lisp_expression`, `Compiler.evaluate_declaration_recipe`,
-`Compiler.evaluate_macro_slot`, `Compiler.evaluate_macro_rows`,
-`Compiler.macro_introduced_name`, `Compiler.peek_macro_hole`,
-`Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_slot`,
-`Compiler.parse_macro_definition`, `Compiler.publish_macro_definition_node`,
-`Compiler.parse_keyword_definition`, `Compiler.macro_targets_unit`,
-`Compiler.keyword_alias_starts_target_at`,
+`Compiler.macro_starts_target_at`, `Compiler.parse_macro_lisp_top_level`,
+`Compiler.evaluate_declaration_effect`, `Compiler.parse_macro_lisp_shallow`,
+`Compiler.lift_macro_lisp_expression`, `Compiler.parse_macro_lisp_expression`,
+`Compiler.evaluate_declaration_recipe`, `Compiler.evaluate_macro_slot`,
+`Compiler.evaluate_macro_rows`, `Compiler.macro_introduced_name`,
+`Compiler.peek_macro_hole`, `Compiler.macro_lisp_starts_declaration`,
+`Compiler.try_parse_macro_slot`, `Compiler.parse_macro_definition`,
+`Compiler.publish_macro_definition_node`, `Compiler.parse_keyword_definition`,
+`Compiler.macro_targets_unit`, `Compiler.keyword_alias_starts_target_at`,
 `Compiler.keyword_alias_needs_shallow_expansion`,
 `Compiler.skip_keyword_alias`, `Compiler.skip_named_type_declaration`,
 `Compiler.macro_invocation_site`, `Compiler.expand_macro_invocation_node`,
@@ -380,8 +381,9 @@ Public functions:
 
 `Compiler.parse_governed`, `Compiler.finish_return_statement`,
 `Compiler.begin_match_arm`, `Compiler.begin_catch_arm`,
-`Compiler.parse_block_item`, `Compiler.parse_statement`,
-`Compiler.parse_block_items`, `Compiler.parse_compound_statement`
+`Compiler.with_binding`, `Compiler.parse_block_item`,
+`Compiler.parse_statement`, `Compiler.parse_block_items`,
+`Compiler.parse_compound_statement`
 
 ### [src/toolchain.x](../src/toolchain.x)
 
@@ -401,8 +403,7 @@ x2c AST transformation pipeline.
 
 Public functions:
 
-`Compiler.printf_variadic_start`, `transform_array_literal`,
-`transform_map_literal`, `Compiler.transform`
+`transform_array_literal`, `transform_map_literal`, `Compiler.transform`
 
 ### [src/type.x](../src/type.x)
 
