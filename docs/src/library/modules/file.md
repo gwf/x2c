@@ -14,6 +14,7 @@
 | [`File.getw`](#File.getw) | Reads and returns one native `int`, or EOF when a full word is unavailable. |
 | [`File.iter`](#File.iter) | Returns an iterator over `File`. |
 | [`File.open`](#File.open) | Opens `path` with the requested stdio mode. |
+| [`File.path_error`](#File.path_error) | Raises `<not-found>` when `error` is `ENOENT` and `<io-fail>` otherwise, with `operation`, `path`, and `errno` details. |
 | [`File.read_into`](#File.read_into) | Reads the remaining stream bytes into caller-owned storage. |
 | [`File.readline_into`](#File.readline_into) | Reads one raw line into caller-owned byte storage. |
 | [`File.write_all`](#File.write_all) | Writes every requested byte unless the stream reports failure. |
@@ -89,6 +90,16 @@ path or mode raises `<bad-arg>`. Host failures carry the path, operation,
 and captured errno.
 
 Source: `lib/file.x:262`
+
+<a id="File.path_error"></a>
+#### File.path_error
+
+`void File.path_error(Var operation, String path, int error)`
+
+Raises `<not-found>` when `error` is `ENOENT` and `<io-fail>` otherwise,
+with `operation`, `path`, and `errno` details.
+
+Source: `lib/file.x:91`
 
 <a id="File.read_into"></a>
 #### File.read_into

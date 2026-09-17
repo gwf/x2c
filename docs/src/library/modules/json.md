@@ -71,7 +71,7 @@ when `source` is not one JSON value surrounded only by whitespace, nests
 arrays and objects more than 512 deep, or contains a number too large for
 a `double`, an unpaired surrogate escape, or `\u0000`.
 
-Source: `lib/json.x:399`
+Source: `lib/json.x:396`
 
 <a id="Json.read_file"></a>
 #### Json.read_file
@@ -83,7 +83,7 @@ Returns the x2c value of the JSON file at `path`, as `Json.parse` does.
 **Raises:** the causes of `Path.read_text`, or `<bad-arg>` as
 `Json.parse` does, with a `path` detail added.
 
-Source: `lib/json.x:405`
+Source: `lib/json.x:402`
 
 <a id="Json.write_file"></a>
 #### Json.write_file
@@ -94,7 +94,7 @@ Replaces the file at `path` with `value` as compact JSON text.
 
 **Raises:** the causes of `Var.json` and `Path.write_text`.
 
-Source: `lib/json.x:564`
+Source: `lib/json.x:561`
 
 ### `JsonBool`
 
@@ -151,7 +151,7 @@ to the same value.
 `<conv-range>` for NaN or an infinity, `<bad-arg>` for a string that is
 not UTF-8, or `<size-limit>` for nesting deeper than 512 levels.
 
-Source: `lib/json.x:554`
+Source: `lib/json.x:551`
 
 <a id="Var.jsonbool"></a>
 #### Var.jsonbool
@@ -171,7 +171,7 @@ Returns `value` as JSON text indented two spaces per level.
 
 **Raises:** the causes of `Var.json`.
 
-Source: `lib/json.x:559`
+Source: `lib/json.x:556`
 
 ## Public types
 

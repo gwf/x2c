@@ -644,13 +644,14 @@ Public functions:
 
 Public functions:
 
-`File.string_close`, `String.open`, `File.fdopen`, `File.open`, `File.popen`,
-`File.reopen`, `File.gets`, `File.putc`, `File.puts`, `File.putw`, `File.getw`,
-`File.setlinebuf`, `File.ungetc`, `File.read`, `File.write`, `File.setbuffer`,
-`File.stat`, `File.printf`, `File.scanf`, `File.readblock`,
-`File.readline_into`, `File.read_into`, `File.write_all`, `File.copy_to`,
-`File.readline`, `File.string`, `File.iter`, `File.hash`, `File.equal`,
-`File.repr`, `File.str`, `File.write_repr`, `File.initialize`, `File.cleanup`
+`File.path_error`, `File.string_close`, `String.open`, `File.fdopen`,
+`File.open`, `File.popen`, `File.reopen`, `File.gets`, `File.putc`,
+`File.puts`, `File.putw`, `File.getw`, `File.setlinebuf`, `File.ungetc`,
+`File.read`, `File.write`, `File.setbuffer`, `File.stat`, `File.printf`,
+`File.scanf`, `File.readblock`, `File.readline_into`, `File.read_into`,
+`File.write_all`, `File.copy_to`, `File.readline`, `File.string`, `File.iter`,
+`File.hash`, `File.equal`, `File.repr`, `File.str`, `File.write_repr`,
+`File.initialize`, `File.cleanup`
 
 ### [lib/func.x](../lib/func.x)
 

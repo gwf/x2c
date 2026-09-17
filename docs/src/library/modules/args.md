@@ -22,7 +22,7 @@ Parse program arguments against a declarative spec.
 
 Returns the program arguments that follow `argv[0]` as `String`s.
 
-Source: `lib/args.x:310`
+Source: `lib/args.x:306`
 
 <a id="Args.parse"></a>
 #### Args.parse
@@ -84,7 +84,7 @@ Returns usage text for `spec` as `Args.parse` reads it: a synopsis
 for `program`, then each option, then each operand that has help, in
 spec order. Help text starts at column 30, as in `x2c help`.
 
-Source: `lib/args.x:287`
+Source: `lib/args.x:283`
 
 ## Public types
 

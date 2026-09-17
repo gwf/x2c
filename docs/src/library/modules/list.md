@@ -56,7 +56,7 @@ Linked list with `Var` elements.
 
 Returns the head of `x`, or `void` when `x` is `nil`.
 
-Source: `lib/list.x:263`
+Source: `lib/list.x:262`
 
 #### cdr
 
@@ -66,7 +66,7 @@ Returns the tail of `x`, or `nil` when `x` is `nil`.
 Nil-safe like `car`. The tail is the same canonical structure the cell was
 built from.
 
-Source: `lib/list.x:269`
+Source: `lib/list.x:268`
 
 #### cons
 
@@ -83,7 +83,7 @@ pointer.
 `<size-limit>`, or `<invariant>` when a new canonical cell cannot be
 installed.
 
-Source: `lib/list.x:243`
+Source: `lib/list.x:242`
 
 ### `Array`
 
@@ -99,7 +99,7 @@ canonical and shares whatever tail it already has in common with another
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/list.x:564`
+Source: `lib/list.x:563`
 
 <a id="Array.list_free"></a>
 #### Array.list_free
@@ -114,7 +114,7 @@ and when the conversion transfers an `Error`.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/list.x:573`
+Source: `lib/list.x:572`
 
 ### `Iter`
 
@@ -130,7 +130,7 @@ never returns for an infinite source. Elements appear in iteration order.
 **Raises:** whatever the iterator's source raises, or `<alloc-fail>` while
 constructing the result.
 
-Source: `lib/list.x:1087`
+Source: `lib/list.x:1082`
 
 ### `List`
 
@@ -145,7 +145,7 @@ nonempty `List`.
 
 Any cause raised by `pred` or its result's truth operation propagates.
 
-Source: `lib/list.x:508`
+Source: `lib/list.x:507`
 
 <a id="List.any"></a>
 #### List.any
@@ -158,7 +158,7 @@ Stops at the first accepted element. Nil and a null `pred` are false.
 
 Any cause raised by `pred` or its result's truth operation propagates.
 
-Source: `lib/list.x:493`
+Source: `lib/list.x:492`
 
 <a id="List.append"></a>
 #### List.append
@@ -173,7 +173,7 @@ the other side is returned as it stands.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the copied
 prefix.
 
-Source: `lib/list.x:315`
+Source: `lib/list.x:314`
 
 <a id="List.array"></a>
 #### List.array
@@ -188,7 +188,7 @@ indexed access or in-place mutation.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/list.x:585`
+Source: `lib/list.x:584`
 
 <a id="List.concat_n"></a>
 #### List.concat_n
@@ -202,7 +202,7 @@ becomes the shared tail of the result.
 **Raises:** `<size-limit>` when `list_count` exceeds the supported index
 range, or `<alloc-fail>` while constructing the result.
 
-Source: `lib/list.x:347`
+Source: `lib/list.x:346`
 
 <a id="List.contains"></a>
 #### List.contains
@@ -211,7 +211,7 @@ Source: `lib/list.x:347`
 
 Reports whether `lst` contains `key` by `Var` equality.
 
-Source: `lib/list.x:408`
+Source: `lib/list.x:407`
 
 <a id="List.filter"></a>
 #### List.filter
@@ -226,7 +226,7 @@ invoking or checking `pred`.
 `<alloc-fail>` or `<size-limit>` while constructing the result. A null
 `pred` on nonempty input raises `<bad-arg>` from `Func.apply`.
 
-Source: `lib/list.x:1100`
+Source: `lib/list.x:1095`
 
 <a id="List.find"></a>
 #### List.find
@@ -239,7 +239,7 @@ Returns the first element `pred` accepts by ordinary `Var` truthiness, or
 Any cause raised by `pred` or its result's truth operation propagates. A
 null `pred` returns `void`.
 
-Source: `lib/list.x:478`
+Source: `lib/list.x:477`
 
 <a id="List.foldl"></a>
 #### List.foldl
@@ -256,7 +256,7 @@ which for a `void` seed is the head.
 
 Any cause raised by `fn` propagates.
 
-Source: `lib/list.x:446`
+Source: `lib/list.x:445`
 
 <a id="List.get"></a>
 #### List.get
@@ -267,7 +267,7 @@ Looks up an integer index or association key in `list`.
 Integer keys use `List.getindex`, including negative indexes; every other
 key uses `List.assoc`. Either absent form returns `void`.
 
-Source: `lib/list.x:754`
+Source: `lib/list.x:749`
 
 <a id="List.getindex"></a>
 #### List.getindex
@@ -277,7 +277,7 @@ Source: `lib/list.x:754`
 Returns `list[index]`, or `void` when out of range.
 A negative index counts from the end and is found without a length pass.
 
-Source: `lib/list.x:718`
+Source: `lib/list.x:713`
 
 <a id="List.getslice"></a>
 #### List.getslice
@@ -293,7 +293,7 @@ cells there so a detached pool cannot escape through the shortcut.
 **Raises:** `<bad-arg>` when `step` is zero, or `<alloc-fail>` or
 `<size-limit>` while constructing the result.
 
-Source: `lib/list.x:823`
+Source: `lib/list.x:818`
 
 <a id="List.head"></a>
 #### List.head
@@ -307,7 +307,7 @@ canonical cells are built for the prefix.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing that prefix.
 
-Source: `lib/list.x:783`
+Source: `lib/list.x:778`
 
 <a id="List.index"></a>
 #### List.index
@@ -316,7 +316,7 @@ Source: `lib/list.x:783`
 
 Returns the first index of `key`, or -1 when absent.
 
-Source: `lib/list.x:401`
+Source: `lib/list.x:400`
 
 <a id="List.iter"></a>
 #### List.iter
@@ -328,7 +328,7 @@ The iterator borrows the immutable cells and yields their stored `Var` bits
 without retaining them, so the owning pool must outlive iteration. A null
 `dest` returns NULL; `nil` produces an exhausted iterator.
 
-Source: `lib/list.x:1076`
+Source: `lib/list.x:1071`
 
 <a id="List.last"></a>
 #### List.last
@@ -337,7 +337,7 @@ Source: `lib/list.x:1076`
 
 Returns the last value in `lst`, or `void` when it is empty.
 
-Source: `lib/list.x:393`
+Source: `lib/list.x:392`
 
 <a id="List.len"></a>
 #### List.len
@@ -346,7 +346,7 @@ Source: `lib/list.x:393`
 
 Returns the number of cells in `lst` in O(n) time.
 
-Source: `lib/list.x:411`
+Source: `lib/list.x:410`
 
 <a id="List.list_n"></a>
 #### List.list_n
@@ -360,7 +360,7 @@ terminator. A zero count returns `nil`.
 **Raises:** `<void-op>` when an argument is `void`, or `<alloc-fail>` or
 `<size-limit>` while constructing the result.
 
-Source: `lib/list.x:371`
+Source: `lib/list.x:370`
 
 <a id="List.map"></a>
 #### List.map
@@ -377,7 +377,7 @@ built.
 **Raises:** those causes, whatever `Func.apply` or `fn` raises, or
 `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/list.x:426`
+Source: `lib/list.x:425`
 
 <a id="List.map2"></a>
 #### List.map2
@@ -389,7 +389,7 @@ A null callback returns `nil` without examining either `List`; otherwise
 this
 has the length, order, ownership, and failures of `List.zip_with`.
 
-Source: `lib/list.x:637`
+Source: `lib/list.x:636`
 
 <a id="List.reduce"></a>
 #### List.reduce
@@ -402,7 +402,7 @@ returns the first element without visiting the rest.
 
 Any cause raised by `fn` propagates.
 
-Source: `lib/list.x:470`
+Source: `lib/list.x:469`
 
 <a id="List.reverse"></a>
 #### List.reverse
@@ -415,7 +415,7 @@ is untouched. Reversing `nil` gives `nil`.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/list.x:384`
+Source: `lib/list.x:383`
 
 <a id="List.sort"></a>
 #### List.sort
@@ -430,7 +430,7 @@ fewer than two cells is returned as it stands.
 **Raises:** whatever element comparison raises, or `<alloc-fail>` while
 constructing the result.
 
-Source: `lib/list.x:525`
+Source: `lib/list.x:524`
 
 <a id="List.sort_by"></a>
 #### List.sort_by
@@ -442,7 +442,7 @@ The key runs once per element in input order; an empty List invokes none.
 The input List is unchanged. Raises: allocation and the key's ordinary
 causes, including failure to compare the resulting keys.
 
-Source: `lib/list.x:550`
+Source: `lib/list.x:549`
 
 <a id="List.sort_with"></a>
 #### List.sort_with
@@ -453,7 +453,7 @@ Returns a stable sorted copy using `Array.sort_with`'s callback contract.
 The input List is unchanged. Fewer than two cells return unchanged without
 a callback. Raises: allocation and the comparator's ordinary causes.
 
-Source: `lib/list.x:537`
+Source: `lib/list.x:536`
 
 <a id="List.tail"></a>
 #### List.tail
@@ -464,7 +464,7 @@ Returns the last `count` elements of `list`.
 The result is an existing tail of `list`, so nothing is allocated. When
 `count` reaches or exceeds the length, the whole `list` comes back.
 
-Source: `lib/list.x:763`
+Source: `lib/list.x:758`
 
 <a id="List.try_next"></a>
 #### List.try_next
@@ -479,7 +479,7 @@ cursor.
 
 `foreach (Var item, lst)` compiles to this loop.
 
-Source: `lib/list.x:1064`
+Source: `lib/list.x:1059`
 
 <a id="List.unique"></a>
 #### List.unique
@@ -496,7 +496,7 @@ fewer than two cells is returned as it stands.
 **Raises:** causes from `Map` hashing or equality, or `<alloc-fail>` or
 `<size-limit>` while constructing the result.
 
-Source: `lib/list.x:600`
+Source: `lib/list.x:599`
 
 <a id="List.unpack_n"></a>
 #### List.unpack_n
@@ -513,7 +513,7 @@ but still counted.
 **Raises:** `<size-limit>` when `destination_count` exceeds `INT_MAX`. The
 failure occurs before any destination is written.
 
-Source: `lib/list.x:867`
+Source: `lib/list.x:862`
 
 <a id="List.unpack_vars_n"></a>
 #### List.unpack_vars_n
@@ -528,7 +528,7 @@ is skipped but still counted.
 **Raises:** `<size-limit>` when `destination_count` exceeds `INT_MAX`. The
 failure occurs before any destination is written.
 
-Source: `lib/list.x:882`
+Source: `lib/list.x:877`
 
 <a id="List.write_str"></a>
 #### List.write_str
@@ -541,7 +541,7 @@ inside each parenthesis, as in `( a b )`, including when nested in another
 container. This method temporarily sets the destination `Buffer`'s padding
 to one and restores it afterward.
 
-Source: `lib/list.x:1019`
+Source: `lib/list.x:1014`
 
 <a id="List.zip_with"></a>
 #### List.zip_with
@@ -555,7 +555,7 @@ callback receives the left and right values and is invoked front to back.
 
 **Raises:** whatever `Func.apply`, `fn`, or result canonicalization raises.
 
-Source: `lib/list.x:616`
+Source: `lib/list.x:615`
 
 ## Advanced and interop API
 
@@ -601,7 +601,7 @@ Returns the second value of the first association whose key equals `key`.
 Nil entries are skipped. A missing association and a missing second value
 both return `void`, so the two cases look the same here.
 
-Source: `lib/list.x:741`
+Source: `lib/list.x:736`
 
 <a id="List.caar"></a>
 #### List.caar
@@ -612,7 +612,7 @@ Returns `car(car(lst))`.
 Compound accessors read from right to left: `a` applies `car` and `d`
 applies `cdr`. Every step is `nil`-safe.
 
-Source: `lib/list.x:279`
+Source: `lib/list.x:278`
 
 <a id="List.caddr"></a>
 #### List.caddr
@@ -621,7 +621,7 @@ Source: `lib/list.x:279`
 
 Returns the third element, or `void`.
 
-Source: `lib/list.x:285`
+Source: `lib/list.x:284`
 
 <a id="List.cadr"></a>
 #### List.cadr
@@ -630,7 +630,7 @@ Source: `lib/list.x:285`
 
 Returns `car(cdr(lst))`, or `void` when there is no second element.
 
-Source: `lib/list.x:281`
+Source: `lib/list.x:280`
 
 <a id="List.car"></a>
 #### List.car
@@ -639,7 +639,7 @@ Source: `lib/list.x:281`
 
 Method form of `car`: the head of `lst`, or `void` when `lst` is `nil`.
 
-Source: `lib/list.x:272`
+Source: `lib/list.x:271`
 
 <a id="List.cddr"></a>
 #### List.cddr
@@ -648,7 +648,7 @@ Source: `lib/list.x:272`
 
 Returns the tail after two cells, or `nil`.
 
-Source: `lib/list.x:283`
+Source: `lib/list.x:282`
 
 <a id="List.cdr"></a>
 #### List.cdr
@@ -657,7 +657,7 @@ Source: `lib/list.x:283`
 
 Method form of `cdr`: the tail of `lst`, or `nil` when `lst` is `nil`.
 
-Source: `lib/list.x:274`
+Source: `lib/list.x:273`
 
 <a id="List.compare"></a>
 #### List.compare
@@ -667,7 +667,7 @@ Source: `lib/list.x:274`
 Compares `a` and `b` lexicographically through `Var.compare`.
 Element comparison causes propagate.
 
-Source: `lib/list.x:917`
+Source: `lib/list.x:912`
 
 <a id="List.cons"></a>
 #### List.cons
@@ -676,7 +676,7 @@ Source: `lib/list.x:917`
 
 Method form of `cons`, with the same identity, lifetime, and failures.
 
-Source: `lib/list.x:258`
+Source: `lib/list.x:257`
 
 <a id="List.cons_in"></a>
 #### List.cons_in
@@ -704,7 +704,7 @@ Reports equality of canonical chains by exact head and tail identity.
 Referenced mutable objects therefore compare by identity here rather than
 by their current contents.
 
-Source: `lib/list.x:908`
+Source: `lib/list.x:903`
 
 <a id="List.flatten"></a>
 #### List.flatten
@@ -718,7 +718,7 @@ and `nil` returns `nil`.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/list.x:676`
+Source: `lib/list.x:671`
 
 <a id="List.flatten_all"></a>
 #### List.flatten_all
@@ -730,7 +730,7 @@ Nested `nil` contributes no element and `nil` returns `nil`.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/list.x:700`
+Source: `lib/list.x:695`
 
 <a id="List.hash"></a>
 #### List.hash
@@ -740,7 +740,7 @@ Source: `lib/list.x:700`
 Returns the stable hash of `List`'s exact head bits and tail identity.
 Mutating an object referenced by the head does not change this hash.
 
-Source: `lib/list.x:895`
+Source: `lib/list.x:890`
 
 <a id="List.nth_cdr"></a>
 #### List.nth_cdr
@@ -750,7 +750,7 @@ Source: `lib/list.x:895`
 Returns the shared tail beginning `n` cells in.
 Returns `nil` past the end and `list` itself when `n` is nonpositive.
 
-Source: `lib/list.x:710`
+Source: `lib/list.x:705`
 
 <a id="List.promote"></a>
 #### List.promote
@@ -772,7 +772,7 @@ therefore cheap. `Var` kinds other than `String`, `Atom`, and `List` are
 
 A null `lst` returns itself unchanged.
 
-Source: `lib/list.x:206`
+Source: `lib/list.x:205`
 
 <a id="List.repr"></a>
 #### List.repr
@@ -789,7 +789,7 @@ released.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/list.x:1035`
+Source: `lib/list.x:1030`
 
 <a id="List.str"></a>
 #### List.str
@@ -806,7 +806,7 @@ ancestor, and remains live until its owning pool is released. Use
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/list.x:1007`
+Source: `lib/list.x:1002`
 
 <a id="List.sublis"></a>
 #### List.sublis
@@ -821,7 +821,7 @@ rebuilt canonically, and `nil` returns `nil`.
 **Raises:** a cause from key equality, or `<alloc-fail>` or `<size-limit>`
 while constructing the result.
 
-Source: `lib/list.x:665`
+Source: `lib/list.x:660`
 
 <a id="List.subseq"></a>
 #### List.subseq
@@ -834,7 +834,7 @@ Negative bounds count from the end. `step` must be positive.
 **Raises:** `<bad-arg>` when `step` is less than 1, or `<alloc-fail>` while
 constructing the result.
 
-Source: `lib/list.x:809`
+Source: `lib/list.x:804`
 
 <a id="List.write_repr"></a>
 #### List.write_repr
@@ -843,7 +843,7 @@ Source: `lib/list.x:809`
 
 Appends the readable representation of `List` to a `Buffer`.
 
-Source: `lib/list.x:1042`
+Source: `lib/list.x:1037`
 
 ### `Var`
 
@@ -854,7 +854,7 @@ Source: `lib/list.x:1042`
 
 Applies the `caar` selector chain to `Var`.
 
-Source: `lib/list.x:292`
+Source: `lib/list.x:291`
 
 <a id="Var.caddr"></a>
 #### Var.caddr
@@ -863,7 +863,7 @@ Source: `lib/list.x:292`
 
 Applies the `caddr` selector chain to `Var`.
 
-Source: `lib/list.x:298`
+Source: `lib/list.x:297`
 
 <a id="Var.cadr"></a>
 #### Var.cadr
@@ -872,7 +872,7 @@ Source: `lib/list.x:298`
 
 Applies the `cadr` selector chain to `Var`.
 
-Source: `lib/list.x:294`
+Source: `lib/list.x:293`
 
 <a id="Var.car"></a>
 #### Var.car
@@ -881,7 +881,7 @@ Source: `lib/list.x:294`
 
 Treats `var` as a `List` and returns its first element.
 
-Source: `lib/list.x:288`
+Source: `lib/list.x:287`
 
 <a id="Var.cddr"></a>
 #### Var.cddr
@@ -890,7 +890,7 @@ Source: `lib/list.x:288`
 
 Applies the `cddr` selector chain to `Var`.
 
-Source: `lib/list.x:296`
+Source: `lib/list.x:295`
 
 <a id="Var.cdr"></a>
 #### Var.cdr
@@ -899,7 +899,7 @@ Source: `lib/list.x:296`
 
 Treats `var` as a `List` and returns its tail.
 
-Source: `lib/list.x:290`
+Source: `lib/list.x:289`
 
 <a id="Var.cons"></a>
 #### Var.cons
@@ -908,7 +908,7 @@ Source: `lib/list.x:290`
 
 Returns `cons(head, tail)`, with the same identity and failures.
 
-Source: `lib/list.x:260`
+Source: `lib/list.x:259`
 
 ## Runtime-internal callables
 
@@ -939,7 +939,7 @@ Initializes the shared process-wide `String` and `List` pool root.
 **Raises:** `<alloc-fail>` if the root cannot be constructed. Native mutex
 initialization failure aborts.
 
-Source: `lib/list.x:91`
+Source: `lib/list.x:90`
 
 <a id="List.pool_current"></a>
 #### List.pool_current
@@ -953,7 +953,7 @@ caller must not release the returned pool.
 **Raises:** `<alloc-fail>` if the root cannot be initialized. Native mutex
 initialization failure aborts.
 
-Source: `lib/list.x:85`
+Source: `lib/list.x:84`
 
 <a id="List.pool_detach"></a>
 #### List.pool_detach
@@ -969,7 +969,7 @@ before destroying its parent.
 **Raises:** `<bad-state>` when no nested pool is active. The active pool is
 unchanged.
 
-Source: `lib/list.x:163`
+Source: `lib/list.x:162`
 
 <a id="List.pool_release"></a>
 #### List.pool_release
@@ -990,7 +990,7 @@ active pool unchanged.
 [`List.promote`](#List.promote),
 [`String.pool_release`](string.md#String.pool_release)
 
-Source: `lib/list.x:149`
+Source: `lib/list.x:148`
 
 <a id="List.pool_retain"></a>
 #### List.pool_retain
@@ -1015,7 +1015,7 @@ operation; callers open one bracket, not one through each name.
 [`List.pool_retain_named`](#List.pool_retain_named),
 [`String.pool_retain`](string.md#String.pool_retain)
 
-Source: `lib/list.x:137`
+Source: `lib/list.x:136`
 
 <a id="List.pool_retain_named"></a>
 #### List.pool_retain_named
@@ -1031,7 +1031,7 @@ pool and must be matched by `List.pool_release` or detached and released.
 **Raises:** `<alloc-fail>` while constructing the child. The failure leaves
 the active pool unchanged. Native mutex failure aborts.
 
-Source: `lib/list.x:120`
+Source: `lib/list.x:119`
 
 <a id="List.shutdown"></a>
 #### List.shutdown
@@ -1042,7 +1042,7 @@ Releases every active nested pool and then the process root at shutdown.
 No worker or canonical value may remain in use afterward. Repeated calls
 after the root is gone do nothing.
 
-Source: `lib/list.x:106`
+Source: `lib/list.x:105`
 
 <a id="List.thread_initialize"></a>
 #### List.thread_initialize
@@ -1052,7 +1052,7 @@ Source: `lib/list.x:106`
 Installs the existing process pool root in a newly created worker thread.
 The root must already be initialized; otherwise the process aborts.
 
-Source: `lib/list.x:98`
+Source: `lib/list.x:97`
 
 <a id="List.try_own"></a>
 #### List.try_own
@@ -1068,7 +1068,7 @@ promotion of an earlier cell or child.
 
 **Raises:** `<alloc-fail>` when promotion metadata cannot be allocated.
 
-Source: `lib/list.x:231`
+Source: `lib/list.x:230`
 
 ## Public types
 
