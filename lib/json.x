@@ -523,7 +523,7 @@ static void _write(Buffer out, Var value, int pretty, int depth) {
   }
   if (value.is_null()) out.write("null");
   else if (value is <jsonbool>) out.write(value.jsonbool().str());
-  else if (value is <string> || value is <symbol>)
+  else if (value is <string> || value.is_atom())
     _write_string(out, value.str());
   else if (value.is_integer()) _write_integer(out, value);
   else if (value.is_floating()) _write_double(out, value.floating());

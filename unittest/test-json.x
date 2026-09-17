@@ -191,6 +191,8 @@ static void json_writes_compact_and_pretty_text(void) {
     "{\"dependency_version\":1,\"x\":2}");
   EXPECT_STR_EQ(Var.json("line\nbreak"), "\"line\\nbreak\"");
   EXPECT_STR_EQ(Var.json(""), "\"\"");
+  EXPECT_STR_EQ(Var.json(%(averyverylongsymbolname)),
+    "[\"averyverylongsymbolname\"]");
 
   const double doubles[] = {
     0.1, 1.0, -0.0, 1e16, 1e15, 1e-5, 0.0001, 123456789.125, 5e-324,
