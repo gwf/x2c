@@ -502,12 +502,3 @@
                 (class.cast representation value)))
               `(adopt ("Var") (,owner) external
                 ,representation ,location)))))))))
-
-// etc/builtin-macros.xmacro is embedded in the compiler binary while this
-// file is read from the live tree, so the two spellings of an entry point
-// have to overlap for one build. The compiler that embeds the renamed macro
-// text no longer needs these, and they go with the next refresh.
-(def x2c._foreach.expand foreach.expand)
-(def x2c._scope.expand scope.expand)
-(def x2c._class.expand class.expand)
-(def x2c._class.defaults class.defaults)
