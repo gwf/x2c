@@ -8,6 +8,7 @@
 #include "x2c.h"
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #define FORMAT(a, b) __attribute__((format(printf, a, b)))
 __attribute__((format(printf, 1, 2))) int report(const char * format, ...);
 

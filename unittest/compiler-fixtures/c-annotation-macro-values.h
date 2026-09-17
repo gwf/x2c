@@ -2,6 +2,7 @@
 #  define API   /* exported by default */
 #endif
 #include <stddef.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,6 +18,15 @@ static API Pair pair_make(int left, int right) {
   Pair pair = {left, right};
   return pair;
 }
+
+#define PAIR_ATTR(note) __attribute__((unused))
+PAIR_ATTR(1) static inline int pair_diff(Pair pair) {
+  return pair.right - pair.left;
+}
+__attribute__((unused)) static inline int pair_max(Pair pair) {
+  return pair.left > pair.right ? pair.left : pair.right;
+}
+_Noreturn static inline void pair_abort(int status) { exit(status); }
 
 #ifdef __cplusplus
 }

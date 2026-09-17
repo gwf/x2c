@@ -387,7 +387,8 @@ static void _partition_function(
   /* C sees only the prototype of a helper that always raises, so a caller
      whose last statement is that call looks like a missing return. Marking
      the type here reaches every generated form of the function. */
-  if (body.never_returns()) type = %(("_Noreturn") @type);
+  if (body.never_returns() && !type.list().contains(%("_Noreturn")))
+    type = %(("_Noreturn") @type);
   List function = %(function $type $declarator $body);
   if (type.is_static()) {
     _push_spaced(source, _source_function(function, type));

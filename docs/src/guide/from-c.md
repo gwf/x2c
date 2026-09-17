@@ -93,16 +93,18 @@ int add(int left, int right);
 A function defined once in each branch of one `#ifdef` is one definition.
 
 The prefix macros that C libraries write before declarations parse as what
-they expand to. A macro defined to nothing, to a storage class such as
-`static` or `extern`, to `inline`, to an attribute, or to builtin type words
-such as `signed int` reads as that text: `JSMN_API void jsmn_init(...)`,
-`STBIDEF stbi_uc *stbi_load(...)`, and `int32 count` work as in C, and a
-function-like macro that wraps its parameter in attributes,
-`CJSON_PUBLIC(const char *) cJSON_Version(void)`, reads as the type inside.
-An attribute after a declarator or parameter,
+they expand to. A macro defined to nothing, to an attribute, or to any mix of
+storage classes, `inline`, qualifiers, and builtin type words reads as that
+text: `JSMN_API void jsmn_init(...)`, `STBIDEF stbi_uc *stbi_load(...)`,
+`int32 count`, `static z_const char *msg`, and `API twice(int x)` with
+`API` defined to `static int` work as in C. A function-like macro that wraps
+its parameter in attributes, `CJSON_PUBLIC(const char *) cJSON_Version(void)`,
+reads as the type inside. An attribute or `_Noreturn` before the type,
+`__attribute__((unused)) static int f(void)`, stays before the type in the
+generated C. An attribute after a declarator or parameter,
 `int a __attribute__((cleanup(release))) = 1, b = 2;`, is written after that
-declarator in the generated C. The GNU spellings `__inline`, `__inline__`,
-`__restrict`, and `__restrict__` mean the standard keywords.
+declarator. The GNU spellings `__inline`, `__inline__`, `__restrict`, and
+`__restrict__` mean the standard keywords.
 
 `in` and `match` are x2c keywords, and they are C identifiers as well. `in`
 is the x2c operator only between two operands, and `match` is the statement

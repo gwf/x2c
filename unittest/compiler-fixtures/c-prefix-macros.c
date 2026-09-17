@@ -2,9 +2,21 @@
 
 #include "c-prefix-macros.h"
 
+static const char * greeting = "hi";
+
+static char * const farewell;
+
+static int quadrupled(int value);
+
+static const int limit = 5;
+
 static void hidden(void);
 
 int weak_value = 5;
+
+static int quadrupled(int value){
+  return value * 4;
+}
 
 static void hidden(void){
   printf("hidden\n");
@@ -22,6 +34,7 @@ int main(void){
   x2c_initialize();
   hidden();
   printf("%d %d %d %s\n", doubled(2), tripled(2), weak_value, label());
+  printf("%s %d %d %d\n", greeting, farewell == NULL, quadrupled(2), limit);
   return 0;
 }
 

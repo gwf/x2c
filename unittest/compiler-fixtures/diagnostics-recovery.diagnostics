@@ -21,3 +21,13 @@ unittest/compiler-fixtures/diagnostics-recovery.x:23:21: type: operator 'is' req
                       ^^
   note: operand type: (int)
 
+unittest/compiler-fixtures/diagnostics-recovery.x:28:33: parse: expected atomic expression
+  int same_line(void) { return 1 +; } int next_on_line(void) { return 2 +; }
+                                  ^
+  note: token: ; kind: ;
+
+unittest/compiler-fixtures/diagnostics-recovery.x:28:72: parse: expected atomic expression
+  int same_line(void) { return 1 +; } int next_on_line(void) { return 2 +; }
+                                                                         ^
+  note: token: ; kind: ;
+

@@ -10,6 +10,15 @@
 #define WEAK __attribute__((weak))
 #define PUBLIC(type) __attribute__((visibility("default"))) type
 #define int32 signed int
+#define z_const const
+#define LOCAL static int
+#define LOCAL_CONST static const
+
+static z_const char *greeting = "hi";
+static char *EXPORT z_const farewell;
+
+LOCAL quadrupled(int value) { return value * 4; }
+LOCAL_CONST int limit = 5;
 
 API void hidden(void);
 API void hidden(void) { printf("hidden\n"); }
@@ -27,5 +36,6 @@ PUBLIC(const char *) label(void) { return "label"; }
 int main(void) {
   hidden();
   printf("%d %d %d %s\n", doubled(2), tripled(2), weak_value, label());
+  printf("%s %d %d %d\n", greeting, farewell == NULL, quadrupled(2), limit);
   return 0;
 }

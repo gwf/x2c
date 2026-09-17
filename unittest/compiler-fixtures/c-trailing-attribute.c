@@ -8,6 +8,12 @@ static void release(int * value);
 
 static int second(int x __attribute__((unused)), int y);
 
+__attribute__((unused)) static int third(int z);
+
+_Noreturn static void finish(int status);
+
+inline static int fourth(int w);
+
 __attribute__((format(printf, 1, 2))) int report(const char * format, ...){
   va_list args;
   va_start(args, format);
@@ -33,6 +39,18 @@ static int second(int x __attribute__((unused)), int y){
   return y;
 }
 
+__attribute__((unused)) static int third(int z){
+  return z;
+}
+
+_Noreturn static void finish(int status){
+  exit(status);
+}
+
+inline static int fourth(int w){
+  return w;
+}
+
 int main(void){
   x2c_initialize();
   report("%s %d\n", "report", 1);
@@ -42,6 +60,9 @@ int main(void){
     int(* pick)(int x __attribute__((unused)), int y) = second;
     printf("%d\n", pick(a, b));
   }
+  int c = 5, d __attribute__((unused)) = 6;
+  printf("%d %d %d %d\n", third(c), fourth(d), c, d);
+  if(c > 5) finish(1);
   return 0;
 }
 

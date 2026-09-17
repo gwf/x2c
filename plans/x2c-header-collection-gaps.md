@@ -4,8 +4,11 @@
 > Found while repairing raylib collection in PR #62. The corpus work in
 > `plans/archive/x2c-c-on-ramp-corpus.md` (f6f029f) fixed the empty and
 > storage-class prefix macros, macros among parameters, and the
-> `__cplusplus`-guarded linkage group. The five forms below still fail. No
-> package build hits them today.
+> `__cplusplus`-guarded linkage group. On 2026-09-17 the syntax cleanup made
+> the attribute macro invocation, the leading `__attribute__`, and
+> `_Noreturn` rows parse in headers and units alike (fixtures
+> `c-annotation-macro` and `c-trailing-attribute`). The two remaining rows
+> still fail. No package build hits them today.
 
 ## Result
 
@@ -22,34 +25,22 @@ read with `--dump-symbols`.
 
 | Header form | Result |
 | --- | --- |
-| `#define ATTR(x)` or `#define ATTR(x) __attribute__((deprecated))`, then `ATTR(1) void f(int a);`, as libcurl's `CURL_DEPRECATED(...)` at `curl.h:157` | "missing closing parenthesis" |
-| `__attribute__((visibility("default"))) void f(int a);` | "expected ')'" |
-| `_Noreturn void f(int a);` | "missing closing parenthesis" |
+| `#define ATTR(x)` or `#define ATTR(x) __attribute__((deprecated))`, then `ATTR(1) void f(int a);`, as libcurl's `CURL_DEPRECATED(...)` at `curl.h:157` | fixed 2026-09-17 |
+| `__attribute__((visibility("default"))) void f(int a);` | fixed 2026-09-17 |
+| `_Noreturn void f(int a);` | fixed 2026-09-17 |
 | `E void f(int); E int v;` with `E` a macro collection cannot see | status 0, but the keys are `( void )` and `( int )`, not `( f )` and `( v )` |
 | `extern "C" {` / `#include "inner.h"` / `}` with no `__cplusplus` guard | "missing '}'": each include-delimited segment checks its braces alone |
 
-Two of the forms also fail in unit source, which is a defect independent of
-collection: `_Noreturn void die(int a) { exit(a); }` reports "missing closing
-parenthesis", and a leading `__attribute__((visibility("default")))` on a
-definition reports "expected ')'". A trailing attribute is accepted in both
-places, as the corpus plan decided.
+A leading attribute or `_Noreturn` is kept in the declaration's specifiers
+as source text, which the type ignores; a trailing attribute stays with its
+declarator, as the corpus plan decided.
 
 ## Decisions needed
 
-- Whether a function-like attribute macro before the type is skipped by
-  name when every definition expands to nothing or to `__attribute__((...))`,
-  or through host preprocessing for collection only.
 - What collection records for a prefix name with no visible definition.
 
 ## Implementation outline
 
-- Extend the `<empty>` and attribute facts recorded in `_note_object_macro`
-  (`src/compiler.x`) to function-like macros, and skip an invocation with its
-  balanced argument list where `_skip_empty_macro` (`src/parse.x`) already
-  skips a name.
-- Accept a leading `__attribute__((...))` and `_Noreturn` among declaration
-  specifiers, in units and collected headers alike, carrying the spelling for
-  emission the way a trailing attribute is carried.
 - For the unguarded linkage group, let a segment end inside a group opened by
   `Compiler.skip_linkage_brace` and close it in a later segment of the same
   file. The corpus plan dropped this because hiding the C++ arm made the

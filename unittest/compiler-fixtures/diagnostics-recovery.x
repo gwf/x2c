@@ -25,6 +25,8 @@ int first_error_only(int value) {
   return first + second;
 }
 
+int same_line(void) { return 1 +; } int next_on_line(void) { return 2 +; }
+
 int main(void) {
   return 0;
 }

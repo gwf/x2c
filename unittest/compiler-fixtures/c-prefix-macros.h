@@ -17,6 +17,9 @@
 #define WEAK __attribute__((weak))
 #define PUBLIC(type) __attribute__((visibility("default"))) type
 #define int32 signed int
+#define z_const const
+#define LOCAL static int
+#define LOCAL_CONST static const
 signed int doubled(signed int value);
 
 static inline int tripled(int value){

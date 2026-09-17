@@ -86,10 +86,10 @@ typedef struct Compiler {
   SymScope params;
   Map key_ids, macros, kw_aliases;
   /* `#define` names this unit has passed, for the literal warning and for
-     declaration prefixes: `<empty>` for a body of nothing or an attribute,
-     a `List` of storage or builtin type words, `<annotation>` for a
-     function-like attribute macro, `<wrapper>` for one that wraps its
-     parameter in prefixes, else 1. */
+     declaration prefixes: the `List` of specifier words of a body made of
+     specifiers and attributes, `<string>` for a string literal,
+     `<annotation>` for a function-like attribute macro, `<wrapper>` for one
+     that wraps its parameter in prefixes, else 1. */
   Map object_macros;
   /* The open conditional directives at the current top-level form, each an
      `(id arm)` pair, so one function defined in two arms of one `#if` is one
@@ -1453,35 +1453,37 @@ List Compiler.leading_preproc(Compiler compiler) {
 }
 
 /* Classifies a macro body, scanned as x2c tokens, by the declaration prefix
-   it contributes: a `List` of storage classes and `inline`, a `List` of
-   builtin type words such as `signed int`, `<empty>` for nothing,
-   attributes, and other prefix macros, `<wrapper>` when a function-like
-   body is its parameter `param` amid prefixes, and 1 for any other text. */
+   it contributes: the `List` of its specifier words, which are storage
+   classes, `inline`, qualifiers, builtin types, and the words of other
+   prefix macros, amid attributes that contribute nothing; `<wrapper>` when
+   a function-like body is its parameter `param` amid prefixes; `<string>`
+   for a string literal; and 1 for any other text. */
 static Var _macro_prefix(Compiler c, Token token, String param) {
-  List storage = NULL, int wrapped = 0;
+  if (token.type == <lit-char*>) return <string>;
+  Array words = [], int wrapped = 0;
   while (token.type != <eof>) {
     Symbol type = token.type, String word = token.text;
     Var definition;
     Token next = _skip_forward(token + 1);
-    if (type.is_storage_class() || type.is_inline() || type.is_builtin_type())
-      storage = storage ? %( @storage $type ) : %($type);
+    if (type.is_storage_class() || type.is_inline() ||
+        type.is_type_qualifier() || type.is_builtin_type())
+      words.push(type);
     else if (type == <lit-char*>);   // the linkage name in `extern "C"`
     else if (type != <ident>) return 1;
     else if (word == "__attribute__" || word == "__declspec" ||
              (c.object_macros.try_get(word, &definition) &&
               definition.equal(<annotation>))) {
-      // The attribute's parenthesized text contributes nothing.
       if (next.type != <(>) return 1;
       next = next.after_group();
     }
     else if (param && word == param && !wrapped) wrapped = 1;
-    else if (!c.object_macros.try_get(word, &definition)) return 1;
-    else if (definition is <list>)
-      storage = storage ? (storage).append(definition) : definition;
-    else if (!definition.equal(<empty>)) return 1;
+    else if (!c.object_macros.try_get(word, &definition) ||
+             definition is not <list>)
+      return 1;
+    else foreach (Var item, definition) words.push(item);
     token = next;
   }
-  return wrapped ? <wrapper> : storage ? storage : <empty>;
+  return wrapped ? <wrapper> : words.list_free();
 }
 
 /* Ranks prefix classifications so a name defined differently in two
@@ -1489,10 +1491,8 @@ static Var _macro_prefix(Compiler c, Token token, String param) {
    a definition from the header, so it wins; other text loses to any
    prefix. */
 static int _prefix_rank(Var definition) {
-  if (definition.equal(<empty>)) return 1;
-  if (definition is <list>)
-    return List.match(definition, %(* static *)) ? 3 : 2;
-  return 0;
+  if (definition is not <list>) return 0;
+  return List.match(definition, %(* static *)) ? 3 : definition.list() ? 2 : 1;
 }
 
 /* Records the name of each `#define` so a bare atom spelled the same way
@@ -1517,7 +1517,7 @@ static void _note_object_macro(Compiler c, String content) {
     if (first.type == <ident> && _skip_forward(first + 1).type == <)>)
       param = first.text;
     Var kind = _macro_prefix(c, after, param);
-    if (kind.equal(<empty>)) c.object_macros[name] = <annotation>;
+    if (kind.equal(%())) c.object_macros[name] = <annotation>;
     else if (kind.equal(<wrapper>)) c.object_macros[name] = <wrapper>;
     return;
   }
@@ -1555,10 +1555,11 @@ static void _append_preproc(Compiler compiler, Array ast) {
 
 /* A failed declaration is skipped whole from its first token, because a
    report inside a body leaves the cursor where no declaration can start.
-   The declaration ends at a `;` outside delimiters, or at a closing
-   delimiter whose next token begins a later line: a function body or a
-   macro definition. A `struct` body followed by its declarators on the same
-   line continues to their `;`. */
+   The declaration ends at a `;` outside delimiters, at a closing delimiter
+   whose next token begins a later line, such as a function body or a macro
+   invocation, or at a `}` that nothing on its line continues. A `struct`
+   body continues to its declarators, and a second function body on the
+   same line is a second declaration. */
 static void _sync_top_level(Compiler c, Token start, int braces) {
   c.token = start;
   c.braces.resize(braces);
@@ -1570,7 +1571,12 @@ static void _sync_top_level(Compiler c, Token start, int braces) {
     int step = token.type.group_step();
     depth += step;
     if (depth < 0) depth = 0;
-    if (!depth && step < 0 && c.token.line > token.line) return;
+    Symbol next = c.peek(0);
+    if (!depth && step < 0 &&
+        (c.token.line > token.line ||
+         (token.type == <"}"> && next != <ident> && next != <*> &&
+          next != <;> && next != <,> && next != <(>)))
+      return;
   }
 }
 

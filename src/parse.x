@@ -205,8 +205,9 @@ static List _declaration_base(Type type, List *modifiers) {
   if (!mods) return type;
   Array storage = [];
   foreach (Var item, type)
-    if (item is <symbol> &&
-        (Symbol.is_storage_class(item) || Symbol.is_inline(item)))
+    if (item is <symbol>
+        ? Symbol.is_storage_class(item) || Symbol.is_inline(item)
+        : item is <list> && car(item) is <string>)
       storage.push(item);
   return storage.list_free().append(base);
 }
@@ -242,90 +243,91 @@ static List _finish_declaration(
 
 // type parsing
 
-/* Source is read before preprocessing, so a macro defined to nothing, to a
-   storage class, or to an attribute, such as an export annotation, still
-   precedes a declaration. It contributes its recorded storage, if any, and
-   no other syntax. */
-static int _skip_prefix_macro(Compiler compiler, List *storage) {
+/* A GNU attribute or an attribute macro is kept as its source text. */
+static int _attribute_starts(Compiler c) {
   Var definition;
-  if (compiler.peek(0) != <ident> ||
-      !compiler.object_macros.try_get(compiler.token.text, &definition))
+  return c.peek(0) == <ident> && c.peek(1) == <(> &&
+         (c.token.text == "__attribute__" ||
+          (c.object_macros.try_get(c.token.text, &definition) &&
+           definition.equal(<annotation>)));
+}
+
+static String _attribute(Compiler c) {
+  if (!_attribute_starts(c)) return NULL;
+  Token first = c.token, last = c.skip_trivia_from(first + 1).group_close();
+  c.token = last.after_group();
+  return String.new_len(c.text + first.pos, last.pos + last.len - first.pos);
+}
+
+/* Source is read before preprocessing, so a macro whose body is declaration
+   specifiers and attributes, such as an export annotation, still sits in a
+   declaration. A specifier position of `rank`, 0 for storage classes and
+   `inline`, 1 for qualifiers, and 2 for builtin types, takes the macro's
+   words of that rank into `words` and consumes the macro unless a later
+   position needs its words. */
+static int _prefix_macro_words(Compiler c, int rank, Array words) {
+  Var definition;
+  if (c.peek(0) != <ident> ||
+      !c.object_macros.try_get(c.token.text, &definition))
     return 0;
-  if (definition.equal(<wrapper>) && compiler.peek(1) == <(>) {
+  if (definition.equal(<wrapper>) && c.peek(1) == <(>) {
     /* `EXPORT(const char *) f(void);` wraps the type. The name and its
        parentheses contribute nothing; the closing one is hidden so the
        type and declarator between them parse as written. */
-    Token close = compiler.skip_trivia_from(compiler.token + 1).group_close();
+    Token close = c.skip_trivia_from(c.token + 1).group_close();
     if (close.type != <eof>) close.type = <comment>;
-    compiler.next();
-    compiler.next();
+    c.next();
+    c.next();
     return 1;
   }
-  if (!(definition.equal(<empty>) ||
-        (definition is <list> && !_is_type_words(definition))))
-    return 0;
-  if (storage && definition is <list>)
-    *storage = *storage ? (*storage).append(definition) : definition;
-  compiler.next();
-  return 1;
-}
-
-/* A macro body of builtin type words, such as `#define int32 signed int`,
-   names a type wherever its name appears. */
-static int _is_type_words(List words) =>
-  Symbol.is_builtin_type(car(words));
-
-static List _macro_type_words(Compiler c) {
-  Var definition;
-  if (c.peek(0) == <ident> &&
-      c.object_macros.try_get(c.token.text, &definition) &&
-      definition is <list> && _is_type_words(definition)) {
-    c.next();
-    return definition;
+  if (definition is not <list>) return 0;
+  int later = 0;
+  foreach (Symbol word, definition) {
+    int word_rank = word.is_type_qualifier() ? 1 : word.is_builtin_type() * 2;
+    if (word_rank == rank) words.push(word);
+    later |= word_rank > rank;
   }
-  return NULL;
+  if (!later) c.next();
+  return !later;
 }
 
-/* One storage class, except that `threaded` pairs with another one the way
-   C's thread-local specifier pairs with `static` or `extern`, in either
-   order. A second one still stops the run, so `static extern` is diagnosed
-   here instead of being passed to C. */
-static List _storage_class(Compiler compiler) {
-  List storage = NULL, int seen_threaded = 0, seen_ordinary = 0;
-  while (_skip_prefix_macro(compiler, &storage));
-  for (Symbol symbol = compiler.peek(0); symbol.is_storage_class();
-       symbol = compiler.peek(0)) {
-    if (symbol == <threaded>) {
-      if (seen_threaded) break;
-      seen_threaded = 1;
+/* Declaration specifiers before the qualifiers and type: storage classes,
+   `inline`, `_Noreturn`, and attributes, in source order. One storage class
+   is allowed, except that `threaded` pairs with another one the way C's
+   thread-local specifier pairs with `static` or `extern`. A second one
+   stops the run, so `static extern` is diagnosed instead of passed to C. */
+static List _storage_class(Compiler c) {
+  Array storage = [], int seen_threaded = 0, seen_ordinary = 0;
+  loop {
+    Symbol symbol = c.peek(0);
+    String attribute = _attribute(c);
+    if (attribute) storage.push(%($attribute));
+    else if (symbol == <ident> && c.token.text == "_Noreturn") {
+      storage.push(%("_Noreturn"));
+      c.next();
     }
-    else {
-      if (seen_ordinary) break;
-      seen_ordinary = 1;
+    else if (symbol.is_inline() ||
+             (symbol == <threaded> ? !seen_threaded++ :
+              symbol.is_storage_class() && !seen_ordinary++)) {
+      storage.push(symbol);
+      c.next();
+      // The linkage name in `extern "C" int f(void);` means nothing to C.
+      if (symbol == <extern> && c.peek(0) == <lit-char*>) c.next();
     }
-    compiler.next();
-    // The linkage name in `extern "C" int f(void);` means nothing to C.
-    if (symbol == <extern> && compiler.peek(0) == <lit-char*>)
-      compiler.next();
-    storage = storage ? %( @storage $symbol ) : %($symbol);
+    else if (!_prefix_macro_words(c, 0, storage)) break;
   }
-  if (compiler.peek(0).is_inline()) {
-    Symbol symbol = compiler.peek(0);
-    compiler.next();
-    storage = %( @storage $symbol );
-  }
-  return storage;
+  return storage.list_free();
 }
 
-static List _type_qualifiers(Compiler compiler) {
+static List _type_qualifiers(Compiler c) {
   Array quals = [];
   loop {
-    Symbol symbol = compiler.peek(0);
+    Symbol symbol = c.peek(0);
     if (symbol.is_type_qualifier()) {
       quals.push(symbol);
-      compiler.next();
+      c.next();
     }
-    else if (!_skip_prefix_macro(compiler, NULL)) break;
+    else if (!_prefix_macro_words(c, 1, quals)) break;
   }
   return quals.list_free();
 }
@@ -657,7 +659,9 @@ static List _type_specifier(Compiler c) {
         syntax = %(self);
         break;
       }
-      syntax = _macro_type_words(c);
+      Array words = [];
+      _prefix_macro_words(c, 2, words);
+      syntax = words.list_free();
       if (!syntax) syntax = _typedef_name(c);
       break;
     default:
@@ -687,16 +691,19 @@ static List _decl_context_group(Compiler compiler, List context) {
   return _finish_declaration(compiler, <declare>, type, binds, 0);
 }
 
-static List _pointer(Compiler compiler) {
+static List _pointer(Compiler c) {
   List ptr = NULL;
   loop {
-    Symbol token_type = compiler.peek(0);
-    if (token_type == <*> || token_type == <^> || token_type == <&> ||
-        token_type.is_type_qualifier()) {
-      ptr = cons(token_type, ptr);
-      compiler.next();
+    Symbol symbol = c.peek(0);
+    if (symbol == <*> || symbol == <^> || symbol == <&> ||
+        symbol.is_type_qualifier()) {
+      ptr = cons(symbol, ptr);
+      c.next();
+      continue;
     }
-    else if (!_skip_prefix_macro(compiler, NULL)) return ptr;
+    Array quals = [];
+    if (!_prefix_macro_words(c, 1, quals)) return ptr;
+    foreach (Var qualifier, quals) ptr = cons(qualifier, ptr);
   }
 }
 
@@ -794,24 +801,11 @@ static List _function_parameters(Compiler c) {
   return params;
 }
 
-/* A GNU attribute or an attribute macro after a declarator is kept as its
-   source text, a modifier of that declarator alone. */
-static String _trailing_attribute(Compiler c) {
-  Var definition;
-  if (c.peek(0) != <ident> || c.peek(1) != <(> ||
-      !(c.token.text == "__attribute__" ||
-        (c.object_macros.try_get(c.token.text, &definition) &&
-         Var.equal(definition, <annotation>))))
-    return NULL;
-  Token first = c.token, last = c.skip_trivia_from(first + 1).group_close();
-  c.token = last.after_group();
-  return String.new_len(c.text + first.pos, last.pos + last.len - first.pos);
-}
-
 static List _declarator_suffix(Compiler compiler) {
   List type = NULL;
   loop {
-    String attribute = _trailing_attribute(compiler);
+    // An attribute after a declarator modifies that declarator alone.
+    String attribute = _attribute(compiler);
     if (attribute)
       type = %( @type ($attribute) );
     else if (compiler.peek(0) == <[>)
@@ -1072,14 +1066,14 @@ static int _test_declaration_start(Compiler c, int require_declarator) {
   if (alias) { c.next(); c.next(); }
   Symbol next = c.peek(0);
   int is_operator = next == <ident> && c.token.text == "is";
+  // `int a, b __attribute__((unused));` declares `b`, not a type named `b`.
+  int attribute = _attribute_starts(c);
   c.token = head;
   if (c.macro_holes && is_operator) return 0;
   if (lookup.is_typedef() && !require_declarator) return next != <.>;
-  int result = next == <*> || next == <&> || next == <ident> ||
-               (!require_declarator && next == <)>) ||
-               (require_declarator &&
-                (next == <^> || next.is_type_qualifier()));
-  return result;
+  return next == <*> || next == <&> || (next == <ident> && !attribute) ||
+         (!require_declarator && next == <)>) ||
+         (require_declarator && (next == <^> || next.is_type_qualifier()));
 }
 
 /* A typedef name after a comma is ambiguous: `int i, T;` declares another
