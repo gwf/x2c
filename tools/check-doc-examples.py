@@ -11,8 +11,10 @@ declarations, and once wrapped in a ``main`` function, in case it is a sequence
 of statements. Only a sample that fails both ways is an error.
 
 A sample followed directly by a ``text`` fence is built and run instead, and
-its standard output or standard error must equal that fence. ``--outputs``
-checks only those samples in the book.
+its standard output or standard error must equal that fence. It must exit
+with status 0, or with N when the fence is tagged ``text,status=N``.
+``--outputs`` checks only those samples in the book. Any other info string
+beginning with ``x2c`` or following a sample as ``text`` is an error.
 """
 
 from __future__ import annotations
@@ -50,6 +52,8 @@ FENCE_PATTERN = re.compile(
     r"^(?P=indent)```[ \t]*$",
     re.DOTALL | re.MULTILINE,
 )
+SAMPLE_INFO_PATTERN = re.compile(r"x2c(,ignore)?")
+OUTPUT_INFO_PATTERN = re.compile(r"text(?:,status=(\d+))?")
 IGNORE_REASON_PATTERN = re.compile(r"<!--\s*ignore:\s*\S+.*?-->", re.DOTALL)
 MAIN_PATTERN = re.compile(r"\bmain\s*\(")
 
@@ -60,12 +64,14 @@ def jobs() -> int:
 
 class Sample:
     def __init__(
-        self, path: pathlib.Path, line: int, code: str, output: str | None
+        self, path: pathlib.Path, line: int, code: str, output: str | None,
+        status: int,
     ) -> None:
         self.path = path
         self.line = line
         self.code = code
         self.output = output
+        self.status = status
 
     @property
     def where(self) -> str:
@@ -110,7 +116,7 @@ def wrapped_in_main(code: str) -> str:
 
 
 def translate(
-    source: str, workdir: pathlib.Path, expected: str | None
+    source: str, workdir: pathlib.Path, expected: str | None, status: int
 ) -> tuple[bool, str]:
     """Build through the driver's normal package handling.
 
@@ -144,9 +150,9 @@ def translate(
         [str(program)], cwd=workdir, text=True, capture_output=True,
         timeout=30, check=False,
     )
-    if expected not in (run.stdout, run.stderr):
+    if run.returncode != status or expected not in (run.stdout, run.stderr):
         return False, (
-            f"output differs (status {run.returncode})\n"
+            f"output differs (status {run.returncode}, expected {status})\n"
             f"      expected: {expected!r}\n"
             f"      stdout:   {run.stdout!r}\n"
             f"      stderr:   {run.stderr!r}"
@@ -164,7 +170,9 @@ def check_sample(sample: Sample) -> str | None:
     failures = []
     for label, source in candidates:
         with tempfile.TemporaryDirectory() as tmp:
-            ok, detail = translate(source, pathlib.Path(tmp), sample.output)
+            ok, detail = translate(
+                source, pathlib.Path(tmp), sample.output, sample.status
+            )
         if ok:
             return None
         failures.append(f"    {label}: {detail}")
@@ -176,31 +184,46 @@ def check_sample(sample: Sample) -> str | None:
     )
 
 
+def language(info: str) -> str:
+    return re.split(r"[\s,]", info, maxsplit=1)[0]
+
+
 def collect(path: pathlib.Path, errors: list[str]) -> list[Sample]:
     text = path.read_text(encoding="utf-8")
     samples: list[Sample] = []
     fences = list(FENCE_PATTERN.finditer(text))
     for match, following in zip(fences, fences[1:] + [None]):
-        tokens = [t.strip() for t in match.group("info").split(",")]
-        if not tokens or tokens[0] != "x2c":
+        info = match.group("info").strip()
+        if language(info) != "x2c":
             continue
         line = text.count("\n", 0, match.start()) + 1
+        where = f"{path.relative_to(ROOT)}:{line}"
+        sample = SAMPLE_INFO_PATTERN.fullmatch(info)
+        if not sample:
+            errors.append(f"{where}: unrecognized fence `{info}`; "
+                          "use `x2c` or `x2c,ignore`")
+            continue
         code = reveal_hidden(dedent(match.group("body"), match.group("indent")))
-        if "ignore" in tokens[1:]:
+        if sample.group(1):
             prior = text[max(0, match.start() - 400):match.start()]
             if not IGNORE_REASON_PATTERN.search(prior):
-                errors.append(
-                    f"{path.relative_to(ROOT)}:{line}: `x2c,ignore` needs an "
-                    "<!-- ignore: reason --> comment above the fence"
-                )
+                errors.append(f"{where}: `x2c,ignore` needs an "
+                              "<!-- ignore: reason --> comment above the fence")
             continue
         if not code.strip():
             continue
-        output = None
-        if (following and following.group("info").strip() == "text" and
+        output, status = None, 0
+        shown = following.group("info").strip() if following else ""
+        if (language(shown) == "text" and
                 not text[match.end():following.start()].strip()):
+            fence = OUTPUT_INFO_PATTERN.fullmatch(shown)
+            if not fence:
+                errors.append(f"{where}: unrecognized output fence `{shown}`; "
+                              "use `text` or `text,status=N`")
+                continue
             output = dedent(following.group("body"), following.group("indent"))
-        samples.append(Sample(path, line, code, output))
+            status = int(fence.group(1) or 0)
+        samples.append(Sample(path, line, code, output, status))
     return samples
 
 
