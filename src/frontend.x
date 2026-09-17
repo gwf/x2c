@@ -45,7 +45,6 @@ typedef struct ParsedUnit {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include "collect.x"
 #include "deps.x"
 #include "utils.x"
@@ -87,48 +86,12 @@ Frontend Frontend.new(CliRequest request) {
   return frontend;
 }
 
-static String _unreadable_input(
-  Compiler compiler, String filename, String reason) {
-  List notes = %("stage: driver" "file: $filename" "reason: $reason");
-  compiler.report_error(<driver>, "cannot read input file", NULL, notes);
-}
-
 /* A `#!` first line makes the file a script unit, and that line reads as an
    include of `scripting.x`. Only the first line changes, so every later
    line number stays in place. */
 static String _script_text(String text) {
   int end = text.find("\n");
   return %"#include \"scripting.x\"${end < 0 ? "" : text[end:]}";
-}
-
-// Read the primary source file. fopen() opens directories on some
-// platforms and then reads nothing, so the handle is checked for a regular
-// file before its text is taken. An empty file yields the canonical empty
-// String (a NULL pointer), which the rest of the pipeline treats as an
-// empty translation unit.
-static String _read_input_text(Compiler compiler, String filename) {
-  if (compiler.sources) {
-    String text;
-    if (!compiler.read_source(filename, &text))
-      return _unreadable_input(compiler, filename, "cannot open");
-    return text;
-  }
-  File file = NULL;
-  try file = filename.open("r");
-  catch %(not-found *):
-    return _unreadable_input(compiler, filename, "cannot open");
-  catch %(io-fail *):
-    return _unreadable_input(compiler, filename, "cannot open");
-  struct stat info;
-  if (file.stat(&info) || !S_ISREG(info.st_mode)) {
-    file.close();
-    return _unreadable_input(compiler, filename, "not a regular file");
-  }
-  String text = NULL;
-  try text = file.string_close();
-  catch %(io-fail *):
-    return _unreadable_input(compiler, filename, "read failed");
-  return text;
 }
 
 static void _tokenize_input(
@@ -148,7 +111,11 @@ static void _tokenize_input(
     !(source_resolved && lib_resolved &&
       !strncmp(source_path, lib_path, lib_length) &&
       source_path[lib_length] == '/');
-  String text = _read_input_text(c, filename);
+  String text = NULL;
+  if (!c.read_source(filename, &text))
+    c.report_error(
+      <driver>, "cannot read input file", NULL,
+      %("stage: driver" "file: $filename" "reason: cannot open"));
   if (text && text.startswith("#!")) {
     int end = text.find("\n");
     ScriptUnit script = Scope.calloc(1, sizeof(struct ScriptUnit));
