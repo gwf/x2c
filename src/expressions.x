@@ -164,18 +164,15 @@ static List _parse_postfix_index(Compiler c, List expr) {
    match. An argument list keeps the note left after each argument, since
    its destinations are known only once the call resolves. A converter takes
    only its receiver and is named for its result: the result spelled in
-   lower case, `str` for String, or a Var numeric reader. */
+   lower case, or `str` for String. */
 static void _note_explicit_converter(
   Compiler c, List call, String method, Token origin) {
   Type result = call.cadr();
   List node = _expression_node(call);
   if (!result.match(%(?)) || !node.match(%(call ? (args ?)))) return;
   String spelled = result.car().str().lower();
-  int named = method == spelled ||
-    (method == "str" && result === %("String")) ||
-    (method == "integer" && result === %(long)) ||
-    (method == "floating" && result === %(double));
-  if (!named) return;
+  if (method != spelled && (method != "str" || result !== %("String")))
+    return;
   c.protocol_helpers["explicit-converter"] =
     %($call $method ${c.token_location(origin)});
 }
@@ -1619,17 +1616,14 @@ static List _resolve_func_call(
   );
 }
 
-/* The function being defined may be the implicit crossing itself, as
-   `Var.long` is for a `long` destination; its explicit reads are how the
-   crossing is written, not a repetition of it. */
+/* The function being defined may be the implicit crossing itself, as a
+   `Var.row` converter is for a `Row` destination; its explicit calls are how
+   the crossing is written, not a repetition of it. */
 static int _defines_crossing(Compiler c, Type source, Type target) {
   if (!c.fn_name || !source.match(%(?)) || !target.match(%(?))) return 0;
   String from = source.car().str(), to = target.car().str();
-  Type scalar = c.sym.resolve_numeric_type(target);
-  String extractor = scalar ? scalar.var_numeric_extractor() : NULL;
   return c.fn_name == %"${from}_${to.lower()}" ||
-    c.fn_name == %"${from}_str" || c.fn_name == %"${from}_var" ||
-    (extractor && c.fn_name == extractor);
+    c.fn_name == %"${from}_str" || c.fn_name == %"${from}_var";
 }
 
 /** Reports `parsed` when it is the explicit converter call resolved last
@@ -1662,9 +1656,19 @@ static void _check_noted_converter(
   int source_is_var = c.sym.is_var_type(source);
   /* `Var.str` displays any value, while the implicit crossing to String
      reads the String payload: a different operation for a Symbol or a
-     number. A hole and a format render through `Var.str` and repeat it. */
-  if (source_is_var && method == "str" && context == 0) return;
+     number. A hole and a format render a Var through `Var.str`, so there
+     only `.str()` repeats the crossing. */
+  if (source_is_var && (method == "str") != (context != 0)) return;
+  /* A Var reaches a numeric scalar other than Symbol through `Var.convert`
+     and then a read. `Var.int` already converts, and a raw reader such as
+     `Var.integer` skips the conversion, so either call differs. */
+  if (source_is_var && target !== %("Symbol") &&
+      c.sym.resolve_numeric_type(target))
+    return;
   if (context == 2 && !source_is_var) return;
+  // A declared crossing to String calls `str`, not a reader like `string`.
+  if (!source_is_var && method != "str" && c.sym.is_string_type(target))
+    return;
   int implicit = source_is_var || c.sym.is_var_type(target) ||
     List.equal(c.sym.resolve_key(source), c.sym.resolve_key(target)) ||
     !!_converter_call(c, receiver, source, target);

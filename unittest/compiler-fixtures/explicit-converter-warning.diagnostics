@@ -1,49 +1,49 @@
-unittest/compiler-fixtures/explicit-converter-warning.x:16:20: warning: unnecessary conversion: .var() where ("Var") is expected
+unittest/compiler-fixtures/explicit-converter-warning.x:21:20: warning: unnecessary conversion: .var() where ("Var") is expected
     Var boxed = s.var();
                      ^
   note: remove the call; the destination converts the value
 
-unittest/compiler-fixtures/explicit-converter-warning.x:18:24: warning: unnecessary conversion: .str() where ("String") is expected
+unittest/compiler-fixtures/explicit-converter-warning.x:23:24: warning: unnecessary conversion: .str() where ("String") is expected
     String name = sym.str();
                          ^
   note: remove the call; the destination converts the value
 
-unittest/compiler-fixtures/explicit-converter-warning.x:19:28: warning: unnecessary conversion: .list() where ("List") is expected
+unittest/compiler-fixtures/explicit-converter-warning.x:24:28: warning: unnecessary conversion: .list() where ("List") is expected
     int count = _count(v.list());
                              ^
   note: remove the call; the destination converts the value
 
-unittest/compiler-fixtures/explicit-converter-warning.x:20:26: warning: unnecessary conversion: .list() where ("List") is expected
+unittest/compiler-fixtures/explicit-converter-warning.x:25:26: warning: unnecessary conversion: .list() where ("List") is expected
     int pair = _pair(v.list(), v.list());
                            ^
   note: remove the call; the destination converts the value
 
-unittest/compiler-fixtures/explicit-converter-warning.x:20:36: warning: unnecessary conversion: .list() where ("List") is expected
+unittest/compiler-fixtures/explicit-converter-warning.x:25:36: warning: unnecessary conversion: .list() where ("List") is expected
     int pair = _pair(v.list(), v.list());
                                      ^
   note: remove the call; the destination converts the value
 
-unittest/compiler-fixtures/explicit-converter-warning.x:22:32: warning: unnecessary conversion: .str() where ("String") is expected
+unittest/compiler-fixtures/explicit-converter-warning.x:27:32: warning: unnecessary conversion: .str() where ("String") is expected
     String hole = %"value ${v.str()}";
                                  ^
   note: remove the call; the hole renders the value
 
-unittest/compiler-fixtures/explicit-converter-warning.x:23:25: warning: unnecessary conversion: .var() where ("Var") is expected
+unittest/compiler-fixtures/explicit-converter-warning.x:28:25: warning: unnecessary conversion: .var() where ("Var") is expected
     List holes = %(${s.var()});
                           ^
   note: remove the call; the destination converts the value
 
-unittest/compiler-fixtures/explicit-converter-warning.x:27:15: warning: unnecessary conversion: .str() where ("String") is expected
+unittest/compiler-fixtures/explicit-converter-warning.x:32:15: warning: unnecessary conversion: .str() where ("String") is expected
            v.str());
                 ^
   note: remove the call; the format converts the value
 
-unittest/compiler-fixtures/explicit-converter-warning.x:28:29: warning: unnecessary conversion: .str() where ("String") is expected
+unittest/compiler-fixtures/explicit-converter-warning.x:33:29: warning: unnecessary conversion: .str() where ("String") is expected
     printf("%s %s %d\n", v.str(), v.str(), pair);
                               ^
   note: remove the call; the format converts the value
 
-unittest/compiler-fixtures/explicit-converter-warning.x:28:38: warning: unnecessary conversion: .str() where ("String") is expected
+unittest/compiler-fixtures/explicit-converter-warning.x:33:38: warning: unnecessary conversion: .str() where ("String") is expected
     printf("%s %s %d\n", v.str(), v.str(), pair);
                                        ^
   note: remove the call; the format converts the value

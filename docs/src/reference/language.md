@@ -2600,32 +2600,43 @@ names the required converter. Declaring that converter, as `lib/typed-array.x`
 does for `Array.arrayint`, permits the conversion; a cast still permits
 reinterpretation.
 
-An explicit conversion that the destination performs on its own is reported
-as a warning, `unnecessary conversion`, and translation continues. Two forms
-are reported. A cast whose operand already has the cast type, qualifiers
-included, changes nothing; the comparison uses the declared x2c type, so a
-cast between a typedef and the type it names, or between two typedefs of one
-C type, is not reported, an operand whose C type x2c does not track, such as
-a pointer difference or a character constant, is never compared, and a
-`(void)` cast discards a value on purpose. A converter call written on the
-value of an initializer, an assignment, a `return`, a declared call argument,
-or an interpolation hole, such as `String s = v.str();` or `f(x.var())`, is
-reported when the destination type would convert the receiver itself:
-either side is `Var`, both share one C type, or the receiver declares a
-converter to the destination. A converter is a method that takes only its
-receiver and is named for its result, `str` for `String` and `integer` or
-`floating` for a `Var` numeric reader. A `Var` value that a printf-family
-format consumes is also a destination, since the format converts it, so
-`printf("%s", v.str())` is reported. A method receiver, an operator
-operand, and a parameter with a qualifier the result lacks, such as
-`const char *`, are not destinations. Only a call spelled in
-source tokens is reported, so a call bound from macro-constructed syntax is
-not, and neither is a call inside the function that implements the crossing,
-such as `x.integer()` inside `Var.long`. `Var.str` displays any value, while
-the implicit crossing to `String` reads the String payload and yields an
-empty `String` for any other tag, so `.str()` on a `Var` is reported only
-in an interpolation hole or a printf-family value, which already render
-through `Var.str`.
+The compiler warns with `unnecessary conversion` when source spells a
+conversion that its destination already performs. Translation continues.
+
+A cast is reported when its operand already has the cast type, qualifiers
+included. The comparison uses the declared x2c type. A cast between a
+typedef and the type it names is not reported, and neither is a cast between
+two typedefs of one C type. An operand whose C type x2c does not track, such
+as a pointer difference or a character constant, is never compared. A
+`(void)` cast discards a value on purpose and is not reported.
+
+A converter call is reported when its destination would make the same call.
+A converter is a method that takes only its receiver and is named for its
+result, with `str` for `String`. The destinations are the value of an
+initializer, an assignment, a `return`, a declared call argument, an
+interpolation hole, and a `Var` value that a printf-family format consumes.
+So `String name = sym.str();`, `f(x.var())`, and `printf("%s", v.str())` are
+reported. The destination makes the same call when either side is `Var`,
+both types share one C type, or the receiver declares the converter. A
+method receiver, an operator operand, and a parameter with a qualifier the
+result lacks, such as `const char *`, are not destinations.
+
+These explicit calls differ from the implicit crossing and are not reported:
+
+- `.str()` on a `Var` at a typed destination, and any other converter call
+  on a `Var` in an interpolation hole or a printf-family value. Holes and
+  formats render a `Var` through `Var.str`, which displays any value. The
+  implicit crossing to `String` reads the String payload and yields an empty
+  `String` for any other tag.
+- A `Var` read into a numeric type other than `Symbol`, such as `v.int()` or
+  `v.integer()`. The implicit crossing calls `Var.convert` and then reads the
+  result. `Var.int` already converts, and `Var.integer` returns 0 where
+  `Var.convert` raises.
+- A reader other than `str` into `String` on another type, such as
+  `File.string`. The implicit crossing calls the type's `str` converter.
+- A call bound from macro-constructed syntax, and a call inside the function
+  that implements the crossing, such as `value.list()` inside `Var.row` for
+  a `List` typedef `Row`.
 
 Supported primitive C specifiers are order-independent and normalize to one
 compiler spelling. For example, `double long` becomes `long double`, and

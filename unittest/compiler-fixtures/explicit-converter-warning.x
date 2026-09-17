@@ -10,6 +10,11 @@ static int _pair(List a, List b) => a.len() + b.len();
 
 static void _write(const char *text) { printf("%s", text); }
 
+typedef struct Label { int id; } *Label;
+
+String Label.str(Label label) => "label";
+String Label.string(Label label) => "text";
+
 int main(void) {
   Var v = "one";
   String s = v.str();
@@ -26,6 +31,10 @@ int main(void) {
   printf("%s %s %s %d %d %s\n", _label(v), name, hole, count, chained,
          v.str());
   printf("%s %s %d\n", v.str(), v.str(), pair);
+  long raw = v.integer();
+  Label label = NULL;
+  String text = label.string();
+  printf("%s %ld %s\n", v.string(), raw, text);
   (void)boxed; (void)holes;
   return 0;
 }
