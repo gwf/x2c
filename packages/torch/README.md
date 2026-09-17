@@ -265,7 +265,7 @@ Python reads that only through `torch.jit.load`.
 
 `make -C packages/torch verify-python` checks agreement in both directions
 against a CPython with the pinned wheel (`TORCH_PYTHON`, defaulting to
-`/Users/gary/Git/Bonsai-demo/.venv/bin/python`). It is not part of `test`.
+`python3` on `PATH`). It is not part of `test`.
 x2c trains 20 Adam steps from seed 0, Python replays them from the saved
 initial parameters and data, then Python's trained weights are evaluated on
 both sides:

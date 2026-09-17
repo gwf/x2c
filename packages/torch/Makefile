@@ -85,7 +85,7 @@ run-mnist: builds/mnist
 
 # The Python agreement checks are not part of `test`: they need an
 # installed CPython with the pinned torch wheel.
-TORCH_PYTHON ?= /Users/gary/Git/Bonsai-demo/.venv/bin/python
+TORCH_PYTHON ?= python3
 
 verify-python: builds/checkpoint-roundtrip builds/module-names
 	TORCH_PYTHON="$(TORCH_PYTHON)" python3 tests/verify-python.py

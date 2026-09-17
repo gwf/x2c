@@ -17,10 +17,11 @@ Step 4  builds/module-names prints what each native layer enumerates, and
 """
 
 import os
+import shutil
 import subprocess
 import sys
 
-DEFAULT_PYTHON = "/Users/gary/Git/Bonsai-demo/.venv/bin/python"
+DEFAULT_PYTHON = "python3"
 PACKAGE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROGRAM = os.path.join(PACKAGE, "builds", "checkpoint-roundtrip")
 NAMES = os.path.join(PACKAGE, "builds", "module-names")
@@ -33,7 +34,8 @@ TOLERANCE = 1e-5
 try:
     import torch
 except ImportError:
-    interpreter = os.environ.get("TORCH_PYTHON", DEFAULT_PYTHON)
+    named = os.environ.get("TORCH_PYTHON", DEFAULT_PYTHON)
+    interpreter = shutil.which(named) or named
     if os.environ.get("X2C_TORCH_REEXEC") or not os.path.exists(interpreter):
         sys.exit("no interpreter with torch; set TORCH_PYTHON")
     os.environ["X2C_TORCH_REEXEC"] = "1"
