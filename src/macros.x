@@ -33,11 +33,11 @@ static Compiler macro_import_compiler = NULL;
 static Token macro_import_invocation = NULL;
 
 macro Expression $_embed_lisp_binding_macros() => (
-  $(x2c.literal.string (x2c._embed.text "../etc/lisp-bindings.xmacro"))
+  $(x2c.literal.string (_x2c.embed.text "../etc/lisp-bindings.xmacro"))
 )
 
 macro Expression $_embed_builtin_macros() => (
-  $(x2c.literal.string (x2c._embed.text "../etc/builtin-macros.xmacro"))
+  $(x2c.literal.string (_x2c.embed.text "../etc/builtin-macros.xmacro"))
 )
 
 static String lisp_binding_macros = $_embed_lisp_binding_macros();
@@ -396,9 +396,9 @@ static Var _sdk_ident(String spelling) {
 }
 
 static Var _sdk_ident_unique(String stem) {
-  $_sdk_guard("private foreach name allocation");
+  $_sdk_guard("_x2c.name.unique");
   if (!stem.is_identifier()) return _sdk_reject(
-    "foreach name allocation requires an identifier stem",
+    "_x2c.name.unique requires an identifier stem",
     %("value: ${stem.repr()}" ));
   String spelling = macro_sdk_compiler.fresh_name(%"macro_$stem");
   return macro_sdk_compiler.sym.introduce(spelling);
@@ -840,7 +840,7 @@ static Var _sdk_embed_text(Var requested) {
 }
 
 static Var _sdk_literal_string(Var syntax) {
-  $_sdk_guard("private native Lisp literal query");
+  $_sdk_guard("x2c.literal.value");
   String value = NULL;
   if (_literal_string(syntax, &value)) return value;
   return _sdk_reject(
@@ -899,21 +899,10 @@ static void _ensure_lisp(Compiler compiler) {
     if (loaded) return;
     $lisp.bind(_.macro_lisp, "_x2c.import-hook", _lisp_import_hook);
     $lisp.bind(_.macro_lisp, "x2c.syntax.type", _sdk_syntax_type);
-    $lisp.bind(
-      _.macro_lisp, "_x2c.foreach.declaration-bindings",
-      _sdk_declaration_bindings);
     $lisp.bind(_.macro_lisp, "x2c.binding.spelling", _sdk_binding_spelling);
-    $lisp.bind(_.macro_lisp, "x2c._source.text", _sdk_source_text);
     $lisp.bind(_.macro_lisp, "x2c.diagnostic.fail", _sdk_diagnostic_fail);
     $lisp.bind(_.macro_lisp, "x2c.ident", _sdk_ident);
-    $lisp.bind(_.macro_lisp, "_x2c.foreach.ident-unique", _sdk_ident_unique);
-    $lisp.bind(
-      _.macro_lisp, "x2c._invocation.location",
-      _sdk_invocation_location);
     $lisp.bind(_.macro_lisp, "x2c.method.resolve", _sdk_method_resolve);
-    $lisp.bind(_.macro_lisp, "x2c._symbol-set", _sdk_symbol_set);
-    $lisp.bind(_.macro_lisp, "x2c._embed.text", _sdk_embed_text);
-    $lisp.bind(_.macro_lisp, "_x2c.literal.string", _sdk_literal_string);
     $lisp.bind(_.macro_lisp, "x2c.function.name", _sdk_function_name);
     $lisp.bind(
       _.macro_lisp, "_x2c.function.reference", _sdk_function_reference);
@@ -924,14 +913,6 @@ static void _ensure_lisp(Compiler compiler) {
       _.macro_lisp, "x2c.function.parameter",
       _sdk_function_parameter);
     $lisp.bind(_.macro_lisp, "x2c.function.body", _sdk_function_body);
-    $lisp.bind(
-      _.macro_lisp, "_x2c.foreach.protocol-member",
-      _sdk_protocol_member);
-    $lisp.bind(_.macro_lisp, "_x2c.type.integral?", _sdk_type_integral);
-    $lisp.bind(_.macro_lisp, "_x2c.type.pointer?", _sdk_type_pointer);
-    $lisp.bind(_.macro_lisp, "_x2c.type.element", _sdk_type_element);
-    $lisp.bind(_.macro_lisp, "_x2c.type.parameters", _sdk_type_parameters);
-    $lisp.bind(_.macro_lisp, "_x2c.type.return", _sdk_type_return);
     $lisp.bind(
       _.macro_lisp, "_x2c.foreach.complete-iter-chain",
       _sdk_complete_iter_chain);
@@ -947,9 +928,7 @@ static void _ensure_lisp(Compiler compiler) {
     $lisp.bind(_.macro_lisp, "x2c.type.tag-name", _sdk_type_tag_name);
     /* One naming rule: a supported operation is `x2c.<noun>.<verb>` and an
        internal primitive carries the `_x2c.` prefix instead of an infix
-       underscore. `etc/` is read from the live tree while `bootstrap/` holds
-       compiled C, so both spellings bind until the checked-in bootstrap
-       knows the new ones; the rows above go once it does. */
+       underscore. */
     $lisp.bind(_.macro_lisp, "_x2c.source.text", _sdk_source_text);
     $lisp.bind(_.macro_lisp, "_x2c.embed.text", _sdk_embed_text);
     $lisp.bind(
@@ -1178,18 +1157,18 @@ static Var _sdk_identifier_result(Var value) {
 }
 
 static Var _sdk_symbol_set(List values) {
-  $_sdk_guard("x2c._symbol-set");
+  $_sdk_guard("_x2c.symbol-set");
   foreach (Var value, values)
     if (value is not <symbol>)
       return _sdk_reject(
-        "x2c._symbol-set requires Symbols",
+        "_x2c.symbol-set requires Symbols",
         %("value:" ${value.repr()}));
   int duplicate = -1;
   List expression = macro_sdk_compiler.symbol_set_expression(
     values, &duplicate);
   if (duplicate >= 0)
     return _sdk_reject(
-      "x2c._symbol-set requires distinct Symbols",
+      "_x2c.symbol-set requires distinct Symbols",
       %("symbol:" ${values.getindex(duplicate).repr()}));
   return expression;
 }

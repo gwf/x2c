@@ -2309,7 +2309,17 @@ The compiler supplies these contextual Lisp operations:
 (x2c.type.tag-name name)
 (x2c.type.reverse-name base participant)
 (x2c.type.parts type)
+(x2c.type.parameters type)
+(x2c.type.return type)
+(x2c.type.element type)
+(x2c.type.integral? type)
+(x2c.type.pointer? type)
+(x2c.protocol.member participant base member)
+(x2c.literal.value literal)
 ```
+
+A supported operation is spelled `x2c.<noun>.<verb>`. A name beginning `_x2c.`
+is a compiler internal with no compatibility promise.
 
 `x2c.syntax.type` returns the canonical semantic `Type` for supported typed
 syntax.
@@ -2364,7 +2374,20 @@ that representation, including unnamed members and padding. Each record is
 `(NAME DECLARED_TYPE)`; an unnamed field has an empty name. Use `fields` for
 named-member access and `layout` when every declared field affects a decision.
 `x2c.type.parts` separates a semantic type into its declaration base and
-declarator modifiers as `(BASE MODIFIERS)`.
+declarator modifiers as `(BASE MODIFIERS)`. `x2c.type.parameters` and
+`x2c.type.return` split a function type into its parameter types and its
+result. `x2c.type.element` returns a pointer or array element type, and
+`x2c.type.integral?` and `x2c.type.pointer?` classify a type without
+resolving it.
+
+`x2c.protocol.member` looks up one member of a participant's conformance to a
+base protocol and returns `nil` when the participant does not adopt it.
+
+`x2c.literal.value` returns a captured `String` literal's decoded value as a
+compile-time `String`. It is the inverse of `x2c.literal.string`, which builds
+a literal from a value. A literal whose text the parser has already consumed,
+such as a multi-line interpolated `%"..."`, is rejected; read its spelling with
+`x2c.source.text` instead.
 
 `x2c.type.value?` recognizes numeric scalars and enums, Symbol, Var, Atom,
 String, List, and their typedef aliases. Pointer-shaped runtime handles such
