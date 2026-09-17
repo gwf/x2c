@@ -831,13 +831,20 @@ List List.match_replace(List input, Var pat, Var template) {
   return result is <list> ? result : NULL;
 }
 
-/* One prepared walk owns a layout, machine, and capture buffer. */
+/* One prepared walk owns a layout, machine, capture buffer, and the cell
+   stack its cdr loops share. Each level takes the region above the length
+   it found and restores that length before returning, so one growing
+   allocation serves the whole traversal. */
 typedef struct MatchWalk {
   MatchPlan plan;
   MachineView view;
   MatchCaptureBuffer *captures;
   MatchMachine m;
+  Block spine;
 } *MatchWalk;
+
+static Var _spine_get(Block spine, size_t index) =>
+  ((Var *) spine.bytes)[index];
 
 static int _walk_prepared(MatchWalk walk, Var input) =>
   _run_prepared_capture(walk.view, walk.m, input, walk.captures);
@@ -851,7 +858,8 @@ macro Statement $match.walk_buffer(
   Var $values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer $captures = { $values, 0, MACHINE_BINDER_MAX };
   struct MatchWalk $walk = {
-    $plan, ($plan).program.view(), &$captures, $machine
+    $plan, ($plan).program.view(), &$captures, $machine,
+    Block.new(sizeof(Var))
   };
 }
 
@@ -863,7 +871,8 @@ macro Statement $match.walk_buffer(
    recursion produced. */
 static int _walk_all_prepared(
   MatchWalk walk, Var input, int include_empty, List *results) {
-  List cells = NULL;
+  Block hits = walk.spine;
+  size_t base = hits.length;
   int visit_tail = 1;
   loop {
     if (input is not <list>) break;
@@ -875,7 +884,10 @@ static int _walk_all_prepared(
     if (_walk_all_prepared(walk, lst.car(), 1, results) < 0) return -1;
     int status = _walk_prepared(walk, input);
     if (status < 0) return -1;
-    if (status == 1) cells = cons(_walk_bindings(walk, input), cells);
+    if (status == 1) {
+      Var found = _walk_bindings(walk, input);
+      hits.push(&found);
+    }
     input = lst.cdr();
     include_empty = 0;
   }
@@ -884,8 +896,10 @@ static int _walk_all_prepared(
     if (status < 0) return -1;
     if (status == 1) *results = cons(_walk_bindings(walk, input), *results);
   }
-  // `cells` runs from the last cell back, so prepending restores cell order
-  foreach (Var found, cells) *results = cons(found, *results);
+  // the cells answer from the last one back, so prepending restores order
+  for (size_t i = hits.length; i > base; i--)
+    *results = cons(_spine_get(hits, i - 1), *results);
+  hits.truncate(base);
   return 0;
 }
 
@@ -945,7 +959,8 @@ static Var _walk_replace_node(
 
 static Var _walk_replace_prepared(
   MatchWalk walk, Var node, Var template, int include_empty, int *error) {
-  List heads = NULL;
+  Block heads = walk.spine;
+  size_t base = heads.length;
   int visit_tail = 1;
   loop {
     if (node is not <list>) break;
@@ -956,17 +971,19 @@ static Var _walk_replace_prepared(
     }
     Var head = _walk_replace_prepared(walk, lst.car(), template, 1, error);
     if (*error) return node;
-    heads = cons(head, heads);
+    heads.push(&head);
     node = lst.cdr();
     include_empty = 0;
   }
   if (visit_tail) node = _walk_replace_node(walk, node, template, error);
-  // `heads` runs from the last cell back, so each cons rebuilds its cell
-  foreach (Var head, heads) {
-    if (*error) return node;
+  // the cells rebuild from the last one back, each around the tail so far
+  for (size_t i = heads.length; i > base && !*error; i--) {
     List tail = node;
-    node = _walk_replace_node(walk, cons(head, tail), template, error);
+    node =
+      _walk_replace_node(walk, cons(_spine_get(heads, i - 1), tail),
+                         template, error);
   }
+  heads.truncate(base);
   return node;
 }
 
@@ -1838,6 +1855,7 @@ static int MatchPlan._first(
   Var matched;
   List bindings;
   int result = _walk_first_prepared(&walk, input, 1, &matched, &bindings);
+  walk.spine.free();
   machine.dispose();
   if (result == 1) {
     *out_match = matched;
@@ -1866,6 +1884,7 @@ static int MatchPlan._all(MatchPlan plan, List input, List *out_results) {
   $match.walk_buffer(plan, machine, walk);
   List results = NULL;
   int status = _walk_all_prepared(&walk, input, 1, &results);
+  walk.spine.free();
   machine.dispose();
   if (status < 0) return -1;
   *out_results = results;
@@ -1915,6 +1934,7 @@ static int MatchPlan._replace_all(
   $match.walk_buffer(plan, machine, walk);
   int error = 0;
   Var result = _walk_replace_prepared(&walk, input, template, 1, &error);
+  walk.spine.free();
   machine.dispose();
   if (error) return -1;
   *out = result;
