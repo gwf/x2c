@@ -1,0 +1,87 @@
+// Compile-time support for $dedent. The transform runs on the literal's own
+// source spelling, which x2c.source.text returns complete with the interior
+// newlines and indentation the author typed.
+
+(defun dedent.at (text index) (substring text index (+ index 1)))
+
+(defun dedent.space? (character)
+  (or (equal? character " ") (equal? character "\t")))
+
+(defun dedent.contains? (text needle index)
+  (cond
+    ((>= index (string-length text)) nil)
+    ((equal? (dedent.at text index) needle) true)
+    (true (dedent.contains? text needle (+ index 1)))))
+
+(defun dedent.eol (text index)
+  (cond
+    ((>= index (string-length text)) (string-length text))
+    ((equal? (dedent.at text index) "\n") index)
+    (true (dedent.eol text (+ index 1)))))
+
+(defun dedent.lines (text index)
+  (if (> index (string-length text))
+      nil
+      (let ((stop (dedent.eol text index)))
+        (cons (substring text index stop)
+              (dedent.lines text (+ stop 1))))))
+
+(defun dedent.width (line index)
+  (if (or (>= index (string-length line))
+          (not (dedent.space? (dedent.at line index))))
+      index
+      (dedent.width line (+ index 1))))
+
+(defun dedent.blank? (line) (= (dedent.width line 0) (string-length line)))
+
+(defun dedent.strip (line prefix) (let
+  ((width (string-length prefix)))
+  (if (and (>= (string-length line) width)
+           (equal? (substring line 0 width) prefix))
+      (substring line width (string-length line))
+      line)))
+
+(defun dedent.join (lines)
+  (if (null? (cdr lines))
+      (car lines)
+      (string-append (car lines) "\n" (dedent.join (cdr lines)))))
+
+// A trailing whitespace-only line carries the closing quote's indentation
+// and never belongs to the text.
+(defun dedent.trim (lines)
+  (if (and (cdr lines) (dedent.blank? (car (reverse lines))))
+      (append (reverse (cdr (reverse lines))) (list ""))
+      lines))
+
+(defun dedent.apply (text) (let*
+  ((raw (dedent.lines text 0))
+   (lines (if (dedent.blank? (car raw)) (cdr raw) raw))
+   (prefix (substring (car lines) 0 (dedent.width (car lines) 0))))
+  (dedent.join (dedent.trim
+    (if (equal? prefix "")
+        lines
+        (map (lambda (line) (dedent.strip line prefix)) lines))))))
+
+// The fold is exact only when the spelling carries no escape and no
+// interpolation hole, which is how a dedented block is normally written.
+// Anything else keeps its meaning by going to String.dedent at run time.
+(defun dedent.body (source) (let*
+  ((length (string-length source))
+   (open (cond
+     ((and (>= length 3) (equal? (substring source 0 2) "%\"")) 2)
+     ((and (>= length 2) (equal? (substring source 0 1) "\"")) 1)
+     (true 0))))
+  (if (or (= open 0)
+          (not (equal? (substring source (- length 1) length) "\"")))
+      nil
+      (let ((body (substring source open (- length 1))))
+        (if (or (dedent.contains? body "\\" 0)
+                (dedent.contains? body "$" 0))
+            nil
+            body)))))
+
+(defun dedent.expand (node) (let
+  ((body (dedent.body (x2c.source.text node))))
+  (if (null? body)
+      (x2c.expr.call (x2c.expr.field node "dedent"))
+      (x2c.literal.string (dedent.apply body)))))

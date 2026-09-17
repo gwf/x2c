@@ -1,0 +1,26 @@
+// System macros that remove boilerplate C leaves to every caller.
+// Import this file to use them: $(import "system-macros.xmacro")
+
+$(import "system-macros.xlisp")
+
+/* Normalizes the indentation a block of text was written with. The literal
+   is dedented during translation when its spelling carries no escape and no
+   interpolation hole; every other form calls String.dedent at run time, so
+   both spellings mean the same thing. */
+macro Expression $dedent(Expr $text) => ($(dedent.expand $text))
+
+/* Reports how long the following statement took on stderr. The caller
+   includes <time.h>. */
+macro Decorator $time(Statement $target, Literal $label)
+  using $started, $stopped, $elapsed => {
+  {
+    struct timespec $started, $stopped;
+    clock_gettime(CLOCK_MONOTONIC, &$started);
+    $target
+    clock_gettime(CLOCK_MONOTONIC, &$stopped);
+    double $elapsed =
+      ($stopped.tv_sec - $started.tv_sec) * 1000.0 +
+      ($stopped.tv_nsec - $started.tv_nsec) / 1000000.0;
+    Stderr.printf("[time] %s %.3f ms\n", $label, $elapsed);
+  }
+}

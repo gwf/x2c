@@ -825,6 +825,35 @@ String String.strip(String str, char *negChars) {
   return String.new_len(str + start, end - start);
 }
 
+/** Removes the indentation the text was written with.
+    The prefix is the run of spaces and tabs that opens the first content
+    line, after one leading newline is dropped. Every following line that
+    starts with that prefix loses exactly it, so indentation written past the
+    prefix survives and the block renormalizes as a unit. A line that does not
+    carry the prefix, including a blank one, is left alone, except that a
+    final line of only spaces and tabs is removed so the closing quote's own
+    indentation does not reach the result. `\r\n` is preserved because only
+    the prefix after a newline is removed.
+    Raises: `<alloc-fail>` while constructing a changed result. Null input
+    returns NULL and text with no prefix is returned as-is.
+*/
+String String.dedent(String str) {
+  if (!str) return NULL;
+  int length = str.len();
+  int skip = str.startswith("\r\n") ? 2 : (str.startswith("\n") ? 1 : 0);
+  int width = 0;
+  while (skip + width < length &&
+         (str[skip + width] == ' ' || str[skip + width] == '\t'))
+    width++;
+  String prefix = String.new_len(str + skip, width);
+  String body = width ? String.new(str + skip + width).replace(
+    %"\n$prefix", "\n") : String.new(str + skip);
+  int end = body.len(), tail = end;
+  while (tail > 0 && (body[tail - 1] == ' ' || body[tail - 1] == '\t')) tail--;
+  if (tail == end || (tail > 0 && body[tail - 1] != '\n')) return body;
+  return String.new_len(body, tail);
+}
+
 /* Builds a filtered copy, leaving each caller to give only its byte test. */
 macro Statement $string.select(
   Expr $subject, Name $index, Expr $selected)

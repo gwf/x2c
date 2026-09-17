@@ -1,11 +1,15 @@
 # Compile-time Lisp SDK completion and system-wide macros
 
-> Status: needs author scoping - 2026-09-17. Designed from a read of
+> Status: blocked - 2026-09-17. An independent review reproduced a fatal
+> defect in Phase 1 and two unimplementable specifications; all three are
+> corrected above and the phases below need re-scoping before implementation.
+> `String.dedent`, `$dedent`, and `$time` are built and working on this branch
+> as a proof of the API, unpublished. Scoped 2026-09-17 from a read of
 > `etc/compiler-sdk.xlisp`, `etc/lisp-bindings.xlisp`, `etc/builtin-macros.xlisp`,
-> the 34 `$lisp.bind` calls at `src/macros.x:894`, and the shipped generator in
-> `lib/varops.x` + `lib/varops.xlisp`. No code written. The macro direction
-> follows the 2026-07-28 decision to keep macros as a hygienic replacement for
-> the C preprocessor.
+> the 33 `$lisp.bind` calls at `src/macros.x:894`, and the shipped generator in
+> `lib/varops.x` + `lib/varops.xlisp`. The macro direction follows the
+> 2026-07-28 decision to keep macros as a hygienic replacement for the C
+> preprocessor.
 
 ## The result
 
@@ -25,9 +29,9 @@ around missing SDK operations.
 
 The naming is three rules at once. `x2c.type.fields` is public;
 `_x2c.type.parameters` is private by prefix; `x2c._source.text` is private by
-infix. `etc/builtin-macros.xlisp` adds 52 `x2c._foreach.*` and `x2c._class.*`
-helpers to the same namespace. Against 14 public operations in
-`etc/compiler-sdk.xlisp`, someone typing `x2c.` sees roughly 86 names of which
+infix. `etc/builtin-macros.xlisp` adds 52 helpers to the same namespace: 16
+`x2c._foreach.*`, 35 `x2c._class.*`, and one `x2c._scope.*`. Against 14 public operations in
+`etc/compiler-sdk.xlisp`, someone typing `x2c.` sees roughly 85 names of which
 about 28 are theirs.
 
 `etc/` holds four Lisp files with three loading behaviors. `src/macros.x:884`
@@ -41,7 +45,8 @@ evaluates `init.xlisp`, `compiler-sdk.xlisp`, and `builtin-macros.xlisp`;
 **Naming.** A supported operation is `x2c.<noun>.<verb>` with no infix
 underscore. An internal primitive keeps a single reserved prefix and never
 appears inside a public name. Shipped-macro helpers leave `x2c.` entirely:
-`x2c._foreach.*` and `x2c._class.*` become `foreach.*` and `class.*`, matching
+`x2c._foreach.*`, `x2c._class.*`, and `x2c._scope.*` become `foreach.*`,
+`class.*`, and `scope.*`, matching
 how `lib/varops.xlisp` already names `native.update.*`.
 
 **Loading.** `etc/lisp-extras.xlisp` loads with the other three, so the macro
@@ -72,17 +77,22 @@ generator never writes a node shape by hand, and the shapes stay unsupported.
 Constructors add `(parens ...)` around binary nodes, since the emitter adds no
 precedence parentheses.
 
-**Dedent semantics.** The prefix is declared, not inferred. It is the leading
-whitespace of the source line on which the literal begins. Dedent removes that
-prefix from the first line and replaces every `\n` or `\r\n` followed by the
-prefix with the bare newline, so indentation past the prefix survives verbatim
-and the block renormalizes as a unit. A single leading newline after the
-opening quote is dropped. A line that does not carry the prefix is left alone.
-Inferring the prefix from the minimum indentation of the content was rejected:
-it collapses to nothing when any line sits at the left margin, it does nothing
-when the first line follows the opening quote, and adding one line silently
-changes every other line's result. Taking the prefix from the closing quote's
-line was considered and rejected as the less predictable of two declared rules.
+**Dedent semantics.** The prefix is declared by the text itself: after one
+leading newline is dropped, it is the run of spaces and tabs opening the first
+content line. Dedent removes it from that line and replaces every `\n` or
+`\r\n` followed by the prefix with the bare newline, so indentation written
+past the prefix survives verbatim and the block renormalizes as a unit. A line
+that does not carry the prefix, including a blank one, is left alone, except
+that a final line of only whitespace is removed so the closing quote's own
+indentation stays out of the result. Inferring the prefix from the minimum
+indentation of the content was rejected: it collapses to nothing when any line
+sits at the left margin, it does nothing when the first line follows the
+opening quote, and adding one line silently changes every other line's result.
+An earlier draft took the prefix from the source line the literal begins on;
+that rule is not implementable, because `x2c._invocation.location` reports the
+invocation token's column rather than the line's indentation and
+`x2c.source.text` cannot see behind its capture. Deriving the prefix from the
+content needs no location at all.
 
 **Switch semantics.** `$switch` is a decorator with a `Block` target and one
 `Expr` argument, written `$switch(condition) { case 1: ... }`. It builds the
@@ -101,14 +111,21 @@ runtime static declaration.
 ## Phase 1 - naming and loading
 
 Rename the bind targets in `src/macros.x`, the definitions in
-`etc/compiler-sdk.xlisp`, and their callers in `etc/lisp-bindings.xlisp` and
-`etc/builtin-macros.xlisp`. Move the 52 shipped-macro helpers out of `x2c.`.
+`etc/compiler-sdk.xlisp`, and their callers in `etc/lisp-bindings.xlisp`,
+`etc/builtin-macros.xlisp`, and `etc/builtin-macros.xmacro`. Move the 52 shipped-macro helpers out of `x2c.`.
 Load `etc/lisp-extras.xlisp` with the other three libraries. Publish the
 promoted operations in `docs/src/reference/language.md` beside the existing SDK
 list.
 
-No new compiler capability, so the checked-in bootstrap builds the renamed
-tree; `bootstrap/` refreshes as part of publication.
+The rename needs a compatibility step, and the plan's earlier claim that the
+checked-in bootstrap builds the renamed tree is wrong. `bootstrap/` holds only
+`Makefile`, `lib`, and `src`; `etc/*.xlisp` is read from the live tree at
+`src/macros.x:870`, while `bootstrap/src/macros.c` hard-codes the old bind
+spellings. Renaming both sides at once leaves the bootstrap compiler binding
+old names against renamed Lisp, and the build fails before `bootstrap-refresh`
+can run. So this phase binds both spellings in `src/macros.x`, lands in
+`bootstrap/`, and drops the old spellings in a following change. A C-side bind
+name is a compiler capability with respect to the shared `etc/` files.
 
 ## Phase 2 - complete the read and write sides
 
@@ -122,6 +139,13 @@ Readers:
 - `x2c.block.items` - the block-item sequence of a captured `Block` or compound
   `Statement`.
 - `x2c.syntax.kind` - the node kind of any captured syntax.
+
+Captured syntax reaches Lisp as an ordinary walkable List, so `block.items` and
+`syntax.kind` are `cdr` and `car` and need no C. Both must see through the
+`(at LINE ...)` origin anchors that `src/statements.x` wraps around every
+ordinary block item, or every item reports its kind as `at`. Only
+`x2c.type.members` and the diagnostic additions below need compiler code, so
+this phase splits by where each part lands.
 
 Constructors, extracted from the quasiquotes `etc/builtin-macros.xlisp` and
 `lib/varops.xlisp` already contain:
@@ -147,15 +171,16 @@ anything in Phase 3 or 4 calls it.
 
 ## Phase 3 - macros that need no new capability, plus dedent
 
-- `String.dedent(String str, String prefix)` in `lib/string.x`, composed from
-  the existing `String.startswith` and `String.replace`. The `$dedent` macro
-  folds it at compile time when `x2c.literal.value` resolves the argument, and
-  emits the call otherwise, so interpolated and runtime strings behave
-  identically. Give it a `keyword dedent` alias.
+- `String.dedent(String str)` in `lib/string.x`, composed from the existing
+  `String.startswith`, `String.replace`, and `String.new_len`. The `$dedent`
+  macro folds at compile time from `x2c.source.text`, not from
+  `x2c.literal.value`: a multi-line `%"..."` literal reaches a macro as
+  `(expr ("String") (cache 0))` with no text in the node, while `source.text`
+  returns the complete spelling. The fold applies when that spelling carries no
+  escape and no interpolation hole; every other form emits the runtime call.
 - `$todo` and `$unreachable` - expand to a raise carrying file, line, and
   column from the existing `x2c.invocation.*`.
-- `$bench` - `Statement` and `Function` target decorator wrapping the target in
-  a timing pair.
+- `$time` - `Statement` target decorator wrapping the target in a timing pair.
 - `$show` - field-by-field debug print from `x2c.type.fields`.
 
 ## Phase 4 - switch and table
@@ -173,6 +198,35 @@ a primitive, so the remaining gap is narrower than the C case suggests.
 Resource-management macros are out of scope; `$auto`, `$scope`, `$lock`, and
 `defer` hold that ground.
 
+## Proof: what a working implementation showed
+
+`String.dedent`, `$dedent`, and `$time` are implemented and building on this
+branch, as a test of whether the proposed API can express them. They are not
+published.
+
+Both `$dedent` paths work. A literal with no escape and no hole folds during
+translation: `$dedent(%"\n    alpha\n      beta\n    gamma\n  ")` emits
+`String_new("alpha\n  beta indented further\ngamma\n")` with no runtime call.
+An interpolated literal emits `String_dedent(String_join(...))` and produces the
+same text at run time. `$time` expands to a `clock_gettime` pair around its
+target with `using` temporaries.
+
+Four things the implementation settled:
+
+- The fold reads `x2c.source.text`, which already exists. The proposed
+  `x2c.literal.value` would not have worked, so `$dedent` is not evidence for
+  that operation.
+- The transform is about 85 lines of compile-time Lisp over `substring`,
+  `string-length`, and `string-append`. It recurses per character within a line
+  and per line across the text; per-character recursion over a whole text would
+  reach the interpreter's ceiling, which sits between 2,000 and 20,000 frames.
+- `x2c.expr.ident` takes the tagged value from `x2c.ident` while
+  `x2c.expr.field` takes a plain String and calls `x2c.ident` itself. Passing
+  the tagged value to `field` fails with `bad-types`. The constructor family
+  already has the inconsistency the naming rule is meant to remove.
+- `String.dedent` needs no prefix argument, which removes the open question
+  about what prefix an emitted runtime call would receive.
+
 ## Validation
 
 Per phase: `make x2c` plus the macro fixtures under `unittest/`, and the
@@ -182,8 +236,9 @@ the new macro's expansion and one for its rejection case. Publication uses
 
 `examples/magic/system-macros.x` is the existing showcase for the shipped macro
 set and is registered in `examples/manifest.txt:33`. Phase 3 and Phase 4 extend
-it with the macros they add and update `examples/expected/system-macros.stdout`
-rather than adding a second showcase.
+it and update `examples/expected/system-macros.stdout` rather than adding a
+second showcase. `$time` writes a measured duration and `$todo` raises, so
+neither belongs in an exact-match expectation; they get unit coverage instead.
 
 ## Plan review
 
