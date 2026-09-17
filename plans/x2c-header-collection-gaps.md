@@ -1,71 +1,67 @@
 # Header collection gaps
 
-> Status: needs author scoping - 2026-09-16.
-> Found while repairing raylib collection in PR #62, which made collection
-> skip an object-like macro defined to nothing (`#define RLAPI`). The forms
-> below are still mis-collected or rejected. No package build hits them
-> today, because only raylib passes `-I` for its upstream headers; each one
-> blocks another package from collecting its real headers.
+> Status: needs author scoping - 2026-09-16, rows re-reproduced 2026-09-17.
+> Found while repairing raylib collection in PR #62. The corpus work in
+> `plans/archive/x2c-c-on-ramp-corpus.md` (f6f029f) fixed the empty and
+> storage-class prefix macros, macros among parameters, and the
+> `__cplusplus`-guarded linkage group. The five forms below still fail. No
+> package build hits them today.
 
 ## Result
 
 Collecting a C header reads its unexpanded source (see "Host preprocessing"
-in `docs/src/reference/language.md`). Headers commonly decorate declarations
-with macros and compiler attributes. Collection should record the same
-declarations and types a C compiler sees for these forms, without changing
-how unit source parses.
+in `docs/src/reference/language.md`). Collection should record the same
+declarations and types a C compiler sees for these forms, and a unit should
+accept the C11 forms among them.
 
 ## Reproduced gaps
 
-Reproductions from the PR #62 investigation, with the current `main`
-compiler (`x2c translate` of a unit that includes the header):
+Each row was translated with `builds/0/x2c translate` at 63d8c1b from a unit
+that includes a header holding the form and calls `f`; the symbol table was
+read with `--dump-symbols`.
 
-| Header form | Result today |
+| Header form | Result |
 | --- | --- |
-| `void API f(int a);`, where `API` is defined to nothing, after the type | parse error |
-| `void f(API int a);` inside a parameter list | "expected ')'" |
-| `void f(int a) API;` trailing | accepted, token dropped |
-| `ATTR(1) void f(int a);` function-like macro expanding to nothing or an attribute, as libcurl's `CURL_DEPRECATED(...)` at `curl.h:157` | parse error |
-| `__attribute__((visibility("default"))) void f(int a);` | parse error |
-| `_Noreturn void f(int a);` | parse error |
-| `#define E extern` then `E void f(int a);` | parse error |
-| `E void f(int);`, `E int v;`, `E struct S {}` with `E` an unknown non-empty macro | records wrong symbol keys such as `( int )` |
-| `extern "C" {` opened before an `#include` and closed after it | "missing '}'": each include-delimited segment checks braces separately (`_shallow_parse_loop` clears `c.braces`) |
+| `#define ATTR(x)` or `#define ATTR(x) __attribute__((deprecated))`, then `ATTR(1) void f(int a);`, as libcurl's `CURL_DEPRECATED(...)` at `curl.h:157` | "missing closing parenthesis" |
+| `__attribute__((visibility("default"))) void f(int a);` | "expected ')'" |
+| `_Noreturn void f(int a);` | "missing closing parenthesis" |
+| `E void f(int); E int v;` with `E` a macro collection cannot see | status 0, but the keys are `( void )` and `( int )`, not `( f )` and `( v )` |
+| `extern "C" {` / `#include "inner.h"` / `}` with no `__cplusplus` guard | "missing '}'": each include-delimited segment checks its braces alone |
 
-The last row blocks libuv (`uv.h:27`) and blis (`blis.h:45`) once their
-builds pass `-I`; sqlite (`SQLITE_API`) is covered by PR #62.
+Two of the forms also fail in unit source, which is a defect independent of
+collection: `_Noreturn void die(int a) { exit(a); }` reports "missing closing
+parenthesis", and a leading `__attribute__((visibility("default")))` on a
+definition reports "expected ')'". A trailing attribute is accepted in both
+places, as the corpus plan decided.
 
 ## Decisions needed
 
-- Whether collection should evaluate simple macro definitions beyond empty
-  object-like ones (for example `#define E extern`), or only skip
-  attribute-like decorations.
-- Whether function-like attribute macros are skipped by name when every
-  definition expands to nothing or to `__attribute__((...))`, or through
-  host preprocessing for collection only.
-- Whether `__attribute__`, `_Noreturn`, and `[[...]]` are accepted in unit
-  source too, which would change emitted C.
+- Whether a function-like attribute macro before the type is skipped by
+  name when every definition expands to nothing or to `__attribute__((...))`,
+  or through host preprocessing for collection only.
+- What collection records for a prefix name with no visible definition.
 
 ## Implementation outline
 
-- Extend the `<empty>` macro facts recorded in `_note_object_macro`
-  (`src/compiler.x`) to function-like macros whose definitions expand to
-  nothing or to an attribute, and skip an invocation with its balanced
-  argument list where `_skip_empty_macro` (`src/parse.x`) already skips a
-  name.
-- Accept `__attribute__((...))` and `_Noreturn` among collected declaration
-  specifiers and after a declarator, carrying the spelling in the type the
-  way `("_Noreturn")` is carried for emission.
-- Carry linkage-group brace depth across segments of one collected file
-  instead of checking each segment alone.
+- Extend the `<empty>` and attribute facts recorded in `_note_object_macro`
+  (`src/compiler.x`) to function-like macros, and skip an invocation with its
+  balanced argument list where `_skip_empty_macro` (`src/parse.x`) already
+  skips a name.
+- Accept a leading `__attribute__((...))` and `_Noreturn` among declaration
+  specifiers, in units and collected headers alike, carrying the spelling for
+  emission the way a trailing attribute is carried.
+- For the unguarded linkage group, let a segment end inside a group opened by
+  `Compiler.skip_linkage_brace` and close it in a later segment of the same
+  file. The corpus plan dropped this because hiding the C++ arm made the
+  guarded form pass; only the unguarded form needs it.
 
 ## Validation
 
-- A compiler fixture per form, in the style of `c-annotation-macro`, whose
-  header uses the form before an `#include` and whose unit calls the
-  declarations.
-- `make -C packages/libcurl test run run-lisp`, `make -C packages/libuv test
-  run`, and `make -C packages/blis test run` with `-I` added for their
+- A compiler fixture per form in the style of `c-annotation-macro` and
+  `c-linkage-include`, whose header uses the form and whose unit calls the
+  declarations, plus unit-source fixtures for `_Noreturn` and a leading
+  attribute.
+- `make -C packages/libcurl test run run-lisp` with `-I` added for its
   upstream headers.
 
 ## Plan review
@@ -73,7 +69,8 @@ builds pass `-I`; sqlite (`SQLITE_API`) is covered by PR #62.
 - Facts: `_note_object_macro` already records each definition from the
   source; the new skips consume only names and invocations whose recorded
   definitions contribute no declaration syntax, and nothing rechecks them.
-- Reuse: extends the existing macro map, `_skip_empty_macro`, and the
-  segment state handoff; no new traversal or cache.
+- Reuse: extends the existing macro map, `_skip_empty_macro`, the trailing
+  attribute carrier, and `Compiler.skip_linkage_brace`; no new traversal or
+  cache.
 - Idiom: a direct parser skip over recorded facts, not a preprocessor.
 - Validators and diagnostics: none proposed.

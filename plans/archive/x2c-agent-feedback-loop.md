@@ -1,10 +1,9 @@
 # The agent feedback loop
 
-> Status: active - 2026-09-16. Third of four plans from the 2026-09-15
-> capabilities and market spike. The compiler half is implemented:
-> `--max-errors`, declaration-granular parse recovery, and
-> `--diagnostics-file` JSON Lines. Step 7, `llms.txt` and the single-file
-> reference, belongs to a separate delivery and is not done here.
+> Status: done - 2026-09-16. Third of four plans from the 2026-09-15
+> capabilities and market spike. c75f9fc delivered `--max-errors`,
+> declaration-granular parse recovery, and `--diagnostics-file` JSON Lines.
+> a260b50 delivered step 7, `llms.txt` and the single-file reference.
 > Notes: the probe disproved the original recovery table. Raising the limit
 > alone produced 174 cascade diagnostics across 115 fixtures, because resync
 > started at the error token inside a body. It also exposed three reporting
@@ -18,8 +17,8 @@
   `script`. The default is 20; 0 removes the bound.
 - `--diagnostics-file <file>` writes the diagnostics as JSON Lines, one object
   per diagnostic, instead of standard error.
-- Not in this delivery: `https://x2c-lang.dev/llms.txt` and a single-file
-  language reference (step 7).
+- Delivered separately in a260b50: `https://x2c-lang.dev/llms.txt` and a
+  single-file language reference (step 7).
 
 ## What was already built
 
@@ -195,7 +194,7 @@ both. The editor now assembles its response in a `Buffer` and writes it once.
    `src/main.x` opens the file after `cli_parse`.
 6. `src/report.x`: `report_json_string`, used by `build.x`, `editor.x`, and
    `diagnostics.x`.
-7. Deferred to another delivery: `llms.txt` and the reference bundle.
+7. Delivered separately in a260b50: `llms.txt` and the reference bundle.
 
 ## Validation
 

@@ -349,9 +349,9 @@ Source: `src/parse.x:1652`
 Consumes one brace of a C linkage specification at file scope and reports
 whether it did. `extern "C" {` opens a group; a `}` at file scope closes
 the innermost open group, because every other file-scope form consumes
-its own braces. The declarations between them stay at file scope. Both
-branches of `#ifdef __cplusplus` are parsed, so the braces of the usual
-header guard balance.
+its own braces. The declarations between them stay at file scope. The
+`#ifdef __cplusplus` arm of the usual header guard is skipped, so only an
+unguarded group reaches this operation.
 
 Source: `src/parse.x:1684`
 

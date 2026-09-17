@@ -1,11 +1,11 @@
 # The C on-ramp corpus
 
-> Status: active - implemented 2026-09-16 after Gary's yes to both
-> decisions. Follows `plans/x2c-c-on-ramp.md` (4a landed as `f94f034` and
-> `76b27c0`). The first round of fixes exposed a second and third layer of
-> failures behind them; those are recorded under "What the corpus
-> established" and "Implementation" as well. Result: 12 of 22 units
-> translate and compile, from 3; the ten that remain are listed under
+> Status: done - 2026-09-16 in f6f029f and 84fa6f8, after Gary's yes to
+> both decisions. Follows `plans/x2c-c-on-ramp.md` (4a landed as `f94f034`
+> and `76b27c0`). The first round of fixes exposed a second and third layer
+> of failures behind them; those are recorded under "What the corpus
+> established" and "Implementation" as well. Result: 14 of 22 units
+> translate and compile, from 3; the eight that remain are listed under
 > "Remaining" with their cause.
 
 ## The result

@@ -1,11 +1,11 @@
 # Salvage from the declined compiler redesign
 
-> Status: active - 2026-09-15. Gary declined the from-scratch compiler
+> Status: done - 2026-09-17. Gary declined the from-scratch compiler
 > redesign on 2026-09-14; no plan was written for it. Three pieces of it
-> survive as incremental work, delivered as separate PRs in this order.
-> Interface files, the fourth piece, already shipped as
-> `plans/archive/unit-interfaces.md`. Item 1 landed as PR #57 and item 3 as
-> PR #58; item 2 remains, and needs scoping on its own evidence first.
+> survived as incremental work. Interface files, the fourth piece, shipped as
+> `plans/archive/unit-interfaces.md`. Item 1 landed as PR #57, item 3 as
+> PR #58, and item 2 as Phase 1 of `plans/emit-cleanup-lowering.md` in
+> 68eea0a. Item 1's two open initializer ideas are Phase 3 of that plan.
 
 ## 1. One file initialization mechanism (queue done, PR #57)
 
@@ -61,7 +61,7 @@ Validation: `conditional-private-split` and the existing initializer fixtures,
 `make verify-fixtures`, and the self-translation comparison. Emission changes,
 so publication takes two gate rounds.
 
-## 2. Cleanup lowering out of `src/emit.x` (scoped, see plan)
+## 2. Cleanup lowering out of `src/emit.x` (Phase 1 done, 68eea0a)
 
 Scoped on 2026-09-16 in `plans/emit-cleanup-lowering.md`, which holds the
 phases, the constraints, and the validation. The summary below is the
@@ -88,10 +88,8 @@ segment state became `Compiler.take_unit_state` and
 `Compiler.return_unit_state`. `_parse_segment` lost 22 lines and generated C
 did not change.
 
-Still open in the same area: binding numbers collide between collection and
-the full parse, so a graph keyed by number alone mixes the two passes. The
-general "parse separated from bind" idea from the redesign is not part of
-this.
+The general "parse separated from bind" idea from the redesign is not part
+of this.
 
 ## Declined, with reasons
 

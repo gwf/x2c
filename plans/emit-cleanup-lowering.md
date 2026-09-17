@@ -1,9 +1,13 @@
 # Cleanup lowering out of `src/emit.x`
 
-> Status: active - proposed 2026-09-16, awaiting approval. Item 2 of
-> `plans/architecture-salvage.md`, the last surviving piece of the declined
-> compiler redesign. Phase 1 changes no generated C; the later phases are
-> optional and each carries its own measurement.
+> Status: active - Phase 1 done 2026-09-15 in 68eea0a; Phases 2 and 3 are
+> optional and unscheduled. Item 2 of
+> `plans/archive/architecture-salvage.md`, the last surviving piece of the
+> declined compiler redesign.
+> Notes: Phase 1 landed as `src/cleanup.x`, a pass that decides regions, the
+> cleanup spliced before each exit, volatile locals, and the two `goto`
+> diagnostics. The emitter still prints each region's push, frame, and
+> `sigsetjmp` text, and generated C changed.
 
 ## The result
 

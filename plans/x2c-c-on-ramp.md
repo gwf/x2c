@@ -2,8 +2,10 @@
 
 > Status: active - 4a landed on main as `f94f034` and `76b27c0` (2026-09-16).
 > 4b (the landing page) has not started. The failures under "End-to-end
-> result" and the rest of a 22-unit corpus are handled by
-> `plans/x2c-c-on-ramp-corpus.md`.
+> result" and the rest of a 22-unit corpus were handled by
+> `plans/archive/x2c-c-on-ramp-corpus.md`, which replaced the linkage-guard
+> design below: the `__cplusplus` arm is skipped, so only an unguarded
+> `extern "C" {` reaches `Compiler.skip_linkage_brace`.
 
 ## The result
 
@@ -130,7 +132,8 @@ declarations inside it. A method call on a type declared inside such a group
 failed to translate.
 
 Directives stay `(preproc ...)` nodes and both `#ifdef` branches are parsed,
-so the `{` and `}` of the guard balance across two conditional regions.
+so the `{` and `}` of the guard balance across two conditional regions. (The
+corpus plan later replaced this: the `__cplusplus` arm is skipped.)
 
 - `Compiler.skip_linkage_brace` (in `src/parse.x`) consumes
   `extern <string> {` or a file-scope `}`. The token cursor's existing

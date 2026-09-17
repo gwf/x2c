@@ -44,7 +44,7 @@ clock, so shipping a time module here would add an owner with no consumer,
 which the bloat test in `agents/x2c-philosophy.md` rejects. It belongs in the
 phase whose conversion needs it; `tools/agent-failure.py` and the benchmark
 tools are the real consumers. Note that `lib/time.x` generates a `time.h`,
-which is why `plans/x2c-include-prefix.md` landed first.
+which is why `plans/archive/x2c-include-prefix.md` landed first.
 
 **Not converted at the time.** `tools/check-conformance-coherence.sh` and
 `tools/check-generated-stages.sh` run inside the Makefile's gate path
