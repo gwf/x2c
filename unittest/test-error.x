@@ -108,6 +108,50 @@ static void error_transferring_registration_is_reclaimed(void) {
   EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
 }
 
+/* The selected catch leaves the handler stack before its arm runs, so the arm
+   measures the depth it had outside the `try` and may close a registration
+   the `try` was nested inside. */
+static void error_catch_arm_leaves_its_registration(void) {
+  Error.initialize();
+  int baseline = Error.handler_depth(), inside = -1, after_pop = -1;
+  ErrorHandler outer = Error.push(_decline_all, void);
+  try raise %(bad-state (where "arm registration"));
+  catch %(bad-state *): {
+    inside = Error.handler_depth();
+    Error.pop(outer);
+    after_pop = Error.handler_depth();
+  }
+  EXPECT_INT_EQ(inside, baseline + 1);
+  EXPECT_INT_EQ(after_pop, baseline);
+  EXPECT_INT_EQ(Error.handler_depth(), baseline);
+}
+
+static Symbol _transfer_from_handler(List errors, Var data) {
+  (void) errors;
+  (void) data;
+  raise %(bad-state (owner "observer"));
+  return <declined>;
+}
+
+/* A handler that raises a transferring cause hands the complete chain back to
+   the cleanup between the raise and the landing, so its own `defer` pop runs
+   in order and no registration survives the round. */
+static void error_handler_transfer_runs_pending_cleanup(void) {
+  Error.initialize();
+  Error.policy_set(<error-prob>, <ignore>);
+  int baseline = Error.handler_depth(), caught = 0;
+  for (int round = 0; round < 3; round++) {
+    try {
+      ErrorHandler observer = Error.push(_transfer_from_handler, void);
+      defer Error.pop(observer);
+      Error.raise(<error-prob>, %((round $round)));
+    }
+    catch %(bad-state *): caught++;
+    EXPECT_INT_EQ(Error.handler_depth(), baseline);
+  }
+  EXPECT_INT_EQ(caught, 3);
+}
+
 static void error_decline_walks_outward(void) {
   Error.initialize();
   Symbol collect = <collect>, code = <error-prob>;
@@ -411,6 +455,8 @@ void error_suite(void) {
   $test.run(error_handler_sees_its_own_slice);
   $test.run(error_handler_registration_is_reclaimed);
   $test.run(error_transferring_registration_is_reclaimed);
+  $test.run(error_catch_arm_leaves_its_registration);
+  $test.run(error_handler_transfer_runs_pending_cleanup);
   $test.run(error_decline_walks_outward);
   $test.run(error_pop_truncates_declined_slice);
   $test.run(error_nested_pop_truncates_exact_watermark);

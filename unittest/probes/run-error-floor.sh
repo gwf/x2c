@@ -97,20 +97,40 @@ test "$(grep -c 'shutdown-hook: after raise' \
 test "$(tail -1 "$BUILD/shutdown-order.stderr")" = \
   "shutdown-complete: error-ready=0"
 
-# exit() runs shutdown while a catch is registered or its arm holds the
-# selected Error; both must reclaim quietly and keep the exit status.
-for exit_case in exit-in-try:3 exit-in-catch:4; do
-  name=${exit_case%:*}
+"$PROGRAM" pop-outer-in-catch \
+  >"$BUILD/pop-outer-in-catch.stdout" 2>"$BUILD/pop-outer-in-catch.stderr"
+test ! -s "$BUILD/pop-outer-in-catch.stdout"
+test ! -s "$BUILD/pop-outer-in-catch.stderr"
+
+run_exit_case() {
+  local name=$1
+
   set +e
   ( "$PROGRAM" "$name" >"$BUILD/$name.stdout" 2>"$BUILD/$name.stderr"
     child_status=$?
     exit "$child_status"
   ) 2>/dev/null
-  status=$?
+  exit_status=$?
   set -e
-  test "$status" -eq "${exit_case#*:}"
+}
+
+# exit() runs shutdown while a catch is registered or its arm holds the
+# selected Error; both must reclaim quietly and keep the exit status.
+for exit_case in exit-in-try:3 exit-in-catch:4; do
+  name=${exit_case%:*}
+  run_exit_case "$name"
+  test "$exit_status" -eq "${exit_case#*:}"
   test ! -s "$BUILD/$name.stdout"
   test ! -s "$BUILD/$name.stderr"
 done
+
+# exit() from a handler callback keeps its status and reclaims the borrowed
+# view the callback was still reading. Its error is still accumulated, so
+# Logger renders it during shutdown; nothing else may appear.
+run_exit_case exit-in-observer
+test "$exit_status" -eq 6
+test ! -s "$BUILD/exit-in-observer.stdout"
+! grep -q 'Scope leak detected' "$BUILD/exit-in-observer.stderr"
+! grep -q 'x2c error floor' "$BUILD/exit-in-observer.stderr"
 
 echo "error floor and shutdown probes passed"

@@ -138,7 +138,7 @@ ErrorHandler x2c_error_catch_site_push(
   state.floor_only++;
   ErrorHandler h = Scope.malloc_in(&state.scope, sizeof(struct ErrorHandler));
   *h = (struct ErrorHandler) {
-      .prev = state.handler_top, .fn = NULL, .data = void,
+      .prev = state.handler_top, .running = NULL, .fn = NULL, .data = void,
       .watermark = Error.count(), .site = site, .target = target,
       .selected = -1, .plans = NULL,
       .capture_values = NULL, .retained = NULL, .detached = 0
@@ -211,32 +211,49 @@ Var x2c_error_catch_capture(ErrorHandler handle, int index) {
   return values[index];
 }
 
-/** Hides the top transferring catch from dispatch while its arm runs.
-    This lets the catch arm raise outward without matching itself. The handle
-    stays registered, so shutdown and outer unwinding reclaim its retained
-    `Error` if the arm never closes it. Repeated detach and a null handle do
-    nothing. Detaching out of stack order reaches the raw error floor.
+/** Unregisters the top transferring catch before its arm runs.
+    The handler stack then holds only registrations that can still be
+    selected, so the arm may raise outward without matching itself and may
+    close handlers the `try` was nested inside. The handle moves to the
+    thread's chain of running arms, which owns the retained `Error` and
+    captures the arm still reads until `x2c_error_catch_close`; `Error`
+    shutdown walks that chain, so an `exit()` from inside an arm still
+    reclaims them. Repeated detach and a null handle do nothing. Detaching out
+    of stack order reaches the raw error floor.
 */
 void x2c_error_catch_detach(ErrorHandler handle) {
   if (!handle || handle.detached) return;
-  if (_thread().handler_top != handle)
+  ErrorThreadState state = _thread();
+  if (state.handler_top != handle)
     _floor(<invariant>, "transferring catch detach out of order");
+  state.handler_top = handle.prev;
   handle.detached = 1;
+  handle.running = state.running_top;
+  state.running_top = handle;
 }
 
 /** Closes and invalidates a transferring-catch handle.
-    The handle releases its plans, captures, and retained error records and
-    unregisters itself; an attached handle also truncates records above its
-    registration watermark. Handles must close in stack order; violating that
-    order reaches the raw error floor. A null handle does nothing.
+    The handle releases its plans, captures, and retained error records. A
+    still-registered handle also leaves the handler stack and truncates
+    records above its registration watermark; a detached one leaves the chain
+    of running arms instead. Handles must close in the order they were opened;
+    violating that order reaches the raw error floor. A null handle does
+    nothing.
 */
 void x2c_error_catch_close(ErrorHandler handle) {
   if (!handle) return;
   ErrorThreadState state = _thread();
-  if (state.handler_top != handle)
-    _floor(<invariant>, "transferring catch close out of order");
-  if (!handle.detached) _truncate(handle.watermark);
-  state.handler_top = handle.prev;
+  if (handle.detached) {
+    if (state.running_top != handle)
+      _floor(<invariant>, "transferring catch close out of order");
+    state.running_top = handle.running;
+  }
+  else {
+    if (state.handler_top != handle)
+      _floor(<invariant>, "transferring catch close out of order");
+    _truncate(handle.watermark);
+    state.handler_top = handle.prev;
+  }
   _handler_free(handle);
 }
 
@@ -299,9 +316,10 @@ int Error.handler_depth(void) {
 void *Error.handler_head(void) => _thread().handler_top;
 
 /** Returns the handler head retained for the current `Error` transfer.
-    During handler dispatch this is the saved pre-dispatch head, even though
-    the active callback is temporarily hidden from nested raises. Exception
-    frames store the opaque result as their landing watermark.
+    During handler dispatch this is the head saved by the outermost dispatch,
+    even though the running callbacks are temporarily hidden from nested
+    raises. Exception frames store the opaque result as their landing
+    watermark.
 */
 void *Error.unwind_head(void) {
   ErrorThreadState state = _thread();
@@ -319,7 +337,7 @@ void Error.restore_landing(void *saved_head, int saved_depth) {
   ErrorThreadState state = _thread();
   if (_chain_contains(saved, state.handler_top))
     state.handler_top = saved;
-  state.dispatch_saved = NULL;
+  state.dispatch_saved = state.dispatch_running = NULL;
   state.depth = saved_depth;
 }
 
@@ -378,6 +396,7 @@ void Error.initialize_raw(void) {
 void Error.shutdown_raw(void) {
   ErrorThreadState state = _thread();
   if (state.shutdown_done) return;
+  _reclaim_hidden(state);
   _unwind_to(state, NULL, 1);
   _truncate(0);
   if ((void *) state.stack != NULL) {
@@ -426,7 +445,8 @@ typedef struct ErrorContextState {
 
 typedef struct ErrorThreadState {
   Scope scope, Block stack, Map policy, int shutdown_done;
-  ErrorHandler handler_top, dispatch_saved, int bound;
+  ErrorHandler handler_top, dispatch_saved, dispatch_running, running_top;
+  int bound;
   ErrorContextState context_top;
   int depth, floor_only, rendered[5];
 } *ErrorThreadState;
@@ -868,7 +888,7 @@ ErrorHandler Error.push(ErrorHandlerFn fn, Var data) {
   ErrorThreadState state = _thread();
   ErrorHandler h = Scope.malloc_in(&state.scope, sizeof(struct ErrorHandler));
   *h = (struct ErrorHandler) {
-      .prev = state.handler_top, .fn = fn, .data = data,
+      .prev = state.handler_top, .running = NULL, .fn = fn, .data = data,
       .watermark = Error.count(), .site = NULL, .target = NULL,
       .selected = -1, .plans = NULL,
       .capture_values = NULL, .retained = NULL, .detached = 0
@@ -899,6 +919,30 @@ static void _unwind_to(
   }
 }
 
+/* Reclaims the registrations the handler stack no longer names. `exit()` can
+   run shutdown from inside a handler callback, which dispatch has hidden
+   along with every registration it already offered the error to, or from
+   inside a catch arm, whose handle left the stack for the running chain.
+   Dispatch hides exactly the span from its saved head through the handler
+   whose callback is running, so both chains stay disjoint from the visible
+   one and nothing is reclaimed twice. */
+static void _reclaim_hidden(ErrorThreadState state) {
+  ErrorHandler stop = state.dispatch_running;
+  for (ErrorHandler h = stop ? state.dispatch_saved : NULL; h;) {
+    ErrorHandler prev = h.prev;
+    int last = h == stop;
+    _handler_free(h);
+    if (last) break;
+    h = prev;
+  }
+  state.dispatch_saved = state.dispatch_running = NULL;
+  while (state.running_top) {
+    ErrorHandler running = state.running_top;
+    state.running_top = running.running;
+    _handler_free(running);
+  }
+}
+
 /* Returns the handler that leaves exactly `depth` registered, or the current
    head when the stack is already that shallow. The height is measured once
    here so an unwind does not re-measure it per cleanup record. */
@@ -924,6 +968,7 @@ static void _handler_free(ErrorHandler handle) {
   }
   if ((void *) handle.capture_values != NULL) handle.capture_values.free();
   _retained_destroy(handle.retained);
+  _region_destroy(&handle.view);
   Scope.free(handle);
 }
 
@@ -1076,42 +1121,37 @@ static Symbol _catch_match(ErrorHandler h) {
 */
 static Symbol _dispatch(Symbol effective, int raised_at, int depth) {
   ErrorThreadState state = _thread();
-  ErrorHandler saved = state.handler_top;
-  state.dispatch_saved = saved;
+  ErrorHandler saved = state.handler_top, outer = state.dispatch_saved;
+  ErrorHandler outer_running = state.dispatch_running;
+  /* Only the outermost dispatch records the complete chain. A handler that
+     raises starts a nested dispatch from its own hidden position, and a
+     transfer out of that nested dispatch must still hand every registration
+     back to the cleanup that runs between the raise and the landing. */
+  if (!outer) state.dispatch_saved = saved;
   Symbol result = <declined>;
   for (ErrorHandler h = saved; h; h = h.prev) {
-    if (h.detached) continue;
+    state.dispatch_running = h;
     state.handler_top = h.prev;
     Symbol disposition = <declined>;
     if (h.site) disposition = _catch_match(h);
     else {
-      ErrorRegion view = { 0 };
-      {
-        defer _region_destroy(&view);
-        state.floor_only++;
-        view = _region_new();
-        List slice = _view_since(&view, h.watermark);
-        state.floor_only--;
-        disposition = h.fn(slice, h.data);
-      }
+      /* The view belongs to the handler, not to this frame: `exit()` from the
+         callback abandons the frame, and shutdown reclaims the handler. */
+      defer _region_destroy(&h.view);
+      state.floor_only++;
+      h.view = _region_new();
+      List slice = _view_since(&h.view, h.watermark);
+      state.floor_only--;
+      disposition = h.fn(slice, h.data);
     }
-    if (disposition == <unwind>) {
-      if (h.site) {
-        state.handler_top = saved;
-        state.dispatch_saved = NULL;
-        _leave();
-        ExceptionFrame.unwind(h.target);
-      }
-      state.handler_top = saved;
-      state.dispatch_saved = NULL;
+    if (disposition == <unwind> || disposition == <fatal>) {
+      state.handler_top = state.dispatch_saved;
+      state.dispatch_saved = state.dispatch_running = NULL;
       _leave();
-      _floor(effective, "<unwind> from an observing registration");
-    }
-    if (disposition == <fatal>) {
-      state.handler_top = saved;
-      state.dispatch_saved = NULL;
-      _leave();
-      _floor(effective, "handler returned fatal");
+      if (disposition == <unwind> && h.site) ExceptionFrame.unwind(h.target);
+      _floor(
+        effective, disposition == <fatal> ? "handler returned fatal"
+                 : "<unwind> from an observing registration");
     }
     if (disposition == <handled>) {
       _truncate(h.watermark);
@@ -1120,7 +1160,8 @@ static Symbol _dispatch(Symbol effective, int raised_at, int depth) {
     }
   }
   state.handler_top = saved;
-  state.dispatch_saved = NULL;
+  state.dispatch_saved = outer;
+  state.dispatch_running = outer_running;
   _leave();
 
   if (_never_returns(effective))

@@ -3,12 +3,25 @@
 #include "x2c.x"
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 static Symbol _consume_terminal(List errors, Var data) {
   (void) errors;
   (void) data;
   return <handled>;
+}
+
+static Symbol _decline_terminal(List errors, Var data) {
+  (void) errors;
+  (void) data;
+  return <declined>;
+}
+
+static Symbol _exit_from_handler(List errors, Var data) {
+  (void) errors;
+  (void) data;
+  exit(6);
 }
 
 static void _raise_during_shutdown(void) {
@@ -100,6 +113,20 @@ int main(int argc, char **argv) {
   if (!strcmp(argv[1], "exit-in-catch")) {
     try raise %(bad-arg (text "held by the catch"));
     catch %(bad-arg *): exit(4);
+  }
+  if (!strcmp(argv[1], "exit-in-observer")) {
+    Error.initialize();
+    Error.push(_exit_from_handler, void);
+    Error.policy_set(<exit-probe>, <ignore>);
+    Error.raise(<exit-probe>, NULL);
+    return 1;
+  }
+  if (!strcmp(argv[1], "pop-outer-in-catch")) {
+    Error.initialize();
+    ErrorHandler outer = Error.push(_decline_terminal, void);
+    try raise %(bad-arg (text "outer observer"));
+    catch %(bad-arg *): Error.pop(outer);
+    return 0;
   }
   if (!strcmp(argv[1], "shutdown-order")) {
     Logger.initialize();
