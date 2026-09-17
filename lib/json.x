@@ -442,7 +442,8 @@ static void _write_string(Buffer out, String text) {
     else out.printf("\\u%04x", byte);
     run = ++at;
   }
-  out.write_len(text + run, length - run);
+  // The empty String is NULL, so an empty tail must not offset it.
+  if (run < length) out.write_len(text + run, length - run);
   out.write_char('"');
 }
 
