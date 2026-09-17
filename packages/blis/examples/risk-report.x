@@ -22,12 +22,12 @@ int main(void) {
   List features = %(return volume liquidity), first_batch = batches[0];
   double source_return = first_batch.get(<return>).double();
 
-  BlisObject observations = BlisObject.copy_rows(
+  BlisObject observations = $auto(BlisObject.copy_rows(
     numerical_rows(batches, features), BLIS_FLOAT
+  ));
+  BlisObject ones = $auto(
+    BlisObject.copy_vector(%(1.0 1.0 1.0 1.0), BLIS_FLOAT)
   );
-  defer observations.free();
-  BlisObject ones = BlisObject.copy_vector(%(1.0 1.0 1.0 1.0), BLIS_FLOAT);
-  defer ones.free();
 
   printf("BLIS %s risk report\n", Blis.version());
   printf(
@@ -51,8 +51,7 @@ int main(void) {
   }
 
   BlisObject transposed = observations.transpose_view();
-  BlisObject risk = BlisObject.new(BLIS_DOUBLE, 3, 3);
-  defer risk.free();
+  BlisObject risk = $auto(BlisObject.new(BLIS_DOUBLE, 3, 3));
   risk.fill(0.25);
   risk.set_computation_precision(BLIS_DOUBLE_PREC);
 

@@ -11,15 +11,15 @@ $(import "../../../unittest/test-macros.xmacro")
   EXPECT_TRUE(fabs((actual) - (expected)) < (tolerance))
 
 static void blis_application_path(void) {
-  BlisObject observations = BlisObject.copy_rows(%(
+  BlisObject observations = $auto(BlisObject.copy_rows(%(
     (0.123456789 1.0 5.0)
     (0.223456789 3.0 5.0)
     (-0.076543211 5.0 5.0)
     (0.323456789 7.0 5.0)
-  ), BLIS_FLOAT);
-  defer observations.free();
-  BlisObject ones = BlisObject.copy_vector(%(1.0 1.0 1.0 1.0), BLIS_FLOAT);
-  defer ones.free();
+  ), BLIS_FLOAT));
+  BlisObject ones = $auto(
+    BlisObject.copy_vector(%(1.0 1.0 1.0 1.0), BLIS_FLOAT)
+  );
 
   for (int index = 0; index < observations.columns(); index++) {
     BlisObject column = observations.column(index);
@@ -29,8 +29,7 @@ static void blis_application_path(void) {
   EXPECT_NEAR(observations.column(2).normfv(), 0.0, 1e-12);
 
   BlisObject transposed = observations.transpose_view();
-  BlisObject risk = BlisObject.new(BLIS_DOUBLE, 3, 3);
-  defer risk.free();
+  BlisObject risk = $auto(BlisObject.new(BLIS_DOUBLE, 3, 3));
   risk.fill(0.25).set_computation_precision(BLIS_DOUBLE_PREC);
   EXPECT_NOT_NULL(risk.gemm(1.0 / 3.0, transposed, observations, 0.5));
 
@@ -41,10 +40,9 @@ static void blis_application_path(void) {
 }
 
 static void blis_views_alias_and_describe_owner_storage(void) {
-  BlisObject matrix = BlisObject.copy_rows(
+  BlisObject matrix = $auto(BlisObject.copy_rows(
     %((1.0 2.0 3.0) (4.0 5.0 6.0)), BLIS_DOUBLE
-  );
-  defer matrix.free();
+  ));
   BlisObject column = matrix.column(-1), transposed = matrix.transpose_view();
 
   EXPECT_TRUE(column.is_view());
@@ -101,8 +99,7 @@ static void blis_owner_release_invalidates_views(void) {
 
 static void blis_collection_boundary_is_a_precision_copy(void) {
   List rows = %((0.123456789 2.0));
-  BlisObject copied = BlisObject.copy_rows(rows, BLIS_FLOAT);
-  defer copied.free();
+  BlisObject copied = $auto(BlisObject.copy_rows(rows, BLIS_FLOAT));
 
   EXPECT_STR_EQ(copied.storage_precision(), "single");
   EXPECT_TRUE(copied.at(0, 0) != rows.car().car().double());
@@ -110,8 +107,7 @@ static void blis_collection_boundary_is_a_precision_copy(void) {
   copied.put(0, 1, 7.0);
   EXPECT_NEAR(rows.car().cadr().double(), 2.0, 1e-12);
 
-  BlisObject result = BlisObject.new(BLIS_DOUBLE, 1, 1);
-  defer result.free();
+  BlisObject result = $auto(BlisObject.new(BLIS_DOUBLE, 1, 1));
   EXPECT_STR_EQ(result.storage_precision(), "double");
   EXPECT_STR_EQ(result.computation_precision(), "double");
   result.set_computation_precision(BLIS_SINGLE_PREC);
@@ -131,8 +127,9 @@ static void blis_collection_boundary_is_a_precision_copy(void) {
 static void blis_collection_copy_converts_every_numeric_tag(void) {
   float single = 1.25f;
   long double wide = 2.5L;
-  BlisObject copied = BlisObject.copy_vector(%(3 $single $wide), BLIS_DOUBLE);
-  defer copied.free();
+  BlisObject copied = $auto(
+    BlisObject.copy_vector(%(3 $single $wide), BLIS_DOUBLE)
+  );
 
   EXPECT_NEAR(copied.at(0, 0), 3.0, 1e-12);
   EXPECT_NEAR(copied.at(1, 0), 1.25, 1e-12);
@@ -158,14 +155,10 @@ static void blis_collection_copy_converts_every_numeric_tag(void) {
 }
 
 static void blis_operators_are_scoped_blis_operations(void) {
-  BlisObject left = BlisObject.copy_rows(%((1 2) (3 4)), BLIS_DOUBLE);
-  defer left.free();
-  BlisObject right = BlisObject.copy_rows(%((2 0) (1 2)), BLIS_DOUBLE);
-  defer right.free();
+  BlisObject left = $auto(BlisObject.copy_rows(%((1 2) (3 4)), BLIS_DOUBLE));
+  BlisObject right = $auto(BlisObject.copy_rows(%((2 0) (1 2)), BLIS_DOUBLE));
   ScopeStats before = Scope.stats();
-  Scope.retain();
-  {
-    defer Scope.release();
+  $scope() {
     BlisObject sum = left + right;
     EXPECT_NEAR(sum.at(0, 0), 3.0, 1e-12);
     BlisObject restored = sum - right;
@@ -182,8 +175,7 @@ static void blis_operators_are_scoped_blis_operations(void) {
   ScopeStats after = Scope.stats();
   EXPECT_INT_EQ((int) after.live_allocations, (int) before.live_allocations);
 
-  BlisObject wrong = BlisObject.copy_rows(%((1 2 3)), BLIS_DOUBLE);
-  defer wrong.free();
+  BlisObject wrong = $auto(BlisObject.copy_rows(%((1 2 3)), BLIS_DOUBLE));
   int shape_caught = 0;
   try left @ wrong;
   catch %(bad-arg *detail): {
@@ -194,17 +186,15 @@ static void blis_operators_are_scoped_blis_operations(void) {
 }
 
 static void blis_dimensions_empty_views_and_bounds(void) {
-  BlisObject empty = BlisObject.new(BLIS_DOUBLE, 0, 3);
-  defer empty.free();
+  BlisObject empty = $auto(BlisObject.new(BLIS_DOUBLE, 0, 3));
   EXPECT_INT_EQ(empty.rows(), 0);
   EXPECT_INT_EQ(empty.columns(), 3);
   BlisObject empty_column = empty.column(1);
   EXPECT_INT_EQ(empty_column.length(), 0);
 
-  BlisObject matrix = BlisObject.copy_rows(
+  BlisObject matrix = $auto(BlisObject.copy_rows(
     %((1.0 2.0 3.0) (4.0 5.0 6.0)), BLIS_DOUBLE
-  );
-  defer matrix.free();
+  ));
   BlisObject part = matrix.part(0, 1, 2, 2);
   EXPECT_INT_EQ(part.rows(), 2);
   EXPECT_INT_EQ(part.columns(), 2);
@@ -228,12 +218,11 @@ static void blis_dimensions_empty_views_and_bounds(void) {
 }
 
 static void blis_mutations_fail_before_changing_destination(void) {
-  BlisObject left = BlisObject.copy_rows(%((1.0 2.0) (3.0 4.0)), BLIS_DOUBLE);
-  defer left.free();
-  BlisObject wrong = BlisObject.copy_rows(%((1.0 2.0)), BLIS_DOUBLE);
-  defer wrong.free();
-  BlisObject destination = BlisObject.new(BLIS_DOUBLE, 2, 2);
-  defer destination.free();
+  BlisObject left = $auto(
+    BlisObject.copy_rows(%((1.0 2.0) (3.0 4.0)), BLIS_DOUBLE)
+  );
+  BlisObject wrong = $auto(BlisObject.copy_rows(%((1.0 2.0)), BLIS_DOUBLE));
+  BlisObject destination = $auto(BlisObject.new(BLIS_DOUBLE, 2, 2));
   destination.fill(7.0);
 
   int gemm_caught = 0;
@@ -245,10 +234,8 @@ static void blis_mutations_fail_before_changing_destination(void) {
   EXPECT_TRUE(gemm_caught);
   EXPECT_NEAR(destination.at(0, 0), 7.0, 1e-12);
 
-  BlisObject vector = BlisObject.copy_vector(%(1.0 2.0), BLIS_DOUBLE);
-  defer vector.free();
-  BlisObject short_vector = BlisObject.copy_vector(%(1.0), BLIS_DOUBLE);
-  defer short_vector.free();
+  BlisObject vector = $auto(BlisObject.copy_vector(%(1.0 2.0), BLIS_DOUBLE));
+  BlisObject short_vector = $auto(BlisObject.copy_vector(%(1.0), BLIS_DOUBLE));
   int axpy_caught = 0;
   try vector.axpyv(1.0, short_vector);
   catch %(bad-arg *detail): {
@@ -258,8 +245,7 @@ static void blis_mutations_fail_before_changing_destination(void) {
   EXPECT_TRUE(axpy_caught);
   EXPECT_NEAR(vector.at(0, 0), 1.0, 1e-12);
 
-  BlisObject single = BlisObject.copy_vector(%(1.0 2.0), BLIS_FLOAT);
-  defer single.free();
+  BlisObject single = $auto(BlisObject.copy_vector(%(1.0 2.0), BLIS_FLOAT));
   int precision_caught = 0;
   try single.axpyv(1.0, vector);
   catch %(bad-types *detail): {
@@ -271,15 +257,12 @@ static void blis_mutations_fail_before_changing_destination(void) {
 }
 
 static void blis_scale_is_negation_with_a_parameter(void) {
-  BlisObject matrix = BlisObject.copy_rows(
+  BlisObject matrix = $auto(BlisObject.copy_rows(
     %((1.0 -2.0) (3.0 4.0)), BLIS_DOUBLE
-  );
-  defer matrix.free();
+  ));
 
   ScopeStats before = Scope.stats();
-  Scope.retain();
-  {
-    defer Scope.release();
+  $scope() {
     BlisObject halved = matrix.scale(0.5);
     EXPECT_NEAR(halved.at(0, 0), 0.5, 1e-12);
     EXPECT_NEAR(halved.at(0, 1), -1.0, 1e-12);
@@ -294,8 +277,7 @@ static void blis_scale_is_negation_with_a_parameter(void) {
           scaled.at(row, column), negated.at(row, column), 1e-12
         );
 
-    BlisObject vector = BlisObject.copy_vector(%(3.0 4.0), BLIS_FLOAT);
-    defer vector.free();
+    BlisObject vector = $auto(BlisObject.copy_vector(%(3.0 4.0), BLIS_FLOAT));
     EXPECT_NEAR(vector.scale(1.0 / vector.normfv()).normfv(), 1.0, 1e-6);
     EXPECT_NEAR(vector.normfv(), 5.0, 1e-6);
   }
@@ -314,10 +296,9 @@ static void blis_scale_is_negation_with_a_parameter(void) {
 }
 
 static void blis_bulk_read_agrees_with_element_reads(void) {
-  BlisObject matrix = BlisObject.copy_rows(
+  BlisObject matrix = $auto(BlisObject.copy_rows(
     %((1.0 2.0 3.0) (4.0 5.0 6.0)), BLIS_DOUBLE
-  );
-  defer matrix.free();
+  ));
   Scope.retain();
   defer Scope.release();
 
@@ -329,8 +310,7 @@ static void blis_bulk_read_agrees_with_element_reads(void) {
     for (int column = 0; column < matrix.columns(); column++)
       EXPECT_NEAR(values[column].double(), matrix.at(row, column), 1e-12);
   }
-  BlisObject rows_copy = BlisObject.copy_rows(rows, BLIS_DOUBLE);
-  defer rows_copy.free();
+  BlisObject rows_copy = $auto(BlisObject.copy_rows(rows, BLIS_DOUBLE));
   EXPECT_NEAR(rows_copy.at(1, 2), 6.0, 1e-12);
 
   Array flipped = matrix.transpose_view().to_rows();
@@ -345,8 +325,7 @@ static void blis_bulk_read_agrees_with_element_reads(void) {
   EXPECT_INT_EQ((int) column.len(), 2);
   EXPECT_NEAR(column[0].double(), 3.0, 1e-12);
   EXPECT_NEAR(column[1].double(), 6.0, 1e-12);
-  BlisObject column_copy = BlisObject.copy_vector(column, BLIS_DOUBLE);
-  defer column_copy.free();
+  BlisObject column_copy = $auto(BlisObject.copy_vector(column, BLIS_DOUBLE));
   EXPECT_NEAR(column_copy.at(1, 0), 6.0, 1e-12);
 
   Array second = matrix.part(1, 0, 1, 3).to_values();
@@ -354,12 +333,10 @@ static void blis_bulk_read_agrees_with_element_reads(void) {
   EXPECT_NEAR(second[0].double(), 4.0, 1e-12);
   EXPECT_NEAR(second[2].double(), 6.0, 1e-12);
 
-  BlisObject single = BlisObject.copy_vector(%(0.5 0.25), BLIS_FLOAT);
-  defer single.free();
+  BlisObject single = $auto(BlisObject.copy_vector(%(0.5 0.25), BLIS_FLOAT));
   EXPECT_NEAR(single.to_values()[1].double(), 0.25, 1e-12);
 
-  BlisObject empty = BlisObject.new(BLIS_DOUBLE, 0, 3);
-  defer empty.free();
+  BlisObject empty = $auto(BlisObject.new(BLIS_DOUBLE, 0, 3));
   EXPECT_INT_EQ((int) empty.to_rows().len(), 0);
 
   int vector_caught = 0;
@@ -372,18 +349,14 @@ static void blis_bulk_read_agrees_with_element_reads(void) {
 }
 
 static void blis_operator_temporaries_are_bounded_per_iteration(void) {
-  BlisObject matrix = BlisObject.copy_rows(
+  BlisObject matrix = $auto(BlisObject.copy_rows(
     %((0.75 0.25) (0.25 0.75)), BLIS_DOUBLE
-  );
-  defer matrix.free();
-  BlisObject rank = BlisObject.copy_vector(%(0.5 0.5), BLIS_DOUBLE);
-  defer rank.free();
+  ));
+  BlisObject rank = $auto(BlisObject.copy_vector(%(0.5 0.5), BLIS_DOUBLE));
   ScopeStats before = Scope.stats();
 
   for (int round = 0; round < 64; round++) {
-    Scope.retain();
-    {
-      defer Scope.release();
+    $scope() {
       BlisObject next = matrix @ rank;
       rank.copy_from(next);
     }

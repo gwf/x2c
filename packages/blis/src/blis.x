@@ -261,9 +261,7 @@ void Blis.shutdown(void) {
   bli_finalize();
 }
 
-String Blis.version(void) {
-  return String.new((char *) bli_info_get_version_str());
-}
+String Blis.version(void) => String.new((char *) bli_info_get_version_str());
 
 BlisObject BlisObject.new(num_t storage, int rows, int columns) {
   return _blis_owned(storage, rows, columns, "new");
@@ -691,9 +689,7 @@ BlisObject BlisObject.scale(BlisObject object, double alpha) {
   return result;
 }
 
-BlisObject BlisObject.neg(BlisObject object) {
-  return object.scale(-1.0);
-}
+BlisObject BlisObject.neg(BlisObject object) => object.scale(-1.0);
 
 BlisObject BlisObject.matmul(BlisObject left, BlisObject right) {
   _blis_live(left, "matmul");
