@@ -1,11 +1,10 @@
 /*  emit.x -- emit C tokens from x2c ASTs
 
     Translates normalized ASTs into token `List`s for downstream flattening and
-    formatting. One stack-local Emitter holds the cleanup stack and preserved
-    automatic names, so emission is reentrant and a failed translation cannot
-    contaminate later units. Cleanup lowering preserves handler order across
-    returns and loop exits.
-
+    formatting. One stack-local Emitter holds the current function's name,
+    static objects, and native aliases, so emission is reentrant and a failed
+    translation cannot contaminate later units. `cleanup.x` has already placed
+    each cleanup region's statements on the exits that leave it.
 */
 
 #pragma once
@@ -23,7 +22,7 @@
 // Per-emission state.
 typedef struct Emitter {
   delegate Compiler compiler;
-  Type return_type, int origin, String fn_name, List native_aliases;
+  int origin, String fn_name, List native_aliases;
   Array native_macros;
   Map static_objects;
   int static_support;
@@ -142,9 +141,7 @@ static List Emitter._declare(Emitter emitter, List ast, List context) {
 
 static List Emitter._function(Emitter e, List ast, List context) {
   List (type, bindings, body) = ast.cdr();
-  List declaration = %(declare $type (bindings $bindings));
-  Type old_return_type = e.return_type, String old_fn = e.fn_name;
-  e.return_type = cdr(declaration.type_from_ast()).type().declared();
+  String old_fn = e.fn_name;
   List function_binding = bindings.cadr();
   e.fn_name = binding_identity_spelling(function_binding);
   Var defer_owner;
@@ -156,10 +153,7 @@ static List Emitter._function(Emitter e, List ast, List context) {
   body = %( $body );
   Map old_statics = e.static_objects;
   e.static_objects = {};
-  // No loop or switch spans a function boundary, so a nested body starts
-  // with the barriers cleared rather than inheriting an enclosing loop's.
   List decl = e._emit(bindings, type), body_code = e._emit(body, NULL);
-  e.return_type = old_return_type;
   e.fn_name = old_fn;
   e.static_objects = old_statics;
   return %(@type @decl @body_code);
@@ -521,11 +515,9 @@ static List Emitter._destructure_value(
 
 
 // Emit a callable defer region. The runtime record covers nonlocal transfer;
-// the emitter cleanup stack covers ordinary fallthrough and structured exits.
+// the cleanup pass placed `cleanup` on ordinary and structured exits.
 static List Emitter._defer(Emitter e, List ast, List context) {
-  List (body, env_binding, callback, records, written, record, cleanup) =
-    ast.cdr();
-  (void) written;
+  List (body, env_binding, callback, records, record, cleanup) = ast.cdr();
   String cleanup_name = binding_identity_spelling(record);
   String callback_name = binding_identity_spelling(callback);
   List env_setup = NULL, env_arg = %("NULL");
@@ -558,7 +550,7 @@ static List Emitter._defer(Emitter e, List ast, List context) {
 
 // Emit the selected transferring arm after detaching its registration. The
 // retained error record stays borrowed through the arm and closes on every
-// arm exit through the ordinary cleanup stack.
+// arm exit through the region's cleanup statements.
 static List Emitter._filtered_catch(
   Emitter emitter, List records, String frame_name, String handle_name,
   List context) {
@@ -586,14 +578,12 @@ static List Emitter._filtered_catch(
 }
 
 static List Emitter._try(Emitter e, List ast, List context) {
-  List (body, clause, finalizer, frame, handle, cleanup) = ast.cdr();
-  (void) finalizer;
+  List (body, clause, frame, handle, cleanup) = ast.cdr();
   String frame_name = binding_identity_spelling(frame);
   String handle_name = handle ? binding_identity_spelling(handle) : NULL;
   /* The pass built the statements that leave this region, including the
      run-once claim around a finalizer. Every path that leaves emits them. */
   List final_code = e._emit(%( $cleanup ), context);
-  List leave_stmt = NULL;
   List body_code = e._emit(%( $body ), context);
   List catch_block = NULL;
   if (clause)
@@ -602,8 +592,7 @@ static List Emitter._try(Emitter e, List ast, List context) {
   /* Normal and handled paths share a trailer. The unhandled landing must
      remain visibly nonreturning to the native compiler. Avoid labels here:
      an enclosing finalizer can copy this emitted block into several exits. */
-  List final_trailer = %(@final_code @leave_stmt);
-  List unhandled = %("{" @final_trailer "__builtin_unreachable();" "}");
+  List unhandled = %("{" @final_code "__builtin_unreachable();" "}");
   catch_block = catch_block ? %("{"
       "if (x2c_exception_is_error_target(&$frame_name))"
         @catch_block
@@ -655,7 +644,7 @@ static List Emitter._try(Emitter e, List ast, List context) {
                "x2c_exception_landed(&" $frame_name ");"
                @catch_block
              "}"
-             @final_trailer
+             @final_code
            "}");
 }
 
@@ -1050,7 +1039,7 @@ static List Emitter._preproc(Emitter emitter, List ast, List context) {
 }
 
 /* Generic sequence emission visits sibling nodes from left to right because
-   generated names, origins, and cleanup state change during the walk.
+   generated names and origins change during the walk.
    Specialized forms choose their required construction order; for example,
    `_try` constructs the finalizer before the body and catch arms. This orders
    tokens, not C operand evaluation; only producer-marked forms such as
@@ -1381,16 +1370,13 @@ static List Emitter._emit(Emitter e, List ast, List context) {
     bind, transform, or choose header and source placement; generation supplies
     any added scaffolding in the same normalized grammar. It preserves the
     top-level AST sequence and advances generated-name counters as it allocates
-    temporaries. Invalid `goto` placement reports through the compiler's
-    `<emit>` diagnostic path. Returned canonical `List`s and `String`s are
-    owned
-    by pools active during emission; promote them before releasing those
-    pools if the tokens must survive.
+    temporaries. Returned canonical `List`s and `String`s are owned by pools
+    active during emission; promote them before releasing those pools if the
+    tokens must survive.
 */
 List Compiler.emit(Compiler compiler, List ast) {
   struct Emitter state = {
     .compiler = compiler,
-    .return_type = NULL,
     .origin = 0,
     .fn_name = NULL,
     .native_macros = []

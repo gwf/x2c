@@ -32,7 +32,7 @@
         (return (expr (int) (ident (binding 40 "_x2c_return_value_0")))))))) 
     (binding 33 "_x2c_defer_env_0") (binding 36 "_x2c_defer_cleanup_0") 
     (((binding 7 "value") (int) (binding 32 "_x2c_defer_capture_0"))) 
-    () (binding 39 "_x2c_defer_record_0") 
+    (binding 39 "_x2c_defer_record_0") 
     ((stmnt 
       (expr (void) 
        (call "x2c_cleanup_leave" 
@@ -61,7 +61,7 @@
                          (ident (binding 41 "_x2c_defer_record_1"))))))))) 
         (return (expr (int) (ident (binding 42 "_x2c_return_value_1")))))))) 
     () (binding 38 "_x2c_defer_cleanup_1") () 
-    () (binding 41 "_x2c_defer_record_1") 
+    (binding 41 "_x2c_defer_record_1") 
     ((stmnt 
       (expr (void) 
        (call "x2c_cleanup_leave" 

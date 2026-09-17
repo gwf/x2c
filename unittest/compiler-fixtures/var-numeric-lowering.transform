@@ -524,10 +524,6 @@
         (at 71 
          (stmnt 
           (expr (int) (postfix ++ (expr (int) (ident (binding 63 "branch"))))))))))) 
-    (block 
-     (at 72 
-      (stmnt 
-       (expr (int) (postfix ++ (expr (int) (ident (binding 63 "branch")))))))) 
     (binding 99 "_x2c_exception_frame_0") (binding 100 "_x2c_error_handler_0") 
     ((if (expr (int) 
           (call "x2c_exception_claim" 

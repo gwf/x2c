@@ -284,7 +284,7 @@
                           (ident (binding 36 "Symbol_var"))) 
                     (args (expr ("Symbol") 
                            (literal ("Symbol") "bad-arg" bad-arg))))) 
-             (nil)))) (block)))) () (binding 57 "_x2c_exception_frame_0") 
+             (nil)))) (block)))) (binding 57 "_x2c_exception_frame_0") 
     (binding 58 "_x2c_error_handler_0") 
     ((stmnt 
       (expr (void) 

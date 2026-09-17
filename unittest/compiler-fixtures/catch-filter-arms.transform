@@ -191,9 +191,6 @@
                    (op & (expr (("ExceptionFrame")) 
                           (ident (binding 29 "_x2c_exception_frame_0"))))))))) 
          (return (expr (int) (ident (binding 33 "_x2c_return_value_2"))))))))) 
-    (block 
-     (at 4 (stmnt 
-            (expr (int) (postfix ++ (expr (int) (ident (binding 3 "mode")))))))) 
     (binding 29 "_x2c_exception_frame_0") (binding 30 "_x2c_error_handler_0") 
     ((if (expr (int) 
           (call "x2c_exception_claim" 

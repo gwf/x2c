@@ -21,6 +21,7 @@
 #include "compiler.x"
 
 #pragma private
+$(import "../src/ast-rewrite.xmacro")
 
 #include "ast.x"
 #include "type.x"
@@ -203,23 +204,21 @@ static void _collect_labels(Walk walk, Var value, List path) {
   foreach (Var child, node) _collect_labels(walk, child, path);
 }
 
-/* Reject a jump that would enter a region it did not open, and return the
-   depth the jump unwinds to. */
-/* Report at the jump the walk is on, and leave the compiler's origin as it
-   was for whatever reports next. */
-static void _reject_goto(Walk walk, String message, List note) {
-  int previous = walk.compiler.origin;
-  walk.compiler.origin = walk.origin;
-  walk.compiler.report_error(<emit>, message, NULL, note);
-  walk.compiler.origin = previous;
+/* Report at `origin`, and leave the compiler's origin as it was for whatever
+   reports next. */
+static void _report_at(Walk w, int origin, String message, List note) {
+  $let(w.compiler.origin, origin)
+    w.compiler.report_error(<emit>, message, NULL, note);
 }
 
+/* Reject a jump that would enter a region it did not open, and return the
+   depth the jump unwinds to. */
 static int _goto_stop(Walk walk, Var label) {
   String name = _label_spelling(label);
   Var stored;
   if (!name || !walk.labels.try_get(name, &stored)) {
-    _reject_goto(walk, "goto target label is not defined in this function",
-                 NULL);
+    _report_at(walk, walk.origin,
+               "goto target label is not defined in this function", NULL);
     return (int) walk.regions.len();
   }
   List target = stored, source = _region_path(walk);
@@ -228,16 +227,16 @@ static int _goto_stop(Walk walk, Var label) {
   for (int i = source_depth; i > target_depth && suffix; i--)
     suffix = suffix.cdr();
   if (target_depth > source_depth || suffix !== target) {
-    _reject_goto(walk, "goto cannot enter or cross a protected cleanup region",
-                 %("jump only within the same region or outward"));
+    _report_at(walk, walk.origin,
+               "goto cannot enter or cross a protected cleanup region",
+               %("jump only within the same region or outward"));
     return (int) walk.regions.len();
   }
   return target_depth;
 }
 
 /* C requires automatic state changed after `sigsetjmp` to be volatile once
-   `siglongjmp` returns. These are the forms that change their left operand,
-   read the same way the emitter used to read them. */
+   `siglongjmp` returns. These are the forms that change their left operand. */
 static String _changed_name(List node) {
   match (node) {
     case %(op ?operator ?target *):
@@ -378,14 +377,9 @@ static List _static_regions(Compiler c, List ast, Map runtime) {
       return %(block @{before.list_free()});
     }
   }
-  Array children = [];
-  foreach (Var child, ast) {
-    if (child is <list>) children.push(_static_regions(c, child, runtime));
-    else children.push(child);
-  }
-  return children.list_free();
+  Var child;
+  $ast.rewrite_children(ast, child, _static_regions(c, child, runtime));
 }
-
 
 /* Names whose storage a transfer may leave stale: those a `try` body writes,
    and those a `defer` inside one writes through its environment. The flag
@@ -436,14 +430,11 @@ static List _function(Compiler compiler, List node);
 /* Rewrite a construct's body with the transfer barriers it establishes. A
    loop bounds both `break` and `continue`; a switch bounds only `break`,
    because a `continue` inside it still targets the enclosing loop. */
-static Var _bounded(Walk walk, Var body, int is_loop) {
-  int saved_break = walk.break_stop, saved_continue = walk.continue_stop;
-  walk.break_stop = (int) walk.regions.len();
-  if (is_loop) walk.continue_stop = (int) walk.regions.len();
-  Var result = _rewrite(walk, body);
-  walk.break_stop = saved_break;
-  walk.continue_stop = saved_continue;
-  return result;
+static Var _bounded(Walk w, Var body, int is_loop) {
+  int depth = w.regions.len();
+  $let(w.break_stop, depth)
+  $let(w.continue_stop, is_loop ? depth : w.continue_stop)
+    return _rewrite(w, body);
 }
 
 /* Rewrite a region's body and its handlers with the region open. */
@@ -551,9 +542,8 @@ static Var _preserve(Var value, Map names) {
       return %($head $type (bindings @{preserved.list_free()}));
     }
   }
-  Array children = [];
-  foreach (Var child, node) children.push(_preserve(child, names));
-  return children.list_free();
+  Var child;
+  $ast.rewrite_children(node, child, _preserve(child, names));
 }
 
 /* Save the returned value before cleanup runs, since cleanup may change the
@@ -577,11 +567,11 @@ static Var _rewrite(Walk walk, Var value) {
   // is long, so the walk stops here.
   match (node) case %(expr *): return value;
   match (node) {
-    case %(defer ?body ?env ?callback ?records ?written): {
+    case %(defer ?body ?env ?callback ?records ?): {
       List record = _region_binding(walk.compiler, "defer_record");
       List cleanup = _defer_cleanup(record);
       return %(defer ${_inside(walk, cleanup, body, body)} $env $callback
-               $records $written $record $cleanup);
+               $records $record $cleanup);
     }
     case %(try ?body ?clause ?finalizer): {
       List frame = _region_binding(walk.compiler, "exception_frame");
@@ -591,13 +581,10 @@ static Var _rewrite(Walk walk, Var value) {
       Var labelled = _finalizer_label(finalizer, walk.origin, &labelled_at);
       if (labelled) {
         String name = _label_spelling(labelled);
-        int previous = walk.compiler.origin;
-        walk.compiler.origin = labelled_at;
-        walk.compiler.report_error(
-          <emit>, "a finally body cannot define a label", NULL,
+        _report_at(
+          walk, labelled_at, "a finally body cannot define a label",
           %(${%"a finalizer runs on every path that leaves its region, so '${
             name ? name : "this label"}' would be defined once for each"}));
-        walk.compiler.origin = previous;
       }
       List cleanup = _try_cleanup(
         frame, handle, _rewrite(walk, finalizer), !!clause);
@@ -616,7 +603,7 @@ static Var _rewrite(Walk walk, Var value) {
           }
           clause_out = %(catcharms ${rewritten.list_free()});
         }
-      return %(try $body_out $clause_out $finalizer $frame $handle $cleanup);
+      return %(try $body_out $clause_out $frame $handle $cleanup);
     }
     /* A function-static initializer leaves its own record at the end of its
        block. No exit runs that record, but a jump still may not enter the
@@ -624,13 +611,8 @@ static Var _rewrite(Walk walk, Var value) {
     case %(localinit ?guard ?body):
       return %(localinit ${_rewrite(walk, guard)}
                ${_inside(walk, NULL, node, body)});
-    case %(at ?(int origin) ?inner): {
-      int previous = walk.origin;
-      walk.origin = origin;
-      Var lowered = _rewrite(walk, inner);
-      walk.origin = previous;
-      return %(at $origin $lowered);
-    }
+    case %(at ?(int origin) ?inner):
+      $let(walk.origin, origin) return %(at $origin ${_rewrite(walk, inner)});
     case %(return): return _transfer(walk, 0, node);
     case %(return (!set ?expression (expr ? ?))): {
       /* Only a region that runs something can change what the expression
@@ -653,9 +635,8 @@ static Var _rewrite(Walk walk, Var value) {
                ${_bounded(walk, body, 0)});
     case %(function *): return _function(walk.compiler, node);
   }
-  Array children = [];
-  foreach (Var child, node) children.push(_rewrite(walk, child));
-  return children.list_free();
+  Var child;
+  $ast.rewrite_children(node, child, _rewrite(walk, child));
 }
 
 /* Each function walks on its own: no loop, switch, or region spans a
@@ -694,9 +675,8 @@ static Var _units(Compiler compiler, Var value) {
     // definition hides inside an expression for the walk to find.
     case %(expr *): return value;
   }
-  Array children = [];
-  foreach (Var child, node) children.push(_units(compiler, child));
-  return children.list_free();
+  Var child;
+  $ast.rewrite_children(node, child, _units(compiler, child));
 }
 
 /** Names each cleanup region, records the statements that leave it, and

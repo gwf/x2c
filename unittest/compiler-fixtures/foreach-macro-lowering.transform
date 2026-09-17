@@ -627,7 +627,7 @@
              (expr (int) 
               (postfix ++ (expr (int) (ident (binding 119 "deferred_keys"))))))))) 
          () (binding 303 "_x2c_defer_cleanup_0") () 
-         () (binding 308 "_x2c_defer_record_0") 
+         (binding 308 "_x2c_defer_record_0") 
          ((stmnt 
            (expr (void) 
             (call "x2c_cleanup_leave" 
@@ -765,7 +765,7 @@
                    (raise 
                     (expr ("Symbol") (literal ("Symbol") "invariant" invariant)) 
                     (args))))) () (binding 306 "_x2c_defer_cleanup_1") 
-                () () (binding 311 "_x2c_defer_record_1") 
+                () (binding 311 "_x2c_defer_record_1") 
                 ((stmnt 
                   (expr (void) 
                    (call "x2c_cleanup_leave" 
@@ -784,7 +784,7 @@
        (stmnt 
         (expr (int) 
          (op = (expr (int) (ident (binding 146 "caught"))) 
-          (expr (int) (literal (int) "1")))))))) () 
+          (expr (int) (literal (int) "1")))))))) 
     (binding 309 "_x2c_exception_frame_0") (binding 310 "_x2c_error_handler_0") 
     ((stmnt 
       (expr (void) 

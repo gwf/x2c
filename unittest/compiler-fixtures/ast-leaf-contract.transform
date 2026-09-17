@@ -251,7 +251,7 @@
          (((binding 76 "count") ("ast_phase1_Count") 
            (binding 122 "_x2c_defer_capture_0")) 
           ((binding 85 "value") ("Var") (binding 123 "_x2c_defer_capture_1"))) 
-         ((binding 76 "count")) (binding 131 "_x2c_defer_record_0") 
+         (binding 131 "_x2c_defer_record_0") 
          ((stmnt 
            (expr (void) 
             (call "x2c_cleanup_leave" 
@@ -330,11 +330,6 @@
           (expr ("Var") 
            (op = (expr ("Var") (ident (binding 96 "caught"))) 
             (expr ("Var") (ident (binding 99 "value"))))))))))) 
-    (block 
-     (at 25 
-      (stmnt 
-       (expr ("ast_phase1_Count") 
-        (postfix ++ (expr ("ast_phase1_Count") (ident (binding 76 "count")))))))) 
     (binding 132 "_x2c_exception_frame_0") (binding 133 "_x2c_error_handler_0") 
     ((if (expr (int) 
           (call "x2c_exception_claim" 
