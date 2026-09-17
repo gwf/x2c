@@ -2031,15 +2031,20 @@ static List _resolve_content(
           expr (<macro-expr>)
             (op $operator $condition $ontrue $onfalse)
         );
-      Type type = true_type, left = c.sym.resolve_numeric_type(type);
-      Type right = c.sym.resolve_numeric_type(false_type);
-      if (left && right) type = left.widest(right);
-      else if (_conditional_joins(c, false_type, true_type)) {
-        type = false_type;
-        ontrue = c.convert_expression(ontrue, type);
+      /* Arms of one declared type keep it, so a `Symbol` conditional stays a
+         `Symbol` rather than the integer that represents it. */
+      Type type = true_type;
+      if (true_type.declared() != false_type.declared()) {
+        Type left = c.sym.resolve_numeric_type(type);
+        Type right = c.sym.resolve_numeric_type(false_type);
+        if (left && right) type = left.widest(right);
+        else if (_conditional_joins(c, false_type, true_type)) {
+          type = false_type;
+          ontrue = c.convert_expression(ontrue, type);
+        }
+        else if (_conditional_joins(c, true_type, false_type))
+          onfalse = c.convert_expression(onfalse, type);
       }
-      else if (_conditional_joins(c, true_type, false_type))
-        onfalse = c.convert_expression(onfalse, type);
       return %(expr $type (op $operator $condition $ontrue $onfalse));
     }
     case %(op ?operator ?left ?right): {
