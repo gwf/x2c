@@ -340,8 +340,37 @@ One correction to the framing: this is not optional for the lowering. A
 statement cannot work without reading it back. The question is the shape of
 the accessor, not whether one is needed.
 
-For now the accessor stays as branch scaffolding with a range check, and
-nothing ships until this is decided.
+**Measured, after the review session narrowed the second alternative.** It
+is nearly free for patterns, and it needs no new API at all.
+`Compiler.runtime_literals` already disables folding, and
+`Compiler.parse_catch_pattern_literal` already sets it for catch filter
+patterns. A match arm sets `in_pattern` but not `runtime_literals`. Adding
+`$let(c.runtime_literals, 1)` beside the existing `$let(c.in_pattern, 1)`
+in `_match_case` makes a `case` pattern fully structural: it reaches a
+macro as the `cons` chain the source wrote.
+
+What that costs, measured on `src/transform.x`:
+
+| | folded | unfolded |
+|---|---|---|
+| translate | 0.44 s | 0.43 s |
+| generated C | 156,758 B | 150,749 B |
+
+Translation time is unchanged and the output is 4% smaller, because the
+cache slots for match patterns were dead weight: the match compiler builds
+a decision tree and never needs the pattern as a runtime List. Twelve
+fixture artifact expectations change, all `c`, `ast`, `transform` and
+`emit`; no `stdout`, `status` or `compile-status` fixture fails, so nothing
+changes behavior.
+
+It solves only half the problem. A template such as `%(sum $a $b)` is not
+in a pattern position and cannot be marked at parse time, so its constant
+head is still a cache id and something is still needed to read it. The
+remaining choice is therefore narrower than it was: patterns need no API,
+and only interpolated templates do.
+
+The experiment is reverted; the accessor stays as branch scaffolding with a
+range check, and nothing ships until Gary decides.
 
 ### M3 - port `autodiff.xmacro`
 
