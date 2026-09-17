@@ -123,6 +123,10 @@ Files: `lib/error.x`, `lib/scope.x`, `lib/context.x`, `lib/logger.x`.
 
 ## Group 7: strings, symbols, and regex
 
+> Fixed 2026-09-17, all eight rows. `String.getindex` now returns the byte
+> unsigned, so -1 means out of range and nothing else; worker threads get an
+> 8 MiB stack so the documented regex depth holds off the main thread.
+
 Files: `lib/common.x` (slice count), `lib/string.x` (except escapes),
 `lib/string-number.x`, `lib/atom.x`, `lib/regex.x`, `lib/scan.x`
 (`scan_atom` only).
@@ -197,6 +201,10 @@ Files: `lib/process.x`, `lib/path.x`, `lib/file.x` (error details),
 
 ## Group 11: driver, build, and project
 
+> Fixed 2026-09-17, all 13 rows. Concurrent builds in one project are safe
+> now (132 parallel builds green, against 17 failures in 24 before): the
+> fingerprint `.i` is per process and outputs are renamed into place.
+
 Files: `src/build.x`, `src/project.x` (planning and manifest), `src/main.x`,
 `src/cli.x`, `src/utils.x`, `src/script.x`, `src/bootstrap.x`, `src/deps.x`.
 
@@ -212,7 +220,7 @@ Files: `src/build.x`, `src/project.x` (planning and manifest), `src/main.x`,
 | `--dump-cpp` writes to stderr. | `x2c translate --dump-cpp hello.x 2>/dev/null \| wc -c` is 0. | `main.x:109`. | me |
 | `--target` and `--profile` are ignored with explicit inputs; `-c` is ignored for manifests. | `x2c build -q --target nonexistent --output o hello.x` exits 0. | `main.x:416` rejects only `--manifest-path`; `project.x:503` resets `compile_only`. | me |
 | `--profile` does not apply to dependency targets. | `x2c run --profile release` prints `core=1`, expected 100. | `project.x:532` applies it only when `chosen`. | agent |
-| A warm `x2c script` run preprocesses and links on every run. | `run_script -v args.x` on an unchanged script reports `up-to-date translate` and `up-to-date compile`, then runs `cc -E` for the depfile and links `run.<pid>` again. Found when `unittest/probes/run-cli-boundary.sh:1304` was made able to fail; that assertion expected no rebuild step at all and is now narrowed to translate and compile. | `src/build.x` fingerprints through a fresh `.i` and republishes the run image. | me |
+| ~~A warm `x2c script` run preprocesses and links on every run.~~ Refuted 2026-09-17. | Three consecutive verbose warm runs print only `x2c: run`. The rebuild came from the probe copying a file into a directory the build searched; `_script_fingerprint` covers those directory mtimes deliberately, so a header added where a search would find it rebuilds. The probe now re-establishes the cache first and asserts both behaviors. | n/a | me |
 | A script edited during its build keeps running the old code. | Edit a script 0.2 s into `x2c script --rebuild`; later runs print the old text. | `Build.publish_script` (`build.x:905-928`) fingerprints files after the build. | agent |
 | `x2c new <symlink>` names the target after the destination. | `x2c new linkempty` writes `[target.realempty]`. | `Path.absolute` resolves links (`project.x:704`). | agent |
 | A non-canonical `X2C_HOME` compiles the runtime into every script. | 49 runtime modules translated per script, 3.4 s. | `Build.script_helpers` (`build.x:884-886`) uses `x2c_get_root()`. | agent |
@@ -503,11 +511,10 @@ Decided 2026-09-17 by Gary unless marked open.
   long, and f64 compare by value, as documented.
 - **Duplicate warnings (Group 4).** Report identical warnings once, as
   `language.md:2757` says.
-- **Concurrent builds (Group 11).** Open: whether two builds in one project
-  are supported. Either way they must not exit 1 silently. Recommended: make
-  them safe through the `file_publish` and `file_lock` owners that landed
-  2026-09-17, giving the fingerprint `.i` a per-process name and never
-  unlinking the output before its replacement exists.
+- **Concurrent builds (Group 11).** Decided 2026-09-17 and done: two builds in
+  one project are safe, through a per-process fingerprint `.i` and outputs
+  renamed into place. Latent remainder: `Build._place_unit_headers` copies
+  generated headers into shared paths without an atomic publish.
 - **`volatile` locals and non-volatile parameters (Group 3).** Open. A local
   written across a `try` is `volatile`, and passing its address to an ordinary
   `self` or callee parameter discards the qualifier (C11 6.7.3 undefined).
