@@ -226,8 +226,16 @@ def tree_content() -> dict[str, str]:
         fields = meta.split()
         if path and len(fields) >= 2:
             index[path] = fields[1][:16]
-    changed = set(zsplit(git("diff", "--name-only", "-z")))
+    # Git does not compare assume-unchanged or skip-worktree paths.
+    flagged = {entry[2:] for entry in zsplit(git("ls-files", "-v", "-z"))
+               if entry[0].islower() or entry[0] == "S"}
+    changed = set(zsplit(git("diff", "--name-only", "-z"))) | flagged
     untracked = zsplit(git("ls-files", "--others", "--exclude-standard", "-z"))
+    # Make reads these names before Makefile, in any directory it enters.
+    shadows = zsplit(git("ls-files", "--others", "-z", "--",
+                         ":(glob)**/GNUmakefile", ":(glob)**/makefile"))
+    if shadows:
+        raise ValueError(f"untracked makefile shadows Makefile: {shadows[0]}")
     entries: dict[str, str] = {}
     for path in index.keys() | set(untracked):
         try:
@@ -359,6 +367,8 @@ def main() -> int:
     ens = sub.add_parser("ensure", help="reuse or run and record a publication gate")
     ens.add_argument("gate", choices=sorted(GATES))
     args = parser.parse_args()
+    # Extra makefiles named here would be read by every Make in the gate.
+    os.environ.pop("MAKEFILES", None)
     try:
         if args.command == "check":
             return cmd_check(args.gate)
