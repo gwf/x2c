@@ -126,9 +126,7 @@ check-after-precommit:
 #	$(MAKE) examples
 	$(MAKE) proof-raw-symbols
 	$(MAKE) doc-check
-# doc-outputs adds about 6 s on macOS, where each new executable's first run
-# waits for a system check; enabling it needs Gary's decision on that cost.
-#	$(MAKE) doc-outputs
+	$(MAKE) doc-outputs
 
 # Stage 2 is where the compiler has reached its fixed point: stage 1 is built
 # by the refreshed bootstrap and stage 2 by stage 1, so `stage-diff-2` proves
