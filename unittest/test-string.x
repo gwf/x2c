@@ -71,7 +71,7 @@ static void string_canonical_identity(void) {
 
   unsigned hash = first.hash();
   EXPECT_INT_EQ(first.hash(), hash);
-  String.free(first);
+  first.free();
   EXPECT_TRUE(String.new("canonical identity") === first);
 
   char raw[] = "raw intern input";
@@ -109,7 +109,7 @@ static void string_literal_receives_methods(void) {
 static void string_add_and_len(void) {
   String hello = "hello";
   String world = "world";
-  String joined = String.add(hello, world);
+  String joined = hello.add(world);
   EXPECT_INT_EQ(joined.len(), 10);
   EXPECT_TRUE(joined == "helloworld");
 
@@ -150,12 +150,12 @@ static void string_slice_stack_probe_boundaries(void) {
   EXPECT_INT_EQ(at_limit.getindex(255), raw[255]);
   EXPECT_INT_EQ(over_limit.getindex(256), raw[256]);
 
-  PoolStats after_first = Pool.stats(pool);
+  PoolStats after_first = pool.stats();
   ScopeStats before_hits = Scope.stats();
   EXPECT_TRUE(long_text.getslice(0, 256, 1) === at_limit);
   EXPECT_TRUE(long_text.getslice(0, 256, 1) === at_limit);
   ScopeStats after_hits = Scope.stats();
-  PoolStats after_repeat = Pool.stats(pool);
+  PoolStats after_repeat = pool.stats();
   EXPECT_INT_EQ((int) after_repeat.interned, (int) after_first.interned);
   EXPECT_INT_EQ((int) after_hits.allocation_calls,
                 (int) before_hits.allocation_calls);
@@ -194,14 +194,14 @@ static void string_noop_construction_preserves_owner(void) {
   Pool pool = String.pool_retain_named("string-noop-construction");
   String text = "unchanged";
   String long_text = "abcdefghij".repeat(30);
-  PoolStats before = Pool.stats(pool);
+  PoolStats before = pool.stats();
 
   EXPECT_TRUE(text.repeat(1) === text);
   EXPECT_TRUE(text.withindex(0, 'u') === text);
   EXPECT_TRUE(long_text.getslice(0, long_text.len(), 1) === long_text);
   EXPECT_TRUE(text.replace_n("change", "change", -1) === text);
 
-  PoolStats after = Pool.stats(pool);
+  PoolStats after = pool.stats();
   EXPECT_INT_EQ((int) after.allocation_calls,
                 (int) before.allocation_calls);
 
@@ -353,7 +353,7 @@ static void string_constructor_invariants(void) {
   ScopeStats before_free = Scope.stats();
   String transient = String.malloc(4);
   strcpy(transient, "xyz");
-  String.free(transient);
+  transient.free();
   ScopeStats after_free = Scope.stats();
   EXPECT_INT_EQ((int) after_free.live_allocations,
                 (int) before_free.live_allocations);

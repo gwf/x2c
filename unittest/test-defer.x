@@ -253,7 +253,7 @@ static void system_scope_restores_destination_and_transfer(void) {
   EXPECT_INT_EQ(caught, 1);
   EXPECT_INT_EQ(after.live_allocations, retained.live_allocations);
   EXPECT_INT_EQ(after.live_scopes, retained.live_scopes);
-  Scope.destroy(destination);
+  destination.destroy();
 }
 
 static void system_let_captures_storage_once(void) {

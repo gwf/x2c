@@ -273,7 +273,7 @@ static void array_splice_and_concat(void) {
   Array insert = Array.update_n([], 2, seven, eight);
   Array removed = arr.splice(1, 2, insert);
   Array extra = Array.update_n([], 1, five);
-  Array combined = Array.concat(arr, extra);
+  Array combined = arr.concat(extra);
   EXPECT_INT_EQ(arr.len(), 4);
   EXPECT_VAR_EQ(arr[0], zero);
   EXPECT_VAR_EQ(arr[1], seven);
@@ -290,11 +290,11 @@ static void array_find_contains_count(void) {
   $test.scoped();
   Var five = 5, six = 6, seven = 7, forty_two = 42;
   Array arr = Array.update_n([], 4, five, six, five, seven);
-  EXPECT_INT_EQ(Array.find(arr, five), 0);
-  EXPECT_INT_EQ(Array.indexof(arr, seven), 3);
-  EXPECT_INT_EQ(Array.count(arr, five), 2);
-  EXPECT_TRUE(Array.contains(arr, six));
-  EXPECT_FALSE(Array.contains(arr, forty_two));
+  EXPECT_INT_EQ(arr.find(five), 0);
+  EXPECT_INT_EQ(arr.indexof(seven), 3);
+  EXPECT_INT_EQ(arr.count(five), 2);
+  EXPECT_TRUE(arr.contains(six));
+  EXPECT_FALSE(arr.contains(forty_two));
 }
 
 static void array_sort_reverse_join(void) {
@@ -313,7 +313,7 @@ static void array_sort_reverse_join(void) {
   Var word_b = Var.new(<string>, %"b");
   Var word_c = Var.new(<string>, %"c");
   Array words = Array.update_n([], 3, word_a, word_b, word_c);
-  String joined = Array.join(words, "-");
+  String joined = words.join("-");
   EXPECT_TRUE(joined == "a-b-c");
 }
 

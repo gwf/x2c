@@ -106,14 +106,14 @@ static void expect_stream_repr(Var value) {
 
 static void var_integer_construction(void) {
   Var vi = 123, vu = (unsigned short)65535, neg = -42;
-  EXPECT_TRUE(Var.tag(vi) == <i32>);
-  EXPECT_TRUE(Var.kind(vi) == <integer>);
-  EXPECT_TRUE(Var.is_integer(vi));
-  EXPECT_INT_EQ(Var.integer(vi), 123);
-  EXPECT_INT_EQ(Var.int(vi), 123);
-  EXPECT_INT_EQ(Var.integer(vu), 65535);
-  EXPECT_INT_EQ(Var.ushort(vu), 65535);
-  EXPECT_INT_EQ(Var.integer(neg), -42);
+  EXPECT_TRUE(vi.tag() == <i32>);
+  EXPECT_TRUE(vi.kind() == <integer>);
+  EXPECT_TRUE(vi.is_integer());
+  EXPECT_INT_EQ(vi.integer(), 123);
+  EXPECT_INT_EQ(vi.int(), 123);
+  EXPECT_INT_EQ(vu.integer(), 65535);
+  EXPECT_INT_EQ(vu.ushort(), 65535);
+  EXPECT_INT_EQ(neg.integer(), -42);
 }
 
 static void var_floating_construction(void) {
@@ -121,8 +121,8 @@ static void var_floating_construction(void) {
   Var vf = high;
   float low = 1.25f;
   Var f32 = low;
-  EXPECT_TRUE(Var.tag(vf) == <f64>);
-  EXPECT_TRUE(Var.kind(vf) == <floating>);
+  EXPECT_TRUE(vf.tag() == <f64>);
+  EXPECT_TRUE(vf.kind() == <floating>);
   EXPECT_DOUBLE_NEAR("Var.floating(vf)", Var.floating(vf), 3.5, 1e-9);
   EXPECT_DOUBLE_NEAR("Var.double(vf)", Var.double(vf), 3.5, 1e-9);
   EXPECT_DOUBLE_NEAR("Var.floating(f32)", Var.floating(f32), 1.25, 1e-6);
@@ -203,18 +203,18 @@ static void var_void_equality_and_rendering(void) {
   EXPECT_FALSE(absent === one);
   EXPECT_TRUE(absent !== one);
 
-  EXPECT_TRUE(Var.binary(absent, <==>, void).int());
-  EXPECT_FALSE(Var.binary(absent, <!=>, void).int());
-  EXPECT_TRUE(Var.binary(absent, <===>, void).int());
-  EXPECT_FALSE(Var.binary(absent, <!==>, void).int());
-  EXPECT_FALSE(Var.binary(absent, <==>, one).int());
-  EXPECT_TRUE(Var.binary(absent, <!=>, one).int());
-  EXPECT_FALSE(Var.binary(absent, <===>, one).int());
-  EXPECT_TRUE(Var.binary(absent, <!==>, one).int());
-  EXPECT_FALSE(Var.binary(one, <==>, absent).int());
-  EXPECT_TRUE(Var.binary(one, <!=>, absent).int());
-  EXPECT_FALSE(Var.binary(one, <===>, absent).int());
-  EXPECT_TRUE(Var.binary(one, <!==>, absent).int());
+  EXPECT_TRUE(absent.binary(<==>, void).int());
+  EXPECT_FALSE(absent.binary(<!=>, void).int());
+  EXPECT_TRUE(absent.binary(<===>, void).int());
+  EXPECT_FALSE(absent.binary(<!==>, void).int());
+  EXPECT_FALSE(absent.binary(<==>, one).int());
+  EXPECT_TRUE(absent.binary(<!=>, one).int());
+  EXPECT_FALSE(absent.binary(<===>, one).int());
+  EXPECT_TRUE(absent.binary(<!==>, one).int());
+  EXPECT_FALSE(one.binary(<==>, absent).int());
+  EXPECT_TRUE(one.binary(<!=>, absent).int());
+  EXPECT_FALSE(one.binary(<===>, absent).int());
+  EXPECT_TRUE(one.binary(<!==>, absent).int());
 
   EXPECT_STR_EQ(absent.str(), "void");
   EXPECT_STR_EQ(absent.repr(), "void");
@@ -272,30 +272,30 @@ static void var_pointer_and_object(void) {
   String *slot = &text;
   Var ref = slot;
   int roundtrip_len = (*(&text)).len();
-  EXPECT_PTR_EQ(Var.pointer(vstr), text);
-  EXPECT_TRUE(Var.kind(vstr) == <object>);
+  EXPECT_PTR_EQ(vstr.pointer(), text);
+  EXPECT_TRUE(vstr.kind() == <object>);
   EXPECT_TRUE(raw.kind() == <pointer>);
   EXPECT_TRUE(ref.kind() == <reference>);
-  EXPECT_TRUE(Var.is_object(vstr));
-  EXPECT_TRUE(Var.is_reference(ref));
+  EXPECT_TRUE(vstr.is_object());
+  EXPECT_TRUE(ref.is_reference());
   EXPECT_INT_EQ(roundtrip_len, 5);
 }
 
 static void var_symbol_handling(void) {
   Symbol sym = <alpha>;
   Var vsym = sym, expected = sym;
-  EXPECT_TRUE(Var.tag(vsym) == <symbol>);
+  EXPECT_TRUE(vsym.tag() == <symbol>);
   EXPECT_TRUE(vsym.kind() == <symbol>);
-  EXPECT_INT_EQ(Var.integer(vsym), sym);
-  EXPECT_TRUE(Var.symbol(vsym) == sym);
-  EXPECT_TRUE(Var.equal(vsym, expected));
+  EXPECT_INT_EQ(vsym.integer(), sym);
+  EXPECT_TRUE(vsym.symbol() == sym);
+  EXPECT_TRUE(vsym.equal(expected));
 }
 
 static void var_equality_and_hash(void) {
   Var a = 17, b = 17, c = 18;
-  unsigned ha = Var.hash(a), hb = Var.hash(b);
-  EXPECT_TRUE(Var.equal(a, b));
-  EXPECT_TRUE(!Var.equal(a, c));
+  unsigned ha = a.hash(), hb = b.hash();
+  EXPECT_TRUE(a.equal(b));
+  EXPECT_TRUE(!a.equal(c));
   EXPECT_TRUE(ha == hb);
   EXPECT_TRUE(ha != 0);
 }
@@ -307,11 +307,11 @@ static void var_helper_accessors(void) {
   Var vf = 9.0;
   Var coerced = 11L;
   Var copy = vshort;
-  EXPECT_INT_EQ(Var.char(vchar), 'A');
-  EXPECT_INT_EQ(Var.short(vshort), 32000);
-  EXPECT_INT_EQ(Var.uint(vuint), 4100u);
+  EXPECT_INT_EQ(vchar.char(), 'A');
+  EXPECT_INT_EQ(vshort.short(), 32000);
+  EXPECT_INT_EQ(vuint.uint(), 4100u);
   EXPECT_TRUE(copy.u64 == vshort.u64);
-  EXPECT_TRUE(Var.tag(coerced) == <long>);
+  EXPECT_TRUE(coerced.tag() == <long>);
   EXPECT_TRUE(coerced.long() == 11L);
   EXPECT_DOUBLE_NEAR("Var.double(vf)", Var.double(vf), 9.0, 1e-9);
 }
@@ -412,17 +412,17 @@ static void var_compare_numeric_total_order(void) {
   Var posinf = 1.0 / 0.0;
   Var nan = 0.0 / 0.0;
 
-  EXPECT_TRUE(Var.tag(neginf) == <-inf>);
-  EXPECT_TRUE(Var.tag(posinf) == <+inf>);
-  EXPECT_TRUE(Var.tag(nan) == <nan>);
-  EXPECT_INT_EQ(Var.integer(neg_wide), -1);
+  EXPECT_TRUE(neginf.tag() == <-inf>);
+  EXPECT_TRUE(posinf.tag() == <+inf>);
+  EXPECT_TRUE(nan.tag() == <nan>);
+  EXPECT_INT_EQ(neg_wide.integer(), -1);
 
-  EXPECT_TRUE(Var.compare(dbl, wide) < 0);
-  EXPECT_TRUE(Var.compare(wide, small) < 0);
+  EXPECT_TRUE(dbl.compare(wide) < 0);
+  EXPECT_TRUE(wide.compare(small) < 0);
 
-  EXPECT_TRUE(Var.compare(neginf, zero) < 0);
-  EXPECT_TRUE(Var.compare(zero, posinf) < 0);
-  EXPECT_TRUE(Var.compare(posinf, nan) < 0);
+  EXPECT_TRUE(neginf.compare(zero) < 0);
+  EXPECT_TRUE(zero.compare(posinf) < 0);
+  EXPECT_TRUE(posinf.compare(nan) < 0);
 
 }
 
@@ -433,9 +433,9 @@ static void var_compare_cross_type_groups(void) {
   arr.push(1);
   List lst = %(1);
 
-  EXPECT_TRUE(Var.compare(number, sym) < 0);
-  EXPECT_TRUE(Var.compare(sym, str) < 0);
-  EXPECT_TRUE(Var.compare(str, arr) < 0);
+  EXPECT_TRUE(number.compare(sym) < 0);
+  EXPECT_TRUE(sym.compare(str) < 0);
+  EXPECT_TRUE(str.compare(arr) < 0);
   EXPECT_TRUE(Var.compare(arr, lst) < 0);
 
   Array a = [];
@@ -462,9 +462,9 @@ static void var_equality_and_identity_operators(void) {
   Var va = a, vb = b;
 
   EXPECT_TRUE(va == vb);
-  EXPECT_TRUE(Var.equal(va, vb));
-  EXPECT_INT_EQ(Var.compare(va, vb), 0);
-  EXPECT_FALSE(Var.same(va, vb));
+  EXPECT_TRUE(va.equal(vb));
+  EXPECT_INT_EQ(va.compare(vb), 0);
+  EXPECT_FALSE(va.same(vb));
   EXPECT_FALSE(va === vb);
   EXPECT_TRUE(va !== vb);
   EXPECT_TRUE(va === a);
@@ -521,7 +521,7 @@ static void var_comparison_operators(void) {
   Var vc = c;
   EXPECT_TRUE(va == vc);
   EXPECT_FALSE(va != vc);
-  EXPECT_INT_EQ(Var.compare(va, vc), 0);
+  EXPECT_INT_EQ(va.compare(vc), 0);
   EXPECT_FALSE(va === vc);
   EXPECT_TRUE(va !== vc);
   EXPECT_TRUE(va === a);
@@ -537,16 +537,16 @@ static void var_comparison_operators(void) {
 
 static void var_compare_strict_encodings(void) {
   Var u = Var.new(<u8>, 1), i = Var.new(<i8>, 1);
-  EXPECT_FALSE(Var.equal(u, i));
-  EXPECT_TRUE(Var.compare(u, i) != 0);
-  EXPECT_INT_EQ(Var.compare(u, i), -Var.compare(i, u));
+  EXPECT_FALSE(u.equal(i));
+  EXPECT_TRUE(u.compare(i) != 0);
+  EXPECT_INT_EQ(u.compare(i), -i.compare(u));
 
   Var zp = Var.new(<f64>, 0.0);
   double negzero = -0.0;
   Var zn = Var.new(<f64>, negzero);
-  EXPECT_FALSE(Var.equal(zp, zn));
-  EXPECT_TRUE(Var.compare(zp, zn) != 0);
-  EXPECT_INT_EQ(Var.compare(zp, zn), -Var.compare(zn, zp));
+  EXPECT_FALSE(zp.equal(zn));
+  EXPECT_TRUE(zp.compare(zn) != 0);
+  EXPECT_INT_EQ(zp.compare(zn), -zn.compare(zp));
 
 }
 
@@ -1058,7 +1058,7 @@ static void var_dense_custom_dispatch(void) {
   EXPECT_TRUE(a.truthy());
   EXPECT_FALSE(z.truthy());
   dispatch_truth_calls = 0;
-  EXPECT_FALSE(Var.binary(z, <&&>, a).truthy());
+  EXPECT_FALSE(z.binary(<&&>, a).truthy());
   EXPECT_INT_EQ(dispatch_truth_calls, 2);
 
   struct Iter storage;

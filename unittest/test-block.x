@@ -8,10 +8,10 @@ $(import "test-macros.xmacro")
 static void bytes_append_and_len(void) {
   $test.scoped();
   Bytes bytes = Bytes.new(sizeof(double));
-  EXPECT_INT_EQ(Bytes.len(bytes), 0);
+  EXPECT_INT_EQ(bytes.len(), 0);
   double samples[] = {0.5, 1.5, 2.5};
-  bytes = Bytes.append(bytes, samples, 3);
-  EXPECT_INT_EQ(Bytes.len(bytes), 3);
+  bytes = bytes.append(samples, 3);
+  EXPECT_INT_EQ(bytes.len(), 3);
   double *out = bytes;
   EXPECT_TRUE(out[0] == samples[0]);
   EXPECT_TRUE(out[2] == samples[2]);
@@ -104,9 +104,9 @@ static void bytes_relocation_and_invalid_width(void) {
   bytes = bytes.append(&value, 1);
   Block block = bytes;
   bytes = bytes.reserve(block.capacity() + 8);
-  EXPECT_TRUE(Bytes.block(bytes) == block);
+  EXPECT_TRUE(bytes.block() == block);
   EXPECT_TRUE(block.bytes == bytes);
-  EXPECT_INT_EQ(Bytes.len(bytes), 1);
+  EXPECT_INT_EQ(bytes.len(), 1);
   EXPECT_INT_EQ(((int *) bytes)[0], 11);
   int caught = 0;
   try Block.new(0);

@@ -276,11 +276,11 @@ static void var_numeric_exact_floating_boundaries(void) {
   Var wide = Var.box_ulong_long(rounding_value);
   Var converted = wide.convert(<f32>);
   float expected = (float) rounding_value;
-  EXPECT_TRUE(Var.decode_f32(converted) == expected);
+  EXPECT_TRUE(converted.decode_f32() == expected);
 
   Var operated = wide.binary(<+>, Var.new(<f32>, 0.0));
   EXPECT_TRUE(operated is <f32>);
-  EXPECT_TRUE(Var.decode_f32(operated) == expected);
+  EXPECT_TRUE(operated.decode_f32() == expected);
 
   unsigned long long lower_value = (1ull << 53) + 3ull;
   Var lower = Var.box_ulong_long(lower_value);
@@ -453,14 +453,14 @@ static void var_invalid_encoding_status_is_atomic(void) {
   Var owned = Var.box_long(7);
   Var retagged = owned;
   retagged.u64 = (retagged.u64 & ~0x7ul) | 0x6ul;
-  EXPECT_FALSE(Var.encoding_valid(malformed_immediate));
-  EXPECT_FALSE(Var.encoding_valid(malformed_special));
-  EXPECT_FALSE(Var.encoding_valid(null_array));
-  EXPECT_FALSE(Var.encoding_valid(null_map));
-  EXPECT_FALSE(Var.encoding_valid(retagged));
+  EXPECT_FALSE(malformed_immediate.encoding_valid());
+  EXPECT_FALSE(malformed_special.encoding_valid());
+  EXPECT_FALSE(null_array.encoding_valid());
+  EXPECT_FALSE(null_map.encoding_valid());
+  EXPECT_FALSE(retagged.encoding_valid());
 
   int caught = 0;
-  try Var.convert(malformed_immediate, <i32>);
+  try malformed_immediate.convert(<i32>);
   catch %(bad-enc *): caught++;
   try malformed_special.truthy();
   catch %(bad-enc *): caught++;
@@ -468,7 +468,7 @@ static void var_invalid_encoding_status_is_atomic(void) {
   catch %(bad-enc *): caught++;
   try null_map.truthy();
   catch %(bad-enc *): caught++;
-  try Var.binary(retagged, <+>, 1);
+  try retagged.binary(<+>, 1);
   catch %(bad-enc *): caught++;
 
   Var lhs = 5, before = lhs;

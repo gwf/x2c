@@ -68,9 +68,9 @@ static void func_apply_converts_numeric_arguments(void) {
   FuncArg argv[2];
   argv[0] = FuncArg.value(Var.new(<i32>, 4));
   argv[1] = FuncArg.value(Var.new(<i32>, 5));
-  Var out = Func.apply(fn, 2, argv);
+  Var out = fn.apply(2, argv);
   EXPECT_TRUE(out is <long>);
-  EXPECT_INT_EQ(Var.integer(out), 9);
+  EXPECT_INT_EQ(out.integer(), 9);
 }
 
 static int _side_effect;
@@ -111,7 +111,7 @@ static Var _nested_transferring_native(Var value) {
     %((func (("Var"))) "Var")
   );
   FuncArg argv[1] = { FuncArg.value(value) };
-  return Func.apply(fn, 1, argv);
+  return fn.apply(1, argv);
 }
 
 static Var _retained_slice_native(Var value) {
@@ -257,7 +257,7 @@ static void func_handwritten_adapter_passes_through(void) {
   FuncArg argv[2];
   argv[0] = FuncArg.value(Var.new(<i32>, 4));
   argv[1] = FuncArg.value(Var.new(<i32>, 5));
-  Var out = Func.apply(fn, 2, argv);
+  Var out = fn.apply(2, argv);
   EXPECT_INT_EQ(out.integer(), 9);
 }
 
@@ -274,8 +274,8 @@ static void func_contexts_are_independent_snapshots(void) {
   first_context.value = Var.new(<i32>, 100);
   second_context.value = Var.new(<i32>, 200);
   FuncArg argv[1] = { FuncArg.value(Var.new(<i32>, 4)) };
-  EXPECT_INT_EQ(Func.apply(first, 1, argv).integer(), 7);
-  EXPECT_INT_EQ(Func.apply(second, 1, argv).integer(), 24);
+  EXPECT_INT_EQ(first.apply(1, argv).integer(), 7);
+  EXPECT_INT_EQ(second.apply(1, argv).integer(), 24);
 }
 
 static void func_zero_context_and_source_checks(void) {
@@ -286,7 +286,7 @@ static void func_zero_context_and_source_checks(void) {
     FuncArg.value(Var.new(<i32>, 2)),
     FuncArg.value(Var.new(<i32>, 5))
   };
-  EXPECT_INT_EQ(Func.apply(fn, 2, argv).integer(), 7);
+  EXPECT_INT_EQ(fn.apply(2, argv).integer(), 7);
   EXPECT_PTR_EQ(fn.context(), NULL);
   int null_caught = 0, source_caught = 0;
   try Func.context(NULL);
@@ -309,7 +309,7 @@ static void func_context_construction_allocates_once(void) {
   );
   ScopeStats constructed = Scope.stats();
   FuncArg argv[1] = { FuncArg.value(Var.new(<i32>, 4)) };
-  Var result = Func.apply(fn, 1, argv);
+  Var result = fn.apply(1, argv);
   ScopeStats applied = Scope.stats();
   EXPECT_INT_EQ(constructed.allocation_calls, before.allocation_calls + 1);
   EXPECT_INT_EQ(result.integer(), 3);
@@ -323,7 +323,7 @@ static void func_context_is_maximum_aligned(void) {
     &context, sizeof context
   );
   EXPECT_INT_EQ((uintptr_t) fn.context() % _Alignof(max_align_t), 0);
-  EXPECT_INT_EQ(Func.apply(fn, 0, NULL).integer(), 41);
+  EXPECT_INT_EQ(fn.apply(0, NULL).integer(), 41);
 }
 
 static void func_context_apply_keeps_arity_and_transfer(void) {
@@ -334,10 +334,10 @@ static void func_context_apply_keeps_arity_and_transfer(void) {
   );
   FuncArg argv[1] = { FuncArg.value(Var.new(<i32>, 23)) };
   int arity_caught = 0, transfer_caught = 0;
-  try Func.apply(fn, 0, NULL);
+  try fn.apply(0, NULL);
   catch %(bad-arity *): arity_caught = 1;
   _side_effect = 0;
-  try Func.apply(fn, 1, argv);
+  try fn.apply(1, argv);
   catch %(format (value ?value)): transfer_caught = value.integer();
   EXPECT_TRUE(arity_caught);
   EXPECT_INT_EQ(transfer_caught, 23);
@@ -350,18 +350,18 @@ static void func_reference_argument_checks_carrier_and_type(void) {
   );
   int value = 6;
   FuncArg valid[1] = { FuncArg.reference(&value, %(int)) };
-  EXPECT_INT_EQ(Func.apply(fn, 1, valid).integer(), 7);
+  EXPECT_INT_EQ(fn.apply(1, valid).integer(), 7);
   EXPECT_INT_EQ(value, 7);
 
   FuncArg boxed[1] = { FuncArg.value(Var.new(<i32>, 7)) };
   int boxed_caught = 0;
-  try Func.apply(fn, 1, boxed);
+  try fn.apply(1, boxed);
   catch %(bad-types *): boxed_caught = 1;
   EXPECT_TRUE(boxed_caught);
 
   FuncArg wrong_type[1] = { FuncArg.reference(&value, %(long)) };
   int type_caught = 0;
-  try Func.apply(fn, 1, wrong_type);
+  try fn.apply(1, wrong_type);
   catch %(bad-types *): type_caught = 1;
   EXPECT_TRUE(type_caught);
 }
@@ -372,7 +372,7 @@ static void func_generated_reference_target_aliases_source(void) {
   );
   int value = 10;
   FuncArg argument[1] = { FuncArg.reference(&value, %(int)) };
-  EXPECT_INT_EQ(Func.apply(fn, 1, argument).integer(), 11);
+  EXPECT_INT_EQ(fn.apply(1, argument).integer(), 11);
   EXPECT_INT_EQ(value, 11);
 }
 
@@ -383,7 +383,7 @@ static void func_reference_and_signature_disagreement_fails(void) {
   long value = 4;
   FuncArg argument[1] = { FuncArg.reference(&value, %(long)) };
   int caught = 0;
-  try Func.apply(wrong_signature, 1, argument);
+  try wrong_signature.apply(1, argument);
   catch %(bad-types *): caught = 1;
   EXPECT_TRUE(caught);
 }
@@ -396,12 +396,12 @@ static void func_rest_accepts_values_and_rejects_references(void) {
     FuncArg.value(Var.new(<i32>, 1)),
     FuncArg.value(Var.new(<i32>, 2))
   };
-  EXPECT_INT_EQ(Func.apply(fn, 2, values).integer(), 2);
+  EXPECT_INT_EQ(fn.apply(2, values).integer(), 2);
 
   int source = 3;
   FuncArg reference[1] = { FuncArg.reference(&source, %(int)) };
   int caught = 0;
-  try Func.apply(fn, 1, reference);
+  try fn.apply(1, reference);
   catch %(bad-types *): caught = 1;
   EXPECT_TRUE(caught);
 }
@@ -422,7 +422,7 @@ static void func_generated_target_runs(void) {
   FuncArg argv[2];
   argv[0] = FuncArg.value(Var.new(<i32>, 20));
   argv[1] = FuncArg.value(Var.new(<i32>, 22));
-  Var out = Func.apply(fn, 2, argv);
+  Var out = fn.apply(2, argv);
   EXPECT_INT_EQ(out.integer(), 42);
 }
 
@@ -434,7 +434,7 @@ static void func_generated_target_transfers_error(void) {
   argv[0] = FuncArg.value(Var.new(<i32>, 3));
   _side_effect = 0;
   int caught = 0;
-  try Func.apply(fn, 1, argv);
+  try fn.apply(1, argv);
   catch %(format *): caught = 1;
   EXPECT_TRUE(caught);
   EXPECT_INT_EQ(_side_effect, 10);
@@ -445,7 +445,7 @@ static void func_apply_wrong_arity_fails(void) {
   FuncArg argv[1];
   argv[0] = FuncArg.value(Var.new(<i32>, 4));
   List detail = NULL;
-  try Func.apply(fn, 1, argv);
+  try fn.apply(1, argv);
   catch %(bad-arity *cause): detail = cause;
   if (!EXPECT_NOT_NULL(detail)) return;
   EXPECT_INT_EQ(detail.assoc(<expected>).integer(), 2);
@@ -458,7 +458,7 @@ static void func_apply_wrong_object_tag_fails(void) {
   FuncArg argv[1];
   argv[0] = FuncArg.value(Var.new(<i32>, 7));
   List detail = NULL;
-  try Func.apply(fn, 1, argv);
+  try fn.apply(1, argv);
   catch %(bad-types *cause): detail = cause;
   EXPECT_NOT_NULL(detail);
   EXPECT_INT_EQ(detail.assoc(<index>).integer(), 0);
@@ -470,7 +470,7 @@ static void func_apply_wrong_symbol_tag_fails(void) {
   FuncArg argv[1];
   argv[0] = FuncArg.value(Var.new(<i32>, 7));
   int caught = 0;
-  try Func.apply(fn, 1, argv);
+  try fn.apply(1, argv);
   catch %(bad-types *): caught = 1;
   EXPECT_TRUE(caught);
 }
@@ -480,7 +480,7 @@ static void func_apply_void_argument_fails(void) {
   FuncArg argv[1];
   argv[0] = FuncArg.value(void);
   int caught = 0;
-  try Func.apply(fn, 1, argv);
+  try fn.apply(1, argv);
   catch %(void-op *): caught = 1;
   EXPECT_TRUE(caught);
 }
@@ -490,7 +490,7 @@ static void func_apply_conversion_range_fails(void) {
   FuncArg argv[1];
   argv[0] = FuncArg.value(Var.new(<f64>, 1.0e300));
   List detail = NULL;
-  try Func.apply(fn, 1, argv);
+  try fn.apply(1, argv);
   catch %(conv-range *cause): detail = cause;
   EXPECT_NOT_NULL(detail);
   EXPECT_INT_EQ(detail.assoc(<index>).integer(), 0);
@@ -504,7 +504,7 @@ static void func_void_result_is_raw_null(void) {
   _side_effect = 0;
   FuncArg argv[1];
   argv[0] = FuncArg.value(Var.new(<i32>, 5));
-  Var out = Func.apply(fn, 1, argv);
+  Var out = fn.apply(1, argv);
   EXPECT_INT_EQ(_side_effect, 5);
   EXPECT_TRUE(out.is_null());
 }
@@ -512,7 +512,7 @@ static void func_void_result_is_raw_null(void) {
 static void func_var_result_rejects_void(void) {
   Func fn = Func.new(_return_void_var, %((func ((void))) "Var"));
   int caught = 0;
-  try Func.apply(fn, 0, NULL);
+  try fn.apply(0, NULL);
   catch %(bad-result *): caught = 1;
   EXPECT_TRUE(caught);
 }
@@ -522,7 +522,7 @@ static void func_list_argument_round_trips(void) {
   List pair = %(1 2);
   FuncArg argv[1];
   argv[0] = FuncArg.value(pair);
-  Var out = Func.apply(fn, 1, argv);
+  Var out = fn.apply(1, argv);
   EXPECT_VAR_EQ(out, %(2).var());
 }
 
@@ -552,7 +552,7 @@ static void func_native_raise_observer_is_safe(void) {
   argv[0] = FuncArg.value(Var.new(<i32>, 77));
   ErrorHandler handler = Error.push(_capture_func_error, void);
   defer Error.pop(handler);
-  Var out = Func.apply(fn, 1, argv);
+  Var out = fn.apply(1, argv);
   EXPECT_INT_EQ(out.integer(), 77);
   EXPECT_INT_EQ(_func_error_code(), <observer-p>);
 }
@@ -566,7 +566,7 @@ static void func_direct_target_transfers_to_catch(void) {
   int returned = 0, caught = 0;
   _side_effect = 0;
   try {
-    Func.apply(fn, 1, argv);
+    fn.apply(1, argv);
     returned = 1;
   }
   catch %(format (value ?value)): {
@@ -589,7 +589,7 @@ static void func_cross_file_target_transfers_to_catch(void) {
   };
   int returned = 0, caught = 0;
   try {
-    Func.apply(fn, 3, argv);
+    fn.apply(3, argv);
     returned = 1;
   }
   catch %(bad-op *): caught = 1;
@@ -606,7 +606,7 @@ static void func_nested_targets_share_one_transfer(void) {
   int returned = 0, caught = 0;
   _side_effect = 0;
   try {
-    Func.apply(fn, 1, argv);
+    fn.apply(1, argv);
     returned = 1;
   }
   catch %(format (value ?value)): caught = value.integer();
@@ -631,7 +631,7 @@ static void func_catch_retains_complete_error_slice(void) {
   );
   x2c_exception_push(&frame);
   if (!sigsetjmp(frame.env, 0)) {
-    Func.apply(fn, 1, argv);
+    fn.apply(1, argv);
     EXPECT_TRUE(0);
   }
   else {

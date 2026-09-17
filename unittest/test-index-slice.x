@@ -73,7 +73,7 @@ static void collection_index_syntax(void) {
   writable[0] = 'z';
   EXPECT_INT_EQ(buffer[0], 'z');
   EXPECT_INT_EQ(writable[0], 'z');
-  String.free(buffer);
+  buffer.free();
 
 }
 
@@ -152,7 +152,7 @@ static void collection_slice_syntax(void) {
 static void slice_stop_beyond_length_clamps(void) {
   $test.scoped();
   Array a = [0, 1, 2, 3], b = a[0:5];
-  EXPECT_INT_EQ((int) Array.len(b), 4);
+  EXPECT_INT_EQ((int) b.len(), 4);
   String s = "abcdefghij", t = s[-100:100];
   EXPECT_INT_EQ(s.len(), t.len());
 }
@@ -160,7 +160,7 @@ static void slice_stop_beyond_length_clamps(void) {
 static void slice_negative_step_at_length(void) {
   $test.scoped();
   Array a = [10, 20, 30], b = a[3:0:-1];
-  EXPECT_INT_EQ((int) Array.len(b), 2);
+  EXPECT_INT_EQ((int) b.len(), 2);
   EXPECT_INT_EQ(b[0].int(), 30);
   EXPECT_INT_EQ(b[1].int(), 20);
 }

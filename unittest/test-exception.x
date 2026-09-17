@@ -638,14 +638,14 @@ static void error_regions_do_not_capture_application_pools(void) {
   Pool lists = strings;
   String text = String.new("application owned");
   List value = %($text 42);
-  EXPECT_TRUE(Pool.owns(strings, text));
-  EXPECT_TRUE(Pool.owns(lists, value));
+  EXPECT_TRUE(strings.owns(text));
+  EXPECT_TRUE(lists.owns(value));
   try {
     raise %(invariant (value $value));
   }
   catch %(invariant *): (void) 0;
-  EXPECT_TRUE(Pool.owns(strings, text));
-  EXPECT_TRUE(Pool.owns(lists, value));
+  EXPECT_TRUE(strings.owns(text));
+  EXPECT_TRUE(lists.owns(value));
   EXPECT_STR_EQ(text, "application owned");
   EXPECT_INT_EQ(value.cadr().integer(), 42);
   String.pool_release();

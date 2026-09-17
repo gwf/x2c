@@ -17,7 +17,7 @@ static MatchCaptureSite capture_site;
 static void _exact_case(List input, Var pattern, List expected) {
   MatchPlan plan = MatchPlan.prepare(pattern);
   if (!EXPECT_INT_EQ(plan.status, MACHINE_PREPARED)) {
-    MatchPlan.free(plan);
+    plan.free();
     return;
   }
   int expect_hit = expected != NULL;
@@ -31,14 +31,14 @@ static void _exact_case(List input, Var pattern, List expected) {
     EXPECT_TRUE(oracle == expect_bindings);
     EXPECT_TRUE(candidate == expect_bindings);
   }
-  MatchPlan.free(plan);
+  plan.free();
 }
 
 /* Oracle/candidate parity without a fixed expectation. */
 static void _parity_case(List input, Var pattern) {
   MatchPlan plan = MatchPlan.prepare(pattern);
   if (!EXPECT_INT_EQ(plan.status, MACHINE_PREPARED)) {
-    MatchPlan.free(plan);
+    plan.free();
     return;
   }
   List oracle = %(sentinel), candidate = %(sentinel);
@@ -46,14 +46,14 @@ static void _parity_case(List input, Var pattern) {
   int candidate_status = plan.try_match(input, &candidate);
   EXPECT_INT_EQ(candidate_status, oracle_status);
   if (oracle_status && candidate_status == 1) EXPECT_TRUE(candidate == oracle);
-  MatchPlan.free(plan);
+  plan.free();
 }
 
 static void _status_case(Var pattern, int status, const char *reason) {
   MatchPlan plan = MatchPlan.prepare(pattern);
   EXPECT_INT_EQ(plan.status, status);
   EXPECT_STR_EQ(String.new(plan.reason), reason);
-  MatchPlan.free(plan);
+  plan.free();
 }
 
 static MachineStats _stats_case(
@@ -61,7 +61,7 @@ static MachineStats _stats_case(
   MachineStats stats;
   memset(&stats, 0, sizeof(stats));
   List bindings = %(sentinel);
-  int status = MatchPlan.execute(plan, input, &bindings, &stats);
+  int status = plan.execute(input, &bindings, &stats);
   EXPECT_INT_EQ(status, expect_status);
   if (expect_status == 1 && expected)
     EXPECT_TRUE(bindings == (expected == %(()) ? NULL : expected));
@@ -228,7 +228,7 @@ static void plan_star_matrix(void) {
   EXPECT_INT_EQ((int) s1_stats.direct_shares, 1);
   EXPECT_INT_EQ((int) s1_stats.materializations_avoided, 1);
   EXPECT_INT_EQ((int) s1_stats.cons_requests, 0);
-  MatchPlan.free(s1);
+  s1.free();
   _exact_case(s1_input, %(tag *rest), %((*rest (a b))));
 
   // S2: shortest-first split; the failed write is restored and only
@@ -239,7 +239,7 @@ static void plan_star_matrix(void) {
   EXPECT_INT_EQ((int) s2_stats.span_descriptors, 1);
   EXPECT_INT_EQ((int) s2_stats.materialization_completions, 1);
   EXPECT_INT_EQ((int) s2_stats.materialized_cells, 1);
-  MatchPlan.free(s2);
+  s2.free();
 
   // S3/S4: anchored scans with offsets and false anchors.
   _exact_case(%(p q mark v end), %(*pre ?head mark ?value end),
@@ -266,7 +266,7 @@ static void plan_star_matrix(void) {
                                    %((?seen value) (*pre $prefix)));
     EXPECT_TRUE(win.materialization_requests == 1);
     EXPECT_TRUE(win.materialized_cells == (long) size * 2);
-    MatchPlan.free(plan);
+    plan.free();
   }
 
   // S6-S8: nested continuation, local cut, multiple stars.
@@ -283,7 +283,7 @@ static void plan_star_matrix(void) {
   MachineStats s9_miss = _stats_case(s9, %(a pivot b end), 0, NULL);
   EXPECT_INT_EQ((int) s9_miss.materialization_requests, 0);
   EXPECT_INT_EQ((int) s9_miss.cons_requests, 0);
-  MatchPlan.free(s9);
+  s9.free();
 
   // S10: final repetition is shallow identity; canonical interning
   // makes (a pivot a) succeed, boxed-equal wide values fail finally
@@ -297,7 +297,7 @@ static void plan_star_matrix(void) {
   MachineStats s10_wide = _stats_case(s10, %($w1 pivot $w2), 0, NULL);
   EXPECT_TRUE(s10_wide.final_range_comparisons == 1);
   EXPECT_INT_EQ((int) s10_wide.materialization_requests, 0);
-  MatchPlan.free(s10);
+  s10.free();
   _exact_case(%($w1 pivot $w2 end), %(*same pivot *same end),
               %((*same ($w1))));
   _exact_case(%(a pivot a),
@@ -321,7 +321,7 @@ static void plan_star_supplementals(void) {
   MachineStats empty_stats = _stats_case(empty_prefix, %(b), 1, %((*pre ())));
   EXPECT_TRUE(empty_stats.materialization_requests == 1);
   EXPECT_INT_EQ((int) empty_stats.cons_requests, 0);
-  MatchPlan.free(empty_prefix);
+  empty_prefix.free();
   _exact_case(%(a (tag v) end), %(*pre (tag v) end), %((*pre (a))));
   _exact_case(%(*x), %(!quote (*x)), %(()));
 
@@ -331,7 +331,7 @@ static void plan_star_supplementals(void) {
   EXPECT_TRUE(not_hit.span_descriptors >= 1);
   EXPECT_INT_EQ((int) not_hit.materialization_requests, 0);
   _stats_case(not_span, %(a c), 1, %(()));
-  MatchPlan.free(not_span);
+  not_span.free();
 
   // Comparison-mode selection: boxed wide and String anchors keep
   // general equality; narrow numeric anchors keep raw bits.
@@ -342,7 +342,7 @@ static void plan_star_supplementals(void) {
   List general_bindings = %(sentinel);
   EXPECT_INT_EQ(general.try_match(%(lead $anchor2 end), &general_bindings), 1);
   EXPECT_TRUE(general_bindings == %((*pre (lead))));
-  MatchPlan.free(general);
+  general.free();
 
   MatchPlan numeric = MatchPlan.prepare(%(*pre 3 ?value));
   EXPECT_INT_EQ(_count_scan_words(numeric, MACHINE_COMPARE_EQUAL), 0);
@@ -351,7 +351,7 @@ static void plan_star_supplementals(void) {
   _exact_case(%(lead $cross v), %(*pre 3 ?value), NULL);
   _exact_case(%(lead 3 v), %(*pre 3 ?value),
               %((?value v) (*pre (lead))));
-  MatchPlan.free(numeric);
+  numeric.free();
 
   String canonical = String.new("scan-needle"), transient = String.malloc(32);
   strcpy(transient, "scan-needle");
@@ -363,8 +363,8 @@ static void plan_star_supplementals(void) {
   List text_bindings = %(sentinel);
   EXPECT_INT_EQ(text.try_match(%(lead $transient_input v), &text_bindings), 1);
   EXPECT_TRUE(text_bindings == %((?v v) (*pre (lead))));
-  MatchPlan.free(text);
-  String.free(transient);
+  text.free();
+  transient.free();
 
   // Long anchored miss stays linear and loop-safe.
   List long_input = NULL;
@@ -373,7 +373,7 @@ static void plan_star_supplementals(void) {
   MachineStats long_stats = _stats_case(long_plan, long_input, 0, NULL);
   EXPECT_TRUE(long_stats.scan_cells <= 5001);
   EXPECT_INT_EQ((int) long_stats.cons_requests, 0);
-  MatchPlan.free(long_plan);
+  long_plan.free();
 }
 
 // categorized preparation boundary - - - - - - - - - - - - - - - - - - - - -
@@ -437,7 +437,7 @@ static List _fenced_wide_pattern(List tail) {
 static void plan_fenced_pattern_raises_at_every_entry(void) {
   MatchPlan plan = MatchPlan.prepare(_fenced_deep_pattern());
   if (!EXPECT_INT_EQ(plan.status, MACHINE_INELIGIBLE)) {
-    MatchPlan.free(plan);
+    plan.free();
     return;
   }
   List input = %(x), bindings = %(sentinel), results = %(sentinel);
@@ -446,20 +446,20 @@ static void plan_fenced_pattern_raises_at_every_entry(void) {
   MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
   int caught = 0;
 
-  try MatchPlan.try_match(plan, input, &bindings);
+  try plan.try_match(input, &bindings);
   catch %(size-limit * (fence ?seen) *): {
     caught++;
     EXPECT_STR_EQ(seen.str(), "frame-depth");
   }
-  try MatchPlan.try_capture(plan, input, &captures);
+  try plan.try_capture(input, &captures);
   catch %(size-limit *): caught++;
-  try MatchPlan.try_search(plan, input, &found, &bindings);
+  try plan.try_search(input, &found, &bindings);
   catch %(size-limit *): caught++;
-  try MatchPlan.search(plan, input, &results);
+  try plan.search(input, &results);
   catch %(size-limit *): caught++;
-  try MatchPlan.try_match_replace(plan, input, %(changed), &replaced);
+  try plan.try_match_replace(input, %(changed), &replaced);
   catch %(size-limit *): caught++;
-  try MatchPlan.search_replace(plan, input, %(changed), &results);
+  try plan.search_replace(input, %(changed), &results);
   catch %(size-limit *): caught++;
 
   EXPECT_INT_EQ(caught, 6);
@@ -467,7 +467,7 @@ static void plan_fenced_pattern_raises_at_every_entry(void) {
   EXPECT_TRUE(results == %(sentinel));
   EXPECT_TRUE(found == <sentinel>);
   EXPECT_TRUE(replaced == <sentinel>);
-  MatchPlan.free(plan);
+  plan.free();
 }
 
 static void fenced_pattern_raises_at_every_consumer(void) {
@@ -475,23 +475,23 @@ static void fenced_pattern_raises_at_every_consumer(void) {
   List input = %(x), bindings = %(sentinel);
   int caught = 0;
 
-  try List.try_match(input, cached, &bindings);
+  try input.try_match(cached, &bindings);
   catch %(size-limit * (fence ?seen) *): {
     caught++;
     EXPECT_STR_EQ(seen.str(), "segment-width");
   }
-  try List.search(input, cached);
+  try input.search(cached);
   catch %(size-limit *): caught++;
-  try List.search_replace(input, cached, %(changed));
+  try input.search_replace(cached, %(changed));
   catch %(size-limit *): caught++;
 
   // a transient String bypasses admission, so this one prepares transiently
   String transient = String.malloc(8);
   strcpy(transient, "bypass");
   Var bypassed = _fenced_wide_pattern(cons(transient, NULL));
-  try List.try_match(input, bypassed, &bindings);
+  try input.try_match(bypassed, &bindings);
   catch %(size-limit *): caught++;
-  String.free(transient);
+  transient.free();
 
   // the arm could never be selected, so registering the catch is the error
   int target = 0;
@@ -526,11 +526,11 @@ static void plan_search_parity(void) {
   EXPECT_INT_EQ(plan.try_search(input, &plan_match, &plan_bindings), 1);
   EXPECT_TRUE(plan_match == oracle_match);
   EXPECT_TRUE(plan_bindings == oracle_bindings);
-  MatchPlan.free(plan);
+  plan.free();
 
   MatchPlan missing = MatchPlan.prepare(%(missing));
   EXPECT_INT_EQ(missing.try_search(input, &plan_match, &plan_bindings), 0);
-  MatchPlan.free(missing);
+  missing.free();
 
   List payload = %(a list with a "string");
   List corpus = %( root (item 1 $payload) (item 2 3.25)
@@ -541,7 +541,7 @@ static void plan_search_parity(void) {
   List plan_results = %(unchanged);
   EXPECT_INT_EQ(pairs.search(corpus, &plan_results), 1);
   EXPECT_TRUE(plan_results == oracle_results);
-  MatchPlan.free(pairs);
+  pairs.free();
 
   // Explicit empty-list values are observed; the implicit terminal
   // cdr is not.
@@ -553,7 +553,7 @@ static void plan_search_parity(void) {
   List top_results = %(unchanged);
   EXPECT_INT_EQ(nil_plan.search(empty, &top_results), 1);
   EXPECT_TRUE(top_results == test_match_oracle_search(empty, %()));
-  MatchPlan.free(nil_plan);
+  nil_plan.free();
 
   // Guard and !is patterns through full search.
   List guarded = %( keep deprecated other );
@@ -563,7 +563,7 @@ static void plan_search_parity(void) {
   EXPECT_TRUE(not_results ==
               test_match_oracle_search(guarded,
                                       %(!not ?node deprecated)));
-  MatchPlan.free(not_plan);
+  not_plan.free();
 
   List samples = %( ?foo 42 (a) "text" );
   MatchPlan is_plan = MatchPlan.prepare(%(!is ?hit type i32));
@@ -571,7 +571,7 @@ static void plan_search_parity(void) {
   EXPECT_INT_EQ(is_plan.search(samples, &is_results), 1);
   EXPECT_TRUE(is_results ==
               test_match_oracle_search(samples, %(!is ?hit type i32)));
-  MatchPlan.free(is_plan);
+  is_plan.free();
 }
 
 /* Atom patterns use the same compiled plan path as list patterns. */
@@ -636,8 +636,8 @@ static void plan_replace_parity(void) {
   EXPECT_INT_EQ(absent.try_match_replace(input, Var.new(<symbol>, <changed>),
                                          &result), 0);
   EXPECT_TRUE(result == <unchanged>);
-  MatchPlan.free(absent);
-  MatchPlan.free(plan);
+  absent.free();
+  plan.free();
 
   // Star template splice parity.
   List payload = %(a list with a "string");
@@ -652,7 +652,7 @@ static void plan_replace_parity(void) {
     chunk, %(chunk ?first ?mid *tail),
     Var.new(<symbol>, <"*tail">), &tail_oracle));
   EXPECT_TRUE(tail_result == tail_oracle);
-  MatchPlan.free(tail_plan);
+  tail_plan.free();
 
   // Full search replacement across every consumer-visible node.
   List corpus = %( root (item 1 2) (item 2 5.5) (wrapper (item 3 $payload)) );
@@ -663,7 +663,7 @@ static void plan_replace_parity(void) {
   List candidate = %(unchanged);
   EXPECT_INT_EQ(sr.search_replace(corpus, template, &candidate), 1);
   EXPECT_TRUE(candidate == oracle);
-  MatchPlan.free(sr);
+  sr.free();
 
   List is_input = %( ?foo value ?bar );
   Var is_pattern = %(!is ?binder binder);
@@ -674,13 +674,13 @@ static void plan_replace_parity(void) {
   List is_candidate = %(unchanged);
   EXPECT_INT_EQ(isr.search_replace(is_input, is_template, &is_candidate), 1);
   EXPECT_TRUE(is_candidate == is_oracle);
-  MatchPlan.free(isr);
+  isr.free();
 }
 
 // positional capture contract - - - - - - - - - - - - - - - - - - - - - - -
 
 static int _capture_present(MatchCaptureBuffer *captures, int index) {
-  return MatchCaptureBuffer.has(captures, index);
+  return captures.has(index);
 }
 
 static void capture_layout_owns_canonical_order(void) {
@@ -936,7 +936,7 @@ static void plan_programs_stay_immutable(void) {
     EXPECT_TRUE(bindings == %((?x ok)));
     EXPECT_INT_EQ(plan.try_match(%(ok other), &bindings), 0);
   }
-  MatchPlan.free(plan);
+  plan.free();
 }
 
 static void plan_long_atom_binder_layout(void) {
@@ -946,7 +946,7 @@ static void plan_long_atom_binder_layout(void) {
     %(item ?VeryLongIdentifierValue *RemainingLongValues)
   );
   if (!EXPECT_INT_EQ(plan.status, MACHINE_PREPARED)) {
-    MatchPlan.free(plan);
+    plan.free();
     return;
   }
   MachineView view = plan.program.view();
@@ -963,7 +963,7 @@ static void plan_long_atom_binder_layout(void) {
   _exact_case(%(item 8 tail),
               %(item ?VeryLongIdentifierValue *RemainingLongValues),
               %((*RemainingLongValues (tail)) (?VeryLongIdentifierValue 8)));
-  MatchPlan.free(plan);
+  plan.free();
 }
 
 

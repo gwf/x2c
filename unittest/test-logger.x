@@ -117,8 +117,8 @@ static void logger_creation_levels_and_queries(void) {
   $test.scoped();
   Logger logger = Logger.new(<info>);
   EXPECT_NOT_NULL(logger);
-  EXPECT_TRUE(Logger.min_level(logger) == <info>);
-  EXPECT_INT_EQ(Logger.sink_count(logger), 0);
+  EXPECT_TRUE(logger.min_level() == <info>);
+  EXPECT_INT_EQ(logger.sink_count(), 0);
   EXPECT_FALSE(logger.should_log(<info>, <test>));
   EXPECT_INT_EQ(Logger.level_priority(<trace>), 0);
   EXPECT_INT_EQ(Logger.level_priority(<fatal>), 5);
@@ -136,7 +136,7 @@ static void logger_creation_levels_and_queries(void) {
   EXPECT_TRUE(logger.set_min_level(<off>));
   EXPECT_FALSE(logger.should_log(<fatal>, <test>));
   EXPECT_FALSE(logger.set_min_level(<unknown>));
-  EXPECT_TRUE(Logger.min_level(logger) == <off>);
+  EXPECT_TRUE(logger.min_level() == <off>);
   logger.free();
 }
 

@@ -38,8 +38,8 @@ static MachineProgram _freeze_binder(Symbol binder) {
 }
 
 static Symbol _run(MatchMachine m, MachineProgram program, Var input) {
-  MatchMachine.begin(m, program.view(), input);
-  MatchMachine.run(m);
+  m.begin(program.view(), input);
+  m.run();
   return m.status;
 }
 
@@ -67,14 +67,14 @@ static void machine_program_is_exact_sized_and_immutable(void) {
 
   struct MatchMachine storage;
   MatchMachine m = &storage;
-  MatchMachine.open(m);
+  m.open();
   EXPECT_TRUE(_run(m, program, Var.new(<symbol>, <hello>)) == <ok>);
-  MatchMachine.finish(m);
+  m.finish();
   EXPECT_TRUE(_run(m, program, Var.new(<symbol>, <other>)) == <fail>);
-  MatchMachine.finish(m);
-  EXPECT_TRUE(MatchMachine.clean(m));
-  MatchMachine.dispose(m);
-  MachineProgram.free(program);
+  m.finish();
+  EXPECT_TRUE(m.clean());
+  m.dispose();
+  program.free();
 }
 
 static void machine_builder_exhaustion_is_categorized(void) {
@@ -119,7 +119,7 @@ static void machine_public_preconditions_transfer(void) {
 
   struct LispMachine lisp_storage;
   LispMachine lisp = &lisp_storage;
-  LispMachine.open(lisp);
+  lisp.open();
   MachineView empty = {0};
   try lisp.begin(empty, NULL, NULL, -1);
   catch %(bad-arity *): caught++;
@@ -130,7 +130,7 @@ static void machine_public_preconditions_transfer(void) {
 
   struct MatchMachine storage;
   MatchMachine m = &storage;
-  MatchMachine.open(m);
+  m.open();
   MachineProgram program = _freeze_eq(1, MACHINE_COMPARE_BITS);
   if (EXPECT_NOT_NULL(program)) {
     m.begin(program.view(), 1);
@@ -140,9 +140,9 @@ static void machine_public_preconditions_transfer(void) {
     m.run();
     m.finish();
     EXPECT_TRUE(m.clean());
-    MachineProgram.free(program);
+    program.free();
   }
-  MatchMachine.dispose(m);
+  m.dispose();
   EXPECT_INT_EQ(caught, 5);
 }
 
@@ -182,7 +182,7 @@ static void machine_nested_calls_return_and_rollback(void) {
 
   struct MatchMachine storage;
   MatchMachine m = &storage;
-  MatchMachine.open(m);
+  m.open();
   MachineStats stats;
   memset(&stats, 0, sizeof(stats));
   m.stats = &stats;
@@ -193,15 +193,15 @@ static void machine_nested_calls_return_and_rollback(void) {
   EXPECT_VAR_EQ(slots[0].value, Var.new(<symbol>, <ok>));
   EXPECT_INT_EQ(stats.max_frames, 2);
   EXPECT_TRUE(stats.calls == 3 && stats.returns == 3);
-  MatchMachine.finish(m);
-  EXPECT_TRUE(MatchMachine.clean(m));
+  m.finish();
+  EXPECT_TRUE(m.clean());
 
   EXPECT_TRUE(_run(m, program, %(ok other)) == <fail>);
   EXPECT_INT_EQ(slots[0].kind, MACHINE_SLOT_INVALID);
-  MatchMachine.finish(m);
-  EXPECT_TRUE(MatchMachine.clean(m));
-  MatchMachine.dispose(m);
-  MachineProgram.free(program);
+  m.finish();
+  EXPECT_TRUE(m.clean());
+  m.dispose();
+  program.free();
 }
 
 static void machine_error_unwinds_to_clean_state(void) {
@@ -217,14 +217,14 @@ static void machine_error_unwinds_to_clean_state(void) {
 
   struct MatchMachine storage;
   MatchMachine m = &storage;
-  MatchMachine.open(m);
+  m.open();
   EXPECT_TRUE(_run(m, program, Var.new(<list>, NULL)) == <error>);
   EXPECT_VAR_EQ(m.error, Var.new(<symbol>, <advance>));
   EXPECT_FALSE(m.running);
-  MatchMachine.finish(m);
-  EXPECT_TRUE(MatchMachine.clean(m));
-  MatchMachine.dispose(m);
-  MachineProgram.free(program);
+  m.finish();
+  EXPECT_TRUE(m.clean());
+  m.dispose();
+  program.free();
 }
 
 /* A caller distinguishes two machine faults by comparing the code, so a
@@ -244,14 +244,14 @@ static void machine_error_codes_are_distinct(void) {
 
   struct MatchMachine storage;
   MatchMachine m = &storage;
-  MatchMachine.open(m);
+  m.open();
   EXPECT_TRUE(_run(m, program, Var.new(<list>, NULL)) == <error>);
   EXPECT_VAR_EQ(m.error, Var.new(<symbol>, <call-head>));
   EXPECT_FALSE(m.error.equal(Var.new(<symbol>, <advance>)));
-  MatchMachine.finish(m);
-  EXPECT_TRUE(MatchMachine.clean(m));
-  MatchMachine.dispose(m);
-  MachineProgram.free(program);
+  m.finish();
+  EXPECT_TRUE(m.clean());
+  m.dispose();
+  program.free();
 
   Symbol codes[] = { <advance>, <bad-local>, <bad-span>, <bad-word>,
                      <call-head>, <call-stack>, <frame-max>,
@@ -277,13 +277,13 @@ static void machine_frame_capacity_is_checked(void) {
 
   struct MatchMachine storage;
   MatchMachine m = &storage;
-  MatchMachine.open(m);
+  m.open();
   EXPECT_TRUE(_run(m, program, Var.new(<symbol>, <loop>)) == <error>);
   EXPECT_VAR_EQ(m.error, Var.new(<symbol>, <frame-max>));
-  MatchMachine.finish(m);
-  EXPECT_TRUE(MatchMachine.clean(m));
-  MatchMachine.dispose(m);
-  MachineProgram.free(program);
+  m.finish();
+  EXPECT_TRUE(m.clean());
+  m.dispose();
+  program.free();
 }
 
 /* A legal program journals at most two transitions per binder, so the
@@ -303,13 +303,13 @@ static void machine_slot_state_errors_are_checked(void) {
 
   struct MatchMachine storage;
   MatchMachine m = &storage;
-  MatchMachine.open(m);
+  m.open();
   EXPECT_TRUE(_run(m, program, Var.new(<symbol>, <value>)) == <error>);
   EXPECT_VAR_EQ(m.error, Var.new(<symbol>, <slot-state>));
-  MatchMachine.finish(m);
-  EXPECT_TRUE(MatchMachine.clean(m));
-  MatchMachine.dispose(m);
-  MachineProgram.free(program);
+  m.finish();
+  EXPECT_TRUE(m.clean());
+  m.dispose();
+  program.free();
 }
 
 static void machine_instances_interleave_independently(void) {
@@ -320,26 +320,26 @@ static void machine_instances_interleave_independently(void) {
 
   struct MatchMachine storage_a, storage_b;
   MatchMachine a = &storage_a, b = &storage_b;
-  MatchMachine.open(a);
-  MatchMachine.open(b);
-  MatchMachine.begin(a, eq.view(), Var.new(<symbol>, <alpha>));
-  MatchMachine.begin(b, binder.view(), Var.new(<symbol>, <captured>));
+  a.open();
+  b.open();
+  a.begin(eq.view(), Var.new(<symbol>, <alpha>));
+  b.begin(binder.view(), Var.new(<symbol>, <captured>));
   int live_a = 1, live_b = 1;
   while (live_a || live_b) {
-    if (live_a) live_a = MatchMachine.step(a);
-    if (live_b) live_b = MatchMachine.step(b);
+    if (live_a) live_a = a.step();
+    if (live_b) live_b = b.step();
   }
   EXPECT_TRUE(a.status == <ok>);
   EXPECT_TRUE(b.status == <ok>);
   MachineSlot *b_slots = b.slots;
   EXPECT_VAR_EQ(b_slots[0].value, Var.new(<symbol>, <captured>));
-  MatchMachine.finish(a);
-  MatchMachine.finish(b);
-  EXPECT_TRUE(MatchMachine.clean(a) && MatchMachine.clean(b));
-  MatchMachine.dispose(a);
-  MatchMachine.dispose(b);
-  MachineProgram.free(eq);
-  MachineProgram.free(binder);
+  a.finish();
+  b.finish();
+  EXPECT_TRUE(a.clean() && b.clean());
+  a.dispose();
+  b.dispose();
+  eq.free();
+  binder.free();
 }
 
 /* A hand-lowered anchored scan: losing runs construct no span and no
@@ -364,7 +364,7 @@ static void machine_scan_binds_lazy_spans_only_on_success(void) {
 
   struct MatchMachine storage;
   MatchMachine m = &storage;
-  MatchMachine.open(m);
+  m.open();
   MachineStats stats;
   memset(&stats, 0, sizeof(stats));
   m.stats = &stats;
@@ -374,26 +374,26 @@ static void machine_scan_binds_lazy_spans_only_on_success(void) {
   EXPECT_INT_EQ((int) stats.materialization_requests, 0);
   EXPECT_INT_EQ((int) stats.cons_requests, 0);
   EXPECT_INT_EQ((int) stats.scan_cells, 3);
-  MatchMachine.finish(m);
+  m.finish();
 
   EXPECT_TRUE(_run(m, program, %(a b mark c)) == <ok>);
   EXPECT_INT_EQ((int) stats.span_descriptors, 1);
   MachineSlot *slots = m.slots;
   EXPECT_INT_EQ(slots[0].kind, MACHINE_SLOT_SPAN);
   EXPECT_INT_EQ(slots[0].span.length, 2);
-  List prefix = MatchMachine.materialize_span(m, slots[0].span);
+  List prefix = m.materialize_span(slots[0].span);
   EXPECT_TRUE(prefix == %(a b));
   EXPECT_INT_EQ((int) stats.materialization_completions, 1);
   EXPECT_INT_EQ((int) stats.materialized_cells, 2);
-  MatchMachine.finish(m);
-  EXPECT_TRUE(MatchMachine.clean(m));
+  m.finish();
+  EXPECT_TRUE(m.clean());
 
   List whole = %(x y z);
   MachineSpan suffix = { whole, NULL, 3 };
-  EXPECT_TRUE(MatchMachine.materialize_span(m, suffix) == whole);
+  EXPECT_TRUE(m.materialize_span(suffix) == whole);
   EXPECT_INT_EQ((int) stats.direct_shares, 1);
-  MatchMachine.dispose(m);
-  MachineProgram.free(program);
+  m.dispose();
+  program.free();
 }
 
 static void machine_compare_modes_respect_boxed_values(void) {
@@ -404,17 +404,17 @@ static void machine_compare_modes_respect_boxed_values(void) {
 
   struct MatchMachine storage;
   MatchMachine m = &storage;
-  MatchMachine.open(m);
+  m.open();
   Var twin = Var.box_long(3);
   EXPECT_TRUE(twin.u64 != boxed.u64);
   EXPECT_TRUE(_run(m, equal, twin) == <ok>);
-  MatchMachine.finish(m);
+  m.finish();
   EXPECT_TRUE(_run(m, bits, twin) == <fail>);
-  MatchMachine.finish(m);
-  EXPECT_TRUE(MatchMachine.clean(m));
-  MatchMachine.dispose(m);
-  MachineProgram.free(equal);
-  MachineProgram.free(bits);
+  m.finish();
+  EXPECT_TRUE(m.clean());
+  m.dispose();
+  equal.free();
+  bits.free();
 }
 
 static void machine_storage_reuse_and_dirty_begin(void) {
@@ -425,25 +425,25 @@ static void machine_storage_reuse_and_dirty_begin(void) {
 
   struct MatchMachine storage;
   MatchMachine m = &storage;
-  MatchMachine.open(m);
+  m.open();
   EXPECT_TRUE(_run(m, eq, Var.new(<symbol>, <alpha>)) == <ok>);
-  MatchMachine.finish(m);
-  EXPECT_TRUE(MatchMachine.clean(m));
+  m.finish();
+  EXPECT_TRUE(m.clean());
   MachineSlot *slots = m.slots;
   EXPECT_TRUE(_run(m, binder, Var.new(<i32>, 7)) == <ok>);
   EXPECT_INT_EQ(slots[0].kind, MACHINE_SLOT_VALUE);
-  MatchMachine.finish(m);
-  EXPECT_TRUE(MatchMachine.clean(m));
+  m.finish();
+  EXPECT_TRUE(m.clean());
 
-  MatchMachine.begin(m, eq.view(), Var.new(<symbol>, <alpha>));
-  MatchMachine.begin(m, eq.view(), Var.new(<symbol>, <alpha>));
+  m.begin(eq.view(), Var.new(<symbol>, <alpha>));
+  m.begin(eq.view(), Var.new(<symbol>, <alpha>));
   EXPECT_TRUE(m.status == <error>);
   EXPECT_VAR_EQ(m.error, Var.new(<symbol>, <not-idle>));
-  MatchMachine.finish(m);
-  EXPECT_TRUE(MatchMachine.clean(m));
-  MatchMachine.dispose(m);
-  MachineProgram.free(eq);
-  MachineProgram.free(binder);
+  m.finish();
+  EXPECT_TRUE(m.clean());
+  m.dispose();
+  eq.free();
+  binder.free();
 }
 
 $(import "test-macros.xmacro")

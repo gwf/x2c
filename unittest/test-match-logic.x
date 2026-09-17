@@ -10,7 +10,7 @@ static void match_or_not_quote(void) {
   {
     List input = %( sum 1 2 );
     Symbol orsym = Symbol.new("!or");
-    List pat = %($orsym (sum ?x ?y) (sum ?x)), binds = List.match(input, pat);
+    List pat = %($orsym (sum ?x ?y) (sum ?x)), binds = input.match(pat);
     EXPECT_NOT_NULL(binds);
   }
 
@@ -18,7 +18,7 @@ static void match_or_not_quote(void) {
   {
     List input = %( sum 1 2 );
     Symbol notsym = Symbol.new("!not");
-    List pat = %($notsym (sum 0)), binds = List.match(input, pat);
+    List pat = %($notsym (sum 0)), binds = input.match(pat);
     EXPECT_NOT_NULL(binds);
   }
 
@@ -26,7 +26,7 @@ static void match_or_not_quote(void) {
   {
     List input = %( foo bar );
     Symbol quotesym = Symbol.new("!quote");
-    List pat = %($quotesym (foo bar)), binds = List.match(input, pat);
+    List pat = %($quotesym (foo bar)), binds = input.match(pat);
     EXPECT_NOT_NULL(binds);
   }
 
@@ -57,21 +57,21 @@ static void match_is_predicates_runtime(void) {
   // (var binder) should recognize ?foo
   {
     Symbol issym = Symbol.new("!is");
-    List pat = %(seq ($issym var binder)), binds = List.match(input1, pat);
+    List pat = %(seq ($issym var binder)), binds = input1.match(pat);
     EXPECT_NOT_NULL(binds);
   }
 
   // (list binder) should recognize *rest
   {
     Symbol issym = Symbol.new("!is");
-    List pat = %(seq ($issym list binder)), binds = List.match(input2, pat);
+    List pat = %(seq ($issym list binder)), binds = input2.match(pat);
     EXPECT_NOT_NULL(binds);
   }
 
   // (op) should recognize !or
   {
     Symbol issym = Symbol.new("!is");
-    List pat = %(seq ($issym op)), binds = List.match(input3, pat);
+    List pat = %(seq ($issym op)), binds = input3.match(pat);
     EXPECT_NOT_NULL(binds);
   }
 
@@ -82,11 +82,11 @@ static void match_nested_complex(void) {
   List input = %(tree (node 3 4) tail);
   Symbol orsym = Symbol.new("!or");
   List pat = %(tree ($orsym (node ?a ?b) (pair ?a ?b)) *rest);
-  List binds = List.match(input, pat);
+  List binds = input.match(pat);
   EXPECT_NOT_NULL(binds);
   if (binds) {
-    Var av = List.assoc(binds, Symbol.new("?a"));
-    Var bv = List.assoc(binds, Symbol.new("?b"));
+    Var av = binds.assoc(Symbol.new("?a"));
+    Var bv = binds.assoc(Symbol.new("?b"));
     EXPECT_INT_EQ(Var_int(av), 3);
     EXPECT_INT_EQ(Var_int(bv), 4);
   }

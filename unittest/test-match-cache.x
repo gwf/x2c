@@ -82,11 +82,11 @@ static void cache_lifecycle_failures_transfer(void) {
   MatchLease held;
   EXPECT_INT_EQ(_acquire(cache, _keyed_pattern(1), &held),
                 MACHINE_PREPARED);
-  try MatchCache.dispose(cache);
+  try cache.dispose();
   catch %(bad-state *): caught++;
   MatchLease.release(&held);
   EXPECT_FALSE(held.active);
-  MatchCache.dispose(cache);
+  cache.dispose();
   EXPECT_INT_EQ(caught, 5);
 }
 
@@ -138,7 +138,7 @@ static void cache_admission_and_bypass(void) {
   // program executes and is released with its lease.
   String.pool_retain_named("match-cache-nested-values");
   String nested = String.new("match-cache-nested-needle");
-  EXPECT_FALSE(String.is_permanent(nested));
+  EXPECT_FALSE(nested.is_permanent());
   EXPECT_INT_EQ(_acquire(cache, %(tag $nested ?v), &lease),
                 MACHINE_PREPARED);
   EXPECT_TRUE(lease.generation == 0);
@@ -175,7 +175,7 @@ static void cache_admission_and_bypass(void) {
   EXPECT_INT_EQ(lease.slot, slot);
   MatchLease.release(&lease);
 
-  MatchCache.dispose(cache);
+  cache.dispose();
 }
 
 static void cache_eviction_is_deterministic(void) {
@@ -212,7 +212,7 @@ static void cache_eviction_is_deterministic(void) {
       last_generation = lease.generation;
       MatchLease.release(&lease);
     }
-  MatchCache.dispose(cache);
+  cache.dispose();
 }
 
 static void cache_pins_protect_active_leases(void) {
@@ -241,7 +241,7 @@ static void cache_pins_protect_active_leases(void) {
   catch %(bad-state *): caught++;
   EXPECT_INT_EQ(caught, 1);
   stale.active = 0;
-  MatchCache.dispose(cache);
+  cache.dispose();
 }
 
 static void cache_scalar_lease_survives_eviction(void) {
@@ -267,7 +267,7 @@ static void cache_scalar_lease_survives_eviction(void) {
   // Releasing the held scalar lease must not assert/crash even
   // though the cache has since evicted and reused every other slot.
   MatchLease.release(&held);
-  MatchCache.dispose(cache);
+  cache.dispose();
 }
 
 static void cache_adapters_match_oracle(void) {
@@ -306,7 +306,7 @@ static void cache_adapters_match_oracle(void) {
     cache, %(foo), %(!or *whole missing), &bindings
   ));
   EXPECT_TRUE(bindings == %(sentinel));
-  MatchCache.dispose(cache);
+  cache.dispose();
 }
 
 static void cache_product_pipeline_matches_oracle(void) {
@@ -397,7 +397,7 @@ static void cache_product_pipeline_matches_oracle(void) {
   EXPECT_TRUE(nested == oracle_full);
   MatchLease.release(&held);
 
-  MatchCache.dispose(cache);
+  cache.dispose();
 }
 
 

@@ -135,7 +135,7 @@ static void list_full_slice_preserves_active_owner(void) {
   List copied = borrowed.getslice(0, borrowed.len(), 1);
   EXPECT_TRUE(copied !== borrowed);
   EXPECT_INT_EQ(copied.compare(borrowed), 0);
-  Pool.release(detached);
+  detached.release();
   EXPECT_INT_EQ(copied.car().integer(), seed + 3);
   EXPECT_INT_EQ(copied.len(), 3);
 }
@@ -263,7 +263,7 @@ static void list_map2_zip_and_sublis(void) {
   EXPECT_INT_EQ(zipped.getindex(2).cadr().integer(), 6);
   List alist = %((alpha 1) (beta 2));
   List tree = %(alpha (gamma (beta delta)) beta);
-  List rewritten = List.sublis(alist, tree);
+  List rewritten = alist.sublis(tree);
   Var expected_one = 1, expected_two = 2;
   (Var first, List middle, Var last) = rewritten;
   (Symbol gamma, List inner) = middle;

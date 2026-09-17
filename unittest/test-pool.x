@@ -20,7 +20,7 @@ static void *_pool_parent_allocator(void *data) {
     probe->parent.free(allocation);
     Scope scratch = Scope.new();
     Scope.malloc_in(&scratch, 16);
-    Scope.destroy(scratch);
+    scratch.destroy();
     probe->allocations++;
   }
   x2c_thread_state_release();
@@ -48,29 +48,29 @@ static int _pool_probe_equal(Var a, Var b) {
 
 static void pool_lookup_shadows_outward(void) {
   Pool root = Pool.retain_named(NULL, "test-pool-root");
-  EXPECT_STR_EQ(Scope.name(root.scope), "test-pool-root");
+  EXPECT_STR_EQ(root.scope.name(), "test-pool-root");
   EXPECT_TRUE(root.table.scope == &root.scope);
   String alpha = "pool-alpha";
-  Pool.insert(root, alpha);
-  Pool child = Pool.retain_named(root, "test-pool-child");
-  EXPECT_STR_EQ(Scope.name(child.scope), "test-pool-child");
+  root.insert(alpha);
+  Pool child = root.retain_named("test-pool-child");
+  EXPECT_STR_EQ(child.scope.name(), "test-pool-child");
   EXPECT_TRUE(child.table.scope == &child.scope);
   Var from_parent = alpha;
-  EXPECT_TRUE(Pool.lookup(child, alpha) == from_parent);
+  EXPECT_TRUE(child.lookup(alpha) == from_parent);
   String beta = "pool-beta";
-  Pool.insert(child, beta);
+  child.insert(beta);
   Var from_child = beta;
-  EXPECT_TRUE(Pool.lookup(child, beta) == from_child);
-  EXPECT_TRUE(Pool.lookup(root, beta) is void);
-  EXPECT_TRUE(Pool.owns(child, beta));
-  EXPECT_FALSE(Pool.owns(child, alpha));
-  EXPECT_TRUE(Pool.owns(root, alpha));
-  PoolStats stats = Pool.stats(child);
+  EXPECT_TRUE(child.lookup(beta) == from_child);
+  EXPECT_TRUE(root.lookup(beta) is void);
+  EXPECT_TRUE(child.owns(beta));
+  EXPECT_FALSE(child.owns(alpha));
+  EXPECT_TRUE(root.owns(alpha));
+  PoolStats stats = child.stats();
   EXPECT_INT_EQ(stats.depth, 2);
   EXPECT_INT_EQ(stats.interned, 1);
-  child = Pool.release(child);
+  child = child.release();
   EXPECT_TRUE(child == root);
-  Pool.release(root);
+  root.release();
 }
 
 
@@ -82,209 +82,209 @@ static void pool_intern_uses_one_probe(void) {
   EXPECT_TRUE(x2c_try_register_descriptor("pprobe", methods));
 
   Pool root = Pool.retain_named(NULL, "test-pool-one-probe");
-  PoolProbe *first = Pool.malloc(root, sizeof(PoolProbe));
+  PoolProbe *first = root.malloc(sizeof(PoolProbe));
   first.value = 17;
   Var candidate = Var.new(<pprobe>, first);
   pool_probe_hash_calls = 0;
-  Var canonical = Pool.intern(root, candidate, first);
+  Var canonical = root.intern(candidate, first);
   EXPECT_TRUE(canonical.same(candidate));
   EXPECT_INT_EQ(pool_probe_hash_calls, 1);
-  EXPECT_INT_EQ(Pool.stats(root).interned, 1);
+  EXPECT_INT_EQ(root.stats().interned, 1);
 
   ScopeStats before_duplicate = Scope.stats();
-  PoolProbe *duplicate = Pool.malloc(root, sizeof(PoolProbe));
+  PoolProbe *duplicate = root.malloc(sizeof(PoolProbe));
   duplicate.value = 17;
   Var repeated = Var.new(<pprobe>, duplicate);
   pool_probe_hash_calls = 0;
-  Var existing = Pool.intern(root, repeated, duplicate);
+  Var existing = root.intern(repeated, duplicate);
   ScopeStats after_duplicate = Scope.stats();
   EXPECT_TRUE(existing.same(candidate));
   EXPECT_INT_EQ(pool_probe_hash_calls, 1);
   EXPECT_INT_EQ(after_duplicate.live_allocations,
                 before_duplicate.live_allocations);
-  EXPECT_INT_EQ(Pool.stats(root).interned, 1);
+  EXPECT_INT_EQ(root.stats().interned, 1);
 
-  Pool child = Pool.retain_named(root, "test-pool-child-one-probe");
-  PoolProbe *fresh = Pool.malloc(child, sizeof(PoolProbe));
+  Pool child = root.retain_named("test-pool-child-one-probe");
+  PoolProbe *fresh = child.malloc(sizeof(PoolProbe));
   fresh.value = 23;
   Var fresh_candidate = Var.new(<pprobe>, fresh);
   pool_probe_hash_calls = 0;
-  Var child_canonical = Pool.intern(child, fresh_candidate, fresh);
+  Var child_canonical = child.intern(fresh_candidate, fresh);
   EXPECT_TRUE(child_canonical.same(fresh_candidate));
   // One ancestor probe plus one innermost lookup-or-insert probe.
   EXPECT_INT_EQ(pool_probe_hash_calls, 2);
-  EXPECT_INT_EQ(Pool.stats(child).interned, 1);
-  Pool.release(Pool.release(child));
+  EXPECT_INT_EQ(child.stats().interned, 1);
+  Pool.release(child.release());
 }
 
 
 static void pool_reuses_child_table_capacity(void) {
   Pool root = Pool.retain_named(NULL, "test-pool-sized-root");
-  Pool child = Pool.retain_named(root, "test-pool-sized-child");
-  for (int i = 0; i < 40; i++) Pool.insert(child, i + 1);
+  Pool child = root.retain_named("test-pool-sized-child");
+  for (int i = 0; i < 40; i++) child.insert(i + 1);
   unsigned learned = child.table.capacity;
   EXPECT_TRUE(learned > 2);
-  child = Pool.release(child);
+  child = child.release();
   EXPECT_TRUE(child == root);
 
-  Pool next = Pool.retain_named(root, "test-pool-sized-next");
+  Pool next = root.retain_named("test-pool-sized-next");
   EXPECT_INT_EQ(next.table.capacity, learned);
-  Pool.release(Pool.release(next));
+  Pool.release(next.release());
 }
 
 static void pool_release_reclaims_wholesale(void) {
   Pool root = Pool.retain_named(NULL, "test-reclaim-root");
-  Pool child = Pool.retain_named(root, "test-reclaim-child");
-  PoolStats before = Pool.stats(child);
+  Pool child = root.retain_named("test-reclaim-child");
+  PoolStats before = child.stats();
   for (int i = 0; i < 100; i++) {
-    char *cell = Pool.malloc(child, 32);
+    char *cell = child.malloc(32);
     EXPECT_NOT_NULL(cell);
     snprintf(cell, 32, "cell-%d", i);
   }
-  PoolStats during = Pool.stats(child);
+  PoolStats during = child.stats();
   EXPECT_INT_EQ(during.allocation_calls - before.allocation_calls, 100);
   EXPECT_INT_EQ(during.requested_bytes - before.requested_bytes, 3200);
   EXPECT_TRUE(during.active_blocks > before.active_blocks);
   EXPECT_TRUE(during.active_bytes > before.active_bytes);
-  Pool.release(child);
-  PoolStats after = Pool.stats(root);
+  child.release();
+  PoolStats after = root.stats();
   EXPECT_TRUE(after.depot_blocks > during.depot_blocks);
   EXPECT_TRUE(after.depot_bytes > during.depot_bytes);
   EXPECT_TRUE(after.backing_bytes >= during.backing_bytes);
-  Pool.release(root);
+  root.release();
 }
 
 
 static void pool_reuses_small_slots_and_blocks(void) {
   Pool root = Pool.retain_named(NULL, "test-reuse-root");
-  Pool child = Pool.retain_named(root, "test-reuse-child");
-  PoolProbe *candidate = Pool.malloc(child, sizeof(PoolProbe));
+  Pool child = root.retain_named("test-reuse-child");
+  PoolProbe *candidate = child.malloc(sizeof(PoolProbe));
   candidate.value = 101;
   Var value = Var.new(<pprobe>, candidate);
-  EXPECT_TRUE(Pool.intern(child, value, candidate).same(value));
+  EXPECT_TRUE(child.intern(value, candidate).same(value));
 
-  PoolProbe *duplicate = Pool.malloc(child, sizeof(PoolProbe));
+  PoolProbe *duplicate = child.malloc(sizeof(PoolProbe));
   duplicate.value = 101;
   Var repeated = Var.new(<pprobe>, duplicate);
-  EXPECT_TRUE(Pool.intern(child, repeated, duplicate).same(value));
-  PoolStats before_slot = Pool.stats(child);
-  PoolProbe *reused = Pool.malloc(child, sizeof(PoolProbe));
-  PoolStats after_slot = Pool.stats(child);
+  EXPECT_TRUE(child.intern(repeated, duplicate).same(value));
+  PoolStats before_slot = child.stats();
+  PoolProbe *reused = child.malloc(sizeof(PoolProbe));
+  PoolStats after_slot = child.stats();
   EXPECT_TRUE(reused == duplicate);
   EXPECT_INT_EQ(after_slot.slot_reuses, before_slot.slot_reuses + 1);
 
-  Pool.release(child);
-  PoolStats before_block = Pool.stats(root);
-  Pool next = Pool.retain_named(root, "test-reuse-next");
-  EXPECT_NOT_NULL(Pool.malloc(next, sizeof(PoolProbe)));
-  PoolStats after_block = Pool.stats(next);
+  child.release();
+  PoolStats before_block = root.stats();
+  Pool next = root.retain_named("test-reuse-next");
+  EXPECT_NOT_NULL(next.malloc(sizeof(PoolProbe)));
+  PoolStats after_block = next.stats();
   EXPECT_INT_EQ(after_block.block_allocations, before_block.block_allocations);
   EXPECT_INT_EQ(after_block.block_reuses, before_block.block_reuses + 1);
   EXPECT_TRUE(after_block.active_bytes > before_block.active_bytes);
   EXPECT_TRUE(after_block.depot_bytes < before_block.depot_bytes);
-  Pool.release(Pool.release(next));
+  Pool.release(next.release());
 }
 
 
 static void pool_promote_is_pointer_stable(void) {
   Pool root = Pool.retain_named(NULL, "test-promote-root");
-  Pool child = Pool.retain_named(root, "test-promote-child");
-  char *buf = Pool.malloc(child, 32);
+  Pool child = root.retain_named("test-promote-child");
+  char *buf = child.malloc(32);
   strcpy(buf, "survivor");
   String key = "pool-promote-key";
-  Pool.insert(child, key);
-  EXPECT_FALSE(Pool.promote(root, key, buf));  // root has no parent
-  EXPECT_FALSE(Pool.promote(child, "pool-promote-miss", buf));
-  EXPECT_TRUE(Pool.promote(child, key, buf));
-  PoolStats promoted = Pool.stats(child);
+  child.insert(key);
+  EXPECT_FALSE(root.promote(key, buf));  // root has no parent
+  EXPECT_FALSE(child.promote("pool-promote-miss", buf));
+  EXPECT_TRUE(child.promote(key, buf));
+  PoolStats promoted = child.stats();
   EXPECT_INT_EQ(promoted.promoted, 1);
-  Pool released = Pool.release(child);
+  Pool released = child.release();
   EXPECT_TRUE(released == root);
   EXPECT_STR_EQ(buf, "survivor");
-  EXPECT_TRUE(Pool.owns(root, key));
-  PoolStats stats = Pool.stats(root);
+  EXPECT_TRUE(root.owns(key));
+  PoolStats stats = root.stats();
   EXPECT_INT_EQ(stats.depth, 1);
-  Pool.release(root);
+  root.release();
 }
 
 
 static void pool_promote_transfers_partial_blocks(void) {
   Pool root = Pool.retain_named(NULL, "test-partial-root");
-  Pool child = Pool.retain_named(root, "test-partial-child");
-  char *kept = Pool.malloc(child, 16), *garbage = Pool.malloc(child, 16);
+  Pool child = root.retain_named("test-partial-child");
+  char *kept = child.malloc(16), *garbage = child.malloc(16);
   strcpy(kept, "kept");
   strcpy(garbage, "gone");
   String key = "pool-partial-key";
-  Pool.insert(child, key);
-  EXPECT_TRUE(Pool.promote(child, key, kept));
-  Pool.release(child);
+  child.insert(key);
+  EXPECT_TRUE(child.promote(key, kept));
+  child.release();
   EXPECT_STR_EQ(kept, "kept");
-  EXPECT_TRUE(Pool.owns(root, key));
-  EXPECT_TRUE(Pool.malloc(root, 16) == garbage);
-  Pool.release(root);
+  EXPECT_TRUE(root.owns(key));
+  EXPECT_TRUE(root.malloc(16) == garbage);
+  root.release();
 }
 
 
 static void pool_promote_tracks_a_full_bitmap(void) {
   Pool root = Pool.retain_named(NULL, "test-bitmap-root");
-  Pool child = Pool.retain_named(root, "test-bitmap-child");
+  Pool child = root.retain_named("test-bitmap-child");
   char *kept[30];
   for (int i = 0; i < 30; i++) {
-    kept[i] = Pool.malloc(child, 32);
+    kept[i] = child.malloc(32);
     snprintf(kept[i], 32, "bitmap-%d", i);
-    Pool.insert(child, i + 1);
-    EXPECT_TRUE(Pool.promote(child, i + 1, kept[i]));
+    child.insert(i + 1);
+    EXPECT_TRUE(child.promote(i + 1, kept[i]));
   }
-  Pool.release(child);
+  child.release();
   for (int i = 0; i < 30; i++) {
     char expected[32];
     snprintf(expected, sizeof expected, "bitmap-%d", i);
     EXPECT_STR_EQ(kept[i], expected);
   }
-  Pool.release(root);
+  root.release();
 }
 
 
 static void pool_promote_crosses_multiple_levels(void) {
   Pool root = Pool.retain_named(NULL, "test-multi-root");
-  Pool middle = Pool.retain_named(root, "test-multi-middle");
-  Pool inner = Pool.retain_named(middle, "test-multi-inner");
-  char *kept = Pool.malloc(inner, 32);
+  Pool middle = root.retain_named("test-multi-middle");
+  Pool inner = middle.retain_named("test-multi-inner");
+  char *kept = inner.malloc(32);
   strcpy(kept, "multi-level survivor");
   String key = "pool-multi-key";
-  Pool.insert(inner, key);
-  EXPECT_TRUE(Pool.promote(inner, key, kept));
-  EXPECT_TRUE(Pool.promote(middle, key, kept));
-  Pool.release(inner);
+  inner.insert(key);
+  EXPECT_TRUE(inner.promote(key, kept));
+  EXPECT_TRUE(middle.promote(key, kept));
+  inner.release();
   EXPECT_STR_EQ(kept, "multi-level survivor");
-  Pool.release(middle);
+  middle.release();
   EXPECT_STR_EQ(kept, "multi-level survivor");
-  EXPECT_TRUE(Pool.owns(root, key));
-  Pool.release(root);
+  EXPECT_TRUE(root.owns(key));
+  root.release();
 }
 
 
 static void pool_large_promotion_retains_scope_path(void) {
   Pool root = Pool.retain_named(NULL, "test-large-root");
-  Pool child = Pool.retain_named(root, "test-large-child");
-  char *kept = Pool.malloc(child, 1024);
+  Pool child = root.retain_named("test-large-child");
+  char *kept = child.malloc(1024);
   strcpy(kept, "large survivor");
   String key = "pool-large-key";
-  Pool.insert(child, key);
-  EXPECT_TRUE(Pool.promote(child, key, kept));
-  Pool.release(child);
+  child.insert(key);
+  EXPECT_TRUE(child.promote(key, kept));
+  child.release();
   EXPECT_STR_EQ(kept, "large survivor");
-  Pool.release(root);
+  root.release();
 }
 
 
 static void pool_release_balances_scope_stats(void) {
   ScopeStats before = Scope.stats();
   Pool root = Pool.retain_named(NULL, "test-balance-root");
-  Pool child = Pool.retain(root);
-  Pool.malloc(child, 64);
-  Pool.malloc(root, 64);
-  Pool.release(Pool.release(child));
+  Pool child = root.retain();
+  child.malloc(64);
+  root.malloc(64);
+  Pool.release(child.release());
   ScopeStats after = Scope.stats();
   EXPECT_INT_EQ(after.live_scopes, before.live_scopes);
   EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
@@ -311,7 +311,7 @@ static void pool_string_bracket_and_wipe(void) {
     if (i == 137) kept = transient;
   }
   ScopeStats during = Scope.stats();
-  String promoted = String.promote(kept);
+  String promoted = kept.promote();
   EXPECT_TRUE(promoted == kept);  // promotion is pointer-stable
   String.pool_release();
   ScopeStats after = Scope.stats();
@@ -333,13 +333,13 @@ static void pool_string_bracket_and_wipe(void) {
 static void pool_string_free_reuses_small_slot(void) {
   String first = String.malloc(24);
   EXPECT_NOT_NULL(first);
-  String.free(first);
+  first.free();
   PoolStats before = Pool.stats(NULL);
   String reused = String.malloc(24);
   PoolStats after = Pool.stats(NULL);
   EXPECT_TRUE(reused == first);
   EXPECT_INT_EQ(after.slot_reuses, before.slot_reuses + 1);
-  String.free(reused);
+  reused.free();
 }
 
 static void pool_list_bracket_promotes_result(void) {
@@ -352,7 +352,7 @@ static void pool_list_bracket_promotes_result(void) {
   String label = String.new("pool-keep-me");
   List nested = %(1 2 3);
   List result = %( $label 42 $nested );
-  List promoted = List.promote(result);
+  List promoted = result.promote();
   EXPECT_TRUE(promoted == result);  // pointer stability
   List.pool_release();
   EXPECT_INT_EQ(result.len(), 3);
@@ -361,7 +361,7 @@ static void pool_list_bracket_promotes_result(void) {
   EXPECT_VAR_EQ(result[1], answer);
   EXPECT_TRUE(result[2].list() == nested);
   // Ancestor-owned structure: promoting again is a harmless no-op.
-  EXPECT_TRUE(List.promote(result) == result);
+  EXPECT_TRUE(result.promote() == result);
   // The nested tail stayed canonical through the wipe.
   EXPECT_TRUE(%(1 2 3) == nested);
 }
@@ -385,26 +385,26 @@ static void pool_try_own_reports_lifetime_safety(void) {
   List permanent_list = %(pool-permanent-list);
   EXPECT_TRUE(String.try_own(NULL));
   EXPECT_TRUE(List.try_own(NULL));
-  EXPECT_TRUE(String.try_own(permanent_string));
-  EXPECT_TRUE(List.try_own(permanent_list));
+  EXPECT_TRUE(permanent_string.try_own());
+  EXPECT_TRUE(permanent_list.try_own());
 
   String transient_string = String.malloc(16);
   strcpy(transient_string, "not interned");
-  EXPECT_FALSE(String.try_own(transient_string));
-  String.free(transient_string);
+  EXPECT_FALSE(transient_string.try_own());
+  transient_string.free();
 
   List transient_list = Scope.malloc(sizeof(struct List));
   transient_list.car = 1;
   transient_list.cdr = NULL;
-  EXPECT_FALSE(List.try_own(transient_list));
+  EXPECT_FALSE(transient_list.try_own());
 
   List.pool_retain_named("test-own-values");
-  EXPECT_TRUE(String.try_own(permanent_string));
-  EXPECT_TRUE(List.try_own(permanent_list));
+  EXPECT_TRUE(permanent_string.try_own());
+  EXPECT_TRUE(permanent_list.try_own());
   String child_string = String.new("pool-child-string");
   List child_list = %($child_string pool-child-list);
-  EXPECT_TRUE(String.try_own(child_string));
-  EXPECT_TRUE(List.try_own(child_list));
+  EXPECT_TRUE(child_string.try_own());
+  EXPECT_TRUE(child_list.try_own());
   List.pool_release();
   EXPECT_STR_EQ(child_string, "pool-child-string");
   EXPECT_TRUE(child_list == %("pool-child-string" pool-child-list));
@@ -414,17 +414,17 @@ static void string_is_permanent_asks_without_promoting(void) {
   String permanent = "pool-permanent-string";
   EXPECT_TRUE(String.is_permanent(NULL));
   EXPECT_TRUE(String.is_permanent(""));
-  EXPECT_TRUE(String.is_permanent(permanent));
+  EXPECT_TRUE(permanent.is_permanent());
 
   String transient = String.malloc(16);
   strcpy(transient, "not interned");
-  EXPECT_FALSE(String.is_permanent(transient));
-  String.free(transient);
+  EXPECT_FALSE(transient.is_permanent());
+  transient.free();
 
   String.pool_retain_named("test-is-permanent");
   String nested = String.new("pool-nested-string");
-  EXPECT_FALSE(String.is_permanent(nested));
-  EXPECT_TRUE(String.is_permanent(permanent));
+  EXPECT_FALSE(nested.is_permanent());
+  EXPECT_TRUE(permanent.is_permanent());
   String.pool_release();
 }
 

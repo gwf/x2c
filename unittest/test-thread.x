@@ -378,8 +378,8 @@ static void thread_memory_sink_retains_worker_events(void) {
 static void thread_results_stay_private_until_join(void) {
   Pool string_root = String.pool_current();
   Pool list_root = List.pool_current();
-  size_t strings_before = Pool.stats(string_root).interned;
-  size_t lists_before = Pool.stats(list_root).interned;
+  size_t strings_before = string_root.stats().interned;
+  size_t lists_before = list_root.stats().interned;
 
   Context destination = Context.open_isolated_named("Thread join target");
   int value = 8675309;
@@ -394,8 +394,8 @@ static void thread_results_stay_private_until_join(void) {
   thread.free();
   destination.close();
 
-  EXPECT_INT_EQ(Pool.stats(string_root).interned, strings_before);
-  EXPECT_INT_EQ(Pool.stats(list_root).interned, lists_before);
+  EXPECT_INT_EQ(string_root.stats().interned, strings_before);
+  EXPECT_INT_EQ(list_root.stats().interned, lists_before);
 }
 
 static void thread_join_returns_void_worker_result(void) {
@@ -475,8 +475,8 @@ static void thread_join_runs_recursive_custom_exporter(void) {
 static void thread_errors_stay_private_until_join(void) {
   Pool string_root = String.pool_current();
   Pool list_root = List.pool_current();
-  size_t strings_before = Pool.stats(string_root).interned;
-  size_t lists_before = Pool.stats(list_root).interned;
+  size_t strings_before = string_root.stats().interned;
+  size_t lists_before = list_root.stats().interned;
 
   Context destination = Context.open_isolated_named("Thread error target");
   int value = 424242;
@@ -490,8 +490,8 @@ static void thread_errors_stay_private_until_join(void) {
   thread.free();
   destination.close();
 
-  EXPECT_INT_EQ(Pool.stats(string_root).interned, strings_before);
-  EXPECT_INT_EQ(Pool.stats(list_root).interned, lists_before);
+  EXPECT_INT_EQ(string_root.stats().interned, strings_before);
+  EXPECT_INT_EQ(list_root.stats().interned, lists_before);
 }
 
 static void thread_error_wide_values_survive_until_join(void) {

@@ -484,20 +484,20 @@ static void match_rejects_malformed_binder_names(void) {
   MatchPlan plan = MatchPlan.prepare(malformed);
   EXPECT_INT_EQ(plan.status, MACHINE_MALFORMED);
   EXPECT_STR_EQ(String.new(plan.reason), "binder-name");
-  MatchPlan.free(plan);
+  plan.free();
 
   plan = MatchPlan.prepare(%(node *9bad));
   EXPECT_INT_EQ(plan.status, MACHINE_MALFORMED);
   EXPECT_STR_EQ(String.new(plan.reason), "binder-name");
-  MatchPlan.free(plan);
+  plan.free();
 
   plan = MatchPlan.prepare(%(!quote ?bad-name));
   EXPECT_INT_EQ(plan.status, MACHINE_PREPARED);
-  MatchPlan.free(plan);
+  plan.free();
 
   plan = MatchPlan.prepare(%(!is (?v) ?binder?));
   EXPECT_TRUE(plan.status != MACHINE_MALFORMED);
-  MatchPlan.free(plan);
+  plan.free();
 }
 
 

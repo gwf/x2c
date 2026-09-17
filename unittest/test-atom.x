@@ -8,8 +8,8 @@ static Var _atom_read_lisp(String source, Symbol *status) {
   Lisp lisp = Lisp.kernel();
   unsigned cursor = 0;
   Var value = void;
-  *status = Lisp.read(lisp, source, &cursor, &value);
-  Lisp.destroy(lisp);
+  *status = lisp.read(source, &cursor, &value);
+  lisp.destroy();
   return value;
 }
 
@@ -168,7 +168,7 @@ static void atom_list_promotion_preserves_long_payload(void) {
   List result = cons(atom, NULL);
   EXPECT_TRUE(atom is <lsym>);
   EXPECT_TRUE(atom.pointer() == spelling);
-  EXPECT_TRUE(List.promote(result) == result);
+  EXPECT_TRUE(result.promote() == result);
   String.pool_release();
 
   EXPECT_STR_EQ(atom.str(), "pool-owned-long-atom-314159");

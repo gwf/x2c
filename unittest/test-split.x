@@ -215,12 +215,12 @@ static void split_cursor_allocation_and_nesting(void) {
     count++;
   }
   EXPECT_INT_EQ(count, 3);
-  PoolStats after_first = Pool.stats(pool);
+  PoolStats after_first = pool.stats();
 
   count = 0;
   foreach(String word, value.words()) count++;
   EXPECT_INT_EQ(count, 3);
-  PoolStats after_repeat = Pool.stats(pool);
+  PoolStats after_repeat = pool.stats();
   EXPECT_INT_EQ((int) after_repeat.interned, (int) after_first.interned);
 
   Split cursor = value.words();

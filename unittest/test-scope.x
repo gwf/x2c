@@ -28,14 +28,14 @@ static void _destroy_active_root(void) {
 static void _destroy_active_pushed(void) {
   Scope slot = Scope.new();
   Scope.push(&slot);
-  Scope.destroy(slot);
+  slot.destroy();
 }
 
 static void _destroy_outer_stack_slot(void) {
   Scope outer = Scope.new(), inner = Scope.new();
   Scope.push(&outer);
   Scope.push(&inner);
-  Scope.destroy(outer);
+  outer.destroy();
 }
 
 static void _destroy_attached_lower(void) {
@@ -45,7 +45,7 @@ static void _destroy_attached_lower(void) {
   Scope lower = slot;
   Scope.retain();
   Scope.pop();
-  Scope.destroy(lower);
+  lower.destroy();
 }
 
 static void _release_without_retain(void) {
@@ -100,11 +100,11 @@ static void scope_push_pop_destroy(void) {
   EXPECT_STR_EQ(outer_mem, "outer");
   Scope.pop();
   EXPECT_TRUE(Scope.top() == &outer);
-  Scope.destroy(inner);
+  inner.destroy();
   EXPECT_STR_EQ(outer_mem, "outer");
   Scope.pop();
   EXPECT_TRUE(Scope.top() == initial);
-  Scope.destroy(outer);
+  outer.destroy();
   Scope.release();
 }
 
@@ -167,7 +167,7 @@ static void scope_named_direct_allocation(void) {
   int *zeroes = Scope.calloc_in(&named, 4, sizeof(int));
 
   EXPECT_TRUE(Scope.top() == active);
-  EXPECT_STR_EQ(Scope.name(named), "named-test");
+  EXPECT_STR_EQ(named.name(), "named-test");
   EXPECT_STR_EQ(copy, "copy");
   EXPECT_NOT_NULL(zeroes);
   if (zeroes) for (int i = 0; i < 4; i++) EXPECT_INT_EQ(zeroes[i], 0);
@@ -177,7 +177,7 @@ static void scope_named_direct_allocation(void) {
   EXPECT_INT_EQ(during.live_scopes, before.live_scopes + 1);
   EXPECT_INT_EQ(during.live_allocations, before.live_allocations + 2);
   EXPECT_INT_EQ(during.requested_bytes, before.requested_bytes + 21);
-  Scope.destroy(named);
+  named.destroy();
   ScopeStats after = Scope.stats();
   EXPECT_INT_EQ(after.free_calls, before.free_calls + 2);
   EXPECT_INT_EQ(after.scope_creations, before.scope_creations + 1);
@@ -263,10 +263,10 @@ static void scope_move_between_scopes(void) {
   fill(c, "gamma");
   Scope.move(b, &to);  // middle of the source list
   Scope.move(c, &to);  // head of the source list
-  Scope.destroy(from);
+  from.destroy();
   EXPECT_STR_EQ(b, "beta");
   EXPECT_STR_EQ(c, "gamma");
-  Scope.destroy(to);
+  to.destroy();
   ScopeStats after = Scope.stats();
   EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
   EXPECT_INT_EQ(after.live_scopes, before.live_scopes);
@@ -292,7 +292,7 @@ static void scope_move_materializes_and_self_moves(void) {
   Scope.move(a, &slot);  // self-move while not at the head
   EXPECT_STR_EQ(a, "kept");
   EXPECT_STR_EQ(b, "second");
-  Scope.destroy(slot);
+  slot.destroy();
   ScopeStats after = Scope.stats();
   EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
   EXPECT_INT_EQ(after.live_scopes, before.live_scopes);
@@ -311,7 +311,7 @@ static void scope_destroy_detached_contract(void) {
   Scope.retain();
   Scope.malloc(8);
   Scope.pop();
-  Scope.destroy(slot);
+  slot.destroy();
 
   ScopeStats after = Scope.stats();
   EXPECT_INT_EQ(after.live_scopes, before.live_scopes);
@@ -387,10 +387,10 @@ static void scope_finalizer_order_and_move(void) {
   Scope.move(b, &to);  // middle of the source list
   Scope.move(c, &to);  // head of the source list
   Scope.move(c, &to);  // self-move keeps the finalizer
-  Scope.destroy(from);
+  from.destroy();
   EXPECT_INT_EQ(drop_count, 1);
   EXPECT_TRUE(drop_order[0] == a);
-  Scope.destroy(to);
+  to.destroy();
   EXPECT_INT_EQ(drop_count, 3);
   EXPECT_TRUE(drop_order[1] == c);  // most recent block first
   EXPECT_TRUE(drop_order[2] == b);
@@ -417,7 +417,7 @@ static void scope_finalizer_realloc_and_scratch(void) {
 
   dying_scope = Scope.new_named("finalize-scratch");
   Scope.malloc_finalized_in(&dying_scope, 8, _scratch_drop);
-  Scope.destroy(dying_scope);
+  dying_scope.destroy();
   dying_scope = NULL;
   EXPECT_INT_EQ(drop_count, 2);
   ScopeStats after = Scope.stats();
