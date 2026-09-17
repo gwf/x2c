@@ -166,12 +166,22 @@
       body
       `(let (,(car bindings)) (let* ,(cdr bindings) ,body))))
 
-// The four useful two-level selectors
+// The two- and three-level selectors. Macro bodies reach this far into a
+// captured node often enough that the three-level names belong here rather
+// than in the optional algorithms.
 
 (defun caar (value) (car (car value)))
 (defun cadr (value) (car (cdr value)))
 (defun cdar (value) (cdr (car value)))
 (defun cddr (value) (cdr (cdr value)))
+(defun caaar (value) (car (car (car value))))
+(defun caadr (value) (car (car (cdr value))))
+(defun cadar (value) (car (cdr (car value))))
+(defun caddr (value) (car (cdr (cdr value))))
+(defun cdaar (value) (cdr (car (car value))))
+(defun cdadr (value) (cdr (car (cdr value))))
+(defun cddar (value) (cdr (cdr (car value))))
+(defun cdddr (value) (cdr (cdr (cdr value))))
 
 // Pattern matching
 

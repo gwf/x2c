@@ -24,11 +24,5 @@
       (cons (subst replacement target (car tree))
             (subst replacement target (cdr tree)))))
 
-(defun caaar (value) (car (car (car value))))
-(defun caadr (value) (car (car (cdr value))))
-(defun cadar (value) (car (cdr (car value))))
-(defun caddr (value) (car (cdr (cdr value))))
-(defun cdaar (value) (cdr (car (car value))))
-(defun cdadr (value) (cdr (car (cdr value))))
-(defun cddar (value) (cdr (cdr (car value))))
-(defun cdddr (value) (cdr (cdr (cdr value))))
+// The three-level selectors moved to etc/init.xlisp, which both the shell and
+// a macro session load, so they are available everywhere without this file.

@@ -945,6 +945,26 @@ static void _ensure_lisp(Compiler compiler) {
     $lisp.bind(_.macro_lisp, "x2c.type.layout", _sdk_type_layout);
     $lisp.bind(_.macro_lisp, "x2c.type.value?", _sdk_type_value);
     $lisp.bind(_.macro_lisp, "x2c.type.tag-name", _sdk_type_tag_name);
+    /* One naming rule: a supported operation is `x2c.<noun>.<verb>` and an
+       internal primitive carries the `_x2c.` prefix instead of an infix
+       underscore. `etc/` is read from the live tree while `bootstrap/` holds
+       compiled C, so both spellings bind until the checked-in bootstrap
+       knows the new ones; the rows above go once it does. */
+    $lisp.bind(_.macro_lisp, "_x2c.source.text", _sdk_source_text);
+    $lisp.bind(_.macro_lisp, "_x2c.embed.text", _sdk_embed_text);
+    $lisp.bind(
+      _.macro_lisp, "_x2c.invocation.location", _sdk_invocation_location);
+    $lisp.bind(_.macro_lisp, "_x2c.symbol-set", _sdk_symbol_set);
+    $lisp.bind(_.macro_lisp, "_x2c.name.unique", _sdk_ident_unique);
+    $lisp.bind(
+      _.macro_lisp, "_x2c.declaration.bindings", _sdk_declaration_bindings);
+    $lisp.bind(_.macro_lisp, "x2c.literal.value", _sdk_literal_string);
+    $lisp.bind(_.macro_lisp, "x2c.protocol.member", _sdk_protocol_member);
+    $lisp.bind(_.macro_lisp, "x2c.type.integral?", _sdk_type_integral);
+    $lisp.bind(_.macro_lisp, "x2c.type.pointer?", _sdk_type_pointer);
+    $lisp.bind(_.macro_lisp, "x2c.type.element", _sdk_type_element);
+    $lisp.bind(_.macro_lisp, "x2c.type.parameters", _sdk_type_parameters);
+    $lisp.bind(_.macro_lisp, "x2c.type.return", _sdk_type_return);
   }
 }
 
