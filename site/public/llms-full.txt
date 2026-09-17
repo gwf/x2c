@@ -465,6 +465,12 @@ Array type chain and constructor; it does not acquire a second allocation
 layout. A forward declaration such as `class Point;` reserves the identity
 until its visible definition supplies the representation.
 
+An enum cannot be a class's value representation, because a `Var` has no fixed
+tag for a type whose integer width C leaves to the implementation. Give the
+enum a typedef and name that typedef, as `class Tone Shade;` does for
+`typedef enum Shade { LIGHT, DARK } Shade;`. A pointer to an enum is an
+ordinary pointer representation and needs no typedef.
+
 ### Construction and early release
 
 A scalar class constructor accepts its scalar value. A class pointing to an
@@ -1297,15 +1303,19 @@ a value or a pointer, and whether the declaration came from x2c source or from
 a C header x2c reads. `->` remains accepted and is required where the compiler
 cannot select the operator: a pointer to a struct whose layout x2c never sees,
 such as one declared in a system header or in a third-party header reached
-through an include x2c does not resolve; a member of an anonymous union or
-struct through a pointer; and a `#define` body, which is preprocessor text.
+through an include x2c does not resolve; and a `#define` body, which is
+preprocessor text. A member of an anonymous union or struct belongs to its
+enclosing aggregate, and `.` reaches it through a pointer like any other
+member.
 `.` reaches through one pointer level, so a pointer to a pointer typedef keeps
 `(*pointer).field`.
 x2c also recognizes method-style calls such as `list.len()`. The namespaced
 function is selected from the static receiver type. When that function
 declares its first parameter `T *` and the receiver is an addressable `T`, the
 receiver's address is passed, so `rec.bump(4)` reaches
-`void Rec.bump(Rec *rec, int by)` without an explicit `&`. Normal pointer
+`void Rec.bump(Rec *rec, int by)` without an explicit `&`. A receiver that is
+a pointer to the declared parameter is one level too far and is a type error;
+write `(*pointer).method()`. Normal pointer
 conversion rules still apply, including preservation of `const` and other
 qualifiers. Method syntax does not make every value dynamically dispatchable;
 only registered callbacks define custom behavior.

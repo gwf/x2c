@@ -1359,7 +1359,7 @@ Var Compiler.evaluate_declaration_recipe(
 static Var _decorator_target_replaced(Var produced, Var target, Var required) {
   if (produced is not <list>) return void;
   List produced_items = produced;
-  Array items = produced_items.array();
+  Array items = produced_items;
   defer items.free();
   int at = produced_items.index(target);
   if (at >= 0) {

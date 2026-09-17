@@ -162,6 +162,11 @@ Files: `lib/array.x`, `lib/array-generics.xmacro`, `lib/list.x`,
 
 ## Group 9: Match, Lisp, and Func
 
+> Fixed 2026-09-17, all nine rows. The plan cache now keys on values that
+> outlive it, so the documented pool bracket is safe; 300,000 differential
+> cases agree between machine and reference. The cache benchmark's product
+> lanes cost 3-4% more, the aggregate moved within noise.
+
 > Fixed 2026-09-17, all nine rows. The plan cache and the compiler-owned
 > sites admit only patterns the outermost canonical pool owns, so the
 > `pool_retain`/`pool_release` bracket is safe; the traversals walk a cdr in
@@ -320,6 +325,14 @@ Files: `docs/`, `agents/`, `plans/`, `site/src/`, `examples/`,
 
 ## Group 15: member access, class registration, and one test
 
+> Fixed 2026-09-17, all seven rows plus the `_Generic` row inherited from
+> Group 3. Row 1 is a diagnostic naming `(*receiver).method()`, not an
+> automatic second dereference, because three shipped documents state the
+> one-pointer-level rule. Row 3's cause was misattributed here: the raise is
+> `<init-fail>` from `Atom.initialize` in `lib/atom.x`, not the `bad-state`
+> raise in `lib/dispatch.x`; the 32-row limit stays, since the rows occupy
+> four NaN-boxing top words and raising it consumes encoding space.
+
 Files: `src/expressions.x`, `src/parse.x`, `lib/error.x`, `lib/dispatch.x`,
 `src/compiler.x`, `etc/builtin-macros.xmacro`, `unittest/test-file.x`.
 
@@ -343,6 +356,14 @@ participation" message points at the token after the declaration, because
 `src/parse.x:1257-1265` reports with an already-advanced token; and defining a
 method on an imported package type fails with "parse: missing closing
 parenthesis" pointing at a parameter name.
+## Group 20: gaps found while fixing Groups 9 and 15
+
+| Defect | Reproduction | Cause | R |
+| --- | --- | --- | --- |
+| A bare-binder template left unbound by a successful match raises, then aborts. | `%(outer (b)).search_replace(%(!or (a *x) (b)), <"*x">)` raises `<void-op>` from `List.cons` on both engines, and the process then aborts with "raise re-entered or after shutdown" although both raises were caught. `try_match_replace` writes `void` for the same input. Predates Group 9. | `_apply_capture_template` and the reference's `bindings.assoc(template)`. | agent |
+| A forward `class` declaration never followed by a definition disappears silently. | `class Color;` produces no registration and no diagnostic. It is the documented forward form, so this may be intentional. | `etc/builtin-macros.xmacro` class decorator. | agent |
+| `Build._place_unit_headers` copies generated headers into shared paths without an atomic publish. | Not reproduced; 48 parallel two-source builds stayed green. A latent version of the concurrent-build row Group 11 fixed. | `src/build.x`. | agent |
+
 ## Group 19: gaps found while fixing Groups 3, 5, and 7
 
 Files: `src/transform.x` or `src/expressions.x` (row 1), `src/type.x` (row 2),

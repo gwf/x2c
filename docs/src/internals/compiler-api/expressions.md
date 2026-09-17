@@ -51,7 +51,7 @@ for a typed destination, 1 for an interpolation hole, which displays
 every value through `Var.str`, and 2 for a printf-family value, which
 the format converts when it is a Var.
 
-Source: `src/expressions.x:1496`
+Source: `src/expressions.x:1514`
 
 <a id="Compiler.complete_iter_chain"></a>
 #### Compiler.complete_iter_chain
@@ -74,7 +74,7 @@ Source: `src/expressions.x:51`
 
 Keeps a compound literal's native type definition at its original scope.
 
-Source: `src/expressions.x:3687`
+Source: `src/expressions.x:3705`
 
 <a id="Compiler.convert_expression"></a>
 #### Compiler.convert_expression
@@ -88,7 +88,7 @@ performs the conversion implicitly; an unsupported x2c conversion reports
 a type error through `c`. Synthesized operations may add generated
 bindings or immutable literal entries to compiler state.
 
-Source: `src/expressions.x:3731`
+Source: `src/expressions.x:3749`
 
 <a id="Compiler.convert_initializer"></a>
 #### Compiler.convert_initializer
@@ -98,7 +98,7 @@ Source: `src/expressions.x:3731`
 Converts an initializer using its declared native object for array
 bounds.
 
-Source: `src/expressions.x:3682`
+Source: `src/expressions.x:3700`
 
 <a id="Compiler.convert_segment_to_string"></a>
 #### Compiler.convert_segment_to_string
@@ -117,7 +117,7 @@ not equivalent: it
 extracts only a `String` payload and yields empty `String` for every other
 tag.
 
-Source: `src/expressions.x:4004`
+Source: `src/expressions.x:4039`
 
 <a id="Compiler.initializer_native_types"></a>
 #### Compiler.initializer_native_types
@@ -128,7 +128,7 @@ Returns native definition/reference types for a compound literal.
 Macro expansion stays in the original cast; named tags let later sizeof
 expressions reuse that exact layout without a new scope.
 
-Source: `src/expressions.x:2827`
+Source: `src/expressions.x:2845`
 
 <a id="Compiler.initializer_rows"></a>
 #### Compiler.initializer_rows
@@ -141,7 +141,7 @@ walk. Scalar runs map their ordinal through the native dimensions; other
 inputs retain possible cursor continuations. A NULL condition is
 unconditional, and a NULL destination is excess.
 
-Source: `src/expressions.x:3274`
+Source: `src/expressions.x:3292`
 
 <a id="Compiler.initializer_slot"></a>
 #### Compiler.initializer_slot
@@ -150,7 +150,7 @@ Source: `src/expressions.x:3274`
 
 Selects a native subobject without evaluating it when used by sizeof.
 
-Source: `src/expressions.x:2954`
+Source: `src/expressions.x:2972`
 
 <a id="Compiler.parse_assignment"></a>
 #### Compiler.parse_assignment
@@ -161,7 +161,7 @@ Parses one right-associative assignment expression.
 A parenthesized identifier list on the left becomes a destructuring
 assignment only for `=`. `compiler.token` stops after the expression.
 
-Source: `src/expressions.x:2380`
+Source: `src/expressions.x:2398`
 
 <a id="Compiler.parse_conditional"></a>
 #### Compiler.parse_conditional
@@ -172,7 +172,7 @@ Parses a binary expression and its optional conditional tail.
 The false arm recurses at conditional precedence, making `?:`
 right-associative, and `compiler.token` stops after the expression.
 
-Source: `src/expressions.x:2360`
+Source: `src/expressions.x:2378`
 
 <a id="Compiler.parse_expression"></a>
 #### Compiler.parse_expression
@@ -183,7 +183,7 @@ Parses an assignment expression and any following comma expressions.
 A comma expression retains source order and takes the type of its final
 value. `compiler.token` stops at the first token outside the expression.
 
-Source: `src/expressions.x:2465`
+Source: `src/expressions.x:2483`
 
 <a id="Compiler.parse_macro_expression_target"></a>
 #### Compiler.parse_macro_expression_target
@@ -210,7 +210,7 @@ resumes at the postfix tail it had already reached. This entry consumes
 the terminating `;` and returns `(stmnt expression)` or an origin-anchored
 `(dstrdecl ...)`.
 
-Source: `src/expressions.x:2488`
+Source: `src/expressions.x:2506`
 
 <a id="Compiler.parse_primary"></a>
 #### Compiler.parse_primary
@@ -221,7 +221,7 @@ Parses one primary expression or expression-valued macro slot.
 Dispatch starts at `compiler.token` to the selected literal, identifier,
 grouping, or macro parser and leaves the token after that primary form.
 
-Source: `src/expressions.x:2416`
+Source: `src/expressions.x:2434`
 
 <a id="Compiler.parse_variable"></a>
 #### Compiler.parse_variable
@@ -231,7 +231,7 @@ Source: `src/expressions.x:2416`
 Parses and resolves one complex identifier expression.
 Parsing starts at `compiler.token` and leaves it after the identifier.
 
-Source: `src/expressions.x:2323`
+Source: `src/expressions.x:2341`
 
 <a id="Compiler.promote_string_literal"></a>
 #### Compiler.promote_string_literal
@@ -253,7 +253,7 @@ Source: `src/expressions.x:942`
 Returns the exact Var tag for a type test, rejecting types without one.
 Enums retain no identity after boxing and cannot be tested this way.
 
-Source: `src/expressions.x:1618`
+Source: `src/expressions.x:1636`
 
 <a id="Compiler.resolve_expression"></a>
 #### Compiler.resolve_expression
@@ -267,7 +267,7 @@ inputs are returned unchanged; abstract declarations use the declaration
 binder. `origin` anchors diagnostics and generated operations that must
 retain source position.
 
-Source: `src/expressions.x:2152`
+Source: `src/expressions.x:2170`
 
 <a id="Compiler.resolve_map_entry"></a>
 #### Compiler.resolve_map_entry
@@ -277,7 +277,7 @@ Source: `src/expressions.x:2152`
 Resolves the key and value of one `(map-entry key value)` AST row.
 Any other shape is reported at `origin` as a parse error.
 
-Source: `src/expressions.x:2136`
+Source: `src/expressions.x:2154`
 
 <a id="Compiler.resolve_postfix_member"></a>
 #### Compiler.resolve_postfix_member
@@ -301,7 +301,7 @@ Source: `src/expressions.x:327`
 Builds an exact tag expression, deferring macro type slots until
 binding.
 
-Source: `src/expressions.x:1646`
+Source: `src/expressions.x:1664`
 
 ### `List`
 

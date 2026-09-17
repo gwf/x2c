@@ -406,7 +406,7 @@ Identities are scoped to the compiler's current file and numbered per
 file, so every process mints the same sequence for one file and two
 files never share an identity. No emission path prints one.
 
-Source: `src/compiler.x:3327`
+Source: `src/compiler.x:3339`
 
 <a id="Compiler.imported_providers"></a>
 #### Compiler.imported_providers
@@ -938,7 +938,7 @@ Source: `src/compiler.x:2700`
 
 Marks one named aggregate field as a delegate.
 
-Source: `src/compiler.x:3304`
+Source: `src/compiler.x:3316`
 
 <a id="Sym.declare_enumerator"></a>
 #### Sym.declare_enumerator
@@ -959,7 +959,7 @@ Records declaration AST fields in source order after binding finishes.
 `Field` types already use member keys. Unnamed rows retain their type
 and an empty name so initializer traversal preserves anonymous subobjects.
 
-Source: `src/compiler.x:3283`
+Source: `src/compiler.x:3295`
 
 <a id="Sym.define"></a>
 #### Sym.define
@@ -1001,7 +1001,7 @@ Source: `src/compiler.x:2301`
 
 Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`.
 
-Source: `src/compiler.x:3309`
+Source: `src/compiler.x:3321`
 
 <a id="Sym.enumerator_owner"></a>
 #### Sym.enumerator_owner
@@ -1019,7 +1019,7 @@ Source: `src/compiler.x:2282`
 
 Returns recorded fields in source order, or `NULL`.
 
-Source: `src/compiler.x:3301`
+Source: `src/compiler.x:3313`
 
 <a id="Sym.file_statics"></a>
 #### Sym.file_statics
@@ -1152,8 +1152,11 @@ Source: `src/compiler.x:2487`
 `Type Sym.lookup_field(Sym sym, Type type, List field)`
 
 Returns an aggregate field's declared type, or `NULL`.
+A member of an anonymous struct or union belongs to its enclosing
+aggregate in C, so unnamed rows are searched the way a designated
+initializer already reaches them.
 
-Source: `src/compiler.x:3271`
+Source: `src/compiler.x:3275`
 
 <a id="Sym.lookup_macro"></a>
 #### Sym.lookup_macro
@@ -1202,7 +1205,7 @@ Source: `src/compiler.x:3207`
 
 Pops the innermost scope, or returns an empty scope when none exists.
 
-Source: `src/compiler.x:3353`
+Source: `src/compiler.x:3365`
 
 <a id="Sym.push_new_scope"></a>
 #### Sym.push_new_scope
@@ -1211,7 +1214,7 @@ Source: `src/compiler.x:3353`
 
 Pushes a new empty lexical scope.
 
-Source: `src/compiler.x:3338`
+Source: `src/compiler.x:3350`
 
 <a id="Sym.push_scope"></a>
 #### Sym.push_scope
@@ -1220,7 +1223,7 @@ Source: `src/compiler.x:3338`
 
 Pushes a caller-supplied lexical scope while retaining its map objects.
 
-Source: `src/compiler.x:3348`
+Source: `src/compiler.x:3360`
 
 <a id="Sym.reference"></a>
 #### Sym.reference
