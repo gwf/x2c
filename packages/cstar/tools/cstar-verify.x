@@ -20,12 +20,13 @@
 #include "frontend.x"
 #include "utils.x"
 #include "adapter.x"
+#include "path.x"
+#include "process.x"
 
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <unistd.h>
 
 #pragma private
@@ -84,27 +85,15 @@ static List _definition(List ast, String name) {
 
 // the proof program
 
-static String _contents(String path) {
-  if (access(path, F_OK) != 0) return NULL;
-  File opened = File.open(path, %"r");
-  defer opened.close();
-  return opened.string();
-}
-
-static String _directory(String path) {
-  int slash = path.rfind(%"/");
-  return slash > 0 ? path[:slash] : %".";
-}
-
 /** Returns the text of the companion helper file, which is spliced into the
     proof program rather than included: an `#include` of another `.x` unit
     would make it a separately translated unit the proof program cannot
     link. */
 static String _companion(String input) {
   int dot = input.rfind(%".x");
-  String path = %"${dot > 0 ? input[:dot] : input}.proofs.x";
-  if (access(path, F_OK) != 0) return NULL;
-  return %"// ${path}\n${_contents(path)}";
+  Path path = %"${dot > 0 ? input[:dot] : input}.proofs.x";
+  if (!path.exists()) return NULL;
+  return %"// ${path}\n${path.read_text()}";
 }
 
 /** Renders the proof program and the `(name line)` row of every function it
@@ -186,56 +175,63 @@ static List _render(Options options) {
 
 // running children
 
-static char **_argv(List words) {
-  char **argv = Scope.calloc(words.len() + 1, sizeof(char *));
-  int index = 0;
-  foreach (Var word, words) argv[index++] = word.str();
-  return argv;
+static String _start_failure(Job job, List detail) {
+  String program = job.stages.car().list().car().str();
+  long error = detail.assoc(Symbol.new("errno")).integer();
+  String reason = String.new(strerror((int) error));
+  return %"cstar-verify: cannot run $program: $reason\n";
 }
 
-/** Runs one child to completion, or kills it after `seconds` and reports
-    `-2`. A local start failure reports `-1`. */
-static int _run(List words, int seconds, String *output, String *errors) {
-  ChildProcess child = process_start(_argv(words), 1);
-  if (child.pid < 0) {
-    Stderr.printf("cstar-verify: %s\n", child.start_error);
-    return -1;
-  }
-  struct timespec pause = { 0, 20 * 1000 * 1000 };
-  for (int waited = 0; waited < seconds * 50; waited++) {
-    if (child.ready()) return child.wait(output, errors);
-    nanosleep(&pause, NULL);
-  }
-  kill((pid_t) child.pid, SIGKILL);
-  child.wait(output, errors);
-  return -2;
+/** Starts `job`, or returns NULL with the reason it could not start in
+    `failure`. */
+static Job _start(Job job, String *failure) {
+  Job started = NULL;
+  try started = job.start();
+  catch %(not-found *detail): *failure = _start_failure(job, detail);
+  catch %(io-fail *detail): *failure = _start_failure(job, detail);
+  return started;
+}
+
+/** Runs `job` to completion with both streams captured, or kills it after
+    `seconds` and reports `-2`. A job that cannot start reports 127, as a
+    shell does, with the reason in `errors`. */
+static int _run(Job job, int seconds, String *output, String *errors) {
+  *output = NULL;
+  if (!_start(job.options({stderr: <capture>}), errors)) return 127;
+  int finished = 0;
+  for (int tick = 0; tick < seconds * 50 && !(finished = job.ready()); tick++)
+    usleep(20 * 1000);
+  if (!finished) job.kill(SIGKILL);
+  int status = job.status();
+  *output = job.output_text;
+  *errors = job.errors_text;
+  return finished ? status : -2;
 }
 
 /** Starts a prover session and returns it once its log reports the port it
     listens on. macOS Control Center also binds 7000, so readiness comes from
     the log line and never from a port probe. */
-static ChildProcess _server(Options options, String directory, int port) {
-  String log = %"${directory}/server.log";
-  String command = %"exec '${options.cstar_home}/bin/hol_light_server' " +
-                   %">'${log}' 2>&1";
-  setenv("LCF_SERVER_PORT", %"${port}", 1);
-  ChildProcess child = process_start(_argv(%("/bin/sh" "-c" $command)), 0);
-  if (child.pid < 0) {
-    Stderr.printf("cstar-verify: %s\n", child.start_error);
+static Job _server(Options options, Path directory, int port) {
+  Path log = directory.join("server.log");
+  String program = %"${options.cstar_home}/bin/hol_light_server";
+  Job server = %($program).job().options({
+    env: {"LCF_SERVER_PORT": %"$port"}, stdout: log, stderr: <stdout>});
+  String failure = NULL;
+  if (!_start(server, &failure)) {
+    Stderr.printf("%s", failure);
     return NULL;
   }
   String wanted = %"listening on 127.0.0.1:${port}";
-  struct timespec pause = { 0, 100 * 1000 * 1000 };
-  for (int waited = 0; waited < 900; waited++) {
-    String text = _contents(log);
-    if (text && text.find(wanted) >= 0) return child;
-    if (child.ready()) break;
-    nanosleep(&pause, NULL);
+  for (int tick = 0; tick < 900; tick++) {
+    String text = log.read_text();
+    if (text && text.contains(wanted)) return server;
+    if (server.ready()) break;
+    usleep(100 * 1000);
   }
   Stderr.printf("cstar-verify: hol_light_server did not report a listening "
                 "port; see %s\n", log);
-  kill((pid_t) child.pid, SIGKILL);
-  child.wait(NULL, NULL);
+  server.kill(SIGKILL);
+  server.status();
   return NULL;
 }
 
@@ -307,9 +303,9 @@ static void _usage(const char *program) {
     program);
 }
 
-static String _env(const char *name, String fallback) {
-  const char *value = getenv(name);
-  return value ? String.new(value) : fallback;
+static String _env(String name, String fallback) {
+  String value = Env.get(name);
+  return value ? value : fallback;
 }
 
 static Options _options(int argc, char **argv) {
@@ -330,28 +326,26 @@ static Options _options(int argc, char **argv) {
   }
   if (!options.input) return NULL;
   options.include_dirs = include_dirs.list_free();
-  const char *port = getenv("CSTAR_PORT");
+  String port = Env.get("CSTAR_PORT");
   if (port && !options.port) options.port = atoi(port);
-  options.x2c = _env("X2C", %"x2c");
-  options.packages = _env("X2C_PACKAGES", %"packages");
-  options.cstar_home = _env("CSTAR_HOME", %"");
+  options.x2c = _env("X2C", "x2c");
+  options.packages = _env("X2C_PACKAGES", "packages");
+  options.cstar_home = _env("CSTAR_HOME", "");
   return options;
 }
 
 static int _verify(Options options, String program, List functions) {
   char pattern[] = "/tmp/cstar-verify.XXXXXX";
-  String directory = String.new(mkdtemp(pattern));
-  String source = %"${directory}/unit.proof.x";
-  File out = File.open(source, %"w");
-  out.printf("%s", program);
-  out.close();
-  String executable = %"${directory}/unit.proof";
+  Path directory = String.new(mkdtemp(pattern));
+  Path source = directory.join("unit.proof.x");
+  source.write_text(program);
+  Path executable = directory.join("unit.proof");
   String output, errors;
   int status = _run(%(
-    ${options.x2c} "build" "--output" $executable "--build-dir"
-    ${%"${directory}/cc"} "--package-dir" ${options.packages}
-    "--x-include-dir" ${_directory(options.input)} $source
-  ), 600, &output, &errors);
+    ${options.x2c} build --output $executable
+    --build-dir ${directory.join("cc")} --package-dir ${options.packages}
+    --x-include-dir ${Path.dirname(options.input)} $source
+  ).job(), 600, &output, &errors);
   if (status) {
     Stderr.printf("cstar-verify: cannot build the proof program; kept %s\n"
                   "%s%s", directory, output ? output : "",
@@ -359,20 +353,20 @@ static int _verify(Options options, String program, List functions) {
     return 3;
   }
   int port = options.port;
-  ChildProcess server = NULL;
+  Job server = NULL;
   if (!port) {
     port = 20000 + (int) (getpid() % 30000);
     server = _server(options, directory, port);
     if (!server) return 3;
   }
-  setenv("LCF_SERVER_PORT", %"${port}", 1);
-  setenv("CSTAR_HOME", options.cstar_home, 1);
-  status = _run(%($executable), options.timeout, &output, &errors);
+  Map env = {"LCF_SERVER_PORT": %"$port", "CSTAR_HOME": options.cstar_home};
+  status = _run(%($executable).job().options({env: env}), options.timeout,
+                &output, &errors);
   if (server) {
-    kill((pid_t) server.pid, SIGKILL);
-    server.wait(NULL, NULL);
+    server.kill(SIGKILL);
+    server.status();
   }
-  if (!options.keep) _run(%("/bin/rm" "-rf" $directory), 60, NULL, NULL);
+  if (!options.keep) directory.remove_tree();
   else Stdout.printf("kept %s\n", directory);
   if (status == -2) {
     Stderr.printf("cstar-verify: the proof program did not finish within "
