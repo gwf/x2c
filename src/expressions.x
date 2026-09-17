@@ -108,6 +108,10 @@ static List _parse_slice(Compiler c, List expr, List start) {
 static List Compiler._postfix_index_expression(
   Compiler compiler, List expr, List index) {
   Type type = expr.cadr();
+  // `T *const p` indexes like `T *p`.
+  while (type && type.car() is <symbol> &&
+         Symbol.is_type_qualifier(type.car()))
+    type = cdr(type);
   if (type.is_pointer() || type.is_array()) {
     type = type.dereference();
     return %(expr $type (index $expr $index));
@@ -136,7 +140,10 @@ static List Compiler._postfix_index_expression(
     }
   }
   Type native = compiler.sym.resolve_key(type);
-  if (native.is_array())
+  // A typedef of a plain C pointer indexes as that pointer; `String` and
+  // its aliases keep their protocol reading.
+  if (native.is_array() ||
+      (native.is_pointer() && !compiler.sym.is_string_type(type)))
     return %(expr ${native.dereference()} (index $expr $index));
   return NULL;
 }
@@ -2029,6 +2036,10 @@ static List _resolve_content(
       List resolved = c._postfix_index_expression(receiver, selector);
       if (resolved) return resolved;
       Type receiver_type = receiver.cadr();
+      // A field of a foreign struct has no x2c type; C indexes it alone.
+      if (!receiver_type &&
+          List.match(receiver, %(expr () (op (!or . ->) * *))))
+        return %(expr () (index $receiver $selector));
       c.report_error(
         <parse>, receiver_type.is_typedef_name()
           ? %"type $receiver_type does not support getindex"

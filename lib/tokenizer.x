@@ -175,7 +175,8 @@ static int Tokenizer._operator(Tokenizer t, int len) {
         case <"%{">:    push = <map>; break;
         case <"%[">:    push = <array>; break;
         case <"$(">:    push = <macro-lisp>; break;
-        case <"}">:      pop = 1; break;
+        // A stray `}` at file scope is the parser's to diagnose or skip.
+        case <"}">:      pop = t.modes.len() > 1; break;
         case <"%(">:    push = <list>; break;
         case <"%<<">:   push = <symbol-set>; break;
         case <"%\"">:   push = <string>; break;

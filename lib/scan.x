@@ -208,12 +208,17 @@ Symbol scan_keyword_type(const char *s, int n) {
       if (!memcmp(s, "threaded", 8)) return <threaded>;
       if (!memcmp(s, "unsigned", 8)) return <unsigned>;
       if (!memcmp(s, "volatile", 8)) return <volatile>;
+      if (!memcmp(s, "__inline", 8)) return <inline>;
       break;
+    /* GNU C spells `inline` and `restrict` with underscores, and C spells
+       thread-local storage two other ways. Each means the standard keyword,
+       so C that already uses any of them passes through unchanged. */
     case 10: if (!memcmp(s, "associated", 10)) return <associated>;
+      if (!memcmp(s, "__inline__", 10)) return <inline>;
+      if (!memcmp(s, "__restrict", 10)) return <restrict>;
       break;
-    /* C spells thread-local storage two other ways. Both mean `threaded`,
-       so C that already uses either passes through unchanged. */
     case 12: if (!memcmp(s, "thread_local", 12)) return <threaded>;
+      if (!memcmp(s, "__restrict__", 12)) return <restrict>;
       break;
     case 13: if (!memcmp(s, "_Thread_local", 13)) return <threaded>;
       break;

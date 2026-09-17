@@ -82,8 +82,18 @@ typedef struct Compiler {
   List aggregate_type, macro_stack, declaration_effects, Sym sym;
   SymScope params;
   Map key_ids, macros, kw_aliases;
-  // Object-like #define names this unit has passed, for the literal warning.
+  /* `#define` names this unit has passed, for the literal warning and for
+     declaration prefixes: `<empty>` for a body of nothing or an attribute,
+     a `List` of storage or builtin type words, `<annotation>` for a
+     function-like attribute macro, `<wrapper>` for one that wraps its
+     parameter in prefixes, else 1. */
   Map object_macros;
+  /* The open conditional directives at the current top-level form, each an
+     `(id arm)` pair, so one function defined in two arms of one `#if` is one
+     definition. `arms_token` is the form the stack was computed for. */
+  Array arms, Token arms_token, int arm_serial;
+  // Trailing attribute text collected by the declarator, moved to the base.
+  Array attributes;
   // Import paths already applied to this .x file's alias map.
   Map kw_seen;
   // Anchored statements whose transform returned them unchanged. The driver
@@ -259,6 +269,8 @@ static Compiler _new(Compiler owner) {
     _.kw_aliases = {};
     _.kw_seen = {};
     _.object_macros = {};
+    _.arms = [];
+    _.attributes = [];
     _.proto_cache = {};
     _.imports = {};
     _.init_tokens = {};
@@ -467,6 +479,145 @@ String Compiler.emitted_binding_name(Compiler compiler, List binding) {
   return binding_identity_spelling(binding);
 }
 
+static Token _next_code(Token token);
+
+/* The macros whose presence x2c output never sees: it is compiled as C by
+   a GNU-style compiler, never as C++ and never by MSVC. */
+static int _never_defined(Token token) =>
+  token.type == <ident> &&
+  (token.text == "__cplusplus" || token.text == "_MSC_VER");
+
+/* Reports whether the tokens from `token` spell `defined(NAME)` or
+   `defined NAME` for a never-defined name, leaving `*after` on the next
+   token. */
+static int _defined_never(Token token, Token *after) {
+  if (token.type != <ident> || token.text != "defined") return 0;
+  token = _next_code(token);
+  int parens = token.type == <(>;
+  if (parens) token = _next_code(token);
+  if (!_never_defined(token)) return 0;
+  token = _next_code(token);
+  if (parens) {
+    if (token.type != <)>) return 0;
+    token = _next_code(token);
+  }
+  *after = token;
+  return 1;
+}
+
+/* Classifies an opening conditional directive by which of its arms C can
+   never reach: `<first>` when the condition requires a never-defined name
+   or is `0`, `<rest>` when it is exactly `!defined(NAME)`, else 0. */
+static Symbol _never_active_arm(String text) {
+  Tokenizer scanned = Tokenizer.new(text.strip(" \t").remove_prefix("#"));
+  scanned.scan();
+  Token token = _skip_forward(scanned.tokens), after;
+  if (token.type != <ident> && token.type != <if>) return 0;
+  String directive = token.text;
+  token = _next_code(token);
+  int name = _never_defined(token) && _next_code(token).type == <eof>;
+  if (directive == "ifdef") return name ? <first> : 0;
+  if (directive == "ifndef") return name ? <rest> : 0;
+  if (directive != "if") return 0;
+  if (token.type == <lit-int>)
+    return token.text == "0" && _next_code(token).type == <eof> ? <first> : 0;
+  if (token.type == <(> && _next_code(token).type == <lit-int> &&
+      _next_code(token).text == "0" &&
+      _next_code(_next_code(token)).type == <)> &&
+      _next_code(_next_code(_next_code(token))).type == <eof>)
+    return <first>;
+  if (token.type == <!>)
+    return _defined_never(_next_code(token), &after) &&
+           after.type == <eof> ? <rest> : 0;
+  if (_defined_never(token, &after) &&
+      (after.type == <eof> || after.type == <&&>))
+    return <first>;
+  return 0;
+}
+
+/* x2c output is always compiled as C by a GNU-style compiler, so an arm
+   that only C++, MSVC, or `#if 0` reaches holds no syntax x2c needs to
+   parse. Its tokens become comments; the directives around it stay in
+   place, so emission is unchanged. Each stack entry is 2 while its arm is
+   hidden, 1 when the arms after its first `#else` will be, and 0
+   otherwise. */
+static void _hide_never_active_arms(Tokenizer tokenizer) {
+  Array stack = [];
+  int hidden = 0;
+  for (size_t i = 0; i < tokenizer.tokens.len(); i++) {
+    Token token = &((struct Token *) tokenizer.tokens)[i];
+    if (token.type == <eof>) break;
+    if (token.type != <preproc>) {
+      if (hidden && token.type != <space>) token.type = <comment>;
+      continue;
+    }
+    Symbol kind = preproc_conditional_kind(token.text);
+    if (!kind) continue;
+    if (kind == <open>) {
+      Symbol never = _never_active_arm(token.text);
+      stack.push(never == <first> ? 2 : never == <rest> ? 1 : 0);
+    }
+    else if (kind == <branch> && stack.len())
+      stack[-1] = (long) stack[-1] == 1 ? 2 : 0;
+    else if (kind == <close> && stack.len()) stack.take_last();
+    hidden = 0;
+    foreach (long state, stack) if (state == 2) hidden = 1;
+  }
+}
+
+static Token _next_code(Token token) {
+  do token++; while (token.type == <space> || token.type == <comment> ||
+                     token.type == <preproc>);
+  return token;
+}
+
+static int _ends_operand(Symbol type) {
+  switch (type)
+    case <ident>: case <lit-int>: case <lit-float>: case <lit-char>:
+    case <lit-char*>: case <lit-atom>: case <lit-symbol>: case <)>: case <]>:
+      return 1;
+  return 0;
+}
+
+static int _starts_operand(Symbol type) {
+  switch (type)
+    case <ident>: case <lit-int>: case <lit-float>: case <lit-char>:
+    case <lit-char*>: case <lit-atom>: case <lit-symbol>: case <(>:
+    case <"%(">: case <"%[">: case <"%{">: case <"$(">: case <"${">:
+    case <$>: case <!>: case <->: case <*>: case <&>: case <~>: case <++>:
+    case <-->:
+      return 1;
+  return 0;
+}
+
+/* `in` and `match` are C identifiers as often as x2c keywords. `in` is the
+   operator only between two operands; `match` is the statement only as
+   `match (...)` followed by `case` or `{`. Every other occurrence is a
+   name, so C that uses them keeps compiling. */
+static void _retag_contextual_keywords(Tokenizer tokenizer) {
+  Token base = tokenizer.tokens, prev = NULL;
+  for (Token token = base; token.type != <eof>; token = _next_code(token)) {
+    if (token.type == <in>) {
+      Token next = _next_code(token);
+      if (!(prev && _ends_operand(prev.type) && _starts_operand(next.type)))
+        token.type = <ident>;
+    }
+    else if (token.type == <match>) {
+      Token next = _next_code(token), int depth = 0;
+      if (next.type == <(>) {
+        // Every opener that ends in `(`, such as `%(`, closes with `)`.
+        for (; next.type != <eof>; next = _next_code(next)) {
+          if (next.text.endswith("(")) depth++;
+          else if (next.type == <)> && !--depth) break;
+        }
+        next = _next_code(next);
+      }
+      if (next.type != <case> && next.type != <"{">) token.type = <ident>;
+    }
+    prev = token;
+  }
+}
+
 /** Scans source and positions the compiler at its first non-trivia token.
 
     The compiler borrows `text` for diagnostics and macro source capture until
@@ -482,6 +633,8 @@ void Compiler.tokenize(Compiler c, char *text) {
   c.text = text;
   c.tokenizer = Tokenizer.new(c.text);
   c.tokenizer.scan();
+  _hide_never_active_arms(c.tokenizer);
+  _retag_contextual_keywords(c.tokenizer);
   c.token = _skip_forward(c.tokenizer.tokens);
   c.braces.clear();
 }
@@ -1319,31 +1472,91 @@ List Compiler.leading_preproc(Compiler compiler) {
   return noncode;
 }
 
-/* Records the name of an object-like `#define` so a bare atom spelled the
-   same way inside a literal can be flagged. A function-like macro cannot be
-   mistaken for data, so `#define F(x)` is skipped. A name with any definition
-   to nothing is recorded as `<empty>`, so header collection can skip it. */
+/* Returns the token after a balanced parenthesized group that starts at
+   `token`, or `token` itself when no group starts there. */
+static Token _after_parens(Token token) {
+  if (token.type != <(>) return token;
+  int depth = 0;
+  for (; token.type != <eof>; token = _next_code(token)) {
+    if (token.type == <(>) depth++;
+    else if (token.type == <)> && !--depth) return _next_code(token);
+  }
+  return token;
+}
+
+/* Classifies a macro body, scanned as x2c tokens, by the declaration prefix
+   it contributes: a `List` of storage classes and `inline`, a `List` of
+   builtin type words such as `signed int`, `<empty>` for nothing,
+   attributes, and other prefix macros, `<wrapper>` when a function-like
+   body is its parameter `param` amid prefixes, and 1 for any other text. */
+static Var _macro_prefix(Compiler c, Token token, String param) {
+  List storage = NULL, int wrapped = 0;
+  while (token.type != <eof>) {
+    Symbol type = token.type, String word = token.text;
+    Var definition;
+    Token next = _next_code(token);
+    if (type.is_storage_class() || type.is_inline() || type.is_builtin_type())
+      storage = storage ? %( @storage $type ) : %($type);
+    else if (type == <lit-char*>);   // the linkage name in `extern "C"`
+    else if (type != <ident>) return 1;
+    else if (word == "__attribute__" || word == "__declspec" ||
+             (c.object_macros.try_get(word, &definition) &&
+              Var.equal(definition, <annotation>))) {
+      // The attribute's parenthesized text contributes nothing.
+      if (next.type != <(>) return 1;
+      next = _after_parens(next);
+    }
+    else if (param && word == param && !wrapped) wrapped = 1;
+    else if (!c.object_macros.try_get(word, &definition)) return 1;
+    else if (definition is <list>)
+      storage = storage ? (storage).append(definition) : definition;
+    else if (!Var.equal(definition, <empty>)) return 1;
+    token = next;
+  }
+  return wrapped ? <wrapper> : storage ? storage : <empty>;
+}
+
+/* Ranks prefix classifications so a name defined differently in two
+   conditional arms keeps the reading that emits correct C: `static` hides
+   a definition from the header, so it wins; other text loses to any
+   prefix. */
+static int _prefix_rank(Var definition) {
+  if (Var.equal(definition, <empty>)) return 1;
+  if (definition is <list>)
+    return List.match(definition, %(* static *)) ? 3 : 2;
+  return 0;
+}
+
+/* Records the name of each `#define` so a bare atom spelled the same way
+   inside a literal can be flagged and a declaration prefix can be read.
+   The directive after `#define` is scanned as x2c tokens: an object-like
+   body is classified by `_macro_prefix`; a function-like macro whose body
+   is empty or an attribute is `<annotation>`, one that wraps its parameter
+   is `<wrapper>`, and any other function-like macro is skipped. */
 static void _note_object_macro(Compiler c, String content) {
-  char *p = content;
-  while (*p == ' ' || *p == '\t') p++;
-  if (*p != '#') return;
-  p++;
-  while (*p == ' ' || *p == '\t') p++;
-  if (strncmp(p, "define", 6) != 0) return;
-  p += 6;
-  if (*p != ' ' && *p != '\t') return;
-  while (*p == ' ' || *p == '\t') p++;
-  char *start = p;
-  while (*p == '_' || scan_ascii_alpha((unsigned char) *p) ||
-         (p > start && *p >= '0' && *p <= '9'))
-    p++;
-  if (p == start || *p == '(') return;
-  String name = String.new_len(start, p - start);
-  while (*p == ' ' || *p == '\t') p++;
-  int empty = !*p || *p == '\n' || *p == '\r' ||
-              (p[0] == '/' && (p[1] == '/' || p[1] == '*'));
-  if (empty) c.object_macros[name] = <empty>;
-  else if (!c.object_macros.contains(name)) c.object_macros[name] = 1;
+  String directive = content.strip(" \t").remove_prefix("#").strip(" \t");
+  if (!directive.startswith("define")) return;
+  Tokenizer scanned = Tokenizer.new(directive.remove_prefix("define"));
+  scanned.scan();
+  Token token = _skip_forward(scanned.tokens);
+  if (token.type != <ident>) return;
+  String name = token.text;
+  Token body = token + 1;
+  if (body.type == <(>) {
+    // A parameter list touching the name makes the macro function-like.
+    Token after = _after_parens(body), String param = NULL;
+    Token first = _next_code(body);
+    if (first.type == <ident> && _next_code(first).type == <)>)
+      param = first.text;
+    Var kind = _macro_prefix(c, after, param);
+    if (Var.equal(kind, <empty>)) c.object_macros[name] = <annotation>;
+    else if (Var.equal(kind, <wrapper>)) c.object_macros[name] = <wrapper>;
+    return;
+  }
+  Var definition = _macro_prefix(c, _next_code(token), NULL), existing;
+  if (!c.object_macros.try_get(name, &existing) ||
+      _prefix_rank(definition) > _prefix_rank(existing))
+    c.object_macros[name] = definition;
 }
 
 /** Applies public and private pragma directives to source visibility state
@@ -1419,6 +1632,8 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   c.static_init_deps = {};
   c.origin = 0;
   c.braces.clear();
+  c.arms.clear();
+  c.arms_token = NULL;
   c.sym.reset(globs);
   c.rebuild_protocols(globs);
   c.macros = {};
@@ -2637,8 +2852,18 @@ static Type _function_contract_type(Type type, int keep_qualifiers) {
   return result.list_free();
 }
 
+/* A source attribute kept as text in front of a type is not part of the
+   signature C compares between a prototype and its definition. */
+static Type _without_attributes(Type type) {
+  Array kept = [];
+  foreach (Var item, type)
+    if (!(item is <list> && car(item.list()) is <string>)) kept.push(item);
+  return kept.list_free();
+}
+
 static List _function_completion_contract(
   Type type, List method_identity, List self_signature) {
+  type = _without_attributes(type);
   Symbol linkage = type.is_static() ? <static> : <extern>;
   List contract = %(
     function-contract
@@ -2671,6 +2896,15 @@ static void _record_function_prototypes(
         List single = %(declare $declared_type (bindings $target));
         Type type = single.type_from_ast();
         if (!type.is_function()) continue;
+        /* A source attribute on the prototype belongs to the function; the
+           generator writes it on the prototype it derives from the
+           definition. */
+        List attributes = NULL;
+        foreach (Var item, declared_type)
+          if (item is <list> && car(item.list()) is <string>)
+            attributes = attributes ? %( @attributes $item ) : %($item);
+        if (attributes)
+          c.semantic_binding_facts()[%(attributes $binding)] = attributes;
         List contract = _function_completion_contract(
           type, _binding_method_identity(c, binding),
           _binding_self_signature(c, binding));
@@ -2693,6 +2927,24 @@ static void _record_function_prototypes(
       }
 }
 
+/* Reports whether the definition of `binding` recorded earlier and the one
+   at the current form sit in different arms of one conditional, which C
+   reads as one definition. The stacks are compared from the outermost
+   group inward; the first shared group with different arms decides. */
+static int _alternative_arms(Compiler c, List binding) {
+  Var stored;
+  if (!c.semantic_binding_facts().try_get(%(arms $binding), &stored))
+    return 0;
+  List prior = stored, current = c.arms.list();
+  for (; prior && current; prior = cdr(prior), current = cdr(current)) {
+    Var (prior_id, prior_arm) = car(prior);
+    Var (id, arm) = car(current);
+    if (!Var.equal(prior_id, id)) return 0;
+    if (!Var.equal(prior_arm, arm)) return 1;
+  }
+  return 0;
+}
+
 static void _record_function_definition(
   Compiler c, Type type, List binding) {
   List contract = _function_completion_contract(
@@ -2705,6 +2957,12 @@ static void _record_function_definition(
     Var (state_kind, prior_contract) = state;
     String spelling = binding_identity_spelling(binding);
     if (state_kind == <prototype>) {
+      /* A definition without `static` after a `static` prototype keeps the
+         prototype's internal linkage in C. */
+      match (prior_contract)
+        case %(function-contract ?a ?b static ?d)
+          if (List.equal(contract, %(function-contract $a $b extern $d))):
+            contract = prior_contract;
       if (List.equal(prior_contract, contract)) {
         c.semantic_binding_facts()[%(completion $binding)] =
           %(completed $contract);
@@ -2720,13 +2978,15 @@ static void _record_function_definition(
         )
       );
     }
-    if (state_kind == <definition> || state_kind == <completed>)
+    if ((state_kind == <definition> || state_kind == <completed>) &&
+        !_alternative_arms(c, binding))
       c.report_error(
         <type>, %"function '$spelling' is already defined in this scope",
         c.token, %("prior definition: '$spelling'"));
   }
   c.semantic_binding_facts()[%(completion $binding)] =
     %(definition $contract);
+  c.semantic_binding_facts()[%(arms $binding)] = c.arms.list();
   String spelling = binding_identity_spelling(binding);
   if (spelling && !type.is_static()) c.fn_defs[spelling] = 1;
 }

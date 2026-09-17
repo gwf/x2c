@@ -234,6 +234,10 @@ static List _finish_declaration(
       bound.push(_append_declarator_modifiers(declarator, modifiers));
     declarators = bound.list_free();
   }
+  while (compiler.attributes.len()) {
+    String attribute = compiler.attributes.take_last();
+    base = %( ($attribute) @base );
+  }
   List declaration = %($tag $base (bindings @declarators));
   return tag == <declare> && !preserved_self
     ? _lower_self_declaration(compiler, declaration)
@@ -242,17 +246,56 @@ static List _finish_declaration(
 
 // type parsing
 
-/* Header collection reads source before preprocessing, so a macro defined to
-   nothing, such as an export annotation, still precedes a declaration. It
-   contributes no syntax there. Unit source keeps parsing unexpanded. */
-static int _skip_empty_macro(Compiler compiler) {
+/* Source is read before preprocessing, so a macro defined to nothing, to a
+   storage class, or to an attribute, such as an export annotation, still
+   precedes a declaration. It contributes its recorded storage, if any, and
+   no other syntax. */
+static int _is_type_words(List words);
+
+static int _skip_prefix_macro(Compiler compiler, List *storage) {
   Var definition;
-  if (!compiler.shallow || compiler.peek(0) != <ident> ||
-      !compiler.object_macros.try_get(compiler.token.text, &definition) ||
-      !Var.equal(definition, <empty>))
+  if (compiler.peek(0) != <ident> ||
+      !compiler.object_macros.try_get(compiler.token.text, &definition))
     return 0;
+  if (Var.equal(definition, <wrapper>) && compiler.peek(1) == <(>) {
+    /* `EXPORT(const char *) f(void);` wraps the type. The name and its
+       parentheses contribute nothing; the closing one is hidden so the
+       type and declarator between them parse as written. */
+    int depth = 0;
+    for (Token token = compiler.token; token.type != <eof>; token++) {
+      if (token.type == <(>) depth++;
+      else if (token.type == <)> && !--depth) {
+        token.type = <comment>;
+        break;
+      }
+    }
+    compiler.next();
+    compiler.next();
+    return 1;
+  }
+  if (!(Var.equal(definition, <empty>) ||
+        (definition is <list> && !_is_type_words(definition))))
+    return 0;
+  if (storage && definition is <list>)
+    *storage = *storage ? (*storage).append(definition) : definition;
   compiler.next();
   return 1;
+}
+
+/* A macro body of builtin type words, such as `#define int32 signed int`,
+   names a type wherever its name appears. */
+static int _is_type_words(List words) =>
+  Symbol.is_builtin_type(car(words));
+
+static List _macro_type_words(Compiler c) {
+  Var definition;
+  if (c.peek(0) == <ident> &&
+      c.object_macros.try_get(c.token.text, &definition) &&
+      definition is <list> && _is_type_words(definition)) {
+    c.next();
+    return definition;
+  }
+  return NULL;
 }
 
 /* One storage class, except that `threaded` pairs with another one the way
@@ -261,7 +304,7 @@ static int _skip_empty_macro(Compiler compiler) {
    here instead of being passed to C. */
 static List _storage_class(Compiler compiler) {
   List storage = NULL, int seen_threaded = 0, seen_ordinary = 0;
-  while (_skip_empty_macro(compiler));
+  while (_skip_prefix_macro(compiler, &storage));
   for (Symbol symbol = compiler.peek(0); symbol.is_storage_class();
        symbol = compiler.peek(0)) {
     if (symbol == <threaded>) {
@@ -294,7 +337,7 @@ static List _type_qualifiers(Compiler compiler) {
       quals.push(symbol);
       compiler.next();
     }
-    else if (!_skip_empty_macro(compiler)) break;
+    else if (!_skip_prefix_macro(compiler, NULL)) break;
   }
   List result = quals.list_free();
   return result;
@@ -627,7 +670,8 @@ static List _type_specifier(Compiler c) {
         syntax = %(self);
         break;
       }
-      syntax = _typedef_name(c);
+      syntax = _macro_type_words(c);
+      if (!syntax) syntax = _typedef_name(c);
       break;
     default:
       syntax = _primitive_type(c);
@@ -657,14 +701,16 @@ static List _decl_context_group(Compiler compiler, List context) {
 }
 
 static List _pointer(Compiler compiler) {
-  List ptr = NULL, Symbol token_type = compiler.peek(0);
-  while (token_type == <*> || token_type == <^> || token_type == <&> ||
-         token_type.is_type_qualifier()) {
-    ptr = cons(token_type, ptr);
-    compiler.next();
-    token_type = compiler.peek(0);
+  List ptr = NULL;
+  loop {
+    Symbol token_type = compiler.peek(0);
+    if (token_type == <*> || token_type == <^> || token_type == <&> ||
+        token_type.is_type_qualifier()) {
+      ptr = cons(token_type, ptr);
+      compiler.next();
+    }
+    else if (!_skip_prefix_macro(compiler, NULL)) return ptr;
   }
-  return ptr;
 }
 
 static List _array_suffix(Compiler c) {
@@ -763,9 +809,37 @@ static List _function_parameters(Compiler c) {
   return params;
 }
 
+/* A GNU attribute or an attribute macro after a declarator is kept as its
+   source text and moved in front of the declaration's type, where C accepts
+   it on a prototype and a definition alike. */
+static int _skip_trailing_attribute(Compiler c) {
+  Var definition;
+  if (c.peek(0) != <ident> || c.peek(1) != <(> ||
+      !(c.token.text == "__attribute__" ||
+        (c.object_macros.try_get(c.token.text, &definition) &&
+         Var.equal(definition, <annotation>))))
+    return 0;
+  Token first = c.token, last = first;
+  c.next();
+  for (int depth = 0; ; c.next()) {
+    Symbol symbol = c.peek(0);
+    if (symbol == <eof>) break;
+    if (symbol == <(>) depth++;
+    else if (symbol == <)> && !--depth) {
+      last = c.token;
+      c.next();
+      break;
+    }
+  }
+  c.attributes.push(
+    String.new_len(c.text + first.pos, last.pos + last.len - first.pos));
+  return 1;
+}
+
 static List _declarator_suffix(Compiler compiler) {
   List type = NULL;
   loop {
+    if (_skip_trailing_attribute(compiler)) continue;
     if (compiler.peek(0) == <[>)
       type = %( @type  @{_array_suffix(compiler)} );
     else if (compiler.peek(0) == <:>) {
@@ -1121,9 +1195,8 @@ static List _declaration_group(Compiler c, int row) {
   Type binding_type = type;
   if (spec.is_aggregate_tag_body()) {
     // Bind the short aggregate tag, but retain the body on the AST node.
-    match (spec) case %(?tag ?name ?body): {
-      binding_type = %( @storage @quals ($tag $name) );
-    }
+    Var (aggregate, tag, body) = spec;
+    binding_type = %( @storage @quals $aggregate $tag );
   }
   if (_test_destructure_declaration(c))
     return _destructure_declaration(c, type, binding_type, 0);
@@ -1631,8 +1704,27 @@ int Compiler.skip_linkage_brace(Compiler c) {
     or linkage brace only updates compiler state, with the first following
     token current.
 */
+/* Advances the conditional-arm stack over the directives before the
+   current top-level form, once per form. */
+static void _track_conditional_arms(Compiler c) {
+  if (c.token == c.arms_token) return;
+  c.arms_token = c.token;
+  foreach (List directive, c.leading_preproc()) {
+    Symbol kind = preproc_conditional_kind(directive.cadr());
+    if (kind == <open>) c.arms.push(%( ${++c.arm_serial} 0 ));
+    else if (kind == <branch> && c.arms.len()) {
+      List top = c.arms[-1];
+      c.arms[-1] = %( ${top.car()} ${(long) top.cadr() + 1} );
+    }
+    else if (kind == <close> && c.arms.len()) c.arms.take_last();
+  }
+}
+
 List Compiler.parse_top_level(Compiler c) {
-  if (!c.macro_holes) c.update_source_visibility(c.leading_preproc());
+  if (!c.macro_holes) {
+    c.update_source_visibility(c.leading_preproc());
+    _track_conditional_arms(c);
+  }
   if (c.skip_linkage_brace()) return NULL;
   if (c.test_static_assert()) return c.parse_static_assert();
   List slot = c.try_parse_macro_slot(<unit>);

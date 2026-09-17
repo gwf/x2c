@@ -371,8 +371,24 @@ static int _is_completed_function_prototype(Compiler compiler, List binding) {
   return 0;
 }
 
+/* A public prototype that names `struct tag` before the header declares it
+   would give the tag prototype scope in C. A forward declaration of each
+   tag the prototype spells keeps it the file-scope type. */
+static void _forward_tags(List node, Map forwarded, Array header) {
+  match (node)
+    case %((!set ?tag (!or struct union)) ?(String name)): {
+      if (forwarded.contains(name)) return;
+      forwarded[name] = 1;
+      _push_spaced(header, %(declare ($tag $name) (bindings (bind () ()))));
+      return;
+    }
+  foreach (Var item, node)
+    if (item is <list>) _forward_tags(item, forwarded, header);
+}
+
 static void _partition_function(
-  Array header, Array source, Type type, List declarator, Ast body) {
+  Array header, Array source, Type type, List declarator, Ast body,
+  Map forwarded) {
   /* C sees only the prototype of a helper that always raises, so a caller
      whose last statement is that call looks like a missing return. Marking
      the type here reaches every generated form of the function. */
@@ -382,15 +398,46 @@ static void _partition_function(
     _push_spaced(source, _source_function(function, type));
     return;
   }
+  _forward_tags(%($type $declarator), forwarded, header);
   _push_spaced(header, _header_function(type, declarator, body));
   _push_spaced(source, _source_function(function, type));
+}
+
+// A binding list with a named declarator, as opposed to a bare tag body.
+static int _declares_object(List bindings) {
+  match (bindings) case %(bindings *declarators):
+    foreach (List declarator, declarators)
+      match (declarator) {
+        case %(bind ?name *): if (name.truth()) return 1;
+        case %(op = * *): return 1;
+      }
+  return 0;
+}
+
+/* `struct b { ... } g;` at public file scope publishes the body and an
+   `extern` declaration of `g`, and defines `g` in the source. */
+static int _partition_tagged_object(
+  Array header, Array source, Type type, List bindings) {
+  Type core = type.base_type();
+  String tag = NULL;
+  match (core) case %((!or struct union enum) ?(String found) (*)): tag = found;
+  if (!tag || !_declares_object(bindings)) return 0;
+  List tagged = type.list()[:type.len() - core.len()]
+                  .append(%(${core.car()} $tag));
+  _push_spaced(header, %(declare $type (bindings (bind () ()))));
+  _push_spaced(header, _header_declaration(
+    NULL, %(extern @tagged), bindings));
+  _push_spaced(source, %(declare $tagged $bindings));
+  return 1;
 }
 
 static void _partition_declaration(
   Array header, Array source, List declaration, Type type, List bindings,
   int private) {
   if (private) _push_spaced(source, declaration);
-  else _push_spaced(header, _header_declaration(declaration, type, bindings));
+  else if (!(type.is_aggregate_tag_body() || type.is_enum_tag_body()) ||
+           !_partition_tagged_object(header, source, type, bindings))
+    _push_spaced(header, _header_declaration(declaration, type, bindings));
 }
 
 static void _partition_alias(
@@ -560,7 +607,7 @@ static List _place_conditionals(
 
 static List _header_and_source(Compiler compiler, List ast) {
   Array header = [], source = [], pending = [], int private = 0;
-  Array opened = [], open = [];
+  Array opened = [], open = [], Map forwarded = {};
   foreach (Ast node, ast) {
     match (node) {
       case %((!or protocol adopt macrodef) *): continue;
@@ -578,7 +625,15 @@ static List _header_and_source(Compiler compiler, List ast) {
       }
       case %(function (!set ?type (*)) ?declarator
              (!set ?body (block *))): {
-        _partition_function(header, source, type, declarator, body);
+        Type function_type = type;
+        match (declarator) case %(bind ?binding *): {
+          Var attributes;
+          if (compiler.semantic_binding_facts().try_get(
+                %(attributes $binding), &attributes))
+            function_type = %( @{attributes.list()} @function_type );
+        }
+        _partition_function(
+          header, source, function_type, declarator, body, forwarded);
         private = 1;
         continue;
       }
@@ -591,6 +646,8 @@ static List _header_and_source(Compiler compiler, List ast) {
               continue;
         Type declaration_type = type;
         if (declaration_type.is_static()) private = 1;
+        if (!private) match (declaration_type.base_type())
+          case %((!or struct union) ?(String tag) *): forwarded[tag] = 1;
         _partition_declaration(
           header, source, declaration, declaration_type, bindings, private);
         continue;
@@ -803,24 +860,82 @@ static void _static_declarations(Var value, Map declarations) {
     _static_declarations(child, declarations);
 }
 
+/* Follows the conditional groups open at each directive: `arms` holds one
+   `Array` per open group with the directives that select its current arm. */
+static void _track_arms(Array arms, String content) {
+  Symbol kind = preproc_conditional_kind(content);
+  if (kind == <open>) arms.push([content]);
+  else if (kind == <branch> && arms.len()) {
+    Array group = arms[-1];
+    group.push(content);
+  }
+  else if (kind == <close> && arms.len()) arms.take_last();
+}
+
+/* A function body that moves after the declarations keeps the conditional
+   arm it was written in: the arm's directives precede it and an `#endif`
+   per group follows. */
+static void _push_within_arms(Array functions, List node, Array arms) {
+  foreach (Array group, arms)
+    foreach (String content, group)
+      functions.push(%(preproc $content));
+  functions.push(node);
+  for (size_t i = 0; i < arms.len(); i++)
+    functions.push(%(preproc "#endif"));
+}
+
+/* An `#undef` written after the functions that use its macro must still
+   follow their bodies, unless a later `#define` of the same name relies on
+   its position. */
+static int _undef_stays_deferred(List source, List node, String content) {
+  String directive = content.strip(" \t").remove_prefix("#").strip(" \t");
+  if (!directive.startswith("undef")) return 0;
+  String name = directive.remove_prefix("undef").strip(" \t");
+  int after = 0;
+  foreach (List item, source) {
+    if (item == node) {
+      after = 1;
+      continue;
+    }
+    if (!after) continue;
+    match (item) case %(preproc ?(String later)): {
+      String text = later.strip(" \t").remove_prefix("#").strip(" \t");
+      if (text.startswith("define") &&
+          text.remove_prefix("define").strip(" \t").startswith(name))
+        return 0;
+    }
+  }
+  return 1;
+}
+
 /* Native directives and initializer inputs keep their source order.
    Ordinary function bodies follow the file's declarations and directives,
    preserving their existing access to later private includes and macros.
    Source initializer helpers stay at their capture positions. */
 static List _static_prototypes(Compiler compiler, List source, List header) {
-  Array output = [], declarations = [], functions = [];
+  Array output = [], declarations = [], functions = [], undefs = [];
+  Array arms = [];
   foreach (List node, source) {
-    match (node)
+    match (node) {
       case %(function ?type ?signature ?): {
-        functions.push(node);
+        _push_within_arms(functions, node, arms);
         if (type.list().type().is_static())
           declarations.push(
             %(declare $type ${ast_prototype_declarator(signature)}));
         continue;
       }
+      case %(preproc ?content): {
+        _track_arms(arms, content);
+        if (_undef_stays_deferred(source, node, content)) {
+          undefs.push(node);
+          continue;
+        }
+      }
+    }
     declarations.push(node);
   }
   source = declarations.list_free().append(functions.list_free());
+  source = source.append(undefs.list_free());
   Map statics = {}, available = {}, seen = {};
   _collect_declared_bindings(header, available);
   _static_declarations(source, statics);

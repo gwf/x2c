@@ -71,8 +71,13 @@ header provides and keeps the directive in the generated C, where the native
 compiler reads the header itself. An `.x` file is a translation unit, for
 which x2c writes its own C file and header.
 
-x2c parses the original source rather than preprocessor output, so both
-branches of an `#ifdef` must parse. The usual guard for C++ callers does:
+x2c parses the original source rather than preprocessor output, so every
+branch of an `#ifdef` that C could compile must parse. Three branches never
+reach C, because x2c output is compiled as C by a GNU-style compiler: the
+branch under `#ifdef __cplusplus` or `#if defined(__cplusplus)`, the branch
+under `#ifdef _MSC_VER`, and `#if 0`. x2c skips those branches, so the usual
+guard for C++ callers, a C++ `template`, or MSVC inline assembly in its own
+branch needs no change:
 
 ```x2c
 #ifdef __cplusplus
@@ -86,9 +91,33 @@ int add(int left, int right);
 #endif
 ```
 
-The declarations inside a braced `extern "C"` group stay at file scope. The
-group's braces do not appear in the generated C. `extern "C" int f(void);`
-declares `f` as `extern int f(void);` does.
+A function defined once in each branch of one `#ifdef` is one definition.
+
+The prefix macros that C libraries write before declarations parse as what
+they expand to. A macro defined to nothing, to a storage class such as
+`static` or `extern`, to `inline`, to an attribute, or to builtin type words
+such as `signed int` reads as that text: `JSMN_API void jsmn_init(...)`,
+`STBIDEF stbi_uc *stbi_load(...)`, and `int32 count` work as in C, and a
+function-like macro that wraps its parameter in attributes,
+`CJSON_PUBLIC(const char *) cJSON_Version(void)`, reads as the type inside.
+An attribute after a declarator, `int f(int x) __attribute__((unused));`,
+is kept and written before the declaration's type in the generated C. The
+GNU spellings `__inline`, `__inline__`, `__restrict`, and `__restrict__`
+mean the standard keywords.
+
+`in` and `match` are x2c keywords, and they are C identifiers as well. `in`
+is the x2c operator only between two operands, and `match` is the statement
+only as `match (...)` followed by `case` or `{`; anywhere else they are
+ordinary names, so `struct buffer *in` and `int match = 0` compile.
+
+`struct tag { ... } name;` at file scope publishes the type and an `extern`
+declaration of `name` in the generated header and defines `name` in the C
+file. A public function whose prototype names a `struct` that the file
+defines privately gets a forward declaration of the tag in the header first.
+
+A directive between `else` and its statement, and a macro invocation that
+supplies grammar, such as a `for`-loop macro or a call without a trailing
+semicolon, still need adjustment.
 
 A C11 generic selection has a static type in x2c when x2c knows which
 association C selects. The compiler selects that association from the
