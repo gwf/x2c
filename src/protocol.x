@@ -420,16 +420,6 @@ static List Compiler._publish_protocol_adoption(
           <protocol>, "Var adoption tag must be a Symbol literal",
           location, NULL);
     }
-    if (base !== %("Var")) {
-      if (modifier_token)
-        c.report_error(
-          <protocol>, "'tag' applies only to a Var adoption",
-          modifier_token, NULL);
-      else
-        c.diagnostics.report(
-          <protocol>, "'tag' applies only to a Var adoption",
-          location, NULL);
-    }
   }
   List record = c._record(base), int private_native = 0;
   if (record)
