@@ -658,8 +658,8 @@ static List _parse_unary_op(Compiler c) {
   return c.resolve_expression(%(expr () (op $op $operand)), origin);
 }
 
-static int _cast_operand_follows(Compiler compiler, int index) {
-  switch (compiler.peek(index)) {
+static int _cast_operand_follows(Symbol type) {
+  switch (type) {
     case <ident>:
     case <$>:
     case <"$(">:
@@ -700,32 +700,12 @@ static int _macro_hole_starts_cast_type(Compiler compiler) {
   if (!hole) return 0;
   Symbol kind = hole.assoc(<kind>);
   if (kind && kind != <type>) return 0;
-  return _cast_operand_follows(compiler, 3);
+  return _cast_operand_follows(compiler.peek(3));
 }
 
-static int _parenthesized_cast_operand_follows(Compiler compiler) {
-  Token token = compiler.token;
-  if (token.type != <"(">) return 0;
-  int depth = 0;
-  loop {
-    switch (token.type) {
-      case <eof>: return 0;
-      case <"(">: case <"$(">: depth++; break;
-      case <")">:
-        depth--;
-        if (!depth) {
-          token = compiler.skip_trivia_from(token + 1);
-          Token head = compiler.token;
-          compiler.token = token;
-          int follows = _cast_operand_follows(compiler, 0);
-          compiler.token = head;
-          return follows;
-        }
-        break;
-    }
-    token = compiler.skip_trivia_from(token + 1);
-  }
-}
+static int _parenthesized_cast_operand_follows(Compiler compiler) =>
+  compiler.peek(0) == <"("> &&
+  _cast_operand_follows(compiler.token.after_group().type);
 
 /* A cast whose operand already has the cast type, qualifiers included,
    changes nothing. The comparison uses x2c's declared type, so a cast
@@ -2228,30 +2208,11 @@ static List _parse_comma_list(Compiler compiler) {
   return expressions.list_free();
 }
 
-static int _opens_group(Symbol type) {
-  switch (type) {
-    case <"(">: case <[>: case <"{">: case <"%(">: case <"%[">:
-    case <"%{">: case <"$(">: case <"${">: case <"@{">: case <"?(">:
-      return 1;
-  }
-  return 0;
-}
-
-static int _closes_group(Symbol type) =>
-  type == <")"> || type == <]> || type == <"}">;
-
 /* A bracketed index followed by `=`, `.`, or `[` designates an element;
    any other bracket is an Array literal. */
 static int _bracket_designates(Compiler compiler) {
-  Token token = compiler.token;
-  int depth = 0;
-  do {
-    if (token.type == <eof>) return 1;
-    if (_opens_group(token.type)) depth++;
-    else if (_closes_group(token.type)) depth--;
-    token = compiler.skip_trivia_from(token + 1);
-  } while (depth);
-  return token.type == <=> || token.type == <.> || token.type == <[>;
+  Symbol type = compiler.token.after_group().type;
+  return type == <=> || type == <.> || type == <[>;
 }
 
 /* An entry that begins with a Map-entry macro, or whose first bracket-level
@@ -2262,22 +2223,16 @@ static int _brace_starts_map(Compiler compiler) {
       (token.type == <ident> &&
        compiler.keyword_alias_starts_target_at(AST_MAP_ENTRY)))
     return 1;
-  int depth = 0, conditionals = 0;
-  while (1) {
-    Symbol type = token.type;
-    if (type == <eof> || type == <;>) return 0;
-    if (_opens_group(type)) depth++;
-    else if (_closes_group(type)) {
-      if (!depth) return 0;
-      depth--;
+  for (int conditionals = 0;; token = token.after_group()) {
+    switch (token.type) {
+      case <eof>: case <;>: case <,>: case <")">: case <]>: case <"}">:
+        return 0;
+      case <?>:
+        conditionals++;
+        break;
+      case <:>:
+        if (!conditionals--) return token != compiler.token;
     }
-    else if (!depth && type == <,>) return 0;
-    else if (!depth && type == <?>) conditionals++;
-    else if (!depth && type == <:>) {
-      if (!conditionals) return token != compiler.token;
-      conditionals--;
-    }
-    token = compiler.skip_trivia_from(token + 1);
   }
 }
 

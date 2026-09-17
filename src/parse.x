@@ -255,14 +255,8 @@ static int _skip_prefix_macro(Compiler compiler, List *storage) {
     /* `EXPORT(const char *) f(void);` wraps the type. The name and its
        parentheses contribute nothing; the closing one is hidden so the
        type and declarator between them parse as written. */
-    int depth = 0;
-    for (Token token = compiler.token; token.type != <eof>; token++) {
-      if (token.type == <(>) depth++;
-      else if (token.type == <)> && !--depth) {
-        token.type = <comment>;
-        break;
-      }
-    }
+    Token close = compiler.skip_trivia_from(compiler.token + 1).group_close();
+    if (close.type != <eof>) close.type = <comment>;
     compiler.next();
     compiler.next();
     return 1;
@@ -809,18 +803,8 @@ static String _trailing_attribute(Compiler c) {
         (c.object_macros.try_get(c.token.text, &definition) &&
          Var.equal(definition, <annotation>))))
     return NULL;
-  Token first = c.token, last = first;
-  c.next();
-  for (int depth = 0; ; c.next()) {
-    Symbol symbol = c.peek(0);
-    if (symbol == <eof>) break;
-    if (symbol == <(>) depth++;
-    else if (symbol == <)> && !--depth) {
-      last = c.token;
-      c.next();
-      break;
-    }
-  }
+  Token first = c.token, last = c.skip_trivia_from(first + 1).group_close();
+  c.token = last.after_group();
   return String.new_len(c.text + first.pos, last.pos + last.len - first.pos);
 }
 
@@ -1581,29 +1565,12 @@ List Compiler.parse_import_declaration(Compiler c) {
     passes read the same tokens, so they agree before either parses.
 */
 int Compiler.defines_main(Compiler c) {
-  int depth = 0;
-  for (Token token = c.tokenizer.tokens; token.type != <eof>; token++) {
-    switch (token.type) {
-      case <space>: case <comment>: case <preproc>:
-        continue;
-      case <)>: case <]>: case <"}">:
-        depth--;
-        continue;
-    }
-    String text = token.text;
-    if (text.endswith("(") || text.endswith("[") || text.endswith("{")) {
-      depth++;
+  for (Token token = c.skip_trivia_from(c.tokenizer.tokens);
+       token.type != <eof>; token = token.after_group()) {
+    Token open = c.skip_trivia_from(token + 1);
+    if (token.type != <ident> || token.text != "main" || open.type != <(>)
       continue;
-    }
-    if (depth || token.type != <ident> || text != "main") continue;
-    Token scan = c.skip_trivia_from(token + 1);
-    if (scan.type != <(>) continue;
-    for (int parens = 0; scan.type != <eof>; scan++) {
-      if (scan.type == <(>) parens++;
-      else if (scan.type == <)> && !--parens) break;
-    }
-    if (scan.type == <eof>) return 0;
-    Token body = c.skip_trivia_from(scan + 1);
+    Token body = open.after_group();
     if (body.type == <"{"> || (body.type == <=> &&
         c.skip_trivia_from(body + 1).type == <">">))
       return 1;
@@ -1617,25 +1584,13 @@ int Compiler.defines_main(Compiler c) {
    as a prototype does. An initialized or plain object declaration belongs
    to `main`. */
 static int _script_declaration_stays(Compiler c) {
-  int depth = 0, Symbol previous = 0;
+  Symbol previous = 0;
   for (Token token = c.token; token.type != <eof>;
-       token = c.skip_trivia_from(token + 1)) {
-    Symbol type = token.type;
-    if (!depth) {
-      if (type == <;>) return previous == <)>;
-      if (type == <"{">) return 1;
-      if (type == <=>) return c.skip_trivia_from(token + 1).type == <">">;
-    }
-    switch (type) {
-      case <(>: case <[>: case <"{">: case <"%(">: case <"%[">:
-      case <"%{">: case <"${">: case <"@{">: case <"$(">:
-        depth++;
-        break;
-      case <)>: case <]>: case <"}">:
-        depth--;
-        break;
-    }
-    previous = type;
+       previous = token.type, token = token.after_group()) {
+    if (token.type == <;>) return previous == <(>;
+    if (token.type == <"{">) return 1;
+    if (token.type == <=>)
+      return c.skip_trivia_from(token + 1).type == <">">;
   }
   return 0;
 }

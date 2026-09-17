@@ -509,58 +509,25 @@ String Compiler.emitted_binding_name(Compiler compiler, List binding) {
   return binding_identity_spelling(binding);
 }
 
-/* The macros whose presence x2c output never sees: it is compiled as C by
-   a GNU-style compiler, never as C++ and never by MSVC. */
-static int _never_defined(Token token) =>
-  token.type == <ident> &&
-  (token.text == "__cplusplus" || token.text == "_MSC_VER");
-
-/* Reports whether the tokens from `token` spell `defined(NAME)` or
-   `defined NAME` for a never-defined name, leaving `*after` on the next
-   token. */
-static int _defined_never(Token token, Token *after) {
-  if (token.type != <ident> || token.text != "defined") return 0;
-  token = _next_code(token);
-  int parens = token.type == <(>;
-  if (parens) token = _next_code(token);
-  if (!_never_defined(token)) return 0;
-  token = _next_code(token);
-  if (parens) {
-    if (token.type != <)>) return 0;
-    token = _next_code(token);
-  }
-  *after = token;
-  return 1;
-}
-
 /* Classifies an opening conditional directive by which of its arms C can
    never reach: `<first>` when the condition requires a never-defined name
-   or is `0`, `<rest>` when it is exactly `!defined(NAME)`, else 0. */
+   or is `0`, `<rest>` when it is exactly `!defined(NAME)`, else 0. x2c output
+   is compiled as C by a GNU-style compiler, so `__cplusplus` and `_MSC_VER`
+   are never defined; each reads as `<never>`, which no C token spells. */
 static Symbol _never_active_arm(String text) {
   Tokenizer scanned = Tokenizer.new(preproc_directive(text));
   scanned.scan();
-  Token token = _skip_forward(scanned.tokens), after;
-  if (token.type != <ident> && token.type != <if>) return 0;
-  String directive = token.text;
-  token = _next_code(token);
-  int name = _never_defined(token) && _next_code(token).type == <eof>;
-  if (directive == "ifdef") return name ? <first> : 0;
-  if (directive == "ifndef") return name ? <rest> : 0;
-  if (directive != "if") return 0;
-  if (token.type == <lit-int>)
-    return token.text == "0" && _next_code(token).type == <eof> ? <first> : 0;
-  if (token.type == <(> && _next_code(token).type == <lit-int> &&
-      _next_code(token).text == "0" &&
-      _next_code(_next_code(token)).type == <)> &&
-      _next_code(_next_code(_next_code(token))).type == <eof>)
+  Array words = [];
+  for (Token t = _skip_forward(scanned.tokens); t.type != <eof>;
+       t = _skip_forward(t + 1))
+    words.push(t.text == "__cplusplus" || t.text == "_MSC_VER"
+               ? "<never>" : t.text);
+  String s = " ".join(words.list_free()).replace(
+    "defined ( <never> )", "defined <never>");
+  if (s == "ifdef <never>" || s == "if 0" || s == "if ( 0 )" ||
+      s == "if defined <never>" || s.startswith("if defined <never> && "))
     return <first>;
-  if (token.type == <!>)
-    return _defined_never(_next_code(token), &after) &&
-           after.type == <eof> ? <rest> : 0;
-  if (_defined_never(token, &after) &&
-      (after.type == <eof> || after.type == <&&>))
-    return <first>;
-  return 0;
+  return s == "ifndef <never>" || s == "if ! defined <never>" ? <rest> : 0;
 }
 
 /* x2c output is always compiled as C by a GNU-style compiler, so an arm
@@ -593,12 +560,6 @@ static void _hide_never_active_arms(Tokenizer tokenizer) {
   }
 }
 
-static Token _next_code(Token token) {
-  do token++; while (token.type == <space> || token.type == <comment> ||
-                     token.type == <preproc>);
-  return token;
-}
-
 static int _ends_operand(Symbol type) {
   switch (type)
     case <ident>: case <lit-int>: case <lit-float>: case <lit-char>:
@@ -623,23 +584,17 @@ static int _starts_operand(Symbol type) {
    `match (...)` followed by `case` or `{`. Every other occurrence is a
    name, so C that uses them keeps compiling. */
 static void _retag_contextual_keywords(Tokenizer tokenizer) {
-  Token base = tokenizer.tokens, prev = NULL;
-  for (Token token = base; token.type != <eof>; token = _next_code(token)) {
+  Token prev = NULL;
+  for (Token token = tokenizer.tokens; token.type != <eof>;
+       token = _skip_forward(token + 1)) {
     if (token.type == <in>) {
-      Token next = _next_code(token);
+      Token next = _skip_forward(token + 1);
       if (!(prev && _ends_operand(prev.type) && _starts_operand(next.type)))
         token.type = <ident>;
     }
     else if (token.type == <match>) {
-      Token next = _next_code(token), int depth = 0;
-      if (next.type == <(>) {
-        // Every opener that ends in `(`, such as `%(`, closes with `)`.
-        for (; next.type != <eof>; next = _next_code(next)) {
-          if (next.text.endswith("(")) depth++;
-          else if (next.type == <)> && !--depth) break;
-        }
-        next = _next_code(next);
-      }
+      Token next = _skip_forward(token + 1);
+      if (next.type == <(>) next = next.after_group();
       if (next.type != <case> && next.type != <"{">) token.type = <ident>;
     }
     prev = token;
@@ -692,6 +647,38 @@ static Token _skip_forward(Token token) {
 /** Returns the first non-trivia token at or after `token`. */
 Token Compiler.skip_trivia_from(Compiler compiler, Token token) =>
   _skip_forward(token);
+
+/** Returns 1 for a token type that opens a delimited group, -1 for one that
+    closes a group, and 0 otherwise. Every opener spelling ends in the `(`,
+    `[`, or `{` that its closer matches.
+*/
+int Symbol.group_step(Symbol s) {
+  switch (s) {
+    case <"(">: case <"[">: case <"{">: case <"?(">: case <"$(">:
+    case <"${">: case <"%(">: case <"%[">: case <"%{">: case <"@{">:
+      return 1;
+    case <")">: case <"]">: case <"}">:
+      return -1;
+  }
+  return 0;
+}
+
+/** Returns the token that closes the group `t` opens, `t` itself when it
+    opens no group, or the `eof` token when the group never closes.
+*/
+Token Token.group_close(Token t) {
+  for (int depth = 0; t.type != <eof>; t++)
+    if ((depth += t.type.group_step()) <= 0) return t;
+  return t;
+}
+
+/** Returns the first non-trivia token after the group `t` opens, or after
+    `t` when it opens no group. A group that never closes yields `eof`.
+*/
+Token Token.after_group(Token t) {
+  t = t.group_close();
+  return t.type == <eof> ? t : _skip_forward(t + 1);
+}
 
 /** Returns the non-trivia token type `steps` from parser position.
 
@@ -852,26 +839,12 @@ int Compiler._at_function_arrow(Compiler compiler) =>
     A top-level comma also terminates the expression when `stop_at_comma` is
     nonzero.
 */
-void Compiler._skip_shallow_expression(Compiler compiler, int stop_at_comma) {
-  int parens = 0, brackets = 0, braces = 0;
-  while (compiler.peek(0) != <eof>) {
-    Symbol token = compiler.peek(0);
-    if (token == <"$(">) {
-      compiler.skip_macro_lisp();
-      continue;
-    }
-    if (!parens && !brackets && !braces &&
-        (token == <;> || (stop_at_comma && token == <,>)))
-      return;
-    if (token == <(> || token == <"?(">) parens++;
-    else if (token == <)> && parens) parens--;
-    else if (token == <[> || token == <"%[">)
-      brackets++;
-    else if (token == <]> && brackets) brackets--;
-    else if (token == <"{"> || token == <"%{"> ||
-             token == <"${"> || token == <"@{">) braces++;
-    else if (token == <"}"> && braces) braces--;
-    compiler.next();
+void Compiler._skip_shallow_expression(Compiler c, int stop_at_comma) {
+  for (Symbol type = c.peek(0);
+       type != <eof> && type != <;> && (!stop_at_comma || type != <,>);
+       type = c.peek(0)) {
+    if (type.group_step() > 0) c.token = c.token.after_group();
+    else c.next();
   }
 }
 
@@ -880,16 +853,15 @@ void Compiler._skip_shallow_expression(Compiler compiler, int stop_at_comma) {
     way leaves its remainder as the next run, and runs are rejoined in order.
 */
 void Compiler.skip_script_statement(Compiler c) {
-  int depth = 0;
-  while (c.peek(0) != <eof>) {
-    Symbol token = c.peek(0);
-    if (token == <"$(">) {
-      c.skip_macro_lisp();
+  for (int depth = 0; c.peek(0) != <eof>;) {
+    Symbol type = c.peek(0);
+    if (type == <"$(">) {
+      c.token = c.token.after_group();
       continue;
     }
-    depth += _delimiter_step(token);
+    depth += type.group_step();
     c.next();
-    if (depth <= 0 && (token == <;> || token == <"}">)) return;
+    if (depth <= 0 && (type == <;> || type == <"}">)) return;
   }
 }
 
@@ -1480,18 +1452,6 @@ List Compiler.leading_preproc(Compiler compiler) {
   return noncode;
 }
 
-/* Returns the token after a balanced parenthesized group that starts at
-   `token`, or `token` itself when no group starts there. */
-static Token _after_parens(Token token) {
-  if (token.type != <(>) return token;
-  int depth = 0;
-  for (; token.type != <eof>; token = _next_code(token)) {
-    if (token.type == <(>) depth++;
-    else if (token.type == <)> && !--depth) return _next_code(token);
-  }
-  return token;
-}
-
 /* Classifies a macro body, scanned as x2c tokens, by the declaration prefix
    it contributes: a `List` of storage classes and `inline`, a `List` of
    builtin type words such as `signed int`, `<empty>` for nothing,
@@ -1502,7 +1462,7 @@ static Var _macro_prefix(Compiler c, Token token, String param) {
   while (token.type != <eof>) {
     Symbol type = token.type, String word = token.text;
     Var definition;
-    Token next = _next_code(token);
+    Token next = _skip_forward(token + 1);
     if (type.is_storage_class() || type.is_inline() || type.is_builtin_type())
       storage = storage ? %( @storage $type ) : %($type);
     else if (type == <lit-char*>);   // the linkage name in `extern "C"`
@@ -1512,7 +1472,7 @@ static Var _macro_prefix(Compiler c, Token token, String param) {
               definition.equal(<annotation>))) {
       // The attribute's parenthesized text contributes nothing.
       if (next.type != <(>) return 1;
-      next = _after_parens(next);
+      next = next.after_group();
     }
     else if (param && word == param && !wrapped) wrapped = 1;
     else if (!c.object_macros.try_get(word, &definition)) return 1;
@@ -1552,16 +1512,16 @@ static void _note_object_macro(Compiler c, String content) {
   Token body = token + 1;
   if (body.type == <(>) {
     // A parameter list touching the name makes the macro function-like.
-    Token after = _after_parens(body), String param = NULL;
-    Token first = _next_code(body);
-    if (first.type == <ident> && _next_code(first).type == <)>)
+    Token after = body.after_group(), String param = NULL;
+    Token first = _skip_forward(body + 1);
+    if (first.type == <ident> && _skip_forward(first + 1).type == <)>)
       param = first.text;
     Var kind = _macro_prefix(c, after, param);
     if (kind.equal(<empty>)) c.object_macros[name] = <annotation>;
     else if (kind.equal(<wrapper>)) c.object_macros[name] = <wrapper>;
     return;
   }
-  Var definition = _macro_prefix(c, _next_code(token), NULL), existing;
+  Var definition = _macro_prefix(c, _skip_forward(token + 1), NULL), existing;
   if (!c.object_macros.try_get(name, &existing) ||
       _prefix_rank(definition) > _prefix_rank(existing))
     c.object_macros[name] = definition;
@@ -1593,17 +1553,6 @@ static void _append_preproc(Compiler compiler, Array ast) {
   foreach (Var directive, directives) ast.push(directive);
 }
 
-static int _delimiter_step(Symbol type) {
-  switch (type) {
-    case <"(">: case <"[">: case <"{">: case <"?(">: case <"$(">:
-    case <"${">: case <"%(">: case <"%[">: case <"%{">: case <"@{">:
-      return 1;
-    case <")">: case <"]">: case <"}">:
-      return -1;
-  }
-  return 0;
-}
-
 /* A failed declaration is skipped whole from its first token, because a
    report inside a body leaves the cursor where no declaration can start.
    The declaration ends at a `;` outside delimiters, or at a closing
@@ -1618,7 +1567,7 @@ static void _sync_top_level(Compiler c, Token start, int braces) {
     Token token = c.token;
     c.next();
     if (!depth && token.type == <;>) return;
-    int step = _delimiter_step(token.type);
+    int step = token.type.group_step();
     depth += step;
     if (depth < 0) depth = 0;
     if (!depth && step < 0 && c.token.line > token.line) return;

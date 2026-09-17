@@ -570,21 +570,6 @@ int Compiler.keyword_form_is_definition(Compiler compiler) =>
          compiler.token.text == "keyword" &&
          compiler.peek(2) == <$>;
 
-static void _skip_balanced_tokens(
-  Compiler compiler, Symbol open, Symbol close) {
-  int depth = 0;
-  if (compiler.peek(0) == open) {
-    depth = 1;
-    compiler.next();
-  }
-  while (depth && compiler.peek(0) != <eof>) {
-    Symbol token = compiler.peek(0);
-    if (token == open) depth++;
-    else if (token == close) depth--;
-    compiler.next();
-  }
-}
-
 /** Consumes a direct macro name and its balanced argument list.
     The invocation terminator remains current for the shallow parser.
 */
@@ -592,7 +577,7 @@ void Compiler.skip_macro_invocation(Compiler compiler) {
   compiler.expect(<$>);
   while (compiler.peek(0) == <ident> || compiler.peek(0) == <.>)
     compiler.next();
-  _skip_balanced_tokens(compiler, <(>, <)>);
+  if (compiler.peek(0) == <(>) compiler.token = compiler.token.after_group();
 }
 
 static Atom _name(Compiler c) {
@@ -923,31 +908,13 @@ static void _ensure_lisp(Compiler compiler) {
 }
 
 static String _lisp_form(Compiler c) {
-  Token start = c.token;
-  c.expect(<"$(">);
-  int depth = 1;
-  Token close = NULL;
-  while (depth && c.peek(0) != <eof>) {
-    Symbol token = c.peek(0);
-    if (token == <(>) depth++;
-    else if (token == <)>) {
-      depth--;
-      if (!depth) close = c.token;
-    }
-    c.next();
-  }
-  if (!close)
+  Token start = c.token, close = start.group_close();
+  if (close.type == <eof>)
     c.report_error(
-      <parse>, "unterminated compile-time Lisp form",
-      start, NULL);
-  int begin = start.pos + start.len, length = close.pos - begin;
-  String body = String.new_len(c.text + begin, length);
-  return %"($body)";
-}
-
-/** Consumes one balanced compile-time Lisp form without evaluating it. */
-void Compiler.skip_macro_lisp(Compiler compiler) {
-  (void) _lisp_form(compiler);
+      <parse>, "unterminated compile-time Lisp form", start, NULL);
+  c.token = close.after_group();
+  int begin = start.pos + start.len;
+  return %"(${String.new_len(c.text + begin, close.pos - begin)})";
 }
 
 static int _import_path(Compiler compiler, String *path) {
@@ -1804,27 +1771,16 @@ static List _parse_hole(Compiler c, Symbol role) {
   return %(macro-bind $replacement);
 }
 
-static Token _after_lisp_form(Compiler compiler) {
-  Token token = compiler.token;
-  int depth = 1;
-  while (depth && token.type != <eof>) {
-    token = compiler.skip_trivia_from(token + 1);
-    if (token.type == <(>) depth++;
-    else if (token.type == <)>) depth--;
-  }
-  return depth ? token : compiler.skip_trivia_from(token + 1);
-}
-
 static int _lisp_splice_follows(Compiler compiler) =>
   compiler.peek(0) == <"$("> &&
-         _after_lisp_form(compiler).type == <...>;
+         compiler.token.after_group().type == <...>;
 
 /** Returns whether tokens after the current Lisp form continue a declaration.
     The balanced form and following trivia are inspected without moving the
     compiler cursor.
 */
 int Compiler.macro_lisp_starts_declaration(Compiler compiler) {
-  Token token = _after_lisp_form(compiler);
+  Token token = compiler.token.after_group();
   return token.type == <$> || token.type == <ident> ||
          token.type == <*> || token.type == <(>;
 }
@@ -2384,7 +2340,7 @@ void Compiler.skip_keyword_alias(Compiler compiler) {
       <parse>, "expected keyword alias", compiler.token, NULL);
   compiler.next();
   if (_keyword_alias_requires_arguments(definition))
-    _skip_balanced_tokens(compiler, <(>, <)>);
+    compiler.token = compiler.token.after_group();
 }
 
 /** Consumes a NamedType target already projected by owning-source collection.
