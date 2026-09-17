@@ -112,7 +112,8 @@ static void Bootstrap._verify(Bootstrap b, List records, String root) {
    Returns zero when a concurrent bootstrap published the prefix first.
 */
 static int Bootstrap._extract(Bootstrap b, List records) {
-  Path temporary = %"${b.prefix}.source.tmp.%ld".printf((long) getpid());
+  String pid = "%ld".printf((long) getpid());
+  Path temporary = %"${b.prefix}.source.tmp.$pid";
   temporary.remove_tree();
   b._verify(records, temporary);
   if (!b.runtime_srcs || !b.compiler_srcs)

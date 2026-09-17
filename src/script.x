@@ -71,8 +71,9 @@ int script_prepare(CliRequest c) {
   String root = script_cache_root();
   if (!root) x2c_driver_error("no cache directory: set X2C_CACHE_DIR");
   String script = Path.absolute(c.inputs.car());
-  c.build_dir = %"$root/scripts/${Path.stem(script)}-%08x".printf(
-    script.hash());
+  // The stem is interpolated, never a format: a path may contain a percent.
+  String stem = Path.stem(script), digest = "%08x".printf(String.hash(script));
+  c.build_dir = %"$root/scripts/$stem-$digest";
   if (c.clean) {
     if (!Path.is_dir(c.build_dir)) return 1;
     int lock = file_lock(%"${c.build_dir}/lock", 1);
@@ -95,7 +96,8 @@ int script_prepare(CliRequest c) {
   if (!c.rebuild && c.script_current(c.build_dir)) _exec(c);
   Path.write_text(%"${c.build_dir}/source", script);
   _prune(%"$root/scripts");
-  c.output = %"${c.output}.%ld".printf((long) getpid());
+  String pid = "%ld".printf((long) getpid());
+  c.output = %"${c.output}.$pid";
   return 0;
 }
 

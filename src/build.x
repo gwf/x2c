@@ -51,8 +51,9 @@ typedef struct Build {
    spelling-derived key. The input path is not canonicalized, so its spelling
    is part of incremental cache identity. */
 static String _key(String path) {
-  String stem = Path.stem(path);
-  return %"$stem-%08x".printf(path.hash());
+  // The stem is interpolated, never a format: a path may contain a percent.
+  String stem = Path.stem(path), digest = "%08x".printf(path.hash());
+  return %"$stem-$digest";
 }
 
 /* Every incremental fingerprint starts with the state format, project or
