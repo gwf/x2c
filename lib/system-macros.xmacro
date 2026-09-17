@@ -24,3 +24,9 @@ macro Decorator $time(Statement $target, Literal $label)
     Stderr.printf("[time] %s %.3f ms\n", $label, $elapsed);
   }
 }
+
+/* Gives every case run its own block and its own break. Deliberate
+   fallthrough is written by nesting an ordinary switch. */
+macro Decorator $switch(Block $body, Expr $condition) => {
+  $(cases.switch $condition $body)...
+}

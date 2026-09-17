@@ -1,10 +1,11 @@
 # Compile-time Lisp SDK completion and system-wide macros
 
-> Status: blocked - 2026-09-17. An independent review reproduced a fatal
-> defect in Phase 1 and two unimplementable specifications; all three are
-> corrected above and the phases below need re-scoping before implementation.
-> `String.dedent`, `$dedent`, and `$time` are built and working on this branch
-> as a proof of the API, unpublished. Scoped 2026-09-17 from a read of
+> Status: active - 2026-09-17. `String.dedent`, `$dedent`, `$time`, and
+> `$switch` are built and working on this branch, unpublished, as a proof of
+> the design. The proof removed most of Phase 2: `$switch` needed no new SDK
+> operation at all. One defect an independent review reproduced stands
+> uncorrected in the design and is fixed above: Phase 1's rename breaks the
+> checked-in bootstrap and needs a compatibility step. Scoped 2026-09-17 from a read of
 > `etc/compiler-sdk.xlisp`, `etc/lisp-bindings.xlisp`, `etc/builtin-macros.xlisp`,
 > the 33 `$lisp.bind` calls at `src/macros.x:894`, and the shipped generator in
 > `lib/varops.x` + `lib/varops.xlisp`. The macro direction follows the
@@ -97,16 +98,19 @@ content needs no location at all.
 **Switch semantics.** `$switch` is a decorator with a `Block` target and one
 `Expr` argument, written `$switch(condition) { case 1: ... }`. It builds the
 switch rather than rewriting an existing one, which keeps it clear of the rule
-that a fixed C keyword cannot serve as a `keyword` alias. It transforms only
-the direct items of the captured block, so a nested switch and a case produced
-by another macro are untouched, and ordinary nesting remains the way to write
-deliberate fallthrough. It operates on runs of labels, so `case 3: case 4:
-body;` receives one block and one break rather than one per label. It appends
-no break when a run's last item is `break`, `return`, `continue`, `goto`, or a
-non-returning raise, which keeps `-Wunreachable-code` quiet. Each run's body
-becomes a block, which also satisfies the rule at
+that a fixed C keyword cannot serve as a `keyword` alias. A switch body is a
+flat item list with a regular shape, so the whole transform is one `match-case`
+walk: a run of `(at LINE (case ?value))` and `(at LINE (default))` items keeps
+its position, and the statements following it become one `(block ...)` carrying
+the break that run needs. `case 3: case 4: body;` therefore receives one block
+and one break rather than one per label. No break is appended when a run's last
+item already transfers, which keeps `-Wunreachable-code` quiet. Items before
+the first label pass through unchanged, so a declaration shared by every case
+keeps its scope, and any item that is not a label passes through, so `goto`
+labels and preprocessor directives inside the body are untouched. Each run's
+body becoming a block also satisfies the rule at
 `docs/src/reference/language.md:1777` that a switch dispatch cannot bypass a
-runtime static declaration.
+runtime static declaration, and lets two cases declare the same name.
 
 ## Phase 1 - naming and loading
 
@@ -185,9 +189,10 @@ anything in Phase 3 or 4 calls it.
 
 ## Phase 4 - switch and table
 
-- `$switch` as specified above.
+- `$switch` as specified above. Implemented; needs a fixture and the showcase
+  entry.
 - `$table` - a dedented text table in a string literal expands to a static
-  array of records, using `x2c.literal.value` and the Phase 2 constructors.
+  array of records, using `x2c.source.text` and the Phase 2 constructors.
 
 Enum name tables and exhaustive-switch checking wait behind `x2c.type.members`
 and are scoped against what `SymbolSet` already covers. `docs/src/guide/idioms.md`
@@ -200,9 +205,19 @@ Resource-management macros are out of scope; `$auto`, `$scope`, `$lock`, and
 
 ## Proof: what a working implementation showed
 
-`String.dedent`, `$dedent`, and `$time` are implemented and building on this
-branch, as a test of whether the proposed API can express them. They are not
-published.
+`String.dedent`, `$dedent`, `$time`, and `$switch` are implemented and building
+on this branch, as a test of whether the proposed API can express them. They
+are not published.
+
+`$switch` needed no new SDK operation. A switch body is a flat item list whose
+labels and statements form a regular pattern, so `match-case` over `car` and
+`cdr` of the captured block is the entire transform, and the `(at LINE ...)`
+origin anchors are matched as part of the pattern rather than seen through.
+The proposed `x2c.block.items` and `x2c.syntax.kind` bought nothing. Measured:
+`case 1: case 2:` share one generated block and one break; a case ending in
+`return` gets no break; two cases declare the same name and compile, which
+plain C rejects without hand-written braces; a leading declaration, a `goto`
+label, and an `#ifdef` inside the body all pass through and compile.
 
 Both `$dedent` paths work. A literal with no escape and no hole folds during
 translation: `$dedent(%"\n    alpha\n      beta\n    gamma\n  ")` emits
@@ -211,7 +226,7 @@ An interpolated literal emits `String_dedent(String_join(...))` and produces the
 same text at run time. `$time` expands to a `clock_gettime` pair around its
 target with `using` temporaries.
 
-Four things the implementation settled:
+Five things the implementation settled:
 
 - The fold reads `x2c.source.text`, which already exists. The proposed
   `x2c.literal.value` would not have worked, so `$dedent` is not evidence for
@@ -226,6 +241,10 @@ Four things the implementation settled:
   already has the inconsistency the naming rule is meant to remove.
 - `String.dedent` needs no prefix argument, which removes the open question
   about what prefix an emitted runtime call would receive.
+- Phase 2's reader set is mostly unnecessary. Captured syntax is an ordinary
+  walkable List and `match-case` is already in the compile-time Lisp, so the
+  readers that remain worth adding are `x2c.type.members` and the diagnostic
+  additions, both of which need C.
 
 ## Validation
 
@@ -265,12 +284,14 @@ with the same shape and the same operand convention. The naming rule is the one
 another language; the template language, decorators, and `using` stay as they
 are.
 
-**Validators, diagnostics, and negative fixtures.** Two, each protecting wrong
-output rather than earlier failure. `x2c.type.members` rejects a non-enum
-`Type`, mirroring the existing rejection in `x2c.type.fields` and preventing a
-generator from emitting a table from an unrelated type. `$switch` rejects a
-captured block item that is neither a label run nor a declaration, since it
-would otherwise emit a switch body whose breaks land in the wrong place.
-`$dedent` has no validator: a line that does not carry the prefix is left alone
-by definition, and a non-literal argument falls through to the runtime call.
-Negative fixtures cover the two rejections.
+**Validators, diagnostics, and negative fixtures.** One. `x2c.type.members`
+rejects a non-enum `Type`, mirroring the existing rejection in
+`x2c.type.fields` and preventing a generator from emitting a table from an
+unrelated type. `$switch` has no validator: an earlier draft rejected any
+block item that was not a label or a declaration, and the working
+implementation shows that check would reject legal `goto` labels and
+preprocessor directives while buying nothing, because passing every non-label
+item through is what produces correct output. `$dedent` has no validator
+either: a line that does not carry the prefix is left alone by definition, and
+a non-literal argument falls through to the runtime call. One negative fixture,
+for the enum rejection.
