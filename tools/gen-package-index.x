@@ -12,17 +12,6 @@
 
 static Path root;
 
-/* Spells `path` as Python's `PurePosixPath` does, so the printed index path
-   matches the tool this replaced. */
-static Path normal(String path) {
-  Array parts = [];
-  foreach (String part, path.split("/"))
-    if (part && part != ".") parts.push(part);
-  String joined = parts.len() ? parts.join("/") : NULL;
-  if (path.startswith("/")) return joined ? %"/$joined" : "/";
-  return joined ? joined : ".";
-}
-
 static String digest(String path) {
   File file = $auto(File.open(path, "rb"));
   return file.sha256();
@@ -109,30 +98,30 @@ if (args.contains("-h") || args.contains("--help")) {
 Map options = NULL;
 try options = Args.parse(args, spec);
 catch %(bad-arg *detail): {
-  String why = detail.assoc(<why>).str(), subject = detail[2].cadr().str();
+  String why = detail.assoc(<why>), subject = detail[2].cadr();
   Stderr.printf("%sx2c: %s: %s\n", Args.usage(spec, program), why, subject);
   return 2;
 }
 
 try {
-  Path output = options["output"].str();
-  String base = options["base"].str();
+  Path output = options["output"];
+  String base = options["base"];
   output.make_dirs();
   Array rows = [];
   List directories = options["package-dir"];
   if (!directories) directories = %(${root.join("packages")});
   foreach (Var directory, directories)
-    source_rows(directory.str(), output, base, rows);
+    source_rows(directory, output, base, rows);
   foreach (Var tarball, options["bundles"])
-    rows.push(bundle_row(tarball.str(), output, base));
-  String version = options["x2c-version"].str();
+    rows.push(bundle_row(tarball, output, base));
+  String version = options["x2c-version"];
   if (!version)
     version = %(${root.join("builds/0/x2c")} --version).job().output()
                 .strip(NULL);
   Array lines = [%"# x2c package index for $version",
                   "# name version kind platform url sha256"];
   foreach (Var row, rows.sort()) lines.push(row);
-  Path index = normal(output).join("index.txt");
+  Path index = output.join("index.txt");
   index.write_text(%"${lines.join("\n")}\n");
   printf("x2c: wrote %s (%d rows)\n", index, (int) rows.len());
 }

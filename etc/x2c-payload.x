@@ -50,22 +50,12 @@ static int is_link(Path path) {
 /* Spells `path` as a Python `PurePosixPath` does, so printed paths match
    what the Makefile and the installer have always shown. */
 static Path normal(Path path) {
-  Array parts = %[];
+  Array parts = [];
   foreach (String part, path.split("/"))
     if (part && part != ".") parts.push(part);
   String joined = parts.len() ? parts.join("/") : NULL;
   if (path.startswith("/")) return joined ? %"/$joined" : %"/";
   return joined ? joined : %".";
-}
-
-static Path absolute(Path path) {
-  if (path.startswith("/")) return path;
-  char buffer[4096];
-  if (!getcwd(buffer, sizeof(buffer))) {
-    int error = errno;
-    raise %(io-fail (operation "getcwd") (errno $error));
-  }
-  return Path.join(String.new(buffer), path);
 }
 
 static void copy(Path source, Path target) {
@@ -90,17 +80,17 @@ static void copy_support(Path destination, int sources) {
     ("." ("LICENSE") ("licenses")));
   if (sources) rows = %(("src" ("*.x" "*.xmacro") ("src")) @rows);
   foreach (List row, rows) {
-    String folder = row.car().str();
+    String folder = row.car();
     foreach (Var pattern, row.cadr()) {
-      List matches = root.join(folder).join(pattern.str()).glob();
+      List matches = root.join(folder).join(pattern).glob();
       if (!matches) {
         String message =
-          %"no ${pattern.str()} under $folder; run 'make build' first";
+          %"no $pattern under $folder; run 'make build' first";
         raise %(not-found (why $message));
       }
       foreach (Path source, matches)
         foreach (Var output, row.caddr())
-          copy(source, destination.join(output.str())
+          copy(source, destination.join(output)
                          .join(source.basename()));
     }
   }
@@ -127,7 +117,7 @@ static String write_manifest(Path destination, String name, String kind) {
     rows.printf("%s %ld %s\n", hex(file_digest(path)), path.size(),
                 relative);
   }
-  String body = rows.str();
+  String body = rows;
   uint64_t digest = fnv64(
     1469598103934665603ULL, (const unsigned char *) body, body.len());
   String identity = %"fnv64-${hex(digest)}";
@@ -136,7 +126,7 @@ static String write_manifest(Path destination, String name, String kind) {
 }
 
 static Map owned_files(Path prefix) {
-  Map files = %{};
+  Map files = {};
   Path manifest = prefix.join(INSTALL_MANIFEST);
   if (!manifest.exists()) return files;
   List lines = manifest.read_text().split_lines(0);
@@ -182,7 +172,8 @@ static Path make_stage(Path parent) {
 static void install(Path prefix, Path destdir) {
   if (!prefix.startswith("/"))
     fail("PREFIX must be an absolute dedicated x2c prefix");
-  Path target = absolute(destdir ? normal(%"$destdir$prefix") : prefix);
+  Path target =
+    Path.absolute(".").join(destdir ? normal(%"$destdir$prefix") : prefix);
   target.dirname().make_dirs();
   if (is_link(target)) fail(%"installation prefix is a symlink: $target");
   String identity;
@@ -223,7 +214,7 @@ static void install(Path prefix, Path destdir) {
 }
 
 static void remove_empty_dirs(Path prefix) {
-  Array paths = prefix.walk().array();
+  Array paths = prefix.walk();
   for (int i = paths.len() - 1; i >= 0; i--) {
     Path path = paths[i];
     if (path.is_dir() && !is_link(path) && !path.list_dir()) rmdir(path);
@@ -270,14 +261,14 @@ foreach (List row, commands)
 if (!spec) {
   foreach (List row, commands)
     Stderr.printf(
-      "%s", Args.usage(row.cdr(), %"$program ${row.car().str()}"));
+      "%s", Args.usage(row.cdr(), %"$program ${row.car()}"));
   return 2;
 }
 
 Map options = NULL;
 try options = Args.parse(args.cdr(), spec);
 catch %(bad-arg *detail): {
-  String why = detail.assoc(<why>).str(), subject = detail[2].cadr().str();
+  String why = detail.assoc(<why>), subject = detail[2].cadr();
   Stderr.printf("%sx2c: %s: %s\n", Args.usage(spec, %"$program $command"),
                 why,
                 subject);
@@ -286,11 +277,11 @@ catch %(bad-arg *detail): {
 
 try {
   if (command == "support")
-    support(normal(options["destination"].str()),
-            options["licenses"] ? normal(options["licenses"].str()) : NULL);
+    support(normal(options["destination"]),
+            options["licenses"] ? normal(options["licenses"]) : NULL);
   else if (command == "install")
-    install(normal(options["prefix"].str()), options["destdir"].str());
-  else uninstall(normal(options["prefix"].str()));
+    install(normal(options["prefix"]), options["destdir"]);
+  else uninstall(normal(options["prefix"]));
 }
 catch %(?code *detail): {
   Var why = detail.assoc(<why>);
