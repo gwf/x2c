@@ -39,7 +39,7 @@ Flush failure is ignored. This function does not return and does not run
 `atexit` handlers. Those belong to the parent process and would close its
 log and process-lifetime `Scope`s twice.
 
-Source: `src/utils.x:252`
+Source: `src/utils.x:251`
 
 #### worker_fork
 
@@ -51,7 +51,7 @@ The call attempts to flush all process streams before the fork so
 successfully flushed bytes cannot be written by both processes. Flush
 failure is ignored. The child must leave through `worker_exit`.
 
-Source: `src/utils.x:241`
+Source: `src/utils.x:240`
 
 #### worker_wait
 
@@ -61,7 +61,7 @@ Waits once for `pid` and returns its shell-style status.
 Normal exit returns the worker status, a signal returns `128 + signal`, and
 a wait failure returns -1. Interrupted waits are retried.
 
-Source: `src/utils.x:261`
+Source: `src/utils.x:260`
 
 #### x2c_cpp_include_dirs
 
@@ -96,7 +96,7 @@ Source: `src/utils.x:116`
 
 Hashes unit filename spelling for stable generated C identifiers.
 
-Source: `src/utils.x:270`
+Source: `src/utils.x:269`
 
 #### x2c_get_executable
 

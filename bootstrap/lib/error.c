@@ -114,8 +114,6 @@ static List _location(ErrorRegion * region, const X2CErrorSite * site);
 
 static List _entry(ErrorRegion * region, const X2CErrorSite * site, Symbol code, List detail);
 
-static void _append_record(ErrorRecord * record);
-
 static void _record(const X2CErrorSite * site, Symbol code, List detail);
 
 typedef struct ErrorPair{
@@ -556,8 +554,7 @@ static Var _copy_value(ErrorRegion * region, Var value){
   if(Var_is_integer(value) || Var_is_floating(value)) return value;
   if(Var_is_row(value, 11, 7, 1)){
     String source = Var_string(value);
-    String owned = String_new_in(region -> strings, source, String_len(source));
-    return String_var(owned);
+    return String_var(String_new_in(region -> strings, source, String_len(source)));
   }
   if(Var_is(value, 826970)){
     String source = Var_str(value);
@@ -603,10 +600,6 @@ static List _entry(ErrorRegion * region, const X2CErrorSite * site, Symbol code,
   return entry;
 }
 
-static void _append_record(ErrorRecord * record){
-  Block_push(_thread() -> stack, record);
-}
-
 static void _record(const X2CErrorSite * site, Symbol code, List detail){
   if(Error_count() >= Error_bound()) _floor(code, "error stack exceeded its bound");
   ErrorThreadState state = _thread();
@@ -617,7 +610,7 @@ static void _record(const X2CErrorSite * site, Symbol code, List detail){
   ;
   detail = Var_list(_copy_value(& record.region, List_var(detail)));
   record.entry = _entry(& record.region, site, code, detail);
-  _append_record(& record);
+  Block_push(state -> stack, & record);
   state -> floor_only --;
 }
 
@@ -644,7 +637,7 @@ static void _record_n(const X2CErrorSite * site, Symbol code, unsigned pair_coun
   Block_free(pairs);
   if(pushed) Scope_pop();
   record.entry = _entry(& record.region, site, code, detail);
-  _append_record(& record);
+  Block_push(state -> stack, & record);
   state -> floor_only --;
 }
 
@@ -785,12 +778,12 @@ Var Map_setindex(Map, Var, Var);
 void Error_policy_set(Symbol code, Symbol disposition){
   if(! Error_ready()) return;
   if(disposition != 2260136 && disposition != 25550 && disposition != 7475046632 && disposition != 619609226){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 816};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 811};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(302607262917214), Symbol_var(disposition));
     __builtin_unreachable();
   }
   if(_never_returns(code) && disposition != 2260136){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 819};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 814};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(227594), Symbol_var(code), Symbol_var(302607262917214), Symbol_var(disposition));
     __builtin_unreachable();
   }
@@ -833,17 +826,10 @@ ErrorHandler Error_push(ErrorHandlerFn fn, Var data){
   if(! Error_ready() || ! fn) return NULL;
   ErrorThreadState state = _thread();
   ErrorHandler h = Scope_malloc_in(& state -> scope, sizeof(struct ErrorHandler));
-  h -> prev = state -> handler_top;
-  h -> fn = fn;
-  h -> data = data;
-  h -> watermark = Error_count();
-  h -> site = NULL;
-  h -> plans = NULL;
-  h -> target = NULL;
-  h -> selected = - 1;
-  h -> capture_values = NULL;
-  h -> retained = NULL;
-  h -> detached = 0;
+  * h =(struct ErrorHandler){
+    .prev = state -> handler_top, .fn = fn, .data = data, .watermark = Error_count(), .site = NULL, .target = NULL, .selected = - 1, .plans = NULL, .capture_values = NULL, .retained = NULL, .detached = 0
+  }
+  ;
   state -> handler_top = h;
   return h;
 }

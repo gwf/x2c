@@ -29,7 +29,7 @@ Configured compiler sessions and sequential source units.
 
 Loads process-owned type and collection support before units.
 
-Source: `src/frontend.x:68`
+Source: `src/frontend.x:70`
 
 <a id="Frontend.new"></a>
 #### Frontend.new
@@ -40,16 +40,17 @@ Borrows a configured request for sequential units. The request and this
 session must outlive its units. Initialize process support above any
 temporary command Context before creating a session inside that Context.
 
-Source: `src/frontend.x:78`
+Source: `src/frontend.x:80`
 
 <a id="Frontend.open"></a>
 #### Frontend.open
 
 `int Frontend.open(Frontend frontend, String filename, ParsedUnit *unit)`
 
-Runs the source stages. On either result, the caller must close the unit.
+Runs the source stages. On either result, the caller must close the
+unit.
 
-Source: `src/frontend.x:332`
+Source: `src/frontend.x:341`
 
 <a id="Frontend.start"></a>
 #### Frontend.start
@@ -60,7 +61,7 @@ Opens and tokenizes an isolated source unit without printing diagnostics.
 A failed unit remains open so its diagnostics can be inspected. Close it
 before opening the next unit; Type and header caches are process-global.
 
-Source: `src/frontend.x:266`
+Source: `src/frontend.x:268`
 
 ### `ParsedUnit`
 
@@ -69,27 +70,30 @@ Source: `src/frontend.x:266`
 
 `void ParsedUnit.close(ParsedUnit *unit)`
 
-Releases the unit after its caller has inspected or exported its results.
+Releases the unit after its caller has inspected or exported its
+results.
 
-Source: `src/frontend.x:338`
+Source: `src/frontend.x:349`
 
 <a id="ParsedUnit.collect"></a>
 #### ParsedUnit.collect
 
 `int ParsedUnit.collect(ParsedUnit *unit, Frontend frontend)`
 
-Collects symbols and retains preprocessor outputs for adapter inspection.
+Collects symbols and retains preprocessor outputs for adapter
+inspection.
 
-Source: `src/frontend.x:295`
+Source: `src/frontend.x:300`
 
 <a id="ParsedUnit.parse"></a>
 #### ParsedUnit.parse
 
 `int ParsedUnit.parse(ParsedUnit *unit)`
 
-Parses a collected unit, retaining both its AST and unsuccessful reports.
+Parses a collected unit, retaining both its AST and unsuccessful
+reports.
 
-Source: `src/frontend.x:315`
+Source: `src/frontend.x:322`
 
 ## Public types
 
@@ -108,16 +112,17 @@ Borrows a configured request and owns shared native-preprocessor setup.
 Units open sequentially; process caches must outlive the session.
 The optional stderr sink runs synchronously; units also retain that text.
 
-Source: `src/frontend.x:21`
+Source: `src/frontend.x:23`
 
 <a id="FrontendErrorSink"></a>
 ### FrontendErrorSink
 
 `typedef void (*FrontendErrorSink)(String text)`
 
-Receives borrowed native-preprocessor stderr synchronously during collect.
+Receives borrowed native-preprocessor stderr synchronously during
+collect.
 
-Source: `src/frontend.x:15`
+Source: `src/frontend.x:17`
 
 <a id="ParsedUnit"></a>
 ### ParsedUnit
@@ -127,7 +132,7 @@ Source: `src/frontend.x:15`
 Owns one isolated source lifetime, including unsuccessful diagnostics.
 Results remain borrowed until close; export values that must survive it.
 
-Source: `src/frontend.x:31`
+Source: `src/frontend.x:33`
 
 ## Design notes
 

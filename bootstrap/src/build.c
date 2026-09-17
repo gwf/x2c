@@ -6,11 +6,11 @@
 
 #include "build.h"
 
-static List _163, _161, _160, _158, _156, _104, _103, _102, _101, _100, _88, _87, _86, _85;
+static List _173, _171, _170, _168, _166, _163, _161, _160, _158, _156, _104, _103, _102, _101, _100, _88, _87, _86, _85;
 
-static String _154, _152, _151, _150, _149, _148, _147, _146, _145, _144, _143, _142, _141, _140, _139, _138, _137, _136, _135, _134, _133, _132, _131, _130, _129, _128, _127, _126, _125, _124, _123, _122, _121, _120, _118, _117, _116, _115, _114, _113, _109, _108, _107, _106, _105, _98, _96, _94, _92, _90, _89, _83, _81, _79, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _54, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _164, _154, _152, _151, _150, _149, _148, _147, _146, _145, _144, _143, _142, _141, _140, _139, _138, _137, _136, _135, _134, _133, _132, _131, _130, _129, _128, _127, _126, _125, _124, _123, _122, _121, _120, _118, _117, _116, _115, _114, _113, _109, _108, _107, _106, _105, _98, _96, _94, _92, _90, _89, _83, _81, _79, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _54, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _162, _159, _157, _155, _153, _99, _97, _95, _93, _91, _84, _82, _80, _78, _55, _53;
+static Var _172, _169, _167, _165, _162, _159, _157, _155, _153, _99, _97, _95, _93, _91, _84, _82, _80, _78, _55, _53;
 
 #include <errno.h>
 #include <fcntl.h>
@@ -283,6 +283,16 @@ __attribute__((constructor)) static void _file_init_(void){
   _161 = cons(_153, _160);
   _162 = List_var(_161);
   _163 = cons(_162, _156);
+  _164 = String_new("String");
+  _165 = String_var(_164);
+  _166 = cons(_165, NULL);
+  _167 = List_var(_166);
+  _168 = cons(_167, NULL);
+  _169 = List_var(_168);
+  _170 = cons(_169, NULL);
+  _171 = cons(_153, _170);
+  _172 = List_var(_171);
+  _173 = cons(_172, _156);
   _x2c_static_initialize_0();
 }
 
@@ -1091,17 +1101,16 @@ static int _compile_sources(Build b){
   }
   CcJob * running = Scope_calloc(b -> request -> jobs, sizeof(CcJob));
   int running_count = 0, failed = 0;
-  b -> cc_n = b -> c_sources -> length;
+  b -> cc_n = Array_len(b -> c_sources);
   b -> cc_start = report_now_us();
   {
-    Var value;
+    String source;
     Array _x2c_macro_object_13 = b -> c_sources;
     int _x2c_macro_cursor_13 = 0;
     Var _x2c_macro_cursor_output_13;
     while(Array_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_13)){
-      value = _x2c_macro_cursor_output_13;
+      source = Var_string(_x2c_macro_cursor_output_13);
       {
-        String source = Var_string(value);
         report_progress(7477414666, b -> cc_done, b -> cc_n, source);
         String key = _key(source), object = String_join(NULL, cons(String_var(b -> obj_root), cons(String_var(_1), cons(String_var(key), cons(String_var(_10), NULL)))));
         if(b -> request -> compile_only && ! List_truth(List_cdr(b -> request -> inputs)) && String_truth(b -> output)) object = b -> output;
@@ -1181,8 +1190,7 @@ static List _native_action_inputs(Build state){
     }
 
   }
-  List result = Array_list_free(inputs);
-  return result;
+  return Array_list_free(inputs);
 }
 
 static int _mapped_debug(Build state){
@@ -1230,8 +1238,6 @@ int Map_try_get(Map, Var, Var *);
 Path Path_join(Path, Path);
 
 void Path_copy_file(Path, Path);
-
-String Var_str(Var);
 
 static void Build__place_unit_headers(Build b){
   if(b -> request -> dry_run || Array_len(b -> units) < 2) return;
@@ -1291,7 +1297,7 @@ static void Build__place_unit_headers(Build b){
                         if(! Map_try_get(headers, String_var(Path_absolute(Path_join(dir, source))), & header)) continue;
                         Path placed = Path_join(directory, target);
                         Path_make_dirs(Path_dirname(placed));
-                        Path_copy_file(Var_str(header), placed);
+                        Path_copy_file(Var_string(header), placed);
                         break;
                       }
 
@@ -1388,11 +1394,9 @@ int report_receipts(void);
 
 String report_duration(unsigned long);
 
-String String_add(String, String);
+String int_str(int);
 
 String report_size(unsigned long long);
-
-String int_str(int);
 
 void Build_report_success(Build b){
   if(! _init_guard_) _file_init_();
@@ -1403,8 +1407,13 @@ void Build_report_success(Build b){
   String label = String_truth(b -> request -> label) ? String_join(NULL, cons(String_var(_56), cons(String_var(b -> request -> label), cons(String_var(_57), NULL)))) : _142;
   String result;
   if(b -> request -> compile_only){
-    if(b -> objects -> length == 1) result = String_join(NULL, cons(String_var(_58), cons(String_var(label), cons(String_var(_59), cons(String_var(b -> output), cons(String_var(_60), cons(String_var(duration), cons(String_var(cache), NULL))))))));
-    else result = String_add(String_join(NULL, cons(String_var(_58), cons(String_var(label), cons(String_var(_61), cons(String_var(Var_str(Var_box_ulong(b -> objects -> length))), cons(String_var(_62), NULL)))))), String_join(NULL, cons(String_var(b -> obj_root), cons(String_var(_60), cons(String_var(duration), cons(String_var(cache), NULL))))));
+    int objects = Array_len(b -> objects);
+    if(objects == 1) result = String_join(NULL, cons(String_var(_58), cons(String_var(label), cons(String_var(_59), cons(String_var(b -> output), cons(String_var(_60), cons(String_var(duration), cons(String_var(cache), NULL))))))));
+    else{
+      String tail = String_join(NULL, cons(String_var(b -> obj_root), cons(String_var(_60), cons(String_var(duration), cons(String_var(cache), NULL)))));
+      result = String_join(NULL, cons(String_var(_58), cons(String_var(label), cons(String_var(_61), cons(String_var(int_str(objects)), cons(String_var(_62), cons(String_var(tail), NULL)))))));
+    }
+
   }
   else{
     String kind = b -> request -> kind == 1381098885964356 ? _143 : _144;
@@ -1415,7 +1424,7 @@ void Build_report_success(Build b){
     String size = report_size(b -> gen_bytes);
     String c_noun = b -> xlat_n == 1 ? _132 : _133;
     String h_noun = b -> xlat_n == 1 ? _145 : _146;
-    report_line(28680520, String_add(String_join(NULL, cons(String_var(_63), cons(String_var(int_str(b -> xlat_n)), cons(String_var(_61), cons(String_var(c_noun), cons(String_var(_64), NULL)))))), String_join(NULL, cons(String_var(int_str(b -> xlat_n)), cons(String_var(_61), cons(String_var(h_noun), cons(String_var(_65), cons(String_var(size), cons(String_var(_66), NULL)))))))));
+    report_line(28680520, String_join(NULL, cons(String_var(_63), cons(String_var(int_str(b -> xlat_n)), cons(String_var(_61), cons(String_var(c_noun), cons(String_var(_64), cons(String_var(int_str(b -> xlat_n)), cons(String_var(_61), cons(String_var(h_noun), cons(String_var(_65), cons(String_var(size), cons(String_var(_66), NULL)))))))))))));
   }
   if(b -> cc_n){
     int count = b -> request -> jobs;
@@ -1617,7 +1626,7 @@ static List Build__script_directories(Build b, List prerequisites){
             while(List_try_next(_x2c_macro_object_26, & _x2c_macro_cursor_26, & _x2c_macro_cursor_output_26)){
               flag = _x2c_macro_cursor_output_26;
               {
-                String spelling = Var_str(flag);
+                String spelling = Var_string(flag);
                 if(! String_startswith(arg, spelling)) continue;
                 if(String_len(arg) > String_len(spelling)) Array_push(directories, String_var(String_getslice(arg, String_len(spelling), -2147483648, 1)));
                 else if(List_truth(List_cdr(p))) Array_push(directories, List_cadr(p));
@@ -1666,7 +1675,7 @@ static List Build__script_directories(Build b, List prerequisites){
     while(Array_try_next(_x2c_macro_object_30, & _x2c_macro_cursor_30, & _x2c_macro_cursor_output_30)){
       value = _x2c_macro_cursor_output_30;
       {
-        String directory = Path_absolute(Var_str(value));
+        String directory = Path_absolute(Var_string(value));
         if(String_startswith(directory, Path_absolute(b -> work_dir))) continue;
         String entry = String_endswith(directory, _129) ? directory : String_join(NULL, cons(String_var(directory), cons(String_var(_1), NULL)));
         if(! Array_contains(unique, String_var(entry))) Array_push(unique, String_var(entry));
@@ -1705,7 +1714,7 @@ List Build_script_helpers(Build b){
           Var _x2c_lambda_capture_value_0 = String_var(path);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
             _x2c_lambda_capture_value_0
           }
-          ;  Func_new_context(_x2c_lambda_1, _163, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+          ;  Func_new_context(_x2c_lambda_1, _173, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
         }
         ))) continue;
         Array_push(helpers, String_var(path));
@@ -1851,9 +1860,9 @@ const void * Func_context(Func);
 Var int_var(int);
 
 static Var _x2c_lambda_1(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda_argv_0){
-  Var prefix = x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 45156);
+  String prefix = Var_string(x2c_func_value_argument(_x2c_lambda_closure_0, _x2c_lambda_argv_0, 0, 1318210446));
   const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
-  return int_var(String_startswith(Var_string(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_0), Var_str(prefix)));
+  return int_var(String_startswith(Var_string(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_0), prefix));
   ;
 }
 

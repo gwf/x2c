@@ -37,6 +37,16 @@ static Type _declarator_parts(Type type, List * modifiers);
 
 static Var _modifier_declaration_ast(Var value);
 
+static const SymbolSet storage_classes =(SymbolSet) "\001\000\000\000\006\000\000\000\003\000\000\000\025\174\112\177\271\171\067\236\003\000\000\005\000\007\000\001\000\004\000\000\114\041\005\146\012\000\000\000\106\242\201\116\000\000\000\000\036\255\001\000\000\000\000\000\234\054\024\027\000\000\000\000\144\241\063\235\042\001\000\000\110\041\241\110\104\001\000\000";
+
+static const SymbolSet type_qualifiers =(SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\003\001\000\000\000\350\164\157\000\000\000\000\000\350\110\222\316\042\001\000\000\012\113\064\260\147\001\000\000";
+
+static const SymbolSet type_modifiers =(SymbolSet) "\001\000\000\000\004\000\000\000\001\000\000\000\052\367\116\072\035\201\054\132\001\003\000\001\001\000\216\173\014\000\000\000\000\000\250\174\150\002\000\000\000\000\110\161\047\115\000\000\000\000\110\161\047\115\127\001\000\000";
+
+static const SymbolSet number_types =(SymbolSet) "\001\000\000\000\011\000\000\000\007\000\000\000\025\174\112\177\271\171\067\236\000\000\005\000\007\006\000\000\001\000\000\000\000\000\000\000\000\000\007\003\010\002\001\000\012\023\365\021\000\000\000\000\150\170\314\000\000\000\000\000\144\100\003\000\000\000\000\000\250\174\150\002\000\000\000\000\250\113\000\000\000\000\000\000\216\173\014\000\000\000\000\000\110\161\047\115\000\000\000\000\110\161\047\115\127\001\000\000\132\165\005\000\000\000\000\000";
+
+static const SymbolSet tagged_types =(SymbolSet) "\001\000\000\000\003\000\000\000\001\000\000\000\033\126\160\042\037\016\242\101\000\001\001\002\000\000\350\250\222\116\000\000\000\000\334\113\256\002\000\000\000\000\132\165\005\000\000\000\000\000";
+
 static int Symbol__is_number_type(Symbol sym);
 
 static int Symbol__is_tagged(Symbol sym);
@@ -172,8 +182,7 @@ List Type_declaration_parts(Type type){
     }
 
   }
-  List result = cons(List_var(base), cons(List_var(List_append(Array_list_free(syntax), NULL)), NULL));
-  return result;
+  return cons(List_var(base), cons(List_var(List_append(Array_list_free(syntax), NULL)), NULL));
 }
 
 Var List_getindex(List, int);
@@ -309,8 +318,9 @@ List Type_parameter_ast(Type type, List binding){
   if(! _init_guard_) Type_initialize();  List base, mods;  List _x2c_destructure_1 = Type_declaration_parts(type);  base = Var_list(List_getindex(_x2c_destructure_1, 0));  mods = Var_list(List_getindex(_x2c_destructure_1, 1));  return cons(_65, cons(List_var(base), cons(List_var(cons(_4, cons(List_var(binding), cons(List_var(mods), NULL)))), NULL)));
 }
 
+int SymbolSet_contains(SymbolSet, Symbol);
 int Symbol_is_storage_class(Symbol sym){
-  if(! _init_guard_) Type_initialize();  switch(sym) case 44661285196 : case 1317118534 : case 109854 : case 387198108 : case 1248177922404 : case 1392787923272 : return 1;  return 0;
+  if(! _init_guard_) Type_initialize();  return SymbolSet_contains(storage_classes, sym);
 }
 
 int Symbol_is_inline(Symbol sym){
@@ -318,19 +328,19 @@ int Symbol_is_inline(Symbol sym){
 }
 
 int Symbol_is_type_qualifier(Symbol sym){
-  if(! _init_guard_) Type_initialize();  switch(sym) case 7304424 : case 1249006209256 : case 1544849476362 : return 1;  return 0;
+  if(! _init_guard_) Type_initialize();  return SymbolSet_contains(type_qualifiers, sym);
 }
 
 int Symbol_is_type_modifier(Symbol sym){
-  if(! _init_guard_) Type_initialize();  switch(sym) case 818062 : case 40402088 : case 1294430536 : case 1474468213064 : return 1;  return 0;
+  if(! _init_guard_) Type_initialize();  return SymbolSet_contains(type_modifiers, sym);
 }
 
 static int Symbol__is_number_type(Symbol sym){
-  switch(sym) case 301273866 : case 13400168 : case 213092 : case 40402088 : case 19368 : case 818062 : case 1294430536 : case 1474468213064 : case 357722 : return 1;  return 0;
+  return SymbolSet_contains(number_types, sym);
 }
 
 static int Symbol__is_tagged(Symbol sym){
-  switch(sym) case 1318234344 : case 44977116 : case 357722 : return 1;  return 0;
+  return SymbolSet_contains(tagged_types, sym);
 }
 
 int Symbol_is_builtin_type(Symbol sym){
@@ -374,9 +384,8 @@ int Type_is_pointer(Type type){
   if(! _init_guard_) Type_initialize();  return ! ! List_truth(({ static MatchCaptureSite _x2c_match_site_17;  x2c_match_site_match(& _x2c_match_site_17, Type_list(type), List_var(_125)); }));
 }
 
-Symbol Var_symbol(Var);
 static Symbol _declarator_kind(Type type){
-  while(List_truth(Type_list(type)) && Var_is_row(List_car(Type_list(type)), 9, 7, 4)) type = Var_type(List_car(Type_list(type)));  return List_truth(Type_list(type)) && Var_is(List_car(Type_list(type)), 1328354264) ? Var_symbol(List_car(Type_list(type))) : 0;
+  while(List_truth(Type_list(type)) && Var_is_row(List_car(Type_list(type)), 9, 7, 4)) type = Var_type(List_car(Type_list(type)));  return Var_symbol(List_truth(Type_list(type)) && Var_is(List_car(Type_list(type)), 1328354264) ? List_car(Type_list(type)) : int_var(0));
 }
 
 int Type_is_array(Type type){
@@ -432,16 +441,16 @@ static List _scalar_row(Type type){
 }
 
 Symbol Type_scalar_tag(Type type){
-  if(! _init_guard_) Type_initialize();  List row = _scalar_row(type);  return List_truth(row) ? Var_symbol(List_car(row)) :(Symbol) 0;
+  if(! _init_guard_) Type_initialize();  List row = _scalar_row(type);  return Var_symbol(List_truth(row) ? List_car(row) : Symbol_var((Symbol) 0));
 }
 
-String Var_str(Var);
+String Var_string(Var);
 String Type_var_numeric_extractor(Type type){
-  if(! _init_guard_) Type_initialize();  if(Type_is_enum(type)) return _441;  List row = _scalar_row(type);  return List_truth(row) ? Var_str(List_cadr(row)) : NULL;
+  if(! _init_guard_) Type_initialize();  if(Type_is_enum(type)) return _441;  List row = _scalar_row(type);  return List_truth(row) ? Var_string(List_cadr(row)) : NULL;
 }
 
 String Type_var_numeric_update_helper(Type type){
-  if(! _init_guard_) Type_initialize();  List row = _scalar_row(type);  return List_truth(row) ? Var_str(List_caddr(row)) : NULL;
+  if(! _init_guard_) Type_initialize();  List row = _scalar_row(type);  return List_truth(row) ? Var_string(List_caddr(row)) : NULL;
 }
 
 static unsigned _literal_digit(int ch){
@@ -514,9 +523,8 @@ static Map _var_row_table(void){
 }
 
 int Var_is_void(Var);
-long Var_integer(Var);
 int Type_var_tag_row(Symbol tag, unsigned long * top, unsigned long * mask, unsigned long * bottom){
-  if(! _init_guard_) Type_initialize();  Var row = Map_getindex(_var_row_table(), Symbol_var(tag));  if(Var_is_void(row)) return 0;  List fields = Var_list(row);  * top = Var_integer(List_car(fields));  * mask = Var_integer(List_cadr(fields));  * bottom = Var_integer(List_caddr(fields));  return 1;
+  if(! _init_guard_) Type_initialize();  Var row = Map_getindex(_var_row_table(), Symbol_var(tag));  if(Var_is_void(row)) return 0;  List fields = Var_list(row);  * top = Var_ulong(Var_convert(List_car(fields), 44858254));  * mask = Var_ulong(Var_convert(List_cadr(fields), 44858254));  * bottom = Var_ulong(Var_convert(List_caddr(fields), 44858254));  return 1;
 }
 
 Var String_var(String);
@@ -955,7 +963,7 @@ String Type_var_converter(Type type){
   if((void *) declared_typetags == NULL || ! List_truth(Type_list(type))) return NULL;
   Var row = Map_getindex(declared_typetags, List_var(Type_canonicalize(type)));
   if(Var_is_void(row)) return NULL;
-  return Var_str(List_cadr(Var_list(row)));
+  return Var_string(List_cadr(Var_list(row)));
 }
 
 Symbol Type_fixed_var_tag(Type type){
@@ -964,7 +972,7 @@ Symbol Type_fixed_var_tag(Type type){
   Symbol scalar = Type_scalar_tag(type);
   if(scalar) return scalar;
   Var vtag = Map_getindex(_typetags_table(), List_var(Type_canonicalize(type)));
-  return Var_is(vtag, 1328354264) ? Var_symbol(vtag) : 0;
+  return Var_symbol(Var_is(vtag, 1328354264) ? vtag : int_var(0));
 }
 
 Symbol Type_var_tag(Type type){
@@ -976,6 +984,8 @@ Symbol Type_var_tag(Type type){
   }
   return Type_fixed_var_tag(type);
 }
+
+Symbol Var_symbol(Var);
 
 Type Type_base_type(Type type){
   if(! _init_guard_) Type_initialize();
@@ -1077,12 +1087,10 @@ int Type_is_builtin(Type type){
 
 int List_len(List);
 
-Var car(List);
-
 int Type_is_typedef_name(Type type){
   if(! _init_guard_) Type_initialize();
   type = Type_base_type(type);
-  return List_truth(Type_list(type)) && List_len(Type_list(type)) == 1 && Var_is_row(car(Type_list(type)), 11, 7, 1);
+  return List_truth(Type_list(type)) && List_len(Type_list(type)) == 1 && Var_is_row(List_car(Type_list(type)), 11, 7, 1);
 }
 
 int Type_is_bare_typedef_name(Type type){
@@ -1110,7 +1118,7 @@ int Type_is_integral(Type type){
 
 static int Type__is_tagged(Type type){
   if(! List_truth(Type_list(type))) return 0;
-  Var first = car(Type_list(type));
+  Var first = List_car(Type_list(type));
   if(Var_is(first, 1328354264)) return Symbol__is_tagged(Var_symbol(first));
   return 0;
 }
@@ -1251,14 +1259,14 @@ static List _from_ast(List ast, List context){
 default: break;
     }
   }
-Var head = car(ast);  switch(Var_symbol(head)){
+Var head = List_car(ast);  switch(Var_symbol(head)){
   case 8932560010 :{
     List _x2c_destructure_2 = List_cdr(ast);  List source_type = Var_list(List_getindex(_x2c_destructure_2, 0));  List bindings = Var_list(List_getindex(_x2c_destructure_2, 1));  List type = _from_ast(source_type, NULL);  return _from_ast(bindings, type);
   }
   case 150408 :{
     List ident, mods;  List _x2c_destructure_3 = List_cdr(ast);  ident = Var_list(List_getindex(_x2c_destructure_3, 0));  mods = Var_list(List_getindex(_x2c_destructure_3, 1)); (void) ident;  mods = _from_ast(mods, context);  List type = Type_list(Type__modify(List_type(context), mods));  return type;
   }
-  case 1077021542 : case 157714837990 : return _from_ast_items(cdr(ast), context);  case 421880102 :{
+  case 1077021542 : case 157714837990 : return _from_ast_items(List_cdr(ast), context);  case 421880102 :{
     Array types = Array_new(); {
       List field;  List _x2c_macro_object_5 = List_cdr(ast);  List _x2c_macro_cursor_6 = _x2c_macro_object_5;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_2)){
         field = Var_list(_x2c_macro_cursor_output_2); {
@@ -1274,7 +1282,7 @@ Var head = car(ast);  switch(Var_symbol(head)){
     List _x2c_destructure_4 = List_cdr(ast);  List source_type = Var_list(List_getindex(_x2c_destructure_4, 0));  List bindings = Var_list(List_getindex(_x2c_destructure_4, 1));  List type = _from_ast(source_type, NULL);  return _from_ast(bindings, type);
   }
   case 13528008 :{
-    List params = _from_ast(cdr(ast), NULL);  return cons(_420, List_append(params, NULL));
+    List params = _from_ast(List_cdr(ast), NULL);  return cons(_420, List_append(params, NULL));
   }
   case 33656922 :{
     List _x2c_destructure_5 = List_cdr(ast);  Type parameter_type = Var_type(List_getindex(_x2c_destructure_5, 0));  List mods = Var_list(List_getindex(_x2c_destructure_5, 1));  return _from_ast(mods, Type_list(parameter_type));

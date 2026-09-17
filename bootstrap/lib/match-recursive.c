@@ -2,9 +2,9 @@
 
 #include "match-recursive.h"
 
-static List _9, _7, _5, _3, _2;
+static List _13, _12, _9, _7, _5, _3, _2;
 
-static Var _10, _8, _6, _4, _1, _0;
+static Var _14, _11, _10, _8, _6, _4, _1, _0;
 
 typedef struct RecursiveMatchState{
   MatchCaptureLayout layout;
@@ -71,7 +71,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _7 = cons(_6, NULL);
   _8 = Symbol_var(107482);
   _9 = cons(_8, NULL);
-  _10 = Symbol_var(54);
+  _10 = Symbol_var(1362954);
+  _11 = Symbol_var(62180362);
+  _12 = cons(_11, NULL);
+  _13 = cons(_10, _12);
+  _14 = Symbol_var(54);
 }
 
 int MatchCaptureLayout_index(MatchCaptureLayout, Atom);
@@ -139,7 +143,7 @@ static int _bind_final(RecursiveMatchState state, Var binder, List input){
   if(index < 0) return 0;
   unsigned long bit = 1UL << index;
   if(!(state -> present & bit)) return _bind(state, binder, List_var(input));
-  if(!(state -> spans & bit)) return Var_is_row(state -> values[index], 9, 7, 4) && List_equal(Var_list(state -> values[index]), input);
+  if(!(state -> spans & bit)) return Var_is_row(state -> values[index], 9, 7, 4) && Var_equal(state -> values[index], List_var(input));
   List expected = state -> span_begin[index], candidate = input;
   int length = 0;
   while(length < state -> span_length[index] && ! List_equal(expected, state -> span_end[index]) && List_truth(candidate)){
@@ -246,13 +250,9 @@ int Var_is_binder(Var);
 
 int Var_is_match_op(Var);
 
-Var List_getindex(List, int);
-
-List List_cddr(List);
-
 int Var_is(Var, Symbol);
 
-Symbol Var_symbol(Var);
+Var int_var(int);
 
 static int _is(Var input, List patterns){
   if(List_equal(patterns, _3)) return Var_is_atom_binder(input);
@@ -260,16 +260,28 @@ static int _is(Var input, List patterns){
   if(List_equal(patterns, _2)) return Var_is_binder(input);
   if(List_equal(patterns, _7)) return Var_is_match_op(input);
   if(List_equal(patterns, _9)) return ! Var_is_row(input, 9, 7, 4);
-  Var kind, type;
-  List _x2c_destructure_0 = patterns;
-  kind = List_getindex(_x2c_destructure_0, 0);
-  type = List_getindex(_x2c_destructure_0, 1);
-  if(List_truth(patterns) && Var_equal(kind, Symbol_var(1362954)) && List_truth(List_cdr(patterns)) && ! List_truth(List_cddr(patterns))){
-    Symbol tag = Var_is(type, 1328354264) ? Var_symbol(type) : 0;
+
+  {
+    List _x2c_match_expr = patterns;
+    Var _x2c_match_values[1];
+  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+
+    switch (Var_symbol(car(_x2c_match_expr))) {
+      case 1362954: ;
+  { List _x2c_match_cursor;
+  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936762981386ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var type = _x2c_match_values[0];
+  {
+    Symbol tag = Var_symbol(Var_is(type, 1328354264) ? type : int_var(0));
     return Var_is(input, _type_tag(tag));
   }
-  return 0;
+  break; } } default: break;
+
+    }
+  }
+return 0;
 }
+
+Symbol Var_symbol(Var);
 
 int List_len(List);
 
@@ -309,7 +321,7 @@ static List _bindings(RecursiveMatchState state){
     Var value = state -> values[i];
     if(state -> spans & bit){
       int length = state -> span_length[i];
-      value = length ? List_var(List_getslice(state -> span_begin[i], -2147483648, length, 1)) : List_var(((List) NULL));
+      value = List_var(length ? List_getslice(state -> span_begin[i], -2147483648, length, 1) :(List) NULL);
     }
     result = cons(List_var(cons(state -> layout -> binders[i], cons(value, NULL))), result);
   }
@@ -328,7 +340,7 @@ static int _try_capture(MatchCaptureLayout layout, Var input, MatchCaptureBuffer
     if(!(state.present & bit)) continue;
     if(state.spans & bit){
       int length = state.span_length[i];
-      captures -> values[i] = length ? List_var(List_getslice(state.span_begin[i], -2147483648, length, 1)) : List_var(((List) NULL));
+      captures -> values[i] = List_var(length ? List_getslice(state.span_begin[i], -2147483648, length, 1) :(List) NULL);
     }
     else captures -> values[i] = state.values[i];
   }
@@ -375,7 +387,7 @@ static List _search(Var input, Var pattern, List results, int include_empty){
     else if(! include_empty) return results;
   }
   List bindings;
-  if(_try_value(input, pattern, & bindings)) results = cons(List_var(cons(List_var(cons(_10, cons(input, NULL))), bindings)), results);
+  if(_try_value(input, pattern, & bindings)) results = cons(List_var(cons(List_var(cons(_14, cons(input, NULL))), bindings)), results);
   return results;
 }
 

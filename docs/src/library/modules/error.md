@@ -168,7 +168,7 @@ Source: `lib/error.x:278`
 
 Returns the maximum number of errors that may remain accumulated.
 
-Source: `lib/error.x:849`
+Source: `lib/error.x:844`
 
 <a id="Error.bound_set"></a>
 #### Error.bound_set
@@ -178,7 +178,7 @@ Source: `lib/error.x:849`
 Sets the accumulated-error bound when `bound` is positive.
 A zero or negative value leaves the current bound unchanged.
 
-Source: `lib/error.x:857`
+Source: `lib/error.x:852`
 
 <a id="Error.count"></a>
 #### Error.count
@@ -188,7 +188,7 @@ Source: `lib/error.x:857`
 Returns the number of errors currently accumulated.
 Returns zero before `Error` initialization and after shutdown.
 
-Source: `lib/error.x:664`
+Source: `lib/error.x:659`
 
 <a id="Error.depth"></a>
 #### Error.depth
@@ -199,7 +199,7 @@ Returns the current nested error-dispatch depth.
 This is the nesting depth of error dispatch. `Error.count` returns the
 number of accumulated errors.
 
-Source: `lib/error.x:659`
+Source: `lib/error.x:654`
 
 <a id="Error.handler_depth"></a>
 #### Error.handler_depth
@@ -244,7 +244,7 @@ Source: `lib/error.x:362`
 Captures the current error-stack position.
 Pass the result to `Error.since` to inspect only later errors.
 
-Source: `lib/error.x:669`
+Source: `lib/error.x:664`
 
 <a id="Error.note_rendered"></a>
 #### Error.note_rendered
@@ -266,7 +266,7 @@ Source: `lib/error.x:263`
 Returns the default disposition for `code`.
 Unknown codes and an unavailable `Error` runtime default to `<abort>`.
 
-Source: `lib/error.x:835`
+Source: `lib/error.x:830`
 
 <a id="Error.policy_set"></a>
 #### Error.policy_set
@@ -281,7 +281,7 @@ disposition raises `<bad-arg>` and leaves their policy unchanged. The call
 is a no-op while `Error` is unavailable; failure to update `Error`-owned
 storage reaches the non-reentrant error floor.
 
-Source: `lib/error.x:814`
+Source: `lib/error.x:809`
 
 <a id="Error.pop"></a>
 #### Error.pop
@@ -295,7 +295,7 @@ Handles
 must be popped in stack order. An out-of-order pop reaches the
 non-reentrant error floor; a null handle does nothing.
 
-Source: `lib/error.x:951`
+Source: `lib/error.x:941`
 
 <a id="Error.push"></a>
 #### Error.push
@@ -313,7 +313,7 @@ registering. Raises `<alloc-fail>` if registration storage cannot be
 allocated. `data` is retained by value without copying its referent, so
 any referenced storage must outlive the registration.
 
-Source: `lib/error.x:875`
+Source: `lib/error.x:870`
 
 <a id="Error.raise"></a>
 #### Error.raise
@@ -335,7 +335,7 @@ failure reaches the non-reentrant error floor.
 Prefer the `raise` statement in source so generated location detail is
 retained.
 
-Source: `lib/error.x:1190`
+Source: `lib/error.x:1180`
 
 <a id="Error.ready"></a>
 #### Error.ready
@@ -346,7 +346,7 @@ Reports whether the rich `Error` runtime can currently accept raises.
 This is per-thread state and is false before initialization and after
 shutdown.
 
-Source: `lib/error.x:1202`
+Source: `lib/error.x:1192`
 
 <a id="Error.restore"></a>
 #### Error.restore
@@ -398,7 +398,7 @@ outermost `Scope` and canonical pools and remains live until those owners
 are
 released. Failure to materialize it reaches the non-reentrant error floor.
 
-Source: `lib/error.x:791`
+Source: `lib/error.x:786`
 
 <a id="Error.snapshot"></a>
 #### Error.snapshot
@@ -413,7 +413,7 @@ outermost `Scope`, so nested caller brackets may be released safely.
 Invalid or identity-bearing values and failures while copying reach the raw
 error floor; they never re-enter handler dispatch.
 
-Source: `lib/error.x:714`
+Source: `lib/error.x:709`
 
 <a id="Error.trim"></a>
 #### Error.trim
@@ -465,7 +465,7 @@ cases handlers pushed inside the `Context` are reclaimed. Tokens must close
 in nesting order; an out-of-order close reaches the raw error floor. A null
 token does nothing and a closed token is invalid.
 
-Source: `lib/error.x:989`
+Source: `lib/error.x:979`
 
 <a id="Error.context_open"></a>
 #### Error.context_open
@@ -481,7 +481,7 @@ close. An unavailable `Error` runtime returns NULL.
 
 **Raises:** `<alloc-fail>` when the overlay cannot be allocated.
 
-Source: `lib/error.x:969`
+Source: `lib/error.x:959`
 
 <a id="Error.since_in"></a>
 #### Error.since_in
@@ -497,7 +497,7 @@ live until that `Scope` is destroyed. An unavailable runtime or negative
 mark
 returns `nil`. `Null` owners or failures while copying reach the raw floor.
 
-Source: `lib/error.x:753`
+Source: `lib/error.x:748`
 
 <a id="Error.snapshot_in"></a>
 #### Error.snapshot_in
@@ -512,7 +512,7 @@ until their actual owning pool is released. Wide scalar boxes enter
 live until that `Scope` is destroyed. `Null` owners, invalid or
 identity-bearing values, and failures while copying reach the raw floor.
 
-Source: `lib/error.x:730`
+Source: `lib/error.x:725`
 
 ## Public types
 

@@ -989,21 +989,19 @@ Iter Iter_init(Iter, Var, IterNextFn, Var);
 
 Var Map_var(Map);
 
-Var Var_new(Symbol, ...);
-
 Iter Map_iter(Map x, Iter dest){
   if(! Iter_truth(dest)) return NULL;
-  return Iter_init(dest, Map_var(x), _next, Var_new(3847013, 0u));
+  return Iter_init(dest, Map_var(x), _next, unsigned_var(0u));
 }
 
 Iter Map_keys(Map x, Iter dest){
   if(! Iter_truth(dest)) return NULL;
-  return Iter_init(dest, Map_var(x), _keys_next, Var_new(3847013, 0u));
+  return Iter_init(dest, Map_var(x), _keys_next, unsigned_var(0u));
 }
 
 Iter Map_enumerate(Map x, Iter dest){
   if(! Iter_truth(dest)) return NULL;
-  return Iter_init(dest, Map_var(x), _enumerate_next, Var_new(3847013, 0u));
+  return Iter_init(dest, Map_var(x), _enumerate_next, unsigned_var(0u));
 }
 
 int Map_equal(Map map1, Map map2){

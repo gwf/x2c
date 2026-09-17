@@ -1860,17 +1860,17 @@ int Compiler.macro_lisp_starts_declaration(Compiler compiler) {
          token.type == <*> || token.type == <(>;
 }
 
-/** Parses a macro hole or Lisp slot for `role` while reading a template.
-    Returns role-shaped syntax containing `(macro-bind ...)` or
-    `(macro-slot ...)`, or NULL when ordinary grammar owns the current tokens;
-    successful parsing advances the cursor.
-*/
 static const SymbolSet declaration_roles =
   %<<field enumerator map-entry unit>>;
 static const SymbolSet sequence_roles =
   %<<argument block field enumerator map-entry param unit>>;
 static const SymbolSet untyped_roles = %<<expression argument type>>;
 
+/** Parses a macro hole or Lisp slot for `role` while reading a template.
+    Returns role-shaped syntax containing `(macro-bind ...)` or
+    `(macro-slot ...)`, or NULL when ordinary grammar owns the current tokens;
+    successful parsing advances the cursor.
+*/
 List Compiler.try_parse_macro_slot(Compiler compiler, Symbol role) {
   if (!compiler.macro_holes) return NULL;
   if (compiler.peek(0) == <"$(">) {

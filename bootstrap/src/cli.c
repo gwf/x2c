@@ -433,8 +433,7 @@ __attribute__((constructor)) static void _file_init_(void){
 }
 
 _Noreturn static void _removed_output(void){
-  fputs("x2c: error: option '-o' was removed\n", stderr);
-  fputs("note: use '--out-dir' with translate or '--output' with build and run\n", stderr);
+  fputs("x2c: error: option '-o' was removed\n" "note: use '--out-dir' with translate or '--output' with build and run\n", stderr);
   exit(2);
 }
 
@@ -680,6 +679,8 @@ int List_try_next(List, List *, Var *);
 
 String Var_string(Var);
 
+int String_equal(String, String);
+
 static int _response_on_stack(List stack, String path){
   {
     String entry;
@@ -688,7 +689,7 @@ static int _response_on_stack(List stack, String path){
     Var _x2c_macro_cursor_output_0;
     while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
       entry = Var_string(_x2c_macro_cursor_output_0);
-      if(strcmp(entry, path) == 0) return 1;
+      if(String_equal(entry, path)) return 1;
     }
 
   }
@@ -897,8 +898,6 @@ int cli_dependency_pass_through(String s){
   if(! _init_guard_) _file_init_();
   return String_truth(s) &&(String_startswith(s, _50) || String_startswith(s, _51) || String_startswith(s, _52) || String_startswith(s, _53) || String_contains(s, _54) || String_contains(s, _55) || String_contains(s, _56) || String_contains(s, _57));
 }
-
-int String_equal(String, String);
 
 static void _driver_kind(CliRequest request, String value){
   request -> kind_explicit = 1;
@@ -1189,7 +1188,7 @@ static CliRequest _parse_command(Array args, CliCommand * command){
   request -> run_args = Array_list_free(run_args);
   request -> include_dirs = Array_list_free(x_paths);
   request -> cpp_args = Array_list_free(cpp_args);
-  if(mask == CLI_BOOTSTRAP && ! cc_args -> length) Array_push(cc_args, String_var(_66));
+  if(mask == CLI_BOOTSTRAP && ! Array_len(cc_args)) Array_push(cc_args, String_var(_66));
   request -> cc_args = Array_list_free(cc_args);
   request -> ld_args = Array_list_free(ld_args);
   if(List_truth(request -> package_dirs)) request -> package_dirs = List_reverse(request -> package_dirs);

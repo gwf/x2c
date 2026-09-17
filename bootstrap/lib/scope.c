@@ -16,11 +16,11 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#define PTR_ALLOC(p)      ((ScopeAlloc) ((char *) (p) - sizeof(struct ScopeAlloc)))
-#define ALLOC_PTR(a)      ((void *) ((char *) (a) + sizeof(struct ScopeAlloc)))
-#define TAG_POINTER(p)    ((void *) ((uintptr_t) (p) | (uintptr_t) 1))
-#define UNTAG_POINTER(p)  ((void *) ((uintptr_t) (p) & ~(uintptr_t) 1))
-#define IS_TAGGED(p)      ((uintptr_t) (p) & (uintptr_t) 1)
+#define PTR_ALLOC(p) ((ScopeAlloc) ((char *) (p) - sizeof(struct ScopeAlloc)))
+#define ALLOC_PTR(a) ((void *) ((char *) (a) + sizeof(struct ScopeAlloc)))
+#define TAG_POINTER(p) ((void *) ((uintptr_t) (p) | (uintptr_t) 1))
+#define UNTAG_POINTER(p) ((void *) ((uintptr_t) (p) & ~(uintptr_t) 1))
+#define IS_TAGGED(p) ((uintptr_t) (p) & (uintptr_t) 1)
 typedef struct ScopeFinalizer{
   void(* drop)(void *);
   void * pad;

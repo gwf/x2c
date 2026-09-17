@@ -47,7 +47,7 @@ static List _make_init_guard(List guard);
 
 static inline int _has_file_init_blocks(Compiler compiler);
 
-static List _prepend_init_prelude(List result, List initGuard, List initFunc);
+static List _prepend_init_prelude(List result, List init_guard, List init_func);
 
 static int _is_protocol_bootstrap_function(String spelling);
 
@@ -864,9 +864,9 @@ static inline int _has_file_init_blocks(Compiler compiler){
 
 int List_truth(List);
 
-static List _prepend_init_prelude(List result, List initGuard, List initFunc){
-  result = cons(List_var(initGuard), result);
-  if(List_truth(initFunc)) result = cons(List_var(initFunc), result);
+static List _prepend_init_prelude(List result, List init_guard, List init_func){
+  result = cons(List_var(init_guard), result);
+  if(List_truth(init_func)) result = cons(List_var(init_func), result);
   return result;
 }
 
@@ -967,10 +967,10 @@ int Type_is_static(Type);
 Type Var_type(Var);
 List List_reverse(List);
 static List _file_init(Compiler c, List source){
-  int hasInitBlocks = _has_file_init_blocks(c);  String initializer = c -> init_fn;  if(! hasInitBlocks && ! String_truth(initializer)) return source;  List guard = Sym_reference(c -> sym, _145, NULL), initFunc = NULL;  if(! String_truth(initializer)){
-    List file_init = Sym_introduce(c -> sym, _546);  initFunc = _make_file_init_func(c, guard, file_init);
+  int has_init_blocks = _has_file_init_blocks(c);  String initializer = c -> init_fn;  if(! has_init_blocks && ! String_truth(initializer)) return source;  List guard = Sym_reference(c -> sym, _145, NULL), init_func = NULL;  if(! String_truth(initializer)){
+    List file_init = Sym_introduce(c -> sym, _546);  init_func = _make_file_init_func(c, guard, file_init);
   }
-  List initGuard = _make_init_guard(guard);  String initializer_name = _546;  if(String_truth(initializer)) initializer_name = initializer;  int cache_only = ! String_truth(initializer) && List_truth(Compiler_init_statements(c, 10588978)) && ! List_truth(Compiler_init_statements(c, 27208)) && ! List_truth(Compiler_init_statements(c, 789770));  Map cache_reachable_ids = cache_only ? _cache_reachable_function_ids(source) : NULL;  int inserted = 0;  List result = NULL; {
+  List init_guard = _make_init_guard(guard);  String initializer_name = String_truth(initializer) ? initializer : _546;  int cache_only = ! String_truth(initializer) && List_truth(Compiler_init_statements(c, 10588978)) && ! List_truth(Compiler_init_statements(c, 27208)) && ! List_truth(Compiler_init_statements(c, 789770));  Map cache_reachable_ids = cache_only ? _cache_reachable_function_ids(source) : NULL;  int inserted = 0;  List result = NULL; {
     List item;  List _x2c_macro_object_3 = source;  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
       item = Var_list(_x2c_macro_cursor_output_3); {
 
@@ -982,7 +982,7 @@ static List _file_init(Compiler c, List source){
       }
       static MatchCaptureSite _x2c_match_site_4;  if (x2c_match_site_try_capture(& _x2c_match_site_4, _x2c_match_expr, List_var(_187), &_x2c_match_capture)) {Var function = _x2c_match_values[0];  Var type = _x2c_match_values[1];  Var declarator = _x2c_match_values[2];  Var identity = _x2c_match_values[3];  Var spelling = _x2c_match_values[4];  List statements = Var_list(_x2c_match_values[5]); {
         String function_key = _cache_function_key(identity);  if(! inserted){
-          result = _prepend_init_prelude(result, initGuard, initFunc);  inserted = 1;
+          result = _prepend_init_prelude(result, init_guard, init_func);  inserted = 1;
         }
         String name = Var_string(spelling);  if(String_equal(name, _113)) function = List_var(_wrap_protocol_initializer_function(c, Var_list(type), Var_list(declarator), statements));  else if(String_truth(initializer) && String_equal(name, initializer)) function = List_var(_wrap_initializer_function(c, Var_list(type), Var_list(declarator), statements, guard));  else if(! Type_is_static(Var_type(type)) && ! _is_protocol_bootstrap_function(name) &&(! cache_only || Map_contains(cache_reachable_ids, String_var(function_key)))) function = List_var(_patch_func_with_init(Var_list(type), Var_list(declarator), statements, initializer_name, guard));  item = Var_list(function);
       }
@@ -996,7 +996,7 @@ result = cons(List_var(item), result);
 
 }
 }
-if(! inserted) result = _prepend_init_prelude(result, initGuard, initFunc);  return List_reverse(result);
+if(! inserted) result = _prepend_init_prelude(result, init_guard, init_func);  return List_reverse(result);
 }
 
 int Type_is_extern(Type);
@@ -1194,7 +1194,6 @@ default: break;
 return NULL;
 }
 
-int Var_int(Var);
 Var List_getindex(List, int);
 int List_contains(List, Var);
 Var Array_setindex(Array, int, Var);
@@ -1207,7 +1206,7 @@ static List _resolve_typedef_markers(Array items, Array pending, int header){
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 34724924302: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497971486542734ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var index = _x2c_match_values[0]; {
-      int at = Var_int(index);  List _x2c_destructure_0 = Var_list(Array_getindex(pending, at));  List names = Var_list(List_getindex(_x2c_destructure_0, 0));  List node = Var_list(List_getindex(_x2c_destructure_0, 1));  int promoted = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 2), 3453797)); {
+      int at = Var_int(Var_convert(index, 3453797));  List _x2c_destructure_0 = Var_list(Array_getindex(pending, at));  List names = Var_list(List_getindex(_x2c_destructure_0, 0));  List node = Var_list(List_getindex(_x2c_destructure_0, 1));  int promoted = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 2), 3453797)); {
         String name;  List _x2c_macro_object_7 = names;  List _x2c_macro_cursor_7 = _x2c_macro_object_7;  Var _x2c_macro_cursor_output_7;  while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
           name = Var_string(_x2c_macro_cursor_output_7); {
             int declared = 0;  for(int j = 0;  j < i && ! declared;  j ++) declared = Var_is_row(Array_getindex(items, j), 9, 7, 4) && List_contains(_typedef_names(Var_list(Array_getindex(items, j))), String_var(name));  for(int j = i + 1;  j < count && ! promoted && ! declared;  j ++) promoted = Var_is_row(Array_getindex(items, j), 9, 7, 4) && _mentions_type(Var_list(Array_getindex(items, j)), name);  if(promoted) break;
@@ -1231,7 +1230,7 @@ static List _resolve_typedef_markers(Array items, Array pending, int header){
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 34724924302: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497971486542734ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var index = _x2c_match_values[0]; {
-          List _x2c_destructure_1 = Var_list(Array_getindex(pending, Var_int(index)));  List names = Var_list(List_getindex(_x2c_destructure_1, 0));  List node = Var_list(List_getindex(_x2c_destructure_1, 1));  int promoted = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 2), 3453797)); (void) names;  if(promoted == header) Array_push(output, List_var(node));  continue;
+          List _x2c_destructure_1 = Var_list(Array_getindex(pending, Var_int(Var_convert(index, 3453797))));  List names = Var_list(List_getindex(_x2c_destructure_1, 0));  List node = Var_list(List_getindex(_x2c_destructure_1, 1));  int promoted = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 2), 3453797)); (void) names;  if(promoted == header) Array_push(output, List_var(node));  continue;
         }
         break; } } default: break;
     }
@@ -1368,6 +1367,7 @@ static Map _filled_conditionals(List items){
 return filled;
 }
 
+int Var_int(Var);
 static List _place_conditionals(List items, Map filled, Map other, Array opened, int header){
   Array output = Array_new(); {
     List item;  List _x2c_macro_object_19 = items;  List _x2c_macro_cursor_19 = _x2c_macro_object_19;  Var _x2c_macro_cursor_output_19;  while(List_try_next(_x2c_macro_object_19, & _x2c_macro_cursor_19, & _x2c_macro_cursor_output_19)){
@@ -1378,7 +1378,7 @@ static List _place_conditionals(List items, Map filled, Map other, Array opened,
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_19;  if (x2c_match_site_try_capture(& _x2c_match_site_19, _x2c_match_expr, List_var(_303), &_x2c_match_capture)) {Var group = _x2c_match_values[0];  Var node = _x2c_match_values[1]; {
-          int placed = Var_int(Array_getindex(opened, Var_int(group))) != header;  if(Map_contains(filled, group) ||(! Map_contains(other, group) && placed)) Array_push(output, node);  continue;
+          int placed = Var_int(Array_getindex(opened, Var_int(Var_convert(group, 3453797)))) != header;  if(Map_contains(filled, group) ||(! Map_contains(other, group) && placed)) Array_push(output, node);  continue;
         }
         break;
       }
@@ -1805,7 +1805,7 @@ static List _vertical_spacing(List code){
     }
 
   }
-  List result = Array_list_free(values);  return result;
+  return Array_list_free(values);
 }
 
 static int _has_runtime_include(List content){
@@ -1854,7 +1854,7 @@ void generate_code(Compiler c, List ast, String dir){
   if(! _init_guard_) _file_init_();  ast = List_filter(ast, _x2c_func_handle_0);  List header, source;  List _x2c_destructure_4 = _header_and_source(c, ast);  header = Var_list(List_getindex(_x2c_destructure_4, 0));  source = Var_list(List_getindex(_x2c_destructure_4, 1));  String hash = x2c_filename_hash(c -> filename); {
     List _x2c_destructure_5 = Compiler_setup_cache_init(c, header, source, String_join(NULL, cons(String_var(_537), cons(String_var(hash), cons(String_var(_538), NULL)))), String_join(NULL, cons(String_var(_539), cons(String_var(hash), NULL))), String_join(NULL, cons(String_var(_540), cons(String_var(hash), NULL))));  header = Var_list(List_getindex(_x2c_destructure_5, 0));  source = Var_list(List_getindex(_x2c_destructure_5, 1));
   }
-  List header_declarations = header;  header = _vertical_spacing(header);  header = _include_guard(c, header, c -> filename);  header = Compiler_emit(c, header);  source = _file_init(c, source);  source = _static_prototypes(c, source, header_declarations);  source = _vertical_spacing(source);  source = _primary_include(c, source);  source = _modify_main(c, source);  source = Compiler_emit(c, source);  String basename = String_join(NULL, cons(String_var(String_rstrip(dir, _541)), cons(String_var(_541), cons(String_var(Path_stem(c -> filename)), NULL))));  String hfile = String_join(NULL, cons(String_var(basename), cons(String_var(_504), NULL))), cfile = String_join(NULL, cons(String_var(basename), cons(String_var(_542), NULL)));  String header_text = String_new(Compiler_code_pretty_string(c, header, hfile));  String source_text = String_new(Compiler_code_pretty_string(c, source, cfile));  String paths[2] ={
+  List header_declarations = header;  header = _vertical_spacing(header);  header = _include_guard(c, header, c -> filename);  header = Compiler_emit(c, header);  source = _file_init(c, source);  source = _static_prototypes(c, source, header_declarations);  source = _vertical_spacing(source);  source = _primary_include(c, source);  source = _modify_main(c, source);  source = Compiler_emit(c, source);  String basename = String_join(NULL, cons(String_var(String_rstrip(dir, "/")), cons(String_var(_541), cons(String_var(Path_stem(c -> filename)), NULL))));  String hfile = String_join(NULL, cons(String_var(basename), cons(String_var(_504), NULL))), cfile = String_join(NULL, cons(String_var(basename), cons(String_var(_542), NULL)));  String header_text = String_new(Compiler_code_pretty_string(c, header, hfile));  String source_text = String_new(Compiler_code_pretty_string(c, source, cfile));  String paths[2] ={
     hfile, cfile
   }
   ;  String contents[2] ={

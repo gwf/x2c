@@ -153,7 +153,7 @@ A miss, malformed pattern, or machine error returns `nil`.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing or constructing results.
 
-Source: `lib/match.x:918`
+Source: `lib/match.x:919`
 
 <a id="List.search_replace"></a>
 #### List.search_replace
@@ -169,7 +169,7 @@ above.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, traversing, or replacing.
 
-Source: `lib/match.x:943`
+Source: `lib/match.x:944`
 
 <a id="List.try_match"></a>
 #### List.try_match
@@ -215,7 +215,7 @@ returns
 
 **Raises:** the same causes as `List.search`.
 
-Source: `lib/match.x:931`
+Source: `lib/match.x:932`
 
 ### `MatchCache`
 

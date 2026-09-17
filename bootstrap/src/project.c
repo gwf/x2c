@@ -333,8 +333,7 @@ static List _string_array(Project project, int line, String value){
   }
   while(isspace((unsigned char) * cursor)) cursor ++;
   if(* cursor) _error(project, line, "unexpected text after array");
-  List result = Array_list_free(values);
-  return result;
+  return Array_list_free(values);
 }
 
 int String_equal(String, String);
@@ -712,14 +711,13 @@ static Array _target_sources(Project project, ProjectTarget target, int verbose)
   Array_free(excluded);
   Array_sort(kept);
   {
-    Var value;
+    String path;
     Array _x2c_macro_object_8 = kept;
     int _x2c_macro_cursor_8 = 0;
     Var _x2c_macro_cursor_output_7;
     while(Array_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_7)){
-      value = _x2c_macro_cursor_output_7;
+      path = Var_string(_x2c_macro_cursor_output_7);
       {
-        String path = Var_string(value);
         if(!(x2c_source_file(path) || String_endswith(path, _40))) _error_name(project, 0, "manifest source is not .x or .c", path);
       }
 

@@ -226,8 +226,7 @@ Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol wa
         x2c_exception_mark_handled(&_x2c_exception_frame_0);
         if (_x2c_catch_selected_0 == 0) {List cause = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
         {
-          Symbol lower_code = 4372507526;
-          List lower = cons(Symbol_var(lower_code), cause);
+          List lower = cons(Symbol_var(4372507526), cause);
           {
             static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 179};
             x2c_error_raise_n(& _x2c_error_site_4, 4372507526, 5, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(46228810), value, Symbol_var(1510312), Symbol_var(want), Symbol_var(6401226), List_var(lower));
@@ -239,8 +238,7 @@ Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol wa
       }
       else if (_x2c_catch_selected_0 == 1) {List cause = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
       {
-        Symbol lower_code = 48270474208;
-        List lower = cons(Symbol_var(lower_code), cause);
+        List lower = cons(Symbol_var(48270474208), cause);
         {
           static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 184};
           x2c_error_raise_n(& _x2c_error_site_5, 48270474208, 5, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(46228810), value, Symbol_var(1510312), Symbol_var(want), Symbol_var(6401226), List_var(lower));
@@ -252,8 +250,7 @@ Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol wa
     }
     else if (_x2c_catch_selected_0 == 2) {List cause = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
     {
-      Symbol lower_code = 143279306979688;
-      List lower = cons(Symbol_var(lower_code), cause);
+      List lower = cons(Symbol_var(143279306979688), cause);
       {
         static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 189};
         x2c_error_raise_n(& _x2c_error_site_6, 143279306979688, 5, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(46228810), value, Symbol_var(1510312), Symbol_var(want), Symbol_var(6401226), List_var(lower));
@@ -265,8 +262,7 @@ Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol wa
   }
   else if (_x2c_catch_selected_0 == 3) {List cause = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
   {
-    Symbol lower_code = 245103016899018;
-    List lower = cons(Symbol_var(lower_code), cause);
+    List lower = cons(Symbol_var(245103016899018), cause);
     {
       static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 194};
       x2c_error_raise_n(& _x2c_error_site_7, 245103016899018, 5, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(46228810), value, Symbol_var(1510312), Symbol_var(want), Symbol_var(6401226), List_var(lower));
@@ -278,8 +274,7 @@ Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol wa
 }
 else {List cause = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
 {
-  Symbol lower_code = 1020285550996648;
-  List lower = cons(Symbol_var(lower_code), cause);
+  List lower = cons(Symbol_var(1020285550996648), cause);
   {
     static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/func.x",.function = "x2c_func_value_argument",.line = 199};
     x2c_error_raise_n(& _x2c_error_site_8, 1020285550996648, 5, Symbol_var(39502), List_var(sig), Symbol_var(19800432), unsigned_var(i), Symbol_var(46228810), value, Symbol_var(1510312), Symbol_var(want), Symbol_var(6401226), List_var(lower));
@@ -400,7 +395,7 @@ int void_params = List_len(params) == 1 && Var_is_row(List_car(params), 9, 7, 4)
   fn -> adapter = adapter;
   fn -> rest = rest;
   fn -> context_size = context_size;
-  for(List p = void_params ? NULL : params;  List_truth(p);  p = List_cdr(p)) fn -> nparams ++;
+  fn -> nparams = void_params ? 0 : List_len(params);
   if(context_size) memcpy(_context(fn), context, context_size);
   result = fn;
   {

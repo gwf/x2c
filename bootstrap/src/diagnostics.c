@@ -403,9 +403,9 @@ void Compiler_print_diagnostic(Compiler compiler, List entry){
   if(List_truth(location)){
     String text = _76;
     v = List_assoc(location, Symbol_var(412426));
-    if(! Var_is_void(v) && Var_is_row(v, 11, 7, 1)) text = Var_string(v);
-    int line = Var_int(List_assoc(location, Symbol_var(805770)));
-    int column = Var_int(List_assoc(location, Symbol_var(233614172)));
+    if(Var_is_row(v, 11, 7, 1)) text = Var_string(v);
+    int line = Var_int(Var_convert(List_assoc(location, Symbol_var(805770)), 3453797));
+    int column = Var_int(Var_convert(List_assoc(location, Symbol_var(233614172)), 3453797));
     fprintf(stderr, "%s:%d:%d: %s: %s\n", text, line, column, Symbol_str(code), message);
     Compiler__show_source_context(compiler, location);
   }
@@ -416,8 +416,6 @@ void Compiler_print_diagnostic(Compiler compiler, List entry){
 }
 
 Var Array_getindex(Array, int);
-
-long Var_integer(Var);
 
 List Compiler_origin_location(Compiler compiler, int occurrence){
   if(! _init_guard_) _file_init_();
@@ -433,7 +431,7 @@ List Compiler_origin_location(Compiler compiler, int occurrence){
       case 15767198343496: ;
     static MatchCaptureSite _x2c_match_site_0;
     if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_27), &_x2c_match_capture)) {Var parent = _x2c_match_values[0]; {
-      occurrence = Var_integer(parent);  continue;
+      occurrence = Var_int(Var_convert(parent, 3453797));  continue;
     }
     break;
   }
@@ -514,9 +512,9 @@ static void Compiler__show_source_context(Compiler compiler, List location){
   Var line_var = List_assoc(location, Symbol_var(805770));
   Var col_var = List_assoc(location, Symbol_var(233614172));
   Var len_var = List_assoc(location, Symbol_var(816725264));
-  int line = Var_is_void(line_var) ? 0 : Var_int(line_var);
-  int column = Var_is_void(col_var) ? 0 : Var_int(col_var);
-  int length = Var_is_void(len_var) ? 1 : Var_int(len_var);
+  int line = Var_int(Var_convert(Var_is_void(line_var) ? int_var(0) : line_var, 3453797));
+  int column = Var_int(Var_convert(Var_is_void(col_var) ? int_var(0) : col_var, 3453797));
+  int length = Var_int(Var_convert(Var_is_void(len_var) ? int_var(1) : len_var, 3453797));
   char * text = compiler -> text;
   int current_line = 1;
   char * line_start = text, * line_end = text;

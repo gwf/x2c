@@ -244,17 +244,16 @@ int Pool_owns(Pool, Var);
 
 String Var_string(Var);
 
+Var String_var(String);
+
 String String_new_in(Pool, const char *, int);
 
 int String_len(String);
 
-Var String_var(String);
-
 static Var _export_string(Var value, Context source){
   if(! source -> pool || ! Pool_owns(source -> pool, value)) return value;
   String string = Var_string(value);
-  String result = String_new_in(source -> destination_pool, string, String_len(string));
-  return String_var(result);
+  return String_var(String_new_in(source -> destination_pool, string, String_len(string)));
 }
 
 String Var_str(Var);
@@ -461,7 +460,7 @@ static Var _export_value(Var v, Context source){
   if(Var_try_export_context(v, source, & custom)) return custom;
   Symbol tag = Var_tag(v);
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/context.x",.function = "_export_value",.line = 293};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/context.x",.function = "_export_value",.line = 292};
     x2c_error_raise_n(& _x2c_error_site_0, 4477479911782, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))), Symbol_var(41038), Symbol_var(tag));
     __builtin_unreachable();
   }
@@ -471,7 +470,7 @@ static Var _export_value(Var v, Context source){
 Var Context_export(Context context, Var value){
   if(! _init_guard_) Context_initialize();
   if(! context || _thread() -> current != context){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/context.x",.function = "Context_export",.line = 313};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/context.x",.function = "Context_export",.line = 312};
     x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))));
     __builtin_unreachable();
   }
@@ -506,7 +505,7 @@ void Scope_free(void *);
 void Context_close(Context context){
   if(! _init_guard_) Context_initialize();
   if(! context || _thread() -> current != context){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 352};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/context.x",.function = "Context_close",.line = 351};
     x2c_error_raise_n(& _x2c_error_site_2, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Context.close")), NULL))));
     __builtin_unreachable();
   }

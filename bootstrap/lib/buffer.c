@@ -202,9 +202,8 @@ Buffer Buffer_printf(Buffer buf, const char * format, ...){
       x2c_error_raise_n(& _x2c_error_site_5, 435316840, 0);
       __builtin_unreachable();
     }
-    buf = Buffer_write_len(buf, bytes, length);
     {
-      Buffer _x2c_return_value_0 = buf;
+      Buffer _x2c_return_value_0 = Buffer_write_len(buf, bytes, length);
       {
         x2c_cleanup_leave(& _x2c_defer_record_0);
         return _x2c_return_value_0;
@@ -220,7 +219,7 @@ Buffer Buffer_printf(Buffer buf, const char * format, ...){
 
 Buffer Buffer_write_char(Buffer buf, char value){
   if(! value){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/buffer.x",.function = "Buffer_write_char",.line = 207};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/buffer.x",.function = "Buffer_write_char",.line = 206};
     x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 1, Symbol_var(46228810), int_var(0));
     __builtin_unreachable();
   }
@@ -241,7 +240,7 @@ void Block_append_fill(Block, const void *, size_t);
 Buffer Buffer_write_repeat(Buffer buf, char value, size_t count){
   if(! count) return buf;
   if(! value){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/buffer.x",.function = "Buffer_write_repeat",.line = 228};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/buffer.x",.function = "Buffer_write_repeat",.line = 227};
     x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 1, Symbol_var(46228810), int_var(0));
     __builtin_unreachable();
   }
@@ -333,7 +332,7 @@ String Buffer_str(Buffer buf){
     size_t length = buf -> content -> length;
     int limit = INT_MAX;
     {
-      static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/buffer.x",.function = "Buffer_str",.line = 326};
+      static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/buffer.x",.function = "Buffer_str",.line = 325};
       x2c_error_raise_n(& _x2c_error_site_8, 1358596898646632, 2, Symbol_var(1265290), Var_box_ulong(length), Symbol_var(25782888), int_var(limit));
       __builtin_unreachable();
     }

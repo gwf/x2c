@@ -24,7 +24,7 @@ Immediate encoded names.
 
 Returns the final decoded byte of `symbol`, or NUL for zero.
 
-Source: `lib/symbol.x:247`
+Source: `lib/symbol.x:246`
 
 <a id="Symbol.len"></a>
 #### Symbol.len
@@ -70,7 +70,7 @@ appends nothing.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` when `out` cannot grow.
 
-Source: `lib/symbol.x:206`
+Source: `lib/symbol.x:205`
 
 ## Advanced and interop API
 
@@ -119,7 +119,7 @@ Source: `lib/symbol.x:133`
 
 Returns the first decoded byte of `symbol`, or NUL for zero.
 
-Source: `lib/symbol.x:236`
+Source: `lib/symbol.x:235`
 
 <a id="Symbol.new_len"></a>
 #### Symbol.new_len
@@ -149,7 +149,7 @@ malformed input returns zero. Zero is also the empty `Symbol`.
 
 **Raises:** `<alloc-fail>` while unescaping a quoted literal.
 
-Source: `lib/symbol.x:261`
+Source: `lib/symbol.x:260`
 
 <a id="Symbol.repr"></a>
 #### Symbol.repr
@@ -192,7 +192,7 @@ values use a quoted angled spelling, escaping backslash and double quote.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` when `out` cannot grow.
 
-Source: `lib/symbol.x:218`
+Source: `lib/symbol.x:217`
 
 ## Design notes
 

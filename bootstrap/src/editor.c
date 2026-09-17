@@ -57,23 +57,21 @@ Var List_assoc(List, Var);
 
 Var Symbol_var(Symbol);
 
+String Var_string(Var);
+
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
-String Var_string(Var);
+Var String_var(String);
 
 int Var_is_void(Var);
 
-int Var_int(Var);
+Var int_var(int);
 
 Buffer Buffer_write_char(Buffer, char);
 
 Path Path_absolute(Path);
 
 Var Map_setindex(Map, Var, Var);
-
-Var String_var(String);
-
-Var int_var(int);
 
 String Symbol_str(Symbol);
 
@@ -91,11 +89,11 @@ static void _diagnostics(Buffer out, Compiler compiler, Map needed){
         Symbol code = Var_symbol(List_assoc(entry, Symbol_var(227594)));
         List location = Var_list(List_assoc(entry, Symbol_var(857050729436)));
         Var source = List_assoc(location, Symbol_var(412426));
-        String path = Var_is_row(source, 11, 7, 1) ? Var_string(source) : compiler -> filename;
+        String path = Var_string(Var_is_row(source, 11, 7, 1) ? source : String_var(compiler -> filename));
         Var position = List_assoc(location, Symbol_var(1133019155420));
         Var width = List_assoc(location, Symbol_var(816725264));
-        int start = Var_is_void(position) ? 0 : Var_int(position);
-        int length = Var_is_void(width) ? 0 : Var_int(width);
+        int start = Var_int(Var_convert(Var_is_void(position) ? int_var(0) : position, 3453797));
+        int length = Var_int(Var_convert(Var_is_void(width) ? int_var(0) : width, 3453797));
         if(comma ++) Buffer_write_char(out, ',');
         Buffer_write_char(out, '{');
         path = Path_absolute(path);
@@ -124,6 +122,8 @@ int String_equal(String, String);
 
 int List_truth(List);
 
+int Var_int(Var);
+
 static List _occurrence(Compiler compiler, String path, int offset){
   List found = NULL;
   {
@@ -135,7 +135,7 @@ static List _occurrence(Compiler compiler, String path, int offset){
       row = Var_list(_x2c_macro_cursor_output_1);
       {
         String file = Var_string(List_getindex(row, 0));
-        int start = Var_int(List_getindex(row, 1)), end = Var_int(List_getindex(row, 2));
+        int start = Var_int(Var_convert(List_getindex(row, 1), 3453797)), end = Var_int(Var_convert(List_getindex(row, 2), 3453797));
         if(! String_equal(file, path) || offset < start || offset >= end) continue;
         if(! List_truth(found) || end - start < Var_int(List_getindex(found, 2)) - Var_int(List_getindex(found, 1))) found = row;
       }
@@ -173,7 +173,7 @@ static void _query(Buffer out, Compiler compiler, String path, String kind, int 
     List target = Var_list(value);
     Map_setindex(needed, List_getindex(target, 0), int_var(1));
     Buffer_write(out, ",\"definition\":{");
-    _location(out, Var_string(List_getindex(target, 0)), Var_int(List_getindex(target, 1)), Var_int(List_getindex(target, 2)));
+    _location(out, Var_string(List_getindex(target, 0)), Var_int(Var_convert(List_getindex(target, 1), 3453797)), Var_int(Var_convert(List_getindex(target, 2), 3453797)));
     Buffer_write_char(out, '}');
   }
   else if(String_equal(kind, _1) && List_truth(Type_list(type))){
@@ -181,7 +181,7 @@ static void _query(Buffer out, Compiler compiler, String path, String kind, int 
     List declaration = Type_declaration_ast(type, binding);
     String text = String_new(Compiler_code_pretty_string(compiler, Compiler_emit(compiler, cons(List_var(declaration), NULL)), NULL));
     Buffer_write(out, ",\"hover\":{");
-    _location(out, Var_string(List_getindex(row, 0)), Var_int(List_getindex(row, 1)), Var_int(List_getindex(row, 2)));
+    _location(out, Var_string(List_getindex(row, 0)), Var_int(Var_convert(List_getindex(row, 1), 3453797)), Var_int(Var_convert(List_getindex(row, 2), 3453797)));
     Buffer_write(out, ",\"text\":");
     report_json_string(out, text);
     Buffer_write_char(out, '}');

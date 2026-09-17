@@ -790,14 +790,12 @@ Array Array_sort(Array array){
   return array;
 }
 
-int Var_int(Var);
-
 static int _sort_order(Func compare, Var left, Var right){
   FuncArg arguments[2] ={
     FuncArg_value(left), FuncArg_value(right)
   }
   ;
-  return Var_int(Func_apply(compare, 2, arguments));
+  return Var_int(Var_convert(Func_apply(compare, 2, arguments), 3453797));
 }
 
 Array Array_sort_with(Array array, Func compare){
@@ -977,8 +975,7 @@ String Array_join(Array array, String separator){
     else Var_write_str(elem, buf);
     if(String_truth(separator) && i < n - 1) Buffer_write(buf, separator);
   }
-  String str = Buffer_str_free(buf);
-  return str;
+  return Buffer_str_free(buf);
 }
 
 int Array_equal(Array a, Array b){
@@ -1051,12 +1048,10 @@ String Array_repr(Array array){
 
 Array Var_array(Var);
 
-long Var_integer(Var);
-
 static int _next(Iter iter, Var * out){
   Array array = Var_array(iter -> obj);
   if(! Array_truth(array)) return 0;
-  int index =(int) Var_integer(iter -> state), length = _int_length(array);
+  int index = Var_int(Var_convert(iter -> state, 3453797)), length = _int_length(array);
   if(index >= length) return 0;
   Var * values =(Var *) array -> bytes;
   * out = values[index];

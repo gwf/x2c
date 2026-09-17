@@ -960,11 +960,11 @@ static ArrayString _prepare_string_array_export(ArrayString array, Context sourc
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
-    Block_reserve((Block) staged, array -> cap);
+    Block_reserve(((Block) staged), array -> cap);
     String * data = array -> bytes;
     for(size_t i = 0;  i < array -> length;  i ++){
       String value = Var_string(Context_export_nested(source, String_var(data[i])));
-      Block_append((Block) staged, & value, 1);
+      Block_append(((Block) staged), & value, 1);
     }
     {
       ArrayString _x2c_return_value_0 = result = staged;

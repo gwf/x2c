@@ -373,16 +373,12 @@ static void _print_action(Symbol phase, List arguments){
   fputc('\n', stderr);
 }
 
-long Var_integer(Var);
-
 Var List_assoc(List, Var);
 
 Var Symbol_var(Symbol);
 
-Symbol Symbol_new(const char *);
-
 static String _start_failure(String program, List detail){
-  long error = Var_integer(List_assoc(detail, Symbol_var(Symbol_new("errno"))));
+  long error = Var_long(Var_convert(List_assoc(detail, Symbol_var(11703198)), 818062));
   String reason = String_new(strerror((int) error));
   return String_join(NULL, cons(String_var(_7), cons(String_var(program), cons(String_var(_8), cons(String_var(reason), cons(String_var(_9), NULL))))));
 }

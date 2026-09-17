@@ -48,7 +48,7 @@ return zero. Cleanup attempts to unlink an opened sibling but does not
 report an unlink failure. Allocation failure transfers through ordinary
 runtime `Error` handling instead of returning zero.
 
-Source: `src/deps.x:166`
+Source: `src/deps.x:165`
 
 ## Design notes
 

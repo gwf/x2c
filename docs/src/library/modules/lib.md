@@ -59,7 +59,7 @@ Source: `lib/lib.x:31`
 
 Returns the live set's current number of disjoint components.
 
-Source: `lib/lib.x:98`
+Source: `lib/lib.x:96`
 
 <a id="DisjointSet.sizes"></a>
 #### DisjointSet.sizes

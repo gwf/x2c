@@ -223,6 +223,10 @@ Var List_var(List);
 
 List cdr(List);
 
+Var List_car(List);
+
+List List_cdr(List);
+
 int MachineSlot_prefix_equal(MachineSlot *, List, int, MachineStats *);
 
 int MachineSlot_final_equal(MachineSlot *, List, MachineStats *);
@@ -305,7 +309,7 @@ int MatchMachine_step(MatchMachine m){
         m -> pc = w -> target;
         break;
       }
-      Var head = car(at);
+      Var head = List_car(at);
       if(! Var_is_row(head, 9, 7, 4)){
         m -> pc = w -> target;
         break;
@@ -321,10 +325,10 @@ int MatchMachine_step(MatchMachine m){
       Var anchor = p -> consts[w -> c];
       while(List_truth(probe)){
         if(m -> stats) m -> stats -> scan_cells ++;
-        int equal = w -> d == MACHINE_COMPARE_BITS ? car(probe).u64 == anchor.u64 : Var_equal(car(probe), anchor);
+        int equal = w -> d == MACHINE_COMPARE_BITS ? List_car(probe).u64 == anchor.u64 : Var_equal(List_car(probe), anchor);
         if(equal) break;
-        split = cdr(split);
-        probe = cdr(probe);
+        split = List_cdr(split);
+        probe = List_cdr(probe);
         split_distance ++;
         probe_distance ++;
       }
@@ -380,12 +384,12 @@ int MatchMachine_step(MatchMachine m){
         m -> pc = w -> target;
         break;
       }
-      int equal = w -> d == MACHINE_COMPARE_BITS ? car(at).u64 == p -> consts[w -> a].u64 : Var_equal(car(at), p -> consts[w -> a]);
+      int equal = w -> d == MACHINE_COMPARE_BITS ? List_car(at).u64 == p -> consts[w -> a].u64 : Var_equal(List_car(at), p -> consts[w -> a]);
       if(! equal){
         m -> pc = w -> target;
         break;
       }
-      * MatchMachine__cursor(m, w -> b) = cdr(at);
+      * MatchMachine__cursor(m, w -> b) = List_cdr(at);
       (* MatchMachine__distance(m, w -> b)) ++;
       break;
     }
@@ -396,14 +400,14 @@ int MatchMachine_step(MatchMachine m){
         break;
       }
       if(m -> slots[w -> a].kind == MACHINE_SLOT_INVALID){
-        MatchMachine__set_value(m, w -> a, car(at), 0);
+        MatchMachine__set_value(m, w -> a, List_car(at), 0);
         if(m -> status == 11703268) break;
       }
-      else if(! MatchMachine__slot_value_equal(m, & m -> slots[w -> a], car(at))){
+      else if(! MatchMachine__slot_value_equal(m, & m -> slots[w -> a], List_car(at))){
         m -> pc = w -> target;
         break;
       }
-      * MatchMachine__cursor(m, w -> b) = cdr(at);
+      * MatchMachine__cursor(m, w -> b) = List_cdr(at);
       (* MatchMachine__distance(m, w -> b)) ++;
       break;
     }
@@ -413,7 +417,7 @@ int MatchMachine_step(MatchMachine m){
         m -> pc = w -> target;
         break;
       }
-      * MatchMachine__cursor(m, w -> b) = cdr(at);
+      * MatchMachine__cursor(m, w -> b) = List_cdr(at);
       (* MatchMachine__distance(m, w -> b)) ++;
       break;
     }
@@ -488,8 +492,8 @@ List MatchMachine_materialize_span(MatchMachine m, MachineSpan span){
       MatchMachine__error(m, 139921162332);
       return NULL;
     }
-    m -> scratch[i] = car(at);
-    at = cdr(at);
+    m -> scratch[i] = List_car(at);
+    at = List_cdr(at);
     if(m -> stats) m -> stats -> materialized_cells ++;
   }
   if(! List_equal(at, span.end)){

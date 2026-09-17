@@ -34,7 +34,7 @@ Shared helpers for x2c compiler AST nodes.
 
 Returns whether `op` writes its left operand.
 
-Source: `src/ast.x:104`
+Source: `src/ast.x:100`
 
 #### ast_contains_head
 
@@ -43,7 +43,7 @@ Source: `src/ast.x:104`
 Returns whether any list under `value` has `kind` as its head. The
 worklist keeps deeply nested operator chains off the C stack.
 
-Source: `src/ast.x:109`
+Source: `src/ast.x:105`
 
 #### binding_identity_new
 
@@ -91,7 +91,7 @@ Source: `src/ast.x:68`
 
 Returns initializer alternatives and their optional native macro input.
 
-Source: `src/ast.x:200`
+Source: `src/ast.x:196`
 
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
@@ -99,9 +99,10 @@ Source: `src/ast.x:200`
 `List Ast.initializer_functions(Ast ast, List *source)`
 
 Returns function alternatives when every initializer arm calls one shared
-input, and stores that input expression in `source`. Other forms return NULL.
+input, and stores that input expression in `source`. Other forms return
+NULL.
 
-Source: `src/ast.x:213`
+Source: `src/ast.x:210`
 
 <a id="Ast.never_returns"></a>
 #### Ast.never_returns
@@ -114,7 +115,7 @@ calls, and blocks ending in either one when the block contains no
 `return`. Generation uses this fact to mark the enclosing function
 `_Noreturn`.
 
-Source: `src/ast.x:186`
+Source: `src/ast.x:182`
 
 <a id="Ast.rewrite_children"></a>
 #### Ast.rewrite_children
@@ -126,7 +127,7 @@ rebuilt from the results; non-list children pass through. When no child
 changed, no scratch storage is allocated and `ast` itself returns, so the
 fixed-point transform driver can compare unchanged-node identity.
 
-Source: `src/ast.x:128`
+Source: `src/ast.x:124`
 
 ### `Symbol`
 
@@ -137,7 +138,7 @@ Source: `src/ast.x:128`
 
 Returns the compound assignment for a binary operator, or zero.
 
-Source: `src/ast.x:97`
+Source: `src/ast.x:90`
 
 <a id="Symbol.compound_operator"></a>
 #### Symbol.compound_operator
@@ -146,7 +147,7 @@ Source: `src/ast.x:97`
 
 Returns the binary operator computed by a compound assignment, or zero.
 
-Source: `src/ast.x:94`
+Source: `src/ast.x:84`
 
 <a id="Symbol.is_assignment_op"></a>
 #### Symbol.is_assignment_op
@@ -155,7 +156,7 @@ Source: `src/ast.x:94`
 
 Returns whether `op` is plain or compound assignment.
 
-Source: `src/ast.x:100`
+Source: `src/ast.x:96`
 
 ## Public types
 

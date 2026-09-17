@@ -139,24 +139,26 @@ int List_truth(List);
 
 String Var_str(Var);
 
-Var car(List);
+Var List_car(List);
 
 static int _next_is_closing_brace(List rest){
   if(! List_truth(rest)) return 0;
-  return _token_is(Var_str(car(rest)), '}');
+  return _token_is(Var_str(List_car(rest)), '}');
 }
 
 Buffer Buffer_new(size_t);
 
-List cdr(List);
+List List_cdr(List);
 
 Var Symbol_var(Symbol);
 
 List Compiler_origin_location(Compiler, int);
 
-long Var_integer(Var);
+String Var_string(Var);
 
 Var List_assoc(List, Var);
+
+Var int_var(int);
 
 String String_escape(String);
 
@@ -168,16 +170,16 @@ char * Compiler_code_pretty_string(Compiler compiler, List code, String output_f
   int indent = 0, paren_depth = 0, directive_break = 0;
   int output_line = 1, scanned = 0, source_line = 0;
   String prev_token = NULL;
-  for(List lst = code;  List_truth(lst);  lst = cdr(lst)){
-    if(Var_equal(car(lst), Symbol_var(1313077352))){
-      lst = cdr(lst);
-      List location = Compiler_origin_location(compiler, Var_integer(car(lst)));
+  for(List lst = code;  List_truth(lst);  lst = List_cdr(lst)){
+    if(Var_equal(List_car(lst), Symbol_var(1313077352))){
+      lst = List_cdr(lst);
+      List location = Compiler_origin_location(compiler, Var_int(Var_convert(List_car(lst), 3453797)));
       while(Buffer_len(buff) > 0 && Buffer_get(buff, - 1) == ' ') Buffer_unwrite(buff, 1);
       if(Buffer_len(buff) > 0 && Buffer_get(buff, - 1) != '\n') _write_newline(buff);
       while(scanned < Buffer_len(buff)) if(Buffer_get(buff, scanned ++) == '\n') output_line ++;
-      String file = List_truth(location) ? Var_str(List_assoc(location, Symbol_var(412426))) : output_file;
+      String file = Var_string(List_truth(location) ? List_assoc(location, Symbol_var(412426)) : String_var(output_file));
       if(! String_truth(file)) file = _2;
-      int line = List_truth(location) ? Var_integer(List_assoc(location, Symbol_var(805770))) : output_line + 1;
+      int line = Var_int(Var_convert(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var(output_line + 1), 3453797));
       source_line = List_truth(location) ? line : 0;
       String escaped = String_replace(String_escape(file), _8, _9);
       Buffer_write(buff, String_join(NULL, cons(String_var(_0), cons(String_var(int_str(line)), cons(String_var(_3), cons(String_var(escaped), cons(String_var(_4), NULL)))))));
@@ -187,9 +189,9 @@ char * Compiler_code_pretty_string(Compiler compiler, List code, String output_f
       prev_token = NULL;
       continue;
     }
-    int emitted_directive = Var_equal(car(lst), Symbol_var(273018923240));
-    if(emitted_directive) lst = cdr(lst);
-    String token = Var_str(car(lst));
+    int emitted_directive = Var_equal(List_car(lst), Symbol_var(273018923240));
+    if(emitted_directive) lst = List_cdr(lst);
+    String token = Var_str(List_car(lst));
     if(! emitted_directive) token = _normalized_token(token);
     char last = String_truth(token) ? String_getindex(token, - 1) : '\0';
     if(directive_break){
@@ -233,7 +235,7 @@ char * Compiler_code_pretty_string(Compiler compiler, List code, String output_f
     else if(last == ';'){
       if(paren_depth == 0){
         _write_mapped_newline(buff, source_line);
-        if(! _next_is_closing_brace(cdr(lst)) && indent > 0) _write_indent(buff, indent);
+        if(! _next_is_closing_brace(List_cdr(lst)) && indent > 0) _write_indent(buff, indent);
         prev_token = NULL;
       }
       else{
@@ -249,7 +251,6 @@ char * Compiler_code_pretty_string(Compiler compiler, List code, String output_f
     }
     else prev_token = token;
   }
-  char * result = Buffer_str_free(buff);
-  return result;
+  return Buffer_str_free(buff);
 }
 

@@ -66,9 +66,9 @@ __attribute__((constructor)) static void _file_init_(void){
   _2 = String_new("/src/");
   _3 = String_new(".x");
   _4 = String_new("/packages");
-  _5 = String_new("%s/include/x2c");
-  _6 = String_new("%s/src");
-  _7 = String_new("%s/lib");
+  _5 = String_new("/include/x2c");
+  _6 = String_new("/src");
+  _7 = String_new("/lib");
   _8 = String_new("%08X");
   _9 = String_new("/");
   _10 = String_new(".x");
@@ -284,15 +284,12 @@ static int _locate_home(const char * start, char * out, size_t size){
   return 0;
 }
 
-String String_printf(String, ...);
-
 List cons(Var, List);
 
 static void _prepare_repo_defaults(void){
   if(! String_truth(x2c_root_path)) return;
-  const char * root = x2c_root_path;
-  String include_dir = String_printf(_5, root);
-  String src_dir = String_printf(_6, root), lib_dir = String_printf(_7, root);
+  String include_dir = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_5), NULL)));
+  String src_dir = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_6), NULL))), lib_dir = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_7), NULL)));
   x2c_base_include_dirs = cons(String_var(include_dir), NULL);
   x2c_repo_cpp_include_dirs = _dir_exists(src_dir) ? cons(String_var(src_dir), cons(String_var(lib_dir), NULL)) : cons(String_var(lib_dir), NULL);
 }
@@ -319,6 +316,8 @@ int worker_wait(long pid){
 }
 
 int String_try_next(String, int *, int *);
+
+String String_printf(String, ...);
 
 String x2c_filename_hash(String filename){
   if(! _init_guard_) _file_init_();

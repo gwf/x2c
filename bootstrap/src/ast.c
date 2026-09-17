@@ -13,45 +13,9 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-static const Symbol compound_operators[][2] ={
-  {
-    11131, 56
-  }
-  , {
-    11643, 62
-  }
-  , {
-    10875, 54
-  }
-  , {
-    12155, 95
-  }
-  , {
-    9595, 75
-  }
-  , {
-    9851, 77
-  }
-  , {
-    24187, 189
-  }
-  , {
-    31867, 249
-  }
-  , {
-    1981563, 15481
-  }
-  , {
-    2047611, 15997
-  }
-  , {
-    16507, 129
-  }
+static const SymbolSet compound_assignments =(SymbolSet) "\001\000\000\000\013\000\000\000\007\000\000\000\025\174\112\177\271\171\067\236\000\012\000\003\013\000\005\007\003\000\004\000\001\000\000\000\000\000\000\000\001\011\000\000\173\053\000\000\000\000\000\000\173\055\000\000\000\000\000\000\173\052\000\000\000\000\000\000\173\057\000\000\000\000\000\000\173\045\000\000\000\000\000\000\173\046\000\000\000\000\000\000\173\136\000\000\000\000\000\000\173\174\000\000\000\000\000\000\173\074\036\000\000\000\000\000\173\076\037\000\000\000\000\000\173\100\000\000\000\000\000\000";
 
-}
-;
-
-static Symbol _compound_lookup(Symbol op, int column);
+static const SymbolSet compound_binaries =(SymbolSet) "\001\000\000\000\013\000\000\000\007\000\000\000\025\174\112\177\271\171\067\236\012\007\000\012\000\000\000\000\000\003\016\000\000\000\001\016\000\000\005\000\006\003\000\000\070\000\000\000\000\000\000\000\076\000\000\000\000\000\000\000\066\000\000\000\000\000\000\000\137\000\000\000\000\000\000\000\113\000\000\000\000\000\000\000\115\000\000\000\000\000\000\000\275\000\000\000\000\000\000\000\371\000\000\000\000\000\000\000\171\074\000\000\000\000\000\000\175\076\000\000\000\000\000\000\201\000\000\000\000\000\000\000";
 
 static Ast _unwrap_origin(Ast node);
 
@@ -69,6 +33,13 @@ typedef struct _x2c_defer_env_0{
 _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_1;
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 Var Symbol_var(Symbol);
 
@@ -227,7 +198,7 @@ int binding_identity_try_parts(List binding, int * identity, String * spelling){
       String name = Var_string(_x2c_match_value_0);
       {
         if(! Var_is_integer(id) || Var_integer(id) <= 0) return 0;
-        if(identity) * identity = Var_integer(id);
+        if(identity) * identity = Var_int(Var_convert(id, 3453797));
         if(spelling) * spelling = name;
         return 1;
       }
@@ -263,18 +234,18 @@ Symbol preproc_conditional_kind(String text){
   return 0;
 }
 
-static Symbol _compound_lookup(Symbol op, int column){
-  int count = sizeof(compound_operators) / sizeof(compound_operators[0]);
-  for(int i = 0;  i < count;  i ++) if(compound_operators[i][column] == op) return compound_operators[i][1 - column];
-  return 0;
-}
+int SymbolSet_index(SymbolSet, Symbol);
+
+Symbol SymbolSet_getindex(SymbolSet, int);
 
 Symbol Symbol_compound_operator(Symbol op){
-  return _compound_lookup(op, 0);
+  int index = SymbolSet_index(compound_assignments, op);
+  return index < 0 ? 0 : SymbolSet_getindex(compound_binaries, index);
 }
 
 Symbol Symbol_compound_assignment(Symbol op){
-  return _compound_lookup(op, 1);
+  int index = SymbolSet_index(compound_binaries, op);
+  return index < 0 ? 0 : SymbolSet_getindex(compound_assignments, index);
 }
 
 int Symbol_is_assignment_op(Symbol op){
@@ -302,11 +273,11 @@ int List_truth(List);
 int ast_contains_head(Var value, Symbol kind){
   Array pending = Array_new();
   {
-  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & pending};
+  _x2c_defer_env_0 _x2c_defer_env_2 = {._x2c_defer_capture_0 =(const void *) & pending};
 
   X2CCleanup _x2c_defer_record_0 = {
     .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_1
+    .env = & _x2c_defer_env_2
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
@@ -489,39 +460,67 @@ return List_cdr(ast);
 int List_len(List);
 int List_try_next(List, List *, Var *);
 Var List_getindex(List, int);
+List Array_list(Array);
 List Ast_initializer_functions(Ast ast, List * source){
   if(! _init_guard_) _file_init_();  List header = NULL;  List cases = Ast_initializer_cases(ast, & header);  if(! List_truth(header) || List_len(List_cdr(header)) != 1) return NULL;  List input = Var_list(List_cadr(header));  List value = Var_list(List_cadr(input));  List argument = cons(_31, cons(List_cadr(value), cons(List_car(input), NULL)));  Array functions = Array_new(); {
-    List choice;  List _x2c_macro_object_1 = cases;  List _x2c_macro_cursor_2 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_0)){
-      choice = Var_list(_x2c_macro_cursor_output_0); {
-        List _x2c_destructure_0 = choice;  List condition = Var_list(List_getindex(_x2c_destructure_0, 0));  List path = Var_list(List_getindex(_x2c_destructure_0, 1));  List destination = Var_list(List_getindex(_x2c_destructure_0, 2));  List expression = Var_list(List_getindex(_x2c_destructure_0, 3));
+  _x2c_defer_env_1 _x2c_defer_env_3 = {._x2c_defer_capture_1 =(const void *) & functions};
+  X2CCleanup _x2c_defer_record_1 = {
+    .fn = _x2c_defer_cleanup_1,
+    .env = & _x2c_defer_env_3
+  };
+  x2c_cleanup_push(&_x2c_defer_record_1);
+  {
+    {
+      List choice;  List _x2c_macro_object_1 = cases;  List _x2c_macro_cursor_2 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_0)){
+        choice = Var_list(_x2c_macro_cursor_output_0); {
+          List _x2c_destructure_0 = choice;  List condition = Var_list(List_getindex(_x2c_destructure_0, 0));  List path = Var_list(List_getindex(_x2c_destructure_0, 1));  List destination = Var_list(List_getindex(_x2c_destructure_0, 2));  List expression = Var_list(List_getindex(_x2c_destructure_0, 3));
   {
     List _x2c_match_expr = expression;
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 377892: ;  static MatchCaptureSite _x2c_match_site_4;  if (x2c_match_site_try_capture(& _x2c_match_site_4, _x2c_match_expr, List_var(_110), &_x2c_match_capture)) {Var callee = _x2c_match_values[0];  Var actual = _x2c_match_values[1]; {
-          if(! Var_same(actual, List_var(argument))){
-            Array_free(functions);  return NULL;
+            if(! Var_same(actual, List_var(argument))){
+              List _x2c_return_value_2 = NULL; {
+                x2c_cleanup_leave(& _x2c_defer_record_1);  return _x2c_return_value_2;
+              }
+
+            }
+            List function = Var_list(callee);  Array_push(functions, List_var(cons(List_var(condition), cons(List_var(path), cons(List_cadr(function), cons(List_var(function), NULL))))));
           }
-          List function = Var_list(callee);  Array_push(functions, List_var(cons(List_var(condition), cons(List_var(path), cons(List_cadr(function), cons(List_var(function), NULL))))));
+          break;
+        }
+        default: ; {
+          List _x2c_return_value_3 = NULL; {
+            x2c_cleanup_leave(& _x2c_defer_record_1);  return _x2c_return_value_3;
+          }
+
         }
         break;
-      }
-      default: ; {
-        Array_free(functions);  return NULL;
-      }
-      break;
     }
   }
+      }
+
+    }
+
+  }
+  * source = value; {
+    List _x2c_return_value_4 = Array_list(functions); {
+      x2c_cleanup_leave(& _x2c_defer_record_1);  return _x2c_return_value_4;
     }
 
   }
 
 }
-* source = value;  return Array_list_free(functions);
+x2c_cleanup_leave(& _x2c_defer_record_1);
+}
 }
 
 void Array_cleanup(Array);
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Array_cleanup((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
+}
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;  Array_cleanup((*(Array *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 

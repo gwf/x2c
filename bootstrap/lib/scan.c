@@ -38,7 +38,7 @@ static inline int _ascii_hex(int c){
 }
 
 static inline int _token_break(int c){
-  return !((unsigned)(c - '0') < 10 ||(unsigned)((c | 32) - 'a') < 26 || c == '_');
+  return !(scan_ascii_digit(c) || scan_ascii_alpha(c) || c == '_');
 }
 
 Symbol scan_number_type(char * s, int n){
@@ -138,7 +138,7 @@ int scan_identifier(char * s){
     __builtin_unreachable();
   }
   int n = 1;
-  while((unsigned)((unsigned char) s[n] - '0') < 10 ||(unsigned)(((unsigned char) s[n] | 32) - 'a') < 26 || s[n] == '_') n ++;
+  while(! _token_break((unsigned char) s[n])) n ++;
   return n;
 }
 
@@ -460,7 +460,7 @@ static int _radix_integer(char * s, int base, int digit_before){
 
 static int _hex_number(char * s, Symbol * type){
   int n = 0;
-  while((unsigned)((unsigned char) s[n] - '0') < 10 ||(unsigned)(((unsigned char) s[n] | 32) - 'a') < 6) n ++;
+  while(_ascii_hex((unsigned char) s[n])) n ++;
   int digits = n, has_point = 0;
   if(s[n] == '.'){
     has_point = 1;
@@ -485,7 +485,7 @@ static int _hex_number(char * s, Symbol * type){
 
 static int _decimal_number(char * s, Symbol * type){
   int n = 0;
-  while((unsigned)((unsigned char) s[n] - '0') < 10) n ++;
+  while(scan_ascii_digit((unsigned char) s[n])) n ++;
   if(s[n] == '.'){
     int fraction = _float_tail(s + n + 1, n > 0);
     if(fraction < 0) return - 1;

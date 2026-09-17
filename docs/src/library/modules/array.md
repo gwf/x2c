@@ -227,7 +227,7 @@ one is outstanding invalidates it. `Iter.array` is the other direction,
 draining an iterator into a fresh `Array`, and `Array.list` converts to a
 canonical `List`.
 
-Source: `lib/array.x:805`
+Source: `lib/array.x:804`
 
 <a id="Array.join"></a>
 #### Array.join
@@ -541,7 +541,7 @@ pointer, a negative cursor, or exhaustion returns zero without changing
 
 **Raises:** `<size-limit>` for an `Array` outside the integer index domain.
 
-Source: `lib/array.x:781`
+Source: `lib/array.x:780`
 
 <a id="Array.unshift"></a>
 #### Array.unshift
@@ -586,7 +586,7 @@ Appends the `Array` display text to `out`, using each element's
 `write_str`.
 `Array.str` materializes this into a `String`.
 
-Source: `lib/array.x:735`
+Source: `lib/array.x:734`
 
 ### `Block`
 
@@ -608,7 +608,7 @@ Source: `lib/array.x:58`
 
 Drains `iter` into a fresh `Array`.
 
-Source: `lib/array.x:811`
+Source: `lib/array.x:810`
 
 ## Advanced and interop API
 
@@ -635,7 +635,7 @@ Source: `lib/array.x:811`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/array.x:819`
+Source: `lib/array.x:818`
 
 <a id="Array.compare"></a>
 #### Array.compare
@@ -653,7 +653,7 @@ Source: `lib/array.x:509`
 
 Returns nonzero when two `Array`s have structurally equal elements.
 
-Source: `lib/array.x:725`
+Source: `lib/array.x:724`
 
 <a id="Array.heap_pop"></a>
 #### Array.heap_pop
@@ -749,7 +749,7 @@ allocating a `String`, and the two `String` forms are built on them.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/array.x:756`
+Source: `lib/array.x:755`
 
 <a id="Array.str"></a>
 #### Array.str
@@ -758,7 +758,7 @@ Source: `lib/array.x:756`
 
 Returns an `Array` display `String` using each element's `str`.
 
-Source: `lib/array.x:739`
+Source: `lib/array.x:738`
 
 <a id="Array.update_n"></a>
 #### Array.update_n
@@ -779,7 +779,7 @@ Source: `lib/array.x:95`
 
 Appends the readable `Array` representation to `out`.
 
-Source: `lib/array.x:728`
+Source: `lib/array.x:727`
 
 ## Runtime-internal callables
 

@@ -234,12 +234,10 @@ static int _range_down_next(Iter iter, Var * out){
   return 1;
 }
 
-int Var_int(Var);
-
 static int _range_general_next(Iter iter, Var * out){
   int stop = _range_raw_high(iter -> obj);
   int step = _range_raw_value(iter -> obj);
-  int result = Var_int(iter -> state);
+  int result = Var_int(Var_convert(iter -> state, 3453797));
   if((step > 0 && result > stop) ||(step < 0 && result < stop)) return 0;
   * out = int_var(result);
   long long next =(long long) result + step;
@@ -516,12 +514,10 @@ static void _unzip_shared_init(UnzipShared * u, Iter source){
 
 }
 
-long Var_long(Var);
-
 static int _unzip_next(Iter iter, Var * out){
   UnzipSharedRef shared = Var_unzipsharedref(iter -> obj);
   if(! shared) return 0;
-  int stage =(int) Var_long(iter -> state);
+  int stage = Var_int(Var_convert(iter -> state, 3453797));
   if(stage >= 2) return 0;
   Iter child = & shared -> column_iters[stage];
   iter -> state = int_var(stage + 1);

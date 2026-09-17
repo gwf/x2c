@@ -119,7 +119,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _init_guard_ = 1;
   _0 = String_new("<0x%012lX>");
   _1 = String_new("<%s: 0x%012lX>");
-  _2 = String_new("\'%c\'");
+  _2 = String_new("'%c'");
   _3 = String_new("0x%04X");
   _4 = String_new("%d");
   _5 = String_new("0x%012lXul");
