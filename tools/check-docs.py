@@ -47,11 +47,16 @@ FLAG_AUDIT = {
     ROOT / "agents" / "quick-start.md",
     ROOT / "docs" / "src" / "internals" / "architecture.md",
     ROOT / "agents" / "x2c-debugging-guide.md",
+    ROOT / "docs" / "src" / "reference" / "cli.md",
     ROOT / "docs" / "src" / "reference" / "language.md",
     ROOT / "docs" / "src" / "guide" / "idioms.md",
     ROOT / "docs" / "src" / "internals" / "implementation-map.md",
     ROOT / "docs" / "src" / "library" / "overview.md",
     ROOT / "agents" / "x2c-philosophy.md",
+}
+# These pages also run other programs, so only lines that name x2c count.
+X2C_LINE_FLAG_AUDIT = {
+    ROOT / "docs" / "src" / "guide" / "scripting.md",
 }
 WORKFLOW_AUDIT = {
     ROOT / "README.md",
@@ -147,13 +152,19 @@ def compiler_options() -> set[str]:
 
 def check_flags(errors: list[str]) -> None:
     valid = compiler_options()
-    for path in FLAG_AUDIT:
+    for path in FLAG_AUDIT | X2C_LINE_FLAG_AUDIT:
         text = path.read_text(encoding="utf-8")
-        for match in FLAG_PATTERN.finditer(text):
-            flag = match.group(0)
-            if flag not in valid:
-                where = location(path, text, match.start())
-                errors.append(f"{where}: unknown flag {flag}")
+        offset = 0
+        for line in text.splitlines(keepends=True):
+            # Words after a lone `--` belong to the program being run.
+            options = line.split(" -- ", 1)[0]
+            if path in FLAG_AUDIT or "x2c" in options:
+                for match in FLAG_PATTERN.finditer(options):
+                    flag = match.group(0)
+                    if flag not in valid:
+                        where = location(path, text, offset + match.start())
+                        errors.append(f"{where}: unknown flag {flag}")
+            offset += len(line)
 
 
 def check_workflows(errors: list[str]) -> None:

@@ -233,6 +233,7 @@ doc-generate:						## Regenerate derived documentation
 
 doc-check:						## Check documentation for drift
 	python3 tools/check-docs.py
+	python3 tools/gen-llms-txt.py --check
 
 doc-examples: build					## Compile every example in the book
 	python3 tools/check-doc-examples.py
