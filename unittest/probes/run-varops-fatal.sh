@@ -51,19 +51,19 @@ check_case() {
 }
 
 check_case convert \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((owner "Var.convert")) location=\n((file "../../lib/varconvert.x") (line <line>)\x20\n (function "Var_convert"))\nx2c error floor: code 0xb3d24fbe0: non-returning error was not caught'
+  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((owner "Var.convert")) location=\n((file "../../lib/varconvert.x") (line <line>)\x20\n (function "Var_convert"))\nx2c error floor: <void-op>: non-returning error was not caught'
 check_case truth \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((owner "Var.truth")) location=\n((file "../../lib/varops.x") (line <line>) (function "Var_fallback_truth"))\nx2c error floor: code 0xb3d24fbe0: non-returning error was not caught'
+  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((owner "Var.truth")) location=\n((file "../../lib/varops.x") (line <line>) (function "Var_fallback_truth"))\nx2c error floor: <void-op>: non-returning error was not caught'
 check_case hash \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((owner "Var.hash")) location=\n((file "../../lib/dispatch.x") (line <line>)\x20\n (function "Var_hash"))\nx2c error floor: code 0xb3d24fbe0: non-returning error was not caught'
+  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((owner "Var.hash")) location=\n((file "../../lib/dispatch.x") (line <line>)\x20\n (function "Var_hash"))\nx2c error floor: <void-op>: non-returning error was not caught'
 check_case compare \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((owner "Var.compare")) location=\n((file "../../lib/dispatch.x") (line <line>)\x20\n (function "Var_compare"))\nx2c error floor: code 0xb3d24fbe0: non-returning error was not caught'
+  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((owner "Var.compare")) location=\n((file "../../lib/dispatch.x") (line <line>)\x20\n (function "Var_compare"))\nx2c error floor: <void-op>: non-returning error was not caught'
 check_case iter \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((owner "Var.iter")) location=\n((file "../../lib/dispatch.x") (line <line>)\x20\n (function "Var_iter"))\nx2c error floor: code 0xb3d24fbe0: non-returning error was not caught'
+  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((owner "Var.iter")) location=\n((file "../../lib/dispatch.x") (line <line>)\x20\n (function "Var_iter"))\nx2c error floor: <void-op>: non-returning error was not caught'
 check_case binary \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((op +)) location=\n((file "../../lib/varops.x") (line <line>) (function "_protocol_arithmetic"))\nx2c error floor: code 0xb3d24fbe0: non-returning error was not caught'
+  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((op +)) location=\n((file "../../lib/varops.x") (line <line>) (function "_protocol_arithmetic"))\nx2c error floor: <void-op>: non-returning error was not caught'
 check_case update \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((op +)) location=\n((file "../../lib/varops.x") (line <line>) (function "Var_update"))\nx2c error floor: code 0xb3d24fbe0: non-returning error was not caught'
+  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((op +)) location=\n((file "../../lib/varops.x") (line <line>) (function "Var_update"))\nx2c error floor: <void-op>: non-returning error was not caught'
 check_case postfix \
-  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((op ++)) location=\n((file "../../lib/varops.x") (line <line>) (function "Var_postfix"))\nx2c error floor: code 0xb3d24fbe0: non-returning error was not caught'
+  $'<elapsed> error/err-report start_time="<wall-time>" code=<void-op> detail=\n((op ++)) location=\n((file "../../lib/varops.x") (line <line>) (function "Var_postfix"))\nx2c error floor: <void-op>: non-returning error was not caught'
 echo "Var fatal probes passed"
