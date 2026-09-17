@@ -136,3 +136,10 @@
 
 (defun cases.switch (condition body)
   (list (list 'switch condition (cases.rewrite body))))
+
+// Location and source text for the diagnostic macros. x2c.invocation.* names
+// the caller, so an imported macro still reports where it was written.
+
+(defun macros.location ()
+  (string-append
+    (x2c.invocation.file) ":" (str (x2c.invocation.line))))

@@ -30,3 +30,26 @@ macro Decorator $time(Statement $target, Literal $label)
 macro Decorator $switch(Block $body, Expr $condition) => {
   $(cases.switch $condition $body)...
 }
+
+/* Marks a path that is not written yet. Reaching it raises `<invariant>`
+   naming the note and the source line the macro was written on. */
+macro Statement $todo(Expr $note) => {
+  raise %(invariant (note ${$note})
+    (at ${$(x2c.literal.string (macros.location))}));
+}
+
+/* Marks a path the surrounding logic excludes. */
+macro Statement $unreachable() => {
+  raise %(invariant (note "unreachable")
+    (at ${$(x2c.literal.string (macros.location))}));
+}
+
+/* Checks an invariant and reports the failing expression as it was written.
+   Unlike C `assert` this transfers to a catch and is not compiled out. */
+macro Statement $assert(Expr $check) => {
+  if (!($check)) {
+    raise %(invariant
+      (check ${$(x2c.literal.string (x2c.source.text $check))})
+      (at ${$(x2c.literal.string (macros.location))}));
+  }
+}
