@@ -2740,14 +2740,9 @@ static int _initializer_integer(List expression, unsigned long long *value) {
   if (!text || text[0] < '0' || text[0] > '9') return 0;
   char *end, *digits = text;
   int base = 0;
-  switch (text[0] == '0' ? text[1] : 0) {
-    case 'b': case 'B': digits += 2;
-      base = 2;
-      break;
-    case 'o': case 'O': digits += 2;
-      base = 8;
-      break;
-  }
+  if (text[0] == '0' && (text[1] == 'b' || text[1] == 'B')) base = 2;
+  if (text[0] == '0' && (text[1] == 'o' || text[1] == 'O')) base = 8;
+  if (base) digits += 2;
   unsigned long long decoded = strtoull(digits, &end, base);
   while (*end == 'u' || *end == 'U' || *end == 'l' || *end == 'L') end++;
   if (*end) return 0;
