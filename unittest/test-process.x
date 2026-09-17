@@ -1,9 +1,11 @@
 /*  test-process.x -- unit tests for commands, pipelines, and jobs */
 
+#include "path.x"
 #include "process.x"
 #include "test-support.x"
 $(import "test-macros.xmacro")
 #include <errno.h>
+#include <fcntl.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -17,24 +19,21 @@ static void process_arguments_stay_whole(void) {
 
 static void process_job_runs_once(void) {
   $test.scoped();
-  char path[] = "/tmp/x2c-process-XXXXXX";
-  int fd = mkstemp(path);
-  if (!EXPECT_TRUE(fd >= 0)) return;
-  close(fd);
-  String log = String.new(path);
-  Job job = %(sh -c "echo run >> \$1; echo out; echo err >&2" sh $log)
-    .job().options({stderr: <capture>});
-  EXPECT_FALSE(job.started);
-  EXPECT_INT_EQ(job.status(), 0);
-  EXPECT_STR_EQ(job.output(), "out\n");
-  EXPECT_LIST_EQ(job.lines(), %("out"));
-  EXPECT_STR_EQ(job.errors(), "err\n");
-  EXPECT_TRUE(job.check() == job);
-  EXPECT_TRUE(job.start() == job);
-  EXPECT_INT_EQ(job.status(), 0);
-  File file = File.open(path, "r");
-  EXPECT_STR_EQ(file.string_close(), "run\n");
-  unlink(path);
+  Path dir = Path.temp_dir(), log = dir.join("log");
+  try {
+    Job job = %(sh -c "echo run >> \$1; echo out; echo err >&2" sh $log)
+      .job().options({stderr: <capture>});
+    EXPECT_FALSE(job.started);
+    EXPECT_INT_EQ(job.status(), 0);
+    EXPECT_STR_EQ(job.output(), "out\n");
+    EXPECT_LIST_EQ(job.lines(), %("out"));
+    EXPECT_STR_EQ(job.errors(), "err\n");
+    EXPECT_TRUE(job.check() == job);
+    EXPECT_TRUE(job.start() == job);
+    EXPECT_INT_EQ(job.status(), 0);
+    EXPECT_STR_EQ(log.read_text(), "run\n");
+  }
+  finally dir.remove_tree();
 }
 
 static void process_status_reports_exit_and_signal(void) {
@@ -110,28 +109,29 @@ static void process_output_and_lines_capture_stdout(void) {
 
 static void process_live_passes_output_through(void) {
   $test.scoped();
-  char path[] = "/tmp/x2c-process-XXXXXX";
-  int fd = mkstemp(path);
-  if (!EXPECT_TRUE(fd >= 0)) return;
-  int saved = dup(STDOUT_FILENO);
-  fflush(stdout);
-  dup2(fd, STDOUT_FILENO);
-  close(fd);
-  Job captured = %(echo captured);
-  Job live = %(echo live).job().live();
+  Path dir = Path.temp_dir(), log = dir.join("stdout");
   try {
-    EXPECT_STR_EQ(captured.output(), "captured\n");
-    EXPECT_NULL(live.output());
-    EXPECT_NULL(live.lines());
-  }
-  finally {
+    int fd = open(log, O_WRONLY | O_CREAT, 0600);
+    if (!EXPECT_TRUE(fd >= 0)) return;
+    int saved = dup(STDOUT_FILENO);
     fflush(stdout);
-    dup2(saved, STDOUT_FILENO);
-    close(saved);
+    dup2(fd, STDOUT_FILENO);
+    close(fd);
+    Job captured = %(echo captured);
+    Job live = %(echo live).job().live();
+    try {
+      EXPECT_STR_EQ(captured.output(), "captured\n");
+      EXPECT_NULL(live.output());
+      EXPECT_NULL(live.lines());
+    }
+    finally {
+      fflush(stdout);
+      dup2(saved, STDOUT_FILENO);
+      close(saved);
+    }
+    EXPECT_STR_EQ(log.read_text(), "live\n");
   }
-  File file = File.open(path, "r");
-  EXPECT_STR_EQ(file.string_close(), "live\n");
-  unlink(path);
+  finally dir.remove_tree();
 }
 
 static void process_pipelines_join_stages(void) {
@@ -213,20 +213,17 @@ static void process_options_route_streams(void) {
 
 static void process_options_write_files_and_merge(void) {
   $test.scoped();
-  char path[] = "/tmp/x2c-process-XXXXXX";
-  int fd = mkstemp(path);
-  if (!EXPECT_TRUE(fd >= 0)) return;
-  close(fd);
-  String output = String.new(path);
-  %(printf hello).job().options({stdout: output}).check();
-  File file = File.open(path, "r");
-  EXPECT_STR_EQ(file.string_close(), "hello");
-  Job job = %(pwd).job().options({dir: "/", stdout: output})
-    .options({input: "x"}).live().options({stdout: <capture>});
-  EXPECT_STR_EQ(job.output(), "/\n");
-  EXPECT_STR_EQ(%(pwd).job().options({dir: "/"}).pipe(%(cat)).output(),
-                "/\n");
-  unlink(path);
+  Path dir = Path.temp_dir(), output = dir.join("stdout");
+  try {
+    %(printf hello).job().options({stdout: output}).check();
+    EXPECT_STR_EQ(output.read_text(), "hello");
+    Job job = %(pwd).job().options({dir: "/", stdout: output})
+      .options({input: "x"}).live().options({stdout: <capture>});
+    EXPECT_STR_EQ(job.output(), "/\n");
+    EXPECT_STR_EQ(%(pwd).job().options({dir: "/"}).pipe(%(cat)).output(),
+                  "/\n");
+  }
+  finally dir.remove_tree();
 }
 
 static void process_changes_after_start_raise(void) {
