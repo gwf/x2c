@@ -2636,7 +2636,10 @@ A cast is reported when its operand already has the cast type, qualifiers
 included. The comparison uses the declared x2c type, so casts between a
 typedef and its underlying type, or between two typedefs of one C type, are
 not reported. Neither are `(void)` casts, or casts of an operand whose C type
-x2c does not track, such as a pointer difference or a character constant.
+x2c does not track, such as a pointer difference or a character constant. A
+cast of a C string literal is not reported either: it is how source keeps the
+literal native where x2c would otherwise promote it to a `String`, so removing
+it changes what the surrounding operator does.
 
 A converter call is reported when its destination would make the same call.
 A converter is a method that takes only its receiver and is named for its
@@ -2644,7 +2647,10 @@ result, with `str` for `String`. The destinations are the value of an
 initializer, an assignment, a `return`, a declared call argument, an
 interpolation hole, and a `Var` value that a printf-family format consumes.
 So `String name = sym.str();`, `f(x.var())`, and `printf("%s", v.str())` are
-reported. The destination makes the same call when either side is `Var`,
+reported. A printf-family value is a destination only where the format is a
+literal the compiler reads; a computed format, such as a `const char *`
+variable or a name an object macro defines, converts nothing.
+The destination makes the same call when either side is `Var`,
 both types share one C type, or the receiver declares the converter. A
 method receiver, an operator operand, and a parameter with a qualifier the
 result lacks, such as `const char *`, are not destinations.
