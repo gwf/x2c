@@ -409,10 +409,8 @@ Var Database.transaction(Database database, Func callback) {
 
 $lisp.binding(sqlite_lisp, "sqlite-query")
 static List _lisp_sqlite_query(String path, String sql, List parameters) {
-  Database db = Database.open(path);
-  defer db.close();
-  Statement statement = db.prepare(sql);
-  defer statement.free();
+  Database db = $auto(Database.open(path));
+  Statement statement = $auto(db.prepare(sql));
   statement.bind(parameters);
   List rows = NULL;
   foreach (List row, statement) rows = cons(row, rows);
@@ -422,10 +420,8 @@ static List _lisp_sqlite_query(String path, String sql, List parameters) {
 $lisp.binding(sqlite_lisp, "sqlite-execute")
 static long long _lisp_sqlite_execute(
   String path, String sql, List parameters) {
-  Database db = Database.open(path);
-  defer db.close();
-  Statement statement = db.prepare(sql);
-  defer statement.free();
+  Database db = $auto(Database.open(path));
+  Statement statement = $auto(db.prepare(sql));
   statement.bind(parameters);
   statement.execute();
   return db.changes();
