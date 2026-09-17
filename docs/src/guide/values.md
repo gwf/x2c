@@ -351,7 +351,7 @@ compiler-inserted conversions raise the same causes. Install a filtered
 ```x2c
 Var quotient = void;
 try quotient = Var.binary(10, </>, 0);
-catch %(div-zero):
+catch %(div-zero *):
   printf("no quotient: division by zero\n");
 ```
 

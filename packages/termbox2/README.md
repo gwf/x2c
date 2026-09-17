@@ -154,7 +154,7 @@ complete types, constants, callbacks, status values, macros, and functions
 without copied declarations or forwarding calls, and the generated
 `builds/termbox2.h` publishes it. An import makes raw `tb_*` names available
 to x2c; the consumer build must also provide the prepared prefix through
-`--c-system-dir`, as this package's Makefile does. `src/termbox2.c`
+`--c-include-dir`, as this package's Makefile does. `src/termbox2.c`
 instantiates that single header once.
 
 File-descriptor and split read/write initialization, raw cell-buffer

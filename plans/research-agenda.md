@@ -129,7 +129,7 @@ be bounded simply, retain the current behavior and record the limitation.
 ## 5. torch-application-distribution.md
 
 Torch currently embeds its prepared-prefix rpath. The existing
-[package bundle owner](../packages/tools/bundle.py) packages interfaces,
+[package bundle owner](../packages/tools/bundle) packages interfaces,
 archives and declared native inputs; the [documented contract](../docs/src/guide/packages.md)
 explicitly excludes shared-library relocation. Moving a runnable Torch app is
 new scope, not a missing promise of completed package integration.

@@ -467,8 +467,10 @@ Matching is byte by byte, so `.` and `\w` treat a multi-byte character as
 several bytes, and `(?i)` folds only ASCII letters. There is no lookahead,
 lookbehind, or backreference. The
 [`pcre2` package](https://github.com/gwf/x2c/blob/main/packages/pcre2/README.md)
-has all of those and Unicode. Its `Regexp` has the same methods; to switch
-to it, import the package and add the options argument to `compile`.
+has all of those and Unicode. Its types are `Regexp`, `RegexpMatch`, and
+`RegexpCapture`, with the same methods. To switch to it, import the package
+with those names, rename the types, and add the options argument to
+`compile`.
 
 A pattern that does not parse raises `<bad-arg>` with `why`, the `pattern`,
 and the zero-based byte `offset` of the problem.
@@ -554,7 +556,7 @@ removed:
 ~int main(void) {
 foreach (List edit, Diff.lines("a\nb\n", "a\nc\n")) {
   (Symbol kind, String line) = edit;
-  if (kind != <same>) printf("%s %s\n", kind, line);
+  if (kind != <same>) printf("%s %s\n", kind.str(), line);
 }
 ~  return 0;
 ~}

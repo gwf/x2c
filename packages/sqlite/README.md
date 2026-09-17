@@ -156,7 +156,7 @@ For an application outside this repository:
 
 ```sh
 /path/to/x2c build --package-dir /path/to/x2c/packages \
-  --c-system-dir /path/to/x2c/packages/sqlite/deps/include \
+  --c-include-dir /path/to/x2c/packages/sqlite/deps/include \
   --output report report.x
 ```
 

@@ -123,9 +123,12 @@ supported.
 ## Developer workflow
 
 A source checkout is the development install. After `make build-safe`, the
-checkout is a complete home with `bin/x2c` (`make build-install` links it to
-the current branch's compiler), and its own `packages/` directory. Select it
-for one shell with `PATH`, or for one command with `X2C_HOME`:
+checkout is a complete home with its own `packages/` directory, and `bin/x2c`
+is the bootstrap compiler. Run `make build-install` before putting `bin/` on
+`PATH`; it links `bin/x2c` to a copy of the current branch's compiler. A
+compiler in the checkout's `bin/` links `bootstrap/lib/libx2c.a`, the runtime
+from the last bootstrap refresh. Select the checkout for one shell with
+`PATH`, or for one command with `X2C_HOME`:
 
 ```sh
 export PATH="$HOME/src/x2c/bin:$PATH"
@@ -188,7 +191,7 @@ select the installed compiler, and use a dependency cache outside its prefix:
 export X2C_DEPS_DIR="$HOME/.cache/x2c-dependencies"
 make -C packages/yyjson prepare build X2C="$HOME/.local/x2c/bin/x2c"
 x2c build --package-dir packages \
-  --c-system-dir packages/yyjson/deps/include app.x --output app
+  --c-include-dir packages/yyjson/deps/include app.x --output app
 ```
 
 Source package builds retain their existing producer-path restrictions; an

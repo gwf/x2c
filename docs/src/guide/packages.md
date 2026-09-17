@@ -158,7 +158,7 @@ make -C packages/yyjson prepare
 make -C packages/yyjson build
 make -C packages/yyjson test run run-lisp
 x2c build --package-dir packages \
-  --c-system-dir packages/yyjson/deps/include \
+  --c-include-dir packages/yyjson/deps/include \
   --output catalog catalog.x
 ```
 
@@ -173,7 +173,7 @@ native storage and when borrowed views expire.
 A source distribution carries `packages/<name>/`, including `src/`,
 `dependency.json`, `LICENSES/`, its README, examples, and tests, together with
 `packages/package.mk`, `packages/dependency.mk`, `packages/tools/deps.py`,
-and `packages/tools/bundle.py`.
+and `packages/tools/bundle`, which `make bundle` runs through `x2c script`.
 It does not carry the ignored `deps` symlink or `builds/` output. From the
 repository root, produce a source archive with ordinary `tar`:
 
@@ -183,7 +183,7 @@ tar --exclude="packages/$package/deps" \
   --exclude="packages/$package/builds" \
   -czf "$package-source.tar.gz" \
   "packages/$package" packages/package.mk packages/dependency.mk \
-  packages/tools/deps.py packages/tools/bundle.py
+  packages/tools/deps.py packages/tools/bundle
 ```
 
 The package directory includes its `Makefile`; keep any additional source
@@ -467,7 +467,7 @@ and directories with the existing `copies` shape and ordered native arguments:
      "to": "native/lib/libyyjson.a"}
   ],
   "native_args": [
-    "--c-system-dir", "{package}/native/include",
+    "--c-include-dir", "{package}/native/include",
     "{package}/native/lib/libyyjson.a"
   ]
 }

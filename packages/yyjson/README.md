@@ -32,7 +32,7 @@ int main(void) {
 ```
 
 Build the package once with `make build`, then compile a consumer with
-`--package-dir <packages>` and `--c-system-dir <prefix>/include`; the driver
+`--package-dir <packages>` and `--c-include-dir <prefix>/include`; the driver
 adds the package's `builds` and `src` directories and links
 `builds/libyyjson.a`. `src/yyjson-0.12.h` stays public because the options
 methods take yyjson's own flag types, so a caller that wants the raw API can

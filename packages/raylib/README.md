@@ -33,7 +33,7 @@ need `with` or the alias:
 `import "raylib" with ImagePixels, RaylibText, RaylibWindow;`.
 
 Build the package once with `make build`, then compile a consumer with
-`--package-dir <packages>`, `--c-system-dir <prefix>/include`, and
+`--package-dir <packages>`, `--c-include-dir <prefix>/include`, and
 `-I <prefix>/include`; the driver adds the package's `builds` and `src`
 directories and links `builds/libraylib.a`. The `-I` is what lets x2c's own
 collection read `raylib.h` and know that `Vector2` is a type.

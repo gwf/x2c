@@ -3732,8 +3732,9 @@ Command-line options, including the dump flags that expose an individual
 phase and the include and output directory switches, are listed in
 [compiler options](https://x2c-lang.dev/docs/reference/cli.html).
 
-By default translation reports up to 20 errors per unit, then emits a
-`<limit>` diagnostic and stops; `--max-errors` changes the bound. Parsing
+Translation stops a unit after 20 errors by default.
+[Compiler diagnostics](https://x2c-lang.dev/docs/reference/cli.html#compiler-diagnostics) describes `--max-errors`
+and the line that reports the stop. Parsing
 recovers at top-level declarations. A rejected declaration is skipped whole
 and parsing resumes at the next one, so independent errors in separate
 declarations are reported together in source order, and one declaration
@@ -3771,7 +3772,8 @@ callbacks, or `Context` regions.
 # Command-line interface
 
 After building the repository, `./x2c` links to the development compiler;
-`./bin/x2c` is the bootstrap compiler. Every invocation begins with a command:
+`./bin/x2c` is the bootstrap compiler until `make build-install` links it to
+a copy of the development compiler. Every invocation begins with a command:
 `translate`, `build`, `run`, `script`, `bootstrap`, `env`, `install`,
 `remove`, `list`, or `help`.
 
@@ -3788,8 +3790,10 @@ The generated help is the short option reference:
 
 ## Translate to C
 
-`translate` writes one matching `.c`, `.h`, and default `.d` file for each
-explicit `.x` input:
+`translate` writes one matching `.c`, `.h`, `.xi`, and default `.d` file for
+each explicit `.x` input. The `.xi` file is the unit's
+[interface](https://x2c-lang.dev/docs/internals/architecture.html), which later translations read in
+place of its source when it is current:
 
 ```sh
 mkdir -p /tmp/x2c-generated
@@ -4070,9 +4074,11 @@ elsewhere. `--rebuild` builds regardless.
 Options come before the script file, and every word after it is passed to
 the program unchanged, including `--` and words that begin with `-` or `@`.
 A response file given before the script supplies options. `script` accepts
-the translation, C compiler, and linker options of `run`, plus `-v`, `-###`,
-`--plain`, `--color`, `--debug`, `-j`, `--source-map`, `--rebuild`, and
-`--clean`. It does not read a project manifest.
+the include options `-I`, `--x-include-dir`, `--c-include-dir`,
+`--c-system-dir`, and `--package-dir`; the C compiler and linker options of
+`run`; and `-j`, `--source-map`, `--rebuild`, `--clean`, `-v`, `-###`,
+`--plain`, `--color`, `--debug`, `--max-errors`, and `--diagnostics-file`.
+`x2c help script` lists them. It does not read a project manifest.
 
 A successful build prints nothing, so the program's output is all that
 appears; build diagnostics still print, and a failed build exits with its
@@ -4262,8 +4268,9 @@ The home is `X2C_HOME` when set. Otherwise the compiler walks up from its
 executable, then from the current directory, to the nearest directory holding
 `include/` and `etc/compiler-sdk.xlisp`. A source checkout and an
 [installed prefix](https://x2c-lang.dev/docs/guide/installation.html) are both homes. A stage compiler
-under `<home>/builds/<n>/` links that stage's runtime archive; any other
-compiler links `<home>/lib/libx2c.a`.
+under `<home>/builds/<n>/` links that stage's runtime archive. Any other
+compiler links `<home>/lib/libx2c.a` when it exists, and otherwise
+`<home>/bootstrap/lib/libx2c.a`, the runtime a source checkout provides.
 
 There is no lowercase `-i`. `-D` and `-U` reach requested x2c preprocessing
 and C compilation. Optimization, debug, and `-Xcc` are compile-only; `-L`,
@@ -4283,8 +4290,9 @@ Translation reports each diagnostic on standard error as
 `file:line:column: code: message`, followed by the source line, a caret, and
 any notes. A unit stops after 20 errors. `--max-errors <count>` changes that
 bound for `translate`, `build`, `run`, and `script`, and `--max-errors 0`
-removes it. A unit that reaches its bound ends with
-`limit: too many errors, stopping`. The
+removes it. When the bound is greater than one, a unit that reaches it ends
+with `limit: too many errors, stopping`. With `--max-errors 1`, the unit's
+output ends after its first error. The
 [diagnostics section](https://x2c-lang.dev/docs/reference/language.html#diagnostics) of the language reference
 describes which errors are reported together.
 
@@ -4379,7 +4387,7 @@ compile its C output yourself:
 ```sh
 mkdir -p /tmp/x2c-example
 ./x2c translate --out-dir /tmp/x2c-example examples/foreach.x
-cc -iquote include /tmp/x2c-example/foreach.c \
+cc -iquote include/x2c /tmp/x2c-example/foreach.c \
   builds/0/libx2c.a -lm -o /tmp/x2c-example/foreach
 /tmp/x2c-example/foreach
 ```

@@ -40,11 +40,11 @@ tools/      documentation and stage-comparison checkers
 ```
 
 Three of those directories hold generated files. `builds/` holds whole staged
-builds and is not tracked. `include/` holds only symlinks: the runtime `.x`
-sources from `lib/`, and the `.h` files stage 0 generated from them. That is
-where `cc -iquote include` finds runtime headers. The C under `bootstrap/` is
-tracked, and it is re-emitted from a known-good stage 0 instead of edited by
-hand. The compiler under development is `builds/0/x2c`; see
+builds and is not tracked. `include/x2c/` holds only symlinks: the runtime
+`.x` sources from `lib/`, and the `.h` files stage 0 generated from them.
+That is where `cc -iquote include/x2c` finds runtime headers. The C under
+`bootstrap/` is tracked, and it is re-emitted from a known-good stage 0
+instead of edited by hand. The compiler under development is `builds/0/x2c`; see
 [building the compiler](building.md) for how it gets there.
 
 ## The compiler pipeline

@@ -58,10 +58,13 @@ programs.
 
 - Runtime and compiler behavior is written in `.x` sources.
 - Numbered build directories are generated and untracked.
-- The runtime aggregator is generated from the runtime module set.
-- Portable bootstrap C is the one generated tracked output.
+- The tracked generated outputs are the portable bootstrap C under
+  `bootstrap/`, the runtime aggregator `lib/x2c.x`, and what
+  `make doc-generate` writes: `agents/x2c-module-catalog.md`,
+  `docs/src/internals/compiler-api/`, `docs/src/library/modules/`, and
+  `site/public/llms.txt` with `llms-full.txt`.
 
-Do not hand-edit generated C or the runtime aggregator.
+Do not hand-edit any of them; regenerate them with their targets.
 
 Contributor instructions cover when to regenerate the bootstrap snapshot and
 which checks to run; see [Contributor checks](#contributor-checks).

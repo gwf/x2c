@@ -2768,8 +2768,9 @@ Command-line options, including the dump flags that expose an individual
 phase and the include and output directory switches, are listed in
 [compiler options](cli.md).
 
-By default translation reports up to 20 errors per unit, then emits a
-`<limit>` diagnostic and stops; `--max-errors` changes the bound. Parsing
+Translation stops a unit after 20 errors by default.
+[Compiler diagnostics](cli.md#compiler-diagnostics) describes `--max-errors`
+and the line that reports the stop. Parsing
 recovers at top-level declarations. A rejected declaration is skipped whole
 and parsing resumes at the next one, so independent errors in separate
 declarations are reported together in source order, and one declaration
