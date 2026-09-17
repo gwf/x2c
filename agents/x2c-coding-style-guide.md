@@ -1173,7 +1173,10 @@ tag inspection, variadic or macro boundaries, raw C ABI code, and direct
 tests of the conversion owner.
 
 Prefer an implicit conversion wherever the compiler supports the exact source
-type, target type, and context.
+type, target type, and context. The compiler reports a converter call or a
+cast that repeats the crossing its destination performs as an `unnecessary
+conversion` warning, described under
+[Types and conversions](../docs/src/reference/language.md#types-and-conversions).
 
 The same rule applies to String literals. Use an ordinary C `"..."` literal
 when a String or Var target requests its promotion, including Array elements
@@ -1193,9 +1196,6 @@ Within a List or String literal, use `$name` for a single identifier. Use
 `${expression}` for a complete expression and retain braces when an ASCII
 letter, digit, or underscore immediately follows the identifier, because that
 byte would otherwise become part of its name.
-
-`tools/find-redundant-conversions.py` performs that check one call at a time
-and reports only removals whose complete generated output is byte-identical.
 
 ### Separate storage ownership from typed crossings
 

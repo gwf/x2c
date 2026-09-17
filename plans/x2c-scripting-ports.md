@@ -103,7 +103,6 @@ by hand today; the module is the first thing the larger probes will need.
 | `tools/check-docs.py` | 395 | regex, done |
 | `tools/gate-state.py` | 360 | mode bits, uuid; see the ruling |
 | `tools/repo-metrics.py` | 375 | column formatting |
-| `tools/find-redundant-conversions.py` | 254 | regex, done |
 | `tools/check-doc-examples.py` | 199 | threads and `Job.wait_any` replace the pool |
 | `unittest/compiler-fixtures/run.sh`, `examples/check.sh` | 314, 257 | `Diff.unified`; the awk manifest parsing is `String.split` |
 | `run-package-install.sh`, `run-preprocessor-boundary.sh`, `run-symbol-snapshot.sh`, `run-raw-symbol-sweep.sh`, `run-varops-fatal.sh`, `run-expression-bodied-functions.sh` | 87-237 | the probe module; `wait_any` replaces `xargs -P` |
@@ -125,7 +124,7 @@ comments, and spans, on which the tools' own logic is rewritten, the way
 | Tool | Lines | `re.` sites |
 | --- | --- | --- |
 | `agents/skills/find-redundant-validation/scripts/redundant_validation.py` | 1042 | 57 |
-| `tools/x2c_source.py` (imported by six tools) | 1051 | 31 |
+| `tools/x2c_source.py` (imported by five tools) | 1051 | 31 |
 | `tools/audit-source-bloat.py` | 860 | 30 |
 | `agents/skills/find-comment-slop/scripts/comment_slop.py` | 569 | 19 |
 | `agents/skills/clean-x2c-source/scripts/source_style.py` | 385 | 15 |
@@ -133,10 +132,10 @@ comments, and spans, on which the tools' own logic is rewritten, the way
 | `tools/gen-api-reference.py` | 1296 | 4, plus wrap and difflib |
 
 `x2c_source.py` is the keystone: `gen-api-reference.py`,
-`gen-module-catalog.py`, `repo-metrics.py`, `find-redundant-conversions.py`,
-`audit-source-bloat.py`, and `redundant_validation.py` import it, so the
-doc generators and the three skill analyzers move together. This is a
-design, to be planned on its own before implementation.
+`gen-module-catalog.py`, `repo-metrics.py`, `audit-source-bloat.py`, and
+`redundant_validation.py` import it, so the doc generators and the three
+skill analyzers move together. This is a design, to be planned on its own
+before implementation.
 
 ## Off the table
 
