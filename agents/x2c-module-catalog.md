@@ -182,17 +182,17 @@ x2c expression parsing.
 Public functions:
 
 `Compiler.complete_iter_chain`, `List.printf_family`,
-`Compiler.resolve_postfix_member`, `Compiler.parse_macro_expression_target`,
-`Compiler.promote_string_literal`, `Compiler.check_explicit_converter`,
-`Compiler.require_var_tag`, `Compiler.var_tag_expression`,
-`Compiler.resolve_map_entry`, `Compiler.resolve_expression`,
-`Compiler.parse_variable`, `Compiler.parse_conditional`,
-`Compiler.parse_assignment`, `Compiler.parse_primary`,
-`Compiler.parse_expression`, `Compiler.parse_parenthesized_statement`,
-`Compiler.initializer_native_types`, `Compiler.initializer_slot`,
-`Compiler.initializer_rows`, `Compiler.convert_initializer`,
-`Compiler.convert_compound_literal`, `Compiler.convert_expression`,
-`Compiler.convert_segment_to_string`
+`Compiler.printf_static_format`, `Compiler.resolve_postfix_member`,
+`Compiler.parse_macro_expression_target`, `Compiler.promote_string_literal`,
+`Compiler.check_explicit_converter`, `Compiler.require_var_tag`,
+`Compiler.var_tag_expression`, `Compiler.resolve_map_entry`,
+`Compiler.resolve_expression`, `Compiler.parse_variable`,
+`Compiler.parse_conditional`, `Compiler.parse_assignment`,
+`Compiler.parse_primary`, `Compiler.parse_expression`,
+`Compiler.parse_parenthesized_statement`, `Compiler.initializer_native_types`,
+`Compiler.initializer_slot`, `Compiler.initializer_rows`,
+`Compiler.convert_initializer`, `Compiler.convert_compound_literal`,
+`Compiler.convert_expression`, `Compiler.convert_segment_to_string`
 
 ### [src/format.x](../src/format.x)
 
@@ -408,23 +408,23 @@ x2c semantic types.
 Public functions:
 
 `Type.declaration_parts`, `Type.declaration_ast`, `ast_addressed_identifier`,
-`ast_direct_identifier`, `ast_prototype_declarator`, `Type.parameter_ast`,
-`Var.type`, `Type.list`, `List.type`, `Symbol.is_storage_class`,
-`Symbol.is_inline`, `Symbol.is_type_qualifier`, `Symbol.is_type_modifier`,
-`Symbol.is_builtin_type`, `Type.is_aggregate`, `Type.is_aggregate_tag`,
-`Type.is_aggregate_tag_body`, `Type.is_enum`, `Type.is_enum_tag`,
-`Type.is_enum_tag_body`, `Type.is_pointer`, `Type.is_array`,
-`Type.is_function`, `Type.is_bitfield`, `Type.scalar`, `Type.scalar_tag`,
-`Type.var_numeric_extractor`, `Type.var_numeric_update_helper`,
-`Type.numeric_literal`, `Type.tag`, `Type.body`, `Type.var_tag_row`,
-`Type.begin_unit`, `Type.end_unit`, `Type.register_var_tag`,
-`Type.register_var_adoption`, `Type.var_converter`, `Type.fixed_var_tag`,
-`Type.var_tag`, `Type.base_type`, `Type.canonicalize`, `Type.declared`,
-`Type.discards_qualifiers`, `Type.is_builtin`, `Type.is_typedef_name`,
-`Type.is_bare_typedef_name`, `Type.is_typedef`, `Type.is_number`,
-`Type.is_integral`, `Type.dereference`, `Type.reference`, `Type.apply`,
-`Type.promote`, `Type.widest`, `Type.is_static`, `Type.is_inline`,
-`Type.is_extern`, `Type.is_threaded`, `List.type_from_ast`
+`ast_direct_identifier`, `ast_indirect_identifier`, `ast_prototype_declarator`,
+`Type.parameter_ast`, `Var.type`, `Type.list`, `List.type`,
+`Symbol.is_storage_class`, `Symbol.is_inline`, `Symbol.is_type_qualifier`,
+`Symbol.is_type_modifier`, `Symbol.is_builtin_type`, `Type.is_aggregate`,
+`Type.is_aggregate_tag`, `Type.is_aggregate_tag_body`, `Type.is_enum`,
+`Type.is_enum_tag`, `Type.is_enum_tag_body`, `Type.is_pointer`,
+`Type.is_array`, `Type.is_function`, `Type.is_bitfield`, `Type.scalar`,
+`Type.scalar_tag`, `Type.var_numeric_extractor`,
+`Type.var_numeric_update_helper`, `Type.numeric_literal`, `Type.tag`,
+`Type.body`, `Type.var_tag_row`, `Type.begin_unit`, `Type.end_unit`,
+`Type.register_var_tag`, `Type.register_var_adoption`, `Type.var_converter`,
+`Type.fixed_var_tag`, `Type.var_tag`, `Type.base_type`, `Type.canonicalize`,
+`Type.declared`, `Type.discards_qualifiers`, `Type.is_builtin`,
+`Type.is_typedef_name`, `Type.is_bare_typedef_name`, `Type.is_typedef`,
+`Type.is_number`, `Type.is_integral`, `Type.dereference`, `Type.reference`,
+`Type.apply`, `Type.promote`, `Type.widest`, `Type.is_static`,
+`Type.is_inline`, `Type.is_extern`, `Type.is_threaded`, `List.type_from_ast`
 
 ### [src/utils.x](../src/utils.x)
 

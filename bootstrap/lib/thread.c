@@ -178,7 +178,7 @@ static void _finish_join(Thread thread){
 
 Scope * Scope_top(void);
 
-void String_thread_initialize(void);
+void Pool_thread_initialize(void);
 
 void Error_initialize_raw(void);
 
@@ -186,7 +186,7 @@ Scope Scope_new_named(const char *);
 
 void Scope_push(Scope *);
 
-Pool String_pool_retain_named(const char *);
+Pool Pool_open_named(const char *);
 
 Context Context_open_isolated_named(const char *);
 
@@ -204,7 +204,7 @@ List Error_since_in(int, Scope *, Pool);
 
 void Context_close(Context);
 
-Pool String_pool_detach(void);
+Pool Pool_detach(void);
 
 void Scope_pop(void);
 
@@ -215,11 +215,11 @@ void x2c_thread_state_release(void);
 static void * _run(void * argument){
   Thread thread = argument;
   (void) Scope_top();
-  String_thread_initialize();
+  Pool_thread_initialize();
   Error_initialize_raw();
   thread -> result_scope = Scope_new_named("Thread result");
   Scope_push(& thread -> result_scope);
-  thread -> result_pool = String_pool_retain_named("Thread result");
+  thread -> result_pool = Pool_open_named("Thread result");
   Context work = Context_open_isolated_named("Thread callback");
   int mark = Error_mark();
   {
@@ -292,14 +292,14 @@ _x2c_error_handler_0 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_0);
 }
 Context_close(work);
-thread -> result_pool = String_pool_detach();
+thread -> result_pool = Pool_detach();
 Scope_pop();
 Error_shutdown_raw();
 x2c_thread_state_release();
 return NULL;
 }
 
-void x2c_pool_thread_start(void);
+void Pool_thread_start(void);
 
 void x2c_descriptor_thread_start_begin(void);
 
@@ -336,7 +336,7 @@ Thread Thread_start(ThreadFn function, const void * input, size_t input_size){
     abort();
   }
   __atomic_fetch_add(& thread_live_count, 1, __ATOMIC_SEQ_CST);
-  x2c_pool_thread_start();
+  Pool_thread_start();
   pthread_attr_t attributes;
   _stack_attributes(& attributes);
   x2c_descriptor_thread_start_begin();

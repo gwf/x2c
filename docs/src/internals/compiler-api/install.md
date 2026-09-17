@@ -13,7 +13,7 @@ Package installation into the x2c home.
 | Function | Summary |
 | --- | --- |
 | [`install_command`](#install_command) | Installs the package named by the request's one operand and returns 0. |
-| [`install_require`](#install_require) | Returns the index row for `name`, installing it under the x2c home first unless an installed package already records `version`. |
+| [`install_require`](#install_require) | Returns the row that records `name` at `version`, installing the package under the x2c home first unless one already records that version. |
 | [`install_rows`](#install_rows) | Returns the package rows of `text`: its lines holding the six fields `name version kind platform url sha256`, where `kind` is `source` or `bundle` and a source row's platform is `-`. |
 | [`install_version`](#install_version) | Returns the version an installed package records, or NULL when no package of that name is installed or it records no version. |
 | [`list_command`](#list_command) | Lists installed packages as `name version kind` lines and returns 0. |
@@ -31,18 +31,20 @@ The operand is a local directory, a local `.tar.gz`, a URL with
 verified against this compiler's version unless `--force`; a pure-x2c
 source package is built by this compiler. Failures exit with status 2.
 
-Source: `src/install.x:261`
+Source: `src/install.x:316`
 
 #### install_require
 
-`List install_require(CliRequest request, String name, String version)`
+`List install_require( CliRequest request, String name, String version, List locked)`
 
-Returns the index row for `name`, installing it under the x2c home first
-unless an installed package already records `version`. The row has the
-`install_rows` shape. An already satisfied dependency reaches no network.
-Failures exit with status 2.
+Returns the row that records `name` at `version`, installing the package
+under the x2c home first unless one already records that version.
+`locked` is the lockfile row to reproduce, so a package a lockfile pins
+comes from the archive that lockfile recorded; NULL resolves the index
+instead. The row has the `install_rows` shape, and an already satisfied
+dependency reaches no network. Failures exit with status 2.
 
-Source: `src/install.x:295`
+Source: `src/install.x:352`
 
 #### install_rows
 
@@ -54,7 +56,7 @@ Returns the package rows of `text`: its lines holding the six fields
 and lines with another field count are skipped. The package index and a
 project lockfile share this format.
 
-Source: `src/install.x:89`
+Source: `src/install.x:115`
 
 #### install_version
 
@@ -63,7 +65,7 @@ Source: `src/install.x:89`
 Returns the version an installed package records, or NULL when no package
 of that name is installed or it records no version. Reaches no network.
 
-Source: `src/install.x:287`
+Source: `src/install.x:342`
 
 #### list_command
 
@@ -71,7 +73,7 @@ Source: `src/install.x:287`
 
 Lists installed packages as `name version kind` lines and returns 0.
 
-Source: `src/install.x:329`
+Source: `src/install.x:399`
 
 #### remove_command
 
@@ -80,7 +82,7 @@ Source: `src/install.x:329`
 Removes the installed package named by the request's one operand.
 A directory without an install marker is left alone. Returns 0.
 
-Source: `src/install.x:313`
+Source: `src/install.x:380`
 
 ## Design notes
 

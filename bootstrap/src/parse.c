@@ -2186,7 +2186,7 @@ static List _parse_expression_function_body(Compiler compiler){
   };
   x2c_cleanup_push(&_x2c_defer_record_3);
   {
-        List expression = Compiler_parse_expression((compiler));  Compiler_expect((compiler), 119);  result = Compiler_finish_return_statement((compiler), expression);
+        List expression = Compiler_parse_expression((compiler));  Compiler_expect((compiler), 119);  result =(compiler) -> return_type == _180 ? cons(_178, cons(List_var(expression), NULL)) : Compiler_finish_return_statement((compiler), expression);
       }
       x2c_cleanup_leave(& _x2c_defer_record_3);
 }

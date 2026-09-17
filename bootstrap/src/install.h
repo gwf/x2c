@@ -13,7 +13,7 @@ int install_command(CliRequest request);
 
 String install_version(String name);
 
-List install_require(CliRequest request, String name, String version);
+List install_require(CliRequest request, String name, String version, List locked);
 
 int remove_command(CliRequest request);
 

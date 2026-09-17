@@ -144,6 +144,8 @@ static void _plan_target(Project project, ProjectTarget target, CliRequest comma
 
 static List _read_lock(String path);
 
+static List _locked_row(List rows, ProjectDependency entry);
+
 static int _lock_satisfies(Project project, List rows);
 
 static void _write_lock(String path, List rows);
@@ -1095,24 +1097,28 @@ Var List_car(List);
 
 List List_cdr(List);
 
+static List _locked_row(List rows, ProjectDependency entry){
+  List found = NULL;
+  {
+    List row;
+    List _x2c_macro_object_13 = rows;
+    List _x2c_macro_cursor_13 = _x2c_macro_object_13;
+    Var _x2c_macro_cursor_output_13;
+    while(List_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_13)){
+      row = Var_list(_x2c_macro_cursor_output_13);
+      if(Var_equal(List_car(row), String_var(entry -> name)) && Var_equal(List_car(List_cdr(row)), String_var(entry -> version))) found = row;
+    }
+
+  }
+  return found;
+}
+
 String install_version(String);
 
 static int _lock_satisfies(Project project, List rows){
   if(! List_truth(rows)) return 0;
   for(ProjectDependency entry = project -> dependencies;  entry;  entry = entry -> next){
-    List found = NULL;
-    {
-      List row;
-      List _x2c_macro_object_13 = rows;
-      List _x2c_macro_cursor_13 = _x2c_macro_object_13;
-      Var _x2c_macro_cursor_output_13;
-      while(List_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_13)){
-        row = Var_list(_x2c_macro_cursor_output_13);
-        if(Var_equal(List_car(row), String_var(entry -> name))) found = row;
-      }
-
-    }
-    if(! List_truth(found) || ! Var_equal(List_car(List_cdr(found)), String_var(entry -> version))) return 0;
+    if(! List_truth(_locked_row(rows, entry))) return 0;
     if(! String_equal(install_version(entry -> name), entry -> version)) return 0;
   }
   return 1;
@@ -1171,7 +1177,7 @@ x2c_exception_leave(& _x2c_exception_frame_1);
 
 void Path_remove_file(Path);
 
-List install_require(CliRequest, String, String);
+List install_require(CliRequest, String, String, List);
 
 static void _resolve_dependencies(Project project, CliRequest request){
   if(project -> sources || request -> dry_run) return;
@@ -1213,7 +1219,7 @@ return;
 List locked = _read_lock(path);
 if(_lock_satisfies(project, locked)) return;
 Array rows = Array_new();
-for(ProjectDependency entry = project -> dependencies;  entry;  entry = entry -> next) Array_push(rows, List_var(install_require(request, entry -> name, entry -> version)));
+for(ProjectDependency entry = project -> dependencies;  entry;  entry = entry -> next) Array_push(rows, List_var(install_require(request, entry -> name, entry -> version, _locked_row(locked, entry))));
 _write_lock(path, Array_list_free(rows));
 }
 
@@ -1324,7 +1330,7 @@ x2c_error_catch_close(_x2c_error_handler_3);
 _x2c_error_handler_3 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_3);
 }
-if(! request -> quiet) printf("x2c: created %s\n", dir);
+if(! request -> quiet) fprintf(stderr, "x2c: created %s\n", dir);
 return 0;
 }
 

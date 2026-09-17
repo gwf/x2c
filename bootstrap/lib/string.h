@@ -21,14 +21,6 @@ _Static_assert(_Generic(& strchr, char *(*)(const char *, int) : 1, default: 0),
 #endif
 #define String_c_find strchr
 String String_new_in(Pool pool, const char * bytes, int length);
-Pool String_pool_current(void);
-void String_initialize(void);
-void String_thread_initialize(void);
-void String_shutdown(void);
-Pool String_pool_retain_named(const char * name);
-Pool String_pool_retain(void);
-void String_pool_release(void);
-Pool String_pool_detach(void);
 String String_promote(String str);
 int String_try_own(String str);
 int String_is_permanent(String str);

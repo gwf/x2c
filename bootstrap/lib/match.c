@@ -1966,7 +1966,7 @@ int String_is_permanent(String);
 
 String Var_string(Var);
 
-int x2c_pool_values_is_permanent(Var);
+int Pool_is_permanent(Var);
 
 static int _pattern_admissible(Var value, int depth){
   if(depth >= 128) return 0;
@@ -1978,7 +1978,7 @@ static int _pattern_admissible(Var value, int depth){
       if(Var_is(value, 826970)) return String_is_permanent((String) Var_pointer(value));
       if(Var_is_row(value, 11, 7, 1)) return String_is_permanent(Var_string(value));
       if(! Var_is_row(value, 9, 7, 4)) return 0;
-      if(! x2c_pool_values_is_permanent(value)) return 0;
+      if(! Pool_is_permanent(value)) return 0;
       {
         Var part;
         List _x2c_macro_object_9 =(List) Var_pointer(value);

@@ -61,11 +61,11 @@ static void _native_error(int error){
 }
 
 static void _lock(void){
-  return _native_error(pthread_mutex_lock(& static_mutex));
+  _native_error(pthread_mutex_lock(& static_mutex));
 }
 
 static void _unlock(void){
-  return _native_error(pthread_mutex_unlock(& static_mutex));
+  _native_error(pthread_mutex_unlock(& static_mutex));
 }
 
 static int _cycle(X2CStatic * guard, StaticThread * self){

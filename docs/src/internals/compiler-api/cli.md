@@ -38,11 +38,12 @@ Source: `src/cli.x:808`
 
 Reads a package's native response options, expanding literal `{package}`
 after tokenization. Only native include/define/thread options, ordered
-archive/library/framework inputs, and run-time library search
-directories are admitted. `cc_args` and `ld_args`
+archive/library/framework inputs, run-time library search directories,
+and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
+`cc_args` and `ld_args`
 serve native actions; no source-preprocessing options are returned.
 
-Source: `src/cli.x:941`
+Source: `src/cli.x:942`
 
 #### cli_parse
 
@@ -57,7 +58,7 @@ canonical-pool lifetimes described by `CliRequest`.
 **Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
 constructing request values.
 
-Source: `src/cli.x:1099`
+Source: `src/cli.x:1101`
 
 #### cli_response_arguments
 
@@ -75,7 +76,7 @@ Source: `src/cli.x:698`
 
 Returns the version line `--version` prints, without a newline.
 
-Source: `src/cli.x:1154`
+Source: `src/cli.x:1156`
 
 ### `CliRequest`
 
@@ -86,7 +87,7 @@ Source: `src/cli.x:1154`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:1157`
+Source: `src/cli.x:1159`
 
 <a id="CliRequest.package_roots"></a>
 #### CliRequest.package_roots
@@ -99,7 +100,7 @@ when it exists. A root named twice is searched twice and resolves the
 same entries. Explicit directories are borrowed; the result is a fresh
 `List` only when the home directory is appended.
 
-Source: `src/cli.x:1165`
+Source: `src/cli.x:1167`
 
 ## Public types
 

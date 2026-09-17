@@ -1318,8 +1318,10 @@ receiver's address is passed, so `rec.bump(4)` reaches
 a pointer to the declared parameter is one level too far and is a type error;
 write `(*pointer).method()`. Normal pointer
 conversion rules still apply, including preservation of `const` and other
-qualifiers. Method syntax does not make every value dynamically dispatchable;
-only registered callbacks define custom behavior.
+qualifiers. A qualifier on the receiver itself does not change which methods
+and operators the type has, so a `const String` answers `len()` and `+` the
+way an unqualified one does. Method syntax does not make every value
+dynamically dispatchable; only registered callbacks define custom behavior.
 
 A method may use `Self` in its result and parameter types when it promises to
 preserve the receiver's static typedef:
@@ -1362,8 +1364,16 @@ conversion, cleanup, and lifetime rules as `return expression;`. The semicolon
 terminates the body; nested compound literals, collection literals, and lambda
 bodies do not terminate it.
 
-An expression is required; `=>;` is invalid. The rules for returning a value
-from a `void` function are unchanged. Use a compound body when a function needs
+A `void` function has no value to return, so its expression body is the
+shorthand for a compound body containing one expression statement:
+
+```x2c
+typedef struct Counter { int value; } Counter;
+static void Counter.step(Counter *self) => self.value++;
+```
+
+An expression is required; `=>;` is invalid. The rules for writing `return` in
+a `void` function are unchanged. Use a compound body when a function needs
 declarations, several statements, or a comment inside the body.
 
 ### Reference parameters
@@ -3743,11 +3753,13 @@ runs no cleanup. An outward `goto` runs every cleanup region it exits. A
 `goto` into a protected cleanup region, or into a sibling protected region,
 is rejected at compile time.
 
-Generated `Error` transfer preserves directly modified automatic locals and
-parameters under the repository's optimized build. The compiler supplies the
-required volatile C representation for those values and for the transfer
-state its frames carry; source code does not need optimization-specific
-qualifiers for ordinary direct assignments in `try`, `catch`, or `finally`.
+Generated `Error` transfer preserves the automatic locals and parameters a
+protected body modifies under the repository's optimized build, whether the
+body assigns them by name or writes through a pointer it holds the address
+in. The compiler supplies the required volatile C representation for those
+values and for the transfer state its frames carry; source code does not need
+optimization-specific qualifiers for ordinary assignments in `try`, `catch`,
+or `finally`.
 `Error` transfer does not restore the process signal mask; code that changes a
 signal mask owns restoring it.
 
@@ -4512,10 +4524,13 @@ lockfile left beside it is removed.
 
 A build whose lockfile already covers every pinned package, at the pinned
 version and installed in the home, reads no index and makes no network
-request. Any other state re-resolves through the index and rewrites the
-lockfile. A version the index cannot supply stops the build with an error
-that includes both versions. A dry run installs nothing and writes no
-lockfile, and the editor adapter never installs.
+request. A pin the lockfile covers but the home does not hold is installed
+from the url and sha256 that lockfile recorded, not from the index, so the
+archive is the one the lockfile pinned however the index has changed. Only a
+pin the lockfile does not cover reaches the index. The lockfile is then
+rewritten to the manifest's pins. A version the index cannot supply stops the
+build with an error that includes both versions. A dry run installs nothing
+and writes no lockfile, and the editor adapter never installs.
 
 ## Include and tool ownership
 
@@ -4545,8 +4560,12 @@ one operand: a local directory, a local `.tar.gz`, a URL with `--sha256
 <hex>`, or a name resolved through the index (`--index <url-or-path>`
 overrides the default). `--force` accepts a bundle built by another x2c
 version. `remove` takes one installed name; `list` prints `name version
-kind` lines. Refusals exit with status 2 and leave the installed set as it
-was.
+kind` lines on standard output, and the install and removal receipts go to
+standard error with the other action output. Refusals, including a package
+whose sources or install marker are damaged, exit with status 2 and leave
+the installed set as it was. One install or removal in a home runs at a
+time; the lock is released once the packages are in place, so a `run` that
+installed a dependency does not hold it while the program runs.
 
 A project manifest can pin packages instead of installing them by hand; see
 [pinned packages](https://x2c-lang.dev/docs/reference/cli.html#pinned-packages).

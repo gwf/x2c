@@ -15,12 +15,6 @@ typedef struct List{
 
 List List_cons_in(Pool pool, Var head, List tail);
 
-void List_initialize(void);
-
-void List_thread_initialize(void);
-
-void List_shutdown(void);
-
 List List_promote(List lst);
 
 int List_try_own(List lst);

@@ -240,227 +240,132 @@ static Pool value_root;
 static _Thread_local struct PoolValueThreadState value_thread;
 static int pool_multithreaded;
 static int _init_guard_ = 0;
-__attribute__((constructor)) static void _file_init_(void);
-
 static void _storage_lock(void);
-
 static void _record_request(size_t size);
-
 static void _storage_unlock(void);
-
 static void _lock(Pool pool);
-
 static void _unlock(Pool pool);
-
 static void _storage_shutdown(void);
-
 static void _storage_initialize(void);
-
 static inline char * _block_data(PoolBlock block);
-
 static inline void * _block_slot(PoolBlock block, unsigned slot);
-
 static int _class(size_t size);
-
 static int _block_contains(PoolBlock block, const void * ptr);
-
 static unsigned _index_start(uintptr_t page, unsigned slots);
-
 static void _index_place(PoolIndexSlot * table, unsigned slots, uintptr_t page, PoolBlock block);
-
 static int _index_grow(void);
-
 static void _index_register(PoolBlock block, unsigned bytes);
-
 static PoolBlock _find_registered_block(const void * ptr);
-
 static int _block_available(PoolBlock block);
-
 static int _depot_index(unsigned bytes);
-
 static PoolBlock _block_lease(Pool pool, int class_index, PoolBlock fresh);
-
 static void _block_return(PoolBlock block);
-
 static PoolBlock _available_block(Pool pool, int class_index);
-
 static void * _small_malloc(Pool pool, int class_index);
-
 static void _small_free(PoolBlock block, void * ptr);
-
 static void _mark_slot(PoolBlock block, unsigned slot);
-
 static void _mark_survivor(PoolPromotion promotion);
-
 static int _slot_kept(PoolBlock block, unsigned slot);
-
 static void _block_transfer(PoolBlock p, Pool parent);
-
 static void _release_blocks(Pool inner);
-
 static void _insert_locked(Pool inner, Var object);
-
 static int _owns_locked(Pool pool, Var key);
-
 static int _promote_block(Pool inner, Var object, void * alloc, PoolBlock block);
-
 static PoolBlock _block_of(void * alloc);
-
 typedef struct _x2c_defer_env_0{
-  const void * _x2c_defer_capture_0;
-  const void * _x2c_defer_capture_1;
-  const void * _x2c_defer_capture_2;
-  const void * _x2c_defer_capture_3;
+  const void * _x2c_defer_capture_0;  const void * _x2c_defer_capture_1;  const void * _x2c_defer_capture_2;  const void * _x2c_defer_capture_3;
 }
 _x2c_defer_env_0;
-
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
-
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
-
 typedef struct _x2c_defer_env_1{
   const void * _x2c_defer_capture_4;
 }
 _x2c_defer_env_1;
-
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
-
 typedef struct _x2c_defer_env_2{
   const void * _x2c_defer_capture_5;
 }
 _x2c_defer_env_2;
-
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
-
 typedef struct _x2c_defer_env_3{
   const void * _x2c_defer_capture_6;
 }
 _x2c_defer_env_3;
-
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
-
 typedef struct _x2c_defer_env_4{
   const void * _x2c_defer_capture_7;
 }
 _x2c_defer_env_4;
-
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
-
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6);
-
 typedef struct _x2c_defer_env_5{
   const void * _x2c_defer_capture_8;
 }
 _x2c_defer_env_5;
-
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
-
 typedef struct _x2c_defer_env_6{
   const void * _x2c_defer_capture_9;
 }
 _x2c_defer_env_6;
-
 static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8);
-
 typedef struct _x2c_defer_env_7{
   const void * _x2c_defer_capture_10;
 }
 _x2c_defer_env_7;
-
 static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9);
-
 typedef struct _x2c_defer_env_8{
   const void * _x2c_defer_capture_11;
 }
 _x2c_defer_env_8;
-
 static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10);
-
 static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11);
-
-__attribute__((constructor)) static void _file_init_(void){
-  x2c_initialize_protocols();
-  if(_init_guard_) return;
-  _init_guard_ = 1;
-  _x2c_static_initialize_0();
-  _x2c_static_initialize_1();
-  _x2c_static_initialize_2();
-  _x2c_static_initialize_3();
-}
-
-void x2c_pool_thread_start(void){
-  if(! _init_guard_) _file_init_();
-  pool_multithreaded = 1;
+void Pool_thread_start(void){
+  if(! _init_guard_) Pool_initialize();  pool_multithreaded = 1;
 }
 
 static void _storage_lock(void){
-  if(! pool_multithreaded) return;
-  if(pthread_mutex_lock(& pool_storage_mutex)){
-    fprintf(stderr, "Pool: could not lock storage mutex\n");
-    abort();
+  if(! pool_multithreaded) return;  if(pthread_mutex_lock(& pool_storage_mutex)){
+    fprintf(stderr, "Pool: could not lock storage mutex\n");  abort();
   }
 
 }
 
 static void _record_request(size_t size){
-  pool_allocation_calls ++;
-  if(SIZE_MAX - pool_requested_bytes < size) pool_requested_bytes = SIZE_MAX;
-  else pool_requested_bytes += size;
+  pool_allocation_calls ++;  if(SIZE_MAX - pool_requested_bytes < size) pool_requested_bytes = SIZE_MAX;  else pool_requested_bytes += size;
 }
 
 static void _storage_unlock(void){
-  if(! pool_multithreaded) return;
-  if(pthread_mutex_unlock(& pool_storage_mutex)){
-    fprintf(stderr, "Pool: could not unlock storage mutex\n");
-    abort();
+  if(! pool_multithreaded) return;  if(pthread_mutex_unlock(& pool_storage_mutex)){
+    fprintf(stderr, "Pool: could not unlock storage mutex\n");  abort();
   }
 
 }
 
 static void _lock(Pool pool){
-  if(! pool_multithreaded) return;
-  if(pool && pthread_mutex_lock(& pool -> mutex)){
-    fprintf(stderr, "Pool: could not lock branch mutex\n");
-    abort();
+  if(! pool_multithreaded) return;  if(pool && pthread_mutex_lock(& pool -> mutex)){
+    fprintf(stderr, "Pool: could not lock branch mutex\n");  abort();
   }
 
 }
 
 static void _unlock(Pool pool){
-  if(! pool_multithreaded) return;
-  if(pool && pthread_mutex_unlock(& pool -> mutex)){
-    fprintf(stderr, "Pool: could not unlock branch mutex\n");
-    abort();
+  if(! pool_multithreaded) return;  if(pool && pthread_mutex_unlock(& pool -> mutex)){
+    fprintf(stderr, "Pool: could not unlock branch mutex\n");  abort();
   }
 
 }
 
 static void _storage_shutdown(void){
-  PoolBlock block = pool_registry;
-  while(block){
-    PoolBlock next = block -> registry_next;
-    free(block);
-    block = next;
+  PoolBlock block = pool_registry;  while(block){
+    PoolBlock next = block -> registry_next;  free(block);  block = next;
   }
-  pool_registry = NULL;
-  free(pool_index);
-  pool_index = NULL;
-  pool_index_slots = pool_index_used = 0;
-  pool_index_complete = 1;
-  for(int i = 0;  i < POOL_DEPOT_COUNT;  i ++) pool_depot[i] = NULL;
-  pool_backing_bytes = 0;
-  pool_active_blocks = pool_active_bytes = 0;
-  pool_depot_blocks = 0;
-  pool_depot_bytes = 0;
-  pool_storage_ready = 0;
+  pool_registry = NULL;  free(pool_index);  pool_index = NULL;  pool_index_slots = pool_index_used = 0;  pool_index_complete = 1;  for(int i = 0;  i < POOL_DEPOT_COUNT;  i ++) pool_depot[i] = NULL;  pool_backing_bytes = 0;  pool_active_blocks = pool_active_bytes = 0;  pool_depot_blocks = 0;  pool_depot_bytes = 0;  pool_storage_ready = 0;
 }
 
 void Scope_shutdown_hook(void(*)(void));
-
 static void _storage_initialize(void){
-  if(pool_storage_ready) return;
-  Scope_shutdown_hook(_storage_shutdown);
-  pool_storage_ready = 1;
+  if(pool_storage_ready) return;  Scope_shutdown_hook(_storage_shutdown);  pool_storage_ready = 1;
 }
 
 static inline char * _block_data(PoolBlock block){
@@ -472,16 +377,11 @@ static inline void * _block_slot(PoolBlock block, unsigned slot){
 }
 
 static int _class(size_t size){
-  for(int i = 0;  i < POOL_CLASS_COUNT;  i ++) if(size <= pool_class_sizes[i]) return i;
-  return - 1;
+  for(int i = 0;  i < POOL_CLASS_COUNT;  i ++) if(size <= pool_class_sizes[i]) return i;  return - 1;
 }
 
 static int _block_contains(PoolBlock block, const void * ptr){
-  if(! block || ! ptr || ! block -> owner) return 0;
-  const char * data = _block_data(block), * candidate = ptr;
-  unsigned size = pool_class_sizes[block -> class_index];
-  if(candidate < data || candidate >= data + block -> used) return 0;
-  return(size_t)(candidate - data) % size == 0;
+  if(! block || ! ptr || ! block -> owner) return 0;  const char * data = _block_data(block), * candidate = ptr;  unsigned size = pool_class_sizes[block -> class_index];  if(candidate < data || candidate >= data + block -> used) return 0;  return(size_t)(candidate - data) % size == 0;
 }
 
 static unsigned _index_start(uintptr_t page, unsigned slots){
@@ -489,151 +389,75 @@ static unsigned _index_start(uintptr_t page, unsigned slots){
 }
 
 static void _index_place(PoolIndexSlot * table, unsigned slots, uintptr_t page, PoolBlock block){
-  unsigned at = _index_start(page, slots);
-  while(table[at].block) at =(at + 1) &(slots - 1);
-  table[at].page = page;
-  table[at].block = block;
+  unsigned at = _index_start(page, slots);  while(table[at].block) at =(at + 1) &(slots - 1);  table[at].page = page;  table[at].block = block;
 }
 
 static int _index_grow(void){
-  unsigned slots = pool_index_slots * 2;
-  if(! slots) slots = POOL_INDEX_FIRST_SLOTS;
-  PoolIndexSlot * table = calloc(slots, sizeof(PoolIndexSlot));
-  if(! table) return 0;
-  for(unsigned at = 0;  at < pool_index_slots;  at ++) if(pool_index[at].block) _index_place(table, slots, pool_index[at].page, pool_index[at].block);
-  free(pool_index);
-  pool_index = table;
-  pool_index_slots = slots;
-  return 1;
+  unsigned slots = pool_index_slots * 2;  if(! slots) slots = POOL_INDEX_FIRST_SLOTS;  PoolIndexSlot * table = calloc(slots, sizeof(PoolIndexSlot));  if(! table) return 0;  for(unsigned at = 0;  at < pool_index_slots;  at ++) if(pool_index[at].block) _index_place(table, slots, pool_index[at].page, pool_index[at].block);  free(pool_index);  pool_index = table;  pool_index_slots = slots;  return 1;
 }
 
 static void _index_register(PoolBlock block, unsigned bytes){
-  if(! pool_index_complete) return;
-  uintptr_t last =((uintptr_t) block + bytes - 1) >> POOL_INDEX_PAGE_SHIFT;
-  for(uintptr_t page =(uintptr_t) block >> POOL_INDEX_PAGE_SHIFT;  page <= last;  page ++){
+  if(! pool_index_complete) return;  uintptr_t last =((uintptr_t) block + bytes - 1) >> POOL_INDEX_PAGE_SHIFT;  for(uintptr_t page =(uintptr_t) block >> POOL_INDEX_PAGE_SHIFT;  page <= last;  page ++){
     if((pool_index_used + 1) * 2 > pool_index_slots && ! _index_grow()){
-      pool_index_complete = 0;
-      return;
+      pool_index_complete = 0;  return;
     }
-    _index_place(pool_index, pool_index_slots, page, block);
-    pool_index_used ++;
+    _index_place(pool_index, pool_index_slots, page, block);  pool_index_used ++;
   }
 
 }
 
 static PoolBlock _find_registered_block(const void * ptr){
   if(! pool_index_complete){
-    for(PoolBlock block = pool_registry;  block;  block = block -> registry_next) if(_block_contains(block, ptr)) return block;
-    return NULL;
+    for(PoolBlock block = pool_registry;  block;  block = block -> registry_next) if(_block_contains(block, ptr)) return block;  return NULL;
   }
-  if(! pool_index_slots) return NULL;
-  uintptr_t page =(uintptr_t) ptr >> POOL_INDEX_PAGE_SHIFT;
-  unsigned at = _index_start(page, pool_index_slots);
-  while(pool_index[at].block){
-    if(pool_index[at].page == page && _block_contains(pool_index[at].block, ptr)) return pool_index[at].block;
-    at =(at + 1) &(pool_index_slots - 1);
+  if(! pool_index_slots) return NULL;  uintptr_t page =(uintptr_t) ptr >> POOL_INDEX_PAGE_SHIFT;  unsigned at = _index_start(page, pool_index_slots);  while(pool_index[at].block){
+    if(pool_index[at].page == page && _block_contains(pool_index[at].block, ptr)) return pool_index[at].block;  at =(at + 1) &(pool_index_slots - 1);
   }
   return NULL;
 }
 
 static int _block_available(PoolBlock block){
-  if(! block) return 0;
-  if(block -> free) return 1;
-  unsigned size = pool_class_sizes[block -> class_index];
-  return block -> used + size <= block -> bytes - POOL_BLOCK_DATA_OFFSET;
+  if(! block) return 0;  if(block -> free) return 1;  unsigned size = pool_class_sizes[block -> class_index];  return block -> used + size <= block -> bytes - POOL_BLOCK_DATA_OFFSET;
 }
 
 static int _depot_index(unsigned bytes){
   switch(bytes){
-    case 256 : return 0;
-    case 512 : return 1;
-    case 1024 : return 2;
-    case 2048 : return 3;
-    default: return 4;
+    case 256 : return 0;  case 512 : return 1;  case 1024 : return 2;  case 2048 : return 3;  default: return 4;
   }
 
 }
 
 static PoolBlock _block_lease(Pool pool, int class_index, PoolBlock fresh){
-  unsigned bytes = pool_block_sizes[class_index];
-  if(class_index == 0 && pool -> up) bytes = 256;
-  int depot_index = _depot_index(bytes);
-  PoolBlock block = pool_depot[depot_index];
-  if(block){
-    pool_depot[depot_index] = block -> next;
-    pool_depot_blocks --;
-    pool_depot_bytes -= bytes;
-    pool_block_reuses ++;
+  unsigned bytes = pool_block_sizes[class_index];  if(class_index == 0 && pool -> up) bytes = 256;  int depot_index = _depot_index(bytes);  PoolBlock block = pool_depot[depot_index];  if(block){
+    pool_depot[depot_index] = block -> next;  pool_depot_blocks --;  pool_depot_bytes -= bytes;  pool_block_reuses ++;
   }
   else{
-    if(! fresh) return NULL;
-    block = fresh;
-    block -> registry_next = pool_registry;
-    pool_registry = block;
-    _index_register(block, bytes);
-    pool_block_allocations ++;
-    pool_backing_bytes += bytes;
+    if(! fresh) return NULL;  block = fresh;  block -> registry_next = pool_registry;  pool_registry = block;  _index_register(block, bytes);  pool_block_allocations ++;  pool_backing_bytes += bytes;
   }
-  pool_active_blocks ++;
-  pool_active_bytes += bytes;
-  block -> next = pool -> blocks;
-  block -> owner = pool;
-  block -> free = NULL;
-  block -> used = 0;
-  block -> class_index = class_index;
-  block -> keep_count = 0;
-  block -> bytes = bytes;
-  memset(block -> keep, 0, sizeof block -> keep);
-  pool -> blocks = block;
-  pool -> current[class_index] = block;
-  return block;
+  pool_active_blocks ++;  pool_active_bytes += bytes;  block -> next = pool -> blocks;  block -> owner = pool;  block -> free = NULL;  block -> used = 0;  block -> class_index = class_index;  block -> keep_count = 0;  block -> bytes = bytes;  memset(block -> keep, 0, sizeof block -> keep);  pool -> blocks = block;  pool -> current[class_index] = block;  return block;
 }
 
 static void _block_return(PoolBlock block){
-  int depot_index = _depot_index(block -> bytes);
-  block -> owner = NULL;
-  block -> free = NULL;
-  block -> used = 0;
-  block -> keep_count = 0;
-  memset(block -> keep, 0, sizeof block -> keep);
-  block -> next = pool_depot[depot_index];
-  pool_depot[depot_index] = block;
-  pool_active_blocks --;
-  pool_active_bytes -= block -> bytes;
-  pool_depot_blocks ++;
-  pool_depot_bytes += block -> bytes;
+  int depot_index = _depot_index(block -> bytes);  block -> owner = NULL;  block -> free = NULL;  block -> used = 0;  block -> keep_count = 0;  memset(block -> keep, 0, sizeof block -> keep);  block -> next = pool_depot[depot_index];  pool_depot[depot_index] = block;  pool_active_blocks --;  pool_active_bytes -= block -> bytes;  pool_depot_blocks ++;  pool_depot_bytes += block -> bytes;
 }
 
 static PoolBlock _available_block(Pool pool, int class_index){
-  PoolBlock current = pool -> current[class_index];
-  if(_block_available(current)) return current;
-  return NULL;
+  PoolBlock current = pool -> current[class_index];  if(_block_available(current)) return current;  return NULL;
 }
 
 static void * _small_malloc(Pool pool, int class_index){
-  PoolBlock block = _available_block(pool, class_index);
-  if(block -> free){
-    void * result = block -> free;
-    block -> free = *(void * *) result;
-    pool_slot_reuses ++;
-    return result;
+  PoolBlock block = _available_block(pool, class_index);  if(block -> free){
+    void * result = block -> free;  block -> free = *(void * *) result;  pool_slot_reuses ++;  return result;
   }
-  void * result = _block_data(block) + block -> used;
-  block -> used += pool_class_sizes[class_index];
-  return result;
+  void * result = _block_data(block) + block -> used;  block -> used += pool_class_sizes[class_index];  return result;
 }
 
 static void _small_free(PoolBlock block, void * ptr){
-  *(void * *) ptr = block -> free;
-  block -> free = ptr;
-  block -> owner -> current[block -> class_index] = block;
+  *(void * *) ptr = block -> free;  block -> free = ptr;  block -> owner -> current[block -> class_index] = block;
 }
 
 static void _mark_slot(PoolBlock block, unsigned slot){
-  uint64_t mask =(uint64_t) 1 <<(slot % 64), * word = & block -> keep[slot / 64];
-  if(* word & mask) return;
-  * word |= mask;
-  block -> keep_count ++;
+  uint64_t mask =(uint64_t) 1 <<(slot % 64), * word = & block -> keep[slot / 64];  if(* word & mask) return;  * word |= mask;  block -> keep_count ++;
 }
 
 static void _mark_survivor(PoolPromotion promotion){
@@ -641,64 +465,32 @@ static void _mark_survivor(PoolPromotion promotion){
 }
 
 static int _slot_kept(PoolBlock block, unsigned slot){
-  uint64_t mask =(uint64_t) 1 <<(slot % 64);
-  return(block -> keep[slot / 64] & mask) != 0;
+  uint64_t mask =(uint64_t) 1 <<(slot % 64);  return(block -> keep[slot / 64] & mask) != 0;
 }
 
 static void _block_transfer(PoolBlock p, Pool parent){
-  unsigned count = p -> used / pool_class_sizes[p -> class_index];
-  p -> free = NULL;
-  for(unsigned slot = count;  slot > 0;  slot --){
-    unsigned index = slot - 1;
-    if(_slot_kept(p, index)) continue;
-    void * ptr = _block_slot(p, index);
-    *(void * *) ptr = p -> free;
-    p -> free = ptr;
+  unsigned count = p -> used / pool_class_sizes[p -> class_index];  p -> free = NULL;  for(unsigned slot = count;  slot > 0;  slot --){
+    unsigned index = slot - 1;  if(_slot_kept(p, index)) continue;  void * ptr = _block_slot(p, index);  *(void * *) ptr = p -> free;  p -> free = ptr;
   }
-  p -> owner = parent;
-  p -> keep_count = 0;
-  memset(p -> keep, 0, sizeof p -> keep);
-  p -> next = parent -> blocks;
-  parent -> blocks = p;
-  parent -> current[p -> class_index] = p;
+  p -> owner = parent;  p -> keep_count = 0;  memset(p -> keep, 0, sizeof p -> keep);  p -> next = parent -> blocks;  parent -> blocks = p;  parent -> current[p -> class_index] = p;
 }
 
 static void _release_blocks(Pool inner){
-  for(PoolPromotion promotion = inner -> promotions;  promotion;  promotion = promotion -> next) _mark_survivor(promotion);
-  PoolBlock block = inner -> blocks;
-  while(block){
-    PoolBlock next = block -> next;
-    if(inner -> up && block -> keep_count) _block_transfer(block, inner -> up);
-    else _block_return(block);
-    block = next;
+  for(PoolPromotion promotion = inner -> promotions;  promotion;  promotion = promotion -> next) _mark_survivor(promotion);  PoolBlock block = inner -> blocks;  while(block){
+    PoolBlock next = block -> next;  if(inner -> up && block -> keep_count) _block_transfer(block, inner -> up);  else _block_return(block);  block = next;
   }
-  inner -> blocks = NULL;
-  for(int i = 0;  i < POOL_CLASS_COUNT;  i ++) inner -> current[i] = NULL;
+  inner -> blocks = NULL;  for(int i = 0;  i < POOL_CLASS_COUNT;  i ++) inner -> current[i] = NULL;
 }
 
 Scope Scope_new_named(const char *);
-
 void * Scope_malloc_in(Scope *, size_t);
-
 void Scope_push(Scope *);
-
 Map Map_new_capacity(unsigned);
-
 Pool Pool_retain_named(Pool inner, const char * name){
-  if(! _init_guard_) _file_init_();
-  _storage_lock();
-  _storage_initialize();
-  _storage_unlock();
-  unsigned capacity = 2;
-  if(inner){
-    _lock(inner);
-    capacity = inner -> child_capacity;
-    _unlock(inner);
+  if(! _init_guard_) Pool_initialize();  _storage_lock();  _storage_initialize();  _storage_unlock();  unsigned capacity = 2;  if(inner){
+    _lock(inner);  capacity = inner -> child_capacity;  _unlock(inner);
   }
-  Scope scope = Scope_new_named(name);
-  Pool pool = NULL;
-  int mutex_ready = 0, finished = 0;
-  {
+  Scope scope = Scope_new_named(name);  Pool pool = NULL;  int mutex_ready = 0, finished = 0; {
   _x2c_defer_env_0 _x2c_defer_env_9 = {._x2c_defer_capture_0 =(const void *) & finished, ._x2c_defer_capture_1 =(const void *) & mutex_ready, ._x2c_defer_capture_2 =(const void *) & pool, ._x2c_defer_capture_3 =(const void *) & scope};
 
   X2CCleanup _x2c_defer_record_0 = {
@@ -763,14 +555,14 @@ Pool Pool_retain_named(Pool inner, const char * name){
 }
 
 Pool Pool_retain(Pool inner){
-  if(! _init_guard_) _file_init_();
+  if(! _init_guard_) Pool_initialize();
   return Pool_retain_named(inner, NULL);
 }
 
 void Scope_destroy(Scope);
 
 Pool Pool_release(Pool inner){
-  if(! _init_guard_) _file_init_();
+  if(! _init_guard_) Pool_initialize();
   if(! inner) return NULL;
   _storage_lock();
   _lock(inner);
@@ -788,21 +580,27 @@ Pool Pool_release(Pool inner){
   return up;
 }
 
-Pool x2c_pool_values_current(void){
-  if(! _init_guard_) _file_init_();
-  if(! value_thread.current) x2c_pool_values_initialize();
+Pool Pool_current(void){
+  if(! _init_guard_) Pool_initialize();
+  if(! value_thread.current) Pool_initialize();
   return value_thread.current;
 }
 
-void x2c_pool_values_initialize(void){
-  if(! _init_guard_) _file_init_();
+void Pool_initialize(void){
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _x2c_static_initialize_0();
+  _x2c_static_initialize_1();
+  _x2c_static_initialize_2();
+  _x2c_static_initialize_3();
   if(value_thread.current) return;
   if(! value_root) value_root = Pool_retain_named(NULL, "canonical values");
   value_thread.current = value_root;
+  Scope_shutdown_hook(Pool_shutdown);
 }
 
-void x2c_pool_values_thread_initialize(void){
-  if(! _init_guard_) _file_init_();
+void Pool_thread_initialize(void){
+  if(! _init_guard_) Pool_initialize();
   if(value_thread.current) return;
   if(! value_root){
     fprintf(stderr, "Pool: canonical value root is not initialized\n");
@@ -811,39 +609,53 @@ void x2c_pool_values_thread_initialize(void){
   value_thread.current = value_root;
 }
 
-void x2c_pool_values_shutdown(void){
-  if(! _init_guard_) _file_init_();
+void Pool_shutdown(void){
+  if(! _init_guard_) Pool_initialize();
   while(value_thread.current && value_thread.current != value_root) value_thread.current = Pool_release(value_thread.current);
   while(value_root) value_root = Pool_release(value_root);
   value_thread.current = NULL;
 }
 
-Pool x2c_pool_values_retain_named(const char * name){
-  if(! _init_guard_) _file_init_();
-  Pool nested = Pool_retain_named(x2c_pool_values_current(), name);
+Pool Pool_open_named(const char * name){
+  if(! _init_guard_) Pool_initialize();
+  Pool nested = Pool_retain_named(Pool_current(), name);
   value_thread.current = nested;
   return nested;
 }
 
-Pool x2c_pool_values_retain(void){
-  if(! _init_guard_) _file_init_();
-  return x2c_pool_values_retain_named(NULL);
+Pool Pool_open(void){
+  if(! _init_guard_) Pool_initialize();
+  return Pool_open_named(NULL);
 }
 
-void x2c_pool_values_release(void){
-  if(! _init_guard_) _file_init_();
+Var Symbol_var(Symbol);
+
+Var String_var(String);
+
+void Pool_close(void){
+  if(! _init_guard_) Pool_initialize();
+  if(! Pool_current() -> up){
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/pool.x",.function = "Pool_close",.line = 615};
+    x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.close")), NULL))));
+    __builtin_unreachable();
+  }
   value_thread.current = Pool_release(value_thread.current);
 }
 
-Pool x2c_pool_values_detach(void){
-  if(! _init_guard_) _file_init_();
-  Pool detached = value_thread.current;
+Pool Pool_detach(void){
+  if(! _init_guard_) Pool_initialize();
+  Pool detached = Pool_current();
+  if(! detached -> up){
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/pool.x",.function = "Pool_detach",.line = 628};
+    x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.detach")), NULL))));
+    __builtin_unreachable();
+  }
   value_thread.current = detached -> up;
   return detached;
 }
 
-int x2c_pool_values_is_permanent(Var value){
-  if(! _init_guard_) _file_init_();
+int Pool_is_permanent(Var value){
+  if(! _init_guard_) Pool_initialize();
   return value_root && Pool_owns(value_root, value);
 }
 
@@ -852,7 +664,7 @@ Var Map_getindex(Map, Var);
 int Var_is_void(Var);
 
 Var Pool_lookup(Pool inner, Var key){
-  if(! _init_guard_) _file_init_();
+  if(! _init_guard_) Pool_initialize();
   for(Pool pool = inner;  pool;  pool = pool -> up){
     _lock(pool);
     Var found = Map_getindex(pool -> table, key);
@@ -869,15 +681,11 @@ static void _insert_locked(Pool inner, Var object){
   inner -> interned ++;
 }
 
-Var Symbol_var(Symbol);
-
-Var String_var(String);
-
 void Pool_insert(Pool inner, Var object){
-  if(! _init_guard_) _file_init_();
+  if(! _init_guard_) Pool_initialize();
   if(! inner){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/pool.x",.function = "Pool_insert",.line = 606};
-    x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.insert")), NULL))));
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/pool.x",.function = "Pool_insert",.line = 666};
+    x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.insert")), NULL))));
     __builtin_unreachable();
   }
   _lock(inner);
@@ -902,10 +710,10 @@ unsigned Map_len(Map);
 Var Map_setdefault(Map, Var, Var);
 
 Var Pool_intern(Pool inner, Var object, void * alloc){
-  if(! _init_guard_) _file_init_();
+  if(! _init_guard_) Pool_initialize();
   if(! inner || ! alloc){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/pool.x",.function = "Pool_intern",.line = 624};
-    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.intern")), NULL))));
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/pool.x",.function = "Pool_intern",.line = 686};
+    x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.intern")), NULL))));
     __builtin_unreachable();
   }
   Var canonical;
@@ -944,10 +752,10 @@ Var Pool_intern(Pool inner, Var object, void * alloc){
 }
 
 void * Pool_malloc(Pool inner, size_t size){
-  if(! _init_guard_) _file_init_();
+  if(! _init_guard_) Pool_initialize();
   if(! inner){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/pool.x",.function = "Pool_malloc",.line = 656};
-    x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.malloc")), NULL))));
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/pool.x",.function = "Pool_malloc",.line = 720};
+    x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.malloc")), NULL))));
     __builtin_unreachable();
   }
   int class_index = _class(size);
@@ -974,8 +782,8 @@ void * Pool_malloc(Pool inner, size_t size){
       fresh = malloc(bytes);
       if(! fresh){
         if(x2c_error_runtime_ready){
-          static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/pool.x",.function = "Pool_malloc",.line = 681};
-          x2c_error_raise_n(& _x2c_error_site_3, 97614135954008, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool backing block")), NULL))));
+          static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/pool.x",.function = "Pool_malloc",.line = 745};
+          x2c_error_raise_n(& _x2c_error_site_5, 97614135954008, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool backing block")), NULL))));
           __builtin_unreachable();
         }
         fprintf(stderr, "Pool: backing block allocation failed\n");
@@ -1016,11 +824,11 @@ void * Pool_malloc(Pool inner, size_t size){
 void Scope_free(void *);
 
 void Pool_free(Pool inner, void * alloc){
-  if(! _init_guard_) _file_init_();
+  if(! _init_guard_) Pool_initialize();
   if(! alloc) return;
   if(! inner){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/pool.x",.function = "Pool_free",.line = 701};
-    x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.free")), NULL))));
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/pool.x",.function = "Pool_free",.line = 768};
+    x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.free")), NULL))));
     __builtin_unreachable();
   }
   _storage_lock();
@@ -1070,7 +878,7 @@ static int _owns_locked(Pool pool, Var key){
 }
 
 int Pool_owns(Pool pool, Var key){
-  if(! _init_guard_) _file_init_();
+  if(! _init_guard_) Pool_initialize();
   if(! pool) return 0;
   _lock(pool);
   {
@@ -1172,13 +980,13 @@ static PoolBlock _block_of(void * alloc){
 }
 
 int Pool_promote(Pool inner, Var object, void * alloc){
-  if(! _init_guard_) _file_init_();
+  if(! _init_guard_) Pool_initialize();
   if(! inner || ! inner -> up || ! alloc) return 0;
   return _promote_block(inner, object, alloc, _block_of(alloc));
 }
 
 int Pool_own(Pool inner, Var object, void * alloc){
-  if(! _init_guard_) _file_init_();
+  if(! _init_guard_) Pool_initialize();
   if(! inner) return 1;
   Pool owner = inner;
   while(owner && ! Pool_owns(owner, object)) owner = owner -> up;
@@ -1194,7 +1002,7 @@ int Pool_own(Pool inner, Var object, void * alloc){
 }
 
 PoolStats Pool_stats(Pool inner){
-  if(! _init_guard_) _file_init_();
+  if(! _init_guard_) Pool_initialize();
   _storage_lock();
   {
 

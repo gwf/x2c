@@ -980,11 +980,11 @@ static void _catch_commit_captures(ErrorHandler handle, ErrorRecord * record, Ma
 
 Var List_cadr(List);
 
-Pool String_pool_retain_named(const char *);
+Pool Pool_open_named(const char *);
 
 int MatchPlan_execute_capture(MatchPlan, Var, MatchCaptureBuffer *, MachineStats *);
 
-void String_pool_release(void);
+void Pool_close(void);
 
 static Symbol _catch_match(ErrorHandler h){
   if(Error_count() <= h -> watermark) return 285842436424;
@@ -994,7 +994,7 @@ static Symbol _catch_match(ErrorHandler h){
   ErrorThreadState state = _thread();
   state -> floor_only ++;
   List projection = _cons(& record -> region, Symbol_var(code), detail);
-  String_pool_retain_named("Error catch bindings");
+  Pool_open_named("Error catch bindings");
   ErrorCatchSite * site = h -> site;
   MatchPlan * plans =(void *) h -> plans != NULL ? h -> plans -> bytes : NULL;
   for(int i = 0;  i < site -> arm_count;  i ++){
@@ -1014,12 +1014,12 @@ static Symbol _catch_match(ErrorHandler h){
     _catch_commit_captures(h, record, layout, & captures);
     if(values) Scope_free(values);
     h -> selected = i;
-    String_pool_release();
+    Pool_close();
     _catch_retain(h);
     state -> floor_only --;
     return 1440172936;
   }
-  String_pool_release();
+  Pool_close();
   state -> floor_only --;
   return 285842436424;
 }
