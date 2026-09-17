@@ -777,17 +777,13 @@ List Error.since_in(int mark, Scope *values, Pool pool) {
   };
   ErrorThreadState state = _thread();
   state.floor_only++;
-  List out = NULL;
-  for (int i = Error.count() - 1; i >= mark; i--) {
-    ErrorRecord *record = _record_at(i);
-    Var entry = _copy_value(&region, record.entry);
-    out = _cons(&region, entry, out);
-  }
+  List out = _view_since(&region, mark);
   state.floor_only--;
   *values = region.values;
   return out;
 }
 
+/* Copies the errors at and after `mark` into one region, oldest first. */
 static List _view_since(ErrorRegion *region, int mark) {
   List out = NULL;
   for (int i = Error.count() - 1; i >= mark; i--) {
