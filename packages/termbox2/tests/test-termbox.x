@@ -85,12 +85,12 @@ static void event_copy_timeout_resize_and_render(void) {
 
   terminal.clear();
   EXPECT_INT_EQ(
-    terminal.print(0, 0, %"e\xcc\x81 \xe7\x95\x8c", TB_WHITE, TB_DEFAULT),
+    terminal.print(0, 0, "e\xcc\x81 \xe7\x95\x8c", TB_WHITE, TB_DEFAULT),
     4
   );
   EXPECT_INT_EQ(
     terminal.print(
-      terminal.width() - 1, 1, %"\xe7\x95\x8c",
+      terminal.width() - 1, 1, "\xe7\x95\x8c",
       TB_WHITE, TB_DEFAULT
     ),
     2
@@ -150,9 +150,9 @@ static void fill_repeats_one_cluster_and_reads_back(void) {
 
   /*  A combining cluster stays one cell and comes back whole; a wide one
       steps two columns and stops before a column it could only half fill. */
-  terminal.fill(0, 4, 2, 1, %"e\xcc\x81", TB_WHITE, TB_DEFAULT);
+  terminal.fill(0, 4, 2, 1, "e\xcc\x81", TB_WHITE, TB_DEFAULT);
   EXPECT_STR_EQ(terminal.cell(1, 4).text, "e\xcc\x81");
-  terminal.fill(0, 5, 5, 1, %"\xe7\x95\x8c", TB_WHITE, TB_DEFAULT);
+  terminal.fill(0, 5, 5, 1, "\xe7\x95\x8c", TB_WHITE, TB_DEFAULT);
   EXPECT_STR_EQ(terminal.cell(0, 5).text, "\xe7\x95\x8c");
   EXPECT_STR_EQ(terminal.cell(2, 5).text, "\xe7\x95\x8c");
   EXPECT_STR_EQ(terminal.cell(4, 5).text, " ");
@@ -211,7 +211,7 @@ static void a_long_cluster_comes_back_whole(void) {
   /*  U+1D400 is the one column; U+E0100 through U+E010A are variation
       selectors, printable and zero-width, and four bytes each. */
   char selector[] = "\xf3\xa0\x84\x80";
-  Buffer drawn = Buffer.new(0).write(%"\xf0\x9d\x90\x80");
+  Buffer drawn = Buffer.new(0).write("\xf0\x9d\x90\x80");
   for (int mark = 0; mark < 11; mark++) {
     selector[3] = (char) (0x80 + mark);
     drawn.write_len(selector, 4);
@@ -258,14 +258,14 @@ static void box_draws_a_frame_around_its_interior(void) {
 
 static void measure_agrees_with_print_without_drawing(void) {
   EXPECT_INT_EQ(Termbox.measure("abc"), 3);
-  EXPECT_INT_EQ(Termbox.measure(%"e\xcc\x81 \xe7\x95\x8c"), 4);
+  EXPECT_INT_EQ(Termbox.measure("e\xcc\x81 \xe7\x95\x8c"), 4);
   EXPECT_INT_EQ(Termbox.measure(""), 0);
   EXPECT_INT_EQ(Termbox.measure(NULL), 0);
   EXPECT_INT_EQ(Termbox.measure("a\nbc"), 3);
 
   Termbox terminal = Termbox.open();
   terminal.clear();
-  String text = %"e\xcc\x81 \xe7\x95\x8c";
+  String text = "e\xcc\x81 \xe7\x95\x8c";
   EXPECT_INT_EQ(terminal.print(0, 0, text, TB_WHITE, TB_DEFAULT), 4);
   EXPECT_INT_EQ(Termbox.measure(text), 4);
 

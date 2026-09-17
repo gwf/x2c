@@ -108,8 +108,7 @@ static void _draw(Termbox terminal, List matched, String filter, int chosen) {
 }
 
 static List _run(String path) {
-  Termbox terminal = Termbox.open();
-  defer terminal.close();
+  Termbox terminal = $auto(Termbox.open());
 
   List incidents = _read_incidents(path);
   List matched = NULL;

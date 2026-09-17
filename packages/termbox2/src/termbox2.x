@@ -259,9 +259,8 @@ static int _termbox_scan(
   return width;
 }
 
-int Termbox.measure(String text) {
-  return _termbox_scan(text, "measure", NULL, 0, NULL);
-}
+int Termbox.measure(String text) =>
+  _termbox_scan(text, "measure", NULL, 0, NULL);
 
 /*  Repeat one grapheme cluster over a rectangle. The origin must be on the
     screen, as it must for print; the extent is clipped to the screen, and a
@@ -307,7 +306,7 @@ Termbox Termbox.box(
   }
 
   int right = x + width - 1, bottom = y + height - 1;
-  String horizontal = %"\xe2\x94\x80", vertical = %"\xe2\x94\x82";
+  String horizontal = "\xe2\x94\x80", vertical = "\xe2\x94\x82";
   terminal.fill(x + 1, y, width - 2, 1, horizontal, foreground, background);
   terminal.fill(
     x + 1, bottom, width - 2, 1, horizontal, foreground, background
@@ -316,10 +315,10 @@ Termbox Termbox.box(
   terminal.fill(
     right, y + 1, 1, height - 2, vertical, foreground, background
   );
-  terminal.fill(x, y, 1, 1, %"\xe2\x94\x8c", foreground, background);
-  terminal.fill(right, y, 1, 1, %"\xe2\x94\x90", foreground, background);
-  terminal.fill(x, bottom, 1, 1, %"\xe2\x94\x94", foreground, background);
-  terminal.fill(right, bottom, 1, 1, %"\xe2\x94\x98", foreground, background);
+  terminal.fill(x, y, 1, 1, "\xe2\x94\x8c", foreground, background);
+  terminal.fill(right, y, 1, 1, "\xe2\x94\x90", foreground, background);
+  terminal.fill(x, bottom, 1, 1, "\xe2\x94\x94", foreground, background);
+  terminal.fill(right, bottom, 1, 1, "\xe2\x94\x98", foreground, background);
   return terminal;
 }
 
@@ -426,54 +425,37 @@ static TermboxEvent _termbox_read(Termbox terminal, int wait, int timeout_ms) {
   }
 }
 
-TermboxEvent Termbox.poll(Termbox terminal) {
-  return _termbox_read(terminal, 1, -1);
-}
+TermboxEvent Termbox.poll(Termbox terminal) => _termbox_read(terminal, 1, -1);
 
-TermboxEvent Termbox.peek(Termbox terminal, int timeout_ms) {
-  return _termbox_read(terminal, 0, timeout_ms);
-}
+TermboxEvent Termbox.peek(Termbox terminal, int timeout_ms) =>
+  _termbox_read(terminal, 0, timeout_ms);
 
-int TermboxEvent.available(TermboxEvent event) {
-  return event.present;
-}
+int TermboxEvent.available(TermboxEvent event) => event.present;
 
-int TermboxEvent.is_key(TermboxEvent event) {
-  return event.present && event.type == TB_EVENT_KEY;
-}
+int TermboxEvent.is_key(TermboxEvent event) =>
+  event.present && event.type == TB_EVENT_KEY;
 
-int TermboxEvent.is_resize(TermboxEvent event) {
-  return event.present && event.type == TB_EVENT_RESIZE;
-}
+int TermboxEvent.is_resize(TermboxEvent event) =>
+  event.present && event.type == TB_EVENT_RESIZE;
 
-int TermboxEvent.is_mouse(TermboxEvent event) {
-  return event.present && event.type == TB_EVENT_MOUSE;
-}
+int TermboxEvent.is_mouse(TermboxEvent event) =>
+  event.present && event.type == TB_EVENT_MOUSE;
 
-int TermboxEvent.has_modifier(TermboxEvent event, int modifier) {
-  return event.present && (event.modifiers & modifier) != 0;
-}
+int TermboxEvent.has_modifier(TermboxEvent event, int modifier) =>
+  event.present && (event.modifiers & modifier) != 0;
 
-uint16_t TermboxEvent.key(TermboxEvent event) {
-  return event.present ? event.native_key : 0;
-}
+uint16_t TermboxEvent.key(TermboxEvent event) =>
+  event.present ? event.native_key : 0;
 
-String TermboxEvent.text(TermboxEvent event) {
-  return event.present ? event.input_text : NULL;
-}
+String TermboxEvent.text(TermboxEvent event) =>
+  event.present ? event.input_text : NULL;
 
-int TermboxEvent.width(TermboxEvent event) {
-  return event.present ? event.resize_width : 0;
-}
+int TermboxEvent.width(TermboxEvent event) =>
+  event.present ? event.resize_width : 0;
 
-int TermboxEvent.height(TermboxEvent event) {
-  return event.present ? event.resize_height : 0;
-}
+int TermboxEvent.height(TermboxEvent event) =>
+  event.present ? event.resize_height : 0;
 
-int TermboxEvent.x(TermboxEvent event) {
-  return event.present ? event.mouse_x : 0;
-}
+int TermboxEvent.x(TermboxEvent event) => event.present ? event.mouse_x : 0;
 
-int TermboxEvent.y(TermboxEvent event) {
-  return event.present ? event.mouse_y : 0;
-}
+int TermboxEvent.y(TermboxEvent event) => event.present ? event.mouse_y : 0;

@@ -41,8 +41,7 @@ static void _draw(Termbox terminal, ArrayChar cells, int width, int height) {
 
 int main(void) {
   srand((unsigned int) time(NULL));
-  Termbox terminal = Termbox.open();
-  defer terminal.close();
+  Termbox terminal = $auto(Termbox.open());
   terminal.hide_cursor();
 
   int width = terminal.width(), height = terminal.height();
