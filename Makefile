@@ -19,7 +19,8 @@ VERIFY_TARGETS = verify-sanitize verify-fixtures verify-fixtures-update \
 	build-recovery packages-check
 DIFF_TARGETS = stage-diff-0 stage-diff-1 stage-diff-2 stage-diff-3 \
 	stage-diff-all
-DOC_TARGETS = doc-generate doc-check doc-examples doc-build doc-serve \
+DOC_TARGETS = doc-generate doc-check doc-examples doc-outputs doc-build \
+	doc-serve \
 	examples-update
 SITE_TARGETS = site site-build site-check site-serve
 BENCHMARK_TARGETS = bm-all bm-scan bm-string bm-list bm-block-buffer \
@@ -125,7 +126,9 @@ check-after-precommit:
 #	$(MAKE) examples
 	$(MAKE) proof-raw-symbols
 	$(MAKE) doc-check
-#	$(MAKE) doc-examples
+# doc-outputs adds about 6 s on macOS, where each new executable's first run
+# waits for a system check; enabling it needs Gary's decision on that cost.
+#	$(MAKE) doc-outputs
 
 # Stage 2 is where the compiler has reached its fixed point: stage 1 is built
 # by the refreshed bootstrap and stage 2 by stage 1, so `stage-diff-2` proves
@@ -237,6 +240,9 @@ doc-check:						## Check documentation for drift
 
 doc-examples: build					## Compile every example in the book
 	python3 tools/check-doc-examples.py
+
+doc-outputs: build					## Run book examples that show output
+	python3 tools/check-doc-examples.py --outputs
 
 doc-build: site/node_modules/.package-lock.json		## Render the documentation book
 	@command -v mdbook >/dev/null 2>&1 || { \

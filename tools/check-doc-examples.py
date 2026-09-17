@@ -9,6 +9,10 @@ sample is a deliberate, explained exception rather than a silent one.
 Each sample is tried twice: once as written, in case it is a set of file-scope
 declarations, and once wrapped in a ``main`` function, in case it is a sequence
 of statements. Only a sample that fails both ways is an error.
+
+A sample followed directly by a ``text`` fence is built and run instead, and
+its standard output or standard error must equal that fence. ``--outputs``
+checks only those samples in the book.
 """
 
 from __future__ import annotations
@@ -55,10 +59,13 @@ def jobs() -> int:
 
 
 class Sample:
-    def __init__(self, path: pathlib.Path, line: int, code: str) -> None:
+    def __init__(
+        self, path: pathlib.Path, line: int, code: str, output: str | None
+    ) -> None:
         self.path = path
         self.line = line
         self.code = code
+        self.output = output
 
     @property
     def where(self) -> str:
@@ -102,20 +109,26 @@ def wrapped_in_main(code: str) -> str:
     )
 
 
-def translate(source: str, workdir: pathlib.Path) -> tuple[bool, str]:
-    """Compile without linking through the driver's normal package handling.
+def translate(
+    source: str, workdir: pathlib.Path, expected: str | None
+) -> tuple[bool, str]:
+    """Build through the driver's normal package handling.
 
     Translation alone cannot catch missing C declarations. The build driver
-    supplies imported packages' generated headers to the native compiler.
+    supplies imported packages' generated headers to the native compiler. A
+    sample without expected output is compiled without linking; one with
+    expected output is linked, run, and compared.
     """
     path = workdir / "sample.x"
     path.write_text(source, encoding="utf-8")
+    program = workdir / "sample"
+    mode = [] if expected is not None else ["--compile-only"]
     result = subprocess.run(
         [
-            str(COMPILER), "build", "--compile-only", "--cc", CC,
+            str(COMPILER), "build", *mode, "--cc", CC,
             "--package-dir", str(ROOT / "packages"), *PACKAGE_HEADERS,
             "--build-dir", str(workdir / "build"),
-            "--output", str(workdir / "sample.o"), str(path),
+            "--output", str(program), str(path),
         ],
         cwd=ROOT,
         text=True,
@@ -125,6 +138,19 @@ def translate(source: str, workdir: pathlib.Path) -> tuple[bool, str]:
     if result.returncode != 0:
         detail = result.stderr.strip() or result.stdout.strip()
         return False, f"x2c: {detail}"
+    if expected is None:
+        return True, ""
+    run = subprocess.run(
+        [str(program)], cwd=workdir, text=True, capture_output=True,
+        timeout=30, check=False,
+    )
+    if expected not in (run.stdout, run.stderr):
+        return False, (
+            f"output differs (status {run.returncode})\n"
+            f"      expected: {expected!r}\n"
+            f"      stdout:   {run.stdout!r}\n"
+            f"      stderr:   {run.stderr!r}"
+        )
     return True, ""
 
 
@@ -132,16 +158,19 @@ def check_sample(sample: Sample) -> str | None:
     candidates = [("as written", as_program(sample.code))]
     if not MAIN_PATTERN.search(sample.code):
         candidates.append(("wrapped in main", wrapped_in_main(sample.code)))
+        # Without main, the sample as written links nothing it could run.
+        if sample.output is not None:
+            del candidates[0]
     failures = []
     for label, source in candidates:
         with tempfile.TemporaryDirectory() as tmp:
-            ok, detail = translate(source, pathlib.Path(tmp))
+            ok, detail = translate(source, pathlib.Path(tmp), sample.output)
         if ok:
             return None
         failures.append(f"    {label}: {detail}")
     tried = " and ".join(label for label, _ in candidates)
     return (
-        f"{sample.where}: x2c sample does not compile (tried {tried}); "
+        f"{sample.where}: x2c sample fails (tried {tried}); "
         "fix it, or tag it `x2c,ignore` with an <!-- ignore: reason --> "
         "comment above the fence\n" + "\n".join(failures)
     )
@@ -150,7 +179,8 @@ def check_sample(sample: Sample) -> str | None:
 def collect(path: pathlib.Path, errors: list[str]) -> list[Sample]:
     text = path.read_text(encoding="utf-8")
     samples: list[Sample] = []
-    for match in FENCE_PATTERN.finditer(text):
+    fences = list(FENCE_PATTERN.finditer(text))
+    for match, following in zip(fences, fences[1:] + [None]):
         tokens = [t.strip() for t in match.group("info").split(",")]
         if not tokens or tokens[0] != "x2c":
             continue
@@ -166,7 +196,11 @@ def collect(path: pathlib.Path, errors: list[str]) -> list[Sample]:
             continue
         if not code.strip():
             continue
-        samples.append(Sample(path, line, code))
+        output = None
+        if (following and following.group("info").strip() == "text" and
+                not text[match.end():following.start()].strip()):
+            output = dedent(following.group("body"), following.group("indent"))
+        samples.append(Sample(path, line, code, output))
     return samples
 
 
@@ -177,11 +211,14 @@ def main() -> int:
             file=sys.stderr,
         )
         return 1
+    outputs_only = sys.argv[1:] == ["--outputs"]
     errors: list[str] = []
     samples: list[Sample] = []
-    for source in SOURCES:
+    for source in SOURCES[:1] if outputs_only else SOURCES:
         for path in sorted(source.rglob("*.md")):
             samples.extend(collect(path, errors))
+    if outputs_only:
+        samples = [sample for sample in samples if sample.output is not None]
     # Each sample is an independent pair of subprocesses, so the pool is bound
     # by the machine, not by Python. map keeps the report in document order.
     with concurrent.futures.ThreadPoolExecutor(max_workers=jobs()) as pool:
@@ -191,7 +228,11 @@ def main() -> int:
         for error in errors:
             print(f"- {error}", file=sys.stderr)
         return 1
-    print(f"doc example check passed: {len(samples)} x2c samples compiled")
+    shown = sum(sample.output is not None for sample in samples)
+    print(
+        f"doc example check passed: {len(samples)} x2c samples compiled, "
+        f"{shown} with matching output"
+    )
     return 0
 
 
