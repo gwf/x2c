@@ -54,6 +54,7 @@
 - [lib/buffer.x](https://x2c-lang.dev/docs/library/modules/buffer.html)
 - [lib/common.x](https://x2c-lang.dev/docs/library/modules/common.html)
 - [lib/context.x](https://x2c-lang.dev/docs/library/modules/context.html)
+- [lib/diff.x](https://x2c-lang.dev/docs/library/modules/diff.html)
 - [lib/digest.x](https://x2c-lang.dev/docs/library/modules/digest.html)
 - [lib/dispatch.x](https://x2c-lang.dev/docs/library/modules/dispatch.html)
 - [lib/error.x](https://x2c-lang.dev/docs/library/modules/error.html)

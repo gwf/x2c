@@ -65,7 +65,7 @@ build: $(PACKAGE_HEADERS) $(PACKAGE_ARCHIVE) builds/$(PACKAGE).link
 
 BUNDLE_DIR ?= builds/bundle
 bundle: build
-	python3 "$(PACKAGE_SUPPORT)tools/bundle.py" --package "$(PACKAGE)" \
+	"$(X2C)" script "$(PACKAGE_SUPPORT)tools/bundle.x" --package "$(PACKAGE)" \
 	  --compiler "$(X2C)" --manifest "$(DEPENDENCY_MANIFEST)" \
 	  --prefix "$(PACKAGE_PREFIX)" --output "$(BUNDLE_DIR)"
 

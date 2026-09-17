@@ -400,9 +400,14 @@ static void _package_link_flags(Build state, String name, String path) {
 static void Build._link_packages(Build state, String input, String directory) {
   List roots = state.request.package_roots();
   if (!roots) return;
+  char buffer[PATH_MAX];
+  String self = realpath(input, buffer) ? %"$buffer" : input;
   String own = _package_source_directory(roots, input);
   String depfile = %"$directory/${Path.stem(input)}.d";
   foreach (String dependency, _state_dep_inputs(depfile)) {
+    // A unit under a package directory that is not the package's own
+    // source, such as a script kept beside it, consumes nothing by itself.
+    if (dependency == self || dependency == input) continue;
     String package = _package_directory(roots, dependency);
     if (!package || (own && package == own)) continue;
     String builds = %"$package/builds";

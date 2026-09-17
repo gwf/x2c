@@ -495,7 +495,7 @@ static void _write_elements(Buffer out, Var sequence, int pretty, int depth) {
 static void _write_members(Buffer out, Map object, int pretty, int depth) {
   Array names = $auto([]);
   foreach (Var (name, member), object) {
-    if (name is not <string> && name is not <symbol>) {
+    if (name is not <string> && !name.is_atom()) {
       Symbol tag = name.tag();
       raise %(bad-types (operation "Var.json") (want "String object key")
               (tag $tag));

@@ -41,6 +41,7 @@
     - [lib/buffer.x](library/modules/buffer.md)
     - [lib/common.x](library/modules/common.md)
     - [lib/context.x](library/modules/context.md)
+    - [lib/diff.x](library/modules/diff.md)
     - [lib/digest.x](library/modules/digest.md)
     - [lib/dispatch.x](library/modules/dispatch.md)
     - [lib/error.x](library/modules/error.md)

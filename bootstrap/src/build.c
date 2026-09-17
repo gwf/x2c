@@ -839,6 +839,8 @@ CliRequest cli_package_options(String, String);
 static void Build__link_packages(Build state, String input, String directory){
   List roots = CliRequest_package_roots(state -> request);
   if(! List_truth(roots)) return;
+  char buffer[PATH_MAX];
+  String self = realpath(input, buffer) ? String_join(NULL, cons(String_var(String_new(buffer)), NULL)) : input;
   String own = _package_source_directory(roots, input);
   String depfile = String_join(NULL, cons(String_var(directory), cons(String_var(_1), cons(String_var(Path_stem(input)), cons(String_var(_21), NULL)))));
   {
@@ -849,6 +851,7 @@ static void Build__link_packages(Build state, String input, String directory){
     while(List_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_8)){
       dependency = Var_string(_x2c_macro_cursor_output_8);
       {
+        if(String_equal(dependency, self) || String_equal(dependency, input)) continue;
         String package = _package_directory(roots, dependency);
         if(! String_truth(package) ||(String_truth(own) && String_equal(package, own))) continue;
         String builds = String_join(NULL, cons(String_var(package), cons(String_var(_28), NULL)));

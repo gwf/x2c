@@ -12,6 +12,7 @@ The modules are optional in ordinary programs. Include the ones a file uses:
 #include "args.x"
 #include "digest.x"
 #include "regex.x"
+#include "diff.x"
 ```
 
 ## Write a script
@@ -523,6 +524,51 @@ backtracks, so a pattern with nested repetition such as `(a*)*b` can take
 time exponential in the text; write the repetition once. A repeated byte or
 set, such as `\w*`, matches any length, but a repeated group such as
 `(?:ab)*` raises `<size-limit>` past 2,000 repetitions in one match.
+
+## Comparing text
+
+`diff.x` compares two texts line by line. `Diff.unified` returns the
+difference the way `diff -u` prints it, with the two names in the header
+and three lines of context around each change, or NULL when the texts are
+the same line for line. A check that keeps expected output in a file
+reports a mismatch with it:
+
+```x2c
+~#include "diff.x"
+~#include "path.x"
+~#include "process.x"
+~int main(void) {
+String expected = Path.read_text("unittest/expected/help.txt");
+String actual = %(./x2c --help).job().output();
+String report = Diff.unified(expected, actual, "expected", "actual");
+if (report) Stderr.printf("%s", report);
+~  return report ? 1 : 0;
+~}
+```
+
+`Diff.lines` returns the edits themselves: a `List` of `(same line)`,
+`(delete line)`, and `(insert line)` forms in order, with line endings
+removed, for a program that wants to act on them:
+
+```x2c
+~#include "diff.x"
+~int main(void) {
+foreach (List edit, Diff.lines("a\nb\n", "a\nc\n")) {
+  (Symbol kind, String line) = edit;
+  if (kind != <same>) printf("%s %s\n", kind, line);
+}
+~  return 0;
+~}
+```
+
+```text
+delete b
+insert c
+```
+
+The edits are a shortest script for texts that are mostly alike. Past two
+thousand edits the differing middle is reported as one run of deletions and
+one run of insertions.
 
 ## JSON
 

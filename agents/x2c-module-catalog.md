@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 33
-- Runtime modules: 54
+- Runtime modules: 55
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -554,6 +554,14 @@ Public functions:
 `Context.open_isolated`, `Context.open_isolated_named`, `Context.current`,
 `Context.export_nested`, `Context.export`, `Context.export_scope`,
 `Context.close`, `Context.cleanup`
+
+### [lib/diff.x](../lib/diff.x)
+
+line differences between two texts.
+
+Public functions:
+
+`Diff.lines`, `Diff.unified`
 
 ### [lib/digest.x](../lib/digest.x)
 

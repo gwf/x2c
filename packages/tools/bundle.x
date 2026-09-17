@@ -1,0 +1,183 @@
+#!/usr/bin/env -S x2c script
+/*  bundle.x -- stage a built package with its native inputs as a bundle
+
+      bundle.x --package <name> --compiler <x2c> [--manifest <json>]
+               [--prefix <dir>] [--output <dir>]
+
+    Run in the package directory. The staged tree lands at <output>/<name>
+    beside <name>-native.tar.gz, with a BUNDLE.json that `x2c install`
+    reads. Object files a package builds outside `x2c build` join the
+    bundled archive; `AR` names the archiver.
+*/
+#include "json.x"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+static void fail(String message) {
+  raise %(bad-arg (why $message));
+}
+
+static String expand(String text, Map variables) {
+  Regex hole = Regex.compile("\\{(\\w*)\\}");
+  return hole.replace_fn(text, %!(RegexMatch found) => {
+    Var value;
+    if (!variables.try_get(found[1], &value))
+      fail(%"unknown manifest variable: '${found[1]}'");
+    return value.str();
+  });
+}
+
+static Var member(Map map, String key, Var fallback) {
+  Var value;
+  return map.try_get(key, &value) ? value : fallback;
+}
+
+static String quoted(String argument) =>
+  %"\"${argument.replace("\\", "\\\\").replace("\"", "\\\"")}\"";
+
+static void copy(Path source, Path target) {
+  target.dirname().make_dirs();
+  if (source.is_dir()) source.copy_tree(target);
+  else source.copy_file(target);
+}
+
+static Path tool_path(String name) {
+  if (name.contains("/")) return Path.absolute(name);
+  foreach (String dir, Env.get("PATH").split(":"))
+    if (Path.join(dir, name).is_executable()) return Path.join(dir, name);
+  return Path.absolute(name);
+}
+
+static String read_version(Path compiler) =>
+  %($compiler --version).job().output().strip("\n");
+
+static String digest(Path path) {
+  File file = File.open(path, "rb");
+  defer file.close();
+  return file.sha256();
+}
+
+List spec = %(
+  (--package (value name) required (help "Package name"))
+  (--compiler (value x2c) required (help "Compiler that built the package"))
+  (--manifest (value json) (help "Dependency manifest"))
+  (--prefix (value dir) (help "Installed dependency prefix"))
+  (--output (value dir) (default "builds/bundle") (help "Bundle directory")));
+Map options;
+try options = Args.parse(args, spec);
+catch %(bad-arg *detail): {
+  Stderr.printf("%s", Args.usage(spec, "bundle.x"));
+  return 2;
+}
+String name = options["package"].str();
+if (name.contains("/") || name == "." || name == "..")
+  fail("package must be one path component");
+Path package = Path.absolute(".");
+Map manifest = {}, distribution = {};
+if (options["manifest"]) {
+  Path path = options["manifest"].str();
+  manifest = Json.read_file(path);
+  if (manifest["schema"] != 1)
+    fail(%"$path: expected schema 1, found ${manifest["schema"]}");
+  if (!manifest["name"] || !manifest["sources"])
+    fail(%"$path: name and sources are required");
+  Var found;
+  if (!manifest.try_get("distribution", &found))
+    fail("dependency manifest has no distribution data");
+  distribution = found;
+}
+Path legacy = package.join(%"builds/$name.link");
+if (!options["manifest"] && legacy.read_text().strip(" \n"))
+  fail("native link inputs require distribution data");
+String prefix = options["prefix"].str();
+Map variables = {"prefix": prefix ? prefix : "", "package": package};
+
+Path output = Path.absolute(options["output"].str());
+output.make_dirs();
+char work_name[4096];
+snprintf(work_name, sizeof(work_name), "%s/.bundle-XXXXXX", output);
+if (!mkdtemp(work_name)) fail(%"cannot create a work directory in $output");
+Path work = String.new(work_name);
+defer work.remove_tree();
+Path stage = work.join(name);
+stage.make_dirs();
+
+copy(package.join("src"), stage.join("src"));
+foreach (String pattern, %("*.h" "*.xi"))
+  foreach (Path generated, Path.glob(package.join("builds").join(pattern)))
+    copy(generated, stage.join("builds").join(generated.basename()));
+String archive = %"lib$name.a";
+copy(package.join("builds").join(archive), stage.join("builds").join(archive));
+foreach (String pattern, %("README*" "LICENSE*" "PROFILE*" "dependency*.json"))
+  foreach (Path source, Path.glob(package.join(pattern)))
+    copy(source, stage.join(source.basename()));
+foreach (Map item, member(distribution, "copies", [])) {
+  String to = item["to"].str();
+  if (to.startswith("/") || to.split("/").contains(%".."))
+    fail("bundle copy destination must be relative");
+  copy(expand(item["from"].str(), variables), stage.join(to));
+}
+List objects = NULL;
+foreach (String item, member(distribution, "archive_objects", []))
+  objects = objects.append(%(${expand(item, variables)}));
+if (objects) {
+  String ar = Env.get("AR");
+  %(${ar ? ar : "ar"} rs ${stage.join("builds").join(archive)} @objects)
+    .job().options({stdout: <inherit>}).check();
+}
+String platform = %(uname -s).job().output().strip("\n").lower();
+String machine = %(uname -m).job().output().strip("\n");
+List native_args = NULL;
+foreach (String argument, member(distribution, "native_args", []))
+  native_args = native_args.append(%($argument));
+Map none = {};
+foreach (Var (host, arguments), member(distribution, "platform_args", none))
+  if (host.str() == platform)
+    foreach (String argument, arguments)
+      native_args = native_args.append(%($argument));
+Buffer response = Buffer.new(0);
+foreach (String argument, native_args)
+  response.printf("%s\n", quoted(argument));
+stage.join("builds").join(%"$name.native.rsp").write_text(response.str());
+
+Path compiler = tool_path(options["compiler"].str());
+Path runtime = compiler.dirname().join("libx2c.a");
+if (!runtime.is_file())
+  runtime = compiler.dirname().dirname().join("lib/libx2c.a");
+if (!runtime.is_file())
+  runtime = compiler.dirname().dirname().join("bootstrap/lib/libx2c.a");
+Var toolchain = (Var) {0};
+if (prefix) {
+  Path receipt = Path.dirname(prefix).join("receipt.json");
+  if (receipt.is_file()) toolchain = Json.read_file(receipt)["identity"];
+}
+String version = read_version(compiler);
+String x2c_sha256 = digest(compiler), runtime_sha256 = digest(runtime);
+String archive_sha256 = digest(stage.join("builds").join(archive));
+Map identity = {
+  "package": name,
+  "platform": platform,
+  "machine": machine,
+  "x2c_version": version,
+  "x2c_sha256": x2c_sha256,
+  "runtime_sha256": runtime_sha256,
+  "archive_sha256": archive_sha256,
+  "dependency_version": manifest["version"],
+  "dependency_profile": manifest["profile"],
+  "dependency_toolchain": toolchain,
+};
+stage.join("BUNDLE.json").write_text(Var.pretty_json(identity) + "\n");
+
+Path tarball = work.join(%"$name-native.tar.gz");
+%(tar czf $tarball -C $work $name).job().run();
+Path destination = output.join(name);
+if (destination.exists()) {
+  if (!destination.join("BUNDLE.json").is_file())
+    fail(%"refusing to replace unowned $destination");
+  destination.move_to(work.join("previous"));
+}
+stage.move_to(destination);
+tarball.move_to(output.join(tarball.basename()));
+printf("x2c: bundled %s\n", destination);
+printf("x2c: wrote %s\n", output.join(tarball.basename()));

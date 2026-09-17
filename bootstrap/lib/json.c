@@ -701,6 +701,8 @@ int Map_try_next(Map, unsigned *, Var *, Var *);
 
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
+int Var_is_atom(Var);
+
 Array Array_sort_by(Array, Func);
 
 int Array_try_next(Array, int *, Var *);
@@ -730,7 +732,7 @@ static void _write_members(Buffer out, Map object, int pretty, int depth){
         name = _x2c_macro_cursor_output_0;
         member = _x2c_macro_cursor_output_1;
         {
-          if(! Var_is_row(name, 11, 7, 1) && ! Var_is(name, 1328354264)){
+          if(! Var_is_row(name, 11, 7, 1) && ! Var_is_atom(name)){
             Symbol tag = Var_tag(name);
             {
               static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/json.x",.function = "_write_members",.line = 500};

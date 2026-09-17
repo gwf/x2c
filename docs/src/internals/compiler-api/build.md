@@ -40,7 +40,7 @@ The destination's parent must exist. Writes a process-specific sibling
 before rename; handled open, write, close, or rename failure preserves
 the existing database, reports a diagnostic, and returns zero.
 
-Source: `src/build.x:547`
+Source: `src/build.x:552`
 
 ### `Build`
 
@@ -55,7 +55,7 @@ directories and native compile options for imported packages. Programs
 also add ordered package archives and link flags; an absent archive prints
 a diagnostic and exits with status 2. Static libraries skip link inputs.
 
-Source: `src/build.x:438`
+Source: `src/build.x:443`
 
 <a id="Build.begin_translation"></a>
 #### Build.begin_translation
@@ -64,7 +64,7 @@ Source: `src/build.x:438`
 
 Starts translation reporting for `input` and initializes timing when unset.
 
-Source: `src/build.x:451`
+Source: `src/build.x:456`
 
 <a id="Build.cleanup"></a>
 #### Build.cleanup
@@ -75,7 +75,7 @@ Removes the temporary work tree after a successful real build.
 Failed builds, retained directories, and dry runs are left untouched; a
 removal failure emits a warning and is not returned to the caller.
 
-Source: `src/build.x:912`
+Source: `src/build.x:917`
 
 <a id="Build.end_translation"></a>
 #### Build.end_translation
@@ -85,7 +85,7 @@ Source: `src/build.x:912`
 Records one completed translation and reports the phase when all finish.
 A nonzero `cached` value also increments the cached-translation count.
 
-Source: `src/build.x:459`
+Source: `src/build.x:464`
 
 <a id="Build.finish"></a>
 #### Build.finish
@@ -100,7 +100,7 @@ selection and implicit linker inputs are not in the fingerprint. Mapped
 macOS debug executables also produce a companion dSYM before cleanup;
 failed symbol assembly fails the build and preserves intermediates.
 
-Source: `src/build.x:739`
+Source: `src/build.x:744`
 
 <a id="Build.generated_dir"></a>
 #### Build.generated_dir
@@ -126,7 +126,7 @@ the runtime archive.
 
 **Raises:** `<io-fail>` when the executable cannot be moved.
 
-Source: `src/build.x:1016`
+Source: `src/build.x:1021`
 
 <a id="Build.record_translation"></a>
 #### Build.record_translation
@@ -147,7 +147,7 @@ Source: `src/build.x:349`
 
 Prints the completed build receipt and artifact details when enabled.
 
-Source: `src/build.x:813`
+Source: `src/build.x:818`
 
 <a id="Build.run_program"></a>
 #### Build.run_program
@@ -157,7 +157,7 @@ Source: `src/build.x:813`
 Runs the built output with the request's arguments and returns its status.
 A dry run prints the action without launching the program.
 
-Source: `src/build.x:873`
+Source: `src/build.x:878`
 
 <a id="Build.script_helpers"></a>
 #### Build.script_helpers
@@ -169,7 +169,7 @@ program must translate and link. The script's translation depfile already
 lists every file the translation read, so helpers of helpers appear too.
 Runtime and package sources are excluded; their objects are archived.
 
-Source: `src/build.x:992`
+Source: `src/build.x:997`
 
 <a id="Build.translation_current"></a>
 #### Build.translation_current
@@ -206,7 +206,7 @@ Source: `src/build.x:213`
 Reports whether the script executable under `directory` still matches
 everything recorded when it was built.
 
-Source: `src/build.x:1045`
+Source: `src/build.x:1050`
 
 ## Public types
 

@@ -74,7 +74,7 @@ build-safe: configure					## Conservatively rebuild the compiler
 	$(PARALLEL_MAKE) -C builds x2c
 
 verify: build						## Build and run unit test suites
-	./unittest/probes/run-suite-coverage.sh
+	$(STAGE0_X2C) script unittest/probes/run-suite-coverage.x
 	$(MAKE) -C unittest clean
 	$(PARALLEL_MAKE) -C unittest test-all
 	$(PARALLEL_MAKE) -C unittest compiler-fixtures scope-probes \
