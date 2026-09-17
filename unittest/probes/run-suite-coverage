@@ -1,5 +1,5 @@
 #!/usr/bin/env -S x2c script
-/*  run-suite-coverage.x -- every test-*.x file must be a registered suite
+/*  run-suite-coverage -- every test-*.x file must be a registered suite
 
     Discovery (unittest/test-*.x) and execution (the $test.suite calls in
     test-all.x) can drift: a new test-foo.x compiles and links but is never
@@ -17,7 +17,7 @@ if (files != suites) {
                 "calls in test-all.x main\n", files, suites);
   Stderr.printf("a test-*.x file was added or removed without updating "
                 "test-all.x, or an exception needs to be added to "
-                "unittest/probes/run-suite-coverage.x\n");
+                "unittest/probes/run-suite-coverage\n");
   return 1;
 }
 printf("suite coverage: %d test files match %d suite calls in test-all.x\n",

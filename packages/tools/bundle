@@ -1,7 +1,7 @@
 #!/usr/bin/env -S x2c script
-/*  bundle.x -- stage a built package with its native inputs as a bundle
+/*  bundle -- stage a built package with its native inputs as a bundle
 
-      bundle.x --package <name> --compiler <x2c> [--manifest <json>]
+      bundle --package <name> --compiler <x2c> [--manifest <json>]
                [--prefix <dir>] [--output <dir>]
 
     Run in the package directory. The staged tree lands at <output>/<name>
@@ -67,7 +67,7 @@ List spec = %(
 Map options;
 try options = Args.parse(args, spec);
 catch %(bad-arg *detail): {
-  Stderr.printf("%s", Args.usage(spec, "bundle.x"));
+  Stderr.printf("%s", Args.usage(spec, "bundle"));
   return 2;
 }
 String name = options["package"].str();
