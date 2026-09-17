@@ -35,7 +35,7 @@ is not. Returns `nil` when the pattern is malformed or no node matches.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while searching or binding.
 
-Source: `lib/match-recursive.x:403`
+Source: `lib/match-recursive.x:411`
 
 #### match_recursive_search_replace
 
@@ -49,7 +49,7 @@ visited, but a proper `List`'s implicit terminal cdr is not.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while searching or replacing.
 
-Source: `lib/match-recursive.x:431`
+Source: `lib/match-recursive.x:439`
 
 #### match_recursive_try_capture
 
@@ -66,7 +66,7 @@ pool.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while materializing captures.
 
-Source: `lib/match-recursive.x:339`
+Source: `lib/match-recursive.x:347`
 
 #### match_recursive_try_match
 
@@ -83,7 +83,7 @@ or null output pointer returns 0 and leaves the output unchanged.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while analyzing or binding.
 
-Source: `lib/match-recursive.x:368`
+Source: `lib/match-recursive.x:376`
 
 #### match_recursive_try_match_replace
 
@@ -98,7 +98,7 @@ owning `List` pool's lifetime, possibly an ancestor of the current pool.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while matching or replacing.
 
-Source: `lib/match-recursive.x:380`
+Source: `lib/match-recursive.x:388`
 
 #### match_recursive_try_search
 
@@ -116,7 +116,7 @@ is not.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while searching or binding.
 
-Source: `lib/match-recursive.x:418`
+Source: `lib/match-recursive.x:426`
 
 #### match_recursive_try_value
 
@@ -133,7 +133,7 @@ or null output pointer returns 0 and leaves the output unchanged.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while analyzing or binding.
 
-Source: `lib/match-recursive.x:354`
+Source: `lib/match-recursive.x:362`
 
 ## Design notes
 

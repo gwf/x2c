@@ -2,7 +2,8 @@
 
     Copyright (c) 2025 Gary William Flake
 
-    Every guard except !quote accepts an optional leading binder. Nil is
+    Every guard except !quote accepts an optional leading binder when at
+    least one operand follows it. Nil is
     typed `List` data: it may be matched at the root or stored as an explicit
     searchable element.  A proper `List`'s implicit terminal cdr is traversal
     structure and is not reported as an extra search node.

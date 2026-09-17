@@ -171,7 +171,9 @@ predicate: `(!is type string)` checks a `Var` tag, and `(!is atom)`,
 the named category.
 
 Every guard except `!quote` accepts an optional leading binder, which
-captures the slice of input the guard checked:
+captures the slice of input the guard checked. A leading binder needs at
+least one operand after it, so `(!not ?y)` tests `?y` rather than capturing
+it, and `(!set ?w a b)` captures the `a`-or-`b` membership:
 
 ```x2c
 match (%(node 7 8)) {
