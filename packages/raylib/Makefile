@@ -27,8 +27,7 @@ DESKTOP_PREFIX = $(shell $(DEPS_TOOL) path $(DESKTOP_MANIFEST) prefix)
 DESKTOP_FRAMEWORKS := -Wl,-framework,OpenGL -Wl,-framework,Cocoa \
 	-Wl,-framework,IOKit -Wl,-framework,CoreVideo
 
-.PHONY: example short-example run verify verify-headers \
-	prepare-desktop run-interactive
+.PHONY: example short-example run verify prepare-desktop run-interactive
 
 example: builds/texture-sheet
 
@@ -39,27 +38,17 @@ run: builds/climate-trends builds/texture-sheet
 	./builds/texture-sheet
 
 # PNG signature, IHDR length and tag, then width and height big-endian.
-verify: verify-headers run test builds/live-chart
+verify: run test builds/live-chart
 	@./verify-renders.sh $(SHORT_PNG) $(SHORT_PNG_HEAD) \
 	  $(SHEET_PNG) $(SHEET_PNG_HEAD)
 	@$(CHECK_SHA256) renders.sha256
 	@file $(SHORT_PNG) $(SHEET_PNG)
 
-verify-headers: $(DEPENDENCY_PREREQUISITE)
-	@cd $(RAYLIB_INCLUDE) && $(CHECK_SHA256) $(CURDIR)/headers.sha256
-
 # live-chart keeps the larger shared chart for the explicit windowed demo.
 CHART := examples/chart.x
 PACKAGE_X_FLAGS += --x-include-dir examples
 
-builds/climate-trends: examples/climate-trends.x examples/fonts/Lato-Regular.ttf \
-  $(PACKAGE_ARCHIVE) | builds
-	$(X2C) build --output $@ --build-dir builds/climate-trends-build \
-	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
-
-builds/texture-sheet: examples/texture-sheet.x $(PACKAGE_ARCHIVE) | builds
-	$(X2C) build --output $@ --build-dir builds/texture-sheet-build \
-	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
+builds/climate-trends: examples/fonts/Lato-Regular.ttf
 
 prepare-desktop:
 	$(DEPS_TOOL) prepare $(DESKTOP_MANIFEST)

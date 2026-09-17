@@ -3,6 +3,8 @@
 # A package Makefile sets PACKAGE (and DEPENDENCY_PREFIX_VAR when the
 # package has a dependency.json), includes this file, then sets
 # PACKAGE_C_FLAGS and PACKAGE_LINK for its native dependency.
+# tools/deps.py selects dependency-<os>-<arch>.json, dependency-<os>.json,
+# or dependency.json for this host.
 #
 # Every src/*.x becomes builds/<unit>.h and builds/<unit>.c. The native
 # driver compiles those files and src/*.c into builds/lib$(PACKAGE).a,
@@ -49,7 +51,7 @@ PACKAGE_DEPS := $(CURDIR)/deps
 PACKAGE_TESTS := $(wildcard tests/test-*.x)
 PACKAGE_TEST_PROGRAMS := $(PACKAGE_TESTS:tests/%.x=builds/%)
 
-.PHONY: all build test clean prepare deps bundle
+.PHONY: all build test clean prepare deps bundle verify-pins
 # Native action fingerprints own header, tool, and option reuse.
 .PHONY: package-build-force
 
@@ -86,6 +88,22 @@ prepare: deps
 
 deps:
 	@ln -sfn $(PACKAGE_PREFIX) $@
+
+# Nothing links against the dependency until its pinned public headers
+# (headers-<os>.sha256 or headers.sha256) and license texts are verified.
+PACKAGE_HEADER_PINS := $(firstword \
+  $(wildcard headers-$(shell uname -s | tr A-Z a-z).sha256 headers.sha256))
+
+$(PACKAGE_ARCHIVE): | verify-pins
+
+verify-pins: $(DEPENDENCY_PREREQUISITE)
+ifneq ($(PACKAGE_HEADER_PINS),)
+	@cd $(PACKAGE_PREFIX)/include && \
+	  $(CHECK_SHA256) $(CURDIR)/$(PACKAGE_HEADER_PINS)
+endif
+ifneq ($(wildcard licenses.sha256),)
+	@$(CHECK_SHA256) licenses.sha256
+endif
 endif
 
 builds/%.c builds/%.h: src/%.x | builds $(DEPENDENCY_PREREQUISITE)
@@ -109,6 +127,10 @@ builds/test-%: tests/test-%.x $(PACKAGE_ARCHIVE) | builds
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) \
 	  --x-include-dir $(ROOT)/unittest \
 	  $< $(ROOT)/unittest/test-support.x
+
+builds/%: examples/%.x $(PACKAGE_ARCHIVE) | builds
+	"$(X2C)" build --output $@ --build-dir builds/$*-build \
+	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
 
 # The test programs need only the archive, but a package whose tests passed
 # has to be usable by a consumer, and that needs the .link file too.

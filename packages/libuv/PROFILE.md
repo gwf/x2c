@@ -37,7 +37,7 @@ The pinned installed headers have these SHA-256 values:
   `adce0ed0821c8466a87a0a4c9e0df9ea7e4a4b24d099c7d7ed196f72a13f669d`
 
 `src/uv-152.h` includes the installed upstream header and rejects a release
-other than 1.52.1. `make verify-headers` checks the five common headers and the current platform
+other than 1.52.1. `make verify-pins` checks the five common headers and the current platform
 header before the package links. The Linux header hash comes directly from
 the checksum-verified pinned source archive.
 
@@ -55,7 +55,7 @@ ISC, and other permissive notices. The complete retained files and hashes are:
 - `libuv-1.52.1-extra.txt`:
   `262c44bd2cdba037e6d2a82fba15f5800d292bc993a6f5d6b6ea487744d02836`
 
-`make verify-licenses` checks these exact files.
+`make verify-pins` also checks these exact files.
 
 ## Imported qualifier losses
 

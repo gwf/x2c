@@ -409,6 +409,16 @@ def _missing_message(missing: dict[str, str]) -> str:
           "\nFor overridden commands, install or correct the selected tool.")
 
 
+def _manifest(package: Path) -> Path:
+  """The package's manifest for this host, most specific name first."""
+  host = f"{sys.platform}-{platform.machine()}"
+  for name in (f"dependency-{host}.json",
+               f"dependency-{sys.platform}.json"):
+    if (package / name).is_file():
+      return package / name
+  return package / "dependency.json"
+
+
 def _preflight(names: list[str]) -> int:
   root = Path(__file__).resolve().parent.parent
   available = sorted(path.parent.name for path in root.glob("*/dependency.json"))
@@ -430,12 +440,7 @@ def _preflight(names: list[str]) -> int:
     variable = "CURL_PREFIX" if name == "libcurl" else name.upper() + "_PREFIX"
     if os.environ.get(variable):
       continue
-    path = root / name / "dependency.json"
-    for alternate in ("dependency-generic.json", "dependency-linux.json"):
-      candidate = path.with_name(alternate)
-      if sys.platform == "linux" and candidate.is_file():
-        path = candidate
-        break
+    path = _manifest(root / name)
     manifest, _ = _load_manifest(path)
     cannot_inspect = False
     for command, package in (("git", "git"),
@@ -579,6 +584,9 @@ def _parser() -> argparse.ArgumentParser:
     command = subparsers.add_parser(name)
     command.add_argument("manifest", type=Path)
 
+  manifest = subparsers.add_parser("manifest")
+  manifest.add_argument("package", type=Path)
+
   preflight = subparsers.add_parser("preflight")
   preflight.add_argument("packages", nargs="*")
 
@@ -595,6 +603,9 @@ def main() -> int:
   arguments = _parser().parse_args()
   if arguments.command == "preflight":
     return _preflight(arguments.packages)
+  if arguments.command == "manifest":
+    print(_manifest(arguments.package))
+    return 0
   context = _context(arguments.manifest.resolve())
   if arguments.command == "path":
     print(_path(context, arguments.kind, arguments.source))

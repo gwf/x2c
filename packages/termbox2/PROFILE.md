@@ -25,4 +25,4 @@
   reproduced in `LICENSES/termbox2-header-MIT.txt`.
 
 `dependency.json` is the machine-readable source record. `make
-verify-profile` checks the admitted header and both exact notices.
+verify-pins` checks the admitted header and both exact notices.

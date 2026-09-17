@@ -12,14 +12,7 @@ endif
 PACKAGE_LINK :=
 PACKAGE_TEST_COMMAND := expect tests/run-test.expect
 
-HEADER := $(TERMBOX2_INCLUDE)/termbox2.h
-
-.PHONY: example short-example run run-interactive run-life-interactive \
-	verify-profile
-
-# Nothing links against termbox2 until its pinned header and licenses have
-# been verified.
-$(PACKAGE_ARCHIVE): | verify-profile
+.PHONY: example short-example run run-interactive run-life-interactive
 
 example: builds/incident-filter
 
@@ -35,19 +28,7 @@ run-life-interactive: builds/game-of-life
 run-interactive: builds/incident-filter
 	./builds/incident-filter
 
-verify-profile: $(DEPENDENCY_PREREQUISITE)
-	@test -f "$(HEADER)" || { echo "missing $(HEADER)" >&2; exit 2; }
-	@cd $(TERMBOX2_INCLUDE) && $(CHECK_SHA256) $(CURDIR)/headers.sha256
-	@$(CHECK_SHA256) licenses.sha256
-
-builds/game-of-life: examples/game-of-life.x $(PACKAGE_ARCHIVE) | builds
-	$(X2C) build --output $@ --build-dir builds/life-build \
-	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
-
-builds/incident-filter: examples/incident-filter.x examples/incidents.log \
-		$(PACKAGE_ARCHIVE) | builds
-	$(X2C) build --output $@ --build-dir builds/application-build \
-	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
+builds/incident-filter: examples/incidents.log
 
 # The termbox suite needs the deterministic tty and signal helper, which is
 # test-only C and therefore stays out of the package archive.

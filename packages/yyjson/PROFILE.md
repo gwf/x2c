@@ -19,5 +19,5 @@
 
 `dependency.json` is the machine-readable source and build record. The client
 uses the prepared upstream header directly rather than copying an API
-inventory into x2c declarations. `make verify-headers` checks the admitted
+inventory into x2c declarations. `make verify-pins` checks the admitted
 header hash before release validation.

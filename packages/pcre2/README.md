@@ -93,7 +93,7 @@ retains and releases that context.
 `dependency.json` pins the source archive and static width-8/POSIX build with
 JIT enabled. JIT compiles PCRE2's bundled SLJIT component into
 `libpcre2-8.a`; `PROFILE.md` records the complete build and license closure.
-`make verify-headers` checks the prepared upstream headers against their
+`make verify-pins` checks the prepared upstream headers against their
 reviewed SHA-256 values.
 
 ## Ownership and execution
@@ -129,7 +129,7 @@ when absent and reuse it when present. Set `X2C_DEPS_DIR` to move the shared
 cache, or set `PCRE2_PREFIX` to diagnose another compatible installation.
 
 ```sh
-make verify-headers
+make verify-pins
 make run
 make test
 ```

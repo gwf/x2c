@@ -157,13 +157,17 @@ Packages use the following layout:
   package needs both, not ABI probes or substitutes for tests.
 - `tests/` covers the x2c surface and direct use of the pinned raw API.
 - `dependency.json` pins upstream source and the native build profile.
+  `tools/deps.py` prefers `dependency-<os>-<arch>.json`, then
+  `dependency-<os>.json`, when one exists for the host.
 - `LICENSES/` and, when useful, a compact `PROFILE.md` or `PROFILE.json`
   retain terms and reviewed facts that cannot be replaced by a generated
   inventory.
-- `Makefile` sets `PACKAGE`, includes `package.mk`, and adds the package's
-  own example rules. `package.mk` builds `builds/lib<package>.a` plus the
-  generated headers, objects, and `builds/<package>.link` line of extra link
-  flags; tests and examples link that archive.
+- `Makefile` sets `PACKAGE`, includes `package.mk`, and names the package's
+  example and run targets. `package.mk` builds `builds/lib<package>.a` plus
+  the generated headers, objects, and `builds/<package>.link` line of extra
+  link flags, checks `headers.sha256` and `licenses.sha256` with
+  `verify-pins` before archiving, and builds `builds/<name>` from each
+  `examples/<name>.x`; tests and examples link that archive.
 
 Opaque handle declarations and callback signatures are kept only when the C
 ABI requires them. Method declarations are emitted from their x2c definitions;

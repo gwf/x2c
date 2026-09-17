@@ -63,7 +63,9 @@ builds/cstar-verify: $(TOOL_SOURCES) $(DEV_ARCHIVE) $(X2C) \
 	  $(TOOL_X_FLAGS) $(TOOL_SOURCES) $(DEV_ARCHIVE)
 
 # Every example is an ordinary program: it builds and runs with no package
-# archive, no verification runtime, and no proof declarations.
+# archive, no verification runtime, and no proof declarations. The first
+# line cancels the package.mk example rule, which links the archive.
+builds/%: examples/%.x $(PACKAGE_ARCHIVE) | builds
 builds/%: examples/%.x | builds
 	$(X2C) build --output $@ --build-dir builds/$*-cc \
 	  --x-include-dir src $<

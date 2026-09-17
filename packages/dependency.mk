@@ -4,9 +4,11 @@ ifndef DEPENDENCY_PREFIX_VAR
 $(error package Makefile must set DEPENDENCY_PREFIX_VAR)
 endif
 
-DEPENDENCY_MANIFEST ?= dependency.json
 DEPENDENCY_SUPPORT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 DEPS_TOOL ?= python3 $(DEPENDENCY_SUPPORT)tools/deps.py
+ifndef DEPENDENCY_MANIFEST
+DEPENDENCY_MANIFEST := $(shell $(DEPS_TOOL) manifest .)
+endif
 ifeq ($($(DEPENDENCY_PREFIX_VAR)),)
 DEPENDENCY_CACHE_PREFIX := $(shell \
 	$(DEPS_TOOL) path $(DEPENDENCY_MANIFEST) prefix)

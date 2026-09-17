@@ -1,11 +1,5 @@
 PACKAGE := libcurl
 DEPENDENCY_PREFIX_VAR := CURL_PREFIX
-ifeq ($(shell uname -s),Linux)
-DEPENDENCY_MANIFEST := dependency-linux.json
-CURL_CA_BUNDLE := /etc/ssl/certs/ca-certificates.crt
-else
-CURL_CA_BUNDLE := /etc/ssl/cert.pem
-endif
 include ../package.mk
 
 OPENSSL_PREFIX ?= $(CURL_PREFIX)
@@ -15,8 +9,10 @@ PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(CURL_INCLUDE)
 PACKAGE_LINK := $(PACKAGE_DEPS)/lib/libcurl.a \
 	-L$(OPENSSL_PREFIX)/lib -lssl -lcrypto
 ifeq ($(shell uname -s),Linux)
+CURL_CA_BUNDLE := /etc/ssl/certs/ca-certificates.crt
 PACKAGE_LINK += -ldl -pthread
 else
+CURL_CA_BUNDLE := /etc/ssl/cert.pem
 PACKAGE_LINK += -Wl,-framework,CoreFoundation -Wl,-framework,CoreServices \
 	-Wl,-framework,SystemConfiguration
 endif
@@ -45,8 +41,7 @@ run: builds/page-titles builds/endpoint-report
 run-lisp: builds/inline-lisp
 	python3 tools/run-fixture.py builds/inline-lisp
 
-verify-profile: verify-dependency verify-headers
-	@$(CHECK_SHA256) licenses.sha256
+verify-profile: verify-dependency verify-headers verify-pins
 	@./verify-profile.sh "$(CURL_PREFIX)" "$(OPENSSL_PREFIX)" \
 	  "$(CURL_CA_BUNDLE)"
 
@@ -55,15 +50,3 @@ verify-headers: $(DEPENDENCY_PREREQUISITE)
 	@cd $(CURL_INCLUDE) && find curl -maxdepth 1 -type f -print | \
 	  LC_ALL=C sort | xargs shasum -a 256 | shasum -a 256 | \
 	  cut -d" " -f1 | cmp -s - $(CURDIR)/header-tree.sha256
-
-builds/endpoint-report: examples/endpoint-report.x $(PACKAGE_ARCHIVE) | builds
-	$(X2C) build --output $@ --build-dir builds/example \
-	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
-
-builds/inline-lisp: examples/inline-lisp.x $(PACKAGE_ARCHIVE) | builds
-	$(X2C) build --output $@ --build-dir builds/inline-lisp-build \
-	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
-
-builds/page-titles: examples/page-titles.x $(PACKAGE_ARCHIVE) | builds
-	$(X2C) build --output $@ --build-dir builds/page-titles-build \
-	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<

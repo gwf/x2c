@@ -173,6 +173,14 @@ class DependencyCacheTests(unittest.TestCase):
     with self.assertRaises(deps.DependencyError):
       deps._extract(self._link_archive("../../../escape"), source, outside)
 
+  def test_manifest_prefers_the_most_specific_host_name(self) -> None:
+    host = f"{sys.platform}-{deps.platform.machine()}"
+    names = ["dependency.json", f"dependency-{sys.platform}.json",
+             f"dependency-{host}.json"]
+    for name in names:
+      (self.root / name).write_text("{}")
+      self.assertEqual(deps._manifest(self.root), self.root / name)
+
 
 class PrerequisiteTests(unittest.TestCase):
   def test_missing_tools_and_perl_modules_are_collected(self) -> None:

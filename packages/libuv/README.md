@@ -359,10 +359,10 @@ make run
 make test
 ```
 
-`make verify-headers` and `make verify-licenses` check the prepared upstream
-headers and the license texts against their reviewed SHA-256 values, and
-`make verify-linkage` asserts that the linked example depends on nothing but
-`/usr/lib/libSystem.B.dylib`. Nothing links until `verify-profile` passes.
+`make verify-pins` checks the prepared upstream headers and the license texts
+against their reviewed SHA-256 values, and `make verify-linkage` asserts that
+the linked example depends on nothing but `/usr/lib/libSystem.B.dylib`.
+Nothing links until `verify-profile` passes.
 
 The client and its tests are licensed under
 [Apache-2.0](../../LICENSE). libuv

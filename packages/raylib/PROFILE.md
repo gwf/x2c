@@ -77,7 +77,7 @@ the package reproduces the licence files required by its admitted profiles,
 including `LICENSES/rlsw-MIT.txt` for the memory renderer.
 
 `dependency.json` is the machine-readable source and build record.
-`make verify-headers` checks both admitted header hashes, and `make verify`
+`make verify-pins` checks both admitted header hashes, and `make verify`
 additionally checks the exact PNG geometry both examples produce.
 
 ## The optional windowed profile

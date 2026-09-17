@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "blis",
   "version": "2.1",
-  "profile": "generic-static-single-threaded-no-blas",
+  "profile": "firestorm-static-single-threaded-no-blas",
   "sources": [
     {
       "name": "blis",
@@ -15,27 +15,17 @@
     {
       "cwd": "{source_blis}",
       "argv": [
-        "./configure",
-        "--prefix={prefix}",
-        "--disable-shared",
-        "--disable-threading",
-        "--disable-blas",
-        "generic"
+        "./configure", "--prefix={prefix}", "--disable-shared",
+        "--disable-threading", "--disable-blas", "firestorm"
       ]
     },
     {
       "cwd": "{source_blis}",
-      "argv": [
-        "make",
-        "-j{jobs}"
-      ]
+      "argv": ["make", "-j{jobs}"]
     },
     {
       "cwd": "{source_blis}",
-      "argv": [
-        "make",
-        "install"
-      ]
+      "argv": ["make", "install"]
     }
   ],
   "receipts": [

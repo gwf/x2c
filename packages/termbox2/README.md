@@ -176,7 +176,7 @@ clean` removes only worktree-local products under `builds/` and the `deps`
 symlink.
 
 ```sh
-make verify-profile
+make verify-pins
 make build
 make test
 make run

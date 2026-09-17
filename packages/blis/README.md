@@ -162,8 +162,8 @@ threading remain raw.
 
 Every profile uses BLIS 2.1, static and single-threaded, with BLAS and CBLAS
 compatibility disabled. Apple silicon keeps the tuned `firestorm`
-configuration, pinned by `dependency.json`. Every other platform uses
-portable `generic` kernels, pinned by `dependency-generic.json`, and needs no
+configuration, pinned by `dependency-darwin-arm64.json`. Every other platform
+uses portable `generic` kernels, pinned by `dependency.json`, and needs no
 Apple silicon instructions. Threading stays disabled throughout.
 
 Each platform has its own `PROFILE-<system>-<machine>.json`, because the

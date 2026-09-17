@@ -27,7 +27,7 @@
   accepted on September 9, 2026. No additional platform support is claimed.
 
 `dependency.json` owns the reproducible native build and archive checksum.
-`make verify-headers` checks both complete public headers. The small
+`make verify-pins` checks both complete public headers. The small
 `src/sqlite-3.h` shim includes the pinned real header and rejects a different
 version or conflicting explicit thread profile; it does not copy declarations
 or forward SQLite functions. The extension author header is installed beside

@@ -194,7 +194,7 @@ absent and reuse it when present. Set `X2C_DEPS_DIR` to move the shared
 cache, or `RAYLIB_PREFIX` to diagnose another compatible installation.
 
 ```sh
-make verify-headers
+make verify-pins
 make test
 make run
 make verify

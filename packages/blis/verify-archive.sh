@@ -23,24 +23,8 @@ expected=$(jq -r '.archive.members' "$profile")
 actual=$(ar -t "$archive" | wc -l | tr -d ' ')
 [ "$actual" = "$expected" ] || fail "$actual members, not $expected"
 
-# Both sides sort under LC_ALL=C. Without it the collation follows the
-# caller's locale: en_US.UTF-8 ignores the leading underscores, so
-# _DefaultRuneLocale moves and the comparison fails on a machine whose
-# LC_COLLATE is not C.
-work=$(mktemp -d "${TMPDIR:-/tmp}/x2c-blis-verify.XXXXXX")
-trap 'rm -rf "$work"' EXIT
-export LC_ALL=C
-
-if [ "$(uname -s)" = Darwin ]; then
-  symbol='substr($1, 2)'
-else
-  symbol='$1'
-fi
-nm -g --format=posix "$archive" |
-  awk "\$2 == \"U\" {print $symbol}" | sort -u >"$work/undefined"
-nm -g --format=posix "$archive" |
-  awk "\$2 != \"U\" && NF >= 2 {print $symbol}" | sort -u >"$work/defined"
-comm -23 "$work/undefined" "$work/defined" >"$work/external"
+expected=$(mktemp "${TMPDIR:-/tmp}/x2c-blis-verify.XXXXXX")
+trap 'rm -f "$expected"' EXIT
 jq -r '.archive.external_undefined_symbols[]' "$profile" |
-  sort -u >"$work/expected"
-diff -u "$work/expected" "$work/external"
+  LC_ALL=C sort -u >"$expected"
+"$(dirname "$0")/external-symbols.sh" "$archive" | diff -u "$expected" -

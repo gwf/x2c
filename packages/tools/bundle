@@ -28,11 +28,6 @@ static String expand(String text, Map variables) {
   });
 }
 
-static Var member(Map map, String key, Var fallback) {
-  Var value;
-  return map.try_get(key, &value) ? value : fallback;
-}
-
 static String quoted(String argument) =>
   %"\"${argument.replace("\\", "\\\\").replace("\"", "\\\"")}\"";
 
@@ -112,14 +107,14 @@ copy(package.join("builds").join(archive), stage.join("builds").join(archive));
 foreach (String pattern, %("README*" "LICENSE*" "PROFILE*" "dependency*.json"))
   foreach (Path source, Path.glob(package.join(pattern)))
     copy(source, stage.join(source.basename()));
-foreach (Map item, member(distribution, "copies", [])) {
+foreach (Map item, distribution.getdefault("copies", [])) {
   String to = item["to"].str();
   if (to.startswith("/") || to.split("/").contains(%".."))
     fail("bundle copy destination must be relative");
   copy(expand(item["from"].str(), variables), stage.join(to));
 }
 List objects = NULL;
-foreach (String item, member(distribution, "archive_objects", []))
+foreach (String item, distribution.getdefault("archive_objects", []))
   objects = objects.append(%(${expand(item, variables)}));
 if (objects) {
   String ar = Env.get("AR");
@@ -129,10 +124,10 @@ if (objects) {
 String platform = %(uname -s).job().output().strip("\n").lower();
 String machine = %(uname -m).job().output().strip("\n");
 List native_args = NULL;
-foreach (String argument, member(distribution, "native_args", []))
+foreach (String argument, distribution.getdefault("native_args", []))
   native_args = native_args.append(%($argument));
 Map none = {};
-foreach (Var (host, arguments), member(distribution, "platform_args", none))
+foreach (Var (host, arguments), distribution.getdefault("platform_args", none))
   if (host.str() == platform)
     foreach (String argument, arguments)
       native_args = native_args.append(%($argument));

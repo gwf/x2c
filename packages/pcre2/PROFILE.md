@@ -27,4 +27,4 @@
 
 `dependency.json` is the machine-readable source and build record. The client
 uses the prepared headers through `src/pcre2-8.h` and `src/pcre2-posix.h`.
-`make verify-headers` checks both admitted public-header hashes.
+`make verify-pins` checks both admitted public-header hashes.
