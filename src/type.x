@@ -121,6 +121,39 @@ String ast_direct_identifier(Var value) {
   return NULL;
 }
 
+/** Returns the name of the pointer an expression designates through, or
+    `NULL` when it designates no object through a single name. `*pointer`,
+    `pointer[index]`, and `pointer->member` all change the object the
+    pointer holds, which `ast_direct_identifier` reports as no name at all.
+*/
+String ast_indirect_identifier(Var value) {
+  while (value is <list>) {
+    List ast = value;
+    match (ast) {
+      case %(!or (expr ? ?inner) (parens ?inner)): {
+        value = inner;
+        continue;
+      }
+      case %(index (!set ?base (expr ?base_type ?)) ?): {
+        Type type = base_type;
+        if (type.is_array()) {
+          value = base;
+          continue;
+        }
+        return ast_direct_identifier(base);
+      }
+      case %(op . ?base *): {
+        value = base;
+        continue;
+      }
+      case %(op (!quote ->) ?base *): return ast_direct_identifier(base);
+      case %(op (!quote *) ?base): return ast_direct_identifier(base);
+    }
+    return NULL;
+  }
+  return NULL;
+}
+
 /** Returns `declarator` with the outermost `volatile` removed from each of
     its parameters. C ignores a parameter's top-level qualifier when it
     compares a prototype with its definition, and the qualifier the error

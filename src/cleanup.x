@@ -236,15 +236,17 @@ static int _goto_stop(Walk walk, Var label) {
 }
 
 /* C requires automatic state changed after `sigsetjmp` to be volatile once
-   `siglongjmp` returns. These are the forms that change their left operand. */
-static String _changed_name(List node) {
+   `siglongjmp` returns. These are the forms that change their left operand;
+   the operand names the object directly, or names a pointer that holds it. */
+static Var _changed_operand(List node) {
   match (node) {
-    case %(op ?operator ?target *):
-      return operator is <symbol> && ast_changes_left_operand(operator)
-           ? ast_direct_identifier(target) : NULL;
-    case %((!or vcompound vpostfix) ?target *):
-      return ast_direct_identifier(target);
-    case %(postfix ? ?target): return ast_direct_identifier(target);
+    case %(op ?operator ?target *): {
+      if (operator is <symbol> && ast_changes_left_operand(operator))
+        return target;
+      return NULL;
+    }
+    case %((!or vcompound vpostfix) ?target *): return target;
+    case %(postfix ? ?target): return target;
   }
   return NULL;
 }
@@ -383,8 +385,11 @@ static List _static_regions(Compiler c, List ast, Map runtime) {
 
 /* Names whose storage a transfer may leave stale: those a `try` body writes,
    and those a `defer` inside one writes through its environment. The flag
-   covers a subtree, so a write outside every `try` preserves nothing. */
-static void _collect_preserved(Var value, int in_try, Map names) {
+   covers a subtree, so a write outside every `try` preserves nothing.
+   `holders` gains the pointers the body writes through, whose own locals
+   `_collect_aliased` resolves. */
+static void _collect_preserved(
+  Var value, int in_try, Map names, Map holders) {
   /* A long expression chain nests as deeply as it is long, so the walk keeps
      its pending work off the C stack. */
   Array pending = $auto([value]), flags = $auto([in_try]);
@@ -394,8 +399,11 @@ static void _collect_preserved(Var value, int in_try, Map names) {
     if (current is not <list> || current.is_nil()) continue;
     List node = current;
     if (inside) {
-      String name = _changed_name(node);
+      Var operand = _changed_operand(node);
+      String name = ast_direct_identifier(operand);
       if (name) names[name] = 1;
+      String holder = ast_indirect_identifier(operand);
+      if (holder) holders[holder] = 1;
     }
     match (node) {
       case %(function *): continue;
@@ -421,6 +429,26 @@ static void _collect_preserved(Var value, int in_try, Map names) {
       pending.push(child);
       flags.push(inside);
     }
+  }
+}
+
+/* Preserve the locals whose address one of `holders` took. A write through
+   such a pointer changes the local without naming it, so the local needs the
+   qualifier the write itself does not ask for. */
+static void _collect_aliased(Var value, Map holders, Map names) {
+  Array pending = $auto([value]);
+  while (pending.len()) {
+    Var current = pending.take_last();
+    if (current is not <list> || current.is_nil()) continue;
+    List node = current;
+    match (node) case %(op = ?target ?source): {
+      String addressed = ast_addressed_identifier(source), holder = NULL;
+      match (target) case %(bind ?binding ?):
+        holder = binding_identity_spelling(binding);
+      if (!holder) holder = ast_direct_identifier(target);
+      if (addressed && holder && holder in holders) names[addressed] = 1;
+    }
+    foreach (Var child, node) pending.push(child);
   }
 }
 
@@ -667,8 +695,9 @@ static List _function(Compiler compiler, List node) {
       Map runtime = {};
       body = _static_regions(compiler, body, runtime);
       _collect_labels(walk, body, NULL);
-      Map preserved = {};
-      _collect_preserved(body, 0, preserved);
+      Map preserved = {}, holders = {};
+      _collect_preserved(body, 0, preserved, holders);
+      if (holders.len()) _collect_aliased(body, holders, preserved);
       List rewritten = _rewrite(walk, body);
       if (preserved.len()) {
         rewritten = _preserve(rewritten, preserved);
