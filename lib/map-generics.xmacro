@@ -42,8 +42,8 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
 ) => {
   static void $map._core_free($map map) {
     if ((void *) map == 0) return;
-    Bytes_free(map.hashes);
-    Bytes_free(map.entries);
+    map.hashes.free();
+    map.entries.free();
     Scope_free(map);
   }
 
@@ -52,9 +52,9 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
     $map map = Scope_malloc(sizeof($storage));
     map.scope = Scope_top();
     map.hashes = Bytes_new(sizeof($hash_cell));
-    map.hashes = Bytes_append(map.hashes, 0, capacity);
+    map.hashes = map.hashes.append(0, capacity);
     map.entries = Bytes_new(sizeof($entry));
-    map.entries = Bytes_append(map.entries, 0, capacity);
+    map.entries = map.entries.append(0, capacity);
     map.capacity = capacity;
     map.mask = capacity - 1;
     map.used = 0;
@@ -129,9 +129,9 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
     if (cap > ~0u / 2) raise %(size-limit (size $cap));
     unsigned capacity = cap * 2;
     Bytes staged_hashes = $auto(Bytes_new(sizeof($hash_cell)));
-    staged_hashes = Bytes_append(staged_hashes, 0, capacity);
+    staged_hashes = staged_hashes.append(0, capacity);
     Bytes staged_entries = $auto(Bytes_new(sizeof($entry)));
-    staged_entries = Bytes_append(staged_entries, 0, capacity);
+    staged_entries = staged_entries.append(0, capacity);
 
     /* Build both replacement arrays before touching `map`; allocation or
        reinsertion failure leaves its current arrays installed. */
@@ -144,9 +144,9 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
     for (unsigned i = 0; i < cap; i++)
       if (hashes[i]) expanded_map._core_reinsert(hashes[i], entries[i], 0);
 
-    Scope_move(Bytes_block(staged_hashes), map.scope);
+    Scope_move(staged_hashes.block(), map.scope);
     Scope_move((unsigned char *) staged_hashes - sizeof(Block), map.scope);
-    Scope_move(Bytes_block(staged_entries), map.scope);
+    Scope_move(staged_entries.block(), map.scope);
     Scope_move((unsigned char *) staged_entries - sizeof(Block), map.scope);
     map.hashes = expanded.hashes;
     map.entries = expanded.entries;
@@ -715,7 +715,7 @@ macro Unit $map.typed.publish(Type $map, Type $key, Type $value, Name $unbox,
       not validate the tag before reading its pointer payload.
   */
   $map Var.$unbox(Var value) {
-    return ($map) Var_pointer(value);
+    return ($map) value.pointer();
   }
 
   static int $next(Iter iter, Var *out) {

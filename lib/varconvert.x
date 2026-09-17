@@ -166,7 +166,7 @@ static void _numeric_decode(
     _.rank = info.rank;
     switch (info.tag) {
       case <i8>: case <u8>: case <i16>: case <u16>: case <i32>: case <u32>:
-        _.raw = Var.payload32(value) & Var.width_mask(_.bits); break;
+        _.raw = value.payload32() & Var.width_mask(_.bits); break;
       case <i48>: case <u48>:
         _.raw = value.u64 & Var.width_mask(48); break;
       case <long>: _.raw = (unsigned long long) value.long_value();  break;
@@ -175,9 +175,9 @@ static void _numeric_decode(
         _.raw = (unsigned long long) value.long_long_value(); break;
       case <ullong>: _.raw = value.ulong_long_value(); break;
       case <f32>:
-        _.floating_value = (long double) Var.decode_f32(value); break;
+        _.floating_value = (long double) value.decode_f32(); break;
       case <f64>:
-        _.floating_value = (long double) Var.decode_f64(value); break;
+        _.floating_value = (long double) value.decode_f64(); break;
       case <ldouble>: _.floating_value = value.long_double_value(); break;
     }
     *out = _;

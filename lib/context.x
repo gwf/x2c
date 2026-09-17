@@ -361,7 +361,7 @@ void Context.close(Context c) {
      this `Context`'s own slot active, and destroying it would raise. */
   while (Scope.top() != &c.scope) Scope.pop();
   Scope.pop();
-  Scope.destroy(scope);
+  scope.destroy();
   _thread().current = parent;
   Scope.free(c);
 }

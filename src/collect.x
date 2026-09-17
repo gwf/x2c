@@ -118,7 +118,7 @@ static String _resolve_include(
 static Map process_cache = NULL, static Scope process_cache_scope = NULL;
 
 static void _cache_shutdown(void) {
-  Scope.destroy(process_cache_scope);
+  process_cache_scope.destroy();
   process_cache_scope = NULL;
   process_cache = NULL;
 }

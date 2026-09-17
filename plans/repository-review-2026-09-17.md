@@ -429,6 +429,14 @@ favor of `String.pool_*`, `Iter.foldl`, and `Var.truth`.
 
 Open questions with no owner yet, recorded so they are not lost:
 
+- **A namespace call does not resolve inside a macro template.**
+  `Block.new(...)`, `Var.new(...)`, `Bytes.new(...)` and the `Scope.*` calls
+  are reported as `type () has no method new` at
+  `lib/array-generics.xmacro:193`, so the generics templates must keep the
+  C-style `Block_new(...)` spelling for the twelve calls that have no
+  receiver. Reproduced by a Phase 8 agent at that site; not rerun by the
+  review author. A dotted call on a *receiver* inside a template works, which
+  is what made the eleven converted sites possible.
 - **The `in` operator accepts a narrower left operand than an ordinary
   argument.** `%"k" in m` and `i++ in a` both fail with `parse: expected ')'`
   at ecdcea9+, while `m.contains(%"k")` and `a.contains(i++)` compile. Found

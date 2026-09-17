@@ -983,12 +983,9 @@ Var Compiler.thaw_declaration_syntax(Compiler c, Var syntax) {
     case %(declaration-atom ?spelling): return Atom.intern(spelling);
     case %(declaration-token ?type ?text ?line ?column ?length ?position): {
       Token token = Scope.calloc(1, sizeof(struct Token));
-      token.type = Symbol.new(type.string());
-      token.text = text;
-      token.line = line;
-      token.col = column;
-      token.len = length;
-      token.pos = position;
+      *token = (struct Token) {
+        .text = text, .type = Symbol.new(type.string()), .line = line,
+        .col = column, .len = length, .pos = position};
       return token;
     }
     case %(declaration-origin ?location ?node): {
@@ -2897,7 +2894,7 @@ static void _record_function_definition(
          prototype's internal linkage in C. */
       match (prior_contract)
         case %(function-contract ?a ?b static ?d)
-          if (List.equal(contract, %(function-contract $a $b extern $d))):
+          if (contract.equal(%(function-contract $a $b extern $d))):
             contract = prior_contract;
       if (List.equal(prior_contract, contract)) {
         c.semantic_binding_facts()[%(completion $binding)] =

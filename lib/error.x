@@ -1004,11 +1004,9 @@ void *Error.context_open(void) {
   if (!Error.ready()) return NULL;
   ErrorThreadState thread = _thread();
   ErrorContextState state = Scope.malloc(sizeof(struct ErrorContextState));
-  state.prev = thread.context_top;
-  state.policy = {};
-  state.bound = Error.bound();
-  state.handler_depth = Error.handler_depth();
-  state.stack_height = Error.count();
+  *state = (struct ErrorContextState) {
+    .prev = thread.context_top, .policy = {}, .bound = Error.bound(),
+    .handler_depth = Error.handler_depth(), .stack_height = Error.count()};
   thread.context_top = state;
   return state;
 }

@@ -1196,7 +1196,7 @@ List Compiler.parse_lambda_literal(Compiler c) {
 
 static void _validate_match_binder_atom(Compiler compiler, Atom atom) {
   if (!compiler.in_pattern || !atom.is_atom()) return;
-  char first = Atom.first(atom);
+  char first = atom.first();
   if ((first != '?' && first != '*') || atom.is_binder()) return;
   int reserved = atom == <?binder?> || atom == <*binder?>;
   if (reserved && compiler.match_is && compiler.peek(1) == <)>) return;

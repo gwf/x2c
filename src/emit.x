@@ -271,9 +271,8 @@ static List Emitter._var_collection(
   return %("${type}_update_n(${type}_new(), " $count ", " $emitted ")");
 }
 
-static List Emitter._binding(Emitter emitter, List ast) {
-  return %(${emitter.emitted_binding_name(ast)});
-}
+static List Emitter._binding(Emitter emitter, List ast) =>
+  %(${emitter.emitted_binding_name(ast)});
 
 static List Emitter._semantic_type(Emitter emitter, Type type) {
   List declaration = type.declaration_ast(NULL);

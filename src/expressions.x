@@ -1504,7 +1504,7 @@ static void _check_noted_converter(
   Compiler c, List noted, List parsed, Type target, int context) {
   if (!noted || !parsed || !target) return;
   (List call, String method, List location) = noted;
-  if (!List.equal(call, parsed)) return;
+  if (!call.equal(parsed)) return;
   // A qualified target, such as `const char *`, is a different crossing.
   if (target.declared() != target.canonicalize() ||
       !List.equal(c.sym.resolve_key(call.cadr()), c.sym.resolve_key(target)))

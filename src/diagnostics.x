@@ -59,11 +59,8 @@ static void _emit_entry(Diagnostics diag, List entry) {
 */
 Diagnostics Diagnostics.new(Compiler printer, int limit) {
   Diagnostics diag = Scope.malloc(sizeof(struct Diagnostics));
-  diag.entries = [];
-  diag.printer = printer;
-  diag.limit = (limit < 0) ? 0 : limit;
-  diag.count = 0;
-  diag.limit_notified = 0;
+  *diag = (struct Diagnostics) {
+    .entries = [], .printer = printer, .limit = (limit < 0) ? 0 : limit};
   return diag;
 }
 

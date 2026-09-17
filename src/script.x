@@ -72,7 +72,7 @@ int script_prepare(CliRequest c) {
   if (!root) x2c_driver_error("no cache directory: set X2C_CACHE_DIR");
   String script = Path.absolute(c.inputs.car());
   c.build_dir = %"$root/scripts/${Path.stem(script)}-%08x".printf(
-    String.hash(script));
+    script.hash());
   if (c.clean) {
     if (!Path.is_dir(c.build_dir)) return 1;
     int lock = file_lock(%"${c.build_dir}/lock", 1);

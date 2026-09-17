@@ -276,9 +276,8 @@ int ParsedUnit.parse(ParsedUnit *p) {
 /** Runs the source stages. On either result, the caller must close the
     unit.
 */
-int Frontend.open(Frontend f, String filename, ParsedUnit *unit) {
-  return f.start(filename, unit) && unit.collect(f) && unit.parse();
-}
+int Frontend.open(Frontend f, String filename, ParsedUnit *unit) =>
+  f.start(filename, unit) && unit.collect(f) && unit.parse();
 
 /** Releases the unit after its caller has inspected or exported its
     results.

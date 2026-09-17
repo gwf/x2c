@@ -555,10 +555,9 @@ int Compiler.macro_form_is_definition(Compiler compiler) {
 /** Returns whether the current tokens begin a local macro definition.
     This query does not consume tokens.
 */
-int Compiler.local_macro_form_is_definition(Compiler c) {
-  return c.peek(0) == <ident> && c.token.text == "macro" &&
-         c.peek(1) == <ident> && c.peek(2) == <ident> && c.peek(3) == <(>;
-}
+int Compiler.local_macro_form_is_definition(Compiler c) =>
+  c.peek(0) == <ident> && c.token.text == "macro" &&
+  c.peek(1) == <ident> && c.peek(2) == <ident> && c.peek(3) == <(>;
 
 /** Returns whether the current tokens begin a `keyword NAME $macro` alias.
     This query does not consume tokens.

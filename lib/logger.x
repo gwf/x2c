@@ -263,11 +263,9 @@ static LogSink _new_sink(
   defer if (!result && destroy) destroy(data);
   if (!logger || !emit) return NULL;
   LogSink sink = Scope.calloc_in(&logger.storage, 1, sizeof(struct LogSink));
-  sink.logger = logger;
-  sink.emit = emit;
-  sink.flush = flush;
-  sink.destroy = destroy;
-  sink.data = data;
+  *sink = (struct LogSink) {
+    .logger = logger, .emit = emit, .flush = flush, .destroy = destroy,
+    .data = data};
   _append_sink(logger, sink);
   return result = sink;
 }
@@ -649,10 +647,9 @@ synchronized
 Logger Logger.new(Symbol min_level) {
   if (_level_priority(min_level) < 0) return NULL;
   Logger logger = Scope.calloc(1, sizeof(struct Logger));
-  logger.min_level = min_level;
-  logger.owner_scope = *Scope.top();
-  logger.pool = String.pool_current();
-  logger.storage = Scope.new_named("Logger");
+  *logger = (struct Logger) {
+    .min_level = min_level, .owner_scope = *Scope.top(),
+    .pool = String.pool_current(), .storage = Scope.new_named("Logger")};
   return logger;
 }
 

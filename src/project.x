@@ -190,10 +190,8 @@ static ProjectTarget _target(Project project, String name, int create) {
     if (target.name == name) return target;
   if (!create) return NULL;
   ProjectTarget target = Scope.calloc(1, sizeof(struct ProjectTarget));
-  target.name = name;
-  target.seen = {};
-  target.kind = <executable>;
-  target.next = project.targets;
+  *target = (struct ProjectTarget) {
+    .name = name, .kind = <executable>, .seen = {}, .next = project.targets};
   project.targets = target;
   return target;
 }
@@ -204,9 +202,8 @@ static ProjectProfile _profile(ProjectTarget target, String name, int create) {
     if (profile.name == name) return profile;
   if (!create) return NULL;
   ProjectProfile profile = Scope.calloc(1, sizeof(struct ProjectProfile));
-  profile.name = name;
-  profile.seen = {};
-  profile.next = target.profiles;
+  *profile = (struct ProjectProfile) {
+    .name = name, .seen = {}, .next = target.profiles};
   target.profiles = profile;
   return profile;
 }
@@ -277,8 +274,8 @@ static void _set_profile_field(
 /* One `[dependencies]` entry: an index package name and its exact version. */
 static void _set_dependency(Project p, int line, String key, String value) {
   ProjectDependency entry = Scope.calloc(1, sizeof(struct ProjectDependency));
-  entry.name = key;
-  entry.version = _string_value(p, line, value);
+  *entry = (struct ProjectDependency) {
+    .name = key, .version = _string_value(p, line, value)};
   ProjectDependency *link = &p.dependencies;
   while (*link) link = &(*link).next;
   *link = entry;
@@ -701,7 +698,7 @@ ProjectBuild project_plan(CliRequest request) {
 */
 int new_command(CliRequest request) {
   Path dir = request.inputs.car();
-  String name = Path.absolute(dir).basename();
+  String name = dir.absolute().basename();
   if (!_name_ok(name))
     x2c_driver_error(
       %"new: '$name' is not a target name; use letters, digits, '_', and '-'");

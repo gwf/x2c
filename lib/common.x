@@ -609,9 +609,8 @@ inline String long.repr(long l)          => l.var().repr();
     of them and must ask `Var.is`.
 */
 inline int Var.is_row(
-  Var value, unsigned top, unsigned long mask, unsigned long bottom) {
-  return value.u64 >> 48 == top && (value.u64 & mask) == bottom;
-}
+  Var value, unsigned top, unsigned long mask, unsigned long bottom) =>
+  value.u64 >> 48 == top && (value.u64 & mask) == bottom;
 
 $var.tag.unbox(Array, array, <array>);
 $var.tag.unbox(Block, block, <block>);

@@ -1,7 +1,10 @@
 # x2c dogfooding remediation
 
-> Status: active - Phases 1 and 2 landed with this plan in ebb7007; Phase 3
-> landed in 2b68db4. Phases 4 through 10 are scoped and wait on Gary.
+> Status: active - Phases 1 through 8 and Phase 10 have landed: ebb7007
+> (guidance and book), 2b68db4 (package Cleanup), 4c8d5d5 (package call
+> sites), 3b32b3c (exemplar examples and slides), 2084195 (`in`, arrows,
+> percent), and this change (initializers, receivers, showcase coverage).
+> Phase 9 stays opportunistic and belongs to the linter.
 > Scoped 2026-09-17 from
 > five sweeps at HEAD ecdcea9 (packages and cleanup, classes, arrows and
 > percent literals, core idioms, periphery idioms). Counts below are authored
@@ -286,10 +289,27 @@ spelling is the subject under test; `===` identity comparisons; `Var.new`
 raw payloads; interpolating and multi-line percent strings; and
 `String.new("literal")`, which allocates where a cached literal does not.
 
-## Phase 8 - initializers, receivers, and expression bodies
+## Phase 8 - initializers, receivers, and expression bodies (landed)
 
-`src/` contains one designated initializer in 33,391 lines, which is why
-agents never write one. Convert the 26 allocate-then-assign sites to compound
+`src/` contained one designated initializer in 33,391 lines, which is why
+agents never wrote one. Converted 19 allocate-then-assign sites and three
+`memset` calls to compound literals, 17 receiver calls, three `List_var`
+ternary arms, five expression bodies, and 11 C-style calls in the generics
+templates: 34 files, 155 lines removed against 104 added.
+
+Everything except the initializers is byte-identical in the generated C. The
+initializer sites change emission, as expected, and `lib/common.c` shifts two
+error-site line numbers because an expression body removed a source line.
+
+Left alone with measured reasons: six sites whose literal would hold two
+allocating initializers; `lib/match.x`'s cache, whose bucket array sizes
+itself from a field set two lines earlier; a union-valued field; both
+destructuring sites and one `foreach`, which emit different lowering and
+renumber a file's generated names; and the twelve namespace calls in the
+generics templates, where the dotted spelling does not resolve inside a macro
+template at all (recorded in the review backlog).
+
+The original scope follows. Convert the 26 allocate-then-assign sites to compound
 literals with designated initializers, three `memset` calls on plain structs
 to `x = (T) {0}`, 15 `Type.method(x)` calls whose receiver already selects the
 callable, three `List_var` ternary arms, six single-`return` brace bodies to
@@ -314,10 +334,20 @@ campaign for the smallest per-site gain. It becomes a lint rule and
 `clean-x2c-source` work when a file is edited for another reason, rather than
 a delivery of its own.
 
-## Phase 10 - showcase coverage for features with none
+## Phase 10 - showcase coverage for features with none (landed)
 
-`delegate`, `Self`, `with`, reference parameters, and destructuring assignment
-have zero showcase coverage; `$let`, `$lock`, and class-with-methods live only
+`examples/power/bindings.x` now covers all five: a delegate field answering a
+dotted call, a `Self` result that keeps its own typedef across a chain, a
+reference parameter written without `&` at the call, destructuring assignment
+feeding two views from one List, and `with ... as`. It is a manifest showcase
+row with checked output and no gallery slide.
+
+`examples/magic/protocols.x` also became three heap classes, 67 authored lines
+to 42 with identical output - the one class conversion in the repository that
+pays, since those three types already carried hand-written constructors.
+
+The original scope follows. `delegate`, `Self`, `with`, reference parameters,
+and destructuring assignment had zero showcase coverage; `$let`, `$lock`, and class-with-methods live only
 in `magic/system-macros.x`, so the gallery's answer to "how do I manage a
 lifetime?" is still retain plus `defer`. One or two new examples cover the
 five uncovered features, and `class` and `$auto` move into at least one

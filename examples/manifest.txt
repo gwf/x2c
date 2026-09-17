@@ -32,6 +32,7 @@ magic/autodiff-fit|showcase|run||expected/autodiff-fit.stdout|Gradient descent t
 magic/tic-tac-toe|external-input|build||-|Interactive game whose Lisp opponent is editable without recompiling; play it as README.md describes.
 magic/system-macros|showcase|run||expected/system-macros.stdout|Classes, copied value keys, explicit allocation destinations, and block cleanup.
 magic/ways-to-agree|showcase|run||expected/magic-ways-to-agree.stdout|Four paths to the same List, including compile-time and runtime Lisp.
+power/bindings|showcase|run||expected/power-bindings.stdout|Delegate fields, Self results, reference parameters, destructuring assignment, and with.
 power/collection-indexing|showcase|run||expected/indexing.stdout|Ordinary and packed indexing, checked reads, and slicing.
 power/contexts|showcase|run||expected/context-lifetime.stdout|Isolated Context cleanup and cyclic result export.
 power/counting|showcase|run|words.txt|expected/power-counting.stdout|Standalone power counting gallery example.

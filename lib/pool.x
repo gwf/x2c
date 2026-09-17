@@ -459,7 +459,7 @@ Pool Pool.retain_named(Pool inner, const char *name) {
   int mutex_ready = 0, finished = 0;
   defer if (!finished) {
     if (mutex_ready) pthread_mutex_destroy(&pool.mutex);
-    Scope.destroy(scope);
+    scope.destroy();
   }
   pool = Scope.malloc_in(&scope, sizeof(struct Pool));
   /* The branch mutex must stay recursive. Pool.lookup holds it across

@@ -1727,9 +1727,9 @@ static Ast _node(Compiler c, Ast ast) {
           <xform>,
           %"type $type does not support slicing", NULL, %());
       String none = "-2147483648";
-      start = start ? start : List_var(%(literal (int) $none));
-      stop = stop ? stop : List_var(%(literal (int) $none));
-      step = step ? step : List_var(%(literal (int) "1"));
+      start = start ? start : %(literal (int) $none);
+      stop = stop ? stop : %(literal (int) $none);
+      step = step ? step : %(literal (int) "1");
       return _children(
         c,
         %(call "$fnname" (args $expression $start $stop $step)));

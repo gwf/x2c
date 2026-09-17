@@ -512,7 +512,7 @@ Lisp Lisp.kernel(void) {
   }
   if (!lisp._initialize()) return NULL;
   lisp.scope = session;
-  memset(&lisp.auto_stats, 0, sizeof(LispAutoStats));
+  lisp.auto_stats = (LispAutoStats) {0};
   lisp.auto_machine_stats = NULL;
   lisp.auto_disabled = 0;
   $scope(&lisp.scope) {
@@ -1700,15 +1700,15 @@ static int _auto_apply(
   bzero(context, sizeof(struct LispMachineContext));
   context.lisp = lisp;
   _machine_env_set(context.frames, lambda, argv, argc, env);
-  LispMachine.open(m);
+  m.open();
   /* Only a Lisp callback can raise out of the machine, and that leaves it
      marked running. Clear the flag ahead of the release below, so its
      `LispMachine.finish` never meets the `<bad-state>` guard. */
   defer m.running = 0;
   m.stats = lisp.auto_machine_stats;
-  LispMachine.begin(m, lambda.auto_program.view(), context, argv, argc);
+  m.begin(lambda.auto_program.view(), context, argv, argc);
   lisp.auto_stats.machine_entries++;
-  LispMachine.run(m);
+  m.run();
   if (m.status == <ok>) {
     Var result = m.value;
     *out = lambda.macro ? _eval(lisp, result, env) : result;

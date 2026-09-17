@@ -413,13 +413,8 @@ int MachineBuilder.emit(
       a < -1 || a >= MACHINE_CODE_MAX ||
       target < -1 || target >= MACHINE_CODE_MAX)
     return b._fail("instruction-range");
-  MachineWord word;
-  word.op = op;
-  word.b = operand_b;
-  word.c = c;
-  word.d = d;
-  word.a = a;
-  word.target = target;
+  MachineWord word = {
+    .op = op, .b = operand_b, .c = c, .d = d, .a = a, .target = target};
   b.code[b.length] = word;
   return b.length++;
 }
@@ -521,10 +516,9 @@ MachineProgram MachineBuilder.freeze(MachineBuilder b) {
     b.length, b.const_count, b.binder_count);
 
   MachineProgram program = Scope.malloc(bytes);
-  program.length = b.length;
-  program.const_count = b.const_count;
-  program.binder_count = b.binder_count;
-  program.root = b.root;
+  *program = (struct MachineProgram) {
+    .length = b.length, .const_count = b.const_count,
+    .binder_count = b.binder_count, .root = b.root};
   MachineWord *code = (MachineWord *) (program + 1);
   Var *consts = (Var *) (code + b.length);
   Atom *binders = (Atom *) (consts + b.const_count);

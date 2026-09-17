@@ -2074,8 +2074,7 @@ static void _cache_activate(MatchCache cache, int slot, MatchLease *lease) {
 */
 int MatchCache.acquire(
   MatchCache m, Var pattern, MatchLease *lease, const char *owner) {
-  memset(lease, 0, sizeof(MatchLease));
-  lease.slot = -1;
+  *lease = (MatchLease) {.slot = -1};
   if (!_cache_admitted(m, pattern)) {
     MatchPlan plan = MatchPlan.prepare(pattern);
     if (plan.status == MACHINE_INELIGIBLE) {
@@ -2446,7 +2445,7 @@ static void _capture_sites_shutdown(void) {
     site.plan = NULL;
   }
   if ((void *) match_capture_sites != NULL) match_capture_sites.free();
-  Scope.destroy(match_capture_site_scope);
+  match_capture_site_scope.destroy();
   match_capture_site_scope = NULL;
 }
 

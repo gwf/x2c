@@ -25,7 +25,7 @@
 /* One process-global state holds the transient line. The driver configures it
    before dispatch; diagnostics, tool output, and stable receipts suspend the
    line before writing to stderr. */
-static struct {
+static struct ReportState {
   int receipts, transient, color, columns, width;
   unsigned long start, update;
 } report;
@@ -97,7 +97,7 @@ static int _columns(void) {
 void report_configure(
   int quiet, int plain, Symbol color_mode, int verbose, int dry_run,
   int inspecting) {
-  memset(&report, 0, sizeof(report));
+  report = (struct ReportState) {0};
   int terminal = _terminal();
   int diagnostic = verbose || dry_run || inspecting;
   report.receipts = !quiet && !diagnostic;

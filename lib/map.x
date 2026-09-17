@@ -342,7 +342,7 @@ Var Map.updateindex(Map map, Var key, Symbol op, Var rhs) {
     int inserted;
     Var *stored = map._core_get_or_insert(&key, &rhs, &inserted);
     if (inserted) return rhs;
-    return Var.update(stored, op, rhs);
+    return stored.update(op, rhs);
   }
   long index = map._core_find_index(&key, NULL);
   if (index < 0) raise %(bad-arg (key $key));

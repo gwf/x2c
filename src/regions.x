@@ -181,9 +181,7 @@ static Region _innermost(Walk w, Symbol kind) {
 
 static Fact _fact(Walk w, List binding, int param) {
   Fact fact = Scope.calloc(1, sizeof(struct Fact));
-  fact.depth = w.depth;
-  fact.origin = w.origin;
-  fact.param = param;
+  *fact = (struct Fact) {.depth = w.depth, .origin = w.origin, .param = param};
   if (binding) w.facts[binding] = fact;
   return fact;
 }

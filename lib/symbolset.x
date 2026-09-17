@@ -68,9 +68,8 @@ static uint32_t _g(SymbolSet set, uint32_t vertex) {
   return _u32(set, offset);
 }
 
-static size_t _order_offset(SymbolSet x, uint32_t span) {
-  return SYMBOL_SET_HEADER_SIZE + (size_t) span * 3 * _byte(x, 0);
-}
+static size_t _order_offset(SymbolSet x, uint32_t span) =>
+  SYMBOL_SET_HEADER_SIZE + (size_t) span * 3 * _byte(x, 0);
 
 /** Returns the number of `Symbol`s in `set`, or zero for a null set. */
 size_t SymbolSet.len(SymbolSet x) => x ? _u32(x, 4) : 0;

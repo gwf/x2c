@@ -1,48 +1,28 @@
 /*  protocols.x -- protocol declaration, adoption, and base defaults */
 
 
-typedef struct Meters {
-  long value;
-} *Meters;
-
-typedef struct Km {
-  long value;
-} *Km;
-
-typedef struct Cm {
-  long value;
-} *Cm;
+/* A class declares the type and supplies its constructor, so each unit
+   here is one line instead of a struct, a malloc, and a field store. */
+class Meters struct { long value; } *;
+class Km struct { long value; } *;
+class Cm struct { long value; } *;
 
 protocol Meters(T) {
   long T.magnitude(T);
   String T.describe(T);
 }
 
-long Meters.magnitude(Meters value) {
-  return value.value;
-}
+long Meters.magnitude(Meters value) => value.value;
 
-String Meters.describe(Meters value) {
-  return %"${value.value} m";
-}
+String Meters.describe(Meters value) => %"${value.value} m";
 
 /* Total forward views: every Km or Cm is a valid Meters. */
-Meters Km.meters(Km value) {
-  Meters result = Scope.malloc(sizeof(struct Meters));
-  result.value = value.value * 1000;
-  return result;
-}
+Meters Km.meters(Km value) => Meters.new(value.value * 1000);
 
-Meters Cm.meters(Cm value) {
-  Meters result = Scope.malloc(sizeof(struct Meters));
-  result.value = value.value / 100;
-  return result;
-}
+Meters Cm.meters(Cm value) => Meters.new(value.value / 100);
 
 /* Km overrides describe; magnitude still forwards to the base. */
-String Km.describe(Km value) {
-  return %"${value.value} km";
-}
+String Km.describe(Km value) => %"${value.value} km";
 
 protocol Meters(Km);
 
@@ -51,16 +31,12 @@ protocol Meters(Km);
 static protocol Meters(Cm);
 
 int main(void) {
-  Scope.retain();
+  $scope() {
+    Km trip = Km.new(3);
+    Cm pencil = Cm.new(1800);
 
-  Km trip = Scope.malloc(sizeof(struct Km));
-  trip.value = 3;
-  Cm pencil = Scope.malloc(sizeof(struct Cm));
-  pencil.value = 1800;
-
-  printf("%s is %ld m\n", trip.describe(), trip.magnitude());
-  printf("%s is %ld m\n", pencil.describe(), pencil.magnitude());
-
-  Scope.release();
+    printf("%s is %ld m\n", trip.describe(), trip.magnitude());
+    printf("%s is %ld m\n", pencil.describe(), pencil.magnitude());
+  }
   return 0;
 }

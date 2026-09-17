@@ -55,9 +55,7 @@ static int _allocation_size(size_t width, size_t cap, size_t *out) {
 Block Block.new(size_t width) {
   if (!width) raise %(bad-arg);
   Block block = Scope.malloc(sizeof(struct Block));
-  block.width = width;
-  block.length = 0;
-  block.cap = 1;
+  *block = (struct Block) {.width = width, .length = 0, .cap = 1};
   size_t size;
   if (!_allocation_size(width, block.cap, &size))
     raise %(size-limit (width $width));

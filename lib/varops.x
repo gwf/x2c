@@ -567,7 +567,7 @@ Var Var.postfix(Var *lhs, Symbol op) {
   else
     raise %(bad-op (op $op));
   Var old = lhs[0], one = Var.box_i32_bits(1);
-  if (Var.update(lhs, binary_op, one) is void) return void;
+  if (lhs.update(binary_op, one) is void) return void;
   return old;
 }
 
