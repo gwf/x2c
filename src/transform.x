@@ -1558,7 +1558,7 @@ static List _match_records(Compiler compiler, List records) {
   foreach (List record, records)
     match (record)
       case %(*prefix ?body):
-        transformed.push(%(@prefix ${_node(compiler, body.list())}));
+        transformed.push(%(@prefix ${_node(compiler, body)}));
   return transformed.list_free();
 }
 
@@ -1570,7 +1570,7 @@ static Ast _sequence(Compiler compiler, Ast ast) {
   foreach (List value, ast) transformed.push(_node(compiler, value));
   Ast tail = NULL;
   for (int i = (int) transformed.len() - 1; i >= 0; i--) {
-    Ast node = transformed[i].list();
+    Ast node = transformed[i];
     List payload = _without_origin(node);
     match (node)
       case %(at ?parent ?):
@@ -1606,7 +1606,7 @@ static Ast _finish(Compiler compiler, Ast ast) {
   match (ast) {
     case %(seq *): return ast;
     case %(matchcases ?subject ?records): {
-      List new_subject = _node(compiler, subject.list());
+      List new_subject = _node(compiler, subject);
       List new_records = _match_records(compiler, records);
       return %(matchcases $new_subject $new_records);
     }
@@ -1638,7 +1638,7 @@ static Ast _op_chain(Compiler compiler, Ast ast) {
       break;
     }
     Var type = ast.cadr();
-    if (type is <list>) type = _node(compiler, type.list());
+    if (type is <list>) type = _node(compiler, type);
     List opnode = ast.caddr();
     List rewritten = _operator(compiler, opnode);
     if (rewritten != opnode) {
@@ -1654,11 +1654,11 @@ static Ast _op_chain(Compiler compiler, Ast ast) {
     match (levels[i])
       case %(expr ? (op ?operator ? *rest)): {
         Array parts = [];
-        if (operator is <list>) parts.push(_node(compiler, operator.list()));
+        if (operator is <list>) parts.push(_node(compiler, operator));
         else parts.push(operator);
         parts.push(rebuilt);
         foreach (Var operand, rest) {
-          if (operand is <list>) parts.push(_node(compiler, operand.list()));
+          if (operand is <list>) parts.push(_node(compiler, operand));
           else parts.push(operand);
         }
         rebuilt = %(expr ${types[i]} (op @{parts.list_free()}));
@@ -1689,7 +1689,7 @@ static Ast _node(Compiler c, Ast ast) {
       int occurrence = origin.integer();
       List transformed = NULL;
       $let(c.origin, occurrence) {
-        transformed = _node(c, inner.list());
+        transformed = _node(c, inner);
       }
       if (transformed == inner) {
         c.fixed[ast] = 1;
@@ -1712,8 +1712,8 @@ static Ast _node(Compiler c, Ast ast) {
       Type function_type = return_type;
       c.inline_header = function_type.is_inline() &&
                         !function_type.is_static();
-      List new_return = _node(c, return_type.list());
-      List new_decl = _node(c, declarator.list());
+      List new_return = _node(c, return_type);
+      List new_decl = _node(c, declarator);
       List prepared_body = _lower_lambda_destructuring(
         c, body);
       prepared_body = c.prepare_lambda_cells(

@@ -197,7 +197,7 @@ static List _pattern_content(Compiler c, List node) {
 static List _typed_pattern(Compiler c, List node, Map tags) {
   Var value = c.match_pattern_value(node), tag;
   if (value.is_atom_binder() && tags.try_get(value, &tag))
-    return _typed_capture_pattern(c, value, tag.list());
+    return _typed_capture_pattern(c, value, tag);
   List content = _pattern_content(c, node);
   match (content) {
     case %(cons ? ?): break;
@@ -226,7 +226,7 @@ static List _typed_pattern(Compiler c, List node, Map tags) {
     Var binder = c.match_pattern_value(elements[1]);
     if (binder.is_atom_binder() &&
         (operator != <!set> || elements.len() == 3)) {
-      if (tags.try_get(binder, &tag)) capture_tag = tag.list();
+      if (tags.try_get(binder, &tag)) capture_tag = tag;
       first++;
     }
   }

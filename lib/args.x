@@ -297,13 +297,13 @@ String Args.usage(List spec, String program) {
       if (option->help) _write_row(operands, label, option->help);
     }
   }
-  String option_rows = options.str(), operand_rows = operands.str();
-  String words = synopsis.str();
+  String option_rows = options, operand_rows = operands;
+  String words = synopsis;
   out.printf("Usage:\n  %s%s%s\n", program, option_rows ? " [options]" : "",
              words ? words : "");
   if (option_rows) out.printf("\nOptions:\n%s", option_rows);
   if (operand_rows) out.printf("\nOperands:\n%s", operand_rows);
-  return out.str();
+  return out;
 }
 
 /** Returns the program arguments that follow `argv[0]` as `String`s. */

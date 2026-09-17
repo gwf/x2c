@@ -539,7 +539,7 @@ static Var _preserve(Var value, Map names) {
            ((!or declare decl) ?type (!set ?bindings (bindings *)))): {
       Symbol head = declaration.car();
       if (!_is_automatic(declaration)) return node;
-      type = _preserve_pointee(type.list(), bindings, names);
+      type = _preserve_pointee(type, bindings, names);
       Array preserved = [];
       foreach (List binding, bindings.cdr())
         match (binding) {
@@ -600,7 +600,7 @@ static Var _rewrite(Walk walk, Var value) {
         walk.compiler.origin = previous;
       }
       List cleanup = _try_cleanup(
-        frame, handle, _rewrite(walk, finalizer).list(), !!clause);
+        frame, handle, _rewrite(walk, finalizer), !!clause);
       List body_out = _inside(walk, cleanup, body, body);
       /* A catch arm runs inside the region it handles, so it leaves the
          same statements behind on its own exits. Each arm is its own
@@ -674,9 +674,9 @@ static List _function(Compiler compiler, List node) {
       _collect_labels(walk, body, NULL);
       Map preserved = {};
       _collect_preserved(body, 0, preserved);
-      List rewritten = _rewrite(walk, body).list();
+      List rewritten = _rewrite(walk, body);
       if (preserved.len()) {
-        rewritten = _preserve(rewritten, preserved).list();
+        rewritten = _preserve(rewritten, preserved);
         bindings = _preserve(bindings, preserved).list();
       }
       state.regions.free();
@@ -706,4 +706,4 @@ static Var _units(Compiler compiler, Var value) {
     point.
 */
 List Compiler.mark_cleanup_regions(Compiler compiler, List ast) =>
-  _units(compiler, ast).list();
+  _units(compiler, ast);

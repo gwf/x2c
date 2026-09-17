@@ -49,9 +49,9 @@ static void _diagnostics(Buffer out, Compiler compiler, Map needed) {
     needed[path] = 1;
     _location(out, path, start, start + length);
     out.write(",\"message\":");
-    report_json_string(out, entry.assoc(<message>).string());
+    report_json_string(out, entry.assoc(<message>));
     out.write(",\"code\":");
-    report_json_string(out, code.str());
+    report_json_string(out, code);
     out.write(",\"severity\":");
     report_json_string(out, code == <warning> ? "warning" : "error");
     out.write_char('}');
@@ -107,9 +107,9 @@ static void _sources(Buffer out, Compiler compiler, Map needed) {
     if (!compiler.source_texts.try_get(key, &text)) continue;
     if (comma++) out.write_char(',');
     out.write("{\"file\":");
-    report_json_string(out, key.string());
+    report_json_string(out, key);
     out.write(",\"text\":");
-    report_json_string(out, text.string());
+    report_json_string(out, text);
     out.write_char('}');
   }
   out.write_char(']');
@@ -164,9 +164,9 @@ static CliRequest _configure(
 
 static int _changed_dependency(Compiler compiler, SourceView sources) {
   foreach (Var path, compiler.deps.keys())
-    if (sources.is_changed(path.string())) return 1;
+    if (sources.is_changed(path)) return 1;
   foreach (Var path, compiler.source_texts.keys())
-    if (sources.is_changed(path.string())) return 1;
+    if (sources.is_changed(path)) return 1;
   return 0;
 }
 

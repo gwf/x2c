@@ -185,7 +185,7 @@ static List _adoption_row(
            : %($base $participant);
   Var stored;
   return compiler.adoptions.try_get(key, &stored)
-       ? stored.list() : NULL;
+       ? stored : NULL;
 }
 
 static Symbol _adoption_visibility(
@@ -453,7 +453,7 @@ static List Compiler._publish_protocol_adoption(
     : NULL;
   Var occurrence_value;
   List occurrence = c.protocols.try_get(base, &occurrence_value)
-    ? occurrence_value.list() : NULL;
+    ? occurrence_value : NULL;
   int inferred_private = storage == <static>;
   if (c.source_private >= 0)
     inferred_private = inferred_private ||
@@ -1043,7 +1043,7 @@ static List Compiler._resolve_ordinary_protocol(
   Var stored;
   List key = %($base $participant);
   if (compiler.conforms.try_get(key, &stored))
-    return stored is <list> ? stored.list() : NULL;
+    return stored is <list> ? stored : NULL;
   String base_name = _base_name(base);
   if (!base_name || !participant.is_bare_typedef_name()) goto does_not_conform;
   String forward = _forward_binding(
@@ -1440,7 +1440,7 @@ Symbol Compiler.derived_member(Compiler compiler, Symbol op) {
 static List _proto_cached(Compiler compiler, Var key, Func compute) {
   Var cached;
   if (compiler.proto_cache.try_get(key, &cached))
-    return cached is <list> ? cached.list() : NULL;
+    return cached is <list> ? cached : NULL;
   List result = compute(compiler);
   compiler.proto_cache[key] = result ? result : 0;
   return result;
@@ -1767,7 +1767,7 @@ List Compiler.discard_helper(
   Compiler c, List binding, Type signature, String stem, int which) {
   List key = %("discard-helper" $stem $which);
   Var stored;
-  if (c.protocol_helpers.try_get(key, &stored)) return stored.list();
+  if (c.protocol_helpers.try_get(key, &stored)) return stored;
 
   List parameters = signature.car().list().cadr();
   Type result = signature.cdr();

@@ -2326,7 +2326,7 @@ List Sym.current_binding(Sym sym, List key) {
   SymScope *scope = _semantic_scope(sym, -1);
   Var binding;
   return scope && scope.bindings.try_get(key, &binding)
-       ? binding.list() : NULL;
+       ? binding : NULL;
 }
 
 /** Returns the current scope's enum owner for `key`, or zero. */
@@ -2624,7 +2624,7 @@ static void _check_package_binding(
   Compiler c, String kind, String local, Token token) {
   Var alias = c.package_aliases[local];
   Var member = c.package_members[local];
-  String bound = alias is void ? NULL : alias.string();
+  String bound = alias is void ? NULL : alias;
   if (!bound && member is not void) {
     List pair = member;
     (String package, String member_name) = pair;
@@ -2878,13 +2878,13 @@ static List _function_completion_contract(
 static List _binding_method_identity(Compiler compiler, List binding) {
   Var stored;
   return compiler.semantic_binding_facts().try_get(
-    %(method $binding), &stored) ? stored.list() : NULL;
+    %(method $binding), &stored) ? stored : NULL;
 }
 
 static List _binding_self_signature(Compiler compiler, List binding) {
   Var stored;
   return compiler.semantic_binding_facts().try_get(
-    %(self $binding), &stored) ? stored.list() : NULL;
+    %(self $binding), &stored) ? stored : NULL;
 }
 
 // Record only prototypes reached in positioned full-parse source order.

@@ -215,7 +215,7 @@ static List Emitter._enum(Emitter emitter, List ast, List context) {
 static List Emitter._aggregate(Emitter emitter, List ast, List context) {
   if (ast.type().is_aggregate_tag()) {
     Var alias = emitter.native_aliases.assoc(ast);
-    if (alias is <list>) return emitter._emit(alias.list(), NULL);
+    if (alias is <list>) return emitter._emit(alias, NULL);
   }
   List tag = ast.type().tag();
   if (_is_gensym_tag(tag) && !ast.type().is_aggregate_tag()) tag = NULL;
@@ -470,7 +470,7 @@ static List Emitter._match_site_call(
   match (args)
     case %(args ? ?pattern *): {
       if (pattern is not <list> ||
-          !e.match_pattern_is_static(pattern.list()))
+          !e.match_pattern_is_static(pattern))
         return NULL;
       String site = e.fresh_name("match_site");
       List c_args = e._emit(%($arguments), NULL);

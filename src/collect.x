@@ -891,7 +891,7 @@ static int _hash_matches(Compiler compiler, String path, Var expected) {
     source_hashes[path] = value;
     hash = value;
   }
-  return String.equal(hash.string(), expected);
+  return String.equal(hash, expected);
 }
 
 /* Materialize one interface file only after its source path and hash,
@@ -913,7 +913,7 @@ static List _interface_load(Compiler compiler, String canonical, String path) {
   if (status != <value> || record is not <list>) return NULL;
   Var (owner, expected_hash, parts_value, definitions_value,
        dependencies_value) = (List) NULL;
-  match (record.list()) {
+  match (record) {
     case %(interface 1 ?(String stored) ?hash ?parts ?definitions ?deps): {
       owner = stored;
       expected_hash = hash;
@@ -955,7 +955,7 @@ static List _interface_load(Compiler compiler, String canonical, String path) {
   foreach (Var dependency, dependencies_value.list()) {
     if (dependency is not <list> || dependency.list().len() != 2)
       return _interface_reject(canonical);
-    Var (dependency_name, content_hash) = dependency.list();
+    Var (dependency_name, content_hash) = dependency;
     if (dependency_name is not <string>) return _interface_reject(canonical);
     String dependency_path =
       _canonical_path(_absolute_path(dependency_name.str()));

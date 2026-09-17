@@ -702,7 +702,7 @@ static Type _generic_control_type(Compiler c, List expression) {
       return NULL;
     }
     case %(expr ?type (op ?operator ?left ?right)): {
-      Symbol op = operator.symbol();
+      Symbol op = operator;
       if (op == <.> || op == <"->"> || c.sym.is_var_type(type))
         return _generic_declared_type(c, type);
       if (op.is_assignment_op()) return _generic_control_type(c, left);
@@ -1149,7 +1149,7 @@ static List Compiler._protocol_operator_expression(
     if (!member) member = compiler.derived_member(op);
     Type participant = lhs.cadr();
     List helper = compiler.protocol_discard_helper(
-      participant, member.str(), which);
+      participant, member, which);
     if (helper) (binding, signature) = helper;
   }
   List call = %(expr $result
@@ -1278,7 +1278,7 @@ static List _resolve_identifier(
       !c.local_macro_captures.contains(binding)) {
     Var order = c.local_macro_captures[<order>];
     c.local_macro_captures[<order>] = cons(
-      binding, order is <list> ? order.list() : NULL);
+      binding, order is <list> ? order : NULL);
     c.local_macro_captures[binding] = 1;
   }
   if (spelling) {
@@ -1729,7 +1729,7 @@ static List Compiler._binary_expression(
       Type participant = lhs_known ? lhs_type : rhs_type;
       List other = lhs_known ? rhs : lhs;
       if (_converts_operands(c, participant) &&
-          c.resolve_protocol_member(participant, member.str()) &&
+          c.resolve_protocol_member(participant, member) &&
           other.match(%(expr ? (ident ?))))
         c.report_error(
           <type>, "operand has no x2c type beside a protocol participant",
@@ -2844,7 +2844,7 @@ static List _next_initializer_field(List fields) {
 static Type _initializer_type(List path, Type root) {
   if (!path) return root;
   (Type owner, Symbol kind, Var selector, Type type, List rest) =
-    path.car().list();
+    path.car();
   return type;
 }
 
@@ -3224,7 +3224,7 @@ static List _initializer_layout(
     List path = _initializer_field(owner, fields, NULL);
     if (!path) break;
     (Type parent, Symbol kind, Var name, Type member, List rest) =
-      path.car().list();
+      path.car();
     List slot = c.initializer_slot(target, path);
     List child = _initializer_layout(c, member, slot, string, symbolic);
     if (!child) { children.free(); return NULL; }
@@ -3357,7 +3357,7 @@ List Compiler.initializer_rows(
     match (value)
       case %(expr ? (!set ?body (initval *))): {
         List header = NULL;
-        List choices = Ast.initializer_cases(body.list(), &header);
+        List choices = Ast.initializer_cases(body, &header);
         Array following = [];
         foreach (List choice, choices) {
           (List condition, List path, Type type, List input) = choice;
@@ -3678,7 +3678,7 @@ static List _convert_composite(
           checked.push(%($condition $path $destination $value));
         }
         List header = NULL;
-        Ast.initializer_cases(terminal.caddr().list(), &header);
+        Ast.initializer_cases(terminal.caddr(), &header);
         List choices = checked.list_free();
         if (header) choices = cons(header, choices);
         List value = %(expr () (initval @choices));

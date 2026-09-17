@@ -591,7 +591,7 @@ static String _expand(RegexMatch found, String replacement) {
       out.write_char(byte);
     }
   }
-  return out.str();
+  return out;
 }
 
 static String _rebuild(Regex regex, String subject, int limit, Func fn,
@@ -607,7 +607,7 @@ static String _rebuild(Regex regex, String subject, int limit, Func fn,
     done++;
   }
   subject[cursor:].write_str(out);
-  return out.str();
+  return out;
 }
 
 static Regex Regex.new(String pattern) {
@@ -650,7 +650,7 @@ String Regex.escape(String literal) {
     if (byte < 128 && !_is_word(byte)) out.write_char('\\');
     out.write_char((char) byte);
   }
-  return out.str();
+  return out;
 }
 
 /** Returns the first match of `regex` in `subject` at or after the byte
@@ -739,13 +739,13 @@ String RegexMatch.getindex(RegexMatch found, Var key) {
 int RegexCapture.index(RegexCapture capture) => capture.getindex(0).int();
 
 /** Returns the capture's name, or NULL. */
-String RegexCapture.name(RegexCapture capture) => capture.getindex(1).string();
+String RegexCapture.name(RegexCapture capture) => capture.getindex(1);
 
 /** Reports whether the capture took part in the match. */
 int RegexCapture.matched(RegexCapture capture) => capture.getindex(2).truth();
 
 /** Returns the matched text, or NULL for a capture that did not take part. */
-String RegexCapture.text(RegexCapture capture) => capture.getindex(3).string();
+String RegexCapture.text(RegexCapture capture) => capture.getindex(3);
 
 /** Returns the byte offset where the capture starts, or -1. */
 int RegexCapture.start(RegexCapture capture) => capture.getindex(4).int();

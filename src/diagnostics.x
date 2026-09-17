@@ -218,9 +218,9 @@ static void Compiler._write_json(Compiler compiler, List entry) {
   List location = entry.assoc(<location>), notes = entry.assoc(<notes>);
   Buffer out = $auto(Buffer.new(0));
   out.write("{\"code\":");
-  report_json_string(out, code.str());
+  report_json_string(out, code);
   out.write(",\"message\":");
-  report_json_string(out, entry.assoc(<message>).string());
+  report_json_string(out, entry.assoc(<message>));
   out.write(",\"severity\":");
   report_json_string(
     out, code == <warning> ? "warning" : code == <limit> ? "note" : "error");
@@ -237,7 +237,7 @@ static void Compiler._write_json(Compiler compiler, List entry) {
   foreach (Var note, notes) {
     if (note is not <string>) continue;
     if (comma++) out.write_char(',');
-    report_json_string(out, note.string());
+    report_json_string(out, note);
   }
   out.write("]}\n");
   while (write(diagnostics_json, out.content.bytes, out.content.length) < 0 &&
@@ -258,9 +258,9 @@ void Compiler.print_diagnostic(Compiler compiler, List entry) {
   Var v;
   Symbol code = entry.assoc(<code>), String message = entry.assoc(<message>);
   v = entry.assoc(<location>);
-  List location = v is <list> ? v.list() : NULL;
+  List location = v is <list> ? v : NULL;
   v = entry.assoc(<notes>);
-  List notes = v is <list> ? v.list() : NULL;
+  List notes = v is <list> ? v : NULL;
   if (location) {
     String text = "<input>";
     v = location.assoc(<file>);

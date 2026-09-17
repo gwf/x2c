@@ -671,7 +671,7 @@ Buffer Map.write_str(Map map, Buffer out) {
 String Map.str(Map map) {
   Buffer buf = $auto(Buffer.new(0));
   map.write_str(buf);
-  return buf.str();
+  return buf;
 }
 
 /** Returns the readable `{ key: value, ... }` representation of `map`.
@@ -691,7 +691,7 @@ String Map.str(Map map) {
 String Map.repr(Map map) {
   Buffer buf = $auto(Buffer.new(0));
   map.write_repr(buf);
-  return buf.str();
+  return buf;
 }
 
 /** Releases this Map and both backing Blocks without freeing stored values. */

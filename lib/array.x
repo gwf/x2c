@@ -739,7 +739,7 @@ Buffer Array.write_str(Array array, Buffer out) =>
 String Array.str(Array array) {
   Buffer buf = $auto(Buffer.new(0));
   array.write_str(buf);
-  return buf.str();
+  return buf;
 }
 
 /** Returns the readable `[ a, b, c ]` representation of `array`.
@@ -756,7 +756,7 @@ String Array.str(Array array) {
 String Array.repr(Array array) {
   Buffer buf = $auto(Buffer.new(0));
   array.write_repr(buf);
-  return buf.str();
+  return buf;
 }
 
 static int _next(Iter iter, Var *out) {

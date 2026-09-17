@@ -132,13 +132,13 @@ static String _syntax_exact_name(Var value) {
 static List _method_self_signature(Compiler compiler, List binding) {
   Var stored;
   return compiler.semantic_binding_facts().try_get(
-    %(self $binding), &stored) ? stored.list() : NULL;
+    %(self $binding), &stored) ? stored : NULL;
 }
 
 static List _method_identity(Compiler compiler, List binding) {
   Var stored;
   return compiler.semantic_binding_facts().try_get(
-    %(method $binding), &stored) ? stored.list() : NULL;
+    %(method $binding), &stored) ? stored : NULL;
 }
 
 static Type _self_owner_type(Compiler compiler, List method) {
@@ -215,7 +215,7 @@ static List _append_declarator_modifiers(List declarator, List modifiers) {
   if (!modifiers) return declarator;
   match (declarator) {
     case %(bind ?binding ?mods):
-      return %(bind $binding (@{mods.list()} @modifiers));
+      return %(bind $binding (@{mods} @modifiers));
     case %(op = ?binding ?initializer):
       return %(op = ${_append_declarator_modifiers(binding, modifiers)}
                $initializer);
@@ -543,7 +543,7 @@ static List _publish_enumerator(
   match (target) case %(bind ?binding_name ?): name = binding_name;
   name = compiler.evaluate_macro_slot(name);
   String exact = _syntax_exact_name(name);
-  List binding = exact ? NULL : name is <list> ? name.list() : NULL;
+  List binding = exact ? NULL : name is <list> ? name : NULL;
   String spelling = exact ? exact : binding_identity_spelling(binding);
   if (!spelling)
     compiler.report_error(
@@ -1298,7 +1298,7 @@ static void _append_managed_declaration(
             <protocol>, "managed initializer requires Cleanup participation",
             c.token, %("type: ${type.repr()}"));
         if (ordinary.len()) {
-          output.push(%(declare $base (bindings @{ordinary.list()})));
+          output.push(%(declare $base (bindings @{ordinary})));
           ordinary.clear();
         }
         output.push(%(declare $base
@@ -1310,7 +1310,7 @@ static void _append_managed_declaration(
         output.push(%(defer (stmnt $cleanup)));
       }
       if (ordinary.len())
-        output.push(%(declare $base (bindings @{ordinary.list()})));
+        output.push(%(declare $base (bindings @{ordinary})));
       return;
     }
   }
@@ -1896,7 +1896,7 @@ static List _install_declarator_node(
     case %("x2c.ident" ?(String exact)):
       name = exact, exact_name = 1;
   List declaration = %(declare $base (bindings (bind () $mods)));
-  List prior_binding = name is <list> ? name.list() : NULL;
+  List prior_binding = name is <list> ? name : NULL;
   List method = method_identity ? method_identity
               : prior_binding
                 ? _method_identity(compiler, prior_binding) : NULL;
@@ -1910,7 +1910,7 @@ static List _install_declarator_node(
                   ((!is ?owner type string))))
            ?(String member)): {
       String owner_name =
-        owner is <symbol> ? owner.symbol().str() : owner.str();
+        owner is <symbol> ? owner.symbol() : owner.str();
       name = %"${owner_name}_$member";
       method = %($owner_name $member);
     }

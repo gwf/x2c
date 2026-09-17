@@ -93,7 +93,7 @@ static List _parameter(Func function, unsigned index) {
   if (!function || index >= function.nparams) return NULL;
   List params = _parameters(function);
   while (params && index--) params = params.cdr();
-  return params && params.car() is <list> ? params.car().list() : NULL;
+  return params && params.car() is <list> ? params.car() : NULL;
 }
 
 /* Dynamic-call lowering evaluates the Func expression once, queries every

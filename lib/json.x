@@ -60,7 +60,7 @@ JsonBool Var.jsonbool(Var value) => (JsonBool) value.pointer();
 String JsonBool.str(JsonBool value) => value.value ? "true" : "false";
 
 /** Returns `true` or `false`. */
-String JsonBool.repr(JsonBool value) => value.str();
+String JsonBool.repr(JsonBool value) => value;
 
 /** Returns nonzero for `true`. */
 int JsonBool.truth(JsonBool value) => value.value != 0;
@@ -539,7 +539,7 @@ static void _write(Buffer out, Var value, int pretty, int depth) {
 static String _json(Var value, int pretty) {
   Buffer out = $auto(Buffer.new(0));
   _write(out, value, pretty, 0);
-  return out.str();
+  return out;
 }
 
 /** Returns `value` as compact JSON text.

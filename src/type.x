@@ -364,7 +364,7 @@ static List _scalar_row(Type type) {
   Type scalar = type.scalar();
   if (!scalar) return NULL;
   Var row = _scalartypes_table()[scalar];
-  return row is <list> ? row.list() : NULL;
+  return row is <list> ? row : NULL;
 }
 
 /** Returns the fixed `Var` numeric tag for `type`, or zero when none exists.
@@ -582,7 +582,7 @@ int Type.var_tag_row(
   Symbol tag, unsigned long *top, unsigned long *mask, unsigned long *bottom) {
   Var row = _var_row_table()[tag];
   if (row is void) return 0;
-  List fields = row.list();
+  List fields = row;
   *top = fields.car().integer();
   *mask = fields.cadr().integer();
   *bottom = fields.caddr().integer();

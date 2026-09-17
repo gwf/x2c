@@ -1479,7 +1479,7 @@ List Compiler.macro_introduced_name(Compiler compiler, String spelling) {
   int identity = INT_MAX - (order is <list> ? order.list().len() : 0);
   List introduced = binding_identity_new(identity, spelling);
   compiler.semantic_binding_facts()[%(known $identity)] = spelling;
-  locals[<order>] = cons(spelling, order is <list> ? order.list() : NULL);
+  locals[<order>] = cons(spelling, order is <list> ? order : NULL);
   locals[spelling] = introduced;
   locals[introduced] = spelling;
   return introduced;
@@ -1670,7 +1670,7 @@ static List _capture_row(Compiler compiler, List hole, List sources) {
              binding_identity_try_parts(value, NULL, NULL))
       expression = %(expr () (ident $value));
   }
-  List values = value is <list> ? value.list() : NULL;
+  List values = value is <list> ? value : NULL;
   if (!singular)
     return %(
       capture (source @sources) (value @values)

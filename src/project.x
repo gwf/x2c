@@ -347,13 +347,13 @@ static void _parse_manifest(Project p) {
       }
       List parts = name.split("."), int count = parts.len();
       String first = parts.car();
-      String second = parts.cdr() ? parts.cdr().car().string() : NULL;
+      String second = parts.cdr() ? parts.cdr().car() : NULL;
       String third = parts.cdr() && parts.cdr().cdr() ?
-                     parts.cdr().cdr().car().string() : NULL;
+                     parts.cdr().cdr().car() : NULL;
       String fourth =
         parts.cdr() && parts.cdr().cdr() &&
         parts.cdr().cdr().cdr() ?
-        parts.cdr().cdr().cdr().car().string() : NULL;
+        parts.cdr().cdr().cdr().car() : NULL;
       if ((count != 2 && count != 4) ||
           first != "target" ||
           !_name_ok(second) ||

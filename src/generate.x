@@ -218,7 +218,7 @@ static void _collect_cache_function_refs(
     }
     case %(ident (binding ?callee ?)): {
       String key = _cache_function_key(callee);
-      List found = callers.contains(key) ? callers[key].list() : NULL;
+      List found = callers.contains(key) ? callers[key] : NULL;
       callers[key] = cons(caller, found);
       return;
     }
@@ -502,10 +502,10 @@ static List _resolve_typedef_markers(Array items, Array pending, int header) {
           int declared = 0;
           for (int j = 0; j < i && !declared; j++)
             declared = items[j] is <list> &&
-                       _typedef_names(items[j].list()).contains(name);
+                       _typedef_names(items[j]).contains(name);
           for (int j = i + 1; j < count && !promoted && !declared; j++)
             promoted = items[j] is <list> &&
-                       _mentions_type(items[j].list(), name);
+                       _mentions_type(items[j], name);
           if (promoted) break;
         }
         pending[at] = %($names $node $promoted);

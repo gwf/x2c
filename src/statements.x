@@ -245,7 +245,7 @@ static List _match_case(Compiler c) {
       $let(c.in_pattern, 1)
       $let(c.match_types, captures) {
         pattern = c.parse_expression();
-        types = captures.list();
+        types = captures;
       }
     }
     if (types) pattern = c.typed_match_pattern(pattern, types);

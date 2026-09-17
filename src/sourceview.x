@@ -61,7 +61,7 @@ int SourceView.read(
   SourceView sources, String path, String volatile *text) {
   Var value;
   if (sources && sources.overlays.try_get(Path.absolute(path), &value)) {
-    *text = value.string();
+    *text = value;
     return 1;
   }
   struct stat info;

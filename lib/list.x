@@ -550,7 +550,7 @@ Self List.sort_with(Self lst, Func compare) {
   Array values = $auto([]);
   foreach (Var value, lst) values.push(value);
   values.sort_with(compare);
-  return values.list();
+  return values;
 }
 
 /** Returns a stable sorted copy using `Array.sort_by`'s callback contract.
@@ -563,7 +563,7 @@ Self List.sort_by(Self lst, Func key) {
   Array values = $auto([]);
   foreach (Var value, lst) values.push(value);
   values.sort_by(key);
-  return values.list();
+  return values;
 }
 
 /** Returns a new `List` holding the elements of `arr` in order.
@@ -676,7 +676,7 @@ static Var _sublis_node(List alist, Var node) {
 */
 List List.sublis(List alist, List tree) {
   if (!tree) return NULL;
-  return _sublis_node(alist, tree).list();
+  return _sublis_node(alist, tree);
 }
 
 /** Flattens one level of nested `List`s into a canonical result.
@@ -701,7 +701,7 @@ Self List.flatten(Self lst) {
 
 static void _flatten_all_collect(Array values, List lst) {
   foreach (Var head, lst) {
-    if (head is <list>) _flatten_all_collect(values, head.list());
+    if (head is <list>) _flatten_all_collect(values, head);
     else _append_value(values, head);
   }
 }
@@ -1024,7 +1024,7 @@ static void _serialize_nested_list(Var elem, Buffer buf, Symbol mode) {
 String List.str(List lst) {
   Buffer buf = $auto(Buffer.new(0));
   lst.write_str(buf);
-  return buf.str();
+  return buf;
 }
 
 /** Appends the `List` display text to `out`, using each element's `write_str`.
@@ -1052,7 +1052,7 @@ Buffer List.write_str(List lst, Buffer out) {
 String List.repr(List lst) {
   Buffer buf = $auto(Buffer.new(0));
   lst.write_repr(buf);
-  return buf.str();
+  return buf;
 }
 
 /** Appends the readable representation of `List` to a `Buffer`. */

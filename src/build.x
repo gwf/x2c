@@ -250,7 +250,7 @@ Build CliRequest.prepare(CliRequest c) {
     state.output = %"${Path.stem(c.inputs.car().string())}.o";
   else if (c.kind == <static-lib>) {
     String stem = c.inputs ?
-                  Path.stem(c.inputs.car().string()) : "target";
+                  Path.stem(c.inputs.car()) : "target";
     state.output = %"lib$stem.a";
   }
   else state.output = "a.out";
@@ -483,7 +483,7 @@ typedef struct CcJob {
 
 static uint64_t _action_fingerprint(
   Build state, ToolAction action, List inputs, int *ok) {
-  String tool = action.arguments ? action.arguments.car().string() : NULL;
+  String tool = action.arguments ? action.arguments.car() : NULL;
   uint64_t hash = _state_base(state.request, tool, ok);
   hash = _state_text(hash, action.phase);
   hash = _state_list(hash, action.arguments);
