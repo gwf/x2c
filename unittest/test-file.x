@@ -183,23 +183,16 @@ static void file_string_transfers_on_read_error(void) {
   $test.scoped();
   char path[] = "/tmp/x2c-file-error-XXXXXX";
   int descriptor = mkstemp(path);
-  if (!EXPECT_TRUE(descriptor >= 0)) {
-    Scope.release();
-    return;
-  }
+  if (!EXPECT_TRUE(descriptor >= 0)) return;
   EXPECT_INT_EQ(write(descriptor, "error", 5), 5);
   EXPECT_INT_EQ(close(descriptor), 0);
 
   descriptor = open(path, O_WRONLY);
   unlink(path);
-  if (!EXPECT_TRUE(descriptor >= 0)) {
-    Scope.release();
-    return;
-  }
+  if (!EXPECT_TRUE(descriptor >= 0)) return;
   File file = fdopen(descriptor, "w");
   if (!EXPECT_NOT_NULL(file)) {
     close(descriptor);
-    Scope.release();
     return;
   }
   int caught = 0;
@@ -286,10 +279,7 @@ static void file_raw_line_unlocks_during_error_cleanup(void) {
 static void file_raw_reads_transfer_host_failures(void) {
   $test.scoped();
   File file = tmpfile();
-  if (!EXPECT_NOT_NULL(file)) {
-    Scope.release();
-    return;
-  }
+  if (!EXPECT_NOT_NULL(file)) return;
   Block line = Block.new(sizeof(char));
   int descriptor = file.fileno();
   EXPECT_INT_EQ(close(descriptor), 0);
@@ -401,10 +391,7 @@ static void file_copy_to_reports_progress(void) {
 static void file_iterator_reads_lines(void) {
   $test.scoped();
   File file = tmpfile();
-  if (!EXPECT_NOT_NULL(file)) {
-    Scope.release();
-    return;
-  }
+  if (!EXPECT_NOT_NULL(file)) return;
   fputs("alpha\nbeta\n", file);
   rewind(file);
   struct Iter lines_storage;
@@ -423,10 +410,7 @@ static void file_iterator_reads_lines(void) {
 static void file_iterator_releases_line_on_transfer(void) {
   $test.scoped();
   File file = tmpfile();
-  if (!EXPECT_NOT_NULL(file)) {
-    Scope.release();
-    return;
-  }
+  if (!EXPECT_NOT_NULL(file)) return;
   struct Iter lines_storage;
   Iter lines = file.iter(&lines_storage);
   int descriptor = file.fileno();
@@ -443,10 +427,7 @@ static void file_iterator_releases_line_on_transfer(void) {
 static void file_var_dispatches_existing_methods(void) {
   $test.scoped();
   File file = tmpfile();
-  if (!EXPECT_NOT_NULL(file)) {
-    Scope.release();
-    return;
-  }
+  if (!EXPECT_NOT_NULL(file)) return;
   fputs("boxed\n", file);
   rewind(file);
   Var boxed = file;
@@ -471,7 +452,6 @@ static void file_identity_is_handle_based(void) {
   if (!EXPECT_NOT_NULL(first) || !EXPECT_NOT_NULL(second)) {
     if (first) first.close();
     if (second) second.close();
-    Scope.release();
     return;
   }
   File alias = first;
