@@ -25,7 +25,6 @@ static const int _CONTEXT = 3;
 
 typedef struct {
   Array old, new;
-  int old_count, new_count;
   List edits;
 } _Diff;
 
@@ -100,10 +99,24 @@ static void _replace(_Diff *d, int lo, int old_hi, int new_hi) {
   for (int j = lo; j < new_hi; j++) _emit(d, <insert>, d.new[j]);
 }
 
-static List _diff(String old, String new) {
+static Symbol _kind(Array edits, int at) => edits[at].list().car();
+
+static void _hunk(Buffer out, List lines, int old_start, int old_count,
+                  int new_start, int new_count) {
+  out.printf("@@ -%d,%d +%d,%d @@\n", old_count ? old_start + 1 : old_start,
+             old_count, new_count ? new_start + 1 : new_start, new_count);
+  foreach (String line, lines) out.write(line);
+}
+
+/** Returns the line edits that turn `old` into `new`: a `List` of
+    `(same line)`, `(delete line)`, and `(insert line)` forms in order, with
+    each line's ending removed. Two equal texts give only `same` forms.
+    Past 2,000 edits the differing middle is one run of deletions followed
+    by one run of insertions.
+*/
+List Diff.lines(String old, String new) {
   _Diff d = {old.split_lines(0).array(), new.split_lines(0).array()};
-  d.old_count = d.old.len(), d.new_count = d.new.len();
-  int lo = 0, old_hi = d.old_count, new_hi = d.new_count;
+  int lo = 0, old_hi = d.old.len(), new_hi = d.new.len();
   while (lo < old_hi && lo < new_hi && _same(&d, lo, lo)) {
     _emit(&d, <same>, d.old[lo]);
     lo++;
@@ -117,64 +130,33 @@ static List _diff(String old, String new) {
   return d.edits.reverse();
 }
 
-static void _hunk(Buffer out, List lines, int old_start, int old_count,
-                  int new_start, int new_count) {
-  out.printf("@@ -%d,%d +%d,%d @@\n", old_count ? old_start + 1 : old_start,
-             old_count, new_count ? new_start + 1 : new_start, new_count);
-  foreach (String line, lines) out.write(line);
-}
-
-#pragma public
-
-/** Returns the line edits that turn `old` into `new`: a `List` of
-    `(same line)`, `(delete line)`, and `(insert line)` forms in order, with
-    each line's ending removed. Two equal texts give only `same` forms.
-    Past 2,000 edits the differing middle is one run of deletions followed
-    by one run of insertions.
-*/
-List Diff.lines(String old, String new) => _diff(old, new);
-
 /** Returns the unified difference between `old` and `new`, as `diff -u`
     prints it with `old_name` and `new_name` in the header and three lines
     of context, or NULL when the texts are equal line for line.
 */
 String Diff.unified(String old, String new, String old_name,
                     String new_name) {
-  List edits = _diff(old, new);
-  Array kinds = [], texts = [];
-  foreach (List edit, edits) {
-    kinds.push(edit.car());
-    texts.push(edit.cadr());
-  }
-  int count = kinds.len(), changed = 0;
-  for (int i = 0; i < count; i++) changed |= kinds[i].symbol() != <same>;
-  if (!changed) return NULL;
-  Buffer out = Buffer.new(0);
-  out.printf("--- %s\n+++ %s\n", old_name, new_name);
-  int at = 0, old_line = 0, new_line = 0;
+  Array edits = $auto(Diff.lines(old, new).array());
+  Buffer out = $auto(Buffer.new(0));
+  int count = edits.len(), at = 0, old_line = 0, new_line = 0;
   while (at < count) {
-    if (kinds[at].symbol() == <same>) {
+    if (_kind(edits, at) == <same>) {
       at++, old_line++, new_line++;
       continue;
     }
-    int start = at - _CONTEXT;
-    if (start < 0) start = 0;
-    int lead = at - start;
+    if (!out.len()) out.printf("--- %s\n+++ %s\n", old_name, new_name);
+    int start = at > _CONTEXT ? at - _CONTEXT : 0, lead = at - start;
     int old_start = old_line - lead, new_start = new_line - lead;
     int end = at, quiet = 0;
-    while (end < count && quiet < 2 * _CONTEXT) {
-      if (kinds[end].symbol() == <same>) quiet++;
-      else quiet = 0;
-      end++;
-    }
+    while (end < count && quiet < 2 * _CONTEXT)
+      quiet = _kind(edits, end++) == <same> ? quiet + 1 : 0;
     if (quiet > _CONTEXT) end -= quiet - _CONTEXT;
     List lines = NULL;
     int old_count = 0, new_count = 0;
     for (int i = start; i < end; i++) {
-      Symbol kind = kinds[i];
-      String text = texts[i];
+      (Symbol kind, String text) = edits[i].list();
       char mark = kind == <same> ? ' ' : kind == <delete> ? '-' : '+';
-      lines = cons(%"$mark${text ? text : ""}\n", lines);
+      lines = cons(%"$mark$text\n", lines);
       if (kind != <insert>) old_count++;
       if (kind != <delete>) new_count++;
     }
