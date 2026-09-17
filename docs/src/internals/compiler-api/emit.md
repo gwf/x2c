@@ -32,7 +32,7 @@ temporaries. Returned canonical `List`s and `String`s are owned by pools
 active during emission; promote them before releasing those pools if the
 tokens must survive.
 
-Source: `src/emit.x:1377`
+Source: `src/emit.x:1373`
 
 ## Design notes
 

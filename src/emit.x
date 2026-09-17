@@ -1027,15 +1027,11 @@ static List Emitter._initializer_value(
 
 // Normalize #include directives to reference generated headers.
 static List Emitter._preproc(Emitter emitter, List ast, List context) {
-  String text = ast.cadr();
-  text = text.rstrip("\n");
-  if (!text.startswith("#include")) return ast.cdr();
-  if (text.endswith(".x\"") || text.endswith(".x>")) {
-    String last = text.split(" ").last(), stem = last.strip("\"<>")[:-3];
-    String name = %"$stem.h", out = %"#include \"$name\"";
-    return %( $out );
-  }
-  return %( $text );
+  int angle = 0;
+  String target = preproc_include_target(ast.cadr(), &angle);
+  if (!target || !target.endswith(".x")) return ast.cdr();
+  String out = %"#include \"${target.remove_suffix(".x")}.h\"";
+  return %( $out );
 }
 
 /* Generic sequence emission visits sibling nodes from left to right because

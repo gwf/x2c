@@ -23,22 +23,6 @@ $(import "../src/ast-rewrite.xmacro")
 #include <string.h>
 #include <unistd.h>
 
-/* Non-include lines yield NULL; `angle` distinguishes <...> from "...". */
-static String _preproc_include_target(String text, int *angle) {
-  *angle = 0;
-  String body = text.strip(" \t\r\n");
-  if (!body.startswith("#")) return NULL;
-  body = body[1:].lstrip(" \t");
-  if (!body.startswith("include")) return NULL;
-  body = body.remove_prefix("include").lstrip(" \t");
-  if (!body.len()) return NULL;
-  char open = body[0];
-  if (open != '"' && open != '<') return NULL;
-  *angle = open == '<';
-  String rest = body[1:], int close = rest.find(*angle ? ">" : "\"");
-  return close > 0 ? rest[:close] : NULL;
-}
-
 /* A directive's `#` follows only whitespace and comments on its line. */
 static int _starts_line(Token first, Token token) {
   while (token-- > first) {
@@ -377,7 +361,7 @@ static void _file(
     for (Token token = first; token.type != <eof>; token++) {
       int angle = 0;
       String target = token.type == <preproc> && _starts_line(first, token)
-        ? _preproc_include_target(token.text, &angle)
+        ? preproc_include_target(token.text, &angle)
         : NULL;
       if (!target) continue;
       _flush_segment(

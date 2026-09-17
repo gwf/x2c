@@ -78,6 +78,21 @@ Symbol preproc_conditional_kind(String text) {
 String preproc_directive(String text) =>
   text.strip(" \t").remove_prefix("#").strip(" \t");
 
+/** Returns the file named by the `#include` line `text`, or `NULL` for any
+    other line. `*angle` is 1 for a `<...>` name and 0 otherwise. Text after
+    the name, such as a comment, is ignored.
+*/
+String preproc_include_target(String text, int *angle) {
+  *angle = 0;
+  String body = preproc_directive(text);
+  if (!body.startswith("include")) return NULL;
+  body = body.remove_prefix("include").lstrip(" \t");
+  if (!body.len() || (body[0] != '"' && body[0] != '<')) return NULL;
+  *angle = body[0] == '<';
+  String rest = body[1:], int close = rest.find(*angle ? ">" : "\"");
+  return close > 0 ? rest[:close] : NULL;
+}
+
 /** Follows the conditional groups open after the preprocessor line `text`.
     `arms` holds one entry per open group, innermost first, listing the
     `preproc` nodes that select that group's current arm.

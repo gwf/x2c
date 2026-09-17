@@ -22,10 +22,11 @@ Public functions:
 
 `binding_identity_new`, `binding_identity_try_parts`,
 `binding_identity_spelling`, `preproc_conditional_kind`, `preproc_directive`,
-`preproc_track_arms`, `preproc_within_arms`, `Symbol.compound_operator`,
-`Symbol.compound_assignment`, `Symbol.is_assignment_op`,
-`ast_changes_left_operand`, `ast_contains_head`, `Ast.rewrite_children`,
-`Ast.never_returns`, `Ast.initializer_cases`, `Ast.initializer_functions`
+`preproc_include_target`, `preproc_track_arms`, `preproc_within_arms`,
+`Symbol.compound_operator`, `Symbol.compound_assignment`,
+`Symbol.is_assignment_op`, `ast_changes_left_operand`, `ast_contains_head`,
+`Ast.rewrite_children`, `Ast.never_returns`, `Ast.initializer_cases`,
+`Ast.initializer_functions`
 
 ### [src/bootstrap.x](../src/bootstrap.x)
 

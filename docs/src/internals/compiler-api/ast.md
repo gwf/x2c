@@ -19,6 +19,7 @@ Shared helpers for x2c compiler AST nodes.
 | [`binding_identity_try_parts`](#binding_identity_try_parts) | Extracts a valid `(binding positive-integer string)` node. |
 | [`preproc_conditional_kind`](#preproc_conditional_kind) | Classifies the preprocessor line `text` as a conditional directive: `<open>` for `#if`, `#ifdef`, and `#ifndef`, `<branch>` for `#elif` and `#else` forms, `<close>` for `#endif`, or 0 for any other line. |
 | [`preproc_directive`](#preproc_directive) | Returns the preprocessor line `text` without its `#` and the blanks around the directive. |
+| [`preproc_include_target`](#preproc_include_target) | Returns the file named by the `#include` line `text`, or `NULL` for any other line. |
 | [`preproc_track_arms`](#preproc_track_arms) | Follows the conditional groups open after the preprocessor line `text`. |
 | [`preproc_within_arms`](#preproc_within_arms) | Returns `items` inside the conditional arms `arms` tracked by `preproc_track_arms`: the directives that reopen each group, outermost first, then `items`, then one `#endif` per group. |
 | [`Ast.initializer_cases`](#Ast.initializer_cases) | Returns initializer alternatives and their optional native macro input. |
@@ -37,7 +38,7 @@ Shared helpers for x2c compiler AST nodes.
 
 Returns whether `op` writes its left operand.
 
-Source: `src/ast.x:131`
+Source: `src/ast.x:146`
 
 #### ast_contains_head
 
@@ -46,7 +47,7 @@ Source: `src/ast.x:131`
 Returns whether any list under `value` has `kind` as its head. The
 worklist keeps deeply nested operator chains off the C stack.
 
-Source: `src/ast.x:136`
+Source: `src/ast.x:151`
 
 #### binding_identity_new
 
@@ -94,6 +95,16 @@ around the directive.
 
 Source: `src/ast.x:78`
 
+#### preproc_include_target
+
+`String preproc_include_target(String text, int *angle)`
+
+Returns the file named by the `#include` line `text`, or `NULL` for any
+other line. `*angle` is 1 for a `<...>` name and 0 otherwise. Text after
+the name, such as a comment, is ignored.
+
+Source: `src/ast.x:85`
+
 #### preproc_track_arms
 
 `List preproc_track_arms(List arms, String text)`
@@ -102,7 +113,7 @@ Follows the conditional groups open after the preprocessor line `text`.
 `arms` holds one entry per open group, innermost first, listing the
 `preproc` nodes that select that group's current arm.
 
-Source: `src/ast.x:85`
+Source: `src/ast.x:100`
 
 #### preproc_within_arms
 
@@ -112,7 +123,7 @@ Returns `items` inside the conditional arms `arms` tracked by
 `preproc_track_arms`: the directives that reopen each group, outermost
 first, then `items`, then one `#endif` per group.
 
-Source: `src/ast.x:98`
+Source: `src/ast.x:113`
 
 ### `Ast`
 
@@ -123,7 +134,7 @@ Source: `src/ast.x:98`
 
 Returns initializer alternatives and their optional native macro input.
 
-Source: `src/ast.x:227`
+Source: `src/ast.x:242`
 
 <a id="Ast.initializer_functions"></a>
 #### Ast.initializer_functions
@@ -134,7 +145,7 @@ Returns function alternatives when every initializer arm calls one shared
 input, and stores that input expression in `source`. Other forms return
 NULL.
 
-Source: `src/ast.x:241`
+Source: `src/ast.x:256`
 
 <a id="Ast.never_returns"></a>
 #### Ast.never_returns
@@ -147,7 +158,7 @@ calls, and blocks ending in either one when the block contains no
 `return`. Generation uses this fact to mark the enclosing function
 `_Noreturn`.
 
-Source: `src/ast.x:213`
+Source: `src/ast.x:228`
 
 <a id="Ast.rewrite_children"></a>
 #### Ast.rewrite_children
@@ -159,7 +170,7 @@ rebuilt from the results; non-list children pass through. When no child
 changed, no scratch storage is allocated and `ast` itself returns, so the
 fixed-point transform driver can compare unchanged-node identity.
 
-Source: `src/ast.x:155`
+Source: `src/ast.x:170`
 
 ### `Symbol`
 
@@ -170,7 +181,7 @@ Source: `src/ast.x:155`
 
 Returns the compound assignment for a binary operator, or zero.
 
-Source: `src/ast.x:121`
+Source: `src/ast.x:136`
 
 <a id="Symbol.compound_operator"></a>
 #### Symbol.compound_operator
@@ -179,7 +190,7 @@ Source: `src/ast.x:121`
 
 Returns the binary operator computed by a compound assignment, or zero.
 
-Source: `src/ast.x:115`
+Source: `src/ast.x:130`
 
 <a id="Symbol.is_assignment_op"></a>
 #### Symbol.is_assignment_op
@@ -188,7 +199,7 @@ Source: `src/ast.x:115`
 
 Returns whether `op` is plain or compound assignment.
 
-Source: `src/ast.x:127`
+Source: `src/ast.x:142`
 
 ## Public types
 
