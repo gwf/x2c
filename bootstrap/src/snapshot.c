@@ -24,6 +24,8 @@ int Atom_bare_spelling(String);
 
 int File_puts(File, const char *);
 
+int Var_is(Var, Symbol);
+
 String Var_repr(Var);
 
 int Var_is_integer(Var);
@@ -45,8 +47,9 @@ int snapshot_write_var(File output, Var value){
   }
   if(Var_is_atom(value)){
     String text = Var_str(value);
-    if(! Atom_bare_spelling(text)) return 0;
-    File_puts(output, text);
+    if(Atom_bare_spelling(text)) File_puts(output, text);
+    else if(Var_is(value, 1328354264)) File_puts(output, Var_repr(value));
+    else return 0;
     return 1;
   }
   if(Var_is_row(value, 11, 7, 1)){

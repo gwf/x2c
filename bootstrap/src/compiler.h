@@ -48,6 +48,10 @@ typedef struct Compiler{
   SymScope params;
   Map key_ids, macros, kw_aliases;
   Map object_macros;
+  Array arms;
+  Token arms_token;
+  int arm_serial;
+  Array attributes;
   Map kw_seen;
   Map fixed;
   Map protocols, conforms, protocol_helpers;

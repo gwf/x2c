@@ -196,10 +196,14 @@ Symbol scan_keyword_type(const char * s, int n){
     if(! memcmp(s, "threaded", 8)) return 1392787923272;
     if(! memcmp(s, "unsigned", 8)) return 1474468213064;
     if(! memcmp(s, "volatile", 8)) return 1544849476362;
+    if(! memcmp(s, "__inline", 8)) return 634145674;
     break;
     case 10 : if(! memcmp(s, "associated", 10)) return 113488288653640;
+    if(! memcmp(s, "__inline__", 10)) return 634145674;
+    if(! memcmp(s, "__restrict", 10)) return 1249006209256;
     break;
     case 12 : if(! memcmp(s, "thread_local", 12)) return 1392787923272;
+    if(! memcmp(s, "__restrict__", 12)) return 1249006209256;
     break;
     case 13 : if(! memcmp(s, "_Thread_local", 13)) return 1392787923272;
     break;

@@ -1699,11 +1699,6 @@ int Compiler.skip_linkage_brace(Compiler c) {
   return 1;
 }
 
-/** Parses one top-level form and applies its source-ordered compiler effects.
-    Returns its AST, or NULL when a keyword definition, top-level Lisp form,
-    or linkage brace only updates compiler state, with the first following
-    token current.
-*/
 /* Advances the conditional-arm stack over the directives before the
    current top-level form, once per form. */
 static void _track_conditional_arms(Compiler c) {
@@ -1720,6 +1715,11 @@ static void _track_conditional_arms(Compiler c) {
   }
 }
 
+/** Parses one top-level form and applies its source-ordered compiler effects.
+    Returns its AST, or NULL when a keyword definition, top-level Lisp form,
+    or linkage brace only updates compiler state, with the first following
+    token current.
+*/
 List Compiler.parse_top_level(Compiler c) {
   if (!c.macro_holes) {
     c.update_source_visibility(c.leading_preproc());
