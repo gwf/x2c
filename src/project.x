@@ -565,8 +565,11 @@ static CliRequest _target_request(
   request.package_dirs =
     %(@{command.package_dirs} @{_paths(p.root, target.package_dirs)});
 
-  ProjectProfile profile =
-    chosen ? _selected_profile(p, target, command.profile) : NULL;
+  // A dependency target takes the profile when it defines one; only the
+  // selected target must have the profile the command named.
+  ProjectProfile profile = chosen ?
+    _selected_profile(p, target, command.profile) :
+    command.profile ? _profile(target, command.profile, 0) : NULL;
   List defines = _defines(target.defines), compile = NULL, link = NULL;
   if (profile) {
     List cc_args = command.cc_args;
@@ -655,11 +658,18 @@ static void _write_lock(String path, List rows) {
 }
 
 /* Installs whatever the manifest pins that the home does not already hold,
-   then records what was resolved beside the manifest. The editor reads a
-   source view and never installs. */
+   then records what was resolved beside the manifest. A manifest with no
+   pins has nothing to reproduce, so a lockfile left from an earlier
+   `[dependencies]` section goes. The editor reads a source view and never
+   installs, and a dry run creates nothing. */
 static void _resolve_dependencies(Project project, CliRequest request) {
-  if (!project.dependencies || project.sources) return;
+  if (project.sources || request.dry_run) return;
   String path = %"${project.root}/x2c.lock";
+  if (!project.dependencies) {
+    try Path.remove_file(path);
+    catch %(io-fail *detail): x2c_host_error(detail);
+    return;
+  }
   List locked = _read_lock(path);
   if (_lock_satisfies(project, locked)) return;
   Array rows = [];
@@ -702,7 +712,6 @@ ProjectBuild project_plan(CliRequest request) {
   _parse_manifest(project);
   for (ProjectTarget target = project.targets; target; target = target.next)
     _validate_target(project, target);
-  _resolve_dependencies(project, request);
 
   String selected_name = request.target ? request.target :
                          project.default_target;
@@ -718,6 +727,9 @@ ProjectBuild project_plan(CliRequest request) {
   Symbol selected_kind = request.kind_explicit ? request.kind : selected.kind;
   if (request.command == <run> && selected_kind != <executable>)
     _error(project, 0, "run requires an executable target");
+  (void) _selected_profile(project, selected, request.profile);
+  // Nothing outside the manifest changes until the request is known good.
+  _resolve_dependencies(project, request);
 
   String build_root = request.build_dir;
   if (build_root) build_root = Path.absolute(".").join(build_root);
