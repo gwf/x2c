@@ -147,8 +147,8 @@ static const char *_color(Symbol tone) {
 }
 
 static void _emit(
-  const char *prefix, int prefix_length, const char *color, String line,
-  int newline) {
+  const char *prefix, int prefix_length, const char *color,
+  const char *line, int newline) {
   /* Issue each display update through one writev call to limit interleaving
      between Make children. Reporting is best effort. Retry only EINTR and
      do not change command status for output failure. */
@@ -161,7 +161,7 @@ static void _emit(
     parts[count].iov_base = (char *) color;
     parts[count++].iov_len = strlen(color);
   }
-  parts[count].iov_base = line;
+  parts[count].iov_base = (char *) line;
   parts[count++].iov_len = strlen(line);
   if (*color) {
     parts[count].iov_base = "\033[0m";
@@ -189,7 +189,7 @@ static int _clear(char *line, int capacity) {
 void report_suspend(void) {
   if (!report.width) return;
   char clear[1002], int length = _clear(clear, sizeof(clear));
-  _emit(clear, length, "", %"", 0);
+  _emit(clear, length, "", "", 0);
 }
 
 /** Writes one newline-terminated receipt to stderr when receipts are enabled.

@@ -588,7 +588,7 @@ static Type _declarator_parts(Type type, List * modifiers){
     return type;
   }
   List reversed = NULL, qualifiers = NULL;
-  for(List rest = type;  rest != base;  rest = List_cdr(rest)) reversed = cons(List_car(rest), reversed);
+  for(List rest = Type_list(type);  rest != base;  rest = List_cdr(rest)) reversed = cons(List_car(rest), reversed);
   while(List_truth(reversed) && Var_is(List_car(reversed), 1328354264) && Symbol_is_type_qualifier(Var_symbol(List_car(reversed)))){
     qualifiers = cons(List_car(reversed), qualifiers);
     reversed = List_cdr(reversed);

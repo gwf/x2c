@@ -31,7 +31,7 @@ static int _columns(void);
 
 static const char * _color(Symbol tone);
 
-static void _emit(const char * prefix, int prefix_length, const char * color, String line, int newline);
+static void _emit(const char * prefix, int prefix_length, const char * color, const char * line, int newline);
 
 static int _clear(char * line, int capacity);
 
@@ -167,7 +167,7 @@ static const char * _color(Symbol tone){
 
 }
 
-static void _emit(const char * prefix, int prefix_length, const char * color, String line, int newline){
+static void _emit(const char * prefix, int prefix_length, const char * color, const char * line, int newline){
   struct iovec parts[5];
   int count = 0;
   if(prefix_length){
@@ -178,7 +178,7 @@ static void _emit(const char * prefix, int prefix_length, const char * color, St
     parts[count].iov_base =(char *) color;
     parts[count ++].iov_len = strlen(color);
   }
-  parts[count].iov_base = line;
+  parts[count].iov_base =(char *) line;
   parts[count ++].iov_len = strlen(line);
   if(* color){
     parts[count].iov_base = "\033[0m";
@@ -209,7 +209,7 @@ void report_suspend(void){
   if(! report.width) return;
   char clear[1002];
   int length = _clear(clear, sizeof(clear));
-  _emit(clear, length, "", 0, 0);
+  _emit(clear, length, "", "", 0);
 }
 
 void report_line(Symbol tone, String line){
@@ -252,7 +252,7 @@ void report_progress(Symbol phase, int done, int total, String detail){
   char clear[1002];
   int clear_length = _clear(clear, sizeof(clear));
   const char * color = _color(34081994);
-  _emit(clear, clear_length, color, String_new(line), 0);
+  _emit(clear, clear_length, color, line, 0);
   report.width = length;
 }
 

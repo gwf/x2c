@@ -426,7 +426,8 @@ static List _assignment(
 // Normalize declaration bindings to match declared type metadata.
 static List _declaration(Compiler compiler, List ast) {
   match (ast) {
-    case %(declare ?target (bindings *bound_list)): {
+    case %((!set ?head (!or declare decl)) ?target
+           (bindings *bound_list)): {
       Array values = [], List new_bind = NULL;
       foreach (Ast binding, bound_list) {
         new_bind = binding;
@@ -449,9 +450,20 @@ static List _declaration(Compiler compiler, List ast) {
         values.push(new_bind);
       }
       List new_bindings = values.list_free();
-      return %(declare $target (bindings @new_bindings));
+      return %($head $target (bindings @new_bindings));
     }
   }
+  return ast;
+}
+
+// A `Var` subscript of a native pointer or array reads as an integer.
+static List _index(Compiler compiler, List ast) {
+  match (ast)
+    case %(index ?base (!set ?selector (expr ?type ?)))
+      if (compiler.sym.is_var_type(type)): {
+        List converted = compiler.convert_expression(selector, %(long));
+        return %(index $base $converted);
+      }
   return ast;
 }
 
@@ -1803,11 +1815,13 @@ static Ast _node(Compiler c, Ast ast) {
     case <array>:    ast = transform_array_literal(c, ast);     break;
     case <map>:      ast = transform_map_literal(c, ast);       break;
     case <cast>:     ast = _cast(c, ast);             break;
+    case <index>:    ast = _index(c, ast);            break;
     case <cons>:     ast = _cons(c, ast);             break;
     case <append>:   ast = _append(c, ast);           break;
     case <var>:      ast = _to_var(c, ast.cadr());    break;
     case <segments>: ast = _string_segments(c, ast);  break;
-    case <declare>:  ast = _declaration(c, ast);      break;
+    case <declare>: case <decl>:
+      ast = _declaration(c, ast);                     break;
     case <dstrdecl>:
       ast = _destructure_declaration(c, ast);        break;
     case <stmnt>:    ast = _destructure_statement(

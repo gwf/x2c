@@ -323,6 +323,20 @@ static void var_unboxes_at_math_call(void) {
   EXPECT_DOUBLE_NEAR("pow(ratio, 2)", pow(ratio, 2), 6.25, 1e-12);
 }
 
+/* A Var converts in a for-header declaration and as a native subscript. */
+static void var_converts_in_for_header_and_subscript(void) {
+  Var count = 3, List items = %(a b c), Var boxed = items;
+  int total = 0, cells = 0;
+  for (int i = count; i > 0; i--) total += i;
+  for (List cell = boxed; cell; cell = cell.cdr()) cells++;
+  EXPECT_INT_EQ(total, 6);
+  EXPECT_INT_EQ(cells, 3);
+  int values[4] = {10, 20, 30, 40}, *pointer = values;
+  Var index = 2;
+  EXPECT_INT_EQ(values[index], 30);
+  EXPECT_INT_EQ(pointer[index], 30);
+}
+
 static void var_scalar_reader_conversion(void) {
   $test.scoped();
   // the reported crossing: a char box read through int() and double()
@@ -1378,6 +1392,7 @@ void var_suite(void) {
   $test.run(var_helper_accessors);
   $test.run(var_scalar_reader_conversion);
   $test.run(var_unboxes_at_math_call);
+  $test.run(var_converts_in_for_header_and_subscript);
   $test.run(var_compare_numeric_total_order);
   $test.run(var_compare_cross_type_groups);
   $test.run(var_equality_and_identity_operators);

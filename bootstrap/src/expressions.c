@@ -4021,7 +4021,7 @@ static MatchCaptureSite _x2c_match_site_99;  if (x2c_match_site_try_capture(& _x
 
     }
   }
-Array definitions = Array_new(), references = Array_new();  for(List rest = type;  rest != base;  rest = List_cdr(rest)){
+Array definitions = Array_new(), references = Array_new();  for(List rest = Type_list(type);  rest != base;  rest = List_cdr(rest)){
   Var modifier = List_car(rest), reused = modifier;
   {
     List _x2c_match_expr = Var_list(modifier);

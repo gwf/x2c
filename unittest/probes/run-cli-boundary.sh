@@ -702,6 +702,57 @@ finally:
     os.close(master)
 PY
 
+# A terminal build clears its active progress line before each receipt.
+python3 - "$X2C" "$BUILD/direct/progress" <<'PY_PROGRESS'
+import os
+import pathlib
+import pty
+import select
+import shutil
+import subprocess
+import sys
+
+compiler = sys.argv[1]
+root = pathlib.Path(sys.argv[2])
+root.mkdir()
+wrapper = root / 'slow-cc'
+wrapper.write_text('#!/bin/sh\nsleep 0.3\nexec "$PROGRESS_CC" "$@"\n')
+wrapper.chmod(0o755)
+sources = []
+for name in ('first', 'second'):
+    source = root / (name + '.c')
+    source.write_text('int ' + name + '(void) { return 0; }\n')
+    sources.append(str(source))
+env = dict(os.environ, PROGRESS_CC=shutil.which('cc'), TERM='xterm')
+env.pop('MAKELEVEL', None)
+master, slave = pty.openpty()
+process = subprocess.Popen(
+    [compiler, 'build', '-c', '-j1', '--cc', str(wrapper),
+     '--build-dir', str(root / 'build'), *sources],
+    stdin=subprocess.DEVNULL, stdout=slave, stderr=slave, env=env)
+os.close(slave)
+output = b''
+try:
+    while True:
+        if not select.select([master], [], [], 20)[0]:
+            break
+        try:
+            data = os.read(master, 65536)
+        except OSError:
+            break
+        if not data:
+            break
+        output += data
+    status = process.wait(timeout=20)
+finally:
+    if process.poll() is None:
+        process.kill()
+        process.wait()
+    os.close(master)
+assert b'Compile [' in output, output
+assert status == 0, (status, output)
+PY_PROGRESS
+
 "$X2C" build -### --build-dir "$BUILD/direct/matched-dry" \
   "$BUILD/direct/source.c" >"$BUILD/direct/matched.stdout" \
   2>"$BUILD/direct/matched.stderr"
