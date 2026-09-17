@@ -234,10 +234,6 @@ static List _finish_declaration(
       bound.push(_append_declarator_modifiers(declarator, modifiers));
     declarators = bound.list_free();
   }
-  while (compiler.attributes.len()) {
-    String attribute = compiler.attributes.take_last();
-    base = %( ($attribute) @base );
-  }
   List declaration = %($tag $base (bindings @declarators));
   return tag == <declare> && !preserved_self
     ? _lower_self_declaration(compiler, declaration)
@@ -807,15 +803,14 @@ static List _function_parameters(Compiler c) {
 }
 
 /* A GNU attribute or an attribute macro after a declarator is kept as its
-   source text and moved in front of the declaration's type, where C accepts
-   it on a prototype and a definition alike. */
-static int _skip_trailing_attribute(Compiler c) {
+   source text, a modifier of that declarator alone. */
+static String _trailing_attribute(Compiler c) {
   Var definition;
   if (c.peek(0) != <ident> || c.peek(1) != <(> ||
       !(c.token.text == "__attribute__" ||
         (c.object_macros.try_get(c.token.text, &definition) &&
          Var.equal(definition, <annotation>))))
-    return 0;
+    return NULL;
   Token first = c.token, last = first;
   c.next();
   for (int depth = 0; ; c.next()) {
@@ -828,16 +823,16 @@ static int _skip_trailing_attribute(Compiler c) {
       break;
     }
   }
-  c.attributes.push(
-    String.new_len(c.text + first.pos, last.pos + last.len - first.pos));
-  return 1;
+  return String.new_len(c.text + first.pos, last.pos + last.len - first.pos);
 }
 
 static List _declarator_suffix(Compiler compiler) {
   List type = NULL;
   loop {
-    if (_skip_trailing_attribute(compiler)) continue;
-    if (compiler.peek(0) == <[>)
+    String attribute = _trailing_attribute(compiler);
+    if (attribute)
+      type = %( @type ($attribute) );
+    else if (compiler.peek(0) == <[>)
       type = %( @type  @{_array_suffix(compiler)} );
     else if (compiler.peek(0) == <:>) {
       compiler.next();

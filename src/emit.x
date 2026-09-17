@@ -85,6 +85,8 @@ static List Emitter._declarator(Emitter e, List decl, List mods) {
   Var first = mods.car();
   if (first is <list>) {
     Type mod = first;
+    if (mod.car() is <string>)
+      return e._declarator(%( @decl @mod ), mods.cdr());
     if (mod.car() == <fnmod>)
       return e._function_declarator(decl, mod, mods.cdr());
     if (mod.is_array()) return e._array_declarator(decl, mod, mods.cdr());

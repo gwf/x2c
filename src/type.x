@@ -884,11 +884,14 @@ static List _from_ast(List ast, List context) {
     }
     // (bind ?ident ?mods)
     case <bind>: {
-      List (ident, mods) = ast.cdr();
-      (void) ident;
-      mods = _from_ast(mods, context);
-      List type = context.type()._modify(mods);
-      return type;
+      // A source attribute modifier, `("__attribute__((unused))")`, is
+      // declaration text with no part in the Type.
+      Array typed = [];
+      foreach (Var item, ast.caddr())
+        if (!(item is <list> && car(item.list()) is <string>))
+          typed.push(item);
+      List mods = _from_ast(typed.list_free(), context);
+      return context.type()._modify(mods);
     }
     // (params ?params), (bindings ?bindings), (fields ?fields)
     case <params>:

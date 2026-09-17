@@ -110,10 +110,10 @@ such as `signed int` reads as that text: `JSMN_API void jsmn_init(...)`,
 `STBIDEF stbi_uc *stbi_load(...)`, and `int32 count` work as in C, and a
 function-like macro that wraps its parameter in attributes,
 `CJSON_PUBLIC(const char *) cJSON_Version(void)`, reads as the type inside.
-An attribute after a declarator, `int f(int x) __attribute__((unused));`,
-is kept and written before the declaration's type in the generated C. The
-GNU spellings `__inline`, `__inline__`, `__restrict`, and `__restrict__`
-mean the standard keywords.
+An attribute after a declarator or parameter,
+`int a __attribute__((cleanup(release))) = 1, b = 2;`, stays with that
+declarator in the generated C. The GNU spellings `__inline`, `__inline__`,
+`__restrict`, and `__restrict__` mean the standard keywords.
 
 `in` and `match` are x2c keywords, and they are C identifiers as well. `in`
 is the x2c operator only between two operands, and `match` is the statement
@@ -3659,13 +3659,16 @@ inside the parentheses. Where a name is defined differently in several
 conditional branches, a `static` definition wins, then any other prefix. A
 name defined to any other text is a typedef name, as before.
 
-A GNU attribute or a function-like attribute macro after a declarator,
-`int f(int x) __attribute__((unused));`, is kept as text and emitted before
-the declaration's type, where C accepts it on a prototype and a definition.
-It is not part of the signature compared between a prototype and its
-definition. A definition without `static` after a `static` prototype keeps
-the prototype's internal linkage. `__inline`, `__inline__`, `__restrict`, and
-`__restrict__` are the standard keywords.
+A GNU attribute or a function-like attribute macro after a declarator or
+parameter, `int a __attribute__((unused)) = 1, b = 2;` or
+`int f(int x __attribute__((unused)));`, is kept as text after that
+declarator and applies to it alone, as in C. An attribute on the prototype
+of a function the unit defines is written before the type on both the
+prototype and the definition x2c generates. Attributes are not part of the
+signature compared between a prototype and its definition. A definition
+without `static` after a `static` prototype keeps the prototype's internal
+linkage. `__inline`, `__inline__`, `__restrict`, and `__restrict__` are the
+standard keywords.
 
 `in` and `match` are keywords only where their x2c forms can occur: `in`
 between two operands, and `match` as `match (...)` followed by `case` or

@@ -100,10 +100,10 @@ such as `signed int` reads as that text: `JSMN_API void jsmn_init(...)`,
 `STBIDEF stbi_uc *stbi_load(...)`, and `int32 count` work as in C, and a
 function-like macro that wraps its parameter in attributes,
 `CJSON_PUBLIC(const char *) cJSON_Version(void)`, reads as the type inside.
-An attribute after a declarator, `int f(int x) __attribute__((unused));`,
-is kept and written before the declaration's type in the generated C. The
-GNU spellings `__inline`, `__inline__`, `__restrict`, and `__restrict__`
-mean the standard keywords.
+An attribute after a declarator or parameter,
+`int a __attribute__((cleanup(release))) = 1, b = 2;`, stays with that
+declarator in the generated C. The GNU spellings `__inline`, `__inline__`,
+`__restrict`, and `__restrict__` mean the standard keywords.
 
 `in` and `match` are x2c keywords, and they are C identifiers as well. `in`
 is the x2c operator only between two operands, and `match` is the statement

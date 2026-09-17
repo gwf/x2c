@@ -23,8 +23,17 @@ static int note(int level, const char *format, ...) {
   return written;
 }
 
+static void release(int *value) { printf("release %d\n", *value); }
+
+static int second(int x __attribute__((unused)), int y) { return y; }
+
 int main(void) {
   report("%s %d\n", "report", 1);
   note(2, "%s\n", "note");
+  {
+    int a __attribute__((cleanup(release))) = 3, b = 4;
+    int (*pick)(int x __attribute__((unused)), int y) = second;
+    printf("%d\n", pick(a, b));
+  }
   return 0;
 }

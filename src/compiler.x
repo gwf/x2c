@@ -92,8 +92,6 @@ typedef struct Compiler {
      `(id arm)` pair, so one function defined in two arms of one `#if` is one
      definition. `arms_token` is the form the stack was computed for. */
   Array arms, Token arms_token, int arm_serial;
-  // Trailing attribute text collected by the declarator, moved to the base.
-  Array attributes;
   // Import paths already applied to this .x file's alias map.
   Map kw_seen;
   // Anchored statements whose transform returned them unchanged. The driver
@@ -270,7 +268,6 @@ static Compiler _new(Compiler owner) {
     _.kw_seen = {};
     _.object_macros = {};
     _.arms = [];
-    _.attributes = [];
     _.proto_cache = {};
     _.imports = {};
     _.init_tokens = {};
@@ -2841,18 +2838,8 @@ static Type _function_contract_type(Type type, int keep_qualifiers) {
   return result.list_free();
 }
 
-/* A source attribute kept as text in front of a type is not part of the
-   signature C compares between a prototype and its definition. */
-static Type _without_attributes(Type type) {
-  Array kept = [];
-  foreach (Var item, type)
-    if (!(item is <list> && car(item.list()) is <string>)) kept.push(item);
-  return kept.list_free();
-}
-
 static List _function_completion_contract(
   Type type, List method_identity, List self_signature) {
-  type = _without_attributes(type);
   Symbol linkage = type.is_static() ? <static> : <extern>;
   List contract = %(
     function-contract
@@ -2881,7 +2868,7 @@ static void _record_function_prototypes(
   Compiler c, Type declared_type, List items) {
   foreach (List target, items)
     match (target)
-      case %(bind ?binding *): {
+      case %(bind ?binding ?modifiers): {
         List single = %(declare $declared_type (bindings $target));
         Type type = single.type_from_ast();
         if (!type.is_function()) continue;
@@ -2889,7 +2876,7 @@ static void _record_function_prototypes(
            generator writes it on the prototype it derives from the
            definition. */
         List attributes = NULL;
-        foreach (Var item, declared_type)
+        foreach (Var item, modifiers)
           if (item is <list> && car(item.list()) is <string>)
             attributes = attributes ? %( @attributes $item ) : %($item);
         if (attributes)
