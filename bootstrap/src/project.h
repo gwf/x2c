@@ -17,5 +17,7 @@ String project_manifest(CliRequest c);
 
 ProjectBuild project_plan(CliRequest request);
 
+int new_command(CliRequest request);
+
 
 #endif /* __GUARD_0x05ED52D8__ */

@@ -971,6 +971,8 @@ int remove_command(CliRequest);
 
 int list_command(CliRequest);
 
+int new_command(CliRequest);
+
 int script_run(CliRequest);
 
 int main(int argc, char * * argv){
@@ -991,6 +993,7 @@ int main(int argc, char * * argv){
   if(request -> command == 20308036376) return install_command(request);
   if(request -> command == 1219329418) return remove_command(request);
   if(request -> command == 806120) return list_command(request);
+  if(request -> command == 29038) return new_command(request);
   _configure_logging(request -> debugging);
   Frontend_load_support(request);
   Context command = Context_open_isolated_named("compiler command");
