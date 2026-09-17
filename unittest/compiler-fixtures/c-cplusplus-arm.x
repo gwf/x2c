@@ -32,8 +32,15 @@ static int power(int base) { return base * base; }
 this arm is never compiled and need not parse
 #endif
 
+// A `||` gives the condition another way to hold, so C takes this arm.
+#if defined(__cplusplus) && __cplusplus >= 201103L || defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+static int modern(void) { return 5; }
+#else
+static int modern(void) { return 6; }
+#endif
+
 int main(void) {
   Kept kept = { 3 };
-  printf("%d %d %d\n", kept.field, platform(), power(4));
+  printf("%d %d %d %d\n", kept.field, platform(), power(4), modern());
   return 0;
 }

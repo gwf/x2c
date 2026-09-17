@@ -2744,7 +2744,8 @@ declarations and the native compiler reads it from the generated C.
 Every branch of a conditional is parsed except the branches C never
 compiles. x2c output is compiled as C by a GNU-style compiler, so the branch
 under `#ifdef __cplusplus`, `#if defined(__cplusplus)` alone or first in a
-`&&` conjunction, and `#ifdef _MSC_VER` or `#if defined(_MSC_VER)` likewise,
+`&&` conjunction with no `||`, and `#ifdef _MSC_VER` or
+`#if defined(_MSC_VER)` likewise,
 the `#else` branch of `#ifndef __cplusplus` or `#if !defined(__cplusplus)`,
 and `#if 0` are skipped: their tokens are trivia, and the directives around
 them stay in place and are emitted. A function defined in two arms of one

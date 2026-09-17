@@ -14,6 +14,13 @@ static int power(int base);
 #endif
 #if 0
 #endif
+#if defined(__cplusplus) && __cplusplus >= 201103L || defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+static int modern(void);
+
+#else
+static int modern(void);
+
+#endif
 #ifdef _MSC_VER
 #else
 int platform(void){
@@ -34,13 +41,26 @@ static int power(int base){
 }
 
 #endif
+#if defined(__cplusplus) && __cplusplus >= 201103L || defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+static int modern(void){
+  return 5;
+}
+
+#endif
+#if defined(__cplusplus) && __cplusplus >= 201103L || defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#else
+static int modern(void){
+  return 6;
+}
+
+#endif
 int main(void){
   x2c_initialize();
   Kept kept ={
     3
   }
   ;
-  printf("%d %d %d\n", kept.field, platform(), power(4));
+  printf("%d %d %d %d\n", kept.field, platform(), power(4), modern());
   return 0;
 }
 

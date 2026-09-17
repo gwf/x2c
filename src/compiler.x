@@ -513,9 +513,10 @@ static Symbol _never_active_arm(String s) {
                ? "<never>" : t.text);
   String line = " ".join(words.list_free()).replace(
     "defined ( <never> )", "defined <never>");
+  // A `||` gives the condition another way to hold, so the arm can be taken.
   if (line == "ifdef <never>" || line == "if 0" || line == "if ( 0 )" ||
       line == "if defined <never>" ||
-      line.startswith("if defined <never> && "))
+      (line.startswith("if defined <never> && ") && !line.contains(" || ")))
     return <first>;
   return line == "ifndef <never>" || line == "if ! defined <never>"
     ? <rest> : 0;
