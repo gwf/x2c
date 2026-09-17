@@ -119,6 +119,8 @@ List Array_list(Array arr);
 
 List Array_list_free(Array arr);
 
+List Map_list(Map map);
+
 Array List_array(List lst);
 
 List List_unique(List lst);
