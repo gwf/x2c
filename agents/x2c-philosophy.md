@@ -667,9 +667,9 @@ saved value.
 A `Pool` pairs a `Scope` that owns storage with a `Map` that owns canonical
 identities, linked to an enclosing parent pool. `lib/pool.x` owns lookup
 (shadowing outward through the parent chain), creation (always landing in the
-innermost pool), and release. `String.pool_retain`/`pool_retain_named` and
-`List.pool_retain`/`pool_retain_named` establish a named pooling scope for
-their respective canonicalization tables; `String.promote` and `List.promote`
+innermost pool), and release. `String.pool_retain`/`pool_retain_named`
+establish a named pooling scope for the shared `String` and `List`
+canonicalization tables; `String.promote` and `List.promote`
 move a value owned by an inner pool up to an ancestor pool so it survives that
 inner pool's release. `String.try_own` and `List.try_own` report whether the
 complete value is proven safe beyond every active pool; zero means not proven

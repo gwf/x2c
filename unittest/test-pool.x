@@ -343,7 +343,7 @@ static void pool_string_free_reuses_small_slot(void) {
 }
 
 static void pool_list_bracket_promotes_result(void) {
-  List.pool_retain_named("test-list-bracket");
+  String.pool_retain_named("test-list-bracket");
   for (int i = 0; i < 100; i++) {
     String garbage = String.printf("pool-garbage-%d", i);
     List cell = %( $garbage $i );
@@ -354,7 +354,7 @@ static void pool_list_bracket_promotes_result(void) {
   List result = %( $label 42 $nested );
   List promoted = result.promote();
   EXPECT_TRUE(promoted == result);  // pointer stability
-  List.pool_release();
+  String.pool_release();
   EXPECT_INT_EQ(result.len(), 3);
   EXPECT_STR_EQ(result.car().string(), "pool-keep-me");
   Var answer = 42;
@@ -369,10 +369,10 @@ static void pool_list_bracket_promotes_result(void) {
 static void pool_unpromoted_identity_is_wiped(void) {
   // volatile seed keeps these cells out of the static literal machinery
   volatile int seed = 9100;
-  List.pool_retain_named("test-list-wipe");
+  String.pool_retain_named("test-list-wipe");
   List doomed = cons(seed + 1, cons(seed + 2, cons(seed + 3, NULL)));
   EXPECT_INT_EQ(doomed.len(), 3);
-  List.pool_release();
+  String.pool_release();
   PoolStats before = Pool.stats(NULL);
   List again = cons(seed + 1, cons(seed + 2, cons(seed + 3, NULL)));
   PoolStats after = Pool.stats(NULL);
@@ -398,14 +398,14 @@ static void pool_try_own_reports_lifetime_safety(void) {
   transient_list.cdr = NULL;
   EXPECT_FALSE(transient_list.try_own());
 
-  List.pool_retain_named("test-own-values");
+  String.pool_retain_named("test-own-values");
   EXPECT_TRUE(permanent_string.try_own());
   EXPECT_TRUE(permanent_list.try_own());
   String child_string = String.new("pool-child-string");
   List child_list = %($child_string pool-child-list);
   EXPECT_TRUE(child_string.try_own());
   EXPECT_TRUE(child_list.try_own());
-  List.pool_release();
+  String.pool_release();
   EXPECT_STR_EQ(child_string, "pool-child-string");
   EXPECT_TRUE(child_list == %("pool-child-string" pool-child-list));
 }

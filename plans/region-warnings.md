@@ -20,7 +20,7 @@
 
 The compiler warns when a value allocated inside a region can outlive it.
 A region is a `$scope()` block, a retain and release pair, a `$scope(&slot)`
-push, a `List.pool_retain` bracket, an `$auto` local, or a Scope local that
+push, a `String.pool_retain` bracket, an `$auto` local, or a Scope local that
 `Scope.destroy` ends. The warning names the value, the region it was born
 in, and the way it leaves: returned,
 assigned to a variable declared outside the region, stored through a
@@ -44,7 +44,7 @@ callbacks, or storage the runtime did not allocate.
 - **Static, no runtime support.** The pass reads typed forms after
   `$scope`, `$auto`, and `foreach` have expanded and before cleanup
   lowering, so regions are still visible as `Scope_retain`, `defer
-  Scope_release`, `Scope_push`, `List_pool_retain`, and `defer X_cleanup`.
+  Scope_release`, `Scope_push`, `String_pool_retain`, and `defer X_cleanup`.
 - **Per-function summaries stay within the unit.** A summary is two
   facts: returns fresh storage; and for each parameter, where it is sunk
   (returned, into another parameter's object, into a static, through an

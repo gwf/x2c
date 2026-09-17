@@ -46,8 +46,8 @@ static void escaping_static(void) {
 
 // A pooled List leaves its bracket without being promoted.
 static List escaping_pooled(void) {
-  List.pool_retain();
-  defer List.pool_release();
+  String.pool_retain();
+  defer String.pool_release();
   List l = cons(1, NULL);
   return l;
 }

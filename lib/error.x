@@ -1031,7 +1031,7 @@ static Symbol _catch_match(ErrorHandler h) {
   ErrorThreadState state = _thread();
   state.floor_only++;
   List projection = _cons(&record.region, code, detail);
-  List.pool_retain_named("Error catch bindings");
+  String.pool_retain_named("Error catch bindings");
   ErrorCatchSite *site = h.site;
   MatchPlan *plans = (void *) h.plans != NULL ? h.plans.bytes : NULL;
   for (int i = 0; i < site.arm_count; i++) {
@@ -1055,12 +1055,12 @@ static Symbol _catch_match(ErrorHandler h) {
     _catch_commit_captures(h, record, layout, &captures);
     if (values) Scope.free(values);
     h.selected = i;
-    List.pool_release();
+    String.pool_release();
     _catch_retain(h);
     state.floor_only--;
     return <unwind>;
   }
-  List.pool_release();
+  String.pool_release();
   state.floor_only--;
   return <declined>;
 }

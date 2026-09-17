@@ -10,7 +10,7 @@ pointer whose target the compiler cannot identify, including a pointer that
 a called function stores into for the caller.
 
 A region is a `$scope()` block, a `Scope.retain` and `Scope.release` pair, a
-`$scope(&slot)` push, a `List.pool_retain` bracket, an `$auto` local, or the
+`$scope(&slot)` push, a `String.pool_retain` bracket, an `$auto` local, or the
 storage of a `Scope` local that `Scope.destroy` ends.
 `src/regions.x` analyzes these forms before the transform driver lowers
 them, so a region is still the call that opens it and the `defer` beside it
@@ -22,7 +22,7 @@ The pass exempts three ways of leaving a region.
 
 A `List` pool owns each canonical value, so ending a region never frees it.
 `String`, `List`, and `Symbol` results therefore cross a region boundary
-without a warning. A value consed inside a `List.pool_retain` bracket is the
+without a warning. A value consed inside a `String.pool_retain` bracket is the
 exception: that bracket's pool frees it, so the pass tracks pool-born values
 the same way it tracks scope-born ones. The exemption covers the List cells
 alone. `cons(a, rest)` and `%($a)` store `a` in a cell that outlives every

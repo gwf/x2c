@@ -115,8 +115,8 @@ double destroy aborts with a diagnostic.
 
 Canonical identity does not require every `List` in a batch or request to stay
 alive until process exit. When a body of work builds substantial `List`
-structure and no `List` from that work escapes, bracket it with the `List` pool
-calls:
+structure and no `List` from that work escapes, bracket it with the shared
+`String` and `List` pool calls:
 
 ```x2c
 ~
@@ -133,17 +133,17 @@ calls:
 ~}
 ~
 static int evaluate(int input) {
-  List.pool_retain();
-  defer List.pool_release();
+  String.pool_retain();
+  defer String.pool_release();
 
   List temporary = %($input ${build_left(input)} ${build_right(input)});
   return temporary_score(temporary);
 }
 ```
 
-Every `cons` inside the bracket remains canonical. `List.pool_release`
+Every `cons` inside the bracket remains canonical. `String.pool_release`
 reclaims cells created in the innermost pool and forgets their identities.
-Calls nest, and every successful `List.pool_retain` requires one matching
+Calls nest, and every successful `String.pool_retain` requires one matching
 release. Use `defer` when an error or early return can cross the boundary.
 
 If a `List` must survive, call `List.promote` before release. Promotion is
@@ -157,10 +157,10 @@ cars, and long `Atom` payloads:
 ~}
 ~
 ~static List promoted_result(void) {
-List.pool_retain();
+String.pool_retain();
 List result = build_result();
 result.promote();
-List.pool_release();
+String.pool_release();
 return result;
 ~}
 ```
@@ -347,8 +347,8 @@ visible where it was chosen.
 
 Translation warns when a value allocated inside a region can still be reached
 after the region ends. A region is a `$scope()` block, a `Scope.retain` and
-`Scope.release` pair, a `$scope(&slot)` push, a `List.pool_retain` bracket, an
-`$auto` local, or a `Scope` local that `Scope.destroy` ends. The warning
+`Scope.release` pair, a `$scope(&slot)` push, a `String.pool_retain` bracket,
+an `$auto` local, or a `Scope` local that `Scope.destroy` ends. The warning
 includes the value's name and the way the value leaves, and its note gives
 the line that opened the region:
 

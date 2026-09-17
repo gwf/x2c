@@ -138,11 +138,13 @@ Pool String.pool_retain_named(const char *name) =>
   x2c_pool_values_retain_named(name);
 
 /** Opens the shared `String` and `List` canonical-value pool.
-    `List.pool_retain` is another name for the same operation; callers open
-    one bracket, not one through each name. New canonical misses enter the
-    child, while equal ancestor values retain their existing owner. The caller
-    must match this with one `String.pool_release` or detach it for transfer.
+    New canonical misses enter the child, while equal ancestor values retain
+    their existing owner. Promote anything that must outlive the bracket with
+    `String.promote` or `List.promote`: unpromoted values are discarded and
+    their identities no longer resolve. Brackets nest. The caller must match
+    this with one `String.pool_release` or detach it for transfer.
     Raises: `<alloc-fail>` while opening the pool.
+    See: String.pool_release, String.pool_retain_named, List.promote
 */
 Pool String.pool_retain(void) => x2c_pool_values_retain();
 

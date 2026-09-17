@@ -517,8 +517,8 @@ Pool Pool.release(Pool inner) {
 }
 
 /* String and List share one stack because their immutable values freely
-   contain one another. The public String.pool_* and List.pool_* entry points
-   remain as names for this one stack. */
+   contain one another. The public String.pool_* entry points operate on this
+   one stack. */
 /* Returns the borrowed active canonical-value pool, lazily installing the
    process root in this thread when needed. */
 Pool x2c_pool_values_current(void) {

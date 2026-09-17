@@ -81,9 +81,7 @@ lib/list.x|advanced|List.flatten,List.flatten_all,List.hash,List.nth_cdr
 lib/list.x|advanced|List.promote,List.repr,List.str,List.sublis,List.subseq
 lib/list.x|advanced|List.write_repr,Var.caar,Var.caddr,Var.cadr,Var.car
 lib/list.x|advanced|Var.cddr,Var.cdr,Var.cons
-lib/list.x|internal|List.initialize,List.shutdown,List.pool_detach
-lib/list.x|internal|List.pool_release,List.pool_retain,List.pool_current
-lib/list.x|internal|List.pool_retain_named,List.try_own
+lib/list.x|internal|List.initialize,List.shutdown,List.try_own
 lib/logger.x|advanced|Logger.add_file_sink,Logger.add_memory_sink
 lib/logger.x|advanced|Logger.add_sink,Logger.add_stderr_sink,Logger.clear_sinks
 lib/logger.x|advanced|Logger.debug,Logger.error,Logger.fatal,Logger.flush
@@ -195,7 +193,6 @@ lib/dispatch.x|internal|x2c_descriptor_thread_start_end
 lib/error.x|internal|Error.context_close,Error.context_open,Error.since_in
 lib/error.x|internal|Error.snapshot_in
 lib/exception.x|internal|x2c_exception_unwinding
-lib/list.x|internal|List.thread_initialize
 lib/map.x|internal|Map.export_to
 lib/scope.x|internal|Scope.owner
 lib/string.x|internal|String.thread_initialize

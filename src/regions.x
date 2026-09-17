@@ -3,7 +3,7 @@
     Copyright (c) 2026 Gary William Flake.
 
     A region is a `$scope()` block, a `Scope.retain` and `Scope.release`
-    pair, a `$scope(&slot)` push, a `List.pool_retain` bracket, an `$auto`
+    pair, a `$scope(&slot)` push, a `String.pool_retain` bracket, an `$auto`
     local, or a Scope local that `Scope.destroy` ends. The pass reads the
     typed forms the parser produced, before the transform driver rewrites
     them, so a region is still the call that opens it and the `defer` beside
@@ -108,7 +108,7 @@ static Map runtime = %{
   "Scope_free": (free),
   "Scope_destroy": (destroy),        "Scope_cleanup": (destroy),
   "Scope_retain": (open scope),      "Scope_release": (close scope),
-  "List_pool_retain": (open pool),   "List_pool_release": (close pool),
+  "String_pool_retain": (open pool), "String_pool_release": (close pool),
   "Scope_push": (open slot),         "Scope_pop": (close slot),
   "Scope_move": (move),              "Context_export": (exit),
   "List_promote": (exit),            "Var_promote": (exit),

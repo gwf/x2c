@@ -71,9 +71,7 @@ static void list_constructor_failures_transfer(void) {
   catch %(bad-arg *): caught++;
   try %(1 2 3).getslice(0, 2, 0);
   catch %(bad-arg *): caught++;
-  try List.pool_release();
-  catch %(bad-state *): caught++;
-  EXPECT_INT_EQ(caught, 5);
+  EXPECT_INT_EQ(caught, 4);
 
   EXPECT_TRUE(List.list_n(2, 1, 2) == %(1 2));
 }
@@ -129,9 +127,9 @@ static void list_full_slice_preserves_active_owner(void) {
   List active = cons(seed, cons(seed + 1, cons(seed + 2, NULL)));
   EXPECT_TRUE(active.getslice(0, active.len(), 1) === active);
 
-  Pool detached = List.pool_retain_named("detached-full-slice");
+  Pool detached = String.pool_retain_named("detached-full-slice");
   List borrowed = cons(seed + 3, cons(seed + 4, cons(seed + 5, NULL)));
-  detached = List.pool_detach();
+  detached = String.pool_detach();
   List copied = borrowed.getslice(0, borrowed.len(), 1);
   EXPECT_TRUE(copied !== borrowed);
   EXPECT_INT_EQ(copied.compare(borrowed), 0);
@@ -586,7 +584,7 @@ static void list_intern_preserves_map_identity(void) {
 
 static void list_pool_lifetime_boundary(void) {
   volatile int seed = 9300;
-  Pool pool = List.pool_retain();
+  Pool pool = String.pool_retain();
   if (!EXPECT_NOT_NULL(pool)) return;
 
   List garbage = cons(seed + 1, cons(seed + 2, NULL));
@@ -594,7 +592,7 @@ static void list_pool_lifetime_boundary(void) {
   ScopeStats during = Scope.stats();
   EXPECT_INT_EQ(garbage.len(), 2);
 
-  List.pool_release();
+  String.pool_release();
   ScopeStats after = Scope.stats();
   EXPECT_TRUE(after.live_allocations < during.live_allocations);
   EXPECT_INT_EQ(survivor.car().integer(), seed + 3);

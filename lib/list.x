@@ -75,14 +75,6 @@ List List.cons_in(Pool pool, Var head, List tail) {
 #include <stdarg.h>
 #include <limits.h>
 
-/** Returns this thread's borrowed active canonical-value pool.
-    The call lazily installs the process root when this thread has none; the
-    caller must not release the returned pool.
-    Raises: `<alloc-fail>` if the root cannot be initialized. Native mutex
-    initialization failure aborts.
-*/
-Pool List.pool_current(void) => x2c_pool_values_current();
-
 /** Initializes the shared process-wide `String` and `List` pool root.
     Raises: `<alloc-fail>` if the root cannot be constructed. Native mutex
     initialization failure aborts.
@@ -91,78 +83,12 @@ void List.initialize(void) {
   x2c_pool_values_initialize();
 }
 
-/** Installs the existing process pool root in a newly created worker thread.
-    The root must already be initialized; otherwise the process aborts.
-*/
-void List.thread_initialize(void) {
-  x2c_pool_values_thread_initialize();
-}
-
 /** Releases every active nested pool and then the process root at shutdown.
     No worker or canonical value may remain in use afterward. Repeated calls
     after the root is gone do nothing.
 */
 void List.shutdown(void) {
   x2c_pool_values_shutdown();
-}
-
-/* New cons cells enter the nested pool until pool_release reclaims it.
-   Promote survivors first. */
-/** Pushes a named child onto the shared `String` and `List` pool stack.
-    New canonical misses belong to the child, while hits retain the lifetime of
-    the ancestor that already owns them. The returned pool is the new active
-    pool and must be matched by `List.pool_release` or detached and released.
-    `name` is copied into the child's diagnostic `Scope`.
-    Raises: `<alloc-fail>` while constructing the child. The failure leaves
-    the active pool unchanged. Native mutex failure aborts.
-*/
-Pool List.pool_retain_named(const char *name) =>
-  x2c_pool_values_retain_named(name);
-
-/** Pushes a nested interning pool that new `String`s and cons cells use.
-    New canonical identities between this call and the matching
-    `List.pool_release` are placed in the new pool. A lookup that finds an
-    equal ancestor-owned value returns that identity with its longer lifetime.
-    Promote anything that must outlive the bracket first: unpromoted cells are
-    discarded and their identities no longer resolve, so a later `cons` of the
-    same head and tail allocates a fresh cell instead of finding the old one.
-    Brackets nest. `List.pool_retain_named` is the same operation with a label
-    for diagnostics. `String.pool_retain` is another name for the same
-    operation; callers open one bracket, not one through each name.
-    Raises: `<alloc-fail>` when the nested pool cannot be allocated.
-    See: List.pool_release, List.promote, List.pool_retain_named,
-    String.pool_retain
-*/
-Pool List.pool_retain(void) => x2c_pool_values_retain();
-
-/** Pops the innermost shared interning pool, discarding everything in it.
-    Cells that `List.promote` moved to the parent pool survive with their
-    pointers unchanged; everything else is reclaimed and drops out of the
-    interning tables. `String`s, long `Atom` payloads, and `List`s
-    move through the
-    same pool chain.
-    Raises: `<bad-state>` when no nested pool is open. The failure leaves the
-    active pool unchanged.
-    See: List.pool_retain, List.promote, String.pool_release
-*/
-void List.pool_release(void) {
-  Pool pool = x2c_pool_values_current();
-  if (!pool.up) raise %(bad-state (owner "List.pool_release"));
-  x2c_pool_values_release();
-}
-
-/** Removes the active nested pool without destroying it and returns it.
-    The parent becomes active. `Thread` keeps the detached pool sealed until
-    join
-    copies its survivors. The caller must eventually pass it to `Pool.release`
-    before destroying its parent.
-    Raises: `<bad-state>` when no nested pool is active. The active pool is
-    unchanged.
-*/
-Pool List.pool_detach(void) {
-  Pool pool = x2c_pool_values_current();
-  if (!pool.up) raise %(bad-state (owner "List.pool_detach"));
-  return x2c_pool_values_detach();
 }
 
 /* In an ordinary shared-pool List.cons graph, an ancestor-owned cell can only
@@ -191,7 +117,7 @@ static void _promote_node(Var node) {
     Cells, nested `List`s, interned `String` cars, and long `Atom` payloads all
     move
     together, so a promoted `List` keeps its complete identity graph across the
-    matching `List.pool_release`. Pointers never change and ancestor-owned
+    matching `String.pool_release`. Pointers never change and ancestor-owned
     structure is left where it is; the return value is `lst` itself.
 
     Cells are immutable, so an ancestor-owned cell can only reference
