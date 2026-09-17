@@ -9,5 +9,5 @@ static int exit_caller(void) {
 }
 
 int main(void) {
-  return 0;
+  exit(0);
 }

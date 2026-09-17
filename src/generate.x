@@ -386,8 +386,10 @@ static void _partition_function(
   Map forwarded) {
   /* C sees only the prototype of a helper that always raises, so a caller
      whose last statement is that call looks like a missing return. Marking
-     the type here reaches every generated form of the function. */
-  if (body.never_returns() && !type.list().contains(%("_Noreturn")))
+     the type here reaches every generated form of the function. C forbids
+     `_Noreturn` on `main`. */
+  if (body.never_returns() && !type.list().contains(%("_Noreturn")) &&
+      binding_identity_spelling(declarator.cadr()) != "main")
     type = %(("_Noreturn") @type);
   List function = %(function $type $declarator $body);
   if (type.is_static()) {

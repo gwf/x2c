@@ -16,6 +16,6 @@ static int exit_caller(void){
 
 int main(void){
   x2c_initialize();
-  return 0;
+  exit(0);
 }
 
