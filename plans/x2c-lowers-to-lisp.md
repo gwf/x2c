@@ -199,15 +199,23 @@ anything it cannot carry to the SDK lowering, so all 22 spike functions
 still match native execution.
 
 Measured end to end, the whole compiler run including startup and
-translation, against a 0.46 s baseline with no compile-time call:
+translation, against a 0.49 s baseline with no compile-time call. Re-taken
+on `48b7d458` after the match and lisp changes landed, because those are on
+the path the lowering exercises:
 
 | workload | SDK lowering | direct lowering |
 |---|---|---|
-| `spin(100000)` | 12.07 s | 0.77 s |
-| `spin(1000000)` | - | 3.85 s |
+| `spin(100000)` | 14.03 s | 0.82 s |
+| `spin(1000000)` | - | 3.79 s |
 
-That is about 295,000 loop iterations per second against 6,800, a 43x
-improvement, and it stays linear to a million iterations. It is 2.3x short
+That is about 303,000 loop iterations per second against 7,400, a 41x
+improvement, and it stays linear to a million iterations.
+
+The direct path is unchanged from the earlier tree while the SDK path slowed
+from 12.07 s to 14.03 s for the same work. That is consistent with `car` and
+`cdr` now checking their argument: the SDK walks a statement list on every
+iteration and the lowered code does arithmetic and one self call. It is an
+observation across two trees, not an isolated measurement. It is 2.3x short
 of the 672,000 the hand-written ideal reaches, because every operator still
 goes through `_binary` with a Symbol rather than Lisp's own `+` and `<`;
 closing that gap is an M1 question, because `<` returns a Lisp truth value
