@@ -1640,20 +1640,18 @@ int Compiler.skip_linkage_brace(Compiler c) {
   return 1;
 }
 
-/* Advances the conditional-arm stack over the directives before the
-   current top-level form, once per form. */
+/* Takes the conditional groups open after the last conditional directive
+   before the current top-level form. */
 static void _track_conditional_arms(Compiler c) {
-  if (c.token == c.arms_token) return;
-  c.arms_token = c.token;
-  foreach (List directive, c.leading_preproc()) {
-    Symbol kind = preproc_conditional_kind(directive.cadr());
-    if (kind == <open>) c.arms.push(%( ${++c.arm_serial} 0 ));
-    else if (kind == <branch> && c.arms.len()) {
-      List top = c.arms[-1];
-      c.arms[-1] = %( ${top.car()} ${(long) top.cadr() + 1} );
+  Token base = c.tokenizer.tokens;
+  Var stack;
+  for (Token token = c.token - 1; token >= base &&
+       (token.type == <space> || token.type == <comment> ||
+        token.type == <preproc>); token--)
+    if (c.arm_stacks.try_get((long) (token - base), &stack)) {
+      c.arms = stack;
+      return;
     }
-    else if (kind == <close> && c.arms.len()) c.arms.take_last();
-  }
 }
 
 /** Parses one top-level form and applies its source-ordered compiler effects.

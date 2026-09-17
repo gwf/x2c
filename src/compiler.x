@@ -91,10 +91,12 @@ typedef struct Compiler {
      `<annotation>` for a function-like attribute macro, `<wrapper>` for one
      that wraps its parameter in prefixes, else 1. */
   Map object_macros;
-  /* The open conditional directives at the current top-level form, each an
-     `(id arm)` pair, so one function defined in two arms of one `#if` is one
-     definition. `arms_token` is the form the stack was computed for. */
-  Array arms, Token arms_token, int arm_serial;
+  /* The open conditional groups at the current top-level form, each an
+     `(id arm state)` entry, so one function defined in two arms of one `#if`
+     is one definition. `arm_stacks` maps each conditional directive's token
+     index to the groups open after it. */
+  List arms;
+  Map arm_stacks;
   // Import paths already applied to this .x file's alias map.
   Map kw_seen;
   // Anchored statements whose transform returned them unchanged. The driver
@@ -270,7 +272,6 @@ static Compiler _new(Compiler owner) {
     _.kw_aliases = {};
     _.kw_seen = {};
     _.object_macros = {};
-    _.arms = [];
     _.proto_cache = {};
     _.imports = {};
     _.init_tokens = {};
@@ -530,33 +531,38 @@ static Symbol _never_active_arm(String text) {
   return s == "ifndef <never>" || s == "if ! defined <never>" ? <rest> : 0;
 }
 
-/* x2c output is always compiled as C by a GNU-style compiler, so an arm
-   that only C++, MSVC, or `#if 0` reaches holds no syntax x2c needs to
-   parse. Its tokens become comments; the directives around it stay in
-   place, so emission is unchanged. Each stack entry is 2 while its arm is
-   hidden, 1 when the arms after its first `#else` will be, and 0
-   otherwise. */
-static void _hide_never_active_arms(Tokenizer tokenizer) {
+/* Records the open conditional groups after each conditional directive as
+   `(id arm state)` entries. x2c output is always compiled as C by a
+   GNU-style compiler, so an arm that only C++, MSVC, or `#if 0` reaches
+   holds no syntax x2c needs to parse. Its tokens become comments; the
+   directives around it stay in place, so emission is unchanged. A group's
+   state is 2 while its arm is hidden, 1 when the arms after its first
+   `#else` will be, and 0 otherwise. */
+static void _scan_conditionals(Compiler c) {
   Array stack = [];
-  int hidden = 0;
-  for (size_t i = 0; i < tokenizer.tokens.len(); i++) {
-    Token token = &((struct Token *) tokenizer.tokens)[i];
+  int hidden = 0, serial = 0;
+  c.arm_stacks = {};
+  for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
+    Token token = &((struct Token *) c.tokenizer.tokens)[i];
     if (token.type == <eof>) break;
     if (token.type != <preproc>) {
       if (hidden && token.type != <space>) token.type = <comment>;
       continue;
     }
     Symbol kind = preproc_conditional_kind(token.text);
-    if (!kind) continue;
     if (kind == <open>) {
       Symbol never = _never_active_arm(token.text);
-      stack.push(never == <first> ? 2 : never == <rest> ? 1 : 0);
+      stack.push(%(${++serial} 0 ${never == <first> ? 2 : never == <rest>}));
     }
-    else if (kind == <branch> && stack.len())
-      stack[-1] = (long) stack[-1] == 1 ? 2 : 0;
+    else if (kind == <branch> && stack.len()) {
+      Var (id, arm, state) = stack[-1];
+      stack[-1] = %($id ${arm.integer() + 1} ${state.integer() == 1 ? 2 : 0});
+    }
     else if (kind == <close> && stack.len()) stack.take_last();
+    else continue;
+    c.arm_stacks[(long) i] = stack.list();
     hidden = 0;
-    foreach (long state, stack) if (state == 2) hidden = 1;
+    foreach (List group, stack) if (group.caddr() == 2) hidden = 1;
   }
 }
 
@@ -616,7 +622,7 @@ void Compiler.tokenize(Compiler c, char *text) {
   c.text = text;
   c.tokenizer = Tokenizer.new(c.text);
   c.tokenizer.scan();
-  _hide_never_active_arms(c.tokenizer);
+  _scan_conditionals(c);
   _retag_contextual_keywords(c.tokenizer);
   c.token = _skip_forward(c.tokenizer.tokens);
   c.braces.clear();
@@ -1594,8 +1600,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   c.static_init_deps = {};
   c.origin = 0;
   c.braces.clear();
-  c.arms.clear();
-  c.arms_token = NULL;
+  c.arms = NULL;
   c.sym.reset(globs);
   c.rebuild_protocols(globs);
   c.macros = {};
@@ -2925,7 +2930,7 @@ static void _record_function_definition(
   }
   c.semantic_binding_facts()[%(completion $binding)] =
     %(definition $contract);
-  c.semantic_binding_facts()[%(arms $binding)] = c.arms.list();
+  c.semantic_binding_facts()[%(arms $binding)] = c.arms;
   String spelling = binding_identity_spelling(binding);
   if (spelling && !type.is_static()) c.fn_defs[spelling] = 1;
 }
