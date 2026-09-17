@@ -560,9 +560,9 @@ static RegexMatch _search(Regex regex, String subject, int offset) {
 static RegexCapture _whole(RegexMatch found) => found.car();
 
 /* The match after `previous`; an empty match advances one byte. */
-static RegexMatch _next(Regex regex, String subject, RegexMatch previous) {
+static RegexMatch _next(Regex r, String subject, RegexMatch previous) {
   int start = _whole(previous).start(), end = _whole(previous).end();
-  return _search(regex, subject, end > start ? end : end + 1);
+  return _search(r, subject, end > start ? end : end + 1);
 }
 
 static void _expand(Buffer out, RegexMatch found, String replacement) {
@@ -592,12 +592,12 @@ static void _expand(Buffer out, RegexMatch found, String replacement) {
   }
 }
 
-static String _rebuild(Regex regex, String subject, int all, Func fn,
+static String _rebuild(Regex r, String subject, int all, Func fn,
                        String replacement) {
   Buffer out = $auto(Buffer.new(0));
   int cursor = 0;
-  for (RegexMatch found = _search(regex, subject, 0); found;
-       found = all ? _next(regex, subject, found) : NULL) {
+  for (RegexMatch found = _search(r, subject, 0); found;
+       found = all ? _next(r, subject, found) : NULL) {
     subject[cursor:_whole(found).start()].write_str(out);
     if (fn) fn(found).str().write_str(out);
     else _expand(out, found, replacement);
@@ -659,13 +659,13 @@ RegexMatch Regex.match_from(Regex regex, String subject, int offset) =>
 RegexMatch Regex.match(Regex regex, String subject) =>
   _search(regex, subject, 0);
 
-/** Returns every non-overlapping match of `regex` in `subject`, in order.
+/** Returns every non-overlapping match of `r` in `subject`, in order.
     An empty match advances one byte. No match returns an empty `List`.
 */
-List Regex.find_all(Regex regex, String subject) {
+List Regex.find_all(Regex r, String subject) {
   Array found = $auto([]);
-  for (RegexMatch next = _search(regex, subject, 0); next;
-       next = _next(regex, subject, next))
+  for (RegexMatch next = _search(r, subject, 0); next;
+       next = _next(r, subject, next))
     found.push(next);
   return found;
 }
