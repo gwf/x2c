@@ -60,6 +60,7 @@
     - [lib/mutex.x](library/modules/mutex.md)
     - [lib/path.x](library/modules/path.md)
     - [lib/process.x](library/modules/process.md)
+    - [lib/regex.x](library/modules/regex.md)
     - [lib/scope.x](library/modules/scope.md)
     - [lib/scripting.x](library/modules/scripting.md)
     - [lib/split.x](library/modules/split.md)

@@ -54,8 +54,9 @@ lib/thread.x|api|
 lib/tokenizer.x|internal|Token stream used by the compiler and the Lisp reader.
 lib/json.x|optional|JSON text to and from ordinary `Map`, `Array`, `String`, and number values; explicitly include `json.x` to use it.
 lib/path.x|optional|Filesystem operations on path `String`s; explicitly include `path.x` to use them.
-lib/scripting.x|optional|The `args.x`, `digest.x`, `path.x`, and `process.x` modules that every script unit includes; include `scripting.x` to use all four.
+lib/scripting.x|optional|The `args.x`, `digest.x`, `path.x`, `process.x`, and `regex.x` modules that every script unit includes; include `scripting.x` to use all five.
 lib/args.x|optional|Argument parsing against a declarative spec; explicitly include `args.x` to use it.
+lib/regex.x|optional|Regular expressions over the bytes of a `String`; explicitly include `regex.x` to use them.
 lib/digest.x|optional|SHA-256 digests of `String`s and streams; explicitly include `digest.x` to use them.
 lib/process.x|optional|Commands, pipelines, and background jobs without a shell; explicitly include `process.x` to use them.
 lib/autodiff.x|optional|Runtime reverse-mode differentiation on a tape; explicitly include `autodiff.x` to use it.

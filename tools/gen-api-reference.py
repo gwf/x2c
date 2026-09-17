@@ -87,6 +87,7 @@ PRIMARY_EVIDENCE = {
     "buffer": "`make verify` (`unittest/test-buffer.x`).",
     "context": "`make verify` (`unittest/test-context.x`).",
     "digest": "`make verify` (`unittest/test-digest.x`).",
+    "regex": "`make verify` (`unittest/test-regex.x`).",
     "dispatch": "`make verify` (`unittest/test-var.x`).",
     "file": (
         "`make verify` (`unittest/test-file.x`) and `make examples` "

@@ -44,7 +44,8 @@ uses the package `import` described below.
 A script unit is a source file whose first line begins with `#!`, usually
 `#!/usr/bin/env -S x2c script` so that [`x2c script`](cli.md#run-a-script)
 runs it. The compiler reads that first line as `#include "scripting.x"`,
-which brings in `args.x`, `digest.x`, `path.x`, and `process.x`. Every other
+which brings in `args.x`, `digest.x`, `path.x`, `process.x`, and `regex.x`.
+Every other
 line keeps its line number.
 
 A script unit takes one of two forms, chosen by whether it defines a

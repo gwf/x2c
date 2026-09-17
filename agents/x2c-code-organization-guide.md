@@ -116,6 +116,7 @@ process                       commands, pipelines, and jobs without a shell
 path                          filesystem operations on path Strings
 args                          argument parsing against a declarative spec
 digest                        SHA-256 digests of Strings and streams
+regex                         Regular expressions over the bytes of a String
 json                          JSON text to and from ordinary values
 ```
 

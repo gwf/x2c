@@ -11,6 +11,7 @@ The modules are optional in ordinary programs. Include the ones a file uses:
 #include "path.x"
 #include "args.x"
 #include "digest.x"
+#include "regex.x"
 ```
 
 ## Write a script
@@ -420,6 +421,108 @@ String abc = "abc".sha256();
 ~  return abc.startswith("ba7816bf8f01cfea") ? 0 : 1;
 ~}
 ```
+
+## Patterns
+
+`regex.x` matches regular expressions over the bytes of a `String`. A
+`Regex` is a compiled pattern:
+
+```x2c
+~#include "regex.x"
+~#include "process.x"
+~int main(void) {
+Regex row = Regex.compile(%"^ *(?<count>\\d+) (?<file>.+)$$");
+foreach (String line, %(wc -l lib/regex.x lib/path.x).job().lines()) {
+  RegexMatch found = row.match(line);
+  if (found) printf("%s: %s\n", found[<file>], found[<count>]);
+}
+~  return 0;
+~}
+```
+
+Since `%"..."` interpolates `$`, write `$$` for an end anchor, or use a
+plain C string literal for the pattern.
+
+### Syntax
+
+A pattern is text with these forms. Anything else matches itself.
+
+| Form | Matches |
+| --- | --- |
+| `.` | any byte except newline |
+| `[abc]`, `[a-z]`, `[^0-9]` | one byte in, or not in, the set |
+| `\d` `\w` `\s`, `\D` `\W` `\S` | a digit, word byte, or space, or their opposites; also inside `[...]` |
+| `\b` `\B` | a word boundary, or its absence |
+| `^` `$` | the start and end of the text |
+| `x*` `x+` `x?` `x{m}` `x{m,}` `x{m,n}` | repetition, as many times as possible |
+| `x*?` `x+?` `x??` `x{m,n}?` | repetition, as few times as possible |
+| `a\|b` | either |
+| `(x)`, `(?<name>x)` | a numbered capture, also named |
+| `(?:x)` | a group that does not capture |
+| `\.` `\\` `\t` `\n` `\r` | a literal byte |
+| `(?i)` `(?m)` `(?s)` | at the start: ignore ASCII case, let `^` and `$` match at line breaks, let `.` match newline |
+
+Matching is byte by byte, so `.` and `\w` see a multi-byte character as
+several bytes, and `(?i)` folds only ASCII letters. There is no lookahead,
+lookbehind, or backreference. The
+[`pcre2` package](https://github.com/gwf/x2c/blob/main/packages/pcre2/README.md)
+has all of those and Unicode; its `Regexp` has the same methods, so a
+program moves to it by importing the package and adding the options
+argument to `compile`.
+
+A pattern that does not parse raises `<bad-arg>` with `why`, the `pattern`,
+and the zero-based byte `offset` of the problem.
+
+### Matching
+
+`match` returns the first match in the text, or NULL. `match_from` starts
+at a byte offset. `find_all` returns every non-overlapping match as a
+`List`. A `RegexMatch` is indexed by capture number, or by a name as a
+`Symbol` or `String`. The whole match is capture 0. A capture that did not
+take part is NULL, and so is one that matched no bytes, since an empty
+`String` is NULL; `matched` tells them apart:
+
+```x2c
+~#include "regex.x"
+~int main(void) {
+Regex pair = Regex.compile("(\\w+)=(\\w*)");
+foreach (RegexMatch found, pair.find_all("a=1 b= c=3"))
+  printf("%s -> %s\n", found[1], found[2] ? found[2] : "(empty)");
+~  return 0;
+~}
+```
+
+`capture(key)` returns the `RegexCapture` behind an index, with `text`,
+`start`, `end`, and `matched`. `capture_names` lists a pattern's names in
+capture order, and `pattern` returns its text.
+
+### Splitting and replacing
+
+`split` returns the text between matches, keeping an empty field where two
+matches touch or a match sits at either end. `replace` replaces the first
+match and `replace_all` every match. In the replacement, `$0` through `$9`
+and `${name}` insert a capture, and `$$` is a dollar sign. `replace_fn`
+calls a function with each `RegexMatch` and inserts what it returns as is.
+`Regex.escape` quotes a literal for use inside a pattern:
+
+```x2c
+~#include "regex.x"
+~int main(void) {
+Regex spaces = Regex.compile(" +");
+List words = spaces.split("  two   words ");        // "", "two", "words", ""
+String dated = Regex.compile("(\\d+)-(\\d+)")
+  .replace_all("2026-09 and 2027-01", "$2/$1");      // 09/2026 and 01/2027
+String shouted = Regex.compile("\\w+")
+  .replace_fn("go now", %!(RegexMatch m) => m[0].upper());
+~  return words.len() == 4 && dated[0] == '0' && shouted == "GO NOW" ? 0 : 1;
+~}
+```
+
+A `Regex` is freed by the scope that made it, like any class value. Matching
+backtracks, so a pattern with nested repetition such as `(a*)*b` can take
+time exponential in the text; write the repetition once. A repeated byte or
+set, such as `\w*`, matches any length, but a repeated group such as
+`(?:ab)*` raises `<size-limit>` past 2,000 repetitions in one match.
 
 ## JSON
 

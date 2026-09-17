@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 33
-- Runtime modules: 53
+- Runtime modules: 54
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -892,6 +892,21 @@ built-in runtime protocol declarations.
 Public functions:
 
 None. This module has no non-static function definitions.
+
+### [lib/regex.x](../lib/regex.x)
+
+regular expressions over the bytes of a String.
+
+Public functions:
+
+`Regex.free`, `Regex.cleanup`, `Regex.var`, `Var.regex`, `Regex.equal`,
+`Regex.hash`, `Regex.write_str`, `Regex.str`, `Regex.write_repr`, `Regex.repr`,
+`Regex.compile`, `Regex.pattern`, `Regex.capture_count`, `Regex.capture_names`,
+`Regex.escape`, `Regex.match_from`, `Regex.match`, `Regex.find_all`,
+`Regex.split`, `Regex.replace`, `Regex.replace_all`, `Regex.replace_fn`,
+`RegexMatch.capture`, `RegexMatch.getindex`, `RegexCapture.index`,
+`RegexCapture.name`, `RegexCapture.matched`, `RegexCapture.text`,
+`RegexCapture.start`, `RegexCapture.end`, `Var.regexcapture`, `Var.regexmatch`
 
 ### [lib/scan.x](../lib/scan.x)
 
