@@ -355,7 +355,11 @@ void Context.close(Context c) {
   Error.context_close(c.error_state, x2c_exception_unwinding());
   if (c.pool) String.pool_release();
 
+  /* Drop any slot the body pushed and never popped, as an `exit()` from
+     inside the `Context` leaves. Popping one of those instead would leave
+     this `Context`'s own slot active and destroying it would raise. */
   Scope scope = c.scope, Context parent = c.parent;
+  while (Scope.top() != &c.scope) Scope.pop();
   Scope.pop();
   Scope.destroy(scope);
   _thread().current = parent;

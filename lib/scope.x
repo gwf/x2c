@@ -549,7 +549,8 @@ void Scope.destroy(Scope scope) {
 /** Registers `hook` to run during process-wide `Scope` shutdown.
     The function pointer is retained without being invoked. Shutdown invokes
     registrations once in reverse order while `Scope` storage is still
-    available.
+    available, including one registered by a hook that shutdown is already
+    running.
 
     Raises: `<bad-arg>` for a null hook, `<size-limit>` when the registry
     cannot grow, or `<alloc-fail>` when its storage cannot be allocated.
@@ -977,9 +978,13 @@ void Scope_shutdown(void) {
   }
   scope_state = <shutting>;
   /* Hooks close higher-level owners in reverse dependency order while Scope
-     allocations still work. Thread-local regions then disappear before leak
-     reporting reads the name registry, and shared thread state goes last. */
-  for (int i = hook_count - 1; i >= 0; i--) hooks[i]();
+     allocations still work; one that registers another runs it next, still
+     newest first. Thread-local regions then disappear before leak reporting
+     reads the name registry, and shared thread state goes last. */
+  while (hook_count) {
+    void (*hook)(void) = hooks[--hook_count];
+    hook();
+  }
   _raw_free(hooks);
   hooks = NULL;
   hook_count = hook_capacity = 0;

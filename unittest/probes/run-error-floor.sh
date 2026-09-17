@@ -124,13 +124,25 @@ for exit_case in exit-in-try:3 exit-in-catch:4; do
   test ! -s "$BUILD/$name.stderr"
 done
 
-# exit() from a handler callback keeps its status and reclaims the borrowed
-# view the callback was still reading. Its error is still accumulated, so
-# Logger renders it during shutdown; nothing else may appear.
-run_exit_case exit-in-observer
-test "$exit_status" -eq 6
-test ! -s "$BUILD/exit-in-observer.stdout"
-! grep -q 'Scope leak detected' "$BUILD/exit-in-observer.stderr"
-! grep -q 'x2c error floor' "$BUILD/exit-in-observer.stderr"
+# exit() from a handler callback, a Context body holding its own pushed slot,
+# or a Logger sink keeps its status and reclaims what the abandoned frame
+# owned. Rendered output is expected for the last two; a leak report or the
+# error floor is not.
+for exit_case in exit-in-observer:6 exit-in-context:5 exit-in-sink:8; do
+  name=${exit_case%:*}
+  run_exit_case "$name"
+  test "$exit_status" -eq "${exit_case#*:}"
+  test ! -s "$BUILD/$name.stdout"
+  ! grep -q 'Scope leak detected' "$BUILD/$name.stderr"
+  ! grep -q 'x2c error floor' "$BUILD/$name.stderr"
+done
+
+# A shutdown hook registered by a running hook still runs, newest first.
+"$PROGRAM" nested-shutdown-hook \
+  >"$BUILD/nested-shutdown-hook.stdout" 2>"$BUILD/nested-shutdown-hook.stderr"
+test ! -s "$BUILD/nested-shutdown-hook.stdout"
+test "$(head -1 "$BUILD/nested-shutdown-hook.stderr")" = "shutdown-hook: outer"
+test "$(sed -n 2p "$BUILD/nested-shutdown-hook.stderr")" = \
+  "shutdown-hook: inner"
 
 echo "error floor and shutdown probes passed"

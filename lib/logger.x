@@ -838,7 +838,11 @@ void Logger.shutdown(void) {
   }
   global_logger = NULL;
   if (active && active != default_logger) active.flush();
-  if (default_logger) default_logger.free();
+  if (default_logger) {
+    // a sink that called exit() abandoned its delivery; nothing can resume it
+    default_logger.emission_depth = 0;
+    default_logger.free();
+  }
   default_logger = NULL;
 }
 

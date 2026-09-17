@@ -24,6 +24,22 @@ static Symbol _exit_from_handler(List errors, Var data) {
   exit(6);
 }
 
+static void _exit_from_sink(Logger logger, const LogEvent *event, Var data) {
+  (void) logger;
+  (void) event;
+  (void) data;
+  exit(8);
+}
+
+static void _inner_shutdown_hook(void) {
+  fprintf(stderr, "shutdown-hook: inner\n");
+}
+
+static void _outer_shutdown_hook(void) {
+  fprintf(stderr, "shutdown-hook: outer\n");
+  Scope.shutdown_hook(_inner_shutdown_hook);
+}
+
 static void _raise_during_shutdown(void) {
   fprintf(stderr, "shutdown-hook: before raise\n");
   raise %(late-probe (phase late-hook));
@@ -120,6 +136,24 @@ int main(int argc, char **argv) {
     Error.policy_set(<exit-probe>, <ignore>);
     Error.raise(<exit-probe>, NULL);
     return 1;
+  }
+  if (!strcmp(argv[1], "exit-in-context")) {
+    Error.initialize();
+    Context context = Context.open_named("exit probe");
+    Scope slot = NULL;
+    Scope.push(&slot);
+    (void) Scope.malloc(16);
+    exit(5);
+  }
+  if (!strcmp(argv[1], "exit-in-sink")) {
+    Logger.initialize();
+    log_get_global_logger().add_sink(_exit_from_sink, NULL, void);
+    log_fatal(<exit-probe>, %((text "from a sink")));
+    return 1;
+  }
+  if (!strcmp(argv[1], "nested-shutdown-hook")) {
+    Scope.shutdown_hook(_outer_shutdown_hook);
+    return 0;
   }
   if (!strcmp(argv[1], "pop-outer-in-catch")) {
     Error.initialize();
