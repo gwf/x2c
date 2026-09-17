@@ -1701,7 +1701,9 @@ three positions a parenthesized literal, a `?:` whose arms are both literals,
 and an object-like macro defined to a string literal, `#define NAME "x"`, are
 literals too, so `(ready ? "on" : "off").len()` and `NAME.len()` work. A macro
 name is a literal only while every definition it has is a string literal and
-no `#undef` has dropped it. This
+no `#undef` has dropped it. A name written next to a literal is one of the
+adjacent words when it is such a macro or when this unit cannot resolve it,
+as a header's `PRId64` is, so `printf("%" PRId64 "\n", count)` works. This
 adjacency rule does not combine percent strings or change quoted collection
 syntax.
 

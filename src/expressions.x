@@ -2282,7 +2282,8 @@ List Compiler.parse_variable(Compiler c) {
   if (c.object_macros.try_get(origin.text, &definition) &&
       definition.equal(<string>)) {
     c.next();
-    return %(expr (* char) (literal (* char) ${origin.text}));
+    return _join_c_string_literals(
+      c, %(expr (* char) (literal (* char) ${origin.text})));
   }
   List name = c.parse_complex_identifier();
   Token after = c.token;
@@ -2334,19 +2335,34 @@ static List _parse_assignment_tail(Compiler compiler, List lhs) {
 List Compiler.parse_assignment(Compiler compiler) =>
   _parse_assignment_tail(compiler, compiler.parse_conditional());
 
-/* Preserve each C token's escape boundary and the ordinary raw-string type. */
-static List _parse_c_string_literals(Compiler compiler) {
-  List first = compiler.parse_atomic_literal();
-  if (compiler.peek(0) != <lit-char*>) return first;
+/* A name adjacent to a C string literal is a preprocessor word: a macro this
+   unit defines to a string literal, or a name it cannot resolve, as a
+   header's `PRId64` is. */
+static int _string_word_follows(Compiler c) {
+  if (c.peek(0) != <ident>) return 0;
+  Var definition;
+  if (c.object_macros.try_get(c.token.text, &definition))
+    return definition.equal(<string>);
+  return !c.sym.get(%(${c.token.text}));
+}
+
+/* Preserve each C token's escape boundary and the ordinary raw-string type.
+   A macro defined to a string literal is one of the adjacent words, spelled
+   as written, so the C preprocessor joins `printf("%" PRId64 "\n", x)`. */
+static List _join_c_string_literals(Compiler c, List first) {
+  if (c.peek(0) != <lit-char*> && !_string_word_follows(c)) return first;
   Array spellings = [];
   spellings.push(first.caddr().caddr());
-  while (compiler.peek(0) == <lit-char*>) {
-    spellings.push(compiler.token.text);
-    compiler.next();
+  while (c.peek(0) == <lit-char*> || _string_word_follows(c)) {
+    spellings.push(c.token.text);
+    c.next();
   }
   String text = " ".join(spellings.list_free());
   return %(expr (* char) (literal (* char) $text));
 }
+
+static List _parse_c_string_literals(Compiler c) =>
+  _join_c_string_literals(c, c.parse_atomic_literal());
 
 /** Parses one primary expression or expression-valued macro slot.
     Dispatch starts at `compiler.token` to the selected literal, identifier,
