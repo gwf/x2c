@@ -327,17 +327,24 @@ inline int MachineSlot.prefix_equal(
   return slot.kind == MACHINE_SLOT_SPAN ? expected == end : !expected;
 }
 
-/* Compares a captured value or span with an exact final List by identity.
+/* Compares a captured value or span with an exact final List.
 
-    VALUE slots require List pointer identity. SPAN slots use raw element
-    identity and the exact range boundary. Interned consing can make a
-    materialized interior prefix identical to an existing suffix, and a
-    successful instruction then memoizes that suffix as VALUE. */
+    A repeated binder means equal values, so both kinds use language equality
+    on each element, as `prefix_equal` does. SPAN slots also require the exact
+    range boundary. Interned consing can make a materialized interior prefix
+    identical to an existing suffix, and a successful instruction then
+    memoizes that suffix as VALUE. */
 inline int MachineSlot.final_equal(
   MachineSlot *slot, List input, MachineStats *stats) {
   if (slot.kind == MACHINE_SLOT_VALUE) {
-    List value = slot.value;
-    return value == input;
+    List expected = slot.value;
+    if (expected == input) return 1;
+    while (expected && input) {
+      if (!(expected.car() == input.car())) return 0;
+      expected = expected.cdr();
+      input = input.cdr();
+    }
+    return !expected && !input;
   }
   if (stats) {
     stats.range_comparisons++;
@@ -345,7 +352,7 @@ inline int MachineSlot.final_equal(
   }
   List expected = slot.span.begin, candidate = input, int length = 0;
   while (length < slot.span.length && expected != slot.span.end && candidate) {
-    if (expected.car().u64 != candidate.car().u64) return 0;
+    if (!(expected.car() == candidate.car())) return 0;
     expected = expected.cdr();
     candidate = candidate.cdr();
     length++;

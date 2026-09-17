@@ -74,14 +74,22 @@ static int _bind_final(
   if (index < 0) return 0;
   unsigned long bit = 1UL << index;
   if (!(state.present & bit)) return _bind(state, binder, input);
-  if (!(state.spans & bit))
-    return state.values[index] is <list> &&
-           state.values[index] == input;
+  if (!(state.spans & bit)) {
+    if (state.values[index] is not <list>) return 0;
+    List stored = state.values[index], rest = input;
+    while (stored && rest) {
+      if (!(stored.car() == rest.car())) return 0;
+      stored = stored.cdr();
+      rest = rest.cdr();
+    }
+    return !stored && !rest;
+  }
 
+  // a repeated binder means equal values, as `_bind_span` also reads it
   List expected = state.span_begin[index], candidate = input, int length = 0;
   while (length < state.span_length[index] &&
          expected != state.span_end[index] && candidate) {
-    if (expected.car().u64 != candidate.car().u64) return 0;
+    if (!(expected.car() == candidate.car())) return 0;
     expected = expected.cdr();
     candidate = candidate.cdr();
     length++;

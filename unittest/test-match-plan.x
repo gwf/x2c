@@ -285,18 +285,19 @@ static void plan_star_matrix(void) {
   EXPECT_INT_EQ((int) s9_miss.cons_requests, 0);
   s9.free();
 
-  // S10: final repetition is shallow identity; canonical interning
-  // makes (a pivot a) succeed, boxed-equal wide values fail finally
-  // but succeed in interior Var.equal comparison.
+  // S10: a repeated final star compares values, as the interior one does:
+  // canonical interning answers (a pivot a) in one comparison, and two
+  // boxes of one wide value are equal there too.
   MatchPlan s10 = MatchPlan.prepare(%(*same pivot *same));
   MachineStats s10_canon = _stats_case(s10, %(a pivot a), 1, %((*same (a))));
   EXPECT_TRUE(s10_canon.final_range_comparisons == 1);
   EXPECT_INT_EQ((int) s10_canon.materialization_requests, 0);
   long wide1 = 42, wide2 = 42;
   Var w1 = wide1, w2 = wide2;
-  MachineStats s10_wide = _stats_case(s10, %($w1 pivot $w2), 0, NULL);
+  MachineStats s10_wide = _stats_case(s10, %($w1 pivot $w2), 1, NULL);
   EXPECT_TRUE(s10_wide.final_range_comparisons == 1);
-  EXPECT_INT_EQ((int) s10_wide.materialization_requests, 0);
+  // the published span is one of the two equal boxes, so parity decides it
+  _parity_case(%($w1 pivot $w2), %(*same pivot *same));
   s10.free();
   _exact_case(%($w1 pivot $w2 end), %(*same pivot *same end),
               %((*same ($w1))));

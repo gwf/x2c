@@ -654,12 +654,15 @@ int MatchCaptureBuffer.has(MatchCaptureBuffer *m, int index) {
   return _capture_bit(m.present, index);
 }
 
+/* An anchor is compared as one value, so a List qualifies only when its
+   bits decide it. Otherwise the scan would reject an input sublist that
+   the same pattern matches element by element at a fixed position. */
 static int _find_fixed_anchor(List pat, Var *anchor, int *offset) {
   int width = 0;
   foreach (Var part, pat) {
     if (part.is_list_binder()) return 0;
     if ((part is not <list> && !part.is_binder()) ||
-        (part is <list> && _is_list_literal(part))) {
+        (part is <list> && _is_list_literal(part) && _bits_unique(part))) {
       *anchor = part;
       *offset = width;
       return 1;
@@ -1085,18 +1088,24 @@ static int MatchLower._compile_child_segment(MatchLower l, List pattern) {
 }
 
 /* Raw-bit comparison may replace general Var equality only where the
-   two agree: Symbols are canonical identities, interned Lists have
-   per-cell identity, and narrow integer immediates are value-encoded
-   per family and width.  Wide boxes carry value semantics across
-   distinct allocations, floating NaN is unequal to itself with equal
-   bits, and a transient mutable String can be content-equal to a
-   canonical String with different bits. */
+   two agree: Symbols are canonical identities and narrow integer
+   immediates are value-encoded per family and width.  Wide boxes carry
+   value semantics across distinct allocations, floating NaN is unequal
+   to itself with equal bits, and a transient mutable String can be
+   content-equal to a canonical String with different bits.  Interning
+   gives two Lists one identity exactly when their elements are
+   bit-equal, so a List answers for its elements. */
 static int _bits_unique(Var value) {
   switch (value.tag()) {
-    case <symbol>: case <lsym>: case <list>:
+    case <symbol>: case <lsym>:
     case <i8>: case <u8>: case <i16>: case <u16>:
     case <i32>: case <u32>: case <i48>: case <u48>:
       return 1;
+    case <list>: {
+      foreach (Var part, (List) value.pointer())
+        if (!_bits_unique(part)) return 0;
+      return 1;
+    }
   }
   return 0;
 }
