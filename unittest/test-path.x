@@ -173,7 +173,52 @@ static void path_failures_raise_with_details(void) {
     caught++;
     EXPECT_INT_EQ(detail.assoc(<errno>).integer(), ENOTDIR);
   }
-  EXPECT_INT_EQ(caught, 7);
+  Path dir = root.join("dir"), target = root.join("target");
+  dir.make_dirs();
+  try dir.read_text();
+  catch %(io-fail *detail): {
+    caught++;
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "Path.read_text");
+    EXPECT_STR_EQ(detail.assoc(<path>).string(), dir);
+    EXPECT_INT_EQ(detail.assoc(<errno>).integer(), EISDIR);
+  }
+  try dir.copy_file(target);
+  catch %(io-fail *detail): {
+    caught++;
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "Path.copy_file");
+    EXPECT_STR_EQ(detail.assoc(<path>).string(), dir);
+  }
+  EXPECT_FALSE(target.exists());
+  EXPECT_INT_EQ(caught, 9);
+  root.remove_tree();
+}
+
+static void path_copies_refuse_to_destroy_their_source(void) {
+  $test.scoped();
+  Path root = Path.temp_dir(), file = root.join("f.txt");
+  file.write_text("hello");
+  file.copy_file(file);
+  EXPECT_STR_EQ(file.read_text(), "hello");
+  root.join("link").symlink_to("f.txt");
+  root.join("link").copy_file(file);
+  EXPECT_STR_EQ(file.read_text(), "hello");
+
+  Path tree = root.join("x");
+  tree.join("y").make_dirs();
+  tree.join("y/z").write_text("z");
+  int caught = 0;
+  try tree.copy_tree(tree.join("y/copy"));
+  catch %(io-fail *detail): {
+    caught++;
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "Path.copy_tree");
+    EXPECT_INT_EQ(detail.assoc(<errno>).integer(), EINVAL);
+  }
+  try tree.copy_tree(tree);
+  catch %(io-fail *): caught++;
+  EXPECT_INT_EQ(caught, 2);
+  EXPECT_FALSE(tree.join("y/copy").exists());
+  tree.copy_tree(root.join("xx"));
+  EXPECT_STR_EQ(root.join("xx/y/z").read_text(), "z");
   root.remove_tree();
 }
 
@@ -196,6 +241,7 @@ void path_suite(void) {
   $test.run(path_parts_examine_text);
   $test.run(path_values_act_as_strings);
   $test.run(path_glob_match_follows_components);
+  $test.run(path_copies_refuse_to_destroy_their_source);
   $test.run(path_tree_operations);
   $test.run(path_reports_executable_permission);
   $test.run(path_failures_raise_with_details);

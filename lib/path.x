@@ -143,9 +143,16 @@ static struct stat _stat(String operation, String path) {
   return info;
 }
 
+/* A directory opens for reading, and its first read would raise without the
+   path. */
 static File _open(String operation, Path path, const char *mode) {
   File file = fopen(path, mode);
   if (!file) File.path_error(operation, path, errno);
+  struct stat info;
+  if (!file.stat(&info) && S_ISDIR(info.st_mode)) {
+    file.close();
+    File.path_error(operation, path, EISDIR);
+  }
   return file;
 }
 
@@ -408,24 +415,25 @@ void Path.remove_tree(Path path) {
 }
 
 /** Copies the regular file `source` to `target`, replacing `target` and
-    giving it `source`'s permission bits.
-    Raises: `<not-found>` or `<io-fail>`.
+    giving it `source`'s permission bits. A `target` that is already the same
+    file as `source` is left as it is.
+    Raises: `<not-found>` or `<io-fail>`, including for a directory `source`.
 */
 void Path.copy_file(Path source, Path target) {
   File input = $auto(_open("Path.copy_file", source, "rb"));
+  struct stat info, existing;
+  input.stat(&info);
+  if (!stat(target, &existing) && existing.st_dev == info.st_dev &&
+      existing.st_ino == info.st_ino)
+    return;
   File output = $auto(_open("Path.copy_file", target, "wb"));
   input.copy_to(output, NULL);
   if (output.flush()) File.path_error("Path.copy_file", target, errno);
-  struct stat info = _stat("Path.copy_file", source);
   if (chmod(target, info.st_mode & 07777))
     File.path_error("Path.copy_file", target, errno);
 }
 
-/** Copies `source` to `target`: a directory recursively, a symbolic link as
-    a link, and a regular file with `Path.copy_file`.
-    Raises: `<not-found>` or `<io-fail>`.
-*/
-void Path.copy_tree(Path source, Path target) {
+static void _copy_tree(Path source, Path target) {
   struct stat info;
   if (lstat(source, &info)) File.path_error("Path.copy_tree", source, errno);
   if (S_ISLNK(info.st_mode)) {
@@ -439,11 +447,24 @@ void Path.copy_tree(Path source, Path target) {
   else if (S_ISDIR(info.st_mode)) {
     target.make_dirs();
     foreach (String name, source.list_dir())
-      source.join(name).copy_tree(target.join(name));
+      _copy_tree(source.join(name), target.join(name));
     if (chmod(target, info.st_mode & 07777))
       File.path_error("Path.copy_tree", target, errno);
   }
   else source.copy_file(target);
+}
+
+/** Copies `source` to `target`: a directory recursively, a symbolic link as
+    a link, and a regular file with `Path.copy_file`.
+    Raises: `<not-found>` or `<io-fail>`, with `EINVAL` when `source` is a
+    directory and `target` is that directory or inside it.
+*/
+void Path.copy_tree(Path source, Path target) {
+  struct stat info;
+  if (!lstat(source, &info) && S_ISDIR(info.st_mode) &&
+      %"${target.absolute()}/".startswith(%"${source.absolute()}/"))
+    File.path_error("Path.copy_tree", target, EINVAL);
+  _copy_tree(source, target);
 }
 
 /** Moves `source` to `target`, copying and removing when they are on
