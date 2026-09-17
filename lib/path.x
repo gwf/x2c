@@ -244,11 +244,13 @@ static void _walk(Path directory, int depth, int hidden, Array paths) {
   }
 }
 
+/* A `]` that opens a class is a member, as in a shell. */
 static int _class_match(const char **pattern, unsigned char value) {
   const char *ch = *pattern, int negate = *ch == '!' || *ch == '^';
   if (negate) ch++;
+  const char *first_member = ch;
   int matched = 0;
-  while (*ch && *ch != ']') {
+  while (*ch && (*ch != ']' || ch == first_member)) {
     unsigned char first = *ch++;
     if (*ch == '-' && ch[1] && ch[1] != ']') {
       ch++;
@@ -265,82 +267,108 @@ static int _class_match(const char **pattern, unsigned char value) {
 static int _hidden(const char *text, const char *origin) =>
   *text == '.' && (text == origin || text[-1] == '/');
 
-/* A name that begins with a dot matches only a pattern that spells the dot,
-   as in a shell: no wildcard matches a component's leading dot, though a
-   `**` component can match zero directories before such a name. */
-static int _glob_match(
-  const char *pattern, const char *text, const char *origin) {
-  if (!*pattern) return !*text;
-  if (_hidden(text, origin) && *pattern != '.' &&
-      !(pattern[0] == '\\' && pattern[1] == '.') && strncmp(pattern, "**/", 3))
-    return 0;
-  if (pattern[0] == '*' && pattern[1] == '*') {
-    const char *rest = pattern + 2;
-    int components = *rest == '/';
-    while (components && rest[1] == '*' && rest[2] == '*' && rest[3] == '/')
-      rest += 3;
-    for (const char *ch = text;; ch++) {
-      if ((!components || ch == text || ch[-1] == '/') &&
-          _glob_match(rest + components, ch, origin))
-        return 1;
-      if (!*ch || _hidden(ch, origin)) return 0;
-    }
-  }
-  if (*pattern == '*') {
-    pattern++;
-    if (_glob_match(pattern, text, origin)) return 1;
-    return *text && *text != '/' &&
-           _glob_match(pattern - 1, text + 1, origin);
-  }
-  if (*pattern == '?')
-    return *text && *text != '/' &&
-           _glob_match(pattern + 1, text + 1, origin);
+/* Returns the pattern after a `?`, class, or literal that matches the
+   character at `text`, or NULL. */
+static const char *_glob_step(const char *pattern, const char *text) {
+  if (!*text || *text == '/') return NULL;
+  if (*pattern == '?') return pattern + 1;
   if (*pattern == '[') {
-    if (!*text || *text == '/') return 0;
     const char *rest = pattern + 1;
     int matched = _class_match(&rest, (unsigned char) *text);
-    if (matched < 0)
-      return *text == '[' && _glob_match(pattern + 1, text + 1, origin);
-    return matched && _glob_match(rest, text + 1, origin);
+    if (matched >= 0) return matched ? rest : NULL;
   }
   if (*pattern == '\\' && pattern[1]) pattern++;
-  return *pattern == *text && _glob_match(pattern + 1, text + 1, origin);
+  return *pattern == *text ? pattern + 1 : NULL;
+}
+
+/* A `*` cannot cross a slash, and each slash run in the pattern meets a
+   slash run in the text, so only the latest `*` ever needs to consume more
+   text. A name that begins with a dot matches only a pattern that spells the
+   dot, as in a shell: no wildcard matches a component's leading dot, though
+   a `**` component can match zero directories before such a name. */
+static int _glob_match(
+  const char *pattern, const char *text, const char *origin) {
+  const char *star = NULL, *resume = NULL, *next;
+  for (;;) {
+    if (!*pattern) {
+      if (!*text) return 1;
+    }
+    else if (_hidden(text, origin) && *pattern != '.' &&
+             !(pattern[0] == '\\' && pattern[1] == '.') &&
+             strncmp(pattern, "**/", 3)) {}
+    else if (pattern[0] == '*' && pattern[1] == '*') {
+      const char *rest = pattern + 2;
+      int components = *rest == '/';
+      while (components && rest[1] == '*' && rest[2] == '*' && rest[3] == '/')
+        rest += 3;
+      for (const char *ch = text;; ch++) {
+        if ((!components || ch == text || ch[-1] == '/') &&
+            _glob_match(rest + components, ch, origin))
+          return 1;
+        if (!*ch || _hidden(ch, origin)) break;
+      }
+    }
+    else if (*pattern == '*') {
+      pattern = star = pattern + 1;
+      resume = text;
+      continue;
+    }
+    else if (*pattern == '/') {
+      if (*text == '/') {
+        while (*pattern == '/') pattern++;
+        while (*text == '/') text++;
+        star = NULL;
+        continue;
+      }
+    }
+    else if ((next = _glob_step(pattern, text))) {
+      pattern = next;
+      text++;
+      continue;
+    }
+    if (!star || !*resume || *resume == '/') return 0;
+    pattern = star;
+    text = ++resume;
+  }
 }
 
 /** Reports whether all of `path` matches the glob `pattern`. A path
     component that begins with a dot matches only a pattern component that
-    begins with one.
+    begins with one, and a run of slashes matches a run of slashes.
 */
 int Path.glob_match(Path pattern, Path path) =>
   pattern && path && _glob_match(pattern, path, path);
 
 /** Returns the existing paths that match the glob `pattern`, sorted.
-    The walk starts at the longest leading directory without a wildcard and
-    descends only as deep as the pattern can match. As in a shell, a name
-    that begins with a dot matches only where the pattern spells the dot.
+    The walk starts at the longest leading directory without a wildcard,
+    spelled as the pattern spells it, and descends only as deep as the
+    pattern can match. As in a shell, a name that begins with a dot matches
+    only where the pattern spells the dot, and a pattern that ends with a
+    slash matches only directories, each returned with a trailing slash.
     No match returns an empty `List`.
 */
 List Path.glob(Path pattern) {
-  if (!strpbrk(pattern, "*?[\\"))
-    return pattern.exists() ? %($pattern) : NULL;
-  List parts = pattern.split("/");
-  Path base = NULL;
-  int depth = 0, recursive = 0;
-  foreach (String part, parts) {
-    if (depth || strpbrk(part ? part : "", "*?[\\")) {
-      depth++;
-      if (part == "**") recursive = 1;
-    }
-    else base = base ? base.join(part) : part ? part : "/";
+  String text = pattern;
+  const char *wildcard = strpbrk(text, "*?[\\");
+  if (!wildcard) return pattern.exists() ? %($pattern) : NULL;
+  int cut = wildcard - (const char *) text;
+  while (cut && text[cut - 1] != '/') cut--;
+  Path base = cut ? text[:cut] : NULL, root = base ? base : ".";
+  int depth = 0, recursive = 0, directories = text.endswith("/");
+  foreach (String part, text[cut:].split("/")) {
+    if (!part) continue;
+    depth++;
+    if (part == "**") recursive = 1;
   }
-  Path root = base ? base : ".";
   Array paths = [], matches = [];
   if (root.is_dir())
     _walk(root, recursive ? -1 : depth,
           pattern.startswith(".") || pattern.contains("/."), paths);
   foreach (String path, paths) {
     String candidate = base ? path : path[2:];
-    if (pattern.glob_match(candidate)) matches.push(candidate);
+    if (directories) candidate = %"$candidate/";
+    if (pattern.glob_match(candidate) && (!directories || Path.is_dir(path)))
+      matches.push(candidate);
   }
   return matches.sort().list_free();
 }

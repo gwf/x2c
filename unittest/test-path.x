@@ -6,6 +6,7 @@ $(import "test-macros.xmacro")
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <time.h>
 #include <unistd.h>
 
 static void path_parts_examine_text(void) {
@@ -72,6 +73,17 @@ static void path_glob_match_follows_components(void) {
   EXPECT_TRUE(Path.glob_match("\\.hidden", ".hidden"));
   EXPECT_TRUE(Path.glob_match("a\\*b", "a*b"));
   EXPECT_FALSE(Path.glob_match("a\\*b", "axb"));
+  EXPECT_TRUE(Path.glob_match("[]a].x", "].x"));
+  EXPECT_TRUE(Path.glob_match("[!]]*.x", "a.x"));
+  EXPECT_FALSE(Path.glob_match("[!]]*.x", "].x"));
+  EXPECT_TRUE(Path.glob_match("src//*.x", "src/a.x"));
+  EXPECT_TRUE(Path.glob_match("src/*.x", "src//a.x"));
+  EXPECT_FALSE(Path.glob_match("src/*.x", "src/.a.x"));
+  String letters = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+  clock_t start = clock();
+  EXPECT_FALSE(Path.glob_match("*a*a*a*a*a*a*a*a*a*a*b", letters));
+  EXPECT_TRUE(Path.glob_match("*a*a*a*a*a*a*a*a*a*a", letters));
+  EXPECT_TRUE(clock() - start < CLOCKS_PER_SEC / 10);
   Path deep = "**/**/**/**/**/**/z";
   EXPECT_FALSE(deep.glob_match(
     "a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/x/y"));
@@ -193,6 +205,32 @@ static void path_failures_raise_with_details(void) {
   root.remove_tree();
 }
 
+static void path_glob_follows_the_shell(void) {
+  $test.scoped();
+  Path root = Path.temp_dir();
+  root.join("src/a").make_dirs();
+  root.join("src/b").make_dirs();
+  root.join("src/f.x").write_text("f");
+  root.join("src/a/g.x").write_text("g");
+  root.join("a.x").write_text("a");
+  root.join("].x").write_text("b");
+  char *cwd = getcwd(NULL, 0);
+  chdir(root);
+  try {
+    EXPECT_LIST_EQ(Path.glob("src/*/"), %("src/a/" "src/b/"));
+    EXPECT_LIST_EQ(Path.glob("src//*.x"), %("src//f.x"));
+    EXPECT_LIST_EQ(Path.glob("src/*//*.x"), %("src/a/g.x"));
+    EXPECT_LIST_EQ(Path.glob("[]a].x"), %("].x" "a.x"));
+    EXPECT_LIST_EQ(Path.glob("*/"), %("src/"));
+    EXPECT_LIST_EQ(Path.glob("src/*"), %("src/a" "src/b" "src/f.x"));
+  }
+  finally {
+    chdir(cwd);
+    free(cwd);
+    root.remove_tree();
+  }
+}
+
 static void path_copies_refuse_to_destroy_their_source(void) {
   $test.scoped();
   Path root = Path.temp_dir(), file = root.join("f.txt");
@@ -241,6 +279,7 @@ void path_suite(void) {
   $test.run(path_parts_examine_text);
   $test.run(path_values_act_as_strings);
   $test.run(path_glob_match_follows_components);
+  $test.run(path_glob_follows_the_shell);
   $test.run(path_copies_refuse_to_destroy_their_source);
   $test.run(path_tree_operations);
   $test.run(path_reports_executable_permission);
