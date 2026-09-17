@@ -29,6 +29,9 @@ typedef struct TermboxCell {
   uintattr_t background;
 } TermboxCell;
 
+void Termbox.cleanup(Termbox);
+protocol Cleanup(Termbox);
+
 #pragma private
 
 #include <errno.h>
@@ -157,6 +160,10 @@ Termbox Termbox.close(Termbox terminal) {
     _termbox_signal_error("restore SIGWINCH", restore_errno);
   }
   return NULL;
+}
+
+void Termbox.cleanup(Termbox termbox) {
+  termbox.close();
 }
 
 static int _termbox_result(String operation, int result) {

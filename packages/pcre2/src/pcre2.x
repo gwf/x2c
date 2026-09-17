@@ -25,6 +25,9 @@ typedef enum RegexpLisp {
   REGEXPLISP_NAMESPACE
 } RegexpLisp;
 
+void Regexp.cleanup(Regexp);
+protocol Cleanup(Regexp);
+
 #pragma private
 
 #include <ctype.h>
@@ -155,6 +158,10 @@ Regexp Regexp.free(Regexp regexp) {
     regexp.code = NULL;
   }
   return NULL;
+}
+
+void Regexp.cleanup(Regexp regexp) {
+  regexp.free();
 }
 
 String Regexp.pattern(Regexp regexp) {

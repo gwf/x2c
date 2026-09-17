@@ -62,6 +62,9 @@ protocol JsonObjectIndex(JsonObject);
 protocol Iter(JsonArray);
 protocol Iter(JsonObject);
 
+void JsonDocument.cleanup(JsonDocument);
+protocol Cleanup(JsonDocument);
+
 #pragma private
 
 #include <limits.h>
@@ -637,6 +640,10 @@ JsonDocument JsonDocument.free(JsonDocument document) {
     document.native = NULL;
   }
   return NULL;
+}
+
+void JsonDocument.cleanup(JsonDocument json_document) {
+  json_document.free();
 }
 
 yyjson_doc *JsonDocument.native(JsonDocument document) {

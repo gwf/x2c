@@ -30,6 +30,12 @@ typedef struct UvTimer *UvTimer;
 typedef struct UvSignal *UvSignal;
 typedef struct UvWatch *UvWatch;
 
+void UvLoop.cleanup(UvLoop);
+protocol Cleanup(UvLoop);
+
+void UvProcess.cleanup(UvProcess);
+protocol Cleanup(UvProcess);
+
 #pragma private
 
 #include <limits.h>
@@ -1139,6 +1145,10 @@ UvLoop UvLoop.free(UvLoop loop) {
   }
   loop.initialized = 0;
   return NULL;
+}
+
+void UvLoop.cleanup(UvLoop uv_loop) {
+  uv_loop.free();
 }
 
 /*  The native loop, for anything uv-152.h offers and this client does not.
@@ -3613,4 +3623,8 @@ UvProcess UvProcess.free(UvProcess process) {
   process.error.bytes = NULL;
   process.released = 1;
   return NULL;
+}
+
+void UvProcess.cleanup(UvProcess uv_process) {
+  uv_process.free();
 }

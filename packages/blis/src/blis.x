@@ -19,6 +19,11 @@ protocol Blis(T) {
   T T.neg(T);
 }
 
+protocol Blis(BlisObject);
+
+void BlisObject.cleanup(BlisObject);
+protocol Cleanup(BlisObject);
+
 #pragma private
 
 #include <math.h>
@@ -310,6 +315,10 @@ BlisObject BlisObject.free(BlisObject object) {
   object.released = 1;
   object.generation++;
   return NULL;
+}
+
+void BlisObject.cleanup(BlisObject blis_object) {
+  blis_object.free();
 }
 
 int BlisObject.rows(BlisObject object) {
@@ -711,5 +720,3 @@ BlisObject BlisObject.matmul(BlisObject left, BlisObject right) {
   bli_gemm(&alpha, &left.native, &right.native, &beta, &result.native);
   return result;
 }
-
-protocol Blis(BlisObject);
