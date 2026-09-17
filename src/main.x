@@ -412,12 +412,20 @@ static int _run_build(CliRequest request) {
   Array commands =
     request.compile_commands && !request.dry_run ? [] : NULL;
   if (request.inputs) {
+    // Manifest options have no meaning without a manifest, so say so rather
+    // than building something the command did not describe.
     if (request.manifest)
       x2c_driver_error("--manifest-path conflicts with explicit inputs");
+    if (request.target)
+      x2c_driver_error("--target conflicts with explicit inputs");
+    if (request.profile)
+      x2c_driver_error("--profile conflicts with explicit inputs");
     int result = _run_build_request(request, commands);
     if (result) return result;
   }
   else {
+    if (request.compile_only)
+      x2c_driver_error("--compile-only needs input operands, not a manifest");
     ProjectBuild plan = project_plan(request);
     for (ProjectBuild node = plan; node; node = node.next) {
       int result = _run_build_request(node.request, commands);

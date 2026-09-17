@@ -276,7 +276,8 @@ program finishes.
 `--` ends build options. Every later value is passed as one program argument,
 including values that begin with `-` or end in `.x`. x2c returns the program's
 exit status. `-###` prints the build and run actions without creating or
-launching anything.
+launching anything. It reads no input file either, so it also prints the
+actions for an artifact a planned target would produce.
 
 The program inherits standard input, output, and error, so interactive prompts
 and terminal applications work as they do when launched directly. Shell pipes
@@ -443,7 +444,11 @@ flags, package directories, and an output. Command-line target, profile,
 kind, output, build directory, and tool options override the corresponding
 defaults. `--target <name>` builds the named manifest target and `--profile
 <name>` applies the named manifest build profile; both work with `build` and
-`run`.
+`run`. The selected target must define the named profile; a dependency target
+takes it when it defines one and builds with its own settings otherwise.
+`--manifest-path`, `--target`, and `--profile` describe a manifest build, so
+each conflicts with explicit input operands, and `-c` needs operands rather
+than a manifest.
 
 ### Pinned packages
 
@@ -459,20 +464,22 @@ pcre2 = "10.48"
 This is separate from a target's `dependencies` field, which lists other
 targets in the same manifest.
 
-`build` and `run` resolve the section before planning. A pinned package
+`build` and `run` resolve the section once the manifest and the selected
+target are known good, and before planning. A pinned package
 missing from the x2c home at that version is installed through the
 index, the same way [`x2c install <name>`](#packages) does, and `--index`
 selects another index. The resolution is then written to `x2c.lock` beside
 the manifest, one `name version kind platform url sha256` row per package.
 Keep that file with the manifest so a later build reproduces the same
-packages.
+packages. A manifest with no `[dependencies]` section pins nothing, so a
+lockfile left beside it is removed.
 
 A build whose lockfile already covers every pinned package, at the pinned
 version and installed in the home, reads no index and makes no network
 request. Any other state re-resolves through the index and rewrites the
 lockfile. A version the index cannot supply stops the build with an error
-that includes both versions. The
-editor adapter never installs.
+that includes both versions. A dry run installs nothing and writes no
+lockfile, and the editor adapter never installs.
 
 ## Include and tool ownership
 
