@@ -201,8 +201,7 @@ static size_t _curl_stream(
   size_t length = size * count;
   if (!length) return 0;
   try {
-    Bytes chunk = Bytes.new(1).append(data, length);
-    defer chunk.free();
+    Bytes chunk = $auto(Bytes.new(1).append(data, length));
     stream.consume(chunk, stream.data);
   }
   catch %(?cause *detail): {
@@ -330,13 +329,11 @@ static CurlHeader _curl_header(String line) {
   return %($line $parsed $name $value);
 }
 
-static CurlResponseBlock _curl_block(String status, List headers) {
-  return %($status ${headers.reverse()});
-}
+static CurlResponseBlock _curl_block(String status, List headers) =>
+  %($status ${headers.reverse()});
 
-static int _curl_status_line(String line) {
-  return line.len() >= 5 && !memcmp(line, "HTTP/", 5);
-}
+static int _curl_status_line(String line) =>
+  line.len() >= 5 && !memcmp(line, "HTTP/", 5);
 
 static List _curl_blocks(const unsigned char *bytes, size_t length) {
   List blocks = NULL, headers = NULL;
@@ -711,14 +708,12 @@ static CurlResponse _curl_perform(
     `HEAD` suppresses the response body, as libcurl needs it to; any other
     method is sent as written.
 */
-CurlResponse CurlEasy.request(CurlEasy easy, String method, String url) {
-  return _curl_perform(easy, method, url, NULL, NULL, void);
-}
+CurlResponse CurlEasy.request(CurlEasy easy, String method, String url) =>
+  _curl_perform(easy, method, url, NULL, NULL, void);
 
 /** Performs a GET and buffers the body under the handle's `max_body`. */
-CurlResponse CurlEasy.get(CurlEasy easy, String url) {
-  return _curl_perform(easy, "GET", url, NULL, NULL, void);
-}
+CurlResponse CurlEasy.get(CurlEasy easy, String url) =>
+  _curl_perform(easy, "GET", url, NULL, NULL, void);
 
 /** Performs a GET and passes copied body chunks to `consume` as they arrive.
     Each Bytes value is read-only and valid only for that callback. An Error
@@ -1007,29 +1002,23 @@ String CurlResponse.text(CurlResponse response) {
   return String.new_len(response.body, (int) length);
 }
 
-String CurlHeader.line(CurlHeader header) {
-  return header ? header.getindex(0).string() : NULL;
-}
+String CurlHeader.line(CurlHeader header) =>
+  header ? header.getindex(0).string() : NULL;
 
-int CurlHeader.parsed(CurlHeader header) {
-  return header && header.getindex(1).truth();
-}
+int CurlHeader.parsed(CurlHeader header) =>
+  header && header.getindex(1).truth();
 
-String CurlHeader.name(CurlHeader header) {
-  return header && header.parsed() ? header.getindex(2).string() : NULL;
-}
+String CurlHeader.name(CurlHeader header) =>
+  header && header.parsed() ? header.getindex(2).string() : NULL;
 
-String CurlHeader.value(CurlHeader header) {
-  return header && header.parsed() ? header.getindex(3).string() : NULL;
-}
+String CurlHeader.value(CurlHeader header) =>
+  header && header.parsed() ? header.getindex(3).string() : NULL;
 
-String CurlResponseBlock.status_line(CurlResponseBlock block) {
-  return block ? block.getindex(0).string() : NULL;
-}
+String CurlResponseBlock.status_line(CurlResponseBlock block) =>
+  block ? block.getindex(0).string() : NULL;
 
-List CurlResponseBlock.headers(CurlResponseBlock block) {
-  return block ? block.getindex(1).list() : NULL;
-}
+List CurlResponseBlock.headers(CurlResponseBlock block) =>
+  block ? block.getindex(1).list() : NULL;
 
 List CurlResponseBlock.values(CurlResponseBlock block, String name) {
   List values = NULL;
@@ -1042,13 +1031,10 @@ List CurlResponseBlock.values(CurlResponseBlock block, String name) {
   return values.reverse();
 }
 
-CurlHeader Var.curlheader(Var value) {
-  return (CurlHeader) value.list();
-}
+CurlHeader Var.curlheader(Var value) => (CurlHeader) value.list();
 
-CurlResponseBlock Var.curlresponseblock(Var value) {
-  return (CurlResponseBlock) value.list();
-}
+CurlResponseBlock Var.curlresponseblock(Var value) =>
+  (CurlResponseBlock) value.list();
 
 /*  The Lisp surface is value-oriented on purpose: every binding takes and
     returns String, List, and int, and each owns and frees its own CurlEasy
@@ -1057,34 +1043,28 @@ CurlResponseBlock Var.curlresponseblock(Var value) {
     timeout of its own, or the raw handle stays in x2c.
 */
 
-static CurlEasy _lisp_easy(void) {
-  return CurlEasy.new().timeouts(2000, 10000).follow_redirects(5);
-}
+static CurlEasy _lisp_easy(void) =>
+  CurlEasy.new().timeouts(2000, 10000).follow_redirects(5);
 
 $lisp.binding(libcurl_lisp, "http-get")
 static String _lisp_http_get(String url) {
-  CurlEasy easy = _lisp_easy();
-  defer easy.free();
-  CurlResponse response = easy.get(url);
-  defer response.free();
+  CurlEasy easy = $auto(_lisp_easy());
+  CurlResponse response = $auto(easy.get(url));
   return response.text();
 }
 
 $lisp.binding(libcurl_lisp, "http-post")
 static String _lisp_http_post(String url, String content_type, String body) {
-  CurlEasy easy = _lisp_easy();
-  defer easy.free();
-  CurlResponse response = easy.body(content_type, body).request("POST", url);
-  defer response.free();
+  CurlEasy easy = $auto(_lisp_easy());
+  CurlResponse response = $auto(
+    easy.body(content_type, body).request("POST", url));
   return response.text();
 }
 
 $lisp.binding(libcurl_lisp, "http-status")
 static int _lisp_http_status(String url) {
-  CurlEasy easy = _lisp_easy();
-  defer easy.free();
-  CurlResponse response = easy.get(url);
-  defer response.free();
+  CurlEasy easy = $auto(_lisp_easy());
+  CurlResponse response = $auto(easy.get(url));
   return (int) response.response_code();
 }
 
@@ -1093,10 +1073,8 @@ static int _lisp_http_status(String url) {
 */
 $lisp.binding(libcurl_lisp, "http-headers")
 static List _lisp_http_headers(String url) {
-  CurlEasy easy = _lisp_easy();
-  defer easy.free();
-  CurlResponse response = easy.request("HEAD", url);
-  defer response.free();
+  CurlEasy easy = $auto(_lisp_easy());
+  CurlResponse response = $auto(easy.request("HEAD", url));
   CurlResponseBlock block = response.blocks().last();
   List lines = NULL;
   foreach(CurlHeader header, block.headers())
@@ -1105,9 +1083,7 @@ static List _lisp_http_headers(String url) {
 }
 
 $lisp.binding(libcurl_lisp, "url-escape")
-static String _lisp_url_escape(String value) {
-  return CurlEasy.escape(value);
-}
+static String _lisp_url_escape(String value) => CurlEasy.escape(value);
 
 /** Installs http-get, http-post, http-status, http-headers, and url-escape
     into `lisp`. A transport failure raises out of the binding as the same

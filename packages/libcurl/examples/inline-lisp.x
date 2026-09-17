@@ -6,8 +6,7 @@ int main(int argc, char **argv) {
   if (argc != 2) return 2;
   String base = String.new(argv[1]);
 
-  Lisp lisp = Lisp.new();
-  defer lisp.destroy();
+  Lisp lisp = $auto(Lisp.new());
   CurlLisp.install(lisp);
 
   /*  A returned body is an ordinary Lisp string and a returned status is an

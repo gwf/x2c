@@ -25,10 +25,8 @@ static void fail_stream(Bytes chunk, Var data) {
 }
 
 static void curl_response_values_and_header_order(void) {
-  CurlEasy easy = test_easy();
-  defer easy.free();
-  CurlResponse response = easy.get(fixture_url + "/ok");
-  defer response.free();
+  CurlEasy easy = $auto(test_easy());
+  CurlResponse response = $auto(easy.get(fixture_url + "/ok"));
 
   EXPECT_INT_EQ(response.response_code(), 200);
   EXPECT_STR_EQ(response.effective_url(), fixture_url + "/ok");
@@ -55,10 +53,8 @@ static void curl_response_values_and_header_order(void) {
 }
 
 static void curl_redirect_preserves_response_blocks(void) {
-  CurlEasy easy = test_easy();
-  defer easy.free();
-  CurlResponse response = easy.get(fixture_url + "/redirect");
-  defer response.free();
+  CurlEasy easy = $auto(test_easy());
+  CurlResponse response = $auto(easy.get(fixture_url + "/redirect"));
 
   EXPECT_INT_EQ(response.response_code(), 200);
   EXPECT_STR_EQ(response.effective_url(), fixture_url + "/binary");
@@ -75,10 +71,8 @@ static void curl_redirect_preserves_response_blocks(void) {
 }
 
 static void curl_binary_body_and_explicit_text_failure(void) {
-  CurlEasy easy = test_easy();
-  defer easy.free();
-  CurlResponse response = easy.get(fixture_url + "/binary");
-  defer response.free();
+  CurlEasy easy = $auto(test_easy());
+  CurlResponse response = $auto(easy.get(fixture_url + "/binary"));
 
   EXPECT_INT_EQ(response.body_size(), 7);
   EXPECT_TRUE(!memcmp(response.body(), "abc\0def", 7));
@@ -93,13 +87,10 @@ static void curl_binary_body_and_explicit_text_failure(void) {
 }
 
 static void curl_empty_and_http_error_are_responses(void) {
-  CurlEasy easy = test_easy();
-  defer easy.free();
+  CurlEasy easy = $auto(test_easy());
   int before = Error.count();
-  CurlResponse empty = easy.get(fixture_url + "/empty");
-  defer empty.free();
-  CurlResponse missing = easy.get(fixture_url + "/missing");
-  defer missing.free();
+  CurlResponse empty = $auto(easy.get(fixture_url + "/empty"));
+  CurlResponse missing = $auto(easy.get(fixture_url + "/missing"));
 
   EXPECT_INT_EQ(empty.response_code(), 204);
   EXPECT_NOT_NULL(empty.body());
@@ -111,8 +102,7 @@ static void curl_empty_and_http_error_are_responses(void) {
 }
 
 static void curl_callback_limit_survives_for_next_transfer(void) {
-  CurlEasy easy = test_easy().max_body(8);
-  defer easy.free();
+  CurlEasy easy = $auto(test_easy().max_body(8));
   int caught = 0;
   try {
     CurlResponse response = easy.get(fixture_url + "/large");
@@ -128,15 +118,13 @@ static void curl_callback_limit_survives_for_next_transfer(void) {
   EXPECT_TRUE(caught);
 
   easy.max_body(32);
-  CurlResponse recovered = easy.get(fixture_url + "/ok");
-  defer recovered.free();
+  CurlResponse recovered = $auto(easy.get(fixture_url + "/ok"));
   EXPECT_INT_EQ(recovered.response_code(), 200);
   EXPECT_STR_EQ(recovered.text(), "hello");
 }
 
 static void curl_header_limit_is_reported_after_callback(void) {
-  CurlEasy easy = test_easy();
-  defer easy.free();
+  CurlEasy easy = $auto(test_easy());
   int caught = 0;
   try {
     CurlResponse response = easy.get(fixture_url + "/headers-large");
@@ -151,10 +139,8 @@ static void curl_header_limit_is_reported_after_callback(void) {
 }
 
 static void curl_trailer_stays_in_its_response_block(void) {
-  CurlEasy easy = test_easy();
-  defer easy.free();
-  CurlResponse response = easy.get(fixture_url + "/trailers");
-  defer response.free();
+  CurlEasy easy = $auto(test_easy());
+  CurlResponse response = $auto(easy.get(fixture_url + "/trailers"));
 
   EXPECT_INT_EQ(response.blocks().len(), 1);
   CurlResponseBlock block = response.blocks().getindex(0);
@@ -169,8 +155,7 @@ static void curl_trailer_stays_in_its_response_block(void) {
 }
 
 static void curl_transport_error_has_native_detail(void) {
-  CurlEasy easy = test_easy();
-  defer easy.free();
+  CurlEasy easy = $auto(test_easy());
   int caught = 0;
   try {
     CurlResponse response = easy.get(fixture_url + "/close");
@@ -189,12 +174,9 @@ static void curl_transport_error_has_native_detail(void) {
 }
 
 static void curl_sequential_reuse_keeps_earlier_response(void) {
-  CurlEasy easy = test_easy();
-  defer easy.free();
-  CurlResponse first = easy.get(fixture_url + "/ok");
-  defer first.free();
-  CurlResponse second = easy.get(fixture_url + "/missing");
-  defer second.free();
+  CurlEasy easy = $auto(test_easy());
+  CurlResponse first = $auto(easy.get(fixture_url + "/ok"));
+  CurlResponse second = $auto(easy.get(fixture_url + "/missing"));
 
   EXPECT_INT_EQ(first.response_code(), 200);
   EXPECT_STR_EQ(first.text(), "hello");
@@ -208,8 +190,7 @@ static void curl_sequential_reuse_keeps_earlier_response(void) {
 }
 
 static void curl_copies_transient_url_and_response_context(void) {
-  CurlEasy easy = test_easy();
-  defer easy.free();
+  CurlEasy easy = $auto(test_easy());
   String expected = fixture_url + "/ok";
   String transient = String.malloc(expected.len() + 1);
   memcpy(transient, expected, expected.len() + 1);
@@ -239,15 +220,13 @@ static void curl_release_is_idempotent_and_stale_use_fails(void) {
 }
 
 static void curl_batch_path_distinguishes_outcomes(void) {
-  CurlEasy easy = test_easy().max_body(32);
-  defer easy.free();
+  CurlEasy easy = $auto(test_easy().max_body(32));
   List paths = %("/ok" "/redirect" "/empty" "/missing" "/large" "/close");
   int responses = 0, size_failures = 0, transfer_failures = 0;
 
   foreach(String path, paths) {
     try {
-      CurlResponse response = easy.get(fixture_url + path);
-      defer response.free();
+      CurlResponse response = $auto(easy.get(fixture_url + path));
       responses++;
     }
     catch %(size-limit *): size_failures++;
@@ -259,16 +238,14 @@ static void curl_batch_path_distinguishes_outcomes(void) {
 }
 
 static void curl_easy_retains_request_configuration(void) {
-  CurlEasy easy = CurlEasy.new()
+  CurlEasy easy = $auto(CurlEasy.new()
     .timeouts(1000, 3000)
     .follow_redirects(3)
     .max_body(1024)
     .user_agent("x2c-compat-test/1")
-    .header("Accept: application/json");
-  defer easy.free();
+    .header("Accept: application/json"));
 
-  CurlResponse response = easy.get(fixture_url + "/compat");
-  defer response.free();
+  CurlResponse response = $auto(easy.get(fixture_url + "/compat"));
   EXPECT_INT_EQ(response.response_code(), 200);
   EXPECT_INT_EQ(response.body_size(), 7);
   EXPECT_STR_EQ(response.text(), "matched");
@@ -278,12 +255,10 @@ static void curl_easy_retains_request_configuration(void) {
 }
 
 static void curl_native_handle_configures_the_next_transfer(void) {
-  CurlEasy easy = test_easy().header("Accept: application/json");
-  defer easy.free();
+  CurlEasy easy = $auto(test_easy().header("Accept: application/json"));
   curl_easy_setopt(easy.native(), CURLOPT_USERAGENT, "x2c-compat-test/1");
 
-  CurlResponse response = easy.get(fixture_url + "/compat");
-  defer response.free();
+  CurlResponse response = $auto(easy.get(fixture_url + "/compat"));
   EXPECT_INT_EQ(response.response_code(), 200);
   EXPECT_STR_EQ(response.text(), "matched");
 
@@ -320,11 +295,9 @@ static size_t native_collect(
     slist and abort on the callback's zero return.
 */
 static void curl_native_handle_performs_its_own_transfer(void) {
-  CurlEasy easy = test_easy().header("Accept: application/json");
-  defer easy.free();
+  CurlEasy easy = $auto(test_easy().header("Accept: application/json"));
   curl_easy_setopt(easy.native(), CURLOPT_USERAGENT, "x2c-compat-test/1");
-  CurlResponse configured = easy.get(fixture_url + "/compat");
-  defer configured.free();
+  CurlResponse configured = $auto(easy.get(fixture_url + "/compat"));
   EXPECT_INT_EQ(configured.response_code(), 200);
 
   CURL *handle = easy.native();
@@ -344,17 +317,14 @@ static void curl_native_handle_performs_its_own_transfer(void) {
   EXPECT_TRUE(!memcmp(collected.bytes, "hello", 5));
 
   /*  And the ordinary path still owns the handle after that transfer. */
-  CurlResponse ordinary = easy.get(fixture_url + "/compat");
-  defer ordinary.free();
+  CurlResponse ordinary = $auto(easy.get(fixture_url + "/compat"));
   EXPECT_STR_EQ(ordinary.text(), "matched");
 }
 
 static void curl_post_sends_a_body_with_its_content_type(void) {
-  CurlEasy easy = test_easy();
-  defer easy.free();
-  CurlResponse posted = easy.body("application/json", "{\"n\":1}")
-    .request("POST", fixture_url + "/echo");
-  defer posted.free();
+  CurlEasy easy = $auto(test_easy());
+  CurlResponse posted = $auto(easy.body("application/json", "{\"n\":1}")
+    .request("POST", fixture_url + "/echo"));
 
   EXPECT_INT_EQ(posted.response_code(), 200);
   EXPECT_INT_EQ(posted.upload_size(), 7);
@@ -364,21 +334,18 @@ static void curl_post_sends_a_body_with_its_content_type(void) {
   EXPECT_NOT_NULL(strstr(echoed, "\"length\": 7"));
 
   /*  The body belongs to that one request; the next carries none. */
-  CurlResponse next = easy.get(fixture_url + "/echo");
-  defer next.free();
+  CurlResponse next = $auto(easy.get(fixture_url + "/echo"));
   EXPECT_NOT_NULL(strstr(next.text(), "\"method\": \"GET\""));
   EXPECT_NOT_NULL(strstr(next.text(), "\"length\": 0"));
   EXPECT_INT_EQ(next.upload_size(), 0);
 }
 
 static void curl_binary_request_body_preserves_nul(void) {
-  CurlEasy easy = test_easy();
-  defer easy.free();
+  CurlEasy easy = $auto(test_easy());
   Bytes content = Bytes.new(2).append("a\0b\0", 2);
-  CurlResponse response = easy
+  CurlResponse response = $auto(easy
     .body_bytes("application/octet-stream", content)
-    .request("POST", fixture_url + "/echo");
-  defer response.free();
+    .request("POST", fixture_url + "/echo"));
 
   EXPECT_INT_EQ(response.response_code(), 200);
   EXPECT_INT_EQ(response.upload_size(), 4);
@@ -386,46 +353,37 @@ static void curl_binary_request_body_preserves_nul(void) {
 }
 
 static void curl_head_and_other_methods_reach_the_server(void) {
-  CurlEasy easy = test_easy();
-  defer easy.free();
-  CurlResponse head = easy.request("HEAD", fixture_url + "/large");
-  defer head.free();
+  CurlEasy easy = $auto(test_easy());
+  CurlResponse head = $auto(easy.request("HEAD", fixture_url + "/large"));
 
   EXPECT_INT_EQ(head.response_code(), 200);
   EXPECT_INT_EQ(head.body_size(), 0);
   CurlResponseBlock block = head.blocks().car();
   EXPECT_STR_EQ(block.values("Content-Length").car().string(), "64");
 
-  CurlResponse deleted = easy.request("DELETE", fixture_url + "/echo");
-  defer deleted.free();
+  CurlResponse deleted = $auto(easy.request("DELETE", fixture_url + "/echo"));
   EXPECT_NOT_NULL(strstr(deleted.text(), "\"method\": \"DELETE\""));
 
   /*  HEAD is not sticky either: the next GET brings its body back. */
-  CurlResponse body = easy.get(fixture_url + "/large");
-  defer body.free();
+  CurlResponse body = $auto(easy.get(fixture_url + "/large"));
   EXPECT_INT_EQ(body.body_size(), 64);
 }
 
 static void curl_basic_auth_unlocks_a_protected_path(void) {
-  CurlEasy easy = test_easy();
-  defer easy.free();
-  CurlResponse denied = easy.get(fixture_url + "/secret");
-  defer denied.free();
+  CurlEasy easy = $auto(test_easy());
+  CurlResponse denied = $auto(easy.get(fixture_url + "/secret"));
   EXPECT_INT_EQ(denied.response_code(), 401);
 
-  CurlResponse allowed = easy.basic_auth("user", "s3cret")
-    .get(fixture_url + "/secret");
-  defer allowed.free();
+  CurlResponse allowed = $auto(easy.basic_auth("user", "s3cret")
+    .get(fixture_url + "/secret"));
   EXPECT_INT_EQ(allowed.response_code(), 200);
   EXPECT_STR_EQ(allowed.text(), "release-7 signing key");
 }
 
 static void curl_transfer_info_describes_the_exchange(void) {
-  CurlEasy easy = test_easy();
-  defer easy.free();
-  CurlResponse response = easy.body("text/plain", "ping")
-    .request("POST", fixture_url + "/echo");
-  defer response.free();
+  CurlEasy easy = $auto(test_easy());
+  CurlResponse response = $auto(easy.body("text/plain", "ping")
+    .request("POST", fixture_url + "/echo"));
 
   EXPECT_TRUE(response.elapsed_us() > 0);
   EXPECT_INT_EQ(response.upload_size(), 4);
@@ -443,21 +401,18 @@ static void curl_escapes_and_unescapes_url_components(void) {
   }
   EXPECT_TRUE(caught);
 
-  CurlEasy easy = test_easy();
-  defer easy.free();
-  CurlResponse response = easy.get(
+  CurlEasy easy = $auto(test_easy());
+  CurlResponse response = $auto(easy.get(
     fixture_url + "/search?q=" + CurlEasy.escape("a b&c")
-  );
-  defer response.free();
+  ));
   EXPECT_STR_EQ(response.text(), "searched for a b&c");
 }
 
 static void curl_download_streams_past_the_body_limit(void) {
   String path = "/tmp/x2c-libcurl-download.bin";
-  CurlEasy easy = test_easy().max_body(8);
-  defer easy.free();
-  CurlResponse response = easy.download(fixture_url + "/download", path);
-  defer response.free();
+  CurlEasy easy = $auto(test_easy().max_body(8));
+  CurlResponse response = $auto(
+    easy.download(fixture_url + "/download", path));
 
   EXPECT_INT_EQ(response.response_code(), 200);
   EXPECT_INT_EQ(response.body_size(), 3072);
@@ -476,14 +431,11 @@ static void curl_download_streams_past_the_body_limit(void) {
 }
 
 static void curl_stream_delivers_chunks_without_buffering(void) {
-  Block streamed_body = Block.new(1);
-  defer streamed_body.free();
-  CurlEasy easy = test_easy().max_body(8);
-  defer easy.free();
-  CurlResponse response = easy.stream(
+  Block streamed_body = $auto(Block.new(1));
+  CurlEasy easy = $auto(test_easy().max_body(8));
+  CurlResponse response = $auto(easy.stream(
     fixture_url + "/download", streamed_body, collect_stream
-  );
-  defer response.free();
+  ));
 
   EXPECT_INT_EQ(response.response_code(), 200);
   EXPECT_INT_EQ(response.body_size(), 3072);
@@ -507,8 +459,7 @@ static void curl_stream_delivers_chunks_without_buffering(void) {
 }
 
 static void curl_stream_contains_callback_errors(void) {
-  CurlEasy easy = test_easy();
-  defer easy.free();
+  CurlEasy easy = $auto(test_easy());
   int caught = 0;
   try {
     CurlResponse response = easy.stream(
@@ -522,14 +473,12 @@ static void curl_stream_contains_callback_errors(void) {
   }
   EXPECT_TRUE(caught);
 
-  CurlResponse recovered = easy.get(fixture_url + "/ok");
-  defer recovered.free();
+  CurlResponse recovered = $auto(easy.get(fixture_url + "/ok"));
   EXPECT_STR_EQ(recovered.text(), "hello");
 }
 
 static void curl_lisp_bindings_return_values_lisp_consumes(void) {
-  Lisp lisp = Lisp.new();
-  defer lisp.destroy();
+  Lisp lisp = $auto(Lisp.new());
   CurlLisp.install(lisp);
 
   EXPECT_INT_EQ(
@@ -558,50 +507,41 @@ static void curl_lisp_bindings_return_values_lisp_consumes(void) {
 }
 
 static void curl_concurrent_batch_preserves_input_order_and_bound(void) {
-  CurlEasy easy = test_easy();
-  defer easy.free();
-  CurlResponse reset = easy.get(fixture_url + "/batch/reset");
-  defer reset.free();
+  CurlEasy easy = $auto(test_easy());
+  CurlResponse reset = $auto(easy.get(fixture_url + "/batch/reset"));
   List paths = %("/batch/delay?name=one&ms=20"
                  "/batch/delay?name=two&ms=20"
                  "/batch/delay?name=three&ms=20");
   List urls = paths.map(%!(String path) => fixture_url + path);
-  CurlBatch serial = easy.get_all(urls, 1);
-  defer serial.free();
+  CurlBatch serial = $auto(easy.get_all(urls, 1));
   EXPECT_INT_EQ(serial.len(), 3);
   EXPECT_STR_EQ(serial.response(0).text(), "one");
   EXPECT_STR_EQ(serial.response(2).text(), "three");
-  CurlResponse serial_stats = easy.get(fixture_url + "/batch/stats");
-  defer serial_stats.free();
+  CurlResponse serial_stats = $auto(easy.get(fixture_url + "/batch/stats"));
   EXPECT_STR_EQ(serial_stats.text(), "1 one,two,three");
 
-  CurlResponse again = easy.get(fixture_url + "/batch/reset");
-  defer again.free();
+  CurlResponse again = $auto(easy.get(fixture_url + "/batch/reset"));
   paths = %("/batch/delay?name=slow&ms=200&barrier=3"
             "/batch/delay?name=fast&barrier=3"
             "/batch/delay?name=middle&ms=50&barrier=3"
             "/batch/delay?name=last");
   urls = paths.map(%!(String path) => fixture_url + path);
-  CurlBatch parallel = easy.get_all(urls, 3);
-  defer parallel.free();
+  CurlBatch parallel = $auto(easy.get_all(urls, 3));
   EXPECT_INT_EQ(parallel.len(), 4);
   EXPECT_STR_EQ(parallel.response(0).text(), "slow");
   EXPECT_STR_EQ(parallel.response(1).text(), "fast");
   EXPECT_STR_EQ(parallel.response(2).text(), "middle");
   EXPECT_STR_EQ(parallel.response(3).text(), "last");
-  CurlResponse parallel_stats = easy.get(fixture_url + "/batch/stats");
-  defer parallel_stats.free();
+  CurlResponse parallel_stats = $auto(easy.get(fixture_url + "/batch/stats"));
   EXPECT_TRUE(parallel_stats.text().startswith("3 fast,"));
   EXPECT_TRUE(parallel_stats.text().endswith(",slow"));
 }
 
 static void curl_concurrent_batch_retains_each_failure(void) {
-  CurlEasy easy = test_easy().max_body(32);
-  defer easy.free();
+  CurlEasy easy = $auto(test_easy().max_body(32));
   List paths = %("/ok" "/close" "/large" "/missing" "/ok");
-  CurlBatch batch = easy.get_all(
-    paths.map(%!(String path) => fixture_url + path), 2);
-  defer batch.free();
+  CurlBatch batch = $auto(easy.get_all(
+    paths.map(%!(String path) => fixture_url + path), 2));
   EXPECT_INT_EQ(batch.len(), 5);
   EXPECT_STR_EQ(batch.response(0).text(), "hello");
   EXPECT_INT_EQ(batch.response(3).response_code(), 404);
@@ -622,42 +562,34 @@ static void curl_concurrent_batch_retains_each_failure(void) {
     EXPECT_STR_EQ(detail.assoc(<channel>).string(), "body");
   }
   EXPECT_TRUE(transport && limit);
-  CurlResponse reused = easy.get(fixture_url + "/ok");
-  defer reused.free();
+  CurlResponse reused = $auto(easy.get(fixture_url + "/ok"));
   EXPECT_STR_EQ(reused.text(), "hello");
   EXPECT_STR_EQ(batch.response(0).text(), "hello");
 }
 
 static void curl_concurrent_batch_broadcasts_body_and_raw_options(void) {
-  CurlEasy easy = test_easy();
-  defer easy.free();
+  CurlEasy easy = $auto(test_easy());
   String echo = fixture_url + "/echo";
-  CurlBatch batch = easy.body("text/plain", "ping")
-    .request_all("POST", %($echo $echo $echo), 2);
-  defer batch.free();
+  CurlBatch batch = $auto(easy.body("text/plain", "ping")
+    .request_all("POST", %($echo $echo $echo), 2));
   for (int i = 0; i < batch.len(); i++) {
     String text = batch.response(i).text();
     EXPECT_TRUE(text.contains("\"method\": \"POST\""));
     EXPECT_TRUE(text.contains("\"body\": \"ping\""));
     EXPECT_INT_EQ(batch.response(i).upload_size(), 4);
   }
-  CurlResponse reused = easy.get(echo);
-  defer reused.free();
+  CurlResponse reused = $auto(easy.get(echo));
   EXPECT_TRUE(reused.text().contains("\"length\": 0"));
   EXPECT_TRUE(reused.text().contains("\"method\": \"GET\""));
 
-  Bytes body = Bytes.new(1);
-  defer body.free();
-  CurlResponse single = easy.body_bytes("application/json", body)
-    .request("POST", echo);
-  defer single.free();
+  Bytes body = $auto(Bytes.new(1));
+  CurlResponse single = $auto(easy.body_bytes("application/json", body)
+    .request("POST", echo));
   EXPECT_TRUE(single.text().contains("\"content_length\": \"0\""));
-  CurlResponse single_reset = easy.get(echo);
-  defer single_reset.free();
+  CurlResponse single_reset = $auto(easy.get(echo));
   EXPECT_TRUE(single_reset.text().contains("\"content_length\": null"));
-  CurlBatch empty_body = easy.body_bytes("application/json", body)
-    .request_all("POST", %($echo $echo $echo), 2);
-  defer empty_body.free();
+  CurlBatch empty_body = $auto(easy.body_bytes("application/json", body)
+    .request_all("POST", %($echo $echo $echo), 2));
   for (int i = 0; i < empty_body.len(); i++) {
     String text = empty_body.response(i).text();
     EXPECT_TRUE(text.contains("\"method\": \"POST\""));
@@ -665,8 +597,7 @@ static void curl_concurrent_batch_broadcasts_body_and_raw_options(void) {
     EXPECT_TRUE(text.contains("\"length\": 0"));
     EXPECT_TRUE(text.contains("\"content_length\": \"0\""));
   }
-  CurlResponse reset = easy.get(echo);
-  defer reset.free();
+  CurlResponse reset = $auto(easy.get(echo));
   EXPECT_TRUE(reset.text().contains("\"method\": \"GET\""));
   EXPECT_TRUE(reset.text().contains("\"type\": \"\""));
   EXPECT_TRUE(reset.text().contains("\"length\": 0"));
@@ -677,22 +608,19 @@ static void curl_concurrent_batch_broadcasts_body_and_raw_options(void) {
   EXPECT_INT_EQ(set, CURLE_OK);
   easy.header("Accept: application/json");
   String compat = fixture_url + "/compat";
-  CurlBatch configured = easy.get_all(%($compat $compat), 2);
-  defer configured.free();
+  CurlBatch configured = $auto(easy.get_all(%($compat $compat), 2));
   EXPECT_STR_EQ(configured.response(0).text(), "matched");
   EXPECT_STR_EQ(configured.response(1).text(), "matched");
 }
 
 static void curl_concurrent_batch_empty_lifetime_and_timeout(void) {
-  CurlEasy easy = test_easy();
-  defer easy.free();
+  CurlEasy easy = $auto(test_easy());
   CurlBatch empty = easy.body("text/plain", "not sent")
     .get_all(NULL, 2);
   EXPECT_INT_EQ(empty.len(), 0);
   empty.free();
   empty.free();
-  CurlResponse echo = easy.get(fixture_url + "/echo");
-  defer echo.free();
+  CurlResponse echo = $auto(easy.get(fixture_url + "/echo"));
   EXPECT_TRUE(echo.text().contains("\"length\": 0"));
   int stale = 0, invalid = 0;
   try empty.response(0);
@@ -704,8 +632,7 @@ static void curl_concurrent_batch_empty_lifetime_and_timeout(void) {
   easy.timeouts(100, 100);
   String slow = fixture_url + "/batch/delay?ms=500";
   String ok = fixture_url + "/ok";
-  CurlBatch batch = easy.get_all(%($slow $ok), 2);
-  defer batch.free();
+  CurlBatch batch = $auto(easy.get_all(%($slow $ok), 2));
   int timeout = 0;
   try batch.response(0);
   catch %(io-fail *detail): {
