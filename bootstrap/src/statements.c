@@ -907,7 +907,7 @@ List Compiler_try_parse_macro_target_at(Compiler, AstPos);
 
 List Compiler_parse_declaration_row(Compiler);
 
-List Compiler_finish_managed_declaration(Compiler, List);
+List Compiler_finish_managed_declaration(Compiler, List, Token);
 
 List Compiler_parse_block_item(Compiler c){
   if(! _init_guard_) _file_init_();
@@ -923,9 +923,10 @@ List Compiler_parse_block_item(Compiler c){
   List macro = with_expression ? NULL : Compiler_try_parse_macro_target_at(c, AST_BLOCK);
   if(List_truth(macro)) return macro;
   if(Compiler_test_declaration(c)){
+    Token origin = c -> token;
     List declaration = Compiler_parse_declaration_row(c);
     Compiler_expect(c, 119);
-    return Compiler_finish_managed_declaration(c, declaration);
+    return Compiler_finish_managed_declaration(c, declaration, origin);
   }
   return Compiler_parse_statement(c);
 }

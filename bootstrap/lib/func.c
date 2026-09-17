@@ -4,11 +4,11 @@
 
 #include "error.h"
 
-static List _33, _31, _30, _27, _26, _24, _23, _22, _20, _19, _18, _12, _11, _8, _7, _5, _3;
+static List _33, _31, _29, _28, _26, _25, _24, _22, _21, _20, _14, _13, _12, _8, _7, _5, _3;
 
 static String _1;
 
-static Var _32, _29, _28, _25, _21, _17, _16, _15, _14, _13, _10, _9, _6, _4, _2, _0;
+static Var _32, _30, _27, _23, _19, _18, _17, _16, _15, _11, _10, _9, _6, _4, _2, _0;
 
 #include "varconvert.h"
 #include "error.h"
@@ -77,28 +77,28 @@ __attribute__((constructor)) static void _file_init_(void){
   _7 = cons(_6, NULL);
   _8 = cons(_0, _7);
   _9 = List_var(_8);
-  _10 = Symbol_var(63496760104);
-  _11 = cons(_10, NULL);
-  _12 = cons(_9, _11);
-  _13 = Symbol_var(2005352);
-  _14 = Symbol_var(63981097423176);
-  _15 = Symbol_var(62054);
-  _16 = Symbol_var(1362954);
-  _17 = Symbol_var(806120);
-  _18 = cons(_17, NULL);
-  _19 = cons(_16, _18);
-  _20 = cons(_15, _19);
-  _21 = List_var(_20);
-  _22 = cons(_21, NULL);
-  _23 = cons(_14, _22);
-  _24 = cons(_13, _23);
-  _25 = List_var(_24);
-  _26 = cons(_25, NULL);
-  _27 = cons(_0, _26);
-  _28 = List_var(_27);
-  _29 = Symbol_var(58);
-  _30 = cons(_29, NULL);
-  _31 = cons(_28, _30);
+  _10 = Symbol_var(58);
+  _11 = Symbol_var(54);
+  _12 = cons(_11, NULL);
+  _13 = cons(_10, _12);
+  _14 = cons(_9, _13);
+  _15 = Symbol_var(2005352);
+  _16 = Symbol_var(63981097423176);
+  _17 = Symbol_var(62054);
+  _18 = Symbol_var(1362954);
+  _19 = Symbol_var(806120);
+  _20 = cons(_19, NULL);
+  _21 = cons(_18, _20);
+  _22 = cons(_17, _21);
+  _23 = List_var(_22);
+  _24 = cons(_23, NULL);
+  _25 = cons(_16, _24);
+  _26 = cons(_15, _25);
+  _27 = List_var(_26);
+  _28 = cons(_27, NULL);
+  _29 = cons(_0, _28);
+  _30 = List_var(_29);
+  _31 = cons(_30, _13);
   _32 = Symbol_var(1473096);
   _33 = cons(_32, NULL);
 }
@@ -349,7 +349,7 @@ int List_len(List);
 void * Scope_calloc(size_t, size_t);
 
 static Func _new(FuncAdapter adapter, List signature, int rest, const void * context, size_t context_size){
-  if(rest && ! List_truth(({ static MatchCaptureSite _x2c_match_site_0;  x2c_match_site_match(& _x2c_match_site_0, signature, List_var(_12)); }))){
+  if(rest && ! List_truth(({ static MatchCaptureSite _x2c_match_site_0;  x2c_match_site_match(& _x2c_match_site_0, signature, List_var(_14)); }))){
     static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/func.x",.function = "_new",.line = 263};
     x2c_error_raise_n(& _x2c_error_site_12, 4372535886, 1, Symbol_var(39502), List_var(signature));
     __builtin_unreachable();

@@ -47,6 +47,10 @@ Symbol Lisp_read(Lisp lisp, String source, unsigned * cursor, Var * out);
 
 Var lisp_atom(Var value);
 
+Var lisp_car(Var value);
+
+Var lisp_cdr(Var value);
+
 Var lisp_eq(Var a, Var b);
 
 Var lisp_pair(Var value);

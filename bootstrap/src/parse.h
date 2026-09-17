@@ -44,7 +44,7 @@ List Compiler_parse_simple_declaration(Compiler c);
 
 List Compiler_parse_declaration_row(Compiler compiler);
 
-List Compiler_finish_managed_declaration(Compiler c, List declaration);
+List Compiler_finish_managed_declaration(Compiler c, List declaration, Token origin);
 
 List Compiler_parse_declaration_argument(Compiler c);
 

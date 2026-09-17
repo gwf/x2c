@@ -143,11 +143,20 @@ static int _bind_final(RecursiveMatchState state, Var binder, List input){
   if(index < 0) return 0;
   unsigned long bit = 1UL << index;
   if(!(state -> present & bit)) return _bind(state, binder, List_var(input));
-  if(!(state -> spans & bit)) return Var_is_row(state -> values[index], 9, 7, 4) && Var_equal(state -> values[index], List_var(input));
+  if(!(state -> spans & bit)){
+    if(! Var_is_row(state -> values[index], 9, 7, 4)) return 0;
+    List stored = Var_list(state -> values[index]), rest = input;
+    while(List_truth(stored) && List_truth(rest)){
+      if(!(Var_equal(List_car(stored), List_car(rest)))) return 0;
+      stored = List_cdr(stored);
+      rest = List_cdr(rest);
+    }
+    return ! List_truth(stored) && ! List_truth(rest);
+  }
   List expected = state -> span_begin[index], candidate = input;
   int length = 0;
   while(length < state -> span_length[index] && ! List_equal(expected, state -> span_end[index]) && List_truth(candidate)){
-    if(List_car(expected).u64 != List_car(candidate).u64) return 0;
+    if(!(Var_equal(List_car(expected), List_car(candidate)))) return 0;
     expected = List_cdr(expected);
     candidate = List_cdr(candidate);
     length ++;

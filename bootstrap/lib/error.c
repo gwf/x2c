@@ -439,13 +439,21 @@ static void _initialize_policies(void){
 
 }
 
+void Symbol_decode(Symbol, char *);
+
 _Noreturn static void _floor(Symbol code, const char * why){
-  fprintf(stderr, "x2c error floor: code 0x%lx: %s\n", (unsigned long) code, why ? why : "unknown");
+  char spelling[SYMBOL_MAX_5BIT + 1] ={
+    __builtin_choose_expr(0ULL <(sizeof(spelling) /(sizeof(spelling[0]))), 0, (__typeof__(spelling[0ULL])){
+      0
+    }
+    )
+  }
+  ;
+  Symbol_decode(code, spelling);
+  fprintf(stderr, "x2c error floor: <%s>: %s\n", spelling, why ? why : "unknown");
   fflush(stderr);
   abort();
 }
-
-void Symbol_decode(Symbol, char *);
 
 static void _report(Symbol code){
   char spelling[SYMBOL_MAX_5BIT + 1] ={
@@ -789,12 +797,12 @@ Var Map_setindex(Map, Var, Var);
 void Error_policy_set(Symbol code, Symbol disposition){
   if(! Error_ready()) return;
   if(disposition != 2260136 && disposition != 25550 && disposition != 7475046632 && disposition != 619609226){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 830};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 832};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(302607262917214), Symbol_var(disposition));
     __builtin_unreachable();
   }
   if(_never_returns(code) && disposition != 2260136){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 833};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 835};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(227594), Symbol_var(code), Symbol_var(302607262917214), Symbol_var(disposition));
     __builtin_unreachable();
   }

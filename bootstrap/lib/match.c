@@ -111,8 +111,11 @@ typedef struct MatchWalk{
   MachineView view;
   MatchCaptureBuffer * captures;
   MatchMachine m;
+  Block spine;
 }
 * MatchWalk;
+
+static Var _spine_get(Block spine, size_t index);
 
 static int _walk_prepared(MatchWalk walk, Var input);
 
@@ -121,6 +124,8 @@ static List _walk_bindings(MatchWalk walk, Var input);
 static int _walk_all_prepared(MatchWalk walk, Var input, int include_empty, List * results);
 
 static int _walk_first_prepared(MatchWalk walk, Var input, int include_empty, Var * out_match, List * out_bindings);
+
+static Var _walk_replace_node(MatchWalk walk, Var node, Var template, int * error);
 
 static Var _walk_replace_prepared(MatchWalk walk, Var node, Var template, int include_empty, int * error);
 
@@ -357,10 +362,10 @@ int x2c_match_try_capture(List input, Var pattern, MatchCaptureBuffer * captures
 
 int x2c_match_site_try_capture(MatchCaptureSite * site, List input, Var pattern, MatchCaptureBuffer * captures){
   if(! _init_guard_) _file_init_();
-  if(! site || ! captures) return 0;
-  MatchPlan plan = __atomic_load_n(& site -> plan, __ATOMIC_ACQUIRE);
-  if(! plan) plan = _capture_site_publish(site, pattern);
-  if(! plan) return 0;
+  if(! captures) return 0;
+  MatchPlan plan = site ? __atomic_load_n(& site -> plan, __ATOMIC_ACQUIRE) : NULL;
+  if(site && ! plan) plan = _capture_site_publish(site, pattern);
+  if(! plan) return x2c_match_try_capture(input, pattern, captures);
   if(plan -> status == MACHINE_MALFORMED) return 0;
   MatchCaptureLayout layout = plan -> layout;
   if(_plan_prepared(plan, "match") && _capture_buffer_valid(layout, captures)){
@@ -473,11 +478,11 @@ static List _normalize_pattern(List pattern){
   List normalized = _normalize_elements(pattern);
   Var op = List_car(normalized);
   List args = List_cdr(normalized);
-  if(! Var_is_match_op(op) || Var_equal(op, Symbol_var(2005352)) || Var_equal(op, Symbol_var(2050325770)) || ! List_truth(args)) return normalized;
+  if(! Var_is_match_op(op) || Var_equal(op, Symbol_var(2050325770)) || ! List_truth(args)) return normalized;
   Var binder = List_car(args);
-  if(! Var_is_binder(binder)) return normalized;
   List rest = List_cdr(args);
-  return cons(_2, cons(binder, cons(List_var(cons(op, List_append(rest, NULL))), NULL)));
+  if(! Var_is_binder(binder) || ! List_truth(rest) ||(Var_equal(op, Symbol_var(2005352)) && ! List_truth(List_cdr(rest)))) return normalized;
+  return cons(_2, cons(binder, cons(List_var(_normalize_pattern(cons(op, List_append(rest, NULL)))), NULL)));
 }
 
 static int _is_list_literal(List pat){
@@ -788,7 +793,7 @@ static int _find_fixed_anchor(List pat, Var * anchor, int * offset){
       part = _x2c_macro_cursor_output_2;
       {
         if(Var_is_list_binder(part)) return 0;
-        if((! Var_is_row(part, 9, 7, 4) && ! Var_is_binder(part)) ||(Var_is_row(part, 9, 7, 4) && _is_list_literal(Var_list(part)))){
+        if((! Var_is_row(part, 9, 7, 4) && ! Var_is_binder(part)) ||(Var_is_row(part, 9, 7, 4) && _is_list_literal(Var_list(part)) && _bits_unique(part))){
           * anchor = part;
           * offset = width;
           return 1;
@@ -878,7 +883,7 @@ static Var _replace(Var input, List bindings){
   int splice = Var_is_list_binder(head) && ! Var_equal(head, Symbol_var(54)) && ! Var_equal(head, Symbol_var(58));
   head = _replace(head, bindings);
   tail = Var_list(_replace(List_var(tail), bindings));
-  if(splice) return List_var(List_append(Var_list(head), List_append(tail, NULL)));
+  if(splice && Var_is_row(head, 9, 7, 4)) return List_var(List_append(Var_list(head), List_append(tail, NULL)));
   return List_var(cons(head, List_append(tail, NULL)));
 }
 
@@ -910,8 +915,8 @@ static Var _capture_replace(Var input, MatchCaptureLayout layout, MatchCaptureBu
   int splice = Var_is_list_binder(head) && ! Var_equal(head, Symbol_var(54)) && ! Var_equal(head, Symbol_var(58));
   Var replaced_head = _capture_replace(head, layout, captures);
   List replaced_tail = Var_list(_capture_replace(List_var(tail), layout, captures));
-  if(splice){
-    List spliced = Var_is_row(replaced_head, 9, 7, 4) ? Var_list(replaced_head) : NULL;
+  if(splice && Var_is_row(replaced_head, 9, 7, 4)){
+    List spliced = Var_list(replaced_head);
     return List_var(List_append(spliced, List_append(replaced_tail, NULL)));
   }
   return List_var(cons(replaced_head, List_append(replaced_tail, NULL)));
@@ -939,6 +944,10 @@ List List_match_replace(List input, Var pat, Var template){
   return Var_is_row(result, 9, 7, 4) ? Var_list(result) : NULL;
 }
 
+static Var _spine_get(Block spine, size_t index){
+  return((Var *) spine -> bytes)[index];
+}
+
 static int _walk_prepared(MatchWalk walk, Var input){
   return _run_prepared_capture(walk -> view, walk -> m, input, walk -> captures);
 }
@@ -947,51 +956,81 @@ static List _walk_bindings(MatchWalk walk, Var input){
   return cons(List_var(cons(_3, cons(input, NULL))), _capture_publish(walk -> plan -> layout, walk -> captures));
 }
 
+void Block_push(Block, const void *);
+
+void Block_truncate(Block, size_t);
+
 static int _walk_all_prepared(MatchWalk walk, Var input, int include_empty, List * results){
-  if(Var_is_row(input, 9, 7, 4)){
+  Block hits = walk -> spine;
+  size_t base = hits -> length;
+  int visit_tail = 1;
+  while(1){
+    if(! Var_is_row(input, 9, 7, 4)) break;
     List lst = Var_list(input);
-    if(List_truth(lst)){
-      if(_walk_all_prepared(walk, List_car(lst), 1, results) < 0) return - 1;
-      if(_walk_all_prepared(walk, List_var(List_cdr(lst)), 0, results) < 0) return - 1;
+    if(! List_truth(lst)){
+      visit_tail = include_empty;
+      break;
     }
-    else if(! include_empty) return 0;
+    if(_walk_all_prepared(walk, List_car(lst), 1, results) < 0) return - 1;
+    int status = _walk_prepared(walk, input);
+    if(status < 0) return - 1;
+    if(status == 1){
+      Var found = List_var(_walk_bindings(walk, input));
+      Block_push(hits, & found);
+    }
+    input = List_var(List_cdr(lst));
+    include_empty = 0;
   }
-  int status = _walk_prepared(walk, input);
-  if(status < 0) return - 1;
-  if(status == 1) * results = cons(List_var(_walk_bindings(walk, input)), * results);
+  if(visit_tail){
+    int status = _walk_prepared(walk, input);
+    if(status < 0) return - 1;
+    if(status == 1) * results = cons(List_var(_walk_bindings(walk, input)), * results);
+  }
+  for(size_t i = hits -> length;  i > base;  i --) * results = cons(_spine_get(hits, i - 1), * results);
+  Block_truncate(hits, base);
   return 0;
 }
 
 static int _walk_first_prepared(MatchWalk walk, Var input, int include_empty, Var * out_match, List * out_bindings){
-  if(Var_is_row(input, 9, 7, 4)){
+  Var last_cell =((void) 0, Void);
+  int have_cell = 0, visit_tail = 1;
+  while(1){
+    if(! Var_is_row(input, 9, 7, 4)) break;
     List lst = Var_list(input);
-    if(List_truth(lst)){
-      int found = _walk_first_prepared(walk, List_car(lst), 1, out_match, out_bindings);
-      if(found) return found;
-      found = _walk_first_prepared(walk, List_var(List_cdr(lst)), 0, out_match, out_bindings);
-      if(found) return found;
+    if(! List_truth(lst)){
+      visit_tail = include_empty;
+      break;
     }
-    else if(! include_empty) return 0;
+    int found = _walk_first_prepared(walk, List_car(lst), 1, out_match, out_bindings);
+    if(found) return found;
+    int status = _walk_prepared(walk, input);
+    if(status < 0) return - 1;
+    if(status == 1){
+      last_cell = input;
+      have_cell = 1;
+    }
+    input = List_var(List_cdr(lst));
+    include_empty = 0;
   }
-  int status = _walk_prepared(walk, input);
+  if(visit_tail){
+    int status = _walk_prepared(walk, input);
+    if(status < 0) return status;
+    if(status == 1){
+      * out_match = input;
+      * out_bindings = _capture_publish(walk -> plan -> layout, walk -> captures);
+      return 1;
+    }
+
+  }
+  if(! have_cell) return 0;
+  int status = _walk_prepared(walk, last_cell);
   if(status != 1) return status;
-  * out_match = input;
+  * out_match = last_cell;
   * out_bindings = _capture_publish(walk -> plan -> layout, walk -> captures);
   return 1;
 }
 
-static Var _walk_replace_prepared(MatchWalk walk, Var node, Var template, int include_empty, int * error){
-  if(Var_is_row(node, 9, 7, 4)){
-    List lst = Var_list(node);
-    if(List_truth(lst)){
-      Var head = _walk_replace_prepared(walk, List_car(lst), template, 1, error);
-      if(* error) return node;
-      List tail = Var_list(_walk_replace_prepared(walk, List_var(List_cdr(lst)), template, 0, error));
-      if(* error) return node;
-      node = List_var(cons(head, tail));
-    }
-    else if(! include_empty) return node;
-  }
+static Var _walk_replace_node(MatchWalk walk, Var node, Var template, int * error){
   int status = _walk_prepared(walk, node);
   if(status < 0){
     * error = 1;
@@ -999,6 +1038,32 @@ static Var _walk_replace_prepared(MatchWalk walk, Var node, Var template, int in
   }
   if(status == 0) return node;
   return _apply_capture_template(walk -> plan -> layout, walk -> captures, template);
+}
+
+static Var _walk_replace_prepared(MatchWalk walk, Var node, Var template, int include_empty, int * error){
+  Block heads = walk -> spine;
+  size_t base = heads -> length;
+  int visit_tail = 1;
+  while(1){
+    if(! Var_is_row(node, 9, 7, 4)) break;
+    List lst = Var_list(node);
+    if(! List_truth(lst)){
+      visit_tail = include_empty;
+      break;
+    }
+    Var head = _walk_replace_prepared(walk, List_car(lst), template, 1, error);
+    if(* error) return node;
+    Block_push(heads, & head);
+    node = List_var(List_cdr(lst));
+    include_empty = 0;
+  }
+  if(visit_tail) node = _walk_replace_node(walk, node, template, error);
+  for(size_t i = heads -> length;  i > base && ! * error;  i --){
+    List tail = Var_list(node);
+    node = _walk_replace_node(walk, List_var(cons(_spine_get(heads, i - 1), tail)), template, error);
+  }
+  Block_truncate(heads, base);
+  return node;
 }
 
 List List_search(List input, Var pat){
@@ -1074,9 +1139,26 @@ static int MatchLower__compile_child_segment(MatchLower l, List pattern){
 
 Symbol Var_tag(Var);
 
+void * Var_pointer(Var);
+
 static int _bits_unique(Var value){
   switch(Var_tag(value)){
-    case 1328354264 : case 826970 : case 806120 : case 26993 : case 30065 : case 3453293 : case 3846509 : case 3453797 : case 3847013 : case 3454065 : case 3847281 : return 1;
+    case 1328354264 : case 826970 : case 26993 : case 30065 : case 3453293 : case 3846509 : case 3453797 : case 3847013 : case 3454065 : case 3847281 : return 1;
+    case 806120 :{
+      {
+        Var part;
+        List _x2c_macro_object_4 =(List) Var_pointer(value);
+        List _x2c_macro_cursor_4 = _x2c_macro_object_4;
+        Var _x2c_macro_cursor_output_4;
+        while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
+          part = _x2c_macro_cursor_output_4;
+          if(! _bits_unique(part)) return 0;
+        }
+
+      }
+      return 1;
+    }
+
   }
   return 0;
 }
@@ -1156,11 +1238,11 @@ static int MatchLower__collect_guard_args(MatchLower l, List args, Var * element
   int count = 0;
   {
     Var part;
-    List _x2c_macro_object_4 = args;
-    List _x2c_macro_cursor_4 = _x2c_macro_object_4;
-    Var _x2c_macro_cursor_output_4;
-    while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
-      part = _x2c_macro_cursor_output_4;
+    List _x2c_macro_object_5 = args;
+    List _x2c_macro_cursor_5 = _x2c_macro_object_5;
+    Var _x2c_macro_cursor_output_5;
+    while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
+      part = _x2c_macro_cursor_output_5;
       {
         if(count >= MATCH_SEGMENT_MAX) return MatchLower__fail(l, "guard-width");
         elements[count] = part;
@@ -1418,11 +1500,11 @@ static int _inline_descend_ok(List child, int reg){
   if(_is_list_literal(child)) return 0;
   {
     Var part;
-    List _x2c_macro_object_5 = child;
-    List _x2c_macro_cursor_5 = _x2c_macro_object_5;
-    Var _x2c_macro_cursor_output_5;
-    while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
-      part = _x2c_macro_cursor_output_5;
+    List _x2c_macro_object_6 = child;
+    List _x2c_macro_cursor_6 = _x2c_macro_object_6;
+    Var _x2c_macro_cursor_output_6;
+    while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_6)){
+      part = _x2c_macro_cursor_output_6;
       if(Var_is_list_binder(part)) return 0;
     }
 
@@ -1433,11 +1515,11 @@ static int _inline_descend_ok(List child, int reg){
 static int MatchLower__plan_inline_segment(MatchLower l, List pattern, int reg, MatchInlinePlan * plan){
   {
     Var part;
-    List _x2c_macro_object_6 = pattern;
-    List _x2c_macro_cursor_6 = _x2c_macro_object_6;
-    Var _x2c_macro_cursor_output_6;
-    while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_6)){
-      part = _x2c_macro_cursor_output_6;
+    List _x2c_macro_object_7 = pattern;
+    List _x2c_macro_cursor_7 = _x2c_macro_object_7;
+    Var _x2c_macro_cursor_output_7;
+    while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
+      part = _x2c_macro_cursor_output_7;
       {
         if(! Var_is_row(part, 9, 7, 4)) continue;
         List child = Var_list(part);
@@ -1474,11 +1556,11 @@ static int MatchLower__emit_inline_segment(MatchLower l, List pattern, int reg, 
   MachineBuilder b = l -> b;
   {
     Var part;
-    List _x2c_macro_object_7 = pattern;
-    List _x2c_macro_cursor_7 = _x2c_macro_object_7;
-    Var _x2c_macro_cursor_output_7;
-    while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
-      part = _x2c_macro_cursor_output_7;
+    List _x2c_macro_object_8 = pattern;
+    List _x2c_macro_cursor_8 = _x2c_macro_object_8;
+    Var _x2c_macro_cursor_output_8;
+    while(List_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_8)){
+      part = _x2c_macro_cursor_output_8;
       {
         if(! Var_is_row(part, 9, 7, 4)){
           if(! MatchLower__emit_head_leaf(l, part, reg)) return - 1;
@@ -1605,7 +1687,7 @@ Var String_var(String);
 _Noreturn static void _raise_ineligible(const char * reason, const char * owner){
   String fence = String_new(reason), site = String_new(owner);
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match.x",.function = "_raise_ineligible",.line = 1589};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match.x",.function = "_raise_ineligible",.line = 1677};
     x2c_error_raise_n(& _x2c_error_site_0, 1358596898646632, 2, Symbol_var(32993636), String_var(site), Symbol_var(12939466), String_var(fence));
     __builtin_unreachable();
   }
@@ -1766,6 +1848,10 @@ int MatchPlan_try_match(MatchPlan plan, List input, List * out_bindings){
   return MatchPlan_execute(plan, List_var(input), out_bindings, NULL);
 }
 
+Block Block_new(size_t);
+
+void Block_free(Block);
+
 static int MatchPlan__first(MatchPlan plan, List input, Var * out_match, List * out_bindings){
   struct MatchMachine _x2c_macro_storage_2;
   MatchMachine machine = & _x2c_macro_storage_2;
@@ -1777,12 +1863,13 @@ static int MatchPlan__first(MatchPlan plan, List input, Var * out_match, List * 
   }
   ;
   struct MatchWalk walk ={
-    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_0, machine
+    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_0, machine, Block_new(sizeof(Var))
   }
   ;
   Var matched;
   List bindings;
   int result = _walk_first_prepared(& walk, List_var(input), 1, & matched, & bindings);
+  Block_free(walk.spine);
   MatchMachine_dispose(machine);
   if(result == 1){
     * out_match = matched;
@@ -1808,11 +1895,12 @@ static int MatchPlan__all(MatchPlan plan, List input, List * out_results){
   }
   ;
   struct MatchWalk walk ={
-    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_1, machine
+    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_1, machine, Block_new(sizeof(Var))
   }
   ;
   List results = NULL;
   int status = _walk_all_prepared(& walk, List_var(input), 1, & results);
+  Block_free(walk.spine);
   MatchMachine_dispose(machine);
   if(status < 0) return - 1;
   * out_results = results;
@@ -1854,11 +1942,12 @@ static int MatchPlan__replace_all(MatchPlan plan, List input, Var template, List
   }
   ;
   struct MatchWalk walk ={
-    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_2, machine
+    plan, MachineProgram_view((plan) -> program), & _x2c_macro_captures_2, machine, Block_new(sizeof(Var))
   }
   ;
   int error = 0;
   Var result = _walk_replace_prepared(& walk, List_var(input), template, 1, & error);
+  Block_free(walk.spine);
   MatchMachine_dispose(machine);
   if(error) return - 1;
   * out = Var_list(result);
@@ -1877,7 +1966,7 @@ int String_is_permanent(String);
 
 String Var_string(Var);
 
-void * Var_pointer(Var);
+int x2c_pool_values_is_permanent(Var);
 
 static int _pattern_admissible(Var value, int depth){
   if(depth >= 128) return 0;
@@ -1886,16 +1975,17 @@ static int _pattern_admissible(Var value, int depth){
     case 1328354264 : return 1;
     case 35386204516 : case 39939274535114 : return 0;
     case 1011493096 :{
-      if(Var_is(value, 826970)) return 1;
+      if(Var_is(value, 826970)) return String_is_permanent((String) Var_pointer(value));
       if(Var_is_row(value, 11, 7, 1)) return String_is_permanent(Var_string(value));
       if(! Var_is_row(value, 9, 7, 4)) return 0;
+      if(! x2c_pool_values_is_permanent(value)) return 0;
       {
         Var part;
-        List _x2c_macro_object_8 =(List) Var_pointer(value);
-        List _x2c_macro_cursor_8 = _x2c_macro_object_8;
-        Var _x2c_macro_cursor_output_8;
-        while(List_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_8)){
-          part = _x2c_macro_cursor_output_8;
+        List _x2c_macro_object_9 =(List) Var_pointer(value);
+        List _x2c_macro_cursor_9 = _x2c_macro_object_9;
+        Var _x2c_macro_cursor_output_9;
+        while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_9)){
+          part = _x2c_macro_cursor_output_9;
           if(! _pattern_admissible(part, depth + 1)) return 0;
         }
 
@@ -1940,12 +2030,12 @@ void Scope_pop(void);
 MatchCache MatchCache_new(int capacity){
   if(! _init_guard_) _file_init_();
   if(capacity <= 0){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/match.x",.function = "MatchCache_new",.line = 1964};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/match.x",.function = "MatchCache_new",.line = 2059};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL))), Symbol_var(209381969202), int_var(capacity));
     __builtin_unreachable();
   }
   if(capacity >(INT_MAX - 1) / 2){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/match.x",.function = "MatchCache_new",.line = 1966};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/match.x",.function = "MatchCache_new",.line = 2061};
     x2c_error_raise_n(& _x2c_error_site_2, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL))), Symbol_var(209381969202), int_var(capacity));
     __builtin_unreachable();
   }
@@ -2131,14 +2221,14 @@ static MatchPlan _lease_plan(MatchLease * lease){
 void MatchLease_release(MatchLease * lease){
   if(! _init_guard_) _file_init_();
   if(! lease){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2157};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2252};
     x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
     __builtin_unreachable();
   }
   if(! lease -> active) return;
   if(lease -> transient_plan){
     if(! lease -> cache || lease -> cache -> active_leases <= 0){
-      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2161};
+      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2256};
       x2c_error_raise_n(& _x2c_error_site_4, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
       __builtin_unreachable();
     }
@@ -2150,7 +2240,7 @@ void MatchLease_release(MatchLease * lease){
   }
   MatchCacheEntry * entry = _lease_entry(lease);
   if(! entry || lease -> cache -> active_leases <= 0 || entry -> pin_count <= 0){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2171};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2266};
     x2c_error_raise_n(& _x2c_error_site_5, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
     __builtin_unreachable();
   }
@@ -2165,7 +2255,7 @@ void MatchCache_dispose(MatchCache cache){
   if(! _init_guard_) _file_init_();
   if(! cache) return;
   if(cache -> active_leases){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/match.x",.function = "MatchCache_dispose",.line = 2187};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/match.x",.function = "MatchCache_dispose",.line = 2282};
     x2c_error_raise_n(& _x2c_error_site_6, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.dispose")), NULL))));
     __builtin_unreachable();
   }
@@ -2283,7 +2373,7 @@ void MatchCache_context_close(void * token){
   MatchContextState state = token;
   if(! state) return;
   if(_thread() -> context_top != state){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/match.x",.function = "MatchCache_context_close",.line = 2377};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/match.x",.function = "MatchCache_context_close",.line = 2472};
     x2c_error_raise_n(& _x2c_error_site_7, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.context_close")), NULL))));
     __builtin_unreachable();
   }
@@ -2322,8 +2412,6 @@ static void _site_unlock(void){
 
 }
 
-void Block_free(Block);
-
 static void _capture_sites_shutdown(void){
   if(! match_capture_site_scope) return;
   MatchCaptureSite * * sites =(void *) match_capture_sites != NULL ? match_capture_sites -> bytes : NULL;
@@ -2358,8 +2446,6 @@ void x2c_match_initialize(void){
 
 }
 
-Block Block_new(size_t);
-
 static void _capture_sites_initialize(void){
   if(match_capture_site_scope) return;
   match_capture_site_scope = Scope_new_named("Match source-site plans");
@@ -2387,8 +2473,6 @@ static void _capture_sites_initialize(void){
   }
   x2c_match_initialize();
 }
-
-void Block_push(Block, const void *);
 
 static void _capture_site_prepare(MatchCaptureSite * site, Var pattern){
   if(! _pattern_admissible(pattern, 0)) return;

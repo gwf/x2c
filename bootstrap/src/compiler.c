@@ -208,8 +208,6 @@ static Type _normalize_declared_type(Sym sym, Type type, Type origin, int hops);
 
 static Symbol _var_tag_for_type_helper(Sym sym, Type type, Type origin, Type * resolved, int hops);
 
-static VarMethods _x2c__x2c_protocol_methods_0;
-
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
   const void * _x2c_defer_capture_1;
@@ -303,9 +301,6 @@ __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  if(! x2c_register_builtin_descriptor(239277269348, _x2c__x2c_protocol_methods_0)){
-    x2c_register_descriptor(String_new("compiler"), _x2c__x2c_protocol_methods_0);
-  }
   _0 = String_new("/");
   _1 = Symbol_var(42018494834);
   _2 = Symbol_var(836963110);
@@ -3854,17 +3849,28 @@ int Sym_is_named_value_type(Sym sym, Type type, String name){
   if(! _init_guard_) _file_init_();  if(! List_truth(Type_list(type)) || ! String_truth(name)) return 0;  Type wanted = List_type(cons(String_var(name), NULL)), origin = Type_canonicalize(type);  type = _resolve_key_helper(sym, origin, wanted, origin, 0);  return List_equal(Type_list(type), Type_list(wanted));
 }
 
+int Var_truth(Var);
+int Type_is_aggregate(Type);
 Type Sym_lookup_field(Sym sym, Type type, List field){
-  if(! _init_guard_) _file_init_();  type = Sym_resolve_key(sym, type);  if(! List_truth(Type_list(type)) || ! Type_is_aggregate_tag(type)) return NULL;  field = List_append(Type_list(type), List_append(field, NULL));  return List_type(Sym_get(sym, field));
+  if(! _init_guard_) _file_init_();  type = Sym_resolve_key(sym, type);  if(! List_truth(Type_list(type)) || ! Type_is_aggregate_tag(type)) return NULL;  Type found = List_type(Sym_get(sym, List_append(Type_list(type), List_append(field, NULL))));  if(List_truth(Type_list(found))) return found; {
+    List row;  List _x2c_macro_object_52 = List_cdr(Sym_field_order(sym, type));  List _x2c_macro_cursor_52 = _x2c_macro_object_52;  Var _x2c_macro_cursor_output_53;  while(List_try_next(_x2c_macro_object_52, & _x2c_macro_cursor_52, & _x2c_macro_cursor_output_53)){
+      row = Var_list(_x2c_macro_cursor_output_53); {
+        Type member = Var_type(List_cadr(row));  if(Var_truth(List_car(row)) || ! Type_is_aggregate(Sym_resolve_key(sym, member))) continue;  found = Sym_lookup_field(sym, member, field);  if(List_truth(Type_list(found))) return found;
+      }
+
+    }
+
+  }
+  return NULL;
 }
 
 void Sym_declare_field_order(Sym sym, Type type, List fields){
   if(! _init_guard_) _file_init_();  Array rows = Array_new(); {
-    List declaration;  List _x2c_macro_object_53 = fields;  List _x2c_macro_cursor_53 = _x2c_macro_object_53;  Var _x2c_macro_cursor_output_54;  while(List_try_next(_x2c_macro_object_53, & _x2c_macro_cursor_53, & _x2c_macro_cursor_output_54)){
-      declaration = Var_list(_x2c_macro_cursor_output_54); {
+    List declaration;  List _x2c_macro_object_54 = fields;  List _x2c_macro_cursor_54 = _x2c_macro_object_54;  Var _x2c_macro_cursor_output_55;  while(List_try_next(_x2c_macro_object_54, & _x2c_macro_cursor_54, & _x2c_macro_cursor_output_55)){
+      declaration = Var_list(_x2c_macro_cursor_output_55); {
         while(Var_equal(List_car(declaration), Symbol_var(104))) declaration = Var_list(List_caddr(declaration));  if(Var_equal(List_car(declaration), Symbol_var(272838634664))) continue;  List bindings = Var_list(List_caddr(declaration)); {
-          List declarator;  List _x2c_macro_object_52 = List_cdr(bindings);  List _x2c_macro_cursor_52 = _x2c_macro_object_52;  Var _x2c_macro_cursor_output_53;  while(List_try_next(_x2c_macro_object_52, & _x2c_macro_cursor_52, & _x2c_macro_cursor_output_53)){
-            declarator = Var_list(_x2c_macro_cursor_output_53); {
+          List declarator;  List _x2c_macro_object_53 = List_cdr(bindings);  List _x2c_macro_cursor_53 = _x2c_macro_object_53;  Var _x2c_macro_cursor_output_54;  while(List_try_next(_x2c_macro_object_53, & _x2c_macro_cursor_53, & _x2c_macro_cursor_output_54)){
+            declarator = Var_list(_x2c_macro_cursor_output_54); {
               String name = binding_identity_spelling(Var_list(List_cadr(declarator)));  Type declared = String_truth(name) ? List_type(Sym_get(sym, List_append(Type_list(type), cons(String_var(name), NULL)))) : Type_declared(List_type_from_ast(cons(_28, cons(List_cadr(declaration), cons(List_var(cons(_30, cons(List_var(declarator), NULL))), NULL)))));  Array_push(rows, List_var(cons(String_var(name), cons(List_var(declared), NULL))));
             }
 
