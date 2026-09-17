@@ -12,7 +12,7 @@ Configured compiler sessions and sequential source units.
 
 | Function | Summary |
 | --- | --- |
-| [`Frontend.load_support`](#Frontend.load_support) | Loads process-owned type and collection support before units. |
+| [`Frontend.load_support`](#Frontend.load_support) | Loads process-owned collection support before units. |
 | [`Frontend.new`](#Frontend.new) | Borrows a configured request for sequential units. |
 | [`Frontend.open`](#Frontend.open) | Runs the source stages. |
 | [`Frontend.start`](#Frontend.start) | Opens and tokenizes an isolated source unit without printing diagnostics. |
@@ -27,7 +27,7 @@ Configured compiler sessions and sequential source units.
 
 `void Frontend.load_support(CliRequest request)`
 
-Loads process-owned type and collection support before units.
+Loads process-owned collection support before units.
 
 Source: `src/frontend.x:70`
 
@@ -40,7 +40,7 @@ Borrows a configured request for sequential units. The request and this
 session must outlive its units. Initialize process support above any
 temporary command Context before creating a session inside that Context.
 
-Source: `src/frontend.x:80`
+Source: `src/frontend.x:79`
 
 <a id="Frontend.open"></a>
 #### Frontend.open
@@ -50,7 +50,7 @@ Source: `src/frontend.x:80`
 Runs the source stages. On either result, the caller must close the
 unit.
 
-Source: `src/frontend.x:341`
+Source: `src/frontend.x:340`
 
 <a id="Frontend.start"></a>
 #### Frontend.start
@@ -61,7 +61,7 @@ Opens and tokenizes an isolated source unit without printing diagnostics.
 A failed unit remains open so its diagnostics can be inspected. Close it
 before opening the next unit; Type and header caches are process-global.
 
-Source: `src/frontend.x:268`
+Source: `src/frontend.x:267`
 
 ### `ParsedUnit`
 
@@ -73,7 +73,7 @@ Source: `src/frontend.x:268`
 Releases the unit after its caller has inspected or exported its
 results.
 
-Source: `src/frontend.x:349`
+Source: `src/frontend.x:348`
 
 <a id="ParsedUnit.collect"></a>
 #### ParsedUnit.collect
@@ -83,7 +83,7 @@ Source: `src/frontend.x:349`
 Collects symbols and retains preprocessor outputs for adapter
 inspection.
 
-Source: `src/frontend.x:300`
+Source: `src/frontend.x:299`
 
 <a id="ParsedUnit.parse"></a>
 #### ParsedUnit.parse
@@ -93,7 +93,7 @@ Source: `src/frontend.x:300`
 Parses a collected unit, retaining both its AST and unsuccessful
 reports.
 
-Source: `src/frontend.x:322`
+Source: `src/frontend.x:321`
 
 ## Public types
 

@@ -313,33 +313,27 @@ Type Type.scalar(Type type) {
    produces, so the lookup needs no separate discriminator; each row carries
    the Var tag, the reader that follows Var.convert, and the helper that
    performs an atomic native update. */
-static Map scalartypes = NULL;
-
-static Map _scalartypes_table(void) {
-  if ((void *) scalartypes != NULL) return scalartypes;
-  scalartypes = %{
-    (char)               : (i8 "Var_char" "x2c_var_update_i8"),
-    (signed char)        : (i8 "Var_char" "x2c_var_update_schar"),
-    (unsigned char)      : (u8 "Var_uchar" "x2c_var_update_u8"),
-    (short)              : (i16 "Var_short" "x2c_var_update_i16"),
-    (unsigned short)     : (u16 "Var_ushort" "x2c_var_update_u16"),
-    (int)                : (i32 "Var_int" "x2c_var_update_i32"),
-    (unsigned)           : (u32 "Var_uint" "x2c_var_update_u32"),
-    (long)               : (long "Var_long" "x2c_var_update_long"),
-    (unsigned long)      : (ulong "Var_ulong" "x2c_var_update_ulong"),
-    (long long)          : (llong "Var_long_long" "x2c_var_update_long_long"),
-    (unsigned long long) : (ullong "Var_ulong_long"
-                           "x2c_var_update_ulong_long"),
-    (float)              : (f32 "Var_float" "x2c_var_update_f32"),
-    (double)             : (f64 "Var_floating" "x2c_var_update_f64"),
-    (long double)        : (ldouble "Var_long_double"
-                           "x2c_var_update_long_double")
-  };
-  return scalartypes;
-}
+static Map scalartypes = %{
+  (char)               : (i8 "Var_char" "x2c_var_update_i8"),
+  (signed char)        : (i8 "Var_char" "x2c_var_update_schar"),
+  (unsigned char)      : (u8 "Var_uchar" "x2c_var_update_u8"),
+  (short)              : (i16 "Var_short" "x2c_var_update_i16"),
+  (unsigned short)     : (u16 "Var_ushort" "x2c_var_update_u16"),
+  (int)                : (i32 "Var_int" "x2c_var_update_i32"),
+  (unsigned)           : (u32 "Var_uint" "x2c_var_update_u32"),
+  (long)               : (long "Var_long" "x2c_var_update_long"),
+  (unsigned long)      : (ulong "Var_ulong" "x2c_var_update_ulong"),
+  (long long)          : (llong "Var_long_long" "x2c_var_update_long_long"),
+  (unsigned long long) : (ullong "Var_ulong_long"
+                         "x2c_var_update_ulong_long"),
+  (float)              : (f32 "Var_float" "x2c_var_update_f32"),
+  (double)             : (f64 "Var_floating" "x2c_var_update_f64"),
+  (long double)        : (ldouble "Var_long_double"
+                         "x2c_var_update_long_double")
+};
 
 static int _scalar_numeric_info(Type type, X2CVarNumericInfo *info) {
-  Var row = _scalartypes_table()[type];
+  Var row = scalartypes[type];
   return row is <list> &&
          Var.numeric_info(row.list().car(), info);
 }
@@ -347,7 +341,7 @@ static int _scalar_numeric_info(Type type, X2CVarNumericInfo *info) {
 static List _scalar_row(Type type) {
   Type scalar = type.scalar();
   if (!scalar) return NULL;
-  Var row = _scalartypes_table()[scalar];
+  Var row = scalartypes[scalar];
   return row is <list> ? row : NULL;
 }
 
@@ -493,70 +487,58 @@ List Type.body(Type type) {
    for each translation unit because their canonical Type keys and converter
    names may belong to that unit's pools; end_unit drops the table before
    those pools are released. */
-static Map typetags = NULL;
+static Map typetags = %{
+  (* void)           : p48,      (* unsigned char)       : <u8*>,
+  (* signed char)    : <i8*>,      (* unsigned short)      : <u16*>,
+  (* short)          : <i16*>,     (* unsigned)            : <u32*>,
+  (* int)            : <i32*>,     (* float)               : <f32*>,
+  (* unsigned long)  : <ulong*>,     (* long)                : <long*>,
+  (* double)         : <f64*>,     (* unsigned long long)  : <ullong*>,
+  (* long long)      : <llong*>,    (* long double)         : <ldouble*>,
+  (* * void)          : <p48*>,     (* * unsigned char)      : <u8**>,
+  (* * signed char)   : <i8**>,     (* * unsigned short)     : <u16**>,
+  (* * short)         : <i16**>,    (* * unsigned)           : <u32**>,
+  (* * int)           : <i32**>,    (* * float)              : <f32**>,
+  (* * unsigned long) : <ulong**>,    (* * long)               : <long**>,
+  (* * double)        : <f64**>,    (* * unsigned long long) : <ullong**>,
+  (* * long long)     : <llong**>,   (* * long double)        : <ldouble**>,
+  ("Array")          : array,    ("Block")               : block,
+  ("Buffer")         : buffer,   ("Bytes")               : bytes,
+  ("Context")        : context,  ("Error")               : error,
+  ("File")           : file,     ("Func")                : func,
+  ("Iter")           : iter,
+  ("Lambda")         : lambda,   ("List")                : list,
+  ("Logger")         : logger,   ("Map")                 : map,
+  ("Mutex")          : mutex,    ("Pipe")                : pipe,
+  ("Proc")           : proc,
+  ("Regexp")         : regexp,   ("Rope")                : rope,
+  ("Scope")          : scope,    ("Slice")               : slice,
+  ("Socket")         : socket,   ("Stream")              : stream,
+  ("String")         : string,   ("Symbol")              : symbol,
+  ("Tensor")         : tensor,   ("Thread")              : thread,
+  ("Token")          : token,    ("Var")                 : var,
+  (* "Array")        : <array*>,   (* "Block")             : <block*>,
+  (* "Buffer")       : <buffer*>,  (* "Bytes")             : <bytes*>,
+  (* "Context")      : <context*>, (* "Error")             : <error*>,
+  (* "File")         : <file*>,    (* "Func")              : <func*>,
+  (* "Iter")         : <iter*>,
+  (* "Lambda")       : <lambda*>,  (* "List")              : <list*>,
+  (* "Logger")       : <logger*>,  (* "Map")               : <map*>,
+  (* "Mutex")        : <mutex*>,   (* "Pipe")              : <pipe*>,
+  (* "Proc")         : <proc*>,
+  (* "Regexp")       : <regexp*>,  (* "Rope")              : <rope*>,
+  (* "Scope")        : <scope*>,   (* "Slice")             : <slice*>,
+  (* "Socket")       : <socket*>,  (* "Stream")            : <stream*>,
+  (* "String")       : <string*>,  (* "Symbol")            : <symbol*>,
+  (* "Tensor")       : <tensor*>,  (* "Thread")            : <thread*>,
+  (* "Token")        : <token*>,   (* "Var")               : <var*>
+};
 static Map declared_typetags = NULL;
-
-static Map _typetags_table(void) {
-  if ((void *) typetags != NULL) return typetags;
-  typetags = %{
-    (* void)           : p48,      (* unsigned char)       : <u8*>,
-    (* signed char)    : <i8*>,      (* unsigned short)      : <u16*>,
-    (* short)          : <i16*>,     (* unsigned)            : <u32*>,
-    (* int)            : <i32*>,     (* float)               : <f32*>,
-    (* unsigned long)  : <ulong*>,     (* long)                : <long*>,
-    (* double)         : <f64*>,     (* unsigned long long)  : <ullong*>,
-    (* long long)      : <llong*>,    (* long double)         : <ldouble*>,
-    (* * void)          : <p48*>,     (* * unsigned char)      : <u8**>,
-    (* * signed char)   : <i8**>,     (* * unsigned short)     : <u16**>,
-    (* * short)         : <i16**>,    (* * unsigned)           : <u32**>,
-    (* * int)           : <i32**>,    (* * float)              : <f32**>,
-    (* * unsigned long) : <ulong**>,    (* * long)               : <long**>,
-    (* * double)        : <f64**>,    (* * unsigned long long) : <ullong**>,
-    (* * long long)     : <llong**>,   (* * long double)        : <ldouble**>,
-    ("Array")          : array,    ("Block")               : block,
-    ("Buffer")         : buffer,   ("Bytes")               : bytes,
-    ("Context")        : context,  ("Error")               : error,
-    ("File")           : file,     ("Func")                : func,
-    ("Iter")           : iter,
-    ("Lambda")         : lambda,   ("List")                : list,
-    ("Logger")         : logger,   ("Map")                 : map,
-    ("Mutex")          : mutex,    ("Pipe")                : pipe,
-    ("Proc")           : proc,
-    ("Regexp")         : regexp,   ("Rope")                : rope,
-    ("Scope")          : scope,    ("Slice")               : slice,
-    ("Socket")         : socket,   ("Stream")              : stream,
-    ("String")         : string,   ("Symbol")              : symbol,
-    ("Tensor")         : tensor,   ("Thread")              : thread,
-    ("Token")          : token,    ("Var")                 : var,
-    (* "Array")        : <array*>,   (* "Block")             : <block*>,
-    (* "Buffer")       : <buffer*>,  (* "Bytes")             : <bytes*>,
-    (* "Context")      : <context*>, (* "Error")             : <error*>,
-    (* "File")         : <file*>,    (* "Func")              : <func*>,
-    (* "Iter")         : <iter*>,
-    (* "Lambda")       : <lambda*>,  (* "List")              : <list*>,
-    (* "Logger")       : <logger*>,  (* "Map")               : <map*>,
-    (* "Mutex")        : <mutex*>,   (* "Pipe")              : <pipe*>,
-    (* "Proc")         : <proc*>,
-    (* "Regexp")       : <regexp*>,  (* "Rope")              : <rope*>,
-    (* "Scope")        : <scope*>,   (* "Slice")             : <slice*>,
-    (* "Socket")       : <socket*>,  (* "Stream")            : <stream*>,
-    (* "String")       : <string*>,  (* "Symbol")            : <symbol*>,
-    (* "Tensor")       : <tensor*>,  (* "Thread")            : <thread*>,
-    (* "Token")        : <token*>,   (* "Var")               : <var*>
-  };
-  return typetags;
-}
 
 /* The encoding rows a statically known tag can be tested against without a
    runtime decode, projected from the same ledger the runtime decoder uses.
    Its keys are tag Symbols, so it outlives a translation unit. */
-static Map varrows = NULL;
-
-static Map _var_row_table(void) {
-  if ((void *) varrows != NULL) return varrows;
-  varrows = %{ ${$var.tag.constant.rows()} };
-  return varrows;
-}
+static Map varrows = %{ ${$var.tag.constant.rows()} };
 
 /** Reads the encoding row of `tag` into `top`, `mask`, and `bottom` and
     reports whether one exists. A tag whose decoded form carries a validity
@@ -564,20 +546,13 @@ static Map _var_row_table(void) {
 */
 int Type.var_tag_row(
   Symbol tag, unsigned long *top, unsigned long *mask, unsigned long *bottom) {
-  Var row = _var_row_table()[tag];
+  Var row = varrows[tag];
   if (row is void) return 0;
   List fields = row;
   *top = fields.car();
   *mask = fields.cadr();
   *bottom = fields.caddr();
   return 1;
-}
-
-/** Initializes the process-lifetime scalar and fixed `Var`-tag tables. */
-void Type.initialize(void) {
-  _typetags_table();
-  _scalartypes_table();
-  _var_row_table();
 }
 
 /** Starts an empty set of source-declared `Var` rows for one translation
@@ -638,7 +613,7 @@ Symbol Type.fixed_var_tag(Type type) {
   if (!type) return 0;
   Symbol scalar = type.scalar_tag();
   if (scalar) return scalar;
-  Var vtag = _typetags_table()[type.canonicalize()];
+  Var vtag = typetags[type.canonicalize()];
   return vtag is <symbol> ? vtag : 0;
 }
 

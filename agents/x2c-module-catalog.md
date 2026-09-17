@@ -416,7 +416,7 @@ Public functions:
 `Type.is_function`, `Type.is_bitfield`, `Type.scalar`, `Type.scalar_tag`,
 `Type.var_numeric_extractor`, `Type.var_numeric_update_helper`,
 `Type.numeric_literal`, `Type.tag`, `Type.body`, `Type.var_tag_row`,
-`Type.initialize`, `Type.begin_unit`, `Type.end_unit`, `Type.register_var_tag`,
+`Type.begin_unit`, `Type.end_unit`, `Type.register_var_tag`,
 `Type.register_var_adoption`, `Type.var_converter`, `Type.fixed_var_tag`,
 `Type.var_tag`, `Type.base_type`, `Type.canonicalize`, `Type.declared`,
 `Type.discards_qualifiers`, `Type.is_builtin`, `Type.is_typedef_name`,

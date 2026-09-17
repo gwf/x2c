@@ -66,9 +66,8 @@ static Token _first_preprocessor_token(Compiler compiler) {
   return compiler.token;
 }
 
-/** Loads process-owned type and collection support before units. */
+/** Loads process-owned collection support before units. */
 void Frontend.load_support(CliRequest request) {
-  Type.initialize();
   header_symbols_initialize();
   interface_configure(request.out_dir);
 }
