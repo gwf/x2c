@@ -107,61 +107,43 @@ static struct JsonNull _json_null = { 0 };
    Symbol holds ten characters and `yyjson__` spends eight, so two boxed
    types must differ in the two that remain: this one is `Boolean`, not
    `JsonBool`, which would tie with `JsonValue` at `yyjson__js`. */
-Var Boolean.var(Boolean value) {
-  return Var.new(<yyjson--bo>, value);
-}
+Var Boolean.var(Boolean value) => Var.new(<yyjson--bo>, value);
 
-Boolean Var.boolean(Var value) {
-  return (Boolean) value.pointer();
-}
+Boolean Var.boolean(Var value) => (Boolean) value.pointer();
 
-String Boolean.str(Boolean value) {
-  return value && value.value ? "true" : "false";
-}
+String Boolean.str(Boolean value) => value && value.value ? "true" : "false";
 
-String Boolean.repr(Boolean value) {
-  return value;
-}
+String Boolean.repr(Boolean value) => value;
 
-int Boolean.truth(Boolean value) {
-  return value && value.value;
-}
+int Boolean.truth(Boolean value) => value && value.value;
 
-unsigned Boolean.hash(Boolean value) {
-  return value && value.value ? 0x93f4a65du : 0x3d45c27bu;
-}
+unsigned Boolean.hash(Boolean value) =>
+  value && value.value ? 0x93f4a65du : 0x3d45c27bu;
 
-int Boolean.equal(Boolean left, Boolean right) {
-  return left.truth() == right.truth();
-}
+int Boolean.equal(Boolean left, Boolean right) =>
+  left.truth() == right.truth();
 
-int Boolean.compare(Boolean left, Boolean right) {
-  return left.truth() - right.truth();
-}
+int Boolean.compare(Boolean left, Boolean right) =>
+  left.truth() - right.truth();
 
-Var NullValue.var(NullValue value) {
-  return Var.new(<yyjson--nu>, value);
-}
+Var NullValue.var(NullValue value) => Var.new(<yyjson--nu>, value);
 
-NullValue Var.nullvalue(Var value) {
-  return value is <yyjson--nu> ? (NullValue) value.pointer() : NULL;
-}
+NullValue Var.nullvalue(Var value) =>
+  value is <yyjson--nu> ? (NullValue) value.pointer() : NULL;
 
-String NullValue.str(NullValue value) { return "null"; }
-String NullValue.repr(NullValue value) { return "null"; }
-int NullValue.truth(NullValue value) { return value != NULL; }
-unsigned NullValue.hash(NullValue value) { return 0x16bc8c2du; }
-int NullValue.equal(NullValue left, NullValue right) { return left == right; }
-int NullValue.compare(NullValue left, NullValue right) { return 0; }
+String NullValue.str(NullValue value) => "null";
+String NullValue.repr(NullValue value) => "null";
+int NullValue.truth(NullValue value) => value != NULL;
+unsigned NullValue.hash(NullValue value) => 0x16bc8c2du;
+int NullValue.equal(NullValue left, NullValue right) => left == right;
+int NullValue.compare(NullValue left, NullValue right) => 0;
 
 Var Json.bool(int value) {
   Boolean boolean = value ? &_json_true : &_json_false;
   return boolean;
 }
 
-int Json.is_bool(Var value) {
-  return value is <yyjson--bo>;
-}
+int Json.is_bool(Var value) => value is <yyjson--bo>;
 
 int Json.boolean(Var value) {
   if (value is not <yyjson--bo>) {
@@ -172,9 +154,8 @@ int Json.boolean(Var value) {
   return value.boolean().truth();
 }
 
-static String _json_message(const char *message) {
-  return message ? String.new((char *) message) : "unknown yyjson error";
-}
+static String _json_message(const char *message) =>
+  message ? String.new((char *) message) : "unknown yyjson error";
 
 static void _json_read_error(yyjson_read_err *error) {
   unsigned code = error ? error->code : 0;
@@ -331,9 +312,7 @@ Var Json.parse_opts(String source, yyjson_read_flag options) {
   return document.to_x2c();
 }
 
-Var Json.parse(String source) {
-  return Json.parse_opts(source, YYJSON_READ_NOFLAG);
-}
+Var Json.parse(String source) => Json.parse_opts(source, YYJSON_READ_NOFLAG);
 
 /*  Reads `path` into ordinary x2c values. This is the converting path, so it
     loses object order, duplicate names, and the signed/unsigned/real
@@ -349,9 +328,8 @@ Var Json.read_file_opts(String path, yyjson_read_flag options) {
   return document.to_x2c();
 }
 
-Var Json.read_file(String path) {
-  return Json.read_file_opts(path, YYJSON_READ_NOFLAG);
-}
+Var Json.read_file(String path) =>
+  Json.read_file_opts(path, YYJSON_READ_NOFLAG);
 
 static yyjson_mut_val *_json_to_value(
   yyjson_mut_doc *document, Var value, unsigned depth) {
@@ -476,13 +454,10 @@ void Json.write_file(Var value, String path) {
   Json.write_file_opts(value, path, YYJSON_WRITE_NOFLAG);
 }
 
-String Var.json(Var value) {
-  return Json.stringify_opts(value, YYJSON_WRITE_NOFLAG);
-}
+String Var.json(Var value) => Json.stringify_opts(value, YYJSON_WRITE_NOFLAG);
 
-String Var.pretty_json(Var value) {
-  return Json.stringify_opts(value, YYJSON_WRITE_PRETTY_TWO_SPACES);
-}
+String Var.pretty_json(Var value) =>
+  Json.stringify_opts(value, YYJSON_WRITE_PRETTY_TWO_SPACES);
 
 int Var.try_json_pointer(Var value, String pointer, Var *out) {
   if (!out) return 0;
@@ -603,9 +578,8 @@ JsonDocument JsonDocument.parse_opts(String source, yyjson_read_flag options) {
   return _json_document_wrap(native);
 }
 
-JsonDocument JsonDocument.parse(String source) {
-  return JsonDocument.parse_opts(source, YYJSON_READ_NOFLAG);
-}
+JsonDocument JsonDocument.parse(String source) =>
+  JsonDocument.parse_opts(source, YYJSON_READ_NOFLAG);
 
 /*  Reads a document straight from `path` through yyjson, so content that an
     x2c String cannot hold still parses and a failure keeps yyjson's own code,
@@ -629,9 +603,8 @@ JsonDocument JsonDocument.read_file_opts(
   return _json_document_wrap(native);
 }
 
-JsonDocument JsonDocument.read_file(String path) {
-  return JsonDocument.read_file_opts(path, YYJSON_READ_NOFLAG);
-}
+JsonDocument JsonDocument.read_file(String path) =>
+  JsonDocument.read_file_opts(path, YYJSON_READ_NOFLAG);
 
 JsonDocument JsonDocument.free(JsonDocument document) {
   if (!document) return NULL;
@@ -661,13 +634,10 @@ Var JsonDocument.to_x2c(JsonDocument document) {
   return root ? root.to_x2c() : void;
 }
 
-Var JsonValue.var(JsonValue value) {
-  return Var.new(<yyjson--js>, value);
-}
+Var JsonValue.var(JsonValue value) => Var.new(<yyjson--js>, value);
 
-JsonValue Var.jsonvalue(Var value) {
-  return value is <yyjson--js> ? (JsonValue) value.pointer() : NULL;
-}
+JsonValue Var.jsonvalue(Var value) =>
+  value is <yyjson--js> ? (JsonValue) value.pointer() : NULL;
 
 yyjson_val *JsonValue.native(JsonValue value) {
   _json_value_live(value, "native");
@@ -861,17 +831,14 @@ List JsonObject.all(JsonObject object, String key) {
   return values.reverse();
 }
 
-JsonMember Var.jsonmember(Var value) {
-  return value is <list> ? (JsonMember) value.list() : NULL;
-}
+JsonMember Var.jsonmember(Var value) =>
+  value is <list> ? (JsonMember) value.list() : NULL;
 
-String JsonMember.key(JsonMember member) {
-  return member ? member.getindex(0).string() : NULL;
-}
+String JsonMember.key(JsonMember member) =>
+  member ? member.getindex(0).string() : NULL;
 
-JsonValue JsonMember.value(JsonMember member) {
-  return member ? member.getindex(1).jsonvalue() : NULL;
-}
+JsonValue JsonMember.value(JsonMember member) =>
+  member ? member.getindex(1).jsonvalue() : NULL;
 
 static String _json_write_document(
   JsonDocument document, yyjson_write_flag options) {
@@ -889,13 +856,11 @@ static String _json_write_document(
   return _json_string(bytes, length, "document write");
 }
 
-String JsonDocument.json(JsonDocument document) {
-  return _json_write_document(document, YYJSON_WRITE_NOFLAG);
-}
+String JsonDocument.json(JsonDocument document) =>
+  _json_write_document(document, YYJSON_WRITE_NOFLAG);
 
-String JsonDocument.pretty_json(JsonDocument document) {
-  return _json_write_document(document, YYJSON_WRITE_PRETTY_TWO_SPACES);
-}
+String JsonDocument.pretty_json(JsonDocument document) =>
+  _json_write_document(document, YYJSON_WRITE_PRETTY_TWO_SPACES);
 
 /*  Writes the document to `path`. Pass YYJSON_WRITE_PRETTY_TWO_SPACES for the
     indented form; the document is returned so a write can chain.
@@ -912,9 +877,8 @@ JsonDocument JsonDocument.write_file_opts(
   return document;
 }
 
-JsonDocument JsonDocument.write_file(JsonDocument document, String path) {
-  return document.write_file_opts(path, YYJSON_WRITE_NOFLAG);
-}
+JsonDocument JsonDocument.write_file(JsonDocument document, String path) =>
+  document.write_file_opts(path, YYJSON_WRITE_NOFLAG);
 
 String JsonValue.json(JsonValue value) {
   _json_value_live(value, "value write");
@@ -1011,24 +975,19 @@ static Var _json_from_lisp(Var value) {
 }
 
 $lisp.binding(json_lisp, "json-parse")
-static Var _lisp_json_parse(String source) {
-  return _json_to_lisp(Json.parse(source));
-}
+static Var _lisp_json_parse(String source) =>
+  _json_to_lisp(Json.parse(source));
 
 $lisp.binding(json_lisp, "json-stringify")
-static String _lisp_json_stringify(Var value) {
-  return _json_from_lisp(value).json();
-}
+static String _lisp_json_stringify(Var value) => _json_from_lisp(value).json();
 
 $lisp.binding(json_lisp, "json-pretty")
-static String _lisp_json_pretty(Var value) {
-  return _json_from_lisp(value).pretty_json();
-}
+static String _lisp_json_pretty(Var value) =>
+  _json_from_lisp(value).pretty_json();
 
 $lisp.binding(json_lisp, "json-read-file")
-static Var _lisp_json_read_file(String path) {
-  return _json_to_lisp(Json.read_file(path));
-}
+static Var _lisp_json_read_file(String path) =>
+  _json_to_lisp(Json.read_file(path));
 
 $lisp.binding(json_lisp, "json-write-file")
 static Var _lisp_json_write_file(Var value, String path) {
