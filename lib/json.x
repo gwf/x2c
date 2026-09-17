@@ -94,27 +94,26 @@ int Json.boolean(Var value) {
     surrogates, and U+0000 is rejected because a `String` cannot hold it.
 */
 
-typedef struct JsonReader {
+typedef struct _JsonReader {
   const char *text;
   String path;
-  int at, length, depth;
-} *JsonReader;
+  int at, depth;
+} *_JsonReader;
 
-static void JsonReader._fail(JsonReader j, const char *why) {
+static void _JsonReader._fail(_JsonReader j, String why) {
   int line = 1, column = 1, offset = j.at;
   scan_next_line_col((char *) j.text, offset, &line, &column);
-  String reason = why;
   if (j.path)
     raise %(bad-arg (operation "Json.read_file") (path ${j.path})
-            (why $reason) (offset $offset) (line $line) (column $column));
-  raise %(bad-arg (operation "Json.parse") (why $reason)
+            (why $why) (offset $offset) (line $line) (column $column));
+  raise %(bad-arg (operation "Json.parse") (why $why)
           (offset $offset) (line $line) (column $column));
 }
 
-static int JsonReader._peek(JsonReader j) =>
+static int _JsonReader._peek(_JsonReader j) =>
   (unsigned char) j.text[j.at];
 
-static void JsonReader._space(JsonReader j) {
+static void _JsonReader._space(_JsonReader j) {
   loop {
     switch (j._peek()) {
       case ' ': case '\t': case '\n': case '\r': j.at++; break;
@@ -123,19 +122,19 @@ static void JsonReader._space(JsonReader j) {
   }
 }
 
-static void JsonReader._expect(JsonReader j, char byte, const char *why) {
+static void _JsonReader._expect(_JsonReader j, char byte, const char *why) {
   j._space();
   if (j._peek() != byte) j._fail(why);
   j.at++;
 }
 
-static void JsonReader._word(JsonReader j, const char *word) {
+static void _JsonReader._word(_JsonReader j, const char *word) {
   size_t length = strlen(word);
   if (strncmp(j.text + j.at, word, length)) j._fail("unexpected character");
   j.at += length;
 }
 
-static int JsonReader._digits(JsonReader j) {
+static int _JsonReader._digits(_JsonReader j) {
   int start = j.at;
   while (scan_ascii_digit(j._peek())) j.at++;
   return j.at - start;
@@ -143,7 +142,7 @@ static int JsonReader._digits(JsonReader j) {
 
 /* The grammar check runs first, so strtol, strtoul, and strtod stop exactly
    at `j.at`: none of them sees a sign, radix prefix, or suffix JSON lacks. */
-static Var JsonReader._number(JsonReader j) {
+static Var _JsonReader._number(_JsonReader j) {
   int start = j.at;
   if (j._peek() == '-') j.at++;
   if (j._peek() == '0') j.at++;
@@ -190,7 +189,7 @@ static int _hex_digit(int byte) {
   return byte >= 'a' && byte <= 'f' ? byte - 'a' + 10 : -1;
 }
 
-static long JsonReader._hex4(JsonReader j) {
+static long _JsonReader._hex4(_JsonReader j) {
   long unit = 0;
   for (int i = 0; i < 4; i++) {
     int digit = _hex_digit(j._peek());
@@ -240,7 +239,7 @@ static void _write_code_point(Buffer out, long point) {
   out.write_len(bytes, length);
 }
 
-static void JsonReader._escape(JsonReader j, Buffer out) {
+static void _JsonReader._escape(_JsonReader j, Buffer out) {
   int escape = j.text[++j.at];
   j.at++;
   switch (escape) {
@@ -284,7 +283,7 @@ static void JsonReader._escape(JsonReader j, Buffer out) {
 /* Text without escapes becomes a String directly; the Buffer exists only
    once an escape needs decoding. A Buffer's truth is its length, so its
    presence is tested as a pointer. */
-static String JsonReader._string(JsonReader j) {
+static String _JsonReader._string(_JsonReader j) {
   int run = ++j.at;
   Buffer decoded = NULL;
   loop {
@@ -312,7 +311,7 @@ static String JsonReader._string(JsonReader j) {
   }
 }
 
-static Var JsonReader._array(JsonReader j) {
+static Var _JsonReader._array(_JsonReader j) {
   Array array = [];
   j.at++;
   j._space();
@@ -331,7 +330,7 @@ static Var JsonReader._array(JsonReader j) {
   }
 }
 
-static Var JsonReader._object(JsonReader j) {
+static Var _JsonReader._object(_JsonReader j) {
   Map object = {};
   j.at++;
   j._space();
@@ -354,7 +353,7 @@ static Var JsonReader._object(JsonReader j) {
   }
 }
 
-static Var JsonReader._value(JsonReader j) {
+static Var _JsonReader._value(_JsonReader j) {
   j._space();
   switch (j._peek()) {
     case '{': case '[': {
@@ -375,13 +374,11 @@ static Var JsonReader._value(JsonReader j) {
 }
 
 static Var _parse(String source, String path) {
-  struct JsonReader reader = {
-    .text = source ? source : "", .path = path, .length = source.len()
-  };
-  JsonReader j = &reader;
+  struct _JsonReader reader = {.text = source ? source : "", .path = path};
+  _JsonReader j = &reader;
   Var value = j._value();
   j._space();
-  if (j.at != j.length) j._fail("unexpected text after the value");
+  if (j._peek()) j._fail("unexpected text after the value");
   return value;
 }
 
