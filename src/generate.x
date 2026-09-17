@@ -365,11 +365,8 @@ static void _partition_declaration(
   Array header, Array source, List declaration, Type type, List bindings,
   int private) {
   if (private) source.push(declaration);
-  else if (type.is_aggregate_tag_body() || type.is_enum_tag_body()) {
-    if (!_partition_tagged_object(header, source, type, bindings))
-      header.push(_header_declaration(declaration, type, bindings));
-  }
-  else if (!_partition_object(header, source, declaration, type, bindings))
+  else if (!_partition_tagged_object(header, source, type, bindings) &&
+           !_partition_object(header, source, declaration, type, bindings))
     header.push(_header_declaration(declaration, type, bindings));
 }
 

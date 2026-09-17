@@ -295,7 +295,7 @@ static List _defer_one_binding(
       Type declared = object.canonicalize();
       Type resolved = compiler.sym.resolve_key(declared);
       if (resolved.is_array()) {
-        if (!_contains_cache_ref(value) &&
+        if (!_needs_runtime_initializer(value) &&
             !ast_contains_head(value, <initval>)) return bound;
         match (value)
           case %(composite (commas *items)): {
@@ -538,14 +538,6 @@ static Array _cache_ids_in(Compiler compiler, List code) {
     return NULL;
   }
   return ids;
-}
-
-static int _contains_cache_ref(Var value) {
-  if (value is not <list>) return 0;
-  List node = value;
-  match (node) case %(cache ?): return 1;
-  foreach (Var child, node) if (_contains_cache_ref(child)) return 1;
-  return 0;
 }
 
 /* Emission turns each of these into a call, and a call is not a C constant
