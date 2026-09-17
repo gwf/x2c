@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/conditional-brace-anonymous.x:3:3: type: a brace in a conditional needs a named destination type
+unittest/compiler-fixtures/conditional-brace-anonymous.x:3:3: type: a brace outside an initializer needs a named destination type
     struct { int a, b; } p = argc > 1 ? {1, 2} : {3, 4};
     ^^^^^^
   note: declare the destination with a struct tag or typedef

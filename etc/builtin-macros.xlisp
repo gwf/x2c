@@ -135,9 +135,10 @@
       ,(x2c._foreach.declare '("Var") item nil)
       (while ,condition ,loop-body)))))
 
-// A C string literal iterates as the String it converts to.
+// A C string literal iterates as the String it converts to; the compiler
+// returns any other C string expression unchanged.
 (defun x2c._foreach.collection (collection)
-  (if (match collection '(expr (* char) (literal (* char) ?)))
+  (if (match collection '(expr (* char) *))
       (_x2c.foreach.string-collection collection)
       collection))
 

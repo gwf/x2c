@@ -667,6 +667,7 @@ static int _cast_operand_follows(Symbol type) {
     case <"{">:
     case <"%(">:
     case <"%<<">:
+    case <[>:
     case <"%[">:
     case <"%{">:
     case <"%\"">:
@@ -875,9 +876,21 @@ static int _expr_is_raw_string_literal(List expr) {
       return _expr_is_raw_string_literal(inner);
     case %(expr ? (literal ?type ?)):
       return _type_is_char_pointer_like(type);
+    case %(expr ? (op ? ? ?ontrue ?onfalse)):
+      return _expr_is_raw_string_literal(ontrue) &&
+             _expr_is_raw_string_literal(onfalse);
   }
   return 0;
 }
+
+/** Converts a C string literal to `String` where no C meaning applies: as a
+    method receiver, a `foreach` collection, or a raise detail. Parentheses
+    and a conditional whose arms are both literals count as the literal; any
+    other expression is returned unchanged.
+*/
+List Compiler.promote_string_literal(Compiler c, List expr) =>
+  _expr_is_raw_string_literal(expr) ? c.convert_expression(expr, %("String"))
+                                    : expr;
 
 /* A participant that converts its operator's other operand: a struct or
    union, or a handle typedef pointing at one. Scalar pointers keep native C
@@ -1509,9 +1522,8 @@ static List _resolve_call(
       Type type = receiver.cadr();
       String method = name.str();
       List resolution = c.resolve_postfix_member(type, field, <.>, 1);
-      if (!resolution &&
-          receiver.list().match(%(expr (* char) (literal (* char) ?)))) {
-        receiver = c.convert_expression(receiver, %("String"));
+      if (!resolution && _expr_is_raw_string_literal(receiver)) {
+        receiver = c.promote_string_literal(receiver);
         type = receiver.cadr();
         resolution = c.resolve_postfix_member(type, field, <.>, 1);
       }
@@ -1622,7 +1634,8 @@ static List Compiler._binary_expression(
     if (operator == <=>) rhs = c.convert_expression(rhs, type);
     return %(expr $type (op $operator $lhs $rhs));
   }
-  if (operator == <==> || operator == <!=>) {
+  if (operator == <==> || operator == <!=> || operator == <"<"> ||
+      operator == <">"> || operator == <"<="> || operator == <">=">) {
     if (c.sym.is_string_type(lhs_type) && _expr_is_raw_string_literal(rhs))
       rhs = c.convert_expression(rhs, lhs_type);
     else if (c.sym.is_string_type(rhs_type) &&
@@ -2280,6 +2293,13 @@ static List _parse_composite(Compiler compiler) {
 */
 List Compiler.parse_variable(Compiler c) {
   Token origin = c.token;
+  Var definition;
+  // A macro defined to a string literal is that literal after preprocessing.
+  if (c.object_macros.try_get(origin.text, &definition) &&
+      definition.equal(<string>)) {
+    c.next();
+    return %(expr (* char) (literal (* char) ${origin.text}));
+  }
   List name = c.parse_complex_identifier();
   Token after = c.token;
   List result = c.resolve_expression(%(expr () (ident $name)), origin);
@@ -3681,16 +3701,18 @@ List Compiler.convert_compound_literal(
 static int _conditional_joins(Compiler c, Type type, Type other) =>
   type && other && c.sym.is_var_type(type) && !c.sym.is_var_type(other);
 
-/* A brace arm that stays a native initializer becomes a compound literal of
-   the destination, because C has no braced conditional operand. An anonymous
-   struct or union has no spelling for that literal. */
-static List _conditional_arm(Compiler c, List arm, Type target) {
-  List converted = c.convert_expression(arm, target);
+/* A brace that stays a native initializer outside a declaration becomes a
+   compound literal of the destination, because C accepts a bare brace only
+   as an initializer. An anonymous struct or union has no spelling for that
+   literal. */
+static List _compound_literal(Compiler c, List composite, Type target) {
+  List converted = _convert_composite(c, composite, target, NULL, NULL, NULL);
   match (converted)
     case %(expr ?type (composite *)): {
       if (Type.tag(type).match(%((gensym *))))
         c.report_error(
-          <type>, "a brace in a conditional needs a named destination type",
+          <type>,
+          "a brace outside an initializer needs a named destination type",
           NULL, %("declare the destination with a struct tag or typedef"));
       return %(expr $type (cast $type $converted));
     }
@@ -3736,7 +3758,7 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
     c.report_error(<type>, message, NULL, hint);
   }
   if (expr.match(%(expr ? (composite ?))))
-    return _convert_composite(c, expr, target, NULL, NULL, NULL);
+    return _compound_literal(c, expr, target);
   /* Arms of different kinds, such as a null pointer beside a C string, each
      convert: only one runs, so that converts the result. A brace arm always
      converts, because C has no braced conditional operand. Numeric arms and
@@ -3748,8 +3770,8 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
         (!true_type.equal(false_type) &&
          !(c.sym.resolve_numeric_type(true_type) &&
            c.sym.resolve_numeric_type(false_type)))) {
-      List converted_true = _conditional_arm(c, ontrue, declared_target);
-      List converted_false = _conditional_arm(c, onfalse, declared_target);
+      List converted_true = c.convert_expression(ontrue, declared_target);
+      List converted_false = c.convert_expression(onfalse, declared_target);
       if (converted_true != ontrue || converted_false != onfalse)
         return %(expr $declared_target
           (op $operator $condition $converted_true $converted_false));

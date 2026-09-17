@@ -875,16 +875,14 @@ macro Entry $handler(Literal $key, Expr $value) => {
 
 int main(void) {
   int open = 1, close = 2;
-  Map handlers = %{
-    ${$handler("open", open)},
-    ${$handler("close", close)}
-  };
+  Map handlers = {$handler("open", open), $handler("close", close)};
   return handlers.len() == 2 ? 0 : 1;
 }
 ```
 
 An entry invocation occupies one comma-delimited row position but may expand to
-any number of rows. Direct and keyword-alias invocations must appear there
+any number of rows. In a bare `{...}` literal a direct or keyword-alias
+invocation is written as a row. In the quoted `%{...}` literal it must sit
 inside `${...}`, which leaves the quoted Map syntax to parse x2c. Elsewhere in
 an entry macro body, ordinary expression grammar applies, so an expression
 macro may generate a key. `$(form)...` inserts a `List` of explicit `(map-entry
@@ -1521,11 +1519,15 @@ kinds; nested `List` data is written `%(...)`.
 `[]` is a fresh empty `Array`. The empty brace `{}` is a fresh empty `Map`
 when its destination is a `Map`, an alias of `Map`, or a type that converts
 from `Map`, and likewise for `Array`; for any other destination, including
-`Var`, it is the native zero initializer. The same holds in a `?:` arm, where a
-brace that remains an initializer becomes a compound literal of the
-destination: `Map m = ready ? {} : NULL;` builds a Map, and
-`Var v = ready ? {} : NULL;` is Null either way. An anonymous struct or union
-destination has no compound-literal spelling and is rejected.
+`Var`, it is the native zero initializer. An element or value of a bare
+`[...]` or `{...}` literal is the exception: there `{}` is an empty `Map`, so
+`[{}]` holds one Map. Outside a declaration initializer, a brace that remains
+an initializer becomes a compound literal of its destination, as an argument,
+a `return` value, an assignment, or a `?:` arm: `Map m = ready ? {} : NULL;`
+builds a Map, `Var v = ready ? {} : NULL;` is Null either way, and
+`return {3, 4};` in a function returning a struct builds that struct. An
+anonymous struct or union destination has no compound-literal spelling and is
+rejected.
 
 The percent forms `%[...]` and `%{...}` below keep their quoted grammar. The
 bare forms differ only in evaluating elements, values, and non-identifier
@@ -1541,7 +1543,8 @@ modulo operator, and `%!` remains the lambda-literal prefix.
 
 `%"`, `%[`, and `%<<` open literals after any token. Modulo by a string literal
 is invalid C, and neither `[` nor `<<` begins an expression, so a cast may
-precede these literals: `return (Path) %"$base/$name";` quotes.
+precede these literals: `return (Path) %"$base/$name";` quotes. A cast may
+precede a bare `[...]` Array literal as well: `(Var) [1, 2]`.
 
 In `%(`, `%{`, and `%!` after an operand, including a closing parenthesis or
 brace, the `%` is the modulo operator, except where a statement begins:
@@ -1672,7 +1675,10 @@ type is a `class` or `typedef` alias reaching `String`, such as
 `class Path String;`, requires the same conversion. A literal used as the
 receiver of a method with no `char *` definition converts to `String` first,
 so `"hello".len()` is `5`. `foreach` iterates such a literal as that
-`String`, and a raise detail accepts it as an immutable `String`. This
+`String`, and a raise detail accepts it as an immutable `String`. In these
+three positions a parenthesized literal, a `?:` whose arms are both literals,
+and an object-like macro defined to a string literal, `#define NAME "x"`, are
+literals too, so `(ready ? "on" : "off").len()` and `NAME.len()` work. This
 adjacency rule does not combine percent strings or change quoted collection
 syntax.
 
@@ -2030,12 +2036,12 @@ alias of `String` and a `String`, or two aliases of `String`, the operator
 uses the eligible member of their nearest shared ancestor. Equality,
 identity, and total ordering do not become binary-arithmetic operations.
 
-For `==` and `!=`, a C string literal opposite an operand of static type
-`String`, or an alias reaching `String`, converts to that type before ordinary
-protocol comparison. This applies in either operand order and through
-parentheses around the literal. Other C pointer expressions, including
-variables, casts, and conditional expressions, retain their native comparison
-behavior. `===` and `!==` do not perform this literal conversion.
+For `==`, `!=`, `<`, `>`, `<=`, and `>=`, a C string literal opposite an
+operand of static type `String`, or an alias reaching `String`, converts to
+that type before ordinary protocol comparison. This applies in either operand
+order, through parentheses around the literal, and to a `?:` whose arms are
+both literals. Other C pointer expressions, including variables and casts,
+retain their native comparison behavior. `===` and `!==` do not perform this literal conversion.
 
 For `+`, when each operand is a `String`, an alias reaching `String`, a
 `char` array, a `char *`, or a `const char *`, both convert to `String` and

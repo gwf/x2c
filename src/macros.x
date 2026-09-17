@@ -249,7 +249,7 @@ static Var _sdk_complete_iter_chain(List expression) {
 
 static Var _sdk_string_collection(List expression) {
   $_sdk_guard("private foreach string conversion");
-  return macro_sdk_compiler.convert_expression(expression, %("String"));
+  return macro_sdk_compiler.promote_string_literal(expression);
 }
 
 static Var _sdk_type_parts(List value) => value.type().declaration_parts();

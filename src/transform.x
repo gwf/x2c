@@ -1066,17 +1066,21 @@ static List _cons(Compiler compiler, List ast) {
   return %(cons $head $tail);
 }
 
+/* A literal element is a `Var`, and an empty brace there is an empty Map. */
+static List _literal_element(Compiler c, List element) {
+  if (element.match(%(expr ? (composite (commas)))))
+    element = %(expr ("Map") (map));
+  return c.convert_expression(element, %("Var"));
+}
+
 /** Converts an `(array ...)` or `(varray ...)` node to source-ordered
     `(varray ...)` form, converting every typed element to `Var`.
 */
 List transform_array_literal(Compiler compiler, List ast) {
-  List elems = ast.cdr(), Array values = [];
-  foreach (List elem, elems) {
-    List velem = compiler.convert_expression(elem, %("Var"));
-    values.push(velem);
-  }
-  List velems = values.list_free();
-  return %(varray @velems);
+  Array values = [];
+  foreach (List elem, ast.cdr())
+    values.push(_literal_element(compiler, elem));
+  return %(varray @{values.list_free()});
 }
 
 /** Converts a `(map ...)` or `(vmap ...)` node to source-ordered
@@ -1087,9 +1091,8 @@ List transform_map_literal(Compiler compiler, List ast) {
   List elems = ast.cdr(), Array values = [];
   foreach (List entry, elems) {
     List (key, val) = entry.cdr();
-    List vkey = compiler.convert_expression(key, %("Var"));
-    List vval = compiler.convert_expression(val, %("Var"));
-    values.push(%(vpair $vkey $vval));
+    values.push(%(vpair ${_literal_element(compiler, key)}
+                        ${_literal_element(compiler, val)}));
   }
   List velems = values.list_free();
   return %(vmap @velems);
@@ -1453,9 +1456,7 @@ static List _raise(
   Array values = [], int changed = 0, index = 0;
   foreach (List value, arguments) {
     Type invalid = NULL;
-    if (index & 1 &&
-        value.match(%(expr (* char) (literal (* char) ?))))
-      value = compiler.convert_expression(value, %("String"));
+    if (index & 1) value = compiler.promote_string_literal(value);
     if (index & 1)
       match (value)
         case %(expr ?value_type ?content): {
