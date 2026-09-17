@@ -242,6 +242,10 @@ Files: `src/build.x`, `src/project.x` (planning and manifest), `src/main.x`,
 
 ## Group 12: install and packages
 
+> Fixed 2026-09-17, all nine rows, including the `.link` removal. Package
+> authors outside this repository must rebuild: a package with only
+> `builds/<name>.link` now reports as not built.
+
 Files: `src/install.x`, `src/project.x` (lockfile), `packages/package.mk`.
 
 | Defect | Reproduction | Cause | R |
@@ -277,6 +281,11 @@ Files: `tools/`, `site/public/install.sh`, `.github/workflows/`,
 | Smaller tooling defects. | `install.sh --help` truncated or empty under `sh -s`; `etc/x2c.mk` includes relative to the includer; `make debug` rewrites tracked `etc/build-mode`; `run-suite-coverage` compares counts only; `examples/check.sh` does not scan `examples/scripts/`. | Individual. | agent |
 
 ## Group 14: documentation, plans, examples, fixtures
+
+> Fixed 2026-09-17. Fixture artifacts now normalize runtime library line
+> numbers, so editing `lib/` no longer churns the seven pinned fixtures, and
+> `check-docs.py` reports a citation past the end of its file. Correction:
+> the `test-index-slice.x:80` row was wrong, that test has 21 assertions.
 
 Files: `docs/`, `agents/`, `plans/`, `site/src/`, `examples/`,
 `unittest/compiler-fixtures/`, `lib/*.x` comments.
@@ -380,6 +389,11 @@ that interval.
 
 ## Group 19: gaps found while fixing Groups 3, 5, and 7
 
+> Rows 1-3 fixed 2026-09-17. Correction to row 2: `g.len()` on a `const`
+> String always worked, because method lookup canonicalizes the receiver;
+> the catalog's message came from `.text()`, which is not a String method.
+> The real defect was operator resolution on a qualified operand, now fixed.
+
 Files: `src/transform.x` or `src/expressions.x` (row 1), `src/type.x` (row 2),
 `src/cleanup.x` (row 3).
 
@@ -392,6 +406,9 @@ Files: `src/transform.x` or `src/expressions.x` (row 1), `src/type.x` (row 2),
 | `String.parse_char` accepts an octal escape above a byte. | `"'\\400'".parse_char()` returns 256. The Simplify session rejected `\400` in the scanner and in `String.unescape`; this entry point still accepts it. | `lib/string.x` decodes the escape without the range check. | me |
 
 ## Group 18: merge the two readable-format owners
+
+> Fixed 2026-09-17. `Compiler.printf_static_format` in `src/expressions.x`
+> is the one owner; the looser predicate is gone.
 
 Files: `src/transform.x`, `src/expressions.x`.
 
@@ -430,6 +447,11 @@ generated C, so this change should be inspected the same way, and any C
 that does change must be reviewed line by line.
 
 ## Group 17: Pool as the public canonical-pool surface
+
+> Fixed 2026-09-17. `Pool.open`, `Pool.open_named`, `Pool.close`,
+> `Pool.current` and `Pool.detach` are the bracket; `String.pool_*` and the
+> duplicate `String`/`List` lifecycle names are gone; `pool.md` is generated
+> from the manifest. Packages pass, so the libuv and torch renames hold.
 
 Files: `lib/pool.x`, `lib/string.x`, `lib/list.x`, callers in `lib/thread.x`,
 `lib/logger.x`, `lib/error.x`, `lib/context.x`, `lib/split.x`, and the memory
