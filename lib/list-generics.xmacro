@@ -66,15 +66,16 @@ macro Unit $list.typed.family(Type $list, Type $element,
      validates once cannot later hold another element. ArrayInt has to copy:
      its source Array has a different element width and is mutable. */
   /** Validates `xs` as `$list` and returns the identical canonical chain.
-      Nil is valid. Every nonempty cell must carry `$tag`; another tag raises
-      `<no-convert>` with its zero-based index. Validation is O(n), does not
-      copy or mutate cells, and preserves their existing `List`-pool lifetime.
+      Nil is valid. Every nonempty cell must hold a `$tag` element; a foreign
+      tag raises `<no-convert>` with its zero-based index. Validation is O(n),
+      does not copy or mutate cells, and preserves their existing `List`-pool
+      lifetime.
 
       Raises: `<no-convert>` for the first foreign element. */
   $list List.$lower(List xs) {
     int index = 0;
     for (List cur = xs; cur; cur = cur.cdr()) {
-      if (cur.car is not $tag)
+      if (!_typed_list_holds(cur.car, $tag))
         _no_convert($owner, index, cur.car.tag());
       index++;
     }

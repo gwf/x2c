@@ -48,6 +48,17 @@ static void _no_convert(String owner, int index, Symbol tag) {
   raise %(no-convert (owner $owner) (index $index) (tag $tag));
 }
 
+/* Reports whether `value` decodes as the element type `tag` names.
+   `Var.box_f64` gives the infinities and NaN their own tags, so a double
+   element arrives under four tags and `Var.decode_f64` reads all four. Every
+   other family stores exactly one tag. */
+static int _typed_list_holds(Var value, Symbol tag) {
+  Symbol found = value.tag();
+  if (found == tag) return 1;
+  return tag == <f64> &&
+    (found == <+inf> || found == <-inf> || found == <nan>);
+}
+
 /* Encoders and decoders are inline because the generated `car` and `cons`
    are, and an inline body cannot call a function the header does not carry.
    Each pair is the Var layout for one tag with the dispatch removed: the

@@ -112,6 +112,33 @@ static void typed_list_iterates_as_elements(void) {
   EXPECT_TRUE(sum == 2.0);
 }
 
+/* Var.box_f64 gives the infinities and NaN their own tags, so a ListDbl built
+   from them used to widen to List and then refuse to come back. */
+static void typed_list_double_holds_infinities(void) {
+  $test.scoped();
+  double inf = 1.0 / 0.0, nan = 0.0 / 0.0;
+  ListDbl built = ListDbl.cons(inf, ListDbl.cons(-inf,
+    ListDbl.cons(nan, ListDbl.cons(2.5, NULL))));
+
+  List widened = built;
+  ListDbl narrowed = widened;
+  EXPECT_TRUE(narrowed.car() == inf);
+  EXPECT_TRUE(narrowed.cdr().car() == -inf);
+  double middle = narrowed.cdr().cdr().car();
+  EXPECT_TRUE(middle != middle);
+  EXPECT_TRUE(narrowed.cdr().cdr().cdr().car() == 2.5);
+
+  // the other families still refuse a foreign tag
+  int caught = 0;
+  try {
+    List mixed = %(1.5 alpha);
+    ListDbl reals = mixed;
+    EXPECT_TRUE(reals.car() == 1.5);
+  }
+  catch %(no-convert *): caught++;
+  EXPECT_INT_EQ(caught, 1);
+}
+
 static void typed_list_covers_every_family(void) {
   $test.scoped();
   ListChar letters =
@@ -296,6 +323,7 @@ void typed_list_suite(void) {
   $test.run(typed_list_remaining_receiver_relative_methods);
   $test.run(typed_list_walks_without_reconverting);
   $test.run(typed_list_iterates_as_elements);
+  $test.run(typed_list_double_holds_infinities);
   $test.run(typed_list_covers_every_family);
   $test.run(typed_list_common_capabilities_cover_every_family);
   $test.run(typed_list_widens_for_var_transforms);
