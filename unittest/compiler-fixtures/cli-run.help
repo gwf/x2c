@@ -20,7 +20,6 @@ Output options:
       --save-temps[=<dir>]    Keep generated C and other intermediate files
 
 Translation options:
-      --index <url-or-path>   Resolve package names through this index
   -I <dir>                    Add a shared x2c/C include directory
       --x-include-dir <dir>   Add an x2c-only include directory
       --c-include-dir <dir>   Add a C-only ordinary include directory
@@ -29,6 +28,9 @@ Translation options:
       --no-cpp                Skip symbol collection and preprocessing
       --live-symbols          Collect symbols through the host preprocessor
       --cpp-symbols           Use CPP collection for this translation
+
+Package options:
+      --index <url-or-path>   Resolve package names through this index
 
 C compiler options:
       --cc <program>          Use <program> as the host C compiler

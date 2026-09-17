@@ -1195,6 +1195,166 @@ set -e
 grep -Fq "exists and is not an empty directory" "$BUILD/starter/again.stderr"
 cmp "$BUILD/starter/x2c.toml.before" "$starter/x2c.toml"
 
+# An empty operand names no directory, and a link names itself.
+set +e
+(cd "$starter" && "$X2C" new "") 2>"$BUILD/starter/empty.stderr"
+empty_status=$?
+set -e
+[[ $empty_status == 2 ]]
+grep -Fq "the directory operand is empty" "$BUILD/starter/empty.stderr"
+cmp "$BUILD/starter/x2c.toml.before" "$starter/x2c.toml"
+mkdir -p "$BUILD/starter/real-name"
+ln -s real-name "$BUILD/starter/link-name"
+"$X2C" new -q "$BUILD/starter/link-name"
+grep -Fxq '[target.link-name]' "$BUILD/starter/real-name/x2c.toml"
+
+# A build that keeps a build directory but cannot read its own fingerprint
+# treats that as a cache miss and builds.
+nostate="$BUILD/no-state"
+mkdir -p "$nostate"
+printf 'int main(void) { printf("built\\n"); return 0; }\n' \
+  >"$nostate/hello.x"
+(cd "$nostate" && env -u PATH "$X2C" build --plain --build-dir bd \
+  --output out hello.x) >"$nostate/first.stdout" 2>"$nostate/first.stderr"
+[[ $("$nostate/out") == built ]]
+(cd "$nostate" && env -u PATH "$X2C" build --plain --build-dir bd \
+  --output out hello.x) >"$nostate/second.stdout" 2>"$nostate/second.stderr"
+[[ $("$nostate/out") == built ]]
+
+# A path holding a percent is a path, not a format.
+percent="$BUILD/percent"
+mkdir -p "$percent"
+printf 'int main(void) { printf("percent\\n"); return 0; }\n' \
+  >"$percent/r%s.x"
+[[ $("$X2C" run -q "$percent/r%s.x") == percent ]]
+"$X2C" build -q --output "$percent/out" "$percent/r%s.x"
+[[ $("$percent/out") == percent ]]
+X2C_CACHE_DIR="$percent/cache" "$X2C" script "$percent/r%s.x" \
+  >"$percent/script.stdout"
+[[ $(cat "$percent/script.stdout") == percent ]]
+X2C_CACHE_DIR="$percent/cache" "$X2C" script "$percent/r%s.x" \
+  >"$percent/warm.stdout"
+[[ $(cat "$percent/warm.stdout") == percent ]]
+
+# A requested dump is data on stdout.
+[[ -s $("$X2C" translate --dump-cpp "$percent/r%s.x" \
+  >"$percent/cpp.stdout" 2>"$percent/cpp.stderr"; echo "$percent/cpp.stdout") ]]
+[[ ! -s "$percent/cpp.stderr" ]]
+"$X2C" translate --dump-cpp-text "$percent/r%s.x" >"$percent/cpp-text.stdout"
+cmp "$percent/cpp.stdout" "$percent/cpp-text.stdout"
+
+# A long option carries its value after '=' as it does as a separate word.
+joined="$BUILD/joined"
+mkdir -p "$joined/out"
+printf 'int main(void) { return 0; }\n' >"$joined/main.x"
+"$X2C" build -q --jobs=2 --output "$joined/app" "$joined/main.x"
+[[ -x "$joined/app" ]]
+"$X2C" translate --out-dir="$joined/out" "$joined/main.x" >/dev/null
+[[ -f "$joined/out/main.c" ]]
+set +e
+"$X2C" build -q --plain=yes --output "$joined/app" "$joined/main.x" \
+  2>"$joined/value.stderr"
+joined_status=$?
+set -e
+[[ $joined_status == 2 ]]
+grep -Fq "option takes no value '--plain=yes'" "$joined/value.stderr"
+
+# Manifest options describe a manifest build, so operands refuse them.
+set +e
+"$X2C" build -q --target app --output "$joined/app" "$joined/main.x" \
+  2>"$joined/target.stderr"
+joined_target=$?
+"$X2C" build -q --profile release --output "$joined/app" "$joined/main.x" \
+  2>"$joined/profile.stderr"
+joined_profile=$?
+"$X2C" build -q -c --manifest-path "$manifest/x2c.toml" \
+  2>"$joined/compile.stderr"
+joined_compile=$?
+set -e
+[[ $joined_target == 2 && $joined_profile == 2 && $joined_compile == 2 ]]
+grep -Fq -- "--target conflicts with explicit inputs" "$joined/target.stderr"
+grep -Fq -- "--profile conflicts with explicit inputs" "$joined/profile.stderr"
+grep -Fq -- "--compile-only needs input operands" "$joined/compile.stderr"
+
+# A manifest array may span lines, and an unclosed one is an error.
+spanning="$BUILD/spanning"
+mkdir -p "$spanning/src"
+printf 'int main(void) { printf("spanning\\n"); return 0; }\n' \
+  >"$spanning/src/main.x"
+printf '[target.spanning]\nsources = [\n  "src/*.x",\n]\n' \
+  >"$spanning/x2c.toml"
+[[ $("$X2C" run -q --manifest-path "$spanning/x2c.toml") == spanning ]]
+printf '[target.spanning]\nsources = [\n  "src/*.x"\n' \
+  >"$spanning/open.toml"
+set +e
+"$X2C" build --manifest-path "$spanning/open.toml" 2>"$spanning/open.stderr"
+spanning_status=$?
+set -e
+[[ $spanning_status == 2 ]]
+grep -Fq 'unterminated array' "$spanning/open.stderr"
+
+# A profile reaches the dependency targets that define it.
+profiles="$BUILD/profiles"
+mkdir -p "$profiles/src"
+printf '%s\n' '#ifndef CORE_VALUE' '#define CORE_VALUE 1' '#endif' \
+  'int core_value(void) { return CORE_VALUE; }' >"$profiles/src/core.x"
+printf '%s\n' '#include "x2c.x"' 'int core_value(void);' \
+  'int main(void) { printf("%d\n", core_value()); return 0; }' \
+  >"$profiles/src/main.x"
+{
+  printf '[project]\ndefault-target = "app"\n\n'
+  printf '[target.core]\nkind = "static-library"\nsources = ["src/core.x"]\n\n'
+  printf '[target.core.profile.release]\ndefines = ["CORE_VALUE=100"]\n\n'
+  printf '[target.app]\nsources = ["src/main.x"]\ndependencies = ["core"]\n\n'
+  printf '[target.app.profile.release]\noptimization = "O2"\n'
+} >"$profiles/x2c.toml"
+[[ $(cd "$profiles" && "$X2C" run -q) == 1 ]]
+rm -rf "$profiles/.x2c-build"
+[[ $(cd "$profiles" && "$X2C" run -q --profile release) == 100 ]]
+
+# A dry run on a manifest whose target consumes a planned archive prints the
+# actions and creates nothing.
+rm -rf "$profiles/.x2c-build"
+(cd "$profiles" && "$X2C" build -###) >"$profiles/dry.stdout" \
+  2>"$profiles/dry.stderr"
+grep -q '^x2c: archive ' "$profiles/dry.stderr"
+grep -q '^x2c: link ' "$profiles/dry.stderr"
+[[ ! -e "$profiles/.x2c-build" ]]
+
+# Builds of one project may run at the same time.
+(cd "$profiles" && "$X2C" build -q)
+parallel_jobs=()
+for i in 1 2 3 4 5 6; do
+  (cd "$profiles" && "$X2C" build --plain) \
+    >"$profiles/parallel-$i.stdout" 2>"$profiles/parallel-$i.stderr" &
+  parallel_jobs+=($!)
+done
+parallel_failed=0
+for job in "${parallel_jobs[@]}"; do wait "$job" || parallel_failed=1; done
+[[ $parallel_failed == 0 ]] || {
+  echo "a concurrent build in one project failed" >&2
+  cat "$profiles"/parallel-*.stderr >&2
+  exit 1
+}
+[[ $("$profiles/.x2c-build/app") == 1 ]]
+
+# A script edited while it builds is never reused for the source it was not
+# built from.
+edited="$BUILD/edited"
+mkdir -p "$edited"
+printf 'int main(void) { printf("first\\n"); return 0; }\n' >"$edited/e.x"
+X2C_CACHE_DIR="$edited/cache" "$X2C" script "$edited/e.x" >/dev/null
+( sleep 0.1
+  printf 'int main(void) { printf("second\\n"); return 0; }\n' \
+    >"$edited/e.x" ) &
+edit_job=$!
+X2C_CACHE_DIR="$edited/cache" "$X2C" script --rebuild "$edited/e.x" \
+  >/dev/null
+wait "$edit_job"
+X2C_CACHE_DIR="$edited/cache" "$X2C" script "$edited/e.x" \
+  >"$edited/after.stdout"
+[[ $(cat "$edited/after.stdout") == second ]]
+
 # Source mapping is independent of -g and belongs to translation reuse.
 python3 - "$X2C" "$BUILD/source-map" <<'PY_SOURCE_MAP'
 from pathlib import Path
@@ -1303,14 +1463,22 @@ set -e
 cp "$SCRIPT/args.x" "$SCRIPT/greet"
 [[ $(PATH="$SCRIPT/bin:$PATH" X2C_CACHE_DIR="$SCRIPT/cache" \
      "$SCRIPT/greet" there) == 'hello [there]' ]]
-run_script -v "$SCRIPT/args.x" >/dev/null 2>"$SCRIPT/warm.stderr"
-# A warm run still preprocesses for the depfile and links the run image; it
-# must not translate or compile again.
-if grep -Eq '^x2c: (translate|compile) ' "$SCRIPT/warm.stderr"; then
-  echo "a warm script run translated or compiled again" >&2
+# Copying `greet` beside the script changed a directory the build searched,
+# so the next run rebuilds. After that a warm run builds nothing at all. The
+# logs go outside the script directory, because a new file there is itself a
+# change the cache must notice.
+run_script "$SCRIPT/args.x" >/dev/null 2>&1
+run_script -v "$SCRIPT/args.x" >/dev/null 2>"$BUILD/script-warm.stderr"
+if grep -Eq '^x2c: (translate|compile|preprocess|link) ' \
+   "$BUILD/script-warm.stderr"; then
+  echo "a warm script run rebuilt" >&2
   exit 1
 fi
-grep -q '^x2c: run ' "$SCRIPT/warm.stderr"
+grep -q '^x2c: run ' "$BUILD/script-warm.stderr"
+# A file added to a searched directory changes what a build would resolve.
+: >"$SCRIPT/added.txt"
+run_script -v "$SCRIPT/args.x" >/dev/null 2>"$BUILD/script-dir.stderr"
+grep -q '^x2c: link ' "$BUILD/script-dir.stderr"
 printf '%s\n' 'macro Expression $greeting() => ("changed")' \
   >"$SCRIPT/greeting.xmacro"
 [[ $(run_script "$SCRIPT/args.x") == changed ]]

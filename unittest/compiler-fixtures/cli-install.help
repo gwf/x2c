@@ -6,7 +6,7 @@ directory, a local .tar.gz, a URL with --sha256, or a name resolved
 through the package index. A bundle installs as built; a pure-x2c
 source package is built by this compiler.
 
-Translation options:
+Package options:
       --sha256 <hex>          Require this digest of a downloaded or local archive
       --index <url-or-path>   Resolve package names through this index
       --force                 Install a bundle built for another x2c version

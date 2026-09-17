@@ -773,22 +773,24 @@ static CliOption *_find_option(
 static CliOption *_take_option(
   Array args, int *index, int mask,
   String *spelling, String *value, int *attached) {
-  // A long option may carry its value after '=', as `--out-dir=gen`.
+  // A long option may carry its value after '=', as `--out-dir=gen`. An
+  // empty one is the option's own missing-value case, not the next word.
   String arg = args[*index], written = arg, joined = NULL;
   int equals = arg.startswith("--") ? arg.find("=") : -1;
   if (equals > 2) {
     written = arg[:equals];
     joined = arg[equals + 1:];
+    if (joined && !joined[0]) joined = NULL;
   }
   const char *suffix = NULL;
   CliOption *option = _find_option(written, mask, &suffix);
   if (!option) return NULL;
-  if (joined && !option.value)
+  if (equals > 2 && !option.value)
     x2c_driver_error(%"option takes no value '$arg'");
   if (spelling) *spelling = written;
   if (attached) *attached = suffix != NULL;
-  *value = joined ? joined : suffix;
-  if (option.value && !*value) {
+  *value = equals > 2 ? joined : suffix;
+  if (option.value && !*value && equals <= 2) {
     if (++*index == args.len())
       x2c_driver_error(%"option requires a value '$arg'");
     *value = args[*index];

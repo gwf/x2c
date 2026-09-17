@@ -179,7 +179,71 @@ set +e
 set -e
 grep -q "the index has greet 1.0, not the pinned 9.9" \
   "$BUILD/project/pin.stderr" || fail "pin diagnostic"
+
+# A dry run and an invalid target resolve nothing: both leave the home and
+# the lockfile as they were.
+sed 's/greet = "9.9"/greet = "1.0"/' x2c.toml >x2c.toml.next
+mv x2c.toml.next x2c.toml
+"$x2c" remove -q greet
+rm -f x2c.lock
+"$x2c" build -### --index "$BUILD/index.txt" \
+  --output "$BUILD/project/client" >/dev/null 2>&1
+[[ -z "$("$x2c" list)" ]] || fail "a dry run installed a pinned package"
+[[ ! -e x2c.lock ]] || fail "a dry run wrote a lockfile"
+set +e
+"$x2c" build -q --target bogus --index "$BUILD/index.txt" \
+  2>"$BUILD/project/target.stderr"
+[[ $? == 2 ]] || fail "unknown target accepted"
+set -e
+grep -q "unknown target 'bogus'" "$BUILD/project/target.stderr" ||
+  fail "unknown target diagnostic"
+[[ -z "$("$x2c" list)" ]] || fail "an unknown target installed a package"
+[[ ! -e x2c.lock ]] || fail "an unknown target wrote a lockfile"
+
+# Deleting the section leaves nothing to reproduce, so the lockfile goes.
+rm -rf .x2c-build
+"$x2c" build -q --index "$BUILD/index.txt" --output "$BUILD/project/client"
+grep -q '^greet 1.0 source - ' x2c.lock || fail "lockfile row after rebuild"
+sed '/^\[dependencies\]$/,/^greet = /d' x2c.toml >x2c.toml.next
+mv x2c.toml.next x2c.toml
+rm -rf .x2c-build
+"$x2c" build -q --output "$BUILD/project/client"
+[[ ! -e x2c.lock ]] || fail "a manifest with no pins kept its lockfile"
 cd "$ROOT"
 "$x2c" remove -q greet
+
+# The home is one path however it is spelled: a link, a relative name, and
+# the real path select the same stage, prelude, and runtime archive.
+mkdir -p "$BUILD/home/builds/1"
+cp "$BUILD/home/lib/libx2c.a" "$BUILD/home/builds/1/libx2c.a"
+mkdir -p "$BUILD/home/builds/1/lib"
+cp "$BUILD/home/lib/"*.xi "$BUILD/home/builds/1/lib/"
+cp "$x2c" "$BUILD/home/builds/1/x2c"
+real=$(cd "$BUILD/home" && pwd -P)
+ln -sfn "$real" "$BUILD/home-link"
+staged="$BUILD/home/builds/1/x2c"
+for name in home runtime_lib prelude; do
+  direct=$(X2C_HOME="$real" "$staged" env "$name")
+  linked=$(X2C_HOME="$BUILD/home-link" "$BUILD/home-link/builds/1/x2c" \
+    env "$name")
+  relative=$(cd "$BUILD/home" && X2C_HOME=. ./builds/1/x2c env "$name")
+  [[ "$direct" == "$linked" && "$direct" == "$relative" ]] ||
+    fail "env $name differs by home spelling: $direct $linked $relative"
+done
+[[ "$(X2C_HOME="$real" "$staged" env runtime_lib)" == \
+   "$real/builds/1/libx2c.a" ]] || fail "a staged compiler links its stage"
+
+# A script under any of those spellings compiles only the script.
+mkdir -p "$BUILD/script"
+printf 'int main(void) { printf("cached\\n"); return 0; }\n' \
+  >"$BUILD/script/one.x"
+for home in "$real" "$BUILD/home-link"; do
+  rm -rf "$BUILD/script/cache"
+  units=$(X2C_HOME="$home" X2C_CACHE_DIR="$BUILD/script/cache" \
+    "$home/builds/1/x2c" script -v "$BUILD/script/one.x" 2>&1 >/dev/null |
+    grep -c '^x2c: translate ' || true)
+  [[ $units == 1 ]] ||
+    fail "a script under $home translated $units units, not 1"
+done
 
 echo "package install probes passed"
