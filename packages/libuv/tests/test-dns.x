@@ -30,7 +30,7 @@ static void _record_lookup(UvLookup lookup, Var value) {
 
 static void numeric_addresses_round_trip(void) {
   UvAddress ip4 = UvAddress.ip4("127.0.0.1", 4321);
-  EXPECT_STR_EQ(ip4.host(), %"127.0.0.1");
+  EXPECT_STR_EQ(ip4.host(), "127.0.0.1");
   EXPECT_INT_EQ(ip4.port(), 4321);
   EXPECT_INT_EQ(ip4.family(), AF_INET);
   EXPECT_INT_EQ(ip4.socket_type(), 0);
@@ -40,7 +40,7 @@ static void numeric_addresses_round_trip(void) {
   EXPECT_INT_EQ(ip4.native()->sa_family, AF_INET);
 
   UvAddress ip6 = UvAddress.ip6("::1", 4321);
-  EXPECT_STR_EQ(ip6.host(), %"::1");
+  EXPECT_STR_EQ(ip6.host(), "::1");
   EXPECT_INT_EQ(ip6.port(), 4321);
   EXPECT_INT_EQ(ip6.family(), AF_INET6);
   EXPECT_INT_EQ(ip6.socket_type(), 0);
@@ -53,7 +53,7 @@ static void numeric_addresses_round_trip(void) {
   try UvAddress.ip4("not-an-ip", 80);
   catch %(io-fail (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"ip4_addr");
+    EXPECT_STR_EQ(operation.string(), "ip4_addr");
   }
   EXPECT_TRUE(caught);
 
@@ -61,7 +61,7 @@ static void numeric_addresses_round_trip(void) {
   try UvAddress.ip6("::1", 65536);
   catch %(bad-arg (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"ip6");
+    EXPECT_STR_EQ(operation.string(), "ip6");
   }
   EXPECT_TRUE(caught);
 }
@@ -146,7 +146,7 @@ static void resolve_and_canonical_names_use_copied_results(void) {
   try resolved.address(-1);
   catch %(bad-arg (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"lookup_address");
+    EXPECT_STR_EQ(operation.string(), "lookup_address");
   }
   EXPECT_TRUE(caught);
 
@@ -154,7 +154,7 @@ static void resolve_and_canonical_names_use_copied_results(void) {
   try resolved.address((int) resolved.count());
   catch %(bad-arg (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"lookup_address");
+    EXPECT_STR_EQ(operation.string(), "lookup_address");
   }
   EXPECT_TRUE(caught);
 }
@@ -172,8 +172,8 @@ static void invalid_numeric_host_preserves_libuv_error_detail(void) {
   catch %(io-fail (library ?library) (operation ?operation)
          (status ?code) (name ?name) (message ?message) *): {
     caught = 1;
-    EXPECT_STR_EQ(library.string(), %"libuv");
-    EXPECT_STR_EQ(operation.string(), %"getaddrinfo");
+    EXPECT_STR_EQ(library.string(), "libuv");
+    EXPECT_STR_EQ(operation.string(), "getaddrinfo");
     EXPECT_INT_EQ(code.integer(), UV_EAI_NONAME);
     EXPECT_STR_EQ(name.string(), String.new(uv_err_name(UV_EAI_NONAME)));
     EXPECT_STR_EQ(
@@ -198,7 +198,7 @@ static void loop_free_rejects_a_pending_lookup_without_draining_it(void) {
   try loop.free();
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"loop_free");
+    EXPECT_STR_EQ(operation.string(), "loop_free");
   }
   EXPECT_TRUE(caught);
   if (!caught) return;
@@ -217,7 +217,7 @@ static void lookup_builder_rejects_invalid_lifetimes(void) {
   try loop.lookup(NULL, NULL);
   catch %(bad-arg (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"lookup");
+    EXPECT_STR_EQ(operation.string(), "lookup");
   }
   EXPECT_TRUE(caught);
 
@@ -226,7 +226,7 @@ static void lookup_builder_rejects_invalid_lifetimes(void) {
   try lookup.count();
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"lookup_count");
+    EXPECT_STR_EQ(operation.string(), "lookup_count");
   }
   EXPECT_TRUE(caught);
 
@@ -234,7 +234,7 @@ static void lookup_builder_rejects_invalid_lifetimes(void) {
   try lookup.cancel();
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"lookup_cancel");
+    EXPECT_STR_EQ(operation.string(), "lookup_cancel");
   }
   EXPECT_TRUE(caught);
 
@@ -244,7 +244,7 @@ static void lookup_builder_rejects_invalid_lifetimes(void) {
   try lookup.hints(AF_INET, SOCK_STREAM, 0, 0);
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"lookup_hints");
+    EXPECT_STR_EQ(operation.string(), "lookup_hints");
   }
   EXPECT_TRUE(caught);
 
@@ -252,7 +252,7 @@ static void lookup_builder_rejects_invalid_lifetimes(void) {
   try lookup.start(Var.new(<p48>, &state), _record_lookup);
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"lookup_start");
+    EXPECT_STR_EQ(operation.string(), "lookup_start");
   }
   EXPECT_TRUE(caught);
   EXPECT_INT_EQ(loop.run(UV_RUN_DEFAULT), 0);
@@ -265,7 +265,7 @@ static void lookup_builder_rejects_invalid_lifetimes(void) {
   try abandoned.start(void, _record_lookup);
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"lookup_start");
+    EXPECT_STR_EQ(operation.string(), "lookup_start");
   }
   EXPECT_TRUE(caught);
 }
@@ -351,13 +351,13 @@ static void lookup_callback_errors_preserve_results_and_loop_resumption(void) {
   try loop.run(UV_RUN_DEFAULT);
   catch %(malformed (library *) (reason ?reason) *): {
     caught = 1;
-    EXPECT_STR_EQ(reason.string(), %"a lookup callback failed");
+    EXPECT_STR_EQ(reason.string(), "a lookup callback failed");
   }
   EXPECT_TRUE(caught);
   EXPECT_INT_EQ(failed.calls, 1);
   EXPECT_TRUE(failed.cleaned);
-  EXPECT_STR_EQ(failed.copied_host, %"127.0.0.1");
-  EXPECT_STR_EQ(first.address(0).host(), %"127.0.0.1");
+  EXPECT_STR_EQ(failed.copied_host, "127.0.0.1");
+  EXPECT_STR_EQ(first.address(0).host(), "127.0.0.1");
   EXPECT_NULL(first.native()->addrinfo);
 
   LookupState resumed = { 0 };
@@ -366,7 +366,7 @@ static void lookup_callback_errors_preserve_results_and_loop_resumption(void) {
   );
   EXPECT_INT_EQ(loop.run(UV_RUN_DEFAULT), 0);
   EXPECT_INT_EQ(resumed.calls, 1);
-  EXPECT_STR_EQ(second.address(0).host(), %"::1");
+  EXPECT_STR_EQ(second.address(0).host(), "::1");
 }
 
 void dns_suite(void) {

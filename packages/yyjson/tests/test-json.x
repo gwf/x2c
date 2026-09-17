@@ -13,7 +13,7 @@ static void json_parse_uses_x2c_values(void) {
     "{\"n\":\"x2c\",\"t\":true,\"f\":false,\"z\":null,\"a\":[1,-2,3.5]}"
   );
   Map object = value;
-  EXPECT_STR_EQ(object["n"].string(), %"x2c");
+  EXPECT_STR_EQ(object["n"].string(), "x2c");
   EXPECT_TRUE(json.Json.is_bool(object["t"]));
   EXPECT_TRUE(object["t"].truthy());
   EXPECT_FALSE(object["f"].truthy());
@@ -41,10 +41,10 @@ static void json_integer_edges_remain_exact(void) {
   Var minimum = json.Json.parse("-9223372036854775808");
   EXPECT_TRUE(maximum is <ullong>);
   EXPECT_TRUE(maximum.ulong_long_value() == ULLONG_MAX);
-  EXPECT_STR_EQ(maximum.json(), %"18446744073709551615");
+  EXPECT_STR_EQ(maximum.json(), "18446744073709551615");
   EXPECT_TRUE(minimum is <llong>);
   EXPECT_TRUE(minimum.long_long_value() == LLONG_MIN);
-  EXPECT_STR_EQ(minimum.json(), %"-9223372036854775808");
+  EXPECT_STR_EQ(minimum.json(), "-9223372036854775808");
 }
 
 static void json_build_and_mutate_with_collections(void) {
@@ -60,7 +60,7 @@ static void json_build_and_mutate_with_collections(void) {
   Var document = value;
   Map decoded = json.Json.parse(document.pretty_json());
   EXPECT_INT_EQ(decoded["names"].array().len(), 3);
-  EXPECT_STR_EQ(decoded["names"].array()[2].string(), %"three");
+  EXPECT_STR_EQ(decoded["names"].array()[2].string(), "three");
   EXPECT_TRUE(decoded["published"].truthy());
   EXPECT_TRUE(decoded["metadata"].is_null());
 }
@@ -75,7 +75,7 @@ static void json_pointer_distinguishes_null_and_missing(void) {
 
   found = "unchanged";
   EXPECT_FALSE(value.try_json_pointer("/a/3", &found));
-  EXPECT_STR_EQ(found.string(), %"unchanged");
+  EXPECT_STR_EQ(found.string(), "unchanged");
   EXPECT_TRUE(value.json_pointer("/missing") is void);
 }
 
@@ -94,12 +94,12 @@ static void json_patch_and_merge_patch_return_x2c_values(void) {
     }
   ];
   Var patched = value.json_patch(operations);
-  EXPECT_STR_EQ(patched.map()["name"].string(), %"new");
+  EXPECT_STR_EQ(patched.map()["name"].string(), "new");
   EXPECT_INT_EQ(patched.map()["tags"].array().len(), 2);
 
   Map changes = {"name": "merged", "tags": (Var) { .u64 = 0 }};
   Var merged = patched.json_merge_patch(changes);
-  EXPECT_STR_EQ(merged.map()["name"].string(), %"merged");
+  EXPECT_STR_EQ(merged.map()["name"].string(), "merged");
   EXPECT_TRUE(merged.map()["tags"] is void);
 }
 
@@ -112,7 +112,7 @@ static void json_options_expose_yyjson_flags(void) {
   String output = json.Json.stringify_opts(
     value, YYJSON_WRITE_PRETTY | YYJSON_WRITE_NEWLINE_AT_END
   );
-  EXPECT_STR_EQ(output, %"{\n    \"value\": 1\n}\n");
+  EXPECT_STR_EQ(output, "{\n    \"value\": 1\n}\n");
 }
 
 static void json_in_situ_stays_in_raw_api(void) {
@@ -122,8 +122,8 @@ static void json_in_situ_stays_in_raw_api(void) {
   }
   catch %(bad-arg *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"yyjson");
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"parse");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "yyjson");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "parse");
   }
   EXPECT_TRUE(caught);
 }
@@ -135,8 +135,8 @@ static void json_parse_error_has_yyjson_detail(void) {
   }
   catch %(malformed *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"yyjson");
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"parse");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "yyjson");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "parse");
     EXPECT_TRUE(detail.assoc(<code>).integer() != 0);
     EXPECT_TRUE(detail.assoc(<message>).string().len() > 0);
     EXPECT_TRUE(detail.assoc(<offset>).integer() > 0);
@@ -151,8 +151,8 @@ static void json_rejects_embedded_nul_strings(void) {
   }
   catch %(bad-enc *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"yyjson");
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"parse");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "yyjson");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "parse");
   }
   EXPECT_TRUE(caught);
 }
@@ -165,8 +165,8 @@ static void json_rejects_values_outside_json_domain(void) {
   }
   catch %(bad-types *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"yyjson");
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"stringify");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "yyjson");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "stringify");
     EXPECT_TRUE(detail.assoc(<tag>).symbol() == <symbol>);
   }
   EXPECT_TRUE(caught);
@@ -194,9 +194,9 @@ static void json_document_preserves_duplicate_member_order(void) {
 
   Array keys = [];
   foreach(json.JsonMember member, object) keys.push(member.key());
-  EXPECT_STR_EQ(keys[0].string(), %"key");
-  EXPECT_STR_EQ(keys[1].string(), %"key");
-  EXPECT_STR_EQ(keys[2].string(), %"last");
+  EXPECT_STR_EQ(keys[0].string(), "key");
+  EXPECT_STR_EQ(keys[1].string(), "key");
+  EXPECT_STR_EQ(keys[2].string(), "last");
   EXPECT_STR_EQ(document.json(), source);
 }
 
@@ -220,8 +220,8 @@ static void json_empty_collections_and_required_members_are_explicit(void) {
   try object.require("missing");
   catch %(bad-arg *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"object require");
-    EXPECT_STR_EQ(detail.assoc(<key>).string(), %"missing");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "object require");
+    EXPECT_STR_EQ(detail.assoc(<key>).string(), "missing");
   }
   EXPECT_TRUE(caught);
 
@@ -248,7 +248,7 @@ static void json_document_preserves_numeric_intent(void) {
   int count = 0;
   foreach(json.JsonValue value, values) count++;
   EXPECT_INT_EQ(count, 4);
-  EXPECT_STR_EQ(values[-1].json(), %"18446744073709551615");
+  EXPECT_STR_EQ(values[-1].json(), "18446744073709551615");
 }
 
 static void json_document_conversion_is_explicit_and_lossy(void) {
@@ -289,7 +289,7 @@ static void json_document_patch_preserves_unrelated_duplicates(void) {
   EXPECT_TRUE(object["active"].boolean());
   EXPECT_STR_EQ(
     patched.json(),
-    %"{\"key\":1,\"key\":2,\"last\":4,\"active\":true}"
+    "{\"key\":1,\"key\":2,\"last\":4,\"active\":true}"
   );
 }
 
@@ -302,7 +302,7 @@ static void json_document_borrowed_views_check_owner(void) {
   try root.kind();
   catch %(bad-state *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"yyjson");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "yyjson");
   }
   EXPECT_TRUE(caught);
 
@@ -310,7 +310,7 @@ static void json_document_borrowed_views_check_owner(void) {
   try document.native();
   catch %(bad-state *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"native");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "native");
   }
   EXPECT_TRUE(caught);
 }
@@ -319,13 +319,13 @@ static void json_document_can_preserve_unrepresentable_string(void) {
   json.JsonDocument document =
     json.JsonDocument.parse(%"\"before\\u0000after\"");
   defer document.free();
-  EXPECT_STR_EQ(document.json(), %"\"before\\u0000after\"");
+  EXPECT_STR_EQ(document.json(), "\"before\\u0000after\"");
 
   int caught = 0;
   try document.root().string();
   catch %(bad-enc *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"yyjson");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "yyjson");
   }
   EXPECT_TRUE(caught);
 }
@@ -338,14 +338,14 @@ static void json_boolean_and_value_vars_stay_distinct(void) {
 
   EXPECT_TRUE(json.Json.is_bool(flag));
   EXPECT_FALSE(json.Json.is_bool(view));
-  EXPECT_STR_EQ(flag.str(), %"true");
-  EXPECT_STR_EQ(view.str(), %"{\"n\":7}");
+  EXPECT_STR_EQ(flag.str(), "true");
+  EXPECT_STR_EQ(view.str(), "{\"n\":7}");
 
   int caught = 0;
   try json.Json.boolean(view);
   catch %(bad-types *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"yyjson");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "yyjson");
   }
   EXPECT_TRUE(caught);
 }
@@ -373,11 +373,11 @@ static void json_document_round_trips_through_a_file(void) {
   pretty.write_file_opts(path, YYJSON_WRITE_PRETTY_TWO_SPACES);
   File indented = File.open(path, %"r");
   String bytes = indented.string_close();
-  EXPECT_STR_EQ(bytes, %"{\n  \"a\": 1\n}");
+  EXPECT_STR_EQ(bytes, "{\n  \"a\": 1\n}");
 
   pretty.write_file(path);
   File compact = File.open(path, %"r");
-  EXPECT_STR_EQ(compact.string_close(), %"{\"a\":1}");
+  EXPECT_STR_EQ(compact.string_close(), "{\"a\":1}");
 }
 
 static void json_write_file_failure_names_its_operation(void) {
@@ -390,8 +390,8 @@ static void json_write_file_failure_names_its_operation(void) {
   try json.Json.write_file({ "a": 1 }, path);
   catch %(format *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"yyjson");
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"write_file");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "yyjson");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "write_file");
     EXPECT_TRUE(detail.assoc(<message>).string().len() > 0);
   }
   EXPECT_TRUE(caught);
@@ -402,7 +402,7 @@ static void json_write_file_failure_names_its_operation(void) {
   try document.write_file(path);
   catch %(format *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"document write_file");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "document write_file");
   }
   EXPECT_TRUE(caught);
 }
@@ -416,7 +416,7 @@ static void json_value_round_trips_through_a_file(void) {
   */
   Var read = json.Json.read_file(path);
   EXPECT_TRUE(read is Map);
-  EXPECT_STR_EQ(read.map()["service"].string(), %"api");
+  EXPECT_STR_EQ(read.map()["service"].string(), "api");
   EXPECT_INT_EQ(read.map()["ports"].array().len(), 2);
 }
 
@@ -425,7 +425,7 @@ static void json_file_errors_carry_yyjson_detail(void) {
   try json.JsonDocument.read_file("/tmp/x2c-yyjson-absent.json");
   catch %(malformed *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"yyjson");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "yyjson");
     EXPECT_TRUE(detail.assoc(<code>).integer() != 0);
     EXPECT_TRUE(detail.assoc(<message>).string().len() > 0);
   }
@@ -440,7 +440,7 @@ static void json_file_errors_carry_yyjson_detail(void) {
   try json.JsonDocument.read_file(path);
   catch %(malformed *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"parse");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "parse");
   }
   EXPECT_TRUE(caught);
 }
@@ -452,7 +452,7 @@ static void json_file_read_rejects_in_situ(void) {
   );
   catch %(bad-arg *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"document read_file");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "document read_file");
   }
   EXPECT_TRUE(caught);
 }
@@ -469,7 +469,7 @@ static void json_lisp_surface_uses_x2c_values(void) {
   EXPECT_TRUE(parsed is Map);
   EXPECT_INT_EQ(parsed.map()["ports"].array().len(), 2);
   EXPECT_STR_EQ(
-    lisp.eval(%(json-stringify (json-parse "[1,2,3]"))).string(), %"[1,2,3]"
+    lisp.eval(%(json-stringify (json-parse "[1,2,3]"))).string(), "[1,2,3]"
   );
   EXPECT_TRUE(
     lisp.eval(%(json-pretty (json-parse "[1]"))).string().len() > 5
@@ -481,16 +481,16 @@ static void json_lisp_surface_uses_x2c_values(void) {
   );
 
   EXPECT_STR_EQ(
-    lisp.eval(%(if (json-parse "false") "yes" "no")).string(), %"no"
+    lisp.eval(%(if (json-parse "false") "yes" "no")).string(), "no"
   );
   EXPECT_STR_EQ(
-    lisp.eval(%(if (json-parse "null") "yes" "no")).string(), %"yes"
+    lisp.eval(%(if (json-parse "null") "yes" "no")).string(), "yes"
   );
   EXPECT_STR_EQ(
-    lisp.eval(%(json-stringify (json-parse "false"))).string(), %"false"
+    lisp.eval(%(json-stringify (json-parse "false"))).string(), "false"
   );
   EXPECT_STR_EQ(
-    lisp.eval(%(json-stringify (json-parse "null"))).string(), %"null"
+    lisp.eval(%(json-stringify (json-parse "null"))).string(), "null"
   );
   EXPECT_TRUE(lisp.eval(%(json-null? (json-parse "null"))) == <true>);
   EXPECT_TRUE(
@@ -499,7 +499,7 @@ static void json_lisp_surface_uses_x2c_values(void) {
   EXPECT_STR_EQ(
     lisp.eval(%(if (json-pointer (json-parse "{\"f\":false}") "/f")
                    "yes" "no")).string(),
-    %"no"
+    "no"
   );
   EXPECT_TRUE(
     lisp.eval(%(json-null?
@@ -517,14 +517,14 @@ static void json_lisp_surface_uses_x2c_values(void) {
   EXPECT_STR_EQ(
     lisp.eval(%(json-stringify (cdr (json-list (json-parse "[1,2,3]"))))
              ).string(),
-    %"[2,3]"
+    "[2,3]"
   );
 
   String path = "/tmp/x2c-yyjson-lisp.json";
   lisp.eval(%(json-write-file (json-parse "{\"k\":1}") $path));
   EXPECT_STR_EQ(
     lisp.eval(%(json-stringify (json-read-file $path))).string(),
-    %"{\"k\":1}"
+    "{\"k\":1}"
   );
 }
 
@@ -537,8 +537,8 @@ static void json_lisp_binding_raises_yyjson_detail(void) {
   try lisp.eval(%(json-parse "{\"broken\":}"));
   catch %(malformed *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"yyjson");
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"parse");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "yyjson");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "parse");
   }
   EXPECT_TRUE(caught);
 }

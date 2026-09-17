@@ -28,7 +28,7 @@ static void curl_raw_version_and_url_api(void) {
   );
   char *host = NULL;
   EXPECT_INT_EQ(curl_url_get(url, CURLUPART_HOST, &host, 0), CURLUE_OK);
-  EXPECT_STR_EQ(host, %"example.com");
+  EXPECT_STR_EQ(host, "example.com");
   curl_free(host);
   curl_url_cleanup(url);
 }

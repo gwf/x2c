@@ -228,7 +228,7 @@ static void pipe_missing_path_reports_error_and_finishes_request(void) {
   catch %(bad-state (library *) (operation ?operation) (reason *)
           (pending ?pending) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"loop_free");
+    EXPECT_STR_EQ(operation.string(), "loop_free");
     EXPECT_TRUE(pending.integer() > 0);
   }
   EXPECT_TRUE(caught);
@@ -238,9 +238,9 @@ static void pipe_missing_path_reports_error_and_finishes_request(void) {
   catch %(io-fail (library *) (operation ?operation) (status ?status)
           (name ?name) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"pipe_connect");
+    EXPECT_STR_EQ(operation.string(), "pipe_connect");
     EXPECT_INT_EQ(status.integer(), UV_ENOENT);
-    EXPECT_STR_EQ(name.string(), %"ENOENT");
+    EXPECT_STR_EQ(name.string(), "ENOENT");
   }
   EXPECT_TRUE(caught);
   EXPECT_INT_EQ(calls, 0);
@@ -264,8 +264,8 @@ static void pipe_failed_bind_does_not_remove_another_listeners_path(void) {
   catch %(io-fail (library *) (operation ?operation) (status *)
           (name ?name) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"pipe_bind");
-    EXPECT_STR_EQ(name.string(), %"EADDRINUSE");
+    EXPECT_STR_EQ(operation.string(), "pipe_bind");
+    EXPECT_STR_EQ(name.string(), "EADDRINUSE");
   }
   EXPECT_TRUE(caught);
   EXPECT_INT_EQ(access(path, F_OK), 0);
@@ -317,8 +317,8 @@ static void pipe_read_error_returns_from_run_and_the_loop_resumes(void) {
   try loop.run(UV_RUN_DEFAULT);
   catch %(malformed (library ?library) (reason ?reason) *): {
     caught = 1;
-    EXPECT_STR_EQ(library.string(), %"test");
-    EXPECT_STR_EQ(reason.string(), %"pipe read failed");
+    EXPECT_STR_EQ(library.string(), "test");
+    EXPECT_STR_EQ(reason.string(), "pipe read failed");
   }
   EXPECT_TRUE(caught);
   EXPECT_TRUE(uv_is_closing((uv_handle_t *) state.accepted.native()));
@@ -356,7 +356,7 @@ static void pipe_accept_error_closes_listener_and_accepted_connection(void) {
   try loop.run(UV_RUN_DEFAULT);
   catch %(malformed (library *) (reason ?reason) *): {
     caught = 1;
-    EXPECT_STR_EQ(reason.string(), %"pipe accept failed");
+    EXPECT_STR_EQ(reason.string(), "pipe accept failed");
   }
   EXPECT_TRUE(caught);
   EXPECT_TRUE(uv_is_closing((uv_handle_t *) state.listener.native()));
@@ -380,7 +380,7 @@ static void pipe_rejects_invalid_names_and_operations_before_connection(void) {
   try pipe.bind(NULL);
   catch %(bad-arg (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"pipe_bind");
+    EXPECT_STR_EQ(operation.string(), "pipe_bind");
   }
   EXPECT_TRUE(caught);
 
@@ -388,7 +388,7 @@ static void pipe_rejects_invalid_names_and_operations_before_connection(void) {
   try pipe.write("x");
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"write");
+    EXPECT_STR_EQ(operation.string(), "write");
   }
   EXPECT_TRUE(caught);
 
@@ -396,7 +396,7 @@ static void pipe_rejects_invalid_names_and_operations_before_connection(void) {
   try pipe.read(void, _ignore_pipe_read);
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"read_start");
+    EXPECT_STR_EQ(operation.string(), "read_start");
   }
   EXPECT_TRUE(caught);
 
@@ -404,7 +404,7 @@ static void pipe_rejects_invalid_names_and_operations_before_connection(void) {
   try pipe.shutdown_write();
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"shutdown");
+    EXPECT_STR_EQ(operation.string(), "shutdown");
   }
   EXPECT_TRUE(caught);
   EXPECT_NULL(pipe.close());

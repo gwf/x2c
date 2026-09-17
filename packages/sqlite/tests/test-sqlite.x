@@ -35,12 +35,12 @@ static void positional_parameters_reset_and_reuse(void) {
   Statement query = db.prepare("SELECT name FROM item WHERE id = ?");
   defer query.free();
   query.bind(%(1));
-  EXPECT_STR_EQ(query.next()[0].string(), %"first");
+  EXPECT_STR_EQ(query.next()[0].string(), "first");
   EXPECT_TRUE(query.next() == NULL);
   query.reset();
-  EXPECT_STR_EQ(query.next()[0].string(), %"first");
+  EXPECT_STR_EQ(query.next()[0].string(), "first");
   query.bind(%(2));
-  EXPECT_STR_EQ(query.next()[0].string(), %"second");
+  EXPECT_STR_EQ(query.next()[0].string(), "second");
   int caught = 0;
   try { query.bind(%()); }
   catch %(bad-arg *_): { caught = 1; }
@@ -79,8 +79,8 @@ static void null_empty_rows_and_duplicate_columns_are_distinct(void) {
   defer query.free();
   List names = query.columns();
   EXPECT_INT_EQ(names.len(), 2);
-  EXPECT_STR_EQ(names[0].string(), %"value");
-  EXPECT_STR_EQ(names[1].string(), %"value");
+  EXPECT_STR_EQ(names[0].string(), "value");
+  EXPECT_STR_EQ(names[1].string(), "value");
   List row = query.next();
   EXPECT_INT_EQ(row.len(), 2);
   EXPECT_TRUE(row[0].is_null());
@@ -100,10 +100,10 @@ static void rows_copy_text_blobs_and_nul_text(void) {
     "UNION ALL SELECT 'second', x'ff', 'plain', x'12'"
   );
   List first = query.next();
-  EXPECT_STR_EQ(query.next()[0].string(), %"second");
+  EXPECT_STR_EQ(query.next()[0].string(), "second");
   query.free();
   db.close();
-  EXPECT_STR_EQ(first[0].string(), %"first");
+  EXPECT_STR_EQ(first[0].string(), "first");
   EXPECT_TRUE(first[1] is Bytes);
   Bytes blob = first[1];
   EXPECT_INT_EQ(blob.block().length, 3);
@@ -136,7 +136,7 @@ static void bound_values_copy_binary_and_preserve_numeric_edges(void) {
   EXPECT_TRUE(row[1].long_long_value() == LLONG_MIN);
   EXPECT_TRUE(row[2].long_long_value() == LLONG_MAX);
   EXPECT_TRUE(row[3].floating() == 1.25);
-  EXPECT_STR_EQ(row[4].string(), %"text");
+  EXPECT_STR_EQ(row[4].string(), "text");
   Bytes copy = row[5];
   EXPECT_TRUE(memcmp(copy, "A\0B", 3) == 0);
 
@@ -147,9 +147,9 @@ static void bound_values_copy_binary_and_preserve_numeric_edges(void) {
   Bytes empty_blob = Bytes.new(1);
   empty.bind(%($empty_blob $empty_blob "" ""));
   List kinds = empty.next();
-  EXPECT_STR_EQ(kinds[0].string(), %"blob");
+  EXPECT_STR_EQ(kinds[0].string(), "blob");
   EXPECT_INT_EQ(kinds[1].integer(), 0);
-  EXPECT_STR_EQ(kinds[2].string(), %"text");
+  EXPECT_STR_EQ(kinds[2].string(), "text");
   EXPECT_INT_EQ(kinds[3].integer(), 0);
 
   Statement integer = db.prepare("SELECT ?");
@@ -192,8 +192,8 @@ static void native_failures_preserve_operation_code_and_message(void) {
   try { insert.bind(%(1)).execute(); }
   catch %(?code *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"SQLite");
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"sqlite3_step");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "SQLite");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "sqlite3_step");
     EXPECT_INT_EQ(detail.assoc(<code>).integer(),
                   SQLITE_CONSTRAINT_UNIQUE);
     EXPECT_TRUE(detail.assoc(<message>).string().len() > 0);
@@ -204,7 +204,7 @@ static void native_failures_preserve_operation_code_and_message(void) {
   try { db.prepare("SELECT FROM"); }
   catch %(?code *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"sqlite3_prepare_v2");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "sqlite3_prepare_v2");
     EXPECT_INT_EQ(detail.assoc(<offset>).integer(), 7);
     EXPECT_TRUE(detail.assoc(<message>).string().len() > 0);
   }
@@ -230,7 +230,7 @@ static void transactions_commit_and_preserve_rollback_error(void) {
   }
   catch %(bad-arg *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<marker>).string(), %"original");
+    EXPECT_STR_EQ(detail.assoc(<marker>).string(), "original");
   }
   EXPECT_TRUE(caught);
   EXPECT_INT_EQ(count_rows(db), 2);

@@ -115,28 +115,28 @@ static void file_offset_io_copies_buffers_and_closes(void) {
   try state.file.read(1, 0, void, _offset_read);
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"fs_read");
+    EXPECT_STR_EQ(operation.string(), "fs_read");
   }
   EXPECT_TRUE(caught);
   caught = 0;
   try state.file.write("x", 0, void, _offset_written);
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"fs_write");
+    EXPECT_STR_EQ(operation.string(), "fs_write");
   }
   EXPECT_TRUE(caught);
   caught = 0;
   try state.file.close(void, _offset_closed);
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"fs_close");
+    EXPECT_STR_EQ(operation.string(), "fs_close");
   }
   EXPECT_TRUE(caught);
   caught = 0;
   try state.file.native();
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"file_native");
+    EXPECT_STR_EQ(operation.string(), "file_native");
   }
   EXPECT_TRUE(caught);
   EXPECT_NULL(loop.free());
@@ -208,8 +208,8 @@ static void whole_file_io_is_bounded_and_binary_safe(void) {
   catch %(size-limit (library ?library) (operation ?operation)
          (limit ?limit) *): {
     caught = 1;
-    EXPECT_STR_EQ(library.string(), %"libuv");
-    EXPECT_STR_EQ(operation.string(), %"read_file");
+    EXPECT_STR_EQ(library.string(), "libuv");
+    EXPECT_STR_EQ(operation.string(), "read_file");
     EXPECT_INT_EQ(limit.integer(), length - 1);
   }
   EXPECT_TRUE(caught);
@@ -225,7 +225,7 @@ static void whole_file_io_is_bounded_and_binary_safe(void) {
   try limited_request.bytes();
   catch %(size-limit (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"read_file");
+    EXPECT_STR_EQ(operation.string(), "read_file");
   }
   EXPECT_TRUE(caught);
 
@@ -346,14 +346,12 @@ static void stat_and_scan_results_are_independent_copies(void) {
   unlink(file_path);
   rmdir(subdirectory);
   EXPECT_INT_EQ(stat.size(), 5);
-  EXPECT_STR_EQ(
-    state.scan_request.entry_name(file_index), %"file.bin"
-  );
+  EXPECT_STR_EQ(state.scan_request.entry_name(file_index), "file.bin");
   int caught = 0;
   try state.scan_request.entry_name(-1);
   catch %(bad-arg (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"fs_entry_name");
+    EXPECT_STR_EQ(operation.string(), "fs_entry_name");
   }
   EXPECT_TRUE(caught);
   caught = 0;
@@ -362,7 +360,7 @@ static void stat_and_scan_results_are_independent_copies(void) {
   );
   catch %(bad-arg (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"fs_entry_type");
+    EXPECT_STR_EQ(operation.string(), "fs_entry_type");
   }
   EXPECT_TRUE(caught);
 }
@@ -412,8 +410,8 @@ static void whole_transfer_and_close_errors_release_descriptors(void) {
   catch %(io-fail (library ?library) (operation ?operation)
          (status ?status) *): {
     caught = 1;
-    EXPECT_STR_EQ(library.string(), %"libuv");
-    EXPECT_STR_EQ(operation.string(), %"fs_read");
+    EXPECT_STR_EQ(library.string(), "libuv");
+    EXPECT_STR_EQ(operation.string(), "fs_read");
     EXPECT_INT_EQ(status.integer(), UV_EISDIR);
   }
   EXPECT_TRUE(caught);
@@ -437,7 +435,7 @@ static void whole_transfer_and_close_errors_release_descriptors(void) {
   catch %(io-fail (library *) (operation ?operation)
          (status ?status) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"fs_close");
+    EXPECT_STR_EQ(operation.string(), "fs_close");
     EXPECT_INT_EQ(status.integer(), UV_EBADF);
   }
   EXPECT_TRUE(caught);
@@ -452,10 +450,10 @@ static void _expect_missing(UvLoop loop, UvFs request, String operation) {
   catch %(io-fail (library ?library) (operation ?actual)
          (status ?status) (name ?name) (message ?message) *): {
     caught = 1;
-    EXPECT_STR_EQ(library.string(), %"libuv");
+    EXPECT_STR_EQ(library.string(), "libuv");
     EXPECT_STR_EQ(actual.string(), operation);
     EXPECT_INT_EQ(status.integer(), UV_ENOENT);
-    EXPECT_STR_EQ(name.string(), %"ENOENT");
+    EXPECT_STR_EQ(name.string(), "ENOENT");
     EXPECT_STR_EQ(message.string(), String.new(uv_strerror(UV_ENOENT)));
   }
   EXPECT_TRUE(caught);
@@ -531,7 +529,7 @@ static void cancelled_fs_request_completes_once(void) {
   try loop.free();
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"loop_free");
+    EXPECT_STR_EQ(operation.string(), "loop_free");
   }
   EXPECT_TRUE(caught);
   uv_sem_post(&blocker.release);
@@ -587,7 +585,7 @@ static void file_close_and_loop_free_reject_live_work(void) {
   try loop.free();
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"loop_free");
+    EXPECT_STR_EQ(operation.string(), "loop_free");
   }
   EXPECT_TRUE(caught);
 
@@ -604,7 +602,7 @@ static void file_close_and_loop_free_reject_live_work(void) {
   try state.file.close(value, _pending_closed);
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"fs_close");
+    EXPECT_STR_EQ(operation.string(), "fs_close");
   }
   EXPECT_TRUE(caught);
   uv_sem_post(&blocker.release);
@@ -641,8 +639,8 @@ static void filesystem_callback_error_returns_and_loop_resumes(void) {
   try loop.run(UV_RUN_DEFAULT);
   catch %(malformed (library ?library) (reason ?reason) *): {
     caught = 1;
-    EXPECT_STR_EQ(library.string(), %"test");
-    EXPECT_STR_EQ(reason.string(), %"a filesystem callback failed");
+    EXPECT_STR_EQ(library.string(), "test");
+    EXPECT_STR_EQ(reason.string(), "a filesystem callback failed");
   }
   EXPECT_TRUE(caught);
   EXPECT_INT_EQ(failed.calls, 1);

@@ -30,8 +30,8 @@ static void process_captures_stdout_stderr_and_exit(void) {
   EXPECT_FALSE(child.exited());
   EXPECT_INT_EQ(loop.run(UV_RUN_DEFAULT), 0);
   EXPECT_TRUE(child.exited());
-  EXPECT_STR_EQ(child.stdout(), %"ordinary output");
-  EXPECT_STR_EQ(child.stderr(), %"diagnostic");
+  EXPECT_STR_EQ(child.stdout(), "ordinary output");
+  EXPECT_STR_EQ(child.stderr(), "diagnostic");
   Bytes diagnostic = child.stderr_bytes();
   defer diagnostic.free();
   EXPECT_INT_EQ(diagnostic.len(), 10);
@@ -55,7 +55,7 @@ static void process_stdin_and_concurrent_children(void) {
   EXPECT_TRUE(loop.alive());
   EXPECT_INT_EQ(loop.run(UV_RUN_DEFAULT), 0);
   EXPECT_FALSE(loop.alive());
-  EXPECT_STR_EQ(upper.stdout(), %"ONE\nTWO\n");
+  EXPECT_STR_EQ(upper.stdout(), "ONE\nTWO\n");
   EXPECT_TRUE(lines.stdout().contains("2"));
   EXPECT_INT_EQ(upper.exit_status(), 0);
   EXPECT_INT_EQ(lines.exit_status(), 0);
@@ -99,8 +99,8 @@ static void process_output_limit_reports_libuv_error(void) {
   try child.stdout();
   catch %(io-fail (library ?library) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(library.string(), %"libuv");
-    EXPECT_STR_EQ(operation.string(), %"stdout");
+    EXPECT_STR_EQ(library.string(), "libuv");
+    EXPECT_STR_EQ(operation.string(), "stdout");
   }
   EXPECT_TRUE(caught);
 }
@@ -123,8 +123,8 @@ static void process_free_waits_for_every_close_callback(void) {
   try child.exit_status();
   catch %(bad-state (library *) (operation ?operation) (reason ?reason) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"exit_status");
-    EXPECT_STR_EQ(reason.string(), %"process has been released");
+    EXPECT_STR_EQ(operation.string(), "exit_status");
+    EXPECT_STR_EQ(reason.string(), "process has been released");
   }
   EXPECT_TRUE(caught);
 }
@@ -158,7 +158,7 @@ static void command_rejects_options_after_it_starts(void) {
   try child.deadline(50);
   catch %(bad-state (library ?library) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"deadline");
+    EXPECT_STR_EQ(operation.string(), "deadline");
   }
   EXPECT_TRUE(caught);
   loop.run(UV_RUN_DEFAULT);
@@ -172,7 +172,7 @@ static void command_rejects_bad_argv_environment_and_stdio(void) {
   try loop.command(%("/usr/bin/printf" 7));
   catch %(bad-types (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"command");
+    EXPECT_STR_EQ(operation.string(), "command");
   }
   EXPECT_TRUE(caught);
 
@@ -180,7 +180,7 @@ static void command_rejects_bad_argv_environment_and_stdio(void) {
   try loop.command(%("/usr/bin/printf" "x")).environment({"MODE": 7});
   catch %(bad-types (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"environment");
+    EXPECT_STR_EQ(operation.string(), "environment");
   }
   EXPECT_TRUE(caught);
 
@@ -189,7 +189,7 @@ static void command_rejects_bad_argv_environment_and_stdio(void) {
     .stdio(<pipe>, <pipe>, <invalid>);
   catch %(bad-arg (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"stdio");
+    EXPECT_STR_EQ(operation.string(), "stdio");
   }
   EXPECT_TRUE(caught);
 }
@@ -202,13 +202,13 @@ static void process_stdio_can_be_captured_inherited_or_ignored(void) {
   defer child.free();
   child.close_stdin();
   loop.run(UV_RUN_DEFAULT);
-  EXPECT_STR_EQ(child.stdout(), %"captured");
+  EXPECT_STR_EQ(child.stdout(), "captured");
 
   int caught = 0;
   try child.stderr();
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"stderr");
+    EXPECT_STR_EQ(operation.string(), "stderr");
   }
   EXPECT_TRUE(caught);
 
@@ -243,14 +243,14 @@ static void deadline_leaves_a_prompt_child_alone(void) {
 
   EXPECT_INT_EQ(loop.run(UV_RUN_DEFAULT), 0);
   EXPECT_FALSE(quick.timed_out());
-  EXPECT_STR_EQ(quick.stdout(), %"quick");
+  EXPECT_STR_EQ(quick.stdout(), "quick");
   EXPECT_INT_EQ(quick.exit_status(), 0);
 
   int caught = 0;
   try quick.kill(SIGTERM);
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"process_kill");
+    EXPECT_STR_EQ(operation.string(), "process_kill");
   }
   EXPECT_TRUE(caught);
 }
@@ -340,8 +340,8 @@ static void _record_tick(UvTimer timer, Var value) {
 static void timer_fires_once_and_repeats(void) {
   UvLoop loop = UvLoop.new();
   defer loop.free();
-  Array once = Array.new();
-  Array repeated = Array.new();
+  Array once = [];
+  Array repeated = [];
 
   loop.timer(1, 0, once, _record_tick);
   loop.timer(1, 1, repeated, _record_tick);
@@ -496,7 +496,7 @@ static void phase_callback_errors_are_independent_and_resumable(void) {
   try loop.run(UV_RUN_DEFAULT);
   catch %(malformed (library *) (reason ?reason) *): {
     caught = 1;
-    EXPECT_STR_EQ(reason.string(), %"an idle callback failed");
+    EXPECT_STR_EQ(reason.string(), "an idle callback failed");
   }
   EXPECT_TRUE(caught);
   EXPECT_INT_EQ(guard.len(), 0);
@@ -510,7 +510,7 @@ static void phase_callback_errors_are_independent_and_resumable(void) {
   try loop.run(UV_RUN_DEFAULT);
   catch %(malformed (library *) (reason ?reason) *): {
     caught = 1;
-    EXPECT_STR_EQ(reason.string(), %"a prepare callback failed");
+    EXPECT_STR_EQ(reason.string(), "a prepare callback failed");
   }
   EXPECT_TRUE(caught);
   EXPECT_INT_EQ(guard.len(), 0);
@@ -526,7 +526,7 @@ static void phase_callback_errors_are_independent_and_resumable(void) {
   try loop.run(UV_RUN_DEFAULT);
   catch %(malformed (library *) (reason ?reason) *): {
     caught = 1;
-    EXPECT_STR_EQ(reason.string(), %"a check callback failed");
+    EXPECT_STR_EQ(reason.string(), "a check callback failed");
   }
   EXPECT_TRUE(caught);
   EXPECT_INT_EQ(guard.len(), 0);
@@ -546,7 +546,7 @@ static void loop_phases_reject_bad_arguments(void) {
   try loop.idle(void, NULL);
   catch %(bad-arg (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"idle");
+    EXPECT_STR_EQ(operation.string(), "idle");
   }
   EXPECT_TRUE(caught);
 
@@ -554,7 +554,7 @@ static void loop_phases_reject_bad_arguments(void) {
   try loop.prepare(void, NULL);
   catch %(bad-arg (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"prepare");
+    EXPECT_STR_EQ(operation.string(), "prepare");
   }
   EXPECT_TRUE(caught);
 
@@ -562,7 +562,7 @@ static void loop_phases_reject_bad_arguments(void) {
   try loop.check(void, NULL);
   catch %(bad-arg (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"check");
+    EXPECT_STR_EQ(operation.string(), "check");
   }
   EXPECT_TRUE(caught);
 }
@@ -574,7 +574,7 @@ static void timer_deadline_stops_a_running_loop(void) {
   defer slow.free();
   slow.close_stdin();
 
-  Array reached = Array.new();
+  Array reached = [];
   loop.timer(100, 0, reached, _stop_the_loop);
   loop.run(UV_RUN_DEFAULT);
 
@@ -600,7 +600,7 @@ static void signal_handler_runs_inside_the_loop(void) {
   defer slow.free();
   slow.close_stdin();
 
-  Array seen = Array.new();
+  Array seen = [];
   loop.signal(SIGUSR1, seen, _handle_interrupt);
   uv_kill(uv_os_getpid(), SIGUSR1);
   loop.run(UV_RUN_DEFAULT);
@@ -631,7 +631,7 @@ static void watch_reports_an_entry_a_child_creates(void) {
   defer loop.free();
 
   unlink(%"$work/x2c-libuv-same-name");
-  Array seen = Array.new();
+  Array seen = [];
   UvWatch watch = loop.watch(work, seen, _record_entry);
   EXPECT_NULL(watch.entry());
   UvTimer timeout = loop.timer(5000, 0, seen, _abandon_watch);
@@ -646,9 +646,7 @@ static void watch_reports_an_entry_a_child_creates(void) {
   loop.run(UV_RUN_DEFAULT);
 
   EXPECT_TRUE(seen.len() > 0);
-  EXPECT_STR_EQ(
-    seen[seen.len() - 1].string(), %"x2c-libuv-same-name"
-  );
+  EXPECT_STR_EQ(seen[seen.len() - 1].string(), "x2c-libuv-same-name");
 }
 
 static void _record_change(UvWatch watch, Var value) {
@@ -717,7 +715,7 @@ static void a_failed_callback_reaches_the_caller(void) {
   try loop.run(UV_RUN_DEFAULT);
   catch %(malformed (library ?library) (reason ?reason) *): {
     caught = 1;
-    EXPECT_STR_EQ(reason.string(), %"a callback body failed");
+    EXPECT_STR_EQ(reason.string(), "a callback body failed");
   }
   EXPECT_TRUE(caught);
   EXPECT_INT_EQ(loop.run(UV_RUN_NOWAIT), 0);
@@ -744,7 +742,7 @@ static void a_failed_signal_callback_reaches_the_caller_once(void) {
   try loop.run(UV_RUN_DEFAULT);
   catch %(malformed (library *) (reason ?reason) *): {
     caught = 1;
-    EXPECT_STR_EQ(reason.string(), %"a signal callback failed");
+    EXPECT_STR_EQ(reason.string(), "a signal callback failed");
   }
   EXPECT_TRUE(caught);
   EXPECT_INT_EQ(guard.len(), 0);
@@ -781,8 +779,8 @@ static void a_failed_async_callback_stops_and_resumes_the_loop(void) {
   try loop.run(UV_RUN_DEFAULT);
   catch %(malformed (library ?library) (reason ?reason) *): {
     caught = 1;
-    EXPECT_STR_EQ(library.string(), %"test");
-    EXPECT_STR_EQ(reason.string(), %"an async callback failed");
+    EXPECT_STR_EQ(library.string(), "test");
+    EXPECT_STR_EQ(reason.string(), "an async callback failed");
   }
   EXPECT_TRUE(caught);
   EXPECT_FALSE(slow.exited());
@@ -817,7 +815,7 @@ static void a_failed_watch_callback_reaches_the_caller(void) {
   try loop.run(UV_RUN_DEFAULT);
   catch %(malformed (library *) (reason ?reason) *): {
     caught = 1;
-    EXPECT_STR_EQ(reason.string(), %"a watch callback failed");
+    EXPECT_STR_EQ(reason.string(), "a watch callback failed");
   }
   writer.stop();
   timeout.stop();
@@ -842,7 +840,7 @@ static void async_watch_and_timer_reject_bad_arguments(void) {
   try loop.async(void, NULL);
   catch %(bad-arg (library ?library) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"async");
+    EXPECT_STR_EQ(operation.string(), "async");
   }
   EXPECT_TRUE(caught);
 
@@ -850,7 +848,7 @@ static void async_watch_and_timer_reject_bad_arguments(void) {
   try loop.timer(-1, 0, 0, _stop_the_loop);
   catch %(bad-arg (library ?library) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"timer");
+    EXPECT_STR_EQ(operation.string(), "timer");
   }
   EXPECT_TRUE(caught);
 
@@ -858,7 +856,7 @@ static void async_watch_and_timer_reject_bad_arguments(void) {
   try loop.watch("/no/such/directory/here", 0, _record_entry);
   catch %(io-fail (library ?library) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"fs_event_start");
+    EXPECT_STR_EQ(operation.string(), "fs_event_start");
   }
   EXPECT_TRUE(caught);
 }

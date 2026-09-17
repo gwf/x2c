@@ -33,21 +33,21 @@ static void curl_response_values_and_header_order(void) {
   EXPECT_INT_EQ(response.response_code(), 200);
   EXPECT_STR_EQ(response.effective_url(), fixture_url + "/ok");
   EXPECT_INT_EQ(response.body_size(), 5);
-  EXPECT_STR_EQ(response.text(), %"hello");
+  EXPECT_STR_EQ(response.text(), "hello");
   EXPECT_INT_EQ(response.blocks().len(), 1);
 
   CurlResponseBlock block = response.blocks().getindex(0);
-  EXPECT_STR_EQ(block.status_line(), %"HTTP/1.1 200 OK");
+  EXPECT_STR_EQ(block.status_line(), "HTTP/1.1 200 OK");
   EXPECT_INT_EQ(block.headers().len(), 5);
   CurlHeader first = block.headers().getindex(0);
-  EXPECT_STR_EQ(first.line(), %"Content-Type: text/plain");
-  EXPECT_STR_EQ(first.name(), %"Content-Type");
-  EXPECT_STR_EQ(first.value(), %"text/plain");
+  EXPECT_STR_EQ(first.line(), "Content-Type: text/plain");
+  EXPECT_STR_EQ(first.name(), "Content-Type");
+  EXPECT_STR_EQ(first.value(), "text/plain");
 
   List traces = block.values("x-trace");
   EXPECT_INT_EQ(traces.len(), 2);
-  EXPECT_STR_EQ(traces.getindex(0).string(), %"alpha");
-  EXPECT_STR_EQ(traces.getindex(1).string(), %"beta");
+  EXPECT_STR_EQ(traces.getindex(0).string(), "alpha");
+  EXPECT_STR_EQ(traces.getindex(1).string(), "beta");
   EXPECT_INT_EQ(block.values("missing").len(), 0);
   List empty = block.values("X-Empty");
   EXPECT_INT_EQ(empty.len(), 1);
@@ -65,12 +65,12 @@ static void curl_redirect_preserves_response_blocks(void) {
   EXPECT_INT_EQ(response.blocks().len(), 2);
   CurlResponseBlock redirect = response.blocks().getindex(0);
   CurlResponseBlock final = response.blocks().getindex(1);
-  EXPECT_STR_EQ(redirect.status_line(), %"HTTP/1.1 302 Found");
+  EXPECT_STR_EQ(redirect.status_line(), "HTTP/1.1 302 Found");
   EXPECT_STR_EQ(
     redirect.headers().getindex(0).curlheader().line(),
-    %"Location: /binary"
+    "Location: /binary"
   );
-  EXPECT_STR_EQ(final.status_line(), %"HTTP/1.1 200 OK");
+  EXPECT_STR_EQ(final.status_line(), "HTTP/1.1 200 OK");
   EXPECT_INT_EQ(final.values("X-Trace").len(), 2);
 }
 
@@ -86,8 +86,8 @@ static void curl_binary_body_and_explicit_text_failure(void) {
   try response.text();
   catch %(bad-enc *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"libcurl");
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"text");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "libcurl");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "text");
   }
   EXPECT_TRUE(caught);
 }
@@ -106,7 +106,7 @@ static void curl_empty_and_http_error_are_responses(void) {
   EXPECT_INT_EQ(empty.body_size(), 0);
   EXPECT_NULL(empty.text());
   EXPECT_INT_EQ(missing.response_code(), 404);
-  EXPECT_STR_EQ(missing.text(), %"not found");
+  EXPECT_STR_EQ(missing.text(), "not found");
   EXPECT_INT_EQ(Error.count(), before);
 }
 
@@ -120,9 +120,9 @@ static void curl_callback_limit_survives_for_next_transfer(void) {
   }
   catch %(size-limit *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"libcurl");
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"easy_perform");
-    EXPECT_STR_EQ(detail.assoc(<channel>).string(), %"body");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "libcurl");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "easy_perform");
+    EXPECT_STR_EQ(detail.assoc(<channel>).string(), "body");
     EXPECT_INT_EQ(detail.assoc(<limit>).integer(), 8);
   }
   EXPECT_TRUE(caught);
@@ -131,7 +131,7 @@ static void curl_callback_limit_survives_for_next_transfer(void) {
   CurlResponse recovered = easy.get(fixture_url + "/ok");
   defer recovered.free();
   EXPECT_INT_EQ(recovered.response_code(), 200);
-  EXPECT_STR_EQ(recovered.text(), %"hello");
+  EXPECT_STR_EQ(recovered.text(), "hello");
 }
 
 static void curl_header_limit_is_reported_after_callback(void) {
@@ -144,7 +144,7 @@ static void curl_header_limit_is_reported_after_callback(void) {
   }
   catch %(size-limit *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<channel>).string(), %"headers");
+    EXPECT_STR_EQ(detail.assoc(<channel>).string(), "headers");
     EXPECT_INT_EQ(detail.assoc(<limit>).integer(), 256 * 1024);
   }
   EXPECT_TRUE(caught);
@@ -158,14 +158,14 @@ static void curl_trailer_stays_in_its_response_block(void) {
 
   EXPECT_INT_EQ(response.blocks().len(), 1);
   CurlResponseBlock block = response.blocks().getindex(0);
-  EXPECT_STR_EQ(block.status_line(), %"HTTP/1.1 200 OK");
+  EXPECT_STR_EQ(block.status_line(), "HTTP/1.1 200 OK");
   EXPECT_INT_EQ(block.headers().len(), 3);
   EXPECT_STR_EQ(
     block.headers().getindex(2).curlheader().line(),
-    %"X-Trailer: finished"
+    "X-Trailer: finished"
   );
-  EXPECT_STR_EQ(block.values("X-Trailer").car().string(), %"finished");
-  EXPECT_STR_EQ(response.text(), %"hello");
+  EXPECT_STR_EQ(block.values("X-Trailer").car().string(), "finished");
+  EXPECT_STR_EQ(response.text(), "hello");
 }
 
 static void curl_transport_error_has_native_detail(void) {
@@ -178,8 +178,8 @@ static void curl_transport_error_has_native_detail(void) {
   }
   catch %(io-fail *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"libcurl");
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"easy_perform");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "libcurl");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "easy_perform");
     EXPECT_TRUE(detail.assoc(<code>).integer() != 0);
     EXPECT_TRUE(detail.assoc(<message>).string().len() > 0);
     EXPECT_STR_EQ(detail.assoc(<url>).string(), fixture_url + "/close");
@@ -197,14 +197,14 @@ static void curl_sequential_reuse_keeps_earlier_response(void) {
   defer second.free();
 
   EXPECT_INT_EQ(first.response_code(), 200);
-  EXPECT_STR_EQ(first.text(), %"hello");
+  EXPECT_STR_EQ(first.text(), "hello");
   EXPECT_INT_EQ(
     first.blocks().getindex(0).curlresponseblock()
       .values("X-Trace").len(),
     2
   );
   EXPECT_INT_EQ(second.response_code(), 404);
-  EXPECT_STR_EQ(second.text(), %"not found");
+  EXPECT_STR_EQ(second.text(), "not found");
 }
 
 static void curl_copies_transient_url_and_response_context(void) {
@@ -218,7 +218,7 @@ static void curl_copies_transient_url_and_response_context(void) {
   transient.free();
   defer response.free();
   EXPECT_STR_EQ(response.effective_url(), expected);
-  EXPECT_STR_EQ(response.text(), %"hello");
+  EXPECT_STR_EQ(response.text(), "hello");
 }
 
 static void curl_release_is_idempotent_and_stale_use_fails(void) {
@@ -231,7 +231,7 @@ static void curl_release_is_idempotent_and_stale_use_fails(void) {
   try response.body_size();
   catch %(bad-state *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"libcurl");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "libcurl");
   }
   EXPECT_TRUE(caught);
   EXPECT_NULL(easy.free());
@@ -271,9 +271,9 @@ static void curl_easy_retains_request_configuration(void) {
   defer response.free();
   EXPECT_INT_EQ(response.response_code(), 200);
   EXPECT_INT_EQ(response.body_size(), 7);
-  EXPECT_STR_EQ(response.text(), %"matched");
+  EXPECT_STR_EQ(response.text(), "matched");
   CurlResponseBlock block = response.blocks().car();
-  EXPECT_STR_EQ(block.values("X-Compat").car().string(), %"matched");
+  EXPECT_STR_EQ(block.values("X-Compat").car().string(), "matched");
   EXPECT_INT_EQ(block.headers().len(), 2);
 }
 
@@ -285,14 +285,14 @@ static void curl_native_handle_configures_the_next_transfer(void) {
   CurlResponse response = easy.get(fixture_url + "/compat");
   defer response.free();
   EXPECT_INT_EQ(response.response_code(), 200);
-  EXPECT_STR_EQ(response.text(), %"matched");
+  EXPECT_STR_EQ(response.text(), "matched");
 
   EXPECT_NULL(easy.free());
   int caught = 0;
   try easy.native();
   catch %(bad-arg *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"native");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "native");
   }
   EXPECT_TRUE(caught);
 }
@@ -346,7 +346,7 @@ static void curl_native_handle_performs_its_own_transfer(void) {
   /*  And the ordinary path still owns the handle after that transfer. */
   CurlResponse ordinary = easy.get(fixture_url + "/compat");
   defer ordinary.free();
-  EXPECT_STR_EQ(ordinary.text(), %"matched");
+  EXPECT_STR_EQ(ordinary.text(), "matched");
 }
 
 static void curl_post_sends_a_body_with_its_content_type(void) {
@@ -394,7 +394,7 @@ static void curl_head_and_other_methods_reach_the_server(void) {
   EXPECT_INT_EQ(head.response_code(), 200);
   EXPECT_INT_EQ(head.body_size(), 0);
   CurlResponseBlock block = head.blocks().car();
-  EXPECT_STR_EQ(block.values("Content-Length").car().string(), %"64");
+  EXPECT_STR_EQ(block.values("Content-Length").car().string(), "64");
 
   CurlResponse deleted = easy.request("DELETE", fixture_url + "/echo");
   defer deleted.free();
@@ -417,7 +417,7 @@ static void curl_basic_auth_unlocks_a_protected_path(void) {
     .get(fixture_url + "/secret");
   defer allowed.free();
   EXPECT_INT_EQ(allowed.response_code(), 200);
-  EXPECT_STR_EQ(allowed.text(), %"release-7 signing key");
+  EXPECT_STR_EQ(allowed.text(), "release-7 signing key");
 }
 
 static void curl_transfer_info_describes_the_exchange(void) {
@@ -433,13 +433,13 @@ static void curl_transfer_info_describes_the_exchange(void) {
 }
 
 static void curl_escapes_and_unescapes_url_components(void) {
-  EXPECT_STR_EQ(CurlEasy.escape("a b&c/d"), %"a%20b%26c%2Fd");
-  EXPECT_STR_EQ(CurlEasy.unescape("a%20b%26c%2Fd"), %"a b&c/d");
+  EXPECT_STR_EQ(CurlEasy.escape("a b&c/d"), "a%20b%26c%2Fd");
+  EXPECT_STR_EQ(CurlEasy.unescape("a%20b%26c%2Fd"), "a b&c/d");
   int caught = 0;
   try CurlEasy.unescape("a%00b");
   catch %(bad-enc *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"unescape");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "unescape");
   }
   EXPECT_TRUE(caught);
 
@@ -449,7 +449,7 @@ static void curl_escapes_and_unescapes_url_components(void) {
     fixture_url + "/search?q=" + CurlEasy.escape("a b&c")
   );
   defer response.free();
-  EXPECT_STR_EQ(response.text(), %"searched for a b&c");
+  EXPECT_STR_EQ(response.text(), "searched for a b&c");
 }
 
 static void curl_download_streams_past_the_body_limit(void) {
@@ -492,7 +492,7 @@ static void curl_stream_delivers_chunks_without_buffering(void) {
   EXPECT_STR_EQ(
     response.blocks().car().curlresponseblock()
       .values("Content-Type").car().string(),
-    %"application/octet-stream"
+    "application/octet-stream"
   );
   int caught = 0;
   try response.body();
@@ -500,7 +500,7 @@ static void curl_stream_delivers_chunks_without_buffering(void) {
     caught = 1;
     EXPECT_STR_EQ(
       detail.assoc(<reason>).string(),
-      %"response body was passed to a callback"
+      "response body was passed to a callback"
     );
   }
   EXPECT_TRUE(caught);
@@ -518,15 +518,13 @@ static void curl_stream_contains_callback_errors(void) {
   }
   catch %(malformed *detail): {
     caught = 1;
-    EXPECT_STR_EQ(
-      detail.assoc(<reason>).string(), %"stream consumer failed"
-    );
+    EXPECT_STR_EQ(detail.assoc(<reason>).string(), "stream consumer failed");
   }
   EXPECT_TRUE(caught);
 
   CurlResponse recovered = easy.get(fixture_url + "/ok");
   defer recovered.free();
-  EXPECT_STR_EQ(recovered.text(), %"hello");
+  EXPECT_STR_EQ(recovered.text(), "hello");
 }
 
 static void curl_lisp_bindings_return_values_lisp_consumes(void) {
@@ -540,7 +538,7 @@ static void curl_lisp_bindings_return_values_lisp_consumes(void) {
   );
   EXPECT_STR_EQ(
     lisp.eval(%( substring (http-get ${fixture_url + "/ok"}) 0 4 )).string(),
-    %"hell"
+    "hell"
   );
   EXPECT_INT_EQ(
     lisp.eval(%( + 1 (http-status ${fixture_url + "/missing"}) )).integer(),
@@ -549,13 +547,13 @@ static void curl_lisp_bindings_return_values_lisp_consumes(void) {
   EXPECT_INT_EQ(
     lisp.eval(%( length (http-headers ${fixture_url + "/ok"}) )).integer(), 5
   );
-  EXPECT_STR_EQ(lisp.eval(%( url-escape "a b" )).string(), %"a%20b");
+  EXPECT_STR_EQ(lisp.eval(%( url-escape "a b" )).string(), "a%20b");
   EXPECT_STR_EQ(
     lisp.eval(%(
       substring (http-post ${fixture_url + "/echo"} "text/plain" "ping")
                 9 15
     )).string(),
-    %"\"ping\""
+    "\"ping\""
   );
 }
 
@@ -571,11 +569,11 @@ static void curl_concurrent_batch_preserves_input_order_and_bound(void) {
   CurlBatch serial = easy.get_all(urls, 1);
   defer serial.free();
   EXPECT_INT_EQ(serial.len(), 3);
-  EXPECT_STR_EQ(serial.response(0).text(), %"one");
-  EXPECT_STR_EQ(serial.response(2).text(), %"three");
+  EXPECT_STR_EQ(serial.response(0).text(), "one");
+  EXPECT_STR_EQ(serial.response(2).text(), "three");
   CurlResponse serial_stats = easy.get(fixture_url + "/batch/stats");
   defer serial_stats.free();
-  EXPECT_STR_EQ(serial_stats.text(), %"1 one,two,three");
+  EXPECT_STR_EQ(serial_stats.text(), "1 one,two,three");
 
   CurlResponse again = easy.get(fixture_url + "/batch/reset");
   defer again.free();
@@ -587,10 +585,10 @@ static void curl_concurrent_batch_preserves_input_order_and_bound(void) {
   CurlBatch parallel = easy.get_all(urls, 3);
   defer parallel.free();
   EXPECT_INT_EQ(parallel.len(), 4);
-  EXPECT_STR_EQ(parallel.response(0).text(), %"slow");
-  EXPECT_STR_EQ(parallel.response(1).text(), %"fast");
-  EXPECT_STR_EQ(parallel.response(2).text(), %"middle");
-  EXPECT_STR_EQ(parallel.response(3).text(), %"last");
+  EXPECT_STR_EQ(parallel.response(0).text(), "slow");
+  EXPECT_STR_EQ(parallel.response(1).text(), "fast");
+  EXPECT_STR_EQ(parallel.response(2).text(), "middle");
+  EXPECT_STR_EQ(parallel.response(3).text(), "last");
   CurlResponse parallel_stats = easy.get(fixture_url + "/batch/stats");
   defer parallel_stats.free();
   EXPECT_TRUE(parallel_stats.text().startswith("3 fast,"));
@@ -605,29 +603,29 @@ static void curl_concurrent_batch_retains_each_failure(void) {
     paths.map(%!(String path) => fixture_url + path), 2);
   defer batch.free();
   EXPECT_INT_EQ(batch.len(), 5);
-  EXPECT_STR_EQ(batch.response(0).text(), %"hello");
+  EXPECT_STR_EQ(batch.response(0).text(), "hello");
   EXPECT_INT_EQ(batch.response(3).response_code(), 404);
-  EXPECT_STR_EQ(batch.response(4).text(), %"hello");
+  EXPECT_STR_EQ(batch.response(4).text(), "hello");
   int transport = 0, limit = 0;
   try batch.response(1);
   catch %(io-fail *detail): {
     transport = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"multi_info_read");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "multi_info_read");
     EXPECT_INT_EQ(detail.assoc(<code>).integer(), CURLE_GOT_NOTHING);
     EXPECT_STR_EQ(detail.assoc(<url>).string(), fixture_url + "/close");
   }
   try batch.response(2);
   catch %(size-limit *detail): {
     limit = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"multi_info_read");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "multi_info_read");
     EXPECT_INT_EQ(detail.assoc(<limit>).integer(), 32);
-    EXPECT_STR_EQ(detail.assoc(<channel>).string(), %"body");
+    EXPECT_STR_EQ(detail.assoc(<channel>).string(), "body");
   }
   EXPECT_TRUE(transport && limit);
   CurlResponse reused = easy.get(fixture_url + "/ok");
   defer reused.free();
-  EXPECT_STR_EQ(reused.text(), %"hello");
-  EXPECT_STR_EQ(batch.response(0).text(), %"hello");
+  EXPECT_STR_EQ(reused.text(), "hello");
+  EXPECT_STR_EQ(batch.response(0).text(), "hello");
 }
 
 static void curl_concurrent_batch_broadcasts_body_and_raw_options(void) {
@@ -681,8 +679,8 @@ static void curl_concurrent_batch_broadcasts_body_and_raw_options(void) {
   String compat = fixture_url + "/compat";
   CurlBatch configured = easy.get_all(%($compat $compat), 2);
   defer configured.free();
-  EXPECT_STR_EQ(configured.response(0).text(), %"matched");
-  EXPECT_STR_EQ(configured.response(1).text(), %"matched");
+  EXPECT_STR_EQ(configured.response(0).text(), "matched");
+  EXPECT_STR_EQ(configured.response(1).text(), "matched");
 }
 
 static void curl_concurrent_batch_empty_lifetime_and_timeout(void) {
@@ -716,7 +714,7 @@ static void curl_concurrent_batch_empty_lifetime_and_timeout(void) {
   }
   EXPECT_TRUE(timeout);
   easy.free();
-  EXPECT_STR_EQ(batch.response(1).text(), %"hello");
+  EXPECT_STR_EQ(batch.response(1).text(), "hello");
 }
 
 void curl_suite(void) {

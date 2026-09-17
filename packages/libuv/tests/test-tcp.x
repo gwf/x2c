@@ -124,7 +124,7 @@ static void tcp_exchanges_copied_binary_data_with_several_clients(void) {
 
   EXPECT_PTR_EQ(test.listener.loop(), loop);
   EXPECT_NOT_NULL(test.listener.native());
-  EXPECT_STR_EQ(address.host(), %"127.0.0.1");
+  EXPECT_STR_EQ(address.host(), "127.0.0.1");
   EXPECT_TRUE(address.port() > 0);
   EXPECT_INT_EQ(address.family(), AF_INET);
   EXPECT_INT_EQ(address.socket_type(), SOCK_STREAM);
@@ -246,8 +246,8 @@ static void _owned_read(UvTcp tcp, Bytes chunk, Var value) {
   try tcp.read(value, _owned_read);
   catch %(bad-state (library *) (operation ?operation) (reason ?reason) *): {
     state.restart_rejected = 1;
-    EXPECT_STR_EQ(operation.string(), %"read_start");
-    EXPECT_STR_EQ(reason.string(), %"the TCP read side has reached EOF");
+    EXPECT_STR_EQ(operation.string(), "read_start");
+    EXPECT_STR_EQ(reason.string(), "the TCP read side has reached EOF");
   }
   tcp.close();
   state.client.close();
@@ -400,7 +400,7 @@ static void tcp_refused_connection_reports_error_and_finishes_request(void) {
   catch %(bad-state (library *) (operation ?operation) (reason *)
           (pending ?pending) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"loop_free");
+    EXPECT_STR_EQ(operation.string(), "loop_free");
     EXPECT_TRUE(pending.integer() > 0);
   }
   EXPECT_TRUE(caught);
@@ -410,8 +410,8 @@ static void tcp_refused_connection_reports_error_and_finishes_request(void) {
   catch %(io-fail (library *) (operation ?operation) (status *)
           (name ?name) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"tcp_connect");
-    EXPECT_STR_EQ(name.string(), %"ECONNREFUSED");
+    EXPECT_STR_EQ(operation.string(), "tcp_connect");
+    EXPECT_STR_EQ(name.string(), "ECONNREFUSED");
   }
   EXPECT_TRUE(caught);
   EXPECT_INT_EQ(calls, 0);
@@ -460,8 +460,8 @@ static void tcp_read_error_returns_from_run_and_the_loop_resumes(void) {
   try loop.run(UV_RUN_DEFAULT);
   catch %(malformed (library ?library) (reason ?reason) *): {
     caught = 1;
-    EXPECT_STR_EQ(library.string(), %"test");
-    EXPECT_STR_EQ(reason.string(), %"TCP read failed");
+    EXPECT_STR_EQ(library.string(), "test");
+    EXPECT_STR_EQ(reason.string(), "TCP read failed");
   }
   EXPECT_TRUE(caught);
   state.client.close();
@@ -495,7 +495,7 @@ static void tcp_accept_error_closes_listener_and_accepted_connection(void) {
   try loop.run(UV_RUN_DEFAULT);
   catch %(malformed (library *) (reason ?reason) *): {
     caught = 1;
-    EXPECT_STR_EQ(reason.string(), %"TCP accept failed");
+    EXPECT_STR_EQ(reason.string(), "TCP accept failed");
   }
   EXPECT_TRUE(caught);
   EXPECT_TRUE(uv_is_closing((uv_handle_t *) state.listener.native()));
@@ -512,7 +512,7 @@ static void tcp_rejects_stream_operations_before_connection(void) {
   try tcp.write("x");
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"write");
+    EXPECT_STR_EQ(operation.string(), "write");
   }
   EXPECT_TRUE(caught);
 
@@ -520,7 +520,7 @@ static void tcp_rejects_stream_operations_before_connection(void) {
   try tcp.shutdown_write();
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"shutdown");
+    EXPECT_STR_EQ(operation.string(), "shutdown");
   }
   EXPECT_TRUE(caught);
   EXPECT_NULL(tcp.close());

@@ -83,7 +83,7 @@ static void blis_owner_release_invalidates_views(void) {
   try view.free();
   catch %(bad-state *detail): {
     view_free_caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"free");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "free");
   }
   EXPECT_TRUE(view_free_caught);
   EXPECT_NEAR(owner.at(0, 0), 1.0, 1e-12);
@@ -94,7 +94,7 @@ static void blis_owner_release_invalidates_views(void) {
   try view.at(0, 0);
   catch %(bad-state *detail): {
     stale_caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"BLIS");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "BLIS");
   }
   EXPECT_TRUE(stale_caught);
 }
@@ -104,7 +104,7 @@ static void blis_collection_boundary_is_a_precision_copy(void) {
   BlisObject copied = BlisObject.copy_rows(rows, BLIS_FLOAT);
   defer copied.free();
 
-  EXPECT_STR_EQ(copied.storage_precision(), %"single");
+  EXPECT_STR_EQ(copied.storage_precision(), "single");
   EXPECT_TRUE(copied.at(0, 0) != rows.car().car().double());
   EXPECT_NEAR(copied.at(0, 0), (double) (float) 0.123456789, 1e-12);
   copied.put(0, 1, 7.0);
@@ -112,17 +112,17 @@ static void blis_collection_boundary_is_a_precision_copy(void) {
 
   BlisObject result = BlisObject.new(BLIS_DOUBLE, 1, 1);
   defer result.free();
-  EXPECT_STR_EQ(result.storage_precision(), %"double");
-  EXPECT_STR_EQ(result.computation_precision(), %"double");
+  EXPECT_STR_EQ(result.storage_precision(), "double");
+  EXPECT_STR_EQ(result.computation_precision(), "double");
   result.set_computation_precision(BLIS_SINGLE_PREC);
-  EXPECT_STR_EQ(result.computation_precision(), %"single");
+  EXPECT_STR_EQ(result.computation_precision(), "single");
 
   int precision_caught = 0;
   try result.set_computation_precision((prec_t) -1);
   catch %(bad-arg *detail): {
     precision_caught = 1;
     EXPECT_STR_EQ(
-      detail.assoc(<operation>).string(), %"set_computation_precision"
+      detail.assoc(<operation>).string(), "set_computation_precision"
     );
   }
   EXPECT_TRUE(precision_caught);
@@ -143,7 +143,7 @@ static void blis_collection_copy_converts_every_numeric_tag(void) {
   try BlisObject.copy_vector(%($exceptional), BLIS_DOUBLE);
   catch %(bad-arg *detail): {
     exceptional_caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"copy_vector");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "copy_vector");
   }
   EXPECT_TRUE(exceptional_caught);
 
@@ -152,7 +152,7 @@ static void blis_collection_copy_converts_every_numeric_tag(void) {
   try BlisObject.copy_vector(%($infinity), BLIS_DOUBLE);
   catch %(bad-arg *detail): {
     exceptional_caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"copy_vector");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "copy_vector");
   }
   EXPECT_TRUE(exceptional_caught);
 }
@@ -188,7 +188,7 @@ static void blis_operators_are_scoped_blis_operations(void) {
   try left @ wrong;
   catch %(bad-arg *detail): {
     shape_caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"matmul");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "matmul");
   }
   EXPECT_TRUE(shape_caught);
 }
@@ -214,7 +214,7 @@ static void blis_dimensions_empty_views_and_bounds(void) {
   try matrix.part(0, 2, 2, 2);
   catch %(bad-arg *detail): {
     bounds_caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"part");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "part");
   }
   EXPECT_TRUE(bounds_caught);
 
@@ -222,7 +222,7 @@ static void blis_dimensions_empty_views_and_bounds(void) {
   try matrix.at(2, 0);
   catch %(bad-arg *detail): {
     index_caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"at");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "at");
   }
   EXPECT_TRUE(index_caught);
 }
@@ -240,7 +240,7 @@ static void blis_mutations_fail_before_changing_destination(void) {
   try destination.gemm(1.0, left, wrong, 0.0);
   catch %(bad-arg *detail): {
     gemm_caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"gemm");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "gemm");
   }
   EXPECT_TRUE(gemm_caught);
   EXPECT_NEAR(destination.at(0, 0), 7.0, 1e-12);
@@ -253,7 +253,7 @@ static void blis_mutations_fail_before_changing_destination(void) {
   try vector.axpyv(1.0, short_vector);
   catch %(bad-arg *detail): {
     axpy_caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"axpyv");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "axpyv");
   }
   EXPECT_TRUE(axpy_caught);
   EXPECT_NEAR(vector.at(0, 0), 1.0, 1e-12);
@@ -264,7 +264,7 @@ static void blis_mutations_fail_before_changing_destination(void) {
   try single.axpyv(1.0, vector);
   catch %(bad-types *detail): {
     precision_caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"axpyv");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "axpyv");
   }
   EXPECT_TRUE(precision_caught);
   EXPECT_NEAR(single.at(0, 0), 1.0, 1e-12);
@@ -308,7 +308,7 @@ static void blis_scale_is_negation_with_a_parameter(void) {
   try released.scale(2.0);
   catch %(bad-state *detail): {
     state_caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"scale");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "scale");
   }
   EXPECT_TRUE(state_caught);
 }
@@ -366,7 +366,7 @@ static void blis_bulk_read_agrees_with_element_reads(void) {
   try matrix.to_values();
   catch %(bad-arg *detail): {
     vector_caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"to_values");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "to_values");
   }
   EXPECT_TRUE(vector_caught);
 }

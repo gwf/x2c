@@ -20,7 +20,7 @@ static void lisp_reads_rows_null_and_binary(void) {
   lisp.set_global("rows", rows);
   EXPECT_INT_EQ(lisp.eval(%(length rows)).integer(), 1);
   EXPECT_INT_EQ(lisp.eval(%(length (car rows))).integer(), 4);
-  EXPECT_STR_EQ(lisp.eval(%(car (car rows))).string(), %"archive");
+  EXPECT_STR_EQ(lisp.eval(%(car (car rows))).string(), "archive");
   List bytes = lisp.eval(%(sqlite-bytes-list (cadr (car rows))));
   EXPECT_TRUE(bytes == %(0 127 255));
   Var null_result = lisp.eval(%(sqlite-null? (car (cdr (cdr (car rows))))));
@@ -47,7 +47,7 @@ static void lisp_persists_parameters_and_reports_errors(void) {
   EXPECT_INT_EQ(lisp.eval(%(sqlite-execute $path
     "INSERT INTO item VALUES (?, ?)" '("saved" 42))).integer(), 1);
   EXPECT_STR_EQ(lisp.eval(%(car (car (sqlite-query $path
-    "SELECT name FROM item WHERE value = ?" '(42))))).string(), %"saved");
+    "SELECT name FROM item WHERE value = ?" '(42))))).string(), "saved");
   EXPECT_INT_EQ(lisp.eval(%(length (sqlite-query $path
     "SELECT name FROM item WHERE value = ?" '(43)))).integer(), 0);
   long long native_before = sqlite3_memory_used();

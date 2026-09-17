@@ -9,7 +9,7 @@
 $(import "../../../unittest/test-macros.xmacro")
 
 static void raw_loop_and_version_surface(void) {
-  EXPECT_STR_EQ(String.new(uv_version_string()), %"1.52.1");
+  EXPECT_STR_EQ(String.new(uv_version_string()), "1.52.1");
   EXPECT_INT_EQ(uv_version(), UV_VERSION_HEX);
 
   uv_loop_t loop;
@@ -19,7 +19,7 @@ static void raw_loop_and_version_surface(void) {
 }
 
 static void raw_error_and_buffer_surface(void) {
-  EXPECT_STR_EQ(String.new(uv_err_name(UV_ENOENT)), %"ENOENT");
+  EXPECT_STR_EQ(String.new(uv_err_name(UV_ENOENT)), "ENOENT");
   uv_buf_t buffer = uv_buf_init(NULL, 0);
   EXPECT_NULL(buffer.base);
   EXPECT_INT_EQ(buffer.len, 0);
@@ -87,12 +87,12 @@ static void raw_numeric_address_surface(void) {
   char host[INET6_ADDRSTRLEN];
   EXPECT_INT_EQ(uv_ip4_addr("127.0.0.1", 4321, &ip4), 0);
   EXPECT_INT_EQ(uv_ip4_name(&ip4, host, sizeof(host)), 0);
-  EXPECT_STR_EQ(String.new(host), %"127.0.0.1");
+  EXPECT_STR_EQ(String.new(host), "127.0.0.1");
   EXPECT_INT_EQ(ntohs(ip4.sin_port), 4321);
 
   EXPECT_INT_EQ(uv_ip6_addr("::1", 4321, &ip6), 0);
   EXPECT_INT_EQ(uv_ip6_name(&ip6, host, sizeof(host)), 0);
-  EXPECT_STR_EQ(String.new(host), %"::1");
+  EXPECT_STR_EQ(String.new(host), "::1");
   EXPECT_INT_EQ(ntohs(ip6.sin6_port), 4321);
 }
 
@@ -590,7 +590,7 @@ static void raw_filesystem_surface(void) {
   EXPECT_INT_EQ(uv_fs_get_type(&request), UV_FS_SCANDIR);
   uv_dirent_t entry;
   EXPECT_INT_EQ(uv_fs_scandir_next(&request, &entry), 0);
-  EXPECT_STR_EQ(String.new(entry.name), %"payload.bin");
+  EXPECT_STR_EQ(String.new(entry.name), "payload.bin");
   EXPECT_INT_EQ(entry.type, UV_DIRENT_FILE);
   EXPECT_INT_EQ(uv_fs_scandir_next(&request, &entry), UV_EOF);
   EXPECT_NULL(uv_fs_get_ptr(&request));

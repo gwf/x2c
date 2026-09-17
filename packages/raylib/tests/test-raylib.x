@@ -64,8 +64,8 @@ static void raylib_export_raises_io_failure(void) {
   try image.export("builds/missing/output.png");
   catch %(io-fail *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"raylib");
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"ExportImage");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "raylib");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "ExportImage");
     EXPECT_TRUE(detail.assoc(<message>).string().len() > 0);
   }
   EXPECT_TRUE(caught);
@@ -94,9 +94,9 @@ static void raylib_load_raises_io_failure(void) {
   }
   catch %(io-fail *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"raylib");
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"LoadImage");
-    EXPECT_STR_EQ(detail.assoc(<path>).string(), %"builds/no-such-image.png");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "raylib");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "LoadImage");
+    EXPECT_STR_EQ(detail.assoc(<path>).string(), "builds/no-such-image.png");
     EXPECT_TRUE(detail.assoc(<message>).string().len() > 0);
   }
   EXPECT_TRUE(caught);
@@ -202,7 +202,7 @@ static void raylib_pixels_reject_an_index_out_of_range(void) {
   }
   catch %(bad-arg *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"pixels index");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "pixels index");
     EXPECT_INT_EQ(detail.assoc(<index>).int(), 4);
   }
   EXPECT_TRUE(caught);
@@ -211,7 +211,7 @@ static void raylib_pixels_reject_an_index_out_of_range(void) {
   try pixels.at(2, 0);
   catch %(bad-arg *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"pixels at");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "pixels at");
   }
   EXPECT_TRUE(caught);
 
@@ -219,7 +219,7 @@ static void raylib_pixels_reject_an_index_out_of_range(void) {
   try pixels.put(0, -1, WHITE);
   catch %(bad-arg *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"pixels put");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "pixels put");
   }
   EXPECT_TRUE(caught);
 
@@ -227,7 +227,7 @@ static void raylib_pixels_reject_an_index_out_of_range(void) {
   try pixels[-1] = WHITE;
   catch %(bad-arg *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"pixels store");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "pixels store");
   }
   EXPECT_TRUE(caught);
 }
@@ -240,7 +240,7 @@ static void raylib_image_color_rejects_coordinates_out_of_range(void) {
   try image.color_at(2, 0);
   catch %(bad-arg *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"image color");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "image color");
   }
   EXPECT_TRUE(caught);
 }
@@ -304,8 +304,8 @@ static void raylib_released_pixels_stay_released(void) {
   }
   catch %(bad-state *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"raylib");
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"pixels index");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "raylib");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "pixels index");
   }
   EXPECT_TRUE(caught);
 }
@@ -337,7 +337,7 @@ static void raylib_polygons_reject_malformed_points(void) {
   try image.draw_polygon(%((1 1) (5 1)), RED);
   catch %(bad-arg *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"draw polygon");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "draw polygon");
     EXPECT_INT_EQ(detail.assoc(<points>).int(), 2);
   }
   EXPECT_TRUE(caught);
@@ -346,7 +346,7 @@ static void raylib_polygons_reject_malformed_points(void) {
   try image.draw_polygon(%((1 1) (5 1) (3 5 7)), RED);
   catch %(bad-arg *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"raylib");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "raylib");
   }
   EXPECT_TRUE(caught);
 }

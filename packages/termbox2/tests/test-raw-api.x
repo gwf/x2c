@@ -7,13 +7,13 @@
 $(import "../../../unittest/test-macros.xmacro")
 
 static void raw_profile_and_status(void) {
-  EXPECT_STR_EQ(String.new((char *) tb_version()), %"2.5.0");
+  EXPECT_STR_EQ(String.new((char *) tb_version()), "2.5.0");
   EXPECT_INT_EQ(tb_attr_width(), 64);
   EXPECT_TRUE(tb_has_egc());
   EXPECT_INT_EQ(tb_width(), TB_ERR_NOT_INIT);
   EXPECT_STR_EQ(
     String.new((char *) tb_strerror(TB_ERR_OUT_OF_BOUNDS)),
-    %"Out of bounds"
+    "Out of bounds"
   );
 }
 

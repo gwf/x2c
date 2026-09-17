@@ -227,7 +227,7 @@ static Var _json_from_value(yyjson_val *value, unsigned depth) {
     );
   }
   if (yyjson_is_arr(value)) {
-    Array array = Array.new();
+    Array array = [];
     yyjson_arr_iter iter = yyjson_arr_iter_with(value);
     yyjson_val *child = NULL;
     while ((child = yyjson_arr_iter_next(&iter))) {
@@ -238,7 +238,7 @@ static Var _json_from_value(yyjson_val *value, unsigned depth) {
     return array;
   }
   if (yyjson_is_obj(value)) {
-    Map map = Map.new();
+    Map map = {};
     yyjson_obj_iter iter = yyjson_obj_iter_with(value);
     yyjson_val *key = NULL;
     while ((key = yyjson_obj_iter_next(&iter))) {
@@ -282,7 +282,7 @@ static Var _json_from_mut_value(yyjson_mut_val *value, unsigned depth) {
     );
   }
   if (yyjson_mut_is_arr(value)) {
-    Array array = Array.new();
+    Array array = [];
     yyjson_mut_arr_iter iter = yyjson_mut_arr_iter_with(value);
     yyjson_mut_val *child = NULL;
     while ((child = yyjson_mut_arr_iter_next(&iter))) {
@@ -293,7 +293,7 @@ static Var _json_from_mut_value(yyjson_mut_val *value, unsigned depth) {
     return array;
   }
   if (yyjson_mut_is_obj(value)) {
-    Map map = Map.new();
+    Map map = {};
     yyjson_mut_obj_iter iter = yyjson_mut_obj_iter_with(value);
     yyjson_mut_val *key = NULL;
     while ((key = yyjson_mut_obj_iter_next(&iter))) {
@@ -967,12 +967,12 @@ static Var _json_to_lisp(Var value) {
   }
   if (value is <yyjson--bo> && !value.boolean().truth()) return %();
   if (value is <array>) {
-    Array result = Array.new();
+    Array result = [];
     foreach(Var child, value.array()) result.push(_json_to_lisp(child));
     return result;
   }
   if (value is <map>) {
-    Map result = Map.new();
+    Map result = {};
     foreach(Var (key, child), value.map())
       result[key] = _json_to_lisp(child);
     return result;
@@ -984,12 +984,12 @@ static Var _json_from_lisp(Var value) {
   if (value is <yyjson--nu>) return Var.null();
   if (value.is_nil()) return Json.bool(0);
   if (value is <array>) {
-    Array result = Array.new();
+    Array result = [];
     foreach(Var child, value.array()) result.push(_json_from_lisp(child));
     return result;
   }
   if (value is <map>) {
-    Map result = Map.new();
+    Map result = {};
     foreach(Var (key, child), value.map())
       result[key] = _json_from_lisp(child);
     return result;

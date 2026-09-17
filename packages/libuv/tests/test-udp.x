@@ -120,7 +120,7 @@ static void udp_sends_connected_unconnected_binary_and_empty_datagrams(void) {
   EXPECT_INT_EQ(state.flags[0], 0);
   EXPECT_INT_EQ(state.flags[1], 0);
   EXPECT_TRUE(state.flags[2] & UV_UDP_PARTIAL);
-  EXPECT_STR_EQ(state.sources[0].host(), %"127.0.0.1");
+  EXPECT_STR_EQ(state.sources[0].host(), "127.0.0.1");
   EXPECT_INT_EQ(state.sources[0].port(), unconnected.port());
   EXPECT_INT_EQ(state.sources[1].port(), connected.port());
   EXPECT_INT_EQ(state.sources[2].port(), connected.port());
@@ -281,8 +281,8 @@ static void udp_callback_error_returns_from_run_and_the_loop_resumes(void) {
   try loop.run(UV_RUN_DEFAULT);
   catch %(malformed (library ?library) (reason ?reason) *): {
     caught = 1;
-    EXPECT_STR_EQ(library.string(), %"test");
-    EXPECT_STR_EQ(reason.string(), %"UDP receive failed");
+    EXPECT_STR_EQ(library.string(), "test");
+    EXPECT_STR_EQ(reason.string(), "UDP receive failed");
   }
   EXPECT_TRUE(caught);
   EXPECT_TRUE(uv_is_closing((uv_handle_t *) receiver.native()));
@@ -312,7 +312,7 @@ static void udp_pending_send_prevents_loop_destruction_and_close_drains(void) {
   catch %(bad-state (library *) (operation ?operation)
           (reason *) (pending ?pending) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"loop_free");
+    EXPECT_STR_EQ(operation.string(), "loop_free");
     EXPECT_TRUE(pending.integer() > 0);
   }
   EXPECT_TRUE(caught);
@@ -341,7 +341,7 @@ static void udp_rejects_invalid_state_and_ignores_native_no_event(void) {
   try udp.max_receive(0);
   catch %(bad-arg (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"udp_max_receive");
+    EXPECT_STR_EQ(operation.string(), "udp_max_receive");
   }
   EXPECT_TRUE(caught);
 
@@ -351,8 +351,8 @@ static void udp_rejects_invalid_state_and_ignores_native_no_event(void) {
   catch %(io-fail (library *) (operation ?operation) (status *)
           (name ?name) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"udp_send");
-    EXPECT_STR_EQ(name.string(), %"EDESTADDRREQ");
+    EXPECT_STR_EQ(operation.string(), "udp_send");
+    EXPECT_STR_EQ(name.string(), "EDESTADDRREQ");
   }
   EXPECT_TRUE(caught);
 
@@ -362,7 +362,7 @@ static void udp_rejects_invalid_state_and_ignores_native_no_event(void) {
   try udp.receive(Var.new(<p48>, &calls), _udp_count_receive);
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"udp_receive");
+    EXPECT_STR_EQ(operation.string(), "udp_receive");
   }
   EXPECT_TRUE(caught);
   uv_buf_t buffer = uv_buf_init(malloc(1), 1);
@@ -380,8 +380,8 @@ static void udp_rejects_invalid_state_and_ignores_native_no_event(void) {
   catch %(io-fail (library *) (operation ?operation) (status *)
           (name ?name) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"udp_send");
-    EXPECT_STR_EQ(name.string(), %"EISCONN");
+    EXPECT_STR_EQ(operation.string(), "udp_send");
+    EXPECT_STR_EQ(name.string(), "EISCONN");
   }
   EXPECT_TRUE(caught);
   caught = 0;
@@ -389,8 +389,8 @@ static void udp_rejects_invalid_state_and_ignores_native_no_event(void) {
   catch %(io-fail (library *) (operation ?operation) (status *)
           (name ?name) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"udp_connect");
-    EXPECT_STR_EQ(name.string(), %"EISCONN");
+    EXPECT_STR_EQ(operation.string(), "udp_connect");
+    EXPECT_STR_EQ(name.string(), "EISCONN");
   }
   EXPECT_TRUE(caught);
   byte.free();
@@ -399,7 +399,7 @@ static void udp_rejects_invalid_state_and_ignores_native_no_event(void) {
   try udp.send_queue_count();
   catch %(bad-state (library *) (operation ?operation) *): {
     caught = 1;
-    EXPECT_STR_EQ(operation.string(), %"udp_send_queue_count");
+    EXPECT_STR_EQ(operation.string(), "udp_send_queue_count");
   }
   EXPECT_TRUE(caught);
   receiver.close();

@@ -13,14 +13,14 @@ static void regexp_named_and_optional_captures(void) {
 
   RegexpMatch found = words.match("alpha");
   EXPECT_NOT_NULL(found);
-  EXPECT_STR_EQ(found[0], %"alpha");
-  EXPECT_STR_EQ(found[<word>], %"alpha");
-  EXPECT_STR_EQ(found[1], %"alpha");
+  EXPECT_STR_EQ(found[0], "alpha");
+  EXPECT_STR_EQ(found[<word>], "alpha");
+  EXPECT_STR_EQ(found[1], "alpha");
 
   RegexpCapture optional = found.capture(<digits>);
   EXPECT_NOT_NULL(optional);
   EXPECT_FALSE(optional.matched());
-  EXPECT_STR_EQ(optional.name(), %"digits");
+  EXPECT_STR_EQ(optional.name(), "digits");
   EXPECT_NULL(found[<digits>]);
   EXPECT_NULL(found.capture(<missing>));
 
@@ -72,8 +72,8 @@ static void regexp_utf_and_replacement_growth(void) {
 
   Regexp x = Regexp.compile("x", 0);
   defer x.free();
-  EXPECT_STR_EQ(x.replace("xxx", "longer"), %"longerxx");
-  EXPECT_STR_EQ(x.replace_all("xxx", "longer"), %"longerlongerlonger");
+  EXPECT_STR_EQ(x.replace("xxx", "longer"), "longerxx");
+  EXPECT_STR_EQ(x.replace_all("xxx", "longer"), "longerlongerlonger");
 }
 
 static void regexp_offsets_limits_and_jit(void) {
@@ -82,12 +82,12 @@ static void regexp_offsets_limits_and_jit(void) {
   );
   defer word.free();
 
-  EXPECT_STR_EQ(word.pattern(), %"[a-z]+");
+  EXPECT_STR_EQ(word.pattern(), "[a-z]+");
   EXPECT_INT_EQ(word.capture_count(), 0);
   word.set_offset_limit(2);
   EXPECT_NULL(word.match_from("xxxword", 3, 0));
   word.set_offset_limit(64);
-  EXPECT_STR_EQ(word.match_from("one two", 4, 0)[0], %"two");
+  EXPECT_STR_EQ(word.match_from("one two", 4, 0)[0], "two");
   EXPECT_INT_EQ(word.find_all_from("one two three", 4, 0).len(), 2);
 
   int jit = 0;
@@ -158,7 +158,7 @@ static void regexp_accessors_reject_a_freed_value(void) {
   try regexp.pattern();
   catch %(bad-state *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"pattern");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "pattern");
   }
   EXPECT_TRUE(caught);
 
@@ -166,7 +166,7 @@ static void regexp_accessors_reject_a_freed_value(void) {
   try regexp.native();
   catch %(bad-state *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"native");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "native");
   }
   EXPECT_TRUE(caught);
 }
@@ -178,8 +178,8 @@ static void regexp_retains_transient_pattern(void) {
   defer repeated.free();
   transient.free();
 
-  EXPECT_STR_EQ(repeated.pattern(), %"a+");
-  EXPECT_STR_EQ(repeated.match("aaa")[0], %"aaa");
+  EXPECT_STR_EQ(repeated.pattern(), "a+");
+  EXPECT_STR_EQ(repeated.match("aaa")[0], "aaa");
 }
 
 static void regexp_duplicate_names_choose_participating_capture(void) {
@@ -187,7 +187,7 @@ static void regexp_duplicate_names_choose_participating_capture(void) {
   defer choice.free();
 
   RegexpMatch found = choice.match("b");
-  EXPECT_STR_EQ(found[<value>], %"b");
+  EXPECT_STR_EQ(found[<value>], "b");
   List duplicates = found.captures(<value>);
   EXPECT_INT_EQ(duplicates.len(), 2);
   EXPECT_FALSE(duplicates.getindex(0).regexpcapture().matched());
@@ -202,8 +202,8 @@ static void regexp_compile_error_has_pcre2_detail(void) {
   }
   catch %(malformed *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"PCRE2");
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"compile");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "PCRE2");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "compile");
     EXPECT_TRUE(detail.assoc(<code>).integer() != 0);
     EXPECT_TRUE(detail.assoc(<message>).string().len() > 0);
     EXPECT_INT_EQ(detail.assoc(<offset>).integer(), 1);
@@ -217,9 +217,9 @@ static void regexp_split_keeps_empty_fields(void) {
 
   List fields = comma.split("alpha,,beta");
   EXPECT_INT_EQ(fields.len(), 3);
-  EXPECT_STR_EQ(fields.car().string(), %"alpha");
+  EXPECT_STR_EQ(fields.car().string(), "alpha");
   EXPECT_INT_EQ(String.len(fields.cadr()), 0);
-  EXPECT_STR_EQ(fields.cddr().car().string(), %"beta");
+  EXPECT_STR_EQ(fields.cddr().car().string(), "beta");
 
   /*  A match against the first and last byte leaves an empty field at each
       end, and a pattern that never matches yields the whole subject.
@@ -227,12 +227,12 @@ static void regexp_split_keeps_empty_fields(void) {
   List edges = comma.split(",solo,");
   EXPECT_INT_EQ(edges.len(), 3);
   EXPECT_INT_EQ(String.len(edges.car()), 0);
-  EXPECT_STR_EQ(edges.cadr().string(), %"solo");
+  EXPECT_STR_EQ(edges.cadr().string(), "solo");
   EXPECT_INT_EQ(String.len(edges.cddr().car()), 0);
 
   List whole = comma.split("no separator here");
   EXPECT_INT_EQ(whole.len(), 1);
-  EXPECT_STR_EQ(whole.car().string(), %"no separator here");
+  EXPECT_STR_EQ(whole.car().string(), "no separator here");
 }
 
 static void regexp_split_handles_empty_matches(void) {
@@ -243,8 +243,8 @@ static void regexp_split_handles_empty_matches(void) {
   List parts = before_a.split("aa");
   EXPECT_INT_EQ(parts.len(), 3);
   EXPECT_INT_EQ(String.len(parts.car()), 0);
-  EXPECT_STR_EQ(parts.cadr().string(), %"a");
-  EXPECT_STR_EQ(parts.cddr().car().string(), %"a");
+  EXPECT_STR_EQ(parts.cadr().string(), "a");
+  EXPECT_STR_EQ(parts.cddr().car().string(), "a");
 }
 
 static String _upper_word(RegexpMatch found) {
@@ -267,7 +267,7 @@ static void regexp_replace_fn_computes_each_replacement(void) {
   Regexp word = Regexp.compile("[a-z]+", 0);
   defer word.free();
   EXPECT_STR_EQ(
-    word.replace_fn("one two three", _upper_word), %"ONE TWO THREE"
+    word.replace_fn("one two three", _upper_word), "ONE TWO THREE"
   );
 
   /*  The callback sees captures, and an empty result deletes the match. */
@@ -275,22 +275,22 @@ static void regexp_replace_fn_computes_each_replacement(void) {
   defer greeting.free();
   EXPECT_STR_EQ(
     greeting.replace_fn("hi ada and hi bob", _name_of_capture),
-    %"ada and bob"
+    "ada and bob"
   );
-  EXPECT_STR_EQ(word.replace_fn("a-b-c", _drop_match), %"--");
+  EXPECT_STR_EQ(word.replace_fn("a-b-c", _drop_match), "--");
 
   /*  Plain C string literals carry PCRE2's `$` syntax without invoking x2c
       interpolation. replace_all expands it; replace_fn leaves it alone. */
   Regexp pair = Regexp.compile("([a-z]+)-([0-9]+)", 0);
   defer pair.free();
-  EXPECT_STR_EQ(pair.replace_all("part-17", "$2:$1"), %"17:part");
+  EXPECT_STR_EQ(pair.replace_all("part-17", "$2:$1"), "17:part");
   EXPECT_STR_EQ(word.replace_fn("x", _literal_backreference), "$1");
   EXPECT_INT_EQ(String.len(word.replace_fn("", _upper_word)), 0);
 }
 
 static void regexp_escape_quotes_metacharacters(void) {
-  EXPECT_STR_EQ(Regexp.escape(%"a.b*c"), %"a\\.b\\*c");
-  EXPECT_STR_EQ(Regexp.escape(%"plain_text99"), %"plain_text99");
+  EXPECT_STR_EQ(Regexp.escape(%"a.b*c"), "a\\.b\\*c");
+  EXPECT_STR_EQ(Regexp.escape(%"plain_text99"), "plain_text99");
   EXPECT_NULL(Regexp.escape(NULL));
 
   /*  The quoted literal must match itself and nothing else. */
@@ -314,8 +314,8 @@ static void regexp_capture_names_lists_declared_groups(void) {
 
   List names = request.capture_names();
   EXPECT_INT_EQ(names.len(), 2);
-  EXPECT_STR_EQ(names.car().string(), %"method");
-  EXPECT_STR_EQ(names.cadr().string(), %"path");
+  EXPECT_STR_EQ(names.car().string(), "method");
+  EXPECT_STR_EQ(names.cadr().string(), "path");
 
   /*  An unnamed pattern declares nothing. */
   Regexp unnamed = Regexp.compile("([0-9]+)-([0-9]+)", 0);
@@ -339,17 +339,17 @@ static void regexp_lisp_surface_is_value_oriented(void) {
   EXPECT_INT_EQ(lisp.eval(%(length (regex-find-all "[0-9]+" $text))).int(), 2);
   EXPECT_STR_EQ(
     lisp.eval(%(regex-replace "[0-9]+" $text "#")).string(),
-    %"Order # ships with # labels"
+    "Order # ships with # labels"
   );
   EXPECT_INT_EQ(lisp.eval(%(length (regex-split ", " "a, b, c"))).int(), 3);
-  EXPECT_STR_EQ(lisp.eval(%(regex-escape "a.b")).string(), %"a\\.b");
+  EXPECT_STR_EQ(lisp.eval(%(regex-escape "a.b")).string(), "a\\.b");
 
   /*  Captures arrive as an ordinary Lisp list, and no match is the empty
       list rather than an error.
   */
   List captured = lisp.eval(%(regex-match "(\\w+)@(\\w+)" "me@here"));
   EXPECT_INT_EQ(captured.len(), 3);
-  EXPECT_STR_EQ(captured.cadr().string(), %"me");
+  EXPECT_STR_EQ(captured.cadr().string(), "me");
   EXPECT_NULL(lisp.eval(%(regex-match "[0-9]+" "letters")).list());
 }
 
@@ -363,8 +363,8 @@ static void regexp_lisp_binding_raises_pcre2_detail(void) {
   try lisp.eval(%(regex-match "(" "anything"));
   catch %(malformed *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"PCRE2");
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"compile");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "PCRE2");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "compile");
   }
   EXPECT_TRUE(caught);
 }

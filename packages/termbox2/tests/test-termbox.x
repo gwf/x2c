@@ -23,8 +23,8 @@ static void failed_init_restores_sigwinch(void) {
   }
   catch %(term-error *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<library>).string(), %"termbox2");
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"init");
+    EXPECT_STR_EQ(detail.assoc(<library>).string(), "termbox2");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "init");
     EXPECT_TRUE(detail.assoc(<code>).integer() < 0);
     EXPECT_TRUE(detail.assoc(<message>).string().len() > 0);
   }
@@ -44,7 +44,7 @@ static void exclusive_owner_and_repeated_close(void) {
   try Termbox.open();
   catch %(bad-state *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"init");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "init");
   }
   EXPECT_TRUE(caught);
   EXPECT_TRUE(terminal.width() > 0);
@@ -68,9 +68,9 @@ static void event_copy_timeout_resize_and_render(void) {
   TermboxEvent first = terminal.poll(), second = terminal.poll();
   EXPECT_TRUE(first.is_key());
   EXPECT_TRUE(second.is_key());
-  EXPECT_STR_EQ(first.text(), %"\xce\xbb");
-  EXPECT_STR_EQ(second.text(), %"x");
-  EXPECT_STR_EQ(first.text(), %"\xce\xbb");
+  EXPECT_STR_EQ(first.text(), "\xce\xbb");
+  EXPECT_STR_EQ(second.text(), "x");
+  EXPECT_STR_EQ(first.text(), "\xce\xbb");
   EXPECT_FALSE(first.has_modifier(TB_MOD_ALT));
   EXPECT_TRUE(second.has_modifier(TB_MOD_ALT));
 
@@ -99,7 +99,7 @@ static void event_copy_timeout_resize_and_render(void) {
   try terminal.print(terminal.width(), 1, "x", TB_WHITE, TB_DEFAULT);
   catch %(term-error *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"print");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "print");
     EXPECT_INT_EQ(detail.assoc(<code>).integer(), TB_ERR_OUT_OF_BOUNDS);
     EXPECT_TRUE(detail.assoc(<message>).string().len() > 0);
   }
@@ -140,33 +140,33 @@ static void fill_repeats_one_cluster_and_reads_back(void) {
 
   terminal.fill(2, 1, 3, 2, "#", TB_GREEN | TB_BOLD, TB_BLUE);
   TermboxCell drawn = terminal.cell(3, 2);
-  EXPECT_STR_EQ(drawn.text, %"#");
+  EXPECT_STR_EQ(drawn.text, "#");
   EXPECT_INT_EQ(drawn.foreground, TB_GREEN | TB_BOLD);
   EXPECT_INT_EQ(drawn.background, TB_BLUE);
   TermboxCell beyond = terminal.cell(5, 1);
-  EXPECT_STR_EQ(beyond.text, %" ");
+  EXPECT_STR_EQ(beyond.text, " ");
   EXPECT_INT_EQ(beyond.background, TB_DEFAULT);
-  EXPECT_STR_EQ(terminal.cell(2, 3).text, %" ");
+  EXPECT_STR_EQ(terminal.cell(2, 3).text, " ");
 
   /*  A combining cluster stays one cell and comes back whole; a wide one
       steps two columns and stops before a column it could only half fill. */
   terminal.fill(0, 4, 2, 1, %"e\xcc\x81", TB_WHITE, TB_DEFAULT);
-  EXPECT_STR_EQ(terminal.cell(1, 4).text, %"e\xcc\x81");
+  EXPECT_STR_EQ(terminal.cell(1, 4).text, "e\xcc\x81");
   terminal.fill(0, 5, 5, 1, %"\xe7\x95\x8c", TB_WHITE, TB_DEFAULT);
-  EXPECT_STR_EQ(terminal.cell(0, 5).text, %"\xe7\x95\x8c");
-  EXPECT_STR_EQ(terminal.cell(2, 5).text, %"\xe7\x95\x8c");
-  EXPECT_STR_EQ(terminal.cell(4, 5).text, %" ");
+  EXPECT_STR_EQ(terminal.cell(0, 5).text, "\xe7\x95\x8c");
+  EXPECT_STR_EQ(terminal.cell(2, 5).text, "\xe7\x95\x8c");
+  EXPECT_STR_EQ(terminal.cell(4, 5).text, " ");
 
   /*  The extent is clipped to the screen; the origin is not. */
   int width = terminal.width(), height = terminal.height();
   terminal.fill(width - 2, height - 1, 40, 40, "*", TB_WHITE, TB_DEFAULT);
-  EXPECT_STR_EQ(terminal.cell(width - 1, height - 1).text, %"*");
+  EXPECT_STR_EQ(terminal.cell(width - 1, height - 1).text, "*");
 
   int outside = 0;
   try terminal.fill(width, 0, 1, 1, "*", TB_WHITE, TB_DEFAULT);
   catch %(term-error *detail): {
     outside = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"fill");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "fill");
     EXPECT_INT_EQ(detail.assoc(<code>).integer(), TB_ERR_OUT_OF_BOUNDS);
   }
   EXPECT_TRUE(outside);
@@ -175,7 +175,7 @@ static void fill_repeats_one_cluster_and_reads_back(void) {
   try terminal.fill(0, 0, 1, 1, "", TB_WHITE, TB_DEFAULT);
   catch %(bad-arg *detail): {
     blank = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"fill");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "fill");
   }
   EXPECT_TRUE(blank);
 
@@ -183,7 +183,7 @@ static void fill_repeats_one_cluster_and_reads_back(void) {
   try terminal.fill(0, 0, 1, 1, NULL, TB_WHITE, TB_DEFAULT);
   catch %(bad-arg *detail): {
     null_text = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"fill");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "fill");
   }
   EXPECT_TRUE(null_text);
 
@@ -191,7 +191,7 @@ static void fill_repeats_one_cluster_and_reads_back(void) {
   try terminal.cell(0, height);
   catch %(term-error *detail): {
     cell_outside = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"cell");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "cell");
     EXPECT_INT_EQ(detail.assoc(<code>).integer(), TB_ERR_OUT_OF_BOUNDS);
   }
   EXPECT_TRUE(cell_outside);
@@ -233,21 +233,21 @@ static void box_draws_a_frame_around_its_interior(void) {
   terminal.clear();
   terminal.box(1, 1, 4, 3, TB_CYAN, TB_DEFAULT);
 
-  EXPECT_STR_EQ(terminal.cell(1, 1).text, %"\xe2\x94\x8c");
-  EXPECT_STR_EQ(terminal.cell(4, 1).text, %"\xe2\x94\x90");
-  EXPECT_STR_EQ(terminal.cell(1, 3).text, %"\xe2\x94\x94");
-  EXPECT_STR_EQ(terminal.cell(4, 3).text, %"\xe2\x94\x98");
-  EXPECT_STR_EQ(terminal.cell(2, 1).text, %"\xe2\x94\x80");
-  EXPECT_STR_EQ(terminal.cell(1, 2).text, %"\xe2\x94\x82");
-  EXPECT_STR_EQ(terminal.cell(4, 2).text, %"\xe2\x94\x82");
+  EXPECT_STR_EQ(terminal.cell(1, 1).text, "\xe2\x94\x8c");
+  EXPECT_STR_EQ(terminal.cell(4, 1).text, "\xe2\x94\x90");
+  EXPECT_STR_EQ(terminal.cell(1, 3).text, "\xe2\x94\x94");
+  EXPECT_STR_EQ(terminal.cell(4, 3).text, "\xe2\x94\x98");
+  EXPECT_STR_EQ(terminal.cell(2, 1).text, "\xe2\x94\x80");
+  EXPECT_STR_EQ(terminal.cell(1, 2).text, "\xe2\x94\x82");
+  EXPECT_STR_EQ(terminal.cell(4, 2).text, "\xe2\x94\x82");
   EXPECT_INT_EQ(terminal.cell(1, 2).foreground, TB_CYAN);
-  EXPECT_STR_EQ(terminal.cell(2, 2).text, %" ");
+  EXPECT_STR_EQ(terminal.cell(2, 2).text, " ");
 
   int degenerate = 0;
   try terminal.box(0, 0, 1, 3, TB_CYAN, TB_DEFAULT);
   catch %(bad-arg *detail): {
     degenerate = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"box");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "box");
     EXPECT_INT_EQ(detail.assoc(<width>).integer(), 1);
   }
   EXPECT_TRUE(degenerate);
@@ -273,7 +273,7 @@ static void measure_agrees_with_print_without_drawing(void) {
       raised, and the row it would have used is still blank. */
   String wide = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
   EXPECT_INT_EQ(Termbox.measure(wide), 50);
-  EXPECT_STR_EQ(terminal.cell(0, 1).text, %" ");
+  EXPECT_STR_EQ(terminal.cell(0, 1).text, " ");
   EXPECT_NULL(terminal.close());
   EXPECT_INT_EQ(Termbox.measure(text), 4);
 }
@@ -294,7 +294,7 @@ static void cursor_shows_moves_and_hides(void) {
   try terminal.set_cursor(0, 0);
   catch %(term-error *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"set_cursor");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "set_cursor");
     EXPECT_INT_EQ(detail.assoc(<code>).integer(), TB_ERR_NOT_INIT);
   }
   EXPECT_TRUE(caught);
@@ -307,7 +307,7 @@ static void cursor_shows_moves_and_hides(void) {
   try terminal.set_cursor(0, 0);
   catch %(bad-state *detail): {
     closed = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"set_cursor");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "set_cursor");
   }
   EXPECT_TRUE(closed);
 }
@@ -338,10 +338,10 @@ static void generic_error_does_not_reuse_errno(void) {
   try terminal.set_output_mode(-1);
   catch %(term-error *detail): {
     caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"set_output_mode");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "set_output_mode");
     EXPECT_INT_EQ(detail.assoc(<code>).integer(), TB_ERR);
     EXPECT_STR_EQ(
-      detail.assoc(<message>).string(), %"Termbox operation failed"
+      detail.assoc(<message>).string(), "Termbox operation failed"
     );
     EXPECT_TRUE(detail.assoc(<errno>) is void);
     EXPECT_TRUE(detail.assoc(<errno-msg>) is void);
@@ -359,7 +359,7 @@ static void event_failure_keeps_native_detail_and_cleans_up(void) {
   try terminal.peek(1);
   catch %(term-error *detail): {
     read_caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"peek_event");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "peek_event");
     EXPECT_INT_EQ(detail.assoc(<code>).integer(), TB_ERR_NOT_INIT);
     EXPECT_TRUE(detail.assoc(<message>).string().len() > 0);
   }
@@ -369,7 +369,7 @@ static void event_failure_keeps_native_detail_and_cleans_up(void) {
   try terminal.close();
   catch %(term-error *detail): {
     close_caught = 1;
-    EXPECT_STR_EQ(detail.assoc(<operation>).string(), %"shutdown");
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "shutdown");
     EXPECT_INT_EQ(detail.assoc(<code>).integer(), TB_ERR_NOT_INIT);
   }
   EXPECT_TRUE(close_caught);
