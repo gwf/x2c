@@ -66,11 +66,42 @@ String binding_identity_spelling(List binding) {
     and `#else` forms, `<close>` for `#endif`, or 0 for any other line.
 */
 Symbol preproc_conditional_kind(String text) {
-  String directive = text.strip(" \t").remove_prefix("#").strip(" \t");
+  String directive = preproc_directive(text);
   if (directive.startswith("if")) return <open>;
   if (directive.startswith("el")) return <branch>;
   if (directive.startswith("endif")) return <close>;
   return 0;
+}
+
+/** Returns the preprocessor line `text` without its `#` and the blanks
+    around the directive. */
+String preproc_directive(String text) =>
+  text.strip(" \t").remove_prefix("#").strip(" \t");
+
+/** Follows the conditional groups open after the preprocessor line `text`.
+    `arms` holds one entry per open group, innermost first, listing the
+    `preproc` nodes that select that group's current arm.
+*/
+List preproc_track_arms(List arms, String text) {
+  Symbol kind = preproc_conditional_kind(text);
+  if (kind == <open>) return cons(%((preproc $text)), arms);
+  if (!arms) return arms;
+  if (kind == <branch>)
+    return cons(%(@{arms.car()} (preproc $text)), arms.cdr());
+  return kind == <close> ? arms.cdr() : arms;
+}
+
+/** Returns `items` inside the conditional arms `arms` tracked by
+    `preproc_track_arms`: the directives that reopen each group, outermost
+    first, then `items`, then one `#endif` per group.
+*/
+List preproc_within_arms(List arms, List items) {
+  Array output = [];
+  foreach (List group, arms.reverse())
+    foreach (List directive, group) output.push(directive);
+  foreach (Var item, items) output.push(item);
+  for (unsigned i = arms.len(); i; i--) output.push(%(preproc "#endif"));
+  return output.list_free();
 }
 
 /* Source position pairs a compound assignment `X=` with the binary `X` it

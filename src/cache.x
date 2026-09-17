@@ -397,17 +397,12 @@ static void _queue_one_static_initializer(
   /* Each branch of a conditional group may define the binding. A definition
      runs under the directives that enclose it, since a disabled branch
      defines no helper. */
-  Array statements = [];
   foreach (List initializer, definitions) {
-    List helper = initializer.caddr(), guard = initializer[3];
-    foreach (List directive, guard) statements.push(directive);
-    statements.push(%(stmnt (expr (void)
-      (call (expr ((func ((void))) void) (ident $helper)) (args)))));
-    for (int i = initializer[4].int(); i > 0; i--)
-      statements.push(%(preproc "#endif"));
-  }
-  foreach (List statement, statements) {
-    compiler.add_init(late ? <late> : <mid>, statement);
+    List helper = initializer.caddr(), arms = initializer[3];
+    List call = %(stmnt (expr (void)
+      (call (expr ((func ((void))) void) (ident $helper)) (args))));
+    foreach (List statement, preproc_within_arms(arms, %($call)))
+      compiler.add_init(late ? <late> : <mid>, statement);
   }
   phases[binding] = late;
   state[binding] = 2;
@@ -436,30 +431,20 @@ static void _queue_static_initializers(
    the source's initializer is ordered against the file statics it reads. */
 static List _rewrite_file_scope_statics(
   Compiler compiler, List code, Array initializers) {
-  Array output = [], groups = [];
+  Array output = [], List arms = NULL;
   foreach (List item, code) {
     int first = initializers.len();
     match (item) {
       case %(!set ?declaration (declare *)):
         item = _rewrite_file_scope_decl(compiler, declaration, initializers);
-      case %(preproc ?content): {
-        Symbol kind = preproc_conditional_kind(content);
-        if (kind == <open>) groups.push([item]);
-        else if (kind == <branch> && groups.len())
-          groups[groups.len() - 1].array().push(item);
-        else if (kind == <close> && groups.len()) groups.take_last();
-      }
+      case %(preproc ?content): arms = preproc_track_arms(arms, content);
     }
     output.push(item);
     for (int i = first; i < initializers.len(); i++) {
       (List binding, List assignment) = initializers[i];
       List helper = compiler.sym.introduce(
         compiler.fresh_name("static_initialize"));
-      Array guard = [];
-      foreach (Array group, groups)
-        foreach (List directive, group) guard.push(directive);
-      initializers[i] = %($binding $assignment $helper
-                          ${guard.list_free()} ${groups.len()});
+      initializers[i] = %($binding $assignment $helper $arms);
       List function = %(function (static void)
         (bind $helper ((fnmod (params (param (void) (bind () ()))))))
         (block $assignment));

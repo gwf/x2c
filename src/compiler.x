@@ -511,7 +511,7 @@ static int _defined_never(Token token, Token *after) {
    never reach: `<first>` when the condition requires a never-defined name
    or is `0`, `<rest>` when it is exactly `!defined(NAME)`, else 0. */
 static Symbol _never_active_arm(String text) {
-  Tokenizer scanned = Tokenizer.new(text.strip(" \t").remove_prefix("#"));
+  Tokenizer scanned = Tokenizer.new(preproc_directive(text));
   scanned.scan();
   Token token = _skip_forward(scanned.tokens), after;
   if (token.type != <ident> && token.type != <if>) return 0;
@@ -1531,7 +1531,7 @@ static int _prefix_rank(Var definition) {
    is empty or an attribute is `<annotation>`, one that wraps its parameter
    is `<wrapper>`, and any other function-like macro is skipped. */
 static void _note_object_macro(Compiler c, String content) {
-  String directive = content.strip(" \t").remove_prefix("#").strip(" \t");
+  String directive = preproc_directive(content);
   if (!directive.startswith("define")) return;
   Tokenizer scanned = Tokenizer.new(directive.remove_prefix("define"));
   scanned.scan();

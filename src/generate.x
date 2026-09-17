@@ -859,19 +859,6 @@ static void _static_declarations(Var value, Map declarations) {
     _static_declarations(child, declarations);
 }
 
-/* Follows the conditional groups open at each directive: `arms` holds one
-   entry per open group, innermost first, with the directives that select
-   its current arm. */
-static List _track_arms(List arms, String content) {
-  Symbol kind = preproc_conditional_kind(content);
-  if (kind == <open>) return cons(%((preproc $content)), arms);
-  if (!arms) return arms;
-  if (kind == <branch>)
-    return cons(%(@{arms.car()} (preproc $content)), arms.cdr());
-  if (kind == <close>) return arms.cdr();
-  return arms;
-}
-
 /* The positions in `source` of each `#undef` and of the directive opening
    each conditional group that contains one. */
 static Map _undef_positions(List source) {
@@ -883,8 +870,7 @@ static Map _undef_positions(List source) {
       Symbol kind = preproc_conditional_kind(content);
       if (kind == <open>) open.push(position);
       else if (kind == <close> && open.len()) open.take_last();
-      else if (content.strip(" \t").remove_prefix("#").strip(" \t")
-                 .startswith("undef")) {
+      else if (preproc_directive(content).startswith("undef")) {
         positions[position] = 1;
         foreach (Var group, open) positions[group] = 1;
       }
@@ -906,11 +892,9 @@ static void _place_functions(Array output, Array functions, List arms) {
       functions[kept++] = pending;
       continue;
     }
-    List reopened = written.head(written.len() - open).reverse();
-    foreach (List group, reopened)
-      foreach (List directive, group) output.push(directive);
-    output.push(pending.car());
-    foreach (List group, reopened) output.push(%(preproc "#endif"));
+    List reopened = written.head(written.len() - open);
+    foreach (List item, preproc_within_arms(reopened, %(${pending.car()})))
+      output.push(item);
   }
   functions.resize(kept);
 }
@@ -936,7 +920,7 @@ static List _static_prototypes(Compiler compiler, List source, List header) {
             %(declare $type ${ast_prototype_declarator(signature)}));
         continue;
       }
-      case %(preproc ?content): arms = _track_arms(arms, content);
+      case %(preproc ?content): arms = preproc_track_arms(arms, content);
     }
     declarations.push(node);
   }
