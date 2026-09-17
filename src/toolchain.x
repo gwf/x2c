@@ -62,7 +62,7 @@ static String _tool_selection(
   value = getenv(fallback_env);
   if (value && *value) return String.new(value);
   if (installed) return installed;
-  return String.new(fallback);
+  return fallback;
 }
 
 static String _installed_tool(const char *name) {
@@ -287,7 +287,7 @@ static void _print_action(Symbol phase, List arguments) {
 }
 
 static String _start_failure(String program, List detail) {
-  long error = detail.assoc(Symbol.new("errno")).integer();
+  long error = detail.assoc(<errno>).integer();
   String reason = String.new(strerror((int) error));
   return %"x2c: unable to execute $program: $reason\n";
 }

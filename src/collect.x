@@ -1059,7 +1059,7 @@ void interface_write(Compiler compiler, String path) {
     if (output.close()) written = 0;
   }
   if (written && !rename(temporary, path)) return;
-  String reason = "%s".printf(strerror(errno));
+  String reason = String.new(strerror(errno));
   unlink(temporary);
   compiler.report_error(
     <emit>, "failed to write interface file", NULL,

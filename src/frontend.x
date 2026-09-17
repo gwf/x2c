@@ -11,7 +11,9 @@
 #include "compiler.x"
 #include "toolchain.x"
 
-/** Receives borrowed native-preprocessor stderr synchronously during collect. */
+/** Receives borrowed native-preprocessor stderr synchronously during
+    collect.
+*/
 typedef void (*FrontendErrorSink)(String text);
 
 /** Borrows a configured request and owns shared native-preprocessor setup.
@@ -265,7 +267,8 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
 */
 int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) {
   *unit = (ParsedUnit) { 0 };
-  unit.generated_symbols = !frontend.request.no_cpp && !frontend.request.dump;
+  unit.generated_symbols =
+    !frontend.request.no_cpp && !frontend.request.dump;
   unit.context = Context.open_isolated_named("translation unit");
   Type.begin_unit();
   unit.compiler = Compiler.new();
@@ -291,7 +294,9 @@ int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) {
   return !compiler.error_count();
 }
 
-/** Collects symbols and retains preprocessor outputs for adapter inspection. */
+/** Collects symbols and retains preprocessor outputs for adapter
+    inspection.
+*/
 int ParsedUnit.collect(ParsedUnit *unit, Frontend frontend) {
   Compiler compiler = unit.compiler;
   try {
@@ -311,7 +316,9 @@ int ParsedUnit.collect(ParsedUnit *unit, Frontend frontend) {
   return !compiler.error_count();
 }
 
-/** Parses a collected unit, retaining both its AST and unsuccessful reports. */
+/** Parses a collected unit, retaining both its AST and unsuccessful
+    reports.
+*/
 int ParsedUnit.parse(ParsedUnit *unit) {
   Compiler compiler = unit.compiler;
   if (compiler.error_count()) return 0;
@@ -328,13 +335,17 @@ int ParsedUnit.parse(ParsedUnit *unit) {
   return ok && !compiler.error_count();
 }
 
-/** Runs the source stages. On either result, the caller must close the unit. */
+/** Runs the source stages. On either result, the caller must close the
+    unit.
+*/
 int Frontend.open(Frontend frontend, String filename, ParsedUnit *unit) {
   return frontend.start(filename, unit) && unit.collect(frontend) &&
          unit.parse();
 }
 
-/** Releases the unit after its caller has inspected or exported its results. */
+/** Releases the unit after its caller has inspected or exported its
+    results.
+*/
 void ParsedUnit.close(ParsedUnit *unit) {
   if (!unit.context) return;
   Compiler compiler = unit.compiler;

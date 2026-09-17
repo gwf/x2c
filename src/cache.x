@@ -195,9 +195,10 @@ static List _build_static_array_block(
     foreach (List choice, cases) {
       (List condition, List path, Type type, List value) = choice;
       if (!type) continue;
-      List slot = target, tests = NULL;
+      List slot = target, tests = %();
       foreach (List frame, path.reverse()) {
-        (Type owner, Symbol kind, Var selector, Type selected, List rest) = frame;
+        (Type owner, Symbol kind, Var selector, Type selected,
+         List rest) = frame;
         List parent = slot;
         if (kind == <index>) {
           slot = %(expr $selected (index $parent $selector));
@@ -217,7 +218,7 @@ static List _build_static_array_block(
       Type resolved = compiler.sym.resolve_key(type);
       if (inner && resolved.is_array())
         assignment = _build_static_array_block(
-          compiler, slot, resolved, inner.cadr().list().cdr());
+          compiler, slot, resolved, inner.cadr().cdr());
       else {
         if (inner)
           rhs = _build_static_initializer_rhs(type, NULL, NULL, type, inner);
@@ -387,7 +388,7 @@ static void _queue_one_static_initializer(
       Array keys = compiler.id_keys;
       for (int i = 0; i < keys.len(); i++)
         if (!dependencies[i].is_null() &&
-            keys[i].list().car() == deferred_kind) {
+            keys[i].car() == deferred_kind) {
           late = 1;
           break;
         }
@@ -473,7 +474,7 @@ static List _rewrite_file_scope_statics(
 /* Split the masked cache ids by declaration type. Each list keeps the
    descending id order the emitted declarations rely on. */
 static List _split_ids(Array keys, Array ids) {
-  List list_ids = NULL, string_ids = NULL, var_ids = NULL;
+  List list_ids = %(), string_ids = %(), var_ids = %();
   for (int i = 0, n = keys.len(); i < n; i++) {
     if (ids[i].is_null()) continue;
     List key = keys[i];

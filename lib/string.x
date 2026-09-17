@@ -208,7 +208,7 @@ int String.try_own(String str) {
 */
 int String.is_permanent(String str) {
   if (!str || !*str) return 1;
-  return x2c_pool_values_is_permanent(str.var());
+  return x2c_pool_values_is_permanent(str);
 }
 
 static inline StringHeader _header(String str) =>
@@ -423,7 +423,7 @@ static String _from_bytes_in(Pool pool, const char *bytes, int length) {
     pool.insert(string);
     return string;
   }
-  Var canonical = pool.intern(string.var(), header);
+  Var canonical = pool.intern(string, header);
   return canonical;
 }
 
@@ -550,8 +550,7 @@ List String.find_all(String str, String sub, int start, int end) {
       pos += n;
     }
   }
-  List result = results.list_free();
-  return result;
+  return results.list_free();
 }
 
 /** Returns the non-overlapping count of `sub` in `str`.

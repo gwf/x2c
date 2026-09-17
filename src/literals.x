@@ -77,7 +77,7 @@ static List _parse_collection_element(Compiler compiler) {
 static List _build_cons_cell(Compiler compiler, List head, List tail) {
   match (head) {
     case %(!or (splice ?sexpr) (expr ("List") (splice ?sexpr))): {
-      head = Var.list(sexpr);
+      head = sexpr;
       if (compiler.sym.is_var_type(head.cadr()))
         head = %(expr ("List") (call "Var_list" (args $head)));
       else head = compiler.convert_expression(head, %("List"));
@@ -203,7 +203,7 @@ static List _typed_pattern(Compiler c, List node, Map tags) {
     case %(cons ? ?): break;
     default: return node;
   }
-  Array elements = [];
+  Array elements = $auto([]);
   List tail = content;
   loop {
     match (tail) {
@@ -216,10 +216,7 @@ static List _typed_pattern(Compiler c, List node, Map tags) {
     break;
   }
   Var operator = c.match_pattern_value(elements[0]);
-  if (operator == <!quote>) {
-    elements.free();
-    return node;
-  }
+  if (operator == <!quote>) return node;
   int first = operator.is_match_op() ? 1 : 0;
   List capture_tag = NULL;
   if (first && elements.len() > 1) {
@@ -235,7 +232,6 @@ static List _typed_pattern(Compiler c, List node, Map tags) {
       elements[i] = _typed_pattern(c, elements[i], tags);
   for (int i = (int) elements.len() - 1; i >= 0; i--)
     tail = _build_cons_cell(c, elements[i], tail);
-  elements.free();
   List result = %(expr ("List") $tail);
   if (capture_tag) {
     tail = _build_cons_cell(c, result, %(nil));
@@ -543,8 +539,7 @@ List Compiler.parse_raise_literal(Compiler c) {
       continue;
     }
     Token pair_token = c.token;
-    c.expect(
-      <(>);
+    c.expect(<(>);
     List key = _parse_error_symbol(
       c, "raise", "detail key",
       "use raise %(code (key value)...);");
@@ -623,9 +618,7 @@ List Compiler.parse_catch_pattern_literal(Compiler c) {
         <parse>, "catch filter detail requires exactly one pattern",
         detail_token, NULL);
     c.expect(<)>);
-    Array pair = [];
-    pair.push(key);
-    pair.push(value);
+    Array pair = [key, value];
     elements.push(_build_error_pattern_list(c, pair));
     pair.free();
   }
@@ -713,7 +706,8 @@ static List _parse_quoted_map_entry(Compiler c) {
         (c.peek(0) == <$> && c.macro_starts_target_at(AST_MAP_ENTRY)) ||
         (c.peek(0) == <ident> &&
          c.keyword_alias_starts_target_at(AST_MAP_ENTRY));
-      if (macro_follows) insertion = c.try_parse_macro_target_at(AST_MAP_ENTRY);
+      if (macro_follows)
+        insertion = c.try_parse_macro_target_at(AST_MAP_ENTRY);
     }
     if (insertion) {
       c.expect(<"}">);
@@ -836,8 +830,7 @@ static List _parse_string_segments(Compiler compiler) {
   Array segments = [];
   while (compiler.peek(0) != <"\"">)
     segments.push(_parse_string_segment(compiler));
-  List result = segments.list_free();
-  return result;
+  return segments.list_free();
 }
 
 /** Parses a percent `String` literal and returns its typed
@@ -905,8 +898,7 @@ static List _lambda_parse_bare_params(Compiler compiler) {
     compiler.next();
     if (!compiler.test(<,>)) break;
   }
-  List result = names.list_free();
-  return result;
+  return names.list_free();
 }
 
 // Build the function parameter types while retaining typed declarators.
@@ -1186,7 +1178,8 @@ List Compiler.parse_lambda_literal(Compiler c) {
       List binding = c.sym.lookup(%($spelling), &type);
       if (!type)
         c.report_error(
-          <type>, %"identifier '$spelling' has no semantic type", origin, NULL);
+          <type>, %"identifier '$spelling' has no semantic type",
+          origin, NULL);
       references.push(binding);
     } while (c.test(<,>));
   }

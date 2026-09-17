@@ -339,8 +339,7 @@ static List _type_qualifiers(Compiler compiler) {
     }
     else if (!_skip_prefix_macro(compiler, NULL)) break;
   }
-  List result = quals.list_free();
-  return result;
+  return quals.list_free();
 }
 
 static int _is_scalar_specifier(Symbol symbol) {
@@ -456,7 +455,8 @@ int Compiler.test_static_assert(Compiler compiler) =>
   compiler.peek(0) == <ident> &&
   compiler.token.text == "_Static_assert";
 
-/** Parses a C assertion declaration; native C owns constant-expression checks. */
+/** Parses a C assertion declaration; native C owns constant-expression
+    checks. */
 List Compiler.parse_static_assert(Compiler compiler) {
   if (compiler.shallow) {
     compiler._skip_shallow_expression(0);
@@ -636,8 +636,7 @@ List Compiler.parse_enumerators(Compiler c, List context) {
     if (c.peek(0) == <"}">) break;
     c.expect(<,>);
   }
-  List result = enumerators.list_free();
-  return result;
+  return enumerators.list_free();
 }
 
 static List _enum(Compiler c) {
@@ -717,8 +716,7 @@ static List _array_suffix(Compiler c) {
   c.next();
   if (c.peek(0) == <]>) {
     c.next();
-    List result = %(dim);
-    return %($result);
+    return %((dim));
   }
   List expr = c.parse_expression();
   if (c.peek(0) != <]>) {
@@ -729,8 +727,7 @@ static List _array_suffix(Compiler c) {
       %("dimension:" ${expr.str()} "symbol:" ${unexpected.str()}));
   }
   c.next();
-  List result = %(dim $expr);
-  return %($result);
+  return %((dim $expr));
 }
 
 static List _finish_parameter(
@@ -1142,8 +1139,7 @@ static List _destructure_declaration(
   Compiler c, List type, List binding_type, int allow_uninitialized) {
   Array targets = [];
   Token origin_token = c.token;
-  c.expect(
-    <(>);
+  c.expect(<(>);
   loop {
     if (c.peek(0) != <ident>)
       c.report_error(
@@ -1349,8 +1345,8 @@ static void _require_lifecycle_signature(
                ((fnmod (params (param (void) (bind () ())))))))):
       return;
   String message = role == "initializer"
-                 ? "type initializer must have signature void TYPE.initialize(void)"
-                 : "type shutdown must have signature void TYPE.shutdown(void)";
+    ? "type initializer must have signature void TYPE.initialize(void)"
+    : "type shutdown must have signature void TYPE.shutdown(void)";
   compiler.report_error(
     <parse>, message, compiler.token, %("$role: $name"));
 }
@@ -2091,8 +2087,7 @@ List Compiler.bind_syntax(
       case %(macro-slot ? ? *):
         if (_.macro_holes) return input;
       case %(src ? ?syntax): {
-        List bound = _.bind_syntax(syntax.list(), context, _.return_type);
-        return bound;
+        return _.bind_syntax(syntax, context, _.return_type);
       }
       case %(named-type ?(String name) ?type): {
         if (context != AST_UNIT) goto construction_error;
@@ -2154,18 +2149,19 @@ List Compiler.bind_syntax(
         if (_.shallow) return input;
         $let(_.macro_stack, _.thaw_declaration_syntax(construction)) {
           return _.bind_syntax(
-            %(function $return_type $declarator $body), context, _.return_type);
+            %(function $return_type $declarator $body),
+            context, _.return_type);
         }
       }
       case %(seq *items): {
         if (context == AST_STATEMENT) {
           match (items) case %(?only):
-            return _.bind_syntax(only.list(), context, _.return_type);
+            return _.bind_syntax(only, context, _.return_type);
           _.report_error(<parse>, "expected one statement", _.token, NULL);
         }
         Array bound = [];
         foreach (Var item, items) {
-          List value = _.bind_syntax(item.list(), context, _.return_type);
+          List value = _.bind_syntax(item, context, _.return_type);
           if (value.car() == <seq>)
             foreach (Var child, value.cdr()) bound.push(child);
           else bound.push(value);
@@ -2226,10 +2222,9 @@ List Compiler.bind_syntax(
                 if (context != AST_FIELD && mods.is_bitfield())
                   goto construction_error;
               }
-            output.push(
-              _install_declarator_node(
-                _, base, declaration_context, declarator, NULL, &preserved_self)
-            );
+            output.push(_install_declarator_node(
+              _, base, declaration_context, declarator, NULL,
+              &preserved_self));
           }
           List result = _finish_declaration(
             _, tag, base, output.list_free(), preserved_self);
@@ -2418,12 +2413,9 @@ List Compiler.bind_syntax(
           _.begin_catch_arm(pattern, _.token);
           {
             defer _.sym.pop_scope();
-            bound.push(
-              %(
+            bound.push(%(
               $pattern
-              ${_.bind_syntax(
-                arm.cadr(), AST_STATEMENT, _.return_type
-              )}
+              ${_.bind_syntax(arm.cadr(), AST_STATEMENT, _.return_type)}
             ));
           }
         }
@@ -2459,11 +2451,7 @@ List Compiler.bind_syntax(
               default:
                 body = _.bind_syntax(body, AST_STATEMENT, _.return_type);
             }
-            bound.push(
-              %(
-              $pattern
-              $body
-            ));
+            bound.push(%($pattern $body));
           }
         }
         return %(match ${_.resolve_expression(subject, _.token)}
@@ -2476,8 +2464,7 @@ List Compiler.bind_syntax(
         {
           defer _.sym.pop_scope();
           foreach (Var child, children) {
-            List bound = _.bind_syntax(
-              child.list(), AST_BLOCK, _.return_type);
+            List bound = _.bind_syntax(child, AST_BLOCK, _.return_type);
             if (bound.car() == <seq>)
               foreach (Var item, bound.cdr()) fields.push(item);
             else fields.push(bound);

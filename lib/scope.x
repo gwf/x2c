@@ -63,11 +63,11 @@ protocol Cleanup(Scope);
    head, `prev` stores the owning Scope with that bit set; every other `prev`
    is the untagged preceding ScopeAlloc. Free, move, realloc, and owner lookup
    all rely on relinking without losing this one in-band ownership marker. */
-#define PTR_ALLOC(p)      ((ScopeAlloc) ((char *) (p) - sizeof(struct ScopeAlloc)))
-#define ALLOC_PTR(a)      ((void *) ((char *) (a) + sizeof(struct ScopeAlloc)))
-#define TAG_POINTER(p)    ((void *) ((uintptr_t) (p) | (uintptr_t) 1))
-#define UNTAG_POINTER(p)  ((void *) ((uintptr_t) (p) & ~(uintptr_t) 1))
-#define IS_TAGGED(p)      ((uintptr_t) (p) & (uintptr_t) 1)
+#define PTR_ALLOC(p) ((ScopeAlloc) ((char *) (p) - sizeof(struct ScopeAlloc)))
+#define ALLOC_PTR(a) ((void *) ((char *) (a) + sizeof(struct ScopeAlloc)))
+#define TAG_POINTER(p) ((void *) ((uintptr_t) (p) | (uintptr_t) 1))
+#define UNTAG_POINTER(p) ((void *) ((uintptr_t) (p) & ~(uintptr_t) 1))
+#define IS_TAGGED(p) ((uintptr_t) (p) & (uintptr_t) 1)
 
 /* A finalized allocation keeps its destructor in a prefix ahead of the
    public header, so the header layout and payload alignment are unchanged
@@ -638,7 +638,7 @@ void Scope.pop(void) {
   if (!state.stack_size) raise %(bad-state);
   state.stack_size--;
   state.active = state.stack_size ? state.stack[state.stack_size - 1]
-    : &state.root;
+                                 : &state.root;
 }
 
 /** Opens a new scope in the active slot and makes it the current one.

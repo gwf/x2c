@@ -115,19 +115,18 @@ static List _occurrence_location(List occurrence) => occurrence.caddr();
 
 static Symbol _adoption_storage(List adoption) => adoption.cddr().cadr();
 
+// Snapshots written before representation sharing have five-field rows.
 static Type _adoption_representation(List adoption) {
-  // Snapshots written before representation sharing have five-field rows.
-  if (adoption.len() < 6) return NULL;
-  Var detail = adoption.cddr().cddr().car();
-  match (detail) case %(tag ?): return NULL;
-  return detail.list();
+  match (adoption) {
+    case %(adopt ? ? ? (tag ?) ?): return NULL;
+    case %(adopt ? ? ? ?representation ?): return representation;
+  }
+  return NULL;
 }
 
 static List _adoption_tag(List adoption) {
-  if (adoption.len() < 6) return NULL;
-  List tag = NULL;
-  match (adoption.cddr().cddr().car()) case %(tag ?value): tag = value;
-  return tag;
+  match (adoption) case %(adopt ? ? ? (tag ?tag) ?): return tag;
+  return NULL;
 }
 
 static List _protocol_tag_syntax(List expression) {
@@ -274,23 +273,20 @@ void Compiler.rebuild_protocols(Compiler compiler, Map symbols) {
              (!set ?record ("protocol-record" ?base *))
              ?storage ?location):
         compiler._install_protocol_occurrence(
-          base.list(), record, storage, location);
+          base, record, storage, location);
       case %(adopt ?base ?participant ?storage ?location):
         compiler._install_protocol_adoption(
-          base.list(), participant.list(), storage,
-          NULL, 0, NULL, location);
+          base, participant, storage, NULL, 0, NULL, location);
       case %(adopt ?base ?participant ?storage
                    (tag (!set ?tag_expression
                      (expr ("Symbol")
                        (literal ("Symbol") ? ?(Symbol tag)))))
                    ?location):
         compiler._install_protocol_adoption(
-          base.list(), participant.list(), storage,
-          NULL, tag, tag_expression, location);
+          base, participant, storage, NULL, tag, tag_expression, location);
       case %(adopt ?base ?participant ?storage ?representation ?location):
         compiler._install_protocol_adoption(
-          base.list(), participant.list(), storage,
-          representation.list(), 0, NULL, location);
+          base, participant, storage, representation, 0, NULL, location);
     }
   }
 }
@@ -357,9 +353,7 @@ static List Compiler._record(Compiler compiler, Type base) {
   Var stored;
   if (!compiler.protocols.try_get(base, &stored)) return NULL;
   List occurrence = stored;
-  (List record, Symbol storage, List location) = occurrence;
-  (void) storage; (void) location;
-  return record;
+  return occurrence.car();
 }
 
 // Keep definition provenance in a generated node while its invocation site
@@ -631,8 +625,7 @@ static Var _substitute(Var value, Map variables, Map bindings) {
   Array output = [];
   foreach (Var item, value.list())
     output.push(_substitute(item, variables, bindings));
-  List result = output.list_free();
-  return result;
+  return output.list_free();
 }
 
 static Type _substitute_signature(
@@ -642,10 +635,8 @@ static Type _substitute_signature(
   List parameter_types = parameters.map(
     %!(Var parameter) =>
       _substitute(parameter, variables, bindings));
-  Type result_type =
-    _substitute(result, variables, bindings).list();
-  Type final = %((func $parameter_types) @result_type);
-  return final;
+  Type result_type = _substitute(result, variables, bindings);
+  return %((func $parameter_types) @result_type);
 }
 
 static int _exact_conversion(
@@ -1131,7 +1122,7 @@ void Compiler.install_generated_protocol_symbols(Compiler c) {
               match (decision)
                 case %(owner ? ? ?signature external):
                   _install_generated_protocol_symbol(
-                    c, participant, member, signature.list());
+                    c, participant, member, signature);
             }
       }
 }
@@ -1341,20 +1332,21 @@ int Compiler.protocol_rejects_direct_member(
    straight to its member; derived rows compute `!=` from `equal` and the
    ordered comparisons from `compare` against zero. The punctuation table in
    docs/src/guide/protocols.md mirrors these rows. */
-static const struct { Symbol op, member; int derived; } operator_members[] = {
-  { <+>,  <add>,   0 },  { <->,  <sub>,   0 },  { <*>,  <mul>,     0 },
-  { </>,  <div>,   0 },  { <%>,  <mod>,   0 },  { <@>,  <matmul>,  0 },
-  { <==>, <equal>,   0 },
-  { <!=>, <equal>, 1 },  { <"<">,  <compare>, 1 },  { <"<=">, <compare>, 1 },
-  { <">">,  <compare>, 1 },  { <">=">, <compare>, 1 }
+static const SymbolSet operator_ops =
+  %<<"+" "-" "*" "/" "%" "@" "==" "!=" "<" "<=" ">" ">=">>;
+
+static const struct { Symbol member; int derived; } operator_members[] = {
+  { <add>, 0 },      { <sub>, 0 },      { <mul>, 0 },
+  { <div>, 0 },      { <mod>, 0 },      { <matmul>, 0 },
+  { <equal>, 0 },
+  { <equal>, 1 },    { <compare>, 1 },  { <compare>, 1 },
+  { <compare>, 1 },  { <compare>, 1 }
 };
 
 static Symbol _operator_member_row(Symbol op, int derived) {
-  int count = sizeof(operator_members) / sizeof(operator_members[0]);
-  for (int i = 0; i < count; i++)
-    if (operator_members[i].op == op && operator_members[i].derived == derived)
-      return operator_members[i].member;
-  return 0;
+  int index = operator_ops.index(op);
+  if (index < 0 || operator_members[index].derived != derived) return 0;
+  return operator_members[index].member;
 }
 
 /** Returns the protocol member corresponding to a direct binary operator.
@@ -1701,7 +1693,7 @@ String Compiler.protocol_update_helper(
     case %(?receiver ?rhs):
       if (List.equal(receiver, participant) &&
           result.equal(participant))
-        rhs_type = rhs.list();
+        rhs_type = rhs;
   if (!rhs_type) return NULL;
 
   String suffix = postfix ? "postfix" : "update";
@@ -1845,8 +1837,7 @@ static List _parameter_declarations(
     declarations.push(type.parameter_ast(binding));
     index++;
   }
-  List result = declarations.list_free();
-  return result;
+  return declarations.list_free();
 }
 
 static int _variable_is(Var template, Map variables, String name) {
@@ -1937,11 +1928,10 @@ static List _declaration_from_signature(
   foreach (Type type, parameters) declarations.push(type.parameter_ast(NULL));
   List binding = compiler.sym.reference(%($name), NULL);
   List storage = make_static ? %(static @result) : result;
-  List declaration = %(
+  return %(
     declare $storage
       (bindings (bind $binding ((fnmod (params @{declarations.list_free()})))))
   );
-  return declaration;
 }
 
 static List Compiler._generate_native_alias(
@@ -1987,8 +1977,7 @@ static List _insert_at_visibility_boundary(
     inserted = 1;
   }
   if (!inserted) foreach (Var added, additions) output.push(added);
-  List result = output.list_free();
-  return result;
+  return output.list_free();
 }
 
 static List _string_literal(Compiler compiler, String value) {
@@ -2195,7 +2184,7 @@ static void Compiler._generate_ordinary_protocol_adapters(
                 continue;
               }
               String inherited = _member_spelling(participant, member);
-              Type inherited_type = owner_expected.list();
+              Type inherited_type = owner_expected;
               c.add_early(
                 _declaration_from_signature(
                   c, inherited, inherited_type, 0)
@@ -2383,8 +2372,7 @@ List Compiler.parse_protocol_declaration(Compiler c) {
   int generated_base = c.macro_holes &&
     (c.peek(0) == <$> || c.peek(0) == <"$(">);
   Type base = c.parse_type_name();
-  c.expect(
-    <(>);
+  c.expect(<(>);
   Token participant_token = c.token;
   Type participant_type = c.parse_type_name();
   String participant = participant_type.len() == 1 &&

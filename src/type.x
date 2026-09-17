@@ -33,7 +33,7 @@ static Type _declarator_parts(Type type, List *modifiers) {
     if (modifiers) *modifiers = NULL;
     return type;
   }
-  List reversed = NULL, qualifiers = NULL;
+  List reversed = %(), qualifiers = %();
   for (List rest = type; rest !== base; rest = rest.cdr())
     reversed = cons(rest.car(), reversed);
   while (reversed && reversed.car() is <symbol> &&
@@ -63,8 +63,7 @@ List Type.declaration_parts(Type type) {
   Type base = _declarator_parts(type, &modifiers), Array syntax = [];
   foreach (Var item, modifiers)
     syntax.push(_modifier_declaration_ast(item));
-  List result = %($base (@{syntax.list_free()}));
-  return result;
+  return %($base (@{syntax.list_free()}));
 }
 
 /** Returns a complete `(declare ...)` AST for `type` and `binding`.
@@ -180,44 +179,29 @@ inline Type List.type(List x) => (void *) x;
 
 // symbol classification predicates
 
+static const SymbolSet storage_classes =
+  %<<typedef static auto extern register threaded>>;
+static const SymbolSet type_qualifiers = %<<const restrict volatile>>;
+static const SymbolSet type_modifiers = %<<long short signed unsigned>>;
+static const SymbolSet number_types =
+  %<<double float char short int long signed unsigned enum>>;
+static const SymbolSet tagged_types = %<<struct union enum>>;
+
 /** Returns whether `sym` is a storage-class specifier. */
-int Symbol.is_storage_class(Symbol sym) {
-  switch (sym)
-    case <typedef>: case <static>: case <auto>: case <extern>: case <register>:
-    case <threaded>:
-      return 1;
-  return 0;
-}
+int Symbol.is_storage_class(Symbol sym) => storage_classes.contains(sym);
 
 /** Returns whether `sym` is the `inline` function specifier. */
 int Symbol.is_inline(Symbol sym) => sym == <inline>;
 
 /** Returns whether `sym` is `const`, `restrict`, or `volatile`. */
-int Symbol.is_type_qualifier(Symbol sym) {
-  switch (sym) case <const>: case <restrict>: case <volatile>: return 1;
-  return 0;
-}
+int Symbol.is_type_qualifier(Symbol sym) => type_qualifiers.contains(sym);
 
 /** Returns whether `sym` modifies the width or signedness of a scalar. */
-int Symbol.is_type_modifier(Symbol sym) {
-  switch (sym)
-    case <long>: case <short>: case <signed>: case <unsigned>:
-      return 1;
-  return 0;
-}
+int Symbol.is_type_modifier(Symbol sym) => type_modifiers.contains(sym);
 
-static int Symbol._is_number_type(Symbol sym) {
-  switch (sym)
-    case <double>: case <float>: case <char>: case <short>: case <int>:
-    case <long>: case <signed>: case <unsigned>: case <enum>:
-      return 1;
-  return 0;
-}
+static int Symbol._is_number_type(Symbol sym) => number_types.contains(sym);
 
-static int Symbol._is_tagged(Symbol sym) {
-  switch (sym) case <struct>: case <union>: case <enum>: return 1;
-  return 0;
-}
+static int Symbol._is_tagged(Symbol sym) => tagged_types.contains(sym);
 
 /** Returns whether `sym` can begin a builtin C type specifier. */
 int Symbol.is_builtin_type(Symbol sym) =>

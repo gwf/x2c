@@ -429,9 +429,6 @@ static List Emitter._local_static(Emitter e, List ast, List context) {
   return output.list_free();
 }
 
-/* Transform has converted every `vseqcall` operand to its parameter type.
-   C leaves call-argument evaluation order unspecified, so typed temporaries
-   materialize these operands left-to-right before the protocol member call. */
 /* Runtime Match entry points whose second argument is the pattern. */
 static String _match_site_entry(String name) {
   if (!name) return NULL;
@@ -480,6 +477,9 @@ static List Emitter._match_site_call(
   return NULL;
 }
 
+/* Transform has converted every `vseqcall` operand to its parameter type.
+   C leaves call-argument evaluation order unspecified, so typed temporaries
+   materialize these operands left-to-right before the protocol member call. */
 static List Emitter._sequenced_call(
   Emitter e, Var callee, List arguments, List context) {
   List c_fn = e._emit(%($callee), context);
@@ -559,7 +559,7 @@ static List Emitter._defer(Emitter e, List ast, List context) {
 // arm exit through the ordinary cleanup stack.
 static List Emitter._filtered_catch(
   Emitter emitter, List records, String frame_name, String handle_name,
-  List context, List final_code, List leave_stmt) {
+  List context) {
   String selected_name = emitter.fresh_name("catch_selected");
   Array arms = [], int index = 0, count = records.len();
   foreach (List rec, records) {
@@ -575,13 +575,12 @@ static List Emitter._filtered_catch(
   List selected = count > 1
     ? %("int $selected_name = x2c_error_catch_selected($handle_name);")
     : %();
-  List result = %("{"
+  return %("{"
     @selected
     "x2c_error_catch_detach($handle_name);"
     "x2c_exception_mark_handled(&$frame_name);"
     @{arms.list_free()}
   "}");
-  return result;
 }
 
 static List Emitter._try(Emitter e, List ast, List context) {
@@ -597,8 +596,7 @@ static List Emitter._try(Emitter e, List ast, List context) {
   List catch_block = NULL;
   if (clause)
     catch_block = e._filtered_catch(
-      clause.cadr(), frame_name, handle_name, context,
-      final_code, leave_stmt);
+      clause.cadr(), frame_name, handle_name, context);
   /* Normal and handled paths share a trailer. The unhandled landing must
      remain visibly nonreturning to the native compiler. Avoid labels here:
      an enclosing finalizer can copy this emitted block into several exits. */
@@ -646,7 +644,7 @@ static List Emitter._try(Emitter e, List ast, List context) {
         "&$frame_name, &$site, $patterns);"
     );
   }
-  List result = %("{"
+  return %("{"
              "ExceptionFrame " $frame_name ";"
              @registration
              "x2c_exception_push(&" $frame_name ");"
@@ -657,7 +655,6 @@ static List Emitter._try(Emitter e, List ast, List context) {
              "}"
              @final_trailer
            "}");
-  return result;
 }
 
 static String _c_string_literal(String value) {
@@ -709,8 +706,7 @@ static List _make_local_binders(List binders, String values_name) {
     }
     index++;
   }
-  List result = values.list_free();
-  return result;
+  return values.list_free();
 }
 
 static List _make_catch_binders(List binders, String handle_name) {
@@ -724,8 +720,7 @@ static List _make_catch_binders(List binders, String handle_name) {
         : %"Var $bvar = $rhs;");
     index++;
   }
-  List result = values.list_free();
-  return result;
+  return values.list_free();
 }
 
 /* Label one arm so the switch can reach it directly. An arm whose pattern
@@ -832,8 +827,7 @@ static List Emitter._match_if(
   if (labelling) values.push(%("default: break;"));
   *dispatched = heads.len() != 0;
   heads.free();
-  List result = values.list_free();
-  return result;
+  return values.list_free();
 }
 
 static List Emitter._match_cases(Emitter e, List ast, List context) {

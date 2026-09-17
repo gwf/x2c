@@ -300,8 +300,7 @@ inline Var  Var.caddr(Var var)     => car(cdr(cdr(var)));
 static List _prepend_array(Array values, List tail) {
   Var *data = values.bytes;
   for (size_t i = values.len(); i; i--) {
-    List next = cons(data[i - 1], tail);
-    tail = next;
+    tail = cons(data[i - 1], tail);
   }
   return tail;
 }
@@ -318,15 +317,14 @@ Self List.append(Self a, Self b) {
   if (!b) return a;
   Array values = $auto([]);
   foreach (Var value, a) values.push(value);
-  List result = _prepend_array(values, b);
-  return result;
+  return _prepend_array(values, b);
 }
 
 static List _concat_lists(Array lists) {
   List result = NULL;
   for (int i = (int) lists.len() - 1; i >= 0; i--) {
-    List current = lists[i], next = current.append(result);
-    result = next;
+    List current = lists[i];
+    result = current.append(result);
   }
   return result;
 }
@@ -337,8 +335,7 @@ static List _concat_n_va(unsigned list_count, va_list ap) {
   Array lists = $auto([]);
   for (unsigned i = 0; i < list_count; i++)
     lists.push(va_arg(ap, List));
-  List result = _concat_lists(lists);
-  return result;
+  return _concat_lists(lists);
 }
 
 /** Returns the concatenation of exactly `list_count` `List` arguments.
@@ -362,8 +359,7 @@ static List _n_va(unsigned element_count, va_list ap) {
     if (value is void) raise %(void-op (owner "List.list_n") (index $i));
     values.push(value);
   }
-  List result = values;
-  return result;
+  return values;
 }
 
 /** Builds a `List` from exactly `element_count` `Var` arguments.
@@ -388,8 +384,7 @@ List List.list_n(unsigned element_count, ...) {
 Self List.reverse(Self lst) {
   List rev = NULL;
   foreach (Var value, lst) {
-    List next = cons(value, rev);
-    rev = next;
+    rev = cons(value, rev);
   }
   return rev;
 }
@@ -435,8 +430,7 @@ List List.map(List lst, Func fn) {
     FuncArg arguments[1] = { FuncArg.value(value) };
     values.push(fn.apply(1, arguments));
   }
-  List result = values;
-  return result;
+  return values;
 }
 
 /** Folds `fn` over the elements of `lst` from the left, starting at `seed`.
@@ -533,8 +527,7 @@ Self List.sort(Self lst) {
   Array values = $auto([]);
   foreach (Var value, lst) values.push(value);
   values.sort();
-  List result = values;
-  return result;
+  return values;
 }
 
 /** Returns a stable sorted copy using `Array.sort_with`'s callback contract.
@@ -633,8 +626,7 @@ List List.zip_with(List a, List b, Func fn) {
     else item = %($left $right);
     values.push(item);
   }
-  List result = values;
-  return result;
+  return values;
 }
 
 /** Maps `fn` over aligned pairs from `a` and `b`.
@@ -691,8 +683,7 @@ Self List.flatten(Self lst) {
     }
     else values.push(head);
   }
-  List result = values;
-  return result;
+  return values;
 }
 
 static void _flatten_all_collect(Array values, List lst) {
@@ -710,8 +701,7 @@ Self List.flatten_all(Self lst) {
   if (!lst) return lst;
   Array values = $auto([]);
   _flatten_all_collect(values, lst);
-  List result = values;
-  return result;
+  return values;
 }
 
 /** Returns the shared tail beginning `n` cells in.
@@ -797,8 +787,7 @@ Self List.head(Self list, unsigned count) {
     list = list.cdr();
   }
   if (!list) return original;
-  List result = values;
-  return result;
+  return values;
 }
 
 static List _collect_subseq(List list, int start, int step, int span) {
@@ -809,8 +798,7 @@ static List _collect_subseq(List list, int start, int step, int span) {
     values.push(list.car);
     for (int i = 0; list && i < step; i++) list = list.cdr();
   }
-  List result = values;
-  return result;
+  return values;
 }
 
 /** Returns every `step`th element from `start` up to exclusive `stop`.
@@ -843,8 +831,7 @@ Self List.getslice(Self list, int start, int stop, int step) {
   Array values = $auto([]);
   for (int i = 0; i < span; i++)
     values.push(source[start + i * step]);
-  List result = values;
-  return result;
+  return values;
 }
 
 static int _unpack_n_va(
@@ -1100,8 +1087,7 @@ Iter List.iter(List lst, Iter dest) {
 List Iter.list(Iter iter) {
   Array values = $auto([]);
   foreach (Var item, iter) values.push(item);
-  List result = values;
-  return result;
+  return values;
 }
 
 /** Returns the elements `pred` accepts by ordinary `Var` truthiness.
@@ -1118,6 +1104,5 @@ Self List.filter(Self lst, Func pred) {
     FuncArg arguments[1] = { FuncArg.value(value) };
     if (pred.apply(1, arguments)) values.push(value);
   }
-  List result = values;
-  return result;
+  return values;
 }

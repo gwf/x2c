@@ -264,7 +264,7 @@ void Compiler.print_diagnostic(Compiler compiler, List entry) {
   if (location) {
     String text = "<input>";
     v = location.assoc(<file>);
-    if (v is not void && v is <string>) text = v;
+    if (v is <string>) text = v;
     int line = location.assoc(<line>).int();
     int column = location.assoc(<column>).int();
     fprintf(

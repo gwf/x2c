@@ -26,9 +26,9 @@
 #include "type.x"
 
 /* The runtime types a region's record and frame have. */
-static const char *_frame_type = "ExceptionFrame";
-static const char *_record_type = "X2CCleanup";
-static const char *_handler_type = "ErrorHandler";
+static String _frame_type = "ExceptionFrame";
+static String _record_type = "X2CCleanup";
+static String _handler_type = "ErrorHandler";
 
 /* The walk state for one function body. */
 typedef struct Walk {
@@ -39,20 +39,20 @@ typedef struct Walk {
   Type return_type;
 } *Walk;
 
-static List _address_of(const char *spelling, List binding) {
-  Type type = %((${String.new(spelling)}));
+static List _address_of(String spelling, List binding) {
+  Type type = %(($spelling));
   return %(expr ${type.reference()} (op & (expr $type (ident $binding))));
 }
 
 /* One native call on a region's record or frame, as a statement. */
-static List _region_call(String function, const char *type, List binding) =>
+static List _region_call(String function, String type, List binding) =>
   %(stmnt (expr (void)
     (call $function (args ${_address_of(type, binding)}))));
 
 /* Introduce a name this pass owns. The emitted declaration spells this
    binding, so the record a region pushes and the record its exits leave are
    one name by construction. */
-static List _region_binding(Compiler compiler, const char *role) =>
+static List _region_binding(Compiler compiler, String role) =>
   compiler.sym.introduce(compiler.fresh_name(role));
 
 /* The statements that leave a `defer` region: the runtime unlinks the
@@ -100,7 +100,7 @@ static List _try_cleanup(
   List frame, List handle, List finalizer, int has_clause) {
   Array body = [];
   if (has_clause) {
-    Type handler = %((${String.new(_handler_type)}));
+    Type handler = %(($_handler_type));
     body.push(%(stmnt (expr (void)
       (call "x2c_error_catch_close"
         (args (expr $handler (ident $handle)))))));
@@ -138,7 +138,7 @@ static List _transfer(Walk walk, int stop, List statement) {
 /* The open regions, innermost first. A label's ancestry is this list, and a
    jump may only leave a suffix of it. */
 static List _region_path(Walk walk) {
-  List path = NULL;
+  List path = %();
   foreach (List region, walk.regions) path = cons(region.cadr(), path);
   return path;
 }
@@ -207,10 +207,10 @@ static void _collect_labels(Walk walk, Var value, List path) {
    depth the jump unwinds to. */
 /* Report at the jump the walk is on, and leave the compiler's origin as it
    was for whatever reports next. */
-static void _reject_goto(Walk walk, const char *message, List note) {
+static void _reject_goto(Walk walk, String message, List note) {
   int previous = walk.compiler.origin;
   walk.compiler.origin = walk.origin;
-  walk.compiler.report_error(<emit>, %"${String.new(message)}", NULL, note);
+  walk.compiler.report_error(<emit>, message, NULL, note);
   walk.compiler.origin = previous;
 }
 

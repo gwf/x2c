@@ -240,7 +240,7 @@ static Var _sdk_type_parameters(List value) => _sdk_function_type_parameters(
     value.type().canonicalize());
 
 static Var _sdk_type_return(List value) =>
-  value.type().canonicalize().apply().canonicalize().var();
+  value.type().canonicalize().apply().canonicalize();
 
 static Var _sdk_complete_iter_chain(List expression) {
   $_sdk_guard("private foreach iterator completion");
@@ -262,14 +262,13 @@ static Var _sdk_type_reverse_name(String base, String participant) {
 
 static Var _sdk_type_resolve(List value) {
   $_sdk_guard("x2c.type.resolve");
-  return macro_sdk_compiler.sym.resolve_key(value.type())
-    .type_from_ast().var();
+  return macro_sdk_compiler.sym.resolve_key(value.type()).type_from_ast();
 }
 
 static Var _sdk_type_layout(List value) {
   $_sdk_guard("x2c.type.layout");
   Type type = macro_sdk_compiler.sym.resolve_key(value.type()).type_from_ast();
-  return macro_sdk_compiler.sym.field_order(type).cdr().var();
+  return macro_sdk_compiler.sym.field_order(type).cdr();
 }
 
 static Var _sdk_type_value(List value) {
@@ -422,13 +421,13 @@ static Var _sdk_method_resolve(List type_value, String name) {
     type, %($name), <.>, 1);
   match (resolution) {
     case %(ambiguous *packages): {
-      List notes = NULL;
+      Array notes = [];
       foreach (String package, packages)
-        notes = cons(%"package: '$package'", notes);
+        notes.push(%"package: '$package'");
       String owner = type.base_type().car().str();
       return _sdk_reject(
         %"method '$owner.$name' is provided by multiple imported packages",
-        notes.reverse());
+        notes.list_free());
     }
     case %(method ?binding ?signature):
       return %(expr $signature (ident $binding));
@@ -482,8 +481,7 @@ static Var _sdk_native_function_type(List syntax) {
   foreach (Var parameter, source_parameters)
     parameters.push(_lisp_resolve_type(parameter.list()));
   Type result = _lisp_resolve_type(source_result);
-  List resolved = cons(%(func ${parameters.list_free()}), result);
-  return resolved;
+  return cons(%(func ${parameters.list_free()}), result);
 }
 
 static Var _sdk_function_parameter(List function, String wanted) {
@@ -1682,15 +1680,15 @@ static List _capture_row(Compiler compiler, List hole, List sources) {
 }
 
 static List _lisp_bindings(List bindings) {
-  List result = NULL;
+  Array result = [];
   foreach (List pair, bindings) {
     Var binder = pair.car();
     if (binder.is_binder() &&
         !binder.str().startswith("?__macro_") &&
         !binder.str().startswith("*__macro_"))
-      result = cons(pair, result);
+      result.push(pair);
   }
-  return result.reverse();
+  return result.list_free();
 }
 
 static String _kind_spelling(Symbol kind) {
@@ -1701,21 +1699,24 @@ static String _kind_spelling(Symbol kind) {
   return kind.str().capitalize();
 }
 
+static const SymbolSet author_kinds =
+  %<<expr type decl function name literal param block field enumerator
+     map-entry unit named-type>>;
+
 static Symbol _author_kind(String spelling) {
   Symbol kind = Symbol.new(spelling);
   if (kind == <statement>) return <block>;
   if (kind == <entry>) return <map-entry>;
   if (kind == <namedtype>) return <named-type>;
-  return %(expr type decl function name
-           literal param block field enumerator
-           map-entry unit named-type).contains(kind)
-       ? kind : 0;
+  return author_kinds.contains(kind) ? kind : 0;
 }
+
+static const SymbolSet value_kinds = %<<expr name literal>>;
 
 static int _kind_accepts_role(Symbol kind, Symbol role) {
   Symbol expected = role == <statement> ? <block> : role;
   if (expected == <expression> || expected == <argument>)
-    return %(expr name literal).contains(kind);
+    return value_kinds.contains(kind);
   return kind == expected ||
     (expected == <field> && kind == <decl>) ||
     (expected == <block> && kind == <decl>) ||
@@ -1864,19 +1865,23 @@ int Compiler.macro_lisp_starts_declaration(Compiler compiler) {
     `(macro-slot ...)`, or NULL when ordinary grammar owns the current tokens;
     successful parsing advances the cursor.
 */
+static const SymbolSet declaration_roles =
+  %<<field enumerator map-entry unit>>;
+static const SymbolSet sequence_roles =
+  %<<argument block field enumerator map-entry param unit>>;
+static const SymbolSet untyped_roles = %<<expression argument type>>;
+
 List Compiler.try_parse_macro_slot(Compiler compiler, Symbol role) {
   if (!compiler.macro_holes) return NULL;
   if (compiler.peek(0) == <"$(">) {
     int splice = _lisp_splice_follows(compiler);
-    if (%(field enumerator map-entry unit).contains(role) && !splice)
+    if (declaration_roles.contains(role) && !splice)
       return NULL;
     if (role == <block> && compiler.macro_lisp_starts_declaration())
       return NULL;
     if (role == <statement>) return NULL;
     if (role == <expression>) return compiler.parse_macro_lisp_expression();
-    int allow_sequence =
-      %(argument block field enumerator map-entry param unit)
-        .contains(role);
+    int allow_sequence = sequence_roles.contains(role);
     return _parse_lisp_slot(compiler, allow_sequence, role);
   }
   List hole = compiler.peek_macro_hole();
@@ -1887,7 +1892,7 @@ List Compiler.try_parse_macro_slot(Compiler compiler, Symbol role) {
     compiler.report_error(
       <parse>, "sequence insertion is not legal in an expression slot",
       compiler.token, NULL);
-  if (!%(expression argument type).contains(role)) {
+  if (!untyped_roles.contains(role)) {
     Symbol kind = hole.assoc(<kind>);
     if (!kind && compiler.peek(2) != <...>) return NULL;
     if (kind && !_kind_accepts_role(kind, role)) return NULL;
@@ -1926,9 +1931,11 @@ static List _parse_body(Compiler c, Symbol result_kind) {
     items.push(c.parse_top_level());
   }
   c.expect(<"}">);
-  List replacement = %(seq @{items.list_free()});
-  return replacement;
+  return %(seq @{items.list_free()});
 }
+
+static const SymbolSet direct_result_kinds =
+  %<<expression field enumerator map-entry unit>>;
 
 static Symbol _result_kind_token(Compiler compiler, Token token) {
   String spelling = token.text, Symbol kind = Symbol.new(spelling);
@@ -1936,8 +1943,7 @@ static Symbol _result_kind_token(Compiler compiler, Token token) {
   if (kind == <statement> || kind == <block>) return <block-item>;
   if (kind == <entry>) return <map-entry>;
   if (kind == <decorator>) return kind;
-  if (%(expression field enumerator map-entry unit).contains(kind))
-    return kind;
+  if (direct_result_kinds.contains(kind)) return kind;
   compiler.report_error(
     <parse>, %"unknown macro result kind '$spelling'",
     token, NULL);
@@ -1975,6 +1981,9 @@ static List _definition(
     (builtin $builtin)
     (local $local)
   );
+
+static const SymbolSet decorator_target_kinds =
+  %<<expr function block field unit named-type>>;
 
 /** Parses the macro definition at the current token into a `macrodef` `List`.
     A source-level definition is published immediately; a definition inside a
@@ -2030,15 +2039,14 @@ List Compiler.parse_macro_definition(Compiler c) {
   c.macro_holes = {};
   Map definition_locals = {};
   c.macro_holes[%(locals)] = definition_locals;
-  List parameters = NULL, using_holes = NULL;
+  Array parameter_holes = [], using_binders = [];
   List target_hole = NULL;
   c.expect(<(>); if (!c.test(<)>)) {
     int first = 1;
     loop {
       List hole = _parse_signature_hole(c, 0);
       if (result_kind == <decorator> && first) {
-        if (!%(expr function block field unit named-type)
-               .contains(hole.assoc(<kind>)))
+        if (!decorator_target_kinds.contains(hole.assoc(<kind>)))
           c.report_error(
             <parse>,
             "decorator first parameter has invalid target kind",
@@ -2058,7 +2066,7 @@ List Compiler.parse_macro_definition(Compiler c) {
           c.macro_holes[%(target)] = hole;
         }
       }
-      else parameters = cons(hole, parameters);
+      else parameter_holes.push(hole);
       first = 0;
       if (hole.assoc(<sequence>).int() && c.peek(0) == <,>)
         c.report_error(
@@ -2073,10 +2081,12 @@ List Compiler.parse_macro_definition(Compiler c) {
       <parse>,
       "decorator requires a first target parameter",
       start, NULL);
-  if (local && (result_kind == <unit> || result_kind == <decl-unit>))
+  if (local && (result_kind == <unit> || result_kind == <decl-unit>)) {
+    String result_spelling = _kind_spelling(result_kind);
     c.report_error(
-      <macro>, %"local macros cannot have ${_kind_spelling(result_kind)} results",
+      <macro>, %"local macros cannot have $result_spelling results",
       start, NULL);
+  }
   if (local && result_kind == <decorator> &&
       (target_hole.assoc(<kind>) == <function> ||
        target_hole.assoc(<kind>) == <unit> ||
@@ -2090,7 +2100,7 @@ List Compiler.parse_macro_definition(Compiler c) {
     c.next();
     loop {
       List hole = _parse_signature_hole(c, 1);
-      using_holes = cons(hole.assoc(<binder>), using_holes);
+      using_binders.push(hole.assoc(<binder>));
       if (!c.test(<,>)) break;
     }
   }
@@ -2126,8 +2136,8 @@ List Compiler.parse_macro_definition(Compiler c) {
       <parse>, "expected parenthesized or braced macro body",
       c.token, NULL);
 
-  parameters = parameters.reverse();
-  using_holes = using_holes.reverse();
+  List parameters = parameter_holes.list_free();
+  List using_holes = using_binders.list_free();
   (void) c.record_origin(start);
   List origin = c.token_location(start);
   String source_file = _source_file(c, c.filename);
@@ -2293,6 +2303,9 @@ static int _keyword_alias_invocation_follows(
      compiler.peek(1) == <(>);
 }
 
+static const SymbolSet alias_kinds =
+  %<<expression block-item field enumerator map-entry unit decorator>>;
+
 /** Parses and installs one source-local `keyword` alias.
     The named macro must already be visible; the alias captures that definition
     and consumes its terminating semicolon.
@@ -2317,9 +2330,7 @@ void Compiler.parse_keyword_definition(Compiler c) {
   Token reference = c.token;
   Atom name = _name(c);
   List definition = _lookup(c, name, reference);
-  if (!%(expression block-item field enumerator map-entry
-         unit decorator)
-       .contains(definition.assoc(<kind>)))
+  if (!alias_kinds.contains(definition.assoc(<kind>)))
     c.report_error(
       <macro>, %"keyword alias cannot name internal macro kind '${
         _kind_spelling(definition.assoc(<kind>))}'",
@@ -2365,8 +2376,9 @@ static int _keyword_alias_targets_at(
 int Compiler.macro_targets_unit(Compiler compiler) {
   List definition = compiler.peek(0) == <$>
     ? _peek_definition(compiler) : _keyword_alias_lookup(compiler);
-  if (!definition || (compiler.peek(0) != <$> &&
-                      !_keyword_alias_invocation_follows(compiler, definition)))
+  if (!definition ||
+      (compiler.peek(0) != <$> &&
+       !_keyword_alias_invocation_follows(compiler, definition)))
     return 0;
   Symbol kind = definition.assoc(<kind>);
   if (kind == <decorator>)
@@ -2460,8 +2472,7 @@ static Var _capture_source(
   String file = _source_file(
     compiler, compiler.filename ? compiler.filename : "<stdin>");
   List source = %(source $file ${first.pos} $end);
-  Var result = %(src $source $syntax);
-  return result;
+  return %(src $source $syntax);
 }
 
 static Var _parse_argument(Compiler c, Symbol kind) {
@@ -2500,8 +2511,7 @@ static Var _parse_argument(Compiler c, Symbol kind) {
 
 static List _invocation_arguments(Compiler c, List definition) {
   Array arguments = [];
-  c.expect(
-    <(>);
+  c.expect(<(>);
   List descriptors = definition.assoc(<parameters>);
   for (List nodes = descriptors; nodes; nodes = nodes.cdr()) {
     List hole = nodes.car();
@@ -2534,8 +2544,7 @@ static List _invocation_arguments(Compiler c, List definition) {
       c.token, NULL);
   }
   c.expect(<)>);
-  List result = %(args @{arguments.list_free()});
-  return result;
+  return %(args @{arguments.list_free()});
 }
 
 static void _bind_name_arguments(
@@ -2588,8 +2597,7 @@ static String _definition_note(List definition) {
   List origin = definition.assoc(<origin>);
   String file = origin.assoc(<file>);
   int line = origin.assoc(<line>).int(),
-      column =
-    origin.assoc(<column>).int();
+      column = origin.assoc(<column>).int();
   return %"definition: $file:$line:$column";
 }
 
@@ -2895,9 +2903,7 @@ static List _parse_target_definition(
     if (target_kind == <unit> && !private_target &&
         captured && !captured.cdr())
       target_capture = target_capture.append(
-        %(
-        (construct ${captured.car()})
-      ));
+        %((construct ${captured.car()})));
     List input = %(
       target $arguments
       $target_capture

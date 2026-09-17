@@ -496,7 +496,7 @@ static void _install_descriptor_methods(
 
 static String _primitive_repr(Var v, Symbol tag) {
   switch (tag) {
-    case <i8>:    case <u8>:    return %"'%c'".printf(v);
+    case <i8>:    case <u8>:    return "'%c'".printf(v);
     case <u16>:   case <i16>:   return "0x%04X".printf(v);
     case <u32>:   case <i32>:   return "%d".printf(v);
     case <u48>:   return "0x%012lXul".printf(v);

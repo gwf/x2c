@@ -549,11 +549,11 @@ static Var _memory_retain_value(LogMemorySink l, Var value) {
   if (value is <string>) {
     if (_memory_pool_owns(l.pool, value)) return value;
     String string = value.string();
-    return String.new_in(l.pool, string, string.len()).var();
+    return String.new_in(l.pool, string, string.len());
   }
   if (value is <lsym>) {
     String spelling = value.str();
-    if (_memory_pool_owns(l.pool, spelling.var())) return value;
+    if (_memory_pool_owns(l.pool, spelling)) return value;
     String copy = String.new_in(l.pool, spelling, spelling.len());
     return Var.new(<lsym>, copy);
   }
@@ -562,8 +562,8 @@ static Var _memory_retain_value(LogMemorySink l, Var value) {
     if (!list || _memory_pool_owns(l.pool, value)) return value;
     Var head = _memory_retain_value(l, list.car);
     List source_tail = list.cdr;
-    List tail = _memory_retain_value(l, source_tail.var());
-    return List.cons_in(l.pool, head, tail).var();
+    List tail = _memory_retain_value(l, source_tail);
+    return List.cons_in(l.pool, head, tail);
   }
   return value;
 }
@@ -582,9 +582,9 @@ static void _emit_memory(Logger logger, const LogEvent *event, Var data) {
   List entry = NULL;
   entry = List.cons_in(
     context.pool,
-    _memory_retain_value(context, event.fields.var()), entry);
-  entry = List.cons_in(context.pool, event.category.var(), entry);
-  entry = List.cons_in(context.pool, event.level.var(), entry);
+    _memory_retain_value(context, event.fields), entry);
+  entry = List.cons_in(context.pool, event.category, entry);
+  entry = List.cons_in(context.pool, event.level, entry);
   entry = List.cons_in(
     context.pool,
     _memory_retain_value(context, Var.box_long_long(elapsed_us)), entry);
@@ -595,7 +595,7 @@ static void _emit_memory(Logger logger, const LogEvent *event, Var data) {
     context.pool,
     _memory_retain_value(context, Var.box_ulong(sequence)), entry);
   *context.destination = List.cons_in(
-    context.pool, entry.var(), *context.destination);
+    context.pool, entry, *context.destination);
 }
 
 static void _destroy_memory(Var data) {

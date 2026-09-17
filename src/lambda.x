@@ -33,8 +33,7 @@ static List _auto_names(Compiler compiler, int count) {
     String pname = %"a$index";
     out.push(compiler.sym.introduce(pname));
   }
-  List result = out.list_free();
-  return result;
+  return out.list_free();
 }
 
 // Preserve typed declarators; bare lambda parameters remain Var.
@@ -1278,7 +1277,8 @@ static List _prepend_setup(List body, List setup) {
 
 /* Explicit reference rows select which automatic bindings need typed cells.
    Parameters allocate at entry and locals at their declarations, preserving
-   initializer order. Snapshot rows retain their separate binding identities. */
+   initializer order. Snapshot rows retain their separate binding
+   identities. */
 static List _prepare_lambda_region(
   Compiler compiler, List entries, List body) {
   if (!ast_contains_head(body, <lambda>)) return body;

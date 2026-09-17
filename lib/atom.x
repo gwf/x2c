@@ -138,8 +138,7 @@ static int _escape_byte(String spelling, int index) {
 static String _repr(Var value) {
   Buffer out = Buffer.new(0);
   Atom.write_repr(value, out);
-  String result = out.str_free();
-  return result;
+  return out.str_free();
 }
 
 static unsigned _hash(Var value) => ((String) value.pointer()).hash();

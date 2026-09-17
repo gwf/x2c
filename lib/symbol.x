@@ -194,8 +194,7 @@ int Symbol.compare(Symbol a, Symbol b) {
 String Symbol.repr(Symbol symbol) {
   Buffer out = Buffer.new(0);
   symbol.write_repr(out);
-  String result = out.str_free();
-  return result;
+  return out.str_free();
 }
 
 /** Appends the decoded spelling of `symbol` to `out`.

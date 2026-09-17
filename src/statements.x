@@ -18,8 +18,7 @@ $(import "../lib/private-keywords.xmacro")
 
 static List _keyword_paren_expr(Compiler compiler, Symbol keyword) {
   compiler.expect(keyword);
-  compiler.expect(
-    <(>);
+  compiler.expect(<(>);
   List expr = compiler.parse_expression();
   compiler.expect(<)>);
   return expr;
@@ -56,8 +55,7 @@ static List _for_statement(Compiler c) {
   c.sym.push_new_scope();
   defer c.sym.pop_scope();
   c.expect(<for>);
-  c.expect(
-    <(>);
+  c.expect(<(>);
   /* Each clause peeks for its terminator and leaves the token for the
      expect below, so an omitted clause consumes exactly what a present
      one does. */
@@ -295,8 +293,7 @@ static List _match_cases(Compiler compiler) {
     cases.push(mcase);
     peek = compiler.peek(0);
   }
-  List result = cases.list_free();
-  return result;
+  return cases.list_free();
 }
 
 static List _match_statement(Compiler compiler) {
@@ -345,8 +342,7 @@ static List _filtered_catches(Compiler compiler) {
         <parse>, "catch default arm must be last",
         compiler.token, %("move catch: after every filtered arm"));
   }
-  List result = arms.list_free();
-  return %(catchcases $result);
+  return %(catchcases ${arms.list_free()});
 }
 
 static List _try_statement(Compiler c) {
@@ -389,6 +385,16 @@ static List _expression_statement(Compiler compiler) {
   return %(stmnt $expr);
 }
 
+/* An identifier naming a live `with` expression is an ordinary expression
+   statement, not a macro target. */
+static int Compiler._names_with_expression(Compiler c) {
+  Var candidate;
+  return c.peek(0) == <ident> &&
+    c.semantic_binding_facts().try_get(
+      %(with-name ${c.token.text}), &candidate) &&
+    c.sym.lookup(%(${c.token.text}), NULL).equal(candidate);
+}
+
 /** Parses one block-position declaration, statement, or macro insertion.
     The caller owns the surrounding scope; a macro insertion may return a
     `(seq ...)` node containing several block items.
@@ -403,11 +409,7 @@ List Compiler.parse_block_item(Compiler compiler) {
   }
   if (compiler.peek(0) == <ident> && compiler.token.text == "with")
     return compiler.parse_statement();
-  Var candidate;
-  int with_expression = compiler.peek(0) == <ident> &&
-    compiler.semantic_binding_facts().try_get(
-      %(with-name ${compiler.token.text}), &candidate) &&
-    compiler.sym.lookup(%(${compiler.token.text}), NULL).equal(candidate);
+  int with_expression = compiler._names_with_expression();
   List macro = with_expression ? NULL
     : compiler.try_parse_macro_target_at(AST_BLOCK);
   if (macro) return macro;
@@ -484,11 +486,7 @@ List Compiler.parse_statement(Compiler compiler) {
     }
     return body;
   }
-  Var candidate;
-  int with_expression = compiler.peek(0) == <ident> &&
-    compiler.semantic_binding_facts().try_get(
-      %(with-name ${compiler.token.text}), &candidate) &&
-    compiler.sym.lookup(%(${compiler.token.text}), NULL).equal(candidate);
+  int with_expression = compiler._names_with_expression();
   List keyword = !with_expression && compiler.peek(0) == <ident>
     ? compiler.try_parse_macro_target_at(AST_STATEMENT) : NULL;
   if (keyword) return keyword;
@@ -559,8 +557,7 @@ List Compiler.parse_block_items(Compiler c, int anchor_items) {
   }
   c.expect(<"}">);
   c.sym.pop_scope();
-  List result = cons(<block>, block.list_free());
-  return result;
+  return cons(<block>, block.list_free());
 }
 
 /** Parses a compound body after its opening brace and consumes the closing

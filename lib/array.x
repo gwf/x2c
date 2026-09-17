@@ -717,8 +717,7 @@ String Array.join(Array array, String separator) {
     else elem.write_str(buf);
     if (separator && i < n - 1) buf.write(separator);
   }
-  String str = buf.str_free();
-  return str;
+  return buf.str_free();
 }
 
 /** Returns nonzero when two `Array`s have structurally equal elements. */

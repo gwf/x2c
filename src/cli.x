@@ -75,7 +75,8 @@ typedef struct CliCommand {
 // `help` parses no options of its own, so it carries the top-level mask.
 static CliCommand cli_commands[] = {
   { <translate>, CLI_TRANSLATE, "Translate .x files to .c and .h files" },
-  { <build>,     CLI_BUILD,     "Translate, compile, and optionally link a target" },
+  { <build>,     CLI_BUILD,
+    "Translate, compile, and optionally link a target" },
   { <run>,       CLI_RUN,       "Build an executable and run it" },
   { <script>,    CLI_SCRIPT,    "Build a script when it changes and run it" },
   { <bootstrap>, CLI_BOOTSTRAP, "Install a native x2c from a APE binary" },
@@ -94,14 +95,17 @@ static CliOption cli_options[] = {
   { <version>, CLI_TOP, <global>, "-V, --version", NULL,
     "Show the x2c version and exit", 0 },
   { <verbose>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
-    <general>, "-v, --verbose", NULL, "Show commands as they are executed", 0 },
+    <general>, "-v, --verbose", NULL,
+    "Show commands as they are executed", 0 },
   { <dry-run>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE,
     <general>, "-###", NULL, "Show commands without executing them", 0 },
   { <quiet>, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP |
     CLI_INSTALL | CLI_REMOVE,
-    <general>, "-q, --quiet", NULL, "Suppress successful progress and receipts", 0 },
+    <general>, "-q, --quiet", NULL,
+    "Suppress successful progress and receipts", 0 },
   { <plain>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
-    <general>, "--plain", NULL, "Use stable output without terminal rendering", 0 },
+    <general>, "--plain", NULL,
+    "Use stable output without terminal rendering", 0 },
   { <color>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
     <general>, "--color", "<auto|always|never>", "Control terminal color", 0 },
   { <debug>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE,
@@ -233,8 +237,8 @@ static CliOption cli_options[] = {
 // diagnostics
 
 static void _removed_output(void) {
-  fputs("x2c: error: option '-o' was removed\n", stderr);
   fputs(
+    "x2c: error: option '-o' was removed\n"
     "note: use '--out-dir' with translate or '--output' with build and run\n",
     stderr);
   exit(2);
@@ -593,7 +597,7 @@ static char *_read_response_file(const char *path, size_t *length) {
 }
 
 static int _response_on_stack(List stack, String path) {
-  foreach (String entry, stack) if (strcmp(entry, path) == 0) return 1;
+  foreach (String entry, stack) if (entry == path) return 1;
   return 0;
 }
 
@@ -1037,7 +1041,7 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
   request.run_args = run_args.list_free();
   request.include_dirs = x_paths.list_free();
   request.cpp_args = cpp_args.list_free();
-  if (mask == CLI_BOOTSTRAP && !cc_args.length) cc_args.push("-O2");
+  if (mask == CLI_BOOTSTRAP && !cc_args.len()) cc_args.push("-O2");
   request.cc_args = cc_args.list_free();
   request.ld_args = ld_args.list_free();
   if (request.package_dirs)

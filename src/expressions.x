@@ -159,8 +159,7 @@ static List _parse_postfix_index(Compiler c, List expr) {
 
 static List _parse_postfix_apply(Compiler c, List expr) {
   Token origin = c.token;
-  c.expect(
-    <(>);
+  c.expect(<(>);
   Array arguments = [];
   if (c.peek(0) == <)>) arguments.push(%(expr (void) ()));
   while (c.peek(0) != <)>) {
@@ -169,9 +168,8 @@ static List _parse_postfix_apply(Compiler c, List expr) {
     if (!c.test(<,>)) break;
   }
   c.expect(<)>);
-  List result = c.resolve_expression(
+  return c.resolve_expression(
     %(expr () (call $expr (args @{arguments.list_free()}))), origin);
-  return result;
 }
 
 static Type _receiver_relative_signature(
@@ -319,8 +317,7 @@ static void _find_delegate_methods(
     List resolution = compiler.resolve_postfix_member(
       field_type, %($member), <.>, 1);
     if (resolution && resolution.car() == <method>) {
-      (Var method_tag, List binding, Type signature) = resolution;
-      (void) method_tag;
+      List binding = resolution.cadr(), Type signature = resolution.caddr();
       List path = cons(<path>, next_path.reverse());
       candidates.push(%( delegate $binding $signature $path ));
     }
@@ -440,8 +437,7 @@ static List _parse_postfix(Compiler compiler) =>
 // unary operators and builtins
 static List _parse_offsetof(Compiler compiler) {
   compiler.expect(<offsetof>);
-  compiler.expect(
-    <(>);
+  compiler.expect(<(>);
   List type = compiler.parse_simple_declaration();
   compiler.expect(<,>);
   List field = compiler.parse_basic_identifier();
@@ -451,8 +447,7 @@ static List _parse_offsetof(Compiler compiler) {
 
 static List _parse_sizeof(Compiler c) {
   c.expect(<sizeof>);
-  int parens = c.test(
-    <(>);
+  int parens = c.test(<(>);
   Token head = c.token;
   List arg = NULL;
   if (c.test_declaration()) {
@@ -898,8 +893,7 @@ static int _is_type_selector_start(Compiler c) {
 }
 
 static Type _parse_is_type(Compiler c, Token origin) {
-  int parenthesized = c.test(
-    <(>), Type type = c.parse_type_name();
+  int parenthesized = c.test(<(>), Type type = c.parse_type_name();
   if (parenthesized) {
     if (c.peek(0) == <[>)
       c.report_error(
@@ -1032,14 +1026,9 @@ static Type _shared_participant(
 static List _resolve_protocol_operator(
   Compiler compiler, Symbol op, List *lhs, List *rhs, Symbol *derived) {
   if (derived) *derived = 0;
-  (Var lhs_tag, Type lhs_type) = *lhs;
-  (void) lhs_tag;
+  Type lhs_type = (*lhs).cadr();
   Type participant = lhs_type, rhs_type = NULL;
-  Var rhs_tag;
-  if (*rhs) {
-    (rhs_tag, rhs_type) = *rhs;
-    (void) rhs_tag;
-  }
+  if (*rhs) rhs_type = (*rhs).cadr();
   Symbol member = 0;
   if (!*rhs) {
     if (op != <->) return NULL;
@@ -1098,18 +1087,16 @@ static void _note_fresh_callee(Compiler compiler, List binding) {
 static List _expression_node(List expression) {
   if (!expression) return NULL;
   List body = expression.cdr().cdr();
-  if (!body || !(body.car() is <list>)) return NULL;
-  List node = body.car();
-  return node;
+  if (!body || body.car() is not <list>) return NULL;
+  return body.car();
 }
 
 static List _call_binding(List node) {
-  if (!node || node.car() != <call> || !(node.cadr() is <list>)) return NULL;
+  if (!node || node.car() != <call> || node.cadr() is not <list>) return NULL;
   List callee = node.cadr(), inner = _expression_node(callee);
-  if (!inner || inner.car() != <ident> || !(inner.cadr() is <list>))
+  if (!inner || inner.car() != <ident> || inner.cadr() is not <list>)
     return NULL;
-  List binding = inner.cadr();
-  return binding;
+  return inner.cadr();
 }
 
 static int _is_operator_temporary(Compiler compiler, List expression) {
@@ -1163,9 +1150,7 @@ static List Compiler._protocol_operator_expression(
 
 static List _binary_op_type_addsub(
   Compiler compiler, Symbol op, List lhs, List rhs) {
-  (Var lhs_tag, Type ltype) = lhs;
-  (Var rhs_tag, Type rtype) = rhs;
-  (void) lhs_tag; (void) rhs_tag;
+  Type ltype = lhs.cadr(), rtype = rhs.cadr();
   if (op == <+> && _expr_is_string_like(compiler, lhs) &&
       _expr_is_string_like(compiler, rhs))
     return %("String");
@@ -1183,9 +1168,7 @@ static List _binary_op_type_addsub(
 }
 
 static List _binary_op_type_fallback(List lhs, List rhs) {
-  (Var lhs_tag, Type ltype) = lhs;
-  (Var rhs_tag, Type rtype) = rhs;
-  (void) lhs_tag; (void) rhs_tag;
+  Type ltype = lhs.cadr(), rtype = rhs.cadr();
   if (!ltype) return rtype;
   if (!rtype) return ltype;
   if (ltype === %("Var") || rtype === %("Var")) return %("Var");
@@ -1196,9 +1179,7 @@ static List _binary_op_type_fallback(List lhs, List rhs) {
 
 static List Compiler._binary_op_type(
   Compiler compiler, Symbol op, List lhs, List rhs) {
-  (Var lhs_tag, Type ltype) = lhs;
-  (Var rhs_tag, Type rtype) = rhs;
-  (void) lhs_tag; (void) rhs_tag;
+  Type ltype = lhs.cadr(), rtype = rhs.cadr();
   if (op == <in>) return NULL;
   if (compiler.sym.is_var_type(ltype) ||
       compiler.sym.is_var_type(rtype)) {
@@ -1387,13 +1368,13 @@ static List _resolve_call_arguments(
    through a helper that discards that temporary once the call returns. */
 static List _discarding_callee(
   Compiler compiler, List callee, Type callee_type, List arguments) {
-  if (!callee_type || !(callee_type.car() is <list>) ||
+  if (!callee_type || callee_type.car() is not <list> ||
       callee_type.car().list().car() != <func>)
     return callee;
   List body = callee.cdr().cdr();
-  if (!body || !(body.car() is <list>)) return callee;
+  if (!body || body.car() is not <list>) return callee;
   List ident = body.car();
-  if (ident.car() != <ident> || !(ident.cadr() is <list>)) return callee;
+  if (ident.car() != <ident> || ident.cadr() is not <list>) return callee;
   List binding = ident.cadr();
   long identity = (long) binding;
   if (compiler.protocol_helpers.contains(%"discard-helper $identity"))
@@ -1459,8 +1440,7 @@ static List _resolve_func_call(
   if (arguments) {
     String callee_name = compiler.fresh_name("func_call");
     List callee_binding = compiler.sym.define(%($callee_name), %("Func"));
-    locals.push(
-      %(
+    locals.push(%(
       declare ("Func")
         (bindings (op = (bind $callee_binding ()) $callee))
     ));
@@ -1481,9 +1461,7 @@ static List _resolve_func_call(
       Type source_type = argument.cadr();
       List source_type_literal = compiler.cache_literal_list(
         compiler.sym.normalize_declared_type(source_type));
-      List index_expr = %(
-        expr (unsigned) (literal (unsigned) "$index")
-      );
+      List index_expr = %(expr (unsigned) (literal (unsigned) "$index"));
       List reference_name = compiler.sym.define(
         %(${compiler.fresh_name("func_reference_type")}), %("List"));
       List queried = %(
@@ -1491,17 +1469,13 @@ static List _resolve_func_call(
           (call (expr $query_type (ident $query))
                 (args $invoked $count $index_expr))
       );
-      locals.push(
-        %(
+      locals.push(%(
         declare ("List")
           (bindings (op = (bind $reference_name ()) $queried))
       ));
       String argument_name = compiler.fresh_name("func_argument");
       List binding = compiler.sym.define(%($argument_name), %("FuncArg"));
-      locals.push(
-        %(
-        declare ("FuncArg") (bindings (bind $binding ()))
-      ));
+      locals.push(%(declare ("FuncArg") (bindings (bind $binding ()))));
 
       List address = %(expr () (ident $null_binding));
       if (_expression_is_addressable(compiler, argument)) {
@@ -1529,8 +1503,7 @@ static List _resolve_func_call(
             (args $invoked $index_expr $source_type_literal))
       );
       List target = %(expr ("FuncArg") (ident $binding));
-      locals.push(
-        %(
+      locals.push(%(
         if (expr ("List") (ident $reference_name))
           (stmnt (expr ("FuncArg") (op = $target $reference_value)))
           (stmnt (expr ("FuncArg") (op = $target $value_value)))
@@ -1538,9 +1511,7 @@ static List _resolve_func_call(
       values.push(%(expr ("FuncArg") (ident $binding)));
       index++;
     }
-    List array_type = %(
-      decl ("FuncArg") (bindings (bind () ((dim))))
-    );
+    List array_type = %(decl ("FuncArg") (bindings (bind () ((dim)))));
     storage = %(
       expr ((dim) "FuncArg")
         (cast $array_type
@@ -1667,7 +1638,8 @@ static int _deferred_type_test(Type target) {
   return 0;
 }
 
-/** Builds an exact tag expression, deferring macro type slots until binding. */
+/** Builds an exact tag expression, deferring macro type slots until
+    binding. */
 List Compiler.var_tag_expression(Compiler c, Type target, Token origin) {
   if (_deferred_type_test(target))
     return %(expr (<macro-expr>) (type-tag $target));
@@ -1678,8 +1650,7 @@ List Compiler.var_tag_expression(Compiler c, Type target, Token origin) {
 /* Operands have been resolved in the caller's current semantic scope. */
 static List Compiler._binary_expression(
   Compiler c, Symbol operator, List lhs, List rhs, Token origin) {
-  (Var lhs_tag, Type lhs_type) = lhs;
-  (Var rhs_tag, Type rhs_type) = rhs;
+  Type lhs_type = lhs.cadr(), rhs_type = rhs.cadr();
   if (lhs_type === %(<macro-expr>) ||
       rhs_type === %(<macro-expr>))
     return %(expr (<macro-expr>) (op $operator $lhs $rhs));
@@ -1764,9 +1735,9 @@ static List _constant_row_test(
   if (!Type.var_tag_row(tag, &top, &mask, &bottom)) return NULL;
   List callee = _resolve_identifier(c, "Var_is_row", NULL, origin);
   return %(expr (int) (call $callee (args $lhs
-    (expr (unsigned) (literal (unsigned) ${%"$top"}))
-    (expr (unsigned long) (literal (unsigned long) ${%"$mask"}))
-    (expr (unsigned long) (literal (unsigned long) ${%"$bottom"})))));
+    (expr (unsigned) (literal (unsigned) "$top"))
+    (expr (unsigned long) (literal (unsigned long) "$mask"))
+    (expr (unsigned long) (literal (unsigned long) "$bottom")))));
 }
 
 static List _resolve_initializer(Compiler c, List node, Token origin) {
@@ -1834,9 +1805,7 @@ static List _resolve_content(
             continue;
           }
           resolved.push(
-            %(
-            $tag ${c.convert_segment_to_string(expression)}
-          ));
+            %($tag ${c.convert_segment_to_string(expression)}));
           continue;
         }
         default: resolved.push(item);
@@ -2007,8 +1976,7 @@ static List _resolve_content(
     case %(is-symbol ?operand ?selector): {
       List lhs = c.resolve_expression(operand, origin);
       selector = c.resolve_expression(selector, origin);
-      (Var lhs_tag, Type lhs_type) = lhs;
-      (Var selector_tag, Type selector_type) = selector;
+      Type lhs_type = lhs.cadr(), selector_type = selector.cadr();
       if (_deferred_receiver(lhs) ||
           _deferred_receiver(selector))
         return %(expr (<macro-expr>) (is-symbol $lhs $selector));
@@ -2104,8 +2072,7 @@ static List _resolve_content(
       condition = c.resolve_expression(condition, origin);
       ontrue = c.resolve_expression(ontrue, origin);
       onfalse = c.resolve_expression(onfalse, origin);
-      (Var true_tag, Type true_type) = ontrue;
-      (Var false_tag, Type false_type) = onfalse;
+      Type true_type = ontrue.cadr(), false_type = onfalse.cadr();
       if (condition.cadr() === %(<macro-expr>) ||
           true_type === %(<macro-expr>) ||
           false_type === %(<macro-expr>))
@@ -2530,8 +2497,7 @@ static List _finish_parenthesized_statement_expression(
 */
 List Compiler.parse_parenthesized_statement(Compiler c) {
   Token origin = c.token;
-  c.expect(
-    <(>);
+  c.expect(<(>);
   if (c.test_declaration()) {
     List parameters = c.parse_parameter_list();
     c.expect(<)>);
@@ -2970,7 +2936,8 @@ static List _initializer_index(Compiler c, List index, List *reference) {
 }
 
 /* Cursor offsets are literal facts even when their native starting index
-   is not. Keep one base-plus-offset expression instead of nested increments. */
+   is not. Keep one base-plus-offset expression instead of nested
+   increments. */
 static void _initializer_position(
   List index, List *base, unsigned long long *offset) {
   *base = NULL;
@@ -3054,8 +3021,10 @@ static void _initializer_next(
       String next_index = %"${at + 1}ULL";
       List increment = %(expr (unsigned long long)
         (literal (unsigned long long) $next_index));
-      index = base ? %(expr (unsigned long long)
-        (op + (expr (unsigned long long) (parens $base)) $increment)) : increment;
+      index = base
+        ? %(expr (unsigned long long)
+            (op + (expr (unsigned long long) (parens $base)) $increment))
+        : increment;
       List next = cons(%($owner index $index $type ()), parent);
       if (!dimension) {
         states.push(%($condition $next 1));
@@ -3218,7 +3187,7 @@ static List _initializer_layout(
     return %($type $count ((${path.car()} $child)));
   }
   if (owner.car() == <union>) return NULL;
-  Array children = [];
+  Array children = $auto([]);
   List count = NULL;
   List fields = c.sym.field_order(owner).cdr();
   while (fields) {
@@ -3228,7 +3197,7 @@ static List _initializer_layout(
       path.car();
     List slot = c.initializer_slot(target, path);
     List child = _initializer_layout(c, member, slot, string, symbolic);
-    if (!child) { children.free(); return NULL; }
+    if (!child) return NULL;
     List units = child.cadr();
     count = count ? %(expr (unsigned long long)
       (op + (expr (unsigned long long) (parens $count))
@@ -3236,8 +3205,8 @@ static List _initializer_layout(
     children.push(%(${path.car()} $child));
     fields = rest;
   }
-  if (!count) { children.free(); return NULL; }
-  return %($type $count ${children.list_free()});
+  if (!count) return NULL;
+  return %($type $count ${children.list()});
 }
 
 static void _initializer_ordinal(
@@ -3352,7 +3321,8 @@ List Compiler.initializer_rows(
   foreach (List original, items) {
     List value = original;
     if (original.car() == <dotinit> || original.car() == <indexinit>) {
-      List path = _initializer_designated(c, root, original, &value, &original);
+      List path = _initializer_designated(
+        c, root, original, &value, &original);
       states = %((() $path 1));
     }
     match (value)
@@ -3408,11 +3378,13 @@ static List _initializer_zero(Type type, List target) {
 }
 
 /* Only native-dependent alternatives speculate. The semantic transaction
-   owns bindings/names; conversion additionally appends literal/adapter data. */
+   owns bindings/names; conversion additionally appends literal and adapter
+   data. */
 static List _initializer_conversion(
   Compiler c, List value, Type type, List condition, List target,
   int *native_used) {
-  if (!condition) return _convert_initializer(c, value, type, target, native_used);
+  if (!condition)
+    return _convert_initializer(c, value, type, target, native_used);
   if (native_used) *native_used = 1;
   match (value)
     case %(expr ?stored (call "__builtin_choose_expr"
@@ -3552,28 +3524,22 @@ static List _initializer_adapters(
   Compiler c, List source, List choices, List placeholder) {
   Type from = _initializer_value_type(c, source.cadr());
   if (!from || !ast_contains_head(source, <fields>)) return NULL;
-  Array prepared = [];
+  Array prepared = $auto([]);
   foreach (List choice, choices) {
     (List condition, List path, Type destination, List value) = choice;
-    if (destination && !_initializer_value_type(c, destination)) {
-      prepared.free();
-      return NULL;
-    }
+    if (destination && !_initializer_value_type(c, destination)) return NULL;
     if (value !== source) {
       match (value) {
         case %(expr ? (call "__builtin_choose_expr" (args ? ?yes ?))):
           value = yes;
-        default: { prepared.free(); return NULL; }
+        default: return NULL;
       }
     }
-    if (!_initializer_value_type(c, value.cadr())) {
-      prepared.free();
-      return NULL;
-    }
+    if (!_initializer_value_type(c, value.cadr())) return NULL;
     prepared.push(%($condition $path $destination $value));
   }
   Array adapted = [];
-  foreach (List choice, prepared.list_free()) {
+  foreach (List choice, prepared.list()) {
     (List condition, List path, Type destination, List value) = choice;
     List adapter = _initializer_adapter(c, source, value);
     Type callable = adapter.cadr(), result = callable.apply();
@@ -3674,8 +3640,9 @@ static List _convert_composite(
           (List condition, List path, Type destination, List input) = choice;
           List slot = compiler.initializer_slot(native_target, path);
           List effective = _initializer_and(row_condition, condition);
-          List value = destination ? _initializer_conversion(
-            compiler, input, destination, effective, slot, native_used) : input;
+          List value = !destination ? input
+            : _initializer_conversion(
+                compiler, input, destination, effective, slot, native_used);
           checked.push(%($condition $path $destination $value));
         }
         List header = NULL;
@@ -3729,15 +3696,17 @@ static List _convert_composite(
       String formal = compiler.fresh_name("initializer_value");
       List placeholder = %(expr ${source.cadr()} $formal);
       List values = converted.list_free();
-      List adapted = _initializer_adapters(compiler, source, values, placeholder);
+      List adapted = _initializer_adapters(
+        compiler, source, values, placeholder);
       if (adapted) values = adapted;
       Array replaced = [];
       List inputs = captured.list_free();
       int uses_input = !!adapted;
       foreach (List choice, values) {
         (List condition, List path, Type destination, List result) = choice;
-        List substituted = !destination && source.match(%(expr ? (composite *)))
-          ? result : result.search_replace(%(!quote $source), placeholder);
+        List substituted =
+          !destination && source.match(%(expr ? (composite *)))
+            ? result : result.search_replace(%(!quote $source), placeholder);
         if (substituted !== result) uses_input = 1;
         replaced.push(%($condition $path $destination $substituted));
       }
@@ -3759,7 +3728,8 @@ static List _convert_initializer(
   return c.convert_expression(value, type.declared());
 }
 
-/** Converts an initializer using its declared native object for array bounds. */
+/** Converts an initializer using its declared native object for array
+    bounds. */
 List Compiler.convert_initializer(
   Compiler c, List value, Type type, List target) =>
   _convert_initializer(c, value, type, target, NULL);

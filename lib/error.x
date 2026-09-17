@@ -540,8 +540,7 @@ static Var _copy_value(ErrorRegion *region, Var value) {
   if (value.is_integer() || value.is_floating()) return value;
   if (value is <string>) {
     String source = value;
-    String owned = String.new_in(region.strings, source, source.len());
-    return owned;
+    return String.new_in(region.strings, source, source.len());
   }
   if (value is <lsym>) {
     String source = value.str();
@@ -591,10 +590,6 @@ static List _entry(
   return entry;
 }
 
-static void _append_record(ErrorRecord *record) {
-  _thread().stack.push(record);
-}
-
 static void _record(const X2CErrorSite *site, Symbol code, List detail) {
   if (Error.count() >= Error.bound())
     _floor(code, "error stack exceeded its bound");
@@ -603,7 +598,7 @@ static void _record(const X2CErrorSite *site, Symbol code, List detail) {
   ErrorRecord record = { .region = _region_new() };
   detail = _copy_value(&record.region, detail);
   record.entry = _entry(&record.region, site, code, detail);
-  _append_record(&record);
+  state.stack.push(&record);
   state.floor_only--;
 }
 
@@ -639,7 +634,7 @@ static void _record_n(
   pairs.free();
   if (pushed) Scope.pop();
   record.entry = _entry(&record.region, site, code, detail);
-  _append_record(&record);
+  state.stack.push(&record);
   state.floor_only--;
 }
 
@@ -876,17 +871,12 @@ ErrorHandler Error.push(ErrorHandlerFn fn, Var data) {
   if (!Error.ready() || !fn) return NULL;
   ErrorThreadState state = _thread();
   ErrorHandler h = Scope.malloc_in(&state.scope, sizeof(struct ErrorHandler));
-  h.prev = state.handler_top;
-  h.fn = fn;
-  h.data = data;
-  h.watermark = Error.count();
-  h.site = NULL;
-  h.plans = NULL;
-  h.target = NULL;
-  h.selected = -1;
-  h.capture_values = NULL;
-  h.retained = NULL;
-  h.detached = 0;
+  *h = (struct ErrorHandler) {
+      .prev = state.handler_top, .fn = fn, .data = data,
+      .watermark = Error.count(), .site = NULL, .target = NULL,
+      .selected = -1, .plans = NULL,
+      .capture_values = NULL, .retained = NULL, .detached = 0
+  };
   state.handler_top = h;
   return h;
 }

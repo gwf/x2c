@@ -192,20 +192,19 @@ static inline int _has_file_init_blocks(Compiler compiler) =>
 /* `Compiler.transform` owns the early-declaration queue and appends its
    drained declarations after the unit, so the queue is empty here. */
 static List _prepend_init_prelude(
-  List result, List initGuard, List initFunc) {
-  result = cons(initGuard, result);
-  if (initFunc) result = cons(initFunc, result);
+  List result, List init_guard, List init_func) {
+  result = cons(init_guard, result);
+  if (init_func) result = cons(init_func, result);
   return result;
 }
 
 static int _is_protocol_bootstrap_function(String spelling) =>
   spelling == "x2c_initialize_protocols" ||
-         spelling == "x2c_register_builtin_descriptor" ||
-         spelling == "x2c_try_register_tagged_descriptor";
+  spelling == "x2c_register_builtin_descriptor" ||
+  spelling == "x2c_try_register_tagged_descriptor";
 
 /* A binding number names one declaration across the whole unit. */
-static String _cache_function_key(Var identity) =>
-  %"${identity.integer()}";
+static String _cache_function_key(Var identity) => %"${identity.integer()}";
 
 static void _collect_cache_function_refs(
   Var value, String caller, Map callers, int *uses_cache) {
@@ -261,18 +260,17 @@ static Map _cache_reachable_function_ids(List source) {
    markers do not reach generated output; the compiler's initialization
    queues hold those statements. */
 static List _file_init(Compiler c, List source) {
-  int hasInitBlocks = _has_file_init_blocks(c);
+  int has_init_blocks = _has_file_init_blocks(c);
   String initializer = c.init_fn;
-  if (!hasInitBlocks && !initializer) return source;
+  if (!has_init_blocks && !initializer) return source;
 
-  List guard = c.sym.reference(%("_init_guard_"), NULL), initFunc = NULL;
+  List guard = c.sym.reference(%("_init_guard_"), NULL), init_func = NULL;
   if (!initializer) {
     List file_init = c.sym.introduce("_file_init_");
-    initFunc = _make_file_init_func(c, guard, file_init);
+    init_func = _make_file_init_func(c, guard, file_init);
   }
-  List initGuard = _make_init_guard(guard);
-  String initializer_name = "_file_init_";
-  if (initializer) initializer_name = initializer;
+  List init_guard = _make_init_guard(guard);
+  String initializer_name = initializer ? initializer : "_file_init_";
   int cache_only =
     !initializer && c.init_statements(<early>) &&
     !c.init_statements(<mid>) && !c.init_statements(<late>);
@@ -290,7 +288,7 @@ static List _file_init(Compiler c, List source) {
                (block *statements))): {
         String function_key = _cache_function_key(identity);
         if (!inserted) {
-          result = _prepend_init_prelude(result, initGuard, initFunc);
+          result = _prepend_init_prelude(result, init_guard, init_func);
           inserted = 1;
         }
         String name = spelling;
@@ -318,7 +316,7 @@ static List _file_init(Compiler c, List source) {
      constructor is then the only thing that runs the initializers the loop
      above dropped, so it goes after the declarations it assigns. */
   if (!inserted)
-    result = _prepend_init_prelude(result, initGuard, initFunc);
+    result = _prepend_init_prelude(result, init_guard, init_func);
 
   return result.reverse();
 }
@@ -982,8 +980,7 @@ static List _vertical_spacing(List code) {
     values.push(elem);
     values.push(%(space "\n"));
   }
-  List result = values.list_free();
-  return result;
+  return values.list_free();
 }
 
 static int _has_runtime_include(List content) {
@@ -997,8 +994,7 @@ static int _has_runtime_include(List content) {
   return 0;
 }
 
-static List _include_guard(
-  Compiler compiler, List content, String filename) {
+static List _include_guard(Compiler compiler, List content, String filename) {
   if (compiler.runtime_inc && !_has_runtime_include(content))
     content = cons(%(preproc "#include \"x2c.x\""), content);
   String guard = x2c_filename_hash(filename), List header = _header();
@@ -1057,8 +1053,7 @@ void generate_code(Compiler c, List ast, String dir) {
   ast = ast.filter(
     %!(unit) => !unit.list().match(%((!or space comment empty) *)));
 
-  List (header, source) =
-    _header_and_source(c, ast);
+  List (header, source) = _header_and_source(c, ast);
   String hash = x2c_filename_hash(c.filename);
   (header, source) = c.setup_cache_init(
     header, source,
@@ -1078,8 +1073,7 @@ void generate_code(Compiler c, List ast, String dir) {
   source = _modify_main(c, source);
   source = c.emit(source);
 
-  String basename =
-    %"${dir.rstrip(%"/")}/${Path.stem(c.filename)}";
+  String basename = %"${dir.rstrip("/")}/${Path.stem(c.filename)}";
   String hfile = %"$basename.h", cfile = %"$basename.c";
   String header_text = c.code_pretty_string(header, hfile);
   String source_text = c.code_pretty_string(source, cfile);

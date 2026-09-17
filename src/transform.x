@@ -403,10 +403,14 @@ static List _assignment(
          would mutate shared storage and leave its cached header hash
          stale. A raw write bypasses that invariant, while generic
          setindex returns a copy that this assignment would discard. */
-      if (compiler.sym.is_string_type(base_type))
+      if (compiler.sym.is_string_type(base_type)) {
+        String note = "String is immutable: use the copy-producing " +
+                      "String.withindex, or bind a char * to write a " +
+                      "transient String.malloc buffer";
         compiler.report_error(
           <xform>, "String does not support bracket assignment", NULL,
-          %("String is immutable: use the copy-producing String.withindex, or bind a char * to write a transient String.malloc buffer"));
+          %($note));
+      }
       if (!compiler.resolve_protocol_member(base_type, "setindex"))
         compiler.report_error(
           <xform>, %"type $base_type does not support bracket assignment",
@@ -533,8 +537,7 @@ static List _destructure_declaration(Compiler compiler, List ast) {
                           compiler, source, source_type.list())})));
       List assignments =
         _destructure_assignments(expressions.list_free(), temporary);
-      List result = %(seq $target_decl $temp_decl @assignments);
-      return result;
+      return %(seq $target_decl $temp_decl @assignments);
     }
     case %(dstrdecl (params *parameters)
                     (!set ?source (expr ?source_type ?))): {
@@ -1321,7 +1324,7 @@ static List _defer_rewrite_captures(
 
 static List _lower_callable_defer(
   Compiler c, List body, List finalizer) {
-  List declared = NULL, written = NULL;
+  List declared = %(), written = %();
   Map captures = {}, Array records = [], int unsupported = 0;
   _defer_collect_captures(
     c, finalizer, &declared, captures, records, &written, &unsupported);
@@ -1331,7 +1334,7 @@ static List _lower_callable_defer(
   }
 
   List env_binding = NULL, env_local = NULL, String env_name = NULL;
-  List record_list = records;
+  List record_list = records.list_free();
   if (record_list) {
     env_name = c.fresh_name("defer_env");
     env_binding = c.sym.introduce(env_name);
@@ -1377,7 +1380,6 @@ static List _lower_callable_defer(
     c.semantic_binding_facts()[%(defer-ownr $callback)] =
       c.fn_name;
 
-  records.free();
   return %(defer $body $env_binding $callback $record_list $written);
 }
 

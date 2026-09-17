@@ -146,9 +146,7 @@ static void _acquire(Bootstrap payload) {
       lock.close();
     }
     if (pid > 0 && (kill((pid_t) pid, 0) == 0 || errno == EPERM))
-      _error_path(
-        "another bootstrap is in progress",
-        payload.prefix);
+      _error_path("another bootstrap is in progress", payload.prefix);
     if (unlink(payload.lock_path) && errno != ENOENT)
       _error_path(
         "cannot recover stale bootstrap lock",
@@ -232,9 +230,7 @@ static void _extract(Bootstrap payload, char *manifest) {
     _error("embedded payload has no compiler or runtime sources");
   _write_marker(%"$temporary/.x2c-source-id", payload.identity);
   if (rename(temporary, payload.prefix))
-    _error_path(
-      "cannot publish extracted source tree",
-      payload.prefix);
+    _error_path("cannot publish extracted source tree", payload.prefix);
 }
 
 static void _collect_existing(Bootstrap payload, char *manifest) {
@@ -255,9 +251,7 @@ static void _collect_existing(Bootstrap payload, char *manifest) {
     uint64_t actual_hash = _hash(input, NULL, &actual_size);
     int close_error = input.close();
     if (close_error || actual_size != size || actual_hash != (uint64_t) hash)
-      _error_path(
-        "materialized source failed verification",
-        installed);
+      _error_path("materialized source failed verification", installed);
     _collect(payload, String.new(relative));
     line = strtok_r(NULL, "\n", &save);
   }
@@ -282,6 +276,7 @@ Bootstrap bootstrap_materialize(CliRequest request) {
   Bootstrap payload = Scope.calloc(1, sizeof(struct Bootstrap));
   payload.prefix = _absolute(request.prefix);
   char *manifest = _manifest(&payload.identity);
+  defer free(manifest);
   _acquire(payload);
   String source_marker = %"${payload.prefix}/.x2c-source-id";
   String complete_marker = %"${payload.prefix}/.x2c-bootstrap-complete";
@@ -297,16 +292,13 @@ Bootstrap bootstrap_materialize(CliRequest request) {
   else _extract(payload, manifest);
   payload.runtime_srcs = payload.runtime_srcs.reverse();
   payload.compiler_srcs = payload.compiler_srcs.reverse();
-  free(manifest);
   payload.complete =
     _read_marker(complete_marker, payload.identity) &&
     !access(%"${payload.prefix}/bin/x2c", X_OK) &&
     !access(%"${payload.prefix}/lib/libx2c.a", R_OK);
   if (!_build_mkdirs(%"${payload.prefix}/bin") ||
       !_build_mkdirs(%"${payload.prefix}/lib"))
-    _error_path(
-      "cannot create installation directories",
-      payload.prefix);
+    _error_path("cannot create installation directories", payload.prefix);
   return payload;
 }
 
@@ -355,9 +347,7 @@ CliRequest bootstrap_build_request(
 void bootstrap_record_install(Bootstrap payload, String cc, String ar) {
   String directory = %"${payload.prefix}/lib/x2c";
   if (!_build_mkdirs(directory))
-    _error_path(
-      "cannot create toolchain record directory",
-      directory);
+    _error_path("cannot create toolchain record directory", directory);
   String record = %"$directory/toolchain", File output = fopen(record, "w");
   if (!output ||
       output.printf("CC=%s\nAR=%s\n", cc, ar) < 0 ||

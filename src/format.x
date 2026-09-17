@@ -20,7 +20,7 @@ static int _is_prefix_punct(char ch) =>
 
 static int _is_suffix_punct(char ch) =>
   ch == '(' || ch == '.' || ch == '[' || ch == ']' || ch == ')' ||
-         ch == ';' || ch == ',' || ch == '{' || ch == '}';
+  ch == ';' || ch == ',' || ch == '{' || ch == '}';
 
 static int _need_space(String prev, String curr) {
   if (!prev || !curr) return 0;
@@ -195,6 +195,5 @@ char *Compiler.code_pretty_string(
     else prev_token = token;
   }
 
-  char *result = buff.str_free();
-  return result;
+  return buff.str_free();
 }

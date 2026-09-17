@@ -25,8 +25,7 @@
    line before writing to stderr. */
 static struct {
   int receipts, transient, color, columns, width;
-  unsigned long start;
-  unsigned long update;
+  unsigned long start, update;
 } report;
 
 /** Returns monotonic time in microseconds, or zero when the clock read fails.
@@ -250,7 +249,7 @@ void report_phase(
   String cache = cached == count && count ? " (up to date)" :
                  cached ? %", $cached cached" : "";
   String name = phase.str().capitalize();
-  String line = %"  $name $count $noun in " +
-                %"${report_duration(microseconds)}$cache";
+  String duration = report_duration(microseconds);
+  String line = %"  $name $count $noun in $duration$cache";
   report_line(<muted>, line);
 }

@@ -185,7 +185,7 @@ static void _preflight_translation(CliRequest c, Map unit_dirs) {
       exit(2);
     }
   }
-  List stems = NULL, stem_inputs = NULL;
+  List stems = %(), stem_inputs = %();
   foreach (String input, c.inputs) {
     if (!input) {
       fputs("x2c: error: input path is empty\n", stderr);
@@ -200,9 +200,9 @@ static void _preflight_translation(CliRequest c, Map unit_dirs) {
     if (S_ISDIR(info.st_mode)) {
       fprintf(stderr, "x2c: error: input is a directory: %s\n", input);
       fputs(
-        "note: pass source files, use a shell wildcard, or define a ",
+        "note: pass source files, use a shell wildcard, or define a "
+        "manifest target\n",
         stderr);
-      fputs("manifest target\n", stderr);
       exit(2);
     }
     if (!S_ISREG(info.st_mode)) {
@@ -357,7 +357,7 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build) {
     if (failed) return 1;
     completed = total;
   }
-  foreach (String input, parallel ? (List) NULL : c.inputs) {
+  foreach (String input, parallel ? %() : c.inputs) {
     if (!c.nested) report_progress(<translate>, completed, total, input);
     if (build) build.begin_translation(input);
     _compile_file(frontend, input, _unit_output_dir(c, unit_dirs, input));
@@ -533,7 +533,7 @@ static int _run_env(CliRequest request) {
     request.cc, request.ar, request.cpp_args, request.cc_args,
     request.ld_args, request.verbose, request.dry_run);
   String executable = x2c_get_executable();
-  String roots = String.join(":", request.package_roots());
+  String roots = ":".join(request.package_roots());
   interface_configure(request.out_dir);
   String prelude = interface_prelude();
   List rows = %(

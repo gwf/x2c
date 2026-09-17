@@ -197,8 +197,7 @@ Var Context.export_nested(Context context, Var value) =>
 static Var _export_string(Var value, Context source) {
   if (!source.pool || !source.pool.owns(value)) return value;
   String string = value;
-  String result = String.new_in(source.destination_pool, string, string.len());
-  return result;
+  return String.new_in(source.destination_pool, string, string.len());
 }
 
 static Var _export_atom(Var value, Context source) {

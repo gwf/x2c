@@ -722,7 +722,7 @@ List List.match(List input, Var pat) {
 }
 
 static Var _replace(Var input, List bindings) {
-  if (input.is_binder() && !(input == <*>) && !(input == <?>)) {
+  if (input.is_binder() && input != <*> && input != <?>) {
     Var val = bindings.assoc(input);
     if (val is void) return input;
     return val;
@@ -990,8 +990,7 @@ static int MatchLower._fail_site(
   if (site < 0) return 0;
   if (l.site_count >= l.site_capacity) {
     int capacity = l.site_capacity ? l.site_capacity * 2 : 64;
-    int *grown = Scope.realloc(l.sites, sizeof(int) * capacity);
-    l.sites = grown;
+    l.sites = Scope.realloc(l.sites, sizeof(int) * capacity);
     l.site_capacity = capacity;
   }
   l.sites[l.site_count++] = site;
@@ -1238,7 +1237,6 @@ static int MatchLower._compile_not(MatchLower l, List args) {
 static int MatchLower._compile_is(MatchLower l, List args) {
   MachineBuilder b = l.b;
   int entry = b.length, base = l.site_count, kind = -1;
-  Var (kind_arg, type_tag) = args;
   if (args == %(var binder))       kind = MACHINE_KIND_ATOM_BINDER;
   else if (args == %(list binder)) kind = MACHINE_KIND_LIST_BINDER;
   else if (args == %(binder))      kind = MACHINE_KIND_BINDER;
@@ -1260,7 +1258,8 @@ static int MatchLower._compile_is(MatchLower l, List args) {
     b.set_target(is_list, failure);
     return entry;
   }
-  else if (args && kind_arg == <type> && args.cdr() && !args.cddr()) {
+  else if (args && args.car() == <type> && args.cdr() && !args.cddr()) {
+    Var type_tag = args.cadr();
     Symbol tag = type_tag is <symbol> ? type_tag.symbol() : 0;
     tag = _canonical_type_tag(tag);
     if (!tag) {
@@ -2104,7 +2103,7 @@ int MatchCache.acquire(
   }
 
   slot = m.size < m.capacity ? _cache_free_slot(m)
-                                     : _cache_victim(m);
+                            : _cache_victim(m);
   if (slot < 0) return MATCH_CACHE_PRESSURE;
 
   MatchPlan plan = NULL;
