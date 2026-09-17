@@ -14,9 +14,9 @@ class Custom { Array values; };
 static int initialized;
 
 void Choice.init(Choice *value) {
-  assert(value->x == 0 && value->tag == 0);
-  value->x = 5;
-  value->tag = 1;
+  assert(value.x == 0 && value.tag == 0);
+  value.x = 5;
+  value.tag = 1;
   initialized++;
 }
 int Choice.equal(Choice a, Choice b) {
