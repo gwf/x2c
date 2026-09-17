@@ -4,7 +4,7 @@
 
 static List _115, _114, _113, _111, _110, _109, _107, _106, _103, _102, _101, _99, _98, _97, _95, _94, _93, _90, _89, _88, _86, _77, _76, _74, _73, _72, _70, _69, _68, _66, _65, _62, _61, _60, _58, _57, _51, _50, _49, _47, _46, _45, _44, _39, _35, _34, _33, _31, _30, _29, _25, _24, _23, _18, _17, _13, _11, _10, _8;
 
-static String _119, _118, _117, _116, _81, _80, _79, _78, _37, _21, _15;
+static String _122, _121, _120, _119, _118, _117, _116, _81, _80, _79, _78, _37, _21, _15;
 
 static Var _112, _108, _105, _104, _100, _96, _92, _91, _87, _85, _84, _83, _82, _75, _71, _67, _64, _63, _59, _56, _55, _54, _53, _52, _48, _43, _42, _41, _40, _38, _36, _32, _28, _27, _26, _22, _20, _19, _16, _14, _12, _9, _7, _2, _1, _0;
 
@@ -169,6 +169,9 @@ __attribute__((constructor)) static void _file_init_(void){
   _117 = String_new("el");
   _118 = String_new("endif");
   _119 = String_new("#");
+  _120 = String_new("include");
+  _121 = String_new(">");
+  _122 = String_new("\"");
 }
 
 Var int_var(int);
@@ -242,6 +245,27 @@ String String_remove_prefix(String, String);
 String preproc_directive(String text){
   if(! _init_guard_) _file_init_();
   return String_strip(String_remove_prefix(String_strip(text, " \t"), _119), " \t");
+}
+
+String String_lstrip(String, char *);
+
+int String_len(String);
+
+int String_getindex(String, int);
+
+int String_find(String, String);
+
+String preproc_include_target(String text, int * angle){
+  if(! _init_guard_) _file_init_();
+  * angle = 0;
+  String body = preproc_directive(text);
+  if(! String_startswith(body, _120)) return NULL;
+  body = String_lstrip(String_remove_prefix(body, _120), " \t");
+  if(! String_len(body) ||(String_getindex(body, 0) != '"' && String_getindex(body, 0) != '<')) return NULL;
+  * angle = String_getindex(body, 0) == '<';
+  String rest = String_getslice(body, 1, -2147483648, 1);
+  int close = String_find(rest, * angle ? _121 : _122);
+  return close > 0 ? String_getslice(rest, -2147483648, close, 1) : NULL;
 }
 
 int List_truth(List);

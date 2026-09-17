@@ -23,6 +23,8 @@ Symbol preproc_conditional_kind(String text);
 
 String preproc_directive(String text);
 
+String preproc_include_target(String text, int * angle);
+
 List preproc_track_arms(List arms, String text);
 
 List preproc_within_arms(List arms, List items);

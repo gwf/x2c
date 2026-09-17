@@ -28,7 +28,7 @@
 
 static List _95, _94, _92, _88, _87, _86, _85, _84, _83, _82, _81, _79, _78, _77, _76, _48, _47, _46, _45, _40, _38, _37, _35, _23, _22, _21, _12;
 
-static String _107, _106, _105, _104, _103, _102, _101, _100, _99, _98, _97, _96, _56, _55, _54, _53, _52, _51, _50, _49, _30, _29, _28, _27, _26, _25, _24, _17, _16, _15, _14, _13, _9, _8, _7, _6, _4, _3, _2, _1, _0;
+static String _103, _102, _101, _100, _99, _98, _97, _96, _56, _55, _54, _53, _52, _51, _50, _49, _30, _29, _28, _27, _26, _25, _24, _17, _16, _15, _14, _13, _9, _8, _7, _6, _4, _3, _2, _1, _0;
 
 static Var _91, _89, _80, _67, _65, _63, _61, _59, _58, _57, _44, _41, _39, _36, _34, _31, _20, _19, _18, _11, _10, _5;
 
@@ -43,8 +43,6 @@ static Var _91, _89, _80, _67, _65, _63, _61, _59, _58, _57, _44, _41, _39, _36,
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
-
-static String _preproc_include_target(String text, int * angle);
 
 static int _starts_line(Token first, Token token);
 
@@ -267,16 +265,12 @@ __attribute__((constructor)) static void _file_init_(void){
   _95 = cons(_39, _94);
   _96 = String_new("file: ");
   _97 = String_new("reason: ");
-  _98 = String_new("#");
-  _99 = String_new("include");
-  _100 = String_new("\n");
-  _101 = String_new(".");
-  _102 = String_new("/");
-  _103 = String_new("cannot read include");
-  _104 = String_new("cannot read runtime source");
-  _105 = String_new("failed to write interface file");
-  _106 = String_new(">");
-  _107 = String_new("\"");
+  _98 = String_new("\n");
+  _99 = String_new(".");
+  _100 = String_new("/");
+  _101 = String_new("cannot read include");
+  _102 = String_new("cannot read runtime source");
+  _103 = String_new("failed to write interface file");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -285,42 +279,12 @@ __attribute__((constructor)) static void _file_init_(void){
   _x2c_static_initialize_5();
 }
 
-String String_strip(String, char *);
-
-int String_startswith(String, String);
-
-String String_lstrip(String, char *);
-
-String String_remove_prefix(String, String);
-
-int String_len(String);
-
-int String_getindex(String, int);
-
-int String_find(String, String);
-
-static String _preproc_include_target(String text, int * angle){
-  * angle = 0;
-  String body = String_strip(text, " \t\r\n");
-  if(! String_startswith(body, _98)) return NULL;
-  body = String_lstrip(String_getslice(body, 1, -2147483648, 1), " \t");
-  if(! String_startswith(body, _99)) return NULL;
-  body = String_lstrip(String_remove_prefix(body, _99), " \t");
-  if(! String_len(body)) return NULL;
-  char open = String_getindex(body, 0);
-  if(open != '"' && open != '<') return NULL;
-  * angle = open == '<';
-  String rest = String_getslice(body, 1, -2147483648, 1);
-  int close = String_find(rest, * angle ? _106 : _107);
-  return close > 0 ? String_getslice(rest, -2147483648, close, 1) : NULL;
-}
-
 int String_contains(String, String);
 
 static int _starts_line(Token first, Token token){
   while(token -- > first){
     if(token -> type != 40896714 && token -> type != 7477210024) return 0;
-    if(String_contains(token -> text, _100)) return 1;
+    if(String_contains(token -> text, _98)) return 1;
   }
   return 1;
 }
@@ -357,8 +321,10 @@ static String _canonical_src(void){
 
 static String _canonical_cwd(void){
   static char cache[PATH_MAX];
-  return _cached_canonical(cache, _101);
+  return _cached_canonical(cache, _99);
 }
+
+int String_startswith(String, String);
 
 int SourceView_exists(SourceView, String);
 
@@ -378,7 +344,7 @@ int String_equal(String, String);
 
 static String _resolve_include_dirs(SourceView sources, List extra_dirs, String includer_dir, String target, int angle, int * covered){
   * covered = 0;
-  if(String_startswith(target, _102)) return SourceView_exists(sources, target) ? target : NULL;
+  if(String_startswith(target, _100)) return SourceView_exists(sources, target) ? target : NULL;
   String lib_dir = _canonical_lib(), include_dir = _canonical_include();
   Array dirs = Array_new();
   if(! angle && String_truth(includer_dir)) Array_push(dirs, String_var(_canonical_path(includer_dir)));
@@ -617,7 +583,7 @@ void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
 static String _include_text(Compiler c, String target, String path){
   String text = NULL;
-  if(! Compiler_read_source(c, path, & text)) Compiler_report_error(c, 306819428, _103, c -> token, cons(_5, cons(String_var(String_join(NULL, cons(String_var(_6), cons(String_var(target), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(path), NULL)))), NULL))));
+  if(! Compiler_read_source(c, path, & text)) Compiler_report_error(c, 306819428, _101, c -> token, cons(_5, cons(String_var(String_join(NULL, cons(String_var(_6), cons(String_var(target), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(path), NULL)))), NULL))));
   return text;
 }
 
@@ -771,6 +737,8 @@ Tokenizer Tokenizer_new(char *);
 
 void Tokenizer_scan(Tokenizer);
 
+String preproc_include_target(String, int *);
+
 Map Compiler_select_declaration_defaults(Compiler, String, Map, Array, Map);
 
 int Map_truth(Map);
@@ -812,7 +780,7 @@ static void _file(Compiler c, String path, String text, String dir, Map globs, M
         int segment_line = 1, segment_position = 0;
         for(Token token = first;  token -> type != 11212;  token ++){
           int angle = 0;
-          String target = token -> type == 35579270086 && _starts_line(first, token) ? _preproc_include_target(token -> text, & angle) : NULL;
+          String target = token -> type == 35579270086 && _starts_line(first, token) ? preproc_include_target(token -> text, & angle) : NULL;
           if(! String_truth(target)) continue;
           _flush_segment(c, path, text, String_getslice(text, segment_position, token -> pos, 1), segment_line, segment_position, globs, parts, definitions, dependencies, & private);
           _include(c, target, angle, dir, globs, visited, parts, dependencies);
@@ -898,7 +866,7 @@ static void _file(Compiler c, String path, String text, String dir, Map globs, M
 
 static String _runtime_text(Compiler c, String runtime){
   String text = NULL;
-  if(! Compiler_read_source(c, runtime, & text)) Compiler_report_error(c, 306819428, _104, c -> token, cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(runtime), NULL)))), NULL));
+  if(! Compiler_read_source(c, runtime, & text)) Compiler_report_error(c, 306819428, _102, c -> token, cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(runtime), NULL)))), NULL));
   return text;
 }
 
@@ -1019,7 +987,7 @@ static void _package_merge(Compiler compiler, String name, String root, String p
           continue;
         }
         if(! foreign) continue;
-        String unit = Var_string(List_last(String_split(path, _102)));
+        String unit = Var_string(List_last(String_split(path, _100)));
         String fix = String_join(NULL, cons(String_var(_25), cons(String_var(name), cons(String_var(_26), NULL))));
         Compiler_report_error(compiler, 306819428, String_join(NULL, cons(String_var(_27), cons(String_var(name), cons(String_var(_28), cons(String_var(spelling), cons(String_var(_29), NULL)))))), token, cons(String_var(String_join(NULL, cons(String_var(_29), cons(String_var(unit), cons(String_var(_30), cons(String_var(fix), NULL)))))), NULL));
       }
@@ -1697,7 +1665,7 @@ x2c_exception_leave(& _x2c_exception_frame_3);
 }
 }
 String reason = String_new(strerror((int) error));
-Compiler_report_error(compiler, 354920, _105, NULL, cons(String_var(String_join(NULL, cons(String_var(_96), cons(String_var(path), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_97), cons(String_var(reason), NULL)))), NULL)));
+Compiler_report_error(compiler, 354920, _103, NULL, cons(String_var(String_join(NULL, cons(String_var(_96), cons(String_var(path), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_97), cons(String_var(reason), NULL)))), NULL)));
 }
 x2c_cleanup_leave(& _x2c_defer_record_3);
 
