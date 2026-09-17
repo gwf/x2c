@@ -17,3 +17,6 @@ The [root instructions](../AGENTS.md) own verification and delivery.
   rather than the generated file.
 - Author skills in `agents/skills/`; `.agents/skills` and `.claude/skills`
   expose the same directory to Codex and Claude Code.
+- `.claude/output-styles/x2c.md` gives Claude Code the working and writing
+  rules that Codex already receives from its own prompt. Change it only with
+  a fresh-session comparison of the affected answers.
