@@ -39,51 +39,13 @@ static String _preproc_include_target(String text, int *angle) {
   return close > 0 ? rest[:close] : NULL;
 }
 
-/* Strip comments while preserving directive text and block state. */
-static String _directive_line(String line, int *in_comment) {
-  int length = line.len(), start = 0;
-  if (*in_comment) {
-    for (int n = 0; n < length; n++)
-      if (line[n] == '*' && n + 1 < length && line[n+1] == '/') {
-        *in_comment = 0;
-        start = n + 2;
-        break;
-      }
-    if (*in_comment) return NULL;
+/* A directive's `#` follows only whitespace and comments on its line. */
+static int _starts_line(Token first, Token token) {
+  while (token-- > first) {
+    if (token.type != <space> && token.type != <comment>) return 0;
+    if (token.text.contains("\n")) return 1;
   }
-  Buffer output = NULL;
-  for (int n = start; n < length; n++) {
-    char ch = line[n];
-    if (ch == '"' || ch == '\'') {
-      int used = ch == '"' ? scan_c_string(line + n)
-                           : scan_c_character(line + n);
-      if (used < 0) return line;
-      n += used - 1;
-      continue;
-    }
-    if (ch != '/') continue;
-    if (n + 1 < length && line[n+1] == '/') {
-      if (!output) return line[start:n];
-      output.write_len(line + start, n - start);
-      return output.str_free();
-    }
-    if (n + 1 < length && line[n+1] == '*') {
-      if (!output) output = Buffer.new(0);
-      output.write_len(line + start, n - start);
-      *in_comment = 1;
-      for (n += 2; n < length; n++)
-        if (line[n] == '*' && n + 1 < length && line[n+1] == '/') {
-          *in_comment = 0;
-          output.write(" ");
-          start = ++n + 1;
-          break;
-        }
-      if (*in_comment) return output.str_free();
-    }
-  }
-  if (!output) return line[start:];
-  output.write_len(line + start, length - start);
-  return output.str_free();
+  return 1;
 }
 
 /* Unresolvable paths retain the caller's spelling. */
@@ -271,13 +233,9 @@ static void _walk_cold(
    are recorded at this segment's source position. Macro, Lisp, and keyword
    state then returns to the enclosing compiler for the next segment. */
 static void _parse_segment(
-  Compiler c, String path, String source, Array lines, int start_line,
+  Compiler c, String path, String source, String text, int start_line,
   int start_pos, Map globs, Map overlay, Map definitions, Map dependencies,
   int *private) {
-  if (!lines.len()) return;
-  String text = "".join(lines);
-  lines.clear();
-  if (!text || !*text) return;
   Compiler shadow = Compiler.new_shared(c);
   defer c.close_child(shadow);
   /* A package renames what it declares, not what it includes. A C header's
@@ -314,15 +272,15 @@ static void _parse_segment(
 
 /* Append one segment's nonempty overlay before the following include. */
 static void _flush_segment(
-  Compiler compiler, String path, String source, Array segment, int start_line,
+  Compiler compiler, String path, String source, String text, int start_line,
   int start_pos, Map globs, Array parts, Map definitions, Map dependencies,
   int *private) {
-  if (!segment.len()) return;
+  if (!text || !*text) return;
   Scope.push(&process_cache_scope);
   Map overlay = {};
   Scope.pop();
   _parse_segment(
-    compiler, path, source, segment, start_line, start_pos,
+    compiler, path, source, text, start_line, start_pos,
     globs, overlay, definitions, dependencies, private);
   if (overlay.len()) {
     Var overlay_var = overlay;
@@ -404,38 +362,35 @@ static void _file(
   $let(c.declaration_effects, NULL) {
     c.kw_aliases = {};
     c.kw_seen = {};
-    Array parts = [], segment = [];
+    Array parts = [];
     Scope.push(&process_cache_scope);
     Map dependencies = {};
     Scope.pop();
-    Map definitions = {}, int in_comment = 0;
-    int line_number = 1, byte_position = 0;
-    int segment_line = 1, segment_position = 0, private = 0;
+    Map definitions = {}, int private = 0;
     String content_hash = "%08x".printf(text.hash());
-    List lines = text.split_lines(1);
-    foreach (String line, lines) {
-      int angle = 0, String stripped = _directive_line(line, &in_comment);
-      String target =
-        stripped ? _preproc_include_target(stripped, &angle) : NULL;
-      if (!target) {
-        segment.push(line);
-        line_number++;
-        byte_position += line.len();
-        continue;
-      }
+    /* Scanned tokens place directives outside strings and comments. A
+       segment ends before an include and the next begins after it. */
+    Tokenizer tokenizer = Tokenizer.new(text);
+    tokenizer.scan();
+    Token first = tokenizer.tokens;
+    int segment_line = 1, segment_position = 0;
+    for (Token token = first; token.type != <eof>; token++) {
+      int angle = 0;
+      String target = token.type == <preproc> && _starts_line(first, token)
+        ? _preproc_include_target(token.text, &angle)
+        : NULL;
+      if (!target) continue;
       _flush_segment(
-        c, path, text, segment, segment_line, segment_position,
-        globs, parts, definitions, dependencies, &private);
+        c, path, text, text[segment_position:token.pos], segment_line,
+        segment_position, globs, parts, definitions, dependencies, &private);
       _include(c, target, angle, dir, globs, visited, parts, dependencies);
-      line_number++;
-      byte_position += line.len();
-      segment_line = line_number;
-      segment_position = byte_position;
+      Token next = token + 1;
+      segment_line = next.line;
+      segment_position = next.pos;
     }
     _flush_segment(
-      c, path, text, segment, segment_line, segment_position,
+      c, path, text, text[segment_position:], segment_line, segment_position,
       globs, parts, definitions, dependencies, &private);
-    segment.free();
     Map generated =
       c.select_declaration_defaults(path, globs, parts, definitions);
     if (generated && generated.len()) {
