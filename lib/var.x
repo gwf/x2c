@@ -246,7 +246,19 @@ int Var.register_object_tag(Symbol tag) {
   if (_tag2id(tag) != _invalid_) return -1;
   int id = _custom_tag_id(tag);
   if (id >= 0) return id;
-  if (custom_tag_count == VAR_CUSTOM_TAG_COUNT) return -1;
+  /* Exhaustion is the one -1 a caller cannot act on, and registration runs
+     before Error exists, so the status surfaces as a floor naming whichever
+     type asked next. Name the budget here, where it is known. */
+  if (custom_tag_count == VAR_CUSTOM_TAG_COUNT) {
+    char spelling[SYMBOL_MAX_5BIT + 1] = { 0 };
+    tag.decode(spelling);
+    fprintf(
+      stderr,
+      "Var registry: all %d custom object tag rows are in use; "
+      "<%s> was not registered\n", VAR_CUSTOM_TAG_COUNT, spelling);
+    fflush(stderr);
+    return -1;
+  }
   custom_tags[custom_tag_count] = tag;
   return custom_tag_count++;
 }

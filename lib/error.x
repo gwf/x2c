@@ -479,9 +479,11 @@ static void _initialize_policies(void) {
     re-entered itself. Allocates nothing and calls nothing that can.
 */
 static void _floor(Symbol code, const char *why) {
+  char spelling[SYMBOL_MAX_5BIT + 1] = { 0 };
+  code.decode(spelling);
   fprintf(
-    stderr, "x2c error floor: code 0x%lx: %s\n",
-    (unsigned long) code, why ? why : "unknown");
+    stderr, "x2c error floor: <%s>: %s\n",
+    spelling, why ? why : "unknown");
   fflush(stderr);
   abort();
 }

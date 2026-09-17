@@ -25,9 +25,9 @@ esac
   "$ROOT/unittest/probes/error-fatal-preinit.c" \
   -L"$ROOT/builds/0" -lx2c -lm -o "$PREINIT"
 
-# The floor prints the Symbol as hex, whose value is not stable across
-# vocabulary edits, so match the fixed prefix and the reason suffix rather
-# than the whole line.
+# The floor decodes the raising cause, so match the fixed prefix and the
+# reason suffix; the preinit probe raises a synthetic code whose spelling is
+# not part of the vocabulary.
 check_case() {
   local name=$1
   local reason=$2
@@ -54,7 +54,7 @@ check_case() {
   fi
   test ! -s "$BUILD/$name.stdout"
   output=$(tail -1 "$BUILD/$name.stderr")
-  if [[ $output != "x2c error floor: code 0x"* ]]; then
+  if [[ $output != "x2c error floor: <"* ]]; then
     echo "$name: final stderr line lacks the floor prefix: $output" >&2
     return 1
   fi
