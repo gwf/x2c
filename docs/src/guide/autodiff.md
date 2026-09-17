@@ -107,7 +107,9 @@ diagnostic at the invocation that names the statement or expression.
 
 The generated function is plain scalar C. Zero and unit factors are
 folded at generation time, so `t_dot = x_dot * y + x * y_dot` is what
-appears in the output.
+appears in the output. A primitive term tests its tangent against zero
+before multiplying, so an infinite partial such as `sqrt` at 0 does not
+turn a zero tangent into NaN.
 
 ## Reverse mode by transformation
 

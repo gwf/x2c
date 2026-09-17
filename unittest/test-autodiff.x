@@ -354,6 +354,22 @@ static void autodiff_keeps_operand_grouping(void) {
   EXPECT_TRUE(fabs(_grouped_updates_dot(2.0, 1.0) - gradient) < 1e-12);
 }
 
+$ad.both()
+static double _power(double x, double y) => pow(x, y);
+
+$ad.both()
+static double _root_plus(double x, double y) => sqrt(x) + y;
+
+static void autodiff_forward_skips_partials_without_tangent(void) {
+  double x_grad, y_grad;
+  _power_grad(0.0, 2.0, &x_grad, &y_grad);
+  EXPECT_TRUE(_near(x_grad, 0.0));
+  EXPECT_TRUE(_near(_power_dot(0.0, 1.0, 2.0, 0.0), x_grad));
+  _root_plus_grad(0.0, 2.0, &x_grad, &y_grad);
+  EXPECT_TRUE(_near(y_grad, 1.0));
+  EXPECT_TRUE(_near(_root_plus_dot(0.0, 0.0, 2.0, 1.0), y_grad));
+}
+
 void autodiff_suite(void) {
   $test.run(autodiff_dual_matches_finite_difference);
   $test.run(autodiff_dual_operators_and_converters);
@@ -369,4 +385,5 @@ void autodiff_suite(void) {
   $test.run(autodiff_differentiates_loop_clauses);
   $test.run(autodiff_tape_skips_inactive_adjoints);
   $test.run(autodiff_keeps_operand_grouping);
+  $test.run(autodiff_forward_skips_partials_without_tangent);
 }

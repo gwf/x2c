@@ -393,13 +393,20 @@ $(defun ad._tangent (e names)
        (ad._call-tangent ?name ?ft *args names))
       (else (ad._fail "unsupported expression" e)))))
 
+/* A primitive's partial can be infinite or NaN where its argument has no
+   tangent, as `sqrt` is at 0, so a zero tangent skips the product. */
+$(defun ad._along (da partial)
+  (if (ad._zero? da) da
+      (ad._select `(expr () (op == ,(ad._operand da) ,(ad._zero)))
+                  (ad._zero) (ad._mul da partial))))
+
 $(defun ad._call-tangent (name ftype args names)
   (let ((prim (assoc name ad._primitives))
         (unbound (map ad._unbind args))
         (tangents (map (lambda (a) (ad._tangent a names)) args)))
     (cond (prim
            (foldl ad._add (ad._zero)
-             (ad._zip (lambda (partial da) (ad._mul da (partial unbound)))
+             (ad._zip (lambda (partial da) (ad._along da (partial unbound)))
                       (cdr prim) tangents)))
           ((member name ad._forward-siblings)
            (ad._call (ad._dot name)

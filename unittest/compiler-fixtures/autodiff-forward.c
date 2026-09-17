@@ -48,7 +48,7 @@ static double model_dot(double x, double x_dot, double y, double y_dot, int n){
     t_dot =(- t_dot);
     t = - t;
   }
-  return((((((t_dot * cos(t)) * x) -(sin(t) * x_dot)) /(x * x)) -(2.0 * y_dot)) + s_dot);
+  return((((((t_dot == 0.0 ? 0.0 :(t_dot * cos(t))) * x) -(sin(t) * x_dot)) /(x * x)) -(2.0 * y_dot)) + s_dot);
 }
 
 int main(void){
