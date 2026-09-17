@@ -14,7 +14,7 @@ $(import "integer-ops.xmacro")
 #include "common.x"
 #include "varconvert.x"
 
-// snapshot-visible declarations; shallow collection does not expand macros
+// declared here because shallow symbol collection does not expand macros
 char x2c_var_update_i8(volatile char *lhs, Symbol op, Var rhs);
 signed char x2c_var_update_schar(
   volatile signed char *lhs, Symbol op, Var rhs);

@@ -704,7 +704,7 @@ void Logger.log(Logger logger, Symbol level, Symbol category, List fields) {
   }
 }
 
-// snapshot-visible declarations; shallow collection does not expand macros
+// declared here because shallow symbol collection does not expand macros
 void Logger.trace(Logger, Symbol, List);
 void Logger.debug(Logger, Symbol, List);
 void Logger.info(Logger, Symbol, List);

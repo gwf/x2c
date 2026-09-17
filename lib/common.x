@@ -480,7 +480,7 @@ inline double Var.decode_f64(Var value) {
   return result;
 }
 
-// snapshot-visible declarations; shallow collection does not expand macros
+// declared here because shallow symbol collection does not expand macros
 Var Var.box_i8(char); Var Var.box_u8(uchar);
 Var Var.box_i16(short); Var Var.box_u16(ushort);
 Var Var.box_i32_bits(unsigned); Var Var.box_u32(unsigned);
@@ -548,7 +548,7 @@ inline Var    Iter.var(Iter x)           => Var.new(<iter>, x);
 
 // primitive conversions
 
-// snapshot-visible declarations; shallow collection does not expand macros
+// declared here because shallow symbol collection does not expand macros
 Var char.var(char); String char.str(char); String char.repr(char);
 Var uchar.var(uchar); String uchar.str(uchar); String uchar.repr(uchar);
 Var short.var(short); String short.str(short); String short.repr(short);
