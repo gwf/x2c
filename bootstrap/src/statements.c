@@ -331,12 +331,10 @@ List Compiler_parse_governed(Compiler c, AstPos position){
   return Var_list(Array_len(items) == 1 ? Array_getindex(items, 0) : List_var(cons(_0, List_append(Array_list_free(items), NULL))));
 }
 
-int Token_equal(Token, Token);
-
 int List_truth(List);
 
 static List _continued(Compiler c, List statement){
-  if(Token_equal(c -> token, c -> directives_taken)) return statement;
+  if(c -> token == c -> directives_taken) return statement;
   List directives = Compiler_leading_preproc(c);
   return List_truth(directives) ? cons(_0, cons(List_var(statement), List_append(directives, NULL))) : statement;
 }
@@ -728,7 +726,7 @@ static List _match_cases(Compiler c){
     Symbol peek = Compiler_peek(c, 0);
     int saw_default = 0;
     while(1){
-      if(! Token_equal(c -> token, c -> directives_taken)){
+      if(c -> token != c -> directives_taken){
         List directive;
         List _x2c_macro_object_5 = Compiler_leading_preproc(c);
         List _x2c_macro_cursor_5 = _x2c_macro_object_5;
@@ -1014,7 +1012,7 @@ List Compiler_parse_block_items(Compiler c, int anchor_items){
   List stmt = NULL;
   Sym_push_new_scope(c -> sym);
   while(1){
-    if(! Token_equal(c -> token, c -> directives_taken)){
+    if(c -> token != c -> directives_taken){
       Var directive;
       List _x2c_macro_object_6 = Compiler_leading_preproc(c);
       List _x2c_macro_cursor_6 = _x2c_macro_object_6;

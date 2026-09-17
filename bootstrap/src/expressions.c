@@ -3572,11 +3572,10 @@ static int _bracket_designates(Compiler c){
 }
 
 int Compiler_macro_starts_target_at(Compiler, AstPos);
-int Token_equal(Token, Token);
 static int _brace_starts_map(Compiler c){
   if(Compiler_macro_starts_target_at(c, AST_MAP_ENTRY)) return 1;  Token token = c -> token;  for(int conditionals = 0; ;  token = Token_after_group(token)){
     switch(token -> type){
-      case 11212 : case 119 : case 89 : case 83 : case 187 : case 251 : return 0;  case 58 : conditionals ++;  break;  case 117 : if(! conditionals --) return ! Token_equal(token, c -> token);
+      case 11212 : case 119 : case 89 : case 83 : case 187 : case 251 : return 0;  case 58 : conditionals ++;  break;  case 117 : if(! conditionals --) return token != c -> token;
     }
 
   }

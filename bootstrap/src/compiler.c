@@ -2399,9 +2399,8 @@ void Compiler_shallow_parse_overlay(Compiler c, Map base, Map overlay){
   Sym__reset_overlay(c -> sym, base, overlay);  Compiler_install_builtin_macros(c);  _shallow_parse_loop(c);
 }
 
-int Token_equal(Token, Token);
 List Compiler_leading_preproc(Compiler compiler){
-  if(! _init_guard_) _file_init_();  List noncode = NULL;  Token base = compiler -> tokenizer -> tokens, token = compiler -> token;  if(Token_equal(token, base)) return NULL;  while(-- token >= base){
+  if(! _init_guard_) _file_init_();  List noncode = NULL;  Token base = compiler -> tokenizer -> tokens, token = compiler -> token;  if(token == base) return NULL;  while(-- token >= base){
     switch(token -> type){
       case 40896714 : case 7477210024 : break;  case 35579270086 : noncode = cons(List_var(cons(_270, cons(String_var(token -> text), NULL))), noncode);  break;  default: return noncode;
     }
