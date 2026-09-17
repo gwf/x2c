@@ -14,8 +14,6 @@ void x2c_set_root(String root);
 
 String x2c_get_root(void);
 
-String x2c_canonical_root(void);
-
 String x2c_get_executable(void);
 
 String x2c_package_directory(List roots, String path);

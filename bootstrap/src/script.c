@@ -2,7 +2,7 @@
 
 #include "script.h"
 
-static String _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 #include <errno.h>
 #include <string.h>
@@ -26,15 +26,17 @@ __attribute__((constructor)) static void _file_init_(void){
   _4 = String_new(": ");
   _5 = String_new("/source");
   _6 = String_new("/lock");
-  _7 = String_new("/scripts/");
-  _8 = String_new("-%08x");
-  _9 = String_new("script does not exist: ");
-  _10 = String_new("direct");
-  _11 = String_new("/scripts");
-  _12 = String_new(".%ld");
-  _13 = String_new("X2C_CACHE_DIR");
-  _14 = String_new("XDG_CACHE_HOME");
-  _15 = String_new("HOME");
+  _7 = String_new("%08x");
+  _8 = String_new("/scripts/");
+  _9 = String_new("-");
+  _10 = String_new("script does not exist: ");
+  _11 = String_new("direct");
+  _12 = String_new("/scripts");
+  _13 = String_new("%ld");
+  _14 = String_new(".");
+  _15 = String_new("X2C_CACHE_DIR");
+  _16 = String_new("XDG_CACHE_HOME");
+  _17 = String_new("HOME");
 }
 
 String Env_get(String);
@@ -45,8 +47,8 @@ Var String_var(String);
 
 String script_cache_root(void){
   if(! _init_guard_) _file_init_();
-  String explicit = Env_get(_13), xdg = Env_get(_14);
-  String home = Env_get(_15);
+  String explicit = Env_get(_15), xdg = Env_get(_16);
+  String home = Env_get(_17);
   return String_truth(explicit) ? explicit : String_truth(xdg) ? String_join(NULL, cons(String_var(xdg), cons(String_var(_0), NULL))) : String_truth(home) ? String_join(NULL, cons(String_var(home), cons(String_var(_1), NULL))) : NULL;
 }
 
@@ -161,9 +163,9 @@ static void _prune(String scripts){
 
 Path Path_absolute(Path);
 
-String String_printf(String, ...);
-
 String Path_stem(Path);
+
+String String_printf(String, ...);
 
 unsigned String_hash(String);
 
@@ -182,7 +184,8 @@ int script_prepare(CliRequest c){
   String root = script_cache_root();
   if(! String_truth(root)) x2c_driver_error("no cache directory: set X2C_CACHE_DIR");
   String script = Path_absolute(Var_string(List_car(c -> inputs)));
-  c -> build_dir = String_printf(String_join(NULL, cons(String_var(root), cons(String_var(_7), cons(String_var(Path_stem(script)), cons(String_var(_8), NULL))))), String_hash(script));
+  String stem = Path_stem(script), digest = String_printf(_7, String_hash(script));
+  c -> build_dir = String_join(NULL, cons(String_var(root), cons(String_var(_8), cons(String_var(stem), cons(String_var(_9), cons(String_var(digest), NULL))))));
   if(c -> clean){
     if(! Path_is_dir(c -> build_dir)) return 1;
     int lock = file_lock(String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_6), NULL))), 1);
@@ -220,9 +223,9 @@ x2c_exception_leave(& _x2c_exception_frame_1);
 close(lock);
 return 1;
 }
-if(! Path_is_file(script)) x2c_driver_error(String_join(NULL, cons(String_var(_9), cons(String_var(script), NULL))));
+if(! Path_is_file(script)) x2c_driver_error(String_join(NULL, cons(String_var(_10), cons(String_var(script), NULL))));
 c -> inputs = cons(String_var(script), NULL);
-c -> state_seed = _10;
+c -> state_seed = _11;
 if(! c -> verbose) c -> quiet = 1;
 c -> output = String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_2), NULL)));
 if(c -> dry_run) return 0;
@@ -259,8 +262,9 @@ x2c_exception_leave(& _x2c_exception_frame_2);
 file_lock(String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_6), NULL))), 1);
 if(! c -> rebuild && CliRequest_script_current(c, c -> build_dir)) _exec(c);
 Path_write_text(String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_5), NULL))), script);
-_prune(String_join(NULL, cons(String_var(root), cons(String_var(_11), NULL))));
-c -> output = String_printf(String_join(NULL, cons(String_var(c -> output), cons(String_var(_12), NULL))), (long) getpid());
+_prune(String_join(NULL, cons(String_var(root), cons(String_var(_12), NULL))));
+String pid = String_printf(_13, (long) getpid());
+c -> output = String_join(NULL, cons(String_var(c -> output), cons(String_var(_14), cons(String_var(pid), NULL))));
 return 0;
 }
 

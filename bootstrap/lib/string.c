@@ -4,7 +4,7 @@
 
 #include "error.h"
 
-static String _5, _4, _3, _2, _1, _0;
+static String _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -45,6 +45,7 @@ static String _intern_owned(String string);
 static String _finish(String string, int length);
 static String _from_bytes_in(Pool pool, const char * bytes, int length);
 static String _from_bytes(const char * bytes, int length);
+static int _count_matches(String str, String sub, int limit);
 static Var _apply(Func fn, char value);
 static String _pad(String str, int width, char fill, int left_padding);
 static inline int _hex_digit(int ch);
@@ -87,7 +88,7 @@ Pool String_pool_current(void){
 
 void x2c_pool_values_initialize(void);
 void String_initialize(void){
-  if(_init_guard_) return;  _init_guard_ = 1;  x2c_pool_values_initialize();  _0 = String_new("\n");  _1 = String_new("\"%s\"");  _2 = String_new("\r\n");  _3 = String_new("\n");  _4 = String_new("\\");  _5 = String_new("\"\"");  Scope_shutdown_hook(String_shutdown);
+  if(_init_guard_) return;  _init_guard_ = 1;  x2c_pool_values_initialize();  _0 = String_new("\"%s\"");  _1 = String_new("\\");  _2 = String_new("\"\"");  Scope_shutdown_hook(String_shutdown);
 }
 
 void x2c_pool_values_thread_initialize(void);
@@ -388,22 +389,18 @@ List String_find_all(String str, String sub, int start, int end){
   if(! String_truth(str) || ! String_truth(sub)) return NULL;
   Array results = Array_new();
   int n = String_len(sub), pos = start;
-  while(pos >= 0){
+  for(; ; ){
     pos = String_find_within(str, sub, pos, end);
-    if(pos >= 0){
-      Array_push(results, int_var(pos));
-      pos += n;
-    }
-
+    if(pos < 0) break;
+    Array_push(results, int_var(pos));
+    pos += n;
   }
   return Array_list_free(results);
 }
 
-int String_count(String str, String sub){
-  if(! _init_guard_) String_initialize();
-  if(! String_truth(str) || ! String_truth(sub)) return 0;
-  int count = 0, sub_len = String_len(sub), pos = 0, str_len = String_len(str);
-  while(pos <= str_len - sub_len){
+static int _count_matches(String str, String sub, int limit){
+  int str_len = String_len(str), sub_len = String_len(sub), count = 0, pos = 0;
+  while(pos <= str_len - sub_len &&(limit < 0 || count < limit)){
     const char * found = _find_bytes(str + pos, str_len - pos, sub, sub_len);
     if(! found) break;
     count ++;
@@ -412,13 +409,19 @@ int String_count(String str, String sub){
   return count;
 }
 
+int String_count(String str, String sub){
+  if(! _init_guard_) String_initialize();
+  if(! String_truth(str) || ! String_truth(sub)) return 0;
+  return _count_matches(str, sub, - 1);
+}
+
 int x2c_normalize_index(int, int);
 
 int String_getindex(String str, int index){
   if(! _init_guard_) String_initialize();
   index = x2c_normalize_index(index, String_len(str));
   if(index < 0) return - 1;
-  return *(str + index);
+  return(unsigned char) *(str + index);
 }
 
 int String_contains(String str, String sub){
@@ -450,7 +453,7 @@ String String_add(String str, String other){
   int left_len = String_len(str), right_len = String_len(other);
   size_t length =(size_t) left_len +(size_t) right_len;
   if(length > INT_MAX - 1){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/string.x",.function = "String_add",.line = 641};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/string.x",.function = "String_add",.line = 648};
     x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.add")), NULL))));
     __builtin_unreachable();
   }
@@ -486,7 +489,7 @@ String String_withindex(String str, int index, char value){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! * str) return str;
   if(value == '\0'){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/string.x",.function = "String_withindex",.line = 693};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/string.x",.function = "String_withindex",.line = 700};
     x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.withindex")), NULL))), Symbol_var(19800432), int_var(index));
     __builtin_unreachable();
   }
@@ -602,21 +605,6 @@ String String_strip(String str, char * negChars){
   return String_new_len(str + start, end - start);
 }
 
-String String_dedent(String str){
-  if(! _init_guard_) String_initialize();
-  if(! String_truth(str)) return NULL;
-  int length = String_len(str);
-  int skip = String_startswith(str, _2) ? 2 :(String_startswith(str, _3) ? 1 : 0);
-  int width = 0;
-  while(skip + width < length &&(String_getindex(str, skip + width) == ' ' || String_getindex(str, skip + width) == '\t')) width ++;
-  String prefix = String_new_len(str + skip, width);
-  String body = width ? String_replace(String_new(str + skip + width), String_join(NULL, cons(String_var(_0), cons(String_var(prefix), NULL))), _3) : String_new(str + skip);
-  int end = String_len(body), tail = end;
-  while(tail > 0 &&(String_getindex(body, tail - 1) == ' ' || String_getindex(body, tail - 1) == '\t')) tail --;
-  if(tail == end ||(tail > 0 && String_getindex(body, tail - 1) != '\n')) return body;
-  return String_new_len(body, tail);
-}
-
 FuncArg FuncArg_value(Var);
 
 Var char_var(char);
@@ -684,10 +672,10 @@ String String_map(String str, Func fn){
     char * out = string;
     const char * src = str;
     for(int i = 0;  i < n;  i ++){
-      int ch = Var_int(Var_convert(_apply(fn, src[i]), 3453797));
+      char ch = Var_char(Var_convert(_apply(fn, src[i]), 26993));
       if(! ch){
         {
-          static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "String_map",.line = 910};
+          static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "String_map",.line = 889};
           x2c_error_raise_n(& _x2c_error_site_5, 143279181245224, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))), Symbol_var(19800432), int_var(i));
           __builtin_unreachable();
         }
@@ -818,14 +806,14 @@ String String_squeeze(String str, String chars){
 
 static String _pad(String str, int width, char fill, int left_padding){
   if(fill == '\0'){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "_pad",.line = 951};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "_pad",.line = 930};
     x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));
     __builtin_unreachable();
   }
   int length = String_len(str);
   if(width <= length) return str;
   if(width == INT_MAX){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/string.x",.function = "_pad",.line = 954};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/string.x",.function = "_pad",.line = 933};
     x2c_error_raise_n(& _x2c_error_site_7, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))), Symbol_var(48833808), int_var(width));
     __builtin_unreachable();
   }
@@ -951,13 +939,8 @@ String String_replace_n(String str, String old, String replacement, int max_repl
   if(! String_truth(str) || ! String_truth(old) || ! * old || max_replacements == 0) return str;
   if(String_equal(old, replacement) && _is_active_canonical(str)) return str;
   int str_len = String_len(str), old_len = String_len(old);
-  int replacement_len = String_len(replacement), count = 0, pos = 0;
-  while(pos <= str_len - old_len &&(max_replacements < 0 || count < max_replacements)){
-    const char * found = _find_bytes(str + pos, str_len - pos, old, old_len);
-    if(! found) break;
-    count ++;
-    pos =(int)(found - str) + old_len;
-  }
+  int replacement_len = String_len(replacement);
+  int count = _count_matches(str, old, max_replacements);
   if(count == 0) return str;
   size_t output_len =(size_t) str_len;
   if(replacement_len >= old_len){
@@ -1134,7 +1117,7 @@ String String_unescape(String str){
   if(! _init_guard_) String_initialize();
   int n = String_len(str);
   if(n == 0) return NULL;
-  if(! String_contains(str, _4)) return str;
+  if(! String_contains(str, _1)) return str;
   String string = String_malloc(n + 1);
   char * dst = string;
   const char * src = str;
@@ -1147,7 +1130,7 @@ String String_unescape(String str){
       if(esc > 0377){
         _free_unchecked(string);
         {
-          static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/string.x",.function = "String_unescape",.line = 1315};
+          static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/string.x",.function = "String_unescape",.line = 1288};
           x2c_error_raise_n(& _x2c_error_site_8, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));
           __builtin_unreachable();
         }
@@ -1204,8 +1187,8 @@ String String_str(String str){
 
 String String_repr(String str){
   if(! _init_guard_) String_initialize();
-  if(! String_truth(str) || ! * str) return _5;
-  return String_printf(_1, String_escape(str));
+  if(! String_truth(str) || ! * str) return _2;
+  return String_printf(_0, String_escape(str));
 }
 
 Buffer Buffer_write(Buffer, const char *);

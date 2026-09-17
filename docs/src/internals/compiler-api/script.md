@@ -48,7 +48,7 @@ Executes a script that `script_prepare` pointed at the cache and the
 caller built; that path does not return. A dry run prints the action and
 returns zero.
 
-Source: `src/script.x:106`
+Source: `src/script.x:108`
 
 ## Design notes
 

@@ -132,7 +132,7 @@ static int _escape_byte(String spelling, int index){
   if(index == 0 && _numeric_prefix(spelling)) return 1;
   if(ch < 33 || ch > 126) return 1;
   if(strchr("()'`,\"$@[]{}#\\", ch)) return 1;
-  if(index == 0 && ch == '<' && strchr(spelling + 1, '>')) return 1;
+  if(index == 0 && ch == '<' && length > 1 && String_getindex(spelling, 1) != '=') return 1;
   if(ch == '/' && index + 1 < length &&(String_getindex(spelling, index + 1) == '/' || String_getindex(spelling, index + 1) == '*')) return 1;
   return 0;
 }
@@ -186,7 +186,7 @@ void Atom_initialize(void){
   }
   ;
   if(! x2c_try_register_descriptor(_0, methods)){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/atom.x",.function = "Atom_initialize",.line = 177};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/atom.x",.function = "Atom_initialize",.line = 180};
     x2c_error_raise_n(& _x2c_error_site_0, 20774016911960, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Atom")), NULL))));
     __builtin_unreachable();
   }
@@ -236,7 +236,7 @@ Var Var_new(Symbol, ...);
 Atom Atom_intern(String spelling){
   if(! _init_guard_) Atom_initialize();
   if(! String_truth(spelling) || ! * spelling){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/atom.x",.function = "Atom_intern",.line = 218};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/atom.x",.function = "Atom_intern",.line = 221};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Atom.intern")), NULL))));
     __builtin_unreachable();
   }

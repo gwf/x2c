@@ -28,6 +28,7 @@ int String_try_long(String str, long * out){
     int base = digits[1] == 'b' || digits[1] == 'B' ? 2 : 8;
     const char * number = digits + 2;
     char * stop = NULL;
+    if(number[0] < '0' || number[0] >= '0' + base) return 0;
     errno = 0;
     unsigned long magnitude = strtoul(number, & stop, base);
     if(stop == number || errno == ERANGE || ! _only_space(stop)) return 0;

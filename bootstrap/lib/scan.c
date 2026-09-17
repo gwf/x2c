@@ -583,7 +583,7 @@ int scan_atom_status(char * s, Symbol * status){
     if(status) * status = 664344300629258;
     return - 1;
   }
-  int n = 1;
+  int n = s[0] == '\\' ? 2 : 1;
   while(s[n]){
     if(strchr("()'`,\"$@{[", s[n]) || strchr(" \n\t\v\f\r", s[n])) return n;
     if(s[n] == '/' &&(s[n + 1] == '/' || s[n + 1] == '*')) return n;

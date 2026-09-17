@@ -53,7 +53,7 @@ static CliCommand cli_commands[] ={
     1282559016, CLI_SCRIPT, "Build a script when it changes and run it"
   }
   , {
-    5462434287712, CLI_BOOTSTRAP, "Install a native x2c from a APE binary"
+    5462434287712, CLI_BOOTSTRAP, "Install a native x2c from an APE binary"
   }
   , {
     11180, CLI_ENV, "Show the resolved home, layout, and tools"
@@ -163,13 +163,13 @@ static CliOption cli_options[] ={
     41897807850336, CLI_BUILD | CLI_RUN, 1052018024, "--save-temps[=<dir>]", NULL, "Keep generated C and other intermediate files", 0
   }
   , {
-    7958982899053, CLI_INSTALL, 1307939018, "--sha256", "<hex>", "Require this digest of a downloaded or local archive", 0
+    7958982899053, CLI_INSTALL, 34433862090, "--sha256", "<hex>", "Require this digest of a downloaded or local archive", 0
   }
   , {
-    19800432, CLI_INSTALL | CLI_BUILD | CLI_RUN, 1307939018, "--index", "<url-or-path>", "Resolve package names through this index", 0
+    19800432, CLI_INSTALL | CLI_BUILD | CLI_RUN, 34433862090, "--index", "<url-or-path>", "Resolve package names through this index", 0
   }
   , {
-    13603018, CLI_INSTALL, 1307939018, "--force", NULL, "Install a bundle built for another x2c version", 0
+    13603018, CLI_INSTALL, 34433862090, "--force", NULL, "Install a bundle built for another x2c version", 0
   }
   , {
     1111831152, CLI_BOOTSTRAP, 1052018024, "--prefix", "<dir>", "Install native x2c and sources under <dir>", 0
@@ -392,7 +392,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _21 = String_new("Usage:\n  x2c help [command]\n\nShow top-level help, or help for translate, build, run, new, script,\nbootstrap, env, install, remove, or list.");
   _22 = String_new("unknown help command \'");
   _23 = String_new("\'");
-  _24 = String_new("--color");
+  _24 = String_new("option takes no value \'");
   _25 = String_new("option requires a value \'");
   _26 = String_new("executable");
   _27 = String_new("static-library");
@@ -419,7 +419,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _48 = String_new("-V");
   _49 = String_new("help");
   _50 = String_new("unknown command or global option \'");
-  _51 = String_new("--color=");
+  _51 = String_new("=");
   _52 = String_new("-MMD");
   _53 = String_new("-MP");
   _54 = String_new("-MF");
@@ -473,6 +473,7 @@ static const char * _group_title(Symbol command, Symbol group){
     case 1345468776 : return "Target options:";
     case 1052018024 : return "Output options:";
     case 1307939018 : return command == 45220543335690 ? "Source options:" : "Translation options:";
+    case 34433862090 : return "Package options:";
     case 279515230724452 : return "C compiler options:";
     case 825121124 : return "Linker options:";
     case 665445396138972 : return "Inspection options:";
@@ -511,10 +512,10 @@ static void _print_options(Symbol command){
     return;
   }
   Symbol groups[] ={
-    495915096, 1345468776, 1052018024, 1307939018, 279515230724452, 825121124, 665445396138972, 15397654616
+    495915096, 1345468776, 1052018024, 1307939018, 34433862090, 279515230724452, 825121124, 665445396138972, 15397654616
   }
   ;
-  for(int i = 0;  i < 8;  i ++){
+  for(int i = 0;  i < 9;  i ++){
     Symbol group = groups[i];
     int found = 0;
     for(CliOption * option = cli_options;  option -> spelling;  option ++) if(! option -> hidden &&(option -> commands & mask) && option -> group == group) found = 1;
@@ -814,6 +815,8 @@ int String_getindex(String, int);
 
 String String_new(const char *);
 
+Path Path_absolute(Path);
+
 List cons(Var, List);
 
 static void _expand_argument(Array output, String argument, List stack){
@@ -827,9 +830,7 @@ static void _expand_argument(Array output, String argument, List stack){
   }
   if(! String_getindex(argument, 1)) x2c_driver_error("empty response-file reference '@'");
   String path = String_new(argument + 1);
-  char * resolved = realpath(path, NULL);
-  String identity = resolved ? String_new(resolved) : path;
-  if(resolved) free(resolved);
+  String identity = Path_absolute(path);
   if(_response_on_stack(stack, identity)){
     fprintf(stderr, "x2c: error: recursive response-file inclusion: %s\n", path);
     exit(2);
@@ -881,27 +882,27 @@ Var Array_getindex(Array, int);
 
 int String_startswith(String, String);
 
-String String_remove_prefix(String, String);
+int String_find(String, String);
 
 static CliOption * _take_option(Array args, int * index, int mask, String * spelling, String * value, int * attached){
-  String arg = Var_string(Array_getindex(args, * index)), written = arg, color = NULL;
-  int color_equal = 0;
-  if(String_startswith(arg, _51)){
-    color_equal = 1;
-    color = String_remove_prefix(arg, _51);
-    written = _24;
+  String arg = Var_string(Array_getindex(args, * index)), written = arg, joined = NULL;
+  int equals = String_startswith(arg, _40) ? String_find(arg, _51) : - 1;
+  if(equals > 2){
+    written = String_getslice(arg, -2147483648, equals, 1);
+    joined = String_getslice(arg, equals + 1, -2147483648, 1);
+    if(String_truth(joined) && ! String_getindex(joined, 0)) joined = NULL;
   }
   const char * suffix = NULL;
   CliOption * option = _find_option(written, mask, & suffix);
   if(! option) return NULL;
+  if(equals > 2 && ! option -> value) x2c_driver_error(String_join(NULL, cons(String_var(_24), cons(String_var(arg), cons(String_var(_23), NULL)))));
   if(spelling) * spelling = written;
   if(attached) * attached = suffix != NULL;
-  * value = String_new(suffix);
-  if(option -> value && ! String_truth(* value) && ! color_equal){
+  * value = equals > 2 ? joined : String_new(suffix);
+  if(option -> value && ! String_truth(* value) && equals <= 2){
     if(++ * index == Array_len(args)) x2c_driver_error(String_join(NULL, cons(String_var(_25), cons(String_var(arg), cons(String_var(_23), NULL)))));
     * value = Var_string(Array_getindex(args, * index));
   }
-  if(color_equal) * value = color;
   return option;
 }
 
@@ -1142,6 +1143,8 @@ static void _one_dash_removed(String arg){
 }
 
 Array Array_splice(Array, int, int, Array);
+
+String String_remove_prefix(String, String);
 
 int List_truth(List);
 

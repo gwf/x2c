@@ -40,9 +40,9 @@ static String x2c_executable_path, x2c_root_path;
 
 _x2c_initializer_choice_6E6B8BB0_0((x2c_executable_path = NULL))
 _x2c_initializer_choice_6E6B8BB0_1((x2c_root_path = NULL))
-static String x2c_canonical_root_path;
+static int x2c_root_found;
 
-_x2c_initializer_choice_6E6B8BB0_2((x2c_canonical_root_path = NULL))
+_x2c_initializer_choice_6E6B8BB0_2((x2c_root_found = 0))
 static List x2c_base_include_dirs, x2c_repo_cpp_include_dirs;
 
 _x2c_initializer_choice_6E6B8BB0_3((x2c_base_include_dirs = NULL))
@@ -67,22 +67,22 @@ __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new(".");
-  _1 = String_new("/");
-  _2 = String_new("/src/");
-  _3 = String_new(".x");
-  _4 = String_new("/packages");
-  _5 = String_new("/builds");
-  _6 = String_new(" ");
-  _7 = String_new(": ");
-  _8 = String_new("cannot lock ");
-  _9 = String_new(".tmp.%ld");
-  _10 = String_new("/");
-  _11 = String_new("/include/x2c");
-  _12 = String_new("/src");
-  _13 = String_new("/lib");
-  _14 = String_new("%08X");
-  _15 = String_new("X2C_HOME");
+  _0 = String_new("/");
+  _1 = String_new("/src/");
+  _2 = String_new(".x");
+  _3 = String_new("/packages");
+  _4 = String_new("/builds");
+  _5 = String_new(" ");
+  _6 = String_new(": ");
+  _7 = String_new("cannot lock ");
+  _8 = String_new(".tmp.%ld");
+  _9 = String_new("/");
+  _10 = String_new("/include/x2c");
+  _11 = String_new("/src");
+  _12 = String_new("/lib");
+  _13 = String_new("%08X");
+  _14 = String_new("X2C_HOME");
+  _15 = String_new(".");
   _16 = String_new(".x");
   _17 = String_new(".c");
   _18 = String_new(".h");
@@ -103,6 +103,8 @@ int String_truth(String);
 
 String Env_get(String);
 
+int String_getindex(String, int);
+
 String String_rstrip(String, char *);
 
 Path Path_absolute(Path);
@@ -111,16 +113,19 @@ void x2c_initialize_environment(const char * argv0){
   if(! _init_guard_) _file_init_();
   if(String_truth(x2c_root_path)) return;
   x2c_executable_path = _executable(argv0);
-  String home = Env_get(_15);
-  x2c_root_path = String_truth(home) ? String_rstrip(home, "/") : _locate_home(x2c_executable_path);
-  if(! String_truth(x2c_root_path)) x2c_root_path = _locate_home(Path_absolute(_0));
-  if(! String_truth(x2c_root_path)) x2c_root_path = _0;
+  String home = Env_get(_14);
+  if(String_truth(home) && ! String_getindex(home, 0)) home = NULL;
+  String root = String_truth(home) ? String_rstrip(home, "/") : _locate_home(x2c_executable_path);
+  if(! String_truth(root)) root = _locate_home(Path_absolute(_15));
+  x2c_root_found = root != NULL;
+  x2c_root_path = Path_absolute(String_truth(root) ? root : _15);
   _prepare_repo_defaults();
 }
 
 void x2c_set_root(String root){
   if(! _init_guard_) _file_init_();
-  x2c_root_path = root;
+  x2c_root_path = Path_absolute(root);
+  x2c_root_found = 1;
   x2c_base_include_dirs = NULL;
   x2c_repo_cpp_include_dirs = NULL;
   _prepare_repo_defaults();
@@ -129,11 +134,6 @@ void x2c_set_root(String root){
 String x2c_get_root(void){
   if(! _init_guard_) _file_init_();
   return x2c_root_path;
-}
-
-String x2c_canonical_root(void){
-  if(! _init_guard_) _file_init_();
-  return x2c_canonical_root_path;
 }
 
 String x2c_get_executable(void){
@@ -170,9 +170,9 @@ String x2c_package_directory(List roots, String path){
     while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
       root = Var_string(_x2c_macro_cursor_output_0);
       {
-        String prefix = String_join(NULL, cons(String_var(Path_absolute(root)), cons(String_var(_1), NULL)));
+        String prefix = String_join(NULL, cons(String_var(Path_absolute(root)), cons(String_var(_0), NULL)));
         if(! String_startswith(source, prefix)) continue;
-        String name = Var_string(List_car(String_split(String_remove_prefix(source, prefix), _10)));
+        String name = Var_string(List_car(String_split(String_remove_prefix(source, prefix), _9)));
         if(String_is_identifier(name) && ! String_equal(source, String_join(NULL, cons(String_var(prefix), cons(String_var(name), NULL))))) return String_join(NULL, cons(String_var(prefix), cons(String_var(name), NULL)));
       }
 
@@ -200,9 +200,9 @@ int String_rfind(String, String);
 
 int x2c_package_source(String directory, String path){
   if(! _init_guard_) _file_init_();
-  if(String_startswith(path, String_join(NULL, cons(String_var(directory), cons(String_var(_2), NULL))))) return 1;
-  String name = String_getslice(directory, String_rfind(directory, _10) + 1, -2147483648, 1);
-  return String_equal(path, String_join(NULL, cons(String_var(directory), cons(String_var(_1), cons(String_var(name), cons(String_var(_3), NULL))))));
+  if(String_startswith(path, String_join(NULL, cons(String_var(directory), cons(String_var(_1), NULL))))) return 1;
+  String name = String_getslice(directory, String_rfind(directory, _9) + 1, -2147483648, 1);
+  return String_equal(path, String_join(NULL, cons(String_var(directory), cons(String_var(_0), cons(String_var(name), cons(String_var(_2), NULL))))));
 }
 
 List x2c_default_include_dirs(void){
@@ -217,13 +217,13 @@ List x2c_cpp_include_dirs(void){
 
 String x2c_home(void){
   if(! _init_guard_) _file_init_();
-  return String_equal(x2c_root_path, _0) ? NULL : x2c_root_path;
+  return x2c_root_found ? x2c_root_path : NULL;
 }
 
 String x2c_home_packages(void){
   if(! _init_guard_) _file_init_();
   String home = x2c_home();
-  return String_truth(home) ? String_join(NULL, cons(String_var(home), cons(String_var(_4), NULL))) : NULL;
+  return String_truth(home) ? String_join(NULL, cons(String_var(home), cons(String_var(_3), NULL))) : NULL;
 }
 
 Path Path_dirname(Path);
@@ -232,7 +232,7 @@ String x2c_stage_dir(void){
   if(! _init_guard_) _file_init_();
   if(! String_truth(x2c_executable_path)) return NULL;
   String stage = Path_dirname(x2c_executable_path);
-  return String_equal(Path_dirname(stage), String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_5), NULL)))) ? stage : NULL;
+  return String_equal(Path_dirname(stage), String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_4), NULL)))) ? stage : NULL;
 }
 
 Path Path_join(Path, Path);
@@ -279,13 +279,13 @@ void x2c_host_error(List detail){
   Var subject = List_assoc(detail, Symbol_var(1051920));
   if(Var_is_void(subject)) subject = List_assoc(detail, Symbol_var(35599650906));
   long error = Var_long(Var_convert(List_assoc(detail, Symbol_var(11703198)), 818062));
-  x2c_driver_error(String_join(NULL, cons(String_var(Var_str(List_assoc(detail, Symbol_var(34096809266140)))), cons(String_var(_6), cons(String_var(Var_str(subject)), cons(String_var(_7), cons(String_var(String_new(strerror(error))), NULL)))))));
+  x2c_driver_error(String_join(NULL, cons(String_var(Var_str(List_assoc(detail, Symbol_var(34096809266140)))), cons(String_var(_5), cons(String_var(Var_str(subject)), cons(String_var(_6), cons(String_var(String_new(strerror(error))), NULL)))))));
 }
 
 int file_lock(Path p, int wait){
   if(! _init_guard_) _file_init_();
   int lock = open(p, O_RDWR | O_CREAT | O_CLOEXEC, 0666);
-  if(lock < 0) x2c_driver_error(String_join(NULL, cons(String_var(_8), cons(String_var(p), NULL))));
+  if(lock < 0) x2c_driver_error(String_join(NULL, cons(String_var(_7), cons(String_var(p), NULL))));
   int operation = wait ? LOCK_EX : LOCK_EX | LOCK_NB;
   while(flock(lock, operation)){
     if(errno == EINTR) continue;
@@ -309,7 +309,7 @@ void File_path_error(Var, String, int);
 
 void file_publish(List outputs){
   if(! _init_guard_) _file_init_();
-  String suffix = String_printf(_9, (long) getpid());
+  String suffix = String_printf(_8, (long) getpid());
   {
   _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & outputs, ._x2c_defer_capture_1 =(const void *) & suffix};
 
@@ -343,7 +343,7 @@ static String _executable(const char * argv0){
     return String_new(buffer);
   }
   String name = String_new(argv0);
-  if(String_truth(name) && ! String_contains(name, _10)) name = x2c_find_program(name);
+  if(String_truth(name) && ! String_contains(name, _9)) name = x2c_find_program(name);
   return Path_exists(name) ? Path_absolute(name) : NULL;
 }
 
@@ -359,7 +359,7 @@ static String _locate_home(Path p){
   if(! String_truth(p)) return NULL;
   Path directory = Path_is_dir(p) ? p : Path_dirname(p);
   while(! _is_home(directory)){
-    if(String_equal(directory, _10)) return NULL;
+    if(String_equal(directory, _9)) return NULL;
     directory = Path_dirname(directory);
   }
   return directory;
@@ -369,9 +369,8 @@ List cons(Var, List);
 
 static void _prepare_repo_defaults(void){
   if(! String_truth(x2c_root_path)) return;
-  x2c_canonical_root_path = Path_absolute(x2c_root_path);
-  String include_dir = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_11), NULL)));
-  String src_dir = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_12), NULL))), lib_dir = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_13), NULL)));
+  String include_dir = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_10), NULL)));
+  String src_dir = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_11), NULL))), lib_dir = String_join(NULL, cons(String_var(x2c_root_path), cons(String_var(_12), NULL)));
   x2c_base_include_dirs = cons(String_var(include_dir), NULL);
   x2c_repo_cpp_include_dirs = Path_is_dir(src_dir) ? cons(String_var(src_dir), cons(String_var(lib_dir), NULL)) : cons(String_var(lib_dir), NULL);
 }
@@ -420,7 +419,7 @@ String x2c_filename_hash(String filename){
     }
 
   }
-  return String_printf(_14, hash);
+  return String_printf(_13, hash);
 }
 
 void Path_remove_file(Path);

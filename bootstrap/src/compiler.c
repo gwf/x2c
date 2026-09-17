@@ -1122,21 +1122,19 @@ String Compiler_canonical_path(Compiler c, String path){
   return realpath(path, resolved) ? String_new(resolved) : path;
 }
 
-String x2c_canonical_root(void);
-
 int String_startswith(String, String);
 
 int String_len(String);
 
 String home_portable_path(String path){
   if(! _init_guard_) _file_init_();
-  String prefix = String_join(NULL, cons(String_var(x2c_canonical_root()), cons(String_var(_0), NULL)));
+  String prefix = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_0), NULL)));
   return String_startswith(path, prefix) ? String_getslice(path, String_len(prefix), -2147483648, 1) : path;
 }
 
 String home_absolute_path(String spelling){
   if(! _init_guard_) _file_init_();
-  return String_startswith(spelling, _603) ? spelling : String_join(NULL, cons(String_var(x2c_canonical_root()), cons(String_var(_0), cons(String_var(spelling), NULL))));
+  return String_startswith(spelling, _603) ? spelling : String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_0), cons(String_var(spelling), NULL))));
 }
 
 Var Map_var(Map);

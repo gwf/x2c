@@ -24,13 +24,12 @@ Make dependency output for x2c translation units.
 Parses prerequisite words after the first literal colon in `text`.
 Backslash escapes and doubled dollars are decoded in that region. A
 backslash-newline continues the rule; an ordinary newline ends it before
-any phony rules. A word immediately before that newline is currently
-returned twice. This accepts internally generated rules with colon-free
+any phony rules. This accepts internally generated rules with colon-free
 targets rather than general Make syntax. A NULL input or no parsed
 prerequisites returns NULL. Returned cells and path `String`s follow the
 current canonical `List` and `String` pool lifetimes.
 
-Source: `src/deps.x:31`
+Source: `src/deps.x:30`
 
 #### translation_depfile_write
 
@@ -48,7 +47,7 @@ return zero. Cleanup attempts to unlink an opened sibling but does not
 report an unlink failure. Allocation failure transfers through ordinary
 runtime `Error` handling instead of returning zero.
 
-Source: `src/deps.x:127`
+Source: `src/deps.x:124`
 
 ## Design notes
 

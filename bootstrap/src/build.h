@@ -18,6 +18,7 @@ typedef struct Build{
   String compile_directory;
   Array compile_commands;
   unsigned long started_at;
+  double started_wall;
   unsigned long xlat_start;
   unsigned long cc_start;
   unsigned long final_at;

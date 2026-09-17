@@ -47,9 +47,13 @@ static int thread_live_count;
 static pthread_once_t thread_shutdown_once;
 
 _x2c_initializer_choice_251C437E_0((thread_shutdown_once =(pthread_once_t) PTHREAD_ONCE_INIT))
+static const size_t _STACK_BYTES = 8u << 20;
+
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
+
+static void _stack_attributes(pthread_attr_t * attributes);
 
 _Noreturn static void _error(const char * operation, int error);
 
@@ -95,6 +99,14 @@ __attribute__((constructor)) static void _file_init_(void){
   _x2c_static_initialize_0();
 }
 
+static void _stack_attributes(pthread_attr_t * attributes){
+  if(pthread_attr_init(attributes) || pthread_attr_setstacksize(attributes, _STACK_BYTES)){
+    fprintf(stderr, "Thread: could not size the worker stack\n");
+    abort();
+  }
+
+}
+
 Var Symbol_var(Symbol);
 
 Var String_var(String);
@@ -104,7 +116,7 @@ Var int_var(int);
 _Noreturn static void _error(const char * operation, int error){
   String name = String_new(operation);
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/thread.x",.function = "_error",.line = 69};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/thread.x",.function = "_error",.line = 83};
     x2c_error_raise_n(& _x2c_error_site_0, 20399393368, 2, Symbol_var(34096809266140), String_var(name), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
@@ -296,19 +308,19 @@ void x2c_descriptor_thread_start_end(int);
 Thread Thread_start(ThreadFn function, const void * input, size_t input_size){
   if(! _init_guard_) _file_init_();
   if(! function ||(input_size && ! input)){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/thread.x",.function = "Thread_start",.line = 177};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/thread.x",.function = "Thread_start",.line = 193};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Thread.start")), NULL))));
     __builtin_unreachable();
   }
   size_t input_offset = _input_offset();
   if(input_size > SIZE_MAX - input_offset){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/thread.x",.function = "Thread_start",.line = 180};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/thread.x",.function = "Thread_start",.line = 196};
     x2c_error_raise_n(& _x2c_error_site_2, 1358596898646632, 0);
     __builtin_unreachable();
   }
   Thread thread = calloc(1, input_offset + input_size);
   if(! thread){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/thread.x",.function = "Thread_start",.line = 182};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/thread.x",.function = "Thread_start",.line = 198};
     x2c_error_raise_n(& _x2c_error_site_3, 97614135954008, 0);
     __builtin_unreachable();
   }
@@ -325,9 +337,12 @@ Thread Thread_start(ThreadFn function, const void * input, size_t input_size){
   }
   __atomic_fetch_add(& thread_live_count, 1, __ATOMIC_SEQ_CST);
   x2c_pool_thread_start();
+  pthread_attr_t attributes;
+  _stack_attributes(& attributes);
   x2c_descriptor_thread_start_begin();
-  int error = pthread_create(& thread -> native, NULL, _run, thread);
+  int error = pthread_create(& thread -> native, & attributes, _run, thread);
   x2c_descriptor_thread_start_end(! error);
+  pthread_attr_destroy(& attributes);
   if(error){
     __atomic_fetch_sub(& thread_live_count, 1, __ATOMIC_SEQ_CST);
     free(thread);
@@ -341,14 +356,14 @@ Var Context_export_scope(Scope, Pool, Var);
 Var Thread_join(Thread t){
   if(! _init_guard_) _file_init_();
   if(! t){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 223};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 242};
     x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Thread.join")), NULL))));
     __builtin_unreachable();
   }
   int expected = THREAD_RUNNING;
   if(! __atomic_compare_exchange_n(& t -> state, & expected, THREAD_JOINING, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST)){
     {
-      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 228};
+      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 247};
       x2c_error_raise_n(& _x2c_error_site_5, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Thread.join")), NULL))));
       __builtin_unreachable();
     }
@@ -373,7 +388,7 @@ Var Thread_join(Thread t){
     if(! Var_is_void(t -> errors)) errors = Context_export_scope(t -> result_scope, t -> result_pool, t -> errors);
     else result = Context_export_scope(t -> result_scope, t -> result_pool, t -> result);
     if(! Var_is_void(errors)){
-      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 243};
+      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/thread.x",.function = "Thread_join",.line = 262};
       x2c_error_raise_n(& _x2c_error_site_6, 23041356991064, 1, Symbol_var(374504614), errors);
       __builtin_unreachable();
     }
@@ -395,7 +410,7 @@ Var Thread_join(Thread t){
 void Thread_free(Thread t){
   if(! _init_guard_) _file_init_();
   if(! t || __atomic_load_n(& t -> state, __ATOMIC_SEQ_CST) != THREAD_JOINED){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/thread.x",.function = "Thread_free",.line = 251};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/thread.x",.function = "Thread_free",.line = 270};
     x2c_error_raise_n(& _x2c_error_site_7, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Thread.free")), NULL))));
     __builtin_unreachable();
   }

@@ -81,10 +81,7 @@ List translation_depfile_parse(String text){
       ch ++;
       continue;
     }
-    if(* ch == '\n'){
-      if(Buffer_len(word)) Array_push(paths, String_var(Buffer_str(word)));
-      break;
-    }
+    if(* ch == '\n') break;
     if(* ch == ' ' || * ch == '\t' || * ch == '\r'){
       if(Buffer_len(word)){
         Array_push(paths, String_var(Buffer_str(word)));

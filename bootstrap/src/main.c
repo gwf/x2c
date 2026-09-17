@@ -273,7 +273,7 @@ static void _compile_file(Frontend frontend, String filename, String output_dir)
     _report_diagnostics(compiler);
     if(! ok) exit(1);
     switch(request -> dump){
-      case 320883072032 : if(String_truth(unit.preprocessor_output)) File_printf(Stderr, "%s", unit.preprocessor_output);
+      case 320883072032 : if(String_truth(unit.preprocessor_output)) printf("%s", unit.preprocessor_output);
       {
         x2c_cleanup_leave(& _x2c_defer_record_0);
         return;
@@ -799,10 +799,13 @@ static int _run_build(CliRequest request){
   Array commands = String_truth(request -> compile_commands) && ! request -> dry_run ? Array_new() : NULL;
   if(List_truth(request -> inputs)){
     if(String_truth(request -> manifest)) x2c_driver_error("--manifest-path conflicts with explicit inputs");
+    if(String_truth(request -> target)) x2c_driver_error("--target conflicts with explicit inputs");
+    if(String_truth(request -> profile)) x2c_driver_error("--profile conflicts with explicit inputs");
     int result = _run_build_request(request, commands);
     if(result) return result;
   }
   else{
+    if(request -> compile_only) x2c_driver_error("--compile-only needs input operands, not a manifest");
     ProjectBuild plan = project_plan(request);
     for(ProjectBuild node = plan;  node;  node = node -> next){
       int result = _run_build_request(node -> request, commands);
