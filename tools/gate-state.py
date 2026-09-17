@@ -231,9 +231,11 @@ def tree_content() -> dict[str, str]:
                if entry[0].islower() or entry[0] == "S"}
     changed = set(zsplit(git("diff", "--name-only", "-z"))) | flagged
     untracked = zsplit(git("ls-files", "--others", "--exclude-standard", "-z"))
-    # Make reads these names before Makefile, in any directory it enters.
-    shadows = zsplit(git("ls-files", "--others", "-z", "--",
-                         ":(glob)**/GNUmakefile", ":(glob)**/makefile"))
+    # Make reads these names before a Makefile in the same directory.
+    shadows = zsplit(git("ls-files", "--others", "-z", "--", *[
+        os.path.join(os.path.dirname(path), name)
+        for path in index if os.path.basename(path) == "Makefile"
+        for name in ("GNUmakefile", "makefile")]))
     if shadows:
         raise ValueError(f"untracked makefile shadows Makefile: {shadows[0]}")
     entries: dict[str, str] = {}
