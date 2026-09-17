@@ -25,7 +25,7 @@ esac
 
 "$ROOT/builds/0/x2c" translate --live-symbols --out-dir "$BUILD" \
   "$ROOT/unittest/benchmarks/match-capture-benchmark.x"
-"${CC:-cc}" "${flags[@]}" -iquote "$ROOT/include" \
+"${CC:-cc}" "${flags[@]}" -iquote "$ROOT/include/x2c" \
   -iquote "$ROOT/builds/0/src" "$BUILD/match-capture-benchmark.c" \
   -L"$ROOT/builds/0" -lx2c -lm -o "$PROGRAM"
 

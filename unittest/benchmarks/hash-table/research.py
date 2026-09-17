@@ -1175,7 +1175,7 @@ def compile_variant(
         defines.append("-DU32_MAP_RECORD_ITERATOR")
     includes = [
         "-I", generated, "-I", HERE / "x2c", "-I", UDB_SOURCE,
-        "-iquote", ROOT / "include",
+        "-iquote", ROOT / "include" / "x2c",
     ]
     binary = variant / "udb3"
     compile_command = [

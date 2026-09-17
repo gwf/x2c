@@ -19,7 +19,7 @@ esac
 
 "$ROOT/builds/0/x2c" translate --out-dir "$BUILD" \
   "$ROOT/unittest/benchmarks/iter-hot-paths.x"
-"${CC:-cc}" "${flags[@]}" -iquote "$ROOT/include" \
+"${CC:-cc}" "${flags[@]}" -iquote "$ROOT/include/x2c" \
   -iquote "$ROOT/builds/0/src" "$BUILD/iter-hot-paths.c" \
   -L"$ROOT/builds/0" -lx2c -lm "${link_flags[@]}" -o "$PROGRAM"
 

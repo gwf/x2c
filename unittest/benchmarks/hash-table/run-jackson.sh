@@ -114,14 +114,14 @@ timestamp=$(date -u +%Y%m%dT%H%M%SZ)
 results_dir="$results_root/$timestamp-$mode-$profile"
 mkdir -p "$results_dir"
 
-"$cc" -O3 -DNDEBUG -iquote "$root/include" \
+"$cc" -O3 -DNDEBUG -iquote "$root/include/x2c" \
   -c "$adapter_dir/abi.c" -o "$abi_object"
 
 (
   cd "$source_dir"
   # Deliberate word splitting expands the compile-time flag lists.
   # shellcheck disable=SC2086
-  "$cxx" -I. -iquote "$root/include" -std=c++20 -O3 -DNDEBUG \
+  "$cxx" -I. -iquote "$root/include/x2c" -std=c++20 -O3 -DNDEBUG \
     -Wall -Wpedantic $mode_flags $profile_flags main.cpp \
     "$abi_object" -L"$root/builds/0" -lx2c -lm -o "$binary"
 )

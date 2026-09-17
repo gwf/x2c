@@ -194,7 +194,7 @@ def compile_scalar_object(runner: Runner, profile: str) -> Path:
         "-I",
         HERE / "x2c",
         "-iquote",
-        ROOT / "include",
+        ROOT / "include" / "x2c",
         "-c",
         HERE / "x2c/u32-map-bridge.c",
         "-o",
@@ -211,7 +211,7 @@ def compile_scalar_profile_object(runner: Runner) -> Path:
         runner.cc, "-std=c11", *PROFILE_FLAGS["standard"],
         "-DU32_MAP_PROFILE", "-Wall", "-Wextra", "-Werror",
         "-I", GENERATED, "-I", HERE / "x2c",
-        "-iquote", ROOT / "include", "-c",
+        "-iquote", ROOT / "include" / "x2c", "-c",
         HERE / "x2c/u32-map-bridge.c", "-o", output,
     ], output=runner.results / "compile-u32-counters.log")
     return output
@@ -255,7 +255,7 @@ def validate_scalar(runner: Runner, translation: dict[str, str]) -> None:
         "-I", GENERATED,
         "-I", HERE / "x2c",
         "-I", vendor.parent,
-        "-iquote", ROOT / "include",
+        "-iquote", ROOT / "include" / "x2c",
     ]
     runner.run([
         runner.cc, "-std=c11", *PROFILE_FLAGS["standard"],
@@ -428,7 +428,7 @@ def compile_production_control(runner: Runner) -> Path:
     binary = BIN / "udb3-x2c-production-standard"
     runner.run([
         runner.cc, "-O3", "-DNDEBUG", "-Wall", "-Wextra",
-        "-I", UDB3_SOURCE, "-iquote", ROOT / "include",
+        "-I", UDB3_SOURCE, "-iquote", ROOT / "include" / "x2c",
         HERE / "udb3/test.c", "-L", ROOT / "builds/0", "-lx2c",
         "-lm", "-o", binary,
     ], output=runner.results / "compile-udb3-production-standard.log")
@@ -439,7 +439,7 @@ def compile_typed_control(runner: Runner) -> Path:
     binary = BIN / "udb3-x2c-typed-standard"
     runner.run([
         runner.cc, "-O3", "-DNDEBUG", "-Wall", "-Wextra",
-        "-I", UDB3_SOURCE, "-iquote", ROOT / "include",
+        "-I", UDB3_SOURCE, "-iquote", ROOT / "include" / "x2c",
         HERE / "udb3/typed-test.c", "-L", ROOT / "builds/0", "-lx2c",
         "-lm", "-o", binary,
     ], output=runner.results / "compile-udb3-typed-standard.log")
@@ -461,7 +461,7 @@ def compile_flat_control(runner: Runner) -> Path:
     binary = BIN / "udb3-x2c-flat-standard"
     runner.run([
         runner.cc, "-O3", "-DNDEBUG", "-Wall", "-Wextra",
-        "-I", UDB3_SOURCE, "-iquote", ROOT / "include", "-I", GENERATED,
+        "-I", UDB3_SOURCE, "-iquote", ROOT / "include" / "x2c", "-I", GENERATED,
         HERE / "udb3/flat-test.c", generated,
         "-L", ROOT / "builds/0", "-lx2c", "-lm", "-o", binary,
     ], output=runner.results / "compile-udb3-flat-standard.log")
@@ -473,7 +473,7 @@ def compile_meta_control(runner: Runner) -> Path:
     binary = BIN / "udb3-x2c-meta-standard"
     runner.run([
         runner.cc, "-O3", "-DNDEBUG", "-Wall", "-Wextra",
-        "-I", UDB3_SOURCE, "-iquote", ROOT / "include", "-I", GENERATED,
+        "-I", UDB3_SOURCE, "-iquote", ROOT / "include" / "x2c", "-I", GENERATED,
         HERE / "udb3/meta-test.c", generated,
         "-L", ROOT / "builds/0", "-lx2c", "-lm", "-o", binary,
     ], output=runner.results / "compile-udb3-meta-standard.log")
@@ -485,7 +485,7 @@ def compile_wide_control(runner: Runner) -> Path:
     binary = BIN / "udb3-x2c-wide-standard"
     runner.run([
         runner.cc, "-O3", "-DNDEBUG", "-Wall", "-Wextra",
-        "-I", UDB3_SOURCE, "-iquote", ROOT / "include", "-I", GENERATED,
+        "-I", UDB3_SOURCE, "-iquote", ROOT / "include" / "x2c", "-I", GENERATED,
         HERE / "udb3/wide-test.c", generated,
         "-L", ROOT / "builds/0", "-lx2c", "-lm", "-o", binary,
     ], output=runner.results / "compile-udb3-wide-standard.log")
@@ -497,7 +497,7 @@ def compile_khashl_backend_control(runner: Runner) -> Path:
     binary = BIN / "udb3-x2c-khashl-standard"
     runner.run([
         runner.cc, "-O3", "-DNDEBUG", "-Wall", "-Wextra",
-        "-I", UDB3_SOURCE, "-iquote", ROOT / "include",
+        "-I", UDB3_SOURCE, "-iquote", ROOT / "include" / "x2c",
         "-I", HERE / "x2c", "-I", vendor.parent,
         HERE / "udb3/khashl-backend-test.c", HERE / "x2c/khashl-map.c",
         "-L", ROOT / "builds/0", "-lx2c", "-lm", "-o", binary,

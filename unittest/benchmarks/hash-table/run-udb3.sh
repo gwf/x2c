@@ -61,7 +61,7 @@ fi
 
 x2c_binary="$campaign_dir/run-test-x2c"
 "$cc" -O3 -DNDEBUG -Wall -Wextra \
-  -I"$source_dir" -iquote "$root/include" "$adapter" \
+  -I"$source_dir" -iquote "$root/include/x2c" "$adapter" \
   -L"$root/builds/0" -lx2c -lm -o "$x2c_binary"
 
 for implementation in $implementations; do

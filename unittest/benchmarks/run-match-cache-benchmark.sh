@@ -27,7 +27,7 @@ mkdir -p "$BUILD/benchmarks"
 "$ROOT/builds/0/x2c" translate --out-dir "$BUILD/benchmarks" "$SOURCE"
 
 CC=${CC:-cc}
-common=(-iquote "$ROOT/include" -iquote "$ROOT/builds/0/src"
+common=(-iquote "$ROOT/include/x2c" -iquote "$ROOT/builds/0/src"
         "$BUILD/test-support.c" "$BUILD/benchmarks/match-cache-benchmark.c"
         -L"$ROOT/builds/0" -lx2c -lm)
 "$CC" -g -O0 "${common[@]}" -o "$BUILD/mcb-debug"
