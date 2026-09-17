@@ -159,9 +159,29 @@ where it exists, and `make packages-check` when the dependency cache is
 present. Packages are outside `make check`, so the package test is the real
 evidence.
 
-## Phase 4 - package call sites, one package per delivery
+## Phase 4 - package call sites, one package per delivery (landed)
 
-One recipe, nine deliveries; do not batch packages into one change. 320
+Nine deliveries, one per package. Converted: 299 releases to `$auto`
+(libcurl 93, libuv 82, sqlite 38, pcre2 34, blis 33, raylib 34, yyjson 17,
+termbox2 2), 30 hand-expanded regions to `$scope()` (torch 26, blis 4, yyjson
+1), 2 `$let` regions in torch, 129 one-statement bodies to `=>`, 48 percent
+strings to plain literals, and the six `PoolBlocker` members in the libuv
+tests to `.`. Every package passes its own `test run`, `run-lisp` where it has
+one, and raylib's `verify`; `make packages-check` covers the combined set.
+
+Skipped as the plan requires: raw C releases in the raw-API tests, conditional
+construction rollbacks, struct-field releases where cleanup must observe the
+field, consuming parameters, non-adjacent defers, and every native-header
+arrow.
+
+One inconsistency is deliberate and waits on decision 1: `yyjson`'s
+`service-health.x` now spells its region `$scope()` while `release-catalog.x`
+and `inline-lisp.x` keep the head-of-function pair, as do about 60 regions
+across the other packages. Converting those today re-indents whole function
+bodies, and if `$scope` gains a function-definition target they become one
+line instead. Decide the decorator before spending that churn.
+
+The original scope follows. 320
 `defer x.free()` and `defer x.close()` become `$auto(...)`, plus 27 sites on
 types that already participate (Lisp, File, Bytes, Block, Context, Array). The
 29 sites spelled `Scope.retain(); { defer Scope.release(); ... }` - the

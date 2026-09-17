@@ -386,6 +386,24 @@ public names removed there (`List.pool_retain`, `List.pool_retain_named`,
 `List.reduce`, `Array.reduce`, `Var.truthy`) need a 0.15.0 release note. It also removes `List.pool_*`, `Iter.reduce`, and `Var.truthy` in
 favor of `String.pool_*`, `Iter.foldl`, and `Var.truth`.
 
+## Backlog
+
+Open questions with no owner yet, recorded so they are not lost:
+
+- **Why do torch's private protocol adoptions still work?** 2d84cd5 stopped a
+  private region from publishing its adoptions, which broke blis (see
+  "Resolved since the baseline"). `packages/torch/src/torch.x:1445-1450` has
+  the same shape - `protocol Torch(Tensor);` and five `protocol Var(T);` below
+  `#pragma private` - and its tests, which use `@` on `Tensor` from a
+  consumer, still pass. Either the rule has an exception worth documenting or
+  torch is relying on something about to change. Nothing outside packages
+  depends on the answer, and `make check` covers none of it.
+- **`make doc-examples` fails on `site/src/content/slides/power-10-imports.md`**
+  because the sample imports pcre2 and the package archive is not built. The
+  check is optional and ungated, so the failure is invisible until someone
+  runs it in a tree without built packages. Either build packages for that
+  check, or mark the sample so it is skipped without one.
+
 ## Decisions needed
 
 Decided 2026-09-17 by Gary unless marked open.
