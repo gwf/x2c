@@ -703,6 +703,9 @@ static int _macro_hole_starts_cast_type(Compiler compiler) {
   if (!hole) return 0;
   Symbol kind = hole.assoc(<kind>);
   if (kind && kind != <type>) return 0;
+  /* `($items)[0]` subscripts the hole's value; only a hole declared a type
+     casts an array literal. */
+  if (compiler.peek(3) == <[> && kind != <type>) return 0;
   return _cast_operand_follows(compiler.peek(3));
 }
 

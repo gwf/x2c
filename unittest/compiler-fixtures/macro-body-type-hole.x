@@ -24,6 +24,12 @@ macro Unit $define_inferred_cast($T) => {
   }
 }
 
+// A parenthesized hole before `[` subscripts its value; only a `Type` hole
+// casts the array literal that follows.
+macro Expression $first($items) => (($items)[0])
+
+macro Expression $literal_of(Type $T) => (($T)[1, 2])
+
 macro Unit $define_annotated_pointer(Type $T) => {
   static $T $(x2c.ident "macro_body_annotated_pointer")($T *value) {
     $T *local = value;
@@ -43,13 +49,16 @@ static long ordinary_local(long value) {
 
 int main(void) {
   long pointer_value = 44;
+  Array numbers = [45, 46];
   printf(
-    "%ld %ld %ld %ld %ld\n",
+    "%ld %ld %ld %ld %ld %ld %zu\n",
     macro_body_local(41),
     ordinary_local(42),
     macro_body_inferred_local(),
     macro_body_inferred_cast(44),
-    macro_body_annotated_pointer(&pointer_value)
+    macro_body_annotated_pointer(&pointer_value),
+    $first(numbers).integer(),
+    $literal_of(Array).len()
   );
   return 0;
 }
