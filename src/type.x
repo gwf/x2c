@@ -658,24 +658,25 @@ Type Type.base_type(Type type) {
   return NULL;
 }
 
-/* Storage classes, `inline`, and source specifier text such as
-   `("_Noreturn")` place a declaration without changing its type. */
-static int _omit_specifier(Var item, int keep_qualifiers) {
-  if (item is <list>) return car(item) is <string>;
-  Symbol first = item;
-  return (first.is_storage_class() ||
-          (!keep_qualifiers && first.is_type_qualifier()) ||
-          first.is_inline()) && first != <typedef>;
-}
+static int _omit_specifier(Symbol first, int keep_qualifiers) =>
+  (first.is_storage_class() ||
+   (!keep_qualifiers && first.is_type_qualifier()) || first.is_inline()) &&
+  first != <typedef>;
 
 static Type _canonical(Type type, int keep_qualifiers) {
   List rest = type;
-  while (rest && !_omit_specifier(rest.car(), keep_qualifiers))
+  while (rest && (rest.car() is not <symbol> ||
+                 !_omit_specifier(rest.car(), keep_qualifiers)))
     rest = rest.cdr();
   if (!rest) return type;
   Array result = [];
-  foreach (Var head, type)
-    if (!_omit_specifier(head, keep_qualifiers)) result.push(head);
+  foreach (Var head, type) {
+    if (head is <symbol>) {
+      Symbol first = head;
+      if (_omit_specifier(first, keep_qualifiers)) continue;
+    }
+    result.push(head);
+  }
   return result.list_free();
 }
 

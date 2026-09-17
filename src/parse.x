@@ -200,14 +200,17 @@ static List _lower_self_declaration(Compiler compiler, List declaration) {
    Keep parsed modifiers (and parameter bindings) intact and append only the
    alias's declarators. Storage still belongs on the declaration's base. */
 static List _declaration_base(Type type, List *modifiers) {
-  List (base, mods) = type.declared().declaration_parts();
+  // Source specifier text, such as `("_Noreturn")`, stays with the storage.
+  Array storage = [], typed = [];
+  foreach (Var item, type)
+    if (item is <list> && car(item) is <string>) storage.push(item);
+    else typed.push(item);
+  List (base, mods) = typed.list_free().type().declared().declaration_parts();
   *modifiers = mods;
   if (!mods) return type;
-  Array storage = [];
   foreach (Var item, type)
-    if (item is <symbol>
-        ? Symbol.is_storage_class(item) || Symbol.is_inline(item)
-        : item is <list> && car(item) is <string>)
+    if (item is <symbol> &&
+        (Symbol.is_storage_class(item) || Symbol.is_inline(item)))
       storage.push(item);
   return storage.list_free().append(base);
 }
@@ -1155,13 +1158,15 @@ static List _declaration_group(Compiler c, int row) {
 
   List quals = _type_qualifiers(c);
   Type spec = _type_specifier(c);
-  Type type = %( @storage @quals @spec );
-  type = c.sym.local_type(type);
-  Type binding_type = type;
+  Type type = c.sym.local_type(%( @storage @quals @spec ));
+  // Source specifier text, such as `("_Noreturn")`, is written with the
+  // declaration but is no part of the type its names are bound to.
+  List words = storage.filter(%!(item) => item is <symbol>);
+  Type binding_type = c.sym.local_type(%( @words @quals @spec ));
   if (spec.is_aggregate_tag_body()) {
     // Bind the short aggregate tag, but retain the body on the AST node.
     Var (aggregate, tag, body) = spec;
-    binding_type = %( @storage @quals $aggregate $tag );
+    binding_type = %( @words @quals $aggregate $tag );
   }
   if (_test_destructure_declaration(c))
     return _destructure_declaration(c, type, binding_type, 0);
