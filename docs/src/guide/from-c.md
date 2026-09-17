@@ -102,7 +102,8 @@ its parameter in attributes, `CJSON_PUBLIC(const char *) cJSON_Version(void)`,
 reads as the type inside. An attribute or `_Noreturn` before the type,
 `__attribute__((unused)) static int f(void)`, is written after the storage
 class and before the type in the generated C, and is no part of the type
-that returns, conversions, and prototypes use. An attribute after a declarator or parameter,
+that returns, conversions, and prototypes use.
+An attribute after a declarator or parameter,
 `int a __attribute__((cleanup(release))) = 1, b = 2;`, is written after that
 declarator. The GNU spellings `__inline`, `__inline__`, `__restrict`, and
 `__restrict__` mean the standard keywords.

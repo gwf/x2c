@@ -265,9 +265,10 @@ static String _attribute(Compiler c) {
 /* Source is read before preprocessing, so a macro whose body is declaration
    specifiers and attributes, such as an export annotation, still sits in a
    declaration. A specifier position of `rank`, 0 for storage classes and
-   `inline`, 1 for qualifiers, and 2 for builtin types, takes the macro's
-   words of that rank into `words` and consumes the macro unless a later
-   position needs its words. */
+   `inline`, 1 for qualifiers, and 2 for builtin types, leaves a macro with
+   words of a later rank to that position; otherwise it consumes the macro
+   and takes all of its words into `words`, so `int LOCAL f(void)` keeps the
+   `static` of `#define LOCAL static`. */
 static int _prefix_macro_words(Compiler c, int rank, Array words) {
   Var definition;
   if (c.peek(0) != <ident> ||
@@ -284,14 +285,12 @@ static int _prefix_macro_words(Compiler c, int rank, Array words) {
     return 1;
   }
   if (definition is not <list>) return 0;
-  int later = 0;
-  foreach (Symbol word, definition) {
-    int word_rank = word.is_type_qualifier() ? 1 : word.is_builtin_type() * 2;
-    if (word_rank == rank) words.push(word);
-    later |= word_rank > rank;
-  }
-  if (!later) c.next();
-  return !later;
+  foreach (Symbol word, definition)
+    if ((word.is_type_qualifier() ? 1 : word.is_builtin_type() * 2) > rank)
+      return 0;
+  foreach (Symbol word, definition) words.push(word);
+  c.next();
+  return 1;
 }
 
 /* Declaration specifiers before the qualifiers and type: storage classes
@@ -1159,6 +1158,10 @@ static List _typedef(Compiler compiler, List context, int row) {
 static List _declaration_types(Compiler c, List storage) {
   List quals = _type_qualifiers(c);
   Type spec = _type_specifier(c);
+  // A storage macro after the type, `int LOCAL f(void)`, is storage.
+  Array trailing = [];
+  while (_prefix_macro_words(c, 0, trailing));
+  if (trailing.len()) storage = %( @{trailing.list_free()} @storage );
   List words = storage.filter(%!(item) => item is <symbol>);
   Type binding_type = c.sym.local_type(%( @words @quals @spec ));
   if (spec.is_aggregate_tag_body()) {

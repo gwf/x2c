@@ -14,6 +14,15 @@ static void hidden(void);
 
 int weak_value = 5;
 
+static int quintupled(int value);
+
+const static int bound = 6;
+
+struct text{
+  char * body;
+}
+;
+
 static int quadrupled(int value){
   return value * 4;
 }
@@ -26,15 +35,24 @@ signed int doubled(signed int value){
   return value * 2;
 }
 
+static int quintupled(int value){
+  return value * 5;
+}
+
 const char * label(void){
   return "label";
 }
 
 int main(void){
   x2c_initialize();
+  char buffer[2] = "a";
+  struct text line;
+  line.body = buffer;
+  line.body[0] = 'b';
   hidden();
   printf("%d %d %d %s\n", doubled(2), tripled(2), weak_value, label());
   printf("%s %d %d %d\n", greeting, farewell == NULL, quadrupled(2), limit);
+  printf("%d %d %s\n", quintupled(2), bound, line.body);
   return 0;
 }
 

@@ -1470,11 +1470,15 @@ static Var _macro_prefix(Compiler c, Token token, String param) {
 
 /* Ranks prefix classifications so a name defined differently in two
    conditional arms keeps the reading that emits correct C: `static` hides
-   a definition from the header, so it wins; other text loses to any
-   prefix. */
+   a definition from the header, so it wins; a qualifier that another arm
+   omits, as zlib's `z_const` is `const` or nothing, rejects writes that C
+   accepts in that arm, so it loses to any other prefix; other text loses to
+   any prefix. */
 static int _prefix_rank(Var v) {
   if (v is not <list>) return 0;
-  return List.match(v, %(* static *)) ? 3 : v.list() ? 2 : 1;
+  if (List.match(v, %(* static *))) return 4;
+  foreach (Symbol word, v) if (word.is_type_qualifier()) return 1;
+  return v.list() ? 3 : 2;
 }
 
 /* Records the name of each `#define` so a bare atom spelled the same way

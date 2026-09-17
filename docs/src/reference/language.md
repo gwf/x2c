@@ -2759,9 +2759,12 @@ contributes: nothing for an empty body or an attribute (`#define RLAPI`,
 body such as `signed int`, and, for a body that is the name of another prefix
 macro, that macro's reading. A function-like macro whose body is its parameter
 amid such prefixes wraps a type: in `CJSON_PUBLIC(const char *) f(void);` the
-type is the one inside the parentheses. Where a name is defined differently
-in several conditional branches, a `static` definition takes precedence,
-then any other prefix. A name defined to any other text is a typedef name.
+type is the one inside the parentheses. A macro whose words are a storage
+class reads as that storage after the type as well, as in
+`int LOCAL f(void)`. Where a name is defined differently in several
+conditional branches, a `static` definition takes precedence, then any
+prefix without a qualifier, then a prefix with one, such as zlib's
+`z_const`, which is `const` in one branch and nothing in another. A name defined to any other text is a typedef name.
 
 A GNU attribute or a function-like attribute macro after a declarator or
 parameter, `int a __attribute__((unused)) = 1, b = 2;` or

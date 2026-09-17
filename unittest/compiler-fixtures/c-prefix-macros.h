@@ -20,6 +20,12 @@
 #define z_const const
 #define LOCAL static int
 #define LOCAL_CONST static const
+#define HIDE static
+#ifdef ZLIB_CONST
+#define maybe_const const
+#else
+#define maybe_const
+#endif
 signed int doubled(signed int value);
 
 static inline int tripled(int value){
