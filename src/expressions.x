@@ -211,25 +211,38 @@ const PrintfFn *List.printf_family(List l) {
   return NULL;
 }
 
-/* The format a printf-family call consumes, when the transform reads it at
-   translation time: a quoted C string literal, or the canonical String one
-   becomes. Any other format, such as a variable or an object macro, leaves
-   the call's `Var` values unlowered, so nothing there converts them. */
-static int _static_printf_format(Compiler c, Var format) {
-  match (format) case %(expr ("String") (cache ?id)): {
-    List key = c.id_keys[id];
-    format = key.cadr();
-  }
-  match (format) case %(expr ? (call "String_new" (args ?literal))):
-    format = literal;
+/** Returns the format a printf-family call consumes when it is known at
+    translation time, or `NULL`. That is a quoted C string literal, the
+    canonical `String` one becomes, or the `String_new` of one; any other
+    format, such as a variable or an object macro, is not readable here.
+    `raw` reports C spelling, whose quotes and escape sequences the caller
+    steps over.
+*/
+String Compiler.printf_static_format(
+  Compiler compiler, Var format, int *raw) {
   match (format) {
-    case %(expr (* char) (literal ? ?spelled)): {
-      String text = spelled;
-      return text.startswith("\"");
+    case %(expr (* char) (literal (* char) ?spelled)): {
+      String spelling = spelled;
+      int length = spelling ? spelling.len() : 0;
+      if (length < 2 || spelling[0] != '"' || spelling[length - 1] != '"')
+        return NULL;
+      *raw = 1;
+      return spelling;
     }
-    case %(expr ("String") (literal ? ?)): return 1;
+    case %(expr ("String") (cache ?id)): {
+      List key = compiler.id_keys[id];
+      match (key)
+        case %(string (expr ("String") (literal ("String") ?text))): {
+          *raw = 0;
+          return text;
+        }
+      match (key)
+        case %(string (expr ("String") (call "String_new" (args ?literal)))):
+          return compiler.printf_static_format(literal, raw);
+      return NULL;
+    }
   }
-  return 0;
+  return NULL;
 }
 
 /* Each argument of a call spelled in source is checked against its declared
@@ -256,9 +269,11 @@ static void _check_explicit_converter_arguments(
   }
   /* A static printf-family format converts each Var value it consumes. The
      family's positions count the receiver a method call spells before the
-     dot, which `arguments` has already dropped. */
-  const PrintfFn *info = callee.printf_family();
-  if (!info || !_static_printf_format(compiler, supplied[info.fmt_arg]))
+     dot, which `arguments` has already dropped. A format the transform
+     cannot read leaves those values unlowered, so nothing converts them. */
+  const PrintfFn *info = callee.printf_family(), int raw = 0;
+  if (!info ||
+      !compiler.printf_static_format(supplied[info.fmt_arg], &raw))
     return;
   int first = info.first_arg - method, index = 0;
   for (List a = arguments, n = notes; a; a = cdr(a), n = cdr(n)) {

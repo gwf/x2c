@@ -70,34 +70,6 @@ static int _iter_immediate_consumer(String name) =>
          name == "Iter_product" || name == "Iter_min" ||
          name == "Iter_max";
 
-// Recover a format known at compile time. Raw C spelling is retained so
-// escaped percent bytes stay outside this first pass.
-static String _printf_static_format(Compiler compiler, List expr, int *raw) {
-  match (expr) {
-    case %(expr (* char) (literal (* char) ?format)): {
-      String spelling = format;
-      int length = spelling ? spelling.len() : 0;
-      if (length < 2 || spelling[0] != '"' || spelling[length - 1] != '"')
-        return NULL;
-      *raw = 1;
-      return spelling;
-    }
-    case %(expr ("String") (cache ?id)): {
-      List key = compiler.id_keys[id];
-      match (key)
-        case %(string (expr ("String") (literal ("String") ?format))): {
-          *raw = 0;
-          return format;
-        }
-      match (key)
-        case %(string (expr ("String") (call "String_new" (args ?literal)))):
-          return _printf_static_format(compiler, literal, raw);
-      return NULL;
-    }
-  }
-  return NULL;
-}
-
 static int _printf_has_var(Compiler compiler, List args, int first_value) {
   int index = 0;
   foreach (List arg, args) {
@@ -202,7 +174,7 @@ static List _lower_printf_vars(Compiler c, List ast) {
   if (info.fmt_arg >= values.len())
     _printf_error(c, family, "call has no format argument");
   List format_arg = values[info.fmt_arg], int raw = 0;
-  String format = _printf_static_format(c, format_arg, &raw);
+  String format = c.printf_static_format(format_arg, &raw);
   if (!format)
     _printf_error(
       c, family,
