@@ -50,6 +50,12 @@ static void list_builders_and_indexing(void) {
   EXPECT_TRUE(seq.getindex(9) is void);
   EXPECT_INT_EQ(seq.get(1L).integer(), 2);
   EXPECT_INT_EQ(seq.get(seq.len() - 1).integer(), 4);
+
+  /* A key outside the int index domain used to be narrowed, so 2^32 answered
+     with element 0 and 2^32 - 1 with the last element. */
+  EXPECT_TRUE(seq.get(Var.box_long(4294967296l)) is void);
+  EXPECT_TRUE(seq.get(Var.box_long(-4294967296l)) is void);
+  EXPECT_INT_EQ(seq.get(Var.box_long(0l)).integer(), 1);
 }
 
 static void list_counted_values_are_boxed(void) {

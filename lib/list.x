@@ -668,11 +668,16 @@ Var List.assoc(List list, Var key) {
 
 /** Looks up an integer index or association key in `list`.
     Integer keys use `List.getindex`, including negative indexes; every other
-    key uses `List.assoc`. Either absent form returns `void`.
+    key uses `List.assoc`. Either absent form returns `void`, as does an
+    integer key outside the `int` index domain, which no `List` can reach.
 */
 Var List.get(List list, Var key) {
-  if (key.kind() == <integer>) return list[key];
-  return list.assoc(key);
+  if (key.kind() != <integer>) return list.assoc(key);
+  /* Narrowing the key instead would fold an unreachable index onto a real
+     one, so 2^32 would answer with the first element. */
+  long long index = key.long_long();
+  if (index != (int) index) return void;
+  return list[(int) index];
 }
 
 /** Returns the last `count` elements of `list`.
