@@ -2210,14 +2210,13 @@ static List _keyword_alias_lookup(Compiler compiler) {
   return stored;
 }
 
-static int _keyword_alias_requires_arguments(List definition) =>
+static int _keyword_alias_takes_args(List definition) =>
   definition.assoc(<kind>) != <decorator> ||
          definition.assoc(<parameters>).list();
 
-static int _keyword_alias_invocation_follows(
-  Compiler compiler, List definition) {
+static int _keyword_alias_follows(Compiler compiler, List definition) {
   return definition &&
-    (!_keyword_alias_requires_arguments(definition) ||
+    (!_keyword_alias_takes_args(definition) ||
      compiler.peek(1) == <(>);
 }
 
@@ -2259,8 +2258,8 @@ void Compiler.parse_keyword_definition(Compiler c) {
 }
 
 static int _keyword_alias_is_expression(Compiler compiler, List definition) {
-  if (!_keyword_alias_invocation_follows(compiler, definition)) return 0;
-  if (_keyword_alias_requires_arguments(definition)) return 1;
+  if (!_keyword_alias_follows(compiler, definition)) return 0;
+  if (_keyword_alias_takes_args(definition)) return 1;
   return definition.assoc(<kind>) == <expression> ||
     (definition.assoc(<kind>) == <decorator> &&
      definition.assoc(<target>) == <expr>);
@@ -2268,14 +2267,14 @@ static int _keyword_alias_is_expression(Compiler compiler, List definition) {
 
 static int _keyword_alias_targets_at(
   Compiler compiler, List definition, AstPos position) {
-  if (!_keyword_alias_invocation_follows(compiler, definition)) return 0;
+  if (!_keyword_alias_follows(compiler, definition)) return 0;
   Symbol kind = definition.assoc(<kind>);
   Symbol target_kind = definition.assoc(<target>);
   if (position == AST_STATEMENT && definition.assoc(<local>).int() &&
       (kind == <expression> ||
        (kind == <decorator> && target_kind == <expr>))) return 0;
   if (position == AST_MAP_ENTRY) return kind == <map-entry>;
-  if (_keyword_alias_requires_arguments(definition)) {
+  if (_keyword_alias_takes_args(definition)) {
     if (position != AST_BLOCK) return 1;
     return kind != <expression> &&
       (kind != <decorator> || target_kind != <expr>);
@@ -2296,7 +2295,7 @@ int Compiler.macro_targets_unit(Compiler compiler) {
     ? _peek_definition(compiler) : _keyword_alias_lookup(compiler);
   if (!definition ||
       (compiler.peek(0) != <$> &&
-       !_keyword_alias_invocation_follows(compiler, definition)))
+       !_keyword_alias_follows(compiler, definition)))
     return 0;
   Symbol kind = definition.assoc(<kind>);
   if (kind == <decorator>)
@@ -2319,7 +2318,7 @@ int Compiler.keyword_alias_starts_target_at(
 */
 int Compiler.keyword_alias_needs_shallow_expansion(Compiler compiler) {
   List definition = _keyword_alias_lookup(compiler);
-  return _keyword_alias_invocation_follows(compiler, definition) &&
+  return _keyword_alias_follows(compiler, definition) &&
          _definition_needs_shallow_expansion(definition);
 }
 
@@ -2331,8 +2330,7 @@ void Compiler.skip_keyword_alias(Compiler c) {
   if (!definition)
     c.report_error(<parse>, "expected keyword alias", c.token, NULL);
   c.next();
-  if (_keyword_alias_requires_arguments(definition))
-    c.token = c.token.after_group();
+  if (_keyword_alias_takes_args(definition)) c.token = c.token.after_group();
 }
 
 /** Consumes a NamedType target already projected by owning-source collection.
@@ -2719,7 +2717,7 @@ List Compiler.try_parse_macro_expression(Compiler c) {
     definition = _keyword_alias_lookup(c);
     if (!_keyword_alias_is_expression(c, definition)) return NULL;
     c.next();
-    bare = !_keyword_alias_requires_arguments(definition);
+    bare = !_keyword_alias_takes_args(definition);
   }
   return c.resolve_expression(
     _parse_expression_definition(
@@ -2854,7 +2852,7 @@ List Compiler.try_parse_macro_target_at(Compiler c, AstPos position) {
     definition = _keyword_alias_lookup(c);
     if (!_keyword_alias_targets_at(c, definition, position)) return NULL;
     c.next();
-    bare = !_keyword_alias_requires_arguments(definition);
+    bare = !_keyword_alias_takes_args(definition);
   }
   return _parse_target_definition(c, definition, invocation, position, bare);
 }

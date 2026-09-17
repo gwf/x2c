@@ -65,7 +65,7 @@ static void _record_declaration_binding_visibility(
       compiler, kind == <typedef> ? <type> : <binding>, name);
 }
 
-static void _record_declaration_rows_visibility(
+static void _record_rows_visibility(
   Compiler compiler, List declaration, Symbol kind, int private, int mark,
   List rows) {
   foreach (List row, rows) match (row) {
@@ -96,8 +96,7 @@ void Compiler.record_declaration_visibility(Compiler c, List declaration) {
       (!set ?kind (!or typedef declare)) ?type (bindings *rows)
     ): {
       int mark = private || type.type().is_static();
-      _record_declaration_rows_visibility(
-        c, declaration, kind, private, mark, rows);
+      _record_rows_visibility(c, declaration, kind, private, mark, rows);
     }
   }
 }
@@ -1084,7 +1083,7 @@ void Compiler.resolve_protocols(Compiler compiler) {
 }
 
 /* Publish resolved external signatures before their adapters are generated. */
-static void _install_generated_protocol_symbol(
+static void _install_generated_symbol(
   Compiler compiler, Type participant, String member, Type signature) {
   String generated = _member_spelling(participant, member);
   compiler.sym.define_global(
@@ -1109,8 +1108,7 @@ void Compiler.install_generated_protocol_symbols(Compiler c) {
           foreach (List row, rows)
             match (row)
               case %(?(String member) ? ? ? ? ?(Type signature)):
-                _install_generated_protocol_symbol(
-                  c, participant, member, signature);
+                _install_generated_symbol(c, participant, member, signature);
           continue;
         }
         if (!c.fn_defs.contains(forward)) continue;
@@ -1123,8 +1121,7 @@ void Compiler.install_generated_protocol_symbols(Compiler c) {
               List decision = _generated_owner(c, participant, member);
               match (decision)
                 case %(owner ? ? ?signature external):
-                  _install_generated_protocol_symbol(
-                    c, participant, member, signature);
+                  _install_generated_symbol(c, participant, member, signature);
             }
       }
 }
@@ -2059,7 +2056,7 @@ static void Compiler._generate_descriptor_registration(
   }
 }
 
-static void _report_requirement_at_adoption(
+static void _report_requirement(
   Compiler compiler, Type base, Type participant, List failure) {
   List dedupe =
     %("protocol-adapter-requirement" $base $participant ${failure.car()});
@@ -2179,8 +2176,7 @@ static void Compiler._generate_ordinary_protocol_adapters(
               List requirement = _descriptor_requirement(
                 c, base, binder, member, template, forward, reverse);
               if (requirement) {
-                _report_requirement_at_adoption(
-                  c, base, participant, requirement);
+                _report_requirement(c, base, participant, requirement);
                 continue;
               }
               String inherited = _member_spelling(participant, member);

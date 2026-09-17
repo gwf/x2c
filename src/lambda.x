@@ -19,7 +19,7 @@
 #include "list.x"
 
 // Produce typed parameters from types and their binding identities.
-static List _decl_params_from_types_with_names(List types, List names) {
+static List _named_decl_params(List types, List names) {
   List params = types.zip_with(
     names,
     %!(Type type, List name) => type.parameter_ast(name));
@@ -105,8 +105,7 @@ static void _typed_adapter_error(
 }
 
 // Permit matching parameter types and one dynamic extraction.
-static int _typed_adapter_parameter_allowed(
-  Compiler compiler, Type target, Type source) {
+static int _typed_param_allowed(Compiler compiler, Type target, Type source) {
   target = target.canonicalize();
   source = source.canonicalize();
   if (target == source) return 1;
@@ -122,8 +121,7 @@ static List _callback_function(
   Compiler compiler, List binding, List parameters, Type result,
   List source_binding, Type source_type, List source_parameters) {
   List names = _auto_names(compiler, parameters.len());
-  List declaration_params =
-    _decl_params_from_types_with_names(parameters, names);
+  List declaration_params = _named_decl_params(parameters, names);
   Array arguments = [];
   for (; parameters;
        parameters = parameters.cdr(),
@@ -229,7 +227,7 @@ List Compiler.lower_typed_adapter_expr(Compiler c, List expression) {
          targets = targets.cdr(), sources = sources.cdr(), index++) {
       Type target_param = targets.car();
       Type source_param = sources.car();
-      if (!_typed_adapter_parameter_allowed(c, target_param, source_param)) {
+      if (!_typed_param_allowed(c, target_param, source_param)) {
         String detail =
           "parameter %d: %s cannot adapt to %s".printf(
             index + 1, target_param.repr(), source_param.repr());
@@ -398,7 +396,7 @@ static List _func_argument_locals(
 static void _publish_func_adapter(
   Compiler compiler, List binding, List fn_binding, List argv_binding,
   List body, List setup) {
-  List parameters = _decl_params_from_types_with_names(
+  List parameters = _named_decl_params(
     %(("Func") (* const "FuncArg")), %($fn_binding $argv_binding));
   compiler.add_early(
     %(function (static ("Var")) (bind $binding ((fnmod $parameters)))

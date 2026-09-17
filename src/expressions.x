@@ -370,7 +370,7 @@ static String _delegate_path_string(Type receiver, List path, String member) {
   return ".".join(parts.list_free());
 }
 
-static void _report_imported_method_ambiguity(
+static void _report_method_ambiguity(
   Compiler compiler, Type receiver, String member, List packages,
   String delegate_path, Token origin) {
   List notes = delegate_path
@@ -418,7 +418,7 @@ static void _find_delegate_methods(
     else if (resolution && resolution.car() == <ambiguous>) {
       String path = _delegate_path_string(
         outer, cons(<path>, next_path.reverse()), NULL);
-      _report_imported_method_ambiguity(
+      _report_method_ambiguity(
         compiler, field_type, member, resolution.cdr(), path, origin);
     }
     else if (!resolution)
@@ -1522,8 +1522,7 @@ static List _resolve_call(
           origin, NULL);
       match (resolution) {
         case %(ambiguous *packages):
-          _report_imported_method_ambiguity(
-            c, type, method, packages, NULL, origin);
+          _report_method_ambiguity(c, type, method, packages, NULL, origin);
         case %(method ?binding (!set ?signature
           ((func (!set ?parameters (?declared *))) *returns))): {
           receiver = _method_bind(c, receiver, type, declared, origin);
@@ -2172,7 +2171,7 @@ static int _destructure_identifier(List expression) => !!expression.match(%(
       (expr ? (parens (expr ? (op * (expr (& *) (ident ?))))))
 ));
 
-static List _destructure_assignment_targets(Compiler compiler, List lhs) {
+static List _destructure_targets(Compiler compiler, List lhs) {
   match (lhs)
     case %(expr ? (parens ?target)): {
       if (_destructure_identifier(target)) return %(targets $target);
@@ -2310,8 +2309,7 @@ static List _parse_assignment_tail(Compiler compiler, List lhs) {
   Symbol op = compiler.peek(0);
   Token origin = compiler.token;
   if (!op.is_assignment_op()) return lhs;
-  List targets = op == <=>
-               ? _destructure_assignment_targets(compiler, lhs) : NULL;
+  List targets = op == <=> ? _destructure_targets(compiler, lhs) : NULL;
   compiler.next();
   List rhs = compiler.parse_assignment();
   if (targets) match (rhs)

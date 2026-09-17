@@ -2927,19 +2927,18 @@ static int _is_initializable_object_type(Compiler compiler, Type type) =>
          compiler.sym.is_map_type(type) ||
          compiler.sym.is_named_value_type(type, "Func");
 
-static void _collect_initializer_references(
-  Var value, Map references, Array ordered) {
+static void _collect_references(Var value, Map references, Array ordered) {
   if (value is not <list> || value.is_nil()) return;
   List node = value;
   match (node)
     case %(input *arguments): {
       foreach (List argument, arguments)
-        _collect_initializer_references(argument.cadr(), references, ordered);
+        _collect_references(argument.cadr(), references, ordered);
       return;
     }
   match (node)
     case %(indexinit ? ?initializer): {
-      _collect_initializer_references(initializer, references, ordered);
+      _collect_references(initializer, references, ordered);
       return;
     }
   match (node)
@@ -2951,12 +2950,10 @@ static void _collect_initializer_references(
       }
       return;
     }
-  foreach (Var child, node)
-    _collect_initializer_references(child, references, ordered);
+  foreach (Var child, node) _collect_references(child, references, ordered);
 }
 
-static void _record_static_object_declaration(
-  Compiler c, Type declared, List bindings) {
+static void _record_static_object(Compiler c, Type declared, List bindings) {
   if (!declared.is_static()) return;
   int declared_var = c.sym.is_var_type(declared);
   if (!declared_var &&
@@ -2969,7 +2966,7 @@ static void _record_static_object_declaration(
           c, initializer_type))
           continue;
         Map references = {}, Array ordered = [];
-        _collect_initializer_references(value, references, ordered);
+        _collect_references(value, references, ordered);
         c.static_init_deps[binding] = ordered.list_free();
       }
 }
@@ -3000,7 +2997,7 @@ static void _record_top_level_function_state(Compiler compiler, List node) {
   match (node) {
     case %(declare (!set ?declared (*)) (bindings *bindings)): {
       Type type = declared;
-      _record_static_object_declaration(compiler, type, bindings);
+      _record_static_object(compiler, type, bindings);
       _record_function_prototypes(compiler, type, bindings);
     }
     case %(function ?return_type

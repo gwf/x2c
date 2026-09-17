@@ -898,8 +898,7 @@ static List _lambda_parse_bare_params(Compiler compiler) {
 }
 
 // Build the function parameter types while retaining typed declarators.
-static List _lambda_param_types_for_signature(
-  Compiler compiler, List entries) {
+static List _signature_param_types(Compiler compiler, List entries) {
   if (!entries) return %((void));
   Array types = [];
   foreach (List entry, entries)
@@ -1116,7 +1115,7 @@ List Compiler.bind_lambda_expression(
              (lambda $parameters (captures @captures) $body));
   if (type === %("Func")) {
     Type signature = %(
-      (func ${_lambda_param_types_for_signature(c, parameters.cdr())}) "Var");
+      (func ${_signature_param_types(c, parameters.cdr())}) "Var");
     return c.lift_func_expression(
       %(expr $signature (lambda $parameters $body)));
   }
@@ -1194,8 +1193,7 @@ List Compiler.parse_lambda_literal(Compiler c) {
   else body = c.parse_assignment();
   List rtype = %("Var");
   List params_node = _lambda_params_node(names, typed_params, used_typed);
-  List param_types = _lambda_param_types_for_signature(
-    c, params_node.cdr());
+  List param_types = _signature_param_types(c, params_node.cdr());
   List ftype = %((func $param_types) @rtype);
   List captures = c.end_lambda_captures();
   c.check_lambda_captures(body);
