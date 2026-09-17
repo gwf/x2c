@@ -171,8 +171,8 @@ An import exposes:
 
 - every public declaration, type, and aggregate above `#pragma private`;
 - protocol declarations and adoptions the package makes; and
-- any header the package's public part includes, such as a vendored foreign
-  header it publishes.
+- any header or runtime module the package's public part includes, such as a
+  vendored foreign header it publishes.
 
 It does not expose macros, `.xmacro` definitions, private declarations, or the
 package's own imports. Packages have no re-exports or hierarchy. One program
@@ -183,7 +183,9 @@ header directly. A package renames what it declares, not what it includes.
 
 An unprefixed public declaration from an x2c file outside the package directory
 would enter the consumer's namespace unchanged. The compiler rejects it as
-`package 'geo' exposes unprefixed top-level declaration '...'`. A consumer that
+`package 'geo' exposes unprefixed top-level declaration '...'`. Including that
+file below `#pragma private` keeps it out of the package's surface, and a
+runtime module, like a C header, crosses unprefixed. A consumer that
 declares a name in an imported package's `geo__` space is reported as `'geo__x'
 is reserved for imported package 'geo'`.
 

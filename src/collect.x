@@ -550,16 +550,19 @@ static int _package_protocol_row(List key, Var value) {
 }
 
 /* The package's `name__` space is visible in the importing unit, and so does
-   a C header it publishes: a package renames what it declares, not what it
-   includes, so those names cross as including that header gives them.
-   Inside the package root an unprefixed x2c key is a static, which
-   keeps C internal linkage and stays home; outside it the file escaped the
-   declare-time rewrite and its bare names would merge into the consumer's
-   one flat namespace. */
+   a C header or runtime module it publishes: a package renames what it
+   declares, not what it includes, so those names cross as including that
+   file gives them. Inside the package root an unprefixed x2c key is a
+   static, which keeps C internal linkage and stays home; outside it the file
+   escaped the declare-time rewrite and its bare names would merge into the
+   consumer's one flat namespace. */
 static void _package_merge(
   Compiler compiler, String name, String root, String path, Map part,
   Map merged, Token token) {
-  String prefix = %"${name}__", int header = !x2c_source_file(path);
+  String prefix = %"${name}__";
+  int header = !x2c_source_file(path) ||
+               path.startswith(%"${_canonical_lib()}/") ||
+               path.startswith(%"${_canonical_include()}/");
   int foreign = !path.startswith(%"$root/");
   foreach (Var (key, value), part) {
     if (key is not <list> || key.is_nil()) continue;
@@ -587,11 +590,13 @@ static void _package_merge(
 }
 
 /* Replay one cached entry for its declarations only, recording each package
-   file as a dependency of the importing unit. */
+   file as a dependency of the importing unit. An include below the file's
+   private boundary is not part of the package surface. */
 static void _package_contributions(
   Compiler compiler, String name, String root, String path, List entry,
   Map merged, Map visited, Token token) {
   compiler.merge_translation_dependencies(entry[3]);
+  int private = 0;
   foreach (Var part, entry.car()) {
     match (%($part)) {
       case %(?(Map declarations)): {
@@ -599,10 +604,17 @@ static void _package_contributions(
           compiler, name, root, path, declarations, merged, token);
         continue;
       }
-      case %((!or private public)): continue;
+      case %(private): {
+        private = 1;
+        continue;
+      }
+      case %(public): {
+        private = 0;
+        continue;
+      }
       case %(?(String dependency)): {
         compiler.add_translation_dependency(dependency);
-        if (visited.contains(dependency)) continue;
+        if (private || visited.contains(dependency)) continue;
         visited[dependency] = 1;
         _package_contributions(
           compiler, name, root, dependency,
