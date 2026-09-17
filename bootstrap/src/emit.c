@@ -1123,6 +1123,7 @@ static List Emitter__declarator(Emitter e, List decl, List mods){
   Var first = List_car(mods);
   if(Var_is_row(first, 9, 7, 4)){
     Type mod = Var_type(first);
+    if(Var_is_row(List_car(Type_list(mod)), 11, 7, 1)) return Emitter__declarator(e, List_append(decl, List_append(Type_list(mod), NULL)), List_cdr(mods));
     if(Var_equal(List_car(Type_list(mod)), Symbol_var(13528008))) return Emitter__function_declarator(e, decl, Type_list(mod), List_cdr(mods));
     if(Type_is_array(mod)) return Emitter__array_declarator(e, decl, Type_list(mod), List_cdr(mods));
     return Emitter__bitfield_declarator(e, decl, Type_list(mod), List_cdr(mods));

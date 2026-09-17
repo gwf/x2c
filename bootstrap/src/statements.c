@@ -18,7 +18,7 @@ __attribute__((constructor)) static void _file_init_(void);
 
 static List _keyword_paren_expr(Compiler compiler, Symbol keyword);
 
-static List _sub_statement(Compiler c);
+static List _continued(Compiler c, List statement);
 
 static List _if_statement(Compiler compiler);
 
@@ -258,33 +258,38 @@ List Compiler_leading_preproc(Compiler);
 
 int List_truth(List);
 
-static List _sub_statement(Compiler c){
+List Compiler_parse_governed(Compiler c, AstPos position){
+  if(! _init_guard_) _file_init_();
   List directives = Compiler_leading_preproc(c);
-  List statement = Compiler_parse_statement(c);
+  List statement = position == AST_BLOCK ? Compiler_parse_block_item(c) : Compiler_parse_statement(c);
   return List_truth(directives) ? cons(_0, List_append(directives, cons(List_var(statement), NULL))) : statement;
 }
 
-int Compiler_test(Compiler, Symbol);
+static List _continued(Compiler c, List statement){
+  List directives = Compiler_leading_preproc(c);
+  return List_truth(directives) ? cons(_0, cons(List_var(statement), List_append(directives, NULL))) : statement;
+}
+
+Symbol Compiler_peek(Compiler, int);
+
+void Compiler_next(Compiler);
 
 static List _if_statement(Compiler compiler){
   List cond = _keyword_paren_expr(compiler, 588);
-  List ontrue = _sub_statement(compiler);
-  if(Compiler_test(compiler, 353482)){
-    List onfalse = _sub_statement(compiler);
-    return cons(_1, cons(List_var(cond), cons(List_var(ontrue), cons(List_var(onfalse), NULL))));
-  }
-  return cons(_1, cons(List_var(cond), cons(List_var(ontrue), NULL)));
+  List ontrue = Compiler_parse_governed(compiler, AST_STATEMENT);
+  if(Compiler_peek(compiler, 0) != 353482) return cons(_1, cons(List_var(cond), cons(List_var(ontrue), NULL)));
+  ontrue = _continued(compiler, ontrue);
+  Compiler_next(compiler);
+  return cons(_1, cons(List_var(cond), cons(List_var(ontrue), cons(List_var(Compiler_parse_governed(compiler, AST_STATEMENT)), NULL))));
 }
 
 static List _while_statement(Compiler compiler){
   List cond = _keyword_paren_expr(compiler, 48777994);
-  List body = _sub_statement(compiler);
+  List body = Compiler_parse_governed(compiler, AST_STATEMENT);
   return cons(_2, cons(List_var(cond), cons(List_var(body), NULL)));
 }
 
 void Sym_push_new_scope(Sym);
-
-Symbol Compiler_peek(Compiler, int);
 
 int Compiler_test_declaration(Compiler);
 
@@ -319,7 +324,7 @@ static List _for_statement(Compiler c){
     if(Compiler_peek(c, 0) == 83) inc = NULL;
     else inc = Compiler_parse_expression(c);
     Compiler_expect(c, 83);
-    body = _sub_statement(c);
+    body = Compiler_parse_governed(c, AST_STATEMENT);
     {
       List _x2c_return_value_0 = cons(_3, cons(List_var(init), cons(List_var(cond), cons(List_var(inc), cons(List_var(body), NULL)))));
       {
@@ -337,9 +342,7 @@ static List _for_statement(Compiler c){
 
 static List _do_statement(Compiler compiler){
   Compiler_expect(compiler, 286);
-  List body = _sub_statement(compiler);
-  List trailing = Compiler_leading_preproc(compiler);
-  if(List_truth(trailing)) body = cons(_0, cons(List_var(body), List_append(trailing, NULL)));
+  List body = _continued(compiler, Compiler_parse_governed(compiler, AST_STATEMENT));
   List cond = _keyword_paren_expr(compiler, 48777994);
   return cons(_4, cons(List_var(body), cons(List_var(cond), NULL)));
 }
@@ -357,8 +360,6 @@ List Compiler_finish_return_statement(Compiler compiler, List expression){
   if(! List_truth(expression)) return _7;
   return cons(_6, cons(List_var(compiler -> return_type), cons(List_var(Compiler_resolve_expression(compiler, expression, compiler -> token)), NULL)));
 }
-
-void Compiler_next(Compiler);
 
 static List _return_statement(Compiler compiler){
   Compiler_expect(compiler, 1219800220);
@@ -401,7 +402,7 @@ static List _goto_statement(Compiler compiler){
 
 static List _switch_statement(Compiler compiler){
   List expr = _keyword_paren_expr(compiler, 1323933904);
-  List body = Compiler_parse_statement(compiler);
+  List body = Compiler_parse_governed(compiler, AST_STATEMENT);
   return cons(_14, cons(List_var(expr), cons(List_var(body), NULL)));
 }
 
@@ -647,6 +648,7 @@ static List _match_cases(Compiler compiler){
   return Array_list_free(cases);
 }
 
+int Compiler_test(Compiler, Symbol);
 static List _match_statement(Compiler compiler){
   List cases = NULL, expr = _keyword_paren_expr(compiler, 27369680);  if(Compiler_test(compiler, 247)){
     cases = _match_cases(compiler);  Compiler_expect(compiler, 251);

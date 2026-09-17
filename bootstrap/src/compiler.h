@@ -51,7 +51,6 @@ typedef struct Compiler{
   Array arms;
   Token arms_token;
   int arm_serial;
-  Array attributes;
   Map kw_seen;
   Map fixed;
   Map protocols, conforms, protocol_helpers;

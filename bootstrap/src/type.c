@@ -1171,6 +1171,8 @@ static List _from_ast_items(List items, List context){
   return(void *) _x2c_macro_rewritten_0 ? Array_list_free(_x2c_macro_rewritten_0) : _x2c_macro_original_0;
 }
 
+Var car(List);
+
 List List_flatten(List);
 
 static List _from_ast(List ast, List context){
@@ -1194,13 +1196,30 @@ Var head = List_car(ast);  switch(Var_symbol(head)){
     List _x2c_destructure_2 = List_cdr(ast);  List source_type = Var_list(List_getindex(_x2c_destructure_2, 0));  List bindings = Var_list(List_getindex(_x2c_destructure_2, 1));  List type = _from_ast(source_type, NULL);  return _from_ast(bindings, type);
   }
   case 150408 :{
-    List ident, mods;  List _x2c_destructure_3 = List_cdr(ast);  ident = Var_list(List_getindex(_x2c_destructure_3, 0));  mods = Var_list(List_getindex(_x2c_destructure_3, 1)); (void) ident;  mods = _from_ast(mods, context);  List type = Type_list(Type__modify(List_type(context), mods));  return type;
+    Array typed = Array_new(); {
+      Var item;  Iter _x2c_macro_iterator_5 = Var_iter(List_caddr(ast), &(struct Iter){
+        int_var(0)
+      }
+      );  Var _x2c_macro_item_6;  while(Iter_try_next(_x2c_macro_iterator_5, & _x2c_macro_item_6)){
+        item = _x2c_macro_item_6;  if(!(Var_is_row(item, 9, 7, 4) && Var_is_row(car(Var_list(item)), 11, 7, 1))) Array_push(typed, item);
+      }
+
+    }
+    List mods = _from_ast(Array_list_free(typed), context);  return Type_list(Type__modify(List_type(context), mods));
   }
   case 1077021542 : case 157714837990 : return _from_ast_items(List_cdr(ast), context);  case 421880102 :{
-    Array types = Array_new(); {
-      List field;  List _x2c_macro_object_5 = List_cdr(ast);  List _x2c_macro_cursor_6 = _x2c_macro_object_5;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_2)){
-        field = Var_list(_x2c_macro_cursor_output_2); {
-          List declaration = field;  while(Var_equal(List_car(declaration), Symbol_var(104))) declaration = Var_list(List_caddr(declaration));  if(! Var_equal(List_car(declaration), Symbol_var(272838634664))) Array_push(types, List_var(_from_ast(field, context)));
+    Array types = Array_new();
+    {
+      List field;
+      List _x2c_macro_object_6 = List_cdr(ast);
+      List _x2c_macro_cursor_7 = _x2c_macro_object_6;
+      Var _x2c_macro_cursor_output_2;
+      while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_2)){
+        field = Var_list(_x2c_macro_cursor_output_2);
+        {
+          List declaration = field;
+          while(Var_equal(List_car(declaration), Symbol_var(104))) declaration = Var_list(List_caddr(declaration));
+          if(! Var_equal(List_car(declaration), Symbol_var(272838634664))) Array_push(types, List_var(_from_ast(field, context)));
         }
 
       }
@@ -1209,17 +1228,31 @@ Var head = List_car(ast);  switch(Var_symbol(head)){
     return Array_list_free(types);
   }
   case 44661285196 :{
-    List _x2c_destructure_4 = List_cdr(ast);  List source_type = Var_list(List_getindex(_x2c_destructure_4, 0));  List bindings = Var_list(List_getindex(_x2c_destructure_4, 1));  List type = _from_ast(source_type, NULL);  return _from_ast(bindings, type);
+    List _x2c_destructure_3 = List_cdr(ast);
+    List source_type = Var_list(List_getindex(_x2c_destructure_3, 0));
+    List bindings = Var_list(List_getindex(_x2c_destructure_3, 1));
+    List type = _from_ast(source_type, NULL);
+    return _from_ast(bindings, type);
   }
   case 13528008 :{
-    List params = _from_ast(List_cdr(ast), NULL);  return cons(_420, List_append(params, NULL));
+    List params = _from_ast(List_cdr(ast), NULL);
+    return cons(_420, List_append(params, NULL));
   }
   case 33656922 :{
-    List _x2c_destructure_5 = List_cdr(ast);  Type parameter_type = Var_type(List_getindex(_x2c_destructure_5, 0));  List mods = Var_list(List_getindex(_x2c_destructure_5, 1));  return _from_ast(mods, Type_list(parameter_type));
+    List _x2c_destructure_4 = List_cdr(ast);
+    Type parameter_type = Var_type(List_getindex(_x2c_destructure_4, 0));
+    List mods = Var_list(List_getindex(_x2c_destructure_4, 1));
+    return _from_ast(mods, Type_list(parameter_type));
   }
-  case 4928588686 : return cons(List_caddr(ast), NULL);  case 1318234344 : case 44977116 :{
-    if(Type_is_aggregate_tag(List_type(ast))) return ast;  List fields = NULL;  if(Type__is_aggregate_body(List_type(ast))){
-      fields = Var_list(List_cadr(ast));  fields = _from_ast(fields, NULL);  fields = List_flatten(fields);  return cons(head, cons(List_var(fields), NULL));
+  case 4928588686 : return cons(List_caddr(ast), NULL);
+  case 1318234344 : case 44977116 :{
+    if(Type_is_aggregate_tag(List_type(ast))) return ast;
+    List fields = NULL;
+    if(Type__is_aggregate_body(List_type(ast))){
+      fields = Var_list(List_cadr(ast));
+      fields = _from_ast(fields, NULL);
+      fields = List_flatten(fields);
+      return cons(head, cons(List_var(fields), NULL));
     }
     return cons(head, cons(List_cadr(ast), NULL));
   }
@@ -1227,9 +1260,13 @@ Var head = List_car(ast);  switch(Var_symbol(head)){
 
   {
     List _x2c_match_expr = ast;
-    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+    Var _x2c_match_values[1];
+    MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 377892: ;  static MatchCaptureSite _x2c_match_site_24;  if (x2c_match_site_try_capture(& _x2c_match_site_24, _x2c_match_expr, List_var(_430), &_x2c_match_capture)) {Var value = _x2c_match_values[0];  return cons(value, NULL);  break;
+      case 377892: ;
+    static MatchCaptureSite _x2c_match_site_24;
+    if (x2c_match_site_try_capture(& _x2c_match_site_24, _x2c_match_expr, List_var(_430), &_x2c_match_capture)) {Var value = _x2c_match_values[0];  return cons(value, NULL);  break;
   }
   default: break;
     }

@@ -4498,7 +4498,7 @@ List Compiler_try_parse_macro_expression(Compiler c){
 
 List Compiler_parse_function_target(Compiler);
 
-List Compiler_parse_statement(Compiler);
+List Compiler_parse_governed(Compiler, AstPos);
 
 List Compiler_anchor_origin(Compiler, List, Token);
 
@@ -4561,15 +4561,13 @@ static List _parse_target_definition(Compiler c, List definition, Token invocati
         else switch(position){
           case AST_UNIT : target = Compiler_parse_top_level(c);
           break;
-          case AST_BLOCK : target = Compiler_parse_block_item(c);
+          case AST_BLOCK : case AST_STATEMENT : target = Compiler_parse_governed(c, position);
           break;
           case AST_FIELD : target = Compiler_parse_field(c, c -> aggregate_type);
           break;
           case AST_ENUMERATOR : target = Compiler_parse_enumerator(c, List_type(c -> aggregate_type));
           break;
           case AST_MAP_ENTRY : target = Compiler_parse_map_entry(c);
-          break;
-          case AST_STATEMENT : target = Compiler_parse_statement(c);
           break;
           default: __builtin_unreachable();
         }

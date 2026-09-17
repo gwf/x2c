@@ -7,6 +7,8 @@
 
 #include "x2c.h"
 #include "compiler.h"
+List Compiler_parse_governed(Compiler c, AstPos position);
+
 List Compiler_finish_return_statement(Compiler compiler, List expression);
 
 void Compiler_begin_match_arm(Compiler compiler, List pattern, Token start, int binds);

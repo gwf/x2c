@@ -13,8 +13,6 @@ void header_symbols_begin_generated(void);
 
 void Compiler_record_generated_header_symbol(Compiler compiler, String name, Type signature);
 
-void Compiler_record_region_summary(Compiler compiler, String name, List summary);
-
 Map Compiler_collect_symbols(Compiler c, Map globs);
 
 void Compiler_collect_package(Compiler c, String name, Token token);
