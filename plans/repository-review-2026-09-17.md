@@ -1,12 +1,13 @@
 # Repository review, 2026-09-17
 
 > Status: active - catalog of reproduced defects from a whole-repository
-> review at ea10e89, rechecked at a0e5641 on 2026-09-17. Nothing here is
-> fixed yet. The "Simplify x2c source" session owns the scanner and private
-> interface items listed under "Assigned elsewhere"; every other group is
-> open. `make verify`, `verify-fixtures`, `examples`, `check`, and
-> `packages-check` all passed at ea10e89, so none of these defects is caught
-> by a current gate.
+> review at ea10e89, rechecked at a0e5641 on 2026-09-17. Groups 1, 2, 6, 8,
+> 10, and 13 are fixed and on main (`ecdcea9..bed22b2` plus the collections
+> commits that follow it), as are the scanner, private-interface, and
+> library-removal items under "Assigned elsewhere" (`ecdcea9..4a003c1`).
+> Groups 3, 4, 5, 7, 9, 11, 12, 14, 15, 16, and 17 are open. `make verify`,
+> `verify-fixtures`, `examples`, `check`, and `packages-check` all passed at
+> ea10e89, so none of these defects was caught by a current gate.
 
 ## Result
 
@@ -23,6 +24,10 @@ Line numbers are from a0e5641. Probe sources were under `/tmp/x2c-review/`,
 which does not survive a reboot; each row carries enough to rebuild the probe.
 
 ## Group 1: parser and preprocessor
+
+> Fixed 2026-09-17 except the raw 0xFF row, which needs `lib/scan.x`. The
+> emitted C now places a leading attribute after the storage class, and a
+> storage class written after the type parses.
 
 Files: `src/parse.x`, `src/statements.x`, `src/expressions.x`,
 `src/compiler.x` (directive scan), `lib/tokenizer.x`.
@@ -45,6 +50,9 @@ Files: `src/parse.x`, `src/statements.x`, `src/expressions.x`,
 | A raw 0xFF byte in code position ends tokenization. | `undeclared_\xff = 1;` gives "unexpected end of file". | A `char` compared with EOF in the tokenizer. | agent |
 
 ## Group 2: macro substitution and autodiff
+
+> Fixed 2026-09-17. Generated C is unchanged across `src/` and `lib/`.
+> Group 16 removes the per-producer grouping this added.
 
 Files: `src/macros.x` (hole substitution), `lib/autodiff.xmacro`.
 
@@ -90,6 +98,9 @@ Files: `src/cleanup.x`, `src/transform.x` (match lowering).
 
 ## Group 6: Error, Scope, and Context runtime
 
+> Fixed 2026-09-17. The handler stack holds only live registrations again,
+> and a running arm's caught error lives on a separate per-thread chain.
+
 Files: `lib/error.x`, `lib/scope.x`, `lib/context.x`, `lib/logger.x`.
 
 | Defect | Reproduction | Cause | R |
@@ -119,6 +130,9 @@ Files: `lib/common.x` (slice count), `lib/string.x` (except escapes),
 | Regex group repetition overflows a worker thread's stack below the documented limit. | `Regex.compile("(?:a\|b)*").match("a".repeat(1800))` in `Thread.start` exits 138. | About 8 frames per repetition; macOS threads get 512 KiB (`thread.x:200`); `_DEPTH_LIMIT` (`regex.x:404`) assumes more. | me |
 
 ## Group 8: collections and Var
+
+> Fixed 2026-09-17. Row 1 needed no String-side change, and row 7 is
+> documentation only, as decided.
 
 Files: `lib/array.x`, `lib/array-generics.xmacro`, `lib/list.x`,
 `lib/list-generics.xmacro`, `lib/dispatch.x`, `lib/map.x` (docs).
@@ -150,6 +164,8 @@ Files: `lib/match.x`, `lib/machine.x`, `lib/lisp.x`, `etc/init.xlisp`,
 | Repeated star binders use two equality rules. | `(*a b *a)` rejects equal wide ints; `(*a b *a c)` accepts them. | `machine.x:310-354`. | agent |
 
 ## Group 10: process, path, JSON, diff
+
+> Fixed 2026-09-17. `copy_file` onto the same file is a documented no-op.
 
 Files: `lib/process.x`, `lib/path.x`, `lib/file.x` (error details),
 `lib/json.x`, `lib/diff.x`.
@@ -209,6 +225,8 @@ Files: `src/install.x`, `src/project.x` (lockfile), `packages/package.mk`.
 | Remove the `.link` format (decided 2026-09-17). | Switch `package.mk` and `install.x` to `.native.rsp`; note the rebuild for outside packages in the release notes. | Two formats for one link record. | n/a |
 
 ## Group 13: tooling, gates, and release
+
+> Fixed 2026-09-17 except the `make debug` and `autocrlf` rows.
 
 Files: `tools/`, `site/public/install.sh`, `.github/workflows/`,
 `unittest/benchmarks/`, `unittest/probes/`, `examples/check.sh`, `etc/x2c.mk`,
@@ -350,7 +368,22 @@ The "Simplify x2c source" session owns these, by the 2026-09-17 handoff:
 `#pragma private` declarations published in `.xi` (`src/collect.x:219-254`);
 `0o17` literals; package import with a runtime include; relative paths
 resolved against the root; and reproduction of install-root-dependent tag
-numbers. It also removes `List.pool_*`, `Iter.reduce`, and `Var.truthy` in
+numbers. All of these landed on main in `ecdcea9..4a003c1`.
+
+Tag numbers depend on the install root, reproduced there and still open: the
+same file translated through a symlinked root tags `SourceView` as
+261698358342 or 212421573704 and `Job` as 244620705480 or 253728524614.
+`_sdk_type_tag_name` (`src/macros.x:285-296`) hashes the display path, and
+`Compiler.display_path` strips the root only when it is spelled exactly as
+`X2C_HOME`, never through `home_portable_path`. That session also reported,
+unfixed: `%"a\0b"` compiles silently to `"ab"`; a malformed escape reports
+"unexpected end of file" instead of naming the escape; `%"0${text + 2}"`
+emits C that does not compile; generated declaration-default rows are
+recorded unfiltered; `architecture.md` still says covered `.x` includes are
+skipped; and the book documents neither `0o` nor `0b` as source syntax. The
+public names removed there (`List.pool_retain`, `List.pool_retain_named`,
+`List.pool_release`, `List.pool_detach`, `List.pool_current`, `Iter.reduce`,
+`List.reduce`, `Array.reduce`, `Var.truthy`) need a 0.15.0 release note. It also removes `List.pool_*`, `Iter.reduce`, and `Var.truthy` in
 favor of `String.pool_*`, `Iter.foldl`, and `Var.truth`.
 
 ## Decisions needed
