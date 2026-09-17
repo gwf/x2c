@@ -641,6 +641,12 @@ static Var _rewrite(Walk walk, Var value) {
     case %(switch ?expression ?body):
       return %(switch ${_rewrite(walk, expression)}
                ${_bounded(walk, body, 0)});
+    /* A `match` emits a switch over its arms, so an arm's `break` leaves the
+       match and no region with it. Its `continue` still reaches the
+       enclosing loop. */
+    case %(matchcases ?subject ?records):
+      return %(matchcases ${_rewrite(walk, subject)}
+               ${_bounded(walk, records, 0)});
     case %(function *): return _function(walk.compiler, node);
   }
   Var child;
