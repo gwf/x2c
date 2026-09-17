@@ -2,11 +2,39 @@
 
 #include "c-body-directive.h"
 
+static List _3, _2;
+
+static Var _1, _0;
+
+static int _init_guard_ = 0;
+
+__attribute__((constructor)) static void _file_init_(void);
+
 static int pick(int dim);
 
 static int width(int back);
 
 static int count(int limit);
+
+static int chain(int a, int b);
+
+static int branch(int a);
+
+static int sum(List items);
+
+Var int_var(int);
+
+List cons(Var, List);
+
+__attribute__((constructor)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _0 = int_var(1);
+  _1 = int_var(2);
+  _2 = cons(_1, NULL);
+  _3 = cons(_0, _2);
+}
 
 static int pick(int dim){
   int buf[4], * ptr;
@@ -66,9 +94,58 @@ static int count(int limit){
   return total;
 }
 
+static int chain(int a, int b){
+  if(a){
+    return 1;
+  }
+#ifdef CHAIN
+  else if(b){
+    return 2;
+  }
+#endif
+  else{
+    return 3;
+  }
+
+}
+
+static int branch(int a){
+  switch(a)
+#ifndef NO_SWITCH
+  {
+    case 2 : return 20;
+  }
+#endif
+  return a;
+}
+
+int List_try_next(List, List *, Var *);
+
+int Var_int(Var);
+
+static int sum(List items){
+  int total = 0;
+  {
+    Var item;
+    List _x2c_macro_object_0 = items;
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      item = _x2c_macro_cursor_output_0;
+#ifndef NO_SUM
+      total += Var_int(item);
+    }
+
+  }
+#endif
+  return total;
+}
+
 int main(void){
   x2c_initialize();
+  if(! _init_guard_) _file_init_();
   printf("%d %d %d %d\n", pick(2), pick(4), width(3), count(5));
+  printf("%d %d %d\n", chain(0, 1), branch(2), sum(_3));
   return 0;
 }
 

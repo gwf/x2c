@@ -24,29 +24,37 @@ static List _keyword_paren_expr(Compiler compiler, Symbol keyword) {
   return expr;
 }
 
-/* The statement a control keyword governs, with any directives written
-   between the keyword and the statement kept in front of it. A `(group
-   DIRECTIVE... STATEMENT)` emits without braces, so a `#endif` between
-   `else` and its `if` stays where C read it. */
-static List _sub_statement(Compiler c) {
+/** Parses the statement a control keyword or statement macro governs, or a
+    block item at `AST_BLOCK`. Directives written before it stay in front of
+    it in a `(group DIRECTIVE... STATEMENT)`, which emits without braces, so
+    each directive stays where C read it.
+*/
+List Compiler.parse_governed(Compiler c, AstPos position) {
   List directives = c.leading_preproc();
-  List statement = c.parse_statement();
+  List statement = position == AST_BLOCK
+    ? c.parse_block_item() : c.parse_statement();
   return directives ? %(group @directives $statement) : statement;
+}
+
+/* Directives written before the `else` or `while` that continues a statement
+   follow that statement. */
+static List _continued(Compiler c, List statement) {
+  List directives = c.leading_preproc();
+  return directives ? %(group $statement @directives) : statement;
 }
 
 static List _if_statement(Compiler compiler) {
   List cond = _keyword_paren_expr(compiler, <if>);
-  List ontrue = _sub_statement(compiler);
-  if (compiler.test(<else>)) {
-    List onfalse = _sub_statement(compiler);
-    return %(if $cond $ontrue $onfalse);
-  }
-  return %(if $cond $ontrue);
+  List ontrue = compiler.parse_governed(AST_STATEMENT);
+  if (compiler.peek(0) != <else>) return %(if $cond $ontrue);
+  ontrue = _continued(compiler, ontrue);
+  compiler.next();
+  return %(if $cond $ontrue ${compiler.parse_governed(AST_STATEMENT)});
 }
 
 static List _while_statement(Compiler compiler) {
   List cond = _keyword_paren_expr(compiler, <while>);
-  List body = _sub_statement(compiler);
+  List body = compiler.parse_governed(AST_STATEMENT);
   return %(while $cond $body);
 }
 
@@ -72,16 +80,13 @@ static List _for_statement(Compiler c) {
   if (c.peek(0) == <)>) inc = NULL;
   else inc = c.parse_expression();
   c.expect(<)>);
-  body = _sub_statement(c);
+  body = c.parse_governed(AST_STATEMENT);
   return %(for $init $cond $inc $body);
 }
 
 static List _do_statement(Compiler compiler) {
   compiler.expect(<do>);
-  List body = _sub_statement(compiler);
-  // A directive between the body and `while` closes one written before it.
-  List trailing = compiler.leading_preproc();
-  if (trailing) body = %(group $body @trailing);
+  List body = _continued(compiler, compiler.parse_governed(AST_STATEMENT));
   List cond = _keyword_paren_expr(compiler, <while>);
   return %(do $body $cond);
 }
@@ -141,7 +146,7 @@ static List _goto_statement(Compiler compiler) {
 
 static List _switch_statement(Compiler compiler) {
   List expr = _keyword_paren_expr(compiler, <switch>);
-  List body = compiler.parse_statement();
+  List body = compiler.parse_governed(AST_STATEMENT);
   return %(switch $expr $body);
 }
 

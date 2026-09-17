@@ -2873,12 +2873,12 @@ static List _parse_target_definition(
     else if (target_kind == <named-type>) target = c.parse_named_type();
     else switch (position) {
       case AST_UNIT:       target = c.parse_top_level(); break;
-      case AST_BLOCK:      target = c.parse_block_item(); break;
+      case AST_BLOCK: case AST_STATEMENT:
+        target = c.parse_governed(position); break;
       case AST_FIELD:      target = c.parse_field(c.aggregate_type); break;
       case AST_ENUMERATOR:
         target = c.parse_enumerator(c.aggregate_type); break;
       case AST_MAP_ENTRY:  target = c.parse_map_entry(); break;
-      case AST_STATEMENT:  target = c.parse_statement(); break;
       default: __builtin_unreachable();
     }
     if (position == AST_STATEMENT)

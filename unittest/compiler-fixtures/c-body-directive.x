@@ -57,7 +57,41 @@ static int count(int limit) {
   return total;
 }
 
+static int chain(int a, int b) {
+  if (a) {
+    return 1;
+  }
+#ifdef CHAIN
+  else if (b) {
+    return 2;
+  }
+#endif
+  else {
+    return 3;
+  }
+}
+
+static int branch(int a) {
+  switch (a)
+#ifndef NO_SWITCH
+  {
+    case 2: return 20;
+  }
+#endif
+  return a;
+}
+
+static int sum(List items) {
+  int total = 0;
+  foreach (Var item, items)
+#ifndef NO_SUM
+    total += item.int();
+#endif
+  return total;
+}
+
 int main(void) {
   printf("%d %d %d %d\n", pick(2), pick(4), width(3), count(5));
+  printf("%d %d %d\n", chain(0, 1), branch(2), sum(%(1 2)));
   return 0;
 }

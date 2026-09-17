@@ -2472,6 +2472,13 @@ List Compiler.bind_syntax(
         }
         return %(block @{fields.list_free()});
       }
+      case %(group *children): {
+        if (!statement_position) goto construction_error;
+        Array items = [];
+        foreach (Var child, children)
+          items.push(_.bind_syntax(child, AST_BLOCK, _.return_type));
+        return %(group @{items.list_free()});
+      }
     }
   construction_error:
     _.report_error(
