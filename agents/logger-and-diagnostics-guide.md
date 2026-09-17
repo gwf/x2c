@@ -137,8 +137,8 @@ equal to a stored entry is ignored, because some producers derive the same
 failure twice.
 
 `Compiler.new` starts with a limit of one, and child compilers inherit their
-owner's limit. The frontend applies `--max-errors`, whose default is 20. This
-is a compiler policy, not a restriction on the reusable Diagnostics API.
+owner's limit. The frontend applies
+[`--max-errors`](../docs/src/reference/cli.md#compiler-diagnostics).
 `--diagnostics-file` makes `Compiler.print_diagnostic` append one JSON line
 per entry to a descriptor opened once in `main`; forked translation workers
 inherit it.

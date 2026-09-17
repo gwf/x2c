@@ -103,27 +103,10 @@ lib                           DisjointSet utility
 ```
 
 More modules ship with the runtime but stay out of the implicit prelude, so
-a client names one in an explicit include:
-
-```text
-typed-array                   packed numeric storage with a native bracket
-typed-list                    typed views over canonical List cells
-typed-map                     native numeric and canonical String maps
-list-selectors                compound List selectors past caddr
-match-recursive               readable recursive Match reference
-autodiff                      runtime reverse-mode differentiation tape
-process                       commands, pipelines, and jobs without a shell
-path                          filesystem operations on path Strings
-args                          argument parsing against a declarative spec
-diff                          Line differences between two texts
-digest                        SHA-256 digests of Strings and streams
-regex                         Regular expressions over the bytes of a String
-json                          JSON text to and from ordinary values
-```
-
-`docs/library-manifest.txt` is the owner of that split and of every module's
-visibility in the generated library reference; `lib/Makefile` builds the same
-modules from `OPTIONAL_SOURCES`.
+a client names one in an explicit include. The `optional` rows of
+`docs/library-manifest.txt` list them, and that file owns every module's
+visibility in the generated library reference; `lib/Makefile` builds the
+same modules from `OPTIONAL_SOURCES`.
 
 `lib/x2c.x` is generated from the standard modules by `lib/Makefile`. Never
 edit it by hand. `.xmacro` files beside the modules own shared macro
