@@ -327,7 +327,7 @@ participation" message points at the token after the declaration, because
 `src/parse.x:1257-1265` reports with an already-advanced token; and defining a
 method on an imported package type fails with "parse: missing closing
 parenthesis" pointing at a parameter name.
-## Group 19: gaps found while fixing Groups 3 and 5
+## Group 19: gaps found while fixing Groups 3, 5, and 7
 
 Files: `src/transform.x` or `src/expressions.x` (row 1), `src/type.x` (row 2),
 `src/cleanup.x` (row 3).
@@ -337,6 +337,8 @@ Files: `src/transform.x` or `src/expressions.x` (row 1), `src/type.x` (row 2),
 | An expression-bodied `void` function emits `return <expr>;`. | `static void Counter.step(Counter *self) => self.value++;` generates `return self -> value ++;`, which clang rejects with `-Wreturn-mismatch` (an error). | The arrow body always emits a return. | agent |
 | `const` on a named x2c type loses its methods. | `static const String g = "hi"; g.len();` fails with `type (const "String") has no method text/len`. | The qualifier is part of the looked-up type. | agent |
 | `_changed_name` misses indirect writes, so a local written only through a pointer is not preserved across a transfer. | `int *p = &x; try { *p = 5; f(); }` does not qualify `x`; today such locals are `volatile` only when a catch arm happens to write them by name. | `src/cleanup.x` inspects direct assignments to a name. Latent, and the reason the Group 3 `volatile` narrowing was unsafe. | agent |
+| A compact Atom does not round-trip through `Var.repr`. | `Atom.intern` returns an immediate `<symbol>` for short spellings, so `Var.repr` dispatches to Symbol's repr: `Atom.intern("va_arg").repr()` gives `<"va_arg">`, which reads back as a Symbol with different bits; `"a b"` raises on read. General to compact atoms, not to the leading `<` that Group 7 fixed in `Atom.write_repr`. | Dispatch picks the repr by representation, not by the value's origin. | agent |
+| `String.parse_char` accepts an octal escape above a byte. | `"'\\400'".parse_char()` returns 256. The Simplify session rejected `\400` in the scanner and in `String.unescape`; this entry point still accepts it. | `lib/string.x` decodes the escape without the range check. | me |
 
 ## Group 18: merge the two readable-format owners
 
