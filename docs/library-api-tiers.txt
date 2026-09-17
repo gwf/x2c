@@ -176,10 +176,6 @@ lib/string.x|advanced|String.new_in
 lib/var.x|advanced|Var.encoding_valid,Var.known_tag
 lib/varconvert.x|advanced|Var.integer_box,Var.integer_tag,Var.numeric_decode
 lib/varconvert.x|advanced|Var.numeric_info,Var.signed_from_bits,Var.width_mask
-lib/varops.x|advanced|x2c_array_updateindex_from_array
-lib/varops.x|advanced|x2c_array_updateindex_from_map
-lib/varops.x|advanced|x2c_map_updateindex_from_array
-lib/varops.x|advanced|x2c_map_updateindex_from_map
 lib/varops.x|advanced|x2c_var_update_long_double,x2c_var_update_f32
 lib/varops.x|advanced|x2c_var_update_f64,x2c_var_update_long_long
 lib/varops.x|advanced|x2c_var_update_i16,x2c_var_update_i32
