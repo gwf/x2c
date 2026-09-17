@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/import-type-without-alias.x:7:19: parse: unknown type name 'Vec'
+  double Vec.scaled(Vec v, double k) { return v.norm() * k; }
+                    ^^^
+  note: name an imported package type through its alias
+

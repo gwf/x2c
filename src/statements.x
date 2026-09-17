@@ -509,9 +509,10 @@ List Compiler.parse_block_item(Compiler c) {
   List macro = with_expression ? NULL : c.try_parse_macro_target_at(AST_BLOCK);
   if (macro) return macro;
   if (c.test_declaration()) {
+    Token origin = c.token;
     List declaration = c.parse_declaration_row();
     c.expect(<;>);
-    return c.finish_managed_declaration(declaration);
+    return c.finish_managed_declaration(declaration, origin);
   }
   return c.parse_statement();
 }

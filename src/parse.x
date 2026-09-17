@@ -832,10 +832,19 @@ static List _direct_declarator(
   // Parenthesized declarator: ( declarator )
   if (c.peek(0) == <(>) {
     c.next();
+    Token opening = c.token;
     List decl = _declarator(
       c, NULL, NULL, method_identity, source_first, source_after);
-    if (c.peek(0) != <)>)
+    if (c.peek(0) != <)>) {
+      /* One identifier followed by another is a parameter list whose type
+         this unit cannot see, such as a package type named without its
+         import alias, not a parenthesized declarator. */
+      if (opening.type == <ident> && c.peek(0) == <ident>)
+        c.report_error(
+          <parse>, %"unknown type name '${opening.text}'", opening,
+          %("name an imported package type through its alias"));
       c.report_error(<parse>, "missing closing parenthesis", c.token, NULL);
+    }
     c.next();
     return decl;
   }
@@ -1257,11 +1266,11 @@ static int _has_managed_declaration(List declaration) {
 }
 
 static void _append_managed_declaration(
-  Compiler c, List declaration, Array output) {
+  Compiler c, List declaration, Array output, Token origin) {
   match (declaration) {
     case %(seq *rows): {
       foreach (List row, rows)
-        _append_managed_declaration(c, row, output);
+        _append_managed_declaration(c, row, output, origin);
       return;
     }
     case %(declare ?base (bindings *declarators)): {
@@ -1284,11 +1293,11 @@ static void _append_managed_declaration(
           case %(* (!or static extern threaded) *):
             c.report_error(
               <parse>, "managed initializer requires automatic local storage",
-              c.token, NULL);
+              origin, NULL);
         if (!c.protocol_members_for(type, %("Cleanup")))
           c.report_error(
             <protocol>, "managed initializer requires Cleanup participation",
-            c.token, %("type: ${type.repr()}"));
+            origin, %("type: ${type.repr()}"));
         if (ordinary.len()) {
           output.push(%(declare $base (bindings @{ordinary})));
           ordinary.clear();
@@ -1312,11 +1321,12 @@ static void _append_managed_declaration(
 /** Lowers managed block declarations to declaration/defer pairs in source
     order, preserving their installed bindings and the enclosing lifetime.
 */
-List Compiler.finish_managed_declaration(Compiler c, List declaration) {
+List Compiler.finish_managed_declaration(
+  Compiler c, List declaration, Token origin) {
   if (c.macro_holes || !_has_managed_declaration(declaration))
     return declaration;
   Array output = [];
-  _append_managed_declaration(c, declaration, output);
+  _append_managed_declaration(c, declaration, output, origin);
   return %(seq @{output.list_free()});
 }
 
@@ -2174,7 +2184,7 @@ List Compiler.bind_syntax(
             _, tag, base, output.list_free(), preserved_self);
           if (context == AST_UNIT) _.record_declaration_visibility(result);
           if (context == AST_BLOCK && tag == <declare>)
-            return _.finish_managed_declaration(result);
+            return _.finish_managed_declaration(result, _.token);
           return result;
       }
       case %(dstrdecl ?base (targets *targets) ?source): {
