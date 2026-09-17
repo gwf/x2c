@@ -222,6 +222,7 @@ Files: `tools/`, `site/public/install.sh`, `.github/workflows/`,
 | `make doc-check` needs `builds/0` and misreports its absence as stale docs. | Fresh clone: "module catalog is stale" plus a traceback. | No `build` prerequisite (`Makefile:235`). | agent |
 | The release workflow never detects mismatched tarball versions. | `sort -u` separates with newlines; the `case` looks for a space. | `release.yml:129-134`. | me (read) |
 | gate-state can be bypassed by an excluded `GNUmakefile`, `MAKEFILES`, `assume-unchanged`, `skip-worktree`, or `autocrlf`. | Each reports `valid` after a change. | Runs `make` without `-f Makefile`; trusts `git diff --name-only`. Low: needs deliberate setup. | agent |
+| Negative probe assertions never fail. | A bare `! grep ...` statement is exempt from `set -e`, so the assertion cannot fail the run. Fixed in `run-error-floor.sh` by Group 6 (deaf794); still open at `run-cli-boundary.sh:96, 1304, 1339, 1341` and `run-preprocessor-boundary.sh:112`. The piped forms at `run-cli-boundary.sh:1076`, `run-preprocessor-boundary.sh:127`, and `run-raw-symbol-sweep.sh:52` are inside conditions and are fine. | `set -e` ignores a command whose status is inverted. | me |
 | Smaller tooling defects. | `install.sh --help` truncated or empty under `sh -s`; `etc/x2c.mk` includes relative to the includer; `make debug` rewrites tracked `etc/build-mode`; `run-suite-coverage` compares counts only; `examples/check.sh` does not scan `examples/scripts/`. | Individual. | agent |
 
 ## Group 14: documentation, plans, examples, fixtures
@@ -296,6 +297,48 @@ participation" message points at the token after the declaration, because
 `src/parse.x:1257-1265` reports with an already-advanced token; and defining a
 method on an imported package type fails with "parse: missing closing
 parenthesis" pointing at a parameter name.
+## Group 16: one owner for precedence grouping
+
+Files: `src/emit.x`, then `lib/autodiff.xmacro` and `src/macros.x` cleanup.
+
+Nothing inserts parentheses by precedence, so every producer of canonical AST
+must remember grouping for itself. Group 2 fixed macro holes (`src/macros.x`)
+and autodiff (`lib/autodiff.xmacro`) separately; a third case is still open:
+the book's `macro Expression $twice($value) => ($value + $value)` drops its
+parenthesized body at definition, so `$twice(21) * 2` emits `21 + 21 * 2` and
+gives 63 instead of 84. Compile-time Lisp forms have the same exposure.
+
+Decided 2026-09-17: one precedence-aware `parens` insertion in `src/emit.x`
+(the `op`, `cast`, and postfix cases and `_op_spine`) owns grouping, and the
+per-producer bookkeeping Group 2 added to `lib/autodiff.xmacro` comes back out.
+Sequence it after Group 1 and Group 2 land, since Group 1 owns
+`src/expressions.x`. Verify with `make stage-1` plus
+`tools/check-generated-stages.sh builds/0 builds/1`: Group 2 changed no
+generated C, so this change should be inspected the same way, and any C
+that does change must be reviewed line by line.
+
+## Group 17: Pool as the public canonical-pool surface
+
+Files: `lib/pool.x`, `lib/string.x`, `lib/list.x`, callers in `lib/thread.x`,
+`lib/logger.x`, `lib/error.x`, `lib/context.x`, `lib/split.x`, and the memory
+and symbols chapters.
+
+`String.pool_*` and `List.pool_*` are both thin wrappers over the same
+`x2c_pool_values_*` functions, so the pool is already shared; the Simplify
+session removes the `List.pool_*` spelling first. The operation belongs to
+neither type.
+
+Decided 2026-09-17: move the thread-active bracket onto a public `Pool`
+surface (`Pool.open`, `Pool.close`, `Pool.current`, `Pool.detach`, with the
+named form) and take it out of the `String` namespace, adding
+`docs/src/library/modules/pool.md`. The existing instance methods
+`Pool.retain(inner)` and `Pool.release(inner)` build a child without making it
+thread-active, so the bracket needs distinct verbs; decide then whether the
+instance forms stay public. `Context` stays the aggregate that owns a Scope, a
+pool, and Error and Match state, and the memory chapter should say so; the
+bracket does not move onto `Context`, which is itself a consumer of it
+(`lib/context.x:128`). Both changes land before 0.15.0, so one set of release
+notes covers them.
 
 ## Assigned elsewhere
 
@@ -310,20 +353,31 @@ favor of `String.pool_*`, `Iter.foldl`, and `Var.truth`.
 
 ## Decisions needed
 
-- **Catch removal (Group 6).** Restore unlinking the selected catch before
-  its arm runs, as the book says, while keeping dd33e20's shutdown
-  reachability; or change the book. Recommended: restore the book behavior.
-- **List equality (Group 8).** Make `List.equal` and `List.hash` compare
-  elements by value, as the book and `contains` do; or keep bit equality and
-  correct the book. Content equality changes Map keys built from Lists.
+Decided 2026-09-17 by Gary unless marked open.
+
+- **Catch removal (Group 6).** The handler stack holds only active
+  registrations, so a selected catch is unlinked before its arm runs, as the
+  book says and as every stack-order check assumes. The caught error a running
+  arm still reads moves to a separate per-thread list of running arms, which
+  shutdown walks, keeping dd33e20's quiet `exit()` inside an arm.
+- **List equality (Group 8).** Keep bit equality; equality and hashing stay
+  constant time. Document the limitation instead: List elements compare by
+  identity, which is value equality for small numbers, Symbols, Atoms,
+  interned Strings, and nested Lists, and identity for boxed wide numbers
+  (`long`, `ulong`, `long long`, `long double`), Arrays, and Maps. Canonical
+  wide boxes were rejected: a program using wide numbers needs the range, and
+  interning every one of them multiplies the memory a generator pays. Add a
+  separately named linear helper only when a caller needs one.
 - **Negative end bound in `setslice`/`remslice` (Group 8).** Match
-  `getslice`. Recommended: yes; no test pins the other meaning.
+  `getslice`; no test pins the other meaning.
 - **Lisp numeric comparison (Group 9).** Numeric `=` and `<` across i32,
-  long, and f64 by value, as documented. Recommended: yes.
-- **Duplicate warnings (Group 4).** Deduplicate identical warnings or delete
-  the book sentence.
-- **Concurrent builds (Group 11).** State whether two builds in one project
-  are supported; either way they must not exit 1 silently.
+  long, and f64 compare by value, as documented.
+- **Duplicate warnings (Group 4).** Report identical warnings once, as
+  `language.md:2757` says.
+- **Concurrent builds (Group 11).** Open: whether two builds in one project
+  are supported. Either way they must not exit 1 silently.
+- **`make debug` (Group 13).** Open: the target rewrites tracked
+  `etc/build-mode`, which is what it has always done (d7bb8da).
 
 ## Resolved since the baseline
 
