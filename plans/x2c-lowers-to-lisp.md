@@ -212,10 +212,15 @@ That is about 303,000 loop iterations per second against 7,400, a 41x
 improvement, and it stays linear to a million iterations.
 
 The direct path is unchanged from the earlier tree while the SDK path slowed
-from 12.07 s to 14.03 s for the same work. That is consistent with `car` and
-`cdr` now checking their argument: the SDK walks a statement list on every
-iteration and the lowered code does arithmetic and one self call. It is an
-observation across two trees, not an isolated measurement. It is 2.3x short
+from 12.07 s to 14.03 s for the same work. I guessed the added `car`/`cdr`
+argument check; that guess was wrong. A controlled probe over roughly
+400,000 `car` and 400,000 `cdr` calls, run interleaved against both trees,
+found current main slightly faster, so the check costs nothing measurable.
+Both of my numbers time a whole compiler run, and the parser, emitter and
+generator all changed between the trees, so the difference most likely sits
+in translation rather than in the compile-time evaluation. Timing only the
+evaluation on one tree would settle it; it does not affect the 41x result,
+which compares two paths on the same tree. It is 2.3x short
 of the 672,000 the hand-written ideal reaches, because every operator still
 goes through `_binary` with a Symbol rather than Lisp's own `+` and `<`;
 closing that gap is an M1 question, because `<` returns a Lisp truth value
@@ -281,10 +286,30 @@ lowering and the SDK still live in `.context/spike/`, so there is no
 compiler fixture. Moving them into `etc/` is only worth doing once M3 says
 the direction pays, so the fixture waits for that.
 
-### M2 - `struct` and `match`
+### M2 - `match` and templates
 
-Extend the subset with the two constructs `autodiff.xmacro` needs. Proof:
-fixtures for each, and the existing `match` fixtures unchanged.
+Reading `autodiff.xmacro` corrected the target: what it needs is `match`
+over ASTs and `%(...)` templates, not `struct`. Both are how it does its
+work, and `struct` barely appears.
+
+**Blocker found and cleared.** Neither is visible in the syntax a macro
+receives. Literal folding hoists a constant `List` into the compiler cache
+and leaves `(cache ID)` behind, so `case %(add ?a ?b)` arrives as
+`(expr ("List") (expr ("List") (cache 5)))` and a template's constant head
+is a cache id too. The cache is a DAG of ids over `(cons ...)`, `(var ...)`
+and `(string ...)` leaves.
+
+`_x2c.cache.value` now returns one cached constructor form, and
+`.context/spike/cache-values.xlisp` walks the DAG to rebuild the value.
+`case %(add ?a ?b)` reads back as the List `(add ?a ?b)`, which is exactly
+what Lisp's own matcher takes, so lowering a `match` statement hands the
+pattern to `List.match` rather than reimplementing it.
+
+Remaining in M2: lower the `match` statement itself, and lower `%(...)`
+templates to `cons` chains. A `match` needs one binding for its result,
+which several binders then read. That is affordable anywhere except on a
+loop's iteration path, where a lambda breaks the frame reuse M0 measured;
+the rule is a lambda is free once per entry and fatal once per iteration.
 
 ### M3 - port `autodiff.xmacro`
 

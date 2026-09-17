@@ -848,6 +848,21 @@ static Var _sdk_literal_string(Var syntax) {
     %("value: ${syntax.repr()}"));
 }
 
+/* Literal folding hoists a constant `List`, `String`, or `Var` into the
+   compiler cache and leaves a `(cache ID)` reference behind, so a `match`
+   pattern and a template's constant head are not visible in the syntax a
+   macro receives. This returns the cached constructor form for one id. */
+static Var _sdk_cache_value(Var id_value) {
+  $_sdk_guard("_x2c.cache.value");
+  Compiler compiler = macro_sdk_compiler;
+  if (id_value.kind() != <integer>)
+    return _sdk_reject("_x2c.cache.value requires a cache id", NULL);
+  long id = id_value.integer();
+  if (id < 0 || id >= (long) compiler.id_keys.len())
+    return _sdk_reject("_x2c.cache.value: unknown cache id", NULL);
+  return compiler.id_keys[(int) id];
+}
+
 /* An unreadable compile-time source is a located diagnostic. */
 static String _source_text(
   Compiler c, String path, String message, Token token, List notes) {
@@ -914,6 +929,7 @@ static void _ensure_lisp(Compiler compiler) {
     $lisp.bind(_.macro_lisp, "x2c._symbol-set", _sdk_symbol_set);
     $lisp.bind(_.macro_lisp, "x2c._embed.text", _sdk_embed_text);
     $lisp.bind(_.macro_lisp, "_x2c.literal.string", _sdk_literal_string);
+    $lisp.bind(_.macro_lisp, "_x2c.cache.value", _sdk_cache_value);
     $lisp.bind(_.macro_lisp, "x2c.function.name", _sdk_function_name);
     $lisp.bind(
       _.macro_lisp, "_x2c.function.reference", _sdk_function_reference);
