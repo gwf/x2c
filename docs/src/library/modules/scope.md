@@ -57,7 +57,7 @@ would overflow the allocation header, or `<alloc-fail>` when the
 underlying allocation fails. Before `Error` initialization they
 terminate at the error floor.
 
-Source: `lib/scope.x:754`
+Source: `lib/scope.x:755`
 
 <a id="Scope.malloc_finalized_in"></a>
 #### Scope.malloc_finalized_in
@@ -72,7 +72,7 @@ scope creation as `Scope.malloc_in`; the active scope is left alone.
 the size overflows, or `<alloc-fail>` when allocation fails. Before
 `Error` initialization they terminate at the error floor.
 
-Source: `lib/scope.x:782`
+Source: `lib/scope.x:783`
 
 <a id="Scope.new"></a>
 #### Scope.new
@@ -107,7 +107,7 @@ and pop raises instead of redirecting allocations. The failure leaves the
 active slot unchanged. Before `Error` initialization it terminates at the
 error floor.
 
-Source: `lib/scope.x:624`
+Source: `lib/scope.x:625`
 
 <a id="Scope.push"></a>
 #### Scope.push
@@ -142,7 +142,7 @@ cannot grow within its representation, or `<alloc-fail>` when its storage
 cannot be allocated. These failures leave the active slot unchanged.
 Before `Error` initialization they terminate at the error floor.
 
-Source: `lib/scope.x:591`
+Source: `lib/scope.x:592`
 
 ## Advanced and interop API
 
@@ -179,7 +179,7 @@ Releases resources owned by `Scope`.
 retain/release and push/pop boundaries remain caller
 responsibilities.
 
-Source: `lib/scope.x:972`
+Source: `lib/scope.x:973`
 
 ### `Scope`
 
@@ -199,7 +199,7 @@ distinct pointer the scope owns, so it is not a failure signal.
 when allocation fails. Before `Error` initialization they terminate at the
 error floor.
 
-Source: `lib/scope.x:800`
+Source: `lib/scope.x:801`
 
 <a id="Scope.calloc_in"></a>
 #### Scope.calloc_in
@@ -215,7 +215,7 @@ alone.
 count overflows, or `<alloc-fail>` when allocation fails. Before `Error`
 initialization they terminate at the error floor.
 
-Source: `lib/scope.x:813`
+Source: `lib/scope.x:814`
 
 <a id="Scope.cleanup"></a>
 #### Scope.cleanup
@@ -224,7 +224,7 @@ Source: `lib/scope.x:813`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/scope.x:995`
+Source: `lib/scope.x:1000`
 
 <a id="Scope.destroy"></a>
 #### Scope.destroy
@@ -269,7 +269,7 @@ either.
 
 A NULL `ptr` does nothing.
 
-Source: `lib/scope.x:862`
+Source: `lib/scope.x:863`
 
 <a id="Scope.malloc"></a>
 #### Scope.malloc
@@ -287,7 +287,7 @@ does not move it.
 or `<alloc-fail>` when the underlying allocation fails. Before `Error`
 initialization they terminate at the error floor.
 
-Source: `lib/scope.x:729`
+Source: `lib/scope.x:730`
 
 <a id="Scope.malloc_in"></a>
 #### Scope.malloc_in
@@ -305,7 +305,7 @@ the active slot explicitly.
 overflows, or `<alloc-fail>` when allocation fails. Before `Error`
 initialization they terminate at the error floor.
 
-Source: `lib/scope.x:770`
+Source: `lib/scope.x:771`
 
 <a id="Scope.memdup"></a>
 #### Scope.memdup
@@ -325,7 +325,7 @@ check the arguments yourself when that distinction matters.
 **Raises:** `<size-limit>` or `<alloc-fail>` from the underlying allocation.
 A NULL `ptr` or zero `size` returns NULL without raising.
 
-Source: `lib/scope.x:830`
+Source: `lib/scope.x:831`
 
 <a id="Scope.memdup_in"></a>
 #### Scope.memdup_in
@@ -342,7 +342,7 @@ current region.
 `<alloc-fail>` from the underlying allocation. A NULL `ptr` or zero
 `size` returns NULL without raising.
 
-Source: `lib/scope.x:844`
+Source: `lib/scope.x:845`
 
 <a id="Scope.move"></a>
 #### Scope.move
@@ -376,7 +376,7 @@ destination scope cannot be allocated. These failures leave ownership
 unchanged. A NULL `ptr` does nothing. Before `Error` initialization they
 terminate at the error floor.
 
-Source: `lib/scope.x:910`
+Source: `lib/scope.x:911`
 
 <a id="Scope.name"></a>
 #### Scope.name
@@ -436,7 +436,7 @@ As with C, the old pointer must be treated as dead once a resize succeeds.
 allocation fails. Before `Error` initialization these failures terminate at
 the error floor.
 
-Source: `lib/scope.x:941`
+Source: `lib/scope.x:942`
 
 <a id="Scope.release"></a>
 #### Scope.release
@@ -470,7 +470,7 @@ nor the runtime tracks it, and using it afterwards is undefined behavior.
 failure leaves the active region intact. Before `Error` initialization it
 terminates at the error floor.
 
-Source: `lib/scope.x:704`
+Source: `lib/scope.x:705`
 
 <a id="Scope.retain"></a>
 #### Scope.retain
@@ -511,7 +511,7 @@ those values already outlive it, and adds a release that is easy to omit.
 allocated, or `<size-limit>` when that record cannot grow. Before `Error`
 initialization they terminate at the error floor.
 
-Source: `lib/scope.x:666`
+Source: `lib/scope.x:667`
 
 <a id="Scope.stats"></a>
 #### Scope.stats
@@ -553,7 +553,7 @@ slot that was active at the call; a later `Scope.push`, `Scope.pop`,
 `Scope.retain`, or `Scope.release` changes which slot is active, so read
 it again instead of caching it.
 
-Source: `lib/scope.x:609`
+Source: `lib/scope.x:610`
 
 ## Runtime-internal callables
 
@@ -590,7 +590,7 @@ out of its own `Scope` chain. Passing any other nonnull pointer is
 undefined
 behavior, matching `Scope.free` and `Scope.move`.
 
-Source: `lib/scope.x:876`
+Source: `lib/scope.x:877`
 
 <a id="Scope.shutdown_hook"></a>
 #### Scope.shutdown_hook
@@ -600,12 +600,13 @@ Source: `lib/scope.x:876`
 Registers `hook` to run during process-wide `Scope` shutdown.
 The function pointer is retained without being invoked. Shutdown invokes
 registrations once in reverse order while `Scope` storage is still
-available.
+available, including one registered by a hook that shutdown is already
+running.
 
 **Raises:** `<bad-arg>` for a null hook, `<size-limit>` when the registry
 cannot grow, or `<alloc-fail>` when its storage cannot be allocated.
 
-Source: `lib/scope.x:557`
+Source: `lib/scope.x:558`
 
 ## Public types
 

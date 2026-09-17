@@ -27,7 +27,7 @@ Bounded runtime state and value export.
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/context.x:366`
+Source: `lib/context.x:370`
 
 <a id="Context.close"></a>
 #### Context.close
