@@ -21,6 +21,12 @@ String binding_identity_spelling(List binding);
 
 Symbol preproc_conditional_kind(String text);
 
+String preproc_directive(String text);
+
+List preproc_track_arms(List arms, String text);
+
+List preproc_within_arms(List arms, List items);
+
 Symbol Symbol_compound_operator(Symbol op);
 
 Symbol Symbol_compound_assignment(Symbol op);

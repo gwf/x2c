@@ -93,12 +93,9 @@ static Token _first_preprocessor_token(Compiler compiler){
   return compiler -> token;
 }
 
-void header_symbols_initialize(void);
-
 void interface_configure(String);
 
 void Frontend_load_support(CliRequest request){
-  header_symbols_initialize();
   interface_configure(request -> out_dir);
 }
 
@@ -287,9 +284,7 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
 
 List CliRequest_package_roots(CliRequest);
 
-int List_truth(List);
-
-Path Path_absolute(Path);
+String Compiler_canonical_path(Compiler, String);
 
 int List_try_next(List, List *, Var *);
 
@@ -306,15 +301,8 @@ int x2c_package_source(String, String);
 Var Map_setindex(Map, Var, Var);
 
 static void _configure_package(Compiler compiler, CliRequest request, String filename){
-  char buffer[PATH_MAX];
   compiler -> package_dirs = CliRequest_package_roots(request);
-  if(! List_truth(compiler -> package_dirs)) return;
-  String source;
-  if(compiler -> sources) source = Path_absolute(filename);
-  else{
-    if(! realpath(filename, buffer)) return;
-    source = String_join(NULL, cons(String_var(String_new(buffer)), NULL));
-  }
+  String source = Compiler_canonical_path(compiler, filename);
   {
     String directory;
     List _x2c_macro_object_0 = compiler -> package_dirs;
@@ -323,12 +311,7 @@ static void _configure_package(Compiler compiler, CliRequest request, String fil
     while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
       directory = Var_string(_x2c_macro_cursor_output_0);
       {
-        String root;
-        if(compiler -> sources) root = Path_absolute(directory);
-        else{
-          if(! realpath(directory, buffer)) continue;
-          root = String_join(NULL, cons(String_var(String_new(buffer)), NULL));
-        }
+        String root = Compiler_canonical_path(compiler, directory);
         String package = x2c_package_directory(root, source);
         if(! String_truth(package)) continue;
         String name = String_getslice(package, String_rfind(package, _24) + 1, -2147483648, 1);
@@ -504,8 +487,6 @@ return ! Compiler_error_count(compiler);
 
 void Compiler_take_diagnostics(Compiler, Compiler);
 
-void header_symbols_begin_generated(void);
-
 void Sym_seed_var_tags(Sym, Map);
 
 void Compiler_close_child(Compiler, Compiler);
@@ -522,7 +503,7 @@ int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
     _x2c_catch_patterns_3[0] = List_var(_x2c_catch_pattern_4);
   }
   ErrorHandler volatile _x2c_error_handler_3 = x2c_error_catch_site_push(&_x2c_exception_frame_3, &_x2c_catch_site_3, _x2c_catch_patterns_3);  x2c_exception_push(& _x2c_exception_frame_3);  if (!sigsetjmp(_x2c_exception_frame_3.env, 0)){
-    unit -> globals = _preprocess_input(frontend, unit);  if(unit -> preprocessor) Compiler_take_diagnostics(compiler, unit -> preprocessor);  if(! frontend -> request -> no_cpp) header_symbols_begin_generated();  Sym_seed_var_tags(compiler -> sym, unit -> globals);
+    unit -> globals = _preprocess_input(frontend, unit);  if(unit -> preprocessor) Compiler_take_diagnostics(compiler, unit -> preprocessor);  Sym_seed_var_tags(compiler -> sym, unit -> globals);
   }
   else {x2c_exception_landed(& _x2c_exception_frame_3); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_3)){

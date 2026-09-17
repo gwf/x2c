@@ -119,6 +119,12 @@ void Compiler_return_unit_state(Compiler compiler, Compiler owner);
 
 int Compiler_read_source(Compiler compiler, String path, String volatile * text);
 
+String Compiler_canonical_path(Compiler c, String path);
+
+String home_portable_path(String path);
+
+String home_absolute_path(String spelling);
+
 void Compiler_copy_source_declaration(Compiler compiler, Map target, Map source, List key);
 
 void Compiler_merge_source_declarations(Compiler compiler, Map target, Map source);

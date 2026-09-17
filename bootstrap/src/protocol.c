@@ -2588,14 +2588,14 @@ static List _declaration_from_signature(Compiler compiler, String name, Type sig
   return cons(_30, cons(List_var(storage), cons(List_var(cons(_39, cons(List_var(cons(_3, cons(List_var(binding), cons(List_var(cons(List_var(cons(_545, cons(List_var(cons(_546, List_append(Array_list_free(declarations), NULL))), NULL))), NULL)), NULL)))), NULL))), NULL)));
 }
 
-void Compiler_record_generated_header_symbol(Compiler, String, Type);
+void Compiler_record_generated_symbol(Compiler, String, Type);
 
 List Compiler_finish_foreign_alias(Compiler, List, List);
 
 static List Compiler__generate_native_alias(Compiler compiler, Type participant, String member, String source, Type signature, int make_static){
   String target = _member_spelling(participant, member);
   List declaration = _declaration_from_signature(compiler, target, signature, make_static);
-  if(! make_static) Compiler_record_generated_header_symbol(compiler, target, signature);
+  if(! make_static) Compiler_record_generated_symbol(compiler, target, signature);
   List native_binding = Sym_reference(compiler -> sym, cons(String_var(source), NULL), NULL);
   return Compiler_finish_foreign_alias(compiler, declaration, cons(_82, cons(List_var(signature), cons(List_var(cons(_512, cons(List_var(native_binding), NULL))), NULL))));
 }
@@ -2757,7 +2757,7 @@ static void Compiler__generate_ordinary_protocol_adapters(Compiler c, Type base,
     Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 32993636: ;  static MatchCaptureSite _x2c_match_site_40;  if (x2c_match_site_try_capture(& _x2c_match_site_40, _x2c_match_expr, List_var(_695), &_x2c_match_capture)) {Var storage = _x2c_match_values[0]; {
-                int make_static = Var_equal(storage, Symbol_var(1317118534));  String generated = _member_spelling(participant, member);  Compiler_add_early(c, Compiler__generate_protocol_function(c, generated, make_static, expected, List_type(Sym_get(c -> sym, cons(String_var(source), NULL))), template, variables, binder, source, forward, NULL));  if(! make_static) Compiler_record_generated_header_symbol(c, generated, expected);
+                int make_static = Var_equal(storage, Symbol_var(1317118534));  String generated = _member_spelling(participant, member);  Compiler_add_early(c, Compiler__generate_protocol_function(c, generated, make_static, expected, List_type(Sym_get(c -> sym, cons(String_var(source), NULL))), template, variables, binder, source, forward, NULL));  if(! make_static) Compiler_record_generated_symbol(c, generated, expected);
               }
               break;
             }

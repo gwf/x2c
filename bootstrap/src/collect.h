@@ -7,11 +7,7 @@
 
 #include "x2c.h"
 #include "compiler.h"
-void header_symbols_initialize(void);
-
-void header_symbols_begin_generated(void);
-
-void Compiler_record_generated_header_symbol(Compiler compiler, String name, Type signature);
+void Compiler_record_generated_symbol(Compiler c, String name, Type signature);
 
 Map Compiler_collect_symbols(Compiler c, Map globs);
 

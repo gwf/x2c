@@ -238,11 +238,11 @@ static Symbol _decorator_result_kind(Symbol target_kind);
 
 static String _source_dir(Compiler compiler);
 
-static String _source_file(Compiler compiler, String file);
+static String _source_file(Compiler c, String file);
 
-static String _embed_path(Compiler compiler, String source_file, String requested);
+static String _embed_path(Compiler c, String source_file, String requested);
 
-static String _canonical_path(Compiler compiler, String path);
+static String _canonical_path(Compiler c, String path);
 
 static int _literal_string(Var syntax, String * value);
 
@@ -250,9 +250,7 @@ static Var _sdk_embed_text(Var requested);
 
 static Var _sdk_literal_string(Var syntax);
 
-static File _open(Compiler compiler, String path, String message, Token token, List notes);
-
-static String _source_text(Compiler compiler, String path, String message, Token token, List notes);
+static String _source_text(Compiler c, String path, String message, Token token, List notes);
 
 static String _read_source(Compiler compiler, String path, String message, Token token, List notes);
 
@@ -2140,47 +2138,31 @@ static String _source_dir(Compiler compiler){
   return String_truth(filename) ? Path_dirname(filename) : _560;
 }
 
-int SourceView_exists(SourceView, String);
-
-Path Path_absolute(Path);
-
 int String_getindex(String, int);
 
-static String _source_file(Compiler compiler, String file){
+int SourceView_exists(SourceView, String);
+
+String Compiler_canonical_path(Compiler, String);
+
+static String _source_file(Compiler c, String file){
   if(! String_truth(file) || String_startswith(file, _561)) return file;
-  char resolved[PATH_MAX];
-  if(compiler -> sources && SourceView_exists(compiler -> sources, file)) return Path_absolute(file);
-  if(realpath(file, resolved)) return String_join(NULL, cons(String_var(String_new(resolved)), NULL));
-  if(String_getindex(file, 0) != '/'){
-    String rooted = String_join(NULL, cons(String_var(compiler -> root_dir), cons(String_var(_245), cons(String_var(file), NULL))));
-    if(realpath(rooted, resolved)) return String_join(NULL, cons(String_var(String_new(resolved)), NULL));
-  }
-  return file;
+  String rooted = String_join(NULL, cons(String_var(c -> root_dir), cons(String_var(_245), cons(String_var(file), NULL))));
+  if(String_getindex(file, 0) != '/' && ! SourceView_exists(c -> sources, file) && SourceView_exists(c -> sources, rooted)) file = rooted;
+  return Compiler_canonical_path(c, file);
 }
 
-static String _embed_path(Compiler compiler, String source_file, String requested){
-  String candidate = requested;
-  if(String_getindex(requested, 0) != '/'){
-    String base = _source_file(compiler, source_file);
-    candidate = String_join(NULL, cons(String_var(Path_dirname(base)), cons(String_var(_245), cons(String_var(requested), NULL))));
-  }
-  if(compiler -> sources) return Path_absolute(candidate);
-  char resolved[PATH_MAX];
-  return realpath(candidate, resolved) ? String_join(NULL, cons(String_var(String_new(resolved)), NULL)) : candidate;
+static String _embed_path(Compiler c, String source_file, String requested){
+  if(String_getindex(requested, 0) == '/') return Compiler_canonical_path(c, requested);
+  String base = Path_dirname(_source_file(c, source_file));
+  return Compiler_canonical_path(c, String_join(NULL, cons(String_var(base), cons(String_var(_245), cons(String_var(requested), NULL)))));
 }
 
-static String _canonical_path(Compiler compiler, String path){
-  String candidate = path;
-  if(String_truth(path) && String_getindex(path, 0) != '/') candidate = String_join(NULL, cons(String_var(_source_dir(compiler)), cons(String_var(_245), cons(String_var(path), NULL))));
-  char resolved[PATH_MAX];
-  if(compiler -> sources && SourceView_exists(compiler -> sources, candidate)) return Path_absolute(candidate);
-  if(realpath(candidate, resolved)) return String_join(NULL, cons(String_var(String_new(resolved)), NULL));
-  if(String_truth(path) && String_getindex(path, 0) != '/'){
-    String system = String_join(NULL, cons(String_var(compiler -> root_dir), cons(String_var(_246), cons(String_var(path), NULL))));
-    if(compiler -> sources && SourceView_exists(compiler -> sources, system)) return Path_absolute(system);
-    if(realpath(system, resolved)) return String_join(NULL, cons(String_var(String_new(resolved)), NULL));
-  }
-  return candidate;
+static String _canonical_path(Compiler c, String path){
+  if(! String_truth(path) || String_getindex(path, 0) == '/') return Compiler_canonical_path(c, path);
+  String local = String_join(NULL, cons(String_var(_source_dir(c)), cons(String_var(_245), cons(String_var(path), NULL))));
+  String system = String_join(NULL, cons(String_var(c -> root_dir), cons(String_var(_246), cons(String_var(path), NULL))));
+  int use_system = ! SourceView_exists(c -> sources, local) && SourceView_exists(c -> sources, system);
+  return Compiler_canonical_path(c, use_system ? system : local);
 }
 
 int String_len(String);
@@ -2338,52 +2320,9 @@ static Var _sdk_literal_string(Var syntax){
   return _sdk_reject(_570, cons(String_var(String_join(NULL, cons(String_var(_104), cons(String_var(Var_repr(syntax)), NULL)))), NULL));
 }
 
-static File _open(Compiler compiler, String path, String message, Token token, List notes){
-  File volatile source = NULL;
-  int volatile failed = 0;
-  {
-    ExceptionFrame _x2c_exception_frame_3;
-    static MatchCaptureSite _x2c_catch_arms_3[2];
-    static ErrorCatchSite _x2c_catch_site_3 = {  _x2c_catch_arms_3, -1, 2, ERROR_CATCH_PENDING, -1 };
-    Var _x2c_catch_patterns_3[2];
-    if (x2c_error_catch_site_pending(&_x2c_catch_site_3)) {List _x2c_catch_pattern_7 = cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL));
-    _x2c_catch_patterns_3[0] = List_var(_x2c_catch_pattern_7);
-    List _x2c_catch_pattern_8 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
-    _x2c_catch_patterns_3[1] = List_var(_x2c_catch_pattern_8);
-  }
-  ErrorHandler volatile _x2c_error_handler_3 = x2c_error_catch_site_push(&_x2c_exception_frame_3, &_x2c_catch_site_3, _x2c_catch_patterns_3);  x2c_exception_push(& _x2c_exception_frame_3);  if (!sigsetjmp(_x2c_exception_frame_3.env, 0)) source = String_open(path, "r");  else {x2c_exception_landed(& _x2c_exception_frame_3); {
-    if (x2c_exception_is_error_target(&_x2c_exception_frame_3)){
-      int _x2c_catch_selected_3 = x2c_error_catch_selected(_x2c_error_handler_3);
-      x2c_error_catch_detach(_x2c_error_handler_3);
-      x2c_exception_mark_handled(&_x2c_exception_frame_3);
-      if (_x2c_catch_selected_3 == 0) {failed = 1;
-    }
-    else {failed = 1;
-  }
-
-}
-else{
-  x2c_error_catch_close(_x2c_error_handler_3);
-  _x2c_error_handler_3 = NULL;
-  x2c_exception_leave(& _x2c_exception_frame_3);
-  __builtin_unreachable();
-}
-}
-}
-x2c_error_catch_close(_x2c_error_handler_3);
-_x2c_error_handler_3 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_3);
-}
-if(failed) Compiler_report_error(compiler, 27335838, message, token, notes);
-return source;
-}
-
-static String _source_text(Compiler compiler, String path, String message, Token token, List notes){
-  String text;
-  if(compiler -> sources){
-    if(! Compiler_read_source(compiler, path, & text)) Compiler_report_error(compiler, 27335838, message, token, notes);
-  }
-  else text = File_string_close(_open(compiler, path, message, token, notes));
+static String _source_text(Compiler c, String path, String message, Token token, List notes){
+  String text = NULL;
+  if(! Compiler_read_source(c, path, & text)) Compiler_report_error(c, 27335838, message, token, notes);
   return text;
 }
 
