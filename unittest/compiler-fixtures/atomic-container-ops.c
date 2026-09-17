@@ -75,6 +75,8 @@ static Var next_rhs(int value){
 
 Var Array_getindex(Array, int);
 
+Var Map_getindex(Map, Var);
+
 Var Var_new(Symbol, ...);
 
 int Var_int(Var);
@@ -89,13 +91,13 @@ int main(void){
   saved_array = dst_array;
   saved_map = dst_map;
   Var value = Array_updateindex(array_base(), next_index(0), 56, next_rhs(3));
-  Var aa = x2c_array_updateindex_from_array(array_base(), next_index(1), 56, src_array, next_index(0));
-  Var am = x2c_array_updateindex_from_map(array_base(), next_index(2), 62, src_map, next_key(_2));
-  Var ma = x2c_map_updateindex_from_array(map_base(), next_key(_0), 56, src_array, next_index(1));
-  Var mm = x2c_map_updateindex_from_map(map_base(), next_key(_1), 54, src_map, next_key(_2));
+  Var aa = Array_updateindex(array_base(), next_index(1), 56, Array_getindex(src_array, next_index(0)));
+  Var am = Array_updateindex(array_base(), next_index(2), 62, (Map_getindex(src_map, next_key(_2))));
+  Var ma = Map_updateindex(map_base(), next_key(_0), 56, Array_getindex(src_array, next_index(1)));
+  Var mm = Map_updateindex(map_base(), next_key(_1), 54, Map_getindex(src_map, next_key(_2)));
   Var complex = Array_updateindex(array_base(), next_index(3), 56, Var_binary(Array_getindex(src_array, next_index(0)), 54, int_var(2)));
   Var casted = Array_updateindex(array_base(), next_index(4), 56, Array_getindex(src_array, next_index(1)));
-  Var same = x2c_array_updateindex_from_array(array_base(), next_index(4), 56, dst_array, next_index(4));
+  Var same = Array_updateindex(array_base(), next_index(4), 56, Array_getindex(dst_array, next_index(4)));
   Var prefix = Array_updateindex(array_base(), next_index(5), 56, int_var(1));
   Var postfix = Array_postfixindex(array_base(), next_index(5), 2046);
   Var counter = int_var(7);

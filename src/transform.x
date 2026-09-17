@@ -664,29 +664,9 @@ static Symbol _indexed_builtin_helper(Compiler compiler, Type type) {
   return 0;
 }
 
-// Unwrap only the syntax that is transparent for a direct indexed source.
-static List _transparent_source(List expr) {
-  while (expr) {
-    if (expr.car() == <at>) {
-      expr = expr.caddr();
-      continue;
-    }
-    match (expr) {
-      case %(expr ? (parens ?inner)): {
-        expr = inner;
-        continue;
-      }
-    }
-    break;
-  }
-  return expr;
-}
-
 // Helper-backed indexes bypass getindex lowering.
 static int _indexed_parts(
-  Compiler compiler, List expr, int transparent, Symbol *owner, List *base,
-  List *selector) {
-  if (transparent) expr = _transparent_source(expr);
+  Compiler compiler, List expr, Symbol *owner, List *base, List *selector) {
   match (expr)
     case %(expr ? (getindex (!set ?matched_base (expr ?type ?))
                             ?matched_selector)): {
@@ -742,7 +722,7 @@ static List _sequenced_protocol_call(
 static List _indexed_update(
   Compiler c, List lhs, Symbol op, List rhs) {
   Symbol owner, List base, selector;
-  if (!_indexed_parts(c, lhs, 0, &owner, &base, &selector)) return NULL;
+  if (!_indexed_parts(c, lhs, &owner, &base, &selector)) return NULL;
   (Var base_tag, Type base_type) = base;
   (void) base_tag;
   List resolved = c.resolve_protocol_member(base_type, "updateindex");
@@ -762,25 +742,6 @@ static List _indexed_update(
     c.report_error(<xform>, message, NULL, %($details));
   }
 
-  Symbol source_owner, List source_base, source_selector;
-  if (owner && _indexed_parts(
-    c, rhs, 1, &source_owner, &source_base, &source_selector) &&
-      source_owner) {
-    _convert_indexed_parts(c, owner, &base, &selector);
-    _convert_indexed_parts(c, source_owner, &source_base, &source_selector);
-    String helper;
-    if (owner == <array> && source_owner == <array>)
-      helper = "x2c_array_updateindex_from_array";
-    else if (owner == <array>) helper = "x2c_array_updateindex_from_map";
-    else if (source_owner == <array>)
-      helper = "x2c_map_updateindex_from_array";
-    else helper = "x2c_map_updateindex_from_map";
-    return %(call $helper (args
-      $base $selector ${_symbol_expression(op)}
-      $source_base $source_selector
-    ));
-  }
-
   if (!owner)
     return _sequenced_protocol_call(
       c, resolved,
@@ -796,7 +757,7 @@ static List _indexed_update(
 static List _indexed_postfix(
   Compiler compiler, List arg, Symbol op) {
   Symbol owner, List base, selector;
-  if (!_indexed_parts(compiler, arg, 0, &owner, &base, &selector)) return NULL;
+  if (!_indexed_parts(compiler, arg, &owner, &base, &selector)) return NULL;
   (Var base_tag, Type base_type) = base;
   (void) base_tag;
   List resolved =

@@ -159,9 +159,7 @@ static void map_additive_initialization(void) {
   EXPECT_INT_EQ(counts[narrow_key].uchar(), 4);
 
   Map source = {"value": Var.new(<f64>, 1.5)};
-  Var copied = x2c_map_updateindex_from_map(
-    counts, "copied", <+>, source, "value"
-  );
+  Var copied = counts["copied"] += source["value"];
   EXPECT_TRUE(copied is <f64>);
   EXPECT_TRUE(copied.double() == 1.5);
   EXPECT_TRUE(counts["copied"] is <f64>);
@@ -220,44 +218,18 @@ static void cross_container_updates_capture_source_first(void) {
   Array dst_array = [10, 2], src_array = [3];
   Map dst_map = {"dst": 20}, src_map = {"src": 4};
 
-  EXPECT_INT_EQ(
-    x2c_array_updateindex_from_array(dst_array, 0, <+>, src_array, 0).int(), 13
-  );
-  EXPECT_INT_EQ(
-    x2c_array_updateindex_from_map(
-      dst_array, 0, <*>, src_map, "src"
-    ).int(), 52
-  );
-  EXPECT_INT_EQ(
-    x2c_map_updateindex_from_array(
-      dst_map, "dst", <->, src_array, 0
-    ).int(), 17
-  );
-  EXPECT_INT_EQ(
-    x2c_map_updateindex_from_map(
-      dst_map, "dst", </>, src_map, "src"
-    ).int(), 4
-  );
+  EXPECT_INT_EQ((dst_array[0] += src_array[0]).int(), 13);
+  EXPECT_INT_EQ((dst_array[0] *= src_map["src"]).int(), 52);
+  EXPECT_INT_EQ((dst_map["dst"] -= src_array[0]).int(), 17);
+  EXPECT_INT_EQ((dst_map["dst"] /= src_map["src"]).int(), 4);
 
   Array alias_array = [5];
-  EXPECT_INT_EQ(
-    x2c_array_updateindex_from_array(
-      alias_array, 0, <+>, alias_array, 0
-    ).int(), 10
-  );
+  EXPECT_INT_EQ((alias_array[0] += alias_array[0]).int(), 10);
   Map alias_map = {"same": 7};
-  EXPECT_INT_EQ(
-    x2c_map_updateindex_from_map(
-      alias_map, "same", <+>, alias_map, "same"
-    ).int(), 14
-  );
+  EXPECT_INT_EQ((alias_map["same"] += alias_map["same"]).int(), 14);
 
   Array strings = [Var.new(<string>, %"a"), Var.new(<string>, %"b")];
-  EXPECT_TRUE(
-    x2c_array_updateindex_from_array(
-      strings, 0, <+>, strings, 1
-    ).string() == "ab"
-  );
+  EXPECT_TRUE((strings[0] += strings[1]).string() == "ab");
 }
 
 
