@@ -545,12 +545,11 @@ int String.rfind(String str, String sub) {
 List String.find_all(String str, String sub, int start, int end) {
   if (!str || !sub) return %();
   Array results = [], int n = sub.len(), pos = start;
-  while (pos >= 0) {
+  for (;;) {
     pos = str.find_within(sub, pos, end);
-    if (pos >= 0) {
-      results.push(pos);
-      pos += n;
-    }
+    if (pos < 0) break;
+    results.push(pos);
+    pos += n;
   }
   return results.list_free();
 }

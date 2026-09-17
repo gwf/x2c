@@ -418,6 +418,10 @@ static void string_search_and_replace(void) {
   EXPECT_TRUE("aaaa".find_all("aa", 0, -1) == %(0 2));
   EXPECT_TRUE("ababa".find_all("ba", 0, 4) == %(1));
   EXPECT_INT_EQ("ababa".find_all("ba", 2, -1).car().integer(), 3);
+  /* A negative start counts from the end, as it does in `find_within`. */
+  EXPECT_TRUE("abcabc".find_all("c", -3, -1) == %(5));
+  EXPECT_INT_EQ("abcabc".find_within("c", -3, -1), 5);
+  EXPECT_TRUE("abcabc".find_all("c", -100, -1) == %(2 5));
   EXPECT_TRUE(text.replace("ab", NULL) == "xxxx");
   EXPECT_TRUE(text.replace_n("ab", "Q", 2) == "QxxQxxab");
   EXPECT_TRUE(text.replace_n("ab", "Q", 0) === text);
