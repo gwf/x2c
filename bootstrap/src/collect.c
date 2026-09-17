@@ -313,31 +313,31 @@ static int _visibility_pragma(String directive){
 
 static String _canonical_path(String path){
   char buffer[PATH_MAX];
-  return realpath(path, buffer) ? String_join(NULL, cons(String_var(String_new(buffer)), NULL)) : path;
+  return realpath(path, buffer) ? String_new(buffer) : path;
 }
 
 static String _cached_canonical(char * cache, String dir){
   if(! * cache && ! realpath(dir, cache)) snprintf(cache, PATH_MAX, "%s", (char *) dir);
-  return String_join(NULL, cons(String_var(String_new(cache)), NULL));
+  return String_new(cache);
 }
 
 String x2c_get_root(void);
 
 static String _canonical_lib(void){
   static char cache[PATH_MAX];
-  if(* cache) return String_join(NULL, cons(String_var(String_new(cache)), NULL));
+  if(* cache) return String_new(cache);
   return _cached_canonical(cache, String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_0), NULL))));
 }
 
 static String _canonical_include(void){
   static char cache[PATH_MAX];
-  if(* cache) return String_join(NULL, cons(String_var(String_new(cache)), NULL));
+  if(* cache) return String_new(cache);
   return _cached_canonical(cache, String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_1), NULL))));
 }
 
 static String _canonical_src(void){
   static char cache[PATH_MAX];
-  if(* cache) return String_join(NULL, cons(String_var(String_new(cache)), NULL));
+  if(* cache) return String_new(cache);
   return _cached_canonical(cache, String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_2), NULL))));
 }
 

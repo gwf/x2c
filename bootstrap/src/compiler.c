@@ -1119,7 +1119,7 @@ int Compiler_read_source(Compiler c, String path, String volatile * text){
 String Compiler_canonical_path(Compiler c, String path){
   if(c -> sources) return Path_absolute(path);
   char resolved[PATH_MAX];
-  return realpath(path, resolved) ? String_join(NULL, cons(String_var(String_new(resolved)), NULL)) : path;
+  return realpath(path, resolved) ? String_new(resolved) : path;
 }
 
 String x2c_canonical_root(void);

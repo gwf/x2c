@@ -1043,7 +1043,7 @@ String Compiler_display_path(Compiler, String);
 static String _normalize_file(Compiler compiler, String file){
   char path[PATH_MAX];
   String root = compiler -> root_dir;
-  if(realpath(file, path) ||(String_truth(root) && String_getindex(file, 0) != '/' && realpath(String_join(NULL, cons(String_var(root), cons(String_var(_0), cons(String_var(file), NULL)))), path))) file = String_join(NULL, cons(String_var(String_new(path)), NULL));
+  if(realpath(file, path) ||(String_truth(root) && String_getindex(file, 0) != '/' && realpath(String_join(NULL, cons(String_var(root), cons(String_var(_0), cons(String_var(file), NULL)))), path))) file = String_new(path);
   return Compiler_display_path(compiler, file);
 }
 
