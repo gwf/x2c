@@ -211,16 +211,38 @@ const PrintfFn *List.printf_family(List l) {
   return NULL;
 }
 
+/* The format a printf-family call consumes, when the transform reads it at
+   translation time: a quoted C string literal, or the canonical String one
+   becomes. Any other format, such as a variable or an object macro, leaves
+   the call's `Var` values unlowered, so nothing there converts them. */
+static int _static_printf_format(Compiler c, Var format) {
+  match (format) case %(expr ("String") (cache ?id)): {
+    List key = c.id_keys[id];
+    format = key.cadr();
+  }
+  match (format) case %(expr ? (call "String_new" (args ?literal))):
+    format = literal;
+  match (format) {
+    case %(expr (* char) (literal ? ?spelled)): {
+      String text = spelled;
+      return text.startswith("\"");
+    }
+    case %(expr ("String") (literal ? ?)): return 1;
+  }
+  return 0;
+}
+
 /* Each argument of a call spelled in source is checked against its declared
    parameter type. A method receiver selects the method and is not a
    destination, and a call the compiler builds for an operator is not a
    destination the source spelled. */
 static void _check_explicit_converter_arguments(
   Compiler compiler, List result, int method, List notes) {
-  List callee = NULL, params = NULL, arguments = NULL;
-  match (result) case %(expr ? (call ?called (args *supplied))): {
+  List callee = NULL, params = NULL, arguments = NULL, supplied = NULL;
+  match (result) case %(expr ? (call ?called (args *values))): {
     callee = called;
-    arguments = method ? cdr(supplied) : supplied;
+    supplied = values;
+    arguments = method ? cdr(values) : values;
     match (callee) case %(expr ((func ?declared) *) ?):
       params = method ? cdr(declared) : declared;
   }
@@ -232,10 +254,13 @@ static void _check_explicit_converter_arguments(
     Type expected = param.car() == <param> ? param.type_from_ast() : param;
     _check_noted_converter(compiler, car(n), argument, expected, 0);
   }
-  // A printf-family format converts each Var value it consumes.
+  /* A static printf-family format converts each Var value it consumes. The
+     family's positions count the receiver a method call spells before the
+     dot, which `arguments` has already dropped. */
   const PrintfFn *info = callee.printf_family();
-  if (!info) return;
-  int first = info->first_arg, index = 0;
+  if (!info || !_static_printf_format(compiler, supplied[info->fmt_arg]))
+    return;
+  int first = info->first_arg - method, index = 0;
   for (List a = arguments, n = notes; a; a = cdr(a), n = cdr(n)) {
     if (index++ >= first && car(a) is <list>)
       _check_noted_converter(
@@ -510,18 +535,35 @@ static List _parse_postfix_decinc(Compiler compiler, List expr) {
   return compiler.resolve_expression(%(expr () (postfix $op $expr)), origin);
 }
 
+/* The operators that apply to the expression written before them. */
+static int _postfix_operator(Symbol token) {
+  switch (token) {
+    case <[>:
+    case <(>:
+    case <"->">:
+    case <.>:
+    case <++>:
+    case <-->:
+      return 1;
+  }
+  return 0;
+}
+
 static List _parse_postfix_tail(Compiler compiler, List expr) {
-  loop {
+  while (_postfix_operator(compiler.peek(0))) {
+    /* The operator makes what precedes it a receiver or a base, and neither
+       is a destination, so a converter call noted before it never reaches
+       one. */
+    compiler.protocol_helpers.del("explicit-converter");
     switch (compiler.peek(0)) {
       case <[>:      expr = _parse_postfix_index(compiler, expr);   break;
       case <(>:      expr = _parse_postfix_apply(compiler, expr);   break;
       case <"->">:   expr = _parse_postfix_arrow(compiler, expr);   break;
       case <.>:      expr = _parse_postfix_dot(compiler, expr);     break;
-      case <++>:
-      case <-->:     expr = _parse_postfix_decinc(compiler, expr);  break;
-      default:       return expr;
+      default:       expr = _parse_postfix_decinc(compiler, expr);  break;
     }
   }
+  return expr;
 }
 
 static List _parse_postfix(Compiler compiler) =>
@@ -719,10 +761,13 @@ static int _parenthesized_cast_operand_follows(Compiler c) =>
    changes nothing. The comparison uses x2c's declared type, so a cast
    between a typedef and its C type stays silent, and only an operand whose
    C type x2c knows is compared: a pointer difference or a character
-   constant is not. A `void` cast discards a value on purpose. */
+   constant is not. A `void` cast discards a value on purpose, and a cast of
+   a C string literal is how source keeps the literal native where x2c would
+   otherwise promote it to a `String`. */
 static void _warn_unnecessary_cast(
   Compiler c, List operand, Type target, Token origin) {
-  if (!target || target === %(void) || target === %(<macro-expr>)) return;
+  if (!target || target === %(void) || target === %(<macro-expr>) ||
+      _expr_is_raw_string_literal(operand)) return;
   Type source = operand.cadr();
   if (!_c_type_known(c, operand) || source.declared() != target.declared())
     return;
