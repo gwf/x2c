@@ -23,7 +23,7 @@ int main(void){
   printf("%d %d %d\n", (* pointer).x, (int)(a = 0), (a = 0) ? 1 : 2);
   if(a == 0) b = a > 0 ? 7 : 8;
   printf("%d\n", b);
-  printf("%d %d %d %d\n", (-(1 + 1)) * 2, -(-(1 + 1)), !(-(1 + 1)), -(1 + 1));
+  printf("%d %d %d %d\n", -(1 + 1) * 2, - -(1 + 1), ! -(1 + 1), -(1 + 1));
   return 0;
 }
 

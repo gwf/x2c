@@ -746,8 +746,10 @@ according to its hole kind. A type such as `FILE *` therefore works as an
 argument even though it is not an expression.
 
 An `Expr` argument stays one operand. With the argument `value > 0`, the body
-`!$condition` means `!(value > 0)`. Generated C adds these parentheses only
-where an operator, cast, or postfix form needs them.
+`!$condition` means `!(value > 0)`. The same holds for a macro's own result:
+`macro Expression $twice($value) => ($value + $value)` makes `$twice(21) * 2`
+mean `(21 + 21) * 2`. Generated C carries these parentheses only where C
+precedence would otherwise regroup the expression.
 
 A `Decl` argument captures one declaration without a trailing semicolon. Its
 comma or closing parenthesis belongs to the macro invocation. The declaration

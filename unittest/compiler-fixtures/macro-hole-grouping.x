@@ -2,9 +2,9 @@
 
 typedef struct Point { int x; int y; } Point;
 
-// An Expr hole is one operand wherever the template places it. A compound
-// argument is grouped under an operator, cast, or postfix form and emitted
-// as parsed in delimited positions such as arguments and conditions.
+// An Expr hole is one operand wherever the template places it. The argument
+// keeps the meaning it has at the call site, and emission parenthesizes it
+// only where C precedence would otherwise regroup the result.
 macro Statement $guard(Expr $condition) => {
   if (!$condition) return 0;
 }
