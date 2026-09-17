@@ -1341,29 +1341,23 @@ static void _shallow_parse_loop(Compiler c) {
       _debug_tokens(c, start, c.token);
       continue;
     }
-    int macro_definition = c.macro_form_is_definition();
-    int keyword_alias = c.keyword_alias_starts_target_at(AST_UNIT);
-    if (!macro_definition && !c.collect_protocols &&
-        c.skip_named_type_declaration()) {
+    if (c.macro_form_is_definition()) {
+      _shallow_parse_compile_time_definition(c, 0);
       _debug_tokens(c, start, c.token);
       continue;
     }
-    if (macro_definition || c.peek(0) == <$> || keyword_alias) {
-      if (macro_definition)
-        _shallow_parse_compile_time_definition(c, 0);
-      else if (c.collect_protocols &&
-               (keyword_alias
-                  ? c.keyword_alias_needs_shallow_expansion()
-                  : c.macro_invocation_needs_shallow_expansion()))
+    if (!c.collect_protocols && c.skip_named_type_declaration()) {
+      _debug_tokens(c, start, c.token);
+      continue;
+    }
+    if (c.macro_starts_target_at(AST_UNIT)) {
+      if (c.collect_protocols && c.macro_invocation_needs_shallow_expansion())
         _shallow_parse_unit_macro(c);
       else {
-        if (keyword_alias) c.skip_keyword_alias();
-        else c.skip_macro_invocation();
+        c.skip_macro_invocation();
         if (!c.test(<;>)) {
-          while (c.peek(0) == <$> ||
-                 c.keyword_alias_starts_target_at(AST_UNIT)) {
-            if (c.peek(0) == <$>) c.skip_macro_invocation();
-            else c.skip_keyword_alias();
+          while (c.macro_starts_target_at(AST_UNIT)) {
+            c.skip_macro_invocation();
             if (c.test(<;>)) break;
           }
           if (c.peek(-1) != <;>) _shallow_finish_declaration(c);

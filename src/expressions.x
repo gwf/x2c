@@ -2208,7 +2208,7 @@ static int _bracket_designates(Compiler c) {
 /* An entry that begins with a Map-entry macro, or whose first bracket-level
    `:` belongs to no conditional, makes a brace a Map literal. */
 static int _brace_starts_map(Compiler c) {
-  if (c.map_entry_macro_follows()) return 1;
+  if (c.macro_starts_target_at(AST_MAP_ENTRY)) return 1;
   Token token = c.token;
   for (int conditionals = 0;; token = token.after_group()) {
     switch (token.type) {

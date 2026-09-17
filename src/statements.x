@@ -501,15 +501,6 @@ List Compiler.parse_block_item(Compiler c) {
 List Compiler.parse_statement(Compiler c) {
   List slot = c.try_parse_macro_slot(<statement>);
   if (slot) return slot;
-  if (c.peek(0) == <$> && c.macro_starts_target_at(AST_STATEMENT)) {
-    List hole = c.peek_macro_hole();
-    List macro = c.try_parse_macro_target_at(AST_STATEMENT);
-    if (macro) return macro;
-    List expression = hole && hole.assoc(<kind>) == <name>
-                    ? c.parse_expression() : c.try_parse_macro_expression();
-    c.expect(<;>);
-    return %(stmnt $expression);
-  }
   /* A `with` alias records its source expression, not a temporary. Its `Sym`
      scope and semantic rows exist only while the body parses, so every use
      substitutes the expression and an unused alias does not evaluate it. */
@@ -554,10 +545,15 @@ List Compiler.parse_statement(Compiler c) {
     }
     return body;
   }
-  int with_expression = !!c.with_binding();
-  List keyword = !with_expression && c.peek(0) == <ident>
-    ? c.try_parse_macro_target_at(AST_STATEMENT) : NULL;
-  if (keyword) return keyword;
+  if (!c.with_binding() && c.macro_starts_target_at(AST_STATEMENT)) {
+    List hole = c.peek_macro_hole();
+    List macro = c.try_parse_macro_target_at(AST_STATEMENT);
+    if (macro) return macro;
+    List expression = hole && hole.assoc(<kind>) == <name>
+                    ? c.parse_expression() : c.try_parse_macro_expression();
+    c.expect(<;>);
+    return %(stmnt $expression);
+  }
   Symbol token = c.peek(0);
   switch (token) {
     case <if>:          return _if_statement(c);
@@ -603,11 +599,10 @@ List Compiler.parse_block_items(Compiler c, int anchor_items) {
        The anchor precedes parsing because parsing leaves the cursor on the
        following token. */
     Token origin = c.token;
-    int expansion = (c.peek(0) == <$> &&
-      !(c.macro_holes && c.peek_macro_hole())) ||
-      (!c.macro_holes && c.local_macro_form_is_definition()) ||
-      (c.peek(0) == <ident> &&
-       c.keyword_alias_starts_target_at(AST_BLOCK));
+    int expansion =
+      (c.macro_starts_target_at(AST_BLOCK) &&
+       !(c.macro_holes && c.peek_macro_hole())) ||
+      (!c.macro_holes && c.local_macro_form_is_definition());
     stmt = c.parse_block_item();
     if (c.macro_holes &&
         (stmt.car() == <macro-bind> || stmt.car() == <macro-slot>)) {

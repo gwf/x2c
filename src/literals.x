@@ -648,17 +648,6 @@ List Compiler.parse_array_literal(Compiler compiler) {
   return %(expr ("Array") (array @elems));
 }
 
-/** Reports whether an `Entry` macro invocation, direct or through a keyword
-    alias, starts at the cursor. This query does not consume tokens.
-*/
-int Compiler.map_entry_macro_follows(Compiler c) =>
-  (c.peek(0) == <$> && c.macro_starts_target_at(AST_MAP_ENTRY)) ||
-  (c.peek(0) == <ident> && c.keyword_alias_starts_target_at(AST_MAP_ENTRY));
-
-static List _map_entry_macro(Compiler c) =>
-  c.map_entry_macro_follows() ? c.try_parse_macro_target_at(AST_MAP_ENTRY)
-                              : NULL;
-
 /** Parses one `Map` entry without consuming its following comma or `}`.
     A bare identifier key is an Atom; any other key is an expression.
     A direct row returns a resolved `(map-entry KEY VALUE)` node; an
@@ -667,7 +656,7 @@ static List _map_entry_macro(Compiler c) =>
 List Compiler.parse_map_entry(Compiler compiler) {
   List slot = compiler.try_parse_macro_slot(<map-entry>);
   if (slot) return slot;
-  List macro = _map_entry_macro(compiler);
+  List macro = compiler.try_parse_macro_target_at(AST_MAP_ENTRY);
   if (macro) return macro;
   Token origin = compiler.token;
   List key = NULL;
@@ -703,7 +692,7 @@ static List _parse_quoted_map_entry(Compiler c) {
   if (c.peek(0) == <"${"> && c.token.len == 2) {
     c.next();
     List insertion = c.try_parse_macro_slot(<map-entry>);
-    if (!insertion) insertion = _map_entry_macro(c);
+    if (!insertion) insertion = c.try_parse_macro_target_at(AST_MAP_ENTRY);
     if (insertion) {
       c.expect(<"}">);
       return insertion;

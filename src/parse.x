@@ -616,10 +616,8 @@ List Compiler.parse_enumerator(Compiler c, Type context) {
 List Compiler.parse_enumerators(Compiler c, List context) {
   Array enumerators = [];
   while (c.peek(0) != <"}">) {
-    if (c.shallow && c.peek(0) == <$>) c.skip_macro_invocation();
-    else if (c.shallow &&
-             c.keyword_alias_starts_target_at(AST_ENUMERATOR))
-      c.skip_keyword_alias();
+    if (c.shallow && c.macro_starts_target_at(AST_ENUMERATOR))
+      c.skip_macro_invocation();
     else {
       List enumerator = c.parse_enumerator(context);
       if (enumerator.car() == <seq>)
@@ -1599,15 +1597,12 @@ int Compiler.script_statement_starts(Compiler c) {
     case <eof>: case <import>: case <protocol>: case <"$(">:
     case <typedef>: case <static>: case <extern>: case <"}">:
       return 0;
-    case <$>:
-      return !c.macro_targets_unit();
   }
   if (c.test_static_assert() || c.keyword_form_is_definition() ||
       c.macro_form_is_definition())
     return 0;
   if (c.peek(0) == <ident> && c.token.text == "with") return 1;
-  if (c.peek(0) == <ident> && c.keyword_alias_starts_target_at(AST_UNIT))
-    return !c.macro_targets_unit();
+  if (c.macro_starts_target_at(AST_UNIT)) return !c.macro_targets_unit();
   return !c.test_declaration() || !_script_declaration_stays(c);
 }
 
@@ -1669,14 +1664,10 @@ List Compiler.parse_top_level(Compiler c) {
     c.parse_keyword_definition();
     return NULL;
   }
-  List keyword = c.peek(0) == <ident>
-    ? c.try_parse_macro_target_at(AST_UNIT) : NULL;
-  if (keyword) return keyword;
+  List macro = c.try_parse_macro_target_at(AST_UNIT);
+  if (macro) return macro;
   if (c.peek(0) == <static> && c.peek(1) == <protocol>)
     return c.parse_protocol_declaration();
-  if (c.peek(0) == <$> &&
-      !(c.macro_holes && c.peek_macro_hole()))
-    return c.try_parse_macro_target_at(AST_UNIT);
   switch (c.peek(0)) {
     case <import>:   return c.parse_import_declaration();
     case <protocol>: return c.parse_protocol_declaration();

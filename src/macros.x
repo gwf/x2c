@@ -565,47 +565,75 @@ int Compiler.local_macro_form_is_definition(Compiler c) {
 int Compiler.keyword_form_is_definition(Compiler c) =>
   c.peek(0) == <ident> && c.token.text == "keyword" && c.peek(2) == <$>;
 
-/** Consumes a direct macro name and its balanced argument list.
-    The invocation terminator remains current for the shallow parser.
-*/
-void Compiler.skip_macro_invocation(Compiler c) {
-  c.expect(<$>);
-  while (c.peek(0) == <ident> || c.peek(0) == <.>) c.next();
-  if (c.peek(0) == <(>) c.token = c.token.after_group();
+/* Scans the dotted name after the current `$` without consuming tokens.
+   Returns the token after the name, or the token where a name component is
+   missing with `spelling` set to NULL. */
+static Token _scan_name(Compiler c, String *spelling) {
+  Token token = c.token, String name = NULL;
+  do {
+    token = c.skip_trivia_from(token + 1);
+    if (token.type != <ident>) {
+      name = NULL;
+      break;
+    }
+    name = name ? %"$name.${token.text}" : token.text;
+    token = c.skip_trivia_from(token + 1);
+  } while (token.type == <.>);
+  *spelling = name;
+  return token;
 }
 
 static Atom _name(Compiler c) {
-  c.expect(<$>);
-  if (c.peek(0) != <ident>)
-    c.report_error(<parse>, "expected macro name after '$'", c.token, NULL);
-  String spelling = c.token.text;
-  c.next();
-  while (c.test(<.>)) {
-    if (c.peek(0) != <ident>)
-      c.report_error(
-        <parse>, "expected macro name component after '.'",
-        c.token, NULL);
-    spelling = %"$spelling.${c.token.text}";
-    c.next();
-  }
+  String spelling;
+  Token end = _scan_name(c, &spelling);
+  if (!spelling)
+    c.report_error(
+      <parse>, c.peek(1) == <ident>
+        ? "expected macro name component after '.'"
+        : "expected macro name after '$'",
+      end, NULL);
+  c.token = end;
   return Atom.intern(spelling);
 }
 
-static List _peek_definition(Compiler c) {
-  Token token = c.skip_trivia_from(c.token + 1);
-  if (c.peek(0) != <$> || token.type != <ident>) return NULL;
-  String spelling = token.text;
-  token = c.skip_trivia_from(token + 1);
-  while (token.type == <.>) {
-    token = c.skip_trivia_from(token + 1);
-    if (token.type != <ident>) return NULL;
-    spelling = %"$spelling.${token.text}";
-    token = c.skip_trivia_from(token + 1);
-  }
+/* An identifier invoking a decorator without explicit parameters has no
+   argument list. */
+static int _bare(Token invocation, List definition) =>
+  invocation.type != <$> && definition.assoc(<kind>) == <decorator> &&
+  !definition.assoc(<parameters>).list();
+
+/* Returns the definition invoked at the cursor without consuming tokens, or
+   NULL. A `$` name invokes its visible definition. An identifier invokes the
+   innermost local macro of that name, or else its keyword alias, when an
+   argument list follows or the invocation is bare. */
+static List _peek_invocation(Compiler c) {
   Var stored;
-  Atom name = Atom.intern(spelling);
-  if (!_try_definition(c, name, !c.shallow, &stored)) return NULL;
-  return stored;
+  if (c.peek(0) == <$>) {
+    String spelling;
+    _scan_name(c, &spelling);
+    if (!spelling ||
+        !_try_definition(c, Atom.intern(spelling), !c.shallow, &stored))
+      return NULL;
+    return stored;
+  }
+  if (c.peek(0) != <ident>) return NULL;
+  Atom name = Atom.intern(c.token.text);
+  List definition = c.sym.has_local_macros()
+                  ? c.sym.lookup_macro(name) : NULL;
+  if (!definition && c.kw_aliases.try_get(name, &stored)) definition = stored;
+  return definition && (c.peek(1) == <(> || _bare(c.token, definition))
+       ? definition : NULL;
+}
+
+/** Consumes a macro invocation name and its balanced argument list.
+    The invocation terminator or following decorator target remains current.
+*/
+void Compiler.skip_macro_invocation(Compiler c) {
+  int bare = _bare(c.token, _peek_invocation(c));
+  String spelling;
+  if (c.peek(0) == <$>) c.token = _scan_name(c, &spelling);
+  else c.next();
+  if (!bare && c.peek(0) == <(>) c.token = c.token.after_group();
 }
 
 static int _definition_needs_shallow_expansion(List definition) {
@@ -620,14 +648,13 @@ static int _definition_needs_shallow_expansion(List definition) {
     %(!or (protocol *) (adopt *)), &matched, &bindings);
 }
 
-/** Returns whether the current direct invocation needs shallow expansion.
-    Every imported `Unit` macro qualifies. A local `Unit` macro qualifies only
-    when its template contains protocol or adoption rows that collection must
-    retain.
+/** Returns whether the macro invocation at the cursor needs shallow
+    expansion. Every imported `Unit` macro qualifies. A local `Unit` macro
+    qualifies only when its template contains protocol or adoption rows that
+    collection must retain.
 */
-int Compiler.macro_invocation_needs_shallow_expansion(Compiler compiler) =>
-  _definition_needs_shallow_expansion(
-    _peek_definition(compiler));
+int Compiler.macro_invocation_needs_shallow_expansion(Compiler c) =>
+  _definition_needs_shallow_expansion(_peek_invocation(c));
 
 typedef struct MacroPos {
   Symbol kind, const char *description, int semicolon;
@@ -646,26 +673,39 @@ static const MacroPos macro_position_info[] = {
 static const MacroPos *_position(AstPos position) =>
   &macro_position_info[position];
 
-static Symbol _decorator_result_kind(Symbol target_kind) {
-  if (target_kind == <function> || target_kind == <unit> ||
-      target_kind == <named-type>) return <unit>;
-  if (target_kind == <block>) return <block-item>;
-  if (target_kind == <expr>) return <expression>;
-  return target_kind;
+/* A decorator produces the result kind of the syntax it targets. */
+static Symbol _result_kind(List definition) {
+  Symbol kind = definition.assoc(<kind>);
+  if (kind != <decorator>) return kind;
+  Symbol target = definition.assoc(<target>);
+  if (target == <function> || target == <unit> || target == <named-type>)
+    return <unit>;
+  if (target == <block>) return <block-item>;
+  if (target == <expr>) return <expression>;
+  return target;
 }
 
-/** Returns whether the current direct macro can start at `position`.
-    The current definition and any decorator target kind determine the result;
-    this query does not consume tokens.
-*/
-int Compiler.macro_starts_target_at(Compiler compiler, AstPos position) {
-  List definition = _peek_definition(compiler);
-  if (!definition) return 0;
-  Symbol kind = definition.assoc(<kind>);
-  return kind == _position(position).kind ||
-    (position == AST_STATEMENT && kind == <decorator> &&
-     definition.assoc(<target>) == <block>);
+/* An invocation is claimed where its result fits. A statement or map entry
+   that does not fit parses as an expression. Elsewhere a `$` name, or an
+   identifier with arguments, is claimed so that its target parser reports
+   the position diagnostic; a local expression macro at block scope remains
+   an expression statement. */
+static int _claims(Compiler c, List definition, AstPos position) {
+  Symbol kind = definition ? _result_kind(definition) : 0;
+  if (kind == _position(position).kind) return 1;
+  if (position == AST_STATEMENT || position == AST_MAP_ENTRY) return 0;
+  if (!definition) return c.peek(0) == <$>;
+  return !_bare(c.token, definition) &&
+    (position != AST_BLOCK || kind != <expression> ||
+     !definition.assoc(<local>).int());
 }
+
+/** Returns whether the parser claims the macro invocation at the cursor for
+    `position`. A bare keyword alias is claimed only where its result fits.
+    This query does not consume tokens.
+*/
+int Compiler.macro_starts_target_at(Compiler c, AstPos position) =>
+  _claims(c, _peek_invocation(c), position);
 
 static String _source_dir(Compiler compiler) {
   String filename = compiler.import_stack.len()
@@ -2197,28 +2237,6 @@ static List _lookup(Compiler compiler, Atom name, Token invocation) {
   return stored;
 }
 
-static List _keyword_alias_lookup(Compiler compiler) {
-  if (compiler.peek(0) != <ident>) return NULL;
-  Atom name = Atom.intern(compiler.token.text);
-  List local = compiler.sym.has_local_macros()
-             ? compiler.sym.lookup_macro(name) : NULL;
-  if (local) return local;
-  Var stored;
-  if (!compiler.kw_aliases.try_get(name, &stored))
-    return NULL;
-  return stored;
-}
-
-static int _keyword_alias_takes_args(List definition) =>
-  definition.assoc(<kind>) != <decorator> ||
-         definition.assoc(<parameters>).list();
-
-static int _keyword_alias_follows(Compiler compiler, List definition) {
-  return definition &&
-    (!_keyword_alias_takes_args(definition) ||
-     compiler.peek(1) == <(>);
-}
-
 static const SymbolSet alias_kinds =
   %<<expression block-item field enumerator map-entry unit decorator>>;
 
@@ -2256,94 +2274,26 @@ void Compiler.parse_keyword_definition(Compiler c) {
   c.kw_aliases[alias] = definition;
 }
 
-static int _keyword_alias_is_expression(Compiler compiler, List definition) {
-  if (!_keyword_alias_follows(compiler, definition)) return 0;
-  if (_keyword_alias_takes_args(definition)) return 1;
-  return definition.assoc(<kind>) == <expression> ||
-    (definition.assoc(<kind>) == <decorator> &&
-     definition.assoc(<target>) == <expr>);
-}
-
-static int _keyword_alias_targets_at(
-  Compiler compiler, List definition, AstPos position) {
-  if (!_keyword_alias_follows(compiler, definition)) return 0;
-  Symbol kind = definition.assoc(<kind>);
-  Symbol target_kind = definition.assoc(<target>);
-  if (position == AST_STATEMENT && definition.assoc(<local>).int() &&
-      (kind == <expression> ||
-       (kind == <decorator> && target_kind == <expr>))) return 0;
-  if (position == AST_MAP_ENTRY) return kind == <map-entry>;
-  if (_keyword_alias_takes_args(definition)) {
-    if (position != AST_BLOCK) return 1;
-    return kind != <expression> &&
-      (kind != <decorator> || target_kind != <expr>);
-  }
-  Symbol expected = _position(position).kind;
-  return kind == expected ||
-    (kind == <decorator> &&
-     _decorator_result_kind(target_kind) == expected);
-}
-
-/** Reports whether the macro or keyword alias at the cursor produces
-    file-scope syntax, directly or through the target it decorates. A script
-    unit keeps such an invocation at file scope. This query does not consume
-    tokens.
+/** Reports whether the macro invocation at the cursor produces file-scope
+    syntax, directly or through the target it decorates. A script unit keeps
+    such an invocation at file scope. This query does not consume tokens.
 */
-int Compiler.macro_targets_unit(Compiler compiler) {
-  List definition = compiler.peek(0) == <$>
-    ? _peek_definition(compiler) : _keyword_alias_lookup(compiler);
-  if (!definition ||
-      (compiler.peek(0) != <$> &&
-       !_keyword_alias_follows(compiler, definition)))
-    return 0;
-  Symbol kind = definition.assoc(<kind>);
-  if (kind == <decorator>)
-    kind = _decorator_result_kind(definition.assoc(<target>));
+int Compiler.macro_targets_unit(Compiler c) {
+  List definition = _peek_invocation(c);
+  if (!definition) return 0;
+  Symbol kind = _result_kind(definition);
   return kind == <unit> || kind == <decl-unit>;
-}
-
-/** Returns whether the parser should claim the current alias at `position`.
-    An argument-taking invocation may be claimed before result-kind validation
-    so target parsing can report a wrong-position diagnostic. Bare forms must
-    already fit the position. This query does not consume tokens.
-*/
-int Compiler.keyword_alias_starts_target_at(
-  Compiler compiler, AstPos position) => _keyword_alias_targets_at(
-    compiler, _keyword_alias_lookup(compiler), position);
-
-/** Returns whether the current keyword alias needs shallow expansion.
-    A visible invocation qualifies when its captured `Unit` definition is
-    imported, or when its local template contains protocol or adoption rows.
-*/
-int Compiler.keyword_alias_needs_shallow_expansion(Compiler compiler) {
-  List definition = _keyword_alias_lookup(compiler);
-  return _keyword_alias_follows(compiler, definition) &&
-         _definition_needs_shallow_expansion(definition);
-}
-
-/** Consumes the current keyword alias and any required argument list.
-    Its terminator or following decorator target remains current.
-*/
-void Compiler.skip_keyword_alias(Compiler c) {
-  List definition = _keyword_alias_lookup(c);
-  if (!definition)
-    c.report_error(<parse>, "expected keyword alias", c.token, NULL);
-  c.next();
-  if (_keyword_alias_takes_args(definition)) c.token = c.token.after_group();
 }
 
 /** Consumes a NamedType target already projected by owning-source collection.
     CPP scanning does not produce the declaration or parse its fields again.
 */
-int Compiler.skip_named_type_declaration(Compiler compiler) {
-  List definition = compiler.peek(0) == <$>
-                  ? _peek_definition(compiler)
-                  : _keyword_alias_lookup(compiler);
+int Compiler.skip_named_type_declaration(Compiler c) {
+  List definition = _peek_invocation(c);
   if (!definition || definition.assoc(<target>) != <named-type>) return 0;
-  if (compiler.peek(0) == <$>) compiler.skip_macro_invocation();
-  else compiler.skip_keyword_alias();
-  compiler._skip_shallow_expression(0);
-  compiler.expect(<;>);
+  c.skip_macro_invocation();
+  c._skip_shallow_expression(0);
+  c.expect(<;>);
   return 1;
 }
 
@@ -2423,7 +2373,9 @@ static Var _parse_argument(Compiler c, Symbol kind) {
     c.token, NULL);
 }
 
-static List _invocation_arguments(Compiler c, List definition) {
+static List _invocation_arguments(
+  Compiler c, List definition, Token invocation) {
+  if (_bare(invocation, definition)) return %(args);
   Array arguments = [];
   c.expect(<(>);
   List descriptors = definition.assoc(<parameters>);
@@ -2627,13 +2579,11 @@ List Compiler.expand_macro_invocation_node(
    generated syntax and raised diagnostics therefore cannot leave provisional
    bindings, enumerators, statics, or generated-name state behind. */
 static List _invoke_definition(
-  Compiler compiler, List definition, Token invocation, AstPos position,
-  int bare) {
+  Compiler compiler, List definition, Token invocation, AstPos position) {
   int deferred = !!compiler.macro_holes;
   SymTxn transaction = compiler.begin_semantic_transaction();
   defer transaction.rollback();
-  List input = bare
-    ? %(args) : _invocation_arguments(compiler, definition);
+  List input = _invocation_arguments(compiler, definition, invocation);
   if (_position(position).semicolon) compiler.expect(<;>);
   List node = _invocation_node(compiler, definition, input, invocation);
   List result = deferred ? %(seq $node) :
@@ -2644,9 +2594,8 @@ static List _invoke_definition(
 }
 
 static List _parse_expression_decorator(
-  Compiler c, List definition, Token invocation, int bare) {
-  List arguments = bare
-    ? %(args) : _invocation_arguments(c, definition);
+  Compiler c, List definition, Token invocation) {
+  List arguments = _invocation_arguments(c, definition, invocation);
   if (c.peek(0) == <;> || c.peek(0) == <eof>) {
     String spelling = definition.assoc(<name>).str();
     c.report_error(
@@ -2667,12 +2616,11 @@ static List _parse_expression_decorator(
 }
 
 static List _parse_expression_definition(
-  Compiler compiler, List definition, Token invocation, int bare) {
+  Compiler compiler, List definition, Token invocation) {
   Symbol kind = definition.assoc(<kind>);
   if (kind == <decorator> && definition.assoc(<target>) == <expr>)
-    return _parse_expression_decorator(
-      compiler, definition, invocation, bare);
-  List arguments = _invocation_arguments(compiler, definition);
+    return _parse_expression_decorator(compiler, definition, invocation);
+  List arguments = _invocation_arguments(compiler, definition, invocation);
   if (kind != <expression>) {
     String spelling = definition.assoc(<name>).str();
     String subject = kind == <decorator>
@@ -2691,42 +2639,44 @@ static List _parse_expression_definition(
   )});
 }
 
+/* Consumes the name of an invocation claimed at `position` and returns its
+   definition, or returns NULL without consuming tokens. A `$` name that is
+   neither visible nor followed by arguments is a replacement variable
+   missing from a template. */
+static List _take_invocation(Compiler c, AstPos position) {
+  List definition = _peek_invocation(c);
+  if (!_claims(c, definition, position)) return NULL;
+  if (c.peek(0) != <$>) {
+    c.next();
+    return definition;
+  }
+  Token invocation = c.token;
+  Atom name = _name(c);
+  Var existing;
+  if (c.macro_holes && c.peek(0) != <(> &&
+      !_try_definition(c, name, 1, &existing)) {
+    String spelling = name.str();
+    c.report_error(
+      <parse>, %"unbound replacement variable '$spelling'",
+      invocation, NULL);
+  }
+  return _lookup(c, name, invocation);
+}
+
 /** Parses and resolves a direct or keyword-alias expression macro.
     Returns NULL without consuming an identifier that is not an applicable
     alias; a direct `$` invocation must resolve to a visible expression form.
 */
 List Compiler.try_parse_macro_expression(Compiler c) {
   Token invocation = c.token;
-  List definition;
-  int bare = 0;
-  if (c.peek(0) == <$>) {
-    Atom name = _name(c);
-    if (c.macro_holes && c.peek(0) != <(>) {
-      Var existing;
-      if (!_try_definition(c, name, 1, &existing)) {
-        String spelling = name.str();
-        c.report_error(
-          <parse>, %"unbound replacement variable '$spelling'",
-          invocation, NULL);
-      }
-    }
-    definition = _lookup(c, name, invocation);
-  }
-  else {
-    definition = _keyword_alias_lookup(c);
-    if (!_keyword_alias_is_expression(c, definition)) return NULL;
-    c.next();
-    bare = !_keyword_alias_takes_args(definition);
-  }
+  List definition = _take_invocation(c, AST_EXPRESSION);
+  if (!definition) return NULL;
   return c.resolve_expression(
-    _parse_expression_definition(
-      c, definition, invocation, bare), invocation
-  );
+    _parse_expression_definition(c, definition, invocation), invocation);
 }
 
 static List _parse_target_definition(
-  Compiler c, List definition, Token invocation, AstPos position,
-  int bare) {
+  Compiler c, List definition, Token invocation, AstPos position) {
   int deferred = !!c.macro_holes;
   Atom name = definition.assoc(<name>);
   Symbol kind = definition.assoc(<kind>);
@@ -2742,11 +2692,9 @@ static List _parse_target_definition(
         %"invoked at ${place.description}";
       c.report_error(<macro>, message, invocation, NULL);
     }
-    return _invoke_definition(
-      c, definition, invocation, position, bare);
+    return _invoke_definition(c, definition, invocation, position);
   }
-  Symbol expected = _decorator_result_kind(target_kind);
-  if (expected != place.kind) {
+  if (_result_kind(definition) != place.kind) {
     String spelling = name.str();
     c.report_error(
       <macro>,
@@ -2766,9 +2714,7 @@ static List _parse_target_definition(
     int block_scope = !c.macro_holes && target_kind == <block>;
     if (block_scope) c.sym.push_new_scope();
     defer if (block_scope) c.sym.pop_scope();
-    arguments = bare
-      ? %(args)
-      : _invocation_arguments(c, definition);
+    arguments = _invocation_arguments(c, definition, invocation);
     if (block_scope) _bind_name_arguments(c, definition, arguments);
     if (c.peek(0) == <;>)
       c.report_error(
@@ -2835,23 +2781,15 @@ static List _parse_target_definition(
 }
 
 /** Parses a direct or keyword-alias macro at the requested syntax position.
-    Returns NULL without consuming a macro hole or inapplicable identifier;
-    template parsing returns a deferred `(seq (macro-invoke ...))`, and
-    ordinary parsing returns the bound expansion.
+    Returns NULL without consuming a macro hole or an invocation that
+    `macro_starts_target_at` does not claim; template parsing returns a
+    deferred `(seq (macro-invoke ...))`, and ordinary parsing returns the bound
+    expansion.
 */
 List Compiler.try_parse_macro_target_at(Compiler c, AstPos position) {
+  if (c.macro_holes && c.peek_macro_hole()) return NULL;
   Token invocation = c.token;
-  List definition;
-  int bare = 0;
-  if (c.peek(0) == <$>) {
-    if (c.macro_holes && c.peek_macro_hole()) return NULL;
-    definition = _lookup(c, _name(c), invocation);
-  }
-  else {
-    definition = _keyword_alias_lookup(c);
-    if (!_keyword_alias_targets_at(c, definition, position)) return NULL;
-    c.next();
-    bare = !_keyword_alias_takes_args(definition);
-  }
-  return _parse_target_definition(c, definition, invocation, position, bare);
+  List definition = _take_invocation(c, position);
+  return definition
+    ? _parse_target_definition(c, definition, invocation, position) : NULL;
 }
