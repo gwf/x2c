@@ -685,12 +685,11 @@ Type Compiler.parse_type_name(Compiler compiler) {
 
 // declarators
 
-static List _decl_context_group(Compiler compiler, List context) {
-  List quals = _type_qualifiers(compiler);
-  List type = quals.append(_type_specifier(compiler));
-  type = compiler.sym.local_type(type);
-  List binds = _declarator_list(compiler, type, context, 1);
-  return _finish_declaration(compiler, <declare>, type, binds, 0);
+static List _decl_context_group(Compiler c, List context) {
+  List storage = _storage_class(c);
+  List (type, binding_type) = _declaration_types(c, storage);
+  List binds = _declarator_list(c, binding_type, context, 1);
+  return _finish_declaration(c, <declare>, type, binds, 0);
 }
 
 static List _pointer(Compiler c) {
@@ -1052,6 +1051,14 @@ static int _test_declaration_start(Compiler c, int require_declarator) {
   if (sym.is_storage_class() || sym.is_type_qualifier() ||
       sym.is_builtin_type() || sym == <inline>) return 1;
   if (sym != <ident>) return 0;
+  // A leading attribute belongs to a declaration in every position.
+  if (c.token.text == "__attribute__" && _attribute_starts(c)) return 1;
+  /* A prefix macro contributes declaration specifiers, so `LOCAL int x = 1;`
+     is a declaration wherever it is written. */
+  Var definition;
+  if (c.object_macros.try_get(c.token.text, &definition) &&
+      (definition is <list> || definition.equal(<wrapper>)))
+    return 1;
 
   Token head = c.token;
   String alias = c.package_alias_spelling();

@@ -33,7 +33,15 @@ __attribute__((unused)) static int third(int z) { return z; }
 _Noreturn static void finish(int status) { exit(status); }
 inline static int fourth(int w) { return w; }
 
+// A leading attribute also belongs to a field and to a block declaration.
+struct box {
+  __attribute__((aligned(8))) int value;
+};
+
 int main(void) {
+  __attribute__((unused)) int spare = 7;
+  struct box boxed = {8};
+  printf("%d %d\n", spare, boxed.value);
   report("%s %d\n", "report", 1);
   note(2, "%s\n", "note");
   {

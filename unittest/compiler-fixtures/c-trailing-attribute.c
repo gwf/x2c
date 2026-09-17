@@ -14,6 +14,11 @@ static _Noreturn void finish(int status);
 
 inline static int fourth(int w);
 
+struct box{
+  __attribute__((aligned(8))) int value;
+}
+;
+
 __attribute__((format(printf, 1, 2))) int report(const char * format, ...){
   va_list args;
   va_start(args, format);
@@ -53,6 +58,12 @@ inline static int fourth(int w){
 
 int main(void){
   x2c_initialize();
+  __attribute__((unused)) int spare = 7;
+  struct box boxed ={
+    8
+  }
+  ;
+  printf("%d %d\n", spare, boxed.value);
   report("%s %d\n", "report", 1);
   note(2, "%s\n", "note");
   {

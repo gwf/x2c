@@ -45,6 +45,7 @@ const char * label(void){
 
 int main(void){
   x2c_initialize();
+  static int held = 9;
   char buffer[2] = "a";
   struct text line;
   line.body = buffer;
@@ -52,7 +53,7 @@ int main(void){
   hidden();
   printf("%d %d %d %s\n", doubled(2), tripled(2), weak_value, label());
   printf("%s %d %d %d\n", greeting, farewell == NULL, quadrupled(2), limit);
-  printf("%d %d %s\n", quintupled(2), bound, line.body);
+  printf("%d %d %d %s\n", quintupled(2), bound, held, line.body);
   return 0;
 }
 
