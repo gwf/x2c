@@ -51,8 +51,7 @@ List List.cons_in(Pool pool, Var head, List tail) {
   List cell = pool.malloc(sizeof(struct List));
   cell.car = head;
   cell.cdr = tail;
-  Var canonical = pool.intern(cell, cell);
-  return canonical;
+  return pool.intern(cell, cell);
 }
 
 #pragma private
@@ -647,12 +646,8 @@ static Var _sublis_node(List alist, Var node) {
   List list = node;
   if (!list) return list;
   Array items = $auto([]);
-  foreach (Var source, list) {
-    Var item = _sublis_node(alist, source);
-    items.push(item);
-  }
-  List rebuilt = items;
-  return rebuilt;
+  foreach (Var source, list) items.push(_sublis_node(alist, source));
+  return items.list();
 }
 
 /** Recursively substitutes non-`List` nodes in `tree` from `alist`.

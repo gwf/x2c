@@ -24,11 +24,10 @@ typedef enum Args {
 
 /* One spec row after its properties are read. An option is named by its
    first long spelling, or else its short one, without the dashes; `value`
-   is the placeholder of an option that takes one, and `row` keeps every
-   spelling for the usage text. */
+   is the placeholder of an option that takes one, and `spellings` joins
+   every spelling for the usage text. */
 typedef struct _Option {
-  List row;
-  String spelling, name, value, help;
+  String spelling, spellings, name, value, help;
   Var fallback;
   int operand, defaulted, required, repeated, given;
 } _Option;
@@ -74,7 +73,6 @@ static void _read_property(_Option *option, List property) {
 /* The first word names an operand unless it begins with a dash; every
    dashed word is a spelling of the same option. */
 static void _read_row(_Option *option, List row, Map index, int position) {
-  option.row = row;
   String first = row.car().str();
   option.operand = !first.startswith("-");
   foreach (Var word, row) {
@@ -87,6 +85,8 @@ static void _read_row(_Option *option, List row, Map index, int position) {
       if (!option.spelling ||
           (text.startswith("--") && !option.spelling.startswith("--")))
         option.spelling = text;
+      option.spellings =
+        option.spellings ? %"${option.spellings}, $text" : text;
       index[text] = position;
     }
     else if (text == "required") option.required = 1;
@@ -263,11 +263,7 @@ static String _label(_Option *option) {
     if (option.repeated) label = %"$label...";
     return option.required ? label : %"[$label]";
   }
-  Array spellings = [];
-  foreach (Var word, option.row)
-    if (word is not List && word.str().startswith("-"))
-      spellings.push(word.str());
-  String label = spellings.join(", ");
+  String label = option.spellings;
   if (option.value) label = %"$label <${option.value}>";
   return label.startswith("--") ? %"    $label" : label;
 }
