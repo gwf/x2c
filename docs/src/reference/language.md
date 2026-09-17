@@ -2604,11 +2604,10 @@ The compiler warns with `unnecessary conversion` when source spells a
 conversion that its destination already performs. Translation continues.
 
 A cast is reported when its operand already has the cast type, qualifiers
-included. The comparison uses the declared x2c type. A cast between a
-typedef and the type it names is not reported, and neither is a cast between
-two typedefs of one C type. An operand whose C type x2c does not track, such
-as a pointer difference or a character constant, is never compared. A
-`(void)` cast discards a value on purpose and is not reported.
+included. The comparison uses the declared x2c type, so casts between a
+typedef and its underlying type, or between two typedefs of one C type, are
+not reported. Neither are `(void)` casts, or casts of an operand whose C type
+x2c does not track, such as a pointer difference or a character constant.
 
 A converter call is reported when its destination would make the same call.
 A converter is a method that takes only its receiver and is named for its
