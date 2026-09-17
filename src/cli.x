@@ -24,7 +24,7 @@ typedef struct CliRequest {
   Symbol color_mode;
   // The one --dump-* option in force, or 0. Each prints and stops.
   Symbol dump;
-  int jobs, debugging, verbose, dry_run, quiet, plain, nested, no_deps;
+  int jobs, debugging, verbose, dry_run, quiet, plain, no_deps;
   int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp;
   // The translation error limit; 0 reports every recoverable error.
   int max_errors;

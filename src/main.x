@@ -34,13 +34,6 @@
 #include "format.x"
 #include "protocol.x"
 
-// global state
-
-/* The active top-level or nested translation request. Its producing Scope and
-   canonical pools outlive every pipeline call that reads these borrowed
-   fields. A nested request may instead be produced by its target Context. */
-static CliRequest opts = NULL;
-
 // logging & diagnostics
 
 /* Only --debug logs. Without it there is no sink, so log_should_log is
@@ -103,14 +96,14 @@ static void _compile_file(
     exit(1);
   }
   compiler.own_diagnostics();
-  if (opts.dump == <tokens>) {
+  if (request.dump == <tokens>) {
     compiler.dump_tokens();
     return;
   }
   ok = unit.collect(frontend);
   _report_diagnostics(compiler);
   if (!ok) exit(1);
-  switch (opts.dump) {
+  switch (request.dump) {
     case <dump-cpp>:
       if (unit.preprocessor_output)
         Stderr.printf("%s", unit.preprocessor_output);
@@ -129,7 +122,7 @@ static void _compile_file(
   }
   compiler.recovery_depth = 0;
   List ast = unit.ast;
-  switch (opts.dump) {
+  switch (request.dump) {
     case <dump-cache>:
       compiler.dump_cache();
       return;
@@ -140,14 +133,14 @@ static void _compile_file(
       foreach (List node, ast) printf("\n%s\n", _ast_inspection_repr(node));
       return;
   }
-  if (opts.dump == <conform>) {
+  if (request.dump == <conform>) {
     printf("(unit %s)\n", filename);
     compiler.dump_conformance(unit.globals);
     return;
   }
   ast = compiler.generate_protocol_adapters(ast);
   ast = _transform_ast(compiler, ast);
-  switch (opts.dump) {
+  switch (request.dump) {
     case <transforms>:
       foreach (List node, ast) printf("\n%s\n", _ast_inspection_repr(node));
       return;
@@ -244,7 +237,7 @@ static int _translate_workers(
     running_count--;
     running[slot] = running[running_count];
     carried[slot] = carried[running_count];
-    if (!request.nested) report_progress(<translate>, done, total, NULL);
+    if (!build) report_progress(<translate>, done, total, NULL);
   }
   Scope.free(carried);
   Scope.free(running);
@@ -280,7 +273,6 @@ static Array _translation_chunks(List inputs, int total, int slices) {
 static int _run_translation(CliRequest c, Map unit_dirs, Build build) {
   unsigned long started_at = report_now_us();
   if (!c.out_dir) c.out_dir = ".";
-  opts = c;
   _preflight_translation(c, unit_dirs);
   if (c.verbose || c.dry_run) {
     fprintf(stderr, "x2c: translate");
@@ -306,20 +298,20 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build) {
     completed = total;
   }
   foreach (String input, parallel ? %() : c.inputs) {
-    if (!c.nested) report_progress(<translate>, completed, total, input);
+    if (!build) report_progress(<translate>, completed, total, input);
     if (build) build.begin_translation(input);
     _compile_file(frontend, input, _unit_output_dir(c, unit_dirs, input));
     if (build) build.end_translation(input, 0);
     completed++;
-    if (!c.nested) report_progress(<translate>, completed, total, input);
+    if (!build) report_progress(<translate>, completed, total, input);
   }
-  if (!c.nested)
+  if (!build)
     foreach (String input, c.inputs) {
       String stem = Path.stem(input);
       gen_bytes += report_file_bytes(%"${c.out_dir}/$stem.c");
       gen_bytes += report_file_bytes(%"${c.out_dir}/$stem.h");
     }
-  if (!c.nested && !c.inspects()) {
+  if (!build && !c.inspects()) {
     String duration = report_duration(report_now_us() - started_at);
     String noun = total == 1 ? "file" : "files";
     report_line(
@@ -335,25 +327,9 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build) {
   return 0;
 }
 
-static CliRequest _build_translation_request(
-  CliRequest source, List inputs, String output_dir) {
-  CliRequest request = Scope.malloc(sizeof(struct CliRequest));
-  *request = *source;
-  request.command = <translate>;
-  request.inputs = inputs;
-  request.run_args = NULL;
-  request.out_dir = output_dir;
-  request.dep_file = NULL;
-  request.dep_target = NULL;
-  request.no_deps = 0;
-  request.no_phony_deps = 0;
-  request.nested = 1;
-  return request;
-}
-
 /* Translates the stale `units` and registers every unit's generated files.
-   Current units are skipped; the rest translate together, so one nested
-   request can fill every job. Each unit keeps its own generated directory,
+   Current units are skipped; the rest translate together, so one request
+   can fill every job. Each unit keeps its own generated directory,
    so no two workers write the same file. */
 static int _translate_units(CliRequest c, Build state, List units) {
   Array stale = [];
@@ -370,21 +346,12 @@ static int _translate_units(CliRequest c, Build state, List units) {
     stale.push(input);
   }
   List inputs = stale.list_free();
-  /* One request carries every stale unit only when it can occupy more than
-     one worker. A single job keeps one request per unit, which is both the
-     faster shape in this process and the one earlier builds recorded their
-     retained translation fingerprints against. */
-  if (!c.dry_run && c.jobs > 1 && inputs) {
-    CliRequest translation =
-      _build_translation_request(c, inputs, state.gen_root);
+  if (!c.dry_run && inputs) {
+    CliRequest translation = Scope.memdup(c, sizeof(struct CliRequest));
+    translation.inputs = inputs;
+    translation.out_dir = state.gen_root;
     if (_run_translation(translation, stale_dirs, state)) return 1;
   }
-  else
-    foreach (String input, inputs) {
-      CliRequest translation = _build_translation_request(
-        c, cons(input, NULL), _unit_output_dir(c, stale_dirs, input));
-      if (!c.dry_run && _run_translation(translation, NULL, state)) return 1;
-    }
   /* Restore input order, including package directories inserted between
      generated directories, before native compilation and linking. */
   foreach (String input, units) {
@@ -404,13 +371,6 @@ static int _translate_units(CliRequest c, Build state, List units) {
 }
 
 static int _run_build_request(CliRequest c, Array commands) {
-  if (!c.dry_run) {
-    foreach (String input, c.inputs) {
-      if (!x2c_source_file(input)) continue;
-      Frontend.load_support(c);
-      break;
-    }
-  }
   /* A target has its own build graph and native-action scratch. Isolate
      its Scope allocations and canonical values so a manifest dependency is
      reclaimed before the next target starts. */
