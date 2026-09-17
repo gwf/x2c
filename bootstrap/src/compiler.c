@@ -1823,7 +1823,10 @@ static MatchCaptureSite _x2c_match_site_9;  if (x2c_match_site_try_capture(& _x2
 static MatchCaptureSite _x2c_match_site_10;  if (x2c_match_site_try_capture(& _x2c_match_site_10, _x2c_match_expr, List_var(_121), &_x2c_match_capture)) {Var spelling = _x2c_match_values[0];  return Atom_intern(Var_string(spelling));  break;
 }
 static MatchCaptureSite _x2c_match_site_11;  if (x2c_match_site_try_capture(& _x2c_match_site_11, _x2c_match_expr, List_var(_133), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  Var text = _x2c_match_values[1];  Var line = _x2c_match_values[2];  Var column = _x2c_match_values[3];  Var length = _x2c_match_values[4];  Var position = _x2c_match_values[5]; {
-  Token token = Scope_calloc(1, sizeof(struct Token));  token -> type = Symbol_new(Var_string(type));  token -> text = Var_string(text);  token -> line = Var_int(Var_convert(line, 3453797));  token -> col = Var_int(Var_convert(column, 3453797));  token -> len = Var_int(Var_convert(length, 3453797));  token -> pos = Var_int(Var_convert(position, 3453797));  return Token_var(token);
+  Token token = Scope_calloc(1, sizeof(struct Token));  * token =(struct Token){
+    .text = Var_string(text), .type = Symbol_new(Var_string(type)), .line = Var_int(Var_convert(line, 3453797)), .col = Var_int(Var_convert(column, 3453797)), .len = Var_int(Var_convert(length, 3453797)), .pos = Var_int(Var_convert(position, 3453797))
+  }
+  ;  return Token_var(token);
 }
 break;
 }

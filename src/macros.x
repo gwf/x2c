@@ -552,12 +552,16 @@ int Compiler.macro_form_is_definition(Compiler compiler) {
   return compiler.peek(1) == <ident> && compiler.peek(2) == <$>;
 }
 
+/* The `<(>` literal keeps this body braced: the API reference generator
+   reads it as an unbalanced parenthesis and drops the rest of the file. */
+
 /** Returns whether the current tokens begin a local macro definition.
     This query does not consume tokens.
 */
-int Compiler.local_macro_form_is_definition(Compiler c) =>
-  c.peek(0) == <ident> && c.token.text == "macro" &&
-  c.peek(1) == <ident> && c.peek(2) == <ident> && c.peek(3) == <(>;
+int Compiler.local_macro_form_is_definition(Compiler c) {
+  return c.peek(0) == <ident> && c.token.text == "macro" &&
+         c.peek(1) == <ident> && c.peek(2) == <ident> && c.peek(3) == <(>;
+}
 
 /** Returns whether the current tokens begin a `keyword NAME $macro` alias.
     This query does not consume tokens.

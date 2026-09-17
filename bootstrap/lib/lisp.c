@@ -1456,7 +1456,10 @@ Lisp Lisp_kernel(void){
 
     }
     lisp -> scope = session;
-    memset(& lisp -> auto_stats, 0, sizeof(LispAutoStats));
+    lisp -> auto_stats =(LispAutoStats){
+      0
+    }
+    ;
     lisp -> auto_machine_stats = NULL;
     lisp -> auto_disabled = 0;
     {

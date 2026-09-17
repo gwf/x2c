@@ -38,7 +38,7 @@ input `String`s, and `dest` must remain live until iteration ends.
 Constructing the iterator does not raise. Pulling may raise
 `<alloc-fail>` as `Split.try_next` does. A null `dest` returns NULL.
 
-Source: `lib/split.x:270`
+Source: `lib/split.x:268`
 
 <a id="Split.try_next"></a>
 #### Split.try_next
@@ -67,7 +67,7 @@ boxing adapter for every other binder.
 **Raises:** `<alloc-fail>` while canonicalizing a nonempty field. `Null`
 arguments produce exhaustion without raising.
 
-Source: `lib/split.x:244`
+Source: `lib/split.x:242`
 
 ### `String`
 
@@ -90,7 +90,7 @@ actual owning pool must remain live through traversal.
 **Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
 An empty `String` produces an exhausted cursor.
 
-Source: `lib/split.x:207`
+Source: `lib/split.x:205`
 
 <a id="String.split"></a>
 #### String.split
@@ -168,7 +168,7 @@ when that residency should be temporary. The cursor borrows `str` and
 
 **Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
 
-Source: `lib/split.x:221`
+Source: `lib/split.x:219`
 
 <a id="String.words"></a>
 #### String.words
@@ -189,7 +189,7 @@ actual owning pool must remain live through traversal.
 **Raises:** `<alloc-fail>` when the cursor descriptor cannot be allocated.
 An empty `String` produces an exhausted cursor.
 
-Source: `lib/split.x:192`
+Source: `lib/split.x:190`
 
 ## Public types
 

@@ -429,6 +429,19 @@ favor of `String.pool_*`, `Iter.foldl`, and `Var.truth`.
 
 Open questions with no owner yet, recorded so they are not lost:
 
+- **The API reference generator drops the rest of a file after a `<(>`
+  literal in an expression body.** Converting
+  `Compiler.local_macro_form_is_definition` (`src/macros.x`) to a `=>` body
+  cut `docs/src/internals/compiler-api/macros.md` from 28 documented
+  callables to two, silently and with `make doc-generate` exiting 0; only the
+  gate's later staleness check noticed. The body compares a token against the
+  Symbol literal `<(>`, which `tools/x2c_source.py` reads as an unbalanced
+  parenthesis. A sibling function two declarations below has used a `=>` body
+  all along without a `<(>` and is unaffected. Reproduced by the review
+  author at 93a42de5; the conversion is reverted with a comment saying why,
+  so the page is whole. This is the regex pseudo-parser that
+  [x2c-lint-and-format](x2c-lint-and-format.md) proposes to replace, and it
+  is a concrete argument for doing so.
 - **A namespace call does not resolve inside a macro template.**
   `Block.new(...)`, `Var.new(...)`, `Bytes.new(...)` and the `Scope.*` calls
   are reported as `type () has no method new` at

@@ -547,11 +547,10 @@ static LogSink _new_sink(Logger logger, LogEmitter emit, LogFlusher flush, Var d
 
     }
     LogSink sink = Scope_calloc_in(& logger -> storage, 1, sizeof(struct LogSink));
-    sink -> logger = logger;
-    sink -> emit = emit;
-    sink -> flush = flush;
-    sink -> destroy = destroy;
-    sink -> data = data;
+    * sink =(struct LogSink){
+      .logger = logger, .emit = emit, .flush = flush, .destroy = destroy, .data = data
+    }
+    ;
     _append_sink(logger, sink);
     {
       LogSink _x2c_return_value_8 = result = sink;
@@ -1272,10 +1271,10 @@ Logger Logger_new(Symbol min_level){
 
     }
     Logger logger = Scope_calloc(1, sizeof(struct Logger));
-    logger -> min_level = min_level;
-    logger -> owner_scope = * Scope_top();
-    logger -> pool = String_pool_current();
-    logger -> storage = Scope_new_named("Logger");
+    * logger =(struct Logger){
+      .min_level = min_level, .owner_scope = * Scope_top(), .pool = String_pool_current(), .storage = Scope_new_named("Logger")
+    }
+    ;
     {
       Logger _x2c_return_value_18 = logger;
       {

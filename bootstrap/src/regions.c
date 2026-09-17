@@ -721,7 +721,10 @@ static Region _innermost(Walk w, Symbol kind){
 int List_truth(List);
 Var Map_setindex(Map, Var, Var);
 static Fact _fact(Walk w, List binding, int param){
-  Fact fact = Scope_calloc(1, sizeof(struct Fact));  fact -> depth = w -> depth;  fact -> origin = w -> origin;  fact -> param = param;  if(List_truth(binding)) Map_setindex(w -> facts, List_var(binding), Fact_var(fact));  return fact;
+  Fact fact = Scope_calloc(1, sizeof(struct Fact));  * fact =(struct Fact){
+    .depth = w -> depth, .origin = w -> origin, .param = param
+  }
+  ;  if(List_truth(binding)) Map_setindex(w -> facts, List_var(binding), Fact_var(fact));  return fact;
 }
 
 static Region _owner(Walk w, Fact slot){

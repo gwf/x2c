@@ -344,11 +344,10 @@ ToolAction Toolchain_link_action(Toolchain t, String output, List inputs){
 ToolAction tool_action_new(Symbol phase, List arguments, int verbose, int dry_run){
   if(! _init_guard_) _file_init_();
   ToolAction action = Scope_calloc(1, sizeof(struct ToolAction));
-  action -> phase = phase;
-  action -> arguments = arguments;
-  action -> verbose = verbose;
-  action -> dry_run = dry_run;
-  action -> report = 1;
+  * action =(struct ToolAction){
+    .phase = phase, .arguments = arguments, .verbose = verbose, .dry_run = dry_run, .report = 1
+  }
+  ;
   return action;
 }
 

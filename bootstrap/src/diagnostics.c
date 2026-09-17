@@ -178,11 +178,10 @@ void * Scope_malloc(size_t);
 Diagnostics Diagnostics_new(Compiler printer, int limit){
   if(! _init_guard_) _file_init_();
   Diagnostics diag = Scope_malloc(sizeof(struct Diagnostics));
-  diag -> entries = Array_new();
-  diag -> printer = printer;
-  diag -> limit =(limit < 0) ? 0 : limit;
-  diag -> count = 0;
-  diag -> limit_notified = 0;
+  * diag =(struct Diagnostics){
+    .entries = Array_new(), .printer = printer, .limit =(limit < 0) ? 0 : limit
+  }
+  ;
   return diag;
 }
 
@@ -488,7 +487,7 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
   List loc = _compiler_location(compiler, token);
   Diagnostics_report(diag, code, message, loc, notes);
   if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 376};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 373};
     x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));
     __builtin_unreachable();
   }

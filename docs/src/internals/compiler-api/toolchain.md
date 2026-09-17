@@ -48,7 +48,7 @@ Runs the host tool `arguments` without a shell, captures both streams,
 and returns its shell-style status. A tool that cannot start returns 127
 and leaves the reason in `errors`.
 
-Source: `src/toolchain.x:245`
+Source: `src/toolchain.x:243`
 
 #### toolchain_new
 
@@ -73,7 +73,7 @@ Source: `src/toolchain.x:100`
 
 Inherits the standard streams and suppresses the failure summary.
 
-Source: `src/toolchain.x:189`
+Source: `src/toolchain.x:187`
 
 <a id="ToolAction.run"></a>
 #### ToolAction.run
@@ -85,7 +85,7 @@ Starts and waits for the action, returning its final status.
 **Raises:** the same construction and capture-reading causes as
 `ToolAction.start` and `ToolRun.wait`.
 
-Source: `src/toolchain.x:350`
+Source: `src/toolchain.x:348`
 
 <a id="ToolAction.start"></a>
 #### ToolAction.start
@@ -99,7 +99,7 @@ starts no child.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the execution
 or argv.
 
-Source: `src/toolchain.x:300`
+Source: `src/toolchain.x:298`
 
 ### `ToolRun`
 
@@ -111,7 +111,7 @@ Source: `src/toolchain.x:300`
 Checks whether an execution can be waited without blocking. A dry run
 and a tool that could not start are ready immediately.
 
-Source: `src/toolchain.x:318`
+Source: `src/toolchain.x:316`
 
 <a id="ToolRun.wait"></a>
 #### ToolRun.wait
@@ -126,7 +126,7 @@ stderr; program actions inherit standard streams.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 reading either capture as a `String`.
 
-Source: `src/toolchain.x:328`
+Source: `src/toolchain.x:326`
 
 ### `Toolchain`
 
@@ -189,7 +189,7 @@ does not consult `dry_run`.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 constructing arguments or reading captured text.
 
-Source: `src/toolchain.x:369`
+Source: `src/toolchain.x:367`
 
 <a id="Toolchain.preprocess_action"></a>
 #### Toolchain.preprocess_action
@@ -214,7 +214,7 @@ without explicit options, as it reports them, plus the `lib` directory
 beside each reported `include` directory. A compiler that reports none
 contributes none.
 
-Source: `src/toolchain.x:261`
+Source: `src/toolchain.x:259`
 
 ## Public types
 

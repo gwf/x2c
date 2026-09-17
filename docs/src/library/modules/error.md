@@ -341,7 +341,7 @@ failure reaches the non-reentrant error floor.
 Prefer the `raise` statement in source so generated location detail is
 retained.
 
-Source: `lib/error.x:1221`
+Source: `lib/error.x:1219`
 
 <a id="Error.ready"></a>
 #### Error.ready
@@ -352,7 +352,7 @@ Reports whether the rich `Error` runtime can currently accept raises.
 This is per-thread state and is false before initialization and after
 shutdown.
 
-Source: `lib/error.x:1233`
+Source: `lib/error.x:1231`
 
 <a id="Error.restore"></a>
 #### Error.restore
@@ -472,7 +472,7 @@ cases handlers pushed inside the `Context` are reclaimed. Tokens must close
 in nesting order; an out-of-order close reaches the raw error floor. A null
 token does nothing and a closed token is invalid.
 
-Source: `lib/error.x:1023`
+Source: `lib/error.x:1021`
 
 <a id="Error.context_open"></a>
 #### Error.context_open

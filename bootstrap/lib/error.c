@@ -922,11 +922,10 @@ void * Error_context_open(void){
   if(! Error_ready()) return NULL;
   ErrorThreadState thread = _thread();
   ErrorContextState state = Scope_malloc(sizeof(struct ErrorContextState));
-  state -> prev = thread -> context_top;
-  state -> policy = Map_new();
-  state -> bound = Error_bound();
-  state -> handler_depth = Error_handler_depth();
-  state -> stack_height = Error_count();
+  * state =(struct ErrorContextState){
+    .prev = thread -> context_top, .policy = Map_new(), .bound = Error_bound(), .handler_depth = Error_handler_depth(), .stack_height = Error_count()
+  }
+  ;
   thread -> context_top = state;
   return state;
 }

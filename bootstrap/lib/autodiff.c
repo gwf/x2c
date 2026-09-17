@@ -141,10 +141,10 @@ Var Array_push(Array, Var);
 
 static AdNode _record(AdTape tape, double value, Func back){
   AdNode node = Scope_malloc(sizeof(struct AdNode));
-  node -> value = value;
-  node -> adjoint = 0.0;
-  node -> back = back;
-  node -> tape = tape;
+  * node =(struct AdNode){
+    .value = value, .adjoint = 0.0, .back = back, .tape = tape
+  }
+  ;
   Array_push(tape -> nodes, AdNode_var(node));
   return node;
 }

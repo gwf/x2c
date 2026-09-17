@@ -56,13 +56,10 @@ static int MachineBuilder__grow_code(MachineBuilder b){
 int MachineBuilder_emit(MachineBuilder b, int op, int a, int operand_b, int c, int d, int target){
   if(b -> status != MACHINE_PREPARED || ! MachineBuilder__grow_code(b)) return - 1;
   if(op < 0 || op > 255 || operand_b < 0 || operand_b > 255 || c < 0 || c > 255 || d < 0 || d > 255 || a < - 1 || a >= MACHINE_CODE_MAX || target < - 1 || target >= MACHINE_CODE_MAX) return MachineBuilder__fail(b, "instruction-range");
-  MachineWord word;
-  word.op = op;
-  word.b = operand_b;
-  word.c = c;
-  word.d = d;
-  word.a = a;
-  word.target = target;
+  MachineWord word ={
+    .op = op, .b = operand_b, .c = c, .d = d, .a = a, .target = target
+  }
+  ;
   b -> code[b -> length] = word;
   return b -> length ++;
 }
@@ -98,7 +95,7 @@ Var int_var(int);
 
 void MachineBuilder_set_target(MachineBuilder b, int site, int target){
   if(target < 0 || target >= MACHINE_CODE_MAX){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/machine.x",.function = "MachineBuilder_set_target",.line = 463};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/machine.x",.function = "MachineBuilder_set_target",.line = 458};
     x2c_error_raise_n(& _x2c_error_site_0, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MachineBuilder.set_target")), NULL))), Symbol_var(1345468776), int_var(target));
     __builtin_unreachable();
   }
@@ -143,10 +140,10 @@ MachineProgram MachineBuilder_freeze(MachineBuilder b){
   if(b -> status != MACHINE_PREPARED || b -> root < 0) return NULL;
   size_t bytes = _program_bytes(b -> length, b -> const_count, b -> binder_count);
   MachineProgram program = Scope_malloc(bytes);
-  program -> length = b -> length;
-  program -> const_count = b -> const_count;
-  program -> binder_count = b -> binder_count;
-  program -> root = b -> root;
+  * program =(struct MachineProgram){
+    .length = b -> length, .const_count = b -> const_count, .binder_count = b -> binder_count, .root = b -> root
+  }
+  ;
   MachineWord * code =(MachineWord *)(program + 1);
   Var * consts =(Var *)(code + b -> length);
   Atom * binders =(Atom *)(consts + b -> const_count);

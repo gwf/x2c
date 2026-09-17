@@ -106,9 +106,10 @@ void * Scope_malloc(size_t);
 
 static Split _new(String str, String sep, int(* next)(Split split, int * cursor, String * out)){
   Split split = Scope_malloc(sizeof(struct Split));
-  split -> str = str;
-  split -> sep = sep;
-  split -> next = next;
+  * split =(struct Split){
+    .str = str, .sep = sep, .next = next
+  }
+  ;
   return split;
 }
 

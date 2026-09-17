@@ -14,7 +14,7 @@ static String _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3
 #include <time.h>
 #include <unistd.h>
 #include "process.h"
-static struct{
+static struct ReportState{
   int receipts, transient, color, columns, width;
   unsigned long start, update;
 }
@@ -114,7 +114,10 @@ static int _columns(void){
 
 void report_configure(int quiet, int plain, Symbol color_mode, int verbose, int dry_run, int inspecting){
   if(! _init_guard_) _file_init_();
-  memset(& report, 0, sizeof(report));
+  report =(struct ReportState){
+    0
+  }
+  ;
   int terminal = _terminal();
   int diagnostic = verbose || dry_run || inspecting;
   report.receipts = ! quiet && ! diagnostic;
