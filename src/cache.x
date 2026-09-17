@@ -281,7 +281,10 @@ static List _defer_one_binding(
     case %(bind *): return bound;
     case %(op = (bind ?name ?mods) (expr ?type ?value)): {
       List declaration = %(declare $decltype (bindings (bind $name $mods)));
-      Type declared = declaration.type_from_ast().canonicalize();
+      Type object = declaration.type_from_ast().declared();
+      // C initializes a const object only in its definition.
+      if (object.car() == <const>) return bound;
+      Type declared = object.canonicalize();
       Type resolved = compiler.sym.resolve_key(declared);
       if (resolved.is_array()) {
         if (!_contains_cache_ref(value) &&
