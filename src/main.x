@@ -106,7 +106,7 @@ static void _compile_file(
   switch (request.dump) {
     case <dump-cpp>:
       if (unit.preprocessor_output)
-        Stderr.printf("%s", unit.preprocessor_output);
+        printf("%s", unit.preprocessor_output);
       return;
     case <cpp-tokens>:
       if (unit.preprocessor) unit.preprocessor.dump_tokens();
