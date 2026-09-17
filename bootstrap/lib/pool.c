@@ -1,11 +1,43 @@
-#define _x2c_initializer_choice_D7C30390_0_expanded(_x2c_static_input_0) static void _x2c_static_initialize_0(void){\
-  _x2c_static_input_0;\
+#define _x2c_initializer_choice_D7C30390_0_expanded(_x2c_static_input_0,_x2c_static_input_1,_x2c_static_input_2,_x2c_static_input_3,_x2c_static_input_4,_x2c_static_input_5,_x2c_static_input_6,_x2c_static_input_7,_x2c_static_input_8,_x2c_static_input_9,_x2c_static_input_10,_x2c_static_input_11,_x2c_static_input_12,_x2c_static_input_13,_x2c_static_input_14,_x2c_static_input_15,_x2c_static_input_16,_x2c_static_input_17,_x2c_static_input_18,_x2c_static_input_19,_x2c_static_input_20,_x2c_static_input_21,_x2c_static_input_22,_x2c_static_input_23,_x2c_static_input_24,_x2c_static_input_25,_x2c_static_input_26,_x2c_static_input_27,_x2c_static_input_28,_x2c_static_input_29) static void _x2c_static_initialize_0(void){\
+  {\
+    if(_x2c_static_input_0) if(_x2c_static_input_1) _x2c_static_input_2;\
+    if(_x2c_static_input_3) if(_x2c_static_input_4) _x2c_static_input_5;\
+    if(_x2c_static_input_6) if(_x2c_static_input_7) _x2c_static_input_8;\
+    if(_x2c_static_input_9) if(_x2c_static_input_10) _x2c_static_input_11;\
+    if(_x2c_static_input_12) if(_x2c_static_input_13) _x2c_static_input_14;\
+    if(_x2c_static_input_15) if(_x2c_static_input_16) _x2c_static_input_17;\
+    if(_x2c_static_input_18) if(_x2c_static_input_19) _x2c_static_input_20;\
+    if(_x2c_static_input_21) if(_x2c_static_input_22) _x2c_static_input_23;\
+    if(_x2c_static_input_24) if(_x2c_static_input_25) _x2c_static_input_26;\
+    if(_x2c_static_input_27) if(_x2c_static_input_28) _x2c_static_input_29;\
+  }\
+\
 }
-#define _x2c_initializer_choice_D7C30390_0(_x2c_static_input_0) _x2c_initializer_choice_D7C30390_0_expanded(_x2c_static_input_0)
-#define _x2c_initializer_choice_D7C30390_1_expanded(_x2c_static_input_1) static void _x2c_static_initialize_1(void){\
-  _x2c_static_input_1;\
+#define _x2c_initializer_choice_D7C30390_0(_x2c_static_input_0,_x2c_static_input_1,_x2c_static_input_2,_x2c_static_input_3,_x2c_static_input_4,_x2c_static_input_5,_x2c_static_input_6,_x2c_static_input_7,_x2c_static_input_8,_x2c_static_input_9,_x2c_static_input_10,_x2c_static_input_11,_x2c_static_input_12,_x2c_static_input_13,_x2c_static_input_14,_x2c_static_input_15,_x2c_static_input_16,_x2c_static_input_17,_x2c_static_input_18,_x2c_static_input_19,_x2c_static_input_20,_x2c_static_input_21,_x2c_static_input_22,_x2c_static_input_23,_x2c_static_input_24,_x2c_static_input_25,_x2c_static_input_26,_x2c_static_input_27,_x2c_static_input_28,_x2c_static_input_29) _x2c_initializer_choice_D7C30390_0_expanded(_x2c_static_input_0,_x2c_static_input_1,_x2c_static_input_2,_x2c_static_input_3,_x2c_static_input_4,_x2c_static_input_5,_x2c_static_input_6,_x2c_static_input_7,_x2c_static_input_8,_x2c_static_input_9,_x2c_static_input_10,_x2c_static_input_11,_x2c_static_input_12,_x2c_static_input_13,_x2c_static_input_14,_x2c_static_input_15,_x2c_static_input_16,_x2c_static_input_17,_x2c_static_input_18,_x2c_static_input_19,_x2c_static_input_20,_x2c_static_input_21,_x2c_static_input_22,_x2c_static_input_23,_x2c_static_input_24,_x2c_static_input_25,_x2c_static_input_26,_x2c_static_input_27,_x2c_static_input_28,_x2c_static_input_29)
+#define _x2c_initializer_choice_D7C30390_1_expanded(_x2c_static_input_30,_x2c_static_input_31,_x2c_static_input_32,_x2c_static_input_33,_x2c_static_input_34,_x2c_static_input_35,_x2c_static_input_36,_x2c_static_input_37,_x2c_static_input_38,_x2c_static_input_39,_x2c_static_input_40,_x2c_static_input_41,_x2c_static_input_42,_x2c_static_input_43,_x2c_static_input_44,_x2c_static_input_45,_x2c_static_input_46,_x2c_static_input_47,_x2c_static_input_48,_x2c_static_input_49,_x2c_static_input_50,_x2c_static_input_51,_x2c_static_input_52,_x2c_static_input_53,_x2c_static_input_54,_x2c_static_input_55,_x2c_static_input_56,_x2c_static_input_57,_x2c_static_input_58,_x2c_static_input_59) static void _x2c_static_initialize_1(void){\
+  {\
+    if(_x2c_static_input_30) if(_x2c_static_input_31) _x2c_static_input_32;\
+    if(_x2c_static_input_33) if(_x2c_static_input_34) _x2c_static_input_35;\
+    if(_x2c_static_input_36) if(_x2c_static_input_37) _x2c_static_input_38;\
+    if(_x2c_static_input_39) if(_x2c_static_input_40) _x2c_static_input_41;\
+    if(_x2c_static_input_42) if(_x2c_static_input_43) _x2c_static_input_44;\
+    if(_x2c_static_input_45) if(_x2c_static_input_46) _x2c_static_input_47;\
+    if(_x2c_static_input_48) if(_x2c_static_input_49) _x2c_static_input_50;\
+    if(_x2c_static_input_51) if(_x2c_static_input_52) _x2c_static_input_53;\
+    if(_x2c_static_input_54) if(_x2c_static_input_55) _x2c_static_input_56;\
+    if(_x2c_static_input_57) if(_x2c_static_input_58) _x2c_static_input_59;\
+  }\
+\
 }
-#define _x2c_initializer_choice_D7C30390_1(_x2c_static_input_1) _x2c_initializer_choice_D7C30390_1_expanded(_x2c_static_input_1)
+#define _x2c_initializer_choice_D7C30390_1(_x2c_static_input_30,_x2c_static_input_31,_x2c_static_input_32,_x2c_static_input_33,_x2c_static_input_34,_x2c_static_input_35,_x2c_static_input_36,_x2c_static_input_37,_x2c_static_input_38,_x2c_static_input_39,_x2c_static_input_40,_x2c_static_input_41,_x2c_static_input_42,_x2c_static_input_43,_x2c_static_input_44,_x2c_static_input_45,_x2c_static_input_46,_x2c_static_input_47,_x2c_static_input_48,_x2c_static_input_49,_x2c_static_input_50,_x2c_static_input_51,_x2c_static_input_52,_x2c_static_input_53,_x2c_static_input_54,_x2c_static_input_55,_x2c_static_input_56,_x2c_static_input_57,_x2c_static_input_58,_x2c_static_input_59) _x2c_initializer_choice_D7C30390_1_expanded(_x2c_static_input_30,_x2c_static_input_31,_x2c_static_input_32,_x2c_static_input_33,_x2c_static_input_34,_x2c_static_input_35,_x2c_static_input_36,_x2c_static_input_37,_x2c_static_input_38,_x2c_static_input_39,_x2c_static_input_40,_x2c_static_input_41,_x2c_static_input_42,_x2c_static_input_43,_x2c_static_input_44,_x2c_static_input_45,_x2c_static_input_46,_x2c_static_input_47,_x2c_static_input_48,_x2c_static_input_49,_x2c_static_input_50,_x2c_static_input_51,_x2c_static_input_52,_x2c_static_input_53,_x2c_static_input_54,_x2c_static_input_55,_x2c_static_input_56,_x2c_static_input_57,_x2c_static_input_58,_x2c_static_input_59)
+#define _x2c_initializer_choice_D7C30390_2_expanded(_x2c_static_input_60) static void _x2c_static_initialize_2(void){\
+  _x2c_static_input_60;\
+}
+#define _x2c_initializer_choice_D7C30390_2(_x2c_static_input_60) _x2c_initializer_choice_D7C30390_2_expanded(_x2c_static_input_60)
+#define _x2c_initializer_choice_D7C30390_3_expanded(_x2c_static_input_61) static void _x2c_static_initialize_3(void){\
+  _x2c_static_input_61;\
+}
+#define _x2c_initializer_choice_D7C30390_3(_x2c_static_input_61) _x2c_initializer_choice_D7C30390_3_expanded(_x2c_static_input_61)
 /* auto-generated by x2c.  Do not edit! */
 
 #include "pool.h"
@@ -48,74 +80,136 @@ enum PoolBlockConstant{
 ;
 
 _Static_assert(sizeof(struct PoolBlock) == 64, "the pool block header is 64 bytes");
-static const unsigned pool_class_sizes[POOL_CLASS_COUNT] ={
-  __builtin_choose_expr(0ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 16, (__typeof__(pool_class_sizes[0ULL])){
-    0
-  }
-  ), __builtin_choose_expr(1ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 32, (__typeof__(pool_class_sizes[1ULL])){
-    0
-  }
-  ), __builtin_choose_expr(2ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 48, (__typeof__(pool_class_sizes[2ULL])){
-    0
-  }
-  ), __builtin_choose_expr(3ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 64, (__typeof__(pool_class_sizes[3ULL])){
-    0
-  }
-  ), __builtin_choose_expr(4ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 96, (__typeof__(pool_class_sizes[4ULL])){
-    0
-  }
-  ), __builtin_choose_expr(5ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 128, (__typeof__(pool_class_sizes[5ULL])){
-    0
-  }
-  ), __builtin_choose_expr(6ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 192, (__typeof__(pool_class_sizes[6ULL])){
-    0
-  }
-  ), __builtin_choose_expr(7ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 256, (__typeof__(pool_class_sizes[7ULL])){
-    0
-  }
-  ), __builtin_choose_expr(8ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 384, (__typeof__(pool_class_sizes[8ULL])){
-    0
-  }
-  ), __builtin_choose_expr(9ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 512, (__typeof__(pool_class_sizes[9ULL])){
-    0
-  }
-  )
+static unsigned pool_class_sizes[POOL_CLASS_COUNT] ={
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 }
 ;
-static const unsigned pool_block_sizes[POOL_CLASS_COUNT] ={
-  __builtin_choose_expr(0ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 512, (__typeof__(pool_block_sizes[0ULL])){
-    0
-  }
-  ), __builtin_choose_expr(1ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 1024, (__typeof__(pool_block_sizes[1ULL])){
-    0
-  }
-  ), __builtin_choose_expr(2ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 2048, (__typeof__(pool_block_sizes[2ULL])){
-    0
-  }
-  ), __builtin_choose_expr(3ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 2048, (__typeof__(pool_block_sizes[3ULL])){
-    0
-  }
-  ), __builtin_choose_expr(4ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 4096, (__typeof__(pool_block_sizes[4ULL])){
-    0
-  }
-  ), __builtin_choose_expr(5ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 4096, (__typeof__(pool_block_sizes[5ULL])){
-    0
-  }
-  ), __builtin_choose_expr(6ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 4096, (__typeof__(pool_block_sizes[6ULL])){
-    0
-  }
-  ), __builtin_choose_expr(7ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 4096, (__typeof__(pool_block_sizes[7ULL])){
-    0
-  }
-  ), __builtin_choose_expr(8ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 4096, (__typeof__(pool_block_sizes[8ULL])){
-    0
-  }
-  ), __builtin_choose_expr(9ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 4096, (__typeof__(pool_block_sizes[9ULL])){
-    0
-  }
-  )
+_x2c_initializer_choice_D7C30390_0((0ULL < sizeof(pool_class_sizes) / sizeof(pool_class_sizes[0ULL])), (0ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0])))), (pool_class_sizes[0ULL] = __builtin_choose_expr(0ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), __builtin_choose_expr(0ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 16, (__typeof__(pool_class_sizes[0ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)), (1ULL < sizeof(pool_class_sizes) / sizeof(pool_class_sizes[1ULL])), (1ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0])))), (pool_class_sizes[1ULL] = __builtin_choose_expr(1ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), __builtin_choose_expr(1ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 32, (__typeof__(pool_class_sizes[1ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)), (2ULL < sizeof(pool_class_sizes) / sizeof(pool_class_sizes[2ULL])), (2ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0])))), (pool_class_sizes[2ULL] = __builtin_choose_expr(2ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), __builtin_choose_expr(2ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 48, (__typeof__(pool_class_sizes[2ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)), (3ULL < sizeof(pool_class_sizes) / sizeof(pool_class_sizes[3ULL])), (3ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0])))), (pool_class_sizes[3ULL] = __builtin_choose_expr(3ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), __builtin_choose_expr(3ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 64, (__typeof__(pool_class_sizes[3ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)), (4ULL < sizeof(pool_class_sizes) / sizeof(pool_class_sizes[4ULL])), (4ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0])))), (pool_class_sizes[4ULL] = __builtin_choose_expr(4ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), __builtin_choose_expr(4ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 96, (__typeof__(pool_class_sizes[4ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)), (5ULL < sizeof(pool_class_sizes) / sizeof(pool_class_sizes[5ULL])), (5ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0])))), (pool_class_sizes[5ULL] = __builtin_choose_expr(5ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), __builtin_choose_expr(5ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 128, (__typeof__(pool_class_sizes[5ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)), (6ULL < sizeof(pool_class_sizes) / sizeof(pool_class_sizes[6ULL])), (6ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0])))), (pool_class_sizes[6ULL] = __builtin_choose_expr(6ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), __builtin_choose_expr(6ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 192, (__typeof__(pool_class_sizes[6ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)), (7ULL < sizeof(pool_class_sizes) / sizeof(pool_class_sizes[7ULL])), (7ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0])))), (pool_class_sizes[7ULL] = __builtin_choose_expr(7ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), __builtin_choose_expr(7ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 256, (__typeof__(pool_class_sizes[7ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)), (8ULL < sizeof(pool_class_sizes) / sizeof(pool_class_sizes[8ULL])), (8ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0])))), (pool_class_sizes[8ULL] = __builtin_choose_expr(8ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), __builtin_choose_expr(8ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 384, (__typeof__(pool_class_sizes[8ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)), (9ULL < sizeof(pool_class_sizes) / sizeof(pool_class_sizes[9ULL])), (9ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0])))), (pool_class_sizes[9ULL] = __builtin_choose_expr(9ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), __builtin_choose_expr(9ULL <(sizeof(pool_class_sizes) /(sizeof(pool_class_sizes[0]))), 512, (__typeof__(pool_class_sizes[9ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)))
+static unsigned pool_block_sizes[POOL_CLASS_COUNT] ={
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 }
 ;
+_x2c_initializer_choice_D7C30390_1((0ULL < sizeof(pool_block_sizes) / sizeof(pool_block_sizes[0ULL])), (0ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0])))), (pool_block_sizes[0ULL] = __builtin_choose_expr(0ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), __builtin_choose_expr(0ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 512, (__typeof__(pool_block_sizes[0ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)), (1ULL < sizeof(pool_block_sizes) / sizeof(pool_block_sizes[1ULL])), (1ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0])))), (pool_block_sizes[1ULL] = __builtin_choose_expr(1ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), __builtin_choose_expr(1ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 1024, (__typeof__(pool_block_sizes[1ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)), (2ULL < sizeof(pool_block_sizes) / sizeof(pool_block_sizes[2ULL])), (2ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0])))), (pool_block_sizes[2ULL] = __builtin_choose_expr(2ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), __builtin_choose_expr(2ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 2048, (__typeof__(pool_block_sizes[2ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)), (3ULL < sizeof(pool_block_sizes) / sizeof(pool_block_sizes[3ULL])), (3ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0])))), (pool_block_sizes[3ULL] = __builtin_choose_expr(3ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), __builtin_choose_expr(3ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 2048, (__typeof__(pool_block_sizes[3ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)), (4ULL < sizeof(pool_block_sizes) / sizeof(pool_block_sizes[4ULL])), (4ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0])))), (pool_block_sizes[4ULL] = __builtin_choose_expr(4ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), __builtin_choose_expr(4ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 4096, (__typeof__(pool_block_sizes[4ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)), (5ULL < sizeof(pool_block_sizes) / sizeof(pool_block_sizes[5ULL])), (5ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0])))), (pool_block_sizes[5ULL] = __builtin_choose_expr(5ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), __builtin_choose_expr(5ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 4096, (__typeof__(pool_block_sizes[5ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)), (6ULL < sizeof(pool_block_sizes) / sizeof(pool_block_sizes[6ULL])), (6ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0])))), (pool_block_sizes[6ULL] = __builtin_choose_expr(6ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), __builtin_choose_expr(6ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 4096, (__typeof__(pool_block_sizes[6ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)), (7ULL < sizeof(pool_block_sizes) / sizeof(pool_block_sizes[7ULL])), (7ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0])))), (pool_block_sizes[7ULL] = __builtin_choose_expr(7ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), __builtin_choose_expr(7ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 4096, (__typeof__(pool_block_sizes[7ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)), (8ULL < sizeof(pool_block_sizes) / sizeof(pool_block_sizes[8ULL])), (8ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0])))), (pool_block_sizes[8ULL] = __builtin_choose_expr(8ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), __builtin_choose_expr(8ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 4096, (__typeof__(pool_block_sizes[8ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)), (9ULL < sizeof(pool_block_sizes) / sizeof(pool_block_sizes[9ULL])), (9ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0])))), (pool_block_sizes[9ULL] = __builtin_choose_expr(9ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), __builtin_choose_expr(9ULL <(sizeof(pool_block_sizes) /(sizeof(pool_block_sizes[0]))), 4096, (__typeof__(pool_block_sizes[9ULL])){
+  0
+}
+), (unsigned){
+  0
+}
+)))
 typedef struct PoolIndexSlot{
   uintptr_t page;  PoolBlock block;
 }
@@ -128,7 +222,7 @@ static PoolBlock pool_registry;
 static PoolIndexSlot * pool_index;
 static unsigned pool_index_slots, pool_index_used;
 static int pool_index_complete;
-_x2c_initializer_choice_D7C30390_0((pool_index_complete = 1))
+_x2c_initializer_choice_D7C30390_2((pool_index_complete = 1))
 static PoolBlock pool_depot[POOL_DEPOT_COUNT];
 static int pool_storage_ready;
 static size_t pool_allocation_calls, pool_free_calls, pool_requested_bytes;
@@ -137,7 +231,7 @@ static size_t pool_slot_reuses, pool_backing_bytes;
 static size_t pool_active_blocks, pool_active_bytes;
 static size_t pool_depot_blocks, pool_depot_bytes;
 static pthread_mutex_t pool_storage_mutex;
-_x2c_initializer_choice_D7C30390_1((pool_storage_mutex =(pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER))
+_x2c_initializer_choice_D7C30390_3((pool_storage_mutex =(pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER))
 typedef struct PoolValueThreadState{
   Pool current;
 }
@@ -290,6 +384,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _init_guard_ = 1;
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
+  _x2c_static_initialize_2();
+  _x2c_static_initialize_3();
 }
 
 void x2c_pool_thread_start(void){
@@ -1225,3 +1321,7 @@ static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11){
 #undef _x2c_initializer_choice_D7C30390_0
 #undef _x2c_initializer_choice_D7C30390_1_expanded
 #undef _x2c_initializer_choice_D7C30390_1
+#undef _x2c_initializer_choice_D7C30390_2_expanded
+#undef _x2c_initializer_choice_D7C30390_2
+#undef _x2c_initializer_choice_D7C30390_3_expanded
+#undef _x2c_initializer_choice_D7C30390_3
