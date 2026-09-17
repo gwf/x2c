@@ -6,6 +6,8 @@ static String _label(Var v) {
 
 static int _count(List items) => items.len();
 
+static int _pair(List a, List b) => a.len() + b.len();
+
 static void _write(const char *text) { printf("%s", text); }
 
 int main(void) {
@@ -15,6 +17,7 @@ int main(void) {
   Symbol sym = <alpha>;
   String name = sym.str();
   int count = _count(v.list());
+  int pair = _pair(v.list(), v.list());
   s = v.str();
   String hole = %"value ${v.str()}";
   List holes = %(${s.var()});
@@ -22,6 +25,7 @@ int main(void) {
   _write(v.string());
   printf("%s %s %s %d %d %s\n", _label(v), name, hole, count, chained,
          v.str());
+  printf("%s %s %d\n", v.str(), v.str(), pair);
   (void)boxed; (void)holes;
   return 0;
 }

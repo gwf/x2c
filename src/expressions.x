@@ -161,9 +161,10 @@ static List _parse_postfix_index(Compiler c, List expr) {
    recent one parsed from source tokens, kept with its spelling and
    location. A destination parser compares the expression it just parsed
    against it, so nested calls and calls bound from constructed syntax never
-   match. A converter takes only its receiver and is named for its result:
-   the result spelled in lower case, `str` for String, or a Var numeric
-   reader. */
+   match. An argument list keeps the note left after each argument, since
+   its destinations are known only once the call resolves. A converter takes
+   only its receiver and is named for its result: the result spelled in
+   lower case, `str` for String, or a Var numeric reader. */
 static void _note_explicit_converter(
   Compiler c, List call, String method, Token origin) {
   Type result = call.cadr();
@@ -186,38 +187,41 @@ int Compiler.printf_variadic_start(Compiler compiler, List callee);
    destination, and a call the compiler builds for an operator is not a
    destination the source spelled. */
 static void _check_explicit_converter_arguments(
-  Compiler compiler, List result, int method) {
+  Compiler compiler, List result, int method, List notes) {
   List callee = NULL, params = NULL, arguments = NULL;
   match (result) case %(expr ? (call ?called (args *supplied))): {
     callee = called;
-    arguments = supplied;
-    match (callee) case %(expr ((func ?declared) *) ?): params = declared;
+    arguments = method ? cdr(supplied) : supplied;
+    match (callee) case %(expr ((func ?declared) *) ?):
+      params = method ? cdr(declared) : declared;
   }
-  for (List p = params, a = arguments; p && a; p = cdr(p), a = cdr(a)) {
-    if (method && a == arguments) continue;
+  List n = notes;
+  for (List p = params, a = arguments; p && a;
+       p = cdr(p), a = cdr(a), n = cdr(n)) {
     if (!(car(p) is <list>) || !(car(a) is <list>)) continue;
     List param = car(p), argument = car(a);
     Type expected = param.car() == <param> ? param.type_from_ast() : param;
-    compiler.check_explicit_converter(argument, expected, 0);
+    _check_noted_converter(compiler, car(n), argument, expected, 0);
   }
   // A printf-family format converts each Var value it consumes.
   int first = compiler.printf_variadic_start(callee), index = 0;
   if (first < 0) return;
-  foreach (Var argument, arguments) {
-    if (index++ >= first && argument is <list>)
-      compiler.check_explicit_converter(
-        argument, argument.list().cadr(), 2);
+  for (List a = arguments, n = notes; a; a = cdr(a), n = cdr(n)) {
+    if (index++ >= first && car(a) is <list>)
+      _check_noted_converter(
+        compiler, car(n), car(a), car(a).list().cadr(), 2);
   }
 }
 
 static List _parse_postfix_apply(Compiler c, List expr) {
   Token origin = c.token;
   c.expect(<(>);
-  Array arguments = [];
+  Array arguments = [], notes = [];
   if (c.peek(0) == <)>) arguments.push(%(expr (void) ()));
   while (c.peek(0) != <)>) {
     List argument = c.try_parse_macro_slot(<argument>);
     arguments.push(argument ? argument : c.parse_assignment());
+    notes.push(c.protocol_helpers.getdefault("explicit-converter", %()));
     if (!c.test(<,>)) break;
   }
   c.expect(<)>);
@@ -225,7 +229,7 @@ static List _parse_postfix_apply(Compiler c, List expr) {
   List result = c.resolve_expression(
     %(expr () (call $expr (args @supplied))), origin);
   int method = !!expr.match(%(expr () (op . ? (?))));
-  _check_explicit_converter_arguments(c, result, method);
+  _check_explicit_converter_arguments(c, result, method, notes.list_free());
   if (method && supplied === %((expr (void) ())))
     match (expr) case %(expr () (op . ? (?name))):
       _note_explicit_converter(c, result, name.str(), origin);
@@ -1638,10 +1642,15 @@ static int _defines_crossing(Compiler c, Type source, Type target) {
 */
 void Compiler.check_explicit_converter(
   Compiler c, List parsed, Type target, int context) {
-  Var noted;
-  if (!parsed || !target ||
-      !c.protocol_helpers.try_get("explicit-converter", &noted)) return;
-  (List call, String method, List location) = noted.list();
+  _check_noted_converter(
+    c, c.protocol_helpers.getdefault("explicit-converter", %()), parsed,
+    target, context);
+}
+
+static void _check_noted_converter(
+  Compiler c, List noted, List parsed, Type target, int context) {
+  if (!noted || !parsed || !target) return;
+  (List call, String method, List location) = noted;
   if (!List.equal(call, parsed)) return;
   // A qualified target, such as `const char *`, is a different crossing.
   if (target.declared() != target.canonicalize() ||
