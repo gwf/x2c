@@ -48,6 +48,37 @@ static void match_set_binds_whole_and_parts(void) {
   if (!matched) TEST_FAIL("!set case did not match");
 }
 
+/* The guide gives every guard but !quote an optional leading binder that
+   captures the slice it checked. A binder needs at least one operand after
+   it, so it is never read as one more alternative and never leaves a guard
+   with nothing to test. */
+static void match_leading_binder_needs_an_operand(void) {
+  $test.scoped();
+  // (!set ?w a b) is a capture of the a-or-b membership, not membership
+  // over ?w as well, so an unrelated element no longer matches
+  EXPECT_NULL(%(q c).match(%(q (!set ?w a b))));
+  List bound = %(q b).match(%(q (!set ?w a b)));
+  if (EXPECT_NOT_NULL(bound)) EXPECT_TRUE(bound.assoc(<?w>) == <b>);
+
+  // (!not ?y) has no operand after ?y, so ?y is the operand it tests
+  EXPECT_NULL(%(a a).match(%(?y (!not ?y))));
+  EXPECT_NOT_NULL(%(a b).match(%(?y (!not ?y))));
+
+  // the guide's one-operand spellings keep capturing the checked slice
+  List whole = %(node 7 8).match(%(!set ?whole (node ?a ?b)));
+  if (EXPECT_NOT_NULL(whole))
+    EXPECT_TRUE(whole.assoc(<?whole>) == %(node 7 8).var());
+  List found = %(key 42).match(%(key (!is ?found atom)));
+  if (EXPECT_NOT_NULL(found)) EXPECT_TRUE(found.assoc(<?found>) is <i32>);
+
+  // a leading binder on the other multi-operand guards reads the same way
+  List any = %(x b).match(%(x (!or ?seen a b)));
+  if (EXPECT_NOT_NULL(any)) EXPECT_TRUE(any.assoc(<?seen>) == <b>);
+  EXPECT_NULL(%(x c).match(%(x (!or ?seen a b))));
+  EXPECT_NOT_NULL(%(x c).match(%(x (!not ?seen a b))));
+  EXPECT_NULL(%(x a).match(%(x (!not ?seen a b))));
+}
+
 static void match_is_predicates_runtime(void) {
   $test.scoped();
 
@@ -96,6 +127,7 @@ static void match_nested_complex(void) {
 void match_logic_suite(void) {
   $test.run(match_set_binds_whole_and_parts);
   $test.run(match_or_not_quote);
+  $test.run(match_leading_binder_needs_an_operand);
   $test.run(match_is_predicates_runtime);
   $test.run(match_nested_complex);
 }

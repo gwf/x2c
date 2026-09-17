@@ -314,7 +314,9 @@ macro Statement $match.lease(
     `_normalize_pattern` rewrites `(OP BINDER PAT ...)` into
     `(!set BINDER (OP PAT ...))` for every operator except `!quote`. Binder
     captures stay consistent whether the binder appears explicitly or as the
-    first argument to a guard.
+    first argument to a guard. A leading binder needs at least one operand
+    after it, so `(!not ?y)` still tests `?y` and `(!set BINDER PAT)` is
+    already the canonical capture form.
 */
 
 // pattern classification
@@ -333,12 +335,13 @@ static List _normalize_pattern(List pattern) {
   List normalized = _normalize_elements(pattern);
   Var op = normalized.car();
   List args = normalized.cdr();
-  if (!op.is_match_op() || op == <!set> || op == <!quote> || !args)
-    return normalized;
+  if (!op.is_match_op() || op == <!quote> || !args) return normalized;
   Var binder = args.car();
-  if (!binder.is_binder()) return normalized;
   List rest = args.cdr();
-  return %(!set $binder ($op @rest));
+  // `(!set BINDER PAT)` is the form this produces, so leave it alone
+  if (!binder.is_binder() || !rest || (op == <!set> && !rest.cdr()))
+    return normalized;
+  return %(!set $binder ${_normalize_pattern(%($op @rest))});
 }
 
 static int _is_list_literal(List pat) {
