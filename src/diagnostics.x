@@ -38,6 +38,7 @@ typedef struct Diagnostics {
 #include "type.x"
 #pragma private
 
+#include "json.x"
 #include "report.x"
 
 #include <errno.h>
@@ -215,23 +216,17 @@ static void Compiler._write_json(Compiler c, List entry) {
   Symbol code = entry.assoc(<code>);
   List location = entry.assoc(<location>), notes = entry.assoc(<notes>);
   Buffer out = $auto(Buffer.new(0));
-  out.write("{\"code\":");
-  report_json_string(out, code);
-  out.write(",\"message\":");
-  report_json_string(out, entry.assoc(<message>));
-  out.write(",\"severity\":");
-  report_json_string(out, entry.assoc(<severity>).symbol());
+  out.write(%"{\"code\":${Var.json(code)}");
+  out.write(%",\"message\":${Var.json(entry.assoc(<message>))}");
+  out.write(%",\"severity\":${Var.json(entry.assoc(<severity>))}");
   foreach (Symbol key, %(file line column length position)) {
     Var value = location.assoc(key);
-    out.printf(",\"%s\":", key.str());
-    if (value is void) out.write("null");
-    else if (value is <string>) report_json_string(out, c._json_path(value));
-    else out.printf("%d", value.int());
+    if (value is void) value = NULL;
+    else if (value is <string>) value = c._json_path(value);
+    out.write(%",${Var.json(key)}:${Var.json(value)}");
   }
-  out.write(",\"notes\":[");
   String note = _note_line(notes);
-  if (note) report_json_string(out, note);
-  out.write("]}\n");
+  out.write(%",\"notes\":${Var.json(note ? [note] : [])}}\n");
   while (write(diagnostics_json, out.content.bytes, out.content.length) < 0 &&
          errno == EINTR) {}
 }

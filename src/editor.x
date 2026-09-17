@@ -25,17 +25,12 @@
 /* The private request uses argv for metadata and separate files for source
    snapshots. Only this response file carries JSON; macros can print freely
    to stdout/stderr without corrupting it. No JSON input parser is needed. */
-static void _location(Buffer out, String path, int start, int end) {
-  out.write("\"file\":");
-  report_json_string(out, path);
-  out.printf(",\"start\":%d,\"end\":%d", start, end);
-}
+static Map _location(String path, int start, int end) =>
+  {file: path, start: start, end: end};
 
-static void _diagnostics(Buffer out, Compiler compiler, Map needed) {
-  int comma = 0;
-  out.write("\"diagnostics\":[");
+static Array _diagnostics(Compiler compiler, Map needed) {
+  Array diagnostics = [];
   foreach (List entry, compiler.diagnostics()) {
-    Symbol code = entry.assoc(<code>);
     List location = entry.assoc(<location>);
     Var source = location.assoc(<file>);
     String path = source is <string> ? source : compiler.filename;
@@ -43,20 +38,15 @@ static void _diagnostics(Buffer out, Compiler compiler, Map needed) {
     Var width = location.assoc(<length>);
     int start = position is void ? 0 : position;
     int length = width is void ? 0 : width;
-    if (comma++) out.write_char(',');
-    out.write_char('{');
     path = Path.absolute(path);
     needed[path] = 1;
-    _location(out, path, start, start + length);
-    out.write(",\"message\":");
-    report_json_string(out, entry.assoc(<message>));
-    out.write(",\"code\":");
-    report_json_string(out, code);
-    out.write(",\"severity\":");
-    report_json_string(out, entry.assoc(<severity>).symbol());
-    out.write_char('}');
+    Map diagnostic = _location(path, start, start + length);
+    diagnostic[<message>] = entry.assoc(<message>);
+    diagnostic[<code>] = entry.assoc(<code>);
+    diagnostic[<severity>] = entry.assoc(<severity>);
+    diagnostics.push(diagnostic);
   }
-  out.write_char(']');
+  return diagnostics;
 }
 
 static List _occurrence(Compiler compiler, String path, int offset) {
@@ -71,7 +61,7 @@ static List _occurrence(Compiler compiler, String path, int offset) {
 }
 
 static void _query(
-  Buffer out, Compiler compiler, String path, String kind, int offset,
+  Map reply, Compiler compiler, String path, String kind, int offset,
   Map needed) {
   List row = _occurrence(compiler, path, offset);
   if (!row) return;
@@ -82,37 +72,26 @@ static void _query(
     if (value is not <list>) return;
     List target = value;
     needed[target[0]] = 1;
-    out.write(",\"definition\":{");
-    _location(out, target[0], target[1], target[2]);
-    out.write_char('}');
+    reply[<definition>] = _location(target[0], target[1], target[2]);
   }
   else if (kind == "hover" && type) {
     needed[row[0]] = 1;
     List declaration = type.declaration_ast(binding);
-    String text = String.new(
+    Map hover = _location(row[0], row[1], row[2]);
+    hover[<text>] = String.new(
       compiler.code_pretty_string(compiler.emit(%($declaration)), NULL));
-    out.write(",\"hover\":{");
-    _location(out, row[0], row[1], row[2]);
-    out.write(",\"text\":");
-    report_json_string(out, text);
-    out.write_char('}');
+    reply[<hover>] = hover;
   }
 }
 
-static void _sources(Buffer out, Compiler compiler, Map needed) {
-  int comma = 0;
-  out.write(",\"sources\":[");
+static Array _sources(Compiler compiler, Map needed) {
+  Array sources = [];
   foreach (Var key, needed.keys()) {
     Var text;
-    if (!compiler.source_texts.try_get(key, &text)) continue;
-    if (comma++) out.write_char(',');
-    out.write("{\"file\":");
-    report_json_string(out, key);
-    out.write(",\"text\":");
-    report_json_string(out, text);
-    out.write_char('}');
+    if (compiler.source_texts.try_get(key, &text))
+      sources.push({file: key, text: text});
   }
-  out.write_char(']');
+  return sources;
 }
 
 static CliRequest _configure(
@@ -215,16 +194,11 @@ int editor_request(int argc, char **argv) {
     command.close();
     return 2;
   }
-  Buffer out = Buffer.new(0);
-  out.write("{\"file\":");
-  report_json_string(out, source);
-  out.write_char(',');
   Map needed = {};
-  _diagnostics(out, unit.compiler, needed);
-  if (parsed) _query(out, unit.compiler, source, kind, offset, needed);
-  _sources(out, unit.compiler, needed);
-  out.write("}\n");
-  fputs(out.str_free(), result);
+  Map reply = {file: source, diagnostics: _diagnostics(unit.compiler, needed)};
+  if (parsed) _query(reply, unit.compiler, source, kind, offset, needed);
+  reply[<sources>] = _sources(unit.compiler, needed);
+  fprintf(result, "%s\n", Var.json(reply));
   int failed = fclose(result);
   unit.close();
   command.close();

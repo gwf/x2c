@@ -350,9 +350,8 @@ Command progress and completion receipts.
 Public functions:
 
 `report_now_us`, `report_file_bytes`, `report_duration`, `report_size`,
-`report_json_string`, `report_make_owned`, `report_configure`,
-`report_receipts`, `report_suspend`, `report_line`, `report_progress`,
-`report_phase`
+`report_make_owned`, `report_configure`, `report_receipts`, `report_suspend`,
+`report_line`, `report_progress`, `report_phase`
 
 ### [src/script.x](../src/script.x)
 

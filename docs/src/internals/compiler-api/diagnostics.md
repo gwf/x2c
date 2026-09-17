@@ -45,7 +45,7 @@ forked translation workers sharing the descriptor never interleave lines,
 and a line is complete before any exit. Returns zero when `path` cannot be
 opened.
 
-Source: `src/diagnostics.x:194`
+Source: `src/diagnostics.x:195`
 
 ### `Compiler`
 
@@ -58,7 +58,7 @@ Returns a report-order snapshot of all collected diagnostics.
 Snapshot cells are canonicalized through the active pool hierarchy and
 share entry values; each retains its actual producing-pool lifetime.
 
-Source: `src/diagnostics.x:443`
+Source: `src/diagnostics.x:438`
 
 <a id="Compiler.display_path"></a>
 #### Compiler.display_path
@@ -68,7 +68,7 @@ Source: `src/diagnostics.x:443`
 Returns a physical source path for semantic facts, otherwise a path
 relative to the compiler root. Pseudo paths and NULL stay unchanged.
 
-Source: `src/diagnostics.x:306`
+Source: `src/diagnostics.x:301`
 
 <a id="Compiler.dump_cache"></a>
 #### Compiler.dump_cache
@@ -77,7 +77,7 @@ Source: `src/diagnostics.x:306`
 
 Prints each cached numeric identifier and its key to stdout.
 
-Source: `src/diagnostics.x:479`
+Source: `src/diagnostics.x:474`
 
 <a id="Compiler.dump_symbol_table"></a>
 #### Compiler.dump_symbol_table
@@ -86,7 +86,7 @@ Source: `src/diagnostics.x:479`
 
 Prints every entry in `map` to stdout in `Map` iteration order.
 
-Source: `src/diagnostics.x:474`
+Source: `src/diagnostics.x:469`
 
 <a id="Compiler.dump_tokens"></a>
 #### Compiler.dump_tokens
@@ -96,7 +96,7 @@ Source: `src/diagnostics.x:474`
 Prints every non-EOF token with its position and visible content.
 `Compiler.tokenize` must have populated the compiler's tokenizer.
 
-Source: `src/diagnostics.x:464`
+Source: `src/diagnostics.x:459`
 
 <a id="Compiler.error_count"></a>
 #### Compiler.error_count
@@ -106,7 +106,7 @@ Source: `src/diagnostics.x:464`
 Returns the number of counted diagnostics accepted since the last reset.
 Warnings and the generated limit notice are excluded.
 
-Source: `src/diagnostics.x:437`
+Source: `src/diagnostics.x:432`
 
 <a id="Compiler.origin_location"></a>
 #### Compiler.origin_location
@@ -120,7 +120,7 @@ location cells are canonicalized through the active pool hierarchy and
 retain their actual producing-pool lifetime. They share the recorded
 filename, which retains its own producing-pool lifetime.
 
-Source: `src/diagnostics.x:281`
+Source: `src/diagnostics.x:276`
 
 <a id="Compiler.print_diagnostic"></a>
 #### Compiler.print_diagnostic
@@ -132,7 +132,7 @@ one JSON line after `diagnostics_write_json`.
 NULL is ignored. A present location supplies `file`, one-based `line` and
 `column`, and token `length`; `String` notes are joined into one note line.
 
-Source: `src/diagnostics.x:244`
+Source: `src/diagnostics.x:239`
 
 <a id="Compiler.report_error"></a>
 #### Compiler.report_error
@@ -146,7 +146,7 @@ before the current token. NULL message defaults to `"compiler error"`.
 **Raises:** `<malformed>` with the supplied category while a recovery boundary
 is active. Without one, exits the process with status 1.
 
-Source: `src/diagnostics.x:354`
+Source: `src/diagnostics.x:349`
 
 <a id="Compiler.report_warning"></a>
 #### Compiler.report_warning
@@ -158,7 +158,7 @@ Location selection matches `Compiler.report_error`; NULL code becomes
 `<warning>` and NULL message becomes `"compiler warning"`. This operation
 returns without raising or changing the process exit status.
 
-Source: `src/diagnostics.x:370`
+Source: `src/diagnostics.x:365`
 
 <a id="Compiler.report_warning_at"></a>
 #### Compiler.report_warning_at
@@ -169,7 +169,7 @@ Records and emits a warning at a location built earlier by
 `Compiler.token_location`, for a report raised after its token has been
 consumed. Defaults match `Compiler.report_warning`.
 
-Source: `src/diagnostics.x:379`
+Source: `src/diagnostics.x:374`
 
 <a id="Compiler.token_location"></a>
 #### Compiler.token_location
@@ -185,7 +185,7 @@ are canonicalized through the active pool hierarchy and retain their actual
 producing-pool lifetimes; an unchanged filename retains the compiler's
 producing-pool lifetime.
 
-Source: `src/diagnostics.x:325`
+Source: `src/diagnostics.x:320`
 
 ### `Diagnostics`
 
@@ -200,7 +200,7 @@ retain their actual producing-pool lifetime. They share the stored entry
 `List`s. The snapshot includes warnings and the limit notice; changing or
 resetting `diag` does not change it.
 
-Source: `src/diagnostics.x:95`
+Source: `src/diagnostics.x:96`
 
 <a id="Diagnostics.has_emitter"></a>
 #### Diagnostics.has_emitter
@@ -209,7 +209,7 @@ Source: `src/diagnostics.x:95`
 
 Returns whether `diag` currently has an emitter.
 
-Source: `src/diagnostics.x:101`
+Source: `src/diagnostics.x:102`
 
 <a id="Diagnostics.new"></a>
 #### Diagnostics.new
@@ -220,7 +220,7 @@ Creates an empty diagnostic store with an optional emitter.
 A negative `limit` is treated as zero; zero collects without a stopping
 threshold. The emitter and `owner` are borrowed.
 
-Source: `src/diagnostics.x:60`
+Source: `src/diagnostics.x:61`
 
 <a id="Diagnostics.reached_limit"></a>
 #### Diagnostics.reached_limit
@@ -230,7 +230,7 @@ Source: `src/diagnostics.x:60`
 Returns whether counted reports have reached the positive limit.
 A zero limit never reports that it has been reached.
 
-Source: `src/diagnostics.x:106`
+Source: `src/diagnostics.x:107`
 
 <a id="Diagnostics.report"></a>
 #### Diagnostics.report
@@ -244,7 +244,7 @@ of one stops after the first error. Later reports are ignored. Supplied
 message, location, and notes are shared; their canonical-value pools must
 outlive the store and its snapshots.
 
-Source: `src/diagnostics.x:150`
+Source: `src/diagnostics.x:151`
 
 <a id="Diagnostics.reset"></a>
 #### Diagnostics.reset
@@ -253,7 +253,7 @@ Source: `src/diagnostics.x:150`
 
 Clears stored entries and limit state while preserving configuration.
 
-Source: `src/diagnostics.x:72`
+Source: `src/diagnostics.x:73`
 
 <a id="Diagnostics.set_emitter"></a>
 #### Diagnostics.set_emitter
@@ -263,7 +263,7 @@ Source: `src/diagnostics.x:72`
 Replaces the borrowed emitter and owner without replaying stored entries.
 A NULL emitter disables streaming.
 
-Source: `src/diagnostics.x:81`
+Source: `src/diagnostics.x:82`
 
 ## Public types
 
