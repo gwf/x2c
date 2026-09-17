@@ -59,6 +59,23 @@ static void string_numeric_readers_are_exact(void) {
   EXPECT_TRUE("42\t\n".try_long(&integer));
   EXPECT_INT_EQ(integer, 42);
 
+  /* The digits must follow the radix prefix directly: whitespace and a second
+     sign belong to strtoul, not to the accepted spelling. */
+  EXPECT_FALSE("0b 101".try_long(&integer));
+  EXPECT_INT_EQ(integer, 42);
+  EXPECT_FALSE("0b-0".try_long(&integer));
+  EXPECT_FALSE("0b+1".try_long(&integer));
+  EXPECT_FALSE("0o 17".try_long(&integer));
+  EXPECT_FALSE("0o+7".try_long(&integer));
+  EXPECT_FALSE("0o  -5".try_long(&integer));
+  EXPECT_FALSE("0b2".try_long(&integer));
+  EXPECT_FALSE("0o8".try_long(&integer));
+  EXPECT_INT_EQ(integer, 42);
+  EXPECT_TRUE("0b101".try_long(&integer));
+  EXPECT_INT_EQ(integer, 5);
+  EXPECT_TRUE(" -0o17 ".try_long(&integer));
+  EXPECT_INT_EQ(integer, -15);
+
   double floating = 4.0;
   EXPECT_FALSE("1.5junk".try_double(&floating));
   EXPECT_TRUE(floating == 4.0);

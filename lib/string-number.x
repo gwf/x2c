@@ -50,6 +50,9 @@ int String.try_long(String str, long *out) {
        digits[1] == 'o' || digits[1] == 'O')) {
     int base = digits[1] == 'b' || digits[1] == 'B' ? 2 : 8;
     const char *number = digits + 2, char *stop = NULL;
+    /* strtoul would skip whitespace and take its own sign, so the first byte
+       after the prefix must already be a digit of the base. */
+    if (number[0] < '0' || number[0] >= '0' + base) return 0;
     errno = 0;
     unsigned long magnitude = strtoul(number, &stop, base);
     if (stop == number || errno == ERANGE || !_only_space(stop)) return 0;

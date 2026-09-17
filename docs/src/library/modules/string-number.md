@@ -33,7 +33,7 @@ underflows `double` fails. It does not know the `0o` and `0b` prefixes
 that the integer parser adds, so `0b101` fails instead of yielding the
 leading zero.
 
-Source: `lib/string-number.x:86`
+Source: `lib/string-number.x:89`
 
 <a id="String.try_long"></a>
 #### String.try_long
