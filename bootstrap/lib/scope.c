@@ -537,7 +537,7 @@ void Scope_shutdown_hook(void(* hook)(void)){
   if(! _init_guard_) Scope_initialize();
   _require_running();
   if(! hook){
-    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/scope.x",.function = "Scope_shutdown_hook",.line = 559};
+    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/scope.x",.function = "Scope_shutdown_hook",.line = 560};
     x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 0);
     __builtin_unreachable();
   }
@@ -549,7 +549,7 @@ void Scope_push(Scope * scope){
   if(! _init_guard_) Scope_initialize();
   _require_running();
   if(! scope){
-    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/scope.x",.function = "Scope_push",.line = 593};
+    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/scope.x",.function = "Scope_push",.line = 594};
     x2c_error_raise_n(& _x2c_error_site_13, 4372499598, 0);
     __builtin_unreachable();
   }
@@ -569,7 +569,7 @@ void Scope_pop(void){
   _require_running();
   ScopeThreadState state = _thread();
   if(! state -> stack_size){
-    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/scope.x",.function = "Scope_pop",.line = 627};
+    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/scope.x",.function = "Scope_pop",.line = 628};
     x2c_error_raise_n(& _x2c_error_site_14, 4477477457162, 0);
     __builtin_unreachable();
   }
@@ -596,7 +596,7 @@ void Scope_release(void){
   ScopeThreadState state = _thread();
   {
     if(! *(state -> active) || ! _forget_retain(*(state -> active), (state -> active))){
-      static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/scope.x",.function = "Scope_release",.line = 708};
+      static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/scope.x",.function = "Scope_release",.line = 709};
       x2c_error_raise_n(& _x2c_error_site_15, 4477477457162, 0);
       __builtin_unreachable();
     }
@@ -618,7 +618,7 @@ void * Scope_malloc_finalized(size_t size, void(* drop)(void *)){
   if(! _init_guard_) Scope_initialize();
   _require_running();
   if(! drop){
-    static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/scope.x",.function = "Scope_malloc_finalized",.line = 756};
+    static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/scope.x",.function = "Scope_malloc_finalized",.line = 757};
     x2c_error_raise_n(& _x2c_error_site_16, 4372499598, 0);
     __builtin_unreachable();
   }
@@ -635,7 +635,7 @@ void * Scope_malloc_finalized_in(Scope * slot, size_t size, void(* drop)(void *)
   if(! _init_guard_) Scope_initialize();
   _require_running();
   if(! drop){
-    static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/scope.x",.function = "Scope_malloc_finalized_in",.line = 786};
+    static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/scope.x",.function = "Scope_malloc_finalized_in",.line = 787};
     x2c_error_raise_n(& _x2c_error_site_17, 4372499598, 0);
     __builtin_unreachable();
   }
@@ -687,7 +687,7 @@ void Scope_move(void * ptr, Scope * slot){
   _require_running();
   if(! ptr) return;
   if(! slot){
-    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/scope.x",.function = "Scope_move",.line = 913};
+    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/scope.x",.function = "Scope_move",.line = 914};
     x2c_error_raise_n(& _x2c_error_site_18, 4372499598, 0);
     __builtin_unreachable();
   }
@@ -717,7 +717,7 @@ void * Scope_realloc(void * ptr, size_t size){
   ScopeAlloc old = PTR_ALLOC(ptr), next = NEXT(old), prev = old -> prev;
   size_t extra = IS_FINALIZED(old) ? sizeof(ScopeFinalizer) : 0;
   if(size > SIZE_MAX - sizeof(struct ScopeAlloc) - extra){
-    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/scope.x",.function = "Scope_realloc",.line = 950};
+    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/scope.x",.function = "Scope_realloc",.line = 951};
     x2c_error_raise_n(& _x2c_error_site_19, 1358596898646632, 0);
     __builtin_unreachable();
   }
@@ -748,7 +748,10 @@ void Scope_shutdown(void){
     return;
   }
   scope_state = 1324302486414;
-  for(int i = hook_count - 1;  i >= 0;  i --) hooks[i]();
+  while(hook_count){
+    void(* hook)(void) = hooks[-- hook_count];
+    hook();
+  }
   _raw_free(hooks);
   hooks = NULL;
   hook_count = hook_capacity = 0;

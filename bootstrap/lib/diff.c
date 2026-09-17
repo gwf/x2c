@@ -288,7 +288,7 @@ String Diff_unified(String old, String new, String old_name, String new_name){
         int start = at > _CONTEXT ? at - _CONTEXT : 0, lead = at - start;
         int old_start = old_line - lead, new_start = new_line - lead;
         int end = at, quiet = 0;
-        while(end < count && quiet < 2 * _CONTEXT) quiet = _kind(edits, end ++) == 1248074 ? quiet + 1 : 0;
+        while(end < count && quiet <= 2 * _CONTEXT) quiet = _kind(edits, end ++) == 1248074 ? quiet + 1 : 0;
         if(quiet > _CONTEXT) end -= quiet - _CONTEXT;
         List lines = NULL;
         int old_count = 0, new_count = 0;

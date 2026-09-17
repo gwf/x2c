@@ -1626,7 +1626,10 @@ void Logger_shutdown(void){
     }
     global_logger = NULL;
     if(active && active != default_logger) Logger_flush(active);
-    if(default_logger) Logger_free(default_logger);
+    if(default_logger){
+      default_logger -> emission_depth = 0;
+      Logger_free(default_logger);
+    }
     default_logger = NULL;
   }
   x2c_cleanup_leave(& _x2c_defer_record_29);

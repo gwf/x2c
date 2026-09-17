@@ -101,6 +101,10 @@ static Type Type__modify(Type type, List mods);
 
 static List _from_ast_items(List items, List context);
 
+static int _is_source_text(Var item);
+
+static List _without_leading_text(List items);
+
 static List _from_ast(List ast, List context);
 
 static Var _x2c_lambda_0(Type parameter);
@@ -1173,6 +1177,30 @@ static List _from_ast_items(List items, List context){
 
 Var car(List);
 
+static int _is_source_text(Var item){
+  return Var_is_row(item, 9, 7, 4) && Var_is_row(car(Var_list(item)), 11, 7, 1);
+}
+
+static List _without_leading_text(List items){
+  List rest = items;
+  while(List_truth(List_cdr(rest)) && ! _is_source_text(List_car(rest))) rest = List_cdr(rest);
+  if(! List_truth(List_cdr(rest))) return items;
+  Array typed = Array_new();
+  size_t index = 0, last = List_len(items) - 1;
+  {
+    Var item;
+    List _x2c_macro_object_5 = items;
+    List _x2c_macro_cursor_6 = _x2c_macro_object_5;
+    Var _x2c_macro_cursor_output_2;
+    while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_2)){
+      item = _x2c_macro_cursor_output_2;
+      if(index ++ == last || ! _is_source_text(item)) Array_push(typed, item);
+    }
+
+  }
+  return Array_list_free(typed);
+}
+
 List List_flatten(List);
 
 static List _from_ast(List ast, List context){
@@ -1193,15 +1221,15 @@ default: break;
   }
 Var head = List_car(ast);  switch(Var_symbol(head)){
   case 8932560010 :{
-    List _x2c_destructure_2 = List_cdr(ast);  List source_type = Var_list(List_getindex(_x2c_destructure_2, 0));  List bindings = Var_list(List_getindex(_x2c_destructure_2, 1));  List type = _from_ast(source_type, NULL);  return _from_ast(bindings, type);
+    List _x2c_destructure_2 = List_cdr(ast);  List source_type = Var_list(List_getindex(_x2c_destructure_2, 0));  List bindings = Var_list(List_getindex(_x2c_destructure_2, 1));  List type = _from_ast(_without_leading_text(source_type), NULL);  return _from_ast(bindings, type);
   }
   case 150408 :{
     Array typed = Array_new(); {
-      Var item;  Iter _x2c_macro_iterator_5 = Var_iter(List_caddr(ast), &(struct Iter){
+      Var item;  Iter _x2c_macro_iterator_6 = Var_iter(List_caddr(ast), &(struct Iter){
         int_var(0)
       }
-      );  Var _x2c_macro_item_6;  while(Iter_try_next(_x2c_macro_iterator_5, & _x2c_macro_item_6)){
-        item = _x2c_macro_item_6;  if(!(Var_is_row(item, 9, 7, 4) && Var_is_row(car(Var_list(item)), 11, 7, 1))) Array_push(typed, item);
+      );  Var _x2c_macro_item_7;  while(Iter_try_next(_x2c_macro_iterator_6, & _x2c_macro_item_7)){
+        item = _x2c_macro_item_7;  if(! _is_source_text(item)) Array_push(typed, item);
       }
 
     }
@@ -1211,11 +1239,11 @@ Var head = List_car(ast);  switch(Var_symbol(head)){
     Array types = Array_new();
     {
       List field;
-      List _x2c_macro_object_6 = List_cdr(ast);
-      List _x2c_macro_cursor_7 = _x2c_macro_object_6;
-      Var _x2c_macro_cursor_output_2;
-      while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_2)){
-        field = Var_list(_x2c_macro_cursor_output_2);
+      List _x2c_macro_object_7 = List_cdr(ast);
+      List _x2c_macro_cursor_8 = _x2c_macro_object_7;
+      Var _x2c_macro_cursor_output_3;
+      while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_3)){
+        field = Var_list(_x2c_macro_cursor_output_3);
         {
           List declaration = field;
           while(Var_equal(List_car(declaration), Symbol_var(104))) declaration = Var_list(List_caddr(declaration));

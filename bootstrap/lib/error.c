@@ -19,6 +19,8 @@ ErrorRecord;
 
 struct ErrorHandler{
   struct ErrorHandler * prev;
+  struct ErrorHandler * running;
+  struct ErrorRegion view;
   ErrorHandlerFn fn;
   Var data;
   int watermark;
@@ -69,7 +71,7 @@ typedef struct ErrorThreadState{
   Block stack;
   Map policy;
   int shutdown_done;
-  ErrorHandler handler_top, dispatch_saved;
+  ErrorHandler handler_top, dispatch_saved, dispatch_running, running_top;
   int bound;
   ErrorContextState context_top;
   int depth, floor_only, rendered[5];
@@ -126,6 +128,8 @@ static void _record_n(const X2CErrorSite * site, Symbol code, unsigned pair_coun
 
 static void _truncate(int mark);
 
+static Var _snapshot_wide(Var v);
+
 static Var _snapshot_value(Var v);
 
 static List _view_since(ErrorRegion * region, int mark);
@@ -133,6 +137,8 @@ static List _view_since(ErrorRegion * region, int mark);
 static void _retained_destroy(Block retained);
 
 static void _unwind_to(ErrorThreadState state, ErrorHandler stop, int truncate);
+
+static void _reclaim_hidden(ErrorThreadState state);
 
 static ErrorHandler _handler_at_depth(ErrorThreadState state, int depth);
 
@@ -220,7 +226,7 @@ ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var
   state -> floor_only ++;
   ErrorHandler h = Scope_malloc_in(& state -> scope, sizeof(struct ErrorHandler));
   * h =(struct ErrorHandler){
-    .prev = state -> handler_top, .fn = NULL, .data =((void) 0, Void), .watermark = Error_count(), .site = site, .target = target, .selected = - 1, .plans = NULL, .capture_values = NULL, .retained = NULL, .detached = 0
+    .prev = state -> handler_top, .running = NULL, .fn = NULL, .data =((void) 0, Void), .watermark = Error_count(), .site = site, .target = target, .selected = - 1, .plans = NULL, .capture_values = NULL, .retained = NULL, .detached = 0
   }
   ;
   if(__atomic_load_n(& site -> state, __ATOMIC_ACQUIRE) == ERROR_CATCH_PENDING) _catch_site_bind(site, patterns);
@@ -279,16 +285,26 @@ Var x2c_error_catch_capture(ErrorHandler handle, int index){
 
 void x2c_error_catch_detach(ErrorHandler handle){
   if(! handle || handle -> detached) return;
-  if(_thread() -> handler_top != handle) _floor(20800632064936, "transferring catch detach out of order");
+  ErrorThreadState state = _thread();
+  if(state -> handler_top != handle) _floor(20800632064936, "transferring catch detach out of order");
+  state -> handler_top = handle -> prev;
   handle -> detached = 1;
+  handle -> running = state -> running_top;
+  state -> running_top = handle;
 }
 
 void x2c_error_catch_close(ErrorHandler handle){
   if(! handle) return;
   ErrorThreadState state = _thread();
-  if(state -> handler_top != handle) _floor(20800632064936, "transferring catch close out of order");
-  if(! handle -> detached) _truncate(handle -> watermark);
-  state -> handler_top = handle -> prev;
+  if(handle -> detached){
+    if(state -> running_top != handle) _floor(20800632064936, "transferring catch close out of order");
+    state -> running_top = handle -> running;
+  }
+  else{
+    if(state -> handler_top != handle) _floor(20800632064936, "transferring catch close out of order");
+    _truncate(handle -> watermark);
+    state -> handler_top = handle -> prev;
+  }
   _handler_free(handle);
 }
 
@@ -333,7 +349,7 @@ void Error_restore_landing(void * saved_head, int saved_depth){
   ErrorHandler saved = saved_head;
   ErrorThreadState state = _thread();
   if(_chain_contains(saved, state -> handler_top)) state -> handler_top = saved;
-  state -> dispatch_saved = NULL;
+  state -> dispatch_saved = state -> dispatch_running = NULL;
   state -> depth = saved_depth;
 }
 
@@ -373,6 +389,7 @@ void Scope_destroy(Scope);
 void Error_shutdown_raw(void){
   ErrorThreadState state = _thread();
   if(state -> shutdown_done) return;
+  _reclaim_hidden(state);
   _unwind_to(state, NULL, 1);
   _truncate(0);
   if((void *) state -> stack != NULL){
@@ -661,6 +678,16 @@ int Error_mark(void){
   return Error_count();
 }
 
+static Var _snapshot_wide(Var v){
+  Scope owner = * Scope_top();
+  if(! owner) return Var_clone_wide(v);
+  while(owner -> down) owner = owner -> down;
+  Scope_push(& owner);
+  Var copy = Var_clone_wide(v);
+  Scope_pop();
+  return copy;
+}
+
 String String_new_len(const char *, int);
 
 int String_try_own(String);
@@ -672,14 +699,7 @@ int List_try_own(List);
 static Var _snapshot_value(Var v){
   if(Var_is_void(v)) _floor(4477479911782, "void is not an admissible error snapshot");
   if(Var_is_null(v) || Var_is_nil(v) || Var_is(v, 1328354264)) return v;
-  if(Var_is_wide(v)){
-    Scope owner = * Scope_top();
-    while(owner && owner -> down) owner = owner -> down;
-    Scope_push(& owner);
-    Var copy = Var_clone_wide(v);
-    Scope_pop();
-    return copy;
-  }
+  if(Var_is_wide(v)) return _snapshot_wide(v);
   if(Var_is_integer(v) || Var_is_floating(v)) return v;
   if(Var_is_row(v, 11, 7, 1)){
     String source = Var_string(v), copy = String_new_len(source, String_len(source));
@@ -733,12 +753,7 @@ List Error_since_in(int mark, Scope * values, Pool pool){
   ;
   ErrorThreadState state = _thread();
   state -> floor_only ++;
-  List out = NULL;
-  for(int i = Error_count() - 1;  i >= mark;  i --){
-    ErrorRecord * record = _record_at(i);
-    Var entry = _copy_value(& region, List_var(record -> entry));
-    out = _cons(& region, entry, out);
-  }
+  List out = _view_since(& region, mark);
   state -> floor_only --;
   * values = region.values;
   return out;
@@ -774,12 +789,12 @@ Var Map_setindex(Map, Var, Var);
 void Error_policy_set(Symbol code, Symbol disposition){
   if(! Error_ready()) return;
   if(disposition != 2260136 && disposition != 25550 && disposition != 7475046632 && disposition != 619609226){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 807};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 830};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(302607262917214), Symbol_var(disposition));
     __builtin_unreachable();
   }
   if(_never_returns(code) && disposition != 2260136){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 810};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 833};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(227594), Symbol_var(code), Symbol_var(302607262917214), Symbol_var(disposition));
     __builtin_unreachable();
   }
@@ -823,7 +838,7 @@ ErrorHandler Error_push(ErrorHandlerFn fn, Var data){
   ErrorThreadState state = _thread();
   ErrorHandler h = Scope_malloc_in(& state -> scope, sizeof(struct ErrorHandler));
   * h =(struct ErrorHandler){
-    .prev = state -> handler_top, .fn = fn, .data = data, .watermark = Error_count(), .site = NULL, .target = NULL, .selected = - 1, .plans = NULL, .capture_values = NULL, .retained = NULL, .detached = 0
+    .prev = state -> handler_top, .running = NULL, .fn = fn, .data = data, .watermark = Error_count(), .site = NULL, .target = NULL, .selected = - 1, .plans = NULL, .capture_values = NULL, .retained = NULL, .detached = 0
   }
   ;
   state -> handler_top = h;
@@ -843,6 +858,24 @@ static void _unwind_to(ErrorThreadState state, ErrorHandler stop, int truncate){
     state -> handler_top = removed -> prev;
     if(truncate) _truncate(removed -> watermark);
     _handler_free(removed);
+  }
+
+}
+
+static void _reclaim_hidden(ErrorThreadState state){
+  ErrorHandler stop = state -> dispatch_running;
+  for(ErrorHandler h = stop ? state -> dispatch_saved : NULL;  h; ){
+    ErrorHandler prev = h -> prev;
+    int last = h == stop;
+    _handler_free(h);
+    if(last) break;
+    h = prev;
+  }
+  state -> dispatch_saved = state -> dispatch_running = NULL;
+  while(state -> running_top){
+    ErrorHandler running = state -> running_top;
+    state -> running_top = running -> running;
+    _handler_free(running);
   }
 
 }
@@ -870,6 +903,7 @@ static void _handler_free(ErrorHandler handle){
   }
   if((void *) handle -> capture_values != NULL) Block_free(handle -> capture_values);
   _retained_destroy(handle -> retained);
+  _region_destroy(& handle -> view);
   Scope_free(handle);
 }
 
@@ -987,22 +1021,18 @@ void ExceptionFrame_unwind(void *);
 
 static Symbol _dispatch(Symbol effective, int raised_at, int depth){
   ErrorThreadState state = _thread();
-  ErrorHandler saved = state -> handler_top;
-  state -> dispatch_saved = saved;
+  ErrorHandler saved = state -> handler_top, outer = state -> dispatch_saved;
+  ErrorHandler outer_running = state -> dispatch_running;
+  if(! outer) state -> dispatch_saved = saved;
   Symbol result = 285842436424;
   for(ErrorHandler h = saved;  h;  h = h -> prev){
-    if(h -> detached) continue;
+    state -> dispatch_running = h;
     state -> handler_top = h -> prev;
     Symbol disposition = 285842436424;
     if(h -> site) disposition = _catch_match(h);
     else{
-      ErrorRegion view ={
-        0
-      }
-      ;
       {
-        {
-  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & view};
+  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & h};
 
   X2CCleanup _x2c_defer_record_0 = {
     .fn = _x2c_defer_cleanup_0,
@@ -1010,35 +1040,22 @@ static Symbol _dispatch(Symbol effective, int raised_at, int depth){
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
-          state -> floor_only ++;
-          view = _region_new();
-          List slice = _view_since(& view, h -> watermark);
-          state -> floor_only --;
-          disposition = h -> fn(slice, h -> data);
-        }
-        x2c_cleanup_leave(& _x2c_defer_record_0);
+        state -> floor_only ++;
+        h -> view = _region_new();
+        List slice = _view_since(& h -> view, h -> watermark);
+        state -> floor_only --;
+        disposition = h -> fn(slice, h -> data);
+      }
+      x2c_cleanup_leave(& _x2c_defer_record_0);
 
 }
-      }
-
     }
-    if(disposition == 1440172936){
-      if(h -> site){
-        state -> handler_top = saved;
-        state -> dispatch_saved = NULL;
-        _leave();
-        ExceptionFrame_unwind(h -> target);
-      }
-      state -> handler_top = saved;
-      state -> dispatch_saved = NULL;
+    if(disposition == 1440172936 || disposition == 12689496){
+      state -> handler_top = state -> dispatch_saved;
+      state -> dispatch_saved = state -> dispatch_running = NULL;
       _leave();
-      _floor(effective, "<unwind> from an observing registration");
-    }
-    if(disposition == 12689496){
-      state -> handler_top = saved;
-      state -> dispatch_saved = NULL;
-      _leave();
-      _floor(effective, "handler returned fatal");
+      if(disposition == 1440172936 && h -> site) ExceptionFrame_unwind(h -> target);
+      _floor(effective, disposition == 12689496 ? "handler returned fatal" : "<unwind> from an observing registration");
     }
     if(disposition == 17276625224){
       _truncate(h -> watermark);
@@ -1048,7 +1065,8 @@ static Symbol _dispatch(Symbol effective, int raised_at, int depth){
 
   }
   state -> handler_top = saved;
-  state -> dispatch_saved = NULL;
+  state -> dispatch_saved = outer;
+  state -> dispatch_running = outer_running;
   _leave();
   if(_never_returns(effective)) _floor(effective, "non-returning error was not caught");
   if(result != 285842436424) return result;
@@ -1098,6 +1116,6 @@ int Error_ready(void){
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  _region_destroy(&(*(ErrorRegion *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  _region_destroy(&(*(ErrorHandler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> view);
 }
 

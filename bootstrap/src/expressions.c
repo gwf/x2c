@@ -215,7 +215,11 @@ static List _parse_conditional_tail(Compiler compiler, List condition);
 
 static List _parse_assignment_tail(Compiler compiler, List lhs);
 
-static List _parse_c_string_literals(Compiler compiler);
+static int _string_word_follows(Compiler c);
+
+static List _join_c_string_literals(Compiler c, List first);
+
+static List _parse_c_string_literals(Compiler c);
 
 static List _parse_expression_tail(Compiler compiler, List expr);
 
@@ -2320,6 +2324,7 @@ static List _parse_sizeof(Compiler c){
     arg = Compiler_parse_simple_declaration(c);
     arg = cons(Symbol_var(272600), List_cdr(arg));
   }
+  else if(parens) arg = Compiler_parse_expression(c);
   else{
     c -> token = head;
     arg = _parse_unary_op(c);
@@ -2444,7 +2449,7 @@ int Map_truth(Map);
 List Compiler_peek_macro_hole(Compiler);
 Var List_assoc(List, Var);
 static int _macro_hole_starts_cast_type(Compiler compiler){
-  if(! Map_truth(compiler -> macro_holes) || Compiler_peek(compiler, 0) != 73 || Compiler_peek(compiler, 2) != 83) return 0;  List hole = Compiler_peek_macro_hole(compiler);  if(! List_truth(hole)) return 0;  Symbol kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));  if(kind && kind != 1362954) return 0;  return _cast_operand_follows(Compiler_peek(compiler, 3));
+  if(! Map_truth(compiler -> macro_holes) || Compiler_peek(compiler, 0) != 73 || Compiler_peek(compiler, 2) != 83) return 0;  List hole = Compiler_peek_macro_hole(compiler);  if(! List_truth(hole)) return 0;  Symbol kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));  if(kind && kind != 1362954) return 0;  if(Compiler_peek(compiler, 3) == 183 && kind != 1362954) return 0;  return _cast_operand_follows(Compiler_peek(compiler, 3));
 }
 
 Token Token_after_group(Token);
@@ -3419,10 +3424,13 @@ break;
   return cons(_0, cons(List_var(type), cons(List_var(cons(_9, cons(operator, cons(List_var(lhs), NULL)))), NULL)));
 }
 break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761619424ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[2] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[3] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var operator = _x2c_match_values[0];  Var condition = _x2c_match_values[1];  Var ontrue = _x2c_match_values[2];  Var onfalse = _x2c_match_values[3]; {
-  condition = List_var(Compiler_resolve_expression(c, Var_list(condition), origin));  ontrue = List_var(Compiler_resolve_expression(c, Var_list(ontrue), origin));  onfalse = List_var(Compiler_resolve_expression(c, Var_list(onfalse), origin));  Type true_type = Var_type(Var_cadr(ontrue)), false_type = Var_type(Var_cadr(onfalse));  if(Var_same(Var_cadr(condition), List_var(_116)) || true_type == _116 || false_type == _116) return cons(_0, cons(_117, cons(List_var(cons(_9, cons(operator, cons(condition, cons(ontrue, cons(onfalse, NULL)))))), NULL)));  Type type = true_type, left = Sym_resolve_numeric_type(c -> sym, type);  Type right = Sym_resolve_numeric_type(c -> sym, false_type);  if(List_truth(Type_list(left)) && List_truth(Type_list(right))) type = Type_widest(left, right);  else if(_conditional_joins(c, false_type, true_type)){
-    type = false_type;  ontrue = List_var(Compiler_convert_expression(c, Var_list(ontrue), type));
+  condition = List_var(Compiler_resolve_expression(c, Var_list(condition), origin));  ontrue = List_var(Compiler_resolve_expression(c, Var_list(ontrue), origin));  onfalse = List_var(Compiler_resolve_expression(c, Var_list(onfalse), origin));  Type true_type = Var_type(Var_cadr(ontrue)), false_type = Var_type(Var_cadr(onfalse));  if(Var_same(Var_cadr(condition), List_var(_116)) || true_type == _116 || false_type == _116) return cons(_0, cons(_117, cons(List_var(cons(_9, cons(operator, cons(condition, cons(ontrue, cons(onfalse, NULL)))))), NULL)));  Type type = true_type;  if(! List_equal(Type_list(Type_declared(true_type)), Type_list(Type_declared(false_type)))){
+    Type left = Sym_resolve_numeric_type(c -> sym, type);  Type right = Sym_resolve_numeric_type(c -> sym, false_type);  if(List_truth(Type_list(left)) && List_truth(Type_list(right))) type = Type_widest(left, right);  else if(_conditional_joins(c, false_type, true_type)){
+      type = false_type;  ontrue = List_var(Compiler_convert_expression(c, Var_list(ontrue), type));
+    }
+    else if(_conditional_joins(c, true_type, false_type)) onfalse = List_var(Compiler_convert_expression(c, Var_list(onfalse), type));
   }
-  else if(_conditional_joins(c, true_type, false_type)) onfalse = List_var(Compiler_convert_expression(c, Var_list(onfalse), type));  return cons(_0, cons(List_var(type), cons(List_var(cons(_9, cons(operator, cons(condition, cons(ontrue, cons(onfalse, NULL)))))), NULL)));
+  return cons(_0, cons(List_var(type), cons(List_var(cons(_9, cons(operator, cons(condition, cons(ontrue, cons(onfalse, NULL)))))), NULL)));
 }
 break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761619424ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[2] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var operator = _x2c_match_values[0];  Var left = _x2c_match_values[1];  Var right = _x2c_match_values[2]; {
   List lhs = Compiler_resolve_expression(c, Var_list(left), origin);  List rhs = Compiler_resolve_expression(c, Var_list(right), origin);  return Compiler__binary_expression(c, Var_symbol(operator), lhs, rhs, origin);
@@ -3609,7 +3617,7 @@ List Compiler_parse_complex_identifier(Compiler);
 void Compiler_record_source_reference(Compiler, List, Type, Token, Token);
 List Compiler_parse_variable(Compiler c){
   if(! _init_guard_) _file_init_();  Token origin = c -> token;  Var definition;  if(Map_try_get(c -> object_macros, String_var(origin -> text), & definition) && Var_equal(definition, Symbol_var(1318210446))){
-    Compiler_next(c);  return cons(_0, cons(_929, cons(List_var(cons(_33, cons(_929, cons(String_var(origin -> text), NULL)))), NULL)));
+    Compiler_next(c);  return _join_c_string_literals(c, cons(_0, cons(_929, cons(List_var(cons(_33, cons(_929, cons(String_var(origin -> text), NULL)))), NULL))));
   }
   List name = Compiler_parse_complex_identifier(c);  Token after = c -> token;  List result = Compiler_resolve_expression(c, cons(_0, cons(_16, cons(List_var(cons(_88, cons(List_var(name), NULL))), NULL))), origin);  if(c -> source_facts)
   {
@@ -3658,12 +3666,20 @@ List Compiler_parse_assignment(Compiler compiler){
   if(! _init_guard_) _file_init_();  return _parse_assignment_tail(compiler, Compiler_parse_conditional(compiler));
 }
 
-List Compiler_parse_atomic_literal(Compiler);
-static List _parse_c_string_literals(Compiler compiler){
-  List first = Compiler_parse_atomic_literal(compiler);  if(Compiler_peek(compiler, 0) != 27051791223990) return first;  Array spellings = Array_new();  Array_push(spellings, Var_caddr(List_caddr(first)));  while(Compiler_peek(compiler, 0) == 27051791223990){
-    Array_push(spellings, String_var(compiler -> token -> text));  Compiler_next(compiler);
+static int _string_word_follows(Compiler c){
+  if(Compiler_peek(c, 0) != 19147688) return 0;  Var definition;  if(Map_try_get(c -> object_macros, String_var(c -> token -> text), & definition)) return Var_equal(definition, Symbol_var(1318210446));  return ! List_truth(Sym_get(c -> sym, cons(String_var(c -> token -> text), NULL)));
+}
+
+static List _join_c_string_literals(Compiler c, List first){
+  if(Compiler_peek(c, 0) != 27051791223990 && ! _string_word_follows(c)) return first;  Array spellings = Array_new();  Array_push(spellings, Var_caddr(List_caddr(first)));  while(Compiler_peek(c, 0) == 27051791223990 || _string_word_follows(c)){
+    Array_push(spellings, String_var(c -> token -> text));  Compiler_next(c);
   }
   String text = String_join(_936, Array_list_free(spellings));  return cons(_0, cons(_929, cons(List_var(cons(_33, cons(_929, cons(String_var(text), NULL)))), NULL)));
+}
+
+List Compiler_parse_atomic_literal(Compiler);
+static List _parse_c_string_literals(Compiler c){
+  return _join_c_string_literals(c, Compiler_parse_atomic_literal(c));
 }
 
 List Compiler_parse_macro_lisp_expression(Compiler);

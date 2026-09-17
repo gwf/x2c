@@ -11,7 +11,7 @@ typedef struct Job{
   struct _Launch * launch;
   long * pids;
   int * statuses;
-  int count, started, finished, status;
+  int count, started, finished, status, nul_output, nul_errors;
   File output_file, errors_file;
   String output_text, errors_text;
 }

@@ -22,6 +22,8 @@ static int _group_step(String s);
 
 static int _take_directives(Compiler c, Array items);
 
+static Symbol _arm_end(List run);
+
 static List _continued(Compiler c, List statement);
 
 static List _if_statement(Compiler compiler);
@@ -304,6 +306,30 @@ static int _take_directives(Compiler c, Array items){
   return depth;
 }
 
+static Symbol _arm_end(List run){
+  int level = 0;
+  Symbol end = 0;
+  {
+    List directive;
+    List _x2c_macro_object_1 = run;
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+      directive = Var_list(_x2c_macro_cursor_output_1);
+      {
+        Symbol kind = preproc_conditional_kind(Var_string(List_cadr(directive)));
+        if(kind == 1016156) level ++;
+        else if(! kind) continue;
+        else if(! level) end = kind;
+        else if(kind == 7109834) level --;
+      }
+
+    }
+
+  }
+  return end;
+}
+
 Symbol Compiler_peek(Compiler, int);
 
 Var Array_getindex(Array, int);
@@ -324,9 +350,11 @@ List Compiler_parse_governed(Compiler c, AstPos position){
       pending = 0;
     }
     if(depth <= 0) break;
+    Symbol end = _arm_end(Compiler_leading_preproc(c));
+    if(! end) break;
     depth += _take_directives(c, items);
     c -> directives_taken = c -> token;
-    if(depth <= 0 || Compiler_peek(c, 0) == 251 || Compiler_peek(c, 0) == 11212) break;
+    if(depth <= 0 || end == 7109834 || Compiler_peek(c, 0) == 251 || Compiler_peek(c, 0) == 11212) break;
   }
   return Var_list(Array_len(items) == 1 ? Array_getindex(items, 0) : List_var(cons(_0, List_append(Array_list_free(items), NULL))));
 }
@@ -503,21 +531,21 @@ static void _define_pattern_binders(Compiler compiler, List pattern, Token start
   List definite = Compiler_match_pattern_binders(compiler, pattern, & possible);
   {
     Var binder;
-    List _x2c_macro_object_2 = possible;
-    List _x2c_macro_cursor_2 = _x2c_macro_object_2;
-    Var _x2c_macro_cursor_output_2;
-    while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
-      binder = _x2c_macro_cursor_output_2;
+    List _x2c_macro_object_3 = possible;
+    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
+    Var _x2c_macro_cursor_output_3;
+    while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
+      binder = _x2c_macro_cursor_output_3;
       {
         if(! List_contains(definite, binder)) Compiler_report_error(compiler, 1362954, String_join(NULL, cons(String_var(role), cons(String_var(_17), NULL))), start, cons(_19, cons(String_var(Var_str(binder)), _22)));
         String name = String_getslice(Var_str(binder), 1, -2147483648, 1);
         {
           Var other;
-          List _x2c_macro_object_1 = possible;
-          List _x2c_macro_cursor_1 = _x2c_macro_object_1;
-          Var _x2c_macro_cursor_output_1;
-          while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
-            other = _x2c_macro_cursor_output_1;
+          List _x2c_macro_object_2 = possible;
+          List _x2c_macro_cursor_2 = _x2c_macro_object_2;
+          Var _x2c_macro_cursor_output_2;
+          while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+            other = _x2c_macro_cursor_output_2;
             {
               if(Var_equal(other, binder) || ! String_equal(String_getslice(Var_str(other), 1, -2147483648, 1), name)) continue;
               Compiler_report_error(compiler, 1362954, String_join(NULL, cons(String_var(role), cons(String_var(_23), NULL))), start, cons(_19, cons(String_var(name), _26)));
@@ -576,11 +604,11 @@ static List _match_capture_temporaries(Compiler c, List types, Array locals){
   Array declarations = Array_new();
   {
     List row;
-    List _x2c_macro_object_3 = types;
-    List _x2c_macro_cursor_3 = _x2c_macro_object_3;
-    Var _x2c_macro_cursor_output_3;
-    while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
-      row = Var_list(_x2c_macro_cursor_output_3);
+    List _x2c_macro_object_4 = types;
+    List _x2c_macro_cursor_4 = _x2c_macro_object_4;
+    Var _x2c_macro_cursor_output_4;
+    while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
+      row = Var_list(_x2c_macro_cursor_output_4);
 
   {
     List _x2c_match_expr = row;
@@ -606,8 +634,8 @@ int Array_try_next(Array, int *, Var *);
 Type Var_type(Var);
 static List _match_capture_locals(Compiler c, Array locals){
   Array declarations = Array_new(); {
-    List row;  Array _x2c_macro_object_4 = locals;  int _x2c_macro_cursor_4 = 0;  Var _x2c_macro_cursor_output_4;  while(Array_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
-      row = Var_list(_x2c_macro_cursor_output_4);
+    List row;  Array _x2c_macro_object_5 = locals;  int _x2c_macro_cursor_5 = 0;  Var _x2c_macro_cursor_output_5;  while(Array_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
+      row = Var_list(_x2c_macro_cursor_output_5);
   {
     List _x2c_match_expr = row;
     Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };
@@ -728,11 +756,11 @@ static List _match_cases(Compiler c){
     while(1){
       if(c -> token != c -> directives_taken){
         List directive;
-        List _x2c_macro_object_5 = Compiler_leading_preproc(c);
-        List _x2c_macro_cursor_5 = _x2c_macro_object_5;
-        Var _x2c_macro_cursor_output_5;
-        while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
-          directive = Var_list(_x2c_macro_cursor_output_5);
+        List _x2c_macro_object_6 = Compiler_leading_preproc(c);
+        List _x2c_macro_cursor_6 = _x2c_macro_object_6;
+        Var _x2c_macro_cursor_output_6;
+        while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_6)){
+          directive = Var_list(_x2c_macro_cursor_output_6);
           {
             Array_push(cases, List_var(directive));
             saw_default = _default_after_directive(groups, saw_default, directive);
@@ -1014,11 +1042,11 @@ List Compiler_parse_block_items(Compiler c, int anchor_items){
   while(1){
     if(c -> token != c -> directives_taken){
       Var directive;
-      List _x2c_macro_object_6 = Compiler_leading_preproc(c);
-      List _x2c_macro_cursor_6 = _x2c_macro_object_6;
-      Var _x2c_macro_cursor_output_6;
-      while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_6)){
-        directive = _x2c_macro_cursor_output_6;
+      List _x2c_macro_object_7 = Compiler_leading_preproc(c);
+      List _x2c_macro_cursor_7 = _x2c_macro_object_7;
+      Var _x2c_macro_cursor_output_7;
+      while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
+        directive = _x2c_macro_cursor_output_7;
         Array_push(block, directive);
       }
 
@@ -1037,11 +1065,11 @@ List Compiler_parse_block_items(Compiler c, int anchor_items){
     }
     {
       List item;
-      List _x2c_macro_object_7 = List_cdr(stmt);
-      List _x2c_macro_cursor_7 = _x2c_macro_object_7;
-      Var _x2c_macro_cursor_output_7;
-      while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
-        item = Var_list(_x2c_macro_cursor_output_7);
+      List _x2c_macro_object_8 = List_cdr(stmt);
+      List _x2c_macro_cursor_8 = _x2c_macro_object_8;
+      Var _x2c_macro_cursor_output_8;
+      while(List_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_8)){
+        item = Var_list(_x2c_macro_cursor_output_8);
         Array_push(block, List_var(! anchor_items || Var_equal(List_car(item), Symbol_var(104)) ? item : Compiler_anchor_origin(c, item, origin)));
       }
 

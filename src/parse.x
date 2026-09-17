@@ -1166,7 +1166,18 @@ static List _declaration_types(Compiler c, List storage) {
   List quals = _type_qualifiers(c);
   Type spec = _type_specifier(c);
   Array trailing = [];
-  while (_prefix_macro_words(c, 0, trailing)) continue;
+  // C11 6.11.5: a storage class after the type is obsolescent but legal, and
+  // preprocessed source spells an expanded storage macro that way.
+  loop {
+    Symbol symbol = c.peek(0);
+    if (symbol != <typedef> &&
+        (symbol.is_storage_class() || symbol.is_inline())) {
+      trailing.push(symbol);
+      c.next();
+      continue;
+    }
+    if (!_prefix_macro_words(c, 0, trailing)) break;
+  }
   if (trailing.len()) storage = %( @{trailing.list_free()} @storage );
   List words = storage.filter(%!(item) => item is <symbol>);
   Type binding_type = c.sym.local_type(%( @words @quals @spec ));

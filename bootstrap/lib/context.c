@@ -514,6 +514,7 @@ void Context_close(Context c){
   if(c -> pool) String_pool_release();
   Scope scope = c -> scope;
   Context parent = c -> parent;
+  while(Scope_top() != & c -> scope) Scope_pop();
   Scope_pop();
   Scope_destroy(scope);
   _thread() -> current = parent;

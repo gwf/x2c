@@ -718,6 +718,8 @@ int Array_try_next(Array, int *, Var *);
 
 String Var_str(Var);
 
+int String_equal(String, String);
+
 Var Map_getindex(Map, Var);
 
 static void _write_members(Buffer out, Map object, int pretty, int depth){
@@ -758,6 +760,7 @@ static void _write_members(Buffer out, Map object, int pretty, int depth){
     }
     Array_sort_by(names, _x2c_func_handle_0);
     int count = 0;
+    String previous = NULL;
     Buffer_write_char(out, '{');
     {
       Var name;
@@ -767,9 +770,16 @@ static void _write_members(Buffer out, Map object, int pretty, int depth){
       while(Array_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
         name = _x2c_macro_cursor_output_2;
         {
+          String text = Var_str(name);
+          if(count && String_equal(text, previous)){
+            static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/json.x",.function = "_write_members",.line = 508};
+            x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("duplicate object name")), NULL))), Symbol_var(920394), String_var(text));
+            __builtin_unreachable();
+          }
+          previous = text;
           if(count ++) Buffer_write_char(out, ',');
           _write_line(out, pretty, depth + 1);
-          _write_string(out, Var_str(name));
+          _write_string(out, text);
           Buffer_write(out, pretty ? ": " : ":");
           _write(out, Map_getindex(object, name), pretty, depth + 1);
         }
@@ -798,8 +808,8 @@ Map Var_map(Var);
 static void _write(Buffer out, Var value, int pretty, int depth){
   if(depth > JSON_MAX_DEPTH){
     {
-      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/json.x",.function = "_write",.line = 517};
-      x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("nesting exceeds 512 levels")), NULL))));
+      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/json.x",.function = "_write",.line = 524};
+      x2c_error_raise_n(& _x2c_error_site_6, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("nesting exceeds 512 levels")), NULL))));
       __builtin_unreachable();
     }
 
@@ -814,8 +824,8 @@ static void _write(Buffer out, Var value, int pretty, int depth){
   else{
     Symbol tag = Var_tag(value);
     {
-      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/json.x",.function = "_write",.line = 531};
-      x2c_error_raise_n(& _x2c_error_site_6, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(41038), Symbol_var(tag));
+      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/json.x",.function = "_write",.line = 538};
+      x2c_error_raise_n(& _x2c_error_site_7, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(41038), Symbol_var(tag));
       __builtin_unreachable();
     }
 
