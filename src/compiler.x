@@ -380,6 +380,38 @@ int Compiler.read_source(
   return 1;
 }
 
+/** Returns the spelling that identifies the file at `path`. Through a
+    source view it is the absolute path, because an unsaved file need not
+    exist on disk; otherwise it is the real path, or `path` itself when that
+    does not resolve.
+*/
+String Compiler.canonical_path(Compiler c, String path) {
+  if (c.sources) return Path.absolute(path);
+  char resolved[PATH_MAX];
+  return realpath(path, resolved) ? %"$resolved" : path;
+}
+
+static String _canonical_home(void) {
+  static char home[PATH_MAX];
+  if (!*home && !realpath(x2c_get_root(), home))
+    snprintf(home, sizeof home, "%s", (char *) x2c_get_root());
+  return %"$home";
+}
+
+/** Returns `path` relative to the canonical x2c home when it lies below the
+    home, otherwise `path`. Interfaces, retained declarations, and generated
+    identities spell paths this way, so they do not depend on where the home
+    is installed.
+*/
+String home_portable_path(String path) {
+  String prefix = %"${_canonical_home()}/";
+  return path.startswith(prefix) ? path[prefix.len():] : path;
+}
+
+/** Returns the absolute path that a `home_portable_path` spelling names. */
+String home_absolute_path(String spelling) =>
+  spelling.startswith("/") ? spelling : %"${_canonical_home()}/$spelling";
+
 /** Carries declaration metadata with one actual symbol contribution. */
 void Compiler.copy_source_declaration(
   Compiler compiler, Map target, Map source, List key) {
@@ -903,12 +935,9 @@ static void _shallow_finish_declaration(Compiler c) {
   else c.next();
 }
 
-static String _declaration_path(Compiler compiler, String path, int thaw) {
+static String _declaration_path(String path, int thaw) {
   if (!path || path.startswith("<")) return path;
-  if (thaw)
-    return path[0] == '/' ? path : %"${compiler.root_dir}/$path";
-  String prefix = %"${compiler.root_dir}/";
-  return path.startswith(prefix) ? path[prefix.len():] : path;
+  return thaw ? home_absolute_path(path) : home_portable_path(path);
 }
 
 static List _declaration_location(Compiler compiler, List location, int thaw) {
@@ -916,7 +945,7 @@ static List _declaration_location(Compiler compiler, List location, int thaw) {
   foreach (List row, location) {
     match (row)
       case %(file ?path):
-        row = %(file ${_declaration_path(compiler, path, thaw)});
+        row = %(file ${_declaration_path(path, thaw)});
     rows.push(row);
   }
   return rows.list_free();
@@ -927,7 +956,7 @@ static List _declaration_macro(Compiler compiler, List rows, int thaw) {
   foreach (List row, rows) {
     match (row) {
       case %(file ?path):
-        row = %(file ${_declaration_path(compiler, path, thaw)});
+        row = %(file ${_declaration_path(path, thaw)});
       case %(origin ?location):
         row = %(origin ${_declaration_location(compiler, location, thaw)});
       default:
@@ -958,7 +987,7 @@ Var Compiler.freeze_declaration_syntax(Compiler compiler, Var syntax) {
   match (syntax) {
     case %(macrodef *rows): return _declaration_macro(compiler, rows, 0);
     case %(src (source ?path ?begin ?end) ?node):
-      return %(src (source ${_declaration_path(compiler, path, 0)} $begin $end)
+      return %(src (source ${_declaration_path(path, 0)} $begin $end)
         ${compiler.freeze_declaration_syntax(node)});
     case %(at ?(int origin) ?node): {
       List location = compiler.origin_location(origin);
@@ -991,7 +1020,7 @@ Var Compiler.thaw_declaration_syntax(Compiler compiler, Var syntax) {
     }
     case %(macrodef *rows): return _declaration_macro(compiler, rows, 1);
     case %(src (source ?path ?begin ?end) ?node):
-      return %(src (source ${_declaration_path(compiler, path, 1)} $begin $end)
+      return %(src (source ${_declaration_path(path, 1)} $begin $end)
         ${compiler.thaw_declaration_syntax(node)});
     case %(declaration-void): return void;
     case %(declaration-empty-symbol): return (Symbol) 0;
@@ -1022,9 +1051,7 @@ Var Compiler.thaw_declaration_syntax(Compiler compiler, Var syntax) {
 }
 
 static List _declaration_source_key(Compiler compiler, Token token) {
-  String path = Path.absolute(compiler.filename);
-  String prefix = %"${compiler.root_dir}/";
-  if (path.startswith(prefix)) path = path[prefix.len():];
+  String path = home_portable_path(Path.absolute(compiler.filename));
   return %("source-node" (declaration $path ${token.pos}));
 }
 
@@ -1050,7 +1077,7 @@ void Compiler.run_declaration_effects(Compiler compiler) {
     String filename = compiler.filename;
     match (key)
       case %("source-node" (declaration ?path ?)):
-        compiler.filename = _declaration_path(compiler, path, 1);
+        compiler.filename = _declaration_path(path, 1);
     compiler.import_stack.push(context);
     defer {
       compiler.import_stack.take_last();
@@ -3366,28 +3393,15 @@ Type Sym.delegate_aggregate(Sym sym, Type type) {
   return type && type.is_aggregate_tag() ? type : NULL;
 }
 
-/* The current file's spelling in generated identities: repository-relative
-   when it lies under the root, otherwise its canonical path. */
-static String _gensym_owner(Compiler compiler) {
-  if (!compiler.filename) return "";
-  char buffer[PATH_MAX];
-  String path = compiler.sources ? Path.absolute(compiler.filename) :
-                realpath(compiler.filename, buffer) ? %"$buffer" :
-                compiler.filename;
-  static char root[PATH_MAX];
-  if (!*root && !realpath(x2c_get_root(), root))
-    snprintf(root, sizeof root, "%s", (char *) x2c_get_root());
-  String prefix = %"$root/";
-  return path.startswith(prefix) ? path[prefix.len():] : path;
-}
-
 /** Returns a fresh semantic identity for an anonymous aggregate.
     Identities are scoped to the compiler's current file and numbered per
     file, so every process mints the same sequence for one file and two
     files never share an identity. No emission path prints one.
 */
 List Compiler.gensym(Compiler compiler) {
-  String owner = _gensym_owner(compiler), key = %"gensym:$owner";
+  String owner = compiler.filename
+    ? home_portable_path(compiler.canonical_path(compiler.filename)) : "";
+  String key = %"gensym:$owner";
   Var stored;
   int count = compiler.names.counters.try_get(key, &stored)
             ? stored.int() + 1 : 1;

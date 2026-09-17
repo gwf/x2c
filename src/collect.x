@@ -100,11 +100,6 @@ static String _cached_canonical(char *cache, String dir) {
   return %"$cache";
 }
 
-static String _canonical_root(void) {
-  static char cache[PATH_MAX];
-  return _cached_canonical(cache, x2c_get_root());
-}
-
 static String _canonical_lib(void) {
   static char cache[PATH_MAX];
   if (*cache) return %"$cache";
@@ -702,24 +697,8 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
 
 /* A `.xi` interface is one unit's cache entry written beside its generated
    C. Missing, stale, or malformed interfaces are cache misses; the caller
-   walks the file cold and installs that result in the process cache. */
-
-static String _root_relative(String path) {
-  String prefix = %"${_canonical_root()}/";
-  if (!path.startswith(prefix)) return NULL;
-  return path[prefix.len():];
-}
-
-/* Paths inside an interface are repository-relative when they can be. */
-static String _portable_path(String path) {
-  String relative = _root_relative(path);
-  return relative ? relative : path;
-}
-
-static String _absolute_path(String spelling) {
-  if (spelling.startswith("/")) return spelling;
-  return %"${_canonical_root()}/$spelling";
-}
+   walks the file cold and installs that result in the process cache. Paths
+   inside an interface use `home_portable_path` spellings. */
 
 static String interface_out_dir = NULL, interface_mirror = NULL;
 
@@ -742,10 +721,10 @@ void interface_configure(String out_dir) {
    directory by stem, its sibling that mirrors a home file's directory, the
    home mirror, and a package's `builds/` beside or above the source. */
 static List _interface_candidates(String canonical) {
-  String stem = Path.stem(canonical), relative = _root_relative(canonical);
+  String stem = Path.stem(canonical), relative = home_portable_path(canonical);
   String dir = Path.dirname(canonical), Array paths = [];
   if (interface_out_dir) paths.push(%"$interface_out_dir/$stem.xi");
-  if (relative) {
+  if (relative != canonical) {
     String mirror = %"${Path.dirname(relative)}/$stem.xi";
     if (interface_out_dir) paths.push(%"$interface_out_dir/../$mirror");
     paths.push(%"$interface_mirror/$mirror");
@@ -824,7 +803,7 @@ static List _interface_load(Compiler c, String canonical, String path) {
   match (record)
     case %(interface 2 ?(String owner) ?(String hash) ?(List stored_parts)
            ?(List definitions) ?(List stored_dependencies)): {
-      if (!_absolute_path(owner).equal(canonical) ||
+      if (!home_absolute_path(owner).equal(canonical) ||
           !_hash_matches(c, canonical, hash)) return NULL;
       return _interface_entry(
         c, canonical, hash, stored_parts, definitions, stored_dependencies);
@@ -840,7 +819,7 @@ static List _interface_entry(
   Array parts = [];
   foreach (Var part, stored_parts) {
     if (part is <string>) {
-      parts.push(_canonical_path(_absolute_path(part)));
+      parts.push(_canonical_path(home_absolute_path(part)));
       continue;
     }
     if (part is not <list>) return NULL;
@@ -864,7 +843,7 @@ static List _interface_entry(
     if (dependency is not <list>) return NULL;
     match (dependency.list())
       case %(?(String name) ?content_hash): {
-        String dependency_path = _canonical_path(_absolute_path(name));
+        String dependency_path = _canonical_path(home_absolute_path(name));
         int unhashed =
           content_hash.is_integer() && content_hash.integer() == 1;
         if (!unhashed && !_hash_matches(c, dependency_path, content_hash))
@@ -924,16 +903,16 @@ static int _write_interface_entry(File output, String canonical, List entry) {
       parts.push(rows_var);
       continue;
     }
-    parts.push(_portable_path(part));
+    parts.push(home_portable_path(part));
   }
   Array dependencies = [];
   foreach (Var (path, content_hash), cached_dependencies)
-    dependencies.push(%(${_portable_path(path)} $content_hash));
+    dependencies.push(%(${home_portable_path(path)} $content_hash));
   dependencies.sort();
   List dependency_list = dependencies.list_free();
   List part_list = parts.list_free();
   List record = %(
-    interface 2 ${_portable_path(canonical)} $hash
+    interface 2 ${home_portable_path(canonical)} $hash
     $part_list $definitions $dependency_list
   );
   return snapshot_write_var(output, record) && output.putc('\n') != EOF;

@@ -695,46 +695,29 @@ static String _source_dir(Compiler compiler) {
   return filename ? Path.dirname(filename) : ".";
 }
 
-static String _source_file(Compiler compiler, String file) {
+/* A relative source name that is not a file resolves against the home. */
+static String _source_file(Compiler c, String file) {
   if (!file || file.startswith("<")) return file;
-  char resolved[PATH_MAX];
-  if (compiler.sources && compiler.sources.exists(file))
-    return Path.absolute(file);
-  if (realpath(file, resolved)) return %"$resolved";
-  if (file[0] != '/') {
-    String rooted = %"${compiler.root_dir}/$file";
-    if (realpath(rooted, resolved)) return %"$resolved";
-  }
-  return file;
+  String rooted = %"${c.root_dir}/$file";
+  if (file[0] != '/' && !c.sources.exists(file) && c.sources.exists(rooted))
+    file = rooted;
+  return c.canonical_path(file);
 }
 
-static String _embed_path(
-  Compiler compiler, String source_file, String requested) {
-  String candidate = requested;
-  if (requested[0] != '/') {
-    String base = _source_file(compiler, source_file);
-    candidate = %"${Path.dirname(base)}/$requested";
-  }
-  if (compiler.sources) return Path.absolute(candidate);
-  char resolved[PATH_MAX];
-  return realpath(candidate, resolved) ? %"$resolved" : candidate;
+static String _embed_path(Compiler c, String source_file, String requested) {
+  if (requested[0] == '/') return c.canonical_path(requested);
+  String base = Path.dirname(_source_file(c, source_file));
+  return c.canonical_path(%"$base/$requested");
 }
 
-static String _canonical_path(Compiler compiler, String path) {
-  String candidate = path;
-  if (path && path[0] != '/')
-    candidate = %"${_source_dir(compiler)}/$path";
-  char resolved[PATH_MAX];
-  if (compiler.sources && compiler.sources.exists(candidate))
-    return Path.absolute(candidate);
-  if (realpath(candidate, resolved)) return %"$resolved";
-  if (path && path[0] != '/') {
-    String system = %"${compiler.root_dir}/lib/$path";
-    if (compiler.sources && compiler.sources.exists(system))
-      return Path.absolute(system);
-    if (realpath(system, resolved)) return %"$resolved";
-  }
-  return candidate;
+/* A relative import names a file beside the importing source, or else one
+   under the home's `lib/`. */
+static String _canonical_path(Compiler c, String path) {
+  if (!path || path[0] == '/') return c.canonical_path(path);
+  String local = %"${_source_dir(c)}/$path";
+  String system = %"${c.root_dir}/lib/$path";
+  int use_system = !c.sources.exists(local) && c.sources.exists(system);
+  return c.canonical_path(use_system ? system : local);
 }
 
 static int _literal_string(Var syntax, String *value) {

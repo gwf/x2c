@@ -171,22 +171,10 @@ static void _tokenize_input(
    package through `import`. */
 static void _configure_package(
   Compiler compiler, CliRequest request, String filename) {
-  char buffer[PATH_MAX];
   compiler.package_dirs = request.package_roots();
-  if (!compiler.package_dirs) return;
-  String source;
-  if (compiler.sources) source = Path.absolute(filename);
-  else {
-    if (!realpath(filename, buffer)) return;
-    source = %"$buffer";
-  }
+  String source = compiler.canonical_path(filename);
   foreach (String directory, compiler.package_dirs) {
-    String root;
-    if (compiler.sources) root = Path.absolute(directory);
-    else {
-      if (!realpath(directory, buffer)) continue;
-      root = %"$buffer";
-    }
+    String root = compiler.canonical_path(directory);
     String package = x2c_package_directory(root, source);
     if (!package) continue;
     String name = package[package.rfind("/") + 1:];
