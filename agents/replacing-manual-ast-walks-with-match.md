@@ -254,8 +254,8 @@ change which converter wins."
 
 ### Turn positional recognizers into grammar cases
 
-`_direct_identifier` and `_addressed_identifier` in `src/emit.x` state the
-accepted grammar directly:
+`ast_direct_identifier` and `ast_addressed_identifier` in `src/type.x:78,95`
+state the accepted grammar directly:
 
 ```x2c
 match (ast) {

@@ -130,14 +130,14 @@ campaign.
 
 Current proven shapes include:
 
-- Uniform method or function families in `lib/logger.x:895-900` and `933-938`
-  and in `lib/common.x:479-487`. Names and types vary; behavior does not.
+- Uniform method or function families in `lib/logger.x:733-738` and `775-780`
+  and in `lib/common.x:494-505`. Names and types vary; behavior does not.
 - Private pointer conversion pairs in `lib/var-adapters.xmacro`. The tagged
   form preserves `Var.new` and `Var.pointer`; the raw form preserves the
   direct `p64` store and load used by iterator callbacks.
-- Uniform selector or native adapter families in `lib/list.x:331` and
-  `lib/varops.x:60`. Each invocation supplies the facts that differ.
-- Local resource setup in `lib/match.x:164` and `lib/match.x:173`. The macro
+- The native adapter family in `lib/varops.x:72-86`. Each invocation supplies
+  the facts that differ.
+- Local resource setup in `lib/match.x:296` and `lib/match.x:304`. The macro
   hides stack-storage mechanics while release and fallback policy stay
   visible.
 - Test registration in `unittest/test-macros.xmacro:1`. The macro removes a
@@ -203,8 +203,9 @@ clearest possible ledger: the enum itself.
 
 Do not make a reader reverse-engineer public function names, C types, or
 failure modes from clever Lisp. The native update macro in
-`lib/varops.x:652` explicitly receives both the native type and public
-function name. That repetition is useful documentation at the call site.
+`lib/varops.x:41` explicitly receives both the native type and public
+function name at each invocation. That repetition is useful documentation at
+the call site.
 
 Generated public declarations also have repository-wide consequences. Check
 symbol collection, generated headers, the module catalog, and documentation
@@ -244,8 +245,8 @@ useful source documentation.
 
 Use a decorator when one existing expression, declaration, function,
 statement, field, or unit should remain recognizable but gain an orthogonal
-wrapper. The checked examples in `examples/decorators.x` show tracing and
-parameter preconditions; the compiler fixtures under
+wrapper. The checked examples in `examples/magic/decorators.x` show tracing
+and parameter preconditions; the compiler fixtures under
 `unittest/compiler-fixtures/macro-decorator-*` own the exact supported
 boundary.
 
