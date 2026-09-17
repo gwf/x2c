@@ -89,7 +89,7 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
       ArrayDbl_push(_ad_tape, 0.0);
     }
     ArrayDbl_push(_ad_tape, s);
-    s = s + x * x *(double) i + fabs(y) * hypot(x, y);
+    s = s +(x * x *(double) i + fabs(y) * hypot(x, y));
     ArrayDbl_push(_ad_tape, i);
     i = i + 1;
     ArrayDbl_push(_ad_tape, 0.0);
@@ -115,7 +115,7 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
     ArrayDbl_push(_ad_tape, _ad_first5);
     _ad_first5 = 0;
     ArrayDbl_push(_ad_tape, s);
-    s = s - sin(t) / x;
+    s = s -(sin(t) / x);
     ArrayDbl_push(_ad_tape, j);
     j = j + 1;
     ArrayDbl_push(_ad_tape, 0.0);
@@ -341,7 +341,7 @@ static double replay_grad(double x, double y, int n, double * x_grad, double * y
           ArrayDbl_push(_ad_tape, 0.0);
         }
         ArrayDbl_push(_ad_tape, s);
-        s = s + x * x *(double) i + fabs(y) * hypot(x, y);
+        s = s +(x * x *(double) i + fabs(y) * hypot(x, y));
         ArrayDbl_push(_ad_tape, i);
         i = i + 1;
         ArrayDbl_push(_ad_tape, 0.0);

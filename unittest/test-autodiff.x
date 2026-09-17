@@ -331,6 +331,29 @@ static void autodiff_tape_skips_inactive_adjoints(void) {
   EXPECT_TRUE(_near(x.adjoint, 2.0));
 }
 
+$ad.both()
+static double _grouped_calls(double x) =>
+  log(x + 1.0) + acosh(x + 1.0) + log2(x + 1.0) + pow(x + 1.0, x - 0.5);
+
+$ad.both()
+static double _grouped_updates(double x) {
+  double s = x * x;
+  s *= x + 1.0;
+  s /= x + 2.0;
+  s -= x - 1.0;
+  return s;
+}
+
+static void autodiff_keeps_operand_grouping(void) {
+  double gradient;
+  _grouped_calls_grad(1.0, &gradient);
+  EXPECT_TRUE(fabs(gradient - _central(_grouped_calls, 1.0)) < 1e-5);
+  EXPECT_TRUE(fabs(_grouped_calls_dot(1.0, 1.0) - gradient) < 1e-12);
+  _grouped_updates_grad(2.0, &gradient);
+  EXPECT_TRUE(fabs(gradient - _central(_grouped_updates, 2.0)) < 1e-5);
+  EXPECT_TRUE(fabs(_grouped_updates_dot(2.0, 1.0) - gradient) < 1e-12);
+}
+
 void autodiff_suite(void) {
   $test.run(autodiff_dual_matches_finite_difference);
   $test.run(autodiff_dual_operators_and_converters);
@@ -345,4 +368,5 @@ void autodiff_suite(void) {
   $test.run(autodiff_continue_with_step_and_for_double);
   $test.run(autodiff_differentiates_loop_clauses);
   $test.run(autodiff_tape_skips_inactive_adjoints);
+  $test.run(autodiff_keeps_operand_grouping);
 }

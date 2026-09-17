@@ -135,7 +135,10 @@ macro Unit $ad.dual(
 
 /* Compile-time support shared by both transformations. Constructed syntax
    uses spelled names, which the compiler rebinds and retypes after the
-   expansion, so copied subtrees drop their binding records first. */
+   expansion, so copied subtrees drop their binding records first. C output
+   groups operators only through `parens` nodes, so a copied binary or
+   conditional operand is parenthesized before it joins a constructed
+   operation. */
 
 $(defun ad._dot (name) (string-append name "_dot"))
 $(defun ad._bar (name) (string-append name "_bar"))
@@ -160,8 +163,14 @@ $(defun ad._zero? (e) (equal? e (ad._zero)))
 $(defun ad._one? (e) (equal? e (ad._lit "1.0")))
 $(defun ad._id (name) `(expr () (ident (,name))))
 $(defun ad._parens (e) `(expr () (parens ,e)))
-$(defun ad._raw (op a b) (ad._parens `(expr () (op ,op ,a ,b))))
-$(defun ad._neg (a) (if (ad._zero? a) a (ad._parens `(expr () (op - ,a)))))
+$(defun ad._operand (e)
+  (if (match e '(expr ? (op ?o ?a ?b *rest)))
+      `(expr ,(cadr e) (parens ,e))
+      e))
+$(defun ad._raw (op a b)
+  (ad._parens `(expr () (op ,op ,(ad._operand a) ,(ad._operand b)))))
+$(defun ad._neg (a)
+  (if (ad._zero? a) a (ad._parens `(expr () (op - ,(ad._operand a))))))
 $(defun ad._add (a b)
   (cond ((ad._zero? a) b)
         ((ad._zero? b) a)
@@ -204,8 +213,10 @@ $(defun ad._zip (f a b)
 /* Every entry names a primitive and one partial derivative per argument.
    Each partial receives the unbound argument list. */
 $(defun ad._select (test a b) `(expr () (parens (expr () (op ? ,test ,a ,b)))))
-$(defun ad._less (a b) `(expr () (op < ,a ,b)))
-$(defun ad._less-eq (a b) `(expr () (op <= ,a ,b)))
+$(defun ad._less (a b)
+  `(expr () (op < ,(ad._operand a) ,(ad._operand b))))
+$(defun ad._less-eq (a b)
+  `(expr () (op <= ,(ad._operand a) ,(ad._operand b))))
 $(defun ad._square (a) (ad._mul a a))
 $(defun ad._recip (e) (ad._div (ad._lit "1.0") e))
 $(defun ad._plus-one (e) (ad._add (ad._lit "1.0") e))
@@ -319,7 +330,8 @@ $(defun ad._var-name (e)
     (else nil)))
 $(defun ad._one-of (target)
   (if (ad._double? target) (ad._lit "1.0") (ad._int "1")))
-$(defun ad._typed (e op a b) (list 'expr (cadr e) (list 'op op a b)))
+$(defun ad._typed (e op a b)
+  (list 'expr (cadr e) (list 'op op a (ad._operand b))))
 $(defun ad._step (e op target)
   (let ((n (ad._var-name target)))
     (if n (list n (ad._typed e op target (ad._one-of target))) nil)))

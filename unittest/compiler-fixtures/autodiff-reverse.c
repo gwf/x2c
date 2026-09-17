@@ -93,7 +93,7 @@ static double model_grad(double x, double y, int n, double * x_grad, double * y_
   while(i <= n){
     _ad_trip4 =(_ad_trip4 + 1);
     ArrayDbl_push(_ad_tape, s);
-    s = s + scale(x, y) *(double) i;
+    s = s +(scale(x, y) *(double) i);
     ArrayDbl_push(_ad_tape, i);
     i = i + 1;
     ArrayDbl_push(_ad_tape, 0.0);
@@ -117,7 +117,7 @@ static double model_grad(double x, double y, int n, double * x_grad, double * y_
   while(j < 2){
     _ad_trip5 =(_ad_trip5 + 1);
     ArrayDbl_push(_ad_tape, s);
-    s = s - sin(t) / x;
+    s = s -(sin(t) / x);
     ArrayDbl_push(_ad_tape, j);
     j = j + 1;
     ArrayDbl_push(_ad_tape, 0.0);
