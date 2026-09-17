@@ -582,11 +582,18 @@ int scan_number_typed(char *s, Symbol *type) {
         n += 2;
         break;
       case '1': case '2': case '3': case '4': case '5':
-      case '6': case '7':
+      case '6': case '7': {
+        // As in C, a point or exponent makes the digits decimal floating.
+        char after = number[_digits(number, 10)];
+        if (after == '.' || after == 'e' || after == 'E') {
+          n = _decimal_number(number, &found);
+          break;
+        }
         n = _radix_integer(number + 2, 8, 1);
         if (n < 0) return -1;
         n += 2;
         break;
+      }
       default: n = _decimal_number(number, &found);
         break;
     }

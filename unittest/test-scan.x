@@ -168,6 +168,7 @@ static void scan_valid_numbers(void) {
   struct NumberCase cases[] = {
     {"0", 1, <int>}, {"123", 3, <int>}, {"123UL;", 5, <int>},
     {"0123", 4, <int>}, {"08", 2, <int>}, {"0o777", 5, <int>},
+    {"01.5", 4, <float>}, {"017e3", 5, <float>}, {"09.5", 4, <float>},
     {"0b101", 5, <int>}, {"0x1e", 4, <int>},
     {"-0x1e", 5, <int>}, {".5", 2, <float>},
     {"1.", 2, <float>}, {"1.e2", 4, <float>},
