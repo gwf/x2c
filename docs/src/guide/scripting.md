@@ -84,10 +84,10 @@ take from it.
 
 | Method | Result |
 | --- | --- |
-| `status()` | the exit status, or 128 plus a signal; never raises |
+| `status()` | the exit status, or 128 plus a signal |
 | `output()` | captured standard output |
 | `lines()` | captured standard output split into lines, without endings |
-| `errors()` | captured standard error, or NULL when it was not captured; never raises |
+| `errors()` | captured standard error, or NULL when it was not captured |
 | `check()` | the job itself; raises when the status is not zero |
 | `run()` | shows output live, waits, and raises when the status is not zero |
 
@@ -126,10 +126,10 @@ if (%(make test).job().live().status())
 
 `check`, `run`, `output`, and `lines` raise `<cmd-fail>` when the status is
 not zero. The detail has `command` and `status` entries, plus `output` and
-`errors` entries when they were captured. `status` and `errors` never raise,
-so a script can read standard error after a failure. When a program cannot
-start, the job raises `<not-found>` for a missing program or directory, and
-`<io-fail>` for anything else:
+`errors` entries when they were captured. `status` and `errors` raise only
+when a program cannot start, so a script can read standard error after a
+nonzero status. When a program cannot start, the job raises `<not-found>`
+for a missing program or directory, and `<io-fail>` for anything else:
 
 ```x2c
 ~#include "process.x"
