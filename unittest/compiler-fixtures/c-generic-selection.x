@@ -1,7 +1,7 @@
 #include "x2c.x"
 
-typedef unsigned int Count;
-typedef int (*Handler)(int);
+typedef struct Bits { unsigned small : 3; } Bits;
+enum Color { RED, GREEN };
 
 macro Expression $kind(Expr $value) => (
   _Generic(($value), int: "int", double: "double", char *: "char *",
@@ -11,34 +11,27 @@ macro Expression $kind(Expr $value) => (
 static const char *file_scope = _Generic((long) 0, long: "long",
                                          default: "other");
 
-static int twice(int value) => value * 2;
-
 static int width(int value) {
   return _Generic(value, int: 32, long: 64, default: 0);
 }
 
+// A selection reaches C unchanged and has no x2c type, so the native
+// compiler chooses the association for every controlling type.
 int main(void) {
   const int limit = 3;
   char buffer[8] = "buf";
-  Count count = 4;
-  size_t size = 5;
   const char *text = "text";
   List names = %(a b c);
+  Bits bits = {1};
+  enum Color color = GREEN;
   printf("%s %s %s %s %s\n", $kind(limit), $kind(2.5), $kind(buffer),
          $kind(text), $kind(names));
   printf("%s %d\n", file_scope, width(limit));
-  if (_Generic(names, List: 1, default: 0))
-    printf("%d\n", _Generic(limit, int: names, default: NULL).len());
-  // Each value converts to Var by the association x2c selects; selecting
-  // differently from C would convert an int as a string.
-  Var constant = _Generic(limit, int: 1, default: "no");
-  Var array = _Generic(buffer, char *: 1, default: "no");
-  Var alias = _Generic(count, unsigned: 1, default: "no");
-  Var system = _Generic(size, size_t: 1, default: "no");
-  Var function = _Generic(twice, Handler: 1, default: "no");
-  Var pointee = _Generic(text, char *: "no", const char *: 1);
-  printf("%s %s %s %s %s %s\n", constant.str(), array.str(), alias.str(),
-         system.str(), function.str(), pointee.str());
-  printf("%s\n", %"${_Generic(size, size_t: names, default: NULL)}");
+  int character = _Generic('a', int: 1, default: 2);
+  int variable = _Generic(color, enum Color: 3, default: 4);
+  int size = _Generic(sizeof(int), size_t: 5, default: 6);
+  int field = _Generic(bits.small, default: 7);
+  Var boxed = (int)_Generic(names, List: 8, default: 9);
+  printf("%d %d %d %d %s\n", character, variable, size, field, boxed);
   return 0;
 }

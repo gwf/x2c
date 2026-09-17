@@ -586,12 +586,7 @@ static List _parse_generic(Compiler c) {
   List control = c.parse_assignment();
   Array associations = [];
   while (c.test(<,>)) {
-    if (c.test(<default>)) {
-      c.expect(<:>);
-      associations.push(%(association default ${c.parse_assignment()}));
-      continue;
-    }
-    Type type = c.parse_type_name();
+    Var type = c.test(<default>) ? <default> : c.parse_type_name();
     c.expect(<:>);
     associations.push(%(association $type ${c.parse_assignment()}));
   }
@@ -600,211 +595,23 @@ static List _parse_generic(Compiler c) {
   return c.resolve_expression(%(expr () $selection), origin);
 }
 
-/* Generic selection gives the expression a static type only when x2c knows
-   the association C selects. Where x2c's model of a type can differ from
-   C's, nothing is selected, the expression stays untyped, and the native
-   compiler decides alone. */
-
-/* Resolves a typedef base through collected declarations only. The LP64
-   table for system names models widths, not identity: `int64_t` is `long`
-   on Linux and `long long` on macOS. An uncollected name stays a name. */
-static Type _generic_resolve(Compiler c, Type type) {
-  int hops = 0;
-  loop {
-    type = type.declared();
-    Type base = type.base_type();
-    if (!base.is_typedef_name() && !base.is_typedef()) return type;
-    Type next = c.sym.next_typedef(base, &hops);
-    if (!next) return type;
-    type = type.list()[:type.len() - base.len()].append(next);
-  }
-}
-
-static unsigned _generic_qualifier(Var item) {
-  if (item is not <symbol>) return 0;
-  switch (item.symbol()) {
-    case <const>:    return 1;
-    case <volatile>: return 2;
-    case <restrict>: return 4;
-  }
-  return 0;
-}
-
-static void _generic_push_qualifiers(Array result, unsigned qualifiers) {
-  if (qualifiers & 1) result.push(<const>);
-  if (qualifiers & 2) result.push(<volatile>);
-  if (qualifiers & 4) result.push(<restrict>);
-}
-
-/* Spells a resolved type with each level's qualifiers as a set in one
-   order, a scalar base in its canonical spelling, and a named aggregate as
-   its tag, so equal results are the same C type. `decidable` is cleared by
-   a part whose compatibility with a different type x2c cannot decide: an
-   uncollected typedef name, an enum, a reference, an array, function, or
-   bitfield declarator, or an unnamed or block-scope aggregate. */
-static Type _generic_canonical(Type type, int *decidable) {
-  Array result = [];
-  unsigned qualifiers = 0;
-  for (Type rest = type; rest; rest = rest.cdr()) {
-    Var head = rest.car();
-    unsigned qualifier = _generic_qualifier(head);
-    if (qualifier) {
-      qualifiers |= qualifier;
-      continue;
-    }
-    if (head is <list> || head == <&> || head == <^> || head == <*>) {
-      if (head != <*>) *decidable = 0;
-      _generic_push_qualifiers(result, qualifiers);
-      result.push(head);
-      qualifiers = 0;
-      continue;
-    }
-    foreach (Var item, rest) qualifiers |= _generic_qualifier(item);
-    _generic_push_qualifiers(result, qualifiers);
-    match (rest)
-      case %((!set ?kind (!or struct union)) ?(String name) *):
-        return result.list_free().append(%($kind $name));
-    Type scalar = rest.scalar();
-    if (scalar) return result.list_free().append(scalar);
-    *decidable = 0;
-    foreach (Var item, rest)
-      if (!_generic_qualifier(item)) result.push(item);
-    return result.list_free();
-  }
-  _generic_push_qualifiers(result, qualifiers);
-  return result.list_free();
-}
-
-static List _generic_selection(
-  Compiler c, List control, List associations);
-static Type _generic_control_type(Compiler c, List expression);
-
-/* A type x2c recorded from a declaration, a literal, or a lowered
-   operation. A bitfield's type differs between C compilers, and an enum's
-   compatible integer type is implementation-defined; an enumeration
-   constant is also `int` in C but the enum in x2c. */
-static Type _generic_declared_type(Compiler c, Type type) {
-  if (!type || type.is_bitfield()) return NULL;
-  type = _generic_resolve(c, type);
-  return type.canonicalize().is_enum() ? NULL : type;
-}
-
-static Type _generic_promoted(Compiler c, List operand) {
-  Type scalar = _generic_control_type(c, operand).scalar();
-  return scalar ? scalar.promote() : NULL;
-}
-
-/* The usual arithmetic conversions, where `widest` follows the LP64 widths
-   `common.x` asserts. Otherwise only pointer-and-integer arithmetic keeps
-   its declared type. */
-static Type _generic_arithmetic(
-  Compiler c, Type type, Symbol operator, List left, List right) {
-  Type left_type = _generic_control_type(c, left);
-  Type right_type = _generic_control_type(c, right);
-  if (!left_type || !right_type) return NULL;
-  Type left_scalar = left_type.scalar(), right_scalar = right_type.scalar();
-  if (left_scalar && right_scalar) return left_scalar.widest(right_scalar);
-  int left_pointer = left_type.is_pointer() || left_type.is_array();
-  int right_pointer = right_type.is_pointer() || right_type.is_array();
-  // A pointer difference is ptrdiff_t, whose identity x2c does not know.
-  if (left_pointer && right_pointer) return NULL;
-  if ((operator == <+> || operator == <->) &&
-      ((left_pointer && right_scalar) || (left_scalar && right_pointer)))
-    return _generic_declared_type(c, type);
-  return NULL;
-}
-
-/* Returns the type C gives a controlling expression, or NULL where x2c's
-   type can differ: a character constant is `int` in C, `sizeof` and
-   `offsetof` are `size_t`, and operators derive their types from their
-   operands. A Var operand makes x2c lower the operation, so C sees its
-   declared result. */
-static Type _generic_control_type(Compiler c, List expression) {
-  match (expression) {
-    case %(expr ? (literal (char) *)): return %(int);
-    case %(expr ? (parens ?inner)): return _generic_control_type(c, inner);
-    case %(expr ? (commas *expressions)):
-      return _generic_control_type(c, expressions.last());
-    case %(expr ? (generic ?control *associations)): {
-      List selected = _generic_selection(c, control, associations);
-      return selected ? _generic_control_type(c, selected) : NULL;
-    }
-    case %(expr ? (!or (sizeof *) (offsetof *))): return NULL;
-    case %(expr ?type (postfix ? ?operand)): {
-      if (c.sym.is_var_type(type)) return _generic_declared_type(c, type);
-      return _generic_control_type(c, operand);
-    }
-    case %(expr ?type (op ?operator ?operand)): {
-      if (c.sym.is_var_type(type)) return _generic_declared_type(c, type);
-      switch (operator.symbol()) {
-        case <!>: return %(int);
-        case <++>: case <-->: return _generic_control_type(c, operand);
-        case <->: case <+>: case <~>: return _generic_promoted(c, operand);
-      }
-      return _generic_declared_type(c, type);
-    }
-    case %(expr ?type (op ? ? ?ontrue ?onfalse)): {
-      if (c.sym.is_var_type(type)) return _generic_declared_type(c, type);
-      Type true_type = _generic_control_type(c, ontrue);
-      Type false_type = _generic_control_type(c, onfalse);
-      Type true_scalar = true_type.scalar();
-      Type false_scalar = false_type.scalar();
-      if (true_scalar && false_scalar)
-        return true_scalar.widest(false_scalar);
-      int decidable = 1;
-      if (true_type &&
-          _generic_canonical(true_type, &decidable).equal(
-            _generic_canonical(false_type, &decidable)))
-        return true_type;
-      return NULL;
-    }
-    case %(expr ?type (op ?operator ?left ?right)): {
-      Symbol op = operator;
-      if (op == <.> || op == <"->"> || c.sym.is_var_type(type))
-        return _generic_declared_type(c, type);
-      if (op.is_assignment_op()) return _generic_control_type(c, left);
-      switch (op) {
-        case <||>: case <&&>: case <==>: case <!=>: case <===>: case <!==>:
-        case <"<">: case <">">: case <"<=">: case <">=">:
-          return %(int);
-        case <"<<">: case <">>">:
-          return _generic_promoted(c, left);
-      }
-      return _generic_arithmetic(c, type, op, left, right);
+/* Whether C gives an operand the type x2c records. A character constant is
+   `int` in C; `sizeof`, `offsetof`, and a pointer difference have `size_t`
+   and `ptrdiff_t` identities x2c does not model; an enum's compatible
+   integer type is implementation-defined; and C compilers type a bitfield
+   differently. */
+static int _c_type_known(Compiler c, List operand) {
+  match (operand) {
+    case %(expr ? (parens ?inner)): return _c_type_known(c, inner);
+    case %(expr ? (!or (literal (char) *) (sizeof *) (offsetof *))): return 0;
+    case %(expr ? (op - (expr ?left *) (expr ?right *))): {
+      Type l = left, r = right;
+      if ((l.is_pointer() || l.is_array()) && (r.is_pointer() || r.is_array()))
+        return 0;
     }
   }
-  return _generic_declared_type(c, expression.cadr());
-}
-
-/* Returns the value of the association C selects, or NULL when x2c cannot
-   know it. C11 6.5.1.1 compares the controlling type after lvalue
-   conversion: an array or function decays to a pointer and top-level
-   qualifiers drop. An equal association is certain, because C either
-   selects it or rejects a second compatible one. `default` is certain only
-   when every other association is certainly incompatible. */
-static List _generic_selection(
-  Compiler c, List control, List associations) {
-  Type type = _generic_control_type(c, control);
-  if (!type) return NULL;
-  if (type.is_array()) type = type.dereference().reference();
-  else if (type.is_function()) type = type.reference();
-  int control_decidable = 1;
-  Type key = _generic_canonical(type, &control_decidable);
-  while (key && _generic_qualifier(key.car())) key = key.cdr();
-  List fallback = NULL;
-  int undecided = 0;
-  foreach (List association, associations) match (association) {
-    case %(association default ?value):
-      fallback = value;
-    case %(association ?selector ?value): {
-      int decidable = control_decidable;
-      Type candidate =
-        _generic_canonical(_generic_resolve(c, selector), &decidable);
-      if (candidate.equal(key)) return value;
-      if (!decidable) undecided = 1;
-    }
-  }
-  return undecided ? NULL : fallback;
+  Type type = operand.cadr(), numeric = c.sym.resolve_numeric_type(type);
+  return type && !type.is_bitfield() && !(numeric && numeric.is_enum());
 }
 
 static List _parse_unary_op(Compiler c) {
@@ -899,8 +706,8 @@ static void _warn_unnecessary_cast(
   Compiler c, List operand, Type target, Token origin) {
   if (!target || target === %(void) || target === %(<macro-expr>)) return;
   Type source = operand.cadr();
-  if (!source || !_generic_control_type(c, operand)) return;
-  if (source.declared() != target.declared()) return;
+  if (!_c_type_known(c, operand) || source.declared() != target.declared())
+    return;
   c.report_warning(
     <warning>,
     %"unnecessary conversion: the operand already has type ${target.repr()}",
@@ -2015,14 +1822,8 @@ static List _resolve_content(
         case %(association ?selector ?value):
           resolved.push(%(association $selector
                           ${c.resolve_expression(value, origin)}));
-      associations = resolved.list_free();
-      Type type = NULL;
-      if (control.cadr() === %(<macro-expr>)) type = %(<macro-expr>);
-      else {
-        List selected = _generic_selection(c, control, associations);
-        if (selected) type = selected.cadr();
-      }
-      return %(expr $type (generic $control @associations));
+      Type type = control.cadr() === %(<macro-expr>) ? %(<macro-expr>) : NULL;
+      return %(expr $type (generic $control @{resolved.list_free()}));
     }
     case %(va-arg ?argument ?declaration):
       return %(expr $input_type
@@ -2760,12 +2561,6 @@ static String _not_null_pointer_constant(Compiler compiler, List expr) {
     // one: no type in C has size zero.
     case %(expr ? (sizeof *)):
       return "sizeof";
-    // A generic selection is the association it selects.
-    case %(expr ? (generic ?control *associations)): {
-      List selected = _generic_selection(compiler, control, associations);
-      return selected ? _not_null_pointer_constant(compiler, selected)
-                      : NULL;
-    }
     // Unary minus or plus over a nonzero literal is still nonzero.  The
     // pattern has a fixed length, so a binary use of the same operator,
     // which would need folding, does not match it.

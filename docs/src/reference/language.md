@@ -528,48 +528,17 @@ assertion. Translation and source analysis alone do not perform that check.
 ### Generic selection
 
 `_Generic(controlling, type: value, ..., default: value)` is a C11 generic
-selection. x2c selects an association from the controlling expression's static
-type and gives the whole expression the selected value's type, so conversions,
-method calls, and interpolation apply to that value:
+selection. x2c resolves the controlling expression and each value, then emits
+the selection unchanged. The native compiler chooses the association and
+reports constraint errors. The selection has no x2c type, so it works where C
+accepts the selected value directly:
 
 ```x2c
-size_t count = 3;
-List names = %(a b c);
-int length = _Generic(count, size_t: names, default: NULL).len();
+int size = _Generic(sizeof(int), size_t: 1, default: 2);
 ```
 
-x2c gives a selection a static type only when it can determine the
-association C selects. Where x2c's model of the controlling type can differ
-from C's, the expression has no static type and the native compiler makes
-the selection, as in C. The selection is always emitted unchanged, and the
-native compiler reports its constraint errors.
-
-The controlling type is compared after C's lvalue conversion: top-level
-qualifiers are dropped and an array or function decays to a pointer. A
-character constant has type `int`, and the arithmetic, shift, comparison, and
-conditional operators derive C's type from their operands. Typedef names
-resolve through collected declarations, scalar spellings such as
-`unsigned int` and `unsigned` compare equal, and the qualifiers at one pointer
-level compare as a set. An equal association is selected. The `default` value
-is selected only when every other association is certainly a different type.
-
-These controlling expressions stay untyped:
-
-- an enum or an enumeration constant, whose compatible integer type is
-  implementation-defined, and arithmetic on one;
-- a bitfield, whose type C compilers treat differently;
-- `sizeof`, `offsetof`, and a pointer difference, whose `size_t` and
-  `ptrdiff_t` identities x2c does not model;
-- a system typedef without a collected declaration, which x2c otherwise
-  models by width, such as `int64_t`, which is `long` on Linux and
-  `long long` on macOS;
-- a controlling or association type that contains an array or function
-  declarator, a reference, or an unnamed or block-scope aggregate, when it is
-  not identical to an association.
-
-An untyped selection still works where C accepts the value directly, such as
-`int size = _Generic(sizeof(int), size_t: 1, default: 2);`, but it does not
-convert to `Var` or take part in method calls.
+A selection does not convert to `Var` or take part in method calls. A cast
+gives it a type: `Var kind = (int)_Generic(text, char *: 1, default: 2);`.
 
 An association type is a type name of specifiers, qualifiers, and pointers.
 Name a function-pointer or array type through a typedef.

@@ -12,8 +12,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-static int twice(int value);
-
 static int width(int value);
 
 Var Symbol_var(Symbol);
@@ -32,44 +30,32 @@ __attribute__((constructor)) static void _file_init_(void){
   _5 = cons(_0, _4);
 }
 
-static int twice(int value){
-  return value * 2;
-}
-
 static int width(int value){
   return _Generic(value, int : 32, long : 64, default : 0);
 }
 
-int List_len(List);
-
 Var int_var(int);
-
-String Var_str(Var);
-
-Var String_var(String);
-
-String List_str(List);
 
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   const int limit = 3;
   char buffer[8] = "buf";
-  Count count = 4;
-  size_t size = 5;
   const char * text = "text";
   List names = _5;
+  Bits bits ={
+    1
+  }
+  ;
+  enum Color color = GREEN;
   printf("%s %s %s %s %s\n", _Generic((limit), int : "int", double : "double", char * : "char *", const char * : "const char *", default : "other"), _Generic((2.5), int : "int", double : "double", char * : "char *", const char * : "const char *", default : "other"), _Generic((buffer), int : "int", double : "double", char * : "char *", const char * : "const char *", default : "other"), _Generic((text), int : "int", double : "double", char * : "char *", const char * : "const char *", default : "other"), _Generic((names), int : "int", double : "double", char * : "char *", const char * : "const char *", default : "other"));
   printf("%s %d\n", file_scope, width(limit));
-  if(_Generic(names, List : 1, default : 0)) printf("%d\n", List_len(_Generic(limit, int : names, default : NULL)));
-  Var constant = int_var(_Generic(limit, int : 1, default : "no"));
-  Var array = int_var(_Generic(buffer, char * : 1, default : "no"));
-  Var alias = int_var(_Generic(count, unsigned : 1, default : "no"));
-  Var system = int_var(_Generic(size, size_t : 1, default : "no"));
-  Var function = int_var(_Generic(twice, Handler : 1, default : "no"));
-  Var pointee = int_var(_Generic(text, char * : "no", const char * : 1));
-  printf("%s %s %s %s %s %s\n", Var_str(constant), Var_str(array), Var_str(alias), Var_str(system), Var_str(function), Var_str(pointee));
-  printf("%s\n", String_join(NULL, cons(String_var(List_str(_Generic(size, size_t : names, default : NULL))), NULL)));
+  int character = _Generic('a', int : 1, default : 2);
+  int variable = _Generic(color, enum Color : 3, default : 4);
+  int size = _Generic(sizeof(int), size_t : 5, default : 6);
+  int field = _Generic(bits.small, default : 7);
+  Var boxed = int_var((int) _Generic(names, List : 8, default : 9));
+  printf("%d %d %d %d %s\n", character, variable, size, field, Var_str(boxed));
   return 0;
 }
 

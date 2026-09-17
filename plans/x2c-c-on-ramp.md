@@ -5,7 +5,9 @@
 > result" and the rest of a 22-unit corpus were handled by
 > `plans/archive/x2c-c-on-ramp-corpus.md`, which replaced the linkage-guard
 > design below: the `__cplusplus` arm is skipped, so only an unguarded
-> `extern "C" {` reaches `Compiler.skip_linkage_brace`.
+> `extern "C" {` reaches `Compiler.skip_linkage_brace`. Typed `_Generic`
+> selection was removed on 2026-09-17: a selection is now emitted unchanged
+> with no x2c type, so the selection design below is history.
 
 ## The result
 

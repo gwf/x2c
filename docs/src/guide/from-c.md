@@ -117,24 +117,18 @@ defines privately gets a forward declaration of the tag in the header first.
 A macro invocation that supplies grammar, such as a `for`-loop macro or a
 call without a trailing semicolon, still needs adjustment.
 
-A C11 generic selection has a static type in x2c when x2c can determine
-which association C selects. The compiler selects that association from the
-controlling expression's type and gives the whole expression its type. The
-selection reaches the generated C unchanged, so the native compiler makes the
-same choice. Where x2c's types can differ from C's, such as for an enum or a
-bitfield, the selection has no static type and only the C compiler selects
-an association:
+A C11 generic selection reaches the generated C unchanged, and the native
+compiler chooses its association. The selection has no x2c type, so it works
+where C accepts the selected value directly:
 
 ```x2c
 ~
 ~int main(void) {
 const char *text = "hello";
-Var kind = _Generic(text, char *: "mutable", const char *: 1);
-~  return kind.int() == 1 ? 0 : 1;
+int kind = _Generic(text, char *: 0, const char *: 1);
+~  return kind == 1 ? 0 : 1;
 ~}
 ```
-
-`kind` receives an `int` because the `const char *` association is selected.
 
 ## Cross into Var deliberately
 
