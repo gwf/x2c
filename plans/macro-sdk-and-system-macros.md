@@ -1,13 +1,15 @@
 # Compile-time Lisp SDK completion and system-wide macros
 
-> Status: active - 2026-09-17. Phase 3 and most of Phase 4 are shipped:
-> `String.dedent`, `$dedent`, `$switch`, `$assert`, `$todo`, `$unreachable`,
-> and `$time`, with unit coverage in `unittest/test-system-macros.x` and a
-> chapter section in `docs/src/guide/system-macros.md`. Building them removed
-> most of Phase 2, because `$switch` needed no new SDK operation at all.
-> Phase 1 is not started and carries a correction an independent review
-> reproduced: its rename breaks the checked-in bootstrap and needs a
-> compatibility step. `$table` and the enum readers remain.
+> Status: active - 2026-09-17. Phases 1 and 3 and most of Phase 4 are
+> shipped. Phase 1 landed in four commits, `f3623b66` through `765e2cdc`:
+> both spellings bound and refreshed into `bootstrap/`, then every caller
+> switched and the old rows dropped, then the transitional entry-point
+> aliases removed. Phase 3 and `$switch` shipped earlier, with unit coverage
+> in `unittest/test-system-macros.x` and a chapter section in
+> `docs/src/guide/system-macros.md`. Building them removed most of Phase 2,
+> because `$switch` needed no new SDK operation at all. What remains is
+> `x2c.type.members`, the diagnostic `warn` and location argument, `$table`,
+> and the enum readers.
 > Scoped 2026-09-17 from a read of
 > `etc/compiler-sdk.xlisp`, `etc/lisp-bindings.xlisp`, `etc/builtin-macros.xlisp`,
 > the 33 `$lisp.bind` calls at `src/macros.x:894`, and the shipped generator in
@@ -117,22 +119,35 @@ runtime static declaration, and lets two cases declare the same name.
 
 ## Phase 1 - naming and loading
 
-Rename the bind targets in `src/macros.x`, the definitions in
-`etc/compiler-sdk.xlisp`, and their callers in `etc/lisp-bindings.xlisp`,
-`etc/builtin-macros.xlisp`, and `etc/builtin-macros.xmacro`. Move the 52 shipped-macro helpers out of `x2c.`.
-Load `etc/lisp-extras.xlisp` with the other three libraries. Publish the
-promoted operations in `docs/src/reference/language.md` beside the existing SDK
-list.
+Shipped. 13 bind targets renamed in `src/macros.x`, 7 of them promoted to
+public names, with callers switched in `etc/compiler-sdk.xlisp`,
+`etc/lisp-bindings.xlisp`, `etc/builtin-macros.xlisp`,
+`etc/builtin-macros.xmacro`, `lib/error-macros.xmacro`, `lib/var-tags.xmacro`,
+and `lib/lisp.x`. The 52 shipped-macro helpers left `x2c.` for `foreach.`,
+`class.`, and `scope.`. The promoted operations are published in
+`docs/src/reference/language.md` with the naming rule itself.
 
-The rename needs a compatibility step, and the plan's earlier claim that the
-checked-in bootstrap builds the renamed tree is wrong. `bootstrap/` holds only
-`Makefile`, `lib`, and `src`; `etc/*.xlisp` is read from the live tree at
-`src/macros.x:870`, while `bootstrap/src/macros.c` hard-codes the old bind
-spellings. Renaming both sides at once leaves the bootstrap compiler binding
-old names against renamed Lisp, and the build fails before `bootstrap-refresh`
-can run. So this phase binds both spellings in `src/macros.x`, lands in
-`bootstrap/`, and drops the old spellings in a following change. A C-side bind
-name is a compiler capability with respect to the shared `etc/` files.
+Two ordering constraints decided the shape, and both bite at the same place:
+something the compiler carries in compiled form against something it reads
+from the live tree.
+
+`bootstrap/` holds only `Makefile`, `lib`, and `src`, while `etc/*.xlisp` is
+read from the live tree at `src/macros.x:870` and `bootstrap/src/macros.c`
+compiles in the bind spellings. Renaming both sides at once leaves the
+bootstrap compiler binding old names against renamed Lisp. So both spellings
+bound first and landed in `bootstrap/`; the callers switched and the old rows
+went in the next change.
+
+`etc/builtin-macros.xmacro` is embedded in the compiler binary by
+`src/macros.x:40`, while `etc/builtin-macros.xlisp` beside it is read from
+disk. Renaming an entry point breaks the build under the compiler that still
+embeds the old macro text, so `foreach.expand`, `scope.expand`, `class.expand`,
+and `class.defaults` kept an alias for one refresh and then lost it.
+
+`etc/lisp-extras.xlisp` is not loaded into a macro session. Its three-level
+`c[ad]{3}r` selectors moved into `etc/init.xlisp`, which every session already
+loads, so macro bodies get them without also importing `fib`, `range`, and
+`sort` into every compilation.
 
 ## Phase 2 - complete the read and write sides
 
