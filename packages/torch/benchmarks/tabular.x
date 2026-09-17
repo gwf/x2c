@@ -439,9 +439,7 @@ static void _memory_steady(String artifacts, Map data, Map batches,
   Tensor requests = batches["requests.32"].tensor();
   long available = requests.size(0);
   for (int index = 0; index < steps; index++) {
-    Scope.retain();
-    {
-      defer Scope.release();
+    $scope() {
       Torch.inference_mode();
       (void) _forward(layers, x_val.index_select(
                                 0, requests.select(0, index % available)));
@@ -528,9 +526,7 @@ static void _memory_survivor(void) {
   Scope survivor = NULL, cloned_owner = NULL;
   Tensor view = NULL, cloned = NULL;
   Bench.sample("before", 0);
-  Scope.retain();
-  {
-    defer Scope.release();
+  $scope() {
     Tensor big = Tensor.randn(%(4194304 4), XT_FLOAT32);
     Bench.sample("allocated", 0);
     view = big.narrow(0, 0, 16);
@@ -560,9 +556,7 @@ static void _memory_lifetime(String artifacts, String out, Map data,
   String checkpoint = %"$out/tabular-x2c-cycle.pt";
   int requests = 0, every = cycles / 16 > 0 ? cycles / 16 : 1;
   for (int cycle = 0; cycle < cycles; cycle++) {
-    Scope.retain();
-    {
-      defer Scope.release();
+    $scope() {
       Module model = _built(artifacts, "tabular-init.pt");
       List layers = _layers(model);
       Optimizer adam = Optimizer.adam(model, LR);
@@ -609,9 +603,7 @@ static void _memory_control(String artifacts, Map data, int steps) {
   Module model = _built(artifacts, "tabular-init.pt");
   List layers = _layers(model);
   int every = steps / 16 > 0 ? steps / 16 : 1;
-  Scope.retain();
-  {
-    defer Scope.release();
+  $scope() {
     Array retained = [];
     Tensor block = x_val.narrow(0, 0, 2048);
     long held = 0, capacity = RETAIN_CAP_BYTES;
@@ -654,9 +646,7 @@ static int _diagnose(String artifacts, String out, int native, int count) {
   double batch_time = 0, forward_time = 0, backward_time = 0;
   double optimizer_time = 0, cleanup_time = 0, loss = 0;
   for (int i = 0; i < count; i++) {
-    Scope.retain();
-    {
-      defer Scope.release();
+    $scope() {
       start = Bench.now();
       Tensor pick = rows.select(0, i % rows.size(0));
       Tensor bx = x.index_select(0, pick), by = y.index_select(0, pick);
@@ -722,9 +712,7 @@ static int _errors(String artifacts, int count, int unique) {
   double checksum = 0;
   Bench.sample("errors-start", 0);
   for (int i = 0; i < count; i++) {
-    Scope.retain();
-    {
-      defer Scope.release();
+    $scope() {
       try { _failed_request(layers, i, unique); }
       catch %(bad-arg *detail): { caught++; }
       if (!Torch.grad_enabled())

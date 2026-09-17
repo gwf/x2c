@@ -14,12 +14,10 @@ int main(void) {
 
   double loss = 0.0;
   for (int step = 0; step < 200; step++) {
-    Scope.retain();
-    {
-      /* Releasing this scope frees the step's tensors and restores the
-         grad mode that Torch.no_grad turned off, even if a raise crosses
-         the release. */
-      defer Scope.release();
+    /* Releasing this region frees the step's tensors and restores the grad
+       mode that Torch.no_grad turned off, even if a raise crosses the
+       release. */
+    $scope() {
       Tensor error = Tensor.mse_loss(x @ w + b, y);
       error.backward();
       loss = error.item().double();

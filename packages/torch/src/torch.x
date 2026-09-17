@@ -1150,14 +1150,14 @@ static int _custom_call(void *pointer, xt_autograd_context native,
     Use `backward_callbacks` to differentiate the result. */
 Tensor Tensor.custom(Func forward, Func backward, List inputs) {
   TorchCallbackError error = {0};
-  TorchCallbackError *previous = callback_error;
-  callback_error = &error;
-  defer callback_error = previous;
-  int count;
-  xt_tensor *handles = _handles(inputs, &count);
-  xt_tensor result = xt_custom(_custom_call, forward, backward, handles, count);
-  if (error.cause) Error.raise(error.cause, error.detail);
-  return _wrap(result, "custom");
+  $let(callback_error, &error) {
+    int count;
+    xt_tensor *handles = _handles(inputs, &count);
+    xt_tensor result =
+      xt_custom(_custom_call, forward, backward, handles, count);
+    if (error.cause) Error.raise(error.cause, error.detail);
+    return _wrap(result, "custom");
+  }
 }
 
 /** Differentiates a scalar on the invoking thread, including CPU and MPS
@@ -1165,12 +1165,11 @@ Tensor Tensor.custom(Func forward, Func backward, List inputs) {
     Nested backward and higher-order differentiation are not supported. */
 void Tensor.backward_callbacks(Tensor tensor) {
   TorchCallbackError error = {0};
-  TorchCallbackError *previous = callback_error;
-  callback_error = &error;
-  defer callback_error = previous;
-  int status = xt_backward_callbacks(tensor.native);
-  if (error.cause) Error.raise(error.cause, error.detail);
-  _check(status, "backward_callbacks");
+  $let(callback_error, &error) {
+    int status = xt_backward_callbacks(tensor.native);
+    if (error.cause) Error.raise(error.cause, error.detail);
+    _check(status, "backward_callbacks");
+  }
 }
 
 /** Saves native tensor references during forward; wrappers may be released

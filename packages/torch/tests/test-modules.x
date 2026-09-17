@@ -386,9 +386,7 @@ static void modules_train_a_small_cnn(void) {
   Optimizer adam = Optimizer.adam(model, 0.01);
   double first = 0.0, last = 0.0;
   for (int step = 0; step < 20; step++) {
-    Scope.retain();
-    {
-      defer Scope.release();
+    $scope() {
       adam.zero_grad();
       Tensor loss = Tensor.cross_entropy(model.forward(images), classes);
       loss.backward();

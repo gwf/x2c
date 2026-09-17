@@ -44,9 +44,7 @@ int main(void) {
   Module model = _mlp();
   Optimizer adam = Optimizer.adam(model, 0.05);
   for (int step = 0; step < 200; step++) {
-    Scope.retain();
-    {
-      defer Scope.release();
+    $scope() {
       /* A mini-batch is a permutation and an index_select, written here
          rather than borrowed from a C++ DataLoader. */
       Tensor pick = Torch.randperm(64).narrow(0, 0, 16);

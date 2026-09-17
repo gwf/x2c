@@ -123,9 +123,7 @@ static void _train(List layers, Optimizer adam, Tensor streams, int count,
   for (int index = 0; index < count; index++) {
     int position = (offset + index) % per_epoch;
     long start = (long) position * window;
-    Scope.retain();
-    {
-      defer Scope.release();
+    $scope() {
       /* A stream boundary resets the state; a truncation boundary keeps
          it and detaches it. */
       if (position == 0 || !carry.state)
@@ -325,9 +323,7 @@ static int _memory(String artifacts, String out, int profile, int count) {
 
   int sweep[3] = { 8, 32, 128 };
   for (int i = 0; i < 3; i++) {
-    Scope.retain();
-    {
-      defer Scope.release();
+    $scope() {
       Module model = _built(artifacts, "sequence-init.pt");
       Bench.sample("window-start", sweep[i]);
       _train(_layers(model), Optimizer.adam(model, LR), train, count, sweep[i],
@@ -337,9 +333,7 @@ static int _memory(String artifacts, String out, int profile, int count) {
     Bench.sample("window-released", sweep[i]);
   }
 
-  Scope.retain();
-  {
-    defer Scope.release();
+  $scope() {
     Module model = _built(artifacts, "sequence-init.pt");
     List layers = _layers(model);
     Bench.sample("accumulate-start", 4);
@@ -381,9 +375,7 @@ static int _diagnose(String artifacts, String out, int count) {
   double last_loss = 0;
   for (int index = 0; index < count; index++) {
     start = Bench.now();
-    Scope.retain();
-    {
-      defer Scope.release();
+    $scope() {
       int position = index % per_epoch;
       long offset = (long) position * WINDOW;
       if (position == 0 || !carry.state)

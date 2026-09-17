@@ -187,9 +187,7 @@ static double _chain_subscope(Tensor x, Tensor a, Tensor b, int operations) {
   Tensor y = x;
   for (int i = 0; i < operations; i++) {
     Scope replacement = NULL;
-    Scope.retain();
-    {
-      defer Scope.release();
+    $scope() {
       Torch.inference_mode();
       y = (y * a + b).relu();
       Scope.move(y, &replacement);
@@ -199,9 +197,7 @@ static double _chain_subscope(Tensor x, Tensor a, Tensor b, int operations) {
   }
   if (interop_observe) _note_live();
   double total;
-  Scope.retain();
-  {
-    defer Scope.release();
+  $scope() {
     Torch.inference_mode();
     total = y.sum().item().double();
   }
@@ -281,9 +277,7 @@ static int _memory(String artifacts, String out, int profile, int requests) {
   Bench.sample("short-scope-start", 16);
   for (int block = 0; block < 512 / 16; block++) {
     Scope replacement = NULL;
-    Scope.retain();
-    {
-      defer Scope.release();
+    $scope() {
       Torch.inference_mode();
       for (int i = 0; i < 16; i++) y = (y * a + b).relu();
       Scope.move(y, &replacement);

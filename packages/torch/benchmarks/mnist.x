@@ -282,9 +282,7 @@ static int _diagnose(String artifacts, String out, String root, int count) {
   double last_loss = 0;
   for (int index = 0; index < count; index++) {
     start = Bench.now();
-    Scope.retain();
-    {
-      defer Scope.release();
+    $scope() {
       int position = index % per_epoch;
       long epoch = (index / per_epoch) % epochs;
       long offset = (long) position * BATCH;
