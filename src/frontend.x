@@ -269,16 +269,9 @@ int ParsedUnit.collect(ParsedUnit *unit, Frontend frontend) {
 int ParsedUnit.parse(ParsedUnit *p) {
   Compiler compiler = p.compiler;
   if (compiler.error_count()) return 0;
-  Diagnostics diagnostics = compiler.diagnostics;
-  Array collected = diagnostics.entries;
-  diagnostics.entries = [];
-  int ok = 1;
-  try p.ast = p.compiler.full_parse(p.globals, p.generated_symbols);
-  catch %(malformed *): ok = 0;
-  foreach (Var entry, diagnostics.entries) collected.push(entry);
-  diagnostics.entries.free();
-  diagnostics.entries = collected;
-  return ok && !compiler.error_count();
+  try p.ast = compiler.full_parse(p.globals, p.generated_symbols);
+  catch %(malformed *): return 0;
+  return !compiler.error_count();
 }
 
 /** Runs the source stages. On either result, the caller must close the

@@ -1562,7 +1562,7 @@ static void _sync_top_level(Compiler c, Token start, int braces) {
 /** Parses and types the positioned source against `globs`.
 
     The result is a source-ordered top-level AST. This resets per-parse
-    origins, macro state, protocol resolution, and recoverable diagnostics.
+    origins, macro state, and protocol resolution.
     `generated_symbols` publishes external adapter signatures before parsing.
 */
 List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
@@ -1585,7 +1585,6 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   c.macro_count = 0;
   c.macro_stack = NULL;
   c.source_private = 0;
-  c.diagnostics.reset();
   c.resolve_protocols();
   if (generated_symbols) c.install_generated_protocol_symbols();
   Token conflict = NULL;
