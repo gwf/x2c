@@ -211,36 +211,32 @@ Var x2c_error_catch_capture(ErrorHandler handle, int index) {
   return values[index];
 }
 
-/** Removes the top transferring catch while retaining its selected state.
-    This lets the catch arm raise outward without matching itself. The caller
-    must still close the handle; repeated detach and a null handle do nothing.
-    Detaching out of stack order reaches the raw error floor.
+/** Hides the top transferring catch from dispatch while its arm runs.
+    This lets the catch arm raise outward without matching itself. The handle
+    stays registered, so shutdown and outer unwinding reclaim its retained
+    `Error` if the arm never closes it. Repeated detach and a null handle do
+    nothing. Detaching out of stack order reaches the raw error floor.
 */
 void x2c_error_catch_detach(ErrorHandler handle) {
   if (!handle || handle.detached) return;
-  ErrorThreadState state = _thread();
-  if (state.handler_top != handle)
+  if (_thread().handler_top != handle)
     _floor(<invariant>, "transferring catch detach out of order");
-  state.handler_top = handle.prev;
   handle.detached = 1;
 }
 
 /** Closes and invalidates a transferring-catch handle.
-    A detached handle releases its plans, captures, and retained error records.
-    An attached handle additionally removes itself and truncates records above
-    its registration watermark. Attached handles must close in stack order;
-    violating that order reaches the raw error floor. A null handle does
-    nothing.
+    The handle releases its plans, captures, and retained error records and
+    unregisters itself; an attached handle also truncates records above its
+    registration watermark. Handles must close in stack order; violating that
+    order reaches the raw error floor. A null handle does nothing.
 */
 void x2c_error_catch_close(ErrorHandler handle) {
   if (!handle) return;
-  if (!handle.detached) {
-    ErrorThreadState state = _thread();
-    if (state.handler_top != handle)
-      _floor(<invariant>, "transferring catch close out of order");
-    _truncate(handle.watermark);
-    state.handler_top = handle.prev;
-  }
+  ErrorThreadState state = _thread();
+  if (state.handler_top != handle)
+    _floor(<invariant>, "transferring catch close out of order");
+  if (!handle.detached) _truncate(handle.watermark);
+  state.handler_top = handle.prev;
   _handler_free(handle);
 }
 
@@ -1084,6 +1080,7 @@ static Symbol _dispatch(Symbol effective, int raised_at, int depth) {
   state.dispatch_saved = saved;
   Symbol result = <declined>;
   for (ErrorHandler h = saved; h; h = h.prev) {
+    if (h.detached) continue;
     state.handler_top = h.prev;
     Symbol disposition = <declined>;
     if (h.site) disposition = _catch_match(h);

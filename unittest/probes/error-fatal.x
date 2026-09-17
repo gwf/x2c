@@ -93,6 +93,14 @@ int main(int argc, char **argv) {
     context.close();
     return 0;
   }
+  if (!strcmp(argv[1], "exit-in-try")) {
+    try exit(3);
+    catch: return 1;
+  }
+  if (!strcmp(argv[1], "exit-in-catch")) {
+    try raise %(bad-arg (text "held by the catch"));
+    catch %(bad-arg *): exit(4);
+  }
   if (!strcmp(argv[1], "shutdown-order")) {
     Logger.initialize();
     Error.policy_set(<hook-probe>, <collect>);

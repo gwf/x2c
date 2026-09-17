@@ -97,4 +97,20 @@ test "$(grep -c 'shutdown-hook: after raise' \
 test "$(tail -1 "$BUILD/shutdown-order.stderr")" = \
   "shutdown-complete: error-ready=0"
 
-echo "error floor and shutdown probes: 17 passed"
+# exit() runs shutdown while a catch is registered or its arm holds the
+# selected Error; both must reclaim quietly and keep the exit status.
+for exit_case in exit-in-try:3 exit-in-catch:4; do
+  name=${exit_case%:*}
+  set +e
+  ( "$PROGRAM" "$name" >"$BUILD/$name.stdout" 2>"$BUILD/$name.stderr"
+    child_status=$?
+    exit "$child_status"
+  ) 2>/dev/null
+  status=$?
+  set -e
+  test "$status" -eq "${exit_case#*:}"
+  test ! -s "$BUILD/$name.stdout"
+  test ! -s "$BUILD/$name.stderr"
+done
+
+echo "error floor and shutdown probes passed"

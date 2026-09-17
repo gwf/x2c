@@ -831,6 +831,8 @@ void Logger.shutdown(void) {
 
       String.pool_release();
     }
+    // exit() can run shutdown while newer registrations are still live
+    Error.trim(logger_error_handler, Error.count());
     Error.pop(logger_error_handler);
     logger_error_handler = NULL;
   }
