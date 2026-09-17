@@ -279,20 +279,16 @@ Var x2c_error_catch_capture(ErrorHandler handle, int index){
 
 void x2c_error_catch_detach(ErrorHandler handle){
   if(! handle || handle -> detached) return;
-  ErrorThreadState state = _thread();
-  if(state -> handler_top != handle) _floor(20800632064936, "transferring catch detach out of order");
-  state -> handler_top = handle -> prev;
+  if(_thread() -> handler_top != handle) _floor(20800632064936, "transferring catch detach out of order");
   handle -> detached = 1;
 }
 
 void x2c_error_catch_close(ErrorHandler handle){
   if(! handle) return;
-  if(! handle -> detached){
-    ErrorThreadState state = _thread();
-    if(state -> handler_top != handle) _floor(20800632064936, "transferring catch close out of order");
-    _truncate(handle -> watermark);
-    state -> handler_top = handle -> prev;
-  }
+  ErrorThreadState state = _thread();
+  if(state -> handler_top != handle) _floor(20800632064936, "transferring catch close out of order");
+  if(! handle -> detached) _truncate(handle -> watermark);
+  state -> handler_top = handle -> prev;
   _handler_free(handle);
 }
 
@@ -778,12 +774,12 @@ Var Map_setindex(Map, Var, Var);
 void Error_policy_set(Symbol code, Symbol disposition){
   if(! Error_ready()) return;
   if(disposition != 2260136 && disposition != 25550 && disposition != 7475046632 && disposition != 619609226){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 811};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 807};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(302607262917214), Symbol_var(disposition));
     __builtin_unreachable();
   }
   if(_never_returns(code) && disposition != 2260136){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 814};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 810};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(227594), Symbol_var(code), Symbol_var(302607262917214), Symbol_var(disposition));
     __builtin_unreachable();
   }
@@ -995,6 +991,7 @@ static Symbol _dispatch(Symbol effective, int raised_at, int depth){
   state -> dispatch_saved = saved;
   Symbol result = 285842436424;
   for(ErrorHandler h = saved;  h;  h = h -> prev){
+    if(h -> detached) continue;
     state -> handler_top = h -> prev;
     Symbol disposition = 285842436424;
     if(h -> site) disposition = _catch_match(h);

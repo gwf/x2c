@@ -1585,6 +1585,10 @@ List Error_since(int);
 
 void String_pool_release(void);
 
+void Error_trim(void *, int);
+
+int Error_count(void);
+
 void Error_pop(ErrorHandler);
 
 void Logger_shutdown(void){
@@ -1616,6 +1620,7 @@ void Logger_shutdown(void){
         }
         String_pool_release();
       }
+      Error_trim(logger_error_handler, Error_count());
       Error_pop(logger_error_handler);
       logger_error_handler = NULL;
     }
