@@ -2,6 +2,7 @@
 
 #include "typed-array.x"
 #include "typed-map.x"
+#include "regex.x"
 #include "test-support.x"
 #include <sched.h>
 #include <stdatomic.h>
@@ -576,6 +577,36 @@ static void thread_rendering_paths_are_independent(void) {
   second.free();
 }
 
+typedef struct RegexDepthInput {
+  int repetitions;
+} RegexDepthInput;
+
+static Var _thread_regex_depth_worker(const void *input, size_t input_size) {
+  if (input_size != sizeof(RegexDepthInput)) return 0;
+  const RegexDepthInput *depth = input;
+  Regex re = Regex.compile("(?:a|b)*");
+  return re.match("a".repeat(depth.repetitions)) ? 1 : 0;
+}
+
+/* A worker's stack reaches the same recursion depth as the main thread's: a
+   group repeated just under the `Regex` limit matches, and one over it raises
+   rather than overflowing the stack. */
+static void thread_stack_reaches_library_recursion_limits(void) {
+  RegexDepthInput deep = { 1999 };
+  Thread thread = Thread.start(_thread_regex_depth_worker, &deep, sizeof deep);
+  EXPECT_INT_EQ(thread.join().integer(), 1);
+  thread.free();
+
+  RegexDepthInput over_limit = { 2500 };
+  Thread limited = Thread.start(
+    _thread_regex_depth_worker, &over_limit, sizeof over_limit);
+  int caught = 0;
+  try limited.join();
+  catch %(join-fail *): caught = 1;
+  EXPECT_INT_EQ(caught, 1);
+  limited.free();
+}
+
 $(import "test-macros.xmacro")
 
 void thread_suite(void) {
@@ -596,4 +627,5 @@ void thread_suite(void) {
   $test.run(thread_error_wide_values_survive_until_join);
   $test.run(thread_failed_join_export_releases_storage);
   $test.run(thread_freezes_late_descriptor_registration);
+  $test.run(thread_stack_reaches_library_recursion_limits);
 }

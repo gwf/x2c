@@ -64,6 +64,20 @@ static int thread_live_count;
 static pthread_once_t thread_shutdown_once =
   (pthread_once_t) PTHREAD_ONCE_INIT;
 
+/* Library recursion limits, such as the `Regex` repetition depth, are sized
+   for a main-thread stack. A macOS pthread defaults to 512 KiB, well under
+   what those limits assume, so every worker is given the 8 MiB that Linux
+   pthreads and the macOS main thread already provide. */
+static const size_t _STACK_BYTES = 8u << 20;
+
+static void _stack_attributes(pthread_attr_t *attributes) {
+  if (pthread_attr_init(attributes) ||
+      pthread_attr_setstacksize(attributes, _STACK_BYTES)) {
+    fprintf(stderr, "Thread: could not size the worker stack\n");
+    abort();
+  }
+}
+
 static void _error(const char *operation, int error) {
   String name = operation;
   raise %(io-fail (operation $name) (errno $error));
@@ -163,7 +177,9 @@ static void *_run(void *argument) {
     `input_size` bytes are copied before native start and passed once to the
     callback. Pointees within those bytes remain shared and must outlive the
     worker. Copied storage has `max_align_t` alignment, so over-aligned input
-    types are unsupported. An attempt that reaches `pthread_create` permanently
+    types are unsupported. A worker runs on an 8 MiB stack on every platform,
+    so library recursion limits are reached the same way on a worker as on the
+    main thread. An attempt that reaches `pthread_create` permanently
     enables canonical-pool locking; the first successful start also freezes
     `Var`
     descriptor registration.
@@ -193,12 +209,15 @@ Thread Thread.start(ThreadFn function, const void *input, size_t input_size) {
   }
   __atomic_fetch_add(&thread_live_count, 1, __ATOMIC_SEQ_CST);
   x2c_pool_thread_start();
+  pthread_attr_t attributes;
+  _stack_attributes(&attributes);
   /* Hold descriptor registration stable across pthread_create. Success makes
      it permanently read-only; failure unlocks it, restores the live count,
      and releases the handle while pool locking stays enabled. */
   x2c_descriptor_thread_start_begin();
-  int error = pthread_create(&thread.native, NULL, _run, thread);
+  int error = pthread_create(&thread.native, &attributes, _run, thread);
   x2c_descriptor_thread_start_end(!error);
+  pthread_attr_destroy(&attributes);
   if (error) {
     __atomic_fetch_sub(&thread_live_count, 1, __ATOMIC_SEQ_CST);
     free(thread);
