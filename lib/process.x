@@ -366,7 +366,7 @@ Job Job.options(Job job, Map options) {
 }
 
 /** Makes `job` pass standard output through instead of capturing it, the
-    same as `options(%{stdout: inherit})`, and returns it.
+    same as `options({stdout: <inherit>})`, and returns it.
     Raises: `<bad-arg>` for a job that has started.
 */
 Job Job.live(Job job) => job.options({stdout: <inherit>});
@@ -394,8 +394,8 @@ Job Job.start(Job job) {
 }
 
 /** Returns the status of `job`, starting it and waiting as needed: the exit
-    status, or 128 plus a signal. A status that is not zero is an ordinary
-    result here.
+    status, or 128 plus a signal. A stage that never ran because the start
+    raised reports 127. A status that is not zero is an ordinary result here.
     Raises: the start causes of `Job.start`.
 */
 int Job.status(Job job) {

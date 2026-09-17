@@ -187,7 +187,7 @@ String upper = %(tr a-z A-Z).job().options({input: "quiet"}).output();
 | `stderr` | `inherit` (the default), `capture`, `stdout` to merge, or a file path |
 
 `stdout` applies to the last stage of a pipeline, and `stderr` to every
-stage. `live()` is the same as `options(%{stdout: inherit})`. An unknown key,
+stage. `live()` is the same as `options({stdout: <inherit>})`. An unknown key,
 such as a misspelled `dir`, raises `<bad-arg>`. Changing options or adding a
 stage after the job has started also raises `<bad-arg>`.
 
@@ -609,7 +609,7 @@ keeps its last value.
 level, and `Json.write_file` writes the compact form to a file. Object names
 are written in byte order, so equal values always produce the same text, and
 the indented layout is the one Python's `json.dumps` produces with
-`indent=2` and `sort_keys=True`. A bare key in a `%{}` literal is a `Symbol`,
+`indent=2` and `sort_keys=True`. A bare key in a `{}` literal is a `Symbol`,
 which is written as a string, and `Json.bool` makes a boolean. A `Map` or
 `Array` variable passes to the writers as a `Var`:
 
@@ -647,5 +647,5 @@ or an infinity.
 The package keeps what a `Map` cannot: object order, duplicate names, and
 whether a number was signed, unsigned, or real. Its converted integers are
 `long long` or `unsigned long long` values, which do not compare equal to an
-`int` literal such as the 5 in `%{n: 5}`. The package raises `<malformed>`
+`int` literal such as the 5 in `{n: 5}`. The package raises `<malformed>`
 for malformed text.
