@@ -482,7 +482,11 @@ arguments retain `{package}` for consumer-time expansion. An optional
 `platform_args` object appends arguments keyed by the producer's platform
 (`darwin` or `linux`) when a shared dependency manifest has platform-specific
 system requirements. The manifest selected by the package Makefile remains
-the native profile owner.
+the native profile owner. Unless `DEPENDENCY_MANIFEST` names one, the
+Makefile uses the first manifest present among
+`dependency-<os>-<arch>.json`, `dependency-<os>.json`, and `dependency.json`,
+where `<os>` is `darwin` or `linux` and `<arch>` is the machine name, such as
+`arm64` or `x86_64`.
 
 Accepted options are native include directories (`-I`, `--c-include-dir`,
 `--c-system-dir`), `-D`, `-U`, `-L`, `-l`, `--rpath`, archive inputs,
