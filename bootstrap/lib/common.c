@@ -397,8 +397,8 @@ int x2c_normalize_slice(int * start, int * stop, int step, int length){
   if(step > 0 && * stop > length) * stop = length;
   if(step < 0 && * stop > length) * stop = length;
   int newlen = 0;
-  if(step < 0 && * start >= * stop) newlen =(* start - * stop - 1) /(- step) + 1;
-  else if(step > 0 && * start <= * stop) newlen =(* stop - * start - 1) / step + 1;
+  if(step < 0 && * start > * stop) newlen =(* start - * stop - 1) /(- step) + 1;
+  else if(step > 0 && * start < * stop) newlen =(* stop - * start - 1) / step + 1;
   return newlen;
 }
 

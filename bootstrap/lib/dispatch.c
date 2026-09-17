@@ -8,7 +8,7 @@
 
 #include "error.h"
 
-static String _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -24,9 +24,12 @@ __attribute__((constructor)) static void _file_init_(void);
 #include "file.h"
 #include "iter.h"
 #include "exception.h"
+#include <float.h>
 #include <stdint.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 typedef struct VarDescriptor{
   int value_dispatch;
   VarMethods methods;
@@ -87,6 +90,10 @@ static String _primitive_str(Var v, Symbol tag);
 
 static Buffer _write_primitive_str(Var v, Symbol tag, Buffer out);
 
+static Buffer _write_byte_repr(Buffer out, unsigned byte);
+
+static Buffer _write_float_repr(Buffer out, long double value, Symbol width, String suffix);
+
 static Buffer _write_primitive_repr(Var v, Symbol tag, Buffer out);
 
 static unsigned _default_hash(Var var);
@@ -119,35 +126,23 @@ __attribute__((constructor)) static void _file_init_(void){
   _init_guard_ = 1;
   _0 = String_new("<0x%012lX>");
   _1 = String_new("<%s: 0x%012lX>");
-  _2 = String_new("'%c'");
-  _3 = String_new("0x%04X");
-  _4 = String_new("%d");
-  _5 = String_new("0x%012lXul");
-  _6 = String_new("0x%012lXl");
-  _7 = String_new("%ldl");
-  _8 = String_new("%luul");
-  _9 = String_new("%lldll");
-  _10 = String_new("%lluull");
-  _11 = String_new("%f");
-  _12 = String_new("%lfl");
-  _13 = String_new("%Lfl");
-  _14 = String_new("%c");
-  _15 = String_new("%ld");
-  _16 = String_new("%lld");
-  _17 = String_new("%u");
-  _18 = String_new("%lu");
-  _19 = String_new("%llu");
-  _20 = String_new("%lf");
-  _21 = String_new("%Lf");
-  _22 = String_new("receiver");
-  _23 = String_new("needle");
-  _24 = String_new("key");
-  _25 = String_new("value");
-  _26 = String_new("right");
-  _27 = String_new("NaN");
-  _28 = String_new("+Inf");
-  _29 = String_new("-Inf");
-  _30 = String_new("void");
+  _2 = String_new("%c");
+  _3 = String_new("%d");
+  _4 = String_new("%ld");
+  _5 = String_new("%lld");
+  _6 = String_new("%u");
+  _7 = String_new("%lu");
+  _8 = String_new("%llu");
+  _9 = String_new("%lf");
+  _10 = String_new("%Lf");
+  _11 = String_new("receiver");
+  _12 = String_new("needle");
+  _13 = String_new("key");
+  _14 = String_new("value");
+  _15 = String_new("right");
+  _16 = String_new("void");
+  _17 = String_new("f");
+  _18 = String_new("l");
   _x2c_static_initialize_0();
 }
 
@@ -484,14 +479,14 @@ static void _valid_member_operand(Var value, String side){
   if(! Var_encoding_valid(value)){
     unsigned long bits = value.u64;
     {
-      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 349};
+      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 352};
       x2c_error_raise_n(& _x2c_error_site_5, 4372507526, 2, Symbol_var(46228810), Var_box_ulong(bits), Symbol_var(1263882), String_var(side));
       __builtin_unreachable();
     }
 
   }
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 351};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/dispatch.x",.function = "_valid_member_operand",.line = 354};
     x2c_error_raise_n(& _x2c_error_site_6, 48270474208, 1, Symbol_var(1263882), String_var(side));
     __builtin_unreachable();
   }
@@ -503,7 +498,7 @@ static VarDescriptor * _required_descriptor(Var value, Symbol member){
   if(descriptor) return descriptor;
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/dispatch.x",.function = "_required_descriptor",.line = 358};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/dispatch.x",.function = "_required_descriptor",.line = 361};
     x2c_error_raise_n(& _x2c_error_site_7, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }
@@ -512,14 +507,14 @@ static VarDescriptor * _required_descriptor(Var value, Symbol member){
 
 int Var_contains(Var value, Var needle){
   if(! _init_guard_) _file_init_();
-  _valid_member_operand(value, _22);
-  _valid_member_operand(needle, _23);
+  _valid_member_operand(value, _11);
+  _valid_member_operand(needle, _12);
   Symbol member = 239352236966;
   VarDescriptor * descriptor = _required_descriptor(value, member);
   if(descriptor -> methods.contains) return descriptor -> methods.contains(value, needle);
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/dispatch.x",.function = "Var_contains",.line = 373};
+    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/dispatch.x",.function = "Var_contains",.line = 376};
     x2c_error_raise_n(& _x2c_error_site_8, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }
@@ -528,14 +523,14 @@ int Var_contains(Var value, Var needle){
 
 Var Var_getindex(Var value, Var key){
   if(! _init_guard_) _file_init_();
-  _valid_member_operand(value, _22);
-  _valid_member_operand(key, _24);
+  _valid_member_operand(value, _11);
+  _valid_member_operand(key, _13);
   Symbol member = 493135733104;
   VarDescriptor * descriptor = _required_descriptor(value, member);
   if(descriptor -> methods.getindex) return descriptor -> methods.getindex(value, key);
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/dispatch.x",.function = "Var_getindex",.line = 388};
+    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/dispatch.x",.function = "Var_getindex",.line = 391};
     x2c_error_raise_n(& _x2c_error_site_9, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }
@@ -544,15 +539,15 @@ Var Var_getindex(Var value, Var key){
 
 Var Var_setindex(Var value, Var key, Var replacement){
   if(! _init_guard_) _file_init_();
-  _valid_member_operand(value, _22);
-  _valid_member_operand(key, _24);
-  _valid_member_operand(replacement, _25);
+  _valid_member_operand(value, _11);
+  _valid_member_operand(key, _13);
+  _valid_member_operand(replacement, _14);
   Symbol member = 1317769453936;
   VarDescriptor * descriptor = _required_descriptor(value, member);
   if(descriptor -> methods.setindex) return descriptor -> methods.setindex(value, key, replacement);
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/dispatch.x",.function = "Var_setindex",.line = 404};
+    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/dispatch.x",.function = "Var_setindex",.line = 407};
     x2c_error_raise_n(& _x2c_error_site_10, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }
@@ -561,15 +556,15 @@ Var Var_setindex(Var value, Var key, Var replacement){
 
 Var Var_updateindex(Var value, Var key, Symbol op, Var rhs){
   if(! _init_guard_) _file_init_();
-  _valid_member_operand(value, _22);
-  _valid_member_operand(key, _24);
-  _valid_member_operand(rhs, _26);
+  _valid_member_operand(value, _11);
+  _valid_member_operand(key, _13);
+  _valid_member_operand(rhs, _15);
   Symbol member = 1513206379923760;
   VarDescriptor * descriptor = _required_descriptor(value, member);
   if(descriptor -> methods.updateindex) return descriptor -> methods.updateindex(value, key, op, rhs);
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/dispatch.x",.function = "Var_updateindex",.line = 422};
+    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/dispatch.x",.function = "Var_updateindex",.line = 425};
     x2c_error_raise_n(& _x2c_error_site_11, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }
@@ -578,14 +573,14 @@ Var Var_updateindex(Var value, Var key, Symbol op, Var rhs){
 
 Var Var_postfixindex(Var value, Var key, Symbol op){
   if(! _init_guard_) _file_init_();
-  _valid_member_operand(value, _22);
-  _valid_member_operand(key, _24);
+  _valid_member_operand(value, _11);
+  _valid_member_operand(key, _13);
   Symbol member = 1160234330442032;
   VarDescriptor * descriptor = _required_descriptor(value, member);
   if(descriptor -> methods.postfixindex) return descriptor -> methods.postfixindex(value, key, op);
   Symbol tag = Var_tag(value);
   {
-    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/dispatch.x",.function = "Var_postfixindex",.line = 437};
+    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/dispatch.x",.function = "Var_postfixindex",.line = 440};
     x2c_error_raise_n(& _x2c_error_site_12, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
     __builtin_unreachable();
   }
@@ -639,40 +634,27 @@ static void _install_descriptor_methods(VarDescriptor * descriptor, VarMethods m
 
 }
 
+String Buffer_str_free(Buffer);
+
+Buffer Buffer_new(size_t);
+
 static String _primitive_repr(Var v, Symbol tag){
-  switch(tag){
-    case 26993 : case 30065 : return String_printf(_2, Var_int(Var_convert(v, 3453797)));
-    case 3846509 : case 3453293 : return String_printf(_3, Var_uint(Var_convert(v, 3847013)));
-    case 3847013 : case 3453797 : return String_printf(_4, Var_int(Var_convert(v, 3453797)));
-    case 3847281 : return String_printf(_5, Var_ulong(Var_convert(v, 44858254)));
-    case 3454065 : return String_printf(_6, Var_ulong(Var_convert(v, 44858254)));
-    case 818062 : return String_printf(_7, Var_long(Var_convert(v, 818062)));
-    case 44858254 : return String_printf(_8, Var_ulong(Var_convert(v, 44858254)));
-    case 25983886 : return String_printf(_9, Var_long_long(Var_convert(v, 25983886)));
-    case 1435270030 : return String_printf(_10, Var_ulong_long(Var_convert(v, 1435270030)));
-    case 3355493 : return String_printf(_11, Var_floating(Var_convert(v, 3356265)));
-    case 3356265 : return String_printf(_12, Var_floating(Var_convert(v, 3356265)));
-    case 26071077642 : return String_printf(_13, Var_long_double(Var_convert(v, 26071077642)));
-    case 28764 : return _27;
-    case 1854348 : return _28;
-    case 2050956 : return _29;
-  }
-  return Var_pointer_string(v);
+  return Buffer_str_free(_write_primitive_repr(v, tag, Buffer_new(0)));
 }
 
 static String _primitive_str(Var v, Symbol tag){
   switch(tag){
-    case 26993 : case 30065 : return String_printf(_14, Var_int(Var_convert(v, 3453797)));
-    case 3453293 : case 3453797 : return String_printf(_4, Var_int(Var_convert(v, 3453797)));
-    case 3454065 : return String_printf(_15, Var_long(Var_convert(v, 818062)));
-    case 818062 : return String_printf(_15, Var_long(Var_convert(v, 818062)));
-    case 25983886 : return String_printf(_16, Var_long_long(Var_convert(v, 25983886)));
-    case 3846509 : case 3847013 : return String_printf(_17, Var_uint(Var_convert(v, 3847013)));
-    case 3847281 : return String_printf(_18, Var_ulong(Var_convert(v, 44858254)));
-    case 44858254 : return String_printf(_18, Var_ulong(Var_convert(v, 44858254)));
-    case 1435270030 : return String_printf(_19, Var_ulong_long(Var_convert(v, 1435270030)));
-    case 3355493 : case 3356265 : return String_printf(_20, Var_floating(Var_convert(v, 3356265)));
-    case 26071077642 : return String_printf(_21, Var_long_double(Var_convert(v, 26071077642)));
+    case 26993 : case 30065 : return String_printf(_2, Var_int(Var_convert(v, 3453797)));
+    case 3453293 : case 3453797 : return String_printf(_3, Var_int(Var_convert(v, 3453797)));
+    case 3454065 : return String_printf(_4, Var_long(Var_convert(v, 818062)));
+    case 818062 : return String_printf(_4, Var_long(Var_convert(v, 818062)));
+    case 25983886 : return String_printf(_5, Var_long_long(Var_convert(v, 25983886)));
+    case 3846509 : case 3847013 : return String_printf(_6, Var_uint(Var_convert(v, 3847013)));
+    case 3847281 : return String_printf(_7, Var_ulong(Var_convert(v, 44858254)));
+    case 44858254 : return String_printf(_7, Var_ulong(Var_convert(v, 44858254)));
+    case 1435270030 : return String_printf(_8, Var_ulong_long(Var_convert(v, 1435270030)));
+    case 3355493 : case 3356265 : return String_printf(_9, Var_floating(Var_convert(v, 3356265)));
+    case 26071077642 : return String_printf(_10, Var_long_double(Var_convert(v, 26071077642)));
     case 28764 : case 1854348 : case 2050956 : return String_join(NULL, cons(String_var(Symbol_str(tag)), NULL));
   }
   return Var_pointer_string(v);
@@ -686,7 +668,7 @@ String Var_fallback_str(Var v){
   switch(Var_kind(v)){
     case 439096724366 : case 20309162340 : return _primitive_str(v, tag);
     case 35386204516 : case 39939274535114 : return Var_pointer_string(v);
-    case 1473096 : return _30;
+    case 1473096 : return _16;
   }
   return Var_pointer_string(v);
 }
@@ -745,7 +727,7 @@ String Var_fallback_repr(Var v){
   switch(Var_kind(v)){
     case 439096724366 : case 20309162340 : return _primitive_repr(v, tag);
     case 35386204516 : case 39939274535114 : return Var_pointer_string(v);
-    case 1473096 : return _30;
+    case 1473096 : return _16;
   }
   return Var_pointer_string(v);
 }
@@ -758,20 +740,62 @@ String Var_repr(Var v){
   return Var_fallback_repr(v);
 }
 
+static Buffer _write_byte_repr(Buffer out, unsigned byte){
+  switch(byte){
+    case '\\' : return Buffer_write(out, "'\\\\'");
+    case '\'' : return Buffer_write(out, "'\\''");
+    case '\n' : return Buffer_write(out, "'\\n'");
+    case '\t' : return Buffer_write(out, "'\\t'");
+    case '\r' : return Buffer_write(out, "'\\r'");
+  }
+  if(byte >= 0x20 && byte < 0x7F) return Buffer_printf(out, "'%c'", (int) byte);
+  return Buffer_printf(out, "'\\x%02X'", byte);
+}
+
+static Buffer _write_float_repr(Buffer out, long double value, Symbol width, String suffix){
+  int limit = width == 3355493 ? FLT_DECIMAL_DIG :(width == 3356265 ? DBL_DECIMAL_DIG : LDBL_DECIMAL_DIG);
+  char text[48];
+  int digits = limit - 3;
+  for(;  digits < limit;  digits ++){
+    snprintf(text, sizeof text, "%.*Lg", digits, value);
+    long double back = strtold(text, NULL);
+    if(width == 3355493) back =(float) back;
+    else if(width == 3356265) back =(double) back;
+    if(back == value) break;
+  }
+  if(digits == limit) snprintf(text, sizeof text, "%.*Lg", limit, value);
+  if(text[strspn(text, "+-0123456789")] == '\0') strcat(text, ".0");
+  Buffer_write(out, text);
+  return String_truth(suffix) ? Buffer_write(out, suffix) : out;
+}
+
+long Var_long(Var);
+
+ulong Var_ulong(Var);
+
+long long Var_long_long(Var);
+
+unsigned long long Var_ulong_long(Var);
+
+double Var_floating(Var);
+
+long double Var_long_double(Var);
+
 static Buffer _write_primitive_repr(Var v, Symbol tag, Buffer out){
   switch(tag){
-    case 26993 : case 30065 : return Buffer_printf(out, "'%c'", Var_int(Var_convert(v, 3453797)));
-    case 3846509 : case 3453293 : return Buffer_printf(out, "0x%04X", Var_uint(Var_convert(v, 3847013)));
-    case 3847013 : case 3453797 : return Buffer_printf(out, "%d", Var_int(Var_convert(v, 3453797)));
-    case 3847281 : return Buffer_printf(out, "0x%012lXul", Var_ulong(Var_convert(v, 44858254)));
-    case 3454065 : return Buffer_printf(out, "0x%012lXl", Var_ulong(Var_convert(v, 44858254)));
-    case 818062 : return Buffer_printf(out, "%ldl", Var_long(Var_convert(v, 818062)));
-    case 44858254 : return Buffer_printf(out, "%luul", Var_ulong(Var_convert(v, 44858254)));
-    case 25983886 : return Buffer_printf(out, "%lldll", Var_long_long(Var_convert(v, 25983886)));
-    case 1435270030 : return Buffer_printf(out, "%lluull", Var_ulong_long(Var_convert(v, 1435270030)));
-    case 3355493 : return Buffer_printf(out, "%f", Var_floating(Var_convert(v, 3356265)));
-    case 3356265 : return Buffer_printf(out, "%lfl", Var_floating(Var_convert(v, 3356265)));
-    case 26071077642 : return Buffer_printf(out, "%Lfl", Var_long_double(Var_convert(v, 26071077642)));
+    case 26993 : case 30065 : return _write_byte_repr(out, (unsigned)(uchar) Var_long(v));
+    case 3846509 : case 3453293 : return Buffer_printf(out, "0x%04X", (unsigned)(ushort) Var_long(v));
+    case 3453797 : return Buffer_printf(out, "%d", (int) Var_long(v));
+    case 3847013 : return Buffer_printf(out, "%uu", (unsigned) Var_long(v));
+    case 3847281 : return Buffer_printf(out, "0x%012lXul", Var_ulong(v) & 0xFFFFFFFFFFFFul);
+    case 3454065 : return Buffer_printf(out, "0x%012lXl", (ulong) Var_long(v) & 0xFFFFFFFFFFFFul);
+    case 818062 : return Buffer_printf(out, "%ldl", Var_long(v));
+    case 44858254 : return Buffer_printf(out, "%luul", Var_ulong(v));
+    case 25983886 : return Buffer_printf(out, "%lldll", Var_long_long(v));
+    case 1435270030 : return Buffer_printf(out, "%lluull", Var_ulong_long(v));
+    case 3355493 : return _write_float_repr(out, Var_floating(v), 3355493, _17);
+    case 3356265 : return _write_float_repr(out, Var_floating(v), 3356265, NULL);
+    case 26071077642 : return _write_float_repr(out, Var_long_double(v), 26071077642, _18);
     case 28764 : return Buffer_write(out, "NaN");
     case 1854348 : return Buffer_write(out, "+Inf");
     case 2050956 : return Buffer_write(out, "-Inf");
@@ -829,7 +853,7 @@ unsigned Var_wide_hash(Var);
 unsigned Var_fallback_hash(Var v){
   if(! _init_guard_) _file_init_();
   if(v.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_hash",.line = 692};
+    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_hash",.line = 730};
     x2c_error_raise_n(& _x2c_error_site_13, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.fallback_hash")), NULL))));
     __builtin_unreachable();
   }
@@ -840,7 +864,7 @@ unsigned Var_fallback_hash(Var v){
 unsigned Var_hash(Var v){
   if(! _init_guard_) _file_init_();
   if(v.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/dispatch.x",.function = "Var_hash",.line = 701};
+    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/dispatch.x",.function = "Var_hash",.line = 739};
     x2c_error_raise_n(& _x2c_error_site_14, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.hash")), NULL))));
     __builtin_unreachable();
   }
@@ -913,8 +937,6 @@ static int _numeric_class(Symbol tag, long double value){
 
 long double Var_long_double_value(Var);
 
-double Var_floating(Var);
-
 int Var_integer_compare(Var, Var);
 
 int Var_integer_floating_compare(Var, Var);
@@ -964,14 +986,14 @@ int Var_fallback_compare(Var a, Var b){
   if(! _init_guard_) _file_init_();
   if(a.u64 == b.u64){
     if(a.u64 == VAR_VOID_BITS){
-      static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_compare",.line = 821};
+      static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_compare",.line = 859};
       x2c_error_raise_n(& _x2c_error_site_15, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.compare")), NULL))));
       __builtin_unreachable();
     }
     return 0;
   }
   if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_compare",.line = 824};
+    static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_compare",.line = 862};
     x2c_error_raise_n(& _x2c_error_site_16, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.compare")), NULL))));
     __builtin_unreachable();
   }
@@ -989,14 +1011,14 @@ int Var_compare(Var a, Var b){
   if(! _init_guard_) _file_init_();
   if(a.u64 == b.u64){
     if(a.u64 == VAR_VOID_BITS){
-      static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/dispatch.x",.function = "Var_compare",.line = 842};
+      static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/dispatch.x",.function = "Var_compare",.line = 880};
       x2c_error_raise_n(& _x2c_error_site_17, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.compare")), NULL))));
       __builtin_unreachable();
     }
     return 0;
   }
   if(a.u64 == VAR_VOID_BITS || b.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/dispatch.x",.function = "Var_compare",.line = 845};
+    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/dispatch.x",.function = "Var_compare",.line = 883};
     x2c_error_raise_n(& _x2c_error_site_18, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.compare")), NULL))));
     __builtin_unreachable();
   }
@@ -1024,7 +1046,7 @@ Iter Iter_init(Iter, Var, IterNextFn, Var);
 Iter Var_fallback_iter(Var x, Iter dest){
   if(! _init_guard_) _file_init_();
   if(x.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_iter",.line = 872};
+    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/dispatch.x",.function = "Var_fallback_iter",.line = 910};
     x2c_error_raise_n(& _x2c_error_site_19, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.iter")), NULL))));
     __builtin_unreachable();
   }
@@ -1041,7 +1063,7 @@ Iter Var_fallback_iter(Var x, Iter dest){
 Iter Var_iter(Var x, Iter dest){
   if(! _init_guard_) _file_init_();
   if(x.u64 == VAR_VOID_BITS){
-    static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/dispatch.x",.function = "Var_iter",.line = 882};
+    static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/dispatch.x",.function = "Var_iter",.line = 920};
     x2c_error_raise_n(& _x2c_error_site_20, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.iter")), NULL))));
     __builtin_unreachable();
   }

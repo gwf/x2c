@@ -52,6 +52,8 @@ static ArrayChar ArrayChar__core_getslice(ArrayChar _x2c_macro_array_0, int _x2c
 
 static inline int ArrayChar__core_normalize_bound(ArrayChar _x2c_macro_array_0, int _x2c_macro_index_0);
 
+static inline void ArrayChar__core_normalize_span(ArrayChar _x2c_macro_array_0, int * _x2c_macro_begin_0, int * _x2c_macro_finish_0);
+
 static void ArrayChar__core_setslice(ArrayChar _x2c_macro_array_0, int _x2c_macro_start_0, int _x2c_macro_end_0, ArrayChar _x2c_macro_values_0);
 
 static ArrayChar ArrayChar__core_remslice(ArrayChar _x2c_macro_array_0, int _x2c_macro_start_0, int _x2c_macro_end_0);
@@ -87,6 +89,8 @@ static ArrayShort ArrayShort__core_copy(ArrayShort _x2c_macro_array_6);
 static ArrayShort ArrayShort__core_getslice(ArrayShort _x2c_macro_array_6, int _x2c_macro_start_2, int _x2c_macro_end_2, int _x2c_macro_step_2);
 
 static inline int ArrayShort__core_normalize_bound(ArrayShort _x2c_macro_array_6, int _x2c_macro_index_4);
+
+static inline void ArrayShort__core_normalize_span(ArrayShort _x2c_macro_array_6, int * _x2c_macro_begin_1, int * _x2c_macro_finish_1);
 
 static void ArrayShort__core_setslice(ArrayShort _x2c_macro_array_6, int _x2c_macro_start_2, int _x2c_macro_end_2, ArrayShort _x2c_macro_values_3);
 
@@ -124,6 +128,8 @@ static ArrayInt ArrayInt__core_getslice(ArrayInt _x2c_macro_array_12, int _x2c_m
 
 static inline int ArrayInt__core_normalize_bound(ArrayInt _x2c_macro_array_12, int _x2c_macro_index_8);
 
+static inline void ArrayInt__core_normalize_span(ArrayInt _x2c_macro_array_12, int * _x2c_macro_begin_2, int * _x2c_macro_finish_2);
+
 static void ArrayInt__core_setslice(ArrayInt _x2c_macro_array_12, int _x2c_macro_start_4, int _x2c_macro_end_4, ArrayInt _x2c_macro_values_6);
 
 static ArrayInt ArrayInt__core_remslice(ArrayInt _x2c_macro_array_12, int _x2c_macro_start_4, int _x2c_macro_end_4);
@@ -159,6 +165,8 @@ static ArrayLong ArrayLong__core_copy(ArrayLong _x2c_macro_array_18);
 static ArrayLong ArrayLong__core_getslice(ArrayLong _x2c_macro_array_18, int _x2c_macro_start_6, int _x2c_macro_end_6, int _x2c_macro_step_6);
 
 static inline int ArrayLong__core_normalize_bound(ArrayLong _x2c_macro_array_18, int _x2c_macro_index_12);
+
+static inline void ArrayLong__core_normalize_span(ArrayLong _x2c_macro_array_18, int * _x2c_macro_begin_3, int * _x2c_macro_finish_3);
 
 static void ArrayLong__core_setslice(ArrayLong _x2c_macro_array_18, int _x2c_macro_start_6, int _x2c_macro_end_6, ArrayLong _x2c_macro_values_9);
 
@@ -196,6 +204,8 @@ static ArrayFloat ArrayFloat__core_getslice(ArrayFloat _x2c_macro_array_24, int 
 
 static inline int ArrayFloat__core_normalize_bound(ArrayFloat _x2c_macro_array_24, int _x2c_macro_index_16);
 
+static inline void ArrayFloat__core_normalize_span(ArrayFloat _x2c_macro_array_24, int * _x2c_macro_begin_4, int * _x2c_macro_finish_4);
+
 static void ArrayFloat__core_setslice(ArrayFloat _x2c_macro_array_24, int _x2c_macro_start_8, int _x2c_macro_end_8, ArrayFloat _x2c_macro_values_12);
 
 static ArrayFloat ArrayFloat__core_remslice(ArrayFloat _x2c_macro_array_24, int _x2c_macro_start_8, int _x2c_macro_end_8);
@@ -232,6 +242,8 @@ static ArrayDbl ArrayDbl__core_getslice(ArrayDbl _x2c_macro_array_30, int _x2c_m
 
 static inline int ArrayDbl__core_normalize_bound(ArrayDbl _x2c_macro_array_30, int _x2c_macro_index_20);
 
+static inline void ArrayDbl__core_normalize_span(ArrayDbl _x2c_macro_array_30, int * _x2c_macro_begin_5, int * _x2c_macro_finish_5);
+
 static void ArrayDbl__core_setslice(ArrayDbl _x2c_macro_array_30, int _x2c_macro_start_10, int _x2c_macro_end_10, ArrayDbl _x2c_macro_values_15);
 
 static ArrayDbl ArrayDbl__core_remslice(ArrayDbl _x2c_macro_array_30, int _x2c_macro_start_10, int _x2c_macro_end_10);
@@ -267,6 +279,8 @@ static ArrayString ArrayString__core_copy(ArrayString _x2c_macro_array_36);
 static ArrayString ArrayString__core_getslice(ArrayString _x2c_macro_array_36, int _x2c_macro_start_12, int _x2c_macro_end_12, int _x2c_macro_step_12);
 
 static inline int ArrayString__core_normalize_bound(ArrayString _x2c_macro_array_36, int _x2c_macro_index_24);
+
+static inline void ArrayString__core_normalize_span(ArrayString _x2c_macro_array_36, int * _x2c_macro_begin_6, int * _x2c_macro_finish_6);
 
 static void ArrayString__core_setslice(ArrayString _x2c_macro_array_36, int _x2c_macro_start_12, int _x2c_macro_end_12, ArrayString _x2c_macro_values_18);
 
@@ -1053,15 +1067,20 @@ static inline int ArrayChar__core_normalize_bound(ArrayChar _x2c_macro_array_0, 
   return _x2c_macro_start_0;
 }
 
+static inline void ArrayChar__core_normalize_span(ArrayChar _x2c_macro_array_0, int * _x2c_macro_begin_0, int * _x2c_macro_finish_0){
+  x2c_normalize_slice(_x2c_macro_begin_0, _x2c_macro_finish_0, 1, (int) _x2c_macro_array_0 -> length);
+  if(* _x2c_macro_finish_0 < * _x2c_macro_begin_0){
+    int _x2c_macro_tmp_0 = * _x2c_macro_begin_0;
+    * _x2c_macro_begin_0 = * _x2c_macro_finish_0;
+    * _x2c_macro_finish_0 = _x2c_macro_tmp_0;
+  }
+
+}
+
 static void ArrayChar__core_setslice(ArrayChar _x2c_macro_array_0, int _x2c_macro_start_0, int _x2c_macro_end_0, ArrayChar _x2c_macro_values_0){
   int _x2c_macro_n_0 =(int) _x2c_macro_array_0 -> length;
-  int _x2c_macro_begin_0 = ArrayChar__core_normalize_bound(_x2c_macro_array_0, _x2c_macro_start_0);
-  int _x2c_macro_finish_0 = ArrayChar__core_normalize_bound(_x2c_macro_array_0, _x2c_macro_end_0);
-  if(_x2c_macro_finish_0 < _x2c_macro_begin_0){
-    int _x2c_macro_tmp_0 = _x2c_macro_begin_0;
-    _x2c_macro_begin_0 = _x2c_macro_finish_0;
-    _x2c_macro_finish_0 = _x2c_macro_tmp_0;
-  }
+  int _x2c_macro_begin_0 = _x2c_macro_start_0, _x2c_macro_finish_0 = _x2c_macro_end_0;
+  ArrayChar__core_normalize_span(_x2c_macro_array_0, & _x2c_macro_begin_0, & _x2c_macro_finish_0);
   int _x2c_macro_remove_0 = _x2c_macro_finish_0 - _x2c_macro_begin_0;
   int _x2c_macro_insert_0 = ArrayChar_truth(_x2c_macro_values_0) ?(int) _x2c_macro_values_0 -> length : 0;
   int _x2c_macro_delta_0 = _x2c_macro_insert_0 - _x2c_macro_remove_0;
@@ -1105,13 +1124,8 @@ static void ArrayChar__core_setslice(ArrayChar _x2c_macro_array_0, int _x2c_macr
 
 static ArrayChar ArrayChar__core_remslice(ArrayChar _x2c_macro_array_0, int _x2c_macro_start_0, int _x2c_macro_end_0){
   int _x2c_macro_n_0 =(int) _x2c_macro_array_0 -> length;
-  int _x2c_macro_begin_0 = ArrayChar__core_normalize_bound(_x2c_macro_array_0, _x2c_macro_start_0);
-  int _x2c_macro_finish_0 = ArrayChar__core_normalize_bound(_x2c_macro_array_0, _x2c_macro_end_0);
-  if(_x2c_macro_finish_0 < _x2c_macro_begin_0){
-    int _x2c_macro_tmp_0 = _x2c_macro_begin_0;
-    _x2c_macro_begin_0 = _x2c_macro_finish_0;
-    _x2c_macro_finish_0 = _x2c_macro_tmp_0;
-  }
+  int _x2c_macro_begin_0 = _x2c_macro_start_0, _x2c_macro_finish_0 = _x2c_macro_end_0;
+  ArrayChar__core_normalize_span(_x2c_macro_array_0, & _x2c_macro_begin_0, & _x2c_macro_finish_0);
   if(_x2c_macro_begin_0 >= _x2c_macro_finish_0) return(ArrayChar) Block_new(sizeof(char));
   ArrayChar _x2c_macro_removed_0 = ArrayChar__core_getslice(_x2c_macro_array_0, _x2c_macro_begin_0, _x2c_macro_finish_0, 1);
   char * _x2c_macro_data_0 =(char *) _x2c_macro_array_0 -> bytes;
@@ -1126,8 +1140,7 @@ static ArrayChar ArrayChar__core_splice(ArrayChar _x2c_macro_array_0, int _x2c_m
   int _x2c_macro_n_0 =(int) _x2c_macro_array_0 -> length;
   int _x2c_macro_start_0 = ArrayChar__core_normalize_bound(_x2c_macro_array_0, _x2c_macro_index_0);
   long long _x2c_macro_target_0 =(long long) _x2c_macro_start_0 + _x2c_macro_remove_count_0;
-  if(_x2c_macro_target_0 > INT_MAX) _x2c_macro_target_0 = INT_MAX;
-  int _x2c_macro_end_0 = ArrayChar__core_normalize_bound(_x2c_macro_array_0, (int) _x2c_macro_target_0);
+  int _x2c_macro_end_0 = _x2c_macro_target_0 > _x2c_macro_n_0 ? _x2c_macro_n_0 :(int) _x2c_macro_target_0;
   ArrayChar _x2c_macro_removed_0 = ArrayChar__core_getslice(_x2c_macro_array_0, _x2c_macro_start_0, _x2c_macro_end_0, 1);
   ArrayChar__core_setslice(_x2c_macro_array_0, _x2c_macro_start_0, _x2c_macro_end_0, _x2c_macro_values_0);
   return _x2c_macro_removed_0;
@@ -1627,15 +1640,20 @@ static inline int ArrayShort__core_normalize_bound(ArrayShort _x2c_macro_array_6
   return _x2c_macro_start_2;
 }
 
+static inline void ArrayShort__core_normalize_span(ArrayShort _x2c_macro_array_6, int * _x2c_macro_begin_1, int * _x2c_macro_finish_1){
+  x2c_normalize_slice(_x2c_macro_begin_1, _x2c_macro_finish_1, 1, (int) _x2c_macro_array_6 -> length);
+  if(* _x2c_macro_finish_1 < * _x2c_macro_begin_1){
+    int _x2c_macro_tmp_1 = * _x2c_macro_begin_1;
+    * _x2c_macro_begin_1 = * _x2c_macro_finish_1;
+    * _x2c_macro_finish_1 = _x2c_macro_tmp_1;
+  }
+
+}
+
 static void ArrayShort__core_setslice(ArrayShort _x2c_macro_array_6, int _x2c_macro_start_2, int _x2c_macro_end_2, ArrayShort _x2c_macro_values_3){
   int _x2c_macro_n_2 =(int) _x2c_macro_array_6 -> length;
-  int _x2c_macro_begin_1 = ArrayShort__core_normalize_bound(_x2c_macro_array_6, _x2c_macro_start_2);
-  int _x2c_macro_finish_1 = ArrayShort__core_normalize_bound(_x2c_macro_array_6, _x2c_macro_end_2);
-  if(_x2c_macro_finish_1 < _x2c_macro_begin_1){
-    int _x2c_macro_tmp_1 = _x2c_macro_begin_1;
-    _x2c_macro_begin_1 = _x2c_macro_finish_1;
-    _x2c_macro_finish_1 = _x2c_macro_tmp_1;
-  }
+  int _x2c_macro_begin_1 = _x2c_macro_start_2, _x2c_macro_finish_1 = _x2c_macro_end_2;
+  ArrayShort__core_normalize_span(_x2c_macro_array_6, & _x2c_macro_begin_1, & _x2c_macro_finish_1);
   int _x2c_macro_remove_1 = _x2c_macro_finish_1 - _x2c_macro_begin_1;
   int _x2c_macro_insert_1 = ArrayShort_truth(_x2c_macro_values_3) ?(int) _x2c_macro_values_3 -> length : 0;
   int _x2c_macro_delta_1 = _x2c_macro_insert_1 - _x2c_macro_remove_1;
@@ -1679,13 +1697,8 @@ static void ArrayShort__core_setslice(ArrayShort _x2c_macro_array_6, int _x2c_ma
 
 static ArrayShort ArrayShort__core_remslice(ArrayShort _x2c_macro_array_6, int _x2c_macro_start_2, int _x2c_macro_end_2){
   int _x2c_macro_n_2 =(int) _x2c_macro_array_6 -> length;
-  int _x2c_macro_begin_1 = ArrayShort__core_normalize_bound(_x2c_macro_array_6, _x2c_macro_start_2);
-  int _x2c_macro_finish_1 = ArrayShort__core_normalize_bound(_x2c_macro_array_6, _x2c_macro_end_2);
-  if(_x2c_macro_finish_1 < _x2c_macro_begin_1){
-    int _x2c_macro_tmp_1 = _x2c_macro_begin_1;
-    _x2c_macro_begin_1 = _x2c_macro_finish_1;
-    _x2c_macro_finish_1 = _x2c_macro_tmp_1;
-  }
+  int _x2c_macro_begin_1 = _x2c_macro_start_2, _x2c_macro_finish_1 = _x2c_macro_end_2;
+  ArrayShort__core_normalize_span(_x2c_macro_array_6, & _x2c_macro_begin_1, & _x2c_macro_finish_1);
   if(_x2c_macro_begin_1 >= _x2c_macro_finish_1) return(ArrayShort) Block_new(sizeof(short));
   ArrayShort _x2c_macro_removed_1 = ArrayShort__core_getslice(_x2c_macro_array_6, _x2c_macro_begin_1, _x2c_macro_finish_1, 1);
   short * _x2c_macro_data_3 =(short *) _x2c_macro_array_6 -> bytes;
@@ -1700,8 +1713,7 @@ static ArrayShort ArrayShort__core_splice(ArrayShort _x2c_macro_array_6, int _x2
   int _x2c_macro_n_2 =(int) _x2c_macro_array_6 -> length;
   int _x2c_macro_start_2 = ArrayShort__core_normalize_bound(_x2c_macro_array_6, _x2c_macro_index_4);
   long long _x2c_macro_target_1 =(long long) _x2c_macro_start_2 + _x2c_macro_remove_count_2;
-  if(_x2c_macro_target_1 > INT_MAX) _x2c_macro_target_1 = INT_MAX;
-  int _x2c_macro_end_2 = ArrayShort__core_normalize_bound(_x2c_macro_array_6, (int) _x2c_macro_target_1);
+  int _x2c_macro_end_2 = _x2c_macro_target_1 > _x2c_macro_n_2 ? _x2c_macro_n_2 :(int) _x2c_macro_target_1;
   ArrayShort _x2c_macro_removed_1 = ArrayShort__core_getslice(_x2c_macro_array_6, _x2c_macro_start_2, _x2c_macro_end_2, 1);
   ArrayShort__core_setslice(_x2c_macro_array_6, _x2c_macro_start_2, _x2c_macro_end_2, _x2c_macro_values_3);
   return _x2c_macro_removed_1;
@@ -2175,15 +2187,20 @@ static inline int ArrayInt__core_normalize_bound(ArrayInt _x2c_macro_array_12, i
   return _x2c_macro_start_4;
 }
 
+static inline void ArrayInt__core_normalize_span(ArrayInt _x2c_macro_array_12, int * _x2c_macro_begin_2, int * _x2c_macro_finish_2){
+  x2c_normalize_slice(_x2c_macro_begin_2, _x2c_macro_finish_2, 1, (int) _x2c_macro_array_12 -> length);
+  if(* _x2c_macro_finish_2 < * _x2c_macro_begin_2){
+    int _x2c_macro_tmp_2 = * _x2c_macro_begin_2;
+    * _x2c_macro_begin_2 = * _x2c_macro_finish_2;
+    * _x2c_macro_finish_2 = _x2c_macro_tmp_2;
+  }
+
+}
+
 static void ArrayInt__core_setslice(ArrayInt _x2c_macro_array_12, int _x2c_macro_start_4, int _x2c_macro_end_4, ArrayInt _x2c_macro_values_6){
   int _x2c_macro_n_4 =(int) _x2c_macro_array_12 -> length;
-  int _x2c_macro_begin_2 = ArrayInt__core_normalize_bound(_x2c_macro_array_12, _x2c_macro_start_4);
-  int _x2c_macro_finish_2 = ArrayInt__core_normalize_bound(_x2c_macro_array_12, _x2c_macro_end_4);
-  if(_x2c_macro_finish_2 < _x2c_macro_begin_2){
-    int _x2c_macro_tmp_2 = _x2c_macro_begin_2;
-    _x2c_macro_begin_2 = _x2c_macro_finish_2;
-    _x2c_macro_finish_2 = _x2c_macro_tmp_2;
-  }
+  int _x2c_macro_begin_2 = _x2c_macro_start_4, _x2c_macro_finish_2 = _x2c_macro_end_4;
+  ArrayInt__core_normalize_span(_x2c_macro_array_12, & _x2c_macro_begin_2, & _x2c_macro_finish_2);
   int _x2c_macro_remove_2 = _x2c_macro_finish_2 - _x2c_macro_begin_2;
   int _x2c_macro_insert_2 = ArrayInt_truth(_x2c_macro_values_6) ?(int) _x2c_macro_values_6 -> length : 0;
   int _x2c_macro_delta_2 = _x2c_macro_insert_2 - _x2c_macro_remove_2;
@@ -2227,13 +2244,8 @@ static void ArrayInt__core_setslice(ArrayInt _x2c_macro_array_12, int _x2c_macro
 
 static ArrayInt ArrayInt__core_remslice(ArrayInt _x2c_macro_array_12, int _x2c_macro_start_4, int _x2c_macro_end_4){
   int _x2c_macro_n_4 =(int) _x2c_macro_array_12 -> length;
-  int _x2c_macro_begin_2 = ArrayInt__core_normalize_bound(_x2c_macro_array_12, _x2c_macro_start_4);
-  int _x2c_macro_finish_2 = ArrayInt__core_normalize_bound(_x2c_macro_array_12, _x2c_macro_end_4);
-  if(_x2c_macro_finish_2 < _x2c_macro_begin_2){
-    int _x2c_macro_tmp_2 = _x2c_macro_begin_2;
-    _x2c_macro_begin_2 = _x2c_macro_finish_2;
-    _x2c_macro_finish_2 = _x2c_macro_tmp_2;
-  }
+  int _x2c_macro_begin_2 = _x2c_macro_start_4, _x2c_macro_finish_2 = _x2c_macro_end_4;
+  ArrayInt__core_normalize_span(_x2c_macro_array_12, & _x2c_macro_begin_2, & _x2c_macro_finish_2);
   if(_x2c_macro_begin_2 >= _x2c_macro_finish_2) return(ArrayInt) Block_new(sizeof(int));
   ArrayInt _x2c_macro_removed_2 = ArrayInt__core_getslice(_x2c_macro_array_12, _x2c_macro_begin_2, _x2c_macro_finish_2, 1);
   int * _x2c_macro_data_6 =(int *) _x2c_macro_array_12 -> bytes;
@@ -2248,8 +2260,7 @@ static ArrayInt ArrayInt__core_splice(ArrayInt _x2c_macro_array_12, int _x2c_mac
   int _x2c_macro_n_4 =(int) _x2c_macro_array_12 -> length;
   int _x2c_macro_start_4 = ArrayInt__core_normalize_bound(_x2c_macro_array_12, _x2c_macro_index_8);
   long long _x2c_macro_target_2 =(long long) _x2c_macro_start_4 + _x2c_macro_remove_count_4;
-  if(_x2c_macro_target_2 > INT_MAX) _x2c_macro_target_2 = INT_MAX;
-  int _x2c_macro_end_4 = ArrayInt__core_normalize_bound(_x2c_macro_array_12, (int) _x2c_macro_target_2);
+  int _x2c_macro_end_4 = _x2c_macro_target_2 > _x2c_macro_n_4 ? _x2c_macro_n_4 :(int) _x2c_macro_target_2;
   ArrayInt _x2c_macro_removed_2 = ArrayInt__core_getslice(_x2c_macro_array_12, _x2c_macro_start_4, _x2c_macro_end_4, 1);
   ArrayInt__core_setslice(_x2c_macro_array_12, _x2c_macro_start_4, _x2c_macro_end_4, _x2c_macro_values_6);
   return _x2c_macro_removed_2;
@@ -2721,15 +2732,20 @@ static inline int ArrayLong__core_normalize_bound(ArrayLong _x2c_macro_array_18,
   return _x2c_macro_start_6;
 }
 
+static inline void ArrayLong__core_normalize_span(ArrayLong _x2c_macro_array_18, int * _x2c_macro_begin_3, int * _x2c_macro_finish_3){
+  x2c_normalize_slice(_x2c_macro_begin_3, _x2c_macro_finish_3, 1, (int) _x2c_macro_array_18 -> length);
+  if(* _x2c_macro_finish_3 < * _x2c_macro_begin_3){
+    int _x2c_macro_tmp_3 = * _x2c_macro_begin_3;
+    * _x2c_macro_begin_3 = * _x2c_macro_finish_3;
+    * _x2c_macro_finish_3 = _x2c_macro_tmp_3;
+  }
+
+}
+
 static void ArrayLong__core_setslice(ArrayLong _x2c_macro_array_18, int _x2c_macro_start_6, int _x2c_macro_end_6, ArrayLong _x2c_macro_values_9){
   int _x2c_macro_n_6 =(int) _x2c_macro_array_18 -> length;
-  int _x2c_macro_begin_3 = ArrayLong__core_normalize_bound(_x2c_macro_array_18, _x2c_macro_start_6);
-  int _x2c_macro_finish_3 = ArrayLong__core_normalize_bound(_x2c_macro_array_18, _x2c_macro_end_6);
-  if(_x2c_macro_finish_3 < _x2c_macro_begin_3){
-    int _x2c_macro_tmp_3 = _x2c_macro_begin_3;
-    _x2c_macro_begin_3 = _x2c_macro_finish_3;
-    _x2c_macro_finish_3 = _x2c_macro_tmp_3;
-  }
+  int _x2c_macro_begin_3 = _x2c_macro_start_6, _x2c_macro_finish_3 = _x2c_macro_end_6;
+  ArrayLong__core_normalize_span(_x2c_macro_array_18, & _x2c_macro_begin_3, & _x2c_macro_finish_3);
   int _x2c_macro_remove_3 = _x2c_macro_finish_3 - _x2c_macro_begin_3;
   int _x2c_macro_insert_3 = ArrayLong_truth(_x2c_macro_values_9) ?(int) _x2c_macro_values_9 -> length : 0;
   int _x2c_macro_delta_3 = _x2c_macro_insert_3 - _x2c_macro_remove_3;
@@ -2773,13 +2789,8 @@ static void ArrayLong__core_setslice(ArrayLong _x2c_macro_array_18, int _x2c_mac
 
 static ArrayLong ArrayLong__core_remslice(ArrayLong _x2c_macro_array_18, int _x2c_macro_start_6, int _x2c_macro_end_6){
   int _x2c_macro_n_6 =(int) _x2c_macro_array_18 -> length;
-  int _x2c_macro_begin_3 = ArrayLong__core_normalize_bound(_x2c_macro_array_18, _x2c_macro_start_6);
-  int _x2c_macro_finish_3 = ArrayLong__core_normalize_bound(_x2c_macro_array_18, _x2c_macro_end_6);
-  if(_x2c_macro_finish_3 < _x2c_macro_begin_3){
-    int _x2c_macro_tmp_3 = _x2c_macro_begin_3;
-    _x2c_macro_begin_3 = _x2c_macro_finish_3;
-    _x2c_macro_finish_3 = _x2c_macro_tmp_3;
-  }
+  int _x2c_macro_begin_3 = _x2c_macro_start_6, _x2c_macro_finish_3 = _x2c_macro_end_6;
+  ArrayLong__core_normalize_span(_x2c_macro_array_18, & _x2c_macro_begin_3, & _x2c_macro_finish_3);
   if(_x2c_macro_begin_3 >= _x2c_macro_finish_3) return(ArrayLong) Block_new(sizeof(long));
   ArrayLong _x2c_macro_removed_3 = ArrayLong__core_getslice(_x2c_macro_array_18, _x2c_macro_begin_3, _x2c_macro_finish_3, 1);
   long * _x2c_macro_data_9 =(long *) _x2c_macro_array_18 -> bytes;
@@ -2794,8 +2805,7 @@ static ArrayLong ArrayLong__core_splice(ArrayLong _x2c_macro_array_18, int _x2c_
   int _x2c_macro_n_6 =(int) _x2c_macro_array_18 -> length;
   int _x2c_macro_start_6 = ArrayLong__core_normalize_bound(_x2c_macro_array_18, _x2c_macro_index_12);
   long long _x2c_macro_target_3 =(long long) _x2c_macro_start_6 + _x2c_macro_remove_count_6;
-  if(_x2c_macro_target_3 > INT_MAX) _x2c_macro_target_3 = INT_MAX;
-  int _x2c_macro_end_6 = ArrayLong__core_normalize_bound(_x2c_macro_array_18, (int) _x2c_macro_target_3);
+  int _x2c_macro_end_6 = _x2c_macro_target_3 > _x2c_macro_n_6 ? _x2c_macro_n_6 :(int) _x2c_macro_target_3;
   ArrayLong _x2c_macro_removed_3 = ArrayLong__core_getslice(_x2c_macro_array_18, _x2c_macro_start_6, _x2c_macro_end_6, 1);
   ArrayLong__core_setslice(_x2c_macro_array_18, _x2c_macro_start_6, _x2c_macro_end_6, _x2c_macro_values_9);
   return _x2c_macro_removed_3;
@@ -3269,15 +3279,20 @@ static inline int ArrayFloat__core_normalize_bound(ArrayFloat _x2c_macro_array_2
   return _x2c_macro_start_8;
 }
 
+static inline void ArrayFloat__core_normalize_span(ArrayFloat _x2c_macro_array_24, int * _x2c_macro_begin_4, int * _x2c_macro_finish_4){
+  x2c_normalize_slice(_x2c_macro_begin_4, _x2c_macro_finish_4, 1, (int) _x2c_macro_array_24 -> length);
+  if(* _x2c_macro_finish_4 < * _x2c_macro_begin_4){
+    int _x2c_macro_tmp_4 = * _x2c_macro_begin_4;
+    * _x2c_macro_begin_4 = * _x2c_macro_finish_4;
+    * _x2c_macro_finish_4 = _x2c_macro_tmp_4;
+  }
+
+}
+
 static void ArrayFloat__core_setslice(ArrayFloat _x2c_macro_array_24, int _x2c_macro_start_8, int _x2c_macro_end_8, ArrayFloat _x2c_macro_values_12){
   int _x2c_macro_n_8 =(int) _x2c_macro_array_24 -> length;
-  int _x2c_macro_begin_4 = ArrayFloat__core_normalize_bound(_x2c_macro_array_24, _x2c_macro_start_8);
-  int _x2c_macro_finish_4 = ArrayFloat__core_normalize_bound(_x2c_macro_array_24, _x2c_macro_end_8);
-  if(_x2c_macro_finish_4 < _x2c_macro_begin_4){
-    int _x2c_macro_tmp_4 = _x2c_macro_begin_4;
-    _x2c_macro_begin_4 = _x2c_macro_finish_4;
-    _x2c_macro_finish_4 = _x2c_macro_tmp_4;
-  }
+  int _x2c_macro_begin_4 = _x2c_macro_start_8, _x2c_macro_finish_4 = _x2c_macro_end_8;
+  ArrayFloat__core_normalize_span(_x2c_macro_array_24, & _x2c_macro_begin_4, & _x2c_macro_finish_4);
   int _x2c_macro_remove_4 = _x2c_macro_finish_4 - _x2c_macro_begin_4;
   int _x2c_macro_insert_4 = ArrayFloat_truth(_x2c_macro_values_12) ?(int) _x2c_macro_values_12 -> length : 0;
   int _x2c_macro_delta_4 = _x2c_macro_insert_4 - _x2c_macro_remove_4;
@@ -3321,13 +3336,8 @@ static void ArrayFloat__core_setslice(ArrayFloat _x2c_macro_array_24, int _x2c_m
 
 static ArrayFloat ArrayFloat__core_remslice(ArrayFloat _x2c_macro_array_24, int _x2c_macro_start_8, int _x2c_macro_end_8){
   int _x2c_macro_n_8 =(int) _x2c_macro_array_24 -> length;
-  int _x2c_macro_begin_4 = ArrayFloat__core_normalize_bound(_x2c_macro_array_24, _x2c_macro_start_8);
-  int _x2c_macro_finish_4 = ArrayFloat__core_normalize_bound(_x2c_macro_array_24, _x2c_macro_end_8);
-  if(_x2c_macro_finish_4 < _x2c_macro_begin_4){
-    int _x2c_macro_tmp_4 = _x2c_macro_begin_4;
-    _x2c_macro_begin_4 = _x2c_macro_finish_4;
-    _x2c_macro_finish_4 = _x2c_macro_tmp_4;
-  }
+  int _x2c_macro_begin_4 = _x2c_macro_start_8, _x2c_macro_finish_4 = _x2c_macro_end_8;
+  ArrayFloat__core_normalize_span(_x2c_macro_array_24, & _x2c_macro_begin_4, & _x2c_macro_finish_4);
   if(_x2c_macro_begin_4 >= _x2c_macro_finish_4) return(ArrayFloat) Block_new(sizeof(float));
   ArrayFloat _x2c_macro_removed_4 = ArrayFloat__core_getslice(_x2c_macro_array_24, _x2c_macro_begin_4, _x2c_macro_finish_4, 1);
   float * _x2c_macro_data_12 =(float *) _x2c_macro_array_24 -> bytes;
@@ -3342,8 +3352,7 @@ static ArrayFloat ArrayFloat__core_splice(ArrayFloat _x2c_macro_array_24, int _x
   int _x2c_macro_n_8 =(int) _x2c_macro_array_24 -> length;
   int _x2c_macro_start_8 = ArrayFloat__core_normalize_bound(_x2c_macro_array_24, _x2c_macro_index_16);
   long long _x2c_macro_target_4 =(long long) _x2c_macro_start_8 + _x2c_macro_remove_count_8;
-  if(_x2c_macro_target_4 > INT_MAX) _x2c_macro_target_4 = INT_MAX;
-  int _x2c_macro_end_8 = ArrayFloat__core_normalize_bound(_x2c_macro_array_24, (int) _x2c_macro_target_4);
+  int _x2c_macro_end_8 = _x2c_macro_target_4 > _x2c_macro_n_8 ? _x2c_macro_n_8 :(int) _x2c_macro_target_4;
   ArrayFloat _x2c_macro_removed_4 = ArrayFloat__core_getslice(_x2c_macro_array_24, _x2c_macro_start_8, _x2c_macro_end_8, 1);
   ArrayFloat__core_setslice(_x2c_macro_array_24, _x2c_macro_start_8, _x2c_macro_end_8, _x2c_macro_values_12);
   return _x2c_macro_removed_4;
@@ -3815,15 +3824,20 @@ static inline int ArrayDbl__core_normalize_bound(ArrayDbl _x2c_macro_array_30, i
   return _x2c_macro_start_10;
 }
 
+static inline void ArrayDbl__core_normalize_span(ArrayDbl _x2c_macro_array_30, int * _x2c_macro_begin_5, int * _x2c_macro_finish_5){
+  x2c_normalize_slice(_x2c_macro_begin_5, _x2c_macro_finish_5, 1, (int) _x2c_macro_array_30 -> length);
+  if(* _x2c_macro_finish_5 < * _x2c_macro_begin_5){
+    int _x2c_macro_tmp_5 = * _x2c_macro_begin_5;
+    * _x2c_macro_begin_5 = * _x2c_macro_finish_5;
+    * _x2c_macro_finish_5 = _x2c_macro_tmp_5;
+  }
+
+}
+
 static void ArrayDbl__core_setslice(ArrayDbl _x2c_macro_array_30, int _x2c_macro_start_10, int _x2c_macro_end_10, ArrayDbl _x2c_macro_values_15){
   int _x2c_macro_n_10 =(int) _x2c_macro_array_30 -> length;
-  int _x2c_macro_begin_5 = ArrayDbl__core_normalize_bound(_x2c_macro_array_30, _x2c_macro_start_10);
-  int _x2c_macro_finish_5 = ArrayDbl__core_normalize_bound(_x2c_macro_array_30, _x2c_macro_end_10);
-  if(_x2c_macro_finish_5 < _x2c_macro_begin_5){
-    int _x2c_macro_tmp_5 = _x2c_macro_begin_5;
-    _x2c_macro_begin_5 = _x2c_macro_finish_5;
-    _x2c_macro_finish_5 = _x2c_macro_tmp_5;
-  }
+  int _x2c_macro_begin_5 = _x2c_macro_start_10, _x2c_macro_finish_5 = _x2c_macro_end_10;
+  ArrayDbl__core_normalize_span(_x2c_macro_array_30, & _x2c_macro_begin_5, & _x2c_macro_finish_5);
   int _x2c_macro_remove_5 = _x2c_macro_finish_5 - _x2c_macro_begin_5;
   int _x2c_macro_insert_5 = ArrayDbl_truth(_x2c_macro_values_15) ?(int) _x2c_macro_values_15 -> length : 0;
   int _x2c_macro_delta_5 = _x2c_macro_insert_5 - _x2c_macro_remove_5;
@@ -3867,13 +3881,8 @@ static void ArrayDbl__core_setslice(ArrayDbl _x2c_macro_array_30, int _x2c_macro
 
 static ArrayDbl ArrayDbl__core_remslice(ArrayDbl _x2c_macro_array_30, int _x2c_macro_start_10, int _x2c_macro_end_10){
   int _x2c_macro_n_10 =(int) _x2c_macro_array_30 -> length;
-  int _x2c_macro_begin_5 = ArrayDbl__core_normalize_bound(_x2c_macro_array_30, _x2c_macro_start_10);
-  int _x2c_macro_finish_5 = ArrayDbl__core_normalize_bound(_x2c_macro_array_30, _x2c_macro_end_10);
-  if(_x2c_macro_finish_5 < _x2c_macro_begin_5){
-    int _x2c_macro_tmp_5 = _x2c_macro_begin_5;
-    _x2c_macro_begin_5 = _x2c_macro_finish_5;
-    _x2c_macro_finish_5 = _x2c_macro_tmp_5;
-  }
+  int _x2c_macro_begin_5 = _x2c_macro_start_10, _x2c_macro_finish_5 = _x2c_macro_end_10;
+  ArrayDbl__core_normalize_span(_x2c_macro_array_30, & _x2c_macro_begin_5, & _x2c_macro_finish_5);
   if(_x2c_macro_begin_5 >= _x2c_macro_finish_5) return(ArrayDbl) Block_new(sizeof(double));
   ArrayDbl _x2c_macro_removed_5 = ArrayDbl__core_getslice(_x2c_macro_array_30, _x2c_macro_begin_5, _x2c_macro_finish_5, 1);
   double * _x2c_macro_data_15 =(double *) _x2c_macro_array_30 -> bytes;
@@ -3888,8 +3897,7 @@ static ArrayDbl ArrayDbl__core_splice(ArrayDbl _x2c_macro_array_30, int _x2c_mac
   int _x2c_macro_n_10 =(int) _x2c_macro_array_30 -> length;
   int _x2c_macro_start_10 = ArrayDbl__core_normalize_bound(_x2c_macro_array_30, _x2c_macro_index_20);
   long long _x2c_macro_target_5 =(long long) _x2c_macro_start_10 + _x2c_macro_remove_count_10;
-  if(_x2c_macro_target_5 > INT_MAX) _x2c_macro_target_5 = INT_MAX;
-  int _x2c_macro_end_10 = ArrayDbl__core_normalize_bound(_x2c_macro_array_30, (int) _x2c_macro_target_5);
+  int _x2c_macro_end_10 = _x2c_macro_target_5 > _x2c_macro_n_10 ? _x2c_macro_n_10 :(int) _x2c_macro_target_5;
   ArrayDbl _x2c_macro_removed_5 = ArrayDbl__core_getslice(_x2c_macro_array_30, _x2c_macro_start_10, _x2c_macro_end_10, 1);
   ArrayDbl__core_setslice(_x2c_macro_array_30, _x2c_macro_start_10, _x2c_macro_end_10, _x2c_macro_values_15);
   return _x2c_macro_removed_5;
@@ -4361,15 +4369,20 @@ static inline int ArrayString__core_normalize_bound(ArrayString _x2c_macro_array
   return _x2c_macro_start_12;
 }
 
+static inline void ArrayString__core_normalize_span(ArrayString _x2c_macro_array_36, int * _x2c_macro_begin_6, int * _x2c_macro_finish_6){
+  x2c_normalize_slice(_x2c_macro_begin_6, _x2c_macro_finish_6, 1, (int) _x2c_macro_array_36 -> length);
+  if(* _x2c_macro_finish_6 < * _x2c_macro_begin_6){
+    int _x2c_macro_tmp_6 = * _x2c_macro_begin_6;
+    * _x2c_macro_begin_6 = * _x2c_macro_finish_6;
+    * _x2c_macro_finish_6 = _x2c_macro_tmp_6;
+  }
+
+}
+
 static void ArrayString__core_setslice(ArrayString _x2c_macro_array_36, int _x2c_macro_start_12, int _x2c_macro_end_12, ArrayString _x2c_macro_values_18){
   int _x2c_macro_n_12 =(int) _x2c_macro_array_36 -> length;
-  int _x2c_macro_begin_6 = ArrayString__core_normalize_bound(_x2c_macro_array_36, _x2c_macro_start_12);
-  int _x2c_macro_finish_6 = ArrayString__core_normalize_bound(_x2c_macro_array_36, _x2c_macro_end_12);
-  if(_x2c_macro_finish_6 < _x2c_macro_begin_6){
-    int _x2c_macro_tmp_6 = _x2c_macro_begin_6;
-    _x2c_macro_begin_6 = _x2c_macro_finish_6;
-    _x2c_macro_finish_6 = _x2c_macro_tmp_6;
-  }
+  int _x2c_macro_begin_6 = _x2c_macro_start_12, _x2c_macro_finish_6 = _x2c_macro_end_12;
+  ArrayString__core_normalize_span(_x2c_macro_array_36, & _x2c_macro_begin_6, & _x2c_macro_finish_6);
   int _x2c_macro_remove_6 = _x2c_macro_finish_6 - _x2c_macro_begin_6;
   int _x2c_macro_insert_6 = ArrayString_truth(_x2c_macro_values_18) ?(int) _x2c_macro_values_18 -> length : 0;
   int _x2c_macro_delta_6 = _x2c_macro_insert_6 - _x2c_macro_remove_6;
@@ -4413,13 +4426,8 @@ static void ArrayString__core_setslice(ArrayString _x2c_macro_array_36, int _x2c
 
 static ArrayString ArrayString__core_remslice(ArrayString _x2c_macro_array_36, int _x2c_macro_start_12, int _x2c_macro_end_12){
   int _x2c_macro_n_12 =(int) _x2c_macro_array_36 -> length;
-  int _x2c_macro_begin_6 = ArrayString__core_normalize_bound(_x2c_macro_array_36, _x2c_macro_start_12);
-  int _x2c_macro_finish_6 = ArrayString__core_normalize_bound(_x2c_macro_array_36, _x2c_macro_end_12);
-  if(_x2c_macro_finish_6 < _x2c_macro_begin_6){
-    int _x2c_macro_tmp_6 = _x2c_macro_begin_6;
-    _x2c_macro_begin_6 = _x2c_macro_finish_6;
-    _x2c_macro_finish_6 = _x2c_macro_tmp_6;
-  }
+  int _x2c_macro_begin_6 = _x2c_macro_start_12, _x2c_macro_finish_6 = _x2c_macro_end_12;
+  ArrayString__core_normalize_span(_x2c_macro_array_36, & _x2c_macro_begin_6, & _x2c_macro_finish_6);
   if(_x2c_macro_begin_6 >= _x2c_macro_finish_6) return(ArrayString) Block_new(sizeof(String));
   ArrayString _x2c_macro_removed_6 = ArrayString__core_getslice(_x2c_macro_array_36, _x2c_macro_begin_6, _x2c_macro_finish_6, 1);
   String * _x2c_macro_data_18 =(String *) _x2c_macro_array_36 -> bytes;
@@ -4434,8 +4442,7 @@ static ArrayString ArrayString__core_splice(ArrayString _x2c_macro_array_36, int
   int _x2c_macro_n_12 =(int) _x2c_macro_array_36 -> length;
   int _x2c_macro_start_12 = ArrayString__core_normalize_bound(_x2c_macro_array_36, _x2c_macro_index_24);
   long long _x2c_macro_target_6 =(long long) _x2c_macro_start_12 + _x2c_macro_remove_count_12;
-  if(_x2c_macro_target_6 > INT_MAX) _x2c_macro_target_6 = INT_MAX;
-  int _x2c_macro_end_12 = ArrayString__core_normalize_bound(_x2c_macro_array_36, (int) _x2c_macro_target_6);
+  int _x2c_macro_end_12 = _x2c_macro_target_6 > _x2c_macro_n_12 ? _x2c_macro_n_12 :(int) _x2c_macro_target_6;
   ArrayString _x2c_macro_removed_6 = ArrayString__core_getslice(_x2c_macro_array_36, _x2c_macro_start_12, _x2c_macro_end_12, 1);
   ArrayString__core_setslice(_x2c_macro_array_36, _x2c_macro_start_12, _x2c_macro_end_12, _x2c_macro_values_18);
   return _x2c_macro_removed_6;
