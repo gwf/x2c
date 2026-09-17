@@ -554,19 +554,25 @@ List String.find_all(String str, String sub, int start, int end) {
   return results.list_free();
 }
 
-/** Returns the non-overlapping count of `sub` in `str`.
-    A null or empty `str` or `sub` returns zero.
-*/
-int String.count(String str, String sub) {
-  if (!str || !sub) return 0;
-  int count = 0, sub_len = sub.len(), pos = 0, str_len = str.len();
-  while (pos <= str_len - sub_len) {
+/* Counts non-overlapping occurrences of `sub` in `str`, left to right, up to
+   `limit` of them; a negative `limit` counts every match. */
+static int _count_matches(String str, String sub, int limit) {
+  int str_len = str.len(), sub_len = sub.len(), count = 0, pos = 0;
+  while (pos <= str_len - sub_len && (limit < 0 || count < limit)) {
     const char *found = _find_bytes(str + pos, str_len - pos, sub, sub_len);
     if (!found) break;
     count++;
     pos = (int) (found - str) + sub_len;
   }
   return count;
+}
+
+/** Returns the non-overlapping count of `sub` in `str`.
+    A null or empty `str` or `sub` returns zero.
+*/
+int String.count(String str, String sub) {
+  if (!str || !sub) return 0;
+  return _count_matches(str, sub, -1);
 }
 
 /** Returns the byte at `index` in `str` as an int, or -1 if out of range.
@@ -1108,14 +1114,8 @@ String String.replace_n(
   if (!str || !old || !*old || max_replacements == 0) return str;
   if (old == replacement && _is_active_canonical(str)) return str;
   int str_len = str.len(), old_len = old.len();
-  int replacement_len = replacement.len(), count = 0, pos = 0;
-  while (pos <= str_len - old_len &&
-         (max_replacements < 0 || count < max_replacements)) {
-    const char *found = _find_bytes(str + pos, str_len - pos, old, old_len);
-    if (!found) break;
-    count++;
-    pos = (int) (found - str) + old_len;
-  }
+  int replacement_len = replacement.len();
+  int count = _count_matches(str, old, max_replacements);
   if (count == 0) return str;
   size_t output_len = (size_t) str_len;
   if (replacement_len >= old_len) {
