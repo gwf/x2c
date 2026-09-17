@@ -257,6 +257,9 @@ static List Emitter._literal(Emitter emitter, List ast) {
     text = %"${(long) symbol}";
   }
   if (type === %("Atom")) return _atom_intern(text);
+  // C has no `0o` prefix; its octal spelling is a bare leading zero.
+  if (text[0] == '0' && (text[1] == 'o' || text[1] == 'O'))
+    text = "0" + String.new(text + 2);
   return %( $text );
 }
 
