@@ -17,10 +17,9 @@ The modules are optional in ordinary programs. Include the ones a file uses:
 
 ## Write a script
 
-A source file whose first line is a shebang is a script. It includes
-`args.x`, `diff.x`, `digest.x`, `path.x`, `process.x`, and `regex.x`
-automatically and may put statements at file scope, which run in order as
-the program:
+A source file whose first line is a shebang is a script. It can use the
+modules above without including them, and its statements at file scope run
+in order as the program:
 
 ```x2c
 #!/usr/bin/env -S x2c script
@@ -29,16 +28,10 @@ foreach (String file, %(git diff --name-only).job().lines())
   printf("%s: %s\n", branch, file);
 ```
 
-`args` holds the arguments after the script's name as `String`s. Functions,
-types, and macros written between the statements work as they do in any
-file, and the statements can call those functions wherever they are
-defined. An existing program also becomes a script by adding the shebang
-line: a file that defines `main` runs `main` and keeps its declarations at
-file scope, so it may not also have top-level statements. A command that
-fails and is not caught ends the script with the command's status, and any
-other uncaught error prints its cause and ends the script with status 1. The
-[language reference](../reference/language.md#script-units) lists what stays
-at file scope.
+`args` holds the arguments after the script's name as `String`s.
+[Script units](../reference/language.md#script-units) in the language
+reference describes which forms stay at file scope, how a script that
+defines `main` runs, and the exit status of an uncaught failure.
 
 `x2c script` runs the file the way an interpreter would. The first run
 builds it; later runs start the cached executable in a few milliseconds

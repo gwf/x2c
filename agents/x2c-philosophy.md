@@ -606,24 +606,19 @@ evidence.
 
 ### Unit interfaces
 
-`collect.x` caches the per-file declaration walk it performs for source
-declaration collection in a process cache whose entries install once: the
-first walk of a file fixes its contribution, so a later walk of the same
-text in a context whose globs already cover its includes cannot replace a
-complete entry with a narrower one. `interface_write` publishes the
-translated unit's entry beside its generated C as `<stem>.xi`, and
-`_interface_read` replays an interface found in the output directory, the
-stage or home mirror of the file's home-relative directory, or a package's
-`builds/`, only when its recorded path, its source hash, and the content
-hashes of its includes and other dependencies all validate. Anonymous aggregate identities are
-`(gensym "<file>" N)`, numbered per file, so an interface is valid in any
-process. Warm replay is byte-identical to a cold walk; a stale or foreign
-interface is ignored rather than trusted; an unreadable include fails
-loudly; a failed interface write leaves no partial file and reports an
-`emit` diagnostic. `run-header-cache.sh` covers merge order across a
-re-declared type, gensym consumption through anonymous aggregates,
-tampered-row liveness, stale-hash rejection, unreadable-include failure,
-out-of-home includes, and batch-vs-solo output parity;
+[Compiler Architecture](../docs/src/internals/architecture.md#shallow-parse-and-global-environment-discovery)
+describes the interface file, its search order, and its hash validation.
+`collect.x` installs each process cache entry once: the first walk of a file
+fixes its contribution, so a later walk of the same text in a context whose
+globs already cover its includes cannot replace a complete entry with a
+narrower one. Anonymous aggregate identities are `(gensym "<file>" N)`,
+numbered per file, so an interface is valid in any process. Warm replay is
+byte-identical to a cold walk; a stale or foreign interface is ignored; an
+unreadable include fails loudly; a failed interface write leaves no partial
+file and reports an `emit` diagnostic. `run-header-cache.sh` covers merge
+order across a re-declared type, gensym consumption through anonymous
+aggregates, tampered-row liveness, stale-hash rejection, unreadable-include
+failure, out-of-home includes, and batch-vs-solo output parity;
 `run-artifact-atomicity.sh` covers repeatable and never-partial writes.
 
 ### Error transfer state
@@ -875,9 +870,6 @@ not of the memory-bracket contract.
 
 - Avoid trivial getters, setters, and wrappers that own no invariant.  Use an
   accessor when it is the enforcement site or protects representation.
-- Reserve public `x2c_*` names for the deliberate C interface used by generated
-  code, native callers, or process-wide setup. Put ordinary public operations
-  on their owning types and make private helpers `static`.
 - Delete a protocol, macro, or adapter family when it only regenerates
   forwarding calls to an existing conversion and operation.
 - Delete dead code; Git is the archive.

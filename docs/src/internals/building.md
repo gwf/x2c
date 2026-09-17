@@ -71,16 +71,12 @@ which checks to run; see [Contributor checks](#contributor-checks).
 
 ## Unit interfaces and native bindings
 
-Each translated unit writes `<stem>.xi` beside its `.c` and `.h`: one
-`(interface 2 "path" "hash" (PARTS...) (DEFINITIONS...) (DEPENDENCIES...))`
-data form. It uses compact bare `Atom`s for its fixed set of structural
-words, case-sensitive `String` identifiers, and the same nested `List` syntax
-as `%()` x2c literals. It never emits the legal but noncanonical `<"name">`
-spelling; adding the percent prefix is the only list-syntax difference. The
-reader reads exactly one form and does not evaluate its content. A stage
-build leaves the runtime's interfaces under `builds/N/lib`, and `lib/x2c.xi`
-there is the prelude every later translation replays. These interfaces are
-untracked build output.
+Each translated unit writes a unit interface, `<stem>.xi`, beside its `.c`
+and `.h`. A stage build leaves the runtime's interfaces under `builds/N/lib`,
+and `lib/x2c.xi` there is the prelude every later translation replays. These
+interfaces are untracked build output;
+[Compiler Architecture](architecture.md#shallow-parse-and-global-environment-discovery)
+describes their contents and validation.
 
 Native `Func` bindings use canonical function `Type` `List`s, for example
 `((func (("String"))) "String")`. Structural words are lowercase `Symbol`s,

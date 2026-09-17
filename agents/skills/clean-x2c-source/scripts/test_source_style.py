@@ -121,6 +121,22 @@ class SourceStyleTest(unittest.TestCase):
         source = "void run(void) {\n  use(node.car());\n  use(node.car());\n  use(node.car());\n}\n"
         self.assertIn("repeated_accessor", categories("src/unit.x", source, "candidate"))
 
+    def test_receiver_subject_uses_type_letter(self):
+        named = ("List Compiler.parse(Compiler compiler, int depth) {\n"
+                 "  return NULL;\n}\n")
+        pointer = "static int Shared._next(const Shared *shared) => 0;\n"
+        self.assertIn("subject_parameter_name",
+                      categories("src/unit.x", named, "violation"))
+        self.assertIn("subject_parameter_name",
+                      categories("lib/unit.x", pointer, "violation"))
+
+    def test_subject_letter_may_repeat_and_other_types_pass(self):
+        source = ("List Compiler.parse(Compiler cc, int c) => NULL;\n"
+                  "Array Array.new(size_t count) => NULL;\n"
+                  "static int _free(Compiler compiler) => 0;\n")
+        self.assertNotIn("subject_parameter_name",
+                         categories("src/unit.x", source, "violation"))
+
     def test_static_output_run_is_a_review_candidate(self):
         source = 'void help(void) {\n  puts("one");\n  fputs("two\\n", stdout);\n}\n'
         self.assertIn("constant_output_run", categories("src/unit.x", source, "candidate"))

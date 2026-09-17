@@ -203,7 +203,11 @@ A file's contribution is collected once per process. Translating a unit
 also writes it beside the generated C as a unit interface, `<stem>.xi`: the
 ordered declaration maps and include placeholders, the source content hash,
 function definitions, and the macro, Lisp, and embedded-text files the walk
-read with their hashes. Before walking a file's source, collection looks for
+read with their hashes. The file holds one
+`(interface 2 "path" "hash" (PARTS...) (DEFINITIONS...) (DEPENDENCIES...))`
+form in `%()` List syntax, with bare Atoms for its structural words and
+Strings for identifiers; the reader reads that one form without evaluating
+it. Before walking a file's source, collection looks for
 its interface in the output directory, then in the directory that mirrors
 the file's home-relative path under the compiler's stage directory (or under
 an installed home), then in a package's `builds/`. An interface is used only

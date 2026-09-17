@@ -26,7 +26,7 @@ Prefer:
 // The artifact may be absent, but a present directory is not a readable
 // source file and must fail before its declarations are cached.
 if (!_includable_file(path))
-  compiler.report_error(<input>, "unreadable include", token, %( $path ));
+  c.report_error(<input>, "unreadable include", token, %($path));
 ```
 
 Avoid:
@@ -35,7 +35,7 @@ Avoid:
 // Check if the path is a regular file.
 if (!_regular_file(path))
   // Report an error.
-  compiler.report_error(<input>, "unreadable include", token, %( $path ));
+  c.report_error(<input>, "unreadable include", token, %($path));
 ```
 
 The preferred comment changes how the reader interprets the branch. The
@@ -44,124 +44,27 @@ avoided comments merely translate the code into English.
 ## Delete before rearranging
 
 A cleanup starts by asking what current x2c syntax, library behavior, or
-existing owner makes unnecessary. Formatting a redundant path leaves the
-redundancy in place.
+existing owner makes a wrapper, route, check, protocol, alias, or
+representation unnecessary. Formatting a redundant path leaves the redundancy
+in place. [The bloat test](x2c-philosophy.md#the-bloat-test) describes what a
+deletion must preserve and how to measure its result.
 
-Prefer changes that delete a complete thing:
+## Prose
 
-- call the existing operation directly instead of keeping a wrapper that only
-  forwards its arguments;
-- use a receiver method, supported conversion, type test, literal, pattern,
-  or protocol default instead of reproducing its lowering by hand;
-- remove a private protocol or adapter family when it only regenerates calls
-  to an existing conversion and method;
-- remove checks after operations whose verified failure cannot return, while
-  preserving documented absence, status, input, I/O, and callback checks;
-- remove telemetry, aliases, compatibility surfaces, and private types only
-  when their information or behavior also disappears.
+Write comments, guides, plans, diagnostics, and commit messages as literal
+statements. Put the fact first and give the owner, constraint, action, or
+consequence. Leave out metaphors, preambles such as "it is important to
+note", persuasion such as "clearly" or "simply", and praise such as "robust".
+Give agency only to actors: a type, table, or check does not "name", "know",
+or "refuse" anything. Avoid negative-then-reversal constructions, "rather
+than" and ", not X" closers, and the words "deliberately", "honest", and "on
+purpose".
+[`audit-source.sh`](skills/clean-x2c-source/scripts/audit-source.sh) reports
+common stock phrases in a source file as prohibited prose candidates.
 
-Do not replace the deleted code with a mode enum, callback, macro, registry,
-generic helper, or parallel representation unless the complete replacement is
-smaller and easier to verify in the current tree. Similar loops may have
-different accepted inputs, results, identity behavior, or hot-path costs. It
-is correct to leave them separate when sharing only their control shape would
-hide those differences.
-
-Source line count is evidence, not the result. Inspect generated C when a
-protocol or macro is involved: deleting a few source rows can remove many
-generated functions. Measure a hot path before keeping a shorter source form.
-A cleanup score may remain unchanged when the reported code carries distinct
-behavior.
-
-## Prose lexicon: words and patterns to avoid
-
-These phrases are removed from project prose except when quoted as examples
-in this section. Replace them with the exact owner, constraint, action, or
-consequence.
-
-1. **"load-bearing" and "load bearing"**
-
-   This is a vague AI-associated metaphor. Name what depends on the rule.
-
-   Avoid:
-
-   > The ordering is load-bearing.
-
-   Prefer:
-
-   > Lower-bound lookup requires encoded order.
-
-   Other useful replacements include "required for bootstrap compatibility",
-   "part of the public ABI", and "verified by the stage comparison", provided
-   that the replacement is true.
-
-2. **"it is important to note", "note that", and "keep in mind"**
-
-   Delete the preamble and state the fact.
-
-   Avoid:
-
-   > It is important to note that empty String is native zero.
-
-   Prefer:
-
-   > Empty String is native zero.
-
-3. **"in order to" and "serves to"**
-
-   Prefer "to" or the direct verb.
-
-   Avoid:
-
-   > The transform serves to normalize arguments in order to emit C.
-
-   Prefer:
-
-   > The transform normalizes arguments before C emission.
-
-4. **"leverage" and "utilize" when they mean "use"**
-
-   Prefer the shorter word. Keep the specialized meaning only when the prose
-   actually describes leverage or utilization as a measured property.
-
-5. **Vague praise such as "robust", "powerful", "seamless",
-   "comprehensive", and "elegant"**
-
-   Replace praise with observable behavior, evidence, or nothing.
-
-   Avoid:
-
-   > The robust cache seamlessly handles every case.
-
-   Prefer:
-
-   > A stale hash rejects the cache entry.
-
-6. **"clearly", "simply", "obviously", and "just" as persuasion**
-
-   If the fact is clear, the adverb is unnecessary. If it is not clear,
-   explain the constraint.
-
-7. **"this ensures" without an explicit mechanism**
-
-   Name the owner and the resulting invariant.
-
-   Avoid:
-
-   > This ensures correct cleanup.
-
-   Prefer:
-
-   > The frame watermark limits cleanup to records registered after entry.
-
-8. **Canned narration and contrast**
-
-   Remove "as mentioned above", "we can see", "not only ... but also", and
-   repeated "not X; rather Y" constructions when a direct statement works.
-
-This list is a starting lexicon, not permission to replace one stock phrase
-with another. Prefer concrete nouns and verbs throughout comments, guides,
-plans, diagnostics, and commit prose.
+Write the language name `x2c`: lowercase `x`, digit `2`, lowercase `c`.
+Speech-to-text may replace it with the word it sounds like; correct that
+spelling wherever it appears.
 
 ## Each file has one subject
 
@@ -235,8 +138,6 @@ Keep the reader's path stable:
 
 typedef Block Widget;
 
-Widget Widget.new(void);
-
 #pragma private
 
 #include <limits.h>
@@ -251,7 +152,7 @@ The order is:
 1. module header;
 2. `#pragma once`, in a compiler or runtime module only;
 3. dependencies needed by public declarations;
-4. public types and declarations;
+4. public types;
 5. `#pragma private`;
 6. private system and repository dependencies;
 7. private representation, state, helpers, and definitions.
@@ -285,7 +186,7 @@ static int _normalize_bound(int length, int *bound) {
   // ...
 }
 
-Array Array.getslice(Array array, int start, int stop, int step) {
+Array Array.getslice(Array a, int start, int stop, int step) {
   // ...
 }
 ```
@@ -323,15 +224,10 @@ Whitespace carries hierarchy:
 Prefer:
 
 ```x2c
-static int _is_digit(int ch) {
-  return ch >= '0' && ch <= '9';
-}
+static int _is_digit(int ch) => ch >= '0' && ch <= '9';
 
-static int _is_hex(int ch) {
-  return _is_digit(ch) ||
-         (ch >= 'a' && ch <= 'f') ||
-         (ch >= 'A' && ch <= 'F');
-}
+static int _is_hex(int ch) =>
+  _is_digit(ch) || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F');
 
 // public scanning
 
@@ -343,9 +239,7 @@ int scan_number(char *text) {
 Avoid:
 
 ```x2c
-static int _is_digit(int ch) {
-  return ch >= '0' && ch <= '9';
-}
+static int _is_digit(int ch) => ch >= '0' && ch <= '9';
 
 
 
@@ -402,9 +296,7 @@ scan_prefix(input);
 scan_suffix(input, delimiter_length);
 ```
 
-Do not add more than one blank line on either side. A generated-reference
-`/**` comment remains immediately adjacent to its public definition because
-the documentation extractor requires it.
+Do not add more than one blank line on either side.
 
 Avoid stretching one thought across many consecutive line comments:
 
@@ -420,39 +312,26 @@ static VarDescriptor descriptors[] = {
 
 ### Public API documentation
 
-Public callables in generated-reference library modules and future-public
-compiler callables use `/** ... */` immediately above the definition. Public
-aliases, structs, unions, enums, and callback types use the same form
-immediately above their declaration. The first sentence must stand alone
-because it becomes the reference index summary.
-
-In `src/`, every non-static callable is future-public unless its name begins
-with `_` or contains `__`. Public type declarations appear before the first
-`#pragma private`. These comments document current behavior but do not promise
-that the provisional compiler API will remain compatible.
-
-Keep a doc comment on one physical line when its complete text fits there.
-When it needs more than one line, put `*/` on its own line. Empty lines inside
-the comment are only for readable prose or real Markdown structure; they do
-not select generator behavior. `Raises:` and `See:` start their sections by
-name, with or without an empty line before them.
+[`docs/AGENTS.md`](../docs/AGENTS.md#the-generated-api-reference) describes
+which declarations carry a `/** ... */` comment and how the generator reads
+it. The first sentence becomes the reference index summary and must
+stand alone. Keep a doc comment on one physical line when its complete text
+fits there; otherwise put `*/` on its own line.
 
 A trivial callable normally gets one line:
 
 ```x2c
-/** Returns the number of elements in `array`. */
-size_t Array.len(Array array) {
-  return Block.len(array);
-}
+/** Returns the number of elements. */
+size_t Array.len(Array a) => Block.len(a);
 ```
 
 Add prose only for behavior the signature does not carry:
 
 ```x2c
 /** Removes and returns the element at `index`, or `void` when out of range.
-    Negative indexes count from the end. On failure, `array` is unchanged.
+    Negative indexes count from the end. On failure, the Array is unchanged.
 */
-Var Array.del(Array array, int index) {
+Var Array.del(Array a, int index) {
   // ...
 }
 ```
@@ -463,14 +342,14 @@ Avoid:
 /** Deletes an element from an Array.
 
     Parameters:
-    - array: the Array
+    - a: the Array
     - index: the index
 
     Returns: the deleted element.
     Raises: nothing.
     See: Array.
 */
-Var Array.del(Array array, int index) {
+Var Array.del(Array a, int index) {
   // ...
 }
 ```
@@ -489,10 +368,6 @@ Do not repeat parameter names, types, module membership, or empty metadata.
 Do not infer guarantees from a name alone. Shared invariants belong in the
 module header, not on every method.
 
-The exact extraction, Markdown, tier, `Raises:`, `See:`, and example rules
-are in `docs/AGENTS.md`. Link that owner rather than copying its complete
-contract here.
-
 ### Internal functions and contracts
 
 An obvious helper needs no prose:
@@ -500,18 +375,14 @@ An obvious helper needs no prose:
 Prefer:
 
 ```x2c
-static int _ascii_digit(int ch) {
-  return (unsigned) (ch - '0') < 10;
-}
+static int _ascii_digit(int ch) => (unsigned) (ch - '0') < 10;
 ```
 
 Avoid:
 
 ```x2c
 // Check if a character is a digit.
-static int _ascii_digit(int ch) {
-  return (unsigned) (ch - '0') < 10;
-}
+static int _ascii_digit(int ch) => (unsigned) (ch - '0') < 10;
 ```
 
 Comment a function when the contract is narrower or stranger than its name
@@ -708,11 +579,11 @@ spans more than one line.
 Prefer:
 
 ```x2c
-static int _same_slot(Map map, Var key, Var value) =>
-  map.lookup(key).same(value);
+static int _same_slot(Map m, Var key, Var expected) =>
+  m.lookup(key).same(expected);
 
 static int MatchLower._compile_bind_and_leaf(
-  MatchLower lower, Var binder, Var leaf) {
+  MatchLower m, Var binder, Var leaf) {
   // ...
 }
 ```
@@ -725,7 +596,7 @@ two-space continuation; its terminating semicolon stays with the expression.
 Avoid:
 
 ```x2c
-static int MatchLower._compile_bind_and_leaf(MatchLower lower,
+static int MatchLower._compile_bind_and_leaf(MatchLower m,
                                              Var binder,
                                              Var leaf) {
   // ...
@@ -735,24 +606,24 @@ static int MatchLower._compile_bind_and_leaf(MatchLower lower,
 Wrap calls by semantic groups:
 
 ```x2c
-compiler.report_error(
+c.report_error(
   <protocol>, message, declaration_token,
-  %( "participant:" $participant "member:" $member ));
+  %("participant:" $participant "member:" $member));
 ```
 
 Do not align continuations to an opening parenthesis, where the indentation
 depends on a renamed callee:
 
 ```x2c
-compiler.report_error(<protocol>, message, declaration_token,
-                      %( "participant:" $participant
-                         "member:" $member ));
+c.report_error(<protocol>, message, declaration_token,
+               %("participant:" $participant
+                 "member:" $member));
 ```
 
 When an argument is itself multiline, a standalone close exposes that nesting:
 
 ```x2c
-compiler.report_error(
+c.report_error(
   <protocol>, message,
   %(
     "participant:" $participant
@@ -807,8 +678,8 @@ Use the next line when either half is long, the action needs emphasis, or a
 comment belongs between the condition and body:
 
 ```x2c
-if (compiler.peek() == <eof>)
-  compiler.report_error(<parse>, "unexpected end of input", token, NULL);
+if (c.peek() == <eof>)
+  c.report_error(<parse>, "unexpected end of input", token, NULL);
 ```
 
 Avoid braces that visually outweigh the work:
@@ -858,11 +729,11 @@ the value becomes meaningful.
 Prefer:
 
 ```x2c
-List result = compiler.parse_expression();
+List result = c.parse_expression();
 if (!result) return NULL;
 
 Type type = result.cadr();
-return compiler.convert_expression(result, type);
+return c.convert_expression(result, type);
 ```
 
 Avoid speculative declarations at the top:
@@ -871,10 +742,10 @@ Avoid speculative declarations at the top:
 List result;
 Type type;
 
-result = compiler.parse_expression();
+result = c.parse_expression();
 if (!result) return NULL;
 type = result.cadr();
-return compiler.convert_expression(result, type);
+return c.convert_expression(result, type);
 ```
 
 Combine consecutive declarations into one row when the complete row stays
@@ -900,7 +771,7 @@ pointer or other complex declarator would make the row hard to read. Never
 move declarations across an executable statement merely to form a row.
 
 ```x2c
-List result = compiler.parse_expression();
+List result = c.parse_expression();
 if (!result) return NULL;
 Type type = result.cadr();
 ```
@@ -946,12 +817,12 @@ Alignment is useful when it exposes a small, stable table:
 
 ```x2c
 switch (token.type) {
-  case <if>:       return _parse_if(compiler);
-  case <while>:    return _parse_while(compiler);
-  case <return>:   return _parse_return(compiler);
+  case <if>:       return _parse_if(c);
+  case <while>:    return _parse_while(c);
+  case <return>:   return _parse_return(c);
   case <{>: {
-    compiler.next();
-    return compiler.parse_compound_statement();
+    c.next();
+    return c.parse_compound_statement();
   }
 }
 ```
@@ -1025,42 +896,15 @@ across a nontrivial function.
 
 ### Public C names
 
-Use an `x2c_*` name only for an intentional C interface consumed by generated
-code, native callers, or process-wide runtime setup. An ordinary public x2c
-operation belongs on its owning type. A private helper is `static` and uses
-`Type._helper` or `_snake_case`; placing an `x2c_*` definition below
-`#pragma private` does not make it private.
-
-Do not rename a retained C entry merely to remove the prefix. First verify its
-generated-code and native callers. Conversely, test-only access does not make
-a runtime oracle or helper public; test the retained behavior through the real
-public operation.
+Use an `x2c_*` name only for the C interface described in
+[One owner per concern](x2c-code-organization-guide.md#one-owner-per-concern).
 
 ### Forward declarations
 
 Do not write function forward declarations in ordinary x2c source. x2c
 collects the complete unit, derives generated headers from definitions, and
 emits required external C prototypes from canonical global signatures. The
-compiler in `src/` is user-space x2c for this rule: it contains definitions,
-not a separate prototype inventory.
-
-Prefer:
-
-```x2c
-static int _is_reserved_spelling(String name) {
-  // ...
-}
-```
-
-Avoid:
-
-```x2c
-static int _is_reserved_spelling(String name);
-
-static int _is_reserved_spelling(String name) {
-  // ...
-}
-```
+compiler in `src/` is user-space x2c for this rule.
 
 Only runtime files under `lib/` have exceptions. Keep a declaration there when
 definitions must name each other through a genuinely co-recursive dependency,
@@ -1077,62 +921,38 @@ their C lowering by hand.
 
 ### Parsers read like grammars
 
-Write recursive-descent productions in the same order as the grammar they
-recognize. The function should visibly parse its left operand, test or expect
-the grammar's punctuation, recurse for a right-associative operand, and return
-the resulting List. A reader should not need to simulate a separate parsing
-machine to recover that order.
-
-Prefer:
+Write each recursive-descent production in the order of the grammar it
+recognizes: parse the left operand, test or expect the punctuation, recurse
+for a right-associative operand, and return the resulting List.
 
 ```x2c
-List Compiler.parse_conditional(Compiler compiler) {
-  List condition = _parse_binary_ops(compiler);
-  Token origin = compiler.token;
-  if (!compiler.test(<?>)) return condition;
-  List ontrue = compiler.parse_expression();
-  compiler.expect(<:>);
-  return compiler.resolve_expression(
-    %(expr () (op ? $condition $ontrue
-                  ${compiler.parse_conditional()})),
-    origin
-  );
+List Compiler.parse_conditional(Compiler c) {
+  List condition = _parse_binary_ops(c);
+  Token origin = c.token;
+  if (!c.test(<?>)) return condition;
+  List ontrue = c.parse_expression();
+  c.expect(<:>);
+  return c.resolve_expression(
+    %(expr () (op ? $condition $ontrue ${c.parse_conditional()})), origin);
 }
 ```
 
-Use one recursive function per production or reusable precedence level. Let
-the call stack express nesting, associativity, and precedence when that is
-what the grammar already says. Do not replace that structure with operand and
-operator stacks, work queues, request records, callbacks, or a generic syntax
-framework unless the grammar cannot express the required state directly.
+- Use one recursive function per production or reusable precedence level.
+  Reserve operand and operator stacks, work queues, request records, and
+  callbacks for state the grammar cannot express directly.
+- Keep token consumption and source-order scope changes in the parser. Give
+  the canonical List to the operation that owns its meaning:
+  `Compiler.resolve_expression` for expression types, conversions, protocol
+  operators, and method resolution; the declaration helpers in `src/parse.x`
+  for installation and publication.
+- Complete macro-produced Lists through those same operations. The
+  generated-syntax walk visits Lists and enters their scopes; it does not
+  replay tokens, parse generated strings, or copy typing rules.
+- Name a shared helper for the semantic action it performs. Avoid vague
+  names such as `process`, `request`, and `handle`.
 
-Keep token consumption and source-order scope changes in the parser. Once a
-production has built its canonical List, call the operation that owns its
-meaning. Expression type selection, conversions, protocol operators, method
-resolution, and result types belong in `Compiler.resolve_expression` rather
-than in each token production. Declaration installation and publication
-belong in the shared declaration helpers in `src/parse.x`.
-
-Macro substitution already produces canonical Lists. Complete those Lists
-through the same semantic operations as direct parsing; do not replay tokens,
-parse generated strings, or copy expression and declaration rules into the
-scope-aware generated-syntax walk. That walk exists to visit Lists and enter
-the scopes their source order establishes, not to become a second parser or
-type checker.
-
-An abstraction is not an improvement merely because it shortens one parser
-function. Prefer visible `test`, `expect`, and recursive calls when they make
-the language production obvious. Name a shared helper for the semantic action
-it owns, not with a vague word such as `process`, `request`, or `handle`.
-
-### Write the language name as `x2c`
-
-The language name is always written `x2c`: lowercase `x`, digit `2`,
-lowercase `c`. It is pronounced like the familiar word for a euphoric
-experience, so speech-to-text may replace the name with that word. Correct
-that transcription in source, comments, documentation, plans, commit
-messages, and identifiers. The spelled-out pronunciation and capitalized
-variants are not alternate written names.
+Later phases descend through ASTs the same way; see
+[AST patterns](replacing-manual-ast-walks-with-match.md).
 
 ### Trust supported conversions
 
@@ -1172,127 +992,54 @@ boundary the compiler cannot prove. Common legitimate sites include dynamic
 tag inspection, variadic or macro boundaries, raw C ABI code, and direct
 tests of the conversion owner.
 
-Prefer an implicit conversion wherever the compiler supports the exact source
-type, target type, and context. The compiler reports a converter call or a
-cast that repeats the crossing its destination performs as an `unnecessary
-conversion` warning, described under
-[Types and conversions](../docs/src/reference/language.md#types-and-conversions).
+The compiler reports a converter call or cast that repeats its destination's
+crossing as an `unnecessary conversion` warning; see
+[Conversions](../docs/src/reference/language.md#types-and-conversions).
 
-The same rule applies to String literals. Use an ordinary C `"..."` literal
-when a String or Var target requests its promotion, including Array elements
-and Map keys and values, and as a method receiver: `"x2c".len()`. Inside
-`%()`, nested `"..."` already selects String grammar, so write
-`"text $name"`, not `${%"text $name"}`. Keep `%"..."` when interpolation,
-multiline text, or percent-string escape decoding requires that literal form.
-
-Write Arrays and Maps as evaluated literals: `[item, count + 1]`,
-`{name: value, (key): other}`, `[]`, and `{}`. Only a bare identifier Map key
-is quoted, as an Atom; write a Symbol value as `<name>` and a computed key in
-parentheses. Keep `%[...]` and `%{...}` for quoted data, where bare names are
-Atoms and `$` inserts values. A `Var` initialized with `{}` is Null, so an
-empty Map for a `Var` destination is `%{}` or `Map.new()`.
-
-Within a List or String literal, use `$name` for a single identifier. Use
-`${expression}` for a complete expression and retain braces when an ASCII
-letter, digit, or underscore immediately follows the identifier, because that
-byte would otherwise become part of its name.
+The same rule applies to literals. Write a plain `"..."` where a String or
+Var destination, Array element, Map key or value, or method receiver requests
+the promotion. Inside `%()`, a nested `"text $name"` already interpolates.
+Elsewhere keep `%"..."` when interpolation, multiline text, or escape
+decoding requires it. Write Arrays and Maps as
+evaluated literals such as `[item, count + 1]` and `{name: value}`, and keep
+`%[...]` and `%{...}` for quoted data. See
+[Collection literals](../docs/src/guide/collections.md#array-and-map-literals)
+for the key, `{}`, and `$` insertion rules.
 
 ### Separate storage ownership from typed crossings
 
-Do not classify a `Var(T)` candidate by allocation alone. A record may remain
-in caller-owned native storage while its pointer crosses a `Var` field. When
-the stored and recovered pointer type is known, give that pointer a private
-alias, define its existing representation once, and adopt `Var(Alias)`.
-Neither the pointee nor its lifetime moves into `Var`.
-
-Keep raw `.p64` access inside the conversion owner. For a transparent pointer
-alias, use the named reverse converter explicitly when the generic
-`Var`-to-pointer conversion would otherwise win:
+A record may stay in caller-owned native storage while its pointer crosses a
+`Var` field. When the stored and recovered pointer type is known, give that
+pointer a private alias, define its conversions once, and adopt
+`Var(Alias)`. The pointee and its lifetime stay where they were. Keep raw
+`.p64` access inside the conversions, and call the named reverse converter
+when the generic `Var`-to-pointer conversion would otherwise win:
 
 ```x2c
 typedef LocalState *LocalStateRef;
 
-static inline Var LocalStateRef.var(LocalStateRef state) {
-  return (Var) { .p64 = state };
-}
-
-static inline LocalStateRef Var.localstateref(Var value) {
-  return value.p64;
-}
-
+static inline Var LocalStateRef.var(LocalStateRef l) => (Var) { .p64 = l };
+static inline LocalStateRef Var.localstateref(Var v) => v.p64;
 protocol Var(LocalStateRef);
 
-static int _next(Iter iter, Var *out) {
-  LocalStateRef state = iter.obj.localstateref();
+static int _next(Iter i, Var *out) {
+  LocalStateRef state = i.obj.localstateref();
   // ...
 }
 ```
 
-For a repeated family, keep the aliases and exact `static inline` prototypes
-visible. Generate the uniform bodies with `lib/var-adapters.xmacro`; an
-adoption row may also be generated, or kept direct when the relationship is
-useful source documentation:
+When a public parameter keeps the underlying pointer spelling, cast it to the
+alias inside the call whose prototype requests `Var`:
+`return dest.init((LocalStateRef) state, _next, 0);`. The cast selects the
+participant and the `Var` parameter inserts its forward converter, so an
+alias-typed temporary for that call adds nothing.
 
-```x2c
-static inline Var LocalStateRef.var(LocalStateRef);
-static inline LocalStateRef Var.localstateref(Var);
-
-$(import "var-adapters.xmacro")
-$var.raw.pointer(LocalStateRef, localstateref);
-
-protocol Var(LocalStateRef);
-```
-
-Shallow header-symbol collection needs the prototypes before the macro is
-expanded. The explicit `static inline` also keeps private converters out of
-the generated header. A unit macro may generate repeated adoptions after its
-converter bodies. Each expansion retains a distinct snapshot row using the
-generated declaration location together with its invocation location.
-Collection transactionally expands file-scope macros containing protocol
-rows, so importing units receive those adoptions without retaining the other
-generated declarations.
-
-For a hot crossing, inspect the generated C and run its focused benchmark.
-The adapter should preserve the existing representation and cost unless the
-change explicitly intends and measures something else.
-
-When a public parameter must keep the underlying pointer spelling, cast it to
-the private alias directly in the call whose prototype requests `Var`:
-
-```x2c
-return dest.init((LocalStateRef) state, _next, 0);
-```
-
-Do not declare an alias-typed temporary used only by that call. The cast
-selects the participant; the `Var` parameter then inserts its forward
-converter.
-
-### Spell protocol visibility by relationship
-
-Use plain adoption for a public protocol and public participant:
-
-```x2c
-protocol Base(Participant);
-```
-
-Also use the plain form when a private implementation type participates in
-the public `Var(T)` protocol:
-
-```x2c
-#pragma private
-protocol Var(LocalRecord);
-```
-
-When both the protocol and participant are private, state the fully local
-relationship explicitly:
-
-```x2c
-static protocol PrivateBase(PrivateParticipant);
-```
-
-The compiler infers local generation from any private dependency, so the last
-row would have the same linkage without `static`. The explicit spelling makes
-the private-private design visible at the adoption site.
+[Box private records through
+`Var(T)`](../docs/src/guide/idioms.md#box-private-records-through-vart) and
+[Protocols](../docs/src/guide/protocols.md#declaration-and-adoption) describe
+adoption and visibility, and
+[Adapters, macros, and decorators](adapters-macros-decorators.md) describes
+generating a repeated converter family.
 
 A protocol adoption must supply a real shared operation, default, or typed
 crossing. Do not add a protocol whose generated methods only convert the
@@ -1334,50 +1081,36 @@ the receiver's static type cannot select the callable.
 One operation gets one public surface. Do not keep a void adapter that
 merely discards a status owner's result, and do not split a result across an
 out-parameter and a status code when the sentinel cannot occur in the
-success domain — return the value and let `void` or NULL carry absence:
+success domain. Return the value and let `void` or NULL carry absence:
 
 ```x2c
 Var owned = value.clone_wide();
 if (owned is void) return void;
 ```
 
-Reserve `try_` names for genuine presence, exhaustion, or traversal
-results. Errors travel on the ambient channel; a raise site that continues
-declares its handled value inline with `$error.fallback`, which is now
-reserved for user-defined causes. Every cause in the shared table of
-`lib/error-macros.xmacro` is non-returning, so do not give one a fallback and
-do not test whether a valid allocation, growth call, `[]`, `{}`, open,
-read, write, format, or binding succeeded. Preserve checks only when the
-operation has a separate documented nullable or status result.
+Reserve `try_` names for genuine presence, exhaustion, or traversal results;
+see [Separate absence from
+data](../docs/src/guide/idioms.md#separate-absence-from-data). See the root
+[AGENTS.md](../AGENTS.md) for the Error causes that never return and the
+checks that stay.
 
 ### Closed identities
 
-Use Symbol literals for closed control vocabularies:
-
-```x2c
-Symbol disposition = Error.policy_get(code);
-if (disposition == <abort>) return;
-```
-
-Keep a numeric enum when values index storage, participate in arithmetic,
-cross an integer ABI, or rely on zero initialization. The choice is semantic,
-not cosmetic.
-
-When a closed vocabulary also needs membership, a dense index, or ordered
-iteration, declare it once as a `SymbolSet` literal instead of hand-writing
-or macro-generating a switch:
+Use Symbol literals such as `<abort>` for closed control vocabularies. Keep a
+numeric enum when values index storage, participate in arithmetic, cross an
+integer ABI, or rely on zero initialization. When the vocabulary also needs
+membership, a dense index, or ordered iteration, declare one `SymbolSet`
+literal instead of a hand-written or generated switch:
 
 ```x2c
 static const SymbolSet tags = $var.tag.symbolset();
-static TagId _tag2id(Symbol tag) { return (TagId) tags.index(tag); }
+static TagId _tag2id(Symbol tag) => (TagId) tags.index(tag);
 ```
 
-The literal compiles to a static perfect-hash table in read-only data:
-lookup allocates nothing, needs no initialization, and `index` returns the
-source-order position, `-1` when absent. Members must be compile-time literals. Do not pay two set
-lookups merely to remove a second switch: when another fact rides on the
-same identity, widen the row the index already reaches
-(`taginfo[id].kind`), not the number of lookups.
+[Ordered Symbol sets](../docs/src/guide/collections.md#ordered-symbol-sets)
+describes the literal. When another fact belongs to the same identity, add it
+to the row the index already selects, such as `taginfo[id].kind`, and keep
+one lookup.
 
 ### Literals, strings, and formatting
 
@@ -1386,7 +1119,6 @@ including empty values:
 
 ```x2c
 String text = %"";
-List items = %();
 Array values = [];
 Map index = {};
 ```
@@ -1396,31 +1128,15 @@ details:
 
 ```x2c
 String text = String.new("");
-List items = NULL;
 Array values = Array.new();
 Map index = Map.new();
 ```
 
-File-static declarations use these literals too. The compiler moves
-each runtime assignment into the unit's guarded initializer in dependency
-order, so a static `String`, `List`, `Array`, `Map`, or `Var` of those does
-not need a bare declaration with a distant `TYPE.initialize` assignment.
-Referenced objects must themselves be file-static, and a dependency cycle is
-a compile error.
+Keep `%""` for an empty String because `""` becomes a static initializer. An
+empty List is `NULL`.
 
-At a typed function-argument boundary, use a C string literal when the
-compiler promotes it efficiently to the required x2c type:
-
-```x2c
-String stem = root.rstrip("/").split("/").last();
-```
-
-Do not force an x2c String literal into the call when the target type already
-requests that promotion:
-
-```x2c
-String stem = root.rstrip(%"/").split(%"/").last();
-```
+File-static declarations use these literals too; see
+[File-static literals](../docs/src/guide/collections.md#file-static-literals).
 
 Use interpolation for ordinary construction:
 
@@ -1466,10 +1182,8 @@ Build a variable-length forward sequence with a transient Array:
 
 ```x2c
 Array statements = [];
-while (compiler.peek() != <}>)
-  statements.push(compiler.parse_statement());
-List body = statements.list();
-statements.free();
+while (c.peek() != <}>) statements.push(c.parse_statement());
+List body = statements.list_free();
 ```
 
 Use `cons` when the sequence is naturally newest-first or deliberately shares
@@ -1477,76 +1191,36 @@ a suffix. Do not prepend in one phase and make a later phase reverse it.
 
 ### Pattern matching
 
-Use a pattern when it states a structural rewrite more directly than manual
-navigation. See the [pattern-matching guide](../docs/src/guide/match.md) for
-the shared pattern vocabulary and binder scope. See
-[Replacing manual AST walks with `match`](replacing-manual-ast-walks-with-match.md)
-for the complete method used to convert connected compiler function families.
+See [AST patterns](replacing-manual-ast-walks-with-match.md) for choosing
+among a source `match`, `match_replace`, flat destructuring, and `foreach`,
+and the [pattern-matching guide](../docs/src/guide/match.md) for the pattern
+vocabulary.
 
-Prefer a source `match` statement when all of these hold:
-
-- the pattern is a static source literal;
-- success already selects a local branch or early return;
-- named captures are consumed only inside that branch; and
-- method syntax would publish a binding List only to read it immediately
-  with `assoc`.
-
-The generated arm writes successful captures into indexed storage used by
-its locals. This avoids constructing the method result's association List
-and walking it once per named capture.
-
-Keep `List.match` when the pattern is built or selected at runtime, when the
-binding List crosses the local branch or is passed to another operation, or
-when the caller needs only a boolean answer and gains nothing from direct
-capture assignment. Also keep it when a statement rewrite would duplicate
-case bodies, alter arm order, or obscure the original control flow.
-
-Do not assume the keyword is faster merely because its pattern is static.
-`List.match` can reuse the shared prepared-pattern cache, while each static
-source arm owns a prepared plan and pays its first-use cost. Cold arms and
-equal patterns repeated at different source sites may therefore favor the
-method. For a hot compiler path, retain a performance-motivated conversion
-only after paired measurement.
-
-Use explicit traversal when order, cursor state, ownership, or performance is
-the point. Pattern matching and traversal are tools, not style quotas.
-
-Before spelling a fixed List or AST shape as several `car`, `cdr`, `len`, and
-type checks, decide whether the rejected shape needs its own behavior. Use
-direct access for a shape an earlier phase guarantees. Use a source `match`
-when success selects a local branch and the existing path can handle failure.
-Do not build a validator, or a catch-all match arm, solely to give an invalid
-internal shape an earlier diagnostic.
+- Prefer a source `match` when the pattern is a static literal, success
+  selects a local branch or early return, and the captures are consumed
+  inside that branch.
+- Keep `List.match` when the pattern is built or selected at runtime, the
+  binding List leaves the branch, the caller needs only a boolean, or a
+  statement rewrite would duplicate case bodies or change arm order.
+- A static source arm owns a prepared plan and pays its first-use cost;
+  `List.match` reuses the shared prepared-pattern cache. On a hot path, keep
+  a conversion made for performance only after paired measurement.
+- Use explicit traversal when order, cursor state, ownership, or performance
+  is the point.
+- Use direct access for a shape an earlier phase guarantees. Do not add a
+  validator or catch-all arm only to give an invalid internal shape an
+  earlier diagnostic.
 
 ## Compiler code shows phase ownership
 
 Parser code preserves source order and source-established types. Transforms
 own runtime crossings and normalization. Emitters consume the normalized
-shape; they do not repair earlier phases.
-
-Prefer a comment that pins a surprising phase boundary:
-
-```x2c
-// Keep Map keys in their parsed types. Bracket lowering owns the Var crossing.
-return %(map-entry $key $value);
-```
-
-Avoid a generic phase narration:
-
-```x2c
-// Parse the key and value and return a map entry.
-return %(map-entry $key $value);
-```
-
-Use direct List literals for fixed AST nodes:
-
-```x2c
-return %(if $condition $on_true $on_false);
-```
-
-A transform helper rewrites its current node and returns the replacement. The
-fixed-point driver owns recursive processing of returned children. Do not add
-local recursive repair unless that phase contract explicitly requires it.
+shape and do not repair earlier phases. A transform helper rewrites its
+current node and returns the replacement; the fixed-point driver processes
+the returned children. Add local recursive repair only when the phase
+contract requires it. Comment a phase boundary where it would surprise a
+reader. The phases and their modules are listed under
+[Compiler organization](x2c-code-organization-guide.md#compiler-organization).
 
 ## Representation and lifetime stay visible
 
@@ -1575,41 +1249,30 @@ many places, the invariant probably lacks one clear owner.
 
 ## Review checklist
 
-Before considering a source-style change complete:
+Run [`audit-source.sh`](skills/clean-x2c-source/scripts/audit-source.sh) for
+width, whitespace, wrapping, braces, deferred initialization, forward
+declarations, negated `is` tests, narration, stock prose, and subject
+parameter names in receiver methods. Then check what it cannot:
 
 - Did the current language or an existing owner make a whole wrapper, route,
   check, protocol, alias, or representation unnecessary?
-- Does every comment add a fact the code does not already say?
-- Does prose avoid the stock words and patterns in the prose lexicon?
-- Is each shared invariant explained once, at its owner?
-- Is the module header about ownership rather than inventory or history?
-- Are public `/**` comments proportional to their callables?
-- Are plain block comments compact or spaced by at most one blank line?
-- Are section labels plain, sparse, and structurally meaningful?
-- Are declarations narrow, named for their roles, and combined with adjacent
-  declarations where the complete row fits?
-- Does each wrapped construct actually need more than the available horizontal
-  space?
-- Are wrapped signatures and calls stable under renaming?
+- Does every comment add a fact the code does not already say, with each
+  shared invariant explained once at its owner?
+- Is the module header about ownership, and are public `/**` comments
+  proportional to their callables?
+- Are section labels sparse and structurally meaningful?
+- Are declarations named for their roles and combined into rows where the
+  complete row fits?
 - Are one-use pure temporaries and hand-expanded standard predicates gone?
-- Are braces, `else`, indentation, width, and whitespace consistent?
-- Do negative type tests use `is not` rather than `!(value is Type)`?
+- Is every `else` on its own line?
 - Are `x2c_*` names limited to intentional generated-code or native C entry
   points?
-- Is the language name written `x2c`?
-- Do supported conversions rely on target types instead of explicit adapters?
-- Do native literals and receiver chains carry the intended construction?
+- Do native literals, receiver chains, and target-typed conversions carry the
+  construction?
 - Does each operation expose one status surface, with `try_` reserved for
   genuine presence or exhaustion?
-- Do closed vocabularies needing membership or a dense index use a
-  `SymbolSet` rather than a generated switch?
-- Do parser functions expose grammar order, punctuation, and recursion
-  without a second parsing machine?
-- Do source parsing and generated Lists call the same semantic operation?
-- Does the code use verified x2c syntax without assuming an unsupported
-  conversion or contract?
-- Did the edit avoid generated `lib/x2c.x` and `bootstrap/`?
-
-When a rule conflicts with a real ABI, bootstrap, phase, or representation
-constraint, preserve the constraint and state it locally. Consistency exists
-to expose the design, not to hide it.
+- Do closed vocabularies that need membership or a dense index use a
+  `SymbolSet`?
+- Do parser functions follow grammar order, and do source parsing and
+  generated Lists call the same semantic operation?
+- Is the language name written `x2c`?

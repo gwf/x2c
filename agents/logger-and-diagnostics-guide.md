@@ -175,7 +175,3 @@ which owns the structured parse error and syntax hint.
   unsupported `$()` and `@()` literal forms exit 1 with positioned parse
   diagnostics, without an assertion or signal. The braced malformed fixtures
   cover empty, missing, and mismatched delimiters.
-
-Ordinary checks never rewrite these expected artifacts. Use
-`make verify-fixtures-update` only when deliberately accepting reviewed
-compiler output changes.

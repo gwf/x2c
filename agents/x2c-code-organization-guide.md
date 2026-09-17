@@ -41,7 +41,10 @@ registry.
 Reserve non-static `x2c_*` functions for the intentional C interface used by
 generated code, native callers, or process-wide setup. Ordinary public x2c
 operations use type methods. Private helpers are `static`; an `x2c_*` spelling
-below `#pragma private` still leaks into generated headers.
+below `#pragma private` still leaks into generated headers. Verify the
+generated-code and native callers of a retained C entry before renaming it.
+Test-only access does not make a helper public; test the behavior through the
+real public operation.
 
 ## Compiler organization
 
@@ -130,7 +133,6 @@ internal-only edit.
 - Include only the public modules required by the public declarations above
   `#pragma private`.
 - Put private standard-library and sibling includes below `#pragma private`.
-- Prefer forward declarations when they preserve a clean ownership boundary.
 - Avoid compiler-to-runtime callbacks that make a runtime module aware of AST
   or code-generation details.
 - Treat generated `.c`, `.h`, dependency files, and `lib/x2c.x` as build

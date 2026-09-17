@@ -157,6 +157,32 @@ def _looks_like_declaration_prefix(prefix: str) -> bool:
     ))
 
 
+_QUALIFIERS = {"const", "volatile", "restrict", "register", "struct", "union",
+               "enum"}
+
+
+def _subject_parameter(name: str, parameters: str) -> str | None:
+    """Return a message when a receiver method misnames its subject."""
+    if "." not in name:
+        return None
+    receiver = name.split(".")[0]
+    depth = 0
+    for i, ch in enumerate(parameters):
+        if ch in "([{": depth += 1
+        elif ch in ")]}": depth -= 1
+        elif ch == "," and not depth:
+            parameters = parameters[:i]
+            break
+    words = [word for word in re.findall(r"[A-Za-z_]\w*", parameters)
+             if word not in _QUALIFIERS]
+    if len(words) != 2 or words[0] != receiver:
+        return None
+    letter = next((ch.lower() for ch in receiver if ch.isalpha()), "")
+    if not letter or re.fullmatch(rf"{letter}+", words[1]):
+        return None
+    return f"name the {receiver} subject {letter} (found {words[1]})"
+
+
 def _line_has_comment(original: str) -> bool:
     return "//" in original or "/*" in original or "*/" in original
 
@@ -241,7 +267,12 @@ def analyze_text(path: str, text: str) -> list[Finding]:
 
         if brace_depth_at.get(opening, 0) == 0 and _looks_like_declaration_prefix(prefix):
             if re.match(r"\s*;", trailer): prototypes.append((name, open_line))
-            elif re.match(r"\s*(?:\{|=>)", trailer): definitions.add(name)
+            elif re.match(r"\s*(?:\{|=>)", trailer):
+                definitions.add(name)
+                message = _subject_parameter(name, masked[opening + 1:closing])
+                if message:
+                    add("violation", "subject_parameter_name", open_line,
+                        message)
 
         if open_line == close_line:
             continue
