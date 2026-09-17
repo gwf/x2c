@@ -153,7 +153,7 @@ Var Compiler.var(Compiler compiler) => (Var) { .p64 = compiler };
 /** Recovers the compiler pointer boxed by `Compiler.var`. */
 Compiler Var.compiler(Var value) => value.p64;
 
-protocol Var(Compiler);
+protocol Var(Compiler) as void *;
 #pragma private
 
 List Compiler.lift_func_expression(Compiler compiler, List expression);
