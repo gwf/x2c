@@ -34,6 +34,8 @@ static void _emit_entry(Diagnostics diag, List entry);
 
 static List _build_entry(Symbol code, Symbol severity, String message, List location, List notes);
 
+static int Diagnostics__publish(Diagnostics diag, List entry);
+
 static void _publish_limit_notice(Diagnostics diag);
 
 static void Diagnostics__warn(Diagnostics diag, Symbol code, String message, List location, List notes);
@@ -238,7 +240,16 @@ static List _build_entry(Symbol code, Symbol severity, String message, List loca
   return cons(List_var(cons(_0, cons(Symbol_var(effective_code), NULL))), cons(List_var(cons(_1, cons(Symbol_var(severity), NULL))), cons(List_var(cons(_2, cons(String_var(message), NULL))), cons(List_var(cons(_3, cons(List_var(location), NULL))), cons(List_var(cons(_4, cons(List_var(notes), NULL))), NULL)))));
 }
 
+int Array_contains(Array, Var);
+
 Var Array_push(Array, Var);
+
+static int Diagnostics__publish(Diagnostics diag, List entry){
+  if(Array_contains(diag -> entries, List_var(entry))) return 0;
+  Array_push(diag -> entries, List_var(entry));
+  _emit_entry(diag, entry);
+  return 1;
+}
 
 static void _publish_limit_notice(Diagnostics diag){
   if(diag -> limit == 1) return;
@@ -258,9 +269,8 @@ void Diagnostics_report(Diagnostics diag, Symbol code, String message, List loca
     return;
   }
   List entry = _build_entry(code, 11703268, message, location, notes);
-  Array_push(diag -> entries, List_var(entry));
+  if(! Diagnostics__publish(diag, entry)) return;
   diag -> count += 1;
-  _emit_entry(diag, entry);
   if(diag -> limit > 0 && diag -> count >= diag -> limit && ! diag -> limit_notified){
     diag -> limit_notified = 1;
     _publish_limit_notice(diag);
@@ -269,9 +279,7 @@ void Diagnostics_report(Diagnostics diag, Symbol code, String message, List loca
 }
 
 static void Diagnostics__warn(Diagnostics diag, Symbol code, String message, List location, List notes){
-  List entry = _build_entry(code, 49497918350, message, location, notes);
-  Array_push(diag -> entries, List_var(entry));
-  _emit_entry(diag, entry);
+  Diagnostics__publish(diag, _build_entry(code, 49497918350, message, location, notes));
 }
 
 List List_filter(List, Func);
@@ -480,7 +488,7 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
   List loc = _compiler_location(compiler, token);
   Diagnostics_report(diag, code, message, loc, notes);
   if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 369};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 376};
     x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));
     __builtin_unreachable();
   }
