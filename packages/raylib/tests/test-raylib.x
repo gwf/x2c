@@ -39,8 +39,7 @@ static void raylib_colors_build_from_named_components(void) {
 }
 
 static void raylib_images_draw_and_export(void) {
-  Image image = Image.new(64, 48, RAYWHITE);
-  defer image.free();
+  Image image = $auto(Image.new(64, 48, RAYWHITE));
   EXPECT_TRUE(image.valid());
 
   image.draw_rectangle_xy(8, 8, 24, 16, RED);
@@ -57,8 +56,7 @@ static void raylib_images_draw_and_export(void) {
 }
 
 static void raylib_export_raises_io_failure(void) {
-  Image image = Image.new(2, 2, BLACK);
-  defer image.free();
+  Image image = $auto(Image.new(2, 2, BLACK));
 
   int caught = 0;
   try image.export("builds/missing/output.png");
@@ -78,8 +76,7 @@ static void raylib_loads_an_image_from_disk(void) {
   written.export(path);
   written.free();
 
-  Image read = Image.load(path);
-  defer read.free();
+  Image read = $auto(Image.load(path));
   EXPECT_INT_EQ(read.width, 12);
   EXPECT_INT_EQ(read.height, 9);
   EXPECT_TRUE(read.color_at(3, 4).equal(RED));
@@ -119,48 +116,38 @@ static void raylib_measures_text_before_drawing(void) {
 }
 
 static void raylib_generates_gradients_and_noise(void) {
-  Image checker = Image.checked(8, 8, 2, 2, BLACK, WHITE);
-  defer checker.free();
+  Image checker = $auto(Image.checked(8, 8, 2, 2, BLACK, WHITE));
   EXPECT_INT_EQ(checker.width, 8);
   EXPECT_TRUE(checker.color_at(0, 0).equal(BLACK));
   EXPECT_TRUE(checker.color_at(2, 0).equal(WHITE));
 
-  Image dark = Image.white_noise(16, 16, 0.0f);
-  defer dark.free();
+  Image dark = $auto(Image.white_noise(16, 16, 0.0f));
   EXPECT_TRUE(dark.color_at(7, 7).equal(BLACK));
 
-  Image light = Image.white_noise(16, 16, 1.0f);
-  defer light.free();
+  Image light = $auto(Image.white_noise(16, 16, 1.0f));
   EXPECT_TRUE(light.color_at(7, 7).equal(WHITE));
 
-  Image linear = Image.gradient_linear(16, 16, 0, BLACK, WHITE);
-  defer linear.free();
+  Image linear = $auto(Image.gradient_linear(16, 16, 0, BLACK, WHITE));
   EXPECT_TRUE(linear.color_at(8, 15).r > linear.color_at(8, 0).r);
 
-  Image radial = Image.gradient_radial(16, 16, 0.0f, WHITE, BLACK);
-  defer radial.free();
+  Image radial = $auto(Image.gradient_radial(16, 16, 0.0f, WHITE, BLACK));
   EXPECT_TRUE(radial.color_at(8, 8).r > radial.color_at(0, 0).r);
 
-  Image perlin = Image.perlin_noise(16, 16, 0, 0, 4.0f);
-  defer perlin.free();
+  Image perlin = $auto(Image.perlin_noise(16, 16, 0, 0, 4.0f));
   EXPECT_TRUE(perlin.valid());
 
-  Image cells = Image.cellular(16, 16, 4);
-  defer cells.free();
+  Image cells = $auto(Image.cellular(16, 16, 4));
   EXPECT_TRUE(cells.valid());
 
-  Image square = Image.gradient_square(16, 16, 0.0f, WHITE, BLACK);
-  defer square.free();
+  Image square = $auto(Image.gradient_square(16, 16, 0.0f, WHITE, BLACK));
   EXPECT_TRUE(square.color_at(8, 8).r > square.color_at(0, 0).r);
 }
 
 static void raylib_pixels_read_filter_and_write_back(void) {
-  Image source = Image.new(4, 3, BLUE);
-  defer source.free();
+  Image source = $auto(Image.new(4, 3, BLUE));
   source.draw_pixel_xy(1, 1, RED);
 
-  ImagePixels pixels = source.pixels();
-  defer pixels.free();
+  ImagePixels pixels = $auto(source.pixels());
   EXPECT_INT_EQ(pixels.len(), 12);
   EXPECT_INT_EQ(pixels.width, 4);
   EXPECT_INT_EQ(pixels.height, 3);
@@ -178,8 +165,7 @@ static void raylib_pixels_read_filter_and_write_back(void) {
   }
   EXPECT_INT_EQ(changed, 10);
 
-  Image filtered = pixels.image();
-  defer filtered.free();
+  Image filtered = $auto(pixels.image());
   EXPECT_INT_EQ(filtered.width, 4);
   EXPECT_INT_EQ(filtered.height, 3);
   EXPECT_TRUE(filtered.color_at(1, 1).equal(RED));
@@ -190,10 +176,8 @@ static void raylib_pixels_read_filter_and_write_back(void) {
 }
 
 static void raylib_pixels_reject_an_index_out_of_range(void) {
-  Image image = Image.new(2, 2, BLACK);
-  defer image.free();
-  ImagePixels pixels = image.pixels();
-  defer pixels.free();
+  Image image = $auto(Image.new(2, 2, BLACK));
+  ImagePixels pixels = $auto(image.pixels());
 
   int caught = 0;
   try {
@@ -233,8 +217,7 @@ static void raylib_pixels_reject_an_index_out_of_range(void) {
 }
 
 static void raylib_image_color_rejects_coordinates_out_of_range(void) {
-  Image image = Image.new(2, 2, BLACK);
-  defer image.free();
+  Image image = $auto(Image.new(2, 2, BLACK));
 
   int caught = 0;
   try image.color_at(2, 0);
@@ -246,17 +229,13 @@ static void raylib_image_color_rejects_coordinates_out_of_range(void) {
 }
 
 static void raylib_image_mutators_update_the_owned_image(void) {
-  Image image = Image.new(5, 3, Color.rgba(200, 100, 50, 64));
-  defer image.free();
-  Image mask = Image.new(8, 4, Color.rgba(0, 0, 0, 128));
-  defer mask.free();
+  Image image = $auto(Image.new(5, 3, Color.rgba(200, 100, 50, 64)));
+  Image mask = $auto(Image.new(8, 4, Color.rgba(0, 0, 0, 128)));
 
   image.format(PIXELFORMAT_UNCOMPRESSED_R5G6B5);
   EXPECT_INT_EQ(image.color_at(0, 0).a, 255);
-  ImagePixels converted = image.pixels();
-  defer converted.free();
-  Image rgba = converted.image();
-  defer rgba.free();
+  ImagePixels converted = $auto(image.pixels());
+  Image rgba = $auto(converted.image());
   EXPECT_INT_EQ(rgba.format, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
   EXPECT_INT_EQ(rgba.color_at(0, 0).a, 255);
   image.format(PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
@@ -290,8 +269,7 @@ static void raylib_image_mutators_update_the_owned_image(void) {
 }
 
 static void raylib_released_pixels_stay_released(void) {
-  Image image = Image.new(2, 2, BLACK);
-  defer image.free();
+  Image image = $auto(Image.new(2, 2, BLACK));
   ImagePixels pixels = image.pixels();
 
   EXPECT_NULL(pixels.free());
@@ -311,8 +289,7 @@ static void raylib_released_pixels_stay_released(void) {
 }
 
 static void raylib_draws_triangles_and_polygons(void) {
-  Image image = Image.new(40, 40, WHITE);
-  defer image.free();
+  Image image = $auto(Image.new(40, 40, WHITE));
 
   image.draw_triangle(
     (Vector2) { 2, 2 }, (Vector2) { 16, 2 }, (Vector2) { 2, 16 }, RED
@@ -330,8 +307,7 @@ static void raylib_draws_triangles_and_polygons(void) {
 }
 
 static void raylib_polygons_reject_malformed_points(void) {
-  Image image = Image.new(8, 8, WHITE);
-  defer image.free();
+  Image image = $auto(Image.new(8, 8, WHITE));
 
   int caught = 0;
   try image.draw_polygon(%((1 1) (5 1)), RED);
@@ -359,8 +335,7 @@ static void raylib_polygons_reject_malformed_points(void) {
     sees is proved by examples/live-chart.x under dependency-desktop.json,
     which no gate can run. */
 static void raylib_window_owns_one_native_window(void) {
-  Image frame = Image.new(64, 48, BLUE);
-  defer frame.free();
+  Image frame = $auto(Image.new(64, 48, BLUE));
 
   RaylibWindow window = RaylibWindow.open(64, 48, "x2c window test");
   EXPECT_INT_EQ(window != NULL, 1);
@@ -377,15 +352,13 @@ static void raylib_window_owns_one_native_window(void) {
 
   window.upload(frame);
   EXPECT_TRUE(IsTextureValid(*window.native()));
-  Image replacement = Image.new(64, 48, RED);
-  defer replacement.free();
+  Image replacement = $auto(Image.new(64, 48, RED));
   window.upload(replacement);
   EXPECT_TRUE(IsTextureValid(*window.native()));
 
   for (int repeat = 0; repeat < 3; repeat++) window.present();
   window.target_fps(0);
-  Image screen = LoadImageFromScreen();
-  defer screen.free();
+  Image screen = $auto(LoadImageFromScreen());
   EXPECT_TRUE(screen.valid());
   Color center = screen.color_at(32, 24);
   // PLATFORM_MEMORY exposes its software framebuffer as BGRA on macOS.

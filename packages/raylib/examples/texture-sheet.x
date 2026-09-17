@@ -15,9 +15,7 @@ static int knockout_cut = 96;
 static Color ink = { 42, 48, 62, 255 };
 static Color edge = { 206, 214, 229, 255 };
 
-static String _tile_path(int index) {
-  return %"builds/tile-$index.png";
-}
+static String _tile_path(int index) => %"builds/tile-$index.png";
 
 /* Write one generated tile out and release it in the same breath. */
 static void _publish(Image tile, int index) {
@@ -79,8 +77,7 @@ int main(void) {
   );
   _publish(Image.perlin_noise(tile_size, tile_size, 128, 128, 6.0f), 3);
 
-  Image sheet = Image.new(900, 600, Color.rgb(247, 248, 252));
-  defer sheet.free();
+  Image sheet = $auto(Image.new(900, 600, Color.rgb(247, 248, 252)));
   sheet.draw_text("Procedural texture tiles", 36, 30, 32, ink);
   sheet.draw_text(
     "generated, written to builds/, and read back from disk",
@@ -100,8 +97,7 @@ int main(void) {
   /* Read the noise tile back as x2c values, make its dark pixels
      transparent, and rebuild an image from the result. */
   Image noise = Image.load(_tile_path(3));
-  ImagePixels pixels = noise.pixels();
-  defer pixels.free();
+  ImagePixels pixels = $auto(noise.pixels());
   noise.free();
 
   int cleared = 0;
@@ -112,12 +108,10 @@ int main(void) {
     cleared++;
   }
 
-  Image backdrop = Image.checked(
+  Image backdrop = $auto(Image.checked(
     32, 32, 4, 4, Color.rgb(202, 212, 228), Color.rgb(248, 250, 253)
-  );
-  defer backdrop.free();
-  Image knockout = pixels.image();
-  defer knockout.free();
+  ));
+  Image knockout = $auto(pixels.image());
 
   // The backdrop only exists so the transparent pixels read as transparent.
   Rectangle whole = { 0, 0, 32, 32 }, panel = { 36, 330, 220, 220 };

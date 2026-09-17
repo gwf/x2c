@@ -74,9 +74,7 @@ inline float Vector2.len(Vector2 vector) {
   return sqrtf(vector.x * vector.x + vector.y * vector.y);
 }
 
-inline float Vector2.distance(Vector2 a, Vector2 b) {
-  return (a - b).len();
-}
+inline float Vector2.distance(Vector2 a, Vector2 b) => (a - b).len();
 
 inline Vector2 Vector2.normalize(Vector2 vector) {
   float length = vector.len();
@@ -460,7 +458,7 @@ static String _raylib_trace_detail(void) {
 static void _raylib_renderer(void) {
   if (_raylib_renderer_started) return;
   _raylib_trace_reset();
-  if (!IsWindowReady()) InitWindow(1, 1, %"x2c raylib");
+  if (!IsWindowReady()) InitWindow(1, 1, "x2c raylib");
   if (!IsWindowReady()) {
     String message = _raylib_trace_detail();
     raise %(init-fail (library "raylib") (operation "InitWindow")
