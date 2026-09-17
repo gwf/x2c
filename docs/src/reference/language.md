@@ -2717,9 +2717,10 @@ and inside compound statements. This includes a trailing directive before
 `do`, `switch (...)`, `defer`, `try`, `catch ...:`, `finally`, a match arm's
 `:`, or a statement macro such as `foreach` and the statement it governs; and
 a directive before the `else`, do-while `while`, `catch`, or `finally` that
-continues a statement. A conditional group opened there governs its later
-arms and closing directive as well, so `foreach` keeps the whole group inside
-its loop. Directives between match arms stay between those arms, so an arm
+continues a statement. A conditional group opened there also takes the
+statement of each later arm and the closing directive, so `foreach` keeps a
+group of one statement per arm inside its loop. A later statement in the same
+arm follows the governed statement, as in C. Directives between match arms stay between those arms, so an arm
 inside a conditional group is present exactly when C compiles the branch that
 holds it.
 

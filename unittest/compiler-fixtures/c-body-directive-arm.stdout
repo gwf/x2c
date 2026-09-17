@@ -1,0 +1,5 @@
+if a=0
+for a=3 b=1
+foreach a=9 b=2
+else a=2 do n=3
+deferred a=2

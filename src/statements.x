@@ -42,12 +42,29 @@ static int _take_directives(Compiler c, Array items) {
   return depth;
 }
 
+/* `<branch>` when the directives `run` begin a later arm of a conditional
+   group open before them, `<close>` when they close one, or 0 when the next
+   statement is in the same arm. */
+static Symbol _arm_end(List run) {
+  int level = 0;
+  Symbol end = 0;
+  foreach (List directive, run) {
+    Symbol kind = preproc_conditional_kind(directive.cadr());
+    if (kind == <open>) level++;
+    else if (kind && level) level -= kind == <close>;
+    else if (kind) end = kind;
+  }
+  return end;
+}
+
 /** Parses the statement a control keyword or statement macro governs, or a
     block item at `AST_BLOCK`. Directives written before it stay in front of
     it in a `(group DIRECTIVE... STATEMENT)`, which emits without braces, so
     each directive stays where C read it. A conditional group they open also
-    takes its later arms and closing directive, so a statement macro that
-    wraps its body in braces keeps the whole group inside them.
+    takes the statement of each later arm and the closing directive, so a
+    statement macro that wraps its body in braces keeps the whole group
+    inside them. A later statement in the same arm follows the governed one,
+    as in C.
 */
 List Compiler.parse_governed(Compiler c, AstPos position) {
   Array items = [];
@@ -66,9 +83,13 @@ List Compiler.parse_governed(Compiler c, AstPos position) {
         pending = 0;
       }
     if (depth <= 0) break;
+    Symbol end = _arm_end(c.leading_preproc());
+    if (!end) break;
     depth += _take_directives(c, items);
     c.directives_taken = c.token;
-    if (depth <= 0 || c.peek(0) == <"}"> || c.peek(0) == <eof>) break;
+    if (depth <= 0 || end == <close> || c.peek(0) == <"}"> ||
+        c.peek(0) == <eof>)
+      break;
   }
   return items.len() == 1 ? items[0] : %(group @{items.list_free()});
 }
