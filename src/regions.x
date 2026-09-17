@@ -520,6 +520,15 @@ static void _scan(Walk w, Var value, int deferred) {
   }
 }
 
+/* A free ends its local for the statements that follow it on the same path.
+   Where that path ends, nothing it freed is known to be freed any more. */
+static void _revive(Walk w) {
+  foreach (Var known, w.facts.iter()) {
+    Fact fact = known;
+    fact.dead = 0;
+  }
+}
+
 /* `fact` receives `value`, declared or stored as `type`. A store of a
    region-born local into a local declared outside that region reports
    once, and the receiving local does not carry the region further. */
@@ -538,6 +547,10 @@ static void _assign(Walk w, Fact fact, Var value, Type type, int store) {
   fact.dead = 0;
   fact.points = NULL;
   fact.place = NULL;
+  /* A Scope local that is assigned again names other storage, whose end has
+     not been seen, so the region its previous value formed is not the one
+     the next allocation belongs to. */
+  fact.owner = NULL;
   if (place is not void) {
     int through = 0;
     fact.points = _fact_of(w, place, NULL);
@@ -704,7 +717,12 @@ static void _walk(Walk w, Var node) {
     case %(return ?type ?result): {
       _scan(w, result, 0);
       _flow(w, result, type, <return>, NULL);
+      _revive(w);
     }
+    /* A jump leaves the statements after it to another path, and a label is
+       where that path arrives, so neither carries forward what the path
+       before it freed. */
+    case %((!or goto label) *): _revive(w);
     case %(stmnt ?expression): {
       List arguments = NULL;
       String callee = _callee_of(expression, &arguments);

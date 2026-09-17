@@ -81,6 +81,36 @@ static int early_release(int stop) {
   return 1;
 }
 
+// The error path frees the array the fall-through already freed and left.
+static int goto_cleanup(int fail) {
+  Array a = [];
+  if (fail) goto failed;
+  a.free();
+  return 0;
+failed:
+  a.free();
+  return -1;
+}
+
+// A destroyed Scope local names other storage once it is assigned again.
+static int reused_slot(void) {
+  Scope s = NULL;
+  Array held = NULL;
+  Scope.push(&s);
+  char *first = Scope.malloc(8);
+  first[0] = 'x';
+  Scope.pop();
+  Scope.destroy(s);
+  s = Scope.new();
+  Scope.push(&s);
+  Array b = [];
+  Scope.pop();
+  held = b;
+  int size = (int) held.len();
+  Scope.destroy(s);
+  return size;
+}
+
 int main(void) {
   Scope keep = NULL;
   Scope.push(&keep);
@@ -89,5 +119,5 @@ int main(void) {
   return moved_out(&keep) != NULL && canonical_result() != NULL &&
          caller_owned() != NULL && auto_local() == 1 &&
          named_close() != NULL && freed_then_cleared() &&
-         early_release(0);
+         early_release(0) && !goto_cleanup(0) && reused_slot() == 0;
 }
