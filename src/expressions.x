@@ -172,8 +172,8 @@ static List _parse_postfix_index(Compiler c, List expr) {
 static void _note_explicit_converter(
   Compiler c, List call, String method, Token origin) {
   Type result = call.cadr();
-  List node = _expression_node(call);
-  if (!result.match(%(?)) || !node.match(%(call ? (args ?)))) return;
+  if (!result.match(%(?)) || !call.match(%(expr ? (call ? (args ?)))))
+    return;
   String spelled = result.car().str().lower();
   if (method != spelled && (method != "str" || result !== %("String")))
     return;
@@ -993,30 +993,14 @@ static void _note_fresh_callee(Compiler compiler, List binding) {
   compiler.protocol_helpers[%"fresh-callee $identity"] = 1;
 }
 
-static List _expression_node(List expression) {
-  if (!expression) return NULL;
-  List body = expression.cdr().cdr();
-  if (!body || body.car() is not <list>) return NULL;
-  return body.car();
-}
-
-static List _call_binding(List node) {
-  if (!node || node.car() != <call> || node.cadr() is not <list>) return NULL;
-  List callee = node.cadr(), inner = _expression_node(callee);
-  if (!inner || inner.car() != <ident> || inner.cadr() is not <list>)
-    return NULL;
-  return inner.cadr();
-}
-
-static int _is_operator_temporary(Compiler compiler, List expression) {
-  List node = _expression_node(expression);
-  if (!node) return 0;
-  if (node.car() == <parens>)
-    return _is_operator_temporary(compiler, node.cadr());
-  List binding = _call_binding(node);
-  if (!binding) return 0;
-  long identity = (long) binding;
-  return compiler.protocol_helpers.contains(%"fresh-callee $identity");
+static int _is_operator_temporary(Compiler c, List expression) {
+  match (expression) {
+    case %(expr ? (parens ?inner)): return _is_operator_temporary(c, inner);
+    case %(expr ? (call (expr ? (ident (!set ?binding (*)))) *)):
+      return c.protocol_helpers.contains(
+        %"fresh-callee ${(long) binding.list()}");
+  }
+  return 0;
 }
 
 static List Compiler._protocol_operator_expression(
@@ -1277,16 +1261,11 @@ static List _resolve_call_arguments(
    through a helper that discards that temporary once the call returns. */
 static List _discarding_callee(
   Compiler compiler, List callee, Type callee_type, List arguments) {
-  if (!callee_type || callee_type.car() is not <list> ||
-      callee_type.car().car() != <func>)
-    return callee;
-  List body = callee.cdr().cdr();
-  if (!body || body.car() is not <list>) return callee;
-  List ident = body.car();
-  if (ident.car() != <ident> || ident.cadr() is not <list>) return callee;
-  List binding = ident.cadr();
-  long identity = (long) binding;
-  if (compiler.protocol_helpers.contains(%"discard-helper $identity"))
+  List binding = NULL;
+  match (callee) case %(expr ? (ident (!set ?bound (*)))): binding = bound;
+  if (!binding || !callee_type.match(%((func *) *)) ||
+      compiler.protocol_helpers.contains(
+        %"discard-helper ${(long) binding}"))
     return callee;
   int which = 0, index = 0;
   foreach (Var argument, arguments) {
@@ -1480,7 +1459,7 @@ static void _check_noted_converter(
   if (target.declared() != target.canonicalize() ||
       !List.equal(c.sym.resolve_key(call.cadr()), c.sym.resolve_key(target)))
     return;
-  List receiver = _expression_node(call).caddr().cadr();
+  List receiver = call.caddr().caddr().cadr();
   Type source = receiver.cadr();
   if (!source) return;
   int source_is_var = c.sym.is_var_type(source);
@@ -2603,8 +2582,8 @@ static List _converted_temporary(
   Compiler compiler, List call, Type owner, Type target) {
   if (compiler.sym.resolve_numeric_type(owner) &&
       compiler.resolve_protocol_member(target, "discard")) {
-    List binding = _call_binding(_expression_node(call));
-    if (binding) _note_fresh_callee(compiler, binding);
+    match (call) case %(expr ? (call (expr ? (ident (!set ?binding (*)))) *)):
+      _note_fresh_callee(compiler, binding);
   }
   return call;
 }
