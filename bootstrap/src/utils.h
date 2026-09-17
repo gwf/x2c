@@ -36,17 +36,17 @@ String x2c_stage_dir(void);
 
 String x2c_find_program(String name);
 
-void x2c_driver_error(const char * message);
+_Noreturn void x2c_driver_error(const char * message);
 
 void x2c_host_error(List detail);
 
 int file_lock(Path p, int wait);
 
-void file_publish(Path p, String text);
+void file_publish(List outputs);
 
 long worker_fork(void);
 
-void worker_exit(int status);
+_Noreturn void worker_exit(int status);
 
 int worker_wait_any(long * pids, int count, int * status);
 

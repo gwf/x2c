@@ -934,8 +934,6 @@ static int _run_env(CliRequest request){
 
 Bootstrap bootstrap_materialize(CliRequest);
 
-void bootstrap_release(Bootstrap);
-
 void x2c_set_root(String);
 
 CliRequest bootstrap_build_request(CliRequest, Bootstrap, Symbol);
@@ -950,7 +948,6 @@ static int _run_bootstrap(CliRequest command){
   Bootstrap payload = bootstrap_materialize(command);
   if(payload -> complete){
     printf("x2c: native compiler is already installed at %s/bin/x2c\n", payload -> prefix);
-    bootstrap_release(payload);
     return 0;
   }
   x2c_set_root(payload -> prefix);
@@ -981,7 +978,6 @@ static int _run_bootstrap(CliRequest command){
     printf("x2c: installed native compiler at %s/bin/x2c\n", payload -> prefix);
   }
   Context_close(build);
-  bootstrap_release(payload);
   fflush(NULL);
   _Exit(result);
 }

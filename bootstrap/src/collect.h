@@ -17,7 +17,7 @@ void interface_configure(String out_dir);
 
 String interface_prelude(void);
 
-void interface_write(Compiler compiler, String path);
+String interface_text(Compiler compiler);
 
 
 #endif /* __GUARD_0xAB8728A9__ */

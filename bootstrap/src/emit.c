@@ -1783,11 +1783,16 @@ static List _flat_match_condition(Symbol head, List tags){
   return Array_list_free(condition);
 }
 
+List preproc_track_arms(List, String);
+
 Symbol Compiler_match_pattern_flat_head(Compiler, List, List, List *);
+
+Var Array_insert(Array, int, Var);
 
 static List Emitter__match_if(Emitter e, List ast, List context, int * dispatched){
   Array values = Array_new(), heads = Array_new();
-  int labelling = 1;
+  int labelling = 1, opening = 0;
+  List arms = NULL;
   {
     List rec;
     List _x2c_macro_object_12 = ast;
@@ -1796,6 +1801,12 @@ static List Emitter__match_if(Emitter e, List ast, List context, int * dispatche
     while(List_try_next(_x2c_macro_object_12, & _x2c_macro_cursor_12, & _x2c_macro_cursor_output_11)){
       rec = Var_list(_x2c_macro_cursor_output_11);
       {
+        if(Var_equal(List_car(rec), Symbol_var(35579270086))){
+          if(! List_truth(arms)) opening = Array_len(values);
+          arms = preproc_track_arms(arms, Var_string(List_cadr(rec)));
+          Array_push(values, List_var(Emitter__emit(e, rec, context)));
+          continue;
+        }
         List binders, pattern_ast, body_ast;
         List _x2c_destructure_10 = rec;
         binders = Var_list(List_getindex(_x2c_destructure_10, 0));
@@ -1826,7 +1837,7 @@ List flat_tags = NULL;
         List pattern = Emitter__emit(e, pattern_ast, context);
         List body = Emitter__emit(e, body_ast, context);
         List label = _match_arm_label(e, pattern_ast, heads, & labelling);
-        if(List_truth(label)) Array_push(values, List_var(label));
+        if(List_truth(label)) Array_insert(values, List_truth(arms) ? opening ++ : Array_len(values), List_var(label));
         if(pattern == _19) Array_push(values, List_var(cons(List_var(body), List_append(implicit_break, NULL))));
         else if(flat_head){
           List condition = _flat_match_condition(flat_head, flat_tags);
@@ -1868,8 +1879,7 @@ static List Emitter__match_cases(Emitter e, List ast, List context){
     while(List_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_12)){
       rec = Var_list(_x2c_macro_cursor_output_12);
       {
-        List binders = Var_list(List_car(rec));
-        int count = List_len(binders);
+        int count = Var_equal(List_car(rec), Symbol_var(35579270086)) ? 0 : List_len(Var_list(List_car(rec)));
         if(count > max_binders) max_binders = count;
       }
 

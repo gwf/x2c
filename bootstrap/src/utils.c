@@ -57,6 +57,7 @@ static void _prepare_repo_defaults(void);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
+  const void * _x2c_defer_capture_1;
 }
 _x2c_defer_env_0;
 
@@ -258,7 +259,7 @@ String x2c_find_program(String name){
   return NULL;
 }
 
-void x2c_driver_error(const char * message){
+_Noreturn void x2c_driver_error(const char * message){
   if(! _init_guard_) _file_init_();
   fprintf(stderr, "x2c: error: %s\n", message);
   fflush(NULL);
@@ -296,15 +297,21 @@ int file_lock(Path p, int wait){
 
 String String_printf(String, ...);
 
+int List_truth(List);
+
+List List_cddr(List);
+
 void Path_write_text(Path, String);
 
-void Path_move_to(Path, Path);
+Var List_cadr(List);
 
-void file_publish(Path p, String text){
+void File_path_error(Var, String, int);
+
+void file_publish(List outputs){
   if(! _init_guard_) _file_init_();
-  Path temporary = String_printf(String_join(NULL, cons(String_var(p), cons(String_var(_9), NULL))), (long) getpid());
+  String suffix = String_printf(_9, (long) getpid());
   {
-  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & temporary};
+  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & outputs, ._x2c_defer_capture_1 =(const void *) & suffix};
 
   X2CCleanup _x2c_defer_record_0 = {
     .fn = _x2c_defer_cleanup_0,
@@ -312,8 +319,12 @@ void file_publish(Path p, String text){
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
-    Path_write_text(temporary, text);
-    Path_move_to(temporary, p);
+    for(List rest = outputs;  List_truth(rest);  rest = List_cddr(rest)) Path_write_text(String_join(NULL, cons(String_var(Var_str(List_car(rest))), cons(String_var(suffix), NULL))), Var_string(List_cadr(rest)));
+    for(List rest = outputs;  List_truth(rest);  rest = List_cddr(rest)){
+      String target = Var_string(List_car(rest));
+      if(rename(String_join(NULL, cons(String_var(target), cons(String_var(suffix), NULL))), target)) File_path_error(Symbol_var(1219365706), target, errno);
+    }
+
   }
   x2c_cleanup_leave(& _x2c_defer_record_0);
 
@@ -372,7 +383,7 @@ long worker_fork(void){
   return pid < 0 ? - 1 :(long) pid;
 }
 
-void worker_exit(int status){
+_Noreturn void worker_exit(int status){
   if(! _init_guard_) _file_init_();
   fflush(NULL);
   _exit(status);
@@ -416,7 +427,7 @@ void Path_remove_file(Path);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  Path_remove_file((*(Path *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  for(List rest =(*(List *) _x2c_defer_data_0->_x2c_defer_capture_0);  List_truth(rest);  rest = List_cddr(rest)) Path_remove_file(String_join(NULL, cons(String_var(Var_str(List_car(rest))), cons(String_var((*(String *) _x2c_defer_data_0->_x2c_defer_capture_1)), NULL))));
 }
 
 #undef _x2c_initializer_choice_6E6B8BB0_0_expanded

@@ -8,7 +8,7 @@
 #include "x2c.h"
 #include "build.h"
 typedef struct Bootstrap{
-  String prefix, identity, lock_path;
+  String prefix, identity;
   List runtime_srcs, compiler_srcs;
   int complete;
 }
@@ -19,8 +19,6 @@ Bootstrap bootstrap_materialize(CliRequest request);
 CliRequest bootstrap_build_request(CliRequest command, Bootstrap payload, Symbol component);
 
 void bootstrap_record_install(Bootstrap b, String cc, String ar);
-
-void bootstrap_release(Bootstrap payload);
 
 
 #endif /* __GUARD_0x4EE62BAD__ */

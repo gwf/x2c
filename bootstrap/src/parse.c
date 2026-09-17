@@ -3370,6 +3370,9 @@ break; } }{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car
   if(! statement_position) goto construction_error;  Array bound = Array_new(); {
     List row;  List _x2c_macro_object_37 = Var_list(cases);  List _x2c_macro_cursor_37 = _x2c_macro_object_37;  Var _x2c_macro_cursor_output_34;  while(List_try_next(_x2c_macro_object_37, & _x2c_macro_cursor_37, & _x2c_macro_cursor_output_34)){
       row = Var_list(_x2c_macro_cursor_output_34); {
+        if(Var_equal(List_car(row), Symbol_var(35579270086))){
+          Array_push(bound, List_var(row));  continue;
+        }
         List pattern = Var_list(List_car(row));  int binds = pattern != _154;  if(binds) pattern = Compiler_resolve_expression((c), pattern, (c) -> token);  Compiler_begin_match_arm((c), pattern, (c) -> token, binds); {
           {
   _x2c_defer_env_13 _x2c_defer_env_28 = {._x2c_defer_capture_21 =(const void *) & c};

@@ -11,15 +11,15 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-static void _location(Buffer out, String path, int start, int end);
+static Map _location(String path, int start, int end);
 
-static void _diagnostics(Buffer out, Compiler compiler, Map needed);
+static Array _diagnostics(Compiler compiler, Map needed);
 
 static List _occurrence(Compiler compiler, String path, int offset);
 
-static void _query(Buffer out, Compiler compiler, String path, String kind, int offset, Map needed);
+static void _query(Map reply, Compiler compiler, String path, String kind, int offset, Map needed);
 
-static void _sources(Buffer out, Compiler compiler, Map needed);
+static Array _sources(Compiler compiler, Map needed);
 
 static CliRequest _configure(int argc, char * * argv, SourceView sources, String source);
 
@@ -33,16 +33,14 @@ __attribute__((constructor)) static void _file_init_(void){
   _1 = String_new("hover");
 }
 
-Buffer Buffer_write(Buffer, const char *);
+Var Symbol_var(Symbol);
 
-void report_json_string(Buffer, String);
+Var String_var(String);
 
-Buffer Buffer_printf(Buffer, const char *, ...);
+Var int_var(int);
 
-static void _location(Buffer out, String path, int start, int end){
-  Buffer_write(out, "\"file\":");
-  report_json_string(out, path);
-  Buffer_printf(out, ",\"start\":%d,\"end\":%d", start, end);
+static Map _location(String path, int start, int end){
+  return Map_update_n(Map_new(), 3, Symbol_var(412426), String_var(path), Symbol_var(41159848), int_var(start), Symbol_var(11144), int_var(end));
 }
 
 List Compiler_diagnostics(Compiler);
@@ -53,31 +51,22 @@ List Var_list(Var);
 
 Var List_assoc(List, Var);
 
-Var Symbol_var(Symbol);
-
 String Var_string(Var);
 
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
-Var String_var(String);
-
 int Var_is_void(Var);
-
-Var int_var(int);
-
-Buffer Buffer_write_char(Buffer, char);
 
 Path Path_absolute(Path);
 
 Var Map_setindex(Map, Var, Var);
 
-String Symbol_str(Symbol);
+Var Array_push(Array, Var);
 
-Symbol Var_symbol(Var);
+Var Map_var(Map);
 
-static void _diagnostics(Buffer out, Compiler compiler, Map needed){
-  int comma = 0;
-  Buffer_write(out, "\"diagnostics\":[");
+static Array _diagnostics(Compiler compiler, Map needed){
+  Array diagnostics = Array_new();
   {
     List entry;
     List _x2c_macro_object_0 = Compiler_diagnostics(compiler);
@@ -86,7 +75,6 @@ static void _diagnostics(Buffer out, Compiler compiler, Map needed){
     while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
       entry = Var_list(_x2c_macro_cursor_output_0);
       {
-        Symbol code = Var_symbol(List_assoc(entry, Symbol_var(227594)));
         List location = Var_list(List_assoc(entry, Symbol_var(857050729436)));
         Var source = List_assoc(location, Symbol_var(412426));
         String path = Var_string(Var_is_row(source, 11, 7, 1) ? source : String_var(compiler -> filename));
@@ -94,24 +82,19 @@ static void _diagnostics(Buffer out, Compiler compiler, Map needed){
         Var width = List_assoc(location, Symbol_var(816725264));
         int start = Var_int(Var_convert(Var_is_void(position) ? int_var(0) : position, 3453797));
         int length = Var_int(Var_convert(Var_is_void(width) ? int_var(0) : width, 3453797));
-        if(comma ++) Buffer_write_char(out, ',');
-        Buffer_write_char(out, '{');
         path = Path_absolute(path);
         Map_setindex(needed, String_var(path), int_var(1));
-        _location(out, path, start, start + length);
-        Buffer_write(out, ",\"message\":");
-        report_json_string(out, Var_string(List_assoc(entry, Symbol_var(28293925322))));
-        Buffer_write(out, ",\"code\":");
-        report_json_string(out, Symbol_str(code));
-        Buffer_write(out, ",\"severity\":");
-        report_json_string(out, Symbol_str(Var_symbol(List_assoc(entry, Symbol_var(1317895556402)))));
-        Buffer_write_char(out, '}');
+        Map diagnostic = _location(path, start, start + length);
+        Map_setindex(diagnostic, Symbol_var(28293925322), List_assoc(entry, Symbol_var(28293925322)));
+        Map_setindex(diagnostic, Symbol_var(227594), List_assoc(entry, Symbol_var(227594)));
+        Map_setindex(diagnostic, Symbol_var(1317895556402), List_assoc(entry, Symbol_var(1317895556402)));
+        Array_push(diagnostics, Map_var(diagnostic));
       }
 
     }
 
   }
-  Buffer_write_char(out, ']');
+  return diagnostics;
 }
 
 int Array_try_next(Array, int *, Var *);
@@ -162,7 +145,7 @@ char * Compiler_code_pretty_string(Compiler, List, String);
 
 List Compiler_emit(Compiler, List);
 
-static void _query(Buffer out, Compiler compiler, String path, String kind, int offset, Map needed){
+static void _query(Map reply, Compiler compiler, String path, String kind, int offset, Map needed){
   List row = _occurrence(compiler, path, offset);
   if(! List_truth(row)) return;
   List binding = Var_list(List_getindex(row, 3));
@@ -172,19 +155,14 @@ static void _query(Buffer out, Compiler compiler, String path, String kind, int 
     if(! Var_is_row(value, 9, 7, 4)) return;
     List target = Var_list(value);
     Map_setindex(needed, List_getindex(target, 0), int_var(1));
-    Buffer_write(out, ",\"definition\":{");
-    _location(out, Var_string(List_getindex(target, 0)), Var_int(Var_convert(List_getindex(target, 1), 3453797)), Var_int(Var_convert(List_getindex(target, 2), 3453797)));
-    Buffer_write_char(out, '}');
+    Map_setindex(reply, Symbol_var(292902696930268), Map_var(_location(Var_string(List_getindex(target, 0)), Var_int(Var_convert(List_getindex(target, 1), 3453797)), Var_int(Var_convert(List_getindex(target, 2), 3453797)))));
   }
   else if(String_equal(kind, _1) && List_truth(Type_list(type))){
     Map_setindex(needed, List_getindex(row, 0), int_var(1));
     List declaration = Type_declaration_ast(type, binding);
-    String text = String_new(Compiler_code_pretty_string(compiler, Compiler_emit(compiler, cons(List_var(declaration), NULL)), NULL));
-    Buffer_write(out, ",\"hover\":{");
-    _location(out, Var_string(List_getindex(row, 0)), Var_int(Var_convert(List_getindex(row, 1), 3453797)), Var_int(Var_convert(List_getindex(row, 2), 3453797)));
-    Buffer_write(out, ",\"text\":");
-    report_json_string(out, text);
-    Buffer_write_char(out, '}');
+    Map hover = _location(Var_string(List_getindex(row, 0)), Var_int(Var_convert(List_getindex(row, 1), 3453797)), Var_int(Var_convert(List_getindex(row, 2), 3453797)));
+    Map_setindex(hover, Symbol_var(1322536), String_var(String_new(Compiler_code_pretty_string(compiler, Compiler_emit(compiler, cons(List_var(declaration), NULL)), NULL))));
+    Map_setindex(reply, Symbol_var(17805668), Map_var(hover));
   }
 
 }
@@ -195,9 +173,8 @@ int Iter_try_next(Iter, Var *);
 
 int Map_try_get(Map, Var, Var *);
 
-static void _sources(Buffer out, Compiler compiler, Map needed){
-  int comma = 0;
-  Buffer_write(out, ",\"sources\":[");
+static Array _sources(Compiler compiler, Map needed){
+  Array sources = Array_new();
   {
     Var key;
     Iter _x2c_macro_iterator_2 = Map_keys(needed, &(struct Iter){
@@ -209,19 +186,13 @@ static void _sources(Buffer out, Compiler compiler, Map needed){
       key = _x2c_macro_item_2;
       {
         Var text;
-        if(! Map_try_get(compiler -> source_texts, key, & text)) continue;
-        if(comma ++) Buffer_write_char(out, ',');
-        Buffer_write(out, "{\"file\":");
-        report_json_string(out, Var_string(key));
-        Buffer_write(out, ",\"text\":");
-        report_json_string(out, Var_string(text));
-        Buffer_write_char(out, '}');
+        if(Map_try_get(compiler -> source_texts, key, & text)) Array_push(sources, Map_var(Map_update_n(Map_new(), 2, Symbol_var(412426), key, Symbol_var(1322536), text)));
       }
 
     }
 
   }
-  Buffer_write_char(out, ']');
+  return sources;
 }
 
 CliRequest cli_parse(int, char * *);
@@ -338,9 +309,9 @@ void ParsedUnit_close(ParsedUnit *);
 
 void Context_close(Context);
 
-Buffer Buffer_new(size_t);
+Var Array_var(Array);
 
-String Buffer_str_free(Buffer);
+String Var_json(Var);
 
 int editor_request(int argc, char * * argv){
   if(! _init_guard_) _file_init_();
@@ -379,16 +350,11 @@ int editor_request(int argc, char * * argv){
     Context_close(command);
     return 2;
   }
-  Buffer out = Buffer_new(0);
-  Buffer_write(out, "{\"file\":");
-  report_json_string(out, source);
-  Buffer_write_char(out, ',');
   Map needed = Map_new();
-  _diagnostics(out, unit.compiler, needed);
-  if(parsed) _query(out, unit.compiler, source, kind, offset, needed);
-  _sources(out, unit.compiler, needed);
-  Buffer_write(out, "}\n");
-  fputs(Buffer_str_free(out), result);
+  Map reply = Map_update_n(Map_new(), 2, Symbol_var(412426), String_var(source), Atom_intern(String_new("diagnostics")), Array_var(_diagnostics(unit.compiler, needed)));
+  if(parsed) _query(reply, unit.compiler, source, kind, offset, needed);
+  Map_setindex(reply, Symbol_var(41854048614), Array_var(_sources(unit.compiler, needed)));
+  fprintf(result, "%s\n", Var_json(Map_var(reply)));
   int failed = fclose(result);
   ParsedUnit_close(&(unit));
   Context_close(command);

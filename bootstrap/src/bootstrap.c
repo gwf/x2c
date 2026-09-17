@@ -12,9 +12,6 @@ static String _41, _40, _39, _38, _37, _36, _32, _23, _21, _20, _19, _18, _17, _
 
 static Var _33, _31, _28, _26, _24, _22;
 
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,13 +30,11 @@ static int _safe_path(String path);
 
 static int _marker_matches(String path, String identity);
 
-static void _acquire(Bootstrap payload);
-
 static List Bootstrap__manifest(Bootstrap b);
 
 static void Bootstrap__verify(Bootstrap b, List records, String root);
 
-static void Bootstrap__extract(Bootstrap b, List records);
+static int Bootstrap__extract(Bootstrap b, List records);
 
 static Var _x2c_lambda_0(String part);
 
@@ -67,12 +62,12 @@ __attribute__((constructor)) static void _file_init_(void){
   _2 = String_new("/");
   _3 = String_new(".");
   _4 = String_new("..");
-  _5 = String_new(".bootstrap.lock");
-  _6 = String_new("/");
-  _7 = String_new("/zip/x2c/");
-  _8 = String_new(".source.tmp.%ld");
-  _9 = String_new("/.x2c-source-id");
-  _10 = String_new("\n");
+  _5 = String_new("/");
+  _6 = String_new("/zip/x2c/");
+  _7 = String_new(".source.tmp.%ld");
+  _8 = String_new("/.x2c-source-id");
+  _9 = String_new("\n");
+  _10 = String_new("/.x2c-bootstrap.lock");
   _11 = String_new("/.x2c-bootstrap-complete");
   _12 = String_new("/bin/x2c");
   _13 = String_new("/lib/libx2c.a");
@@ -198,34 +193,6 @@ String first = String_truth(text) ? Var_string(List_car(String_split_lines(text,
 return String_truth(text) && String_equal(first, identity);
 }
 
-static void _acquire(Bootstrap payload){
-  payload -> lock_path = String_join(NULL, cons(String_var(payload -> prefix), cons(String_var(_5), NULL)));
-  for(int attempt = 0;  attempt < 2;  attempt ++){
-    int fd = open(payload -> lock_path, O_WRONLY | O_CREAT | O_EXCL, 0666);
-    if(fd >= 0){
-      char pid[40];
-      int length = snprintf(pid, sizeof(pid), "%ld\n", (long) getpid());
-      if(write(fd, pid, length) != length){
-        close(fd);
-        unlink(payload -> lock_path);
-        _error("cannot write bootstrap lock");
-      }
-      close(fd);
-      return;
-    }
-    if(errno != EEXIST) _error_path("cannot create bootstrap lock", payload -> lock_path);
-    File lock = fopen(payload -> lock_path, "r");
-    long pid = 0;
-    if(lock){
-      fscanf(lock, "%ld", & pid);
-      File_close(lock);
-    }
-    if(pid > 0 &&(kill((pid_t) pid, 0) == 0 || errno == EPERM)) _error_path("another bootstrap is in progress", payload -> prefix);
-    if(unlink(payload -> lock_path) && errno != ENOENT) _error_path("cannot recover stale bootstrap lock", payload -> lock_path);
-  }
-  _error("cannot acquire bootstrap lock");
-}
-
 int String_contains(String, String);
 
 String String_remove_prefix(String, String);
@@ -306,15 +273,15 @@ static void Bootstrap__verify(Bootstrap b, List records, String root){
         char spelling[1024], extra;
         if(sscanf(record, "%llx %zu %1023s %c", & expected_hash, & expected_size, spelling, & extra) != 3 || ! _safe_path(String_new(spelling))) _error("malformed embedded source record");
         String relative = String_new(spelling);
-        Path installed = String_join(NULL, cons(String_var(root), cons(String_var(_6), cons(String_var(relative), NULL))));
+        Path installed = String_join(NULL, cons(String_var(root), cons(String_var(_5), cons(String_var(relative), NULL))));
         if(! String_equal(root, b -> prefix)){
           Path_make_dirs(Path_dirname(installed));
-          Path_copy_file(String_join(NULL, cons(String_var(_7), cons(String_var(relative), NULL))), installed);
+          Path_copy_file(String_join(NULL, cons(String_var(_6), cons(String_var(relative), NULL))), installed);
         }
         String text = Path_read_text(installed);
         uint64_t hash = build_hash_bytes(UINT64_C(1469598103934665603), text, String_len(text));
         if(String_len(text) != expected_size || hash !=(uint64_t) expected_hash) _error_path("source failed verification", installed);
-        String source = String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_6), cons(String_var(relative), NULL))));
+        String source = String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_5), cons(String_var(relative), NULL))));
         if(String_endswith(relative, _39) && String_startswith(relative, _40)) Array_push(runtime, String_var(source));
         else if(String_endswith(relative, _39) && String_startswith(relative, _41)) Array_push(compiler, String_var(source));
       }
@@ -336,16 +303,56 @@ void Path_write_text(Path, String);
 
 void Path_move_to(Path, Path);
 
-static void Bootstrap__extract(Bootstrap b, List records){
-  Path temporary = String_printf(String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_8), NULL))), (long) getpid());
+void x2c_host_error(List);
+
+static int Bootstrap__extract(Bootstrap b, List records){
+  Path temporary = String_printf(String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_7), NULL))), (long) getpid());
   Path_remove_tree(temporary);
   Bootstrap__verify(b, records, temporary);
   if(! List_truth(b -> runtime_srcs) || ! List_truth(b -> compiler_srcs)) _error("embedded payload has no compiler or runtime sources");
-  Path_write_text(String_join(NULL, cons(String_var(temporary), cons(String_var(_9), NULL))), String_join(NULL, cons(String_var(b -> identity), cons(String_var(_10), NULL))));
-  Path_move_to(temporary, b -> prefix);
+  Path_write_text(String_join(NULL, cons(String_var(temporary), cons(String_var(_8), NULL))), String_join(NULL, cons(String_var(b -> identity), cons(String_var(_9), NULL))));
+  int volatile published = 1;
+  {
+    ExceptionFrame _x2c_exception_frame_2;
+    static MatchCaptureSite _x2c_catch_arms_2[1];
+    static ErrorCatchSite _x2c_catch_site_2 = {  _x2c_catch_arms_2, -1, 1, ERROR_CATCH_PENDING, -1 };
+    Var _x2c_catch_patterns_2[1];
+    if (x2c_error_catch_site_pending(&_x2c_catch_site_2)) {List _x2c_catch_pattern_2 = cons(Symbol_var(20399393368), cons(Symbol_var(58262293080), NULL));
+    _x2c_catch_patterns_2[0] = List_var(_x2c_catch_pattern_2);
+  }
+  ErrorHandler volatile _x2c_error_handler_2 = x2c_error_catch_site_push(&_x2c_exception_frame_2, &_x2c_catch_site_2, _x2c_catch_patterns_2);  x2c_exception_push(& _x2c_exception_frame_2);  if (!sigsetjmp(_x2c_exception_frame_2.env, 0)) Path_move_to(temporary, b -> prefix);  else {x2c_exception_landed(& _x2c_exception_frame_2); {
+    if (x2c_exception_is_error_target(&_x2c_exception_frame_2)){
+      x2c_error_catch_detach(_x2c_error_handler_2);
+      x2c_exception_mark_handled(&_x2c_exception_frame_2);
+       {List detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_2, 0));
+      {
+        if(! Path_exists(b -> prefix)) x2c_host_error(detail);
+        published = 0;
+      }
+
+    }
+
+  }
+  else{
+    x2c_error_catch_close(_x2c_error_handler_2);
+    _x2c_error_handler_2 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_2);
+    __builtin_unreachable();
+  }
+
+}
+}
+x2c_error_catch_close(_x2c_error_handler_2);
+_x2c_error_handler_2 = NULL;
+x2c_exception_leave(& _x2c_exception_frame_2);
+}
+Path_remove_tree(temporary);
+return published;
 }
 
 void * Scope_calloc(size_t, size_t);
+
+int file_lock(Path, int);
 
 int Path_is_executable(Path);
 
@@ -356,13 +363,11 @@ Bootstrap bootstrap_materialize(CliRequest request){
   Bootstrap b = Scope_calloc(1, sizeof(struct Bootstrap));
   b -> prefix = _prefix(request -> prefix);
   List records = Bootstrap__manifest(b);
-  _acquire(b);
-  if(! Path_exists(b -> prefix)) Bootstrap__extract(b, records);
-  else if(_marker_matches(String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_9), NULL))), b -> identity)) Bootstrap__verify(b, records, b -> prefix);
-  else{
-    bootstrap_release(b);
-    _error_path("prefix exists but does not contain this source payload", b -> prefix);
+  if(Path_exists(b -> prefix) || ! Bootstrap__extract(b, records)){
+    if(! _marker_matches(String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_8), NULL))), b -> identity)) _error_path("prefix exists but does not contain this source payload", b -> prefix);
+    Bootstrap__verify(b, records, b -> prefix);
   }
+  if(file_lock(String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_10), NULL))), 0) < 0) _error_path("another bootstrap is in progress", b -> prefix);
   b -> complete = _marker_matches(String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_11), NULL))), b -> identity) && Path_is_executable(String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_12), NULL)))) && Path_is_file(String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_13), NULL))));
   Path_make_dirs(String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_14), NULL))));
   Path_make_dirs(String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_15), NULL))));
@@ -394,15 +399,8 @@ void bootstrap_record_install(Bootstrap b, String cc, String ar){
   if(! _init_guard_) _file_init_();
   Path directory = String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_18), NULL)));
   Path_make_dirs(directory);
-  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_19), NULL))), String_join(NULL, cons(String_var(_20), cons(String_var(cc), cons(String_var(_21), cons(String_var(ar), cons(String_var(_10), NULL)))))));
-  Path_write_text(String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_11), NULL))), String_join(NULL, cons(String_var(b -> identity), cons(String_var(_10), NULL))));
-}
-
-void bootstrap_release(Bootstrap payload){
-  if(! _init_guard_) _file_init_();
-  if(! payload || ! String_truth(payload -> lock_path)) return;
-  unlink(payload -> lock_path);
-  payload -> lock_path = NULL;
+  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_19), NULL))), String_join(NULL, cons(String_var(_20), cons(String_var(cc), cons(String_var(_21), cons(String_var(ar), cons(String_var(_9), NULL)))))));
+  Path_write_text(String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_11), NULL))), String_join(NULL, cons(String_var(b -> identity), cons(String_var(_9), NULL))));
 }
 
 Var int_var(int);

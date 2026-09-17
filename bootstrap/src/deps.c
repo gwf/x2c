@@ -237,7 +237,7 @@ static String _contents(CliRequest request, Compiler compiler, String input, Str
 
 int CliRequest_inspects(CliRequest);
 
-void file_publish(Path, String);
+void file_publish(List);
 
 Var Symbol_var(Symbol);
 
@@ -259,7 +259,7 @@ int translation_depfile_write(CliRequest request, Compiler compiler, String inpu
     _x2c_catch_patterns_0[1] = List_var(_x2c_catch_pattern_1);
   }
   ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-    file_publish(path, _contents(request, compiler, input, output_dir)); {
+    file_publish(cons(String_var(path), cons(String_var(_contents(request, compiler, input, output_dir)), NULL))); {
       int _x2c_return_value_1 = 1; {
         x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);  return _x2c_return_value_1;
       }

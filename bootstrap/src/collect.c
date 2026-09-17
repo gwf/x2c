@@ -28,7 +28,7 @@
 
 static List _95, _94, _92, _88, _87, _86, _85, _84, _83, _82, _81, _79, _78, _77, _76, _48, _47, _46, _45, _40, _38, _37, _35, _23, _22, _21, _12;
 
-static String _103, _102, _101, _100, _99, _98, _97, _96, _56, _55, _54, _53, _52, _51, _50, _49, _30, _29, _28, _27, _26, _25, _24, _17, _16, _15, _14, _13, _9, _8, _7, _6, _4, _3, _2, _1, _0;
+static String _101, _100, _99, _98, _97, _96, _56, _55, _54, _53, _52, _51, _50, _49, _30, _29, _28, _27, _26, _25, _24, _17, _16, _15, _14, _13, _9, _8, _7, _6, _4, _3, _2, _1, _0;
 
 static Var _91, _89, _80, _67, _65, _63, _61, _59, _58, _57, _44, _41, _39, _36, _34, _31, _20, _19, _18, _11, _10, _5;
 
@@ -263,14 +263,12 @@ __attribute__((constructor)) static void _file_init_(void){
   _92 = cons(_91, NULL);
   _94 = cons(_89, _46);
   _95 = cons(_39, _94);
-  _96 = String_new("file: ");
-  _97 = String_new("reason: ");
-  _98 = String_new("\n");
-  _99 = String_new(".");
-  _100 = String_new("/");
-  _101 = String_new("cannot read include");
-  _102 = String_new("cannot read runtime source");
-  _103 = String_new("failed to write interface file");
+  _96 = String_new("\n");
+  _97 = String_new(".");
+  _98 = String_new("/");
+  _99 = String_new("cannot read include");
+  _100 = String_new("cannot read runtime source");
+  _101 = String_new("failed to write interface file");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -284,7 +282,7 @@ int String_contains(String, String);
 static int _starts_line(Token first, Token token){
   while(token -- > first){
     if(token -> type != 40896714 && token -> type != 7477210024) return 0;
-    if(String_contains(token -> text, _98)) return 1;
+    if(String_contains(token -> text, _96)) return 1;
   }
   return 1;
 }
@@ -321,7 +319,7 @@ static String _canonical_src(void){
 
 static String _canonical_cwd(void){
   static char cache[PATH_MAX];
-  return _cached_canonical(cache, _99);
+  return _cached_canonical(cache, _97);
 }
 
 int String_startswith(String, String);
@@ -344,7 +342,7 @@ int String_equal(String, String);
 
 static String _resolve_include_dirs(SourceView sources, List extra_dirs, String includer_dir, String target, int angle, int * covered){
   * covered = 0;
-  if(String_startswith(target, _100)) return SourceView_exists(sources, target) ? target : NULL;
+  if(String_startswith(target, _98)) return SourceView_exists(sources, target) ? target : NULL;
   String lib_dir = _canonical_lib(), include_dir = _canonical_include();
   Array dirs = Array_new();
   if(! angle && String_truth(includer_dir)) Array_push(dirs, String_var(_canonical_path(includer_dir)));
@@ -583,7 +581,7 @@ void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
 static String _include_text(Compiler c, String target, String path){
   String text = NULL;
-  if(! Compiler_read_source(c, path, & text)) Compiler_report_error(c, 306819428, _101, c -> token, cons(_5, cons(String_var(String_join(NULL, cons(String_var(_6), cons(String_var(target), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(path), NULL)))), NULL))));
+  if(! Compiler_read_source(c, path, & text)) Compiler_report_error(c, 306819428, _99, c -> token, cons(_5, cons(String_var(String_join(NULL, cons(String_var(_6), cons(String_var(target), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(path), NULL)))), NULL))));
   return text;
 }
 
@@ -866,7 +864,7 @@ static void _file(Compiler c, String path, String text, String dir, Map globs, M
 
 static String _runtime_text(Compiler c, String runtime){
   String text = NULL;
-  if(! Compiler_read_source(c, runtime, & text)) Compiler_report_error(c, 306819428, _102, c -> token, cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(runtime), NULL)))), NULL));
+  if(! Compiler_read_source(c, runtime, & text)) Compiler_report_error(c, 306819428, _100, c -> token, cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(runtime), NULL)))), NULL));
   return text;
 }
 
@@ -987,7 +985,7 @@ static void _package_merge(Compiler compiler, String name, String root, String p
           continue;
         }
         if(! foreign) continue;
-        String unit = Var_string(List_last(String_split(path, _100)));
+        String unit = Var_string(List_last(String_split(path, _98)));
         String fix = String_join(NULL, cons(String_var(_25), cons(String_var(name), cons(String_var(_26), NULL))));
         Compiler_report_error(compiler, 306819428, String_join(NULL, cons(String_var(_27), cons(String_var(name), cons(String_var(_28), cons(String_var(spelling), cons(String_var(_29), NULL)))))), token, cons(String_var(String_join(NULL, cons(String_var(_29), cons(String_var(unit), cons(String_var(_30), cons(String_var(fix), NULL)))))), NULL));
       }
@@ -1595,19 +1593,13 @@ static int _write_interface_entry(Buffer out, String canonical, List entry){
 
 Buffer Buffer_new(size_t);
 
-void file_publish(Path, String);
-
 String Buffer_str(Buffer);
 
-Var List_assoc(List, Var);
-
-String String_new(const char *);
-
-void interface_write(Compiler compiler, String path){
+String interface_text(Compiler compiler){
   if(! _init_guard_) _file_init_();
   String canonical = _canonical_path(compiler -> filename);
   Var cached = Map_getindex(_process_cache(), String_var(canonical));
-  if(Var_is_void(cached)) return;
+  if(Var_is_void(cached)) return NULL;
   Buffer out = Buffer_new(0);
   {
   _x2c_defer_env_3 _x2c_defer_env_7 = {._x2c_defer_capture_6 =(const void *) & out};
@@ -1618,56 +1610,18 @@ void interface_write(Compiler compiler, String path){
   };
   x2c_cleanup_push(&_x2c_defer_record_3);
   {
-    long volatile error = 0;
-    if(_write_interface_entry(out, canonical, Var_list(cached))){
+    if(! _write_interface_entry(out, canonical, Var_list(cached))) Compiler_report_error(compiler, 354920, _101, NULL, NULL);
+    {
+      String _x2c_return_value_7 = Buffer_str(out);
       {
-        ExceptionFrame _x2c_exception_frame_3;
-        static MatchCaptureSite _x2c_catch_arms_3[2];
-        static ErrorCatchSite _x2c_catch_site_3 = {  _x2c_catch_arms_3, -1, 2, ERROR_CATCH_PENDING, -1 };
-        Var _x2c_catch_patterns_3[2];
-        if (x2c_error_catch_site_pending(&_x2c_catch_site_3)) {List _x2c_catch_pattern_6 = cons(Symbol_var(31862161386376), cons(Symbol_var(1868397587594), NULL));
-        _x2c_catch_patterns_3[0] = List_var(_x2c_catch_pattern_6);
-        List _x2c_catch_pattern_7 = cons(Symbol_var(20399393368), cons(Symbol_var(1868397587594), NULL));
-        _x2c_catch_patterns_3[1] = List_var(_x2c_catch_pattern_7);
-      }
-      ErrorHandler volatile _x2c_error_handler_3 = x2c_error_catch_site_push(&_x2c_exception_frame_3, &_x2c_catch_site_3, _x2c_catch_patterns_3);  x2c_exception_push(& _x2c_exception_frame_3);  if (!sigsetjmp(_x2c_exception_frame_3.env, 0)){
-        file_publish(path, Buffer_str(out)); {
-          x2c_error_catch_close(_x2c_error_handler_3);  _x2c_error_handler_3 = NULL;  x2c_exception_leave(& _x2c_exception_frame_3);  x2c_cleanup_leave(& _x2c_defer_record_3);  return;
-        }
-
-      }
-      else {x2c_exception_landed(& _x2c_exception_frame_3); {
-        if (x2c_exception_is_error_target(&_x2c_exception_frame_3)){
-          int _x2c_catch_selected_3 = x2c_error_catch_selected(_x2c_error_handler_3);
-          x2c_error_catch_detach(_x2c_error_handler_3);
-          x2c_exception_mark_handled(&_x2c_exception_frame_3);
-          if (_x2c_catch_selected_3 == 0) {List failure = Var_list(x2c_error_catch_capture(_x2c_error_handler_3, 0));
-          error = Var_long(Var_convert(List_assoc(failure, Symbol_var(11703198)), 818062));
-        }
-        else {List failure = Var_list(x2c_error_catch_capture(_x2c_error_handler_3, 0));
-        error = Var_long(Var_convert(List_assoc(failure, Symbol_var(11703198)), 818062));
+        x2c_cleanup_leave(& _x2c_defer_record_3);
+        return _x2c_return_value_7;
       }
 
-    }
-    else{
-      x2c_error_catch_close(_x2c_error_handler_3);
-      _x2c_error_handler_3 = NULL;
-      x2c_exception_leave(& _x2c_exception_frame_3);
-      __builtin_unreachable();
     }
 
   }
-
-}
-x2c_error_catch_close(_x2c_error_handler_3);
-_x2c_error_handler_3 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_3);
-}
-}
-String reason = String_new(strerror((int) error));
-Compiler_report_error(compiler, 354920, _103, NULL, cons(String_var(String_join(NULL, cons(String_var(_96), cons(String_var(path), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_97), cons(String_var(reason), NULL)))), NULL)));
-}
-x2c_cleanup_leave(& _x2c_defer_record_3);
+  x2c_cleanup_leave(& _x2c_defer_record_3);
 
 }
 }

@@ -385,7 +385,7 @@ Buffer Buffer_new(size_t);
 
 String Buffer_str(Buffer);
 
-String Args_usage(List spec, String program){
+String Args_usage(String program, List spec){
   if(! _init_guard_) _file_init_();
   _Spec parsed = _read_spec(spec);
   Buffer synopsis = Buffer_new(0);

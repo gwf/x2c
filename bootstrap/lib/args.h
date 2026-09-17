@@ -13,7 +13,7 @@ Args;
 
 Map Args_parse(List args, List spec);
 
-String Args_usage(List spec, String program);
+String Args_usage(String program, List spec);
 
 List Args_from_argv(int argc, char * * argv);
 

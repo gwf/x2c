@@ -58,7 +58,7 @@ static List _match_capture_locals(Compiler c, Array locals);
 
 static List _match_case(Compiler c);
 
-static List _match_cases(Compiler compiler);
+static List _match_cases(Compiler c);
 
 static List _match_statement(Compiler compiler);
 
@@ -695,9 +695,15 @@ List guard = Compiler_peek(c, 0) == 588 ? _keyword_paren_expr(c, 588) : NULL;  C
 if(List_truth(guard)) body = cons(_66, cons(List_var(body), NULL));  Sym_pop_scope(c -> sym);  return cons(List_var(pattern), cons(List_var(body), NULL));  error : Compiler_report_error(c, 33658058, _103, c -> token, cons(_68, cons(String_var(c -> token -> text), NULL)));
 }
 
-static List _match_cases(Compiler compiler){
-  Array cases = Array_new();  Symbol peek = Compiler_peek(compiler, 0);  int saw_default = 0;  while(peek == 199882 || peek == 8938171176){
-    if(saw_default) Compiler_report_error(compiler, 33658058, _104, compiler -> token, _71);  if(peek == 8938171176) saw_default = 1;  List mcase = _match_case(compiler);  Array_push(cases, List_var(mcase));  peek = Compiler_peek(compiler, 0);
+static List _match_cases(Compiler c){
+  Array cases = Array_new();  Symbol peek = Compiler_peek(c, 0);  int saw_default = 0;  while(1){
+    if(! Token_equal(c -> token, c -> directives_taken)){
+      Var directive;  List _x2c_macro_object_5 = Compiler_leading_preproc(c);  List _x2c_macro_cursor_5 = _x2c_macro_object_5;  Var _x2c_macro_cursor_output_5;  while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
+        directive = _x2c_macro_cursor_output_5;  Array_push(cases, directive);
+      }
+
+    }
+    if(peek != 199882 && peek != 8938171176) break;  if(saw_default) Compiler_report_error(c, 33658058, _104, c -> token, _71);  if(peek == 8938171176) saw_default = 1;  List mcase = _match_case(c);  Array_push(cases, List_var(mcase));  peek = Compiler_peek(c, 0);
   }
   return Array_list_free(cases);
 }
@@ -943,11 +949,11 @@ List Compiler_parse_block_items(Compiler c, int anchor_items){
   while(1){
     if(! Token_equal(c -> token, c -> directives_taken)){
       Var directive;
-      List _x2c_macro_object_5 = Compiler_leading_preproc(c);
-      List _x2c_macro_cursor_5 = _x2c_macro_object_5;
-      Var _x2c_macro_cursor_output_5;
-      while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
-        directive = _x2c_macro_cursor_output_5;
+      List _x2c_macro_object_6 = Compiler_leading_preproc(c);
+      List _x2c_macro_cursor_6 = _x2c_macro_object_6;
+      Var _x2c_macro_cursor_output_6;
+      while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_6)){
+        directive = _x2c_macro_cursor_output_6;
         Array_push(block, directive);
       }
 
@@ -966,11 +972,11 @@ List Compiler_parse_block_items(Compiler c, int anchor_items){
     }
     {
       List item;
-      List _x2c_macro_object_6 = List_cdr(stmt);
-      List _x2c_macro_cursor_6 = _x2c_macro_object_6;
-      Var _x2c_macro_cursor_output_6;
-      while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_6)){
-        item = Var_list(_x2c_macro_cursor_output_6);
+      List _x2c_macro_object_7 = List_cdr(stmt);
+      List _x2c_macro_cursor_7 = _x2c_macro_object_7;
+      Var _x2c_macro_cursor_output_7;
+      while(List_try_next(_x2c_macro_object_7, & _x2c_macro_cursor_7, & _x2c_macro_cursor_output_7)){
+        item = Var_list(_x2c_macro_cursor_output_7);
         Array_push(block, List_var(! anchor_items || Var_equal(List_car(item), Symbol_var(104)) ? item : Compiler_anchor_origin(c, item, origin)));
       }
 

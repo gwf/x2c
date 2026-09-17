@@ -461,7 +461,7 @@ static int _state_matches(String path, uint64_t hash){
   return saved ==(unsigned long long) hash;
 }
 
-void file_publish(Path, String);
+void file_publish(List);
 
 static void _state_write_lines(String path, uint64_t hash, List lines){
   String text = String_printf(_1, (unsigned long long) hash);
@@ -486,7 +486,7 @@ static void _state_write_lines(String path, uint64_t hash, List lines){
     List _x2c_catch_pattern_2 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_1[1] = List_var(_x2c_catch_pattern_2);
   }
-  ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) file_publish(path, text);  else {x2c_exception_landed(& _x2c_exception_frame_1); {
+  ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) file_publish(cons(String_var(path), cons(String_var(text), NULL)));  else {x2c_exception_landed(& _x2c_exception_frame_1); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
       int _x2c_catch_selected_1 = x2c_error_catch_selected(_x2c_error_handler_1);
       x2c_error_catch_detach(_x2c_error_handler_1);
@@ -967,6 +967,7 @@ void report_line(Symbol, String);
 
 int compile_commands_write(String path, Array commands){
   if(! _init_guard_) _file_init_();
+  String text = String_join(NULL, cons(String_var(_38), cons(String_var(String_join(_39, Array_list(commands))), cons(String_var(_40), NULL))));
   {
     ExceptionFrame _x2c_exception_frame_4;
     static MatchCaptureSite _x2c_catch_arms_4[2];
@@ -978,8 +979,7 @@ int compile_commands_write(String path, Array commands){
     _x2c_catch_patterns_4[1] = List_var(_x2c_catch_pattern_6);
   }
   ErrorHandler volatile _x2c_error_handler_4 = x2c_error_catch_site_push(&_x2c_exception_frame_4, &_x2c_catch_site_4, _x2c_catch_patterns_4);  x2c_exception_push(& _x2c_exception_frame_4);  if (!sigsetjmp(_x2c_exception_frame_4.env, 0)){
-    file_publish(path, String_join(NULL, cons(String_var(_38), cons(String_var(String_join(_39, Array_list(commands))), cons(String_var(_40), NULL)))));
-    report_line(28680520, String_join(NULL, cons(String_var(_41), cons(String_var(path), NULL))));
+    file_publish(cons(String_var(path), cons(String_var(text), NULL)));  report_line(28680520, String_join(NULL, cons(String_var(_41), cons(String_var(path), NULL))));
     {
       int _x2c_return_value_1 = 1;
       {

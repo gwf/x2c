@@ -1074,7 +1074,7 @@ static int _lock_satisfies(Project project, List rows){
 
 String String_join(String, List);
 
-void file_publish(Path, String);
+void file_publish(List);
 
 void x2c_host_error(List);
 
@@ -1099,7 +1099,7 @@ static void _write_lock(String path, List rows){
     if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_1 = cons(Symbol_var(20399393368), cons(Symbol_var(58262293080), NULL));
     _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_1);
   }
-  ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) file_publish(path, text);  else {x2c_exception_landed(& _x2c_exception_frame_1); {
+  ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) file_publish(cons(String_var(path), cons(String_var(text), NULL)));  else {x2c_exception_landed(& _x2c_exception_frame_1); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
       x2c_error_catch_detach(_x2c_error_handler_1);
       x2c_exception_mark_handled(&_x2c_exception_frame_1);

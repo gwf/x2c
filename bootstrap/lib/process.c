@@ -57,7 +57,7 @@ static void _close(int fd);
 
 static char * * _argv(List stage);
 
-static void _child(char * * argv, _Launch * launch, int stdin_fd, int stdout_fd, int stderr_fd, int report);
+_Noreturn static void _child(char * * argv, _Launch * launch, int stdin_fd, int stdout_fd, int stderr_fd, int report);
 
 static void Job__spawn(Job job, int index, List stage, int stdin_fd, int stdout_fd, int stderr_fd);
 
@@ -517,7 +517,7 @@ static char * * _argv(List stage){
   return argv;
 }
 
-static void _child(char * * argv, _Launch * launch, int stdin_fd, int stdout_fd, int stderr_fd, int report){
+_Noreturn static void _child(char * * argv, _Launch * launch, int stdin_fd, int stdout_fd, int stderr_fd, int report){
   if(stdin_fd >= 0) dup2(stdin_fd, STDIN_FILENO);
   if(stdout_fd >= 0) dup2(stdout_fd, STDOUT_FILENO);
   if(launch -> errors_to_output) dup2(STDOUT_FILENO, STDERR_FILENO);
