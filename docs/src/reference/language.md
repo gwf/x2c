@@ -1699,7 +1699,9 @@ so `"hello".len()` is `5`. `foreach` iterates such a literal as that
 `String`, and a raise detail accepts it as an immutable `String`. In these
 three positions a parenthesized literal, a `?:` whose arms are both literals,
 and an object-like macro defined to a string literal, `#define NAME "x"`, are
-literals too, so `(ready ? "on" : "off").len()` and `NAME.len()` work. This
+literals too, so `(ready ? "on" : "off").len()` and `NAME.len()` work. A macro
+name is a literal only while every definition it has is a string literal and
+no `#undef` has dropped it. This
 adjacency rule does not combine percent strings or change quoted collection
 syntax.
 

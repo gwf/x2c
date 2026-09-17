@@ -2,6 +2,17 @@
 
 #define GREETING "hello"
 
+// A name is a String literal only where every arm defines it as one and no
+// `#undef` drops it.
+#ifdef USE_TEXT
+#define SEP "/"
+#else
+#define SEP 47
+#endif
+
+#define LABEL "hi"
+#undef LABEL
+
 static int size(String s) => s.len();
 
 // A C string literal becomes a String wherever C gives it no meaning, also
@@ -21,5 +32,8 @@ int main(void) {
   printf("%d %d %d %d\n", size(GREETING), s.len(), GREETING.len(),
          s == GREETING);
   printf("%d %d %d %d\n", b < "c", b > "a", b <= "a", "a" >= b);
+  int sep = SEP, LABEL = 3;
+  Var relabeled = LABEL;
+  printf("%d %s\n", sep, relabeled.repr());
   return 0;
 }

@@ -1490,15 +1490,22 @@ static int _prefix_rank(Var v) {
    The directive after `#define` is scanned as x2c tokens: an object-like
    body is classified by `_macro_prefix`; a function-like macro whose body
    is empty or an attribute is `<annotation>`, one that wraps its parameter
-   is `<wrapper>`, and any other function-like macro is skipped. */
+   is `<wrapper>`, and any other function-like macro is skipped. An `#undef`
+   drops the name, so later source reads it as an ordinary identifier. */
 static void _note_object_macro(Compiler c, String content) {
   String directive = preproc_directive(content);
-  if (!directive.startswith("define")) return;
-  Tokenizer scanned = Tokenizer.new(directive.remove_prefix("define"));
+  int undefined = directive.startswith("undef");
+  if (!undefined && !directive.startswith("define")) return;
+  Tokenizer scanned = Tokenizer.new(
+    directive.remove_prefix(undefined ? "undef" : "define"));
   scanned.scan();
   Token token = _skip_forward(scanned.tokens);
   if (token.type != <ident>) return;
   String name = token.text;
+  if (undefined) {
+    c.object_macros.del(name);
+    return;
+  }
   Token body = token + 1;
   if (body.type == <(>) {
     // A parameter list touching the name makes the macro function-like.
@@ -1512,13 +1519,18 @@ static void _note_object_macro(Compiler c, String content) {
     return;
   }
   Var definition = _macro_prefix(c, _skip_forward(token + 1), NULL), existing;
+  /* A name another arm defines to anything but a string literal is no string
+     literal: `Var v = SEP;` must not make a String of the other arm's
+     number. */
   if (!c.object_macros.try_get(name, &existing) ||
-      _prefix_rank(definition) > _prefix_rank(existing))
+      _prefix_rank(definition) > _prefix_rank(existing) ||
+      (existing.equal(<string>) && !definition.equal(<string>)))
     c.object_macros[name] = definition;
 }
 
 /** Applies public and private pragma directives to source visibility state
-    and records each object-like `#define` name for the literal warning.
+    and records each object-like `#define` name, less those `#undef` drops,
+    for the literal warning.
 
     A negative visibility state disables pragma tracking for this token
     stream; macro names are recorded regardless.
