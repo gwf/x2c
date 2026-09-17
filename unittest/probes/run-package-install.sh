@@ -51,7 +51,10 @@ grep -q "extract failed (tar)" "$BUILD/broken-tar.stderr" ||
 "$x2c" install -q "$BUILD/src/greet"
 [[ "$("$x2c" list)" == "greet - source" ]] || fail "list after directory"
 [[ -f "$BUILD/home/packages/greet/builds/libgreet.a" ]] || fail "no archive"
-[[ ! -s "$BUILD/home/packages/greet/builds/greet.link" ]] || fail "link file"
+[[ -f "$BUILD/home/packages/greet/builds/greet.native.rsp" ]] ||
+  fail "no native response file"
+[[ ! -s "$BUILD/home/packages/greet/builds/greet.native.rsp" ]] ||
+  fail "a source package recorded native arguments"
 "$x2c" run -q "$ROOT/examples/power/greet-client.x" >"$BUILD/client.stdout"
 grep -q "ping ping ping" "$BUILD/client.stdout" || fail "client output"
 "$x2c" remove -q greet

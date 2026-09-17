@@ -934,8 +934,9 @@ static void _apply_option(
 
 /** Reads a package's native response options, expanding literal `{package}`
     after tokenization. Only native include/define/thread options, ordered
-    archive/library/framework inputs, and run-time library search
-    directories are admitted. `cc_args` and `ld_args`
+    archive/library/framework inputs, run-time library search directories,
+    and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
+    `cc_args` and `ld_args`
     serve native actions; no source-preprocessing options are returned.
 */
 CliRequest cli_package_options(String path, String package) {
@@ -961,7 +962,8 @@ CliRequest cli_package_options(String path, String package) {
     switch (option.id) {
       case <include>: case <c-include>: case <c-system>:
       case <define>: case <undefine>: case <lib-dir>: case <library>:
-      case <rpath>: case <pthread>: case <framework>: break;
+      case <rpath>: case <pthread>: case <framework>:
+      case <wl>: case <xlinker>: break;
       default:
         x2c_driver_error(%"unsupported package native argument '$argument'");
     }

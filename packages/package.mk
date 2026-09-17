@@ -9,8 +9,8 @@
 # Every src/*.x becomes builds/<unit>.h and builds/<unit>.c. The native
 # driver compiles those files and src/*.c into builds/lib$(PACKAGE).a,
 # retaining objects and dependency state under builds/cc.
-# builds/$(PACKAGE).link holds the one line of link
-# flags a consumer needs besides that archive.
+# builds/$(PACKAGE).native.rsp holds the native arguments a consumer needs
+# besides that archive, one argument per line.
 #
 # src/*.c is C the package itself must compile, such as a single-header
 # library's instantiation unit. The driver keeps distinct object paths for
@@ -47,6 +47,7 @@ PACKAGE_NATIVE := $(wildcard src/*.c)
 PACKAGE_HEADERS := $(PACKAGE_SOURCES:src/%.x=builds/%.h)
 PACKAGE_GENERATED := $(PACKAGE_SOURCES:src/%.x=builds/%.c)
 PACKAGE_ARCHIVE := builds/lib$(PACKAGE).a
+PACKAGE_RESPONSE := builds/$(PACKAGE).native.rsp
 PACKAGE_DEPS := $(CURDIR)/deps
 PACKAGE_TESTS := $(wildcard tests/test-*.x)
 PACKAGE_TEST_PROGRAMS := $(PACKAGE_TESTS:tests/%.x=builds/%)
@@ -63,7 +64,7 @@ all: test
 
 package-build-force:
 
-build: $(PACKAGE_HEADERS) $(PACKAGE_ARCHIVE) builds/$(PACKAGE).link
+build: $(PACKAGE_HEADERS) $(PACKAGE_ARCHIVE) $(PACKAGE_RESPONSE)
 
 BUNDLE_DIR ?= builds/bundle
 bundle: build
@@ -78,7 +79,7 @@ else
 include $(PACKAGE_SUPPORT)dependency.mk
 
 $(PACKAGE_SOURCES:src/%.x=builds/%.c) $(PACKAGE_HEADERS) \
-  $(PACKAGE_ARCHIVE) builds/$(PACKAGE).link: $(DEPENDENCY_MANIFEST)
+  $(PACKAGE_ARCHIVE) $(PACKAGE_RESPONSE): $(DEPENDENCY_MANIFEST)
 
 # dependency.mk owns download, verification, and the shared cache; this
 # only exposes the prepared prefix at a stable path inside the package.
@@ -110,18 +111,19 @@ builds/%.c builds/%.h: src/%.x | builds $(DEPENDENCY_PREREQUISITE)
 	"$(X2C)" translate --out-dir builds $(PACKAGE_X_FLAGS) $<
 
 # A consumer resolves the package through both files, so the archive carries
-# the link line as a prerequisite; otherwise `make run` on a clean builds/
-# fails with "package is not built".
+# the response file as a prerequisite; otherwise `make run` on a clean
+# builds/ fails with "package is not built".
 $(PACKAGE_ARCHIVE): $(PACKAGE_GENERATED) $(PACKAGE_NATIVE) \
-  builds/$(PACKAGE).link package-build-force | $(DEPENDENCY_PREREQUISITE)
+  $(PACKAGE_RESPONSE) package-build-force | $(DEPENDENCY_PREREQUISITE)
 	"$(X2C)" build --kind static-library --output $@ --build-dir builds/cc \
 	  $(PACKAGE_C_FLAGS) $(PACKAGE_GENERATED) $(PACKAGE_NATIVE)
 
-builds/$(PACKAGE).link: Makefile | builds
-	@printf '%s\n' '$(PACKAGE_LINK)' >$@
+# One argument per line, the response-file form the compiler reads.
+$(PACKAGE_RESPONSE): Makefile | builds
+	@printf '%s\n' $(PACKAGE_LINK) >$@
 
-# --package-dir reads builds/$(PACKAGE).link, so a consumer never repeats
-# PACKAGE_LINK; passing it again links the dependency twice.
+# --package-dir reads builds/$(PACKAGE).native.rsp, so a consumer never
+# repeats PACKAGE_LINK; passing it again links the dependency twice.
 builds/test-%: tests/test-%.x $(PACKAGE_ARCHIVE) | builds
 	"$(X2C)" build --output $@ --build-dir builds/$* \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) \
@@ -133,7 +135,7 @@ builds/%: examples/%.x $(PACKAGE_ARCHIVE) | builds
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
 
 # The test programs need only the archive, but a package whose tests passed
-# has to be usable by a consumer, and that needs the .link file too.
+# has to be usable by a consumer, and that needs the response file too.
 test: build $(PACKAGE_TEST_PROGRAMS)
 	@for program in $(PACKAGE_TEST_PROGRAMS); do \
 	  $(PACKAGE_TEST_COMMAND) ./$$program || exit 1; \

@@ -159,7 +159,7 @@ static void _build_source(String package, String name, String spec) {
   _run(%( $x2c "build" "--kind" "static-library"
           "--output" "$builds/lib$name.a"
           "--build-dir" "$builds/cc" ).append(inputs), "build");
-  Path.write_text(%"$builds/$name.link", NULL);
+  Path.write_text(%"$builds/$name.native.rsp", NULL);
 }
 
 /* `bundle` or `source` for an installed package, or NULL for a directory

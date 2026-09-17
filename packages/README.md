@@ -164,8 +164,8 @@ Packages use the following layout:
   inventory.
 - `Makefile` sets `PACKAGE`, includes `package.mk`, and names the package's
   example and run targets. `package.mk` builds `builds/lib<package>.a` plus
-  the generated headers, objects, and `builds/<package>.link` line of extra
-  link flags, checks `headers.sha256` and `licenses.sha256` with
+  the generated headers, objects, and the `builds/<package>.native.rsp`
+  native arguments a consumer needs, checks `headers.sha256` and `licenses.sha256` with
   `verify-pins` before archiving, and builds `builds/<name>` from each
   `examples/<name>.x`; tests and examples link that archive.
 
