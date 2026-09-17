@@ -238,7 +238,7 @@ while IFS= read -r source; do
   fi
 done < <({
   find "$example_dir" -maxdepth 1 -type f -name '*.x'
-  find "$example_dir"/{love,power,magic,programs,tours} \
+  find "$example_dir"/{love,power,magic,programs,scripts,tours} \
     -type f -name '*.x'
 } | sort)
 
