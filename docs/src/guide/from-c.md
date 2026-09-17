@@ -113,9 +113,14 @@ is the x2c operator only between two operands, and `match` is the statement
 only as `match (...)` followed by `case` or `{`; anywhere else they are
 ordinary names, so `struct buffer *in` and `int match = 0` compile.
 
-`struct tag { ... } name;` at file scope publishes the type and an `extern`
-declaration of `name` in the generated header and defines `name` in the C
-file. A public function whose prototype uses a `struct` that the file
+A public object at file scope, `int counter = 0;` or
+`struct tag { ... } name;`, publishes an `extern` declaration in the generated
+header and its one definition in the C file, so every including unit shares
+that object. A `struct` or `union` body publishes the type as well. An
+initializer that has to run, such as `Map registry = {};`, runs in the unit's
+initialization instead of standing as a C initializer, and a `const` object
+with such an initializer keeps the qualifier in x2c and loses it in the
+generated C. A public function whose prototype uses a `struct` that the file
 defines privately gets a forward declaration of the tag in the header first.
 
 A macro invocation that supplies grammar, such as a `for`-loop macro or a
