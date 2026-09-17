@@ -64,7 +64,7 @@ static List _for_statement(Compiler c) {
   if (c.peek(0) == <;>) init = NULL;
   else if (c.test_declaration()) {
     init = c.parse_simple_declaration();
-    init = cons(<decl>, cdr(init));
+    init = cons(<decl>, init.cdr());
   }
   else init = c.parse_expression();
   c.expect(<;>);
@@ -406,9 +406,8 @@ List Compiler.parse_block_item(Compiler compiler) {
   Var candidate;
   int with_expression = compiler.peek(0) == <ident> &&
     compiler.semantic_binding_facts().try_get(
-      %(with-name ${compiler.token.text}), &candidate) && List.equal(
-        compiler.sym.lookup(%(${compiler.token.text}), NULL),
-        candidate);
+      %(with-name ${compiler.token.text}), &candidate) &&
+    compiler.sym.lookup(%(${compiler.token.text}), NULL).equal(candidate);
   List macro = with_expression ? NULL
     : compiler.try_parse_macro_target_at(AST_BLOCK);
   if (macro) return macro;
@@ -488,9 +487,8 @@ List Compiler.parse_statement(Compiler compiler) {
   Var candidate;
   int with_expression = compiler.peek(0) == <ident> &&
     compiler.semantic_binding_facts().try_get(
-      %(with-name ${compiler.token.text}), &candidate) && List.equal(
-        compiler.sym.lookup(%(${compiler.token.text}), NULL),
-        candidate);
+      %(with-name ${compiler.token.text}), &candidate) &&
+    compiler.sym.lookup(%(${compiler.token.text}), NULL).equal(candidate);
   List keyword = !with_expression && compiler.peek(0) == <ident>
     ? compiler.try_parse_macro_target_at(AST_STATEMENT) : NULL;
   if (keyword) return keyword;

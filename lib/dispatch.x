@@ -344,7 +344,7 @@ static VarDescriptor *_descriptor_for_value(Var value) {
 }
 
 static void _valid_member_operand(Var value, String side) {
-  if (!Var.encoding_valid(value)) {
+  if (!value.encoding_valid()) {
     unsigned long bits = value.u64;
     raise %(bad-enc (value $bits) (side $side));
   }
@@ -512,7 +512,7 @@ static String _primitive_repr(Var v, Symbol tag) {
     case <+inf>:  return "+Inf";
     case <-inf>:  return "-Inf";
   }
-  return Var.pointer_string(v);
+  return v.pointer_string();
 }
 
 static String _primitive_str(Var v, Symbol tag) {
@@ -530,7 +530,7 @@ static String _primitive_str(Var v, Symbol tag) {
     case <ldouble>: return "%Lf".printf(v);
     case <nan>:  case <+inf>: case <-inf>: return %"$tag";
   }
-  return Var.pointer_string(v);
+  return v.pointer_string();
 }
 
 /** Returns the non-dispatch display `String` of `Var`. */
@@ -538,10 +538,10 @@ String Var.fallback_str(Var v) {
   Symbol tag = v.tag();
   switch (v.kind()) {
     case <floating>: case <integer>:   return _primitive_str(v, tag);
-    case <pointer>:  case <reference>: return Var.pointer_string(v);
+    case <pointer>:  case <reference>: return v.pointer_string();
     case <void>:     return "void";
   }
-  return Var.pointer_string(v);
+  return v.pointer_string();
 }
 
 /** Returns the display `String` of `Var`. */
@@ -564,7 +564,7 @@ static Buffer _write_primitive_str(Var v, Symbol tag, Buffer out) {
     case <ldouble>: return out.printf("%Lf", v);
     case <nan>:  case <+inf>: case <-inf>: return out.write(%"$tag");
   }
-  return out.write(Var.pointer_string(v));
+  return out.write(v.pointer_string());
 }
 
 /** Appends the non-dispatch display text of `Var` to a `Buffer`.
@@ -577,10 +577,10 @@ Buffer Var.fallback_write_str(Var v, Buffer out) {
     case <floating>:
     case <integer>:   return _write_primitive_str(v, tag, out);
     case <pointer>: case <reference>:
-      return out.write(Var.pointer_string(v));
+      return out.write(v.pointer_string());
     case <void>:      return out.write("void");
   }
-  return out.write(Var.pointer_string(v));
+  return out.write(v.pointer_string());
 }
 
 /** Appends the display text of `Var` to a `Buffer`.
@@ -607,10 +607,10 @@ String Var.fallback_repr(Var v) {
   Symbol tag = v.tag();
   switch (v.kind()) {
     case <floating>: case <integer>:   return _primitive_repr(v, tag);
-    case <pointer>:  case <reference>: return Var.pointer_string(v);
+    case <pointer>:  case <reference>: return v.pointer_string();
     case <void>:     return "void";
   }
-  return Var.pointer_string(v);
+  return v.pointer_string();
 }
 
 /** Returns the readable representation of `Var`. */
@@ -639,7 +639,7 @@ static Buffer _write_primitive_repr(Var v, Symbol tag, Buffer out) {
     case <+inf>: return out.write("+Inf");
     case <-inf>: return out.write("-Inf");
   }
-  return Var.write_pointer_repr(v, out);
+  return v.write_pointer_repr(out);
 }
 
 /** Appends the non-dispatch representation of `Var` to a `Buffer`. */
@@ -649,10 +649,10 @@ Buffer Var.fallback_write_repr(Var v, Buffer out) {
     case <floating>:
     case <integer>:   return _write_primitive_repr(v, tag, out);
     case <pointer>: case <reference>:
-      return Var.write_pointer_repr(v, out);
+      return v.write_pointer_repr(out);
     case <void>:      return out.write("void");
   }
-  return Var.write_pointer_repr(v, out);
+  return v.write_pointer_repr(out);
 }
 
 /** Appends the readable representation of `Var` to a `Buffer`. */

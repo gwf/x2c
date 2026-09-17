@@ -782,7 +782,7 @@ int Type.is_builtin(Type type) => !!type.scalar() || type._is_tagged();
 /** Returns whether the base of `type` is exactly one typedef-name `String`. */
 int Type.is_typedef_name(Type type) {
   type = type.base_type();
-  return type && type.len() == 1 && car(type) is <string>;
+  return type && type.len() == 1 && type.car() is <string>;
 }
 
 /** Returns whether `type` is one bare typedef-name `String`.
@@ -809,7 +809,7 @@ int Type.is_integral(Type type) {
 
 static int Type._is_tagged(Type type) {
   if (!type) return 0;
-  Var first = car(type);
+  Var first = type.car();
   if (first is <symbol>) return Symbol._is_tagged(first);
   return 0;
 }
@@ -915,7 +915,7 @@ static List _from_ast(List ast, List context) {
   match (ast)
     case %(op = (!set ?binding (bind *)) ?):
       return _from_ast(binding, context);
-  Var head = car(ast);
+  Var head = ast.car();
   switch (head.symbol()) {
     // (declare ?type ?bindings)
     case <declare>: {
@@ -934,7 +934,7 @@ static List _from_ast(List ast, List context) {
     // (params ?params), (bindings ?bindings), (fields ?fields)
     case <params>:
     case <bindings>:
-      return _from_ast_items(cdr(ast), context);
+      return _from_ast_items(ast.cdr(), context);
     case <fields>: {
       Array types = [];
       foreach (List field, ast.cdr()) {
@@ -953,7 +953,7 @@ static List _from_ast(List ast, List context) {
     }
     // (fnmod ?params)
     case <fnmod>: {
-      List params = _from_ast(cdr(ast), NULL);
+      List params = _from_ast(ast.cdr(), NULL);
       return %( func @params );
     }
     // (param ?type ?mods)

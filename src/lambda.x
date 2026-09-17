@@ -285,7 +285,7 @@ static int _is_func_adapter(Compiler compiler, Type type) {
   if (!type) return 0;
   Type adapter = compiler.sym.resolve_key(%("FuncAdapter"));
   if (!adapter) return 0;
-  return List.equal(compiler.sym.resolve_key(type), adapter);
+  return compiler.sym.resolve_key(type).equal(adapter);
 }
 
 /* A function already written in the adapter's own shape needs no wrapper:
@@ -295,7 +295,7 @@ static int _is_func_adapter_target(Compiler compiler, Type type) {
   Type adapter = compiler.sym.resolve_key(%("FuncAdapter"));
   if (!adapter || !adapter.is_pointer()) return 0;
   Type pointee = adapter.dereference();
-  return List.equal(type.canonicalize(), pointee.canonicalize());
+  return type.canonicalize().equal(pointee.canonicalize());
 }
 
 static List _adapter_symbol_literal(Symbol value) =>
@@ -415,8 +415,7 @@ static List _build_func_adapter(
   _typed_function_parts(source_type, &params, &return_type);
   if (_typed_params_variadic(params)) {
     Type func_type = c.sym.resolve_key(%("Func"));
-    String message = List.equal(
-      c.sym.resolve_key(diagnostic_type), func_type)
+    String message = c.sym.resolve_key(diagnostic_type).equal(func_type)
       ? "function conversion to Func cannot be variadic"
       : "native binding target cannot be variadic";
     _typed_adapter_error(
@@ -827,7 +826,7 @@ List Compiler.lift_func_expression(Compiler compiler, List expression) {
     }
   if (!type) return _deref_func_lift(compiler, expression, payload);
   Type func_type = compiler.sym.resolve_key(%("Func"));
-  if (List.equal(compiler.sym.resolve_key(type), func_type)) return expression;
+  if (compiler.sym.resolve_key(type).equal(func_type)) return expression;
 
   match (payload)
     case %(lambda *): {
@@ -837,7 +836,7 @@ List Compiler.lift_func_expression(Compiler compiler, List expression) {
           type = lowered_type;
           payload = lowered_payload;
         }
-      if (List.equal(compiler.sym.resolve_key(type), func_type))
+      if (compiler.sym.resolve_key(type).equal(func_type))
         return expression;
     }
 

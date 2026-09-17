@@ -212,7 +212,7 @@ List Ast.initializer_cases(Ast ast, List *input) {
 */
 List Ast.initializer_functions(Ast ast, List *source) {
   List header = NULL;
-  List cases = Ast.initializer_cases(ast, &header);
+  List cases = ast.initializer_cases(&header);
   if (!header || header.cdr().len() != 1) return NULL;
   List input = header.cadr();
   List value = input.cadr();

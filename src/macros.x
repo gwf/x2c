@@ -50,7 +50,7 @@ static void _install_source(
   (void) marker.try_own();
   Var installed;
   if (compiler.macros.try_get(marker, &installed)) {
-    Map.merge(compiler.kw_aliases, installed);
+    compiler.kw_aliases.merge(installed);
     return;
   }
   Map aliases = {};
@@ -784,7 +784,7 @@ static Var _sdk_embed_text(Var requested) {
         "cannot read embedded text",
         %("path: ${compiler.display_path(path)}"));
     compiler.deps.merge_translation_dependency(
-      path, "%08x".printf(String.hash(text)));
+      path, "%08x".printf(text.hash()));
     return text;
   }
   struct stat info;
@@ -830,7 +830,7 @@ static Var _sdk_embed_text(Var requested) {
     return _sdk_reject(
       "embedded text exceeds the String size limit",
       %("path: ${compiler.display_path(path)}"));
-  String content_hash = "%08x".printf(String.hash(result));
+  String content_hash = "%08x".printf(result.hash());
   compiler.deps.merge_translation_dependency(path, content_hash);
   return result;
 }
@@ -871,7 +871,7 @@ static String _read_source(
   Compiler compiler, String path, String message, Token token, List notes) {
   String text = _source_text(compiler, path, message, token, notes);
   compiler.deps.merge_translation_dependency(
-    path, "%08x".printf(String.hash(text)));
+    path, "%08x".printf(text.hash()));
   return text;
 }
 
@@ -1040,7 +1040,7 @@ static void _import(
         if (!c.kw_seen.contains(path)) {
           foreach (Var (name, definition), definitions.map())
             c.macros[name] = _rebind_import_definition(c, definition);
-          if (aliases is <map>) Map.merge(c.kw_aliases, aliases);
+          if (aliases is <map>) c.kw_aliases.merge(aliases);
           c.kw_seen[path] = 1;
         }
       }
@@ -2621,8 +2621,8 @@ List Compiler.expand_macro_invocation_node(
       foreach (List active, _.macro_stack) {
         (List prior, List prior_input, Var bindings, Var site) = active;
         (void) bindings, (void) site;
-        if (List.equal(prior, definition) &&
-            List.equal(prior_input, input)) {
+        if (prior.equal(definition) &&
+            prior_input.equal(input)) {
           String spelling = name.str();
           _.report_error(
             <macro>, %"identical recursive expansion of '$spelling'",

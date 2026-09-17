@@ -56,7 +56,7 @@ typedef struct Build {
    is part of incremental cache identity. */
 static String _key(String path) {
   String stem = Path.stem(path);
-  return %"$stem-%08x".printf(String.hash(path));
+  return %"$stem-%08x".printf(path.hash());
 }
 
 /* Every incremental fingerprint starts with the state format, project or
@@ -493,32 +493,32 @@ static uint64_t _action_fingerprint(
 
 /* Returns -1 when preprocessing starts a compile in the same job slot. */
 static int _finish_compile(Build state, CcJob *pending) {
-  int status = pending->execution.wait();
-  if (pending->preprocessed) {
+  int status = pending.execution.wait();
+  if (pending.preprocessed) {
     int ok = !status;
-    String preprocessed = pending->preprocessed;
+    String preprocessed = pending.preprocessed;
     if (ok)
-      pending->fingerprint = _action_fingerprint(
-        state, pending->action, %($preprocessed), &ok);
-    unlink(pending->preprocessed);
-    pending->preprocessed = NULL;
+      pending.fingerprint = _action_fingerprint(
+        state, pending.action, %($preprocessed), &ok);
+    unlink(pending.preprocessed);
+    pending.preprocessed = NULL;
     if (!ok) return 1;
-    if (!access(pending->object, R_OK) && !access(pending->depfile, R_OK) &&
-        _state_matches(pending->state_path, pending->fingerprint)) {
+    if (!access(pending.object, R_OK) && !access(pending.depfile, R_OK) &&
+        _state_matches(pending.state_path, pending.fingerprint)) {
       if (state.request.verbose)
-        fprintf(stderr, "x2c: up-to-date compile %s\n", pending->source);
+        fprintf(stderr, "x2c: up-to-date compile %s\n", pending.source);
       state.cc_cached++;
     }
     else {
-      pending->execution = pending->action.start();
+      pending.execution = pending.action.start();
       return -1;
     }
   }
   else if (!status && state.state_root && !state.request.dry_run)
-    _state_write(pending->state_path, pending->fingerprint);
+    _state_write(pending.state_path, pending.fingerprint);
   if (!status) {
     state.cc_done++;
-    report_progress(<compile>, state.cc_done, state.cc_n, pending->source);
+    report_progress(<compile>, state.cc_done, state.cc_n, pending.source);
   }
   return status != 0;
 }

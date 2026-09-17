@@ -850,7 +850,8 @@ List Compiler.parse_string_literal(Compiler compiler) {
   if (compiler.test(<"\"">)) return %(expr ("String") (0));
   List segments = _parse_string_segments(compiler);
   compiler.expect(<"\"">);
-  if (segments.match(%((cache *)))) return %(expr ("String") ${car(segments)});
+  if (segments.match(%((cache *))))
+    return %(expr ("String") ${segments.car()});
   return %(expr ("String") (segments @segments));
 }
 

@@ -477,7 +477,7 @@ static List Compiler._publish_protocol_adoption(
       Type first_representation = _adoption_representation(row);
       List first_tag = _adoption_tag(row);
       if (first_representation != representation ||
-          !List.equal(first_tag, tag_expression)) {
+          !first_tag.equal(tag_expression)) {
         List first_location = _adoption_location(row);
         String first = %"first: ${
           _location_string(first_location)}";
@@ -1558,7 +1558,7 @@ static void _report_generated_collision(
   String first_repr = _type_spelling(first_base);
   String second_repr = _type_spelling(second_base);
   String participant_repr = _type_spelling(participant);
-  int incompatible_signatures = !List.equal(first_expected, second_expected);
+  int incompatible_signatures = !first_expected.equal(second_expected);
   String message = %"member '$member' of '$participant_repr' ";
   String owners =
     %"$first_repr($participant_repr) and $second_repr($participant_repr)";
@@ -1616,10 +1616,10 @@ static List _resolve_protocol_member(
       (Type base, List occurrence) = entry;
       List record = occurrence.car();
       List declared = record.last().list().cdr();
-      int matches = List.equal(base, participant);
+      int matches = base.equal(participant);
       for (List ancestry = base_ancestry ? base_ancestry.cdr() : NULL;
            !matches && ancestry; ancestry = ancestry.cdr())
-        matches = List.equal(base, ancestry.car());
+        matches = base.equal(ancestry.car());
       if (!matches) continue;
       String base_name = _base_name(base);
       if (!base_name) continue;
@@ -1700,7 +1700,7 @@ String Compiler.protocol_update_helper(
   match (parameters)
     case %(?receiver ?rhs):
       if (List.equal(receiver, participant) &&
-          List.equal(result, participant))
+          result.equal(participant))
         rhs_type = rhs.list();
   if (!rhs_type) return NULL;
 
@@ -1804,7 +1804,7 @@ List Compiler.discard_helper(
   List call = %(expr $result
     (call (expr $signature (ident $binding))
           (args @{arguments.list_free()})));
-  List body = List.equal(result, %(void))
+  List body = result.equal(%(void))
     ? %(block (stmnt $call) @{discards.list_free()} (return))
     : %(block
         (declare $result (bindings (op = (bind $value_binding ()) $call)))

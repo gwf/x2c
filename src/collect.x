@@ -260,7 +260,7 @@ static void _replay_cached(
   compiler.merge_translation_dependencies(dependencies);
   foreach (Var part, parts) {
     if (part is <map>) {
-      Map.merge(globs, part);
+      globs.merge(part);
       compiler.merge_source_declarations(globs, part);
       continue;
     }
@@ -347,8 +347,8 @@ static void _parse_segment(
   shadow.shallow_parse_overlay(globs, overlay);
   shadow.return_unit_state(c);
   if (unit) {
-    Map.merge(c.fn_defs, shadow.fn_defs);
-    Map.merge(definitions, shadow.fn_defs);
+    c.fn_defs.merge(shadow.fn_defs);
+    definitions.merge(shadow.fn_defs);
   }
   /* A segment's import collects the package once for the whole unit, so its
      files are prerequisites of the unit rather than of this shadow, and they
@@ -356,7 +356,7 @@ static void _parse_segment(
   _cache_dependencies(dependencies, shadow.deps);
   c.merge_translation_dependencies(shadow.deps);
   *private = shadow.source_private;
-  Map.merge(globs, overlay);
+  globs.merge(overlay);
   c.merge_source_declarations(globs, overlay);
 }
 
@@ -407,7 +407,7 @@ static void _include(
   /* A file still being walked, as in an include cycle, has no entry yet. */
   Var walked = _header_cache()[canonical];
   String content_hash = walked is void
-    ? "%08x".printf(String.hash(_include_text(c, target, canonical)))
+    ? "%08x".printf(_include_text(c, target, canonical).hash())
     : walked.list().cadr();
   _cache_dependency(dependencies, canonical, content_hash);
 }
@@ -474,7 +474,7 @@ static void _file(
     Map definitions = {}, int in_comment = 0;
     int line_number = 1, byte_position = 0;
     int segment_line = 1, segment_position = 0, private = 0;
-    String content_hash = "%08x".printf(String.hash(text));
+    String content_hash = "%08x".printf(text.hash());
     List lines = text.split_lines(1);
     foreach (String line, lines) {
       int angle = 0, String stripped = _directive_line(line, &in_comment);
@@ -768,7 +768,7 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
     _file(package, entry, text, Path.dirname(entry), globs, visited);
   }
   else _replay_cached(package, cached, globs, visited);
-  Map.merge(c.fn_defs, package.fn_defs);
+  c.fn_defs.merge(package.fn_defs);
   Map merged = {}, walked = {};
   walked[entry] = 1;
   c.add_translation_dependency(entry);
@@ -885,7 +885,7 @@ static int _hash_matches(Compiler compiler, String path, Var expected) {
     catch %(io-fail *): return 0;
     catch %(bad-arg *): return 0;
     catch %(size-limit *): return 0;
-    String value = "%08x".printf(String.hash(text));
+    String value = "%08x".printf(text.hash());
     _require_header_cache_owner(path.try_own());
     _require_header_cache_owner(value.try_own());
     source_hashes[path] = value;
@@ -925,7 +925,7 @@ static List _interface_load(Compiler compiler, String canonical, String path) {
   }
   if (parts_value is not <list> || definitions_value is not <list> ||
       dependencies_value is not <list>) return NULL;
-  if (!String.equal(_absolute_path(owner.str()), canonical)) return NULL;
+  if (!_absolute_path(owner.str()).equal(canonical)) return NULL;
   if (!_hash_matches(compiler, canonical, expected_hash)) return NULL;
   interface_loading[canonical] = 1;
   Array parts = [];

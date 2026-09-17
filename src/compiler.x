@@ -202,7 +202,7 @@ typedef struct Sym {
 void Compiler.free_lisp(Compiler c) {
   if (!c) return;
   if (c.macro_lisp && !c.borrowed_lisp) {
-    Lisp.destroy(c.macro_lisp);
+    c.macro_lisp.destroy();
     c.macro_lisp = NULL;
   }
   c.diagnostics = NULL;
@@ -1293,10 +1293,10 @@ Map Compiler.select_declaration_defaults(
     symbols[key] = declarations[key];
   }
   Map additions = shadow.sym.current_symbols();
-  Map.merge(symbols, additions);
+  symbols.merge(additions);
   compiler.merge_source_declarations(symbols, additions);
-  Map.merge(compiler.fn_defs, shadow.fn_defs);
-  Map.merge(definitions, shadow.fn_defs);
+  compiler.fn_defs.merge(shadow.fn_defs);
+  definitions.merge(shadow.fn_defs);
   return additions;
 }
 
@@ -2030,8 +2030,8 @@ Symbol Compiler.match_pattern_flat_head(
   List elements = compiler.match_pattern_value(pattern).list().cdr();
   Array typed = [];
   for (List cursor = binders; cursor && elements;
-       cursor = cdr(cursor), elements = cdr(elements)) {
-    Var binder = car(cursor), element = car(elements);
+       cursor = cursor.cdr(), elements = elements.cdr()) {
+    Var binder = cursor.car(), element = elements.car();
     Symbol tag = 0;
     if (!binder.is_atom_binder() || binder == <?>) return 0;
     if (element != binder && !(tag = _flat_capture_tag(element, binder)))
@@ -2209,13 +2209,13 @@ void SymTxn.commit(SymTxn s) {
   /* Restore the original map identities before merging staged rows. Code
      holding a borrowed scope map must observe a committed expansion. */
   *scope = s.scope;
-  Map.merge(scope.symbols, staged.symbols);
+  scope.symbols.merge(staged.symbols);
   compiler.merge_source_declarations(scope.symbols, staged.symbols);
-  Map.merge(scope.bindings, staged.bindings);
-  Map.merge(scope.enumerators, staged.enumerators);
+  scope.bindings.merge(staged.bindings);
+  scope.enumerators.merge(staged.enumerators);
   if ((void *) staged.macros != NULL) {
     if ((void *) scope.macros == NULL) scope.macros = {};
-    Map.merge(scope.macros, staged.macros);
+    scope.macros.merge(staged.macros);
   }
   s.active = 0;
 }
@@ -2227,7 +2227,7 @@ int SymTxn.local_macros_changed(SymTxn transaction) {
   Map before = transaction.scope.macros, after = scope.macros;
   if ((void *) before == NULL || (void *) after == NULL)
     return (void *) before != (void *) after;
-  return !Map.equal(before, after);
+  return !before.equal(after);
 }
 
 /** Restores every semantic value captured by an active transaction. */
@@ -2249,7 +2249,7 @@ void SymTxn.rollback(SymTxn transaction) {
       _.source_occurrences.resize(transaction.source_occurrences);
       foreach (Var key, _.source_definitions.keys().list())
         _.source_definitions.del(key);
-      Map.merge(_.source_definitions, transaction.source_definitions);
+      _.source_definitions.merge(transaction.source_definitions);
     }
     transaction.active = 0;
   }
@@ -2300,7 +2300,7 @@ Map Sym.global_symbols(Sym sym) => sym.globals;
 Map Sym.base_symbols(Sym sym) {
   Map seed = {};
   for (int i = 0; i < sym.base_scopes; i++)
-    Map.merge(seed, _semantic_scope(sym, i).symbols);
+    seed.merge(_semantic_scope(sym, i).symbols);
   return seed;
 }
 

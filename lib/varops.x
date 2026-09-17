@@ -183,21 +183,21 @@ static inline Symbol _fast_numeric_tag(Var lhs, Var rhs) {
 }
 
 static unsigned long long _raw_for_width(X2CVarNumeric *value, int bits) {
-  unsigned long long raw = value->unsigned_value ? value->raw
+  unsigned long long raw = value.unsigned_value ? value.raw
                          : (unsigned long long)
-                           Var.signed_from_bits(value->raw, value->bits);
+                           Var.signed_from_bits(value.raw, value.bits);
   return raw & Var.width_mask(bits);
 }
 
 static void _promote_integer(X2CVarNumeric *value) {
-  if (value->rank >= 3) return;
-  if (!value->unsigned_value)
-    value->raw = (unsigned long long)
-                 Var.signed_from_bits(value->raw, value->bits);
-  value->tag = <i32>;
-  value->unsigned_value = 0;
-  value->bits = 32;
-  value->rank = 3;
+  if (value.rank >= 3) return;
+  if (!value.unsigned_value)
+    value.raw = (unsigned long long)
+                 Var.signed_from_bits(value.raw, value.bits);
+  value.tag = <i32>;
+  value.unsigned_value = 0;
+  value.bits = 32;
+  value.rank = 3;
 }
 
 /* C's usual arithmetic conversion, expressed in ranks. Narrow integers first
@@ -208,17 +208,17 @@ static void _promote_integer(X2CVarNumeric *value) {
 static Symbol _integer_result_tag(X2CVarNumeric *lhs, X2CVarNumeric *rhs) {
   _promote_integer(lhs);
   _promote_integer(rhs);
-  if (lhs->unsigned_value == rhs->unsigned_value) {
-    X2CVarNumeric *value = lhs->rank >= rhs->rank ? lhs : rhs;
-    return Var.integer_tag(value->rank, value->unsigned_value);
+  if (lhs.unsigned_value == rhs.unsigned_value) {
+    X2CVarNumeric *value = lhs.rank >= rhs.rank ? lhs : rhs;
+    return Var.integer_tag(value.rank, value.unsigned_value);
   }
-  X2CVarNumeric *unsigned_value = lhs->unsigned_value ? lhs : rhs;
-  X2CVarNumeric *signed_value = lhs->unsigned_value ? rhs : lhs;
-  if (unsigned_value->rank >= signed_value->rank)
-    return Var.integer_tag(unsigned_value->rank, 1);
-  if (signed_value->bits > unsigned_value->bits)
-    return Var.integer_tag(signed_value->rank, 0);
-  return Var.integer_tag(signed_value->rank, 1);
+  X2CVarNumeric *unsigned_value = lhs.unsigned_value ? lhs : rhs;
+  X2CVarNumeric *signed_value = lhs.unsigned_value ? rhs : lhs;
+  if (unsigned_value.rank >= signed_value.rank)
+    return Var.integer_tag(unsigned_value.rank, 1);
+  if (signed_value.bits > unsigned_value.bits)
+    return Var.integer_tag(signed_value.rank, 0);
+  return Var.integer_tag(signed_value.rank, 1);
 }
 
 static Var _integer_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs) {
@@ -249,9 +249,9 @@ static Var _shift_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs) {
 static Var _floating_binary(
   Symbol op, Var lhs_value, X2CVarNumeric *lhs, Var rhs_value,
   X2CVarNumeric *rhs) {
-  Symbol tag = lhs->floating && lhs->rank >= rhs->rank ? lhs->tag : rhs->tag;
-  if (!lhs->floating) tag = rhs->tag;
-  if (!rhs->floating) tag = lhs->tag;
+  Symbol tag = lhs.floating && lhs.rank >= rhs.rank ? lhs.tag : rhs.tag;
+  if (!lhs.floating) tag = rhs.tag;
+  if (!rhs.floating) tag = lhs.tag;
   Var left = lhs_value.convert(tag);
   Var right = rhs_value.convert(tag);
   Var result;
@@ -294,8 +294,8 @@ static Var _floating_binary(
 
 static Var _general_numeric_binary(Symbol op, Var lhs_value, Var rhs_value) {
   X2CVarNumeric lhs, rhs;
-  Var.numeric_decode(lhs_value, &lhs);
-  Var.numeric_decode(rhs_value, &rhs);
+  lhs_value.numeric_decode(&lhs);
+  rhs_value.numeric_decode(&rhs);
   switch (op) {
     case <"<<">: case <">>">:
       if (lhs.floating || rhs.floating) raise %(bad-types (op $op));
@@ -329,19 +329,19 @@ static Var _fast_numeric(Symbol op, Var lhs, Var rhs, int *handled) {
   *handled = 1;
   switch (tag) {
     case <i32>:
-      return _fast_i32(op, Var.payload32(lhs), Var.payload32(rhs), 0);
+      return _fast_i32(op, lhs.payload32(), rhs.payload32(), 0);
     case <u32>:
-      return _fast_i32(op, Var.payload32(lhs), Var.payload32(rhs), 1);
+      return _fast_i32(op, lhs.payload32(), rhs.payload32(), 1);
     case <f32>: {
       if (op != <+> && op != <-> && op != <*> && op != </>) break;
-      float a = Var.decode_f32(lhs), b = Var.decode_f32(rhs);
+      float a = lhs.decode_f32(), b = rhs.decode_f32();
       float value = op == <+> ? a + b : op == <-> ? a - b
                   : op == <*> ? a * b : a / b;
       return Var.box_f32(value);
     }
     case <f64>: {
       if (op != <+> && op != <-> && op != <*> && op != </>) break;
-      double a = Var.decode_f64(lhs), b = Var.decode_f64(rhs);
+      double a = lhs.decode_f64(), b = rhs.decode_f64();
       double value = op == <+> ? a + b : op == <-> ? a - b
                    : op == <*> ? a * b : a / b;
       return Var.box_f64(value);
@@ -383,7 +383,7 @@ static int _update_operator(Symbol op) {
     `<bad-types>` when no truthiness rule exists.
 */
 int Var.fallback_truth(Var value) {
-  if (!Var.encoding_valid(value)) {
+  if (!value.encoding_valid()) {
     unsigned long bits = value.u64;
     raise %(bad-enc (value $bits));
   }
@@ -392,7 +392,7 @@ int Var.fallback_truth(Var value) {
   int truth;
   if (Var.numeric_info(value.tag(), &info)) {
     X2CVarNumeric numeric;
-    Var.numeric_decode(value, &numeric);
+    value.numeric_decode(&numeric);
     truth = numeric.floating ? numeric.floating_value != 0.0L
           : numeric.raw != 0;
   }
@@ -420,9 +420,9 @@ int Var.fallback_truth(Var value) {
     selected descriptor callback.
 */
 int Var.truth(Var value) {
-  if (!Var.encoding_valid(value) || value is void)
+  if (!value.encoding_valid() || value is void)
     return value.fallback_truth();
-  int handled = 0, truth = Var.dispatch_truth(value, &handled);
+  int handled = 0, truth = value.dispatch_truth(&handled);
   return handled ? !!truth : value.fallback_truth();
 }
 
@@ -433,11 +433,11 @@ static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs) {
   int fast_handled;
   Var result = _fast_numeric(op, lhs, rhs, &fast_handled);
   if (fast_handled) return result;
-  if (!Var.encoding_valid(lhs)) {
+  if (!lhs.encoding_valid()) {
     unsigned long bits = lhs.u64;
     raise %(bad-enc (value $bits) (side "left"));
   }
-  if (!Var.encoding_valid(rhs)) {
+  if (!rhs.encoding_valid()) {
     unsigned long bits = rhs.u64;
     raise %(bad-enc (value $bits) (side "right"));
   }
@@ -448,7 +448,7 @@ static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs) {
   if (op == <+> && lhs is <string> && rhs is <string>)
     return lhs.string().add(rhs);
   if (lhs is <string>) return _general_numeric_binary(op, lhs, rhs);
-  if (Var.try_dispatch_binary(lhs, member, rhs, &result)) return result;
+  if (lhs.try_dispatch_binary(member, rhs, &result)) return result;
   if (lhs.kind() == <object>) {
     Symbol tag = lhs.tag();
     raise %(no-member (tag $tag) (member $member));
@@ -505,13 +505,13 @@ Var Var.mod(Var lhs, Var rhs) => _protocol_arithmetic(lhs, <mod>, <%>, rhs);
     subtraction.
 */
 Var Var.neg(Var value) {
-  if (!Var.encoding_valid(value)) {
+  if (!value.encoding_valid()) {
     unsigned long bits = value.u64;
     raise %(bad-enc (value $bits));
   }
   if (value is void) raise %(void-op (owner "Var.neg"));
   Var result;
-  if (Var.try_dispatch_unary(value, <neg>, &result)) return result;
+  if (value.try_dispatch_unary(<neg>, &result)) return result;
   if (value.kind() == <object>) {
     Symbol tag = value.tag();
     raise %(no-member (tag $tag) (member neg));
@@ -546,11 +546,11 @@ Var Var.binary(Var lhs, Symbol op, Var rhs) {
   int fast_handled;
   Var result = _fast_numeric(op, lhs, rhs, &fast_handled);
   if (fast_handled) return result;
-  if (!Var.encoding_valid(lhs)) {
+  if (!lhs.encoding_valid()) {
     unsigned long bits = lhs.u64;
     raise %(bad-enc (value $bits) (side "left"));
   }
-  if (!Var.encoding_valid(rhs)) {
+  if (!rhs.encoding_valid()) {
     unsigned long bits = rhs.u64;
     raise %(bad-enc (value $bits) (side "right"));
   }
@@ -592,11 +592,11 @@ Var Var.binary(Var lhs, Symbol op, Var rhs) {
 */
 Var Var.update(Var *lhs, Symbol op, Var rhs) {
   if (!lhs) raise %(bad-arg (owner "Var.update"));
-  if (!Var.encoding_valid(lhs[0])) {
+  if (!lhs[0].encoding_valid()) {
     unsigned long bits = lhs[0].u64;
     raise %(bad-enc (value $bits) (side "left"));
   }
-  if (!Var.encoding_valid(rhs)) {
+  if (!rhs.encoding_valid()) {
     unsigned long bits = rhs.u64;
     raise %(bad-enc (value $bits) (side "right"));
   }
@@ -624,7 +624,7 @@ Var Var.update(Var *lhs, Symbol op, Var rhs) {
 */
 Var Var.postfix(Var *lhs, Symbol op) {
   if (!lhs) raise %(bad-arg (owner "Var.postfix"));
-  if (!Var.encoding_valid(lhs[0])) {
+  if (!lhs[0].encoding_valid()) {
     unsigned long bits = lhs[0].u64;
     raise %(bad-enc (value $bits));
   }

@@ -357,8 +357,8 @@ static List _typed_call(
     args = cons(compiler.complete_iter_chain(args.car()), args.cdr());
   Array values = [], int arg_index = 0;
   for (List p = params, a = args; a;
-       p = cdr(p), a = cdr(a), arg_index++) {
-    List param = (p ? car(p).list() : NULL), arg = car(a);
+       p = p.cdr(), a = a.cdr(), arg_index++) {
+    List param = (p ? p.car().list() : NULL), arg = a.car();
     List expected = param;
     if (list_varargs && arg_index > 0) expected = %("Var");
     if (param && param.car() == <param>) expected = param.type_from_ast();
@@ -667,14 +667,14 @@ static int _raw_string_type(Type type) {
 }
 
 static int _string_operand(Compiler compiler, Type type) =>
-  Sym.is_string_type(compiler.sym, type)
+  compiler.sym.is_string_type(type)
       || _raw_string_type(type);
 
 // Identify only the built-in helper family. Protocol resolution still
 // handles every bracket form.
 static Symbol _indexed_builtin_helper(Compiler compiler, Type type) {
-  if (Sym.is_array_type(compiler.sym, type)) return <array>;
-  if (Sym.is_map_type(compiler.sym, type)) return <map>;
+  if (compiler.sym.is_array_type(type)) return <array>;
+  if (compiler.sym.is_map_type(type)) return <map>;
   return 0;
 }
 
@@ -1085,7 +1085,7 @@ static List _cons(Compiler compiler, List ast) {
     `(varray ...)` form, converting every typed element to `Var`.
 */
 List transform_array_literal(Compiler compiler, List ast) {
-  List elems = cdr(ast), Array values = [];
+  List elems = ast.cdr(), Array values = [];
   foreach (List elem, elems) {
     List velem = compiler.convert_expression(elem, %("Var"));
     values.push(velem);
@@ -1099,7 +1099,7 @@ List transform_array_literal(Compiler compiler, List ast) {
     `Var`.
 */
 List transform_map_literal(Compiler compiler, List ast) {
-  List elems = cdr(ast), Array values = [];
+  List elems = ast.cdr(), Array values = [];
   foreach (List entry, elems) {
     List (key, val) = entry.cdr();
     List vkey = compiler.convert_expression(key, %("Var"));
@@ -1131,7 +1131,7 @@ static List _process_raw_segment(Compiler compiler, List seg) {
 
 static List _build_cons_list(List list) {
   if (!list) return %(nil);
-  List head = car(list), tail = _build_cons_list(cdr(list));
+  List head = list.car(), tail = _build_cons_list(list.cdr());
   return %(cons $head $tail);
 }
 
@@ -1505,8 +1505,8 @@ static List _raise(
 // Lower bracket reads into helper calls with method-call conversions.
 static List _nominal_getindex(Compiler compiler, Type type) {
   if (!type.is_typedef_name()) return NULL;
-  if (Sym.is_array_type(compiler.sym, type) ||
-      Sym.is_map_type(compiler.sym, type))
+  if (compiler.sym.is_array_type(type) ||
+      compiler.sym.is_map_type(type))
     return NULL;
   match (type)
     case %(?(String nominal)): {

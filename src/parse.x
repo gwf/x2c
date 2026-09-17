@@ -257,7 +257,7 @@ static int _skip_prefix_macro(Compiler compiler, List *storage) {
   if (compiler.peek(0) != <ident> ||
       !compiler.object_macros.try_get(compiler.token.text, &definition))
     return 0;
-  if (Var.equal(definition, <wrapper>) && compiler.peek(1) == <(>) {
+  if (definition.equal(<wrapper>) && compiler.peek(1) == <(>) {
     /* `EXPORT(const char *) f(void);` wraps the type. The name and its
        parentheses contribute nothing; the closing one is hidden so the
        type and declarator between them parse as written. */
@@ -273,7 +273,7 @@ static int _skip_prefix_macro(Compiler compiler, List *storage) {
     compiler.next();
     return 1;
   }
-  if (!(Var.equal(definition, <empty>) ||
+  if (!(definition.equal(<empty>) ||
         (definition is <list> && !_is_type_words(definition))))
     return 0;
   if (storage && definition is <list>)
@@ -553,7 +553,7 @@ static List _publish_enumerator(
   Symbol prior = compiler.sym.enumerator_owner(key);
   if (prior && binding) {
     List existing = compiler.sym.lookup(key, NULL);
-    if (existing && List.equal(existing, binding)) return input;
+    if (existing && existing.equal(binding)) return input;
   }
   if (prior)
     compiler.report_error(
@@ -749,7 +749,7 @@ static List _finish_parameter(
   List parameter = %(param $base $declarator);
   match (declarator)
     case %(bind ?binding ?):
-      if (!compiler.macro_holes && car(parameter.type_from_ast()) == <&>)
+      if (!compiler.macro_holes && parameter.type_from_ast().car() == <&>)
         compiler.semantic_binding_facts()[
           %(reference-param ${binding.list()})] = 1;
   return parameter;
@@ -920,8 +920,8 @@ static List _direct_declarator(
         Var candidate;
         int shadows_with =
           c.semantic_binding_facts().try_get(
-            %(with-name $spelling), &candidate) && List.equal(
-              c.sym.lookup(%($spelling), NULL), candidate);
+            %(with-name $spelling), &candidate) &&
+          c.sym.lookup(%($spelling), NULL).equal(candidate);
         c.next();
         if (shadows_with) c.sym.define(%($spelling), NULL);
         return %(bind ${c.macro_introduced_name(spelling)} ());

@@ -296,7 +296,7 @@ int MatchMachine.step(MatchMachine m) {
         m.pc = w.target;
         break;
       }
-      Var head = car(at);
+      Var head = at.car();
       if (head is not <list>) {
         m.pc = w.target;
         break;
@@ -317,10 +317,10 @@ int MatchMachine.step(MatchMachine m) {
       while (probe) {
         if (m.stats) m.stats.scan_cells++;
         int equal = w.d == MACHINE_COMPARE_BITS ?
-                    car(probe).u64 == anchor.u64 : car(probe) == anchor;
+                    probe.car().u64 == anchor.u64 : probe.car() == anchor;
         if (equal) break;
-        split = cdr(split);
-        probe = cdr(probe);
+        split = split.cdr();
+        probe = probe.cdr();
         split_distance++;
         probe_distance++;
       }
@@ -397,13 +397,13 @@ int MatchMachine.step(MatchMachine m) {
         break;
       }
       int equal = w.d == MACHINE_COMPARE_BITS ?
-                  car(at).u64 == p.consts[w.a].u64 :
-                  car(at) == p.consts[w.a];
+                  at.car().u64 == p.consts[w.a].u64 :
+                  at.car() == p.consts[w.a];
       if (!equal) {
         m.pc = w.target;
         break;
       }
-      *m._cursor(w.b) = cdr(at);
+      *m._cursor(w.b) = at.cdr();
       (*m._distance(w.b))++;
       break;
     }
@@ -415,14 +415,14 @@ int MatchMachine.step(MatchMachine m) {
         break;
       }
       if (m.slots[w.a].kind == MACHINE_SLOT_INVALID) {
-        m._set_value(w.a, car(at), 0);
+        m._set_value(w.a, at.car(), 0);
         if (m.status == <error>) break;
       }
-      else if (!m._slot_value_equal(&m.slots[w.a], car(at))) {
+      else if (!m._slot_value_equal(&m.slots[w.a], at.car())) {
         m.pc = w.target;
         break;
       }
-      *m._cursor(w.b) = cdr(at);
+      *m._cursor(w.b) = at.cdr();
       (*m._distance(w.b))++;
       break;
     }
@@ -433,7 +433,7 @@ int MatchMachine.step(MatchMachine m) {
         m.pc = w.target;
         break;
       }
-      *m._cursor(w.b) = cdr(at);
+      *m._cursor(w.b) = at.cdr();
       (*m._distance(w.b))++;
       break;
     }
@@ -509,8 +509,8 @@ List MatchMachine.materialize_span(MatchMachine m, MachineSpan span) {
       m._error(<bad-span>);
       return NULL;
     }
-    m.scratch[i] = car(at);
-    at = cdr(at);
+    m.scratch[i] = at.car();
+    at = at.cdr();
     if (m.stats) m.stats.materialized_cells++;
   }
   if (at != span.end) {

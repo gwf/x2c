@@ -145,7 +145,7 @@ static int _reference_type_accepts(List target, List source) {
   unsigned target_qualifiers = _type_qualifiers(&target);
   unsigned source_qualifiers = _type_qualifiers(&source);
   return !(source_qualifiers & ~target_qualifiers) &&
-         List.equal(target, source);
+         target.equal(source);
 }
 
 /** Checks and converts value argument `i`, reporting its position.
@@ -223,7 +223,7 @@ void *x2c_func_reference_argument(
   int signature_reference = declared && declared.car() == <&>;
   List target = signature_reference ? declared.cdr() : NULL;
   if (!source || !argv[i].data.reference || !signature_reference || !want ||
-      !List.equal(target, want) ||
+      !target.equal(want) ||
       !_reference_type_accepts(want, source)) {
     List sig = fn ? fn.sig : NULL;
     raise %(bad-types (sig $sig) (index $i)
