@@ -420,6 +420,14 @@ At a0e5641: `translate` with `%` in the output directory (d17c1b5), `Args.usage`
 argument order (2b22657), directives between match arms (755b274), the
 `cli.c` missing-return warning (11ba05e), and bootstrap locking (656b5b4).
 
+At f122d9d: blis lost `@` and unary `-` for every consumer, including its own
+tests, because 2d84cd5 stopped a private region from publishing its protocol
+adoptions and `protocol Blis(BlisObject);` sat below `#pragma private`. Fixed
+in 2b68db4 by moving the adoption above the pragma. Packages are outside
+`make check`, so nothing caught it. torch has the same shape at
+`packages/torch/src/torch.x:1445-1450` and still passes; why those adoptions
+survive is unexplained.
+
 ## Refuted or verified clean
 
 Generated C/H/`.xi` is byte-identical across `-j 1`, `-j 8`, reversed input

@@ -1,7 +1,8 @@
 # x2c dogfooding remediation
 
-> Status: active - Phases 1 and 2 are authorized and land with this plan.
-> Phases 3 through 10 are scoped and wait on Gary. Scoped 2026-09-17 from
+> Status: active - Phases 1 and 2 landed with this plan in ebb7007; Phase 3
+> landed in 2b68db4. Phases 4 through 10 are scoped and wait on Gary.
+> Scoped 2026-09-17 from
 > five sweeps at HEAD ecdcea9 (packages and cleanup, classes, arrows and
 > percent literals, core idioms, periphery idioms). Counts below are authored
 > sites reproduced by those sweeps; every "identical translation" claim was
@@ -117,11 +118,26 @@ Verification: `make doc-generate` first, because `doc-check` runs
 `make doc-examples` by hand for the changed chapters, since it is optional and
 ungated. Use `~` hidden lines for context rather than `x2c,ignore`.
 
-## Phase 3 - packages adopt `Cleanup(T)`
+## Phase 3 - packages adopt `Cleanup(T)` (landed 2b68db4)
 
-The enabling change, and the reason package users cannot write `$auto` at all
-today: a consumer gets "managed initializer requires Cleanup participation",
-and consumer-side adoption does not work.
+The enabling change, and the reason package users could not write `$auto` at
+all: a consumer got "managed initializer requires Cleanup participation", and
+consumer-side adoption does not work.
+
+Landed as written: 14 types across eight packages, declaration and protocol
+row above `#pragma private`, one-line body after the release definition, no
+call site touched. All nine packages pass their own `test run` and `run-lisp`,
+raylib passes `verify`, and a consumer probe confirmed `$auto` on pcre2's
+`Regexp`, sqlite's `Database` and `Statement`, and yyjson's `JsonDocument`.
+
+The work also uncovered a regression it had to fix first: since 2d84cd5 a
+private region publishes only its functions, so blis's
+`protocol Blis(BlisObject);` below `#pragma private` stopped reaching
+consumers and its own tests no longer compiled - `@` and unary `-` on
+`BlisObject` were gone. Moving that adoption above the pragma restores both.
+The same shape exists in torch, whose private adoptions still work today; that
+difference is unexplained and worth a look before another package relies on a
+private adoption.
 
 Three lines per type, no call site touched, no descriptor row consumed:
 `void T.cleanup(T);` and `protocol Cleanup(T);` above `#pragma private`, and
