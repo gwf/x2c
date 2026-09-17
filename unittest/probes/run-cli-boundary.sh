@@ -949,6 +949,10 @@ run([compiler, 'build', '-c', '--compile-commands', str(blocked), str(helper)],
     'write-failure', 1)
 assert blocked.is_dir()
 assert not list(root.glob('db-directory.tmp.*'))
+run([compiler, 'build', '-c', '--compile-commands', 'bytes.json',
+     '-D', b'DB_BYTES=\xff', str(helper)], 'bytes')
+bytes_rows = json.loads((root / 'bytes.json').read_bytes())
+assert 'DB_BYTES=\ufffd' in bytes_rows[0]['arguments']
 print('compilation database argv, cache, retention, failure, run: passed')
 PY_COMMANDS
 

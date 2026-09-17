@@ -200,12 +200,13 @@ static long _JsonReader._hex4(_JsonReader j) {
   return unit;
 }
 
-/* Returns the length of the well-formed UTF-8 sequence at `s`, or 0. Overlong
-   forms, surrogates, and code points above U+10FFFF are ill-formed. */
+/* Returns the length of the well-formed UTF-8 sequence at `s`, or the negated
+   length of its maximal ill-formed subpart. Overlong forms, surrogates, and
+   code points above U+10FFFF are ill-formed. */
 static int _utf8_length(const unsigned char *s) {
   int length, low = 0x80, high = 0xBF;
   if (s[0] < 0x80) return 1;
-  if (s[0] < 0xC2) return 0;
+  if (s[0] < 0xC2) return -1;
   if (s[0] < 0xE0) length = 2;
   else if (s[0] < 0xF0) {
     length = 3;
@@ -217,10 +218,10 @@ static int _utf8_length(const unsigned char *s) {
     if (s[0] == 0xF0) low = 0x90;
     if (s[0] == 0xF4) high = 0x8F;
   }
-  else return 0;
-  if (s[1] < low || s[1] > high) return 0;
+  else return -1;
+  if (s[1] < low || s[1] > high) return -1;
   for (int i = 2; i < length; i++)
-    if (s[i] < 0x80 || s[i] > 0xBF) return 0;
+    if (s[i] < 0x80 || s[i] > 0xBF) return -i;
   return length;
 }
 
@@ -305,7 +306,7 @@ static String _JsonReader._string(_JsonReader j) {
     else if (byte < 0x20) j._fail("control character in string");
     else {
       int length = _utf8_length((const unsigned char *) j.text + j.at);
-      if (!length) j._fail("invalid UTF-8");
+      if (length < 0) j._fail("invalid UTF-8");
       j.at += length;
     }
   }
@@ -426,18 +427,16 @@ static void _write_string(Buffer out, String text) {
       case '\r': escape = "\\r"; break;
       case '\t': escape = "\\t"; break;
     }
-    if (!escape && byte >= 0x20) {
-      int sequence = _utf8_length(bytes + at);
-      if (!sequence)
-        raise %(bad-arg (operation "Var.json") (why "invalid UTF-8")
-                (offset $at));
+    int sequence = escape || byte < 0x20 ? -1 : _utf8_length(bytes + at);
+    if (sequence > 0) {
       at += sequence;
       continue;
     }
     out.write_len(text + run, at - run);
     if (escape) out.write(escape);
-    else out.printf("\\u%04x", byte);
-    run = ++at;
+    else if (byte < 0x20) out.printf("\\u%04x", byte);
+    else _write_code_point(out, 0xFFFD);
+    run = at -= sequence;
   }
   // The empty String is NULL, so an empty tail must not offset it.
   if (run < length) out.write_len(text + run, length - run);
@@ -543,10 +542,11 @@ static String _json(Var value, int pretty) {
     `Map` names are written in byte order and must be `String`s or
     `Symbol`s; a `Symbol` value is written as a string. A `List` is written
     as an array. A `double` is written with the fewest digits that read back
-    to the same value.
+    to the same value. Each maximal ill-formed UTF-8 subsequence in a string
+    is written as U+FFFD, as Python and JavaScript decoders replace it.
     Raises: `<bad-types>` for a value or name JSON cannot hold,
-    `<conv-range>` for NaN or an infinity, `<bad-arg>` for a string that is
-    not UTF-8, or `<size-limit>` for nesting deeper than 512 levels.
+    `<conv-range>` for NaN or an infinity, or `<size-limit>` for nesting
+    deeper than 512 levels.
 */
 String Var.json(Var value) => _json(value, 0);
 

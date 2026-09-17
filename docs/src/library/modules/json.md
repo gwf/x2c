@@ -71,7 +71,7 @@ when `source` is not one JSON value surrounded only by whitespace, nests
 arrays and objects more than 512 deep, or contains a number too large for
 a `double`, an unpaired surrogate escape, or `\u0000`.
 
-Source: `lib/json.x:396`
+Source: `lib/json.x:397`
 
 <a id="Json.read_file"></a>
 #### Json.read_file
@@ -83,7 +83,7 @@ Returns the x2c value of the JSON file at `path`, as `Json.parse` does.
 **Raises:** the causes of `Path.read_text`, or `<bad-arg>` as
 `Json.parse` does, with a `path` detail added.
 
-Source: `lib/json.x:402`
+Source: `lib/json.x:403`
 
 <a id="Json.write_file"></a>
 #### Json.write_file
@@ -145,11 +145,12 @@ Returns `value` as compact JSON text.
 `Map` names are written in byte order and must be `String`s or
 `Symbol`s; a `Symbol` value is written as a string. A `List` is written
 as an array. A `double` is written with the fewest digits that read back
-to the same value.
+to the same value. Each maximal ill-formed UTF-8 subsequence in a string
+is written as U+FFFD, as Python and JavaScript decoders replace it.
 
 **Raises:** `<bad-types>` for a value or name JSON cannot hold,
-`<conv-range>` for NaN or an infinity, `<bad-arg>` for a string that is
-not UTF-8, or `<size-limit>` for nesting deeper than 512 levels.
+`<conv-range>` for NaN or an infinity, or `<size-limit>` for nesting
+deeper than 512 levels.
 
 Source: `lib/json.x:551`
 

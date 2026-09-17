@@ -220,9 +220,17 @@ static void json_writes_compact_and_pretty_text(void) {
   File output = stdout;
   try Var.json([%{}, output]);
   catch %(bad-types *): caught++;
-  try Var.json(String.new("\xc3("));
-  catch %(bad-arg *): caught++;
-  EXPECT_INT_EQ(caught, 5);
+  EXPECT_INT_EQ(caught, 4);
+}
+
+static void json_writes_ill_formed_utf8_as_replacement(void) {
+  $test.scoped();
+  String replaced = "\"\xef\xbf\xbd(\xef\xbf\xbd\xef\xbf\xbd" "A"
+    "\xef\xbf\xbd\xef\xbf\xbd\xef\xbf\xbd\xef\xbf\xbd\"";
+  String text = Var.json(String.new(
+    "\xc3(\xe2\x82\xf0\x90\x80" "A\xed\xa0\x80\xff"));
+  EXPECT_STR_EQ(text, replaced);
+  EXPECT_STR_EQ(Json.parse(text).json(), replaced);
 }
 
 static void json_values_round_trip(void) {
@@ -284,6 +292,7 @@ void json_suite(void) {
   $test.run(json_nesting_is_limited_to_512_levels);
   $test.run(json_repeated_names_keep_the_last_value);
   $test.run(json_writes_compact_and_pretty_text);
+  $test.run(json_writes_ill_formed_utf8_as_replacement);
   $test.run(json_values_round_trip);
   $test.run(json_files_read_and_write);
 }

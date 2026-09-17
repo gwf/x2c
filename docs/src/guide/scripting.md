@@ -635,7 +635,10 @@ catch %(bad-arg *detail):
 
 Writing raises `<bad-types>` for a value JSON cannot hold, such as a `File`
 or a `Map` key that is not a `String` or `Symbol`, and `<conv-range>` for NaN
-or an infinity.
+or an infinity. A `String` that is not valid UTF-8 is written with U+FFFD in
+place of each ill-formed byte sequence, the same text that Python and
+JavaScript produce when they decode those bytes, so the output is always
+UTF-8 that `Json.parse` accepts.
 
 The package keeps what a `Map` cannot: object order, duplicate names, and
 whether a number was signed, unsigned, or real. Its converted integers are
