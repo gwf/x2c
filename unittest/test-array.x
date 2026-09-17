@@ -317,6 +317,17 @@ static void array_sort_reverse_join(void) {
   EXPECT_TRUE(joined == "a-b-c");
 }
 
+/* The empty String is the null pointer, so a fast path that wrote its bytes
+   straight into the Buffer raised <bad-arg> instead of contributing nothing.
+   String.join over the same elements has always produced ",a,". */
+static void array_join_empty_string_elements(void) {
+  $test.scoped();
+  Array words = ["", "a", ""];
+  EXPECT_TRUE(words.join(",") == ",a,");
+  EXPECT_TRUE(words.join(NULL) == "a");
+  EXPECT_TRUE(",".join(%("" "a")) == ",a");
+}
+
 static void array_heap_push_pop_min_basic(void) {
   $test.scoped();
   Array heap = [];
@@ -622,6 +633,7 @@ void array_suite(void) {
   $test.run(array_splice_and_concat);
   $test.run(array_find_contains_count);
   $test.run(array_sort_reverse_join);
+  $test.run(array_join_empty_string_elements);
   $test.run(array_sort_callbacks_keep_ties_and_identity);
   $test.run(array_sort_callback_errors_preserve_elements);
   $test.run(array_sort_by_releases_scratch);

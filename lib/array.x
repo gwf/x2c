@@ -718,8 +718,7 @@ String Array.join(Array array, String separator) {
   Buffer buf = Buffer.new(0);
   for (size_t i = 0; i < n; i++) {
     Var elem = ((Var *) array.bytes)[i];
-    if (elem is <string>) buf.write(elem.string());
-    else elem.write_str(buf);
+    elem.write_str(buf);
     if (separator && i < n - 1) buf.write(separator);
   }
   return buf.str_free();
