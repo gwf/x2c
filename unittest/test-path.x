@@ -59,6 +59,8 @@ static void path_glob_match_follows_components(void) {
   EXPECT_FALSE(Path.glob_match("*", ".hidden"));
   EXPECT_FALSE(Path.glob_match("src/*.x", "src/.draft.x"));
   EXPECT_FALSE(Path.glob_match("**/*.x", ".git/objects/a.x"));
+  EXPECT_FALSE(Path.glob_match("a/**", "a/.h/x"));
+  EXPECT_TRUE(Path.glob_match("tree/**/.hid/*.x", "tree/.hid/e.x"));
   EXPECT_TRUE(Path.glob_match(".*", ".hidden"));
   EXPECT_TRUE(Path.glob_match("src/.draft.*", "src/.draft.x"));
   EXPECT_TRUE(Path.glob_match("\\.hidden", ".hidden"));
@@ -101,6 +103,8 @@ static void path_tree_operations(void) {
   EXPECT_LIST_EQ(Path.glob(%"$root/**/*.x"),
                  %(${%"$root/one/g.x"} ${%"$root/one/two/f.x"}));
   EXPECT_LIST_EQ(Path.glob(%"$root/.*/*.x"), %(${%"$root/.hidden/h.x"}));
+  EXPECT_LIST_EQ(Path.glob(%"$root/**/.hidden/*.x"),
+                 %(${%"$root/.hidden/h.x"}));
   char *cwd = getcwd(NULL, 0);
   chdir(root);
   EXPECT_LIST_EQ(Path.glob(".*/*.x"), %(".hidden/h.x"));

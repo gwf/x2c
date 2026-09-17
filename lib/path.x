@@ -253,13 +253,17 @@ static int _class_match(const char **pattern, unsigned char value) {
   return negate ? !matched : matched;
 }
 
+static int _hidden(const char *text, const char *origin) =>
+  *text == '.' && (text == origin || text[-1] == '/');
+
 /* A name that begins with a dot matches only a pattern that spells the dot,
-   as in a shell: no wildcard matches a component's leading dot. */
+   as in a shell: no wildcard matches a component's leading dot, though a
+   `**` component can match zero directories before such a name. */
 static int _glob_match(
   const char *pattern, const char *text, const char *origin) {
   if (!*pattern) return !*text;
-  if (*text == '.' && (text == origin || text[-1] == '/') &&
-      *pattern != '.' && !(pattern[0] == '\\' && pattern[1] == '.'))
+  if (_hidden(text, origin) && *pattern != '.' &&
+      !(pattern[0] == '\\' && pattern[1] == '.') && strncmp(pattern, "**/", 3))
     return 0;
   if (pattern[0] == '*' && pattern[1] == '*') {
     const char *rest = pattern + 2;
@@ -270,7 +274,7 @@ static int _glob_match(
       if ((!components || ch == text || ch[-1] == '/') &&
           _glob_match(rest + components, ch, origin))
         return 1;
-      if (!*ch) return 0;
+      if (!*ch || _hidden(ch, origin)) return 0;
     }
   }
   if (*pattern == '*') {
