@@ -234,6 +234,66 @@ static void match_star_long_anchor_miss_is_loop_safe(void) {
   EXPECT_NULL(input.match(%(*items ?last absent)));
 }
 
+/* A star anchor is compared as one value, so a List anchor whose bits do
+   not decide it would reject a sublist the same pattern matches at a fixed
+   position. Two boxes of one wide number are equal but not identical. */
+static void match_star_anchor_agrees_with_a_fixed_position(void) {
+  Var left = Var.box_long(4294967296l), right = Var.box_long(4294967296l);
+  List input = %(1 ($left) 2);
+  EXPECT_NOT_NULL(input.match(%(? ($right) ?)));
+  EXPECT_NOT_NULL(input.match(%(*a ($right) *b)));
+  List oracle = %(sentinel);
+  EXPECT_TRUE(test_match_oracle_try_match(input, %(*a ($right) *b), &oracle));
+  EXPECT_NULL(input.match(%(*a ($left 9) *b)));
+  // a Symbol anchor still decides by bits, which is the fast path
+  EXPECT_NOT_NULL(%(a (mark) b).match(%(*pre (mark) *post)));
+  EXPECT_NULL(%(a (other) b).match(%(*pre (mark) *post)));
+}
+
+/* A repeated star compares values wherever it appears: an interior one
+   already did, and the final one compared raw bits. */
+static void match_repeated_star_compares_values(void) {
+  Var left = Var.box_long(4294967296l), right = Var.box_long(4294967296l);
+  EXPECT_NOT_NULL(%($left b $right).match(%(*a b *a)));
+  EXPECT_NOT_NULL(%($left b $right c).match(%(*a b *a c)));
+  EXPECT_NULL(%($left b 7).match(%(*a b *a)));
+  EXPECT_NULL(%($left b 7 c).match(%(*a b *a c)));
+  List oracle = %(sentinel);
+  EXPECT_TRUE(
+    test_match_oracle_try_match(%($left b $right), %(*a b *a), &oracle));
+}
+
+/* The doc says a template retains a binder the match did not bind, and the
+   two replacement paths answer alike. */
+static void replace_retains_an_unbound_sequence_binder(void) {
+  EXPECT_TRUE(%(a *m b).replace(%((?x 1))) == %(a *m b));
+  EXPECT_TRUE(%(a *m b).replace(NULL) == %(a *m b));
+  EXPECT_TRUE(%(a *m b).replace(%((*m (1 2)))) == %(a 1 2 b));
+  Var out = <unchanged>;
+  EXPECT_TRUE(%(b).try_match_replace(%(!or (a *x) (b)), %(r *x), &out));
+  EXPECT_TRUE(out == %(r *x).var());
+  Var oracle = <unchanged>;
+  EXPECT_TRUE(test_match_oracle_try_match_replace(
+    %(b), %(!or (a *x) (b)), %(r *x), &oracle));
+  EXPECT_TRUE(out == oracle);
+}
+
+/* Traversal descends a cdr in a loop, so `List` length costs no stack and
+   only nesting reaches it. A worker thread's stack is a fraction of the
+   main thread's, so the length a search survives cannot depend on it. */
+static void search_walks_a_long_list_without_recursing(void) {
+  List input = NULL;
+  for (int i = 0; i < 200000; i++) input = cons(%(item $i), input);
+  EXPECT_INT_EQ(input.search(%(item 199999)).len(), 1);
+  Var node = void;
+  List bindings = %(sentinel);
+  EXPECT_TRUE(input.try_search(%(item ?id), &node, &bindings));
+  EXPECT_INT_EQ(bindings.assoc(<?id>).int(), 199999);
+  List replaced = input.search_replace(%(item 0), %(gone));
+  EXPECT_INT_EQ(replaced.len(), input.len());
+  EXPECT_INT_EQ(replaced.search(%(gone)).len(), 1);
+}
+
 static void try_match_separates_status_from_bindings(void) {
   List empty = NULL, bindings = %(unchanged);
   EXPECT_TRUE(empty.try_match(empty, &bindings));
@@ -518,6 +578,10 @@ void match_suite(void) {
   $test.run(match_star_uses_leftmost_successful_split);
   $test.run(match_star_handles_repeated_and_multiple_segments);
   $test.run(match_star_long_anchor_miss_is_loop_safe);
+  $test.run(match_star_anchor_agrees_with_a_fixed_position);
+  $test.run(match_repeated_star_compares_values);
+  $test.run(replace_retains_an_unbound_sequence_binder);
+  $test.run(search_walks_a_long_list_without_recursing);
   $test.run(try_match_separates_status_from_bindings);
   $test.run(try_search_returns_first_depth_first_match);
   $test.run(try_match_replace_preserves_var_results);

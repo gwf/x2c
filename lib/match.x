@@ -745,7 +745,8 @@ static Var _replace(Var input, List bindings) {
   int splice = head.is_list_binder() && head != <*> && head != <?>;
   head = _replace(head, bindings);
   tail = _replace(tail, bindings);
-  if (splice) return %(@head @tail);
+  // an unbound sequence binder is retained, so it is still one element
+  if (splice && head is <list>) return %(@head @tail);
   return %($head @tail);
 }
 
@@ -787,8 +788,9 @@ static Var _capture_replace(
   int splice = head.is_list_binder() && head != <*> && head != <?>;
   Var replaced_head = _capture_replace(head, layout, captures);
   List replaced_tail = _capture_replace(tail, layout, captures);
-  if (splice) {
-    List spliced = replaced_head is <list> ? replaced_head : NULL;
+  // an unbound sequence binder is retained, so it is still one element
+  if (splice && replaced_head is <list>) {
+    List spliced = replaced_head;
     return %(@spliced @replaced_tail);
   }
   return %($replaced_head @replaced_tail);

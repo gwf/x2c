@@ -623,9 +623,10 @@ static void plan_replace_parity(void) {
   EXPECT_INT_EQ(plan.try_match_replace(input, %(wrapped ?payload),
                                        &result), 1);
   EXPECT_TRUE(result is <list> && result.list() == %(wrapped value));
+  // an unbound sequence binder is retained, so it stays one element
   EXPECT_INT_EQ(plan.try_match_replace(input, %(*missing tail),
                                        &result), 1);
-  EXPECT_TRUE(result is <list> && result.list() == %(tail));
+  EXPECT_TRUE(result is <list> && result.list() == %(*missing tail));
   EXPECT_INT_EQ(plan.try_match_replace(input, %(!quote ?payload),
                                        &result), 1);
   EXPECT_TRUE(result == <?payload>);
