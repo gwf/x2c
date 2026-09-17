@@ -525,7 +525,10 @@ x2c env runtime_lib
 
 The home is `X2C_HOME` when set. Otherwise the compiler walks up from its
 executable, then from the current directory, to the nearest directory holding
-`include/` and `etc/compiler-sdk.xlisp`. A source checkout and an
+`include/` and `etc/compiler-sdk.xlisp`. Either way the home is reported and
+compared as an absolute path with symbolic links resolved, so a relative or
+symlinked `X2C_HOME` selects the same stage, prelude, and runtime archive as
+its real path. A source checkout and an
 [installed prefix](../guide/installation.md) are both homes. A stage compiler
 under `<home>/builds/<n>/` links that stage's runtime archive. Any other
 compiler links `<home>/lib/libx2c.a` when it exists, and otherwise

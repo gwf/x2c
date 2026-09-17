@@ -15,40 +15,48 @@ $(import "../lib/private-keywords.xmacro")
 
 /** Initializes compiler paths and default include `List`s once.
     The executable is resolved from the host, `argv0`, or `PATH`. The home is
-    `X2C_HOME` as given when set; otherwise discovery walks from the
-    executable and then from the current directory to a directory holding
+    `X2C_HOME` when it is set and not empty; otherwise discovery walks from
+    the executable and then from the current directory to a directory holding
     `include/` and `etc/compiler-sdk.xlisp`, a source checkout or an
-    installed prefix alike, before falling back to `.`. An already configured
-    root leaves all state unchanged.
+    installed prefix alike. The root is kept absolute with symbolic links
+    resolved, the one spelling every path below the home is compared in.
+    Without a home the root is the current directory and `x2c_home` reports
+    none. An already configured root leaves all state unchanged.
 */
 void x2c_initialize_environment(const char *argv0) {
   if (x2c_root_path) return;
   x2c_executable_path = _executable(argv0);
   String home = Env.get("X2C_HOME");
-  x2c_root_path = home ? home.rstrip("/") : _locate_home(x2c_executable_path);
-  if (!x2c_root_path) x2c_root_path = _locate_home(Path.absolute("."));
-  if (!x2c_root_path) x2c_root_path = ".";
+  if (home && !home[0]) home = NULL;
+  String root = home ? home.rstrip("/") : _locate_home(x2c_executable_path);
+  if (!root) root = _locate_home(Path.absolute("."));
+  x2c_root_found = root != NULL;
+  x2c_root_path = Path.absolute(root ? root : ".");
   _prepare_repo_defaults();
 }
 
 /** Overrides the repository root and rebuilds its default include `List`s.
-    `root` is retained without copying. It and the rebuilt values must remain
-    valid until the next override or the process no longer uses them.
+    The root is resolved as environment setup resolves it. The rebuilt values
+    must remain valid until the next override or the process no longer uses
+    them.
 */
 void x2c_set_root(String root) {
-  x2c_root_path = root;
+  x2c_root_path = Path.absolute(root);
+  x2c_root_found = 1;
   x2c_base_include_dirs = NULL;
   x2c_repo_cpp_include_dirs = NULL;
   _prepare_repo_defaults();
 }
 
-/** Returns the borrowed repository root, or NULL before it is configured. */
+/** Returns the borrowed repository root, or NULL before it is configured.
+    The root is absolute with symbolic links resolved.
+*/
 String x2c_get_root(void) => x2c_root_path;
 
 /** Returns the root with symbolic links resolved, or NULL before it is
     configured. Paths below the home are compared in this spelling.
 */
-String x2c_canonical_root(void) => x2c_canonical_root_path;
+String x2c_canonical_root(void) => x2c_root_path;
 
 /** Returns the borrowed resolved executable path, or NULL when unavailable. */
 String x2c_get_executable(void) => x2c_executable_path;
@@ -105,9 +113,8 @@ List x2c_default_include_dirs(void) => x2c_base_include_dirs;
 */
 List x2c_cpp_include_dirs(void) => x2c_repo_cpp_include_dirs;
 
-/** Returns the discovered or configured home, or NULL for the `.` fallback.
-*/
-String x2c_home(void) => x2c_root_path == "." ? NULL : x2c_root_path;
+/** Returns the discovered or configured home, or NULL when there is none. */
+String x2c_home(void) => x2c_root_found ? x2c_root_path : NULL;
 
 /** Returns `<home>/packages`, which may not exist, or NULL without a home. */
 String x2c_home_packages(void) {
@@ -209,7 +216,7 @@ void file_publish(List outputs) {
 // module state
 
 static String x2c_executable_path = NULL, x2c_root_path = NULL;
-static String x2c_canonical_root_path = NULL;
+static int x2c_root_found = 0;
 static List x2c_base_include_dirs = NULL, x2c_repo_cpp_include_dirs = NULL;
 
 // environment discovery
@@ -242,7 +249,6 @@ static String _locate_home(Path p) {
 
 static void _prepare_repo_defaults(void) {
   if (!x2c_root_path) return;
-  x2c_canonical_root_path = Path.absolute(x2c_root_path);
   String include_dir = %"$x2c_root_path/include/x2c";
   String src_dir = %"$x2c_root_path/src", lib_dir = %"$x2c_root_path/lib";
   x2c_base_include_dirs = cons(include_dir, NULL);
