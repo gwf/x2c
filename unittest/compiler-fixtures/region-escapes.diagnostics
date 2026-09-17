@@ -1,0 +1,34 @@
+unittest/compiler-fixtures/region-escapes.x:24:3: region: 'a' can outlive the region it was allocated in
+    return a;
+    ^^^^^^
+  note: region opened at line 22 leaves by: returned
+
+unittest/compiler-fixtures/region-escapes.x:32:5: region: 'a' can outlive the region it was allocated in
+      out = a;
+      ^^^
+  note: region opened at line 30 leaves by: assigned to a local declared outside the region
+
+unittest/compiler-fixtures/region-escapes.x:34:3: region: 'out' is used after the region that allocated it ended
+    return out;
+    ^^^^^^
+  note: region opened at line 30
+
+unittest/compiler-fixtures/region-escapes.x:42:5: region: 'n' can outlive the region it was allocated in
+      global_node = n;
+      ^^^^^^^^^^^
+  note: region opened at line 39 leaves by: stored into a static
+
+unittest/compiler-fixtures/region-escapes.x:51:3: region: 'l' can outlive the region it was allocated in
+    return l;
+    ^^^^^^
+  note: region opened at line 48 leaves by: returned
+
+unittest/compiler-fixtures/region-escapes.x:58:3: after-free: 'a' is used after it was freed
+    return (int) a.len() + l.len();
+    ^^^^^^
+
+unittest/compiler-fixtures/region-escapes.x:65:5: region: 'n' can outlive the region it was allocated in
+      _link(holder, n);
+      ^^^^^
+  note: region opened at line 63 leaves by: stored through a parameter
+

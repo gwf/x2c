@@ -1858,7 +1858,7 @@ static Ast _node(Compiler c, Ast ast) {
 List Compiler.transform(Compiler compiler, List ast) {
   /* Regions are read before lowering, while `$scope`, `$auto`, and the
      `defer` beside each region are still the forms the parser produced. */
-  // compiler.check_regions(ast);
+  compiler.check_regions(ast);
   List newast = _sequence(compiler, ast);
   while (newast != ast) {
     ast = newast;

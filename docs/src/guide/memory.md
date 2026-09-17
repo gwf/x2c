@@ -315,8 +315,7 @@ file has been parsed, or temporary values have been combined into one result. A
 scope wrapped around canonical values that already outlive it buys nothing and
 adds a release you can forget.
 
-A scope does not prevent dangling pointers. This translates without a
-diagnostic:
+A scope does not prevent dangling pointers:
 
 ```x2c
 static char *leaked_label(void) {
@@ -330,15 +329,80 @@ static char *leaked_label(void) {
 `Scope.release` freed that storage. The returned pointer is dangling, and
 every use of it afterwards is undefined behavior: reading stale bytes,
 corrupting the allocator, or appearing to work until it does not.
-`Scope`s make lifetimes explicit and cheap to end. They do not check that a
-value has stopped being used. The same applies to a boxed wide `Var`: if you
-keep the `Var`, you must keep the scope that allocated the box.
+`Scope`s make lifetimes explicit and cheap to end. They do not check at
+runtime that a value has stopped being used. The same applies to a boxed wide
+`Var`: if you keep the `Var`, you must keep the scope that allocated the box.
+
+The compiler does warn about this one, because the escape is visible in the
+source: `label` is allocated between a retain and its release and read after
+it. The next section describes what the check sees and what it cannot see.
 
 Three habits keep this out of your code. Return a canonical value, a
 `String`, a `List`, or a `Symbol`, when a result must cross a scope boundary.
 Use `Scope.move` when a mutable allocation has to survive. When in doubt,
 let the caller create the scope and pass the slot down, so the lifetime is
 visible where it was chosen.
+
+## Warnings when a value outlives its region
+
+A region is a `$scope()` block, a `Scope.retain` and `Scope.release` pair, a
+`$scope(&slot)` push, a `List.pool_retain` bracket, or an `$auto` local.
+Translation warns when a value allocated inside a region can still be reached
+after the region ends. The warning names the value, the line that opened its
+region, and the way the value leaves:
+
+- returned;
+- assigned to a local declared outside the region;
+- stored through a parameter, through an unknown pointer, or into a static;
+- stored into an object that belongs to another region;
+- handed to a function that stores it in one of those places.
+
+Two more warnings come from the same pass. `unbalanced` reports a region
+opened in one block and released in another, which is the shape the other
+warnings cannot follow. `after-free` reports a local read after `Scope.free`
+or `Array.list_free` consumed it.
+
+Code that stays inside the pattern the chapter teaches compiles silently:
+
+```x2c
+~typedef struct Entry { int id; } *Entry;
+~int main(void) { Scope keep = NULL; Scope.push(&keep); Entry e = adopt(&keep);
+~  Scope.pop(); Scope.destroy(keep); return e != NULL && !label().len(); }
+static Entry adopt(Scope *keep) {
+  $scope() {
+    Entry entry = Scope.calloc(1, sizeof(struct Entry));
+    Scope.move(entry, keep);
+    return entry;
+  }
+  return NULL;
+}
+
+static String label(void) {
+  $scope() {
+    Buffer out = Buffer.new(0);
+    out.write("ready");
+    return out.str();
+  }
+  return NULL;
+}
+```
+
+`Scope.move` hands the storage to a scope the caller owns, and `Buffer.str`
+produces a canonical `String` that its pool owns rather than the region.
+`Context.export` and `List.promote` end tracking the same way.
+
+These warnings are a report on the lexical pattern, not a memory-safety
+claim. They say nothing about storage from plain `malloc` or a C library,
+raw pointer arithmetic and casts, values reached through a field of a stack
+`struct`, callbacks and function pointers, entry points a Lisp binding calls,
+or `Context` regions. Every one of those can still produce a dangling
+pointer that translates silently. Linking a program against `libx2c.a` with
+`cc -fsanitize=address,undefined` remains the way to observe the dangling
+read itself.
+
+Translation continues after a warning, so a program the compiler cannot
+prove safe still compiles. When a warning describes a lifetime you have
+arranged some other way, the departure is yours to keep.
 
 ## Ordinary C storage still works
 

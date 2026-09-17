@@ -2706,3 +2706,20 @@ repeated. `--diagnostics-file` writes the same diagnostics as JSON Lines; the
 Locations retain `file`, one-based `line` and `column`, token
 `length`, and absolute byte `position`. The source renderer uses `length` for
 the caret width.
+
+### Region warnings
+
+Three codes come from the region check described in
+[Scopes and Lifetime](../guide/memory.md#warnings-when-a-value-outlives-its-region).
+Each is a warning: translation continues and the program still compiles.
+
+| Code | Reported for |
+| --- | --- |
+| `region` | A value allocated inside a region is reachable after the region ends. The notes give the line that opened the region and the way the value leaves. |
+| `unbalanced` | A region is opened in one block and released in another. |
+| `after-free` | A local is read after `Scope.free` or `Array.list_free` consumed it. |
+
+The check reads regions lexically and carries one summary per function
+across units. It makes no claim about storage from plain `malloc` or a C
+library, raw pointer arithmetic, values reached through a field of a stack
+`struct`, callbacks, or `Context` regions.

@@ -20,6 +20,7 @@ static Var _857, _854, _837, _834, _833, _829, _818, _811, _805, _804, _803, _80
 #include "protocol.h"
 #include "lambda.h"
 #include "cleanup.h"
+#include "regions.h"
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
@@ -2768,9 +2769,10 @@ case 1219800220 : ast = _return(c, ast);  break;  case 588 : case 48777994 : cas
 return _finish(c, ast);
 }
 
+void Compiler_check_regions(Compiler, List);
 List Compiler_mark_cleanup_regions(Compiler, List);
 List Compiler_transform(Compiler compiler, List ast){
-  if(! _init_guard_) _file_init_();  List newast = _sequence(compiler, ast);  while(! List_equal(newast, ast)){
+  if(! _init_guard_) _file_init_();  Compiler_check_regions(compiler, ast);  List newast = _sequence(compiler, ast);  while(! List_equal(newast, ast)){
     ast = newast;  newast = _sequence(compiler, ast);
   }
   Array generated = Array_new();  while(Array_len(compiler -> early_decls)){

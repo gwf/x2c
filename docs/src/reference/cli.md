@@ -531,9 +531,10 @@ no diagnostics leaves it empty. Each line is one JSON object:
 ```
 
 - `code` is the diagnostic category, such as `parse`, `type`, `macro`,
-  `protocol`, `xform`, `warning`, or `limit`.
-- `severity` is `warning` for `warning`, `note` for the `limit` notice, and
-  `error` otherwise.
+  `protocol`, `xform`, `region`, `warning`, or `limit`.
+- `severity` is `error`, `warning`, or `note`. It records how the report was
+  submitted, so a category that reports both, such as `region` or `literal`,
+  carries the right severity on each entry. The `limit` notice is a `note`.
 - `file` is relative to the working directory for a source inside it and
   absolute otherwise. A pseudo-source such as `<stdin>` keeps its name.
 - `line` and `column` are one-based, `length` is the token width in bytes,

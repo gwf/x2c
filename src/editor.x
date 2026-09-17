@@ -53,7 +53,7 @@ static void _diagnostics(Buffer out, Compiler compiler, Map needed) {
     out.write(",\"code\":");
     report_json_string(out, code.str());
     out.write(",\"severity\":");
-    report_json_string(out, code == <warning> ? "warning" : "error");
+    report_json_string(out, entry.assoc(<severity>).symbol().str());
     out.write_char('}');
   }
   out.write_char(']');

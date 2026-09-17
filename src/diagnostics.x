@@ -110,17 +110,20 @@ int Diagnostics.reached_limit(Diagnostics diag) {
 
 // reporting
 
-/* Diagnostic entries always carry code, message, location, and notes rows.
+/* Diagnostic entries always carry code, severity, message, location, and
+   notes rows. The severity is the submitting operation's, not the code's: a
+   category such as `literal` or `region` reports both errors and warnings.
    Entry cells are canonicalized through the active pool hierarchy and retain
    their actual producing-pool lifetime. Message, location, and notes remain
    shared with their producers and retain those pool lifetimes, which must
    outlive every store or snapshot use. A missing location or notes value
    remains a typed empty List rather than an omitted row. */
 static List _build_entry(
-  Symbol code, String message, List location, List notes) {
+  Symbol code, Symbol severity, String message, List location, List notes) {
   Symbol effective_code = code ? code : <driver>;
   return %(
     (code $effective_code)
+    (severity $severity)
     (message $message)
     (location $location)
     (notes $notes)
@@ -132,7 +135,7 @@ static List _build_entry(
 static void _publish_limit_notice(Diagnostics diag) {
   if (diag.limit == 1) return;
   String note = "too many errors, stopping";
-  List entry = _build_entry(<limit>, note, NULL, NULL);
+  List entry = _build_entry(<limit>, <note>, note, NULL, NULL);
   diag.entries.push(entry);
   _emit_entry(diag, entry);
 }
@@ -157,7 +160,7 @@ void Diagnostics.report(
 
   /* Protocol adoption is checked before and while parsing its declaration,
      so a failed adoption is submitted twice. */
-  List entry = _build_entry(code, message, location, notes);
+  List entry = _build_entry(code, <error>, message, location, notes);
   if (diag.entries.contains(entry)) return;
   diag.entries.push(entry);
   diag.count += 1;
@@ -173,7 +176,7 @@ void Diagnostics.report(
    never change `count` or publish the limit notice. */
 static void Diagnostics._warn(
   Diagnostics diag, Symbol code, String message, List location, List notes) {
-  List entry = _build_entry(code, message, location, notes);
+  List entry = _build_entry(code, <warning>, message, location, notes);
   diag.entries.push(entry);
   _emit_entry(diag, entry);
 }
@@ -222,8 +225,7 @@ static void Compiler._write_json(Compiler compiler, List entry) {
   out.write(",\"message\":");
   report_json_string(out, entry.assoc(<message>).string());
   out.write(",\"severity\":");
-  report_json_string(
-    out, code == <warning> ? "warning" : code == <limit> ? "note" : "error");
+  report_json_string(out, entry.assoc(<severity>).symbol().str());
   foreach (Symbol key, %(file line column length position)) {
     Var value = location.assoc(key);
     out.printf(",\"%s\":", key.str());

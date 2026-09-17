@@ -121,5 +121,6 @@
 
 - [Compiler Architecture](internals/architecture.md)
 - [Implementation Map](internals/implementation-map.md)
+- [The Region Model](internals/regions.md)
 - [Building the Compiler](internals/building.md)
 - [A Recursive Lisp in x2c](internals/reference-lisp.md)
