@@ -2231,11 +2231,8 @@ static int _bracket_designates(Compiler compiler) {
 /* An entry that begins with a Map-entry macro, or whose first bracket-level
    `:` belongs to no conditional, makes a brace a Map literal. */
 static int _brace_starts_map(Compiler compiler) {
+  if (compiler.map_entry_macro_follows()) return 1;
   Token token = compiler.token;
-  if ((token.type == <$> && compiler.macro_starts_target_at(AST_MAP_ENTRY)) ||
-      (token.type == <ident> &&
-       compiler.keyword_alias_starts_target_at(AST_MAP_ENTRY)))
-    return 1;
   for (int conditionals = 0;; token = token.after_group()) {
     switch (token.type) {
       case <eof>: case <;>: case <,>: case <")">: case <]>: case <"}">:
@@ -2377,21 +2374,14 @@ List Compiler.parse_primary(Compiler compiler) {
     case <lit-char*>:  return _parse_c_string_literals(compiler);
     case <$>:          return compiler.try_parse_macro_expression();
     case <ident>: {
-      Var candidate;
-      if (compiler.semantic_binding_facts().try_get(
-        %(with-name ${compiler.token.text}), &candidate)) {
-        List binding = compiler.sym.lookup(%(${compiler.token.text}), NULL);
-        if (binding && binding.equal(candidate)) {
-          Var stored;
-          if (compiler.semantic_binding_facts().try_get(
+      List binding = compiler.with_binding();
+      Var stored;
+      if (binding && compiler.semantic_binding_facts().try_get(
             %(with $binding), &stored)) {
-            List expression = stored;
-            compiler.next();
-            match (expression)
-              case %(expr ?type ?):
-                return %(expr $type (parens $expression));
-          }
-        }
+        List expression = stored;
+        compiler.next();
+        match (expression)
+          case %(expr ?type ?): return %(expr $type (parens $expression));
       }
       List keyword = compiler.try_parse_macro_expression();
       if (keyword) return keyword;
@@ -2538,22 +2528,6 @@ static int _unrelated_pointers(Compiler compiler, Type source, Type target) {
   }
 }
 
-/* Report whether either name is defined, directly or through further
-   typedefs, from the other.  A name and the name it was defined from are
-   the same type by construction: an Array is a Block, an Ast is a List.
-   C lets them stand for each other in both directions. */
-static int _same_typedef_line(Compiler compiler, Type one, Type other) {
-  for (int reversed = 0; reversed < 2; reversed++) {
-    Type walk = reversed ? other : one, stop = reversed ? one : other;
-    int hops = 0;
-    while (walk) {
-      walk = compiler.sym.next_typedef(walk, &hops);
-      if (walk.equal(stop)) return 1;
-    }
-  }
-  return 0;
-}
-
 /* A proven nonzero operand yields its short spelling; unknown forms yield
    NULL. C11 6.3.2.3p3 requires an integer constant expression with value zero,
    not just the token 0. x2c does not fold constants, so this recognizes
@@ -2682,17 +2656,14 @@ static List _converter_owned_call(
 static List _converter_call(
   Compiler compiler, List expr, Type type, Type target) {
   if (!type.match(%(?)) || !target.match(%(?))) return NULL;
-  int hops = 0;
-  for (Type owner = type; owner; ) {
+  List owners = type.is_bare_typedef_name()
+              ? _typedef_names(compiler, type).list_free() : %($type);
+  foreach (Type owner, owners) {
     if (owner == target) return NULL;
-    if (owner.match(%(?))) {
-      int declared = 0;
-      List converted = _converter_owned_call(
-        compiler, expr, owner, target, &declared);
-      if (converted || declared) return converted;
-    }
-    if (!owner.is_typedef_name() && !owner.is_typedef()) break;
-    owner = compiler.sym.next_typedef(owner, &hops);
+    int declared = 0;
+    List converted = _converter_owned_call(
+      compiler, expr, owner, target, &declared);
+    if (converted || declared) return converted;
   }
   return NULL;
 }
@@ -3965,13 +3936,15 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
      ArrayInt and its doubles were read as ints.  Such a pair needs a
      converter, which the lookup above would already have taken, or a cast.
      A `void *` source is the one pointer C itself lets stand for any
-     other. */
+     other. A name defined from the other, as an Array is a Block, is the
+     same type by construction, in both directions. */
   if (declared_source.is_bare_typedef_name() &&
       declared_target.is_bare_typedef_name() &&
       !declared_source.equal(declared_target) &&
       c.sym.resolve_key(declared_target).is_pointer() &&
       c.sym.resolve_key(declared_source).base_type() !== %(void) &&
-      !_same_typedef_line(c, declared_source, declared_target)) {
+      !_typedef_names(c, declared_source).contains(declared_target) &&
+      !_typedef_names(c, declared_target).contains(declared_source)) {
     String message =
       %"cannot convert ${declared_source.repr()} to ${declared_target.repr()}";
     c.report_error(

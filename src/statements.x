@@ -391,14 +391,17 @@ static List _expression_statement(Compiler compiler) {
   return %(stmnt $expr);
 }
 
-/* An identifier naming a live `with` expression is an ordinary expression
-   statement, not a macro target. */
-static int Compiler._names_with_expression(Compiler c) {
+/** Returns the binding of the current identifier when it names a live
+    `with` expression, or NULL.
+*/
+List Compiler.with_binding(Compiler c) {
   Var candidate;
-  return c.peek(0) == <ident> &&
-    c.semantic_binding_facts().try_get(
-      %(with-name ${c.token.text}), &candidate) &&
-    c.sym.lookup(%(${c.token.text}), NULL).equal(candidate);
+  if (c.peek(0) != <ident> ||
+      !c.semantic_binding_facts().try_get(
+        %(with-name ${c.token.text}), &candidate))
+    return NULL;
+  List binding = c.sym.lookup(%(${c.token.text}), NULL);
+  return binding.equal(candidate) ? binding : NULL;
 }
 
 /** Parses one block-position declaration, statement, or macro insertion.
@@ -415,7 +418,8 @@ List Compiler.parse_block_item(Compiler compiler) {
   }
   if (compiler.peek(0) == <ident> && compiler.token.text == "with")
     return compiler.parse_statement();
-  int with_expression = compiler._names_with_expression();
+  // An identifier naming a live `with` expression is no macro target.
+  int with_expression = !!compiler.with_binding();
   List macro = with_expression ? NULL
     : compiler.try_parse_macro_target_at(AST_BLOCK);
   if (macro) return macro;
@@ -492,7 +496,7 @@ List Compiler.parse_statement(Compiler compiler) {
     }
     return body;
   }
-  int with_expression = compiler._names_with_expression();
+  int with_expression = !!compiler.with_binding();
   List keyword = !with_expression && compiler.peek(0) == <ident>
     ? compiler.try_parse_macro_target_at(AST_STATEMENT) : NULL;
   if (keyword) return keyword;

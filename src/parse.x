@@ -885,11 +885,7 @@ static List _direct_declarator(
       case <$>: return %(bind ${c.try_parse_macro_slot(<name>)} ());
       case <ident>: {
         String spelling = c.token.text;
-        Var candidate;
-        int shadows_with =
-          c.semantic_binding_facts().try_get(
-            %(with-name $spelling), &candidate) &&
-          c.sym.lookup(%($spelling), NULL).equal(candidate);
+        int shadows_with = !!c.with_binding();
         c.next();
         if (shadows_with) c.sym.define(%($spelling), NULL);
         return %(bind ${c.macro_introduced_name(spelling)} ());

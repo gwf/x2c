@@ -649,6 +649,17 @@ List Compiler.parse_array_literal(Compiler compiler) {
   return %(expr ("Array") (array @elems));
 }
 
+/** Reports whether an `Entry` macro invocation, direct or through a keyword
+    alias, starts at the cursor. This query does not consume tokens.
+*/
+int Compiler.map_entry_macro_follows(Compiler c) =>
+  (c.peek(0) == <$> && c.macro_starts_target_at(AST_MAP_ENTRY)) ||
+  (c.peek(0) == <ident> && c.keyword_alias_starts_target_at(AST_MAP_ENTRY));
+
+static List _map_entry_macro(Compiler c) =>
+  c.map_entry_macro_follows() ? c.try_parse_macro_target_at(AST_MAP_ENTRY)
+                              : NULL;
+
 /** Parses one `Map` entry without consuming its following comma or `}`.
     A bare identifier key is an Atom; any other key is an expression.
     A direct row returns a resolved `(map-entry KEY VALUE)` node; an
@@ -657,13 +668,7 @@ List Compiler.parse_array_literal(Compiler compiler) {
 List Compiler.parse_map_entry(Compiler compiler) {
   List slot = compiler.try_parse_macro_slot(<map-entry>);
   if (slot) return slot;
-  int macro_follows =
-    (compiler.peek(0) == <$> &&
-     compiler.macro_starts_target_at(AST_MAP_ENTRY)) ||
-    (compiler.peek(0) == <ident> &&
-     compiler.keyword_alias_starts_target_at(AST_MAP_ENTRY));
-  List macro = macro_follows
-    ? compiler.try_parse_macro_target_at(AST_MAP_ENTRY) : NULL;
+  List macro = _map_entry_macro(compiler);
   if (macro) return macro;
   Token origin = compiler.token;
   List key = NULL;
@@ -699,14 +704,7 @@ static List _parse_quoted_map_entry(Compiler c) {
   if (c.peek(0) == <"${"> && c.token.len == 2) {
     c.next();
     List insertion = c.try_parse_macro_slot(<map-entry>);
-    if (!insertion) {
-      int macro_follows =
-        (c.peek(0) == <$> && c.macro_starts_target_at(AST_MAP_ENTRY)) ||
-        (c.peek(0) == <ident> &&
-         c.keyword_alias_starts_target_at(AST_MAP_ENTRY));
-      if (macro_follows)
-        insertion = c.try_parse_macro_target_at(AST_MAP_ENTRY);
-    }
+    if (!insertion) insertion = _map_entry_macro(c);
     if (insertion) {
       c.expect(<"}">);
       return insertion;
