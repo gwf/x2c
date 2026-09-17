@@ -214,8 +214,10 @@ receiver's address is passed, so `rec.bump(4)` reaches
 a pointer to the declared parameter is one level too far and is a type error;
 write `(*pointer).method()`. Normal pointer
 conversion rules still apply, including preservation of `const` and other
-qualifiers. Method syntax does not make every value dynamically dispatchable;
-only registered callbacks define custom behavior.
+qualifiers. A qualifier on the receiver itself does not change which methods
+and operators the type has, so a `const String` answers `len()` and `+` the
+way an unqualified one does. Method syntax does not make every value
+dynamically dispatchable; only registered callbacks define custom behavior.
 
 A method may use `Self` in its result and parameter types when it promises to
 preserve the receiver's static typedef:

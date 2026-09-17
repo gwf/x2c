@@ -997,13 +997,20 @@ static Type _shared_participant(
 /* A binary operator whose one operand is a converting participant converts
    the other operand to that type through its declared converter, so
    `x * 2.0` and `2.0 - x` resolve like `x * two`. The converted operand
-   replaces the original through `lhs` and `rhs`. */
+   replaces the original through `lhs` and `rhs`. An operand's qualifier
+   describes its storage, not the type that adopts the operator, so the
+   participant is the unqualified type both here and in the operands'
+   comparison. */
 static List _resolve_protocol_operator(
   Compiler compiler, Symbol op, List *lhs, List *rhs, Symbol *derived) {
   if (derived) *derived = 0;
   Type lhs_type = (*lhs).cadr();
+  lhs_type = lhs_type.canonicalize();
   Type participant = lhs_type, rhs_type = NULL;
-  if (*rhs) rhs_type = (*rhs).cadr();
+  if (*rhs) {
+    rhs_type = (*rhs).cadr();
+    rhs_type = rhs_type.canonicalize();
+  }
   Symbol member = 0;
   if (!*rhs) {
     if (op != <->) return NULL;
@@ -1094,6 +1101,7 @@ static List Compiler._protocol_operator_expression(
     Symbol member = rhs ? c.operator_member(op) : <neg>;
     if (!member) member = c.derived_member(op);
     Type participant = lhs.cadr();
+    participant = participant.canonicalize();
     List helper = c.protocol_discard_helper(
       participant, member, which);
     if (helper) (binding, signature) = helper;
