@@ -500,11 +500,18 @@ static void _write_members(Buffer out, Map object, int pretty, int depth) {
   }
   names.sort_by(%!(name) => name.str());
   int count = 0;
+  String previous = NULL;
   out.write_char('{');
   foreach (Var name, names) {
+    String text = name.str();
+    // A String and a Symbol with the same spelling would write one name twice.
+    if (count && text == previous)
+      raise %(bad-arg (operation "Var.json") (why "duplicate object name")
+              (name $text));
+    previous = text;
     if (count++) out.write_char(',');
     _write_line(out, pretty, depth + 1);
-    _write_string(out, name.str());
+    _write_string(out, text);
     out.write(pretty ? ": " : ":");
     _write(out, object[name], pretty, depth + 1);
   }
@@ -540,11 +547,13 @@ static String _json(Var value, int pretty) {
 
 /** Returns `value` as compact JSON text.
     `Map` names are written in byte order and must be `String`s or
-    `Symbol`s; a `Symbol` value is written as a string. A `List` is written
-    as an array. A `double` is written with the fewest digits that read back
-    to the same value. Each maximal ill-formed UTF-8 subsequence in a string
-    is written as U+FFFD, as Python and JavaScript decoders replace it.
-    Raises: `<bad-types>` for a value or name JSON cannot hold,
+    `Symbol`s with distinct spellings; a `Symbol` value is written as a
+    string. A `List` is written as an array. A `double` is written with the
+    fewest digits that read back to the same value. Each maximal ill-formed
+    UTF-8 subsequence in a string is written as U+FFFD, as Python and
+    JavaScript decoders replace it.
+    Raises: `<bad-types>` for a value or name JSON cannot hold, `<bad-arg>`
+    for a `String` and a `Symbol` name with the same spelling,
     `<conv-range>` for NaN or an infinity, or `<size-limit>` for nesting
     deeper than 512 levels.
 */

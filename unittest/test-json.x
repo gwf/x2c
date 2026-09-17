@@ -170,6 +170,17 @@ static void json_repeated_names_keep_the_last_value(void) {
   EXPECT_INT_EQ(object.len(), 2);
   EXPECT_TRUE(Var.equal(object["a"], [3]));
   EXPECT_STR_EQ(Var.json(object), "{\"a\":[3],\"b\":2}");
+  Map spelled_twice = {};
+  spelled_twice["a"] = 1;
+  spelled_twice[<a>] = 2;
+  int caught = 0;
+  try Var.json(spelled_twice);
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "Var.json");
+    EXPECT_STR_EQ(detail.assoc(<name>).string(), "a");
+  }
+  EXPECT_INT_EQ(caught, 1);
 }
 
 static void json_writes_compact_and_pretty_text(void) {
@@ -277,9 +288,14 @@ static void json_files_read_and_write(void) {
     EXPECT_INT_EQ(detail.assoc(<line>).integer(), 2);
     EXPECT_INT_EQ(detail.assoc(<column>).integer(), 6);
   }
+  try Json.read_file(root);
+  catch %(io-fail *detail): {
+    caught++;
+    EXPECT_STR_EQ(detail.assoc(<path>).string(), root);
+  }
   try Json.read_file(root.join("missing.json"));
   catch %(not-found *): caught++;
-  EXPECT_INT_EQ(caught, 2);
+  EXPECT_INT_EQ(caught, 3);
   root.remove_tree();
 }
 
