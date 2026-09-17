@@ -82,7 +82,7 @@ static CliCommand cli_commands[] = {
   { <run>,       CLI_RUN,       "Build an executable and run it" },
   { <new>,       CLI_NEW,       "Create a project that builds and runs" },
   { <script>,    CLI_SCRIPT,    "Build a script when it changes and run it" },
-  { <bootstrap>, CLI_BOOTSTRAP, "Install a native x2c from a APE binary" },
+  { <bootstrap>, CLI_BOOTSTRAP, "Install a native x2c from an APE binary" },
   { <env>,       CLI_ENV,       "Show the resolved home, layout, and tools" },
   { <install>,   CLI_INSTALL,   "Install a package into the home" },
   { <remove>,    CLI_REMOVE,    "Remove an installed package" },
@@ -155,12 +155,12 @@ static CliOption cli_options[] = {
   { <save-temp>, CLI_BUILD | CLI_RUN, <output>,
     "--save-temps[=<dir>]", NULL,
     "Keep generated C and other intermediate files", 0 },
-  { <sha256>, CLI_INSTALL, <source>, "--sha256", "<hex>",
+  { <sha256>, CLI_INSTALL, <package>, "--sha256", "<hex>",
     "Require this digest of a downloaded or local archive", 0 },
-  { <index>, CLI_INSTALL | CLI_BUILD | CLI_RUN, <source>, "--index",
+  { <index>, CLI_INSTALL | CLI_BUILD | CLI_RUN, <package>, "--index",
     "<url-or-path>",
     "Resolve package names through this index", 0 },
-  { <force>, CLI_INSTALL, <source>, "--force", NULL,
+  { <force>, CLI_INSTALL, <package>, "--force", NULL,
     "Install a bundle built for another x2c version", 0 },
   { <prefix>, CLI_BOOTSTRAP, <output>, "--prefix", "<dir>",
     "Install native x2c and sources under <dir>", 0 },
@@ -284,6 +284,7 @@ static const char *_group_title(Symbol command, Symbol group) {
     case <source>:
       return command == <translate> ?
              "Source options:" : "Translation options:";
+    case <package>:    return "Package options:";
     case <c-compiler>: return "C compiler options:";
     case <linker>:     return "Linker options:";
     case <inspection>: return "Inspection options:";
@@ -323,10 +324,10 @@ static void _print_options(Symbol command) {
     return;
   }
   Symbol groups[] = {
-    <global>, <target>, <output>, <source>, <c-compiler>,
+    <global>, <target>, <output>, <source>, <package>, <c-compiler>,
     <linker>, <inspection>, <general>
   };
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < 9; i++) {
     Symbol group = groups[i], int found = 0;
     for (CliOption *option = cli_options; option.spelling; option++)
       if (!option.hidden && (option.commands & mask) &&
@@ -772,24 +773,26 @@ static CliOption *_find_option(
 static CliOption *_take_option(
   Array args, int *index, int mask,
   String *spelling, String *value, int *attached) {
-  String arg = args[*index], written = arg, color = NULL, int color_equal = 0;
-  if (arg.startswith("--color=")) {
-    color_equal = 1;
-    color = arg.remove_prefix("--color=");
-    written = "--color";
+  // A long option may carry its value after '=', as `--out-dir=gen`.
+  String arg = args[*index], written = arg, joined = NULL;
+  int equals = arg.startswith("--") ? arg.find("=") : -1;
+  if (equals > 2) {
+    written = arg[:equals];
+    joined = arg[equals + 1:];
   }
   const char *suffix = NULL;
   CliOption *option = _find_option(written, mask, &suffix);
   if (!option) return NULL;
+  if (joined && !option.value)
+    x2c_driver_error(%"option takes no value '$arg'");
   if (spelling) *spelling = written;
   if (attached) *attached = suffix != NULL;
-  *value = suffix;
-  if (option.value && !*value && !color_equal) {
+  *value = joined ? joined : suffix;
+  if (option.value && !*value) {
     if (++*index == args.len())
       x2c_driver_error(%"option requires a value '$arg'");
     *value = args[*index];
   }
-  if (color_equal) *value = color;
   return option;
 }
 
