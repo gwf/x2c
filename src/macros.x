@@ -1348,6 +1348,33 @@ Var Compiler.evaluate_declaration_recipe(
     invocation, compiler.filename, void);
 }
 
+/* The decorator target is a value to find among the produced items, not a
+   shape to recognize, so it is compared rather than matched. Interpolating
+   it into a pattern would read a binder-shaped symbol inside it, such as the
+   `*=` operator, as a sequence binder. A foreign alias wraps its target, so
+   Match recognizes that wrapper and the comparison still owns the target. */
+static Var _decorator_target_replaced(Var produced, Var target, Var required) {
+  if (produced is not <list>) return void;
+  List produced_items = produced;
+  Array items = produced_items.array();
+  defer items.free();
+  int at = produced_items.index(target);
+  if (at >= 0) {
+    items[at] = required;
+    return items.list();
+  }
+  for (int i = 0; i < (int) items.len(); i++) {
+    match (items[i]) {
+      case %(falias ?found ?native):
+        if (found == target) {
+          items[i] = %(falias $required $native);
+          return items.list();
+        }
+    }
+  }
+  return void;
+}
+
 /** Evaluates an active template's `(macro-slot ...)` value.
     Non-slots and slots outside an expansion are returned unchanged. A splice
     slot's `List` result is wrapped as `(seq ...)` for its syntax position.
@@ -1369,18 +1396,8 @@ Var Compiler.evaluate_macro_slot(Compiler compiler, Var value) {
   Var construction = slot.assoc(<target>);
   if (required is not void && splice) {
     construction = required;
-    Var target = _source_unwrap(required);
-    Var evaluated = result;
-    result = void;
-    match (evaluated)
-      case %(*before $target *after):
-        result = %(@before $required @after);
-    if (result is void)
-      evaluated.list().try_match_replace(
-        %(*before (falias $target ?native) *after),
-        %(*before (falias $required ?native) *after),
-        &result
-      );
+    result = _decorator_target_replaced(
+      result, _source_unwrap(required), required);
   }
   if (construction is not void) {
     String exact = NULL;
