@@ -312,6 +312,30 @@ static void process_empty_input_is_empty_stdin(void) {
   EXPECT_NULL(output);
 }
 
+static void process_nul_capture_keeps_the_record(void) {
+  $test.scoped();
+  int before = _open_descriptors();
+  Job job = %(sh -c "printf 'a\\000b'; printf 'c\\000d' >&2").job()
+    .options({stderr: <capture>});
+  EXPECT_INT_EQ(job.status(), 0);
+  EXPECT_INT_EQ(job.status(), 0);
+  int caught = 0;
+  try job.output();
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "Job.output");
+  }
+  try job.lines();
+  catch %(bad-arg *): caught++;
+  try job.errors();
+  catch %(bad-arg *detail): {
+    caught++;
+    EXPECT_STR_EQ(detail.assoc(<operation>).string(), "Job.errors");
+  }
+  EXPECT_INT_EQ(caught, 3);
+  EXPECT_INT_EQ(_open_descriptors(), before);
+}
+
 static void process_failed_starts_close_descriptors(void) {
   $test.scoped();
   int before = _open_descriptors(), caught = 0;
@@ -405,5 +429,6 @@ void process_suite(void) {
   $test.run(process_start_failures_raise);
   $test.run(process_jobs_wait_kill_and_clean_up);
   $test.run(process_empty_input_is_empty_stdin);
+  $test.run(process_nul_capture_keeps_the_record);
   $test.run(process_failed_starts_close_descriptors);
 }

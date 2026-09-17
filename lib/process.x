@@ -30,7 +30,7 @@ class Job struct {
   struct _Launch *launch;
   long *pids;
   int *statuses;
-  int count, started, finished, status;
+  int count, started, finished, status, nul_output, nul_errors;
   File output_file, errors_file;
   String output_text, errors_text;
 } *;
@@ -263,21 +263,32 @@ static void Job._reap(Job job, int index, int flags) {
   job.pids[index] = 0;
 }
 
+/* Reads and closes a capture file. Text with a NUL byte cannot be a
+   `String`, so it is recorded in `nul` for `output` or `errors` to raise and
+   the status stays readable. */
+static String _captured(File file, int *nul) {
+  if (!file) return NULL;
+  file.rewind();
+  String text = NULL;
+  try text = file.string_close();
+  catch %(bad-arg *): *nul = 1;
+  return text;
+}
+
 static void Job._finish(Job job) {
   if (job.finished) return;
   job.finished = 1;
   for (int i = 0; i < job.count; i++)
     if (job.statuses[i]) job.status = job.statuses[i];
-  if (job.output_file) {
-    job.output_file.rewind();
-    job.output_text = job.output_file.string_close();
-    job.output_file = NULL;
-  }
-  if (job.errors_file) {
-    job.errors_file.rewind();
-    job.errors_text = job.errors_file.string_close();
-    job.errors_file = NULL;
-  }
+  job.output_text = _captured(job.output_file, &job.nul_output);
+  job.errors_text = _captured(job.errors_file, &job.nul_errors);
+  job.output_file = job.errors_file = NULL;
+}
+
+static String _text(String text, int nul, String operation) {
+  if (nul)
+    raise %(bad-arg (operation $operation) (why "embedded NUL"));
+  return text;
 }
 
 static Job Job.new(List command) {
@@ -436,23 +447,28 @@ void Job.run(Job job) {
 
 /** Returns the captured standard output of `job`, starting it and waiting
     as needed. A live job, or one whose output was empty, returns NULL.
-    Raises: the causes of `Job.check`.
+    Raises: the causes of `Job.check`, or `<bad-arg>` when the output
+    contains a NUL byte.
 */
-String Job.output(Job job) => job.check().output_text;
+String Job.output(Job job) {
+  job.check();
+  return _text(job.output_text, job.nul_output, "Job.output");
+}
 
 /** Returns the captured standard output of `job` as lines without their
     endings.
-    Raises: the causes of `Job.check`.
+    Raises: the causes of `Job.output`.
 */
 List Job.lines(Job job) => job.output().split_lines(0);
 
 /** Returns the captured standard error of `job`, starting it and waiting as
     needed, or NULL when standard error was not captured or was empty.
-    Raises: the start causes of `Job.start`.
+    Raises: the start causes of `Job.start`, or `<bad-arg>` when the captured
+    text contains a NUL byte.
 */
 String Job.errors(Job job) {
   job.status();
-  return job.errors_text;
+  return _text(job.errors_text, job.nul_errors, "Job.errors");
 }
 
 /** Reports whether every stage of `job` has exited, without blocking. A job
