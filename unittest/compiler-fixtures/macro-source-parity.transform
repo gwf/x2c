@@ -3,8 +3,8 @@
 
 (typedef 
  (struct "DirectValue" 
-  (fields (declare (int) (bindings (bind (binding 25 "value") ()))))) 
- (bindings (bind (binding 27 "DirectValue") ())))
+  (fields (declare (int) (bindings (bind (binding 1 "value") ()))))) 
+ (bindings (bind (binding 2 "DirectValue") ())))
 
 (protocol 
  ("protocol-record" ("DirectProtocol") "T" 
@@ -14,13 +14,13 @@
   (line 7) (column 1) (length 8) (position 76)))
 
 (function (int) 
- (bind (binding 31 "DirectValue_read") 
-  ((fnmod (params (param ("DirectValue") (bind (binding 30 "value") ())))))) 
+ (bind (binding 3 "DirectValue_read") 
+  ((fnmod (params (param ("DirectValue") (bind (binding 4 "value") ())))))) 
  (block 
   (at 20 
    (return 
     (expr (int) 
-     (op . (expr ("DirectValue") (ident (binding 30 "value"))) 
+     (op . (expr ("DirectValue") (ident (binding 4 "value"))) 
       ("value")))))))
 
 (adopt ("DirectProtocol") ("DirectValue") 
@@ -30,44 +30,44 @@
 
 (typedef 
  (enum "DirectKind" 
-  ((op = (binding 32 "DIRECT_KIND") (expr (int) (literal (int) "3"))))) 
- (bindings (bind (binding 34 "DirectKind") ())))
+  ((op = (binding 5 "DIRECT_KIND") (expr (int) (literal (int) "3"))))) 
+ (bindings (bind (binding 6 "DirectKind") ())))
 
 (typedef 
  (struct "DirectRecord" 
-  (fields (declare (int) (bindings (bind (binding 35 "value") ()))))) 
- (bindings (bind (binding 37 "DirectRecord") ())))
+  (fields (declare (int) (bindings (bind (binding 7 "value") ()))))) 
+ (bindings (bind (binding 8 "DirectRecord") ())))
 
 (typedef 
  (union "DirectUnion" 
-  (fields (declare (int) (bindings (bind (binding 38 "integer") ()))) 
-   (declare (float) (bindings (bind (binding 39 "floating") ()))))) 
- (bindings (bind (binding 41 "DirectUnion") ())))
+  (fields (declare (int) (bindings (bind (binding 9 "integer") ()))) 
+   (declare (float) (bindings (bind (binding 10 "floating") ()))))) 
+ (bindings (bind (binding 11 "DirectUnion") ())))
 
 (declare (int) 
  (bindings 
-  (bind (binding 43 "direct_function") 
-   ((fnmod (params (param (int) (bind (binding 42 "value") ()))))))))
+  (bind (binding 12 "direct_function") 
+   ((fnmod (params (param (int) (bind (binding 13 "value") ()))))))))
 
 (function (inline int) 
- (bind (binding 45 "direct_inline") 
-  ((fnmod (params (param (int) (bind (binding 44 "value") ())))))) 
+ (bind (binding 14 "direct_inline") 
+  ((fnmod (params (param (int) (bind (binding 15 "value") ())))))) 
  (block 
   (at 21 
    (return 
     (expr (int) 
-     (op + (expr (int) (ident (binding 44 "value"))) 
+     (op + (expr (int) (ident (binding 15 "value"))) 
       (expr (int) (literal (int) "1"))))))))
 
 (function (int) 
- (bind (binding 43 "direct_function") 
-  ((fnmod (params (param (int) (bind (binding 46 "value") ())))))) 
+ (bind (binding 12 "direct_function") 
+  ((fnmod (params (param (int) (bind (binding 16 "value") ())))))) 
  (block 
   (at 22 
    (return 
     (expr (int) 
-     (op + (expr (int) (ident (binding 46 "value"))) 
-      (expr (enum "DirectKind") (ident (binding 32 "DIRECT_KIND")))))))))
+     (op + (expr (int) (ident (binding 16 "value"))) 
+      (expr (enum "DirectKind") (ident (binding 5 "DIRECT_KIND")))))))))
 
 (macrodef <macro generated_protocol>)
 
@@ -91,100 +91,100 @@
 
 (typedef 
  (enum "GeneratedKind" 
-  ((op = (binding 49 "GENERATED_KIND") (expr (int) (literal (int) "3"))))) 
- (bindings (bind (binding 51 "GeneratedKind") ())))
+  ((op = (binding 17 "GENERATED_KIND") (expr (int) (literal (int) "3"))))) 
+ (bindings (bind (binding 18 "GeneratedKind") ())))
 
 (typedef 
  (struct "GeneratedRecord" 
-  (fields (declare (int) (bindings (bind (binding 52 "value") ()))))) 
- (bindings (bind (binding 54 "GeneratedRecord") ())))
+  (fields (declare (int) (bindings (bind (binding 19 "value") ()))))) 
+ (bindings (bind (binding 20 "GeneratedRecord") ())))
 
 (typedef 
  (union "GeneratedUnion" 
-  (fields (declare (int) (bindings (bind (binding 55 "integer") ()))) 
-   (declare (float) (bindings (bind (binding 56 "floating") ()))))) 
- (bindings (bind (binding 58 "GeneratedUnion") ())))
+  (fields (declare (int) (bindings (bind (binding 21 "integer") ()))) 
+   (declare (float) (bindings (bind (binding 22 "floating") ()))))) 
+ (bindings (bind (binding 23 "GeneratedUnion") ())))
 
 (declare (static int) 
  (bindings 
-  (op = (bind (binding 59 "generated_global") ()) 
+  (op = (bind (binding 24 "generated_global") ()) 
    (expr (int) (literal (int) "4")))))
 
 (declare (int) 
  (bindings 
-  (bind (binding 60 "generated_function") 
-   ((fnmod (params (param (int) (bind (binding 48 "_x2c_macro_value_0") ()))))))))
+  (bind (binding 25 "generated_function") 
+   ((fnmod (params (param (int) (bind (binding 26 "_x2c_macro_value_0") ()))))))))
 
 (function (inline int) 
- (bind (binding 61 "generated_inline") 
-  ((fnmod (params (param (int) (bind (binding 48 "_x2c_macro_value_0") ())))))) 
+ (bind (binding 27 "generated_inline") 
+  ((fnmod (params (param (int) (bind (binding 26 "_x2c_macro_value_0") ())))))) 
  (block 
   (at 23 
    (return 
     (expr (int) 
-     (op + (expr (int) (ident (binding 48 "_x2c_macro_value_0"))) 
+     (op + (expr (int) (ident (binding 26 "_x2c_macro_value_0"))) 
       (expr (int) (literal (int) "1"))))))))
 
 (function (int) 
- (bind (binding 60 "generated_function") 
-  ((fnmod (params (param (int) (bind (binding 48 "_x2c_macro_value_0") ())))))) 
+ (bind (binding 25 "generated_function") 
+  ((fnmod (params (param (int) (bind (binding 26 "_x2c_macro_value_0") ())))))) 
  (block 
   (at 24 
    (return 
     (expr (int) 
-     (op + (expr (int) (ident (binding 48 "_x2c_macro_value_0"))) 
+     (op + (expr (int) (ident (binding 26 "_x2c_macro_value_0"))) 
       (expr (int) (literal (int) "3"))))))))
 
 (macrodef <macro generated_read>)
 
 (function (int) 
- (bind (binding 62 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (bind (binding 28 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 25 
    (declare ("DirectValue") 
     (bindings 
-     (op = (bind (binding 63 "direct") ()) 
+     (op = (bind (binding 29 "direct") ()) 
       (expr ("DirectValue") 
        (composite (commas (dotinit ("value") (expr (int) (literal (int) "37")))))))))) 
   (at 26 
    (declare ("DirectRecord") 
     (bindings 
-     (op = (bind (binding 64 "direct_record") ()) 
+     (op = (bind (binding 30 "direct_record") ()) 
       (expr ("DirectRecord") 
        (composite (commas (dotinit ("value") (expr (int) (literal (int) "1")))))))))) 
   (at 27 
    (declare ("DirectUnion") 
     (bindings 
-     (op = (bind (binding 65 "direct_union") ()) 
+     (op = (bind (binding 31 "direct_union") ()) 
       (expr ("DirectUnion") 
        (composite 
         (commas 
          (dotinit ("integer") 
           (expr (int) 
-           (op . (expr ("DirectRecord") (ident (binding 64 "direct_record"))) 
+           (op . (expr ("DirectRecord") (ident (binding 30 "direct_record"))) 
             ("value"))))))))))) 
   (at 28 
    (declare ("GeneratedRecord") 
     (bindings 
-     (op = (bind (binding 66 "generated_record") ()) 
+     (op = (bind (binding 32 "generated_record") ()) 
       (expr ("GeneratedRecord") 
        (composite (commas (dotinit ("value") (expr (int) (literal (int) "1")))))))))) 
   (at 29 
    (declare ("GeneratedUnion") 
     (bindings 
-     (op = (bind (binding 67 "generated_union") ()) 
+     (op = (bind (binding 33 "generated_union") ()) 
       (expr ("GeneratedUnion") 
        (composite 
         (commas 
          (dotinit ("integer") 
           (expr (int) 
            (op . (expr ("GeneratedRecord") 
-                  (ident (binding 66 "generated_record"))) 
+                  (ident (binding 32 "generated_record"))) 
             ("value"))))))))))) 
   (at 16 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 68 "parity") ()) 
+     (op = (bind (binding 34 "parity") ()) 
       (expr () 
        (op + (expr (int) 
               (op + (expr (int) 
@@ -193,41 +193,41 @@
                                    (op + (expr (int) 
                                           (call (expr ((func ((int))) int) 
                                                  (ident 
-                                                  (binding 43 "direct_function"))) 
+                                                  (binding 12 "direct_function"))) 
                                            (args (expr (int) 
                                                   (op . (expr ("DirectUnion") 
                                                          (ident 
-                                                          (binding 65 
+                                                          (binding 31 
                                                            "direct_union"))) 
                                                    ("integer")))))) 
                                     (expr (int) 
                                      (call (expr ((func ((int))) int) 
                                             (ident 
-                                             (binding 60 "generated_function"))) 
+                                             (binding 25 "generated_function"))) 
                                       (args (expr (int) 
                                              (op . (expr ("GeneratedUnion") 
                                                     (ident 
-                                                     (binding 67 
+                                                     (binding 33 
                                                       "generated_union"))) 
                                               ("integer")))))))) 
                              (expr (int) 
                               (call (expr ((func ((int))) int) 
-                                     (ident (binding 45 "direct_inline"))) 
+                                     (ident (binding 14 "direct_inline"))) 
                                (args (expr (int) (literal (int) "0"))))))) 
                       (expr (int) 
                        (call (expr ((func ((int))) int) 
-                              (ident (binding 61 "generated_inline"))) 
+                              (ident (binding 27 "generated_inline"))) 
                         (args (expr (int) (literal (int) "0"))))))) 
-               (expr (int) (ident (binding 59 "generated_global"))))) 
-        (expr () (ident (binding 69 "GENERATED_SOURCE_FLAG"))))))))) 
+               (expr (int) (ident (binding 24 "generated_global"))))) 
+        (expr () (ident (binding 35 "GENERATED_SOURCE_FLAG"))))))))) 
   (at 18 
    (stmnt 
     (expr () 
-     (call (expr () (ident (binding 70 "printf"))) 
+     (call (expr () (ident (binding 36 "printf"))) 
       (args (expr (* char) (literal (* char) "\"%d %d\\n\"")) 
        (expr (int) 
         (call (expr ((func (("DirectValue"))) (int)) 
-               (ident (binding 31 "DirectValue_read"))) 
-         (args (expr ("DirectValue") (ident (binding 63 "direct")))))) 
-       (expr (int) (ident (binding 68 "parity")))))))) 
+               (ident (binding 3 "DirectValue_read"))) 
+         (args (expr ("DirectValue") (ident (binding 29 "direct")))))) 
+       (expr (int) (ident (binding 34 "parity")))))))) 
   (at 30 (return (expr (int) (literal (int) "0"))))))

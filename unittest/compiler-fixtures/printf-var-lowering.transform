@@ -1,24 +1,24 @@
 
 (preproc "#include \"x2c.x\"")
 
-(typedef ("Var") (bindings (bind (binding 4 "Dynamic") ())))
+(typedef ("Var") (bindings (bind (binding 1 "Dynamic") ())))
 
-(typedef ("Dynamic") (bindings (bind (binding 5 "DynamicAlias") ())))
+(typedef ("Dynamic") (bindings (bind (binding 2 "DynamicAlias") ())))
 
 (function (int) 
- (bind (binding 6 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (bind (binding 3 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 18 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 7 "key") ()) 
+     (op = (bind (binding 4 "key") ()) 
       (expr ("Var") 
-       (call (expr ((func ((int))) "Var") (ident (binding 51 "int_var"))) 
+       (call (expr ((func ((int))) "Var") (ident (binding 5 "int_var"))) 
         (args (expr (int) (literal (int) "23"))))))))) 
   (at 19 
    (declare ("Dynamic") 
     (bindings 
-     (op = (bind (binding 8 "val") ()) 
+     (op = (bind (binding 6 "val") ()) 
       (expr ("Var") 
        (call "Var_new" 
         (args (expr ("Symbol") "3356265") 
@@ -26,28 +26,28 @@
   (at 20 
    (declare ("DynamicAlias") 
     (bindings 
-     (op = (bind (binding 9 "answer") ()) 
+     (op = (bind (binding 7 "answer") ()) 
       (expr ("Var") 
-       (call (expr ((func (("String"))) "Var") (ident (binding 44 "String_var"))) 
+       (call (expr ((func (("String"))) "Var") (ident (binding 8 "String_var"))) 
         (args (expr ("String") (cache 0))))))))) 
   (at 21 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 10 "width") ()) 
+     (op = (bind (binding 9 "width") ()) 
       (expr ("Var") 
-       (call (expr ((func ((int))) "Var") (ident (binding 51 "int_var"))) 
+       (call (expr ((func ((int))) "Var") (ident (binding 5 "int_var"))) 
         (args (expr (int) (literal (int) "6")))))) 
-     (op = (bind (binding 11 "precision") ()) 
+     (op = (bind (binding 10 "precision") ()) 
       (expr ("Var") 
-       (call (expr ((func ((int))) "Var") (ident (binding 51 "int_var"))) 
+       (call (expr ((func ((int))) "Var") (ident (binding 5 "int_var"))) 
         (args (expr (int) (literal (int) "1")))))) 
-     (op = (bind (binding 12 "letter") ()) 
+     (op = (bind (binding 11 "letter") ()) 
       (expr ("Var") 
-       (call (expr ((func ((char))) "Var") (ident (binding 52 "char_var"))) 
+       (call (expr ((func ((char))) "Var") (ident (binding 12 "char_var"))) 
         (args (expr (char) (literal (char) "\'A\'")))))) 
      (op = (bind (binding 13 "whole") ()) 
       (expr ("Var") 
-       (call (expr ((func ((int))) "Var") (ident (binding 51 "int_var"))) 
+       (call (expr ((func ((int))) "Var") (ident (binding 5 "int_var"))) 
         (args (expr (int) (literal (int) "7"))))))))) 
   (at 5 (declare (char) 
          (bindings 
@@ -64,17 +64,17 @@
         (call "Var_int" 
          (args (expr ("Var") 
                 (call "Var_convert" 
-                 (args (expr ("Var") (ident (binding 7 "key"))) 
+                 (args (expr ("Var") (ident (binding 4 "key"))) 
                   (expr ("Symbol") "3453797"))))))) 
        (expr (double) 
         (call "Var_floating" 
          (args (expr ("Var") 
                 (call "Var_convert" 
-                 (args (expr ("Dynamic") (ident (binding 8 "val"))) 
+                 (args (expr ("Dynamic") (ident (binding 6 "val"))) 
                   (expr ("Symbol") "3356265"))))))) 
        (expr ("String") 
         (call "Var_str" 
-         (args (expr ("DynamicAlias") (ident (binding 9 "answer")))))) 
+         (args (expr ("DynamicAlias") (ident (binding 7 "answer")))))) 
        (expr (int) (literal (int) "9"))))))) 
   (at 23 
    (stmnt 
@@ -86,13 +86,13 @@
         (call "Var_int" 
          (args (expr ("Var") 
                 (call "Var_convert" 
-                 (args (expr ("Var") (ident (binding 7 "key"))) 
+                 (args (expr ("Var") (ident (binding 4 "key"))) 
                   (expr ("Symbol") "3453797"))))))) 
        (expr (int) 
         (call "Var_int" 
          (args (expr ("Var") 
                 (call "Var_convert" 
-                 (args (expr ("Var") (ident (binding 7 "key"))) 
+                 (args (expr ("Var") (ident (binding 4 "key"))) 
                   (expr ("Symbol") "3453797")))))))))))) 
   (at 24 
    (stmnt 
@@ -104,11 +104,11 @@
         (call "Var_long_long" 
          (args (expr ("Var") 
                 (call "Var_convert" 
-                 (args (expr ("Var") (ident (binding 7 "key"))) 
+                 (args (expr ("Var") (ident (binding 4 "key"))) 
                   (expr ("Symbol") "25983886"))))))) 
        (expr ("String") 
         (call "Var_str" 
-         (args (expr ("DynamicAlias") (ident (binding 9 "answer"))))))))))) 
+         (args (expr ("DynamicAlias") (ident (binding 7 "answer"))))))))))) 
   (at 25 
    (stmnt 
     (expr () 
@@ -121,19 +121,19 @@
         (call "Var_uint" 
          (args (expr ("Var") 
                 (call "Var_convert" 
-                 (args (expr ("Var") (ident (binding 7 "key"))) 
+                 (args (expr ("Var") (ident (binding 4 "key"))) 
                   (expr ("Symbol") "3847013"))))))) 
        (expr (int) 
         (call "Var_int" 
          (args (expr ("Var") 
                 (call "Var_convert" 
-                 (args (expr ("Var") (ident (binding 10 "width"))) 
+                 (args (expr ("Var") (ident (binding 9 "width"))) 
                   (expr ("Symbol") "3453797"))))))) 
        (expr (int) 
         (call "Var_int" 
          (args (expr ("Var") 
                 (call "Var_convert" 
-                 (args (expr ("Var") (ident (binding 11 "precision"))) 
+                 (args (expr ("Var") (ident (binding 10 "precision"))) 
                   (expr ("Symbol") "3453797"))))))) 
        (expr (double) 
         (call "Var_floating" 
@@ -156,7 +156,7 @@
         (call "Var_int" 
          (args (expr ("Var") 
                 (call "Var_convert" 
-                 (args (expr ("Var") (ident (binding 7 "key"))) 
+                 (args (expr ("Var") (ident (binding 4 "key"))) 
                   (expr ("Symbol") "3453797")))))))))))) 
   (at 27 
    (declare ("String") 
@@ -170,41 +170,41 @@
           (call "Var_int" 
            (args (expr ("Var") 
                   (call "Var_convert" 
-                   (args (expr ("Var") (ident (binding 7 "key"))) 
+                   (args (expr ("Var") (ident (binding 4 "key"))) 
                     (expr ("Symbol") "3453797"))))))) 
          (expr (int) 
           (call "Var_int" 
            (args (expr ("Var") 
                   (call "Var_convert" 
-                   (args (expr ("Var") (ident (binding 7 "key"))) 
+                   (args (expr ("Var") (ident (binding 4 "key"))) 
                     (expr ("Symbol") "3453797"))))))) 
          (expr (long double) 
           (call "Var_long_double" 
            (args (expr ("Var") 
                   (call "Var_convert" 
-                   (args (expr ("Dynamic") (ident (binding 8 "val"))) 
+                   (args (expr ("Dynamic") (ident (binding 6 "val"))) 
                     (expr ("Symbol") "26071077642"))))))) 
          (expr ("String") 
           (call "Var_str" 
-           (args (expr ("DynamicAlias") (ident (binding 9 "answer"))))))))))))) 
+           (args (expr ("DynamicAlias") (ident (binding 7 "answer"))))))))))))) 
   (at 28 
    (stmnt 
     (expr (int) 
      (call (expr ((func (("File") (* const char) (...))) (int)) 
-            (ident (binding 26 "File_printf"))) 
-      (args (expr ("File") (ident (binding 25 "Stdout"))) 
+            (ident (binding 25 "File_printf"))) 
+      (args (expr ("File") (ident (binding 26 "Stdout"))) 
        (expr (* char) (literal (* char) "\"file:%c/%u\\n\"")) 
        (expr (int) 
         (call "Var_int" 
          (args (expr ("Var") 
                 (call "Var_convert" 
-                 (args (expr ("Var") (ident (binding 12 "letter"))) 
+                 (args (expr ("Var") (ident (binding 11 "letter"))) 
                   (expr ("Symbol") "3453797"))))))) 
        (expr (unsigned) 
         (call "Var_uint" 
          (args (expr ("Var") 
                 (call "Var_convert" 
-                 (args (expr ("Var") (ident (binding 7 "key"))) 
+                 (args (expr ("Var") (ident (binding 4 "key"))) 
                   (expr ("Symbol") "3847013")))))))))))) 
   (at 13 
    (declare ("Buffer") 
@@ -225,13 +225,13 @@
         (call "Var_long" 
          (args (expr ("Var") 
                 (call "Var_convert" 
-                 (args (expr ("Var") (ident (binding 7 "key"))) 
+                 (args (expr ("Var") (ident (binding 4 "key"))) 
                   (expr ("Symbol") "818062"))))))) 
        (expr (double) 
         (call "Var_floating" 
          (args (expr ("Var") 
                 (call "Var_convert" 
-                 (args (expr ("Dynamic") (ident (binding 8 "val"))) 
+                 (args (expr ("Dynamic") (ident (binding 6 "val"))) 
                   (expr ("Symbol") "3356265")))))))))))) 
   (at 15 
    (stmnt 

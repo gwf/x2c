@@ -65,6 +65,10 @@ run_dump() {
     record_failure "$name/$phase compiler invocation failed"
     return
   fi
+  # Binding numbers depend on every declaration the unit's includes add, so
+  # renumber them by first appearance, as elapsed times are normalized below.
+  perl -pi -e 's/\(binding (-?\d+)/"(binding " . ($id{$1} \/\/= ++$n)/ge' \
+    "$actual"
   check_artifact "$phase" "$actual"
 }
 

@@ -8,9 +8,15 @@ tmp=${TMPDIR:-/tmp}/x2c-graph-tests.$$
 mkdir -p "$tmp"
 trap 'rm -rf "$tmp"' EXIT HUP INT TERM
 
-builds/ast-parity "$fixtures/calls.x" >"$tmp/embedded.ast"
-x2c/builds/0/x2c translate --plain --dump-ast \
-  "$fixtures/calls.x" >"$tmp/cli.ast"
+# Binding numbers count the declarations each frontend loaded first, and
+# their widths move line breaks, so compare renumbered, unwrapped dumps.
+ast_shape() {
+  perl -pe 's/\(binding (-?\d+)/"(binding " . ($id{$1} \/\/= ++$n)/ge' |
+    tr '\n' ' ' | sed 's/  */ /g'
+}
+builds/ast-parity "$fixtures/calls.x" | ast_shape >"$tmp/embedded.ast"
+x2c/builds/0/x2c translate --plain --dump-ast "$fixtures/calls.x" |
+  ast_shape >"$tmp/cli.ast"
 cmp "$tmp/embedded.ast" "$tmp/cli.ast"
 
 sources="$fixtures/calls.x $fixtures/public-target.x \
@@ -37,7 +43,7 @@ grep -q '(function "indirect" static (calls (call indirect "callback" 1)))' \
   "$tmp/graph-line"
 grep -q '(function "computed" static (calls (call indirect "computed" 1)))' \
   "$tmp/graph-line"
-grep -q '(call external "Iter_try_next" 1)' "$tmp/graph-line"
+grep -q '(call external "List_try_next" 1)' "$tmp/graph-line"
 grep -q '(function "<top-level>" static (calls (call direct .* "helper" 1)))' \
   "$tmp/graph-line"
 grep -q '(call direct .*public-target.x" "public_target" 1)' \
@@ -141,7 +147,7 @@ grep -q '(function .*calls.x" "helper" static (callers (function .*calls.x" "<to
 $tool focus resolved_method $sources >"$tmp/focus-method"
 grep -q '(call external "String_len" 1)' "$tmp/focus-method"
 $tool focus expanded $sources >"$tmp/focus-macro"
-grep -q '(call external "Iter_try_next" 1)' "$tmp/focus-macro"
+grep -q '(call external "List_try_next" 1)' "$tmp/focus-macro"
 
 $tool focus unknown_function $sources >"$tmp/focus-empty"
 tr '\n' ' ' <"$tmp/focus-empty" | sed 's/  */ /g' >"$tmp/focus-empty-line"
@@ -375,7 +381,7 @@ grep -q 'sites-a.x" .*"first_shared_caller" static 1' \
 grep -q 'sites-b.x" .*"second_shared_caller" public 1' \
   "$tmp/sites-static-line"
 
-$tool sites Iter_try_next "$fixtures/calls.x" >"$tmp/sites-macro"
+$tool sites List_try_next "$fixtures/calls.x" >"$tmp/sites-macro"
 grep -q '"expanded" static 1' "$tmp/sites-macro"
 
 $tool sites site_make $site_sources >"$tmp/sites-top-level"

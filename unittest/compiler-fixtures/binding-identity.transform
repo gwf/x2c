@@ -1,96 +1,96 @@
 
 (preproc "#include \"x2c.x\"")
 
-(typedef (int) (bindings (bind (binding 13 "binding_phase5_Base") ())))
+(typedef (int) (bindings (bind (binding 1 "binding_phase5_Base") ())))
 
 (typedef ("binding_phase5_Base") 
- (bindings (bind (binding 14 "binding_phase5_Value") ())))
+ (bindings (bind (binding 2 "binding_phase5_Value") ())))
 
 (typedef 
  (struct "binding_phase5_Box" 
   (fields 
-   (declare ("binding_phase5_Value") (bindings (bind (binding 15 "value") ()))))) 
- (bindings (bind (binding 17 "binding_phase5_Box") ())))
+   (declare ("binding_phase5_Value") (bindings (bind (binding 3 "value") ()))))) 
+ (bindings (bind (binding 4 "binding_phase5_Box") ())))
 
 (declare ("binding_phase5_Value") 
  (bindings 
-  (op = (bind (binding 18 "binding_phase5_global") ()) 
+  (op = (bind (binding 5 "binding_phase5_global") ()) 
    (expr (int) (literal (int) "1")))))
 
 (function ("binding_phase5_Value") 
- (bind (binding 20 "binding_phase5_shadow") 
+ (bind (binding 6 "binding_phase5_shadow") 
   ((fnmod 
-    (params (param ("binding_phase5_Value") (bind (binding 19 "value") ())))))) 
+    (params (param ("binding_phase5_Value") (bind (binding 7 "value") ())))))) 
  (block 
   (at 1 (declare ("binding_phase5_Value") 
          (bindings 
-          (op = (bind (binding 21 "result") ()) 
-           (expr ("binding_phase5_Value") (ident (binding 19 "value"))))))) 
+          (op = (bind (binding 8 "result") ()) 
+           (expr ("binding_phase5_Value") (ident (binding 7 "value"))))))) 
   (at 4 (block 
          (at 2 (declare ("binding_phase5_Value") 
                 (bindings 
-                 (op = (bind (binding 22 "value") ()) 
+                 (op = (bind (binding 9 "value") ()) 
                   (expr (int) (literal (int) "2")))))) 
          (at 3 (stmnt 
                 (expr ("binding_phase5_Value") 
                  (op += 
-                  (expr ("binding_phase5_Value") (ident (binding 21 "result"))) 
-                  (expr ("binding_phase5_Value") (ident (binding 22 "value"))))))))) 
+                  (expr ("binding_phase5_Value") (ident (binding 8 "result"))) 
+                  (expr ("binding_phase5_Value") (ident (binding 9 "value"))))))))) 
   (at 14 
    (return 
     (expr (int) 
      (op + (expr (int) 
-            (op + (expr ("binding_phase5_Value") (ident (binding 21 "result"))) 
-             (expr ("binding_phase5_Value") (ident (binding 19 "value"))))) 
+            (op + (expr ("binding_phase5_Value") (ident (binding 8 "result"))) 
+             (expr ("binding_phase5_Value") (ident (binding 7 "value"))))) 
       (expr ("binding_phase5_Value") 
-       (ident (binding 18 "binding_phase5_global")))))))))
+       (ident (binding 5 "binding_phase5_global")))))))))
 
 (function ("binding_phase5_Value") 
- (bind (binding 25 "binding_phase5_Box_bump") 
+ (bind (binding 10 "binding_phase5_Box_bump") 
   ((fnmod 
-    (params (param ("binding_phase5_Box") (bind (binding 23 "box") ())) 
-     (param ("binding_phase5_Value") (bind (binding 24 "value") ())))))) 
+    (params (param ("binding_phase5_Box") (bind (binding 11 "box") ())) 
+     (param ("binding_phase5_Value") (bind (binding 12 "value") ())))))) 
  (block 
   (at 15 
    (return 
     (expr (int) 
      (op + (expr ("binding_phase5_Value") 
-            (op . (expr ("binding_phase5_Box") (ident (binding 23 "box"))) 
+            (op . (expr ("binding_phase5_Box") (ident (binding 11 "box"))) 
              ("value"))) 
-      (expr ("binding_phase5_Value") (ident (binding 24 "value")))))))))
+      (expr ("binding_phase5_Value") (ident (binding 12 "value")))))))))
 
 (function (int) 
- (bind (binding 26 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (bind (binding 13 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 16 
    (declare ("binding_phase5_Box") 
     (bindings 
-     (op = (bind (binding 27 "box") ()) 
+     (op = (bind (binding 14 "box") ()) 
       (expr ("binding_phase5_Box") 
        (composite (commas (dotinit ("value") (expr (int) (literal (int) "3")))))))))) 
   (at 8 (declare ("binding_phase5_Value") 
          (bindings 
-          (op = (bind (binding 28 "value") ()) 
+          (op = (bind (binding 15 "value") ()) 
            (expr ("binding_phase5_Value") 
             (call (expr ((func (("binding_phase5_Value"))) 
                          "binding_phase5_Value") 
-                   (ident (binding 20 "binding_phase5_shadow"))) 
+                   (ident (binding 6 "binding_phase5_shadow"))) 
              (args (expr (int) (literal (int) "4"))))))))) 
   (at 17 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 29 "lambda") ()) 
+     (op = (bind (binding 16 "lambda") ()) 
       (expr ("Var") 
        (call (expr ((func (("Var"))) "Var") 
               (parens 
                (expr ((func (("Var"))) "Var") 
-                (ident (binding 54 "_x2c_lambda_0"))))) 
+                (ident (binding 17 "_x2c_lambda_0"))))) 
         (args (expr ("Var") 
-               (call (expr ((func ((int))) "Var") (ident (binding 53 "int_var"))) 
+               (call (expr ((func ((int))) "Var") (ident (binding 18 "int_var"))) 
                 (args (expr (int) (literal (int) "5")))))))))))) 
   (at 18 
    (if (expr (int) 
-        (op != (expr ("binding_phase5_Value") (ident (binding 28 "value"))) 
+        (op != (expr ("binding_phase5_Value") (ident (binding 15 "value"))) 
          (expr (int) (literal (int) "11")))) 
     (return (expr (int) (literal (int) "1"))))) 
   (at 19 
@@ -99,31 +99,31 @@
          (expr ("binding_phase5_Value") 
           (call (expr ((func (("binding_phase5_Box") ("binding_phase5_Value"))) 
                        ("binding_phase5_Value")) 
-                 (ident (binding 25 "binding_phase5_Box_bump"))) 
-           (args (expr ("binding_phase5_Box") (ident (binding 27 "box"))) 
+                 (ident (binding 10 "binding_phase5_Box_bump"))) 
+           (args (expr ("binding_phase5_Box") (ident (binding 14 "box"))) 
             (expr (int) (literal (int) "2"))))) (expr (int) (literal (int) "5")))) 
     (return (expr (int) (literal (int) "2"))))) 
   (at 20 
    (if (expr (int) 
         (op != 
          (expr (int) 
-          (call (expr ((func (("Var"))) (int)) (ident (binding 32 "Var_int"))) 
-           (args (expr ("Var") (ident (binding 29 "lambda")))))) 
+          (call (expr ((func (("Var"))) (int)) (ident (binding 19 "Var_int"))) 
+           (args (expr ("Var") (ident (binding 16 "lambda")))))) 
          (expr (int) (literal (int) "6")))) 
     (return (expr (int) (literal (int) "3"))))) 
   (at 21 (return (expr (int) (literal (int) "0"))))))
 
 (function (static ("Var")) 
- (bind (binding 54 "_x2c_lambda_0") 
-  ((fnmod (params (param ("Var") (bind (binding 30 "value") ())))))) 
+ (bind (binding 17 "_x2c_lambda_0") 
+  ((fnmod (params (param ("Var") (bind (binding 20 "value") ())))))) 
  (block 
   (stmnt 
    (return 
     (expr ("Var") 
-     (call (expr ((func ((int))) "Var") (ident (binding 53 "int_var"))) 
+     (call (expr ((func ((int))) "Var") (ident (binding 18 "int_var"))) 
       (args (expr (int) 
              (op + (expr (int) 
                     (call (expr ((func (("Var"))) (int)) 
-                           (ident (binding 32 "Var_int"))) 
-                     (args (expr ("Var") (ident (binding 30 "value")))))) 
+                           (ident (binding 19 "Var_int"))) 
+                     (args (expr ("Var") (ident (binding 20 "value")))))) 
               (expr (int) (literal (int) "1")))))))))))

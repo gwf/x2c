@@ -16,25 +16,25 @@
 (macrodef <macro fixture.preserve_unit>)
 
 (function (static int) 
- (bind (binding 22 "calculate") 
-  ((fnmod (params (param (int) (bind (binding 21 "value") ())))))) 
+ (bind (binding 1 "calculate") 
+  ((fnmod (params (param (int) (bind (binding 2 "value") ())))))) 
  (block 
   (at 8 (return (int) 
          (expr (int) 
-          (op + (expr (int) (ident (binding 21 "value"))) 
+          (op + (expr (int) (ident (binding 2 "value"))) 
            (expr (int) (literal (int) "10"))))))))
 
 (function (static int) 
- (bind (binding 23 "before_alias") 
+ (bind (binding 3 "before_alias") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 9 (return (int) 
          (expr (int) 
-          (call (expr ((func ((int))) int) (ident (binding 22 "calculate"))) 
+          (call (expr ((func ((int))) int) (ident (binding 1 "calculate"))) 
            (args (expr (int) (literal (int) "1")))))))))
 
 (function (static int) 
- (bind (binding 24 "first_alias") ((fnmod (params (param (void) (bind () ())))))) 
+ (bind (binding 4 "first_alias") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 11 
    (return (int) 
@@ -44,7 +44,7 @@
        (op + (expr (int) (literal (int) "2")) (expr (int) (literal (int) "1"))))))))))
 
 (function (static int) 
- (bind (binding 25 "frozen_before_redefinition") 
+ (bind (binding 5 "frozen_before_redefinition") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 13 
@@ -57,7 +57,7 @@
 (macrodef <macro fixture.frozen>)
 
 (function (static int) 
- (bind (binding 26 "frozen_after_redefinition") 
+ (bind (binding 6 "frozen_after_redefinition") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 16 
@@ -69,42 +69,42 @@
 
 (declare (static int) 
  (bindings 
-  (op = (bind (binding 27 "direct_unit") ()) 
+  (op = (bind (binding 7 "direct_unit") ()) 
    (expr (int) (literal (int) "3")))))
 
 (declare (static int) 
  (bindings 
-  (op = (bind (binding 28 "aliased_unit") ()) 
+  (op = (bind (binding 8 "aliased_unit") ()) 
    (expr (int) (literal (int) "4")))))
 
 (declare (static int) 
  (bindings 
-  (op = (bind (binding 29 "stacked_unit") ()) 
+  (op = (bind (binding 9 "stacked_unit") ()) 
    (expr (int) (literal (int) "5")))))
 
 (typedef 
  (struct "KeywordRecord" 
-  (fields (declare (int) (bindings (bind (binding 30 "direct_field") ()))) 
-   (declare (int) (bindings (bind (binding 31 "aliased_field") ()))))) 
- (bindings (bind (binding 33 "KeywordRecord") ())))
+  (fields (declare (int) (bindings (bind (binding 10 "direct_field") ()))) 
+   (declare (int) (bindings (bind (binding 11 "aliased_field") ()))))) 
+ (bindings (bind (binding 12 "KeywordRecord") ())))
 
 (function (static int) 
- (bind (binding 34 "direct_function") 
+ (bind (binding 13 "direct_function") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block (at 23 (return (int) (expr (int) (literal (int) "7"))))))
 
 (function (static int) 
- (bind (binding 35 "aliased_function") 
+ (bind (binding 14 "aliased_function") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block (at 25 (return (int) (expr (int) (literal (int) "8"))))))
 
 (function (static int) 
- (bind (binding 36 "stacked_function") 
+ (bind (binding 15 "stacked_function") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block (at 27 (return (int) (expr (int) (literal (int) "9"))))))
 
 (function (static int) 
- (bind (binding 37 "second_alias") 
+ (bind (binding 16 "second_alias") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 31 
@@ -115,12 +115,12 @@
        (op * (expr (int) (literal (int) "3")) (expr (int) (literal (int) "2"))))))))))
 
 (function (int) 
- (bind (binding 38 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (bind (binding 17 "main") ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 32 
    (declare ("KeywordRecord") 
     (bindings 
-     (op = (bind (binding 39 "record") ()) 
+     (op = (bind (binding 18 "record") ()) 
       (expr () 
        (composite 
         (commas (expr (int) (literal (int) "1")) 
@@ -128,66 +128,66 @@
   (at 33 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 40 "imported") ()) (expr (int) (literal (int) "6")))))) 
+     (op = (bind (binding 19 "imported") ()) (expr (int) (literal (int) "6")))))) 
   (at 34 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 41 "statements") ()) 
+     (op = (bind (binding 20 "statements") ()) 
       (expr (int) (literal (int) "0")))))) 
   (at 35 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 42 "conditional") ()) 
+     (op = (bind (binding 21 "conditional") ()) 
       (expr (int) (literal (int) "0")))))) 
   (at 37 
    (stmnt 
-    (expr (int) (postfix ++ (expr (int) (ident (binding 41 "statements"))))))) 
+    (expr (int) (postfix ++ (expr (int) (ident (binding 20 "statements"))))))) 
   (at 38 
    (stmnt 
-    (expr (int) (postfix ++ (expr (int) (ident (binding 41 "statements"))))))) 
+    (expr (int) (postfix ++ (expr (int) (ident (binding 20 "statements"))))))) 
   (at 41 
    (block 
     (at 39 
      (stmnt 
       (expr (int) 
-       (op += (expr (int) (ident (binding 41 "statements"))) 
+       (op += (expr (int) (ident (binding 20 "statements"))) 
         (expr (int) (literal (int) "2")))))))) 
   (at 42 
    (block 
     (at 39 
      (stmnt 
       (expr (int) 
-       (op += (expr (int) (ident (binding 41 "statements"))) 
+       (op += (expr (int) (ident (binding 20 "statements"))) 
         (expr (int) (literal (int) "2")))))))) 
   (at 45 
    (if (expr (int) (literal (int) "1")) 
     (block 
      (at 43 
       (stmnt 
-       (expr (int) (postfix ++ (expr (int) (ident (binding 42 "conditional")))))))))) 
+       (expr (int) (postfix ++ (expr (int) (ident (binding 21 "conditional")))))))))) 
   (at 48 
    (stmnt 
     (expr () 
-     (call (expr () (ident (binding 43 "printf"))) 
+     (call (expr () (ident (binding 22 "printf"))) 
       (args (expr (* char) 
              (literal (* char) 
               "\"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\\n\"")) 
        (expr (int) 
-        (call (expr ((func ((void))) int) (ident (binding 23 "before_alias"))) 
+        (call (expr ((func ((void))) int) (ident (binding 3 "before_alias"))) 
          (args (expr (void) ())))) 
        (expr (int) 
-        (call (expr ((func ((void))) int) (ident (binding 24 "first_alias"))) 
+        (call (expr ((func ((void))) int) (ident (binding 4 "first_alias"))) 
          (args (expr (void) ())))) 
        (expr (int) 
-        (call (expr ((func ((void))) int) (ident (binding 37 "second_alias"))) 
-         (args (expr (void) ())))) 
-       (expr (int) 
-        (call (expr ((func ((void))) int) 
-               (ident (binding 25 "frozen_before_redefinition"))) 
+        (call (expr ((func ((void))) int) (ident (binding 16 "second_alias"))) 
          (args (expr (void) ())))) 
        (expr (int) 
         (call (expr ((func ((void))) int) 
-               (ident (binding 26 "frozen_after_redefinition"))) 
+               (ident (binding 5 "frozen_before_redefinition"))) 
+         (args (expr (void) ())))) 
+       (expr (int) 
+        (call (expr ((func ((void))) int) 
+               (ident (binding 6 "frozen_after_redefinition"))) 
          (args (expr (void) ())))) 
        (expr (int) 
         (parens 
@@ -199,32 +199,32 @@
          (expr (int) 
           (op * (expr (int) (literal (int) "3")) 
            (expr (int) (literal (int) "2")))))) 
-       (expr (int) (ident (binding 41 "statements"))) 
-       (expr (int) (ident (binding 42 "conditional"))) 
-       (expr (int) (ident (binding 27 "direct_unit"))) 
-       (expr (int) (ident (binding 28 "aliased_unit"))) 
-       (expr (int) (ident (binding 29 "stacked_unit"))) 
+       (expr (int) (ident (binding 20 "statements"))) 
+       (expr (int) (ident (binding 21 "conditional"))) 
+       (expr (int) (ident (binding 7 "direct_unit"))) 
+       (expr (int) (ident (binding 8 "aliased_unit"))) 
+       (expr (int) (ident (binding 9 "stacked_unit"))) 
        (expr (int) 
-        (op . (expr ("KeywordRecord") (ident (binding 39 "record"))) 
+        (op . (expr ("KeywordRecord") (ident (binding 18 "record"))) 
          ("direct_field"))) 
        (expr (int) 
-        (op . (expr ("KeywordRecord") (ident (binding 39 "record"))) 
+        (op . (expr ("KeywordRecord") (ident (binding 18 "record"))) 
          ("aliased_field"))) 
        (expr (int) 
-        (call (expr ((func ((void))) int) (ident (binding 34 "direct_function"))) 
+        (call (expr ((func ((void))) int) (ident (binding 13 "direct_function"))) 
          (args (expr (void) ())))) 
        (expr (int) 
         (call (expr ((func ((void))) int) 
-               (ident (binding 35 "aliased_function"))) 
+               (ident (binding 14 "aliased_function"))) 
          (args (expr (void) ())))) 
        (expr (int) 
         (call (expr ((func ((void))) int) 
-               (ident (binding 36 "stacked_function"))) 
-         (args (expr (void) ())))) (expr (int) (ident (binding 40 "imported")))))))) 
+               (ident (binding 15 "stacked_function"))) 
+         (args (expr (void) ())))) (expr (int) (ident (binding 19 "imported")))))))) 
   (at 49 (return (int) (expr (int) (literal (int) "0"))))))
 
 (function (static void) 
- (bind (binding 44 "direct_captured_raise") 
+ (bind (binding 23 "direct_captured_raise") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 52 
@@ -236,7 +236,7 @@
         (args)))))))))
 
 (function (static void) 
- (bind (binding 45 "aliased_captured_raise") 
+ (bind (binding 24 "aliased_captured_raise") 
   ((fnmod (params (param (void) (bind () ())))))) 
  (block 
   (at 55 
