@@ -318,11 +318,14 @@ static void _partition_function(
   if (!type.is_inline()) source.push(function);
 }
 
-// A binding list with a named declarator, as opposed to a bare tag body.
+/* A binding list with a named object declarator, as opposed to a bare tag
+   body or a function prototype. A prototype names no storage, so it stays
+   whole in the header. */
 static int _declares_object(List bindings) {
   match (bindings) case %(bindings *declarators):
     foreach (List declarator, declarators)
       match (declarator) {
+        case %(bind ? ((fnmod *) *)): return 0;
         case %(bind ?name *): if (name.truth()) return 1;
         case %(op = * *): return 1;
       }
@@ -346,12 +349,27 @@ static int _partition_tagged_object(
   return 1;
 }
 
+/* A public file-scope object has one definition, in the source, and an
+   `extern` declaration in the header. Defining it in the header would give
+   every including unit its own copy, and a runtime initializer there is not
+   a C constant expression. */
+static int _partition_object(
+  Array header, Array source, List declaration, Type type, List bindings) {
+  if (type.is_extern() || !_declares_object(bindings)) return 0;
+  header.push(_header_declaration(NULL, %(extern @type), bindings));
+  source.push(declaration);
+  return 1;
+}
+
 static void _partition_declaration(
   Array header, Array source, List declaration, Type type, List bindings,
   int private) {
   if (private) source.push(declaration);
-  else if (!(type.is_aggregate_tag_body() || type.is_enum_tag_body()) ||
-           !_partition_tagged_object(header, source, type, bindings))
+  else if (type.is_aggregate_tag_body() || type.is_enum_tag_body()) {
+    if (!_partition_tagged_object(header, source, type, bindings))
+      header.push(_header_declaration(declaration, type, bindings));
+  }
+  else if (!_partition_object(header, source, declaration, type, bindings))
     header.push(_header_declaration(declaration, type, bindings));
 }
 

@@ -8,6 +8,8 @@ static List _9, _8, _5, _4, _3;
 
 static Var _7, _6, _2, _1, _0;
 
+int * ast_phase1_plain_pointer, ast_phase1_plain_array[3], (* ast_phase1_pointer_to_array)[3], (* ast_phase1_function_pointer)(int);
+
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);

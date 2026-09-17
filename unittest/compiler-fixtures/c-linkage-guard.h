@@ -18,7 +18,7 @@ extern int scale;
 
 #ifdef __cplusplus
 #endif
-int scale = 10;
+extern int scale;
 
 int Span_len(Span span);
 

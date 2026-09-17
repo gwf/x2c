@@ -266,6 +266,12 @@ static List _build_static_array_block(
   return %(block @{statements.list_free()});
 }
 
+/* C initializes a const object only in its definition, so a definition whose
+   initializer has to run drops the qualifier. The declared type still carries
+   it everywhere x2c checks the object. */
+static List _unqualify_const(List specifiers) =>
+  specifiers.filter(%!(specifier) => specifier != <const>);
+
 /* Strip one initialized binding and record the assignment that replaces it.
    C does not allow a non-constant static initializer, and after lowering
    most of them are calls. */
@@ -282,8 +288,10 @@ static List _defer_one_binding(
     case %(op = (bind ?name ?mods) (expr ?type ?value)): {
       List declaration = %(declare $decltype (bindings (bind $name $mods)));
       Type object = declaration.type_from_ast().declared();
-      // C initializes a const object only in its definition.
-      if (object.car() == <const>) return bound;
+      if (object.car() == <const>) {
+        if (!_needs_runtime_initializer(value)) return bound;
+        mods = _unqualify_const(mods);
+      }
       Type declared = object.canonicalize();
       Type resolved = compiler.sym.resolve_key(declared);
       if (resolved.is_array()) {
@@ -319,19 +327,24 @@ static List _defer_bindings(
 }
 
 /* Lowering turns most non-const file-static initializers into calls, so they
-   run in the initializer phase. Public file statics holding cache references
-   defer too; otherwise nothing assigns their slots. */
+   run in the initializer phase. A public object or a const object defers only
+   where its initializer is not a C constant expression; otherwise nothing
+   assigns its slot. */
 static List _rewrite_file_scope_decl(
   Compiler compiler, List decl, Array initializers) {
   match (decl)
     case %(declare (!set ?decltype (!and (static *) (!not (* const *))))
                    (bindings *bound_list)):
       return _defer_bindings(compiler, decltype, bound_list, initializers);
-  if (!_contains_cache_ref(decl)) return decl;
+  if (!_needs_runtime_initializer(decl)) return decl;
   match (decl)
     case %(declare (!set ?decltype (!not (* const *)))
                    (bindings *bound_list)):
       return _defer_bindings(compiler, decltype, bound_list, initializers);
+  match (decl)
+    case %(declare ?decltype (bindings *bound_list)):
+      return _defer_bindings(
+        compiler, _unqualify_const(decltype), bound_list, initializers);
   return decl;
 }
 
@@ -532,6 +545,19 @@ static int _contains_cache_ref(Var value) {
   List node = value;
   match (node) case %(cache ?): return 1;
   foreach (Var child, node) if (_contains_cache_ref(child)) return 1;
+  return 0;
+}
+
+/* Emission turns each of these into a call, and a call is not a C constant
+   expression, so a file-scope initializer holding one runs as an assignment
+   the unit initializer makes instead. */
+static int _needs_runtime_initializer(Var value) {
+  if (value is not <list>) return 0;
+  List node = value;
+  match (node)
+    case %((!or cache call varray vmap cons append) *): return 1;
+  foreach (Var child, node)
+    if (_needs_runtime_initializer(child)) return 1;
   return 0;
 }
 

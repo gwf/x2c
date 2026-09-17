@@ -15,6 +15,8 @@
 #include "conditional-private-split.h"
 
 #if VERBOSE
+int shared = 1;
+
 static const char * mode = "verbose";
 
 #  ifdef MISSING

@@ -2,6 +2,8 @@
 
 #include "binding-identity.h"
 
+binding_phase5_Value binding_phase5_global = 1;
+
 static Var _x2c_lambda_0(Var value);
 
 binding_phase5_Value binding_phase5_shadow(binding_phase5_Value value){

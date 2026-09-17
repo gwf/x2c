@@ -6,6 +6,12 @@ static List _1;
 
 static Var _0;
 
+int mixed_global_i = 1;
+
+float mixed_global_x = 2.5;
+
+char mixed_global_c = 'g';
+
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);

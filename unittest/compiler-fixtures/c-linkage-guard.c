@@ -2,6 +2,8 @@
 
 #include "c-linkage-guard.h"
 
+int scale = 10;
+
 int Span_len(Span span){
   return span.stop - span.start;
 }

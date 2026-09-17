@@ -2,6 +2,8 @@
 
 #include "threaded-storage.h"
 
+_Thread_local int visible;
+
 static _Thread_local int hidden;
 
 _Thread_local static int reordered;

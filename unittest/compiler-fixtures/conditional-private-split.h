@@ -8,7 +8,7 @@
 #include "x2c.h"
 #define VERBOSE 1
 #if VERBOSE
-int shared = 1;
+extern int shared;
 
 #else
 #endif
