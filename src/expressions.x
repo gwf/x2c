@@ -3800,6 +3800,23 @@ List Compiler.convert_expression(Compiler c, List expr, Type target) {
     }
   }
   if (!type) {
+    /* A generic selection has no x2c type of its own, and only one
+       association runs, so each one converts to the destination the way
+       conditional arms above do. */
+    match (expr) case %(expr () (generic ?control *associations)): {
+      Array converted = [];
+      int changed = 0;
+      foreach (List association, associations) match (association)
+        case %(association ?selector ?value): {
+          List result = c.convert_expression(value, declared_target);
+          if (result != value) changed = 1;
+          converted.push(%(association $selector $result));
+        }
+      if (changed)
+        return %(expr $declared_target
+          (generic $control @{converted.list_free()}));
+      converted.free();
+    }
     if (target_is_var &&
         expr.match(%(expr () (ident (binding ? ?))))) {
       List binding = expr.caddr().cadr();
