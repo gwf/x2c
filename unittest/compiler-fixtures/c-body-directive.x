@@ -90,8 +90,48 @@ static int sum(List items) {
   return total;
 }
 
+static int governed(List items) {
+  int total = 0;
+  {
+    defer
+#ifdef TWICE
+      total *= 2;
+#else
+      total += 1;
+#endif
+  }
+  try
+#ifdef FAIL
+    raise %(boom);
+#else
+    total += 10;
+#endif
+  finally
+#ifndef QUIET
+    total += 100;
+#endif
+  try raise %(boom);
+  catch %(boom):
+#ifdef QUIET
+    total = 0;
+#else
+    total += 1000;
+#endif
+  match (items) {
+    case %(1 2):
+#ifdef QUIET
+      total = 0;
+#else
+      total += 10000;
+#endif
+    default: total = -1;
+  }
+  return total;
+}
+
 int main(void) {
   printf("%d %d %d %d\n", pick(2), pick(4), width(3), count(5));
   printf("%d %d %d\n", chain(0, 1), branch(2), sum(%(1 2)));
+  printf("%d\n", governed(%(1 2)));
   return 0;
 }

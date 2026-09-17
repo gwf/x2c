@@ -97,6 +97,9 @@ typedef struct Compiler {
      index to the groups open after it. */
   List arms;
   Map arm_stacks;
+  /* The cursor after a governed statement took the directives before it,
+     which the following item must not read again. */
+  Token directives_taken;
   // Import paths already applied to this .x file's alias map.
   Map kw_seen;
   // Anchored statements whose transform returned them unchanged. The driver

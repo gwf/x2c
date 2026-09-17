@@ -24,21 +24,59 @@ static List _keyword_paren_expr(Compiler compiler, Symbol keyword) {
   return expr;
 }
 
+/* How many conditional groups the directive `text` opens, or -1 when it
+   closes one. */
+static int _group_step(String text) {
+  Symbol kind = preproc_conditional_kind(text);
+  return kind == <open> ? 1 : kind == <close> ? -1 : 0;
+}
+
+/* Adds the directives before the cursor to `items` and returns how many
+   conditional groups they open, less those they close. */
+static int _take_directives(Compiler c, Array items) {
+  int depth = 0;
+  foreach (List directive, c.leading_preproc()) {
+    items.push(directive);
+    depth += _group_step(directive.cadr());
+  }
+  return depth;
+}
+
 /** Parses the statement a control keyword or statement macro governs, or a
     block item at `AST_BLOCK`. Directives written before it stay in front of
     it in a `(group DIRECTIVE... STATEMENT)`, which emits without braces, so
-    each directive stays where C read it.
+    each directive stays where C read it. A conditional group they open also
+    takes its later arms and closing directive, so a statement macro that
+    wraps its body in braces keeps the whole group inside them.
 */
 List Compiler.parse_governed(Compiler c, AstPos position) {
-  List directives = c.leading_preproc();
-  List statement = position == AST_BLOCK
-    ? c.parse_block_item() : c.parse_statement();
-  return directives ? %(group @directives $statement) : statement;
+  Array items = [];
+  int depth = _take_directives(c, items);
+  loop {
+    Token start = c.token;
+    items.push(position == AST_BLOCK ? c.parse_block_item()
+                                     : c.parse_statement());
+    /* A directive inside the statement may close the group; those after its
+       last token precede the next item. */
+    int pending = 0;
+    for (Token token = start; depth > 0 && token < c.token; token++)
+      if (token.type == <preproc>) pending += _group_step(token.text);
+      else if (token.type != <space> && token.type != <comment>) {
+        depth += pending;
+        pending = 0;
+      }
+    if (depth <= 0) break;
+    depth += _take_directives(c, items);
+    c.directives_taken = c.token;
+    if (depth <= 0 || c.peek(0) == <"}"> || c.peek(0) == <eof>) break;
+  }
+  return items.len() == 1 ? items[0] : %(group @{items.list_free()});
 }
 
-/* Directives written before the `else` or `while` that continues a statement
-   follow that statement. */
+/* Directives written before the `else`, `while`, `catch`, or `finally` that
+   continues a statement follow that statement. */
 static List _continued(Compiler c, List statement) {
+  if (c.token == c.directives_taken) return statement;
   List directives = c.leading_preproc();
   return directives ? %(group $statement @directives) : statement;
 }
@@ -93,8 +131,7 @@ static List _do_statement(Compiler compiler) {
 
 static List _defer_statement(Compiler compiler) {
   compiler.expect(<defer>);
-  List body = compiler.parse_statement();
-  return %(defer $body);
+  return %(defer ${compiler.parse_governed(AST_STATEMENT)});
 }
 
 /** Builds a return node for an optional expression without consuming tokens.
@@ -272,7 +309,7 @@ static List _match_case(Compiler c) {
   }
   List guard = c.peek(0) == <if> ? _keyword_paren_expr(c, <if>) : NULL;
   c.expect(<:>);
-  List body = c.parse_statement();
+  List body = c.parse_governed(AST_STATEMENT);
   if (guard) body = %(if $guard (block $body (break)));
   if (types) {
     body = %(block @temporaries (block @declarations $body));
@@ -330,7 +367,9 @@ static List _filtered_catch_arm(Compiler c, int *is_default) {
     c.expect(<:>);
   }
   c.begin_catch_arm(pattern, start);
-  List body = c.parse_statement();
+  List body = c.parse_governed(AST_STATEMENT);
+  if (c.peek(0) == <catch> || c.peek(0) == <finally>)
+    body = _continued(c, body);
   c.sym.pop_scope();
   return %($pattern $body);
 }
@@ -353,9 +392,9 @@ static List _filtered_catches(Compiler compiler) {
 
 static List _try_statement(Compiler c) {
   c.expect(<try>);
-  List body = c.parse_statement(), ctch = NULL;
+  List body = _continued(c, c.parse_governed(AST_STATEMENT)), ctch = NULL;
   if (c.test(<catch>)) ctch = _filtered_catches(c);
-  List fnly = c.test(<finally>) ? c.parse_statement() : NULL;
+  List fnly = c.test(<finally>) ? c.parse_governed(AST_STATEMENT) : NULL;
   if (ctch || fnly) return %(try $body $ctch $fnly);
   c.report_error(
     <parse>, "expected 'catch' or 'finally' after try block",
@@ -536,7 +575,8 @@ List Compiler.parse_block_items(Compiler c, int anchor_items) {
   Array block = [], List stmt = NULL;
   c.sym.push_new_scope();
   loop {
-    foreach (Var directive, c.leading_preproc()) block.push(directive);
+    if (c.token != c.directives_taken)
+      foreach (Var directive, c.leading_preproc()) block.push(directive);
     if (c.peek(0) == <"}">) break;
     /* Anchor every statement to the token that opens it. Transform-phase
        diagnostics have no useful current token, so this occurrence lets

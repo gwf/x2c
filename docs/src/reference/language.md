@@ -2664,9 +2664,13 @@ environment. Full parsing, diagnostics, and emitted source still come from the
 original token stream. Directives remain AST nodes in source order at top level
 and inside compound statements. This includes a trailing directive before
 `}`; a directive between `if (...)`, `else`, `while (...)`, `for (...)`,
-`do`, `switch (...)`, or a statement macro such as `foreach` and the
-statement it governs; and a directive before the `else` or do-while `while`
-that continues a statement.
+`do`, `switch (...)`, `defer`, `try`, `catch ...:`, `finally`, a match arm's
+`:`, or a statement macro such as `foreach` and the statement it governs; and
+a directive before the `else`, do-while `while`, `catch`, or `finally` that
+continues a statement. A conditional group opened there governs its later
+arms and closing directive as well, so `foreach` keeps the whole group inside
+its loop. A directive between two match arms, around a whole `case`, is not
+kept; write the condition inside the arm body instead.
 
 An include that x2c cannot resolve remains in the emitted C. Translation
 without host preprocessing can therefore succeed with an active missing
