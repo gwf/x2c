@@ -3773,12 +3773,18 @@ static int _conditional_joins(Compiler c, Type type, Type other) =>
   type && other && c.sym.is_var_type(type) && !c.sym.is_var_type(other);
 
 /* A brace arm that stays a native initializer becomes a compound literal of
-   the destination, because C has no braced conditional operand. */
+   the destination, because C has no braced conditional operand. An anonymous
+   struct or union has no spelling for that literal. */
 static List _conditional_arm(Compiler c, List arm, Type target) {
   List converted = c.convert_expression(arm, target);
   match (converted)
-    case %(expr ?type (composite *)):
+    case %(expr ?type (composite *)): {
+      if (Type.tag(type).match(%((gensym *))))
+        c.report_error(
+          <type>, "a brace in a conditional needs a named destination type",
+          NULL, %("declare the destination with a struct tag or typedef"));
       return %(expr $type (cast $type $converted));
+    }
   return converted;
 }
 
