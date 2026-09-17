@@ -23,6 +23,7 @@ Structured compiler diagnostics collection.
 | [`Compiler.print_diagnostic`](#Compiler.print_diagnostic) | Writes one structured diagnostic entry and source context to stderr, or one JSON line after `diagnostics_write_json`. |
 | [`Compiler.report_error`](#Compiler.report_error) | Submits a located compiler error, then transfers or exits. |
 | [`Compiler.report_warning`](#Compiler.report_warning) | Records and emits a located warning without consuming the error limit. |
+| [`Compiler.report_warning_at`](#Compiler.report_warning_at) | Records and emits a warning at a location built earlier by `Compiler.token_location`, for a report raised after its token has been consumed. |
 | [`Compiler.token_location`](#Compiler.token_location) | Builds the diagnostic location for `token` or the current token. |
 | [`Diagnostics.entries`](#Diagnostics.entries) | Returns an immutable `List` snapshot in publication order. |
 | [`Diagnostics.has_emitter`](#Diagnostics.has_emitter) | Returns whether `diag` currently has an emitter. |
@@ -57,7 +58,7 @@ Returns a report-order snapshot of all collected diagnostics.
 Snapshot cells are canonicalized through the active pool hierarchy and
 share entry values; each retains its actual producing-pool lifetime.
 
-Source: `src/diagnostics.x:443`
+Source: `src/diagnostics.x:453`
 
 <a id="Compiler.display_path"></a>
 #### Compiler.display_path
@@ -76,7 +77,7 @@ Source: `src/diagnostics.x:315`
 
 Prints each cached numeric identifier and its key to stdout.
 
-Source: `src/diagnostics.x:479`
+Source: `src/diagnostics.x:489`
 
 <a id="Compiler.dump_symbol_table"></a>
 #### Compiler.dump_symbol_table
@@ -85,7 +86,7 @@ Source: `src/diagnostics.x:479`
 
 Prints every entry in `map` to stdout in `Map` iteration order.
 
-Source: `src/diagnostics.x:474`
+Source: `src/diagnostics.x:484`
 
 <a id="Compiler.dump_tokens"></a>
 #### Compiler.dump_tokens
@@ -95,7 +96,7 @@ Source: `src/diagnostics.x:474`
 Prints every non-EOF token with its position and visible content.
 `Compiler.tokenize` must have populated the compiler's tokenizer.
 
-Source: `src/diagnostics.x:464`
+Source: `src/diagnostics.x:474`
 
 <a id="Compiler.error_count"></a>
 #### Compiler.error_count
@@ -105,7 +106,7 @@ Source: `src/diagnostics.x:464`
 Returns the number of counted diagnostics accepted since the last reset.
 Warnings and the generated limit notice are excluded.
 
-Source: `src/diagnostics.x:437`
+Source: `src/diagnostics.x:447`
 
 <a id="Compiler.origin_location"></a>
 #### Compiler.origin_location
@@ -158,6 +159,17 @@ Location selection matches `Compiler.report_error`; NULL code becomes
 returns without raising or changing the process exit status.
 
 Source: `src/diagnostics.x:379`
+
+<a id="Compiler.report_warning_at"></a>
+#### Compiler.report_warning_at
+
+`void Compiler.report_warning_at( Compiler compiler, Symbol code, String message, List location, List notes)`
+
+Records and emits a warning at a location built earlier by
+`Compiler.token_location`, for a report raised after its token has been
+consumed. Defaults match `Compiler.report_warning`.
+
+Source: `src/diagnostics.x:389`
 
 <a id="Compiler.token_location"></a>
 #### Compiler.token_location
