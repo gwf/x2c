@@ -586,8 +586,8 @@ static Var _rewrite(Walk walk, Var value) {
         String name = _label_spelling(labelled);
         _report_at(
           walk, labelled_at, "a finally body cannot define a label",
-          %(${%"a finalizer runs on every path that leaves its region, so '${
-            name ? name : "this label"}' would be defined once for each"}));
+          %("a finalizer runs on every path that leaves its region, so '${
+            name ? name : "this label"}' would be defined once for each"));
       }
       List cleanup = _try_cleanup(
         frame, handle, _rewrite(walk, finalizer), !!clause);

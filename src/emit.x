@@ -891,8 +891,8 @@ static List Emitter._initializer_macro(
   String expanded = %"${name}_expanded";
   String definition = %"#define $expanded($formal) $replacement";
   e.native_macros.push(%($expanded $definition));
-  e.native_macros.push(%($name
-    ${%"#define $name($formal) $expanded($formal)"}));
+  e.native_macros.push(
+    %($name "#define $name($formal) $expanded($formal)"));
   Array arguments = [];
   foreach (List argument, input.cdr()) {
     List emitted = e._emit(argument.cadr(), context);
@@ -1391,7 +1391,7 @@ List Compiler.emit(Compiler compiler, List ast) {
   foreach (List entry, state.native_macros.list_free()) {
     (String name, String definition) = entry;
     before.push(%(c-direct $definition));
-    after.push(%(c-direct ${%"#undef $name"}));
+    after.push(%(c-direct "#undef $name"));
   }
   return before.list_free().flatten_all().append(code)
     .append(after.list_free().flatten_all());
