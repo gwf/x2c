@@ -1,7 +1,7 @@
 # Issues
 
 > Status: retired - 2026-09-11; questions preserved, not resolved.
-> Superseded by the [recommended research agenda](../research-agenda.md),
+> Superseded by the [recommended research agenda](research-agenda.md),
 > sections 1 and 2, in the delivery commit titled
 > `repair gallery coverage and retire closeout plans`.
 

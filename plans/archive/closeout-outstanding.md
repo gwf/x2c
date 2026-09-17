@@ -9,7 +9,7 @@ The accepted compiler/runtime, Torch, and site work below was delivered.
 The remaining Fable onboarding experiment is intentionally stopped, not
 passed; see [its retirement record](agent-onboarding-accuracy.md). The two
 deferred issues and four future opportunities are preserved in the
-[recommended research agenda](../research-agenda.md). That document proposes
+[recommended research agenda](research-agenda.md). That document proposes
 new plan boundaries; it does not authorize their implementation. Historical
 active-work statements below describe the earlier outcome.
 

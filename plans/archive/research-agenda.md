@@ -1,6 +1,7 @@
 # Recommended research plans
 
-> Status: reference - independent work pursued on 2026-09-11.
+> Status: done - all five investigations closed on 2026-09-11, with the
+> one implementation they justified delivered.
 > Gary authorized proceeding in parallel where little further input was needed.
 > Delivery commit subject: `overlap native fingerprints and close research probes`.
 
@@ -8,20 +9,20 @@
 
 All five topics received bounded investigation. One justified an implementation:
 
-- [Native build reuse](archive/native-build-reuse.md): preprocess fingerprints
+- [Native build reuse](native-build-reuse.md): preprocess fingerprints
   now use the existing bounded job scheduler. A synthetic 16-file warm build
   fell from 0.456 to 0.167 seconds at four jobs; single-job time was unchanged.
-- [Memory retention](archive/memory-retention.md): fresh Torch probes identify
+- [Memory retention](memory-retention.md): fresh Torch probes identify
   substantial allocator-reclaimable residency, with only 2 KB in its Pool
   depot. A separate burst proves intentional depot retention and full reuse.
   No Pool policy or ownership change is justified by these measurements.
-- [Temporary ownership](archive/temporary-result-ownership.md): the existing
+- [Temporary ownership](temporary-result-ownership.md): the existing
   fixture reproduces why returned inputs/views must survive. Preserve the
   guard and explicit named-value lifetimes; no new freshness contract.
-- [Editor reuse](archive/editor-semantic-reuse.md): existing callers already
+- [Editor reuse](editor-semantic-reuse.md): existing callers already
   debounce diagnostics. No observed repeated-request workload justified more
   cancellation state, and arbitrary macro inputs prevent revision-only caching.
-- [Torch relocation](archive/torch-application-distribution.md): a moved macOS
+- [Torch relocation](torch-application-distribution.md): a moved macOS
   application with four private libraries passes CPU/checkpoint execution and
   matches the original's 19 records and 64 curve observations. Public packaging
   remains future scope; this probe adds no signing/platform promise.
@@ -33,8 +34,8 @@ These outcomes supersede the initial uncertainty below without rewriting its
 historical scope. No deferred language or memory-policy change was inferred
 from the implementation authorization.
 
-The earlier [closeout](archive/closeout-outstanding.md) implementation remains
-complete. The [Fable effort](archive/agent-onboarding-accuracy.md) remains
+The earlier [closeout](closeout-outstanding.md) implementation remains
+complete. The [Fable effort](agent-onboarding-accuracy.md) remains
 intentionally retired with failed acceptance and was not reopened.
 
 ## Original research scopes
@@ -48,12 +49,12 @@ Combine the unresolved Torch process footprint with the known Pool depot
 retention as two separately measured questions. Do not assume one explains
 or fixes the other.
 
-Evidence: [Torch's report](../packages/torch/benchmarks/REPORT.md) records stable
-native/Scope counts and bounded canonical storage in the pooled variant,
+Evidence: [Torch's report](../../packages/torch/benchmarks/REPORT.md) records
+stable native/Scope counts and bounded canonical storage in the pooled variant,
 but an unexplained incremental process-peak excess. Historical pool churn is
-not equivalent to a leak. [Pool._block_return](../lib/pool.x) places released
-blocks in the process depot; the registry frees them at shutdown. The block
-registry/page index assumes storage remains allocated until shutdown.
+not equivalent to a leak. [Pool._block_return](../../lib/pool.x) places
+released blocks in the process depot; the registry frees them at shutdown. The
+block registry/page index assumes storage remains allocated until shutdown.
 
 First reproduce request loops and burst/release/reuse on current source.
 Separate live handles, Scope allocations, canonical active/depot bytes,
@@ -73,11 +74,11 @@ policy or public trim API requires a separately settled design.
 ## 2. temporary-result-ownership.md
 
 Treat the guard as a correctness boundary to preserve, not an obsolete check.
-[Compiler.discard_helper](../src/protocol.x) retains temporary inputs when an
-ordinary pointer/aggregate-returning function might return an input or an
-interior view. [Expression lowering](../src/expressions.x) records fresh
-callees for protocol operators, numeric converters, and their wrappers.
-Current operator cleanup fixtures cover borrowed handles and interior views.
+[Compiler.discard_helper](../../src/protocol.x) retains temporary inputs when
+an ordinary pointer/aggregate-returning function might return an input or an
+interior view. [Expression lowering](../../src/expressions.x) records fresh
+callees for protocol operators, numeric converters, and their wrappers. Current
+operator cleanup fixtures cover borrowed handles and interior views.
 
 Inventory actual missed early-release opportunities, beginning with Torch
 chains. Distinguish an unnamed fresh intermediate from a named variable's
@@ -94,7 +95,7 @@ A no-change conclusion is valid if the benefit does not justify a new contract.
 
 ## 3. native-build-reuse.md
 
-[Build._compile_fingerprint](../src/build.x) synchronously preprocesses each
+[Build._compile_fingerprint](../../src/build.x) synchronously preprocesses each
 source before its compile action enters the bounded job loop. Unchanged
 retained builds therefore serialize fingerprint work even with multiple jobs.
 This establishes the scheduling opportunity, not its performance value.
@@ -109,10 +110,11 @@ complexity and unchanged builds still skip compilation correctly.
 
 ## 4. editor-semantic-reuse.md
 
-[SemanticService.analyze](../etc/vsc-extension/semantic.js) launches a worker
-for each query; [editor_request](../src/editor.x) opens a new frontend each
-time. Prefer one response containing existing compiler-owned semantic facts,
-with hover/definition lookup in the adapter, over a persistent compiler daemon.
+[SemanticService.analyze](../../etc/vsc-extension/semantic.js) launches a
+worker for each query; [editor_request](../../src/editor.x) opens a new
+frontend each time. Prefer one response containing existing compiler-owned
+semantic facts, with hover/definition lookup in the adapter, over a persistent
+compiler daemon.
 
 First measure repeated diagnostics/hover/definition on unchanged inputs and
 identify the exact fact set needed. Settle invalidation before caching:
@@ -128,9 +130,9 @@ be bounded simply, retain the current behavior and record the limitation.
 
 ## 5. torch-application-distribution.md
 
-Torch currently embeds its prepared-prefix rpath. The existing
-[package bundle owner](../packages/tools/bundle) packages interfaces,
-archives and declared native inputs; the [documented contract](../docs/src/guide/packages.md)
+Torch currently embeds its prepared-prefix rpath. The existing [package bundle
+owner](../../packages/tools/bundle) packages interfaces, archives and declared
+native inputs; the [documented contract](../../docs/src/guide/packages.md)
 explicitly excludes shared-library relocation. Moving a runnable Torch app is
 new scope, not a missing promise of completed package integration.
 
