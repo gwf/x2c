@@ -713,12 +713,10 @@ int new_command(CliRequest request) {
       %"[target.$name]
 sources = [\"src/*.x\"]
 ");
-    // Symbol collection reads a line-leading `#include` inside a percent
-    // string as a directive, so that line is inserted as a C string.
     dir.join("src/main.x").write_text(
       %"/*  main.x -- greet the name given on the command line */
 
-${"#include <stdio.h>"}
+#include <stdio.h>
 
 int main(int argc, char **argv) {
   String name = argc > 1 ? argv[1] : \"world\";
