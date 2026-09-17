@@ -153,7 +153,7 @@ def build(lane, counters=False):
         with open(marker) as handle:
             recorded = handle.read().strip()
     if recorded != wanted:
-        for name in ("torch.link", "torch-shim.o", "xt_ops.o"):
+        for name in ("torch.native.rsp", "torch-shim.o", "xt_ops.o"):
             path = os.path.join(package, "builds", name)
             if os.path.exists(path):
                 os.remove(path)
