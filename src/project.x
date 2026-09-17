@@ -503,7 +503,7 @@ static Array _target_sources(
   kept.sort();
   foreach (Var value, kept) {
     String path = value;
-    if (!(path.endswith(".x") || path.endswith(".c")))
+    if (!(x2c_source_file(path) || path.endswith(".c")))
       _error_name(project, 0, "manifest source is not .x or .c", path);
   }
   return kept;

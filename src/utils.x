@@ -67,6 +67,22 @@ String x2c_package_directory(String root, String path) {
   return slash > 0 ? path[:prefix.len() + slash] : NULL;
 }
 
+/** Reports whether `path` is x2c source: a `.x` file, or a file of any
+    other name whose first line is a shebang, which is a script.
+*/
+int x2c_source_file(String path) {
+  if (path.endswith(".x")) return 1;
+  if (path.endswith(".c") || path.endswith(".h") || path.endswith(".o") ||
+      path.endswith(".a")) return 0;
+  FILE *file = fopen(path, "r");
+  if (!file) return 0;
+  char head[2];
+  int shebang = fread(head, 1, 2, file) == 2 && head[0] == '#' &&
+                head[1] == '!';
+  fclose(file);
+  return shebang;
+}
+
 /** Recognizes a package's `src/` files or its package-named legacy entry.
     Other files under the package directory are consumers.
 */

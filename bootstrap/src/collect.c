@@ -32,7 +32,7 @@
 
 static List _80, _78, _77, _73, _72, _71, _70, _52, _51, _40, _39, _38, _29, _25, _23, _22, _21, _19, _17, _16, _14;
 
-static String _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _61, _60, _59, _58, _57, _56, _55, _54, _53, _47, _46, _45, _44, _43, _42, _41, _34, _33, _32, _31, _30, _26, _9, _8, _7, _6, _4, _3, _2, _1, _0;
+static String _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _61, _60, _59, _58, _57, _56, _55, _54, _53, _47, _46, _45, _44, _43, _42, _41, _34, _33, _32, _31, _30, _26, _9, _8, _7, _6, _4, _3, _2, _1, _0;
 
 static Var _79, _69, _68, _67, _66, _64, _63, _62, _48, _37, _36, _35, _28, _27, _24, _20, _18, _15, _13, _10, _5;
 
@@ -281,11 +281,10 @@ __attribute__((constructor)) static void _file_init_(void){
   _87 = String_new(".");
   _88 = String_new("/");
   _89 = String_new("cannot read include");
-  _90 = String_new(".x");
-  _91 = String_new("cannot read runtime source");
-  _92 = String_new("failed to write interface file");
-  _93 = String_new(">");
-  _94 = String_new("\"");
+  _90 = String_new("cannot read runtime source");
+  _91 = String_new("failed to write interface file");
+  _92 = String_new(">");
+  _93 = String_new("\"");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -321,7 +320,7 @@ static String _preproc_include_target(String text, int * angle){
   if(open != '"' && open != '<') return NULL;
   * angle = open == '<';
   String rest = String_getslice(body, 1, -2147483648, 1);
-  int close = String_find(rest, * angle ? _93 : _94);
+  int close = String_find(rest, * angle ? _92 : _93);
   return close > 0 ? String_getslice(rest, -2147483648, close, 1) : NULL;
 }
 
@@ -788,7 +787,7 @@ List Array_list(Array);
 
 Compiler Compiler_new_shared(Compiler);
 
-int String_endswith(String, String);
+int x2c_source_file(String);
 
 void Compiler_take_unit_state(Compiler, Compiler);
 
@@ -815,7 +814,8 @@ static void _parse_segment(Compiler c, String path, String source, Array lines, 
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
-    if(! String_endswith(path, _90)) shadow -> package = NULL;
+    int unit = x2c_source_file(path);
+    if(! unit) shadow -> package = NULL;
     shadow -> filename = path;
     shadow -> source_private = * private;
     Compiler_take_unit_state(shadow, c);
@@ -829,7 +829,7 @@ static void _parse_segment(Compiler c, String path, String source, Array lines, 
     }
     Compiler_shallow_parse_overlay(shadow, globs, overlay);
     Compiler_return_unit_state(shadow, c);
-    if(String_endswith(path, _90)){
+    if(unit){
       Map_merge(c -> fn_defs, shadow -> fn_defs);
       Map_merge(definitions, shadow -> fn_defs);
     }
@@ -871,7 +871,7 @@ static void _include(Compiler c, String target, int angle, String dir, Map globs
   int covered = 0;
   String path = _resolve_include(c, dir, target, angle, & covered);
   if(! String_truth(path)) return;
-  if(covered && ! String_endswith(path, _90)) return;
+  if(covered && ! x2c_source_file(path)) return;
   String canonical = _canonical_path(path);
   Var cached = c -> source_facts ?((void) 0, Void) : Map_getindex(_header_cache(), String_var(canonical));
   List entry = Var_is_void(cached) ? _interface_read(c, canonical) : Var_list(cached);
@@ -1130,7 +1130,7 @@ _x2c_error_handler_2 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_2);
 }
 }
-if(failed) Compiler_report_error(c, 306819428, _91, c -> token, cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(runtime), NULL)))), NULL));
+if(failed) Compiler_report_error(c, 306819428, _90, c -> token, cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(runtime), NULL)))), NULL));
 return text;
 }
 
@@ -1229,7 +1229,7 @@ List String_split(String, String);
 
 static void _package_merge(Compiler compiler, String name, String root, String path, Map part, Map merged, Token token){
   String prefix = String_join(NULL, cons(String_var(name), cons(String_var(_41), NULL)));
-  int header = ! String_endswith(path, _90);
+  int header = ! x2c_source_file(path);
   int foreign = ! String_startswith(path, String_join(NULL, cons(String_var(root), cons(String_var(_3), NULL))));
   {
     Var key, value;
@@ -1955,7 +1955,7 @@ void interface_write(Compiler compiler, String path){
   if(written && ! rename(temporary, path)) return;
   String reason = String_printf(_82, strerror(errno));
   unlink(temporary);
-  Compiler_report_error(compiler, 354920, _92, NULL, cons(String_var(String_join(NULL, cons(String_var(_83), cons(String_var(path), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_84), cons(String_var(reason), NULL)))), NULL)));
+  Compiler_report_error(compiler, 354920, _91, NULL, cons(String_var(String_join(NULL, cons(String_var(_83), cons(String_var(path), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_84), cons(String_var(reason), NULL)))), NULL)));
 }
 
 void Compiler_close_child(Compiler, Compiler);

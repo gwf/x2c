@@ -38,12 +38,10 @@ __attribute__((constructor)) static void _file_init_(void){
   _4 = String_new(".tmp.%ld");
 }
 
-String String_new_len(const char *, int);
+String Path_stem(Path);
 
 static String _stem(String input){
-  const char * base = strrchr(input, '/');
-  base = base ? base + 1 : input;
-  return String_new_len(base, strlen(base) - 2);
+  return Path_stem(input);
 }
 
 int String_truth(String);

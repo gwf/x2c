@@ -6,11 +6,11 @@
 
 #include "generate.h"
 
-static List _526, _524, _523, _521, _519, _518, _514, _513, _511, _509, _490, _488, _487, _486, _485, _483, _481, _480, _478, _477, _475, _474, _473, _472, _470, _469, _466, _465, _464, _461, _457, _456, _444, _443, _439, _438, _435, _434, _433, _430, _429, _425, _424, _423, _422, _421, _420, _418, _417, _416, _414, _413, _411, _410, _409, _407, _406, _405, _403, _402, _400, _399, _397, _396, _395, _394, _393, _392, _391, _389, _387, _386, _385, _381, _380, _379, _377, _376, _373, _372, _370, _369, _368, _367, _366, _365, _363, _362, _361, _359, _358, _357, _355, _354, _353, _352, _351, _349, _348, _346, _345, _344, _342, _341, _340, _339, _334, _333, _330, _329, _328, _326, _325, _323, _322, _319, _318, _316, _315, _313, _312, _310, _309, _308, _306, _305, _304, _302, _301, _299, _298, _297, _296, _294, _293, _292, _290, _288, _286, _285, _284, _282, _281, _279, _278, _277, _276, _272, _271, _270, _269, _267, _266, _265, _264, _260, _259, _258, _257, _256, _254, _251, _250, _249, _247, _246, _245, _241, _240, _239, _236, _235, _232, _231, _229, _228, _226, _225, _224, _222, _221, _220, _218, _217, _213, _210, _206, _205, _201, _199, _198, _197, _196, _195, _193, _192, _191, _190, _187, _186, _185, _183, _182, _181, _180, _178, _177, _174, _173, _172, _170, _169, _167, _166, _165, _161, _160, _159, _155, _154, _151, _150, _149, _145, _142, _141, _140, _138, _137, _136, _134, _133, _131, _130, _126, _125, _123, _122, _119, _118, _112, _110, _109, _108, _106, _105, _104, _99, _96, _95, _93, _92, _91, _89, _88, _85, _83, _81, _80, _78, _77, _75, _74, _73, _71, _70, _69, _62, _61, _58, _55, _53, _52, _51, _49, _48, _47, _42, _40, _35, _33, _32, _30, _26, _24, _20, _13;
+static List _523, _521, _520, _518, _516, _515, _511, _510, _508, _506, _490, _488, _487, _486, _485, _483, _481, _480, _478, _477, _475, _474, _473, _472, _470, _469, _466, _465, _464, _461, _457, _456, _444, _443, _439, _438, _435, _434, _433, _430, _429, _425, _424, _423, _422, _421, _420, _418, _417, _416, _414, _413, _411, _410, _409, _407, _406, _405, _403, _402, _400, _399, _397, _396, _395, _394, _393, _392, _391, _389, _387, _386, _385, _381, _380, _379, _377, _376, _373, _372, _370, _369, _368, _367, _366, _365, _363, _362, _361, _359, _358, _357, _355, _354, _353, _352, _351, _349, _348, _346, _345, _344, _342, _341, _340, _339, _334, _333, _330, _329, _328, _326, _325, _323, _322, _319, _318, _316, _315, _313, _312, _310, _309, _308, _306, _305, _304, _302, _301, _299, _298, _297, _296, _294, _293, _292, _290, _288, _286, _285, _284, _282, _281, _279, _278, _277, _276, _272, _271, _270, _269, _267, _266, _265, _264, _260, _259, _258, _257, _256, _254, _251, _250, _249, _247, _246, _245, _241, _240, _239, _236, _235, _232, _231, _229, _228, _226, _225, _224, _222, _221, _220, _218, _217, _213, _210, _206, _205, _201, _199, _198, _197, _196, _195, _193, _192, _191, _190, _187, _186, _185, _183, _182, _181, _180, _178, _177, _174, _173, _172, _170, _169, _167, _166, _165, _161, _160, _159, _155, _154, _151, _150, _149, _145, _142, _141, _140, _138, _137, _136, _134, _133, _131, _130, _126, _125, _123, _122, _119, _118, _112, _110, _109, _108, _106, _105, _104, _99, _96, _95, _93, _92, _91, _89, _88, _85, _83, _81, _80, _78, _77, _75, _74, _73, _71, _70, _69, _62, _61, _58, _55, _53, _52, _51, _49, _48, _47, _42, _40, _35, _33, _32, _30, _26, _24, _20, _13;
 
-static String _516, _507, _506, _505, _504, _503, _502, _501, _500, _499, _498, _497, _496, _495, _494, _493, _492, _491, _476, _459, _458, _454, _453, _452, _451, _450, _449, _448, _447, _446, _441, _436, _427, _382, _337, _336, _211, _207, _203, _143, _115, _114, _113, _102, _86, _56, _45, _27, _9, _8, _7, _6, _5, _4, _3, _2, _0;
+static String _513, _504, _503, _502, _501, _500, _499, _498, _497, _496, _495, _494, _493, _492, _491, _476, _459, _458, _454, _453, _452, _451, _450, _449, _448, _447, _446, _441, _436, _427, _382, _337, _336, _211, _207, _203, _143, _115, _114, _113, _102, _86, _56, _45, _27, _9, _8, _7, _6, _5, _4, _3, _2, _0;
 
-static Var _525, _522, _520, _517, _515, _512, _510, _508, _489, _484, _482, _479, _471, _468, _467, _463, _462, _460, _455, _445, _442, _440, _437, _432, _431, _428, _426, _419, _415, _412, _408, _404, _401, _398, _390, _388, _384, _383, _378, _375, _374, _371, _364, _360, _356, _350, _347, _343, _338, _335, _332, _331, _327, _324, _321, _320, _317, _314, _311, _307, _303, _300, _295, _291, _289, _287, _283, _280, _275, _274, _273, _268, _263, _262, _261, _255, _253, _252, _248, _244, _243, _242, _238, _237, _234, _233, _230, _227, _223, _219, _216, _215, _214, _212, _209, _208, _204, _202, _200, _194, _189, _188, _184, _179, _176, _175, _171, _168, _164, _163, _162, _158, _157, _156, _153, _152, _148, _147, _146, _144, _139, _135, _132, _129, _128, _127, _124, _121, _120, _117, _116, _111, _107, _103, _101, _100, _98, _97, _94, _90, _87, _84, _82, _79, _76, _72, _68, _67, _66, _65, _64, _63, _60, _59, _57, _54, _50, _46, _44, _43, _41, _39, _38, _37, _36, _34, _31, _29, _28, _25, _23, _22, _21, _19, _18, _17, _16, _15, _14, _12, _11, _10, _1;
+static Var _522, _519, _517, _514, _512, _509, _507, _505, _489, _484, _482, _479, _471, _468, _467, _463, _462, _460, _455, _445, _442, _440, _437, _432, _431, _428, _426, _419, _415, _412, _408, _404, _401, _398, _390, _388, _384, _383, _378, _375, _374, _371, _364, _360, _356, _350, _347, _343, _338, _335, _332, _331, _327, _324, _321, _320, _317, _314, _311, _307, _303, _300, _295, _291, _289, _287, _283, _280, _275, _274, _273, _268, _263, _262, _261, _255, _253, _252, _248, _244, _243, _242, _238, _237, _234, _233, _230, _227, _223, _219, _216, _215, _214, _212, _209, _208, _204, _202, _200, _194, _189, _188, _184, _179, _176, _175, _171, _168, _164, _163, _162, _158, _157, _156, _153, _152, _148, _147, _146, _144, _139, _135, _132, _129, _128, _127, _124, _121, _120, _117, _116, _111, _107, _103, _101, _100, _98, _97, _94, _90, _87, _84, _82, _79, _76, _72, _68, _67, _66, _65, _64, _63, _60, _59, _57, _54, _50, _46, _44, _43, _41, _39, _38, _37, _36, _34, _31, _29, _28, _25, _23, _22, _21, _19, _18, _17, _16, _15, _14, _12, _11, _10, _1;
 
 #include <errno.h>
 #include <fcntl.h>
@@ -138,7 +138,7 @@ static Func _x2c_func_handle_0;
 
 Func Func_new(FuncAdapter, List);
 
-_x2c_initializer_choice_3F61ACEA_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _526)))
+_x2c_initializer_choice_3F61ACEA_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _523)))
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
 }
@@ -618,7 +618,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _455 = String_var(_454);
   _456 = cons(_455, NULL);
   _457 = cons(_335, _456);
-  _458 = String_new("h");
+  _458 = String_new(".h");
   _459 = String_new("x2c_initialize");
   _460 = String_var(_459);
   _461 = cons(_460, NULL);
@@ -656,37 +656,34 @@ __attribute__((constructor)) static void _file_init_(void){
   _493 = String_new("_x2c_hcache_guard_");
   _494 = String_new("_x2c_hcache_init_");
   _495 = String_new("/");
-  _496 = String_new(".h");
-  _497 = String_new(".c");
-  _498 = String_new(".xi");
-  _499 = String_new("<stdout>");
-  _500 = String_new("_x2c_protocol_guard_");
-  _501 = String_new("_file_init_");
-  _502 = String_new("pragma public");
-  _503 = String_new("pragma private");
-  _504 = String_new("/");
-  _505 = String_new(".x");
-  _506 = String_new("error.h");
-  _507 = String_new("List");
-  _508 = String_var(_507);
-  _509 = cons(_508, NULL);
-  _510 = List_var(_509);
-  _511 = cons(_510, NULL);
+  _496 = String_new(".c");
+  _497 = String_new(".xi");
+  _498 = String_new("<stdout>");
+  _499 = String_new("_x2c_protocol_guard_");
+  _500 = String_new("_file_init_");
+  _501 = String_new("pragma public");
+  _502 = String_new("pragma private");
+  _503 = String_new("error.h");
+  _504 = String_new("List");
+  _505 = String_var(_504);
+  _506 = cons(_505, NULL);
+  _507 = List_var(_506);
+  _508 = cons(_507, NULL);
+  _509 = List_var(_508);
+  _510 = cons(_509, NULL);
+  _511 = cons(_29, _510);
   _512 = List_var(_511);
-  _513 = cons(_512, NULL);
-  _514 = cons(_29, _513);
-  _515 = List_var(_514);
-  _516 = String_new("Var");
-  _517 = String_var(_516);
+  _513 = String_new("Var");
+  _514 = String_var(_513);
+  _515 = cons(_514, NULL);
+  _516 = cons(_512, _515);
+  _517 = List_var(_515);
   _518 = cons(_517, NULL);
-  _519 = cons(_515, _518);
-  _520 = List_var(_518);
-  _521 = cons(_520, NULL);
+  _519 = List_var(_518);
+  _520 = cons(_519, NULL);
+  _521 = cons(_29, _520);
   _522 = List_var(_521);
-  _523 = cons(_522, NULL);
-  _524 = cons(_29, _523);
-  _525 = List_var(_524);
-  _526 = cons(_525, _518);
+  _523 = cons(_522, _515);
   _x2c_static_initialize_0();
 }
 
@@ -699,7 +696,7 @@ String String_new(const char *);
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
 static void _report_output_error(Compiler compiler, String fname, String message, int error){
-  String target = String_truth(fname) ? fname : _499;
+  String target = String_truth(fname) ? fname : _498;
   List notes = cons(_1, cons(String_var(target), NULL));
   String err_note = String_join(NULL, cons(String_var(_2), cons(String_var(int_str(error)), cons(String_var(_3), cons(String_var(String_new(strerror(error))), cons(String_var(_4), NULL))))));
   notes = cons(String_var(err_note), notes);
@@ -805,7 +802,7 @@ static List _make_file_init_func(Compiler compiler, List guard, List initializer
 List Sym_introduce(Sym, String);
 
 static List _wrap_protocol_initializer_function(Compiler compiler, List type, List bind, List statements){
-  List guard = Sym_introduce(compiler -> sym, _500);
+  List guard = Sym_introduce(compiler -> sym, _499);
   return cons(_37, cons(List_var(type), cons(List_var(bind), cons(List_var(cons(_38, cons(List_var(cons(_98, cons(_100, cons(List_var(cons(_101, cons(List_var(cons(_15, cons(_43, cons(List_var(cons(_64, cons(List_var(guard), _69))), _112)))), NULL))), NULL)))), cons(List_var(cons(_10, cons(List_var(cons(_11, cons(_14, cons(List_var(cons(_17, cons(List_var(guard), NULL))), NULL)))), _42))), cons(List_var(cons(_18, cons(List_var(cons(_11, cons(_14, cons(List_var(cons(_15, cons(_43, cons(List_var(cons(_11, cons(_14, cons(List_var(cons(_17, cons(List_var(guard), NULL))), NULL)))), _55)))), NULL)))), NULL))), List_append(Compiler_init_statements(compiler, 1139215899608), List_append(statements, NULL))))))), NULL))));
 }
 
@@ -923,9 +920,9 @@ Type Var_type(Var);
 List List_reverse(List);
 static List _file_init(Compiler c, List source){
   int hasInitBlocks = _has_file_init_blocks(c);  String initializer = c -> init_fn;  if(! hasInitBlocks && ! String_truth(initializer)) return source;  List guard = Sym_reference(c -> sym, _145, NULL), initFunc = NULL;  if(! String_truth(initializer)){
-    List file_init = Sym_introduce(c -> sym, _501);  initFunc = _make_file_init_func(c, guard, file_init);
+    List file_init = Sym_introduce(c -> sym, _500);  initFunc = _make_file_init_func(c, guard, file_init);
   }
-  List initGuard = _make_init_guard(guard);  String initializer_name = _501;  if(String_truth(initializer)) initializer_name = initializer;  int cache_only = ! String_truth(initializer) && List_truth(Compiler_init_statements(c, 10588978)) && ! List_truth(Compiler_init_statements(c, 27208)) && ! List_truth(Compiler_init_statements(c, 789770));  Map cache_reachable_ids = cache_only ? _cache_reachable_function_ids(source) : NULL;  int inserted = 0;  List result = NULL; {
+  List initGuard = _make_init_guard(guard);  String initializer_name = _500;  if(String_truth(initializer)) initializer_name = initializer;  int cache_only = ! String_truth(initializer) && List_truth(Compiler_init_statements(c, 10588978)) && ! List_truth(Compiler_init_statements(c, 27208)) && ! List_truth(Compiler_init_statements(c, 789770));  Map cache_reachable_ids = cache_only ? _cache_reachable_function_ids(source) : NULL;  int inserted = 0;  List result = NULL; {
     List item;  List _x2c_macro_object_3 = source;  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
       item = Var_list(_x2c_macro_cursor_output_3); {
 
@@ -1020,7 +1017,7 @@ static void _partition_alias(Array header, Array source, List alias, Type type){
 
 int String_contains(String, String);
 static void _partition_preproc(Array header, Array source, List node, String content, int * private){
-  if(_is_pragma_once(content)) return;  if(String_contains(content, _502)) * private = 0;  else if(String_contains(content, _503)) * private = 1;  else Array_push((* private ? source : header), List_var(node));
+  if(_is_pragma_once(content)) return;  if(String_contains(content, _501)) * private = 0;  else if(String_contains(content, _502)) * private = 1;  else Array_push((* private ? source : header), List_var(node));
 }
 
 Var List_car(List);
@@ -1609,12 +1606,10 @@ static List _include_guard(Compiler compiler, List content, String filename){
   if(compiler -> runtime_inc && ! _has_runtime_include(content)) content = cons(List_var(_457), content);  String guard = x2c_filename_hash(filename);  List header = _header();  List guarded_code = _header_guard(content, guard);  return List_append(header, List_append(guarded_code, NULL));
 }
 
-Var List_last(List);
-List String_split(String, String);
-int String_endswith(String, String);
+String Path_stem(Path);
 int ast_contains_head(Var, Symbol);
 static List _primary_include(Compiler compiler, List content){
-  String xname = Var_string(List_last(String_split(compiler -> filename, _504)));  if(String_endswith(xname, _505)) xname = String_getslice(xname, -2147483648, - 2, 1);  String hname = String_join(NULL, cons(String_var(xname), cons(String_var(_458), NULL)));  List header = _header();  List include = _include_directive(hname);  List error = ast_contains_head(List_var(content), 37833930) ? _include_directive(_506) : NULL;  return List_append(header, List_append(include, List_append(error, List_append(content, NULL))));
+  String hname = String_join(NULL, cons(String_var(Path_stem(compiler -> filename)), cons(String_var(_458), NULL)));  List header = _header();  List include = _include_directive(hname);  List error = ast_contains_head(List_var(content), 37833930) ? _include_directive(_503) : NULL;  return List_append(header, List_append(include, List_append(error, List_append(content, NULL))));
 }
 
 List List_map(List, Func);
@@ -1624,7 +1619,7 @@ static List _modify_main(Compiler compiler, List source){
     Var _x2c_lambda_capture_value_0 = List_var(initializer);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
       _x2c_lambda_capture_value_0
     }
-    ;  Func_new_context(_x2c_lambda_0, _519, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+    ;  Func_new_context(_x2c_lambda_0, _516, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
   }
   ));
 }
@@ -1633,20 +1628,19 @@ List List_filter(List, Func);
 List Compiler_setup_cache_init(Compiler, List, List, String, String, String);
 List Compiler_emit(Compiler, List);
 String String_rstrip(String, char *);
-String Path_stem(Path);
 char * Compiler_code_pretty_string(Compiler, List, String);
 void interface_write(Compiler, String);
 void generate_code(Compiler c, List ast, String dir){
   if(! _init_guard_) _file_init_();  ast = List_filter(ast, _x2c_func_handle_0);  List header, source;  List _x2c_destructure_4 = _header_and_source(c, ast);  header = Var_list(List_getindex(_x2c_destructure_4, 0));  source = Var_list(List_getindex(_x2c_destructure_4, 1));  String hash = x2c_filename_hash(c -> filename); {
     List _x2c_destructure_5 = Compiler_setup_cache_init(c, header, source, String_join(NULL, cons(String_var(_491), cons(String_var(hash), cons(String_var(_492), NULL)))), String_join(NULL, cons(String_var(_493), cons(String_var(hash), NULL))), String_join(NULL, cons(String_var(_494), cons(String_var(hash), NULL))));  header = Var_list(List_getindex(_x2c_destructure_5, 0));  source = Var_list(List_getindex(_x2c_destructure_5, 1));
   }
-  List header_declarations = header;  header = _vertical_spacing(header);  header = _include_guard(c, header, c -> filename);  header = Compiler_emit(c, header);  source = _file_init(c, source);  source = _static_prototypes(c, source, header_declarations);  source = _vertical_spacing(source);  source = _primary_include(c, source);  source = _modify_main(c, source);  source = Compiler_emit(c, source);  String basename = String_join(NULL, cons(String_var(String_rstrip(dir, _495)), cons(String_var(_495), cons(String_var(Path_stem(c -> filename)), NULL))));  String hfile = String_join(NULL, cons(String_var(basename), cons(String_var(_496), NULL))), cfile = String_join(NULL, cons(String_var(basename), cons(String_var(_497), NULL)));  String header_text = String_new(Compiler_code_pretty_string(c, header, hfile));  String source_text = String_new(Compiler_code_pretty_string(c, source, cfile));  String paths[2] ={
+  List header_declarations = header;  header = _vertical_spacing(header);  header = _include_guard(c, header, c -> filename);  header = Compiler_emit(c, header);  source = _file_init(c, source);  source = _static_prototypes(c, source, header_declarations);  source = _vertical_spacing(source);  source = _primary_include(c, source);  source = _modify_main(c, source);  source = Compiler_emit(c, source);  String basename = String_join(NULL, cons(String_var(String_rstrip(dir, _495)), cons(String_var(_495), cons(String_var(Path_stem(c -> filename)), NULL))));  String hfile = String_join(NULL, cons(String_var(basename), cons(String_var(_458), NULL))), cfile = String_join(NULL, cons(String_var(basename), cons(String_var(_496), NULL)));  String header_text = String_new(Compiler_code_pretty_string(c, header, hfile));  String source_text = String_new(Compiler_code_pretty_string(c, source, cfile));  String paths[2] ={
     hfile, cfile
   }
   ;  String contents[2] ={
     header_text, source_text
   }
-  ;  _write_outputs(c, paths, contents);  if(! c -> source_facts) interface_write(c, String_join(NULL, cons(String_var(basename), cons(String_var(_498), NULL))));
+  ;  _write_outputs(c, paths, contents);  if(! c -> source_facts) interface_write(c, String_join(NULL, cons(String_var(basename), cons(String_var(_497), NULL))));
 }
 
 Var x2c_func_value_argument(Func, const FuncArg *, unsigned, Symbol);

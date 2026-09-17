@@ -22,11 +22,7 @@
 
 #include "buffer.x"
 
-static String _stem(String input) {
-  const char *base = strrchr(input, '/');
-  base = base ? base + 1 : input;
-  return String.new_len(base, strlen(base) - 2);
-}
+static String _stem(String input) => Path.stem(input);
 
 /** Parses prerequisite words after the first literal colon in `text`.
     Backslash escapes and doubled dollars are decoded in that region. A

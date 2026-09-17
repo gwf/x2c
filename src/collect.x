@@ -331,7 +331,8 @@ static void _parse_segment(
   /* A package renames what it declares, not what it includes. A C header's
      types and enumerators keep their upstream spelling, so a public method
      over one of them still names a type the header defines. */
-  if (!path.endswith(".x")) shadow.package = NULL;
+  int unit = x2c_source_file(path);
+  if (!unit) shadow.package = NULL;
   shadow.filename = path;
   shadow.source_private = *private;
   shadow.take_unit_state(c);
@@ -345,7 +346,7 @@ static void _parse_segment(
   }
   shadow.shallow_parse_overlay(globs, overlay);
   shadow.return_unit_state(c);
-  if (path.endswith(".x")) {
+  if (unit) {
     Map.merge(c.fn_defs, shadow.fn_defs);
     Map.merge(definitions, shadow.fn_defs);
   }
@@ -386,7 +387,7 @@ static void _include(
   int covered = 0;
   String path = _resolve_include(c, dir, target, angle, &covered);
   if (!path) return;
-  if (covered && !path.endswith(".x")) return;
+  if (covered && !x2c_source_file(path)) return;
   String canonical = _canonical_path(path);
   Var cached = c.source_facts ? void : _header_cache()[canonical];
   List entry = cached is void ? _interface_read(c, canonical)
@@ -668,7 +669,7 @@ static int _package_protocol_row(List key, Var value) {
 static void _package_merge(
   Compiler compiler, String name, String root, String path, Map part,
   Map merged, Token token) {
-  String prefix = %"${name}__", int header = !path.endswith(".x");
+  String prefix = %"${name}__", int header = !x2c_source_file(path);
   int foreign = !path.startswith(%"$root/");
   foreach (Var (key, value), part) {
     if (key is not <list> || key.is_nil()) continue;

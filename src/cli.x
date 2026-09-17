@@ -482,7 +482,7 @@ dependencies is refused; install its bundle instead.");
 static void _print_script_help(void) {
   puts(
     %"Usage:
-  x2c script [options] <file.x> [<argument>...]
+  x2c script [options] <file> [<argument>...]
 
 Run an x2c source file as a script. The first run builds an executable in
 the per-user cache; later runs start it directly until the script, a file
@@ -492,7 +492,7 @@ it includes or imports, the compiler, the runtime, or an option changes.");
     "@<file>", "Read additional options from a response file", 2);
   puts(
     %"
-Every word after <file.x> is passed unchanged to the script, including
+Every word after <file> is passed unchanged to the script, including
 words that begin with - or @. A script whose first line is the shebang
 '#!/usr/bin/env -S x2c script' runs directly. The cache is X2C_CACHE_DIR,
 XDG_CACHE_HOME/x2c, or ~/.cache/x2c. Builds remove the entries of

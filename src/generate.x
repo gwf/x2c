@@ -893,9 +893,8 @@ static List _include_guard(
 
 // Insert the generated header include at the top of the source file.
 static List _primary_include(Compiler compiler, List content) {
-  String xname = compiler.filename.split("/").last();
-  if (xname.endswith(".x")) xname = xname[:-2];
-  String hname = %"${xname}h", List header = _header();
+  String hname = %"${Path.stem(compiler.filename)}.h";
+  List header = _header();
   List include = _include_directive(hname);
   List error = ast_contains_head(content, <raise>)
              ? _include_directive("error.h") : NULL;

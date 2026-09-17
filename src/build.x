@@ -199,7 +199,7 @@ static void _validate_input(String input) {
     x2c_driver_error(%"input is a directory: $input");
   if (!S_ISREG(info.st_mode))
     x2c_driver_error(%"input is not a regular file: $input");
-  if (!(input.endswith(".x") || input.endswith(".c") ||
+  if (!(x2c_source_file(input) || input.endswith(".c") ||
         input.endswith(".o") || input.endswith(".a")))
     x2c_driver_error(%"unsupported build input: $input");
 }
@@ -217,7 +217,7 @@ Build CliRequest.prepare(CliRequest c) {
   foreach (String input, c.inputs) {
     input_count++;
     _validate_input(input);
-    if (input.endswith(".x") || input.endswith(".c")) compilable++;
+    if (x2c_source_file(input) || input.endswith(".c")) compilable++;
     if (c.kind == <static-lib> && input.endswith(".a"))
       x2c_driver_error(
         %"cannot nest an archive in a static library: $input");
@@ -281,7 +281,7 @@ Build CliRequest.prepare(CliRequest c) {
     if (state.state_root) _require_directory(state.state_root);
   }
   foreach (String input, c.inputs) {
-    if (input.endswith(".x")) state.xlat_n++;
+    if (x2c_source_file(input)) state.xlat_n++;
     if (input.endswith(".c")) state.c_sources.push(input);
     else if (input.endswith(".o") || input.endswith(".a"))
       state.native_inputs.push(input);
@@ -1002,7 +1002,7 @@ List Build.script_helpers(Build b) {
     .append(b.request.package_roots().map(%!(dir) => %"${dir.str()}/"));
   Array helpers = [];
   foreach (String path, _state_dep_inputs(translation)) {
-    if (!path.endswith(".x") || path == script || helpers.contains(path))
+    if (!x2c_source_file(path) || path == script || helpers.contains(path))
       continue;
     if (excluded.any(%!(prefix) => path.startswith(prefix.str()))) continue;
     helpers.push(path);

@@ -210,7 +210,7 @@ static void _preflight_translation(CliRequest c, Map unit_dirs) {
         stderr, "x2c: error: input is not a regular file: %s\n", input);
       exit(2);
     }
-    if (!input.endswith(".x")) {
+    if (!x2c_source_file(input)) {
       fprintf(
         stderr, "x2c: error: translation input is not an .x file: %s\n",
         input);
@@ -411,7 +411,7 @@ static int _translate_units(CliRequest c, Build state, List units) {
   Array stale = [];
   Map stale_dirs = {};
   foreach (String input, units) {
-    if (!input.endswith(".x")) continue;
+    if (!x2c_source_file(input)) continue;
     String directory = state.generated_dir(input);
     if (state.translation_current(input, directory)) {
       state.begin_translation(input);
@@ -440,7 +440,7 @@ static int _translate_units(CliRequest c, Build state, List units) {
   /* Restore input order, including package directories inserted between
      generated directories, before native compilation and linking. */
   foreach (String input, units) {
-    if (!input.endswith(".x")) continue;
+    if (!x2c_source_file(input)) continue;
     int cached = !stale_dirs.contains(input);
     String directory = state.generated_dir(input);
     if (c.dry_run && !cached) {
@@ -458,7 +458,7 @@ static int _translate_units(CliRequest c, Build state, List units) {
 static int _run_build_request(CliRequest c, Array commands) {
   if (!c.dry_run) {
     foreach (String input, c.inputs) {
-      if (!input.endswith(".x")) continue;
+      if (!x2c_source_file(input)) continue;
       Frontend.load_support(c);
       break;
     }

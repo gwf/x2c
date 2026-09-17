@@ -1206,6 +1206,10 @@ set -e
 [[ ! -s "$SCRIPT/first.stderr" ]]
 [[ $(PATH="$SCRIPT/bin:$PATH" X2C_CACHE_DIR="$SCRIPT/cache" \
      "$SCRIPT/args.x") == hello ]]
+# A script is x2c source by its shebang line, whatever its name.
+cp "$SCRIPT/args.x" "$SCRIPT/greet"
+[[ $(PATH="$SCRIPT/bin:$PATH" X2C_CACHE_DIR="$SCRIPT/cache" \
+     "$SCRIPT/greet" there) == 'hello [there]' ]]
 run_script -v "$SCRIPT/args.x" >/dev/null 2>"$SCRIPT/warm.stderr"
 ! grep -Eq '^x2c: (translate|preprocess|compile|link) ' "$SCRIPT/warm.stderr"
 grep -q '^x2c: run ' "$SCRIPT/warm.stderr"

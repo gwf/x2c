@@ -8,7 +8,7 @@
 
 static List _9, _8, _7, _4, _3;
 
-static String _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _42, _40, _38, _36, _34, _32, _30, _28, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10;
+static String _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _42, _40, _38, _36, _34, _32, _30, _28, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10;
 
 static Var _43, _41, _39, _37, _35, _33, _31, _29, _27, _6, _5, _2, _1, _0;
 
@@ -147,15 +147,14 @@ __attribute__((constructor)) static void _file_init_(void){
   _46 = String_new("runtime");
   _47 = String_new("compiler");
   _48 = String_new("cannot open diagnostics file \'");
-  _49 = String_new(".x");
-  _50 = String_new("could not start a translation worker");
-  _51 = String_new("file");
-  _52 = String_new("files");
-  _53 = String_new("C file");
-  _54 = String_new("C files");
-  _55 = String_new("header");
-  _56 = String_new("headers");
-  _57 = String_new(":");
+  _49 = String_new("could not start a translation worker");
+  _50 = String_new("file");
+  _51 = String_new("files");
+  _52 = String_new("C file");
+  _53 = String_new("C files");
+  _54 = String_new("header");
+  _55 = String_new("headers");
+  _56 = String_new(":");
   _x2c_static_initialize_0();
 }
 
@@ -350,7 +349,7 @@ int CliRequest_inspects(CliRequest);
 
 String Var_string(Var);
 
-int String_endswith(String, String);
+int x2c_source_file(String);
 
 String Path_stem(Path);
 
@@ -409,7 +408,7 @@ static void _preflight_translation(CliRequest c, Map unit_dirs){
           fprintf(stderr, "x2c: error: input is not a regular file: %s\n", input);
           exit(2);
         }
-        if(! String_endswith(input, _49)){
+        if(! x2c_source_file(input)){
           fprintf(stderr, "x2c: error: translation input is not an .x file: %s\n", input);
           exit(2);
         }
@@ -498,7 +497,7 @@ static int _translate_workers(Frontend frontend, Array chunks, Map unit_dirs, in
         worker_exit(0);
       }
       if(pid < 0){
-        report_line(11703268, _50);
+        report_line(11703268, _49);
         failed ++;
         continue;
       }
@@ -624,11 +623,11 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build){
   }
   if(! c -> nested && ! CliRequest_inspects(c)){
     String duration = report_duration(report_now_us() - started_at);
-    String noun = total == 1 ? _51 : _52;
+    String noun = total == 1 ? _50 : _51;
     report_line(42217975014, String_join(NULL, cons(String_var(_16), cons(String_var(int_str(total)), cons(String_var(_17), cons(String_var(noun), cons(String_var(_18), cons(String_var(c -> out_dir), cons(String_var(_19), cons(String_var(duration), NULL))))))))));
     String size = report_size(gen_bytes);
-    String c_noun = total == 1 ? _53 : _54;
-    String h_noun = total == 1 ? _55 : _56;
+    String c_noun = total == 1 ? _52 : _53;
+    String h_noun = total == 1 ? _54 : _55;
     report_line(28680520, String_join(NULL, cons(String_var(_20), cons(String_var(int_str(total)), cons(String_var(_21), cons(String_var(c_noun), cons(String_var(_22), cons(String_var(int_str(total)), cons(String_var(_21), cons(String_var(h_noun), cons(String_var(_23), cons(String_var(size), cons(String_var(_24), NULL)))))))))))));
   }
   return 0;
@@ -674,7 +673,7 @@ static int _translate_units(CliRequest c, Build state, List units){
     while(List_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_8)){
       input = Var_string(_x2c_macro_cursor_output_8);
       {
-        if(! String_endswith(input, _49)) continue;
+        if(! x2c_source_file(input)) continue;
         String directory = Build_generated_dir(state, input);
         if(Build_translation_current(state, input, directory)){
           Build_begin_translation(state, input);
@@ -716,7 +715,7 @@ static int _translate_units(CliRequest c, Build state, List units){
     while(List_try_next(_x2c_macro_object_10, & _x2c_macro_cursor_10, & _x2c_macro_cursor_output_10)){
       input = Var_string(_x2c_macro_cursor_output_10);
       {
-        if(! String_endswith(input, _49)) continue;
+        if(! x2c_source_file(input)) continue;
         int cached = ! Map_contains(stale_dirs, String_var(input));
         String directory = Build_generated_dir(state, input);
         if(c -> dry_run && ! cached){
@@ -768,7 +767,7 @@ static int _run_build_request(CliRequest c, Array commands){
       while(List_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_11)){
         input = Var_string(_x2c_macro_cursor_output_11);
         {
-          if(! String_endswith(input, _49)) continue;
+          if(! x2c_source_file(input)) continue;
           Frontend_load_support(c);
           break;
         }
@@ -909,7 +908,7 @@ void x2c_driver_error(const char *);
 static int _run_env(CliRequest request){
   Toolchain toolchain = toolchain_new(request -> cc, request -> ar, request -> cpp_args, request -> cc_args, request -> ld_args, request -> verbose, request -> dry_run);
   String executable = x2c_get_executable();
-  String roots = String_join(_57, CliRequest_package_roots(request));
+  String roots = String_join(_56, CliRequest_package_roots(request));
   interface_configure(request -> out_dir);
   String prelude = interface_prelude();
   List rows = cons(List_var(cons(_27, cons(String_var(x2c_get_root()), NULL))), cons(List_var(cons(_29, cons(String_var(String_truth(executable) ? executable : 0), NULL))), cons(List_var(cons(_31, cons(String_var(toolchain -> include_dir), NULL))), cons(List_var(cons(_33, cons(String_var(toolchain -> runtime_lib), NULL))), cons(List_var(cons(_35, cons(String_var(String_truth(prelude) ? prelude : 0), NULL))), cons(List_var(cons(_37, cons(String_var(String_truth(roots) ? roots : 0), NULL))), cons(List_var(cons(_39, cons(String_var(toolchain -> cc), NULL))), cons(List_var(cons(_41, cons(String_var(toolchain -> ar), NULL))), cons(List_var(cons(_43, cons(String_var(script_cache_root()), NULL))), NULL)))))))));

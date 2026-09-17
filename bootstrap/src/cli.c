@@ -379,8 +379,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _14 = String_new("Usage:\n  x2c remove [options] <name>\n\nRemove one installed package from <home>/packages.");
   _15 = String_new("Usage:\n  x2c list\n\nList installed packages as \'name version kind\' lines.");
   _16 = String_new("A bundle records the x2c version that built it and is refused for\nanother version unless --force. A source package with native\ndependencies is refused; install its bundle instead.");
-  _17 = String_new("Usage:\n  x2c script [options] <file.x> [<argument>...]\n\nRun an x2c source file as a script. The first run builds an executable in\nthe per-user cache; later runs start it directly until the script, a file\nit includes or imports, the compiler, the runtime, or an option changes.");
-  _18 = String_new("\nEvery word after <file.x> is passed unchanged to the script, including\nwords that begin with - or @. A script whose first line is the shebang\n\'#!/usr/bin/env -S x2c script\' runs directly. The cache is X2C_CACHE_DIR,\nXDG_CACHE_HOME/x2c, or ~/.cache/x2c. Builds remove the entries of\nscripts that no longer exist.");
+  _17 = String_new("Usage:\n  x2c script [options] <file> [<argument>...]\n\nRun an x2c source file as a script. The first run builds an executable in\nthe per-user cache; later runs start it directly until the script, a file\nit includes or imports, the compiler, the runtime, or an option changes.");
+  _18 = String_new("\nEvery word after <file> is passed unchanged to the script, including\nwords that begin with - or @. A script whose first line is the shebang\n\'#!/usr/bin/env -S x2c script\' runs directly. The cache is X2C_CACHE_DIR,\nXDG_CACHE_HOME/x2c, or ~/.cache/x2c. Builds remove the entries of\nscripts that no longer exist.");
   _19 = String_new("Usage:\n  x2c help [command]\n\nShow top-level help, or help for translate, build, run, script,\nbootstrap, env, install, remove, or list.");
   _20 = String_new("unknown help command \'");
   _21 = String_new("\'");

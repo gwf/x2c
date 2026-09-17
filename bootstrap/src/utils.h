@@ -16,6 +16,8 @@ String x2c_get_executable(void);
 
 String x2c_package_directory(String root, String path);
 
+int x2c_source_file(String path);
+
 int x2c_package_source(String directory, String path);
 
 List x2c_default_include_dirs(void);

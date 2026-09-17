@@ -3926,7 +3926,8 @@ and redirections also apply to the program; its output is not held until exit.
 
 ## Run a script
 
-`script` runs one `.x` file and builds it only when needed:
+`script` runs one source file and builds it only when needed. The file is
+named with `.x`, or with any name when its first line is a shebang:
 
 ```sh
 ./x2c script tools/report.x -- first --second

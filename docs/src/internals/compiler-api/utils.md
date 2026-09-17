@@ -26,6 +26,7 @@ System utilities for environment discovery and workers.
 | [`x2c_package_directory`](#x2c_package_directory) | Returns the package directory containing `path` below a registered root. |
 | [`x2c_package_source`](#x2c_package_source) | Recognizes a package's `src/` files or its package-named legacy entry. |
 | [`x2c_set_root`](#x2c_set_root) | Overrides the repository root and rebuilds its default include `List`s. |
+| [`x2c_source_file`](#x2c_source_file) | Reports whether `path` is x2c source: a `.x` file, or a file of any other name whose first line is a shebang, which is a script. |
 
 ### Functions
 
@@ -38,7 +39,7 @@ Flush failure is ignored. This function does not return and does not run
 `atexit` handlers. Those belong to the parent process and would close its
 log and process-lifetime `Scope`s twice.
 
-Source: `src/utils.x:236`
+Source: `src/utils.x:252`
 
 #### worker_fork
 
@@ -50,7 +51,7 @@ The call attempts to flush all process streams before the fork so
 successfully flushed bytes cannot be written by both processes. Flush
 failure is ignored. The child must leave through `worker_exit`.
 
-Source: `src/utils.x:225`
+Source: `src/utils.x:241`
 
 #### worker_wait
 
@@ -60,7 +61,7 @@ Waits once for `pid` and returns its shell-style status.
 Normal exit returns the worker status, a signal returns `128 + signal`, and
 a wait failure returns -1. Interrupted waits are retried.
 
-Source: `src/utils.x:245`
+Source: `src/utils.x:261`
 
 #### x2c_cpp_include_dirs
 
@@ -70,7 +71,7 @@ Returns the borrowed preprocessor `List` `<root>/src`, then `<root>/lib`.
 `<root>/src` is present only when the home has that directory. Returns
 NULL before environment setup.
 
-Source: `src/utils.x:88`
+Source: `src/utils.x:104`
 
 #### x2c_default_include_dirs
 
@@ -79,7 +80,7 @@ Source: `src/utils.x:88`
 Returns the borrowed default include `List` containing `<root>/include`.
 Returns NULL before environment setup.
 
-Source: `src/utils.x:82`
+Source: `src/utils.x:98`
 
 #### x2c_driver_error
 
@@ -87,7 +88,7 @@ Source: `src/utils.x:82`
 
 Prints `x2c: error: <message>` to stderr and exits with status 2.
 
-Source: `src/utils.x:100`
+Source: `src/utils.x:116`
 
 #### x2c_filename_hash
 
@@ -95,7 +96,7 @@ Source: `src/utils.x:100`
 
 Hashes unit filename spelling for stable generated C identifiers.
 
-Source: `src/utils.x:254`
+Source: `src/utils.x:270`
 
 #### x2c_get_executable
 
@@ -120,7 +121,7 @@ Source: `src/utils.x:55`
 Returns `<root>/packages` when a discovered home has that directory, or
 NULL for a missing directory or the `.` fallback.
 
-Source: `src/utils.x:93`
+Source: `src/utils.x:109`
 
 #### x2c_initialize_environment
 
@@ -152,7 +153,7 @@ Source: `src/utils.x:63`
 Recognizes a package's `src/` files or its package-named legacy entry.
 Other files under the package directory are consumers.
 
-Source: `src/utils.x:73`
+Source: `src/utils.x:89`
 
 #### x2c_set_root
 
@@ -163,6 +164,15 @@ Overrides the repository root and rebuilds its default include `List`s.
 valid until the next override or the process no longer uses them.
 
 Source: `src/utils.x:47`
+
+#### x2c_source_file
+
+`int x2c_source_file(String path)`
+
+Reports whether `path` is x2c source: a `.x` file, or a file of any
+other name whose first line is a shebang, which is a script.
+
+Source: `src/utils.x:73`
 
 ## Design notes
 
