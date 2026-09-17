@@ -126,7 +126,7 @@ Returns the semantic `Type` represented by a complete `(declare ...)` AST.
 A declaration with one binding is unwrapped to that binding's `Type`;
 multiple bindings return their `Type`s in source order.
 
-Source: `src/type.x:975`
+Source: `src/type.x:992`
 
 ### `Symbol`
 

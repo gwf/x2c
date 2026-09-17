@@ -110,8 +110,10 @@ text: `JSMN_API void jsmn_init(...)`, `STBIDEF stbi_uc *stbi_load(...)`,
 `API` defined to `static int` work as in C. A function-like macro that wraps
 its parameter in attributes, `CJSON_PUBLIC(const char *) cJSON_Version(void)`,
 reads as the type inside. An attribute or `_Noreturn` before the type,
-`__attribute__((unused)) static int f(void)`, stays before the type in the
-generated C. An attribute after a declarator or parameter,
+`__attribute__((unused)) static int f(void)`, is written after the storage
+class and before the type in the generated C, and is no part of the type
+that returns, conversions, and prototypes use.
+An attribute after a declarator or parameter,
 `int a __attribute__((cleanup(release))) = 1, b = 2;`, is written after that
 declarator. The GNU spellings `__inline`, `__inline__`, `__restrict`, and
 `__restrict__` mean the standard keywords.
@@ -2673,7 +2675,11 @@ so `"hello".len()` is `5`. `foreach` iterates such a literal as that
 `String`, and a raise detail accepts it as an immutable `String`. In these
 three positions a parenthesized literal, a `?:` whose arms are both literals,
 and an object-like macro defined to a string literal, `#define NAME "x"`, are
-literals too, so `(ready ? "on" : "off").len()` and `NAME.len()` work. This
+literals too, so `(ready ? "on" : "off").len()` and `NAME.len()` work. A macro
+name is a literal only while every definition it has is a string literal and
+no `#undef` has dropped it. A name written next to a literal is one of the
+adjacent words when it is such a macro or when this unit cannot resolve it,
+as a header's `PRId64` is, so `printf("%" PRId64 "\n", count)` works. This
 adjacency rule does not combine percent strings or change quoted collection
 syntax.
 
@@ -3691,9 +3697,10 @@ and inside compound statements. This includes a trailing directive before
 `do`, `switch (...)`, `defer`, `try`, `catch ...:`, `finally`, a match arm's
 `:`, or a statement macro such as `foreach` and the statement it governs; and
 a directive before the `else`, do-while `while`, `catch`, or `finally` that
-continues a statement. A conditional group opened there governs its later
-arms and closing directive as well, so `foreach` keeps the whole group inside
-its loop. Directives between match arms stay between those arms, so an arm
+continues a statement. A conditional group opened there also takes the
+statement of each later arm and the closing directive, so `foreach` keeps a
+group of one statement per arm inside its loop. A later statement in the same
+arm follows the governed statement, as in C. Directives between match arms stay between those arms, so an arm
 inside a conditional group is present exactly when C compiles the branch that
 holds it.
 
@@ -3715,7 +3722,8 @@ declarations and the native compiler reads it from the generated C.
 Every branch of a conditional is parsed except the branches C never
 compiles. x2c output is compiled as C by a GNU-style compiler, so the branch
 under `#ifdef __cplusplus`, `#if defined(__cplusplus)` alone or first in a
-`&&` conjunction, and `#ifdef _MSC_VER` or `#if defined(_MSC_VER)` likewise,
+`&&` conjunction with no `||`, and `#ifdef _MSC_VER` or
+`#if defined(_MSC_VER)` likewise,
 the `#else` branch of `#ifndef __cplusplus` or `#if !defined(__cplusplus)`,
 and `#if 0` are skipped: their tokens are trivia, and the directives around
 them stay in place and are emitted. A function defined in two arms of one
@@ -3732,9 +3740,12 @@ contributes: nothing for an empty body or an attribute (`#define RLAPI`,
 body such as `signed int`, and, for a body that is the name of another prefix
 macro, that macro's reading. A function-like macro whose body is its parameter
 amid such prefixes wraps a type: in `CJSON_PUBLIC(const char *) f(void);` the
-type is the one inside the parentheses. Where a name is defined differently
-in several conditional branches, a `static` definition takes precedence,
-then any other prefix. A name defined to any other text is a typedef name.
+type is the one inside the parentheses. A macro whose words are a storage
+class reads as that storage after the type as well, as in
+`int LOCAL f(void)`. Where a name is defined differently in several
+conditional branches, a `static` definition takes precedence, then any
+prefix without a qualifier, then a prefix with one, such as zlib's
+`z_const`, which is `const` in one branch and nothing in another. A name defined to any other text is a typedef name.
 
 A GNU attribute or a function-like attribute macro after a declarator or
 parameter, `int a __attribute__((unused)) = 1, b = 2;` or
