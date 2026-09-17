@@ -83,16 +83,14 @@ static List _transform_ast(Compiler compiler, List ast) {
     _report_diagnostics(compiler);
     exit(1);
   }
-  if (opts.dump == <transforms>) {
-    foreach (List node, ast) printf("\n%s\n", _ast_inspection_repr(node));
-    exit(0);
-  }
   return ast;
 }
 
 // public entry point
 
-// Compile one translation unit through the pipeline.
+/* Compile one translation unit through the pipeline. An inspection prints
+   its stage and returns, so every input is inspected and a failing later
+   input still fails the command. */
 static void _compile_file(
   Frontend frontend, String filename, String output_dir) {
   CliRequest request = frontend.request;
@@ -107,7 +105,7 @@ static void _compile_file(
   compiler.own_diagnostics();
   if (opts.dump == <tokens>) {
     compiler.dump_tokens();
-    exit(0);
+    return;
   }
   ok = unit.collect(frontend);
   _report_diagnostics(compiler);
@@ -116,14 +114,14 @@ static void _compile_file(
     case <dump-cpp>:
       if (unit.preprocessor_output)
         Stderr.printf("%s", unit.preprocessor_output);
-      exit(0);
+      return;
     case <cpp-tokens>:
       if (unit.preprocessor) unit.preprocessor.dump_tokens();
-      exit(0);
+      return;
     case <dump-csym>:
       if (unit.preprocessor)
         unit.preprocessor.dump_symbol_table(unit.globals);
-      exit(0);
+      return;
   }
   if (!unit.parse()) {
     _report_diagnostics(compiler);
@@ -134,13 +132,13 @@ static void _compile_file(
   switch (opts.dump) {
     case <dump-cache>:
       compiler.dump_cache();
-      exit(0);
+      return;
     case <symbols>:
       compiler.dump_symbol_table(compiler.sym.current_symbols());
-      exit(0);
+      return;
     case <dump-ast>:
       foreach (List node, ast) printf("\n%s\n", _ast_inspection_repr(node));
-      exit(0);
+      return;
   }
   if (opts.dump == <conform>) {
     printf("(unit %s)\n", filename);
@@ -149,10 +147,13 @@ static void _compile_file(
   }
   ast = compiler.generate_protocol_adapters(ast);
   ast = _transform_ast(compiler, ast);
-  if (opts.dump == <dump-code>) {
-    ast = compiler.emit(ast);
-    puts(compiler.code_pretty_string(ast, NULL));
-    exit(0);
+  switch (opts.dump) {
+    case <transforms>:
+      foreach (List node, ast) printf("\n%s\n", _ast_inspection_repr(node));
+      return;
+    case <dump-code>:
+      puts(compiler.code_pretty_string(compiler.emit(ast), NULL));
+      return;
   }
   generate_code(compiler, ast, output_dir);
   if (!translation_depfile_write(request, compiler, filename, output_dir))

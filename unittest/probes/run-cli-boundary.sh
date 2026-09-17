@@ -224,6 +224,16 @@ grep -Fq "inputs produce the same output stem 'item'" \
 [[ ! -e "$BUILD/out/item.c" && ! -e "$BUILD/out/item.h" ]]
 grep -Fq "x2c: translate --out-dir" "$BUILD/dry-run.stderr"
 
+# An inspection covers every input, so a later input's error fails it.
+printf 'int broken(void) { return 1 +; }\n' >"$BUILD/b/broken.x"
+set +e
+"$X2C" translate --dump-code "$BUILD/a/item.x" "$BUILD/b/broken.x" \
+  >"$BUILD/dump-later.stdout" 2>"$BUILD/dump-later.stderr"
+dump_later_status=$?
+set -e
+[[ $dump_later_status == 1 ]]
+grep -Fq "expected atomic expression" "$BUILD/dump-later.stderr"
+
 set +e
 "$X2C" "$BUILD/a/item.x" >"$BUILD/no-command.stdout" \
   2>"$BUILD/no-command.stderr"
