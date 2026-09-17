@@ -203,7 +203,7 @@ static int _call_never_returns(Ast node) {
     case %(stmnt (expr ? (call (expr () (ident ?binding)) (args *)))): {
       String name = binding_identity_spelling(binding);
       return name == "abort" || name == "exit" || name == "_Exit" ||
-             name == "quick_exit";
+             name == "_exit" || name == "quick_exit";
     }
   return 0;
 }
