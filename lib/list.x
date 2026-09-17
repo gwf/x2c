@@ -98,10 +98,9 @@ static void _promote_node(Var node) {
 }
 
 /** Moves `lst` out of the innermost interning pool into its parent.
-    Cells, nested `List`s, interned `String` cars, and long `Atom` payloads all
-    move
-    together, so a promoted `List` keeps its complete identity graph across the
-    matching `Pool.close`. Pointers never change and ancestor-owned
+    Cells, nested `List`s, interned `String` cars, and long `Atom` payloads
+    all move together, so a promoted `List` keeps its complete identity graph
+    across the matching `Pool.close`. Pointers never change and ancestor-owned
     structure is left where it is; the return value is `lst` itself.
 
     Cells are immutable, so an ancestor-owned cell can only reference

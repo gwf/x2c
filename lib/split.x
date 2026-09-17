@@ -180,9 +180,9 @@ static int _splits_next(Split split, int *cursor, String *out) {
     preserves empty fields around every explicit separator.
 
     Each yielded field is a canonical `String`. Distinct fields remain resident
-    in the active `String` pool; bracket bulk traversal with
-    `Pool.open` / `Pool.close` and promote retained values
-    when that residency should be temporary. The cursor borrows `str`, whose
+    in the active `String` pool; bracket bulk traversal with `Pool.open` /
+    `Pool.close` and promote retained values when that residency should be
+    temporary. The cursor borrows `str`, whose
     actual owning pool must remain live through traversal.
     Raises: `<alloc-fail>` when the cursor descriptor cannot be allocated.
     An empty `String` produces an exhausted cursor.
@@ -195,9 +195,9 @@ Split String.words(String str) => _new(str, NULL, _words_next);
     the rule that a trailing ending does not add a final empty line.
 
     Each yielded field is a canonical `String`. Distinct fields remain resident
-    in the active `String` pool; bracket bulk traversal with
-    `Pool.open` / `Pool.close` and promote retained values
-    when that residency should be temporary. The cursor borrows `str`, whose
+    in the active `String` pool; bracket bulk traversal with `Pool.open` /
+    `Pool.close` and promote retained values when that residency should be
+    temporary. The cursor borrows `str`, whose
     actual owning pool must remain live through traversal.
     Raises: `<alloc-fail>` when the cursor descriptor cannot be allocated.
     An empty `String` produces an exhausted cursor.
@@ -210,9 +210,9 @@ Split String.lines(String str) => _new(str, NULL, _lines_next);
     separator yields `str` once, while an empty `str` yields nothing.
 
     Each yielded field is a canonical `String`. Distinct fields remain resident
-    in the active `String` pool; bracket bulk traversal with
-    `Pool.open` / `Pool.close` and promote retained values
-    when that residency should be temporary. The cursor borrows `str` and
+    in the active `String` pool; bracket bulk traversal with `Pool.open` /
+    `Pool.close` and promote retained values when that residency should be
+    temporary. The cursor borrows `str` and
     `sep`; both actual owning pools must remain live through traversal.
     Raises: `<alloc-fail>` when the cursor descriptor cannot be allocated.
 */

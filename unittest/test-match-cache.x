@@ -401,7 +401,7 @@ static void cache_product_pipeline_matches_oracle(void) {
 }
 
 
-/* `memory.md` recommends the pool_retain/pool_release bracket, so a plan
+/* `memory.md` recommends the Pool.open/Pool.close bracket, so a plan
    the cache keeps must outlive it. A pattern built inside the bracket is
    owned by the nested pool, whose cells the next round reuses at the same
    address, so admitting one would let it answer for a different pattern. */
