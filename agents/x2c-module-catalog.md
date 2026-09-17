@@ -34,8 +34,7 @@ Source-bearing APE to native x2c transition.
 
 Public functions:
 
-`bootstrap_materialize`, `bootstrap_build_request`, `bootstrap_record_install`,
-`bootstrap_release`
+`bootstrap_materialize`, `bootstrap_build_request`, `bootstrap_record_install`
 
 ### [src/build.x](../src/build.x)
 

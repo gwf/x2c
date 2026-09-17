@@ -3993,6 +3993,10 @@ The command verifies and extracts the source distribution stored in the APE
 ZIP, builds a native runtime archive first, then builds and installs the
 matching native compiler. The result includes the compiler, its runtime
 archive, headers, sources, unit interfaces, licenses, and a toolchain record.
+A running bootstrap locks `<prefix>/.x2c-bootstrap.lock`, and a second
+bootstrap into the same prefix stops with an error. The operating system
+releases the lock when the process exits, and the empty file stays in the
+prefix.
 
 Bootstrap selects tools in the same order as ordinary builds: `--cc`, `X2C_CC`,
 `CC`, then `cc`; and `--ar`, `X2C_AR`, `AR`, then `ar`. It uses `-O2` unless

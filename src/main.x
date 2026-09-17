@@ -511,15 +511,14 @@ static int _run_bootstrap(CliRequest command) {
     printf(
       "x2c: native compiler is already installed at %s/bin/x2c\n",
       payload.prefix);
-    bootstrap_release(payload);
     return 0;
   }
   x2c_set_root(payload.prefix);
   _configure_logging(command.debugging);
   Frontend.load_support(bootstrap_build_request(command, payload, <runtime>));
   /* A source-bearing APE is one-shot: the runtime builds, then the compiler
-     that links it, and either status closes build and lock state and
-     flushes stdio before `_Exit`. */
+     that links it, and either status closes build state and flushes stdio
+     before `_Exit`. */
   Context build = Context.open_isolated_named("bootstrap build");
   int result = 0, CliRequest request = NULL;
   foreach (Symbol component, %(runtime compiler)) {
@@ -533,7 +532,6 @@ static int _run_bootstrap(CliRequest command) {
     printf("x2c: installed native compiler at %s/bin/x2c\n", payload.prefix);
   }
   build.close();
-  bootstrap_release(payload);
   fflush(NULL);
   _Exit(result);
 }

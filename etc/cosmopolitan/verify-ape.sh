@@ -39,7 +39,20 @@ unzip -t "$SEED" >/dev/null
 (
   unset X2C_CC CC X2C_AR AR
   "$SEED" bootstrap --prefix "$NATIVE"
-)
+) &
+bootstrap=$!
+
+# The build directory appears after the bootstrap takes its lock, so a
+# second bootstrap into the same prefix must stop.
+while [ ! -d "$NATIVE/.x2c-build" ] && kill -0 "$bootstrap" 2>/dev/null; do
+  sleep 1
+done
+if "$SEED" bootstrap --prefix "$NATIVE" 2>"$WORK/contention.stderr"; then
+  printf 'x2c: a concurrent bootstrap did not stop\n' >&2
+  exit 1
+fi
+grep -q 'another bootstrap is in progress' "$WORK/contention.stderr"
+wait "$bootstrap"
 
 cp -R "$NATIVE" "$NEXT"
 "$NEXT/bin/x2c" build --kind static-library \

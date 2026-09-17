@@ -15,7 +15,6 @@ Source-bearing APE to native x2c transition.
 | [`bootstrap_build_request`](#bootstrap_build_request) | Builds an ordinary native request for one materialized bootstrap component. |
 | [`bootstrap_materialize`](#bootstrap_materialize) | Verifies and materializes the APE source payload at `request.prefix`. |
 | [`bootstrap_record_install`](#bootstrap_record_install) | Records the resolved host tools and then publishes bootstrap completion. |
-| [`bootstrap_release`](#bootstrap_release) | Attempts to remove a held bootstrap lock without freeing the payload. |
 
 ### Functions
 
@@ -34,7 +33,7 @@ their actual canonical pool lifetimes, which may belong to ancestor pools.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the request.
 
-Source: `src/bootstrap.x:213`
+Source: `src/bootstrap.x:177`
 
 #### bootstrap_materialize
 
@@ -43,19 +42,18 @@ Source: `src/bootstrap.x:213`
 Verifies and materializes the APE source payload at `request.prefix`.
 The prefix must be nonempty and must not be `/`. An existing tree is reused
 only when its source identity matches and every manifest entry verifies.
-On success the `Scope`-owned result retains the exclusive bootstrap lock;
-`complete` additionally requires the matching completion marker, executable
-compiler, and readable runtime archive. Validation, locking, or filesystem
-failure prints a bootstrap diagnostic and exits with status 2; a later
-invocation can recover its dead-PID lock.
+On success the process holds the exclusive lock on
+`<prefix>/.x2c-bootstrap.lock` until it exits; the file stays in place.
+`complete` additionally requires the matching completion marker,
+executable compiler, and readable runtime archive. Validation, locking,
+or filesystem failure prints a bootstrap diagnostic and exits with
+status 2.
 
 **Raises:** `<bad-arg>` for embedded manifest bytes that are not `String` text,
 or `<alloc-fail>` or `<size-limit>` while reading the manifest or
-constructing the result. If one transfers after lock acquisition, no
-payload is returned for release and the live process keeps the lock until
-it exits.
+constructing the result.
 
-Source: `src/bootstrap.x:180`
+Source: `src/bootstrap.x:145`
 
 #### bootstrap_record_install
 
@@ -69,17 +67,7 @@ failure prints a bootstrap diagnostic and exits with status 2.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing canonical
 paths.
 
-Source: `src/bootstrap.x:242`
-
-#### bootstrap_release
-
-`void bootstrap_release(Bootstrap payload)`
-
-Attempts to remove a held bootstrap lock without freeing the payload.
-The lock path is cleared even if `unlink` fails. NULL payloads and repeated
-calls have no effect.
-
-Source: `src/bootstrap.x:253`
+Source: `src/bootstrap.x:206`
 
 ## Public types
 
@@ -90,16 +78,13 @@ Source: `src/bootstrap.x:253`
 <a id="Bootstrap"></a>
 ### Bootstrap
 
-`typedef struct Bootstrap { String prefix, identity, lock_path, List runtime_srcs, compiler_srcs; int complete; } *Bootstrap`
+`typedef struct Bootstrap { String prefix, identity, List runtime_srcs, compiler_srcs; int complete; } *Bootstrap`
 
 Represents one verified source payload while its installation lock is held.
 The record is `Scope`-owned; its `String`s and source `List`s retain their
-actual
-canonical pool lifetimes, which may belong to ancestor pools. Every
-successful path must call `bootstrap_release` to remove the filesystem
-lock.
+actual canonical pool lifetimes, which may belong to ancestor pools.
 
-Source: `src/bootstrap.x:21`
+Source: `src/bootstrap.x:18`
 
 ## Design notes
 
