@@ -218,11 +218,11 @@ int Var_is_void(Var);
 
 void * Pool_malloc(Pool, size_t);
 
+List Var_list(Var);
+
 Var Pool_intern(Pool, Var, void *);
 
 Var List_var(List);
-
-List Var_list(Var);
 
 List List_cons_in(Pool pool, Var head, List tail){
   if(! _init_guard_) List_initialize();
@@ -230,8 +230,7 @@ List List_cons_in(Pool pool, Var head, List tail){
   List cell = Pool_malloc(pool, sizeof(struct List));
   cell -> car = head;
   cell -> cdr = tail;
-  Var canonical = Pool_intern(pool, List_var(cell), cell);
-  return Var_list(canonical);
+  return Var_list(Pool_intern(pool, List_var(cell), cell));
 }
 
 Pool x2c_pool_values_current(void);
@@ -288,7 +287,7 @@ void List_pool_release(void){
   if(! _init_guard_) List_initialize();
   Pool pool = x2c_pool_values_current();
   if(! pool -> up){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/list.x",.function = "List_pool_release",.line = 151};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/list.x",.function = "List_pool_release",.line = 150};
     x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.pool_release")), NULL))));
     __builtin_unreachable();
   }
@@ -301,7 +300,7 @@ Pool List_pool_detach(void){
   if(! _init_guard_) List_initialize();
   Pool pool = x2c_pool_values_current();
   if(! pool -> up){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/list.x",.function = "List_pool_detach",.line = 165};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/list.x",.function = "List_pool_detach",.line = 164};
     x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.pool_detach")), NULL))));
     __builtin_unreachable();
   }
@@ -373,7 +372,7 @@ Var Pool_lookup(Pool, Var);
 List cons(Var head, List tail){
   if(! _init_guard_) List_initialize();
   if(Var_is_void(head)){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/list.x",.function = "cons",.line = 244};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/list.x",.function = "cons",.line = 243};
     x2c_error_raise_n(& _x2c_error_site_2, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.cons")), NULL))));
     __builtin_unreachable();
   }
@@ -478,7 +477,7 @@ Var unsigned_var(unsigned);
 
 static List _concat_n_va(unsigned list_count, va_list ap){
   if(list_count > INT_MAX){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/list.x",.function = "_concat_n_va",.line = 333};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/list.x",.function = "_concat_n_va",.line = 332};
     x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.concat_n")), NULL))), Symbol_var(7318440), unsigned_var(list_count));
     __builtin_unreachable();
   }
@@ -531,7 +530,7 @@ static List _n_va(unsigned element_count, va_list ap){
     for(unsigned i = 0;  i < element_count;  i ++){
       Var value = va_arg(ap, Var);
       if(Var_is_void(value)){
-        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/list.x",.function = "_n_va",.line = 359};
+        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/list.x",.function = "_n_va",.line = 358};
         x2c_error_raise_n(& _x2c_error_site_4, 48270474208, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.list_n")), NULL))), Symbol_var(19800432), unsigned_var(i));
         __builtin_unreachable();
       }
@@ -1056,17 +1055,12 @@ static Var _sublis_node(List alist, Var node){
       Var _x2c_macro_cursor_output_11;
       while(List_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_11)){
         source = _x2c_macro_cursor_output_11;
-        {
-          Var item = _sublis_node(alist, source);
-          Array_push(items, item);
-        }
-
+        Array_push(items, _sublis_node(alist, source));
       }
 
     }
-    List rebuilt = Array_list(items);
     {
-      Var _x2c_return_value_10 = List_var(rebuilt);
+      Var _x2c_return_value_10 = List_var(Array_list(items));
       {
         x2c_cleanup_leave(& _x2c_defer_record_10);
         return _x2c_return_value_10;
@@ -1343,7 +1337,7 @@ int x2c_normalize_slice(int *, int *, int, int);
 List List_subseq(List list, int start, int stop, int step){
   if(! _init_guard_) List_initialize();
   if(step < 1){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/list.x",.function = "List_subseq",.line = 810};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/list.x",.function = "List_subseq",.line = 805};
     x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.subseq")), NULL))), Symbol_var(1286496), int_var(step));
     __builtin_unreachable();
   }
@@ -1354,7 +1348,7 @@ List List_subseq(List list, int start, int stop, int step){
 List List_getslice(List list, int start, int stop, int step){
   if(! _init_guard_) List_initialize();
   if(! step){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/list.x",.function = "List_getslice",.line = 824};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/list.x",.function = "List_getslice",.line = 819};
     x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.getslice")), NULL))), Symbol_var(1286496), int_var(step));
     __builtin_unreachable();
   }
@@ -1405,7 +1399,7 @@ List List_getslice(List list, int start, int stop, int step){
 
 static int _unpack_n_va(List src, unsigned destination_count, va_list ap, int list_outputs){
   if(destination_count > INT_MAX){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/list.x",.function = "_unpack_n_va",.line = 839};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/list.x",.function = "_unpack_n_va",.line = 834};
     x2c_error_raise_n(& _x2c_error_site_7, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.unpack_n")), NULL))), Symbol_var(7318440), unsigned_var(destination_count));
     __builtin_unreachable();
   }

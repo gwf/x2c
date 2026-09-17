@@ -16,11 +16,11 @@
 
 #include "error.h"
 
-static List _12, _10, _9, _7, _5;
+static List _26, _24, _23, _21, _19;
 
-static String _3, _1, _0;
+static String _17, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _11, _8, _6, _4, _2;
+static Var _25, _22, _20, _18, _16;
 
 #include <errno.h>
 #include <limits.h>
@@ -48,44 +48,44 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-typedef struct JsonReader{
+typedef struct _JsonReader{
   const char * text;
   String path;
-  int at, length, depth;
+  int at, depth;
 }
-* JsonReader;
+* _JsonReader;
 
-_Noreturn static void JsonReader__fail(JsonReader j, const char * why);
+_Noreturn static void _JsonReader__fail(_JsonReader j, String why);
 
-static int JsonReader__peek(JsonReader j);
+static int _JsonReader__peek(_JsonReader j);
 
-static void JsonReader__space(JsonReader j);
+static void _JsonReader__space(_JsonReader j);
 
-static void JsonReader__expect(JsonReader j, char byte, const char * why);
+static void _JsonReader__expect(_JsonReader j, char byte, const char * why);
 
-static void JsonReader__word(JsonReader j, const char * word);
+static void _JsonReader__word(_JsonReader j, const char * word);
 
-static int JsonReader__digits(JsonReader j);
+static int _JsonReader__digits(_JsonReader j);
 
-static Var JsonReader__number(JsonReader j);
+static Var _JsonReader__number(_JsonReader j);
 
 static int _hex_digit(int byte);
 
-static long JsonReader__hex4(JsonReader j);
+static long _JsonReader__hex4(_JsonReader j);
 
 static int _utf8_length(const unsigned char * s);
 
 static void _write_code_point(Buffer out, long point);
 
-static void JsonReader__escape(JsonReader j, Buffer out);
+static void _JsonReader__escape(_JsonReader j, Buffer out);
 
-static String JsonReader__string(JsonReader j);
+static String _JsonReader__string(_JsonReader j);
 
-static Var JsonReader__array(JsonReader j);
+static Var _JsonReader__array(_JsonReader j);
 
-static Var JsonReader__object(JsonReader j);
+static Var _JsonReader__object(_JsonReader j);
 
-static Var JsonReader__value(JsonReader j);
+static Var _JsonReader__value(_JsonReader j);
 
 static Var _parse(String source, String path);
 
@@ -121,7 +121,7 @@ static Func _x2c_func_handle_0;
 
 Func Func_new(FuncAdapter, List);
 
-_x2c_initializer_choice_CDBE555C_2((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _12)))
+_x2c_initializer_choice_CDBE555C_2((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _26)))
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
 }
@@ -157,17 +157,31 @@ __attribute__((constructor)) static void _file_init_(void){
   }
   _0 = String_new("true");
   _1 = String_new("false");
-  _2 = Symbol_var(437126);
-  _3 = String_new("Var");
-  _4 = String_var(_3);
-  _5 = cons(_4, NULL);
-  _6 = List_var(_5);
-  _7 = cons(_6, NULL);
-  _8 = List_var(_7);
-  _9 = cons(_8, NULL);
-  _10 = cons(_2, _9);
-  _11 = List_var(_10);
-  _12 = cons(_11, _5);
+  _2 = String_new("unexpected character");
+  _3 = String_new("invalid number");
+  _4 = String_new("number out of range");
+  _5 = String_new("invalid \\u escape");
+  _6 = String_new("invalid escape");
+  _7 = String_new("unpaired surrogate");
+  _8 = String_new("U+0000 cannot appear in a String");
+  _9 = String_new("unterminated string");
+  _10 = String_new("control character in string");
+  _11 = String_new("invalid UTF-8");
+  _12 = String_new("expected a string key");
+  _13 = String_new("nesting exceeds 512 levels");
+  _14 = String_new("unexpected end of input");
+  _15 = String_new("unexpected text after the value");
+  _16 = Symbol_var(437126);
+  _17 = String_new("Var");
+  _18 = String_var(_17);
+  _19 = cons(_18, NULL);
+  _20 = List_var(_19);
+  _21 = cons(_20, NULL);
+  _22 = List_var(_21);
+  _23 = cons(_22, NULL);
+  _24 = cons(_16, _23);
+  _25 = List_var(_24);
+  _26 = cons(_25, _19);
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
   _x2c_static_initialize_2();
@@ -236,30 +250,29 @@ int String_truth(String);
 
 Var int_var(int);
 
-_Noreturn static void JsonReader__fail(JsonReader j, const char * why){
+_Noreturn static void _JsonReader__fail(_JsonReader j, String why){
   int line = 1, column = 1, offset = j -> at;
   scan_next_line_col((char *) j -> text, offset, & line, & column);
-  String reason = String_new(why);
   if(String_truth(j -> path)){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/json.x",.function = "JsonReader__fail",.line = 107};
-    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 6, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Json.read_file")), NULL))), Symbol_var(1051920), String_var(j -> path), Symbol_var(47666), String_var(reason), Symbol_var(1019648360), int_var(offset), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/json.x",.function = "_JsonReader__fail",.line = 106};
+    x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 6, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Json.read_file")), NULL))), Symbol_var(1051920), String_var(j -> path), Symbol_var(47666), String_var(why), Symbol_var(1019648360), int_var(offset), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
     __builtin_unreachable();
   }
   {
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/json.x",.function = "JsonReader__fail",.line = 110};
-    x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 5, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Json.parse")), NULL))), Symbol_var(47666), String_var(reason), Symbol_var(1019648360), int_var(offset), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/json.x",.function = "_JsonReader__fail",.line = 109};
+    x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 5, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Json.parse")), NULL))), Symbol_var(47666), String_var(why), Symbol_var(1019648360), int_var(offset), Symbol_var(805770), int_var(line), Symbol_var(233614172), int_var(column));
     __builtin_unreachable();
   }
 
 }
 
-static int JsonReader__peek(JsonReader j){
+static int _JsonReader__peek(_JsonReader j){
   return(unsigned char) j -> text[j -> at];
 }
 
-static void JsonReader__space(JsonReader j){
+static void _JsonReader__space(_JsonReader j){
   while(1){
-    switch(JsonReader__peek(j)){
+    switch(_JsonReader__peek(j)){
       case ' ' : case '\t' : case '\n' : case '\r' : j -> at ++;
       break;
       default: return;
@@ -269,23 +282,23 @@ static void JsonReader__space(JsonReader j){
 
 }
 
-static void JsonReader__expect(JsonReader j, char byte, const char * why){
-  JsonReader__space(j);
-  if(JsonReader__peek(j) != byte) JsonReader__fail(j, why);
+static void _JsonReader__expect(_JsonReader j, char byte, const char * why){
+  _JsonReader__space(j);
+  if(_JsonReader__peek(j) != byte) _JsonReader__fail(j, String_new(why));
   j -> at ++;
 }
 
-static void JsonReader__word(JsonReader j, const char * word){
+static void _JsonReader__word(_JsonReader j, const char * word){
   size_t length = strlen(word);
-  if(strncmp(j -> text + j -> at, word, length)) JsonReader__fail(j, "unexpected character");
+  if(strncmp(j -> text + j -> at, word, length)) _JsonReader__fail(j, _2);
   j -> at += length;
 }
 
 int scan_ascii_digit(int);
 
-static int JsonReader__digits(JsonReader j){
+static int _JsonReader__digits(_JsonReader j){
   int start = j -> at;
-  while(scan_ascii_digit(JsonReader__peek(j))) j -> at ++;
+  while(scan_ascii_digit(_JsonReader__peek(j))) j -> at ++;
   return j -> at - start;
 }
 
@@ -295,24 +308,24 @@ Var Var_box_ulong(unsigned long);
 
 Var double_var(double);
 
-static Var JsonReader__number(JsonReader j){
+static Var _JsonReader__number(_JsonReader j){
   int start = j -> at;
-  if(JsonReader__peek(j) == '-') j -> at ++;
-  if(JsonReader__peek(j) == '0') j -> at ++;
-  else if(! JsonReader__digits(j)) JsonReader__fail(j, "invalid number");
+  if(_JsonReader__peek(j) == '-') j -> at ++;
+  if(_JsonReader__peek(j) == '0') j -> at ++;
+  else if(! _JsonReader__digits(j)) _JsonReader__fail(j, _3);
   int integral = 1;
-  if(JsonReader__peek(j) == '.'){
+  if(_JsonReader__peek(j) == '.'){
     integral = 0;
     j -> at ++;
-    if(! JsonReader__digits(j)) JsonReader__fail(j, "invalid number");
+    if(! _JsonReader__digits(j)) _JsonReader__fail(j, _3);
   }
-  if((JsonReader__peek(j) | 32) == 'e'){
+  if((_JsonReader__peek(j) | 32) == 'e'){
     integral = 0;
     j -> at ++;
-    if(JsonReader__peek(j) == '+' || JsonReader__peek(j) == '-') j -> at ++;
-    if(! JsonReader__digits(j)) JsonReader__fail(j, "invalid number");
+    if(_JsonReader__peek(j) == '+' || _JsonReader__peek(j) == '-') j -> at ++;
+    if(! _JsonReader__digits(j)) _JsonReader__fail(j, _3);
   }
-  if(scan_ascii_digit(JsonReader__peek(j))) JsonReader__fail(j, "invalid number");
+  if(scan_ascii_digit(_JsonReader__peek(j))) _JsonReader__fail(j, _3);
   const char * spelling = j -> text + start;
   errno = 0;
   if(integral){
@@ -331,7 +344,7 @@ static Var JsonReader__number(JsonReader j){
   double number = strtod(spelling, NULL);
   if(isinf(number)){
     j -> at = start;
-    JsonReader__fail(j, "number out of range");
+    _JsonReader__fail(j, _4);
   }
   return double_var(number);
 }
@@ -342,11 +355,11 @@ static int _hex_digit(int byte){
   return byte >= 'a' && byte <= 'f' ? byte - 'a' + 10 : - 1;
 }
 
-static long JsonReader__hex4(JsonReader j){
+static long _JsonReader__hex4(_JsonReader j){
   long unit = 0;
   for(int i = 0;  i < 4;  i ++){
-    int digit = _hex_digit(JsonReader__peek(j));
-    if(digit < 0) JsonReader__fail(j, "invalid \\u escape");
+    int digit = _hex_digit(_JsonReader__peek(j));
+    if(digit < 0) _JsonReader__fail(j, _5);
     unit = unit * 16 + digit;
     j -> at ++;
   }
@@ -393,7 +406,7 @@ static void _write_code_point(Buffer out, long point){
   Buffer_write_len(out, bytes, length);
 }
 
-static void JsonReader__escape(JsonReader j, Buffer out){
+static void _JsonReader__escape(_JsonReader j, Buffer out){
   int escape = j -> text[++ j -> at];
   j -> at ++;
   switch(escape){
@@ -411,30 +424,30 @@ static void JsonReader__escape(JsonReader j, Buffer out){
     return;
     case 'u' : break;
     default: j -> at -= 2;
-    JsonReader__fail(j, "invalid escape");
+    _JsonReader__fail(j, _6);
   }
   int start = j -> at - 2;
-  long point = JsonReader__hex4(j);
+  long point = _JsonReader__hex4(j);
   if(point >= 0xD800 && point <= 0xDBFF){
-    if(JsonReader__peek(j) != '\\' || j -> text[j -> at + 1] != 'u'){
+    if(_JsonReader__peek(j) != '\\' || j -> text[j -> at + 1] != 'u'){
       j -> at = start;
-      JsonReader__fail(j, "unpaired surrogate");
+      _JsonReader__fail(j, _7);
     }
     j -> at += 2;
-    long low = JsonReader__hex4(j);
+    long low = _JsonReader__hex4(j);
     if(low < 0xDC00 || low > 0xDFFF){
       j -> at = start;
-      JsonReader__fail(j, "unpaired surrogate");
+      _JsonReader__fail(j, _7);
     }
     point = 0x10000 +((point - 0xD800) << 10) +(low - 0xDC00);
   }
   else if(point >= 0xDC00 && point <= 0xDFFF){
     j -> at = start;
-    JsonReader__fail(j, "unpaired surrogate");
+    _JsonReader__fail(j, _7);
   }
   else if(! point){
     j -> at = start;
-    JsonReader__fail(j, "U+0000 cannot appear in a String");
+    _JsonReader__fail(j, _8);
   }
   _write_code_point(out, point);
 }
@@ -445,11 +458,11 @@ String Buffer_str_free(Buffer);
 
 Buffer Buffer_new(size_t);
 
-static String JsonReader__string(JsonReader j){
+static String _JsonReader__string(_JsonReader j){
   int run = ++ j -> at;
   Buffer decoded = NULL;
   while(1){
-    int byte = JsonReader__peek(j);
+    int byte = _JsonReader__peek(j);
     if(byte == '"'){
       String text =(void *) decoded == NULL ? String_new_len(j -> text + run, j -> at - run) : Buffer_str_free(Buffer_write_len(decoded, j -> text + run, j -> at - run));
       j -> at ++;
@@ -458,14 +471,14 @@ static String JsonReader__string(JsonReader j){
     if(byte == '\\'){
       if((void *) decoded == NULL) decoded = Buffer_new(0);
       Buffer_write_len(decoded, j -> text + run, j -> at - run);
-      JsonReader__escape(j, decoded);
+      _JsonReader__escape(j, decoded);
       run = j -> at;
     }
-    else if(! byte) JsonReader__fail(j, "unterminated string");
-    else if(byte < 0x20) JsonReader__fail(j, "control character in string");
+    else if(! byte) _JsonReader__fail(j, _9);
+    else if(byte < 0x20) _JsonReader__fail(j, _10);
     else{
       int length = _utf8_length((const unsigned char *) j -> text + j -> at);
-      if(! length) JsonReader__fail(j, "invalid UTF-8");
+      if(! length) _JsonReader__fail(j, _11);
       j -> at += length;
     }
 
@@ -477,22 +490,22 @@ Var Array_var(Array);
 
 Var Array_push(Array, Var);
 
-static Var JsonReader__array(JsonReader j){
+static Var _JsonReader__array(_JsonReader j){
   Array array = Array_new();
   j -> at ++;
-  JsonReader__space(j);
-  if(JsonReader__peek(j) == ']'){
+  _JsonReader__space(j);
+  if(_JsonReader__peek(j) == ']'){
     j -> at ++;
     return Array_var(array);
   }
   while(1){
-    Array_push(array, JsonReader__value(j));
-    JsonReader__space(j);
-    if(JsonReader__peek(j) == ']'){
+    Array_push(array, _JsonReader__value(j));
+    _JsonReader__space(j);
+    if(_JsonReader__peek(j) == ']'){
       j -> at ++;
       return Array_var(array);
     }
-    JsonReader__expect(j, ',', "expected ',' or ']'");
+    _JsonReader__expect(j, ',', "expected ',' or ']'");
   }
 
 }
@@ -501,66 +514,64 @@ Var Map_var(Map);
 
 Var Map_setindex(Map, Var, Var);
 
-static Var JsonReader__object(JsonReader j){
+static Var _JsonReader__object(_JsonReader j){
   Map object = Map_new();
   j -> at ++;
-  JsonReader__space(j);
-  if(JsonReader__peek(j) == '}'){
+  _JsonReader__space(j);
+  if(_JsonReader__peek(j) == '}'){
     j -> at ++;
     return Map_var(object);
   }
   while(1){
-    JsonReader__space(j);
-    if(JsonReader__peek(j) != '"') JsonReader__fail(j, "expected a string key");
-    String name = JsonReader__string(j);
-    JsonReader__expect(j, ':', "expected ':'");
-    Map_setindex(object, String_var(name), JsonReader__value(j));
-    JsonReader__space(j);
-    if(JsonReader__peek(j) == '}'){
+    _JsonReader__space(j);
+    if(_JsonReader__peek(j) != '"') _JsonReader__fail(j, _12);
+    String name = _JsonReader__string(j);
+    _JsonReader__expect(j, ':', "expected ':'");
+    Map_setindex(object, String_var(name), _JsonReader__value(j));
+    _JsonReader__space(j);
+    if(_JsonReader__peek(j) == '}'){
       j -> at ++;
       return Map_var(object);
     }
-    JsonReader__expect(j, ',', "expected ',' or '}'");
+    _JsonReader__expect(j, ',', "expected ',' or '}'");
   }
 
 }
 
-static Var JsonReader__value(JsonReader j){
-  JsonReader__space(j);
-  switch(JsonReader__peek(j)){
+static Var _JsonReader__value(_JsonReader j){
+  _JsonReader__space(j);
+  switch(_JsonReader__peek(j)){
     case '{' : case '[' :{
-      if(++ j -> depth > JSON_MAX_DEPTH) JsonReader__fail(j, "nesting exceeds 512 levels");
-      Var nested = JsonReader__peek(j) == '{' ? JsonReader__object(j) : JsonReader__array(j);
+      if(++ j -> depth > JSON_MAX_DEPTH) _JsonReader__fail(j, _13);
+      Var nested = _JsonReader__peek(j) == '{' ? _JsonReader__object(j) : _JsonReader__array(j);
       j -> depth --;
       return nested;
     }
-    case '"' : return String_var(JsonReader__string(j));
-    case 't' : JsonReader__word(j, "true");
+    case '"' : return String_var(_JsonReader__string(j));
+    case 't' : _JsonReader__word(j, "true");
     return Json_bool(1);
-    case 'f' : JsonReader__word(j, "false");
+    case 'f' : _JsonReader__word(j, "false");
     return Json_bool(0);
-    case 'n' : JsonReader__word(j, "null");
+    case 'n' : _JsonReader__word(j, "null");
     return(Var){
       .u64 = 0
     }
     ;
-    case '-' : case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : case '8' : case '9' : return JsonReader__number(j);
-    case '\0' : JsonReader__fail(j, "unexpected end of input");
+    case '-' : case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : case '8' : case '9' : return _JsonReader__number(j);
+    case '\0' : _JsonReader__fail(j, _14);
   }
-  JsonReader__fail(j, "unexpected character");
+  _JsonReader__fail(j, _2);
 }
 
-int String_len(String);
-
 static Var _parse(String source, String path){
-  struct JsonReader reader ={
-    .text = String_truth(source) ? source : "", .path = path, .length = String_len(source)
+  struct _JsonReader reader ={
+    .text = String_truth(source) ? source : "", .path = path
   }
   ;
-  JsonReader j = & reader;
-  Var value = JsonReader__value(j);
-  JsonReader__space(j);
-  if(j -> at != j -> length) JsonReader__fail(j, "unexpected text after the value");
+  _JsonReader j = & reader;
+  Var value = _JsonReader__value(j);
+  _JsonReader__space(j);
+  if(_JsonReader__peek(j)) _JsonReader__fail(j, _15);
   return value;
 }
 
@@ -575,6 +586,8 @@ Var Json_read_file(Path path){
   if(! _init_guard_) _file_init_();
   return _parse(Path_read_text(path), path);
 }
+
+int String_len(String);
 
 Buffer Buffer_write(Buffer, const char *);
 
@@ -606,7 +619,7 @@ static void _write_string(Buffer out, String text){
     if(! escape && byte >= 0x20){
       int sequence = _utf8_length(bytes + at);
       if(! sequence){
-        static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/json.x",.function = "_write_string",.line = 434};
+        static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/json.x",.function = "_write_string",.line = 431};
         x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("invalid UTF-8")), NULL))), Symbol_var(1019648360), int_var(at));
         __builtin_unreachable();
       }
@@ -625,7 +638,7 @@ static void _write_string(Buffer out, String text){
 static void _write_double(Buffer out, double number){
   if(! isfinite(number)){
     {
-      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/json.x",.function = "_write_double",.line = 456};
+      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/json.x",.function = "_write_double",.line = 453};
       x2c_error_raise_n(& _x2c_error_site_4, 245103016899018, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("JSON has no NaN or infinity")), NULL))));
       __builtin_unreachable();
     }
@@ -735,7 +748,7 @@ static void _write_members(Buffer out, Map object, int pretty, int depth){
           if(! Var_is_row(name, 11, 7, 1) && ! Var_is_atom(name)){
             Symbol tag = Var_tag(name);
             {
-              static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/json.x",.function = "_write_members",.line = 500};
+              static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/json.x",.function = "_write_members",.line = 497};
               x2c_error_raise_n(& _x2c_error_site_5, 4477479911782, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(1510312), String_var(String_join(NULL, cons(String_var(String_new("String object key")), NULL))), Symbol_var(41038), Symbol_var(tag));
               __builtin_unreachable();
             }
@@ -789,7 +802,7 @@ Map Var_map(Var);
 static void _write(Buffer out, Var value, int pretty, int depth){
   if(depth > JSON_MAX_DEPTH){
     {
-      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/json.x",.function = "_write",.line = 521};
+      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/json.x",.function = "_write",.line = 518};
       x2c_error_raise_n(& _x2c_error_site_6, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("nesting exceeds 512 levels")), NULL))));
       __builtin_unreachable();
     }
@@ -797,7 +810,7 @@ static void _write(Buffer out, Var value, int pretty, int depth){
   }
   if(Var_is_null(value)) Buffer_write(out, "null");
   else if(Var_is(value, 729033112536)) Buffer_write(out, JsonBool_str(Var_jsonbool(value)));
-  else if(Var_is_row(value, 11, 7, 1) || Var_is(value, 1328354264)) _write_string(out, Var_str(value));
+  else if(Var_is_row(value, 11, 7, 1) || Var_is_atom(value)) _write_string(out, Var_str(value));
   else if(Var_is_integer(value)) _write_integer(out, value);
   else if(Var_is_floating(value)) _write_double(out, Var_floating(value));
   else if(Var_is(value, 3313778) || Var_is_row(value, 9, 7, 4)) _write_elements(out, value, pretty, depth);
@@ -805,7 +818,7 @@ static void _write(Buffer out, Var value, int pretty, int depth){
   else{
     Symbol tag = Var_tag(value);
     {
-      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/json.x",.function = "_write",.line = 535};
+      static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/json.x",.function = "_write",.line = 532};
       x2c_error_raise_n(& _x2c_error_site_7, 4477479911782, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Var.json")), NULL))), Symbol_var(41038), Symbol_var(tag));
       __builtin_unreachable();
     }

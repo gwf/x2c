@@ -4,7 +4,7 @@
 
 #include "error.h"
 
-static String _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -152,8 +152,9 @@ __attribute__((constructor)) static void _file_init_(void){
   _16 = String_new("errors_text: ");
   _17 = String_new(" }");
   _18 = String_new("=");
-  _19 = String_new("Job.options");
-  _20 = String_new("Job.pipe");
+  _19 = String_new("Job.start");
+  _20 = String_new("Job.options");
+  _21 = String_new("Job.pipe");
 }
 
 void Scope_free(void *);
@@ -536,6 +537,8 @@ static void _child(char * * argv, _Launch * launch, int stdin_fd, int stdout_fd,
   _exit(127);
 }
 
+void File_path_error(Var, String, int);
+
 static void Job__spawn(Job job, int index, List stage, int stdin_fd, int stdout_fd, int stderr_fd){
   _Launch * launch = job -> launch;
   char * * argv = _argv(stage);
@@ -563,29 +566,16 @@ static void Job__spawn(Job job, int index, List stage, int stdin_fd, int stdout_
   job -> pids[index] = pid;
   if(count != sizeof(failure)) return;
   int error = failure[1];
-  if(failure[0] == _STEP_DIR){
-    String dir = launch -> dir;
-    if(error == ENOENT){
-      static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/process.x",.function = "Job__spawn",.line = 195};
-      x2c_error_raise_n(& _x2c_error_site_5, 31862161386376, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.start")), NULL))), Symbol_var(1051920), String_var(dir), Symbol_var(11703198), int_var(error));
-      __builtin_unreachable();
-    }
-    {
-      static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/process.x",.function = "Job__spawn",.line = 197};
-      x2c_error_raise_n(& _x2c_error_site_6, 20399393368, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.start")), NULL))), Symbol_var(1051920), String_var(dir), Symbol_var(11703198), int_var(error));
-      __builtin_unreachable();
-    }
-
-  }
+  if(failure[0] == _STEP_DIR) File_path_error(String_var(_19), launch -> dir, error);
   String program = String_new(argv[0]);
   if(error == ENOENT){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/process.x",.function = "Job__spawn",.line = 200};
-    x2c_error_raise_n(& _x2c_error_site_7, 31862161386376, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.start")), NULL))), Symbol_var(35599650906), String_var(program), Symbol_var(11703198), int_var(error));
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/process.x",.function = "Job__spawn",.line = 196};
+    x2c_error_raise_n(& _x2c_error_site_5, 31862161386376, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.start")), NULL))), Symbol_var(35599650906), String_var(program), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
   {
-    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/process.x",.function = "Job__spawn",.line = 203};
-    x2c_error_raise_n(& _x2c_error_site_8, 20399393368, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.start")), NULL))), Symbol_var(35599650906), String_var(program), Symbol_var(11703198), int_var(error));
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/process.x",.function = "Job__spawn",.line = 199};
+    x2c_error_raise_n(& _x2c_error_site_6, 20399393368, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.start")), NULL))), Symbol_var(35599650906), String_var(program), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
 
@@ -603,6 +593,7 @@ static void Job__start(Job job){
   job -> count = List_len(job -> stages);
   job -> pids = Scope_calloc(job -> count, sizeof(long));
   job -> statuses = Scope_calloc(job -> count, sizeof(int));
+  for(int i = 0;  i < job -> count;  i ++) job -> statuses[i] = 127;
   int input = - 1, output = - 1, errors = - 1, launched = 0;
   {
   _x2c_defer_env_3 _x2c_defer_env_8 = {._x2c_defer_capture_3 =(const void *) & launched, ._x2c_defer_capture_4 =(const void *) & job};
@@ -741,8 +732,8 @@ static Job Job_new(List command){
 
 static Job Job__unstarted(Job job, String operation){
   if(job -> started){
-    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/process.x",.function = "Job__unstarted",.line = 297};
-    x2c_error_raise_n(& _x2c_error_site_9, 4372499598, 2, Symbol_var(34096809266140), String_var(operation), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("the job has started")), NULL))));
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/process.x",.function = "Job__unstarted",.line = 295};
+    x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 2, Symbol_var(34096809266140), String_var(operation), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("the job has started")), NULL))));
     __builtin_unreachable();
   }
   return job;
@@ -756,7 +747,7 @@ Map Var_map(Var);
 
 Job Job_options(Job job, Map options){
   if(! _init_guard_) _file_init_();
-  _Launch * launch = Job__unstarted(job, _19) -> launch;
+  _Launch * launch = Job__unstarted(job, _20) -> launch;
   {
     Var key, value;
     Map _x2c_macro_object_5 = options;
@@ -768,8 +759,8 @@ Job Job_options(Job job, Map options){
       value = _x2c_macro_cursor_output_6;
       {
         if(! Var_is(key, 1328354264)){
-          static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/process.x",.function = "Job_options",.line = 337};
-          x2c_error_raise_n(& _x2c_error_site_10, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.options")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("option keys are atoms")), NULL))));
+          static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/process.x",.function = "Job_options",.line = 335};
+          x2c_error_raise_n(& _x2c_error_site_8, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.options")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("option keys are atoms")), NULL))));
           __builtin_unreachable();
         }
         Symbol name = Var_symbol(key);
@@ -788,8 +779,8 @@ Job Job_options(Job job, Map options){
           launch -> stderr_path = launch -> capture_errors || launch -> errors_to_output || _is(value, 20284019304) ? NULL : Var_string(value);
           break;
           default:{
-            static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/process.x",.function = "Job_options",.line = 364};
-            x2c_error_raise_n(& _x2c_error_site_11, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.options")), NULL))), Symbol_var(1041517532), Symbol_var(name));
+            static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/process.x",.function = "Job_options",.line = 362};
+            x2c_error_raise_n(& _x2c_error_site_9, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.options")), NULL))), Symbol_var(1041517532), Symbol_var(name));
             __builtin_unreachable();
           }
 
@@ -812,17 +803,19 @@ List List_append(List, List);
 
 Job Job_pipe(Job job, List command){
   if(! _init_guard_) _file_init_();
-  Job__unstarted(job, _20);
+  Job__unstarted(job, _21);
   job -> stages = List_append(job -> stages, _stages(command));
   return job;
 }
 
 Job Job_start(Job job){
+  if(! _init_guard_) _file_init_();
   if(! job -> started) Job__start(job);
   return job;
 }
 
 int Job_status(Job job){
+  if(! _init_guard_) _file_init_();
   Job_start(job);
   for(int i = 0;  i < job -> count;  i ++) if(job -> pids[i]) Job__reap(job, i, 0);
   Job__finish(job);
@@ -832,6 +825,7 @@ int Job_status(Job job){
 List List_cdr(List);
 
 Job Job_check(Job job){
+  if(! _init_guard_) _file_init_();
   int status = Job_status(job);
   if(! status) return job;
   List stages = job -> stages;
@@ -840,23 +834,23 @@ Job Job_check(Job job){
   int captured = job -> launch -> capture_output;
   int logged = job -> launch -> capture_errors;
   if(captured && logged){
-    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/process.x",.function = "Job_check",.line = 423};
-    x2c_error_raise_n(& _x2c_error_site_12, 234409560664, 4, Symbol_var(7477201800), List_var(command), Symbol_var(1317119334), int_var(status), Symbol_var(1052018024), String_var(output), Symbol_var(374504614), String_var(errors));
+    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/process.x",.function = "Job_check",.line = 421};
+    x2c_error_raise_n(& _x2c_error_site_10, 234409560664, 4, Symbol_var(7477201800), List_var(command), Symbol_var(1317119334), int_var(status), Symbol_var(1052018024), String_var(output), Symbol_var(374504614), String_var(errors));
     __builtin_unreachable();
   }
   if(captured){
-    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/process.x",.function = "Job_check",.line = 426};
-    x2c_error_raise_n(& _x2c_error_site_13, 234409560664, 3, Symbol_var(7477201800), List_var(command), Symbol_var(1317119334), int_var(status), Symbol_var(1052018024), String_var(output));
+    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/process.x",.function = "Job_check",.line = 424};
+    x2c_error_raise_n(& _x2c_error_site_11, 234409560664, 3, Symbol_var(7477201800), List_var(command), Symbol_var(1317119334), int_var(status), Symbol_var(1052018024), String_var(output));
     __builtin_unreachable();
   }
   if(logged){
-    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/process.x",.function = "Job_check",.line = 428};
-    x2c_error_raise_n(& _x2c_error_site_14, 234409560664, 3, Symbol_var(7477201800), List_var(command), Symbol_var(1317119334), int_var(status), Symbol_var(374504614), String_var(errors));
+    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/process.x",.function = "Job_check",.line = 426};
+    x2c_error_raise_n(& _x2c_error_site_12, 234409560664, 3, Symbol_var(7477201800), List_var(command), Symbol_var(1317119334), int_var(status), Symbol_var(374504614), String_var(errors));
     __builtin_unreachable();
   }
   {
-    static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/process.x",.function = "Job_check",.line = 430};
-    x2c_error_raise_n(& _x2c_error_site_15, 234409560664, 2, Symbol_var(7477201800), List_var(command), Symbol_var(1317119334), int_var(status));
+    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/process.x",.function = "Job_check",.line = 428};
+    x2c_error_raise_n(& _x2c_error_site_13, 234409560664, 2, Symbol_var(7477201800), List_var(command), Symbol_var(1317119334), int_var(status));
     __builtin_unreachable();
   }
 
@@ -868,16 +862,19 @@ void Job_run(Job job){
 }
 
 String Job_output(Job job){
+  if(! _init_guard_) _file_init_();
   return Job_check(job) -> output_text;
 }
 
 List String_split_lines(String, int);
 
 List Job_lines(Job job){
+  if(! _init_guard_) _file_init_();
   return String_split_lines(Job_output(job), 0);
 }
 
 String Job_errors(Job job){
+  if(! _init_guard_) _file_init_();
   Job_status(job);
   return job -> errors_text;
 }
@@ -900,6 +897,7 @@ void Job_kill(Job job, int signal){
 }
 
 void Job_cleanup(Job job){
+  if(! _init_guard_) _file_init_();
   if(! job || ! job -> started || job -> finished) return;
   Job_kill(job, SIGTERM);
   Job_status(job);
@@ -918,8 +916,8 @@ Job Job_wait_any(Array jobs){
     while(Array_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_7)){
       job = Var_job(_x2c_macro_cursor_output_7);
       if(! job -> started){
-        static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/process.x",.function = "Job_wait_any",.line = 496};
-        x2c_error_raise_n(& _x2c_error_site_16, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.wait_any")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("a job has not started")), NULL))));
+        static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/process.x",.function = "Job_wait_any",.line = 494};
+        x2c_error_raise_n(& _x2c_error_site_14, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.wait_any")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("a job has not started")), NULL))));
         __builtin_unreachable();
       }
 

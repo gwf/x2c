@@ -4,7 +4,7 @@
 
 #include "error.h"
 
-static String _7, _6, _5, _4, _3, _2, _1, _0;
+static String _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -18,11 +18,13 @@ __attribute__((constructor)) static void _file_init_(void);
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-_Noreturn static void _path_error(const char * operation, String path, int error);
-
 static String _trimmed(String path);
 
-static struct stat _stat(const char * operation, String path);
+static int _mode(Path p);
+
+static struct stat _stat(String operation, String path);
+
+static File _open(String operation, Path path, const char * mode);
 
 static int _descends(String path);
 
@@ -33,6 +35,8 @@ static int _walk_next(Iter iter, Var * out);
 static void _walk(Path directory, int depth, int hidden, Array paths);
 
 static int _class_match(const char * * pattern, unsigned char value);
+
+static int _hidden(const char * text, const char * origin);
 
 static int _glob_match(const char * pattern, const char * text, const char * origin);
 
@@ -75,34 +79,26 @@ __attribute__((constructor)) static void _file_init_(void){
   _2 = String_new(".");
   _3 = String_new("..");
   _4 = String_new("**");
-  _5 = String_new("/.");
-  _6 = String_new("/tmp");
-  _7 = String_new("x2c-XXXXXX");
+  _5 = String_new("Path.absolute");
+  _6 = String_new("Path.size");
+  _7 = String_new("Path.modified_time");
+  _8 = String_new("Path.list_dir");
+  _9 = String_new("/.");
+  _10 = String_new("Path.make_dirs");
+  _11 = String_new("Path.remove_file");
+  _12 = String_new("Path.copy_file");
+  _13 = String_new("Path.copy_tree");
+  _14 = String_new("Path.move_to");
+  _15 = String_new("Path.symlink_to");
+  _16 = String_new("Path.read_text");
+  _17 = String_new("Path.write_text");
+  _18 = String_new("/tmp");
+  _19 = String_new("x2c-XXXXXX");
+  _20 = String_new("Path.temp_dir");
 }
 
 Path Path_new(const char * argument0){
   return(Path) String_new(argument0);
-}
-
-Var Symbol_var(Symbol);
-
-Var String_var(String);
-
-Var int_var(int);
-
-_Noreturn static void _path_error(const char * operation, String path, int error){
-  String name = String_new(operation);
-  if(error == ENOENT){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/path.x",.function = "_path_error",.line = 40};
-    x2c_error_raise_n(& _x2c_error_site_0, 31862161386376, 3, Symbol_var(34096809266140), String_var(name), Symbol_var(1051920), String_var(path), Symbol_var(11703198), int_var(error));
-    __builtin_unreachable();
-  }
-  {
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/path.x",.function = "_path_error",.line = 42};
-    x2c_error_raise_n(& _x2c_error_site_1, 20399393368, 3, Symbol_var(34096809266140), String_var(name), Symbol_var(1051920), String_var(path), Symbol_var(11703198), int_var(error));
-    __builtin_unreachable();
-  }
-
 }
 
 int String_len(String);
@@ -120,6 +116,8 @@ int String_truth(String);
 int String_startswith(String, String);
 
 int String_endswith(String, String);
+
+Var String_var(String);
 
 Path Path_join(Path base, Path name){
   if(! _init_guard_) _file_init_();
@@ -165,6 +163,8 @@ String Path_stem(Path path){
 
 String String_new(const char *);
 
+void File_path_error(Var, String, int);
+
 List String_split(String, String);
 
 int List_try_next(List, List *, Var *);
@@ -176,7 +176,7 @@ Path Path_absolute(Path path){
   char buffer[PATH_MAX];
   if(realpath(path, buffer)) return String_new(buffer);
   if(! String_startswith(path, _1)){
-    if(! getcwd(buffer, sizeof(buffer))) _path_error("Path.absolute", path, errno);
+    if(! getcwd(buffer, sizeof(buffer))) File_path_error(String_var(_5), path, errno);
     path = Path_join(String_new(buffer), path);
   }
   Path result = _1;
@@ -203,37 +203,47 @@ Path Path_absolute(Path path){
   return result;
 }
 
-int Path_exists(Path path){
+static int _mode(Path p){
   struct stat info;
-  return String_truth(path) && stat(path, & info) == 0;
+  return String_truth(p) && stat(p, & info) == 0 ? info.st_mode : 0;
 }
 
-int Path_is_dir(Path path){
-  struct stat info;
-  return String_truth(path) && stat(path, & info) == 0 && S_ISDIR(info.st_mode);
+int Path_exists(Path p){
+  return _mode(p) != 0;
 }
 
-int Path_is_file(Path path){
-  struct stat info;
-  return String_truth(path) && stat(path, & info) == 0 && S_ISREG(info.st_mode);
+int Path_is_dir(Path p){
+  return S_ISDIR(_mode(p));
+}
+
+int Path_is_file(Path p){
+  return S_ISREG(_mode(p));
 }
 
 int Path_is_executable(Path path){
   return String_truth(path) && access(path, X_OK) == 0;
 }
 
-static struct stat _stat(const char * operation, String path){
+static struct stat _stat(String operation, String path){
   struct stat info;
-  if(stat(path, & info)) _path_error(operation, path, errno);
+  if(stat(path, & info)) File_path_error(String_var(operation), path, errno);
   return info;
 }
 
+static File _open(String operation, Path path, const char * mode){
+  File file = fopen(path, mode);
+  if(! file) File_path_error(String_var(operation), path, errno);
+  return file;
+}
+
 long Path_size(Path path){
-  return(long) _stat("Path.size", path).st_size;
+  if(! _init_guard_) _file_init_();
+  return(long) _stat(_6, path).st_size;
 }
 
 double Path_modified_time(Path path){
-  struct stat info = _stat("Path.modified_time", path);
+  if(! _init_guard_) _file_init_();
+  struct stat info = _stat(_7, path);
 #ifdef __APPLE__
   return info.st_mtimespec.tv_sec + info.st_mtimespec.tv_nsec / 1e9;
 #else
@@ -249,8 +259,9 @@ List Array_list_free(Array);
 Array Array_sort(Array);
 
 List Path_list_dir(Path path){
+  if(! _init_guard_) _file_init_();
   DIR * directory = opendir(path);
-  if(! directory) _path_error("Path.list_dir", path, errno);
+  if(! directory) File_path_error(String_var(_8), path, errno);
   Array names = Array_new();
   struct dirent * entry;
   while((entry = readdir(directory))) if(strcmp(entry -> d_name, ".") && strcmp(entry -> d_name, "..")) Array_push(names, String_var(String_new(entry -> d_name)));
@@ -287,7 +298,7 @@ Var Array_take_last(Array);
 
 static int _walk_next(Iter iter, Var * out){
   Array pending = Var_array(iter -> state);
-  if(! Array_truth(pending) || ! Array_len(pending)) return 0;
+  if(! Array_len(pending)) return 0;
   String path = Var_string(Array_take_last(pending));
   if(_descends(path)) _push_children(pending, path);
   * out = String_var(path);
@@ -347,16 +358,20 @@ static int _class_match(const char * * pattern, unsigned char value){
   return negate ? ! matched : matched;
 }
 
+static int _hidden(const char * text, const char * origin){
+  return * text == '.' &&(text == origin || text[- 1] == '/');
+}
+
 static int _glob_match(const char * pattern, const char * text, const char * origin){
   if(! * pattern) return ! * text;
-  if(* text == '.' &&(text == origin || text[- 1] == '/') && * pattern != '.' && !(pattern[0] == '\\' && pattern[1] == '.')) return 0;
+  if(_hidden(text, origin) && * pattern != '.' && !(pattern[0] == '\\' && pattern[1] == '.') && strncmp(pattern, "**/", 3)) return 0;
   if(pattern[0] == '*' && pattern[1] == '*'){
     const char * rest = pattern + 2;
     int components = * rest == '/';
     while(components && rest[1] == '*' && rest[2] == '*' && rest[3] == '/') rest += 3;
     for(const char * ch = text; ;  ch ++){
       if((! components || ch == text || ch[- 1] == '/') && _glob_match(rest + components, ch, origin)) return 1;
-      if(! * ch) return 0;
+      if(! * ch || _hidden(ch, origin)) return 0;
     }
 
   }
@@ -411,7 +426,7 @@ List Path_glob(Path pattern){
   }
   Path root = String_truth(base) ? base : _2;
   Array paths = Array_new(), matches = Array_new();
-  if(Path_is_dir(root)) _walk(root, recursive ? - 1 : depth, String_startswith(pattern, _2) || String_contains(pattern, _5), paths);
+  if(Path_is_dir(root)) _walk(root, recursive ? - 1 : depth, String_startswith(pattern, _2) || String_contains(pattern, _9), paths);
   {
     String path;
     Array _x2c_macro_object_4 = paths;
@@ -430,22 +445,19 @@ List Path_glob(Path pattern){
   return Array_list_free(Array_sort(matches));
 }
 
-void Path_make_dirs(Path path){
-  char buffer[PATH_MAX];
-  if(String_len(path) >= sizeof(buffer)) _path_error("Path.make_dirs", path, ENAMETOOLONG);
-  strcpy(buffer, path);
-  for(char * ch = buffer + 1;  * ch;  ch ++){
-    if(* ch != '/') continue;
-    * ch = 0;
-    if(mkdir(buffer, 0777) && errno != EEXIST) _path_error("Path.make_dirs", String_new(buffer), errno);
-    * ch = '/';
-  }
-  if(mkdir(buffer, 0777) && errno != EEXIST) _path_error("Path.make_dirs", path, errno);
-  if(! Path_is_dir(path)) _path_error("Path.make_dirs", path, ENOTDIR);
+void Path_make_dirs(Path p){
+  if(! _init_guard_) _file_init_();
+  if(Path_is_dir(p)) return;
+  Path parent = Path_dirname(p);
+  if(! String_equal(parent, p)) Path_make_dirs(parent);
+  if(! mkdir(p, 0777)) return;
+  int error = errno;
+  if(error != EEXIST || ! Path_is_dir(p)) File_path_error(String_var(_10), p, error == EEXIST ? ENOTDIR : error);
 }
 
 void Path_remove_file(Path path){
-  if(unlink(path) && errno != ENOENT) _path_error("Path.remove_file", path, errno);
+  if(! _init_guard_) _file_init_();
+  if(unlink(path) && errno != ENOENT) File_path_error(String_var(_11), path, errno);
 }
 
 Context Context_open_isolated(void);
@@ -494,25 +506,28 @@ static void _remove_tree(Path path, String * failed, int * failure){
   else if(unlink(path) && ! String_truth(* failed)) * failed = path, * failure = errno;
 }
 
+Var Symbol_var(Symbol);
+
+Var int_var(int);
+
 void Path_remove_tree(Path path){
   if(! _init_guard_) _file_init_();
   String failed = NULL;
   int failure = 0;
   _remove_tree(path, & failed, & failure);
   if(String_truth(failed)){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/path.x",.function = "Path_remove_tree",.line = 407};
-    x2c_error_raise_n(& _x2c_error_site_2, 20399393368, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Path.remove_tree")), NULL))), Symbol_var(1051920), String_var(failed), Symbol_var(11703198), int_var(failure));
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/path.x",.function = "Path_remove_tree",.line = 399};
+    x2c_error_raise_n(& _x2c_error_site_0, 20399393368, 3, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Path.remove_tree")), NULL))), Symbol_var(1051920), String_var(failed), Symbol_var(11703198), int_var(failure));
     __builtin_unreachable();
   }
 
 }
 
-File File_open(const char *, const char *);
-
 int File_copy_to(File, File, size_t *);
 
 void Path_copy_file(Path source, Path target){
-  File input = File_open(source, "rb");
+  if(! _init_guard_) _file_init_();
+  File input = _open(_12, source, "rb");
   {
   _x2c_defer_env_2 _x2c_defer_env_5 = {._x2c_defer_capture_2 =(const void *) & input};
 
@@ -522,7 +537,7 @@ void Path_copy_file(Path source, Path target){
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
-    File output = File_open(target, "wb");
+    File output = _open(_12, target, "wb");
     {
   _x2c_defer_env_1 _x2c_defer_env_6 = {._x2c_defer_capture_1 =(const void *) & output};
 
@@ -533,9 +548,9 @@ void Path_copy_file(Path source, Path target){
   x2c_cleanup_push(&_x2c_defer_record_2);
   {
       File_copy_to(input, output, NULL);
-      if(File_flush(output)) _path_error("Path.copy_file", target, errno);
-      struct stat info = _stat("Path.copy_file", source);
-      if(chmod(target, info.st_mode & 07777)) _path_error("Path.copy_file", target, errno);
+      if(File_flush(output)) File_path_error(String_var(_12), target, errno);
+      struct stat info = _stat(_12, source);
+      if(chmod(target, info.st_mode & 07777)) File_path_error(String_var(_12), target, errno);
     }
     x2c_cleanup_leave(& _x2c_defer_record_2);
 
@@ -549,13 +564,13 @@ void Path_copy_file(Path source, Path target){
 void Path_copy_tree(Path source, Path target){
   if(! _init_guard_) _file_init_();
   struct stat info;
-  if(lstat(source, & info)) _path_error("Path.copy_tree", source, errno);
+  if(lstat(source, & info)) File_path_error(String_var(_13), source, errno);
   if(S_ISLNK(info.st_mode)){
     char buffer[PATH_MAX];
     ssize_t length = readlink(source, buffer, sizeof(buffer) - 1);
-    if(length < 0) _path_error("Path.copy_tree", source, errno);
+    if(length < 0) File_path_error(String_var(_13), source, errno);
     buffer[length] = 0;
-    if(symlink(buffer, target)) _path_error("Path.copy_tree", target, errno);
+    if(symlink(buffer, target)) File_path_error(String_var(_13), target, errno);
   }
   else if(S_ISDIR(info.st_mode)){
     Path_make_dirs(target);
@@ -570,7 +585,7 @@ void Path_copy_tree(Path source, Path target){
       }
 
     }
-    if(chmod(target, info.st_mode & 07777)) _path_error("Path.copy_tree", target, errno);
+    if(chmod(target, info.st_mode & 07777)) File_path_error(String_var(_13), target, errno);
   }
   else Path_copy_file(source, target);
 }
@@ -578,25 +593,28 @@ void Path_copy_tree(Path source, Path target){
 void Path_move_to(Path source, Path target){
   if(! _init_guard_) _file_init_();
   if(! rename(source, target)) return;
-  if(errno != EXDEV) _path_error("Path.move_to", source, errno);
+  if(errno != EXDEV) File_path_error(String_var(_14), source, errno);
   Path_copy_tree(source, target);
   Path_remove_tree(source);
 }
 
 void Path_symlink_to(Path link, Path target){
-  if(symlink(target, link)) _path_error("Path.symlink_to", link, errno);
+  if(! _init_guard_) _file_init_();
+  if(symlink(target, link)) File_path_error(String_var(_15), link, errno);
 }
 
 String File_string_close(File);
 
 String Path_read_text(Path path){
-  return File_string_close(File_open(path, "r"));
+  if(! _init_guard_) _file_init_();
+  return File_string_close(_open(_16, path, "r"));
 }
 
 int File_write_all(File, const void *, size_t);
 
 void Path_write_text(Path path, String text){
-  File output = File_open(path, "w");
+  if(! _init_guard_) _file_init_();
+  File output = _open(_17, path, "w");
   {
   _x2c_defer_env_3 _x2c_defer_env_7 = {._x2c_defer_capture_3 =(const void *) & output};
 
@@ -607,23 +625,23 @@ void Path_write_text(Path path, String text){
   x2c_cleanup_push(&_x2c_defer_record_3);
   {
     File_write_all(output, text, String_len(text));
-    if(File_flush(output)) _path_error("Path.write_text", path, errno);
+    if(File_flush(output)) File_path_error(String_var(_17), path, errno);
   }
   x2c_cleanup_leave(& _x2c_defer_record_3);
 
 }
 }
 
+void * Scope_memdup(const void *, size_t);
+
 Path Path_temp_dir(void){
   if(! _init_guard_) _file_init_();
   const char * parent = getenv("TMPDIR");
-  Path root = parent && * parent ? String_new(parent) : _6;
-  String pattern = Path_join(root, _7);
-  char buffer[PATH_MAX];
-  if(String_len(pattern) >= sizeof(buffer)) _path_error("Path.temp_dir", root, ENAMETOOLONG);
-  strcpy(buffer, pattern);
-  if(! mkdtemp(buffer)) _path_error("Path.temp_dir", root, errno);
-  return String_new(buffer);
+  Path root = parent && * parent ? String_new(parent) : _18;
+  String pattern = Path_join(root, _19);
+  char * created = Scope_memdup(pattern, String_len(pattern) + 1);
+  if(! mkdtemp(created)) File_path_error(String_var(_20), root, errno);
+  return String_new(created);
 }
 
 void Context_cleanup(Context);

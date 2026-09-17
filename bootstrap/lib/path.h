@@ -22,11 +22,11 @@ String Path_stem(Path path);
 
 Path Path_absolute(Path path);
 
-int Path_exists(Path path);
+int Path_exists(Path p);
 
-int Path_is_dir(Path path);
+int Path_is_dir(Path p);
 
-int Path_is_file(Path path);
+int Path_is_file(Path p);
 
 int Path_is_executable(Path path);
 
@@ -42,7 +42,7 @@ int Path_glob_match(Path pattern, Path path);
 
 List Path_glob(Path pattern);
 
-void Path_make_dirs(Path path);
+void Path_make_dirs(Path p);
 
 void Path_remove_file(Path path);
 

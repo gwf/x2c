@@ -55,7 +55,7 @@ RegexMatch Regex_match_from(Regex regex, String subject, int offset);
 
 RegexMatch Regex_match(Regex regex, String subject);
 
-List Regex_find_all(Regex regex, String subject);
+List Regex_find_all(Regex r, String subject);
 
 List Regex_split(Regex regex, String subject);
 
