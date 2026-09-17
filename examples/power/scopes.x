@@ -30,17 +30,13 @@ size_t before = Scope.stats().live_allocations;
 // Reclaim working storage regularly in a long-running survey.
 size_t total = 0;
 // Each day's file list lives until that survey finishes.
-while (wait_for_day()) {
-  Scope.retain();
-  defer Scope.release();
+while (wait_for_day()) $scope() {
   assert(Scope.stats().live_allocations == before);
   Array files = survey_files();
   size_t daily = Scope.stats().live_allocations;
 
   // Working data is reclaimed after every file.
-  foreach (String path, files) {
-    Scope.retain();
-    defer Scope.release();
+  foreach (String path, files) $scope() {
     assert(Scope.stats().live_allocations == daily);
     Map findings = inspect_file(path);
     save_findings(path, findings);

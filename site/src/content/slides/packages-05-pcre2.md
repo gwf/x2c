@@ -14,15 +14,12 @@ links:
 ```x2c,ignore
 import "pcre2" with Regexp, RegexpMatch;
 
-Regexp entry = Regexp.compile(
-  %"^(?<time>\\d\\d:\\d\\d:\\d\\d) "
-    + %"(?<program>\\w+)\\[\\d+\\]: (?<text>.*)$$",
+Regexp entry = $auto(Regexp.compile(
+  %"^(?<time>\\d\\d:\\d\\d:\\d\\d) (?<program>\\w+)\\[\\d+\\]: (?<text>.*)$$",
   0
-);
-defer entry.free();
-Regexp fields = Regexp.compile(%"\\s*\\|\\s*", 0);
-defer fields.free();
-Map counts = %{};
+));
+Regexp fields = $auto(Regexp.compile("\\s*\\|\\s*", 0));
+Map counts = {};
 
 foreach(String line, lines) {
   RegexpMatch found = entry.match(line);

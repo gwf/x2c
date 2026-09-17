@@ -13,7 +13,7 @@ Set Set.new(List keys) => keys.foldl(%{},
   %!(Map set, Var key) => set.update_n(1, key, 1));
 Set Set.add(Set left, Set right) => left.copy().merge(right);
 Set Set.mul(Set left, Set right) => Set.new(left.keys()
-  .filter(%!(Var key) => right.contains(key)));
+  .filter(%!(Var key) => key in right));
 
 // Connect add and mul to the + and * operators.
 protocol Map(T) { T T.add(T, T); T T.mul(T, T); }

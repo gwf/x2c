@@ -12,9 +12,9 @@ int main(int argc, char **argv) {
   Array a = ["hello", "world", 42];
   String s = "this is a string";
 
-  printf("Map m: %s\n", Map.repr(m));
-  printf("List l: %s\n", List.repr(l));
-  printf("Array a: %s\n", Array.repr(a));
-  printf("String s: %s\n", String.repr(s));
+  printf("Map m: %s\n", m.repr());
+  printf("List l: %s\n", l.repr());
+  printf("Array a: %s\n", a.repr());
+  printf("String s: %s\n", s.repr());
   return 0;
 }

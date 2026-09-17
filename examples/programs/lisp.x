@@ -3,15 +3,14 @@
 #include <unistd.h>
 
 static void _print_error(Symbol code, List detail) {
-  List error = cons(Symbol.var(code), detail);
+  List error = cons(code, detail);
   Stderr.printf("error: %s\n", error.repr());
 }
 
 static int _eval_input(
   Lisp lisp, Var form, String source, int is_form, int print) {
   try {
-    Var result = is_form ? Lisp.eval(lisp, form)
-                         : Lisp.eval_string(lisp, source);
+    Var result = is_form ? lisp.eval(form) : lisp.eval_string(source);
     if (print) Stdout.printf("%s\n", result.repr());
   }
   catch %(?code *detail): {
@@ -40,7 +39,7 @@ static int _eval_file(Lisp lisp, const char *path, int print) {
 }
 
 static int _repl(Lisp lisp) {
-  Buffer source = Buffer.new(0);
+  Buffer source = $auto(Buffer.new(0));
   unsigned cursor = 0;
   int failed = 0, incomplete = 0, interactive = isatty(Stdin.fileno());
   while (1) {
@@ -67,7 +66,7 @@ static int _repl(Lisp lisp) {
       Var form = void;
       Symbol status = 0;
       try {
-        status = Lisp.read(lisp, source, &cursor, &form);
+        status = lisp.read(source, &cursor, &form);
       }
       catch %(incomplete *): status = <incomplete>;
       catch %(?code *detail): {
@@ -92,7 +91,6 @@ static int _repl(Lisp lisp) {
       break;
     }
   }
-  source.free();
   return !failed;
 }
 
@@ -120,8 +118,7 @@ static const char *_default_init(char *buffer, size_t size) {
 }
 
 int main(int argc, char **argv) {
-  Lisp lisp = Lisp.kernel();
-  defer Lisp.destroy(lisp);
+  Lisp lisp = $auto(Lisp.kernel());
   const char *init = NULL;
   char probed[512];
   int arg = 1;
@@ -146,7 +143,7 @@ int main(int argc, char **argv) {
   else if (remaining == 1 && !strcmp(argv[arg], "--selftest"))
     ok = _selftest(lisp);
   else if (remaining == 2 && !strcmp(argv[arg], "-e"))
-    ok = _eval_text(lisp, String.new(argv[arg + 1]), 1);
+    ok = _eval_text(lisp, argv[arg + 1], 1);
   else if (remaining == 1) ok = _eval_file(lisp, argv[arg], 1);
   else {
     _usage(argv[0]);

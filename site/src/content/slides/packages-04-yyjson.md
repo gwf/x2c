@@ -14,27 +14,21 @@ links:
 ```x2c,ignore
 import "yyjson" as json;
 
-Scope.retain();
-defer Scope.release();
-Map config = json.Json.read_file(
-  %"examples/services.json"
-);
-Array services = config[%"services"];
-Array unhealthy = %[];
+$scope() {
+  Map config = json.Json.read_file("examples/services.json");
+  Array services = config["services"];
+  Array unhealthy = [];
 
-foreach(Map service, services) {
-  String mark = service[%"healthy"].truth()
-    ? %"ok" : %"DOWN";
-  printf("%s", %"  ${service[%"name"]}:"
-    + %"${service[%"port"]} $mark\n");
-  if (!service[%"healthy"].truth())
-    unhealthy.push(service[%"name"]);
+  foreach(Map service, services) {
+    String mark = service["healthy"].truth() ? "ok" : "DOWN";
+    printf("%s", %"  ${service["name"]}:${service["port"]} $mark\n");
+    if (!service["healthy"].truth())
+      unhealthy.push(service["name"]);
+  }
+
+  Var report = unhealthy;
+  json.Json.write_file(report, "/tmp/unhealthy.json");
 }
-
-Var report = unhealthy;
-json.Json.write_file(
-  report, %"/tmp/unhealthy.json"
-);
 ```
 
 Read a JSON file into ordinary Maps and Arrays, then use the same

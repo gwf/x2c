@@ -12,12 +12,12 @@ static Func add_to(int bias) {
 }
 
 int main(void) {
-  int no_arg = Var_integer((%!() => 42)());
-  int bare_identity = Var_integer((%!(x) => x.int())(7));
-  int bare_first = Var_integer((%!(a, b) => a.int())(1, 2));
+  int no_arg = (%!() => 42)();
+  int bare_identity = (%!(x) => x.int())(7);
+  int bare_first = (%!(a, b) => a.int())(1, 2);
 
-  int typed_identity = Var_integer((%!(int x) => x)(41));
-  int typed_first = Var_integer((%!(int a, int b) => a)(1, 2));
+  int typed_identity = (%!(int x) => x)(41);
+  int typed_first = (%!(int a, int b) => a)(1, 2);
   Func add_three = add_to(3);
 
   printf("no-arg: %d\n", no_arg);

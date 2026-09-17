@@ -14,20 +14,14 @@ links:
 ```x2c,ignore
 import "libuv" with UvLoop, UvProcess;
 
-UvLoop loop = UvLoop.new();
-defer loop.free();
-UvProcess normalized = loop.spawn(
-  %("/usr/bin/tr" "[:lower:]" "[:upper:]")
-);
-defer normalized.free();
-normalized.write(%"alpha\nbeta\ngamma\n")
-  .close_stdin();
+UvLoop loop = $auto(UvLoop.new());
 
-UvProcess counted = loop.spawn(
-  %("/usr/bin/wc" "-l")
-);
-defer counted.free();
-counted.write(%"alpha\nbeta\ngamma\n").close_stdin();
+UvProcess normalized =
+  $auto(loop.spawn(%("/usr/bin/tr" "[:lower:]" "[:upper:]")));
+normalized.write("alpha\nbeta\ngamma\n").close_stdin();
+
+UvProcess counted = $auto(loop.spawn(%("/usr/bin/wc" "-l")));
+counted.write("alpha\nbeta\ngamma\n").close_stdin();
 loop.run(UV_RUN_DEFAULT);
 
 printf("normalized:\n");

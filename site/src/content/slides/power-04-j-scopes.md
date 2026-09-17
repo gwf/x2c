@@ -37,17 +37,13 @@ tab: scopes
 // Reclaim working storage regularly in a long-running survey.
 size_t total = 0;
 // Each day's file list lives until that survey finishes.
-while (wait_for_day()) {
-  Scope.retain();
-  defer Scope.release();
+while (wait_for_day()) $scope() {
 ~  assert(Scope.stats().live_allocations == before);
   Array files = survey_files();
 ~  size_t daily = Scope.stats().live_allocations;
 
   // Working data is reclaimed after every file.
-  foreach (String path, files) {
-    Scope.retain();
-    defer Scope.release();
+  foreach (String path, files) $scope() {
 ~    assert(Scope.stats().live_allocations == daily);
     Map findings = inspect_file(path);
     save_findings(path, findings);
@@ -66,8 +62,10 @@ printf("processed: %zu files\n", total);
 ~}
 ```
 
-The `Scope` module groups allocations with `Scope.retain` and reclaims
-them together with `Scope.release`. `defer` guarantees cleanup on normal
-exit, return, or exception. Each file's working data is freed before the
-day's file list. No individual `free` calls are needed; application
-helpers save results before cleanup.
+The `Scope` module groups allocations by lifetime. `$scope()` retains one
+region around the statement it decorates and releases it on every exit,
+including a `return` or an `Error` crossing the release; it is
+`Scope.retain` and a deferred `Scope.release` in one construct. Decorating
+a loop body gives one region per iteration, so each file's working data is
+freed before the day's file list. No individual `free` calls are needed;
+application helpers save results before cleanup.
