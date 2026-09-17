@@ -148,8 +148,9 @@ int x2c_match_try_capture(
     Its first admissible pattern permanently binds the site; direct C callers
     must not reuse one site for different patterns. `site` must be
     zero-initialized static storage and `pattern` must contain only values that
-    remain live through `Match` shutdown. Returns 1 only after atomically
-    committing `captures`; invalid arguments, malformed or inadmissible
+    remain live through `Match` shutdown. A pattern the site cannot retain
+    takes the ordinary runtime route, with the same result. Returns 1 only
+    after atomically committing `captures`; invalid arguments, malformed
     patterns, misses, and machine errors return 0 without changing it.
     Raises: `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
     publishing or matching.
@@ -157,10 +158,11 @@ int x2c_match_try_capture(
 int x2c_match_site_try_capture(
   MatchCaptureSite *site, List input, Var pattern,
   MatchCaptureBuffer *captures) {
-  if (!site || !captures) return 0;
-  MatchPlan plan = __atomic_load_n(&site.plan, __ATOMIC_ACQUIRE);
-  if (!plan) plan = _capture_site_publish(site, pattern);
-  if (!plan) return 0;
+  if (!captures) return 0;
+  MatchPlan plan = site ? __atomic_load_n(&site.plan, __ATOMIC_ACQUIRE) : NULL;
+  if (site && !plan) plan = _capture_site_publish(site, pattern);
+  // a pattern the site cannot retain takes the ordinary runtime route
+  if (!plan) return x2c_match_try_capture(input, pattern, captures);
   if (plan.status == MACHINE_MALFORMED) return 0;
   MatchCaptureLayout layout = plan.layout;
   if (_plan_prepared(plan, "match") &&
@@ -1867,13 +1869,15 @@ int MatchPlan.search_replace(
 
 // pattern admissibility for compiler-owned sites
 
-/* A site retains its prepared program for the life of the process, so it may
-   only bind a pattern whose values outlive it. Symbols and narrow immediates
-   have value lifetime. Canonical Lists and long Atoms are admitted by
-   identity. A String is admitted only when `String.is_permanent` proves the
-   outermost canonical pool owns it. Wide boxes, pointers, references, and
-   transient Strings are never admitted; those patterns prepare a transient
-   plan owned by their lease instead. */
+/* A site retains its prepared program for the life of the process, and the
+   plan cache keys an entry by the pattern's raw identity, so both may only
+   admit a pattern whose values outlive every later call. Symbols and narrow
+   immediates have value lifetime. A canonical `List`, long `Atom`, or
+   `String` is admitted only when the outermost canonical pool owns it: a
+   nested pool reuses the storage of its released cells, so an identity that
+   belongs to one would let a different pattern answer at the same address.
+   Wide boxes, pointers, and references are never admitted; those patterns
+   prepare a transient plan owned by their lease instead. */
 static int _pattern_admissible(Var value, int depth) {
   if (depth >= 128) return 0;
   Symbol kind = value.kind();
@@ -1881,9 +1885,11 @@ static int _pattern_admissible(Var value, int depth) {
     case <symbol>: return 1;
     case <pointer>: case <reference>: return 0;
     case <object>: {
-      if (value is <lsym>) return 1;
+      if (value is <lsym>)
+        return String.is_permanent((String) value.pointer());
       if (value is <string>) return String.is_permanent(value);
       if (value is not <list>) return 0;
+      if (!x2c_pool_values_is_permanent(value)) return 0;
       // kind and tag prove the raw payload is a List cell
       foreach (Var part, (List) value.pointer())
         if (!_pattern_admissible(part, depth + 1)) return 0;

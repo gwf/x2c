@@ -401,6 +401,51 @@ static void cache_product_pipeline_matches_oracle(void) {
 }
 
 
+/* `memory.md` recommends the pool_retain/pool_release bracket, so a plan
+   the cache keeps must outlive it. A pattern built inside the bracket is
+   owned by the nested pool, whose cells the next round reuses at the same
+   address, so admitting one would let it answer for a different pattern. */
+static void cache_rejects_a_pattern_a_nested_pool_owns(void) {
+  MatchCache cache = MatchCache.new(16);
+  MatchLease lease;
+  int misses = 0;
+  for (int i = 0; i < 200; i++) {
+    String.pool_retain_named("match-cache-round");
+    Var counter = i;
+    Var pattern = %(round $counter ?value);
+    EXPECT_INT_EQ(_acquire(cache, pattern, &lease), MACHINE_PREPARED);
+    // a bypassed pattern owns its plan through the lease, never an entry
+    EXPECT_TRUE(lease.generation == 0);
+    EXPECT_NOT_NULL(lease.transient_plan);
+    MatchLease.release(&lease);
+    List bindings = %(sentinel);
+    if (!_try_match(cache, %(round $counter ok), pattern, &bindings) ||
+        bindings.assoc(<?value>) != <ok>)
+      misses++;
+    String.pool_release();
+  }
+  EXPECT_INT_EQ(misses, 0);
+  cache.dispose();
+}
+
+
+/* The same bracket through the public operation and the default cache. */
+static void default_cache_answers_inside_a_value_pool_bracket(void) {
+  int misses = 0;
+  for (int i = 0; i < 200; i++) {
+    String.pool_retain();
+    Var counter = i;
+    List bindings = %(sentinel);
+    if (!%(round $counter ok).try_match(%(round $counter ?value),
+                                        &bindings) ||
+        bindings.assoc(<?value>) != <ok>)
+      misses++;
+    String.pool_release();
+  }
+  EXPECT_INT_EQ(misses, 0);
+}
+
+
 /* A pattern held in a variable is not a source literal, so the compiler
    leaves the call on the per-call route and the default cache answers it. */
 static void default_cache_recreates_without_new_shutdown_ownership(void) {
@@ -464,6 +509,8 @@ $(import "test-macros.xmacro")
 void match_cache_suite(void) {
   $test.run(cache_lifecycle_failures_transfer);
   $test.run(cache_admission_and_bypass);
+  $test.run(cache_rejects_a_pattern_a_nested_pool_owns);
+  $test.run(default_cache_answers_inside_a_value_pool_bracket);
   $test.run(cache_eviction_is_deterministic);
   $test.run(cache_pins_protect_active_leases);
   $test.run(cache_scalar_lease_survives_eviction);
