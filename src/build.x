@@ -210,7 +210,9 @@ Build CliRequest.prepare(CliRequest c) {
   int compilable = 0, input_count = 0;
   foreach (String input, c.inputs) {
     input_count++;
-    build_check_input(input);
+    // A dry run runs nothing and reads nothing, and a planned target's
+    // archive exists only after the build it is printing would run.
+    if (!c.dry_run) build_check_input(input);
     if (!(x2c_source_file(input) || input.endswith(".c") ||
           input.endswith(".o") || input.endswith(".a")))
       x2c_driver_error(%"unsupported build input: $input");
