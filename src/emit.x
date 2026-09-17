@@ -1030,6 +1030,82 @@ static List Emitter._preproc(Emitter emitter, List ast) {
   return %( $out );
 }
 
+/* Canonical AST nesting already states how operators group, but C text
+   regroups by precedence, so emission is the one place that restores the
+   nesting with parentheses. Every producer therefore builds operator nodes by
+   structure alone and none of them tracks grouping.
+
+   Larger levels bind more tightly, matching the C grammar: member access with
+   postfix, then unary and cast, the binary levels, the conditional, and
+   assignment. Level 0 means the emitter has no grouping rule for the
+   operator, which leaves its text exactly as the other cases build it. */
+static int _operator_precedence(Symbol operator) {
+  switch (operator) {
+    case <.>:    case <"->">:                   return 15;
+    case <*>:    case </>:      case <%>:       return 13;
+    case <+>:    case <->:                      return 12;
+    case <"<<">: case <">>">:                   return 11;
+    case <"<">:  case <">">:
+    case <"<=">: case <">=">:                   return 10;
+    case <==>:   case <!=>:                     return 9;
+    case <&>:                                   return 8;
+    case <^>:                                   return 7;
+    case <|>:                                   return 6;
+    case <&&>:                                  return 5;
+    case <||>:                                  return 4;
+  }
+  return operator.is_assignment_op() ? 2 : 0;
+}
+
+enum {
+  EMIT_CONDITIONAL = 3,
+  EMIT_UNARY       = 14,
+  EMIT_POSTFIX     = 15,
+  EMIT_PRIMARY     = 16
+};
+
+/* The precedence of the C expression a node emits. Names, literals, calls,
+   compound literals, statement expressions, and `parens` all emit text that
+   already binds as tightly as a primary expression, so the default needs no
+   grouping and adds no parentheses that C does not require. */
+static int _emitted_precedence(Var node) {
+  match (node) {
+    case %(at ? ?inner):        return _emitted_precedence(inner);
+    case %(expr ? ?content):    return _emitted_precedence(content);
+    case %(op ?operator ? ?): {
+      int level = _operator_precedence(operator);
+      return level ? level : EMIT_PRIMARY;
+    }
+    case %(op ? ?):             return EMIT_UNARY;
+    case %(op ? ? ? ?):         return EMIT_CONDITIONAL;
+    case %((!or cast sizeof) *):
+      return EMIT_UNARY;
+    case %(postfix ? ?):        return EMIT_POSTFIX;
+    case %(commas *):           return 1;
+  }
+  return EMIT_PRIMARY;
+}
+
+// The least tightly binding operand each side of a binary form accepts.
+static int _left_operand_level(Symbol operator) {
+  int level = _operator_precedence(operator);
+  if (!level) return 0;
+  return operator.is_assignment_op() ? level + 1 : level;
+}
+
+static int _right_operand_level(Symbol operator) {
+  int level = _operator_precedence(operator);
+  // A member name is not an expression, so it never takes parentheses.
+  if (!level || operator == <.> || operator == <"->">) return 0;
+  return operator.is_assignment_op() ? level : level + 1;
+}
+
+static List Emitter._operand(Emitter e, Var node, int level) {
+  List code = e._emit(%($node));
+  if (_emitted_precedence(node) < level) return _parens(code);
+  return code;
+}
+
 /* Generic sequence emission visits sibling nodes from left to right because
    generated names and origins change during the walk.
    Specialized forms choose their required construction order; for example,
@@ -1041,18 +1117,22 @@ static List Emitter._preproc(Emitter emitter, List ast) {
 /* A left-leaning chain nests one (expr (op ...)) level per source term;
    walk the spine and build the token stream iteratively, folding from the
    right so each emitted piece is copied once. A separate function keeps the
-   spine arrays out of _emit's frame on every other recursion path. */
+   spine arrays out of _emit's frame on every other recursion path. The walk
+   stops where the nested operator needs parentheses, leaving that operand to
+   the ordinary recursion. */
 static List Emitter._op_spine(Emitter e, Var operator, Var left, Var right) {
   Array operators = [];
   Array rights = [];
   defer operators.free();
   defer rights.free();
   Var op_item = operator, left_item = left, right_item = right;
+  int level = 0;
   for (;;) {
     operators.push(op_item);
     rights.push(right_item);
+    level = _left_operand_level(op_item);
     int deeper = 0;
-    if (left_item is <list>)
+    if (_emitted_precedence(left_item) >= level)
       match (left_item)
         case %(expr ? (op ?next_operator ?next_left ?next_right)): {
           op_item = next_operator;
@@ -1062,11 +1142,12 @@ static List Emitter._op_spine(Emitter e, Var operator, Var left, Var right) {
         }
     if (!deeper) break;
   }
-  List result = e._emit(%($left_item));
+  List result = e._operand(left_item, level);
   Array pieces = $auto([]);
   for (int i = (int) operators.len() - 1; i >= 0; i--) {
+    Symbol binary = operators[i];
     pieces.push(operators[i]);
-    pieces.push(e._emit(%(${rights[i]})));
+    pieces.push(e._operand(rights[i], _right_operand_level(binary)));
   }
   List tail = NULL;
   for (int i = (int) pieces.len() - 1; i >= 0; i--) {
@@ -1165,13 +1246,13 @@ static List Emitter._emit(Emitter e, List ast) {
     }
     case %(cast ?type ?expression): {
       List c_type = e._semantic_type(type);
-      List c_expr = e._emit(%($expression));
+      List c_expr = e._operand(expression, EMIT_UNARY);
       return %("(" @c_type ")" @c_expr);
     }
     case %(cache ?id): return %("_$id");
     case %(expr ? ?content): return e._emit(%($content));
     case %(postfix ?operator ?argument): {
-      List c_arg = e._emit(%($argument));
+      List c_arg = e._operand(argument, EMIT_POSTFIX);
       return %(@c_arg $operator);
     }
     case %(generic ?control *associations): {
@@ -1197,30 +1278,33 @@ static List Emitter._emit(Emitter e, List ast) {
     case %(call ?function ?arguments): {
       List site_call = e._match_site_call(function, arguments);
       if (site_call) return site_call;
-      List c_fn = e._emit(%($function));
+      List c_fn = e._operand(function, EMIT_POSTFIX);
       List c_args = e._emit(%($arguments));
       return %(@c_fn "(" @c_args ")");
     }
     case %(index ?array ?index): {
-      List c_array = e._emit(%($array));
+      List c_array = e._operand(array, EMIT_POSTFIX);
       List c_index = e._emit(%($index));
       return %(@c_array "[" @c_index "]");
     }
     case %(op ?operator ?argument): {
-      List c_arg = e._emit(%($argument));
+      List c_arg = e._operand(argument, EMIT_UNARY);
       return %($operator @c_arg);
     }
     case %(op ?operator ?left ?right): {
       if (left is <list> && left.list().match(%(expr ? (op *))))
         return e._op_spine(operator, left, right);
-      List c_left = e._emit(%($left));
-      List c_right = e._emit(%($right));
+      Symbol binary = operator;
+      List c_left = e._operand(left, _left_operand_level(binary));
+      List c_right = e._operand(right, _right_operand_level(binary));
       return %(@c_left $operator @c_right);
     }
+    /* Between `?` and `:` C accepts a complete expression, so only the
+       condition and the false arm can regroup. */
     case %(op ?operator ?condition ?ontrue ?onfalse): {
-      List c_cond = e._emit(%($condition));
+      List c_cond = e._operand(condition, EMIT_CONDITIONAL + 1);
       List c_then = e._emit(%($ontrue));
-      List c_else = e._emit(%($onfalse));
+      List c_else = e._operand(onfalse, EMIT_CONDITIONAL);
       return %(@c_cond "?" @c_then ":" @c_else);
     }
     // Dynamic updates emit the lvalue once.
