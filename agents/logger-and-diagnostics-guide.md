@@ -2,8 +2,8 @@
 
 This is the canonical guide to the two related but distinct reporting
 modules. `lib/logger.x` owns general structured event delivery.
-`src/diagnostics.x` owns bounded compiler-error storage and forwards each
-entry to one emitter callback.
+`src/diagnostics.x` owns bounded compiler-error storage and prints each
+entry through one compiler.
 
 ## Logger contract
 
@@ -104,9 +104,10 @@ contract.
 
 ## Diagnostics contract
 
-`Diagnostics.new(emit, owner, limit)` creates a store. It records entries
-newest-first internally and `Diagnostics.entries` returns them in report
-order. Each entry has these associative-list fields:
+`Diagnostics.new(printer, limit)` creates a store; a NULL printer collects
+without streaming. It records entries newest-first internally and
+`Diagnostics.entries` returns them in report order. Each entry has these
+associative-list fields:
 
 | Field | Value |
 | --- | --- |
@@ -146,16 +147,17 @@ inherit it.
 ## Compiler flow
 
 `Compiler.report_error` constructs the location from the current or supplied
-Token and passes the entry to Diagnostics, whose emitter is the compiler's own
-`print_diagnostic`. Compilers that share one store take the stream in turn
-with `Compiler.own_diagnostics`. During `Compiler.full_parse`, the
-reporter raises `<malformed>` with the diagnostic category. A filtered catch
-rewinds to the start of the failed top-level declaration and skips it whole.
-State set before a raise must be restored by `defer` or `$let`, or later
-declarations parse in the wrong mode. A `<malformed>` transfer out of
-compile-time Lisp continues outward, since its diagnostic is already
-reported. Outside that recovery region the
-reporter exits with status 1.
+Token and passes the entry to Diagnostics, whose printer is the compiler
+itself. Compilers that share one store take the stream in turn with
+`Compiler.own_diagnostics`. A speculative parse brackets its reports with
+`Diagnostics.hold` and `Diagnostics.release`, which either discards them or
+keeps and prints them. During `Compiler.full_parse`, the reporter raises
+`<malformed>` with the diagnostic category. A filtered catch rewinds to the
+start of the failed top-level declaration and skips it whole. State set before
+a raise must be restored by `defer` or `$let`, or later declarations parse in
+the wrong mode. A `<malformed>` transfer out of compile-time Lisp continues
+outward, since its diagnostic is already reported. Outside that recovery region
+the reporter exits with status 1.
 
 Tokenizer helpers must honor their scanner preconditions. In particular, the
 tokenizer calls `scan_identifier` only after checking for an identifier-start
@@ -165,8 +167,8 @@ which owns the structured parse error and syntax hint.
 ## Executable proof
 
 - `unittest/test-logger.x` verifies Logger behavior.
-- `unittest/test-diagnostics.x` verifies entry ordering, limits, reset, and
-  emitter forwarding.
+- `unittest/test-diagnostics.x` verifies entry ordering, limits, reset,
+  printing, and held reports.
 - `unittest/compiler-fixtures/parse-error.x` verifies the ordinary parse
   failure boundary.
 - `unittest/compiler-fixtures/diagnostic-width.x` fixes filename, one-based

@@ -3290,27 +3290,13 @@ static List _initializer_conversion(
   int key_count = c.id_keys.len(), declarations = c.early_decls.len();
   c.key_ids = keys.copy();
   c.names.adapters = adapters.copy();
-  Diagnostics diag = c.diagnostics;
-  DiagnosticEmitter emit = diag.emit;
-  void *owner = diag.owner;
-  int entries = diag.entries.len(), count = diag.count;
-  int limited = diag.limit_notified, depth = c.recovery_depth;
-  int completed = 0, rejected = 0;
+  DiagnosticsHold hold = c.diagnostics.hold();
+  int depth = c.recovery_depth, completed = 0, rejected = 0;
   List result = NULL;
   {
     defer {
       c.recovery_depth = depth;
-      diag.set_emitter(emit, owner);
-      if (rejected) {
-        diag.entries.resize(entries);
-        diag.count = count;
-        diag.limit_notified = limited;
-      }
-      else if (emit)
-        for (int i = entries; i < diag.entries.len(); i++) {
-          List entry = diag.entries[i];
-          emit(owner, entry);
-        }
+      c.diagnostics.release(hold, !rejected);
       if (!completed) {
         c.key_ids = keys;
         c.names.adapters = adapters;
@@ -3319,7 +3305,6 @@ static List _initializer_conversion(
       }
       transaction.rollback();
     }
-    diag.set_emitter(NULL, NULL);
     c.recovery_depth = depth + 1;
     try {
       result = value.match(%(expr ? (composite ?)))

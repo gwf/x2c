@@ -3,32 +3,47 @@
 #include "test-support.x"
 $(import "test-macros.xmacro")
 #include "diagnostics.x"
+#include <unistd.h>
 
-static int capture_calls = 0;
+/* Stderr goes to a temporary file between the two calls, so a test reads
+   exactly what its printer streamed. */
+static int _capture_stderr(File *file) {
+  fflush(stderr);
+  *file = tmpfile();
+  int saved = dup(STDERR_FILENO);
+  dup2(fileno(*file), STDERR_FILENO);
+  return saved;
+}
 
-static void capture_entry(void *owner, List entry) {
-  List *buffer = owner;
-  if (!buffer) return;
-  *buffer = cons(entry, *buffer);
-  capture_calls += 1;
+static String _captured_stderr(File file, int saved) {
+  fflush(stderr);
+  dup2(saved, STDERR_FILENO);
+  close(saved);
+  rewind(file);
+  return file.string_close();
 }
 
 static void diagnostics_records_entries(void) {
   $test.scoped();
 
-  capture_calls = 0;
-  List sink_buffer = nil;
-  Diagnostics diag = Diagnostics.new(NULL, NULL, 2);
-  diag.set_emitter(capture_entry, &sink_buffer);
+  Diagnostics diag =
+    Diagnostics.new(Scope.calloc(1, sizeof(struct Compiler)), 2);
   List first_notes = %( "initialize flag before use" );
+  File file;
+  int saved = _capture_stderr(&file);
   diag.report(<first>, "first", NULL, first_notes);
   diag.report(<second>, "second", NULL, NULL);
   diag.report(<third>, "third", NULL, NULL);
+  String printed = _captured_stderr(file, saved);
 
   EXPECT_INT_EQ(diag.count, 2);
   EXPECT_TRUE(diag.reached_limit());
   EXPECT_INT_EQ(diag.limit, 2);
-  EXPECT_INT_EQ(sink_buffer.len(), 3);
+  EXPECT_STR_EQ(
+    printed,
+    "first: first\n  note: initialize flag before use\n\n"
+    "second: second\n\n"
+    "limit: too many errors, stopping\n\n");
 
   List entries = diag.entries();
   EXPECT_INT_EQ(entries.len(), 3);
@@ -42,36 +57,46 @@ static void diagnostics_records_entries(void) {
   EXPECT_NULL(second_location.list());
   EXPECT_NULL(second_notes.list());
 
-  Var first_message = first.assoc(<message>);
-  Var second_message = second.assoc(<message>);
-  String first_str = first_message is void ? NULL : first_message.string();
-  String second_str = second_message is void ? NULL : second_message.string();
-  EXPECT_TRUE(first_str != NULL);
-  EXPECT_TRUE(second_str != NULL);
-  EXPECT_TRUE(first_str == "first");
-  EXPECT_TRUE(second_str == "second");
-
-  List sink_entries = sink_buffer.reverse();
-  EXPECT_INT_EQ(sink_entries.len(), 3);
-  List first_sink_entry = sink_entries.car();
-  Var log_message = first_sink_entry.assoc(<message>);
-  Var log_notes = first_sink_entry.assoc(<notes>);
-  EXPECT_TRUE(log_message.string() == "first");
-  EXPECT_FALSE(log_notes is void);
-  List logged_notes = log_notes;
+  EXPECT_TRUE(first.assoc(<message>).string() == "first");
+  EXPECT_TRUE(second.assoc(<message>).string() == "second");
+  List logged_notes = first.assoc(<notes>);
   EXPECT_INT_EQ(logged_notes.len(), 1);
   EXPECT_TRUE(logged_notes.car().string() == "initialize flag before use");
 
   Var limit_code = limit.assoc(<code>), limit_message = limit.assoc(<message>);
   EXPECT_TRUE(limit_code.symbol() == <limit>);
   EXPECT_TRUE(limit_message.string() == "too many errors, stopping");
-  EXPECT_INT_EQ(capture_calls, 3);
+}
+
+static void diagnostics_release_keeps_or_discards(void) {
+  $test.scoped();
+
+  Compiler printer = Scope.calloc(1, sizeof(struct Compiler));
+  Diagnostics diag = Diagnostics.new(printer, 1);
+  File file;
+  int saved = _capture_stderr(&file);
+  DiagnosticsHold hold = diag.hold();
+  EXPECT_NULL(diag.printer);
+  diag.report(<discarded>, "discarded", NULL, NULL);
+  diag.release(hold, 0);
+  EXPECT_PTR_EQ(diag.printer, printer);
+  EXPECT_INT_EQ(diag.count, 0);
+  EXPECT_INT_EQ(diag.entries.len(), 0);
+
+  hold = diag.hold();
+  diag.report(<kept>, "kept", NULL, NULL);
+  EXPECT_STR_EQ(_captured_stderr(file, saved), NULL);
+  saved = _capture_stderr(&file);
+  diag.release(hold, 1);
+  EXPECT_STR_EQ(_captured_stderr(file, saved), "kept: kept\n\n");
+  EXPECT_INT_EQ(diag.count, 1);
+  EXPECT_TRUE(diag.reached_limit());
 }
 
 static void diagnostics_reset_clears_state(void) {
   $test.scoped();
 
-  Diagnostics diag = Diagnostics.new(NULL, NULL, 1);
+  Diagnostics diag = Diagnostics.new(NULL, 1);
   diag.report(<once>, "only", NULL, NULL);
   diag.report(<ignored>, "later", NULL, NULL);
 
@@ -88,5 +113,6 @@ static void diagnostics_reset_clears_state(void) {
 
 void diagnostics_suite(void) {
   $test.run(diagnostics_records_entries);
+  $test.run(diagnostics_release_keeps_or_discards);
   $test.run(diagnostics_reset_clears_state);
 }

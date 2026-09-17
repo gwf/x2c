@@ -1269,7 +1269,7 @@ static int _open_input(Frontend frontend, String filename, ParsedUnit *unit) {
     ok = unit.collect(frontend) && unit.parse();
   }
   if (ok) return 1;
-  if (!unit->compiler.diagnostics.has_emitter())
+  if (!unit->compiler.diagnostics.printer)
     foreach (Var entry, unit->compiler.diagnostics())
       unit->compiler.print_diagnostic(entry);
   unit.close();

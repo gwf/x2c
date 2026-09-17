@@ -218,26 +218,21 @@ static void _drop_compiler(void *ptr) {
   compiler.free_lisp();
 }
 
-static void _emit_user(void *owner, List entry) {
-  Compiler compiler = owner;
-  if (compiler) compiler.print_diagnostic(entry);
-}
-
 /** Routes this compiler's diagnostic store through its own printer.
 
     Compilers that share a store call this when taking the diagnostic stream
     back from another compiler.
 */
 void Compiler.own_diagnostics(Compiler compiler) {
-  compiler.diagnostics.set_emitter(_emit_user, compiler);
+  compiler.diagnostics.printer = compiler;
 }
 
 /** Shares a caller's diagnostic stream while preserving its emission policy.
-    The caller restores the saved emitter and owner after this child finishes.
+    The caller restores the saved printer after this child finishes.
 */
 void Compiler.borrow_diagnostics(Compiler compiler, Compiler owner) {
   compiler.diagnostics = owner.diagnostics;
-  if (compiler.diagnostics.emit == _emit_user) compiler.own_diagnostics();
+  if (compiler.diagnostics.printer) compiler.own_diagnostics();
 }
 
 /** Moves collected child reports into the caller's store without re-emitting.
@@ -318,11 +313,8 @@ static Compiler _new(Compiler owner) {
     _.inits = [];
     _.early_decls = [];
     _.collect_protocols = 1;
-    _.diagnostics =
-      Diagnostics.new(_emit_user, _, owner ? owner.diagnostics.limit : 1);
-    if (owner && owner.diagnostics.emit != _emit_user)
-      _.diagnostics.set_emitter(
-        owner.diagnostics.emit, owner.diagnostics.owner);
+    _.diagnostics = Diagnostics.new(_, owner ? owner.diagnostics.limit : 1);
+    if (owner && !owner.diagnostics.printer) _.diagnostics.printer = NULL;
     _.braces = [];
     _.import_stack = [];
     _.origins = [];
@@ -800,12 +792,7 @@ List Compiler.anchor_origin(Compiler compiler, List node, Token token) {
 
 static int _shallow_parse_compile_time_definition(Compiler c, int keyword) {
   int failed = 0;
-  Diagnostics diag = c.diagnostics;
-  DiagnosticEmitter emitter = diag.emit;
-  void *owner = diag.owner;
-  int entries = diag.entries.len(), count = diag.count;
-  int limited = diag.limit_notified;
-  diag.set_emitter(NULL, NULL);
+  DiagnosticsHold hold = c.diagnostics.hold();
   $let(c.recovery_depth, c.recovery_depth + 1) {
     try {
       if (keyword) c.parse_keyword_definition();
@@ -813,10 +800,7 @@ static int _shallow_parse_compile_time_definition(Compiler c, int keyword) {
     }
     catch %(malformed *): failed = 1;
   }
-  diag.set_emitter(emitter, owner);
-  diag.entries.resize(entries);
-  diag.count = count;
-  diag.limit_notified = limited;
+  c.diagnostics.release(hold, 0);
   if (failed) while (c.peek(0) != <eof>) c.next();
   return !failed;
 }

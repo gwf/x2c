@@ -1009,8 +1009,7 @@ static void _import(
       defer c.close_child(imported);
       imported.filename = path;
       imported.collect_protocols = c.collect_protocols;
-      $let(c.diagnostics.owner, c.diagnostics.owner)
-      $let(c.diagnostics.emit, c.diagnostics.emit) {
+      $let(c.diagnostics.printer, c.diagnostics.printer) {
         imported.borrow_diagnostics(c);
         imported.sym = c.sym;
         imported.fn_defs = c.fn_defs;

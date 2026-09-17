@@ -1,7 +1,7 @@
 /*  diagnostics.x -- structured compiler diagnostics collection
 
     Maintains a bounded, ordered collection of compiler diagnostics with
-    optional streaming to one emitter.
+    optional streaming to one compiler's printer.
 
     Entries are stored chronologically and exposed as immutable `List`
     snapshots.
@@ -13,28 +13,27 @@
 
 #pragma once
 #include "common.x"
-
-/** Receives one borrowed diagnostic entry when the store publishes it.
-    `Diagnostics` retains the callback and borrowed `owner`, invokes the
-    callback synchronously, and never releases `owner`.
-*/
-typedef void (*DiagnosticEmitter)(void *owner, List entry);
+#include "compiler.x"
 
 /** Collects diagnostic entries and optionally streams them.
     A value is valid after `Diagnostics.new`. The store and backing `Array` are
     `Scope`-owned; entry `List`s and immutable children retain the lifetime of
-    their producing canonical-value pools. A borrowed `owner` must remain valid
-    while its emitter is installed.
+    their producing canonical-value pools. A borrowed `printer` must remain
+    valid while it is installed.
 */
 typedef struct Diagnostics {
-  Array entries;          // Stored chronologically; entries() is a snapshot
-  DiagnosticEmitter emit; // Destination for streaming output (optional)
-  void *owner;            // Handed back to emit
-  int limit;              // 0 disables limiting
+  Array entries;    // Stored chronologically; entries() is a snapshot
+  Compiler printer; // Prints each published entry; NULL does not stream
+  int limit;        // 0 disables limiting
   int count, limit_notified;
 } *Diagnostics;
 
-#include "compiler.x"
+/** Records where `Diagnostics.hold` stopped streaming. */
+typedef struct DiagnosticsHold {
+  Compiler printer;
+  int entries, count, limit_notified;
+} DiagnosticsHold;
+
 #include "type.x"
 #pragma private
 
@@ -49,20 +48,19 @@ typedef struct Diagnostics {
 static int diagnostics_json = -1;
 
 static void _emit_entry(Diagnostics diag, List entry) {
-  if (diag.emit) diag.emit(diag.owner, entry);
+  if (diag.printer) diag.printer.print_diagnostic(entry);
 }
 
 // lifecycle
 
-/** Creates an empty diagnostic store with an optional emitter.
-    A negative `limit` is treated as zero; zero collects without a stopping
-    threshold. The emitter and `owner` are borrowed.
+/** Creates an empty diagnostic store that streams through `printer`.
+    A NULL `printer` does not stream. A negative `limit` is treated as zero;
+    zero collects without a stopping threshold. The printer is borrowed.
 */
-Diagnostics Diagnostics.new(DiagnosticEmitter emit, void *owner, int limit) {
+Diagnostics Diagnostics.new(Compiler printer, int limit) {
   Diagnostics diag = Scope.malloc(sizeof(struct Diagnostics));
   diag.entries = [];
-  diag.emit = emit;
-  diag.owner = owner;
+  diag.printer = printer;
   diag.limit = (limit < 0) ? 0 : limit;
   diag.count = 0;
   diag.limit_notified = 0;
@@ -76,13 +74,31 @@ void Diagnostics.reset(Diagnostics diag) {
   diag.limit_notified = 0;
 }
 
-/** Replaces the borrowed emitter and owner without replaying stored entries.
-    A NULL emitter disables streaming.
+/** Stops streaming until `Diagnostics.release` and records the current
+    entries, count, and limit state.
 */
-void Diagnostics.set_emitter(
-  Diagnostics diag, DiagnosticEmitter emit, void *owner) {
-  diag.emit = emit;
-  diag.owner = owner;
+DiagnosticsHold Diagnostics.hold(Diagnostics diag) {
+  DiagnosticsHold hold = {
+    diag.printer, diag.entries.len(), diag.count, diag.limit_notified
+  };
+  diag.printer = NULL;
+  return hold;
+}
+
+/** Restores the streaming saved by `hold`. When `keep` is set, entries
+    published since the hold remain and stream now; otherwise they are
+    discarded with the count and limit state they changed.
+*/
+void Diagnostics.release(Diagnostics diag, DiagnosticsHold hold, int keep) {
+  diag.printer = hold.printer;
+  if (keep) {
+    for (int i = hold.entries; i < diag.entries.len(); i++)
+      _emit_entry(diag, diag.entries[i]);
+    return;
+  }
+  diag.entries.resize(hold.entries);
+  diag.count = hold.count;
+  diag.limit_notified = hold.limit_notified;
 }
 
 // state queries
@@ -97,9 +113,6 @@ List Diagnostics.entries(Diagnostics diag) {
   if (!diag.entries.len()) return %();
   return diag.entries;
 }
-
-/** Returns whether `diag` currently has an emitter. */
-int Diagnostics.has_emitter(Diagnostics diag) => diag.emit != NULL;
 
 /** Returns whether counted reports have reached the positive limit.
     A zero limit never reports that it has been reached.
@@ -169,7 +182,7 @@ void Diagnostics.report(
   }
 }
 
-/* Warnings share publication order and emitter delivery with reports, but
+/* Warnings share publication order and streaming with reports, but
    never change `count` or publish the limit notice. */
 static void Diagnostics._warn(
   Diagnostics diag, Symbol code, String message, List location, List notes) {

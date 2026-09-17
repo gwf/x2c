@@ -51,7 +51,7 @@ static void _configure_logging(int debugging) {
 static void _report_diagnostics(Compiler compiler) {
   report_suspend();
   Diagnostics diag = compiler ? compiler.diagnostics : NULL;
-  if (!diag || diag.has_emitter()) return;
+  if (!diag || diag.printer) return;
   List entries = compiler.diagnostics();
   foreach (Var entry, entries) compiler.print_diagnostic(entry);
 }
