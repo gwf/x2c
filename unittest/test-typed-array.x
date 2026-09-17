@@ -458,6 +458,25 @@ static void typed_array_double_generated_sequences(void) {
   EXPECT_TRUE(combined.remove(-1) == 1.5);
 }
 
+/* A typed array shares the generated region code, so a negative `end` is the
+   same stop the matching slice uses. */
+static void typed_array_region_end_matches_slice_stop(void) {
+  $test.scoped();
+  ArrayInt values = ArrayInt.new();
+  for (int i = 0; i < 5; i++) values.push(i);
+
+  ArrayInt selected = values.getslice(1, -1, 1);
+  EXPECT_INT_EQ(selected.len(), 4);
+  EXPECT_INT_EQ(selected[3], 4);
+
+  ArrayInt removed = values.remslice(1, -1);
+  EXPECT_INT_EQ(removed.len(), 4);
+  EXPECT_INT_EQ(removed[0], 1);
+  EXPECT_INT_EQ(removed[3], 4);
+  EXPECT_INT_EQ(values.len(), 1);
+  EXPECT_INT_EQ(values[0], 0);
+}
+
 static void typed_array_int_raise_paths_transfer(void) {
   $test.scoped();
   ArrayInt values = ArrayInt.new();
@@ -621,6 +640,7 @@ void typed_array_suite(void) {
   $test.run(typed_array_int_sequence_mutations);
   $test.run(typed_array_int_slice_search_and_concat);
   $test.run(typed_array_double_generated_sequences);
+  $test.run(typed_array_region_end_matches_slice_stop);
   $test.run(typed_array_int_raise_paths_transfer);
   $test.run(typed_array_double_raise_paths_transfer);
   $test.run(typed_array_compound_update_is_native);

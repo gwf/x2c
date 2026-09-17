@@ -219,6 +219,10 @@ macro Unit $array.core.family(Type $array, Type $element) => {
     return slice;
   }
 
+  /* Normalizes `index` in the start domain, where a negative value counts
+     from the last element. `splice` names one position this way; the region
+     operations normalize a start and a stop together instead, so that their
+     `end` means what the same `end` means in a slice. */
   static inline int $array._core_normalize_bound($array array, int index) {
     int length = (int) array.length;
     int start = index, stop = index;
@@ -226,16 +230,24 @@ macro Unit $array.core.family(Type $array, Type $element) => {
     return start;
   }
 
+  /* One shared call decides both bounds, so `array[start:end]` and
+     `setslice(start, end, ...)` select the same region. A reversed pair is
+     swapped. */
+  static inline void $array._core_normalize_span(
+    $array array, int *begin, int *finish) {
+    x2c_normalize_slice(begin, finish, 1, (int) array.length);
+    if (*finish < *begin) {
+      int tmp = *begin;
+      *begin = *finish;
+      *finish = tmp;
+    }
+  }
+
   static void $array._core_setslice(
     $array array, int start, int end, $array values) {
     int n = (int) array.length;
-    int begin = array._core_normalize_bound(start);
-    int finish = array._core_normalize_bound(end);
-    if (finish < begin) {
-      int tmp = begin;
-      begin = finish;
-      finish = tmp;
-    }
+    int begin = start, finish = end;
+    array._core_normalize_span(&begin, &finish);
     int remove = finish - begin;
     int insert = values ? (int) values.length : 0;
     int delta = insert - remove;
@@ -264,13 +276,8 @@ macro Unit $array.core.family(Type $array, Type $element) => {
 
   static $array $array._core_remslice($array array, int start, int end) {
     int n = (int) array.length;
-    int begin = array._core_normalize_bound(start);
-    int finish = array._core_normalize_bound(end);
-    if (finish < begin) {
-      int tmp = begin;
-      begin = finish;
-      finish = tmp;
-    }
+    int begin = start, finish = end;
+    array._core_normalize_span(&begin, &finish);
     if (begin >= finish) return ($array) Block_new(sizeof($element));
     $array removed = array._core_getslice(begin, finish, 1);
     $element *data = ($element *) array.bytes;
@@ -287,8 +294,7 @@ macro Unit $array.core.family(Type $array, Type $element) => {
     int n = (int) array.length;
     int start = array._core_normalize_bound(index);
     long long target = (long long) start + remove_count;
-    if (target > INT_MAX) target = INT_MAX;
-    int end = array._core_normalize_bound((int) target);
+    int end = target > n ? n : (int) target;
     $array removed = array._core_getslice(start, end, 1);
     array._core_setslice(start, end, values);
     return removed;
@@ -526,7 +532,8 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
     return array._core_getslice(start, end, step);
   }
 
-  /** Replaces normalized bounds `[start:end]` and returns `array`.
+  /** Replaces the region `array[start:end]` and returns `array`.
+      Bounds normalize as slice bounds, so a negative `end` is a stop.
       Reversed bounds are swapped; null `values` deletes the region. Passing
       `array` itself as `values` is supported and copies before mutation.
       Raises: `<bad-arg>` for a null array, `<size-limit>` outside the integer
@@ -543,7 +550,8 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
     return array;
   }
 
-  /** Removes normalized bounds `[start:end]` and returns a fresh packed array.
+  /** Removes the region `array[start:end]` and returns a fresh packed array.
+      Bounds normalize as slice bounds, so a negative `end` is a stop.
       Reversed bounds are swapped, and the removed values retain their order.
       Raises: `<bad-arg>` for a null array, `<size-limit>` outside the integer
       index domain, or `<alloc-fail>` on allocation failure.

@@ -266,6 +266,34 @@ static void array_setslice_and_remslice(void) {
   EXPECT_VAR_EQ(removed[1], eight);
 }
 
+/* The region operations used to normalize `end` as a start index, so a
+   negative end named the last element instead of the stop that the matching
+   slice names. */
+static void array_region_end_matches_slice_stop(void) {
+  $test.scoped();
+  Array source = [0, 1, 2, 3, 4];
+  EXPECT_STR_EQ(source[1:-1].str(), "[ 1, 2, 3, 4 ]");
+
+  Array replaced = [0, 1, 2, 3, 4];
+  replaced.setslice(1, -1, [9]);
+  EXPECT_STR_EQ(replaced.str(), "[ 0, 9 ]");
+
+  Array trimmed = [0, 1, 2, 3, 4];
+  Array taken = trimmed.remslice(1, -1);
+  EXPECT_STR_EQ(taken.str(), "[ 1, 2, 3, 4 ]");
+  EXPECT_STR_EQ(trimmed.str(), "[ 0 ]");
+
+  // -2 stops before the last element, and a reversed pair still swaps
+  Array pair = [0, 1, 2, 3, 4];
+  EXPECT_STR_EQ(pair.remslice(-2, 1).str(), "[ 1, 2 ]");
+  EXPECT_STR_EQ(pair.str(), "[ 0, 3, 4 ]");
+
+  // splice still counts forward from one normalized position
+  Array spliced = [0, 1, 2, 3, 4];
+  EXPECT_STR_EQ(spliced.splice(-2, 5, NULL).str(), "[ 3, 4 ]");
+  EXPECT_STR_EQ(spliced.str(), "[ 0, 1, 2 ]");
+}
+
 static void array_splice_and_concat(void) {
   $test.scoped();
   Var zero = 0, one = 1, two = 2, three = 3, five = 5, seven = 7, eight = 8;
@@ -630,6 +658,7 @@ void array_suite(void) {
   $test.run(array_getslice_unit_step);
   $test.run(array_getslice_variable_steps);
   $test.run(array_setslice_and_remslice);
+  $test.run(array_region_end_matches_slice_stop);
   $test.run(array_splice_and_concat);
   $test.run(array_find_contains_count);
   $test.run(array_sort_reverse_join);

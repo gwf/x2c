@@ -351,7 +351,10 @@ static void _setslice(Array array, int start, int end, Array values) {
     The array grows or shrinks and the tail moves to fit. A null or empty
     `values` deletes the region, and an empty region inserts.
 
-    Bounds are normalized as slice bounds, and a reversed pair is swapped.
+    Bounds are normalized exactly as `array[start:end]` normalizes them, so
+    the replaced region is the one that slice selects: `start` counts from the
+    end when negative, and a negative `end` is a stop, with -1 naming the
+    position after the last element. A reversed pair is swapped.
     There is no `step` and no bracket spelling; `array[start:end] = values`
     is not accepted, so call the method. Aliasing is handled, so passing
     `array` as its own `values` copies first.
@@ -364,9 +367,10 @@ Self Array.setslice(Self array, int start, int end, Self values) {
   return array;
 }
 
-/** Removes normalized bounds `[start:end]` and returns a fresh `Array`.
-    A reversed pair is swapped. Allocation or size failure occurs before
-    `array` is changed.
+/** Removes the region `array[start:end]` and returns a fresh `Array`.
+    Bounds are normalized the way that slice normalizes them, so a negative
+    `end` is a stop. A reversed pair is swapped. Allocation or size failure
+    occurs before `array` is changed.
 */
 Self Array.remslice(Self array, int start, int end) {
   _int_length(array);

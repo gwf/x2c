@@ -1257,6 +1257,24 @@ printf("%s %s\n", middle.repr(), tail.repr());
 (b c) "hinx"
 ```
 
+`Array.setslice` and `Array.remslice` read `start` and `end` the same way, so
+`array.setslice(start, end, values)` replaces exactly the elements
+`array[start:end]` selects and `array.remslice(start, end)` removes them.
+`Array.splice` is the other shape: it normalizes one position and counts
+forward from it. A reversed pair of region bounds is swapped.
+
+```x2c
+Array digits = [0, 1, 2, 3, 4];
+Array region = digits[1:-1];
+digits.setslice(1, -1, [9]);
+
+printf("%s %s\n", region.repr(), digits.repr());
+```
+
+```text
+[ 1, 2, 3, 4 ] [ 0, 9 ]
+```
+
 A helper-backed indexed expression is not a general C lvalue. `Array` and `Map`
 assignment, compound assignment, and increment/decrement work through their
 collection update calls, but the expression cannot be addressed as native
