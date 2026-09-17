@@ -63,7 +63,7 @@ struct _RegexNode {
   _RegexNode child, sibling, next;
 };
 
-/* Parsing */
+// parsing
 
 typedef struct {
   Regex regex;
@@ -99,8 +99,7 @@ static void _set_range(_RegexNode node, int low, int high) {
 }
 
 static int _is_word(int byte) =>
-  byte == '_' || (byte >= '0' && byte <= '9') ||
-  (byte >= 'a' && byte <= 'z') || (byte >= 'A' && byte <= 'Z');
+  byte == '_' || scan_ascii_alpha(byte) || scan_ascii_digit(byte);
 
 /* Adds the bytes of `\d`, `\w`, or `\s` to `node`, or every other byte
    for the capital letter. */
@@ -205,8 +204,8 @@ static _RegexNode _group(_Parser *p) {
       p.pos++;
       int start = p.pos;
       while (_is_word(_peek(p))) p.pos++;
-      int digit = p.text[start] >= '0' && p.text[start] <= '9';
-      if (p.pos == start || digit || _peek(p) != '>') {
+      if (p.pos == start || scan_ascii_digit(p.text[start]) ||
+          _peek(p) != '>') {
         p.pos = start;
         _fail(p, "malformed group name");
       }
@@ -244,7 +243,7 @@ static _RegexNode _group(_Parser *p) {
 
 static int _digits(_Parser *p, int *out) {
   int start = p.pos, value = 0;
-  while (_peek(p) >= '0' && _peek(p) <= '9')
+  while (scan_ascii_digit(_peek(p)))
     value = value * 10 + (p.text[p.pos++] - '0');
   *out = value;
   return p.pos > start;
@@ -382,7 +381,7 @@ static void _flags(_Parser *p) {
   p.pos = at + 1;
 }
 
-/* Matching */
+// matching
 
 /* What to run once the current sequence ends: the node after a group or
    alternation, or the next iteration of a repeated group. */
@@ -543,8 +542,7 @@ static RegexMatch _search(Regex regex, String subject, int offset) {
   int count = regex.capture_count + 1;
   int *starts = Scope.calloc(2 * count, sizeof(int)), *ends = starts + count;
   defer Scope.free(starts);
-  _State st = {regex, subject ? subject : "", subject.len(), 0, 0,
-               starts, ends};
+  _State st = {regex, subject, subject.len(), 0, 0, starts, ends};
   for (int at = offset; at <= st.len; at++) {
     for (int i = 0; i < count; i++) starts[i] = ends[i] = -1;
     if (!_run(&st, regex.program, at, NULL)) continue;
@@ -561,12 +559,17 @@ static RegexMatch _search(Regex regex, String subject, int offset) {
 
 static RegexCapture _whole(RegexMatch found) => found.car();
 
-static String _expand(RegexMatch found, String replacement) {
-  Buffer out = Buffer.new(0);
+/* The match after `previous`; an empty match advances one byte. */
+static RegexMatch _next(Regex regex, String subject, RegexMatch previous) {
+  int start = _whole(previous).start(), end = _whole(previous).end();
+  return _search(regex, subject, end > start ? end : end + 1);
+}
+
+static void _expand(Buffer out, RegexMatch found, String replacement) {
   int n = replacement.len();
   for (int i = 0; i < n; i++) {
     char byte = replacement[i];
-    int next = i + 1 < n ? replacement[i + 1] : -1;
+    int next = i + 1 < n ? replacement[i + 1] : -1, close = -1;
     if (byte != '$' || next < 0) {
       out.write_char(byte);
     }
@@ -574,12 +577,12 @@ static String _expand(RegexMatch found, String replacement) {
       out.write_char('$');
       i++;
     }
-    else if (next >= '0' && next <= '9') {
+    else if (scan_ascii_digit(next)) {
       found[next - '0'].write_str(out);
       i++;
     }
-    else if (next == '{' && replacement.find_within("}", i + 2, -1) >= 0) {
-      int close = replacement.find_within("}", i + 2, -1);
+    else if (next == '{' &&
+             (close = replacement.find_within("}", i + 2, -1)) >= 0) {
       found[replacement[i + 2:close]].write_str(out);
       i = close;
     }
@@ -587,20 +590,18 @@ static String _expand(RegexMatch found, String replacement) {
       out.write_char(byte);
     }
   }
-  return out;
 }
 
-static String _rebuild(Regex regex, String subject, int limit, Func fn,
+static String _rebuild(Regex regex, String subject, int all, Func fn,
                        String replacement) {
-  Buffer out = Buffer.new(0);
-  int cursor = 0, done = 0;
-  foreach (RegexMatch found, regex.find_all(subject)) {
-    if (limit >= 0 && done == limit) break;
+  Buffer out = $auto(Buffer.new(0));
+  int cursor = 0;
+  for (RegexMatch found = _search(regex, subject, 0); found;
+       found = all ? _next(regex, subject, found) : NULL) {
     subject[cursor:_whole(found).start()].write_str(out);
-    String piece = fn ? fn(found).str() : _expand(found, replacement);
-    piece.write_str(out);
+    if (fn) fn(found).str().write_str(out);
+    else _expand(out, found, replacement);
     cursor = _whole(found).end();
-    done++;
   }
   subject[cursor:].write_str(out);
   return out;
@@ -608,15 +609,13 @@ static String _rebuild(Regex regex, String subject, int limit, Func fn,
 
 static Regex Regex.new(String pattern) {
   Regex regex = Scope.calloc(1, sizeof(struct Regex));
-  regex.pattern = pattern ? pattern : "";
+  regex.pattern = pattern;
   _Parser p = {regex, regex.pattern, 0, regex.pattern.len()};
   _flags(&p);
   regex.program = _alternation(&p);
   if (p.pos < p.len) _fail(&p, "unmatched closing parenthesis");
   return regex;
 }
-
-#pragma public
 
 /** Compiles `pattern` and returns the `Regex`, owned by the current scope.
     Raises: `<bad-arg>` with `why`, the `pattern`, and the byte `offset`
@@ -639,7 +638,7 @@ List Regex.capture_names(Regex regex) => regex.capture_names;
     underscore escaped, so that it matches itself inside a pattern.
 */
 String Regex.escape(String literal) {
-  Buffer out = Buffer.new(0);
+  Buffer out = $auto(Buffer.new(0));
   int n = literal.len();
   for (int i = 0; i < n; i++) {
     int byte = (unsigned char) literal[i];
@@ -665,14 +664,9 @@ RegexMatch Regex.match(Regex regex, String subject) =>
 */
 List Regex.find_all(Regex regex, String subject) {
   Array found = $auto([]);
-  int len = subject.len(), at = 0;
-  while (at <= len) {
-    RegexMatch next = _search(regex, subject, at);
-    if (!next) break;
+  for (RegexMatch next = _search(regex, subject, 0); next;
+       next = _next(regex, subject, next))
     found.push(next);
-    int end = _whole(next).end();
-    at = end > _whole(next).start() ? end : end + 1;
-  }
   return found;
 }
 
@@ -695,20 +689,20 @@ List Regex.split(Regex regex, String subject) {
     is a dollar sign.
 */
 String Regex.replace(Regex regex, String subject, String replacement) =>
-  _rebuild(regex, subject, 1, NULL, replacement);
+  _rebuild(regex, subject, 0, NULL, replacement);
 
 /** Returns `subject` with every match of `regex` replaced, expanding
     `replacement` as `replace` does.
 */
 String Regex.replace_all(Regex regex, String subject, String replacement) =>
-  _rebuild(regex, subject, -1, NULL, replacement);
+  _rebuild(regex, subject, 1, NULL, replacement);
 
 /** Returns `subject` with every match of `regex` replaced by what `fn`
     returns for its `RegexMatch`, inserted as is.
     Raises: whatever `fn` raises.
 */
 String Regex.replace_fn(Regex regex, String subject, Func fn) =>
-  _rebuild(regex, subject, -1, fn, NULL);
+  _rebuild(regex, subject, 1, fn, NULL);
 
 /** Returns the capture of `found` selected by `key`: a capture number, or
     a name as a `Symbol` or `String`. NULL when there is no such capture.
