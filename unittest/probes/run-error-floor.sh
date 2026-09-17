@@ -114,6 +114,16 @@ run_exit_case() {
   set -e
 }
 
+# `set -e` ignores a failing `! grep`, so report the match explicitly.
+refute_stderr() {
+  local name=$1 pattern=$2
+
+  if grep -q "$pattern" "$BUILD/$name.stderr"; then
+    echo "$name: stderr reports '$pattern'" >&2
+    return 1
+  fi
+}
+
 # exit() runs shutdown while a catch is registered or its arm holds the
 # selected Error; both must reclaim quietly and keep the exit status.
 for exit_case in exit-in-try:3 exit-in-catch:4; do
@@ -133,8 +143,8 @@ for exit_case in exit-in-observer:6 exit-in-context:5 exit-in-sink:8; do
   run_exit_case "$name"
   test "$exit_status" -eq "${exit_case#*:}"
   test ! -s "$BUILD/$name.stdout"
-  ! grep -q 'Scope leak detected' "$BUILD/$name.stderr"
-  ! grep -q 'x2c error floor' "$BUILD/$name.stderr"
+  refute_stderr "$name" 'Scope leak detected'
+  refute_stderr "$name" 'x2c error floor'
 done
 
 # A shutdown hook registered by a running hook still runs, newest first.

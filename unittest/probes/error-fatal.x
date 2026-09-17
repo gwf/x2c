@@ -142,7 +142,6 @@ int main(int argc, char **argv) {
     Context context = Context.open_named("exit probe");
     Scope slot = NULL;
     Scope.push(&slot);
-    (void) Scope.malloc(16);
     exit(5);
   }
   if (!strcmp(argv[1], "exit-in-sink")) {
