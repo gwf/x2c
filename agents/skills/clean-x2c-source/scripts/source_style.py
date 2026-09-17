@@ -160,34 +160,205 @@ def _looks_like_declaration_prefix(prefix: str) -> bool:
 _QUALIFIERS = {"const", "volatile", "restrict", "register", "struct", "union",
                "enum"}
 
+_DELIMITER_SYMBOL = re.compile(r"<[][(){}]>")
 
-def _subject_parameter(name: str, parameters: str) -> str | None:
-    """Return a message when a receiver method misnames its subject."""
+
+def _subject(name: str, parameters: str) -> tuple[str, str] | None:
+    """Return the receiver type and parameter name of a method's subject.
+
+    The first parameter is the subject when no other parameter has its type,
+    so a symmetric operation such as String.add(String left, String right)
+    has none.
+    """
     if "." not in name:
         return None
     receiver = name.split(".")[0]
-    depth = 0
-    for i, ch in enumerate(parameters):
+    pieces, depth, start = [], 0, 0
+    for i, ch in enumerate(parameters + ","):
         if ch in "([{": depth += 1
         elif ch in ")]}": depth -= 1
         elif ch == "," and not depth:
-            parameters = parameters[:i]
-            break
-    words = [word for word in re.findall(r"[A-Za-z_]\w*", parameters)
-             if word not in _QUALIFIERS]
-    if len(words) != 2 or words[0] != receiver:
+            pieces.append(parameters[start:i])
+            start = i + 1
+    words = [[word for word in re.findall(r"[A-Za-z_]\w*", piece)
+              if word not in _QUALIFIERS] for piece in pieces]
+    if len(words[0]) != 2 or words[0][0] != receiver:
         return None
-    letter = next((ch.lower() for ch in receiver if ch.isalpha()), "")
-    if not letter or re.fullmatch(rf"{letter}+", words[1]):
+    if any(piece[:1] == [receiver] for piece in words[1:]):
         return None
-    return f"name the {receiver} subject {letter} (found {words[1]})"
+    return receiver, words[0][1]
+
+
+def _references(text: str, word: str) -> list[int]:
+    """Return offsets where `word` is an x2c variable reference.
+
+    Bare atoms inside %(...), $(...), and @(...) forms are literal symbols;
+    only their $name, @name, ${...}, and @{...} unquotes reach variables.
+    Interpolating %"..." strings follow the same rule.
+    """
+    found: list[int] = []
+    stack = ["code"]
+    i = 0
+    while i < len(text):
+        ch, nxt = text[i], text[i + 1:i + 2]
+        state = stack[-1]
+        if state == "code" and ch == "/" and nxt in "/*" and nxt:
+            end = text.find("\n" if nxt == "/" else "*/", i + 2)
+            i = len(text) if end < 0 else end + (1 if nxt == "/" else 2)
+            continue
+        if state == "code" and ch == "'" or state != "string" and ch == '"':
+            if ch == '"' and i and text[i - 1] == "%" and state == "code":
+                stack.append("string")
+                i += 1
+                continue
+            i += 1
+            while i < len(text) and text[i] != ch:
+                i += 2 if text[i] == "\\" else 1
+            i += 1
+            continue
+        if state == "string":
+            if ch == "\\":
+                i += 2
+                continue
+            if ch == '"':
+                stack.pop()
+                i += 1
+                continue
+        if state != "string" and _DELIMITER_SYMBOL.match(text, i):
+            i += 3
+            continue
+        if state != "string" and ch in "$@%" and nxt == "(":
+            stack.append("lisp")
+            i += 2
+            continue
+        if ch in "$@" and nxt == "{":
+            stack.append("code")
+            i += 2
+            continue
+        if state != "string" and ch in "([{":
+            stack.append(state)
+        elif state != "string" and ch in ")]}" and len(stack) > 1:
+            stack.pop()
+        elif ch.isalpha() or ch == "_":
+            end = i
+            while end < len(text) and (text[end].isalnum() or text[end] == "_"):
+                end += 1
+            before = text[i - 1] if i else ""
+            if text[i:end] == word:
+                if state == "code":
+                    if before != "." and text[i - 2:i] != "->":
+                        found.append(i)
+                elif before in "$@":
+                    found.append(i)
+            i = end
+            continue
+        i += 1
+    return found
+
+
+def _rename(text: str, old: str, new: str) -> str:
+    for offset in reversed(_references(text, old)):
+        text = text[:offset] + new + text[offset + len(old):]
+    return text
+
+
+_OPENER = re.compile(r"(?:\(|\[|=>|=|\belse)$")
+_CONTROL = re.compile(r"(?:else\s+)?(?:if|for|foreach|while)\b")
+
+
+def _join(left: str, right: str) -> str:
+    return left + right if left.endswith(("(", "[")) else f"{left} {right}"
+
+
+def _code(text: str) -> str:
+    """Mask comments, literals, and delimiter Symbols such as `<(>`."""
+    return _DELIMITER_SYMBOL.sub("   ", _mask(text))
+
+
+def _depth(text: str) -> int:
+    code = _code(text)
+    return (code.count("(") + code.count("[") -
+            code.count(")") - code.count("]"))
+
+
+def _rejoin(lines: list[str]) -> list[str]:
+    """Join the lines of one statement that fit within 79 columns.
+
+    A line that opens a call, an expression body, an assignment, or a control
+    body joins its successor only when that completes the statement, so wraps
+    still start all arguments on the continuation line.
+    """
+    indent = len(lines[0]) - len(lines[0].lstrip())
+    words = [line.strip() for line in lines]
+    whole = words[0]
+    for word in words[1:]: whole = _join(whole, word)
+    if indent + len(whole) <= 79: return [" " * indent + whole]
+    control = _CONTROL.match(words[0])
+    result, depth = [lines[0].rstrip()], 0
+    for number, line in enumerate(lines[1:], 1):
+        previous = result[-1]
+        code = _code(previous.strip()).rstrip()
+        depth += _depth(lines[number - 1])
+        head = control and not depth and code.endswith(")")
+        joined = _join(previous, line.strip())
+        last = number == len(lines) - 1
+        if len(joined) <= 79 and not (head and len(result) > 1) and (
+                last or not (head or _OPENER.search(code))):
+            result[-1] = joined
+        else:
+            result.append(line.rstrip())
+    return result
+
+
+def _statements(text: str) -> list[tuple[int, int]]:
+    """Return the line ranges of wrapped statements that may be rejoined."""
+    lines, code_lines = text.split("\n"), _code(text).split("\n")
+    ranges, start, depth = [], 0, 0
+    for number, code in enumerate(code_lines):
+        depth += code.count("(") + code.count("[")
+        depth -= code.count(")") + code.count("]")
+        stripped = code.strip()
+        if depth > 0 or stripped and not stripped.startswith("#") and \
+                not stripped.endswith((";", "{", "}", ":")):
+            continue
+        group = range(start, number + 1)
+        if (number > start and
+                not any(_line_has_comment(lines[i]) for i in group) and
+                all(code_lines[i].strip()[:1] not in ")]}#"
+                    for i in group[1:])):
+            ranges.append((start, number + 1))
+        start, depth = number + 1, 0
+    return ranges
+
+
+def rename_subject(function: str, old: str, new: str) -> tuple[str, int]:
+    """Rename a subject, rejoin the statements that shrink, count the lines."""
+    before = function.split("\n")
+    after = _rename(function, old, new).split("\n")
+    saved = 0
+    for start, end in reversed(_statements(function)):
+        joined = _rejoin(after[start:end])
+        lines = len(_rejoin(before[start:end])) - len(joined)
+        if lines > 0:
+            after[start:end] = joined
+            saved += lines
+    return "\n".join(after), saved
+
+
+def subject_name(function: str, receiver: str) -> str:
+    letter = next(ch.lower() for ch in receiver if ch.isalpha())
+    name = letter
+    while _references(function, name): name += letter
+    return name
 
 
 def _line_has_comment(original: str) -> bool:
     return "//" in original or "/*" in original or "*/" in original
 
 
-def analyze_text(path: str, text: str) -> list[Finding]:
+def analyze_text(path: str, text: str,
+                 renames: list | None = None) -> list[Finding]:
+    """Report findings and append line-saving subject renames to `renames`."""
     masked = _mask(text)
     lines = text.splitlines()
     code_lines = masked.splitlines()
@@ -250,6 +421,7 @@ def analyze_text(path: str, text: str) -> list[Finding]:
         if ch == "{": depth += 1
         elif ch == "}": depth = max(0, depth - 1)
 
+    braces = dict(_pairs(masked, "{", "}"))
     definitions: set[str] = set()
     prototypes: list[tuple[str, int]] = []
     for opening, closing in parens:
@@ -269,10 +441,26 @@ def analyze_text(path: str, text: str) -> list[Finding]:
             if re.match(r"\s*;", trailer): prototypes.append((name, open_line))
             elif re.match(r"\s*(?:\{|=>)", trailer):
                 definitions.add(name)
-                message = _subject_parameter(name, masked[opening + 1:closing])
-                if message:
-                    add("violation", "subject_parameter_name", open_line,
-                        message)
+                subject = _subject(name, masked[opening + 1:closing])
+                if subject:
+                    receiver, old = subject
+                    if trailer.lstrip().startswith("{"):
+                        body = masked.index("{", closing)
+                        end = braces[body] + 1
+                    else:
+                        end = masked.index(";", closing) + 1
+                    function = text[line_start:end]
+                    new = subject_name(function, receiver)
+                    renamed, saved = (
+                        (function, 0) if re.fullmatch(rf"{new[0]}+", old)
+                        else rename_subject(function, old, new))
+                    if saved > 0:
+                        if renames is not None:
+                            renames.append((line_start, end, old, new, renamed))
+                        add("violation", "subject_parameter_name", open_line,
+                            f"name the {receiver} subject {new} to save "
+                            f"{saved} line{'s' if saved > 1 else ''} "
+                            f"(found {old})")
 
         if open_line == close_line:
             continue

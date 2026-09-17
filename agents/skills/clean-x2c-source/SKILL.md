@@ -34,8 +34,8 @@ python3 agents/skills/find-redundant-validation/scripts/redundant_validation.py 
 The survey masks comments and literals and balances delimiters; it does not
 parse or compile. Mechanical violations include whitespace, ordinary forward
 declarations, reliable wrapping errors, immediate declaration/assignment
-pairs, one-statement braces, and receiver methods whose subject parameter
-name differs from the lowercase first letter of its type. Width exceptions,
+pairs, one-statement braces, and receiver methods where renaming the subject
+parameter to the first letter of its type would save wrapped lines. Width exceptions,
 runtime declarations, horizontal compaction, repeated accessors, and adjacent
 static output require source review. Method-match bindings read through `assoc` are candidates for
 source `match`; keep method matching when bindings escape the local branch.

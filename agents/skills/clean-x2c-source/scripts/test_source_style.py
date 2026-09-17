@@ -121,14 +121,29 @@ class SourceStyleTest(unittest.TestCase):
         source = "void run(void) {\n  use(node.car());\n  use(node.car());\n  use(node.car());\n}\n"
         self.assertIn("repeated_accessor", categories("src/unit.x", source, "candidate"))
 
-    def test_receiver_subject_uses_type_letter(self):
+    def test_subject_rename_that_saves_lines_is_reported(self):
         named = ("List Compiler.parse(Compiler compiler, int depth) {\n"
-                 "  return NULL;\n}\n")
-        pointer = "static int Shared._next(const Shared *shared) => 0;\n"
+                 "  return compiler.parse_expression(\n"
+                 "    compiler.token, depth + 1, compiler.state.depth);\n}\n")
+        pointer = ("static int Shared._next(const Shared *shared) =>\n"
+                   "  shared->count + shared->limit + shared->width;\n")
         self.assertIn("subject_parameter_name",
                       categories("src/unit.x", named, "violation"))
         self.assertIn("subject_parameter_name",
                       categories("lib/unit.x", pointer, "violation"))
+
+    def test_subject_rename_that_saves_no_lines_passes(self):
+        source = ("List Compiler.parse(Compiler compiler, int depth) {\n"
+                  "  return compiler.parse_expression(compiler.token);\n}\n")
+        self.assertNotIn("subject_parameter_name",
+                         categories("src/unit.x", source, "violation"))
+
+    def test_symmetric_operation_has_no_subject(self):
+        source = ("String String.add(String left, String right) =>\n"
+                  "  left.concatenate_with_separator_and_copy(\n"
+                  "    right, left.length_of_the_separator_value);\n")
+        self.assertNotIn("subject_parameter_name",
+                         categories("lib/unit.x", source, "violation"))
 
     def test_subject_letter_may_repeat_and_other_types_pass(self):
         source = ("List Compiler.parse(Compiler cc, int c) => NULL;\n"

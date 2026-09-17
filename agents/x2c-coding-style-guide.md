@@ -843,11 +843,14 @@ Use:
 - `snake_case` for local variables and parameters;
 - `UPPER_CASE` for true constants and enum members.
 
-When one parameter is the subject of the whole function, name it with the
-first lowercase letter of its unqualified type: `Compiler c`, `Emitter e`, or
-`UnzipShared *u`. If that name is already bound, repeat the letter until the
-name is free: `c`, `cc`, `ccc`. Other parameters keep names that state their
-roles.
+When one parameter is the subject of the whole function and a longer name
+would wrap statements or expressions onto more lines, name it with the first
+lowercase letter of its unqualified type: `Compiler c`, `Emitter e`, or
+`UnzipShared *u`. Otherwise either name is fine. If the short name is already
+bound, repeat the letter until the name is free: `c`, `cc`, `ccc`. A symmetric
+operation such as `String.add(String left, String right)` has no single
+subject. Other parameters keep names that state their roles. This keeps names
+and functions short.
 
 Prefer receiver ownership when most inputs and mutable state come from one
 object:
@@ -1251,8 +1254,8 @@ many places, the invariant probably lacks one clear owner.
 
 Run [`audit-source.sh`](skills/clean-x2c-source/scripts/audit-source.sh) for
 width, whitespace, wrapping, braces, deferred initialization, forward
-declarations, negated `is` tests, narration, stock prose, and subject
-parameter names in receiver methods. Then check what it cannot:
+declarations, negated `is` tests, narration, stock prose, and receiver
+subject names whose length wraps lines. Then check what it cannot:
 
 - Did the current language or an existing owner make a whole wrapper, route,
   check, protocol, alias, or representation unnecessary?
