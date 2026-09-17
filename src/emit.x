@@ -1328,6 +1328,7 @@ static List Emitter._emit(Emitter e, List ast, List context) {
   }
   switch (head.symbol()) {
     // x2c-specific constructs
+    case <adopt>: case <macrodef>: case <protocol>: return NULL;
     case <literal>:    return e._literal(ast, context);
     case <preproc>:    return e._preproc(ast, context);
     // Declarations

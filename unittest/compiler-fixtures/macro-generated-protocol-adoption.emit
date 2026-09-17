@@ -1,0 +1,58 @@
+#include "x2c.h"
+typedef Block MacroArrayInt;
+typedef List MacroRow;
+Var MacroArrayInt_var(MacroArrayInt);
+MacroArrayInt Var_macroarrayint(Var);
+MacroArrayInt MacroArrayInt_new(void);
+int MacroArrayInt_equal(MacroArrayInt, MacroArrayInt);
+int MacroArrayInt_contains(MacroArrayInt, int);
+int MacroArrayInt_getindex(MacroArrayInt, int);
+static inline Var MacroRow_var(MacroRow value){
+  return Var_new(806120, value);
+}
+static inline MacroRow Var_macrorow(Var value){
+  return Var_list(value);
+}
+inline Var MacroArrayInt_var(MacroArrayInt _x2c_macro_array_0){
+  return Var_new(895705321586, _x2c_macro_array_0);
+}
+inline MacroArrayInt Var_macroarrayint(Var _x2c_macro_value_0){
+  return(MacroArrayInt) Var_pointer(_x2c_macro_value_0);
+}
+MacroArrayInt MacroArrayInt_new(void){
+  return Block_new(sizeof(int));
+}
+int MacroArrayInt_equal(MacroArrayInt _x2c_macro_a_0, MacroArrayInt _x2c_macro_b_0){
+  return(void *) _x2c_macro_a_0 ==(void *) _x2c_macro_b_0;
+}
+int MacroArrayInt_contains(MacroArrayInt _x2c_macro_array_0, int _x2c_macro_needle_0){
+  int * _x2c_macro_data_0 =(int *) _x2c_macro_array_0 -> bytes;
+  for(size_t _x2c_macro_i_0 = 0;  _x2c_macro_i_0 < _x2c_macro_array_0 -> length;  _x2c_macro_i_0 ++) if(_x2c_macro_data_0[_x2c_macro_i_0] == _x2c_macro_needle_0) return 1;
+  return 0;
+}
+int MacroArrayInt_getindex(MacroArrayInt _x2c_macro_array_0, int _x2c_macro_index_0){
+  return((int *) _x2c_macro_array_0 -> bytes)[_x2c_macro_index_0];
+}
+int main(void){
+  MacroArrayInt array = MacroArrayInt_new();
+  Block_append(array, &(int){
+    31
+  }
+  , 1);
+  MacroRow row = _1;
+  Var boxed_array = MacroArrayInt_var(array), boxed_row = MacroRow_var(row);
+  printf("%d %d %d %d %d %d\n", MacroArrayInt_equal(array, array), MacroArrayInt_contains(array, 31), MacroArrayInt_getindex(array, 0), Var_is_row(boxed_row, 9, 7, 4), Var_is(boxed_array, 895705321586), Var_int(Var_getindex(boxed_array, int_var(0))));
+  Block_free(array);
+  return 0;
+}
+static inline int _x2c_proto_macroarrayint_equal_0(Var a0, Var a1){
+  return MacroArrayInt_equal(Var_macroarrayint(a0), Var_macroarrayint(a1));
+}
+static inline int _x2c_proto_macroarrayint_contains_0(Var a0, Var a1){
+  return MacroArrayInt_contains(Var_macroarrayint(a0), Var_int(Var_convert(a1, 3453797)));
+}
+static inline Var _x2c_proto_macroarrayint_getindex_0(Var a0, Var a1){
+  return int_var(MacroArrayInt_getindex(Var_macroarrayint(a0), Var_int(Var_convert(a1, 3453797))));
+}
+static VarMethods _x2c__x2c_protocol_methods_0;
+
