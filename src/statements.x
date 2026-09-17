@@ -51,8 +51,9 @@ static Symbol _arm_end(List run) {
   foreach (List directive, run) {
     Symbol kind = preproc_conditional_kind(directive.cadr());
     if (kind == <open>) level++;
-    else if (kind && level) level -= kind == <close>;
-    else if (kind) end = kind;
+    else if (!kind) continue;
+    else if (!level) end = kind;
+    else if (kind == <close>) level--;
   }
   return end;
 }

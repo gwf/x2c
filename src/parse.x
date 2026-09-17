@@ -1157,17 +1157,16 @@ static List _typedef(Compiler compiler, List context, int row) {
   return _finish_declaration(compiler, <typedef>, spec, bindings, 0);
 }
 
-/* Reads the qualifiers and type specifier after `storage` and returns the
-   declared type and the type its names are bound to. Source specifier text,
-   such as `("_Noreturn")`, is written with the declaration but is no part of
-   the bound type. An aggregate binds its short tag; the declared type keeps
-   the body. */
+/* Reads the qualifiers, the type specifier, and any storage macro after it,
+   `int LOCAL f(void)`, and returns the declared type and the type its names
+   are bound to. Source specifier text, such as `("_Noreturn")`, is written
+   with the declaration but is no part of the bound type. An aggregate binds
+   its short tag; the declared type keeps the body. */
 static List _declaration_types(Compiler c, List storage) {
   List quals = _type_qualifiers(c);
   Type spec = _type_specifier(c);
-  // A storage macro after the type, `int LOCAL f(void)`, is storage.
   Array trailing = [];
-  while (_prefix_macro_words(c, 0, trailing));
+  while (_prefix_macro_words(c, 0, trailing)) continue;
   if (trailing.len()) storage = %( @{trailing.list_free()} @storage );
   List words = storage.filter(%!(item) => item is <symbol>);
   Type binding_type = c.sym.local_type(%( @words @quals @spec ));
