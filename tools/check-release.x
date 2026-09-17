@@ -30,7 +30,7 @@ if (published != version)
   return fail(%"the site names $published, not $version");
 
 String heading =
-  %(curl -fsSL "$site/packages/index.txt").job().lines().car().str();
+  %(curl -fsSL "$site/packages/index.txt").job().lines().car();
 if (heading != %"# x2c package index for x2c $version")
   return fail(%"the site's package index is not for x2c $version");
 

@@ -270,8 +270,7 @@ try options = Args.parse(args.cdr(), spec);
 catch %(bad-arg *detail): {
   String why = detail.assoc(<why>), subject = detail[2].cadr();
   Stderr.printf("%sx2c: %s: %s\n", Args.usage(spec, %"$program $command"),
-                why,
-                subject);
+                why, subject);
   return 2;
 }
 
