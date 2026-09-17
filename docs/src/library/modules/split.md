@@ -83,7 +83,7 @@ the rule that a trailing ending does not add a final empty line.
 
 Each yielded field is a canonical `String`. Distinct fields remain resident
 in the active `String` pool; bracket bulk traversal with
-`String.pool_retain` / `String.pool_release` and promote retained values
+`Pool.open` / `Pool.close` and promote retained values
 when that residency should be temporary. The cursor borrows `str`, whose
 actual owning pool must remain live through traversal.
 
@@ -162,7 +162,7 @@ separator yields `str` once, while an empty `str` yields nothing.
 
 Each yielded field is a canonical `String`. Distinct fields remain resident
 in the active `String` pool; bracket bulk traversal with
-`String.pool_retain` / `String.pool_release` and promote retained values
+`Pool.open` / `Pool.close` and promote retained values
 when that residency should be temporary. The cursor borrows `str` and
 `sep`; both actual owning pools must remain live through traversal.
 
@@ -182,7 +182,7 @@ preserves empty fields around every explicit separator.
 
 Each yielded field is a canonical `String`. Distinct fields remain resident
 in the active `String` pool; bracket bulk traversal with
-`String.pool_retain` / `String.pool_release` and promote retained values
+`Pool.open` / `Pool.close` and promote retained values
 when that residency should be temporary. The cursor borrows `str`, whose
 actual owning pool must remain live through traversal.
 

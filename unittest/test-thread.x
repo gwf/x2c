@@ -377,7 +377,7 @@ static void thread_memory_sink_retains_worker_events(void) {
 }
 
 static void thread_results_stay_private_until_join(void) {
-  Pool root = String.pool_current();
+  Pool root = Pool.current();
   size_t before = root.stats().interned;
 
   Context destination = Context.open_isolated_named("Thread join target");
@@ -471,7 +471,7 @@ static void thread_join_runs_recursive_custom_exporter(void) {
 }
 
 static void thread_errors_stay_private_until_join(void) {
-  Pool root = String.pool_current();
+  Pool root = Pool.current();
   size_t before = root.stats().interned;
 
   Context destination = Context.open_isolated_named("Thread error target");

@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
   }
   if (!strcmp(argv[1], "pool-isolation")) {
     Error.initialize();
-    Pool transient = String.pool_retain_named("error-floor-transfer");
+    Pool transient = Pool.open_named("error-floor-transfer");
     String text = String.new("ephemeral error detail");
     Block records = transient.up.table.entries;
     records.width = SIZE_MAX;

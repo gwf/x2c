@@ -181,7 +181,7 @@ static int _splits_next(Split split, int *cursor, String *out) {
 
     Each yielded field is a canonical `String`. Distinct fields remain resident
     in the active `String` pool; bracket bulk traversal with
-    `String.pool_retain` / `String.pool_release` and promote retained values
+    `Pool.open` / `Pool.close` and promote retained values
     when that residency should be temporary. The cursor borrows `str`, whose
     actual owning pool must remain live through traversal.
     Raises: `<alloc-fail>` when the cursor descriptor cannot be allocated.
@@ -196,7 +196,7 @@ Split String.words(String str) => _new(str, NULL, _words_next);
 
     Each yielded field is a canonical `String`. Distinct fields remain resident
     in the active `String` pool; bracket bulk traversal with
-    `String.pool_retain` / `String.pool_release` and promote retained values
+    `Pool.open` / `Pool.close` and promote retained values
     when that residency should be temporary. The cursor borrows `str`, whose
     actual owning pool must remain live through traversal.
     Raises: `<alloc-fail>` when the cursor descriptor cannot be allocated.
@@ -211,7 +211,7 @@ Split String.lines(String str) => _new(str, NULL, _lines_next);
 
     Each yielded field is a canonical `String`. Distinct fields remain resident
     in the active `String` pool; bracket bulk traversal with
-    `String.pool_retain` / `String.pool_release` and promote retained values
+    `Pool.open` / `Pool.close` and promote retained values
     when that residency should be temporary. The cursor borrows `str` and
     `sep`; both actual owning pools must remain live through traversal.
     Raises: `<alloc-fail>` when the cursor descriptor cannot be allocated.

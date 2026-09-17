@@ -281,10 +281,10 @@ intern inside a child string pool and the atom must outlive it, promote the
 spelling first:
 
 ```x2c
-String.pool_retain_named("scratch-names");
+Pool.open_named("scratch-names");
 Atom row = Atom.intern(String.printf("row-%d", 314159));
 String.promote(row.str());
-String.pool_release();
+Pool.close();
 
 printf("%s\n", row);
 ```

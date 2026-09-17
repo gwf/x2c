@@ -136,7 +136,7 @@ static void cache_admission_and_bypass(void) {
 
   // A String a nested pool can still reclaim stays bypassed: a transient
   // program executes and is released with its lease.
-  String.pool_retain_named("match-cache-nested-values");
+  Pool.open_named("match-cache-nested-values");
   String nested = String.new("match-cache-nested-needle");
   EXPECT_FALSE(nested.is_permanent());
   EXPECT_INT_EQ(_acquire(cache, %(tag $nested ?v), &lease),
@@ -144,7 +144,7 @@ static void cache_admission_and_bypass(void) {
   EXPECT_TRUE(lease.generation == 0);
   MatchLease.release(&lease);
   EXPECT_NULL(lease.transient_plan);
-  String.pool_release();
+  Pool.close();
 
   // Wide boxes carry value semantics across allocations: bypassed.
   long wide_value = 42;
@@ -410,7 +410,7 @@ static void cache_rejects_a_pattern_a_nested_pool_owns(void) {
   MatchLease lease;
   int misses = 0;
   for (int i = 0; i < 200; i++) {
-    String.pool_retain_named("match-cache-round");
+    Pool.open_named("match-cache-round");
     Var counter = i;
     Var pattern = %(round $counter ?value);
     EXPECT_INT_EQ(_acquire(cache, pattern, &lease), MACHINE_PREPARED);
@@ -422,7 +422,7 @@ static void cache_rejects_a_pattern_a_nested_pool_owns(void) {
     if (!_try_match(cache, %(round $counter ok), pattern, &bindings) ||
         bindings.assoc(<?value>) != <ok>)
       misses++;
-    String.pool_release();
+    Pool.close();
   }
   EXPECT_INT_EQ(misses, 0);
   cache.dispose();
@@ -433,14 +433,14 @@ static void cache_rejects_a_pattern_a_nested_pool_owns(void) {
 static void default_cache_answers_inside_a_value_pool_bracket(void) {
   int misses = 0;
   for (int i = 0; i < 200; i++) {
-    String.pool_retain();
+    Pool.open();
     Var counter = i;
     List bindings = %(sentinel);
     if (!%(round $counter ok).try_match(%(round $counter ?value),
                                         &bindings) ||
         bindings.assoc(<?value>) != <ok>)
       misses++;
-    String.pool_release();
+    Pool.close();
   }
   EXPECT_INT_EQ(misses, 0);
 }

@@ -229,16 +229,16 @@ int x2c_static_acquire(
 void x2c_static_commit(X2CStatic *guard);
 void x2c_static_abort(void *guard);
 
-Pool x2c_pool_values_current(void);
-void x2c_pool_values_initialize(void);
-void x2c_pool_values_thread_initialize(void);
-void x2c_pool_values_shutdown(void);
-Pool x2c_pool_values_retain_named(const char *name);
-Pool x2c_pool_values_retain(void);
-void x2c_pool_values_release(void);
-Pool x2c_pool_values_detach(void);
-int x2c_pool_values_is_permanent(Var value);
-void x2c_pool_thread_start(void);
+Pool Pool.current(void);
+void Pool.initialize(void);
+void Pool.thread_initialize(void);
+void Pool.shutdown(void);
+Pool Pool.open_named(const char *name);
+Pool Pool.open(void);
+void Pool.close(void);
+Pool Pool.detach(void);
+int Pool.is_permanent(Var value);
+void Pool.thread_start(void);
 void x2c_descriptor_thread_start_begin(void);
 void x2c_descriptor_thread_start_end(int success);
 int x2c_descriptor_registration_frozen(void);
@@ -789,9 +789,8 @@ void x2c_initialize_protocols(void) {
 /** Initializes the x2c runtime once for the current process. */
 void x2c_initialize(void) {
   void Atom.initialize(void), File.initialize(void);
-  void List.initialize(void), Scope.initialize(void);
-  void x2c_match_initialize(void);
-  void String.initialize(void), Logger_initialize(void);
+  void Pool.initialize(void), Scope.initialize(void);
+  void x2c_match_initialize(void), Logger_initialize(void);
   Scope Scope.new(void), *Scope.top(void);
   static int initialized = 0;
   if (initialized) return;
@@ -799,8 +798,7 @@ void x2c_initialize(void) {
   x2c_initialize_protocols();
   Scope.initialize();
   if (!*Scope.top()) *Scope.top() = Scope.new();
-  String.initialize();
-  List.initialize();
+  Pool.initialize();
   Atom.initialize();
   x2c_match_initialize();
   File.initialize();

@@ -739,20 +739,19 @@ linked list with `Var` elements.
 
 Public functions:
 
-`List.cons_in`, `List.initialize`, `List.thread_initialize`, `List.shutdown`,
-`List.promote`, `List.try_own`, `cons`, `List.cons`, `Var.cons`, `car`, `cdr`,
-`List.car`, `List.cdr`, `List.caar`, `List.cadr`, `List.cddr`, `List.caddr`,
-`Var.car`, `Var.cdr`, `Var.caar`, `Var.cadr`, `Var.cddr`, `Var.caddr`,
-`List.append`, `List.concat_n`, `List.list_n`, `List.reverse`, `List.last`,
-`List.index`, `List.contains`, `List.len`, `List.map`, `List.foldl`,
-`List.find`, `List.any`, `List.all`, `List.sort`, `List.sort_with`,
-`List.sort_by`, `Array.list`, `Array.list_free`, `Map.list`, `List.array`,
-`List.unique`, `List.zip_with`, `List.map2`, `List.sublis`, `List.flatten`,
-`List.flatten_all`, `List.nth_cdr`, `List.getindex`, `List.assoc`, `List.get`,
-`List.tail`, `List.head`, `List.subseq`, `List.getslice`, `List.unpack_n`,
-`List.unpack_vars_n`, `List.hash`, `List.equal`, `List.compare`, `List.str`,
-`List.write_str`, `List.repr`, `List.write_repr`, `List.try_next`, `List.iter`,
-`Iter.list`, `List.filter`
+`List.cons_in`, `List.promote`, `List.try_own`, `cons`, `List.cons`,
+`Var.cons`, `car`, `cdr`, `List.car`, `List.cdr`, `List.caar`, `List.cadr`,
+`List.cddr`, `List.caddr`, `Var.car`, `Var.cdr`, `Var.caar`, `Var.cadr`,
+`Var.cddr`, `Var.caddr`, `List.append`, `List.concat_n`, `List.list_n`,
+`List.reverse`, `List.last`, `List.index`, `List.contains`, `List.len`,
+`List.map`, `List.foldl`, `List.find`, `List.any`, `List.all`, `List.sort`,
+`List.sort_with`, `List.sort_by`, `Array.list`, `Array.list_free`, `Map.list`,
+`List.array`, `List.unique`, `List.zip_with`, `List.map2`, `List.sublis`,
+`List.flatten`, `List.flatten_all`, `List.nth_cdr`, `List.getindex`,
+`List.assoc`, `List.get`, `List.tail`, `List.head`, `List.subseq`,
+`List.getslice`, `List.unpack_n`, `List.unpack_vars_n`, `List.hash`,
+`List.equal`, `List.compare`, `List.str`, `List.write_str`, `List.repr`,
+`List.write_repr`, `List.try_next`, `List.iter`, `Iter.list`, `List.filter`
 
 ### [lib/logger.x](../lib/logger.x)
 
@@ -874,12 +873,10 @@ nested interning pools with region-backed object storage.
 
 Public functions:
 
-`x2c_pool_thread_start`, `Pool.retain_named`, `Pool.retain`, `Pool.release`,
-`x2c_pool_values_current`, `x2c_pool_values_initialize`,
-`x2c_pool_values_thread_initialize`, `x2c_pool_values_shutdown`,
-`x2c_pool_values_retain_named`, `x2c_pool_values_retain`,
-`x2c_pool_values_release`, `x2c_pool_values_detach`,
-`x2c_pool_values_is_permanent`, `Pool.lookup`, `Pool.insert`, `Pool.intern`,
+`Pool.thread_start`, `Pool.retain_named`, `Pool.retain`, `Pool.release`,
+`Pool.current`, `Pool.initialize`, `Pool.thread_initialize`, `Pool.shutdown`,
+`Pool.open_named`, `Pool.open`, `Pool.close`, `Pool.detach`,
+`Pool.is_permanent`, `Pool.lookup`, `Pool.insert`, `Pool.intern`,
 `Pool.malloc`, `Pool.free`, `Pool.owns`, `Pool.promote`, `Pool.own`,
 `Pool.stats`
 
@@ -999,19 +996,16 @@ canonical byte strings and core text operations.
 
 Public functions:
 
-`String.new_in`, `String.pool_current`, `String.initialize`,
-`String.thread_initialize`, `String.shutdown`, `String.pool_retain_named`,
-`String.pool_retain`, `String.pool_release`, `String.pool_detach`,
-`String.promote`, `String.try_own`, `String.is_permanent`, `String.malloc`,
-`String.free`, `String.len`, `String.intern`, `String.intern_free`,
-`String.new`, `String.new_len`, `String.new_fill`, `String.find_within`,
-`String.find`, `String.rfind`, `String.find_all`, `String.count`,
-`String.getindex`, `String.contains`, `String.startswith`, `String.endswith`,
-`String.add`, `String.repeat`, `String.withindex`, `String.getslice`,
-`String.lower`, `String.upper`, `String.capitalize`, `String.lstrip`,
-`String.rstrip`, `String.strip`, `String.dedent`, `String.filter`,
-`String.map`, `String.keep`, `String.reject`, `String.squeeze`,
-`String.pad_left`, `String.pad_right`, `String.pad_center`,
+`String.new_in`, `String.promote`, `String.try_own`, `String.is_permanent`,
+`String.malloc`, `String.free`, `String.len`, `String.intern`,
+`String.intern_free`, `String.new`, `String.new_len`, `String.new_fill`,
+`String.find_within`, `String.find`, `String.rfind`, `String.find_all`,
+`String.count`, `String.getindex`, `String.contains`, `String.startswith`,
+`String.endswith`, `String.add`, `String.repeat`, `String.withindex`,
+`String.getslice`, `String.lower`, `String.upper`, `String.capitalize`,
+`String.lstrip`, `String.rstrip`, `String.strip`, `String.dedent`,
+`String.filter`, `String.map`, `String.keep`, `String.reject`,
+`String.squeeze`, `String.pad_left`, `String.pad_right`, `String.pad_center`,
 `String.remove_prefix`, `String.remove_suffix`, `String.partition`,
 `String.rpartition`, `String.join`, `String.replace_n`, `String.replace`,
 `String.printf`, `String.unescape`, `String.escape`, `String.str`,

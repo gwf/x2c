@@ -47,7 +47,7 @@ static void add(void) {
 /* Equal text interned in sibling pools has distinct pointers, so only String
    equality reports these operands equal. */
 static void equality(void) {
-  Pool root = String.pool_current();
+  Pool root = Pool.current();
   Pool left = root.retain(), right = root.retain();
   Name name = String.new_in(left, "build", 5);
   String text = String.new_in(right, "build", 5);

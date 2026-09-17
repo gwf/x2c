@@ -133,9 +133,9 @@ static void list_full_slice_preserves_active_owner(void) {
   List active = cons(seed, cons(seed + 1, cons(seed + 2, NULL)));
   EXPECT_TRUE(active.getslice(0, active.len(), 1) === active);
 
-  Pool detached = String.pool_retain_named("detached-full-slice");
+  Pool detached = Pool.open_named("detached-full-slice");
   List borrowed = cons(seed + 3, cons(seed + 4, cons(seed + 5, NULL)));
-  detached = String.pool_detach();
+  detached = Pool.detach();
   List copied = borrowed.getslice(0, borrowed.len(), 1);
   EXPECT_TRUE(copied !== borrowed);
   EXPECT_INT_EQ(copied.compare(borrowed), 0);
@@ -588,7 +588,7 @@ static void list_intern_preserves_map_identity(void) {
 
 static void list_pool_lifetime_boundary(void) {
   volatile int seed = 9300;
-  Pool pool = String.pool_retain();
+  Pool pool = Pool.open();
   if (!EXPECT_NOT_NULL(pool)) return;
 
   List garbage = cons(seed + 1, cons(seed + 2, NULL));
@@ -596,7 +596,7 @@ static void list_pool_lifetime_boundary(void) {
   ScopeStats during = Scope.stats();
   EXPECT_INT_EQ(garbage.len(), 2);
 
-  String.pool_release();
+  Pool.close();
   ScopeStats after = Scope.stats();
   EXPECT_TRUE(after.live_allocations < during.live_allocations);
   EXPECT_INT_EQ(survivor.car().integer(), seed + 3);

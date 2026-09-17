@@ -25,19 +25,21 @@ $(import "private-keywords.xmacro")
 #include "var.x"
 #include "map.x"
 
-/* Holds one internal level of canonical values and their backing storage.
-   Pools are released from child to parent. Their handles and unpromoted
-   allocations become invalid at release; promoted identities retain their
-   pointers under the parent. */
+/** Holds one level of canonical values and their backing storage.
+    Pools are released from child to parent. Their handles and unpromoted
+    allocations become invalid at release; promoted identities retain their
+    pointers under the parent.
+*/
 typedef struct Pool {
   Scope scope, Map table, struct Pool *up, pthread_mutex_t mutex;
   unsigned child_capacity;  // last released direct child's table capacity
   size_t interned, promoted, void *blocks, *current[10], *promotions;
 } *Pool;
 
-/* Reports one pool level's activity and process-wide storage counters.
-   The snapshot owns no storage; `requested_bytes` saturates rather than
-   wraps. */
+/** Reports one pool level's activity and process-wide storage counters.
+    The snapshot owns no storage; `requested_bytes` saturates rather than
+    wraps.
+*/
 typedef struct PoolStats {
   int depth, size_t interned, promoted, allocation_calls, free_calls;
   size_t requested_bytes, block_allocations, block_reuses, slot_reuses;
@@ -135,8 +137,10 @@ static threaded struct PoolValueThreadState value_thread;
    because a value interned while it was clear was published without one. */
 static int pool_multithreaded;
 
-/* Makes Pool lock from here on, for a process about to start a worker. */
-void x2c_pool_thread_start(void) {
+/** Makes `Pool` lock from here on, for a process about to start a worker.
+    `Thread.start` calls this before `pthread_create`. It never clears.
+*/
+void Pool.thread_start(void) {
   pool_multithreaded = 1;
 }
 
@@ -441,10 +445,14 @@ static void _release_blocks(Pool inner) {
   for (int i = 0; i < POOL_CLASS_COUNT; i++) inner.current[i] = NULL;
 }
 
-/* Returns a new child of `inner` without making it thread-active. The child
-   owns its control Scope, Map, and mutex and must be released before `inner`.
-   A transfer destroys partial child resources and leaves `inner` unchanged;
-   native mutex initialization failure aborts. */
+/** Returns a new named child of `inner` without making it thread-active.
+    The child owns its control `Scope`, `Map`, and mutex and must be released
+    before `inner`. Use `Pool.open_named` instead to open a bracket that the
+    canonical `String` and `List` operations allocate into.
+    Raises: `<alloc-fail>` while building the child. A transfer destroys
+    partial child resources and leaves `inner` unchanged; native mutex
+    initialization failure aborts.
+*/
 Pool Pool.retain_named(Pool inner, const char *name) {
   _storage_lock();
   _storage_initialize();
@@ -490,13 +498,18 @@ Pool Pool.retain_named(Pool inner, const char *name) {
   return pool;
 }
 
-/* Returns an unnamed child of `inner`; ownership follows `retain_named`. */
+/** Returns an unnamed child of `inner`, without making it thread-active.
+    Ownership, failures, and the comparison with `Pool.open` follow
+    `Pool.retain_named`.
+*/
 Pool Pool.retain(Pool inner) => inner.retain_named(NULL);
 
-/* Destroys one pool and returns its parent, or returns NULL for NULL input.
-   Promoted slots and large allocations survive under the parent with stable
-   addresses; other identities, the table, and the control Scope are invalid.
-   Children must already be released, and no caller may use `inner` afterward.
+/** Destroys one pool and returns its parent, or returns NULL for NULL input.
+    Promoted slots and large allocations survive under the parent with stable
+    addresses; other identities, the table, and the control `Scope` become
+    invalid. Children must already be released, and no caller may use `inner`
+    afterward. Use `Pool.close` instead to end a bracket opened with
+    `Pool.open`.
 */
 Pool Pool.release(Pool inner) {
   if (!inner) return NULL;
@@ -517,24 +530,32 @@ Pool Pool.release(Pool inner) {
 }
 
 /* String and List share one stack because their immutable values freely
-   contain one another. The public String.pool_* entry points operate on this
-   one stack. */
-/* Returns the borrowed active canonical-value pool, lazily installing the
-   process root in this thread when needed. */
-Pool x2c_pool_values_current(void) {
-  if (!value_thread.current) x2c_pool_values_initialize();
+   contain one another. The public bracket below operates on that one stack;
+   the instance methods above build a pool without making it thread-active. */
+/** Returns the borrowed canonical-value pool active on this thread.
+    The process root is installed lazily on first use, so the result is never
+    NULL. The pool is borrowed: do not release it with `Pool.release`.
+*/
+Pool Pool.current(void) {
+  if (!value_thread.current) Pool.initialize();
   return value_thread.current;
 }
 
-/* Installs the shared root as this thread's active pool, creating it once. */
-void x2c_pool_values_initialize(void) {
+/** Creates the process-wide canonical-value root and makes it active here.
+    `x2c_initialize` calls this once; a repeat call does nothing.
+    Raises: `<alloc-fail>` if the root cannot be constructed. Native mutex
+    initialization failure aborts.
+*/
+void Pool.initialize(void) {
   if (value_thread.current) return;
   if (!value_root) value_root = Pool.retain_named(NULL, "canonical values");
   value_thread.current = value_root;
 }
 
-/* Installs the existing process root in a worker; an absent root aborts. */
-void x2c_pool_values_thread_initialize(void) {
+/** Installs the existing process root in a newly created worker thread.
+    The root must already exist; otherwise the process aborts.
+*/
+void Pool.thread_initialize(void) {
   if (value_thread.current) return;
   if (!value_root) {
     fprintf(stderr, "Pool: canonical value root is not initialized\n");
@@ -543,45 +564,76 @@ void x2c_pool_values_thread_initialize(void) {
   value_thread.current = value_root;
 }
 
-/* Releases this thread's nested chain, then the shared root. Process shutdown
-   calls this only after workers stop and before Pool storage is destroyed. */
-void x2c_pool_values_shutdown(void) {
+/** Releases this thread's open brackets and then the process root.
+    Call it only after every worker has stopped and no canonical value is
+    still in use. A repeat call after the root is gone does nothing.
+*/
+void Pool.shutdown(void) {
   while (value_thread.current && value_thread.current != value_root)
     value_thread.current = value_thread.current.release();
   while (value_root) value_root = value_root.release();
   value_thread.current = NULL;
 }
 
-/* Pushes and returns a named child as this thread's active pool. */
-Pool x2c_pool_values_retain_named(const char *name) {
-  Pool nested = x2c_pool_values_current().retain_named(name);
+/** Opens and returns a named child of the pool active on this thread.
+    New canonical misses enter the child; an equal ancestor value keeps its
+    existing owner and lifetime. The caller must match this with one
+    `Pool.close` or detach it for transfer. The name appears in `Scope`
+    diagnostics.
+    Raises: `<alloc-fail>` while opening the pool.
+    See: Pool.open, Pool.close
+*/
+Pool Pool.open_named(const char *name) {
+  Pool nested = Pool.current().retain_named(name);
   value_thread.current = nested;
   return nested;
 }
 
-/* Pushes and returns an unnamed child as this thread's active pool. */
-Pool x2c_pool_values_retain(void) => x2c_pool_values_retain_named(NULL);
+/** Opens a child of the shared `String` and `List` canonical-value pool.
+    New canonical misses enter the child, while equal ancestor values retain
+    their existing owner. Promote anything that must outlive the bracket with
+    `String.promote` or `List.promote`: unpromoted values are discarded and
+    their identities no longer resolve. Brackets nest. The caller must match
+    this with one `Pool.close` or detach it for transfer.
+    Raises: `<alloc-fail>` while opening the pool.
+    See: Pool.close, Pool.open_named, List.promote
+*/
+Pool Pool.open(void) => Pool.open_named(NULL);
 
-/* Releases the active pool and makes its parent active. The caller guarantees
-   that the active pool is a child rather than the shared root. */
-void x2c_pool_values_release(void) {
+/** Closes the innermost open bracket and makes its parent active.
+    Canonical `String`s, `List`s, and transient `String` buffers owned by that
+    pool are reclaimed unless promoted; ancestor-owned values remain live.
+    Raises: `<bad-state>` when no bracket is open. The failure leaves the
+    active pool unchanged.
+*/
+void Pool.close(void) {
+  if (!Pool.current().up) raise %(bad-state (owner "Pool.close"));
   value_thread.current = value_thread.current.release();
 }
 
-/* Removes and returns the active child without releasing it. Its parent
-   becomes active, and the detached chain must remain sealed until release. */
-Pool x2c_pool_values_detach(void) {
-  Pool detached = value_thread.current;
+/** Removes the innermost open bracket without destroying it.
+    `Thread` keeps the detached pool sealed until join copies its survivors.
+    The returned pool remains owned by the caller until that transfer or an
+    explicit `Pool.release`.
+    Raises: `<bad-state>` when no bracket is open. The failure leaves the
+    active pool unchanged.
+*/
+Pool Pool.detach(void) {
+  Pool detached = Pool.current();
+  if (!detached.up) raise %(bad-state (owner "Pool.detach"));
   value_thread.current = detached.up;
   return detached;
 }
 
-/* Reports exact identity ownership by the process root without promotion. */
-int x2c_pool_values_is_permanent(Var value) =>
-  value_root && value_root.owns(value);
+/** Reports whether the process root owns `value` as its canonical identity.
+    Nothing is promoted, and no open bracket can reclaim a value that answers
+    one.
+*/
+int Pool.is_permanent(Var value) => value_root && value_root.owns(value);
 
-/* Returns the first value equal to `key` from `inner` outward, or `void`.
-   The returned identity remains owned by the level where it was found. */
+/** Returns the first value equal to `key` from `inner` outward, or `void`.
+    The returned identity remains owned by the level where it was found.
+*/
 Var Pool.lookup(Pool inner, Var key) {
   for (Pool pool = inner; pool; pool = pool.up) {
     _lock(pool);
@@ -598,10 +650,13 @@ static void _insert_locked(Pool inner, Var object) {
   inner.interned++;
 }
 
-/* Installs `object` as its own canonical value in exactly `inner`. The caller
-   must have ruled out an equal identity in this pool chain; this primitive
-   neither searches ancestors nor takes ownership of separate object
-   storage. */
+/** Installs `object` as its own canonical value in exactly `inner`.
+    The caller must have ruled out an equal identity in this pool chain; this
+    primitive neither searches ancestors nor takes ownership of separate
+    object storage.
+    Raises: `<bad-arg>` when `inner` is NULL. Map insertion causes propagate
+    and leave the object unregistered.
+*/
 void Pool.insert(Pool inner, Var object) {
   if (!inner) raise %(bad-arg (owner "Pool.insert"));
   _lock(inner);
@@ -609,17 +664,19 @@ void Pool.insert(Pool inner, Var object) {
   _insert_locked(inner, object);
 }
 
-/* Returns the canonical value equal to `object`, installing `object` in the
-   innermost table when absent. `alloc` is the object's Pool-owned allocation;
-   a hit releases that losing candidate immediately. A failed insertion leaves
-   the candidate owned by the caller so its existing cleanup boundary runs.
+/** Returns the canonical value equal to `object`, installing it when absent.
+    A miss lands in `inner`. `alloc` is the object's `Pool`-owned allocation;
+    a hit releases that losing candidate immediately. A failed insertion
+    leaves the candidate owned by the caller so its existing cleanup boundary
+    runs.
 
-   Ancestors are checked before the innermost fused Map operation. Pool's
-   single-canonical-pointer invariant makes that order equivalent to outward
-   shadowing while allowing the innermost table to be probed exactly once.
+    Ancestors are checked before the innermost fused `Map` operation. `Pool`'s
+    single-canonical-pointer invariant makes that order equivalent to outward
+    shadowing while allowing the innermost table to be probed exactly once.
 
-   Raises: `<bad-arg>` when inner or alloc is NULL. Map lookup and insertion
-   causes propagate. */
+    Raises: `<bad-arg>` when `inner` or `alloc` is NULL. `Map` lookup and
+    insertion causes propagate.
+*/
 Var Pool.intern(Pool inner, Var object, void *alloc) {
   if (!inner || !alloc) raise %(bad-arg (owner "Pool.intern"));
   Var canonical;
@@ -646,12 +703,14 @@ Var Pool.intern(Pool inner, Var object, void *alloc) {
   return canonical;
 }
 
-/* Allocates object storage owned by inner. Requests through 512 bytes use a
-   size-class region; larger requests retain ordinary Scope ownership.
+/** Allocates object storage owned by `inner`.
+    Requests through 512 bytes use a size-class region; larger requests retain
+    ordinary `Scope` ownership.
 
-   Raises: `<bad-arg>` when inner is NULL, `<size-limit>` when a large request
-   overflows Scope storage, or `<alloc-fail>` when storage cannot be
-   allocated. */
+    Raises: `<bad-arg>` when `inner` is NULL, `<size-limit>` when a large
+    request overflows `Scope` storage, or `<alloc-fail>` when storage cannot
+    be allocated.
+*/
 void *Pool.malloc(Pool inner, size_t size) {
   if (!inner) raise %(bad-arg (owner "Pool.malloc"));
   int class_index = _class(size);
@@ -693,9 +752,12 @@ void *Pool.malloc(Pool inner, size_t size) {
   return Scope.malloc_in(&inner.scope, size);
 }
 
-/* Releases a losing or transient allocation from `inner`'s Pool chain. Region
-   slots become immediately reusable; large allocations use Scope.free. A
-   canonical allocation still present in a table must not be freed this way. */
+/** Releases a losing or transient allocation from `inner`'s pool chain.
+    Region slots become immediately reusable; large allocations use
+    `Scope.free`. A canonical allocation still present in a table must not be
+    freed this way. A null allocation does nothing.
+    Raises: `<bad-arg>` when `inner` is NULL and `alloc` is not.
+*/
 void Pool.free(Pool inner, void *alloc) {
   if (!alloc) return;
   if (!inner) raise %(bad-arg (owner "Pool.free"));
@@ -717,8 +779,9 @@ static int _owns_locked(Pool pool, Var key) {
   return found is not void && found === key;
 }
 
-/* Reports whether this exact level stores `key` as its canonical identity.
-   Ancestors are not searched. */
+/** Reports whether this exact level stores `key` as its canonical identity.
+    Ancestors are not searched, and a null pool reports zero.
+*/
 int Pool.owns(Pool pool, Var key) {
   if (!pool) return 0;
   _lock(pool);
@@ -766,24 +829,27 @@ static PoolBlock _block_of(void *alloc) {
   return block;
 }
 
-/* Publishes an identity owned by `inner` in its parent and preserves `alloc`
-   across `inner`'s release without changing its address. Returns zero for a
-   missing owner, root pool, or null allocation. Promotion metadata or parent
-   table insertion may transfer before storage is marked or moved. */
+/** Publishes an identity owned by `inner` in its parent.
+    `alloc` survives `inner`'s release without changing its address. Returns
+    zero for a missing owner, root pool, or null allocation.
+    Raises: `<alloc-fail>`, `<size-limit>`, or `<invariant>` while recording
+    the promotion; that transfer may happen before storage is marked or moved.
+*/
 int Pool.promote(Pool inner, Var object, void *alloc) {
   if (!inner || !inner.up || !alloc) return 0;
   return _promote_block(inner, object, alloc, _block_of(alloc));
 }
 
-/* Proves `object` safe beyond every pool in `inner`'s chain, promoting it to
-   the outermost pool when a pool in the chain owns it. `alloc` is the
-   object's Pool-owned allocation. Returns one when the value is already
-   outermost or reaches it, and zero when no pool in the chain owns it or a
-   promotion fails. A null `inner` reports safe, since no pool can then
-   reclaim the value. Promotion is not transactional across levels: an earlier
-   level remains promoted if a later promotion transfers.
+/** Proves `object` safe beyond every pool in `inner`'s chain.
+    It is promoted to the outermost pool when a pool in the chain owns it.
+    `alloc` is the object's `Pool`-owned allocation. Returns one when the
+    value is already outermost or reaches it, and zero when no pool in the
+    chain owns it or a promotion fails. A null `inner` reports safe, since no
+    pool can then reclaim the value. Promotion is not transactional across
+    levels: an earlier level remains promoted if a later promotion transfers.
 
-   Raises: `<alloc-fail>` when promotion metadata cannot be allocated. */
+    Raises: `<alloc-fail>` when promotion metadata cannot be allocated.
+*/
 int Pool.own(Pool inner, Var object, void *alloc) {
   if (!inner) return 1;
   Pool owner = inner;
@@ -799,8 +865,10 @@ int Pool.own(Pool inner, Var object, void *alloc) {
   return 1;
 }
 
-/* Returns this level's canonical counts plus process-wide storage counters.
-   A null pool reports depth and per-level counts as zero. */
+/** Returns this level's canonical counts plus process-wide storage counters.
+    A null pool reports depth and per-level counts as zero. The counters are a
+    snapshot; nothing in the result stays live with the pool.
+*/
 PoolStats Pool.stats(Pool inner) {
   _storage_lock();
   defer _storage_unlock();

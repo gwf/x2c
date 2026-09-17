@@ -132,12 +132,12 @@ static void _finish_join(Thread thread) {
 static void *_run(void *argument) {
   Thread thread = argument;
   (void) Scope.top();
-  String.thread_initialize();
+  Pool.thread_initialize();
   Error.initialize_raw();
 
   thread.result_scope = Scope.new_named("Thread result");
   Scope.push(&thread.result_scope);
-  thread.result_pool = String.pool_retain_named("Thread result");
+  thread.result_pool = Pool.open_named("Thread result");
 
   /* Callback temporaries belong to `work`; its exported result or Error
      snapshot is moved or copied into the outer result stores before `work`
@@ -165,7 +165,7 @@ static void *_run(void *argument) {
     thread.result = void;
   }
   work.close();
-  thread.result_pool = String.pool_detach();
+  thread.result_pool = Pool.detach();
   Scope.pop();
 
   Error.shutdown_raw();
@@ -208,7 +208,7 @@ Thread Thread.start(ThreadFn function, const void *input, size_t input_size) {
     abort();
   }
   __atomic_fetch_add(&thread_live_count, 1, __ATOMIC_SEQ_CST);
-  x2c_pool_thread_start();
+  Pool.thread_start();
   pthread_attr_t attributes;
   _stack_attributes(&attributes);
   /* Hold descriptor registration stable across pthread_create. Success makes

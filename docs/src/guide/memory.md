@@ -37,8 +37,8 @@ Canonical values are the other case. A non-empty `String` and every `List` cell
 built by `cons` are interned: equal content becomes one canonical pointer. By
 default those values stay valid for the rest of the process. You do not free
 them, and you do not have to keep a scope alive to hold them. They are held in
-canonical interning pools. The `List` pool calls described below give temporary
-`List` structure a shorter lifetime.
+canonical interning pools. The `Pool` calls described below give temporary
+`String` and `List` structure a shorter lifetime.
 
 That leaves mutable storage: `Block`, `Array`, `Buffer`, wide `Var` boxes,
 and anything you request with `Scope.malloc`, `Scope.calloc`, or
@@ -115,8 +115,9 @@ double destroy aborts with a diagnostic.
 
 Canonical identity does not require every `List` in a batch or request to stay
 alive until process exit. When a body of work builds substantial `List`
-structure and no `List` from that work escapes, bracket it with the shared
-`String` and `List` pool calls:
+structure and no `List` from that work escapes, bracket it with `Pool.open`
+and `Pool.close`. `String` and `List` share one canonical pool, so the bracket
+bounds both:
 
 ```x2c
 ~
@@ -133,18 +134,20 @@ structure and no `List` from that work escapes, bracket it with the shared
 ~}
 ~
 static int evaluate(int input) {
-  String.pool_retain();
-  defer String.pool_release();
+  Pool.open();
+  defer Pool.close();
 
   List temporary = %($input ${build_left(input)} ${build_right(input)});
   return temporary_score(temporary);
 }
 ```
 
-Every `cons` inside the bracket remains canonical. `String.pool_release`
+Every `cons` inside the bracket remains canonical. `Pool.close`
 reclaims cells created in the innermost pool and forgets their identities.
-Calls nest, and every successful `String.pool_retain` requires one matching
-release. Use `defer` when an error or early return can cross the boundary.
+Calls nest, and every successful `Pool.open` requires one matching
+`Pool.close`. Use `defer` when an error or early return can cross the
+boundary. `Pool.open_named` gives the bracket a name that appears in `Scope`
+diagnostics, and `Pool.current` returns the pool that is active right now.
 
 If a `List` must survive, call `List.promote` before release. Promotion is
 pointer-stable and recursively preserves nested `List`s, interned `String`
@@ -157,10 +160,10 @@ cars, and long `Atom` payloads:
 ~}
 ~
 ~static List promoted_result(void) {
-String.pool_retain();
+Pool.open();
 List result = build_result();
 result.promote();
-String.pool_release();
+Pool.close();
 return result;
 ~}
 ```
@@ -168,6 +171,18 @@ return result;
 An unpromoted `List` dangles after the release. Use these calls when a task
 creates substantial temporary `List` structure. Small amounts of data and
 values needed for the rest of the process can stay in the default pool.
+
+### Context bundles a pool with the rest of a boundary
+
+A pool bracket bounds canonical values and nothing else. A `Context` is the
+aggregate: one open `Context` owns a `Scope`, `Error` state, `Match` state,
+and, when it is opened isolated, a canonical-value pool of its own.
+`Context.open_isolated` calls `Pool.open_named` to get that pool, and
+`Context.close` closes it. So the bracket is the smaller tool underneath
+`Context`, not a feature of it. Reach for `Pool.open` when only canonical
+`String` and `List` structure needs bounding, and for a `Context` when the
+`Scope` and the error and match state must be bounded with it. See
+[Contexts and Threads](contexts-and-threads.md).
 
 ## Moving a value out of a scope
 
@@ -351,7 +366,7 @@ Every allocation in this chapter belongs to a region: a span of the program
 that owns storage and ends at a definite point. A `$scope()` block is a
 region, and so are a `Scope.retain` and `Scope.release` pair, a
 `$scope(&slot)` push, an `$auto` local, and a `Scope` local that
-`Scope.destroy` ends. A `String.pool_retain` bracket is a region over the
+`Scope.destroy` ends. A `Pool.open` bracket is a region over the
 pool, so a `List` cell consed inside one belongs to that bracket rather than
 outliving every scope the way a canonical value normally does.
 

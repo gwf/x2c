@@ -1978,7 +1978,7 @@ static int _pattern_admissible(Var value, int depth) {
         return String.is_permanent((String) value.pointer());
       if (value is <string>) return String.is_permanent(value);
       if (value is not <list>) return 0;
-      if (!x2c_pool_values_is_permanent(value)) return 0;
+      if (!Pool.is_permanent(value)) return 0;
       // kind and tag prove the raw payload is a List cell
       foreach (Var part, (List) value.pointer())
         if (!_pattern_admissible(part, depth + 1)) return 0;

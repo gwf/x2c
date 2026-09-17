@@ -41,6 +41,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/match.x`](match.md) | pattern matching and transformation utilities for lists. |
 | [`lib/mutex.x`](mutex.md) | shared mutable-state coordination. |
 | [`lib/path.x`](path.md) | filesystem locations and the operations on them. |
+| [`lib/pool.x`](pool.md) | nested interning pools with region-backed object storage. |
 | [`lib/process.x`](process.md) | run commands and pipelines without a shell. |
 | [`lib/regex.x`](regex.md) | regular expressions over the bytes of a String. |
 | [`lib/scope.x`](scope.md) | memory allocation scope management. |
@@ -88,7 +89,6 @@ These modules implement the runtime and are not public APIs.
 - `lib/lisp-machine.x` - Private compile-time Lisp wordcode decoder.
 - `lib/machine.x` - Shared `Match` and Lisp wordcode, builder, and execution-state definitions.
 - `lib/match-machine.x` - Private `Match` wordcode decoder.
-- `lib/pool.x` - Nested interning pools that back canonical `String` and `List` identity.
 - `lib/protocols.x` - The built-in `Cleanup`, `Block`, `Iter`, and `Var` protocol declarations used to generate runtime dispatch adapters.
 - `lib/scan.x` - Allocation-free character scanners used by the tokenizer.
 - `lib/static-init.x` - Compiler-owned first-use static storage and initialization guards.

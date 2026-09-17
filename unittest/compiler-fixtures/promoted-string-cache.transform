@@ -143,7 +143,7 @@
      (op = (bind (binding 25 "string_pool") ()) 
       (expr ("Pool") 
        (call (expr ((func ((* const char))) "Pool") 
-              (ident (binding 26 "String_pool_retain_named"))) 
+              (ident (binding 26 "Pool_open_named"))) 
         (args (expr (* char) (literal (* char) "\"promoted-value-cache\""))))))))) 
   (at 23 
    (declare ("Pool") 
@@ -196,8 +196,7 @@
   (at 29 
    (stmnt 
     (expr (void) 
-     (call (expr ((func ((void))) void) 
-            (ident (binding 33 "String_pool_release"))) 
+     (call (expr ((func ((void))) void) (ident (binding 33 "Pool_close"))) 
       (args (expr (void) ())))))) 
   (at 45 
    (stmnt 

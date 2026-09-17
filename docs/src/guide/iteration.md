@@ -99,8 +99,8 @@ These cursors allocate one scope-owned traversal descriptor. There is no
 `List` and no object per field. Each yielded field is a canonical `String`.
 After a field has been interned once, finding an equal field of at most 256
 bytes needs no heap allocation. Distinct fields remain in the active `String`
-pool. For a large input, use `String.pool_retain()` and
-`String.pool_release()` to reclaim temporary fields, and promote the values
+pool. For a large input, use `Pool.open()` and
+`Pool.close()` to reclaim temporary fields, and promote the values
 that must survive.
 
 A `Var` is iterated through its descriptor, so a boxed `List` or `Array`

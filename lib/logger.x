@@ -649,7 +649,7 @@ Logger Logger.new(Symbol min_level) {
   Logger logger = Scope.calloc(1, sizeof(struct Logger));
   *logger = (struct Logger) {
     .min_level = min_level, .owner_scope = *Scope.top(),
-    .pool = String.pool_current(), .storage = Scope.new_named("Logger")};
+    .pool = Pool.current(), .storage = Scope.new_named("Logger")};
   return logger;
 }
 
@@ -821,12 +821,12 @@ void Logger.shutdown(void) {
   Logger active = global_logger;
   if (logger_error_handler) {
     if (active) {
-      String.pool_retain_named("Logger shutdown errors");
+      Pool.open_named("Logger shutdown errors");
       List pending = Error.since(logger_error_mark);
       foreach (List entry, pending)
         active.log(<error>, <err-report>, entry);
 
-      String.pool_release();
+      Pool.close();
     }
     // exit() can run shutdown while newer registrations are still live
     Error.trim(logger_error_handler, Error.count());

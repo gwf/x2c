@@ -119,7 +119,7 @@ Source: `lib/common.x:786`
 
 Normalizes one element index against `length`.
 
-Source: `lib/common.x:816`
+Source: `lib/common.x:814`
 
 #### x2c_normalize_slice
 
@@ -127,7 +127,7 @@ Source: `lib/common.x:816`
 
 Normalizes slice bounds and returns the resulting element count.
 
-Source: `lib/common.x:836`
+Source: `lib/common.x:834`
 
 ### `Array`
 

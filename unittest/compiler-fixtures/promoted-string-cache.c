@@ -43,11 +43,11 @@ static String take_string(String value){
   return value;
 }
 
-Pool String_pool_retain_named(const char *);
+Pool Pool_open_named(const char *);
 
 PoolStats Pool_stats(Pool);
 
-void String_pool_release(void);
+void Pool_close(void);
 
 int String_equal(String, String);
 
@@ -76,14 +76,14 @@ int main(void){
   Var boxed = header_boxed();
   String child_string = NULL;
   List child_list = NULL;
-  Pool string_pool = String_pool_retain_named("promoted-value-cache");
+  Pool string_pool = Pool_open_named("promoted-value-cache");
   Pool list_pool = string_pool;
   PoolStats string_before = Pool_stats(string_pool);
   PoolStats list_before = Pool_stats(list_pool);
   child_string = header_same();
   child_list = header_list();
   PoolStats string_after = Pool_stats(string_pool), list_after = Pool_stats(list_pool);
-  String_pool_release();
+  Pool_close();
   printf("%d %d %d %d %d %d %d %d %d %d %s %s %s %s\n", String_equal(header_direct(), header_same()), String_equal(header_dual(), source_dual()), String_equal(before_string, child_string), List_equal(before_list, child_list), List_len(child_list), String_len(escaped), String_getindex(escaped, 0), (unsigned char) String_getindex(escaped, 1), String_getindex(escaped, 3), String_getindex(escaped, 4), assigned, direct, dynamic, Var_string(boxed));
   printf("pool %lu %lu\n", (unsigned long)(string_after.interned - string_before.interned), (unsigned long)(list_after.interned - list_before.interned));
   printf("calls %d parens %s nested %s\n", dynamic_calls, header_parens(), Var_string(List_cadr(child_list)));

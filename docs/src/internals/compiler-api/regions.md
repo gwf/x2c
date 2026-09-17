@@ -31,7 +31,7 @@ Source: `src/regions.x:800`
 ## Design notes
 
 A region is a `$scope()` block, a `Scope.retain` and `Scope.release`
-pair, a `$scope(&slot)` push, a `String.pool_retain` bracket, an `$auto`
+pair, a `$scope(&slot)` push, a `Pool.open` bracket, an `$auto`
 local, or a Scope local that `Scope.destroy` ends. The pass reads the
 typed forms the parser produced, before the transform driver rewrites
 them, so a region is still the call that opens it and the `defer` beside

@@ -231,7 +231,7 @@ static void error_counted_bridge_records_site_and_pairs(void) {
 }
 
 static void _raise_collected_from_transient_pools(void) {
-  String.pool_retain_named("error-record-values");
+  Pool.open_named("error-record-values");
   String text = String.malloc(27);
   strcpy(text, "transient collected detail");
   X2CErrorSite site = {
@@ -240,7 +240,7 @@ static void _raise_collected_from_transient_pools(void) {
     .line = 29
   };
   x2c_error_raise_n(&site, <error-prob>, 1, <text>.var(), text.var());
-  String.pool_release();
+  Pool.close();
 }
 
 static void error_collected_record_survives_transient_pools(void) {
@@ -321,14 +321,14 @@ static void error_nested_pop_truncates_exact_watermark(void) {
 
 
 static void _raise_unique_errors(Symbol code, int count) {
-  String.pool_retain_named("error-unique-source-values");
+  Pool.open_named("error-unique-source-values");
   for (int i = 0; i < count; i++) {
     char raw[32];
     snprintf(raw, sizeof raw, "unique-error-%d", i);
     String text = String.new(raw);
     x2c_error_raise_n(NULL, code, 1, <value>.var(), text.var());
   }
-  String.pool_release();
+  Pool.close();
 }
 
 

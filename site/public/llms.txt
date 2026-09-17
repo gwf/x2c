@@ -74,6 +74,7 @@
 - [lib/match.x](https://x2c-lang.dev/docs/library/modules/match.html)
 - [lib/mutex.x](https://x2c-lang.dev/docs/library/modules/mutex.html)
 - [lib/path.x](https://x2c-lang.dev/docs/library/modules/path.html)
+- [lib/pool.x](https://x2c-lang.dev/docs/library/modules/pool.html)
 - [lib/process.x](https://x2c-lang.dev/docs/library/modules/process.html)
 - [lib/regex.x](https://x2c-lang.dev/docs/library/modules/regex.html)
 - [lib/scope.x](https://x2c-lang.dev/docs/library/modules/scope.html)
