@@ -128,7 +128,10 @@ static int _escape_byte(String spelling, int index) {
   if (index == 0 && _numeric_prefix(spelling)) return 1;
   if (ch < 33 || ch > 126) return 1;
   if (strchr("()'`,\"$@[]{}#\\", ch)) return 1;
-  if (index == 0 && ch == '<' && strchr(spelling + 1, '>')) return 1;
+  /* A leading `<` opens a Symbol literal for the reader unless nothing or an
+     `=` follows it, and every other byte this writer escapes begins with a
+     backslash, which does not stop that literal. */
+  if (index == 0 && ch == '<' && length > 1 && spelling[1] != '=') return 1;
   if (ch == '/' && index + 1 < length &&
       (spelling[index + 1] == '/' || spelling[index + 1] == '*'))
     return 1;

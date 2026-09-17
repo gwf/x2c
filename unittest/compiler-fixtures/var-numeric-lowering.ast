@@ -95,7 +95,7 @@
      (op = (bind (binding 22 "shifted") ()) 
       (expr ("Var") 
        (at 17 
-        (op << (expr ("Dynamic") (ident (binding 18 "a"))) 
+        (op \x3C< (expr ("Dynamic") (ident (binding 18 "a"))) 
          (expr ("DynamicAlias") (ident (binding 19 "b")))))))))) 
   (at 20 
    (declare ("Var") 

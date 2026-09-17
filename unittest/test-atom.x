@@ -80,12 +80,46 @@ static void atom_repr_round_trips_lisp_reader(void) {
     "angle<atom>long",
     "paren(atom)long",
     "backslash\\atom-long",
-    "line\nbreak-long"
+    "line\nbreak-long",
+    /* A leading `<` needs escaping whether or not a `>` follows later. */
+    "<no-close-long-atom",
+    "<with-close-long-atom>"
   };
   for (int i = 0; i < sizeof spellings / sizeof spellings[0]; i++) {
     Atom expected = Atom.intern(spellings[i]);
     Symbol status;
     Var actual = _atom_read_lisp(expected.repr(), &status);
+    EXPECT_TRUE(status == <value>);
+    EXPECT_TRUE(actual.u64 == expected.u64);
+  }
+}
+
+
+/* A leading `<` opens a Symbol literal for the reader unless nothing or an
+   `=` follows it, so `Atom.write_repr` escapes it in every other spelling and
+   leaves `<` and `<=` bare. Either way the repr reads back as that Atom. */
+static void atom_write_repr_escapes_leading_angle(void) {
+  String escaped[] = { "<a", "<ab", "<a b", "<\"", "<a>", "<<", "<-", "<<=" };
+  String bare[] = { "<", "<=", "<=x" };
+  for (int i = 0; i < sizeof escaped / sizeof escaped[0]; i++) {
+    Atom expected = Atom.intern(escaped[i]);
+    Buffer out = Buffer.new(0);
+    Atom.write_repr(expected, out);
+    String written = out.str_free();
+    EXPECT_TRUE(written.startswith("\\x3C"));
+    Symbol status;
+    Var actual = _atom_read_lisp(written, &status);
+    EXPECT_TRUE(status == <value>);
+    EXPECT_TRUE(actual.u64 == expected.u64);
+  }
+  for (int i = 0; i < sizeof bare / sizeof bare[0]; i++) {
+    Atom expected = Atom.intern(bare[i]);
+    Buffer out = Buffer.new(0);
+    Atom.write_repr(expected, out);
+    String written = out.str_free();
+    EXPECT_STR_EQ(written, bare[i]);
+    Symbol status;
+    Var actual = _atom_read_lisp(written, &status);
     EXPECT_TRUE(status == <value>);
     EXPECT_TRUE(actual.u64 == expected.u64);
   }
@@ -206,6 +240,7 @@ void atom_suite(void) {
   $test.run(atom_hash_and_string_alignment);
   $test.run(atom_rejects_empty_spelling);
   $test.run(atom_repr_round_trips_lisp_reader);
+  $test.run(atom_write_repr_escapes_leading_angle);
   $test.run(atom_list_literals_are_exact);
   $test.run(atom_list_angles_only_quote_spelling);
   $test.run(atom_list_and_lisp_readers_canonicalize);

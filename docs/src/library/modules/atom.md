@@ -86,7 +86,7 @@ Repeated calls after successful registration have no effect.
 `<alloc-fail>` while lower-casing the descriptor name, or `<init-fail>`
 when registration returns zero.
 
-Source: `lib/atom.x:164`
+Source: `lib/atom.x:167`
 
 <a id="Atom.intern"></a>
 #### Atom.intern
@@ -107,7 +107,7 @@ its canonical `String` cannot be allocated, or `<bad-enc>` if the
 long-`Atom`
 pointer cannot be boxed.
 
-Source: `lib/atom.x:217`
+Source: `lib/atom.x:220`
 
 <a id="Atom.promote"></a>
 #### Atom.promote
