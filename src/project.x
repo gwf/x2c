@@ -281,10 +281,41 @@ static void _set_dependency(Project p, int line, String key, String value) {
   *link = entry;
 }
 
+/* Whether `value` opens an array that no later bracket closes, so the field
+   continues on the next manifest line. A bracket inside a quoted string is
+   part of the string. */
+static int _array_open(String value) {
+  int depth = 0, quoted = 0;
+  for (const char *ch = value; *ch; ch++) {
+    if (quoted) {
+      if (*ch == '\\' && ch[1]) ch++;
+      else if (*ch == '"') quoted = 0;
+    }
+    else if (*ch == '"') quoted = 1;
+    else if (*ch == '[') depth++;
+    else if (*ch == ']') depth--;
+  }
+  return depth > 0;
+}
+
+typedef enum ManifestSection {
+  NONE, PROJECT, TARGET, PROFILE, DEPENDENCIES
+} ManifestSection;
+
+static void _set_field(
+  Project p, ManifestSection section, ProjectTarget target,
+  ProjectProfile profile, int line, String key, String value) {
+  if (section == PROJECT) _set_project_field(p, line, key, value);
+  else if (section == DEPENDENCIES) _set_dependency(p, line, key, value);
+  else if (section == TARGET) _set_target_field(p, target, line, key, value);
+  else _set_profile_field(p, profile, line, key, value);
+}
+
 static void _parse_manifest(Project p) {
-  enum { NONE, PROJECT, TARGET, PROFILE, DEPENDENCIES } section = NONE;
+  ManifestSection section = NONE;
   ProjectTarget target = NULL;
   ProjectProfile profile = NULL;
+  String open_key = NULL, open_value = NULL, int open_line = 0;
   List lines = p.text.split_lines(0), int line_number = 0;
   foreach (String owned, lines) {
     line_number++;
@@ -296,6 +327,13 @@ static void _parse_manifest(Project p) {
     _strip_comment(line);
     line = _trim(line);
     if (!*line) continue;
+    if (open_key) {
+      open_value = %"$open_value ${String.new(line)}";
+      if (_array_open(open_value)) continue;
+      _set_field(p, section, target, profile, open_line, open_key, open_value);
+      open_key = NULL;
+      continue;
+    }
     if (*line == '[') {
       int length = strlen(line);
       if (length < 3 || line[length - 1] != ']')
@@ -362,13 +400,15 @@ static void _parse_manifest(Project p) {
       section == TARGET ? target.seen : profile.seen,
       key
     );
-    if (section == PROJECT) _set_project_field(p, line_number, key, value);
-    else if (section == DEPENDENCIES)
-      _set_dependency(p, line_number, key, value);
-    else if (section == TARGET)
-      _set_target_field(p, target, line_number, key, value);
-    else _set_profile_field(p, profile, line_number, key, value);
+    if (_array_open(value)) {
+      open_key = key;
+      open_value = value;
+      open_line = line_number;
+      continue;
+    }
+    _set_field(p, section, target, profile, line_number, key, value);
   }
+  if (open_key) _error(p, open_line, "unterminated array");
   if (!p.targets) _error(p, 0, "manifest defines no targets");
 }
 
