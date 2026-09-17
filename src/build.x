@@ -29,6 +29,7 @@ typedef struct Build {
   int temporary, Array c_sources, gen_dirs, native_inputs, objects, units;
   String compile_directory, Array compile_commands;
   unsigned long started_at;
+  double started_wall;
   unsigned long xlat_start;
   unsigned long cc_start;
   unsigned long final_at;
@@ -43,6 +44,7 @@ typedef struct Build {
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "json.x"
@@ -55,6 +57,14 @@ static String _key(String path) {
   // The stem is interpolated, never a format: a path may contain a percent.
   String stem = Path.stem(path), digest = "%08x".printf(path.hash());
   return %"$stem-$digest";
+}
+
+/* Wall-clock seconds in the scale `Path.modified_time` reports, so a build
+   can tell whether a file it read has been written since it started. */
+static double _wall_seconds(void) {
+  struct timespec now;
+  if (clock_gettime(CLOCK_REALTIME, &now)) return 0;
+  return (double) now.tv_sec + (double) now.tv_nsec / 1e9;
 }
 
 /* Names one process's private sibling of a shared artifact path. Concurrent
@@ -177,6 +187,23 @@ static void _state_write(String path, uint64_t hash) {
   _state_write_lines(path, hash, NULL);
 }
 
+/* Whether every file the build read still carries the contents it read. A
+   fingerprint is taken after the work it describes, so a file written while
+   the build ran would record contents the artifact was not built from.
+   Recording nothing leaves the artifact in place and rebuilds it next time.
+   Every caller asks after hashing, never before: a write that reached the
+   hash has already moved the modification time this reads. The build's own
+   output under the work directory is not one of those files. */
+static int _files_unchanged(Build b, List files) {
+  String work = %"${Path.absolute(b.work_dir)}/";
+  foreach (String path, files) {
+    if (Path.absolute(path).startswith(work)) continue;
+    if (Path.is_file(path) && Path.modified_time(path) >= b.started_wall)
+      return 0;
+  }
+  return 1;
+}
+
 /** Exits with a driver error unless `input` names a regular file.
     A wildcard or directory operand adds a note on what to pass instead.
 */
@@ -254,6 +281,7 @@ Build CliRequest.prepare(CliRequest c) {
   }
   else state.output = "a.out";
   state.started_at = report_now_us();
+  state.started_wall = _wall_seconds();
   if (c.build_dir) state.work_dir = c.build_dir;
   else if (c.temps_dir) state.work_dir = c.temps_dir;
   else if (c.save_temps) state.work_dir = ".x2c-build";
@@ -334,15 +362,19 @@ int Build.translation_current(Build state, String input, String directory) {
 }
 
 /** Records the successful translation fingerprint when retained state exists.
-    Dry runs and incomplete fingerprints are ignored. Writing the private
+    Dry runs, incomplete fingerprints, and a source edited while the build ran
+    are ignored, so the generated C is never reused for an input it does not
+    match. Writing the private
     state file is best effort; after a write or rename failure, cleanup
     attempts to unlink the temporary file but cannot guarantee its removal.
 */
 void Build.record_translation(Build state, String input, String directory) {
   if (!state.state_root || state.request.dry_run) return;
+  String depfile = %"$directory/${Path.stem(input)}.d";
   int ok = 1;
   uint64_t hash = _translation_fingerprint(state, input, directory, &ok);
-  if (ok) _state_write(%"${state.state_root}/x-${_key(input)}", hash);
+  if (ok && _files_unchanged(state, _state_dep_inputs(depfile)))
+    _state_write(%"${state.state_root}/x-${_key(input)}", hash);
 }
 
 /* The one line of link flags the package needs besides its archive. Both
@@ -949,7 +981,8 @@ List Build.script_helpers(Build b) {
     `executable` and records what it was built from, so
     `CliRequest.script_current` can reuse it. The record lists
     the script's translation and compile prerequisites, package archives, and
-    the runtime archive.
+    the runtime archive. A file changed while the build ran records nothing,
+    so the executable is never reused for source it was not built from.
     Raises: `<io-fail>` when the executable cannot be moved.
 */
 void Build.publish_script(Build b, String executable) {
@@ -974,7 +1007,8 @@ void Build.publish_script(Build b, String executable) {
   List paths = files.append(b._script_directories(files));
   int ok = 1;
   uint64_t hash = _script_fingerprint(b.request, b.toolchain.cc, paths, &ok);
-  if (ok) _state_write_lines(%"${b.state_root}/script", hash, paths);
+  if (ok && _files_unchanged(b, files))
+    _state_write_lines(%"${b.state_root}/script", hash, paths);
 }
 
 /** Reports whether the script executable under `directory` still matches
