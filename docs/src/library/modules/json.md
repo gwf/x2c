@@ -94,7 +94,7 @@ Replaces the file at `path` with `value` as compact JSON text.
 
 **Raises:** the causes of `Var.json` and `Path.write_text`.
 
-Source: `lib/json.x:561`
+Source: `lib/json.x:570`
 
 ### `JsonBool`
 
@@ -143,16 +143,18 @@ Source: `lib/json.x:54`
 
 Returns `value` as compact JSON text.
 `Map` names are written in byte order and must be `String`s or
-`Symbol`s; a `Symbol` value is written as a string. A `List` is written
-as an array. A `double` is written with the fewest digits that read back
-to the same value. Each maximal ill-formed UTF-8 subsequence in a string
-is written as U+FFFD, as Python and JavaScript decoders replace it.
+`Symbol`s with distinct spellings; a `Symbol` value is written as a
+string. A `List` is written as an array. A `double` is written with the
+fewest digits that read back to the same value. Each maximal ill-formed
+UTF-8 subsequence in a string is written as U+FFFD, as Python and
+JavaScript decoders replace it.
 
-**Raises:** `<bad-types>` for a value or name JSON cannot hold,
+**Raises:** `<bad-types>` for a value or name JSON cannot hold, `<bad-arg>`
+for a `String` and a `Symbol` name with the same spelling,
 `<conv-range>` for NaN or an infinity, or `<size-limit>` for nesting
 deeper than 512 levels.
 
-Source: `lib/json.x:551`
+Source: `lib/json.x:560`
 
 <a id="Var.jsonbool"></a>
 #### Var.jsonbool
@@ -172,7 +174,7 @@ Returns `value` as JSON text indented two spaces per level.
 
 **Raises:** the causes of `Var.json`.
 
-Source: `lib/json.x:556`
+Source: `lib/json.x:565`
 
 ## Public types
 

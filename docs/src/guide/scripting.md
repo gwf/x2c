@@ -119,10 +119,10 @@ if (%(make test).job().live().status())
 
 `check`, `run`, `output`, and `lines` raise `<cmd-fail>` when the status is
 not zero. The detail has `command` and `status` entries, plus `output` and
-`errors` entries when they were captured. `status` and `errors` raise only
-when a program cannot start, so a script can read standard error after a
-nonzero status. When a program cannot start, the job raises `<not-found>`
-for a missing program or directory, and `<io-fail>` for anything else:
+`errors` entries when they were captured. `status` and `errors` do not
+raise for a nonzero status, so a script can read standard error after one.
+When a program cannot start, the job raises `<not-found>` for a missing
+program or directory, and `<io-fail>` for anything else:
 
 ```x2c
 ~#include "process.x"
@@ -138,6 +138,10 @@ catch %(not-found *):
 
 In a script, a `<cmd-fail>` that nothing catches ends the script with the
 command's status.
+
+Captured output is text. When the captured bytes contain a NUL, `output`,
+`lines`, and `errors` raise `<bad-arg>`, and `status` still reports the run.
+Send binary output to a file with the `stdout` option instead.
 
 ### Pipelines
 
@@ -179,9 +183,11 @@ String upper = %(tr a-z A-Z).job().options({input: "quiet"}).output();
 | `stdout` | `capture` (the default), `inherit`, or a file path |
 | `stderr` | `inherit` (the default), `capture`, `stdout` to merge, or a file path |
 
-`stdout` applies to the last stage of a pipeline, and `stderr` to every
-stage. `live()` is the same as `options({stdout: <inherit>})`. An unknown key,
-such as a misspelled `dir`, raises `<bad-arg>`. Changing options or adding a
+Without `input`, the first stage reads the script's standard input, and an
+empty `input` gives it an empty one. `stdout` applies to the last stage of a
+pipeline, and `stderr` to every stage. `live()` is the same as
+`options({stdout: <inherit>})`. An unknown key, such as a misspelled `dir`,
+raises `<bad-arg>`. Changing options or adding a
 stage after the job has started also raises `<bad-arg>`.
 
 ### Background jobs
@@ -206,7 +212,8 @@ while (running.len()) Job.wait_any(running).check();
 
 `kill` sends a signal to every stage still running. A job held with `$auto`
 is terminated and reaped if it is still running when its block exits,
-including when an error leaves the block:
+including when an error leaves the block. Each stage receives `SIGTERM`,
+and a stage still running a second later receives `SIGKILL`:
 
 ```x2c
 ~#include "process.x"
@@ -266,14 +273,17 @@ filesystem records.
 `list_dir` returns the sorted names in one directory. `walk` lazily yields
 every path below a directory. `glob` returns the paths that match a pattern,
 where `**` matches any number of directories. As in a shell, a wildcard does
-not match a leading dot, so `*` skips `.git` while `.*` finds it.
+not match a leading dot, so `*` skips `.git` while `.*` finds it. A pattern
+that ends with a slash, such as `src/*/`, finds only directories.
 
 ### Changing the filesystem
 
 `make_dirs`, `remove_file`, `remove_tree`, `copy_file`, `copy_tree`,
 `move_to`, and `symlink_to` change the filesystem. Removing something that is
-already gone succeeds. `read_text` and `write_text` read and replace a whole
-file. `Path.temp_dir` creates a private directory:
+already gone succeeds. Copying a file onto itself leaves it unchanged, and
+copying a directory into itself raises `<io-fail>`. `read_text` and
+`write_text` read and replace a whole file. `Path.temp_dir` creates a
+private directory:
 
 ```x2c
 ~#include "path.x"
