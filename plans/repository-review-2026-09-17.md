@@ -566,8 +566,11 @@ Decided 2026-09-17 by Gary unless marked open.
   address-escape rule qualified `foreach` cursors and `sigset_t` locals and
   produced more warnings than it removed. The decision is how the address is
   spelled at the call, not which locals carry the qualifier.
-- **`make debug` (Group 13).** Open: the target rewrites tracked
-  `etc/build-mode`, which is what it has always done (d7bb8da).
+- **`make debug` (Group 13).** Decided 2026-09-17: keep the target, but write
+  the mode to an untracked local file that the build configuration reads, with
+  the tracked `etc/build-mode` as the committed default. Today a mode switch
+  dirties a tracked file, which collides with the gate's unchanged-tree rule
+  and can be committed by accident.
 
 ## Resolved since the baseline
 
