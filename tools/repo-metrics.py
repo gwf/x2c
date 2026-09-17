@@ -38,7 +38,6 @@ BOLD = "\033[1m"
 RESET = "\033[0m"
 LISP_PATTERNS = ("src/*.xlisp", "lib/*.xlisp", "etc/*.xlisp")
 MACRO_PATTERNS = ("src/*.xmacro", "lib/*.xmacro", "etc/*.xmacro")
-GENERATED_LISP = set()
 SUMMARY_GROUPS = {
     "src": "src/*.x",
     "lib": "lib/*.x",
@@ -96,7 +95,6 @@ def source_paths(patterns, root: pathlib.Path = ROOT) -> list[pathlib.Path]:
     return sorted({
         path for pattern in patterns for path in root.glob(pattern)
         if path.is_file()
-        and path.relative_to(root).as_posix() not in GENERATED_LISP
     })
 
 

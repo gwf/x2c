@@ -47,7 +47,6 @@ class ConfigureTests(unittest.TestCase):
         self.assertIn("missing core build tool: x2c-missing-ar", result.stderr)
         self.assertNotIn("-C bootstrap", result.stdout)
         self.assertNotIn("-C builds", result.stdout)
-        self.assertNotIn("sym-ensure", result.stdout)
 
 
 if __name__ == "__main__":

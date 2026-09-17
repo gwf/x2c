@@ -149,9 +149,9 @@ through `Var.new`'s variadic interface, and pair construction needs declared
 initialization needed no translation and disappeared with the storage
 forwarders.
 
-The focused build then passed. `sym-check` failed because
-`etc/symbols.xlisp` still named the deleted private functions. The correct next
-step was `make sym-refresh` and review of those removals, not restoration of
-the functions. Apply that distinction everywhere: compiler or behavior
-failures require more design work; exact artifact deletions require the
-documented refresh target.
+The focused build then passed, and the checked-in `bootstrap/` C still named
+the deleted private functions. The correct next step was the documented
+refresh through the publication command and review of those removals, not
+restoration of the functions. Apply that distinction everywhere: compiler or
+behavior failures require more design work; exact artifact deletions require
+the documented refresh target.
