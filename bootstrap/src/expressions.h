@@ -8,11 +8,21 @@
 #include "x2c.h"
 #include "compiler.h"
 #include "type.h"
+typedef struct PrintfFn{
+  const char * name;
+  int fmt_arg, first_arg, unresolved;
+}
+PrintfFn;
+
 List Compiler_complete_iter_chain(Compiler compiler, List expression);
+
+const PrintfFn * List_printf_family(List l);
 
 List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field, Symbol access, int call_context);
 
 List Compiler_parse_macro_expression_target(Compiler compiler);
+
+List Compiler_promote_string_literal(Compiler c, List expr);
 
 void Compiler_check_explicit_converter(Compiler c, List parsed, Type target, int context);
 

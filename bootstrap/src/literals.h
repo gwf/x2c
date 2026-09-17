@@ -21,6 +21,8 @@ List Compiler_parse_catch_pattern_literal(Compiler c);
 
 List Compiler_parse_array_literal(Compiler compiler);
 
+int Compiler_map_entry_macro_follows(Compiler c);
+
 List Compiler_parse_map_entry(Compiler compiler);
 
 List Compiler_parse_map_entries(Compiler c);

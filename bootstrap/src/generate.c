@@ -1077,9 +1077,10 @@ static void _forward_tags(List node, Map forwarded, Array header){
 }
 
 int Ast_never_returns(Ast);
+int List_contains(List, Var);
 Type List_type(List);
 static void _partition_function(Array header, Array source, Type type, List declarator, Ast body, Map forwarded){
-  if(Ast_never_returns(body)) type = List_type(cons(_236, List_append(Type_list(type), NULL)));  List function = cons(_37, cons(List_var(type), cons(List_var(declarator), cons(List_var(body), NULL))));  if(Type_is_static(type)){
+  if(Ast_never_returns(body) && ! List_contains(Type_list(type), List_var(_235))) type = List_type(cons(_236, List_append(Type_list(type), NULL)));  List function = cons(_37, cons(List_var(type), cons(List_var(declarator), cons(List_var(body), NULL))));  if(Type_is_static(type)){
     _push_spaced(source, _source_function(function, type));  return;
   }
   _forward_tags(cons(List_var(type), cons(List_var(declarator), NULL)), forwarded, header);  _push_spaced(header, _header_function(type, declarator, body));  _push_spaced(source, _source_function(function, type));
@@ -1197,7 +1198,6 @@ return NULL;
 }
 
 Var List_getindex(List, int);
-int List_contains(List, Var);
 Var Array_setindex(Array, int, Var);
 int Array_try_next(Array, int *, Var *);
 static List _resolve_typedef_markers(Array items, Array pending, int header){

@@ -1482,9 +1482,10 @@ static List Compiler__publish_protocol_adoption(Compiler c, Type base, Type part
     else Map_setindex(c -> protocol_helpers, List_var(key), List_var(_adoption_node(base, participant, storage, representation, tag_expression, location)));
   }
   Compiler__install_protocol_adoption(c, base, participant, storage, representation, tag, tag_expression, location);
+  int resolved = Map_contains(c -> conforms, List_var(cons(List_var(base), cons(List_var(participant), NULL))));
   Map_del(c -> conforms, List_var(cons(List_var(base), cons(List_var(participant), NULL))));
   c -> proto_cache = Map_new();
-  if(! c -> shallow) _resolve_declared_adoption(c, base, participant, location);
+  if(! c -> shallow) _resolve_declared_adoption(c, base, participant, resolved ? NULL : location);
   List published = _adoption_node(base, participant, storage, representation, tag_expression, location);
   Compiler__retain_protocol_source_node(c, published, storage, location);
   return published;

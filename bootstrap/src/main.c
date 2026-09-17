@@ -239,15 +239,6 @@ static List _transform_ast(Compiler compiler, List ast){
   List Compiler_transform(Compiler compiler, List ast);  ast = Compiler_transform(compiler, ast);  if(Compiler_error_count(compiler)){
     _report_diagnostics(compiler);  exit(1);
   }
-  if(opts -> dump == 1447057375073126){
-    {
-      List node;  List _x2c_macro_object_1 = ast;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
-        node = Var_list(_x2c_macro_cursor_output_1);  printf("\n%s\n", _ast_inspection_repr(node));
-      }
-
-    }
-    exit(0);
-  }
   return ast;
 }
 
@@ -262,8 +253,8 @@ void Compiler_dump_cache(Compiler);
 Map Sym_current_symbols(Sym);
 void Compiler_dump_conformance(Compiler, Map);
 List Compiler_generate_protocol_adapters(Compiler, List);
-List Compiler_emit(Compiler, List);
 char * Compiler_code_pretty_string(Compiler, List, String);
+List Compiler_emit(Compiler, List);
 void generate_code(Compiler, List, String);
 int translation_depfile_write(CliRequest, Compiler, String, String);
 static void _compile_file(Frontend frontend, String filename, String output_dir){
@@ -284,18 +275,32 @@ static void _compile_file(Frontend frontend, String filename, String output_dir)
     Compiler_own_diagnostics(compiler);
     if(opts -> dump == 1374366630){
       Compiler_dump_tokens(compiler);
-      exit(0);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return;
+      }
+
     }
     ok = ParsedUnit_collect(&(unit), frontend);
     _report_diagnostics(compiler);
     if(! ok) exit(1);
     switch(opts -> dump){
       case 320883072032 : if(String_truth(unit.preprocessor_output)) File_printf(Stderr, "%s", unit.preprocessor_output);
-      exit(0);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return;
+      }
       case 247458062609318 : if(unit.preprocessor) Compiler_dump_tokens(unit.preprocessor);
-      exit(0);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return;
+      }
       case 10268258311770 : if(unit.preprocessor) Compiler_dump_symbol_table(unit.preprocessor, unit.globals);
-      exit(0);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return;
+      }
+
     }
     if(! ParsedUnit_parse(&(unit))){
       _report_diagnostics(compiler);
@@ -305,21 +310,31 @@ static void _compile_file(Frontend frontend, String filename, String output_dir)
     List ast = unit.ast;
     switch(opts -> dump){
       case 328584264751626 : Compiler_dump_cache(compiler);
-      exit(0);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return;
+      }
       case 42507336486 : Compiler_dump_symbol_table(compiler, Sym_current_symbols(compiler -> sym));
-      exit(0);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return;
+      }
       case 320883068136 :{
         List node;
-        List _x2c_macro_object_2 = ast;
-        List _x2c_macro_cursor_2 = _x2c_macro_object_2;
-        Var _x2c_macro_cursor_output_2;
-        while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
-          node = Var_list(_x2c_macro_cursor_output_2);
+        List _x2c_macro_object_1 = ast;
+        List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+        Var _x2c_macro_cursor_output_1;
+        while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+          node = Var_list(_x2c_macro_cursor_output_1);
           printf("\n%s\n", _ast_inspection_repr(node));
         }
 
       }
-      exit(0);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return;
+      }
+
     }
     if(opts -> dump == 7478869146){
       printf("(unit %s)\n", filename);
@@ -332,10 +347,28 @@ static void _compile_file(Frontend frontend, String filename, String output_dir)
     }
     ast = Compiler_generate_protocol_adapters(compiler, ast);
     ast = _transform_ast(compiler, ast);
-    if(opts -> dump == 10268258302218){
-      ast = Compiler_emit(compiler, ast);
-      puts(Compiler_code_pretty_string(compiler, ast, NULL));
-      exit(0);
+    switch(opts -> dump){
+      case 1447057375073126 :{
+        List node;
+        List _x2c_macro_object_2 = ast;
+        List _x2c_macro_cursor_2 = _x2c_macro_object_2;
+        Var _x2c_macro_cursor_output_2;
+        while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+          node = Var_list(_x2c_macro_cursor_output_2);
+          printf("\n%s\n", _ast_inspection_repr(node));
+        }
+
+      }
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return;
+      }
+      case 10268258302218 : puts(Compiler_code_pretty_string(compiler, Compiler_emit(compiler, ast), NULL));
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return;
+      }
+
     }
     generate_code(compiler, ast, output_dir);
     if(! translation_depfile_write(request, compiler, filename, output_dir)) exit(1);

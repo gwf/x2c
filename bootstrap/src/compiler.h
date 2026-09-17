@@ -48,9 +48,9 @@ typedef struct Compiler{
   SymScope params;
   Map key_ids, macros, kw_aliases;
   Map object_macros;
-  Array arms;
-  Token arms_token;
-  int arm_serial;
+  List arms;
+  Map arm_stacks;
+  Token directives_taken;
   Map kw_seen;
   Map fixed;
   Map protocols, conforms, protocol_helpers;
@@ -145,6 +145,12 @@ void Compiler_tokenize(Compiler c, char * text);
 
 Token Compiler_skip_trivia_from(Compiler compiler, Token token);
 
+int Symbol_group_step(Symbol s);
+
+Token Token_group_close(Token t);
+
+Token Token_after_group(Token t);
+
 Symbol Compiler_peek(Compiler compiler, int steps);
 
 Symbol Compiler_expect(Compiler c, Symbol type);
@@ -163,7 +169,7 @@ List Compiler_anchor_origin(Compiler compiler, List node, Token token);
 
 int Compiler__at_function_arrow(Compiler compiler);
 
-void Compiler__skip_shallow_expression(Compiler compiler, int stop_at_comma);
+void Compiler__skip_shallow_expression(Compiler c, int stop_at_comma);
 
 void Compiler_skip_script_statement(Compiler c);
 

@@ -37,7 +37,7 @@ static void _publish_limit_notice(Diagnostics diag);
 
 static void Diagnostics__warn(Diagnostics diag, Symbol code, String message, List location, List notes);
 
-static void _emit_note_summaries(List notes);
+static String _note_line(List l);
 
 static String Compiler__json_path(Compiler compiler, String path);
 
@@ -224,8 +224,6 @@ static void _publish_limit_notice(Diagnostics diag){
   _emit_entry(diag, entry);
 }
 
-int Array_contains(Array, Var);
-
 void Diagnostics_report(Diagnostics diag, Symbol code, String message, List location, List notes){
   if(! _init_guard_) _file_init_();
   if(diag -> limit > 0 && diag -> count >= diag -> limit){
@@ -236,7 +234,6 @@ void Diagnostics_report(Diagnostics diag, Symbol code, String message, List loca
     return;
   }
   List entry = _build_entry(code, 11703268, message, location, notes);
-  if(Array_contains(diag -> entries, List_var(entry))) return;
   Array_push(diag -> entries, List_var(entry));
   diag -> count += 1;
   _emit_entry(diag, entry);
@@ -253,17 +250,15 @@ static void Diagnostics__warn(Diagnostics diag, Symbol code, String message, Lis
   _emit_entry(diag, entry);
 }
 
-int List_truth(List);
-
 List List_filter(List, Func);
+
+int List_truth(List);
 
 String String_join(String, List);
 
-static void _emit_note_summaries(List notes){
-  if(! List_truth(notes)) return;
-  List strings = List_filter(notes, _x2c_func_handle_0);
-  if(! List_truth(strings)) return;
-  fprintf(stderr, "  note: %s\n", String_join(_5, strings));
+static String _note_line(List l){
+  List strings = List_filter(l, _x2c_func_handle_0);
+  return List_truth(strings) ? String_join(_5, strings) : NULL;
 }
 
 int diagnostics_write_json(String path){
@@ -318,8 +313,6 @@ int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
 int Var_int(Var);
 
-Buffer Buffer_write_char(Buffer, char);
-
 static void Compiler__write_json(Compiler compiler, List entry){
   Symbol code = Var_symbol(List_assoc(entry, Symbol_var(227594)));
   List location = Var_list(List_assoc(entry, Symbol_var(857050729436))), notes = Var_list(List_assoc(entry, Symbol_var(30384486)));
@@ -358,23 +351,8 @@ static void Compiler__write_json(Compiler compiler, List entry){
 
     }
     Buffer_write(out, ",\"notes\":[");
-    int comma = 0;
-    {
-      Var note;
-      List _x2c_macro_object_1 = notes;
-      List _x2c_macro_cursor_1 = _x2c_macro_object_1;
-      Var _x2c_macro_cursor_output_1;
-      while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
-        note = _x2c_macro_cursor_output_1;
-        {
-          if(! Var_is_row(note, 11, 7, 1)) continue;
-          if(comma ++) Buffer_write_char(out, ',');
-          report_json_string(out, Var_string(note));
-        }
-
-      }
-
-    }
+    String note = _note_line(notes);
+    if(String_truth(note)) report_json_string(out, note);
     Buffer_write(out, "]}\n");
     while(write(diagnostics_json, out -> content -> bytes, out -> content -> length) < 0 && errno == EINTR){
 
@@ -410,7 +388,8 @@ void Compiler_print_diagnostic(Compiler compiler, List entry){
     Compiler__show_source_context(compiler, location);
   }
   else fprintf(stderr, "%s: %s\n", Symbol_str(code), message);
-  _emit_note_summaries(notes);
+  String note = _note_line(notes);
+  if(String_truth(note)) fprintf(stderr, "  note: %s\n", note);
   fprintf(stderr, "\n");
   fflush(stderr);
 }
@@ -491,7 +470,7 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
   List loc = _compiler_location(compiler, token);
   Diagnostics_report(diag, code, message, loc, notes);
   if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 370};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 362};
     x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));
     __builtin_unreachable();
   }
@@ -605,13 +584,13 @@ void Compiler_dump_symbol_table(Compiler compiler, Map map){
   if(! _init_guard_) _file_init_();
   {
     Var key, value;
-    Map _x2c_macro_object_2 = map;
-    unsigned _x2c_macro_cursor_2 = 0;
+    Map _x2c_macro_object_1 = map;
+    unsigned _x2c_macro_cursor_1 = 0;
+    Var _x2c_macro_cursor_output_1;
     Var _x2c_macro_cursor_output_2;
-    Var _x2c_macro_cursor_output_3;
-    while(Map_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2, & _x2c_macro_cursor_output_3)){
-      key = _x2c_macro_cursor_output_2;
-      value = _x2c_macro_cursor_output_3;
+    while(Map_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1, & _x2c_macro_cursor_output_2)){
+      key = _x2c_macro_cursor_output_1;
+      value = _x2c_macro_cursor_output_2;
       printf("%s ==>\n%s\n", Var_str(key), Var_str(value));
     }
 
@@ -625,13 +604,13 @@ void Compiler_dump_cache(Compiler compiler){
   if(! _init_guard_) _file_init_();
   {
     Var key, value;
-    Map _x2c_macro_object_3 = compiler -> key_ids;
-    unsigned _x2c_macro_cursor_3 = 0;
+    Map _x2c_macro_object_2 = compiler -> key_ids;
+    unsigned _x2c_macro_cursor_2 = 0;
+    Var _x2c_macro_cursor_output_3;
     Var _x2c_macro_cursor_output_4;
-    Var _x2c_macro_cursor_output_5;
-    while(Map_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_4, & _x2c_macro_cursor_output_5)){
-      key = _x2c_macro_cursor_output_4;
-      value = _x2c_macro_cursor_output_5;
+    while(Map_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_3, & _x2c_macro_cursor_output_4)){
+      key = _x2c_macro_cursor_output_3;
+      value = _x2c_macro_cursor_output_4;
       printf("%s\t==>\t%s\n", Var_repr(value), Var_repr(key));
     }
 
