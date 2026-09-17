@@ -15,7 +15,8 @@ It exits 0 for valid and 1 for stale, so a shell can branch on it.
 
 `ensure` accepts the two publication gates, reuses a valid record, or runs the
 corresponding Make target with live output and records the resulting tree only
-after success. `check` remains available for direct inspection.
+after success, and only when nothing but the gate's own regenerated outputs
+changed while it ran. `check` remains available for direct inspection.
 Records are in untracked `debug/`, so they belong to this workspace and
 never travel with a commit.
 """
@@ -285,14 +286,6 @@ def differences(old: dict, new: dict) -> list[str] | None:
     return reasons
 
 
-def _record(gate: str) -> int:
-    records = load()
-    records[gate] = digest()
-    save(records)
-    print(f"recorded {gate} green for this tree")
-    return 0
-
-
 def cmd_check(gate: str | None) -> int:
     records = load()
     current = digest()
@@ -324,6 +317,16 @@ def run_gate(gate: str) -> int:
     return subprocess.run(["make", gate], cwd=ROOT, check=False).returncode
 
 
+# Tracked outputs that the gate itself regenerates from digested sources.
+GATE_OUTPUTS = ("bootstrap/", "lib/x2c.x")
+
+
+def sources(record: dict) -> dict:
+    files = {name: value for name, value in record["files"].items()
+             if not name.startswith(GATE_OUTPUTS)}
+    return {**record, "files": files}
+
+
 def cmd_ensure(gate: str) -> int:
     if gate not in GATES:
         allowed = ", ".join(sorted(GATES))
@@ -331,10 +334,21 @@ def cmd_ensure(gate: str) -> int:
         return 2
     if cmd_check(gate) == 0:
         return 0
+    before = digest()
     result = run_gate(gate)
     if result:
         return result
-    return _record(gate)
+    after = digest()
+    moved = differences(sources(before), sources(after))
+    if moved:
+        print(f"{gate}: not recorded - the tree moved during the gate: "
+              f"{'; '.join(moved)}")
+        return 1
+    records = load()
+    records[gate] = after
+    save(records)
+    print(f"recorded {gate} green for this tree")
+    return 0
 
 
 def main() -> int:
