@@ -129,7 +129,7 @@ through memory avoids the problem, and the spike already draws exactly this
 distinction for address-taken locals. Map-backed locals cost a lookup;
 parameter locals cost nothing.
 
-### Raise `LISP_AUTO_PARAM_MAX` from 8 to 32
+### Measured: the machine's parameter ceiling
 
 Locals-as-parameters has a ceiling. `LISP_AUTO_PARAM_MAX` in `lib/lisp.x`
 is 8, and a lowered loop carrying more parameters than that falls off the
@@ -189,7 +189,61 @@ All work stays on `x2c-lowers-to-lisp`. No push to `main`, no PR against
 
 ## Implementation
 
-### M0 - prove the lowering on the machine
+### M0 - prove the lowering on the machine  (DONE 2026-09-17)
+
+Implemented in `.context/spike/lower-direct.xlisp`. The lowering substitutes
+straight-line assignments symbolically, puts a complete tail call in each
+`cond` branch, emits one global function per loop, and inlines the rest of
+the block at the loop's exit. It screens the function first and hands
+anything it cannot carry to the SDK lowering, so all 22 spike functions
+still match native execution.
+
+Measured end to end, the whole compiler run including startup and
+translation, against a 0.46 s baseline with no compile-time call:
+
+| workload | SDK lowering | direct lowering |
+|---|---|---|
+| `spin(100000)` | 12.07 s | 0.77 s |
+| `spin(1000000)` | - | 3.85 s |
+
+That is about 295,000 loop iterations per second against 6,800, a 43x
+improvement, and it stays linear to a million iterations. It is 2.3x short
+of the 672,000 the hand-written ideal reaches, because every operator still
+goes through `_binary` with a Symbol rather than Lisp's own `+` and `<`;
+closing that gap is an M1 question, because `<` returns a Lisp truth value
+rather than a C `int` and the two uses have to be told apart.
+
+Three constraints the implementation ran into, each recorded because it
+shapes M1:
+
+- **Generated names must be at most seven characters.** A compact `Symbol`
+  packs seven characters of this alphabet and silently truncates beyond
+  that, so `lower.loop1` becomes `lower.l` and two loops would collide.
+  Names are therefore positional: loops are `lwN`, parameters are `pN`.
+- **Substitution duplicates work.** A local read several times has its
+  expression copied to each read, which can grow the body past what the
+  machine will prepare; the result then runs on the evaluator. A size
+  guard declines a substituted value over 512 nodes. A wide live set is
+  still not machine-prepared, and the binding limit there is
+  `MACHINE_CODE_MAX`, not the parameter count.
+- **`binder?` in `etc/init.xlisp` misses long binders.** A binder of ten
+  or more characters reads as an `lsym` rather than a `Symbol`, and
+  `symbol?` is false for it, so `match-case` does not bind it while
+  `match` does. Changing `binder?` to accept both broke the spike's own
+  translation for reasons not yet understood, so the lowering avoids long
+  binder names and the defect is left for its own investigation.
+
+### Superseded: raise `LISP_AUTO_PARAM_MAX` from 8 to 32
+
+Kept for the measurement, not adopted. The synthetic carried-locals
+benchmark below is real, but on a function with a wide live set the raise
+bought nothing end to end, because substitution had already grown the body
+past the machine's code budget. Raising it also invalidates the premise of
+`lisp_auto_declined_form_releases_programs`, which uses a nine-argument
+call as its example of a form that declines. Revisit in M1 together with
+the code-size limit, since neither is worth changing alone.
+
+### Original M0 statement
 
 Implement the substitution lowering above for the loop shapes it covers,
 keeping the spike's existing path for everything it declines, so the 22
