@@ -114,7 +114,7 @@ Var Var.integer_box(Symbol target, unsigned long long raw) {
     case <u48>: result = Var.new(<u48>, (unsigned long) raw); break;
     case <long>: result = Var.box_long((long) signed_value); break;
     case <ulong>: result = Var.box_ulong((unsigned long) raw); break;
-    case <llong>: result = Var.box_long_long((long long) signed_value); break;
+    case <llong>: result = Var.box_long_long(signed_value); break;
     case <ullong>: result = Var.box_ulong_long(raw); break;
     default: raise %(bad-target (target $target));
   }

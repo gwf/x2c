@@ -829,6 +829,23 @@ static int _parenthesized_cast_operand_follows(Compiler compiler) {
   }
 }
 
+/* A cast whose operand already has the cast type, qualifiers included,
+   changes nothing. The comparison uses x2c's declared type, so a cast
+   between a typedef and its C type stays silent, and only an operand whose
+   C type x2c knows is compared: a pointer difference or a character
+   constant is not. A `void` cast discards a value on purpose. */
+static void _warn_unnecessary_cast(
+  Compiler c, List operand, Type target, Token origin) {
+  if (!target || target === %(void) || target === %(<macro-expr>)) return;
+  Type source = operand.cadr();
+  if (!source || !_generic_control_type(c, operand)) return;
+  if (source.declared() != target.declared()) return;
+  c.report_warning(
+    <warning>,
+    %"unnecessary conversion: the operand already has type ${target.repr()}",
+    origin, %("remove the cast"));
+}
+
 static List _parse_cast(Compiler c) {
   Token head = c.token;
   if (_parenthesized_cast_operand_follows(c) && c.test(<(>)) {
@@ -838,6 +855,7 @@ static List _parse_cast(Compiler c) {
       c.expect(<)>);
       List expr = _parse_cast(c);
       if (expr.cadr() === %(<macro-expr>)) type = %(<macro-expr>);
+      _warn_unnecessary_cast(c, expr, type, head);
       return %(expr $type (cast $decl $expr));
     }
   }

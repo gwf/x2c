@@ -1280,7 +1280,7 @@ static int _next(Iter iter, Var * out){
   int index = Var_int(Var_convert(iter -> state, 3453797));
   String str = Var_string(iter -> obj);
   if(index < 0 || index >= String_len(str)) return 0;
-  * out = int_var((int) String_getindex(str, index));
+  * out = int_var(String_getindex(str, index));
   iter -> state = int_var(index + 1);
   return 1;
 }
@@ -1289,7 +1289,7 @@ int String_try_next(String str, int * cursor, int * out){
   if(! _init_guard_) String_initialize();
   if(! String_truth(str) || ! cursor || ! out || * cursor < 0) return 0;
   if(* cursor >= String_len(str)) return 0;
-  * out =(int) String_getindex(str, * cursor);
+  * out = String_getindex(str, * cursor);
   * cursor += 1;
   return 1;
 }

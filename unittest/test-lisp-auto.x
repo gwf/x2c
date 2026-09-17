@@ -361,8 +361,8 @@ static void lisp_auto_quasiquote_capacity(void) {
   source.write(",x)))");
   _ev(lisp, source.str_free());
   LispAutoStats before = Lisp.auto_stats(lisp);
-  EXPECT_INT_EQ((int) Var.list(_ev(lisp, "(deep-qq 7)")).len(), 251);
-  EXPECT_INT_EQ((int) Var.list(_ev(lisp, "(deep-qq 7)")).len(), 251);
+  EXPECT_INT_EQ(Var.list(_ev(lisp, "(deep-qq 7)")).len(), 251);
+  EXPECT_INT_EQ(Var.list(_ev(lisp, "(deep-qq 7)")).len(), 251);
   LispAutoStats after = Lisp.auto_stats(lisp);
   // The quasiquote exceeds the operand stack, so it is interpreted in place;
   // the lambda around it still prepares and runs on the machine.

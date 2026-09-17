@@ -236,7 +236,7 @@ unsigned Var_unsigned(Var x){
 long Var_long(Var x){
   if(! _init_guard_) _file_init_();
   if(Var_is(x, 818062)) return Var_long_value(x);
-  if(Var_is_row(x, 32769, 0, 0) || Var_is(x, 3453797) || Var_is(x, 3847013) || Var_is(x, 3453293) || Var_is(x, 3846509) || Var_is(x, 26993) || Var_is(x, 30065)) return(long) Var_integer(x);
+  if(Var_is_row(x, 32769, 0, 0) || Var_is(x, 3453797) || Var_is(x, 3847013) || Var_is(x, 3453293) || Var_is(x, 3846509) || Var_is(x, 26993) || Var_is(x, 30065)) return Var_integer(x);
   return Var_long_value(Var_convert(x, 818062));
 }
 

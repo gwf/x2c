@@ -210,7 +210,7 @@ Var Var_integer_box(Symbol target, unsigned long long raw){
     break;
     case 44858254 : result = Var_box_ulong((unsigned long) raw);
     break;
-    case 25983886 : result = Var_box_long_long((long long) signed_value);
+    case 25983886 : result = Var_box_long_long(signed_value);
     break;
     case 1435270030 : result = Var_box_ulong_long(raw);
     break;

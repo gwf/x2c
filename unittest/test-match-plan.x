@@ -166,7 +166,7 @@ static void plan_guard_parity(void) {
 
 static void plan_is_parity(void) {
   String string_value = "hello";
-  Var integer_var = 42, float_var = (double) 3.14159;
+  Var integer_var = 42, float_var = 3.14159;
   List list_value = %(alpha beta);
   Var symbol_var = <bar>;
   List cases = %( ($string_value string)

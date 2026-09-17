@@ -132,13 +132,13 @@ static void symbol_parse_malformed_returns_zero(void) {
 
 static void symbol_parse_empty_quoted(void) {
   Symbol s = Symbol.parse(%"<\"\">"), empty = Symbol.new_len("", 0);
-  EXPECT_INT_EQ((int)(s == empty), 1);
+  EXPECT_INT_EQ(s == empty, 1);
 }
 
 // A line-continuation escape scans as valid but unescapes to zero bytes.
 static void symbol_parse_escape_collapses_to_empty(void) {
   Symbol s = Symbol.parse(%"<\"\\\n\">"), empty = Symbol.new_len("", 0);
-  EXPECT_INT_EQ((int)(s == empty), 1);
+  EXPECT_INT_EQ(s == empty, 1);
 }
 
 static void symbol_compare_lexicographic(void) {

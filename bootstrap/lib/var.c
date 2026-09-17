@@ -814,21 +814,21 @@ static Var _new_floating(TagId id, double d){
     unsigned u;
     memcpy(& u, & f, sizeof u);
     v.u64 = u;
-    v.u64 |=(unsigned long) taginfo[id].top << 48;
-    v.u64 |=(unsigned long) taginfo[id].middle << 32;
+    v.u64 |= taginfo[id].top << 48;
+    v.u64 |= taginfo[id].middle << 32;
   }
   else{
     if(d != d){
-      v.u64 =(unsigned long) taginfo[_nan_].top << 48;
-      v.u64 |=(unsigned long) taginfo[_nan_].middle << 32;
+      v.u64 = taginfo[_nan_].top << 48;
+      v.u64 |= taginfo[_nan_].middle << 32;
     }
     else if(d > 0 && d == 1.0 / 0.0){
-      v.u64 =(unsigned long) taginfo[_posinf_].top << 48;
-      v.u64 |=(unsigned long) taginfo[_posinf_].middle << 32;
+      v.u64 = taginfo[_posinf_].top << 48;
+      v.u64 |= taginfo[_posinf_].middle << 32;
     }
     else if(d < 0 && d == - 1.0 / 0.0){
-      v.u64 =(unsigned long) taginfo[_neginf_].top << 48;
-      v.u64 |=(unsigned long) taginfo[_neginf_].middle << 32;
+      v.u64 = taginfo[_neginf_].top << 48;
+      v.u64 |= taginfo[_neginf_].middle << 32;
     }
     else{
       unsigned long u;
@@ -846,8 +846,8 @@ static Var _new_pointer(TagId id, void * ptr){
     .p64 = ptr
   }
   ;
-  v.u64 |=(unsigned long) taginfo[id].top << 48;
-  v.u64 |=(unsigned long) taginfo[id].bottom;
+  v.u64 |= taginfo[id].top << 48;
+  v.u64 |= taginfo[id].bottom;
   return v;
 }
 
@@ -873,8 +873,8 @@ static Var _new_wide(TagId id, VarWideValue value){
     .u64 = raw
   }
   ;
-  v.u64 |=(unsigned long) taginfo[id].top << 48;
-  v.u64 |=(unsigned long) taginfo[id].bottom;
+  v.u64 |= taginfo[id].top << 48;
+  v.u64 |= taginfo[id].bottom;
   return v;
 }
 
@@ -1031,8 +1031,8 @@ static Var _new_integer(TagId id, long value){
     .u64 = payload
   }
   ;
-  v.u64 |=(unsigned long) taginfo[id].top << 48;
-  if(bits != 48) v.u64 |=(unsigned long) taginfo[id].middle << 32;
+  v.u64 |= taginfo[id].top << 48;
+  if(bits != 48) v.u64 |= taginfo[id].middle << 32;
   return v;
 }
 
@@ -1143,7 +1143,7 @@ double Var_floating(Var v){
 
 long Var_integer(Var v){
   unsigned top = _top_bits(v);
-  if(top == taginfo[_u48_].top) return(unsigned long)(v.u64 & _bitmask(48));
+  if(top == taginfo[_u48_].top) return v.u64 & _bitmask(48);
   if(top == taginfo[_i48_].top){
     unsigned long mask = _bitmask(48), raw = v.u64 & mask;
     if(raw &(1ul << 47)) return -(long)((~ raw & mask) + 1ul);

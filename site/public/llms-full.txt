@@ -3564,6 +3564,14 @@ names the required converter. Declaring that converter, as `lib/typed-array.x`
 does for `Array.arrayint`, permits the conversion; a cast still permits
 reinterpretation.
 
+A cast whose operand already has the cast type, qualifiers included, is
+reported as a warning, `unnecessary conversion`, and translation continues.
+The comparison uses the declared x2c type, so a cast between a typedef and
+the type it names, or between two typedefs of one C type, is not reported.
+An operand whose C type x2c does not track, such as a pointer difference or
+a character constant, is never compared. A `(void)` cast discards a value on
+purpose and is not reported.
+
 Supported primitive C specifiers are order-independent and normalize to one
 compiler spelling. For example, `double long` becomes `long double`, and
 `long unsigned long` becomes `unsigned long long`. Invalid combinations such

@@ -1437,7 +1437,7 @@ int String.compare(String x, String y) {
 static int _next(Iter iter, Var *out) {
   int index = iter.state, String str = iter.obj;
   if (index < 0 || index >= str.len()) return 0;
-  *out = (int) str[index];
+  *out = str[index];
   iter.state = index + 1;
   return 1;
 }
@@ -1453,7 +1453,7 @@ static int _next(Iter iter, Var *out) {
 int String.try_next(String str, int *cursor, int *out) {
   if (!str || !cursor || !out || *cursor < 0) return 0;
   if (*cursor >= str.len()) return 0;
-  *out = (int) str[*cursor];
+  *out = str[*cursor];
   *cursor += 1;
   return 1;
 }

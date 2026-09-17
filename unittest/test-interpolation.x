@@ -62,7 +62,7 @@ static void interp_braced_nested_lisp(void) {
 
 static void interp_braced_complete_expression(void) {
   int value = 0;
-  List list = %(${value = 1, (int) (value + 1)});
+  List list = %(${value = 1, (value + 1)});
   EXPECT_INT_EQ(value, 1);
   EXPECT_LIST_EQ(list, %(2));
 }

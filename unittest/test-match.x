@@ -105,7 +105,7 @@ static void replace_handles_mixed_types(void) {
   List payload = %(a list with a "string");
   List template = %( invoice ?id $payload ?amount *extras );
   List extras = %( tax 0.07 $payload );
-  Var amount = (double) 3.75;
+  Var amount = 3.75;
   List bindings = %(());;
   bindings = cons(%(?id 42), bindings);
   if (!EXPECT_NOT_NULL(bindings)) return;
@@ -370,7 +370,7 @@ static void search_replace_binder_prefix_handles_is(void) {
 
 static void match_is_type_accepts_var_tags(void) {
   String string_value = "hello";
-  Var integer_var = 42, float_var = (double) 3.14159;
+  Var integer_var = 42, float_var = 3.14159;
   List list_value = %(alpha beta);
   Array array_value = [1, 2];
   Map map_value = { foo: 1 };

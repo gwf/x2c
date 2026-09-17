@@ -387,25 +387,25 @@ static Var _new_floating(TagId id, double d) {
     unsigned u;
     memcpy(&u, &f, sizeof u);
     v.u64 = u;
-    v.u64 |= (unsigned long) taginfo[id].top << 48;
-    v.u64 |= (unsigned long) taginfo[id].middle << 32;
+    v.u64 |= taginfo[id].top << 48;
+    v.u64 |= taginfo[id].middle << 32;
   }
   // id == _f64_
   else {
     // NaN
     if (d != d) {  // NaN test: NaN != NaN
-      v.u64 = (unsigned long) taginfo[_nan_].top << 48;
-      v.u64 |= (unsigned long) taginfo[_nan_].middle << 32;
+      v.u64 = taginfo[_nan_].top << 48;
+      v.u64 |= taginfo[_nan_].middle << 32;
     }
     // +Inf
     else if (d > 0 && d == 1.0/0.0) {
-      v.u64 = (unsigned long) taginfo[_posinf_].top << 48;
-      v.u64 |= (unsigned long) taginfo[_posinf_].middle << 32;
+      v.u64 = taginfo[_posinf_].top << 48;
+      v.u64 |= taginfo[_posinf_].middle << 32;
     }
     // -Inf
     else if (d < 0 && d == -1.0/0.0) {
-      v.u64 = (unsigned long) taginfo[_neginf_].top << 48;
-      v.u64 |= (unsigned long) taginfo[_neginf_].middle << 32;
+      v.u64 = taginfo[_neginf_].top << 48;
+      v.u64 |= taginfo[_neginf_].middle << 32;
     }
     // normal number
     else {
@@ -422,8 +422,8 @@ static Var _new_pointer(TagId id, void *ptr) {
   /* Pointer families store only the low 48 address bits and reclaim the
      alignment bits implied by their C type for the row subtype. */
   Var v = { .p64 = ptr };
-  v.u64 |= (unsigned long) taginfo[id].top << 48;
-  v.u64 |= (unsigned long) taginfo[id].bottom;
+  v.u64 |= taginfo[id].top << 48;
+  v.u64 |= taginfo[id].bottom;
   return v;
 }
 
@@ -437,8 +437,8 @@ static Var _new_wide(TagId id, VarWideValue value) {
     raise %(bad-enc (owner "Var.box"));
   }
   Var v = { .u64 = raw };
-  v.u64 |= (unsigned long) taginfo[id].top << 48;
-  v.u64 |= (unsigned long) taginfo[id].bottom;
+  v.u64 |= taginfo[id].top << 48;
+  v.u64 |= taginfo[id].bottom;
   return v;
 }
 
@@ -601,8 +601,8 @@ static Var _new_integer(TagId id, long value) {
   }
   unsigned long payload = ((unsigned long) value) & (unsigned long) mask;
   Var v = { .u64 = payload };
-  v.u64 |= (unsigned long) taginfo[id].top << 48;
-  if (bits != 48)  v.u64 |= (unsigned long) taginfo[id].middle << 32;
+  v.u64 |= taginfo[id].top << 48;
+  if (bits != 48)  v.u64 |= taginfo[id].middle << 32;
   return v;
 }
 
@@ -747,7 +747,7 @@ double Var.floating(Var v) {
 */
 long Var.integer(Var v) {
   unsigned top = _top_bits(v);
-  if (top == taginfo[_u48_].top) return (unsigned long) (v.u64 & _bitmask(48));
+  if (top == taginfo[_u48_].top) return v.u64 & _bitmask(48);
   if (top == taginfo[_i48_].top) {
     unsigned long mask = _bitmask(48), raw = v.u64 & mask;
     if (raw & (1ul << 47)) return -(long) ((~raw & mask) + 1ul);

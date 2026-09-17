@@ -708,7 +708,7 @@ long Var.long(Var x) {
   if (x is <long>) return x.long_value();
   if (x is <i48> || x is <i32> || x is <u32> ||
       x is <i16> || x is <u16> || x is <i8> || x is <u8>)
-    return (long) x.integer();
+    return x.integer();
   return x.convert(<long>).long_value();
 }
 
