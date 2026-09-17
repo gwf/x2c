@@ -60,7 +60,7 @@ Source: `src/statements.x:141`
 <a id="Compiler.parse_block_item"></a>
 #### Compiler.parse_block_item
 
-`List Compiler.parse_block_item(Compiler compiler)`
+`List Compiler.parse_block_item(Compiler c)`
 
 Parses one block-position declaration, statement, or macro insertion.
 The caller owns the surrounding scope; a macro insertion may return a
@@ -78,17 +78,17 @@ returns a `(block ...)` node. The call opens one lexical `Sym` scope;
 `anchor_items` records statement origins and distributes a macro sequence's
 invocation origin over its inserted items.
 
-Source: `src/statements.x:574`
+Source: `src/statements.x:568`
 
 <a id="Compiler.parse_compound_statement"></a>
 #### Compiler.parse_compound_statement
 
-`List Compiler.parse_compound_statement(Compiler compiler)`
+`List Compiler.parse_compound_statement(Compiler c)`
 
 Parses a compound body after its opening brace and consumes the closing
 `}`, returning an origin-anchored `(block ...)` node.
 
-Source: `src/statements.x:616`
+Source: `src/statements.x:610`
 
 <a id="Compiler.parse_governed"></a>
 #### Compiler.parse_governed
@@ -107,13 +107,13 @@ Source: `src/statements.x:52`
 <a id="Compiler.parse_statement"></a>
 #### Compiler.parse_statement
 
-`List Compiler.parse_statement(Compiler compiler)`
+`List Compiler.parse_statement(Compiler c)`
 
 Parses and binds one statement or statement-position macro at the current
 token. On return, the cursor follows the complete statement and any
 temporary `Sym` scopes opened by the statement have been closed.
 
-Source: `src/statements.x:477`
+Source: `src/statements.x:476`
 
 <a id="Compiler.with_binding"></a>
 #### Compiler.with_binding

@@ -27,12 +27,12 @@ Bounded runtime state and value export.
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/context.x:370`
+Source: `lib/context.x:366`
 
 <a id="Context.close"></a>
 #### Context.close
 
-`void Context.close(Context context)`
+`void Context.close(Context c)`
 
 Closes the current `Context`, reclaims unexported state, and restores
 parent.
@@ -43,7 +43,7 @@ private canonical pool become invalid.
 `Match`
 cache has an active lease. The failure leaves the `Context` active.
 
-Source: `lib/context.x:350`
+Source: `lib/context.x:347`
 
 <a id="Context.current"></a>
 #### Context.current
@@ -52,7 +52,7 @@ Source: `lib/context.x:350`
 
 Returns the `Context` currently active on this thread, or NULL.
 
-Source: `lib/context.x:177`
+Source: `lib/context.x:175`
 
 <a id="Context.export"></a>
 #### Context.export
@@ -76,7 +76,7 @@ rolled back.
 unsupported value without a registered exporter, or a cause from nested
 allocation, hashing, equality, or custom export.
 
-Source: `lib/context.x:311`
+Source: `lib/context.x:308`
 
 <a id="Context.open"></a>
 #### Context.open
@@ -91,7 +91,7 @@ allocations.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:148`
+Source: `lib/context.x:146`
 
 <a id="Context.open_isolated"></a>
 #### Context.open_isolated
@@ -105,7 +105,7 @@ Export surviving immutable values before closing the `Context`.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:165`
+Source: `lib/context.x:163`
 
 <a id="Context.open_isolated_named"></a>
 #### Context.open_isolated_named
@@ -120,7 +120,7 @@ The diagnostic name is copied; export survivors before closing the
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:174`
+Source: `lib/context.x:172`
 
 <a id="Context.open_named"></a>
 #### Context.open_named
@@ -135,7 +135,7 @@ parent.
 Failed construction restores the parent's `Scope`, canonical pool, `Error`,
 `Match`, and current `Context` state.
 
-Source: `lib/context.x:157`
+Source: `lib/context.x:155`
 
 ## Advanced and interop API
 
@@ -149,13 +149,13 @@ Source: `lib/context.x:157`
 <a id="Context.move_allocation"></a>
 #### Context.move_allocation
 
-`void Context.move_allocation(Context context, void *allocation)`
+`void Context.move_allocation(Context c, void *allocation)`
 
 Moves one custom-exporter-owned allocation to the destination `Context`.
-A null allocation or one outside `context`'s `Scope` chain is unchanged.
+A null allocation or one outside `c`'s `Scope` chain is unchanged.
 Application code exports its value with `Context.export` instead.
 
-Source: `lib/context.x:102`
+Source: `lib/context.x:101`
 
 <a id="Context.owns"></a>
 #### Context.owns
@@ -175,7 +175,7 @@ for source readers but are not supported as user API.
 
 | Function | Summary |
 | --- | --- |
-| [`Context.export_destination`](#Context.export_destination) | Returns the borrowed `Scope` slot that receives exports from `context`. |
+| [`Context.export_destination`](#Context.export_destination) | Returns the borrowed `Scope` slot that receives exports from `c`. |
 | [`Context.export_nested`](#Context.export_nested) | Recursively exports one nested value through an active or sealed `Context`. |
 | [`Context.export_scope`](#Context.export_scope) | Exports a sealed worker result `Scope` into the current `Scope` and pool. |
 | [`Context.initialize`](#Context.initialize) | Registers `Context` cleanup before workers can start. |
@@ -185,9 +185,9 @@ for source readers but are not supported as user API.
 <a id="Context.export_destination"></a>
 #### Context.export_destination
 
-`Scope *Context.export_destination(Context context)`
+`Scope *Context.export_destination(Context c)`
 
-Returns the borrowed `Scope` slot that receives exports from `context`.
+Returns the borrowed `Scope` slot that receives exports from `c`.
 The slot remains valid only while the `Context`'s destination state lives;
 a null `Context` returns NULL.
 
@@ -196,7 +196,7 @@ Source: `lib/context.x:95`
 <a id="Context.export_nested"></a>
 #### Context.export_nested
 
-`Var Context.export_nested(Context context, Var value)`
+`Var Context.export_nested(Context c, Var value)`
 
 Recursively exports one nested value through an active or sealed `Context`.
 Registered custom exporters call this; other callers export their
@@ -213,7 +213,7 @@ rolled back.
 exporter, or a cause from nested allocation, hashing, equality, or custom
 export.
 
-Source: `lib/context.x:194`
+Source: `lib/context.x:192`
 
 <a id="Context.export_scope"></a>
 #### Context.export_scope
@@ -235,7 +235,7 @@ rolled back.
 exporter, or a cause from nested allocation, hashing, equality, or custom
 export.
 
-Source: `lib/context.x:332`
+Source: `lib/context.x:329`
 
 <a id="Context.initialize"></a>
 #### Context.initialize

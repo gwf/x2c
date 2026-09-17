@@ -299,15 +299,14 @@ int ParsedUnit.collect(ParsedUnit *unit, Frontend frontend) {
 /** Parses a collected unit, retaining both its AST and unsuccessful
     reports.
 */
-int ParsedUnit.parse(ParsedUnit *unit) {
-  Compiler compiler = unit.compiler;
+int ParsedUnit.parse(ParsedUnit *p) {
+  Compiler compiler = p.compiler;
   if (compiler.error_count()) return 0;
   Diagnostics diagnostics = compiler.diagnostics;
   Array collected = diagnostics.entries;
   diagnostics.entries = [];
   int ok = 1;
-  try unit.ast = unit.compiler.full_parse(
-    unit.globals, unit.generated_symbols);
+  try p.ast = p.compiler.full_parse(p.globals, p.generated_symbols);
   catch %(malformed *): ok = 0;
   foreach (Var entry, diagnostics.entries) collected.push(entry);
   diagnostics.entries.free();
@@ -318,9 +317,8 @@ int ParsedUnit.parse(ParsedUnit *unit) {
 /** Runs the source stages. On either result, the caller must close the
     unit.
 */
-int Frontend.open(Frontend frontend, String filename, ParsedUnit *unit) {
-  return frontend.start(filename, unit) && unit.collect(frontend) &&
-         unit.parse();
+int Frontend.open(Frontend f, String filename, ParsedUnit *unit) {
+  return f.start(filename, unit) && unit.collect(f) && unit.parse();
 }
 
 /** Releases the unit after its caller has inspected or exported its

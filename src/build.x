@@ -786,14 +786,13 @@ void Build.report_success(Build b) {
 /** Runs the built output with the request's arguments and returns its status.
     A dry run prints the action without launching the program.
 */
-int Build.run_program(Build state) {
-  report_line(<phase>, %"Running ${state.output}");
+int Build.run_program(Build b) {
+  report_line(<phase>, %"Running ${b.output}");
   Array arguments = [];
-  arguments.push(state.output);
-  foreach (String argument, state.request.run_args) arguments.push(argument);
+  arguments.push(b.output);
+  foreach (String argument, b.request.run_args) arguments.push(argument);
   ToolAction action = tool_action_new(
-    <run>, arguments.list_free(),
-    state.request.verbose, state.request.dry_run);
+    <run>, arguments.list_free(), b.request.verbose, b.request.dry_run);
   action.as_program();
   return action.run();
 }

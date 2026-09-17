@@ -209,10 +209,9 @@ int Symbol.is_builtin_type(Symbol sym) =>
 /** Returns whether `type` is any struct or union shape. */
 int Type.is_aggregate(Type type) => !!type.match(%((!or struct union) *));
 
-/** Returns whether `type` is a body-free struct or union tag reference. */
-int Type.is_aggregate_tag(Type type) =>
-  !!type.match(%((!or struct union)
-    (!or (!not (*)) (gensym ? ?) (binding ? ?))));
+/** Returns whether `t` is a body-free struct or union tag reference. */
+int Type.is_aggregate_tag(Type t) =>
+  !!t.match(%((!or struct union) (!or (!not (*)) (gensym ? ?) (binding ? ?))));
 
 static int Type._is_aggregate_body(Type type) =>
   !!type.match(%((!or struct union) (*)));
@@ -473,10 +472,9 @@ List Type.tag(Type type) {
 /** Returns the stored body portion of an enum, struct, or union `Type`.
     Tag references and `Type`s without a stored body return `NULL`.
 */
-List Type.body(Type type) {
-  if (type._is_enum_body() || type._is_aggregate_body()) return cdr(type);
-  if (type.is_enum_tag_body() || type.is_aggregate_tag_body())
-    return type.cddr();
+List Type.body(Type t) {
+  if (t._is_enum_body() || t._is_aggregate_body()) return cdr(t);
+  if (t.is_enum_tag_body() || t.is_aggregate_tag_body()) return t.cddr();
   return NULL;
 }
 
@@ -572,10 +570,9 @@ void Type.end_unit(void) {
     converter,
     or no active unit, leaves the table unchanged.
 */
-void Type.register_var_tag(Type type, String name, String converter) {
-  if ((void *) declared_typetags == NULL ||
-      !type || !name || !converter) return;
-  Type key = type.canonicalize();
+void Type.register_var_tag(Type t, String name, String converter) {
+  if ((void *) declared_typetags == NULL || !t || !name || !converter) return;
+  Type key = t.canonicalize();
   Var row = declared_typetags[key];
   if (row is void)
     declared_typetags[key] = %( ${name.lower().symbol()} $converter );

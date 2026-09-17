@@ -648,16 +648,14 @@ String Regex.escape(String literal) {
   return out;
 }
 
-/** Returns the first match of `regex` in `subject` at or after the byte
+/** Returns the first match of `r` in `subject` at or after the byte
     `offset`, or NULL. An offset beyond the end of `subject` finds nothing.
 */
-RegexMatch Regex.match_from(Regex regex, String subject, int offset) =>
-  offset < 0 || offset > subject.len() ? NULL
-                                       : _search(regex, subject, offset);
+RegexMatch Regex.match_from(Regex r, String subject, int offset) =>
+  offset < 0 || offset > subject.len() ? NULL : _search(r, subject, offset);
 
-/** Returns the first match of `regex` in `subject`, or NULL. */
-RegexMatch Regex.match(Regex regex, String subject) =>
-  _search(regex, subject, 0);
+/** Returns the first match of `r` in `subject`, or NULL. */
+RegexMatch Regex.match(Regex r, String subject) => _search(r, subject, 0);
 
 /** Returns every non-overlapping match of `r` in `subject`, in order.
     An empty match advances one byte. No match returns an empty `List`.

@@ -671,7 +671,7 @@ static List _setup_source_cache_init(
 
 /** Materializes cached literals and deferred file-static initialization.
     `header` and `source` must be partitioned lowered AST regions from this
-    compiler. Every `(cache id)` must index `compiler.id_keys`, and file-static
+    compiler. Every `(cache id)` must index `c.id_keys`, and file-static
     dependency state from the full parse must be complete. `prefix`,
     `guard_name`, and `initializer_name` name the header's private slots,
     guard, and initializer. Returns `(header source)` and appends source work
@@ -680,22 +680,21 @@ static List _setup_source_cache_init(
     C translation unit that includes it.
 */
 List Compiler.setup_cache_init(
-  Compiler compiler, List header, List source, String prefix,
+  Compiler c, List header, List source, String prefix,
   String guard_name, String initializer_name) {
   Array initializers = [];
-  header = _rewrite_file_scope_statics(compiler, header, initializers);
-  Array header_ids = _cache_ids_in(compiler, header);
+  header = _rewrite_file_scope_statics(c, header, initializers);
+  Array header_ids = _cache_ids_in(c, header);
   /* A deferred header initializer is now in the source's initializer,
      so its slots belong to the source region. */
   Array scan = [];
   scan.push(source);
   foreach (Var initializer, initializers) scan.push(initializer);
-  Array source_ids = _cache_ids_in(compiler, scan.list_free());
+  Array source_ids = _cache_ids_in(c, scan.list_free());
   if (header_ids)
     header = _setup_header_cache(
-      compiler, header, header_ids, prefix, guard_name, initializer_name);
-  source = _setup_source_cache_init(
-    compiler, source, source_ids, initializers);
+      c, header, header_ids, prefix, guard_name, initializer_name);
+  source = _setup_source_cache_init(c, source, source_ids, initializers);
   initializers.free();
   return %($header $source);
 }

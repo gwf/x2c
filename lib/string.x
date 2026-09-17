@@ -701,26 +701,24 @@ String String.withindex(String str, int index, char value) {
   return _finish(string, n);
 }
 
-/** Returns the canonical `String` `str[start:stop:step]`.
+/** Returns the canonical `String` `s[start:stop:step]`.
     This is what slice syntax lowers to. `stop` is exclusive, negative
     `start` and `stop` count from the end, and a negative `step` walks
-    backwards, so `str[::-1]` reverses. Indices are byte positions, so a
+    backwards, so `s[::-1]` reverses. Indices are byte positions, so a
     slice can split a multibyte sequence. A full unit-step slice may return
-    `str`; other nonempty slices return their canonical `String`.
+    `s`; other nonempty slices return their canonical `String`.
     Raises: `<alloc-fail>` while constructing a nonempty result. An empty
     range, a range that runs the wrong way for its `step`, or a `step` of zero
     also returns NULL, the empty `String`, without raising.
 */
-String String.getslice(String str, int start, int stop, int step) {
-  if (!str || step == 0) return NULL;
-  int n = str.len(), len = x2c_normalize_slice(&start, &stop, step, n);
+String String.getslice(String s, int start, int stop, int step) {
+  if (!s || step == 0) return NULL;
+  int n = s.len(), len = x2c_normalize_slice(&start, &stop, step, n);
   if (len <= 0) return NULL;
-  if (step == 1 && start == 0 && len == n &&
-      _is_active_canonical(str))
-    return str;
-  if (step == 1) return _from_bytes(str + start, len);
+  if (step == 1 && start == 0 && len == n && _is_active_canonical(s)) return s;
+  if (step == 1) return _from_bytes(s + start, len);
   String string = String.malloc(len + 1);
-  char *out = string, const char *src = str;
+  char *out = string, const char *src = s;
   for (int i = 0, idx = start; i < len; i++, idx += step) out[i] = src[idx];
   return _finish(string, len);
 }

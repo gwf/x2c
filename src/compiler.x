@@ -168,12 +168,11 @@ List Compiler.lift_func_expression(Compiler compiler, List expression);
 #include <string.h>
 
 /** Merges one translation dependency, preserving an existing content hash. */
-void Map.merge_translation_dependency(
-  Map dependencies, String path, Var content_hash) {
+void Map.merge_translation_dependency(Map m, String path, Var content_hash) {
   if (content_hash is <string>) {
-    if (dependencies[path] is not <string>) dependencies[path] = content_hash;
+    if (m[path] is not <string>) m[path] = content_hash;
   }
-  else dependencies.setdefault(path, 1);
+  else m.setdefault(path, 1);
 }
 
 /** Records a path dependency not embedded in generated C. */
@@ -182,10 +181,9 @@ void Compiler.add_translation_dependency(Compiler compiler, String path) {
 }
 
 /** Merges another translation's dependency rows into this compiler. */
-void Compiler.merge_translation_dependencies(
-  Compiler compiler, Map dependencies) {
+void Compiler.merge_translation_dependencies(Compiler c, Map dependencies) {
   foreach (Var (path, content_hash), dependencies)
-    compiler.deps.merge_translation_dependency(path, content_hash);
+    c.deps.merge_translation_dependency(path, content_hash);
 }
 
 // compiler lifecycle
@@ -379,11 +377,9 @@ void Compiler.return_unit_state(Compiler compiler, Compiler owner) {
 /** Reads a source through the request view and retains exact response
     bytes.
 */
-int Compiler.read_source(
-  Compiler compiler, String path, String volatile *text) {
-  if (!compiler.sources.read(path, text)) return 0;
-  if (compiler.source_facts)
-    compiler.source_texts[Path.absolute(path)] = *text;
+int Compiler.read_source(Compiler c, String path, String volatile *text) {
+  if (!c.sources.read(path, text)) return 0;
+  if (c.source_facts) c.source_texts[Path.absolute(path)] = *text;
   return 1;
 }
 
@@ -424,11 +420,10 @@ void Compiler.copy_source_declaration(
 }
 
 /** Carries declaration metadata beside a completed symbol-map merge. */
-void Compiler.merge_source_declarations(
-  Compiler compiler, Map target, Map source) {
-  if (!compiler.source_facts) return;
+void Compiler.merge_source_declarations(Compiler c, Map target, Map source) {
+  if (!c.source_facts) return;
   foreach (Var key, source.keys())
-    if (key is <list>) compiler.copy_source_declaration(target, source, key);
+    if (key is <list>) c.copy_source_declaration(target, source, key);
 }
 
 static List _source_range(Compiler compiler, Token first, Token after) {
@@ -445,21 +440,20 @@ static List _source_range(Compiler compiler, Token first, Token after) {
 
 /** Records a physical declaration using the binding's actual scope and key. */
 void Compiler.record_source_declaration(
-  Compiler compiler, List binding, Token first, Token after) {
-  if (!compiler.source_facts || compiler.macro_holes) return;
+  Compiler c, List binding, Token first, Token after) {
+  if (!c.source_facts || c.macro_holes) return;
   Var value;
-  if (!compiler.semantic_binding_facts().try_get(
-      %(src-key $binding), &value)) return;
-  List source_key = value, range = _source_range(compiler, first, after);
+  if (!c.semantic_binding_facts().try_get(%(src-key $binding), &value)) return;
+  List source_key = value, range = _source_range(c, first, after);
   if (!range) return;
   Map symbols = source_key.car();
   List key = source_key.cadr();
   Type type = symbols[key];
   List declaration = %(@range $type);
-  compiler.source_declarations[source_key] = declaration;
-  if (compiler.source_primary && !compiler.shallow) {
-    compiler.source_definitions[binding] = declaration;
-    compiler.source_occurrences.push(%(@range $binding $type));
+  c.source_declarations[source_key] = declaration;
+  if (c.source_primary && !c.shallow) {
+    c.source_definitions[binding] = declaration;
+    c.source_occurrences.push(%(@range $binding $type));
   }
 }
 
@@ -467,20 +461,18 @@ void Compiler.record_source_declaration(
     ASTs.
 */
 void Compiler.record_source_reference(
-  Compiler compiler, List binding, Type type, Token first, Token after) {
-  if (!compiler.source_facts || !compiler.source_primary || compiler.shallow ||
-      compiler.macro_holes ||
+  Compiler c, List binding, Type type, Token first, Token after) {
+  if (!c.source_facts || !c.source_primary || c.shallow || c.macro_holes ||
       !binding_identity_try_parts(binding, NULL, NULL)) return;
-  List range = _source_range(compiler, first, after);
-  if (range) compiler.source_occurrences.push(%(@range $binding $type));
+  List range = _source_range(c, first, after);
+  if (range) c.source_occurrences.push(%(@range $binding $type));
 }
 
 /** Returns the current borrowed semantic-facts map indexed by binding.
 
     A semantic transaction may replace this map, so reacquire it afterwards.
 */
-Map Compiler.semantic_binding_facts(Compiler compiler) =>
-  compiler.sym.binding_facts;
+Map Compiler.semantic_binding_facts(Compiler c) => c.sym.binding_facts;
 
 /** Returns the active macro definition's borrowed local map, or `NULL`. */
 Map Compiler.macro_definition_locals(Compiler compiler) {
@@ -941,7 +933,7 @@ static List _declaration_macro(Compiler compiler, List rows, int thaw) {
     Tokens and origin indices become portable source data; marker-shaped user
     Lists are escaped so thawing preserves their values.
 */
-Var Compiler.freeze_declaration_syntax(Compiler compiler, Var syntax) {
+Var Compiler.freeze_declaration_syntax(Compiler c, Var syntax) {
   if (syntax is void) return %(declaration-void);
   if (syntax is <symbol> && !syntax.symbol())
     return %(declaration-empty-symbol);
@@ -954,22 +946,20 @@ Var Compiler.freeze_declaration_syntax(Compiler compiler, Var syntax) {
   }
   if (syntax is not <list> || syntax.is_nil()) return syntax;
   match (syntax) {
-    case %(macrodef *rows): return _declaration_macro(compiler, rows, 0);
+    case %(macrodef *rows): return _declaration_macro(c, rows, 0);
     case %(src (source ?path ?begin ?end) ?node):
       return %(src (source ${_declaration_path(path, 0)} $begin $end)
-        ${compiler.freeze_declaration_syntax(node)});
+        ${c.freeze_declaration_syntax(node)});
     case %(at ?(int origin) ?node): {
-      List location = compiler.origin_location(origin);
+      List location = c.origin_location(origin);
       if (!location)
-        return %(at m-origin ${compiler.freeze_declaration_syntax(node)});
-      return %(declaration-origin
-                ${_declaration_location(compiler, location, 0)}
-                ${compiler.freeze_declaration_syntax(node)});
+        return %(at m-origin ${c.freeze_declaration_syntax(node)});
+      return %(declaration-origin ${_declaration_location(c, location, 0)}
+                ${c.freeze_declaration_syntax(node)});
     }
   }
   Array rows = [];
-  foreach (Var row, syntax.list())
-    rows.push(compiler.freeze_declaration_syntax(row));
+  foreach (Var row, syntax.list()) rows.push(c.freeze_declaration_syntax(row));
   match (syntax)
     case %((!or declaration-void declaration-empty-symbol declaration-atom
                 declaration-token declaration-origin declaration-list) *):
@@ -978,19 +968,18 @@ Var Compiler.freeze_declaration_syntax(Compiler compiler, Var syntax) {
 }
 
 /** Restores a retained declaration recipe in the current parsing lifetime. */
-Var Compiler.thaw_declaration_syntax(Compiler compiler, Var syntax) {
+Var Compiler.thaw_declaration_syntax(Compiler c, Var syntax) {
   if (syntax is not <list> || syntax.is_nil()) return syntax;
   match (syntax) {
     case %(declaration-list *rows): {
       Array values = [];
-      foreach (Var row, rows)
-        values.push(compiler.thaw_declaration_syntax(row));
+      foreach (Var row, rows) values.push(c.thaw_declaration_syntax(row));
       return values.list_free();
     }
-    case %(macrodef *rows): return _declaration_macro(compiler, rows, 1);
+    case %(macrodef *rows): return _declaration_macro(c, rows, 1);
     case %(src (source ?path ?begin ?end) ?node):
       return %(src (source ${_declaration_path(path, 1)} $begin $end)
-        ${compiler.thaw_declaration_syntax(node)});
+        ${c.thaw_declaration_syntax(node)});
     case %(declaration-void): return void;
     case %(declaration-empty-symbol): return (Symbol) 0;
     case %(declaration-atom ?spelling): return Atom.intern(spelling);
@@ -1006,16 +995,14 @@ Var Compiler.thaw_declaration_syntax(Compiler compiler, Var syntax) {
     }
     case %(declaration-origin ?location ?node): {
       List source = location;
-      compiler.origins.push(%(source ${source.assoc(<file>)}
+      c.origins.push(%(source ${source.assoc(<file>)}
         ${source.assoc(<line>)} ${source.assoc(<column>)}
         ${source.assoc(<length>)} ${source.assoc(<position>)}));
-      return %(at ${compiler.origins.len()}
-                ${compiler.thaw_declaration_syntax(node)});
+      return %(at ${c.origins.len()} ${c.thaw_declaration_syntax(node)});
     }
   }
   Array rows = [];
-  foreach (Var row, syntax.list())
-    rows.push(compiler.thaw_declaration_syntax(row));
+  foreach (Var row, syntax.list()) rows.push(c.thaw_declaration_syntax(row));
   return rows.list_free();
 }
 
@@ -1027,36 +1014,33 @@ static List _declaration_source_key(Compiler compiler, Token token) {
 /** Queues a source Lisp form until declaration production needs its state.
     Files without declaration producers keep ordinary full-parse evaluation. */
 void Compiler.queue_declaration_effect(
-  Compiler compiler, String form, Token first, Token after) {
-  List key = _declaration_source_key(compiler, first);
-  String context = compiler.import_stack.len()
-                 ? compiler.import_stack[-1] : compiler.filename;
-  compiler.declaration_effects = cons(
-    %($key ${after.pos} $form
-      ${compiler.freeze_declaration_syntax(first)} $context),
-    compiler.declaration_effects);
+  Compiler c, String form, Token first, Token after) {
+  List key = _declaration_source_key(c, first);
+  String context = c.import_stack.len() ? c.import_stack[-1] : c.filename;
+  c.declaration_effects = cons(
+    %($key ${after.pos} $form ${c.freeze_declaration_syntax(first)} $context),
+    c.declaration_effects);
 }
 
 /** Runs pending effects for declaration production or CPP macro evaluation. */
-void Compiler.run_declaration_effects(Compiler compiler) {
-  List effects = compiler.declaration_effects.reverse();
-  compiler.declaration_effects = NULL;
+void Compiler.run_declaration_effects(Compiler c) {
+  List effects = c.declaration_effects.reverse();
+  c.declaration_effects = NULL;
   foreach (List effect, effects) {
     (List key, int end, String form, Var site, String context) = effect;
-    String filename = compiler.filename;
+    String filename = c.filename;
     match (key)
       case %("source-node" (declaration ?path ?)):
-        compiler.filename = _declaration_path(path, 1);
-    compiler.import_stack.push(context);
+        c.filename = _declaration_path(path, 1);
+    c.import_stack.push(context);
     defer {
-      compiler.import_stack.take_last();
-      compiler.filename = filename;
+      c.import_stack.take_last();
+      c.filename = filename;
     }
-    Token token = compiler.thaw_declaration_syntax(site);
-    compiler.evaluate_declaration_effect(form, token);
-    if (compiler.collect_protocols)
-      compiler.sym.set(key,
-        %(declaration-source $end (declaration-bundle (rows))));
+    Token token = c.thaw_declaration_syntax(site);
+    c.evaluate_declaration_effect(form, token);
+    if (c.collect_protocols)
+      c.sym.set(key, %(declaration-source $end (declaration-bundle (rows))));
   }
 }
 
@@ -2016,9 +2000,8 @@ Symbol Compiler.match_pattern_flat_head(
 
     When `possible` is non-null, stores every binder appearing on any path.
 */
-List Compiler.match_pattern_binders(
-  Compiler compiler, List pattern, List *possible) {
-  Var value = compiler.match_pattern_value(pattern);
+List Compiler.match_pattern_binders(Compiler c, List pattern, List *possible) {
+  Var value = c.match_pattern_value(pattern);
   MatchCaptureLayout layout = MatchCaptureLayout.analyze(value);
   List definite = layout.definite_list();
   if (possible) *possible = layout.possible_list();
@@ -2185,10 +2168,9 @@ void SymTxn.commit(SymTxn s) {
 }
 
 /** Returns whether the transaction's active scope changed its macro map. */
-int SymTxn.local_macros_changed(SymTxn transaction) {
-  SymScope *scope = _semantic_scope(
-    transaction.compiler.sym, transaction.scope_index);
-  Map before = transaction.scope.macros, after = scope.macros;
+int SymTxn.local_macros_changed(SymTxn s) {
+  SymScope *scope = _semantic_scope(s.compiler.sym, s.scope_index);
+  Map before = s.scope.macros, after = scope.macros;
   if ((void *) before == NULL || (void *) after == NULL)
     return (void *) before != (void *) after;
   return !before.equal(after);
@@ -2346,14 +2328,13 @@ static int _retained_aggregate_member(List key) =>
     (!or (binding ? ?) (gensym ? ?)) ? *));
 
 /** Sets a semantic type for `key` in the required active scope. */
-void Sym.set(Sym sym, List key, List type) {
-  SymScope *current = _semantic_scope(sym, -1);
+void Sym.set(Sym s, List key, List type) {
+  SymScope *current = _semantic_scope(s, -1);
   Map scope = current.symbols;
   if (log_should_log(<debug>, <symtab>))
     log_debug(<symtab>, %( (func "Sym.set") (key $key) (val $type) ));
   scope[key] = type;
-  if (_retained_aggregate_member(key))
-    sym.binding_facts[%(aggfact $key)] = type;
+  if (_retained_aggregate_member(key)) s.binding_facts[%(aggfact $key)] = type;
 }
 
 static List _semantic_new_binding(Sym sym, List key) {
@@ -2769,26 +2750,25 @@ List Sym.declare(Sym sym, List context, List key, List ast) {
 }
 
 /** Installs an existing binding with `ast`'s qualifier-preserving type. */
-List Sym.bind_identity(Sym sym, List context, List binding, List ast) {
+List Sym.bind_identity(Sym s, List context, List binding, List ast) {
   String spelling = binding_identity_spelling(binding);
   List key = context ? %(@context $spelling) : %($spelling);
-  SymScope *scope = _semantic_scope(sym, -1);
+  SymScope *scope = _semantic_scope(s, -1);
   Type annotation = ast.type_from_ast();
   scope.symbols[key] = annotation.declared();
   if (context === %(typedef)) {
     key = %($spelling);
     scope.symbols[key] = %(typedef $spelling);
-    if (annotation.is_aggregate_tag() &&
-        (int) sym.scopes.len() > sym.base_scopes)
-      sym.binding_facts[%(ntype $binding)] = annotation;
-    if ((int) sym.scopes.len() > sym.base_scopes)
-      sym.binding_facts[%(emitted $binding)] =
-        sym.compiler.fresh_name("local_typedef");
+    if (annotation.is_aggregate_tag() && (int) s.scopes.len() > s.base_scopes)
+      s.binding_facts[%(ntype $binding)] = annotation;
+    if ((int) s.scopes.len() > s.base_scopes)
+      s.binding_facts[%(emitted $binding)] =
+        s.compiler.fresh_name("local_typedef");
   }
   scope.bindings[key] = binding;
-  if (!context && (int) sym.scopes.len() > sym.base_scopes) {
-    sym.binding_facts[%(automatic $binding)] = 1;
-    sym.binding_facts[%(type $binding)] = annotation;
+  if (!context && (int) s.scopes.len() > s.base_scopes) {
+    s.binding_facts[%(automatic $binding)] = 1;
+    s.binding_facts[%(type $binding)] = annotation;
   }
   return binding;
 }
@@ -3264,8 +3244,7 @@ Symbol Sym.var_tag_for_type(Sym sym, Type type, Type *resolved) {
 }
 
 /** Reports whether `type` reaches the named `Var` value type. */
-int Sym.is_var_type(Sym sym, Type type) =>
-  sym.is_named_value_type(type, "Var");
+int Sym.is_var_type(Sym s, Type type) => s.is_named_value_type(type, "Var");
 
 /** Reports whether `type` reaches the named `String` value type. */
 int Sym.is_string_type(Sym sym, Type type) =>
@@ -3276,8 +3255,7 @@ int Sym.is_array_type(Sym sym, Type type) =>
   sym.is_named_value_type(type, "Array");
 
 /** Reports whether `type` reaches the named `Map` value type. */
-int Sym.is_map_type(Sym sym, Type type) =>
-  sym.is_named_value_type(type, "Map");
+int Sym.is_map_type(Sym s, Type type) => s.is_named_value_type(type, "Map");
 
 /** Reports whether `type` reaches a named value type before its definition. */
 int Sym.is_named_value_type(Sym sym, Type type, String name) {
@@ -3345,14 +3323,13 @@ Type Sym.delegate_aggregate(Sym sym, Type type) {
     file, so every process mints the same sequence for one file and two
     files never share an identity. No emission path prints one.
 */
-List Compiler.gensym(Compiler compiler) {
-  String owner = compiler.filename
-    ? home_portable_path(compiler.canonical_path(compiler.filename)) : "";
+List Compiler.gensym(Compiler c) {
+  String owner = c.filename
+    ? home_portable_path(c.canonical_path(c.filename)) : "";
   String key = %"gensym:$owner";
   Var stored;
-  int count = compiler.names.counters.try_get(key, &stored)
-            ? stored.int() + 1 : 1;
-  compiler.names.counters[key] = count;
+  int count = c.names.counters.try_get(key, &stored) ? stored.int() + 1 : 1;
+  c.names.counters[key] = count;
   return %((gensym $owner $count));
 }
 
@@ -3372,11 +3349,10 @@ void Sym.push_scope(Sym sym, SymScope scope) {
 }
 
 /** Pops the innermost scope, or returns an empty scope when none exists. */
-SymScope Sym.pop_scope(Sym sym) {
+SymScope Sym.pop_scope(Sym s) {
   struct SymScope scope = { 0 };
-  sym.scopes.try_pop(&scope);
-  if ((void *) scope.macros != NULL)
-    sym.local_macro_names -= scope.macros.len();
+  s.scopes.try_pop(&scope);
+  if ((void *) scope.macros != NULL) s.local_macro_names -= scope.macros.len();
   return scope;
 }
 

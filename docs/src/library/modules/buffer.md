@@ -14,7 +14,7 @@ Growable text buffer with indentation support.
 | [`Buffer.new`](#Buffer.new) | Allocates an empty `Buffer` whose `pad` method writes `padding` spaces. |
 | [`Buffer.pop`](#Buffer.pop) | Pops one indentation depth from `buf`'s stack when present. |
 | [`Buffer.push`](#Buffer.push) | Pushes the current column as a later indentation depth. |
-| [`Buffer.truth`](#Buffer.truth) | Returns nonzero when `buffer` contains at least one byte. |
+| [`Buffer.truth`](#Buffer.truth) | Returns nonzero when `b` contains at least one byte. |
 | [`Buffer.try_get`](#Buffer.try_get) | Writes the byte at normalized `index` to `out` when it exists. |
 
 ### `Buffer`
@@ -73,9 +73,9 @@ Source: `lib/buffer.x:264`
 <a id="Buffer.truth"></a>
 #### Buffer.truth
 
-`int Buffer.truth(Buffer buffer)`
+`int Buffer.truth(Buffer b)`
 
-Returns nonzero when `buffer` contains at least one byte.
+Returns nonzero when `b` contains at least one byte.
 
 Source: `lib/buffer.x:351`
 
@@ -121,7 +121,7 @@ Source: `lib/buffer.x:286`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/buffer.x:355`
+Source: `lib/buffer.x:354`
 
 <a id="Buffer.free"></a>
 #### Buffer.free

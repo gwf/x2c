@@ -642,11 +642,10 @@ int MatchCaptureLayout.index(MatchCaptureLayout layout, Atom binder) =>
     A null buffer or an index outside its capacity or `Match`'s binder limit
     returns false. Presence is independent of the captured `Var` value.
 */
-int MatchCaptureBuffer.has(MatchCaptureBuffer *captures, int index) {
-  if (!captures || index < 0 || index >= captures.capacity ||
-      index >= MACHINE_BINDER_MAX)
+int MatchCaptureBuffer.has(MatchCaptureBuffer *m, int index) {
+  if (!m || index < 0 || index >= m.capacity || index >= MACHINE_BINDER_MAX)
     return 0;
-  return _capture_bit(captures.present, index);
+  return _capture_bit(m.present, index);
 }
 
 static int _find_fixed_anchor(List pat, Var *anchor, int *offset) {
@@ -1695,21 +1694,19 @@ static int _run_prepared_capture(
 
 /* Publication reads committed positional state, never speculative matcher
    state. */
-static int MatchPlan._run(
-  MatchPlan plan, MatchMachine m, Var input, List *out) {
+static int MatchPlan._run(MatchPlan mm, MatchMachine m, Var input, List *out) {
   Var values[MACHINE_BINDER_MAX];
   MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
-  int result = _run_prepared_capture(plan.program.view(), m, input, &captures);
-  if (result == 1) *out = _capture_publish(plan.layout, &captures);
+  int result = _run_prepared_capture(mm.program.view(), m, input, &captures);
+  if (result == 1) *out = _capture_publish(mm.layout, &captures);
   return result;
 }
 
 static int MatchPlan._capture(
-  MatchPlan plan, Var input, MatchCaptureBuffer *captures,
-  MachineStats *stats) {
+  MatchPlan m, Var input, MatchCaptureBuffer *captures, MachineStats *stats) {
   $match.machine(machine, stats);
   int result = _run_prepared_capture(
-    plan.program.view(), machine, input, captures);
+    m.program.view(), machine, input, captures);
   machine.dispose();
   return result;
 }
@@ -1723,12 +1720,11 @@ static int MatchPlan._capture(
     materializing captures.
 */
 int MatchPlan.execute_capture(
-  MatchPlan plan, Var input, MatchCaptureBuffer *captures,
-  MachineStats *stats) {
-  if (!_plan_prepared(plan, "MatchPlan.execute_capture") ||
-      !_capture_buffer_valid(plan.layout, captures))
+  MatchPlan m, Var input, MatchCaptureBuffer *captures, MachineStats *stats) {
+  if (!_plan_prepared(m, "MatchPlan.execute_capture") ||
+      !_capture_buffer_valid(m.layout, captures))
     return -1;
-  return plan._capture(input, captures, stats);
+  return m._capture(input, captures, stats);
 }
 
 /** Executes a prepared `List` match into caller-owned positional storage.

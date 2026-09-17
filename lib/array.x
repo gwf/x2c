@@ -724,15 +724,13 @@ String Array.join(Array array, String separator) {
 int Array.equal(Array a, Array b) => a._core_equal(b);
 
 /** Appends the readable `Array` representation to `out`. */
-Buffer Array.write_repr(Array array, Buffer out) =>
-  array._core_write(out, <repr>);
+Buffer Array.write_repr(Array a, Buffer out) => a._core_write(out, <repr>);
 
 /** Appends the `Array` display text to `out`, using each element's
     `write_str`.
     `Array.str` materializes this into a `String`.
 */
-Buffer Array.write_str(Array array, Buffer out) =>
-  array._core_write(out, <str>);
+Buffer Array.write_str(Array a, Buffer out) => a._core_write(out, <str>);
 
 /** Returns an `Array` display `String` using each element's `str`. */
 String Array.str(Array array) {

@@ -11,18 +11,18 @@ Checked dynamic storage for fixed-width elements.
 | --- | --- |
 | [`Block.append`](#Block.append) | Appends `count` elements copied from `source` to `block`. |
 | [`Block.append_fill`](#Block.append_fill) | Appends repeated fixed-width elements to `block`. |
-| [`Block.capacity`](#Block.capacity) | Returns how many elements `block` can hold without growing. |
+| [`Block.capacity`](#Block.capacity) | Returns how many elements `b` can hold without growing. |
 | [`Block.cleanup`](#Block.cleanup) | Ends the owned lifetime when a managed local leaves its block. |
 | [`Block.clear`](#Block.clear) | Removes every element from `block` without releasing capacity. |
 | [`Block.free`](#Block.free) | Releases the `Block` and its backing storage, invalidating every alias. |
-| [`Block.len`](#Block.len) | Returns the number of elements stored in `block`. |
+| [`Block.len`](#Block.len) | Returns the number of elements stored in `b`. |
 | [`Block.new`](#Block.new) | Allocates an empty `Block` for elements of `width` bytes. |
 | [`Block.pop`](#Block.pop) | Removes the final element of `block` when present. |
 | [`Block.push`](#Block.push) | Appends one copied element; storage and failures follow `Block.append`. |
 | [`Block.reserve`](#Block.reserve) | Ensures `block` can hold at least `minimum` elements. |
 | [`Block.truncate`](#Block.truncate) | Shortens `block` to at most `length` elements. |
 | [`Block.truth`](#Block.truth) | Returns nonzero when `block` contains at least one element. |
-| [`Block.try_pop`](#Block.try_pop) | Removes the final element of `block`, copying it to `out` when present. |
+| [`Block.try_pop`](#Block.try_pop) | Removes the final element of `b`, copying it to `out` when present. |
 | [`Bytes.append`](#Bytes.append) | Appends `count` elements to `bytes` and returns its current base pointer. |
 | [`Bytes.append_fill`](#Bytes.append_fill) | Appends repeated elements to `bytes` and returns its current base pointer. |
 | [`Bytes.block`](#Bytes.block) | Returns the stable `Block` that owns the live `bytes` base pointer. |
@@ -75,11 +75,11 @@ Source: `lib/block.x:215`
 <a id="Block.capacity"></a>
 #### Block.capacity
 
-`inline size_t Block.capacity(Block block)`
+`inline size_t Block.capacity(Block b)`
 
-Returns how many elements `block` can hold without growing.
+Returns how many elements `b` can hold without growing.
 
-Source: `lib/block.x:321`
+Source: `lib/block.x:318`
 
 <a id="Block.cleanup"></a>
 #### Block.cleanup
@@ -88,7 +88,7 @@ Source: `lib/block.x:321`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/block.x:325`
+Source: `lib/block.x:321`
 
 <a id="Block.clear"></a>
 #### Block.clear
@@ -106,16 +106,16 @@ Source: `lib/block.x:134`
 
 Releases the `Block` and its backing storage, invalidating every alias.
 
-Source: `lib/block.x:290`
+Source: `lib/block.x:288`
 
 <a id="Block.len"></a>
 #### Block.len
 
-`inline size_t Block.len(Block block)`
+`inline size_t Block.len(Block b)`
 
-Returns the number of elements stored in `block`.
+Returns the number of elements stored in `b`.
 
-Source: `lib/block.x:314`
+Source: `lib/block.x:312`
 
 <a id="Block.new"></a>
 #### Block.new
@@ -137,7 +137,7 @@ Source: `lib/block.x:55`
 
 Removes the final element of `block` when present.
 
-Source: `lib/block.x:285`
+Source: `lib/block.x:283`
 
 <a id="Block.push"></a>
 #### Block.push
@@ -146,7 +146,7 @@ Source: `lib/block.x:285`
 
 Appends one copied element; storage and failures follow `Block.append`.
 
-Source: `lib/block.x:276`
+Source: `lib/block.x:274`
 
 <a id="Block.reserve"></a>
 #### Block.reserve
@@ -179,14 +179,14 @@ Source: `lib/block.x:129`
 
 Returns nonzero when `block` contains at least one element.
 
-Source: `lib/block.x:318`
+Source: `lib/block.x:315`
 
 <a id="Block.try_pop"></a>
 #### Block.try_pop
 
-`inline int Block.try_pop(Block block, void *out)`
+`inline int Block.try_pop(Block b, void *out)`
 
-Removes the final element of `block`, copying it to `out` when present.
+Removes the final element of `b`, copying it to `out` when present.
 Returns zero for a null or empty `Block` and leaves `out` unchanged. A null
 `out` still removes a present element.
 
@@ -235,7 +235,7 @@ Source: `lib/block.x:80`
 
 Releases the Block backing a managed Bytes view.
 
-Source: `lib/block.x:328`
+Source: `lib/block.x:324`
 
 <a id="Bytes.new"></a>
 #### Bytes.new
@@ -257,7 +257,7 @@ Source: `lib/block.x:75`
 
 Appends one element and returns the possibly relocated `Bytes` base.
 
-Source: `lib/block.x:281`
+Source: `lib/block.x:279`
 
 <a id="Bytes.reserve"></a>
 #### Bytes.reserve
@@ -278,7 +278,7 @@ Source: `lib/block.x:122`
 
 Removes the final element through `bytes` as `Block.try_pop` does.
 
-Source: `lib/block.x:273`
+Source: `lib/block.x:271`
 
 ## Runtime-internal callables
 
@@ -305,7 +305,7 @@ For a nonnull `Block`, raises `<bad-arg>` for a null destination slot, or
 `<alloc-fail>` when an empty slot cannot acquire a `Scope`. Failure leaves
 ownership unchanged.
 
-Source: `lib/block.x:306`
+Source: `lib/block.x:304`
 
 ## Public types
 

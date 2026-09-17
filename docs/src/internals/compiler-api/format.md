@@ -19,7 +19,7 @@ Code formatting helpers for the x2c compiler.
 <a id="Compiler.code_pretty_string"></a>
 #### Compiler.code_pretty_string
 
-`char *Compiler.code_pretty_string( Compiler compiler, List code, String output_file)`
+`char *Compiler.code_pretty_string(Compiler cc, List code, String output_file)`
 
 Returns a canonical formatted C `String` for an emitted token `List`.
 Token order and `code` are unchanged. Braces indent by two spaces,

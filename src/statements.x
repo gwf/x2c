@@ -447,123 +447,117 @@ List Compiler.with_binding(Compiler c) {
     The caller owns the surrounding scope; a macro insertion may return a
     `(seq ...)` node containing several block items.
 */
-List Compiler.parse_block_item(Compiler compiler) {
-  if (compiler.test_static_assert()) return compiler.parse_static_assert();
-  List slot = compiler.try_parse_macro_slot(<block>);
+List Compiler.parse_block_item(Compiler c) {
+  if (c.test_static_assert()) return c.parse_static_assert();
+  List slot = c.try_parse_macro_slot(<block>);
   if (slot) return slot;
-  if (compiler.local_macro_form_is_definition()) {
-    List definition = compiler.parse_macro_definition();
-    return compiler.macro_holes ? definition : %(seq);
+  if (c.local_macro_form_is_definition()) {
+    List definition = c.parse_macro_definition();
+    return c.macro_holes ? definition : %(seq);
   }
-  if (compiler.peek(0) == <ident> && compiler.token.text == "with")
-    return compiler.parse_statement();
+  if (c.peek(0) == <ident> && c.token.text == "with")
+    return c.parse_statement();
   // An identifier naming a live `with` expression is no macro target.
-  int with_expression = !!compiler.with_binding();
-  List macro = with_expression ? NULL
-    : compiler.try_parse_macro_target_at(AST_BLOCK);
+  int with_expression = !!c.with_binding();
+  List macro = with_expression ? NULL : c.try_parse_macro_target_at(AST_BLOCK);
   if (macro) return macro;
-  if (compiler.test_declaration()) {
-    List declaration = compiler.parse_declaration_row();
-    compiler.expect(<;>);
-    return compiler.finish_managed_declaration(declaration);
+  if (c.test_declaration()) {
+    List declaration = c.parse_declaration_row();
+    c.expect(<;>);
+    return c.finish_managed_declaration(declaration);
   }
-  return compiler.parse_statement();
+  return c.parse_statement();
 }
 
 /** Parses and binds one statement or statement-position macro at the current
     token. On return, the cursor follows the complete statement and any
     temporary `Sym` scopes opened by the statement have been closed.
 */
-List Compiler.parse_statement(Compiler compiler) {
-  List slot = compiler.try_parse_macro_slot(<statement>);
+List Compiler.parse_statement(Compiler c) {
+  List slot = c.try_parse_macro_slot(<statement>);
   if (slot) return slot;
-  if (compiler.peek(0) == <$> &&
-      compiler.macro_starts_target_at(AST_STATEMENT)) {
-    List hole = compiler.peek_macro_hole();
-    List macro = compiler.try_parse_macro_target_at(AST_STATEMENT);
+  if (c.peek(0) == <$> && c.macro_starts_target_at(AST_STATEMENT)) {
+    List hole = c.peek_macro_hole();
+    List macro = c.try_parse_macro_target_at(AST_STATEMENT);
     if (macro) return macro;
     List expression = hole && hole.assoc(<kind>) == <name>
-                    ? compiler.parse_expression()
-                    : compiler.try_parse_macro_expression();
-    compiler.expect(<;>);
+                    ? c.parse_expression() : c.try_parse_macro_expression();
+    c.expect(<;>);
     return %(stmnt $expression);
   }
   /* A `with` alias records its source expression, not a temporary. Its `Sym`
      scope and semantic rows exist only while the body parses, so every use
      substitutes the expression and an unused alias does not evaluate it. */
-  if (compiler.peek(0) == <ident> && compiler.token.text == "with") {
-    compiler.next();
-    if ((compiler.peek(0) == <"{"> && compiler.peek(1) == <"}">) ||
-        compiler.peek(0) == <;> || compiler.peek(0) == <eof>)
-      compiler.report_error(
-        <parse>, "with requires an expression", compiler.token, NULL);
-    List expression = compiler.parse_expression(), String alias = "_";
-    if (compiler.peek(0) == <ident> && compiler.token.text == "as") {
-      compiler.next();
-      if (compiler.peek(0) != <ident>)
-        compiler.report_error(
-          <parse>, "expected an alias identifier after 'as'",
-          compiler.token, NULL);
-      alias = compiler.token.text;
-      compiler.next();
+  if (c.peek(0) == <ident> && c.token.text == "with") {
+    c.next();
+    if ((c.peek(0) == <"{"> && c.peek(1) == <"}">) ||
+        c.peek(0) == <;> || c.peek(0) == <eof>)
+      c.report_error(<parse>, "with requires an expression", c.token, NULL);
+    List expression = c.parse_expression(), String alias = "_";
+    if (c.peek(0) == <ident> && c.token.text == "as") {
+      c.next();
+      if (c.peek(0) != <ident>)
+        c.report_error(
+          <parse>, "expected an alias identifier after 'as'", c.token, NULL);
+      alias = c.token.text;
+      c.next();
     }
-    if (compiler.peek(0) != <"{">)
-      compiler.report_error(
-        <parse>, "with requires a braced body", compiler.token, NULL);
+    if (c.peek(0) != <"{">)
+      c.report_error(<parse>, "with requires a braced body", c.token, NULL);
     List type = NULL;
     match (expression)
       case %(expr ?expression_type ?): type = expression_type;
-    compiler.sym.push_new_scope();
-    List binding = compiler.sym.define(%($alias), type);
-    compiler.semantic_binding_facts()[%(with $binding)] = expression;
+    c.sym.push_new_scope();
+    List binding = c.sym.define(%($alias), type);
+    c.semantic_binding_facts()[%(with $binding)] = expression;
     Var old_with;
-    int had_previous_with = compiler.semantic_binding_facts().try_get(
+    int had_previous_with = c.semantic_binding_facts().try_get(
       %(with-name $alias), &old_with);
-    compiler.semantic_binding_facts()[%(with-name $alias)] = binding;
+    c.semantic_binding_facts()[%(with-name $alias)] = binding;
     List body = NULL;
     {
       defer {
-        compiler.semantic_binding_facts().del(%(with $binding));
+        c.semantic_binding_facts().del(%(with $binding));
         if (had_previous_with)
-          compiler.semantic_binding_facts()[%(with-name $alias)] =
+          c.semantic_binding_facts()[%(with-name $alias)] =
             old_with;
-        else compiler.semantic_binding_facts().del(%(with-name $alias));
-        compiler.sym.pop_scope();
+        else c.semantic_binding_facts().del(%(with-name $alias));
+        c.sym.pop_scope();
       }
-      compiler.next();
-      body = compiler.parse_compound_statement();
+      c.next();
+      body = c.parse_compound_statement();
     }
     return body;
   }
-  int with_expression = !!compiler.with_binding();
-  List keyword = !with_expression && compiler.peek(0) == <ident>
-    ? compiler.try_parse_macro_target_at(AST_STATEMENT) : NULL;
+  int with_expression = !!c.with_binding();
+  List keyword = !with_expression && c.peek(0) == <ident>
+    ? c.try_parse_macro_target_at(AST_STATEMENT) : NULL;
   if (keyword) return keyword;
-  Symbol token = compiler.peek(0);
+  Symbol token = c.peek(0);
   switch (token) {
-    case <if>:          return _if_statement(compiler);
-    case <while>:       return _while_statement(compiler);
-    case <for>:         return _for_statement(compiler);
-    case <do>:          return _do_statement(compiler);
-    case <return>:      return _return_statement(compiler);
-    case <case>:        return _case_statement(compiler);
-    case <break>:       return _break_statement(compiler);
-    case <continue>:    return _continue_statement(compiler);
-    case <goto>:        return _goto_statement(compiler);
-    case <try>:         return _try_statement(compiler);
-    case <raise>:       return _raise_statement(compiler);
-    case <defer>:       return _defer_statement(compiler);
-    case <match>:       return _match_statement(compiler);
-    case <switch>:      return _switch_statement(compiler);
-    case <default>:     return _default_statement(compiler);
-    case <;>:           return _empty_statement(compiler);
-    case <(>:           return compiler.parse_parenthesized_statement();
+    case <if>:          return _if_statement(c);
+    case <while>:       return _while_statement(c);
+    case <for>:         return _for_statement(c);
+    case <do>:          return _do_statement(c);
+    case <return>:      return _return_statement(c);
+    case <case>:        return _case_statement(c);
+    case <break>:       return _break_statement(c);
+    case <continue>:    return _continue_statement(c);
+    case <goto>:        return _goto_statement(c);
+    case <try>:         return _try_statement(c);
+    case <raise>:       return _raise_statement(c);
+    case <defer>:       return _defer_statement(c);
+    case <match>:       return _match_statement(c);
+    case <switch>:      return _switch_statement(c);
+    case <default>:     return _default_statement(c);
+    case <;>:           return _empty_statement(c);
+    case <(>:           return c.parse_parenthesized_statement();
     case <"{">: case <"%{">: {
-      compiler.next();
-      return compiler.parse_compound_statement();
+      c.next();
+      return c.parse_compound_statement();
     }
   }
-  return _expression_statement(compiler);
+  return _expression_statement(c);
 }
 
 /** Parses block items after an already-consumed opening brace through `}` and
@@ -613,5 +607,4 @@ List Compiler.parse_block_items(Compiler c, int anchor_items) {
 /** Parses a compound body after its opening brace and consumes the closing
     `}`, returning an origin-anchored `(block ...)` node.
 */
-List Compiler.parse_compound_statement(Compiler compiler) =>
-  compiler.parse_block_items(1);
+List Compiler.parse_compound_statement(Compiler c) => c.parse_block_items(1);

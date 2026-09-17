@@ -18,7 +18,7 @@
 <a id="Thread.free"></a>
 #### Thread.free
 
-`void Thread.free(Thread thread)`
+`void Thread.free(Thread t)`
 
 Frees a `Thread` handle after its consuming join has completed.
 

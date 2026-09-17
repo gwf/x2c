@@ -453,8 +453,7 @@ static List _symbol_set_literal_expression(Array symbols) {
     Stores the first duplicate index, or -1, through `duplicate`; a duplicate
     returns NULL.
 */
-List Compiler.symbol_set_expression(
-  Compiler compiler, List values, int *duplicate) {
+List Compiler.symbol_set_expression(Compiler c, List values, int *duplicate) {
   int repeated = _symbol_set_duplicate(values);
   *duplicate = repeated;
   if (repeated >= 0) return NULL;

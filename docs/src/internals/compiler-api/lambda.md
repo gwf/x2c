@@ -25,7 +25,7 @@ Lambda transformation helpers for the x2c compiler.
 <a id="Compiler.adapt_lambda_arg"></a>
 #### Compiler.adapt_lambda_arg
 
-`List Compiler.adapt_lambda_arg( Compiler compiler, List argument, List expected_type)`
+`List Compiler.adapt_lambda_arg(Compiler c, List argument, List expected_type)`
 
 Adapts a lowered noncapturing lambda helper to a typed callback.
 `argument` must be a resolved helper reference produced by
@@ -37,7 +37,7 @@ original parameter types before calling it, then converts its `Var` result
 to the expected return type. Already compatible or unsupported shapes pass
 through unchanged.
 
-Source: `src/lambda.x:867`
+Source: `src/lambda.x:866`
 
 <a id="Compiler.check_lambda_captures"></a>
 #### Compiler.check_lambda_captures
@@ -48,12 +48,12 @@ Rejects writes and reference access to read-only snapshot bindings.
 The body has already resolved identifiers and call arguments. Templates
 defer this check until expansion; nested lambdas check their own bodies.
 
-Source: `src/lambda.x:1045`
+Source: `src/lambda.x:1043`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
 
-`List Compiler.lift_func_expression(Compiler compiler, List expression)`
+`List Compiler.lift_func_expression(Compiler c, List expression)`
 
 Converts a resolved function-like expression to `Func` when supported.
 Existing `Func` values pass through. Direct fixed functions reuse a
@@ -80,7 +80,7 @@ Nested lambdas lower inside out, block fallthrough and bare returns produce
 Null, and synthesized declarations enter the early queue. Parentheses
 remain around lowered helpers; other non-lambda expressions pass through.
 
-Source: `src/lambda.x:1595`
+Source: `src/lambda.x:1592`
 
 <a id="Compiler.lower_typed_adapter_expr"></a>
 #### Compiler.lower_typed_adapter_expr
@@ -113,7 +113,7 @@ Source: `src/lambda.x:492`
 <a id="Compiler.prepare_lambda_cells"></a>
 #### Compiler.prepare_lambda_cells
 
-`List Compiler.prepare_lambda_cells( Compiler compiler, List declarator, List body)`
+`List Compiler.prepare_lambda_cells(Compiler c, List declarator, List body)`
 
 Prepares one resolved function body for shared mutable lambda captures.
 `declarator` must carry a resolved `bind` with `fnmod` parameters, and
@@ -123,7 +123,7 @@ parameters and locals to `Scope`-owned cells, prepares nested bodies,
 and returns the rewritten body with declaration and initializer order
 preserved.
 
-Source: `src/lambda.x:1315`
+Source: `src/lambda.x:1313`
 
 ## Design notes
 

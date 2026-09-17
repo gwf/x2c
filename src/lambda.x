@@ -813,7 +813,7 @@ static List _deref_func_lift(
     unrelated expressions pass through unchanged. Public inline functions
     reach the queued helpers through generated bridge functions.
 */
-List Compiler.lift_func_expression(Compiler compiler, List expression) {
+List Compiler.lift_func_expression(Compiler c, List expression) {
   Type type = NULL;
   List payload = NULL;
   match (expression)
@@ -821,19 +821,19 @@ List Compiler.lift_func_expression(Compiler compiler, List expression) {
       type = matched_type;
       payload = matched_payload;
     }
-  if (!type) return _deref_func_lift(compiler, expression, payload);
-  Type func_type = compiler.sym.resolve_key(%("Func"));
-  if (compiler.sym.resolve_key(type).equal(func_type)) return expression;
+  if (!type) return _deref_func_lift(c, expression, payload);
+  Type func_type = c.sym.resolve_key(%("Func"));
+  if (c.sym.resolve_key(type).equal(func_type)) return expression;
 
   match (payload)
     case %(lambda *): {
-      expression = compiler.lower_lambda_expr(expression);
+      expression = c.lower_lambda_expr(expression);
       match (expression)
         case %(expr ?lowered_type ?lowered_payload): {
           type = lowered_type;
           payload = lowered_payload;
         }
-      if (compiler.sym.resolve_key(type).equal(func_type))
+      if (c.sym.resolve_key(type).equal(func_type))
         return expression;
     }
 
@@ -841,17 +841,16 @@ List Compiler.lift_func_expression(Compiler compiler, List expression) {
   List source_binding = NULL;
   if (_direct_func_source(
         type, payload, &source_type, &source_binding))
-    return _direct_func_value(compiler, source_binding, source_type);
+    return _direct_func_value(c, source_binding, source_type);
 
-  Type pointer_type = _func_pointer_value_type(compiler, type);
-  if (pointer_type)
-    return _indirect_func_lift(compiler, expression, pointer_type);
-  Type resolved = compiler.sym.resolve_key(type);
+  Type pointer_type = _func_pointer_value_type(c, type);
+  if (pointer_type) return _indirect_func_lift(c, expression, pointer_type);
+  Type resolved = c.sym.resolve_key(type);
   if (resolved && resolved.is_function()) {
     Type pointer = cons(<*>, resolved);
-    return _indirect_func_lift(compiler, %(expr $pointer $payload), pointer);
+    return _indirect_func_lift(c, %(expr $pointer $payload), pointer);
   }
-  return _deref_func_lift(compiler, expression, payload);
+  return _deref_func_lift(c, expression, payload);
 }
 
 /** Adapts a lowered noncapturing lambda helper to a typed callback.
@@ -864,12 +863,11 @@ List Compiler.lift_func_expression(Compiler compiler, List expression) {
     to the expected return type. Already compatible or unsupported shapes pass
     through unchanged.
 */
-List Compiler.adapt_lambda_arg(
-  Compiler compiler, List argument, List expected_type) {
+List Compiler.adapt_lambda_arg(Compiler c, List argument, List expected_type) {
   Type orig_type = NULL, List orig_binding = NULL;
   match (argument) {
     case %(expr ? (parens ?inner)): {
-      List adapted = compiler.adapt_lambda_arg(inner, expected_type);
+      List adapted = c.adapt_lambda_arg(inner, expected_type);
       if (adapted == inner) return argument;
       return %(expr $expected_type (parens $adapted));
     }
@@ -909,10 +907,10 @@ List Compiler.adapt_lambda_arg(
     ? return_type : %( $return_type );
   if (all_params_var && return_type_list === %("Var")) return argument;
 
-  String adapter = compiler.fresh_name("lambda_adapt");
-  List adapter_binding = compiler.sym.introduce(adapter);
-  compiler.add_early(_callback_function(
-    compiler, adapter_binding, param_types, return_type_list,
+  String adapter = c.fresh_name("lambda_adapt");
+  List adapter_binding = c.sym.introduce(adapter);
+  c.add_early(_callback_function(
+    c, adapter_binding, param_types, return_type_list,
     orig_binding, orig_type, source_param_types));
   return %(expr $expected_type (ident $adapter_binding));
 }
@@ -1312,13 +1310,12 @@ static List _prepare_lambda_region(
     and returns the rewritten body with declaration and initializer order
     preserved.
 */
-List Compiler.prepare_lambda_cells(
-  Compiler compiler, List declarator, List body) {
+List Compiler.prepare_lambda_cells(Compiler c, List declarator, List body) {
   List entries = NULL;
   match (declarator)
     case %(bind ? ((fnmod (params *parameters)))):
       entries = parameters;
-  return _prepare_lambda_region(compiler, entries, body);
+  return _prepare_lambda_region(c, entries, body);
 }
 
 /* Rewrite capture-construction expressions through this environment, but do

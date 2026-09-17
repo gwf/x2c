@@ -82,23 +82,22 @@ static void _record_declaration_rows_visibility(
     Lexical privacy and static storage mark bindings in `Sym`; typedef rows are
     retained for placing generated protocol declarations at the same boundary.
 */
-void Compiler.record_declaration_visibility(
-  Compiler compiler, List declaration) {
-  int private = _lexically_private(compiler);
+void Compiler.record_declaration_visibility(Compiler c, List declaration) {
+  int private = _lexically_private(c);
   match (declaration) {
     case %(seq *rows):
-      foreach (List row, rows) compiler.record_declaration_visibility(row);
+      foreach (List row, rows) c.record_declaration_visibility(row);
     case %(function ?type (bind ?identity *) *): {
       if (!private && !type.type().is_static()) return;
       String name = binding_identity_spelling(identity);
-      if (name) _mark_private(compiler, <binding>, name);
+      if (name) _mark_private(c, <binding>, name);
     }
     case %(
       (!set ?kind (!or typedef declare)) ?type (bindings *rows)
     ): {
       int mark = private || type.type().is_static();
       _record_declaration_rows_visibility(
-        compiler, declaration, kind, private, mark, rows);
+        c, declaration, kind, private, mark, rows);
     }
   }
 }
@@ -800,21 +799,20 @@ static void _install_native_bindings(
    rows of `(name status source expected default-kind template)`. Consumers
    dispatch on `status`; a non-list cache value records failed resolution. */
 static List Compiler._resolve_native_protocol_participant(
-  Compiler compiler, Type base, Type participant, String binder,
+  Compiler c, Type base, Type participant, String binder,
   List associations, List templates, Type participant_definition,
   List *failure) {
   *failure = NULL;
   List key = %($base $participant);
   Var stored;
-  if (compiler.conforms.try_get(key, &stored)) {
+  if (c.conforms.try_get(key, &stored)) {
     if (stored is not <list>) return NULL;
     List conformance = stored;
-    _install_native_bindings(
-      compiler, participant, conformance.last().list().cdr());
+    _install_native_bindings(c, participant, conformance.last().list().cdr());
     return conformance;
   }
   if (!participant.is_bare_typedef_name() || !participant_definition) {
-    compiler.conforms[key] = 0;
+    c.conforms[key] = 0;
     return NULL;
   }
   Map variables = {}, bindings = {};
@@ -834,7 +832,7 @@ static List Compiler._resolve_native_protocol_participant(
     if (requirement) {
       *failure = requirement;
       members.free();
-      compiler.conforms[key] = 0;
+      c.conforms[key] = 0;
       return NULL;
     }
     Type expected = _substitute_signature(
@@ -855,7 +853,7 @@ static List Compiler._resolve_native_protocol_participant(
     protocol-conformance $base $participant "" ""
     $variables $bindings (members @rows)
   );
-  compiler.conforms[key] = conformance;
+  c.conforms[key] = conformance;
   return conformance;
 }
 
@@ -1287,23 +1285,22 @@ static void _resolve_declared_adoption(
     typedef ancestor. Native conformances install their generated bindings
     before the cached conformance row is returned.
 */
-List Compiler.protocol_members_for(
-  Compiler compiler, Type participant, Type base) {
+List Compiler.protocol_members_for(Compiler c, Type participant, Type base) {
   participant = participant.canonicalize();
   Type owner = participant;
-  if (!compiler._is_adopted(base, owner)) {
-    List ancestry = _ancestry(compiler, participant).cdr();
+  if (!c._is_adopted(base, owner)) {
+    List ancestry = _ancestry(c, participant).cdr();
     for (; ancestry; ancestry = ancestry.cdr()) {
       owner = ancestry.car();
-      if (compiler._is_adopted(base, owner)) break;
+      if (c._is_adopted(base, owner)) break;
     }
     if (!ancestry) return NULL;
   }
-  Var stored = compiler.conforms[%($base $owner)];
+  Var stored = c.conforms[%($base $owner)];
   if (stored is not <list>) return NULL;
   List conformance = stored;
   _install_native_bindings(
-    compiler, owner, conformance.last().list().cdr());
+    c, owner, conformance.last().list().cdr());
   return conformance;
 }
 
@@ -2117,24 +2114,23 @@ static List _guard_value_rendering(
 }
 
 static List Compiler._generate_protocol_thunk(
-  Compiler compiler, Type participant, String member, Type expected,
+  Compiler c, Type participant, String member, Type expected,
   Type template, Map variables, Map bindings, String binder, String source,
   String reverse) {
   Map erased = bindings.copy();
   foreach (Var variable, variables.keys()) erased[variable] = %("Var");
   Type target = _substitute_signature(template, variables, erased);
   String participant_name = participant.car().str().lower();
-  String thunk_name =
-    compiler.fresh_name(%"proto_${participant_name}_$member");
+  String thunk_name = c.fresh_name(%"proto_${participant_name}_$member");
   List thunk_binding = NULL;
-  List function = compiler._generate_protocol_function(
+  List function = c._generate_protocol_function(
     thunk_name, 1, target, expected, template,
     variables, binder, source, reverse, &thunk_binding);
   if ((member == "str" || member == "repr" || member == "write_str" ||
        member == "write_repr") &&
-      compiler.sym.normalize_declared_type(participant).is_aggregate())
-    function = _guard_value_rendering(compiler, function, member);
-  compiler.add_early(function);
+      c.sym.normalize_declared_type(participant).is_aggregate())
+    function = _guard_value_rendering(c, function, member);
+  c.add_early(function);
   return %($member $thunk_binding $target);
 }
 

@@ -35,10 +35,9 @@ void SourceView.init(SourceView sources) {
 /** Stores an immutable snapshot under its logical source path. Empty text
     is a present snapshot, not a request to fall back to the disk file.
 */
-void SourceView.set(
-  SourceView sources, String path, String text, int changed) {
-  sources.overlays[Path.absolute(path)] = text;
-  if (changed) sources.dirty_paths[Path.absolute(path)] = 1;
+void SourceView.set(SourceView s, String path, String text, int changed) {
+  s.overlays[Path.absolute(path)] = text;
+  if (changed) s.dirty_paths[Path.absolute(path)] = 1;
 }
 
 /** Returns whether this logical file has an unsaved overlay. */

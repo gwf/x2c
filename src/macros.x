@@ -554,30 +554,24 @@ int Compiler.macro_form_is_definition(Compiler compiler) {
 /** Returns whether the current tokens begin a local macro definition.
     This query does not consume tokens.
 */
-int Compiler.local_macro_form_is_definition(Compiler compiler) {
-  return compiler.peek(0) == <ident> &&
-         compiler.token.text == "macro" &&
-         compiler.peek(1) == <ident> &&
-         compiler.peek(2) == <ident> &&
-         compiler.peek(3) == <(>;
+int Compiler.local_macro_form_is_definition(Compiler c) {
+  return c.peek(0) == <ident> && c.token.text == "macro" &&
+         c.peek(1) == <ident> && c.peek(2) == <ident> && c.peek(3) == <(>;
 }
 
 /** Returns whether the current tokens begin a `keyword NAME $macro` alias.
     This query does not consume tokens.
 */
-int Compiler.keyword_form_is_definition(Compiler compiler) =>
-  compiler.peek(0) == <ident> &&
-         compiler.token.text == "keyword" &&
-         compiler.peek(2) == <$>;
+int Compiler.keyword_form_is_definition(Compiler c) =>
+  c.peek(0) == <ident> && c.token.text == "keyword" && c.peek(2) == <$>;
 
 /** Consumes a direct macro name and its balanced argument list.
     The invocation terminator remains current for the shallow parser.
 */
-void Compiler.skip_macro_invocation(Compiler compiler) {
-  compiler.expect(<$>);
-  while (compiler.peek(0) == <ident> || compiler.peek(0) == <.>)
-    compiler.next();
-  if (compiler.peek(0) == <(>) compiler.token = compiler.token.after_group();
+void Compiler.skip_macro_invocation(Compiler c) {
+  c.expect(<$>);
+  while (c.peek(0) == <ident> || c.peek(0) == <.>) c.next();
+  if (c.peek(0) == <(>) c.token = c.token.after_group();
 }
 
 static Atom _name(Compiler c) {
@@ -1796,33 +1790,32 @@ static const SymbolSet untyped_roles = %<<expression argument type>>;
     `(macro-slot ...)`, or NULL when ordinary grammar owns the current tokens;
     successful parsing advances the cursor.
 */
-List Compiler.try_parse_macro_slot(Compiler compiler, Symbol role) {
-  if (!compiler.macro_holes) return NULL;
-  if (compiler.peek(0) == <"$(">) {
-    int splice = _lisp_splice_follows(compiler);
+List Compiler.try_parse_macro_slot(Compiler c, Symbol role) {
+  if (!c.macro_holes) return NULL;
+  if (c.peek(0) == <"$(">) {
+    int splice = _lisp_splice_follows(c);
     if (declaration_roles.contains(role) && !splice)
       return NULL;
-    if (role == <block> && compiler.macro_lisp_starts_declaration())
-      return NULL;
+    if (role == <block> && c.macro_lisp_starts_declaration()) return NULL;
     if (role == <statement>) return NULL;
-    if (role == <expression>) return compiler.parse_macro_lisp_expression();
+    if (role == <expression>) return c.parse_macro_lisp_expression();
     int allow_sequence = sequence_roles.contains(role);
-    return _parse_lisp_slot(compiler, allow_sequence, role);
+    return _parse_lisp_slot(c, allow_sequence, role);
   }
-  List hole = compiler.peek_macro_hole();
+  List hole = c.peek_macro_hole();
   if (!hole ||
       (role == <argument> && !hole.assoc(<sequence>).int()) ||
-      (role == <statement> && compiler.peek(2) == <(>)) return NULL;
+      (role == <statement> && c.peek(2) == <(>)) return NULL;
   if (role == <expression> && hole.assoc(<sequence>).int())
-    compiler.report_error(
+    c.report_error(
       <parse>, "sequence insertion is not legal in an expression slot",
-      compiler.token, NULL);
+      c.token, NULL);
   if (!untyped_roles.contains(role)) {
     Symbol kind = hole.assoc(<kind>);
-    if (!kind && compiler.peek(2) != <...>) return NULL;
+    if (!kind && c.peek(2) != <...>) return NULL;
     if (kind && !_kind_accepts_role(kind, role)) return NULL;
   }
-  List syntax = _parse_hole(compiler, role);
+  List syntax = _parse_hole(c, role);
   return syntax && role == <expression>
        ? %(expr (<macro-expr>) $syntax) : syntax;
 }
@@ -2333,14 +2326,13 @@ int Compiler.keyword_alias_needs_shallow_expansion(Compiler compiler) {
 /** Consumes the current keyword alias and any required argument list.
     Its terminator or following decorator target remains current.
 */
-void Compiler.skip_keyword_alias(Compiler compiler) {
-  List definition = _keyword_alias_lookup(compiler);
+void Compiler.skip_keyword_alias(Compiler c) {
+  List definition = _keyword_alias_lookup(c);
   if (!definition)
-    compiler.report_error(
-      <parse>, "expected keyword alias", compiler.token, NULL);
-  compiler.next();
+    c.report_error(<parse>, "expected keyword alias", c.token, NULL);
+  c.next();
   if (_keyword_alias_requires_arguments(definition))
-    compiler.token = compiler.token.after_group();
+    c.token = c.token.after_group();
 }
 
 /** Consumes a NamedType target already projected by owning-source collection.
@@ -2533,18 +2525,17 @@ static String _definition_note(List definition) {
     not begin a semantic transaction.
 */
 List Compiler.expand_macro_invocation_node(
-  Compiler compiler, Var stored, List arguments, Token invocation,
-  AstPos position) {
+  Compiler c, Var stored, List arguments, Token invocation, AstPos position) {
   List definition = NULL;
   if (stored.is_atom())
     definition = _lookup(
-      compiler, Atom.intern(stored.str()), invocation);
+      c, Atom.intern(stored.str()), invocation);
   else match (stored)
     case %(local-macro (!is ?name type atom)):
-      definition = compiler.sym.lookup_macro(name);
+      definition = c.sym.lookup_macro(name);
   if (!definition) definition = stored;
   List input = arguments;
-  with compiler {
+  with c {
     int block_scope = definition.assoc(<kind>) == <decorator> &&
                       definition.assoc(<target>) == <block>;
     if (block_scope) _.sym.push_new_scope();
@@ -2570,7 +2561,7 @@ List Compiler.expand_macro_invocation_node(
       if (_.macro_stack.len() >= 64) {
         String first_note =
           %"first expansion: ${
-            compiler.macro_stack.last().repr()
+            c.macro_stack.last().repr()
           }";
         _.report_error(
           <macro>, "macro expansion depth exceeds 64",
@@ -2851,21 +2842,19 @@ static List _parse_target_definition(
     template parsing returns a deferred `(seq (macro-invoke ...))`, and
     ordinary parsing returns the bound expansion.
 */
-List Compiler.try_parse_macro_target_at(Compiler compiler, AstPos position) {
-  Token invocation = compiler.token;
+List Compiler.try_parse_macro_target_at(Compiler c, AstPos position) {
+  Token invocation = c.token;
   List definition;
   int bare = 0;
-  if (compiler.peek(0) == <$>) {
-    if (compiler.macro_holes && compiler.peek_macro_hole()) return NULL;
-    definition = _lookup(compiler, _name(compiler), invocation);
+  if (c.peek(0) == <$>) {
+    if (c.macro_holes && c.peek_macro_hole()) return NULL;
+    definition = _lookup(c, _name(c), invocation);
   }
   else {
-    definition = _keyword_alias_lookup(compiler);
-    if (!_keyword_alias_targets_at(
-      compiler, definition, position)) return NULL;
-    compiler.next();
+    definition = _keyword_alias_lookup(c);
+    if (!_keyword_alias_targets_at(c, definition, position)) return NULL;
+    c.next();
     bare = !_keyword_alias_requires_arguments(definition);
   }
-  return _parse_target_definition(
-    compiler, definition, invocation, position, bare);
+  return _parse_target_definition(c, definition, invocation, position, bare);
 }

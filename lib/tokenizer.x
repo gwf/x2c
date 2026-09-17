@@ -43,8 +43,7 @@ inline Var Token.var(Token x) => Var.new(<token>, x);
 protocol Var(Token);
 
 /* Hashes a live Token's complete representation; it must be nonnull. */
-unsigned Token.hash(Token token) =>
-  x2c_hash_bytes(0, token, sizeof(struct Token));
+unsigned Token.hash(Token t) => x2c_hash_bytes(0, t, sizeof(struct Token));
 
 /* Reports byte-for-byte Token equality, with two null Tokens equal. */
 int Token.equal(Token a, Token b) {
@@ -94,8 +93,7 @@ Tokenizer Tokenizer.new_mode(char *text, Symbol mode) {
 
 // mode stack
 
-static inline Symbol Tokenizer._scan_mode(Tokenizer tokenizer) =>
-  tokenizer.modes[-1];
+static inline Symbol Tokenizer._scan_mode(Tokenizer t) => t.modes[-1];
 
 static inline void Tokenizer._push_mode(Tokenizer tokenizer, Symbol mode) {
   tokenizer.modes.push(mode);
@@ -140,11 +138,10 @@ int Tokenizer.error(Tokenizer tokenizer) => _error(tokenizer, <malformed>);
    be nonnull. A positive length appends `type`, zero makes no progress, and
    -1 records a malformed token stream. A cause from the callback or token
    append does not return here. */
-int Tokenizer.do_scanner(
-  Tokenizer tokenizer, int (*scanner)(char *), Symbol type) {
-  int len = scanner(tokenizer.text + tokenizer.pos);
-  if (len > 0) return tokenizer.tokenize(len, type);
-  if (len < 0) return tokenizer.error();
+int Tokenizer.do_scanner(Tokenizer t, int (*scanner)(char *), Symbol type) {
+  int len = scanner(t.text + t.pos);
+  if (len > 0) return t.tokenize(len, type);
+  if (len < 0) return t.error();
   return 0;
 }
 
@@ -530,9 +527,8 @@ static int Tokenizer._lisp_tokens(Tokenizer t) {
 
 /* NUL always ends tokenization, even in a nested mode. The parser or Lisp
    reader, not this lexical layer, diagnoses a missing closing delimiter. */
-static int Tokenizer._end_of_file(Tokenizer tokenizer) {
-  if (tokenizer.text[tokenizer.pos] == '\0')
-    return tokenizer.tokenize(0, <eof>);
+static int Tokenizer._end_of_file(Tokenizer t) {
+  if (t.text[t.pos] == '\0') return t.tokenize(0, <eof>);
   return 0;
 }
 
@@ -590,5 +586,4 @@ Token Tokenizer.next(Tokenizer tokenizer) {
 }
 
 /* Returns the first scan status, or `<malformed>` for a null Tokenizer. */
-Symbol Tokenizer.status(Tokenizer tokenizer) =>
-  tokenizer ? tokenizer.scan_status : <malformed>;
+Symbol Tokenizer.status(Tokenizer t) => t ? t.scan_status : <malformed>;

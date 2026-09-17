@@ -40,7 +40,7 @@ a diagnostic and aborts the process.
 **Raises:** `<alloc-fail>` or `<size-limit>` while registering the shutdown
 hook.
 
-Source: `lib/match.x:2475`
+Source: `lib/match.x:2471`
 
 #### x2c_match_site_match
 
@@ -118,7 +118,7 @@ leases and `Context` states must already be closed.
 
 **Raises:** `<bad-state>` when a lease remains active.
 
-Source: `lib/match.x:2343`
+Source: `lib/match.x:2339`
 
 ### `List`
 
@@ -136,7 +136,7 @@ unchanged. New structure follows the module pool-chain lifetime above.
 
 **Raises:** `<alloc-fail>` while constructing replacement `List`s.
 
-Source: `lib/match.x:752`
+Source: `lib/match.x:751`
 
 <a id="List.search"></a>
 #### List.search
@@ -153,7 +153,7 @@ A miss, malformed pattern, or machine error returns `nil`.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing or constructing results.
 
-Source: `lib/match.x:919`
+Source: `lib/match.x:918`
 
 <a id="List.search_replace"></a>
 #### List.search_replace
@@ -169,7 +169,7 @@ above.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, traversing, or replacing.
 
-Source: `lib/match.x:944`
+Source: `lib/match.x:943`
 
 <a id="List.try_match"></a>
 #### List.try_match
@@ -184,7 +184,7 @@ match writes `nil`. A null output pointer returns 0.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, materializing captures, or publishing bindings.
 
-Source: `lib/match.x:711`
+Source: `lib/match.x:710`
 
 <a id="List.try_match_replace"></a>
 #### List.try_match_replace
@@ -200,7 +200,7 @@ a miss, malformed pattern, invalid output, or machine error and leaves
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, materializing, or replacing.
 
-Source: `lib/match.x:808`
+Source: `lib/match.x:807`
 
 <a id="List.try_search"></a>
 #### List.try_search
@@ -215,7 +215,7 @@ returns
 
 **Raises:** the same causes as `List.search`.
 
-Source: `lib/match.x:932`
+Source: `lib/match.x:931`
 
 ### `MatchCache`
 
@@ -231,7 +231,7 @@ the token storage remains owned by its `Context` `Scope`.
 **Raises:** `<bad-state>` when `token` is not the top state or its cache has an
 active lease. The failure leaves the state installed.
 
-Source: `lib/match.x:2379`
+Source: `lib/match.x:2375`
 
 <a id="MatchCache.context_open"></a>
 #### MatchCache.context_open
@@ -246,7 +246,7 @@ active `Scope` and must be passed to `MatchCache.context_close` before that
 
 **Raises:** `<alloc-fail>` when the state cannot be allocated.
 
-Source: `lib/match.x:2365`
+Source: `lib/match.x:2361`
 
 ## Advanced and interop API
 
@@ -333,7 +333,7 @@ Returns bindings when `input` matches `pat`, or `nil` on a miss.
 A binder-free success returns the nonnull `%(())` sentinel
 with no associations. Binding order and failures follow `List.try_match`.
 
-Source: `lib/match.x:718`
+Source: `lib/match.x:717`
 
 <a id="List.match_replace"></a>
 #### List.match_replace
@@ -346,7 +346,7 @@ inhabit the `List` result and returns `nil`. Matching and replacement
 failures
 follow `List.try_match_replace`.
 
-Source: `lib/match.x:818`
+Source: `lib/match.x:817`
 
 ### `Var`
 
@@ -447,7 +447,7 @@ inactive pressure lease is a no-op.
 pattern compiles to no program, so it is never cached and never leased.
 `<alloc-fail>` may also be raised while preparing or growing storage.
 
-Source: `lib/match.x:2079`
+Source: `lib/match.x:2075`
 
 <a id="MatchCache.dispose"></a>
 #### MatchCache.dispose
@@ -461,7 +461,7 @@ invalidates every alias.
 **Raises:** `<bad-state>` when a lease remains active. The failure leaves the
 cache intact.
 
-Source: `lib/match.x:2190`
+Source: `lib/match.x:2186`
 
 <a id="MatchCache.flush_default"></a>
 #### MatchCache.flush_default
@@ -475,7 +475,7 @@ compiler capture sites are unaffected.
 **Raises:** `<bad-state>` when a lease remains active. The failure leaves the
 cache installed.
 
-Source: `lib/match.x:2412`
+Source: `lib/match.x:2408`
 
 <a id="MatchCache.new"></a>
 #### MatchCache.new
@@ -491,7 +491,7 @@ pools. `MatchCache.dispose` is required after every lease is released.
 storage dimensions cannot be represented, and `<alloc-fail>` when cache
 storage cannot be allocated.
 
-Source: `lib/match.x:1967`
+Source: `lib/match.x:1963`
 
 <a id="MatchCache.search"></a>
 #### MatchCache.search
@@ -507,7 +507,7 @@ that `List` is nonempty.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing or constructing results.
 
-Source: `lib/match.x:2272`
+Source: `lib/match.x:2268`
 
 <a id="MatchCache.search_replace"></a>
 #### MatchCache.search_replace
@@ -522,7 +522,7 @@ or machine error returns 0 and writes `input` unchanged.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, traversing, or replacing.
 
-Source: `lib/match.x:2310`
+Source: `lib/match.x:2306`
 
 <a id="MatchCache.try_capture"></a>
 #### MatchCache.try_capture
@@ -537,7 +537,7 @@ malformed pattern, invalid buffer, cache pressure, or machine error returns
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing or matching.
 
-Source: `lib/match.x:2215`
+Source: `lib/match.x:2211`
 
 <a id="MatchCache.try_match"></a>
 #### MatchCache.try_match
@@ -552,7 +552,7 @@ binding shape and order follow `MatchPlan.execute`.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, materializing, or publishing.
 
-Source: `lib/match.x:2233`
+Source: `lib/match.x:2229`
 
 <a id="MatchCache.try_match_replace"></a>
 #### MatchCache.try_match_replace
@@ -567,7 +567,7 @@ may be any `Var`.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, materializing, or replacing.
 
-Source: `lib/match.x:2291`
+Source: `lib/match.x:2287`
 
 <a id="MatchCache.try_search"></a>
 #### MatchCache.try_search
@@ -582,14 +582,14 @@ follows `MatchPlan.try_search`.
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing or constructing bindings.
 
-Source: `lib/match.x:2252`
+Source: `lib/match.x:2248`
 
 ### `MatchCaptureBuffer`
 
 <a id="MatchCaptureBuffer.has"></a>
 #### MatchCaptureBuffer.has
 
-`int MatchCaptureBuffer.has(MatchCaptureBuffer *captures, int index)`
+`int MatchCaptureBuffer.has(MatchCaptureBuffer *m, int index)`
 
 Reports whether a committed capture slot is present.
 A null buffer or an index outside its capacity or `Match`'s binder limit
@@ -674,7 +674,7 @@ transient plan or unpins its cached entry and makes the lease inactive.
 **Raises:** `<bad-arg>` when lease is NULL and `<bad-state>` when its cache or
 entry state is inconsistent. The failure leaves the lease active.
 
-Source: `lib/match.x:2161`
+Source: `lib/match.x:2157`
 
 ### `MatchPlan`
 
@@ -693,12 +693,12 @@ and is not initialized here.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 materializing or publishing bindings.
 
-Source: `lib/match.x:1751`
+Source: `lib/match.x:1747`
 
 <a id="MatchPlan.execute_capture"></a>
 #### MatchPlan.execute_capture
 
-`int MatchPlan.execute_capture( MatchPlan plan, Var input, MatchCaptureBuffer *captures, MachineStats *stats)`
+`int MatchPlan.execute_capture( MatchPlan m, Var input, MatchCaptureBuffer *captures, MachineStats *stats)`
 
 Executes a prepared plan into caller-owned positional storage.
 Returns 1 on a match, 0 on a miss, and -1 for a null or malformed plan, an
@@ -709,7 +709,7 @@ the indicated values; all other results leave the buffer unchanged.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 materializing captures.
 
-Source: `lib/match.x:1725`
+Source: `lib/match.x:1722`
 
 <a id="MatchPlan.free"></a>
 #### MatchPlan.free
@@ -720,7 +720,7 @@ Releases resources owned by `plan`.
 A null plan is ignored; the plan, layout, program, and all aliases to them
 are invalid afterward. Borrowed pattern constants are not released.
 
-Source: `lib/match.x:1655`
+Source: `lib/match.x:1654`
 
 <a id="MatchPlan.prepare"></a>
 #### MatchPlan.prepare
@@ -737,7 +737,7 @@ pattern constants, which must outlive it.
 
 **Raises:** `<alloc-fail>` while analyzing, lowering, or freezing.
 
-Source: `lib/match.x:1613`
+Source: `lib/match.x:1612`
 
 <a id="MatchPlan.search"></a>
 #### MatchPlan.search
@@ -754,7 +754,7 @@ output unchanged for an unusable plan, null output, or machine error.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 constructing results.
 
-Source: `lib/match.x:1818`
+Source: `lib/match.x:1814`
 
 <a id="MatchPlan.search_replace"></a>
 #### MatchPlan.search_replace
@@ -770,7 +770,7 @@ error. Children are replaced before their containing `List` is tested.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 traversing or replacing.
 
-Source: `lib/match.x:1866`
+Source: `lib/match.x:1862`
 
 <a id="MatchPlan.try_capture"></a>
 #### MatchPlan.try_capture
@@ -781,7 +781,7 @@ Executes a prepared `List` match into caller-owned positional storage.
 This is `MatchPlan.execute_capture` without statistics and has the same
 results, atomicity, and failures.
 
-Source: `lib/match.x:1738`
+Source: `lib/match.x:1734`
 
 <a id="MatchPlan.try_match"></a>
 #### MatchPlan.try_match
@@ -792,7 +792,7 @@ Executes prepared `plan` against `input`, writing bindings on success.
 This is `MatchPlan.execute` without statistics and has the same status,
 output atomicity, ordering, and failures.
 
-Source: `lib/match.x:1765`
+Source: `lib/match.x:1761`
 
 <a id="MatchPlan.try_match_replace"></a>
 #### MatchPlan.try_match_replace
@@ -807,7 +807,7 @@ plan, null output, or machine error. Non-success leaves `out` unchanged.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 materializing captures or replacing.
 
-Source: `lib/match.x:1840`
+Source: `lib/match.x:1836`
 
 <a id="MatchPlan.try_search"></a>
 #### MatchPlan.try_search
@@ -822,7 +822,7 @@ machine error. Unless it returns 1, both outputs remain unchanged.
 **Raises:** `<size-limit>` for an ineligible plan, or `<alloc-fail>` while
 materializing or publishing bindings.
 
-Source: `lib/match.x:1790`
+Source: `lib/match.x:1786`
 
 ## Public types
 

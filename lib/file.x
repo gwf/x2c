@@ -227,14 +227,13 @@ String File.string_close(File file) {
   return file.string();
 }
 
-/** Opens the filesystem path named by `fname`.
+/** Opens the filesystem path named by `s`.
     The caller owns a successful stream and must close it. A missing path
     raises `<not-found>`; another host failure raises `<io-fail>`; and a null
     path or mode raises `<bad-arg>`. Host failures carry the path, operation,
     and captured errno.
 */
-File String.open(String fname, const char *mode) =>
-  _open_path(fname, mode, <open>);
+File String.open(String s, const char *mode) => _open_path(s, mode, <open>);
 
 /** Wraps an open file descriptor in a `File` stream.
     On success the returned stream owns `fildes`, which must be closed through
@@ -296,8 +295,7 @@ Self File.reopen(Self file, const char *path, const char *mode) {
     At most `size - 1` bytes are stored followed by NUL, and a newline is kept
     when it fits.
 */
-inline char *File.gets(File file, char *str, int size) =>
-  fgets(str, size, file);
+inline char *File.gets(File f, char *str, int size) => fgets(str, size, f);
 
 /** Writes one byte and returns it as an unsigned char, or EOF on failure. */
 inline int File.putc(File file, int c) => fputc(c, file);

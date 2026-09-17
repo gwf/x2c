@@ -227,7 +227,7 @@ one is outstanding invalidates it. `Iter.array` is the other direction,
 draining an iterator into a fresh `Array`, and `Array.list` converts to a
 canonical `List`.
 
-Source: `lib/array.x:804`
+Source: `lib/array.x:802`
 
 <a id="Array.join"></a>
 #### Array.join
@@ -541,7 +541,7 @@ pointer, a negative cursor, or exhaustion returns zero without changing
 
 **Raises:** `<size-limit>` for an `Array` outside the integer index domain.
 
-Source: `lib/array.x:780`
+Source: `lib/array.x:778`
 
 <a id="Array.unshift"></a>
 #### Array.unshift
@@ -580,13 +580,13 @@ Source: `lib/array.x:168`
 <a id="Array.write_str"></a>
 #### Array.write_str
 
-`Buffer Array.write_str(Array array, Buffer out)`
+`Buffer Array.write_str(Array a, Buffer out)`
 
 Appends the `Array` display text to `out`, using each element's
 `write_str`.
 `Array.str` materializes this into a `String`.
 
-Source: `lib/array.x:734`
+Source: `lib/array.x:733`
 
 ### `Block`
 
@@ -608,7 +608,7 @@ Source: `lib/array.x:58`
 
 Drains `iter` into a fresh `Array`.
 
-Source: `lib/array.x:810`
+Source: `lib/array.x:808`
 
 ## Advanced and interop API
 
@@ -635,7 +635,7 @@ Source: `lib/array.x:810`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/array.x:818`
+Source: `lib/array.x:816`
 
 <a id="Array.compare"></a>
 #### Array.compare
@@ -749,7 +749,7 @@ allocating a `String`, and the two `String` forms are built on them.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
 
-Source: `lib/array.x:755`
+Source: `lib/array.x:753`
 
 <a id="Array.str"></a>
 #### Array.str
@@ -758,7 +758,7 @@ Source: `lib/array.x:755`
 
 Returns an `Array` display `String` using each element's `str`.
 
-Source: `lib/array.x:738`
+Source: `lib/array.x:736`
 
 <a id="Array.update_n"></a>
 #### Array.update_n
@@ -775,7 +775,7 @@ Source: `lib/array.x:95`
 <a id="Array.write_repr"></a>
 #### Array.write_repr
 
-`Buffer Array.write_repr(Array array, Buffer out)`
+`Buffer Array.write_repr(Array a, Buffer out)`
 
 Appends the readable `Array` representation to `out`.
 

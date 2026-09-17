@@ -85,7 +85,7 @@ Starts and waits for the action, returning its final status.
 **Raises:** the same construction and capture-reading causes as
 `ToolAction.start` and `ToolRun.wait`.
 
-Source: `src/toolchain.x:352`
+Source: `src/toolchain.x:350`
 
 <a id="ToolAction.start"></a>
 #### ToolAction.start
@@ -99,19 +99,19 @@ starts no child.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the execution
 or argv.
 
-Source: `src/toolchain.x:301`
+Source: `src/toolchain.x:300`
 
 ### `ToolRun`
 
 <a id="ToolRun.ready"></a>
 #### ToolRun.ready
 
-`int ToolRun.ready(ToolRun execution)`
+`int ToolRun.ready(ToolRun t)`
 
 Checks whether an execution can be waited without blocking. A dry run
 and a tool that could not start are ready immediately.
 
-Source: `src/toolchain.x:319`
+Source: `src/toolchain.x:318`
 
 <a id="ToolRun.wait"></a>
 #### ToolRun.wait
@@ -126,7 +126,7 @@ stderr; program actions inherit standard streams.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 reading either capture as a `String`.
 
-Source: `src/toolchain.x:330`
+Source: `src/toolchain.x:328`
 
 ### `Toolchain`
 
@@ -189,7 +189,7 @@ does not consult `dry_run`.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 constructing arguments or reading captured text.
 
-Source: `src/toolchain.x:371`
+Source: `src/toolchain.x:369`
 
 <a id="Toolchain.preprocess_action"></a>
 #### Toolchain.preprocess_action
@@ -207,7 +207,7 @@ Source: `src/toolchain.x:141`
 <a id="Toolchain.search_directories"></a>
 #### Toolchain.search_directories
 
-`List Toolchain.search_directories(Toolchain toolchain)`
+`List Toolchain.search_directories(Toolchain t)`
 
 Returns the directories the C compiler searches for headers and libraries
 without explicit options, as it reports them, plus the `lib` directory

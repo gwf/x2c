@@ -19,11 +19,11 @@ Constant caching for x2c code generation.
 <a id="Compiler.setup_cache_init"></a>
 #### Compiler.setup_cache_init
 
-`List Compiler.setup_cache_init( Compiler compiler, List header, List source, String prefix, String guard_name, String initializer_name)`
+`List Compiler.setup_cache_init( Compiler c, List header, List source, String prefix, String guard_name, String initializer_name)`
 
 Materializes cached literals and deferred file-static initialization.
 `header` and `source` must be partitioned lowered AST regions from this
-compiler. Every `(cache id)` must index `compiler.id_keys`, and file-static
+compiler. Every `(cache id)` must index `c.id_keys`, and file-static
 dependency state from the full parse must be complete. `prefix`,
 `guard_name`, and `initializer_name` name the header's private slots,
 guard, and initializer. Returns `(header source)` and appends source work

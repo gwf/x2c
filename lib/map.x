@@ -249,16 +249,15 @@ Var Map.setdefault(Map map, Var key, Var defval) {
   return stored[0];
 }
 
-/** Returns nonzero when `key` is present in `map`, whatever its value.
-    A null `map` reports absence rather than failing. Key comparison follows
+/** Returns nonzero when `key` is present in `m`, whatever its value.
+    A null `m` reports absence rather than failing. Key comparison follows
     `Map.get`:
     `Array`s and `Map`s compare structurally but hash by identity, so only
     same-object lookup is reliable.
     Raises: `<void-op>` when `key` is `void`, or a cause raised by custom key
     hashing or equality.
 */
-int Map.contains(Map map, Var key) =>
-  map && map._core_find_index(&key, NULL) >= 0;
+int Map.contains(Map m, Var key) => m && m._core_find_index(&key, NULL) >= 0;
 
 static void _set(Map map, Var key, Var val) {
   if ((void *) map == NULL) raise %(bad-arg);

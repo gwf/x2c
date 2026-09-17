@@ -258,11 +258,11 @@ int tool_capture(List arguments, String *output, String *errors) {
     beside each reported `include` directory. A compiler that reports none
     contributes none.
 */
-List Toolchain.search_directories(Toolchain toolchain) {
+List Toolchain.search_directories(Toolchain t) {
   Array directories = [];
-  List flags = toolchain.cc_args;
+  List flags = t.cc_args;
   String output = NULL, errors = NULL;
-  if (!tool_capture(%(${toolchain.cc} @flags "-E" "-v" "-x" "c" "/dev/null"),
+  if (!tool_capture(%(${t.cc} @flags "-E" "-v" "-x" "c" "/dev/null"),
                     &output, &errors)) {
     int listing = 0;
     foreach (String line, errors.split_lines(0)) {
@@ -280,8 +280,7 @@ List Toolchain.search_directories(Toolchain toolchain) {
         directories.push(Path.dirname(directory).join("lib"));
     }
   }
-  if (!tool_capture(%(${toolchain.cc} @flags "-print-search-dirs"),
-                    &output, &errors))
+  if (!tool_capture(%(${t.cc} @flags "-print-search-dirs"), &output, &errors))
     foreach (String line, output.split_lines(0)) {
       if (!line.startswith("libraries: ")) continue;
       String list = line.remove_prefix("libraries: ").remove_prefix("=");
@@ -316,8 +315,7 @@ ToolRun ToolAction.start(ToolAction action) {
 /** Checks whether an execution can be waited without blocking. A dry run
     and a tool that could not start are ready immediately.
 */
-int ToolRun.ready(ToolRun execution) =>
-  !execution.job || execution.job.ready();
+int ToolRun.ready(ToolRun t) => !t.job || t.job.ready();
 
 /** Waits for an execution, forwards its captured streams, and returns its
     shell-style status. Signals return `128 + signal`, a tool that could not

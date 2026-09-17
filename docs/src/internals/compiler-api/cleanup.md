@@ -20,7 +20,7 @@ What a cleanup region runs, and which exits run it.
 <a id="Compiler.mark_cleanup_regions"></a>
 #### Compiler.mark_cleanup_regions
 
-`List Compiler.mark_cleanup_regions(Compiler compiler, List ast)`
+`List Compiler.mark_cleanup_regions(Compiler c, List ast)`
 
 Names each cleanup region, records the statements that leave it, and
 runs them on every exit that leaves it. `ast` must be a transformed

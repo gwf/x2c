@@ -955,18 +955,17 @@ List Compiler.parse_named_type(Compiler c) {
 
 /** Installs a definition-local template binding or typedef provisionally. */
 void Compiler.bind_template_local(
-  Compiler compiler, List key, List type, List context) {
-  Var local = compiler.macro_holes && key
-            ? compiler.macro_definition_locals()[key] : void;
-  if (compiler.macro_holes && local is <string> &&
+  Compiler c, List key, List type, List context) {
+  Var local = c.macro_holes && key ? c.macro_definition_locals()[key] : void;
+  if (c.macro_holes && local is <string> &&
       (!context || context === %(typedef))) {
     List local_key = %($local);
     Type local_type = type.type_from_ast().declared();
     if (context === %(typedef)) {
-      compiler.sym.set(local_key, %(typedef $local));
-      compiler.sym.set(%(typedef $local), local_type);
+      c.sym.set(local_key, %(typedef $local));
+      c.sym.set(%(typedef $local), local_type);
     }
-    else compiler.sym.bind_identity(
+    else c.sym.bind_identity(
       NULL, key,
       %(declare (<macro-expr>) (bindings (bind $key ()))));
   }
@@ -1178,15 +1177,13 @@ static List _declaration_group(Compiler c, int row) {
     Typedefs, package aliases, and macro-hole kinds are resolved through the
     current compiler state.
 */
-int Compiler.test_declaration(Compiler compiler) =>
-  _test_declaration_start(compiler, 0);
+int Compiler.test_declaration(Compiler c) => _test_declaration_start(c, 0);
 
 /** Parses one declaration group and leaves its terminating token current.
     Declared names are installed in `Sym` as their declarators are completed;
     the result is one `declare`, `typedef`, or initialized `dstrdecl` AST.
 */
-List Compiler.parse_simple_declaration(Compiler compiler) =>
-  _declaration_group(compiler, 0);
+List Compiler.parse_simple_declaration(Compiler c) => _declaration_group(c, 0);
 
 static List _declaration_rows(Compiler compiler) {
   Array declarations = [];
@@ -1978,24 +1975,21 @@ static void _append_declaration_rows(Array output, List syntax) {
     mutates `Sym` and does not open a semantic transaction.
 */
 List Compiler.bind_syntax(
-  Compiler compiler, Var syntax, AstPos context, Type return_type) {
-  Var value = compiler.evaluate_macro_slot(syntax);
+  Compiler c, Var syntax, AstPos context, Type return_type) {
+  Var value = c.evaluate_macro_slot(syntax);
   if (value is not <list>)
-    compiler.report_error(<parse>, "expected syntax", compiler.token, NULL);
+    c.report_error(<parse>, "expected syntax", c.token, NULL);
   List input = value;
-  if (!input)
-    compiler.report_error(<parse>, "expected syntax", compiler.token, NULL);
+  if (!input) c.report_error(<parse>, "expected syntax", c.token, NULL);
   if (context == AST_ENUMERATOR) match (input) {
     case %(!or
            (binding ? (!is ? type string))
            ((!is ? type string))
            ("x2c.ident" (!is ? type string))):
-      return _publish_enumerator(
-        compiler, input, compiler.aggregate_type, compiler.token);
+      return _publish_enumerator(c, input, c.aggregate_type, c.token);
     case %(!set ?node
            (bind ? ?)):
-      return _publish_enumerator(
-        compiler, node, compiler.aggregate_type, compiler.token);
+      return _publish_enumerator(c, node, c.aggregate_type, c.token);
     case %(!set ?node
            (op =
              (!or
@@ -2004,12 +1998,11 @@ List Compiler.bind_syntax(
                ("x2c.ident" (!is ? type string))
                (bind ? ?))
              ?)):
-      return _publish_enumerator(
-        compiler, node, compiler.aggregate_type, compiler.token);
+      return _publish_enumerator(c, node, c.aggregate_type, c.token);
   }
   if (context == AST_MAP_ENTRY && input.car() != <seq> &&
       input.car() != Atom.intern("macro-invoke"))
-    return compiler.resolve_map_entry(input, compiler.token);
+    return c.resolve_map_entry(input, c.token);
   /* Parsed templates and compile-time Lisp are the intended producers. There
      is no separate validation pass before or after expansion. The structural
      match below enforces `AstPos` and rejects unmatched shapes at
@@ -2019,7 +2012,7 @@ List Compiler.bind_syntax(
      Binding mutates the current `Sym` in visitation order. Macro invocation
      opens the surrounding `SymTxn`, allowing earlier siblings to be visible to
      later ones while preserving whole-expansion rollback on failure. */
-  $let(compiler.return_type, return_type) with compiler {
+  $let(c.return_type, return_type) with c {
     int statement_position = context == AST_BLOCK ||
                              context == AST_STATEMENT;
     match (input) {

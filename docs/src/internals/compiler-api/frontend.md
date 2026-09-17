@@ -45,12 +45,12 @@ Source: `src/frontend.x:78`
 <a id="Frontend.open"></a>
 #### Frontend.open
 
-`int Frontend.open(Frontend frontend, String filename, ParsedUnit *unit)`
+`int Frontend.open(Frontend f, String filename, ParsedUnit *unit)`
 
 Runs the source stages. On either result, the caller must close the
 unit.
 
-Source: `src/frontend.x:321`
+Source: `src/frontend.x:320`
 
 <a id="Frontend.start"></a>
 #### Frontend.start
@@ -74,7 +74,7 @@ Source: `src/frontend.x:249`
 Releases the unit after its caller has inspected or exported its
 results.
 
-Source: `src/frontend.x:329`
+Source: `src/frontend.x:327`
 
 <a id="ParsedUnit.collect"></a>
 #### ParsedUnit.collect
@@ -89,7 +89,7 @@ Source: `src/frontend.x:281`
 <a id="ParsedUnit.parse"></a>
 #### ParsedUnit.parse
 
-`int ParsedUnit.parse(ParsedUnit *unit)`
+`int ParsedUnit.parse(ParsedUnit *p)`
 
 Parses a collected unit, retaining both its AST and unsuccessful
 reports.

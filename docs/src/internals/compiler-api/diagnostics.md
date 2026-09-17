@@ -58,7 +58,7 @@ Returns a report-order snapshot of all collected diagnostics.
 Snapshot cells are canonicalized through the active pool hierarchy and
 share entry values; each retains its actual producing-pool lifetime.
 
-Source: `src/diagnostics.x:445`
+Source: `src/diagnostics.x:443`
 
 <a id="Compiler.display_path"></a>
 #### Compiler.display_path
@@ -68,7 +68,7 @@ Source: `src/diagnostics.x:445`
 Returns a physical source path for semantic facts, otherwise a path
 relative to the compiler root. Pseudo paths and NULL stay unchanged.
 
-Source: `src/diagnostics.x:307`
+Source: `src/diagnostics.x:306`
 
 <a id="Compiler.dump_cache"></a>
 #### Compiler.dump_cache
@@ -77,7 +77,7 @@ Source: `src/diagnostics.x:307`
 
 Prints each cached numeric identifier and its key to stdout.
 
-Source: `src/diagnostics.x:481`
+Source: `src/diagnostics.x:479`
 
 <a id="Compiler.dump_symbol_table"></a>
 #### Compiler.dump_symbol_table
@@ -86,7 +86,7 @@ Source: `src/diagnostics.x:481`
 
 Prints every entry in `map` to stdout in `Map` iteration order.
 
-Source: `src/diagnostics.x:476`
+Source: `src/diagnostics.x:474`
 
 <a id="Compiler.dump_tokens"></a>
 #### Compiler.dump_tokens
@@ -96,7 +96,7 @@ Source: `src/diagnostics.x:476`
 Prints every non-EOF token with its position and visible content.
 `Compiler.tokenize` must have populated the compiler's tokenizer.
 
-Source: `src/diagnostics.x:466`
+Source: `src/diagnostics.x:464`
 
 <a id="Compiler.error_count"></a>
 #### Compiler.error_count
@@ -106,7 +106,7 @@ Source: `src/diagnostics.x:466`
 Returns the number of counted diagnostics accepted since the last reset.
 Warnings and the generated limit notice are excluded.
 
-Source: `src/diagnostics.x:439`
+Source: `src/diagnostics.x:437`
 
 <a id="Compiler.origin_location"></a>
 #### Compiler.origin_location
@@ -120,7 +120,7 @@ location cells are canonicalized through the active pool hierarchy and
 retain their actual producing-pool lifetime. They share the recorded
 filename, which retains its own producing-pool lifetime.
 
-Source: `src/diagnostics.x:282`
+Source: `src/diagnostics.x:281`
 
 <a id="Compiler.print_diagnostic"></a>
 #### Compiler.print_diagnostic
@@ -132,7 +132,7 @@ one JSON line after `diagnostics_write_json`.
 NULL is ignored. A present location supplies `file`, one-based `line` and
 `column`, and token `length`; `String` notes are joined into one note line.
 
-Source: `src/diagnostics.x:245`
+Source: `src/diagnostics.x:244`
 
 <a id="Compiler.report_error"></a>
 #### Compiler.report_error
@@ -146,19 +146,19 @@ before the current token. NULL message defaults to `"compiler error"`.
 **Raises:** `<malformed>` with the supplied category while a recovery boundary
 is active. Without one, exits the process with status 1.
 
-Source: `src/diagnostics.x:355`
+Source: `src/diagnostics.x:354`
 
 <a id="Compiler.report_warning"></a>
 #### Compiler.report_warning
 
-`void Compiler.report_warning( Compiler compiler, Symbol code, String message, Token token, List notes)`
+`void Compiler.report_warning( Compiler c, Symbol code, String message, Token token, List notes)`
 
 Records and emits a located warning without consuming the error limit.
 Location selection matches `Compiler.report_error`; NULL code becomes
 `<warning>` and NULL message becomes `"compiler warning"`. This operation
 returns without raising or changing the process exit status.
 
-Source: `src/diagnostics.x:371`
+Source: `src/diagnostics.x:370`
 
 <a id="Compiler.report_warning_at"></a>
 #### Compiler.report_warning_at
@@ -169,7 +169,7 @@ Records and emits a warning at a location built earlier by
 `Compiler.token_location`, for a report raised after its token has been
 consumed. Defaults match `Compiler.report_warning`.
 
-Source: `src/diagnostics.x:381`
+Source: `src/diagnostics.x:379`
 
 <a id="Compiler.token_location"></a>
 #### Compiler.token_location
@@ -185,7 +185,7 @@ are canonicalized through the active pool hierarchy and retain their actual
 producing-pool lifetimes; an unchanged filename retains the compiler's
 producing-pool lifetime.
 
-Source: `src/diagnostics.x:326`
+Source: `src/diagnostics.x:325`
 
 ### `Diagnostics`
 

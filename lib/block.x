@@ -255,17 +255,15 @@ inline Self Bytes.append_fill(Self bytes, const void *element, size_t count) {
   return block.bytes;
 }
 
-/** Removes the final element of `block`, copying it to `out` when present.
+/** Removes the final element of `b`, copying it to `out` when present.
     Returns zero for a null or empty `Block` and leaves `out` unchanged. A null
     `out` still removes a present element.
 */
-inline int Block.try_pop(Block block, void *out) {
-  if ((void *) block == NULL || !block.length) return 0;
-  size_t index = block.length - 1;
-  if (out)
-    memmove(
-      out, (unsigned char *) block.bytes + index * block.width, block.width);
-  block.length = index;
+inline int Block.try_pop(Block b, void *out) {
+  if ((void *) b == NULL || !b.length) return 0;
+  size_t index = b.length - 1;
+  if (out) memmove(out, (unsigned char *) b.bytes + index * b.width, b.width);
+  b.length = index;
   return 1;
 }
 
@@ -310,16 +308,14 @@ void Block.move_to(Block block, Scope *scope) {
   Scope.move(block, scope);
 }
 
-/** Returns the number of elements stored in `block`. */
-inline size_t Block.len(Block block) =>
-  (void *) block != NULL ? block.length : 0;
+/** Returns the number of elements stored in `b`. */
+inline size_t Block.len(Block b) => (void *) b != NULL ? b.length : 0;
 
 /** Returns nonzero when `block` contains at least one element. */
 int Block.truth(Block block) => (void *) block != NULL && block.length != 0;
 
-/** Returns how many elements `block` can hold without growing. */
-inline size_t Block.capacity(Block block) =>
-  (void *) block != NULL ? block.cap : 0;
+/** Returns how many elements `b` can hold without growing. */
+inline size_t Block.capacity(Block b) => (void *) b != NULL ? b.cap : 0;
 
 /** Ends the owned lifetime when a managed local leaves its block. */
 void Block.cleanup(Block value) { value.free(); }

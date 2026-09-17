@@ -88,20 +88,18 @@ static int _owns_scope(Context context, Scope owner) {
 int Context.owns(Context context, void *allocation) => allocation &&
          _owns_scope(context, Scope.owner(allocation));
 
-/** Returns the borrowed `Scope` slot that receives exports from `context`.
+/** Returns the borrowed `Scope` slot that receives exports from `c`.
     The slot remains valid only while the `Context`'s destination state lives;
     a null `Context` returns NULL.
 */
-Scope *Context.export_destination(Context context) =>
-  context ? context.destination_scope : NULL;
+Scope *Context.export_destination(Context c) => c ? c.destination_scope : NULL;
 
 /** Moves one custom-exporter-owned allocation to the destination `Context`.
-    A null allocation or one outside `context`'s `Scope` chain is unchanged.
+    A null allocation or one outside `c`'s `Scope` chain is unchanged.
     Application code exports its value with `Context.export` instead.
 */
-void Context.move_allocation(Context context, void *allocation) {
-  if (context.owns(allocation))
-    Scope.move(allocation, context.export_destination());
+void Context.move_allocation(Context c, void *allocation) {
+  if (c.owns(allocation)) Scope.move(allocation, c.export_destination());
 }
 
 static Context _open(const char *name, int isolated) {
@@ -191,8 +189,7 @@ Context Context.current(void) => _thread().current;
     exporter, or a cause from nested allocation, hashing, equality, or custom
     export.
 */
-Var Context.export_nested(Context context, Var value) =>
-  _export_value(value, context);
+Var Context.export_nested(Context c, Var value) => _export_value(value, c);
 
 static Var _export_string(Var value, Context source) {
   if (!source.pool || !source.pool.owns(value)) return value;
@@ -347,23 +344,22 @@ Var Context.export_scope(Scope source_scope, Pool pool, Var value) {
     Raises: `<bad-state>` for a null or noncurrent `Context`, or while its
     `Match`
     cache has an active lease. The failure leaves the `Context` active. */
-void Context.close(Context context) {
-  if (!context || _thread().current != context)
-    raise %(bad-state (owner "Context.close"));
+void Context.close(Context c) {
+  if (!c || _thread().current != c) raise %(bad-state (owner "Context.close"));
 
   /* Match and Error teardown can still use Context-owned values. Release the
      private canonical pool before its Scope, restore the destination Scope
      before destroying the child, and publish the parent only after teardown
      can no longer observe this Context. */
-  MatchCache.context_close(context.match_state);
-  Error.context_close(context.error_state, x2c_exception_unwinding());
-  if (context.pool) String.pool_release();
+  MatchCache.context_close(c.match_state);
+  Error.context_close(c.error_state, x2c_exception_unwinding());
+  if (c.pool) String.pool_release();
 
-  Scope scope = context.scope, Context parent = context.parent;
+  Scope scope = c.scope, Context parent = c.parent;
   Scope.pop();
   Scope.destroy(scope);
   _thread().current = parent;
-  Scope.free(context);
+  Scope.free(c);
 }
 
 /** Ends the owned lifetime when a managed local leaves its block. */

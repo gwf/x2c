@@ -397,9 +397,8 @@ Var List.last(List lst) {
 }
 
 /** Returns the first index of `key`, or -1 when absent. */
-int List.index(List lst, Var key) {
-  for (int index = 0; lst; lst = lst.cdr(), index++)
-    if (lst.car == key) return index;
+int List.index(List l, Var key) {
+  for (int index = 0; l; l = l.cdr(), index++) if (l.car == key) return index;
   return -1;
 }
 

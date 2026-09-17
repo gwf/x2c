@@ -211,7 +211,7 @@ static String Compiler._json_path(Compiler compiler, String path) {
   return path.startswith(directory) ? path.remove_prefix(directory) : path;
 }
 
-static void Compiler._write_json(Compiler compiler, List entry) {
+static void Compiler._write_json(Compiler c, List entry) {
   Symbol code = entry.assoc(<code>);
   List location = entry.assoc(<location>), notes = entry.assoc(<notes>);
   Buffer out = $auto(Buffer.new(0));
@@ -225,8 +225,7 @@ static void Compiler._write_json(Compiler compiler, List entry) {
     Var value = location.assoc(key);
     out.printf(",\"%s\":", key.str());
     if (value is void) out.write("null");
-    else if (value is <string>)
-      report_json_string(out, compiler._json_path(value));
+    else if (value is <string>) report_json_string(out, c._json_path(value));
     else out.printf("%d", value.int());
   }
   out.write(",\"notes\":[");
@@ -369,9 +368,8 @@ void Compiler.report_error(
     returns without raising or changing the process exit status.
 */
 void Compiler.report_warning(
-  Compiler compiler, Symbol code, String message, Token token, List notes) {
-  compiler.report_warning_at(
-    code, message, _compiler_location(compiler, token), notes);
+  Compiler c, Symbol code, String message, Token token, List notes) {
+  c.report_warning_at(code, message, _compiler_location(c, token), notes);
 }
 
 /** Records and emits a warning at a location built earlier by

@@ -347,9 +347,8 @@ String Buffer.repr(Buffer buf) {
   return str.repr();
 }
 
-/** Returns nonzero when `buffer` contains at least one byte. */
-int Buffer.truth(Buffer buffer) =>
-  (void *) buffer != NULL && buffer.content.length != 0;
+/** Returns nonzero when `b` contains at least one byte. */
+int Buffer.truth(Buffer b) => (void *) b != NULL && b.content.length != 0;
 
 /** Ends the owned lifetime when a managed local leaves its block. */
 void Buffer.cleanup(Buffer value) { value.free(); }

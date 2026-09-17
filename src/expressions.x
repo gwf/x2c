@@ -114,7 +114,7 @@ static List _parse_slice(Compiler c, List expr, List start) {
 }
 
 static List Compiler._postfix_index_expression(
-  Compiler compiler, List expr, List index) {
+  Compiler c, List expr, List index) {
   Type type = expr.cadr();
   // `T *const p` indexes like `T *p`.
   while (type && type.car() is <symbol> &&
@@ -126,32 +126,31 @@ static List Compiler._postfix_index_expression(
   }
   if (!type.is_typedef_name()) return NULL;
   String owner = type.car(), Type receiver = type;
-  if (compiler.sym.is_array_type(type)) {
+  if (c.sym.is_array_type(type)) {
     owner = "Array";
     receiver = %("Array");
   }
-  else if (compiler.sym.is_map_type(type)) {
+  else if (c.sym.is_map_type(type)) {
     owner = "Map";
     receiver = %("Map");
   }
   String fnname = %"${owner}_getindex";
-  List fntype = compiler.sym.get(%($fnname));
+  List fntype = c.sym.get(%($fnname));
   match (fntype) {
     case %((func (!set ?params ($receiver ?))) ?rtype): {
       Type key = params.cadr(), supplied = index.cadr();
-      if (key.is_integral() &&
-          compiler.sym.is_named_value_type(supplied, "Symbol"))
-        compiler.report_error(
+      if (key.is_integral() && c.sym.is_named_value_type(supplied, "Symbol"))
+        c.report_error(
           <type>, "Symbol cannot be used as an integer bracket index",
-          compiler.token, NULL);
+          c.token, NULL);
       return %(expr ($rtype) (getindex $expr $index));
     }
   }
-  Type native = compiler.sym.resolve_key(type);
+  Type native = c.sym.resolve_key(type);
   // A typedef of a plain C pointer indexes as that pointer; `String` and
   // its aliases keep their protocol reading.
   if (native.is_array() ||
-      (native.is_pointer() && !compiler.sym.is_string_type(type)))
+      (native.is_pointer() && !c.sym.is_string_type(type)))
     return %(expr ${native.dereference()} (index $expr $index));
   return NULL;
 }
@@ -747,11 +746,10 @@ static List _parse_cast(Compiler c) {
 }
 
 /** Parses one macro target through the cast-expression grammar.
-    Parsing starts at `compiler.token` and leaves it at the first token after
+    Parsing starts at `c.token` and leaves it at the first token after
     the target.
 */
-List Compiler.parse_macro_expression_target(Compiler compiler) =>
-  _parse_cast(compiler);
+List Compiler.parse_macro_expression_target(Compiler c) => _parse_cast(c);
 
 /* Larger levels bind more tightly. The recursive parser descends to level 10
    before consuming operators while each level folds left; `is` shares the
@@ -1008,10 +1006,9 @@ static int _is_operator_temporary(Compiler c, List expression) {
 }
 
 static List Compiler._protocol_operator_expression(
-  Compiler compiler, Symbol op, List lhs, List rhs) {
+  Compiler c, Symbol op, List lhs, List rhs) {
   Symbol derived = 0;
-  List resolved =
-    _resolve_protocol_operator(compiler, op, &lhs, &rhs, &derived);
+  List resolved = _resolve_protocol_operator(c, op, &lhs, &rhs, &derived);
   if (!resolved) return NULL;
   (List binding, Type signature) = resolved;
   Type result = signature.cdr(), List arguments = NULL;
@@ -1019,21 +1016,21 @@ static List Compiler._protocol_operator_expression(
   if (!rhs) arguments = %(args $lhs);
   else if (op == <in>) {
     List parameters = signature.car().cadr();
-    lhs = compiler.convert_expression(lhs, parameters.cadr());
+    lhs = c.convert_expression(lhs, parameters.cadr());
     arguments = %(args $rhs $lhs);
   }
   else arguments = %(args $lhs $rhs);
   if (op != <in>) {
-    if (_is_operator_temporary(compiler, lhs)) which |= 1;
-    if (rhs && _is_operator_temporary(compiler, rhs)) which |= 2;
+    if (_is_operator_temporary(c, lhs)) which |= 1;
+    if (rhs && _is_operator_temporary(c, rhs)) which |= 2;
   }
-  if (!derived && compiler.resolve_protocol_member(result, "discard"))
-    _note_fresh_callee(compiler, binding);
+  if (!derived && c.resolve_protocol_member(result, "discard"))
+    _note_fresh_callee(c, binding);
   if (which) {
-    Symbol member = rhs ? compiler.operator_member(op) : <neg>;
-    if (!member) member = compiler.derived_member(op);
+    Symbol member = rhs ? c.operator_member(op) : <neg>;
+    if (!member) member = c.derived_member(op);
     Type participant = lhs.cadr();
-    List helper = compiler.protocol_discard_helper(
+    List helper = c.protocol_discard_helper(
       participant, member, which);
     if (helper) (binding, signature) = helper;
   }
@@ -2099,14 +2096,13 @@ List Compiler.resolve_map_entry(Compiler compiler, List input, Token origin) {
     binder. `origin` anchors diagnostics and generated operations that must
     retain source position.
 */
-List Compiler.resolve_expression(Compiler compiler, List input, Token origin) {
+List Compiler.resolve_expression(Compiler c, List input, Token origin) {
   match (input) {
     case %(decl *):
-      return compiler.bind_syntax(input, AST_BLOCK, compiler.return_type);
+      return c.bind_syntax(input, AST_BLOCK, c.return_type);
     case %(expr ?type ?(List content)): {
-      if (type && !_expression_requires_resolution(compiler, input))
-        return input;
-      return _resolve_content(compiler, input, type, content, origin);
+      if (type && !_expression_requires_resolution(c, input)) return input;
+      return _resolve_content(c, input, type, content, origin);
     }
   }
   return input;

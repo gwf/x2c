@@ -95,8 +95,7 @@ static int _next_is_closing_brace(List rest) {
 
     Raises: `<size-limit>` or `<alloc-fail>` while materializing the result.
 */
-char *Compiler.code_pretty_string(
-  Compiler compiler, List code, String output_file) {
+char *Compiler.code_pretty_string(Compiler cc, List code, String output_file) {
   Buffer buff = Buffer.new(0);
   int indent = 0, paren_depth = 0, directive_break = 0;
   int output_line = 1, scanned = 0, source_line = 0;
@@ -105,7 +104,7 @@ char *Compiler.code_pretty_string(
   for (List lst = code; lst; lst = lst.cdr()) {
     if (lst.car() == <src-at>) {
       lst = lst.cdr();
-      List location = compiler.origin_location(lst.car());
+      List location = cc.origin_location(lst.car());
       while (buff.len() > 0 && buff.get(-1) == ' ') buff.unwrite(1);
       if (buff.len() > 0 && buff.get(-1) != '\n') _write_newline(buff);
       while (scanned < buff.len())

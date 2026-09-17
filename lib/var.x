@@ -559,8 +559,7 @@ Self Var.move_wide_to(Self value, Scope *scope) {
 }
 
 /** Returns the `Scope` owning a live wide numeric box, or NULL otherwise. */
-Scope Var.wide_owner(Var value) =>
-  value.is_wide() ? Scope.owner(_wide_box(value)) : NULL;
+Scope Var.wide_owner(Var v) => v.is_wide() ? Scope.owner(_wide_box(v)) : NULL;
 
 static Var _new_custom_pointer(int id, void *ptr) {
   uintptr_t raw = (uintptr_t) ptr;

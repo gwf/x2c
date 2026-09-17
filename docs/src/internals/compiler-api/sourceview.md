@@ -60,7 +60,7 @@ Source: `src/sourceview.x:17`
 
 Returns readable-file presence, including unsaved new files.
 
-Source: `src/sourceview.x:49`
+Source: `src/sourceview.x:48`
 
 <a id="SourceView.free"></a>
 #### SourceView.free
@@ -100,7 +100,7 @@ Source: `src/sourceview.x:30`
 
 Returns whether this logical file has an unsaved overlay.
 
-Source: `src/sourceview.x:45`
+Source: `src/sourceview.x:44`
 
 <a id="SourceView.new"></a>
 #### SourceView.new
@@ -122,7 +122,7 @@ Reads through the request overlay, falling back to a regular disk file.
 The return value distinguishes an empty file from a failed read. Disk
 text belongs to the calling unit; configured snapshots remain borrowed.
 
-Source: `src/sourceview.x:60`
+Source: `src/sourceview.x:59`
 
 <a id="SourceView.repr"></a>
 #### SourceView.repr
@@ -138,7 +138,7 @@ Source: `src/sourceview.x:17`
 <a id="SourceView.set"></a>
 #### SourceView.set
 
-`void SourceView.set( SourceView sources, String path, String text, int changed)`
+`void SourceView.set(SourceView s, String path, String text, int changed)`
 
 Stores an immutable snapshot under its logical source path. Empty text
 is a present snapshot, not a request to fall back to the disk file.
