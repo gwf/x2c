@@ -8,6 +8,7 @@ $(import "test-macros.xmacro")
 #include <fcntl.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <time.h>
 #include <unistd.h>
 
 static void process_arguments_stay_whole(void) {
@@ -376,6 +377,20 @@ static void process_child_stdio_without_parent_stdio(void) {
   EXPECT_STR_EQ(merged, "in\nerr\n");
 }
 
+static void process_cleanup_kills_a_job_ignoring_term(void) {
+  $test.scoped();
+  long pid = 0;
+  time_t start = time(NULL);
+  {
+    Job stubborn = $auto(%(sh -c "trap '' TERM; exec sleep 30").job()
+                           .start());
+    pid = stubborn.pids[0];
+    usleep(100000);
+  }
+  EXPECT_TRUE(time(NULL) - start < 5);
+  EXPECT_TRUE(pid > 0 && kill((pid_t) pid, 0) != 0);
+}
+
 static void process_jobs_wait_kill_and_clean_up(void) {
   $test.scoped();
   Array jobs = [];
@@ -457,4 +472,5 @@ void process_suite(void) {
   $test.run(process_nul_capture_keeps_the_record);
   $test.run(process_failed_starts_close_descriptors);
   $test.run(process_child_stdio_without_parent_stdio);
+  $test.run(process_cleanup_kills_a_job_ignoring_term);
 }

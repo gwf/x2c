@@ -504,10 +504,14 @@ void Job.kill(Job job, int signal) {
     if (job.pids[i]) kill((pid_t) job.pids[i], signal);
 }
 
-/** Terminates and reaps a job that is still running. */
+/** Terminates and reaps a job that is still running: `SIGTERM`, then
+    `SIGKILL` to any stage still running a second later.
+*/
 void Job.cleanup(Job job) {
   if (!job || !job.started || job.finished) return;
   job.kill(SIGTERM);
+  for (int waited = 0; waited < 1000 && !job.ready(); waited++) usleep(1000);
+  job.kill(SIGKILL);
   job.status();
 }
 
