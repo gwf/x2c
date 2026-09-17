@@ -7,6 +7,7 @@
 
 #pragma once
 $(import "../lib/private-keywords.xmacro")
+$(import "../src/ast-rewrite.xmacro")
 #include "compiler.x"
 #pragma private
 #include "expressions.x"
@@ -1476,11 +1477,13 @@ static List _capture_pattern(List hole, Map binders) {
   Var value_binder = _replacement_binder(author, "value", sequence);
   Var expression_binder = _replacement_binder(
     author, "expression", sequence);
+  Var operand_binder = _replacement_binder(author, "operand", sequence);
   Var splice_binder = _replacement_binder(author, "splice", 1);
   Var one = sequence ? <*>.var() : <?>.var();
   Var source = _projection(binders, source_binder, one);
   Var value = _projection(binders, value_binder, one);
   Var expression = _projection(binders, expression_binder, one);
+  Var operand = _projection(binders, operand_binder, one);
   Var splice = _projection(binders, splice_binder, <*>);
   if (!sequence && hole.assoc(<kind>) == <function>) {
     Var result = _replacement_binder(author, "return", 0);
@@ -1503,7 +1506,7 @@ static List _capture_pattern(List hole, Map binders) {
     )
     : %(
       capture $source_pattern (value $value)
-              (expression $expression) (splice $splice)
+              (expression $expression $operand) (splice $splice)
     );
   Var construction = _replacement_binder(author, "construction", 1);
   if (hole.assoc(<kind>) == <unit> &&
@@ -1585,17 +1588,68 @@ static List _forwarded_capture(Compiler compiler, Var captured) {
     Var construction = _replacement_binder(author, "construction", 1);
     return %(
       capture (source $source) (value $source)
-              (expression $source) (splice) $construction
+              (expression $source $source) (splice) $construction
     );
   }
   if (hole.assoc(<kind>) != <expr>) return NULL;
   Var value = _replacement_binder(author, "value", sequence);
   Var expression = _replacement_binder(author, "expression", sequence);
+  Var operand = _replacement_binder(author, "operand", sequence);
   Var splice = _replacement_binder(author, "splice", 1);
   return %(
     capture (source $source) (value $value)
-            (expression $expression) (splice $splice)
+            (expression $expression $operand) (splice $splice)
   );
+}
+
+/* C emission groups operators only through `parens` nodes, so an operand
+   projection parenthesizes a compound argument. Member access and other
+   postfix forms already bind tightest. */
+static Var _grouped(Var expression) {
+  match (expression) {
+    case %(expr ? (op (!or . (!quote ->)) ? ?)): return expression;
+    case %(expr ?type ((!or op cast) *)):
+      return %(expr $type (parens $expression));
+  }
+  return expression;
+}
+
+static Var _operand(Var syntax) {
+  match (syntax)
+    case %(expr (<macro-expr>) (macro-bind ?binder)): {
+      String spelling = binder.str();
+      String prefix = _replacement_binder(<?>, "expression", 0).str();
+      if (spelling.startswith(prefix)) {
+        String operand = _replacement_binder(<?>, "operand", 0).str();
+        Atom grouped = Atom.intern(operand + spelling[prefix.len():]);
+        return %(expr (<macro-expr>) (macro-bind $grouped));
+      }
+    }
+  return syntax;
+}
+
+/* Rebinds expression holes that are operands of an operator, cast, sizeof,
+   or postfix form. Assignment operands and delimited positions such as
+   arguments and conditions keep the argument as parsed. */
+static List _group_operands(List node) {
+  match (node) {
+    case %(op ?operator ?operand):
+      node = %(op $operator ${_operand(operand)});
+    case %(op ?operator ?left ?right)
+        if (!operator.symbol().is_assignment_op()):
+      node = %(op $operator ${_operand(left)} ${_operand(right)});
+    case %(op ?operator ?condition ?ontrue ?onfalse):
+      node = %(
+        op $operator ${_operand(condition)} $ontrue ${_operand(onfalse)}
+      );
+    case %((!set ?head (!or postfix cast)) ?part ?operand):
+      node = %($head $part ${_operand(operand)});
+    case %((!set ?head (!or index call)) ?operand ?part):
+      node = %($head ${_operand(operand)} $part);
+    case %(sizeof ?operand): node = %(sizeof ${_operand(operand)});
+  }
+  Var child;
+  $ast.rewrite_children(node, child, _group_operands(child));
 }
 
 /* Capture rows keep exact source apart from syntax projections. Forwarding a
@@ -1644,7 +1698,8 @@ static List _capture_row(Compiler compiler, List hole, List sources) {
     );
   return %(
     capture (source $source) (value $value)
-            (expression $expression) (splice @values)
+            (expression $expression ${_grouped(expression)})
+            (splice @values)
   );
 }
 
@@ -2131,6 +2186,7 @@ List Compiler.parse_macro_definition(Compiler c) {
             ? <block-item> : target_kind;
       replacement = _parse_body(c, replacement_kind);
     }
+    replacement = _group_operands(replacement);
     parameters = _parameter_rows(c, parameters);
     Var local_order = definition_locals[<order>];
     local_names = local_order is <list>

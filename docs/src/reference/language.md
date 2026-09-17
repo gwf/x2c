@@ -745,6 +745,10 @@ Because the definition is already known, an invocation parses each argument
 according to its hole kind. A type such as `FILE *` therefore works as an
 argument even though it is not an expression.
 
+An `Expr` argument stays one operand. With the argument `value > 0`, the body
+`!$condition` means `!(value > 0)`. Generated C adds these parentheses only
+where an operator, cast, or postfix form needs them.
+
 A `Decl` argument captures one declaration without a trailing semicolon. Its
 comma or closing parenthesis belongs to the macro invocation. The declaration
 may have an initializer or use flat destructuring with two or more simple
