@@ -273,8 +273,10 @@ static void process_start_failures_raise(void) {
   }
   try %(sleep 30).job().pipe(%(x2c-process-test-missing-program)).run();
   catch %(not-found *): caught++;
-  try %().job().run();
+  Job empty = %().job();
+  try empty.start();
   catch %(bad-arg *): caught++;
+  EXPECT_INT_EQ(empty.status(), 127);
   EXPECT_INT_EQ(caught, 4);
 
   int before = dup(STDERR_FILENO);
