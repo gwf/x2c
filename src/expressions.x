@@ -547,6 +547,8 @@ static List _parse_sizeof(Compiler c) {
     arg = c.parse_simple_declaration();
     arg = cons(<decl>, arg.cdr());
   }
+  // `sizeof(x + 1)` measures any expression; only `sizeof x` is unary.
+  else if (parens) arg = c.parse_expression();
   else {
     c.token = head;
     arg = _parse_unary_op(c);
