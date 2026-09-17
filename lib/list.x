@@ -83,6 +83,13 @@ void List.initialize(void) {
   x2c_pool_values_initialize();
 }
 
+/** Installs the existing process pool root in a newly created worker thread.
+    The root must already be initialized; otherwise the process aborts.
+*/
+void List.thread_initialize(void) {
+  x2c_pool_values_thread_initialize();
+}
+
 /** Releases every active nested pool and then the process root at shutdown.
     No worker or canonical value may remain in use afterward. Repeated calls
     after the root is gone do nothing.

@@ -82,6 +82,7 @@ lib/list.x|advanced|List.promote,List.repr,List.str,List.sublis,List.subseq
 lib/list.x|advanced|List.write_repr,Var.caar,Var.caddr,Var.cadr,Var.car
 lib/list.x|advanced|Var.cddr,Var.cdr,Var.cons
 lib/list.x|internal|List.initialize,List.shutdown,List.try_own
+lib/list.x|internal|List.thread_initialize
 lib/logger.x|advanced|Logger.add_file_sink,Logger.add_memory_sink
 lib/logger.x|advanced|Logger.add_sink,Logger.add_stderr_sink,Logger.clear_sinks
 lib/logger.x|advanced|Logger.debug,Logger.error,Logger.fatal,Logger.flush
