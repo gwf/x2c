@@ -158,7 +158,7 @@ static int _state_matches(String path, uint64_t hash) {
 static void _state_write_lines(String path, uint64_t hash, List lines) {
   String text = "x2c-state-v1 %016llx\n".printf((unsigned long long) hash);
   foreach (String line, lines) text = %"$text$line\n";
-  try file_publish(path, text);
+  try file_publish(%($path $text));
   catch %(not-found *): {}
   catch %(io-fail *): {}
 }
@@ -492,8 +492,9 @@ static String _compile_command(
     existing database, reports a diagnostic, and returns zero.
 */
 int compile_commands_write(String path, Array commands) {
+  String text = %"[\n${",\n".join(commands)}\n]\n";
   try {
-    file_publish(path, %"[\n${",\n".join(commands)}\n]\n");
+    file_publish(%($path $text));
     report_line(<muted>, %"  Compilation database $path");
     return 1;
   }

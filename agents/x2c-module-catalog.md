@@ -83,7 +83,7 @@ Public functions:
 
 `Compiler.record_generated_symbol`, `Compiler.collect_symbols`,
 `Compiler.collect_package`, `interface_configure`, `interface_prelude`,
-`interface_write`
+`interface_text`
 
 ### [src/compiler.x](../src/compiler.x)
 

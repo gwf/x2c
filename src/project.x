@@ -613,7 +613,7 @@ static void _write_lock(String path, List rows) {
     "# x2c lockfile. Written by x2c build; keep it with the manifest.\n"
     "# name version kind platform url sha256\n";
   foreach (List row, rows) text = %"$text${" ".join(row)}\n";
-  try file_publish(path, text);
+  try file_publish(%($path $text));
   catch %(io-fail *detail): x2c_host_error(detail);
 }
 

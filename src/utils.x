@@ -174,15 +174,25 @@ int file_lock(Path p, int wait) {
   return lock;
 }
 
-/** Replaces the file `p` with `text` through a process-specific sibling and
-    one rename, so a reader sees the old contents or the new ones.
-    Raises: `<not-found>` or `<io-fail>`, after removing the sibling.
+/** Replaces each file named in `outputs`, a List of alternating paths and
+    texts. Every text is written and closed in a process-specific sibling of
+    its path before the first rename, so a failed write replaces no
+    destination. The renames then run in order: each destination holds its
+    old contents or its new ones, and a failed rename leaves the earlier
+    destinations replaced.
+    Raises: `<not-found>` or `<io-fail>`, after removing the siblings.
 */
-void file_publish(Path p, String text) {
-  Path temporary = %"$p.tmp.%ld".printf((long) getpid());
-  defer temporary.remove_file();
-  temporary.write_text(text);
-  temporary.move_to(p);
+void file_publish(List outputs) {
+  String suffix = ".tmp.%ld".printf((long) getpid());
+  defer for (List rest = outputs; rest; rest = rest.cddr())
+    Path.remove_file(%"${rest.car()}$suffix");
+  for (List rest = outputs; rest; rest = rest.cddr())
+    Path.write_text(%"${rest.car()}$suffix", rest.cadr());
+  for (List rest = outputs; rest; rest = rest.cddr()) {
+    String target = rest.car();
+    if (rename(%"$target$suffix", target))
+      File.path_error(<rename>, target, errno);
+  }
 }
 
 #pragma private

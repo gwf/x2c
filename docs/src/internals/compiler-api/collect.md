@@ -14,7 +14,7 @@ Source-ordered shallow symbol collection and replay.
 | --- | --- |
 | [`interface_configure`](#interface_configure) | Creates the process cache and names the directories searched for `.xi` interfaces. |
 | [`interface_prelude`](#interface_prelude) | Returns the readable prelude interface path, or NULL when none exists. |
-| [`interface_write`](#interface_write) | Writes the compiler's own collected contribution to `path`. |
+| [`interface_text`](#interface_text) | Returns the compiler's own collected contribution as interface text, or NULL when the unit has not collected its symbols. |
 | [`Compiler.collect_package`](#Compiler.collect_package) | Collects a package once and installs its public surface in the current unit. |
 | [`Compiler.collect_symbols`](#Compiler.collect_symbols) | Collects the current translation unit's declarations into `globs`. |
 | [`Compiler.record_generated_symbol`](#Compiler.record_generated_symbol) | Records one generated public callable in the declaration map that the current file's collected entry contributes, which is the map its interface publishes. |
@@ -41,17 +41,15 @@ Returns the readable prelude interface path, or NULL when none exists.
 
 Source: `src/collect.x:674`
 
-#### interface_write
+#### interface_text
 
-`void interface_write(Compiler compiler, String path)`
+`String interface_text(Compiler compiler)`
 
-Writes the compiler's own collected contribution to `path`.
-The unit must have collected its symbols; otherwise nothing is written.
-A process-specific sibling is written and renamed into place, so a
-failure leaves any existing interface intact and is reported as an
-`emit` diagnostic.
+Returns the compiler's own collected contribution as interface text, or
+NULL when the unit has not collected its symbols. A contribution that
+the interface grammar cannot spell is reported as an `emit` diagnostic.
 
-Source: `src/collect.x:893`
+Source: `src/collect.x:891`
 
 ### `Compiler`
 

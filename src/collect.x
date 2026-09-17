@@ -884,28 +884,17 @@ static int _write_interface_entry(Buffer out, String canonical, List entry) {
   return 1;
 }
 
-/** Writes the compiler's own collected contribution to `path`.
-    The unit must have collected its symbols; otherwise nothing is written.
-    A process-specific sibling is written and renamed into place, so a
-    failure leaves any existing interface intact and is reported as an
-    `emit` diagnostic.
+/** Returns the compiler's own collected contribution as interface text, or
+    NULL when the unit has not collected its symbols. A contribution that
+    the interface grammar cannot spell is reported as an `emit` diagnostic.
 */
-void interface_write(Compiler compiler, String path) {
+String interface_text(Compiler compiler) {
   String canonical = _canonical_path(compiler.filename);
   Var cached = _process_cache()[canonical];
-  if (cached is void) return;
+  if (cached is void) return NULL;
   Buffer out = $auto(Buffer.new(0));
-  long error = 0;
-  if (_write_interface_entry(out, canonical, cached)) {
-    try {
-      file_publish(path, out);
-      return;
-    }
-    catch %(not-found *failure): error = failure.assoc(<errno>);
-    catch %(io-fail *failure): error = failure.assoc(<errno>);
-  }
-  String reason = String.new(strerror((int) error));
-  compiler.report_error(
-    <emit>, "failed to write interface file", NULL,
-    %("file: $path" "reason: $reason"));
+  if (!_write_interface_entry(out, canonical, cached))
+    compiler.report_error(
+      <emit>, "failed to write interface file", NULL, NULL);
+  return out;
 }

@@ -10,87 +10,15 @@
 #include "compiler.x"
 #pragma private
 
-#include <errno.h>
-#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "cache.x"
 #include "collect.x"
 #include "format.x"
 #include "emit.x"
 #include "utils.x"
-
-// file utilities
-
-static void _report_output_error(
-  Compiler compiler, String fname, String message, int error) {
-  String target = fname ? fname : "<stdout>";
-  List notes = %( "file:" $target );
-  String err_note = %"errno: $error (${String.new(strerror(error))})";
-  notes = cons(err_note, notes);
-  compiler.report_error(<emit>, message, compiler.token, notes);
-}
-
-// Close both siblings before publishing either. A rename commits one complete
-// file; the pair is not a transaction. Clean up before reporting: diagnostics
-// may exit the process instead of unwinding the caller's cleanup stack.
-static void _write_outputs(
-  Compiler compiler, String paths[2], String contents[2]) {
-  String temporaries[2] = { NULL, NULL };
-  String message = NULL, fname = NULL;
-  int error = 0;
-  for (int i = 0; i < 2; i++) {
-    fname = paths[i];
-    File output = Stdout;
-    if (fname) {
-      String directory = Path.dirname(fname);
-      int fd, serial = 0;
-      do {
-        temporaries[i] = %"$directory/.x2c-output.%ld.%d".printf(
-          (long) getpid(), serial++);
-        fd = open(temporaries[i], O_CREAT | O_EXCL | O_WRONLY, 0666);
-      } while (fd < 0 && errno == EEXIST);
-      if (fd < 0) {
-        error = errno;
-        temporaries[i] = NULL;
-        message = "failed to open output file";
-        break;
-      }
-      output = fdopen(fd, "w");
-      if (!output) {
-        error = errno;
-        close(fd);
-        message = "failed to open output file";
-        break;
-      }
-    }
-    if (output.puts(contents[i]) == EOF) {
-      error = errno;
-      message = "failed to write generated file";
-    }
-    if (output != Stdout && output.close() != 0 && !message) {
-      error = errno;
-      message = "failed to close generated file";
-    }
-    if (message) break;
-  }
-  if (!message) {
-    for (int i = 0; i < 2; i++) {
-      fname = paths[i];
-      if (fname && rename(temporaries[i], fname)) {
-        error = errno;
-        message = "failed to replace generated file";
-        break;
-      }
-    }
-  }
-  for (int i = 0; i < 2; i++)
-    if (temporaries[i]) unlink(temporaries[i]);
-  if (message) _report_output_error(compiler, fname, message, error);
-}
 
 // init staging
 
@@ -1035,11 +963,10 @@ static List _modify_main(Compiler compiler, List source) {
     must still describe that same unit. `dir` must already exist. Generation
     partitions the AST, materializes caches and once-only initialization, and
     writes or replaces `<dir>/<source-stem>.h`, `.c`, and the `.xi` interface
-    of a collected unit. It appends generated
-    bindings and initialization work to the compiler and is not idempotent.
-    Both files are closed before individual renames replace their
-    destinations; failure can leave only the header replaced, but never a
-    partial file. Failures are reported as `emit` diagnostics.
+    of a collected unit through one `file_publish`, so a failed write
+    replaces none of them. It appends generated bindings and initialization
+    work to the compiler and is not idempotent. Failures are reported as
+    `emit` diagnostics.
 */
 void generate_code(Compiler c, List ast, String dir) {
   ast = ast.filter(
@@ -1067,10 +994,20 @@ void generate_code(Compiler c, List ast, String dir) {
 
   String basename = %"${dir.rstrip("/")}/${Path.stem(c.filename)}";
   String hfile = %"$basename.h", cfile = %"$basename.c";
-  String header_text = c.code_pretty_string(header, hfile);
-  String source_text = c.code_pretty_string(source, cfile);
-  String paths[2] = { hfile, cfile };
-  String contents[2] = { header_text, source_text };
-  _write_outputs(c, paths, contents);
-  if (!c.source_facts) interface_write(c, %"$basename.xi");
+  List outputs = %(
+    $hfile ${c.code_pretty_string(header, hfile)}
+    $cfile ${c.code_pretty_string(source, cfile)}
+  );
+  String interface = c.source_facts ? NULL : interface_text(c);
+  if (interface) outputs = outputs.append(%("$basename.xi" $interface));
+  List failure = NULL;
+  try file_publish(outputs);
+  catch %(not-found *detail): failure = Error.snapshot(detail);
+  catch %(io-fail *detail): failure = Error.snapshot(detail);
+  if (failure) {
+    String reason = String.new(strerror((int) failure.assoc(<errno>)));
+    c.report_error(
+      <emit>, "failed to write generated file", c.token,
+      %("file: ${failure.assoc(<path>)}" "reason: $reason"));
+  }
 }

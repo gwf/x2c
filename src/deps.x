@@ -131,7 +131,7 @@ int translation_depfile_write(
     %"${output_dir.rstrip("/")}/${Path.stem(input)}.d";
   long error = 0;
   try {
-    file_publish(path, _contents(request, compiler, input, output_dir));
+    file_publish(%($path ${_contents(request, compiler, input, output_dir)}));
     return 1;
   }
   catch %(not-found *failure): error = failure.assoc(<errno>);

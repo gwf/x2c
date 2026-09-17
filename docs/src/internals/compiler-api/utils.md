@@ -13,7 +13,7 @@ System utilities for environment discovery and workers.
 | Function | Summary |
 | --- | --- |
 | [`file_lock`](#file_lock) | Locks the file `p`, creating it, and returns a descriptor that holds the lock until it is closed or the process exits. |
-| [`file_publish`](#file_publish) | Replaces the file `p` with `text` through a process-specific sibling and one rename, so a reader sees the old contents or the new ones. |
+| [`file_publish`](#file_publish) | Replaces each file named in `outputs`, a List of alternating paths and texts. |
 | [`worker_exit`](#worker_exit) | Attempts to flush process streams and terminates a worker with `status`. |
 | [`worker_fork`](#worker_fork) | Forks a worker that continues the current program with inherited state. |
 | [`worker_wait_any`](#worker_wait_any) | Waits until one of the `count` workers in `pids` exits and returns its index, storing its shell-style status: the exit status, `128 + signal`, or -1 when it cannot be waited. |
@@ -49,14 +49,18 @@ Source: `src/utils.x:165`
 
 #### file_publish
 
-`void file_publish(Path p, String text)`
+`void file_publish(List outputs)`
 
-Replaces the file `p` with `text` through a process-specific sibling and
-one rename, so a reader sees the old contents or the new ones.
+Replaces each file named in `outputs`, a List of alternating paths and
+texts. Every text is written and closed in a process-specific sibling of
+its path before the first rename, so a failed write replaces no
+destination. The renames then run in order: each destination holds its
+old contents or its new ones, and a failed rename leaves the earlier
+destinations replaced.
 
-**Raises:** `<not-found>` or `<io-fail>`, after removing the sibling.
+**Raises:** `<not-found>` or `<io-fail>`, after removing the siblings.
 
-Source: `src/utils.x:181`
+Source: `src/utils.x:185`
 
 #### worker_exit
 
@@ -67,7 +71,7 @@ Flush failure is ignored. This function does not return and does not run
 `atexit` handlers. Those belong to the parent process and would close its
 log and process-lifetime `Scope`s twice.
 
-Source: `src/utils.x:262`
+Source: `src/utils.x:272`
 
 #### worker_fork
 
@@ -79,7 +83,7 @@ The call attempts to flush all process streams before the fork so
 successfully flushed bytes cannot be written by both processes. Flush
 failure is ignored. The child must leave through `worker_exit`.
 
-Source: `src/utils.x:251`
+Source: `src/utils.x:261`
 
 #### worker_wait_any
 
@@ -90,7 +94,7 @@ index, storing its shell-style status: the exit status, `128 + signal`,
 or -1 when it cannot be waited. Other children stay unreaped, so the
 wait polls with a short sleep.
 
-Source: `src/utils.x:272`
+Source: `src/utils.x:282`
 
 #### x2c_canonical_root
 
@@ -137,7 +141,7 @@ Source: `src/utils.x:144`
 
 Hashes unit filename spelling for stable generated C identifiers.
 
-Source: `src/utils.x:287`
+Source: `src/utils.x:297`
 
 #### x2c_find_program
 

@@ -116,7 +116,7 @@ captures a value; by itself it does not establish that value's type.
 | Promoted immutable literal caching | verified | expression lowering, cache and generator | promoted-string-cache fixture |
 | Match transform dump | verified | `String.repr` | transform fixture |
 | Pooled interning | verified | `lib/pool.x` (`Pool.retain*`/`.release`/`.insert`/`.lookup`/`.owns`), `String.pool_retain*`, `List.promote` | Pool suite |
-| Unit interfaces | verified | `interface_write`/`_interface_read` (`src/collect.x`), `<stem>.xi` beside generated C | `run-header-cache.sh`, `run-artifact-atomicity.sh` |
+| Unit interfaces | verified | `interface_text`/`_interface_read` (`src/collect.x`), `<stem>.xi` beside generated C | `run-header-cache.sh`, `run-artifact-atomicity.sh` |
 | Batch-compilation memory brackets | partial | `src/main.x` per-unit `Scope`/pool brackets, the per-unit `Context` in `src/frontend.x` | batch/solo output parity in `run-header-cache.sh`; no probe yet asserts the pool-release/no-leak discipline directly |
 
 ## Verified contracts

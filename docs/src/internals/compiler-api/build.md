@@ -93,7 +93,7 @@ Removes the temporary work tree after a successful real build.
 Failed builds, retained directories, and dry runs are left untouched; a
 removal failure emits a warning and is not returned to the caller.
 
-Source: `src/build.x:804`
+Source: `src/build.x:805`
 
 <a id="Build.end_translation"></a>
 #### Build.end_translation
@@ -118,7 +118,7 @@ selection and implicit linker inputs are not in the fingerprint. Mapped
 macOS debug executables also produce a companion dSYM before cleanup;
 failed symbol assembly fails the build and preserves intermediates.
 
-Source: `src/build.x:663`
+Source: `src/build.x:664`
 
 <a id="Build.generated_dir"></a>
 #### Build.generated_dir
@@ -144,7 +144,7 @@ the runtime archive.
 
 **Raises:** `<io-fail>` when the executable cannot be moved.
 
-Source: `src/build.x:905`
+Source: `src/build.x:906`
 
 <a id="Build.record_translation"></a>
 #### Build.record_translation
@@ -165,7 +165,7 @@ Source: `src/build.x:329`
 
 Prints the completed build receipt and artifact details when enabled.
 
-Source: `src/build.x:734`
+Source: `src/build.x:735`
 
 <a id="Build.run_program"></a>
 #### Build.run_program
@@ -175,7 +175,7 @@ Source: `src/build.x:734`
 Runs the built output with the request's arguments and returns its status.
 A dry run prints the action without launching the program.
 
-Source: `src/build.x:789`
+Source: `src/build.x:790`
 
 <a id="Build.script_helpers"></a>
 #### Build.script_helpers
@@ -187,7 +187,7 @@ program must translate and link. The script's translation depfile already
 lists every file the translation read, so helpers of helpers appear too.
 Runtime and package sources are excluded; their objects are archived.
 
-Source: `src/build.x:882`
+Source: `src/build.x:883`
 
 <a id="Build.translation_current"></a>
 #### Build.translation_current
@@ -224,7 +224,7 @@ Source: `src/build.x:197`
 Reports whether the script executable under `directory` still matches
 everything recorded when it was built.
 
-Source: `src/build.x:933`
+Source: `src/build.x:934`
 
 ## Public types
 

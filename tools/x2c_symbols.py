@@ -2,7 +2,7 @@
 """Read the compiler's own unit interfaces.
 
 Every translated unit writes a `.xi` interface beside its generated C
-(`src/collect.x:interface_write`), and `make build` leaves the runtime's and
+(`src/collect.x:interface_text`), and `make build` leaves the runtime's and
 compiler's under `builds/0/lib` and `builds/0/src`. Each records its source
 path, a content hash, and every symbol with a canonical Type list. That makes
 them the authoritative source of signatures for documentation: nothing here
@@ -256,7 +256,7 @@ class HeaderSymbols:
             if node[1] != INTERFACE_VERSION:
                 raise ValueError(
                     f"interface version {node[1]}, expected "
-                    f"{INTERFACE_VERSION}; src/collect.x:interface_write "
+                    f"{INTERFACE_VERSION}; src/collect.x:interface_text "
                     "changed shape"
                 )
             self._entries[str(node[2])] = node
