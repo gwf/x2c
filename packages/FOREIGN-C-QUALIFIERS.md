@@ -25,8 +25,9 @@ Type lookup uses the unqualified form: a `const` receiver has the same
 aggregate, fields, methods, protocol conformance, and `Var` tag as its
 unqualified type. The func-landing thunk in `src/emit.x` also uses an
 unqualified result type because it declares a result variable and assigns to
-it afterwards. `src/snapshot.x` serializes the qualifiers in the symbol Map,
-so snapshot and live symbol collection expose the same declared types.
+it afterwards. Unit interfaces (`.xi`) record the qualifiers, so a unit
+read from its interface and a unit collected from source have the same
+declared types.
 
 Qualified typedefs, including `typedef const char *(*fn)(int);` and
 `typedef const int cint;`, preserve their qualifiers. Conversions to `void *`

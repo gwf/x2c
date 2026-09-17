@@ -355,7 +355,8 @@ its region, and the way the value leaves:
 - assigned to a local declared outside the region;
 - stored through a parameter, through an unknown pointer, or into a static;
 - stored into an object that belongs to another region;
-- handed to a function that stores it in one of those places.
+- handed to a function in the same unit, or to a runtime operation such as
+  `cons`, that stores it in one of those places.
 
 Two more warnings come from the same pass. `unbalanced` reports a region
 opened in one block and released in another, a shape the other warnings

@@ -99,6 +99,5 @@ Go's escape analysis and Infer use the most similar methods. Go computes
 per-function escape facts and uses them to choose between stack and heap
 allocation. Infer computes per-procedure summaries and propagates them
 across a program to report memory and lifetime defects. x2c's pass applies
-Infer's method to Go's kind of fact: it computes summaries per function,
-passes them between units in the artifact that holds signatures, and uses
-them for warnings.
+Infer's method to Go's kind of fact: it computes summaries per function
+within one unit and uses them for warnings.
