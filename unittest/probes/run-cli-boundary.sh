@@ -1334,7 +1334,8 @@ missing_status=$?
 cpp_status=$?
 set -e
 [[ $missing_status == 1 ]] &&
-  grep -Fq 'not-found ((operation open) (path "/x2c-script-probe-missing")' \
+  grep -Fq \
+    'not-found ((operation "Path.read_text") (path "/x2c-script-probe-missing")' \
     "$SCRIPT/missing.stderr"
 [[ $cpp_status == 1 ]] &&
   grep -q 'script units use the default symbol collection' "$SCRIPT/cpp.stderr"

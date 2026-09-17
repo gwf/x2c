@@ -210,7 +210,7 @@ static void Job._start(Job job) {
   job.count = job.stages.len();
   job.pids = Scope.calloc(job.count, sizeof(long));
   job.statuses = Scope.calloc(job.count, sizeof(int));
-  // A stage that never runs, because the launch failed first, fails.
+  // A stage the launch never reaches reports 127.
   for (int i = 0; i < job.count; i++) job.statuses[i] = 127;
   int input = -1, output = -1, errors = -1, launched = 0;
   defer if (!launched) job.cleanup();

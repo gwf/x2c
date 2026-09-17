@@ -273,7 +273,7 @@ static void process_start_failures_raise(void) {
   }
   try %(sleep 30).job().pipe(%(x2c-process-test-missing-program)).run();
   catch %(not-found *): caught++;
-  Job empty = %().job();
+  Job empty = %();
   try empty.start();
   catch %(bad-arg *): caught++;
   EXPECT_INT_EQ(empty.status(), 127);
