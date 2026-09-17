@@ -8,6 +8,7 @@
 ( ProbeArrayInt__core_getslice ) ==> (( func (( ProbeArrayInt ) ( int ) ( int ) ( int ))) ProbeArrayInt )
 ( ProbeArrayInt__core_insert ) ==> (( func (( ProbeArrayInt ) ( int ) ( int ))) int )
 ( ProbeArrayInt__core_normalize_bound ) ==> (( func (( ProbeArrayInt ) ( int ))) int )
+( ProbeArrayInt__core_normalize_span ) ==> (( func (( ProbeArrayInt ) ( * int ) ( * int ))) void )
 ( ProbeArrayInt__core_remove ) ==> (( func (( ProbeArrayInt ) ( int ) ( * int ))) int )
 ( ProbeArrayInt__core_remslice ) ==> (( func (( ProbeArrayInt ) ( int ) ( int ))) ProbeArrayInt )
 ( ProbeArrayInt__core_reverse ) ==> (( func (( ProbeArrayInt ))) ProbeArrayInt )

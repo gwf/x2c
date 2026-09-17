@@ -83,7 +83,8 @@ int main(void) {
   first = bits;
   second = bits;
   assert(bits.low == 5 && bits.high == 9 && first == second);
-  assert(bits.repr() == %"Bits { low: 5, high: 9 }");
+  // an unsigned bitfield boxes as <u32>, whose repr carries the C suffix
+  assert(bits.repr() == %"Bits { low: 5u, high: 9u }");
 
   Choice choice = Choice.new();
   Nested nested = Nested.new();

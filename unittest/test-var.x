@@ -945,6 +945,54 @@ static void var_wide_value_semantics(void) {
 }
 
 
+/* Each numeric tag used to share a format with a neighbour: <u32> printed as
+   a signed int, <i16> hex-printed a sign-widened value, a byte went into the
+   text raw, and every floating tag went through %f, which lost the value and
+   gave <f64> the long-double suffix. */
+static void var_numeric_repr_prints_its_own_value(void) {
+  $test.scoped();
+  EXPECT_STR_EQ(Var.box_u32(0xFFFFFFFFu).repr(), "4294967295u");
+  EXPECT_STR_EQ(Var.box_i32_bits((unsigned) -1).repr(), "-1");
+  EXPECT_STR_EQ(Var.box_i16((short) -1).repr(), "0xFFFF");
+  EXPECT_STR_EQ(Var.box_u16((unsigned short) 65535).repr(), "0xFFFF");
+  EXPECT_STR_EQ(Var.box_long(-5l).repr(), "-5l");
+
+  // a byte is spelled as a C character constant, never written raw
+  EXPECT_STR_EQ(Var.box_u8((unsigned char) 0).repr(), "'\\x00'");
+  EXPECT_INT_EQ(Var.box_u8((unsigned char) 0).repr().len(), 6);
+  EXPECT_STR_EQ(Var.box_u8((unsigned char) 255).repr(), "'\\xFF'");
+  EXPECT_STR_EQ(Var.box_i8((char) 'A').repr(), "'A'");
+  EXPECT_STR_EQ(Var.box_i8((char) '\n').repr(), "'\\n'");
+
+  // floating text is the shortest decimal that reads back as the same value
+  EXPECT_STR_EQ(Var.box_f64(0.1).repr(), "0.1");
+  EXPECT_STR_EQ(Var.box_f64(1e-7).repr(), "1e-07");
+  EXPECT_STR_EQ(Var.box_f64(1e-9).repr(), "1e-09");
+  EXPECT_STR_EQ(Var.box_f64(5.0).repr(), "5.0");
+  EXPECT_STR_EQ(Var.box_f32(0.1f).repr(), "0.1f");
+}
+
+/* collections.md promises that the List repr reads back through the same
+   reader. The reader produces <i32>, <long>, and <f64>, so those three must
+   come back as the same value and tag. */
+static void var_repr_reads_back_for_reader_tags(void) {
+  $test.scoped();
+  Lisp lisp = Lisp.kernel();
+  Var sources[] = {
+    Var.box_i32_bits((unsigned) -1), Var.box_i32_bits(65535u),
+    Var.box_f64(0.1), Var.box_f64(1e-9), Var.box_f64(1e300),
+    Var.box_f64(-0.0), Var.box_f64(5.0),
+  };
+  for (int i = 0; i < (int) (sizeof sources / sizeof sources[0]); i++) {
+    unsigned cursor = 0;
+    Var parsed = void;
+    if (!EXPECT_TRUE(
+          lisp.read(sources[i].repr(), &cursor, &parsed) == <value>))
+      continue;
+    EXPECT_VAR_EQ(parsed, sources[i]);
+  }
+}
+
 static void var_streaming_repr_matches_canonical(void) {
   $test.scoped();
   List list = %(alpha 17 "line\ntext");
@@ -1410,6 +1458,8 @@ void var_suite(void) {
   $test.run(var_wide_value_semantics);
   $test.run(var_clone_wide_copies_wide_boxes);
   $test.run(var_clone_wide_returns_void_for_narrow_values);
+  $test.run(var_numeric_repr_prints_its_own_value);
+  $test.run(var_repr_reads_back_for_reader_tags);
   $test.run(var_streaming_repr_matches_canonical);
   $test.run(var_dense_custom_dispatch);
   $test.run(var_rendering_restores_after_error);

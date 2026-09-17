@@ -234,8 +234,10 @@ Buffer Var.write_pointer_repr(Var v, Buffer out) {
 #include "file.x"
 #include "iter.x"
 #include "exception.x"
+#include <float.h>
 #include <stdint.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 /* Descriptors are process-global and never freed. They borrow native function
@@ -494,26 +496,11 @@ static void _install_descriptor_methods(
   }
 }
 
-static String _primitive_repr(Var v, Symbol tag) {
-  switch (tag) {
-    case <i8>:    case <u8>:    return "'%c'".printf(v);
-    case <u16>:   case <i16>:   return "0x%04X".printf(v);
-    case <u32>:   case <i32>:   return "%d".printf(v);
-    case <u48>:   return "0x%012lXul".printf(v);
-    case <i48>:   return "0x%012lXl".printf(v);
-    case <long>:   return "%ldl".printf(v);
-    case <ulong>:   return "%luul".printf(v);
-    case <llong>:  return "%lldll".printf(v);
-    case <ullong>:  return "%lluull".printf(v);
-    case <f32>:   return "%f".printf(v);
-    case <f64>:   return "%lfl".printf(v);
-    case <ldouble>:  return "%Lfl".printf(v);
-    case <nan>:   return "NaN";
-    case <+inf>:  return "+Inf";
-    case <-inf>:  return "-Inf";
-  }
-  return v.pointer_string();
-}
+/* `_write_primitive_repr` is the one owner of the numeric repr spellings. The
+   `String` form renders through a `Buffer` rather than keeping a second copy
+   of the table that could drift from it again. */
+static String _primitive_repr(Var v, Symbol tag) =>
+  _write_primitive_repr(v, tag, Buffer.new(0)).str_free();
 
 static String _primitive_str(Var v, Symbol tag) {
   switch (tag) {
@@ -621,20 +608,70 @@ String Var.repr(Var v) {
   return v.fallback_repr();
 }
 
+/* A byte is spelled the way C spells a character constant. Writing the raw
+   byte instead would put a NUL or a control byte inside the repr text. */
+static Buffer _write_byte_repr(Buffer out, unsigned byte) {
+  switch (byte) {
+    case '\\': return out.write("'\\\\'");
+    case '\'': return out.write("'\\''");
+    case '\n': return out.write("'\\n'");
+    case '\t': return out.write("'\\t'");
+    case '\r': return out.write("'\\r'");
+  }
+  if (byte >= 0x20 && byte < 0x7F) return out.printf("'%c'", (int) byte);
+  return out.printf("'\\x%02X'", byte);
+}
+
+/* The shortest decimal that reads back as `value`, followed by the suffix
+   that names its C type. `*_DECIMAL_DIG` is the precision that always
+   round-trips that width on this target; starting three digits short keeps
+   0.1 spelled `0.1` instead of `0.10000000000000001`. The candidate is
+   narrowed to `width` before the comparison, so a float is not asked to match
+   a double's digits. */
+static Buffer _write_float_repr(
+  Buffer out, long double value, Symbol width, String suffix) {
+  int limit = width == <f32> ? FLT_DECIMAL_DIG
+            : (width == <f64> ? DBL_DECIMAL_DIG : LDBL_DECIMAL_DIG);
+  char text[48];
+  int digits = limit - 3;
+  for (; digits < limit; digits++) {
+    snprintf(text, sizeof text, "%.*Lg", digits, value);
+    long double back = strtold(text, NULL);
+    if (width == <f32>) back = (float) back;
+    else if (width == <f64>) back = (double) back;
+    if (back == value) break;
+  }
+  if (digits == limit) snprintf(text, sizeof text, "%.*Lg", limit, value);
+  /* `%g` drops the point for a whole value, and bare digits read back as an
+     integer, so restore the form that says floating. */
+  if (text[strspn(text, "+-0123456789")] == '\0') strcat(text, ".0");
+  out.write(text);
+  return suffix ? out.write(suffix) : out;
+}
+
+/* Each numeric tag prints its own value with its own C spelling, so the text
+   names both the number and the width it was boxed at. The narrow integer
+   tags read their payload through `Var.long`, which does not widen a signed
+   value into another tag's domain. */
 static Buffer _write_primitive_repr(Var v, Symbol tag, Buffer out) {
   switch (tag) {
-    case <i8>:  case <u8>:   return out.printf("'%c'", v);
-    case <u16>: case <i16>:  return out.printf("0x%04X", v);
-    case <u32>: case <i32>:  return out.printf("%d", v);
-    case <u48>:  return out.printf("0x%012lXul", v);
-    case <i48>:  return out.printf("0x%012lXl", v);
-    case <long>:  return out.printf("%ldl", v);
-    case <ulong>:  return out.printf("%luul", v);
-    case <llong>: return out.printf("%lldll", v);
-    case <ullong>: return out.printf("%lluull", v);
-    case <f32>:  return out.printf("%f", v);
-    case <f64>:  return out.printf("%lfl", v);
-    case <ldouble>: return out.printf("%Lfl", v);
+    case <i8>:  case <u8>:
+      return _write_byte_repr(out, (unsigned) (uchar) v.long());
+    case <u16>: case <i16>:
+      return out.printf("0x%04X", (unsigned) (ushort) v.long());
+    case <i32>:  return out.printf("%d", (int) v.long());
+    case <u32>:  return out.printf("%uu", (unsigned) v.long());
+    case <u48>:  return out.printf("0x%012lXul", v.ulong() & 0xFFFFFFFFFFFFul);
+    case <i48>:
+      return out.printf("0x%012lXl", (ulong) v.long() & 0xFFFFFFFFFFFFul);
+    case <long>:  return out.printf("%ldl", v.long());
+    case <ulong>:  return out.printf("%luul", v.ulong());
+    case <llong>: return out.printf("%lldll", v.long_long());
+    case <ullong>: return out.printf("%lluull", v.ulong_long());
+    case <f32>:  return _write_float_repr(out, v.floating(), <f32>, "f");
+    case <f64>:  return _write_float_repr(out, v.floating(), <f64>, NULL);
+    case <ldouble>:
+      return _write_float_repr(out, v.long_double(), <ldouble>, "l");
     case <nan>:  return out.write("NaN");
     case <+inf>: return out.write("+Inf");
     case <-inf>: return out.write("-Inf");

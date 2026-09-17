@@ -89,6 +89,13 @@ The four forms print differently. `repr` is the readable representation for
 each type, and the `List` form round-trips through the same reader the Lisp
 showcase uses.
 
+A number's `repr` prints its own value and, where C has one, the suffix that
+names the width it was boxed at: `5u` for an `unsigned`, `5l` for a `long`,
+`0.1f` for a `float`. Floating text is the shortest decimal that reads back as
+the same value. The reader itself has no suffixes, so it is the `int` and
+`double` forms that read back unchanged; a suffixed form is for you to read,
+not for the reader.
+
 ### Quoted data and x2c expressions
 
 Inside `%(...)`, `%[...]`, and `%{...}`, a bare spelling is an **`Atom`**,
