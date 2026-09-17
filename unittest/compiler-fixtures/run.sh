@@ -33,6 +33,20 @@ record_failure() {
   failures=$((failures + 1))
 }
 
+# A raise or a protocol note inside `lib/` reports the runtime source line it
+# came from. That line belongs to the runtime, not to the fixture, so editing
+# any runtime module would otherwise rewrite these artifacts. Replace it the
+# way binding numbers and elapsed times are replaced above; the file and
+# function still name the raising operation.
+normalize_runtime_lines() {
+  local file=$1
+  sed -E \
+    -e 's|(\(file "[^"]*lib/[A-Za-z0-9_-]+\.x"\) \(line )[0-9]+|\1<line>|g' \
+    -e 's|(lib/[A-Za-z0-9_-]+\.x):[0-9]+:[0-9]+|\1:<line>:<column>|g' \
+    "$file" >"$file.normalized"
+  mv "$file.normalized" "$file"
+}
+
 check_artifact() {
   local phase=$1
   local actual=$2
@@ -211,6 +225,7 @@ run_fixture() {
 
   has_phase compile-status && \
     check_artifact compile-status "$case_build/compile-status.actual"
+  normalize_runtime_lines "$compile_stderr"
   has_phase diagnostics && check_artifact diagnostics "$compile_stderr"
 
   if ((compile_status != 0)); then
@@ -260,6 +275,7 @@ run_fixture() {
       s/start_time="[^"]*"/start_time="<wall-time>"/
     }
   ' "$stderr_raw" >"$case_build/stderr.actual"
+  normalize_runtime_lines "$case_build/stderr.actual"
   printf '%d\n' "$run_status" >"$case_build/status.actual"
 
   has_phase stdout && check_artifact stdout "$case_build/stdout.actual"
