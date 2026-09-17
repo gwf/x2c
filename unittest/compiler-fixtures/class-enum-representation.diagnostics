@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/class-enum-representation.x:10:1: macro: class Color cannot take an enum value representation: Var has no fixed tag for an enum
+  class Color enum { RED, GREEN };
+  ^^^^^
+  note: give the enum a typedef and name that typedef instead
+

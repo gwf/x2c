@@ -96,6 +96,12 @@ Array type chain and constructor; it does not acquire a second allocation
 layout. A forward declaration such as `class Point;` reserves the identity
 until its visible definition supplies the representation.
 
+An enum cannot be a class's value representation, because a `Var` has no fixed
+tag for a type whose integer width C leaves to the implementation. Give the
+enum a typedef and name that typedef, as `class Tone Shade;` does for
+`typedef enum Shade { LIGHT, DARK } Shade;`. A pointer to an enum is an
+ordinary pointer representation and needs no typedef.
+
 ### Construction and early release
 
 A scalar class constructor accepts its scalar value. A class pointing to an

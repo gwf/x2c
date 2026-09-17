@@ -412,9 +412,16 @@
                            (string-append owner "_" member))) found nil)))
 (defun x2c._class.expand (capture)
   (let ((owner (cadr capture)) (type (car (cddr capture))))
-    (if (null? type) (list capture)
-      (list capture `(declaration-recipe x2c._class.defaults
-        (,owner ,type ,(x2c._invocation.location)))))))
+    (cond
+      ((null? type) (list capture))
+      ((and (not (_x2c.type.pointer? type)) (eq? (car type) 'enum))
+       (x2c.diagnostic.fail
+         (string-append "class " owner
+           " cannot take an enum value representation: Var has no fixed tag "
+           "for an enum")
+         (list "give the enum a typedef and name that typedef instead")))
+      (true (list capture `(declaration-recipe x2c._class.defaults
+        (,owner ,type ,(x2c._invocation.location))))))))
 (defun x2c._class.defaults (owner type location)
   (let* ((heap (_x2c.type.pointer? type))
          (alias (and (= (length type) 1) (string? (car type))))
