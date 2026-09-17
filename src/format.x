@@ -105,14 +105,14 @@ char *Compiler.code_pretty_string(
   for (List lst = code; lst; lst = lst.cdr()) {
     if (lst.car() == <src-at>) {
       lst = lst.cdr();
-      List location = compiler.origin_location(lst.car().integer());
+      List location = compiler.origin_location(lst.car());
       while (buff.len() > 0 && buff.get(-1) == ' ') buff.unwrite(1);
       if (buff.len() > 0 && buff.get(-1) != '\n') _write_newline(buff);
       while (scanned < buff.len())
         if (buff.get(scanned++) == '\n') output_line++;
-      String file = location ? location.assoc(<file>).str() : output_file;
+      String file = location ? location.assoc(<file>) : output_file;
       if (!file) file = "<generated>";
-      int line = location ? location.assoc(<line>).integer()
+      int line = location ? location.assoc(<line>)
                           : output_line + 1;
       source_line = location ? line : 0;
       String escaped = file.escape().replace("$$", "$");

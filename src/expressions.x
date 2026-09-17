@@ -29,7 +29,7 @@ static int _iter_parameters_variadic(List parameters) {
 }
 
 static int _exact_iter_type(Var value) {
-  Type type = value is <list> ? value.list() : %($value);
+  Type type = value is <list> ? value : %($value);
   return type.canonicalize().equal(%("Iter"));
 }
 
@@ -117,7 +117,7 @@ static List Compiler._postfix_index_expression(
     return %(expr $type (index $expr $index));
   }
   if (!type.is_typedef_name()) return NULL;
-  String owner = type.car().str(), Type receiver = type;
+  String owner = type.car(), Type receiver = type;
   if (compiler.sym.is_array_type(type)) {
     owner = "Array";
     receiver = %("Array");
@@ -130,7 +130,7 @@ static List Compiler._postfix_index_expression(
   List fntype = compiler.sym.get(%($fnname));
   match (fntype) {
     case %((func (!set ?params ($receiver ?))) ?rtype): {
-      Type key = params.list().cadr(), supplied = index.cadr();
+      Type key = params.cadr(), supplied = index.cadr();
       if (key.is_integral() &&
           compiler.sym.is_named_value_type(supplied, "Symbol"))
         compiler.report_error(
@@ -1121,7 +1121,7 @@ static List Compiler._protocol_operator_expression(
   int which = 0;
   if (!rhs) arguments = %(args $lhs);
   else if (op == <in>) {
-    List parameters = signature.car().list().cadr();
+    List parameters = signature.car().cadr();
     lhs = compiler.convert_expression(lhs, parameters.cadr());
     arguments = %(args $rhs $lhs);
   }
@@ -1224,7 +1224,7 @@ static List _resolve_identifier(
   if (deferred) type = NULL;
   int read_reference = !type;
   List binding = NULL, int require_type = value is <string>;
-  if (value is <string>) binding = c.sym.reference(%(${value.str()}), &type);
+  if (value is <string>) binding = c.sym.reference(%($value), &type);
   else if (value is <list>) {
     List name = value;
     int identity = 0;
@@ -1250,7 +1250,7 @@ static List _resolve_identifier(
   }
   int macro_binder = value.is_binder() ||
     (value is <list> && !value.is_nil() &&
-     value.list().car() == <macro-bind>);
+     value.car() == <macro-bind>);
   if (!binding && macro_binder) return %(expr (<macro-expr>) (ident $value));
   Map binding_facts = c.semantic_binding_facts();
   String spelling = binding_identity_spelling(binding);
@@ -1297,7 +1297,7 @@ static List _resolve_identifier(
     result = c.capture_lambda_identifier(binding, type);
     match (result)
       case %(expr ?captured_type (ident ?captured)): {
-        if (type.car() != <&> && captured_type.list().car() == <&>)
+        if (type.car() != <&> && captured_type.car() == <&>)
           read_reference = 1;
         type = captured_type;
         binding = captured;
@@ -1346,10 +1346,10 @@ static List _resolve_call_arguments(
   if (receiver && supplied === %((expr (void) ()))) supplied = NULL;
   foreach (Var argument, supplied) {
     int slot = argument is <list> && !argument.is_nil() &&
-               argument.list().car() == <macro-slot>;
+               argument.car() == <macro-slot>;
     Var value = compiler.evaluate_macro_slot(argument);
     if (value is <list> && !value.is_nil() &&
-        value.list().car() == <seq>)
+        value.car() == <seq>)
       foreach (List item, value.list().cdr())
         arguments.push(compiler.resolve_expression(item, origin));
     else if (slot)
@@ -1369,7 +1369,7 @@ static List _resolve_call_arguments(
 static List _discarding_callee(
   Compiler compiler, List callee, Type callee_type, List arguments) {
   if (!callee_type || callee_type.car() is not <list> ||
-      callee_type.car().list().car() != <func>)
+      callee_type.car().car() != <func>)
     return callee;
   List body = callee.cdr().cdr();
   if (!body || body.car() is not <list>) return callee;
@@ -1762,7 +1762,7 @@ static List _resolve_content(
       return c.resolve_expression(inner, origin);
     case %(managed-init ?initializer): {
       initializer = c.resolve_expression(initializer, origin);
-      Type type = initializer.list().cadr();
+      Type type = initializer.cadr();
       return %(expr $type (managed-init $initializer));
     }
     case %(ident ?value):
@@ -1888,7 +1888,7 @@ static List _resolve_content(
         resolved.push(c.resolve_expression(expression, origin));
       List values = resolved.list_free();
       Type type = input_type;
-      if (values) type = values.last().list().cadr();
+      if (values) type = values.last().cadr();
       return %(expr $type (commas @values));
     }
     case %(splice ?expression):
@@ -1944,7 +1944,7 @@ static List _resolve_content(
     case %(cast (!set ?declaration (decl *)) ?operand): {
       operand = c.resolve_expression(operand, origin);
       declaration = c.bind_syntax(declaration, AST_BLOCK, c.return_type);
-      List typed = %(declare @{declaration.list().cdr()});
+      List typed = %(declare @{declaration.cdr()});
       Type type = operand.cadr() === %(<macro-expr>)
                 ? %(<macro-expr>) : typed.type_from_ast();
       return %(expr $type (cast $declaration $operand));
@@ -2038,7 +2038,7 @@ static List _resolve_content(
     case %(op ?operator ?operand): {
       List lhs = c.resolve_expression(operand, origin);
       Type lhs_type = lhs.cadr();
-      if (operator == <*> && operand.list().cadr().list().car() == <&> &&
+      if (operator == <*> && operand.cadr().car() == <&> &&
           lhs_type.car() != <&>) return lhs;
       if (lhs_type === %(<macro-expr>))
         return %(expr (<macro-expr>) (op $operator $lhs));
@@ -2539,7 +2539,7 @@ static Symbol _integer_literal_kind(List expr, String *out_text) {
     case %(expr ? (parens ?inner)):
       return _integer_literal_kind(inner, out_text);
     case %(expr ? (literal ?ltype ?text)): {
-      String spelling = text.str(), Type type = ltype.list();
+      String spelling = text, Type type = ltype;
       if (!spelling || !type.is_integral()) return <unknown>;
       char *s = spelling;
       // A character constant is integral too, but it is not spelled in
@@ -2636,9 +2636,9 @@ static String _not_null_pointer_constant(Compiler compiler, List expr) {
     // identically here, and a zero-valued enum constant *is* a null pointer
     // constant.
     case %(expr ?type (ident (binding ? ?name))): {
-      Type vartype = compiler.sym.resolve_numeric_type(type.list());
+      Type vartype = compiler.sym.resolve_numeric_type(type);
       if (!vartype || vartype.is_enum() || !vartype.is_integral()) return NULL;
-      return name.str();
+      return name;
     }
   }
   String spelling = NULL;
@@ -3013,7 +3013,7 @@ static void _initializer_next(
       }
     }
     else {
-      List index = selector, dimension = owner.car().list().cadr();
+      List index = selector, dimension = owner.car().cadr();
       unsigned long long at, count;
       List base;
       _initializer_position(index, &base, &at);
@@ -3163,7 +3163,7 @@ static List _initializer_layout(
       (!owner.is_array() && !owner.is_aggregate()))
     return %($type $one ());
   if (owner.is_array()) {
-    List dimension = owner.car().list().cadr();
+    List dimension = owner.car().cadr();
     if (!dimension) return NULL;
     if (string && _initializer_string_array(c, type, string)) return NULL;
     unsigned long long size;
@@ -3566,7 +3566,7 @@ static List _empty_collection(Compiler c, Type target) {
 static List _convert_composite(
   Compiler compiler, List expr, Type target, List native_target,
   List parent_condition, int *native_used) {
-  if (!expr.caddr().cadr().list().cdr()) {
+  if (!expr.caddr().cadr().cdr()) {
     List fresh = _empty_collection(compiler, target);
     if (fresh) return fresh;
   }
@@ -3577,7 +3577,7 @@ static List _convert_composite(
       (op * (expr $pointer (parens (expr $pointer (cast $pointer $zero))))))));
   }
   Array rows = [], elements = [];
-  List items = expr.caddr().cadr().list().cdr();
+  List items = expr.caddr().cadr().cdr();
   int initialized = 0, discarded = 0;
   foreach (List row, compiler.initializer_rows(target, items, native_target)) {
     List cases = row.cadr();

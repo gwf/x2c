@@ -535,7 +535,7 @@ Self Array.sort(Self array) {
 
 static int _sort_order(Func compare, Var left, Var right) {
   FuncArg arguments[2] = { FuncArg.value(left), FuncArg.value(right) };
-  return compare.apply(2, arguments).int();
+  return compare.apply(2, arguments);
 }
 
 /** Stably sorts `array` with a borrowed synchronous comparator and returns it.
@@ -761,7 +761,7 @@ String Array.repr(Array array) {
 static int _next(Iter iter, Var *out) {
   Array array = iter.obj;
   if (!array) return 0;
-  int index = (int) iter.state.integer(), length = _int_length(array);
+  int index = iter.state, length = _int_length(array);
   if (index >= length) return 0;
   Var *values = (Var *) array.bytes;
   *out = values[index];

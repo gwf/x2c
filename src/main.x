@@ -76,7 +76,7 @@ static void _preprocessor_errors(String text) {
 static String _ast_inspection_repr(List node) {
   match (node)
     case %(macrodef (name ?name) *):
-      return %"(macrodef <macro ${name.str()}>)";
+      return %"(macrodef <macro $name>)";
   return node.repr();
 }
 
@@ -220,7 +220,7 @@ static void _preflight_translation(CliRequest c, Map unit_dirs) {
     if (!c.inspects() && !unit_dirs) {
       List prior_stem = stems, prior_input = stem_inputs;
       while (prior_stem) {
-        if (prior_stem.car().string() == stem) {
+        if (prior_stem.car() == stem) {
           fprintf(
             stderr,
             "x2c: error: inputs produce the same output stem '%s'\n", stem);
@@ -550,7 +550,7 @@ static int _run_env(CliRequest request) {
   if (request.inputs) wanted = request.inputs.car();
   foreach (List row, rows) {
     String name = row.car(), value = row.cadr();
-    const char *text = value ? value.str() : "";
+    const char *text = value ? value : "";
     if (!wanted) printf("%s = %s\n", name.str(), text);
     else if (name == wanted) {
       printf("%s\n", text);

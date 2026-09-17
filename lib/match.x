@@ -263,7 +263,7 @@ List x2c_match_site_match_replace(
   Var result;
   if (!x2c_match_site_try_match_replace(site, input, pat, template, &result))
     return input;
-  return result is <list> ? result.list() : NULL;
+  return result is <list> ? result : NULL;
 }
 
 /** Replaces every match through one compiler-owned site.
@@ -780,7 +780,7 @@ static Var _capture_replace(
   Var replaced_head = _capture_replace(head, layout, captures);
   List replaced_tail = _capture_replace(tail, layout, captures);
   if (splice) {
-    List spliced = replaced_head is <list> ? replaced_head.list() : NULL;
+    List spliced = replaced_head is <list> ? replaced_head : NULL;
     return %(@spliced @replaced_tail);
   }
   return %($replaced_head @replaced_tail);
@@ -818,7 +818,7 @@ int List.try_match_replace(List input, Var pat, Var template, Var *out) =>
 List List.match_replace(List input, Var pat, Var template) {
   Var result;
   if (!input.try_match_replace(pat, template, &result)) return input;
-  return result is <list> ? result.list() : NULL;
+  return result is <list> ? result : NULL;
 }
 
 /* One prepared walk owns a layout, machine, and capture buffer. */
@@ -1886,7 +1886,7 @@ static int _pattern_admissible(Var value, int depth) {
     case <pointer>: case <reference>: return 0;
     case <object>: {
       if (value is <lsym>) return 1;
-      if (value is <string>) return String.is_permanent(value.str());
+      if (value is <string>) return String.is_permanent(value);
       if (value is not <list>) return 0;
       // kind and tag prove the raw payload is a List cell
       foreach (Var part, (List) value.pointer())

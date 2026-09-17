@@ -339,7 +339,7 @@ static void _report_static_initializer_cycle(
     match (initializer)
       case %(?binding *): {
         Var status;
-        if (!state.try_get(binding, &status) || status.integer() != 1)
+        if (!state.try_get(binding, &status) || status != 1)
           continue;
         if (!first) first = binding;
         String name = binding_identity_spelling(binding);
@@ -362,7 +362,7 @@ static void _queue_one_static_initializer(
   Map phases, Array initializers, Symbol deferred_kind) {
   Var status;
   if (state.try_get(binding, &status)) {
-    if (status.integer() == 2) return;
+    if (status == 2) return;
     _report_static_initializer_cycle(compiler, initializers, state);
   }
   state[binding] = 1;
@@ -377,7 +377,7 @@ static void _queue_one_static_initializer(
           compiler, dependency, pending, state, phases,
           initializers, deferred_kind);
         Var phase = phases[dependency];
-        if (phase is not void && phase.integer()) late = 1;
+        if (phase is not void && phase) late = 1;
       }
     }
   }

@@ -241,7 +241,7 @@ int Type.is_pointer(Type type) => !!type.match(%((!or (!quote *) & ^) *));
 
 static Symbol _declarator_kind(Type type) {
   while (type && type.car() is <list>) type = type.car();
-  return type && type.car() is <symbol> ? type.car().symbol() : 0;
+  return type && type.car() is <symbol> ? type.car() : 0;
 }
 
 /** Returns whether the outer declarator represented by `type` is an array. */
@@ -355,7 +355,7 @@ static List _scalar_row(Type type) {
 */
 Symbol Type.scalar_tag(Type type) {
   List row = _scalar_row(type);
-  return row ? row.car().symbol() : (Symbol) 0;
+  return row ? row.car() : (Symbol) 0;
 }
 
 /** Returns the numeric `Var` reader for `type`, or `NULL` when unsupported.
@@ -364,7 +364,7 @@ Symbol Type.scalar_tag(Type type) {
 String Type.var_numeric_extractor(Type type) {
   if (type.is_enum()) return "Var_int";
   List row = _scalar_row(type);
-  return row ? row.cadr().str() : NULL;
+  return row ? row.cadr() : NULL;
 }
 
 /** Returns the native numeric update helper for `type`, or `NULL` when the
@@ -372,7 +372,7 @@ String Type.var_numeric_extractor(Type type) {
 */
 String Type.var_numeric_update_helper(Type type) {
   List row = _scalar_row(type);
-  return row ? row.caddr().str() : NULL;
+  return row ? row.caddr() : NULL;
 }
 
 static unsigned _literal_digit(int ch) => ch <= '9' ? (unsigned) (ch - '0')
@@ -567,9 +567,9 @@ int Type.var_tag_row(
   Var row = _var_row_table()[tag];
   if (row is void) return 0;
   List fields = row;
-  *top = fields.car().integer();
-  *mask = fields.cadr().integer();
-  *bottom = fields.caddr().integer();
+  *top = fields.car();
+  *mask = fields.cadr();
+  *bottom = fields.caddr();
   return 1;
 }
 
@@ -630,7 +630,7 @@ String Type.var_converter(Type type) {
   if ((void *) declared_typetags == NULL || !type) return NULL;
   Var row = declared_typetags[type.canonicalize()];
   if (row is void) return NULL;
-  return row.list().cadr().str();
+  return row.list().cadr();
 }
 
 /** Returns the process-lifetime `Var` tag fixed for `type`, or zero. */
@@ -639,7 +639,7 @@ Symbol Type.fixed_var_tag(Type type) {
   Symbol scalar = type.scalar_tag();
   if (scalar) return scalar;
   Var vtag = _typetags_table()[type.canonicalize()];
-  return vtag is <symbol> ? vtag.symbol() : 0;
+  return vtag is <symbol> ? vtag : 0;
 }
 
 /** Returns the unit-local `Var` tag for `type`, falling back to its fixed

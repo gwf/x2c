@@ -248,7 +248,7 @@ List Compiler.typed_match_pattern(Compiler c, List pattern, List types) {
   Map tags = {};
   foreach (List row, types) match (row)
     case %(?name ?type):
-      tags[Atom.intern(%"?${name.str()}")] =
+      tags[Atom.intern(%"?${name}")] =
         c.var_tag_expression(type, c.token);
   return _typed_pattern(c, pattern, tags);
 }
@@ -941,7 +941,7 @@ int Compiler.lambda_capture_required(Compiler c, List binding) {
       foreach (List row, supplied.list())
         match (row) case %(capture ?target ? ?):
           if (target == binding) return 1;
-      return _lambda_binding_is_outer(c, binding, depth.integer());
+      return _lambda_binding_is_outer(c, binding, depth);
     }
   return 0;
 }
@@ -990,7 +990,7 @@ List Compiler.capture_lambda_identifier(
               if (target == binding || target == original):
                 prescribed = row;
         if (!prescribed &&
-            !_lambda_binding_is_outer(c, binding, depth.integer())) continue;
+            !_lambda_binding_is_outer(c, binding, depth)) continue;
         if (type.is_static()) continue;
         Map facts = c.semantic_binding_facts();
         List key = %(lambda-capture $scope $binding);
@@ -1061,11 +1061,11 @@ List Compiler.bind_lambda_expression(
       case %(capture ?target ?captured_type ?expression): {
         Type source = NULL, target_type = captured_type;
         List binding = target is <string>
-                     ? c.sym.lookup(%($target), &source) : target.list();
+                     ? c.sym.lookup(%($target), &source) : target;
         if (target_type.contains(<macro-expr>))
           target_type = source.car() == <&> ? source : cons(<&>, source);
         if (!binding_identity_spelling(binding)) {
-          String spelling = target is <string> ? target.str() : NULL;
+          String spelling = target is <string> ? target : NULL;
           match (binding) {
             case %(?(String name)): spelling = name;
             case %("x2c.ident" ?(String name)): spelling = name;
@@ -1239,7 +1239,7 @@ static List _atom_literal(Compiler c, String text) {
   if (atom is <symbol>)
     return %(literal ("Symbol") $text ${atom.symbol()});
   Var value = c.macro_holes && atom.is_binder()
-            ? %(!quote $atom).var() : atom;
+            ? %(!quote $atom) : atom;
   return %(literal ("Atom") $spelling $value);
 }
 

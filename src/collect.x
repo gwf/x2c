@@ -235,7 +235,7 @@ static int _entry_adds_symbols_visit(
     visited[dependency] = 1;
     Var cached = _header_cache()[dependency];
     List resolved = cached is void ? _interface_read(compiler, dependency)
-                                   : cached.list();
+                                   : cached;
     if (resolved &&
         _entry_adds_symbols_visit(compiler, resolved, globs, visited))
       return 1;
@@ -270,7 +270,7 @@ static void _replay_cached(
     visited[dep_path] = 1;
     Var dep_entry = _header_cache()[dep_path];
     List resolved = dep_entry is void ? _interface_read(compiler, dep_path)
-                                        : dep_entry.list();
+                                        : dep_entry;
     if (resolved) _replay_cached(compiler, resolved, globs, visited);
     else _walk_cold(compiler, dep_path, dep_path, globs, visited);
   }
@@ -391,7 +391,7 @@ static void _include(
   String canonical = _canonical_path(path);
   Var cached = c.source_facts ? void : _header_cache()[canonical];
   List entry = cached is void ? _interface_read(c, canonical)
-                              : cached.list();
+                              : cached;
   /* The entry records every include, so it does not depend on what the unit
      that first walked this file had already seen. */
   parts.push(canonical);
@@ -637,17 +637,17 @@ static String _package_entry(
 static String _package_key_spelling(List key) {
   Var (head, spelling_value) = key;
   if (head is <string>) {
-    String spelling = head.str();
+    String spelling = head;
     if (key.cdr() || spelling == "source-node") return NULL;
     return spelling == "source-typedef" ? NULL : spelling;
   }
   if (head == <self>)
     return key.cdr() && !key.cddr() && spelling_value is <string>
-         ? spelling_value.str() : NULL;
+         ? spelling_value : NULL;
   if (head != <typedef> && head != <struct> &&
       head != <union> && head != <enum>) return NULL;
   return key.cdr() && spelling_value is <string>
-       ? spelling_value.str() : NULL;
+       ? spelling_value : NULL;
 }
 
 /* Protocol declarations and adoptions are keyed by source location instead
@@ -925,7 +925,7 @@ static List _interface_load(Compiler compiler, String canonical, String path) {
   }
   if (parts_value is not <list> || definitions_value is not <list> ||
       dependencies_value is not <list>) return NULL;
-  if (!_absolute_path(owner.str()).equal(canonical)) return NULL;
+  if (!_absolute_path(owner).equal(canonical)) return NULL;
   if (!_hash_matches(compiler, canonical, expected_hash)) return NULL;
   interface_loading[canonical] = 1;
   Array parts = [];
@@ -958,7 +958,7 @@ static List _interface_load(Compiler compiler, String canonical, String path) {
     Var (dependency_name, content_hash) = dependency;
     if (dependency_name is not <string>) return _interface_reject(canonical);
     String dependency_path =
-      _canonical_path(_absolute_path(dependency_name.str()));
+      _canonical_path(_absolute_path(dependency_name));
     if (content_hash.is_integer() && content_hash.integer() == 1) {
       _cache_dependency(dependencies, dependency_path, content_hash);
       continue;
@@ -1003,7 +1003,7 @@ static Var _renumber_bindings(Var value, Map identities) {
   List node = value, String spelling = NULL;
   if (binding_identity_try_parts(node, NULL, &spelling)) {
     Var identity = identities.setdefault(node, identities.len() + 1);
-    return binding_identity_new(identity.integer(), spelling);
+    return binding_identity_new(identity, spelling);
   }
   Array children = [];
   foreach (Var child, node)

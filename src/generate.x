@@ -494,7 +494,7 @@ static List _resolve_typedef_markers(Array items, Array pending, int header) {
   if (header) for (int i = count - 1; i >= 0; i--) {
     match (items[i])
       case %(pending ?index): {
-        int at = index.int();
+        int at = index;
         (List names, List node, int promoted) = pending[at];
         foreach (String name, names) {
           int declared = 0;
@@ -513,7 +513,7 @@ static List _resolve_typedef_markers(Array items, Array pending, int header) {
   foreach (Var item, items) {
     match (item)
       case %(pending ?index): {
-        (List names, List node, int promoted) = pending[index.int()];
+        (List names, List node, int promoted) = pending[index];
         (void) names;
         if (promoted == header) output.push(node);
         continue;
@@ -593,7 +593,7 @@ static List _place_conditionals(
   foreach (List item, items) {
     match (item)
       case %(conditional ?group ? ?node): {
-        int placed = opened[group.int()].int() != header;
+        int placed = opened[group].int() != header;
         if (filled.contains(group) || (!other.contains(group) && placed))
           output.push(node);
         continue;

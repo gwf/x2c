@@ -84,7 +84,7 @@ static void _install_source(
    when `install` is nonzero and the bindings are not yet installed. */
 static void _use_lisp_bindings(Compiler compiler, int install) {
   if (!lisp_binding_macros_marker)
-    lisp_binding_macros_marker = String.new("_x2c.lisp.bindings");
+    lisp_binding_macros_marker = "_x2c.lisp.bindings";
   int loaded =
     !install || compiler.macros.contains(lisp_binding_macros_marker);
   if (!loaded) _ensure_lisp(compiler);
@@ -109,7 +109,7 @@ static int _try_definition(
 /** Installs the compiler-shipped source macros into `compiler` once. */
 void Compiler.install_builtin_macros(Compiler compiler) {
   if (!builtin_macros_marker)
-    builtin_macros_marker = String.new("_x2c.builtin.macros");
+    builtin_macros_marker = "_x2c.builtin.macros";
   _install_source(
     compiler, builtin_macros, "<builtin:macros>",
     builtin_macros_marker, 1);
@@ -370,7 +370,7 @@ static Var _sdk_source_text(Var value) {
       "x2c.source.text requires complete captured syntax",
       macro_sdk_has_references ? NULL : %("value: ${value.repr()}"));
   List source = stored;
-  int begin = source.caddr().int(), end = source.last().int();
+  int begin = source.caddr(), end = source.last();
   return String.new_len(macro_sdk_compiler.text + begin, end - begin);
 }
 
@@ -479,7 +479,7 @@ static Var _sdk_native_function_type(List syntax) {
   List source_parameters = _sdk_function_type_parameters(type);
   Type source_result = type.apply(), Array parameters = [];
   foreach (Var parameter, source_parameters)
-    parameters.push(_lisp_resolve_type(parameter.list()));
+    parameters.push(_lisp_resolve_type(parameter));
   Type result = _lisp_resolve_type(source_result);
   return cons(%(func ${parameters.list_free()}), result);
 }
@@ -490,7 +490,7 @@ static Var _sdk_function_parameter(List function, String wanted) {
   foreach (List parameter, parameters) {
     match (parameter) {
       case %(param ? (bind ?identity *)):
-        if (_sdk_binding_spelling(identity).string() == wanted) {
+        if (_sdk_binding_spelling(identity) == wanted) {
           Type type = parameter.type_from_ast().canonicalize();
           return %(expr $type (ident $identity));
         }
@@ -690,7 +690,7 @@ int Compiler.macro_starts_target_at(Compiler compiler, AstPos position) {
 
 static String _source_dir(Compiler compiler) {
   String filename = compiler.import_stack.len()
-                  ? compiler.import_stack[-1].str()
+                  ? compiler.import_stack[-1]
                   : compiler.filename;
   return filename ? Path.dirname(filename) : ".";
 }
@@ -1048,7 +1048,7 @@ static void _import(
     String display = c.display_path(path);
     Array notes = [ %"import: $display" ];
     foreach (Var parent, c.import_stack)
-      notes.push(%"from: ${c.display_path(parent.str())}");
+      notes.push(%"from: ${c.display_path(parent)}");
     c.report_error(
       <macro>, "compile-time import cycle",
       invocation, notes.list_free());
@@ -1130,7 +1130,7 @@ static void _import(
   foreach (Var (dependency, hash), c.deps)
     if (previous_dependencies[dependency] != hash)
       dependencies[dependency] = hash;
-  Var aliases = imported_aliases ? imported_aliases.var() : %().var();
+  Var aliases = imported_aliases ? imported_aliases : %();
   c.imports[path] = %(imported $aliases $definitions $dependencies);
   c.kw_seen[path] = 1;
 }
@@ -1322,7 +1322,7 @@ static Var _eval_template_form(
         Var replacement = name && name.type == <ident>
                         ? references.assoc(name.text) : void;
         String temporary = replacement is <string>
-                         ? replacement.str() : NULL;
+                         ? replacement : NULL;
         if (temporary) {
           rewritten.write_len(form + copied, token.pos - copied);
           rewritten.write(temporary);
@@ -1384,7 +1384,7 @@ Var Compiler.evaluate_macro_slot(Compiler compiler, Var value) {
   List slot = value;
   if (slot.car() != <macro-slot>) return value;
   if (compiler.macro_holes || !compiler.macro_stack) return value;
-  int splice = slot.cadr().int();
+  int splice = slot.cadr();
   String form = slot.caddr();
   List active = compiler.macro_stack.car();
   (List definition, Var input, List bindings, Token invocation) = active;
@@ -1417,7 +1417,7 @@ Var Compiler.evaluate_macro_slot(Compiler compiler, Var value) {
     if (exact) result = %($construction $exact);
   }
   return splice && result is <list>
-    ? %(seq @{result}).var() : result;
+    ? %(seq @{result}) : result;
 }
 
 /** Evaluates a macro slot and returns its syntax as a row sequence.
@@ -1502,7 +1502,7 @@ static Var _projection(Map binders, Var binder, Var otherwise) =>
    value to compile-time Lisp. */
 static List _capture_pattern(List hole, Map binders) {
   Var author = hole.assoc(<binder>);
-  int sequence = hole.assoc(<sequence>).int();
+  int sequence = hole.assoc(<sequence>);
   Var source_binder = _replacement_binder(author, "source", sequence);
   Var value_binder = _replacement_binder(author, "value", sequence);
   Var expression_binder = _replacement_binder(
@@ -1610,7 +1610,7 @@ static List _forwarded_capture(Compiler compiler, Var captured) {
     compiler, Atom.intern(spelling[prefix.len():]));
   if (!hole) return NULL;
   Var author = hole.assoc(<binder>);
-  int sequence = hole.assoc(<sequence>).int();
+  int sequence = hole.assoc(<sequence>);
   Var source = _replacement_binder(author, "source", sequence);
   if (hole.assoc(<kind>) == <unit>) {
     Var construction = _replacement_binder(author, "construction", 1);
@@ -1633,9 +1633,9 @@ static List _forwarded_capture(Compiler compiler, Var captured) {
    macro projection reconstructs its original row instead of assigning source
    text to generated syntax; Unit construction requirements travel with it. */
 static List _capture_row(Compiler compiler, List hole, List sources) {
-  int sequence = hole.assoc(<sequence>).int();
+  int sequence = hole.assoc(<sequence>);
   int singular = !sequence && sources && !sources.cdr();
-  Var source = singular ? sources.car() : sources.var();
+  Var source = singular ? sources.car() : sources;
   if (singular) {
     List forwarded = _forwarded_capture(compiler, source);
     if (forwarded) return forwarded;
@@ -2516,7 +2516,7 @@ static List _invocation_arguments(Compiler c, List definition) {
   for (List nodes = descriptors; nodes; nodes = nodes.cdr()) {
     List hole = nodes.car();
     Symbol kind = hole.assoc(<kind>);
-    int sequence = hole.assoc(<sequence>).int();
+    int sequence = hole.assoc(<sequence>);
     Array captured = [];
     if (c.peek(0) == <)> && !sequence)
       c.report_error(
@@ -2556,7 +2556,7 @@ static void _bind_name_arguments(
     if (parameter.assoc(<kind>) == <name>) {
       Var names = captures.car().list().assoc(<value>);
       List values = parameter.assoc(<sequence>).int()
-                  ? names.list() : %($names);
+                  ? names : %($names);
       foreach (String name, values)
         compiler.sym.reference(%($name), NULL);
     }
@@ -2571,9 +2571,9 @@ static List _invocation_node(
   Var site = invocation;
   if (compiler.macro_holes) {
     stored = definition.assoc(<template>)
-      ? %(!quote $definition).var()
+      ? %(!quote $definition)
       : definition.assoc(<local>).int()
-        ? %(local-macro ${definition.assoc(<name>)}).var()
+        ? %(local-macro ${definition.assoc(<name>)})
         : definition.assoc(<name>);
     site = <m-invoke>;
   }
@@ -2596,8 +2596,8 @@ Token Compiler.macro_invocation_site(Compiler compiler, Var site) {
 static String _definition_note(List definition) {
   List origin = definition.assoc(<origin>);
   String file = origin.assoc(<file>);
-  int line = origin.assoc(<line>).int(),
-      column = origin.assoc(<column>).int();
+  int line = origin.assoc(<line>),
+      column = origin.assoc(<column>);
   return %"definition: $file:$line:$column";
 }
 
@@ -2701,7 +2701,7 @@ List Compiler.expand_macro_invocation_node(
         }
         $let(_.origin, expansion_origin) {
           result = _.bind_syntax(
-            matched ? constructed.var() : void,
+            matched ? constructed : void,
             position, _.return_type);
         }
       }

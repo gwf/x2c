@@ -148,7 +148,7 @@ static List Emitter._function(Emitter e, List ast, List context) {
   Var defer_owner;
   if (e.semantic_binding_facts().try_get(
     %(defer-ownr $function_binding), &defer_owner))
-    e.fn_name = defer_owner.str();
+    e.fn_name = defer_owner;
   type = e._emit(%( $type ), NULL);
   bindings = %( $bindings );
   body = %( $body );
@@ -325,7 +325,7 @@ static List Emitter._static_copy(
 static List Emitter._local_static(Emitter e, List ast, List context) {
   List declaration = ast.cadr(), body = ast.caddr();
   while (declaration.car() == <at>) {
-    e.origin = declaration.cadr().int();
+    e.origin = declaration.cadr();
     declaration = declaration.caddr();
   }
   if (_static_case_entry(body)) {
@@ -669,8 +669,8 @@ static List Emitter._raise(
   String site_name = e.fresh_name("error_site");
   List location = e.origin_location(e.origin);
   String file = location
-    ? location.assoc(<file>).string() : e.compiler.filename;
-  int line = location ? location.assoc(<line>).integer() : 0;
+    ? location.assoc(<file>) : e.compiler.filename;
+  int line = location ? location.assoc(<line>) : 0;
   String function = e.fn_name
     ? e.fn_name : "<unknown>";
   String file_literal = _c_string_literal(file);
@@ -1132,7 +1132,7 @@ static List Emitter._emit(Emitter e, List ast, List context) {
   match (ast) {
     case %(at ?origin ?inner): {
       int old_origin = e.origin;
-      e.origin = origin.integer();
+      e.origin = origin;
       List result = e._emit(inner, context);
       e.origin = old_origin;
       if (e.compiler.source_map)

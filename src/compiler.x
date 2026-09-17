@@ -456,7 +456,7 @@ Map Compiler.semantic_binding_facts(Compiler compiler) =>
 /** Returns the active macro definition's borrowed local map, or `NULL`. */
 Map Compiler.macro_definition_locals(Compiler compiler) {
   Var stored = compiler.macro_holes[%(locals)];
-  return stored is <map> ? stored.map() : NULL;
+  return stored is <map> ? stored : NULL;
 }
 
 /** Allocates the next compiler-private C spelling for `stem`.
@@ -466,7 +466,7 @@ Map Compiler.macro_definition_locals(Compiler compiler) {
 String Compiler.fresh_name(Compiler compiler, String stem) {
   Var stored;
   int count = compiler.names.counters.try_get(stem, &stored)
-            ? stored.int() : 0;
+            ? stored : 0;
   String name = %"_x2c_${stem}_${count++}";
   compiler.names.counters[stem] = count;
   return name;
@@ -480,7 +480,7 @@ String Compiler.emitted_binding_name(Compiler compiler, List binding) {
   Var renamed;
   if (compiler.semantic_binding_facts().try_get(%(emitted $binding),
                                                 &renamed))
-    return renamed.str();
+    return renamed;
   return binding_identity_spelling(binding);
 }
 
@@ -997,7 +997,7 @@ Var Compiler.thaw_declaration_syntax(Compiler compiler, Var syntax) {
       return %(src (source ${_declaration_path(compiler, path, 1)} $begin $end)
         ${compiler.thaw_declaration_syntax(node)});
     case %(declaration-void): return void;
-    case %(declaration-empty-symbol): return ((Symbol) 0).var();
+    case %(declaration-empty-symbol): return (Symbol) 0;
     case %(declaration-atom ?spelling): return Atom.intern(spelling);
     case %(declaration-token ?type ?text ?line ?column ?length ?position): {
       Token token = Scope.calloc(1, sizeof(struct Token));
@@ -1037,7 +1037,7 @@ void Compiler.queue_declaration_effect(
   Compiler compiler, String form, Token first, Token after) {
   List key = _declaration_source_key(compiler, first);
   String context = compiler.import_stack.len()
-                 ? compiler.import_stack[-1].str() : compiler.filename;
+                 ? compiler.import_stack[-1] : compiler.filename;
   compiler.declaration_effects = cons(
     %($key ${after.pos} $form
       ${compiler.freeze_declaration_syntax(first)} $context),
@@ -1153,7 +1153,7 @@ static List _select_declaration_rows(Compiler compiler, List rows) {
 static List _declaration_forward(
   Compiler compiler, Type child, Type parent, String member,
   List fallback, Map pending) {
-  String name = %"${child.car().str()}_$member";
+  String name = %"${child.car()}_$member";
   if (compiler.sym.get(%($name))) return %(seq);
   List method = compiler.resolve_postfix_member(parent, %($member), <.>, 1);
   if (!method) {
@@ -1766,10 +1766,10 @@ static void _check_script_locals(Compiler c, List ast) {
           if (!statement.list().try_search(
                 %(expr () (ident (binding ? $name))), &found, &bindings))
             continue;
-          c.origin = origin.int();
+          c.origin = origin;
           c.report_error(
             <type>,
-            %"'${name.str()}' is declared among the script's statements",
+            %"'$name' is declared among the script's statements",
             NULL,
             %("functions cannot see those locals;"
               "declare it static to share it"));
@@ -1822,8 +1822,8 @@ static void _append_script_main(Compiler c, Array statements) {
   for (Token token = template.tokens; token.type != <eof>; token++) {
     if (token.text == "x2c_script_statements") {
       for (int i = 0; i < statements.len(); i += 2) {
-        long start = statements[i].integer();
-        long end = statements[i + 1].integer();
+        long start = statements[i];
+        long end = statements[i + 1];
         stream = stream.append(tokens + start, end - start);
       }
       continue;
@@ -1937,7 +1937,7 @@ List Compiler.cache_literal_list(Compiler compiler, List values) {
    expressions are represented by a private marker so binder analysis can
    distinguish a computed operator head from ordinary literal data. */
 static String _match_pattern_converter_name(Var node) {
-  if (node is <string>) return node.str();
+  if (node is <string>) return node;
   if (node is not <list>) return NULL;
   List matched = node.list().match(%(expr ? (ident ?binding)));
   if (!matched) return NULL;
@@ -2326,7 +2326,7 @@ Symbol Sym.enumerator_owner(Sym sym, List key) {
   SymScope *scope = _semantic_scope(sym, -1);
   Var owner;
   return scope && scope.enumerators.try_get(key, &owner)
-       ? owner.symbol() : 0;
+       ? owner : 0;
 }
 
 /** Associates an enumerator key with its owner in the active scope. */
@@ -2388,7 +2388,7 @@ void Sym.set(Sym sym, List key, List type) {
 static List _semantic_new_binding(Sym sym, List key) {
   int identity = ++sym.compiler.names.next_binding;
   Var name = key.last();
-  List binding = binding_identity_new(identity, name.str());
+  List binding = binding_identity_new(identity, name);
   sym.binding_facts[%(known $identity)] = name;
   return binding;
 }
@@ -2487,7 +2487,7 @@ List Sym.get_exact(Sym sym, List key) {
 static List _package_retry_key(Sym sym, List key) {
   String package = sym.compiler.package;
   if (!package || !key || key.cdr() || key.car() is not <string>) return NULL;
-  String spelling = key.car().str();
+  String spelling = key.car();
   String prefixed = sym.compiler.package_spelling(spelling);
   return prefixed == spelling ? NULL : %($prefixed);
 }
@@ -2591,9 +2591,9 @@ static int _is_reserved_spelling(String s) {
 // and are not source spellings.
 static String _declared_spelling(List key) {
   Var (head, tag) = key;
-  if (head is <string>) return head.str();
+  if (head is <string>) return head;
   if (head == <struct> || head == <union> || head == <enum>)
-    if (tag is <string>) return tag.str();
+    if (tag is <string>) return tag;
   return NULL;
 }
 
@@ -2639,7 +2639,7 @@ static void _check_package_binding(
 void Compiler.register_package_alias(
   Compiler compiler, String name, String alias, Token token) {
   Var bound = compiler.package_aliases[alias];
-  if (bound is not void && bound.string() == name) return;
+  if (bound is not void && bound == name) return;
   _check_package_binding(compiler, "alias", alias, token);
   compiler.package_aliases[alias] = name;
 }
@@ -2689,7 +2689,7 @@ List Compiler.imported_providers(Compiler c, String name) {
   if (!name || !c.package_roots.len()) return NULL;
   List packages = %();
   foreach (Var (key, root), c.package_roots) {
-    String package = key.str();
+    String package = key;
     if (c.sym.get_exact(%("${package}__$name")))
       packages = cons(package, packages);
   }
@@ -2700,7 +2700,7 @@ List Compiler.imported_providers(Compiler c, String name) {
 String Compiler.imported_spelling(Compiler compiler, String name) {
   List packages = compiler.imported_providers(name);
   if (!packages || packages.cdr()) return NULL;
-  return %"${packages.car().str()}__$name";
+  return %"${packages.car()}__$name";
 }
 
 /* Only packages imported by this unit reserve their `name__` space; foreign
@@ -2727,10 +2727,10 @@ static List _package_declared_key(Sym sym, List context, List key, List ast) {
   if (ast.type().is_static()) return key;
   Var (head, tag) = key;
   if (head is <string> && !key.cdr())
-    return %(${compiler.package_spelling(head.str())});
+    return %(${compiler.package_spelling(head)});
   if ((head == <struct> || head == <union> || head == <enum>) &&
       key.cdr() && !key.cddr() && tag is <string>)
-    return %($head ${compiler.package_spelling(tag.str())});
+    return %($head ${compiler.package_spelling(tag)});
   return key;
 }
 
@@ -2826,7 +2826,7 @@ static Type _function_contract_type(Type type, int keep_qualifiers) {
   Array result = [];
   foreach (Var item, type) {
     if (item is <list>) {
-      result.push(_function_contract_type(item.list(), keep_qualifiers));
+      result.push(_function_contract_type(item, keep_qualifiers));
       continue;
     }
     if (item is <symbol>) {
@@ -3148,7 +3148,7 @@ Type Sym.next_typedef(Sym sym, Type type, int *hops) {
    spelling. */
 static Type _builtin_typedef_scalar(Type key) {
   if (!key.is_bare_typedef_name()) return NULL;
-  String name = key.car().str();
+  String name = key.car();
   switch (name.symbol()) {
     case <u8>: case <uint8_t>: return %(unsigned char);
     case <i8>: case <int8_t>: return %(signed char);

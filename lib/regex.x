@@ -714,7 +714,7 @@ String Regex.replace_fn(Regex regex, String subject, Func fn) =>
     a name as a `Symbol` or `String`. NULL when there is no such capture.
 */
 RegexCapture RegexMatch.capture(RegexMatch found, Var key) {
-  int numbered = key.is_integer(), number = numbered ? key.int() : -1;
+  int numbered = key.is_integer(), number = numbered ? key : -1;
   String name = numbered ? NULL : key.str();
   foreach (RegexCapture capture, found) {
     if (numbered && capture.index() == number) return capture;

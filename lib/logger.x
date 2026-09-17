@@ -548,7 +548,7 @@ static Var _memory_retain_value(LogMemorySink l, Var value) {
   if (value.is_integer() || value.is_floating()) return value;
   if (value is <string>) {
     if (_memory_pool_owns(l.pool, value)) return value;
-    String string = value.string();
+    String string = value;
     return String.new_in(l.pool, string, string.len());
   }
   if (value is <lsym>) {

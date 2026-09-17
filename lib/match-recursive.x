@@ -76,7 +76,7 @@ static int _bind_final(
   if (!(state.present & bit)) return _bind(state, binder, input);
   if (!(state.spans & bit))
     return state.values[index] is <list> &&
-           state.values[index].list() == input;
+           state.values[index] == input;
 
   List expected = state.span_begin[index], candidate = input, int length = 0;
   while (length < state.span_length[index] &&
@@ -167,7 +167,7 @@ static int _is(Var input, List patterns) {
   if (patterns == %(op))          return input.is_match_op();
   if (patterns == %(atom))        return input is not <list>;
   match (patterns) case %(type ?type): {
-    Symbol tag = type is <symbol> ? type.symbol() : 0;
+    Symbol tag = type is <symbol> ? type : 0;
     return input is _type_tag(tag);
   }
   return 0;

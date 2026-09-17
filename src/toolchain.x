@@ -287,7 +287,7 @@ static void _print_action(Symbol phase, List arguments) {
 }
 
 static String _start_failure(String program, List detail) {
-  long error = detail.assoc(<errno>).integer();
+  long error = detail.assoc(<errno>);
   String reason = String.new(strerror((int) error));
   return %"x2c: unable to execute $program: $reason\n";
 }

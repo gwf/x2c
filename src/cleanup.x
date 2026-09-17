@@ -67,7 +67,7 @@ static Var _finalizer_label(Var value, int origin, int *at) {
   Array pending = $auto([value]), origins = $auto([origin]);
   while (pending.len()) {
     Var current = pending.take_last();
-    int here = origins.take_last().int();
+    int here = origins.take_last();
     if (current is not <list> || current.is_nil()) continue;
     List node = current;
     match (node) {
@@ -146,7 +146,7 @@ static List _region_path(Walk walk) {
 /* A label reads as a binding, as a wrapped expression, or as the bare name
    a macro wrote. */
 static String _label_spelling(Var label) {
-  if (label is <string>) return label.str();
+  if (label is <string>) return label;
   if (label is not <list>) return NULL;
   List node = label;
   match (node) {
@@ -273,7 +273,7 @@ int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime) {
   modes.push(0);
   while (pending.len()) {
     List node = pending.take_last();
-    int address = modes.take_last().int();
+    int address = modes.take_last();
     if (address) {
       match (node) {
         case %(!or (expr ? ?inner) (parens ?inner)
@@ -396,7 +396,7 @@ static void _collect_preserved(Var value, int in_try, Map names) {
   Array pending = $auto([value]), flags = $auto([in_try]);
   while (pending.len()) {
     Var current = pending.take_last();
-    int inside = flags.take_last().int();
+    int inside = flags.take_last();
     if (current is not <list> || current.is_nil()) continue;
     List node = current;
     if (inside) {
@@ -677,7 +677,7 @@ static List _function(Compiler compiler, List node) {
       List rewritten = _rewrite(walk, body);
       if (preserved.len()) {
         rewritten = _preserve(rewritten, preserved);
-        bindings = _preserve(bindings, preserved).list();
+        bindings = _preserve(bindings, preserved);
       }
       state.regions.free();
       return %(function $type $bindings $rewritten);

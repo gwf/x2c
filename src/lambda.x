@@ -56,7 +56,7 @@ static int _collect_param_types(List raw_params, List *out_types) {
     Var ptype = entry;
     match (entry)
       case %(param ? ?): ptype = entry.list().type_from_ast();
-    List ptype_list = ptype is <list> ? ptype.list() : %( $ptype );
+    List ptype_list = ptype is <list> ? ptype : %( $ptype );
     types.push(ptype_list);
     if (all_var && ptype_list != %("Var")) all_var = 0;
   }
@@ -160,10 +160,10 @@ List Compiler.lower_typed_adapter_expr(Compiler c, List expression) {
       target_spelling = target;
       source_type = source;
       source_binding = binding;
-      origin = at.integer();
+      origin = at;
     }
     case %(expr ?target (tadapt ?at (expr ?source ?))): {
-      $let(c.origin, at.integer()) {
+      $let(c.origin, at) {
         Type target_type = c.sym.resolve_key(target);
         _typed_adapter_error(
           c,
@@ -607,7 +607,7 @@ static List _direct_func_handle(
   List key = %(fhandle $source_binding $key_type);
   Var stored;
   if (compiler.names.adapters.try_get(key, &stored))
-    return %(expr ("Func") (ident ${stored.list()}));
+    return %(expr ("Func") (ident $stored));
 
   List adapter = _direct_func_adapter(
     compiler, %("Func"), source_binding, source_type);
@@ -798,7 +798,7 @@ static List _deref_func_lift(
   }
   match (probe)
     case %(op * (expr ?operand_type ?)): {
-      Type resolved = compiler.sym.resolve_key(operand_type.list());
+      Type resolved = compiler.sym.resolve_key(operand_type);
       if (resolved && resolved.is_pointer() &&
           resolved.dereference().is_function())
         return _indirect_func_lift(
@@ -908,7 +908,7 @@ List Compiler.adapt_lambda_arg(
   _typed_function_parts(orig_type, &source_params, NULL);
   _collect_param_types(source_params, &source_param_types);
   List return_type_list = return_type is <list>
-    ? return_type.list() : %( $return_type );
+    ? return_type : %( $return_type );
   if (all_params_var && return_type_list === %("Var")) return argument;
 
   String adapter = compiler.fresh_name("lambda_adapt");

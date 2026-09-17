@@ -47,7 +47,7 @@ int binding_identity_try_parts(List binding, int *identity, String *spelling) {
   match (binding)
     case %(binding ?id ?(String name)): {
       if (!id.is_integer() || id.integer() <= 0) return 0;
-      if (identity) *identity = id.integer();
+      if (identity) *identity = id;
       if (spelling) *spelling = name;
       return 1;
     }
@@ -227,5 +227,5 @@ List Ast.initializer_functions(Ast ast, List *source) {
     }
   }
   *source = value;
-  return functions.list();
+  return functions;
 }

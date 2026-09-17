@@ -35,7 +35,7 @@ String Compiler.package_alias_spelling(Compiler c) {
   if (package is void || c.sym.get_exact(%($alias))) return NULL;
   Token member = c.skip_trivia_from(c.skip_trivia_from(c.token + 1) + 1);
   return member.text.is_identifier()
-       ? %"${package.string()}__${member.text}" : NULL;
+       ? %"${package}__${member.text}" : NULL;
 }
 
 /* Consume `alias .` and return the folded spelling. The member token stays
@@ -120,7 +120,7 @@ List Compiler.parse_optional_identifier(Compiler compiler) {
 }
 
 static String _syntax_exact_name(Var value) {
-  if (value is <string>) return value.str();
+  if (value is <string>) return value;
   if (value is not <list>) return NULL;
   match (value) {
     case %(?(String exact)): return exact;
@@ -142,7 +142,7 @@ static List _method_identity(Compiler compiler, List binding) {
 }
 
 static Type _self_owner_type(Compiler compiler, List method) {
-  String source = method.car().str();
+  String source = method.car();
   Type declared = compiler.sym.get(%($source));
   if (declared.is_typedef())
     return %(${_package_type_reference(compiler, 0, source)});
@@ -161,7 +161,7 @@ static void _lower_parameter_self(Compiler compiler, Var replacement) {
       Var binding;
       if (compiler.params.bindings.try_get(key, &binding))
         compiler.semantic_binding_facts()[
-          %(type ${binding.list()})
+          %(type $binding)
         ] = lowered;
     }
   }
@@ -171,7 +171,7 @@ static void _lower_parameter_self(Compiler compiler, Var replacement) {
    declaring owner, so direct calls and generated C retain the existing
    function signature. */
 static List _lower_self_declaration(Compiler compiler, List declaration) {
-  List items = declaration.caddr().list().cdr();
+  List items = declaration.caddr().cdr();
   if (!items || items.cdr()) return declaration;
   List target = items.car();
   if (target.car() == <op>) target = target.caddr();
@@ -386,7 +386,7 @@ static String _package_type_reference(
    the tag, its member keys, and the pointee spellings recorded for it agree
    in the shallow collection an importing unit reads and in the full parse. */
 static List _package_aggregate_name(Compiler compiler, Symbol tag, List name) {
-  String spelling = name.car().str();
+  String spelling = name.car();
   if (compiler.peek(0) == <"{">)
     return %(${compiler.package_spelling(spelling)});
   return %(${_package_type_reference(compiler, tag, spelling)});
@@ -442,7 +442,7 @@ static List _publish_aggregate_type(
   Compiler compiler, Symbol tag, Var name, List members) {
   List type = %($tag $name);
   List body = tag == <enum> ? members : %(fields @members);
-  if (name is <list> && name.list().car() == <binding>)
+  if (name is <list> && name.car() == <binding>)
     compiler.sym.bind_identity(%($tag), name, %($tag $body));
   else
     compiler.sym.declare(NULL, type, tag == <enum> ? %(enum) : %($tag $body));
@@ -543,7 +543,7 @@ static List _publish_enumerator(
   match (target) case %(bind ?binding_name ?): name = binding_name;
   name = compiler.evaluate_macro_slot(name);
   String exact = _syntax_exact_name(name);
-  List binding = exact ? NULL : name is <list> ? name : NULL;
+  List binding = exact ? NULL : name is <list> ? name.list() : NULL;
   String spelling = exact ? exact : binding_identity_spelling(binding);
   if (!spelling)
     compiler.report_error(
@@ -748,7 +748,7 @@ static List _finish_parameter(
     case %(bind ?binding ?):
       if (!compiler.macro_holes && parameter.type_from_ast().car() == <&>)
         compiler.semantic_binding_facts()[
-          %(reference-param ${binding.list()})] = 1;
+          %(reference-param $binding)] = 1;
   return parameter;
 }
 
@@ -990,11 +990,11 @@ void Compiler.bind_template_local(
             ? compiler.macro_definition_locals()[key] : void;
   if (compiler.macro_holes && local is <string> &&
       (!context || context === %(typedef))) {
-    List local_key = %(${local.str()});
+    List local_key = %($local);
     Type local_type = type.type_from_ast().declared();
     if (context === %(typedef)) {
-      compiler.sym.set(local_key, %(typedef ${local.str()}));
-      compiler.sym.set(%(typedef ${local.str()}), local_type);
+      compiler.sym.set(local_key, %(typedef $local));
+      compiler.sym.set(%(typedef $local), local_type);
     }
     else compiler.sym.bind_identity(
       NULL, key,
@@ -1330,7 +1330,7 @@ static String _lifecycle_owner(
   if (!method) return NULL;
   match (method)
     case %(?name $member): {
-      String owner = name.str(), Type owner_type = compiler.sym.get(%($owner));
+      String owner = name, Type owner_type = compiler.sym.get(%($owner));
       return owner_type.is_typedef() ? owner : NULL;
     }
   return NULL;
@@ -1793,7 +1793,7 @@ static List _finish_aggregate_type(
 
 static Var _finish_type_spec(Compiler compiler, Var value) {
   int slot = value is <list> && !value.is_nil() &&
-             value.list().car() == <macro-slot>;
+             value.car() == <macro-slot>;
   value = compiler.evaluate_macro_slot(value);
   if (slot && value is <list>) {
     Type type = value.type().canonicalize();
@@ -1825,7 +1825,7 @@ static List _finish_type(Compiler compiler, List type) {
   foreach (Var spec, type) {
     Var value = _finish_type_spec(compiler, spec);
     if (value is <list> && !value.is_nil() &&
-        value.list().car() == <seq>)
+        value.car() == <seq>)
       foreach (Var item, value.list().cdr()) bound.push(item);
     else bound.push(value);
   }
@@ -2218,7 +2218,7 @@ List Compiler.bind_syntax(
             match (syntax) case %(op = ?binding ?): syntax = binding;
             match (syntax)
               case %(bind ? ?modifiers): {
-                Type mods = modifiers.list();
+                Type mods = modifiers;
                 if (context != AST_FIELD && mods.is_bitfield())
                   goto construction_error;
               }
@@ -2332,7 +2332,7 @@ List Compiler.bind_syntax(
       case %(at ?origin ?node): {
         List bound = _.bind_syntax(node, context, _.return_type);
         match (bound) case %(seq ?only): bound = only;
-        Var anchor = origin == <m-origin> ? _.origin.var() : origin;
+        Var anchor = origin == <m-origin> ? _.origin : origin;
         return %(at $anchor $bound);
       }
       case %(return):
@@ -2387,8 +2387,8 @@ List Compiler.bind_syntax(
         if (init is <list>) {
           List node = init;
           init = node.car() == <decl>
-               ? _.bind_syntax(node, AST_BLOCK, _.return_type).var()
-               : _.resolve_expression(node, _.token).var();
+               ? _.bind_syntax(node, AST_BLOCK, _.return_type)
+               : _.resolve_expression(node, _.token);
         }
         if (condition is <list>)
           condition = _.resolve_expression(condition, _.token);

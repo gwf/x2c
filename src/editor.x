@@ -38,11 +38,11 @@ static void _diagnostics(Buffer out, Compiler compiler, Map needed) {
     Symbol code = entry.assoc(<code>);
     List location = entry.assoc(<location>);
     Var source = location.assoc(<file>);
-    String path = source is <string> ? source.string() : compiler.filename;
+    String path = source is <string> ? source : compiler.filename;
     Var position = location.assoc(<position>);
     Var width = location.assoc(<length>);
-    int start = position is void ? 0 : position.int();
-    int length = width is void ? 0 : width.int();
+    int start = position is void ? 0 : position;
+    int length = width is void ? 0 : width;
     if (comma++) out.write_char(',');
     out.write_char('{');
     path = Path.absolute(path);
@@ -63,7 +63,7 @@ static List _occurrence(Compiler compiler, String path, int offset) {
   List found = NULL;
   foreach (List row, compiler.source_occurrences) {
     String file = row[0];
-    int start = row[1].int(), end = row[2].int();
+    int start = row[1], end = row[2];
     if (file != path || offset < start || offset >= end) continue;
     if (!found || end - start < found[2].int() - found[1].int()) found = row;
   }
@@ -83,7 +83,7 @@ static void _query(
     List target = value;
     needed[target[0]] = 1;
     out.write(",\"definition\":{");
-    _location(out, target[0], target[1].int(), target[2].int());
+    _location(out, target[0], target[1], target[2]);
     out.write_char('}');
   }
   else if (kind == "hover" && type) {
@@ -92,7 +92,7 @@ static void _query(
     String text = String.new(
       compiler.code_pretty_string(compiler.emit(%($declaration)), NULL));
     out.write(",\"hover\":{");
-    _location(out, row[0], row[1].int(), row[2].int());
+    _location(out, row[0], row[1], row[2]);
     out.write(",\"text\":");
     report_json_string(out, text);
     out.write_char('}');

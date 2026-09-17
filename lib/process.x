@@ -82,7 +82,7 @@ static char **_environment(Map env) {
       entries.push(text);
   }
   foreach (Var (name, value), env)
-    entries.push(%"${name.str()}=${value.str()}");
+    entries.push(%"$name=$value");
   char **result = Scope.calloc(entries.len() + 1, sizeof(char *));
   int index = 0;
   foreach (String entry, entries) result[index++] = entry;
@@ -94,7 +94,7 @@ static List _stages(List command) =>
   command && command.car() is List ? command : %($command);
 
 static int _is(Var value, Symbol name) =>
-  value is Symbol && value.symbol() == name;
+  value is Symbol && value == name;
 
 static void _close_on_exec(int fd) {
   fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
@@ -340,25 +340,25 @@ Job Job.options(Job job, Map options) {
     Symbol name = key;
     switch (name) {
       case <dir>:
-        launch.dir = value.str();
+        launch.dir = value;
         break;
       case <env>:
         launch.environment = _environment(value);
         break;
       case <input>:
-        launch.input = value.str();
+        launch.input = value;
         break;
       case <stdout>:
         launch.capture_output = _is(value, <capture>);
         launch.stdout_path = launch.capture_output ||
-          _is(value, <inherit>) ? NULL : value.str();
+          _is(value, <inherit>) ? NULL : value;
         break;
       case <stderr>:
         launch.capture_errors = _is(value, <capture>);
         launch.errors_to_output = _is(value, <stdout>);
         launch.stderr_path =
           launch.capture_errors || launch.errors_to_output ||
-          _is(value, <inherit>) ? NULL : value.str();
+          _is(value, <inherit>) ? NULL : value;
         break;
       default:
         raise %(bad-arg (operation "Job.options") (option $name));

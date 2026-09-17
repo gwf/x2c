@@ -247,7 +247,7 @@ Build CliRequest.prepare(CliRequest c) {
   if (c.output) state.output = c.output;
   else if (c.command == <run>) state.output = NULL;
   else if (c.compile_only && c.inputs && !c.inputs.cdr())
-    state.output = %"${Path.stem(c.inputs.car().string())}.o";
+    state.output = %"${Path.stem(c.inputs.car())}.o";
   else if (c.kind == <static-lib>) {
     String stem = c.inputs ?
                   Path.stem(c.inputs.car()) : "target";
@@ -720,7 +720,7 @@ static void Build._place_unit_headers(Build b) {
             continue;
           Path placed = Path.join(directory, target);
           placed.dirname().make_dirs();
-          Path.copy_file(header.str(), placed);
+          Path.copy_file(header, placed);
           break;
         }
       }
@@ -966,7 +966,7 @@ static List Build._script_directories(Build b, List prerequisites) {
     directories.push(directory);
   Array unique = [];
   foreach (Var value, directories) {
-    String directory = Path.absolute(value.str());
+    String directory = Path.absolute(value);
     if (directory.startswith(Path.absolute(b.work_dir))) continue;
     String entry = directory.endswith("/") ? directory : %"$directory/";
     if (!unique.contains(entry)) unique.push(entry);
@@ -983,7 +983,7 @@ List Build.script_helpers(Build b) {
   String script = b.request.inputs.car(), root = x2c_get_root();
   String translation = %"${b.gen_root}/${_key(script)}/${Path.stem(script)}.d";
   List excluded = %("$root/lib/" "$root/include/" "$root/builds/")
-    .append(b.request.package_roots().map(%!(dir) => %"${dir.str()}/"));
+    .append(b.request.package_roots().map(%!(dir) => %"$dir/"));
   Array helpers = [];
   foreach (String path, _state_dep_inputs(translation)) {
     if (!x2c_source_file(path) || path == script || helpers.contains(path))

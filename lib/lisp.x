@@ -685,7 +685,7 @@ static Var _chain(List values, String operation, int want, int expect) {
     raise %(bad-arity (operation $operation) (expected 2) (actual $actual));
   for (List p = values; p.cdr(); p = p.cdr()) {
     Var (left, right) = p;
-    int order = lisp_compare(left, right).integer();
+    int order = lisp_compare(left, right);
     if (expect ? order != want : order == want) return _bool(0);
   }
   return _bool(1);

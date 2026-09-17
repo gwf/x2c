@@ -752,7 +752,7 @@ Var List.assoc(List list, Var key) {
     key uses `List.assoc`. Either absent form returns `void`.
 */
 Var List.get(List list, Var key) {
-  if (key.kind() == <integer>) return list[key.integer()];
+  if (key.kind() == <integer>) return list[key];
   return list.assoc(key);
 }
 
