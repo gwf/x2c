@@ -269,6 +269,9 @@ supplies `defun`, short-circuit control, higher-order `List` operations,
 numeric comparisons, basic `String` operations, and the pattern matching
 described in [the language reference][lisp]. `Lisp.kernel()` creates the
 evaluator primitives alone, for hosts that build their own environment.
+`etc/lisp-values.xlisp` names the core `List`, `Array`, `Map`, `String`,
+`Var`, and `Symbol` operations; the compiler loads it into every compile-time
+session, and an embedding host loads it by name.
 `etc/lisp-extras.xlisp` and `etc/lisp-io.xlisp` stay optional and must be
 loaded by name.
 

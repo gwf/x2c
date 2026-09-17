@@ -498,6 +498,19 @@ List Array.list_free(Array arr) {
   return arr;
 }
 
+/** Returns the entries of `map` as a `List` of two-element `(key value)`
+    `List`s, in the map's iteration order.
+    This is the eager form of `Map.enumerate`, for a caller that wants the
+    pairs as ordinary `List` data rather than a cursor. An empty `map`
+    returns nil. The pair cells are new; the keys and values are shared.
+    Raises: `<alloc-fail>` or `<size-limit>` while constructing the result.
+*/
+List Map.list(Map map) {
+  Array pairs = [];
+  foreach (Var (key, value), map) pairs.push(%($key $value));
+  return pairs.list_free();
+}
+
 /** Returns a new `Array` holding the elements of `lst` in order.
     The `Array` is a fresh mutable container the caller owns and
     should free; the

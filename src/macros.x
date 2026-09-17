@@ -885,6 +885,9 @@ static void _ensure_lisp(Compiler compiler) {
       _, loaded, "etc/init.xlisp",
       "cannot open the compile-time Lisp environment");
     _eval_library(
+      _, loaded, "etc/lisp-values.xlisp",
+      "cannot open the compile-time value operations");
+    _eval_library(
       _, loaded, "etc/compiler-sdk.xlisp",
       "cannot open the compile-time Lisp SDK");
     _eval_library(

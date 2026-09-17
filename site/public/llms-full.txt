@@ -2326,6 +2326,54 @@ A clause's pattern is quoted implicitly and written as `List` syntax, with the
 same `?binder` and `*binder` spellings. A binder keeps its `?` where the body
 reads it. Without an `else` clause an exhausted `match-case` is `nil`.
 
+Compile-time Lisp also reaches the core value types directly. A Lisp value in
+a session is an x2c `Var`: a Lisp list is a `List`, a Lisp string is a
+`String`, and a quoted name is a `Symbol`. The operations below are the
+library's own, so a macro and the program it generates compute with the same
+`List`, `String`, `Map`, and `Array`.
+
+```text
+List.getindex  List.last     List.index    List.contains
+List.get       List.assoc    List.array    List.sort
+
+Array.new      Array.len     Array.push    Array.getindex  Array.setindex
+Array.take_last Array.shift  Array.unshift Array.insert    Array.remove
+Array.find     Array.contains Array.count  Array.join      Array.list
+
+Map.new        Map.len       Map.get       Map.getindex    Map.setindex
+Map.contains   Map.del       Map.getdefault Map.setdefault Map.list
+
+String.len     String.find   String.rfind  String.count    String.contains
+String.startswith String.endswith String.getindex String.getslice
+String.add     String.lower  String.upper  String.capitalize
+String.repeat  String.replace String.join  String.split    String.split_lines
+String.partition String.rpartition String.find_all
+String.remove_prefix String.remove_suffix String.escape String.unescape
+
+Var.tag        Var.kind      Var.is        Var.parse       Var.convert
+Var.integer    Var.floating  Var.is_null
+
+Symbol.len     Symbol.str    Symbol.compare
+```
+
+Each name takes the arguments its [library](https://x2c-lang.dev/docs/library/index.html) entry
+documents and behaves identically. `Var.parse` reads a `String` as an `int`,
+`double`, `string`, `symbol`, or `char`, and `Var.convert` changes a value's
+numeric tag, which is how compile-time code narrows a `double` to an integer.
+`Map.list` returns a map's entries as `(key value)` pairs, because a `Map`
+cursor has no Lisp representation.
+
+The Lisp core keeps its own spellings for cons-cell and text work. `car`,
+`cdr`, `cons`, `length`, `reverse`, `string-append`, `substring`, `lower`,
+`str`, and `repr` are unchanged and reach the same code. Note that Lisp's
+`assoc` returns the matching pair while `List.assoc` returns its second
+value, as the library documents.
+
+An operation whose parameters or result have no `Var` representation is not
+available, which excludes `Iter` cursors, pointer out-parameters, variadic
+entry points, and `char *` parameters. A program embedding its own session
+loads the same names from `etc/lisp-values.xlisp`.
+
 ### Macro-visible syntax
 
 Lisp sees the canonical parsed, typed `List` AST used by `--dump-ast`, with

@@ -1,0 +1,97 @@
+// x2c value operations for Lisp.
+// Load etc/init.xlisp first. The compiler loads this layer into every
+// compile-time Lisp session; an embedding program loads it by name.
+//
+// A Lisp value is an x2c Var: a Lisp list is a List, a Lisp string is a
+// String, a quoted name is a Symbol. These names are the library's own
+// operations over those types, so a macro and the program it generates
+// compute with the same List, String, Map, and Array.
+//
+// The Lisp core keeps its own spellings for cons-cell and text work:
+// `car`, `cdr`, `cons`, `length`, `reverse`, `string-append`, `substring`,
+// `lower`, `str`, and `repr` are unchanged and reach the same code.
+
+// List
+
+(def List.getindex (bind "List_getindex" nil))
+(def List.last     (bind "List_last" nil))
+(def List.index    (bind "List_index" nil))
+(def List.contains (bind "List_contains" nil))
+(def List.assoc    (bind "List_assoc" nil))
+(def List.get      (bind "List_get" nil))
+(def List.array    (bind "List_array" nil))
+(def List.sort     (bind "List_sort" nil))
+
+// Array
+
+(def Array.new       (bind "Array_new" nil))
+(def Array.len       (bind "Array_len" nil))
+(def Array.push      (bind "Array_push" nil))
+(def Array.getindex  (bind "Array_getindex" nil))
+(def Array.setindex  (bind "Array_setindex" nil))
+(def Array.take_last (bind "Array_take_last" nil))
+(def Array.shift     (bind "Array_shift" nil))
+(def Array.unshift   (bind "Array_unshift" nil))
+(def Array.insert    (bind "Array_insert" nil))
+(def Array.remove    (bind "Array_remove" nil))
+(def Array.find      (bind "Array_find" nil))
+(def Array.contains  (bind "Array_contains" nil))
+(def Array.count     (bind "Array_count" nil))
+(def Array.join      (bind "Array_join" nil))
+(def Array.list      (bind "Array_list" nil))
+
+// Map
+
+(def Map.new        (bind "Map_new" nil))
+(def Map.len        (bind "Map_len" nil))
+(def Map.get        (bind "Map_get" nil))
+(def Map.getindex   (bind "Map_getindex" nil))
+(def Map.setindex   (bind "Map_setindex" nil))
+(def Map.contains   (bind "Map_contains" nil))
+(def Map.del        (bind "Map_del" nil))
+(def Map.getdefault (bind "Map_getdefault" nil))
+(def Map.setdefault (bind "Map_setdefault" nil))
+(def Map.list       (bind "Map_list" nil))
+
+// String
+
+(def String.len           (bind "String_len" nil))
+(def String.find          (bind "String_find" nil))
+(def String.rfind         (bind "String_rfind" nil))
+(def String.count         (bind "String_count" nil))
+(def String.contains      (bind "String_contains" nil))
+(def String.startswith    (bind "String_startswith" nil))
+(def String.endswith      (bind "String_endswith" nil))
+(def String.getindex      (bind "String_getindex" nil))
+(def String.getslice      (bind "String_getslice" nil))
+(def String.add           (bind "String_add" nil))
+(def String.lower         (bind "String_lower" nil))
+(def String.upper         (bind "String_upper" nil))
+(def String.capitalize    (bind "String_capitalize" nil))
+(def String.repeat        (bind "String_repeat" nil))
+(def String.replace       (bind "String_replace" nil))
+(def String.join          (bind "String_join" nil))
+(def String.split         (bind "String_split" nil))
+(def String.split_lines   (bind "String_split_lines" nil))
+(def String.partition     (bind "String_partition" nil))
+(def String.rpartition    (bind "String_rpartition" nil))
+(def String.find_all      (bind "String_find_all" nil))
+(def String.remove_prefix (bind "String_remove_prefix" nil))
+(def String.remove_suffix (bind "String_remove_suffix" nil))
+(def String.escape        (bind "String_escape" nil))
+(def String.unescape      (bind "String_unescape" nil))
+
+// Var and Symbol
+
+(def Var.tag      (bind "Var_tag" nil))
+(def Var.kind     (bind "Var_kind" nil))
+(def Var.is       (bind "Var_is" nil))
+(def Var.parse    (bind "Var_parse" nil))
+(def Var.convert  (bind "Var_convert" nil))
+(def Var.integer  (bind "Var_integer" nil))
+(def Var.floating (bind "Var_floating" nil))
+(def Var.is_null  (bind "Var_is_null" nil))
+
+(def Symbol.len     (bind "Symbol_len" nil))
+(def Symbol.str     (bind "Symbol_str" nil))
+(def Symbol.compare (bind "Symbol_compare" nil))

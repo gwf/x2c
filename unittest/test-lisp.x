@@ -572,8 +572,8 @@ static void lisp_eval_bind_native(void) {
                   "(quote ((func ((void))) void)))"),
                 <no-symbol>);
   EXPECT_INT_EQ(_raised_code(lisp,
-                String.new("(bind \"String_lower\" ") +
-                  "(quote ((func ((\"String\"))) \"String\")))"),
+                String.new("(bind \"String_strip\" ") +
+                  "(quote ((func ((\"String\") (* char))) \"String\")))"),
                 <no-symbol>);
   lisp.destroy();
 }
@@ -968,6 +968,33 @@ static void lisp_optional_layers_are_explicit(void) {
   lisp.destroy();
 }
 
+static void lisp_value_layer_uses_library_operations(void) {
+  Lisp lisp = _boot_session();
+  Var value = void;
+  EXPECT_FALSE(lisp.try_get("Map.new", &value));
+  if (!_load_lisp_layer(lisp, "../etc/lisp-values.xlisp")) return;
+
+  EXPECT_VAR_EQ(_ev(lisp, "(List.getindex '(a b c) 1)"), _ev(lisp, "'b"));
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(List.index '(a b c) 'c)")), 2);
+  EXPECT_VAR_EQ(_ev(lisp, "(Array.list (List.array '(a b)))"),
+                _ev(lisp, "'(a b)"));
+  EXPECT_STR_EQ(Var.string(_ev(lisp, "(String.join \"-\" '(\"a\" \"b\"))")),
+                "a-b");
+  EXPECT_VAR_EQ(_ev(lisp, "(String.split \"a b\" \" \")"),
+                _ev(lisp, "'(\"a\" \"b\")"));
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(Var.convert 3.9 'i32)")), 3);
+  EXPECT_VAR_EQ(_ev(lisp, "(Var.parse \"hey\" 'symbol)"), _ev(lisp, "'hey"));
+
+  /* A Map built here is the library's Map, so the entries read back as
+     ordinary pairs. */
+  EXPECT_VAR_EQ(
+    _ev(lisp, "(let ((m (Map.new)))"
+              "  (begin (Map.setindex m 'a 1) (Map.setindex m 'b 2)"
+              "         (List.sort (Map.list m))))"),
+    _ev(lisp, "'((a 1) (b 2))"));
+  lisp.destroy();
+}
+
 static void lisp_bootstrap_import_uses_current_session(void) {
   FILE *raw = fopen("/tmp/x2c-lisp-import.xlisp", "w");
   if (!EXPECT_NOT_NULL(raw)) return;
@@ -1050,6 +1077,7 @@ void lisp_suite(void) {
   $test.run(lisp_bootstrap_collections_and_macros);
   $test.run(lisp_bootstrap_predicates_are_exact);
   $test.run(lisp_optional_layers_are_explicit);
+  $test.run(lisp_value_layer_uses_library_operations);
   $test.run(lisp_bootstrap_import_uses_current_session);
   $test.run(lisp_sessions_release_scopes);
 }
