@@ -227,7 +227,7 @@ static void _warn(Walk w, Symbol code, int origin, String message,
 
 static List _opened(Walk w, Region region) {
   List location = w.compiler.origin_location(region.origin);
-  return %(${%"region opened at line ${location.assoc(<line>).int()}"});
+  return %("region opened at line ${location.assoc(<line>).int()}");
 }
 
 // summaries
