@@ -8,8 +8,9 @@ import "pcre2" with Regexp, RegexpCapture, RegexpLisp, RegexpMatch;
 $(import "../../../unittest/test-macros.xmacro")
 
 static void regexp_named_and_optional_captures(void) {
-  Regexp words = Regexp.compile(%"^(?<word>[a-z]+)(?<digits>[0-9]+)?$$", 0);
-  defer words.free();
+  Regexp words = $auto(
+    Regexp.compile(%"^(?<word>[a-z]+)(?<digits>[0-9]+)?$$", 0)
+  );
 
   RegexpMatch found = words.match("alpha");
   EXPECT_NOT_NULL(found);
@@ -24,8 +25,7 @@ static void regexp_named_and_optional_captures(void) {
   EXPECT_NULL(found[<digits>]);
   EXPECT_NULL(found.capture(<missing>));
 
-  Regexp empty_group = Regexp.compile(%"^(a*)b$$", 0);
-  defer empty_group.free();
+  Regexp empty_group = $auto(Regexp.compile(%"^(a*)b$$", 0));
   RegexpCapture empty = empty_group.match("b").capture(1);
   EXPECT_TRUE(empty.matched());
   EXPECT_NULL(empty.text());
@@ -47,8 +47,7 @@ static void regexp_no_match_is_not_an_error(void) {
 }
 
 static void regexp_global_empty_match_progress(void) {
-  Regexp before_a = Regexp.compile("(?=a)", 0);
-  defer before_a.free();
+  Regexp before_a = $auto(Regexp.compile("(?=a)", 0));
 
   List found = before_a.find_all("aa");
   EXPECT_INT_EQ(found.len(), 2);
@@ -59,28 +58,24 @@ static void regexp_global_empty_match_progress(void) {
   EXPECT_INT_EQ(first.capture(0).start(), 0);
   EXPECT_INT_EQ(second.capture(0).start(), 1);
 
-  Regexp optional = Regexp.compile("a*", 0);
-  defer optional.free();
+  Regexp optional = $auto(Regexp.compile("a*", 0));
   EXPECT_INT_EQ(optional.find_all_from("aa", 0, PCRE2_NOTEMPTY).len(), 1);
 }
 
 static void regexp_utf_and_replacement_growth(void) {
-  Regexp letters = Regexp.compile(%"^\\p{L}+$$", PCRE2_UTF | PCRE2_UCP);
-  defer letters.free();
-  String cafe = %"caf\xc3\xa9";
+  Regexp letters = $auto(Regexp.compile(%"^\\p{L}+$$", PCRE2_UTF | PCRE2_UCP));
+  String cafe = "caf\xc3\xa9";
   EXPECT_STR_EQ(letters.match(cafe)[0], cafe);
 
-  Regexp x = Regexp.compile("x", 0);
-  defer x.free();
+  Regexp x = $auto(Regexp.compile("x", 0));
   EXPECT_STR_EQ(x.replace("xxx", "longer"), "longerxx");
   EXPECT_STR_EQ(x.replace_all("xxx", "longer"), "longerlongerlonger");
 }
 
 static void regexp_offsets_limits_and_jit(void) {
-  Regexp word = Regexp.compile(
+  Regexp word = $auto(Regexp.compile(
     "[a-z]+", PCRE2_UTF | PCRE2_UCP | PCRE2_USE_OFFSET_LIMIT
-  );
-  defer word.free();
+  ));
 
   EXPECT_STR_EQ(word.pattern(), "[a-z]+");
   EXPECT_INT_EQ(word.capture_count(), 0);
@@ -108,8 +103,7 @@ static void _expect_limit(Regexp regexp, int code) {
 }
 
 static void regexp_match_limits_bind(void) {
-  Regexp nested = Regexp.compile(%"(a+)+$$", 0);
-  defer nested.free();
+  Regexp nested = $auto(Regexp.compile(%"(a+)+$$", 0));
 
   nested.set_match_limit(0);
   _expect_limit(nested, PCRE2_ERROR_MATCHLIMIT);
@@ -134,8 +128,7 @@ static void regexp_compile_context_and_native_state_are_reachable(void) {
     0
   );
 
-  Regexp regexp = Regexp.compile_context("(?=ab\\K)", 0, context);
-  defer regexp.free();
+  Regexp regexp = $auto(Regexp.compile_context("(?=ab\\K)", 0, context));
   EXPECT_NOT_NULL(regexp.native());
   EXPECT_NOT_NULL(regexp.native_match_data());
   EXPECT_NOT_NULL(regexp.native_match_context());
@@ -174,8 +167,7 @@ static void regexp_accessors_reject_a_freed_value(void) {
 static void regexp_retains_transient_pattern(void) {
   String transient = String.malloc(3);
   strcpy(transient, "a+");
-  Regexp repeated = Regexp.compile(transient, 0);
-  defer repeated.free();
+  Regexp repeated = $auto(Regexp.compile(transient, 0));
   transient.free();
 
   EXPECT_STR_EQ(repeated.pattern(), "a+");
@@ -183,8 +175,9 @@ static void regexp_retains_transient_pattern(void) {
 }
 
 static void regexp_duplicate_names_choose_participating_capture(void) {
-  Regexp choice = Regexp.compile(%"(?J)^(?:(?<value>a)|(?<value>b))$$", 0);
-  defer choice.free();
+  Regexp choice = $auto(
+    Regexp.compile(%"(?J)^(?:(?<value>a)|(?<value>b))$$", 0)
+  );
 
   RegexpMatch found = choice.match("b");
   EXPECT_STR_EQ(found[<value>], "b");
@@ -212,8 +205,7 @@ static void regexp_compile_error_has_pcre2_detail(void) {
 }
 
 static void regexp_split_keeps_empty_fields(void) {
-  Regexp comma = Regexp.compile(",", 0);
-  defer comma.free();
+  Regexp comma = $auto(Regexp.compile(",", 0));
 
   List fields = comma.split("alpha,,beta");
   EXPECT_INT_EQ(fields.len(), 3);
@@ -236,8 +228,7 @@ static void regexp_split_keeps_empty_fields(void) {
 }
 
 static void regexp_split_handles_empty_matches(void) {
-  Regexp before_a = Regexp.compile("(?=a)", 0);
-  defer before_a.free();
+  Regexp before_a = $auto(Regexp.compile("(?=a)", 0));
 
   /*  A zero-length match must advance rather than split forever. */
   List parts = before_a.split("aa");
@@ -247,32 +238,22 @@ static void regexp_split_handles_empty_matches(void) {
   EXPECT_STR_EQ(parts.cddr().car().string(), "a");
 }
 
-static String _upper_word(RegexpMatch found) {
-  return found[0].upper();
-}
+static String _upper_word(RegexpMatch found) => found[0].upper();
 
-static String _name_of_capture(RegexpMatch found) {
-  return found[<who>];
-}
+static String _name_of_capture(RegexpMatch found) => found[<who>];
 
-static String _drop_match(RegexpMatch found) {
-  return NULL;
-}
+static String _drop_match(RegexpMatch found) => NULL;
 
-static String _literal_backreference(RegexpMatch found) {
-  return "$1";
-}
+static String _literal_backreference(RegexpMatch found) => "$1";
 
 static void regexp_replace_fn_computes_each_replacement(void) {
-  Regexp word = Regexp.compile("[a-z]+", 0);
-  defer word.free();
+  Regexp word = $auto(Regexp.compile("[a-z]+", 0));
   EXPECT_STR_EQ(
     word.replace_fn("one two three", _upper_word), "ONE TWO THREE"
   );
 
   /*  The callback sees captures, and an empty result deletes the match. */
-  Regexp greeting = Regexp.compile("hi (?<who>[a-z]+)", 0);
-  defer greeting.free();
+  Regexp greeting = $auto(Regexp.compile("hi (?<who>[a-z]+)", 0));
   EXPECT_STR_EQ(
     greeting.replace_fn("hi ada and hi bob", _name_of_capture),
     "ada and bob"
@@ -281,36 +262,34 @@ static void regexp_replace_fn_computes_each_replacement(void) {
 
   /*  Plain C string literals carry PCRE2's `$` syntax without invoking x2c
       interpolation. replace_all expands it; replace_fn leaves it alone. */
-  Regexp pair = Regexp.compile("([a-z]+)-([0-9]+)", 0);
-  defer pair.free();
+  Regexp pair = $auto(Regexp.compile("([a-z]+)-([0-9]+)", 0));
   EXPECT_STR_EQ(pair.replace_all("part-17", "$2:$1"), "17:part");
   EXPECT_STR_EQ(word.replace_fn("x", _literal_backreference), "$1");
   EXPECT_INT_EQ(String.len(word.replace_fn("", _upper_word)), 0);
 }
 
 static void regexp_escape_quotes_metacharacters(void) {
-  EXPECT_STR_EQ(Regexp.escape(%"a.b*c"), "a\\.b\\*c");
-  EXPECT_STR_EQ(Regexp.escape(%"plain_text99"), "plain_text99");
+  EXPECT_STR_EQ(Regexp.escape("a.b*c"), "a\\.b\\*c");
+  EXPECT_STR_EQ(Regexp.escape("plain_text99"), "plain_text99");
   EXPECT_NULL(Regexp.escape(NULL));
 
   /*  The quoted literal must match itself and nothing else. */
-  Regexp literal = Regexp.compile(Regexp.escape(%"1+1 (really?)"), 0);
-  defer literal.free();
-  EXPECT_NOT_NULL(literal.match(%"the sum 1+1 (really?) holds"));
-  EXPECT_NULL(literal.match(%"1x1 (really!)"));
+  Regexp literal = $auto(Regexp.compile(Regexp.escape("1+1 (really?)"), 0));
+  EXPECT_NOT_NULL(literal.match("the sum 1+1 (really?) holds"));
+  EXPECT_NULL(literal.match("1x1 (really!)"));
 
   /*  Bytes above ASCII pass through, so a UTF-8 literal stays valid. */
-  Regexp accented = Regexp.compile(Regexp.escape(%"caf\xc3\xa9."), PCRE2_UTF);
-  defer accented.free();
-  EXPECT_NOT_NULL(accented.match(%"caf\xc3\xa9."));
-  EXPECT_NULL(accented.match(%"caf\xc3\xa9x"));
+  Regexp accented = $auto(
+    Regexp.compile(Regexp.escape("caf\xc3\xa9."), PCRE2_UTF)
+  );
+  EXPECT_NOT_NULL(accented.match("caf\xc3\xa9."));
+  EXPECT_NULL(accented.match("caf\xc3\xa9x"));
 }
 
 static void regexp_capture_names_lists_declared_groups(void) {
-  Regexp request = Regexp.compile(
+  Regexp request = $auto(Regexp.compile(
     "(?<method>[A-Z]+) (?<path>[^ ]+) ([0-9]+)", 0
-  );
-  defer request.free();
+  ));
 
   List names = request.capture_names();
   EXPECT_INT_EQ(names.len(), 2);
@@ -318,21 +297,18 @@ static void regexp_capture_names_lists_declared_groups(void) {
   EXPECT_STR_EQ(names.cadr().string(), "path");
 
   /*  An unnamed pattern declares nothing. */
-  Regexp unnamed = Regexp.compile("([0-9]+)-([0-9]+)", 0);
-  defer unnamed.free();
+  Regexp unnamed = $auto(Regexp.compile("([0-9]+)-([0-9]+)", 0));
   EXPECT_NULL(unnamed.capture_names());
 
   /*  Under (?J) one name covers several groups and is listed per group. */
-  Regexp duplicated = Regexp.compile(
+  Regexp duplicated = $auto(Regexp.compile(
     "(?J)(?:(?<slot>[a-z]+)|(?<slot>[0-9]+))", 0
-  );
-  defer duplicated.free();
+  ));
   EXPECT_INT_EQ(duplicated.capture_names().len(), 2);
 }
 
 static void regexp_lisp_surface_is_value_oriented(void) {
-  Lisp lisp = Lisp.new();
-  defer lisp.destroy();
+  Lisp lisp = $auto(Lisp.new());
   RegexpLisp.install(lisp);
 
   String text = "Order 41 ships with 3 labels";
@@ -354,8 +330,7 @@ static void regexp_lisp_surface_is_value_oriented(void) {
 }
 
 static void regexp_lisp_binding_raises_pcre2_detail(void) {
-  Lisp lisp = Lisp.new();
-  defer lisp.destroy();
+  Lisp lisp = $auto(Lisp.new());
   RegexpLisp.install(lisp);
 
   /*  A bad pattern inside a binding reaches the x2c caller unchanged. */

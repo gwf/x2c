@@ -3,8 +3,7 @@
 import "pcre2" with RegexpLisp;
 
 int main(void) {
-  Lisp lisp = Lisp.new();
-  defer lisp.destroy();
+  Lisp lisp = $auto(Lisp.new());
   RegexpLisp.install(lisp);
 
   String text = "Order 41 ships with 3 labels";

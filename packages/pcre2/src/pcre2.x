@@ -532,13 +532,9 @@ String RegexpMatch.getindex(RegexpMatch found, Var key) {
   return capture && capture.matched() ? capture.text() : NULL;
 }
 
-RegexpCapture Var.regexpcapture(Var value) {
-  return (RegexpCapture) value.list();
-}
+RegexpCapture Var.regexpcapture(Var value) => (RegexpCapture) value.list();
 
-RegexpMatch Var.regexpmatch(Var value) {
-  return (RegexpMatch) value.list();
-}
+RegexpMatch Var.regexpmatch(Var value) => (RegexpMatch) value.list();
 
 /*  The Lisp surface is value-oriented on purpose: every binding takes and
     returns String and List, and each compiles and frees its own Regexp, so
@@ -548,8 +544,7 @@ RegexpMatch Var.regexpmatch(Var value) {
 
 $lisp.binding(pcre2_lisp, "regex-match")
 static List _lisp_regex_match(String pattern, String subject) {
-  Regexp regexp = Regexp.compile(pattern, 0);
-  defer regexp.free();
+  Regexp regexp = $auto(Regexp.compile(pattern, 0));
   RegexpMatch found = regexp.match(subject);
   if (!found) return NULL;
   List texts = NULL;
@@ -560,8 +555,7 @@ static List _lisp_regex_match(String pattern, String subject) {
 
 $lisp.binding(pcre2_lisp, "regex-find-all")
 static List _lisp_regex_find_all(String pattern, String subject) {
-  Regexp regexp = Regexp.compile(pattern, 0);
-  defer regexp.free();
+  Regexp regexp = $auto(Regexp.compile(pattern, 0));
   List texts = NULL;
   foreach (RegexpMatch found, regexp.find_all(subject))
     texts = cons(found[0], texts);
@@ -570,23 +564,19 @@ static List _lisp_regex_find_all(String pattern, String subject) {
 
 $lisp.binding(pcre2_lisp, "regex-split")
 static List _lisp_regex_split(String pattern, String subject) {
-  Regexp regexp = Regexp.compile(pattern, 0);
-  defer regexp.free();
+  Regexp regexp = $auto(Regexp.compile(pattern, 0));
   return regexp.split(subject);
 }
 
 $lisp.binding(pcre2_lisp, "regex-replace")
 static String _lisp_regex_replace(
   String pattern, String subject, String replacement) {
-  Regexp regexp = Regexp.compile(pattern, 0);
-  defer regexp.free();
+  Regexp regexp = $auto(Regexp.compile(pattern, 0));
   return regexp.replace_all(subject, replacement);
 }
 
 $lisp.binding(pcre2_lisp, "regex-escape")
-static String _lisp_regex_escape(String literal) {
-  return Regexp.escape(literal);
-}
+static String _lisp_regex_escape(String literal) => Regexp.escape(literal);
 
 /*  Installs regex-match, regex-find-all, regex-split, regex-replace, and
     regex-escape into `lisp`. A bad pattern raises out of the binding as the
