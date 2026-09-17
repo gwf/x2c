@@ -545,7 +545,8 @@ static RegexCapture _capture(Regex regex, String subject, int index,
 
 static RegexMatch _search(Regex regex, String subject, int offset) {
   int count = regex.capture_count + 1;
-  int starts[count], ends[count];
+  int *starts = Scope.calloc(2 * count, sizeof(int)), *ends = starts + count;
+  defer Scope.free(starts);
   _State st = {regex, subject ? subject : "", subject.len(), 0, 0,
                starts, ends};
   for (int at = offset; at <= st.len; at++) {
