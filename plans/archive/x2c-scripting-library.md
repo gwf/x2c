@@ -1,7 +1,8 @@
 # The scripting library gap
 
-> Status: active - 2026-09-16. All four phases are done; the defects at the
-> end remain open.
+> Status: done - 2026-09-16. All four phases are done. The remaining ports,
+> the library gaps they need, and the regex and diff modules that landed
+> afterwards are in `plans/x2c-scripting-ports.md`.
 > Second of four plans from the 2026-09-15 capabilities and market spike.
 > The scripting capability shipped 2026-09-15 and the repository still runs
 > 30,212 lines of Python, shell, and awk automation against it.
@@ -12,12 +13,10 @@ A script does the work scripts actually do without leaving x2c. Each phase
 ships the primitives one real conversion needs and converts that tool, so no
 operation lands without a consumer.
 
-Regex is not implemented. `lib/match.x` is structural List matching and
-`String.glob_match` is shell globbing; a text engine is greenfield, and
-`packages/pcre2` already ships 34 operations with named captures. Because
-`CliRequest.package_roots` (`src/cli.x:1132-1136`) always appends the x2c home,
-`x2c install pcre2` then `import "pcre2"` works in a script with no flags.
-That is a documentation task, not a code one.
+Regex was left out of these phases; `lib/regex.x` landed afterwards as
+`31f9b95`, a byte-oriented engine with the pcre2 package's method names, so
+gate tooling needs no package. `packages/pcre2` remains the answer for
+Unicode, lookaround, and speed.
 
 ## Phase A - the primitives a shell script needs (done)
 
@@ -47,10 +46,13 @@ phase whose conversion needs it; `tools/agent-failure.py` and the benchmark
 tools are the real consumers. Note that `lib/time.x` generates a `time.h`,
 which is why `plans/x2c-include-prefix.md` landed first.
 
-**Not converted, deliberately.** `tools/check-conformance-coherence.sh` and
+**Not converted at the time.** `tools/check-conformance-coherence.sh` and
 `tools/check-generated-stages.sh` run inside the Makefile's gate path
-(`Makefile:207-220`). Rewriting them in x2c would put the check that detects a
-broken compiler behind the compiler's own scripting feature. They stay shell.
+(`Makefile:207-220`), and rewriting them in x2c would put the check that
+detects a broken compiler behind the compiler's own scripting feature.
+`plans/x2c-scripting-ports.md` records the later ruling: a probe that fails
+loud may be a script, the stage-diff check and `gate-state.py` are Gary's
+call.
 
 ## Phase B - `lib/args.x` (done)
 
