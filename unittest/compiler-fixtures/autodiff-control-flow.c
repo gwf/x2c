@@ -69,7 +69,7 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
   i = 0;
   _ad_trip3 = 0;
   while(i < n){
-    _ad_trip3 =(_ad_trip3 + 1);
+    _ad_trip3 = _ad_trip3 + 1;
     if(i == 2){
       ArrayDbl_push(_ad_tape, i);
       i = i + 1;
@@ -111,11 +111,11 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
   _ad_first5 = 1;
   _ad_trip6 = 0;
   while(_ad_first5 || j < 2){
-    _ad_trip6 =(_ad_trip6 + 1);
+    _ad_trip6 = _ad_trip6 + 1;
     ArrayDbl_push(_ad_tape, _ad_first5);
     _ad_first5 = 0;
     ArrayDbl_push(_ad_tape, s);
-    s = s -(sin(t) / x);
+    s = s - sin(t) / x;
     ArrayDbl_push(_ad_tape, j);
     j = j + 1;
     ArrayDbl_push(_ad_tape, 0.0);
@@ -131,8 +131,8 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
     t = ArrayDbl_take_last(_ad_tape);
     _ad_seed = t_bar;
     t_bar = 0.0;
-    x_bar +=(_ad_seed * y);
-    y_bar +=(_ad_seed * x);
+    x_bar += _ad_seed * y;
+    y_bar += _ad_seed * x;
     _ad_trip3 =(int) ArrayDbl_take_last(_ad_tape);
     while(_ad_trip3 > 0){
       _ad_code = ArrayDbl_take_last(_ad_tape);
@@ -154,11 +154,11 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
         _ad_seed = s_bar;
         s_bar = 0.0;
         s_bar += _ad_seed;
-        x_bar +=((_ad_seed *(double) i) * x);
-        x_bar +=((_ad_seed *(double) i) * x);
-        y_bar +=((_ad_seed * hypot(x, y)) *(y < 0.0 ? -1.0 : 1.0));
-        x_bar +=((_ad_seed * fabs(y)) *(x / hypot(x, y)));
-        y_bar +=((_ad_seed * fabs(y)) *(y / hypot(x, y)));
+        x_bar += _ad_seed *(double) i * x;
+        x_bar += _ad_seed *(double) i * x;
+        y_bar += _ad_seed * hypot(x, y) *(y < 0.0 ? -1.0 : 1.0);
+        x_bar += _ad_seed * fabs(y) *(x / hypot(x, y));
+        y_bar += _ad_seed * fabs(y) *(y / hypot(x, y));
         if(ArrayDbl_take_last(_ad_tape) != 0.0){
 
         }
@@ -173,7 +173,7 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
         }
 
       }
-      _ad_trip3 =(_ad_trip3 - 1);
+      _ad_trip3 = _ad_trip3 - 1;
     }
     i =(int) ArrayDbl_take_last(_ad_tape);
     s = ArrayDbl_take_last(_ad_tape);
@@ -182,10 +182,10 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
   }
   else if(_ad_code == 7.0){
     s_bar += atan2(y, x);
-    y_bar +=(s *(x /((y * y) +(x * x))));
-    x_bar +=(s *(-(y /((y * y) +(x * x)))));
-    x_bar +=(y <= x ? 1.0 : 0.0);
-    y_bar +=(x < y ? 1.0 : 0.0);
+    y_bar += s *(x /(y * y + x * x));
+    x_bar += s * -(y /(y * y + x * x));
+    x_bar += y <= x ? 1.0 : 0.0;
+    y_bar += x < y ? 1.0 : 0.0;
     _ad_trip6 =(int) ArrayDbl_take_last(_ad_tape);
     while(_ad_trip6 > 0){
       _ad_code = ArrayDbl_take_last(_ad_tape);
@@ -195,11 +195,11 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
         _ad_seed = s_bar;
         s_bar = 0.0;
         s_bar += _ad_seed;
-        t_bar +=(((- _ad_seed) / x) * cos(t));
-        x_bar +=(-(((- _ad_seed) * sin(t)) /(x * x)));
+        t_bar += - _ad_seed / x * cos(t);
+        x_bar += -(- _ad_seed * sin(t) /(x * x));
         _ad_first5 =(int) ArrayDbl_take_last(_ad_tape);
       }
-      _ad_trip6 =(_ad_trip6 - 1);
+      _ad_trip6 = _ad_trip6 - 1;
     }
     j =(int) ArrayDbl_take_last(_ad_tape);
     if(ArrayDbl_take_last(_ad_tape) != 0.0){
@@ -211,8 +211,8 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
     t = ArrayDbl_take_last(_ad_tape);
     _ad_seed = t_bar;
     t_bar = 0.0;
-    x_bar +=(_ad_seed * y);
-    y_bar +=(_ad_seed * x);
+    x_bar += _ad_seed * y;
+    y_bar += _ad_seed * x;
     _ad_trip3 =(int) ArrayDbl_take_last(_ad_tape);
     while(_ad_trip3 > 0){
       _ad_code = ArrayDbl_take_last(_ad_tape);
@@ -234,11 +234,11 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
         _ad_seed = s_bar;
         s_bar = 0.0;
         s_bar += _ad_seed;
-        x_bar +=((_ad_seed *(double) i) * x);
-        x_bar +=((_ad_seed *(double) i) * x);
-        y_bar +=((_ad_seed * hypot(x, y)) *(y < 0.0 ? -1.0 : 1.0));
-        x_bar +=((_ad_seed * fabs(y)) *(x / hypot(x, y)));
-        y_bar +=((_ad_seed * fabs(y)) *(y / hypot(x, y)));
+        x_bar += _ad_seed *(double) i * x;
+        x_bar += _ad_seed *(double) i * x;
+        y_bar += _ad_seed * hypot(x, y) *(y < 0.0 ? -1.0 : 1.0);
+        x_bar += _ad_seed * fabs(y) *(x / hypot(x, y));
+        y_bar += _ad_seed * fabs(y) *(y / hypot(x, y));
         if(ArrayDbl_take_last(_ad_tape) != 0.0){
 
         }
@@ -253,7 +253,7 @@ static double walk_grad(double x, double y, int n, double * x_grad, double * y_g
         }
 
       }
-      _ad_trip3 =(_ad_trip3 - 1);
+      _ad_trip3 = _ad_trip3 - 1;
     }
     i =(int) ArrayDbl_take_last(_ad_tape);
     s = ArrayDbl_take_last(_ad_tape);
@@ -303,9 +303,9 @@ static double replay_grad(double x, double y, int n, double * x_grad, double * y
     if(_ad_total3 % 4 == 0){
       ArrayDbl_push(_ad_tape, i);
       ArrayDbl_push(_ad_tape, s);
-      _ad_blocks4 =(_ad_blocks4 + 1);
+      _ad_blocks4 = _ad_blocks4 + 1;
     }
-    _ad_total3 =(_ad_total3 + 1);
+    _ad_total3 = _ad_total3 + 1;
     if(i == 2) continue;
     s += x * x *(double) i + fabs(y) * hypot(x, y);
   }
@@ -317,19 +317,19 @@ static double replay_grad(double x, double y, int n, double * x_grad, double * y
   _ad_reverse : _ad_code = ArrayDbl_take_last(_ad_tape);
   if(_ad_code == 7.0){
     s_bar += atan2(y, x);
-    y_bar +=(s *(x /((y * y) +(x * x))));
-    x_bar +=(s *(-(y /((y * y) +(x * x)))));
+    y_bar += s *(x /(y * y + x * x));
+    x_bar += s * -(y /(y * y + x * x));
     _ad_blocks4 =(int) ArrayDbl_take_last(_ad_tape);
     _ad_total3 =(int) ArrayDbl_take_last(_ad_tape);
     while(_ad_blocks4 > 0){
       s = ArrayDbl_take_last(_ad_tape);
       i =(int) ArrayDbl_take_last(_ad_tape);
-      _ad_remaining5 =(_ad_total3 -((_ad_blocks4 - 1) * 4));
+      _ad_remaining5 = _ad_total3 -(_ad_blocks4 - 1) * 4;
       _ad_replay6 = 0;
       _ad_trip2 = 0;
       while(_ad_replay6 < _ad_remaining5){
-        _ad_replay6 =(_ad_replay6 + 1);
-        _ad_trip2 =(_ad_trip2 + 1);
+        _ad_replay6 = _ad_replay6 + 1;
+        _ad_trip2 = _ad_trip2 + 1;
         if(i == 2){
           ArrayDbl_push(_ad_tape, i);
           i = i + 1;
@@ -357,11 +357,11 @@ static double replay_grad(double x, double y, int n, double * x_grad, double * y
           _ad_seed = s_bar;
           s_bar = 0.0;
           s_bar += _ad_seed;
-          x_bar +=((_ad_seed *(double) i) * x);
-          x_bar +=((_ad_seed *(double) i) * x);
-          y_bar +=((_ad_seed * hypot(x, y)) *(y < 0.0 ? -1.0 : 1.0));
-          x_bar +=((_ad_seed * fabs(y)) *(x / hypot(x, y)));
-          y_bar +=((_ad_seed * fabs(y)) *(y / hypot(x, y)));
+          x_bar += _ad_seed *(double) i * x;
+          x_bar += _ad_seed *(double) i * x;
+          y_bar += _ad_seed * hypot(x, y) *(y < 0.0 ? -1.0 : 1.0);
+          x_bar += _ad_seed * fabs(y) *(x / hypot(x, y));
+          y_bar += _ad_seed * fabs(y) *(y / hypot(x, y));
           if(ArrayDbl_take_last(_ad_tape) != 0.0){
 
           }
@@ -370,10 +370,10 @@ static double replay_grad(double x, double y, int n, double * x_grad, double * y
           }
 
         }
-        _ad_trip2 =(_ad_trip2 - 1);
+        _ad_trip2 = _ad_trip2 - 1;
       }
-      _ad_total3 =(_ad_total3 - _ad_remaining5);
-      _ad_blocks4 =(_ad_blocks4 - 1);
+      _ad_total3 = _ad_total3 - _ad_remaining5;
+      _ad_blocks4 = _ad_blocks4 - 1;
     }
     i =(int) ArrayDbl_take_last(_ad_tape);
     s = ArrayDbl_take_last(_ad_tape);

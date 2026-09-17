@@ -15,7 +15,7 @@ static double scale(double a, int k){
 }
 
 static double scale_dot(double a, double a_dot, int k){
-  return(a_dot *(double) k);
+  return a_dot *(double) k;
 }
 
 double sin(double);
@@ -35,20 +35,20 @@ static double model_dot(double x, double x_dot, double y, double y_dot, int n){
   double s = 0.0;
   double s_dot = 0.0;
   for(int i = 1;  i <= n;  i ++){
-    s_dot =(s_dot +(((scale_dot(x, x_dot, i) * y) -(scale(x, i) * y_dot)) /(y * y)));
+    s_dot = s_dot +(scale_dot(x, x_dot, i) * y - scale(x, i) * y_dot) /(y * y);
     s += scale(x, i) / y;
   }
   double t = x * y + 3.0;
-  double t_dot =((x_dot * y) +(x * y_dot));
+  double t_dot = x_dot * y + x * y_dot;
   if(t > 1.0){
-    t_dot =((t_dot * t) +(t * t_dot));
+    t_dot = t_dot * t + t * t_dot;
     t *= t;
   }
   else{
-    t_dot =(- t_dot);
+    t_dot = - t_dot;
     t = - t;
   }
-  return((((((t_dot == 0.0 ? 0.0 :(t_dot * cos(t))) * x) -(sin(t) * x_dot)) /(x * x)) -(2.0 * y_dot)) + s_dot);
+  return((t_dot == 0.0 ? 0.0 : t_dot * cos(t)) * x - sin(t) * x_dot) /(x * x) - 2.0 * y_dot + s_dot;
 }
 
 int main(void){

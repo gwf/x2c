@@ -91,9 +91,9 @@ static double model_grad(double x, double y, int n, double * x_grad, double * y_
   i = 1;
   _ad_trip4 = 0;
   while(i <= n){
-    _ad_trip4 =(_ad_trip4 + 1);
+    _ad_trip4 = _ad_trip4 + 1;
     ArrayDbl_push(_ad_tape, s);
-    s = s +(scale(x, y) *(double) i);
+    s = s + scale(x, y) *(double) i;
     ArrayDbl_push(_ad_tape, i);
     i = i + 1;
     ArrayDbl_push(_ad_tape, 0.0);
@@ -115,9 +115,9 @@ static double model_grad(double x, double y, int n, double * x_grad, double * y_
   j = 0;
   _ad_trip5 = 0;
   while(j < 2){
-    _ad_trip5 =(_ad_trip5 + 1);
+    _ad_trip5 = _ad_trip5 + 1;
     ArrayDbl_push(_ad_tape, s);
-    s = s -(sin(t) / x);
+    s = s - sin(t) / x;
     ArrayDbl_push(_ad_tape, j);
     j = j + 1;
     ArrayDbl_push(_ad_tape, 0.0);
@@ -129,12 +129,12 @@ static double model_grad(double x, double y, int n, double * x_grad, double * y_
   _ad_reverse : _ad_code = ArrayDbl_take_last(_ad_tape);
   if(_ad_code == 6.0){
     if(t > 4.0){
-      t_bar +=(0.5 / sqrt(t));
+      t_bar += 0.5 / sqrt(t);
       s_bar += 1.0;
     }
     else{
       t_bar += exp(t);
-      s_bar +=(- 1.0);
+      s_bar += - 1.0;
     }
     _ad_trip5 =(int) ArrayDbl_take_last(_ad_tape);
     while(_ad_trip5 > 0){
@@ -145,30 +145,30 @@ static double model_grad(double x, double y, int n, double * x_grad, double * y_
         _ad_seed = s_bar;
         s_bar = 0.0;
         s_bar += _ad_seed;
-        t_bar +=(((- _ad_seed) / x) * cos(t));
-        x_bar +=(-(((- _ad_seed) * sin(t)) /(x * x)));
+        t_bar += - _ad_seed / x * cos(t);
+        x_bar += -(- _ad_seed * sin(t) /(x * x));
       }
-      _ad_trip5 =(_ad_trip5 - 1);
+      _ad_trip5 = _ad_trip5 - 1;
     }
     j =(int) ArrayDbl_take_last(_ad_tape);
     if(ArrayDbl_take_last(_ad_tape) != 0.0){
       t = ArrayDbl_take_last(_ad_tape);
       _ad_seed = t_bar;
       t_bar = 0.0;
-      t_bar +=(_ad_seed * t);
-      t_bar +=(_ad_seed * t);
+      t_bar += _ad_seed * t;
+      t_bar += _ad_seed * t;
     }
     else{
       t = ArrayDbl_take_last(_ad_tape);
       _ad_seed = t_bar;
       t_bar = 0.0;
-      t_bar +=(- _ad_seed);
+      t_bar += - _ad_seed;
     }
     t = ArrayDbl_take_last(_ad_tape);
     _ad_seed = t_bar;
     t_bar = 0.0;
-    x_bar +=(_ad_seed * y);
-    y_bar +=(_ad_seed * x);
+    x_bar += _ad_seed * y;
+    y_bar += _ad_seed * x;
     _ad_trip4 =(int) ArrayDbl_take_last(_ad_tape);
     while(_ad_trip4 > 0){
       _ad_code = ArrayDbl_take_last(_ad_tape);
@@ -179,10 +179,10 @@ static double model_grad(double x, double y, int n, double * x_grad, double * y_
         s_bar = 0.0;
         s_bar += _ad_seed;
         _ad_call3 = scale_grad(x, y, & _ad_partial2, & _ad_partial1);
-        x_bar +=((_ad_seed *(double) i) * _ad_partial2);
-        y_bar +=((_ad_seed *(double) i) * _ad_partial1);
+        x_bar += _ad_seed *(double) i * _ad_partial2;
+        y_bar += _ad_seed *(double) i * _ad_partial1;
       }
-      _ad_trip4 =(_ad_trip4 - 1);
+      _ad_trip4 = _ad_trip4 - 1;
     }
     i =(int) ArrayDbl_take_last(_ad_tape);
     s = ArrayDbl_take_last(_ad_tape);
