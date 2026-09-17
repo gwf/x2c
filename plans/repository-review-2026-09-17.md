@@ -330,6 +330,13 @@ held by parallel sessions; take it with whichever of the two lands last.
 
 ## Group 16: one owner for precedence grouping
 
+> Fixed 2026-09-17. `src/emit.x` owns precedence grouping; the autodiff and
+> macro producer-side grouping is deleted, and generated C for `src/` and
+> `lib/` is byte-identical (`builds/0 == builds/1`, 178 files). Gary decided
+> 2026-09-17 to keep the `Expr` decorator's explicit `(parens ...)` in
+> `src/macros.x`: it is redundant for emission but is a documented AST
+> guarantee in `docs/src/reference/language.md`.
+
 Files: `src/emit.x`, then `lib/autodiff.xmacro` and `src/macros.x` cleanup.
 
 Nothing inserts parentheses by precedence, so every producer of canonical AST
