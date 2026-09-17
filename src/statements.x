@@ -324,12 +324,33 @@ error:
     c.token, %( "token:" ${c.token.text} ));
 }
 
+/* A default arm must be last in each preprocessor configuration. `groups`
+   holds, per open conditional group, whether a default preceded the group
+   and whether one ended any of its branches; `saw_default` is the state of
+   the current branch. */
+static int _default_after_directive(Array groups, int saw_default, List d) {
+  Symbol kind = preproc_conditional_kind(d.cadr());
+  if (kind == <open>) groups.push(%($saw_default $saw_default));
+  else if (kind && groups.len()) {
+    (int before, int any) = groups.take_last();
+    any |= saw_default;
+    if (kind == <close>) return any;
+    groups.push(%($before $any));
+    return before;
+  }
+  return saw_default;
+}
+
 static List _match_cases(Compiler c) {
-  Array cases = [], Symbol peek = c.peek(0), int saw_default = 0;
+  Array cases = [], groups = $auto([]);
+  Symbol peek = c.peek(0), int saw_default = 0;
   loop {
     // Directives around whole arms stay between them as `preproc` rows.
     if (c.token != c.directives_taken)
-      foreach (Var directive, c.leading_preproc()) cases.push(directive);
+      foreach (List directive, c.leading_preproc()) {
+        cases.push(directive);
+        saw_default = _default_after_directive(groups, saw_default, directive);
+      }
     if (peek != <case> && peek != <default>) break;
     if (saw_default)
       c.report_error(

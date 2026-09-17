@@ -2,7 +2,7 @@
 
 #include "match-arm-directive.h"
 
-static List _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _50, _47, _42, _40, _39, _36, _35, _33, _32, _26, _24, _22, _21, _19, _18, _16, _14, _13, _12, _9, _7, _5, _3, _2;
+static List _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _50, _47, _42, _40, _39, _36, _35, _33, _32, _26, _24, _22, _21, _19, _18, _16, _14, _13, _12, _9, _7, _5, _3, _2;
 
 static Var _51, _49, _48, _46, _45, _44, _43, _41, _38, _37, _34, _31, _30, _29, _28, _27, _25, _23, _20, _17, _15, _11, _10, _8, _6, _4, _1, _0;
 
@@ -11,6 +11,8 @@ static int _init_guard_ = 0;
 __attribute__((constructor)) static void _file_init_(void);
 
 static void arms(List subject);
+
+static void defaults(List subject);
 
 Var Symbol_var(Symbol);
 
@@ -89,6 +91,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _62 = cons(_27, _61);
   _63 = cons(_45, NULL);
   _64 = cons(_28, _63);
+  _65 = cons(_28, NULL);
+  _66 = cons(_27, _65);
 }
 
 int Var_int(Var);
@@ -151,6 +155,29 @@ puts("off other");  break;
   }
 }
 
+static void defaults(List subject){
+
+  {
+    List _x2c_match_expr = subject;
+    MatchCaptureBuffer _x2c_match_capture = { 0 };
+    switch (0) {
+      default: ;  static MatchCaptureSite _x2c_match_site_8;  if (x2c_match_site_try_capture(& _x2c_match_site_8, _x2c_match_expr, List_var(_2), &_x2c_match_capture)) {puts("default one");  break;
+}
+#ifdef ON
+puts("default on");  break;
+#elif defined(OFF)
+static MatchCaptureSite _x2c_match_site_9;  if (x2c_match_site_try_capture(& _x2c_match_site_9, _x2c_match_expr, List_var(_7), &_x2c_match_capture)) {puts("default off two");  break;
+}
+# ifdef OFF
+puts("default off");  break;
+# else
+puts("default neither");  break;
+# endif
+#endif
+    }
+  }
+}
+
 int List_try_next(List, List *, Var *);
 List Var_list(Var);
 int main(void){
@@ -169,10 +196,10 @@ int main(void){
     switch (0) {
       default: ;
 #ifdef OFF
-      static MatchCaptureSite _x2c_match_site_8;  if (x2c_match_site_try_capture(& _x2c_match_site_8, _x2c_match_expr, List_var(_7), &_x2c_match_capture)) {puts("loop off two");  break;
+      static MatchCaptureSite _x2c_match_site_10;  if (x2c_match_site_try_capture(& _x2c_match_site_10, _x2c_match_expr, List_var(_7), &_x2c_match_capture)) {puts("loop off two");  break;
     }
 #endif
-    static MatchCaptureSite _x2c_match_site_9;  if (x2c_match_site_try_capture(& _x2c_match_site_9, _x2c_match_expr, List_var(_7), &_x2c_match_capture)) {puts("loop two");  break;
+    static MatchCaptureSite _x2c_match_site_11;  if (x2c_match_site_try_capture(& _x2c_match_site_11, _x2c_match_expr, List_var(_7), &_x2c_match_capture)) {puts("loop two");  break;
   }
 #ifdef OFF
   puts("loop off");  break;
@@ -180,6 +207,12 @@ int main(void){
       }
   }
 }
+}
+{
+  List subject;  List _x2c_macro_object_2 = _66;  List _x2c_macro_cursor_2 = _x2c_macro_object_2;  Var _x2c_macro_cursor_output_2;  while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+    subject = Var_list(_x2c_macro_cursor_output_2);  defaults(subject);
+  }
+
 }
 return 0;
 }

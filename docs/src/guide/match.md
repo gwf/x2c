@@ -381,7 +381,9 @@ pattern with `(!is type string)` or check the type before the `match`.
 ## Limitations to know up front
 
 **`default` must be the last arm.** The compiler diagnoses a later arm. A final
-`default` runs only when every earlier case failed.
+`default` runs only when every earlier case failed. Each branch of a
+conditional group may end with its own `default`, as long as no arm follows
+the group.
 
 **A `case` pattern must be a `%(...)` `List` literal.** The runtime matcher
 accepts a standalone `Symbol` pattern such as `<?whole>`, but the statement

@@ -66,7 +66,7 @@ Parses one block-position declaration, statement, or macro insertion.
 The caller owns the surrounding scope; a macro insertion may return a
 `(seq ...)` node containing several block items.
 
-Source: `src/statements.x:454`
+Source: `src/statements.x:475`
 
 <a id="Compiler.parse_block_items"></a>
 #### Compiler.parse_block_items
@@ -78,7 +78,7 @@ returns a `(block ...)` node. The call opens one lexical `Sym` scope;
 `anchor_items` records statement origins and distributes a macro sequence's
 invocation origin over its inserted items.
 
-Source: `src/statements.x:572`
+Source: `src/statements.x:593`
 
 <a id="Compiler.parse_compound_statement"></a>
 #### Compiler.parse_compound_statement
@@ -88,7 +88,7 @@ Source: `src/statements.x:572`
 Parses a compound body after its opening brace and consumes the closing
 `}`, returning an origin-anchored `(block ...)` node.
 
-Source: `src/statements.x:614`
+Source: `src/statements.x:635`
 
 <a id="Compiler.parse_governed"></a>
 #### Compiler.parse_governed
@@ -113,7 +113,7 @@ Parses and binds one statement or statement-position macro at the current
 token. On return, the cursor follows the complete statement and any
 temporary `Sym` scopes opened by the statement have been closed.
 
-Source: `src/statements.x:480`
+Source: `src/statements.x:501`
 
 <a id="Compiler.with_binding"></a>
 #### Compiler.with_binding
@@ -123,7 +123,7 @@ Source: `src/statements.x:480`
 Returns the binding of the current identifier when it names a live
 `with` expression, or NULL.
 
-Source: `src/statements.x:440`
+Source: `src/statements.x:461`
 
 ## Design notes
 

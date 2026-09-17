@@ -37,6 +37,22 @@ static void arms(List subject) {
   }
 }
 
+static void defaults(List subject) {
+  match (subject) {
+    case %(1): puts("default one");
+#ifdef ON
+    default: puts("default on");
+#elif defined(OFF)
+    case %(2): puts("default off two");
+# ifdef OFF
+    default: puts("default off");
+# else
+    default: puts("default neither");
+# endif
+#endif
+  }
+}
+
 int main(void) {
   foreach (List subject, %((1) (2) (3) (foo 1) (foo (bar 4)) (big 9) (big 1)
                            (sym) (off) (w 1) (other)))
@@ -51,5 +67,6 @@ int main(void) {
       default: puts("loop off");
 #endif
     }
+  foreach (List subject, %((1) (2))) defaults(subject);
   return 0;
 }
