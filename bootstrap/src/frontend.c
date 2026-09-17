@@ -93,14 +93,11 @@ static Token _first_preprocessor_token(Compiler compiler){
   return compiler -> token;
 }
 
-void Type_initialize(void);
-
 void header_symbols_initialize(void);
 
 void interface_configure(String);
 
 void Frontend_load_support(CliRequest request){
-  Type_initialize();
   header_symbols_initialize();
   interface_configure(request -> out_dir);
 }

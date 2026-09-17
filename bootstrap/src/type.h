@@ -79,8 +79,6 @@ List Type_body(Type type);
 
 int Type_var_tag_row(Symbol tag, unsigned long * top, unsigned long * mask, unsigned long * bottom);
 
-void Type_initialize(void);
-
 void Type_begin_unit(void);
 
 void Type_end_unit(void);
