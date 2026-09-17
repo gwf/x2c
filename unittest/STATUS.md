@@ -161,6 +161,13 @@
 
 ## Outstanding Items
 
+Symbol collection scans source line by line for `#include`
+(`_preproc_include_target` in `src/collect.x`), so a line of a multi-line
+`%"..."` string that begins with `#include <stdio.h>` is read as a directive
+and the unit fails with `parse: unexpected end of file`. `--no-cpp` avoids it.
+`new_command` in `src/project.x` inserts that line as `${"..."}` until the
+scan skips string contents.
+
 No outstanding static-initialization defects are recorded. Bare unknown native
 macro names retain native C initializer rules; tags hidden inside an opaque
 native macro retain native scope. Pass lowered local objects explicitly to

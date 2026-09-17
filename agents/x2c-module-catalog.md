@@ -315,7 +315,7 @@ x2c project manifests.
 
 Public functions:
 
-`project_manifest`, `project_plan`
+`project_manifest`, `project_plan`, `new_command`
 
 ### [src/protocol.x](../src/protocol.x)
 

@@ -1,0 +1,13 @@
+Usage:
+  x2c new [options] <dir>
+
+Create a project in <dir> that builds and runs as written: x2c.toml,
+src/main.x, and .gitignore. The directory may be missing or empty.
+
+General options:
+  -h, --help                  Show help and exit
+  -q, --quiet                 Suppress successful progress and receipts
+  @<file>                     Read additional arguments from a response file
+
+The target is named after the last component of <dir>, which may
+contain letters, digits, '_', and '-'. Run 'x2c run' in <dir> next.

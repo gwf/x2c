@@ -563,6 +563,7 @@ int main(int argc, char **argv) {
   if (request.command == <install>) return install_command(request);
   if (request.command == <remove>) return remove_command(request);
   if (request.command == <list>) return list_command(request);
+  if (request.command == <new>) return new_command(request);
   _configure_logging(request.debugging);
   /* Initialize process caches above the command Context so its cleanup cannot
      invalidate their canonical values. */

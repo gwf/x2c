@@ -20,6 +20,7 @@ mkdir -p "$BUILD/out" "$BUILD/a" "$BUILD/b" \
 "$X2C" install --help >"$BUILD/install.help"
 "$X2C" remove --help >"$BUILD/remove.help"
 "$X2C" list --help >"$BUILD/list.help"
+"$X2C" new --help >"$BUILD/new.help"
 "$X2C" help --help >"$BUILD/help.help"
 "$X2C" help help >"$BUILD/help-command.help"
 "$X2C" -h >"$BUILD/top-short.help"
@@ -39,6 +40,7 @@ diff -u "$FIXTURES/cli-env.help" "$BUILD/env.help"
 diff -u "$FIXTURES/cli-install.help" "$BUILD/install.help"
 diff -u "$FIXTURES/cli-remove.help" "$BUILD/remove.help"
 diff -u "$FIXTURES/cli-list.help" "$BUILD/list.help"
+diff -u "$FIXTURES/cli-new.help" "$BUILD/new.help"
 diff -u "$FIXTURES/cli-help.help" "$BUILD/help.help"
 cmp "$BUILD/help.help" "$BUILD/help-command.help"
 cmp "$BUILD/top.help" "$BUILD/top-short.help"
@@ -1162,6 +1164,19 @@ printf 'int main(void) { return 0; }\n' >"$equivalent/main.c"
   --output "$equivalent/app" "$equivalent/main.c" \
   >"$equivalent/direct.stdout" 2>"$equivalent/direct.stderr"
 cmp "$equivalent/manifest.stderr" "$equivalent/direct.stderr"
+
+# A new project runs as written, and new never writes into a used directory.
+starter="$BUILD/starter/hello"
+"$X2C" new -q "$starter"
+(cd "$starter" && [[ $("$X2C" run -q -- x2c) == "Hello, x2c!" ]])
+cp "$starter/x2c.toml" "$BUILD/starter/x2c.toml.before"
+set +e
+"$X2C" new "$starter" 2>"$BUILD/starter/again.stderr"
+starter_status=$?
+set -e
+[[ $starter_status == 2 ]]
+grep -Fq "exists and is not an empty directory" "$BUILD/starter/again.stderr"
+cmp "$BUILD/starter/x2c.toml.before" "$starter/x2c.toml"
 
 # Source mapping is independent of -g and belongs to translation reuse.
 python3 - "$X2C" "$BUILD/source-map" <<'PY_SOURCE_MAP'

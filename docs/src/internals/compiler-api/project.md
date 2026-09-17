@@ -12,10 +12,23 @@ X2c project manifests.
 
 | Function | Summary |
 | --- | --- |
+| [`new_command`](#new_command) | Creates the starter project for `x2c new` in the directory named by `request`'s one operand and returns 0. |
 | [`project_manifest`](#project_manifest) | Returns the explicit or nearest readable project manifest, or NULL. |
 | [`project_plan`](#project_plan) | Parses a project manifest and returns its selected target's build plan. |
 
 ### Functions
+
+#### new_command
+
+`int new_command(CliRequest request)`
+
+Creates the starter project for `x2c new` in the directory named by
+`request`'s one operand and returns 0. The directory may be missing or
+empty, and its last component names the target. Any other directory, an
+unusable name, or a failed write prints a diagnostic and exits with
+status 2.
+
+Source: `src/project.x:704`
 
 #### project_manifest
 

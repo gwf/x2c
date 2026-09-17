@@ -694,3 +694,43 @@ ProjectBuild project_plan(CliRequest request) {
   _plan_target(project, selected, request, selected, build_root);
   return project.head;
 }
+
+/** Creates the starter project for `x2c new` in the directory named by
+    `request`'s one operand and returns 0. The directory may be missing or
+    empty, and its last component names the target. Any other directory, an
+    unusable name, or a failed write prints a diagnostic and exits with
+    status 2.
+*/
+int new_command(CliRequest request) {
+  Path dir = request.inputs.car();
+  String name = Path.absolute(dir).basename();
+  if (!_name_ok(name))
+    x2c_driver_error(
+      %"new: '$name' is not a target name; use letters, digits, '_', and '-'");
+  try {
+    if (dir.exists() && (!dir.is_dir() || dir.list_dir()))
+      x2c_driver_error(%"new: $dir exists and is not an empty directory");
+    dir.join("src").make_dirs();
+    dir.join("x2c.toml").write_text(
+      %"[target.$name]
+sources = [\"src/*.x\"]
+");
+    // Symbol collection reads a line-leading `#include` inside a percent
+    // string as a directive, so that line is inserted as a C string.
+    dir.join("src/main.x").write_text(
+      %"/*  main.x -- greet the name given on the command line */
+
+${"#include <stdio.h>"}
+
+int main(int argc, char **argv) {
+  String name = argc > 1 ? argv[1] : \"world\";
+  puts(%\"Hello, \$name!\");
+  return 0;
+}
+");
+    dir.join(".gitignore").write_text(".x2c-build/\n");
+  }
+  catch %(io-fail *detail): x2c_host_error(detail);
+  if (!request.quiet) printf("x2c: created %s\n", dir);
+  return 0;
+}

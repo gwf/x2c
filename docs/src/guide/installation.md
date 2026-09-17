@@ -147,6 +147,14 @@ earlier one, and every release's downloads stay available.
 
 ## Build, debug, and use packages
 
+Start a project with [`x2c new`](../reference/cli.md#start-a-project):
+
+```sh
+x2c new hello
+cd hello
+x2c run -q
+```
+
 Direct source and `x2c.toml` project builds use the same installed compiler.
 For source debugging, opt into native debug information and original source
 locations:

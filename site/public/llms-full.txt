@@ -3774,7 +3774,7 @@ callbacks, or `Context` regions.
 After building the repository, `./x2c` links to the development compiler;
 `./bin/x2c` is the bootstrap compiler until `make build-install` links it to
 a copy of the development compiler. Every invocation begins with a command:
-`translate`, `build`, `run`, `script`, `bootstrap`, `env`, `install`,
+`translate`, `build`, `run`, `new`, `script`, `bootstrap`, `env`, `install`,
 `remove`, `list`, or `help`.
 
 The generated help is the short option reference:
@@ -4142,6 +4142,32 @@ single and double quotes preserve whitespace; backslash quotes the next
 character. A first-non-whitespace `#` begins a comment. Response files may
 include other response files, but cycles are rejected. `@@name` passes the
 literal operand `@name`.
+
+## Start a project
+
+`new` creates a project that builds and runs as written:
+
+```sh
+x2c new hello
+cd hello
+x2c run -q            # Hello, world!
+x2c run -q -- Gary    # Hello, Gary!
+```
+
+It writes `x2c.toml`, `src/main.x`, and `.gitignore`, which ignores the
+default build directory `.x2c-build/`. The manifest has one executable target
+named after the directory:
+
+```toml
+[target.hello]
+sources = ["src/*.x"]
+```
+
+The directory may be missing or empty; `x2c new .` fills the current empty
+directory. `new` refuses any other existing path and never overwrites a
+file. The target name is the directory's last component and may contain
+letters, digits, `_`, and `-`. `-q` suppresses the `x2c: created <dir>`
+line.
 
 ## Project manifests
 

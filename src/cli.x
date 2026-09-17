@@ -60,6 +60,7 @@ enum {
   CLI_INSTALL   = 128,
   CLI_REMOVE    = 256,
   CLI_LIST      = 512,
+  CLI_NEW       = 1024,
   // Commands that build native code from options on the command line.
   CLI_NATIVE    = CLI_BUILD | CLI_RUN | CLI_SCRIPT
 };
@@ -79,6 +80,7 @@ static CliCommand cli_commands[] = {
   { <build>,     CLI_BUILD,
     "Translate, compile, and optionally link a target" },
   { <run>,       CLI_RUN,       "Build an executable and run it" },
+  { <new>,       CLI_NEW,       "Create a project that builds and runs" },
   { <script>,    CLI_SCRIPT,    "Build a script when it changes and run it" },
   { <bootstrap>, CLI_BOOTSTRAP, "Install a native x2c from a APE binary" },
   { <env>,       CLI_ENV,       "Show the resolved home, layout, and tools" },
@@ -91,7 +93,7 @@ static CliCommand cli_commands[] = {
 
 static CliOption cli_options[] = {
   { <help>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP |
-    CLI_ENV | CLI_INSTALL | CLI_REMOVE | CLI_LIST, <general>,
+    CLI_ENV | CLI_INSTALL | CLI_REMOVE | CLI_LIST | CLI_NEW, <general>,
     "-h, --help", NULL, "Show help and exit", 0 },
   { <version>, CLI_TOP, <global>, "-V, --version", NULL,
     "Show the x2c version and exit", 0 },
@@ -101,7 +103,7 @@ static CliOption cli_options[] = {
   { <dry-run>, CLI_TRANSLATE | CLI_NATIVE,
     <general>, "-###", NULL, "Show commands without executing them", 0 },
   { <quiet>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP |
-    CLI_INSTALL | CLI_REMOVE,
+    CLI_INSTALL | CLI_REMOVE | CLI_NEW,
     <general>, "-q, --quiet", NULL,
     "Suppress successful progress and receipts", 0 },
   { <plain>, CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
@@ -484,6 +486,22 @@ another version unless --force. A source package with native
 dependencies is refused; install its bundle instead.");
 }
 
+static void _print_new_help(void) {
+  puts(
+    %"Usage:
+  x2c new [options] <dir>
+
+Create a project in <dir> that builds and runs as written: x2c.toml,
+src/main.x, and .gitignore. The directory may be missing or empty.");
+  _print_options(<new>);
+  _print_help_row(
+    "@<file>", "Read additional arguments from a response file", 2);
+  puts("");
+  puts(
+    %"The target is named after the last component of <dir>, which may
+contain letters, digits, '_', and '-'. Run 'x2c run' in <dir> next.");
+}
+
 static void _print_script_help(void) {
   puts(
     %"Usage:
@@ -510,6 +528,7 @@ static void _print_help(Symbol command) {
     case <translate>:  _print_translate_help();       break;
     case <build>:
     case <run>:        _print_driver_help(command);   break;
+    case <new>:        _print_new_help();             break;
     case <script>:     _print_script_help();          break;
     case <bootstrap>:  _print_bootstrap_help();       break;
     case <env>:        _print_env_help();             break;
@@ -521,7 +540,7 @@ static void _print_help(Symbol command) {
         %"Usage:
   x2c help [command]
 
-Show top-level help, or help for translate, build, run, script,
+Show top-level help, or help for translate, build, run, new, script,
 bootstrap, env, install, remove, or list.");
       break;
     default: x2c_driver_error(%"unknown help command '${command}'");
@@ -1055,7 +1074,7 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
     x2c_driver_error("bootstrap requires --prefix <dir>");
   if (mask == CLI_ENV && request.inputs.cdr())
     x2c_driver_error("env accepts at most one name");
-  if ((mask == CLI_INSTALL || mask == CLI_REMOVE) &&
+  if ((mask == CLI_INSTALL || mask == CLI_REMOVE || mask == CLI_NEW) &&
       (!request.inputs || request.inputs.cdr()))
     x2c_driver_error(%"${name} requires exactly one operand");
   if (mask == CLI_LIST && request.inputs)
