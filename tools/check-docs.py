@@ -378,6 +378,11 @@ def check_summary(errors: list[str]) -> None:
 
 
 def main() -> int:
+    # The generated references are rendered from the stage's unit interfaces.
+    if not any((ROOT / "builds" / "0").glob("*/*.xi")):
+        print("documentation audit needs the unit interfaces under builds/0; "
+              "run 'make build'", file=sys.stderr)
+        return 1
     errors: list[str] = []
     check_catalog(errors)
     check_api_reference(errors)
