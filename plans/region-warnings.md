@@ -95,7 +95,23 @@ callbacks, or storage the runtime did not allocate.
    fix them if their authors prefer.
 5. Book: one section in the memory chapter naming the pattern, the exits,
    the warnings, and the unsafe list. The reference gets the warning codes.
-6. Review the completed diff against the settled choices before validation.
+6. Book, internals: a short chapter beside the implementation map on the
+   region model, written against the shipped behavior. It holds five
+   things and nothing else: the invariant in one sentence with the four
+   kinds of places that outlive a region; the exemptions and why each is
+   sound (canonical values are never freed, moves and exports change the
+   owner, typed conversions copy); the unsafe list, identical to what the
+   warnings implement (raw C storage, pointer arithmetic and casts,
+   callbacks, `Scope.free` and `Scope.realloc`, stores through fields of
+   stack structs, Contexts until covered); how the check works in two
+   paragraphs (the three-fact summary per function, its travel in the
+   interface file, and the consequence that a callee change can surface a
+   warning in a caller); and one factual paragraph each placing the design
+   beside the ML Kit and Cyclone as ancestors, Rust and Swift as the
+   annotate-and-check-locally choice, and Go's escape analysis and Infer as
+   summary-based relatives. No measurements, no false-positive catalog, and
+   never the phrase "memory safe" without the unsafe list beside it.
+7. Review the completed diff against the settled choices before validation.
 
 ## Compatibility
 

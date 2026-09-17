@@ -417,6 +417,18 @@ static void _require_header_cache_owner(int owned) {
   abort();
 }
 
+/* The declaration map this file's own cache entry contributes, or NULL when
+   the file has not been collected in this process. A later recording adds to
+   the same map the interface writer publishes. */
+static Map _own_contribution(Compiler compiler) {
+  Var cached = _header_cache()[_canonical_path(compiler.filename)];
+  if (cached is not <list>) return NULL;
+  Map contribution = NULL;
+  foreach (Var part, cached.list().car())
+    if (part is <map>) contribution = part;
+  return contribution;
+}
+
 /** Records one generated public callable in its source file's cached surface.
     The operation has no effect until generated-symbol recording is enabled.
     The compiler's current file must already have a collected contribution;
@@ -425,23 +437,7 @@ static void _require_header_cache_owner(int owned) {
 void Compiler.record_generated_header_symbol(
   Compiler compiler, String name, Type signature) {
   if (!record_generated_symbols) return;
-  String path = _canonical_path(compiler.filename);
-  (List parts, Var content_hash, List definitions, Map dependencies) =
-    _header_cache()[path];
-  (void) content_hash;
-  (void) definitions;
-  (void) dependencies;
-  Map contribution = NULL;
-  foreach (Var part, parts) {
-    match (%($part)) {
-      case %(?(Map declarations)): {
-        contribution = declarations;
-        continue;
-      }
-      case %((!is type string)): continue;
-    }
-    __builtin_unreachable();
-  }
+  Map contribution = _own_contribution(compiler);
   if ((void *) contribution == NULL) __builtin_unreachable();
   List key = %($name), marker_key = %("generated-protocol" $name);
   List marker = %(generated);
@@ -451,6 +447,21 @@ void Compiler.record_generated_header_symbol(
   _require_header_cache_owner(signature.try_own());
   contribution[key] = signature;
   contribution[marker_key] = marker;
+}
+
+/** Records one function's region summary in its source file's cached surface.
+    A dependent unit reads the same `("region-summary" NAME)` key from its
+    symbol table after replaying this file's interface. The call has no effect
+    when the file has no collected contribution, as under a SourceView.
+*/
+void Compiler.record_region_summary(
+  Compiler compiler, String name, List summary) {
+  Map contribution = _own_contribution(compiler);
+  if ((void *) contribution == NULL) return;
+  List key = %("region-summary" $name);
+  _require_header_cache_owner(key.try_own());
+  _require_header_cache_owner(summary.try_own());
+  contribution[key] = summary;
 }
 
 /* Record a cold walk under canonical path identity. Segment overlays and
@@ -913,7 +924,7 @@ static List _interface_load(Compiler compiler, String canonical, String path) {
   Var (owner, expected_hash, parts_value, definitions_value,
        dependencies_value) = (List) NULL;
   match (record.list()) {
-    case %(interface 1 ?(String stored) ?hash ?parts ?definitions ?deps): {
+    case %(interface 2 ?(String stored) ?hash ?parts ?definitions ?deps): {
       owner = stored;
       expected_hash = hash;
       parts_value = parts;
@@ -1034,7 +1045,7 @@ static int _write_interface_entry(File output, String canonical, List entry) {
   List dependency_list = dependencies.list_free();
   List part_list = parts.list_free();
   List record = %(
-    interface 1 ${_portable_path(canonical)} $hash
+    interface 2 ${_portable_path(canonical)} $hash
     $part_list $definitions $dependency_list
   );
   return snapshot_write_var(output, record) && output.putc('\n') != EOF;

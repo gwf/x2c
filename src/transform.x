@@ -29,6 +29,7 @@ $(import "../src/ast-rewrite.xmacro")
 #include "protocol.x"
 #include "lambda.x"
 #include "cleanup.x"
+#include "regions.x"
 
 // type coercion passes
 
@@ -1855,6 +1856,9 @@ static Ast _node(Compiler c, Ast ast) {
     and may add generated origins or diagnostics to `compiler`.
 */
 List Compiler.transform(Compiler compiler, List ast) {
+  /* Regions are read before lowering, while `$scope`, `$auto`, and the
+     `defer` beside each region are still the forms the parser produced. */
+  // compiler.check_regions(ast);
   List newast = _sequence(compiler, ast);
   while (newast != ast) {
     ast = newast;

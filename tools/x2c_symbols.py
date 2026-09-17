@@ -29,7 +29,7 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 STAGE = ROOT / "builds" / "0"
-INTERFACE_VERSION = 1
+INTERFACE_VERSION = 2
 UINT32 = 0xFFFFFFFF
 UINT64 = 0xFFFFFFFFFFFFFFFF
 # String.escape emits these and nothing else; anything outside [32,126] becomes
