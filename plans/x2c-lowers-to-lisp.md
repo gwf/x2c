@@ -305,11 +305,43 @@ and `(string ...)` leaves.
 what Lisp's own matcher takes, so lowering a `match` statement hands the
 pattern to `List.match` rather than reimplementing it.
 
-Remaining in M2: lower the `match` statement itself, and lower `%(...)`
-templates to `cons` chains. A `match` needs one binding for its result,
-which several binders then read. That is affordable anywhere except on a
-loop's iteration path, where a lambda breaks the frame reuse M0 measured;
-the rule is a lambda is free once per entry and fatal once per iteration.
+**Both are now lowered.** `.context/spike/match-lower.x` runs an x2c
+function that matches `%(add ?a ?b)` and returns `%(sum $a $b)` during
+translation, and the arms, the binders and the fall-through all give the
+right answer. A `case` becomes `(match subject 'pattern)` against Lisp's
+own matcher, and a binder reads its value with `bound`.
+
+A binder repeats the match rather than naming its result. Matching is pure,
+so that is correct, and it keeps an arm free of a binding form, which
+matters because a lambda is free once per entry and fatal once per
+iteration on a loop's path. The cost is one extra match per binder; for an
+arm with two or three binders that is cheaper than it looks, and naming the
+result would cost more on a loop path than it saves.
+
+### Open question for Gary: how a macro should read a folded literal
+
+Raised by the review session and worth deciding before M3 builds on it.
+
+`_x2c.cache.value` takes an integer and returns `compiler.id_keys[id]`.
+The objection is fair: an id is a handle into a table whose numbering is an
+implementation detail, nothing ties the id to the form the macro was given,
+and `AGENTS.md` says ordinary operations accept forms by structure and
+position. The `_x2c.` prefix reads private, but a macro depending on it
+makes it public compile-time surface.
+
+The alternatives offered were to emit `(cache id key)` so the key rides
+along, which costs a larger AST for every folded literal and partly defeats
+what folding is for, or to defer folding for forms that reach a macro,
+which is cleaner but needs to know at literal-parse time which forms those
+are.
+
+One correction to the framing: this is not optional for the lowering. A
+`case` pattern reaches a macro only as a cache id, so lowering a `match`
+statement cannot work without reading it back. The question is the shape of
+the accessor, not whether one is needed.
+
+For now the accessor stays as branch scaffolding with a range check, and
+nothing ships until this is decided.
 
 ### M3 - port `autodiff.xmacro`
 
