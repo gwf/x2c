@@ -840,6 +840,73 @@ for name in a b; do
     fail "hist-$name.xi depends on which unit first walked it"
 done
 
+# Case 13: below #pragma private, only functions with external linkage reach
+# the generated header, and only they reach an including unit; a private
+# include still splices, because the includer may call its functions through
+# the prototypes x2c emits. The includer walks the file cold in its batch or
+# replays its interface; either way x2c reports each other private name.
+private="$BUILD/private"
+mkdir -p "$private/src" "$private/cold" "$private/warm"
+cat >"$private/src/hidden.x" <<'EOF'
+int hidden_value(void);
+#pragma private
+int hidden_value(void) => 1;
+EOF
+cat >"$private/src/owner.x" <<'EOF'
+int public_value(void);
+#pragma private
+#include "hidden.x"
+enum Hidden { H_ONE = 1, H_TWO };
+static const int SECRET = 9;
+typedef struct Inner { int a; } Inner;
+static int helper(int x) => x + SECRET + hidden_value();
+int public_value(void) => helper(H_TWO);
+int defined_value(void) => 3;
+EOF
+cat >"$private/src/public.x" <<'EOF'
+#include "owner.x"
+Var use_public(void) {
+  Var value = public_value() + defined_value() + hidden_value();
+  return value;
+}
+EOF
+(cd "$private" && "$X2C" translate --out-dir warm src/owner.x src/hidden.x)
+grep -q '"defined_value"' "$private/warm/owner.xi" ||
+  fail "private external definition is missing from its interface"
+grep -q 'src/hidden.x' "$private/warm/owner.xi" ||
+  fail "private include is missing from its interface"
+! grep -q 'H_TWO\|SECRET\|Inner\|helper' "$private/warm/owner.xi" ||
+  fail "a private declaration was written to its interface"
+(cd "$private" && "$X2C" translate --out-dir cold src/public.x src/owner.x &&
+  "$X2C" translate --out-dir warm src/public.x) ||
+  fail "an includer lost the public part of a private-region file"
+cmp -s "$private/cold/public.c" "$private/warm/public.c" ||
+  fail "private-region replay diverged from its cold walk"
+cat >"$private/src/call-helper.x" <<'EOF'
+#include "owner.x"
+int call_helper(void) { return helper(1); }
+EOF
+for out in cold-helper warm; do
+  mkdir -p "$private/$out"
+  (cd "$private" && "$X2C" translate --out-dir "$out" src/call-helper.x)
+  ! grep -q 'int helper(int)' "$private/$out/call-helper.c" ||
+    fail "a private static function was declared in an includer ($out)"
+done
+index=0
+for use in H_TWO SECRET; do
+  index=$((index + 1))
+  leak="$private/src/leak-$index.x"
+  printf '#include "owner.x"\nVar leak(void) { return %s; }\n' \
+    "$use" >"$leak"
+  for out in "cold-$index" warm; do
+    mkdir -p "$private/$out"
+    if (cd "$private" && "$X2C" translate --out-dir "$out" "$leak") \
+        >"$private/$out-leak-$index.log" 2>&1; then
+      fail "private '$use' reached an including unit through $out"
+    fi
+  done
+done
+
 # Generated calls keep their signatures whether the runtime prelude replays
 # from the stage interfaces, walks cold, or comes from the host preprocessor.
 mkdir -p "$FAKE/builds/0/lib"

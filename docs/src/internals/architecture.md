@@ -201,9 +201,12 @@ by real path, so include cycles terminate.
 
 A file's contribution is collected once per process. Translating a unit
 also writes it beside the generated C as a unit interface, `<stem>.xi`: the
-ordered declaration maps and include placeholders, the source content hash,
+ordered declaration maps, include placeholders, and `private` and `public`
+markers for the visibility pragmas, the source content hash,
 function definitions, and the macro, Lisp, and embedded-text files the walk
-read with their hashes. The file holds one
+read with their hashes. A declaration map below a `private` marker holds only
+what that region publishes, so an including unit never sees a private type or
+static helper, and a package's surface stops at that marker. The file holds one
 `(interface 2 "path" "hash" (PARTS...) (DEFINITIONS...) (DEPENDENCIES...))`
 form in `%()` List syntax, with bare Atoms for its structural words and
 Strings for identifiers; the reader reads that one form without evaluating

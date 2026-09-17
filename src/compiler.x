@@ -806,9 +806,17 @@ static int _shallow_parse_compile_time_definition(Compiler c, int keyword) {
   return !failed;
 }
 
+/* Lexical privacy also marks a name in Sym.statics, so a static function is
+   marked again as `(function name)`. File collection reads that key to keep
+   the function out of what a private region publishes. */
 static List _shallow_parse_declaration(Compiler compiler) {
   List declaration = compiler.parse_declaration_row();
   compiler.record_declaration_visibility(declaration);
+  match (declaration)
+    case %(declare ?type (bindings (bind ?binding ((fnmod *) *)))):
+      if (type.type().is_static())
+        compiler.sym.mark_static(
+          %(function ${binding_identity_spelling(binding)}));
   return declaration;
 }
 

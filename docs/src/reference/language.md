@@ -24,6 +24,13 @@ to the header when a later public prototype names it. Every translated header
 starts with `#pragma once` and also carries a conventional include guard, so
 `.x` programs do not need to write either one.
 
+A file that includes another sees what that file's header declares: everything
+above its `#pragma private` and the functions with external linkage it defines
+below it. Its private types, enumerators, objects, and static functions belong
+to that file, and naming one of them is an error in the including unit. An
+`#include` below `#pragma private` still splices, because the including file
+may call the functions it declares.
+
 The advanced `--cpp-symbols` and `--live-symbols` modes run the host
 preprocessor over raw `.x` include graphs. A module used with those modes needs
 a source-level `#pragma once` only when its own `.x` includes form a cycle.

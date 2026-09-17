@@ -32,6 +32,13 @@ static int _starts_line(Token first, Token token) {
   return 1;
 }
 
+/* 1 for `#pragma private`, 0 for `#pragma public`, and -1 for any other
+   directive, matching Compiler.update_source_visibility. */
+static int _visibility_pragma(String directive) {
+  if (directive.contains("pragma private")) return 1;
+  return directive.contains("pragma public") ? 0 : -1;
+}
+
 /* Unresolvable paths retain the caller's spelling. */
 static String _canonical_path(String path) {
   char buffer[PATH_MAX];
@@ -160,13 +167,15 @@ static void _replay_cached(
       compiler.merge_source_declarations(globs, part);
       continue;
     }
+    if (part is <symbol>) continue;
     String dep_path = part;
     compiler.add_translation_dependency(dep_path);
     if (visited.contains(dep_path)) continue;
     visited[dep_path] = 1;
     List resolved = _entry(compiler, dep_path);
-    if (resolved) _replay_cached(compiler, resolved, globs, visited);
-    else _walk_cold(compiler, dep_path, dep_path, globs, visited);
+    if (!resolved)
+      resolved = _walk_cold(compiler, dep_path, dep_path, globs, visited);
+    _replay_cached(compiler, resolved, globs, visited);
   }
 }
 
@@ -179,11 +188,16 @@ static String _include_text(Compiler c, String target, String path) {
   return text;
 }
 
-/* Walk one included file cold into globs; its entry joins the cache. */
-static void _walk_cold(
+/* Walk one included file cold and return its entry. The walk reads the
+   includer's names through copies, so its private rows and includes stay
+   there; the includer replays the entry as any later unit would. */
+static List _walk_cold(
   Compiler c, String target, String canonical, Map globs, Map visited) {
   String text = _include_text(c, target, canonical);
-  _file(c, canonical, text, Path.dirname(canonical), globs, visited);
+  _file(
+    c, canonical, text, Path.dirname(canonical), globs.copy(),
+    visited.copy());
+  return _process_cache()[canonical];
 }
 
 /* A segment resolves names through cumulative globs but writes declarations
@@ -194,7 +208,7 @@ static void _walk_cold(
 static void _parse_segment(
   Compiler c, String path, String source, String text, int start_line,
   int start_pos, Map globs, Map overlay, Map definitions, Map dependencies,
-  int *private) {
+  int private) {
   Compiler shadow = Compiler.new_shared(c);
   defer c.close_child(shadow);
   /* A package renames what it declares, not what it includes. A C header's
@@ -203,7 +217,7 @@ static void _parse_segment(
   int unit = x2c_source_file(path);
   if (!unit) shadow.package = NULL;
   shadow.filename = path;
-  shadow.source_private = *private;
+  shadow.source_private = private;
   shadow.take_unit_state(c);
   shadow.tokenize(text);
   shadow.text = source;
@@ -224,16 +238,46 @@ static void _parse_segment(
      go on this file's cache entry so a later replay of it records them too. */
   _cache_dependencies(dependencies, shadow.deps);
   c.merge_translation_dependencies(shadow.deps);
-  *private = shadow.source_private;
   globs.merge(overlay);
   c.merge_source_declarations(globs, overlay);
+  /* This file has taken every row; what remains in the overlay is what it
+     publishes to an including unit. */
+  if (private) _keep_published_rows(shadow.sym.file_statics(), overlay);
 }
 
-/* Append one segment's nonempty overlay before the following include. */
+/* A private function row names a function that an including unit may call
+   through the prototype x2c emits, unless it has internal linkage. */
+static int _external_function(Map statics, String name, Var type) =>
+  type is <list> && type.list().type().is_function() &&
+  !statics.contains(%(function $name));
+
+/* Below `#pragma private`, an including unit sees only functions with
+   external linkage and the protocol and declaration rows keyed by source
+   position. Types, enumerators, objects, and static functions stay in the
+   file, as they stay out of its generated header. */
+static void _keep_published_rows(Map statics, Map overlay) {
+  Array dropped = [];
+  foreach (Var (key, value), overlay) {
+    int crosses = 0;
+    match (%($key)) {
+      case %(("source-node" *)): crosses = 1;
+      case %((?(String name))):
+        crosses = _external_function(statics, name, value);
+      case %((self ?(String name))):
+        crosses = _external_function(statics, name, value);
+    }
+    if (!crosses) dropped.push(key);
+  }
+  foreach (Var key, dropped) overlay.del(key);
+  dropped.free();
+}
+
+/* Append one segment's nonempty published rows before the following
+   include. */
 static void _flush_segment(
   Compiler compiler, String path, String source, String text, int start_line,
   int start_pos, Map globs, Array parts, Map definitions, Map dependencies,
-  int *private) {
+  int private) {
   if (!text || !*text) return;
   Scope.push(&process_cache_scope);
   Map overlay = {};
@@ -241,32 +285,29 @@ static void _flush_segment(
   _parse_segment(
     compiler, path, source, text, start_line, start_pos,
     globs, overlay, definitions, dependencies, private);
-  if (overlay.len()) {
-    Var overlay_var = overlay;
-    parts.push(overlay_var);
-  }
+  if (!overlay.len()) return;
+  Var overlay_var = overlay;
+  parts.push(overlay_var);
 }
 
-/* Resolve and splice one include during a file walk. The included file's
-   content hash joins the including file's dependencies, so a replayed
-   interface is rejected when any file it spliced has changed. */
-static void _include(
+/* Resolve and splice one include during a file walk, returning its canonical
+   path, or NULL when nothing is spliced. The included file's content hash
+   joins the including file's dependencies, so a replayed interface is
+   rejected when any file it spliced has changed. */
+static String _include(
   Compiler c, String target, int angle, String dir, Map globs,
-  Map visited, Array parts, Map dependencies) {
+  Map visited, Map dependencies) {
   int covered = 0;
   String path = _resolve_include(c, dir, target, angle, &covered);
-  if (!path) return;
-  if (covered && !x2c_source_file(path)) return;
+  if (!path) return NULL;
+  if (covered && !x2c_source_file(path)) return NULL;
   String canonical = _canonical_path(path);
   List entry = _entry(c, canonical);
-  /* The entry records every include, so it does not depend on what the unit
-     that first walked this file had already seen. */
-  parts.push(canonical);
   c.add_translation_dependency(canonical);
   if (!visited.contains(canonical)) {
     visited[canonical] = 1;
-    if (entry) _replay_cached(c, entry, globs, visited);
-    else _walk_cold(c, target, canonical, globs, visited);
+    if (!entry) entry = _walk_cold(c, target, canonical, globs, visited);
+    _replay_cached(c, entry, globs, visited);
   }
   /* A file still being walked, as in an include cycle, has no entry yet. */
   Var walked = _process_cache()[canonical];
@@ -274,6 +315,7 @@ static void _include(
     ? "%08x".printf(_include_text(c, target, canonical).hash())
     : walked.list().cadr();
   _cache_dependency(dependencies, canonical, content_hash);
+  return canonical;
 }
 
 static void _require_retained(int owned) {
@@ -305,12 +347,15 @@ void Compiler.record_generated_symbol(
   contribution[marker_key] = marker;
 }
 
-/* Record a cold walk under canonical path identity. Segment overlays and
-   included canonical paths enter parts in source order, while source-private
-   state carries only between segments of this file; every included file
-   starts its own visibility state. The first cold visit fixes a header's
-   contribution for later units, so its public declarations must not depend on
-   unit-local names visible before the include. */
+/* Record a cold walk under canonical path identity. Published segment rows,
+   included canonical paths, and visibility pragmas enter parts in source
+   order, while source-private state carries only between segments of this
+   file; every included file starts its own visibility state. An including
+   unit replays private includes too, since it may call their functions, but
+   a package publishes only the includes above its private boundary. The
+   first cold visit fixes a header's contribution for later units, so its
+   public declarations must not depend on unit-local names visible before
+   the include. */
 static void _file(
   Compiler c, String path, String text, String dir, Map globs,
   Map visited) {
@@ -325,28 +370,39 @@ static void _file(
     Map definitions = {}, int private = 0;
     String content_hash = "%08x".printf(text.hash());
     /* Scanned tokens place directives outside strings and comments. A
-       segment ends before an include and the next begins after it. */
+       segment ends before an include or a visibility pragma, and the next
+       begins after it. */
     Tokenizer tokenizer = Tokenizer.new(text);
     tokenizer.scan();
     Token first = tokenizer.tokens;
     int segment_line = 1, segment_position = 0;
     for (Token token = first; token.type != <eof>; token++) {
-      int angle = 0;
-      String target = token.type == <preproc> && _starts_line(first, token)
-        ? preproc_include_target(token.text, &angle)
-        : NULL;
-      if (!target) continue;
+      if (token.type != <preproc> || !_starts_line(first, token)) continue;
+      int angle = 0, visibility = _visibility_pragma(token.text);
+      String target = preproc_include_target(token.text, &angle);
+      if (!target && visibility < 0) continue;
       _flush_segment(
         c, path, text, text[segment_position:token.pos], segment_line,
-        segment_position, globs, parts, definitions, dependencies, &private);
-      _include(c, target, angle, dir, globs, visited, parts, dependencies);
+        segment_position, globs, parts, definitions, dependencies, private);
+      if (target) {
+        /* The entry records every include, so it does not depend on what
+           the unit that first walked this file had already seen. */
+        String canonical =
+          _include(c, target, angle, dir, globs, visited, dependencies);
+        if (canonical) parts.push(canonical);
+      }
+      else {
+        private = visibility;
+        Symbol marker = private ? <private> : <public>;
+        parts.push(marker);
+      }
       Token next = token + 1;
       segment_line = next.line;
       segment_position = next.pos;
     }
     _flush_segment(
       c, path, text, text[segment_position:], segment_line, segment_position,
-      globs, parts, definitions, dependencies, &private);
+      globs, parts, definitions, dependencies, private);
     Map generated =
       c.select_declaration_defaults(path, globs, parts, definitions);
     if (generated && generated.len()) {
@@ -543,6 +599,7 @@ static void _package_contributions(
           compiler, name, root, path, declarations, merged, token);
         continue;
       }
+      case %((!or private public)): continue;
       case %(?(String dependency)): {
         compiler.add_translation_dependency(dependency);
         if (visited.contains(dependency)) continue;
@@ -730,6 +787,10 @@ static List _interface_entry(
       parts.push(_canonical_path(home_absolute_path(part)));
       continue;
     }
+    if (part == <private> || part == <public>) {
+      parts.push(part);
+      continue;
+    }
     if (part is not <list>) return NULL;
     Scope.push(&process_cache_scope);
     Map contributions = {};
@@ -839,7 +900,8 @@ static int _write_interface_entry(Buffer out, String canonical, List entry) {
       parts.push(rows_var);
       continue;
     }
-    parts.push(home_portable_path(part));
+    if (part is <symbol>) parts.push(part);
+    else parts.push(home_portable_path(part));
   }
   Array dependencies = [];
   foreach (Var (path, content_hash), cached_dependencies)
