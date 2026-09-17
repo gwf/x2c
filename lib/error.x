@@ -236,9 +236,9 @@ void x2c_error_catch_detach(ErrorHandler handle) {
     The handle releases its plans, captures, and retained error records. A
     still-registered handle also leaves the handler stack and truncates
     records above its registration watermark; a detached one leaves the chain
-    of running arms instead. Handles must close in the order they were opened;
-    violating that order reaches the raw error floor. A null handle does
-    nothing.
+    of running arms instead. Handles must close in stack order on whichever
+    chain holds them; violating that order reaches the raw error floor. A null
+    handle does nothing.
 */
 void x2c_error_catch_close(ErrorHandler handle) {
   if (!handle) return;
