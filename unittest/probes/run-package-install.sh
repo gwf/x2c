@@ -181,7 +181,7 @@ wait "$remover" || fail "removal after the lock failed"
 
 # A reinstall from a local path keeps the version the package it replaces
 # recorded, and the marker records an absolute source and nothing empty.
-"$x2c" install -q "$BUILD/src/greet"
+(cd "$BUILD/src" && "$x2c" install -q ./greet)
 [[ "$("$x2c" list)" == "greet 1.0 source" ]] ||
   fail "a reinstall from a path lost the version"
 grep -q '"source": "/' "$BUILD/home/packages/greet/SOURCE.json" ||
