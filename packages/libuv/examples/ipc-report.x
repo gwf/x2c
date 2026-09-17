@@ -75,8 +75,7 @@ int main(void) {
   defer rmdir(directory);
   String path = %"$directory/report.sock";
   defer unlink(path);
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
+  UvLoop loop = $auto(UvLoop.new());
   IpcState state = { .received = Bytes.new(1) };
   defer state.received.free();
   Var value = Var.new(<p48>, &state);

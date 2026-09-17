@@ -82,8 +82,7 @@ static void _verify_numeric_lookup(
 }
 
 static void lookup_hints_copy_ipv4_and_ipv6_results(void) {
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
+  UvLoop loop = $auto(UvLoop.new());
   LookupState ip4_state = { 0 }, ip6_state = { 0 };
   ip4_state.loop_thread = ip6_state.loop_thread = uv_thread_self();
 
@@ -121,8 +120,7 @@ static void lookup_hints_copy_ipv4_and_ipv6_results(void) {
 }
 
 static void resolve_and_canonical_names_use_copied_results(void) {
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
+  UvLoop loop = $auto(UvLoop.new());
   LookupState resolved_state = { 0 }, canonical_state = { 0 };
   UvLookup resolved = loop.resolve(
     "localhost", "80", Var.new(<p48>, &resolved_state), _record_lookup
@@ -211,8 +209,7 @@ static void loop_free_rejects_a_pending_lookup_without_draining_it(void) {
 }
 
 static void lookup_builder_rejects_invalid_lifetimes(void) {
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
+  UvLoop loop = $auto(UvLoop.new());
   int caught = 0;
   try loop.lookup(NULL, NULL);
   catch %(bad-arg (library *) (operation ?operation) *): {
@@ -280,19 +277,18 @@ typedef struct PoolBlocker {
 
 static void _hold_only_pool_worker(uv_work_t *request) {
   PoolBlocker *blocker = request->data;
-  uv_sem_post(&blocker->started);
-  uv_sem_wait(&blocker->release);
+  uv_sem_post(&blocker.started);
+  uv_sem_wait(&blocker.release);
 }
 
 static void _pool_worker_released(uv_work_t *request, int status) {
   PoolBlocker *blocker = request->data;
-  blocker->after_calls++;
-  blocker->after_status = status;
+  blocker.after_calls++;
+  blocker.after_status = status;
 }
 
 static void accepted_cancel_keeps_request_alive_until_completion(void) {
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
+  UvLoop loop = $auto(UvLoop.new());
   PoolBlocker blocker = { 0 };
   LookupState state = { 0 };
   EXPECT_INT_EQ(uv_sem_init(&blocker.started, 0), 0);
@@ -340,8 +336,7 @@ static void _raise_after_lookup(UvLookup lookup, Var value) {
 }
 
 static void lookup_callback_errors_preserve_results_and_loop_resumption(void) {
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
+  UvLoop loop = $auto(UvLoop.new());
   FailingLookupState failed = { 0 };
   UvLookup first = loop.resolve(
     "127.0.0.1", "80", Var.new(<p48>, &failed), _raise_after_lookup

@@ -97,8 +97,7 @@ static void resolved(UvLookup lookup, Var value) {
 }
 
 int main(void) {
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
+  UvLoop loop = $auto(UvLoop.new());
   NetworkState network = { .loop = loop };
   Var state = Var.new(<p48>, &network);
   network.guard = loop.timer(5000, 0, state, timed_out);

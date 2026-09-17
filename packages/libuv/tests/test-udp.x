@@ -50,8 +50,7 @@ static void _udp_exchange_receive(
 }
 
 static void udp_sends_connected_unconnected_binary_and_empty_datagrams(void) {
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
+  UvLoop loop = $auto(UvLoop.new());
   UdpExchange state = {
     .driver = uv_thread_self(),
     .callback_thread = 1
@@ -175,8 +174,7 @@ static void _udp_restart_receive(
 }
 
 static void udp_receive_limit_truncates_and_stop_restarts(void) {
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
+  UvLoop loop = $auto(UvLoop.new());
   UdpRestart state = { .loop = loop };
   Var value = Var.new(<p48>, &state);
   state.guard = loop.timer(5000, 0, value, _udp_timeout);
@@ -220,8 +218,7 @@ static void _udp_large_receive(
 }
 
 static void udp_default_receive_limit_accepts_a_large_datagram(void) {
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
+  UvLoop loop = $auto(UvLoop.new());
   UdpLarge state = { 0 };
   Var value = Var.new(<p48>, &state);
   state.guard = loop.timer(5000, 0, value, _udp_timeout);
@@ -334,8 +331,7 @@ static void _udp_count_receive(
 }
 
 static void udp_rejects_invalid_state_and_ignores_native_no_event(void) {
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
+  UvLoop loop = $auto(UvLoop.new());
   UvUdp udp = loop.udp();
   int caught = 0;
   try udp.max_receive(0);

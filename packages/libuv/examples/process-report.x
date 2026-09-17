@@ -3,15 +3,13 @@
 import "libuv" with UvLoop, UvProcess;
 
 int main(void) {
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
+  UvLoop loop = $auto(UvLoop.new());
 
-  UvProcess normalized = loop.spawn(%("/usr/bin/tr" "[:lower:]" "[:upper:]"));
-  defer normalized.free();
+  UvProcess normalized =
+    $auto(loop.spawn(%("/usr/bin/tr" "[:lower:]" "[:upper:]")));
   normalized.write("alpha\nbeta\ngamma\n").close_stdin();
 
-  UvProcess counted = loop.spawn(%("/usr/bin/wc" "-l"));
-  defer counted.free();
+  UvProcess counted = $auto(loop.spawn(%("/usr/bin/wc" "-l")));
   counted.write("alpha\nbeta\ngamma\n").close_stdin();
 
   printf("started %d and %d before running the loop\n",

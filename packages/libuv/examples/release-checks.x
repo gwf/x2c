@@ -78,8 +78,8 @@ static Var _plan(
 static String _sandbox(String work) {
   mkdir(work, 0700);
   mkdir(%"$work/out", 0700);
-  File source = File.open(%"$work/release.txt", %"w");
-  source.puts(%"alpha\nbeta\ngamma\n");
+  File source = File.open(%"$work/release.txt", "w");
+  source.puts("alpha\nbeta\ngamma\n");
   source.close();
   return %"$work/out";
 }
@@ -113,8 +113,7 @@ static int _report_finished(Array checks, int *passed, int *expired) {
 int main(void) {
   String work = "/tmp/x2c-libuv-release";
   String output = _sandbox(work);
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
+  UvLoop loop = $auto(UvLoop.new());
   Map environment = {
     "PATH": "/usr/bin:/bin", "RELEASE_MODE": "strict"
   };
@@ -129,11 +128,11 @@ int main(void) {
 
   checks.push(_plan(
     loop, work, environment, "line-count",
-    %"wc -l < release.txt | tr -d ' ' | tee out/lines.txt", 2000
+    "wc -l < release.txt | tr -d ' ' | tee out/lines.txt", 2000
   ));
   checks.push(_plan(
     loop, work, environment, "fingerprint",
-    %"cksum release.txt | cut -d' ' -f1 | tee out/sum.txt", 2000
+    "cksum release.txt | cut -d' ' -f1 | tee out/sum.txt", 2000
   ));
   checks.push(_plan(
     loop, work, environment, "environment", "printenv RELEASE_MODE", 2000

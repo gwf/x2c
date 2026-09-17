@@ -163,8 +163,7 @@ static void whole_file_io_is_bounded_and_binary_safe(void) {
   String path = _fs_path("whole");
   unlink(path);
   defer unlink(path);
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
+  UvLoop loop = $auto(UvLoop.new());
   size_t length = 160 * 1024 + 3;
   unsigned char byte = 'x';
   Bytes payload = Bytes.new(1).append_fill(&byte, length);
@@ -297,8 +296,8 @@ static void stat_and_scan_results_are_independent_copies(void) {
   rmdir(directory);
   mkdir(directory, 0700);
   mkdir(subdirectory, 0700);
-  File file = File.open(file_path, %"w");
-  file.puts(%"five\n");
+  File file = File.open(file_path, "w");
+  file.puts("five\n");
   file.close();
   symlink("file.bin", link_path);
   defer {
@@ -308,8 +307,7 @@ static void stat_and_scan_results_are_independent_copies(void) {
     rmdir(directory);
   }
 
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
+  UvLoop loop = $auto(UvLoop.new());
   MetadataState state = { 0 };
   Var value = Var.new(<p48>, &state);
   loop.stat(file_path, value, _stat_done);
@@ -393,8 +391,8 @@ static void whole_transfer_and_close_errors_release_descriptors(void) {
   rmdir(directory);
   unlink(path);
   mkdir(directory, 0700);
-  File seed = File.open(path, %"w");
-  seed.puts(%"data");
+  File seed = File.open(path, "w");
+  seed.puts("data");
   seed.close();
   defer {
     rmdir(directory);
@@ -463,8 +461,7 @@ static void _expect_missing(UvLoop loop, UvFs request, String operation) {
 static void missing_paths_preserve_libuv_errors(void) {
   String path = _fs_path("absent");
   unlink(path);
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
+  UvLoop loop = $auto(UvLoop.new());
   int calls = 0;
   Var value = Var.new(<p48>, &calls);
   UvFs read = loop.read_file(path, 32, value, _count_fs);
@@ -484,8 +481,8 @@ typedef struct PoolBlocker {
 
 static void _hold_fs_worker(uv_work_t *request) {
   PoolBlocker *blocker = request->data;
-  uv_sem_post(&blocker->started);
-  uv_sem_wait(&blocker->release);
+  uv_sem_post(&blocker.started);
+  uv_sem_wait(&blocker.release);
 }
 
 static void _fs_worker_released(uv_work_t *request, int status) {
@@ -572,8 +569,8 @@ static void file_close_and_loop_free_reject_live_work(void) {
   String path = _fs_path("pending");
   unlink(path);
   defer unlink(path);
-  File seed = File.open(path, %"w");
-  seed.puts(%"pending");
+  File seed = File.open(path, "w");
+  seed.puts("pending");
   seed.close();
   UvLoop loop = UvLoop.new();
   PendingState state = { 0 };
@@ -631,8 +628,7 @@ static void _failing_stat(UvFs request, Var value) {
 }
 
 static void filesystem_callback_error_returns_and_loop_resumes(void) {
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
+  UvLoop loop = $auto(UvLoop.new());
   FailureState failed = { 0 };
   loop.stat("/tmp", Var.new(<p48>, &failed), _failing_stat);
   int caught = 0;

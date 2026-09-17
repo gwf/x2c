@@ -34,8 +34,7 @@ static void receive(UvAsync async, Var value) {
 }
 
 int main(void) {
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
+  UvLoop loop = $auto(UvLoop.new());
   NotifyState state = { 0 };
   UvAsync async = loop.async(Var.new(<p48>, &state), receive);
   NotifyWork work = { async, 19, 23 };

@@ -46,8 +46,7 @@ static void timed_out(UvTimer timer, Var value) {
 }
 
 int main(void) {
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
+  UvLoop loop = $auto(UvLoop.new());
   DatagramReport report = { 0 };
   Var value = Var.new(<p48>, &report);
   report.guard = loop.timer(5000, 0, value, timed_out);

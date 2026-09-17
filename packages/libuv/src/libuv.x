@@ -1155,9 +1155,8 @@ void UvLoop.cleanup(UvLoop uv_loop) {
     struct UvLoop is private and its layout is not a contract; this is the
     only supported way to reach uv_loop_t.
 */
-uv_loop_t *UvLoop.native(UvLoop loop) {
-  return loop && loop.initialized ? &loop.loop : NULL;
-}
+uv_loop_t *UvLoop.native(UvLoop loop) =>
+  loop && loop.initialized ? &loop.loop : NULL;
 
 int UvLoop.run(UvLoop loop, uv_run_mode mode) {
   if (!loop || !loop.initialized || loop.running) {
@@ -1177,9 +1176,8 @@ int UvLoop.run(UvLoop loop, uv_run_mode mode) {
   return pending;
 }
 
-int UvLoop.alive(UvLoop loop) {
-  return loop && loop.initialized ? uv_loop_alive(&loop.loop) : 0;
-}
+int UvLoop.alive(UvLoop loop) =>
+  loop && loop.initialized ? uv_loop_alive(&loop.loop) : 0;
 
 void UvLoop.stop(UvLoop loop) {
   if (loop && loop.initialized) uv_stop(&loop.loop);
@@ -1221,9 +1219,7 @@ UvAddress UvAddress.ip6(String host, int port) {
   return address;
 }
 
-String UvAddress.host(UvAddress address) {
-  return address ? address.host : NULL;
-}
+String UvAddress.host(UvAddress address) => address ? address.host : NULL;
 
 int UvAddress.port(UvAddress address) {
   if (!address) return 0;
@@ -1245,13 +1241,10 @@ int UvAddress.family(UvAddress address) {
     : AF_UNSPEC;
 }
 
-int UvAddress.socket_type(UvAddress address) {
-  return address ? address.socket_type : 0;
-}
+int UvAddress.socket_type(UvAddress address) =>
+  address ? address.socket_type : 0;
 
-int UvAddress.protocol(UvAddress address) {
-  return address ? address.protocol : 0;
-}
+int UvAddress.protocol(UvAddress address) => address ? address.protocol : 0;
 
 unsigned int UvAddress.scope_id(UvAddress address) {
   if (!address || address.family() != AF_INET6) return 0;
@@ -1259,13 +1252,11 @@ unsigned int UvAddress.scope_id(UvAddress address) {
   return ip6->sin6_scope_id;
 }
 
-String UvAddress.canonical_name(UvAddress address) {
-  return address ? address.canonical_name : NULL;
-}
+String UvAddress.canonical_name(UvAddress address) =>
+  address ? address.canonical_name : NULL;
 
-const struct sockaddr *UvAddress.native(UvAddress address) {
-  return address ? (struct sockaddr *) &address.address : NULL;
-}
+const struct sockaddr *UvAddress.native(UvAddress address) =>
+  address ? (struct sockaddr *) &address.address : NULL;
 
 UvLookup UvLoop.lookup(UvLoop loop, String node, String service) {
   if (!loop || !loop.initialized || (!node && !service)) {
@@ -1356,9 +1347,8 @@ int UvLookup.cancel(UvLookup lookup) {
   _uv_raise("getaddrinfo_cancel", status);
 }
 
-int UvLookup.cancelled(UvLookup lookup) {
-  return lookup && lookup.completed && lookup.cancelled;
-}
+int UvLookup.cancelled(UvLookup lookup) =>
+  lookup && lookup.completed && lookup.cancelled;
 
 size_t UvLookup.count(UvLookup lookup) {
   if (!lookup || !lookup.completed) {
@@ -1381,13 +1371,10 @@ UvAddress UvLookup.address(UvLookup lookup, int index) {
   return &lookup.addresses[index];
 }
 
-UvLoop UvLookup.loop(UvLookup lookup) {
-  return lookup ? lookup.loop : NULL;
-}
+UvLoop UvLookup.loop(UvLookup lookup) => lookup ? lookup.loop : NULL;
 
-uv_getaddrinfo_t *UvLookup.native(UvLookup lookup) {
-  return lookup ? &lookup.request : NULL;
-}
+uv_getaddrinfo_t *UvLookup.native(UvLookup lookup) =>
+  lookup ? &lookup.request : NULL;
 
 static UvStream _uv_tcp_ready(UvTcp tcp, String operation) {
   if (!tcp) {
@@ -1590,26 +1577,18 @@ static UvAddress _uv_tcp_address(UvTcp tcp, int peer) {
   return address;
 }
 
-UvAddress UvTcp.local_address(UvTcp tcp) {
-  return _uv_tcp_address(tcp, 0);
-}
+UvAddress UvTcp.local_address(UvTcp tcp) => _uv_tcp_address(tcp, 0);
 
-UvAddress UvTcp.peer_address(UvTcp tcp) {
-  return _uv_tcp_address(tcp, 1);
-}
+UvAddress UvTcp.peer_address(UvTcp tcp) => _uv_tcp_address(tcp, 1);
 
 size_t UvTcp.write_queue_size(UvTcp tcp) {
   UvStream stream = _uv_tcp_ready(tcp, "write_queue_size");
   return uv_stream_get_write_queue_size(stream.native);
 }
 
-UvLoop UvTcp.loop(UvTcp tcp) {
-  return tcp ? tcp.stream.loop : NULL;
-}
+UvLoop UvTcp.loop(UvTcp tcp) => tcp ? tcp.stream.loop : NULL;
 
-uv_tcp_t *UvTcp.native(UvTcp tcp) {
-  return tcp ? &tcp.tcp : NULL;
-}
+uv_tcp_t *UvTcp.native(UvTcp tcp) => tcp ? &tcp.tcp : NULL;
 
 static UvStream _uv_pipe_ready(UvPipe pipe, String operation) {
   if (!pipe) {
@@ -1814,26 +1793,18 @@ static String _uv_pipe_name(UvPipe pipe, int peer) {
   return name;
 }
 
-String UvPipe.local_name(UvPipe pipe) {
-  return _uv_pipe_name(pipe, 0);
-}
+String UvPipe.local_name(UvPipe pipe) => _uv_pipe_name(pipe, 0);
 
-String UvPipe.peer_name(UvPipe pipe) {
-  return _uv_pipe_name(pipe, 1);
-}
+String UvPipe.peer_name(UvPipe pipe) => _uv_pipe_name(pipe, 1);
 
 size_t UvPipe.write_queue_size(UvPipe pipe) {
   UvStream stream = _uv_pipe_ready(pipe, "write_queue_size");
   return uv_stream_get_write_queue_size(stream.native);
 }
 
-UvLoop UvPipe.loop(UvPipe pipe) {
-  return pipe ? pipe.stream.loop : NULL;
-}
+UvLoop UvPipe.loop(UvPipe pipe) => pipe ? pipe.stream.loop : NULL;
 
-uv_pipe_t *UvPipe.native(UvPipe pipe) {
-  return pipe ? &pipe.pipe : NULL;
-}
+uv_pipe_t *UvPipe.native(UvPipe pipe) => pipe ? &pipe.pipe : NULL;
 
 static UvUdp _uv_udp_ready(UvUdp udp, String operation) {
   if (!udp) {
@@ -2135,13 +2106,9 @@ static UvAddress _uv_udp_address(UvUdp udp, int peer) {
   return address;
 }
 
-UvAddress UvUdp.local_address(UvUdp udp) {
-  return _uv_udp_address(udp, 0);
-}
+UvAddress UvUdp.local_address(UvUdp udp) => _uv_udp_address(udp, 0);
 
-UvAddress UvUdp.peer_address(UvUdp udp) {
-  return _uv_udp_address(udp, 1);
-}
+UvAddress UvUdp.peer_address(UvUdp udp) => _uv_udp_address(udp, 1);
 
 size_t UvUdp.send_queue_size(UvUdp udp) {
   _uv_udp_ready(udp, "udp_send_queue_size");
@@ -2153,13 +2120,9 @@ size_t UvUdp.send_queue_count(UvUdp udp) {
   return uv_udp_get_send_queue_count(&udp.udp);
 }
 
-UvLoop UvUdp.loop(UvUdp udp) {
-  return udp ? udp.loop : NULL;
-}
+UvLoop UvUdp.loop(UvUdp udp) => udp ? udp.loop : NULL;
 
-uv_udp_t *UvUdp.native(UvUdp udp) {
-  return udp ? &udp.udp : NULL;
-}
+uv_udp_t *UvUdp.native(UvUdp udp) => udp ? &udp.udp : NULL;
 
 static String _uv_fs_operation_name(uv_fs_type operation) {
   switch (operation) {
@@ -2643,9 +2606,7 @@ UvFs UvFile.close(UvFile file, Var value, void (*fn)(UvFs, Var)) {
   return fs;
 }
 
-UvLoop UvFile.loop(UvFile file) {
-  return file ? file.loop : NULL;
-}
+UvLoop UvFile.loop(UvFile file) => file ? file.loop : NULL;
 
 uv_file UvFile.native(UvFile file) {
   _uv_file_ready(file, "file_native");
@@ -2768,9 +2729,7 @@ int UvFs.cancel(UvFs fs) {
   _uv_raise("fs_cancel", status);
 }
 
-int UvFs.cancelled(UvFs fs) {
-  return fs && fs.completed && fs.cancelled;
-}
+int UvFs.cancelled(UvFs fs) => fs && fs.completed && fs.cancelled;
 
 static UvFs _uv_fs_completed(UvFs fs, String operation) {
   if (!fs || !fs.completed) {
@@ -2808,22 +2767,18 @@ static UvFs _uv_fs_result_type(
   return fs;
 }
 
-uv_fs_type UvFs.operation(UvFs fs) {
-  return fs ? fs.operation : UV_FS_UNKNOWN;
-}
+uv_fs_type UvFs.operation(UvFs fs) => fs ? fs.operation : UV_FS_UNKNOWN;
 
 ssize_t UvFs.result(UvFs fs) {
   _uv_fs_completed(fs, "fs_result");
   return fs.result;
 }
 
-UvFile UvFs.file(UvFs fs) {
-  return _uv_fs_result_type(fs, UV_FS_OPEN, "fs_file").file;
-}
+UvFile UvFs.file(UvFs fs) =>
+  _uv_fs_result_type(fs, UV_FS_OPEN, "fs_file").file;
 
-Bytes UvFs.bytes(UvFs fs) {
-  return _uv_fs_result_type(fs, UV_FS_READ, "fs_bytes").bytes;
-}
+Bytes UvFs.bytes(UvFs fs) =>
+  _uv_fs_result_type(fs, UV_FS_READ, "fs_bytes").bytes;
 
 UvStat UvFs.stat(UvFs fs) {
   _uv_fs_result_type(fs, UV_FS_STAT, "fs_stat_result");
@@ -2846,41 +2801,27 @@ static UvDirEntry _uv_fs_entry(UvFs fs, int index, String operation) {
   return &fs.entries[index];
 }
 
-String UvFs.entry_name(UvFs fs, int index) {
-  return _uv_fs_entry(fs, index, "fs_entry_name").name;
-}
+String UvFs.entry_name(UvFs fs, int index) =>
+  _uv_fs_entry(fs, index, "fs_entry_name").name;
 
-uv_dirent_type_t UvFs.entry_type(UvFs fs, int index) {
-  return _uv_fs_entry(fs, index, "fs_entry_type").type;
-}
+uv_dirent_type_t UvFs.entry_type(UvFs fs, int index) =>
+  _uv_fs_entry(fs, index, "fs_entry_type").type;
 
-UvLoop UvFs.loop(UvFs fs) {
-  return fs ? fs.loop : NULL;
-}
+UvLoop UvFs.loop(UvFs fs) => fs ? fs.loop : NULL;
 
-uv_fs_t *UvFs.native(UvFs fs) {
-  return fs ? &fs.request : NULL;
-}
+uv_fs_t *UvFs.native(UvFs fs) => fs ? &fs.request : NULL;
 
-uint64_t UvStat.mode(UvStat stat) {
-  return stat ? stat.value.st_mode : 0;
-}
+uint64_t UvStat.mode(UvStat stat) => stat ? stat.value.st_mode : 0;
 
-uint64_t UvStat.size(UvStat stat) {
-  return stat ? stat.value.st_size : 0;
-}
+uint64_t UvStat.size(UvStat stat) => stat ? stat.value.st_size : 0;
 
-long UvStat.modified_seconds(UvStat stat) {
-  return stat ? stat.value.st_mtim.tv_sec : 0;
-}
+long UvStat.modified_seconds(UvStat stat) =>
+  stat ? stat.value.st_mtim.tv_sec : 0;
 
-long UvStat.modified_nanoseconds(UvStat stat) {
-  return stat ? stat.value.st_mtim.tv_nsec : 0;
-}
+long UvStat.modified_nanoseconds(UvStat stat) =>
+  stat ? stat.value.st_mtim.tv_nsec : 0;
 
-const uv_stat_t *UvStat.native(UvStat stat) {
-  return stat ? &stat.value : NULL;
-}
+const uv_stat_t *UvStat.native(UvStat stat) => stat ? &stat.value : NULL;
 
 /*  A thread-safe, coalescing wakeup. `value` is callback state, not a value
     carried by each send. A sending x2c Thread must be joined before this
@@ -2923,13 +2864,9 @@ UvAsync UvAsync.stop(UvAsync async) {
   return NULL;
 }
 
-UvLoop UvAsync.loop(UvAsync async) {
-  return async ? async.loop : NULL;
-}
+UvLoop UvAsync.loop(UvAsync async) => async ? async.loop : NULL;
 
-uv_async_t *UvAsync.native(UvAsync async) {
-  return async ? &async.async : NULL;
-}
+uv_async_t *UvAsync.native(UvAsync async) => async ? &async.async : NULL;
 
 /*  Runs once per loop turn before prepare and polling. An active idle handle
     forces a zero-timeout poll; it is a deliberate busy-loop mechanism, not a
@@ -2963,13 +2900,9 @@ UvIdle UvIdle.stop(UvIdle idle) {
   return NULL;
 }
 
-UvLoop UvIdle.loop(UvIdle idle) {
-  return idle ? idle.loop : NULL;
-}
+UvLoop UvIdle.loop(UvIdle idle) => idle ? idle.loop : NULL;
 
-uv_idle_t *UvIdle.native(UvIdle idle) {
-  return idle ? &idle.idle : NULL;
-}
+uv_idle_t *UvIdle.native(UvIdle idle) => idle ? &idle.idle : NULL;
 
 /*  Runs once per loop turn immediately before libuv polls for I/O. */
 UvPrepare UvLoop.prepare(UvLoop loop, Var value, void (*fn)(UvPrepare, Var)) {
@@ -3000,13 +2933,10 @@ UvPrepare UvPrepare.stop(UvPrepare prepare) {
   return NULL;
 }
 
-UvLoop UvPrepare.loop(UvPrepare prepare) {
-  return prepare ? prepare.loop : NULL;
-}
+UvLoop UvPrepare.loop(UvPrepare prepare) => prepare ? prepare.loop : NULL;
 
-uv_prepare_t *UvPrepare.native(UvPrepare prepare) {
-  return prepare ? &prepare.prepare : NULL;
-}
+uv_prepare_t *UvPrepare.native(UvPrepare prepare) =>
+  prepare ? &prepare.prepare : NULL;
 
 /*  Runs once per loop turn immediately after libuv polls for I/O. */
 UvCheck UvLoop.check(UvLoop loop, Var value, void (*fn)(UvCheck, Var)) {
@@ -3037,13 +2967,9 @@ UvCheck UvCheck.stop(UvCheck check) {
   return NULL;
 }
 
-UvLoop UvCheck.loop(UvCheck check) {
-  return check ? check.loop : NULL;
-}
+UvLoop UvCheck.loop(UvCheck check) => check ? check.loop : NULL;
 
-uv_check_t *UvCheck.native(UvCheck check) {
-  return check ? &check.check : NULL;
-}
+uv_check_t *UvCheck.native(UvCheck check) => check ? &check.check : NULL;
 
 /*  Calls `fn(timer, value)` after `delay` milliseconds, and every `repeat`
     milliseconds after that when `repeat` is positive. A repeating timer
@@ -3080,13 +3006,9 @@ UvTimer UvTimer.stop(UvTimer timer) {
   return NULL;
 }
 
-UvLoop UvTimer.loop(UvTimer timer) {
-  return timer ? timer.loop : NULL;
-}
+UvLoop UvTimer.loop(UvTimer timer) => timer ? timer.loop : NULL;
 
-uv_timer_t *UvTimer.native(UvTimer timer) {
-  return timer ? &timer.timer : NULL;
-}
+uv_timer_t *UvTimer.native(UvTimer timer) => timer ? &timer.timer : NULL;
 
 /*  Calls `fn(signal, value)` when the process receives `number`. The handle
     is unreferenced, so it never keeps the loop alive by itself: a
@@ -3121,22 +3043,17 @@ UvSignal UvLoop.signal(
 /*  The signal most recently delivered to this handle, so one callback can
     serve SIGINT and SIGTERM.
 */
-int UvSignal.number(UvSignal signal) {
-  return signal ? signal.number : 0;
-}
+int UvSignal.number(UvSignal signal) => signal ? signal.number : 0;
 
 UvSignal UvSignal.stop(UvSignal signal) {
   _uv_signal_release(signal);
   return NULL;
 }
 
-UvLoop UvSignal.loop(UvSignal signal) {
-  return signal ? signal.loop : NULL;
-}
+UvLoop UvSignal.loop(UvSignal signal) => signal ? signal.loop : NULL;
 
-uv_signal_t *UvSignal.native(UvSignal signal) {
-  return signal ? &signal.signal : NULL;
-}
+uv_signal_t *UvSignal.native(UvSignal signal) =>
+  signal ? &signal.signal : NULL;
 
 /*  Calls `fn(watch, value)` when `path` or an entry inside it changes. The
     watcher keeps the loop alive until something calls UvWatch.stop.
@@ -3182,22 +3099,16 @@ String UvWatch.entry(UvWatch watch) {
 /*  <rename> when the entry appeared, disappeared, or was renamed;
     <change> when its contents or metadata changed.
 */
-Symbol UvWatch.kind(UvWatch watch) {
-  return watch ? watch.kind : 0;
-}
+Symbol UvWatch.kind(UvWatch watch) => watch ? watch.kind : 0;
 
 UvWatch UvWatch.stop(UvWatch watch) {
   _uv_watch_release(watch);
   return NULL;
 }
 
-UvLoop UvWatch.loop(UvWatch watch) {
-  return watch ? watch.loop : NULL;
-}
+UvLoop UvWatch.loop(UvWatch watch) => watch ? watch.loop : NULL;
 
-uv_fs_event_t *UvWatch.native(UvWatch watch) {
-  return watch ? &watch.event : NULL;
-}
+uv_fs_event_t *UvWatch.native(UvWatch watch) => watch ? &watch.event : NULL;
 
 /*  An unstarted child. Configure it, then start it; UvLoop.spawn is the
     same thing when no option is needed. The argv Strings must stay valid
@@ -3431,9 +3342,8 @@ pipe_failed: _uv_discard_closed_handles(loop, process);
   _uv_raise("spawn", status);
 }
 
-UvProcess UvLoop.spawn(UvLoop loop, List arguments) {
-  return loop.command(arguments).start();
-}
+UvProcess UvLoop.spawn(UvLoop loop, List arguments) =>
+  loop.command(arguments).start();
 
 UvProcess UvProcess.write(UvProcess process, String text) {
   _uv_process_ready(process, "write");
