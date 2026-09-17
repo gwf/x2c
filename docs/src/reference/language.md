@@ -258,8 +258,16 @@ conversion, cleanup, and lifetime rules as `return expression;`. The semicolon
 terminates the body; nested compound literals, collection literals, and lambda
 bodies do not terminate it.
 
-An expression is required; `=>;` is invalid. The rules for returning a value
-from a `void` function are unchanged. Use a compound body when a function needs
+A `void` function has no value to return, so its expression body is the
+shorthand for a compound body containing one expression statement:
+
+```x2c
+~typedef struct Counter { int value; } Counter;
+static void Counter.step(Counter *self) => self.value++;
+```
+
+An expression is required; `=>;` is invalid. The rules for writing `return` in
+a `void` function are unchanged. Use a compound body when a function needs
 declarations, several statements, or a comment inside the body.
 
 ### Reference parameters
