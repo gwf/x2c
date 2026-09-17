@@ -304,6 +304,17 @@ static List _analyze_tail_unit(Compiler compiler, List ast, String path) {
   return functions.list_free();
 }
 
+static List _walk_argument_root(Var argument) {
+  List root = _walk_stable_root(argument, void);
+  match (root)
+    case %(root (binding ?identity ?spelling) ?type (path *path)):
+      return %(
+        root $identity $spelling $type (path @path)
+        ${_walk_root_spelling(spelling.str(), path)}
+      );
+  return NULL;
+}
+
 static void _collect_walk_calls(
   Compiler compiler, Var value, String path, int origin, Map definitions,
   Array calls) {
@@ -326,20 +337,8 @@ static void _collect_walk_calls(
       Array direct_arguments = [];
       int position = 0;
       foreach (Var argument, arguments) {
-        List root = _walk_stable_root(argument, void);
-        match (root)
-          case %(
-            root (binding ?identity ?spelling) ?type (path *root_path)
-          ): {
-            String display = _walk_root_spelling(
-              spelling.str(), root_path
-            );
-            direct_arguments.push(%(
-              argument $position
-              (root $identity $spelling $type
-                (path @root_path) $display)
-            ));
-          }
+        List root = _walk_argument_root(argument);
+        if (root) direct_arguments.push(%(argument $position $root));
         position++;
       }
       List target = definitions.contains(callee)
@@ -350,6 +349,15 @@ static void _collect_walk_calls(
         ${_source_location(compiler, path, origin)}
         (arguments @{direct_arguments.list_free()})
       ));
+    }
+    /* foreach over a List copies the collection into this local before its
+       cursor loop, so the copy's initializer is the walked value. */
+    case %(op = (bind (binding ? ?spelling) ?) ?collection): {
+      List root = _walk_argument_root(collection);
+      if (root && spelling.str().startswith("_x2c_macro_object_"))
+        calls.push(%(
+          foreach ${_source_location(compiler, path, origin)} $root
+        ));
     }
   }
   foreach (Var child, node)
@@ -443,28 +451,15 @@ static List _walk_direct_parameters(
       case %(parameter ?position ?binding ? ?):
         parameters[binding] = position;
 
-  int recursive = 0, iterates = 0;
+  int recursive = 0;
   List recursive_location = %(location "" 0 0);
   foreach (List call, calls)
     match (call)
-      case %(
-        call ?target ?name (!set ?location (location ? ? ?))
-        (arguments *arguments)
-      ): {
+      case %(call ?target ? (!set ?location (location ? ? ?)) *):
         if (List.equal(target, self)) {
           recursive = 1;
           recursive_location = location;
         }
-        if (name is <string> && name.string() == "Iter_try_next")
-          foreach (List argument, arguments)
-            match (argument)
-              case %(
-                argument 0 (root ? ?spelling ? (path) ?)
-              ):
-                if (spelling.str().startswith(
-                      "_x2c_macro_iterator_"
-                    )) iterates = 1;
-      }
 
   if (recursive)
     foreach (List parameter, parameter_records)
@@ -476,20 +471,11 @@ static List _walk_direct_parameters(
               $recursive_location
             )] = 1;
 
-  if (iterates && !_walk_loop_has_exit(body))
+  if (!_walk_loop_has_exit(body))
     foreach (List call, calls)
       match (call)
-        case %(
-          call ? ?name (!set ?location (location ? ? ?))
-          (arguments *arguments)
-        ):
-          if (name is <string> && name.string() == "List_iter")
-            foreach (List argument, arguments)
-              match (argument)
-                case %(argument 0 ?root):
-                  _walk_mark_root(
-                    root, location, parameters, direct
-                  );
+        case %(foreach ?location ?root):
+          _walk_mark_root(root, location, parameters, direct);
 
   match (self)
     case %(target ? "List_len"):
