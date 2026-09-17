@@ -7,7 +7,7 @@
 
 #include "x2c.h"
 #include "compiler.h"
-void Compiler_check_regions(Compiler compiler, List ast);
+void Compiler_check_regions(Compiler c, List ast);
 
 
 #endif /* __GUARD_0x3FB21E3E__ */
