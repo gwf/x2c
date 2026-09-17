@@ -31,8 +31,6 @@ Symbol Compiler_derived_member(Compiler compiler, Symbol op);
 
 List Compiler_resolve_protocol_member(Compiler compiler, Type participant, String member_name);
 
-List Compiler_resolve_protocol_method(Compiler compiler, Type participant, String member_name);
-
 String Compiler_protocol_update_helper(Compiler c, Type participant, String member, int postfix);
 
 List Compiler_discard_helper(Compiler c, List binding, Type signature, String stem, int which);

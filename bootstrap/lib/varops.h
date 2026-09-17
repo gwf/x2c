@@ -35,14 +35,6 @@ double x2c_var_update_f64(volatile double * lhs, Symbol op, Var rhs);
 
 long double x2c_var_update_long_double(volatile long double * lhs, Symbol op, Var rhs);
 
-Var x2c_array_updateindex_from_array(Array dst, int dst_index, Symbol op, Array src, int src_index);
-
-Var x2c_array_updateindex_from_map(Array dst, int dst_index, Symbol op, Map src, Var src_key);
-
-Var x2c_map_updateindex_from_array(Map dst, Var dst_key, Symbol op, Array src, int src_index);
-
-Var x2c_map_updateindex_from_map(Map dst, Var dst_key, Symbol op, Map src, Var src_key);
-
 int Var_fallback_truth(Var value);
 
 int Var_truth(Var value);

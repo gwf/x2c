@@ -904,6 +904,10 @@ List Compiler_parse_block_item(Compiler c){
   return Compiler_parse_statement(c);
 }
 
+List Sym_define(Sym, List, List);
+
+Var Map_setindex(Map, Var, Var);
+
 int Compiler_macro_starts_target_at(Compiler, AstPos);
 
 List Compiler_peek_macro_hole(Compiler);
@@ -912,24 +916,12 @@ Var List_assoc(List, Var);
 
 List Compiler_try_parse_macro_expression(Compiler);
 
-List Sym_define(Sym, List, List);
-
-Var Map_setindex(Map, Var, Var);
-
 List Compiler_parse_parenthesized_statement(Compiler);
 
 List Compiler_parse_statement(Compiler c){
   if(! _init_guard_) _file_init_();
   List slot = Compiler_try_parse_macro_slot(c, 43159332400040);
   if(List_truth(slot)) return slot;
-  if(Compiler_peek(c, 0) == 73 && Compiler_macro_starts_target_at(c, AST_STATEMENT)){
-    List hole = Compiler_peek_macro_hole(c);
-    List macro = Compiler_try_parse_macro_target_at(c, AST_STATEMENT);
-    if(List_truth(macro)) return macro;
-    List expression = List_truth(hole) && Var_equal(List_assoc(hole, Symbol_var(740232)), Symbol_var(920394)) ? Compiler_parse_expression(c) : Compiler_try_parse_macro_expression(c);
-    Compiler_expect(c, 119);
-    return cons(_87, cons(List_var(expression), NULL));
-  }
   if(Compiler_peek(c, 0) == 19147688 && String_equal(c -> token -> text, _91)){
     Compiler_next(c);
     if((Compiler_peek(c, 0) == 247 && Compiler_peek(c, 1) == 251) || Compiler_peek(c, 0) == 119 || Compiler_peek(c, 0) == 11212) Compiler_report_error(c, 33658058, _109, c -> token, NULL);
@@ -976,9 +968,14 @@ Sym_push_new_scope(c -> sym);  List binding = Sym_define(c -> sym, cons(String_v
   }
   return body;
 }
-int with_expression = ! ! List_truth(Compiler_with_binding(c));
-List keyword = ! with_expression && Compiler_peek(c, 0) == 19147688 ? Compiler_try_parse_macro_target_at(c, AST_STATEMENT) : NULL;
-if(List_truth(keyword)) return keyword;
+if(! List_truth(Compiler_with_binding(c)) && Compiler_macro_starts_target_at(c, AST_STATEMENT)){
+  List hole = Compiler_peek_macro_hole(c);
+  List macro = Compiler_try_parse_macro_target_at(c, AST_STATEMENT);
+  if(List_truth(macro)) return macro;
+  List expression = List_truth(hole) && Var_equal(List_assoc(hole, Symbol_var(740232)), Symbol_var(920394)) ? Compiler_parse_expression(c) : Compiler_try_parse_macro_expression(c);
+  Compiler_expect(c, 119);
+  return cons(_87, cons(List_var(expression), NULL));
+}
 Symbol token = Compiler_peek(c, 0);
 switch(token){
   case 588 : return _if_statement(c);
@@ -1007,8 +1004,6 @@ switch(token){
 return _expression_statement(c);
 }
 
-int Compiler_keyword_alias_starts_target_at(Compiler, AstPos);
-
 Var List_car(List);
 
 List Compiler_anchor_origin(Compiler, List, Token);
@@ -1032,7 +1027,7 @@ List Compiler_parse_block_items(Compiler c, int anchor_items){
     }
     if(Compiler_peek(c, 0) == 251) break;
     Token origin = c -> token;
-    int expansion =(Compiler_peek(c, 0) == 73 && !(Map_truth(c -> macro_holes) && List_truth(Compiler_peek_macro_hole(c)))) ||(! Map_truth(c -> macro_holes) && Compiler_local_macro_form_is_definition(c)) ||(Compiler_peek(c, 0) == 19147688 && Compiler_keyword_alias_starts_target_at(c, AST_BLOCK));
+    int expansion =(Compiler_macro_starts_target_at(c, AST_BLOCK) && !(Map_truth(c -> macro_holes) && List_truth(Compiler_peek_macro_hole(c)))) ||(! Map_truth(c -> macro_holes) && Compiler_local_macro_form_is_definition(c));
     stmt = Compiler_parse_block_item(c);
     if(Map_truth(c -> macro_holes) &&(Var_equal(List_car(stmt), Symbol_var(917238582496136)) || Var_equal(List_car(stmt), Symbol_var(917238583616488)))){
       Array_push(block, List_var(stmt));

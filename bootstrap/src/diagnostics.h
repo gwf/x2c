@@ -7,28 +7,31 @@
 
 #include "x2c.h"
 #include "common.h"
-typedef void(* DiagnosticEmitter)(void * owner, List entry);
-
+#include "compiler.h"
 typedef struct Diagnostics{
   Array entries;
-  DiagnosticEmitter emit;
-  void * owner;
+  Compiler printer;
   int limit;
   int count, limit_notified;
 }
 * Diagnostics;
 
-#include "compiler.h"
+typedef struct DiagnosticsHold{
+  Compiler printer;
+  int entries, count, limit_notified;
+}
+DiagnosticsHold;
+
 #include "type.h"
-Diagnostics Diagnostics_new(DiagnosticEmitter emit, void * owner, int limit);
+Diagnostics Diagnostics_new(Compiler printer, int limit);
 
 void Diagnostics_reset(Diagnostics diag);
 
-void Diagnostics_set_emitter(Diagnostics diag, DiagnosticEmitter emit, void * owner);
+DiagnosticsHold Diagnostics_hold(Diagnostics diag);
+
+void Diagnostics_release(Diagnostics diag, DiagnosticsHold hold, int keep);
 
 List Diagnostics_entries(Diagnostics diag);
-
-int Diagnostics_has_emitter(Diagnostics diag);
 
 int Diagnostics_reached_limit(Diagnostics diag);
 

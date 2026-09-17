@@ -17,9 +17,9 @@ int Compiler_keyword_form_is_definition(Compiler c);
 
 void Compiler_skip_macro_invocation(Compiler c);
 
-int Compiler_macro_invocation_needs_shallow_expansion(Compiler compiler);
+int Compiler_macro_invocation_needs_shallow_expansion(Compiler c);
 
-int Compiler_macro_starts_target_at(Compiler compiler, AstPos position);
+int Compiler_macro_starts_target_at(Compiler c, AstPos position);
 
 void Compiler_parse_macro_lisp_top_level(Compiler compiler);
 
@@ -51,15 +51,9 @@ List Compiler_publish_macro_definition_node(Compiler compiler, List node);
 
 void Compiler_parse_keyword_definition(Compiler c);
 
-int Compiler_macro_targets_unit(Compiler compiler);
+int Compiler_macro_targets_unit(Compiler c);
 
-int Compiler_keyword_alias_starts_target_at(Compiler compiler, AstPos position);
-
-int Compiler_keyword_alias_needs_shallow_expansion(Compiler compiler);
-
-void Compiler_skip_keyword_alias(Compiler c);
-
-int Compiler_skip_named_type_declaration(Compiler compiler);
+int Compiler_skip_named_type_declaration(Compiler c);
 
 Token Compiler_macro_invocation_site(Compiler compiler, Var site);
 

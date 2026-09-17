@@ -1620,12 +1620,11 @@ List Compiler_parse_enumerator(Compiler c, Type context){
   return _publish_enumerator(c, syntax, context, origin);
 }
 
+int Compiler_macro_starts_target_at(Compiler, AstPos);
 void Compiler_skip_macro_invocation(Compiler);
-int Compiler_keyword_alias_starts_target_at(Compiler, AstPos);
-void Compiler_skip_keyword_alias(Compiler);
 List Compiler_parse_enumerators(Compiler c, List context){
   if(! _init_guard_) _file_init_();  Array enumerators = Array_new();  while(Compiler_peek(c, 0) != 251){
-    if(c -> shallow && Compiler_peek(c, 0) == 73) Compiler_skip_macro_invocation(c);  else if(c -> shallow && Compiler_keyword_alias_starts_target_at(c, AST_ENUMERATOR)) Compiler_skip_keyword_alias(c);  else{
+    if(c -> shallow && Compiler_macro_starts_target_at(c, AST_ENUMERATOR)) Compiler_skip_macro_invocation(c);  else{
       List enumerator = Compiler_parse_enumerator(c, List_type(context));  if(Var_equal(List_car(enumerator), Symbol_var(39266))){
         Var sibling;  List _x2c_macro_object_8 = List_cdr(enumerator);  List _x2c_macro_cursor_8 = _x2c_macro_object_8;  Var _x2c_macro_cursor_output_6;  while(List_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_6)){
           sibling = _x2c_macro_cursor_output_6;  Array_push(enumerators, sibling);
@@ -2232,14 +2231,14 @@ static int _script_declaration_stays(Compiler c){
   return 0;
 }
 
-int Compiler_macro_targets_unit(Compiler);
 int Compiler_keyword_form_is_definition(Compiler);
 int Compiler_macro_form_is_definition(Compiler);
+int Compiler_macro_targets_unit(Compiler);
 int Compiler_script_statement_starts(Compiler c){
   if(! _init_guard_) _file_init_();  switch(Compiler_peek(c, 0)){
-    case 11212 : case 632323240 : case 1139215899608 : case 9297 : case 44661285196 : case 1317118534 : case 387198108 : case 251 : return 0;  case 73 : return ! Compiler_macro_targets_unit(c);
+    case 11212 : case 632323240 : case 1139215899608 : case 9297 : case 44661285196 : case 1317118534 : case 387198108 : case 251 : return 0;
   }
-  if(Compiler_test_static_assert(c) || Compiler_keyword_form_is_definition(c) || Compiler_macro_form_is_definition(c)) return 0;  if(Compiler_peek(c, 0) == 19147688 && String_equal(c -> token -> text, _234)) return 1;  if(Compiler_peek(c, 0) == 19147688 && Compiler_keyword_alias_starts_target_at(c, AST_UNIT)) return ! Compiler_macro_targets_unit(c);  return ! Compiler_test_declaration(c) || ! _script_declaration_stays(c);
+  if(Compiler_test_static_assert(c) || Compiler_keyword_form_is_definition(c) || Compiler_macro_form_is_definition(c)) return 0;  if(Compiler_peek(c, 0) == 19147688 && String_equal(c -> token -> text, _234)) return 1;  if(Compiler_macro_starts_target_at(c, AST_UNIT)) return ! Compiler_macro_targets_unit(c);  return ! Compiler_test_declaration(c) || ! _script_declaration_stays(c);
 }
 
 int Compiler_script_statement_executes(Compiler c){
@@ -2275,7 +2274,7 @@ List Compiler_parse_top_level(Compiler c){
   if(Compiler_skip_linkage_brace(c)) return NULL;  if(Compiler_test_static_assert(c)) return Compiler_parse_static_assert(c);  List slot = Compiler_try_parse_macro_slot(c, 1405544);  if(List_truth(slot)) return slot;  if(Compiler_keyword_form_is_definition(c)){
     Compiler_parse_keyword_definition(c);  return NULL;
   }
-  List keyword = Compiler_peek(c, 0) == 19147688 ? Compiler_try_parse_macro_target_at(c, AST_UNIT) : NULL;  if(List_truth(keyword)) return keyword;  if(Compiler_peek(c, 0) == 1317118534 && Compiler_peek(c, 1) == 1139215899608) return Compiler_parse_protocol_declaration(c);  if(Compiler_peek(c, 0) == 73 && !(Map_truth(c -> macro_holes) && List_truth(Compiler_peek_macro_hole(c)))) return Compiler_try_parse_macro_target_at(c, AST_UNIT);  switch(Compiler_peek(c, 0)){
+  List macro = Compiler_try_parse_macro_target_at(c, AST_UNIT);  if(List_truth(macro)) return macro;  if(Compiler_peek(c, 0) == 1317118534 && Compiler_peek(c, 1) == 1139215899608) return Compiler_parse_protocol_declaration(c);  switch(Compiler_peek(c, 0)){
     case 632323240 : return Compiler_parse_import_declaration(c);  case 1139215899608 : return Compiler_parse_protocol_declaration(c);  case 9297 : Compiler_parse_macro_lisp_top_level(c);  return NULL;  case 129 : Compiler_report_error(c, 33658058, _739, c -> token, _237);
   }
   if(Compiler_macro_form_is_definition(c)) return Compiler_parse_macro_definition(c);  List decl = Compiler_parse_declaration_row(c);  if(Compiler_test(c, 119)){

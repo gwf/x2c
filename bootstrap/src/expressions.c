@@ -314,32 +314,27 @@ typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_7;
   const void * _x2c_defer_capture_8;
   const void * _x2c_defer_capture_9;
-  const void * _x2c_defer_capture_10;
-  const void * _x2c_defer_capture_11;
-  const void * _x2c_defer_capture_12;
-  const void * _x2c_defer_capture_13;
-  const void * _x2c_defer_capture_14;
 }
 _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 typedef struct _x2c_defer_env_1{
-  const void * _x2c_defer_capture_15;
+  const void * _x2c_defer_capture_10;
 }
 _x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 typedef struct _x2c_defer_env_2{
-  const void * _x2c_defer_capture_16;
+  const void * _x2c_defer_capture_11;
 }
 _x2c_defer_env_2;
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
 typedef struct _x2c_defer_env_3{
-  const void * _x2c_defer_capture_17;
+  const void * _x2c_defer_capture_12;
 }
 _x2c_defer_env_3;
 
@@ -2081,7 +2076,7 @@ static List _imported_method(Compiler compiler, String method, Type receiver){
 Type Sym_lookup_field(Sym, Type, List);
 int Type_is_builtin(Type);
 int Compiler_protocol_rejects_direct_member(Compiler, Type, String);
-List Compiler_resolve_protocol_method(Compiler, Type, String);
+List Compiler_resolve_protocol_member(Compiler, Type, String);
 Var List_getindex(List, int);
 int Type_is_aggregate(Type);
 Type Sym_next_typedef(Sym, Type, int *);
@@ -2092,7 +2087,7 @@ List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field,
   while(List_truth(Type_list(type))){
     int is_method_type = Type_is_typedef_name(type) || Type_is_builtin(type);  if(call_context && is_method_type){
       Type ctype = type;  String method = String_join(NULL, cons(String_var(Var_str(List_car(Type_list(Type_base_type(ctype))))), cons(String_var(_210), cons(String_var(Var_str(List_car(field))), NULL))));  Type signature = List_type(Sym_get(c -> sym, cons(String_var(method), NULL)));  int rejected = Compiler_protocol_rejects_direct_member(c, ctype, Var_str(List_car(field)));  if(List_truth(Type_list(signature)) && rejected) signature = NULL;  List binding = NULL;  if(List_truth(Type_list(signature))) binding = Sym_reference(c -> sym, cons(String_var(method), NULL), NULL);  else{
-        List imported = rejected ? NULL : _imported_method(c, method, receiver_type);  if(List_truth(imported)) return imported;  List resolved = Compiler_resolve_protocol_method(c, ctype, Var_str(List_car(field)));  if(List_truth(resolved)){
+        List imported = rejected ? NULL : _imported_method(c, method, receiver_type);  if(List_truth(imported)) return imported;  List resolved = Compiler_resolve_protocol_member(c, ctype, Var_str(List_car(field)));  if(List_truth(resolved)){
           List _x2c_destructure_0 = resolved;  List method_binding = Var_list(List_getindex(_x2c_destructure_0, 0));  Type method_signature = Var_type(List_getindex(_x2c_destructure_0, 1));  return cons(_207, cons(List_var(method_binding), cons(List_var(method_signature), NULL)));
         }
 
@@ -2510,7 +2505,7 @@ int Compiler_lambda_capture_required(Compiler, List);
 List Sym_lookup(Sym, List, List *);
 static int _expression_requires_resolution(Compiler compiler, Var value){
   Array pending = Array_new(); {
-  _x2c_defer_env_1 _x2c_defer_env_4 = {._x2c_defer_capture_15 =(const void *) & pending};
+  _x2c_defer_env_1 _x2c_defer_env_4 = {._x2c_defer_capture_10 =(const void *) & pending};
   X2CCleanup _x2c_defer_record_0 = {
     .fn = _x2c_defer_cleanup_1,
     .env = & _x2c_defer_env_4
@@ -2681,7 +2676,6 @@ static Array _typedef_names(Compiler compiler, Type type){
 
 int Array_try_next(Array, int *, Var *);
 int Array_contains(Array, Var);
-List Compiler_resolve_protocol_member(Compiler, Type, String);
 static Type _shared_participant(Compiler compiler, Type lhs_type, Type rhs_type, Symbol member){
   if(! Type_is_bare_typedef_name(lhs_type) || ! Type_is_bare_typedef_name(rhs_type)) return NULL;  Array lhs_names = _typedef_names(compiler, lhs_type); {
     Type name;  Array _x2c_macro_object_8 = _typedef_names(compiler, rhs_type);  int _x2c_macro_cursor_8 = 0;  Var _x2c_macro_cursor_output_8;  while(Array_try_next(_x2c_macro_object_8, & _x2c_macro_cursor_8, & _x2c_macro_cursor_output_8)){
@@ -3577,10 +3571,10 @@ static int _bracket_designates(Compiler c){
   Symbol type = Token_after_group(c -> token) -> type;  return type == 123 || type == 93 || type == 183;
 }
 
-int Compiler_map_entry_macro_follows(Compiler);
+int Compiler_macro_starts_target_at(Compiler, AstPos);
 int Token_equal(Token, Token);
 static int _brace_starts_map(Compiler c){
-  if(Compiler_map_entry_macro_follows(c)) return 1;  Token token = c -> token;  for(int conditionals = 0; ;  token = Token_after_group(token)){
+  if(Compiler_macro_starts_target_at(c, AST_MAP_ENTRY)) return 1;  Token token = c -> token;  for(int conditionals = 0; ;  token = Token_after_group(token)){
     switch(token -> type){
       case 11212 : case 119 : case 89 : case 83 : case 187 : case 251 : return 0;  case 58 : conditionals ++;  break;  case 117 : if(! conditionals --) return ! Token_equal(token, c -> token);
     }
@@ -4183,7 +4177,7 @@ static List _initializer_layout(Compiler c, Type type, List target, List string,
     List dimension = Var_list(Var_cadr(List_car(Type_list(owner))));  if(! List_truth(dimension)) return NULL;  if(List_truth(string) && _initializer_string_array(c, type, string)) return NULL;  unsigned long long size;  if(! _initializer_integer(dimension, & size)) * symbolic = 1;  List path = _initializer_first(c, type, NULL);  List element = Compiler_initializer_slot(c, target, path);  List child = _initializer_layout(c, List_cdr(owner), element, string, symbolic);  if(! List_truth(child)) return NULL;  List bytes = cons(_0, cons(_1185, cons(List_var(cons(_234, cons(List_var(cons(_233, cons(List_var(element), NULL))), NULL))), NULL)));  List divisor = Var_truth(List_caddr(child)) ? cons(_0, cons(_1185, cons(List_var(cons(_9, cons(_84, cons(List_var(bytes), cons(List_var(bytes), cons(List_var(one), NULL)))))), NULL))) : bytes;  List count = cons(_0, cons(_1185, cons(List_var(cons(_9, cons(_1186, cons(List_var(cons(_0, cons(_1185, cons(List_var(cons(_234, cons(List_var(cons(_233, cons(List_var(target), NULL))), NULL))), NULL)))), cons(List_var(cons(_0, cons(_1185, cons(List_var(cons(_233, cons(List_var(divisor), NULL))), NULL)))), NULL))))), NULL)));  List units = Var_list(List_cadr(child));  if(units != one) count = cons(_0, cons(_1185, cons(List_var(cons(_9, cons(_1, cons(List_var(cons(_0, cons(_1185, cons(List_var(cons(_233, cons(List_var(count), NULL))), NULL)))), cons(List_var(cons(_0, cons(_1185, cons(List_var(cons(_233, cons(List_var(units), NULL))), NULL)))), NULL))))), NULL)));  return cons(List_var(type), cons(List_var(count), cons(List_var(cons(List_var(cons(List_car(path), cons(List_var(child), NULL))), NULL)), NULL)));
   }
   if(Var_equal(List_car(Type_list(owner)), Symbol_var(44977116))) return NULL;  Array children = Array_new(); {
-  _x2c_defer_env_2 _x2c_defer_env_5 = {._x2c_defer_capture_16 =(const void *) & children};
+  _x2c_defer_env_2 _x2c_defer_env_5 = {._x2c_defer_capture_11 =(const void *) & children};
   X2CCleanup _x2c_defer_record_1 = {
     .fn = _x2c_defer_cleanup_2,
     .env = & _x2c_defer_env_5
@@ -4354,7 +4348,7 @@ static List _initializer_zero(Type type, List target){
 
 SymTxn Compiler_begin_semantic_transaction(Compiler);
 Map Map_copy(Map);
-void Diagnostics_set_emitter(Diagnostics, DiagnosticEmitter, void *);
+DiagnosticsHold Diagnostics_hold(Diagnostics);
 void SymTxn_commit(SymTxn);
 static List _initializer_conversion(Compiler c, List value, Type type, List condition, List target, int * native_used){
   if(! List_truth(condition)) return _convert_initializer(c, value, type, target, native_used);  if(native_used) * native_used = 1;
@@ -4367,16 +4361,16 @@ static List _initializer_conversion(Compiler c, List value, Type type, List cond
 default: break;
     }
   }
-SymTxn transaction = Compiler_begin_semantic_transaction(c);  Map keys = c -> key_ids, adapters = c -> names -> adapters;  int key_count = Array_len(c -> id_keys), declarations = Array_len(c -> early_decls);  c -> key_ids = Map_copy(keys);  c -> names -> adapters = Map_copy(adapters);  Diagnostics diag = c -> diagnostics;  DiagnosticEmitter emit = diag -> emit;  void * owner = diag -> owner;  int entries = Array_len(diag -> entries), count = diag -> count;  int limited = diag -> limit_notified, depth = c -> recovery_depth;  int volatile completed = 0;  int volatile rejected = 0;  List volatile result = NULL; {
+SymTxn transaction = Compiler_begin_semantic_transaction(c);  Map keys = c -> key_ids, adapters = c -> names -> adapters;  int key_count = Array_len(c -> id_keys), declarations = Array_len(c -> early_decls);  c -> key_ids = Map_copy(keys);  c -> names -> adapters = Map_copy(adapters);  DiagnosticsHold hold = Diagnostics_hold(c -> diagnostics);  int depth = c -> recovery_depth;  int volatile completed = 0;  int volatile rejected = 0;  List volatile result = NULL; {
   {
-  _x2c_defer_env_0 _x2c_defer_env_6 = {._x2c_defer_capture_0 =(const void *) & c, ._x2c_defer_capture_1 =(const void *) & depth, ._x2c_defer_capture_2 =(const void *) & diag, ._x2c_defer_capture_3 =(const void *) & emit, ._x2c_defer_capture_4 =(const void *) & owner, ._x2c_defer_capture_5 =(const void *) & rejected, ._x2c_defer_capture_6 =(const void *) & entries, ._x2c_defer_capture_7 =(const void *) & count, ._x2c_defer_capture_8 =(const void *) & limited, ._x2c_defer_capture_9 =(const void *) & completed, ._x2c_defer_capture_10 =(const void *) & keys, ._x2c_defer_capture_11 =(const void *) & adapters, ._x2c_defer_capture_12 =(const void *) & key_count, ._x2c_defer_capture_13 =(const void *) & declarations, ._x2c_defer_capture_14 =(const void *) & transaction};
+  _x2c_defer_env_0 _x2c_defer_env_6 = {._x2c_defer_capture_0 =(const void *) & c, ._x2c_defer_capture_1 =(const void *) & depth, ._x2c_defer_capture_2 =(const void *) & hold, ._x2c_defer_capture_3 =(const void *) & rejected, ._x2c_defer_capture_4 =(const void *) & completed, ._x2c_defer_capture_5 =(const void *) & keys, ._x2c_defer_capture_6 =(const void *) & adapters, ._x2c_defer_capture_7 =(const void *) & key_count, ._x2c_defer_capture_8 =(const void *) & declarations, ._x2c_defer_capture_9 =(const void *) & transaction};
   X2CCleanup _x2c_defer_record_2 = {
     .fn = _x2c_defer_cleanup_0,
     .env = & _x2c_defer_env_6
   };
   x2c_cleanup_push(&_x2c_defer_record_2);
   {
-    Diagnostics_set_emitter(diag, NULL, NULL);  c -> recovery_depth = depth + 1; {
+    c -> recovery_depth = depth + 1; {
       ExceptionFrame _x2c_exception_frame_0;  static MatchCaptureSite _x2c_catch_arms_0[1];  static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1 };  Var _x2c_catch_patterns_0[1];  if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(28682226919752), cons(List_var(cons(Symbol_var(209659067570), cons(Symbol_var(1362954), NULL))), NULL));  _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
     }
     ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
@@ -4469,7 +4463,7 @@ static List _initializer_adapter(Compiler c, List source, List converted){
 int ast_contains_head(Var, Symbol);
 static List _initializer_adapters(Compiler c, List source, List choices, List placeholder){
   Type from = _initializer_value_type(c, Var_type(List_cadr(source)));  if(! List_truth(Type_list(from)) || ! ast_contains_head(List_var(source), 421880102)) return NULL;  Array prepared = Array_new(); {
-  _x2c_defer_env_3 _x2c_defer_env_7 = {._x2c_defer_capture_17 =(const void *) & prepared};
+  _x2c_defer_env_3 _x2c_defer_env_7 = {._x2c_defer_capture_12 =(const void *) & prepared};
   X2CCleanup _x2c_defer_record_3 = {
     .fn = _x2c_defer_cleanup_3,
     .env = & _x2c_defer_env_7
@@ -4796,34 +4790,29 @@ List Compiler_convert_segment_to_string(Compiler compiler, List expr){
   if(! _init_guard_) _file_init_();  Type type = Type_canonicalize(Var_type(List_cadr(expr)));  if(Sym_is_var_type(compiler -> sym, type)) return cons(_0, cons(_608, cons(List_var(cons(_70, cons(_1445, cons(List_var(cons(_101, cons(List_var(expr), NULL))), NULL)))), NULL)));  if(! List_truth(Type_list(Sym_resolve_numeric_type(compiler -> sym, type)))) return Compiler_convert_expression(compiler, expr, List_type(_153));  List converted = _converter_call(compiler, expr, type, List_type(_153));  if(List_truth(converted)) return converted;  List boxed = Compiler_convert_expression(compiler, expr, List_type(_405));  return cons(_0, cons(_608, cons(List_var(cons(_70, cons(_1445, cons(List_var(cons(_101, cons(List_var(boxed), NULL))), NULL)))), NULL)));
 }
 
+void Diagnostics_release(Diagnostics, DiagnosticsHold, int);
 void Array_resize(Array, size_t);
 void SymTxn_rollback(SymTxn);
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0; {
-    (*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> recovery_depth =(*(int *) _x2c_defer_data_0->_x2c_defer_capture_1);  Diagnostics_set_emitter((*(Diagnostics *) _x2c_defer_data_0->_x2c_defer_capture_2), (*(DiagnosticEmitter *) _x2c_defer_data_0->_x2c_defer_capture_3), (*(void * *) _x2c_defer_data_0->_x2c_defer_capture_4));  if((*(int *) _x2c_defer_data_0->_x2c_defer_capture_5)){
-      Array_resize((*(Diagnostics *) _x2c_defer_data_0->_x2c_defer_capture_2) -> entries, (*(int *) _x2c_defer_data_0->_x2c_defer_capture_6)); (*(Diagnostics *) _x2c_defer_data_0->_x2c_defer_capture_2) -> count =(*(int *) _x2c_defer_data_0->_x2c_defer_capture_7); (*(Diagnostics *) _x2c_defer_data_0->_x2c_defer_capture_2) -> limit_notified =(*(int *) _x2c_defer_data_0->_x2c_defer_capture_8);
+    (*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> recovery_depth =(*(int *) _x2c_defer_data_0->_x2c_defer_capture_1);  Diagnostics_release((*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> diagnostics, (*(DiagnosticsHold *) _x2c_defer_data_0->_x2c_defer_capture_2), !(*(int *) _x2c_defer_data_0->_x2c_defer_capture_3));  if(!(*(int *) _x2c_defer_data_0->_x2c_defer_capture_4)){
+      (*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> key_ids =(*(Map *) _x2c_defer_data_0->_x2c_defer_capture_5); (*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> names -> adapters =(*(Map *) _x2c_defer_data_0->_x2c_defer_capture_6);  Array_resize((*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> id_keys, (*(int *) _x2c_defer_data_0->_x2c_defer_capture_7));  Array_resize((*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> early_decls, (*(int *) _x2c_defer_data_0->_x2c_defer_capture_8));
     }
-    else if((*(DiagnosticEmitter *) _x2c_defer_data_0->_x2c_defer_capture_3)) for(int i =(*(int *) _x2c_defer_data_0->_x2c_defer_capture_6);  i < Array_len((*(Diagnostics *) _x2c_defer_data_0->_x2c_defer_capture_2) -> entries);  i ++){
-      List entry = Var_list(Array_getindex((*(Diagnostics *) _x2c_defer_data_0->_x2c_defer_capture_2) -> entries, i)); (*(DiagnosticEmitter *) _x2c_defer_data_0->_x2c_defer_capture_3)((*(void * *) _x2c_defer_data_0->_x2c_defer_capture_4), entry);
-    }
-    if(!(*(int *) _x2c_defer_data_0->_x2c_defer_capture_9)){
-      (*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> key_ids =(*(Map *) _x2c_defer_data_0->_x2c_defer_capture_10); (*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> names -> adapters =(*(Map *) _x2c_defer_data_0->_x2c_defer_capture_11);  Array_resize((*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> id_keys, (*(int *) _x2c_defer_data_0->_x2c_defer_capture_12));  Array_resize((*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> early_decls, (*(int *) _x2c_defer_data_0->_x2c_defer_capture_13));
-    }
-    SymTxn_rollback((*(SymTxn *) _x2c_defer_data_0->_x2c_defer_capture_14));
+    SymTxn_rollback((*(SymTxn *) _x2c_defer_data_0->_x2c_defer_capture_9));
   }
 
 }
 
 void Array_cleanup(Array);
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;  Array_cleanup((*(Array *) _x2c_defer_data_1->_x2c_defer_capture_15));
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;  Array_cleanup((*(Array *) _x2c_defer_data_1->_x2c_defer_capture_10));
 }
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;  Array_cleanup((*(Array *) _x2c_defer_data_2->_x2c_defer_capture_16));
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;  Array_cleanup((*(Array *) _x2c_defer_data_2->_x2c_defer_capture_11));
 }
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
-  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;  Array_cleanup((*(Array *) _x2c_defer_data_3->_x2c_defer_capture_17));
+  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;  Array_cleanup((*(Array *) _x2c_defer_data_3->_x2c_defer_capture_12));
 }
 

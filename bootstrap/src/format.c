@@ -2,7 +2,7 @@
 
 #include "format.h"
 
-static String _9, _8, _6, _5, _4, _3, _2, _1, _0;
+static String _7, _6, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -13,8 +13,6 @@ static int _is_prefix_punct(char ch);
 static int _is_suffix_punct(char ch);
 
 static int _need_space(String prev, String curr);
-
-static String _normalized_token(String token);
 
 static int _token_is(String token, char ch);
 
@@ -39,10 +37,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _2 = String_new("<generated>");
   _3 = String_new(" \"");
   _4 = String_new("\"");
-  _5 = String_new("\\\"");
-  _6 = String_new("\"");
-  _8 = String_new("$$");
-  _9 = String_new("$");
+  _6 = String_new("$$");
+  _7 = String_new("$");
 }
 
 static int _is_prefix_punct(char ch){
@@ -64,13 +60,6 @@ static int _need_space(String prev, String curr){
   if(_is_suffix_punct(c)) return 0;
   if(_is_prefix_punct(p)) return 0;
   return 1;
-}
-
-String String_replace(String, String, String);
-
-static String _normalized_token(String token){
-  if(String_truth(token) && String_getindex(token, 0) == '#') return String_replace(token, _5, _6);
-  return token;
 }
 
 int String_len(String);
@@ -160,6 +149,8 @@ Var List_assoc(List, Var);
 
 Var int_var(int);
 
+String String_replace(String, String, String);
+
 String String_escape(String);
 
 String Buffer_str_free(Buffer);
@@ -181,7 +172,7 @@ char * Compiler_code_pretty_string(Compiler cc, List code, String output_file){
       if(! String_truth(file)) file = _2;
       int line = Var_int(Var_convert(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var(output_line + 1), 3453797));
       source_line = List_truth(location) ? line : 0;
-      String escaped = String_replace(String_escape(file), _8, _9);
+      String escaped = String_replace(String_escape(file), _6, _7);
       Buffer_write(buff, String_join(NULL, cons(String_var(_0), cons(String_var(int_str(line)), cons(String_var(_3), cons(String_var(escaped), cons(String_var(_4), NULL)))))));
       _write_newline(buff);
       if(indent > 0) _write_indent(buff, indent);
@@ -189,10 +180,7 @@ char * Compiler_code_pretty_string(Compiler cc, List code, String output_file){
       prev_token = NULL;
       continue;
     }
-    int emitted_directive = Var_equal(List_car(lst), Symbol_var(273018923240));
-    if(emitted_directive) lst = List_cdr(lst);
     String token = Var_str(List_car(lst));
-    if(! emitted_directive) token = _normalized_token(token);
     char last = String_truth(token) ? String_getindex(token, - 1) : '\0';
     if(directive_break){
       directive_break = 0;

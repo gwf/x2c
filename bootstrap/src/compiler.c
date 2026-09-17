@@ -32,8 +32,6 @@ typedef struct Sym{
 
 static void _drop_compiler(void * ptr);
 
-static void _emit_user(void * owner, List entry);
-
 static Compiler _new(Compiler owner);
 
 static List _source_range(Compiler compiler, Token first, Token after);
@@ -947,22 +945,13 @@ static void _drop_compiler(void * ptr){
   Compiler_free_lisp(compiler);
 }
 
-void Compiler_print_diagnostic(Compiler, List);
-
-static void _emit_user(void * owner, List entry){
-  Compiler compiler = owner;
-  if(compiler) Compiler_print_diagnostic(compiler, entry);
-}
-
-void Diagnostics_set_emitter(Diagnostics, DiagnosticEmitter, void *);
-
 void Compiler_own_diagnostics(Compiler compiler){
-  Diagnostics_set_emitter(compiler -> diagnostics, _emit_user, compiler);
+  compiler -> diagnostics -> printer = compiler;
 }
 
 void Compiler_borrow_diagnostics(Compiler compiler, Compiler owner){
   compiler -> diagnostics = owner -> diagnostics;
-  if(compiler -> diagnostics -> emit == _emit_user) Compiler_own_diagnostics(compiler);
+  if(compiler -> diagnostics -> printer) Compiler_own_diagnostics(compiler);
 }
 
 int Array_try_next(Array, int *, Var *);
@@ -1003,7 +992,7 @@ void * Scope_calloc(size_t, size_t);
 
 Block Block_new(size_t);
 
-Diagnostics Diagnostics_new(DiagnosticEmitter, void *, int);
+Diagnostics Diagnostics_new(Compiler, int);
 
 String x2c_get_root(void);
 
@@ -1060,8 +1049,7 @@ static Compiler _new(Compiler owner){
     (compiler) -> inits = Array_new();
     (compiler) -> early_decls = Array_new();
     (compiler) -> collect_protocols = 1;
-    (compiler) -> diagnostics = Diagnostics_new(_emit_user, (compiler), owner ? owner -> diagnostics -> limit : 1);
-    if(owner && owner -> diagnostics -> emit != _emit_user) Diagnostics_set_emitter((compiler) -> diagnostics, owner -> diagnostics -> emit, owner -> diagnostics -> owner);
+    (compiler) -> diagnostics = Diagnostics_new(owner && owner -> diagnostics -> printer ?(compiler) : NULL, owner ? owner -> diagnostics -> limit : 1);
     (compiler) -> braces = Array_new();
     (compiler) -> import_stack = Array_new();
     (compiler) -> origins = Array_new();
@@ -1516,20 +1504,17 @@ List Compiler_anchor_origin(Compiler compiler, List node, Token token){
   return cons(_26, cons(int_var(occurrence), cons(List_var(node), NULL)));
 }
 
+DiagnosticsHold Diagnostics_hold(Diagnostics);
+
 void Compiler_parse_keyword_definition(Compiler);
 
 List Compiler_parse_macro_definition(Compiler);
 
-void Array_resize(Array, size_t);
+void Diagnostics_release(Diagnostics, DiagnosticsHold, int);
 
 static int _shallow_parse_compile_time_definition(Compiler c, int keyword){
   int volatile failed = 0;
-  Diagnostics diag = c -> diagnostics;
-  DiagnosticEmitter emitter = diag -> emit;
-  void * owner = diag -> owner;
-  int entries = Array_len(diag -> entries), count = diag -> count;
-  int limited = diag -> limit_notified;
-  Diagnostics_set_emitter(diag, NULL, NULL);
+  DiagnosticsHold hold = Diagnostics_hold(c -> diagnostics);
   {
     int * _x2c_macro_address_0 = & c -> recovery_depth;
     int _x2c_macro_previous_0 = * _x2c_macro_address_0;
@@ -1584,10 +1569,7 @@ x2c_cleanup_leave(& _x2c_defer_record_0);
 
 }
 }
-Diagnostics_set_emitter(diag, emitter, owner);
-Array_resize(diag -> entries, entries);
-diag -> count = count;
-diag -> limit_notified = limited;
+Diagnostics_release(c -> diagnostics, hold, 0);
 if(failed) while(Compiler_peek(c, 0) != 11212) Compiler_next(c);
 return ! failed;
 }
@@ -2351,11 +2333,9 @@ List Compiler_parse_import_declaration(Compiler);
 List Compiler_parse_protocol_declaration(Compiler);
 int Compiler_keyword_form_is_definition(Compiler);
 int Compiler_macro_form_is_definition(Compiler);
-int Compiler_keyword_alias_starts_target_at(Compiler, AstPos);
 int Compiler_skip_named_type_declaration(Compiler);
-int Compiler_keyword_alias_needs_shallow_expansion(Compiler);
+int Compiler_macro_starts_target_at(Compiler, AstPos);
 int Compiler_macro_invocation_needs_shallow_expansion(Compiler);
-void Compiler_skip_keyword_alias(Compiler);
 void Compiler_skip_macro_invocation(Compiler);
 static void _shallow_parse_loop(Compiler c){
   Compiler_rebuild_protocols(c, NULL);  c -> conforms = Map_new();  c -> shallow = 1;  Array_clear(c -> braces);  while(Compiler_peek(c, 0) != 11212){
@@ -2377,14 +2357,17 @@ static void _shallow_parse_loop(Compiler c){
     if(Compiler_keyword_form_is_definition(c)){
       _shallow_parse_compile_time_definition(c, 1);  _debug_tokens(c, start, c -> token);  continue;
     }
-    int macro_definition = Compiler_macro_form_is_definition(c);  int keyword_alias = Compiler_keyword_alias_starts_target_at(c, AST_UNIT);  if(! macro_definition && ! c -> collect_protocols && Compiler_skip_named_type_declaration(c)){
+    if(Compiler_macro_form_is_definition(c)){
+      _shallow_parse_compile_time_definition(c, 0);  _debug_tokens(c, start, c -> token);  continue;
+    }
+    if(! c -> collect_protocols && Compiler_skip_named_type_declaration(c)){
       _debug_tokens(c, start, c -> token);  continue;
     }
-    if(macro_definition || Compiler_peek(c, 0) == 73 || keyword_alias){
-      if(macro_definition) _shallow_parse_compile_time_definition(c, 0);  else if(c -> collect_protocols &&(keyword_alias ? Compiler_keyword_alias_needs_shallow_expansion(c) : Compiler_macro_invocation_needs_shallow_expansion(c))) _shallow_parse_unit_macro(c);  else{
-        if(keyword_alias) Compiler_skip_keyword_alias(c);  else Compiler_skip_macro_invocation(c);  if(! Compiler_test(c, 119)){
-          while(Compiler_peek(c, 0) == 73 || Compiler_keyword_alias_starts_target_at(c, AST_UNIT)){
-            if(Compiler_peek(c, 0) == 73) Compiler_skip_macro_invocation(c);  else Compiler_skip_keyword_alias(c);  if(Compiler_test(c, 119)) break;
+    if(Compiler_macro_starts_target_at(c, AST_UNIT)){
+      if(c -> collect_protocols && Compiler_macro_invocation_needs_shallow_expansion(c)) _shallow_parse_unit_macro(c);  else{
+        Compiler_skip_macro_invocation(c);  if(! Compiler_test(c, 119)){
+          while(Compiler_macro_starts_target_at(c, AST_UNIT)){
+            Compiler_skip_macro_invocation(c);  if(Compiler_test(c, 119)) break;
           }
           if(Compiler_peek(c, - 1) != 119) _shallow_finish_declaration(c);
         }
@@ -2497,6 +2480,7 @@ static void _append_preproc(Compiler compiler, Array ast){
 
 }
 
+void Array_resize(Array, size_t);
 static void _sync_top_level(Compiler c, Token start, int braces){
   c -> token = start;  Array_resize(c -> braces, braces);  int depth = 0;  while(Compiler_peek(c, 0) != 11212){
     Token token = c -> token;  Compiler_next(c);  if(! depth && token -> type == 119) return;  int step = Symbol_group_step(token -> type);  depth += step;  if(depth < 0) depth = 0;  Symbol next = Compiler_peek(c, 0);  if(! depth && step < 0 &&(c -> token -> line > token -> line ||(token -> type == 251 && next != 19147688 && next != 54 && next != 119 && next != 89 && next != 81))) return;
@@ -2511,7 +2495,7 @@ List List_cdr(List);
 int Diagnostics_reached_limit(Diagnostics);
 int Compiler_error_count(Compiler);
 List Compiler_full_parse(Compiler c, Map globs, int generated_symbols){
-  if(! _init_guard_) _file_init_();  Array nodes = Array_new();  Array_clear(c -> origins);  c -> fixed = Map_new();  c -> init_tokens = Map_new();  c -> static_init_deps = Map_new();  c -> origin = 0;  Array_clear(c -> braces);  c -> arms = NULL;  Sym_reset(c -> sym, globs);  Compiler_rebuild_protocols(c, globs);  c -> macros = Map_new();  c -> kw_aliases = Map_new();  c -> kw_seen = Map_new();  Compiler_install_builtin_macros(c);  if(! c -> declaration_produced) c -> imports = Map_new();  Array_clear(c -> import_stack);  c -> macro_count = 0;  c -> macro_stack = NULL;  c -> source_private = 0;  Diagnostics_reset(c -> diagnostics);  Compiler_resolve_protocols(c);  if(generated_symbols) Compiler_install_generated_protocol_symbols(c);  Token conflict = NULL; {
+  if(! _init_guard_) _file_init_();  Array nodes = Array_new();  Array_clear(c -> origins);  c -> fixed = Map_new();  c -> init_tokens = Map_new();  c -> static_init_deps = Map_new();  c -> origin = 0;  Array_clear(c -> braces);  c -> arms = NULL;  Sym_reset(c -> sym, globs);  Compiler_rebuild_protocols(c, globs);  c -> macros = Map_new();  c -> kw_aliases = Map_new();  c -> kw_seen = Map_new();  Compiler_install_builtin_macros(c);  if(! c -> declaration_produced) c -> imports = Map_new();  Array_clear(c -> import_stack);  c -> macro_count = 0;  c -> macro_stack = NULL;  c -> source_private = 0;  Compiler_resolve_protocols(c);  if(generated_symbols) Compiler_install_generated_protocol_symbols(c);  Token conflict = NULL; {
     int * _x2c_macro_address_6 = & c -> recovery_depth;  int _x2c_macro_previous_6 = * _x2c_macro_address_6; {
   _x2c_defer_env_8 _x2c_defer_env_18 = {._x2c_defer_capture_16 =(const void *) & _x2c_macro_address_6, ._x2c_defer_capture_17 =(const void *) & _x2c_macro_previous_6};
   X2CCleanup _x2c_defer_record_8 = {

@@ -2,17 +2,16 @@
 
 #include "frontend.h"
 
-static List _13, _12;
+static List _15, _14, _9;
 
-static String _25, _24, _23, _22, _21, _20, _19, _18, _17, _15, _14, _10, _8, _7, _6, _5, _4, _3, _2, _0;
+static String _24, _23, _22, _21, _20, _19, _17, _16, _12, _10, _7, _6, _4, _3, _2, _1, _0;
 
-static Var _16, _11, _9, _1;
+static Var _18, _13, _11, _8, _5;
 
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include "collect.h"
 #include "deps.h"
 #include "utils.h"
@@ -26,11 +25,7 @@ static int _source_lines(String text);
 
 static Token _first_preprocessor_token(Compiler compiler);
 
-static String _unreadable_input(Compiler compiler, String filename, String reason);
-
 static String _script_text(String text);
-
-static String _read_input_text(Compiler compiler, String filename);
 
 static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filename);
 
@@ -46,32 +41,31 @@ __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _0 = String_new("stage: driver");
-  _1 = String_var(_0);
-  _2 = String_new("file: ");
-  _3 = String_new("reason: ");
-  _4 = String_new("#include \"scripting.x\"");
-  _5 = String_new("");
-  _6 = String_new("/lib");
-  _7 = String_new("/x2c.x");
-  _8 = String_new("the host preprocessor reads the #! line as C, so --cpp-symbols,");
-  _9 = String_var(_8);
-  _10 = String_new("--live-symbols, and the --dump-cpp modes cannot read a script");
+  _0 = String_new("#include \"scripting.x\"");
+  _1 = String_new("");
+  _2 = String_new("/lib");
+  _3 = String_new("/x2c.x");
+  _4 = String_new("stage: driver");
+  _5 = String_var(_4);
+  _6 = String_new("file: ");
+  _7 = String_new("reason: cannot open");
+  _8 = String_var(_7);
+  _9 = cons(_8, NULL);
+  _10 = String_new("the host preprocessor reads the #! line as C, so --cpp-symbols,");
   _11 = String_var(_10);
-  _12 = cons(_11, NULL);
-  _13 = cons(_9, _12);
-  _14 = String_new("/lib/x2c.x");
-  _15 = String_new("stage: preprocess");
-  _16 = String_var(_15);
-  _17 = String_new("status: ");
-  _18 = String_new("cannot read input file");
-  _19 = String_new("\n");
-  _20 = String_new("cannot open");
-  _21 = String_new("not a regular file");
-  _22 = String_new("read failed");
-  _23 = String_new("#!");
-  _24 = String_new("script units use the default symbol collection");
-  _25 = String_new("failed to run C preprocessor");
+  _12 = String_new("--live-symbols, and the --dump-cpp modes cannot read a script");
+  _13 = String_var(_12);
+  _14 = cons(_13, NULL);
+  _15 = cons(_11, _14);
+  _16 = String_new("/lib/x2c.x");
+  _17 = String_new("stage: preprocess");
+  _18 = String_var(_17);
+  _19 = String_new("status: ");
+  _20 = String_new("\n");
+  _21 = String_new("cannot read input file");
+  _22 = String_new("#!");
+  _23 = String_new("script units use the default symbol collection");
+  _24 = String_new("failed to run C preprocessor");
 }
 
 int String_truth(String);
@@ -115,138 +109,18 @@ Frontend Frontend_new(CliRequest request){
   return frontend;
 }
 
-void Compiler_report_error(Compiler, Symbol, String, Token, List);
-
-static String _unreadable_input(Compiler compiler, String filename, String reason){
-  List notes = cons(_1, cons(String_var(String_join(NULL, cons(String_var(_2), cons(String_var(filename), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_3), cons(String_var(reason), NULL)))), NULL)));
-  Compiler_report_error(compiler, 306819428, _18, NULL, notes);
-}
-
 int String_find(String, String);
 
 static String _script_text(String text){
-  int end = String_find(text, _19);
-  return String_join(NULL, cons(String_var(_4), cons(String_var(end < 0 ? _5 : String_getslice(text, end, -2147483648, 1)), NULL)));
-}
-
-int Compiler_read_source(Compiler, String, volatile String *);
-
-File String_open(String, const char *);
-
-Var Symbol_var(Symbol);
-
-int File_stat(File, struct stat *);
-
-String File_string_close(File);
-
-static String _read_input_text(Compiler compiler, String filename){
-  if(compiler -> sources){
-    String volatile text;
-    if(! Compiler_read_source(compiler, filename, & text)) return _unreadable_input(compiler, filename, _20);
-    return text;
-  }
-  File volatile file = NULL;
-  {
-    ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_catch_arms_0[2];
-    static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 2, ERROR_CATCH_PENDING, -1 };
-    Var _x2c_catch_patterns_0[2];
-    if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL));
-    _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
-    List _x2c_catch_pattern_1 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
-    _x2c_catch_patterns_0[1] = List_var(_x2c_catch_pattern_1);
-  }
-  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)) file = String_open(filename, "r");  else {x2c_exception_landed(& _x2c_exception_frame_0); {
-    if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-      int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
-      x2c_error_catch_detach(_x2c_error_handler_0);
-      x2c_exception_mark_handled(&_x2c_exception_frame_0);
-      if (_x2c_catch_selected_0 == 0) {{
-        String _x2c_return_value_0 = _unreadable_input(compiler, filename, _20);
-        {
-          x2c_error_catch_close(_x2c_error_handler_0);
-          _x2c_error_handler_0 = NULL;
-          x2c_exception_leave(& _x2c_exception_frame_0);
-          return _x2c_return_value_0;
-        }
-
-      }
-
-    }
-    else {{
-      String _x2c_return_value_1 = _unreadable_input(compiler, filename, _20);
-      {
-        x2c_error_catch_close(_x2c_error_handler_0);
-        _x2c_error_handler_0 = NULL;
-        x2c_exception_leave(& _x2c_exception_frame_0);
-        return _x2c_return_value_1;
-      }
-
-    }
-
-  }
-
-}
-else{
-  x2c_error_catch_close(_x2c_error_handler_0);
-  _x2c_error_handler_0 = NULL;
-  x2c_exception_leave(& _x2c_exception_frame_0);
-  __builtin_unreachable();
-}
-}
-}
-x2c_error_catch_close(_x2c_error_handler_0);
-_x2c_error_handler_0 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_0);
-}
-struct stat info;
-if(File_stat(file, & info) || ! S_ISREG(info.st_mode)){
-  File_close(file);
-  return _unreadable_input(compiler, filename, _21);
-}
-String volatile text = NULL;
-{
-  ExceptionFrame _x2c_exception_frame_1;
-  static MatchCaptureSite _x2c_catch_arms_1[1];
-  static ErrorCatchSite _x2c_catch_site_1 = {  _x2c_catch_arms_1, -1, 1, ERROR_CATCH_PENDING, -1 };
-  Var _x2c_catch_patterns_1[1];
-  if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_2 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
-  _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_2);
-}
-ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) text = File_string_close(file);  else {x2c_exception_landed(& _x2c_exception_frame_1); {
-  if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
-    x2c_error_catch_detach(_x2c_error_handler_1);
-    x2c_exception_mark_handled(&_x2c_exception_frame_1);
-     {{
-      String _x2c_return_value_2 = _unreadable_input(compiler, filename, _22);
-      {
-        x2c_error_catch_close(_x2c_error_handler_1);
-        _x2c_error_handler_1 = NULL;
-        x2c_exception_leave(& _x2c_exception_frame_1);
-        return _x2c_return_value_2;
-      }
-
-    }
-
-  }
-
-}
-else{
-  x2c_error_catch_close(_x2c_error_handler_1);
-  _x2c_error_handler_1 = NULL;
-  x2c_exception_leave(& _x2c_exception_frame_1);
-  __builtin_unreachable();
-}
-}
-}
-x2c_error_catch_close(_x2c_error_handler_1);
-_x2c_error_handler_1 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_1);
-}
-return text;
+  int end = String_find(text, _20);
+  return String_join(NULL, cons(String_var(_0), cons(String_var(end < 0 ? _1 : String_getslice(text, end, -2147483648, 1)), NULL)));
 }
 
 String x2c_get_root(void);
+
+int Compiler_read_source(Compiler, String, volatile String *);
+
+void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
 int String_startswith(String, String);
 
@@ -260,15 +134,16 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
   Compiler c = unit -> compiler;
   c -> filename = filename;
   char source_path[PATH_MAX], runtime_path[PATH_MAX], lib_path[PATH_MAX];
-  String lib = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_6), NULL))), runtime = String_join(NULL, cons(String_var(lib), cons(String_var(_7), NULL)));
+  String lib = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_2), NULL))), runtime = String_join(NULL, cons(String_var(lib), cons(String_var(_3), NULL)));
   int source_resolved = realpath(filename, source_path) != NULL;
   int lib_resolved = realpath(lib, lib_path) != NULL;
   c -> prelude = !(source_resolved && realpath(runtime, runtime_path) && ! strcmp(source_path, runtime_path));
   int lib_length = lib_resolved ? strlen(lib_path) : 0;
   c -> runtime_inc = !(source_resolved && lib_resolved && ! strncmp(source_path, lib_path, lib_length) && source_path[lib_length] == '/');
-  String text = _read_input_text(c, filename);
-  if(String_truth(text) && String_startswith(text, _23)){
-    int end = String_find(text, _19);
+  String text = NULL;
+  if(! Compiler_read_source(c, filename, & text)) Compiler_report_error(c, 306819428, _21, NULL, cons(_5, cons(String_var(String_join(NULL, cons(String_var(_6), cons(String_var(filename), NULL)))), _9)));
+  if(String_truth(text) && String_startswith(text, _22)){
+    int end = String_find(text, _20);
     ScriptUnit script = Scope_calloc(1, sizeof(struct ScriptUnit));
     script -> path = source_resolved ? String_new(source_path) : filename;
     script -> shebang = end < 0 ? text : String_getslice(text, -2147483648, end, 1);
@@ -337,19 +212,19 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   Map globs = NULL;
   int use_cpp = request -> cpp_symbols || request -> live_symbols || SymbolSet_contains(cpp_dumps, request -> dump);
   if(use_prelude && ! use_cpp) return Compiler_collect_symbols(c, NULL);
-  if(c -> script) Compiler_report_error(c, 306819428, _24, _first_preprocessor_token(c), _13);
+  if(c -> script) Compiler_report_error(c, 306819428, _23, _first_preprocessor_token(c), _15);
   Compiler cppcompiler = Compiler_new_shared(c);
   unit -> preprocessor = cppcompiler;
   cppcompiler -> filename = filename;
   String text = NULL, errors = NULL, dependency_text = NULL;
-  String runtime = c -> prelude ? String_join(NULL, cons(String_var(root), cons(String_var(_14), NULL))) : NULL, imacros = runtime;
+  String runtime = c -> prelude ? String_join(NULL, cons(String_var(root), cons(String_var(_16), NULL))) : NULL, imacros = runtime;
   int status = Toolchain_preprocess(frontend -> toolchain, filename, c -> include_dirs, imacros, & text, & errors, & dependency_text);
   unit -> preprocessor_output = text;
   unit -> preprocessor_errors = errors;
   if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);
   if(status){
-    List notes = cons(_16, cons(String_var(String_join(NULL, cons(String_var(_17), cons(String_var(int_str(status)), NULL)))), NULL));
-    Compiler_report_error(c, 306819428, _25, _first_preprocessor_token(c), notes);
+    List notes = cons(_18, cons(String_var(String_join(NULL, cons(String_var(_19), cons(String_var(int_str(status)), NULL)))), NULL));
+    Compiler_report_error(c, 306819428, _24, _first_preprocessor_token(c), notes);
   }
   {
     String dependency;
@@ -391,7 +266,7 @@ void Type_begin_unit(void);
 
 Compiler Compiler_new(void);
 
-void Diagnostics_set_emitter(Diagnostics, DiagnosticEmitter, void *);
+Var Symbol_var(Symbol);
 
 int Compiler_error_count(Compiler);
 
@@ -417,30 +292,137 @@ int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit){
     compiler -> source_declarations = Map_new();
     compiler -> source_texts = Map_new();
   }
-  Diagnostics_set_emitter(compiler -> diagnostics, NULL, NULL);
   compiler -> recovery_depth ++;
+  {
+    ExceptionFrame _x2c_exception_frame_0;
+    static MatchCaptureSite _x2c_catch_arms_0[1];
+    static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1 };
+    Var _x2c_catch_patterns_0[1];
+    if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL));
+    _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
+  }
+  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
+    _configure_package(compiler, frontend -> request, filename);  _tokenize_input(frontend, unit, filename);
+  }
+  else {x2c_exception_landed(& _x2c_exception_frame_0); {
+    if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
+      x2c_error_catch_detach(_x2c_error_handler_0);
+      x2c_exception_mark_handled(&_x2c_exception_frame_0);
+       {{
+        int _x2c_return_value_0 = 0;
+        {
+          x2c_error_catch_close(_x2c_error_handler_0);
+          _x2c_error_handler_0 = NULL;
+          x2c_exception_leave(& _x2c_exception_frame_0);
+          return _x2c_return_value_0;
+        }
+
+      }
+
+    }
+
+  }
+  else{
+    x2c_error_catch_close(_x2c_error_handler_0);
+    _x2c_error_handler_0 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_0);
+    __builtin_unreachable();
+  }
+
+}
+}
+x2c_error_catch_close(_x2c_error_handler_0);
+_x2c_error_handler_0 = NULL;
+x2c_exception_leave(& _x2c_exception_frame_0);
+}
+return ! Compiler_error_count(compiler);
+}
+
+void Compiler_take_diagnostics(Compiler, Compiler);
+
+void Sym_seed_var_tags(Sym, Map);
+
+void Compiler_close_child(Compiler, Compiler);
+
+int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
+  if(! _init_guard_) _file_init_();
+  Compiler compiler = unit -> compiler;
+  {
+    ExceptionFrame _x2c_exception_frame_1;
+    static MatchCaptureSite _x2c_catch_arms_1[1];
+    static ErrorCatchSite _x2c_catch_site_1 = {  _x2c_catch_arms_1, -1, 1, ERROR_CATCH_PENDING, -1 };
+    Var _x2c_catch_patterns_1[1];
+    if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_1 = cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL));
+    _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_1);
+  }
+  ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)){
+    unit -> globals = _preprocess_input(frontend, unit);  if(unit -> preprocessor) Compiler_take_diagnostics(compiler, unit -> preprocessor);  Sym_seed_var_tags(compiler -> sym, unit -> globals);
+  }
+  else {x2c_exception_landed(& _x2c_exception_frame_1); {
+    if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
+      x2c_error_catch_detach(_x2c_error_handler_1);
+      x2c_exception_mark_handled(&_x2c_exception_frame_1);
+       {{
+        if(unit -> preprocessor){
+          Compiler_close_child(compiler, unit -> preprocessor);
+          unit -> preprocessor = NULL;
+        }
+        {
+          int _x2c_return_value_1 = 0;
+          {
+            x2c_error_catch_close(_x2c_error_handler_1);
+            _x2c_error_handler_1 = NULL;
+            x2c_exception_leave(& _x2c_exception_frame_1);
+            return _x2c_return_value_1;
+          }
+
+        }
+
+      }
+
+    }
+
+  }
+  else{
+    x2c_error_catch_close(_x2c_error_handler_1);
+    _x2c_error_handler_1 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_1);
+    __builtin_unreachable();
+  }
+
+}
+}
+x2c_error_catch_close(_x2c_error_handler_1);
+_x2c_error_handler_1 = NULL;
+x2c_exception_leave(& _x2c_exception_frame_1);
+}
+return ! Compiler_error_count(compiler);
+}
+
+List Compiler_full_parse(Compiler, Map, int);
+
+int ParsedUnit_parse(ParsedUnit * p){
+  Compiler compiler = p -> compiler;
+  if(Compiler_error_count(compiler)) return 0;
   {
     ExceptionFrame _x2c_exception_frame_2;
     static MatchCaptureSite _x2c_catch_arms_2[1];
     static ErrorCatchSite _x2c_catch_site_2 = {  _x2c_catch_arms_2, -1, 1, ERROR_CATCH_PENDING, -1 };
     Var _x2c_catch_patterns_2[1];
-    if (x2c_error_catch_site_pending(&_x2c_catch_site_2)) {List _x2c_catch_pattern_3 = cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL));
-    _x2c_catch_patterns_2[0] = List_var(_x2c_catch_pattern_3);
+    if (x2c_error_catch_site_pending(&_x2c_catch_site_2)) {List _x2c_catch_pattern_2 = cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL));
+    _x2c_catch_patterns_2[0] = List_var(_x2c_catch_pattern_2);
   }
-  ErrorHandler volatile _x2c_error_handler_2 = x2c_error_catch_site_push(&_x2c_exception_frame_2, &_x2c_catch_site_2, _x2c_catch_patterns_2);  x2c_exception_push(& _x2c_exception_frame_2);  if (!sigsetjmp(_x2c_exception_frame_2.env, 0)){
-    _configure_package(compiler, frontend -> request, filename);  _tokenize_input(frontend, unit, filename);
-  }
-  else {x2c_exception_landed(& _x2c_exception_frame_2); {
+  ErrorHandler volatile _x2c_error_handler_2 = x2c_error_catch_site_push(&_x2c_exception_frame_2, &_x2c_catch_site_2, _x2c_catch_patterns_2);  x2c_exception_push(& _x2c_exception_frame_2);  if (!sigsetjmp(_x2c_exception_frame_2.env, 0)) p -> ast = Compiler_full_parse(compiler, p -> globals, p -> generated_symbols);  else {x2c_exception_landed(& _x2c_exception_frame_2); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_2)){
       x2c_error_catch_detach(_x2c_error_handler_2);
       x2c_exception_mark_handled(&_x2c_exception_frame_2);
        {{
-        int _x2c_return_value_3 = 0;
+        int _x2c_return_value_2 = 0;
         {
           x2c_error_catch_close(_x2c_error_handler_2);
           _x2c_error_handler_2 = NULL;
           x2c_exception_leave(& _x2c_exception_frame_2);
-          return _x2c_return_value_3;
+          return _x2c_return_value_2;
         }
 
       }
@@ -462,125 +444,6 @@ _x2c_error_handler_2 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_2);
 }
 return ! Compiler_error_count(compiler);
-}
-
-void Compiler_take_diagnostics(Compiler, Compiler);
-
-void Sym_seed_var_tags(Sym, Map);
-
-void Compiler_close_child(Compiler, Compiler);
-
-int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
-  if(! _init_guard_) _file_init_();
-  Compiler compiler = unit -> compiler;
-  {
-    ExceptionFrame _x2c_exception_frame_3;
-    static MatchCaptureSite _x2c_catch_arms_3[1];
-    static ErrorCatchSite _x2c_catch_site_3 = {  _x2c_catch_arms_3, -1, 1, ERROR_CATCH_PENDING, -1 };
-    Var _x2c_catch_patterns_3[1];
-    if (x2c_error_catch_site_pending(&_x2c_catch_site_3)) {List _x2c_catch_pattern_4 = cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL));
-    _x2c_catch_patterns_3[0] = List_var(_x2c_catch_pattern_4);
-  }
-  ErrorHandler volatile _x2c_error_handler_3 = x2c_error_catch_site_push(&_x2c_exception_frame_3, &_x2c_catch_site_3, _x2c_catch_patterns_3);  x2c_exception_push(& _x2c_exception_frame_3);  if (!sigsetjmp(_x2c_exception_frame_3.env, 0)){
-    unit -> globals = _preprocess_input(frontend, unit);  if(unit -> preprocessor) Compiler_take_diagnostics(compiler, unit -> preprocessor);  Sym_seed_var_tags(compiler -> sym, unit -> globals);
-  }
-  else {x2c_exception_landed(& _x2c_exception_frame_3); {
-    if (x2c_exception_is_error_target(&_x2c_exception_frame_3)){
-      x2c_error_catch_detach(_x2c_error_handler_3);
-      x2c_exception_mark_handled(&_x2c_exception_frame_3);
-       {{
-        if(unit -> preprocessor){
-          Compiler_close_child(compiler, unit -> preprocessor);
-          unit -> preprocessor = NULL;
-        }
-        {
-          int _x2c_return_value_4 = 0;
-          {
-            x2c_error_catch_close(_x2c_error_handler_3);
-            _x2c_error_handler_3 = NULL;
-            x2c_exception_leave(& _x2c_exception_frame_3);
-            return _x2c_return_value_4;
-          }
-
-        }
-
-      }
-
-    }
-
-  }
-  else{
-    x2c_error_catch_close(_x2c_error_handler_3);
-    _x2c_error_handler_3 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_3);
-    __builtin_unreachable();
-  }
-
-}
-}
-x2c_error_catch_close(_x2c_error_handler_3);
-_x2c_error_handler_3 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_3);
-}
-return ! Compiler_error_count(compiler);
-}
-
-List Compiler_full_parse(Compiler, Map, int);
-
-int Array_try_next(Array, int *, Var *);
-
-Var Array_push(Array, Var);
-
-int ParsedUnit_parse(ParsedUnit * p){
-  Compiler compiler = p -> compiler;
-  if(Compiler_error_count(compiler)) return 0;
-  Diagnostics diagnostics = compiler -> diagnostics;
-  Array collected = diagnostics -> entries;
-  diagnostics -> entries = Array_new();
-  int volatile ok = 1;
-  {
-    ExceptionFrame _x2c_exception_frame_4;
-    static MatchCaptureSite _x2c_catch_arms_4[1];
-    static ErrorCatchSite _x2c_catch_site_4 = {  _x2c_catch_arms_4, -1, 1, ERROR_CATCH_PENDING, -1 };
-    Var _x2c_catch_patterns_4[1];
-    if (x2c_error_catch_site_pending(&_x2c_catch_site_4)) {List _x2c_catch_pattern_5 = cons(Symbol_var(28682226919752), cons(Symbol_var(54), NULL));
-    _x2c_catch_patterns_4[0] = List_var(_x2c_catch_pattern_5);
-  }
-  ErrorHandler volatile _x2c_error_handler_4 = x2c_error_catch_site_push(&_x2c_exception_frame_4, &_x2c_catch_site_4, _x2c_catch_patterns_4);  x2c_exception_push(& _x2c_exception_frame_4);  if (!sigsetjmp(_x2c_exception_frame_4.env, 0)) p -> ast = Compiler_full_parse(p -> compiler, p -> globals, p -> generated_symbols);  else {x2c_exception_landed(& _x2c_exception_frame_4); {
-    if (x2c_exception_is_error_target(&_x2c_exception_frame_4)){
-      x2c_error_catch_detach(_x2c_error_handler_4);
-      x2c_exception_mark_handled(&_x2c_exception_frame_4);
-       {ok = 0;
-    }
-
-  }
-  else{
-    x2c_error_catch_close(_x2c_error_handler_4);
-    _x2c_error_handler_4 = NULL;
-    x2c_exception_leave(& _x2c_exception_frame_4);
-    __builtin_unreachable();
-  }
-
-}
-}
-x2c_error_catch_close(_x2c_error_handler_4);
-_x2c_error_handler_4 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_4);
-}
-{
-  Var entry;
-  Array _x2c_macro_object_1 = diagnostics -> entries;
-  int _x2c_macro_cursor_1 = 0;
-  Var _x2c_macro_cursor_output_1;
-  while(Array_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
-    entry = _x2c_macro_cursor_output_1;
-    Array_push(collected, entry);
-  }
-
-}
-Array_free(diagnostics -> entries);
-diagnostics -> entries = collected;
-return ok && ! Compiler_error_count(compiler);
 }
 
 int Frontend_open(Frontend f, String filename, ParsedUnit * unit){

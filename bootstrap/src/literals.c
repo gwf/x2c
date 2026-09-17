@@ -75,8 +75,6 @@ static List _build_error_pattern_list(Compiler compiler, Array values);
 
 static List _parse_quoted_array_elements(Compiler compiler);
 
-static List _map_entry_macro(Compiler c);
-
 static List _parse_quoted_map_entry(Compiler c);
 
 static List _parse_quoted_map_entries(Compiler c);
@@ -1127,19 +1125,7 @@ List Compiler_parse_array_literal(Compiler compiler){
   return cons(_12, cons(_109, cons(List_var(cons(_179, List_append(elems, NULL))), NULL)));
 }
 
-int Compiler_macro_starts_target_at(Compiler, AstPos);
-
-int Compiler_keyword_alias_starts_target_at(Compiler, AstPos);
-
-int Compiler_map_entry_macro_follows(Compiler c){
-  return(Compiler_peek(c, 0) == 73 && Compiler_macro_starts_target_at(c, AST_MAP_ENTRY)) ||(Compiler_peek(c, 0) == 19147688 && Compiler_keyword_alias_starts_target_at(c, AST_MAP_ENTRY));
-}
-
 List Compiler_try_parse_macro_target_at(Compiler, AstPos);
-
-static List _map_entry_macro(Compiler c){
-  return Compiler_map_entry_macro_follows(c) ? Compiler_try_parse_macro_target_at(c, AST_MAP_ENTRY) : NULL;
-}
 
 List Compiler_parse_assignment(Compiler);
 
@@ -1149,7 +1135,7 @@ List Compiler_parse_map_entry(Compiler compiler){
   if(! _init_guard_) _file_init_();
   List slot = Compiler_try_parse_macro_slot(compiler, 28692473357490);
   if(List_truth(slot)) return slot;
-  List macro = _map_entry_macro(compiler);
+  List macro = Compiler_try_parse_macro_target_at(compiler, AST_MAP_ENTRY);
   if(List_truth(macro)) return macro;
   Token origin = compiler -> token;
   List key = NULL;
@@ -1202,7 +1188,7 @@ static List _parse_quoted_map_entry(Compiler c){
   if(Compiler_peek(c, 0) == 9463 && c -> token -> len == 2){
     Compiler_next(c);
     List insertion = Compiler_try_parse_macro_slot(c, 28692473357490);
-    if(! List_truth(insertion)) insertion = _map_entry_macro(c);
+    if(! List_truth(insertion)) insertion = Compiler_try_parse_macro_target_at(c, AST_MAP_ENTRY);
     if(List_truth(insertion)){
       Compiler_expect(c, 251);
       return insertion;

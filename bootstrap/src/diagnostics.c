@@ -168,17 +168,16 @@ __attribute__((constructor)) static void _file_init_(void){
 }
 
 static void _emit_entry(Diagnostics diag, List entry){
-  if(diag -> emit) diag -> emit(diag -> owner, entry);
+  if(diag -> printer) Compiler_print_diagnostic(diag -> printer, entry);
 }
 
 void * Scope_malloc(size_t);
 
-Diagnostics Diagnostics_new(DiagnosticEmitter emit, void * owner, int limit){
+Diagnostics Diagnostics_new(Compiler printer, int limit){
   if(! _init_guard_) _file_init_();
   Diagnostics diag = Scope_malloc(sizeof(struct Diagnostics));
   diag -> entries = Array_new();
-  diag -> emit = emit;
-  diag -> owner = owner;
+  diag -> printer = printer;
   diag -> limit =(limit < 0) ? 0 : limit;
   diag -> count = 0;
   diag -> limit_notified = 0;
@@ -192,10 +191,32 @@ void Diagnostics_reset(Diagnostics diag){
   diag -> limit_notified = 0;
 }
 
-void Diagnostics_set_emitter(Diagnostics diag, DiagnosticEmitter emit, void * owner){
+DiagnosticsHold Diagnostics_hold(Diagnostics diag){
   if(! _init_guard_) _file_init_();
-  diag -> emit = emit;
-  diag -> owner = owner;
+  DiagnosticsHold hold ={
+    diag -> printer, Array_len(diag -> entries), diag -> count, diag -> limit_notified
+  }
+  ;
+  diag -> printer = NULL;
+  return hold;
+}
+
+List Var_list(Var);
+
+Var Array_getindex(Array, int);
+
+void Array_resize(Array, size_t);
+
+void Diagnostics_release(Diagnostics diag, DiagnosticsHold hold, int keep){
+  if(! _init_guard_) _file_init_();
+  diag -> printer = hold.printer;
+  if(keep){
+    for(int i = hold.entries;  i < Array_len(diag -> entries);  i ++) _emit_entry(diag, Var_list(Array_getindex(diag -> entries, i)));
+    return;
+  }
+  Array_resize(diag -> entries, hold.entries);
+  diag -> count = hold.count;
+  diag -> limit_notified = hold.limit_notified;
 }
 
 List Array_list(Array);
@@ -204,11 +225,6 @@ List Diagnostics_entries(Diagnostics diag){
   if(! _init_guard_) _file_init_();
   if(! Array_len(diag -> entries)) return NULL;
   return Array_list(diag -> entries);
-}
-
-int Diagnostics_has_emitter(Diagnostics diag){
-  if(! _init_guard_) _file_init_();
-  return diag -> emit != NULL;
 }
 
 int Diagnostics_reached_limit(Diagnostics diag){
@@ -296,8 +312,6 @@ static String Compiler__json_path(Compiler compiler, String path){
 }
 
 Var List_assoc(List, Var);
-
-List Var_list(Var);
 
 Buffer Buffer_new(size_t);
 
@@ -392,8 +406,6 @@ void Compiler_print_diagnostic(Compiler compiler, List entry){
   fflush(stderr);
 }
 
-Var Array_getindex(Array, int);
-
 List Compiler_origin_location(Compiler compiler, int occurrence){
   if(! _init_guard_) _file_init_();
   while(occurrence > 0 && occurrence <=(int) Array_len(compiler -> origins)){
@@ -468,7 +480,7 @@ _Noreturn void Compiler_report_error(Compiler compiler, Symbol code, String mess
   List loc = _compiler_location(compiler, token);
   Diagnostics_report(diag, code, message, loc, notes);
   if(compiler -> recovery_depth > 0){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 356};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/diagnostics.x",.function = "Compiler_report_error",.line = 369};
     x2c_error_raise_n(& _x2c_error_site_0, 28682226919752, 1, Symbol_var(209659067570), Symbol_var(code));
     __builtin_unreachable();
   }

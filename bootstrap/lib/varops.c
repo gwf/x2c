@@ -311,44 +311,6 @@ long double x2c_var_update_long_double(volatile long double * lhs, Symbol op, Va
   return _x2c_macro_value_13;
 }
 
-Var Array_getindex(Array, int);
-
-Var Array_updateindex(Array, int, Symbol, Var);
-
-Var x2c_array_updateindex_from_array(Array dst, int dst_index, Symbol op, Array src, int src_index){
-  if((void *) src == NULL){
-    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/varops.x",.function = "x2c_array_updateindex_from_array",.line = 100};
-    x2c_error_raise_n(& _x2c_error_site_14, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_array_updateindex_from_array")), NULL))));
-    __builtin_unreachable();
-  }
-  Var rhs = Array_getindex(src, src_index);
-  return Array_updateindex(dst, dst_index, op, rhs);
-}
-
-Var Map_getindex(Map, Var);
-
-Var x2c_array_updateindex_from_map(Array dst, int dst_index, Symbol op, Map src, Var src_key){
-  Var rhs = Map_getindex(src, src_key);
-  return Array_updateindex(dst, dst_index, op, rhs);
-}
-
-Var Map_updateindex(Map, Var, Symbol, Var);
-
-Var x2c_map_updateindex_from_array(Map dst, Var dst_key, Symbol op, Array src, int src_index){
-  if((void *) src == NULL){
-    static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/varops.x",.function = "x2c_map_updateindex_from_array",.line = 132};
-    x2c_error_raise_n(& _x2c_error_site_15, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("x2c_map_updateindex_from_array")), NULL))));
-    __builtin_unreachable();
-  }
-  Var rhs = Array_getindex(src, src_index);
-  return Map_updateindex(dst, dst_key, op, rhs);
-}
-
-Var x2c_map_updateindex_from_map(Map dst, Var dst_key, Symbol op, Map src, Var src_key){
-  Var rhs = Map_getindex(src, src_key);
-  return Map_updateindex(dst, dst_key, op, rhs);
-}
-
 unsigned long long Var_width_mask(int);
 
 long long Var_signed_from_bits(unsigned long long, int);
@@ -369,8 +331,8 @@ static inline unsigned long long _integer_raw(Symbol _x2c_macro_op_0, unsigned l
     case 189 : _x2c_macro_raw_0 = _x2c_macro_a_0 ^ _x2c_macro_b_0;
     break;
     case 95 : case 75 : if(! _x2c_macro_b_0){
-      static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/varops.x",.function = "_integer_raw",.line = 161};
-      x2c_error_raise_n(& _x2c_error_site_16, 295748381854, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_0));
+      static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/varops.x",.function = "_integer_raw",.line = 96};
+      x2c_error_raise_n(& _x2c_error_site_14, 295748381854, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_0));
       __builtin_unreachable();
     }
     if(_x2c_macro_unsigned_value_0) _x2c_macro_raw_0 = _x2c_macro_op_0 == 95 ? _x2c_macro_a_0 / _x2c_macro_b_0 : _x2c_macro_a_0 % _x2c_macro_b_0;
@@ -388,8 +350,8 @@ static inline unsigned long long _integer_raw(Symbol _x2c_macro_op_0, unsigned l
     if(! _x2c_macro_unsigned_value_0 && _x2c_macro_b_0 &&(_x2c_macro_a_0 &(1ull <<(_x2c_macro_bits_0 - 1)))) _x2c_macro_raw_0 |= _x2c_macro_mask_0 <<(_x2c_macro_bits_0 - _x2c_macro_b_0);
     break;
     default:{
-      static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/varops.x",.function = "_integer_raw",.line = 161};
-      x2c_error_raise_n(& _x2c_error_site_17, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_0));
+      static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/varops.x",.function = "_integer_raw",.line = 96};
+      x2c_error_raise_n(& _x2c_error_site_15, 136641504, 1, Symbol_var(992), Symbol_var(_x2c_macro_op_0));
       __builtin_unreachable();
     }
 
@@ -449,8 +411,8 @@ static Var _integer_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs){
   Symbol tag = _integer_result_tag(& lhs, & rhs);
   X2CVarNumericInfo info;
   if(! Var_numeric_info(tag, & info)){
-    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/varops.x",.function = "_integer_binary",.line = 227};
-    x2c_error_raise_n(& _x2c_error_site_18, 4477479911782, 1, Symbol_var(992), Symbol_var(op));
+    static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/varops.x",.function = "_integer_binary",.line = 162};
+    x2c_error_raise_n(& _x2c_error_site_16, 4477479911782, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
   }
   unsigned long long raw = _integer_raw(op, _raw_for_width(& lhs, info.bits), _raw_for_width(& rhs, info.bits), info.bits, info.unsigned_value);
@@ -463,14 +425,14 @@ static Var _shift_binary(Symbol op, X2CVarNumeric lhs, X2CVarNumeric rhs){
   _promote_integer(& lhs);
   _promote_integer(& rhs);
   if(! rhs.unsigned_value && Var_signed_from_bits(rhs.raw, rhs.bits) < 0){
-    static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/varops.x",.function = "_shift_binary",.line = 237};
-    x2c_error_raise_n(& _x2c_error_site_19, 4477476686248, 1, Symbol_var(992), Symbol_var(op));
+    static const X2CErrorSite _x2c_error_site_17 = {.file = "../../lib/varops.x",.function = "_shift_binary",.line = 172};
+    x2c_error_raise_n(& _x2c_error_site_17, 4477476686248, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
   }
   unsigned long long count = rhs.unsigned_value ? rhs.raw :(unsigned long long) Var_signed_from_bits(rhs.raw, rhs.bits);
   if(count >=(unsigned long long) lhs.bits){
-    static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/varops.x",.function = "_shift_binary",.line = 242};
-    x2c_error_raise_n(& _x2c_error_site_20, 4477476686248, 3, Symbol_var(992), Symbol_var(op), Symbol_var(7318440), Var_box_ulong_long(count), Symbol_var(48833808), int_var(lhs.bits));
+    static const X2CErrorSite _x2c_error_site_18 = {.file = "../../lib/varops.x",.function = "_shift_binary",.line = 177};
+    x2c_error_raise_n(& _x2c_error_site_18, 4477476686248, 3, Symbol_var(992), Symbol_var(op), Symbol_var(7318440), Var_box_ulong_long(count), Symbol_var(48833808), int_var(lhs.bits));
     __builtin_unreachable();
   }
   unsigned long long raw = _integer_raw(op, _raw_for_width(& lhs, lhs.bits), count, lhs.bits, lhs.unsigned_value);
@@ -502,8 +464,8 @@ static Var _floating_binary(Symbol op, Var lhs_value, X2CVarNumeric * lhs, Var r
       case 95 : value = a / b;
       break;
       default:{
-        static const X2CErrorSite _x2c_error_site_21 = {.file = "../../lib/varops.x",.function = "_floating_binary",.line = 265};
-        x2c_error_raise_n(& _x2c_error_site_21, 136641504, 1, Symbol_var(992), Symbol_var(op));
+        static const X2CErrorSite _x2c_error_site_19 = {.file = "../../lib/varops.x",.function = "_floating_binary",.line = 200};
+        x2c_error_raise_n(& _x2c_error_site_19, 136641504, 1, Symbol_var(992), Symbol_var(op));
         __builtin_unreachable();
       }
 
@@ -522,8 +484,8 @@ static Var _floating_binary(Symbol op, Var lhs_value, X2CVarNumeric * lhs, Var r
       case 95 : value = a / b;
       break;
       default:{
-        static const X2CErrorSite _x2c_error_site_22 = {.file = "../../lib/varops.x",.function = "_floating_binary",.line = 276};
-        x2c_error_raise_n(& _x2c_error_site_22, 136641504, 1, Symbol_var(992), Symbol_var(op));
+        static const X2CErrorSite _x2c_error_site_20 = {.file = "../../lib/varops.x",.function = "_floating_binary",.line = 211};
+        x2c_error_raise_n(& _x2c_error_site_20, 136641504, 1, Symbol_var(992), Symbol_var(op));
         __builtin_unreachable();
       }
 
@@ -543,8 +505,8 @@ static Var _floating_binary(Symbol op, Var lhs_value, X2CVarNumeric * lhs, Var r
       case 95 : value = a / b;
       break;
       default:{
-        static const X2CErrorSite _x2c_error_site_23 = {.file = "../../lib/varops.x",.function = "_floating_binary",.line = 288};
-        x2c_error_raise_n(& _x2c_error_site_23, 136641504, 1, Symbol_var(992), Symbol_var(op));
+        static const X2CErrorSite _x2c_error_site_21 = {.file = "../../lib/varops.x",.function = "_floating_binary",.line = 223};
+        x2c_error_raise_n(& _x2c_error_site_21, 136641504, 1, Symbol_var(992), Symbol_var(op));
         __builtin_unreachable();
       }
 
@@ -562,20 +524,20 @@ static Var _general_numeric_binary(Symbol op, Var lhs_value, Var rhs_value){
   Var_numeric_decode(rhs_value, & rhs);
   switch(op){
     case 15481 : case 15997 : if(lhs.floating || rhs.floating){
-      static const X2CErrorSite _x2c_error_site_24 = {.file = "../../lib/varops.x",.function = "_general_numeric_binary",.line = 301};
-      x2c_error_raise_n(& _x2c_error_site_24, 4477479911782, 1, Symbol_var(992), Symbol_var(op));
+      static const X2CErrorSite _x2c_error_site_22 = {.file = "../../lib/varops.x",.function = "_general_numeric_binary",.line = 236};
+      x2c_error_raise_n(& _x2c_error_site_22, 4477479911782, 1, Symbol_var(992), Symbol_var(op));
       __builtin_unreachable();
     }
     return _shift_binary(op, lhs, rhs);
     case 75 : case 77 : case 249 : case 189 : if(lhs.floating || rhs.floating){
-      static const X2CErrorSite _x2c_error_site_25 = {.file = "../../lib/varops.x",.function = "_general_numeric_binary",.line = 304};
-      x2c_error_raise_n(& _x2c_error_site_25, 4477479911782, 1, Symbol_var(992), Symbol_var(op));
+      static const X2CErrorSite _x2c_error_site_23 = {.file = "../../lib/varops.x",.function = "_general_numeric_binary",.line = 239};
+      x2c_error_raise_n(& _x2c_error_site_23, 4477479911782, 1, Symbol_var(992), Symbol_var(op));
       __builtin_unreachable();
     }
     return _integer_binary(op, lhs, rhs);
     case 129 :{
-      static const X2CErrorSite _x2c_error_site_26 = {.file = "../../lib/varops.x",.function = "_general_numeric_binary",.line = 306};
-      x2c_error_raise_n(& _x2c_error_site_26, 136641504, 1, Symbol_var(992), Symbol_var(op));
+      static const X2CErrorSite _x2c_error_site_24 = {.file = "../../lib/varops.x",.function = "_general_numeric_binary",.line = 241};
+      x2c_error_raise_n(& _x2c_error_site_24, 136641504, 1, Symbol_var(992), Symbol_var(op));
       __builtin_unreachable();
     }
     case 56 : case 62 : case 54 : case 95 : break;
@@ -588,8 +550,8 @@ Var unsigned_var(unsigned);
 
 static Var _fast_i32(Symbol op, unsigned a, unsigned b, int unsigned_value){
   if((op == 15481 || op == 15997) && b >= 32){
-    static const X2CErrorSite _x2c_error_site_27 = {.file = "../../lib/varops.x",.function = "_fast_i32",.line = 315};
-    x2c_error_raise_n(& _x2c_error_site_27, 4477476686248, 3, Symbol_var(992), Symbol_var(op), Symbol_var(7318440), unsigned_var(b), Symbol_var(48833808), int_var(32));
+    static const X2CErrorSite _x2c_error_site_25 = {.file = "../../lib/varops.x",.function = "_fast_i32",.line = 250};
+    x2c_error_raise_n(& _x2c_error_site_25, 4477476686248, 3, Symbol_var(992), Symbol_var(op), Symbol_var(7318440), unsigned_var(b), Symbol_var(48833808), int_var(32));
     __builtin_unreachable();
   }
   unsigned raw = _integer_raw(op, a, b, 32, unsigned_value);
@@ -659,15 +621,15 @@ int Var_fallback_truth(Var value){
   if(! Var_encoding_valid(value)){
     unsigned long bits = value.u64;
     {
-      static const X2CErrorSite _x2c_error_site_28 = {.file = "../../lib/varops.x",.function = "Var_fallback_truth",.line = 388};
-      x2c_error_raise_n(& _x2c_error_site_28, 4372507526, 1, Symbol_var(46228810), Var_box_ulong(bits));
+      static const X2CErrorSite _x2c_error_site_26 = {.file = "../../lib/varops.x",.function = "Var_fallback_truth",.line = 323};
+      x2c_error_raise_n(& _x2c_error_site_26, 4372507526, 1, Symbol_var(46228810), Var_box_ulong(bits));
       __builtin_unreachable();
     }
 
   }
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_error_site_29 = {.file = "../../lib/varops.x",.function = "Var_fallback_truth",.line = 390};
-    x2c_error_raise_n(& _x2c_error_site_29, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.truth")), NULL))));
+    static const X2CErrorSite _x2c_error_site_27 = {.file = "../../lib/varops.x",.function = "Var_fallback_truth",.line = 325};
+    x2c_error_raise_n(& _x2c_error_site_27, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.truth")), NULL))));
     __builtin_unreachable();
   }
   X2CVarNumericInfo info;
@@ -684,8 +646,8 @@ int Var_fallback_truth(Var value){
     else{
       Symbol source = Var_tag(value);
       {
-        static const X2CErrorSite _x2c_error_site_30 = {.file = "../../lib/varops.x",.function = "Var_fallback_truth",.line = 406};
-        x2c_error_raise_n(& _x2c_error_site_30, 4477479911782, 2, Symbol_var(1307939018), Symbol_var(source), Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("truthy")), NULL))));
+        static const X2CErrorSite _x2c_error_site_28 = {.file = "../../lib/varops.x",.function = "Var_fallback_truth",.line = 341};
+        x2c_error_raise_n(& _x2c_error_site_28, 4477479911782, 2, Symbol_var(1307939018), Symbol_var(source), Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("truthy")), NULL))));
         __builtin_unreachable();
       }
 
@@ -722,8 +684,8 @@ static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs){
   if(! Var_encoding_valid(lhs)){
     unsigned long bits = lhs.u64;
     {
-      static const X2CErrorSite _x2c_error_site_31 = {.file = "../../lib/varops.x",.function = "_protocol_arithmetic",.line = 438};
-      x2c_error_raise_n(& _x2c_error_site_31, 4372507526, 2, Symbol_var(46228810), Var_box_ulong(bits), Symbol_var(1263882), String_var(String_join(NULL, cons(String_var(String_new("left")), NULL))));
+      static const X2CErrorSite _x2c_error_site_29 = {.file = "../../lib/varops.x",.function = "_protocol_arithmetic",.line = 373};
+      x2c_error_raise_n(& _x2c_error_site_29, 4372507526, 2, Symbol_var(46228810), Var_box_ulong(bits), Symbol_var(1263882), String_var(String_join(NULL, cons(String_var(String_new("left")), NULL))));
       __builtin_unreachable();
     }
 
@@ -731,15 +693,15 @@ static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs){
   if(! Var_encoding_valid(rhs)){
     unsigned long bits = rhs.u64;
     {
-      static const X2CErrorSite _x2c_error_site_32 = {.file = "../../lib/varops.x",.function = "_protocol_arithmetic",.line = 442};
-      x2c_error_raise_n(& _x2c_error_site_32, 4372507526, 2, Symbol_var(46228810), Var_box_ulong(bits), Symbol_var(1263882), String_var(String_join(NULL, cons(String_var(String_new("right")), NULL))));
+      static const X2CErrorSite _x2c_error_site_30 = {.file = "../../lib/varops.x",.function = "_protocol_arithmetic",.line = 377};
+      x2c_error_raise_n(& _x2c_error_site_30, 4372507526, 2, Symbol_var(46228810), Var_box_ulong(bits), Symbol_var(1263882), String_var(String_join(NULL, cons(String_var(String_new("right")), NULL))));
       __builtin_unreachable();
     }
 
   }
   if(Var_is_void(lhs) || Var_is_void(rhs)){
-    static const X2CErrorSite _x2c_error_site_33 = {.file = "../../lib/varops.x",.function = "_protocol_arithmetic",.line = 444};
-    x2c_error_raise_n(& _x2c_error_site_33, 48270474208, 1, Symbol_var(992), Symbol_var(op));
+    static const X2CErrorSite _x2c_error_site_31 = {.file = "../../lib/varops.x",.function = "_protocol_arithmetic",.line = 379};
+    x2c_error_raise_n(& _x2c_error_site_31, 48270474208, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
   }
   if(op == 56 && Var_is_row(lhs, 11, 7, 1) && Var_is_row(rhs, 11, 7, 1)) return String_var(String_add(Var_string(lhs), Var_string(rhs)));
@@ -748,8 +710,8 @@ static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs){
   if(Var_kind(lhs) == 1011493096){
     Symbol tag = Var_tag(lhs);
     {
-      static const X2CErrorSite _x2c_error_site_34 = {.file = "../../lib/varops.x",.function = "_protocol_arithmetic",.line = 454};
-      x2c_error_raise_n(& _x2c_error_site_34, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
+      static const X2CErrorSite _x2c_error_site_32 = {.file = "../../lib/varops.x",.function = "_protocol_arithmetic",.line = 389};
+      x2c_error_raise_n(& _x2c_error_site_32, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(member));
       __builtin_unreachable();
     }
 
@@ -787,15 +749,15 @@ Var Var_neg(Var value){
   if(! Var_encoding_valid(value)){
     unsigned long bits = value.u64;
     {
-      static const X2CErrorSite _x2c_error_site_35 = {.file = "../../lib/varops.x",.function = "Var_neg",.line = 510};
-      x2c_error_raise_n(& _x2c_error_site_35, 4372507526, 1, Symbol_var(46228810), Var_box_ulong(bits));
+      static const X2CErrorSite _x2c_error_site_33 = {.file = "../../lib/varops.x",.function = "Var_neg",.line = 445};
+      x2c_error_raise_n(& _x2c_error_site_33, 4372507526, 1, Symbol_var(46228810), Var_box_ulong(bits));
       __builtin_unreachable();
     }
 
   }
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_error_site_36 = {.file = "../../lib/varops.x",.function = "Var_neg",.line = 512};
-    x2c_error_raise_n(& _x2c_error_site_36, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.neg")), NULL))));
+    static const X2CErrorSite _x2c_error_site_34 = {.file = "../../lib/varops.x",.function = "Var_neg",.line = 447};
+    x2c_error_raise_n(& _x2c_error_site_34, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.neg")), NULL))));
     __builtin_unreachable();
   }
   Var result;
@@ -803,8 +765,8 @@ Var Var_neg(Var value){
   if(Var_kind(value) == 1011493096){
     Symbol tag = Var_tag(value);
     {
-      static const X2CErrorSite _x2c_error_site_37 = {.file = "../../lib/varops.x",.function = "Var_neg",.line = 517};
-      x2c_error_raise_n(& _x2c_error_site_37, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(29006));
+      static const X2CErrorSite _x2c_error_site_35 = {.file = "../../lib/varops.x",.function = "Var_neg",.line = 452};
+      x2c_error_raise_n(& _x2c_error_site_35, 31884573479268, 2, Symbol_var(41038), Symbol_var(tag), Symbol_var(883757412), Symbol_var(29006));
       __builtin_unreachable();
     }
 
@@ -831,8 +793,8 @@ Var Var_binary(Var lhs, Symbol op, Var rhs){
   if(! Var_encoding_valid(lhs)){
     unsigned long bits = lhs.u64;
     {
-      static const X2CErrorSite _x2c_error_site_38 = {.file = "../../lib/varops.x",.function = "Var_binary",.line = 551};
-      x2c_error_raise_n(& _x2c_error_site_38, 4372507526, 2, Symbol_var(46228810), Var_box_ulong(bits), Symbol_var(1263882), String_var(String_join(NULL, cons(String_var(String_new("left")), NULL))));
+      static const X2CErrorSite _x2c_error_site_36 = {.file = "../../lib/varops.x",.function = "Var_binary",.line = 486};
+      x2c_error_raise_n(& _x2c_error_site_36, 4372507526, 2, Symbol_var(46228810), Var_box_ulong(bits), Symbol_var(1263882), String_var(String_join(NULL, cons(String_var(String_new("left")), NULL))));
       __builtin_unreachable();
     }
 
@@ -840,8 +802,8 @@ Var Var_binary(Var lhs, Symbol op, Var rhs){
   if(! Var_encoding_valid(rhs)){
     unsigned long bits = rhs.u64;
     {
-      static const X2CErrorSite _x2c_error_site_39 = {.file = "../../lib/varops.x",.function = "Var_binary",.line = 555};
-      x2c_error_raise_n(& _x2c_error_site_39, 4372507526, 2, Symbol_var(46228810), Var_box_ulong(bits), Symbol_var(1263882), String_var(String_join(NULL, cons(String_var(String_new("right")), NULL))));
+      static const X2CErrorSite _x2c_error_site_37 = {.file = "../../lib/varops.x",.function = "Var_binary",.line = 490};
+      x2c_error_raise_n(& _x2c_error_site_37, 4372507526, 2, Symbol_var(46228810), Var_box_ulong(bits), Symbol_var(1263882), String_var(String_join(NULL, cons(String_var(String_new("right")), NULL))));
       __builtin_unreachable();
     }
 
@@ -853,8 +815,8 @@ Var Var_binary(Var lhs, Symbol op, Var rhs){
     case 1097083 : return Var_box_i32_bits((unsigned)(! Var_same(lhs, rhs)));
   }
   if(Var_is_void(lhs) || Var_is_void(rhs)){
-    static const X2CErrorSite _x2c_error_site_40 = {.file = "../../lib/varops.x",.function = "Var_binary",.line = 563};
-    x2c_error_raise_n(& _x2c_error_site_40, 48270474208, 1, Symbol_var(992), Symbol_var(op));
+    static const X2CErrorSite _x2c_error_site_38 = {.file = "../../lib/varops.x",.function = "Var_binary",.line = 498};
+    x2c_error_raise_n(& _x2c_error_site_38, 48270474208, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
   }
   int predicate;
@@ -874,8 +836,8 @@ Var Var_binary(Var lhs, Symbol op, Var rhs){
     }
     case 77 : case 249 : case 189 : case 15481 : case 15997 : return _general_numeric_binary(op, lhs, rhs);
     default:{
-      static const X2CErrorSite _x2c_error_site_41 = {.file = "../../lib/varops.x",.function = "Var_binary",.line = 578};
-      x2c_error_raise_n(& _x2c_error_site_41, 136641504, 1, Symbol_var(992), Symbol_var(op));
+      static const X2CErrorSite _x2c_error_site_39 = {.file = "../../lib/varops.x",.function = "Var_binary",.line = 513};
+      x2c_error_raise_n(& _x2c_error_site_39, 136641504, 1, Symbol_var(992), Symbol_var(op));
       __builtin_unreachable();
     }
 
@@ -885,15 +847,15 @@ Var Var_binary(Var lhs, Symbol op, Var rhs){
 
 Var Var_update(Var * lhs, Symbol op, Var rhs){
   if(! lhs){
-    static const X2CErrorSite _x2c_error_site_42 = {.file = "../../lib/varops.x",.function = "Var_update",.line = 594};
-    x2c_error_raise_n(& _x2c_error_site_42, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.update")), NULL))));
+    static const X2CErrorSite _x2c_error_site_40 = {.file = "../../lib/varops.x",.function = "Var_update",.line = 529};
+    x2c_error_raise_n(& _x2c_error_site_40, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.update")), NULL))));
     __builtin_unreachable();
   }
   if(! Var_encoding_valid(lhs[0])){
     unsigned long bits = lhs[0].u64;
     {
-      static const X2CErrorSite _x2c_error_site_43 = {.file = "../../lib/varops.x",.function = "Var_update",.line = 597};
-      x2c_error_raise_n(& _x2c_error_site_43, 4372507526, 2, Symbol_var(46228810), Var_box_ulong(bits), Symbol_var(1263882), String_var(String_join(NULL, cons(String_var(String_new("left")), NULL))));
+      static const X2CErrorSite _x2c_error_site_41 = {.file = "../../lib/varops.x",.function = "Var_update",.line = 532};
+      x2c_error_raise_n(& _x2c_error_site_41, 4372507526, 2, Symbol_var(46228810), Var_box_ulong(bits), Symbol_var(1263882), String_var(String_join(NULL, cons(String_var(String_new("left")), NULL))));
       __builtin_unreachable();
     }
 
@@ -901,20 +863,20 @@ Var Var_update(Var * lhs, Symbol op, Var rhs){
   if(! Var_encoding_valid(rhs)){
     unsigned long bits = rhs.u64;
     {
-      static const X2CErrorSite _x2c_error_site_44 = {.file = "../../lib/varops.x",.function = "Var_update",.line = 601};
-      x2c_error_raise_n(& _x2c_error_site_44, 4372507526, 2, Symbol_var(46228810), Var_box_ulong(bits), Symbol_var(1263882), String_var(String_join(NULL, cons(String_var(String_new("right")), NULL))));
+      static const X2CErrorSite _x2c_error_site_42 = {.file = "../../lib/varops.x",.function = "Var_update",.line = 536};
+      x2c_error_raise_n(& _x2c_error_site_42, 4372507526, 2, Symbol_var(46228810), Var_box_ulong(bits), Symbol_var(1263882), String_var(String_join(NULL, cons(String_var(String_new("right")), NULL))));
       __builtin_unreachable();
     }
 
   }
   if(Var_is_void(lhs[0]) || Var_is_void(rhs)){
-    static const X2CErrorSite _x2c_error_site_45 = {.file = "../../lib/varops.x",.function = "Var_update",.line = 603};
-    x2c_error_raise_n(& _x2c_error_site_45, 48270474208, 1, Symbol_var(992), Symbol_var(op));
+    static const X2CErrorSite _x2c_error_site_43 = {.file = "../../lib/varops.x",.function = "Var_update",.line = 538};
+    x2c_error_raise_n(& _x2c_error_site_43, 48270474208, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
   }
   if(! _update_operator(op)){
-    static const X2CErrorSite _x2c_error_site_46 = {.file = "../../lib/varops.x",.function = "Var_update",.line = 604};
-    x2c_error_raise_n(& _x2c_error_site_46, 136641504, 1, Symbol_var(992), Symbol_var(op));
+    static const X2CErrorSite _x2c_error_site_44 = {.file = "../../lib/varops.x",.function = "Var_update",.line = 539};
+    x2c_error_raise_n(& _x2c_error_site_44, 136641504, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
   }
   Var result = Var_binary(lhs[0], op, rhs);
@@ -930,30 +892,30 @@ Var Var_update(Var * lhs, Symbol op, Var rhs){
 
 Var Var_postfix(Var * lhs, Symbol op){
   if(! lhs){
-    static const X2CErrorSite _x2c_error_site_47 = {.file = "../../lib/varops.x",.function = "Var_postfix",.line = 626};
-    x2c_error_raise_n(& _x2c_error_site_47, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.postfix")), NULL))));
+    static const X2CErrorSite _x2c_error_site_45 = {.file = "../../lib/varops.x",.function = "Var_postfix",.line = 561};
+    x2c_error_raise_n(& _x2c_error_site_45, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Var.postfix")), NULL))));
     __builtin_unreachable();
   }
   if(! Var_encoding_valid(lhs[0])){
     unsigned long bits = lhs[0].u64;
     {
-      static const X2CErrorSite _x2c_error_site_48 = {.file = "../../lib/varops.x",.function = "Var_postfix",.line = 629};
-      x2c_error_raise_n(& _x2c_error_site_48, 4372507526, 1, Symbol_var(46228810), Var_box_ulong(bits));
+      static const X2CErrorSite _x2c_error_site_46 = {.file = "../../lib/varops.x",.function = "Var_postfix",.line = 564};
+      x2c_error_raise_n(& _x2c_error_site_46, 4372507526, 1, Symbol_var(46228810), Var_box_ulong(bits));
       __builtin_unreachable();
     }
 
   }
   if(Var_is_void(lhs[0])){
-    static const X2CErrorSite _x2c_error_site_49 = {.file = "../../lib/varops.x",.function = "Var_postfix",.line = 631};
-    x2c_error_raise_n(& _x2c_error_site_49, 48270474208, 1, Symbol_var(992), Symbol_var(op));
+    static const X2CErrorSite _x2c_error_site_47 = {.file = "../../lib/varops.x",.function = "Var_postfix",.line = 566};
+    x2c_error_raise_n(& _x2c_error_site_47, 48270474208, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
   }
   Symbol binary_op;
   if(op == 1848) binary_op = 56;
   else if(op == 2046) binary_op = 62;
   else{
-    static const X2CErrorSite _x2c_error_site_50 = {.file = "../../lib/varops.x",.function = "Var_postfix",.line = 633};
-    x2c_error_raise_n(& _x2c_error_site_50, 136641504, 1, Symbol_var(992), Symbol_var(op));
+    static const X2CErrorSite _x2c_error_site_48 = {.file = "../../lib/varops.x",.function = "Var_postfix",.line = 568};
+    x2c_error_raise_n(& _x2c_error_site_48, 136641504, 1, Symbol_var(992), Symbol_var(op));
     __builtin_unreachable();
   }
   Var old = lhs[0], one = Var_box_i32_bits(1);
