@@ -49,14 +49,10 @@ void x2c_set_root(String root) {
 }
 
 /** Returns the borrowed repository root, or NULL before it is configured.
-    The root is absolute with symbolic links resolved.
+    The root is absolute with symbolic links resolved, the one spelling
+    paths below the home are compared in.
 */
 String x2c_get_root(void) => x2c_root_path;
-
-/** Returns the root with symbolic links resolved, or NULL before it is
-    configured. Paths below the home are compared in this spelling.
-*/
-String x2c_canonical_root(void) => x2c_root_path;
 
 /** Returns the borrowed resolved executable path, or NULL when unavailable. */
 String x2c_get_executable(void) => x2c_executable_path;

@@ -168,7 +168,10 @@ static int _state_matches(String path, uint64_t hash) {
   try text = Path.read_text(path);
   catch %(not-found *): return 0;
   catch %(io-fail *): return 0;
-  return text.split_lines(0).car() == _state_line(hash);
+  List lines = text.split_lines(0);
+  if (!lines) return 0;
+  String first = lines.car();
+  return first == _state_line(hash);
 }
 
 /* Lines after the fingerprint name the files it covers, for a reader that

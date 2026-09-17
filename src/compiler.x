@@ -393,13 +393,13 @@ String Compiler.canonical_path(Compiler c, String path) {
     is installed.
 */
 String home_portable_path(String path) {
-  String prefix = %"${x2c_canonical_root()}/";
+  String prefix = %"${x2c_get_root()}/";
   return path.startswith(prefix) ? path[prefix.len():] : path;
 }
 
 /** Returns the absolute path that a `home_portable_path` spelling names. */
 String home_absolute_path(String spelling) =>
-  spelling.startswith("/") ? spelling : %"${x2c_canonical_root()}/$spelling";
+  spelling.startswith("/") ? spelling : %"${x2c_get_root()}/$spelling";
 
 /** Carries declaration metadata with one actual symbol contribution. */
 void Compiler.copy_source_declaration(
