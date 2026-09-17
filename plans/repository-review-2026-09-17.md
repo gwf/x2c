@@ -317,6 +317,17 @@ participation" message points at the token after the declaration, because
 `src/parse.x:1257-1265` reports with an already-advanced token; and defining a
 method on an imported package type fails with "parse: missing closing
 parenthesis" pointing at a parameter name.
+## Group 18: merge the two readable-format owners
+
+Files: `src/transform.x`, `src/expressions.x`.
+
+Group 4 narrowed the printf-family warning to a format the transform can
+read, adding `_static_printf_format` (`src/expressions.x`) beside the existing
+`_printf_static_format` (`src/transform.x`). Both now describe the same set: a
+quoted C literal, the cached canonical String, or the `String_new` of one.
+Give them one owner. Neither session could do it, because the two files were
+held by parallel sessions; take it with whichever of the two lands last.
+
 ## Group 16: one owner for precedence grouping
 
 Files: `src/emit.x`, then `lib/autodiff.xmacro` and `src/macros.x` cleanup.
