@@ -56,15 +56,15 @@ enum {
   _SET, _ANY, _BOL, _EOL, _WORDB, _NWORDB, _GROUP, _CAPEND, _ALT, _REPEAT
 };
 
+/* One node of the compiled pattern. `next` follows the sequence; an `_ALT`
+   node holds its first alternative in `child`, and alternatives follow each
+   other through `sibling`. */
 struct _RegexNode {
   int kind;
   unsigned char set[32];
   int index;
   int min, max, greedy;
-  _RegexNode child;
-  _RegexNode *alts;
-  int alt_count;
-  _RegexNode next;
+  _RegexNode child, sibling, next;
 };
 
 /* Parsing */
@@ -76,24 +76,27 @@ typedef struct {
 } _Parser;
 
 static void _fail(_Parser *p, String why) {
-  String pattern = p->regex.pattern;
-  int offset = p->pos;
+  String pattern = p.regex.pattern;
+  int offset = p.pos;
   raise %(bad-arg (operation "Regex.compile") (why $why)
           (pattern $pattern) (offset $offset));
 }
 
+static int _peek(_Parser *p) =>
+  p.pos < p.len ? (unsigned char) p.text[p.pos] : -1;
+
 static _RegexNode _node(int kind) {
   _RegexNode node = Scope.calloc(1, sizeof(struct _RegexNode));
-  node->kind = kind;
+  node.kind = kind;
   return node;
 }
 
 static void _set_add(_RegexNode node, int byte) {
-  node->set[byte >> 3] |= (unsigned char) (1 << (byte & 7));
+  node.set[byte >> 3] |= (unsigned char) (1 << (byte & 7));
 }
 
 static int _set_has(_RegexNode node, int byte) =>
-  node->set[byte >> 3] & (1 << (byte & 7));
+  node.set[byte >> 3] & (1 << (byte & 7));
 
 static void _set_range(_RegexNode node, int low, int high) {
   for (int byte = low; byte <= high; byte++) _set_add(node, byte);
@@ -119,7 +122,7 @@ static void _set_class(_RegexNode node, int letter) {
     _set_range(&members, '\t', '\r');
   }
   for (int i = 0; i < 32; i++)
-    node->set[i] |= negate ? (unsigned char) ~members.set[i] : members.set[i];
+    node.set[i] |= negate ? (unsigned char) ~members.set[i] : members.set[i];
 }
 
 static void _set_fold(_RegexNode node) {
@@ -135,8 +138,8 @@ static void _set_fold(_RegexNode node) {
 /* Reads one escaped byte after the backslash, or a class letter, which is
    returned as its negative letter code. `in_class` refuses `\b`. */
 static int _escape(_Parser *p, int in_class) {
-  if (p->pos >= p->len) _fail(p, "pattern ends in a backslash");
-  int byte = (unsigned char) p->text[p->pos++];
+  if (p.pos >= p.len) _fail(p, "pattern ends in a backslash");
+  int byte = (unsigned char) p.text[p.pos++];
   switch (byte) {
     case 't': return '\t';
     case 'n': return '\n';
@@ -153,21 +156,18 @@ static int _escape(_Parser *p, int in_class) {
       if (!_is_word(byte) && byte < 128) return byte;
       break;
   }
-  p->pos--;
+  p.pos--;
   _fail(p, "unknown escape");
   return 0;
 }
 
 static _RegexNode _class(_Parser *p) {
   _RegexNode node = _node(_SET);
-  int negate = 0, first = 1;
-  if (p->pos < p->len && p->text[p->pos] == '^') {
-    negate = 1;
-    p->pos++;
-  }
+  int negate = _peek(p) == '^', first = 1;
+  if (negate) p.pos++;
   for (;;) {
-    if (p->pos >= p->len) _fail(p, "unterminated character class");
-    int byte = (unsigned char) p->text[p->pos++];
+    if (p.pos >= p.len) _fail(p, "unterminated character class");
+    int byte = (unsigned char) p.text[p.pos++];
     if (byte == ']' && !first) break;
     first = 0;
     if (byte == '\\') {
@@ -177,10 +177,9 @@ static _RegexNode _class(_Parser *p) {
         continue;
       }
     }
-    if (p->pos + 1 < p->len && p->text[p->pos] == '-' &&
-        p->text[p->pos + 1] != ']') {
-      p->pos++;
-      int high = (unsigned char) p->text[p->pos++];
+    if (_peek(p) == '-' && p.pos + 1 < p.len && p.text[p.pos + 1] != ']') {
+      p.pos++;
+      int high = (unsigned char) p.text[p.pos++];
       if (high == '\\') high = _escape(p, 1);
       if (high < byte) _fail(p, "character range out of order");
       _set_range(node, byte, high);
@@ -189,9 +188,9 @@ static _RegexNode _class(_Parser *p) {
       _set_add(node, byte);
     }
   }
-  if (p->regex.caseless) _set_fold(node);
+  if (p.regex.caseless) _set_fold(node);
   if (negate)
-    for (int i = 0; i < 32; i++) node->set[i] = (unsigned char) ~node->set[i];
+    for (int i = 0; i < 32; i++) node.set[i] = (unsigned char) ~node.set[i];
   return node;
 }
 
@@ -200,163 +199,152 @@ static _RegexNode _alternation(_Parser *p);
 static _RegexNode _group(_Parser *p) {
   int index = -1;
   String name = NULL;
-  if (p->pos + 1 < p->len && p->text[p->pos] == '?') {
-    if (p->text[p->pos + 1] == ':') {
-      p->pos += 2;
+  if (_peek(p) == '?') {
+    p.pos++;
+    int marker = _peek(p);
+    if (marker == ':') {
+      p.pos++;
     }
-    else if (p->text[p->pos + 1] == '<') {
-      p->pos += 2;
-      int start = p->pos;
-      while (p->pos < p->len && _is_word((unsigned char) p->text[p->pos]))
-        p->pos++;
-      int digit = p->text[start] >= '0' && p->text[start] <= '9';
-      if (p->pos == start || digit || p->pos >= p->len ||
-          p->text[p->pos] != '>') {
-        p->pos = start;
+    else if (marker == '<') {
+      p.pos++;
+      int start = p.pos;
+      while (_is_word(_peek(p))) p.pos++;
+      int digit = p.text[start] >= '0' && p.text[start] <= '9';
+      if (p.pos == start || digit || _peek(p) != '>') {
+        p.pos = start;
         _fail(p, "malformed group name");
       }
-      name = String.new_len(p->text + start, p->pos - start);
-      p->pos++;
-      index = ++p->regex.capture_count;
+      name = p.regex.pattern[start:p.pos];
+      p.pos++;
+      index = ++p.regex.capture_count;
     }
     else {
+      p.pos--;
       _fail(p, "unknown group syntax");
     }
   }
   else {
-    index = ++p->regex.capture_count;
+    index = ++p.regex.capture_count;
   }
   if (index > 0)
-    p->regex.capture_names = p->regex.capture_names.append(%($name));
+    p.regex.capture_names = p.regex.capture_names.append(%($name));
   _RegexNode node = _node(_GROUP);
-  node->index = index;
-  node->child = _alternation(p);
-  if (p->pos >= p->len || p->text[p->pos] != ')')
-    _fail(p, "missing closing parenthesis");
-  p->pos++;
+  node.index = index;
+  node.child = _alternation(p);
+  if (_peek(p) != ')') _fail(p, "missing closing parenthesis");
+  p.pos++;
   if (index < 0) return node;
   _RegexNode end = _node(_CAPEND);
-  end->index = index;
-  if (!node->child) {
-    node->child = end;
+  end.index = index;
+  if (!node.child) {
+    node.child = end;
+    return node;
   }
-  else {
-    _RegexNode last = node->child;
-    while (last->next) last = last->next;
-    last->next = end;
-  }
+  _RegexNode last = node.child;
+  while (last.next) last = last.next;
+  last.next = end;
   return node;
 }
 
 static int _digits(_Parser *p, int *out) {
-  int start = p->pos, value = 0;
-  while (p->pos < p->len && p->text[p->pos] >= '0' && p->text[p->pos] <= '9')
-    value = value * 10 + (p->text[p->pos++] - '0');
+  int start = p.pos, value = 0;
+  while (_peek(p) >= '0' && _peek(p) <= '9')
+    value = value * 10 + (p.text[p.pos++] - '0');
   *out = value;
-  return p->pos > start;
+  return p.pos > start;
 }
 
 /* Reads `{m}`, `{m,}`, or `{m,n}` after the brace. Leaves the position
    unchanged and returns 0 when the brace is not a repetition. */
 static int _braces(_Parser *p, int *min, int *max) {
-  int start = p->pos;
+  int start = p.pos;
   if (!_digits(p, min)) {
-    p->pos = start;
+    p.pos = start;
     return 0;
   }
   *max = *min;
-  if (p->pos < p->len && p->text[p->pos] == ',') {
-    p->pos++;
+  if (_peek(p) == ',') {
+    p.pos++;
     if (!_digits(p, max)) *max = -1;
   }
-  if (p->pos >= p->len || p->text[p->pos] != '}') {
-    p->pos = start;
+  if (_peek(p) != '}') {
+    p.pos = start;
     return 0;
   }
-  p->pos++;
+  p.pos++;
   if (*max >= 0 && *max < *min) _fail(p, "repetition range out of order");
   return 1;
 }
 
-static _RegexNode _quantify(_Parser *p, _RegexNode atom, int min, int max) {
-  if (!atom || atom->kind == _BOL || atom->kind == _EOL ||
-      atom->kind == _WORDB || atom->kind == _NWORDB)
-    _fail(p, "nothing to repeat");
-  _RegexNode node = _node(_REPEAT);
-  node->min = min;
-  node->max = max;
-  node->greedy = 1;
-  node->child = atom;
-  if (p->pos < p->len && p->text[p->pos] == '?') {
-    node->greedy = 0;
-    p->pos++;
+/* Reads one atom. A quantifier here has nothing before it to repeat. */
+static _RegexNode _atom(_Parser *p) {
+  int byte = (unsigned char) p.text[p.pos++];
+  _RegexNode atom;
+  switch (byte) {
+    case '*': case '+': case '?':
+      p.pos--;
+      _fail(p, "nothing to repeat");
+    case '.': return _node(_ANY);
+    case '^': return _node(_BOL);
+    case '$': return _node(_EOL);
+    case '[': return _class(p);
+    case '(': return _group(p);
+    case '\\': {
+      int escaped = _escape(p, 0);
+      if (escaped == -'b') return _node(_WORDB);
+      if (escaped == -'B') return _node(_NWORDB);
+      atom = _node(_SET);
+      if (escaped < 0) _set_class(atom, -escaped);
+      else _set_add(atom, escaped);
+      break;
+    }
+    default:
+      atom = _node(_SET);
+      _set_add(atom, byte);
+      break;
   }
+  if (p.regex.caseless) _set_fold(atom);
+  return atom;
+}
+
+/* Wraps `atom` in the repetition that follows it, if any. */
+static _RegexNode _quantified(_Parser *p, _RegexNode atom) {
+  int min, max, marker = _peek(p);
+  switch (marker) {
+    case '*': min = 0; max = -1; break;
+    case '+': min = 1; max = -1; break;
+    case '?': min = 0; max = 1; break;
+    case '{':
+      p.pos++;
+      if (_braces(p, &min, &max)) {
+        p.pos--;
+        break;
+      }
+      p.pos--;
+      return atom;
+    default:
+      return atom;
+  }
+  if (atom.kind == _BOL || atom.kind == _EOL || atom.kind == _WORDB ||
+      atom.kind == _NWORDB)
+    _fail(p, "nothing to repeat");
+  p.pos++;
+  _RegexNode node = _node(_REPEAT);
+  node.min = min;
+  node.max = max;
+  node.greedy = _peek(p) != '?';
+  node.child = atom;
+  if (!node.greedy) p.pos++;
+  if (strchr("*+?", _peek(p))) _fail(p, "nothing to repeat");
   return node;
 }
 
 static _RegexNode _sequence(_Parser *p) {
-  _RegexNode head = NULL, last = NULL, prev = NULL;
-  while (p->pos < p->len) {
-    int byte = (unsigned char) p->text[p->pos];
-    if (byte == '|' || byte == ')') break;
-    p->pos++;
-    _RegexNode atom = NULL;
-    int min = -2, max = -1;
-    switch (byte) {
-      case '*': min = 0; break;
-      case '+': min = 1; break;
-      case '?': min = 0; max = 1; break;
-      case '{':
-        if (!_braces(p, &min, &max)) {
-          min = -2;
-          atom = _node(_SET);
-          _set_add(atom, '{');
-        }
-        break;
-      case '.':
-        atom = _node(_ANY);
-        break;
-      case '^':
-        atom = _node(_BOL);
-        break;
-      case '$':
-        atom = _node(_EOL);
-        break;
-      case '[':
-        atom = _class(p);
-        break;
-      case '(':
-        atom = _group(p);
-        break;
-      case '\\': {
-        int escaped = _escape(p, 0);
-        if (escaped == -'b') atom = _node(_WORDB);
-        else if (escaped == -'B') atom = _node(_NWORDB);
-        else {
-          atom = _node(_SET);
-          if (escaped < 0) _set_class(atom, -escaped);
-          else _set_add(atom, escaped);
-          if (p->regex.caseless) _set_fold(atom);
-        }
-        break;
-      }
-      default:
-        atom = _node(_SET);
-        _set_add(atom, byte);
-        if (p->regex.caseless) _set_fold(atom);
-        break;
-    }
-    if (min != -2) {
-      _RegexNode repeated = _quantify(p, last, min, max);
-      last->next = NULL;
-      if (prev) prev->next = repeated;
-      else head = repeated;
-      last = repeated;
-      continue;
-    }
-    if (last) last->next = atom;
+  _RegexNode head = NULL, last = NULL;
+  while (p.pos < p.len && _peek(p) != '|' && _peek(p) != ')') {
+    _RegexNode atom = _quantified(p, _atom(p));
+    if (last) last.next = atom;
     else head = atom;
-    prev = last;
     last = atom;
   }
   return head;
@@ -364,38 +352,44 @@ static _RegexNode _sequence(_Parser *p) {
 
 static _RegexNode _alternation(_Parser *p) {
   _RegexNode first = _sequence(p);
-  if (p->pos >= p->len || p->text[p->pos] != '|') return first;
-  _RegexNode node = _node(_ALT);
-  int capacity = 4;
-  node->alts = Scope.calloc(capacity, sizeof(_RegexNode));
-  node->alts[node->alt_count++] = first;
-  while (p->pos < p->len && p->text[p->pos] == '|') {
-    p->pos++;
-    if (node->alt_count == capacity) {
-      _RegexNode *grown = Scope.calloc(capacity * 2, sizeof(_RegexNode));
-      memcpy(grown, node->alts, capacity * sizeof(_RegexNode));
-      node->alts = grown;
-      capacity *= 2;
-    }
-    node->alts[node->alt_count++] = _sequence(p);
+  if (_peek(p) != '|') return first;
+  _RegexNode node = _node(_ALT), last = _node(_GROUP);
+  node.child = last;
+  last.index = -1;
+  last.child = first;
+  while (_peek(p) == '|') {
+    p.pos++;
+    last.sibling = _node(_GROUP);
+    last = last.sibling;
+    last.index = -1;
+    last.child = _sequence(p);
   }
   return node;
 }
 
+/* Reads a leading `(?i)`, `(?m)`, or `(?s)` in any combination. */
 static void _flags(_Parser *p) {
-  if (p->len < 4 || p->text[0] != '(' || p->text[1] != '?') return;
-  int at = 2;
-  while (at < p->len && strchr("ims", p->text[at])) {
-    if (p->text[at] == 'i') p->regex.caseless = 1;
-    if (p->text[at] == 'm') p->regex.multiline = 1;
-    if (p->text[at] == 's') p->regex.dotall = 1;
-    at++;
+  if (p.len < 4 || p.text[0] != '(' || p.text[1] != '?') return;
+  int at = 2, caseless = 0, multiline = 0, dotall = 0;
+  for (; at < p.len; at++) {
+    switch (p.text[at]) {
+      case 'i': caseless = 1; continue;
+      case 'm': multiline = 1; continue;
+      case 's': dotall = 1; continue;
+    }
+    break;
   }
-  if (at > 2 && at < p->len && p->text[at] == ')') p->pos = at + 1;
+  if (at == 2 || at >= p.len || p.text[at] != ')') return;
+  p.regex.caseless = caseless;
+  p.regex.multiline = multiline;
+  p.regex.dotall = dotall;
+  p.pos = at + 1;
 }
 
 /* Matching */
 
+/* What to run once the current sequence ends: the node after a group or
+   alternation, or the next iteration of a repeated group. */
 typedef struct _Cont {
   int repeat;
   _RegexNode node;
@@ -421,77 +415,81 @@ static int _iterate_from(_State *st, _RegexNode rep, int count, int pos,
 
 static int _iterate(_State *st, _RegexNode rep, int count, int pos,
                     int last_start, _Cont *k) {
-  if (st->depth == _DEPTH_LIMIT) {
-    String pattern = st->regex.pattern;
+  if (st.depth == _DEPTH_LIMIT) {
+    String pattern = st.regex.pattern;
     raise %(size-limit (operation "Regex.match") (pattern $pattern)
             (why "a group repeated more times than one match allows")
             (limit $_DEPTH_LIMIT));
   }
-  st->depth++;
+  st.depth++;
   int matched = _iterate_from(st, rep, count, pos, last_start, k);
-  st->depth--;
+  st.depth--;
   return matched;
 }
 
 static int _iterate_from(_State *st, _RegexNode rep, int count, int pos,
                          int last_start, _Cont *k) {
-  if (count > 0 && pos == last_start && count >= rep->min)
-    return _run(st, rep->next, pos, k);
-  int more = rep->max < 0 || count < rep->max;
+  if (count > 0 && pos == last_start && count >= rep.min)
+    return _run(st, rep.next, pos, k);
+  int more = rep.max < 0 || count < rep.max;
   _Cont again = {1, rep, count, pos, k};
-  if (count < rep->min) return _run(st, rep->child, pos, &again);
-  if (rep->greedy) {
-    if (more && _run(st, rep->child, pos, &again)) return 1;
-    return _run(st, rep->next, pos, k);
+  if (count < rep.min) return _run(st, rep.child, pos, &again);
+  if (rep.greedy) {
+    if (more && _run(st, rep.child, pos, &again)) return 1;
+    return _run(st, rep.next, pos, k);
   }
-  if (_run(st, rep->next, pos, k)) return 1;
-  return more && _run(st, rep->child, pos, &again);
+  if (_run(st, rep.next, pos, k)) return 1;
+  return more && _run(st, rep.child, pos, &again);
 }
 
 static int _single(_State *st, _RegexNode n, int pos) {
-  if (pos >= st->len) return 0;
-  int byte = (unsigned char) st->text[pos];
-  if (n->kind == _ANY) return st->regex.dotall || byte != '\n';
+  if (pos >= st.len) return 0;
+  int byte = (unsigned char) st.text[pos];
+  if (n.kind == _ANY) return st.regex.dotall || byte != '\n';
   return _set_has(n, byte) != 0;
 }
 
 /* A repeated byte class needs no continuation per iteration: count the
    longest run, then offer the ends in greedy or lazy order. */
 static int _run_loop(_State *st, _RegexNode rep, int pos, _Cont *k) {
-  int limit = rep->max < 0 ? st->len - pos : rep->max, count = 0;
-  while (count < limit && _single(st, rep->child, pos + count)) count++;
-  if (count < rep->min) return 0;
-  if (rep->greedy) {
-    for (int n = count; n >= rep->min; n--)
-      if (_run(st, rep->next, pos + n, k)) return 1;
+  int limit = rep.max < 0 ? st.len - pos : rep.max, count = 0;
+  while (count < limit && _single(st, rep.child, pos + count)) count++;
+  if (count < rep.min) return 0;
+  if (rep.greedy) {
+    for (int n = count; n >= rep.min; n--)
+      if (_run(st, rep.next, pos + n, k)) return 1;
     return 0;
   }
-  for (int n = rep->min; n <= count; n++)
-    if (_run(st, rep->next, pos + n, k)) return 1;
+  for (int n = rep.min; n <= count; n++)
+    if (_run(st, rep.next, pos + n, k)) return 1;
   return 0;
 }
 
 static int _at_boundary(_State *st, int pos) {
-  int before = pos > 0 && _is_word((unsigned char) st->text[pos - 1]);
-  int after = pos < st->len && _is_word((unsigned char) st->text[pos]);
+  int before = pos > 0 && _is_word((unsigned char) st.text[pos - 1]);
+  int after = pos < st.len && _is_word((unsigned char) st.text[pos]);
   return before != after;
 }
 
+static int _at_line_start(_State *st, int pos) =>
+  pos == 0 || (st.regex.multiline && st.text[pos - 1] == '\n');
+
+static int _at_line_end(_State *st, int pos) =>
+  pos == st.len || (st.regex.multiline && st.text[pos] == '\n');
+
 static int _run(_State *st, _RegexNode n, int pos, _Cont *k) {
-  while (n) {
-    switch (n->kind) {
+  for (; n; n = n.next) {
+    switch (n.kind) {
       case _SET:
       case _ANY:
         if (!_single(st, n, pos)) return 0;
         pos++;
         break;
       case _BOL:
-        if (pos != 0 &&
-            !(st->regex.multiline && st->text[pos - 1] == '\n')) return 0;
+        if (!_at_line_start(st, pos)) return 0;
         break;
       case _EOL:
-        if (pos != st->len &&
-            !(st->regex.multiline && st->text[pos] == '\n')) return 0;
+        if (!_at_line_end(st, pos)) return 0;
         break;
       case _WORDB:
         if (!_at_boundary(st, pos)) return 0;
@@ -500,51 +498,49 @@ static int _run(_State *st, _RegexNode n, int pos, _Cont *k) {
         if (_at_boundary(st, pos)) return 0;
         break;
       case _GROUP: {
-        _Cont after = {0, n->next, 0, 0, k};
-        if (n->index < 0) return _run(st, n->child, pos, &after);
-        int old_start = st->starts[n->index], old_end = st->ends[n->index];
-        st->starts[n->index] = pos;
-        if (_run(st, n->child, pos, &after)) return 1;
-        st->starts[n->index] = old_start;
-        st->ends[n->index] = old_end;
+        _Cont after = {0, n.next, 0, 0, k};
+        if (n.index < 0) return _run(st, n.child, pos, &after);
+        int old_start = st.starts[n.index], old_end = st.ends[n.index];
+        st.starts[n.index] = pos;
+        if (_run(st, n.child, pos, &after)) return 1;
+        st.starts[n.index] = old_start;
+        st.ends[n.index] = old_end;
         return 0;
       }
       case _CAPEND: {
-        int old_end = st->ends[n->index];
-        st->ends[n->index] = pos;
-        if (_run(st, n->next, pos, k)) return 1;
-        st->ends[n->index] = old_end;
+        int old_end = st.ends[n.index];
+        st.ends[n.index] = pos;
+        if (_run(st, n.next, pos, k)) return 1;
+        st.ends[n.index] = old_end;
         return 0;
       }
       case _ALT: {
-        _Cont after = {0, n->next, 0, 0, k};
-        for (int i = 0; i < n->alt_count; i++)
-          if (_run(st, n->alts[i], pos, &after)) return 1;
+        _Cont after = {0, n.next, 0, 0, k};
+        for (_RegexNode alt = n.child; alt; alt = alt.sibling)
+          if (_run(st, alt.child, pos, &after)) return 1;
         return 0;
       }
       case _REPEAT:
-        if (n->child->kind == _SET || n->child->kind == _ANY)
+        if (n.child.kind == _SET || n.child.kind == _ANY)
           return _run_loop(st, n, pos, k);
         return _iterate(st, n, 0, pos, -1, k);
     }
-    n = n->next;
   }
   if (!k) {
-    st->end = pos;
+    st.end = pos;
     return 1;
   }
-  if (k->repeat)
-    return _iterate(st, k->node, k->count + 1, pos, k->start, k->up);
-  return _run(st, k->node, pos, k->up);
+  if (k.repeat)
+    return _iterate(st, k.node, k.count + 1, pos, k.start, k.up);
+  return _run(st, k.node, pos, k.up);
 }
 
 static RegexCapture _capture(Regex regex, String subject, int index,
                              int start, int end) {
-  int matched = start >= 0 && end >= 0;
+  int matched = start >= 0;
   String name = index ? regex.capture_names[index - 1] : NULL;
-  String text = matched ? String.new_len(subject + start, end - start) : NULL;
-  int first = matched ? start : -1, last = matched ? end : -1;
-  return %($index $name $matched $text $first $last);
+  String text = matched ? subject[start:end] : NULL;
+  return %($index $name $matched $text $start $end);
 }
 
 static RegexMatch _search(Regex regex, String subject, int offset) {
@@ -566,38 +562,28 @@ static RegexMatch _search(Regex regex, String subject, int offset) {
   return NULL;
 }
 
-static int _whole_start(RegexMatch found) => found.car().list()[4].int();
-static int _whole_end(RegexMatch found) => found.car().list()[5].int();
+static RegexCapture _whole(RegexMatch found) => found.car();
 
-static void _write(Buffer out, String text) {
-  if (text) out.write(text);
-}
-
-static String _expand(Regex regex, RegexMatch found, String replacement) {
+static String _expand(RegexMatch found, String replacement) {
   Buffer out = Buffer.new(0);
   int n = replacement.len();
   for (int i = 0; i < n; i++) {
     char byte = replacement[i];
-    if (byte != '$' || i + 1 >= n) {
+    int next = i + 1 < n ? replacement[i + 1] : -1;
+    if (byte != '$' || next < 0) {
       out.write_char(byte);
-      continue;
     }
-    char next = replacement[i + 1];
-    if (next == '$') {
+    else if (next == '$') {
       out.write_char('$');
       i++;
     }
     else if (next >= '0' && next <= '9') {
-      _write(out, found[next - '0']);
+      found[next - '0'].write_str(out);
       i++;
     }
-    else if (next == '{') {
+    else if (next == '{' && replacement.find_within("}", i + 2, -1) >= 0) {
       int close = replacement.find_within("}", i + 2, -1);
-      if (close < 0) {
-        out.write_char(byte);
-        continue;
-      }
-      _write(out, found[replacement[i + 2:close]]);
+      found[replacement[i + 2:close]].write_str(out);
       i = close;
     }
     else {
@@ -613,12 +599,13 @@ static String _rebuild(Regex regex, String subject, int limit, Func fn,
   int cursor = 0, done = 0;
   foreach (RegexMatch found, regex.find_all(subject)) {
     if (limit >= 0 && done == limit) break;
-    _write(out, subject[cursor:_whole_start(found)]);
-    _write(out, fn ? fn(found).str() : _expand(regex, found, replacement));
-    cursor = _whole_end(found);
+    subject[cursor:_whole(found).start()].write_str(out);
+    String piece = fn ? fn(found).str() : _expand(found, replacement);
+    piece.write_str(out);
+    cursor = _whole(found).end();
     done++;
   }
-  _write(out, subject[cursor:]);
+  subject[cursor:].write_str(out);
   return out.str();
 }
 
@@ -686,8 +673,8 @@ List Regex.find_all(Regex regex, String subject) {
     RegexMatch next = _search(regex, subject, at);
     if (!next) break;
     found = cons(next, found);
-    int end = _whole_end(next);
-    at = end > _whole_start(next) ? end : end + 1;
+    int end = _whole(next).end();
+    at = end > _whole(next).start() ? end : end + 1;
   }
   return found.reverse();
 }
@@ -699,8 +686,8 @@ List Regex.split(Regex regex, String subject) {
   List parts = NULL;
   int cursor = 0;
   foreach (RegexMatch found, regex.find_all(subject)) {
-    parts = cons(subject[cursor:_whole_start(found)], parts);
-    cursor = _whole_end(found);
+    parts = cons(subject[cursor:_whole(found).start()], parts);
+    cursor = _whole(found).end();
   }
   parts = cons(subject[cursor:], parts);
   return parts.reverse();

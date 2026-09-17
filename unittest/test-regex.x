@@ -163,14 +163,16 @@ static void regex_rejects_bad_patterns(void) {
   List cases = %(("(ab" "missing closing parenthesis" 3)
                  ("ab)" "unmatched closing parenthesis" 2)
                  ("[ab" "unterminated character class" 3)
-                 ("*a" "nothing to repeat" 1)
-                 ("^*" "nothing to repeat" 2)
+                 ("*a" "nothing to repeat" 0)
+                 ("^*" "nothing to repeat" 1)
                  ("a{3,1}" "repetition range out of order" 6)
                  ("[z-a]" "character range out of order" 4)
                  ("\\q" "unknown escape" 1)
                  ("ab\\" "pattern ends in a backslash" 3)
                  ("(?<1a>x)" "malformed group name" 3)
-                 ("(?=x)" "unknown group syntax" 1));
+                 ("(?=x)" "unknown group syntax" 1)
+                 ("a**" "nothing to repeat" 2)
+                 ("a+?+" "nothing to repeat" 3));
   foreach (List row, cases) {
     String pattern = row.car().string();
     int caught = 0;
