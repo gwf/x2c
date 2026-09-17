@@ -434,6 +434,7 @@ typedef struct CcJob {
   ToolAction action;
   String source, object, depfile, state_path, preprocessed;
   uint64_t fingerprint;
+  int fingerprinted;
 } CcJob;
 
 static uint64_t _action_fingerprint(
@@ -446,19 +447,24 @@ static uint64_t _action_fingerprint(
   return hash;
 }
 
-/* Returns -1 when preprocessing starts a compile in the same job slot. */
+/* Returns -1 when preprocessing starts a compile in the same job slot. A
+   fingerprint this run cannot read is a cache miss: the source compiles and
+   records nothing. Only the preprocessing command itself failing is an
+   error, and the C compiler has already said why. */
 static int _finish_compile(Build state, CcJob *pending) {
   int status = pending.execution.wait();
   if (pending.preprocessed) {
-    int ok = !status;
+    int ok = 1;
     String preprocessed = pending.preprocessed;
-    if (ok)
+    if (!status)
       pending.fingerprint = _action_fingerprint(
         state, pending.action, %($preprocessed), &ok);
     unlink(pending.preprocessed);
     pending.preprocessed = NULL;
-    if (!ok) return 1;
-    if (!access(pending.object, R_OK) && !access(pending.depfile, R_OK) &&
+    if (status) return 1;
+    pending.fingerprinted = ok;
+    if (ok && !access(pending.object, R_OK) &&
+        !access(pending.depfile, R_OK) &&
         _state_matches(pending.state_path, pending.fingerprint)) {
       if (state.request.verbose)
         fprintf(stderr, "x2c: up-to-date compile %s\n", pending.source);
@@ -469,7 +475,7 @@ static int _finish_compile(Build state, CcJob *pending) {
       return -1;
     }
   }
-  else if (!status && state.state_root && !state.request.dry_run)
+  else if (!status && pending.fingerprinted && !state.request.dry_run)
     _state_write(pending.state_path, pending.fingerprint);
   if (!status) {
     state.cc_done++;
