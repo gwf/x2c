@@ -378,7 +378,7 @@ try {
   if (!options["quiet"]) printf("installing to %s\n", prefix);
 }
 catch %(bad-arg *detail): {
-  Stderr.printf("%s", Args.usage(spec, "install.x"));
+  Stderr.printf("%s", Args.usage("install.x", spec));
   return 2;
 }
 ~  return 0;

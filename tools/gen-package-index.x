@@ -91,7 +91,7 @@ List spec = %(
    (help "index header version; defaults to builds/0/x2c --version"))
   (bundles repeated (help "<name>-native.tar.gz bundles to list")));
 if (args.contains("-h") || args.contains("--help")) {
-  printf("%s", Args.usage(spec, program));
+  printf("%s", Args.usage(program, spec));
   return 0;
 }
 
@@ -99,7 +99,7 @@ Map options = NULL;
 try options = Args.parse(args, spec);
 catch %(bad-arg *detail): {
   String why = detail.assoc(<why>), subject = detail[2].cadr();
-  Stderr.printf("%sx2c: %s: %s\n", Args.usage(spec, program), why, subject);
+  Stderr.printf("%sx2c: %s: %s\n", Args.usage(program, spec), why, subject);
   return 2;
 }
 

@@ -114,7 +114,7 @@ static void args_bad_input_raises(void) {
 
 static void args_usage_lists_spec_rows(void) {
   $test.scoped();
-  EXPECT_STR_EQ(Args.usage(_spec(), "tool"),
+  EXPECT_STR_EQ(Args.usage("tool", _spec()),
     "Usage:\n"
     "  tool [options] <source> [<rest>...]\n"
     "\n"
@@ -126,14 +126,14 @@ static void args_usage_lists_spec_rows(void) {
     "\n"
     "Operands:\n"
     "  <source>                    The input file\n");
-  EXPECT_STR_EQ(Args.usage(%((files repeated required)), "cat"),
+  EXPECT_STR_EQ(Args.usage("cat", %((files repeated required))),
                 "Usage:\n  cat <files>...\n");
-  EXPECT_STR_EQ(Args.usage(NULL, "true"), "Usage:\n  true\n");
+  EXPECT_STR_EQ(Args.usage("true", NULL), "Usage:\n  true\n");
   EXPECT_INT_EQ(Args.parse(NULL, NULL).len(), 0);
   EXPECT_STR_EQ(
     Args.usage(
-      %((--a-very-long-option-name (value placeholder) (help "Wraps"))),
-      "tool"),
+      "tool",
+      %((--a-very-long-option-name (value placeholder) (help "Wraps")))),
     "Usage:\n  tool [options]\n\nOptions:\n"
     "      --a-very-long-option-name <placeholder>\n"
     "                              Wraps\n");

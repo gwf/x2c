@@ -78,7 +78,7 @@ Source: `lib/args.x:232`
 <a id="Args.usage"></a>
 #### Args.usage
 
-`String Args.usage(List spec, String program)`
+`String Args.usage(String program, List spec)`
 
 Returns usage text for `spec` as `Args.parse` reads it: a synopsis
 for `program`, then each option, then each operand that has help, in

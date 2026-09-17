@@ -62,7 +62,7 @@ List spec = %(
 Map options;
 try options = Args.parse(args, spec);
 catch %(bad-arg *detail): {
-  Stderr.printf("%s", Args.usage(spec, "bundle"));
+  Stderr.printf("%s", Args.usage("bundle", spec));
   return 2;
 }
 String name = options["package"].str();

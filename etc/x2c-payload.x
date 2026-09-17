@@ -261,7 +261,7 @@ foreach (List row, commands)
 if (!spec) {
   foreach (List row, commands)
     Stderr.printf(
-      "%s", Args.usage(row.cdr(), %"$program ${row.car()}"));
+      "%s", Args.usage(%"$program ${row.car()}", row.cdr()));
   return 2;
 }
 
@@ -269,7 +269,7 @@ Map options = NULL;
 try options = Args.parse(args.cdr(), spec);
 catch %(bad-arg *detail): {
   String why = detail.assoc(<why>), subject = detail[2].cadr();
-  Stderr.printf("%sx2c: %s: %s\n", Args.usage(spec, %"$program $command"),
+  Stderr.printf("%sx2c: %s: %s\n", Args.usage(%"$program $command", spec),
                 why, subject);
   return 2;
 }

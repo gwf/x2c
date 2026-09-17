@@ -280,7 +280,7 @@ static void _write_row(Buffer out, String label, String help) {
     for `program`, then each option, then each operand that has help, in
     spec order. Help text starts at column 30, as in `x2c help`.
 */
-String Args.usage(List spec, String program) {
+String Args.usage(String program, List spec) {
   _Spec parsed = _read_spec(spec);
   Buffer synopsis = $auto(Buffer.new(0)), options = $auto(Buffer.new(0));
   Buffer operands = $auto(Buffer.new(0)), out = $auto(Buffer.new(0));
