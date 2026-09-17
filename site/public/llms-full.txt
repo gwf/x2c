@@ -3629,8 +3629,9 @@ and inside compound statements. This includes a trailing directive before
 a directive before the `else`, do-while `while`, `catch`, or `finally` that
 continues a statement. A conditional group opened there governs its later
 arms and closing directive as well, so `foreach` keeps the whole group inside
-its loop. A directive between two match arms, around a whole `case`, is not
-kept; write the condition inside the arm body instead.
+its loop. Directives between match arms stay between those arms, so an arm
+inside a conditional group is present exactly when C compiles the branch that
+holds it.
 
 An include that x2c cannot resolve remains in the emitted C. Translation
 without host preprocessing can therefore succeed with an active missing
