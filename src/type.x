@@ -86,6 +86,33 @@ String ast_addressed_identifier(Var value) {
   return NULL;
 }
 
+/* The innermost node an expression designates, past the forms that still
+   name the same object: parentheses, a member, and an index into an array.
+   What remains is a name, a designation through a pointer, or neither. */
+static Var _designated(Var value) {
+  while (value is <list>) {
+    List ast = value;
+    match (ast) {
+      case %(!or (expr ? ?inner) (parens ?inner)): {
+        value = inner;
+        continue;
+      }
+      case %(index (!set ?base (expr ?base_type ?)) ?): {
+        Type type = base_type;
+        if (!type.is_array()) return ast;
+        value = base;
+        continue;
+      }
+      case %(op . ?base *): {
+        value = base;
+        continue;
+      }
+    }
+    return ast;
+  }
+  return NULL;
+}
+
 /** Returns the name an expression designates directly, following the forms
     that still name the same object - parentheses, a member, an array index,
     a dereference - or `NULL` when the expression designates no single name.
@@ -93,63 +120,31 @@ String ast_addressed_identifier(Var value) {
     an error transfer requires, applies to this name.
 */
 String ast_direct_identifier(Var value) {
-  while (value is <list>) {
-    List ast = value;
-    match (ast) {
-      case %(ident ?binding):
-        return binding_identity_spelling(binding);
-      case %(!or (expr ? ?inner) (parens ?inner)): {
-        value = inner;
-        continue;
-      }
-      case %(index (!set ?base (expr ?base_type ?)) ?): {
-        Type type = base_type;
-        if (type.is_array()) {
-          value = base;
-          continue;
-        }
-      }
-      case %(op . ?base *): {
-        value = base;
-        continue;
-      }
-      case %(op (!quote ->) ?base *): return ast_addressed_identifier(base);
-      case %(op (!quote *) ?base): return ast_addressed_identifier(base);
-    }
-    return NULL;
+  Var designated = _designated(value);
+  if (designated is not <list>) return NULL;
+  List ast = designated;
+  match (ast) {
+    case %(ident ?binding): return binding_identity_spelling(binding);
+    case %(op (!quote ->) ?base *): return ast_addressed_identifier(base);
+    case %(op (!quote *) ?base): return ast_addressed_identifier(base);
   }
   return NULL;
 }
 
 /** Returns the name of the pointer an expression designates through, or
     `NULL` when it designates no object through a single name. `*pointer`,
-    `pointer[index]`, and `pointer->member` all change the object the
-    pointer holds, which `ast_direct_identifier` reports as no name at all.
+    `pointer[index]`, and `pointer->member` all change the object the pointer
+    holds, which `ast_direct_identifier` reports as no name at all.
 */
 String ast_indirect_identifier(Var value) {
-  while (value is <list>) {
-    List ast = value;
-    match (ast) {
-      case %(!or (expr ? ?inner) (parens ?inner)): {
-        value = inner;
-        continue;
-      }
-      case %(index (!set ?base (expr ?base_type ?)) ?): {
-        Type type = base_type;
-        if (type.is_array()) {
-          value = base;
-          continue;
-        }
-        return ast_direct_identifier(base);
-      }
-      case %(op . ?base *): {
-        value = base;
-        continue;
-      }
-      case %(op (!quote ->) ?base *): return ast_direct_identifier(base);
-      case %(op (!quote *) ?base): return ast_direct_identifier(base);
-    }
-    return NULL;
+  Var designated = _designated(value);
+  if (designated is not <list>) return NULL;
+  List ast = designated;
+  match (ast) {
+    case %(index (!set ?base (expr ? ?)) ?):
+      return ast_direct_identifier(base);
+    case %(op (!quote ->) ?base *): return ast_direct_identifier(base);
+    case %(op (!quote *) ?base): return ast_direct_identifier(base);
   }
   return NULL;
 }
