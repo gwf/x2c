@@ -21,8 +21,6 @@ $(import "../lib/private-keywords.xmacro")
 #include "digest.x"
 #include "json.x"
 
-#define INSTALL_INDEX "https://x2c-lang.dev/packages/index.txt"
-
 static void _error(const char *message) {
   x2c_driver_error(%"install: $message");
 }
@@ -98,7 +96,8 @@ List install_rows(String text) {
 }
 
 static List _index_row(CliRequest request, String name, String work) {
-  String location = request.index ? request.index : INSTALL_INDEX;
+  String location = request.index ? request.index :
+    "https://x2c-lang.dev/packages/index.txt";
   String path =
     _remote(location) ? _fetch(location, work, "index.txt") : location;
   String platform = _platform(), text = NULL, List source = NULL;

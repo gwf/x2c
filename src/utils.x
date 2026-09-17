@@ -45,6 +45,11 @@ void x2c_set_root(String root) {
 /** Returns the borrowed repository root, or NULL before it is configured. */
 String x2c_get_root(void) => x2c_root_path;
 
+/** Returns the root with symbolic links resolved, or NULL before it is
+    configured. Paths below the home are compared in this spelling.
+*/
+String x2c_canonical_root(void) => x2c_canonical_root_path;
+
 /** Returns the borrowed resolved executable path, or NULL when unavailable. */
 String x2c_get_executable(void) => x2c_executable_path;
 
@@ -131,10 +136,15 @@ String x2c_find_program(String name) {
   return NULL;
 }
 
-/** Prints `x2c: error: <message>` to stderr and exits with status 2. */
+/** Prints `x2c: error: <message>` to stderr and exits with status 2.
+    The streams are flushed and `atexit` handlers do not run, so the call is
+    safe inside a `try` body or a catch arm, whose records those handlers
+    would otherwise find still live.
+*/
 void x2c_driver_error(const char *message) {
   fprintf(stderr, "x2c: error: %s\n", message);
-  exit(2);
+  fflush(NULL);
+  _exit(2);
 }
 
 /** Reports a caught `<not-found>` or `<io-fail>` through `x2c_driver_error`
@@ -181,7 +191,6 @@ void file_publish(Path p, String text) {
 #include <fcntl.h>
 #include <limits.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <sys/file.h>
 #include <sys/wait.h>
@@ -190,6 +199,7 @@ void file_publish(Path p, String text) {
 // module state
 
 static String x2c_executable_path = NULL, x2c_root_path = NULL;
+static String x2c_canonical_root_path = NULL;
 static List x2c_base_include_dirs = NULL, x2c_repo_cpp_include_dirs = NULL;
 
 // environment discovery
@@ -222,6 +232,7 @@ static String _locate_home(Path p) {
 
 static void _prepare_repo_defaults(void) {
   if (!x2c_root_path) return;
+  x2c_canonical_root_path = Path.absolute(x2c_root_path);
   String include_dir = %"$x2c_root_path/include/x2c";
   String src_dir = %"$x2c_root_path/src", lib_dir = %"$x2c_root_path/lib";
   x2c_base_include_dirs = cons(include_dir, NULL);

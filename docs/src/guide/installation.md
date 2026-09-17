@@ -126,8 +126,8 @@ A source checkout is the development install. After `make build-safe`, the
 checkout is a complete home with its own `packages/` directory, and `bin/x2c`
 is the bootstrap compiler. Run `make build-install` before putting `bin/` on
 `PATH`; it links `bin/x2c` to a copy of the current branch's compiler. A
-compiler in the checkout's `bin/` links `bootstrap/lib/libx2c.a`, the runtime
-from the last bootstrap refresh. Select the checkout for one shell with
+compiler in the checkout's `bin/` links `builds/0/libx2c.a`, the runtime built
+with the headers in `include/x2c`. Select the checkout for one shell with
 `PATH`, or for one command with `X2C_HOME`:
 
 ```sh

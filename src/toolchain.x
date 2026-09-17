@@ -71,10 +71,11 @@ static String _tool(String explicit, String name, String fallback) {
   return value ? value : fallback;
 }
 
-/* A staged compiler links its stage-local runtime. A compiler with a home,
-   checkout or installed prefix alike, uses `<home>/lib/libx2c.a` or the
-   checkout's bootstrap fallback. Without a home, the layout is read from
-   the executable's own prefix. No compiler links an unrelated runtime.
+/* A staged compiler links its stage-local runtime. A compiler with a home
+   uses `<home>/lib/libx2c.a`, or in a checkout the stage 0 archive built
+   with the headers `<home>/include/x2c` names. Without a home, the layout is
+   read from the executable's own prefix. No compiler links an unrelated
+   runtime.
 */
 static void Toolchain._layout(Toolchain t) {
   String home = x2c_home(), stage = x2c_stage_dir();
@@ -85,7 +86,7 @@ static void Toolchain._layout(Toolchain t) {
   t.runtime_lib = %"$prefix/lib/libx2c.a";
   if (stage) t.runtime_lib = %"$stage/libx2c.a";
   else if (home && !Path.is_file(t.runtime_lib))
-    t.runtime_lib = %"$home/bootstrap/lib/libx2c.a";
+    t.runtime_lib = %"$home/builds/0/libx2c.a";
 }
 
 /** Creates a `Scope`-owned host toolchain and resolves its native layout.

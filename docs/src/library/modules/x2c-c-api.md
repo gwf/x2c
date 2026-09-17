@@ -13,6 +13,7 @@ prefix.
 | --- | --- | --- |
 | [`x2c_array_updateindex_from_array`](varops.md#x2c_array_updateindex_from_array) | `lib/varops.x` | `Var x2c_array_updateindex_from_array( Array dst, int dst_index, Symbol op, Array src, int src_index)` |
 | [`x2c_array_updateindex_from_map`](varops.md#x2c_array_updateindex_from_map) | `lib/varops.x` | `Var x2c_array_updateindex_from_map( Array dst, int dst_index, Symbol op, Map src, Var src_key)` |
+| `x2c_canonical_root` | `src/utils.x` | `String x2c_canonical_root(void)` |
 | [`x2c_cleanup_leave`](exception.md#x2c_cleanup_leave) | `lib/exception.x` | `void x2c_cleanup_leave(X2CCleanup *record)` |
 | [`x2c_cleanup_push`](exception.md#x2c_cleanup_push) | `lib/exception.x` | `void x2c_cleanup_push(X2CCleanup *record)` |
 | `x2c_cpp_include_dirs` | `src/utils.x` | `List x2c_cpp_include_dirs(void)` |
@@ -100,4 +101,4 @@ prefix.
 | [`x2c_var_update_ulong`](varops.md#x2c_var_update_ulong) | `lib/varops.x` | `ulong x2c_var_update_ulong( volatile ulong *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long( volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 
-Total: 88 functions.
+Total: 89 functions.

@@ -33,8 +33,6 @@ typedef struct Bootstrap {
 #include <stdlib.h>
 #include <unistd.h>
 
-#define BOOTSTRAP_MANIFEST "/zip/x2c/.x2c-bootstrap-manifest"
-
 static void _error(const char *message) {
   x2c_driver_error(%"bootstrap: $message");
 }
@@ -106,7 +104,7 @@ static void _acquire(Bootstrap payload) {
    identity. */
 static List Bootstrap._manifest(Bootstrap b) {
   String text = NULL;
-  try text = Path.read_text(BOOTSTRAP_MANIFEST);
+  try text = Path.read_text("/zip/x2c/.x2c-bootstrap-manifest");
   catch %(not-found *):
     _error("this executable has no embedded source payload");
   if (!text.contains("\n")) _error("malformed embedded source manifest");

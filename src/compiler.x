@@ -394,26 +394,19 @@ String Compiler.canonical_path(Compiler c, String path) {
   return realpath(path, resolved) ? %"$resolved" : path;
 }
 
-static String _canonical_home(void) {
-  static char home[PATH_MAX];
-  if (!*home && !realpath(x2c_get_root(), home))
-    snprintf(home, sizeof home, "%s", (char *) x2c_get_root());
-  return %"$home";
-}
-
 /** Returns `path` relative to the canonical x2c home when it lies below the
     home, otherwise `path`. Interfaces, retained declarations, and generated
     identities spell paths this way, so they do not depend on where the home
     is installed.
 */
 String home_portable_path(String path) {
-  String prefix = %"${_canonical_home()}/";
+  String prefix = %"${x2c_canonical_root()}/";
   return path.startswith(prefix) ? path[prefix.len():] : path;
 }
 
 /** Returns the absolute path that a `home_portable_path` spelling names. */
 String home_absolute_path(String spelling) =>
-  spelling.startswith("/") ? spelling : %"${_canonical_home()}/$spelling";
+  spelling.startswith("/") ? spelling : %"${x2c_canonical_root()}/$spelling";
 
 /** Carries declaration metadata with one actual symbol contribution. */
 void Compiler.copy_source_declaration(
