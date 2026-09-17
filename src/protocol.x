@@ -1174,7 +1174,7 @@ static String _requirement_detail(
   String prefix = %"$participant_repr does not satisfy $owner: ";
   if (adapter == <fallback> && direction == <nested>)
     return %"${prefix}member '$member' uses T inside a compound " +
-      %"${position.str()} type, which protocol fallback adapters " +
+      %"${position} type, which protocol fallback adapters " +
       "do not support";
   if (adapter == <fallback> && direction == <reverse>)
     return %"${prefix}member '$member' returns T, so $owner needs " +
@@ -1184,7 +1184,7 @@ static String _requirement_detail(
       %"conversion '$participant_repr.${base_repr.lower()}'";
   if (adapter == <thunk> && direction == <nested>)
     return %"${prefix}member '$member' uses T inside a compound " +
-      %"${position.str()} type, which protocol descriptor thunks " +
+      %"${position} type, which protocol descriptor thunks " +
       "do not support";
   if (adapter == <thunk> && position == <parameter>)
     return %"${prefix}member '$member' has a T parameter, so " +
@@ -1565,8 +1565,8 @@ static void _report_generated_collision(
   List notes =
     linkage_conflict
       ? %(
-          "$first_repr adoption: ${first_storage.str()}"
-          "$second_repr adoption: ${second_storage.str()}"
+          "$first_repr adoption: ${first_storage}"
+          "$second_repr adoption: ${second_storage}"
         )
       : incompatible_signatures
       ? %(

@@ -95,8 +95,6 @@ String Var_repr(Var);
 
 long Var_integer(Var);
 
-String Var_str(Var);
-
 String List_repr(List);
 
 int main(int argc, char * * argv){
@@ -129,7 +127,7 @@ int main(int argc, char * * argv){
       if (_x2c_catch_selected_0 == 0) {Var command = x2c_error_catch_capture(_x2c_error_handler_0, 0);
       Var status = x2c_error_catch_capture(_x2c_error_handler_0, 1);
       {
-        fprintf(stderr, "%s: command %s failed with status %ld\n", argv[0], String_str(Var_repr(command)), Var_long(Var_convert(status, 818062)));
+        fprintf(stderr, "%s: command %s failed with status %ld\n", argv[0], String_str(Var_repr(command)), Var_integer(status));
         {
           int _x2c_return_value_1 =(int) Var_integer(status);
           {

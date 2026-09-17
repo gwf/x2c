@@ -640,7 +640,7 @@ Iter Iter.unique(Iter iter, Iter dest) {
 }
 
 static int _unzip_column_next(Iter iter, Var *out) {
-  UnzipColumnRef state = iter.obj.unzipcolumnref();
+  UnzipColumnRef state = iter.obj;
   if (!state) return 0;
   UnzipShared *shared = state.shared;
   if (!_unzip_ensure(shared, state.column)) return 0;
@@ -667,7 +667,7 @@ static void _unzip_shared_init(UnzipShared *u, Iter source) {
 }
 
 static int _unzip_next(Iter iter, Var *out) {
-  UnzipSharedRef shared = iter.obj.unzipsharedref();
+  UnzipSharedRef shared = iter.obj;
   if (!shared) return 0;
   int stage = iter.state;
   if (stage >= 2) return 0;

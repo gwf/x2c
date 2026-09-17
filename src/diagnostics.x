@@ -225,7 +225,7 @@ static void Compiler._write_json(Compiler compiler, List entry) {
   out.write(",\"message\":");
   report_json_string(out, entry.assoc(<message>));
   out.write(",\"severity\":");
-  report_json_string(out, entry.assoc(<severity>).symbol().str());
+  report_json_string(out, entry.assoc(<severity>).symbol());
   foreach (Symbol key, %(file line column length position)) {
     Var value = location.assoc(key);
     out.printf(",\"%s\":", key.str());

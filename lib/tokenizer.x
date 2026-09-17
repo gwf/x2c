@@ -61,7 +61,7 @@ String Token.str(Token token) => token.text;
    owning pool is released.
    Raises: `<alloc-fail>` or `<size-limit>` while rendering. */
 String Token.repr(Token token) {
-  String head = %"{{text:${token.str()}, type:${token.type}";
+  String head = %"{{text:${token}, type:${token.type}";
   String location = %"line:${token.line}, col:${token.col}";
   String extent = %"len:${token.len}, pos:${token.pos}";
   return %"$head, $location, $extent}}";

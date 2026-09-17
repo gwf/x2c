@@ -673,7 +673,7 @@ List Regex.find_all(Regex regex, String subject) {
     int end = _whole(next).end();
     at = end > _whole(next).start() ? end : end + 1;
   }
-  return found.list();
+  return found;
 }
 
 /** Returns the text of `subject` between the matches of `regex`, keeping
@@ -687,7 +687,7 @@ List Regex.split(Regex regex, String subject) {
     cursor = _whole(found).end();
   }
   parts.push(subject[cursor:]);
-  return parts.list();
+  return parts;
 }
 
 /** Returns `subject` with the first match of `regex` replaced. In

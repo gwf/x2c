@@ -262,12 +262,12 @@ static Var _sdk_type_reverse_name(String base, String participant) {
 
 static Var _sdk_type_resolve(List value) {
   $_sdk_guard("x2c.type.resolve");
-  return macro_sdk_compiler.sym.resolve_key(value.type()).type_from_ast();
+  return macro_sdk_compiler.sym.resolve_key(value).type_from_ast();
 }
 
 static Var _sdk_type_layout(List value) {
   $_sdk_guard("x2c.type.layout");
-  Type type = macro_sdk_compiler.sym.resolve_key(value.type()).type_from_ast();
+  Type type = macro_sdk_compiler.sym.resolve_key(value).type_from_ast();
   return macro_sdk_compiler.sym.field_order(type).cdr();
 }
 

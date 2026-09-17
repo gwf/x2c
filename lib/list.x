@@ -182,7 +182,7 @@ static void _promote_node(Var node) {
     return;
   }
   if (node is not <list>) return;
-  for (List cur = node.list(); cur; cur = cur.cdr) {
+  for (List cur = node; cur; cur = cur.cdr) {
     if (!x2c_pool_values_current().promote(cur, cur)) break;
     _promote_node(cur.car);
   }
@@ -213,7 +213,7 @@ static int _try_own_node(Var node) {
   if (node is <string>) return node.string().try_own();
   if (node is <lsym>) return node.str().try_own();
   if (node is not <list>) return 1;
-  for (List cur = node.list(); cur; cur = cur.cdr) {
+  for (List cur = node; cur; cur = cur.cdr) {
     if (!x2c_pool_values_current().own(cur, cur)) return 0;
     if (!_try_own_node(cur.car)) return 0;
   }

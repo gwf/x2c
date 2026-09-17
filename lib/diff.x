@@ -171,8 +171,8 @@ String Diff.unified(String old, String new, String old_name,
     List lines = NULL;
     int old_count = 0, new_count = 0;
     for (int i = start; i < end; i++) {
-      Symbol kind = kinds[i].symbol();
-      String text = texts[i].string();
+      Symbol kind = kinds[i];
+      String text = texts[i];
       char mark = kind == <same> ? ' ' : kind == <delete> ? '-' : '+';
       lines = cons(%"$mark${text ? text : ""}\n", lines);
       if (kind != <insert>) old_count++;
@@ -183,5 +183,5 @@ String Diff.unified(String old, String new, String old_name,
     new_line = new_start + new_count;
     at = end;
   }
-  return out.str();
+  return out;
 }

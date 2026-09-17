@@ -523,7 +523,7 @@ static void _print_help(Symbol command) {
 Show top-level help, or help for translate, build, run, script,
 bootstrap, env, install, remove, or list.");
       break;
-    default: x2c_driver_error(%"unknown help command '${command.str()}'");
+    default: x2c_driver_error(%"unknown help command '${command}'");
   }
 }
 
@@ -1061,7 +1061,7 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
     x2c_driver_error("env accepts at most one name");
   if ((mask == CLI_INSTALL || mask == CLI_REMOVE) &&
       (!request.inputs || request.inputs.cdr()))
-    x2c_driver_error(%"${name.str()} requires exactly one operand");
+    x2c_driver_error(%"${name} requires exactly one operand");
   if (mask == CLI_LIST && request.inputs)
     x2c_driver_error("list accepts no operands");
   if (mask == CLI_SCRIPT && !request.inputs)

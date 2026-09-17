@@ -359,7 +359,7 @@ static List _primitive_type(Compiler compiler) {
   // pass over the original source reports source-level type diagnostics.
   if (compiler.shallow) return source;
   compiler.report_error(
-    <type>, source ? %"invalid scalar type ${source.str()}"
+    <type>, source ? %"invalid scalar type ${source}"
                    : "expected scalar type",
     start, NULL
   );

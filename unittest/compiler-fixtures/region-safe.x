@@ -19,7 +19,7 @@ static String canonical_result(void) {
   $scope() {
     Buffer b = Buffer.new(0);
     b.write("x");
-    return b.str();
+    return b;
   }
   return NULL;
 }

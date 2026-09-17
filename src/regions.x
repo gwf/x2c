@@ -64,7 +64,7 @@ static Var _unwrap(Var value) {
 static List _expression_type(Var value) {
   if (value is not <list> || value.is_nil()) return NULL;
   List node = value;
-  match (node) case %(expr ?type ?): return type.list();
+  match (node) case %(expr ?type ?): return type;
   return NULL;
 }
 
@@ -74,7 +74,7 @@ static List _binding_of(Var value) {
   List node = inner;
   match (node) case %(ident ?name): {
     if (name is not <list>) return NULL;
-    List identity = name.list();
+    List identity = name;
     return binding_identity_try_parts(identity, NULL, NULL) ? identity : NULL;
   }
   return NULL;
@@ -99,7 +99,7 @@ static String _callee_of(Var value, List *arguments) {
   match (node) case %(call ?function (!set ?args (args *))): {
     List name = _binding_of(function);
     if (!name) return NULL;
-    if (arguments) *arguments = _call_arguments(args.list());
+    if (arguments) *arguments = _call_arguments(args);
     return binding_identity_spelling(name);
   }
   return NULL;
@@ -204,7 +204,7 @@ static List _summary_rows(Map sinks) {
    state keeps its derived form until the next merge changes it. */
 static List _summary_of(Map state) {
   Var derived = state[<summary>];
-  if (derived is <list>) return derived.list();
+  if (derived is <list>) return derived;
   List rows = _summary_rows(state[<sinks>]);
   List summary = %(${state[<allocates>]} ${state[<fresh>]} $rows);
   state[<summary>] = summary;
@@ -214,7 +214,7 @@ static List _summary_of(Map state) {
 static List _summary_for(Walk w, String name) {
   if (!name) return NULL;
   Var local = w.summaries[name];
-  if (local is <map>) return _summary_of(local.map());
+  if (local is <map>) return _summary_of(local);
   switch (_role(w, name)) {
     case <alloc>: case <slot-alloc>: return %(1 1 ());
     /* A cons cell holds both arguments in storage the region does not own. */
@@ -377,7 +377,7 @@ static List _birth_of(Walk w, Var expression) {
   /* A callee that hands one argument back keeps that argument's region. */
   foreach (List row, _parameter_sinks(w, callee)) {
     int index = row.car().int();
-    if (!row.cdr().contains(<return>) || index >= (int) arguments.len())
+    if (!row.cdr().contains(<return>) || index >= arguments.len())
       continue;
     Map fact = _fact_of(w, arguments[index], NULL);
     if (!fact || _flag(fact, <exited>)) continue;
@@ -471,7 +471,7 @@ static int _alias_parameter(Walk w, Var expression) {
   if (!callee) return -1;
   foreach (List row, _parameter_sinks(w, callee)) {
     int index = row.car().int();
-    if (!row.cdr().contains(<return>) || index >= (int) arguments.len())
+    if (!row.cdr().contains(<return>) || index >= arguments.len())
       continue;
     Map fact = _fact_of(w, arguments[index], NULL);
     if (fact && _parameter_of(fact) >= 0 && !_flag(fact, <exited>))
@@ -490,7 +490,7 @@ static Var _sink_for_base(Walk w, Map base, int through) {
   }
   if (!base) return %(heap ());
   Var points = base[<points>];
-  if (points is <map>) return _sink_for_base(w, points.map(), 0);
+  if (points is <map>) return _sink_for_base(w, points, 0);
   if (_parameter_of(base) >= 0 || _flag(base, <origin>))
     return %(heap $base);
   return %(heap ());
@@ -499,7 +499,7 @@ static Var _sink_for_base(Walk w, Map base, int through) {
 static void _sink_parameter(Walk w, int index, Var target) {
   Var found = w.sinks[index];
   Map targets = {};
-  if (found is <map>) targets = found.map();
+  if (found is <map>) targets = found;
   targets[target] = 1;
   w.sinks[index] = targets;
 }
@@ -528,7 +528,7 @@ static void _flow_region(Walk w, Map region, Var sink, String subject) {
   if (sink is not <list> || sink.is_nil()) return;
   match (sink.list()) {
     case %(local ?target): {
-      if (target is <map> && _flag(target.map(), <depth>) <
+      if (target is <map> && _flag(target, <depth>) <
                              _flag(region, <depth>))
         _report_escape(w, subject, region,
                        "assigned to a local declared outside the region");
@@ -625,7 +625,7 @@ static void _scan_call(Walk w, String callee, List arguments) {
     return;
   }
   List rows = _parameter_sinks(w, callee);
-  int count = (int) arguments.len();
+  int count = arguments.len();
   foreach (List row, rows) {
     int index = row.car().int();
     if (index >= count) continue;
@@ -665,7 +665,7 @@ static void _scan(Walk w, Var value, int deferred) {
     match (node) case %(ident ?): binding = _binding_of(node);
     if (binding) {
       Var found = w.facts[binding];
-      if (found is <map> && _flag(found.map(), <dead>)) {
+      if (found is <map> && _flag(found, <dead>)) {
         _report_dead(w, binding_identity_spelling(binding));
         found.map()[<dead>] = 0;
       }
@@ -688,7 +688,7 @@ static void _scan(Walk w, Var value, int deferred) {
       case %(op (!quote =) ?stored_target ?stored_value):
         if (current != root) _store(w, stored_target, stored_value);
     }
-    for (int i = (int) node.len() - 1; i >= 0; i--) pending.push(node[i]);
+    for (int i = node.len() - 1; i >= 0; i--) pending.push(node[i]);
   }
   if (deferred) return;
   foreach (Var item, consumed) {
@@ -794,7 +794,7 @@ static void _declare(Walk w, Var type, List bindings) {
     match (item.list()) {
       case %(op (!quote =) (bind ?name ?modifiers) ?value): {
         if (name is not <list> ||
-            !binding_identity_try_parts(name.list(), NULL, NULL)) continue;
+            !binding_identity_try_parts(name, NULL, NULL)) continue;
         Map fact = _new_fact(w, -1);
         fact[<array>] = _declares_array(modifiers);
         w.facts[name] = fact;
@@ -802,7 +802,7 @@ static void _declare(Walk w, Var type, List bindings) {
       }
       case %(bind ?name ?modifiers): {
         if (name is not <list> ||
-            !binding_identity_try_parts(name.list(), NULL, NULL)) continue;
+            !binding_identity_try_parts(name, NULL, NULL)) continue;
         Map fact = _new_fact(w, -1);
         fact[<array>] = _declares_array(modifiers);
         w.facts[name] = fact;
@@ -935,7 +935,7 @@ static int _walk_region_call(Walk w, String callee, List arguments) {
   if (callee == "Scope_destroy" && arguments) {
     List slot = _binding_of(arguments.car());
     Var found = slot ? w.facts[slot] : void;
-    if (found is <map> && _flag(found.map(), <depth>) == w.depth)
+    if (found is <map> && _flag(found, <depth>) == w.depth)
       foreach (Var item, w.open) {
         Map region = item;
         if (region[<slot>] == slot) region[<closed>] = 1;
@@ -957,7 +957,7 @@ static int _walk_region_call(Walk w, String callee, List arguments) {
         slot = _binding_of(place);
     if (!slot) slot = _binding_of(arguments[1]);
     Var found = slot ? w.facts[slot] : void;
-    if (found is not <map> || _parameter_of(found.map()) >= 0) {
+    if (found is not <map> || _parameter_of(found) >= 0) {
       fact[<exited>] = 1;
       return 1;
     }
@@ -1033,7 +1033,7 @@ static void _walk_statement(Walk w, Var value) {
       return;
     }
     case %((!or declare decl) ?type (!set ?bindings (bindings *))): {
-      _declare(w, type, bindings.list());
+      _declare(w, type, bindings);
       return;
     }
     case %(return ?type ?result): {
@@ -1088,7 +1088,7 @@ static void _collect_functions(Var value, Array found) {
   match (node) {
     case %(expr *): return;
     case %(function ? (bind ?name ?modifiers) ?body): {
-      String spelling = name is <list> ? binding_identity_spelling(name.list())
+      String spelling = name is <list> ? binding_identity_spelling(name)
                                        : NULL;
       if (!spelling) return;
       Array parameters = [];
@@ -1098,7 +1098,7 @@ static void _collect_functions(Var value, Array found) {
             foreach (Var row, rows)
               match (row.list()) case %(param ? (bind ?parameter ?)): {
                 if (parameter is <list> &&
-                    binding_identity_try_parts(parameter.list(), NULL, NULL))
+                    binding_identity_try_parts(parameter, NULL, NULL))
                   parameters.push(parameter);
                 else parameters.push(NULL);
               }
@@ -1144,7 +1144,7 @@ static void _analyze(
   foreach (Var (parameter_index, targets), w.sinks) {
     Var existing = sinks[parameter_index];
     Map merged = {};
-    if (existing is <map>) merged = existing.map();
+    if (existing is <map>) merged = existing;
     foreach (Var target, targets.map().keys()) {
       if (merged.contains(target)) continue;
       merged[target] = 1;

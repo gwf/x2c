@@ -116,7 +116,7 @@ static Symbol _exact_symbol_literal(
     compiler.report_error(
       <parse>, "Symbol literal does not round-trip", token,
       %("source spelling: $spelling"
-        "encoded spelling: ${lossy.str()}")
+        "encoded spelling: ${lossy}")
     );
   }
   return symbol;

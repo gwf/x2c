@@ -1792,12 +1792,12 @@ static const char *script_main =
   "  }\n"
   "  catch %(cmd-fail (command ?command) (status ?status) *): {\n"
   "    fprintf(stderr, \"%s: command %s failed with status %ld\\n\",\n"
-  "            argv[0], command.repr().str(), status);\n"
+  "            argv[0], command.repr().str(), status.integer());\n"
   "    return (int) status.integer();\n"
   "  }\n"
   "  catch %(?code *detail): {\n"
   "    fprintf(stderr, \"%s: %s %s\\n\",\n"
-  "            argv[0], code.str(), detail.repr().str());\n"
+  "            argv[0], code, detail.repr().str());\n"
   "    return 1;\n"
   "  }\n"
   "}\n";
@@ -2877,7 +2877,7 @@ static void _record_function_prototypes(
            definition. */
         List attributes = NULL;
         foreach (Var item, modifiers)
-          if (item is <list> && car(item.list()) is <string>)
+          if (item is <list> && car(item) is <string>)
             attributes = attributes ? %( @attributes $item ) : %($item);
         if (attributes)
           c.semantic_binding_facts()[%(attributes $binding)] = attributes;
@@ -2911,7 +2911,7 @@ static int _alternative_arms(Compiler c, List binding) {
   Var stored;
   if (!c.semantic_binding_facts().try_get(%(arms $binding), &stored))
     return 0;
-  List prior = stored, current = c.arms.list();
+  List prior = stored, current = c.arms;
   for (; prior && current; prior = prior.cdr(), current = current.cdr()) {
     Var (prior_id, prior_arm) = prior.car();
     Var (id, arm) = current.car();
@@ -3196,11 +3196,11 @@ Type Sym.local_type(Sym sym, Type type) {
     Map symbols = _semantic_scope(sym, i).symbols;
     Var marker;
     if (!symbols.try_get(base, &marker)) continue;
-    Type declared = marker.type();
+    Type declared = marker;
     if (!declared.is_typedef()) return type;
     Var target;
     if (!symbols.try_get(declared, &target)) return type;
-    return _replace_type_base(type, base, target.type());
+    return _replace_type_base(type, base, target);
   }
   return type;
 }
