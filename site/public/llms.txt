@@ -42,6 +42,7 @@
 - [Automatic Differentiation](https://x2c-lang.dev/docs/guide/autodiff.html)
 - [Verifying Functions with C*](https://x2c-lang.dev/docs/guide/verification.html)
 - [Training and Inference with torch](https://x2c-lang.dev/docs/guide/torch.html)
+- [The Region Model](https://x2c-lang.dev/docs/guide/regions.html)
 
 ## Optional
 
@@ -126,6 +127,5 @@
 - [src/utils.x](https://x2c-lang.dev/docs/internals/compiler-api/utils.html)
 - [Compiler Architecture](https://x2c-lang.dev/docs/internals/architecture.html)
 - [Implementation Map](https://x2c-lang.dev/docs/internals/implementation-map.html)
-- [The Region Model](https://x2c-lang.dev/docs/internals/regions.html)
 - [Building the Compiler](https://x2c-lang.dev/docs/internals/building.html)
 - [A Recursive Lisp in x2c](https://x2c-lang.dev/docs/internals/reference-lisp.html)

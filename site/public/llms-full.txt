@@ -4443,6 +4443,32 @@ output ends after its first error. The
 [diagnostics section](https://x2c-lang.dev/docs/reference/language.html#diagnostics) of the language reference
 describes which errors are reported together.
 
+### Warnings
+
+Translation also reports warnings, which never stop a build: the unit
+compiles and the program runs. Warnings do not count against `--max-errors`,
+and there is no option to suppress or escalate one. A warning describes
+something the compiler can see and you may have arranged deliberately, so
+code that means what it says can be left as written.
+
+Five codes are reported as warnings:
+
+- `region` says a value allocated inside a region can still be reached after
+  the region ends, and names how it leaves. Its note gives the line that
+  opened the region.
+- `after-free` says a local was read after `Scope.free` or
+  `Array.list_free` consumed it.
+- `unbalanced` says a region was opened in one block and released in
+  another, a shape the `region` check cannot follow.
+- `literal` says a bare word inside a macro is a `Symbol` where a value was
+  probably meant, and names the unquoted spelling that inserts the value.
+- `warning` covers the remaining cases: an unnecessary conversion, and a
+  protocol binder that shadows a visible type name.
+
+[The Region Model](https://x2c-lang.dev/docs/guide/regions.html) explains what the first three cover
+and what they cannot see. [Scopes and Lifetime](https://x2c-lang.dev/docs/guide/memory.html) shows
+the patterns that avoid them.
+
 `--diagnostics-file <file>` writes the same diagnostics to `<file>` as JSON
 Lines instead of standard error:
 

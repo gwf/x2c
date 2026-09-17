@@ -1154,6 +1154,7 @@ def render_summary(
         "  - [Automatic Differentiation](guide/autodiff.md)",
         "  - [Verifying Functions with C*](guide/verification.md)",
         "  - [Training and Inference with torch](guide/torch.md)",
+        "  - [The Region Model](guide/regions.md)",
         "",
     ])
     heading = SECTION if SECTION in current.splitlines() else "# Standard library"

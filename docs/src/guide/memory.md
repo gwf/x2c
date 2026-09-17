@@ -335,7 +335,8 @@ runtime that a value has stopped being used. The same applies to a boxed wide
 
 The compiler warns about this example because the escape is visible in the
 source: `label` is allocated between a retain and its release and read after
-it. The next section describes what the check covers and what it does not.
+it. The next two sections give the rule behind that warning and what the
+check covers.
 
 Three habits keep this out of your code. Return a canonical value, a
 `String`, a `List`, or a `Symbol`, when a result must cross a scope boundary.
@@ -343,14 +344,36 @@ Use `Scope.move` when a mutable allocation has to survive. When in doubt,
 let the caller create the scope and pass the slot down, so the lifetime is
 visible where it was chosen.
 
+## The region model
+
+Every allocation in this chapter belongs to a region: a span of the program
+that owns storage and ends at a definite point. A `$scope()` block is a
+region, and so are a `Scope.retain` and `Scope.release` pair, a
+`$scope(&slot)` push, an `$auto` local, and a `Scope` local that
+`Scope.destroy` ends. A `String.pool_retain` bracket is a region over the
+pool, so a `List` cell consed inside one belongs to that bracket rather than
+outliving every scope the way a canonical value normally does.
+
+The model is one rule: a value allocated inside a region must not be
+reachable after that region ends. Four kinds of place outlive a region, and
+reaching one of them is how the rule gets broken. They are the function's
+result, storage declared outside the region, an object owned by an outer or
+sibling region, and any pointer whose target the compiler cannot identify.
+The advice in this chapter follows from that rule. `Scope.move` and
+`Context.export` work because they change which region owns the storage, and
+returning a `String`, `List`, or `Symbol` works because the pool owns it and
+no region end frees it.
+
+The compiler checks this rule and warns where it is broken. The next section
+lists those warnings and the exits they name.
+[The Region Model](regions.md) states the invariant precisely, says what the
+check cannot see, and explains how it works.
+
 ## Warnings when a value outlives its region
 
 Translation warns when a value allocated inside a region can still be reached
-after the region ends. A region is a `$scope()` block, a `Scope.retain` and
-`Scope.release` pair, a `$scope(&slot)` push, a `String.pool_retain` bracket,
-an `$auto` local, or a `Scope` local that `Scope.destroy` ends. The warning
-includes the value's name and the way the value leaves, and its note gives
-the line that opened the region:
+after the region ends. The warning includes the value's name and the way the
+value leaves, and its note gives the line that opened the region:
 
 - returned;
 - assigned to a local declared outside the region;
@@ -437,3 +460,6 @@ that.
 Read the [standard library overview](../library/overview.md) and the
 [language reference](../reference/language.md) for the rules.
 [Idioms](idioms.md) shows how scopes combine with other x2c features.
+[The Region Model](regions.md) covers the lifetime check itself: what it
+guarantees, what it leaves to you, and how it compares with the checks in
+other languages.
