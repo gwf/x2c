@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 34
+- Compiler modules: 33
 - Runtime modules: 55
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -360,14 +360,6 @@ Public functions:
 
 `script_cache_root`, `script_prepare`, `script_run`
 
-### [src/snapshot.x](../src/snapshot.x)
-
-deterministic Lisp data writer for unit interfaces.
-
-Public functions:
-
-`snapshot_write_var`
-
 ### [src/sourceview.x](../src/sourceview.x)
 
 request-owned source overlays.
@@ -444,11 +436,12 @@ System utilities for environment discovery and workers.
 Public functions:
 
 `x2c_initialize_environment`, `x2c_set_root`, `x2c_get_root`,
-`x2c_get_executable`, `x2c_package_directory`, `x2c_source_file`,
-`x2c_package_source`, `x2c_default_include_dirs`, `x2c_cpp_include_dirs`,
-`x2c_home`, `x2c_home_packages`, `x2c_stage_dir`, `x2c_find_program`,
-`x2c_driver_error`, `x2c_host_error`, `file_lock`, `file_publish`,
-`worker_fork`, `worker_exit`, `worker_wait_any`, `x2c_filename_hash`
+`x2c_canonical_root`, `x2c_get_executable`, `x2c_package_directory`,
+`x2c_source_file`, `x2c_package_source`, `x2c_default_include_dirs`,
+`x2c_cpp_include_dirs`, `x2c_home`, `x2c_home_packages`, `x2c_stage_dir`,
+`x2c_find_program`, `x2c_driver_error`, `x2c_host_error`, `file_lock`,
+`file_publish`, `worker_fork`, `worker_exit`, `worker_wait_any`,
+`x2c_filename_hash`
 
 ## Runtime modules
 

@@ -118,7 +118,6 @@
 - [src/regions.x](https://x2c-lang.dev/docs/internals/compiler-api/regions.html)
 - [src/report.x](https://x2c-lang.dev/docs/internals/compiler-api/report.html)
 - [src/script.x](https://x2c-lang.dev/docs/internals/compiler-api/script.html)
-- [src/snapshot.x](https://x2c-lang.dev/docs/internals/compiler-api/snapshot.html)
 - [src/sourceview.x](https://x2c-lang.dev/docs/internals/compiler-api/sourceview.html)
 - [src/statements.x](https://x2c-lang.dev/docs/internals/compiler-api/statements.html)
 - [src/toolchain.x](https://x2c-lang.dev/docs/internals/compiler-api/toolchain.html)

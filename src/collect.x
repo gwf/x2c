@@ -15,7 +15,6 @@
 $(import "../src/ast-rewrite.xmacro")
 #include "buffer.x"
 #include "utils.x"
-#include "snapshot.x"
 
 #include <errno.h>
 #include <limits.h>
@@ -886,7 +885,35 @@ static List _renumber_bindings(List node, Map identities) {
     node, child, _renumber_bindings(child, identities));
 }
 
-static int _write_interface_entry(File output, String canonical, List entry) {
+/* An interface is data in part of the Lisp reader grammar: proper Lists,
+   bare Symbols and Atoms, Strings, integers, and floating-point values. A
+   loader never evaluates it. An atom that needs quoting, or any other value,
+   returns zero. */
+static int _write_datum(Buffer out, Var value) {
+  if (value is <list>) {
+    List list = value;
+    out.write_char('(');
+    for (List p = list; p; p = p.cdr()) {
+      if (p != list) out.write_char(' ');
+      if (!_write_datum(out, p.car())) return 0;
+    }
+    out.write_char(')');
+  }
+  else if (value.is_atom()) {
+    // lib/atom.x owns bare spelling and the reader's Symbol/Atom choice.
+    String text = value.str();
+    if (Atom.bare_spelling(text)) out.write(text);
+    else if (value is <symbol>) out.write(value.repr());  // `<"<<">`
+    else return 0;
+  }
+  else if (value is <string>) out.write(value.repr());
+  else if (value.is_integer()) out.printf("%ld", value.integer());
+  else if (value.is_floating()) out.printf("%.17g", value.floating());
+  else return 0;
+  return 1;
+}
+
+static int _write_interface_entry(Buffer out, String canonical, List entry) {
   (List cached_parts, Var hash, List definitions, Map cached_dependencies) =
     entry;
   Array parts = [];
@@ -913,7 +940,9 @@ static int _write_interface_entry(File output, String canonical, List entry) {
     interface 2 ${home_portable_path(canonical)} $hash
     $part_list $definitions $dependency_list
   );
-  return snapshot_write_var(output, record) && output.putc('\n') != EOF;
+  if (!_write_datum(out, record)) return 0;
+  out.write_char('\n');
+  return 1;
 }
 
 /** Writes the compiler's own collected contribution to `path`.
@@ -926,16 +955,17 @@ void interface_write(Compiler compiler, String path) {
   String canonical = _canonical_path(compiler.filename);
   Var cached = _process_cache()[canonical];
   if (cached is void) return;
-  String temporary = %"$path.tmp.%ld".printf((long) getpid());
-  File output = fopen(temporary, "w");
-  int written = output != NULL;
-  if (written) {
-    written = _write_interface_entry(output, canonical, cached);
-    if (output.close()) written = 0;
+  Buffer out = $auto(Buffer.new(0));
+  long error = 0;
+  if (_write_interface_entry(out, canonical, cached)) {
+    try {
+      file_publish(path, out);
+      return;
+    }
+    catch %(not-found *failure): error = failure.assoc(<errno>);
+    catch %(io-fail *failure): error = failure.assoc(<errno>);
   }
-  if (written && !rename(temporary, path)) return;
-  String reason = String.new(strerror(errno));
-  unlink(temporary);
+  String reason = String.new(strerror((int) error));
   compiler.report_error(
     <emit>, "failed to write interface file", NULL,
     %("file: $path" "reason: $reason"));

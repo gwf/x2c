@@ -11,7 +11,7 @@ re-derives a type from source.
 Two pieces of knowledge are duplicated from the runtime and are deliberately
 narrow. `content_hash` mirrors `String.hash` (`lib/string.x`), and
 `read_sexp` mirrors the subset of the Lisp grammar that
-`snapshot_write_var` (`src/snapshot.x`) emits. Both are pinned: a grammar
+`_write_datum` (`src/collect.x`) emits. Both are pinned: a grammar
 change moves the interface version integer, and a hash change makes every file
 comparison fail at once. Neither can drift quietly into a plausible wrong
 answer, which is the only kind of drift that would matter here.

@@ -37,7 +37,6 @@ Functions and types exposed by each compiler module.
 | [`src/regions.x`](regions.md) | values that can outlive the region that allocated them. |
 | [`src/report.x`](report.md) | Command progress and completion receipts. |
 | [`src/script.x`](script.md) | Build-once execution of x2c scripts. |
-| [`src/snapshot.x`](snapshot.md) | deterministic Lisp data writer for unit interfaces. |
 | [`src/sourceview.x`](sourceview.md) | request-owned source overlays. |
 | [`src/statements.x`](statements.md) | x2c statement parsing. |
 | [`src/toolchain.x`](toolchain.md) | Host preprocessing, compilation, archive, and link actions. |

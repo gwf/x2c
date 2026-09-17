@@ -4270,7 +4270,8 @@ executable, then from the current directory, to the nearest directory holding
 [installed prefix](https://x2c-lang.dev/docs/guide/installation.html) are both homes. A stage compiler
 under `<home>/builds/<n>/` links that stage's runtime archive. Any other
 compiler links `<home>/lib/libx2c.a` when it exists, and otherwise
-`<home>/bootstrap/lib/libx2c.a`, the runtime a source checkout provides.
+`<home>/builds/0/libx2c.a`, the stage 0 runtime whose headers a source
+checkout's `include/x2c` names.
 
 There is no lowercase `-i`. `-D` and `-U` reach requested x2c preprocessing
 and C compilation. Optimization, debug, and `-Xcc` are compile-only; `-L`,

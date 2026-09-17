@@ -468,8 +468,7 @@ The modules under `src/` divide ownership as follows:
 - `src/ast.x` -- AST sequence placement and binding helpers;
 - `src/type.x`, `src/protocol.x` -- type representation, conversions, protocol
   declarations, conformance, and generated adapters;
-- `src/collect.x`, `src/snapshot.x` -- global environment discovery, unit
-  interfaces, and their Lisp data writer;
+- `src/collect.x` -- global environment discovery and unit interfaces;
 - `src/utils.x` -- repository discovery, the driver's fatal error line, and
   forked translation workers;
 - `src/transform.x`, `src/lambda.x`, `src/cleanup.x` -- lowering to

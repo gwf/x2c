@@ -112,7 +112,6 @@
   - [src/regions.x](internals/compiler-api/regions.md)
   - [src/report.x](internals/compiler-api/report.md)
   - [src/script.x](internals/compiler-api/script.md)
-  - [src/snapshot.x](internals/compiler-api/snapshot.md)
   - [src/sourceview.x](internals/compiler-api/sourceview.md)
   - [src/statements.x](internals/compiler-api/statements.md)
   - [src/toolchain.x](internals/compiler-api/toolchain.md)

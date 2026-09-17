@@ -48,7 +48,7 @@ below `#pragma private` still leaks into generated headers.
 The compiler is consolidated by phase rather than filename prefixes:
 
 - entry and shared state: `main.x`, `cli.x`, `compiler.x`, `diagnostics.x`,
-  `collect.x`, `report.x`, `snapshot.x`, `deps.x`, `utils.x`;
+  `collect.x`, `report.x`, `deps.x`, `utils.x`;
 - shared runtime tokenization: `lib/tokenizer.x`; compiler parsing:
   `parse.x`, `expressions.x`, `statements.x`, `literals.x`, `macros.x`,
   `ast.x`;

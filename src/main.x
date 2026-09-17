@@ -32,7 +32,6 @@
 #include "emit.x"
 #include "generate.x"
 #include "format.x"
-#include "snapshot.x"
 #include "protocol.x"
 
 // global state
