@@ -267,17 +267,6 @@ static List _header_function(Type type, List bind, List body) {
   return %( declare $type ${ast_prototype_declarator(bind)} );
 }
 
-// Keep only eligible functions in the source unit.
-static List _source_function(List node, Type type) =>
-  (!type.is_static() && type.is_inline()) ? NULL : node;
-
-// Append generated nodes with consistent spacing.
-static void _push_spaced(Array output, List code) {
-  if (!code) return;
-  output.push(code);
-  output.push(%(space "\n"));
-}
-
 // The generator writes the header guard. Source pragmas serve only the CPP
 // compatibility path and must not duplicate the generated directive.
 static int _is_pragma_once(String content) =>
@@ -302,7 +291,7 @@ static void _forward_tags(List node, Map forwarded, Array header) {
     case %((!set ?tag (!or struct union)) ?(String name)): {
       if (forwarded.contains(name)) return;
       forwarded[name] = 1;
-      _push_spaced(header, %(declare ($tag $name) (bindings (bind () ()))));
+      header.push(%(declare ($tag $name) (bindings (bind () ()))));
       return;
     }
   foreach (Var item, node)
@@ -321,12 +310,12 @@ static void _partition_function(
     type = %(("_Noreturn") @type);
   List function = %(function $type $declarator $body);
   if (type.is_static()) {
-    _push_spaced(source, _source_function(function, type));
+    source.push(function);
     return;
   }
   _forward_tags(%($type $declarator), forwarded, header);
-  _push_spaced(header, _header_function(type, declarator, body));
-  _push_spaced(source, _source_function(function, type));
+  header.push(_header_function(type, declarator, body));
+  if (!type.is_inline()) source.push(function);
 }
 
 // A binding list with a named declarator, as opposed to a bare tag body.
@@ -351,25 +340,24 @@ static int _partition_tagged_object(
   if (!tag || !_declares_object(bindings)) return 0;
   List tagged = type.list()[:type.len() - core.len()]
                   .append(%(${core.car()} $tag));
-  _push_spaced(header, %(declare $type (bindings (bind () ()))));
-  _push_spaced(header, _header_declaration(
-    NULL, %(extern @tagged), bindings));
-  _push_spaced(source, %(declare $tagged $bindings));
+  header.push(%(declare $type (bindings (bind () ()))));
+  header.push(_header_declaration(NULL, %(extern @tagged), bindings));
+  source.push(%(declare $tagged $bindings));
   return 1;
 }
 
 static void _partition_declaration(
   Array header, Array source, List declaration, Type type, List bindings,
   int private) {
-  if (private) _push_spaced(source, declaration);
+  if (private) source.push(declaration);
   else if (!(type.is_aggregate_tag_body() || type.is_enum_tag_body()) ||
            !_partition_tagged_object(header, source, type, bindings))
-    _push_spaced(header, _header_declaration(declaration, type, bindings));
+    header.push(_header_declaration(declaration, type, bindings));
 }
 
 static void _partition_alias(
   Array header, Array source, List alias, Type type) {
-  _push_spaced(type.is_static() ? source : header, alias);
+  (type.is_static() ? source : header).push(alias);
 }
 
 static void _partition_preproc(
@@ -494,19 +482,17 @@ static List _aggregate_typedef_forwards(List items, List earlier) {
 }
 
 /* The groups among `items` that contain an item other than a conditional
-   directive or space, including through a nested group. */
+   directive, including through a nested group. */
 static Map _filled_conditionals(List items) {
   Map filled = {};
   Array open = [];
   foreach (List item, items) {
-    match (item) {
+    match (item)
       case %(conditional ?group ?kind ?): {
         if (kind == <open>) open.push(group);
         else if (kind == <close>) open.take_last();
         continue;
       }
-      case %(space *): continue;
-    }
     foreach (Var group, open) filled[group] = 1;
   }
   return filled;
@@ -588,7 +574,6 @@ static List _header_and_source(Compiler compiler, List ast) {
       // the header; the source reaches it through the generated header.
       case %(import ?unit *): {
         header.push(%(preproc "#include \"${unit.string()}.x\""));
-        header.push(%(space "\n"));
         continue;
       }
       case %(preproc ?content): {
@@ -895,8 +880,6 @@ static List _include_directive(String fname) =>
 static List _vertical_spacing(List code) {
   Array values = [];
   foreach (Var elem, code) {
-    Symbol kind = elem.car();
-    if (kind == <space>) continue;
     values.push(elem);
     values.push(%(space "\n"));
   }
