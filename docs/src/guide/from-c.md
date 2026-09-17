@@ -188,7 +188,8 @@ need the information it omits.
 
 ## Choose who owns the native build
 
-The driver has four commands:
+Four of the driver's commands decide who owns the native build; the
+[CLI reference](../reference/cli.md) lists the rest:
 
 ```sh
 x2c translate --out-dir generated src/main.x

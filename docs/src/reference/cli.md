@@ -234,7 +234,8 @@ initialization rules.
 The Cosmopolitan APE executable is an experiment for fun only. It can
 bootstrap a minimal native compiler and runtime without a repository checkout,
 but includes no examples, book, or optional packages. Use the full repository
-for normal development; this experiment is no substitute for it.
+for normal development; this experiment is no substitute for it. Releases do
+not publish the APE; `make ape-build` in a checkout produces it.
 
 To try the experiment:
 
@@ -588,8 +589,8 @@ Five codes are reported as warnings:
   opened the region.
 - `after-free` says a local was read after `Scope.free` or
   `Array.list_free` consumed it.
-- `unbalanced` says a region was opened in one block and released in
-  another, a shape the `region` check cannot follow.
+- `unbalanced` says a region has no matching release in the block that
+  opened it, a shape the `region` check cannot follow.
 - `literal` says a bare word inside a macro is a `Symbol` where a value was
   probably meant, and names the unquoted spelling that inserts the value.
 - `warning` covers the remaining cases: an unnecessary conversion, and a
