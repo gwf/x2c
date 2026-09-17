@@ -144,6 +144,15 @@ static List _build_entry(
   );
 }
 
+/* Some producers derive one failure twice, so an entry equal to a stored
+   one is not repeated. Reports whether the entry was published. */
+static int Diagnostics._publish(Diagnostics diag, List entry) {
+  if (diag.entries.contains(entry)) return 0;
+  diag.entries.push(entry);
+  _emit_entry(diag, entry);
+  return 1;
+}
+
 /* The limit notice follows the report that reaches the threshold. It is
    stored and streamed like an entry but is not included in `count`. */
 static void _publish_limit_notice(Diagnostics diag) {
@@ -155,7 +164,8 @@ static void _publish_limit_notice(Diagnostics diag) {
 }
 
 /** Records and synchronously emits one diagnostic unless already limited.
-    Entries retain publication order. NULL `code` becomes `<driver>`. Reaching
+    Entries retain publication order. NULL `code` becomes `<driver>`. A report
+    equal to a stored entry is ignored. Reaching
     a limit greater than one publishes a following `<limit>` notice; a limit
     of one stops after the first error. Later reports are ignored. Supplied
     message, location, and notes are shared; their canonical-value pools must
@@ -172,9 +182,8 @@ void Diagnostics.report(
   }
 
   List entry = _build_entry(code, <error>, message, location, notes);
-  diag.entries.push(entry);
+  if (!diag._publish(entry)) return;
   diag.count += 1;
-  _emit_entry(diag, entry);
 
   if (diag.limit > 0 && diag.count >= diag.limit && !diag.limit_notified) {
     diag.limit_notified = 1;
@@ -182,13 +191,11 @@ void Diagnostics.report(
   }
 }
 
-/* Warnings share publication order and streaming with reports, but
-   never change `count` or publish the limit notice. */
+/* Warnings share publication order, streaming, and the repeat rule with
+   reports, but never change `count` or publish the limit notice. */
 static void Diagnostics._warn(
   Diagnostics diag, Symbol code, String message, List location, List notes) {
-  List entry = _build_entry(code, <warning>, message, location, notes);
-  diag.entries.push(entry);
-  _emit_entry(diag, entry);
+  diag._publish(_build_entry(code, <warning>, message, location, notes));
 }
 
 // diagnostics & error reporting

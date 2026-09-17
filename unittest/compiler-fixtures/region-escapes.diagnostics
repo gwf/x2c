@@ -57,3 +57,8 @@ unittest/compiler-fixtures/region-escapes.x:120:3: region: a fresh allocation ca
     ^^^^^^
   note: region opened at line 119
 
+unittest/compiler-fixtures/region-escapes.x:131:5: region: 'a' can outlive the region it was allocated in when stored through an unknown pointer
+      _keep_two(a, a);
+      ^^^^^^^^^
+  note: region opened at line 129
+

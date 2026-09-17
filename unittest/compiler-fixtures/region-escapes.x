@@ -120,11 +120,24 @@ static Func escaping_closure(void) {
   return %!() => a.len();
 }
 
+static void _keep_two(Var first, Var second) {
+  saved = cons(first, cons(second, saved));
+}
+
+// One statement sinks the same value twice, and reports it once.
+static void escaping_twice(void) {
+  $scope() {
+    Array a = [];
+    _keep_two(a, a);
+  }
+}
+
 int main(void) {
   escaping_static();
   escaping_pooled();
   escaping_through_callee(global_node);
   escaping_static_cons();
+  escaping_twice();
   return escaping_auto() != NULL && escaping_outer_local() != NULL &&
          use_after_free() && escaping_string_block() != NULL &&
          escaping_destroyed_slot() != NULL &&
