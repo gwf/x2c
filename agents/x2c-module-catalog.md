@@ -21,11 +21,11 @@ shared helpers for x2c compiler AST nodes.
 Public functions:
 
 `binding_identity_new`, `binding_identity_try_parts`,
-`binding_identity_spelling`, `preproc_conditional_kind`,
-`Symbol.compound_operator`, `Symbol.compound_assignment`,
-`Symbol.is_assignment_op`, `ast_changes_left_operand`, `ast_contains_head`,
-`Ast.rewrite_children`, `Ast.never_returns`, `Ast.initializer_cases`,
-`Ast.initializer_functions`
+`binding_identity_spelling`, `preproc_conditional_kind`, `preproc_directive`,
+`preproc_track_arms`, `preproc_within_arms`, `Symbol.compound_operator`,
+`Symbol.compound_assignment`, `Symbol.is_assignment_op`,
+`ast_changes_left_operand`, `ast_contains_head`, `Ast.rewrite_children`,
+`Ast.never_returns`, `Ast.initializer_cases`, `Ast.initializer_functions`
 
 ### [src/bootstrap.x](../src/bootstrap.x)
 
@@ -80,8 +80,7 @@ source-ordered shallow symbol collection and replay.
 
 Public functions:
 
-`header_symbols_initialize`, `header_symbols_begin_generated`,
-`Compiler.record_generated_header_symbol`, `Compiler.collect_symbols`,
+`Compiler.record_generated_symbol`, `Compiler.collect_symbols`,
 `Compiler.collect_package`, `interface_configure`, `interface_prelude`,
 `interface_write`
 
@@ -98,6 +97,7 @@ Public functions:
 `Compiler.take_diagnostics`, `Compiler.close_child`, `Compiler.new`,
 `Compiler.new_shared`, `Compiler.take_unit_state`,
 `Compiler.return_unit_state`, `Compiler.read_source`,
+`Compiler.canonical_path`, `home_portable_path`, `home_absolute_path`,
 `Compiler.copy_source_declaration`, `Compiler.merge_source_declarations`,
 `Compiler.record_source_declaration`, `Compiler.record_source_reference`,
 `Compiler.semantic_binding_facts`, `Compiler.macro_definition_locals`,
@@ -361,7 +361,7 @@ Public functions:
 
 ### [src/snapshot.x](../src/snapshot.x)
 
-deterministic Lisp data writer for compiler artifacts.
+deterministic Lisp data writer for unit interfaces.
 
 Public functions:
 

@@ -49,10 +49,10 @@ job limit. On the measured 16-core host this reduced clean-stage wall time
 unchanged. The B4/B5 section of
 `plans/archive/x2c-correctness-performance-tooling.md` records the full comparison.
 
-`make precommit` checks symbols, refreshes header symbols and bootstrap,
-rebuilds stage 0 safely, builds through stage 2, and compares stages 0, 1,
-and 2. `agent-pr-check` runs it and the remaining extended checks. Stage 2
-establishes self-host convergence; the fourth build is available on demand.
+`make precommit` refreshes bootstrap, rebuilds stage 0 safely, builds through
+stage 2, and compares stages 0, 1, and 2. `agent-pr-check` runs it and the
+remaining extended checks. Stage 2 establishes self-host convergence; the
+fourth build is available on demand.
 
 Source changes can leave `stage-diff-0` red until bootstrap is regenerated:
 it compares checked-in bootstrap C/H with stage 0 output. The publication

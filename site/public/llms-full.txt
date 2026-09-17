@@ -4016,7 +4016,7 @@ To try the experiment:
 The command verifies and extracts the source distribution stored in the APE
 ZIP, builds a native runtime archive first, then builds and installs the
 matching native compiler. The result includes the compiler, its runtime
-archive, headers, sources, symbol inputs, licenses, and a toolchain record.
+archive, headers, sources, unit interfaces, licenses, and a toolchain record.
 
 Bootstrap selects tools in the same order as ordinary builds: `--cc`, `X2C_CC`,
 `CC`, then `cc`; and `--ar`, `X2C_AR`, `AR`, then `ar`. It uses `-O2` unless
@@ -4363,9 +4363,9 @@ that output, and the inspection modes keep progress out of their stdout data.
 ## Dependencies and external builds
 
 Translation depfiles contain the primary source, transitive quote-includes,
-and the symbol artifacts that unit used. The native driver adds
-`-MMD -MP -MF -MT` per object and rejects conflicting dependency flags passed
-through `-Xcc`.
+and the runtime, macro, Lisp, and embedded-text files that unit read. The
+native driver adds `-MMD -MP -MF -MT` per object and rejects conflicting
+dependency flags passed through `-Xcc`.
 
 Persistent direct and manifest builds use x2c depfiles for translation reuse.
 Before reusing a native object, the selected C compiler preprocesses its source

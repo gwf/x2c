@@ -2721,7 +2721,7 @@ int main(int argc, char **argv) {
       Stdout.printf("%s\n", result.repr());
   }
   catch %(not-found *): {
-    Stderr.printf("x2c-graph: cannot load the compiler symbol snapshot\n");
+    Stderr.printf("x2c-graph: cannot find a compiler input\n");
     status = 1;
   }
   catch %(io-fail *): {
@@ -2732,11 +2732,11 @@ int main(int argc, char **argv) {
     status = 1;
   }
   catch %(incomplete *): {
-    Stderr.printf("x2c-graph: incomplete compiler symbol snapshot\n");
+    Stderr.printf("x2c-graph: incomplete compiler input\n");
     status = 1;
   }
   catch %(malformed *): {
-    Stderr.printf("x2c-graph: malformed compiler input or snapshot\n");
+    Stderr.printf("x2c-graph: malformed compiler input\n");
     status = 1;
   }
   command.close();

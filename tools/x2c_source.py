@@ -661,7 +661,7 @@ def _unit_macro_definitions(
     This is intentionally not a second macro evaluator. It recognizes unit
     macros whose body contains ordinary function definitions and substitutes
     their captured arguments textually. Signatures still get checked against
-    the compiler's symbol artifact; this pass only keeps source-owned prose
+    the compiler's unit interfaces; this pass only keeps source-owned prose
     and declaration families visible to documentation tooling.
     """
     marker = re.compile(
@@ -722,7 +722,7 @@ def _unit_macro_definitions(
                 )
             # Exact identifiers are source-shaped names, not arbitrary Lisp.
             # Materialize the literal form so public parameter spellings in a
-            # macro definition remain checkable against the symbol artifact.
+            # macro definition remain checkable against the unit interfaces.
             expanded = EXACT_IDENT.sub(r"\1", expanded)
             line = text.count("\n", 0, call.start()) + 1
             call_doc = _doc_before(text, 0, call.start())
@@ -795,7 +795,7 @@ def definitions(text: str, include_static: bool = False
     """Every function definition, with its doc comment.
 
     Static definitions are excluded by default because they are not API. Pass
-    include_static to account for them anyway: the symbol artifact records
+    include_static to account for them anyway: the unit interfaces record
     statics too, so a reverse check against it needs the full set or it
     mistakes a static method such as `Lisp._initialize` for a scanner gap.
     """

@@ -67,8 +67,9 @@ them.
 Compiler phase state may use mutable storage internally even when its output
 is an immutable List. Compiler scope and brace stacks and initialization
 queues use Arrays; Diagnostics stores chronological entries in an Array and
-returns a List snapshot; Emitter owns typed cleanup records. Convert at the
-phase boundary rather than maintaining two live representations.
+returns a List snapshot; the cleanup pass keeps its open regions in an
+Array. Convert at the phase boundary rather than maintaining two live
+representations.
 
 When adding compiler behavior:
 

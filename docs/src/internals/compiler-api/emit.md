@@ -28,18 +28,16 @@ translation session's shared generated-name state. This operation does not
 bind, transform, or choose header and source placement; generation supplies
 any added scaffolding in the same normalized grammar. It preserves the
 top-level AST sequence and advances generated-name counters as it allocates
-temporaries. Invalid `goto` placement reports through the compiler's
-`<emit>` diagnostic path. Returned canonical `List`s and `String`s are
-owned
-by pools active during emission; promote them before releasing those
-pools if the tokens must survive.
+temporaries. Returned canonical `List`s and `String`s are owned by pools
+active during emission; promote them before releasing those pools if the
+tokens must survive.
 
-Source: `src/emit.x:1390`
+Source: `src/emit.x:1376`
 
 ## Design notes
 
 Translates normalized ASTs into token `List`s for downstream flattening and
-formatting. One stack-local Emitter holds the cleanup stack and preserved
-automatic names, so emission is reentrant and a failed translation cannot
-contaminate later units. Cleanup lowering preserves handler order across
-returns and loop exits.
+formatting. One stack-local Emitter holds the current function's name,
+static objects, and native aliases, so emission is reentrant and a failed
+translation cannot contaminate later units. `cleanup.x` has already placed
+each cleanup region's statements on the exits that leave it.

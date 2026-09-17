@@ -248,8 +248,9 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
 }
 
 /** Opens and tokenizes an isolated source unit without printing diagnostics.
-    A failed unit remains open so its diagnostics can be inspected. Close it
-    before opening the next unit; Type and header caches are process-global.
+    A failed unit remains open so its diagnostics can be inspected. Close
+    it before opening the next unit; Type and collection caches are
+    process-global.
 */
 int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) {
   *unit = (ParsedUnit) { 0 };

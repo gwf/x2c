@@ -1,10 +1,9 @@
-/*  snapshot.x -- deterministic Lisp data writer for compiler artifacts
+/*  snapshot.x -- deterministic Lisp data writer for unit interfaces
 
     Copyright (c) 2026 Gary William Flake.
 
-    Serializes symbol rows and other compiler data as Lisp that the shared
-    bare reader restores. Unit interfaces in `src/collect.x` are written
-    through this grammar.
+    Serializes interface rows as Lisp that the shared bare reader restores.
+    `src/collect.x` writes each unit's `.xi` interface through this grammar.
 */
 
 #pragma once

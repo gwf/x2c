@@ -66,8 +66,8 @@ Source: `src/protocol.x:1758`
 
 Prints stable conformance rows for typedefs in `globs`.
 Rows are ordered by participant and protocol and identify whether each
-adoption is owned by this unit, making the output suitable for comparing
-live and artifact symbol modes.
+adoption is owned by this unit, so prelude and live symbol modes can be
+compared.
 
 Source: `src/protocol.x:1394`
 

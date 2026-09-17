@@ -34,8 +34,8 @@ examples/   curated executable and build-checked programs
 docs/       this book: guide, reference, library, and internals
 agents/     repository-facing documentation, contracts, and project skills
 plans/      active plans-as-logs and archived execution records
-etc/        shared Makefile rules, build configuration, symbol artifacts,
-            and the Lisp bootstrap
+etc/        shared Makefile rules, build configuration, built-in macros,
+            and the compile-time Lisp environment and SDK
 tools/      documentation and stage-comparison checkers
 ```
 
@@ -403,12 +403,11 @@ initialization instead of at the literal's source expression.
 
 Consumes the lowered AST, produces a flat `List` of C tokens. `src/emit.x`
 does this with one stack-local `Emitter` per translation unit, which holds
-the cleanup stack and preserved automatic names. Emission is therefore
-reentrant, and a unit that fails cannot contaminate the next one. Cleanup
-lowering happens here instead of in the transform phase, because it depends on
-emission order. `defer` blocks, `catch` handlers, and scope exits must run in
-the right sequence across returns, loop exits, and `Error` transfer.
-Preprocessor nodes are re-emitted here too, with `.x` include targets rewritten
+the current function's name and static objects. Emission is therefore
+reentrant, and a unit that fails cannot contaminate the next one.
+`src/cleanup.x` has already placed each region's cleanup statements on every
+exit that leaves the region, so emission prints frames, records, and
+statements where the AST puts them. Preprocessor nodes are re-emitted here too, with `.x` include targets rewritten
 to the generated `.h` they correspond to.
 
 ```sh
@@ -511,7 +510,7 @@ through collection and imports. The primary parser associates resolved
 bindings with physical token spans for definition and hover queries. It does
 not infer a source location for constructed syntax that has no physical token.
 Each editor request runs in a fresh process and collects source declarations
-without replaying header artifacts, which do not carry their physical spans.
+without reading `.xi` interfaces, which do not carry their physical spans.
 This isolates process caches and macro failures from the editor service.
 
 The VS Code adapter under `etc/vsc-extension/` converts compiler UTF-8 byte
@@ -539,8 +538,8 @@ divisions:
   `lib/match-machine.x` executes those plans over the shared wordcode and
   state definitions in `lib/machine.x`;
 - `lib/lisp.x` owns the embedded Lisp reader, session, and evaluator, while
-  `lib/lisp-machine.x` executes eligible prepared Lisp programs; the build
-  itself uses Lisp for the symbol artifacts in `etc/`;
+  `lib/lisp-machine.x` executes eligible prepared Lisp programs; the compiler
+  uses it to read `.xi` interfaces and to run compile-time macros;
 - `lib/func.x` owns generic native calls through generated adapters;
 - `lib/tokenizer.x` and `lib/scan.x` own tokenization, so the compiler's
   first phase is library code;

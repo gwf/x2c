@@ -12,44 +12,26 @@ Source-ordered shallow symbol collection and replay.
 
 | Function | Summary |
 | --- | --- |
-| [`header_symbols_begin_generated`](#header_symbols_begin_generated) | Enables recording of generated public protocol callables. |
-| [`header_symbols_initialize`](#header_symbols_initialize) | Initializes the process-wide source-collection cache. |
-| [`interface_configure`](#interface_configure) | Names the directories searched for `.xi` interfaces. |
+| [`interface_configure`](#interface_configure) | Creates the process cache and names the directories searched for `.xi` interfaces. |
 | [`interface_prelude`](#interface_prelude) | Returns the readable prelude interface path, or NULL when none exists. |
 | [`interface_write`](#interface_write) | Writes the compiler's own collected contribution to `path`. |
 | [`Compiler.collect_package`](#Compiler.collect_package) | Collects a package once and installs its public surface in the current unit. |
 | [`Compiler.collect_symbols`](#Compiler.collect_symbols) | Collects the current translation unit's declarations into `globs`. |
-| [`Compiler.record_generated_header_symbol`](#Compiler.record_generated_header_symbol) | Records one generated public callable in its source file's cached surface. |
+| [`Compiler.record_generated_symbol`](#Compiler.record_generated_symbol) | Records one generated public callable in the declaration map that the current file's collected entry contributes, which is the map its interface publishes. |
 
 ### Functions
-
-#### header_symbols_begin_generated
-
-`void header_symbols_begin_generated(void)`
-
-Enables recording of generated public protocol callables.
-Recording remains enabled for subsequent translations in this process.
-
-Source: `src/collect.x:205`
-
-#### header_symbols_initialize
-
-`void header_symbols_initialize(void)`
-
-Initializes the process-wide source-collection cache.
-
-Source: `src/collect.x:198`
 
 #### interface_configure
 
 `void interface_configure(String out_dir)`
 
-Names the directories searched for `.xi` interfaces.
-`out_dir` is the current translation output directory, or NULL. Home
-files mirror their home-relative path under the compiler's stage
-directory when it runs from `<home>/builds/`, otherwise under the home.
+Creates the process cache and names the directories searched for `.xi`
+interfaces. `out_dir` is the current translation output directory, or
+NULL. Home files mirror their home-relative path under the compiler's
+stage directory when it runs from `<home>/builds/`, otherwise under the
+home. Call it before opening any translation unit's Context.
 
-Source: `src/collect.x:811`
+Source: `src/collect.x:711`
 
 #### interface_prelude
 
@@ -57,7 +39,7 @@ Source: `src/collect.x:811`
 
 Returns the readable prelude interface path, or NULL when none exists.
 
-Source: `src/collect.x:837`
+Source: `src/collect.x:738`
 
 #### interface_write
 
@@ -69,7 +51,7 @@ A process-specific sibling is written and renamed into place, so a
 failure leaves any existing interface intact and is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:1046`
+Source: `src/collect.x:927`
 
 ### `Compiler`
 
@@ -87,7 +69,7 @@ protocol rows enter the current symbol state, and dependencies enter the
 importing compiler. Replay also merges recorded function definitions.
 `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:734`
+Source: `src/collect.x:659`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -104,19 +86,19 @@ is `globs`. Collection also updates dependencies, function definitions,
 and macro state. Keyword alias maps and seen-name state are file-local
 and restored when each file walk ends.
 
-Source: `src/collect.x:583`
+Source: `src/collect.x:512`
 
-<a id="Compiler.record_generated_header_symbol"></a>
-#### Compiler.record_generated_header_symbol
+<a id="Compiler.record_generated_symbol"></a>
+#### Compiler.record_generated_symbol
 
-`void Compiler.record_generated_header_symbol( Compiler compiler, String name, Type signature)`
+`void Compiler.record_generated_symbol( Compiler c, String name, Type signature)`
 
-Records one generated public callable in its source file's cached surface.
-The operation has no effect until generated-symbol recording is enabled.
-The compiler's current file must already have a collected contribution;
-the cache retains `signature`.
+Records one generated public callable in the declaration map that the
+current file's collected entry contributes, which is the map its
+interface publishes. A file without a collected declaration map records
+nothing. The cache retains `signature`.
 
-Source: `src/collect.x:438`
+Source: `src/collect.x:377`
 
 ## Design notes
 

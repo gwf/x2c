@@ -73,7 +73,7 @@ captures a value; by itself it does not establish that value's type.
 | Supported source-to-`Var` round trips | verified | `Type.var_tag`, typed Var constructors | Var suite and compiler fixtures |
 | Missing and exhaustion API use | partial | individual public APIs | runtime suites |
 | Iterator protocol | verified | `Iter.try_next`, status callbacks | runtime and compiler suites |
-| Optimized Error transfer | verified | emitter/frame/cleanup chain | Error/defer fixtures |
+| Optimized Error transfer | verified | cleanup pass, emitter, and exception frame chain | Error/defer fixtures |
 | Native target Error transfer | verified | generated adapter is ordinary compiled C, so no landing pad or guard | Func/Error/exception suites, `func-adapt` fixture |
 | Allocation lifetime | verified | `Scope` | scope suite and shutdown probes |
 | Boxed identity and dispatch | verified | `Var.*`, typed descriptors | Var/Map/File suites |
@@ -89,8 +89,8 @@ captures a value; by itself it does not establish that value's type.
 | Error protocol | verified | `Error`, plain `raise`, filtered `catch`; private record regions and handler watermarks own lifetime | Error/exception suites, compiler fixtures, allocation/floor/fatal probes, self-host convergence |
 | Allocation and size failure | verified | `Scope`, `Pool`, `Error`, and literal-raise emission | Error/exception suites, Scope and Error fatal probes, compiler fixtures |
 | Lisp read/eval failures | verified | `Lisp.read`, evaluator, `Func` Type boundary | Lisp/Func suites |
-| Serialized List syntax | verified | shared Atom/String/List spelling | Atom/Lisp cross-syntax and full snapshot probes |
-| Compiler runtime symbols | verified | versioned Lisp snapshot plus live oracle | snapshot probes and compiler fixtures |
+| Serialized List syntax | verified | shared Atom/String/List spelling | Atom/Lisp cross-syntax suites and interface replay probes |
+| Compiler runtime symbols | verified | runtime `x2c.xi` prelude interface plus live-symbols oracle | prelude/live parity probes and compiler fixtures |
 | Protocol adapter visibility | verified | least-public protocol dependency closure; descriptor registration remains process-wide | protocol fixtures, normal/live owner-consumer probes, self-host convergence |
 | Fixture token stream | verified | `Tokenizer.scan` | token-mode fixture |
 | Fixture parsed AST shapes | verified | `Compiler.full_parse` | AST fixtures |
@@ -572,11 +572,11 @@ located diagnostic — one check per declaration in
 `Sym.declare`, with no prescan — so generated names can never
 collide with user names. The `reserved-namespace` fixture pins the rejection
 and `generated-name-hygiene` pins that ordinary names near the convention
-still lower unchanged. Snapshot or live preprocessing seeds the same
-anonymous-type sequence. Lambda helpers, adapters, transfer frames, and
-cleanup temporaries allocate names from that session. Emission keeps cleanup
-and preserved-automatic bookkeeping in a stack-local owner, so failed or
-repeated Compiler invocations cannot contaminate later output.
+still lower unchanged. Anonymous-type identities are numbered per file, so
+interface replay and live preprocessing agree on them. Lambda helpers,
+adapters, transfer frames, and cleanup temporaries allocate names from that
+session. Emission keeps its per-function state in a stack-local `Emitter`, so
+failed or repeated Compiler invocations cannot contaminate later output.
 
 ### Source declaration collection and host preprocessing
 
@@ -614,8 +614,8 @@ complete entry with a narrower one. `interface_write` publishes the
 translated unit's entry beside its generated C as `<stem>.xi`, and
 `_interface_read` replays an interface found in the output directory, the
 stage or home mirror of the file's home-relative directory, or a package's
-`builds/`, only when its recorded path, source hash, included interfaces,
-and dependency hashes all validate. Anonymous aggregate identities are
+`builds/`, only when its recorded path, its source hash, and the content
+hashes of its includes and other dependencies all validate. Anonymous aggregate identities are
 `(gensym "<file>" N)`, numbered per file, so an interface is valid in any
 process. Warm replay is byte-identical to a cold walk; a stale or foreign
 interface is ignored rather than trusted; an unreadable include fails
@@ -827,12 +827,11 @@ exhaustion API use** row in the ledger above.
 
 ### Batch-compilation memory brackets
 
-`src/main.x` wraps a multi-file compile in nested lifetime brackets: an
-outer `String`/`List` pool retained for "header symbols" survives the whole
-batch so cached header contributions promote out of a unit's pools and stay
-live, while each translation unit runs inside its own `Scope.retain()` plus
-per-unit named `String`/`List` pools that release when the unit finishes, so
-batch peak memory stays near single-file peak. A compiler-owned pattern site
+A multi-file compile has two lifetimes. The process cache in `src/collect.x`
+owns a Scope that survives the whole batch, so collected entries promote out
+of a unit's pools and stay live, while each translation unit runs inside its
+own isolated `Context` whose Scope and `String`/`List` pools release when the
+unit closes, so batch peak memory stays near single-file peak. A compiler-owned pattern site
 keeps its plan in `Match`'s own shutdown-owned scope and needs no flush. The
 plan cache does key entries on pattern pointers that may point into cells
 consed inside a unit's bracket, which is why it is `Context`-local: each

@@ -6,7 +6,7 @@
 
 # `src/snapshot.x`
 
-Deterministic Lisp data writer for compiler artifacts.
+Deterministic Lisp data writer for unit interfaces.
 
 ## Functions
 
@@ -26,10 +26,9 @@ unsupported value returns zero; otherwise the result is one. A successful
 result establishes representability, not stream health, so the caller must
 inspect `output.error()` separately. The stream remains open.
 
-Source: `src/snapshot.x:22`
+Source: `src/snapshot.x:21`
 
 ## Design notes
 
-Serializes symbol rows and other compiler data as Lisp that the shared
-bare reader restores. Unit interfaces in `src/collect.x` are written
-through this grammar.
+Serializes interface rows as Lisp that the shared bare reader restores.
+`src/collect.x` writes each unit's `.xi` interface through this grammar.

@@ -24,11 +24,11 @@ x2c build hello.x --output hello
 ```
 
 Use the project's supported GNU Make. The install command builds the compiler
-and installs its matching runtime, headers, compile-time Lisp SDK, symbols,
-runnable examples, an empty package directory, and license. It does not
-require Cosmopolitan or an APE build. With no `PREFIX`, `make install` keeps
-its development behavior: it installs into the checkout's `bin/` under the
-current branch name.
+and installs its matching runtime, headers, compile-time Lisp SDK, unit
+interfaces, runnable examples, an empty package directory, and license. It
+does not require Cosmopolitan or an APE build. With no `PREFIX`, `make
+install` keeps its development behavior: it installs into the checkout's
+`bin/` under the current branch name.
 
 ## The x2c home
 

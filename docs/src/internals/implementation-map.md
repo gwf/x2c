@@ -252,7 +252,8 @@ inline-lisp example
 ### Raise, filtered catch, finally, and defer
 
 - Parse: `src/statements.x`
-- Lower/generate: `src/transform.x`, `src/emit.x`
+- Lower/generate: `src/transform.x`; `src/cleanup.x` places cleanup on every
+  exit from a region; `src/emit.x`
 - Runtime: `lib/exception.x` owns the frame/jump engine for transfer and
   cleanup; `lib/error.x` owns handlers, policy, watermarks, accumulated
   records, matching, and transferring registration lifetime
@@ -294,9 +295,11 @@ The main translation steps are:
 4. `src/type.x` supplies type facts and canonical forms.
 5. `src/transform.x` lowers most extensions; `src/lambda.x` owns lambda
    helper and adapter synthesis.
-6. `src/generate.x` partitions the translation unit and installs init
+6. `src/cleanup.x` names each `defer` and `try` region's runtime record and
+   places its cleanup statements on every exit that leaves the region.
+7. `src/generate.x` partitions the translation unit and installs init
    scaffolding; `src/cache.x` owns literal-cache initialization.
-7. `src/emit.x` emits C tokens and `src/format.x` formats them.
+8. `src/emit.x` emits C tokens and `src/format.x` formats them.
 
 Global type information reaches the parser outside that
 pipeline. `src/collect.x` gathers global symbol types by shallow-parsing raw
