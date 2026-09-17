@@ -1010,12 +1010,12 @@ String String.remove_suffix(String str, String suffix) {
     and the text after it. When `sep` does not occur, the result is `str`
     followed by two empty `String`s, so the shape is three elements either
     way and a caller can destructure it without testing for the separator
-    first. A leading separator and a missing separator both give
-    an empty first element, so compare the middle element against `sep` if
-    you need to tell them apart. The result and any new substrings are
-    canonical and follow their owning `List` and `String` pools. Unchanged
-    `str` and `sep` elements are borrowed into the result, so a transient input
-    must outlive the returned `List`.
+    first. A leading separator gives an empty first element and a missing
+    separator gives two empty trailing elements, so compare the middle element
+    against `sep` if you need to tell them apart. The result and any new
+    substrings are canonical and follow their owning `List` and `String` pools.
+    Unchanged `str` and `sep` elements are borrowed into the result, so a
+    transient input must outlive the returned `List`.
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the result.
 */
 List String.partition(String str, String sep) {
