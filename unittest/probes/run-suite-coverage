@@ -3,22 +3,43 @@
 
     Discovery (unittest/test-*.x) and execution (the $test.suite calls in
     test-all.x) can drift: a new test-foo.x compiles and links but is never
-    called. The counts must match. test-all.x and test-support.x are the
-    driver and shared support, not suites. Run from the repository root.
+    called. The suites the test files define must be the suites test-all.x
+    calls. test-all.x and test-support.x are the driver and shared support,
+    not suites. Run from the repository root.
 */
 List exceptions = %("test-all.x" "test-support.x");
-int files = 0;
-foreach (Path source, Path.glob("unittest/test-*.x"))
-  if (!exceptions.contains(source.basename().str())) files++;
-int suites = Path.read_text("unittest/test-all.x").count("$test.suite(");
-if (files != suites) {
-  Stderr.printf("suite coverage mismatch: %d discoverable test-*.x files "
-                "(excluding test-all.x, test-support.x) but %d $test.suite "
-                "calls in test-all.x main\n", files, suites);
-  Stderr.printf("a test-*.x file was added or removed without updating "
-                "test-all.x, or an exception needs to be added to "
+Regex definition = Regex.compile("(?m)^void (\\w+_suite)\\(void\\) *\\{");
+Regex call = Regex.compile("\\$test\\.suite\\((\\w+)\\)");
+Array defined = [];
+int problems = 0;
+foreach (Path source, Path.glob("unittest/test-*.x")) {
+  if (exceptions.contains(source.basename().str())) continue;
+  List found = definition.find_all(Path.read_text(source));
+  if (!found) {
+    Stderr.printf("suite coverage: %s defines no suite\n", source);
+    problems++;
+  }
+  foreach (RegexMatch suite, found) defined.push(suite[1]);
+}
+Array called = [];
+foreach (RegexMatch suite,
+         call.find_all(Path.read_text("unittest/test-all.x")))
+  called.push(suite[1]);
+foreach (String name, defined)
+  if (!called.contains(name)) {
+    Stderr.printf("suite coverage: test-all.x does not call %s\n", name);
+    problems++;
+  }
+foreach (String name, called)
+  if (!defined.contains(name)) {
+    Stderr.printf("suite coverage: test-all.x calls %s, which no test-*.x "
+                  "file defines\n", name);
+    problems++;
+  }
+if (problems) {
+  Stderr.printf("update test-all.x, or add an exception to "
                 "unittest/probes/run-suite-coverage\n");
   return 1;
 }
-printf("suite coverage: %d test files match %d suite calls in test-all.x\n",
-       files, suites);
+printf("suite coverage: %zu suites defined and called in test-all.x\n",
+       defined.len());
