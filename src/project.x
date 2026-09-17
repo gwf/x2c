@@ -585,10 +585,6 @@ static void _plan_target(
 
 // dependencies
 
-#define PROJECT_LOCK_HEADER \
-  "# x2c lockfile. Written by x2c build; keep it with the manifest.\n" \
-  "# name version kind platform url sha256\n"
-
 /* The lockfile's rows, or NULL when it is absent. */
 static List _read_lock(String path) {
   String text = NULL;
@@ -613,7 +609,9 @@ static int _lock_satisfies(Project project, List rows) {
 }
 
 static void _write_lock(String path, List rows) {
-  String text = PROJECT_LOCK_HEADER;
+  String text =
+    "# x2c lockfile. Written by x2c build; keep it with the manifest.\n"
+    "# name version kind platform url sha256\n";
   foreach (List row, rows) text = %"$text${" ".join(row)}\n";
   try file_publish(path, text);
   catch %(io-fail *detail): x2c_host_error(detail);
