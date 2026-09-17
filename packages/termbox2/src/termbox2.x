@@ -71,7 +71,7 @@ static int _termbox_errno_code(int code) {
 
 static void _termbox_native_error(
   String operation, int code, int restore_errno) {
-  String message = code == TB_ERR ? %"Termbox operation failed" :
+  String message = code == TB_ERR ? "Termbox operation failed" :
     String.new((char *) tb_strerror(code));
   int error_number = _termbox_errno_code(code) ? tb_last_errno() : 0;
   if (restore_errno) {
@@ -101,7 +101,7 @@ static void _termbox_signal_error(String operation, int error_number) {
 static void _termbox_save_winch(struct sigaction *previous) {
   if (sigaction(SIGWINCH, NULL, previous) == 0) return;
   int error_number = errno;
-  _termbox_signal_error(%"save SIGWINCH", error_number);
+  _termbox_signal_error("save SIGWINCH", error_number);
 }
 
 static int _termbox_restore_winch(struct sigaction *previous) {
@@ -127,7 +127,7 @@ Termbox Termbox.open(void) {
   int result = tb_init();
   if (result < 0) {
     int restore_errno = _termbox_restore_winch(&previous);
-    _termbox_native_error(%"init", result, restore_errno);
+    _termbox_native_error("init", result, restore_errno);
   }
   terminal.open = 1;
   terminal.has_previous_winch = 1;
@@ -151,10 +151,10 @@ Termbox Termbox.close(Termbox terminal) {
   _termbox_active = NULL;
 
   if (result < 0) {
-    _termbox_native_error(%"shutdown", result, restore_errno);
+    _termbox_native_error("shutdown", result, restore_errno);
   }
   if (restore_errno) {
-    _termbox_signal_error(%"restore SIGWINCH", restore_errno);
+    _termbox_signal_error("restore SIGWINCH", restore_errno);
   }
   return NULL;
 }
@@ -165,58 +165,58 @@ static int _termbox_result(String operation, int result) {
 }
 
 int Termbox.width(Termbox terminal) {
-  _termbox_require(terminal, %"width");
-  return _termbox_result(%"width", tb_width());
+  _termbox_require(terminal, "width");
+  return _termbox_result("width", tb_width());
 }
 
 int Termbox.height(Termbox terminal) {
-  _termbox_require(terminal, %"height");
-  return _termbox_result(%"height", tb_height());
+  _termbox_require(terminal, "height");
+  return _termbox_result("height", tb_height());
 }
 
 Termbox Termbox.clear(Termbox terminal) {
-  _termbox_require(terminal, %"clear");
-  _termbox_result(%"clear", tb_clear());
+  _termbox_require(terminal, "clear");
+  _termbox_result("clear", tb_clear());
   return terminal;
 }
 
 Termbox Termbox.present(Termbox terminal) {
-  _termbox_require(terminal, %"present");
-  _termbox_result(%"present", tb_present());
+  _termbox_require(terminal, "present");
+  _termbox_result("present", tb_present());
   return terminal;
 }
 
 Termbox Termbox.hide_cursor(Termbox terminal) {
-  _termbox_require(terminal, %"hide_cursor");
-  _termbox_result(%"hide_cursor", tb_hide_cursor());
+  _termbox_require(terminal, "hide_cursor");
+  _termbox_result("hide_cursor", tb_hide_cursor());
   return terminal;
 }
 
 Termbox Termbox.set_cursor(Termbox terminal, int x, int y) {
-  _termbox_require(terminal, %"set_cursor");
-  _termbox_result(%"set_cursor", tb_set_cursor(x, y));
+  _termbox_require(terminal, "set_cursor");
+  _termbox_result("set_cursor", tb_set_cursor(x, y));
   return terminal;
 }
 
 int Termbox.set_input_mode(Termbox terminal, int mode) {
-  _termbox_require(terminal, %"set_input_mode");
-  return _termbox_result(%"set_input_mode", tb_set_input_mode(mode));
+  _termbox_require(terminal, "set_input_mode");
+  return _termbox_result("set_input_mode", tb_set_input_mode(mode));
 }
 
 int Termbox.set_output_mode(Termbox terminal, int mode) {
-  _termbox_require(terminal, %"set_output_mode");
-  return _termbox_result(%"set_output_mode", tb_set_output_mode(mode));
+  _termbox_require(terminal, "set_output_mode");
+  return _termbox_result("set_output_mode", tb_set_output_mode(mode));
 }
 
 int Termbox.print(
   Termbox terminal, int x, int y, String text, uintattr_t foreground,
   uintattr_t background) {
-  _termbox_require(terminal, %"print");
+  _termbox_require(terminal, "print");
   size_t width = 0;
   int result = tb_print_ex(
     x, y, foreground, background, &width, text ? text : ""
   );
-  _termbox_result(%"print", result);
+  _termbox_result("print", result);
   return (int) width;
 }
 
@@ -253,7 +253,7 @@ static int _termbox_scan(
 }
 
 int Termbox.measure(String text) {
-  return _termbox_scan(text, %"measure", NULL, 0, NULL);
+  return _termbox_scan(text, "measure", NULL, 0, NULL);
 }
 
 /*  Repeat one grapheme cluster over a rectangle. The origin must be on the
@@ -262,11 +262,11 @@ int Termbox.measure(String text) {
 Termbox Termbox.fill(
   Termbox terminal, int x, int y, int width, int height, String character,
   uintattr_t foreground, uintattr_t background) {
-  _termbox_require(terminal, %"fill");
+  _termbox_require(terminal, "fill");
   uint32_t cluster[TERMBOX_CLUSTER_MAX];
   int count = 0;
   int step = _termbox_scan(
-    character, %"fill", cluster, TERMBOX_CLUSTER_MAX, &count
+    character, "fill", cluster, TERMBOX_CLUSTER_MAX, &count
   );
   if (step < 1 || count < 1 || count > TERMBOX_CLUSTER_MAX) {
     raise %(bad-arg (library "termbox2") (operation "fill")
@@ -276,13 +276,13 @@ Termbox Termbox.fill(
 
   int columns = terminal.width(), rows = terminal.height();
   if (x < 0 || y < 0 || x >= columns || y >= rows) {
-    _termbox_native_error(%"fill", TB_ERR_OUT_OF_BOUNDS, 0);
+    _termbox_native_error("fill", TB_ERR_OUT_OF_BOUNDS, 0);
   }
   int last_column = x + width > columns ? columns : x + width;
   int last_row = y + height > rows ? rows : y + height;
   for (int row = y; row < last_row; row++)
     for (int column = x; column + step <= last_column; column += step)
-      _termbox_result(%"fill", tb_set_cell_ex(
+      _termbox_result("fill", tb_set_cell_ex(
         column, row, cluster, (size_t) count, foreground, background
       ));
   return terminal;
@@ -292,7 +292,7 @@ Termbox Termbox.fill(
 Termbox Termbox.box(
   Termbox terminal, int x, int y, int width, int height, uintattr_t foreground,
   uintattr_t background) {
-  _termbox_require(terminal, %"box");
+  _termbox_require(terminal, "box");
   if (width < 2 || height < 2) {
     raise %(bad-arg (library "termbox2") (operation "box")
             (reason "a frame needs at least two columns and two rows")
@@ -338,14 +338,14 @@ static String _termbox_cell_text(struct tb_cell *cell) {
 /*  Copy back what the last draw put in the cell. The back buffer is the one
     a later present sends, so this reads what was drawn, not what is lit. */
 TermboxCell Termbox.cell(Termbox terminal, int x, int y) {
-  _termbox_require(terminal, %"cell");
+  _termbox_require(terminal, "cell");
   int columns = terminal.width(), rows = terminal.height();
   if (x < 0 || y < 0 || x >= columns || y >= rows) {
-    _termbox_native_error(%"cell", TB_ERR_OUT_OF_BOUNDS, 0);
+    _termbox_native_error("cell", TB_ERR_OUT_OF_BOUNDS, 0);
   }
   struct tb_cell *cells = tb_cell_buffer();
   if (!cells) {
-    _termbox_native_error(%"cell", TB_ERR_NOT_INIT, 0);
+    _termbox_native_error("cell", TB_ERR_NOT_INIT, 0);
   }
 
   struct tb_cell *cell = &cells[y * columns + x];
@@ -389,7 +389,7 @@ static long long _termbox_monotonic_ns(void) {
 
 static TermboxEvent _termbox_read(Termbox terminal, int wait, int timeout_ms) {
   TermboxEvent empty = { 0 };
-  String operation = wait ? %"poll_event" : %"peek_event";
+  String operation = wait ? "poll_event" : "peek_event";
   _termbox_require(terminal, operation);
 
   long long deadline = 0;

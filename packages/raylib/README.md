@@ -20,8 +20,8 @@ int main(void) {
   for (int index = 0; index < 5; index++)
     chart.draw_circle(origin + step.scale(index), 6, BLUE);
 
-  chart.draw_text(%"five points", 20, 12, 20, DARKGRAY);
-  chart.export(%"chart.png");
+  chart.draw_text("five points", 20, 12, 20, DARKGRAY);
+  chart.export("chart.png");
   return 0;
 }
 ```

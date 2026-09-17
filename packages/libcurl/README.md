@@ -36,8 +36,8 @@ libcurl, so the caller keeps no obligation.
 the `Bytes` value holds, embedded NUL bytes included, and copies them here.
 
 ```x2c
-CurlResponse accepted = easy.body(%"application/json", job)
-  .request(%"POST", url);
+CurlResponse accepted = easy.body("application/json", job)
+  .request("POST", url);
 ```
 
 `basic_auth(user, password)` sends HTTP Basic credentials on the first

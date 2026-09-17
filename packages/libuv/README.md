@@ -38,8 +38,8 @@ setting one afterwards raises `<bad-state>`.
 
 ```x2c
 UvProcess check = loop.command(%("/bin/sh" "-c" "make test"))
-  .directory(%"/tmp/build")
-  .environment(%{"PATH": "/usr/bin:/bin", "MODE": "strict"})
+  .directory("/tmp/build")
+  .environment({"PATH": "/usr/bin:/bin", "MODE": "strict"})
   .stdio(<pipe>, <pipe>, <pipe>)
   .deadline(30000)
   .start();
@@ -104,7 +104,7 @@ stopping the loop needs no file-scope state.
 `addrinfo` hint fields available:
 
 ```x2c
-UvLookup lookup = loop.lookup(%"127.0.0.1", %"443")
+UvLookup lookup = loop.lookup("127.0.0.1", "443")
   .hints(AF_INET, SOCK_STREAM, IPPROTO_TCP,
          AI_NUMERICHOST | AI_NUMERICSERV)
   .start(state, completed);

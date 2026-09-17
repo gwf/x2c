@@ -272,7 +272,7 @@ favour.
    raising `<bad-state>`. Reproducer:
 
    ```x2c
-   Map values = %{};
+   Map values = {};
    Scope.retain();
    { defer Scope.release(); values["x"] = Tensor.zeros(%(2 2), XT_FLOAT32); }
    Checkpoint.save(values, "/tmp/crash.pt");   /* EXC_BAD_ACCESS */

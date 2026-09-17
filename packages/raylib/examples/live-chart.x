@@ -10,7 +10,7 @@ int main(void) {
   defer chart.free();
 
   RaylibWindow window = RaylibWindow.open(
-    chart.width, chart.height, %"Weekly high temperature"
+    chart.width, chart.height, "Weekly high temperature"
   );
   defer window.close();
 

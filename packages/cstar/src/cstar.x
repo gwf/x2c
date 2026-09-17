@@ -180,15 +180,15 @@ void Cstar.fill_exit(Cstar cstar, String index_var, String length_var,
     across queries; its axiom and strategy arrays already span the session. */
 String Cstar.report(Cstar cstar) {
   String report = cst_print_vc();
-  String prefix = %"{\"verification_conditions\":[";
-  int end = report.find(%"],\"axioms\":[");
+  String prefix = "{\"verification_conditions\":[";
+  int end = report.find("],\"axioms\":[");
   if (report.find(prefix) != 0 || end < prefix.len())
     raise %(bad-state (library "cstar") (operation "report")
             (message "unexpected verification report"));
   String conditions = report[prefix.len():end];
   if (conditions.len())
     cstar.conditions = cstar.conditions
-      ? cstar.conditions + %"," + conditions : conditions;
+      ? cstar.conditions + "," + conditions : conditions;
   return prefix + (cstar.conditions ? cstar.conditions : %"") + report[end:];
 }
 

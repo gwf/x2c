@@ -48,7 +48,7 @@ static void raylib_images_draw_and_export(void) {
   EXPECT_TRUE(image.color_at(12, 12).equal(RED));
   EXPECT_FALSE(image.color_at(40, 30).equal(RAYWHITE));
 
-  image.export(%"builds/test-image.png");
+  image.export("builds/test-image.png");
   EXPECT_TRUE(FileExists("builds/test-image.png"));
 
   image.resize_nearest(32, 24);
@@ -61,7 +61,7 @@ static void raylib_export_raises_io_failure(void) {
   defer image.free();
 
   int caught = 0;
-  try image.export(%"builds/missing/output.png");
+  try image.export("builds/missing/output.png");
   catch %(io-fail *detail): {
     caught = 1;
     EXPECT_STR_EQ(detail.assoc(<library>).string(), %"raylib");
@@ -72,7 +72,7 @@ static void raylib_export_raises_io_failure(void) {
 }
 
 static void raylib_loads_an_image_from_disk(void) {
-  String path = %"builds/test-load.png";
+  String path = "builds/test-load.png";
   Image written = Image.new(12, 9, GREEN);
   written.draw_pixel_xy(3, 4, RED);
   written.export(path);
@@ -89,7 +89,7 @@ static void raylib_loads_an_image_from_disk(void) {
 static void raylib_load_raises_io_failure(void) {
   int caught = 0;
   try {
-    Image absent = Image.load(%"builds/no-such-image.png");
+    Image absent = Image.load("builds/no-such-image.png");
     absent.free();
   }
   catch %(io-fail *detail): {
@@ -103,19 +103,19 @@ static void raylib_load_raises_io_failure(void) {
 }
 
 static void raylib_measures_text_before_drawing(void) {
-  int narrow = RaylibText.width(%"ab", 20);
-  int wide = RaylibText.width(%"abcdef", 20);
-  int larger = RaylibText.width(%"ab", 40);
+  int narrow = RaylibText.width("ab", 20);
+  int wide = RaylibText.width("abcdef", 20);
+  int larger = RaylibText.width("ab", 40);
   // size takes raylib's own spacing; width uses the default font's.
-  Vector2 spaced = RaylibText.size(%"abcdef", 20, 1.0f);
-  Vector2 shorter = RaylibText.size(%"ab", 20, 1.0f);
+  Vector2 spaced = RaylibText.size("abcdef", 20, 1.0f);
+  Vector2 shorter = RaylibText.size("ab", 20, 1.0f);
 
   EXPECT_TRUE(narrow > 0);
   EXPECT_TRUE(wide > narrow);
   EXPECT_TRUE(larger > narrow);
   EXPECT_TRUE(spaced.x > shorter.x);
   EXPECT_INT_EQ((int) spaced.y, 20);
-  EXPECT_INT_EQ(RaylibText.width(%"", 20), 0);
+  EXPECT_INT_EQ(RaylibText.width("", 20), 0);
 }
 
 static void raylib_generates_gradients_and_noise(void) {
@@ -362,7 +362,7 @@ static void raylib_window_owns_one_native_window(void) {
   Image frame = Image.new(64, 48, BLUE);
   defer frame.free();
 
-  RaylibWindow window = RaylibWindow.open(64, 48, %"x2c window test");
+  RaylibWindow window = RaylibWindow.open(64, 48, "x2c window test");
   EXPECT_INT_EQ(window != NULL, 1);
 
   int no_texture = 0;
@@ -371,7 +371,7 @@ static void raylib_window_owns_one_native_window(void) {
   EXPECT_INT_EQ(no_texture, 1);
 
   int duplicate = 0;
-  try RaylibWindow.open(64, 48, %"duplicate window");
+  try RaylibWindow.open(64, 48, "duplicate window");
   catch %(bad-state *detail): duplicate = 1;
   EXPECT_INT_EQ(duplicate, 1);
 
@@ -406,7 +406,7 @@ static void raylib_window_owns_one_native_window(void) {
 static void raylib_window_rejects_an_empty_extent(void) {
   int refused = 0;
   try {
-    RaylibWindow window = RaylibWindow.open(0, 48, %"x2c window test");
+    RaylibWindow window = RaylibWindow.open(0, 48, "x2c window test");
     window.close();
   }
   catch %(bad-arg *detail): refused = 1;
