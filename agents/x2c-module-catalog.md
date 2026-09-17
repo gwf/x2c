@@ -81,9 +81,9 @@ source-ordered shallow symbol collection and replay.
 Public functions:
 
 `header_symbols_initialize`, `header_symbols_begin_generated`,
-`Compiler.record_generated_header_symbol`, `Compiler.record_region_summary`,
-`Compiler.collect_symbols`, `Compiler.collect_package`, `interface_configure`,
-`interface_prelude`, `interface_write`
+`Compiler.record_generated_header_symbol`, `Compiler.collect_symbols`,
+`Compiler.collect_package`, `interface_configure`, `interface_prelude`,
+`interface_write`
 
 ### [src/compiler.x](../src/compiler.x)
 

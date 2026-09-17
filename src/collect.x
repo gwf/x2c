@@ -450,21 +450,6 @@ void Compiler.record_generated_header_symbol(
   contribution[marker_key] = marker;
 }
 
-/** Records one function's region summary in its source file's cached surface.
-    A dependent unit reads the same `("region-summary" NAME)` key from its
-    symbol table after replaying this file's interface. The call has no effect
-    when the file has no collected contribution, as under a SourceView.
-*/
-void Compiler.record_region_summary(
-  Compiler compiler, String name, List summary) {
-  Map contribution = _own_contribution(compiler);
-  if ((void *) contribution == NULL) return;
-  List key = %("region-summary" $name);
-  _require_header_cache_owner(key.try_own());
-  _require_header_cache_owner(summary.try_own());
-  contribution[key] = summary;
-}
-
 /* Record a cold walk under canonical path identity. Segment overlays and
    included canonical paths enter parts in source order, while source-private
    state carries only between segments of this file; every included file

@@ -2752,7 +2752,9 @@ Each is a warning: translation continues and the program still compiles.
 | `unbalanced` | A region is opened in one block and released in another. |
 | `after-free` | A local is read after `Scope.free` or `Array.list_free` consumed it. |
 
-The check reads regions lexically and carries one summary per function
-across units. It makes no claim about storage from plain `malloc` or a C
-library, raw pointer arithmetic, values reached through a field of a stack
-`struct`, callbacks, or `Context` regions.
+The check reads regions lexically and summarizes each function within its
+own unit, so the same unit reports the same warnings whatever else is
+translated with it. Calls into another unit are understood only for the
+runtime operations the check knows by name. It makes no claim about storage
+from plain `malloc` or a C library, raw pointer arithmetic, values reached
+through a field of a stack `struct`, callbacks, or `Context` regions.

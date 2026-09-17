@@ -12,7 +12,7 @@ Values that can outlive the region that allocated them.
 
 | Function | Summary |
 | --- | --- |
-| [`Compiler.check_regions`](#Compiler.check_regions) | Warns about values that can outlive the region that allocated them and records each function's region summary for this unit's interface. |
+| [`Compiler.check_regions`](#Compiler.check_regions) | Warns about values that can outlive the region that allocated them. |
 
 ### `Compiler`
 
@@ -21,14 +21,12 @@ Values that can outlive the region that allocated them.
 
 `void Compiler.check_regions(Compiler compiler, List ast)`
 
-Warns about values that can outlive the region that allocated them and
-records each function's region summary for this unit's interface.
+Warns about values that can outlive the region that allocated them.
 `ast` must be the bound and typed top-level unit, before transform
 lowering rewrites its `defer` and region forms. The call adds warnings to
-`compiler` and records a `("region-summary" NAME)` contribution for every
-non-static function whose summary is not empty. It does not change `ast`.
+`compiler` and does not change `ast`.
 
-Source: `src/regions.x:1169`
+Source: `src/regions.x:1162`
 
 ## Design notes
 
@@ -43,11 +41,11 @@ after it was freed.
 
 A function's summary is three facts: it allocates into the caller's
 active region, it returns fresh storage, and where each parameter is
-sunk. Static functions reach a fixpoint inside the unit; a function with
-a non-trivial summary publishes it in the unit's interface contribution,
-where a dependent unit reads it beside the signature. The walk's records
-are ordinary Maps in the translation's own Scope, so a diagnostic's
-canonical text outlives them.
+sunk. The unit's functions reach a fixpoint over their summaries. A call
+into another unit has a summary only through the runtime role table, so
+a unit's warnings do not depend on which units were translated before
+it. The walk's records are ordinary Maps in the translation's own Scope,
+so a diagnostic's canonical text outlives them.
 
 The warnings name departures from the lexical pattern, not memory safety:
 raw C stores, pointer arithmetic, callbacks, and storage the runtime did

@@ -13,11 +13,11 @@
 
     A function's summary is three facts: it allocates into the caller's
     active region, it returns fresh storage, and where each parameter is
-    sunk. Static functions reach a fixpoint inside the unit; a function with
-    a non-trivial summary publishes it in the unit's interface contribution,
-    where a dependent unit reads it beside the signature. The walk's records
-    are ordinary Maps in the translation's own Scope, so a diagnostic's
-    canonical text outlives them.
+    sunk. The unit's functions reach a fixpoint over their summaries. A call
+    into another unit has a summary only through the runtime role table, so
+    a unit's warnings do not depend on which units were translated before
+    it. The walk's records are ordinary Maps in the translation's own Scope,
+    so a diagnostic's canonical text outlives them.
 
     The warnings name departures from the lexical pattern, not memory safety:
     raw C stores, pointer arithmetic, callbacks, and storage the runtime did
@@ -40,7 +40,7 @@
    are both Maps, so one record can hold another. */
 typedef struct Walk {
   Compiler compiler;
-  Map roles, summaries, external, facts, restored, sinks;
+  Map roles, summaries, facts, restored, sinks;
   Array open, parameters;
   int depth, origin, report, allocates, fresh;
 } *Walk;
@@ -217,13 +217,10 @@ static List _summary_for(Walk w, String name) {
   if (local is <map>) return _summary_of(local.map());
   switch (_role(w, name)) {
     case <alloc>: case <slot-alloc>: return %(1 1 ());
+    /* A cons cell holds both arguments in storage the region does not own. */
+    case <pool>: return %(0 0 ((0 unknown) (1 unknown)));
   }
-  /* One symbol-table lookup per name per unit, not per call site. */
-  Var cached = w.external[name];
-  if (cached is <list>) return cached.list();
-  List published = w.compiler.sym.get(%("region-summary" $name));
-  w.external[name] = published;
-  return published;
+  return NULL;
 }
 
 static int _allocates_active(Walk w, String name) {
@@ -1081,16 +1078,16 @@ static void _walk_statement(Walk w, Var value) {
   foreach (Var child, node.cdr()) _walk_child(w, child);
 }
 
-// per-unit fixpoint and publication
+// per-unit fixpoint
 
-/* One function row: its C name, whether it is static, its parameter
-   bindings in order, and its body. */
+/* One function row: its C name, its parameter bindings in order, and its
+   body. */
 static void _collect_functions(Var value, Array found) {
   if (value is not <list> || value.is_nil()) return;
   List node = value;
   match (node) {
     case %(expr *): return;
-    case %(function ?type (bind ?name ?modifiers) ?body): {
+    case %(function ? (bind ?name ?modifiers) ?body): {
       String spelling = name is <list> ? binding_identity_spelling(name.list())
                                        : NULL;
       if (!spelling) return;
@@ -1105,9 +1102,7 @@ static void _collect_functions(Var value, Array found) {
                   parameters.push(parameter);
                 else parameters.push(NULL);
               }
-      Type declared = type;
-      found.push(%($spelling ${declared.is_static() ? 1 : 0}
-                   ${parameters.list_free()} $body));
+      found.push(%($spelling ${parameters.list_free()} $body));
       return;
     }
   }
@@ -1159,19 +1154,17 @@ static void _analyze(
   }
 }
 
-/** Warns about values that can outlive the region that allocated them and
-    records each function's region summary for this unit's interface.
+/** Warns about values that can outlive the region that allocated them.
     `ast` must be the bound and typed top-level unit, before transform
     lowering rewrites its `defer` and region forms. The call adds warnings to
-    `compiler` and records a `("region-summary" NAME)` contribution for every
-    non-static function whose summary is not empty. It does not change `ast`.
+    `compiler` and does not change `ast`.
 */
 void Compiler.check_regions(Compiler compiler, List ast) {
   Array functions = [];
   defer functions.free();
   _collect_functions(ast, functions);
   if (!functions.len()) return;
-  struct Walk state = {compiler, _runtime_roles(), {}, {}, {}, {}, {}, [], [],
+  struct Walk state = {compiler, _runtime_roles(), {}, {}, {}, {}, [], [],
                        0, 0, 0, 0, 0};
   Walk w = &state;
   Map summaries = w.summaries;
@@ -1188,8 +1181,7 @@ void Compiler.check_regions(Compiler compiler, List ast) {
   for (int round = 0; changed && round < 20; round++) {
     changed = 0;
     foreach (List row, functions) {
-      (Var name, Var is_static, List parameters, Var body) = row;
-      (void) is_static;
+      (Var name, List parameters, Var body) = row;
       Map current = summaries[name];
       List before = _summary_of(current);
       _analyze(w, parameters, body, current, 0);
@@ -1197,11 +1189,7 @@ void Compiler.check_regions(Compiler compiler, List ast) {
     }
   }
   foreach (List row, functions) {
-    (String name, Var is_static, List parameters, Var body) = row;
-    Map current = summaries[name];
-    _analyze(w, parameters, body, current, 1);
-    List summary = _summary_of(current);
-    if (is_static.int() || summary == %(0 0 ())) continue;
-    compiler.record_region_summary(name, summary);
+    (Var name, List parameters, Var body) = row;
+    _analyze(w, parameters, body, summaries[name], 1);
   }
 }

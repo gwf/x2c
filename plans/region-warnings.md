@@ -1,13 +1,17 @@
 # Region escape warnings
 
-> Status: needs author scoping - 2026-09-16. Decided by the Scope memory
-> safety spike (`.context/scope-memory-safety-spike.md` in worktree
+> Status: active - 2026-09-17. Shipped in ac931c4: on by default, with
+> `$let` taught to the pass. Summaries no longer cross units: a summary
+> recorded during transform and read back from interfaces made warnings
+> depend on input order, `-j`, and earlier `.xi` files, so each unit now
+> uses its own summaries and the runtime role table. Open: the false
+> positives, missed escapes, and cleanup from the 2026-09-17 merge review.
+> Decided by the Scope memory safety spike
+> (`.context/scope-memory-safety-spike.md` in worktree
 > frosty-jang-06431e). A Python prototype over `--dump-ast` found 0 real
 > escapes in src, lib, and examples and 5 explained reports in packages, with
 > 7 of 7 planted escapes detected. The runtime barrier variant was measured
-> at 1.42x to 2.35x translation cost and dropped. Open for Gary: whether the
-> warnings are on by default (recommended) and whether `$let` is taught to
-> the pass or rewritten to avoid the parameter store.
+> at 1.42x to 2.35x translation cost and dropped.
 
 ## The result
 
@@ -37,14 +41,15 @@ callbacks, or storage the runtime did not allocate.
   `$scope`, `$auto`, and `foreach` have expanded and before cleanup
   lowering, so regions are still visible as `Scope_retain`, `defer
   Scope_release`, `Scope_push`, `List_pool_retain`, and `defer X_cleanup`.
-- **Per-function summaries cross units through the interface file.** A
-  summary is three facts: allocates into the caller's active region;
-  returns fresh storage; and for each parameter, where it is sunk
-  (returned, into another parameter's object, into a static, through an
-  unknown pointer). Static functions are summarized within their unit to a
-  fixpoint. Public functions publish their summary in the unit's `.xi`
-  interface beside the signature, so a dependent unit reads it the way it
-  reads the type. Interface format version increments.
+- **Per-function summaries stay within the unit.** A summary is three
+  facts: allocates into the caller's active region; returns fresh storage;
+  and for each parameter, where it is sunk (returned, into another
+  parameter's object, into a static, through an unknown pointer). A unit's
+  functions are summarized to a fixpoint. A call into another unit has a
+  summary only through the runtime role table. Publishing summaries in the
+  `.xi` interface was shipped and removed on 2026-09-17: dependents collect
+  interfaces before the summarized unit is transformed, so the warnings
+  depended on translation order.
 - **Ownership sources.** A value is region-born when it comes from
   `Scope.malloc` and family, `Block.new`, `Bytes.new`, `Array.new`,
   `Map.new`, `Buffer.new`, `String.malloc`, an array or map literal, `cons`

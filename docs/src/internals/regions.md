@@ -69,14 +69,16 @@ walks each body with a stack of open regions and a map from binding to what
 is known about it: its parameter index, the region it was born in, the local
 a pointer was taken from, and whether a consuming call has already ended it.
 
-A summary that is not empty is published in the unit's `.xi` interface as a
-`("region-summary" NAME)` contribution, beside the signature, and a
-dependent unit reads it from its symbol table the way it reads a type. The
-consequence is that a change inside one function can surface a warning in a
-different unit: teaching a callee to store its argument into a static makes
-every caller that hands it a region-born value report. That is the intended
-behavior for a summary-based check, and it is the reason the interface
-format version moves when the summary shape changes.
+Summaries stay inside the unit. A call into another unit is understood only
+when the callee is a runtime operation the pass knows by name, such as a
+`Scope` allocator, `cons`, `Scope.move`, or `Array.list_free`. A dependent
+unit collects its includes before those units are transformed, and
+parallel workers do not share what they transform, so a summary carried in
+the `.xi` interface would make a unit's warnings depend on input order, the
+job count, and interfaces left by an earlier translation. The consequence is
+that a function in one unit that stores its argument into a static is
+invisible to a caller in another unit. The pass reports nothing there rather
+than reporting it only some of the time.
 
 ## Where the design sits
 

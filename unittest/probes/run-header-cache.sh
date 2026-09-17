@@ -114,6 +114,48 @@ for extension in c h; do
   done
 done
 
+# Region warnings do not depend on input order, workers, or interfaces left
+# by an earlier translation. Summaries stay inside a unit, so the store
+# into region-keep.x's static is silent and the local one always warns.
+cat >"$BUILD/src/region-keep.x" <<'EOF'
+typedef struct RegionNode { struct RegionNode *next; } *RegionNode;
+static RegionNode region_stash;
+void region_keep(RegionNode n) { region_stash = n; }
+EOF
+cat >"$BUILD/src/region-use.x" <<'EOF'
+#include "region-keep.x"
+static RegionNode local_stash;
+static void _local_keep(RegionNode n) { local_stash = n; }
+void region_use(void) {
+  $scope() {
+    RegionNode n = Scope.calloc(1, sizeof(struct RegionNode));
+    region_keep(n);
+    _local_keep(n);
+  }
+}
+EOF
+region_warnings() {
+  local out="$BUILD/regions-$1"
+  shift
+  mkdir -p "$out"
+  "$X2C" translate --out-dir "$out" "$@" 2>&1 | grep ': region: ' || true
+}
+region_expected=$(region_warnings solo "$BUILD/src/region-use.x")
+[[ $(grep -c '' <<<"$region_expected") == 1 &&
+  $region_expected == *region-use.x:8:* ]] ||
+  fail "unexpected region warnings: $region_expected"
+region_warnings solo "$BUILD/src/region-keep.x" >/dev/null
+for run in "solo $BUILD/src/region-use.x" \
+  "keep-use -j1 $BUILD/src/region-keep.x $BUILD/src/region-use.x" \
+  "use-keep -j1 $BUILD/src/region-use.x $BUILD/src/region-keep.x" \
+  "parallel-keep-use -j4 $BUILD/src/region-keep.x $BUILD/src/region-use.x" \
+  "parallel-use-keep -j4 $BUILD/src/region-use.x $BUILD/src/region-keep.x"
+do
+  # shellcheck disable=SC2086
+  [[ $(region_warnings $run) == "$region_expected" ]] ||
+    fail "region warnings changed under: $run"
+done
+
 # Fake home: interface paths are home-relative, so the probe gets its own
 # home with the real compiler, runtime sources, and compile-time Lisp copied
 # in.  Home discovery climbs from the binary looking for include/ and
