@@ -264,12 +264,22 @@ The two-path arrangement is scaffolding for this milestone only. M1 either
 extends the substitution lowering to cover everything or records why a
 second path is permanent.
 
-### M1 - the compile-time function
+### M1 - the compile-time function  (PROVEN IN THE SPIKE 2026-09-17)
 
-Decide and implement the source spelling, lower a marked function at
-definition, and make it callable from `$(...)`. Proof: a compiler fixture
-where a macro calls a compile-time function written in x2c and the result
-reaches the program as a literal.
+`.context/spike/comptime.x` runs end to end: `$comptime()` marks a
+function, `$at(...)` calls it during translation, and the generated C holds
+`55, 5050, 500500` and `1627576247` as literals where the source called
+`triangle` and `mix`. The same functions still compile and run normally, and
+their run-time and compile-time results agree, including a `double`.
+
+The spelling is a `Unit` decorator, chosen because it needs no parser
+change and is reversible. A keyword is the eventual spelling and is not
+decided here.
+
+What remains before this could ship, and deliberately not done yet: the
+lowering and the SDK still live in `.context/spike/`, so there is no
+compiler fixture. Moving them into `etc/` is only worth doing once M3 says
+the direction pays, so the fixture waits for that.
 
 ### M2 - `struct` and `match`
 
