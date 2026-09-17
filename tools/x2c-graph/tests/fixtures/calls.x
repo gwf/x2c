@@ -32,7 +32,7 @@ static int computed(CallbackHolder *holder) {
 
 static int expanded(List values) {
   int count = 0;
-  foreach (Var value, values) count += value.truthy();
+  foreach (Var value, values) count += value.truth();
   return count;
 }
 

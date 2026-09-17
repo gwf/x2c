@@ -107,7 +107,7 @@ captures a value; by itself it does not establish that value's type.
 | Structural `Var` decoding | verified | `lib/var.x` | VarOps suite |
 | Cross-tag numeric conversion | verified | `Var.convert` | VarOps |
 | Dynamic numeric operations | verified | `Var.binary` | VarOps/fixture |
-| `Var` truthiness | verified | `Var.truthy` | VarOps/Error fixture |
+| `Var` truthiness | verified | `Var.truth` | VarOps/Error fixture |
 | Single-call container update | verified | `Array.updateindex`, `Map.updateindex`, Var owners | atomic-container suite/fixtures |
 | Atomic compound update | verified | typed VarOps adapters | VarOps/fixtures |
 | Identity-only runtime state | verified | Scope, Exception, Machine, Match, Lisp, Func, Var owners | runtime suites and unit interfaces |
@@ -395,7 +395,7 @@ floating point. `Var.integer_floating_compare` supplies exact mixed
 integer/floating comparison to `Var.compare`, while dispatch retains
 total-order policy.
 
-`Var.truthy` raises `<void-op>` for `void` and `<bad-enc>` for invalid encodings.
+`Var.truth` raises `<void-op>` for `void` and `<bad-enc>` for invalid encodings.
 Numeric and Symbol zero, Null and null pointers, canonical empty String/List,
 and empty Array/Map/Block/Bytes/Buffer values are false. NaN, infinities,
 nonzero values, nonempty containers, and other nonnull objects are true. A

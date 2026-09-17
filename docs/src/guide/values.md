@@ -247,7 +247,7 @@ Var also_absent = NULL;
 List row = %($absent 1);
 
 printf("null=%d void=%d truthy=%d len=%d\n",
-       absent.is_null(), absent is void, absent.truthy(), row.len());
+       absent.is_null(), absent is void, absent.truth(), row.len());
 ```
 
 ```text
@@ -343,7 +343,7 @@ operators use `Var.compare`. See
 
 ## Handling dynamic-operation failures
 
-`Var.convert`, `Var.binary`, `Var.truthy`, `Var.update`, and `Var.postfix`
+`Var.convert`, `Var.binary`, `Var.truth`, `Var.update`, and `Var.postfix`
 raise cause-specific `Error`s. Their default policies fail fast, and
 compiler-inserted conversions raise the same causes. Install a filtered
 `catch` where your code can recover from one of them.

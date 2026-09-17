@@ -1055,10 +1055,10 @@ static void var_dense_custom_dispatch(void) {
   EXPECT_INT_EQ(a.compare(b), 0);
   EXPECT_TRUE(a < c);
   EXPECT_TRUE(c > a);
-  EXPECT_TRUE(a.truthy());
-  EXPECT_FALSE(z.truthy());
+  EXPECT_TRUE(a.truth());
+  EXPECT_FALSE(z.truth());
   dispatch_truth_calls = 0;
-  EXPECT_FALSE(z.binary(<&&>, a).truthy());
+  EXPECT_FALSE(z.binary(<&&>, a).truth());
   EXPECT_INT_EQ(dispatch_truth_calls, 2);
 
   struct Iter storage;
@@ -1076,7 +1076,7 @@ static void var_dense_custom_dispatch(void) {
     .truth = dispatch_fixture_false
   };
   x2c_register_descriptor("fixture", truth_replacement);
-  EXPECT_FALSE(a.truthy());
+  EXPECT_FALSE(a.truth());
   EXPECT_STR_EQ(a.str(), "custom-str-replaced");
 }
 
@@ -1177,8 +1177,8 @@ static void var_dense_dispatch_capacity(void) {
   EXPECT_FALSE(x2c_try_register_descriptor(NULL, methods));
   x2c_register_type("token");
   long token_value = 1;
-  EXPECT_TRUE(Var.new(<token>, &token_value).truthy());
-  EXPECT_FALSE(Var.new(<token>, NULL).truthy());
+  EXPECT_TRUE(Var.new(<token>, &token_value).truth());
+  EXPECT_FALSE(Var.new(<token>, NULL).truth());
   // Fill whatever slots remain: runtime modules (the Lisp lsym tag) and
   // earlier suites own an unknown share of the 32.
   int filled = 0;
@@ -1194,7 +1194,7 @@ static void var_dense_dispatch_capacity(void) {
   catch %(bad-state *): caught = 1;
   EXPECT_INT_EQ(caught, 1);
   // Tags registered before capacity keep working.
-  EXPECT_TRUE(Var.new(<token>, &token_value).truthy());
+  EXPECT_TRUE(Var.new(<token>, &token_value).truth());
 }
 
 /* Streaming must produce exactly what str produces, for every built-in shape

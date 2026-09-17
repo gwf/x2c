@@ -15,8 +15,8 @@ static void json_parse_uses_x2c_values(void) {
   Map object = value;
   EXPECT_STR_EQ(object["n"].string(), "x2c");
   EXPECT_TRUE(json.Json.is_bool(object["t"]));
-  EXPECT_TRUE(object["t"].truthy());
-  EXPECT_FALSE(object["f"].truthy());
+  EXPECT_TRUE(object["t"].truth());
+  EXPECT_FALSE(object["f"].truth());
   EXPECT_TRUE(object["z"].is_null());
 
   Array items = object["a"];
@@ -33,7 +33,7 @@ static void json_round_trip_preserves_values(void) {
   String encoded = original.json();
   Var decoded = json.Json.parse(encoded);
   EXPECT_TRUE(original == decoded);
-  EXPECT_TRUE(decoded.map()["enabled"].truthy());
+  EXPECT_TRUE(decoded.map()["enabled"].truth());
 }
 
 static void json_integer_edges_remain_exact(void) {
@@ -61,7 +61,7 @@ static void json_build_and_mutate_with_collections(void) {
   Map decoded = json.Json.parse(document.pretty_json());
   EXPECT_INT_EQ(decoded["names"].array().len(), 3);
   EXPECT_STR_EQ(decoded["names"].array()[2].string(), "three");
-  EXPECT_TRUE(decoded["published"].truthy());
+  EXPECT_TRUE(decoded["published"].truth());
   EXPECT_TRUE(decoded["metadata"].is_null());
 }
 

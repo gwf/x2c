@@ -2,5 +2,5 @@
 
 int main(void) {
   Var value = 1, invalid = -value;
-  return invalid.truthy();
+  return invalid.truth();
 }

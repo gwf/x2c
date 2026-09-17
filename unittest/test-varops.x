@@ -462,11 +462,11 @@ static void var_invalid_encoding_status_is_atomic(void) {
   int caught = 0;
   try malformed_immediate.convert(<i32>);
   catch %(bad-enc *): caught++;
-  try malformed_special.truthy();
+  try malformed_special.truth();
   catch %(bad-enc *): caught++;
-  try null_array.truthy();
+  try null_array.truth();
   catch %(bad-enc *): caught++;
-  try null_map.truthy();
+  try null_map.truth();
   catch %(bad-enc *): caught++;
   try retagged.binary(<+>, 1);
   catch %(bad-enc *): caught++;
@@ -486,12 +486,12 @@ static void var_invalid_encoding_status_is_atomic(void) {
 
 static void var_truth_and_generic_predicates(void) {
   $test.scoped();
-  int truth = Var.truthy(0);
+  int truth = Var.truth(0);
   EXPECT_FALSE(truth);
-  EXPECT_FALSE(Var.new(<f64>, -0.0).truthy());
-  EXPECT_TRUE(Var.new(<f64>, 0.0 / 0.0).truthy());
-  EXPECT_FALSE(((Var) {0}).truthy());
-  EXPECT_FALSE(Var.new(<symbol>, 0ul).truthy());
+  EXPECT_FALSE(Var.new(<f64>, -0.0).truth());
+  EXPECT_TRUE(Var.new(<f64>, 0.0 / 0.0).truth());
+  EXPECT_FALSE(((Var) {0}).truth());
+  EXPECT_FALSE(Var.new(<symbol>, 0ul).truth());
   Var empty_string = (String) NULL;
   Var text = "x";
   Var empty_list = (List) NULL;
@@ -500,14 +500,14 @@ static void var_truth_and_generic_predicates(void) {
   Var array = [1];
   Var empty_map = %{};
   Var map = { a: 1 };
-  EXPECT_FALSE(empty_string.truthy());
-  EXPECT_TRUE(text.truthy());
-  EXPECT_FALSE(empty_list.truthy());
-  EXPECT_TRUE(list.truthy());
-  EXPECT_FALSE(empty_array.truthy());
-  EXPECT_TRUE(array.truthy());
-  EXPECT_FALSE(empty_map.truthy());
-  EXPECT_TRUE(map.truthy());
+  EXPECT_FALSE(empty_string.truth());
+  EXPECT_TRUE(text.truth());
+  EXPECT_FALSE(empty_list.truth());
+  EXPECT_TRUE(list.truth());
+  EXPECT_FALSE(empty_array.truth());
+  EXPECT_TRUE(array.truth());
+  EXPECT_FALSE(empty_map.truth());
+  EXPECT_TRUE(map.truth());
 
   Block empty_block = Block.new(sizeof(int));
   Block full_block = Block.new(sizeof(int));
@@ -519,14 +519,14 @@ static void var_truth_and_generic_predicates(void) {
   full_bytes = full_bytes.append(&byte, 1);
   Buffer empty_buffer = Buffer.new(0), full_buffer = Buffer.new(0);
   full_buffer.write("x");
-  EXPECT_FALSE(Var.new(<block>, empty_block).truthy());
-  EXPECT_TRUE(Var.new(<block>, full_block).truthy());
-  EXPECT_FALSE(Var.new(<bytes>, empty_bytes).truthy());
-  EXPECT_TRUE(Var.new(<bytes>, full_bytes).truthy());
-  EXPECT_FALSE(Var.new(<buffer>, empty_buffer).truthy());
-  EXPECT_TRUE(Var.new(<buffer>, full_buffer).truthy());
+  EXPECT_FALSE(Var.new(<block>, empty_block).truth());
+  EXPECT_TRUE(Var.new(<block>, full_block).truth());
+  EXPECT_FALSE(Var.new(<bytes>, empty_bytes).truth());
+  EXPECT_TRUE(Var.new(<bytes>, full_bytes).truth());
+  EXPECT_FALSE(Var.new(<buffer>, empty_buffer).truth());
+  EXPECT_TRUE(Var.new(<buffer>, full_buffer).truth());
   int caught = 0;
-  try void.truthy();
+  try void.truth();
   catch %(void-op *): caught = 1;
   EXPECT_TRUE(caught);
 
@@ -549,18 +549,18 @@ static void var_truth_and_generic_predicates(void) {
   };
   int numeric_count = sizeof(numeric_tags) / sizeof(numeric_tags[0]);
   for (int i = 0; i < numeric_count; i++) {
-    EXPECT_FALSE(numeric_value_for_tag(numeric_tags[i], 0).truthy());
-    EXPECT_TRUE(numeric_value_for_tag(numeric_tags[i], 1).truthy());
+    EXPECT_FALSE(numeric_value_for_tag(numeric_tags[i], 0).truth());
+    EXPECT_TRUE(numeric_value_for_tag(numeric_tags[i], 1).truth());
   }
 
   Array iter_values = [7];
   struct Iter iter_storage;
   Iter iter = iter_values.iter(&iter_storage);
   Var boxed_iter = iter;
-  EXPECT_TRUE(boxed_iter.truthy());
-  EXPECT_TRUE(boxed_iter.truthy());
+  EXPECT_TRUE(boxed_iter.truth());
+  EXPECT_TRUE(boxed_iter.truth());
   EXPECT_INT_EQ(iter.next().int(), 7);
-  EXPECT_TRUE(boxed_iter.truthy());
+  EXPECT_TRUE(boxed_iter.truth());
   empty_buffer.free();
   full_buffer.free();
 }

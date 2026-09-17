@@ -374,7 +374,6 @@ int Var.fallback_compare(Var a, Var b);
 
 Var Var.convert(Var value, Symbol target);
 int Var.truth(Var value);
-int Var.truthy(Var value);
 int Var.fallback_truth(Var value);
 Iter Var.fallback_iter(Var value, Iter dest);
 int Var.contains(Var value, Var needle);

@@ -12,9 +12,9 @@ int main(void) {
 
   printf("%s", %"region ${config["region"]}, ${services.len()} services\n");
   foreach(Map service, services) {
-    String mark = service["healthy"].truthy() ? "ok" : "DOWN";
+    String mark = service["healthy"].truth() ? "ok" : "DOWN";
     printf("%s", %"  ${service["name"]}:${service["port"]} $mark\n");
-    if (!service["healthy"].truthy()) unhealthy.push(service["name"]);
+    if (!service["healthy"].truth()) unhealthy.push(service["name"]);
   }
 
   Var report = unhealthy;

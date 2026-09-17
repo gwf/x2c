@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
   struct Iter iter_storage;
 
   if (!strcmp(argv[1], "convert")) void.convert(<i32>);
-  if (!strcmp(argv[1], "truth")) void.truthy();
+  if (!strcmp(argv[1], "truth")) void.truth();
   if (!strcmp(argv[1], "hash")) void.hash();
   if (!strcmp(argv[1], "compare")) void.compare(one);
   if (!strcmp(argv[1], "iter")) void.iter(&iter_storage);

@@ -79,9 +79,9 @@ static void protocols_adoption_dispatch_reaches_boxed_arrayint(void) {
 
   // Descriptor truth reports emptiness; the fallback would only see a
   // non-null pointer.
-  EXPECT_TRUE(boxed_left.truthy());
+  EXPECT_TRUE(boxed_left.truth());
   Var boxed_empty = ArrayInt.new();
-  EXPECT_FALSE(boxed_empty.truthy());
+  EXPECT_FALSE(boxed_empty.truth());
 
   struct Iter storage;
   Iter items = boxed_left.iter(&storage);
@@ -98,10 +98,10 @@ static void protocols_adoption_dispatch_reaches_boxed_bytes(void) {
   // Var(Bytes) registers only truth on the builtin <bytes> descriptor row;
   // a boxed empty Bytes is falsy even though its pointer is non-null.
   EXPECT_TRUE(boxed_empty is <bytes>);
-  EXPECT_FALSE(boxed_empty.truthy());
+  EXPECT_FALSE(boxed_empty.truth());
   bytes = bytes.append("x", 1);
   Var boxed_full = bytes;
-  EXPECT_TRUE(boxed_full.truthy());
+  EXPECT_TRUE(boxed_full.truth());
 }
 
 void protocols_suite(void) {

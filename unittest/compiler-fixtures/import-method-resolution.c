@@ -4,10 +4,10 @@
 
 static int Var_vec(Var value);
 
-int Var_truthy(Var);
+int Var_truth(Var);
 
 static int Var_vec(Var value){
-  return Var_truthy(value) + 7;
+  return Var_truth(value) + 7;
 }
 
 geo__Vec geo__Var_vec(Var);

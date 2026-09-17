@@ -361,9 +361,6 @@ int Var.truth(Var value) {
   return handled ? !!truth : value.fallback_truth();
 }
 
-/** Returns `value.truth()`. */
-int Var.truthy(Var value) => value.truth();
-
 static Var _protocol_arithmetic(Var lhs, Symbol member, Symbol op, Var rhs) {
   int fast_handled;
   Var result = _fast_numeric(op, lhs, rhs, &fast_handled);

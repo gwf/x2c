@@ -13,7 +13,7 @@ int local_vec(Packed value);
 #pragma private
 
 static int Var.vec(Var value) {
-  return value.truthy() + 7;
+  return value.truth() + 7;
 }
 
 g.Vec geo_vec(Var value) {
