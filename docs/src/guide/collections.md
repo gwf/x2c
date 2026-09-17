@@ -333,13 +333,14 @@ printf("%s\n", %"$who has ${who.len()} bytes");
 world has 5 bytes
 ```
 
-An already-boxed `Var` carries no presentation format. Extract its native
-value or call `str()`:
+An already-boxed `Var` interpolates through its `String` conversion, the same
+text `str()` returns. Extract the native value to interpolate it as that type
+instead:
 
 ```x2c
 Var answer = 42;
 printf("%s\n", %"answer=${answer.integer()}");
-printf("%s\n", %"boxed=${answer.str()}");
+printf("%s\n", %"boxed=${answer}");
 ```
 
 ```text
@@ -806,8 +807,8 @@ printf("%s %s\n", word, capital);
 hello Hello
 ```
 
-For anything longer, use `Buffer`. It grows, it tracks indentation, and
-`Buffer.str` produces the finished canonical `String`.
+For anything longer, use `Buffer`. It grows, it tracks indentation, and a
+`String` destination calls `Buffer.str` for the finished canonical `String`.
 
 ```x2c
 Buffer out = Buffer.new(0);
@@ -816,7 +817,7 @@ foreach(Var item, [1, 2, 3]) {
   out.write(item.str());
   out.newline();
 }
-String report = out.str();
+String report = out;
 out.free();
 printf("%s", report);
 ```

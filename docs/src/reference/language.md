@@ -2519,7 +2519,7 @@ bind one name or destructure a key and value:
 foreach(int value, values) total += value;
 foreach(int key, map.keys()) printf("%d\n", key);
 foreach(Var (key, value), map)
-  printf("%d=%d\n", key.integer(), value.integer());
+  printf("%ld=%ld\n", key.integer(), value.integer());
 ~  return total == 6 ? 0 : 1;
 ~}
 ```
@@ -2917,7 +2917,7 @@ Each is a warning: translation continues and the program still compiles.
 | Code | Reported for |
 | --- | --- |
 | `region` | A value allocated inside a region is reachable after the region ends. The message gives the way the value leaves, and the note gives the line that opened the region. |
-| `unbalanced` | A region is opened in one block and released in another. |
+| `unbalanced` | A region has no matching release in the block that opened it. |
 | `after-free` | A local is read after `Scope.free` or `Array.list_free` consumed it. |
 
 The check analyzes regions lexically and summarizes each function within its

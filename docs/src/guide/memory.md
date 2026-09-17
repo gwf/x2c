@@ -274,12 +274,13 @@ String text;
 $scope() {
   Buffer out = $auto(Buffer.new(0));
   out.write("case ").printf("%d", 7).write(":").newline_indent();
-  text = out.str();
+  text = out;
 }
 puts(text);
 ```
 
-`Buffer.str` interns the accumulated text, so `text` is canonical. It is
+The `String` destination calls `Buffer.str`, which interns the accumulated
+text, so `text` is canonical. It is
 still valid after the `Buffer` cleanup and the region release that disposed of
 every byte the builder used. Most x2c code is written this way: mutable
 storage in a region, canonical result outside it.
@@ -384,8 +385,8 @@ value leaves, and its note gives the line that opened the region:
 - handed to a function in the same unit, or to a runtime operation such as
   `Array.push`, that stores it in one of those places.
 
-Two more warnings come from the same pass. `unbalanced` reports a region
-opened in one block and released in another, a shape the other warnings
+Two more warnings come from the same pass. `unbalanced` reports a region with
+no matching release in the block that opened it, a shape the other warnings
 cannot track. `after-free` reports a local read after `Scope.free` or
 `Array.list_free` consumed it.
 
@@ -408,14 +409,15 @@ static String label(void) {
   $scope() {
     Buffer out = Buffer.new(0);
     out.write("ready");
-    return out.str();
+    return out;
   }
   return NULL;
 }
 ```
 
-`Scope.move` moves the storage into a scope the caller owns, and `Buffer.str`
-produces a canonical `String` owned by its pool.
+`Scope.move` moves the storage into a scope the caller owns, and the `String`
+return destination calls `Buffer.str`, which produces a canonical `String`
+owned by its pool.
 `Context.export` and `List.promote` end tracking the same way.
 
 These warnings cover the lexical pattern only. They do not cover storage

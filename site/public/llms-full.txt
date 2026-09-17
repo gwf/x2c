@@ -198,7 +198,8 @@ need the information it omits.
 
 ## Choose who owns the native build
 
-The driver has four commands:
+Four of the driver's commands decide who owns the native build; the
+[CLI reference](https://x2c-lang.dev/docs/reference/cli.html) lists the rest:
 
 ```sh
 x2c translate --out-dir generated src/main.x
@@ -408,7 +409,7 @@ int main(void) {
 Point point = Point.new(3, 4);
 Map labels = $auto({});
 labels[point] = "origin";
-printf("%s: %s\n", point.repr(), labels[Point.new(3, 4)].str());
+printf("%s: %s\n", point.repr(), labels[Point.new(3, 4)]);
   return 0;
 }
 ```
@@ -544,7 +545,7 @@ Point point = Point.new(3, 4);
 Var first = point, second = Point.new(3, 4);
 Map labels = $auto({});
 labels[first] = "origin";
-printf("%s\n", labels[second].str());
+printf("%s\n", labels[second]);
   return second in labels ? 0 : 1;
 }
 ```
@@ -3622,7 +3623,7 @@ int main(void) {
 foreach(int value, values) total += value;
 foreach(int key, map.keys()) printf("%d\n", key);
 foreach(Var (key, value), map)
-  printf("%d=%d\n", key.integer(), value.integer());
+  printf("%ld=%ld\n", key.integer(), value.integer());
   return total == 6 ? 0 : 1;
 }
 ```
@@ -4020,7 +4021,7 @@ Each is a warning: translation continues and the program still compiles.
 | Code | Reported for |
 | --- | --- |
 | `region` | A value allocated inside a region is reachable after the region ends. The message gives the way the value leaves, and the note gives the line that opened the region. |
-| `unbalanced` | A region is opened in one block and released in another. |
+| `unbalanced` | A region has no matching release in the block that opened it. |
 | `after-free` | A local is read after `Scope.free` or `Array.list_free` consumed it. |
 
 The check analyzes regions lexically and summarizes each function within its
@@ -4268,7 +4269,8 @@ initialization rules.
 The Cosmopolitan APE executable is an experiment for fun only. It can
 bootstrap a minimal native compiler and runtime without a repository checkout,
 but includes no examples, book, or optional packages. Use the full repository
-for normal development; this experiment is no substitute for it.
+for normal development; this experiment is no substitute for it. Releases do
+not publish the APE; `make ape-build` in a checkout produces it.
 
 To try the experiment:
 
@@ -4615,8 +4617,8 @@ Five codes are reported as warnings:
   opened the region.
 - `after-free` says a local was read after `Scope.free` or
   `Array.list_free` consumed it.
-- `unbalanced` says a region was opened in one block and released in
-  another, a shape the `region` check cannot follow.
+- `unbalanced` says a region has no matching release in the block that
+  opened it, a shape the `region` check cannot follow.
 - `literal` says a bare word inside a macro is a `Symbol` where a value was
   probably meant, and names the unquoted spelling that inserts the value.
 - `warning` covers the remaining cases: an unnecessary conversion, and a

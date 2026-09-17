@@ -39,7 +39,7 @@ class Point { int x; int y; };
 Point point = Point.new(3, 4);
 Map labels = $auto({});
 labels[point] = "origin";
-printf("%s: %s\n", point.repr(), labels[Point.new(3, 4)].str());
+printf("%s: %s\n", point.repr(), labels[Point.new(3, 4)]);
 ~  return 0;
 ~}
 ```
@@ -175,7 +175,7 @@ Point point = Point.new(3, 4);
 Var first = point, second = Point.new(3, 4);
 Map labels = $auto({});
 labels[first] = "origin";
-printf("%s\n", labels[second].str());
+printf("%s\n", labels[second]);
 ~  return second in labels ? 0 : 1;
 ~}
 ```

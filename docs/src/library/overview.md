@@ -61,7 +61,7 @@ Use [Buffer](modules/buffer.md) for incremental text:
 Buffer output = Buffer.new(0);
 output.write("count=");
 output.printf("%d", 4);
-String text = output.str();
+String text = output;
 output.free();
 printf("%s\n", text);
 ```
@@ -181,7 +181,7 @@ static Var increment(const void *input, size_t input_size) {
   if (input_size != sizeof(CounterWork)) raise %(bad-arg);
   const CounterWork *work = input;
   $lock(work.mutex) (*work.counter)++;
-  return work.label.var();
+  return work.label;
 }
 
 int main(void) {
@@ -190,8 +190,8 @@ int main(void) {
   CounterWork work = { mutex, &counter, "parent label" };
   Thread first = Thread.start(increment, &work, sizeof(work));
   Thread second = Thread.start(increment, &work, sizeof(work));
-  String a = first.join().string();
-  String b = second.join().string();
+  String a = first.join();
+  String b = second.join();
   printf("%s, %s: %d\n", a, b, counter);
   first.free();
   second.free();

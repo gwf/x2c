@@ -118,7 +118,7 @@ Atom exact = Atom.intern("VeryLongIdentifierName");
 Atom again = Atom.intern(String.new("VeryLongIdentifierName"));
 Atom lower = Atom.intern("verylongidentifiername");
 
-printf("%s\n", exact.str());        /* VeryLongIdentifierName */
+printf("%s\n", exact);              /* VeryLongIdentifierName */
 printf("same value: %d\n", exact == again);
 printf("case matters: %d\n", exact == lower);
 ```
@@ -286,7 +286,7 @@ Atom row = Atom.intern(String.printf("row-%d", 314159));
 String.promote(row.str());
 String.pool_release();
 
-printf("%s\n", row.str());
+printf("%s\n", row);
 ```
 
 `List.promote` promotes the long atoms inside a list, so a promoted list

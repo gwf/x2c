@@ -419,7 +419,7 @@ int main(void) {
   value.x = 1;
   value.y = 2;
   Var boxed = value;
-  printf("%s\n", boxed.str());
+  printf("%s\n", boxed);
   return 0;
 }
 ```

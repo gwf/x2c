@@ -318,12 +318,13 @@ static Job Job._unstarted(Job job, String operation) {
 
 /** Returns a `Job` for `command`, a command or pipeline, without starting
     it. The job captures standard output and passes standard error through.
-    Its first result starts it, waits, and records the run.
+    Its first result starts it, waits, and records the run. A `Job`
+    destination calls this converter, so the call is usually left implicit.
 
     ```x2c
     ~#include "process.x"
     ~int main(void) {
-    Job job = %(printf "a\nb\n").job();
+    Job job = %(printf "a\nb\n");
     ~  return job.status() == 0 && job.lines().len() == 2 ? 0 : 1;
     ~}
     ```

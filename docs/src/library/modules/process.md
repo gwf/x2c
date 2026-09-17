@@ -46,7 +46,7 @@ Returns the value of this process's environment variable `name`, or
 NULL when it is unset. The `env` option sets variables for a child
 instead.
 
-Source: `lib/process.x:541`
+Source: `lib/process.x:542`
 
 ### `Job`
 
@@ -60,7 +60,7 @@ Returns `job` once its status is zero, starting it and waiting as needed.
 **Raises:** `<cmd-fail>` with `command` and `status` details, plus `output`
 and `errors` when they were captured, or the start causes of `Job.start`.
 
-Source: `lib/process.x:433`
+Source: `lib/process.x:434`
 
 <a id="Job.cleanup"></a>
 #### Job.cleanup
@@ -70,7 +70,7 @@ Source: `lib/process.x:433`
 Terminates and reaps a job that is still running: `SIGTERM`, then
 `SIGKILL` to any stage still running a second later.
 
-Source: `lib/process.x:510`
+Source: `lib/process.x:511`
 
 <a id="Job.equal"></a>
 #### Job.equal
@@ -94,7 +94,7 @@ needed, or NULL when standard error was not captured or was empty.
 **Raises:** the start causes of `Job.start`, or `<bad-arg>` when the captured
 text contains a NUL byte.
 
-Source: `lib/process.x:480`
+Source: `lib/process.x:481`
 
 <a id="Job.free"></a>
 #### Job.free
@@ -125,7 +125,7 @@ Source: `lib/process.x:28`
 
 Sends `signal` to every stage of `job` that is still running.
 
-Source: `lib/process.x:502`
+Source: `lib/process.x:503`
 
 <a id="Job.lines"></a>
 #### Job.lines
@@ -137,7 +137,7 @@ endings.
 
 **Raises:** the causes of `Job.output`.
 
-Source: `lib/process.x:473`
+Source: `lib/process.x:474`
 
 <a id="Job.live"></a>
 #### Job.live
@@ -149,7 +149,7 @@ same as `options({stdout: <inherit>})`, and returns it.
 
 **Raises:** `<bad-arg>` for a job that has started.
 
-Source: `lib/process.x:392`
+Source: `lib/process.x:393`
 
 <a id="Job.options"></a>
 #### Job.options
@@ -174,7 +174,7 @@ String root = %(pwd).job().options({dir: "/"}).output();
 
 **Raises:** `<bad-arg>` for an unknown key or a job that has started.
 
-Source: `lib/process.x:351`
+Source: `lib/process.x:352`
 
 <a id="Job.output"></a>
 #### Job.output
@@ -187,7 +187,7 @@ as needed. A live job, or one whose output was empty, returns NULL.
 **Raises:** the causes of `Job.check`, or `<bad-arg>` when the output
 contains a NUL byte.
 
-Source: `lib/process.x:464`
+Source: `lib/process.x:465`
 
 <a id="Job.pipe"></a>
 #### Job.pipe
@@ -200,7 +200,7 @@ stages.
 
 **Raises:** `<bad-arg>` for a job that has started.
 
-Source: `lib/process.x:399`
+Source: `lib/process.x:400`
 
 <a id="Job.ready"></a>
 #### Job.ready
@@ -210,7 +210,7 @@ Source: `lib/process.x:399`
 Reports whether every stage of `job` has exited, without blocking. A job
 that has not started reports 0.
 
-Source: `lib/process.x:488`
+Source: `lib/process.x:489`
 
 <a id="Job.repr"></a>
 #### Job.repr
@@ -233,7 +233,7 @@ status is not zero: `live()` followed by `check()`.
 
 **Raises:** the causes of `Job.live` and `Job.check`.
 
-Source: `lib/process.x:455`
+Source: `lib/process.x:456`
 
 <a id="Job.start"></a>
 #### Job.start
@@ -247,7 +247,7 @@ returned unchanged.
 `<io-fail>` when a pipe, fork, output file, or other start step fails, or
 `<bad-arg>` for an empty command.
 
-Source: `lib/process.x:411`
+Source: `lib/process.x:412`
 
 <a id="Job.status"></a>
 #### Job.status
@@ -260,7 +260,7 @@ raised reports 127. A status that is not zero is an ordinary result here.
 
 **Raises:** the start causes of `Job.start`.
 
-Source: `lib/process.x:421`
+Source: `lib/process.x:422`
 
 <a id="Job.str"></a>
 #### Job.str
@@ -294,7 +294,7 @@ until one does. An empty `jobs` returns NULL.
 
 **Raises:** `<bad-arg>` when a job in `jobs` has not started.
 
-Source: `lib/process.x:522`
+Source: `lib/process.x:523`
 
 <a id="Job.write_repr"></a>
 #### Job.write_repr
@@ -327,17 +327,18 @@ Source: `lib/process.x:28`
 
 Returns a `Job` for `command`, a command or pipeline, without starting
 it. The job captures standard output and passes standard error through.
-Its first result starts it, waits, and records the run.
+Its first result starts it, waits, and records the run. A `Job`
+destination calls this converter, so the call is usually left implicit.
 
 ```x2c
 ~#include "process.x"
 ~int main(void) {
-Job job = %(printf "a\nb\n").job();
+Job job = %(printf "a\nb\n");
 ~  return job.status() == 0 && job.lines().len() == 2 ? 0 : 1;
 ~}
 ```
 
-Source: `lib/process.x:331`
+Source: `lib/process.x:332`
 
 ### `Var`
 

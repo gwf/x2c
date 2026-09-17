@@ -68,7 +68,8 @@ meaning in collection syntax: a comma, `$`, `@`, or a redirection such as
 `2>&1`. Inside a string, `$` still interpolates; write `\$` for a literal
 dollar sign.
 
-`job` turns a command into a `Job`. The first request for a result starts
+`job` turns a command into a `Job`, and a `Job` destination calls it for you.
+The first request for a result starts
 the program, waits for it, and records what it did. Every later request
 reads that same record, so a job runs exactly once however many results you
 take from it.
@@ -91,7 +92,7 @@ output, and error messages appear on the terminal.
 ```x2c
 ~#include "process.x"
 ~int main(void) {
-Job diff = %(git diff --stat).job();
+Job diff = %(git diff --stat);
 if (diff.status() == 0)
   printf("%ld lines of summary\n", (long) diff.lines().len());
 ~  return 0;
