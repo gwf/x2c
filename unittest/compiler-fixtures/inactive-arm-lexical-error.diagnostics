@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/inactive-arm-lexical-error.x:6:9: type: expected scalar type
+  this isn't code
+          ^
+

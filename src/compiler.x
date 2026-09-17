@@ -536,7 +536,11 @@ static void _scan_conditionals(Compiler c) {
     Token token = &((struct Token *) c.tokenizer.tokens)[i];
     if (token.type == <eof>) break;
     if (token.type != <preproc>) {
-      if (hidden && token.type != <space>) token.type = <comment>;
+      /* A lexical failure ends the token stream, so the rest of the unit is
+         missing whichever arm holds it; the parser reports the `<error>`
+         token rather than hiding it. */
+      if (hidden && token.type != <space> && token.type != <error>)
+        token.type = <comment>;
       continue;
     }
     Symbol kind = preproc_conditional_kind(token.text);
