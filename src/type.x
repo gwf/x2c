@@ -857,17 +857,21 @@ static List _from_ast_items(List items, List context) {
   $ast.rewrite_children(items, child, _from_ast(child, context));
 }
 
-/* Source specifier text, a leading `("_Noreturn")` or a trailing
-   `("__attribute__((unused))")`, is declaration text with no part in the
-   Type. */
-static List _without_source_text(List items) {
+static int _is_source_text(Var item) =>
+  item is <list> && car(item) is <string>;
+
+/* Source specifier text, `("_Noreturn")` or `("__attribute__((unused))")`,
+   is written before a declaration's type and is no part of it. A named type
+   is spelled the same way and is the type's last item, so only an item
+   before it is text. */
+static List _without_leading_text(List items) {
   List rest = items;
-  while (rest && !(rest.car() is <list> && car(rest.car()) is <string>))
-    rest = rest.cdr();
-  if (!rest) return items;
+  while (rest.cdr() && !_is_source_text(rest.car())) rest = rest.cdr();
+  if (!rest.cdr()) return items;
   Array typed = [];
+  size_t index = 0, last = items.len() - 1;
   foreach (Var item, items)
-    if (!(item is <list> && car(item) is <string>)) typed.push(item);
+    if (index++ == last || !_is_source_text(item)) typed.push(item);
   return typed.list_free();
 }
 
@@ -885,12 +889,17 @@ static List _from_ast(List ast, List context) {
     // (declare ?type ?bindings)
     case <declare>: {
       (List source_type, List bindings) = ast.cdr();
-      List type = _from_ast(_without_source_text(source_type), NULL);
+      List type = _from_ast(_without_leading_text(source_type), NULL);
       return _from_ast(bindings, type);
     }
     // (bind ?ident ?mods)
     case <bind>: {
-      List mods = _from_ast(_without_source_text(ast.caddr()), context);
+      // A declarator modifier is never a named type, so all of its source
+      // attribute text, `("__attribute__((unused))")`, drops.
+      Array typed = [];
+      foreach (Var item, ast.caddr())
+        if (!_is_source_text(item)) typed.push(item);
+      List mods = _from_ast(typed.list_free(), context);
       return context.type()._modify(mods);
     }
     // (params ?params), (bindings ?bindings), (fields ?fields)
