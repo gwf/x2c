@@ -81,7 +81,7 @@ static void digest_file_read_failure_raises(void) {
   catch %(io-fail *detail): {
     caught++;
     EXPECT_TRUE(detail.assoc(<operation>).symbol() == <read>);
-    EXPECT_INT_EQ(detail.assoc(Symbol.new("errno")).integer(), EBADF);
+    EXPECT_INT_EQ(detail.assoc(<errno>).integer(), EBADF);
   }
   EXPECT_INT_EQ(caught, 1);
   file.close();

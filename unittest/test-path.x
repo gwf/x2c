@@ -165,7 +165,7 @@ static void path_failures_raise_with_details(void) {
   try file.make_dirs();
   catch %(io-fail *detail): {
     caught++;
-    EXPECT_INT_EQ(detail.assoc(Symbol.new("errno")).integer(), ENOTDIR);
+    EXPECT_INT_EQ(detail.assoc(<errno>).integer(), ENOTDIR);
   }
   EXPECT_INT_EQ(caught, 7);
   root.remove_tree();

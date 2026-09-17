@@ -24,7 +24,7 @@ static void *_file_lock_probe(void *opaque) {
 
 static void _expect_file_io_error(List detail, Symbol operation, int error) {
   EXPECT_TRUE(detail.assoc(<operation>).symbol() == operation);
-  EXPECT_INT_EQ(detail.assoc(Symbol.new("errno")).integer(), error);
+  EXPECT_INT_EQ(detail.assoc(<errno>).integer(), error);
 }
 
 
@@ -99,7 +99,7 @@ static void file_open_transfers_external_cause(void) {
     caught++;
     EXPECT_TRUE(detail.assoc(<operation>).symbol() == <open>);
     EXPECT_STR_EQ(detail.assoc(<path>).string(), path);
-    EXPECT_INT_EQ(detail.assoc(Symbol.new("errno")).integer(), ENOENT);
+    EXPECT_INT_EQ(detail.assoc(<errno>).integer(), ENOENT);
   }
 
   String name = String.new(path);

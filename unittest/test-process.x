@@ -264,7 +264,7 @@ static void process_start_failures_raise(void) {
     caught++;
     EXPECT_STR_EQ(detail.assoc(<program>).string(),
                   "x2c-process-test-missing-program");
-    EXPECT_INT_EQ(detail.assoc(Symbol.new("errno")).integer(), ENOENT);
+    EXPECT_INT_EQ(detail.assoc(<errno>).integer(), ENOENT);
   }
   try %(pwd).job().options({dir: "/x2c-process-test-missing"}).run();
   catch %(not-found *detail): {

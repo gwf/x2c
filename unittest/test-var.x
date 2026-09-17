@@ -157,7 +157,7 @@ static void var_construction_and_void_dispatch_transfer(void) {
   catch %(conv-range *): caught++;
   try Var.new(<array>, NULL);
   catch %(bad-arg *): caught++;
-  Symbol custom = Symbol.new("misaligned");
+  Symbol custom = <misaligned>;
   EXPECT_TRUE(Var.register_object_tag(custom) >= 0);
   VarMethods methods = {0};
   EXPECT_TRUE(x2c_try_register_tagged_descriptor(
@@ -978,7 +978,7 @@ static void var_streaming_repr_matches_canonical(void) {
   expect_stream_repr(Var.new(<string>, %"quote\"slash\\tab\t"));
   expect_stream_repr(Var.new(<string>, NULL));
   expect_stream_repr(Var.new(<symbol>, <alpha>));
-  expect_stream_repr(Var.new(<symbol>, Symbol.new("a.b")));
+  expect_stream_repr(Var.new(<symbol>, <"a.b">));
   expect_stream_repr(Var.new(<symbol>, 0));
   expect_stream_repr(Var.new(<list>, list));
   expect_stream_repr(Var.new(<list>, NULL));
