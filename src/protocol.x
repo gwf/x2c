@@ -18,14 +18,14 @@
 #include "expressions.x"
 #include "parse.x"
 
+/* A relative path names a file below the working directory, or else one below
+   the x2c root, where `Compiler.display_path` spells root sources. */
 static String _normalize_file(Compiler compiler, String file) {
-  char path[PATH_MAX], String result = file, root = compiler.root_dir;
-  if (root && file && file[0] != '/') {
-    String rooted = %"$root/$file";
-    if (realpath(rooted, path)) result = %"$path";
-  }
-  if (result == file && realpath(file, path)) result = %"$path";
-  return compiler.display_path(result);
+  char path[PATH_MAX], String root = compiler.root_dir;
+  if (realpath(file, path) ||
+      (root && file[0] != '/' && realpath(%"$root/$file", path)))
+    file = %"$path";
+  return compiler.display_path(file);
 }
 
 static String _path(Compiler compiler) {

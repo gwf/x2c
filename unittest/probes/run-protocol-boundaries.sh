@@ -123,6 +123,16 @@ grep -q 'protocol-conflict-a.x' "$FAKE/conflict.stderr" ||
 grep -q 'protocol-conflict-b.x' "$FAKE/conflict.stderr" ||
   fail "artifact conflict did not name the second declaration"
 
+# A relative source path names a file below the working directory, even when
+# the x2c root holds a file with the same relative name.
+RELATIVE="$BUILD/relative-adoption"
+mkdir -p "$RELATIVE/src" "$RELATIVE/out"
+test -f "$ROOT/src/main.x" || fail "relative probe needs the root src/main.x"
+cp "$SOURCE/relative-adoption.x" "$RELATIVE/src/main.x"
+(cd "$RELATIVE" && "$X2C" translate --out-dir out src/main.x) \
+  >"$RELATIVE/stdout" 2>"$RELATIVE/stderr" ||
+  fail "a relative adoption resolved against the x2c root"
+
 "$X2C" translate --out-dir "$BUILD/protocol-owner" \
   "$SOURCE/protocol-owner.x" "$SOURCE/protocol-consumer.x"
 grep -q '_x2c_proto_vec_str' "$BUILD/protocol-owner/protocol-owner.c" ||
