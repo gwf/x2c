@@ -65,6 +65,16 @@ static void diff_unified_prints_hunks_with_context(void) {
                              "1\n2\n3\nX\n5\n6\nY\n8\n9\n", "a", "b"),
                 "--- a\n+++ b\n@@ -1,9 +1,9 @@\n 1\n 2\n 3\n-4\n+X\n 5\n 6\n"
                 "-7\n+Y\n 8\n 9\n");
+  EXPECT_STR_EQ(Diff.unified("1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n",
+                             "1\nB\n3\n4\n5\n6\n7\n8\nI\n10\n11\n12\n",
+                             "a", "b"),
+                "--- a\n+++ b\n@@ -1,12 +1,12 @@\n 1\n-2\n+B\n 3\n 4\n"
+                " 5\n 6\n 7\n 8\n-9\n+I\n 10\n 11\n 12\n");
+  EXPECT_STR_EQ(Diff.unified("1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n",
+                             "1\nB\n3\n4\n5\n6\n7\n8\n9\nJ\n11\n12\n13\n",
+                             "a", "b"),
+                "--- a\n+++ b\n@@ -1,5 +1,5 @@\n 1\n-2\n+B\n 3\n 4\n 5\n"
+                "@@ -7,7 +7,7 @@\n 7\n 8\n 9\n-10\n+J\n 11\n 12\n 13\n");
   EXPECT_STR_EQ(Diff.unified(NULL, "only\n", "a", "b"),
                 "--- a\n+++ b\n@@ -0,0 +1,1 @@\n+only\n");
   EXPECT_STR_EQ(Diff.unified("gone\n", NULL, "a", "b"),
