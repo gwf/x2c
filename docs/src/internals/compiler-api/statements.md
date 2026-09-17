@@ -78,7 +78,7 @@ returns a `(block ...)` node. The call opens one lexical `Sym` scope;
 `anchor_items` records statement origins and distributes a macro sequence's
 invocation origin over its inserted items.
 
-Source: `src/statements.x:593`
+Source: `src/statements.x:589`
 
 <a id="Compiler.parse_compound_statement"></a>
 #### Compiler.parse_compound_statement
@@ -88,7 +88,7 @@ Source: `src/statements.x:593`
 Parses a compound body after its opening brace and consumes the closing
 `}`, returning an origin-anchored `(block ...)` node.
 
-Source: `src/statements.x:635`
+Source: `src/statements.x:630`
 
 <a id="Compiler.parse_governed"></a>
 #### Compiler.parse_governed
