@@ -860,81 +860,88 @@ static void _static_declarations(Var value, Map declarations) {
 }
 
 /* Follows the conditional groups open at each directive: `arms` holds one
-   `Array` per open group with the directives that select its current arm. */
-static void _track_arms(Array arms, String content) {
+   entry per open group, innermost first, with the directives that select
+   its current arm. */
+static List _track_arms(List arms, String content) {
   Symbol kind = preproc_conditional_kind(content);
-  if (kind == <open>) arms.push([content]);
-  else if (kind == <branch> && arms.len()) {
-    Array group = arms[-1];
-    group.push(content);
+  if (kind == <open>) return cons(%((preproc $content)), arms);
+  if (!arms) return arms;
+  if (kind == <branch>)
+    return cons(%(@{arms.car()} (preproc $content)), arms.cdr());
+  if (kind == <close>) return arms.cdr();
+  return arms;
+}
+
+/* The positions in `source` of each `#undef` and of the directive opening
+   each conditional group that contains one. */
+static Map _undef_positions(List source) {
+  Map positions = {};
+  Array open = $auto([]);
+  int position = 0;
+  foreach (List node, source) {
+    match (node) case %(preproc ?(String content)): {
+      Symbol kind = preproc_conditional_kind(content);
+      if (kind == <open>) open.push(position);
+      else if (kind == <close> && open.len()) open.take_last();
+      else if (content.strip(" \t").remove_prefix("#").strip(" \t")
+                 .startswith("undef")) {
+        positions[position] = 1;
+        foreach (Var group, open) positions[group] = 1;
+      }
+    }
+    position++;
   }
-  else if (kind == <close> && arms.len()) arms.take_last();
+  return positions;
 }
 
-/* A function body that moves after the declarations keeps the conditional
-   arm it was written in: the arm's directives precede it and an `#endif`
-   per group follows. */
-static void _push_within_arms(Array functions, List node, Array arms) {
-  foreach (Array group, arms)
-    foreach (String content, group)
-      functions.push(%(preproc $content));
-  functions.push(node);
-  for (size_t i = 0; i < arms.len(); i++)
-    functions.push(%(preproc "#endif"));
-}
-
-/* An `#undef` written after the functions that use its macro must still
-   follow their bodies, unless a later `#define` of the same name relies on
-   its position. */
-static int _undef_stays_deferred(List source, List node, String content) {
-  String directive = content.strip(" \t").remove_prefix("#").strip(" \t");
-  if (!directive.startswith("undef")) return 0;
-  String name = directive.remove_prefix("undef").strip(" \t");
-  int after = 0;
-  foreach (List item, source) {
-    if (item == node) {
-      after = 1;
+/* Moves to `output` each pending body written under the open `arms`,
+   reopening the groups it was written in beyond those. A body from another
+   arm stays pending. */
+static void _place_functions(Array output, Array functions, List arms) {
+  size_t kept = 0;
+  unsigned open = arms.len();
+  foreach (List pending, functions) {
+    List written = pending.cdr();
+    if (written.tail(open) != arms) {
+      functions[kept++] = pending;
       continue;
     }
-    if (!after) continue;
-    match (item) case %(preproc ?(String later)): {
-      String text = later.strip(" \t").remove_prefix("#").strip(" \t");
-      if (text.startswith("define") &&
-          text.remove_prefix("define").strip(" \t").startswith(name))
-        return 0;
-    }
+    List reopened = written.head(written.len() - open).reverse();
+    foreach (List group, reopened)
+      foreach (List directive, group) output.push(directive);
+    output.push(pending.car());
+    foreach (List group, reopened) output.push(%(preproc "#endif"));
   }
-  return 1;
+  functions.resize(kept);
 }
 
 /* Native directives and initializer inputs keep their source order.
    Ordinary function bodies follow the file's declarations and directives,
-   preserving their existing access to later private includes and macros.
-   Source initializer helpers stay at their capture positions. */
+   preserving their existing access to later private includes and macros,
+   but precede a later `#undef` and any conditional group containing one,
+   as C requires of a body that uses the macro. Source initializer helpers
+   stay at their capture positions. */
 static List _static_prototypes(Compiler compiler, List source, List header) {
-  Array output = [], declarations = [], functions = [], undefs = [];
-  Array arms = [];
+  Array output = [], declarations = [], functions = $auto([]);
+  Map undefs = $auto(_undef_positions(source)), List arms = NULL;
+  int position = 0;
   foreach (List node, source) {
+    if (undefs.contains(position++))
+      _place_functions(declarations, functions, arms);
     match (node) {
       case %(function ?type ?signature ?): {
-        _push_within_arms(functions, node, arms);
+        functions.push(%($node @arms));
         if (type.list().type().is_static())
           declarations.push(
             %(declare $type ${ast_prototype_declarator(signature)}));
         continue;
       }
-      case %(preproc ?content): {
-        _track_arms(arms, content);
-        if (_undef_stays_deferred(source, node, content)) {
-          undefs.push(node);
-          continue;
-        }
-      }
+      case %(preproc ?content): arms = _track_arms(arms, content);
     }
     declarations.push(node);
   }
-  source = declarations.list_free().append(functions.list_free());
-  source = source.append(undefs.list_free());
+  _place_functions(declarations, functions, NULL);
+  source = declarations.list_free();
   Map statics = {}, available = {}, seen = {};
   _collect_declared_bindings(header, available);
   _static_declarations(source, statics);

@@ -3679,9 +3679,9 @@ A public `struct tag { ... } name;` publishes the tag body and
 `extern struct tag name;` in the header and defines `name` in the source.
 A public prototype naming `struct tag` is preceded in the header by
 `struct tag;` when the header has not declared the tag. A function body that
-follows the declarations keeps the conditional arm it was written in, and
-an `#undef` written after the functions that use its macro follows their
-bodies unless a later `#define` of the same name depends on its position.
+follows the declarations keeps the conditional arm it was written in. It
+stays ahead of a later `#undef` and of any conditional group containing
+one, so it sees the macro definitions in effect where it was written.
 
 A failed host preprocess prints its captured stderr, reports a structured x2c
 driver diagnostic at the first directive, and exits nonzero. Partial host
