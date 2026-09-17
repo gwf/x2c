@@ -199,16 +199,16 @@ static List _lower_self_declaration(Compiler compiler, List declaration) {
 /* An expanded alias may contribute pointer, array, or function modifiers.
    Keep parsed modifiers (and parameter bindings) intact and append only the
    alias's declarators. Storage still belongs on the declaration's base. */
-static List _declaration_base(Type type, List *modifiers) {
+static List _declaration_base(Type t, List *modifiers) {
   // Source specifier text, such as `("_Noreturn")`, stays with the storage.
   Array storage = [], typed = [];
-  foreach (Var item, type)
+  foreach (Var item, t)
     if (item is <list> && car(item) is <string>) storage.push(item);
     else typed.push(item);
   List (base, mods) = typed.list_free().type().declared().declaration_parts();
   *modifiers = mods;
-  if (!mods) return type;
-  foreach (Var item, type)
+  if (!mods) return t;
+  foreach (Var item, t)
     if (item is <symbol> &&
         (Symbol.is_storage_class(item) || Symbol.is_inline(item)))
       storage.push(item);

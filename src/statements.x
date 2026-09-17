@@ -24,10 +24,10 @@ static List _keyword_paren_expr(Compiler compiler, Symbol keyword) {
   return expr;
 }
 
-/* How many conditional groups the directive `text` opens, or -1 when it
+/* How many conditional groups the directive `s` opens, or -1 when it
    closes one. */
-static int _group_step(String text) {
-  Symbol kind = preproc_conditional_kind(text);
+static int _group_step(String s) {
+  Symbol kind = preproc_conditional_kind(s);
   return kind == <open> ? 1 : kind == <close> ? -1 : 0;
 }
 
@@ -129,9 +129,9 @@ static List _do_statement(Compiler compiler) {
   return %(do $body $cond);
 }
 
-static List _defer_statement(Compiler compiler) {
-  compiler.expect(<defer>);
-  return %(defer ${compiler.parse_governed(AST_STATEMENT)});
+static List _defer_statement(Compiler c) {
+  c.expect(<defer>);
+  return %(defer ${c.parse_governed(AST_STATEMENT)});
 }
 
 /** Builds a return node for an optional expression without consuming tokens.

@@ -518,20 +518,22 @@ String Compiler.emitted_binding_name(Compiler compiler, List binding) {
    or is `0`, `<rest>` when it is exactly `!defined(NAME)`, else 0. x2c output
    is compiled as C by a GNU-style compiler, so `__cplusplus` and `_MSC_VER`
    are never defined; each reads as `<never>`, which no C token spells. */
-static Symbol _never_active_arm(String text) {
-  Tokenizer scanned = Tokenizer.new(preproc_directive(text));
+static Symbol _never_active_arm(String s) {
+  Tokenizer scanned = Tokenizer.new(preproc_directive(s));
   scanned.scan();
   Array words = [];
   for (Token t = _skip_forward(scanned.tokens); t.type != <eof>;
        t = _skip_forward(t + 1))
     words.push(t.text == "__cplusplus" || t.text == "_MSC_VER"
                ? "<never>" : t.text);
-  String s = " ".join(words.list_free()).replace(
+  String line = " ".join(words.list_free()).replace(
     "defined ( <never> )", "defined <never>");
-  if (s == "ifdef <never>" || s == "if 0" || s == "if ( 0 )" ||
-      s == "if defined <never>" || s.startswith("if defined <never> && "))
+  if (line == "ifdef <never>" || line == "if 0" || line == "if ( 0 )" ||
+      line == "if defined <never>" ||
+      line.startswith("if defined <never> && "))
     return <first>;
-  return s == "ifndef <never>" || s == "if ! defined <never>" ? <rest> : 0;
+  return line == "ifndef <never>" || line == "if ! defined <never>"
+    ? <rest> : 0;
 }
 
 /* Records the open conditional groups after each conditional directive as
@@ -1499,9 +1501,9 @@ static Var _macro_prefix(Compiler c, Token token, String param) {
    conditional arms keeps the reading that emits correct C: `static` hides
    a definition from the header, so it wins; other text loses to any
    prefix. */
-static int _prefix_rank(Var definition) {
-  if (definition is not <list>) return 0;
-  return List.match(definition, %(* static *)) ? 3 : definition.list() ? 2 : 1;
+static int _prefix_rank(Var v) {
+  if (v is not <list>) return 0;
+  return List.match(v, %(* static *)) ? 3 : v.list() ? 2 : 1;
 }
 
 /* Records the name of each `#define` so a bare atom spelled the same way

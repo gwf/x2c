@@ -193,8 +193,8 @@ static const PrintfFn printf_family_info[] = {
 
 /** Returns the printf-family entry a callee names, or `NULL`. A resolved
     user function that happens to use a libc spelling is not one. */
-const PrintfFn *List.printf_family(List callee) {
-  match (callee)
+const PrintfFn *List.printf_family(List l) {
+  match (l)
     case %(expr ?type (ident ?binding)): {
       String name = binding_identity_spelling(binding);
       int count = sizeof(printf_family_info) / sizeof(printf_family_info[0]);
@@ -658,8 +658,8 @@ static List _parse_unary_op(Compiler c) {
   return c.resolve_expression(%(expr () (op $op $operand)), origin);
 }
 
-static int _cast_operand_follows(Symbol type) {
-  switch (type) {
+static int _cast_operand_follows(Symbol s) {
+  switch (s) {
     case <ident>:
     case <$>:
     case <"$(">:
@@ -704,9 +704,9 @@ static int _macro_hole_starts_cast_type(Compiler compiler) {
   return _cast_operand_follows(compiler.peek(3));
 }
 
-static int _parenthesized_cast_operand_follows(Compiler compiler) =>
-  compiler.peek(0) == <"("> &&
-  _cast_operand_follows(compiler.token.after_group().type);
+static int _parenthesized_cast_operand_follows(Compiler c) =>
+  c.peek(0) == <"("> &&
+  _cast_operand_follows(c.token.after_group().type);
 
 /* A cast whose operand already has the cast type, qualifiers included,
    changes nothing. The comparison uses x2c's declared type, so a cast
@@ -1260,23 +1260,23 @@ static List _resolve_call_arguments(
 /* A call whose receiver or argument is an unnamed operator temporary goes
    through a helper that discards that temporary once the call returns. */
 static List _discarding_callee(
-  Compiler compiler, List callee, Type callee_type, List arguments) {
+  Compiler c, List callee, Type callee_type, List arguments) {
   List binding = NULL;
   match (callee) case %(expr ? (ident (!set ?bound (*)))): binding = bound;
   if (!binding || !callee_type.match(%((func *) *)) ||
-      compiler.protocol_helpers.contains(
+      c.protocol_helpers.contains(
         %"discard-helper ${(long) binding}"))
     return callee;
   int which = 0, index = 0;
   foreach (Var argument, arguments) {
-    if (argument is <list> && _is_operator_temporary(compiler, argument))
+    if (argument is <list> && _is_operator_temporary(c, argument))
       which |= 1 << index;
     index++;
   }
   if (!which) return callee;
   String stem = binding_identity_spelling(binding);
   if (!stem) return callee;
-  List helper = compiler.discard_helper(binding, callee_type, stem, which);
+  List helper = c.discard_helper(binding, callee_type, stem, which);
   if (!helper) return callee;
   List (helper_binding, signature) = helper;
   return %(expr $signature (ident $helper_binding));
@@ -2202,16 +2202,16 @@ static List _parse_comma_list(Compiler compiler) {
 
 /* A bracketed index followed by `=`, `.`, or `[` designates an element;
    any other bracket is an Array literal. */
-static int _bracket_designates(Compiler compiler) {
-  Symbol type = compiler.token.after_group().type;
+static int _bracket_designates(Compiler c) {
+  Symbol type = c.token.after_group().type;
   return type == <=> || type == <.> || type == <[>;
 }
 
 /* An entry that begins with a Map-entry macro, or whose first bracket-level
    `:` belongs to no conditional, makes a brace a Map literal. */
-static int _brace_starts_map(Compiler compiler) {
-  if (compiler.map_entry_macro_follows()) return 1;
-  Token token = compiler.token;
+static int _brace_starts_map(Compiler c) {
+  if (c.map_entry_macro_follows()) return 1;
+  Token token = c.token;
   for (int conditionals = 0;; token = token.after_group()) {
     switch (token.type) {
       case <eof>: case <;>: case <,>: case <")">: case <]>: case <"}">:
@@ -2220,7 +2220,7 @@ static int _brace_starts_map(Compiler compiler) {
         conditionals++;
         break;
       case <:>:
-        if (!conditionals--) return token != compiler.token;
+        if (!conditionals--) return token != c.token;
     }
   }
 }
@@ -2633,15 +2633,15 @@ static List _converter_owned_call(
 }
 
 static List _converter_call(
-  Compiler compiler, List expr, Type type, Type target) {
+  Compiler c, List expr, Type type, Type target) {
   if (!type.match(%(?)) || !target.match(%(?))) return NULL;
   List owners = type.is_bare_typedef_name()
-              ? _typedef_names(compiler, type).list_free() : %($type);
+              ? _typedef_names(c, type).list_free() : %($type);
   foreach (Type owner, owners) {
     if (owner == target) return NULL;
     int declared = 0;
     List converted = _converter_owned_call(
-      compiler, expr, owner, target, &declared);
+      c, expr, owner, target, &declared);
     if (converted || declared) return converted;
   }
   return NULL;

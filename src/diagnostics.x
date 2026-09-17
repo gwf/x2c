@@ -180,8 +180,8 @@ static void Diagnostics._warn(
 // diagnostics & error reporting
 
 /* A diagnostic's text notes form one line, such as `token: ; kind: ;`. */
-static String _note_line(List notes) {
-  List strings = notes.filter(%!(entry) => entry is <string>);
+static String _note_line(List l) {
+  List strings = l.filter(%!(entry) => entry is <string>);
   return strings ? " ".join(strings) : NULL;
 }
 
