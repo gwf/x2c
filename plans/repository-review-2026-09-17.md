@@ -162,8 +162,16 @@ Files: `lib/array.x`, `lib/array-generics.xmacro`, `lib/list.x`,
 
 ## Group 9: Match, Lisp, and Func
 
-Files: `lib/match.x`, `lib/machine.x`, `lib/lisp.x`, `etc/init.xlisp`,
-`lib/func.x`.
+> Fixed 2026-09-17, all nine rows. The plan cache and the compiler-owned
+> sites admit only patterns the outermost canonical pool owns, so the
+> `pool_retain`/`pool_release` bracket is safe; the traversals walk a cdr in
+> a loop, so only nesting reaches the C stack, and the Lisp reader fences
+> its nesting at 1024 instead of crashing. `etc/init.xlisp` is unchanged:
+> the checked `car` and `cdr` publish under the bind names it already
+> writes, because the checked-in bootstrap reads that file.
+
+Files: `lib/match.x`, `lib/machine.x`, `lib/match-recursive.x`,
+`lib/lisp.x`, `etc/lisp-bindings.xlisp`, `lib/func.x`.
 
 | Defect | Reproduction | Cause | R |
 | --- | --- | --- | --- |
