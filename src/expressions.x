@@ -1267,16 +1267,13 @@ static int _expression_is_addressable(Compiler c, List expression) {
   return 0;
 }
 
-/* How many dereferences separate a receiver from the declared parameter, or
-   zero when it is not a pointer to it. `.` binds a receiver by identity or by
-   one address-of, so any count here means the call would pass the wrong
-   pointer; a pointer typedef makes that a C warning and a runtime abort. */
-static int _receiver_indirection(Type source, Type declared) {
-  int levels = 0;
+/* Whether a method receiver is a pointer to the declared parameter. `.` binds
+   a receiver by identity or by one address-of, so such a call would pass the
+   wrong pointer; with a pointer typedef C only warns and the program aborts. */
+static int _receiver_points_to(Type source, Type declared) {
   while (source.is_pointer()) {
     source = source.dereference();
-    levels++;
-    if (source === declared) return levels;
+    if (source === declared) return 1;
   }
   return 0;
 }
@@ -1285,7 +1282,7 @@ static List _method_bind(
   Compiler compiler, List receiver, Type type, Type declared, Token origin) {
   if (!declared || !type) return receiver;
   Type target = declared.canonicalize(), source = type.canonicalize();
-  if (_receiver_indirection(source, target))
+  if (_receiver_points_to(source, target))
     compiler.report_error(
       <type>,
       %"method receiver ${type.repr()} is a pointer to ${declared.repr()}",

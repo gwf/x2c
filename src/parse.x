@@ -832,18 +832,19 @@ static List _direct_declarator(
   // Parenthesized declarator: ( declarator )
   if (c.peek(0) == <(>) {
     c.next();
-    Token opening = c.token;
+    Token first = c.token;
     List decl = _declarator(
       c, NULL, NULL, method_identity, source_first, source_after);
     if (c.peek(0) != <)>) {
       /* One identifier followed by another is a parameter list whose type
          this unit cannot see, such as a package type named without its
          import alias, not a parenthesized declarator. */
-      if (opening.type == <ident> && c.peek(0) == <ident>)
+      if (first.type == <ident> && c.peek(0) == <ident>)
         c.report_error(
-          <parse>, %"unknown type name '${opening.text}'", opening,
+          <parse>, %"unknown type name '${first.text}'", first,
           %("name an imported package type through its alias"));
-      c.report_error(<parse>, "missing closing parenthesis", c.token, NULL);
+      else
+        c.report_error(<parse>, "missing closing parenthesis", c.token, NULL);
     }
     c.next();
     return decl;
