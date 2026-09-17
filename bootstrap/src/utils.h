@@ -6,15 +6,19 @@
 #define __GUARD_0x6E6B8BB0__
 
 #include "x2c.h"
+#include "path.h"
+#include "process.h"
 void x2c_initialize_environment(const char * argv0);
 
 void x2c_set_root(String root);
 
 String x2c_get_root(void);
 
+String x2c_canonical_root(void);
+
 String x2c_get_executable(void);
 
-String x2c_package_directory(String root, String path);
+String x2c_package_directory(List roots, String path);
 
 int x2c_source_file(String path);
 
@@ -24,15 +28,27 @@ List x2c_default_include_dirs(void);
 
 List x2c_cpp_include_dirs(void);
 
+String x2c_home(void);
+
 String x2c_home_packages(void);
 
-_Noreturn void x2c_driver_error(const char * message);
+String x2c_stage_dir(void);
+
+String x2c_find_program(String name);
+
+void x2c_driver_error(const char * message);
+
+void x2c_host_error(List detail);
+
+int file_lock(Path p, int wait);
+
+void file_publish(Path p, String text);
 
 long worker_fork(void);
 
 void worker_exit(int status);
 
-int worker_wait(long pid);
+int worker_wait_any(long * pids, int count, int * status);
 
 String x2c_filename_hash(String filename);
 

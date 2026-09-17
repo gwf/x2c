@@ -16,6 +16,8 @@ String report_size(unsigned long long bytes);
 
 void report_json_string(Buffer out, String text);
 
+int report_make_owned(void);
+
 void report_configure(int quiet, int plain, Symbol color_mode, int verbose, int dry_run, int inspecting);
 
 int report_receipts(void);

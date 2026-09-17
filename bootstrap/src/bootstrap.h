@@ -18,7 +18,7 @@ Bootstrap bootstrap_materialize(CliRequest request);
 
 CliRequest bootstrap_build_request(CliRequest command, Bootstrap payload, Symbol component);
 
-void bootstrap_record_install(Bootstrap payload, String cc, String ar);
+void bootstrap_record_install(Bootstrap b, String cc, String ar);
 
 void bootstrap_release(Bootstrap payload);
 

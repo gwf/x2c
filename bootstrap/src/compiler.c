@@ -36,8 +36,6 @@ static void _emit_user(void * owner, List entry);
 
 static Compiler _new(Compiler owner);
 
-static String _canonical_home(void);
-
 static List _source_range(Compiler compiler, Token first, Token after);
 
 static int _never_defined(Token token);
@@ -1125,11 +1123,7 @@ String Compiler_canonical_path(Compiler c, String path){
   return realpath(path, resolved) ? String_join(NULL, cons(String_var(String_new(resolved)), NULL)) : path;
 }
 
-static String _canonical_home(void){
-  static char home[PATH_MAX];
-  if(! * home && ! realpath(x2c_get_root(), home)) snprintf(home, sizeof home, "%s", (char *) x2c_get_root());
-  return String_join(NULL, cons(String_var(String_new(home)), NULL));
-}
+String x2c_canonical_root(void);
 
 int String_startswith(String, String);
 
@@ -1137,13 +1131,13 @@ int String_len(String);
 
 String home_portable_path(String path){
   if(! _init_guard_) _file_init_();
-  String prefix = String_join(NULL, cons(String_var(_canonical_home()), cons(String_var(_0), NULL)));
+  String prefix = String_join(NULL, cons(String_var(x2c_canonical_root()), cons(String_var(_0), NULL)));
   return String_startswith(path, prefix) ? String_getslice(path, String_len(prefix), -2147483648, 1) : path;
 }
 
 String home_absolute_path(String spelling){
   if(! _init_guard_) _file_init_();
-  return String_startswith(spelling, _586) ? spelling : String_join(NULL, cons(String_var(_canonical_home()), cons(String_var(_0), cons(String_var(spelling), NULL))));
+  return String_startswith(spelling, _586) ? spelling : String_join(NULL, cons(String_var(x2c_canonical_root()), cons(String_var(_0), cons(String_var(spelling), NULL))));
 }
 
 Var Map_var(Map);

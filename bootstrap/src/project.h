@@ -13,7 +13,7 @@ typedef struct ProjectBuild{
 }
 * ProjectBuild;
 
-String project_manifest(CliRequest request);
+String project_manifest(CliRequest c);
 
 ProjectBuild project_plan(CliRequest request);
 

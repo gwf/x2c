@@ -4,7 +4,7 @@
 
 static List _13, _12;
 
-static String _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _15, _14, _10, _8, _7, _6, _5, _4, _3, _2, _0;
+static String _25, _24, _23, _22, _21, _20, _19, _18, _17, _15, _14, _10, _8, _7, _6, _5, _4, _3, _2, _0;
 
 static Var _16, _11, _9, _1;
 
@@ -34,7 +34,7 @@ static String _read_input_text(Compiler compiler, String filename);
 
 static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filename);
 
-static void _configure_package(Compiler compiler, CliRequest request, String filename);
+static void _configure_package(Compiler c, CliRequest request, String filename);
 
 static Map _preprocess_input(Frontend frontend, ParsedUnit * unit);
 
@@ -70,9 +70,8 @@ __attribute__((constructor)) static void _file_init_(void){
   _21 = String_new("not a regular file");
   _22 = String_new("read failed");
   _23 = String_new("#!");
-  _24 = String_new("/");
-  _25 = String_new("script units use the default symbol collection");
-  _26 = String_new("failed to run C preprocessor");
+  _24 = String_new("script units use the default symbol collection");
+  _25 = String_new("failed to run C preprocessor");
 }
 
 int String_truth(String);
@@ -284,48 +283,24 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
 
 List CliRequest_package_roots(CliRequest);
 
-String Compiler_canonical_path(Compiler, String);
+Path Path_absolute(Path);
 
-int List_try_next(List, List *, Var *);
-
-String Var_string(Var);
-
-String x2c_package_directory(String, String);
-
-int String_rfind(String, String);
-
-int String_is_identifier(String);
+String x2c_package_directory(List, String);
 
 int x2c_package_source(String, String);
 
+Path Path_basename(Path);
+
 Var Map_setindex(Map, Var, Var);
 
-static void _configure_package(Compiler compiler, CliRequest request, String filename){
-  compiler -> package_dirs = CliRequest_package_roots(request);
-  String source = Compiler_canonical_path(compiler, filename);
-  {
-    String directory;
-    List _x2c_macro_object_0 = compiler -> package_dirs;
-    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
-    Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
-      directory = Var_string(_x2c_macro_cursor_output_0);
-      {
-        String root = Compiler_canonical_path(compiler, directory);
-        String package = x2c_package_directory(root, source);
-        if(! String_truth(package)) continue;
-        String name = String_getslice(package, String_rfind(package, _24) + 1, -2147483648, 1);
-        if(! String_is_identifier(name)) continue;
-        if(! x2c_package_source(package, source)) continue;
-        compiler -> package = name;
-        Map_setindex(compiler -> package_roots, String_var(name), String_var(package));
-        return;
-      }
-
-    }
-
-  }
-
+static void _configure_package(Compiler c, CliRequest request, String filename){
+  c -> package_dirs = CliRequest_package_roots(request);
+  String source = Path_absolute(filename);
+  String package = x2c_package_directory(c -> package_dirs, source);
+  if(! String_truth(package) || ! x2c_package_source(package, source)) return;
+  String name = Path_basename(package);
+  c -> package = name;
+  Map_setindex(c -> package_roots, String_var(name), String_var(package));
 }
 
 int SymbolSet_contains(SymbolSet, Symbol);
@@ -339,6 +314,10 @@ int Toolchain_preprocess(Toolchain, const char *, List, const char *, String *, 
 String int_str(int);
 
 List translation_depfile_parse(String);
+
+int List_try_next(List, List *, Var *);
+
+String Var_string(Var);
 
 void Compiler_add_translation_dependency(Compiler, String);
 
@@ -358,7 +337,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   Map globs = NULL;
   int use_cpp = request -> cpp_symbols || request -> live_symbols || SymbolSet_contains(cpp_dumps, request -> dump);
   if(use_prelude && ! use_cpp) return Compiler_collect_symbols(c, NULL);
-  if(c -> script) Compiler_report_error(c, 306819428, _25, _first_preprocessor_token(c), _13);
+  if(c -> script) Compiler_report_error(c, 306819428, _24, _first_preprocessor_token(c), _13);
   Compiler cppcompiler = Compiler_new_shared(c);
   unit -> preprocessor = cppcompiler;
   cppcompiler -> filename = filename;
@@ -370,15 +349,15 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);
   if(status){
     List notes = cons(_16, cons(String_var(String_join(NULL, cons(String_var(_17), cons(String_var(int_str(status)), NULL)))), NULL));
-    Compiler_report_error(c, 306819428, _26, _first_preprocessor_token(c), notes);
+    Compiler_report_error(c, 306819428, _25, _first_preprocessor_token(c), notes);
   }
   {
     String dependency;
-    List _x2c_macro_object_1 = translation_depfile_parse(dependency_text);
-    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
-    Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
-      dependency = Var_string(_x2c_macro_cursor_output_1);
+    List _x2c_macro_object_0 = translation_depfile_parse(dependency_text);
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      dependency = Var_string(_x2c_macro_cursor_output_0);
       Compiler_add_translation_dependency(c, dependency);
     }
 
@@ -590,11 +569,11 @@ x2c_exception_leave(& _x2c_exception_frame_4);
 }
 {
   Var entry;
-  Array _x2c_macro_object_2 = diagnostics -> entries;
-  int _x2c_macro_cursor_2 = 0;
-  Var _x2c_macro_cursor_output_2;
-  while(Array_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
-    entry = _x2c_macro_cursor_output_2;
+  Array _x2c_macro_object_1 = diagnostics -> entries;
+  int _x2c_macro_cursor_1 = 0;
+  Var _x2c_macro_cursor_output_1;
+  while(Array_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+    entry = _x2c_macro_cursor_output_1;
     Array_push(collected, entry);
   }
 

@@ -2,7 +2,7 @@
 
 #include "report.h"
 
-static String _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 #include <errno.h>
 #include <stdio.h>
@@ -13,6 +13,7 @@ static String _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 #include <sys/uio.h>
 #include <time.h>
 #include <unistd.h>
+#include "process.h"
 static struct{
   int receipts, transient, color, columns, width;
   unsigned long start, update;
@@ -24,8 +25,6 @@ static int _init_guard_ = 0;
 __attribute__((constructor)) static void _file_init_(void);
 
 static int _terminal(void);
-
-static int _make_owned(void);
 
 static int _columns(void);
 
@@ -45,13 +44,18 @@ __attribute__((constructor)) static void _file_init_(void){
   _3 = String_new("%llu B");
   _4 = String_new("%.1f KiB");
   _5 = String_new("%.1f MiB");
-  _6 = String_new(", ");
-  _7 = String_new(" cached");
-  _8 = String_new("  ");
-  _9 = String_new(" ");
-  _10 = String_new(" in ");
-  _11 = String_new(" (up to date)");
-  _12 = String_new("");
+  _6 = String_new("dumb");
+  _7 = String_new(", ");
+  _8 = String_new(" cached");
+  _9 = String_new("  ");
+  _10 = String_new(" ");
+  _11 = String_new(" in ");
+  _12 = String_new("TERM");
+  _13 = String_new("MAKELEVEL");
+  _14 = String_new("COLUMNS");
+  _15 = String_new("NO_COLOR");
+  _16 = String_new(" (up to date)");
+  _17 = String_new("");
 }
 
 unsigned long report_now_us(void){
@@ -112,43 +116,42 @@ void report_json_string(Buffer out, String text){
   Buffer_write_char(out, '"');
 }
 
+int String_equal(String, String);
+
+String Env_get(String);
+
 static int _terminal(void){
-  if(! isatty(fileno(stderr))) return 0;
-  const char * term = getenv("TERM");
-  return ! term || strcmp(term, "dumb") != 0;
+  return isatty(fileno(stderr)) && ! String_equal(Env_get(_12), _6);
 }
 
-static int _make_owned(void){
-  const char * level = getenv("MAKELEVEL");
-  if(! level || ! * level) return 0;
-  char * end = NULL;
-  long parsed = strtol(level, & end, 10);
-  return end && ! * end && parsed > 0;
+int String_is_digit(String);
+
+int report_make_owned(void){
+  if(! _init_guard_) _file_init_();
+  String level = Env_get(_13);
+  return String_is_digit(level) && atol(level) > 0;
 }
 
 static int _columns(void){
   struct winsize size;
   if(ioctl(fileno(stderr), TIOCGWINSZ, & size) == 0 && size.ws_col > 0) return size.ws_col;
-  const char * columns = getenv("COLUMNS");
-  if(columns && * columns){
-    char * end = NULL;
-    long parsed = strtol(columns, & end, 10);
-    if(end && ! * end && parsed >= 20 && parsed <= 1000) return(int) parsed;
-  }
-  return 80;
+  String columns = Env_get(_14);
+  int parsed = String_is_digit(columns) ? atoi(columns) : 0;
+  return parsed >= 20 && parsed <= 1000 ? parsed : 80;
 }
 
 void report_configure(int quiet, int plain, Symbol color_mode, int verbose, int dry_run, int inspecting){
+  if(! _init_guard_) _file_init_();
   memset(& report, 0, sizeof(report));
   int terminal = _terminal();
   int diagnostic = verbose || dry_run || inspecting;
   report.receipts = ! quiet && ! diagnostic;
-  report.transient = report.receipts && terminal && ! plain && ! _make_owned();
+  report.transient = report.receipts && terminal && ! plain && ! report_make_owned();
   report.columns = _columns();
   report.start = report_now_us();
   if(plain || color_mode == 29733220) report.color = 0;
   else if(color_mode == 93785702) report.color = 1;
-  else report.color = terminal && ! getenv("NO_COLOR");
+  else report.color = terminal && ! String_truth(Env_get(_15));
 }
 
 int report_receipts(void){
@@ -262,10 +265,10 @@ String int_str(int);
 
 void report_phase(Symbol phase, int count, String noun, int cached, unsigned long microseconds){
   if(! _init_guard_) _file_init_();
-  String cache = cached == count && count ? _11 : cached ? String_join(NULL, cons(String_var(_6), cons(String_var(int_str(cached)), cons(String_var(_7), NULL)))) : _12;
+  String cache = cached == count && count ? _16 : cached ? String_join(NULL, cons(String_var(_7), cons(String_var(int_str(cached)), cons(String_var(_8), NULL)))) : _17;
   String name = String_capitalize(Symbol_str(phase));
   String duration = report_duration(microseconds);
-  String line = String_join(NULL, cons(String_var(_8), cons(String_var(name), cons(String_var(_9), cons(String_var(int_str(count)), cons(String_var(_9), cons(String_var(noun), cons(String_var(_10), cons(String_var(duration), cons(String_var(cache), NULL))))))))));
+  String line = String_join(NULL, cons(String_var(_9), cons(String_var(name), cons(String_var(_10), cons(String_var(int_str(count)), cons(String_var(_10), cons(String_var(noun), cons(String_var(_11), cons(String_var(duration), cons(String_var(cache), NULL))))))))));
   report_line(28680520, line);
 }
 

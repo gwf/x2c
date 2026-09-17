@@ -31,17 +31,19 @@ typedef struct ToolRun{
 
 Toolchain toolchain_new(String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose, int dry_run);
 
-ToolAction Toolchain_compile_action(Toolchain toolchain, String source, String object, String depfile, List gen_dirs);
+ToolAction Toolchain_compile_action(Toolchain t, String source, String object, String depfile, List gen_dirs);
 
-ToolAction Toolchain_preprocess_action(Toolchain toolchain, String source, String output, List gen_dirs);
+ToolAction Toolchain_preprocess_action(Toolchain t, String source, String output, List gen_dirs);
 
-ToolAction Toolchain_archive_action(Toolchain toolchain, String output, List objects);
+ToolAction Toolchain_archive_action(Toolchain t, String output, List objects);
 
-ToolAction Toolchain_link_action(Toolchain toolchain, String output, List inputs);
+ToolAction Toolchain_link_action(Toolchain t, String output, List inputs);
 
 ToolAction tool_action_new(Symbol phase, List arguments, int verbose, int dry_run);
 
 void ToolAction_as_program(ToolAction action);
+
+int tool_capture(List arguments, String * output, String * errors);
 
 List Toolchain_search_directories(Toolchain toolchain);
 
@@ -53,7 +55,7 @@ int ToolRun_wait(ToolRun execution);
 
 int ToolAction_run(ToolAction action);
 
-int Toolchain_preprocess(Toolchain toolchain, const char * fname, List include_dirs, const char * imacros, String * output, String * errors, String * dependencies);
+int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, const char * imacros, String * output, String * errors, String * dependencies);
 
 
 #endif /* __GUARD_0x242786A8__ */

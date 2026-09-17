@@ -2,30 +2,33 @@
 
 #include "deps.h"
 
-static String _4, _3, _2, _1, _0;
+static String _3, _2, _1, _0;
 
 #include "collect.h"
-#include <errno.h>
-#include <limits.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 #include "buffer.h"
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-static String _stem(String input);
+static void _write_word(Buffer out, String word);
 
-static int _write_word(File output, String word);
+static String _contents(CliRequest request, Compiler compiler, String input, String output_dir);
 
-static void _add(Array paths, String path);
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+}
+_x2c_defer_env_0;
 
-static Array _prerequisites(CliRequest request, Compiler compiler, String input);
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
-static int _write_targets(File output, CliRequest request, String output_dir, String stem);
+typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_1;
 
-static int _write_contents(File output, CliRequest request, Compiler compiler, String input, String output_dir, String stem);
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -35,13 +38,6 @@ __attribute__((constructor)) static void _file_init_(void){
   _1 = String_new(".c");
   _2 = String_new(".h");
   _3 = String_new(".d");
-  _4 = String_new(".tmp.%ld");
-}
-
-String Path_stem(Path);
-
-static String _stem(String input){
-  return Path_stem(input);
 }
 
 int String_truth(String);
@@ -103,14 +99,12 @@ List translation_depfile_parse(String text){
   return Array_list_free(paths);
 }
 
-int File_puts(File, const char *);
+Buffer Buffer_write(Buffer, const char *);
 
 int String_try_next(String, int *, int *);
 
-int File_putc(File, int);
-
-static int _write_word(File output, String word){
-  if(! String_truth(word)) return File_puts(output, "\\ ");
+static void _write_word(Buffer out, String word){
+  if(! String_truth(word)) Buffer_write(out, "\\ ");
   {
     char ch;
     String _x2c_macro_object_0 = word;
@@ -119,150 +113,200 @@ static int _write_word(File output, String word){
     while(String_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
       ch = _x2c_macro_cursor_output_0;
       {
-        if(ch == '$'){
-          if(File_puts(output, "$$") == EOF) return 0;
-          continue;
-        }
-        if(ch == ' ' || ch == '\t' || ch == '#' || ch == ':' || ch == '\\') if(File_putc(output, '\\') == EOF) return 0;
-        if(File_putc(output, ch) == EOF) return 0;
+        if(ch == '$') Buffer_write_char(out, '$');
+        else if(ch == ' ' || ch == '\t' || ch == '#' || ch == ':' || ch == '\\') Buffer_write_char(out, '\\');
+        Buffer_write_char(out, ch);
       }
 
     }
 
   }
-  return 1;
+
 }
-
-int Array_contains(Array, Var);
-
-static void _add(Array paths, String path){
-  if(String_truth(path) && ! Array_contains(paths, String_var(path))) Array_push(paths, String_var(path));
-}
-
-unsigned Map_len(Map);
 
 int Map_try_next(Map, unsigned *, Var *, Var *);
 
-String Var_string(Var);
-
 Array Array_sort(Array);
-
-static Array _prerequisites(CliRequest request, Compiler compiler, String input){
-  (void) request;
-  Array paths = Array_new();
-  if(Map_len(compiler -> deps)){
-    Var path, content_hash;
-    Map _x2c_macro_object_1 = compiler -> deps;
-    unsigned _x2c_macro_cursor_1 = 0;
-    Var _x2c_macro_cursor_output_1;
-    Var _x2c_macro_cursor_output_2;
-    while(Map_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1, & _x2c_macro_cursor_output_2)){
-      path = _x2c_macro_cursor_output_1;
-      content_hash = _x2c_macro_cursor_output_2;
-      _add(paths, Var_string(path));
-    }
-
-  }
-  else _add(paths, input);
-  Array_sort(paths);
-  return paths;
-}
 
 String String_rstrip(String, char *);
 
-static int _write_targets(File output, CliRequest request, String output_dir, String stem){
-  if(String_truth(request -> dep_target)) return _write_word(output, request -> dep_target);
-  String base = String_join(NULL, cons(String_var(String_rstrip(output_dir, "/")), cons(String_var(_0), cons(String_var(stem), NULL))));
-  if(! _write_word(output, String_join(NULL, cons(String_var(base), cons(String_var(_1), NULL))))) return 0;
-  if(File_putc(output, ' ') == EOF) return 0;
-  return _write_word(output, String_join(NULL, cons(String_var(base), cons(String_var(_2), NULL))));
-}
+String Path_stem(Path);
 
 int Array_try_next(Array, int *, Var *);
 
+String Var_string(Var);
+
+Path Path_absolute(Path);
+
 int String_equal(String, String);
 
-static int _write_contents(File output, CliRequest request, Compiler compiler, String input, String output_dir, String stem){
-  Array paths = _prerequisites(request, compiler, input);
-  char primary_buffer[PATH_MAX];
-  String primary = realpath(input, primary_buffer) ? String_join(NULL, cons(String_var(String_new(primary_buffer)), NULL)) : input;
-  int ok = _write_targets(output, request, output_dir, stem);
-  if(ok && File_putc(output, ':') == EOF) ok = 0;
+static String _contents(CliRequest request, Compiler compiler, String input, String output_dir){
+  Array paths = Array_new();
   {
-    Var value;
-    Array _x2c_macro_object_2 = paths;
-    int _x2c_macro_cursor_2 = 0;
-    Var _x2c_macro_cursor_output_3;
-    while(Array_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_3)){
-      value = _x2c_macro_cursor_output_3;
-      {
-        if(! ok || File_putc(output, ' ') == EOF){
-          ok = 0;
-          break;
-        }
-        if(! _write_word(output, Var_string(value))){
-          ok = 0;
-          break;
-        }
+  _x2c_defer_env_1 _x2c_defer_env_2 = {._x2c_defer_capture_1 =(const void *) & paths};
 
+  X2CCleanup _x2c_defer_record_0 = {
+    .fn = _x2c_defer_cleanup_1,
+    .env = & _x2c_defer_env_2
+  };
+  x2c_cleanup_push(&_x2c_defer_record_0);
+  {
+    {
+      Var path, content_hash;
+      Map _x2c_macro_object_1 = compiler -> deps;
+      unsigned _x2c_macro_cursor_1 = 0;
+      Var _x2c_macro_cursor_output_1;
+      Var _x2c_macro_cursor_output_2;
+      while(Map_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1, & _x2c_macro_cursor_output_2)){
+        path = _x2c_macro_cursor_output_1;
+        content_hash = _x2c_macro_cursor_output_2;
+        Array_push(paths, path);
       }
 
     }
-
-  }
-  if(ok && File_putc(output, '\n') == EOF) ok = 0;
-  if(ok && ! request -> no_phony_deps){
+    if(! Array_len(paths)) Array_push(paths, String_var(input));
+    Array_sort(paths);
+    Buffer out = Buffer_new(0);
     {
-      Var value;
-      Array _x2c_macro_object_3 = paths;
-      int _x2c_macro_cursor_3 = 0;
-      Var _x2c_macro_cursor_output_4;
-      while(Array_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_4)){
-        value = _x2c_macro_cursor_output_4;
-        {
-          String path = Var_string(value);
-          if(String_equal(path, primary)) continue;
-          if(! _write_word(output, path) || File_puts(output, ":\n") == EOF){
-            ok = 0;
-            break;
+  _x2c_defer_env_0 _x2c_defer_env_3 = {._x2c_defer_capture_0 =(const void *) & out};
+
+  X2CCleanup _x2c_defer_record_1 = {
+    .fn = _x2c_defer_cleanup_0,
+    .env = & _x2c_defer_env_3
+  };
+  x2c_cleanup_push(&_x2c_defer_record_1);
+  {
+      String base = String_join(NULL, cons(String_var(String_rstrip(output_dir, "/")), cons(String_var(_0), cons(String_var(Path_stem(input)), NULL))));
+      _write_word(out, String_truth(request -> dep_target) ? request -> dep_target : String_join(NULL, cons(String_var(base), cons(String_var(_1), NULL))));
+      if(! String_truth(request -> dep_target)){
+        Buffer_write_char(out, ' ');
+        _write_word(out, String_join(NULL, cons(String_var(base), cons(String_var(_2), NULL))));
+      }
+      Buffer_write_char(out, ':');
+      {
+        String path;
+        Array _x2c_macro_object_2 = paths;
+        int _x2c_macro_cursor_2 = 0;
+        Var _x2c_macro_cursor_output_3;
+        while(Array_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_3)){
+          path = Var_string(_x2c_macro_cursor_output_3);
+          {
+            Buffer_write_char(out, ' ');
+            _write_word(out, path);
           }
 
         }
 
       }
+      Buffer_write_char(out, '\n');
+      String primary = Path_absolute(input);
+      if(! request -> no_phony_deps){
+        String path;
+        Array _x2c_macro_object_3 = paths;
+        int _x2c_macro_cursor_3 = 0;
+        Var _x2c_macro_cursor_output_4;
+        while(Array_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_4)){
+          path = Var_string(_x2c_macro_cursor_output_4);
+          if(! String_equal(path, primary)){
+            _write_word(out, path);
+            Buffer_write(out, ":\n");
+          }
+
+        }
+
+      }
+      {
+        String _x2c_return_value_0 = Buffer_str(out);
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_1);
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_0;
+        }
+
+      }
 
     }
+    x2c_cleanup_leave(& _x2c_defer_record_1);
 
+}
   }
-  Array_free(paths);
-  return ok && ! File_error(output);
+  x2c_cleanup_leave(& _x2c_defer_record_0);
+
+}
 }
 
 int CliRequest_inspects(CliRequest);
 
-String String_printf(String, ...);
+void file_publish(Path, String);
+
+Var Symbol_var(Symbol);
+
+Var List_assoc(List, Var);
 
 int translation_depfile_write(CliRequest request, Compiler compiler, String input, String output_dir){
   if(! _init_guard_) _file_init_();
   if(request -> no_deps || CliRequest_inspects(request)) return 1;
-  String stem = _stem(input);
-  String path = String_truth(request -> dep_file) ? request -> dep_file : String_join(NULL, cons(String_var(String_rstrip(output_dir, "/")), cons(String_var(_0), cons(String_var(stem), cons(String_var(_3), NULL)))));
-  String temporary = String_printf(String_join(NULL, cons(String_var(path), cons(String_var(_4), NULL))), (long) getpid());
-  File output = fopen(temporary, "w");
-  if(! output){
-    fprintf(stderr, "x2c: error: cannot open dependency file: %s\n", path);
-    fprintf(stderr, "note: %s\n", strerror(errno));
-    return 0;
+  String path = String_truth(request -> dep_file) ? request -> dep_file : String_join(NULL, cons(String_var(String_rstrip(output_dir, "/")), cons(String_var(_0), cons(String_var(Path_stem(input)), cons(String_var(_3), NULL)))));
+  long volatile error = 0;
+  {
+    ExceptionFrame _x2c_exception_frame_0;
+    static MatchCaptureSite _x2c_catch_arms_0[2];
+    static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 2, ERROR_CATCH_PENDING, -1 };
+    Var _x2c_catch_patterns_0[2];
+    if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(31862161386376), cons(Symbol_var(1868397587594), NULL));
+    _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
+    List _x2c_catch_pattern_1 = cons(Symbol_var(20399393368), cons(Symbol_var(1868397587594), NULL));
+    _x2c_catch_patterns_0[1] = List_var(_x2c_catch_pattern_1);
   }
-  int ok = _write_contents(output, request, compiler, input, output_dir, stem);
-  int close_error = File_close(output);
-  if(! ok || close_error || rename(temporary, path)){
-    int error = errno;
-    unlink(temporary);
-    fprintf(stderr, "x2c: error: cannot write dependency file: %s\n", path);
-    fprintf(stderr, "note: %s\n", strerror(error));
-    return 0;
+  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
+    file_publish(path, _contents(request, compiler, input, output_dir)); {
+      int _x2c_return_value_1 = 1; {
+        x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);  return _x2c_return_value_1;
+      }
+
+    }
+
   }
-  return 1;
+  else {x2c_exception_landed(& _x2c_exception_frame_0); {
+    if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
+      int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
+      x2c_error_catch_detach(_x2c_error_handler_0);
+      x2c_exception_mark_handled(&_x2c_exception_frame_0);
+      if (_x2c_catch_selected_0 == 0) {List failure = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
+      error = Var_long(Var_convert(List_assoc(failure, Symbol_var(11703198)), 818062));
+    }
+    else {List failure = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
+    error = Var_long(Var_convert(List_assoc(failure, Symbol_var(11703198)), 818062));
+  }
+
+}
+else{
+  x2c_error_catch_close(_x2c_error_handler_0);
+  _x2c_error_handler_0 = NULL;
+  x2c_exception_leave(& _x2c_exception_frame_0);
+  __builtin_unreachable();
+}
+}
+}
+x2c_error_catch_close(_x2c_error_handler_0);
+_x2c_error_handler_0 = NULL;
+x2c_exception_leave(& _x2c_exception_frame_0);
+}
+fprintf(stderr, "x2c: error: cannot write dependency file: %s\nnote: %s\n", path, strerror(error));
+return 0;
+}
+
+void Buffer_cleanup(Buffer);
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
+  Buffer_cleanup((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
+}
+
+void Array_cleanup(Array);
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  Array_cleanup((*(Array *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 

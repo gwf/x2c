@@ -2,10 +2,9 @@
 
 #include "script.h"
 
-static String _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 #include <errno.h>
-#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 static int _init_guard_ = 0;
@@ -29,26 +28,26 @@ __attribute__((constructor)) static void _file_init_(void){
   _6 = String_new("/lock");
   _7 = String_new("/scripts/");
   _8 = String_new("-%08x");
-  _9 = String_new("cannot remove script cache: ");
-  _10 = String_new("script does not exist: ");
-  _11 = String_new("direct");
-  _12 = String_new("cannot create script cache: ");
-  _13 = String_new("/scripts");
-  _14 = String_new(".%ld");
+  _9 = String_new("script does not exist: ");
+  _10 = String_new("direct");
+  _11 = String_new("/scripts");
+  _12 = String_new(".%ld");
+  _13 = String_new("X2C_CACHE_DIR");
+  _14 = String_new("XDG_CACHE_HOME");
+  _15 = String_new("HOME");
 }
 
-String String_new(const char *);
+String Env_get(String);
+
+int String_truth(String);
 
 Var String_var(String);
 
 String script_cache_root(void){
   if(! _init_guard_) _file_init_();
-  const char * explicit = getenv("X2C_CACHE_DIR");
-  if(explicit && * explicit) return String_new(explicit);
-  const char * xdg = getenv("XDG_CACHE_HOME");
-  if(xdg && * xdg) return String_join(NULL, cons(String_var(String_new(xdg)), cons(String_var(_0), NULL)));
-  const char * home = getenv("HOME");
-  return home && * home ? String_join(NULL, cons(String_var(String_new(home)), cons(String_var(_1), NULL))) : NULL;
+  String explicit = Env_get(_13), xdg = Env_get(_14);
+  String home = Env_get(_15);
+  return String_truth(explicit) ? explicit : String_truth(xdg) ? String_join(NULL, cons(String_var(xdg), cons(String_var(_0), NULL))) : String_truth(home) ? String_join(NULL, cons(String_var(home), cons(String_var(_1), NULL))) : NULL;
 }
 
 ToolRun ToolAction_start(ToolAction);
@@ -67,9 +66,9 @@ int List_try_next(List, List *, Var *);
 
 String Var_string(Var);
 
-int String_truth(String);
-
 void x2c_driver_error(const char *);
+
+String String_new(const char *);
 
 static void _exec(CliRequest c){
   String executable = String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_2), NULL)));
@@ -101,7 +100,7 @@ int Path_is_file(Path);
 
 String Path_read_text(Path);
 
-int _build_lock(String, int);
+int file_lock(Path, int);
 
 void Path_remove_tree(Path);
 
@@ -119,7 +118,7 @@ static void _prune(String scripts){
         String directory = Path_join(scripts, name);
         Path source = String_join(NULL, cons(String_var(directory), cons(String_var(_5), NULL)));
         if(! Path_is_file(source) || Path_is_file(Path_read_text(source))) continue;
-        int lock = _build_lock(String_join(NULL, cons(String_var(directory), cons(String_var(_6), NULL))), 0);
+        int lock = file_lock(String_join(NULL, cons(String_var(directory), cons(String_var(_6), NULL))), 0);
         if(lock < 0) continue;
         {
           ExceptionFrame _x2c_exception_frame_0;
@@ -170,9 +169,11 @@ unsigned String_hash(String);
 
 int Path_is_dir(Path);
 
+void x2c_host_error(List);
+
 int CliRequest_script_current(CliRequest, String);
 
-int _build_mkdirs(String);
+void Path_make_dirs(Path);
 
 void Path_write_text(Path, String);
 
@@ -184,20 +185,21 @@ int script_prepare(CliRequest c){
   c -> build_dir = String_printf(String_join(NULL, cons(String_var(root), cons(String_var(_7), cons(String_var(Path_stem(script)), cons(String_var(_8), NULL))))), String_hash(script));
   if(c -> clean){
     if(! Path_is_dir(c -> build_dir)) return 1;
-    int lock = _build_lock(String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_6), NULL))), 1);
+    int lock = file_lock(String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_6), NULL))), 1);
     {
       ExceptionFrame _x2c_exception_frame_1;
       static MatchCaptureSite _x2c_catch_arms_1[1];
       static ErrorCatchSite _x2c_catch_site_1 = {  _x2c_catch_arms_1, -1, 1, ERROR_CATCH_PENDING, -1 };
       Var _x2c_catch_patterns_1[1];
-      if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_1 = cons(Symbol_var(20399393368), cons(Symbol_var(54), NULL));
+      if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_1 = cons(Symbol_var(20399393368), cons(Symbol_var(58262293080), NULL));
       _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_1);
     }
     ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) Path_remove_tree(c -> build_dir);  else {x2c_exception_landed(& _x2c_exception_frame_1); {
       if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
         x2c_error_catch_detach(_x2c_error_handler_1);
         x2c_exception_mark_handled(&_x2c_exception_frame_1);
-         {x2c_driver_error(String_join(NULL, cons(String_var(_9), cons(String_var(c -> build_dir), NULL))));
+         {List detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_1, 0));
+        x2c_host_error(detail);
       }
 
     }
@@ -218,19 +220,47 @@ x2c_exception_leave(& _x2c_exception_frame_1);
 close(lock);
 return 1;
 }
-if(! Path_is_file(script)) x2c_driver_error(String_join(NULL, cons(String_var(_10), cons(String_var(script), NULL))));
+if(! Path_is_file(script)) x2c_driver_error(String_join(NULL, cons(String_var(_9), cons(String_var(script), NULL))));
 c -> inputs = cons(String_var(script), NULL);
-c -> state_seed = _11;
+c -> state_seed = _10;
 if(! c -> verbose) c -> quiet = 1;
 c -> output = String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_2), NULL)));
 if(c -> dry_run) return 0;
 if(! c -> rebuild && CliRequest_script_current(c, c -> build_dir)) _exec(c);
-if(! _build_mkdirs(c -> build_dir)) x2c_driver_error(String_join(NULL, cons(String_var(_12), cons(String_var(c -> build_dir), NULL))));
-_build_lock(String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_6), NULL))), 1);
+{
+  ExceptionFrame _x2c_exception_frame_2;
+  static MatchCaptureSite _x2c_catch_arms_2[1];
+  static ErrorCatchSite _x2c_catch_site_2 = {  _x2c_catch_arms_2, -1, 1, ERROR_CATCH_PENDING, -1 };
+  Var _x2c_catch_patterns_2[1];
+  if (x2c_error_catch_site_pending(&_x2c_catch_site_2)) {List _x2c_catch_pattern_2 = cons(Symbol_var(20399393368), cons(Symbol_var(58262293080), NULL));
+  _x2c_catch_patterns_2[0] = List_var(_x2c_catch_pattern_2);
+}
+ErrorHandler volatile _x2c_error_handler_2 = x2c_error_catch_site_push(&_x2c_exception_frame_2, &_x2c_catch_site_2, _x2c_catch_patterns_2);  x2c_exception_push(& _x2c_exception_frame_2);  if (!sigsetjmp(_x2c_exception_frame_2.env, 0)) Path_make_dirs(c -> build_dir);  else {x2c_exception_landed(& _x2c_exception_frame_2); {
+  if (x2c_exception_is_error_target(&_x2c_exception_frame_2)){
+    x2c_error_catch_detach(_x2c_error_handler_2);
+    x2c_exception_mark_handled(&_x2c_exception_frame_2);
+     {List detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_2, 0));
+    x2c_host_error(detail);
+  }
+
+}
+else{
+  x2c_error_catch_close(_x2c_error_handler_2);
+  _x2c_error_handler_2 = NULL;
+  x2c_exception_leave(& _x2c_exception_frame_2);
+  __builtin_unreachable();
+}
+}
+}
+x2c_error_catch_close(_x2c_error_handler_2);
+_x2c_error_handler_2 = NULL;
+x2c_exception_leave(& _x2c_exception_frame_2);
+}
+file_lock(String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_6), NULL))), 1);
 if(! c -> rebuild && CliRequest_script_current(c, c -> build_dir)) _exec(c);
 Path_write_text(String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_5), NULL))), script);
-_prune(String_join(NULL, cons(String_var(root), cons(String_var(_13), NULL))));
-c -> output = String_printf(String_join(NULL, cons(String_var(c -> output), cons(String_var(_14), NULL))), (long) getpid());
+_prune(String_join(NULL, cons(String_var(root), cons(String_var(_11), NULL))));
+c -> output = String_printf(String_join(NULL, cons(String_var(c -> output), cons(String_var(_12), NULL))), (long) getpid());
 return 0;
 }
 

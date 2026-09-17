@@ -7,6 +7,8 @@
 
 #include "x2c.h"
 #include "build.h"
+List install_rows(String text);
+
 int install_command(CliRequest request);
 
 String install_version(String name);

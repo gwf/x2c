@@ -26,7 +26,9 @@ typedef struct Build{
 }
 * Build;
 
-int _build_mkdirs(String path);
+uint64_t build_hash_bytes(uint64_t hash, const void * bytes, size_t length);
+
+void build_check_input(String input);
 
 Build CliRequest_prepare(CliRequest c);
 
@@ -50,11 +52,7 @@ void Build_report_success(Build b);
 
 int Build_run_program(Build state);
 
-int _build_remove_tree(String path);
-
-int _build_lock(String path, int wait);
-
-void Build_cleanup(Build state, int success);
+void Build_cleanup(Build b, int success);
 
 List Build_script_helpers(Build b);
 

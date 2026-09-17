@@ -12,6 +12,7 @@ static String _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _
 #include <string.h>
 #include <unistd.h>
 #include "buffer.h"
+#include "report.h"
 #include "utils.h"
 enum{
   CLI_TOP = 1, CLI_TRANSLATE = 2, CLI_BUILD = 4, CLI_RUN = 8, CLI_SCRIPT = 16, CLI_BOOTSTRAP = 32, CLI_ENV = 64, CLI_INSTALL = 128, CLI_REMOVE = 256, CLI_LIST = 512, CLI_NATIVE = CLI_BUILD | CLI_RUN | CLI_SCRIPT
@@ -81,22 +82,22 @@ static CliOption cli_options[] ={
     47619197916, CLI_TOP, 495915096, "-V, --version", NULL, "Show the x2c version and exit", 0
   }
   , {
-    47618096330, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP, 15397654616, "-v, --verbose", NULL, "Show commands as they are executed", 0
+    47618096330, CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP, 15397654616, "-v, --verbose", NULL, "Show commands as they are executed", 0
   }
   , {
-    9852392796, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE, 15397654616, "-###", NULL, "Show commands without executing them", 0
+    9852392796, CLI_TRANSLATE | CLI_NATIVE, 15397654616, "-###", NULL, "Show commands without executing them", 0
   }
   , {
-    37046632, CLI_TOP | CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP | CLI_INSTALL | CLI_REMOVE, 15397654616, "-q, --quiet", NULL, "Suppress successful progress and receipts", 0
+    37046632, CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP | CLI_INSTALL | CLI_REMOVE, 15397654616, "-q, --quiet", NULL, "Suppress successful progress and receipts", 0
   }
   , {
-    34343516, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP, 15397654616, "--plain", NULL, "Use stable output without terminal rendering", 0
+    34343516, CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP, 15397654616, "--plain", NULL, "Use stable output without terminal rendering", 0
   }
   , {
-    7300068, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP, 15397654616, "--color", "<auto|always|never>", "Control terminal color", 0
+    7300068, CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP, 15397654616, "--color", "<auto|always|never>", "Control terminal color", 0
   }
   , {
-    8721742, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE, 15397654616, "--debug", NULL, "Enable compiler debug logging", 0
+    8721742, CLI_TRANSLATE | CLI_NATIVE, 15397654616, "--debug", NULL, "Enable compiler debug logging", 0
   }
   , {
     918708911504550, CLI_TRANSLATE | CLI_NATIVE, 15397654616, "--max-errors", "<count>", "Stop after <count> errors per unit (default: 20)", 0
@@ -1105,13 +1106,10 @@ CliRequest cli_package_options(String path, String package){
 }
 }
 
+int report_make_owned(void);
+
 static int _default_build_jobs(void){
-  const char * level = getenv("MAKELEVEL");
-  if(level && * level){
-    char * end = NULL;
-    long depth = strtol(level, & end, 10);
-    if(end && ! * end && depth > 0) return 1;
-  }
+  if(report_make_owned()) return 1;
   long count = sysconf(_SC_NPROCESSORS_ONLN);
   return count > 0 && count <= INT_MAX ?(int) count : 1;
 }
@@ -1283,11 +1281,13 @@ int CliRequest_inspects(CliRequest request){
 
 String x2c_home_packages(void);
 
+int Path_is_dir(Path);
+
 List List_append(List, List);
 
 List CliRequest_package_roots(CliRequest request){
   String home = x2c_home_packages();
-  if(! String_truth(home)) return request -> package_dirs;
+  if(! Path_is_dir(home)) return request -> package_dirs;
   return List_append(request -> package_dirs, cons(String_var(home), NULL));
 }
 
