@@ -37,6 +37,7 @@
 #pragma once
 
 $(import "error-macros.xmacro")
+$(import "private-keywords.xmacro")
 #include "common.x"
 #include "machine.x"
 
@@ -850,58 +851,84 @@ macro Statement $match.walk_buffer(
 }
 
 /* Every traversal descends car with include_empty=1 and cdr with
-   include_empty=0 before trying the match at this node. */
+   include_empty=0 before trying the match at this node. The cdr descent runs
+   as a loop, so a `List` of any length costs one frame and only nesting
+   depth reaches the C stack. The loop visits every car in order and then
+   answers for the cells from the last one back, which is the order the
+   recursion produced. */
 static int _walk_all_prepared(
   MatchWalk walk, Var input, int include_empty, List *results) {
-  if (input is <list>) {
+  List cells = NULL;
+  int visit_tail = 1;
+  loop {
+    if (input is not <list>) break;
     List lst = input;
-    if (lst) {
-      if (_walk_all_prepared(walk, lst.car(), 1, results) < 0) return -1;
-      if (_walk_all_prepared(walk, lst.cdr(), 0, results) < 0) return -1;
+    if (!lst) {
+      visit_tail = include_empty;
+      break;
     }
-    else if (!include_empty) return 0;
+    if (_walk_all_prepared(walk, lst.car(), 1, results) < 0) return -1;
+    int status = _walk_prepared(walk, input);
+    if (status < 0) return -1;
+    if (status == 1) cells = cons(_walk_bindings(walk, input), cells);
+    input = lst.cdr();
+    include_empty = 0;
   }
-  int status = _walk_prepared(walk, input);
-  if (status < 0) return -1;
-  if (status == 1) *results = cons(_walk_bindings(walk, input), *results);
+  if (visit_tail) {
+    int status = _walk_prepared(walk, input);
+    if (status < 0) return -1;
+    if (status == 1) *results = cons(_walk_bindings(walk, input), *results);
+  }
+  // `cells` runs from the last cell back, so prepending restores cell order
+  foreach (Var found, cells) *results = cons(found, *results);
   return 0;
 }
 
 static int _walk_first_prepared(
   MatchWalk walk, Var input, int include_empty, Var *out_match,
   List *out_bindings) {
-  if (input is <list>) {
+  Var last_cell = void;
+  int have_cell = 0, visit_tail = 1;
+  loop {
+    if (input is not <list>) break;
     List lst = input;
-    if (lst) {
-      int found =
-        _walk_first_prepared(walk, lst.car(), 1, out_match, out_bindings);
-      if (found) return found;
-      found =
-        _walk_first_prepared(walk, lst.cdr(), 0, out_match, out_bindings);
-      if (found) return found;
+    if (!lst) {
+      visit_tail = include_empty;
+      break;
     }
-    else if (!include_empty) return 0;
+    int found =
+      _walk_first_prepared(walk, lst.car(), 1, out_match, out_bindings);
+    if (found) return found;
+    int status = _walk_prepared(walk, input);
+    if (status < 0) return -1;
+    if (status == 1) {
+      last_cell = input;
+      have_cell = 1;
+    }
+    input = lst.cdr();
+    include_empty = 0;
   }
-  int status = _walk_prepared(walk, input);
+  if (visit_tail) {
+    int status = _walk_prepared(walk, input);
+    if (status < 0) return status;
+    if (status == 1) {
+      *out_match = input;
+      *out_bindings = _capture_publish(walk.plan.layout, walk.captures);
+      return 1;
+    }
+  }
+  if (!have_cell) return 0;
+  // the cells answer from the last one back, and the buffer now holds a
+  // later node, so the winner is matched once more to publish its captures
+  int status = _walk_prepared(walk, last_cell);
   if (status != 1) return status;
-  *out_match = input;
+  *out_match = last_cell;
   *out_bindings = _capture_publish(walk.plan.layout, walk.captures);
   return 1;
 }
 
-static Var _walk_replace_prepared(
-  MatchWalk walk, Var node, Var template, int include_empty, int *error) {
-  if (node is <list>) {
-    List lst = node;
-    if (lst) {
-      Var head = _walk_replace_prepared(walk, lst.car(), template, 1, error);
-      if (*error) return node;
-      List tail = _walk_replace_prepared(walk, lst.cdr(), template, 0, error);
-      if (*error) return node;
-      node = cons(head, tail);
-    }
-    else if (!include_empty) return node;
-  }
+static Var _walk_replace_node(
+  MatchWalk walk, Var node, Var template, int *error) {
   int status = _walk_prepared(walk, node);
   if (status < 0) {
     *error = 1;
@@ -909,6 +936,33 @@ static Var _walk_replace_prepared(
   }
   if (status == 0) return node;
   return _apply_capture_template(walk.plan.layout, walk.captures, template);
+}
+
+static Var _walk_replace_prepared(
+  MatchWalk walk, Var node, Var template, int include_empty, int *error) {
+  List heads = NULL;
+  int visit_tail = 1;
+  loop {
+    if (node is not <list>) break;
+    List lst = node;
+    if (!lst) {
+      visit_tail = include_empty;
+      break;
+    }
+    Var head = _walk_replace_prepared(walk, lst.car(), template, 1, error);
+    if (*error) return node;
+    heads = cons(head, heads);
+    node = lst.cdr();
+    include_empty = 0;
+  }
+  if (visit_tail) node = _walk_replace_node(walk, node, template, error);
+  // `heads` runs from the last cell back, so each cons rebuilds its cell
+  foreach (Var head, heads) {
+    if (*error) return node;
+    List tail = node;
+    node = _walk_replace_node(walk, cons(head, tail), template, error);
+  }
+  return node;
 }
 
 /** Returns every matching subtree of `input` with its bindings.
