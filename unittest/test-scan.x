@@ -120,6 +120,8 @@ static void scan_operators(void) {
 static void scan_byte_escapes_and_segments(void) {
   EXPECT_INT_EQ(scan_escape_sequence("\\n"), 2);
   EXPECT_INT_EQ(scan_escape_sequence("\\101"), 4);
+  EXPECT_INT_EQ(scan_escape_sequence("\\377"), 4);
+  EXPECT_INT_EQ(scan_escape_sequence("\\400"), -1);
   EXPECT_INT_EQ(scan_escape_sequence("\\x"), -1);
   EXPECT_INT_EQ(scan_escape_sequence("\\x0"), 3);
   EXPECT_INT_EQ(scan_escape_sequence("\\x123"), 4);
@@ -143,6 +145,7 @@ static void scan_c_literals(void) {
   EXPECT_INT_EQ(scan_c_string("\"\\U00000041\""), 12);
   EXPECT_INT_EQ(scan_c_string("\"\\u12\""), -1);
   EXPECT_INT_EQ(scan_c_string("\"\\z\""), -1);
+  EXPECT_INT_EQ(scan_c_string("\"\\400\""), -1);
 
   char raw_string[] = {'"', 'a', '\n', 'b', '"', 0};
   char raw_char[] = {'\'', '\n', '\'', 0};

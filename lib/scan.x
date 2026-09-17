@@ -303,7 +303,9 @@ static int _escape_sequence_status(char *s, Symbol *status) {
       n++;
       if (s[n] >= '0' && s[n] <= '7') n++;
       if (s[n] >= '0' && s[n] <= '7') n++;
-      return n;
+      // Three digits from \400 up exceed the byte C requires.
+      if (n < 4 || s[1] <= '3') return n;
+      break;
   }
   if (status) *status = <malformed>;
   return -1;
@@ -336,7 +338,8 @@ static int _c_escape_sequence_status(char *s, Symbol *status) {
       n++;
       if (s[n] >= '0' && s[n] <= '7') n++;
       if (s[n] >= '0' && s[n] <= '7') n++;
-      return n;
+      if (n < 4 || s[1] <= '3') return n;
+      break;
     case 'x': case 'X': n++;
       if (!s[n]) {
         if (status) *status = <incomplete>;

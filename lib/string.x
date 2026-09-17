@@ -1264,7 +1264,8 @@ static inline int _escape_byte(unsigned char ch, char *out) {
     backslash is dropped. `Null` input returns NULL and input without a
     backslash
     is returned unchanged.
-    Raises: `<alloc-fail>` while constructing a changed result.
+    Raises: `<bad-arg>` for an octal escape above `\377`, which does not fit
+    a byte, or `<alloc-fail>` while constructing a changed result.
 */
 String String.unescape(String str) {
   int n = str.len();
@@ -1278,6 +1279,10 @@ String String.unescape(String str) {
       if (!*src) break;
       const char *cursor = src;
       int emit, esc = _decode_escape_char(&cursor, &emit);
+      if (esc > 0377) {
+        _free_unchecked(string);
+        raise %(bad-arg (owner "String.unescape"));
+      }
       src = cursor;
       if (emit && esc) *dst++ = esc;
     }

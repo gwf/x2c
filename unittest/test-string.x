@@ -223,13 +223,15 @@ static void string_invalid_bytes_transfer(void) {
   catch %(bad-arg *): caught++;
   try "x".pad_left(3, '\0');
   catch %(bad-arg *): caught++;
+  try String.new("a\\400b").unescape();
+  catch %(bad-arg *): caught++;
 
   try "abc".map(_string_test_nul);
   catch %(bad-result *): caught++;
 
   try String.pool_release();
   catch %(bad-state *): caught++;
-  EXPECT_INT_EQ(caught, 5);
+  EXPECT_INT_EQ(caught, 6);
 }
 
 static void _callback_transfer_round(int measure) {
