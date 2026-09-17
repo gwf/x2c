@@ -177,7 +177,7 @@ static List _render(Options options) {
 
 static String _start_failure(Job job, List detail) {
   String program = job.stages.car().list().car().str();
-  long error = detail.assoc(Symbol.new("errno")).integer();
+  long error = detail.assoc(<errno>).integer();
   String reason = String.new(strerror((int) error));
   return %"cstar-verify: cannot run $program: $reason\n";
 }
