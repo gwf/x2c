@@ -70,8 +70,8 @@ int main(void) {
     (void) _forward(model, Tensor.randn(%(3 5), XT_FLOAT32));
   }
   catch %(bad-state (library "torch") *detail): {
-    String operation = detail.assoc(<operation>).string();
-    String reason = detail.assoc(<reason>).string();
+    String operation = detail.assoc(<operation>);
+    String reason = detail.assoc(<reason>);
     printf("%s", %"caught $operation: $reason\n");
   }
   return 0;

@@ -9,7 +9,7 @@ import "libcurl" with CurlBatch, CurlEasy, CurlHeader, CurlResponse,
 static const long BUDGET_US = 3000000;
 
 static void count_chunk(Bytes chunk, Var data) {
-  Array count = data.array();
+  Array count = data;
   count[0] = count[0].integer() + chunk.block().length;
 }
 

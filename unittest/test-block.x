@@ -102,7 +102,7 @@ static void bytes_relocation_and_invalid_width(void) {
   Bytes bytes = Bytes.new(sizeof(int));
   int value = 11;
   bytes = bytes.append(&value, 1);
-  Block block = bytes.block();
+  Block block = bytes;
   bytes = bytes.reserve(block.capacity() + 8);
   EXPECT_TRUE(Bytes.block(bytes) == block);
   EXPECT_TRUE(block.bytes == bytes);

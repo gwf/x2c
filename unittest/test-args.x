@@ -62,7 +62,7 @@ static void args_operands_and_double_dash(void) {
   EXPECT_STR_EQ(parsed["source"].str(), "a");
   EXPECT_INT_EQ(parsed["verbose"].integer(), 1);
   EXPECT_STR_EQ(parsed["output"].str(), "a.out");
-  List rest = parsed["rest"].list();
+  List rest = parsed["rest"];
   EXPECT_INT_EQ(rest.len(), 5);
   EXPECT_STR_EQ(rest.car().str(), "b");
   EXPECT_STR_EQ(rest.cadr().str(), "-o");

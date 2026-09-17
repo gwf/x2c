@@ -174,7 +174,7 @@ static void regex_rejects_bad_patterns(void) {
                  ("a**" "nothing to repeat" 2)
                  ("a+?+" "nothing to repeat" 3));
   foreach (List row, cases) {
-    String pattern = row.car().string();
+    String pattern = row.car();
     int caught = 0;
     try Regex.compile(pattern);
     catch %(bad-arg *detail): {

@@ -937,7 +937,7 @@ static void var_wide_value_semantics(void) {
   EXPECT_INT_EQ(map[same_value].integer(), 73);
   EXPECT_TRUE(map[adjacent] is void);
 
-  Var source_long = precise.var(), explicit_i48 = Var.new(<i48>, (long) 17);
+  Var source_long = precise, explicit_i48 = Var.new(<i48>, (long) 17);
   EXPECT_TRUE(source_long is <long>);
   EXPECT_TRUE(source_long.long_value() == precise);
   EXPECT_TRUE(explicit_i48 is <i48>);

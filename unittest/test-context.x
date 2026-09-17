@@ -366,7 +366,7 @@ static void context_string_map_collapse_uses_later_bucket(void) {
   foreach (String traversed_value, map) later_value = traversed_value;
   int later_is_second = later_value == second_value;
 
-  map = inner.export(map).mapstringstring();
+  map = inner.export(map);
   inner.close();
   EXPECT_INT_EQ(map.len(), 1);
   String collapsed = map.get(String.new("collapse-key-a7"));

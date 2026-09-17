@@ -20,10 +20,10 @@ static String _names(List pairs) {
     String name = pair[0].str();
     names = names.append(%($name));
   }
-  return names.str();
+  return names;
 }
 
-static String _shape(Tensor t) => t.shape().str();
+static String _shape(Tensor t) => t.shape();
 
 static void modules_shapes(void) {
   $test.scoped();

@@ -349,7 +349,7 @@ static void timer_fires_once_and_repeats(void) {
 
   EXPECT_INT_EQ(once.len(), 1);
   EXPECT_INT_EQ(repeated.len(), 3);
-  EXPECT_INT_EQ(((Var) repeated[2]).int(), 3);
+  EXPECT_INT_EQ(repeated[2].int(), 3);
 }
 
 static void _stop_the_loop(UvTimer timer, Var value) {
@@ -419,10 +419,10 @@ static void loop_phases_keep_their_order_and_native_handles(void) {
   EXPECT_INT_EQ(loop.run(UV_RUN_DEFAULT), 0);
 
   EXPECT_INT_EQ(state.order.len(), 4);
-  EXPECT_TRUE(((Var) state.order[0]).symbol() == <idle>);
-  EXPECT_TRUE(((Var) state.order[1]).symbol() == <prepare>);
-  EXPECT_TRUE(((Var) state.order[2]).symbol() == <poll>);
-  EXPECT_TRUE(((Var) state.order[3]).symbol() == <check>);
+  EXPECT_TRUE(state.order[0].symbol() == <idle>);
+  EXPECT_TRUE(state.order[1].symbol() == <prepare>);
+  EXPECT_TRUE(state.order[2].symbol() == <poll>);
+  EXPECT_TRUE(state.order[3].symbol() == <check>);
   EXPECT_INT_EQ(state.same_thread, 3);
   EXPECT_NULL(state.idle.stop());
   EXPECT_NULL(state.prepare.stop());
@@ -606,7 +606,7 @@ static void signal_handler_runs_inside_the_loop(void) {
   loop.run(UV_RUN_DEFAULT);
 
   EXPECT_INT_EQ(seen.len(), 1);
-  EXPECT_INT_EQ(((Var) seen[0]).int(), SIGUSR1);
+  EXPECT_INT_EQ(seen[0].int(), SIGUSR1);
   slow.kill(SIGTERM);
   loop.run(UV_RUN_DEFAULT);
   EXPECT_TRUE(slow.exited());
@@ -647,7 +647,7 @@ static void watch_reports_an_entry_a_child_creates(void) {
 
   EXPECT_TRUE(seen.len() > 0);
   EXPECT_STR_EQ(
-    ((Var) seen[seen.len() - 1]).string(), %"x2c-libuv-same-name"
+    seen[seen.len() - 1].string(), %"x2c-libuv-same-name"
   );
 }
 
@@ -682,7 +682,7 @@ static void watch_distinguishes_content_changes(void) {
   loop.run(UV_RUN_DEFAULT);
 
   EXPECT_INT_EQ(seen.len(), 2);
-  EXPECT_TRUE(((Var) seen[1]).symbol() == <change>);
+  EXPECT_TRUE(seen[1].symbol() == <change>);
 }
 
 static void native_handles_reach_the_pinned_api(void) {
@@ -798,7 +798,7 @@ static void a_failed_async_callback_stops_and_resumes_the_loop(void) {
 
 static void _write_watched_file(UvTimer timer, Var value) {
   (void) timer;
-  String path = value.string();
+  String path = value;
   File file = File.open(path, "w");
   file.puts(%"changed\n");
   file.close();

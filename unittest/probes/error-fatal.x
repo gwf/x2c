@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
     Error.initialize();
     Pool transient = String.pool_retain_named("error-floor-transfer");
     String text = String.new("ephemeral error detail");
-    Block records = transient.up.table.entries.block();
+    Block records = transient.up.table.entries;
     records.width = SIZE_MAX;
     records.cap = records.length;
     try {

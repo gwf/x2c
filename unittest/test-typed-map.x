@@ -431,7 +431,7 @@ static void typed_map_string_int_family(void) {
   EXPECT_TRUE(boxed is <mapstrint>);
   EXPECT_PTR_EQ(boxed.mapstringint(), counts);
   EXPECT_INT_EQ(boxed["beta"].integer(), 7);
-  Map ordinary = counts.map();
+  Map ordinary = counts;
   EXPECT_INT_EQ(ordinary["gamma"].integer(), 13);
 
   int visited = 0, total = 0;
@@ -475,11 +475,11 @@ static void typed_map_common_capabilities_cover_every_family(void) {
   $test.scoped();
 
   MapIntInt ints = {1: 2}, later_ints = {1: 3};
-  Map int_map = ints.map();
+  Map int_map = ints;
   Buffer int_str = Buffer.new(0), int_repr = Buffer.new(0);
   ints.write_str(int_str); ints.write_repr(int_repr);
   _expect_typed_map_common(
-    ints, later_ints, int_map, ints.str(), ints.repr(),
+    ints, later_ints, int_map, ints, ints.repr(),
     int_str, int_repr, ints.compare(later_ints));
   EXPECT_INT_EQ(int_map[1].integer(), 2);
   int_map[1] = 99;
@@ -487,33 +487,33 @@ static void typed_map_common_capabilities_cover_every_family(void) {
 
   MapLongDouble doubles = {10L: 2.5};
   MapLongDouble later_doubles = {10L: 3.5};
-  Map double_map = doubles.map();
+  Map double_map = doubles;
   Buffer double_str = Buffer.new(0), double_repr = Buffer.new(0);
   doubles.write_str(double_str); doubles.write_repr(double_repr);
   _expect_typed_map_common(
-    doubles, later_doubles, double_map, doubles.str(), doubles.repr(),
+    doubles, later_doubles, double_map, doubles, doubles.repr(),
     double_str, double_repr, doubles.compare(later_doubles));
   EXPECT_TRUE(double_map[10L].double() == 2.5);
 
   MapStringString strings = {"alpha": "one"};
   MapStringString later_strings = {"alpha": "two"};
-  Map string_map = strings.map();
+  Map string_map = strings;
   Buffer string_str = Buffer.new(0), string_repr = Buffer.new(0);
   strings.write_str(string_str); strings.write_repr(string_repr);
   _expect_typed_map_common(
-    strings, later_strings, string_map, strings.str(), strings.repr(),
+    strings, later_strings, string_map, strings, strings.repr(),
     string_str, string_repr, strings.compare(later_strings));
   EXPECT_STR_EQ(string_map["alpha"].string(), "one");
 
   MapStringInt string_ints = {"alpha": 1};
   MapStringInt later_string_ints = {"alpha": 2};
-  Map string_int_map = string_ints.map();
+  Map string_int_map = string_ints;
   Buffer string_int_str = Buffer.new(0), string_int_repr = Buffer.new(0);
   string_ints.write_str(string_int_str);
   string_ints.write_repr(string_int_repr);
   _expect_typed_map_common(
     string_ints, later_string_ints, string_int_map,
-    string_ints.str(), string_ints.repr(),
+    string_ints, string_ints.repr(),
     string_int_str, string_int_repr,
     string_ints.compare(later_string_ints));
   EXPECT_INT_EQ(string_int_map["alpha"].integer(), 1);

@@ -4,6 +4,6 @@ int main(void) {
   Vec value = Scope.malloc(sizeof(struct Vec));
   value.x = 7;
   Var boxed = value;
-  printf("%s\n", boxed.str());
+  printf("%s\n", boxed);
   return 0;
 }

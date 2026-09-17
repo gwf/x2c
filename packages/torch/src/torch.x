@@ -1566,7 +1566,7 @@ static List _lisp_values(Var tensor) {
   Tensor value = _lisp_tensor_arg(tensor);
   Array values = value.to_values();
   defer values.free();
-  return values.list();
+  return values;
 }
 
 $lisp.binding(torch_lisp, "torch-save")

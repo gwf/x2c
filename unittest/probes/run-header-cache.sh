@@ -850,7 +850,7 @@ int main(void) {
   String value = %"hello";
   Array items = %[1, 2, 3];
   Var count = Array_len(items), length = String_c_len(value);
-  printf("%s %s\n", count.str(), length.str());
+  printf("%s %s\n", count, length);
   printf("%zu %d %s\n", value.c_len(), String.c_compare(value, "hello"),
     String.c_find(value, 'e'));
   return 0;

@@ -89,7 +89,7 @@ static void path_tree_operations(void) {
   EXPECT_TRUE(file.is_file() && !file.is_dir() && file.exists());
   EXPECT_LIST_EQ(root.join("one").list_dir(), %("g.x" "two"));
 
-  List walked = root.walk().map(%!(path) => path.str()[root.len():]).list();
+  List walked = root.walk().map(%!(path) => path.str()[root.len():]);
   EXPECT_LIST_EQ(walked, %("/one" "/one/g.x" "/one/two" "/one/two/f.x"));
   EXPECT_LIST_EQ(Path.glob(%"$root/**/*.x"),
                  %(${%"$root/one/g.x"} ${%"$root/one/two/f.x"}));

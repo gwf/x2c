@@ -16,7 +16,7 @@ static CurlEasy test_easy(void) {
 }
 
 static void collect_stream(Bytes chunk, Var data) {
-  Block streamed_body = data.block();
+  Block streamed_body = data;
   streamed_body.append(chunk, chunk.block().length);
 }
 

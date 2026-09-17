@@ -11,7 +11,7 @@ static void _hello_machine(void) {
   Array back = [words[$(+ 1 0)], words[$(- 1 1)]];              // Array
   Map machine = {parts: back};                                  // Map + Symbol
   Lisp lisp = Lisp.new(); defer lisp.destroy();                 // RT Lisp
-  List parts = machine[<parts>].array().list();                 // methods
+  List parts = machine[<parts>].array();                        // methods
   List order = lisp.eval(%(reverse (quote $parts)));            // code/data
   (String hello, String world) = order;                         // destructure
   List done = order.map(%!(w) => bang($loud(w.string())))       // lambda + map

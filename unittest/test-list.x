@@ -441,7 +441,7 @@ static void list_assoc_hash_equal(void) {
 static void list_array_conversion_boundaries(void) {
   Array values = [1, 2, 3];
   List list = values.list_free();
-  Array roundtrip = list.array();
+  Array roundtrip = list;
 
   EXPECT_TRUE(list == %(1 2 3));
   EXPECT_INT_EQ(roundtrip.len(), 3);
@@ -488,7 +488,7 @@ static void list_large_operations_are_iterative(void) {
   List filtered = source.filter(keep_even);
   List sliced = source.getslice(7, count - 3, 7);
   struct Iter storage;
-  List collected = source.iter(&storage).list();
+  List collected = source.iter(&storage);
 
   EXPECT_INT_EQ(appended.len(), count + 1);
   EXPECT_INT_EQ(appended.last().integer(), count);
@@ -568,7 +568,7 @@ static void list_intern_preserves_map_identity(void) {
   EXPECT_TRUE(m1.equal(m2));
   EXPECT_TRUE(m1.var() == m2.var());
   EXPECT_TRUE(m1.var() !== m2.var());
-  EXPECT_INT_EQ(m1.var().compare(m2.var()), 0);
+  EXPECT_INT_EQ(m1.var().compare(m2), 0);
 
   // List interning preserves distinct identities for mutable elements,
   // even when their contents compare equal.

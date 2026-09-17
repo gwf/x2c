@@ -443,8 +443,8 @@ $lisp.binding(sqlite_lisp, "sqlite-bytes-list")
 static List _lisp_sqlite_bytes_list(Var value) {
   if (value is not Bytes)
     raise %(bad-types (library "SQLite") (operation "sqlite-bytes-list"));
-  Bytes bytes = value.bytes();
-  Block block = bytes.block();
+  Bytes bytes = value;
+  Block block = bytes;
   if ((void *)block == NULL)
     raise %(bad-arg (library "SQLite") (operation "sqlite-bytes-list"));
   size_t size = block.len() * block.width;

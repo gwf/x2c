@@ -18,7 +18,7 @@ static Var _tree(int item, int depth) {
 
 static int _sum(Var tree) {
   if (tree.is_integer()) return tree.int();
-  Array node = tree.array();
+  Array node = tree;
   return node[0].int() + _sum(node[1]) - _sum(node[2]);
 }
 

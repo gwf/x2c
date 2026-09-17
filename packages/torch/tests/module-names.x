@@ -9,8 +9,8 @@ import "torch" with Tensor, Module;
 
 static void _print(String kind, Module m) {
   printf("%s", kind);
-  foreach (List pair, m.named_parameters()) printf(" %s", pair[0].str());
-  foreach (List pair, m.named_buffers()) printf(" %s", pair[0].str());
+  foreach (List pair, m.named_parameters()) printf(" %s", pair[0]);
+  foreach (List pair, m.named_buffers()) printf(" %s", pair[0]);
   printf("\n");
 }
 

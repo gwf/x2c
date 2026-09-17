@@ -301,7 +301,7 @@ static void iter_immediate_fluent_chains(void) {
   $test.scoped();
   map_call_count = 0;
   List values = range(0, 3, 1)
-    .map(double_value).filter(greater_than_one).list();
+    .map(double_value).filter(greater_than_one);
   EXPECT_INT_EQ(values.len(), 3);
   EXPECT_INT_EQ(values[0].int(), 2);
   EXPECT_INT_EQ(values[1].int(), 4);
@@ -603,7 +603,7 @@ static void iter_scan_and_array_collector(void) {
   EXPECT_INT_EQ(scan_call_count, 3);
 
   struct Iter collect_source_storage;
-  Array values = range(-1, 1, 1, &collect_source_storage).array();
+  Array values = range(-1, 1, 1, &collect_source_storage);
   EXPECT_INT_EQ(values.len(), 3);
   EXPECT_INT_EQ(values[0].int(), -1);
   EXPECT_INT_EQ(values[1].int(), 0);
@@ -612,7 +612,7 @@ static void iter_scan_and_array_collector(void) {
   struct Iter empty_source_storage, empty_scan_storage;
   Iter empty_scan = range(1, 0, 1, &empty_source_storage).scan(
     7, counted_add, &empty_scan_storage);
-  Array empty = empty_scan.array();
+  Array empty = empty_scan;
   EXPECT_INT_EQ(empty.len(), 0);
 
   struct Iter null_source_storage, null_scan_storage;

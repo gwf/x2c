@@ -117,7 +117,7 @@ static void process_live_passes_output_through(void) {
   fflush(stdout);
   dup2(fd, STDOUT_FILENO);
   close(fd);
-  Job captured = %(echo captured).job();
+  Job captured = %(echo captured);
   Job live = %(echo live).job().live();
   try {
     EXPECT_STR_EQ(captured.output(), "captured\n");
@@ -231,7 +231,7 @@ static void process_options_write_files_and_merge(void) {
 
 static void process_changes_after_start_raise(void) {
   $test.scoped();
-  Job job = %(true).job();
+  Job job = %(true);
   job.status();
   int caught = 0;
   try job.options({dir: "/"});
@@ -310,7 +310,7 @@ static void process_jobs_wait_kill_and_clean_up(void) {
   EXPECT_INT_EQ(jobs.len(), 1);
   jobs.pop();
 
-  Job killed = %(sleep 30).job();
+  Job killed = %(sleep 30);
   EXPECT_FALSE(killed.ready());
   killed.start();
   EXPECT_FALSE(killed.ready());

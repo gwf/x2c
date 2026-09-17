@@ -407,15 +407,15 @@ static void thread_join_returns_void_worker_result(void) {
 static void thread_joins_nested_packed_containers(void) {
   Thread thread = Thread.start(_thread_packed_result_worker, NULL, 0);
   Array graph = thread.join();
-  ArrayChar chars = graph[0].arraychar();
-  ArrayShort shorts = graph[1].arrayshort();
-  ArrayInt ints = graph[2].arrayint();
-  ArrayLong longs = graph[3].arraylong();
-  ArrayFloat floats = graph[4].arrayfloat();
-  ArrayDbl doubles = graph[5].arraydbl();
-  MapIntInt integer_map = graph[6].mapintint();
-  MapLongDouble double_map = graph[7].maplongdouble();
-  MapStringString string_map = graph[8].mapstringstring();
+  ArrayChar chars = graph[0];
+  ArrayShort shorts = graph[1];
+  ArrayInt ints = graph[2];
+  ArrayLong longs = graph[3];
+  ArrayFloat floats = graph[4];
+  ArrayDbl doubles = graph[5];
+  MapIntInt integer_map = graph[6];
+  MapLongDouble double_map = graph[7];
+  MapStringString string_map = graph[8];
 
   EXPECT_PTR_EQ(graph[9].arrayint(), ints);
   EXPECT_INT_EQ(chars[0], 4);

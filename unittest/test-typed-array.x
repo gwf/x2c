@@ -171,7 +171,7 @@ static void typed_array_string_family(void) {
   EXPECT_TRUE(boxed is <arraystr>);
   EXPECT_PTR_EQ(boxed.arraystring(), words);
   EXPECT_STR_EQ(boxed[1].string(), "beta");
-  Array ordinary = words.array();
+  Array ordinary = words;
   EXPECT_STR_EQ(ordinary[0].string(), "alpha-one");
 
   int count = 0;
@@ -250,11 +250,11 @@ static void typed_array_common_capabilities_cover_every_family(void) {
   int char_cursor = 0; char char_value = 0;
   EXPECT_TRUE(chars.try_next(&char_cursor, &char_value));
   EXPECT_INT_EQ(char_value, 1);
-  Array char_array = chars.array();
+  Array char_array = chars;
   Buffer char_str = Buffer.new(0), char_repr = Buffer.new(0);
   chars.write_str(char_str); chars.write_repr(char_repr);
   _expect_typed_array_common(
-    chars, later_chars, char_array, chars.str(), chars.repr(),
+    chars, later_chars, char_array, chars, chars.repr(),
     char_str, char_repr, chars.compare(later_chars));
   EXPECT_INT_EQ(char_array[1].char(), 2);
 
@@ -262,11 +262,11 @@ static void typed_array_common_capabilities_cover_every_family(void) {
   int short_cursor = 0; short short_value = 0;
   EXPECT_TRUE(shorts.try_next(&short_cursor, &short_value));
   EXPECT_INT_EQ(short_value, 10);
-  Array short_array = shorts.array();
+  Array short_array = shorts;
   Buffer short_str = Buffer.new(0), short_repr = Buffer.new(0);
   shorts.write_str(short_str); shorts.write_repr(short_repr);
   _expect_typed_array_common(
-    shorts, later_shorts, short_array, shorts.str(), shorts.repr(),
+    shorts, later_shorts, short_array, shorts, shorts.repr(),
     short_str, short_repr, shorts.compare(later_shorts));
   EXPECT_INT_EQ(short_array[1].short(), 20);
 
@@ -274,11 +274,11 @@ static void typed_array_common_capabilities_cover_every_family(void) {
   int int_cursor = 0, int_value = 0;
   EXPECT_TRUE(ints.try_next(&int_cursor, &int_value));
   EXPECT_INT_EQ(int_value, 100);
-  Array int_array = ints.array();
+  Array int_array = ints;
   Buffer int_str = Buffer.new(0), int_repr = Buffer.new(0);
   ints.write_str(int_str); ints.write_repr(int_repr);
   _expect_typed_array_common(
-    ints, later_ints, int_array, ints.str(), ints.repr(),
+    ints, later_ints, int_array, ints, ints.repr(),
     int_str, int_repr, ints.compare(later_ints));
   EXPECT_INT_EQ(int_array[1].integer(), 200);
   int_array[0] = 999;
@@ -289,11 +289,11 @@ static void typed_array_common_capabilities_cover_every_family(void) {
   int long_cursor = 0; long long_value = 0;
   EXPECT_TRUE(longs.try_next(&long_cursor, &long_value));
   EXPECT_TRUE(long_value == 3000000000L);
-  Array long_array = longs.array();
+  Array long_array = longs;
   Buffer long_str = Buffer.new(0), long_repr = Buffer.new(0);
   longs.write_str(long_str); longs.write_repr(long_repr);
   _expect_typed_array_common(
-    longs, later_longs, long_array, longs.str(), longs.repr(),
+    longs, later_longs, long_array, longs, longs.repr(),
     long_str, long_repr, longs.compare(later_longs));
   EXPECT_TRUE(long_array[1].long() == 3000000001L);
 
@@ -301,11 +301,11 @@ static void typed_array_common_capabilities_cover_every_family(void) {
   int float_cursor = 0; float float_value = 0.0f;
   EXPECT_TRUE(floats.try_next(&float_cursor, &float_value));
   EXPECT_TRUE(float_value == 1.5f);
-  Array float_array = floats.array();
+  Array float_array = floats;
   Buffer float_str = Buffer.new(0), float_repr = Buffer.new(0);
   floats.write_str(float_str); floats.write_repr(float_repr);
   _expect_typed_array_common(
-    floats, later_floats, float_array, floats.str(), floats.repr(),
+    floats, later_floats, float_array, floats, floats.repr(),
     float_str, float_repr, floats.compare(later_floats));
   EXPECT_TRUE(float_array[1].float() == 2.5f);
 
@@ -313,11 +313,11 @@ static void typed_array_common_capabilities_cover_every_family(void) {
   int double_cursor = 0; double double_value = 0.0;
   EXPECT_TRUE(doubles.try_next(&double_cursor, &double_value));
   EXPECT_TRUE(double_value == 1.5);
-  Array double_array = doubles.array();
+  Array double_array = doubles;
   Buffer double_str = Buffer.new(0), double_repr = Buffer.new(0);
   doubles.write_str(double_str); doubles.write_repr(double_repr);
   _expect_typed_array_common(
-    doubles, later_doubles, double_array, doubles.str(), doubles.repr(),
+    doubles, later_doubles, double_array, doubles, doubles.repr(),
     double_str, double_repr, doubles.compare(later_doubles));
   EXPECT_TRUE(double_array[1].double() == 2.5);
 
@@ -326,11 +326,11 @@ static void typed_array_common_capabilities_cover_every_family(void) {
   int string_cursor = 0; String string_value = NULL;
   EXPECT_TRUE(strings.try_next(&string_cursor, &string_value));
   EXPECT_STR_EQ(string_value, "alpha");
-  Array string_array = strings.array();
+  Array string_array = strings;
   Buffer string_str = Buffer.new(0), string_repr = Buffer.new(0);
   strings.write_str(string_str); strings.write_repr(string_repr);
   _expect_typed_array_common(
-    strings, later_strings, string_array, strings.str(), strings.repr(),
+    strings, later_strings, string_array, strings, strings.repr(),
     string_str, string_repr, strings.compare(later_strings));
   EXPECT_STR_EQ(string_array[1].string(), "beta");
 }

@@ -116,7 +116,7 @@ static List _program(Options options, ParsedUnit parsed, List records) {
                         "parsing\n", options.input, spelling);
           return NULL;
         }
-        if (!List.equal(_strip_items(erased.list()),
+        if (!List.equal(_strip_items(erased),
                         _strip_items(definition.cadr().list().cdr()))) {
           Stderr.printf("cstar-verify: %s: the body recorded for %s is not "
                         "the body the compiler kept; $cstar.verify must be "
@@ -124,7 +124,7 @@ static List _program(Options options, ParsedUnit parsed, List records) {
           return NULL;
         }
         functions.push(%($spelling $line));
-        adapter.function(record, definition.car().list());
+        adapter.function(record, definition.car());
       }
   if (adapter.failure()) {
     Stderr.printf("cstar-verify: %s\n", adapter.failure());
@@ -147,7 +147,7 @@ static List _program(Options options, ParsedUnit parsed, List records) {
             %"\"${options.input}\");");
   if (adapter.uses_arrays()) text.push("  cstar.load_arrays();");
   foreach (List function, functions)
-    text.push(%"  _verify_${function.car().str()}(cstar);");
+    text.push(%"  _verify_${function.car()}(cstar);");
   text.push("  return cstar.finish();");
   text.push("}");
   return %(${text.join("\n") + "\n"} ${functions.list_free()});
@@ -168,7 +168,7 @@ static List _render(Options options) {
   if (!Lisp.try_get(parsed.compiler.macro_lisp, "cstar.records", &stored))
     Stderr.printf("cstar-verify: %s: no cstar annotations\n", options.input);
   else rendered = _program(options, parsed, stored.list().reverse());
-  if (rendered) rendered = parsed.context.export(rendered).list();
+  if (rendered) rendered = parsed.context.export(rendered);
   parsed.close();
   return rendered;
 }
@@ -276,7 +276,7 @@ static List _conditions(String report) {
 static void _classify(List functions, String file, String report, int status) {
   List conditions = _conditions(report);
   for (List cursor = functions; cursor; cursor = cursor.cdr) {
-    List function = cursor.car.list();
+    List function = cursor.car;
     int first = function.cadr().integer();
     int last = cursor.cdr ? cursor.cdr.car.list().cadr().integer() : 1 << 30;
     Array mine = [];
@@ -289,7 +289,7 @@ static void _classify(List functions, String file, String report, int status) {
                   : status ? "no local verification conditions" : "verified");
     foreach (List condition, mine.list_free())
       Stdout.printf("  %s:%d  %s\n", file, condition.car().integer(),
-                    condition.cadr().str());
+                    condition.cadr());
   }
   if (status)
     Stdout.printf("%s\nRESULT: obligations remain\n", report);
@@ -345,7 +345,7 @@ static int _verify(Options options, String program, List functions) {
     ${options.x2c} build --output $executable
     --build-dir ${directory.join("cc")} --package-dir ${options.packages}
     --x-include-dir ${Path.dirname(options.input)} $source
-  ).job(), 600, &output, &errors);
+  ), 600, &output, &errors);
   if (status) {
     Stderr.printf("cstar-verify: cannot build the proof program; kept %s\n"
                   "%s%s", directory, output ? output : "",
@@ -409,5 +409,5 @@ int main(int argc, char **argv) {
     Stdout.printf("%s", rendered.car().str());
     return 0;
   }
-  return _verify(options, rendered.car().str(), rendered.cadr().list());
+  return _verify(options, rendered.car().str(), rendered.cadr());
 }

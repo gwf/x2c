@@ -12,7 +12,7 @@ static String script(List edits) {
     out.printf("%c%s\n", kind == <same> ? ' ' : kind == <delete> ? '-' : '+',
                line ? line : "");
   }
-  return out.str();
+  return out;
 }
 
 static void diff_lines_finds_a_shortest_script(void) {
@@ -38,7 +38,7 @@ static void diff_lines_replaces_unrelated_texts_past_the_limit(void) {
     old.printf("old %d\n", i);
     new.printf("new %d\n", i);
   }
-  List edits = Diff.lines(old.str(), new.str());
+  List edits = Diff.lines(old, new);
   EXPECT_INT_EQ(edits.len(), 6000);
   EXPECT_TRUE(edits.car().list().car().symbol() == <delete>);
   EXPECT_TRUE(edits[2999].list().car().symbol() == <delete>);
@@ -56,7 +56,7 @@ static void diff_unified_prints_hunks_with_context(void) {
     old.printf("%d\n", i);
     new.printf("%s\n", i == 5 ? "five" : i == 15 ? "fifteen" : %"$i");
   }
-  EXPECT_STR_EQ(Diff.unified(old.str(), new.str(), "a", "b"),
+  EXPECT_STR_EQ(Diff.unified(old, new, "a", "b"),
                 "--- a\n+++ b\n"
                 "@@ -2,7 +2,7 @@\n 2\n 3\n 4\n-5\n+five\n 6\n 7\n 8\n"
                 "@@ -12,7 +12,7 @@\n 12\n 13\n 14\n-15\n+fifteen\n"

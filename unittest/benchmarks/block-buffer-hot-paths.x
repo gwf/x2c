@@ -66,7 +66,7 @@ int main(void) {
     serialize.pos = 0;
     serialize._indent = 0;
     serialize.write("alpha: beta, gamma: delta");
-    String output = serialize.str();
+    String output = serialize;
     sink += output.len();
   }
   result("buffer-serialize", now_ns() - start, serial_count);

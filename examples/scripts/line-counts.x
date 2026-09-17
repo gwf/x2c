@@ -29,7 +29,7 @@ Array lines = [];
 foreach (String count, counts) {
   List fields = count.strip(" \n").split(" ").filter(%!(word) => word);
   String path = fields.cadr().str();
-  lines.push(%"${fields.car().str()} ${path[root.len() + 1:]}");
+  lines.push(%"${fields.car()} ${path[root.len() + 1:]}");
 }
 Path report = root.join("report/lines.txt");
 report.dirname().make_dirs();

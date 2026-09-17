@@ -55,7 +55,7 @@ int main(void) {
     labels[boxed] = "same point";
     Var lookup = Point.new(1, 2);
     assert(boxed == lookup && boxed.hash() == lookup.hash());
-    printf("copy: %d,%d; key: %s\n", copy.x, copy.y, labels[lookup].str());
+    printf("copy: %d,%d; key: %s\n", copy.x, copy.y, labels[lookup]);
   }
   return 0;
 }

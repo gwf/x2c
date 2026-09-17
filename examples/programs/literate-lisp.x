@@ -617,7 +617,7 @@ static Var _substring(String s, int a, int b) => s.getslice(a, b, 1);           
 
 static Var _match_replace(List input, Var pat, Var template) {
   Var result;                                                                   // Dynamic value for the match result.
-  if (!input.try_match_replace(pat, template, &result)) return input.var();     // Match/replace with a success result.
+  if (!input.try_match_replace(pat, template, &result)) return input;           // Match/replace with a success result.
   return result;
 }
 
@@ -969,8 +969,7 @@ int main(int argc, char **argv) {                                               
     try {                                                                       // Structured exception boundary.
       Array args = range(0, argc - 1, 1)                                        // Lazy range iterator.
         .map(%!(int i) using &argv                                              // Typed lambda; capture C pointer.
-          => String.new(argv[i]))                                               // C indexing -> immutable String.
-        .array();                                                               // Materialize the iterator as Array.
+          => String.new(argv[i]));                                              // C indexing -> immutable String.
       Interp self = _interpreter();                                             // Session record returned by value.
       String source;                                                            // Immutable String held by a handle.
       match (args.list()) {                                                     // Chain conversion into matching.
