@@ -10,6 +10,14 @@
 > decide the design; those from 2026-09-18 record what the pass now does.
 > Making the pass general enough to replace the remaining macro Lisp is
 > scoped separately in `plans/comptime-x2c-generalization.md`.
+>
+> This file is the design record and its narrative cites spike files under
+> `.context/spike/`, which were per-worktree working files and are gone. What
+> survives is tracked: the pass in `src/comptime.x` (named `src/lower.x` here),
+> its runtime in `etc/comptime.xlisp` (named `etc/lisp-lower.xlisp` here), the
+> fixtures under `unittest/compiler-fixtures/comptime-*`, and the value-type
+> reference in `plans/reference/`. Read a `.context/spike/` citation as
+> evidence that was taken, not as a file to open.
 
 ## The result
 
@@ -56,7 +64,7 @@ x2c source
   -> Lisp evaluator + word machine  (existing, unchanged)
 ```
 
-Only the middle step is new. The `.context/spike/c-from-ast.xlisp`
+Only the middle step is new. The `plans/reference/lisp-lowering-values.xlisp`
 prototype already performs it for a useful subset, which is how the
 measurements below were obtained.
 
@@ -869,7 +877,7 @@ The smaller declaration slice measures the same way: 0.80s against 0.08s.
 
 ## Reverse mode through the compiled pass
 
-`.context/spike/pass-rev.x` carries the whole of `lib/autodiff.xmacro`'s
+`unittest/compiler-fixtures/comptime-autodiff.x` carries the whole of `lib/autodiff.xmacro`'s
 forward and reverse modes as compile-time x2c: the primitive derivative
 table, the tangent rules, the adjoint rules, the tape, exit codes, the loop
 trip counter and its dispatch, and both decorators. Every derivative it
