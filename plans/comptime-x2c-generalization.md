@@ -281,6 +281,28 @@ are name tables and stay.
 Each port keeps the macro's public surface identical and is verified by the
 suites that already cover it, not by new tests written for the port.
 
+Phase 7 shrank this phase considerably: with `etc/builtin-macros.xlisp` out of
+scope, about 355 lines remain rather than 860, so `lib/var-tags.xmacro` and
+the error and system macros are nearly all of it.
+
+**One construct to know about before starting, scoped 2026-09-18.**
+`var-tags` passes procedures as values: `var.tag.map` and `var.tag.filter`
+each take one. Calling a `Func` held in a parameter does not lower, and
+binding a name for it would not help, because `f(v)` is not a call in the
+AST at all. It expands to a statement-expression that declares a `FuncArg`,
+probes the reference type through `x2c_func_reference_type`, takes the
+address of the argument, and only then reaches `Func.apply` - the whole C
+calling convention, with struct locals and address-of. Reproduce it with
+`Var call1(Func f, Var v) { return f(v); }` under a `$c.show` decorator.
+
+The port does not need it. `var.tag.map` and `var.tag.filter` are `map` and
+`filter`, so write them as `List.map` and `List.filter` with a `%!(Var x) =>`
+lambda, which the pass already lowers because the receiving operation is a
+bound native; `comptime-lowering.x`'s `map` case and the autodiff port's
+`ad_unbind` both do this today, including calling another compile-time
+function from inside the lambda. Take that route rather than teaching the
+pass a calling convention for one caller.
+
 ## Phase 6 - fold the AD port back
 
 Depends on Phases 1-3. Rewrite
