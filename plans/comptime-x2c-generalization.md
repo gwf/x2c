@@ -4,9 +4,9 @@
 >
 > Scoped 2026-09-18 on branch `x2c-lowers-to-lisp` after the autodiff port
 > landed. Phases 0 and 1 are done and merged; Phases 2-4 are the rest of the
-> pass, 5-7 are ports and one investigation. Nothing on this branch reaches `main` without Gary's
-> explicit green light. The design in `plans/x2c-lowers-to-lisp.md` is
-> settled and this plan does not revisit it.
+> pass, 5 and 6 are ports, and 7 is answered. Nothing on this branch reaches
+> `main` without Gary's explicit green light. The design in
+> `plans/x2c-lowers-to-lisp.md` is settled and this plan does not revisit it.
 
 ## The result
 
@@ -50,7 +50,7 @@ Macro Lisp in the repository, measured 2026-09-18 by counting lines inside
 | file | Lisp lines | disposition |
 | --- | --- | --- |
 | `lib/autodiff.xmacro` | 754 | ported (Phase 6 decides whether it replaces the original) |
-| `etc/builtin-macros.xlisp` | 504 | Phase 7 investigates; bootstrap question |
+| `etc/builtin-macros.xlisp` | 504 | stays Lisp; Phase 7 answered it |
 | `lib/var-tags.xmacro` | 295 | Phase 5 |
 | `etc/init.xlisp` | 237 | substrate, stays |
 | `etc/comptime.xlisp` | 121 | name table, stays |
@@ -317,16 +317,124 @@ differentiates, so it is ahead from the first one. The subject carries a
 loop, a primitive call and a division, and both implementations return the
 same gradient to nine decimals: `11.573550919 0.932986487`.
 
-## Phase 7 - the builtin-macros bootstrap question
+## Phase 7 - the builtin-macros bootstrap question (answered)
 
-Independent of the others and investigation-first.
-`etc/builtin-macros.xlisp` is 504 lines and is the macro templating system
-that `$comptime` itself runs on. Its definitions must be live before any user
-macro expands, whereas comptime x2c functions install per unit. Establish
-whether a compile-time function can be installed early enough to serve the
-macro expander, and what would have to hold for that to be safe. The answer
-may be that this file stays Lisp; that is an acceptable outcome and should be
-recorded rather than worked around.
+**`etc/builtin-macros.xlisp` stays Lisp.** Investigated 2026-09-18. The
+mechanism to port it exists and was demonstrated; the ordering does not, and
+buying the ordering costs more than the file is worth. Close this phase.
+
+### What is actually in the file
+
+Not the macro templating system. That is `src/macros.x`, in x2c. This file is
+the Lisp body of three built-in macros declared in `etc/builtin-macros.xmacro`:
+`foreach`, `$scope`, and `class`. Nothing else uses it, and it holds no name
+table, so its lines are all work, unlike `etc/comptime.xlisp`.
+
+| group | definitions | lines |
+| --- | --- | --- |
+| `x2c._foreach.*` | 16 | 173 |
+| `x2c._scope.expand` | 1 | 14 |
+| `x2c._class.*` | 35 | 316 |
+| total | 52 | 503 |
+
+By size: 34 definitions are five lines or fewer (103 lines) and are one
+quasiquote apiece naming an AST shape, such as `x2c._class.ref` or
+`x2c._foreach.assign`; 2 are six to nine lines; 16 are ten or more (387
+lines) and carry the real logic. `x2c._class.defaults` alone is 80 lines.
+The file calls 29 distinct compiler SDK natives and uses `apply` five times.
+
+Usage of what it implements, across the 90 `.x` units in `lib/` and `src/`:
+`foreach` at 684 sites in 51 units, `$scope` at 15 sites, `class` at 4.
+
+### The established order
+
+`_ensure_lisp` in `src/macros.x` creates the unit's Lisp session and
+evaluates five libraries in order - `init`, `lisp-values`, `comptime`,
+`compiler-sdk`, `builtin-macros` - and only then runs the `$lisp.bind` calls
+that install the SDK natives. Every path that expands a macro or evaluates a
+`$(...)` form calls `_ensure_lisp` first, including `_eval_template_form`,
+which is the macro-replacement path. So `builtin-macros.xlisp` is live before
+the unit's first expansion, always and by construction.
+
+Three orderings were probed against `builds/0/x2c` rather than inferred.
+
+- A `$comptime()` install is strictly file-position ordered. Calling the
+  function above its decorator reports `(unbound (name probe_marker))`.
+- An installed compile-time x2c function does drive a `Decorator` macro
+  later in the same unit. A 17-line x2c port of `x2c._scope.expand`, wired to
+  a local `$p7scope` macro, emitted exactly the `Scope_retain` / `defer
+  Scope_release` shape the Lisp original does.
+- A compile-time x2c function can reach a dotted SDK native during a real
+  expansion: `$(def x2c_syntax_type x2c.syntax.type)` plus an x2c prototype
+  made `x2c_syntax_type(place)` resolve and return `(int)` inside a decorator.
+
+So the port mechanism works. What blocks it is where the install can happen.
+
+### The circularity, and which part of it is real
+
+Apparent: a compile-time x2c file does not need its own output to be
+translated. Written without `foreach`, `class` or `$scope` - a constraint one
+500-line file can meet - it parses and types like any other unit, and
+`lower_comptime` reads the ordinary typed AST. There is no self-reference.
+
+Real, in two places that the phase brief did not name.
+
+- **Ordering.** An install is driven by a decorator the parser reaches in
+  source order, so it can only serve expansions after it, in the same unit.
+  To serve `foreach` in every unit the compiler would have to translate a
+  shipped compile-time x2c file itself, at session start. It cannot do that
+  during the library load as `_ensure_lisp` is written, because
+  `x2c.comptime.install` is not bound until after the five libraries are
+  evaluated. Reordering that, plus a sub-translation entry point, is new
+  machinery whose only caller would be this port.
+- **The bootstrap chain.** The checked-in `bin/x2c` has no
+  `etc/comptime.xlisp` and no comptime install at all; run against the
+  probe it reports `(unbound (name x2c.comptime.install))`. It is the binary
+  `make build-safe` uses to translate `src/` and `lib/`, which contain those
+  684 `foreach` sites. Moving `foreach` out of Lisp breaks the chain until a
+  bootstrap refresh lands the capability first, and thereafter every
+  bootstrap binary must carry comptime lowering to compile the runtime at
+  all. That is a permanent coupling, not a one-time transition.
+
+`protect_x2c` in `lib/lisp.x` is a third, smaller wall: once the first
+`x2c.*` native is bound, no source can `def` an `x2c.`-prefixed name, so the
+alias that would point `x2c._foreach.expand` at a ported function has to be
+evaluated inside the privileged library load. Probed: `$(def
+x2c._scope.expand 1)` in a unit reports `bad-state`.
+
+### The cost, measured
+
+Installs are not free and the cost would be per unit. Translating the 1085
+definition lines of `comptime-autodiff.x` takes 451 ms with its 111
+`$comptime()` decorators and 293 ms with them stripped, against 62 ms for a
+trivial unit: 158 ms of install for 111 functions, on top of 231 ms of parse
+and type. A ported `builtin-macros` of 52 functions and about 500 lines would
+add roughly 180 ms to any unit that expands a macro. `src/*.x` is 34 units in
+8.75 s today, so that is about +70% on the compiler's own translation.
+
+A process-level cache of the lowered forms would amortize the parse, type and
+lower across the units in one `x2c` invocation, leaving only the per-session
+`eval`. That is the one mitigation worth knowing about, and it is another
+mechanism with one caller.
+
+### What could still be ported, if anything
+
+Nothing, as things stand. All 52 definitions serve compiler-shipped macros
+that must be live before the unit's first expansion, and none of them is a
+helper that merely happens to live here.
+
+The only boundary with a real argument behind it is `class`: 35 definitions
+and 316 lines, used at 4 sites in `lib/` and `src/`, and never needed by a
+unit that does not write `class`. It could in principle be installed lazily,
+the first time the `class` keyword is seen. That still needs the reordered
+`_ensure_lisp`, the sub-translation entry point, 29 SDK aliases with x2c
+prototypes, and `apply` rewritten as literal templates at its five sites -
+and it pays about 100 ms in every unit that uses `class`. The recommendation
+is no: the machinery does not earn 316 lines.
+
+Reopen this only if a shipped compile-time x2c unit becomes necessary for
+another reason. Then `class` is the first thing to move, `$scope` the second,
+and `foreach` last or never.
 
 ## Handoff
 
@@ -340,9 +448,8 @@ matching. A fork needs no files that this branch does not carry.
 works as is; anything off this machine needs the branch pushed first.
 
 Give each agent one phase. Phase 1 goes first because 5 and 6 depend on it.
-Phases 2, 3 and 4 can run beside it and beside each other; 5, 6 and 7 wait,
-except that 7 is investigation and can start any time. Each agent gets the
-same brief:
+Phases 2, 3 and 4 can run beside it and beside each other; 5 and 6 wait.
+Phase 7 is answered and needs no agent. Each agent gets the same brief:
 
 > You are working on branch `x2c-lowers-to-lisp` in the x2c repository. Read
 > `AGENTS.md`, then `plans/comptime-x2c-generalization.md`, then
