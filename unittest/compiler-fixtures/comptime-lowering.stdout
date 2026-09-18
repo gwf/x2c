@@ -11,8 +11,8 @@ foreach      4
 discard      3
 array-len    3
 array-grow   2
-array-kind   1 1
-convert-kind 1 1
+array-kind   array list
+convert-kind array list
 array-arg    3
 map-symbol   6
 map-string   5

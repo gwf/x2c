@@ -872,14 +872,19 @@ static Var _lower_braced(Lowering l, List type, int id, List items) {
 
 /* A declaration and a return both name a type the value has to reach, and
    neither carries the conversion the transform would insert later. An
-   assignment does carry it, so this sees only the two places that do not. */
+   assignment does carry it, so this sees only the two places that do not.
+   Only the pairs a Lisp value can tell apart need one: a `Symbol` is not a
+   `String`, and an `Array` is not a `List`. */
 static Var _lower_coerce(List want, Var node, Var value) {
   match (node)
     case %(expr ?from ?): {
+      if (want.equal(from)) return value;
       if (want.equal(%("List")) && from.equal(%("Array")))
         return %(Array_list $value);
       if (want.equal(%("Array")) && from.equal(%("List")))
         return %(List_array $value);
+      if (want.equal(%("String")) && from.equal(%("Symbol")))
+        return %(Symbol_str $value);
     }
   return value;
 }

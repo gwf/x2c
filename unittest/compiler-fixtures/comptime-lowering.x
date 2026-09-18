@@ -115,25 +115,19 @@ int ct_array_grow(int n) {
   return (int) xs.len();
 }
 
+/* `Var.tag` answers a `Symbol`, so returning one where a `String` is
+   declared needs the conversion the transform would otherwise insert. */
 $comptime()
-int ct_array_is_array(int n) { Var xs = [n]; return xs.is(<array>); }
+String ct_array_kind(int n) { Array xs = [n]; return Var.tag(xs); }
 
 $comptime()
-int ct_list_is_list(int n) { List ys = [n]; Var v = ys; return v.is(<list>); }
+String ct_list_kind(int n) { List ys = [n]; return Var.tag(ys); }
 
 $comptime()
-int ct_to_array_is_array(List ys) {
-  Array xs = ys;
-  Var v = xs;
-  return v.is(<array>);
-}
+String ct_to_array_kind(List ys) { Array xs = ys; return Var.tag(xs); }
 
 $comptime()
-int ct_to_list_is_list(Array xs) {
-  List ys = xs;
-  Var v = ys;
-  return v.is(<list>);
-}
+String ct_to_list_kind(Array xs) { List ys = xs; return Var.tag(ys); }
 
 /* An array literal in an argument position has no destination to read, so
    lowering it as a Lisp List would hand the callee the wrong container. */
@@ -284,10 +278,9 @@ int main(void) {
   printf("discard      %d\n", $(ct_discard 1));
   printf("array-len    %d\n", $(ct_array_len 1));
   printf("array-grow   %d\n", $(ct_array_grow 1));
-  printf("array-kind   %d %d\n",
-         $(ct_array_is_array 1), $(ct_list_is_list 1));
-  printf("convert-kind %d %d\n", $(ct_to_array_is_array '(1 2)),
-         $(ct_to_list_is_list (List.array '(1 2))));
+  printf("array-kind   %s %s\n", $(ct_array_kind 1), $(ct_list_kind 1));
+  printf("convert-kind %s %s\n", $(ct_to_array_kind '(1 2)),
+         $(ct_to_list_kind (List.array '(1 2))));
   printf("array-arg    %d\n", $(ct_array_argument 1));
   printf("map-symbol   %d\n", $(ct_map_symbol 5));
   printf("map-string   %d\n", $(ct_map_string 4));
