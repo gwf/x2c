@@ -169,6 +169,23 @@ case %(postfix ?operator
 Without that facility, an agent is tempted to match the tag and then resume
 walking the original node by position.
 
+`*` is a sequence binder, never a literal `*`, and a pattern that forgets
+this still matches. Both `*` and `*name` accept zero or more elements, so the
+extra position costs nothing and the case body runs on the wrong node:
+
+- `%(op * ?operand)`, written as a unary deref, matched every `op` form. The
+  binder took `+` and `n`, so `n + 1` lowered to `(C.load 1)`.
+- `%(literal (* char) ?text)`, written as the C string type, also matched a
+  plain `(char)`, so a character literal lowered through the string path.
+
+Each one shipped a plausible-looking result before it was found. Match the
+arity the production really has, then compare the operator or type by value
+in the case body. `_lower_expr` in `src/comptime.x` matches
+`%(op ?operator ?operand)` and asks whether `operator` is `<"*">`. Where a
+pattern cannot separate two forms at all, the comparison moves one level
+down: `_lower_text` reads the literal's opening quote to decide whether the
+spelling is a string or a character code.
+
 ### 3. Which matching form fits each job
 
 Four forms were needed, and treating them as interchangeable would have made
