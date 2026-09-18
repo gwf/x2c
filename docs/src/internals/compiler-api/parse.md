@@ -57,7 +57,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:2038`
+Source: `src/parse.x:2043`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -90,7 +90,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:1972`
+Source: `src/parse.x:1977`
 
 <a id="Compiler.finish_managed_declaration"></a>
 #### Compiler.finish_managed_declaration
@@ -316,9 +316,11 @@ Source: `src/parse.x:454`
 Parses one top-level form and applies its source-ordered compiler effects.
 Returns its AST, or NULL when a keyword definition, top-level Lisp form,
 or linkage brace only updates compiler state, with the first following
-token current.
+token current. A macro import whose `.xmacro` declares `meta` functions
+retains their runtime definitions, which the unit emits where it reaches
+them.
 
-Source: `src/parse.x:1714`
+Source: `src/parse.x:1716`
 
 <a id="Compiler.parse_type_name"></a>
 #### Compiler.parse_type_name

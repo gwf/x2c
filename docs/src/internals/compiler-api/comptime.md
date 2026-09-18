@@ -28,7 +28,7 @@ function is callable from compile-time Lisp under its own name.
 Returns whether the lowering succeeded. This method mutates the macro
 session and does not open a semantic transaction.
 
-Source: `src/comptime.x:1485`
+Source: `src/comptime.x:1493`
 
 <a id="Compiler.lower_comptime"></a>
 #### Compiler.lower_comptime
@@ -41,7 +41,7 @@ The result is the loop definitions the body needed followed by the
 function's own, in evaluation order. This method does not open a
 semantic transaction.
 
-Source: `src/comptime.x:1423`
+Source: `src/comptime.x:1431`
 
 <a id="Compiler.lower_declined"></a>
 #### Compiler.lower_declined
@@ -50,7 +50,7 @@ Source: `src/comptime.x:1423`
 
 Returns why the last `Compiler.lower_comptime` declined, or `NULL`.
 
-Source: `src/comptime.x:1475`
+Source: `src/comptime.x:1483`
 
 ## Design notes
 
