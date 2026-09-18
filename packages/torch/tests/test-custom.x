@@ -99,19 +99,19 @@ static void _device(String device) {
   x.square().sum().backward();
   EXPECT_TRUE(x.grad().allclose(x * 2, 1e-6, 1e-6));
   {
-    Scope.retain();
-    defer Scope.release();
-    Torch.inference_mode();
-    Tensor a = Tensor.ones(%(2), XT_FLOAT32)
-      .to_device(device, XT_FLOAT32, 0, 0);
-    Tensor b = a * 3;
-    Tensor prediction = Tensor.custom(_product, _product_gradient, %($a $b));
-    EXPECT_TRUE(prediction.equal(b));
-    EXPECT_TRUE(!prediction.requires_grad());
-    int rejected = 0;
-    try Tensor.custom(_mutate, _product_gradient, %($x $y));
-    catch %(bad-state (library "torch") *): rejected = 1;
-    EXPECT_TRUE(rejected);
+    $scope() {
+      Torch.inference_mode();
+      Tensor a = Tensor.ones(%(2), XT_FLOAT32)
+        .to_device(device, XT_FLOAT32, 0, 0);
+      Tensor b = a * 3;
+      Tensor prediction = Tensor.custom(_product, _product_gradient, %($a $b));
+      EXPECT_TRUE(prediction.equal(b));
+      EXPECT_TRUE(!prediction.requires_grad());
+      int rejected = 0;
+      try Tensor.custom(_mutate, _product_gradient, %($x $y));
+      catch %(bad-state (library "torch") *): rejected = 1;
+      EXPECT_TRUE(rejected);
+    }
   }
   EXPECT_TRUE(Torch.grad_enabled());
 }

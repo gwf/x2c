@@ -17,33 +17,33 @@ static List _swish_gradient(AutogradContext context, Tensor gradient) {
 }
 
 int main(void) {
-  Scope.retain();
-  defer Scope.release();
-  Torch.manual_seed(7);
-  String device = getenv("TORCH_DEVICE");
-  if (!device) device = "cpu";
-  Module model = Module.composed();
-  model.register("hidden", Module.linear(1, 16));
-  model.register("output", Module.linear(16, 1));
-  model.to_device(device);
-  Optimizer optimizer = Optimizer.adam(model, 0.02);
-  Tensor input = Tensor.arange(-2.0, 2.0, 0.0625, XT_FLOAT32)
-    .reshape(%(64 1)).to_device(device, XT_FLOAT32, 0, 0);
-  Tensor target = input.square();
-  Func forward = _swish, backward = _swish_gradient;
-  double first = 0, last = 0;
-  for (int i = 0; i < 300; i++) {
-    Scope.retain();
-    defer Scope.release();
-    optimizer.zero_grad();
-    Tensor hidden = model.child("hidden").forward(input);
-    Tensor active = Tensor.custom(forward, backward, %($hidden));
-    Tensor loss = Tensor.mse_loss(model.child("output").forward(active), target);
-    loss.backward_callbacks();
-    optimizer.step();
-    last = loss.item().double();
-    if (i == 0) first = last;
+  $scope() {
+    Torch.manual_seed(7);
+    String device = getenv("TORCH_DEVICE");
+    if (!device) device = "cpu";
+    Module model = Module.composed();
+    model.register("hidden", Module.linear(1, 16));
+    model.register("output", Module.linear(16, 1));
+    model.to_device(device);
+    Optimizer optimizer = Optimizer.adam(model, 0.02);
+    Tensor input = Tensor.arange(-2.0, 2.0, 0.0625, XT_FLOAT32)
+      .reshape(%(64 1)).to_device(device, XT_FLOAT32, 0, 0);
+    Tensor target = input.square();
+    Func forward = _swish, backward = _swish_gradient;
+    double first = 0, last = 0;
+    for (int i = 0; i < 300; i++) {
+      Scope.retain();
+      defer Scope.release();
+      optimizer.zero_grad();
+      Tensor hidden = model.child("hidden").forward(input);
+      Tensor active = Tensor.custom(forward, backward, %($hidden));
+      Tensor loss = Tensor.mse_loss(model.child("output").forward(active), target);
+      loss.backward_callbacks();
+      optimizer.step();
+      last = loss.item().double();
+      if (i == 0) first = last;
+    }
+    printf("custom swish on %s: loss %.6f -> %.6f\n", device, first, last);
+    return last < 0.01 ? 0 : 1;
   }
-  printf("custom swish on %s: loss %.6f -> %.6f\n", device, first, last);
-  return last < 0.01 ? 0 : 1;
 }

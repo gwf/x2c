@@ -15,30 +15,30 @@ static void _print_row(String label, Tensor row) {
 }
 
 int main(int argc, char **argv) {
-  Scope.retain();
-  defer Scope.release();
-  String path = argc > 1 ? argv[1] : "builds/scripted.pt";
+  $scope() {
+    String path = argc > 1 ? argv[1] : "builds/scripted.pt";
 
-  JitModule model = JitModule.load(path);
-  model.eval();
+    JitModule model = JitModule.load(path);
+    model.eval();
 
-  /* A fixed batch, so the Python side can reproduce it exactly. */
-  Tensor x = Tensor.arange(0.0, 8.0, 1.0, XT_FLOAT32).reshape(%(2 4)) / 8.0;
+    /* A fixed batch, so the Python side can reproduce it exactly. */
+    Tensor x = Tensor.arange(0.0, 8.0, 1.0, XT_FLOAT32).reshape(%(2 4)) / 8.0;
 
-  Torch.inference_mode();
-  List results = model.forward(%($x));
-  Tensor logits = results[0].tensor();
-  printf("model %s\n", path);
-  printf("input %s\n", x.shape().str());
-  for (long row = 0; row < logits.size(0); row++)
-    _print_row(%"logits $row", logits[row]);
+    Torch.inference_mode();
+    List results = model.forward(%($x));
+    Tensor logits = results[0].tensor();
+    printf("model %s\n", path);
+    printf("input %s\n", x.shape().str());
+    for (long row = 0; row < logits.size(0); row++)
+      _print_row(%"logits $row", logits[row]);
 
-  /* A scripted forward returning a tuple of tensors arrives as a longer
-     List; this one adds the predicted class per row. */
-  JitModule pair = JitModule.load("builds/scripted-pair.pt");
-  pair.eval();
-  List both = pair.forward(%($x));
-  printf("tuple results %d\n", both.len());
-  _print_row("classes", both[1].tensor());
-  return 0;
+    /* A scripted forward returning a tuple of tensors arrives as a longer
+       List; this one adds the predicted class per row. */
+    JitModule pair = JitModule.load("builds/scripted-pair.pt");
+    pair.eval();
+    List both = pair.forward(%($x));
+    printf("tuple results %d\n", both.len());
+    _print_row("classes", both[1].tensor());
+    return 0;
+  }
 }

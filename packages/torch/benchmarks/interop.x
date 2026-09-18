@@ -43,12 +43,12 @@ static Map _artifact(String directory, String name) {
 /* One request. Out-of-place throughout: every step allocates its result,
    which is the behavior being measured. */
 static double _chain(Tensor x, Tensor a, Tensor b, int operations) {
-  Scope.retain();
-  defer Scope.release();
-  Torch.inference_mode();
-  Tensor y = x;
-  for (int i = 0; i < operations; i++) y = (y * a + b).relu();
-  return y.sum().item().double();
+  $scope() {
+    Torch.inference_mode();
+    Tensor y = x;
+    for (int i = 0; i < operations; i++) y = (y * a + b).relu();
+    return y.sum().item().double();
+  }
 }
 
 static Tensor _input(Map values, String prefix, int count) =>
@@ -158,28 +158,28 @@ static void _note_live(void) {
 }
 
 static double _chain_natural(Tensor x, Tensor a, Tensor b, int operations) {
-  Scope.retain();
-  defer Scope.release();
-  Torch.inference_mode();
-  Tensor y = x;
-  for (int i = 0; i < operations; i++) y = (y * a + b).relu();
-  if (interop_observe) _note_live();
-  return y.sum().item().double();
+  $scope() {
+    Torch.inference_mode();
+    Tensor y = x;
+    for (int i = 0; i < operations; i++) y = (y * a + b).relu();
+    if (interop_observe) _note_live();
+    return y.sum().item().double();
+  }
 }
 
 static double _chain_freed(Tensor x, Tensor a, Tensor b, int operations) {
-  Scope.retain();
-  defer Scope.release();
-  Torch.inference_mode();
-  Tensor y = x;
-  for (int i = 0; i < operations; i++) {
-    Tensor next = (y * a + b).relu();
-    /* The first value is the caller's input and is not ours to release. */
-    if (i > 0) (void) y.free();
-    y = next;
+  $scope() {
+    Torch.inference_mode();
+    Tensor y = x;
+    for (int i = 0; i < operations; i++) {
+      Tensor next = (y * a + b).relu();
+      /* The first value is the caller's input and is not ours to release. */
+      if (i > 0) (void) y.free();
+      y = next;
+    }
+    if (interop_observe) _note_live();
+    return y.sum().item().double();
   }
-  if (interop_observe) _note_live();
-  return y.sum().item().double();
 }
 
 static double _chain_subscope(Tensor x, Tensor a, Tensor b, int operations) {
@@ -296,40 +296,40 @@ static int _memory(String artifacts, String out, int profile, int requests) {
 #pragma public
 
 int main(int argc, char **argv) {
-  Scope.retain();
-  defer Scope.release();
-  if (argc < 4) {
-    fprintf(stderr, "usage: interop <check|time|memory> <artifacts> <out>"
-                    " [variant] [count]\n");
+  $scope() {
+    if (argc < 4) {
+      fprintf(stderr, "usage: interop <check|time|memory> <artifacts> <out>"
+                      " [variant] [count]\n");
+      return 2;
+    }
+    const char *threads = getenv("X2C_TORCH_THREADS");
+    Torch.set_num_threads(threads ? atoi(threads) : 1);
+    /* Inter-op threads are fixed before any work, so the only parallelism
+       either language uses is the intra-op pool the runner sets. */
+    Torch.set_num_interop_threads(1);
+    Bench.begin(1024);
+    Bench.record_text("language", "x2c");
+    Bench.record_text("torch_version", Torch.version());
+    Bench.record_text("counters", xb_handles_enabled() ? "on" : "off");
+    Bench.record_int("cfg_artifact_version", ARTIFACT_VERSION);
+    Bench.record_int("threads", Torch.num_threads());
+    Bench.record_int("interop_threads", Torch.num_interop_threads());
+
+    if (argc > 4 && !strcmp(argv[4], "freed")) chain_lifetime = 1;
+    if (argc > 4 && !strcmp(argv[4], "subscope")) chain_lifetime = 2;
+    Bench.record_text("lifetime", chain_lifetime == 1 ? "freed" :
+                      chain_lifetime == 2 ? "subscope" : "natural");
+    String artifacts = String.new(argv[2]), out = String.new(argv[3]);
+    if (!strcmp(argv[1], "check")) return _check(artifacts, out);
+    if (!strcmp(argv[1], "time"))
+      return _time(artifacts, out, chain_lifetime ? "chain" :
+                   String.new(argv[4]), atoi(argv[5]));
+    if (!strcmp(argv[1], "memory"))
+      return _memory(artifacts, out, atoi(argv[4]), atoi(argv[5]));
+    if (!strcmp(argv[1], "attribute"))
+      return _attribute(artifacts, out, atoi(argv[4]), atoi(argv[5]),
+                        argc > 6 ? String.new(argv[6]) : "all");
+    fprintf(stderr, "interop: no mode %s\n", argv[1]);
     return 2;
   }
-  const char *threads = getenv("X2C_TORCH_THREADS");
-  Torch.set_num_threads(threads ? atoi(threads) : 1);
-  /* Inter-op threads are fixed before any work, so the only parallelism
-     either language uses is the intra-op pool the runner sets. */
-  Torch.set_num_interop_threads(1);
-  Bench.begin(1024);
-  Bench.record_text("language", "x2c");
-  Bench.record_text("torch_version", Torch.version());
-  Bench.record_text("counters", xb_handles_enabled() ? "on" : "off");
-  Bench.record_int("cfg_artifact_version", ARTIFACT_VERSION);
-  Bench.record_int("threads", Torch.num_threads());
-  Bench.record_int("interop_threads", Torch.num_interop_threads());
-
-  if (argc > 4 && !strcmp(argv[4], "freed")) chain_lifetime = 1;
-  if (argc > 4 && !strcmp(argv[4], "subscope")) chain_lifetime = 2;
-  Bench.record_text("lifetime", chain_lifetime == 1 ? "freed" :
-                    chain_lifetime == 2 ? "subscope" : "natural");
-  String artifacts = String.new(argv[2]), out = String.new(argv[3]);
-  if (!strcmp(argv[1], "check")) return _check(artifacts, out);
-  if (!strcmp(argv[1], "time"))
-    return _time(artifacts, out, chain_lifetime ? "chain" :
-                 String.new(argv[4]), atoi(argv[5]));
-  if (!strcmp(argv[1], "memory"))
-    return _memory(artifacts, out, atoi(argv[4]), atoi(argv[5]));
-  if (!strcmp(argv[1], "attribute"))
-    return _attribute(artifacts, out, atoi(argv[4]), atoi(argv[5]),
-                      argc > 6 ? String.new(argv[6]) : "all");
-  fprintf(stderr, "interop: no mode %s\n", argv[1]);
-  return 2;
 }

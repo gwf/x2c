@@ -88,20 +88,20 @@ static List _dataset(String root, int train) {
 }
 
 static double _accuracy(Module model, Tensor images, Tensor targets) {
-  Scope.retain();
-  defer Scope.release();
-  Torch.no_grad();
-  model.eval();
-  long total = images.size(0), correct = 0;
-  for (long start = 0; start < total; start += 1000) {
-    Scope.retain();
-    defer Scope.release();
-    long span = total - start < 1000 ? total - start : 1000;
-    correct += model.forward(images.narrow(0, start, span)).argmax(1, 0)
-      .eq(targets.narrow(0, start, span)).sum().item().integer();
+  $scope() {
+    Torch.no_grad();
+    model.eval();
+    long total = images.size(0), correct = 0;
+    for (long start = 0; start < total; start += 1000) {
+      Scope.retain();
+      defer Scope.release();
+      long span = total - start < 1000 ? total - start : 1000;
+      correct += model.forward(images.narrow(0, start, span)).argmax(1, 0)
+        .eq(targets.narrow(0, start, span)).sum().item().integer();
+    }
+    model.train();
+    return (double) correct / (double) total;
   }
-  model.train();
-  return (double) correct / (double) total;
 }
 
 /* One mini-batch, one scope. The final partial batch of an epoch is kept
@@ -196,20 +196,20 @@ static int _check(String artifacts, String out, String root) {
   Bench.record("trained_accuracy",
                _accuracy(trained, test_images, test_targets));
   {
-    Scope.retain();
-    defer Scope.release();
-    /* Everything the checkpoint holds is created in this scope and saved
-       before it closes: a Map outlives a scope, but the Tensor wrappers
-       it refers to do not. `no_grad` rather than inference mode, because
-       the pickler detaches what it writes. */
-    Torch.no_grad();
-    Map final = {};
-    _save_state(trained, final, "final");
-    trained.eval();
-    final["predictions"] =
-      trained.forward(test_images.narrow(0, 0, 2000)).clone();
-    trained.train();
-    Checkpoint.save(final, %"$out/mnist-x2c-final.pt");
+    $scope() {
+      /* Everything the checkpoint holds is created in this scope and saved
+         before it closes: a Map outlives a scope, but the Tensor wrappers
+         it refers to do not. `no_grad` rather than inference mode, because
+         the pickler detaches what it writes. */
+      Torch.no_grad();
+      Map final = {};
+      _save_state(trained, final, "final");
+      trained.eval();
+      final["predictions"] =
+        trained.forward(test_images.narrow(0, 0, 2000)).clone();
+      trained.train();
+      Checkpoint.save(final, %"$out/mnist-x2c-final.pt");
+    }
   }
 
   /* Reload must reproduce the predictions, buffers included. */
@@ -267,10 +267,10 @@ static int _diagnose(String artifacts, String out, String root, int count) {
   Tensor images = train[0].tensor(), targets = train[1].tensor();
   Bench.record("load_seconds", Bench.now() - start);
   {
-    Scope.retain();
-    defer Scope.release();
-    Module warm = _built(artifacts, "mnist-init.pt");
-    _train(warm, Optimizer.adam(warm, LR), images, targets, order, 50, 0);
+    $scope() {
+      Module warm = _built(artifacts, "mnist-init.pt");
+      _train(warm, Optimizer.adam(warm, LR), images, targets, order, 50, 0);
+    }
   }
   start = Bench.now();
   Module model = _built(artifacts, "mnist-init.pt");
@@ -326,21 +326,21 @@ static int _diagnose(String artifacts, String out, String root, int count) {
   restored_adam.load(saved_adam);
   Bench.record("checkpoint_load_seconds", Bench.now() - start);
   {
-    Scope.retain();
-    defer Scope.release();
-    Torch.no_grad();
-    model.eval();
-    restored.eval();
-    Tensor input = images.narrow(0, 0, BATCH);
-    Tensor target = targets.narrow(0, 0, BATCH);
-    double original = Tensor.cross_entropy(model.forward(input), target)
-                        .item().double();
-    double reloaded = Tensor.cross_entropy(restored.forward(input), target)
-                        .item().double();
-    double difference = original - reloaded;
-    Bench.record("diagnostic_reloaded_loss", reloaded);
-    Bench.record("diagnostic_reload_difference",
-                 difference < 0 ? -difference : difference);
+    $scope() {
+      Torch.no_grad();
+      model.eval();
+      restored.eval();
+      Tensor input = images.narrow(0, 0, BATCH);
+      Tensor target = targets.narrow(0, 0, BATCH);
+      double original = Tensor.cross_entropy(model.forward(input), target)
+                          .item().double();
+      double reloaded = Tensor.cross_entropy(restored.forward(input), target)
+                          .item().double();
+      double difference = original - reloaded;
+      Bench.record("diagnostic_reloaded_loss", reloaded);
+      Bench.record("diagnostic_reload_difference",
+                   difference < 0 ? -difference : difference);
+    }
   }
   return 0;
 }
@@ -348,36 +348,36 @@ static int _diagnose(String artifacts, String out, String root, int count) {
 #pragma public
 
 int main(int argc, char **argv) {
-  Scope.retain();
-  defer Scope.release();
-  if (argc < 4) {
-    fprintf(stderr, "usage: mnist <check|time|diagnose|startup> <artifacts> <out>"
-                    " [variant] [batches]\n");
+  $scope() {
+    if (argc < 4) {
+      fprintf(stderr, "usage: mnist <check|time|diagnose|startup> <artifacts> <out>"
+                      " [variant] [batches]\n");
+      return 2;
+    }
+    const char *threads = getenv("X2C_TORCH_THREADS");
+    Torch.set_num_threads(threads ? atoi(threads) : 1);
+    /* Inter-op threads are fixed before any work, so the only parallelism
+       either language uses is the intra-op pool the runner sets. */
+    Torch.set_num_interop_threads(1);
+    Torch.manual_seed(0);
+    Bench.begin(256);
+    Bench.record_text("language", "x2c");
+    Bench.record_text("torch_version", Torch.version());
+    _record_profile();
+    Bench.record_int("threads", Torch.num_threads());
+    Bench.record_int("interop_threads", Torch.num_interop_threads());
+    if (!strcmp(argv[1], "startup")) return 0;
+
+    const char *root = getenv("TORCH_MNIST");
+    String mnist_root = String.new(root ? root : "/tmp/mnist-real");
+    String artifacts = String.new(argv[2]), out = String.new(argv[3]);
+    if (!strcmp(argv[1], "check")) return _check(artifacts, out, mnist_root);
+    if (!strcmp(argv[1], "diagnose"))
+      return _diagnose(artifacts, out, mnist_root, atoi(argv[4]));
+    if (!strcmp(argv[1], "time"))
+      return _time(artifacts, out, mnist_root, String.new(argv[4]),
+                   atoi(argv[5]));
+    fprintf(stderr, "mnist: no mode %s\n", argv[1]);
     return 2;
   }
-  const char *threads = getenv("X2C_TORCH_THREADS");
-  Torch.set_num_threads(threads ? atoi(threads) : 1);
-  /* Inter-op threads are fixed before any work, so the only parallelism
-     either language uses is the intra-op pool the runner sets. */
-  Torch.set_num_interop_threads(1);
-  Torch.manual_seed(0);
-  Bench.begin(256);
-  Bench.record_text("language", "x2c");
-  Bench.record_text("torch_version", Torch.version());
-  _record_profile();
-  Bench.record_int("threads", Torch.num_threads());
-  Bench.record_int("interop_threads", Torch.num_interop_threads());
-  if (!strcmp(argv[1], "startup")) return 0;
-
-  const char *root = getenv("TORCH_MNIST");
-  String mnist_root = String.new(root ? root : "/tmp/mnist-real");
-  String artifacts = String.new(argv[2]), out = String.new(argv[3]);
-  if (!strcmp(argv[1], "check")) return _check(artifacts, out, mnist_root);
-  if (!strcmp(argv[1], "diagnose"))
-    return _diagnose(artifacts, out, mnist_root, atoi(argv[4]));
-  if (!strcmp(argv[1], "time"))
-    return _time(artifacts, out, mnist_root, String.new(argv[4]),
-                 atoi(argv[5]));
-  fprintf(stderr, "mnist: no mode %s\n", argv[1]);
-  return 2;
 }

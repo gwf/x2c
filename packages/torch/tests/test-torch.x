@@ -159,13 +159,13 @@ static void torch_no_grad_is_scoped(void) {
 
   int caught = 0;
   try {
-    Scope.retain();
-    defer Scope.release();
-    Torch.no_grad();
-    EXPECT_FALSE(Torch.grad_enabled());
-    Tensor a = Tensor.ones(%(2 3), XT_FLOAT64);
-    Tensor b = Tensor.ones(%(2 2), XT_FLOAT64);
-    (void) (a @ b);
+    $scope() {
+      Torch.no_grad();
+      EXPECT_FALSE(Torch.grad_enabled());
+      Tensor a = Tensor.ones(%(2 3), XT_FLOAT64);
+      Tensor b = Tensor.ones(%(2 2), XT_FLOAT64);
+      (void) (a @ b);
+    }
   }
   catch %(bad-state (library "torch") *): caught++;
   EXPECT_INT_EQ(caught, 1);
