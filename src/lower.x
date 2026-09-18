@@ -287,18 +287,20 @@ static Var _lower_lambda(Lowering l, List params, List held, Var body) {
   }
   Array shadowed = [];
   defer shadowed.free();
+  Map previous = {};
+  defer previous.cleanup();
   foreach (List pair, saved) {
     Var (id, value) = pair;
-    Var previous = void;
-    l.env.try_get(id, &previous);
-    shadowed.push(%($id $previous));
+    Var was;
+    if (l.env.try_get(id, &was)) previous[id] = was;
+    shadowed.push(id);
     l.env[id] = value;
   }
   Var lowered = _lower_expr(l, body);
-  foreach (List pair, shadowed) {
-    Var (id, previous) = pair;
-    if (previous is void) l.env.del(id);
-    else l.env[id] = previous;
+  foreach (Var id, shadowed) {
+    Var was;
+    if (previous.try_get(id, &was)) l.env[id] = was;
+    else l.env.del(id);
   }
   if (_lower_failed(l, lowered)) return void;
   return %(lambda ${names.list()} $lowered);
@@ -326,7 +328,7 @@ static Var _lower_expr(Lowering l, Var form) {
 
 static Var _lower_content(Lowering l, List type, Var content) {
   match (content) {
-    case %(literal ("Symbol") ? ?(Var symbol)): return %(quote $symbol);
+    case %(literal ("Symbol") ? ?symbol): return %(quote $symbol);
     case %(literal (* char) ?(String text)):
       return _lower_text(text);
     case %(literal ("String") ?(String text)): return text;
