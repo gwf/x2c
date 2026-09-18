@@ -19,6 +19,12 @@
 (defmacro C.or (a b) `(if (C.true? ,a) 1 (if (C.true? ,b) 1 0)))
 (defmacro C.ternary (test a b) `(if (C.true? ,test) ,a ,b))
 
+// A local whose address is taken lives in a one-slot Array, so a call can
+// write through it the way an out-parameter does in C.
+(defun C.cell (v) (let ((box (Array.new))) (begin (Array.push box v) box)))
+(defun C.load (box) (Array.getindex box 0))
+(defun C.store (box v) (Array.setindex box 0 v))
+
 // File-scope state, keyed by binding id. A unit-level initializer is not
 // part of the function, so an unwritten global reads as zero.
 (def C._globals (Map.new))
@@ -50,6 +56,10 @@
 (defun List_equal (a b) (if (equal? a b) 1 0))
 (defun List_contains (xs v) (if (member v xs) 1 0))
 (defun List_map (xs fn) (map fn xs))
+(defun List_try_next (xs cursor out)
+  (let ((rest (C.load cursor)))
+    (if (null? rest) 0
+        (begin (C.store out (car rest)) (C.store cursor (cdr rest)) 1))))
 (defun List_filter (xs fn) (filter fn xs))
 
 (def Array_new Array.new)
@@ -82,6 +92,7 @@
 (def String_join String.join)
 (def String_split String.split)
 (defun String_new (text) text)
+(defun String_equal (a b) (if (equal? a b) 1 0))
 
 (def Symbol_str Symbol.str)
 (def Var_tag Var.tag)
@@ -95,5 +106,6 @@
 (defun double_var (v) v)
 (defun String_var (v) v)
 (defun List_var (v) v)
+(defun Var_list (v) v)
 (defun Array_var (v) v)
 (defun Map_var (v) v)

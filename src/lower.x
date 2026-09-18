@@ -32,7 +32,7 @@ typedef struct Lowering {
   Compiler compiler;
   Map env, locals, cells, arrays;
   Array definitions;
-  int counter, declined, on_loop, rejected, uncallable;
+  int counter, declined, on_loop, in_loop, rejected, uncallable;
 } *Lowering;
 
 /* Why the last lowering declined, for the diagnostic at the invocation. */
@@ -55,10 +55,40 @@ static void _lower_scan_each(Lowering l, List items) {
   foreach (Var item, items) _lower_scan(l, item);
 }
 
+/* A call's result and a cell's contents cannot be substituted, so a local
+   the loop assigns one to would need a binding form on the iteration path.
+   It gets a cell instead, where the assignment is an ordinary effect. The
+   scan runs twice so this sees the cells the first pass found. */
+static int _lower_scan_impure(Lowering l, Var form) {
+  if (form is not <list>) return 0;
+  List items = form;
+  if (!items) return 0;
+  if (items.car() == <call>) return 1;
+  match (items)
+    case %(ident (binding ?(int id) ?)): return l.cells.contains(id);
+  foreach (Var part, items) if (_lower_scan_impure(l, part)) return 1;
+  return 0;
+}
+
 /* Address-of is the one-operand `&`; three operands is bitwise and. */
 static void _lower_scan_op(Lowering l, List form) {
-  match (form)
-    case %(op & (expr ? (ident (binding ?(int id) ?)))): l.cells[id] = 1;
+  match (form) {
+    case %(op & (expr ? (ident (binding ?(int id) ?)))): {
+      l.cells[id] = 1;
+      return;
+    }
+    case %(op ?operator ?target ?value): {
+      if (!l.in_loop || !_lower_scan_impure(l, value)) return;
+      if (operator != <"="> && operator != <"+="> && operator != <"-="> &&
+          operator != <"*="> && operator != <"/=">)
+        return;
+      match (target) {
+        case %(expr ? (ident (binding ?(int id) ?))): l.cells[id] = 1;
+        case %(bind (binding ?(int id) ?) *):         l.cells[id] = 1;
+      }
+      return;
+    }
+  }
 }
 
 static void _lower_scan_bind(Lowering l, List form) {
@@ -102,6 +132,13 @@ static void _lower_scan(Lowering l, Var form) {
   List items = form;
   if (!items) return;
   Var head = items.car();
+  if (head == <while> || head == <for>) {
+    int was = l.in_loop;
+    l.in_loop = 1;
+    _lower_scan_each(l, items);
+    l.in_loop = was;
+    return;
+  }
   if (head == <bind>) _lower_scan_bind(l, items);
   else if (head == <op>) _lower_scan_op(l, items);
   else if (head == <call>) _lower_scan_call(l, items);
@@ -186,6 +223,11 @@ static Var _lower_constant_leaf(Lowering l, List value) {
     case %(expr ?type (literal ? ?(String text))):
       return _lower_number(l, type, text);
   }
+  /* Folding leaves an expression in place when it needs a conversion at run
+     time, as a typed capture in a pattern does. There is no compile-time
+     value to read back, so the caller declines rather than treating the
+     unfolded node as data. */
+  if (value && value.car() == <expr>) return void;
   return value;
 }
 
@@ -207,6 +249,23 @@ static Var _lower_constant(Lowering l, Var node) {
     case %(nil): return %();
   }
   return _lower_constant_leaf(l, node);
+}
+
+/* A local whose address is taken lives in a cell: one box allocated at its
+   declaration, read with `C.load` and written with `C.store`. Taking its
+   address yields the box, so an out-parameter is an ordinary argument. */
+static Var _lower_address(Lowering l, int id) {
+  Var slot;
+  if (!l.env.try_get(id, &slot))
+    return _lower_decline(l, "address of an unknown local");
+  return slot;
+}
+
+/* A folded constant used as a value. */
+static Var _lower_quoted(Lowering l, Var node) {
+  Var value = _lower_constant(l, node);
+  if (value is void) return _lower_decline(l, "a constant did not fold");
+  return %(quote $value);
 }
 
 /* --- expressions -------------------------------------------------------- */
@@ -320,7 +379,7 @@ static Var _lower_expr(Lowering l, Var form) {
     case %(append ?head ?tail):
       return %(append ${_lower_expr(l, head)} ${_lower_expr(l, tail)});
     case %(nil):     return %(quote ());
-    case %(cache ?): return %(quote ${_lower_constant(l, form)});
+    case %(cache ?): return _lower_quoted(l, form);
   }
   return _lower_decline(l, "not an expression");
 }
@@ -345,6 +404,14 @@ static Var _lower_content(Lowering l, List type, Var content) {
     case %(cast ? ?inner):                return _lower_expr(l, inner);
     case %(expr ?inner ?within):          return _lower_content(l, inner, within);
     case %(at ? ?node):                   return _lower_content(l, type, node);
+    case %(op & (expr ? (ident (binding ?(int id) ?)))):
+      return _lower_address(l, id);
+    /* `*` is a sequence binder in a pattern, so a unary deref is matched by
+       arity and then by its operator. */
+    case %(op ?operator ?operand): {
+      if (operator == <"*">) return %(C.load ${_lower_expr(l, operand)});
+      return _lower_operands(l, operator, %($operand));
+    }
     case %(call (expr ? (ident (binding ? ?(String name)))) (args *args)):
       return _lower_call(l, name, args);
     case %(call ?(String name) (args *args)):
@@ -361,7 +428,7 @@ static Var _lower_content(Lowering l, List type, Var content) {
     case %(append ?head ?tail):
       return %(append ${_lower_expr(l, head)} ${_lower_expr(l, tail)});
     case %(nil):     return %(quote ());
-    case %(cache ?): return %(quote ${_lower_constant(l, content)});
+    case %(cache ?): return _lower_quoted(l, content);
   }
   return _lower_decline(l, "unsupported expression");
 }
@@ -422,7 +489,9 @@ static int _lower_pure(Var form) {
   List items = form;
   if (!items) return 1;
   Var head = items.car();
-  if (head == <C.gread> || head == <C.load> || head == <lambda>) return 0;
+  if (head == <C.gread> || head == <C.load> || head == <C.cell> ||
+      head == <lambda>)
+    return 0;
   if (head is <lsym> || head is <symbol>) {
     String spelling = head.str();
     if (spelling && !spelling.startswith("C.") && !spelling.startswith("_") &&
@@ -553,9 +622,29 @@ static Var _lower_branch(
    direct self call, the only shape the evaluator runs in constant space,
    and its exit inlines the rest of the block rather than calling a
    continuation, which would accumulate environment once per loop. */
+/* A cell the body declares is allocated once before the loop runs, so the
+   declaration inside it is a store rather than a binding form. */
+static void _lower_loop_cells(Lowering l, Var form, Array out) {
+  if (form is not <list>) return;
+  List items = form;
+  if (!items) return;
+  match (items)
+    case %(bind (binding ?(int id) ?) *): {
+      if (l.cells.contains(id) && !l.env.contains(id)) {
+        l.env[id] = _lower_name(l, "box");
+        out.push(l.env[id]);
+      }
+      return;
+    }
+  foreach (Var part, items) _lower_loop_cells(l, part, out);
+}
+
 static Var _lower_loop(
   Lowering l, Var test, List body, List rest, List k) {
   Var name = _lower_name(l, "loop");
+  Array boxes = [];
+  defer boxes.free();
+  _lower_loop_cells(l, body, boxes);
   Array ids = [];
   defer ids.free();
   Array slots = [];
@@ -588,17 +677,38 @@ static Var _lower_loop(
   l.definitions.push(
     %(def $name (lambda ${slots.list()} (cond ($guard $iterate)
                                               (true $leave)))));
-  return cons(name, entry.list_free());
+  Var call = cons(name, entry.list_free());
+  if (!boxes.len()) return call;
+  Array empty = [];
+  foreach (Var box, boxes) {
+    (void) box;
+    empty.push(%(C.cell 0));
+  }
+  return %((lambda ${boxes.list()} $call) @{empty.list_free()});
+}
+
+/* A cell local's declaration allocates its box; every other local keeps the
+   value itself. */
+static Var _lower_boxed(Lowering l, int id, Var value) {
+  if (_lower_failed(l, value)) return void;
+  return l.cells.contains(id) ? %(C.cell $value) : value;
 }
 
 static Var _lower_declarator(
   Lowering l, List type, List declarator, List rest, List k) {
   match (declarator) {
-    case %(op = (bind (binding ?(int id) ?) *) ?init):
-      return _lower_bind_value(l, id, _lower_expr(l, init), rest, k);
+    case %(op = (bind (binding ?(int id) ?) *) ?init): {
+      Var value = _lower_expr(l, init);
+      if (l.cells.contains(id) && l.env.contains(id)) {
+        if (_lower_failed(l, value)) return void;
+        return _lower_effect(
+          l, %(C.store ${_lower_address(l, id)} $value), rest, k);
+      }
+      return _lower_bind_value(l, id, _lower_boxed(l, id, value), rest, k);
+    }
     case %(bind (binding ?(int id) ?) *): {
       Var zero = type.match(%((!or double float))) ? 0.0 : 0;
-      return _lower_bind_value(l, id, zero, rest, k);
+      return _lower_bind_value(l, id, _lower_boxed(l, id, zero), rest, k);
     }
   }
   return _lower_decline(l, "unsupported declarator");
@@ -613,11 +723,20 @@ static int _lower_target(Var form) {
 
 static Var _lower_store(
   Lowering l, Var target, Var value, List rest, List k) {
+  match (target)
+    case %(expr ? (op ?operator ?operand)): {
+      if (operator == <"*">) {
+        Var box = _lower_expr(l, operand);
+        if (_lower_failed(l, box) || _lower_failed(l, value)) return void;
+        return _lower_effect(l, %(C.store $box $value), rest, k);
+      }
+    }
   int id = _lower_target(target);
   if (id < 0) return _lower_decline(l, "assignment to a computed place");
-  if (l.cells.contains(id))
-    return _lower_decline(l, "assignment through a cell");
   if (_lower_failed(l, value)) return void;
+  if (l.cells.contains(id))
+    return _lower_effect(
+      l, %(C.store ${_lower_address(l, id)} $value), rest, k);
   if (!l.locals.contains(id))
     return _lower_effect(l, %(C.gwrite $id $value), rest, k);
   return _lower_bind_value(l, id, value, rest, k);
@@ -636,8 +755,11 @@ static Var _lower_update(
   }
   Var current = _lower_read(l, id);
   if (_lower_failed(l, current)) return void;
-  return _lower_bind_value(
-    l, id, %(_binary $current (quote $operator) $right), rest, k);
+  Var combined = %(_binary $current (quote $operator) $right);
+  if (l.cells.contains(id))
+    return _lower_effect(
+      l, %(C.store ${_lower_address(l, id)} $combined), rest, k);
+  return _lower_bind_value(l, id, combined, rest, k);
 }
 
 /* The operator a compound assignment applies, or the zero Symbol. */
@@ -750,7 +872,7 @@ List Compiler.lower_comptime(Compiler compiler, List fn) {
   struct Lowering state = {
     .compiler = compiler, .env = {}, .locals = {}, .cells = {},
     .arrays = {}, .definitions = [], .counter = 0, .declined = 0,
-    .on_loop = 0, .rejected = 0, .uncallable = 0
+    .on_loop = 0, .in_loop = 0, .rejected = 0, .uncallable = 0
   };
   Lowering l = &state;
   match (fn) {
@@ -759,11 +881,11 @@ List Compiler.lower_comptime(Compiler compiler, List fn) {
       (void) spec;
       lower_declined_reason = NULL;
       _lower_scan(l, fn);
+      _lower_scan(l, fn);
       if (l.rejected) lower_declined_reason = "unsupported construct";
       else if (l.uncallable) lower_declined_reason = "callee has no binding";
-      else if (l.cells.len()) lower_declined_reason = "address is taken";
       else if (l.arrays.len()) lower_declined_reason = "declares an array";
-      if (l.rejected || l.uncallable || l.cells.len() || l.arrays.len()) {
+      if (l.rejected || l.uncallable || l.arrays.len()) {
         l.definitions.free();
         return NULL;
       }
