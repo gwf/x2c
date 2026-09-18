@@ -15,7 +15,8 @@
 /** Computes one `Thread` result from a borrowed copy of the start input bytes.
     The input is valid only during the call. The returned value is exported by
     `Thread.join`; an `Error` escaping the callback is reported as
-    `<join-fail>`.
+    `<join-fail>`. A cause the worker's `Error` policy resolves returns to its
+    raise and does not end the callback.
 */
 typedef Var (*ThreadFn)(const void *input, size_t input_size);
 
@@ -57,6 +58,7 @@ struct Thread {
   Pool result_pool;
   Var result;
   Var errors;
+  void *policy;
   int state;
 };
 
@@ -110,11 +112,26 @@ static void _register_shutdown(void) {
   Scope.shutdown_hook(_shutdown);
 }
 
+/* The outermost of the worker's registrations, so a cause the callback did not
+   catch reaches it after `Logger` has had its look. A cause whose policy is
+   `<abort>`, which is every shared non-returning cause and every code no
+   policy names, would reach the error floor and end the process; a worker
+   leaves the callback as `<join-fail>` carrying this snapshot instead. Any
+   other policy resolves the cause and returns to its raise, exactly as it does
+   on the starting thread, so the backstop never sees it. The replacement cause
+   dispatches outward from here, which is the `try` below and nothing else. */
 static Symbol _capture_errors(List errors, Var data) {
   Thread thread = data;
+  if (!errors) return <declined>;
+  Var newest = errors.last();
+  if (newest is not <list>) return <declined>;
+  List entry = newest;
+  Var code = entry.assoc(<code>);
+  if (code is not <symbol>) return <declined>;
+  if (Error.policy_get(code) != <abort>) return <declined>;
   thread.errors = Error.snapshot_in(
     errors, &thread.result_scope, thread.result_pool);
-  return <declined>;
+  raise %(join-fail (owner "Thread callback"));
 }
 
 /* Join owns the sealed result stores after pthread_join succeeds. Release the
@@ -129,11 +146,23 @@ static void _finish_join(Thread thread) {
   __atomic_store_n(&thread.state, THREAD_JOINED, __ATOMIC_SEQ_CST);
 }
 
+/* Records what escaped the callback so `Thread.join` can report `<join-fail>`.
+   `_capture_errors` has already snapshotted the slice unless the transfer
+   began before it was registered. */
+static void _worker_failed(Thread thread, int mark) {
+  if (thread.errors is void)
+    thread.errors = Error.since_in(
+      mark, &thread.result_scope, thread.result_pool);
+  thread.result = void;
+}
+
 static void *_run(void *argument) {
   Thread thread = argument;
   (void) Scope.top();
   Pool.thread_initialize();
   Error.initialize_raw();
+  Error.policy_adopt(thread.policy);
+  thread.policy = NULL;
 
   thread.result_scope = Scope.new_named("Thread result");
   Scope.push(&thread.result_scope);
@@ -147,23 +176,21 @@ static void *_run(void *argument) {
   Context work = Context.open_isolated_named("Thread callback");
   int mark = Error.mark();
   try {
+    ErrorHandler observer = Error.push(_capture_errors, thread);
+    defer Error.pop(observer);
     ErrorHandler logger_handler = Error.push(Logger.error_handler, void);
     defer Error.pop(logger_handler);
-    ErrorHandler observer = Error.push(
-      _capture_errors, thread);
-    defer Error.pop(observer);
     const void *input = thread.input_size ? _input(thread) : NULL;
     Var result = thread.function(input, thread.input_size);
     thread.result = work.export(result);
   }
-  catch: {
-    if (thread.errors is void) {
-      List errors = Error.since_in(
-        mark, &thread.result_scope, thread.result_pool);
-      thread.errors = errors;
-    }
-    thread.result = void;
-  }
+  /* A registered catch is consulted during dispatch, before `Error` reaches
+     its policy table, so a bare `catch:` would match first and no policy could
+     ever resume inside a worker. `_capture_errors` converts the causes that
+     really must leave the callback, so this backstop needs only that cause and
+     the one an `Error.push` failure can raise before the observer exists. */
+  catch %(join-fail *): _worker_failed(thread, mark);
+  catch %(alloc-fail *): _worker_failed(thread, mark);
   work.close();
   thread.result_pool = Pool.detach();
   Scope.pop();
@@ -179,10 +206,12 @@ static void *_run(void *argument) {
     worker. Copied storage has `max_align_t` alignment, so over-aligned input
     types are unsupported. A worker runs on an 8 MiB stack on every platform,
     so library recursion limits are reached the same way on a worker as on the
-    main thread. An attempt that reaches `pthread_create` permanently
-    enables canonical-pool locking; the first successful start also freezes
-    `Var`
-    descriptor registration.
+    main thread. The worker also adopts this thread's `Error` policy, so a
+    cause set to `<ignore>`, `<log>`, or `<collect>` resumes inside the
+    callback as it does here.
+    An attempt that reaches `pthread_create` permanently enables canonical-pool
+    locking; the first successful start also freezes `Var` descriptor
+    registration.
     Raises: `<bad-arg>` for a NULL function or missing nonempty input,
     `<size-limit>` when the handle size or shutdown-hook registry overflows,
     `<alloc-fail>` when the handle or shutdown hook cannot be allocated, or
@@ -194,8 +223,13 @@ Thread Thread.start(ThreadFn function, const void *input, size_t input_size) {
     raise %(bad-arg (owner "Thread.start"));
   size_t input_offset = _input_offset();
   if (input_size > SIZE_MAX - input_offset) raise %(size-limit);
+  void *policy = Error.policy_capture();
   Thread thread = calloc(1, input_offset + input_size);
-  if (!thread) raise %(alloc-fail);
+  if (!thread) {
+    Error.policy_release(policy);
+    raise %(alloc-fail);
+  }
+  thread.policy = policy;
   thread.function = function;
   thread.input_size = input_size;
   thread.result = void;
@@ -203,6 +237,7 @@ Thread Thread.start(ThreadFn function, const void *input, size_t input_size) {
   __atomic_store_n(&thread.state, THREAD_RUNNING, __ATOMIC_SEQ_CST);
   if (input_size) memcpy(_input(thread), input, input_size);
   if (pthread_once(&thread_shutdown_once, _register_shutdown)) {
+    Error.policy_release(thread.policy);
     free(thread);
     fprintf(stderr, "Thread: could not register shutdown\n");
     abort();
@@ -220,6 +255,7 @@ Thread Thread.start(ThreadFn function, const void *input, size_t input_size) {
   pthread_attr_destroy(&attributes);
   if (error) {
     __atomic_fetch_sub(&thread_live_count, 1, __ATOMIC_SEQ_CST);
+    Error.policy_release(thread.policy);
     free(thread);
     _error("pthread_create", error);
   }

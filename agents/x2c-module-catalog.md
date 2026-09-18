@@ -607,7 +607,8 @@ Public functions:
 `Error.trim`, `Error.restore`, `Error.initialize_raw`, `Error.shutdown_raw`,
 `Error.depth`, `Error.count`, `Error.mark`, `Error.snapshot`,
 `Error.snapshot_in`, `Error.since_in`, `Error.since`, `Error.policy_set`,
-`Error.policy_get`, `Error.bound`, `Error.bound_set`, `Error.push`,
+`Error.policy_get`, `Error.policy_capture`, `Error.policy_adopt`,
+`Error.policy_release`, `Error.bound`, `Error.bound_set`, `Error.push`,
 `Error.pop`, `Error.context_open`, `Error.context_close`, `Error.raise`,
 `Error.ready`
 

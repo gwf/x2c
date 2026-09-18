@@ -27,7 +27,10 @@ Handler stack and accumulated errors.
 | [`Error.initialize_raw`](#Error.initialize_raw) | Initializes the current thread's `Error` runtime without lifecycle insertion. |
 | [`Error.mark`](#Error.mark) | Captures the current error-stack position. |
 | [`Error.note_rendered`](#Error.note_rendered) | Marks the current nested error dispatch as already rendered by `Logger`. |
+| [`Error.policy_adopt`](#Error.policy_adopt) | Adopts a policy capture on the calling thread and releases it. |
+| [`Error.policy_capture`](#Error.policy_capture) | Captures the calling thread's `Error` policy for another thread to adopt. |
 | [`Error.policy_get`](#Error.policy_get) | Returns the default disposition for `code`. |
+| [`Error.policy_release`](#Error.policy_release) | Releases a policy capture that no thread adopted. |
 | [`Error.policy_set`](#Error.policy_set) | Sets the default disposition for `code`. |
 | [`Error.pop`](#Error.pop) | Closes the most recently pushed observing handler. |
 | [`Error.push`](#Error.push) | Pushes an observing handler and returns its removal handle. |
@@ -174,7 +177,7 @@ Source: `lib/error.x:291`
 
 Returns the maximum number of errors that may remain accumulated.
 
-Source: `lib/error.x:865`
+Source: `lib/error.x:947`
 
 <a id="Error.bound_set"></a>
 #### Error.bound_set
@@ -184,7 +187,7 @@ Source: `lib/error.x:865`
 Sets the accumulated-error bound when `bound` is positive.
 A zero or negative value leaves the current bound unchanged.
 
-Source: `lib/error.x:873`
+Source: `lib/error.x:955`
 
 <a id="Error.count"></a>
 #### Error.count
@@ -264,6 +267,36 @@ outside dispatch has no effect.
 
 Source: `lib/error.x:276`
 
+<a id="Error.policy_adopt"></a>
+#### Error.policy_adopt
+
+`void Error.policy_adopt(void *capture)`
+
+Adopts a policy capture on the calling thread and releases it.
+Each captured code takes its captured disposition; codes the capture does
+not name keep the disposition this thread already has. A NULL capture, or
+one adopted while `Error` is unavailable, is released without effect.
+Failure to update `Error`-owned storage reaches the non-reentrant error
+floor.
+
+Source: `lib/error.x:924`
+
+<a id="Error.policy_capture"></a>
+#### Error.policy_capture
+
+`void *Error.policy_capture(void)`
+
+Captures the calling thread's `Error` policy for another thread to adopt.
+Policy is per-thread state, so a worker starts with only the shared
+non-returning causes locked to `<abort>`; a capture carries the starting
+thread's dispositions across. `Error.policy_adopt` consumes the capture and
+`Error.policy_release` discards one that no thread adopted. An unavailable
+`Error` runtime captures nothing and answers NULL.
+
+**Raises:** `<alloc-fail>` when the capture cannot be allocated.
+
+Source: `lib/error.x:900`
+
 <a id="Error.policy_get"></a>
 #### Error.policy_get
 
@@ -273,6 +306,16 @@ Returns the default disposition for `code`.
 Unknown codes and an unavailable `Error` runtime default to `<abort>`.
 
 Source: `lib/error.x:851`
+
+<a id="Error.policy_release"></a>
+#### Error.policy_release
+
+`void Error.policy_release(void *capture)`
+
+Releases a policy capture that no thread adopted. A NULL capture is
+accepted and does nothing.
+
+Source: `lib/error.x:944`
 
 <a id="Error.policy_set"></a>
 #### Error.policy_set
@@ -301,7 +344,7 @@ Handles
 must be popped in stack order. An out-of-order pop reaches the
 non-reentrant error floor; a null handle does nothing.
 
-Source: `lib/error.x:987`
+Source: `lib/error.x:1069`
 
 <a id="Error.push"></a>
 #### Error.push
@@ -319,7 +362,7 @@ registering. Raises `<alloc-fail>` if registration storage cannot be
 allocated. `data` is retained by value without copying its referent, so
 any referenced storage must outlive the registration.
 
-Source: `lib/error.x:891`
+Source: `lib/error.x:973`
 
 <a id="Error.raise"></a>
 #### Error.raise
@@ -341,7 +384,7 @@ failure reaches the non-reentrant error floor.
 Prefer the `raise` statement in source so generated location detail is
 retained.
 
-Source: `lib/error.x:1221`
+Source: `lib/error.x:1303`
 
 <a id="Error.ready"></a>
 #### Error.ready
@@ -352,7 +395,7 @@ Reports whether the rich `Error` runtime can currently accept raises.
 This is per-thread state and is false before initialization and after
 shutdown.
 
-Source: `lib/error.x:1233`
+Source: `lib/error.x:1315`
 
 <a id="Error.restore"></a>
 #### Error.restore
@@ -472,7 +515,7 @@ cases handlers pushed inside the `Context` are reclaimed. Tokens must close
 in nesting order; an out-of-order close reaches the raw error floor. A null
 token does nothing and a closed token is invalid.
 
-Source: `lib/error.x:1023`
+Source: `lib/error.x:1105`
 
 <a id="Error.context_open"></a>
 #### Error.context_open
@@ -488,7 +531,7 @@ close. An unavailable `Error` runtime returns NULL.
 
 **Raises:** `<alloc-fail>` when the overlay cannot be allocated.
 
-Source: `lib/error.x:1005`
+Source: `lib/error.x:1087`
 
 <a id="Error.since_in"></a>
 #### Error.since_in

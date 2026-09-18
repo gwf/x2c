@@ -45,7 +45,9 @@ lib/dispatch.x|advanced|RenderPath.enter,RenderPath.leave
 lib/dispatch.x|advanced|x2c_register_tagged_descriptor
 lib/dispatch.x|advanced|Var.str,Var.write_repr
 lib/error.x|advanced|Error.bound,Error.bound_set,Error.count,Error.depth
-lib/error.x|advanced|Error.mark,Error.policy_get,Error.policy_set,Error.pop
+lib/error.x|advanced|Error.mark,Error.policy_adopt,Error.policy_capture
+lib/error.x|advanced|Error.policy_get,Error.policy_release,Error.policy_set
+lib/error.x|advanced|Error.pop
 lib/error.x|advanced|Error.push,Error.raise,Error.ready,Error.since
 lib/error.x|advanced|Error.snapshot
 lib/file.x|advanced|File.equal,File.fdopen,File.gets,File.hash,File.popen
