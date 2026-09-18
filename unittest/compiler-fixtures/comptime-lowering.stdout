@@ -65,6 +65,28 @@ typed-int    42 -1
 typed-nested y none
 typed-mixed  z none
 typed-symbol 1 0
+str-case     Hi
+str-count    2
+str-escape   a\nb
+str-unescape a	b
+str-find-all 2
+str-part     a/=/b ab//
+str-rpart    a=b/=/c //ab
+str-prefix   name name
+str-suffix   unit unit.c
+str-repeat   ababab
+str-rfind    3
+str-lines    one|two
+arr-contains 1
+arr-count    2
+arr-find     1
+arr-unshift  5
+arr-shift    4
+arr-take     4
+arr-remove   5
+arr-insert   5
+map-del      4
+map-default  5
 meta-poly    71 71 71 71
 meta-static  slot:4 slot:4
 meta-ident   3 3
