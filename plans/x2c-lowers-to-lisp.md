@@ -405,6 +405,34 @@ macro was handed rather than an index it invented.
 paying for, but not 10% of every translation plus a shape that every future
 consumer has to remember.
 
+### M3 groundwork - lambdas  (DONE 2026-09-17)
+
+Surveying `autodiff.xmacro` first changed what M3 needs. Its 754 lines of
+Lisp use 65 lambdas, 52 templates, 24 `match-case` and 19 mutable globals.
+Templates and `match` were M2. Lambdas were not supported at all, and at 65
+uses they are the largest single dependency.
+
+Lambdas now lower. An x2c lambda becomes a Lisp lambda, and because the
+environment substitutes a local's expression rather than naming it, a
+captured value is inlined, which is exactly the by-value snapshot x2c gives
+a captured scalar. A lambda inside a call argument never reaches the
+statement lowering, so expression translation marks it `(C.lambda ids
+captures body)` and substitution turns it into the real lambda where the
+environment is in scope.
+
+`.context/spike/lambda-lower.x` runs `xs.map(%!(Var item) => item.integer()
+* by)` at translation time with `by` captured, and all seven spike programs
+still agree with native execution.
+
+Two smaller things this needed. Slot names are now unique within a function
+rather than positional, because a lambda's parameters sit inside the
+enclosing environment and must not shadow it. And eligibility no longer
+rejects every call: it rejects a callee with no compile-time binding, which
+is the case expression translation would raise on.
+
+Still missing before the port: mutable file-scope state, which autodiff
+uses in 19 places to accumulate across invocations.
+
 ### M3 - port `autodiff.xmacro`
 
 Rewrite its roughly 700 lines of Lisp as x2c compile-time functions. This
