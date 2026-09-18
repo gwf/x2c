@@ -220,6 +220,105 @@ on the spelling's own quote and answers a character's code, `'\n'` included.
 Covered by the `character` row in `comptime-lowering.x`, which prints each
 answer beside the same function's run-time answer: `65 65  10 10  1 1`.
 
+## The install cost, and what it costs now (fixed)
+
+Measured 2026-09-18 on branch `meta-install-cost`, after M2. A `.xmacro`
+holding 44 one-line definitions, imported by a unit that calls none of them
+at run time, made an imported `meta` function cost about fifteen times what a
+Lisp `defun` costs, paid by every importing unit. `lib/var-tags.xmacro` has 32
+importers, which is what made Phase 5 of
+`plans/comptime-x2c-generalization.md` a net loss.
+
+**Where the time went.** Split with a sampling profile of one translation of a
+4400-definition import, and confirmed by a hit/miss probe:
+
+- About half is the x2c parse of the declaration and its body.
+- About half is `Compiler.lower_comptime`, dominated by the two `_lower_scan`
+  passes and `_lower_stmnt`.
+- The install itself - evaluating the `def` forms in the session - is about
+  1%. It was never the cost, despite the milestone's name.
+
+Each importing unit pays this **twice**: the collection pass and the full
+parse each read the import and each parse and lower every definition. Only the
+collection pass discards the syntax it produced.
+
+**What a process can share.** `make build` translates a stage in one
+`x2c translate` process, and `translate` defaults to one job, so one process
+sees every unit; `x2c build` forks one worker per unit, where the same cache
+still removes the second pass. Nothing was shared before this: `c.imports` is
+per unit, and its entry records only whether an import contributed `meta`
+definitions, which is what makes the second pass read the file again.
+
+**What is safe to share.** The lowering reads the unit through exactly two
+things. `_lower_constant` dereferences a `(cache id)` into the literal's
+value, so no unit-relative id survives into the forms. `_lower_known` asks the
+unit's Lisp session whether a callee is bound, which is the one input that can
+differ; the names it resolved are recorded with the entry and rechecked on
+reuse, so a unit whose session lacks one lowers again and reports the same
+refusal. Generated names are safe: `lower_counter` already runs across the
+process and only advances, so a name minted for a cached entry is never minted
+again.
+
+**The fix.** `src/comptime.x` keeps a process cache of lowered forms, keyed by
+the file and the name the author wrote, in the idiom `src/collect.x` already
+uses for its process cache: a `Scope` with a shutdown hook, and `try_own` to
+promote each retained entry past every per-unit `Context`. A lowering holding
+a wide numeric leaf - what a literal too large for an `int` produces - is not
+retained, because its box belongs to the unit's `Scope` and promotion to the
+value pools does not reach it.
+
+**Result**, before and after, as the minimum of interleaved runs of the two
+compilers on one host. The one-unit column is the wall time `x2c translate`
+reports; the 32-unit column is CPU time for one process translating 32 units
+that import the same file. The host was busy, so read the differences between
+rows rather than the absolute numbers: with the same runs, a row that should
+not move moved by 2 to 5 ms.
+
+| the import holds | 1 unit | 32 units |
+| --- | --- | --- |
+| nothing | 61 -> 59 ms | 1119 -> 1124 ms |
+| 44 Lisp `defun`s | 66 -> 68 ms | 1175 -> 1180 ms |
+| 44 `meta static` | 91 -> 86 ms | 1905 -> 1559 ms |
+
+Per declaration per importing unit, across the 32 units: 0.56 ms before,
+0.31 ms after, against 0.04 ms for a Lisp `defun`. A 44-function `var-tags`
+port over its 32 importers costs about 0.44 s of translation instead of
+0.79 s. One unit gains little, because only its second pass can hit a cache
+the first pass just filled; the gain is across units, which is where a build
+spends the time.
+
+What is left is the parse, still done twice per unit. Removing the second one
+means the collection pass not parsing `meta` bodies, and the collection pass
+is where the install has to happen for a macro expanded during collection.
+That is a separate change and was not attempted here.
+
+## `foreach` in a macro import (fixed)
+
+A `meta` function in a `.xmacro` could not iterate a concrete collection:
+`foreach` over a `List` reported "type (\"List\") is not iterable", while the
+same body in a `.x` unit worked. The cause is not a missing shared field.
+`_shallow_parse_loop` opens with `c.rebuild_protocols(NULL)` and
+`c.conforms = {}`, because the collection pass parses no bodies and needs no
+conformances - except that a `meta` definition in an import is the one body it
+does parse, and `foreach` reaches a collection's `iter` member through the
+conformance registry. A unit's own `meta` function is unaffected because
+collection skips its body and installs it only during the full parse.
+
+The import now installs the protocols and adoptions visible to it into its
+own compiler, the first time `Compiler.protocol_members_for` is asked for a
+member, and that call resolves the one adoption it needs. The caller's
+registries are left alone, since the full parse rebuilds and resolves them
+anyway. The first arrangement tried resolved every visible adoption instead of
+the one asked for, and cost a third of a translation - more than the whole
+feature - so both halves are on demand. `List`, `Array` and `Map` all iterate
+now; `meta-import-defs.xmacro` covers the `List` case.
+
+A `Var` collection still declines, with "no binding for Iter_try_next". That
+is not a missing entry in `etc/comptime.xlisp`: the `Var` branch of `foreach`
+expands to `Iter iterator = Var_iter(collection, &storage)` and a
+`Iter_try_next(iterator, &item)` loop, and neither `Var_iter` nor `Iter` has a
+compile-time representation. Deciding one is its own change.
+
 ## M3 - the pipeline position
 
 **Do not build this.** Scouted 2026-09-18 on branch `meta-m3-pipeline` with a

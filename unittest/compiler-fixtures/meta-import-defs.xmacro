@@ -27,6 +27,18 @@ meta static String mi_accessor(String path) =>
 
 meta static int mi_depth(String path) => path.split(".").len();
 
+/* A `foreach` over a `List`, which is the loop a macro body writes, and the
+   collection pass parses this body although it parses no other. The lowering
+   turns the loop into a session global of its own, and a unit installs the
+   definition once while collecting and once while parsing, the second time
+   from the lowering the first one cached, so the two columns `$probe.score`
+   prints disagree if a reused lowering is not the same program. */
+meta static int mi_score(String path) {
+  int score = 0;
+  foreach (Var part, path.split(".")) score = score + String.len(part);
+  return score;
+}
+
 /* Only `$probe.tag` calls this one, and a macro call is a compile-time use,
    so no unit emits a runtime definition for it. */
 meta static String mi_tag(String path) => %"<${path.replace(".", "/")}>";
@@ -41,6 +53,10 @@ macro Expression $probe.accessor(Expr $path) => (
 
 macro Expression $probe.depth(Expr $path) => (
   $(x2c.literal.int (mi_depth (x2c.source.text $path)))
+)
+
+macro Expression $probe.score(Expr $path) => (
+  $(x2c.literal.int (mi_score (x2c.source.text $path)))
 )
 
 macro Expression $probe.tag(Expr $path) => (

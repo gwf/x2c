@@ -451,21 +451,48 @@ autodiff win is real but specific: it comes from the generated Lisp being
 better than the hand-written Lisp there - `match` compiled once instead of
 `match-case` re-expanded per call - not from x2c being faster than Lisp.
 
-Installing costs about 0.45 ms per meta function per importing unit, and
-about 2.5 ms when the function contains a loop, because each loop becomes its
-own lowered global. A Lisp `defun` costs about 0.02 ms.
+**The declaration cost was more than halved on 2026-09-18**, and the number
+above is superseded. The cost was never the install: it was parsing each
+definition and lowering it again in every importing unit, in both of that
+unit's passes. `src/comptime.x` now keeps the lowered forms for the process,
+so a file's function lowers once however many units import it.
+`plans/meta-functions.md` records the split, what makes the forms safe to
+share, and the measurements.
 
-Applied to the two candidates:
+Declaring one meta function in an importing unit costs about 0.31 ms, down
+from 0.56 ms, against 0.04 ms for a Lisp `defun`. Applied to the two
+candidates:
 
-- `lib/var-tags.xmacro`: 44 functions, imported by 32 units. About 630 ms
-  added to a full build, against accessor bodies that show no per-call win.
+- `lib/var-tags.xmacro`: 44 functions, imported by 32 units. About 0.44 s
+  added to a full build, down from 0.79 s, against accessor bodies that show
+  no per-call win.
 - `lib/system-macros.xlisp`: 22 functions, imported by 9 units, for two
-  `$dedent` call sites.
+  `$dedent` call sites. About 0.06 s.
 
-Both are slower after porting. The autodiff-shaped win needs a body whose
-Lisp was doing something expensive and a unit count low enough that install
-does not dominate; neither candidate has that shape. Decide whether
-readability is worth the time before scheduling this phase.
+Both are still slower after porting, and the case for either is still
+readability. What changed is the size of the bill: `var-tags` now costs about
+0.4 s rather than 0.8 s. The autodiff-shaped win needs a
+body whose Lisp was doing something expensive; neither candidate has that
+shape. Decide whether readability is worth the time before scheduling this
+phase.
+
+One blocker on the idiom is gone too: a `meta` function in a `.xmacro` can
+now `foreach` over a `List`, `Array` or `Map`. It could not before, because
+the collection pass parses a `meta` body with its protocol registries empty;
+`plans/meta-functions.md` records the fix. A `Var` collection still declines,
+so write the concrete type.
+
+### A compound assignment of a call result in a loop (open)
+
+Found 2026-09-18 while writing a `foreach` body for the meta-import fixture,
+and reproduced on the revision before that day's work, so it predates it.
+Inside a compile-time loop, `score += String.len(part)` answers
+`(no-member (tag array) (member add))` at compile time, while
+`score = score + String.len(part)` answers correctly. A loop-assigned local
+that takes a call result gets a cell, and the compound form appears to add to
+the cell rather than to its contents. Reproduce with a `$comptime()` function
+whose `foreach` body accumulates any call's result with `+=`. Nothing here
+depends on it; write the long form until it is fixed.
 
 ### Original scope, for when it is unblocked
 

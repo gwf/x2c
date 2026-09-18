@@ -16,6 +16,8 @@ static String mi_accessor(String path);
 
 static int mi_depth(String path);
 
+static int mi_score(String path);
+
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
@@ -39,6 +41,7 @@ int main(void){
   printf("constant %s %s\n", _3, mi_constant(_4));
   printf("accessor %s %s\n", _5, mi_accessor(_6));
   printf("depth    %d %d\n", 3, mi_depth(_7));
+  printf("score    %d %d\n", 11, mi_score(_4));
   printf("dashed   %s %s\n", _8, mi_dashed(_4));
   printf("tag      %s\n", _9);
   return 0;
@@ -77,5 +80,27 @@ int List_len(List);
 
 static int mi_depth(String path){
   return List_len(String_split(path, _10));
+}
+
+int List_try_next(List, List *, Var *);
+
+int String_len(String);
+
+String Var_string(Var);
+
+static int mi_score(String path){
+  int score = 0;
+  {
+    Var part;
+    List _x2c_macro_object_1 = String_split(path, _10);
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+      part = _x2c_macro_cursor_output_1;
+      score = score + String_len(Var_string(part));
+    }
+
+  }
+  return score;
 }
 
