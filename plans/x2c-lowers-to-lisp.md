@@ -500,9 +500,43 @@ of M0 through M2. The port needed one further lowering feature as well: a
 value that cannot be substituted is now bound with a real lambda when it is
 off a loop's iteration path, and declined on it.
 
+**Two further slices ported.** `.context/spike/autodiff-slice2.x` has the
+syntax-rewriting helpers, including a recursive walk that strips binding
+records from a copied subtree. `.context/spike/autodiff-slice3.x` has the
+forward-mode statement walker: `ad_fwd_item`, `ad_fwd_items` and
+`ad_fwd_body`, mutually recursive, producing a correct forward-mode body
+from a real one. Twenty-six functions are ported in all, every one lowers
+directly, and every one computes what its Lisp original computes.
+
+Nine more lowering defects surfaced across these two slices, none of them
+visible in constructed examples:
+
+- a Symbol literal was translated as a number, so every operator in a
+  template came out as `0`;
+- a cached leaf holding a cached `List` was returned unexpanded;
+- a cached `String` holds its value, not its spelling, and was unquoted
+  twice;
+- an empty `()` template element was returned as its node;
+- a zero-argument call carries one void placeholder argument;
+- a `String` literal constructs through `String_new` with a bare string
+  callee rather than a binding;
+- a folded `String` wraps that constructor call in the cache;
+- a spliced element builds an `append` node, which was unhandled;
+- the truth test was numeric only, so a nil `List` read as true. It now
+  inlines the numeric comparison when the static type is numeric and asks
+  for x2c truth otherwise.
+
+Execution speed is unchanged: 100,000 loop iterations still cost about
+0.36 s. The whole-run number grew only because the spike itself is bigger
+to translate.
+
+Two x2c facts the port depended on, recorded because they are easy to get
+wrong: a `match` arm takes exactly one statement, so several need braces,
+and `List` has no `concat` — splicing two lists into `%(@a @b)` is the
+idiom, which builds the `append` node above.
+
 Remaining for a complete port: reverse mode, the primitive derivative
-table, the statement walkers, and the two decorators, which together are
-roughly ten times the slice.
+table, the `for` and update walkers, and the two decorators.
 
 Rewrite its roughly 700 lines of Lisp as x2c compile-time functions. This
 is the measurement that decides whether the whole direction pays: report
