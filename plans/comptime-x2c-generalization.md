@@ -79,7 +79,7 @@ general case.
 ## Working agreement
 
 Every phase happens on a branch off `x2c-lowers-to-lisp` and merges back into
-it, never into `main`. Phases 1-4 all edit `src/lower.x`, so each names the
+it, never into `main`. Phases 1-4 all edit `src/comptime.x`, so each names the
 functions it owns; an agent that needs to change a function another phase
 owns says so in its branch rather than editing it silently.
 

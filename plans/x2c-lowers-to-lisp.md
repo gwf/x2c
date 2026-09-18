@@ -2,8 +2,8 @@
 
 > Status: active
 >
-> Design decided and built. `src/lower.x` is the compiled pass and
-> `etc/lisp-lower.xlisp` its runtime; the whole of `lib/autodiff.xmacro`'s
+> Design decided and built. `src/comptime.x` is the compiled pass and
+> `etc/comptime.xlisp` its runtime; the whole of `lib/autodiff.xmacro`'s
 > forward and reverse modes is ported and exact. Work happens on the isolated
 > branch `x2c-lowers-to-lisp` and does not reach `main` without Gary's
 > explicit green light. Measurements from 2026-09-17 against `82bd746b`
