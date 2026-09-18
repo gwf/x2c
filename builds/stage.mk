@@ -88,7 +88,7 @@ X2C_TRANSLATE_DEPS = $(X2C_COMPILER) $(LIB_X_FILES) \
 	$(wildcard $(ROOT)/etc/init.xlisp $(ROOT)/etc/compiler-sdk.xlisp \
 		$(ROOT)/etc/builtin-macros.xlisp \
 		$(ROOT)/etc/lisp-bindings.xlisp \
-		$(ROOT)/etc/lisp-values.xlisp $(ROOT)/etc/lisp-lower.xlisp) \
+		$(ROOT)/etc/lisp-values.xlisp $(ROOT)/etc/comptime.xlisp) \
 	$(wildcard $(LIB_SOURCE)/*.xlisp) \
 	$(wildcard $(LIB_SOURCE)/*.xmacro) $(wildcard $(BIN_SOURCE)/*.xmacro)
 LIB_MISSING_GENERATED = $(filter-out \

@@ -1,4 +1,4 @@
-/*  lower.x -- lowering a compile-time function to Lisp
+/*  comptime.x -- translating a compile-time x2c function into Lisp
 
     Copyright (c) 2026 Gary William Flake.
 
@@ -106,7 +106,7 @@ static void _lower_scan_bind(Lowering l, List form) {
 }
 
 /* A callee is reachable when the macro session already binds its name: a
-   native from `etc/lisp-lower.xlisp`, or a function this pass installed. The
+   native from `etc/comptime.xlisp`, or a function this pass installed. The
    function being lowered is reachable from itself, because the definition
    binds its name before anything calls it. */
 static int _lower_known(Lowering l, String name) {

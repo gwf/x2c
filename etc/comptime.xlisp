@@ -1,6 +1,6 @@
-// Runtime for lowered compile-time functions.
-// Load etc/init.xlisp and etc/lisp-values.xlisp first. The compiler loads
-// this into every compile-time Lisp session.
+// The runtime a compile-time x2c function calls once `src/comptime.x` has
+// translated it to Lisp. Load etc/init.xlisp and etc/lisp-values.xlisp
+// first; the compiler loads this into every compile-time Lisp session.
 //
 // A lowered function is ordinary Lisp: its locals are lambda parameters and
 // its calls are direct. These are the few operations it still needs, plus

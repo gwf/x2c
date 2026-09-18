@@ -12,7 +12,7 @@ $(import "../src/ast-rewrite.xmacro")
 #pragma private
 #include "expressions.x"
 #include "literals.x"
-#include "lower.x"
+#include "comptime.x"
 #include "parse.x"
 #include "statements.x"
 #include "utils.x"
@@ -932,7 +932,7 @@ static void _ensure_lisp(Compiler compiler) {
       _, loaded, "etc/lisp-values.xlisp",
       "cannot open the compile-time value operations");
     _eval_library(
-      _, loaded, "etc/lisp-lower.xlisp",
+      _, loaded, "etc/comptime.xlisp",
       "cannot open the compile-time function runtime");
     _eval_library(
       _, loaded, "etc/compiler-sdk.xlisp",
