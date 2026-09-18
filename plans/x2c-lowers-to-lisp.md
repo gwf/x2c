@@ -535,8 +535,39 @@ wrong: a `match` arm takes exactly one statement, so several need braces,
 and `List` has no `concat` — splicing two lists into `%(@a @b)` is the
 idiom, which builds the `append` node above.
 
-Remaining for a complete port: reverse mode, the primitive derivative
-table, the `for` and update walkers, and the two decorators.
+**Forward mode is fully ported and works end to end.**
+`.context/spike/autodiff-fwd.x` holds thirty compile-time x2c functions
+that generate a derivative function, which then compiles to C and runs:
+`square_dot(3) = 7.0` and `poly_dot(2) = 17.0`, both correct.
+
+### Size and speed against the original
+
+Same work, same two derivatives, measured against `lib/autodiff.xmacro`.
+
+**Size: the port is larger.** 236 lines of x2c against 191 lines of Lisp
+for the equivalent functions, plus one `$comptime()` marker each. About 24%
+more.
+
+**Speed: the port is far slower to translate.**
+
+| | translate |
+|---|---|
+| original, `$ad.forward()` | 241 ms |
+| port, `$c.derive()` | 79 s |
+
+That is 330x. Splitting it says where it goes:
+
+| | translate |
+|---|---|
+| parse the thirty functions, lower nothing | 154 ms |
+| lower them, derive nothing | 76.7 s |
+| lower them and derive | 79.0 s |
+
+So 97% of the cost is the lowering pass itself, not the generated code and
+not the derivation. The lowering is interpreted Lisp walking ASTs, which is
+the inefficiency this plan exists to remove; it is prototype cost rather
+than a property of the approach. It does mean the prototype cannot be used
+on real code until the pass is compiled.
 
 Rewrite its roughly 700 lines of Lisp as x2c compile-time functions. This
 is the measurement that decides whether the whole direction pays: report
