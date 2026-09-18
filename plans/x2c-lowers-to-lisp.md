@@ -583,9 +583,27 @@ free. Before it, five derivations cost 7.4 s more than zero derivations;
 after it, five cost 0.1 s more. The handwritten Lisp calls its helpers
 directly, so the lowering had been paying a search the original never pays.
 
-What remains is 2.9 s against the original's 241 ms, and all of it is the
-one-time lowering: 756 ms scanning and about 1.9 s lowering thirty
-functions. Running the lowered algorithm is no longer measurable.
+What remains is a fixed cost, and measuring the slope rather than one
+point changes the conclusion. Deriving n functions in one unit:
+
+| derivations | original | port |
+|---|---|---|
+| 0 | 93 ms | 2.89 s |
+| 5 | 646 ms | 2.95 s |
+| 20 | 2.07 s | 3.29 s |
+| 50 | 5.00 s | 3.90 s |
+
+**Per derivation the port is about 20 ms and the original about 98 ms**, so
+the ported algorithm runs roughly five times faster than the Lisp it
+replaces. The port carries a 2.89 s fixed cost for lowering its thirty
+functions once, against 93 ms to load the `.xmacro`, and the two cross at
+about 36 derivations in a unit.
+
+The reason the port is faster is the same `match-case` cost measured above,
+from the other side: `autodiff.xmacro` uses `match-case` throughout, so it
+re-expands a macro on every call, while the lowering emits a direct
+`(match subject 'pattern)` against the native matcher. Lowering from x2c
+produced Lisp that avoids a trap the handwritten Lisp falls into.
 
 **The first cause was `match-case`, and it is not specific to this
 prototype.**
