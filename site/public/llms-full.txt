@@ -876,6 +876,9 @@ int main(void) {
 }
 ```
 
+The report runs from a `defer`, so decorating a whole function body still
+reports when that body returns or a cause transfers out of it.
+
 ## A complete resource-using program
 
 This program collects line lengths from a file. The retained region owns all
@@ -2110,6 +2113,12 @@ int main(void) { return total(%(1 2 3), 10) == 16 ? 0 : 1; }
 
 An expression body works the same way. A decorator written this way before a
 declaration that is not a function definition is rejected.
+
+Block items the production places *after* the captured target are ordinary
+statements, so a body that returns or that a cause transfers out of never
+reaches them. A decorator with work to do once the body is finished puts that
+work in a `defer` written before the target; `$scope`, `$lock`, and `$time`
+are all written this way.
 
 A `.x` file may give a visible macro or decorator an identifier spelling:
 

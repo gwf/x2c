@@ -506,6 +506,9 @@ int main(void) {
 }
 ```
 
+The report runs from a `defer`, so decorating a whole function body still
+reports when that body returns or a cause transfers out of it.
+
 ## A complete resource-using program
 
 This program collects line lengths from a file. The retained region owns all

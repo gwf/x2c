@@ -991,6 +991,12 @@ $scope() static int total(List values, int bias) {
 An expression body works the same way. A decorator written this way before a
 declaration that is not a function definition is rejected.
 
+Block items the production places *after* the captured target are ordinary
+statements, so a body that returns or that a cause transfers out of never
+reaches them. A decorator with work to do once the body is finished puts that
+work in a `defer` written before the target; `$scope`, `$lock`, and `$time`
+are all written this way.
+
 A `.x` file may give a visible macro or decorator an identifier spelling:
 
 ```text
