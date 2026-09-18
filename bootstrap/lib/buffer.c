@@ -5,6 +5,8 @@
 #include "error.h"
 
 #include "exception.h"
+
+#include "exception.h"
 #include "scope.h"
 #include "string.h"
 #include <limits.h>

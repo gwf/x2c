@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 static String _0;
 
 #include <string.h>

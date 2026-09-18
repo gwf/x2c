@@ -29,6 +29,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 static List _13, _11, _9, _7, _6, _1;
 
 static Var _12, _10, _8, _5, _4, _3, _2, _0;

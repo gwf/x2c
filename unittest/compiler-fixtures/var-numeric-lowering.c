@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 static int base_calls;
 
 static int index_calls;

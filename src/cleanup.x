@@ -599,12 +599,14 @@ static Var _rewrite(Walk walk, Var value) {
   match (node) case %(expr *): return value;
   match (node) {
     case %(defer ?body ?env ?callback ?records ?): {
+      walk.compiler.needs_exception = 1;
       List record = _region_binding(walk.compiler, "defer_record");
       List cleanup = _defer_cleanup(record);
       return %(defer ${_inside(walk, cleanup, body, body)} $env $callback
                $records $record $cleanup);
     }
     case %(try ?body ?clause ?finalizer): {
+      walk.compiler.needs_exception = 1;
       List frame = _region_binding(walk.compiler, "exception_frame");
       List handle = clause
         ? _region_binding(walk.compiler, "error_handler") : NULL;

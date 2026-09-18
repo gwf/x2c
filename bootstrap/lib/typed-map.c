@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 static String _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;

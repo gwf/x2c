@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 static void boom(void);
 
 static void boom(void){

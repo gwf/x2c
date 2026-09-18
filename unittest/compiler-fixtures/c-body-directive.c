@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 static List _3, _2;
 
 static Var _1, _0;

@@ -8,6 +8,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 #include "context.h"
 #include "dispatch.h"
 #include "error.h"

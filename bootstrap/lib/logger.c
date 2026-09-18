@@ -20,6 +20,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 static String _3, _2, _1, _0;
 
 #include <assert.h>

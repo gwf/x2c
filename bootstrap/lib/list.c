@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 #include "symbol.h"
 #include "atom.h"
 #include "block.h"

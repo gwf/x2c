@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 void Error_initialize(void);
 
 Var Symbol_var(Symbol);

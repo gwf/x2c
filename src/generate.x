@@ -927,7 +927,11 @@ static List _primary_include(Compiler compiler, List content) {
   List include = _include_directive(hname);
   List error = ast_contains_head(content, <raise>)
              ? _include_directive("error.h") : NULL;
-  return %( @header @include @error @content );
+  /* A cleanup region spells `X2CCleanup` and its push and leave calls, which
+     `exception.x` declares. */
+  List exception = compiler.needs_exception
+                 ? _include_directive("exception.h") : NULL;
+  return %( @header @include @error @exception @content );
 }
 
 // source finalization

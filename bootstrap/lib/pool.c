@@ -44,6 +44,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 #include <stdint.h>
 #include <pthread.h>
 #include <stdio.h>

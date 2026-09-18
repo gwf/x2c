@@ -127,6 +127,8 @@ typedef struct Compiler {
   int in_pattern, match_is, runtime_literals, inline_header;
   int builtin_defs, in_proto, macro_count, recovery_depth;
   int declaration_projection, declaration_produced;
+  // Set when a cleanup region needs the exception runtime declarations.
+  int needs_exception;
   int local_macro_capture_scopes;
   String fn_name, Diagnostics diagnostics, Array braces, import_stack;
   // The unit's script record, and the same record on the compiler whose own

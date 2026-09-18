@@ -2,6 +2,8 @@
 
 #include "tokenizer.h"
 
+#include "exception.h"
+
 static String _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 #include "exception.h"

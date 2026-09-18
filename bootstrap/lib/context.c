@@ -8,6 +8,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 #include "array.h"
 #include "atom.h"
 #include "block.h"

@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 typedef struct ErrorRegion{
   Scope values;
   Pool lists;

@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
