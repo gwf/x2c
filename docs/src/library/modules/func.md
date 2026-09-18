@@ -36,7 +36,7 @@ compiler-generated adapters establish both facts.
 would
 discard a qualifier. It does not return on failure.
 
-Source: `lib/func.x:220`
+Source: `lib/func.x:223`
 
 #### x2c_func_value_argument
 
@@ -53,8 +53,11 @@ compiler-generated adapters establish both facts.
 a reference, and
 `<alloc-fail>`, `<bad-enc>`, `<bad-target>`, `<conv-range>`, or
 `<no-convert>` from a numeric conversion. The result has tag `want`.
+A detail names the argument's tag rather than the argument: any tag may
+arrive here, and an identity-bearing detail value terminates at the error
+floor instead of reaching the handler that would report it.
 
-Source: `lib/func.x:162`
+Source: `lib/func.x:165`
 
 ### `Func`
 
@@ -78,7 +81,7 @@ argument, `<alloc-fail>` or `<size-limit>` while packing rest arguments,
 adapter or native target. The result has the ownership of the value the
 adapter returned.
 
-Source: `lib/func.x:360`
+Source: `lib/func.x:363`
 
 <a id="Func.context"></a>
 #### Func.context
@@ -92,7 +95,7 @@ when the binding has no context.
 
 **Raises:** `<bad-arg>` for a null binding. It does not return on failure.
 
-Source: `lib/func.x:341`
+Source: `lib/func.x:344`
 
 <a id="Func.new"></a>
 #### Func.new
@@ -109,7 +112,7 @@ parameter count and types.
 **Raises:** `<bad-sig>` for a null adapter or a malformed signature, and
 `<alloc-fail>` when binding storage cannot be allocated.
 
-Source: `lib/func.x:302`
+Source: `lib/func.x:305`
 
 <a id="Func.new_context"></a>
 #### Func.new_context
@@ -127,7 +130,7 @@ borrowed for the `Func` lifetime.
 the allocation size overflows, `<bad-sig>` for a null adapter or malformed
 signature, or `<alloc-fail>` when storage cannot be allocated. None return.
 
-Source: `lib/func.x:330`
+Source: `lib/func.x:333`
 
 <a id="Func.new_rest"></a>
 #### Func.new_rest
@@ -147,7 +150,7 @@ The result belongs to the current `Scope`.
 signature whose parameters are anything but one `List`, and `<alloc-fail>`
 when binding storage cannot be allocated.
 
-Source: `lib/func.x:317`
+Source: `lib/func.x:320`
 
 <a id="Func.var"></a>
 #### Func.var
@@ -158,7 +161,7 @@ Boxes `function` without copying or retaining the `Func`.
 The returned `Var` carries the same pointer and shares its `Scope`
 lifetime.
 
-Source: `lib/func.x:395`
+Source: `lib/func.x:398`
 
 ### `FuncArg`
 
@@ -219,7 +222,7 @@ Rejects a value argument whose source type has no `Var` representation.
 Generated calls use this branch instead of compiling an impossible
 conversion. Raises: `<bad-types>`.
 
-Source: `lib/func.x:239`
+Source: `lib/func.x:242`
 
 ## Public types
 
