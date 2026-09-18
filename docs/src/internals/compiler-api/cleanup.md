@@ -28,7 +28,7 @@ top-level unit whose `defer` and `try` forms are final; the pass rewrites
 transfers, so it runs once, after the transform driver reaches its fixed
 point.
 
-Source: `src/cleanup.x:733`
+Source: `src/cleanup.x:757`
 
 <a id="Compiler.static_value_is_runtime"></a>
 #### Compiler.static_value_is_runtime

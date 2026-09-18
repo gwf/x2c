@@ -925,13 +925,7 @@ static Var _capture_replace(Var input, MatchCaptureLayout layout, MatchCaptureBu
 }
 
 static Var _apply_capture_template(MatchCaptureLayout layout, MatchCaptureBuffer * captures, Var template){
-  if(Var_is_row(template, 9, 7, 4)) return _capture_replace(template, layout, captures);
-  if(_named_binder(template)){
-    Var value =((void) 0, Void);
-    _capture_lookup(layout, captures, template, & value);
-    return value;
-  }
-  return template;
+  return _capture_replace(template, layout, captures);
 }
 
 int List_try_match_replace(List input, Var pat, Var template, Var * out){
@@ -1689,7 +1683,7 @@ Var String_var(String);
 _Noreturn static void _raise_ineligible(const char * reason, const char * owner){
   String fence = String_new(reason), site = String_new(owner);
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match.x",.function = "_raise_ineligible",.line = 1677};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match.x",.function = "_raise_ineligible",.line = 1674};
     x2c_error_raise_n(& _x2c_error_site_0, 1358596898646632, 2, Symbol_var(32993636), String_var(site), Symbol_var(12939466), String_var(fence));
     __builtin_unreachable();
   }
@@ -2032,12 +2026,12 @@ void Scope_pop(void);
 MatchCache MatchCache_new(int capacity){
   if(! _init_guard_) _file_init_();
   if(capacity <= 0){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/match.x",.function = "MatchCache_new",.line = 2059};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/match.x",.function = "MatchCache_new",.line = 2056};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL))), Symbol_var(209381969202), int_var(capacity));
     __builtin_unreachable();
   }
   if(capacity >(INT_MAX - 1) / 2){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/match.x",.function = "MatchCache_new",.line = 2061};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/match.x",.function = "MatchCache_new",.line = 2058};
     x2c_error_raise_n(& _x2c_error_site_2, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL))), Symbol_var(209381969202), int_var(capacity));
     __builtin_unreachable();
   }
@@ -2223,14 +2217,14 @@ static MatchPlan _lease_plan(MatchLease * lease){
 void MatchLease_release(MatchLease * lease){
   if(! _init_guard_) _file_init_();
   if(! lease){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2252};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2249};
     x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
     __builtin_unreachable();
   }
   if(! lease -> active) return;
   if(lease -> transient_plan){
     if(! lease -> cache || lease -> cache -> active_leases <= 0){
-      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2256};
+      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2253};
       x2c_error_raise_n(& _x2c_error_site_4, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
       __builtin_unreachable();
     }
@@ -2242,7 +2236,7 @@ void MatchLease_release(MatchLease * lease){
   }
   MatchCacheEntry * entry = _lease_entry(lease);
   if(! entry || lease -> cache -> active_leases <= 0 || entry -> pin_count <= 0){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2266};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2263};
     x2c_error_raise_n(& _x2c_error_site_5, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
     __builtin_unreachable();
   }
@@ -2257,7 +2251,7 @@ void MatchCache_dispose(MatchCache cache){
   if(! _init_guard_) _file_init_();
   if(! cache) return;
   if(cache -> active_leases){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/match.x",.function = "MatchCache_dispose",.line = 2282};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/match.x",.function = "MatchCache_dispose",.line = 2279};
     x2c_error_raise_n(& _x2c_error_site_6, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.dispose")), NULL))));
     __builtin_unreachable();
   }
@@ -2375,7 +2369,7 @@ void MatchCache_context_close(void * token){
   MatchContextState state = token;
   if(! state) return;
   if(_thread() -> context_top != state){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/match.x",.function = "MatchCache_context_close",.line = 2472};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/match.x",.function = "MatchCache_context_close",.line = 2469};
     x2c_error_raise_n(& _x2c_error_site_7, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.context_close")), NULL))));
     __builtin_unreachable();
   }

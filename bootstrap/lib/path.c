@@ -587,7 +587,7 @@ void Path_copy_file(Path source, Path target){
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
     struct stat info, existing;
-    File_stat(input, & info);
+    if(File_stat(input, & info)) File_path_error(String_var(_12), source, errno);
     if(! stat(target, & existing) && existing.st_dev == info.st_dev && existing.st_ino == info.st_ino){
       x2c_cleanup_leave(& _x2c_defer_record_1);
       return;

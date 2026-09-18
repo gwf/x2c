@@ -280,48 +280,54 @@ typedef struct _x2c_defer_env_0{
 _x2c_defer_env_0;
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 typedef struct _x2c_defer_env_1{
   const void * _x2c_defer_capture_4;
 }
 _x2c_defer_env_1;
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 typedef struct _x2c_defer_env_2{
   const void * _x2c_defer_capture_5;
 }
 _x2c_defer_env_2;
-static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
+static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
 typedef struct _x2c_defer_env_3{
   const void * _x2c_defer_capture_6;
 }
 _x2c_defer_env_3;
-static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
+static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
 typedef struct _x2c_defer_env_4{
   const void * _x2c_defer_capture_7;
 }
 _x2c_defer_env_4;
-static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5);
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6);
 typedef struct _x2c_defer_env_5{
   const void * _x2c_defer_capture_8;
 }
 _x2c_defer_env_5;
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7);
+static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8);
 typedef struct _x2c_defer_env_6{
   const void * _x2c_defer_capture_9;
 }
 _x2c_defer_env_6;
-static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8);
+static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9);
 typedef struct _x2c_defer_env_7{
   const void * _x2c_defer_capture_10;
 }
 _x2c_defer_env_7;
-static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9);
+static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10);
 typedef struct _x2c_defer_env_8{
   const void * _x2c_defer_capture_11;
 }
 _x2c_defer_env_8;
-static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10);
 static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11);
+typedef struct _x2c_defer_env_9{
+  const void * _x2c_defer_capture_12;
+}
+_x2c_defer_env_9;
+static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12);
+static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13);
 void Pool_thread_start(void){
   if(! _init_guard_) Pool_initialize();  pool_multithreaded = 1;
 }
@@ -489,17 +495,31 @@ void * Scope_malloc_in(Scope *, size_t);
 void Scope_push(Scope *);
 Map Map_new_capacity(unsigned);
 Pool Pool_retain_named(Pool inner, const char * name){
-  if(! _init_guard_) Pool_initialize();  _storage_lock();  _storage_initialize();  _storage_unlock();  unsigned capacity = 2;  if(inner){
+  if(! _init_guard_) Pool_initialize(); {
+    _storage_lock(); {
+
+  X2CCleanup _x2c_defer_record_0 = {
+    .fn = _x2c_defer_cleanup_1,
+    .env = NULL
+  };
+  x2c_cleanup_push(&_x2c_defer_record_0);
+  {
+      _storage_initialize();
+    }
+    x2c_cleanup_leave(& _x2c_defer_record_0);
+}
+  }
+  unsigned capacity = 2;  if(inner){
     _lock(inner);  capacity = inner -> child_capacity;  _unlock(inner);
   }
   Scope scope = Scope_new_named(name);  Pool pool = NULL;  int mutex_ready = 0, finished = 0; {
-  _x2c_defer_env_0 _x2c_defer_env_9 = {._x2c_defer_capture_0 =(const void *) & finished, ._x2c_defer_capture_1 =(const void *) & mutex_ready, ._x2c_defer_capture_2 =(const void *) & pool, ._x2c_defer_capture_3 =(const void *) & scope};
+  _x2c_defer_env_0 _x2c_defer_env_10 = {._x2c_defer_capture_0 =(const void *) & finished, ._x2c_defer_capture_1 =(const void *) & mutex_ready, ._x2c_defer_capture_2 =(const void *) & pool, ._x2c_defer_capture_3 =(const void *) & scope};
 
-  X2CCleanup _x2c_defer_record_0 = {
+  X2CCleanup _x2c_defer_record_1 = {
     .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_9
+    .env = & _x2c_defer_env_10
   };
-  x2c_cleanup_push(&_x2c_defer_record_0);
+  x2c_cleanup_push(&_x2c_defer_record_1);
   {
     pool = Scope_malloc_in(& scope, sizeof(struct Pool));
     pthread_mutexattr_t attributes;
@@ -516,18 +536,18 @@ Pool Pool_retain_named(Pool inner, const char * name){
       {
         {
 
-  X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_1,
+  X2CCleanup _x2c_defer_record_2 = {
+    .fn = _x2c_defer_cleanup_2,
     .env = NULL
   };
-  x2c_cleanup_push(&_x2c_defer_record_1);
+  x2c_cleanup_push(&_x2c_defer_record_2);
   {
           {
             table = Map_new_capacity(capacity);
           }
 
         }
-        x2c_cleanup_leave(& _x2c_defer_record_1);
+        x2c_cleanup_leave(& _x2c_defer_record_2);
 
 }
       }
@@ -544,14 +564,14 @@ Pool Pool_retain_named(Pool inner, const char * name){
     {
       Pool _x2c_return_value_0 = pool;
       {
-        x2c_cleanup_leave(& _x2c_defer_record_0);
+        x2c_cleanup_leave(& _x2c_defer_record_1);
         return _x2c_return_value_0;
       }
 
     }
 
   }
-  x2c_cleanup_leave(& _x2c_defer_record_0);
+  x2c_cleanup_leave(& _x2c_defer_record_1);
 
 }
 }
@@ -637,7 +657,7 @@ Var String_var(String);
 void Pool_close(void){
   if(! _init_guard_) Pool_initialize();
   if(! Pool_current() -> up){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/pool.x",.function = "Pool_close",.line = 615};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/pool.x",.function = "Pool_close",.line = 617};
     x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.close")), NULL))));
     __builtin_unreachable();
   }
@@ -648,7 +668,7 @@ Pool Pool_detach(void){
   if(! _init_guard_) Pool_initialize();
   Pool detached = Pool_current();
   if(! detached -> up){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/pool.x",.function = "Pool_detach",.line = 628};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/pool.x",.function = "Pool_detach",.line = 630};
     x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.detach")), NULL))));
     __builtin_unreachable();
   }
@@ -667,13 +687,45 @@ int Var_is_void(Var);
 
 Var Pool_lookup(Pool inner, Var key){
   if(! _init_guard_) Pool_initialize();
-  for(Pool pool = inner;  pool;  pool = pool -> up){
-    _lock(pool);
-    Var found = Map_getindex(pool -> table, key);
-    _unlock(pool);
-    if(! Var_is_void(found)) return found;
+  Pool locked = NULL;
+  {
+  _x2c_defer_env_1 _x2c_defer_env_11 = {._x2c_defer_capture_4 =(const void *) & locked};
+
+  X2CCleanup _x2c_defer_record_3 = {
+    .fn = _x2c_defer_cleanup_3,
+    .env = & _x2c_defer_env_11
+  };
+  x2c_cleanup_push(&_x2c_defer_record_3);
+  {
+    for(Pool pool = inner;  pool;  pool = pool -> up){
+      _lock(pool);
+      locked = pool;
+      Var found = Map_getindex(pool -> table, key);
+      _unlock(pool);
+      locked = NULL;
+      if(! Var_is_void(found)){
+        Var _x2c_return_value_1 = found;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_3);
+          return _x2c_return_value_1;
+        }
+
+      }
+
+    }
+    {
+      Var _x2c_return_value_2 =((void) 0, Void);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_3);
+        return _x2c_return_value_2;
+      }
+
+    }
+
   }
-  return((void) 0, Void);
+  x2c_cleanup_leave(& _x2c_defer_record_3);
+
+}
 }
 
 Var Map_setindex(Map, Var, Var);
@@ -686,23 +738,23 @@ static void _insert_locked(Pool inner, Var object){
 void Pool_insert(Pool inner, Var object){
   if(! _init_guard_) Pool_initialize();
   if(! inner){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/pool.x",.function = "Pool_insert",.line = 666};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/pool.x",.function = "Pool_insert",.line = 677};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.insert")), NULL))));
     __builtin_unreachable();
   }
   _lock(inner);
   {
-  _x2c_defer_env_1 _x2c_defer_env_10 = {._x2c_defer_capture_4 =(const void *) & inner};
+  _x2c_defer_env_2 _x2c_defer_env_12 = {._x2c_defer_capture_5 =(const void *) & inner};
 
-  X2CCleanup _x2c_defer_record_2 = {
-    .fn = _x2c_defer_cleanup_2,
-    .env = & _x2c_defer_env_10
+  X2CCleanup _x2c_defer_record_4 = {
+    .fn = _x2c_defer_cleanup_4,
+    .env = & _x2c_defer_env_12
   };
-  x2c_cleanup_push(&_x2c_defer_record_2);
+  x2c_cleanup_push(&_x2c_defer_record_4);
   {
     _insert_locked(inner, object);
   }
-  x2c_cleanup_leave(& _x2c_defer_record_2);
+  x2c_cleanup_leave(& _x2c_defer_record_4);
 
 }
 }
@@ -714,7 +766,7 @@ Var Map_setdefault(Map, Var, Var);
 Var Pool_intern(Pool inner, Var object, void * alloc){
   if(! _init_guard_) Pool_initialize();
   if(! inner || ! alloc){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/pool.x",.function = "Pool_intern",.line = 686};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/pool.x",.function = "Pool_intern",.line = 697};
     x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.intern")), NULL))));
     __builtin_unreachable();
   }
@@ -723,13 +775,13 @@ Var Pool_intern(Pool inner, Var object, void * alloc){
   {
     _lock(inner);
     {
-  _x2c_defer_env_2 _x2c_defer_env_11 = {._x2c_defer_capture_5 =(const void *) & inner};
+  _x2c_defer_env_3 _x2c_defer_env_13 = {._x2c_defer_capture_6 =(const void *) & inner};
 
-  X2CCleanup _x2c_defer_record_3 = {
-    .fn = _x2c_defer_cleanup_3,
-    .env = & _x2c_defer_env_11
+  X2CCleanup _x2c_defer_record_5 = {
+    .fn = _x2c_defer_cleanup_5,
+    .env = & _x2c_defer_env_13
   };
-  x2c_cleanup_push(&_x2c_defer_record_3);
+  x2c_cleanup_push(&_x2c_defer_record_5);
   {
       Var existing = Pool_lookup(inner -> up, object);
       if(! Var_is_void(existing)){
@@ -745,7 +797,7 @@ Var Pool_intern(Pool inner, Var object, void * alloc){
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_3);
+    x2c_cleanup_leave(& _x2c_defer_record_5);
 
 }
   }
@@ -756,7 +808,7 @@ Var Pool_intern(Pool inner, Var object, void * alloc){
 void * Pool_malloc(Pool inner, size_t size){
   if(! _init_guard_) Pool_initialize();
   if(! inner){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/pool.x",.function = "Pool_malloc",.line = 720};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/pool.x",.function = "Pool_malloc",.line = 731};
     x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.malloc")), NULL))));
     __builtin_unreachable();
   }
@@ -784,7 +836,7 @@ void * Pool_malloc(Pool inner, size_t size){
       fresh = malloc(bytes);
       if(! fresh){
         if(x2c_error_runtime_ready){
-          static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/pool.x",.function = "Pool_malloc",.line = 745};
+          static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/pool.x",.function = "Pool_malloc",.line = 756};
           x2c_error_raise_n(& _x2c_error_site_5, 97614135954008, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool backing block")), NULL))));
           __builtin_unreachable();
         }
@@ -800,25 +852,25 @@ void * Pool_malloc(Pool inner, size_t size){
   _storage_unlock();
   _lock(inner);
   {
-  _x2c_defer_env_3 _x2c_defer_env_12 = {._x2c_defer_capture_6 =(const void *) & inner};
+  _x2c_defer_env_4 _x2c_defer_env_14 = {._x2c_defer_capture_7 =(const void *) & inner};
 
-  X2CCleanup _x2c_defer_record_4 = {
-    .fn = _x2c_defer_cleanup_4,
-    .env = & _x2c_defer_env_12
+  X2CCleanup _x2c_defer_record_6 = {
+    .fn = _x2c_defer_cleanup_6,
+    .env = & _x2c_defer_env_14
   };
-  x2c_cleanup_push(&_x2c_defer_record_4);
+  x2c_cleanup_push(&_x2c_defer_record_6);
   {
     {
-      void * _x2c_return_value_1 = Scope_malloc_in(& inner -> scope, size);
+      void * _x2c_return_value_3 = Scope_malloc_in(& inner -> scope, size);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_4);
-        return _x2c_return_value_1;
+        x2c_cleanup_leave(& _x2c_defer_record_6);
+        return _x2c_return_value_3;
       }
 
     }
 
   }
-  x2c_cleanup_leave(& _x2c_defer_record_4);
+  x2c_cleanup_leave(& _x2c_defer_record_6);
 
 }
 }
@@ -829,47 +881,47 @@ void Pool_free(Pool inner, void * alloc){
   if(! _init_guard_) Pool_initialize();
   if(! alloc) return;
   if(! inner){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/pool.x",.function = "Pool_free",.line = 768};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/pool.x",.function = "Pool_free",.line = 779};
     x2c_error_raise_n(& _x2c_error_site_6, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Pool.free")), NULL))));
     __builtin_unreachable();
   }
   _storage_lock();
   {
 
-  X2CCleanup _x2c_defer_record_5 = {
-    .fn = _x2c_defer_cleanup_6,
+  X2CCleanup _x2c_defer_record_7 = {
+    .fn = _x2c_defer_cleanup_8,
     .env = NULL
   };
-  x2c_cleanup_push(&_x2c_defer_record_5);
+  x2c_cleanup_push(&_x2c_defer_record_7);
   {
     _lock(inner);
     {
-  _x2c_defer_env_4 _x2c_defer_env_13 = {._x2c_defer_capture_7 =(const void *) & inner};
+  _x2c_defer_env_5 _x2c_defer_env_15 = {._x2c_defer_capture_8 =(const void *) & inner};
 
-  X2CCleanup _x2c_defer_record_6 = {
-    .fn = _x2c_defer_cleanup_5,
-    .env = & _x2c_defer_env_13
+  X2CCleanup _x2c_defer_record_8 = {
+    .fn = _x2c_defer_cleanup_7,
+    .env = & _x2c_defer_env_15
   };
-  x2c_cleanup_push(&_x2c_defer_record_6);
+  x2c_cleanup_push(&_x2c_defer_record_8);
   {
       PoolBlock block = _find_registered_block(alloc);
       pool_free_calls ++;
       if(block){
         _small_free(block, alloc);
         {
-          x2c_cleanup_leave(& _x2c_defer_record_6);
-          x2c_cleanup_leave(& _x2c_defer_record_5);
+          x2c_cleanup_leave(& _x2c_defer_record_8);
+          x2c_cleanup_leave(& _x2c_defer_record_7);
           return;
         }
 
       }
       Scope_free(alloc);
     }
-    x2c_cleanup_leave(& _x2c_defer_record_6);
+    x2c_cleanup_leave(& _x2c_defer_record_8);
 
 }
   }
-  x2c_cleanup_leave(& _x2c_defer_record_5);
+  x2c_cleanup_leave(& _x2c_defer_record_7);
 
 }
 }
@@ -884,25 +936,25 @@ int Pool_owns(Pool pool, Var key){
   if(! pool) return 0;
   _lock(pool);
   {
-  _x2c_defer_env_5 _x2c_defer_env_14 = {._x2c_defer_capture_8 =(const void *) & pool};
+  _x2c_defer_env_6 _x2c_defer_env_16 = {._x2c_defer_capture_9 =(const void *) & pool};
 
-  X2CCleanup _x2c_defer_record_7 = {
-    .fn = _x2c_defer_cleanup_7,
-    .env = & _x2c_defer_env_14
+  X2CCleanup _x2c_defer_record_9 = {
+    .fn = _x2c_defer_cleanup_9,
+    .env = & _x2c_defer_env_16
   };
-  x2c_cleanup_push(&_x2c_defer_record_7);
+  x2c_cleanup_push(&_x2c_defer_record_9);
   {
     {
-      int _x2c_return_value_2 = _owns_locked(pool, key);
+      int _x2c_return_value_4 = _owns_locked(pool, key);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_7);
-        return _x2c_return_value_2;
+        x2c_cleanup_leave(& _x2c_defer_record_9);
+        return _x2c_return_value_4;
       }
 
     }
 
   }
-  x2c_cleanup_leave(& _x2c_defer_record_7);
+  x2c_cleanup_leave(& _x2c_defer_record_9);
 
 }
 }
@@ -912,19 +964,19 @@ void Scope_move(void *, Scope *);
 static int _promote_block(Pool inner, Var object, void * alloc, PoolBlock block){
   _lock(inner);
   {
-  _x2c_defer_env_7 _x2c_defer_env_15 = {._x2c_defer_capture_10 =(const void *) & inner};
+  _x2c_defer_env_8 _x2c_defer_env_17 = {._x2c_defer_capture_11 =(const void *) & inner};
 
-  X2CCleanup _x2c_defer_record_8 = {
-    .fn = _x2c_defer_cleanup_9,
-    .env = & _x2c_defer_env_15
+  X2CCleanup _x2c_defer_record_10 = {
+    .fn = _x2c_defer_cleanup_11,
+    .env = & _x2c_defer_env_17
   };
-  x2c_cleanup_push(&_x2c_defer_record_8);
+  x2c_cleanup_push(&_x2c_defer_record_10);
   {
     if(! _owns_locked(inner, object)){
-      int _x2c_return_value_3 = 0;
+      int _x2c_return_value_5 = 0;
       {
-        x2c_cleanup_leave(& _x2c_defer_record_8);
-        return _x2c_return_value_3;
+        x2c_cleanup_leave(& _x2c_defer_record_10);
+        return _x2c_return_value_5;
       }
 
     }
@@ -938,13 +990,13 @@ static int _promote_block(Pool inner, Var object, void * alloc, PoolBlock block)
     }
     _lock(inner -> up);
     {
-  _x2c_defer_env_6 _x2c_defer_env_16 = {._x2c_defer_capture_9 =(const void *) & inner};
+  _x2c_defer_env_7 _x2c_defer_env_18 = {._x2c_defer_capture_10 =(const void *) & inner};
 
-  X2CCleanup _x2c_defer_record_9 = {
-    .fn = _x2c_defer_cleanup_8,
-    .env = & _x2c_defer_env_16
+  X2CCleanup _x2c_defer_record_11 = {
+    .fn = _x2c_defer_cleanup_10,
+    .env = & _x2c_defer_env_18
   };
-  x2c_cleanup_push(&_x2c_defer_record_9);
+  x2c_cleanup_push(&_x2c_defer_record_11);
   {
       _insert_locked(inner -> up, object);
       if(block && block -> owner == inner) _mark_slot(block, slot);
@@ -955,21 +1007,21 @@ static int _promote_block(Pool inner, Var object, void * alloc, PoolBlock block)
       else Scope_move(alloc, & inner -> up -> scope);
       inner -> promoted ++;
       {
-        int _x2c_return_value_4 = 1;
+        int _x2c_return_value_6 = 1;
         {
-          x2c_cleanup_leave(& _x2c_defer_record_9);
-          x2c_cleanup_leave(& _x2c_defer_record_8);
-          return _x2c_return_value_4;
+          x2c_cleanup_leave(& _x2c_defer_record_11);
+          x2c_cleanup_leave(& _x2c_defer_record_10);
+          return _x2c_return_value_6;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_9);
+    x2c_cleanup_leave(& _x2c_defer_record_11);
 
 }
   }
-  x2c_cleanup_leave(& _x2c_defer_record_8);
+  x2c_cleanup_leave(& _x2c_defer_record_10);
 
 }
 }
@@ -1008,21 +1060,21 @@ PoolStats Pool_stats(Pool inner){
   _storage_lock();
   {
 
-  X2CCleanup _x2c_defer_record_10 = {
-    .fn = _x2c_defer_cleanup_11,
+  X2CCleanup _x2c_defer_record_12 = {
+    .fn = _x2c_defer_cleanup_13,
     .env = NULL
   };
-  x2c_cleanup_push(&_x2c_defer_record_10);
+  x2c_cleanup_push(&_x2c_defer_record_12);
   {
     if(inner) _lock(inner);
     {
-  _x2c_defer_env_8 _x2c_defer_env_17 = {._x2c_defer_capture_11 =(const void *) & inner};
+  _x2c_defer_env_9 _x2c_defer_env_19 = {._x2c_defer_capture_12 =(const void *) & inner};
 
-  X2CCleanup _x2c_defer_record_11 = {
-    .fn = _x2c_defer_cleanup_10,
-    .env = & _x2c_defer_env_17
+  X2CCleanup _x2c_defer_record_13 = {
+    .fn = _x2c_defer_cleanup_12,
+    .env = & _x2c_defer_env_19
   };
-  x2c_cleanup_push(&_x2c_defer_record_11);
+  x2c_cleanup_push(&_x2c_defer_record_13);
   {
       PoolStats stats ={
         0
@@ -1045,21 +1097,21 @@ PoolStats Pool_stats(Pool inner){
       stats.depot_blocks = pool_depot_blocks;
       stats.depot_bytes = pool_depot_bytes;
       {
-        PoolStats _x2c_return_value_5 = stats;
+        PoolStats _x2c_return_value_7 = stats;
         {
-          x2c_cleanup_leave(& _x2c_defer_record_11);
-          x2c_cleanup_leave(& _x2c_defer_record_10);
-          return _x2c_return_value_5;
+          x2c_cleanup_leave(& _x2c_defer_record_13);
+          x2c_cleanup_leave(& _x2c_defer_record_12);
+          return _x2c_return_value_7;
         }
 
       }
 
     }
-    x2c_cleanup_leave(& _x2c_defer_record_11);
+    x2c_cleanup_leave(& _x2c_defer_record_13);
 
 }
   }
-  x2c_cleanup_leave(& _x2c_defer_record_10);
+  x2c_cleanup_leave(& _x2c_defer_record_12);
 
 }
 }
@@ -1073,34 +1125,34 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 
 }
 
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+  _storage_unlock();
+}
+
 void Scope_pop(void);
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   Scope_pop();
 }
 
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_2;
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_3;
   _unlock((*(Pool *) _x2c_defer_data_1->_x2c_defer_capture_4));
 }
 
-static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_3;
+static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_4;
   _unlock((*(Pool *) _x2c_defer_data_2->_x2c_defer_capture_5));
 }
 
-static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
-  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_4;
+static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
+  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_5;
   _unlock((*(Pool *) _x2c_defer_data_3->_x2c_defer_capture_6));
 }
 
-static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
-  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_5;
-  _unlock((*(Pool *) _x2c_defer_data_4->_x2c_defer_capture_7));
-}
-
 static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
-  _storage_unlock();
+  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_6;
+  _unlock((*(Pool *) _x2c_defer_data_4->_x2c_defer_capture_7));
 }
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
@@ -1109,21 +1161,30 @@ static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
 }
 
 static void _x2c_defer_cleanup_8(void * _x2c_defer_opaque_8){
-  _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_8;
-  _unlock((*(Pool *) _x2c_defer_data_6->_x2c_defer_capture_9) -> up);
+  _storage_unlock();
 }
 
 static void _x2c_defer_cleanup_9(void * _x2c_defer_opaque_9){
-  _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_9;
-  _unlock((*(Pool *) _x2c_defer_data_7->_x2c_defer_capture_10));
+  _x2c_defer_env_6 * _x2c_defer_data_6 =(_x2c_defer_env_6 *) _x2c_defer_opaque_9;
+  _unlock((*(Pool *) _x2c_defer_data_6->_x2c_defer_capture_9));
 }
 
 static void _x2c_defer_cleanup_10(void * _x2c_defer_opaque_10){
-  _x2c_defer_env_8 * _x2c_defer_data_8 =(_x2c_defer_env_8 *) _x2c_defer_opaque_10;
-  if((*(Pool *) _x2c_defer_data_8->_x2c_defer_capture_11)) _unlock((*(Pool *) _x2c_defer_data_8->_x2c_defer_capture_11));
+  _x2c_defer_env_7 * _x2c_defer_data_7 =(_x2c_defer_env_7 *) _x2c_defer_opaque_10;
+  _unlock((*(Pool *) _x2c_defer_data_7->_x2c_defer_capture_10) -> up);
 }
 
 static void _x2c_defer_cleanup_11(void * _x2c_defer_opaque_11){
+  _x2c_defer_env_8 * _x2c_defer_data_8 =(_x2c_defer_env_8 *) _x2c_defer_opaque_11;
+  _unlock((*(Pool *) _x2c_defer_data_8->_x2c_defer_capture_11));
+}
+
+static void _x2c_defer_cleanup_12(void * _x2c_defer_opaque_12){
+  _x2c_defer_env_9 * _x2c_defer_data_9 =(_x2c_defer_env_9 *) _x2c_defer_opaque_12;
+  if((*(Pool *) _x2c_defer_data_9->_x2c_defer_capture_12)) _unlock((*(Pool *) _x2c_defer_data_9->_x2c_defer_capture_12));
+}
+
+static void _x2c_defer_cleanup_13(void * _x2c_defer_opaque_13){
   _storage_unlock();
 }
 

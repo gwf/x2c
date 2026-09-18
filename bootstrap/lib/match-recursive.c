@@ -51,6 +51,8 @@ static List _search(Var input, Var pattern, List results, int include_empty);
 
 static int _first(Var input, Var pattern, int include_empty, Var * out_match, List * out_bindings);
 
+static Var _replace_template(Var template, List bindings);
+
 static Var _replace_all(Var input, Var pattern, Var template, int include_empty);
 
 Var Symbol_var(Symbol);
@@ -418,6 +420,15 @@ List List_replace(List, List);
 
 Var List_assoc(List, Var);
 
+int Var_is_void(Var);
+
+static Var _replace_template(Var template, List bindings){
+  if(Var_is_row(template, 9, 7, 4)) return List_var(List_replace(Var_list(template), bindings));
+  if(! Var_is_binder(template)) return template;
+  Var value = List_assoc(bindings, template);
+  return Var_is_void(value) ? template : value;
+}
+
 static Var _replace_all(Var input, Var pattern, Var template, int include_empty){
   if(Var_is_row(input, 9, 7, 4)){
     List list = Var_list(input);
@@ -430,9 +441,7 @@ static Var _replace_all(Var input, Var pattern, Var template, int include_empty)
   }
   List bindings;
   if(! _try_value(input, pattern, & bindings)) return input;
-  if(Var_is_row(template, 9, 7, 4)) return List_var(List_replace(Var_list(template), bindings));
-  if(Var_is_binder(template)) return List_assoc(bindings, template);
-  return template;
+  return _replace_template(template, bindings);
 }
 
 int match_recursive_try_capture(MatchCaptureLayout layout, Var input, MatchCaptureBuffer * captures){
@@ -455,9 +464,7 @@ int match_recursive_try_match_replace(List input, Var pattern, Var template, Var
   if(! out) return 0;
   List bindings;
   if(! match_recursive_try_match(input, pattern, & bindings)) return 0;
-  if(Var_is_row(template, 9, 7, 4)) * out = List_var(List_replace(Var_list(template), bindings));
-  else if(Var_is_binder(template)) * out = List_assoc(bindings, template);
-  else * out = template;
+  * out = _replace_template(template, bindings);
   return 1;
 }
 

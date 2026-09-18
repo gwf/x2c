@@ -481,8 +481,6 @@ int scan_line_comment(char *);
 
 int scan_block_comment_status(char *, Symbol *);
 
-int scan_block_comment(char *);
-
 int scan_c_character(char *);
 
 int scan_ascii_digit(int);
@@ -493,7 +491,7 @@ static int Tokenizer__common_tokens(Tokenizer t){
     case ' ' : case '\t' : case '\v' : case '\f' : case '\n' : case '\r' : return Tokenizer_do_scanner(t, scan_white_space, 40896714);
     case '#' : return Tokenizer_do_scanner(t, scan_preprocessor, 35579270086);
     case '/' : if(text[1] == '/') return Tokenizer_do_scanner(t, scan_line_comment, 7477210024);
-    if(text[1] == '*') return Tokenizer__scan_mode(t) == 806112 ? _status_scanner(t, scan_block_comment_status, 7477210024) : Tokenizer_do_scanner(t, scan_block_comment, 7477210024);
+    if(text[1] == '*') return _status_scanner(t, scan_block_comment_status, 7477210024);
     return 0;
     case '\'' : return Tokenizer_do_scanner(t, scan_c_character, 845368475748);
     case '0' : case '1' : case '2' : case '3' : case '4' : case '5' : case '6' : case '7' : case '8' : case '9' : return Tokenizer__number(t);
@@ -502,7 +500,7 @@ static int Tokenizer__common_tokens(Tokenizer t){
   return 0;
 }
 
-int scan_c_string(char *);
+int scan_c_string_status(char *, Symbol *);
 
 Symbol scan_keyword_type(const char *, int);
 
@@ -512,7 +510,7 @@ static int Tokenizer__x2c_tokens(Tokenizer tokenizer){
   static const char * opchars = "-,;:!?.()[]{}*/&%^+<=>|~@";
   char * text = tokenizer -> text + tokenizer -> pos;
   int n;
-  if(text[0] == '"') return Tokenizer_do_scanner(tokenizer, scan_c_string, 27051791223990);
+  if(text[0] == '"') return _status_scanner(tokenizer, scan_c_string_status, 27051791223990);
   if(text[0] == '_' || scan_ascii_alpha((unsigned char) text[0])){
     n = scan_identifier(text);
     Symbol type = scan_keyword_type(text, n);
@@ -546,8 +544,6 @@ static int Tokenizer__symbol_set_tokens(Tokenizer t){
   }
   return Tokenizer_do_scanner(t, scan_symbol_set_atom, 845368370138);
 }
-
-int scan_c_string_status(char *, Symbol *);
 
 int scan_symbol_literal_status(char *, Symbol *);
 
