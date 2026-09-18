@@ -972,6 +972,25 @@ appears where one statement is required, its production must likewise yield
 exactly one statement. A compound statement may contain the captured target
 plus any additional block items without requiring braces at the invocation.
 
+A `Statement` or `Block` decorator standing before a file-scope function
+definition decorates that function's body. The body is parsed as usual, the
+decorator's production replaces it, and the same function is rebuilt around
+the result, so parameters resolve inside the produced items and a `return`
+from within the body runs the decorator's deferred cleanup before leaving:
+
+```x2c
+~#include "x2c.x"
+$scope() static int total(List values, int bias) {
+  int sum = bias;
+  foreach (Var value, values) sum += value.int();
+  return sum;
+}
+~int main(void) { return total(%(1 2 3), 10) == 16 ? 0 : 1; }
+```
+
+An expression body works the same way. A decorator written this way before a
+declaration that is not a function definition is rejected.
+
 A `.x` file may give a visible macro or decorator an identifier spelling:
 
 ```text

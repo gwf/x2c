@@ -250,6 +250,22 @@ for (int i = 0; i < 3; i++) $scope() { Scope.malloc(8); }
 ~}
 ```
 
+Place it before a file-scope function definition to retain one region around
+that whole function, without indenting the body a further level:
+
+```x2c
+$scope() static int distinct(List words) {
+  Map seen = {};
+  foreach (String word, words) seen[word] = 1;
+  return seen.len();
+}
+~int main(void) { return distinct(%("ab" "cd" "ab")) == 2 ? 0 : 1; }
+```
+
+The `Map` belongs to the retained region, and the region closes on every
+exit, so the `return` releases it. `$lock` and `$let` decorate a function
+the same way.
+
 With one Scope-pointer argument, `$scope` evaluates the argument once, pushes
 that destination, and restores the previous destination on exit:
 

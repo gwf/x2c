@@ -517,6 +517,14 @@ Open questions with no owner yet, recorded so they are not lost:
   so the page is whole. This is the regex pseudo-parser that
   [x2c-lint-and-format](x2c-lint-and-format.md) proposes to replace, and it
   is a concrete argument for doing so.
+- **`unnecessary conversion` fires where the conversion is required.**
+  `Buffer out = ...; return out;` in a function returning `String` warns
+  `unnecessary conversion: .str() where ("String") is expected` on the
+  `return out.str();` spelling, but removing `.str()` does not compile: it
+  reports a region escape and emits C that initializes a `String` from a
+  `Buffer *`. Reproduced at a85aff1b while writing a book sample for the
+  `$scope` function form, which is why that sample uses a different shape.
+  Buffer's conversion to String is not one the return destination performs.
 - **A namespace call does not resolve inside a macro template.**
   `Block.new(...)`, `Var.new(...)`, `Bytes.new(...)` and the `Scope.*` calls
   are reported as `type () has no method new` at
