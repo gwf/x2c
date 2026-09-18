@@ -102,19 +102,18 @@ static Map runtime = %{
   "Var_block": (wrap),               "Block_var": (wrap),
   "Var_buffer": (wrap),              "Buffer_var": (wrap),
   "Array_free": (free),              "Array_list_free": (free),
-  "Array_cleanup": (free),           "Map_free": (free),
-  "Map_cleanup": (free),             "Block_free": (free),
-  "Block_cleanup": (free),           "Bytes_cleanup": (free),
-  "Buffer_free": (free),             "Buffer_cleanup": (free),
-  "Context_close": (free),           "Context_cleanup": (free),
-  "Scope_free": (free),
+  "Array_cleanup": (free),           "Map_cleanup": (free),
+  "Block_free": (free),              "Block_cleanup": (free),
+  "Bytes_cleanup": (free),           "Buffer_free": (free),
+  "Buffer_cleanup": (free),          "Context_close": (free),
+  "Context_cleanup": (free),         "Scope_free": (free),
   "Scope_destroy": (destroy),        "Scope_cleanup": (destroy),
   "Scope_retain": (open scope),      "Scope_release": (close scope),
   "Pool_open": (open pool),          "Pool_close": (close pool),
   "Scope_push": (open slot),         "Scope_pop": (close slot),
   "Scope_move": (move),              "Context_export": (exit),
-  "List_promote": (exit),            "Var_promote": (exit),
-  "String_promote": (exit)
+  "List_promote": (exit),            "String_promote": (exit),
+  "Atom_promote": (exit)
 };
 
 // canonical forms the pass reads
