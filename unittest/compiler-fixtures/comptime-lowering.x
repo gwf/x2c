@@ -62,6 +62,160 @@ int ct_pick(int n) => n > 3 ? n * 2 : -n;
 $comptime()
 double ct_area(double r) => 3.141592653589793 * r * r;
 
+/* --- control flow: break, continue, do/while, switch --------------------- */
+
+/* A loop's exit is a function over its live locals, so a `break` reaches it
+   with a call rather than a copy of the rest of the block. */
+$comptime()
+int ct_break(int n) {
+  int s = 0;
+  int i = 0;
+  while (1) {
+    if (i >= n) break;
+    s = s + i;
+    i = i + 1;
+  }
+  return s;
+}
+
+/* A `for` carries its step as the continuation the body and every
+   `continue` reach, so nothing can skip it. */
+$comptime()
+int ct_continue(int n) {
+  int s = 0;
+  for (int i = 0; i < n; i++) {
+    if (i % 2) continue;
+    s = s + i;
+  }
+  return s;
+}
+
+/* `do` runs its body before the first test, so this body runs once even
+   where the test is false from the start. */
+$comptime()
+int ct_do(int n) {
+  int s = 0;
+  do {
+    s = s + n;
+    n = n - 1;
+  }
+  while (n > 0);
+  return s;
+}
+
+$comptime()
+int ct_do_once(int n) {
+  int s = 0;
+  do { s = s + 1; }
+  while (n > 100);
+  return s;
+}
+
+/* A `continue` in a `do` reaches the test the same way the body's end does,
+   because the test is the loop's step. */
+$comptime()
+int ct_do_continue(int n) {
+  int s = 0;
+  do {
+    n = n - 1;
+    if (n % 2) continue;
+    s = s + n;
+  }
+  while (n > 0);
+  return s;
+}
+
+/* A `switch` is a `cond` chain over its subject. An arm ends in `break` or
+   `return`; the last needs neither, since nothing follows it to fall into. */
+$comptime()
+int ct_switch(int n) {
+  int s = 0;
+  switch (n) {
+    case 1:
+      s = 10;
+      break;
+    case 2: {
+      s = 20;
+      break;
+    }
+    case 3:
+      return 33;
+    default:
+      s = 99;
+  }
+  return s + 1;
+}
+
+/* Labels with no statements between them share one arm, and a `switch` with
+   no `default` falls out to the rest of the block. */
+$comptime()
+int ct_switch_shared(int n) {
+  switch (n) {
+    case 1:
+    case 2:
+      return 12;
+    case 3:
+      return 3;
+  }
+  return 0;
+}
+
+/* A subject that cannot be repeated is bound once, and a `Symbol` compares
+   the way every other value does. */
+$comptime()
+String ct_switch_symbol(Var form) {
+  switch (Var.tag(form)) {
+    case <list>:   return "a list";
+    case <symbol>: return "a symbol";
+  }
+  return "other";
+}
+
+/* A `break` inside a `switch` leaves the switch, and a `continue` inside one
+   still reaches the loop around it. */
+$comptime()
+int ct_switch_in_loop(int n) {
+  int total = 0;
+  for (int i = 0; i < n; i++) {
+    switch (i) {
+      case 2:
+        break;
+      case 3:
+        continue;
+      default:
+        total = total + 1;
+        break;
+    }
+    total = total + 1000;
+  }
+  return total;
+}
+
+/* A `break` binds to the loop nearest it. */
+$comptime()
+int ct_nested_break(int n) {
+  int s = 0;
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      if (j > 1) break;
+      s = s + 1;
+    }
+    s = s + 100;
+  }
+  return s;
+}
+
+/* `foreach` is an ordinary `while`, so a `break` leaves it too. */
+$comptime()
+int ct_break_in_foreach(List xs) {
+  int n = 0;
+  foreach (Var item, xs) {
+    if (Var.equal(item, <stop>)) break;
+    n = n + 1;
+  }
+  return n;
+}
+
 /* --- file-scope state ---------------------------------------------------- */
 
 static int ct_counter;
@@ -349,6 +503,19 @@ int main(void) {
   printf("bits         %d\n", $(ct_bits 7));
   printf("ternary      %d %d\n", $(ct_pick 5), $(ct_pick 2));
   printf("area         %s\n", $(str (ct_area 3.0)));
+  printf("break        %d\n", $(ct_break 5));
+  printf("continue     %d\n", $(ct_continue 7));
+  printf("do           %d %d\n", $(ct_do 4), $(ct_do_once 1));
+  printf("do-continue  %d\n", $(ct_do_continue 6));
+  printf("switch       %d %d %d %d\n", $(ct_switch 1), $(ct_switch 2),
+         $(ct_switch 3), $(ct_switch 9));
+  printf("switch-share %d %d %d\n", $(ct_switch_shared 1),
+         $(ct_switch_shared 2), $(ct_switch_shared 5));
+  printf("switch-sym   %s / %s / %s\n", $(ct_switch_symbol '(a)),
+         $(ct_switch_symbol 'a), $(ct_switch_symbol "x"));
+  printf("switch-loop  %d\n", $(ct_switch_in_loop 5));
+  printf("nested-break %d\n", $(ct_nested_break 3));
+  printf("foreach-brk  %d\n", $(ct_break_in_foreach '(a b stop c)));
   printf("globals      %d %d\n", $(ct_next), $(ct_next));
   printf("pointer      %d\n", $(ct_through_pointer 7));
   printf("foreach      %d\n", $(ct_count '(a b c d)));

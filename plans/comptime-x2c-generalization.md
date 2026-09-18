@@ -3,9 +3,9 @@
 > Status: active
 >
 > Scoped 2026-09-18 on branch `x2c-lowers-to-lisp` after the autodiff port
-> landed. Phases 0, 1 and 3 are done and merged; Phases 2 and 4 are the rest
-> of the pass, 5 and 6 are ports, and 7 is answered. Nothing on this branch
-> reaches `main` without Gary's explicit green light. The design in
+> landed. Phases 0-3 are done and merged; Phase 4 is the rest of the pass,
+> 5 and 6 are ports, and 7 is answered. Nothing on this branch reaches `main`
+> without Gary's explicit green light. The design in
 > `plans/x2c-lowers-to-lisp.md` is settled and this plan does not revisit it.
 
 ## The result
@@ -76,7 +76,8 @@ dictionary, not as work.
 
 Fifteen everyday constructs were probed against the pass on 2026-09-18.
 Fourteen declined. That gap, not the remaining Lisp, is what blocks the
-general case.
+general case. Phases 1 and 2 have since closed the collection and control
+flow parts of it.
 
 ## Working agreement
 
@@ -219,25 +220,61 @@ The rule:
 
 Everything this needs is bound in `etc/comptime.xlisp` already.
 
-## Phase 2 - control flow
+## Phase 2 - control flow (done)
 
-Owns `_lower_stmnt`, `_lower_loop`, and a new `_lower_switch`.
+`break`, `continue`, `do`/`while` and `switch`. The eleven new
+`$comptime()` functions in `comptime-lowering.x` and the ten new lines in
+`comptime-lowering.stdout` are the evidence, plus the new
+`comptime-declines-fallthrough` fixture.
 
-- `break` and `continue` need no exit codes. `_lower_loop` already holds both
-  the self call `(again ...)` and the inlined `leave` continuation; carry
-  them in the `Lowering` state the way `on_loop` is carried, and lower
-  `continue` to the first and `break` to the second. A `break` or `continue`
-  outside a loop declines.
-- `do`/`while` rewrites to a `while` with a first-iteration flag, which is
-  what `ad._rev-do` in `lib/autodiff.xmacro` already does for its subject
-  programs. Mechanical.
-- `switch` lowers to a `cond` chain over a subject bound once. Fallthrough is
-  deliberately not supported: an arm that does not end in `break` or `return`
-  declines with a reason naming fallthrough. The repository writes `switch`
-  this way already, and a fallthrough state machine would be machinery with
-  no caller.
-- `goto` and labels decline permanently. Record that as a decision, not an
-  omission.
+`break` and `continue` are continuations, carried in `Lowering` beside
+`on_loop`. `continue` is the loop's own `(again ...)`. `break` needed an
+exit the body can reach from anywhere, so a loop whose body contains one
+also defines its `leave` as a function over the same live locals and calls
+it; a loop without a `break` still inlines `leave` into the `cond`. That is
+the only lasting new mechanism, as the plan review predicted.
+
+Four corrections to what this section said before the work.
+
+- **`do`/`while` is not a `while` with a first-iteration flag.** A flag
+  needs a local, and the pass has no binding id to give it: `_lower_target`
+  returns `-1` for "not a plain local", so synthetic negative ids read as
+  computed places, and a synthetic positive id can collide with a real one.
+  `do BODY while (TEST)` is instead `while (1)` with
+  `if (TEST) ; else break;` as the loop's **step**, which is exact and needs
+  nothing new.
+- **A `for`'s step had to move out of the body.** It sat at the end of the
+  body because the subset had no `continue`; with `continue` it would be
+  skipped. Both loops now carry a step, reached by the body's end and by
+  every `continue`, through one continuation form `(then steps next break)`.
+- **That continuation has to carry the `break` in force where it was
+  written.** Without it, a `switch` inside a `do`/`while` recursed forever:
+  the arm's `break` reached the switch's exit, which reached the loop's
+  step, whose `break` found the switch's exit again.
+- **An arm ending in `continue` is not fallthrough**, and the last arm of a
+  `switch` needs no `break`, since nothing follows it to fall into.
+
+`switch` lowers to one `cond` over a subject that is bound only when
+`_lower_pure` says it cannot be repeated; a `default` anywhere becomes the
+final clause, and labels with no statements between them share one arm.
+Fallthrough declines, as decided. `goto` still declines from the scan, now
+with a reason that names it rather than "unsupported construct", so
+`comptime-declines.diagnostics` changed.
+
+One gap this phase leaves: a `switch` whose subject needs a binding and
+which sits on a loop's iteration path declines, because the binding would
+cost the loop its frame reuse. In practice that is a `switch` on a call
+result inside a loop, which Phase 5 and Phase 6 will meet. Hoisting such a
+subject into a cell allocated before the loop, the way `_lower_loop_cells`
+already hoists a body's cells, is the shape of the answer; it was out of
+scope here and has no caller yet.
+
+One defect fixed in passing, outside this phase's functions. `_lower_name`
+numbered from zero per function, so two compile-time functions with the same
+parameter count defined the same `loop2` in the one shared macro session and
+the second silently replaced the first. Two loops that only differ in their
+body returned the same wrong answer. Generated names now carry the function
+they belong to.
 
 ## Phase 3 - the mechanical gaps (done)
 
@@ -605,8 +642,11 @@ than ahead of it.
 ## Validation
 
 Focused per phase: `make build`, that phase's fixture entries, and the whole
-`comptime-lowering` fixture. The Lisp suite (`make -C unittest test-lisp`,
-915 tests) has caught nothing in this work so far but is cheap and stays.
+`comptime-lowering` fixture, which `./unittest/compiler-fixtures/run.sh
+check` runs on its own. The unit suites (`make -C unittest test-all` then
+`./unittest/test-all`, 915 tests, of which `lisp_suite` is 56) have caught
+nothing in this work so far but are cheap and stay. There is no
+`test-lisp` target; an earlier revision of this section named one.
 
 Branch merges back to `x2c-lowers-to-lisp` need no gate. Delivery to `main`
 is a separate decision that Gary owns and has not given.

@@ -5,6 +5,16 @@ mutual       1 0
 bits         30
 ternary      10 -2
 area         28.274334
+break        10
+continue     12
+do           10 1
+do-continue  6
+switch       11 21 33 100
+switch-share 12 12 0
+switch-sym   a list / a symbol / other
+switch-loop  4003
+nested-break 306
+foreach-brk  2
 globals      1 2
 pointer      12
 foreach      4
