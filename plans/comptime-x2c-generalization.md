@@ -434,6 +434,39 @@ library. Three candidate routes, none built, none costed:
 Route 1 is the same mechanism Phase 7 wanted for `etc/builtin-macros.xlisp`,
 so one capability unblocks both. Decide it before scheduling this phase.
 
+### The economics, measured 2026-09-18 after M2 unblocked it
+
+Porting a shipped macro's Lisp body to meta functions is a **translation-time
+regression**, and the case for doing it is readability rather than speed.
+
+| | Lisp | meta |
+| --- | --- | --- |
+| declaring 44 accessors | +1 ms | +20 ms |
+| per call, accessor work | 0.075 ms | 0.075 ms |
+| autodiff, per derivation | 581 ms | 79 ms |
+
+Per-call cost is identical for ordinary work, because a Lisp `defun` is
+word-compiled by `_auto_analyze` just as a lowered meta function is. The
+autodiff win is real but specific: it comes from the generated Lisp being
+better than the hand-written Lisp there - `match` compiled once instead of
+`match-case` re-expanded per call - not from x2c being faster than Lisp.
+
+Installing costs about 0.45 ms per meta function per importing unit, and
+about 2.5 ms when the function contains a loop, because each loop becomes its
+own lowered global. A Lisp `defun` costs about 0.02 ms.
+
+Applied to the two candidates:
+
+- `lib/var-tags.xmacro`: 44 functions, imported by 32 units. About 630 ms
+  added to a full build, against accessor bodies that show no per-call win.
+- `lib/system-macros.xlisp`: 22 functions, imported by 9 units, for two
+  `$dedent` call sites.
+
+Both are slower after porting. The autodiff-shaped win needs a body whose
+Lisp was doing something expensive and a unit count low enough that install
+does not dominate; neither candidate has that shape. Decide whether
+readability is worth the time before scheduling this phase.
+
 ### Original scope, for when it is unblocked
 
 
