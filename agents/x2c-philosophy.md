@@ -627,10 +627,15 @@ Generated `try` uses POSIX `sigsetjmp(env, 0)`/`siglongjmp`, so Error
 transfer preserves registers and stack state without restoring a signal mask.
 `src/cleanup.x` owns the C rule that automatic state changed across that
 boundary must be volatile. It qualifies directly modified named locals and
-parameters in the definition, and also locals the body reaches only through a
-pointer; a prototype drops the parameter qualifier, which C ignores when it
-compares the two. [The language reference](../docs/src/reference/language.md)
-records the rule the generated code follows.
+parameters in the definition, and locals the body writes through a pointer it
+holds, along with that pointer's pointee type; a prototype drops the parameter
+qualifier, which C ignores when it compares the two. A local that only a
+callee writes through an address the body hands it is not qualified: taking
+its address already forces it to memory, so the register a transfer would
+restore is not where its value lives, and qualifying it would instead discard
+the qualifier at every such call.
+[The language reference](../docs/src/reference/language.md) records the rule
+the generated code follows.
 `ExceptionFrame` owns the volatile transfer state, the unwind target, and the
 run-once cleanup claim, written before transfer and read afterward.
 Native-runtime fixtures compile with the active repository build flags, so
