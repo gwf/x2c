@@ -96,9 +96,12 @@ static void _lower_scan_op(Lowering l, List form) {
 
 static void _lower_scan_bind(Lowering l, List form) {
   match (form) {
-    case %(bind (binding ?(int id) ?) ((dim ?) *)): {
+    /* A local C array is a mutable buffer, so it lives in a cell the way an
+       address-taken local does, holding an `Array` of its declared size. */
+    case %(bind (binding ?(int id) ?) ((dim ?size) *)): {
       l.locals[id] = 1;
-      l.arrays[id] = 1;
+      l.cells[id] = 1;
+      l.arrays[id] = size;
       return;
     }
     case %(bind (binding ?(int id) ?) *): l.locals[id] = 1;
@@ -155,9 +158,7 @@ static void _lower_scan(Lowering l, Var form) {
   else if (head == <op>) _lower_scan_op(l, items);
   else if (head == <call>) _lower_scan_call(l, items);
   else if (head == <switch> || head == <do> || head == <break> ||
-           head == <continue> || head == <goto> || head == <index> ||
-           head == <getindex> || head == <composite> || head == <array> ||
-           head == <commas>)
+           head == <continue> || head == <goto>)
     l.rejected = 1;
   _lower_scan_each(l, items);
 }
@@ -394,6 +395,103 @@ static Var _lower_lambda(Lowering l, List params, List held, Var body) {
   return %(lambda ${names.list()} $lowered);
 }
 
+/* --- collections -------------------------------------------------------- */
+
+/* A container operation is chosen by the receiver's own type, which the type
+   pass already put on its `expr` node. */
+static String _lower_container(List type) {
+  if (type.equal(%("List")))   return "List";
+  if (type.equal(%("Array")))  return "Array";
+  if (type.equal(%("Map")))    return "Map";
+  if (type.equal(%("String"))) return "String";
+  return NULL;
+}
+
+/* A declared local starts at its type's zero. The two branches cannot share
+   a conditional expression: C would promote the `int` to `double` and every
+   uninitialized local would come back floating. */
+static Var _lower_zero(List type) {
+  if (type.match(%((!or double float)))) return 0.0;
+  return 0;
+}
+
+/* The caller owns the result and frees it, or hands it to `_lower_sequence`.
+   Failure is reported through `declined`, because an empty Array is a
+   legitimate result and is falsy. */
+static Array _lower_values(Lowering l, List items) {
+  Array values = [];
+  foreach (Var item, items) {
+    Var value = _lower_expr(l, item);
+    if (_lower_failed(l, value)) {
+      values.free();
+      _lower_decline(l, "an element that is not an expression");
+      return NULL;
+    }
+    values.push(value);
+  }
+  return values;
+}
+
+/* Elements as a Lisp List, which is what every container is built from. */
+static Var _lower_sequence(Lowering l, List items) {
+  Array values = _lower_values(l, items);
+  if (l.declined) return void;
+  return cons(<list>, values.list_free());
+}
+
+/* `[a, b]` is an array literal wherever it appears, including an argument
+   position where no destination names a type, so it lowers to an `Array`
+   and a `List` destination converts. Lowering it to a Lisp List instead
+   would hand an argument the wrong container without saying so. */
+static Var _lower_array(Lowering l, List items) {
+  Var values = _lower_sequence(l, items);
+  if (_lower_failed(l, values)) return void;
+  return %(List_array $values);
+}
+
+static Var _lower_map(Lowering l, List entries) {
+  Array flat = [];
+  foreach (List entry, entries) {
+    match (entry)
+      case %(map-entry ?key ?value): {
+        Var k = _lower_expr(l, key);
+        Var v = _lower_expr(l, value);
+        if (_lower_failed(l, k) || _lower_failed(l, v)) {
+          flat.free();
+          return void;
+        }
+        flat.push(k);
+        flat.push(v);
+        continue;
+      }
+    flat.free();
+    return _lower_decline(l, "unsupported map entry");
+  }
+  return %(Map_of ${cons(<list>, flat.list_free())});
+}
+
+/* The container a bracket names. A local C array is always an `Array`,
+   because its declaration allocated one; every other receiver carries its
+   own type. */
+static String _lower_indexed(Var receiver, int is_c_array) {
+  if (is_c_array) return "Array";
+  match (receiver) case %(expr ?type ?): return _lower_container(type);
+  return NULL;
+}
+
+/* `xs[i]` and `m[k]`. The C-array form is the same read through the cell the
+   declaration allocated, which `_lower_expr` already loads. */
+static Var _lower_getindex(
+  Lowering l, Var receiver, Var key, int is_c_array) {
+  String container = _lower_indexed(receiver, is_c_array);
+  if (!container)
+    return _lower_decline(l, "indexing a type with no compile-time meaning");
+  Var target = _lower_expr(l, receiver);
+  Var index = _lower_expr(l, key);
+  if (_lower_failed(l, target) || _lower_failed(l, index)) return void;
+  return %(${Atom.intern(container + "_getindex")} $target $index);
+}
+
 /* One `match` over the expression grammar. The compiler turns it into a
    decision tree, so reading the productions costs nothing extra. */
 static Var _lower_expr(Lowering l, Var form) {
@@ -448,6 +546,12 @@ static Var _lower_content(Lowering l, List type, Var content) {
       return _lower_call(l, name, args);
     case %(op ?operator *operands):
       return _lower_operands(l, operator, operands);
+    case %(array *items):                 return _lower_array(l, items);
+    case %(map *entries):                 return _lower_map(l, entries);
+    case %(getindex ?receiver ?key):
+      return _lower_getindex(l, receiver, key, 0);
+    case %(index ?receiver ?key):
+      return _lower_getindex(l, receiver, key, 1);
     case %(postfix ? ?): return _lower_decline(l, "postfix in an expression");
     case %(lambda (params *params) (captures *held) ?body):
       return _lower_lambda(l, params, held, body);
@@ -724,11 +828,81 @@ static Var _lower_boxed(Lowering l, int id, Var value) {
   return l.cells.contains(id) ? %(C.cell $value) : value;
 }
 
+/* A C array's dimension, read at lowering time so a partly written one is
+   zero-filled the way C fills it. A computed dimension has no such answer. */
+static int _lower_dimension(Lowering l, int id, int *out) {
+  Var size;
+  if (!l.arrays.try_get(id, &size)) return 0;
+  match (size)
+    case %(expr ? (literal ? ?(String text))): {
+      long count;
+      if (text.try_long(&count) && count >= 0 && count == (int) count) {
+        *out = (int) count;
+        return 1;
+      }
+    }
+  return 0;
+}
+
+/* A braced initializer carries no type of its own, so the declared type
+   decides which container it builds. */
+static Var _lower_braced(Lowering l, List type, int id, List items) {
+  if (l.arrays.contains(id)) {
+    int size = 0;
+    if (!_lower_dimension(l, id, &size))
+      return _lower_decline(l, "an array dimension that is not a literal");
+    Array values = _lower_values(l, items);
+    if (l.declined) return void;
+    if (values.len() > size) {
+      values.free();
+      return _lower_decline(l, "more initializers than the array holds");
+    }
+    Var zero = _lower_zero(type);
+    while (values.len() < size) values.push(zero);
+    return %(List_array ${cons(<list>, values.list_free())});
+  }
+  if (type.equal(%("Map"))) {
+    if (items) return _lower_decline(l, "a braced Map initializer needs keys");
+    return %(Map_new);
+  }
+  if (type.equal(%("Array"))) return _lower_array(l, items);
+  if (type.equal(%("List")))  return _lower_sequence(l, items);
+  return _lower_decline(l, "a braced initializer for this type");
+}
+
+/* A declaration and a return both name a type the value has to reach, and
+   neither carries the conversion the transform would insert later. An
+   assignment does carry it, so this sees only the two places that do not. */
+static Var _lower_coerce(List want, Var node, Var value) {
+  match (node)
+    case %(expr ?from ?): {
+      if (want.equal(%("List")) && from.equal(%("Array")))
+        return %(Array_list $value);
+      if (want.equal(%("Array")) && from.equal(%("List")))
+        return %(List_array $value);
+    }
+  return value;
+}
+
+/* An array literal knows it is an `Array`, so only a `List` destination
+   needs the conversion. A braced initializer knows nothing, so its
+   destination decides outright. */
+static Var _lower_initializer(Lowering l, List type, int id, Var init) {
+  match (init) {
+    case %(expr ? (composite (commas *items))):
+      return _lower_braced(l, type, id, items);
+    case %(expr ? (composite)): return _lower_braced(l, type, id, %());
+  }
+  Var value = _lower_expr(l, init);
+  if (_lower_failed(l, value)) return void;
+  return _lower_coerce(type, init, value);
+}
+
 static Var _lower_declarator(
   Lowering l, List type, List declarator, List rest, List k) {
   match (declarator) {
     case %(op = (bind (binding ?(int id) ?) *) ?init): {
-      Var value = _lower_expr(l, init);
+      Var value = _lower_initializer(l, type, id, init);
       if (l.cells.contains(id) && l.env.contains(id)) {
         if (_lower_failed(l, value)) return void;
         return _lower_effect(
@@ -737,7 +911,11 @@ static Var _lower_declarator(
       return _lower_bind_value(l, id, _lower_boxed(l, id, value), rest, k);
     }
     case %(bind (binding ?(int id) ?) *): {
-      Var zero = type.match(%((!or double float))) ? 0.0 : 0;
+      if (l.arrays.contains(id)) {
+        Var empty = _lower_braced(l, type, id, %());
+        return _lower_bind_value(l, id, _lower_boxed(l, id, empty), rest, k);
+      }
+      Var zero = _lower_zero(type);
       return _lower_bind_value(l, id, _lower_boxed(l, id, zero), rest, k);
     }
   }
@@ -751,9 +929,29 @@ static int _lower_target(Var form) {
   return -1;
 }
 
+/* `m[k] = v` and `a[i] = v`. A `List` has no indexed write, so a store
+   through one declines rather than silently dropping. */
+static Var _lower_setindex(
+  Lowering l, Var receiver, Var key, int is_c_array, Var value, List rest,
+  List k) {
+  String container = _lower_indexed(receiver, is_c_array);
+  if (!container)
+    return _lower_decline(l, "indexing a type with no compile-time meaning");
+  if (container.equal("List") || container.equal("String"))
+    return _lower_decline(l, "indexed write to a List or String");
+  Var target = _lower_expr(l, receiver);
+  Var index = _lower_expr(l, key);
+  if (_lower_failed(l, target) || _lower_failed(l, index) ||
+      _lower_failed(l, value))
+    return void;
+  return _lower_effect(
+    l, %(${Atom.intern(container + "_setindex")} $target $index $value),
+    rest, k);
+}
+
 static Var _lower_store(
   Lowering l, Var target, Var value, List rest, List k) {
-  match (target)
+  match (target) {
     case %(expr ? (op ?operator ?operand)): {
       if (operator == <"*">) {
         Var box = _lower_expr(l, operand);
@@ -761,6 +959,11 @@ static Var _lower_store(
         return _lower_effect(l, %(C.store $box $value), rest, k);
       }
     }
+    case %(expr ? (getindex ?receiver ?key)):
+      return _lower_setindex(l, receiver, key, 0, value, rest, k);
+    case %(expr ? (index ?receiver ?key)):
+      return _lower_setindex(l, receiver, key, 1, value, rest, k);
+  }
   int id = _lower_target(target);
   if (id < 0) return _lower_decline(l, "assignment to a computed place");
   if (_lower_failed(l, value)) return void;
@@ -857,7 +1060,11 @@ static Var _lower_stmnt(Lowering l, Var form, List rest, List k) {
     case %(at ? ?node):    return _lower_stmnt(l, node, rest, k);
     case %(empty):         return _lower_block(l, rest, k);
     case %(block *items):  return _lower_block(l, %(@items @rest), k);
-    case %(return ? ?value): return _lower_expr(l, value);
+    case %(return ?want ?value): {
+      Var result = _lower_expr(l, value);
+      if (_lower_failed(l, result)) return void;
+      return _lower_coerce(want, value, result);
+    }
     case %(return ?):      return 0;
     case %(declare ?type (bindings ?declarator)):
       return _lower_declarator(l, type, declarator, rest, k);
@@ -930,8 +1137,7 @@ List Compiler.lower_comptime(Compiler compiler, List fn) {
       if (l.rejected) lower_declined_reason = "unsupported construct";
       else if (l.uncallable)
         lower_declined_reason = "no binding for " + lower_missing_callee;
-      else if (l.arrays.len()) lower_declined_reason = "declares an array";
-      if (l.rejected || l.uncallable || l.arrays.len()) {
+      if (l.rejected || l.uncallable) {
         l.definitions.free();
         return NULL;
       }

@@ -70,20 +70,43 @@
 (def Array_new Array.new)
 (def Array_len Array.len)
 (def Array_push Array.push)
-(def Array_getindex Array.getindex)
-(def Array_setindex Array.setindex)
+// Out of range these answer `void`, which has no Lisp value, so the index
+// is checked here and an absent element reads as nil. A negative index
+// counts from the end, as `Array.getindex` documents.
+(defun _array_index (a i)
+  (let ((n (Array.len a))) (if (< i 0) (+ n i) i)))
+(defun _array_holds (a j) (and (>= j 0) (< j (Array.len a))))
+(defun Array_getindex (a i)
+  (let ((j (_array_index a i)))
+    (if (_array_holds a j) (Array.getindex a j) ())))
+(defun Array_setindex (a i v)
+  (let ((j (_array_index a i)))
+    (if (_array_holds a j) (Array.setindex a j v) ())))
 (def Array_list Array.list)
 (def Array_join Array.join)
+
+// A map literal builds its entries in one expression, the way an array
+// literal does, so the lowering needs no statement sequence. The flat list
+// alternates key and value in source order, so a repeated key keeps the
+// last entry the way the braced form reads.
+(defun Map_of (flat) (_map_fill (Map.new) flat))
+(defun _map_fill (m flat)
+  (if (null? flat) m
+      (begin (Map.setindex m (car flat) (car (cdr flat)))
+             (_map_fill m (cdr (cdr flat))))))
 
 (def Map_new Map.new)
 (def Map_len Map.len)
 (defun Map_get (m k) (if (eq? (Map.contains m k) 0) () (Map.getindex m k)))
-(def Map_getindex Map.getindex)
+// `Map.getindex` is `Map.get` in every respect, including the `void` an
+// absent key answers, so it reads back the same way.
+(def Map_getindex Map_get)
 (def Map_setindex Map.setindex)
 (def Map_contains Map.contains)
 (def Map_getdefault Map.getdefault)
 (def Map_list Map.list)
 
+(def String_getindex String.getindex)
 (def String_len String.len)
 (def String_add String.add)
 (def String_lower String.lower)

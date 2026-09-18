@@ -9,6 +9,25 @@ globals      1 2
 pointer      12
 foreach      4
 discard      3
+array-len    3
+array-grow   2
+array-kind   1 1
+convert-kind 1 1
+array-arg    3
+map-symbol   6
+map-string   5
+map-empty    0
+map-store    9
+array-store  6
+index-list   8
+index-string 98
+index-absent 0
+c-array      14
+c-array-pad  7
+c-array-bare 4
+scalar-zero  0
+accumulate   ((1 1) (2 2))
+table        (neg sin) ()
 is-list      1
 head         a
 len          3

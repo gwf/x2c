@@ -100,6 +100,129 @@ int ct_discard(int n) {
   return ct_counter;
 }
 
+/* --- collection literals and indexing ------------------------------------ */
+
+/* `[a, b]` is an array literal wherever it appears, so it lowers to an
+   `Array`; a `List` destination converts, the way the transform would. */
+$comptime()
+int ct_array_len(int n) { Array xs = [n, n + 1, n + 2]; return (int) xs.len(); }
+
+$comptime()
+int ct_array_grow(int n) {
+  Array xs = [];
+  xs.push(n);
+  xs.push(n);
+  return (int) xs.len();
+}
+
+$comptime()
+int ct_array_is_array(int n) { Var xs = [n]; return xs.is(<array>); }
+
+$comptime()
+int ct_list_is_list(int n) { List ys = [n]; Var v = ys; return v.is(<list>); }
+
+$comptime()
+int ct_to_array_is_array(List ys) {
+  Array xs = ys;
+  Var v = xs;
+  return v.is(<array>);
+}
+
+$comptime()
+int ct_to_list_is_list(Array xs) {
+  List ys = xs;
+  Var v = ys;
+  return v.is(<list>);
+}
+
+/* An array literal in an argument position has no destination to read, so
+   lowering it as a Lisp List would hand the callee the wrong container. */
+$comptime()
+int ct_takes_array(Array a) => (int) a.len();
+
+$comptime()
+int ct_array_argument(int n) => ct_takes_array([n, n, n]);
+
+/* A bare name left of `:` is a Symbol key, which is x2c's map literal. */
+$comptime()
+int ct_map_symbol(int v) {
+  Map m = { one: v, two: v + 1 };
+  return Var.integer(m[<two>]);
+}
+
+$comptime()
+int ct_map_string(int v) {
+  Map m = { "a": v, "b": v + 1 };
+  return Var.integer(m["b"]);
+}
+
+$comptime()
+int ct_map_empty(void) { Map m = {}; return (int) m.len(); }
+
+$comptime()
+int ct_map_store(int v) {
+  Map m = {};
+  m[<k>] = v;
+  return Var.integer(m[<k>]);
+}
+
+$comptime()
+int ct_array_store(int n) {
+  Array xs = [n, n];
+  xs[1] = n + 5;
+  return Var.integer(xs[1]);
+}
+
+$comptime()
+int ct_index_list(List ys) => Var.integer(ys[1]);
+
+$comptime()
+int ct_index_string(String s) => s[1];
+
+/* An absent element has no Lisp value, so it reads as nil rather than
+   aborting the session the way a `void` crossing would. */
+$comptime()
+int ct_index_absent(List ys) => ys[9] ? 1 : 0;
+
+/* A local C array is a cell holding an `Array`, zero-filled to its declared
+   size the way C fills one. */
+$comptime()
+int ct_c_array(int n) {
+  int a[4] = { 1, 2, 3, 4 };
+  a[0] = a[3] + n;
+  return a[0];
+}
+
+$comptime()
+int ct_c_array_padded(void) { int a[4] = { 7 }; return a[0] + a[3]; }
+
+$comptime()
+int ct_c_array_bare(int n) {
+  int a[3];
+  a[1] = n;
+  return a[1] + a[2];
+}
+
+/* An `Array` accumulated with `push` and returned where a `List` is
+   declared: the return converts, the way a declaration does. */
+$comptime()
+List ct_accumulate(List items) {
+  Array out = [];
+  foreach (Var item, items) out.push(%($item $item));
+  return out;
+}
+
+/* One `Map` lookup in place of a chain of string comparisons. */
+$comptime()
+Var ct_table(String name) {
+  Map table = { "sin": %(cos), "cos": %(neg sin) };
+  return table[name];
+}
+
+/* An uninitialized local keeps its own type's zero. */
+$comptime()
+int ct_scalar_zero(void) { int z; return z; }
+
 /* --- value types --------------------------------------------------------- */
 
 $comptime()
@@ -159,6 +282,28 @@ int main(void) {
   printf("pointer      %d\n", $(ct_through_pointer 7));
   printf("foreach      %d\n", $(ct_count '(a b c d)));
   printf("discard      %d\n", $(ct_discard 1));
+  printf("array-len    %d\n", $(ct_array_len 1));
+  printf("array-grow   %d\n", $(ct_array_grow 1));
+  printf("array-kind   %d %d\n",
+         $(ct_array_is_array 1), $(ct_list_is_list 1));
+  printf("convert-kind %d %d\n", $(ct_to_array_is_array '(1 2)),
+         $(ct_to_list_is_list (List.array '(1 2))));
+  printf("array-arg    %d\n", $(ct_array_argument 1));
+  printf("map-symbol   %d\n", $(ct_map_symbol 5));
+  printf("map-string   %d\n", $(ct_map_string 4));
+  printf("map-empty    %d\n", $(ct_map_empty));
+  printf("map-store    %d\n", $(ct_map_store 9));
+  printf("array-store  %d\n", $(ct_array_store 1));
+  printf("index-list   %d\n", $(ct_index_list '(7 8 9)));
+  printf("index-string %d\n", $(ct_index_string "abc"));
+  printf("index-absent %d\n", $(ct_index_absent '(1 2)));
+  printf("c-array      %d\n", $(ct_c_array 10));
+  printf("c-array-pad  %d\n", $(ct_c_array_padded));
+  printf("c-array-bare %d\n", $(ct_c_array_bare 4));
+  printf("scalar-zero  %d\n", $(ct_scalar_zero));
+  printf("accumulate   %s\n", $(repr (ct_accumulate '(1 2))));
+  printf("table        %s %s\n",
+         $(repr (ct_table "cos")), $(repr (ct_table "nope")));
   printf("is-list      %d\n", $(ct_is_list '(a b)));
   printf("head         %s\n", $(str (ct_head '(a b))));
   printf("len          %d\n", $(ct_len '(a b c)));
