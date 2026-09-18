@@ -387,7 +387,12 @@ static List _static_regions(Compiler c, List ast, Map runtime) {
    and those a `defer` inside one writes through its environment. The flag
    covers a subtree, so a write outside every `try` preserves nothing.
    `holders` gains the pointers the body writes through, whose own locals
-   `_collect_aliased` resolves. */
+   `_collect_aliased` resolves.
+
+   A local that only a callee writes, through an address the body hands it,
+   is not qualified. Taking its address already forces it to memory, so the
+   register `siglongjmp` would restore is not where its value lives, and
+   qualifying it would discard the qualifier at every such call instead. */
 static void _collect_preserved(
   Var value, int in_try, Map names, Map holders) {
   /* A long expression chain nests as deeply as it is long, so the walk keeps
@@ -434,8 +439,10 @@ static void _collect_preserved(
 
 /* Preserve the locals whose address one of `holders` took. A write through
    such a pointer changes the local without naming it, so the local needs the
-   qualifier the write itself does not ask for. */
-static void _collect_aliased(Var value, Map holders, Map names) {
+   qualifier the write itself does not ask for. `pointers` gains the holders
+   that resolved, because their pointee type has to carry the qualifier too. */
+static void _collect_aliased(
+  Var value, Map holders, Map names, Map pointers) {
   Array pending = $auto([value]);
   while (pending.len()) {
     Var current = pending.take_last();
@@ -446,7 +453,10 @@ static void _collect_aliased(Var value, Map holders, Map names) {
       match (target) case %(bind ?binding ?):
         holder = binding_identity_spelling(binding);
       if (!holder) holder = ast_direct_identifier(target);
-      if (addressed && holder && holder in holders) names[addressed] = 1;
+      if (addressed && holder && holder in holders) {
+        names[addressed] = 1;
+        pointers[holder] = 1;
+      }
     }
     foreach (Var child, node) pending.push(child);
   }
@@ -505,24 +515,32 @@ static int _is_automatic(List declaration) {
          !type.is_threaded();
 }
 
-/* A pointer initialized with the address of a preserved local points at a
-   volatile object, so its pointee type must say so or C rejects dropping
-   the qualifier. */
-static List _preserve_pointee(List type, List bindings, Map names) {
-  match (bindings)
-    case %(bindings (op = (bind ? ((!quote *))) ?value)): {
-      String name = ast_addressed_identifier(value);
-      if (name && name in names &&
-          !type.type().flatten_all().contains(<volatile>))
-        return cons(<volatile>, type);
+/* A pointer that holds the address of a preserved local points at a volatile
+   object, so its pointee type must say so or C rejects dropping the
+   qualifier. `pointers` names the holders the walk resolved, which covers a
+   pointer assigned after its declaration; an initializer that takes the
+   address directly says the same thing on its own. */
+static int _declares_pointee(List bindings, Map names, Map pointers) {
+  foreach (List binding, bindings.cdr()) {
+    List declarator = binding;
+    match (binding) case %(op = ?bind ?value): {
+      String addressed = ast_addressed_identifier(value);
+      if (addressed && addressed in names) return 1;
+      declarator = bind;
     }
-  return type;
+    match (declarator) case %(bind ?name ?): {
+      String spelling = binding_identity_spelling(name);
+      if (spelling && spelling in pointers) return 1;
+    }
+  }
+  return 0;
 }
 
-/* Qualify the declarations and parameters the set names. C puts a qualifier
-   on the whole declaration, so a statement declaring several names splits
-   into one declaration each. */
-static Var _preserve(Var value, Map names) {
+/* Qualify the declarations and parameters the sets name. C puts a qualifier
+   on the whole declaration - on the declarator for the object itself, and on
+   the base type for a pointee - so a statement that qualifies any of several
+   names splits into one declaration each. */
+static Var _preserve(Var value, Map names, Map pointers) {
   if (value is not <list> || value.is_nil()) return value;
   List node = value;
   // Only declarations and parameters carry a qualifier, and neither appears
@@ -534,26 +552,29 @@ static Var _preserve(Var value, Map names) {
     case %(block *statements): {
       Array output = [];
       foreach (Var statement, statements) {
-        Var lowered = _preserve(statement, names);
-        List origin = NULL, Var inner = lowered;
+        List origin = NULL, Var inner = statement;
         match (inner) case %(at ?anchor ?wrapped): {
           origin = anchor;
           inner = wrapped;
         }
+        /* Split before qualifying, so a base-type qualifier one declarator
+           needs does not reach the names beside it. */
         match (inner)
           case %(!set ?declaration
                  ((!or declare decl) ?type
                   (!set ?bindings (bindings ? ? *)))):
             if (_is_automatic(declaration) &&
-                _declares_preserved(bindings, names)) {
+                (_declares_preserved(bindings, names) ||
+                 _declares_pointee(bindings, names, pointers))) {
               Symbol head = declaration.car();
               foreach (List binding, bindings.cdr()) {
-                List one = %($head $type (bindings $binding));
+                Var one = _preserve(
+                  %($head $type (bindings $binding)), names, pointers);
                 output.push(origin ? %(at $origin $one) : one);
               }
               continue;
             }
-        output.push(lowered);
+        output.push(_preserve(statement, names, pointers));
       }
       return %(block @{output.list_free()});
     }
@@ -561,7 +582,9 @@ static Var _preserve(Var value, Map names) {
            ((!or declare decl) ?type (!set ?bindings (bindings *)))): {
       Symbol head = declaration.car();
       if (!_is_automatic(declaration)) return node;
-      type = _preserve_pointee(type, bindings, names);
+      if (_declares_pointee(bindings, names, pointers) &&
+          !type.type().flatten_all().contains(<volatile>))
+        type = cons(<volatile>, type);
       Array preserved = [];
       foreach (List binding, bindings.cdr())
         match (binding) {
@@ -574,7 +597,7 @@ static Var _preserve(Var value, Map names) {
     }
   }
   Var child;
-  $ast.rewrite_children(node, child, _preserve(child, names));
+  $ast.rewrite_children(node, child, _preserve(child, names, pointers));
 }
 
 /* Save the returned value before cleanup runs, since cleanup may change the
@@ -697,13 +720,14 @@ static List _function(Compiler compiler, List node) {
       Map runtime = {};
       body = _static_regions(compiler, body, runtime);
       _collect_labels(walk, body, NULL);
-      Map preserved = {}, holders = {};
+      Map preserved = {}, holders = {}, pointers = {};
       _collect_preserved(body, 0, preserved, holders);
-      if (holders.len()) _collect_aliased(body, holders, preserved);
+      if (holders.len())
+        _collect_aliased(body, holders, preserved, pointers);
       List rewritten = _rewrite(walk, body);
       if (preserved.len()) {
-        rewritten = _preserve(rewritten, preserved);
-        bindings = _preserve(bindings, preserved);
+        rewritten = _preserve(rewritten, preserved, pointers);
+        bindings = _preserve(bindings, preserved, pointers);
       }
       state.regions.free();
       return %(function $type $bindings $rewritten);

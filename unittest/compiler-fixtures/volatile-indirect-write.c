@@ -24,6 +24,9 @@ int main(void){
   int volatile through = 1;
   int volatile slot = 1;
   int outside = 1;
+  int volatile later = 1;
+  int volatile twin = 1;
+  int mate = 1;
   Point volatile point ={
     1, 1
   }
@@ -32,6 +35,10 @@ int main(void){
   volatile int * cells = & slot;
   int * quiet = & outside;
   volatile Point * cursor = & point;
+  volatile int * deferred;
+  volatile int * twins = & twin;
+  int * mates = & mate;
+  deferred = & later;
   * quiet = 9;
   {
     ExceptionFrame _x2c_exception_frame_0;
@@ -42,7 +49,7 @@ int main(void){
     _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
   }
   ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
-    direct = 5;  * pointer = 5;  cells[0] = 5;  cursor -> x = 5;  boom();
+    direct = 5;  * pointer = 5;  cells[0] = 5;  cursor -> x = 5;  * deferred = 5;  * twins = 5;  boom();
   }
   else {x2c_exception_landed(& _x2c_exception_frame_0); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
@@ -65,7 +72,7 @@ x2c_error_catch_close(_x2c_error_handler_0);
 _x2c_error_handler_0 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_0);
 }
-printf("%d %d %d %d %d\n", direct, through, slot, point.x, outside);
+printf("%d %d %d %d %d %d %d %d\n", direct, through, slot, point.x, outside, later, twin, * mates);
 return 0;
 }
 
