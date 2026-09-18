@@ -962,13 +962,14 @@ List ad_rev_item(List s, List names) {
 
 $comptime()
 List ad_grad_slots_params(List params) {
-  if (!params) return %();
-  List rest = ad_grad_slots_params(params.cdr());
-  match (params.car()) {
-    case %(param (double) (bind (binding ? ?n) ())):
-      return %((param (double) (bind (${ad_grad(n)}) (*))) @rest);
+  Array slots = [];
+  foreach (List param, params) {
+    match (param) {
+      case %(param (double) (bind (binding ? ?n) ())):
+        slots.push(%(param (double) (bind (${ad_grad(n)}) (*))));
+    }
   }
-  return rest;
+  return slots;
 }
 
 $comptime()
@@ -980,22 +981,24 @@ List ad_grad_params(List params) {
 
 $comptime()
 List ad_param_locals(List params) {
-  if (!params) return %();
-  List rest = ad_param_locals(params.cdr());
-  match (params.car()) {
-    case %(param ?type (bind (binding ? ?n) ())): return %(($n $type) @rest);
+  Array locals = [];
+  foreach (List param, params) {
+    match (param) {
+      case %(param ?type (bind (binding ? ?n) ())): locals.push(%($n $type));
+    }
   }
-  return rest;
+  return locals;
 }
 
 $comptime()
 List ad_param_names(List params) {
-  if (!params) return %();
-  List rest = ad_param_names(params.cdr());
-  match (params.car()) {
-    case %(param ? (bind (binding ? ?n) ())): return %($n @rest);
+  Array names = [];
+  foreach (List param, params) {
+    match (param) {
+      case %(param ? (bind (binding ? ?n) ())): names.push(n);
+    }
   }
-  return rest;
+  return names;
 }
 
 $comptime()
@@ -1006,37 +1009,35 @@ List ad_write_slot(Var n) {
 
 $comptime()
 List ad_hoisted(List locals, List params) {
-  if (!locals) return %();
-  List rest = ad_hoisted(locals.cdr(), params);
-  List entry = locals.car();
-  if (entry.car() in params) return rest;
-  return %($entry @rest);
+  Array out = [];
+  foreach (List entry, locals)
+    if (!(entry.car() in params)) out.push(entry);
+  return out;
 }
 
 $comptime()
 List ad_declare_locals(List locals) {
-  if (!locals) return %();
-  List rest = ad_declare_locals(locals.cdr());
-  List entry = locals.car();
-  List type = entry.cdr().car();
-  List one = ad_declare(type, entry.car(), ad_zero_of(type));
-  return %($one @rest);
+  Array out = [];
+  foreach (List entry, locals) {
+    List type = entry[1];
+    out.push(ad_declare(type, entry.car(), ad_zero_of(type)));
+  }
+  return out;
 }
 
 $comptime()
 List ad_declare_bars(List names) {
-  if (!names) return %();
-  List rest = ad_declare_bars(names.cdr());
-  List one = ad_declare(%(double), ad_bar(names.car()), ad_zero());
-  return %($one @rest);
+  Array out = [];
+  foreach (Var name, names)
+    out.push(ad_declare(%(double), ad_bar(name), ad_zero()));
+  return out;
 }
 
 $comptime()
 List ad_write_slots(List inputs) {
-  if (!inputs) return %();
-  List rest = ad_write_slots(inputs.cdr());
-  List one = ad_write_slot(inputs.car());
-  return %($one @rest);
+  Array out = [];
+  foreach (Var name, inputs) out.push(ad_write_slot(name));
+  return out;
 }
 
 $comptime()
