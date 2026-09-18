@@ -8,6 +8,7 @@ area         28.274334
 globals      1 2
 pointer      12
 foreach      4
+discard      3
 is-list      1
 head         a
 len          3

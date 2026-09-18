@@ -838,9 +838,15 @@ static Var _lower_expression_stmnt(
     /* A call's result can be discarded: it runs for what it writes. */
     case %(expr ? (call ? ?)):
       return _lower_effect(l, _lower_expr(l, e), rest, k);
-    /* `(void) x;` marks a local used and does nothing. */
-    case %(expr (void) (cast (decl (void) ?) ?)):
-      return _lower_block(l, rest, k);
+    /* A cast to `void` discards the result but not the work: `(void) x;`
+       marks a local used and does nothing, while `(void) f();` still calls
+       `f`. Discarding the operand instead would silently drop its effect. */
+    case %(expr (void) (cast (decl (void) ?) ?operand)): {
+      Var value = _lower_expr(l, operand);
+      if (_lower_failed(l, value)) return void;
+      if (_lower_pure(value)) return _lower_block(l, rest, k);
+      return _lower_effect(l, value, rest, k);
+    }
   }
   return _lower_decline(l, "statement with no effect on a local");
 }

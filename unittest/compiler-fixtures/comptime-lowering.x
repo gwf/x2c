@@ -92,6 +92,14 @@ int ct_count(List xs) {
   return n;
 }
 
+/* A cast to `void` discards the result, not the work. */
+$comptime()
+int ct_discard(int n) {
+  (void) n;
+  (void) ct_next();
+  return ct_counter;
+}
+
 /* --- value types --------------------------------------------------------- */
 
 $comptime()
@@ -150,6 +158,7 @@ int main(void) {
   printf("globals      %d %d\n", $(ct_next), $(ct_next));
   printf("pointer      %d\n", $(ct_through_pointer 7));
   printf("foreach      %d\n", $(ct_count '(a b c d)));
+  printf("discard      %d\n", $(ct_discard 1));
   printf("is-list      %d\n", $(ct_is_list '(a b)));
   printf("head         %s\n", $(str (ct_head '(a b))));
   printf("len          %d\n", $(ct_len '(a b c)));
