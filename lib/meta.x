@@ -19,7 +19,12 @@
     This module is not part of the implicit prelude. Include it where the
     `meta` functions are parsed: a `.xmacro` borrows the consuming unit's
     symbol table, so the unit that imports it includes this file.
-    See `plans/meta-functions.md` and the compile-time chapter of the book.
+
+    The declarations below are the signatures. Each operation's semantics are
+    those of the compile-time Lisp operation of the same name, specified under
+    "Compile-time Lisp and imports" in the language reference, which also gives
+    the naming rule and the two answers whose shape differs.
+    See `plans/meta-functions.md`.
 */
 
 #pragma once

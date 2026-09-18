@@ -16,7 +16,9 @@ Translating a compile-time x2c function into Lisp.
 | [`Compiler.install_comptime`](#Compiler.install_comptime) | Lowers `fn` and evaluates the result in the macro session, so the function is callable from compile-time Lisp under its own name. |
 | [`Compiler.lower_comptime`](#Compiler.lower_comptime) | Lowers one compile-time function into the forms the macro session evaluates, or returns `NULL` when the substitution cannot carry it. |
 | [`Compiler.lower_declined`](#Compiler.lower_declined) | Returns why the last `Compiler.lower_comptime` declined, or `NULL`. |
-| [`Compiler.lower_reached_globals`](#Compiler.lower_reached_globals) | Returns whether the last `Compiler.lower_comptime` reached file-scope state, directly or through a callee already recorded as reaching it. |
+| [`Compiler.lower_reached_globals`](#Compiler.lower_reached_globals) | Returns whether the last `Compiler.install_comptime` reached file-scope state, directly or through a callee already recorded as reaching it. |
+| [`Compiler.lower_reached_meta`](#Compiler.lower_reached_meta) | Returns whether the last `Compiler.install_comptime` reached a `Meta` operation, directly or through a callee already recorded as reaching one. |
+| [`Compiler.meta_is_comptime_only`](#Compiler.meta_is_comptime_only) | Returns whether `fn` is a `meta` function this compiler recorded as compile-time only, whose runtime form the unit does not emit. |
 
 ### `Compiler`
 
@@ -35,7 +37,7 @@ installed folds, so an import's runtime definition keeps the run-time
 call that designates the unit emitting it. Evaluation runs in the macro
 session; a raise there leaves the call.
 
-Source: `src/comptime.x:1674`
+Source: `src/comptime.x:1728`
 
 <a id="Compiler.install_comptime"></a>
 #### Compiler.install_comptime
@@ -47,7 +49,7 @@ function is callable from compile-time Lisp under its own name.
 Returns whether the lowering succeeded. This method mutates the macro
 session and does not open a semantic transaction.
 
-Source: `src/comptime.x:1605`
+Source: `src/comptime.x:1639`
 
 <a id="Compiler.lower_comptime"></a>
 #### Compiler.lower_comptime
@@ -60,7 +62,7 @@ The result is the loop definitions the body needed followed by the
 function's own, in evaluation order. This method does not open a
 semantic transaction.
 
-Source: `src/comptime.x:1482`
+Source: `src/comptime.x:1510`
 
 <a id="Compiler.lower_declined"></a>
 #### Compiler.lower_declined
@@ -69,17 +71,37 @@ Source: `src/comptime.x:1482`
 
 Returns why the last `Compiler.lower_comptime` declined, or `NULL`.
 
-Source: `src/comptime.x:1538`
+Source: `src/comptime.x:1569`
 
 <a id="Compiler.lower_reached_globals"></a>
 #### Compiler.lower_reached_globals
 
 `int Compiler.lower_reached_globals(Compiler compiler)`
 
-Returns whether the last `Compiler.lower_comptime` reached file-scope
+Returns whether the last `Compiler.install_comptime` reached file-scope
 state, directly or through a callee already recorded as reaching it.
 
-Source: `src/comptime.x:1631`
+Source: `src/comptime.x:1667`
+
+<a id="Compiler.lower_reached_meta"></a>
+#### Compiler.lower_reached_meta
+
+`int Compiler.lower_reached_meta(Compiler compiler)`
+
+Returns whether the last `Compiler.install_comptime` reached a `Meta`
+operation, directly or through a callee already recorded as reaching one.
+
+Source: `src/comptime.x:1675`
+
+<a id="Compiler.meta_is_comptime_only"></a>
+#### Compiler.meta_is_comptime_only
+
+`int Compiler.meta_is_comptime_only(Compiler c, List fn)`
+
+Returns whether `fn` is a `meta` function this compiler recorded as
+compile-time only, whose runtime form the unit does not emit.
+
+Source: `src/comptime.x:1683`
 
 ## Design notes
 

@@ -878,6 +878,31 @@ keeps both forms. It mentions none of `ms_fields`, `ms_field_reads`, `ms_reads`,
 `ms_total_call`, `ms_names`, `ms_count` or `ms_spelling`, and the program prints
 the same answers a runtime implementation would.
 
+### What it costs
+
+`make build` is clean with no new warnings, `make verify-fixtures` reports 727
+passed against 726 before - the new fixture - with `comptime-autodiff.stdout`
+byte-identical, and `make verify` reports 915 passed, 0 failed.
+
+Two measurements, each the minimum of interleaved runs of the two compilers on
+one host whose load average was about 9, so read the difference between the
+columns rather than the absolute numbers.
+
+| what | without M6 | with M6 |
+| --- | --- | --- |
+| `comptime-autodiff.x`, 106 compile-time functions | 928 ms | 921 ms |
+| `meta-import.x`, the 30 rows' own session cost | 81 ms | 80 ms |
+
+The first is eight interleaved pairs and isolates the compiler change,
+including the extra `_lower_coerce` per argument. The second swaps
+`etc/comptime.xlisp` under one binary, so it is the cost of evaluating 30 more
+`defun` forms in every compile-time Lisp session; it does not register.
+
+Both binaries have to sit in `builds/0` for this. The same binary run from
+`debug/bin` translated `comptime-autodiff.x` in 1.5 s rather than 0.93 s,
+because the repository root it discovers decides whether it replays
+`lib/x2c.xi` as the prelude.
+
 ## Compatibility
 
 `meta` is contextual, so no identifier breaks; the one in-tree use is a `List`
@@ -916,9 +941,15 @@ milestone is declined. M4 expected to reuse the literal-fold cache rather
 than add a value serializer; its own scouting found the cache cannot
 represent the constants, and it is declined too. Both are recorded above
 rather than removed, because each names what a later design would have to
-beat. The only lasting new mechanism is the contextual `meta` marker, and it
-exists because the parser must know a fact before macro expansion that no
-macro can tell it.
+beat. M6 wrote no implementation at all: the `_sdk_*` operations already
+existed, so it is a declaration file and a table of forwarding rows, and it
+reuses M5's propagation rather than adding a second one.
+
+Two lasting new mechanisms. The contextual `meta` marker exists because the
+parser must know a fact before macro expansion that no macro can tell it. The
+`Meta` namespace exists because a declaration is how x2c names an operation,
+and it earns a second job: the namespace is what makes "compile-time only"
+derivable without a keyword.
 
 **Why this is idiomatic x2c.** `meta` sits where `static` and `inline` sit and
 states the same kind of fact about a declaration. Contextual recognition
