@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/comptime-declines-meta.x:11:1: macro: this function cannot run at compile time
+  meta int mt_goto(int n) {
+  ^^^^
+  note: reason: a goto has no lowering
+

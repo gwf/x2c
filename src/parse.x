@@ -1613,6 +1613,38 @@ static int _script_declaration_stays(Compiler c) {
   return 0;
 }
 
+/* A declarator declares a function when it ends in a parameter group: the
+   group is the token before the body or the `;` that closes the row. Any
+   other terminator belongs to an object declaration, and an opening brace
+   that no group precedes belongs to an aggregate, which is the case the
+   script test above answers differently. */
+static int _declares_function(Compiler c, Token token) {
+  Symbol previous = 0;
+  for (; token.type != <eof>;
+       previous = token.type, token = token.after_group()) {
+    if (token.type == <;> || token.type == <"{">) return previous == <(>;
+    if (token.type == <=>)
+      return previous == <(> &&
+             c.skip_trivia_from(token + 1).type == <">">;
+  }
+  return 0;
+}
+
+/** Reports whether the current tokens begin a `meta` function declaration.
+    `meta` is contextual: it marks a function the compiler runs at compile
+    time as well as emits, and stays an ordinary identifier wherever the
+    tokens after it do not declare or define a function. This query does not
+    consume tokens.
+*/
+int Compiler.meta_form_is_definition(Compiler c) {
+  if (c.peek(0) != <ident> || c.token.text != "meta") return 0;
+  Token head = c.token;
+  c.next();
+  int marker = c.test_declaration() && _declares_function(c, c.token);
+  c.token = head;
+  return marker;
+}
+
 /** Reports whether the top-level item at the cursor is one of a script
     unit's statements, which become `main`'s body.
     Preprocessor lines, imports, protocols, compile-time definitions and
@@ -1627,7 +1659,7 @@ int Compiler.script_statement_starts(Compiler c) {
       return 0;
   }
   if (c.test_static_assert() || c.keyword_form_is_definition() ||
-      c.macro_form_is_definition())
+      c.macro_form_is_definition() || c.meta_form_is_definition())
     return 0;
   if (c.peek(0) == <ident> && c.token.text == "with") return 1;
   if (c.macro_starts_target_at(AST_UNIT)) return !c.macro_targets_unit();
@@ -1708,8 +1740,17 @@ List Compiler.parse_top_level(Compiler c) {
         %( "module initialization: void TYPE.initialize(void)" ));
   }
   if (c.macro_form_is_definition()) return c.parse_macro_definition();
+  Token meta = NULL;
+  if (c.meta_form_is_definition()) {
+    meta = c.token;
+    c.next();
+  }
   List decl = c.parse_declaration_row();
   if (c.test(<;>)) {
+    if (meta)
+      c.report_error(
+        <parse>, "a meta function needs a body", meta,
+        %("the compiler runs the body, so a prototype has nothing to run"));
     c.record_declaration_visibility(decl);
     return decl;
   }
@@ -1719,6 +1760,7 @@ List Compiler.parse_top_level(Compiler c) {
         <parse>, "a function definition cannot share a declaration row",
         c.token, NULL);
     List function = _finish_function_definition(c, decl);
+    if (meta) c.install_meta_function(function, meta);
     c.record_declaration_visibility(function);
     return function;
   }

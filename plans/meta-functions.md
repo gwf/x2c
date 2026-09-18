@@ -66,15 +66,38 @@ There is no opt-out spelling. A meta function whose runtime form cannot be
 emitted has no caller today, and inventing `meta only` before one exists would
 be machinery without a user.
 
-## M1 - the parser marker
+## M1 - the parser marker (done)
 
-Recognise `meta` contextually at file scope in `src/parse.x`, alongside the
-existing `keyword_form_is_definition` test, and carry the fact on the
-declaration. The decorator stays working throughout; `meta` is a second
-spelling for the same effect until M4, not a replacement.
+`Compiler.meta_form_is_definition` in `src/parse.x` recognises the word, and
+`Compiler.install_meta_function` in `src/macros.x` runs the install the
+decorator's SDK native runs. `comptime-lowering.x` prints `mt_poly` and
+`ct_poly` at compile time and at run time, four equal answers, and
+`comptime-declines-meta` pins the refusal.
 
-Deliverable: `meta int f(int n) { ... }` installs and emits exactly what
-`$comptime()` does today, proven by the same fixture entry written both ways.
+Three facts the work established.
+
+- **The contextual test needs both halves.** `test_declaration()` at the
+  token after `meta` rejects `meta f(int);` where `meta` is a typedef name,
+  and a scan for a declarator ending in a parameter group rejects
+  `meta int x = 3;`. Either test alone accepts something the other refuses.
+- **The macro session is lazy.** `_ensure_lisp` runs on a Lisp form, an
+  import, or a macro expansion, so the decorator always had a session by the
+  time its native ran. A marker in the parser has none, and
+  `install_comptime` aborted on a null `macro_lisp`. The install therefore
+  belongs beside `_ensure_lisp` in `src/macros.x`, doing what
+  `_eval_template_form` does before it: run pending declaration effects,
+  then ensure the session.
+- **Collection has to skip the word too.** `_shallow_finish_declaration`
+  reads the runtime declaration; without the skip it takes `meta` for the
+  type.
+
+One diagnostic beyond the shared refusal: `meta` on a prototype reports that
+a meta function needs a body, because there is nothing to install and a
+silent acceptance would look like the compile-time form existed.
+
+The decorator stays working; `meta` is a second spelling for the same effect
+until M4, not a replacement. The book gains nothing here because it does not
+document compile-time x2c functions at all yet.
 
 ## M2 - the import loop
 

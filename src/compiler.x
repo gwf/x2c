@@ -876,6 +876,9 @@ static void _report_script_statement(Compiler c) {
 }
 
 static void _shallow_finish_declaration(Compiler c) {
+  /* Collection records the runtime function a `meta` marker precedes; the
+     compile-time form is installed by the full parse. */
+  if (c.meta_form_is_definition()) c.next();
   List declaration = _shallow_parse_declaration(c);
   if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> ||
       c._at_function_arrow()) {
