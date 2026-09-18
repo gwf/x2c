@@ -394,6 +394,12 @@ longer true.
 
 ## Phase 5 - port the remaining macro Lisp (blocked)
 
+**Blocked, and the capability is now planned in `plans/meta-functions.md`.**
+That plan's M2 adds the import-loop branch this phase needs. One correction to
+what follows: the branch does not need to emit nothing. `x2c.comptime.install`
+already returns `%($fn)`, so a compile-time function is emitted as a native
+function today, and emission from an import is the ordinary header problem.
+
 **Blocked on a missing capability, established 2026-09-18.** There is nowhere
 to put a compile-time function that a shipped macro can rely on. Three probes,
 all against the merged pass:
@@ -738,7 +744,13 @@ silent wrong answer: both defects found here — a pattern that never fired and
 a discarded operand whose call never ran — produced plausible output rather
 than an error.
 
-## The decision that gates a reserved word
+## The decision that gates a reserved word (decided)
+
+**Decided 2026-09-18: the word is `meta`, contextual, and both forms are
+emitted.** See `plans/meta-functions.md`. The analysis below stands except
+for one claim it rests on: a compile-time function does *not* omit its
+runtime form, and never did.
+
 
 Not scheduled, and deliberately left until Phases 2-4 land. Recorded here
 because it is the thing most likely to be discovered late.
