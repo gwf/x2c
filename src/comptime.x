@@ -44,10 +44,13 @@ static String lower_missing_callee;
 /* --- names ------------------------------------------------------------- */
 
 /* `Atom.intern` gives an `lsym` for a spelling too long to pack into a
-   Symbol, so a generated name is readable and cannot collide by truncation. */
+   Symbol, so a generated name is readable and cannot collide by truncation.
+   Every function shares one macro session, so the name carries the function
+   it belongs to: a counter alone made two functions with the same shape
+   define the same loop, and the second silently replaced the first. */
 static Var _lower_name(Lowering l, String stem) {
   l.counter++;
-  return Atom.intern(%"$stem${l.counter}");
+  return Atom.intern(%"$stem${l.counter}-${l.own}");
 }
 
 /* --- the single scan --------------------------------------------------- */
