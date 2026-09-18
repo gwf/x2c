@@ -254,6 +254,15 @@ static Var _lower_read(Lowering l, int id) {
   return _lower_decline(l, "unbound local");
 }
 
+/* The value a local holds. A cell's slot is its box, so reading one loads
+   through it; every other slot already is the value. */
+static Var _lower_value(Lowering l, int id) {
+  Var slot = _lower_read(l, id);
+  if (_lower_failed(l, slot)) return void;
+  if (l.cells.contains(id)) return %(C.load $slot);
+  return slot;
+}
+
 /* --- literals ----------------------------------------------------------- */
 
 static Var _lower_number(Lowering l, List type, String text) {
@@ -375,23 +384,39 @@ static Var _lower_quoted(Lowering l, Var node) {
 /* --- expressions -------------------------------------------------------- */
 
 static Var _lower_expr(Lowering l, Var form);
+static Var _lower_coerce(List want, Var node, Var value);
 
-static List _lower_args(Lowering l, List args) {
+/* The parameter type at one argument's position, or nothing where the callee
+   declares none: a variadic tail, or a call the compiler constructed. The two
+   spellings are the ones `_typed_call` aligns its conversions against. */
+static List _lower_param_type(List params) {
+  if (!params) return NULL;
+  List param = params.car();
+  if (param && param.car() == <param>) return param.type_from_ast();
+  return param;
+}
+
+static List _lower_args(Lowering l, List params, List args) {
   Array values = [];
   defer values.free();
-  foreach (List argument, args) {
+  for (List p = params, a = args; a; p = p.cdr(), a = a.cdr()) {
+    List argument = a.car();
     match (argument) case %(expr (void) ()): continue;
     Var value = _lower_expr(l, argument);
     if (_lower_failed(l, value)) return NULL;
-    values.push(value);
+    values.push(_lower_coerce(_lower_param_type(p), argument, value));
   }
   return values;
 }
 
 /* A call is a direct Lisp call: the callee's name is a session global, so
-   the lowered code pays a lookup and nothing more. */
-static Var _lower_call(Lowering l, String name, List args) {
-  List values = _lower_args(l, args);
+   the lowered code pays a lookup and nothing more. Its type carries the
+   parameter types the arguments have to reach, and carries none where the
+   compiler constructed the call itself. */
+static Var _lower_call(Lowering l, List callee, String name, List args) {
+  List params = NULL;
+  match (callee) case %((func ?declared) *): params = declared;
+  List values = _lower_args(l, params, args);
   if (l.declined) return void;
   return cons(Atom.intern(name), values);
 }
@@ -599,9 +624,7 @@ static Var _lower_content(Lowering l, List type, Var content) {
     case %(literal ?ltype ?(String text) ?):
       return _lower_number(l, ltype, text);
     case %(segments *parts):              return _lower_segments(l, parts);
-    case %(ident (binding ?(int id) ?)):
-      return l.cells.contains(id) ? %(C.load ${_lower_read(l, id)})
-                                  : _lower_read(l, id);
+    case %(ident (binding ?(int id) ?)): return _lower_value(l, id);
     case %(parens ?inner):                return _lower_expr(l, inner);
     case %(cast ? ?inner):                return _lower_expr(l, inner);
     case %(expr ?inner ?within):          return _lower_content(l, inner, within);
@@ -614,10 +637,11 @@ static Var _lower_content(Lowering l, List type, Var content) {
       if (operator == <"*">) return %(C.load ${_lower_expr(l, operand)});
       return _lower_operands(l, operator, %($operand));
     }
-    case %(call (expr ? (ident (binding ? ?(String name)))) (args *args)):
-      return _lower_call(l, name, args);
+    case %(call (expr ?callee (ident (binding ? ?(String name))))
+                (args *args)):
+      return _lower_call(l, callee, name, args);
     case %(call ?(String name) (args *args)):
-      return _lower_call(l, name, args);
+      return _lower_call(l, NULL, name, args);
     case %(op ?operator *operands):
       return _lower_operands(l, operator, operands);
     case %(array *items):                 return _lower_array(l, items);
@@ -1148,11 +1172,12 @@ static Var _lower_braced(Lowering l, List type, int id, List items) {
   return _lower_decline(l, "a braced initializer for this type");
 }
 
-/* A declaration and a return both name a type the value has to reach, and
-   neither carries the conversion the transform would insert later. An
-   assignment does carry it, so this sees only the two places that do not.
-   Only the pairs a Lisp value can tell apart need one: a `Symbol` is not a
-   `String`, and an `Array` is not a `List`. */
+/* A declaration, a return, and an argument each name a type the value has to
+   reach, and none of them carries the conversion the transform would insert
+   later; an assignment does carry it. Only the pairs a Lisp value can tell
+   apart need one: a `Symbol` is not a `String`, and an `Array` is not a
+   `List`. Without the argument case an `Array` reached a `List` parameter and
+   the native adapter refused it. */
 static Var _lower_coerce(List want, Var node, Var value) {
   match (node)
     case %(expr ?from ?): {
@@ -1320,7 +1345,7 @@ static Var _lower_update(
     Var combined = %(_binary (C.gread $id) (quote $operator) $right);
     return _lower_effect(l, %(C.gwrite $id $combined), rest, k);
   }
-  Var current = _lower_read(l, id);
+  Var current = _lower_value(l, id);
   if (_lower_failed(l, current)) return void;
   Var combined = %(_binary $current (quote $operator) $right);
   if (l.cells.contains(id))
