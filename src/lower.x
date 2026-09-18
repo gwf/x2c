@@ -32,11 +32,14 @@ typedef struct Lowering {
   Compiler compiler;
   Map env, locals, cells, arrays;
   Array definitions;
+  String own;
   int counter, declined, on_loop, in_loop, rejected, uncallable;
 } *Lowering;
 
-/* Why the last lowering declined, for the diagnostic at the invocation. */
+/* Why the last lowering declined, for the diagnostic at the invocation, and
+   the callee that has no compile-time binding when that is the reason. */
 static String lower_declined_reason;
+static String lower_missing_callee;
 
 /* --- names ------------------------------------------------------------- */
 
@@ -103,20 +106,29 @@ static void _lower_scan_bind(Lowering l, List form) {
 }
 
 /* A callee is reachable when the macro session already binds its name: a
-   native from `etc/lisp-lower.xlisp`, or a function this pass installed. */
+   native from `etc/lisp-lower.xlisp`, or a function this pass installed. The
+   function being lowered is reachable from itself, because the definition
+   binds its name before anything calls it. */
 static int _lower_known(Lowering l, String name) {
   Var value;
+  if (l.own && l.own.equal(name)) return 1;
   return l.compiler.macro_lisp.try_get(name, &value);
 }
 
 static void _lower_scan_call(Lowering l, List form) {
   match (form) {
     case %(call (expr ? (ident (binding ? ?(String name)))) ?): {
-      if (!_lower_known(l, name)) l.uncallable = 1;
+      if (!_lower_known(l, name)) {
+        l.uncallable = 1;
+        lower_missing_callee = name;
+      }
       return;
     }
     case %(call ?(String name) ?): {
-      if (!_lower_known(l, name)) l.uncallable = 1;
+      if (!_lower_known(l, name)) {
+        l.uncallable = 1;
+        lower_missing_callee = name;
+      }
       return;
     }
   }
@@ -261,6 +273,23 @@ static Var _lower_address(Lowering l, int id) {
   return slot;
 }
 
+/* An interpolated string joins its parts; each part already carries the
+   conversion the type needs. */
+static Var _lower_segments(Lowering l, List parts) {
+  Array values = [];
+  foreach (List part, parts) {
+    Var inner = part;
+    match (part) case %(!or (segvar ?node) (segexp ?node)): inner = node;
+    Var value = _lower_expr(l, inner);
+    if (_lower_failed(l, value)) {
+      values.free();
+      return void;
+    }
+    values.push(value);
+  }
+  return cons(Atom.intern("string-append"), values.list_free());
+}
+
 /* A folded constant used as a value. */
 static Var _lower_quoted(Lowering l, Var node) {
   Var value = _lower_constant(l, node);
@@ -397,6 +426,7 @@ static Var _lower_content(Lowering l, List type, Var content) {
       return _lower_number(l, ltype, text);
     case %(literal ?ltype ?(String text) ?):
       return _lower_number(l, ltype, text);
+    case %(segments *parts):              return _lower_segments(l, parts);
     case %(ident (binding ?(int id) ?)):
       return l.cells.contains(id) ? %(C.load ${_lower_read(l, id)})
                                   : _lower_read(l, id);
@@ -804,6 +834,10 @@ static Var _lower_expression_stmnt(
         l, target, applied, _lower_expr(l, rhs), rest, k);
     }
   }
+  /* A call's result can be discarded: it runs for what it writes. */
+  match (e)
+    case %(expr ? (call ? ?)):
+      return _lower_effect(l, _lower_expr(l, e), rest, k);
   return _lower_decline(l, "statement with no effect on a local");
 }
 
@@ -872,7 +906,7 @@ List Compiler.lower_comptime(Compiler compiler, List fn) {
   struct Lowering state = {
     .compiler = compiler, .env = {}, .locals = {}, .cells = {},
     .arrays = {}, .definitions = [], .counter = 0, .declined = 0,
-    .on_loop = 0, .in_loop = 0, .rejected = 0, .uncallable = 0
+    .own = NULL, .on_loop = 0, .in_loop = 0, .rejected = 0, .uncallable = 0
   };
   Lowering l = &state;
   match (fn) {
@@ -880,10 +914,12 @@ List Compiler.lower_comptime(Compiler compiler, List fn) {
                             ((fnmod (params *params)))) (block *items)): {
       (void) spec;
       lower_declined_reason = NULL;
+      l.own = name;
       _lower_scan(l, fn);
       _lower_scan(l, fn);
       if (l.rejected) lower_declined_reason = "unsupported construct";
-      else if (l.uncallable) lower_declined_reason = "callee has no binding";
+      else if (l.uncallable)
+        lower_declined_reason = "no binding for " + lower_missing_callee;
       else if (l.arrays.len()) lower_declined_reason = "declares an array";
       if (l.rejected || l.uncallable || l.arrays.len()) {
         l.definitions.free();
