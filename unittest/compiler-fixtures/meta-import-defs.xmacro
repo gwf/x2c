@@ -1,16 +1,21 @@
 /*  meta-import-defs.xmacro -- macros whose implementation is x2c
 
-    A `meta` declaration in a macro import installs the function in the
-    consuming unit's macro session, so the macro bodies below call x2c rather
-    than Lisp. Each consuming unit emits its own copy of the definition,
-    which is why they are `static`. See `plans/meta-functions.md`.
+    A `meta` declaration in a macro import installs its compile-time form in
+    every consuming unit's macro session, so the macro bodies below call x2c
+    rather than Lisp. The runtime form is separate: a unit emits only the
+    definitions it reaches, and the storage class written here says what it
+    emits. `static` gives that unit its own copy; public names the one copy
+    the program links, which the reaching unit's header exports. See
+    `plans/meta-functions.md`.
 */
 
 $(import "meta-import-nested.xmacro")
 
 /* A dotted path spelled as one identifier. This is the string and list work
-   a shipped macro family writes in Lisp today. */
-meta static String mi_flatten(String path, String sep) =>
+   a shipped macro family writes in Lisp today. Public, and no unit calls it
+   directly, so it is emitted by the unit that reaches it through the two
+   below. */
+meta String mi_flatten(String path, String sep) =>
   sep.join(path.split("."));
 
 /* Both spellings the macros below need. Each calls the function above, so
@@ -22,6 +27,10 @@ meta static String mi_accessor(String path) =>
 
 meta static int mi_depth(String path) => path.split(".").len();
 
+/* Only `$probe.tag` calls this one, and a macro call is a compile-time use,
+   so no unit emits a runtime definition for it. */
+meta static String mi_tag(String path) => %"<${path.replace(".", "/")}>";
+
 macro Expression $probe.constant(Expr $path) => (
   $(x2c.literal.string (mi_constant (x2c.source.text $path)))
 )
@@ -32,6 +41,10 @@ macro Expression $probe.accessor(Expr $path) => (
 
 macro Expression $probe.depth(Expr $path) => (
   $(x2c.literal.int (mi_depth (x2c.source.text $path)))
+)
+
+macro Expression $probe.tag(Expr $path) => (
+  $(x2c.literal.string (mi_tag (x2c.source.text $path)))
 )
 
 /* `mi_dashed` arrives through this file's own import, so the nested
