@@ -133,8 +133,10 @@ typedef struct Compiler {
      declared, so a macro import's own compiler keeps its entries and no unit
      folds a call another unit's emission designates. `meta_impure` names the
      functions that reach file-scope state, whose two forms disagree; it is
-     shared with an import's compiler, which installs into the same session. */
-  Map meta_folds, meta_impure;
+     shared with an import's compiler, which installs into the same session.
+     `meta_comptime` names the ones that reach a `Meta` operation and so have
+     no runtime form at all: no unit emits one and no call to one folds. */
+  Map meta_folds, meta_impure, meta_comptime;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   /* A macro import whose protocol registries are installed on first use;
      `Compiler.protocol_members_for` owns the installation. */
@@ -270,6 +272,7 @@ void Compiler.borrow_unit_semantics(Compiler compiler, Compiler owner) {
   compiler.protocol_helpers = owner.protocol_helpers;
   compiler.proto_cache = owner.proto_cache;
   compiler.meta_impure = owner.meta_impure;
+  compiler.meta_comptime = owner.meta_comptime;
 }
 
 /** Moves collected child reports into the caller's store without re-emitting.
@@ -312,6 +315,7 @@ static Compiler _new(Compiler owner) {
     _.fn_defs = {};
     _.meta_folds = {};
     _.meta_impure = {};
+    _.meta_comptime = {};
     if (owner) {
       /* A child compiler owns its tokens, symbols, and diagnostics. Package
          registries and generated-name state belong to the whole translation
@@ -1640,7 +1644,9 @@ static void _collect_binding_references(Var node, Map referenced) {
    in import order. A `meta` function has two lifetimes: every importing unit
    installs its compile-time form, and the runtime definition belongs where
    it is called. A unit that calls one only during translation emits nothing
-   for it, and a definition an emitted one calls comes with it. */
+   for it, and a definition an emitted one calls comes with it. A
+   compile-time-only one has no runtime form to emit, so a unit that calls it
+   at run time reaches the link error that names it. */
 static void _append_meta_definitions(Compiler c, Array nodes) {
   if (!c.meta_defs.len()) return;
   Map referenced = {}, reached = {};
@@ -1659,7 +1665,7 @@ static void _append_meta_definitions(Compiler c, Array nodes) {
   }
   foreach (List definition, c.meta_defs)
     match (definition) case %(function ? (bind (binding ?identity ?) *) ?):
-      if (identity in reached) {
+      if (identity in reached && !c.meta_is_comptime_only(definition)) {
         _record_top_level_function_state(c, definition);
         nodes.push(definition);
       }
@@ -1679,6 +1685,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
      the previous pass's numbering would name a different binding. */
   c.meta_folds = {};
   c.meta_impure = {};
+  c.meta_comptime = {};
   c.fixed = {};
   c.init_tokens = {};
   c.static_init_deps = {};

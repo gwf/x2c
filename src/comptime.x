@@ -36,7 +36,7 @@ typedef struct Lowering {
   Array definitions;
   String own;
   List on_break, on_continue;
-  int declined, on_loop, in_loop, rejected, uncallable, globals;
+  int declined, on_loop, in_loop, rejected, uncallable, globals, meta_only;
 } *Lowering;
 
 /* Why the last lowering declined, for the diagnostic at the invocation, and
@@ -49,6 +49,12 @@ static String lower_missing_callee;
    no unit initializer writes, so the two forms of such a function answer
    differently and a call to it cannot be folded. */
 static int lower_reached_globals;
+
+/* Whether the last lowering reached a `Meta` operation, directly or through a
+   callee that does. Those operations exist only inside a compiler, so such a
+   function has no valid runtime form: the unit emits no definition for it and
+   a call to it is never folded. */
+static int lower_reached_meta;
 
 /* The callee names the last successful lowering resolved through the macro
    session, which is the only unit-dependent input it had. */
@@ -152,9 +158,15 @@ static int _lower_known(Lowering l, String name) {
   return 1;
 }
 
+/* The compiler surface `lib/meta.x` declares is the `Meta` namespace, and
+   nothing else declares into it, so a callee spelled this way names an
+   operation that exists only inside a compiler. */
+static int _lower_compiler_operation(String name) => name.startswith("Meta_");
+
 /* A callee this pass already installed carries its own reach to file-scope
-   state, so the caller inherits it. A callee is always installed first: the
-   scan refuses a name the session does not bind. */
+   state and to the compiler surface, so the caller inherits both. A callee is
+   always installed first: the scan refuses a name the session does not
+   bind. */
 static void _lower_scan_callee(Lowering l, String name) {
   if (!_lower_known(l, name)) {
     l.uncallable = 1;
@@ -162,6 +174,9 @@ static void _lower_scan_callee(Lowering l, String name) {
     return;
   }
   if (l.compiler.meta_impure.contains(name)) l.globals = 1;
+  if (_lower_compiler_operation(name) ||
+      l.compiler.meta_comptime.contains(name))
+    l.meta_only = 1;
 }
 
 static void _lower_scan_call(Lowering l, List form) {
@@ -376,22 +391,53 @@ static Var _lower_quoted(Lowering l, Var node) {
 
 static Var _lower_expr(Lowering l, Var form);
 
-static List _lower_args(Lowering l, List args) {
+/* A declaration, a return and an argument each name a type the value has to
+   reach, and none of them carries the conversion the transform would insert
+   later. An assignment does carry it, so this sees only the places that do
+   not. Only the pairs a Lisp value can tell apart need one: a `Symbol` is not
+   a `String`, and an `Array` is not a `List`. */
+static Var _lower_coerce(List want, Var node, Var value) {
+  match (node)
+    case %(expr ?from ?): {
+      if (want.equal(from)) return value;
+      if (want.equal(%("List")) && from.equal(%("Array")))
+        return %(Array_list $value);
+      if (want.equal(%("Array")) && from.equal(%("List")))
+        return %(List_array $value);
+      if (want.equal(%("String")) && from.equal(%("Symbol")))
+        return %(Symbol_str $value);
+    }
+  return value;
+}
+
+/* An argument is the third place the syntax does not carry the conversion,
+   so a parameter's type coerces its argument the same way a declaration
+   does. Without this a `List` parameter receives the `Array` an array
+   literal produced and the operation raises. `parameters` runs out before
+   `args` for a variadic callee, whose extra arguments name no type. */
+static List _lower_args(Lowering l, List parameters, List args) {
   Array values = [];
   defer values.free();
   foreach (List argument, args) {
     match (argument) case %(expr (void) ()): continue;
     Var value = _lower_expr(l, argument);
     if (_lower_failed(l, value)) return NULL;
-    values.push(value);
+    if (!parameters) {
+      values.push(value);
+      continue;
+    }
+    values.push(_lower_coerce(parameters.car(), argument, value));
+    parameters = parameters.cdr();
   }
   return values;
 }
 
 /* A call is a direct Lisp call: the callee's name is a session global, so
    the lowered code pays a lookup and nothing more. */
-static Var _lower_call(Lowering l, String name, List args) {
-  List values = _lower_args(l, args);
+static Var _lower_call(Lowering l, String name, List signature, List args) {
+  List parameters = NULL;
+  match (signature) case %((func ?params) *): parameters = params;
+  List values = _lower_args(l, parameters, args);
   if (l.declined) return void;
   return cons(Atom.intern(name), values);
 }
@@ -614,10 +660,11 @@ static Var _lower_content(Lowering l, List type, Var content) {
       if (operator == <"*">) return %(C.load ${_lower_expr(l, operand)});
       return _lower_operands(l, operator, %($operand));
     }
-    case %(call (expr ? (ident (binding ? ?(String name)))) (args *args)):
-      return _lower_call(l, name, args);
+    case %(call (expr ?signature (ident (binding ? ?(String name))))
+                (args *args)):
+      return _lower_call(l, name, signature, args);
     case %(call ?(String name) (args *args)):
-      return _lower_call(l, name, args);
+      return _lower_call(l, name, NULL, args);
     case %(op ?operator *operands):
       return _lower_operands(l, operator, operands);
     case %(array *items):                 return _lower_array(l, items);
@@ -1148,25 +1195,6 @@ static Var _lower_braced(Lowering l, List type, int id, List items) {
   return _lower_decline(l, "a braced initializer for this type");
 }
 
-/* A declaration and a return both name a type the value has to reach, and
-   neither carries the conversion the transform would insert later. An
-   assignment does carry it, so this sees only the two places that do not.
-   Only the pairs a Lisp value can tell apart need one: a `Symbol` is not a
-   `String`, and an `Array` is not a `List`. */
-static Var _lower_coerce(List want, Var node, Var value) {
-  match (node)
-    case %(expr ?from ?): {
-      if (want.equal(from)) return value;
-      if (want.equal(%("List")) && from.equal(%("Array")))
-        return %(Array_list $value);
-      if (want.equal(%("Array")) && from.equal(%("List")))
-        return %(List_array $value);
-      if (want.equal(%("String")) && from.equal(%("Symbol")))
-        return %(Symbol_str $value);
-    }
-  return value;
-}
-
 /* An array literal knows it is an `Array`, so only a `List` destination
    needs the conversion. A braced initializer knows nothing, so its
    destination decides outright. */
@@ -1484,10 +1512,12 @@ List Compiler.lower_comptime(Compiler compiler, List fn) {
     .compiler = compiler, .env = {}, .locals = {}, .cells = {},
     .arrays = {}, .callees = {}, .definitions = [], .declined = 0,
     .own = NULL, .on_break = NULL, .on_continue = NULL, .on_loop = 0,
-    .in_loop = 0, .rejected = 0, .uncallable = 0, .globals = 0
+    .in_loop = 0, .rejected = 0, .uncallable = 0, .globals = 0,
+    .meta_only = 0
   };
   Lowering l = &state;
   lower_reached_globals = 1;
+  lower_reached_meta = 0;
   match (fn) {
     case %(function ?spec (bind (binding ? ?(String name))
                             ((fnmod (params *params)))) (block *items)): {
@@ -1526,6 +1556,7 @@ List Compiler.lower_comptime(Compiler compiler, List fn) {
       l.definitions.push(
         %(def ${Atom.intern(name)} (lambda ${slots.list()} $body)));
       lower_reached_globals = l.globals;
+      lower_reached_meta = l.meta_only;
       lower_session_callees = l.callees.keys();
       return l.definitions.list_free();
     }
@@ -1550,9 +1581,11 @@ String Compiler.lower_declined(Compiler compiler) {
    the same wherever that file is read. They are kept for the process and
    evaluated again in each unit, because a Lisp session belongs to one unit.
 
-   Process cache: "path#name" -> `(forms callees)`. Entries outlive the
-   per-unit `Context`, so a retained entry belongs to `lowered_scope` and to
-   the outermost value pools. */
+   Process cache: "path#name" -> `(forms callees globals meta)`. The two
+   facts travel with the forms because a reused entry installs without
+   lowering, and the caller reads them to decide folding and emission.
+   Entries outlive the per-unit `Context`, so a retained entry belongs to
+   `lowered_scope` and to the outermost value pools. */
 static Map lowered_defs = NULL, static Scope lowered_scope = NULL;
 
 static void _lowered_shutdown(void) {
@@ -1592,7 +1625,8 @@ static int _lowered_callable(Compiler compiler, List callees) {
 }
 
 static void _retain_lowering(String key, List forms, List callees) {
-  List entry = %($forms $callees);
+  List entry =
+    %($forms $callees $lower_reached_globals $lower_reached_meta);
   if (!_lowered_portable(entry) || !key.try_own() || !entry.try_own()) return;
   _lowered_defs()[key] = entry;
 }
@@ -1613,9 +1647,11 @@ int Compiler.install_comptime(Compiler compiler, List fn) {
     }
   if (key)
     match (_lowered_defs()[key])
-      case %(?(List forms) ?(List callees)):
+      case %(?(List forms) ?(List callees) ?(int globals) ?(int meta)):
         if (_lowered_callable(compiler, callees)) {
           foreach (Var form, forms) compiler.macro_lisp.eval(form);
+          lower_reached_globals = globals;
+          lower_reached_meta = meta;
           return 1;
         }
   List forms = compiler.lower_comptime(fn);
@@ -1625,12 +1661,30 @@ int Compiler.install_comptime(Compiler compiler, List fn) {
   return 1;
 }
 
-/** Returns whether the last `Compiler.lower_comptime` reached file-scope
+/** Returns whether the last `Compiler.install_comptime` reached file-scope
     state, directly or through a callee already recorded as reaching it.
 */
 int Compiler.lower_reached_globals(Compiler compiler) {
   (void) compiler;
   return lower_reached_globals;
+}
+
+/** Returns whether the last `Compiler.install_comptime` reached a `Meta`
+    operation, directly or through a callee already recorded as reaching one.
+*/
+int Compiler.lower_reached_meta(Compiler compiler) {
+  (void) compiler;
+  return lower_reached_meta;
+}
+
+/** Returns whether `fn` is a `meta` function this compiler recorded as
+    compile-time only, whose runtime form the unit does not emit.
+*/
+int Compiler.meta_is_comptime_only(Compiler c, List fn) {
+  match (fn)
+    case %(function ? (bind (binding ? ?(String name)) *) ?):
+      return c.meta_comptime.contains(name);
+  return 0;
 }
 
 /* --- constant-argument folding ------------------------------------------ */

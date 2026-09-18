@@ -1320,6 +1320,15 @@ comma-separated initializer. Compose a call to an existing spelling with
 Names under `x2c.*` or `_x2c.*` with a component beginning `_` are private
 implementation details.
 
+Every public operation above is also declared in x2c, in the optional module
+`lib/meta.x`, under the `Meta` namespace: `x2c.type.fields` is
+`Meta.type_fields`, `x2c.expr.call` is `Meta.expr_call` taking its arguments as
+one `List`, and so on. A compile-time function that includes that module calls
+them directly, so a macro's implementation does not have to be written in Lisp.
+These operations exist only inside a compiler, so a compile-time function that
+reaches one has no runtime form and none is emitted for it; calling such a
+function at run time is a link error that names it.
+
 Compiler facilities load before author imports, and macro code cannot redefine
 them.
 

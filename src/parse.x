@@ -1708,10 +1708,10 @@ static void _track_conditional_arms(Compiler c) {
 
 /** Parses one top-level form and applies its source-ordered compiler effects.
     Returns its AST, or NULL when a keyword definition, top-level Lisp form,
-    or linkage brace only updates compiler state, with the first following
-    token current. A macro import whose `.xmacro` declares `meta` functions
-    retains their runtime definitions, which the unit emits where it reaches
-    them.
+    linkage brace, or compile-time-only `meta` function only updates compiler
+    state, with the first following token current. A macro import whose
+    `.xmacro` declares `meta` functions retains their runtime definitions,
+    which the unit emits where it reaches them.
 */
 List Compiler.parse_top_level(Compiler c) {
   if (!c.macro_holes) {
@@ -1767,6 +1767,9 @@ List Compiler.parse_top_level(Compiler c) {
     List function = _finish_function_definition(c, decl);
     if (meta) c.install_meta_function(function, meta);
     c.record_declaration_visibility(function);
+    /* A `meta` function that reaches a `Meta` operation exists only inside
+       the compiler, so there is no runtime form to emit. */
+    if (meta && c.meta_is_comptime_only(function)) return NULL;
     return function;
   }
   Symbol unexpected = c.peek(0);
