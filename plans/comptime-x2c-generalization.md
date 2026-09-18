@@ -455,17 +455,50 @@ Installing costs about 0.45 ms per meta function per importing unit, and
 about 2.5 ms when the function contains a loop, because each loop becomes its
 own lowered global. A Lisp `defun` costs about 0.02 ms.
 
-Applied to the two candidates:
+**Corrected 2026-09-18.** An earlier version of this section put the importer
+counts at 32 and 9. Both were wrong by about eight times: the grep behind them
+counted copies under `unittest/build/`, which are build artifacts, and a file's
+own comment. Excluding those, the real counts are:
 
-- `lib/var-tags.xmacro`: 44 functions, imported by 32 units. About 630 ms
-  added to a full build, against accessor bodies that show no per-call win.
-- `lib/system-macros.xlisp`: 22 functions, imported by 9 units, for two
-  `$dedent` call sites.
+| library | importers |
+| --- | --- |
+| `lib/var-tags.xmacro` | 4 - `lib/common.x`, `lib/dispatch.x`, `lib/varconvert.x`, `lib/var.x` |
+| `lib/varops.xlisp` | 1 - `lib/varops.x` |
+| `lib/system-macros.xmacro` | 1 - `unittest/test-system-macros.x` |
 
-Both are slower after porting. The autodiff-shaped win needs a body whose
-Lisp was doing something expensive and a unit count low enough that install
-does not dominate; neither candidate has that shape. Decide whether
-readability is worth the time before scheduling this phase.
+So the per-unit install cost barely applies. The measured cost of the
+`dedent` port is **+11 ms on the one unit that imports it**, not the ~90 ms
+the nine-importer model implied, and `var-tags` would be roughly 120 ms rather
+than 630 ms. Phase 5 is a small regression, not a large one, and a per-process
+lowering cache would remove most of what remains.
+
+### Two defects the first port found, both reproduced
+
+**`foreach` does not work inside a `.xmacro`.** A `meta` function in a macro
+import that iterates a `List` or `Array` reports `type ("List") is not
+iterable / declare an Iter protocol adoption`; the identical body in a `.x`
+unit lowers and runs. The import's child compiler is not seeing the `Iter`
+protocol adoptions, so this is the same class as the literal cache and
+`protocol_helpers` that M2 had to share through
+`Compiler.borrow_unit_semantics`. It matters out of proportion to its size:
+`foreach` is the iteration idiom, and without it the `dedent` port had to
+spell "strip the prefix from each line" as a `replace` over the whole text,
+which is the one function in that port that came out worse than its Lisp.
+Fix this before porting anything else.
+
+**A `meta` function aborts the compiler instead of declining.** Reproduced:
+
+```x2c
+meta static String joined(String a, String b) {
+  Array out = [a, b];
+  return "/".join(out);
+}
+```
+
+gives `x2c error floor: <bad-types>: error detail contains an identity-bearing
+value` and no diagnostic. `List out = [a, b];` is fine and the same call works
+at run time. An error floor is the worst failure this branch has produced -
+every other defect at least answered something.
 
 ### Original scope, for when it is unblocked
 
