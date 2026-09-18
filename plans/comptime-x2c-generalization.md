@@ -3,8 +3,8 @@
 > Status: active
 >
 > Scoped 2026-09-18 on branch `x2c-lowers-to-lisp` after the autodiff port
-> landed. Phases 0-4 are done and merged; 7 is answered; 5 is blocked on a
-> missing capability and 6 is the last one available. Nothing on this branch reaches `main`
+> landed. Phases 0-4 and 6 are done; 7 is answered; 5 is blocked on a
+> missing capability. Nothing on this branch reaches `main`
 > without Gary's explicit green light. The design in
 > `plans/x2c-lowers-to-lisp.md` is settled and this plan does not revisit it.
 
@@ -482,7 +482,54 @@ bound native; `comptime-lowering.x`'s `map` case and the autodiff port's
 function from inside the lambda. Take that route rather than teaching the
 pass a calling convention for one caller.
 
-## Phase 6 - fold the AD port back
+## Phase 6 - fold the AD port back (done)
+
+Landed on `comptime-phase6-fold`. `comptime-autodiff.x` goes from 1181 to
+1130 lines and from 111 to 106 compile-time functions;
+`comptime-autodiff.stdout` is unchanged, which is the check that the
+mathematics did not move. Gary has already decided the port stays a
+demonstration, so `lib/autodiff.xmacro` is untouched and the two unported
+paths - checkpointed loops and calls to an earlier differentiated sibling -
+stay out of scope.
+
+Eighteen recursive list builders are now `foreach` loops that push to an
+`Array` and return it where a `List` is declared. Four more functions are
+gone outright: `ad_sequence_from`, `ad_dispatch_from`,
+`ad_call_partial_adjoints` and `ad_local_type_in` were folds or searches
+their one caller now performs directly, and `ad_items_of` was dead. Every
+`cdr` chain that read a fixed position is an index, and the five parts
+`ad_loop_parts` answers are one destructuring declaration.
+
+Three corrections to what this section said before the work.
+
+- **`foreach` cannot nest.** A `foreach` whose body holds another declines
+  with "a value needing a binding is on a loop path", whatever the inner
+  container is, because the inner loop's cells are values on the outer
+  loop's iteration path. So a builder whose items expand to several
+  statements cannot push them one at a time; it concatenates instead, and
+  `ad_fwd_items`, `ad_sequence` and `ad_call_adjoint` read that way. The
+  same decline covers a destructuring declaration inside a `foreach`, since
+  the loop's output cell is read through a call.
+- **One walk stays recursive.** `ad_declared_doubles` and
+  `ad_declared_join` walk the whole tree, so concatenating once per node
+  costs more than the recursion: as a loop the fixture translated in 1.41 s
+  against 884 ms. They are a tree walk, not a list builder.
+- **`ad_partial` as one `Map` costs 110 ms.** The table has to be built
+  before it can be read, so a lookup evaluates all 27 derivatives where the
+  chain evaluated one. Translation goes from 802 ms to 952 ms overall, of
+  which about 42 ms is the `Map` itself, 110 ms its values, and 40 ms the
+  loop idiom elsewhere. The alternative - a name-to-code `Map` and a
+  27-label `switch` - is lazy but puts the primitive vocabulary in two
+  places, which is the bloat this repository already names as a cause.
+  The table was kept.
+
+Of the 13 `$(def name (lambda (. rest) 0))` prototypes, five remain, each a
+real cycle: `ad_tangent`, `ad_adjoint`, `ad_rev_item`, `ad_fwd_item` and
+`ad_declared_join`. Seven were for names nothing called before their
+definition, one was a duplicate, and `ad_is_loop_exit` was not in a cycle at
+all, so its definition moved above its one caller instead.
+
+### Original scope
 
 Depends on Phases 1-3. Rewrite
 `unittest/compiler-fixtures/comptime-autodiff.x` onto the constructs those
