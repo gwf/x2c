@@ -1,0 +1,41 @@
+/*  meta-import-defs.xmacro -- macros whose implementation is x2c
+
+    A `meta` declaration in a macro import installs the function in the
+    consuming unit's macro session, so the macro bodies below call x2c rather
+    than Lisp. Each consuming unit emits its own copy of the definition,
+    which is why they are `static`. See `plans/meta-functions.md`.
+*/
+
+$(import "meta-import-nested.xmacro")
+
+/* A dotted path spelled as one identifier. This is the string and list work
+   a shipped macro family writes in Lisp today. */
+meta static String mi_flatten(String path, String sep) =>
+  sep.join(path.split("."));
+
+/* Both spellings the macros below need. Each calls the function above, so
+   one meta function reaches another in the same import. */
+meta static String mi_constant(String path) => mi_flatten(path, "_").upper();
+
+meta static String mi_accessor(String path) =>
+  %"get_${mi_flatten(path, "_").lower()}";
+
+meta static int mi_depth(String path) => path.split(".").len();
+
+macro Expression $probe.constant(Expr $path) => (
+  $(x2c.literal.string (mi_constant (x2c.source.text $path)))
+)
+
+macro Expression $probe.accessor(Expr $path) => (
+  $(x2c.literal.string (mi_accessor (x2c.source.text $path)))
+)
+
+macro Expression $probe.depth(Expr $path) => (
+  $(x2c.literal.int (mi_depth (x2c.source.text $path)))
+)
+
+/* `mi_dashed` arrives through this file's own import, so the nested
+   definition has to reach the consuming unit too. */
+macro Expression $probe.dashed(Expr $path) => (
+  $(x2c.literal.string (mi_dashed (x2c.source.text $path)))
+)
