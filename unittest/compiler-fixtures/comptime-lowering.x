@@ -383,7 +383,9 @@ List ct_flatten(List rows) {
 /* A character literal is its code. The pattern that selects a C string is
    `(* char)`, and `*` is a sequence binder, so it matches a plain `(char)`
    too; without the spelling test a character lowered to its own text and
-   read as a different number on every run. */
+   read as a different number on every run. `main` prints each answer beside
+   the same function's run-time answer, because agreement between the two is
+   what the defect broke. */
 $comptime()
 int ct_letter(void) => 'A';
 
@@ -636,8 +638,10 @@ int main(void) {
   printf("c-array-pad  %d\n", $(ct_c_array_padded));
   printf("c-array-bare %d\n", $(ct_c_array_bare 4));
   printf("scalar-zero  %d\n", $(ct_scalar_zero));
-  printf("character    %d %d %d\n",
-         $(ct_letter), $(ct_newline), $(ct_is_dot "."));
+  printf("character    %d %d  %d %d  %d %d\n",
+         $(ct_letter), ct_letter(),
+         $(ct_newline), ct_newline(),
+         $(ct_is_dot "."), ct_is_dot("."));
   printf("flatten      %s\n", $(repr (ct_flatten '((a b) (c) (d e)))));
   printf("accumulate   %s\n", $(repr (ct_accumulate '(1 2))));
   printf("table        %s %s\n",

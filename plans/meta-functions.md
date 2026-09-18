@@ -154,7 +154,8 @@ sequence binder in a pattern, so `(* char)`, which selects a C string, also
 matches a plain `(char)`. A character therefore reached `_lower_text`, which
 returned the spelling itself to be read as a number. `_lower_text` now decides
 on the spelling's own quote and answers a character's code, `'\n'` included.
-Covered by `character 65 10 1` in `comptime-lowering.x`.
+Covered by the `character` row in `comptime-lowering.x`, which prints each
+answer beside the same function's run-time answer: `65 65  10 10  1 1`.
 
 ## M3 - the pipeline position
 
