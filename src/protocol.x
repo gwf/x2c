@@ -1267,6 +1267,20 @@ static void _resolve_declared_adoption(
         compiler, base, participant, location, binder, associations, members);
 }
 
+/* A macro import parses one body during the caller's collection pass, which
+   keeps its own registries empty because it parses no bodies at all. That
+   body's `foreach` is the only reader, so the protocols and adoptions visible
+   to the import are installed the first time one is asked for. Installing
+   them for every import, or resolving every conformance here rather than the
+   one below, each cost more than the feature. */
+static void _install_import_protocols(Compiler c) {
+  c.import_protocols = 0;
+  Map symbols = c.sym.base_symbols();
+  Map current = c.sym.current_symbols();
+  if (current) symbols.merge(current);
+  c.rebuild_protocols(symbols);
+}
+
 /** Returns the resolved conformance for `participant` and `base`, if any.
     Lookup canonicalizes the participant and may use the nearest adopted
     typedef ancestor. Native conformances install their generated bindings
@@ -1274,6 +1288,7 @@ static void _resolve_declared_adoption(
 */
 List Compiler.protocol_members_for(Compiler c, Type participant, Type base) {
   participant = participant.canonicalize();
+  if (c.import_protocols) _install_import_protocols(c);
   Type owner = participant;
   if (!c._is_adopted(base, owner)) {
     List ancestry = _ancestry(c, participant).cdr();
@@ -1283,7 +1298,18 @@ List Compiler.protocol_members_for(Compiler c, Type participant, Type base) {
     }
     if (!ancestry) return NULL;
   }
-  Var stored = c.conforms[%($base $owner)];
+  List key = %($base $owner);
+  Var stored = c.conforms[key];
+  /* One adoption is resolved where it is asked for when the parse has not
+     resolved it. `_install_protocol_adoption` already skips resolving during
+     a shallow pass, and an import installed just above resolves nothing.
+     `adoptions` holds only the adoptions this compiler may use, and the full
+     parse resolves all of them before it starts, so the full parse has an
+     entry for every pair that reaches this point. */
+  if (stored is void) {
+    _resolve_declared_adoption(c, base, owner, NULL);
+    stored = c.conforms[key];
+  }
   if (stored is not <list>) return NULL;
   List conformance = stored;
   _install_native_bindings(

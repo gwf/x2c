@@ -1113,6 +1113,11 @@ static List _import(
       defer c.close_child(imported);
       imported.filename = path;
       imported.collect_protocols = c.collect_protocols;
+      /* The caller's collection pass parses no bodies and so keeps its
+         protocol registries empty. A `meta` definition here is the one body it
+         does parse, and its `foreach` is the only reader, so the import
+         installs the protocols visible to it when one is asked for. */
+      imported.import_protocols = c.shallow;
       $let(c.diagnostics.printer, c.diagnostics.printer) {
         imported.borrow_diagnostics(c);
         imported.borrow_unit_semantics(c);
