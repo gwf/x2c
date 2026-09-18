@@ -292,11 +292,30 @@ demonstration. Two paths are still unported and that decision needs them:
 checkpointed loops (`$ad.checkpoint`) and calls to an earlier differentiated
 sibling.
 
-A working-time comparison against the shipped implementation is still
-missing. `$ad.reverse` did not resolve in a standalone file during the port
-although `$ad.dual` from the same import did, while
-`unittest/test-autodiff.x` translates fine in 13.3 s. Resolve that before
-claiming any speed result for reverse mode.
+**The speed claim is now measured, and the question that blocked it is
+answered.** `$ad.reverse` did not resolve in a standalone file because its
+target was not `static`, and a public target "cannot gain new public
+siblings" — `docs/src/reference/language.md` says so under the `Unit`
+decorator rules, and every use in `unittest/test-autodiff.x` is `static` for
+that reason. There is no defect here. The diagnostic is the weak part: a
+public target reports `parse: expected syntax` at the decorator line without
+naming the rule, which is what sent the earlier reading astray. Reproduced
+without autodiff by splicing any Lisp-built function beside a public target.
+
+Holding the derived function constant and varying only how many are derived,
+on 2026-09-18:
+
+| derivations | shipped `$ad.reverse` | ported `$c.gradient` |
+| --- | --- | --- |
+| 1 | 797 ms | 557 ms |
+| 5 | 3.12 s | 873 ms |
+| marginal, per derivation | 581 ms | 79 ms |
+
+7.4x per derivation. The ported pass pays about 260 ms more to install its
+111 compile-time functions and saves about 500 ms on every function it
+differentiates, so it is ahead from the first one. The subject carries a
+loop, a primitive call and a division, and both implementations return the
+same gradient to nine decimals: `11.573550919 0.932986487`.
 
 ## Phase 7 - the builtin-macros bootstrap question
 
