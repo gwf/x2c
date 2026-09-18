@@ -797,20 +797,17 @@ static Var _capture_replace(
   return %($replaced_head @replaced_tail);
 }
 
+/* A whole template follows the same rule as a template element: a binder
+   the match left unbound is retained, so no result is ever void. */
 static Var _apply_capture_template(
-  MatchCaptureLayout layout, MatchCaptureBuffer *captures, Var template) {
-  if (template is <list>) return _capture_replace(template, layout, captures);
-  if (_named_binder(template)) {
-    Var value = void;
-    _capture_lookup(layout, captures, template, &value);
-    return value;
-  }
-  return template;
-}
+  MatchCaptureLayout layout, MatchCaptureBuffer *captures, Var template) =>
+  _capture_replace(template, layout, captures);
 
 /** Matches `input` and writes the instantiated `template` on success.
     The output may be any `Var`, including typed `nil` or a
-    scalar. Returns 0 for
+    scalar. A template that is one binder the match left unbound, such as the
+    binder of an `!or` alternative another alternative satisfied, writes that
+    binder. Returns 0 for
     a miss, malformed pattern, invalid output, or machine error and leaves
     `out` unchanged.
     Raises: `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while

@@ -679,6 +679,30 @@ static void plan_replace_parity(void) {
   isr.free();
 }
 
+/* A subject that satisfies one !or alternative leaves the other
+   alternative's binder unbound, and a template that is only that binder
+   must substitute the binder itself rather than a void. */
+static void unbound_alternative_binder_template_is_retained(void) {
+  List subject = %(outer (b));
+  Var pattern = %(!or (a *x) (b)), template = Var.new(<symbol>, <"*x">);
+  EXPECT_TRUE(subject.search_replace(pattern, template) == %(outer *x));
+  EXPECT_TRUE(subject.search_replace(pattern, template) ==
+              test_match_oracle_search_replace(subject, pattern, template));
+
+  Var result = <unchanged>, oracle = <unchanged>;
+  EXPECT_TRUE(%(b).try_match_replace(pattern, template, &result));
+  EXPECT_TRUE(result == template);
+  EXPECT_TRUE(test_match_oracle_try_match_replace(%(b), pattern, template,
+                                                  &oracle));
+  EXPECT_TRUE(result == oracle);
+
+  MatchPlan plan = MatchPlan.prepare(pattern);
+  Var planned = <unchanged>;
+  EXPECT_INT_EQ(plan.try_match_replace(%(b), template, &planned), 1);
+  EXPECT_TRUE(planned == template);
+  plan.free();
+}
+
 // positional capture contract - - - - - - - - - - - - - - - - - - - - - - -
 
 static int _capture_present(MatchCaptureBuffer *captures, int index) {
@@ -984,6 +1008,7 @@ void match_plan_suite(void) {
   $test.run(plan_search_parity);
   $test.run(atom_consumers_match_the_reference);
   $test.run(plan_replace_parity);
+  $test.run(unbound_alternative_binder_template_is_retained);
   $test.run(capture_layout_owns_canonical_order);
   $test.run(prepared_capture_is_atomic_and_positional);
   $test.run(capture_layout_refuses_past_the_binder_limit);
