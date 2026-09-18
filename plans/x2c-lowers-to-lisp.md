@@ -340,8 +340,7 @@ One correction to the framing: this is not optional for the lowering. A
 statement cannot work without reading it back. The question is the shape of
 the accessor, not whether one is needed.
 
-**Measured, after the review session narrowed the second alternative.** It
-is nearly free for patterns, and it needs no new API at all.
+**Rejected after measuring its runtime cost.** It looked free and is not.
 `Compiler.runtime_literals` already disables folding, and
 `Compiler.parse_catch_pattern_literal` already sets it for catch filter
 patterns. A match arm sets `in_pattern` but not `runtime_literals`. Adding
@@ -356,18 +355,27 @@ What that costs, measured on `src/transform.x`:
 | translate | 0.44 s | 0.43 s |
 | generated C | 156,758 B | 150,749 B |
 
-Translation time is unchanged and the output is 4% smaller, because the
-cache slots for match patterns were dead weight: the match compiler builds
-a decision tree and never needs the pattern as a runtime List. Twelve
-fixture artifact expectations change, all `c`, `ast`, `transform` and
-`emit`; no `stdout`, `status` or `compile-status` fixture fails, so nothing
-changes behavior.
+Translation time is unchanged and the output is 4% smaller, which is what
+misled me: I concluded the cache slots were dead weight. They are not. The
+generated C stops referencing a cached constant and instead rebuilds the
+pattern on every match execution:
 
-It solves only half the problem. A template such as `%(sum $a $b)` is not
-in a pattern position and cannot be marked at parse time, so its constant
-head is still a cache id and something is still needed to read it. The
-remaining choice is therefore narrower than it was: patterns need no API,
-and only interpolated templates do.
+```c
+// before
+x2c_match_site_try_capture(&site, expr, List_var(_3), &capture)
+// after
+x2c_match_site_try_capture(&site, expr,
+  List_var(cons(List_var(cons(Symbol_var(982), NULL)), NULL)), &capture)
+```
+
+Over 8,000,000 matches that costs about 5%: 0.090 s against 0.085 s. Small,
+but it is a permanent tax on every `match` in every program, and the
+compiler itself is full of them. Since the accessor already reads patterns,
+this buys convenience and nothing else.
+
+It also solves only half the problem: a template such as `%(sum $a $b)` is
+not in a pattern position and cannot be marked at parse time, so an
+accessor is needed regardless.
 
 **Both remaining options built and measured, on `src/transform.x`.**
 
