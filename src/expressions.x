@@ -24,6 +24,7 @@ typedef struct PrintfFn {
 #include "literals.x"
 #include "protocol.x"
 #include "lambda.x"
+#include "comptime.x"
 
 static List _iter_destination(void) => %(expr (* struct "Iter")
     (op & (expr (struct "Iter")
@@ -1370,6 +1371,9 @@ static List _finish_call(
         result_type = %(<macro-expr>);
     }
   if (!result_type) result_type = applied;
+  List folded = compiler.fold_meta_call(
+    callee, callee_type, result_type, arguments);
+  if (folded) return folded;
   callee = _discarding_callee(compiler, callee, callee_type, arguments);
   return %(expr $result_type
            (call $callee (args @arguments)));
