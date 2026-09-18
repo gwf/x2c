@@ -88,6 +88,12 @@ order, the job count, and interfaces left by an earlier translation. As a
 result, the pass reports no warning when a caller passes a region-born value
 to a function in another unit that stores its argument into a static.
 
+The whole-project answer is a separate run over the sources at once. The
+`region-escapes` command of the `x2c-graph` tool walks every unit against the
+summaries the other units proved, repeating until no summary grows, and then
+reports. It finds the cross-unit store a translation cannot, and it changes
+nothing about how a translation behaves.
+
 ## Where the design sits
 
 The region check descends from the ML Kit and Cyclone. The ML Kit inferred

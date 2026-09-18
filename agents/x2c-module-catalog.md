@@ -337,7 +337,7 @@ values that can outlive the region that allocated them.
 
 Public functions:
 
-`Compiler.check_regions`
+`Compiler.check_regions`, `Compiler.region_escapes`
 
 ### [src/report.x](../src/report.x)
 
