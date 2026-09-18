@@ -12,6 +12,7 @@ $(import "../src/ast-rewrite.xmacro")
 #pragma private
 #include "expressions.x"
 #include "literals.x"
+#include "lower.x"
 #include "parse.x"
 #include "statements.x"
 #include "utils.x"
@@ -869,6 +870,25 @@ static Var _sdk_cache_value(List node) {
   return compiler.id_keys[(int) id];
 }
 
+/* Lowers a compile-time function and installs it in the macro session.
+   Returns the function itself so a decorator emits its target unchanged. */
+static Var _sdk_comptime_install(List fn) {
+  $_sdk_guard("x2c.comptime.install");
+  if (macro_sdk_compiler.install_comptime(fn)) return %($fn);
+  String why = macro_sdk_compiler.lower_declined();
+  return _sdk_reject(
+    "this function cannot run at compile time",
+    %("function: ${_sdk_function_name(fn).repr()}" "reason: $why"));
+}
+
+/* The forms a compile-time function lowers to, for inspection. */
+static Var _sdk_comptime_lower(List fn) {
+  $_sdk_guard("x2c.comptime.lower");
+  List forms = macro_sdk_compiler.lower_comptime(fn);
+  if (forms) return forms;
+  return %();
+}
+
 /* An unreadable compile-time source is a located diagnostic. */
 static String _source_text(
   Compiler c, String path, String message, Token token, List notes) {
@@ -912,6 +932,9 @@ static void _ensure_lisp(Compiler compiler) {
       _, loaded, "etc/lisp-values.xlisp",
       "cannot open the compile-time value operations");
     _eval_library(
+      _, loaded, "etc/lisp-lower.xlisp",
+      "cannot open the compile-time function runtime");
+    _eval_library(
       _, loaded, "etc/compiler-sdk.xlisp",
       "cannot open the compile-time Lisp SDK");
     _eval_library(
@@ -936,6 +959,10 @@ static void _ensure_lisp(Compiler compiler) {
     $lisp.bind(_.macro_lisp, "x2c._embed.text", _sdk_embed_text);
     $lisp.bind(_.macro_lisp, "_x2c.literal.string", _sdk_literal_string);
     $lisp.bind(_.macro_lisp, "x2c.cache.value", _sdk_cache_value);
+    $lisp.bind(
+      _.macro_lisp, "x2c.comptime.install", _sdk_comptime_install);
+    $lisp.bind(
+      _.macro_lisp, "x2c.comptime.lower", _sdk_comptime_lower);
     $lisp.bind(_.macro_lisp, "x2c.function.name", _sdk_function_name);
     $lisp.bind(
       _.macro_lisp, "_x2c.function.reference", _sdk_function_reference);

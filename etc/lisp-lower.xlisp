@@ -1,0 +1,99 @@
+// Runtime for lowered compile-time functions.
+// Load etc/init.xlisp and etc/lisp-values.xlisp first. The compiler loads
+// this into every compile-time Lisp session.
+//
+// A lowered function is ordinary Lisp: its locals are lambda parameters and
+// its calls are direct. These are the few operations it still needs, plus
+// the library names its calls resolve against.
+
+// x2c truth: nil is false, a number is false at zero, anything else true.
+// The lowering inlines the numeric case and calls this for the rest.
+(defun C.true? (a)
+  (cond ((null? a) nil)
+        ((number? a) (not (eq? a 0)))
+        (true true)))
+
+(defun C.not (a) (if (C.true? a) 0 1))
+
+(defmacro C.and (a b) `(if (C.true? ,a) (if (C.true? ,b) 1 0) 0))
+(defmacro C.or (a b) `(if (C.true? ,a) 1 (if (C.true? ,b) 1 0)))
+(defmacro C.ternary (test a b) `(if (C.true? ,test) ,a ,b))
+
+// File-scope state, keyed by binding id. A unit-level initializer is not
+// part of the function, so an unwritten global reads as zero.
+(def C._globals (Map.new))
+
+(defun C.gread (id)
+  (if (eq? (Map.contains C._globals id) 0) 0
+      (Map.getindex C._globals id)))
+
+(defun C.gwrite (id value) (Map.setindex C._globals id value))
+
+// The library operations a lowered call resolves against, under the names
+// the typed AST already uses.
+(def List_len length)
+(def Var_car car)
+(def List_car car)
+(def Var_cdr cdr)
+(def List_cdr cdr)
+(def Var_cons cons)
+(def List_reverse reverse)
+(def List_getindex List.getindex)
+(def List_last List.last)
+(def List_index List.index)
+(def List_get List.get)
+(def List_assoc List.assoc)
+(def List_array List.array)
+(def List_sort List.sort)
+(def List_match match)
+(def List_search search)
+(defun List_equal (a b) (if (equal? a b) 1 0))
+(defun List_contains (xs v) (if (member v xs) 1 0))
+(defun List_map (xs fn) (map fn xs))
+(defun List_filter (xs fn) (filter fn xs))
+
+(def Array_new Array.new)
+(def Array_len Array.len)
+(def Array_push Array.push)
+(def Array_getindex Array.getindex)
+(def Array_setindex Array.setindex)
+(def Array_list Array.list)
+(def Array_join Array.join)
+
+(def Map_new Map.new)
+(def Map_len Map.len)
+(def Map_get Map.get)
+(def Map_getindex Map.getindex)
+(def Map_setindex Map.setindex)
+(def Map_contains Map.contains)
+(def Map_getdefault Map.getdefault)
+(def Map_list Map.list)
+
+(def String_len String.len)
+(def String_add String.add)
+(def String_lower String.lower)
+(def String_upper String.upper)
+(def String_find String.find)
+(def String_contains String.contains)
+(def String_startswith String.startswith)
+(def String_endswith String.endswith)
+(def String_getslice String.getslice)
+(def String_replace String.replace)
+(def String_join String.join)
+(def String_split String.split)
+(defun String_new (text) text)
+
+(def Symbol_str Symbol.str)
+(def Var_tag Var.tag)
+(def Var_parse Var.parse)
+(def Var_convert Var.convert)
+(defun Var_integer (v) v)
+(defun Var_floating (v) v)
+(defun Var_is (v tag) (if (eq? (type v) tag) 1 0))
+(defun int_var (v) v)
+(defun long_var (v) v)
+(defun double_var (v) v)
+(defun String_var (v) v)
+(defun List_var (v) v)
+(defun Array_var (v) v)
+(defun Map_var (v) v)

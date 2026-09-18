@@ -621,6 +621,39 @@ Closing that means fewer calls per node, or writing the pass in x2c and
 compiling it, which is where this plan was always going. Compiling the Lisp
 ahead of time is not the lever, because the Lisp is already compiled.
 
+### The pass in x2c  (FIRST WORKING VERSION 2026-09-17)
+
+`src/lower.x`, 700 lines, with `etc/lisp-lower.xlisp` holding the 95-line
+runtime the lowered code calls. `x2c.comptime.install` lowers a function and
+evaluates the result in the macro session; `x2c.comptime.lower` returns the
+forms for inspection. 716 fixtures and 915 unit tests pass.
+
+Thirty functions, each with a `while`, a `for`, an `if` and a `return`:
+
+| | translate |
+|---|---|
+| parse and type only, no lowering | 125 ms |
+| compiled pass | 147 ms |
+| Lisp prototype | 2.57 s |
+
+So the pass costs 22 ms for thirty functions, 18% of what parsing them
+costs, and is 111 times faster than the prototype. That is the result the
+scope predicted.
+
+Three things the x2c version gets for free. `Atom.intern` gives an `lsym`
+for a long spelling, so generated names are readable and cannot collide by
+truncation. `String.try_long` and `String.try_double` replace forty lines of
+digit arithmetic. And the dispatches are `match` statements again, compiled
+to a decision tree, rather than the hand-rolled `cond` chains the prototype
+needed to avoid `match-case` re-expansion.
+
+A call is now a direct Lisp call: the callee's name is a session global, so
+`C.call` and its lookup are gone entirely.
+
+Still to port: `match` statements, which the autodiff port needs, and the
+value types beyond `int` and `double`. The prototype keeps working
+meanwhile.
+
 ### Scope of writing the pass in x2c
 
 Measured against the prototype as it stands, 1,057 lines of Lisp across

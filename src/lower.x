@@ -1,0 +1,728 @@
+/*  lower.x -- lowering a compile-time function to Lisp
+
+    Copyright (c) 2026 Gary William Flake.
+
+    A function marked for compile-time use is lowered here into the Lisp the
+    macro session evaluates. The evaluator reuses a frame only for a direct
+    self tail call, so a loop must reach its recursive call with nothing in
+    between: no binding form, no continuation call. A block is therefore
+    reduced by substitution to one expression per live local, and an
+    iteration ends in `(loop e1 e2 ...)` directly.
+
+    Locals are Lisp values held in an environment mapping each binding id to
+    the expression that currently produces it. A value the substitution
+    cannot carry is bound with a real lambda when it is off a loop's
+    iteration path, and declines the function when it is on one.
+  */
+#pragma once
+#include "compiler.x"
+#pragma private
+#include "type.x"
+#include "var.x"
+#include "string.x"
+#include "lisp.x"
+#include "atom.x"
+#include "logger.x"
+
+/* One lowering. `env` maps a binding id to the Lisp form that produces it;
+   `locals` are the ids the function declares, so an id outside it is
+   file-scope state. `on_loop` records whether the current point is on a
+   loop's iteration path, where a binding form would cost frame reuse. */
+typedef struct Lowering {
+  Compiler compiler;
+  Map env, locals, cells, arrays;
+  Array definitions;
+  int counter, declined, on_loop, rejected, uncallable;
+} *Lowering;
+
+/* Why the last lowering declined, for the diagnostic at the invocation. */
+static String lower_declined_reason;
+
+/* --- names ------------------------------------------------------------- */
+
+/* `Atom.intern` gives an `lsym` for a spelling too long to pack into a
+   Symbol, so a generated name is readable and cannot collide by truncation. */
+static Var _lower_name(Lowering l, String stem) {
+  l.counter++;
+  return Atom.intern(%"$stem${l.counter}");
+}
+
+/* --- the single scan --------------------------------------------------- */
+
+static void _lower_scan(Lowering l, Var form);
+
+static void _lower_scan_each(Lowering l, List items) {
+  foreach (Var item, items) _lower_scan(l, item);
+}
+
+/* Address-of is the one-operand `&`; three operands is bitwise and. */
+static void _lower_scan_op(Lowering l, List form) {
+  match (form)
+    case %(op & (expr ? (ident (binding ?(int id) ?)))): l.cells[id] = 1;
+}
+
+static void _lower_scan_bind(Lowering l, List form) {
+  match (form) {
+    case %(bind (binding ?(int id) ?) ((dim ?) *)): {
+      l.locals[id] = 1;
+      l.arrays[id] = 1;
+      return;
+    }
+    case %(bind (binding ?(int id) ?) *): l.locals[id] = 1;
+  }
+}
+
+/* A callee is reachable when the macro session already binds its name: a
+   native from `etc/lisp-lower.xlisp`, or a function this pass installed. */
+static int _lower_known(Lowering l, String name) {
+  Var value;
+  return l.compiler.macro_lisp.try_get(name, &value);
+}
+
+static void _lower_scan_call(Lowering l, List form) {
+  match (form) {
+    case %(call (expr ? (ident (binding ? ?(String name)))) ?): {
+      if (!_lower_known(l, name)) l.uncallable = 1;
+      return;
+    }
+    case %(call ?(String name) ?): {
+      if (!_lower_known(l, name)) l.uncallable = 1;
+      return;
+    }
+  }
+  l.uncallable = 1;
+}
+
+/* Everything the lowering needs before it starts, in one pass: which locals
+   need a memory cell, which are arrays, which ids the function declares,
+   whether it uses a construct the substitution cannot carry, and whether
+   every callee has a compile-time binding. */
+static void _lower_scan(Lowering l, Var form) {
+  if (form is not <list>) return;
+  List items = form;
+  if (!items) return;
+  Var head = items.car();
+  if (head == <bind>) _lower_scan_bind(l, items);
+  else if (head == <op>) _lower_scan_op(l, items);
+  else if (head == <call>) _lower_scan_call(l, items);
+  else if (head == <switch> || head == <do> || head == <break> ||
+           head == <continue> || head == <goto> || head == <index> ||
+           head == <getindex> || head == <composite> || head == <array> ||
+           head == <commas>)
+    l.rejected = 1;
+  _lower_scan_each(l, items);
+}
+
+/* --- declining ---------------------------------------------------------- */
+
+static Var _lower_decline(Lowering l, String why) {
+  if (!l.declined) {
+    l.declined = 1;
+    lower_declined_reason = why;
+  }
+  return void;
+}
+
+static int _lower_failed(Lowering l, Var value) =>
+  l.declined || value is void;
+
+/* --- environment -------------------------------------------------------- */
+
+/* A name the function never declares is file-scope state. Its value is not
+   substitutable, because a write between two reads changes it, so a read
+   stays a read. */
+static Var _lower_read(Lowering l, int id) {
+  Var form;
+  if (l.env.try_get(id, &form)) return form;
+  if (!l.locals.contains(id)) return %(C.gread $id);
+  return _lower_decline(l, "unbound local");
+}
+
+/* --- literals ----------------------------------------------------------- */
+
+static Var _lower_number(Lowering l, List type, String text) {
+  long integer;
+  double floating;
+  if (type.match(%((!or double float))) || text.contains(".") ||
+      text.contains("e") || text.contains("E")) {
+    if (text.try_double(&floating)) return floating;
+    return _lower_decline(l, "unreadable floating literal");
+  }
+  if (text.try_long(&integer)) {
+    if (integer == (int) integer) return (int) integer;
+    return integer;
+  }
+  return _lower_decline(l, "unreadable integer literal");
+}
+
+/* A String literal arrives as its source spelling, quotes included. */
+static Var _lower_text(String spelling) {
+  int len = spelling.len();
+  if (len >= 2 && spelling[0] == '"')
+    return String.new_len(spelling + 1, len - 2).unescape();
+  return spelling;
+}
+
+/* --- folded constants --------------------------------------------------- */
+
+/* Literal folding hoists a constant `List`, `String` or `Var` into the
+   compiler cache and leaves `(cache ID)` behind, so a `match` pattern and a
+   template's constant head are not visible in the syntax. The cache is a
+   graph of ids over `cons`, `var` and `string` leaves. */
+static Var _lower_constant(Lowering l, Var node);
+
+static Var _lower_constant_leaf(Lowering l, List value) {
+  match (value) {
+    case %(expr ? (!set ?node (cache ?))):      return _lower_constant(l, node);
+    case %(expr ? (!set ?node (expr ? (cache ?)))):
+      return _lower_constant(l, node);
+    case %(expr ? (nil)):                       return %();
+    case %(expr ? (expr ? (nil))):              return %();
+    case %(expr ? (literal ? ? ?(Var symbol))): return symbol;
+    case %(expr ("String") (call ? (args ?inner))):
+      return _lower_constant_leaf(l, inner);
+    case %(expr ("String") (literal ? ?(String text))): return text;
+    case %(expr (* char) (literal ? ?(String text))): return _lower_text(text);
+    case %(expr ?type (literal ? ?(String text))):
+      return _lower_number(l, type, text);
+  }
+  return value;
+}
+
+static Var _lower_constant(Lowering l, Var node) {
+  match (node) {
+    case %(cache ?(int id)): {
+      List key = l.compiler.id_keys[id];
+      match (key) {
+        case %(cons ?head ?tail):
+          return cons(_lower_constant(l, head), _lower_constant(l, tail));
+        case %(!or (var ?value) (string ?value)):
+          return _lower_constant_leaf(l, value);
+        case %(nil): return %();
+      }
+      return key;
+    }
+    case %(cons ?head ?tail):
+      return cons(_lower_constant(l, head), _lower_constant(l, tail));
+    case %(nil): return %();
+  }
+  return _lower_constant_leaf(l, node);
+}
+
+/* --- expressions -------------------------------------------------------- */
+
+static Var _lower_expr(Lowering l, Var form);
+
+static List _lower_args(Lowering l, List args) {
+  Array values = [];
+  defer values.free();
+  foreach (List argument, args) {
+    match (argument) case %(expr (void) ()): continue;
+    Var value = _lower_expr(l, argument);
+    if (_lower_failed(l, value)) return NULL;
+    values.push(value);
+  }
+  return values;
+}
+
+/* A call is a direct Lisp call: the callee's name is a session global, so
+   the lowered code pays a lookup and nothing more. */
+static Var _lower_call(Lowering l, String name, List args) {
+  List values = _lower_args(l, args);
+  if (l.declined) return void;
+  return cons(Atom.intern(name), values);
+}
+
+static Var _lower_operands(Lowering l, Var operator, List operands) {
+  Array values = [];
+  defer values.free();
+  foreach (Var operand, operands) {
+    Var value = _lower_expr(l, operand);
+    if (_lower_failed(l, value)) return void;
+    values.push(value);
+  }
+  if (values.len() == 1) {
+    Var only = values[0];
+    if (operator == <->) return %(_binary 0 (quote <->) $only);
+    if (operator == <+>) return only;
+    if (operator == <~>) return %(_binary -1 (quote <^>) $only);
+    if (operator == <!>) return %(C.not $only);
+    return _lower_decline(l, "unsupported unary operator");
+  }
+  if (values.len() == 2) {
+    Var left = values[0], right = values[1];
+    if (operator == <&&>) return %(C.and $left $right);
+    if (operator == <||>) return %(C.or $left $right);
+    return %(_binary $left (quote $operator) $right);
+  }
+  if (values.len() == 3) {
+    Var test = values[0], a = values[1], b = values[2];
+    return %(C.ternary $test $a $b);
+  }
+  return _lower_decline(l, "unsupported operator arity");
+}
+
+/* A lambda's free locals are substituted, which is the by-value snapshot
+   x2c gives a captured scalar. Its parameters get fresh slots. */
+static Var _lower_lambda(Lowering l, List params, List held, Var body) {
+  Array names = [];
+  defer names.free();
+  Array saved = [];
+  defer saved.free();
+  foreach (List capture, held) {
+    match (capture)
+      case %(capture (binding ?(int id) ?) ? ?source): {
+        Var value = _lower_expr(l, source);
+        if (_lower_failed(l, value)) return void;
+        saved.push(%($id $value));
+      }
+  }
+  foreach (List parameter, params) {
+    match (parameter)
+      case %(param ? (bind (binding ?(int id) ?) *)): {
+        Var slot = _lower_name(l, "arg");
+        names.push(slot);
+        saved.push(%($id $slot));
+      }
+  }
+  Array shadowed = [];
+  defer shadowed.free();
+  foreach (List pair, saved) {
+    Var (id, value) = pair;
+    Var previous = void;
+    l.env.try_get(id, &previous);
+    shadowed.push(%($id $previous));
+    l.env[id] = value;
+  }
+  Var lowered = _lower_expr(l, body);
+  foreach (List pair, shadowed) {
+    Var (id, previous) = pair;
+    if (previous is void) l.env.del(id);
+    else l.env[id] = previous;
+  }
+  if (_lower_failed(l, lowered)) return void;
+  return %(lambda ${names.list()} $lowered);
+}
+
+/* One `match` over the expression grammar. The compiler turns it into a
+   decision tree, so reading the productions costs nothing extra. */
+static Var _lower_expr(Lowering l, Var form) {
+  if (l.declined) return void;
+  match (form) {
+    case %(at ? ?node):                   return _lower_expr(l, node);
+    case %(expr ? (at ? ?node)):          return _lower_expr(l, node);
+    case %(expr ?type ?content):          return _lower_content(l, type, content);
+    case %(!or (cons ? ?) (nil) (cache ?)):
+      return %(quote ${_lower_constant(l, form)});
+  }
+  return _lower_decline(l, "not an expression");
+}
+
+static Var _lower_content(Lowering l, List type, Var content) {
+  match (content) {
+    case %(literal ("Symbol") ? ?(Var symbol)): return %(quote $symbol);
+    case %(literal (* char) ?(String text)):
+      return _lower_text(text);
+    case %(literal ("String") ?(String text)): return text;
+    case %(literal ?ltype ?(String text)):
+      return _lower_number(l, ltype, text);
+    case %(literal ?ltype ?(String text) ?):
+      return _lower_number(l, ltype, text);
+    case %(ident (binding ?(int id) ?)):
+      return l.cells.contains(id) ? %(C.load ${_lower_read(l, id)})
+                                  : _lower_read(l, id);
+    case %(parens ?inner):                return _lower_expr(l, inner);
+    case %(cast ? ?inner):                return _lower_expr(l, inner);
+    case %(expr ?inner ?within):          return _lower_content(l, inner, within);
+    case %(at ? ?node):                   return _lower_content(l, type, node);
+    case %(call (expr ? (ident (binding ? ?(String name)))) (args *args)):
+      return _lower_call(l, name, args);
+    case %(call ?(String name) (args *args)):
+      return _lower_call(l, name, args);
+    case %(op ?operator *operands):
+      return _lower_operands(l, operator, operands);
+    case %(postfix ? ?): return _lower_decline(l, "postfix in an expression");
+    case %(lambda (params *params) (captures *held) ?body):
+      return _lower_lambda(l, params, held, body);
+    case %(lambda (params *params) ?body):
+      return _lower_lambda(l, params, %(), body);
+    case %(!or (cons ? ?) (nil) (cache ?)):
+      return %(quote ${_lower_constant(l, content)});
+  }
+  return _lower_decline(l, "unsupported expression");
+}
+
+/* --- statements --------------------------------------------------------- */
+
+/* The continuation after a block is data, not a closure: either the end of
+   the function, or one more turn of the loop it sits inside. */
+static Var _lower_block(Lowering l, List items, List k);
+
+static Map _lower_env_copy(Lowering l) {
+  Map copy = {};
+  foreach (Var (id, form), l.env) copy[id] = form;
+  return copy;
+}
+
+static void _lower_env_restore(Lowering l, Map saved) {
+  l.env = saved;
+}
+
+static Var _lower_apply_k(Lowering l, List k) {
+  match (k) {
+    case %(end): return 0;
+    case %(again ?name (*ids)): {
+      Array values = [];
+      defer values.free();
+      values.push(name);
+      foreach (Var id, ids) {
+        Var value = _lower_read(l, id);
+        if (_lower_failed(l, value)) return void;
+        values.push(value);
+      }
+      return values.list();
+    }
+  }
+  return _lower_decline(l, "unknown continuation");
+}
+
+/* nil is the only false value in Lisp, so a C zero has to be compared. A
+   numeric test inlines that; anything else asks for x2c truth, because a
+   nil List is false and zero is not a meaningful comparison there. */
+static Var _lower_truth(Lowering l, Var test) {
+  Var value = _lower_expr(l, test);
+  if (_lower_failed(l, value)) return void;
+  match (test)
+    case %(expr (!or (int) (long) (char) (short) (unsigned)
+                     (double) (float)) ?):
+      return %(not (eq? $value 0));
+  return %(C.true? $value);
+}
+
+/* Substitution duplicates an expression at every read, so a value that
+   cannot be duplicated is bound instead. A binding costs one lambda, which
+   is free once per entry and fatal once per iteration, so on a loop's path
+   the function is declined. */
+static int _lower_pure(Var form) {
+  if (form is not <list>) return 1;
+  List items = form;
+  if (!items) return 1;
+  Var head = items.car();
+  if (head == <C.gread> || head == <C.load> || head == <lambda>) return 0;
+  if (head is <lsym> || head is <symbol>) {
+    String spelling = head.str();
+    if (spelling && !spelling.startswith("C.") && !spelling.startswith("_") &&
+        spelling != "quote" && spelling != "not" && spelling != "eq?")
+      return 0;
+  }
+  foreach (Var part, items) if (!_lower_pure(part)) return 0;
+  return 1;
+}
+
+static Var _lower_bind_value(
+  Lowering l, int id, Var value, List rest, List k) {
+  if (_lower_failed(l, value)) return void;
+  if (_lower_pure(value)) {
+    Var previous = void;
+    l.env.try_get(id, &previous);
+    l.env[id] = value;
+    return _lower_block(l, rest, k);
+  }
+  if (l.on_loop)
+    return _lower_decline(l, "a value needing a binding is on a loop path");
+  Var slot = _lower_name(l, "hold");
+  l.env[id] = slot;
+  Var after = _lower_block(l, rest, k);
+  if (_lower_failed(l, after)) return void;
+  return %((lambda ($slot) $after) $value);
+}
+
+/* An effect runs on a `cond` test that always fails, which keeps the rest
+   of the block in tail position and introduces no binding form. */
+static Var _lower_effect(Lowering l, Var effect, List rest, List k) {
+  Var after = _lower_block(l, rest, k);
+  if (_lower_failed(l, after)) return void;
+  return %(cond ((begin $effect false) ()) (true $after));
+}
+
+static Var _lower_stmnt(Lowering l, Var form, List rest, List k);
+
+/* Both arms continue with the same remaining statements, so the rest of the
+   block appears in each. `cond` keeps every path in tail position. */
+static Var _lower_branch(
+  Lowering l, Var test, List then, List alt, List rest, List k) {
+  Var guard = _lower_truth(l, test);
+  if (_lower_failed(l, guard)) return void;
+  Map saved = _lower_env_copy(l);
+  Var taken = _lower_block(l, %(@then @rest), k);
+  _lower_env_restore(l, saved);
+  if (_lower_failed(l, taken)) return void;
+  Map second = _lower_env_copy(l);
+  Var other = _lower_block(l, %(@alt @rest), k);
+  _lower_env_restore(l, second);
+  if (_lower_failed(l, other)) return void;
+  return %(cond ($guard $taken) (true $other));
+}
+
+/* A loop is a global function over the live locals. Its body ends in a
+   direct self call, the only shape the evaluator runs in constant space,
+   and its exit inlines the rest of the block rather than calling a
+   continuation, which would accumulate environment once per loop. */
+static Var _lower_loop(
+  Lowering l, Var test, List body, List rest, List k) {
+  Var name = _lower_name(l, "loop");
+  Array ids = [];
+  defer ids.free();
+  Array slots = [];
+  defer slots.free();
+  Array entry = [];
+  foreach (Var (id, form), l.env) {
+    ids.push(id);
+    entry.push(form);
+  }
+  Map inside = {};
+  foreach (Var id, ids) {
+    Var slot = _lower_name(l, "live");
+    slots.push(slot);
+    inside[id] = slot;
+  }
+  Map outer = l.env;
+  l.env = inside;
+  Var guard = _lower_truth(l, test);
+  int was_on_loop = l.on_loop;
+  l.on_loop = 1;
+  Map before = _lower_env_copy(l);
+  Var iterate = _lower_block(l, body, %(again $name ${ids.list()}));
+  _lower_env_restore(l, before);
+  l.on_loop = was_on_loop;
+  Var leave = _lower_block(l, rest, k);
+  l.env = outer;
+  if (_lower_failed(l, guard) || _lower_failed(l, iterate) ||
+      _lower_failed(l, leave))
+    return void;
+  l.definitions.push(
+    %(def $name (lambda ${slots.list()} (cond ($guard $iterate)
+                                              (true $leave)))));
+  return cons(name, entry.list_free());
+}
+
+static Var _lower_declarator(
+  Lowering l, List type, List declarator, List rest, List k) {
+  match (declarator) {
+    case %(op = (bind (binding ?(int id) ?) *) ?init):
+      return _lower_bind_value(l, id, _lower_expr(l, init), rest, k);
+    case %(bind (binding ?(int id) ?) *): {
+      Var zero = type.match(%((!or double float))) ? 0.0 : 0;
+      return _lower_bind_value(l, id, zero, rest, k);
+    }
+  }
+  return _lower_decline(l, "unsupported declarator");
+}
+
+/* The binding id an lvalue names, or -1 when it is not a plain local. */
+static int _lower_target(Var form) {
+  match (form)
+    case %(expr ? (ident (binding ?(int id) ?))): return id;
+  return -1;
+}
+
+static Var _lower_store(
+  Lowering l, Var target, Var value, List rest, List k) {
+  int id = _lower_target(target);
+  if (id < 0) return _lower_decline(l, "assignment to a computed place");
+  if (l.cells.contains(id))
+    return _lower_decline(l, "assignment through a cell");
+  if (_lower_failed(l, value)) return void;
+  if (!l.locals.contains(id))
+    return _lower_effect(l, %(C.gwrite $id $value), rest, k);
+  return _lower_bind_value(l, id, value, rest, k);
+}
+
+/* `right` is already lowered: a step supplies its own one, and a compound
+   assignment supplies its lowered right-hand side. */
+static Var _lower_update(
+  Lowering l, Var target, Var operator, Var right, List rest, List k) {
+  int id = _lower_target(target);
+  if (id < 0) return _lower_decline(l, "update of a computed place");
+  if (_lower_failed(l, right)) return void;
+  if (!l.locals.contains(id)) {
+    Var combined = %(_binary (C.gread $id) (quote $operator) $right);
+    return _lower_effect(l, %(C.gwrite $id $combined), rest, k);
+  }
+  Var current = _lower_read(l, id);
+  if (_lower_failed(l, current)) return void;
+  return _lower_bind_value(
+    l, id, %(_binary $current (quote $operator) $right), rest, k);
+}
+
+/* The operator a compound assignment applies, or the zero Symbol. */
+static Symbol _lower_compound(Var operator) {
+  Symbol zero = 0;
+  if (operator == <"+=">) return <+>;
+  if (operator == <"-=">) return <->;
+  if (operator == <"*=">) return <*>;
+  if (operator == <"/=">) return </>;
+  if (operator == <"%=">) return <%>;
+  if (operator == <"&=">) return <&>;
+  if (operator == <"|=">) return <|>;
+  if (operator == <"^=">) return <^>;
+  if (operator == <"<<=">) return <"<<">;
+  if (operator == <">>=">) return <">>">;
+  return zero;
+}
+
+/* A step of one in the target's own type: an `int` counter must not become
+   a `double`, or the next bitwise operation on it has no meaning. */
+static Var _lower_step_of(Var target) {
+  match (target)
+    case %(expr (!or (double) (float)) ?): return 1.0;
+  return 1;
+}
+
+static Var _lower_expression_stmnt(
+  Lowering l, Var e, List rest, List k) {
+  match (e) {
+    case %(expr ? (op = ?target ?rhs)):
+      return _lower_store(l, target, _lower_expr(l, rhs), rest, k);
+    case %(expr ? (!or (op ++ ?target) (postfix ++ ?target))):
+      return _lower_update(l, target, <+>, _lower_step_of(target), rest, k);
+    case %(expr ? (!or (op -- ?target) (postfix -- ?target))):
+      return _lower_update(
+        l, target, <->, _lower_step_of(target), rest, k);
+    case %(expr ? (op ?operator ?target ?rhs)): {
+      Symbol applied = _lower_compound(operator);
+      if (!applied)
+        return _lower_decline(l, "statement with no effect on a local");
+      return _lower_update(
+        l, target, applied, _lower_expr(l, rhs), rest, k);
+    }
+  }
+  return _lower_decline(l, "statement with no effect on a local");
+}
+
+static Var _lower_stmnt(Lowering l, Var form, List rest, List k) {
+  if (l.declined) return void;
+  match (form) {
+    case %(at ? ?node):    return _lower_stmnt(l, node, rest, k);
+    case %(empty):         return _lower_block(l, rest, k);
+    case %(block *items):  return _lower_block(l, %(@items @rest), k);
+    case %(return ? ?value): return _lower_expr(l, value);
+    case %(return ?):      return 0;
+    case %(declare ?type (bindings ?declarator)):
+      return _lower_declarator(l, type, declarator, rest, k);
+    case %(declare ?type (bindings *declarators)): {
+      Array expanded = [];
+      defer expanded.free();
+      foreach (List declarator, declarators)
+        expanded.push(%(declare $type (bindings $declarator)));
+      return _lower_block(l, %(@{expanded.list()} @rest), k);
+    }
+    case %(stmnt ?e):      return _lower_expression_stmnt(l, e, rest, k);
+    case %(if ?test ?then):
+      return _lower_branch(l, test, %($then), %(), rest, k);
+    case %(if ?test ?then ?alt):
+      return _lower_branch(l, test, %($then), %($alt), rest, k);
+    case %(while ?test ?body):
+      return _lower_loop(l, test, %($body), rest, k);
+    /* A `for` is the same loop with its step at the end of the body; the
+       subset has no `continue`, so nothing can skip that step. */
+    case %(for ?init ?test ?step ?body): {
+      List start = init ? %(${_lower_for_init(init)}) : %();
+      List turn = step ? %($body (stmnt $step)) : %($body);
+      List guard = test ? test : %(expr (int) (literal (int) "1"));
+      return _lower_block(
+        l, %(@start (while $guard (block @turn)) @rest), k);
+    }
+  }
+  return _lower_decline(l, "unsupported statement");
+}
+
+static List _lower_for_init(List init) {
+  match (init) {
+    case %(decl ?type (bindings *declarators)):
+      return %(declare $type (bindings @declarators));
+  }
+  return %(stmnt $init);
+}
+
+static Var _lower_block(Lowering l, List items, List k) {
+  if (l.declined) return void;
+  if (!items) return _lower_apply_k(l, k);
+  return _lower_stmnt(l, items.car(), items.cdr(), k);
+}
+
+/* --- the function ------------------------------------------------------- */
+
+/** Lowers one compile-time function into the forms the macro session
+    evaluates, or returns `NULL` when the substitution cannot carry it.
+    The result is the loop definitions the body needed followed by the
+    function's own, in evaluation order. This method does not open a
+    semantic transaction.
+*/
+List Compiler.lower_comptime(Compiler compiler, List fn) {
+  struct Lowering state = {
+    .compiler = compiler, .env = {}, .locals = {}, .cells = {},
+    .arrays = {}, .definitions = [], .counter = 0, .declined = 0,
+    .on_loop = 0, .rejected = 0, .uncallable = 0
+  };
+  Lowering l = &state;
+  match (fn) {
+    case %(function ?spec (bind (binding ? ?(String name))
+                            ((fnmod (params *params)))) (block *items)): {
+      (void) spec;
+      lower_declined_reason = NULL;
+      _lower_scan(l, fn);
+      if (l.rejected) lower_declined_reason = "unsupported construct";
+      else if (l.uncallable) lower_declined_reason = "callee has no binding";
+      else if (l.cells.len()) lower_declined_reason = "address is taken";
+      else if (l.arrays.len()) lower_declined_reason = "declares an array";
+      if (l.rejected || l.uncallable || l.cells.len() || l.arrays.len()) {
+        l.definitions.free();
+        return NULL;
+      }
+      Array slots = [];
+      defer slots.free();
+      foreach (List parameter, params) {
+        match (parameter)
+          case %(param ? (bind (binding ?(int id) ?) *)): {
+            Var slot = _lower_name(l, "arg");
+            slots.push(slot);
+            l.env[id] = slot;
+          }
+      }
+      Var body = _lower_block(l, items, %(end));
+      if (_lower_failed(l, body)) {
+        l.definitions.free();
+        return NULL;
+      }
+      l.definitions.push(
+        %(def ${Atom.intern(name)} (lambda ${slots.list()} $body)));
+      return l.definitions.list_free();
+    }
+  }
+  l.definitions.free();
+  return NULL;
+}
+
+/** Returns why the last `Compiler.lower_comptime` declined, or `NULL`. */
+String Compiler.lower_declined(Compiler compiler) {
+  (void) compiler;
+  return lower_declined_reason;
+}
+
+/** Lowers `fn` and evaluates the result in the macro session, so the
+    function is callable from compile-time Lisp under its own name.
+    Returns whether the lowering succeeded. This method mutates the macro
+    session and does not open a semantic transaction.
+*/
+int Compiler.install_comptime(Compiler compiler, List fn) {
+  /* A recursive call resolves against the name before the body is lowered,
+     the way a C prototype lets a function call itself. */
+  match (fn)
+    case %(function ? (bind (binding ? ?(String name)) ?) ?):
+      compiler.macro_lisp.eval(%(def ${Atom.intern(name)} (lambda () 0)));
+  List forms = compiler.lower_comptime(fn);
+  if (!forms) return 0;
+  foreach (Var form, forms) compiler.macro_lisp.eval(form);
+  return 1;
+}
