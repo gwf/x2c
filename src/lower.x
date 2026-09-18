@@ -312,7 +312,6 @@ static Var _lower_expr(Lowering l, Var form) {
   if (l.declined) return void;
   match (form) {
     case %(at ? ?node):                   return _lower_expr(l, node);
-    case %(expr ? (at ? ?node)):          return _lower_expr(l, node);
     case %(expr ?type ?content):          return _lower_content(l, type, content);
     /* A literal template builds its List with `cons`, and folding replaced
        only its constant parts, so each part is lowered as an expression. */
@@ -329,6 +328,9 @@ static Var _lower_expr(Lowering l, Var form) {
 static Var _lower_content(Lowering l, List type, Var content) {
   match (content) {
     case %(literal ("Symbol") ? ?symbol): return %(quote $symbol);
+    /* x2c `void` has no Lisp counterpart; nil is the falsy stand-in, so a
+       lowered function cannot tell `void` from an empty List. */
+    case %(literal ("Var") "void"): return %(quote ());
     case %(literal (* char) ?(String text)):
       return _lower_text(text);
     case %(literal ("String") ?(String text)): return text;
