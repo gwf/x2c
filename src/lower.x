@@ -178,7 +178,7 @@ static Var _lower_constant_leaf(Lowering l, List value) {
       return _lower_constant(l, node);
     case %(expr ? (nil)):                       return %();
     case %(expr ? (expr ? (nil))):              return %();
-    case %(expr ? (literal ? ? ?(Var symbol))): return symbol;
+    case %(expr ? (literal ? ? ?symbol)): return symbol;
     case %(expr ("String") (call ? (args ?inner))):
       return _lower_constant_leaf(l, inner);
     case %(expr ("String") (literal ? ?(String text))): return text;
@@ -196,8 +196,8 @@ static Var _lower_constant(Lowering l, Var node) {
       match (key) {
         case %(cons ?head ?tail):
           return cons(_lower_constant(l, head), _lower_constant(l, tail));
-        case %(!or (var ?value) (string ?value)):
-          return _lower_constant_leaf(l, value);
+        case %(var ?value):    return _lower_constant_leaf(l, value);
+        case %(string ?value): return _lower_constant_leaf(l, value);
         case %(nil): return %();
       }
       return key;
@@ -312,8 +312,14 @@ static Var _lower_expr(Lowering l, Var form) {
     case %(at ? ?node):                   return _lower_expr(l, node);
     case %(expr ? (at ? ?node)):          return _lower_expr(l, node);
     case %(expr ?type ?content):          return _lower_content(l, type, content);
-    case %(!or (cons ? ?) (nil) (cache ?)):
-      return %(quote ${_lower_constant(l, form)});
+    /* A literal template builds its List with `cons`, and folding replaced
+       only its constant parts, so each part is lowered as an expression. */
+    case %(cons ?head ?tail):
+      return %(cons ${_lower_expr(l, head)} ${_lower_expr(l, tail)});
+    case %(append ?head ?tail):
+      return %(append ${_lower_expr(l, head)} ${_lower_expr(l, tail)});
+    case %(nil):     return %(quote ());
+    case %(cache ?): return %(quote ${_lower_constant(l, form)});
   }
   return _lower_decline(l, "not an expression");
 }
@@ -346,8 +352,12 @@ static Var _lower_content(Lowering l, List type, Var content) {
       return _lower_lambda(l, params, held, body);
     case %(lambda (params *params) ?body):
       return _lower_lambda(l, params, %(), body);
-    case %(!or (cons ? ?) (nil) (cache ?)):
-      return %(quote ${_lower_constant(l, content)});
+    case %(cons ?head ?tail):
+      return %(cons ${_lower_expr(l, head)} ${_lower_expr(l, tail)});
+    case %(append ?head ?tail):
+      return %(append ${_lower_expr(l, head)} ${_lower_expr(l, tail)});
+    case %(nil):     return %(quote ());
+    case %(cache ?): return %(quote ${_lower_constant(l, content)});
   }
   return _lower_decline(l, "unsupported expression");
 }
@@ -446,6 +456,77 @@ static Var _lower_effect(Lowering l, Var effect, List rest, List k) {
 }
 
 static Var _lower_stmnt(Lowering l, Var form, List rest, List k);
+
+/* --- match -------------------------------------------------------------- */
+
+/* A binder is an atom spelled `?name` or `*name`; a bare `?` or `*` is a
+   wildcard and names nothing. */
+static int _lower_binder(Var value, String *name) {
+  if (!value.is_atom()) return 0;
+  String spelling = value.str();
+  if (!spelling || spelling.len() < 2) return 0;
+  if (spelling[0] != '?' && spelling[0] != '*') return 0;
+  if (name) *name = String.new_len(spelling + 1, spelling.len() - 1);
+  return 1;
+}
+
+static void _lower_binders(Var pattern, Array found) {
+  if (pattern is <list>) {
+    List items = pattern;
+    foreach (Var part, items) _lower_binders(part, found);
+    return;
+  }
+  if (_lower_binder(pattern, NULL)) found.push(pattern);
+}
+
+/* The compiler bound each `?name` to an ordinary local, so the arm's body
+   refers to it by binding id. Those ids are what the environment needs. */
+static void _lower_arm_ids(Var form, String name, Array found) {
+  if (form is not <list>) return;
+  List items = form;
+  if (!items) return;
+  match (items)
+    case %(binding ?(int id) ?(String spelling)): {
+      if (spelling == name) found.push(id);
+      return;
+    }
+  foreach (Var part, items) _lower_arm_ids(part, name, found);
+}
+
+/* A `case` pattern was folded into the compiler cache, so it reads back as
+   the List the source wrote and goes straight to the matcher. A binder
+   repeats the match rather than naming its result: matching is pure, and an
+   arm free of a binding form stays usable on a loop's iteration path. */
+static Var _lower_arms(
+  Lowering l, Var subject, List arms, List rest, List k) {
+  if (!arms) return _lower_block(l, rest, k);
+  List arm = arms.car();
+  Var pattern = _lower_constant(l, arm.car());
+  if (pattern is void) return _lower_decline(l, "case pattern is not folded");
+  Var value = _lower_expr(l, subject);
+  if (_lower_failed(l, value)) return void;
+  Var result = %(match $value (quote $pattern));
+  Array binders = [];
+  defer binders.free();
+  _lower_binders(pattern, binders);
+  Map saved = _lower_env_copy(l);
+  foreach (Var binder, binders) {
+    String name = NULL;
+    _lower_binder(binder, &name);
+    Array ids = [];
+    defer ids.free();
+    _lower_arm_ids(arm.cadr(), name, ids);
+    foreach (Var id, ids) l.env[id] = %(bound $result (quote $binder));
+  }
+  Var taken = _lower_block(l, %(${arm.cadr()} @rest), k);
+  _lower_env_restore(l, saved);
+  if (_lower_failed(l, taken)) return void;
+  Map second = _lower_env_copy(l);
+  Var other = _lower_arms(l, subject, arms.cdr(), rest, k);
+  _lower_env_restore(l, second);
+  if (_lower_failed(l, other)) return void;
+  return %(cond ($result $taken) (true $other));
+}
 
 /* Both arms continue with the same remaining statements, so the rest of the
    block appears in each. `cond` keeps every path in tail position. */
@@ -624,6 +705,8 @@ static Var _lower_stmnt(Lowering l, Var form, List rest, List k) {
       return _lower_branch(l, test, %($then), %($alt), rest, k);
     case %(while ?test ?body):
       return _lower_loop(l, test, %($body), rest, k);
+    case %(match ?subject ?arms):
+      return _lower_arms(l, subject, arms, rest, k);
     /* A `for` is the same loop with its step at the end of the body; the
        subset has no `continue`, so nothing can skip that step. */
     case %(for ?init ?test ?step ?body): {
