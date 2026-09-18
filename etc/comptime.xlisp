@@ -108,6 +108,28 @@
     (if (_array_holds a j) (Array.setindex a j v) ())))
 (def Array_list Array.list)
 (def Array_join Array.join)
+(def Array_find Array.find)
+(def Array_contains Array.contains)
+(def Array_count Array.count)
+// `Array.unshift` answers the element it inserted, and refuses a `void` one
+// by raising, so it never answers `void` itself.
+(def Array_unshift Array.unshift)
+
+// These four answer `void` where there is no such element, so each checks
+// its range first and an absent element reads as nil. `Array.len` answers an
+// unsigned length, so a length is compared rather than subtracted from.
+(defun Array_take_last (a) (if (> (Array.len a) 0) (Array.take_last a) ()))
+(defun Array_shift (a) (if (> (Array.len a) 0) (Array.shift a) ()))
+(defun Array_remove (a i)
+  (let ((j (_array_index a i)))
+    (if (_array_holds a j) (Array.remove a j) ())))
+// An insertion may also land past the last element, so its range is one
+// wider than a read's and `-1` appends. `Array.insert` normalizes a negative
+// index itself, so an accepted one is passed through as written.
+(defun Array_insert (a i v)
+  (if (< i 0)
+      (if (<= (- 0 i) (+ (Array.len a) 1)) (Array.insert a i v) ())
+      (if (<= i (Array.len a)) (Array.insert a i v) ())))
 
 // A map literal builds its entries in one expression, the way an array
 // literal does, so the lowering needs no statement sequence. The flat list
@@ -127,7 +149,10 @@
 (def Map_getindex Map_get)
 (def Map_setindex Map.setindex)
 (def Map_contains Map.contains)
+// `Map.del` answers the removed value, or `void` when the key was absent.
+(defun Map_del (m k) (if (eq? (Map.contains m k) 0) () (Map.del m k)))
 (def Map_getdefault Map.getdefault)
+(def Map_setdefault Map.setdefault)
 (def Map_list Map.list)
 
 (def String_getindex String.getindex)
@@ -143,6 +168,18 @@
 (def String_replace String.replace)
 (def String_join String.join)
 (def String_split String.split)
+(def String_split_lines String.split_lines)
+(def String_partition String.partition)
+(def String_rpartition String.rpartition)
+(def String_find_all String.find_all)
+(def String_rfind String.rfind)
+(def String_count String.count)
+(def String_capitalize String.capitalize)
+(def String_repeat String.repeat)
+(def String_remove_prefix String.remove_prefix)
+(def String_remove_suffix String.remove_suffix)
+(def String_escape String.escape)
+(def String_unescape String.unescape)
 (defun String_new (text) text)
 (defun String_equal (a b) (if (equal? a b) 1 0))
 

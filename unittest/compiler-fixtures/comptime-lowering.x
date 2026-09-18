@@ -568,6 +568,122 @@ int ct_typed_symbol(List form) {
   return 0;
 }
 
+/* --- the library names a call resolves against --------------------------- */
+
+/* A call in a compile-time function resolves against a name in
+   `etc/comptime.xlisp`, and an operation with no binding there declines the
+   whole function. One function below per binding added for `String`,
+   `Array` and `Map`. */
+
+$comptime()
+String ct_str_capitalize(String s) => s.capitalize();
+
+$comptime()
+int ct_str_count(String s) => s.count("ab");
+
+$comptime()
+String ct_str_escape(String s) => s.escape();
+
+$comptime()
+String ct_str_unescape(String s) => s.unescape();
+
+$comptime()
+int ct_str_find_all(String s) => s.find_all("a", 0, -1).len();
+
+$comptime()
+String ct_str_partition(String s) => "/".join(s.partition("="));
+
+$comptime()
+String ct_str_rpartition(String s) => "/".join(s.rpartition("="));
+
+$comptime()
+String ct_str_prefix(String s) => s.remove_prefix("ct_");
+
+$comptime()
+String ct_str_suffix(String s) => s.remove_suffix(".x");
+
+$comptime()
+String ct_str_repeat(String s) => s.repeat(3);
+
+$comptime()
+int ct_str_rfind(String s) => s.rfind("b");
+
+$comptime()
+String ct_str_lines(String s) => "|".join(s.split_lines(0));
+
+$comptime()
+int ct_arr_contains(int n) {
+  Array xs = [n, n + 1];
+  return xs.contains(n + 1);
+}
+
+$comptime()
+int ct_arr_count(int n) {
+  Array xs = [n, n, n + 1];
+  return xs.count(n);
+}
+
+$comptime()
+int ct_arr_find(int n) {
+  Array xs = [n, n + 1];
+  return xs.find(n + 1);
+}
+
+$comptime()
+int ct_arr_unshift(int n) {
+  Array xs = [n];
+  xs.unshift(n + 1);
+  return Var.integer(xs[0]);
+}
+
+/* `Array.shift`, `Array.take_last`, `Array.remove`, `Array.insert` and
+   `Map.del` answer `void` where there is no element, and `void` has no Lisp
+   value, so each is wrapped rather than aliased. Each function below reads a
+   present element and then an absent one, which is where an alias would
+   fail. */
+
+$comptime()
+int ct_arr_shift(int n) {
+  Array xs = [n];
+  int first = Var.integer(xs.shift());
+  return xs.shift() ? -1 : first;
+}
+
+$comptime()
+int ct_arr_take_last(int n) {
+  Array xs = [n];
+  int last = Var.integer(xs.take_last());
+  return xs.take_last() ? -1 : last;
+}
+
+$comptime()
+int ct_arr_remove(int n) {
+  Array xs = [n, n + 1];
+  int gone = Var.integer(xs.remove(-1));
+  return xs.remove(9) ? -1 : gone;
+}
+
+$comptime()
+int ct_arr_insert(int n) {
+  Array xs = [n];
+  xs.insert(0, n + 1);
+  return xs.insert(9, n) ? -1 : Var.integer(xs[0]);
+}
+
+$comptime()
+int ct_map_del(int n) {
+  Map m = { "a": n };
+  int gone = Var.integer(m.del("a"));
+  return m.del("a") ? -1 : gone;
+}
+
+$comptime()
+int ct_map_setdefault(int n) {
+  Map m = { "a": n };
+  m.setdefault("b", n + 1);
+  return Var.integer(m.setdefault("b", 0));
+}
+
 /* --- `meta`, the second spelling ----------------------------------------- */
 
 /* `meta` marks a function the compiler runs as well as emits. The parser
@@ -678,6 +794,32 @@ int main(void) {
          $(ct_typed_mixed '(op add "z")), $(ct_typed_mixed '(op add 5)));
   printf("typed-symbol %d %d\n",
          $(ct_typed_symbol '(tag a)), $(ct_typed_symbol '(tag "a")));
+  printf("str-case     %s\n", $(ct_str_capitalize "hi"));
+  printf("str-count    %d\n", $(ct_str_count "abab"));
+  printf("str-escape   %s\n", $(ct_str_escape "a\nb"));
+  printf("str-unescape %s\n", $(ct_str_unescape "a\\tb"));
+  printf("str-find-all %d\n", $(ct_str_find_all "abab"));
+  printf("str-part     %s %s\n",
+         $(ct_str_partition "a=b"), $(ct_str_partition "ab"));
+  printf("str-rpart    %s %s\n",
+         $(ct_str_rpartition "a=b=c"), $(ct_str_rpartition "ab"));
+  printf("str-prefix   %s %s\n",
+         $(ct_str_prefix "ct_name"), $(ct_str_prefix "name"));
+  printf("str-suffix   %s %s\n",
+         $(ct_str_suffix "unit.x"), $(ct_str_suffix "unit.c"));
+  printf("str-repeat   %s\n", $(ct_str_repeat "ab"));
+  printf("str-rfind    %d\n", $(ct_str_rfind "abcb"));
+  printf("str-lines    %s\n", $(ct_str_lines "one\ntwo"));
+  printf("arr-contains %d\n", $(ct_arr_contains 4));
+  printf("arr-count    %d\n", $(ct_arr_count 4));
+  printf("arr-find     %d\n", $(ct_arr_find 4));
+  printf("arr-unshift  %d\n", $(ct_arr_unshift 4));
+  printf("arr-shift    %d\n", $(ct_arr_shift 4));
+  printf("arr-take     %d\n", $(ct_arr_take_last 4));
+  printf("arr-remove   %d\n", $(ct_arr_remove 4));
+  printf("arr-insert   %d\n", $(ct_arr_insert 4));
+  printf("map-del      %d\n", $(ct_map_del 4));
+  printf("map-default  %d\n", $(ct_map_setdefault 4));
   printf("meta-poly    %d %d %d %d\n",
          $(mt_poly 7), mt_poly(7), $(ct_poly 7), ct_poly(7));
   printf("meta-static  %s %s\n",
