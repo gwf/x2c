@@ -4657,9 +4657,11 @@ checkout's `include/x2c` names.
 
 There is no lowercase `-i`. `-D` and `-U` reach requested x2c preprocessing
 and C compilation. Optimization, debug, and `-Xcc` are compile-only; `-L`,
-`-l`, `--rpath`, `-Wl,`, and `-Xlinker` are link-only. Unknown options are
+`-l`, `--rpath`, `-Wl,`, `-Xlinker`, and `-framework` are link-only.
+`-pthread` reaches both the compile and the link. Unknown options are
 rejected. `--rpath <dir>` records `<dir>` in the program as a place to find
 shared libraries when it runs; a package bundle may include it.
+`-framework <name>` links a native framework on macOS.
 
 The C compiler selection order is `--cc`, `X2C_CC`, `CC`, the installed
 toolchain record, then `cc`. The archiver follows `--ar`, `X2C_AR`, `AR`, the
@@ -4687,7 +4689,7 @@ and there is no option to suppress or escalate one. A warning describes
 something the compiler can see and you may have arranged deliberately, so
 code that means what it says can be left as written.
 
-Five codes are reported as warnings:
+Six codes are reported as warnings:
 
 - `region` says a value allocated inside a region can still be reached after
   the region ends, and names how it leaves. Its note gives the line that
@@ -4698,6 +4700,8 @@ Five codes are reported as warnings:
   opened it, a shape the `region` check cannot follow.
 - `literal` says a bare word inside a macro is a `Symbol` where a value was
   probably meant, and names the unquoted spelling that inserts the value.
+- `macro` carries what a macro reported through `x2c.diagnostic.warn`, at the
+  invocation, with the notes the macro supplied.
 - `warning` covers the remaining cases: an unnecessary conversion, and a
   protocol binder that shadows a visible type name.
 
@@ -4723,8 +4727,8 @@ no diagnostics leaves it empty. Each line is one JSON object:
   `protocol`, `xform`, `region`, `warning`, or `limit`.
 - `severity` is `error`, `warning`, or `note`. It records how the report was
   submitted, so each entry in a category with both severities, such as
-  `region` or `literal`, has its own severity. The `limit` notice is a
-  `note`.
+  `region`, `literal`, or `macro`, has its own severity. The `limit` notice
+  is a `note`.
 - `file` is relative to the working directory for a source inside it and
   absolute otherwise. A pseudo-source such as `<stdin>` keeps its name.
 - `line` and `column` are one-based, `length` is the token width in bytes,

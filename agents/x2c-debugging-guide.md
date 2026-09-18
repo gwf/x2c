@@ -79,7 +79,7 @@ mkdir -p /tmp/x2c-debug
 formatted generated C to `/tmp/x2c-debug/test.c` and its header to `test.h`.
 
 Compiler diagnostics report one-based lines and columns and underline the
-offending token's first-line width. The CLI records one ordinary error by
+offending token's first-line width. The CLI records twenty ordinary errors by
 default, followed by its limit notice. The exact location fields and generic
 Diagnostics API are documented in `agents/logger-and-diagnostics-guide.md`.
 

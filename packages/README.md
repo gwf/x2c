@@ -3,7 +3,9 @@
 These optional packages make C libraries available through x2c types and
 methods while preserving access to their native APIs. Choose a package for
 its examples, then follow its README to prepare dependencies and run it.
-Package builds are tested on macOS. Torch also has Linux x86_64 CPU coverage.
+Release bundles are built on macOS arm64 and x86_64 and on Linux x86_64 and
+arm64; Torch bundles only on macOS arm64 and Linux x86_64, because upstream
+publishes prebuilt CPU libtorch for those two alone.
 
 | Package | What it provides |
 | --- | --- |
@@ -86,7 +88,7 @@ an adapter.
 
 ## The applications
 
-Each package carries a short application and a broader one, and the three
+Each package carries a short application and a broader one, and the five
 with a value-oriented Lisp surface carry a Lisp one. Libuv also carries four
 focused reports for thread notification, TCP, named pipes, and UDP. `make
 short-example`, `make example`, and `make lisp-example` build them; `make run`
@@ -132,8 +134,9 @@ runs every standard application for that package.
 - [raylib/examples/chart.x](raylib/examples/chart.x) and [raylib/examples/live-chart.x](raylib/examples/live-chart.x): shared chart
   drawing and its optional desktop-window front end. The package checks compile both;
   only `make run-interactive` launches the window.
-- [pcre2/examples/inline-lisp.x](pcre2/examples/inline-lisp.x), [yyjson/examples/inline-lisp.x](yyjson/examples/inline-lisp.x), and
-  [libcurl/examples/inline-lisp.x](libcurl/examples/inline-lisp.x): each installs its package's Lisp surface
+- [pcre2/examples/inline-lisp.x](pcre2/examples/inline-lisp.x), [yyjson/examples/inline-lisp.x](yyjson/examples/inline-lisp.x),
+  [libcurl/examples/inline-lisp.x](libcurl/examples/inline-lisp.x), [sqlite/examples/inline-lisp.x](sqlite/examples/inline-lisp.x), and
+  [torch/examples/inline-lisp.x](torch/examples/inline-lisp.x): each installs its package's Lisp surface
   into a session and drives it.
 - [http-json-releases](../examples/packages/http-json-releases/http-json-releases.x):
   two packages in one program, importing libcurl and yyjson and linking both
@@ -159,7 +162,7 @@ Packages use the following layout:
 - `dependency.json` pins upstream source and the native build profile.
   `tools/deps.py` prefers `dependency-<os>-<arch>.json`, then
   `dependency-<os>.json`, when one exists for the host.
-- `LICENSES/` and, when useful, a compact `PROFILE.md` or `PROFILE.json`
+- `LICENSES/` and, when useful, a compact `PROFILE.md`
   retain terms and reviewed facts that cannot be replaced by a generated
   inventory.
 - `Makefile` sets `PACKAGE`, includes `package.mk`, and names the package's

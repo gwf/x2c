@@ -927,11 +927,12 @@ smallest first: 10
 non-empty Array literals. Raw `Null` is `Array` data. An out-of-range read
 returns `void`. `Array` has no status-bearing read.
 
-### Packed numeric Arrays
+### Packed typed Arrays
 
-`typed-array.x` declares six `Array`s whose elements are native scalars rather
-than `Var`: `ArrayChar`, `ArrayShort`, `ArrayInt`, `ArrayLong`,
-`ArrayFloat`, and `ArrayDbl`. Each stores its elements packed, at the width
+`typed-array.x` declares seven `Array`s whose elements use a concrete field
+rather than `Var`: `ArrayChar`, `ArrayShort`, `ArrayInt`, `ArrayLong`,
+`ArrayFloat`, and `ArrayDbl` hold native scalars, and `ArrayString` holds
+canonical `String` pointers. Each stores its elements packed, at the width
 of the C type, and carries the same positional, slicing, searching, and
 `Block` operations that `Array` does. An Array literal builds one when that is
 the declared type, so `ArrayInt counts = [1, 2, 3];` packs the literal; an
@@ -1156,13 +1157,14 @@ destructuring form.
 
 ### Packed typed Maps
 
-`typed-map.x` declares three `Map`s whose keys and values use concrete fields
+`typed-map.x` declares four `Map`s whose keys and values use concrete fields
 rather than `Var`. `MapIntInt` and `MapLongDouble` store native numeric
-scalars; `MapStringString` stores canonical `String` pointers. Each carries the
-same lookup, defaulting, update, deletion, traversal, `copy`, and `merge`
-operations that `Map` does. A Map literal builds one when that is the declared
-type, converting every key and value to the field type; an entry that cannot
-be converted raises `<no-convert>`.
+scalars; `MapStringString` stores canonical `String` pointers, and
+`MapStringInt` stores a canonical `String` key against a native `int`. Each
+carries the same lookup, defaulting, update, deletion, traversal, `copy`, and
+`merge` operations that `Map` does. A Map literal builds one when that is the
+declared type, converting every key and value to the field type; an entry that
+cannot be converted raises `<no-convert>`.
 
 ```x2c
 #include "typed-map.x"
@@ -1196,16 +1198,17 @@ label=x2c
 These types adopt `protocol Var`, so their `getindex`, `setindex`,
 `updateindex`, and `postfixindex` members also provide bracket reads, writes,
 compound updates, and numeric postfix updates. The numeric families update
-with native arithmetic. For `MapStringString`, `<+>` concatenates, and both
-postfix operators raise `<bad-op>`. In all three families `<+>` initializes
-an absent key from the right-hand side, and every other update requires an
-existing one.
+with native arithmetic, and so does `MapStringInt`'s `int` value. For
+`MapStringString`, `<+>` concatenates, and both postfix operators raise
+`<bad-op>`. In all four families `<+>` initializes an absent key from the
+right-hand side, and every other update requires an existing one.
 
-All three packed `Map`s can be boxed into a `Context` or returned from a
+All four packed `Map`s can be boxed into a `Context` or returned from a
 `Thread`. An owned map keeps its pointer and can continue growing after the
 source `Context` closes or `Thread.join` returns. Numeric maps move their
-existing entries directly. `MapStringString` rebuilds its table with `String`s
-canonicalized in the destination pool; `String` pointers may change, and if two
+existing entries directly. `MapStringString` and `MapStringInt` rebuild their
+tables with `String` keys canonicalized in the destination pool; `String`
+pointers may change, and if two
 source keys become one destination `String`, the later entry in source bucket
 order wins. Traversal order is otherwise unspecified. A map borrowed from an
 outer `Context` is left untouched.
@@ -1246,7 +1249,7 @@ successful `String` read returns one byte as an `int` between 0 and 255, so
 
 The packed numeric `Array`s are the exception on both counts. Their bracket is
 raw native indexing, with no bounds test and no negative-index rule. See
-[Packed numeric Arrays](#packed-numeric-arrays).
+[Packed typed Arrays](#packed-typed-arrays).
 
 Writing is where the immutable/mutable split shows up in the syntax:
 

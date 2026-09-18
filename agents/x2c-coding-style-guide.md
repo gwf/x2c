@@ -416,7 +416,7 @@ Prefer:
 ```x2c
 // The selected arm's captures are copied out, so the pattern pool can go.
 _catch_commit_captures(h, record, layout, &captures);
-String.pool_release();
+Pool.release();
 _catch_retain(h);
 ```
 
@@ -427,7 +427,7 @@ Avoid:
 _catch_commit_captures(h, record, layout, &captures);
 
 // Release pool.
-String.pool_release();
+Pool.release();
 
 // Retain the handler.
 _catch_retain(h);

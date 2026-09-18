@@ -18,7 +18,7 @@ that closes it.
 
 ## Exemptions
 
-The pass exempts three ways of leaving a region.
+The pass exempts four ways of leaving a region.
 
 A `List` pool owns each canonical value, so ending a region never frees it.
 `String`, `List`, and `Symbol` results therefore cross a region boundary
@@ -30,9 +30,12 @@ region, so the pass reports a region-born `a` at that store.
 
 `Scope.move` and `Context.export` change the storage's owner. After the
 move, the region the pass was tracking no longer holds the allocation, so
-the allocation survives the end of that region. Moving into a caller's slot
-is the ordinary way to return mutable storage, and the pass stops tracking
-the value there. Moving into a `Scope` local of the same function ties the
+the allocation survives the end of that region. The promote family -
+`String.promote`, `List.promote`, and `Atom.promote` - hands the value to an
+ancestor pool the same way and is exempt for the same reason. Moving into a
+caller's slot is the ordinary way to return mutable storage, and the pass
+stops tracking the value there. Moving into a `Scope` local of the same
+function ties the
 value to that local's storage, so a read after `Scope.destroy` reports.
 
 A typed conversion copies. Assigning a `Block`, `Buffer`, or `Array` into a

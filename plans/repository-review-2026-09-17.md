@@ -1,13 +1,24 @@
 # Repository review, 2026-09-17
 
-> Status: active - catalog of reproduced defects from a whole-repository
-> review at ea10e89, rechecked at a0e5641 on 2026-09-17. Groups 1, 2, 6, 8,
-> 10, and 13 are fixed and on main (`ecdcea9..bed22b2` plus the collections
-> commits that follow it), as are the scanner, private-interface, and
-> library-removal items under "Assigned elsewhere" (`ecdcea9..4a003c1`).
-> Groups 3, 4, 5, 7, 9, 11, 12, 14, 15, 16, and 17 are open. `make verify`,
-> `verify-fixtures`, `examples`, `check`, and `packages-check` all passed at
-> ea10e89, so none of these defects was caught by a current gate.
+> Status: done - catalog of reproduced defects from a whole-repository review
+> at ea10e89, rechecked at a0e5641 on 2026-09-17, and rechecked again at
+> dbfc9cfc on 2026-09-18. Every group's own note is authoritative and records
+> what landed; an earlier version of this header contradicted those notes by
+> listing fixed groups as open. `make verify`, `verify-fixtures`, `examples`,
+> `check`, and `packages-check` all passed at ea10e89, so none of these
+> defects was caught by a current gate.
+>
+> Five rows remain open and are carried into
+> `plans/repository-review-2026-09-18.md`: the raw 0xFF byte in Group 1, the
+> `make debug` and autocrlf rows in Group 13, `String.parse_char`'s octal
+> escape in Group 19, and the bare-binder template and `binder?` length rows
+> in Group 20. Group 3's two `_Generic` rows and Group 19's indirect-write
+> `volatile` row were confirmed fixed at dbfc9cfc. Correction to Group 20:
+> a long binder does not silently fail to bind; the build fails with
+> `(unbound (name ...))`. Correction to Group 13: the two remaining `!`
+> assertions at `run-cli-boundary.sh` and `run-preprocessor-boundary.sh` are
+> *not* "inside conditions and fine" - a bare `!`-inverted pipeline is exempt
+> from `set -e` and can never fail.
 
 ## Result
 
