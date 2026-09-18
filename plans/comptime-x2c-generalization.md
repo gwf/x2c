@@ -731,6 +731,109 @@ Reopen this only if a shipped compile-time x2c unit becomes necessary for
 another reason. Then `class` is the first thing to move, `$scope` the second,
 and `foreach` last or never.
 
+## The loop parameter ceiling (investigated 2026-09-18, no change)
+
+**Do not raise `LISP_AUTO_PARAM_MAX`.** The cliff M4 found is real and the
+constant is only where it surfaces. `_lower_loop` passes the enclosing
+function's whole lexical environment, so the cliff tracks how many locals a
+compile-time function declares, not what its loop uses. Raising the bound
+moves that cliff without removing it, buys nothing measurable on the
+repository's own corpus, and costs 6% of the compile-time recursion ceiling.
+Measured on branch `comptime-loop-params` off `0469ee39`.
+
+### What the limit costs
+
+A probe with a dialable live set - K accumulators plus a counter and the
+parameter, looping 3000 times at compile time - puts the step exactly at the
+ninth parameter. Translate time, best of three:
+
+| live locals | cap 8 | cap 32 |
+|---|---|---|
+| 6 | 80 ms | 83 ms |
+| 7 | 82 ms | 83 ms |
+| 8 | 84 ms | 118 ms |
+| 9 | **1.64 s** | 94 ms |
+| 10 | 1.74 s | 126 ms |
+| 11 | 1.86 s | 118 ms |
+| 12 | 1.99 s | 97 ms |
+
+One more live local costs 20x. Every iteration of the loop runs through the
+evaluator instead of the machine.
+
+### Why the limit is 8
+
+It is a buffer someone sized, not an encoding. `Var argv[LISP_AUTO_PARAM_MAX]`
+in `_auto_apply` is the only thing the constant sizes. An activation record
+borrows that array - `_machine_env_set` stores `const Var *values` and a
+count - so a parameter costs nothing per frame. The argument count rides in
+`MachineWord.b`, an `unsigned char` that `MachineBuilder.emit` range-checks
+into `[0, 255]`, so the encoding permits 255. `MACHINE_CODE_MAX` is not
+involved; M4 measured the largest program at 511 words of 4096.
+
+Two other sites read the constant. `_auto_compile_call` bounds the arguments
+a compiled call may pass, which is how a lowered loop's own call site
+declines alongside the loop. `_auto_compile_qq` reserves it as quasiquote
+headroom against `MACHINE_VALUE_MAX`, 248 slots at 8 and 224 at 32. At run
+time `LispMachine._call` bounds `argc` against `MACHINE_LOCAL_MAX` of 256 and
+crosses to the evaluator when there is no room, so a wide call degrades
+rather than failing.
+
+### What raising it would cost
+
+Raising to 32 adds 192 bytes to `_auto_apply`'s C stack frame. Measured by
+bisecting the depth of a non-tail compile-time recursion that still builds:
+12900 at cap 8, 12100 at cap 32, a 6% reduction. Both ceilings end in a
+segmentation fault rather than a diagnostic, which is a separate defect and
+is not caused by the constant.
+
+On the corpus the raise does what it claims and nothing more. The 8 declines
+`comptime-autodiff.x` produces become 6 - 895 analyses, 887 frozen at cap 8
+and 889 at cap 32, with the six remaining declines all rest-parameter
+lambdas from the Lisp standard library. Translate time does not move: seven
+runs each give a median of 987 ms at cap 8 and 973 ms at cap 32, inside the
+benchmark noise floor. The two loops it frees, `loop56-ad_call_tangent` and
+`loop244-ad_call_adjoint`, iterate over a call's arguments a few times each,
+so the evaluator was never doing much work in them.
+
+Answers are unaffected either way: the probe's compile-time result is
+byte-identical at both caps across the whole dial, K = 4 through 12.
+
+### Why the lowering is the lever
+
+`_lower_loop` builds its parameter list from every entry of `l.env`, the
+lowering environment at the loop's position, rather than from the locals the
+loop reads or writes. A loop over three variables is therefore made
+ineligible by unrelated declarations elsewhere in the same function. Probed
+at cap 32 with a loop touching exactly three locals and U further locals in
+scope but never named inside it:
+
+| locals in scope | translate |
+|---|---|
+| 31 | 96 ms |
+| 32 | 104 ms |
+| 33 | **1.17 s** |
+| 43 | 1.32 s |
+
+The cliff follows the count of declarations, not the loop. Passing the
+loop's live-in set, or one environment value for the remainder, removes the
+coupling; raising the constant only relabels it. That work belongs with
+whoever next touches `_lower_loop` and is not worth doing on its own, since
+the corpus shows no time to recover.
+
+### What would reopen this
+
+A compile-time function whose loop both carries a wide live set and iterates
+enough for the evaluator cost to show. Nothing in the repository does today.
+If one appears, narrow `_lower_loop`'s parameter list first and measure
+again before touching the constant.
+
+One note for whoever does: `lisp_auto_declined_form_releases_programs` in
+`unittest/test-lisp-auto.x` uses a nine-argument call as its example of a
+form that declines, so it fails at any larger bound. Widening its two calls
+past the new bound restores it. A declining argument does not substitute -
+`_auto_compile` rewinds it to an interpreted word and the enclosing call
+still compiles.
+
 ## Handoff
 
 The branch is self-contained. Verified on 2026-09-18 by forking `d553a2f3`
