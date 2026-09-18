@@ -3,8 +3,8 @@
 > Status: active
 >
 > Scoped 2026-09-18 on branch `x2c-lowers-to-lisp` after the autodiff port
-> landed. Phase 0 is done and committed; Phases 1-4 are the pass, 5-7 are
-> ports and one investigation. Nothing on this branch reaches `main` without Gary's
+> landed. Phases 0 and 1 are done and merged; Phases 2-4 are the rest of the
+> pass, 5-7 are ports and one investigation. Nothing on this branch reaches `main` without Gary's
 > explicit green light. The design in `plans/x2c-lowers-to-lisp.md` is
 > settled and this plan does not revisit it.
 
@@ -120,7 +120,54 @@ A calling convention worth knowing: a bare `$(fn args)` in expression position
 folds a compile-time result into the program, which is how the fixtures report.
 It accepts integers and strings; a `double` result needs `$(str (fn args))`.
 
-## Phase 1 - collection literals and indexing
+## Phase 1 - collection literals and indexing (done)
+
+Landed as `6e5cec84` and `47f9653a`. Array literals, map literals, bracket
+reads on `Array`/`List`/`Map`/`String`, bracket writes to `Array` and `Map`,
+local C arrays, and the conversions a declaration and a return need. The
+nineteen new lines in `comptime-lowering.stdout` are the evidence.
+
+Three corrections to what this section said before the work, each checked
+against `--dump-ast` from a decorator:
+
+- **An array literal lowers to an `Array`, not to a Lisp `List`.** The rule
+  below said the opposite, and it is wrong: `g([n])` is legal x2c, and an
+  array literal in an argument position has no destination for the pass to
+  read, so lowering it as a `List` hands a callee that declared `Array` the
+  wrong container with nothing to catch it. The conversion goes the other
+  way, at a `List` destination.
+- **`{}` is not `(map)`.** It is `(composite (commas))` and its node carries
+  no type at all, so only the destination can decide what it builds. Only a
+  non-empty map literal is `(map (map-entry k v)...)`.
+- **A bare name left of `:` is a `Symbol` key**, not a variable reference.
+
+Two conversions the pass has to make itself, because the pre-transform tree
+does not carry them: a declaration and a return. An assignment does carry
+its conversion already, so it needs nothing. `_lower_coerce` owns all of it
+and covers `Array`/`List` both ways and `Symbol` to `String`; the last pair
+was a segfault, because a compile-time function returning `Var.tag` folded a
+`Symbol` into a `%s` slot.
+
+Two defects fixed in passing. `Var zero = type.match(...) ? 0.0 : 0;` promotes
+both branches to `double` in C, so every uninitialized local was lowering to a
+floating zero. And `if (!values)` on an `Array` tests emptiness, not failure,
+so an empty initializer read as an error.
+
+Still refused, deliberately: compound assignment through an index
+(`xs[0] += 5`) declines as "update of a computed place", because a
+read-modify-write through one place is more than place analysis; an indexed
+write to a `List` or `String` declines, since `List` has no `setindex`; and a
+computed array dimension declines.
+
+Two files outside this phase changed, as the working agreement requires an
+agent to say. `etc/comptime.xlisp` (Phase 3) gained `String_getindex`, a
+`Map_of` constructor, and bounds-checked `Array_getindex`/`Array_setindex`,
+without which the first out-of-range read aborts the session on a `void`
+crossing. `_lower_stmnt`'s `return` case (Phase 2) now coerces, without which
+a `List`-returning function that accumulates into an `Array` returns the
+`Array` silently.
+
+The original scope follows.
 
 Owns `_lower_content`'s value productions, `_lower_store`'s place analysis,
 and the `array`/`map`/`composite`/`commas`/`getindex`/`index` entries in
