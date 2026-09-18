@@ -2444,8 +2444,11 @@ the parser has already consumed, such as a multi-line interpolated `%"..."`, is
 rejected; read its spelling with `x2c.source.text` instead.
 
 `x2c.type.members` returns an enum's members in source order as `(("NAME"
-VALUE) ...)`, where `VALUE` is the member's explicit initializer spelling or
-`nil` when it takes its position's value. A non-enum `Type` is rejected.
+VALUE) ...)`. `VALUE` is `nil` when the member takes its position's value, the
+literal's exact spelling as a `String` when the initializer is one literal,
+carrying its base, suffix, and character quotes, and otherwise the
+initializer's expression node, which a generator can splice or walk. Test it
+with `string?` when both kinds can occur. A non-enum `Type` is rejected.
 
 `x2c.diagnostic.warn` reports a macro warning at the invocation with `String`
 notes and returns, so expansion continues. `x2c.diagnostic.fail` does not

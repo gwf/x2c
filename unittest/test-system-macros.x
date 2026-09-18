@@ -98,16 +98,37 @@ static void system_macro_time_runs_its_target(void) {
 
 typedef enum Shade { DIM, MID = 5, BRIGHT } Shade;
 
+typedef enum Span {
+  SPAN_SUFFIX = 1L,
+  SPAN_LARGE = 3000000000,
+  SPAN_HEX = 0x10,
+  SPAN_CHAR = 'x',
+  SPAN_NEGATIVE = -1,
+  SPAN_RELATIVE = SPAN_HEX + 1
+} Span;
+
+// A literal initializer reads as its spelling; any other initializer reads
+// as its expression node, which this table renders as a placeholder.
 macro Expression $member_table(Type $T) => (
   $(x2c.literal.string (foldl
      (lambda (text row)
-       (string-append text (car row) "=" (if (cadr row) (cadr row) "-") ","))
+       (string-append text (car row) "="
+         (let ((value (cadr row)))
+           (if (not value) "-" (if (string? value) value "<expr>")))
+         ","))
      "" (x2c.type.members $T)))
 )
 
 static void system_macro_type_members_reads_an_enum(void) {
   String table = $member_table(Shade);
   EXPECT_TRUE(table == "DIM=-,MID=5,BRIGHT=-,");
+}
+
+static void system_macro_type_members_reads_every_initializer(void) {
+  String table = $member_table(Span);
+  EXPECT_TRUE(table == "SPAN_SUFFIX=1L,SPAN_LARGE=3000000000,SPAN_HEX=0x10,"
+                       "SPAN_CHAR='x',SPAN_NEGATIVE=<expr>,"
+                       "SPAN_RELATIVE=<expr>,");
 }
 
 void system_macros_suite(void) {
@@ -118,4 +139,5 @@ void system_macros_suite(void) {
   $test.run(system_macro_todo_and_unreachable_carry_a_note);
   $test.run(system_macro_time_runs_its_target);
   $test.run(system_macro_type_members_reads_an_enum);
+  $test.run(system_macro_type_members_reads_every_initializer);
 }

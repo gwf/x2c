@@ -62,8 +62,15 @@
 
 // Enum members as (("NAME" VALUE) ...), with VALUE nil when the member takes
 // its position's value. The member list is the resolved enum's last part.
+// A single literal initializer reads as its spelling; any other initializer
+// reads as its expression node, which a generator can splice or inspect.
+(defun _x2c.initializer (node) (match-case node
+  ((expr ? (literal ? ?text)) ?text)
+  ((?text) ?text)
+  (else node)))
+
 (defun _x2c.member (node) (match-case node
-  ((op = (?name) (?value)) (list ?name ?value))
+  ((op = (?name) ?value) (list ?name (_x2c.initializer ?value)))
   ((?name) (list ?name nil))
   (else (_x2c.fail "x2c.type.members found an unreadable member" node))))
 
