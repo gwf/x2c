@@ -774,11 +774,13 @@ than asserted:
   in source order, which is what makes a session-start install inexpressible.
 
 Two of those are really about **where in the pipeline the pass runs**, not how
-it is spelled, and that is the decision to settle first. If the lowering moves
-after the transform, `_lower_coerce` and the pre-transform re-derivation go
-away, and a keyword becomes the natural way to mark a function whose typed
-body the compiler must retain. If it stays where it is, a keyword buys better
-prototypes and better diagnostics and little else.
+it is spelled. That decision is now settled: `plans/meta-functions.md` M3
+scouted moving the lowering after the transform and declined it, because the
+transform erases a lambda's body into a generated sibling and an interpolated
+string into raw C text, both of which the pass lowers today. `_lower_coerce`
+and the pre-transform re-derivation stay. The `meta` marker that M1 landed
+therefore buys better prototypes and better diagnostics, which is what the
+remaining option was worth.
 
 Against a keyword: x2c is shipped, so the identifier breaks callers, and every
 reserved word spends from a closed vocabulary that has been a recurring source

@@ -118,17 +118,103 @@ Phase 7 verdict. Do not re-scope either until this lands.
 
 ## M3 - the pipeline position
 
-Today the lowering reads the pre-transform AST, because a `Unit` decorator
-captures it. That forced `_lower_coerce` to re-derive conversions the compiler
-already knows how to insert — `Array_list` at a declaration, `Symbol_str` at a
-return — and each was a silent wrong answer before it was found.
+**Do not build this.** Scouted 2026-09-18 on branch `meta-m3-pipeline` with a
+throwaway probe that ran `Compiler.transform` on one function at its install
+point and dumped the result. The ordering the milestone worried about is
+satisfiable. The premise underneath it is not: the transformed tree cannot
+carry a compile-time function, because the transform erases two constructs
+the pass already lowers.
 
-With `meta` on the declaration the compiler chooses when to lower, so lower
-the same typed tree the C emitter reads: one body, two backends. Delete
-`_lower_coerce` and the pre-transform re-derivation with it.
+The milestone's reasoning, kept because the defects it names were real:
+`_lower_coerce` re-derives conversions the compiler knows how to insert -
+`Array_list` at a `List` declaration, `List_array` at an `Array` one,
+`Symbol_str` at a `String` return - and each was a silent wrong answer
+before it was found.
 
-Settle this before M4, because the serialized form should be produced from
-whatever tree M3 selects.
+### The ordering is satisfiable, and it is not the blocker
+
+`Compiler.install_meta_function` runs from `Compiler.parse_top_level`, so a
+`meta` function is installed the moment its definition parses, and a macro
+defined later in the same unit calls it during expansion. Probed: a
+`meta int mt_len(List node)` above a `macro Expression $nodelen(Expr $e)`
+folds `$nodelen(1 + 2)` to `printf("%d\n", 3)`. `Compiler.transform` runs in
+`_compile_file` after `unit.parse()` returns, which is after all expansion.
+The two pass positions are therefore strictly ordered install-then-transform
+and no reordering of the passes serves both.
+
+What does work is calling `Compiler.transform` on the one function at the
+install point, out of its pipeline position. It returns exactly the tree
+`--dump-transforms` prints, mid-parse, and re-transforming it at the unit
+level is idempotent: a `meta` function whose transformed nodes are returned
+to `parse_top_level` produces byte-identical C, except that the lambda
+sibling the transform generated lands beside the function instead of at the
+end of the unit. The cost is one extra transform per compile-time function:
+`comptime-autodiff.x` translates in 0.99 s today and 1.04 s with the extra
+pass over its 106 functions, five runs each, +5.4% or about 0.5 ms a
+function.
+
+### The transform erases two constructs the pass lowers
+
+- **A lambda has no body left.** `items.map(%!(Var part) => ...)` becomes
+  `List_map(items, _x2c_func_handle_0)`, where the handle is a file-scope
+  `static Func` assigned `Func_new(_x2c_func_adapt_0, ...)` at program
+  startup and the body is a separate static `_x2c_lambda_0` reached through
+  an `x2c_func_value_argument` adapter. The AST at the call site holds a
+  reference to a run-time value. Lowering it means mapping a handle binding
+  back to a generated sibling - by shared name suffix, since the AST does not
+  record the association - and rebuilding the lambda the transform took
+  apart.
+- **An interpolated string is raw C text.** `%"$stem-${n}"` becomes
+  `(expr ("String") ("String_join(NULL, " (expr ("List") (cons ...)) ")"))`.
+  The head of the content list is emitted C, not an operation to look up, so
+  lowering it needs a table mapping C text back to compile-time bindings.
+
+Both are in the ledger the milestone must not move: `ct_doubled` and
+`ct_label` in `comptime-lowering.x`, `ad_unbind` and `ad_local` in
+`comptime-autodiff.x`.
+
+Reading the transformed tree for literals and indexing and the pre-transform
+tree for lambdas and interpolation is two representations of one body, which
+is the thing this milestone existed to remove.
+
+### The decorator cannot carry a transformed tree at all
+
+`_sdk_comptime_install` returns `%($fn)` and the `$comptime()` decorator
+splices it back into the unit, where a decorator's replacement is re-bound.
+A transformed function is not bindable syntax: returning one reported
+`parse: expected syntax` at every `$comptime()` site in
+`comptime-lowering.x`. The decorator spelling, which this plan keeps through
+M3, would therefore need the transform run on a discarded copy - which also
+advances the lambda, adapter and literal-cache counters, so `_x2c_lambda_0`
+becomes `_x2c_lambda_1` and the whole constant table renumbers.
+
+### What the transformed tree would have given
+
+The half that does lower is real and worth recording, because it is what a
+future design would aim at. `[1, 2, 3]` at a `List` declaration becomes
+`Array_list(varray(int_var(1), ...))`, `{}` at a `Map` one becomes `(vmap)`,
+`xs[0]` becomes `List_getindex`, `m[<k>]` becomes `Map_getindex` around
+`Symbol_var`, and `match` becomes `matchcases` with a `Var_list` subject and
+per-binder `Var_string` conversions. Most of those names are bound in
+`etc/comptime.xlisp` already; `Symbol_var` and `Var_string` are not, so the
+transformed tree introduces callees the pass declines on today and the
+dictionary grows to meet it.
+
+Against that, the deletion is `_lower_coerce` at 17 lines plus the literal
+and index productions, and the additions are a handle-to-sibling association,
+a C-text table, and the missing bindings. It adds more machinery than it
+removes.
+
+### Consequence
+
+`_lower_coerce` stays, and the three pairs it covers stay named there:
+`Array` to `List`, `List` to `Array`, and `Symbol` to `String`. They are the
+only pairs a Lisp value can tell apart, so the list is closed; extend it only
+when a new destination type needs one, and write the fixture in
+`comptime-lowering.x` that shows the conversion arriving.
+
+M4 is already declined, so nothing waits on which tree M3 would have
+selected.
 
 ## M4 - serialize the word-compiled form
 
@@ -258,7 +344,7 @@ process addresses. It is a different milestone and is not scoped here.
 ### Consequences for the rest of the plan
 
 M5 does not depend on M4: constant-argument folding needs the compile-time
-form, which M1 and M3 supply. The M4 measurement in "Validation" and the
+form, which M1 already supplies. The M4 measurement in "Validation" and the
 "Plan review" sentences that reason from literal-fold reuse and from a
 per-function serialization diagnostic no longer apply.
 
@@ -267,7 +353,7 @@ per-function serialization diagnostic no longer apply.
 With both forms present, a call whose arguments are all compile-time
 constants can be answered by the compile-time form at the call site. This is
 the benefit that motivates emitting both, and it is the last milestone
-because it needs M1 and M3 and nothing else needs it.
+because it needs M1 and nothing else needs it.
 
 ## Compatibility
 
@@ -299,10 +385,14 @@ plumbing for the install and decides only emission. `lib/machine.x` states
 that frozen constants do not own their pointees, which is why M4 rebuilds the
 constant table instead of copying it.
 
-**Deletion and reuse.** M3 deletes `_lower_coerce` and the pre-transform
-conversion re-derivation, which exist only because the pass reads the wrong
-tree. M4 reuses the literal-fold cache rather than adding a value serializer.
-The only lasting new mechanism is the contextual `meta` marker itself, and it
+**Deletion and reuse.** M3 expected to delete `_lower_coerce` and the
+pre-transform conversion re-derivation; its scouting found the transformed
+tree cannot carry a lambda or an interpolated string, so both stay and the
+milestone is declined. M4 expected to reuse the literal-fold cache rather
+than add a value serializer; its own scouting found the cache cannot
+represent the constants, and it is declined too. Both are recorded above
+rather than removed, because each names what a later design would have to
+beat. The only lasting new mechanism is the contextual `meta` marker, and it
 exists because the parser must know a fact before macro expansion that no
 macro can tell it.
 
