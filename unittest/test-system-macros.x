@@ -96,6 +96,20 @@ static void system_macro_time_runs_its_target(void) {
   EXPECT_TRUE(total == 499500);
 }
 
+typedef enum Shade { DIM, MID = 5, BRIGHT } Shade;
+
+macro Expression $member_table(Type $T) => (
+  $(x2c.literal.string (foldl
+     (lambda (text row)
+       (string-append text (car row) "=" (if (cadr row) (cadr row) "-") ","))
+     "" (x2c.type.members $T)))
+)
+
+static void system_macro_type_members_reads_an_enum(void) {
+  String table = $member_table(Shade);
+  EXPECT_TRUE(table == "DIM=-,MID=5,BRIGHT=-,");
+}
+
 void system_macros_suite(void) {
   $test.run(system_macro_switch_scopes_and_breaks_each_run);
   $test.run(system_macro_dedent_folds_and_defers);
@@ -103,4 +117,5 @@ void system_macros_suite(void) {
   $test.run(system_macro_assert_passes_a_true_check);
   $test.run(system_macro_todo_and_unreachable_carry_a_note);
   $test.run(system_macro_time_runs_its_target);
+  $test.run(system_macro_type_members_reads_an_enum);
 }

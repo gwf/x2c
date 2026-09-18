@@ -41,3 +41,34 @@
   (if (match items '((param (void) (bind () ?mods))))
       nil
       (map _x2c.arg items))))
+
+// Statement, declaration, and type construction. A generator composes these
+// instead of writing canonical node shapes by hand.
+(defun x2c.stmnt.make (expression) `(stmnt ,expression))
+(defun x2c.stmnt.return (expression) `(return () ,expression))
+(defun x2c.block.make (items) (cons 'block items))
+(defun x2c.decl.make (type name initializer)
+  (let* ((parts (x2c.type.parts type))
+         (binding `(bind (,name) ,(cadr parts))))
+    `(declare ,(car parts) (bindings
+      ,(if initializer `(op = ,binding ,initializer) binding)))))
+(defun x2c.param.make (type name)
+  (let ((parts (x2c.type.parts type)))
+    `(param ,(car parts) (bind (,name) ,(cadr parts)))))
+(defun x2c.expr.cast (type expression)
+  (let ((parts (x2c.type.parts type)))
+    `(expr ,type (cast (decl ,(car parts)
+       (bindings (bind () ,(cadr parts)))) ,expression))))
+
+// Enum members as (("NAME" VALUE) ...), with VALUE nil when the member takes
+// its position's value. The member list is the resolved enum's last part.
+(defun _x2c.member (node) (match-case node
+  ((op = (?name) (?value)) (list ?name ?value))
+  ((?name) (list ?name nil))
+  (else (_x2c.fail "x2c.type.members found an unreadable member" node))))
+
+(defun x2c.type.members (type) (let
+  ((resolved (x2c.type.resolve type)))
+  (if (not (eq? (car resolved) 'enum))
+      (_x2c.fail "x2c.type.members requires an enum Type" type)
+      (map _x2c.member (car (reverse resolved))))))

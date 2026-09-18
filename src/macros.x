@@ -843,9 +843,31 @@ static Var _sdk_literal_string(Var syntax) {
   $_sdk_guard("x2c.literal.value");
   String value = NULL;
   if (_literal_string(syntax, &value)) return value;
+  match (syntax) case %(expr ? (literal (int) ?(String digits))): {
+    long parsed = 0;
+    if (digits.try_long(&parsed)) return parsed;
+  }
+  match (syntax) case %(expr ? (literal ("Symbol") ? ?(Symbol tag))): {
+    Symbol found = tag;
+    return found;
+  }
   return _sdk_reject(
-    "native Lisp binding name requires a String literal",
+    "x2c.literal.value requires a String, int, or Symbol literal",
     %("value: ${syntax.repr()}"));
+}
+
+/* A warning reports where it is raised and returns, so a macro can keep
+   expanding. Failure stays separate because it never returns. */
+static Var _sdk_diagnostic_warn(String message, List notes) {
+  $_sdk_guard("x2c.diagnostic.warn");
+  foreach (Var note, notes)
+    if (note is not <string>)
+      return _sdk_reject(
+        "x2c.diagnostic.warn notes must be Strings",
+        %("value: ${note.repr()}" ));
+  macro_sdk_compiler.report_warning(
+    <macro>, message, macro_sdk_compiler.token, notes);
+  return void;
 }
 
 /* An unreadable compile-time source is a located diagnostic. */
@@ -938,6 +960,7 @@ static void _ensure_lisp(Compiler compiler) {
     $lisp.bind(
       _.macro_lisp, "_x2c.declaration.bindings", _sdk_declaration_bindings);
     $lisp.bind(_.macro_lisp, "x2c.literal.value", _sdk_literal_string);
+    $lisp.bind(_.macro_lisp, "x2c.diagnostic.warn", _sdk_diagnostic_warn);
     $lisp.bind(_.macro_lisp, "x2c.protocol.member", _sdk_protocol_member);
     $lisp.bind(_.macro_lisp, "x2c.type.integral?", _sdk_type_integral);
     $lisp.bind(_.macro_lisp, "x2c.type.pointer?", _sdk_type_pointer);

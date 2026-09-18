@@ -2362,6 +2362,14 @@ The compiler supplies these contextual Lisp operations:
 (x2c.type.pointer? type)
 (x2c.protocol.member participant base member)
 (x2c.literal.value literal)
+(x2c.type.members type)
+(x2c.diagnostic.warn message notes)
+(x2c.stmnt.make expression)
+(x2c.stmnt.return expression)
+(x2c.block.make items)
+(x2c.decl.make type name initializer)
+(x2c.param.make type name)
+(x2c.expr.cast type expression)
 ```
 
 A supported operation is spelled `x2c.<noun>.<verb>`. A name beginning `_x2c.`
@@ -2429,11 +2437,26 @@ resolving it.
 `x2c.protocol.member` looks up one member of a participant's conformance to a
 base protocol and returns `nil` when the participant does not adopt it.
 
-`x2c.literal.value` returns a captured `String` literal's decoded value as a
-compile-time `String`. It is the inverse of `x2c.literal.string`, which builds
-a literal from a value. A literal whose text the parser has already consumed,
-such as a multi-line interpolated `%"..."`, is rejected; read its spelling with
-`x2c.source.text` instead.
+`x2c.literal.value` returns a captured literal's value: a `String`, a number,
+or a `Symbol`, according to the literal. It is the inverse of
+`x2c.literal.string`, which builds a literal from a value. A literal whose text
+the parser has already consumed, such as a multi-line interpolated `%"..."`, is
+rejected; read its spelling with `x2c.source.text` instead.
+
+`x2c.type.members` returns an enum's members in source order as `(("NAME"
+VALUE) ...)`, where `VALUE` is the member's explicit initializer spelling or
+`nil` when it takes its position's value. A non-enum `Type` is rejected.
+
+`x2c.diagnostic.warn` reports a macro warning at the invocation with `String`
+notes and returns, so expansion continues. `x2c.diagnostic.fail` does not
+return.
+
+The statement and declaration constructors build one node each from operands
+that are themselves nodes, as the `x2c.expr.*` family does. `x2c.block.make`
+takes a `List` of block items; `x2c.decl.make` and `x2c.param.make` take a
+`Type`, a name value from `x2c.ident`, and for a declaration an optional
+initializer expression. `x2c.expr.cast` applies a `Type` to an expression,
+carrying that type's declarator modifiers.
 
 `x2c.type.value?` recognizes numeric scalars and enums, Symbol, Var, Atom,
 String, List, and their typedef aliases. Pointer-shaped runtime handles such

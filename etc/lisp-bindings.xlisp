@@ -45,12 +45,20 @@
 (def lisp.binding.rows nil)
 (def lisp.binding.sealed nil)
 
+// The bind name is published to callers, so it must be a String literal.
+// x2c.literal.value reads any literal, which leaves this rejection here.
+(defun lisp.binding.name (node) (let ((value (x2c.literal.value node)))
+  (if (string? value)
+      value
+      (_x2c.fail
+        "native Lisp binding name requires a String literal" node))))
+
 (defun lisp.binding.rows-for (group)
   (filter (lambda (row) (equal? (car row) group)) lisp.binding.rows))
 
 (defun lisp.binding.record (group name function) (let*
   ((group-name (x2c.binding.spelling group))
-   (lisp-name (x2c.literal.value name))
+   (lisp-name (lisp.binding.name name))
    (function-name (x2c.function.name function))
    (type (_x2c.function.native-type function))
    (rows (lisp.binding.rows-for group-name)))
