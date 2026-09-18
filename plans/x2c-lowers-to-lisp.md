@@ -599,6 +599,20 @@ replaces. The port carries a 2.89 s fixed cost for lowering its thirty
 functions once, against 93 ms to load the `.xmacro`, and the two cross at
 about 36 derivations in a unit.
 
+The pipeline is x2c source, to Lisp lambdas, to the word machine, and the
+machine is doing real work. Disabling it with `Lisp.auto_disable` on the
+compiler's own macro session:
+
+| | machine on | machine off |
+|---|---|---|
+| lower 30 functions | 2.90 s | 9.83 s |
+| 50 derivations on top | 3.95 s | 11.21 s |
+
+So the machine is worth 3.4x on the lowering pass, and per derivation the
+difference is 21 ms against 28 ms. Running a derivation is cheap mostly
+because the call table became a `Map`, not because of the machine; the
+machine is what makes the one-time lowering affordable.
+
 The reason the port is faster is the same `match-case` cost measured above,
 from the other side: `autodiff.xmacro` uses `match-case` throughout, so it
 re-expands a macro on every call, while the lowering emits a direct
