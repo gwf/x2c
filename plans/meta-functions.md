@@ -144,11 +144,17 @@ Three facts the work established.
 This unblocks `plans/comptime-x2c-generalization.md` Phase 5 and reopens its
 Phase 7 verdict. Do not re-scope either until Gary asks.
 
-One defect found and not fixed here, because it belongs to the lowering pass
-rather than the import loop: **a character literal in a compile-time function
-lowers to garbage.** `meta int f(void) => 'A';` answers 65 at run time and a
-different large number on each compile-time run, so a body that tests
-characters is a silent wrong answer. Reproduced 2026-09-18.
+One defect surfaced here and **fixed during integration**: a character
+literal in a compile-time function lowered to garbage. `meta int f(void) =>
+'A';` answered 65 at run time and a different large number on each
+compile-time run, so a body that tested characters was a silent wrong answer.
+
+The cause is the trap this branch keeps hitting for the third time: `*` is a
+sequence binder in a pattern, so `(* char)`, which selects a C string, also
+matches a plain `(char)`. A character therefore reached `_lower_text`, which
+returned the spelling itself to be read as a number. `_lower_text` now decides
+on the spelling's own quote and answers a character's code, `'\n'` included.
+Covered by `character 65 10 1` in `comptime-lowering.x`.
 
 ## M3 - the pipeline position
 
