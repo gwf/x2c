@@ -453,7 +453,44 @@ collects an id and still descends.
 
 All eight spike programs agree with native execution.
 
-### M3 - port `autodiff.xmacro`
+### M3 - port `autodiff.xmacro`  (SLICE DONE 2026-09-17)
+
+`.context/spike/autodiff-slice.x` ports the forward-mode arithmetic core:
+`ad_zero`, `ad_one`, the four simplifying constructors, the two predicates,
+and `ad_tangent`. All twelve lower directly, none fall back, and every
+result matches what the Lisp original computes, including the
+simplifications that make `0 + x` read back as `x` and `1 * x` as `x`.
+
+**The line count is parity, not a reduction.** 54 lines of x2c against 55
+lines of Lisp for the same functions, plus one `$comptime()` marker per
+function. The premise of this milestone was that the x2c version would be
+meaningfully shorter. It is not.
+
+What the port did buy is types and the compiler checking the templates. A
+`case` pattern and a `%()` template are checked where Lisp's are data. That
+is real but it is a clarity argument, not a size one, and it has to carry
+the whole case on its own.
+
+**Five defects in the lowering surfaced only under real code**, which is
+worth recording because it says something about how much is left:
+
+- a Symbol literal was translated as a number, so every operator in a
+  template came out as `0`;
+- a cached leaf holding a cached `List` was returned unexpanded;
+- a cached `String` holds its value, not its source spelling, and was being
+  unquoted a second time;
+- an empty `()` template element was returned as its node;
+- a zero-argument call carries one void placeholder argument, which
+  expression translation rejected.
+
+Each was a few lines to fix. None were visible in the constructed examples
+of M0 through M2. The port needed one further lowering feature as well: a
+value that cannot be substituted is now bound with a real lambda when it is
+off a loop's iteration path, and declined on it.
+
+Remaining for a complete port: reverse mode, the primitive derivative
+table, the statement walkers, and the two decorators, which together are
+roughly ten times the slice.
 
 Rewrite its roughly 700 lines of Lisp as x2c compile-time functions. This
 is the measurement that decides whether the whole direction pays: report
