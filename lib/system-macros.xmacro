@@ -3,6 +3,52 @@
 
 $(import "system-macros.xlisp")
 
+/* The width of the leading spaces and tabs `line` was written with. */
+meta static int _dedent_width(String line) {
+  int length = line.len(), width = 0;
+  while (width < length && (line[width] == ' ' || line[width] == '\t'))
+    width++;
+  return width;
+}
+
+meta static int _dedent_blank(String line) =>
+  _dedent_width(line) == line.len();
+
+/* Removes the indentation the first line carries from the front of every
+   line. An opening blank line belongs to the quote rather than the text, and
+   so does the content of a trailing whitespace-only line, which carries the
+   closing quote's own indentation. */
+meta static String _dedent_apply(String text) {
+  int width = _dedent_width(text);
+  if (width < text.len() && text[width] == '\n') {
+    text = text.getslice(width + 1, text.len(), 1);
+    width = _dedent_width(text);
+  }
+  String prefix = text.getslice(0, width, 1);
+  Array lines = [];
+  foreach (Var line, text.split("\n"))
+    lines.push(String.remove_prefix(line, prefix));
+  if (lines.len() > 1 && _dedent_blank(lines[-1])) lines[-1] = "";
+  return lines.join("\n");
+}
+
+/* Dedents the text the literal `source` was written as, or answers `void`
+   where there is none to fold. The fold is exact only when the spelling
+   carries no escape and no interpolation hole, which is how a dedented block
+   is normally written; every other spelling keeps its meaning by going to
+   String.dedent at run time. */
+meta static Var _dedent_fold(String source) {
+  int length = source.len(), open = 0;
+  if (length >= 3 && source.startswith("%\""))
+    open = 2;
+  else if (length >= 2 && source.startswith("\""))
+    open = 1;
+  if (open == 0 || !source.endswith("\"")) return void;
+  String body = source.getslice(open, length - 1, 1);
+  if (body.contains("\\") || body.contains("$")) return void;
+  return _dedent_apply(body);
+}
+
 /* Normalizes the indentation a block of text was written with. The literal
    is dedented during translation when its spelling carries no escape and no
    interpolation hole; every other form calls String.dedent at run time, so
