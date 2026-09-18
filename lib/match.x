@@ -88,6 +88,7 @@ typedef struct MatchPlan {
 */
 typedef struct MatchCaptureSite {
   MatchPlan plan;
+  int refused;
 } MatchCaptureSite;
 
 #pragma private
@@ -151,9 +152,11 @@ int x2c_match_try_capture(
     must not reuse one site for different patterns. `site` must be
     zero-initialized static storage and `pattern` must contain only values that
     remain live through `Match` shutdown. A pattern the site cannot retain
-    takes the ordinary runtime route, with the same result. Returns 1 only
-    after atomically committing `captures`; invalid arguments, malformed
-    patterns, misses, and machine errors return 0 without changing it.
+    takes the ordinary runtime route, with the same result, and the site
+    remembers that refusal rather than reconsidering it on every call.
+    Returns 1 only after atomically committing `captures`; invalid arguments,
+    malformed patterns, misses, and machine errors return 0 without changing
+    it.
     Raises: `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
     publishing or matching.
 */
@@ -161,8 +164,7 @@ int x2c_match_site_try_capture(
   MatchCaptureSite *site, List input, Var pattern,
   MatchCaptureBuffer *captures) {
   if (!captures) return 0;
-  MatchPlan plan = site ? __atomic_load_n(&site.plan, __ATOMIC_ACQUIRE) : NULL;
-  if (site && !plan) plan = _capture_site_publish(site, pattern);
+  MatchPlan plan = _site_published(site, pattern);
   // a pattern the site cannot retain takes the ordinary runtime route
   if (!plan) return x2c_match_try_capture(input, pattern, captures);
   if (plan.status == MACHINE_MALFORMED) return 0;
@@ -180,9 +182,7 @@ int x2c_match_site_try_capture(
    caller falls back to the ordinary runtime route. That route has the same
    result and names the public operation when it reports the fence. */
 static MatchPlan _site_plan(MatchCaptureSite *site, Var pattern) {
-  if (!site) return NULL;
-  MatchPlan plan = __atomic_load_n(&site.plan, __ATOMIC_ACQUIRE);
-  if (!plan) plan = _capture_site_publish(site, pattern);
+  MatchPlan plan = _site_published(site, pattern);
   return plan && plan.status != MACHINE_INELIGIBLE ? plan : NULL;
 }
 
@@ -199,11 +199,8 @@ int x2c_match_pattern_retainable(Var pattern) =>
     the caller can name the fence.
     Raises: `<alloc-fail>` while publishing.
 */
-MatchPlan x2c_match_site_prepare(MatchCaptureSite *site, Var pattern) {
-  if (!site) return NULL;
-  MatchPlan plan = __atomic_load_n(&site.plan, __ATOMIC_ACQUIRE);
-  return plan ? plan : _capture_site_publish(site, pattern);
-}
+MatchPlan x2c_match_site_prepare(MatchCaptureSite *site, Var pattern) =>
+  _site_published(site, pattern);
 
 /** Matches through one compiler-owned site, writing bindings on success.
     Results follow `List.try_match`.
@@ -1955,16 +1952,22 @@ int MatchPlan.search_replace(
 
 // pattern admissibility for compiler-owned sites
 
-/* A site retains its prepared program for the life of the process, and the
-   plan cache keys an entry by the pattern's raw identity, so both may only
-   admit a pattern whose values outlive every later call. Symbols and narrow
-   immediates have value lifetime. A canonical `List`, long `Atom`, or
-   `String` is admitted only when the outermost canonical pool owns it: a
-   nested pool reuses the storage of its released cells, so an identity that
-   belongs to one would let a different pattern answer at the same address.
-   Wide boxes, pointers, and references are never admitted; those patterns
-   prepare a transient plan owned by their lease instead. */
-static int _pattern_admissible(Var value, int depth) {
+/* Both borrowing owners walk the same graph and differ on one question: how
+   long the borrow lasts. Symbols and narrow immediates have value lifetime,
+   and `nil` holds no storage, so no later pattern can reuse its address. A
+   `String` or long `Atom` is borrowed only when the outermost canonical pool
+   owns it, because an equal transient buffer is never interned and its
+   address proves nothing. Wide boxes, pointers, and references are never
+   borrowed; those patterns prepare a transient plan owned by their lease.
+
+   `permanent_lists` is what separates the two owners. A site keeps its
+   program for the life of the process, so it needs a `List` the outermost
+   pool owns: a nested pool reuses the storage of its released cells, and an
+   identity that belongs to one would let a different pattern answer at the
+   same address. The plan cache retires every entry when a level is released,
+   so a `List` that is canonical now serves it, and interning gives an equal
+   pattern the same cell. */
+static int _pattern_borrowable(Var value, int depth, int permanent_lists) {
   if (depth >= 128) return 0;
   Symbol kind = value.kind();
   switch (kind) {
@@ -1975,10 +1978,11 @@ static int _pattern_admissible(Var value, int depth) {
         return String.is_permanent((String) value.pointer());
       if (value is <string>) return String.is_permanent(value);
       if (value is not <list>) return 0;
-      if (!Pool.is_permanent(value)) return 0;
+      if (!value.pointer()) return 1;
+      if (permanent_lists && !Pool.is_permanent(value)) return 0;
       // kind and tag prove the raw payload is a List cell
       foreach (Var part, (List) value.pointer())
-        if (!_pattern_admissible(part, depth + 1)) return 0;
+        if (!_pattern_borrowable(part, depth + 1, permanent_lists)) return 0;
       return 1;
     }
   }
@@ -1986,6 +1990,14 @@ static int _pattern_admissible(Var value, int depth) {
          value is not <llong> && value is not <ullong> &&
          value is not <ldouble>;
 }
+
+/* A compiler-owned site borrows its pattern for the life of the process. */
+static int _pattern_admissible(Var value, int depth) =>
+  _pattern_borrowable(value, depth, 1);
+
+/* The plan cache borrows a pattern only until its level is released. */
+static int _cache_keyable(Var value, int depth) =>
+  _pattern_borrowable(value, depth, 0);
 
 // private Match plan identity cache
 
@@ -1998,8 +2010,10 @@ static int _pattern_admissible(Var value, int depth) {
    while leased, so eviction can never free a program under an active
    execution, and leases carry the entry generation so a stale lease can never
    validate a recycled slot. Raw key zero (the inadmissible null-pointer Var)
-   is rejected before the positive-only admission memo, whose direct-mapped
-   collisions force a fresh admission walk, never a false admission. */
+   is rejected before the admission memos, whose direct-mapped collisions force
+   a fresh admission walk, never a false admission. A refusal is memoized as
+   well; refusing only sends a pattern through a transient plan, so a stale
+   refusal costs nothing but that preparation. */
 
 #define MATCH_ADMITTED_MEMO 256
 
@@ -2015,8 +2029,8 @@ struct MatchCache {
   MatchCacheEntry *entries;
   int *buckets;
   int capacity, bucket_count, size, lru_head, lru_tail, active_leases;
-  unsigned long next_generation;
-  unsigned long admitted_memo[256];
+  unsigned long next_generation, pool_epoch;
+  unsigned long admitted_memo[256], refused_memo[256];
 };
 
 static unsigned long _cache_mix(unsigned long key) {
@@ -2034,12 +2048,35 @@ static int _memo_slot(unsigned long key) =>
   (int) ((key * 0x9e3779b97f4a7c15UL >> 48) &
                 (MATCH_ADMITTED_MEMO - 1));
 
+/* Drops every entry a released level could have invalidated and adopts the
+   new epoch. A pinned entry is still executing, so the table keeps its
+   contents and stays refused until a later call finds no lease outstanding. */
+static int _cache_resync(MatchCache cache) {
+  unsigned long epoch = Pool.epoch();
+  if (cache.pool_epoch == epoch) return 1;
+  if (cache.active_leases) return 0;
+  for (int slot = 0; slot < cache.capacity; slot++)
+    if (cache.entries[slot].occupied) _cache_remove(cache, slot);
+  for (int i = 0; i < MATCH_ADMITTED_MEMO; i++) {
+    cache.admitted_memo[i] = 0;
+    cache.refused_memo[i] = 0;
+  }
+  cache.pool_epoch = epoch;
+  return 1;
+}
+
 static int _cache_admitted(MatchCache cache, Var pattern) {
   unsigned long key = pattern.u64;
   if (!key) return 0;
+  // a level was released under this table; nothing it held can be trusted
+  if (!_cache_resync(cache)) return 0;
   int slot = _memo_slot(key);
   if (cache.admitted_memo[slot] == key) return 1;
-  if (!_pattern_admissible(pattern, 0)) return 0;
+  if (cache.refused_memo[slot] == key) return 0;
+  if (!_cache_keyable(pattern, 0)) {
+    cache.refused_memo[slot] = key;
+    return 0;
+  }
   cache.admitted_memo[slot] = key;
   return 1;
 }
@@ -2065,6 +2102,7 @@ MatchCache MatchCache.new(int capacity) {
   cache.capacity = capacity;
   cache.bucket_count = capacity * 2 + 1;
   cache.lru_head = cache.lru_tail = -1;
+  cache.pool_epoch = Pool.epoch();
   cache.entries = Scope.calloc(capacity, sizeof(MatchCacheEntry));
   cache.buckets = Scope.malloc(sizeof(int) * cache.bucket_count);
   for (int i = 0; i < capacity; i++) {
@@ -2576,7 +2614,10 @@ static void _capture_sites_initialize(void) {
 }
 
 static void _capture_site_prepare(MatchCaptureSite *site, Var pattern) {
-  if (!_pattern_admissible(pattern, 0)) return;
+  if (!_pattern_admissible(pattern, 0)) {
+    __atomic_store_n(&site.refused, 1, __ATOMIC_RELEASE);
+    return;
+  }
   _capture_sites_initialize();
   MatchPlan plan = NULL;
   $scope(&match_capture_site_scope) {
@@ -2584,6 +2625,18 @@ static void _capture_site_prepare(MatchCaptureSite *site, Var pattern) {
     match_capture_sites.push(&site);
   }
   __atomic_store_n(&site.plan, plan, __ATOMIC_RELEASE);
+}
+
+/* Returns this site's plan, publishing it on the first call and answering
+   NULL for a site whose pattern it cannot retain. The refusal is recorded on
+   the site, so a pattern the site rejects costs one relaxed load per call
+   instead of the registry lock and a fresh admissibility walk. */
+static MatchPlan _site_published(MatchCaptureSite *site, Var pattern) {
+  if (!site) return NULL;
+  MatchPlan plan = __atomic_load_n(&site.plan, __ATOMIC_ACQUIRE);
+  if (plan) return plan;
+  if (__atomic_load_n(&site.refused, __ATOMIC_ACQUIRE)) return NULL;
+  return _capture_site_publish(site, pattern);
 }
 
 /* Prepares one site once, under the lock that also guards the site

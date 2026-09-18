@@ -401,22 +401,25 @@ static void cache_product_pipeline_matches_oracle(void) {
 }
 
 
-/* `memory.md` recommends the Pool.open/Pool.close bracket, so a plan
-   the cache keeps must outlive it. A pattern built inside the bracket is
-   owned by the nested pool, whose cells the next round reuses at the same
-   address, so admitting one would let it answer for a different pattern. */
-static void cache_rejects_a_pattern_a_nested_pool_owns(void) {
+/* `memory.md` recommends the Pool.open/Pool.close bracket, so a plan the
+   cache keeps must not outlive the level that owns its pattern. A pattern
+   built inside the bracket is owned by the nested pool, whose cells the next
+   round reuses at the same address. The cache may key such a pattern while
+   its level is open; closing the level retires every entry, so no round can
+   answer with the plan another round left at that address. */
+static void cache_retires_a_nested_pool_pattern_with_its_level(void) {
   MatchCache cache = MatchCache.new(16);
   MatchLease lease;
-  int misses = 0;
+  int misses = 0, reused = 0;
+  unsigned long previous = 0;
   for (int i = 0; i < 200; i++) {
     Pool.open_named("match-cache-round");
     Var counter = i;
     Var pattern = %(round $counter ?value);
     EXPECT_INT_EQ(_acquire(cache, pattern, &lease), MACHINE_PREPARED);
-    // a bypassed pattern owns its plan through the lease, never an entry
-    EXPECT_TRUE(lease.generation == 0);
-    EXPECT_NOT_NULL(lease.transient_plan);
+    // no round may answer from the entry the previous round left behind
+    if (lease.generation && lease.generation == previous) reused++;
+    previous = lease.generation;
     MatchLease.release(&lease);
     List bindings = %(sentinel);
     if (!_try_match(cache, %(round $counter ok), pattern, &bindings) ||
@@ -424,6 +427,7 @@ static void cache_rejects_a_pattern_a_nested_pool_owns(void) {
       misses++;
     Pool.close();
   }
+  EXPECT_INT_EQ(reused, 0);
   EXPECT_INT_EQ(misses, 0);
   cache.dispose();
 }
@@ -509,7 +513,7 @@ $(import "test-macros.xmacro")
 void match_cache_suite(void) {
   $test.run(cache_lifecycle_failures_transfer);
   $test.run(cache_admission_and_bypass);
-  $test.run(cache_rejects_a_pattern_a_nested_pool_owns);
+  $test.run(cache_retires_a_nested_pool_pattern_with_its_level);
   $test.run(default_cache_answers_inside_a_value_pool_bracket);
   $test.run(cache_eviction_is_deterministic);
   $test.run(cache_pins_protect_active_leases);

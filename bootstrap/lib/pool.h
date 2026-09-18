@@ -55,6 +55,8 @@ Pool Pool_detach(void);
 
 int Pool_is_permanent(Var value);
 
+unsigned long Pool_epoch(void);
+
 Var Pool_lookup(Pool inner, Var key);
 
 void Pool_insert(Pool inner, Var object);

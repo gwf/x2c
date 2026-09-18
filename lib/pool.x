@@ -133,6 +133,7 @@ typedef struct PoolValueThreadState {
 } *PoolValueThreadState;
 
 static Pool value_root;
+static unsigned long value_epoch;
 static threaded struct PoolValueThreadState value_thread;
 
 /* A process that has never started a worker cannot contend for a pool, and
@@ -520,6 +521,9 @@ Pool Pool.retain(Pool inner) => inner.retain_named(NULL);
 */
 Pool Pool.release(Pool inner) {
   if (!inner) return NULL;
+  /* Published before any storage is freed, so a reader that sees the old
+     value has not yet been able to observe a reused address. */
+  __atomic_fetch_add(&value_epoch, 1, __ATOMIC_RELEASE);
   _storage_lock();
   _lock(inner);
   Pool up = inner.up;
@@ -637,6 +641,15 @@ Pool Pool.detach(void) {
     one.
 */
 int Pool.is_permanent(Var value) => value_root && value_root.owns(value);
+
+/** Returns a counter that changes whenever any pool level is destroyed.
+    A cache that borrows canonical identities reads this before trusting an
+    entry: a released level's addresses can be reused, so identities admitted
+    under an earlier value prove nothing. The counter only advances, so a
+    reader needs no lock to tell that something was released.
+*/
+unsigned long Pool.epoch(void) =>
+  __atomic_load_n(&value_epoch, __ATOMIC_ACQUIRE);
 
 /** Returns the first value equal to `key` from `inner` outward, or `void`.
     The returned identity remains owned by the level where it was found.

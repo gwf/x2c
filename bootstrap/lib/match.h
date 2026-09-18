@@ -34,6 +34,7 @@ typedef struct MatchPlan{
 
 typedef struct MatchCaptureSite{
   MatchPlan plan;
+  int refused;
 }
 MatchCaptureSite;
 
