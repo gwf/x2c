@@ -3,8 +3,8 @@
 > Status: active
 >
 > Scoped 2026-09-18 on branch `x2c-lowers-to-lisp` after the autodiff port
-> landed. Phases 0-3 are done and merged; Phase 4 is the rest of the pass,
-> 5 and 6 are ports, and 7 is answered. Nothing on this branch reaches `main`
+> landed. Phases 0-4 are done and merged; 7 is answered; 5 is blocked on a
+> missing capability and 6 is the last one available. Nothing on this branch reaches `main`
 > without Gary's explicit green light. The design in
 > `plans/x2c-lowers-to-lisp.md` is settled and this plan does not revisit it.
 
@@ -392,7 +392,44 @@ agent to say: a four-line comment in `_lower_constant_leaf` (`src/comptime.x`)
 named the typed capture as its example of an unfoldable node, which is no
 longer true.
 
-## Phase 5 - port the remaining macro Lisp
+## Phase 5 - port the remaining macro Lisp (blocked)
+
+**Blocked on a missing capability, established 2026-09-18.** There is nowhere
+to put a compile-time function that a shipped macro can rely on. Three probes,
+all against the merged pass:
+
+- A `.xmacro` cannot hold one. `$ct()` above a function definition inside a
+  macro import fails with `unexpected form in macro import`; a macro import
+  carries macro definitions and `$(...)` Lisp, not x2c function definitions.
+- `#include` of a `.x` that defines one does not install it. The including
+  unit reports `(unbound (name shout_width))`, so an include does not run the
+  decorator.
+- What does work is the consuming unit defining it: a macro imported from a
+  `.xmacro` calls a compile-time function the consuming unit installed, and
+  returns the right answer. That is the only shape available today.
+
+So the campaign reaches Lisp inside a translation unit, which the autodiff
+port demonstrates, and not Lisp inside a shipped macro library, which is
+where all 497 remaining lines live. `lib/system-macros.xlisp`,
+`lib/varops.xlisp` and `lib/var-tags.xmacro` are each the body of a macro
+every consumer imports; requiring each consumer to define the functions first
+would change their public surface, which the phase forbids.
+
+This is Phase 7's ordering finding one level down, and it generalizes: the
+blocking capability is installing a compile-time function from a shipped
+library. Three candidate routes, none built, none costed:
+
+1. The compiler sub-translates a named `.x` at import time.
+2. `#include` runs a decorator in the including unit.
+3. A `.xmacro` form carries x2c function source for the compiler to translate.
+   There is no SDK binding that parses x2c text into an AST today;
+   `x2c.source.text` goes the other way.
+
+Route 1 is the same mechanism Phase 7 wanted for `etc/builtin-macros.xlisp`,
+so one capability unblocks both. Decide it before scheduling this phase.
+
+### Original scope, for when it is unblocked
+
 
 Depends on Phases 1-3. `lib/var-tags.xmacro` at 295 Lisp lines is the real
 one; the error and system macros are small. `etc/compiler-sdk.xlisp` and
