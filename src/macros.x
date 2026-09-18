@@ -1186,6 +1186,20 @@ void Compiler.evaluate_declaration_effect(
   }
 }
 
+/** Installs a `meta` function in the macro session, so it is callable from
+    compile-time Lisp under its own name. The refusal is the one the
+    `$comptime()` decorator reports, sited on the marker the developer wrote.
+    The caller still emits the function, which is what the decorator does.
+*/
+void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
+  if (!c.collect_protocols) c.run_declaration_effects();
+  _ensure_lisp(c);
+  if (c.install_comptime(fn)) return;
+  c.report_error(
+    <macro>, "this function cannot run at compile time", marker,
+    %("reason: ${c.lower_declined()}"));
+}
+
 /** Imports immediate dependencies and queues other source Lisp effects.
     Declaration projection forces preceding effects exactly once; otherwise
     full parsing keeps the ordinary source-order evaluation. */

@@ -553,6 +553,31 @@ int ct_typed_symbol(List form) {
   return 0;
 }
 
+/* --- `meta`, the second spelling ----------------------------------------- */
+
+/* `meta` marks a function the compiler runs as well as emits. The parser
+   recognizes it on the declaration, so it does what `$comptime()` does
+   without going through a macro. Both spellings are live; see
+   `plans/meta-functions.md`. */
+meta int mt_poly(int n) => n * n + 3 * n + 1;
+
+/* The same computation through the decorator. `main` prints all four
+   answers, so the two spellings have to agree at compile time and at run
+   time or the fixture says so. */
+$comptime()
+int ct_poly(int n) => n * n + 3 * n + 1;
+
+/* `meta` composes with a storage class rather than replacing one: `static`
+   still says what it always said about the emitted function. */
+meta static String mt_label(String stem, int n) => %"$stem:$n";
+
+/* Everywhere else `meta` is an ordinary identifier. This is the fixture's
+   claim that the word stays contextual: a file-scope name, an assignment
+   target, and a struct field. */
+List meta = %(a b);
+
+struct MetaHolder { int meta; };
+
 /* --- the program reports what the pass produced -------------------------- */
 
 int main(void) {
@@ -634,5 +659,12 @@ int main(void) {
          $(ct_typed_mixed '(op add "z")), $(ct_typed_mixed '(op add 5)));
   printf("typed-symbol %d %d\n",
          $(ct_typed_symbol '(tag a)), $(ct_typed_symbol '(tag "a")));
+  printf("meta-poly    %d %d %d %d\n",
+         $(mt_poly 7), mt_poly(7), $(ct_poly 7), ct_poly(7));
+  printf("meta-static  %s %s\n",
+         $(mt_label "slot" 4), mt_label("slot", 4));
+  meta = %(a b c);
+  struct MetaHolder holder = { .meta = 3 };
+  printf("meta-ident   %d %d\n", meta.len(), holder.meta);
   return 0;
 }
