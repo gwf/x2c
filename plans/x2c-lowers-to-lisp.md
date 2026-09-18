@@ -821,3 +821,47 @@ function's name. It protects against silently producing a wrong
 compile-time result for a function the session cannot execute, which is
 not detectable later. No other validator, and no negative fixture beyond
 that one diagnostic.
+
+## Compiled pass: what it now lowers
+
+`src/lower.x` carries the whole lowering. Beyond the int/double core it
+handles:
+
+- `match` statements, including patterns with binders and arms that are
+  blocks. A folded pattern resolves through its cache; the arm binds each
+  binder to the matched sub-form.
+- Literal templates in expression position. A `cons`/`append` chain lowers
+  part by part, so `%(sum $a $b)` builds the List at run time instead of
+  being mistaken for a folded constant.
+- The value types: `List`, `Var`, `String`, `Symbol`, `Map`, `Array`. A
+  method call is an ordinary direct call into the name `etc/lisp-lower.xlisp`
+  binds.
+- Symbol literals, including operator spellings such as `<+>`.
+- Lambdas passed to a value operation, with their free locals substituted by
+  value.
+- `void`, lowered to nil. A lowered function cannot tell `void` from an empty
+  List; nothing in the ported code depends on that difference.
+
+Mutual recursion needs a Lisp stub ahead of the definitions, the way a C
+prototype does: `$(def ad_fwd_item (lambda (. rest) 0))`.
+
+## Forward-mode autodiff through the compiled pass
+
+`.context/spike/pass-fwd.x` is the whole of forward mode written as
+compile-time x2c, installed by `$(x2c.comptime.install $fn)`. It derives
+`square` and `poly` and both derivatives are exact:
+
+    square_dot(3) = 7.0  expected 7.0
+    poly_dot(2)   = 17.0  expected 17.0
+
+Whole-build time against the interpreted spike over the same source:
+
+| pass | build |
+| --- | --- |
+| interpreted (`.context/spike/autodiff-fwd.x`) | 3.11s |
+| compiled (`.context/spike/pass-fwd.x`) | 0.30s |
+
+The smaller declaration slice measures the same way: 0.80s against 0.08s.
+
+Still to port: reverse mode, the primitive derivative table, and the two
+decorators from `lib/autodiff.xmacro`.
