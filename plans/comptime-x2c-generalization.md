@@ -1,0 +1,257 @@
+# Comptime x2c generalization
+
+> Status: active
+>
+> Scoped 2026-09-18 on branch `x2c-lowers-to-lisp` after the autodiff port
+> landed. Phase 0 is not started; Phases 1-4 are the pass, 5-7 are ports and
+> one investigation. Nothing on this branch reaches `main` without Gary's
+> explicit green light. The design in `plans/x2c-lowers-to-lisp.md` is
+> settled and this plan does not revisit it.
+
+## The result
+
+A compile-time function written in x2c can use the language the way the rest
+of the compiler uses it: collection literals, indexing, the ordinary control
+flow, and iteration over any container. When that is true, the macro Lisp
+that exists only because Lisp was the only compile-time language can be
+rewritten as x2c, and the lowering pass compiles it to the same Lisp the
+evaluator and word machine already run.
+
+The measure of done is not a line count. It is that a reader can open a
+compile-time function and see ordinary x2c, and that the remaining Lisp in
+the repository is there because it is the substrate (`etc/init.xlisp`), a
+name table (`etc/lisp-bindings.xlisp`, `etc/lisp-values.xlisp`,
+`etc/lisp-lower.xlisp`), or a macro template with no Lisp body at all
+(`lib/array-generics.xmacro`, `lib/map-generics.xmacro`).
+
+## Where the work stands
+
+`src/lower.x` is the compiled lowering pass and `etc/lisp-lower.xlisp` its
+runtime. Together they already lower: `if`, `while`, `for`, `match` with
+binders and block arms, literal templates, direct and self recursion,
+lambdas passed to a value operation, cells for address-taken and
+loop-assigned locals, `foreach` over a `List`, pointer deref and store,
+interpolated strings, file-scope state, and the `List`/`Var`/`String`/
+`Symbol` operations named in `etc/lisp-lower.xlisp`.
+
+The whole of forward and reverse mode from `lib/autodiff.xmacro` is ported
+in `.context/spike/pass-rev.x`: 111 compile-time functions, every derivative
+exact against a central finite difference, and 777 ms to install them all
+and derive five siblings. Forward mode alone measures 0.30 s of whole-build
+time against the interpreted spike's 3.11 s.
+
+Macro Lisp in the repository, measured 2026-09-18 by counting lines inside
+`$(...)` forms:
+
+| file | Lisp lines | disposition |
+| --- | --- | --- |
+| `lib/autodiff.xmacro` | 754 | ported (Phase 6 decides whether it replaces the original) |
+| `etc/builtin-macros.xlisp` | 504 | Phase 7 investigates; bootstrap question |
+| `lib/var-tags.xmacro` | 295 | Phase 5 |
+| `etc/init.xlisp` | 237 | substrate, stays |
+| `etc/lisp-lower.xlisp` | 121 | name table, stays |
+| `etc/lisp-bindings.xlisp` | 119 | name table, stays |
+| `etc/lisp-values.xlisp` | 97 | name table, stays |
+| `etc/compiler-sdk.xlisp` | 43 | Phase 5 decides |
+| `etc/lisp-extras.xlisp` | 34 | Phase 5 decides |
+| `lib/error-macros.xmacro` | 32 | Phase 5 |
+| `lib/error-private.xmacro` | 20 | Phase 5 |
+| `lib/system-macros.xmacro` | 8 | Phase 5 |
+| `etc/lisp-io.xlisp` | 5 | stays |
+
+Fifteen everyday constructs were probed against the pass on 2026-09-18.
+Fourteen declined. That gap, not the remaining Lisp, is what blocks the
+general case.
+
+## Working agreement
+
+Every phase happens on a branch off `x2c-lowers-to-lisp` and merges back into
+it, never into `main`. Phases 1-4 all edit `src/lower.x`, so each names the
+functions it owns; an agent that needs to change a function another phase
+owns says so in its branch rather than editing it silently.
+
+Each phase ends by adding its probes to the fixture from Phase 0 and by
+rerunning the whole fixture, so a phase that regresses another phase's
+construct is caught before it merges.
+
+## Phase 0 - a tracked probe fixture
+
+The pass probes live in `.context/spike/`, which is git-excluded, so no other
+agent can run them. Move them into a compiler fixture.
+
+Add `unittest/compiler-fixtures/comptime-lowering.x`: one program whose
+compile-time functions exercise every construct the pass supports, each
+printing its result, with `.phases` of `stdout status` and a checked-in
+`.stdout`. A construct that declines is not an error in this fixture; it is
+simply absent until its phase lands, and its phase adds it.
+
+Add a second fixture `comptime-declines.x` with `.phases` of `diagnostics`,
+holding one function per construct the pass deliberately refuses, so the
+refusal and its wording are checked rather than incidental.
+
+This phase gates the others: they have nowhere to put evidence until it
+exists.
+
+## Phase 1 - collection literals and indexing
+
+Owns `_lower_content`'s value productions, `_lower_store`'s place analysis,
+and the `composite`/`commas`/`getindex`/`index`/`array` entries in
+`_lower_scan`.
+
+The largest gap and the one that changes how ported code reads. Today
+`.context/spike/pass-rev.x` contains eighteen hand-rolled recursive list
+builders that exist only because there is no `Array` with `push`, and
+`ad_partial` is a twenty-seven-branch `if (name.equal("sin"))` chain that
+wants to be one `Map` lookup.
+
+- `[a, b]` lowers to `(list a b)`; `[]`, `{}` and a bare `{k: v}` lower by
+  the declared type on the `expr` node: `Array` to `(Array.new)`, `Map` to
+  `(Map.new)`, `List` to `()`. The type is already on the node, so no
+  inference is needed.
+- `xs[i]` dispatches on the receiver's type, not a guess:
+  `List.getindex`, `Array.getindex`, `Map.getindex`, `String.getindex`. The
+  interpreted spike already did exactly this in
+  `.context/spike/c-from-ast.xlisp`'s `c._getindex`; carry that dispatch in.
+- `m[k] = v` is the `index` production in a store position and becomes
+  `Map.setindex` or `Array.setindex` by the same dispatch.
+- A local array `int a[4] = {...}` becomes a cell holding an `Array`, reusing
+  the machinery Phase 0 of this branch already built; `a[i]` then reads the
+  box and indexes it. This removes the `arrays` decline entirely.
+
+Everything this needs is bound in `etc/lisp-lower.xlisp` already.
+
+## Phase 2 - control flow
+
+Owns `_lower_stmnt`, `_lower_loop`, and a new `_lower_switch`.
+
+- `break` and `continue` need no exit codes. `_lower_loop` already holds both
+  the self call `(again ...)` and the inlined `leave` continuation; carry
+  them in the `Lowering` state the way `on_loop` is carried, and lower
+  `continue` to the first and `break` to the second. A `break` or `continue`
+  outside a loop declines.
+- `do`/`while` rewrites to a `while` with a first-iteration flag, which is
+  what `ad._rev-do` in `lib/autodiff.xmacro` already does for its subject
+  programs. Mechanical.
+- `switch` lowers to a `cond` chain over a subject bound once. Fallthrough is
+  deliberately not supported: an arm that does not end in `break` or `return`
+  declines with a reason naming fallthrough. The repository writes `switch`
+  this way already, and a fallthrough state machine would be machinery with
+  no caller.
+- `goto` and labels decline permanently. Record that as a decision, not an
+  omission.
+
+## Phase 3 - the mechanical gaps
+
+Owns `_lower_declarator`'s tuple case and `etc/lisp-lower.xlisp`.
+
+- `Var (a, b) = pair` binds each name to `(car p)` and `(cadr p)`, holding
+  `p` once when it is not pure.
+- `foreach` over a `Map` or an `Array` needs `Map_try_next` and
+  `Array_try_next` shims beside the `List_try_next` that already exists.
+  Check the generated AST for each: the `List` form takes object, cursor and
+  output, and the others may differ.
+- `defer` declines, with a diagnostic saying a compile-time function does not
+  free its values because the evaluator owns them. This is a deliberate
+  limit; `Array a = []; defer a.free();` is correct x2c and wrong comptime
+  x2c, so the refusal has to explain itself rather than say "unsupported".
+- Struct locals and field access stay out of scope. A struct would have to
+  become a `Map` keyed by field name, which changes value semantics. Say so
+  in the declines fixture.
+
+## Phase 4 - typed captures in patterns
+
+Owns `_lower_arms` and whatever in `src/literals.x` the investigation finds.
+
+A `case %(call ?(String n))` pattern does not fold to a constant: folding
+leaves an `expr` node carrying a run-time conversion, so the arm was
+previously matched against raw AST and silently never fired. The pass now
+declines it with "case pattern is not folded", which is correct but blocks a
+pattern the compiler itself uses constantly.
+
+Start with an investigation: establish whether a typed capture in a pattern
+can fold to the capture atom at literal-folding time, since the type is only
+there to type the binder at the use site. If it can, the fix is in folding
+and the decline disappears. If it cannot, record why and keep the decline.
+Do not build a second folding path in the pass.
+
+## Phase 5 - port the remaining macro Lisp
+
+Depends on Phases 1-3. `lib/var-tags.xmacro` at 295 Lisp lines is the real
+one; the error and system macros are small. `etc/compiler-sdk.xlisp` and
+`etc/lisp-extras.xlisp` are judged during this phase: some of their contents
+are name tables and stay.
+
+Each port keeps the macro's public surface identical and is verified by the
+suites that already cover it, not by new tests written for the port.
+
+## Phase 6 - fold the AD port back
+
+Depends on Phases 1-3. Rewrite `.context/spike/pass-rev.x` onto the
+constructs those phases add: the eighteen recursive list builders become
+loops over an `Array`, and `ad_partial` becomes a `Map`. Then decide, with
+Gary, whether the result replaces `lib/autodiff.xmacro` or stays a
+demonstration. Two paths are still unported and that decision needs them:
+checkpointed loops (`$ad.checkpoint`) and calls to an earlier differentiated
+sibling.
+
+A working-time comparison against the shipped implementation is still
+missing. `$ad.reverse` did not resolve in a standalone file during the port
+although `$ad.dual` from the same import did, while
+`unittest/test-autodiff.x` translates fine in 13.3 s. Resolve that before
+claiming any speed result for reverse mode.
+
+## Phase 7 - the builtin-macros bootstrap question
+
+Independent of the others and investigation-first.
+`etc/builtin-macros.xlisp` is 504 lines and is the macro templating system
+that `$comptime` itself runs on. Its definitions must be live before any user
+macro expands, whereas comptime x2c functions install per unit. Establish
+whether a compile-time function can be installed early enough to serve the
+macro expander, and what would have to hold for that to be safe. The answer
+may be that this file stays Lisp; that is an acceptable outcome and should be
+recorded rather than worked around.
+
+## Validation
+
+Focused per phase: `make build`, that phase's fixture entries, and the whole
+`comptime-lowering` fixture. The Lisp suite (`make -C unittest test-lisp`,
+915 tests) has caught nothing in this work so far but is cheap and stays.
+
+Branch merges back to `x2c-lowers-to-lisp` need no gate. Delivery to `main`
+is a separate decision that Gary owns and has not given.
+
+## Plan review
+
+**Facts the producers establish.** The typed AST already carries the
+receiver's type on every `expr` node, so Phase 1's `getindex` dispatch reads
+a fact the type pass established rather than inferring one. `_lower_loop`
+already constructs both the self call and the leave continuation, so Phase 2
+consumes values that exist rather than recomputing control flow. Neither
+phase rechecks those facts.
+
+**Deletion and reuse.** Phase 1 deletes the `arrays` decline and the
+`composite`/`commas`/`getindex`/`index`/`array` entries in the scan's reject
+list rather than adding a parallel path, and reuses the cell machinery for
+local arrays instead of introducing a second mutable representation. Phase 2
+deletes three reject entries and adds one function, `_lower_switch`. Phase 6
+deletes eighteen hand-rolled list builders and a twenty-seven-branch chain
+from the port. The only lasting new mechanism in the whole plan is the
+loop-continuation state Phase 2 carries, which exists because `break` has no
+other way to name the loop's exit.
+
+**Why this is idiomatic x2c.** The pass is a `match` over the canonical AST
+that produces Lisp forms through literal templates, which is how the rest of
+`src/` reads. Phase 1 makes the ported code use `Array` and `Map` the way
+`src/` does, instead of the cons-recursion the missing constructs force
+today. Nothing here imports a framework; the exit-code machinery that a
+general `switch` or a non-local `break` would need is explicitly refused in
+favour of a decline.
+
+**Validators, diagnostics, and negative fixtures.** Three deliberate
+declines carry dedicated wording: fallthrough in a `switch`, `defer` in a
+compile-time function, and `goto`. Each protects a real wrong answer rather
+than failing earlier — silently accepting fallthrough would run the wrong
+arms, and silently accepting `defer` would free a value the evaluator owns.
+The `comptime-declines` fixture exists to check that wording, and is the only
+negative fixture the plan adds. Phase 4 adds no validator; it either removes
+a decline or records why the decline stays.

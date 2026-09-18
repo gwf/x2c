@@ -2,10 +2,14 @@
 
 > Status: active
 >
-> Design decided, nothing implemented. Work happens on the isolated branch
-> `x2c-lowers-to-lisp` and does not reach `main` without Gary's explicit
-> green light. Measurements below were taken on 2026-09-17 against
-> `82bd746b` and decide the design.
+> Design decided and built. `src/lower.x` is the compiled pass and
+> `etc/lisp-lower.xlisp` its runtime; the whole of `lib/autodiff.xmacro`'s
+> forward and reverse modes is ported and exact. Work happens on the isolated
+> branch `x2c-lowers-to-lisp` and does not reach `main` without Gary's
+> explicit green light. Measurements from 2026-09-17 against `82bd746b`
+> decide the design; those from 2026-09-18 record what the pass now does.
+> Making the pass general enough to replace the remaining macro Lisp is
+> scoped separately in `plans/comptime-x2c-generalization.md`.
 
 ## The result
 
