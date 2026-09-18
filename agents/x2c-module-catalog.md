@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 33
+- Compiler modules: 34
 - Runtime modules: 55
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -136,6 +136,15 @@ Public functions:
 `Sym.lookup_field`, `Sym.declare_field_order`, `Sym.field_order`,
 `Sym.declare_delegate_field`, `Sym.delegate_aggregate`, `Compiler.gensym`,
 `Sym.push_new_scope`, `Sym.push_scope`, `Sym.pop_scope`
+
+### [src/comptime.x](../src/comptime.x)
+
+translating a compile-time x2c function into Lisp.
+
+Public functions:
+
+`Compiler.lower_comptime`, `Compiler.lower_declined`,
+`Compiler.install_comptime`
 
 ### [src/deps.x](../src/deps.x)
 

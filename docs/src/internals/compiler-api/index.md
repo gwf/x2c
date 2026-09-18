@@ -18,6 +18,7 @@ Functions and types exposed by each compiler module.
 | [`src/cli.x`](cli.md) | x2c command-line parsing and presentation. |
 | [`src/collect.x`](collect.md) | source-ordered shallow symbol collection and replay. |
 | [`src/compiler.x`](compiler.md) | core x2c compiler state and operations. |
+| [`src/comptime.x`](comptime.md) | translating a compile-time x2c function into Lisp. |
 | [`src/deps.x`](deps.md) | Make dependency output for x2c translation units. |
 | [`src/diagnostics.x`](diagnostics.md) | structured compiler diagnostics collection. |
 | [`src/editor.x`](editor.md) | one-request semantic editor adapter. |

@@ -94,6 +94,7 @@
   - [src/cli.x](internals/compiler-api/cli.md)
   - [src/collect.x](internals/compiler-api/collect.md)
   - [src/compiler.x](internals/compiler-api/compiler.md)
+  - [src/comptime.x](internals/compiler-api/comptime.md)
   - [src/deps.x](internals/compiler-api/deps.md)
   - [src/diagnostics.x](internals/compiler-api/diagnostics.md)
   - [src/editor.x](internals/compiler-api/editor.md)
