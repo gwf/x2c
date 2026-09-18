@@ -504,6 +504,41 @@ silent wrong answer: both defects found here — a pattern that never fired and
 a discarded operand whose call never ran — produced plausible output rather
 than an error.
 
+## The decision that gates a reserved word
+
+Not scheduled, and deliberately left until Phases 2-4 land. Recorded here
+because it is the thing most likely to be discovered late.
+
+`$comptime()` is a `Decorator` macro today. It reads as a transformation, but
+a compile-time function is not transformed: it is a function whose lifetime is
+translation rather than run time, which is the kind of fact `static` and
+`inline` state. Three costs follow from the spelling, each measured rather
+than asserted:
+
+- `comptime-autodiff.x` carries 13 `$(def name (lambda (. rest) 0))` lines,
+  which are C prototypes written in Lisp. A decorator fires per definition and
+  cannot see a forward declaration.
+- A `Unit` decorator captures the pre-transform AST, so the pass re-derives
+  conversions the compiler already knows how to insert. `_lower_coerce` exists
+  only for that, and before it existed the gap was a silently wrong container
+  and a segfault.
+- A public decorator target cannot gain new public siblings, which is why
+  `$ad.reverse` needs a `static` target. A keyword would not inherit that rule.
+- Phase 7 adds a fourth: an install is driven by a decorator the parser reaches
+  in source order, which is what makes a session-start install inexpressible.
+
+Two of those are really about **where in the pipeline the pass runs**, not how
+it is spelled, and that is the decision to settle first. If the lowering moves
+after the transform, `_lower_coerce` and the pre-transform re-derivation go
+away, and a keyword becomes the natural way to mark a function whose typed
+body the compiler must retain. If it stays where it is, a keyword buys better
+prototypes and better diagnostics and little else.
+
+Against a keyword: x2c is shipped, so the identifier breaks callers, and every
+reserved word spends from a closed vocabulary that has been a recurring source
+of bloat. Both argue for doing it once, as part of the larger rework, rather
+than ahead of it.
+
 ## Validation
 
 Focused per phase: `make build`, that phase's fixture entries, and the whole
