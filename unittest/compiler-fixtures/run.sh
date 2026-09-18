@@ -14,6 +14,11 @@ x2c=${X2C:-"$root/builds/0/x2c"}
 cc=${CC:-cc}
 read -r -a build_cflags <<< "${BUILD_CFLAGS:-}"
 
+# Start from an empty tree so no fixture can read a tally left by an earlier
+# run; the parent below treats a missing tally as a failure to report.
+if [[ "${2:-}" != --fixture ]]; then
+  rm -rf "$build"
+fi
 mkdir -p "$build"
 
 failures=0

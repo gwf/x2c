@@ -412,13 +412,13 @@ ape-verify:						## Verify the APE-to-native rebuild
 ##@ Configuration and maintenance
 config-debug:						## Switch to debug build mode
 	@echo "Switching to debug build mode..."
-	@echo "debug" > $(BUILD_MODE_FILE)
+	@echo "debug" > $(BUILD_MODE_LOCAL_FILE)
 	@echo "Build mode set to: Debug build with symbols and warnings"
 	@echo "Run 'make clean' and 'make' to rebuild with debug flags"
 
 config-optimize:					## Switch to optimized build mode
 	@echo "Switching to optimized build mode..."
-	@echo "optimize" > $(BUILD_MODE_FILE)
+	@echo "optimize" > $(BUILD_MODE_LOCAL_FILE)
 	@echo "Build mode set to: Optimized build for performance"
 	@echo "Run 'make clean' and 'make' to rebuild with optimization flags"
 
