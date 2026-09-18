@@ -217,6 +217,83 @@ Var ct_table(String name) {
 $comptime()
 int ct_scalar_zero(void) { int z; return z; }
 
+/* --- destructuring and iteration over every container -------------------- */
+
+/* `Var (a, b) = pair` reads each name out of the source by position, which
+   is what the transform does with the same declaration. */
+$comptime()
+int ct_pair(List pair) {
+  Var (a, b) = pair;
+  return Var.integer(a) * 10 + Var.integer(b);
+}
+
+/* The same declaration with a type on each name. Neither spelling lets the
+   type decide anything, because a Lisp value already is a `Var`. */
+$comptime()
+int ct_pair_typed(List pair) {
+  (Var a, Var b) = pair;
+  return Var.integer(a) * 10 + Var.integer(b);
+}
+
+/* A source that is not duplicable is held in one binding, so the call
+   below runs once however many names read it. */
+$comptime()
+int ct_pair_held(List xs) {
+  Var (a, b) = xs.cdr();
+  return Var.integer(a) * 10 + Var.integer(b);
+}
+
+/* Fewer values than names is the absent element again: nil, not a `void`
+   crossing that would end the session. */
+$comptime()
+int ct_pair_short(List one) {
+  Var (a, b) = one;
+  return Var.integer(a) + (b ? 100 : 0);
+}
+
+/* An `Array` source converts to a `List` first, the way the transform
+   converts it. */
+$comptime()
+int ct_pair_array(Array xs) {
+  Var (a, b) = xs;
+  return Var.integer(a) * 10 + Var.integer(b);
+}
+
+/* `foreach` over an `Array` walks a counting cursor; over a `Map` the one
+   name is the value, and two names are the key and the value. */
+$comptime()
+int ct_walk_array(Array xs) {
+  int total = 0;
+  foreach (Var x, xs) total = total + Var.integer(x);
+  return total;
+}
+
+$comptime()
+int ct_walk_map(Map m) {
+  int total = 0;
+  foreach (Var v, m) total = total + Var.integer(v);
+  return total;
+}
+
+/* A sum, because a `Map` walks in bucket order and this has to report the
+   same number whatever that order is. */
+$comptime()
+int ct_walk_map_pairs(Map m) {
+  int total = 0;
+  foreach (Var (k, v), m)
+    total = total + Var.integer(k) * 100 + Var.integer(v);
+  return total;
+}
+
+/* An empty container ends the walk on its first call. */
+$comptime()
+int ct_walk_empty(Map m, Array xs) {
+  int n = 0;
+  foreach (Var v, m) { (void) v; n = n + 1; }
+  foreach (Var x, xs) { (void) x; n = n + 1; }
+  return n;
+}
+
 /* --- value types --------------------------------------------------------- */
 
 $comptime()
@@ -297,6 +374,15 @@ int main(void) {
   printf("accumulate   %s\n", $(repr (ct_accumulate '(1 2))));
   printf("table        %s %s\n",
          $(repr (ct_table "cos")), $(repr (ct_table "nope")));
+  printf("pair         %d\n", $(ct_pair '(3 4)));
+  printf("pair-typed   %d\n", $(ct_pair_typed '(3 4)));
+  printf("pair-held    %d\n", $(ct_pair_held '(9 3 4)));
+  printf("pair-short   %d\n", $(ct_pair_short '(7)));
+  printf("pair-array   %d\n", $(ct_pair_array (List.array '(5 6))));
+  printf("walk-array   %d\n", $(ct_walk_array (List.array '(4 5 6))));
+  printf("walk-map     %d\n", $(ct_walk_map (Map_of '(1 2 3 4))));
+  printf("walk-pairs   %d\n", $(ct_walk_map_pairs (Map_of '(1 2 3 4))));
+  printf("walk-empty   %d\n", $(ct_walk_empty (Map.new) (List.array '())));
   printf("is-list      %d\n", $(ct_is_list '(a b)));
   printf("head         %s\n", $(str (ct_head '(a b))));
   printf("len          %d\n", $(ct_len '(a b c)));

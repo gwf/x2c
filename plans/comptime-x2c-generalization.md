@@ -3,7 +3,7 @@
 > Status: active
 >
 > Scoped 2026-09-18 on branch `x2c-lowers-to-lisp` after the autodiff port
-> landed. Phases 0 and 1 are done and merged; Phases 2-4 are the rest of the
+> landed. Phases 0, 1 and 3 are done; Phases 2 and 4 are the rest of the
 > pass, 5-7 are ports and one investigation. Nothing on this branch reaches `main` without Gary's
 > explicit green light. The design in `plans/x2c-lowers-to-lisp.md` is
 > settled and this plan does not revisit it.
@@ -237,7 +237,47 @@ Owns `_lower_stmnt`, `_lower_loop`, and a new `_lower_switch`.
 - `goto` and labels decline permanently. Record that as a decision, not an
   omission.
 
-## Phase 3 - the mechanical gaps
+## Phase 3 - the mechanical gaps (done)
+
+Landed on `comptime-phase3-mechanical`. Destructuring declarations,
+`foreach` over a `Map` and an `Array`, and the two deliberate refusals.
+Ten new lines in `comptime-lowering.stdout` and two new decline fixtures,
+`comptime-declines-defer` and `comptime-declines-struct`, are the evidence.
+
+Four corrections to what this section said before the work, each checked
+against `--dump-ast` from a decorator:
+
+- **A destructuring declaration is not a declarator.** It is its own
+  statement, `(dstrdecl TYPE (targets (binding id name)...) SOURCE)`, so the
+  case is in `_lower_stmnt`, which Phase 2 owns. There is a second spelling,
+  `(int a, String b) = pair`, which parses as `(dstrdecl (params ...)
+  SOURCE)`; the repository writes both, so both lower through one
+  `_lower_destructure`.
+- **The elements are `List.getindex`, not `car` and `cadr`.** The transform
+  converts the source to a `List` and reads position `i` out of it, so the
+  lowering converts with `_lower_coerce` and reads the same way. That also
+  gives a short source a nil element instead of a `void` crossing.
+- **A destructured target is not a `bind` node**, so the scan had to learn to
+  register those ids as locals. Without that a later write to one lowered to
+  `C.gwrite`, treating it as file-scope state.
+- **`Map_try_next` takes four arguments, not three**: object, cursor, key and
+  value. `foreach (Var v, m)` binds the one name to the *value*. `Array` uses
+  a counting cursor and one output; `List` walks a cursor that holds the
+  remaining list.
+
+One defect fixed in passing, reproduced first at `ea3d955d`. Generated names
+restarted their counter with each function, so two compile-time functions of
+the same shape named their loops alike and the second `def` silently replaced
+the first. Everything a fixture could show was already wrong: adding a second
+loop-bearing function broke `ct_accumulate`. The counter now runs across the
+session and `Lowering.counter` is gone.
+
+Still refused, deliberately: `defer` and any struct or union, each with its
+own wording and its own fixture. Refused for want of work: a destructured
+local that needs a cell, and a destructuring on a loop path whose source is
+not duplicable, which is the rule every other initializer already follows.
+
+The original scope follows.
 
 Owns `_lower_declarator`'s tuple case and `etc/comptime.xlisp`.
 
