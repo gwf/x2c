@@ -564,10 +564,43 @@ That is 330x. Splitting it says where it goes:
 | lower them and derive | 79.0 s |
 
 So 97% of the cost is the lowering pass itself, not the generated code and
-not the derivation. The lowering is interpreted Lisp walking ASTs, which is
-the inefficiency this plan exists to remove; it is prototype cost rather
-than a property of the approach. It does mean the prototype cannot be used
-on real code until the pass is compiled.
+not the derivation.
+
+**The cause is `match-case`, and it is not specific to this prototype.**
+`match-case` is a `defmacro`, and `_apply_lambda` in `lib/lisp.x` expands a
+macro and then evaluates the expansion on *every call*. The nested
+`cond`/`let` structure a `match-case` with sixteen clauses builds is
+therefore rebuilt every time the function runs.
+
+Isolating it on one function whose body is a single folded template:
+
+| | translate |
+|---|---|
+| cache expansion stubbed out entirely | 163 ms |
+| native accessor called, no Lisp expansion | 170 ms |
+| expansion through `match-case` | 505 ms |
+| the same expansion dispatched on the head | 186 ms |
+
+The native accessor costs 7 ms across seventeen calls. The Lisp expansion
+costs 335 ms, and rewriting two `match-case` uses as `cond` on the head
+recovers all but 23 ms of it. Across the thirty ported functions the same
+rewrite moved 70 s to 62 s, because the lowering's own dispatches, which
+are much larger, still go through `match-case`.
+
+Two ways to fix it, and they are not exclusive:
+
+- **In the prototype**, dispatch on the head in the hot paths. Mechanical,
+  and `c._content` with sixteen clauses is the one that matters. It makes
+  the lowering's own source worse to read, which is the cost.
+- **In the interpreter**, memoize a macro expansion per call site. The raw
+  argument forms at a site do not change, so the expansion does not either.
+  This would speed every macro in compile-time Lisp, including
+  `autodiff.xmacro`'s own `match-case` uses, and it is the fix that belongs
+  in the compiler rather than in one caller. It needs care over macro
+  redefinition and over macros that read mutable globals.
+
+The 330x figure therefore measures a fixable interpreter cost that this
+prototype happens to pay heavily, not the cost of lowering x2c to Lisp.
 
 Rewrite its roughly 700 lines of Lisp as x2c compile-time functions. This
 is the measurement that decides whether the whole direction pays: report
