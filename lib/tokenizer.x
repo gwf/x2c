@@ -403,9 +403,7 @@ static int Tokenizer._common_tokens(Tokenizer t) {
     case '/':
       if (text[1] == '/') return t.do_scanner(scan_line_comment, <comment>);
       if (text[1] == '*')
-        return t._scan_mode() == <lisp>
-          ? _status_scanner(t, scan_block_comment_status, <comment>)
-          : t.do_scanner(scan_block_comment, <comment>);
+        return _status_scanner(t, scan_block_comment_status, <comment>);
       return 0;
     case '\'': return t.do_scanner(scan_c_character, <lit-char>);
     case '0': case '1': case '2': case '3': case '4':
@@ -420,7 +418,8 @@ static int Tokenizer._common_tokens(Tokenizer t) {
 static int Tokenizer._x2c_tokens(Tokenizer tokenizer) {
   static const char *opchars = "-,;:!?.()[]{}*/&%^+<=>|~@";
   char *text = tokenizer.text + tokenizer.pos, int n;
-  if (text[0] == '"') return tokenizer.do_scanner(scan_c_string, <lit-char*>);
+  if (text[0] == '"')
+    return _status_scanner(tokenizer, scan_c_string_status, <lit-char*>);
   if (text[0] == '_' || scan_ascii_alpha((unsigned char) text[0])) {
     n = scan_identifier(text);
     Symbol type = scan_keyword_type(text, n);
