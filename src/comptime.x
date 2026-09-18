@@ -236,10 +236,10 @@ static Var _lower_constant_leaf(Lowering l, List value) {
     case %(expr ?type (literal ? ?(String text))):
       return _lower_number(l, type, text);
   }
-  /* Folding leaves an expression in place when it needs a conversion at run
-     time, as a typed capture in a pattern does. There is no compile-time
-     value to read back, so the caller declines rather than treating the
-     unfolded node as data. */
+  /* Folding leaves an expression in place when the value is only known at
+     run time, as a pattern that interpolates a local does. There is no
+     compile-time value to read back, so the caller declines rather than
+     treating the unfolded node as data. */
   if (value && value.car() == <expr>) return void;
   return value;
 }

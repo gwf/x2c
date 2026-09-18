@@ -255,21 +255,63 @@ Owns `_lower_declarator`'s tuple case and `etc/comptime.xlisp`.
   become a `Map` keyed by field name, which changes value semantics. Say so
   in the declines fixture.
 
-## Phase 4 - typed captures in patterns
+## Phase 4 - typed captures in patterns (done)
 
-Owns `_lower_arms` and whatever in `src/literals.x` the investigation finds.
+Owned `_lower_arms` and whatever in `src/literals.x` the investigation found.
+`_lower_arms` needed no change; six lines in `_build_cons_cell` were the fix.
 
-A `case %(call ?(String n))` pattern does not fold to a constant: folding
-leaves an `expr` node carrying a run-time conversion, so the arm was
-previously matched against raw AST and silently never fired. The pass now
-declines it with "case pattern is not folded", which is correct but blocks a
-pattern the compiler itself uses constantly.
+**The question the phase was given has a negative answer.** A typed capture
+must not fold to the plain capture atom. `?(String n)` is not only an
+annotation on the binder: `_parse_typed_capture` and
+`Compiler.typed_match_pattern` expand it into `(!is ?n type <String>)`, which
+`lib/match.x` normalizes to
+`(!set ?n (!is type <String>))` - bind the element and test its `Var` tag.
+Dropping the type would make `case %(call ?(String n))` fire on `(call 42)`,
+which is the silent wrong answer the decline exists to prevent. Any future
+work here must keep the guard in the folded value.
 
-Start with an investigation: establish whether a typed capture in a pattern
-can fold to the capture atom at literal-folding time, since the type is only
-there to type the binder at the use site. If it can, the fix is in folding
-and the decline disappears. If it cannot, record why and keep the decline.
-Do not build a second folding path in the pass.
+**The pattern folds anyway, guard included.** For a concrete type
+`Compiler.var_tag_expression` returns a `Symbol` literal, so every part of
+the expansion is constant. What stopped it was mechanical. Typed captures
+are parsed as bare `?n` atoms with their types recorded in `match_types`,
+and `Compiler.typed_match_pattern` re-expands them afterwards, rebuilding the
+cons chain through `_build_cons_cell`. That builder converted each nested
+`List` head to `Var` before offering the cell to the cache, and a `List_var`
+call is not a shape `Compiler.cache_cons_cell` can represent, so the first
+rebuilt head broke folding for the whole pattern. Caching a folded nested
+`List` head as its own `(var ...)` key first - which is exactly what
+`_parse_list_head` does for a parsed element - restores it. No second folding
+path, and no new representation: the rebuilt pattern now reaches the cache
+the way a parsed one always did.
+
+Measured with `--dump-ast` from a `Unit` decorator: `case %(call ?(String n))`
+was a four-deep `cons` chain around a `List_var` call and is now
+`(expr ("List") (expr ("List") (cache 14)))`, the same shape the untyped
+`case %(call ?n)` already had.
+
+**The decline stays and is still reachable.** A pattern that interpolates a
+run-time local, `case %(call $x)`, still declines with "case pattern is not
+folded". That is the decline doing its job; it was never specific to typed
+captures.
+
+Five constructs are in `comptime-lowering`, each called twice so the
+fallback proves the tag test survived folding: a `String` capture, an `int`
+capture, a capture inside a sublist, a typed and an untyped capture in one
+pattern, and a `Symbol` capture. The same five functions compiled as ordinary
+run-time x2c print the same ten answers.
+
+Four checked-in artifacts changed, each read before it was accepted.
+`match-typed-flat.c` and `braced-unquote.{ast,transform,c}` now intern the
+folded lists their literals had been rebuilding at run time. The generated
+`classify` body in `match-typed-flat.c` is byte-identical and every `.stdout`
+and `.status` passed unchanged, so only the file-init constant table moved.
+Typed patterns now intern the whole pattern the way untyped patterns already
+did, which is consistency rather than a new cost.
+
+One file outside this phase changed, as the working agreement requires an
+agent to say: a four-line comment in `_lower_constant_leaf` (`src/comptime.x`)
+named the typed capture as its example of an unfoldable node, which is no
+longer true.
 
 ## Phase 5 - port the remaining macro Lisp
 

@@ -262,6 +262,53 @@ Var ct_binding_name(List form) {
   return void;
 }
 
+/* --- typed captures in match patterns ------------------------------------ */
+
+/* A typed capture is a tag test as well as a binder, so each of these
+   answers its fallback when the element has the wrong type. The pair of
+   results per function is what proves the test survived folding. */
+
+$comptime()
+String ct_typed_string(List form) {
+  match (form) {
+    case %(call ?(String n)): return n;
+  }
+  return "none";
+}
+
+$comptime()
+int ct_typed_int(List form) {
+  match (form) {
+    case %(call ?(int n)): return n;
+  }
+  return -1;
+}
+
+/* A typed capture inside a sublist folds with the cell around it. */
+$comptime()
+String ct_typed_nested(List form) {
+  match (form) {
+    case %(call (arg ?(String n)) ?rest): return n;
+  }
+  return "none";
+}
+
+$comptime()
+String ct_typed_mixed(List form) {
+  match (form) {
+    case %(op ?name ?(String text)): return text;
+  }
+  return "none";
+}
+
+$comptime()
+int ct_typed_symbol(List form) {
+  match (form) {
+    case %(tag ?(Symbol s)): return 1;
+  }
+  return 0;
+}
+
 /* --- the program reports what the pass produced -------------------------- */
 
 int main(void) {
@@ -309,5 +356,16 @@ int main(void) {
   printf("match-miss   %s\n", $(repr (ct_rewrite '(other 5))));
   printf("binding      %s\n",
          $(str (ct_binding_name '(expr (int) (ident (binding 5 "t"))))));
+  printf("typed-string %s %s\n",
+         $(ct_typed_string '(call "x")), $(ct_typed_string '(call 42)));
+  printf("typed-int    %d %d\n",
+         $(ct_typed_int '(call 42)), $(ct_typed_int '(call "x")));
+  printf("typed-nested %s %s\n",
+         $(ct_typed_nested '(call (arg "y") 1)),
+         $(ct_typed_nested '(call (arg 3) 1)));
+  printf("typed-mixed  %s %s\n",
+         $(ct_typed_mixed '(op add "z")), $(ct_typed_mixed '(op add 5)));
+  printf("typed-symbol %d %d\n",
+         $(ct_typed_symbol '(tag a)), $(ct_typed_symbol '(tag "a")));
   return 0;
 }

@@ -2,11 +2,11 @@
 
 #include "braced-unquote.h"
 
-static List _31, _28, _26, _25, _23, _22, _21, _20, _18, _17, _14, _12, _7, _3, _2;
+static List _31, _28, _26, _25, _24, _23, _22, _21, _18, _17, _14, _12, _7, _3, _2;
 
 static String _29, _19, _15, _10;
 
-static Var _30, _27, _24, _16, _13, _11, _9, _8, _6, _5, _4, _1, _0;
+static Var _30, _27, _20, _16, _13, _11, _9, _8, _6, _5, _4, _1, _0;
 
 static int calls;
 
@@ -48,12 +48,12 @@ __attribute__((constructor)) static void _file_init_(void){
   _17 = cons(_16, NULL);
   _18 = cons(_9, _17);
   _19 = String_new("answer=42");
-  _20 = cons(_4, _17);
-  _21 = cons(_1, _7);
-  _22 = cons(_0, _21);
-  _23 = cons(_5, _22);
-  _24 = List_var(_18);
-  _25 = cons(_24, NULL);
+  _20 = List_var(_18);
+  _21 = cons(_4, _17);
+  _22 = cons(_1, _7);
+  _23 = cons(_0, _22);
+  _24 = cons(_5, _23);
+  _25 = cons(_20, NULL);
   _26 = cons(_8, _25);
   _27 = int_var(40);
   _28 = cons(_27, _14);
@@ -115,8 +115,8 @@ int main(void){
   List comma_value = cons(int_var((comma = 1, (int)(comma + 1))), NULL);
   List index = cons(int_var(Var_int(Array_getindex(array, 0))), NULL);
   List ternary = cons(int_var(base == 40 ? 42 : 0), NULL);
-  List literals = cons(List_var(_18), cons(String_var(_19), cons(Array_var(Array_update_n(Array_new(), 1, int_var(42))), cons(Map_var(Map_update_n(Map_new(), 1, Symbol_var(97761636), int_var(42))), NULL))));
-  if(! List_equal(insert, _20) || ! List_equal(splice, _23)) return 1;
+  List literals = cons(_20, cons(String_var(_19), cons(Array_var(Array_update_n(Array_new(), 1, int_var(42))), cons(Map_var(Map_update_n(Map_new(), 1, Symbol_var(97761636), int_var(42))), NULL))));
+  if(! List_equal(insert, _21) || ! List_equal(splice, _24)) return 1;
   if(! List_equal(short_splice, splice)) return 2;
   if(! List_equal(nested, _26)) return 3;
   if(! String_equal(Var_string(List_getindex(nested_string, 0)), _19)) return 4;
