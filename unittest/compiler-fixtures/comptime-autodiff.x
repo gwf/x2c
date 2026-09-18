@@ -18,19 +18,11 @@
 
 macro Decorator $comptime(Unit $fn) => { $(x2c.comptime.install $fn)... }
 
-$(def ad_is_loop_exit (lambda (. rest) 0))
+$(def ad_tangent (lambda (. rest) 0))
 $(def ad_adjoint (lambda (. rest) 0))
 $(def ad_rev_item (lambda (. rest) 0))
-$(def ad_rev_body (lambda (. rest) 0))
-$(def ad_rev_block (lambda (. rest) 0))
-$(def ad_loop_step (lambda (. rest) 0))
-$(def ad_tangent (lambda (. rest) 0))
 $(def ad_fwd_item (lambda (. rest) 0))
-$(def ad_fwd_items (lambda (. rest) 0))
-$(def ad_fwd_body (lambda (. rest) 0))
-$(def ad_tangent (lambda (. rest) 0))
 $(def ad_declared_join (lambda (. rest) 0))
-$(def ad_declared_doubles (lambda (. rest) 0))
 
 /* Forward mode from lib/autodiff.xmacro, as compile-time x2c. */
 
@@ -774,6 +766,12 @@ List ad_dispatch(List normal, List exits) {
 }
 
 $comptime()
+int ad_is_loop_exit(List x) {
+  Var kind = ad_exit_kind(x);
+  return kind == <break> || kind == <continue>;
+}
+
+$comptime()
 List ad_loop_exits(List exits, int want) {
   Array out = [];
   foreach (List x, exits)
@@ -787,12 +785,6 @@ List ad_return_exits(List exits) {
   foreach (List x, exits)
     if (ad_exit_kind(x) == <return>) out.push(x);
   return out;
-}
-
-$comptime()
-int ad_is_loop_exit(List x) {
-  Var kind = ad_exit_kind(x);
-  return kind == <break> || kind == <continue>;
 }
 
 $comptime()
