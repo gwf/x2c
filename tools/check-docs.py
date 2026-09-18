@@ -18,6 +18,29 @@ DOCS = (
     *sorted((ROOT / "docs").glob("*.md")),
     *sorted((ROOT / "docs" / "src").rglob("*.md")),
 )
+# Markdown outside DOCS whose links are checked, but whose paths, flags,
+# counts, and other claims are not audited. Link targets are resolved without
+# their anchors, here as everywhere else.
+# `site/` is absent on purpose: its Markdown links are URLs on the rendered
+# site, not repository paths, and `make site-check` already resolves every
+# rendered link and fragment against the built output.
+LINK_DIRS = (
+    ROOT / "agents" / "skills",
+    ROOT / "plans",
+    ROOT / "packages",
+)
+# Fetched, installed, or rendered trees grow inside those directories and
+# carry Markdown that is not ours to repair.
+UNTRACKED_DIR_NAMES = {"build", "builds", "deps", "dist", "node_modules"}
+LINK_DOCS = (
+    *DOCS,
+    *sorted(
+        path
+        for directory in LINK_DIRS
+        for path in directory.rglob("*.md")
+        if not UNTRACKED_DIR_NAMES & set(path.relative_to(ROOT).parts)
+    ),
+)
 PATH_AUDIT = {
     ROOT / "README.md",
     ROOT / "AGENTS.md",
@@ -126,7 +149,7 @@ def line_count(path: pathlib.Path) -> int:
 
 
 def check_links(errors: list[str]) -> None:
-    for path in DOCS:
+    for path in LINK_DOCS:
         text = path.read_text(encoding="utf-8")
         for match in LINK_PATTERN.finditer(text):
             target = match.group(1).strip().strip("<>").split()[0]
@@ -422,6 +445,7 @@ def main() -> int:
         return 1
     print(
         f"documentation audit passed: {len(DOCS)} files, "
+        f"{len(LINK_DOCS)} link-checked files, "
         f"{len(PATH_AUDIT)} path-audited entry points"
     )
     return 0

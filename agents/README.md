@@ -68,7 +68,8 @@ Skills have one canonical copy in `agents/skills/`, exposed through
   syntax, Match, templates, and ordinary compiler operations.
 - [Source graph](../tools/x2c-graph/README.md#investigate-a-change) - optional
   commands for callers, allocation returns, repeated walks, and source paths;
-  verify findings in source before changing behavior.
+  verify findings in source before changing behavior. No gate compiles or
+  tests the tool, so it may need fixing before it builds.
 - [Adapters, macros, and decorators](adapters-macros-decorators.md) - when
   generation and shared implementations make source clearer.
 - [Logger and diagnostics](logger-and-diagnostics-guide.md) - delivery,

@@ -57,12 +57,12 @@ decision in the package notices when the package exists.
 
 Relevant current x2c facts, verified by probe on 2026-09-09:
 
-- [Function decorators](../docs/src/guide/macros.md#decorators-transform-one-target)
+- [Function decorators](../../docs/src/guide/macros.md#decorators-transform-one-target)
   capture the typed function and preserve its signature. Statement
   decorators exist, and a decorator returning `{ $target }` works as an
   unbraced loop body. An empty production is rejected as a loop body, so an
   erased marker becomes `;`.
-- [Macro-visible syntax](../docs/src/reference/language.md#macro-visible-syntax)
+- [Macro-visible syntax](../../docs/src/reference/language.md#macro-visible-syntax)
   is the canonical typed List AST. x2c does not reject an undeclared
   identifier in an expression hole; it reaches C. Proof helper names are
   checked when the generated proof program is compiled.
