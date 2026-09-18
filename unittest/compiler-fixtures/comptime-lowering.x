@@ -380,6 +380,19 @@ List ct_flatten(List rows) {
   return out;
 }
 
+/* A character literal is its code. The pattern that selects a C string is
+   `(* char)`, and `*` is a sequence binder, so it matches a plain `(char)`
+   too; without the spelling test a character lowered to its own text and
+   read as a different number on every run. */
+$comptime()
+int ct_letter(void) => 'A';
+
+$comptime()
+int ct_newline(void) => '\n';
+
+$comptime()
+int ct_is_dot(String s) => s[0] == '.' ? 1 : 0;
+
 /* An uninitialized local keeps its own type's zero. */
 $comptime()
 int ct_scalar_zero(void) { int z; return z; }
@@ -623,6 +636,8 @@ int main(void) {
   printf("c-array-pad  %d\n", $(ct_c_array_padded));
   printf("c-array-bare %d\n", $(ct_c_array_bare 4));
   printf("scalar-zero  %d\n", $(ct_scalar_zero));
+  printf("character    %d %d %d\n",
+         $(ct_letter), $(ct_newline), $(ct_is_dot "."));
   printf("flatten      %s\n", $(repr (ct_flatten '((a b) (c) (d e)))));
   printf("accumulate   %s\n", $(repr (ct_accumulate '(1 2))));
   printf("table        %s %s\n",

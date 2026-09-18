@@ -251,10 +251,18 @@ static Var _lower_number(Lowering l, List type, String text) {
 }
 
 /* A String literal arrives as its source spelling, quotes included. */
+/* `*` is a sequence binder in a pattern, so the `(* char)` that selects a C
+   string also matches a plain `(char)`. The spelling settles it: a string
+   carries its double quote and a character literal its single quote, and a
+   character is its code, not its text. */
 static Var _lower_text(String spelling) {
   int len = spelling.len();
   if (len >= 2 && spelling[0] == '"')
     return String.new_len(spelling + 1, len - 2).unescape();
+  if (len >= 3 && spelling[0] == '\'') {
+    String body = String.new_len(spelling + 1, len - 2).unescape();
+    return body.len() ? body[0] : 0;
+  }
   return spelling;
 }
 
