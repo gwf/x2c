@@ -1047,28 +1047,49 @@ static Var _rebind_import_definition(Compiler compiler, Var stored) {
   return _replace_definition_bindings(definition, replacements);
 }
 
+/* Parses one `meta` function definition in a macro import. The parser
+   installs its compile-time form in the caller's session, which the importer
+   borrows, and returns the definition for the consuming unit to emit. Each
+   consuming unit emits its own copy, so the definition must be `static`. */
+static List _import_meta_definition(Compiler imported) {
+  Token marker = imported.token;
+  List definition = imported.parse_top_level();
+  match (definition)
+    case %(function ?type (bind ? *) *):
+      if (type.type().is_static()) return definition;
+  imported.report_error(
+    <macro>, "a meta function in a macro import must be static", marker,
+    %("every unit that imports it emits its own copy of the definition,"
+      "and two public copies collide at link"));
+}
+
 /* An import is cached only after it completes. Cached `.xmacro` aliases are
    replayed once per source alias map, while definitions and the Lisp session
    remain shared by the translation unit. CPP reads definitions and aliases;
    imported Lisp stays pending until a declaration needs its evaluation. */
-static void _import(
+static List _import(
   Compiler c, String requested, Token invocation) {
   _ensure_lisp(c);
   String path = _canonical_path(c, requested);
   c.add_translation_dependency(path);
   Var cached;
+  int replay = 0;
   if (c.imports.try_get(path, &cached)) {
     match (cached)
-      case %(imported ?aliases ?definitions ?dependencies): {
+      case %(imported ?aliases ?definitions ?dependencies ?(int meta)): {
         c.merge_translation_dependencies(dependencies);
-        if (!c.kw_seen.contains(path)) {
+        /* A `meta` definition is bound in the current symbol table and
+           emitted where its import stands, so a pass that has not seen this
+           path yet reads the file again instead of replaying definitions. */
+        if (meta) replay = !c.kw_seen.contains(path);
+        else if (!c.kw_seen.contains(path)) {
           foreach (Var (name, definition), definitions.map())
             c.macros[name] = _rebind_import_definition(c, definition);
           if (aliases is <map>) c.kw_aliases.merge(aliases);
           c.kw_seen[path] = 1;
         }
       }
-    return;
+    if (!replay) return NULL;
   }
   if (path in c.import_stack) {
     String display = c.display_path(path);
@@ -1083,6 +1104,7 @@ static void _import(
   Map previous_dependencies = c.deps.copy();
   c.import_stack.push(path);
   Map imported_aliases = NULL;
+  Array meta_definitions = [];
   {
     defer c.import_stack.take_last();
     if (path.endswith(".xlisp")) {
@@ -1099,16 +1121,17 @@ static void _import(
         %( "path: ${c.display_path(path)}" ));
       /* The import parser borrows the caller's semantic maps and Lisp. Its
          diagnostics are returned to the caller before release; lasting
-         effects enter the shared definitions, aliases, dependencies, and
-         Lisp session. */
+         effects enter the shared definitions, aliases, dependencies, literal
+         cache, and Lisp session. A `meta` definition the import returns is
+         emitted by the caller, so its `(cache id)` references have to index
+         the caller's keys. */
       Compiler imported = Compiler.new_shared(c);
       defer c.close_child(imported);
       imported.filename = path;
       imported.collect_protocols = c.collect_protocols;
       $let(c.diagnostics.printer, c.diagnostics.printer) {
         imported.borrow_diagnostics(c);
-        imported.sym = c.sym;
-        imported.fn_defs = c.fn_defs;
+        imported.borrow_unit_semantics(c);
         imported.macros = c.macros;
         imported.kw_aliases = c.kw_aliases;
         imported.kw_seen = c.kw_seen;
@@ -1128,9 +1151,16 @@ static void _import(
           }
           else if (imported.macro_form_is_definition())
             imported.parse_macro_definition();
+          else if (imported.meta_form_is_definition())
+            meta_definitions.push(_import_meta_definition(imported));
           else if (imported.peek(0) == <"$(">) {
-            if (c.collect_protocols || _import_path(imported, NULL))
-              imported.parse_macro_lisp_top_level();
+            if (c.collect_protocols || _import_path(imported, NULL)) {
+              /* A nested import's own `meta` definitions belong to the same
+                 consuming unit. */
+              List nested = imported.parse_macro_lisp_top_level();
+              if (nested)
+                foreach (Var form, nested.cdr()) meta_definitions.push(form);
+            }
             else imported.parse_macro_lisp_shallow();
           }
           else
@@ -1156,25 +1186,30 @@ static void _import(
     if (previous_dependencies[dependency] != hash)
       dependencies[dependency] = hash;
   Var aliases = imported_aliases ? imported_aliases : %();
-  c.imports[path] = %(imported $aliases $definitions $dependencies);
+  int meta = !!meta_definitions.len();
+  c.imports[path] = %(imported $aliases $definitions $dependencies $meta);
   c.kw_seen[path] = 1;
+  if (!meta) return NULL;
+  List forms = meta_definitions.list_free();
+  return %(seq @forms);
 }
 
 /** Consumes and evaluates one top-level compile-time Lisp form.
     `$(import ...)` loads a tracked `.xlisp` or `.xmacro` dependency; other
     results are discarded in the translation unit's Lisp session.
+    Returns a `%(seq ...)` of the `meta` definitions a macro import
+    contributed, for the consuming unit to emit, or NULL when it contributed
+    none.
 */
-void Compiler.parse_macro_lisp_top_level(Compiler compiler) {
+List Compiler.parse_macro_lisp_top_level(Compiler compiler) {
   Token invocation = compiler.token;
   String import_path = NULL;
   int is_import = _import_path(compiler, &import_path);
   String form = _lisp_form(compiler);
-  if (is_import) {
-    _import(compiler, import_path, invocation);
-    return;
-  }
+  if (is_import) return _import(compiler, import_path, invocation);
   _ensure_lisp(compiler);
   _eval_string(compiler, form, invocation);
+  return NULL;
 }
 
 /** Evaluates a queued source Lisp form with its original diagnostic site. */

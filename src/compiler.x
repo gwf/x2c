@@ -235,6 +235,25 @@ void Compiler.borrow_diagnostics(Compiler compiler, Compiler owner) {
   if (compiler.diagnostics.printer) compiler.own_diagnostics();
 }
 
+/** Shares the symbol table, literal cache, and protocol registries of the
+    unit `owner` is translating, so a child that binds declarations binds
+    them into that unit. A `meta` definition in a macro import is bound here
+    and emitted by `owner`, so both compilers must read one table: its
+    `(cache id)` references index `owner`'s keys, and its operations resolve
+    through `owner`'s protocol rows.
+*/
+void Compiler.borrow_unit_semantics(Compiler compiler, Compiler owner) {
+  compiler.sym = owner.sym;
+  compiler.fn_defs = owner.fn_defs;
+  compiler.id_keys = owner.id_keys;
+  compiler.key_ids = owner.key_ids;
+  compiler.protocols = owner.protocols;
+  compiler.adoptions = owner.adoptions;
+  compiler.conforms = owner.conforms;
+  compiler.protocol_helpers = owner.protocol_helpers;
+  compiler.proto_cache = owner.proto_cache;
+}
+
 /** Moves collected child reports into the caller's store without re-emitting.
     Shared stores already contain their entries. The child's separate store
     remains configured and empty after its reports have been transferred.

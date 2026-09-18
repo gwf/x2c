@@ -1,0 +1,8 @@
+/*  meta-import-nested.xmacro -- a `meta` function behind a second import
+
+    `meta-import-defs.xmacro` imports this file, so its definition reaches
+    the consuming unit through two levels of macro import rather than one.
+    See `plans/meta-functions.md`.
+*/
+
+meta static String mi_dashed(String path) => path.replace(".", "-");

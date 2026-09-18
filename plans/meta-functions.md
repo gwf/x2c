@@ -99,22 +99,56 @@ The decorator stays working; `meta` is a second spelling for the same effect
 until M4, not a replacement. The book gains nothing here because it does not
 document compile-time x2c functions at all yet.
 
-## M2 - the import loop
+## M2 - the import loop (done)
 
-`src/macros.x:1121` accepts a keyword definition, a macro definition, or a
-top-level `$(...)` form, and reports `unexpected form in macro import` for
-anything else. Add a branch for a `meta` declaration.
+The macro-import loop in `src/macros.x` now accepts a `meta` declaration
+beside a keyword definition, a macro definition, and a top-level `$(...)`
+form. The branch calls `Compiler.parse_top_level`, so M1's marker performs
+the install; the importer already borrows the caller's `macro_lisp`, so it
+lands in the consuming unit's session.
 
-The importer is already a `Compiler.new_shared(c)` holding the caller's `sym`,
-`fn_defs`, `macros` and `macro_lisp` with `borrowed_lisp = 1`, so the install
-lands in the consuming unit's session with no new plumbing. What the branch
-decides is emission, and it is the ordinary header problem: a `meta static`
-definition in an import emits one copy per consuming unit, which is what
-`lib/*.xmacro` macros already do; a non-`static` one needs the declaration and
-definition split that public macro families already use.
+**The emission rule: an imported `meta` function must be `static`.** Each
+consuming unit emits its own copy, which is what a macro family's generated
+statics already do, and two public copies collide at link. The refusal is
+`a meta function in a macro import must be static`, sited on the marker, with
+the note `every unit that imports it emits its own copy of the definition,
+and two public copies collide at link`. The declaration-and-definition split
+was the alternative and buys nothing: a `.xmacro` is not a translation unit,
+so there is nowhere for the single definition to live.
+
+`Compiler.parse_macro_lisp_top_level` returns the definitions a macro import
+contributed as a `%(seq ...)`, which `parse_top_level` hands to the unit
+driver, so they are emitted where the import stands. A nested import's
+definitions travel the same way.
+
+Three facts the work established.
+
+- **The importer has to borrow more than `sym` and `fn_defs`.** Binding real
+  x2c in the import touches the unit's literal cache and its protocol
+  registries. Without the literal cache the emitted body's `(cache id)`
+  references index the wrong table, which produced a silently wrong string;
+  without `protocol_helpers` a converter check wrote to a null `Map` and
+  aborted. `Compiler.borrow_unit_semantics` now shares all of it.
+- **The import cache had to learn about them.** A unit whose shallow pass
+  produced a declaration bundle keeps `c.imports` into the full parse, so
+  the cached entry answered and nothing was emitted. The entry records
+  whether the import contributed `meta` definitions; when it did, the first
+  import in each pass reads the file again rather than replaying definitions
+  bound in the previous pass's symbol table.
+- **The lowering's callee surface is `etc/comptime.xlisp`, not
+  `etc/lisp-values.xlisp`.** `String.count`, `String.partition` and
+  `String.remove_prefix` are bound as values but have no `String_*` name for
+  the pass to find, so a body using one declines. Widening that list is its
+  own change.
 
 This unblocks `plans/comptime-x2c-generalization.md` Phase 5 and reopens its
-Phase 7 verdict. Do not re-scope either until this lands.
+Phase 7 verdict. Do not re-scope either until Gary asks.
+
+One defect found and not fixed here, because it belongs to the lowering pass
+rather than the import loop: **a character literal in a compile-time function
+lowers to garbage.** `meta int f(void) => 'A';` answers 65 at run time and a
+different large number on each compile-time run, so a body that tests
+characters is a silent wrong answer. Reproduced 2026-09-18.
 
 ## M3 - the pipeline position
 

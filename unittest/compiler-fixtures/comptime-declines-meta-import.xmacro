@@ -1,0 +1,8 @@
+/*  comptime-declines-meta-import.xmacro -- a public `meta` definition
+
+    Every unit that imports this file would emit its own copy of `mi_public`,
+    and two public copies collide at link, so the import loop refuses it.
+    See `plans/meta-functions.md`.
+*/
+
+meta String mi_public(String text) => text.upper();
