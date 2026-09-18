@@ -863,5 +863,43 @@ Whole-build time against the interpreted spike over the same source:
 
 The smaller declaration slice measures the same way: 0.80s against 0.08s.
 
-Still to port: reverse mode, the primitive derivative table, and the two
-decorators from `lib/autodiff.xmacro`.
+## Reverse mode through the compiled pass
+
+`.context/spike/pass-rev.x` carries the whole of `lib/autodiff.xmacro`'s
+forward and reverse modes as compile-time x2c: the primitive derivative
+table, the tangent rules, the adjoint rules, the tape, exit codes, the loop
+trip counter and its dispatch, and both decorators. Every derivative it
+produces matches a central finite difference:
+
+    energy_grad  = 1.027917 0.201031   finite diff 1.027917 0.201031
+    horner_grad  = 30.243600 16.863256 finite diff 30.243600 16.863256
+    guarded_grad = 5.200248 5.672335   finite diff 5.200248 5.672335
+    mixed_dot(1.3) = 12.146367         finite diff 12.146367
+
+`horner` covers a `for` loop with a nested `if`; `guarded` covers a `while`
+with `break` and `continue`; `mixed` covers `sin`, `exp`, `sqrt`, `log`,
+`pow`, `fabs` and `atan2`. Installing about ninety compile-time functions and
+deriving five siblings translates in 777 ms.
+
+Checkpointed loops (`$ad.checkpoint`) and calls to an earlier differentiated
+sibling are the two paths not ported.
+
+## What the pass gained along the way
+
+- Cells. A local whose address is taken, or one a loop assigns a call result
+  to, lives in a one-slot box: `C.cell` allocates, `C.load` reads, `C.store`
+  writes. `foreach`, out-parameters and `*p` all work through it. A cell a
+  loop body declares is allocated once before the loop runs.
+- The scan runs twice, so the second pass sees the cells the first found.
+- A function's own name counts as bound, so self-recursion needs no stub.
+- Interpolated strings (`%"$stem${n}"`) lower to `string-append`.
+- An expression statement that is a call runs as an effect.
+- `*` is a sequence binder in a pattern, so a unary deref is matched by arity
+  and then by its operator. The same trap silently swallowed every `op` form
+  the first time.
+- A pattern that folding left unresolved, as a typed capture leaves it, now
+  declines instead of being matched as raw AST. Before that, a `case` with a
+  typed capture silently never fired.
+- `List.assoc`, `List.get`, `List.getindex`, `List.last` and `Map.get` return
+  `void` for an absent element, which has no Lisp value and aborts the
+  session. Their bindings in `etc/lisp-lower.xlisp` answer nil instead.
