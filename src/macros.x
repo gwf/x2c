@@ -2806,13 +2806,26 @@ static List _parse_target_definition(
       transaction.commit();
       return %(seq $node);
     }
-    List result = c.bind_syntax(
-      node, body_target ? AST_BLOCK : position, c.return_type);
+    List result = NULL;
     if (body_target) {
+      /* The body was bound with the function's own result type; bind the
+         produced items with it too, so a `return` that needs a conversion
+         still gets one. */
+      Type declared = NULL;
+      match (decorated) case %(function ?rtype ?declarator ?): {
+        List declaration = %(declare $rtype (bindings $declarator));
+        match (declaration.type_from_ast())
+          case %((func *) *result_type):
+            declared = result_type.type().declared();
+      }
+      $let(c.return_type, declared) {
+        result = c.bind_syntax(node, AST_BLOCK, c.return_type);
+      }
       List items = result.car() == <seq> ? result.cdr() : %($result);
       match (decorated) case %(function ?rtype ?declarator ?):
         result = %(seq (function $rtype $declarator (block @items)));
     }
+    else result = c.bind_syntax(node, position, c.return_type);
     $let(c.token, invocation) {
       transaction.commit();
     }

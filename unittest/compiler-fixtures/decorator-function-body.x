@@ -21,10 +21,19 @@ $let(level, 7) static int borrowed(void) {
   return level;
 }
 
+/* A return that needs a conversion still gets one: the produced items are
+   bound with the decorated function's own result type. */
+$scope() static String joined(List parts) {
+  Buffer out = $auto(Buffer.new(0));
+  foreach (String part, parts) out.write(part);
+  return out;
+}
+
 int main(void) {
   Mutex mutex = $auto(Mutex.new());
   int count = 0;
   bump(mutex, &count);
-  printf("%d %d %d %d\n", summed(%(1 2 3), 10), count, borrowed(), level);
+  printf("%d %d %d %d %s\n", summed(%(1 2 3), 10), count, borrowed(),
+         level, joined(%("a" "b")));
   return 0;
 }
