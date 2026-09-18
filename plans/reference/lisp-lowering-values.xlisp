@@ -1,0 +1,515 @@
+// c-from-ast.xlisp -- rewrite a typed x2c function AST into c-sdk.xlisp forms.
+//
+// The decorator hands over the bound and typed AST, so every identifier
+// carries its unique binding id and every expression carries its type.
+// Translation is one match-case per grammar production.
+//
+// Load cache-values.xlisp first: a literal template's constant parts are
+// cache ids and are read back through it.
+
+// --- literal text to a Lisp number --------------------------------------
+
+(def c._digits '("0" "1" "2" "3" "4" "5" "6" "7" "8" "9"))
+
+(defun c._at (text index) (substring text index (+ index 1)))
+(defun c._digit (ch)
+  (let ((rest (member ch c._digits)))
+    (if rest (- 10 (length rest)) nil)))
+
+(defun c._span (text index stop)
+  (if (or (= index stop) (null? (c._digit (c._at text index)))) index
+      (c._span text (+ index 1) stop)))
+
+(defun c._int-from (text index stop acc)
+  (if (= index stop) acc
+      (c._int-from text (+ index 1) stop
+                   (+ (* acc 10) (c._digit (c._at text index))))))
+
+(defun c._frac-from (text index stop acc scale)
+  (if (= index stop) acc
+      (c._frac-from text (+ index 1) stop
+                    (+ acc (* (c._digit (c._at text index)) scale))
+                    (/ scale 10.0))))
+
+(defun c._pow10 (n) (if (= n 0) 1.0 (* 10.0 (c._pow10 (- n 1)))))
+(defun c._scale (value exponent)
+  (if (< exponent 0) (/ value (c._pow10 (- 0 exponent)))
+      (* value (c._pow10 exponent))))
+
+// Reads [digits][.digits][(e|E)[+|-]digits] and stops at any suffix.
+(defun c._number (text)
+  (let* ((n (string-length text))
+         (whole-end (c._span text 0 n))
+         (whole (c._int-from text 0 whole-end 0))
+         (dot (and (< whole-end n) (equal? (c._at text whole-end) ".")))
+         (frac-end (if dot (c._span text (+ whole-end 1) n) whole-end))
+         (frac (if dot
+                   (c._frac-from text (+ whole-end 1) frac-end 0.0 0.1)
+                   nil))
+         (mantissa (if dot (+ (* 1.0 whole) frac) whole))
+         (at (if dot frac-end whole-end))
+         (marker (if (< at n) (lower (c._at text at)) ""))
+         (exponent? (equal? marker "e")))
+    (if (not exponent?) mantissa
+        (let* ((sign-at (+ at 1))
+               (sign (c._at text sign-at))
+               (negative (equal? sign "-"))
+               (start (if (or negative (equal? sign "+"))
+                          (+ sign-at 1) sign-at))
+               (stop (c._span text start n))
+               (magnitude (c._int-from text start stop 0)))
+          (c._scale (* 1.0 mantissa)
+                    (if negative (- 0 magnitude) magnitude))))))
+
+// A string literal arrives as its source spelling, quotes included.
+(defun c._unescape (text index stop acc)
+  (if (= index stop) acc
+      (let ((ch (c._at text index)))
+        (if (equal? ch "\\")
+            (c._unescape text (+ index 2) stop
+                         (string-append acc (c._escape (c._at text (+ index 1)))))
+            (c._unescape text (+ index 1) stop (string-append acc ch))))))
+
+(defun c._escape (ch)
+  (cond ((equal? ch "n") "\n")
+        ((equal? ch "t") "\t")
+        (true ch)))
+
+(defun c._string (text)
+  (c._unescape text 1 (- (string-length text) 1) ""))
+
+// --- shared helpers -----------------------------------------------------
+
+(defun c._fail (message form)
+  (x2c.diagnostic.fail (string-append "c-from-ast: " message)
+                       (list (repr form))))
+
+(def c._symbols (list
+  (list "+" '<"+">) (list "-" '<"-">) (list "*" '<"*">) (list "/" '<"/">)
+  (list "%" '<"%">) (list "&" '<"&">) (list "|" '<"|">) (list "^" '<"^">)
+  (list "<<" '<"<<">) (list ">>" '<">>">)
+  (list "==" '<"==">) (list "!=" '<"!=">)
+  (list "<" '<"<">) (list "<=" '<"<=">)
+  (list ">" '<">">) (list ">=" '<">=">)))
+
+(defun c._op (spelling)
+  (let ((row (assoc spelling c._symbols)))
+    (if row (list 'quote (cadr row))
+        (c._fail "no operator symbol" spelling))))
+
+(def c._assign-ops '(("+=" "+") ("-=" "-") ("*=" "*") ("/=" "/")
+                     ("%=" "%") ("&=" "&") ("|=" "|") ("^=" "^")
+                     ("<<=" "<<") (">>=" ">>")))
+
+(def c._binary-ops
+  '("+" "-" "*" "/" "%" "&" "|" "^" "<<" ">>"
+    "==" "!=" "<" "<=" ">" ">="))
+
+(defun c._float-type? (type)
+  (or (member 'double type) (member 'float type)))
+
+// The x2c value types need no emulation: a Lisp list in a macro session is
+// a List, a Lisp string is a String, and a number is a Var. Only the
+// operation that reads or writes a keyed element has to know which one.
+(defun c._value-type (type)
+  (cond ((equal? type '("Map")) 'map)
+        ((equal? type '("Array")) 'array)
+        ((equal? type '("List")) 'list)
+        ((equal? type '("String")) 'string)
+        ((equal? type '("Var")) 'var)
+        (true nil)))
+
+(defun c._string-type? (type)
+  (or (equal? type '(* char)) (equal? type '("String"))))
+
+(defun c._getindex (kind)
+  (cond ((eq? kind 'map) 'Map.getindex)
+        ((eq? kind 'array) 'Array.getindex)
+        ((eq? kind 'list) 'List.getindex)
+        (true (c._fail "indexing an unsupported value type" kind))))
+
+(defun c._setindex (kind)
+  (cond ((eq? kind 'map) 'Map.setindex)
+        ((eq? kind 'array) 'Array.setindex)
+        (true (c._fail "assigning to an unsupported value type" kind))))
+
+(defun c._empty (kind)
+  (cond ((eq? kind 'map) '(Map.new))
+        ((eq? kind 'array) '(Array.new))
+        ((eq? kind 'list) ''())
+        (true nil)))
+
+(defun c._receiver-kind (receiver)
+  (match-case receiver
+    ((expr ?type ?) (c._value-type ?type))
+    (else nil)))
+
+(defun c._step-value (type) (if (c._float-type? type) 1.0 1))
+
+// --- which locals need a memory cell ------------------------------------
+
+// An array name is already an address, and a scalar whose address is taken
+// needs a cell to hold. Every other local lives directly in the frame,
+// which keeps the common case to one lookup. Both sets are collected once
+// per function before translation.
+
+(def c._cells '())
+(def c._arrays '())
+
+(defun c._cell? (id) (if (member id c._cells) true nil))
+(defun c._array? (id) (if (member id c._arrays) true nil))
+
+// Accumulates onto one list; appending at every node would make the walk
+// quadratic in the size of the function.
+// --- addresses ----------------------------------------------------------
+
+// The address of an lvalue. Word-addressed memory makes pointer
+// arithmetic ordinary integer arithmetic, so no element size appears.
+(defun c.address (form)
+  (match-case form
+    ((expr ? ?content) (c._address ?content))
+    (else (c._fail "not an expression" form))))
+
+(defun c._address (content)
+  (match-case content
+    ((ident (binding ?id ?name))
+     (if (or (c._cell? ?id) (c._array? ?id)) `(C.get ,?id)
+         (c._fail "address of a local with no cell" content)))
+    ((parens ?inner) (c.address ?inner))
+    ((index ?base ?subscript)
+     `(C.binop '<"+"> ,(c.expr ?base) ,(c.expr ?subscript)))
+    ((op * ?pointer) (c.expr ?pointer))
+    (else (c._fail "not an lvalue" content))))
+
+// --- expressions --------------------------------------------------------
+
+// A literal template's parts appear bare, without an enclosing expr node.
+(defun c.expr (form)
+  (match-case form
+    ((expr ?type ?content) (c._content ?type ?content))
+    ((cons ?head ?tail) `(cons ,(c.expr ?head) ,(c.expr ?tail)))
+    // A spliced element joins its List onto the tail.
+    ((append ?head ?tail) `(append ,(c.expr ?head) ,(c.expr ?tail)))
+    ((cache ?id) (list 'quote (cache.value ?id)))
+    ((nil) ''())
+    ((at ? ?node) (c.expr ?node))
+    (else (c._fail "not an expression" form))))
+
+// A call with no arguments carries one void placeholder.
+(defun c._real-args (args)
+  (if (and args (null? (cdr args))
+           (match (car args) '(expr (void) ())))
+      '() args))
+
+(defun c._call (callee args)
+  // A lowered literal calls its constructor by name, without a binding.
+  (if (string? callee) (c._named-call callee args)
+  (match-case callee
+    ((expr ? (ident (binding ? ?name)))
+     (begin (c._require ?name)
+            `(C.call ,?name (list ,@(map c.expr (c._real-args args))))))
+    (else (c._fail "call through a computed callee" callee)))))
+
+(defun c._named-call (name args)
+  (begin (c._require name)
+         `(C.call ,name (list ,@(map c.expr (c._real-args args))))))
+
+(defun c._require (name)
+  (if (C.known? name) nil
+      (c._fail "call to a function with no compile-time binding" name)))
+
+// Dispatches on the head rather than through one large `match-case`: the
+// interpreter re-expands a macro on every call, so a sixteen-clause
+// match-case rebuilds its whole `cond` for every expression node.
+(defun c._content (type content)
+  (if (not (and (list? content) content))
+      (c._fail "unsupported expression" content)
+    (let ((head (car content)))
+      (cond
+        ((eq? head 'ident) (c._ident content))
+        ((eq? head 'literal) (c._literal-value type content))
+        ((eq? head 'op) (c._operator type (cadr content) (cddr content)))
+        ((eq? head 'call) (c._call (cadr content) (cdr (car (cddr content)))))
+        ((eq? head 'cons)
+         `(cons ,(c.expr (cadr content)) ,(c.expr (car (cddr content)))))
+        ((eq? head 'append)
+         `(append ,(c.expr (cadr content)) ,(c.expr (car (cddr content)))))
+        ((eq? head 'cache) (list 'quote (cache.value (cadr content))))
+        ((eq? head 'nil) ''())
+        ((eq? head 'expr) (c._content (cadr content) (car (cddr content))))
+        ((eq? head 'at) (c._content type (car (cddr content))))
+        ((eq? head 'parens) (c.expr (cadr content)))
+        ((eq? head 'cast) (c.expr (car (cddr content))))
+        ((eq? head 'lambda) (c._lambda-mark content))
+        ((eq? head 'getindex)
+         (list (c._getindex (c._receiver-kind (cadr content)))
+               (c.expr (cadr content)) (c.expr (car (cddr content)))))
+        ((eq? head 'index)
+         `(C.load (C.binop '<"+"> ,(c.expr (cadr content))
+                           ,(c.expr (car (cddr content))))))
+        ((eq? head 'postfix)
+         (c._postfix type (cadr content) (car (cddr content))))
+        ((eq? head 'array) '(Array.new))
+        ((eq? head 'composite) (c._empty (c._value-type type)))
+        (true (c._fail "unsupported expression" content))))))
+
+(defun c._ident (content)
+  (let ((binding (cadr content)))
+    (if (not (and (list? binding) binding (eq? (car binding) 'binding)))
+        (c._fail "unsupported identifier" content)
+      (let ((id (cadr binding)))
+        (if (c._cell? id) `(C.load (C.get ,id)) `(C.get ,id))))))
+
+// A Symbol literal carries its value; every other literal its spelling.
+(defun c._literal-value (type content)
+  (let ((ltype (cadr content)) (text (car (cddr content))))
+    (cond ((equal? ltype '("Symbol")) (list 'quote (car (cdr (cddr content)))))
+          ((c._string-type? ltype) (c._string text))
+          (true (c._number text)))))
+
+(defun c._lambda-mark (content)
+  (match-case content
+    ((lambda (params *params) (captures *held) ?body)
+     `(C.lambda ,(c._lambda-ids *params) ,(c._lambda-captures *held)
+                ,(c.expr ?body)))
+    ((lambda (params *params) ?body)
+     `(C.lambda ,(c._lambda-ids *params) () ,(c.expr ?body)))
+    (else (c._fail "unsupported lambda" content))))
+
+
+(defun c._frame-id (form)
+  (match-case form
+    ((expr ? (ident (binding ?id ?name)))
+     (if (c._cell? ?id) nil ?id))
+    (else nil)))
+
+(defun c._postfix (type operator target)
+  (let ((id (c._frame-id target)) (one (c._step-value type)))
+    (cond ((eq? operator '++) (c._bump id target one))
+          ((eq? operator '--) (c._bump id target (- 0 one)))
+          (true (c._fail "unsupported postfix operator" operator)))))
+
+(defun c._bump (id target step)
+  (if id `(C.bump ,id ,step) `(C.postinc ,(c.address target) ,step)))
+
+(defun c._unary (type spelling operand)
+  (cond ((equal? spelling "-") `(C.neg ,(c.expr operand)))
+        ((equal? spelling "+") (c.expr operand))
+        ((equal? spelling "!") `(C.not ,(c.expr operand)))
+        ((equal? spelling "~") `(C.bnot ,(c.expr operand)))
+        ((equal? spelling "&") (c.address operand))
+        ((equal? spelling "*") `(C.load ,(c.expr operand)))
+        ((equal? spelling "++") (c._step type operand (c._step-value type)))
+        ((equal? spelling "--")
+         (c._step type operand (- 0 (c._step-value type))))
+        (true (c._fail "unsupported unary operator" spelling))))
+
+(defun c._store-index (target value)
+  (match-case target
+    ((expr ? (getindex ?receiver ?key))
+     (list (c._setindex (c._receiver-kind ?receiver))
+           (c.expr ?receiver) (c.expr ?key) value))
+    (else (c._fail "not an indexed lvalue" target))))
+
+(defun c._step (type operand amount)
+  (let ((id (c._frame-id operand)))
+    (if id `(C.step ,id ,amount)
+        `(C.preinc ,(c.address operand) ,amount))))
+
+(defun c._operator (type operator operands)
+  (let ((spelling (str operator)) (arity (length operands)))
+    (cond ((= arity 1) (c._unary type spelling (car operands)))
+          ((= arity 3)
+           `(C.ternary ,(c.expr (car operands))
+                       ,(c.expr (cadr operands))
+                       ,(c.expr (car (cddr operands)))))
+          ((and (equal? spelling "=")
+                (match (car operands) '(expr ? (getindex ? ?))))
+           (c._store-index (car operands) (c.expr (cadr operands))))
+          ((equal? spelling "=")
+           (let ((id (c._frame-id (car operands))))
+             (if id `(C.set ,id ,(c.expr (cadr operands)))
+                 `(C.store ,(c.address (car operands))
+                           ,(c.expr (cadr operands))))))
+          ((equal? spelling "&&")
+           `(C.and ,(c.expr (car operands)) ,(c.expr (cadr operands))))
+          ((equal? spelling "||")
+           `(C.or ,(c.expr (car operands)) ,(c.expr (cadr operands))))
+          ((assoc spelling c._assign-ops)
+           (let ((id (c._frame-id (car operands)))
+                 (op (c._op (cadr (assoc spelling c._assign-ops))))
+                 (value (c.expr (cadr operands))))
+             (if id `(C.combine ,id ,op ,value)
+                 `(C.update ,(c.address (car operands)) ,op ,value))))
+          ((member spelling c._binary-ops)
+           `(C.binop ,(c._op spelling)
+                     ,(c.expr (car operands)) ,(c.expr (cadr operands))))
+          (true (c._fail "unsupported operator" operator)))))
+
+// --- declarations -------------------------------------------------------
+
+(defun c._lambda-ids (params)
+  (filter (lambda (v) v)
+    (map (lambda (p)
+           (match-case p
+             ((param ? (bind (binding ?id ?name) *)) ?id)
+             (else nil)))
+         params)))
+
+(defun c._lambda-captures (held)
+  (map (lambda (h)
+         (match-case h
+           ((capture (binding ?id ?name) ? ?source) (list ?id ?source))
+           (else (c._fail "unsupported lambda capture" h))))
+       held))
+
+(defun c._items (form)
+  (match-case form
+    ((composite (commas *items)) (map c.expr *items))
+    (else (c._fail "unsupported initializer" form))))
+
+(defun c._declarator (type declarator)
+  (match-case declarator
+    ((op = (bind (binding ?id ?name) ((dim ?count))) ?init)
+     `(C.declare-array ,?id ,(c.expr ?count)
+        (list ,@(c._items (car (cddr ?init))))))
+    ((bind (binding ?id ?name) ((dim ?count)))
+     `(C.declare-array ,?id ,(c.expr ?count) '()))
+    ((op = (bind (binding ?id ?name) *) ?init)
+     (c._define ?id (c._init type ?init)))
+    ((bind (binding ?id ?name) *)
+     (c._define ?id (let ((empty (c._empty (c._value-type type))))
+                      (if empty empty
+                          (if (c._float-type? type) 0.0 0)))))
+    (else (c._fail "unsupported declarator" declarator))))
+
+// An empty `{}` or `[]` carries no type of its own, so the declared type
+// picks the constructor.
+(defun c._init (type form)
+  (match-case form
+    ((expr ? (composite (commas))) (c._empty-of type))
+    ((expr ? (array)) (c._empty-of type))
+    ((expr ? (composite)) (c._empty-of type))
+    (else (c.expr form))))
+
+(defun c._empty-of (type)
+  (let ((empty (c._empty (c._value-type type))))
+    (if empty empty (c._fail "unsupported empty initializer" type))))
+
+(defun c._define (id value)
+  (if (c._cell? id) `(C.declare-cell ,id ,value) `(C.declare ,id ,value)))
+
+(defun c._declaration (type declarators)
+  `(C.block ,@(map (lambda (d) (c._declarator type d)) declarators)))
+
+// --- statements ---------------------------------------------------------
+
+(defun c._body (form)
+  (match-case form
+    ((block *items) `(C.block ,@(map c.stmnt *items)))
+    (else `(C.block ,(c.stmnt form)))))
+
+(defun c._clause (form) (if (null? form) 'nil `(C.expr ,(c.expr form))))
+(defun c._test (form) (if (null? form) 1 (c.expr form)))
+
+(defun c._for-init (form)
+  (cond ((null? form) 'nil)
+        ((eq? (car form) 'decl)
+         (match-case form
+           ((decl ?type (bindings *decls)) (c._declaration ?type *decls))
+           (else (c._fail "unsupported for initializer" form))))
+        (true `(C.expr ,(c.expr form)))))
+
+(defun c.stmnt (form)
+  (match-case form
+    ((at ? ?node) (c.stmnt ?node))
+    ((block *items) `(C.block ,@(map c.stmnt *items)))
+    ((declare ?type (bindings *decls)) (c._declaration ?type *decls))
+    ((stmnt ?e) `(C.expr ,(c.expr ?e)))
+    ((if ?test ?then) `(C.if ,(c.expr ?test) ,(c._body ?then) nil))
+    ((if ?test ?then ?else)
+     `(C.if ,(c.expr ?test) ,(c._body ?then) ,(c._body ?else)))
+    ((while ?test ?body) `(C.while ,(c.expr ?test) ,(c._body ?body)))
+    ((do ?body ?test) `(C.do-while ,(c._body ?body) ,(c.expr ?test)))
+    ((for ?init ?test ?step ?body)
+     `(C.for ,(c._for-init ?init) ,(c._test ?test) ,(c._clause ?step)
+             ,(c._body ?body)))
+    ((switch ?value (block *items)) (c._switch ?value *items))
+    ((return ? ?e) `(C.return ,(c.expr ?e)))
+    ((return ?) '(C.return 0))
+    ((break) '(C.break))
+    ((continue) '(C.continue))
+    ((empty) '(C.empty))
+    (else (c._fail "unsupported statement" form))))
+
+// A switch keeps its block flat: each label records where the statement
+// list resumes, and everything after it runs until a break.
+(defun c._strip (form)
+  (match-case form ((at ? ?node) ?node) (else form)))
+
+(defun c._labels (items index labels default)
+  (if (null? items) (list (reverse labels) default)
+      (let ((item (c._strip (car items))))
+        (match-case item
+          ((case ?value)
+           (c._labels (cdr items) (+ index 1)
+                      (cons `(list ,(c.expr ?value) ,index) labels)
+                      default))
+          ((default) (c._labels (cdr items) (+ index 1) labels index))
+          (else (c._labels (cdr items) (+ index 1) labels default))))))
+
+(defun c._switch-item (form)
+  (let ((item (c._strip form)))
+    (match-case item
+      ((case ?value) '(C.empty))
+      ((default) '(C.empty))
+      (else (c.stmnt form)))))
+
+(defun c._switch (value items)
+  (let ((found (c._labels items 0 '() nil)))
+    `(C.switch ,(c.expr value) (list ,@(car found)) ,(cadr found)
+       ,@(map c._switch-item items))))
+
+// --- functions ----------------------------------------------------------
+
+(defun c._param-ids (params)
+  (map (lambda (p)
+         (match-case p
+           ((param ? (bind (binding ?id ?name) *)) ?id)
+           ((param (void) ?) nil)
+           (else (c._fail "unsupported parameter" p))))
+       params))
+
+(defun c.translate (fn)
+  (match-case fn
+    ((function ?spec (bind (binding ?id ?name) ((fnmod (params *params))))
+       ?body)
+     (let ((ids (filter (lambda (v) v) (c._param-ids *params))))
+       (begin
+         (scan.run fn)
+         `(C.define ,?name
+            (lambda (. c._arguments)
+              (C.enter ',ids c._arguments
+                       (lambda () ,(c._body ?body))))))))
+    (else (c._fail "expected a function definition" fn))))
+
+// The translated procedure is installed for its name before the body is
+// translated, so a recursive call resolves and a decorator production
+// stays non-empty by returning the definition it was given.
+(defun c.install (fn)
+  (match-case fn
+    ((function ? (bind (binding ? ?name) ?) ?)
+     (begin (C.define ?name (lambda (. rest) 0))
+            (eval (c.translate fn))
+            (list fn)))
+    (else (c._fail "expected a function definition" fn))))
+
+// --- emitting a compile-time result back into the source -----------------
+
+(defun c._literal (value)
+  (if (equal? (type value) 'f64)
+      `(expr (double) (literal (double) ,(repr value)))
+      (x2c.literal.int value)))
+
+(defun c.evaluate (name . arguments)
+  (c._literal (C.call (_x2c.literal.string name) (map c._number arguments))))

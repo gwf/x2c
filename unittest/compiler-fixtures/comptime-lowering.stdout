@@ -1,0 +1,21 @@
+gcd          21
+sum          5050
+fib          144
+mutual       1 0
+bits         30
+ternary      10 -2
+area         28.274334
+globals      1 2
+pointer      12
+foreach      4
+is-list      1
+head         a
+len          3
+suffix       t_dot
+equal        1
+interpolate  slot-4
+map          ((1 1) (2 2))
+match-add    (sum 1 2)
+match-neg    (sub 0 7)
+match-miss   (other 5)
+binding      t

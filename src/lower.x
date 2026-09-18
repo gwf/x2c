@@ -834,10 +834,14 @@ static Var _lower_expression_stmnt(
         l, target, applied, _lower_expr(l, rhs), rest, k);
     }
   }
-  /* A call's result can be discarded: it runs for what it writes. */
-  match (e)
+  match (e) {
+    /* A call's result can be discarded: it runs for what it writes. */
     case %(expr ? (call ? ?)):
       return _lower_effect(l, _lower_expr(l, e), rest, k);
+    /* `(void) x;` marks a local used and does nothing. */
+    case %(expr (void) (cast (decl (void) ?) ?)):
+      return _lower_block(l, rest, k);
+  }
   return _lower_decline(l, "statement with no effect on a local");
 }
 

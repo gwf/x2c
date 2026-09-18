@@ -1,0 +1,10 @@
+ok   square_dot
+ok   poly_dot
+ok   energy_grad/x
+ok   energy_grad/y
+ok   horner_grad/x
+ok   horner_grad/y
+ok   guarded_grad/x
+ok   guarded_grad/y
+ok   mixed_dot
+all derivatives match
