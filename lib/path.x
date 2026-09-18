@@ -450,7 +450,7 @@ void Path.remove_tree(Path path) {
 void Path.copy_file(Path source, Path target) {
   File input = $auto(_open("Path.copy_file", source, "rb"));
   struct stat info, existing;
-  input.stat(&info);
+  if (input.stat(&info)) File.path_error("Path.copy_file", source, errno);
   if (!stat(target, &existing) && existing.st_dev == info.st_dev &&
       existing.st_ino == info.st_ino)
     return;

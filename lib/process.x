@@ -253,12 +253,13 @@ static void Job._start(Job job) {
     int link[2] = { -1, -1 };
     if (index < last) _pipe(link);
     {
-      defer _close(link[1]);
+      defer { _close(link[0]); _close(link[1]); }
       job._spawn(index, stage, previous, index < last ? link[1] : output,
                  errors);
+      _close(previous);
+      previous = link[0];
+      link[0] = -1;
     }
-    _close(previous);
-    previous = link[0];
     index++;
   }
   launched = 1;
