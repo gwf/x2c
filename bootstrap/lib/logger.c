@@ -20,6 +20,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 static String _3, _2, _1, _0;
 
 #include <assert.h>
@@ -1249,7 +1251,7 @@ LogSink Logger_add_memory_sink(Logger logger, List * destination){
 
 void * Scope_calloc(size_t, size_t);
 
-Pool String_pool_current(void);
+Pool Pool_current(void);
 
 Logger Logger_new(Symbol min_level){
   if(! _init_guard_) Logger_initialize();
@@ -1272,7 +1274,7 @@ Logger Logger_new(Symbol min_level){
     }
     Logger logger = Scope_calloc(1, sizeof(struct Logger));
     * logger =(struct Logger){
-      .min_level = min_level, .owner_scope = * Scope_top(), .pool = String_pool_current(), .storage = Scope_new_named("Logger")
+      .min_level = min_level, .owner_scope = * Scope_top(), .pool = Pool_current(), .storage = Scope_new_named("Logger")
     }
     ;
     {
@@ -1578,11 +1580,11 @@ Symbol Logger_error_handler(List errors, Var data){
 }
 }
 
-Pool String_pool_retain_named(const char *);
+Pool Pool_open_named(const char *);
 
 List Error_since(int);
 
-void String_pool_release(void);
+void Pool_close(void);
 
 void Error_trim(void *, int);
 
@@ -1604,7 +1606,7 @@ void Logger_shutdown(void){
     Logger active = global_logger;
     if(logger_error_handler){
       if(active){
-        String_pool_retain_named("Logger shutdown errors");
+        Pool_open_named("Logger shutdown errors");
         List pending = Error_since(logger_error_mark);
         {
           List entry;
@@ -1617,7 +1619,7 @@ void Logger_shutdown(void){
           }
 
         }
-        String_pool_release();
+        Pool_close();
       }
       Error_trim(logger_error_handler, Error_count());
       Error_pop(logger_error_handler);

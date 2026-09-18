@@ -21,13 +21,14 @@ After Phase 1:
 - `x2c translate --dump-transforms` shows the exception frame, the cleanup
   push and leave calls, the branch on `sigsetjmp`, and the cleanup statements
   spliced before each `return`, `break`, `continue`, and `goto` that leaves a
-  region. Today that structure exists only in the emitted text.
-- The two diagnostics the emitter reports, "goto target label is not defined
-  in this function" and "goto cannot enter or cross a protected cleanup
-  region" (`src/emit.x:1309`, `src/emit.x:1320`), come from the pass, at the
-  stage that owns diagnostics.
-- Generated C is byte-identical, which is the check that the move preserved
-  behavior.
+  region.
+- The two diagnostics "goto target label is not defined in this function" and
+  "goto cannot enter or cross a protected cleanup region"
+  (`src/cleanup.x:221`, `src/cleanup.x:231`) come from the pass, at the stage
+  that owns diagnostics.
+- Generated C changed. Byte-identical output was the intended check, and it
+  did not hold; the fixture and self-host comparisons carried the proof
+  instead.
 
 ## Not the 2026-07-26 experiment
 
@@ -44,33 +45,30 @@ scope.
 
 ## What is where today
 
-The emitter carries the whole lowering and a per-function analysis:
+`_rewrite_defer_list` and `_lower_defer_region` (`src/transform.x:1334-1366`)
+turn a `defer` statement into either a callable defer region or
+`(try body () finalizer)`, lifting the finalizer into a callback with a
+capture environment.
+
+`src/cleanup.x` then owns the analysis Phase 1 moved out of the emitter:
 
 | Piece | Location |
 | --- | --- |
-| Cleanup stack, barriers, exit splicing | `src/emit.x:860-925` |
-| `defer` region | `src/emit.x:930-960` |
-| `try`/`catch`/`finally`, frames, `sigsetjmp` | `src/emit.x:995-1080` |
-| Filtered catch arms | `src/emit.x:963-993` |
-| `goto` across regions, with two diagnostics | `src/emit.x:1302-1330` |
-| Volatile and label analysis (`_collect_function_state`) | `src/emit.x:395-445` |
-| Volatile declaration rewriting | `src/emit.x:1330-1365` |
+| Region stack, barriers, exit splicing | `src/cleanup.x:124-148` |
+| Label collection and `goto`, with two diagnostics | `src/cleanup.x:149-239` |
+| Volatile locals, including the pointee rule | `src/cleanup.x:387-553` |
+| Region rewriting and the per-function walk | `src/cleanup.x:566-702` |
 
-Five `Emitter` fields hold the state: `cleanups`, `break_stop`,
-`continue_stop`, `cleanup_path`, `label_paths`, and `volatile_names`
-(`src/emit.x:29-36`), referenced at 44 sites.
-
-Half of the work already lives in the transform stage. `_rewrite_defer_list`
-and `_lower_defer_region` (`src/transform.x:1380-1421`) turn a `defer`
-statement into either a callable defer region or `(try body () finalizer)`,
-lifting the finalizer into a callback with a capture environment. What
-remains in the emitter is lowering those two region forms. This plan
-finishes a move that is already half done rather than starting a new one.
+`src/emit.x` prints the region text the pass placed: the defer record and its
+push and leave (`src/emit.x:513-547`), and the exception frame, catch-site
+registration, and `sigsetjmp` branch (`src/emit.x:575-640`). No `Emitter`
+field carries cleanup state any more.
 
 ## Phase 1 - move the lowering, keep the output
 
-Add `src/cleanup.x`, a transform pass that runs after the existing defer
-rewrite and after lambda lifting, and consumes the two region forms:
+Done in 68eea0a. `src/cleanup.x` is a transform pass that runs after the
+existing defer rewrite and after lambda lifting, and consumes the two region
+forms:
 
 - `(defer body env callback records written)` becomes the environment
   declaration, the `X2CCleanup` record, `x2c_cleanup_push`, the body, and
@@ -118,15 +116,15 @@ building the rest.
 
 - The run-once claim on a finalizer, and the rule that a `raise` inside a
   finalizer reaches the enclosing frame rather than re-entering its own
-  (`src/emit.x:1005-1012`).
+  (now `_try_cleanup`, `src/cleanup.x:100`).
 - The order within one region: finalizers, then that region's leave
   statement, so an inner frame leaves before an outer `defer` runs
-  (`src/emit.x:888-892`).
+  (now `_unwind`, `src/cleanup.x:124`).
 - The absence of labels in the trailer, which lets an enclosing finalizer
   copy a block into several exits.
-- The documented owner. `agents/x2c-philosophy.md:631-637` says the emitter
-  owns the volatile rule. Phase 1 makes that inaccurate, so the section moves
-  with the code.
+- The documented owner. `agents/x2c-philosophy.md:628` now names
+  `src/cleanup.x` as the owner of the volatile rule; the section moved with
+  the code.
 - Source-map origins. Emitted cleanup inherits the origin of the statement it
   came from; the pass must attach origins explicitly, or `--source-map`
   builds drift. Check a `-g --source-map` build's line table before and
@@ -165,8 +163,8 @@ the risk to weigh.
   this area landed on 2026-09-15 for `$let` inside `try`; keep that fixture
   in view.
 - **Catch arms.** Each arm closes the borrowed error record through the same
-  cleanup stack. The arm bodies are emitted inside the region today
-  (`src/emit.x:963-993`); the pass has to preserve that nesting.
+  cleanup stack. The arm bodies are emitted inside the region
+  (`src/emit.x:575-640`); the pass has to preserve that nesting.
 - **Fixed-point interaction.** A pass that rewrites `return` inside regions
   must not re-walk its own output.
 - **Diagnostics position.** The two `goto` errors currently report with the

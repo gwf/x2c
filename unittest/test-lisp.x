@@ -692,6 +692,11 @@ static void lisp_match_case_dispatch(void) {
   EXPECT_VAR_EQ(
     _ev(lisp, "(match-case '(dim 4 (int)) ((dim ? *rest) *rest))"),
     %((int)).var());
+  // A binder too long for a compact Symbol reads as an lsym and still binds.
+  EXPECT_INT_EQ(Var.integer(_ev(lisp,
+    "(match-case '(tag 7) ((tag ?abcdefghij) ?abcdefghij) (else 0))")), 7);
+  EXPECT_VAR_EQ(_ev(lisp, "(binder? '?abcdefghij)"), Symbol.var(<true>));
+  EXPECT_VAR_EQ(_ev(lisp, "(binder? '?)"), nil.var());
   // A pattern describes a List shape, so an atom subject falls through.
   EXPECT_VAR_EQ(_ev(lisp, "(match 'atom '(?a ?b))"), nil.var());
   EXPECT_INT_EQ(Var.integer(

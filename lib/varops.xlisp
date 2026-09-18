@@ -30,9 +30,7 @@
           (expr (long double) (literal (long double) "0.0L")) (() ()))))
 
 (defun native.update.row (id)
-  (assoc
-    (car (cdr (cdr (cdr (car (cddr id))))))
-    native.update.rows))
+  (assoc (car (cdddr (caddr id))) native.update.rows))
 
 (defun native.update.tag (id) (cadr (native.update.row id)))
 (defun native.update.boxer (id) (car (cddr (native.update.row id))))
@@ -41,12 +39,9 @@
 (defun native.update.policy (id)
   (cadr (cddr (cddr (native.update.row id)))))
 
-(defun native.update.cast (type value)
-  `(expr () (cast (decl ,type (bindings (bind () ()))) ,value)))
-
 (defun native.update.box (id value) (let*
   ((policy (native.update.policy id)) (cast (car policy))
-   (argument (if cast (native.update.cast cast value) value)))
+   (argument (if cast (x2c.expr.cast cast value) value)))
   (x2c.expr.call
     (x2c.expr.ident (native.update.boxer id)) argument)))
 
@@ -54,4 +49,4 @@
   ((policy (native.update.policy id)) (cast (cadr policy))
    (decoded (x2c.expr.call
      (x2c.expr.ident (native.update.decoder id)) value)))
-  (if cast (native.update.cast cast decoded) decoded)))
+  (if cast (x2c.expr.cast cast decoded) decoded)))

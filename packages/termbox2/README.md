@@ -25,7 +25,7 @@ int main(void) {
 
 termbox2 is a single header, so `src/termbox2.c` instantiates it once and
 `builds/libtermbox2.a` carries both it and the client. The package links no
-external library, and `builds/termbox2.link` is empty.
+external library, and `builds/termbox2.native.rsp` is empty.
 
 ## Drawing
 

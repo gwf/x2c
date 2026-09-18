@@ -1,7 +1,7 @@
 unittest/compiler-fixtures/class-repr-signature.x:1:1: protocol: 'Wrong_repr' has a signature incompatible with Var(Wrong) member 'repr'
   class Wrong struct { int x; } *;
   ^^^^^
-  note: protocol member 'repr' declared by Var(Wrong) at lib/protocols.x:48:1 conflicting definition 'Wrong_repr': ((func (("Wrong"))) int) expected: ((func (("Wrong"))) "String")
+  note: protocol member 'repr' declared by Var(Wrong) at lib/protocols.x:<line>:<column> conflicting definition 'Wrong_repr': ((func (("Wrong"))) int) expected: ((func (("Wrong"))) "String")
 
 unittest/compiler-fixtures/class-repr-signature.x:1:1: type: type ("Wrong") has no method repr
   class Wrong struct { int x; } *;

@@ -17,8 +17,9 @@ guide: docs/guide/packages.html
 
 ## Bring a real terminal.
 
-The termbox2 package needs its own dependency preparation. Package builds are
-currently tested on macOS. `./configure --packages termbox2` reports missing
+The termbox2 package needs its own dependency preparation, and its release
+bundles are built on macOS and Linux, on both arm64 and x86_64.
+`./configure --packages termbox2` reports missing
 prerequisites; it does not install them. The build then prepares the pinned
 dependency as needed. Interactive play does not require Expect.
 

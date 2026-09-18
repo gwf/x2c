@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 #include <string.h>
 #include "symbol.h"
 #include "map.h"

@@ -2,6 +2,8 @@
 
 #include "frontend.h"
 
+#include "exception.h"
+
 static List _15, _14, _9;
 
 static String _24, _23, _22, _21, _20, _19, _17, _16, _12, _10, _7, _6, _4, _3, _2, _1, _0;

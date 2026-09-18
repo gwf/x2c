@@ -92,10 +92,10 @@ static Tensor _apply(List layers, Tensor x, int native) =>
   native ? _forward(layers, x) : _forward_explicit(layers, x);
 
 static double _evaluate(List layers, Tensor x, Tensor y, int native) {
-  Scope.retain();
-  defer Scope.release();
-  Torch.inference_mode();
-  return Tensor.mse_loss(_apply(layers, x, native), y).item().double();
+  $scope() {
+    Torch.inference_mode();
+    return Tensor.mse_loss(_apply(layers, x, native), y).item().double();
+  }
 }
 
 /* One training step is one scope: the forward's temporaries, the graph,
@@ -103,18 +103,18 @@ static double _evaluate(List layers, Tensor x, Tensor y, int native) {
    live in the caller's scope. */
 static double _step(List layers, Optimizer adam, Tensor x, Tensor y,
                     Tensor batches, long row, int native, int want_loss) {
-  Scope.retain();
-  defer Scope.release();
-  Tensor pick = batches.select(0, row);
-  adam.zero_grad();
-  Tensor error = Tensor.mse_loss(_apply(layers, x.index_select(0, pick),
-                                        native),
-                                 y.index_select(0, pick));
-  error.backward();
-  adam.step();
-  /* Reading the loss costs a synchronization, so a timed step never asks
-     for it and returns nothing. */
-  return want_loss ? error.item().double() : 0.0;
+  $scope() {
+    Tensor pick = batches.select(0, row);
+    adam.zero_grad();
+    Tensor error = Tensor.mse_loss(_apply(layers, x.index_select(0, pick),
+                                          native),
+                                   y.index_select(0, pick));
+    error.backward();
+    adam.step();
+    /* Reading the loss costs a synchronization, so a timed step never asks
+       for it and returns nothing. */
+    return want_loss ? error.item().double() : 0.0;
+  }
 }
 
 static void _train_logged(List layers, Optimizer adam, Tensor x, Tensor y,
@@ -142,13 +142,13 @@ static void _train(List layers, Optimizer adam, Tensor x, Tensor y,
    beat. A row of ones times the mean row broadcasts without relying on
    an implicit shape rule the two languages might differ on. */
 static double _mean_baseline(Tensor y_train, Tensor y_val) {
-  Scope.retain();
-  defer Scope.release();
-  Torch.inference_mode();
-  Tensor mean = y_train.mean_dim(0, 1);
-  long rows = y_val.size(0);
-  Tensor column = Tensor.ones(%($rows 1), XT_FLOAT32);
-  return Tensor.mse_loss(column @ mean, y_val).item().double();
+  $scope() {
+    Torch.inference_mode();
+    Tensor mean = y_train.mean_dim(0, 1);
+    long rows = y_val.size(0);
+    Tensor column = Tensor.ones(%($rows 1), XT_FLOAT32);
+    return Tensor.mse_loss(column @ mean, y_val).item().double();
+  }
 }
 
 static void _record_profile(void) {
@@ -214,16 +214,16 @@ static int _check(String artifacts, String out) {
   Bench.record("trained_val_mse",
                _evaluate(trained_layers, x_val, y_val, 1));
   {
-    Scope.retain();
-    defer Scope.release();
-    Torch.inference_mode();
-    Map final = {};
-    foreach (List pair, trained.named_parameters()) {
-      String name = pair[0].str();
-      final[%"final.$name"] = pair[1].tensor().clone();
+    $scope() {
+      Torch.inference_mode();
+      Map final = {};
+      foreach (List pair, trained.named_parameters()) {
+        String name = pair[0].str();
+        final[%"final.$name"] = pair[1].tensor().clone();
+      }
+      final["predictions"] = _forward(trained_layers, x_val).clone();
+      Checkpoint.save(final, %"$out/tabular-x2c-final.pt");
     }
-    final["predictions"] = _forward(trained_layers, x_val).clone();
-    Checkpoint.save(final, %"$out/tabular-x2c-final.pt");
   }
 
   /* The same training through the documented explicit forward. */
@@ -260,11 +260,11 @@ static int _check(String artifacts, String out) {
     long count = requests.size(0);
     double total = 0.0;
     for (long index = 0; index < count; index++) {
-      Scope.retain();
-      defer Scope.release();
-      Torch.inference_mode();
-      Tensor batch = x_val.index_select(0, requests.select(0, index));
-      total += _forward(trained_layers, batch).abs().sum().item().double();
+      $scope() {
+        Torch.inference_mode();
+        Tensor batch = x_val.index_select(0, requests.select(0, index));
+        total += _forward(trained_layers, batch).abs().sum().item().double();
+      }
     }
     char name[32];
     snprintf(name, sizeof(name), "predict%d_checksum", size);
@@ -287,21 +287,21 @@ static int _time_predict(String artifacts, String out, int size,
   List layers = _layers(model);
 
   for (int index = 0; index < WARMUP; index++) {
-    Scope.retain();
-    defer Scope.release();
-    Torch.inference_mode();
-    (void) _forward(layers,
-                    x_val.index_select(0, rows.select(0, index % available)));
+    $scope() {
+      Torch.inference_mode();
+      Tensor batch = rows.select(0, index % available);
+      (void) _forward(layers, x_val.index_select(0, batch));
+    }
   }
 
   double checksum = 0.0;
   double start = Bench.now();
   for (int index = 0; index < requests; index++) {
-    Scope.retain();
-    defer Scope.release();
-    Torch.inference_mode();
-    Tensor batch = x_val.index_select(0, rows.select(0, index % available));
-    checksum += _forward(layers, batch).abs().sum().item().double();
+    $scope() {
+      Torch.inference_mode();
+      Tensor batch = x_val.index_select(0, rows.select(0, index % available));
+      checksum += _forward(layers, batch).abs().sum().item().double();
+    }
   }
   double seconds = Bench.now() - start;
   Bench.record_int("requests", requests);
@@ -474,7 +474,7 @@ static void _memory_churn(String artifacts, Map data, int steps,
   Bench.sample("setup", 0);
   Bench.record_text("churn_lifetime", lifetime);
   Bench.record_int("churn_pool_depth",
-                   Pool.stats(String.pool_current()).depth);
+                   Pool.stats(Pool.current()).depth);
   for (int step = -WARMUP; step < steps; step++) {
     if (step == 0) {
       values_sum = 0;
@@ -482,8 +482,8 @@ static void _memory_churn(String artifacts, Map data, int steps,
       Bench.sample("warm", 0);
     }
     {
-      if (pooled) String.pool_retain();
-      defer { if (pooled) String.pool_release(); }
+      if (pooled) Pool.open();
+      defer { if (pooled) Pool.close(); }
       Scope.retain();
       defer Scope.release();
       Torch.inference_mode();
@@ -510,7 +510,7 @@ static void _memory_churn(String artifacts, Map data, int steps,
       Bench.sample("request", step + 1);
   }
   Bench.record_int("churn_final_pool_depth",
-                   Pool.stats(String.pool_current()).depth);
+                   Pool.stats(Pool.current()).depth);
   Bench.record_int("churn_requests", steps);
   Bench.record("churn_values_sum", values_sum);
   Bench.record_int("churn_indices_sum", indices_sum);
@@ -570,10 +570,10 @@ static void _memory_lifetime(String artifacts, String out, Map data,
       requests += 20;
       if (requests % 100 == 0) {
         try {
-          Scope.retain();
-          defer Scope.release();
-          (void) _forward(reloaded_layers,
-                          Tensor.randn(%(4 129), XT_FLOAT32));
+          $scope() {
+            (void) _forward(reloaded_layers,
+                            Tensor.randn(%(4 129), XT_FLOAT32));
+          }
         }
         catch %(bad-state (library "torch") *detail): {
           Bench.record_int("caught_bad_shape", 1);
@@ -581,10 +581,10 @@ static void _memory_lifetime(String artifacts, String out, Map data,
         /* Valid work still runs, and the mode is what it was. */
         reloaded.eval();
         {
-          Scope.retain();
-          defer Scope.release();
-          Torch.inference_mode();
-          (void) _forward(reloaded_layers, x_val.narrow(0, 0, 4));
+          $scope() {
+            Torch.inference_mode();
+            (void) _forward(reloaded_layers, x_val.narrow(0, 0, 4));
+          }
         }
         reloaded.train();
         Bench.record_int("mode_after_error", reloaded.is_training());
@@ -692,10 +692,10 @@ static int _diagnose(String artifacts, String out, int native, int count) {
    variation is whether the request's canonical message changes. */
 static void _failed_request(List layers, int request, int unique) {
   try {
-    Scope.retain();
-    defer Scope.release();
-    Torch.inference_mode();
-    (void) _forward(layers, Tensor.zeros(%(4 129), XT_FLOAT32));
+    $scope() {
+      Torch.inference_mode();
+      (void) _forward(layers, Tensor.zeros(%(4 129), XT_FLOAT32));
+    }
   }
   catch %(bad-state (library "torch") *detail): {
     String message = unique ? %"request $request" : "request";
@@ -756,42 +756,42 @@ static int _memory(String artifacts, String out, int profile, int steps,
 #pragma public
 
 int main(int argc, char **argv) {
-  Scope.retain();
-  defer Scope.release();
-  if (argc < 4) {
-    fprintf(stderr, "usage: tabular <check|time|memory|trace> <artifacts>"
-                    " <out>"
-                    " [variant] [count]\n");
+  $scope() {
+    if (argc < 4) {
+      fprintf(stderr, "usage: tabular <check|time|memory|trace> <artifacts>"
+                      " <out>"
+                      " [variant] [count]\n");
+      return 2;
+    }
+    const char *threads = getenv("X2C_TORCH_THREADS");
+    Torch.set_num_threads(threads ? atoi(threads) : 1);
+    /* Inter-op threads are fixed before any work, so the only parallelism
+       either language uses is the intra-op pool the runner sets. */
+    Torch.set_num_interop_threads(1);
+    Torch.manual_seed(0);
+    Bench.begin(4096);
+    Bench.record_text("language", "x2c");
+    Bench.record_text("torch_version", Torch.version());
+    _record_profile();
+    Bench.record_int("threads", Torch.num_threads());
+    Bench.record_int("interop_threads", Torch.num_interop_threads());
+
+    String artifacts = String.new(argv[2]), out = String.new(argv[3]);
+    if (!strcmp(argv[1], "startup")) return 0;
+    if (!strcmp(argv[1], "diagnose"))
+      return _diagnose(artifacts, out, !strcmp(argv[4], "native"),
+                       atoi(argv[5]));
+    if (!strcmp(argv[1], "errors"))
+      return _errors(artifacts, atoi(argv[5]), !strcmp(argv[4], "unique"));
+    if (!strcmp(argv[1], "check")) return _check(artifacts, out);
+    if (!strcmp(argv[1], "time"))
+      return _time(artifacts, out, String.new(argv[4]), atoi(argv[5]));
+    if (!strcmp(argv[1], "trace"))
+      return _trace(artifacts, out, String.new(argv[4]), atoi(argv[5]));
+    if (!strcmp(argv[1], "memory"))
+      return _memory(artifacts, out, atoi(argv[4]), atoi(argv[5]),
+                     argc > 6 ? String.new(argv[6]) : "ordinary");
+    fprintf(stderr, "tabular: no mode %s\n", argv[1]);
     return 2;
   }
-  const char *threads = getenv("X2C_TORCH_THREADS");
-  Torch.set_num_threads(threads ? atoi(threads) : 1);
-  /* Inter-op threads are fixed before any work, so the only parallelism
-     either language uses is the intra-op pool the runner sets. */
-  Torch.set_num_interop_threads(1);
-  Torch.manual_seed(0);
-  Bench.begin(4096);
-  Bench.record_text("language", "x2c");
-  Bench.record_text("torch_version", Torch.version());
-  _record_profile();
-  Bench.record_int("threads", Torch.num_threads());
-  Bench.record_int("interop_threads", Torch.num_interop_threads());
-
-  String artifacts = String.new(argv[2]), out = String.new(argv[3]);
-  if (!strcmp(argv[1], "startup")) return 0;
-  if (!strcmp(argv[1], "diagnose"))
-    return _diagnose(artifacts, out, !strcmp(argv[4], "native"),
-                     atoi(argv[5]));
-  if (!strcmp(argv[1], "errors"))
-    return _errors(artifacts, atoi(argv[5]), !strcmp(argv[4], "unique"));
-  if (!strcmp(argv[1], "check")) return _check(artifacts, out);
-  if (!strcmp(argv[1], "time"))
-    return _time(artifacts, out, String.new(argv[4]), atoi(argv[5]));
-  if (!strcmp(argv[1], "trace"))
-    return _trace(artifacts, out, String.new(argv[4]), atoi(argv[5]));
-  if (!strcmp(argv[1], "memory"))
-    return _memory(artifacts, out, atoi(argv[4]), atoi(argv[5]),
-                   argc > 6 ? String.new(argv[6]) : "ordinary");
-  fprintf(stderr, "tabular: no mode %s\n", argv[1]);
-  return 2;
 }

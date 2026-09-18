@@ -564,8 +564,8 @@ static void array_sort_callbacks_keep_ties_and_identity(void) {
 
 static void array_sort_by_releases_scratch(void) {
   $test.scoped();
-  Pool pool = String.pool_retain();
-  defer String.pool_release();
+  Pool pool = Pool.open();
+  defer Pool.close();
   Array values = [3, 2, 1];
   Func key = %!(int value) => value;
   FuncArg arguments[1] = { FuncArg.value(42) };

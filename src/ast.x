@@ -194,7 +194,7 @@ static int _raise_never_returns(Ast node) {
   if (code_ast is not <list>) return 0;
   match (code_ast)
     case %(expr ("Symbol") (literal ("Symbol") ? ?code)):
-      return nonreturning_error_causes.contains(code);
+      return code in nonreturning_error_causes;
   return 0;
 }
 

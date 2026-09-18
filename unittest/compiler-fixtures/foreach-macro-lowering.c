@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 static List _21, _20, _8, _7, _6;
 
 static String _24, _23, _22, _18, _16, _15, _14, _13, _12, _11, _10, _9, _2, _1, _0;

@@ -3,14 +3,18 @@
 # This file defines compiler flags and build settings based on the current mode
 ###############################################################################
 
-# Default to debug only when the tracked build-mode file is unavailable.
+# etc/build-mode is the tracked default. A local switch writes
+# etc/build-mode.local, which is untracked and wins here, so `make debug` does
+# not dirty the worktree. Default to debug when neither file is available.
 # Resolve repository root relative to this configuration file so includes work
 # regardless of the invoking Makefile's location.
 BUILD_CONFIG_MK := $(abspath $(lastword $(MAKEFILE_LIST)))
 BUILD_CONFIG_DIR := $(dir $(BUILD_CONFIG_MK))
 REPO_ROOT := $(abspath $(BUILD_CONFIG_DIR)/..)
 BUILD_MODE_FILE := $(REPO_ROOT)/etc/build-mode
-BUILD_MODE ?= $(shell cat $(BUILD_MODE_FILE) 2>/dev/null || echo debug)
+BUILD_MODE_LOCAL_FILE := $(REPO_ROOT)/etc/build-mode.local
+BUILD_MODE ?= $(shell cat $(BUILD_MODE_LOCAL_FILE) 2>/dev/null || \
+    cat $(BUILD_MODE_FILE) 2>/dev/null || echo debug)
 BUILD_LTO ?= 0
 
 # Define compiler flags for each mode

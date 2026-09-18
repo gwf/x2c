@@ -118,7 +118,7 @@ Atom exact = Atom.intern("VeryLongIdentifierName");
 Atom again = Atom.intern(String.new("VeryLongIdentifierName"));
 Atom lower = Atom.intern("verylongidentifiername");
 
-printf("%s\n", exact.str());        /* VeryLongIdentifierName */
+printf("%s\n", exact);              /* VeryLongIdentifierName */
 printf("same value: %d\n", exact == again);
 printf("case matters: %d\n", exact == lower);
 ```
@@ -281,12 +281,12 @@ intern inside a child string pool and the atom must outlive it, promote the
 spelling first:
 
 ```x2c
-String.pool_retain_named("scratch-names");
+Pool.open_named("scratch-names");
 Atom row = Atom.intern(String.printf("row-%d", 314159));
 String.promote(row.str());
-String.pool_release();
+Pool.close();
 
-printf("%s\n", row.str());
+printf("%s\n", row);
 ```
 
 `List.promote` promotes the long atoms inside a list, so a promoted list

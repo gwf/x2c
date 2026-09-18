@@ -107,10 +107,12 @@ For a protocol and participant that are both private, use
 inferred, but the explicit spelling makes the fully private relationship
 clear at the declaration.
 
-Type's handwritten inline List methods supply its complete static and boxed
-behavior, including `contains` and `getindex`. A replacement must preserve
-both ordinary calls and indexing; forwarding methods alone do not establish
-that the compiler's indexing path can consume a separate protocol.
+`Type` is a `List` typedef and inherits List's methods through typedef method
+inheritance; `src/type.x` keeps only the three crossings `Var.type`,
+`Type.list`, and `List.type`, and its own type-shape operations. A
+replacement must preserve both ordinary calls and indexing; forwarding
+methods alone do not establish that the compiler's indexing path can consume
+a separate protocol.
 
 Prefer an explicit adapter when the source and target contracts genuinely
 differ. Hiding that translation in a large macro makes the boundary harder to
@@ -130,14 +132,14 @@ campaign.
 
 Current proven shapes include:
 
-- Uniform method or function families in `lib/logger.x:895-900` and `933-938`
-  and in `lib/common.x:479-487`. Names and types vary; behavior does not.
+- Uniform method or function families in `lib/logger.x:733-738` and `775-780`
+  and in `lib/common.x:494-505`. Names and types vary; behavior does not.
 - Private pointer conversion pairs in `lib/var-adapters.xmacro`. The tagged
   form preserves `Var.new` and `Var.pointer`; the raw form preserves the
   direct `p64` store and load used by iterator callbacks.
-- Uniform selector or native adapter families in `lib/list.x:331` and
-  `lib/varops.x:60`. Each invocation supplies the facts that differ.
-- Local resource setup in `lib/match.x:164` and `lib/match.x:173`. The macro
+- The native adapter family in `lib/varops.x:72-86`. Each invocation supplies
+  the facts that differ.
+- Local resource setup in `lib/match.x:296` and `lib/match.x:304`. The macro
   hides stack-storage mechanics while release and fallback policy stay
   visible.
 - Test registration in `unittest/test-macros.xmacro:1`. The macro removes a
@@ -203,8 +205,9 @@ clearest possible ledger: the enum itself.
 
 Do not make a reader reverse-engineer public function names, C types, or
 failure modes from clever Lisp. The native update macro in
-`lib/varops.x:652` explicitly receives both the native type and public
-function name. That repetition is useful documentation at the call site.
+`lib/varops.x:41` explicitly receives both the native type and public
+function name at each invocation. That repetition is useful documentation at
+the call site.
 
 Generated public declarations also have repository-wide consequences. Check
 symbol collection, generated headers, the module catalog, and documentation
@@ -244,8 +247,8 @@ useful source documentation.
 
 Use a decorator when one existing expression, declaration, function,
 statement, field, or unit should remain recognizable but gain an orthogonal
-wrapper. The checked examples in `examples/decorators.x` show tracing and
-parameter preconditions; the compiler fixtures under
+wrapper. The checked examples in `examples/magic/decorators.x` show tracing
+and parameter preconditions; the compiler fixtures under
 `unittest/compiler-fixtures/macro-decorator-*` own the exact supported
 boundary.
 
@@ -322,8 +325,9 @@ repeats its exact technical reason.
 `$error.fallback` is defined for user-defined resumable causes; a shared cause
 must not use it because shared causes never return to the raise.
 
-The filesystem helpers `_build_mkdirs` and `_build_remove_tree` in
-`src/build.x` also serve `src/bootstrap.x`. The Lisp evaluator's local target
+`src/build.x` and `src/bootstrap.x` both reach the runtime's own
+`Path.make_dirs` and `Path.remove_tree` rather than keeping compiler-local
+filesystem helpers. The Lisp evaluator's local target
 rows in `lib/lisp.x` produce the native-target Map. Use macros, compile-time
 Lisp, or ordinary helpers according to which form leaves the facts easiest
 to inspect.
@@ -510,8 +514,10 @@ Status: rejected
 Checked: 2026-07-30 at `9d762c97`
 Owner: `src/type.x` and protocol generated-member ownership
 
-Problem: `Type` is a `List` typedef but repeats ten inline forwarding methods
-so its static operators and `Var(Type)` descriptor retain List semantics. A
+Problem, as it stood at the checked revision: `Type` was a `List` typedef that
+repeated ten inline forwarding methods so its static operators and `Var(Type)`
+descriptor retained List semantics. `src/type.x` has since dropped them and
+keeps three crossings; the rejection below is recorded as it was measured. A
 native `protocol List(T)` can emit checked `Type_*` aliases to the existing
 `List_*` owners, including the early `Type_getindex` binding required by the
 postfix parser, with no call overhead. The generated-owner selector considers
@@ -553,21 +559,24 @@ $(defun var.tag.symbol-expr (value)
 Adapter/macro/decorator form: `x2c.literal.int`, `x2c.literal.symbol`,
 `x2c.expr.ident`, `x2c.expr.index`, `x2c.expr.call`, and
 `x2c.expr.composite`, all taking expression ASTs as operands so a generator
-composes them. Cast construction remains private to its shipped consumer.
+composes them.
 
 The retained constructors have shipped callers or a concrete documentation
-example. Cast, named-call, runtime-List, and statement construction stay
-private to their consumers rather than enlarging the public SDK. A wrong
-literal argument reports `x2c.literal.int requires a number` instead of
-failing later inside an expansion.
+example. Statement, declaration, and type construction joined them later:
+`x2c.stmnt.make`, `x2c.stmnt.return`, `x2c.block.make`, `x2c.decl.make`,
+`x2c.param.make`, and `x2c.expr.cast` are public in
+`etc/compiler-sdk.xlisp` and documented in
+[the language reference](../docs/src/reference/language.md). A wrong literal
+argument reports `x2c.literal.int requires a number` instead of failing later
+inside an expansion.
 
 Proof: generated `.h` and `.c` byte-identical for `lib/var.x` and
 `lib/varops.x` before and after adoption; `make precommit` and `make check`.
 
-Limits or counterexample: expression nodes only. Statement and declaration
-shapes — `switch`, `case`, `return`, and the `(op & ...)` selector in
-`var.tag.decode-inner` — are still hand-written quasiquotes. Add constructors
-for those when a second generator needs the same one, not before.
+Limits or counterexample: the shapes without a constructor, `switch`, `case`,
+and the `(op & ...)` selector in `var.tag.decode-inner`, are still
+hand-written quasiquotes. Add constructors for those when a second generator
+needs the same one, not before.
 
 Language gap, if any: none; this is an SDK addition, not a compiler change.
 

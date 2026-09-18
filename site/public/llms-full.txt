@@ -198,7 +198,8 @@ need the information it omits.
 
 ## Choose who owns the native build
 
-The driver has four commands:
+Four of the driver's commands decide who owns the native build; the
+[CLI reference](https://x2c-lang.dev/docs/reference/cli.html) lists the rest:
 
 ```sh
 x2c translate --out-dir generated src/main.x
@@ -408,7 +409,7 @@ int main(void) {
 Point point = Point.new(3, 4);
 Map labels = $auto({});
 labels[point] = "origin";
-printf("%s: %s\n", point.repr(), labels[Point.new(3, 4)].str());
+printf("%s: %s\n", point.repr(), labels[Point.new(3, 4)]);
   return 0;
 }
 ```
@@ -544,7 +545,7 @@ Point point = Point.new(3, 4);
 Var first = point, second = Point.new(3, 4);
 Map labels = $auto({});
 labels[first] = "origin";
-printf("%s\n", labels[second].str());
+printf("%s\n", labels[second]);
   return second in labels ? 0 : 1;
 }
 ```
@@ -618,6 +619,22 @@ for (int i = 0; i < 3; i++) $scope() { Scope.malloc(8); }
   return 0;
 }
 ```
+
+Place it before a file-scope function definition to retain one region around
+that whole function, without indenting the body a further level:
+
+```x2c
+$scope() static int distinct(List words) {
+  Map seen = {};
+  foreach (String word, words) seen[word] = 1;
+  return seen.len();
+}
+int main(void) { return distinct(%("ab" "cd" "ab")) == 2 ? 0 : 1; }
+```
+
+The `Map` belongs to the retained region, and the region closes on every
+exit, so the `return` releases it. `$lock` and `$let` decorate a function
+the same way.
 
 With one Scope-pointer argument, `$scope` evaluates the argument once, pushes
 that destination, and restores the previous destination on exit:
@@ -858,6 +875,9 @@ int main(void) {
   return total == 499500 ? 0 : 1;
 }
 ```
+
+The report runs from a `defer`, so decorating a whole function body still
+reports when that body returns or a cause transfers out of it.
 
 ## A complete resource-using program
 
@@ -1317,8 +1337,10 @@ receiver's address is passed, so `rec.bump(4)` reaches
 a pointer to the declared parameter is one level too far and is a type error;
 write `(*pointer).method()`. Normal pointer
 conversion rules still apply, including preservation of `const` and other
-qualifiers. Method syntax does not make every value dynamically dispatchable;
-only registered callbacks define custom behavior.
+qualifiers. A qualifier on the receiver itself does not change which methods
+and operators the type has, so a `const String` answers `len()` and `+` the
+way an unqualified one does. Method syntax does not make every value
+dynamically dispatchable; only registered callbacks define custom behavior.
 
 A method may use `Self` in its result and parameter types when it promises to
 preserve the receiver's static typedef:
@@ -1361,8 +1383,16 @@ conversion, cleanup, and lifetime rules as `return expression;`. The semicolon
 terminates the body; nested compound literals, collection literals, and lambda
 bodies do not terminate it.
 
-An expression is required; `=>;` is invalid. The rules for returning a value
-from a `void` function are unchanged. Use a compound body when a function needs
+A `void` function has no value to return, so its expression body is the
+shorthand for a compound body containing one expression statement:
+
+```x2c
+typedef struct Counter { int value; } Counter;
+static void Counter.step(Counter *self) => self.value++;
+```
+
+An expression is required; `=>;` is invalid. The rules for writing `return` in
+a `void` function are unchanged. Use a compound body when a function needs
 declarations, several statements, or a comment inside the body.
 
 ### Reference parameters
@@ -2065,6 +2095,31 @@ appears where one statement is required, its production must likewise yield
 exactly one statement. A compound statement may contain the captured target
 plus any additional block items without requiring braces at the invocation.
 
+A `Statement` or `Block` decorator standing before a file-scope function
+definition decorates that function's body. The body is parsed as usual, the
+decorator's production replaces it, and the same function is rebuilt around
+the result, so parameters resolve inside the produced items and a `return`
+from within the body runs the decorator's deferred cleanup before leaving:
+
+```x2c
+#include "x2c.x"
+$scope() static int total(List values, int bias) {
+  int sum = bias;
+  foreach (Var value, values) sum += value.int();
+  return sum;
+}
+int main(void) { return total(%(1 2 3), 10) == 16 ? 0 : 1; }
+```
+
+An expression body works the same way. A decorator written this way before a
+declaration that is not a function definition is rejected.
+
+Block items the production places *after* the captured target are ordinary
+statements, so a body that returns or that a cause transfers out of never
+reaches them. A decorator with work to do once the body is finished puts that
+work in a `defer` written before the target; `$scope`, `$lock`, and `$time`
+are all written this way.
+
 A `.x` file may give a visible macro or decorator an identifier spelling:
 
 ```text
@@ -2309,7 +2364,25 @@ The compiler supplies these contextual Lisp operations:
 (x2c.type.tag-name name)
 (x2c.type.reverse-name base participant)
 (x2c.type.parts type)
+(x2c.type.parameters type)
+(x2c.type.return type)
+(x2c.type.element type)
+(x2c.type.integral? type)
+(x2c.type.pointer? type)
+(x2c.protocol.member participant base member)
+(x2c.literal.value literal)
+(x2c.type.members type)
+(x2c.diagnostic.warn message notes)
+(x2c.stmnt.make expression)
+(x2c.stmnt.return expression)
+(x2c.block.make items)
+(x2c.decl.make type name initializer)
+(x2c.param.make type name)
+(x2c.expr.cast type expression)
 ```
+
+A supported operation is spelled `x2c.<noun>.<verb>`. A name beginning `_x2c.`
+is a compiler internal with no compatibility promise.
 
 `x2c.syntax.type` returns the canonical semantic `Type` for supported typed
 syntax.
@@ -2364,7 +2437,38 @@ that representation, including unnamed members and padding. Each record is
 `(NAME DECLARED_TYPE)`; an unnamed field has an empty name. Use `fields` for
 named-member access and `layout` when every declared field affects a decision.
 `x2c.type.parts` separates a semantic type into its declaration base and
-declarator modifiers as `(BASE MODIFIERS)`.
+declarator modifiers as `(BASE MODIFIERS)`. `x2c.type.parameters` and
+`x2c.type.return` split a function type into its parameter types and its
+result. `x2c.type.element` returns a pointer or array element type, and
+`x2c.type.integral?` and `x2c.type.pointer?` classify a type without
+resolving it.
+
+`x2c.protocol.member` looks up one member of a participant's conformance to a
+base protocol and returns `nil` when the participant does not adopt it.
+
+`x2c.literal.value` returns a captured literal's value: a `String`, a number,
+or a `Symbol`, according to the literal. It is the inverse of
+`x2c.literal.string`, which builds a literal from a value. A literal whose text
+the parser has already consumed, such as a multi-line interpolated `%"..."`, is
+rejected; read its spelling with `x2c.source.text` instead.
+
+`x2c.type.members` returns an enum's members in source order as `(("NAME"
+VALUE) ...)`. `VALUE` is `nil` when the member takes its position's value, the
+literal's exact spelling as a `String` when the initializer is one literal,
+carrying its base, suffix, and character quotes, and otherwise the
+initializer's expression node, which a generator can splice or walk. Test it
+with `string?` when both kinds can occur. A non-enum `Type` is rejected.
+
+`x2c.diagnostic.warn` reports a macro warning at the invocation with `String`
+notes and returns, so expansion continues. `x2c.diagnostic.fail` does not
+return.
+
+The statement and declaration constructors build one node each from operands
+that are themselves nodes, as the `x2c.expr.*` family does. `x2c.block.make`
+takes a `List` of block items; `x2c.decl.make` and `x2c.param.make` take a
+`Type`, a name value from `x2c.ident`, and for a declaration an optional
+initializer expression. `x2c.expr.cast` applies a `Type` to an expression,
+carrying that type's declarator modifiers.
 
 `x2c.type.value?` recognizes numeric scalars and enums, Symbol, Var, Atom,
 String, List, and their typedef aliases. Pointer-shaped runtime handles such
@@ -3061,8 +3165,10 @@ A `Map` tests its keys, a `List` or `Array` its elements, and a `String` a
 substring. The left operand converts to the member's parameter type, so a
 `Var` holding the key works as well as a literal. A receiver whose type does
 not implement a `contains` member is rejected with
-`operator 'in' requires an implemented contains member`; `SymbolSet` is one
-such type today and uses `set.contains(name)`. There is no `not in`
+`operator 'in' requires an implemented contains member`. The member comes
+from a protocol the receiver adopts: `Var(T)` declares one, and the
+one-member `Contains(T)` protocol gives membership to a type that holds
+members without boxing them, as `SymbolSet` does. There is no `not in`
 spelling; write `!(name in ages)`.
 
 `in` is a keyword only between two operands, so `struct buffer *in` and
@@ -3597,7 +3703,7 @@ int main(void) {
 foreach(int value, values) total += value;
 foreach(int key, map.keys()) printf("%d\n", key);
 foreach(Var (key, value), map)
-  printf("%d=%d\n", key.integer(), value.integer());
+  printf("%ld=%ld\n", key.integer(), value.integer());
   return total == 6 ? 0 : 1;
 }
 ```
@@ -3717,11 +3823,13 @@ runs no cleanup. An outward `goto` runs every cleanup region it exits. A
 `goto` into a protected cleanup region, or into a sibling protected region,
 is rejected at compile time.
 
-Generated `Error` transfer preserves directly modified automatic locals and
-parameters under the repository's optimized build. The compiler supplies the
-required volatile C representation for those values and for the transfer
-state its frames carry; source code does not need optimization-specific
-qualifiers for ordinary direct assignments in `try`, `catch`, or `finally`.
+Generated `Error` transfer preserves the automatic locals and parameters a
+protected body modifies under the repository's optimized build, whether the
+body assigns them by name or writes through a pointer it holds the address
+in. The compiler supplies the required volatile C representation for those
+values and for the transfer state its frames carry; source code does not need
+optimization-specific qualifiers for ordinary assignments in `try`, `catch`,
+or `finally`.
 `Error` transfer does not restore the process signal mask; code that changes a
 signal mask owns restoring it.
 
@@ -3995,7 +4103,7 @@ Each is a warning: translation continues and the program still compiles.
 | Code | Reported for |
 | --- | --- |
 | `region` | A value allocated inside a region is reachable after the region ends. The message gives the way the value leaves, and the note gives the line that opened the region. |
-| `unbalanced` | A region is opened in one block and released in another. |
+| `unbalanced` | A region has no matching release in the block that opened it. |
 | `after-free` | A local is read after `Scope.free` or `Array.list_free` consumed it. |
 
 The check analyzes regions lexically and summarizes each function within its
@@ -4243,7 +4351,8 @@ initialization rules.
 The Cosmopolitan APE executable is an experiment for fun only. It can
 bootstrap a minimal native compiler and runtime without a repository checkout,
 but includes no examples, book, or optional packages. Use the full repository
-for normal development; this experiment is no substitute for it.
+for normal development; this experiment is no substitute for it. Releases do
+not publish the APE; `make ape-build` in a checkout produces it.
 
 To try the experiment:
 
@@ -4485,10 +4594,13 @@ lockfile left beside it is removed.
 
 A build whose lockfile already covers every pinned package, at the pinned
 version and installed in the home, reads no index and makes no network
-request. Any other state re-resolves through the index and rewrites the
-lockfile. A version the index cannot supply stops the build with an error
-that includes both versions. A dry run installs nothing and writes no
-lockfile, and the editor adapter never installs.
+request. A pin the lockfile covers but the home does not hold is installed
+from the url and sha256 that lockfile recorded, not from the index, so the
+archive is the one the lockfile pinned however the index has changed. Only a
+pin the lockfile does not cover reaches the index. The lockfile is then
+rewritten to the manifest's pins. A version the index cannot supply stops the
+build with an error that includes both versions. A dry run installs nothing
+and writes no lockfile, and the editor adapter never installs.
 
 ## Include and tool ownership
 
@@ -4518,8 +4630,12 @@ one operand: a local directory, a local `.tar.gz`, a URL with `--sha256
 <hex>`, or a name resolved through the index (`--index <url-or-path>`
 overrides the default). `--force` accepts a bundle built by another x2c
 version. `remove` takes one installed name; `list` prints `name version
-kind` lines. Refusals exit with status 2 and leave the installed set as it
-was.
+kind` lines on standard output, and the install and removal receipts go to
+standard error with the other action output. Refusals, including a package
+whose sources or install marker are damaged, exit with status 2 and leave
+the installed set as it was. One install or removal in a home runs at a
+time; the lock is released once the packages are in place, so a `run` that
+installed a dependency does not hold it while the program runs.
 
 A project manifest can pin packages instead of installing them by hand; see
 [pinned packages](https://x2c-lang.dev/docs/reference/cli.html#pinned-packages).
@@ -4553,9 +4669,11 @@ checkout's `include/x2c` names.
 
 There is no lowercase `-i`. `-D` and `-U` reach requested x2c preprocessing
 and C compilation. Optimization, debug, and `-Xcc` are compile-only; `-L`,
-`-l`, `--rpath`, `-Wl,`, and `-Xlinker` are link-only. Unknown options are
+`-l`, `--rpath`, `-Wl,`, `-Xlinker`, and `-framework` are link-only.
+`-pthread` reaches both the compile and the link. Unknown options are
 rejected. `--rpath <dir>` records `<dir>` in the program as a place to find
 shared libraries when it runs; a package bundle may include it.
+`-framework <name>` links a native framework on macOS.
 
 The C compiler selection order is `--cc`, `X2C_CC`, `CC`, the installed
 toolchain record, then `cc`. The archiver follows `--ar`, `X2C_AR`, `AR`, the
@@ -4583,17 +4701,19 @@ and there is no option to suppress or escalate one. A warning describes
 something the compiler can see and you may have arranged deliberately, so
 code that means what it says can be left as written.
 
-Five codes are reported as warnings:
+Six codes are reported as warnings:
 
 - `region` says a value allocated inside a region can still be reached after
   the region ends, and names how it leaves. Its note gives the line that
   opened the region.
 - `after-free` says a local was read after `Scope.free` or
   `Array.list_free` consumed it.
-- `unbalanced` says a region was opened in one block and released in
-  another, a shape the `region` check cannot follow.
+- `unbalanced` says a region has no matching release in the block that
+  opened it, a shape the `region` check cannot follow.
 - `literal` says a bare word inside a macro is a `Symbol` where a value was
   probably meant, and names the unquoted spelling that inserts the value.
+- `macro` carries what a macro reported through `x2c.diagnostic.warn`, at the
+  invocation, with the notes the macro supplied.
 - `warning` covers the remaining cases: an unnecessary conversion, and a
   protocol binder that shadows a visible type name.
 
@@ -4619,8 +4739,8 @@ no diagnostics leaves it empty. Each line is one JSON object:
   `protocol`, `xform`, `region`, `warning`, or `limit`.
 - `severity` is `error`, `warning`, or `note`. It records how the report was
   submitted, so each entry in a category with both severities, such as
-  `region` or `literal`, has its own severity. The `limit` notice is a
-  `note`.
+  `region`, `literal`, or `macro`, has its own severity. The `limit` notice
+  is a `note`.
 - `file` is relative to the working directory for a source inside it and
   absolute otherwise. A pseudo-source such as `<stdin>` keeps its name.
 - `line` and `column` are one-based, `length` is the token width in bytes,

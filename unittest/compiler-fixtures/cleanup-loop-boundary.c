@@ -8,6 +8,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 static List _5, _4, _3;
 
 static Var _2, _1, _0;

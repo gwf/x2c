@@ -227,9 +227,10 @@ static void scope_nested_stats_restore(void) {
 static void scope_release_requires_matching_retain(void) {
   EXPECT_TRUE(_scope_rejected(_release_without_retain));
   EXPECT_TRUE(_scope_rejected(_release_wrong_slot));
+  Scope *before = Scope.top();
   Scope.retain();
   Scope.release();
-  EXPECT_TRUE(1);
+  EXPECT_PTR_EQ(Scope.top(), before);
 }
 
 static void scope_stack_grows_and_restores(void) {

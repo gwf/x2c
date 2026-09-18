@@ -70,6 +70,7 @@ builds/x2c-graph walks [-I DIR] FILE...
 builds/x2c-graph tail-calls [-I DIR] FILE...
 builds/x2c-graph loop-allocations [--all] [-I DIR] FILE...
 builds/x2c-graph lifetime-escapes [-I DIR] FILE...
+builds/x2c-graph region-escapes [-I DIR] FILE...
 builds/x2c-graph allocation-returns NAME [-I DIR] FILE...
 builds/x2c-graph flows PRODUCER CONSUMER [-I DIR] FILE...
 builds/x2c-graph compare LEFT RIGHT TARGET... -- [-I DIR] FILE...
@@ -296,6 +297,26 @@ remain unresolved. Values passed to unknown or indirect calls also become
 unresolved instead of producing a finding. A missing report does not establish
 that the code is safe. A reported pooled return may reuse an ancestor's
 canonical value, so even a `dangling-return` finding needs source verification.
+
+`region-escapes` runs the compiler's own region pass over every input at
+once. A translation reads a call into another unit through a fixed runtime
+table, so a value born in a `$scope()` that a function in another file
+stores has no warning; here each unit is walked against the summaries the
+other units proved, until no summary grows, and the round after that is the
+one that reports. The result carries the same warnings a translation prints,
+each with its path, line, and column.
+
+A summary is what the pass already computes for a call within one file:
+whether the function returns fresh storage, and where each parameter is
+sunk. Two units that define the same emitted name keep their own summaries
+and report in `ambiguous`, because neither describes the other's callers.
+`settled` is 0 when the walk reached its pass limit with a summary still
+growing, which makes the warnings a lower bound rather than the project's.
+
+Its limits are the region pass's own, documented in the
+[region model](../../docs/src/guide/regions.md): raw C stores, pointer
+arithmetic, callbacks, and storage the runtime did not allocate stay outside
+it. A silent result is not a proof of safety.
 
 `allocation-returns` reports return expressions in functions with the exact
 emitted `NAME` that call allocation operations for the caller's current Scope or

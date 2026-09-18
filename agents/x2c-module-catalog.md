@@ -193,17 +193,17 @@ x2c expression parsing.
 Public functions:
 
 `Compiler.complete_iter_chain`, `List.printf_family`,
-`Compiler.resolve_postfix_member`, `Compiler.parse_macro_expression_target`,
-`Compiler.promote_string_literal`, `Compiler.check_explicit_converter`,
-`Compiler.require_var_tag`, `Compiler.var_tag_expression`,
-`Compiler.resolve_map_entry`, `Compiler.resolve_expression`,
-`Compiler.parse_variable`, `Compiler.parse_conditional`,
-`Compiler.parse_assignment`, `Compiler.parse_primary`,
-`Compiler.parse_expression`, `Compiler.parse_parenthesized_statement`,
-`Compiler.initializer_native_types`, `Compiler.initializer_slot`,
-`Compiler.initializer_rows`, `Compiler.convert_initializer`,
-`Compiler.convert_compound_literal`, `Compiler.convert_expression`,
-`Compiler.convert_segment_to_string`
+`Compiler.printf_static_format`, `Compiler.resolve_postfix_member`,
+`Compiler.parse_macro_expression_target`, `Compiler.promote_string_literal`,
+`Compiler.check_explicit_converter`, `Compiler.require_var_tag`,
+`Compiler.var_tag_expression`, `Compiler.resolve_map_entry`,
+`Compiler.resolve_expression`, `Compiler.parse_variable`,
+`Compiler.parse_conditional`, `Compiler.parse_assignment`,
+`Compiler.parse_primary`, `Compiler.parse_expression`,
+`Compiler.parse_parenthesized_statement`, `Compiler.initializer_native_types`,
+`Compiler.initializer_slot`, `Compiler.initializer_rows`,
+`Compiler.convert_initializer`, `Compiler.convert_compound_literal`,
+`Compiler.convert_expression`, `Compiler.convert_segment_to_string`
 
 ### [src/format.x](../src/format.x)
 
@@ -349,7 +349,7 @@ values that can outlive the region that allocated them.
 
 Public functions:
 
-`Compiler.check_regions`
+`Compiler.check_regions`, `Compiler.region_escapes`
 
 ### [src/report.x](../src/report.x)
 
@@ -420,23 +420,23 @@ x2c semantic types.
 Public functions:
 
 `Type.declaration_parts`, `Type.declaration_ast`, `ast_addressed_identifier`,
-`ast_direct_identifier`, `ast_prototype_declarator`, `Type.parameter_ast`,
-`Var.type`, `Type.list`, `List.type`, `Symbol.is_storage_class`,
-`Symbol.is_inline`, `Symbol.is_type_qualifier`, `Symbol.is_type_modifier`,
-`Symbol.is_builtin_type`, `Type.is_aggregate`, `Type.is_aggregate_tag`,
-`Type.is_aggregate_tag_body`, `Type.is_enum`, `Type.is_enum_tag`,
-`Type.is_enum_tag_body`, `Type.is_pointer`, `Type.is_array`,
-`Type.is_function`, `Type.is_bitfield`, `Type.scalar`, `Type.scalar_tag`,
-`Type.var_numeric_extractor`, `Type.var_numeric_update_helper`,
-`Type.numeric_literal`, `Type.tag`, `Type.body`, `Type.var_tag_row`,
-`Type.begin_unit`, `Type.end_unit`, `Type.register_var_tag`,
-`Type.register_var_adoption`, `Type.var_converter`, `Type.fixed_var_tag`,
-`Type.var_tag`, `Type.base_type`, `Type.canonicalize`, `Type.declared`,
-`Type.discards_qualifiers`, `Type.is_builtin`, `Type.is_typedef_name`,
-`Type.is_bare_typedef_name`, `Type.is_typedef`, `Type.is_number`,
-`Type.is_integral`, `Type.dereference`, `Type.reference`, `Type.apply`,
-`Type.promote`, `Type.widest`, `Type.is_static`, `Type.is_inline`,
-`Type.is_extern`, `Type.is_threaded`, `List.type_from_ast`
+`ast_direct_identifier`, `ast_indirect_identifier`, `ast_prototype_declarator`,
+`Type.parameter_ast`, `Var.type`, `Type.list`, `List.type`,
+`Symbol.is_storage_class`, `Symbol.is_inline`, `Symbol.is_type_qualifier`,
+`Symbol.is_type_modifier`, `Symbol.is_builtin_type`, `Type.is_aggregate`,
+`Type.is_aggregate_tag`, `Type.is_aggregate_tag_body`, `Type.is_enum`,
+`Type.is_enum_tag`, `Type.is_enum_tag_body`, `Type.is_pointer`,
+`Type.is_array`, `Type.is_function`, `Type.is_bitfield`, `Type.scalar`,
+`Type.scalar_tag`, `Type.var_numeric_extractor`,
+`Type.var_numeric_update_helper`, `Type.numeric_literal`, `Type.tag`,
+`Type.body`, `Type.var_tag_row`, `Type.begin_unit`, `Type.end_unit`,
+`Type.register_var_tag`, `Type.register_var_adoption`, `Type.var_converter`,
+`Type.fixed_var_tag`, `Type.var_tag`, `Type.base_type`, `Type.canonicalize`,
+`Type.declared`, `Type.discards_qualifiers`, `Type.is_builtin`,
+`Type.is_typedef_name`, `Type.is_bare_typedef_name`, `Type.is_typedef`,
+`Type.is_number`, `Type.is_integral`, `Type.dereference`, `Type.reference`,
+`Type.apply`, `Type.promote`, `Type.widest`, `Type.is_static`,
+`Type.is_inline`, `Type.is_extern`, `Type.is_threaded`, `List.type_from_ast`
 
 ### [src/utils.x](../src/utils.x)
 
@@ -619,7 +619,8 @@ Public functions:
 `Error.trim`, `Error.restore`, `Error.initialize_raw`, `Error.shutdown_raw`,
 `Error.depth`, `Error.count`, `Error.mark`, `Error.snapshot`,
 `Error.snapshot_in`, `Error.since_in`, `Error.since`, `Error.policy_set`,
-`Error.policy_get`, `Error.bound`, `Error.bound_set`, `Error.push`,
+`Error.policy_get`, `Error.policy_capture`, `Error.policy_adopt`,
+`Error.policy_release`, `Error.bound`, `Error.bound_set`, `Error.push`,
 `Error.pop`, `Error.context_open`, `Error.context_close`, `Error.raise`,
 `Error.ready`
 
@@ -751,20 +752,19 @@ linked list with `Var` elements.
 
 Public functions:
 
-`List.cons_in`, `List.initialize`, `List.thread_initialize`, `List.shutdown`,
-`List.promote`, `List.try_own`, `cons`, `List.cons`, `Var.cons`, `car`, `cdr`,
-`List.car`, `List.cdr`, `List.caar`, `List.cadr`, `List.cddr`, `List.caddr`,
-`Var.car`, `Var.cdr`, `Var.caar`, `Var.cadr`, `Var.cddr`, `Var.caddr`,
-`List.append`, `List.concat_n`, `List.list_n`, `List.reverse`, `List.last`,
-`List.index`, `List.contains`, `List.len`, `List.map`, `List.foldl`,
-`List.find`, `List.any`, `List.all`, `List.sort`, `List.sort_with`,
-`List.sort_by`, `Array.list`, `Array.list_free`, `Map.list`, `List.array`,
-`List.unique`, `List.zip_with`, `List.map2`, `List.sublis`, `List.flatten`,
-`List.flatten_all`, `List.nth_cdr`, `List.getindex`, `List.assoc`, `List.get`,
-`List.tail`, `List.head`, `List.subseq`, `List.getslice`, `List.unpack_n`,
-`List.unpack_vars_n`, `List.hash`, `List.equal`, `List.compare`, `List.str`,
-`List.write_str`, `List.repr`, `List.write_repr`, `List.try_next`, `List.iter`,
-`Iter.list`, `List.filter`
+`List.cons_in`, `List.promote`, `List.try_own`, `cons`, `List.cons`,
+`Var.cons`, `car`, `cdr`, `List.car`, `List.cdr`, `List.caar`, `List.cadr`,
+`List.cddr`, `List.caddr`, `Var.car`, `Var.cdr`, `Var.caar`, `Var.cadr`,
+`Var.cddr`, `Var.caddr`, `List.append`, `List.concat_n`, `List.list_n`,
+`List.reverse`, `List.last`, `List.index`, `List.contains`, `List.len`,
+`List.map`, `List.foldl`, `List.find`, `List.any`, `List.all`, `List.sort`,
+`List.sort_with`, `List.sort_by`, `Array.list`, `Array.list_free`, `Map.list`,
+`List.array`, `List.unique`, `List.zip_with`, `List.map2`, `List.sublis`,
+`List.flatten`, `List.flatten_all`, `List.nth_cdr`, `List.getindex`,
+`List.assoc`, `List.get`, `List.tail`, `List.head`, `List.subseq`,
+`List.getslice`, `List.unpack_n`, `List.unpack_vars_n`, `List.hash`,
+`List.equal`, `List.compare`, `List.str`, `List.write_str`, `List.repr`,
+`List.write_repr`, `List.try_next`, `List.iter`, `Iter.list`, `List.filter`
 
 ### [lib/logger.x](../lib/logger.x)
 
@@ -886,12 +886,10 @@ nested interning pools with region-backed object storage.
 
 Public functions:
 
-`x2c_pool_thread_start`, `Pool.retain_named`, `Pool.retain`, `Pool.release`,
-`x2c_pool_values_current`, `x2c_pool_values_initialize`,
-`x2c_pool_values_thread_initialize`, `x2c_pool_values_shutdown`,
-`x2c_pool_values_retain_named`, `x2c_pool_values_retain`,
-`x2c_pool_values_release`, `x2c_pool_values_detach`,
-`x2c_pool_values_is_permanent`, `Pool.lookup`, `Pool.insert`, `Pool.intern`,
+`Pool.thread_start`, `Pool.retain_named`, `Pool.retain`, `Pool.release`,
+`Pool.current`, `Pool.initialize`, `Pool.thread_initialize`, `Pool.shutdown`,
+`Pool.open_named`, `Pool.open`, `Pool.close`, `Pool.detach`,
+`Pool.is_permanent`, `Pool.epoch`, `Pool.lookup`, `Pool.insert`, `Pool.intern`,
 `Pool.malloc`, `Pool.free`, `Pool.owns`, `Pool.promote`, `Pool.own`,
 `Pool.stats`
 
@@ -1011,19 +1009,16 @@ canonical byte strings and core text operations.
 
 Public functions:
 
-`String.new_in`, `String.pool_current`, `String.initialize`,
-`String.thread_initialize`, `String.shutdown`, `String.pool_retain_named`,
-`String.pool_retain`, `String.pool_release`, `String.pool_detach`,
-`String.promote`, `String.try_own`, `String.is_permanent`, `String.malloc`,
-`String.free`, `String.len`, `String.intern`, `String.intern_free`,
-`String.new`, `String.new_len`, `String.new_fill`, `String.find_within`,
-`String.find`, `String.rfind`, `String.find_all`, `String.count`,
-`String.getindex`, `String.contains`, `String.startswith`, `String.endswith`,
-`String.add`, `String.repeat`, `String.withindex`, `String.getslice`,
-`String.lower`, `String.upper`, `String.capitalize`, `String.lstrip`,
-`String.rstrip`, `String.strip`, `String.dedent`, `String.filter`,
-`String.map`, `String.keep`, `String.reject`, `String.squeeze`,
-`String.pad_left`, `String.pad_right`, `String.pad_center`,
+`String.new_in`, `String.promote`, `String.try_own`, `String.is_permanent`,
+`String.malloc`, `String.free`, `String.len`, `String.intern`,
+`String.intern_free`, `String.new`, `String.new_len`, `String.new_fill`,
+`String.find_within`, `String.find`, `String.rfind`, `String.find_all`,
+`String.count`, `String.getindex`, `String.contains`, `String.startswith`,
+`String.endswith`, `String.add`, `String.repeat`, `String.withindex`,
+`String.getslice`, `String.lower`, `String.upper`, `String.capitalize`,
+`String.lstrip`, `String.rstrip`, `String.strip`, `String.dedent`,
+`String.filter`, `String.map`, `String.keep`, `String.reject`,
+`String.squeeze`, `String.pad_left`, `String.pad_right`, `String.pad_center`,
 `String.remove_prefix`, `String.remove_suffix`, `String.partition`,
 `String.rpartition`, `String.join`, `String.replace_n`, `String.replace`,
 `String.printf`, `String.unescape`, `String.escape`, `String.str`,

@@ -2,6 +2,8 @@
 
 #include "defer-only-cleanup.h"
 
+#include "exception.h"
+
 static int observed;
 
 static int local_latest(void);

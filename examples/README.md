@@ -133,7 +133,7 @@ The [Greet example](power/greet-client.x) imports the small teaching package in
 and applies [greet-client.flags](power/greet-client.flags).
 
 The [package examples](packages/README.md) cover creating and using packages,
-with links to all seven adapters' build and run instructions. The
+with links to every maintained adapter's build and run instructions. The
 [HTTP and JSON example](packages/http-json-releases/) combines libcurl and
 yyjson. Its optional check needs prepared dependencies:
 

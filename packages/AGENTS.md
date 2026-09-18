@@ -235,8 +235,8 @@ Generated C, headers, executables, and application outputs stay in ignored
 `builds/`. `clean` removes local products and `deps`, leaving the cache intact.
 `build` translates `src/*.x` in package mode into unit headers and objects,
 compiles any package-authored `src/*.c`, and creates `builds/lib<package>.a`.
-`builds/<package>.link` holds the additional consumer link flags (empty without
-native dependencies). Tests/examples import and link the archive.
+`builds/<package>.native.rsp` holds the additional consumer native arguments,
+one per line (empty without native dependencies). Tests/examples import and link the archive.
 
 Reuse this machinery; change `dependency.json` for pin/profile changes. Use a
 package-specific prefix override only for narrow diagnosis.

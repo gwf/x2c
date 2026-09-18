@@ -98,81 +98,12 @@ typedef struct StringHeader {
 _Static_assert(sizeof(struct StringHeader) == 8,
                "the String header is 8 bytes, so payloads stay aligned");
 
-/** Returns the borrowed active `String`/`List` pool on this thread. */
-Pool String.pool_current(void) => x2c_pool_values_current();
-
 #define STRING_STACK_BYTES 256
 
 typedef union StringQuery {
   unsigned long align;
   char bytes[sizeof(struct StringHeader) + 257];
 } StringQuery;
-
-/* Pool construction already reported its cause. Before Error is ready a
-   failed initialization cannot continue, and it must not report the cause
-   twice. */
-/** Initializes the process-wide `String` runtime. */
-void String.initialize(void) {
-  x2c_pool_values_initialize();
-}
-
-/** Installs the process `String` root in a newly created worker thread. */
-void String.thread_initialize(void) {
-  x2c_pool_values_thread_initialize();
-}
-
-/** Releases the canonical `String` pool during process shutdown. */
-void String.shutdown(void) {
-  x2c_pool_values_shutdown();
-}
-
-/* Push a nested interning pool: new canonical misses are placed in it until
-   the matching pool_release discards them. Promote survivors first. */
-/** Opens and returns a named child of the active `String`/`List` pool.
-    New canonical misses enter the child; an equal ancestor value keeps its
-    existing owner and lifetime. The caller must match this with one
-    `String.pool_release` or detach it for transfer.
-    Raises: `<alloc-fail>` while opening the pool.
-*/
-Pool String.pool_retain_named(const char *name) =>
-  x2c_pool_values_retain_named(name);
-
-/** Opens the shared `String` and `List` canonical-value pool.
-    New canonical misses enter the child, while equal ancestor values retain
-    their existing owner. Promote anything that must outlive the bracket with
-    `String.promote` or `List.promote`: unpromoted values are discarded and
-    their identities no longer resolve. Brackets nest. The caller must match
-    this with one `String.pool_release` or detach it for transfer.
-    Raises: `<alloc-fail>` while opening the pool.
-    See: String.pool_release, String.pool_retain_named, List.promote
-*/
-Pool String.pool_retain(void) => x2c_pool_values_retain();
-
-/** Releases the current canonical-value pool for `String`.
-    Canonical `String`s, `List`s, and transient `String` buffers owned by that
-    pool
-    are reclaimed unless promoted; ancestor-owned values remain live.
-    Raises: `<bad-state>` when no nested pool is open. The failure leaves the
-    active pool unchanged.
-*/
-void String.pool_release(void) {
-  Pool pool = x2c_pool_values_current();
-  if (!pool.up) raise %(bad-state (owner "String.pool_release"));
-  x2c_pool_values_release();
-}
-
-/** Removes the active nested pool without destroying it.
-    `Thread` keeps the detached pool sealed until join copies its survivors.
-    The returned pool remains owned by the caller until that transfer or an
-    explicit release.
-    Raises: `<bad-state>` when no nested pool is open. The failure leaves the
-    active pool unchanged.
-*/
-Pool String.pool_detach(void) {
-  Pool pool = x2c_pool_values_current();
-  if (!pool.up) raise %(bad-state (owner "String.pool_detach"));
-  return x2c_pool_values_detach();
-}
 
 /* Move a canonical String owned by the innermost pool into its parent.
    The pointer never changes; ancestor-owned and transient Strings are
@@ -185,7 +116,7 @@ Pool String.pool_detach(void) {
 */
 Self String.promote(Self str) {
   if (!str || !*str) return str;
-  x2c_pool_values_current().promote(str, _header(str));
+  Pool.current().promote(str, _header(str));
   return str;
 }
 
@@ -199,7 +130,7 @@ Self String.promote(Self str) {
 */
 int String.try_own(String str) {
   if (!str || !*str) return 1;
-  return x2c_pool_values_current().own(str, _header(str));
+  return Pool.current().own(str, _header(str));
 }
 
 /** Asks whether `str` already outlives every canonical `String` pool.
@@ -210,7 +141,7 @@ int String.try_own(String str) {
 */
 int String.is_permanent(String str) {
   if (!str || !*str) return 1;
-  return x2c_pool_values_is_permanent(str);
+  return Pool.is_permanent(str);
 }
 
 static inline StringHeader _header(String str) =>
@@ -234,13 +165,13 @@ static Var _lookup_bytes(
 }
 
 static int _is_active_canonical(String str) =>
-  x2c_pool_values_current().lookup(str) === str;
+  Pool.current().lookup(str) === str;
 
 static void _free_unchecked(String str) {
   /* Only Pool-backed transient or losing-candidate storage may enter here;
      callers establish that the pointer is not a live canonical table entry. */
   if ((void *) str != NULL)
-    x2c_pool_values_current().free(_header(str));
+    Pool.current().free(_header(str));
 }
 
 static const char *_find_bytes(
@@ -277,7 +208,7 @@ String String.malloc(int len) {
   if (len <= 0) return NULL;
   if ((size_t) len > SIZE_MAX - sizeof(struct StringHeader)) return NULL;
   size_t total_len = sizeof(struct StringHeader) + (size_t) len;
-  Pool pool = x2c_pool_values_current();
+  Pool pool = Pool.current();
   StringHeader header = pool.malloc(total_len);
   header.length = len;
   header.hash = 0;
@@ -299,7 +230,7 @@ void String.free(String str) {
     _free_unchecked(str);
     return;
   }
-  Var existing = x2c_pool_values_current().lookup(str);
+  Var existing = Pool.current().lookup(str);
   if (existing is not void && existing.string() === str) return;
   _free_unchecked(str);
 }
@@ -331,7 +262,7 @@ static String _intern_owned(String string) {
     header.length = length + 1;
     header.hash = _hash_n(string, length);
   }
-  Pool pool = x2c_pool_values_current();
+  Pool pool = Pool.current();
   Var existing = pool.lookup(string);
   if (existing is not void) return existing;
   pool.insert(string);
@@ -430,7 +361,7 @@ static String _from_bytes_in(Pool pool, const char *bytes, int length) {
 }
 
 static String _from_bytes(const char *bytes, int length) =>
-  _from_bytes_in(x2c_pool_values_current(), bytes, length);
+  _from_bytes_in(Pool.current(), bytes, length);
 
 /** Returns the canonical `String` holding the bytes of the C string `str`.
     The input is borrowed and copied, so `str` may be a stack buffer and
@@ -469,15 +400,16 @@ String String.new_len(const char *str, int len) {
 }
 
 /** Returns the canonical `String` containing `count` copies of `fill`.
-    `count` must be less than `INT_MAX`, because the allocation includes one
-    trailing NUL byte.
-    Raises: `<bad-arg>` when `fill` is NUL, or `<alloc-fail>` when canonical
-    storage cannot be allocated. A nonpositive `count` returns NULL without
-    raising.
+    Raises: `<bad-arg>` when `fill` is NUL, `<size-limit>` when `count` is
+    `INT_MAX`, because the allocation includes one trailing NUL byte, or
+    `<alloc-fail>` when canonical storage cannot be allocated. A nonpositive
+    `count` returns NULL without raising.
 */
 String String.new_fill(char fill, int count) {
   if (count <= 0) return NULL;
   if (fill == '\0') raise %(bad-arg (owner "String.new_fill"));
+  if (count == INT_MAX)
+    raise %(size-limit (owner "String.new_fill") (count $count));
   String string = String.malloc(count + 1);
   memset(string, fill, count);
   return _finish(string, count);
@@ -1386,7 +1318,8 @@ Buffer String.write_repr(String str, Buffer out) {
 /** Parses one leading single-quoted escaped or literal byte, or returns -1.
     The opening quote, one decoded byte, and a closing quote are required.
     Text after that closing quote is ignored. A decoded NUL is returned as
-    zero; malformed and null input returns -1.
+    zero; malformed and null input returns -1, as does an octal escape above
+    `\377`, which does not fit a byte.
 */
 int String.parse_char(String str) {
   if (!str || !*str) return -1;
@@ -1398,7 +1331,7 @@ int String.parse_char(String str) {
     if (!*s) return -1;
     const char *cursor = s;
     int emit, esc = _decode_escape_char(&cursor, &emit);
-    if (!emit) return -1;
+    if (!emit || esc > 0377) return -1;
     value = esc;
     s = cursor;
   }

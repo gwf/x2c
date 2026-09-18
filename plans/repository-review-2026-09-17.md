@@ -1,13 +1,24 @@
 # Repository review, 2026-09-17
 
-> Status: active - catalog of reproduced defects from a whole-repository
-> review at ea10e89, rechecked at a0e5641 on 2026-09-17. Groups 1, 2, 6, 8,
-> 10, and 13 are fixed and on main (`ecdcea9..bed22b2` plus the collections
-> commits that follow it), as are the scanner, private-interface, and
-> library-removal items under "Assigned elsewhere" (`ecdcea9..4a003c1`).
-> Groups 3, 4, 5, 7, 9, 11, 12, 14, 15, 16, and 17 are open. `make verify`,
-> `verify-fixtures`, `examples`, `check`, and `packages-check` all passed at
-> ea10e89, so none of these defects was caught by a current gate.
+> Status: done - catalog of reproduced defects from a whole-repository review
+> at ea10e89, rechecked at a0e5641 on 2026-09-17, and rechecked again at
+> dbfc9cfc on 2026-09-18. Every group's own note is authoritative and records
+> what landed; an earlier version of this header contradicted those notes by
+> listing fixed groups as open. `make verify`, `verify-fixtures`, `examples`,
+> `check`, and `packages-check` all passed at ea10e89, so none of these
+> defects was caught by a current gate.
+>
+> Five rows remain open and are carried into
+> `plans/repository-review-2026-09-18.md`: the raw 0xFF byte in Group 1, the
+> `make debug` and autocrlf rows in Group 13, `String.parse_char`'s octal
+> escape in Group 19, and the bare-binder template and `binder?` length rows
+> in Group 20. Group 3's two `_Generic` rows and Group 19's indirect-write
+> `volatile` row were confirmed fixed at dbfc9cfc. Correction to Group 20:
+> a long binder does not silently fail to bind; the build fails with
+> `(unbound (name ...))`. Correction to Group 13: the two remaining `!`
+> assertions at `run-cli-boundary.sh` and `run-preprocessor-boundary.sh` are
+> *not* "inside conditions and fine" - a bare `!`-inverted pipeline is exempt
+> from `set -e` and can never fail.
 
 ## Result
 
@@ -242,6 +253,10 @@ Files: `src/build.x`, `src/project.x` (planning and manifest), `src/main.x`,
 
 ## Group 12: install and packages
 
+> Fixed 2026-09-17, all nine rows, including the `.link` removal. Package
+> authors outside this repository must rebuild: a package with only
+> `builds/<name>.link` now reports as not built.
+
 Files: `src/install.x`, `src/project.x` (lockfile), `packages/package.mk`.
 
 | Defect | Reproduction | Cause | R |
@@ -277,6 +292,11 @@ Files: `tools/`, `site/public/install.sh`, `.github/workflows/`,
 | Smaller tooling defects. | `install.sh --help` truncated or empty under `sh -s`; `etc/x2c.mk` includes relative to the includer; `make debug` rewrites tracked `etc/build-mode`; `run-suite-coverage` compares counts only; `examples/check.sh` does not scan `examples/scripts/`. | Individual. | agent |
 
 ## Group 14: documentation, plans, examples, fixtures
+
+> Fixed 2026-09-17. Fixture artifacts now normalize runtime library line
+> numbers, so editing `lib/` no longer churns the seven pinned fixtures, and
+> `check-docs.py` reports a citation past the end of its file. Correction:
+> the `test-index-slice.x:80` row was wrong, that test has 21 assertions.
 
 Files: `docs/`, `agents/`, `plans/`, `site/src/`, `examples/`,
 `unittest/compiler-fixtures/`, `lib/*.x` comments.
@@ -356,15 +376,34 @@ participation" message points at the token after the declaration, because
 `src/parse.x:1257-1265` reports with an already-advanced token; and defining a
 method on an imported package type fails with "parse: missing closing
 parenthesis" pointing at a parameter name.
+## Refuted after a controlled measurement
+
+The AST-to-Lisp spike reported the interpretive Lisp path about 17% slower
+between 4a003c18 and 48b7d458 and suspected Group 9's `car`/`cdr` tag checks.
+Measured 2026-09-17 on a probe with no compiler startup or translation in it:
+a `Lisp.eval_string` session building a 2000-element list and walking it with
+`car`/`cdr` 200 times, about 400,000 calls of each. Interleaved runs of both
+runtimes, user seconds: new 0.46 0.52 0.46 0.48 0.47 (median 0.47), old
+0.54 0.49 0.45 0.50 0.45 (median 0.49). Current main is slightly faster, so
+the tag check is not the cause. The spike's number covers whole compiler
+runs, and the parser, emitter, generator, and macro expansion all changed in
+that interval.
+
 ## Group 20: gaps found while fixing Groups 9 and 15
 
 | Defect | Reproduction | Cause | R |
 | --- | --- | --- | --- |
 | A bare-binder template left unbound by a successful match raises, then aborts. | `%(outer (b)).search_replace(%(!or (a *x) (b)), <"*x">)` raises `<void-op>` from `List.cons` on both engines, and the process then aborts with "raise re-entered or after shutdown" although both raises were caught. `try_match_replace` writes `void` for the same input. Predates Group 9. | `_apply_capture_template` and the reference's `bindings.assoc(template)`. | agent |
 | A forward `class` declaration never followed by a definition disappears silently. | `class Color;` produces no registration and no diagnostic. It is the documented forward form, so this may be intentional. | `etc/builtin-macros.xmacro` class decorator. | agent |
+| `binder?` misses binders of ten or more characters, so `match-case` silently does not bind them. | The threshold counts the `?` or `*` prefix: `?abcdefghi` binds, `?abcdefghij` does not. A long name reads as an `lsym`, and `symbol?` is false for it, while `match` binds it. The AST-to-Lisp spike reverted its own fix because it broke that spike's translation; cause unknown, so the fix is unproven rather than wrong. | `etc/init.xlisp`. Note the checked-in bootstrap compiler reads that file during stage 0, so a change there needs a bootstrap round. | agent |
 | `Build._place_unit_headers` copies generated headers into shared paths without an atomic publish. | Not reproduced; 48 parallel two-source builds stayed green. A latent version of the concurrent-build row Group 11 fixed. | `src/build.x`. | agent |
 
 ## Group 19: gaps found while fixing Groups 3, 5, and 7
+
+> Rows 1-3 fixed 2026-09-17. Correction to row 2: `g.len()` on a `const`
+> String always worked, because method lookup canonicalizes the receiver;
+> the catalog's message came from `.text()`, which is not a String method.
+> The real defect was operator resolution on a qualified operand, now fixed.
 
 Files: `src/transform.x` or `src/expressions.x` (row 1), `src/type.x` (row 2),
 `src/cleanup.x` (row 3).
@@ -378,6 +417,9 @@ Files: `src/transform.x` or `src/expressions.x` (row 1), `src/type.x` (row 2),
 | `String.parse_char` accepts an octal escape above a byte. | `"'\\400'".parse_char()` returns 256. The Simplify session rejected `\400` in the scanner and in `String.unescape`; this entry point still accepts it. | `lib/string.x` decodes the escape without the range check. | me |
 
 ## Group 18: merge the two readable-format owners
+
+> Fixed 2026-09-17. `Compiler.printf_static_format` in `src/expressions.x`
+> is the one owner; the looser predicate is gone.
 
 Files: `src/transform.x`, `src/expressions.x`.
 
@@ -416,6 +458,11 @@ generated C, so this change should be inspected the same way, and any C
 that does change must be reviewed line by line.
 
 ## Group 17: Pool as the public canonical-pool surface
+
+> Fixed 2026-09-17. `Pool.open`, `Pool.open_named`, `Pool.close`,
+> `Pool.current` and `Pool.detach` are the bracket; `String.pool_*` and the
+> duplicate `String`/`List` lifecycle names are gone; `pool.md` is generated
+> from the manifest. Packages pass, so the libuv and torch renames hold.
 
 Files: `lib/pool.x`, `lib/string.x`, `lib/list.x`, callers in `lib/thread.x`,
 `lib/logger.x`, `lib/error.x`, `lib/context.x`, `lib/split.x`, and the memory
@@ -552,8 +599,11 @@ Decided 2026-09-17 by Gary unless marked open.
   address-escape rule qualified `foreach` cursors and `sigset_t` locals and
   produced more warnings than it removed. The decision is how the address is
   spelled at the call, not which locals carry the qualifier.
-- **`make debug` (Group 13).** Open: the target rewrites tracked
-  `etc/build-mode`, which is what it has always done (d7bb8da).
+- **`make debug` (Group 13).** Decided 2026-09-17: keep the target, but write
+  the mode to an untracked local file that the build configuration reads, with
+  the tracked `etc/build-mode` as the committed default. Today a mode switch
+  dirties a tracked file, which collides with the gate's unchanged-tree rule
+  and can be committed by accident.
 
 ## Resolved since the baseline
 

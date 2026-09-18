@@ -13,7 +13,8 @@
   every SUMMARY entry names a file that exists;
 - no document spells the project name as the drug it is pronounced like;
 - local Markdown links resolve across README and active top-level docs;
-- repository paths in the canonical entry-point set resolve;
+- repository paths in the canonical entry-point set resolve, and a path that
+  cites a line number names a line the file has;
 - compiler flags named by active docs exist in `src/cli.x`;
 - canonical workflow docs do not reintroduce unsupported `V=1`, missing
   `OVERVIEW.md`, or bootstrap redirection before creating `debug/`;
@@ -27,12 +28,13 @@
 - every section under "Partial contracts and open decisions" in
   `agents/x2c-philosophy.md` names a ledger row that is not yet verified.
 
-The path-audited entry-point set is declared in `tools/check-docs.py`. Its 17
+The path-audited entry-point set is declared in `tools/check-docs.py`. Its 19
 entries are README, the root and `agents/` agent guidance, the philosophy,
 quick start, development guide, code-organization guide, debugging guide,
-module catalog, this report, the canonical diagnostics guide, and six book
-chapters: architecture, the CLI reference, the language reference, idioms, the
-implementation map, and the library overview.
+module catalog, this report, the canonical diagnostics guide, the adapter and
+AST-walk references, and six book chapters: architecture, the CLI reference,
+the language reference, idioms, the implementation map, and the library
+overview.
 
 ## Executable examples surface
 

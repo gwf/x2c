@@ -195,12 +195,12 @@ const [titleHtml, kickerHtml] = await Promise.all([
           instructions</a> for the self-hosting process.
         </p>
         <p>
-          Just experimenting? The <a
+          Just experimenting? <code>make ape-build</code> in a checkout
+          produces a <a
             href={local("docs/reference/cli.html#bootstrap-a-native-installation")}
-            >Cosmopolitan</a>{" "}<a
-            href="https://github.com/gwf/x2c/releases/download/v0.12.0/x2c.com"
-            >executable</a> bootstraps a minimal compiler and
-          runtime for fun, without examples, the book, or packages.
+            >Cosmopolitan executable</a> that bootstraps a minimal compiler
+          and runtime for fun, without examples, the book, or packages.
+          Releases do not publish it.
         </p>
       </div>
       <figure class="install-window">
@@ -235,8 +235,8 @@ const [titleHtml, kickerHtml] = await Promise.all([
             <div class="install-code" set:html={await packageBuildCode()} />
           </figure>
           <p class="package-note">
-            Packages need separate dependency preparation. Builds are currently
-            tested on macOS.
+            Packages need separate dependency preparation. Release bundles are
+            built on macOS and Linux, on both arm64 and x86_64.
           </p>
         </div>
       </div>

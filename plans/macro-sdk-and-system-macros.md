@@ -1,13 +1,15 @@
 # Compile-time Lisp SDK completion and system-wide macros
 
-> Status: active - 2026-09-17. Phase 3 and most of Phase 4 are shipped:
-> `String.dedent`, `$dedent`, `$switch`, `$assert`, `$todo`, `$unreachable`,
-> and `$time`, with unit coverage in `unittest/test-system-macros.x` and a
-> chapter section in `docs/src/guide/system-macros.md`. Building them removed
-> most of Phase 2, because `$switch` needed no new SDK operation at all.
-> Phase 1 is not started and carries a correction an independent review
-> reproduced: its rename breaks the checked-in bootstrap and needs a
-> compatibility step. `$table` and the enum readers remain.
+> Status: active - 2026-09-17. Phases 1 and 3 and most of Phase 4 are
+> shipped. Phase 1 landed in four commits, `f3623b66` through `765e2cdc`:
+> both spellings bound and refreshed into `bootstrap/`, then every caller
+> switched and the old rows dropped, then the transitional entry-point
+> aliases removed. Phase 3 and `$switch` shipped earlier, with unit coverage
+> in `unittest/test-system-macros.x` and a chapter section in
+> `docs/src/guide/system-macros.md`. Phase 2 shipped smaller than scoped,
+> because `$switch` showed that captured syntax is an ordinary walkable List.
+> `$table` is dropped. What remains is the diagnostic location argument, the
+> `lib/varops.xlisp` row accessor, and the enum consumers, all recorded below.
 > Scoped 2026-09-17 from a read of
 > `etc/compiler-sdk.xlisp`, `etc/lisp-bindings.xlisp`, `etc/builtin-macros.xlisp`,
 > the 33 `$lisp.bind` calls at `src/macros.x:894`, and the shipped generator in
@@ -21,28 +23,18 @@ The compile-time Lisp SDK reads and constructs every syntax category it can
 already capture, under one naming rule, and the repository ships a small set of
 system-wide macros that remove C boilerplate x2c currently reproduces.
 
-Today the SDK constructs expressions and literals and inspects types and
-functions. It cannot read a literal's value, an enum's members, a block's
-items, or a node's kind, and it cannot construct a statement, declaration,
-block, or type. Generators therefore hand-walk and hand-write canonical AST.
-`lib/varops.xlisp:34` digs a tag Symbol out of a captured `Literal` with
-`(car (cdr (cdr (cdr (car (cddr id))))))`, and `lib/varops.xlisp:44` writes
-`(expr () (cast (decl ,type (bindings (bind () ())))  ,value))` by hand because
-no constructor exists. That file is 57 lines and roughly half of it is working
-around missing SDK operations.
+Before this work the SDK constructed expressions and literals and inspected
+types and functions, and nothing else. It could not read a literal's value or
+an enum's members, and it could not construct a statement or a declaration, so
+generators hand-walked and hand-wrote canonical AST: `lib/varops.xlisp` dug a
+tag Symbol out of a captured `Literal` with
+`(car (cdr (cdr (cdr (car (cddr id))))))` and wrote its own cast constructor.
 
-The naming is three rules at once. `x2c.type.fields` is public;
-`_x2c.type.parameters` is private by prefix; `x2c._source.text` is private by
-infix. `etc/builtin-macros.xlisp` adds 52 helpers to the same namespace: 16
-`x2c._foreach.*`, 35 `x2c._class.*`, and one `x2c._scope.*`. Against 14 public operations in
-`etc/compiler-sdk.xlisp`, someone typing `x2c.` sees roughly 85 names of which
-about 28 are theirs.
-
-`etc/` holds four Lisp files with three loading behaviors. `src/macros.x:884`
-evaluates `init.xlisp`, `compiler-sdk.xlisp`, and `builtin-macros.xlisp`;
-`lisp-bindings.xlisp` loads conditionally at `src/macros.x:92`;
-`etc/lisp-extras.xlisp` never loads into the macro environment, which is why
-`caddr` is unbound inside a macro while `cadr` and `cddr` work.
+The naming was three rules at once. `x2c.type.fields` was public,
+`_x2c.type.parameters` private by prefix, and `x2c._source.text` private by
+infix, while `etc/builtin-macros.xlisp` added 52 helpers to the same namespace.
+Against 14 public operations, someone typing `x2c.` saw roughly 85 names of
+which about 28 were theirs.
 
 ## Settled choices
 
@@ -53,9 +45,10 @@ appears inside a public name. Shipped-macro helpers leave `x2c.` entirely:
 `class.*`, and `scope.*`, matching
 how `lib/varops.xlisp` already names `native.update.*`.
 
-**Loading.** `etc/lisp-extras.xlisp` loads with the other three, so the macro
-environment and the Lisp shell offer the same library. It is 34 lines of
-`sort`, `range`, `subst`, and the `c[ad]{3}r` accessors.
+**Loading.** `etc/lisp-extras.xlisp` stays out of a macro session. Its
+three-level `c[ad]{3}r` selectors moved into `etc/init.xlisp`, which every
+session loads, so a macro body gets them without also importing `fib`,
+`range`, and `sort` into every compilation.
 
 **Promotion over invention.** Seven primitives already bound privately become
 public under names describing their behavior. They need no new compiler code.
@@ -75,11 +68,11 @@ public under names describing their behavior. They need no new compiler code.
 exposes gensym publicly through `using $temporary`. Promote it only if a Lisp
 generator needs a name the `using` clause cannot declare.
 
-**AST vocabulary.** The canonical node shapes are already a compatibility
-surface that nothing documents. The constructor set completes far enough that a
-generator never writes a node shape by hand, and the shapes stay unsupported.
-Constructors add `(parens ...)` around binary nodes, since the emitter adds no
-precedence parentheses.
+**AST vocabulary.** The canonical node shapes are a compatibility surface that
+nothing documents. The constructors cover the shapes generators in this tree
+actually wrote by hand; the vocabulary itself stays unsupported. A generator
+reaching past them still quasiquotes, and a constructed binary node still needs
+explicit `(parens ...)` because the emitter adds no precedence parentheses.
 
 **Dedent semantics.** The prefix is declared by the text itself: after one
 leading newline is dropped, it is the run of spaces and tabs opening the first
@@ -117,64 +110,68 @@ runtime static declaration, and lets two cases declare the same name.
 
 ## Phase 1 - naming and loading
 
-Rename the bind targets in `src/macros.x`, the definitions in
-`etc/compiler-sdk.xlisp`, and their callers in `etc/lisp-bindings.xlisp`,
-`etc/builtin-macros.xlisp`, and `etc/builtin-macros.xmacro`. Move the 52 shipped-macro helpers out of `x2c.`.
-Load `etc/lisp-extras.xlisp` with the other three libraries. Publish the
-promoted operations in `docs/src/reference/language.md` beside the existing SDK
-list.
+Shipped. 13 bind targets renamed in `src/macros.x`, 7 of them promoted to
+public names, with callers switched in `etc/compiler-sdk.xlisp`,
+`etc/lisp-bindings.xlisp`, `etc/builtin-macros.xlisp`,
+`etc/builtin-macros.xmacro`, `lib/error-macros.xmacro`, `lib/var-tags.xmacro`,
+and `lib/lisp.x`. The 52 shipped-macro helpers left `x2c.` for `foreach.`,
+`class.`, and `scope.`. The promoted operations are published in
+`docs/src/reference/language.md` with the naming rule itself.
 
-The rename needs a compatibility step, and the plan's earlier claim that the
-checked-in bootstrap builds the renamed tree is wrong. `bootstrap/` holds only
-`Makefile`, `lib`, and `src`; `etc/*.xlisp` is read from the live tree at
-`src/macros.x:870`, while `bootstrap/src/macros.c` hard-codes the old bind
-spellings. Renaming both sides at once leaves the bootstrap compiler binding
-old names against renamed Lisp, and the build fails before `bootstrap-refresh`
-can run. So this phase binds both spellings in `src/macros.x`, lands in
-`bootstrap/`, and drops the old spellings in a following change. A C-side bind
-name is a compiler capability with respect to the shared `etc/` files.
+Two ordering constraints decided the shape, and both bite at the same place:
+something the compiler carries in compiled form against something it reads
+from the live tree.
+
+`bootstrap/` holds only `Makefile`, `lib`, and `src`, while `etc/*.xlisp` is
+read from the live tree at `src/macros.x:870` and `bootstrap/src/macros.c`
+compiles in the bind spellings. Renaming both sides at once leaves the
+bootstrap compiler binding old names against renamed Lisp. So both spellings
+bound first and landed in `bootstrap/`; the callers switched and the old rows
+went in the next change.
+
+`etc/builtin-macros.xmacro` is embedded in the compiler binary by
+`src/macros.x:40`, while `etc/builtin-macros.xlisp` beside it is read from
+disk. Renaming an entry point breaks the build under the compiler that still
+embeds the old macro text, so `foreach.expand`, `scope.expand`, `class.expand`,
+and `class.defaults` kept an alias for one refresh and then lost it.
+
+`etc/lisp-extras.xlisp` is not loaded into a macro session. Its three-level
+`c[ad]{3}r` selectors moved into `etc/init.xlisp`, which every session already
+loads, so macro bodies get them without also importing `fib`, `range`, and
+`sort` into every compilation.
 
 ## Phase 2 - complete the read and write sides
 
-Readers:
+Shipped. `x2c.type.members`, `x2c.diagnostic.warn`, `x2c.literal.value`
+widened to int and Symbol literals, and the constructors `x2c.stmnt.make`,
+`x2c.stmnt.return`, `x2c.block.make`, `x2c.decl.make`, `x2c.param.make`, and
+`x2c.expr.cast`. The constructors were promotions: five private copies in
+`etc/builtin-macros.xlisp` and one in `lib/varops.xlisp` were deleted and their
+callers now use the public names.
 
-- `x2c.literal.value` - promotion; also accepts int and Symbol literals.
-- `x2c.type.members` - enum members as `(("NAME" VALUE) ...)`. Nothing exposes
-  them today: `x2c.type.fields` rejects non-aggregates (`src/macros.x:306`) and
-  `x2c.type.parts` returns `declaration_parts()`, a base and declarator-modifier
-  split (`src/macros.x:256`).
-- `x2c.block.items` - the block-item sequence of a captured `Block` or compound
-  `Statement`.
-- `x2c.syntax.kind` - the node kind of any captured syntax.
+`x2c.type.members` and the constructors are pure Lisp over `x2c.type.resolve`
+and quasiquotes, so `x2c.block.items` and `x2c.syntax.kind` were never built:
+captured syntax is an ordinary walkable List and `match-case` reaches it
+directly, which `$switch` proved.
 
-Captured syntax reaches Lisp as an ordinary walkable List, so `block.items` and
-`syntax.kind` are `cdr` and `car` and need no C. Both must see through the
-`(at LINE ...)` origin anchors that `src/statements.x` wraps around every
-ordinary block item, or every item reports its kind as `at`. Only
-`x2c.type.members` and the diagnostic additions below need compiler code, so
-this phase splits by where each part lands.
+Widening `x2c.literal.value` moved one rejection. `lisp.binding.record` relied
+on the reader refusing a non-String, and the fixture
+`unittest/compiler-fixtures/lisp-bind-non-literal-name` records that a binding
+name must be a String literal. `lisp.binding.name` now makes that check where
+the requirement lives.
 
-Constructors, extracted from the quasiquotes `etc/builtin-macros.xlisp` and
-`lib/varops.xlisp` already contain:
+Two follow-ups, both waiting on a bootstrap that carries the widened reader:
 
-- `x2c.stmnt.make`, `x2c.stmnt.return`, `x2c.block.make`
-- `x2c.decl.make`, `x2c.expr.cast`, `x2c.type.make`
-- typed literal construction, replacing rows such as
-  `(expr (int) (literal (int) "0"))` embedded in `lib/varops.xlisp`
-
-Diagnostics: add `x2c.diagnostic.warn`, and a location argument on both
-diagnostic operations accepting captured syntax, so a macro reports against the
-declaration it rejects rather than always at its own invocation.
-
-Acceptance for this phase is `lib/varops.xlisp`: the
-`(car (cdr (cdr (cdr (car (cddr id))))))` row accessor, the
-`native.update.cast` constructor, and the embedded AST literals all disappear.
-Confirm during implementation whether a bare identifier can replace the seven
-`$(x2c.ident "lhs")` wrappers in the `$native.update` body at `lib/varops.x:54`;
-if it can, include that template fix here.
-
-This phase adds compiler capability, so it lands in `bootstrap/` before
-anything in Phase 3 or 4 calls it.
+- `lib/varops.xlisp:32` reads its row tag with `(car (cdddr (caddr id)))`. It
+  becomes `(x2c.literal.value id)` once the building compiler accepts a Symbol
+  literal there.
+- The location argument on `x2c.diagnostic.fail` and `.warn` is not built. A
+  diagnostic location comes from a `Token` (`src/diagnostics.x:351`) while a
+  capture records byte offsets (`src/macros.x:364`), so reporting against
+  captured syntax needs an offset-to-token mapping that does not exist. A macro
+  can meanwhile put `x2c.source.text` or `x2c.invocation.*` in a note. When it
+  is built the parameter is optional, so the 23 existing two-argument calls
+  keep their meaning.
 
 ## Phase 3 - macros that need no new capability, plus dedent
 
@@ -195,65 +192,25 @@ anything in Phase 3 or 4 calls it.
 `class` already generates a string method from a type's `write_` members
 (`etc/builtin-macros.xlisp:363`), so it would duplicate shipped behavior.
 
-## Phase 4 - switch and table
+## Phase 4 - switch
 
-- `$switch` as specified above. Implemented; needs a fixture and the showcase
-  entry.
-- `$table` - a dedented text table in a string literal expands to a static
-  array of records, using `x2c.source.text` and the Phase 2 constructors.
+`$switch` shipped. `$table` is dropped.
 
-Enum name tables and exhaustive-switch checking wait behind `x2c.type.members`
-and are scoped against what `SymbolSet` already covers. `docs/src/guide/idioms.md`
-directs a closed vocabulary of Symbols needing membership tests, a dense index,
-or ordered iteration to a `SymbolSet` literal, and `x2c._symbol-set` is already
-a primitive, so the remaining gap is narrower than the C case suggests.
+`$table` would have expanded an aligned text table in a string literal into a
+static array of records. The six tables in this repository show why that does
+not pay: `cli_commands` (`src/cli.x:78`), `cli_options`, and
+`lisp_canonical_names` (`lib/lisp.x:308`) hold Symbols, enum constants,
+`CLI_TOP | CLI_TRANSLATE` bitwise expressions, `&lsym_quote`, `NULL`, and
+strings containing spaces. A whitespace-delimited grid cannot hold an
+expression, an address-of, or a cell containing the delimiter, so it would have
+replaced none of them, and `cli_commands` is already aligned by hand, which was
+the benefit claimed. `native.update.rows` in `lib/varops.xlisp`, the one real
+data table, holds AST fragments and works as a Lisp list with no new syntax.
 
-Resource-management macros are out of scope; `$auto`, `$scope`, `$lock`, and
-`defer` hold that ground.
-
-## Proof: what a working implementation showed
-
-Seven operations are implemented, tested, and documented: `String.dedent`,
-`$dedent`, `$switch`, `$assert`, `$todo`, `$unreachable`, and `$time`. Building
-them was the test of whether the proposed API can express them, and it changed
-the plan more than the plan changed the implementation.
-
-`$switch` needed no new SDK operation. A switch body is a flat item list whose
-labels and statements form a regular pattern, so `match-case` over `car` and
-`cdr` of the captured block is the entire transform, and the `(at LINE ...)`
-origin anchors are matched as part of the pattern rather than seen through.
-The proposed `x2c.block.items` and `x2c.syntax.kind` bought nothing. Measured:
-`case 1: case 2:` share one generated block and one break; a case ending in
-`return` gets no break; two cases declare the same name and compile, which
-plain C rejects without hand-written braces; a leading declaration, a `goto`
-label, and an `#ifdef` inside the body all pass through and compile.
-
-Both `$dedent` paths work. A literal with no escape and no hole folds during
-translation: `$dedent(%"\n    alpha\n      beta\n    gamma\n  ")` emits
-`String_new("alpha\n  beta indented further\ngamma\n")` with no runtime call.
-An interpolated literal emits `String_dedent(String_join(...))` and produces the
-same text at run time. `$time` expands to a `clock_gettime` pair around its
-target with `using` temporaries.
-
-Five things the implementation settled:
-
-- The fold reads `x2c.source.text`, which already exists. The proposed
-  `x2c.literal.value` would not have worked, so `$dedent` is not evidence for
-  that operation.
-- The transform is about 85 lines of compile-time Lisp over `substring`,
-  `string-length`, and `string-append`. It recurses per character within a line
-  and per line across the text; per-character recursion over a whole text would
-  reach the interpreter's ceiling, which sits between 2,000 and 20,000 frames.
-- `x2c.expr.ident` takes the tagged value from `x2c.ident` while
-  `x2c.expr.field` takes a plain String and calls `x2c.ident` itself. Passing
-  the tagged value to `field` fails with `bad-types`. The constructor family
-  already has the inconsistency the naming rule is meant to remove.
-- `String.dedent` needs no prefix argument, which removes the open question
-  about what prefix an emitted runtime call would receive.
-- Phase 2's reader set is mostly unnecessary. Captured syntax is an ordinary
-  walkable List and `match-case` is already in the compile-time Lisp, so the
-  readers that remain worth adding are `x2c.type.members` and the diagnostic
-  additions, both of which need C.
+Enum name tables and exhaustive-switch checking are now unblocked by
+`x2c.type.members`. Scope them against `SymbolSet`, which
+`docs/src/guide/idioms.md` already directs a closed vocabulary of Symbols to
+when it needs membership tests, a dense index, or ordered iteration.
 
 ## Validation
 

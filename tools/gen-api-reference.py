@@ -116,6 +116,7 @@ PRIMARY_EVIDENCE = {
     ),
     "match-recursive": "`make verify` (`unittest/test-match.x`).",
     "mutex": "`make verify` (`unittest/test-mutex.x`).",
+    "pool": "`make verify` (`unittest/test-pool.x`).",
     "path": (
         "`make verify` (`unittest/test-path.x`) and `make examples` "
         "(`scripts/line-counts`)."
@@ -426,17 +427,6 @@ def collect() -> tuple[Module, ...]:
     rows = read_manifest()
     remaining_tiers = read_tier_ledger()
     symbols = load_symbols()
-    # A module's symbol table also contains the functions it forward-declares
-    # for other modules -- lib/common.x declares most of the runtime. So a row
-    # counts as accounted for when any lib source defines that name, not just
-    # this one. The check still catches a name defined nowhere, which is what a
-    # scanner gap looks like.
-    defined_anywhere: set[str] = set()
-    for path in sorted(rows):
-        for definition in definitions_with_symbols(
-            ROOT / path, symbols, include_static=True
-        ):
-            defined_anywhere.add(definition.name.replace(".", "_"))
     modules: list[Module] = []
     for path in sorted(rows):
         visibility, note = rows[path]
@@ -465,14 +455,6 @@ def collect() -> tuple[Module, ...]:
             declarations.extend(
                 TypeItem(path, declaration)
                 for declaration in audit.declarations
-            )
-            # A row whose name no lib source defines is a prototype that
-            # would fail at link. Not fatal, but it gets published so it
-            # cannot hide.
-            table = symbols.functions(path)
-            DANGLING.update(
-                (orphan, path)
-                for orphan in unmatched(path, table, items, defined_anywhere)
             )
         else:
             for definition in definitions_for_path(source):
@@ -724,28 +706,6 @@ def collect_public_paths(paths, *, manifest=None, symbols=None,
     )
 
 
-def unmatched(path: str, table, items, accounted: set[str]) -> set[str]:
-    """Func rows whose receiver we documented but whose name we never saw.
-
-    `accounted` includes static definitions, so a static method is not
-    mistaken for a scanner gap.
-    """
-    found = {item.name.replace(".", "_") for item in items}
-    receivers = {item.receiver for item in items}
-    missing = set()
-    for name in table:
-        if name in found or name in accounted:
-            continue
-        if name.startswith("_"):
-            continue
-        if "_" not in name:
-            continue
-        receiver = name.split("_", 1)[0]
-        if receiver in receivers:
-            missing.add(name)
-    return missing
-
-
 def anchor(name: str) -> str:
     return name
 
@@ -817,8 +777,6 @@ def see_link(module: Module, item: Item, target: str) -> str:
 
 
 SEE_INDEX: dict[str, str] = {}
-# name -> declaring module, for prototypes nothing in lib/ defines.
-DANGLING: dict[str, str] = {}
 
 
 def render_types(module: Module) -> list[str]:
@@ -1024,20 +982,6 @@ def render_index(modules: tuple[Module, ...]) -> str:
         "## Runtime-internal",
         "These modules implement the runtime and are not public APIs.",
     )
-    if DANGLING:
-        lines.extend((
-            "",
-            "## Declared but not defined",
-            "",
-            "These prototypes reach the generated headers, but no runtime",
-            "source defines them. Calling one fails at link time.",
-            "",
-        ))
-        for name in sorted(DANGLING):
-            lines.append(
-                f"- `{name.replace('_', '.', 1)}` - declared in "
-                f"`{DANGLING[name]}`"
-            )
     return "\n".join(lines).rstrip() + "\n"
 
 
@@ -1175,7 +1119,6 @@ def render_summary(
 
 
 def build() -> tuple[dict[pathlib.Path, str], str]:
-    DANGLING.clear()
     modules = collect()
     compiler = collect_compiler()
     SEE_INDEX.clear()

@@ -31,10 +31,10 @@ static Tensor _forward(Module model, Tensor x) =>
   _affine(model.child("l2"), _affine(model.child("l1"), x).tanh());
 
 static double _loss(Module model, Tensor x, Tensor y) {
-  Scope.retain();
-  defer Scope.release();
-  Torch.no_grad();
-  return Tensor.mse_loss(_forward(model, x), y).item().double();
+  $scope() {
+    Torch.no_grad();
+    return Tensor.mse_loss(_forward(model, x), y).item().double();
+  }
 }
 
 static int _train(void) {
@@ -53,12 +53,12 @@ static int _train(void) {
 
   Optimizer adam = Optimizer.adam(model, LR);
   for (int step = 0; step < STEPS; step++) {
-    Scope.retain();
-    defer Scope.release();
-    adam.zero_grad();
-    Tensor error = Tensor.mse_loss(_forward(model, x), y);
-    error.backward();
-    adam.step();
+    $scope() {
+      adam.zero_grad();
+      Tensor error = Tensor.mse_loss(_forward(model, x), y);
+      error.backward();
+      adam.step();
+    }
   }
   model.save("builds/x2c-model.pt");
   printf("loss %.8f\n", _loss(model, x, y));
@@ -75,8 +75,8 @@ static int _load(void) {
 }
 
 int main(int argc, char **argv) {
-  Scope.retain();
-  defer Scope.release();
-  if (argc > 1 && !strcmp(argv[1], "load")) return _load();
-  return _train();
+  $scope() {
+    if (argc > 1 && !strcmp(argv[1], "load")) return _load();
+    return _train();
+  }
 }

@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 typedef struct ErrorRegion{
   Scope values;
   Pool lists;
@@ -133,6 +135,16 @@ static Var _snapshot_wide(Var v);
 static Var _snapshot_value(Var v);
 
 static List _view_since(ErrorRegion * region, int mark);
+
+typedef struct ErrorPolicyCapture{
+  int count;
+  Symbol * pairs;
+}
+* ErrorPolicyCapture;
+
+static int _policy_fill(Map policy, Symbol * pairs, int at, int capacity);
+
+static int _policy_fill_contexts(ErrorContextState state, Symbol * pairs, int at, int capacity);
 
 static void _retained_destroy(Block retained);
 
@@ -829,6 +841,64 @@ Symbol Error_policy_get(Symbol code){
   return Var_symbol(found);
 }
 
+int Map_try_next(Map, unsigned *, Var *, Var *);
+
+static int _policy_fill(Map policy, Symbol * pairs, int at, int capacity){
+  unsigned cursor = 0;
+  Var key =((void) 0, Void), value =((void) 0, Void);
+  while(Map_try_next(policy, & cursor, & key, & value)){
+    if(at + 2 > capacity) break;
+    pairs[at ++] = Var_symbol(key);
+    pairs[at ++] = Var_symbol(value);
+  }
+  return at;
+}
+
+static int _policy_fill_contexts(ErrorContextState state, Symbol * pairs, int at, int capacity){
+  if(! state) return at;
+  at = _policy_fill_contexts(state -> prev, pairs, at, capacity);
+  return _policy_fill(state -> policy, pairs, at, capacity);
+}
+
+unsigned Map_len(Map);
+
+void * Error_policy_capture(void){
+  if(! Error_ready()) return NULL;
+  ErrorThreadState state = _thread();
+  int capacity = Map_len(state -> policy);
+  for(ErrorContextState at = state -> context_top;  at;  at = at -> prev) capacity += Map_len(at -> policy);
+  capacity *= 2;
+  ErrorPolicyCapture capture = malloc(sizeof(struct ErrorPolicyCapture) +(size_t) capacity * sizeof(Symbol));
+  if(! capture){
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/error.x",.function = "Error_policy_capture",.line = 909};
+    x2c_error_raise_n(& _x2c_error_site_3, 97614135954008, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_capture")), NULL))));
+    __builtin_unreachable();
+  }
+  capture -> pairs =(Symbol *)(capture + 1);
+  int written = _policy_fill(state -> policy, capture -> pairs, 0, capacity);
+  capture -> count = _policy_fill_contexts(state -> context_top, capture -> pairs, written, capacity);
+  return capture;
+}
+
+void Error_policy_adopt(void * capture){
+  ErrorPolicyCapture adopted = capture;
+  if(! adopted) return;
+  if(Error_ready()){
+    ErrorThreadState state = _thread();
+    Map policy = state -> context_top ? state -> context_top -> policy : state -> policy;
+    state -> floor_only ++;
+    int pushed = _scope_push(20800632064936, "could not enter error scope while adopting policy");
+    for(int i = 0;  i + 1 < adopted -> count;  i += 2) Map_setindex(policy, Symbol_var(adopted -> pairs[i]), Symbol_var(adopted -> pairs[i + 1]));
+    if(pushed) Scope_pop();
+    state -> floor_only --;
+  }
+  free(adopted);
+}
+
+void Error_policy_release(void * capture){
+  free(capture);
+}
+
 int Error_bound(void){
   ErrorThreadState state = _thread();
   return state -> context_top ? state -> context_top -> bound : state -> bound;
@@ -980,11 +1050,11 @@ static void _catch_commit_captures(ErrorHandler handle, ErrorRecord * record, Ma
 
 Var List_cadr(List);
 
-Pool String_pool_retain_named(const char *);
+Pool Pool_open_named(const char *);
 
 int MatchPlan_execute_capture(MatchPlan, Var, MatchCaptureBuffer *, MachineStats *);
 
-void String_pool_release(void);
+void Pool_close(void);
 
 static Symbol _catch_match(ErrorHandler h){
   if(Error_count() <= h -> watermark) return 285842436424;
@@ -994,7 +1064,7 @@ static Symbol _catch_match(ErrorHandler h){
   ErrorThreadState state = _thread();
   state -> floor_only ++;
   List projection = _cons(& record -> region, Symbol_var(code), detail);
-  String_pool_retain_named("Error catch bindings");
+  Pool_open_named("Error catch bindings");
   ErrorCatchSite * site = h -> site;
   MatchPlan * plans =(void *) h -> plans != NULL ? h -> plans -> bytes : NULL;
   for(int i = 0;  i < site -> arm_count;  i ++){
@@ -1014,12 +1084,12 @@ static Symbol _catch_match(ErrorHandler h){
     _catch_commit_captures(h, record, layout, & captures);
     if(values) Scope_free(values);
     h -> selected = i;
-    String_pool_release();
+    Pool_close();
     _catch_retain(h);
     state -> floor_only --;
     return 1440172936;
   }
-  String_pool_release();
+  Pool_close();
   state -> floor_only --;
   return 285842436424;
 }

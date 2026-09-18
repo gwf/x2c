@@ -50,10 +50,13 @@ def git(*args: str) -> str:
 # The root Makefile owns defaults and precedence. Child Makefiles derive their
 # flags from these inputs; their definitions are already in the file digest.
 # Search/SDK variables also affect native tools without appearing in argv.
+# X2C_HOME belongs here for the same reason: src/utils.x resolves the compiler
+# home from it, which selects etc/compiler-sdk.xlisp and the prelude
+# interfaces, so it changes translation output.
 TOOL_ENV_VARIABLES = (
     "PATH CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH LIBRARY_PATH COMPILER_PATH "
     "GCC_EXEC_PREFIX SDKROOT DEVELOPER_DIR TOOLCHAINS MACOSX_DEPLOYMENT_TARGET "
-    "LD_LIBRARY_PATH DYLD_LIBRARY_PATH DYLD_FALLBACK_LIBRARY_PATH"
+    "LD_LIBRARY_PATH DYLD_LIBRARY_PATH DYLD_FALLBACK_LIBRARY_PATH X2C_HOME"
 ).split()
 CONFIG_VARIABLES = (
     "MAKE CC AR ARFLAGS RANLIB SHELL BUILD_MODE BUILD_LTO BUILD_CFLAGS "

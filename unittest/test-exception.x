@@ -587,8 +587,8 @@ static void filtered_catch_binder_survives_callee_scope(void) {
 }
 
 static void _raise_from_transient_pools(void) {
-  String.pool_retain_named("catch-binding-values");
-  defer String.pool_release();
+  Pool.open_named("catch-binding-values");
+  defer Pool.close();
   String text = String.new("transient catch binding");
   raise %(invariant (value $text));
 }
@@ -611,7 +611,7 @@ static void error_snapshot_survives_catch_and_caller_owners(void) {
   Error.initialize();
   List escaped = NULL;
   Scope.retain();
-  String.pool_retain_named("snapshot-source-values");
+  Pool.open_named("snapshot-source-values");
   String text = String.new("snapshot survives");
   Atom atom = Atom.intern(String.new("long snapshot atom survives"));
   long number = 0x123456789L;
@@ -623,7 +623,7 @@ static void error_snapshot_survives_catch_and_caller_owners(void) {
     Var snapshot = Error.snapshot(value);
     escaped = snapshot;
   }
-  String.pool_release();
+  Pool.close();
   Scope.release();
   (String escaped_text, long escaped_number, Atom escaped_atom) = escaped;
   EXPECT_STR_EQ(escaped_text, "snapshot survives");
@@ -634,7 +634,7 @@ static void error_snapshot_survives_catch_and_caller_owners(void) {
 
 static void error_regions_do_not_capture_application_pools(void) {
   Error.initialize();
-  Pool strings = String.pool_retain_named("application-error-source");
+  Pool strings = Pool.open_named("application-error-source");
   Pool lists = strings;
   String text = String.new("application owned");
   List value = %($text 42);
@@ -648,7 +648,7 @@ static void error_regions_do_not_capture_application_pools(void) {
   EXPECT_TRUE(lists.owns(value));
   EXPECT_STR_EQ(text, "application owned");
   EXPECT_INT_EQ(value.cadr().integer(), 42);
-  String.pool_release();
+  Pool.close();
 }
 
 

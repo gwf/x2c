@@ -14,6 +14,8 @@
 
 #include "project.h"
 
+#include "exception.h"
+
 static List _120, _118, _117, _115, _113, _110, _108, _107, _105, _103, _40;
 
 static String _137, _136, _135, _134, _133, _132, _131, _130, _129, _128, _127, _126, _125, _124, _123, _122, _121, _111, _101, _99, _98, _97, _96, _95, _94, _93, _92, _91, _90, _89, _88, _87, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
@@ -143,6 +145,8 @@ static void _append_plan(Project project, CliRequest request);
 static void _plan_target(Project project, ProjectTarget target, CliRequest command, ProjectTarget selected, String build_root);
 
 static List _read_lock(String path);
+
+static List _locked_row(List rows, ProjectDependency entry);
 
 static int _lock_satisfies(Project project, List rows);
 
@@ -1095,24 +1099,28 @@ Var List_car(List);
 
 List List_cdr(List);
 
+static List _locked_row(List rows, ProjectDependency entry){
+  List found = NULL;
+  {
+    List row;
+    List _x2c_macro_object_13 = rows;
+    List _x2c_macro_cursor_13 = _x2c_macro_object_13;
+    Var _x2c_macro_cursor_output_13;
+    while(List_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_13)){
+      row = Var_list(_x2c_macro_cursor_output_13);
+      if(Var_equal(List_car(row), String_var(entry -> name)) && Var_equal(List_car(List_cdr(row)), String_var(entry -> version))) found = row;
+    }
+
+  }
+  return found;
+}
+
 String install_version(String);
 
 static int _lock_satisfies(Project project, List rows){
   if(! List_truth(rows)) return 0;
   for(ProjectDependency entry = project -> dependencies;  entry;  entry = entry -> next){
-    List found = NULL;
-    {
-      List row;
-      List _x2c_macro_object_13 = rows;
-      List _x2c_macro_cursor_13 = _x2c_macro_object_13;
-      Var _x2c_macro_cursor_output_13;
-      while(List_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_13)){
-        row = Var_list(_x2c_macro_cursor_output_13);
-        if(Var_equal(List_car(row), String_var(entry -> name))) found = row;
-      }
-
-    }
-    if(! List_truth(found) || ! Var_equal(List_car(List_cdr(found)), String_var(entry -> version))) return 0;
+    if(! List_truth(_locked_row(rows, entry))) return 0;
     if(! String_equal(install_version(entry -> name), entry -> version)) return 0;
   }
   return 1;
@@ -1171,7 +1179,7 @@ x2c_exception_leave(& _x2c_exception_frame_1);
 
 void Path_remove_file(Path);
 
-List install_require(CliRequest, String, String);
+List install_require(CliRequest, String, String, List);
 
 static void _resolve_dependencies(Project project, CliRequest request){
   if(project -> sources || request -> dry_run) return;
@@ -1213,7 +1221,7 @@ return;
 List locked = _read_lock(path);
 if(_lock_satisfies(project, locked)) return;
 Array rows = Array_new();
-for(ProjectDependency entry = project -> dependencies;  entry;  entry = entry -> next) Array_push(rows, List_var(install_require(request, entry -> name, entry -> version)));
+for(ProjectDependency entry = project -> dependencies;  entry;  entry = entry -> next) Array_push(rows, List_var(install_require(request, entry -> name, entry -> version, _locked_row(locked, entry))));
 _write_lock(path, Array_list_free(rows));
 }
 
@@ -1324,7 +1332,7 @@ x2c_error_catch_close(_x2c_error_handler_3);
 _x2c_error_handler_3 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_3);
 }
-if(! request -> quiet) printf("x2c: created %s\n", dir);
+if(! request -> quiet) fprintf(stderr, "x2c: created %s\n", dir);
 return 0;
 }
 

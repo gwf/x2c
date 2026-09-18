@@ -18,6 +18,8 @@ List Compiler_complete_iter_chain(Compiler compiler, List expression);
 
 const PrintfFn * List_printf_family(List l);
 
+String Compiler_printf_static_format(Compiler compiler, Var format, int * raw);
+
 List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field, Symbol access, int call_context);
 
 List Compiler_parse_macro_expression_target(Compiler c);

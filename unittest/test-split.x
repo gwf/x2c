@@ -207,7 +207,7 @@ static void split_typed_cursor_independence(void) {
 
 static void split_cursor_allocation_and_nesting(void) {
   char raw[] = "cursor_alpha  cursor_beta cursor_alpha";
-  Pool pool = String.pool_retain_named("string-cursor-probe");
+  Pool pool = Pool.open_named("string-cursor-probe");
   String value = String.new(raw);
   int count = 0;
   foreach(String word, value.words()) {
@@ -242,7 +242,7 @@ static void split_cursor_allocation_and_nesting(void) {
     foreach(String right, "1 2".words())
       if (left && right) pairs++;
   EXPECT_INT_EQ(pairs, 4);
-  String.pool_release();
+  Pool.close();
 }
 
 $(import "test-macros.xmacro")

@@ -704,7 +704,7 @@ Source: `lib/map.x:114`
 <a id="Map"></a>
 ### Map
 
-`typedef struct Map { Scope *scope, Bytes hashes, entries; unsigned used; unsigned capacity; unsigned mask; } *Map`
+`typedef struct Map { Scope scope, Bytes hashes, entries; unsigned used; unsigned capacity; unsigned mask; } *Map`
 
 `Scope`-backed mutable hash table from `Var` keys to `Var` values.
 The `Map` records the `Scope` used for its two backing `Block`s. `Context`

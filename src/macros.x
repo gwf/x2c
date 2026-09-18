@@ -34,11 +34,11 @@ static Compiler macro_import_compiler = NULL;
 static Token macro_import_invocation = NULL;
 
 macro Expression $_embed_lisp_binding_macros() => (
-  $(x2c.literal.string (x2c._embed.text "../etc/lisp-bindings.xmacro"))
+  $(x2c.literal.string (_x2c.embed.text "../etc/lisp-bindings.xmacro"))
 )
 
 macro Expression $_embed_builtin_macros() => (
-  $(x2c.literal.string (x2c._embed.text "../etc/builtin-macros.xmacro"))
+  $(x2c.literal.string (_x2c.embed.text "../etc/builtin-macros.xmacro"))
 )
 
 static String lisp_binding_macros = $_embed_lisp_binding_macros();
@@ -397,9 +397,9 @@ static Var _sdk_ident(String spelling) {
 }
 
 static Var _sdk_ident_unique(String stem) {
-  $_sdk_guard("private foreach name allocation");
+  $_sdk_guard("_x2c.name.unique");
   if (!stem.is_identifier()) return _sdk_reject(
-    "foreach name allocation requires an identifier stem",
+    "_x2c.name.unique requires an identifier stem",
     %("value: ${stem.repr()}" ));
   String spelling = macro_sdk_compiler.fresh_name(%"macro_$stem");
   return macro_sdk_compiler.sym.introduce(spelling);
@@ -841,11 +841,19 @@ static Var _sdk_embed_text(Var requested) {
 }
 
 static Var _sdk_literal_string(Var syntax) {
-  $_sdk_guard("private native Lisp literal query");
+  $_sdk_guard("x2c.literal.value");
   String value = NULL;
   if (_literal_string(syntax, &value)) return value;
+  match (syntax) case %(expr ? (literal (int) ?(String digits))): {
+    long parsed = 0;
+    if (digits.try_long(&parsed)) return parsed;
+  }
+  match (syntax) case %(expr ? (literal ("Symbol") ? ?(Symbol tag))): {
+    Symbol found = tag;
+    return found;
+  }
   return _sdk_reject(
-    "native Lisp binding name requires a String literal",
+    "x2c.literal.value requires a String, int, or Symbol literal",
     %("value: ${syntax.repr()}"));
 }
 
@@ -887,6 +895,20 @@ static Var _sdk_comptime_lower(List fn) {
   List forms = macro_sdk_compiler.lower_comptime(fn);
   if (forms) return forms;
   return %();
+}
+
+/* A warning reports where it is raised and returns, so a macro can keep
+   expanding. Failure stays separate because it never returns. */
+static Var _sdk_diagnostic_warn(String message, List notes) {
+  $_sdk_guard("x2c.diagnostic.warn");
+  foreach (Var note, notes)
+    if (note is not <string>)
+      return _sdk_reject(
+        "x2c.diagnostic.warn notes must be Strings",
+        %("value: ${note.repr()}" ));
+  macro_sdk_compiler.report_warning(
+    <macro>, message, macro_sdk_compiler.token, notes);
+  return void;
 }
 
 /* An unreadable compile-time source is a located diagnostic. */
@@ -943,21 +965,10 @@ static void _ensure_lisp(Compiler compiler) {
     if (loaded) return;
     $lisp.bind(_.macro_lisp, "_x2c.import-hook", _lisp_import_hook);
     $lisp.bind(_.macro_lisp, "x2c.syntax.type", _sdk_syntax_type);
-    $lisp.bind(
-      _.macro_lisp, "_x2c.foreach.declaration-bindings",
-      _sdk_declaration_bindings);
     $lisp.bind(_.macro_lisp, "x2c.binding.spelling", _sdk_binding_spelling);
-    $lisp.bind(_.macro_lisp, "x2c._source.text", _sdk_source_text);
     $lisp.bind(_.macro_lisp, "x2c.diagnostic.fail", _sdk_diagnostic_fail);
     $lisp.bind(_.macro_lisp, "x2c.ident", _sdk_ident);
-    $lisp.bind(_.macro_lisp, "_x2c.foreach.ident-unique", _sdk_ident_unique);
-    $lisp.bind(
-      _.macro_lisp, "x2c._invocation.location",
-      _sdk_invocation_location);
     $lisp.bind(_.macro_lisp, "x2c.method.resolve", _sdk_method_resolve);
-    $lisp.bind(_.macro_lisp, "x2c._symbol-set", _sdk_symbol_set);
-    $lisp.bind(_.macro_lisp, "x2c._embed.text", _sdk_embed_text);
-    $lisp.bind(_.macro_lisp, "_x2c.literal.string", _sdk_literal_string);
     $lisp.bind(_.macro_lisp, "x2c.cache.value", _sdk_cache_value);
     $lisp.bind(
       _.macro_lisp, "x2c.comptime.install", _sdk_comptime_install);
@@ -974,14 +985,6 @@ static void _ensure_lisp(Compiler compiler) {
       _sdk_function_parameter);
     $lisp.bind(_.macro_lisp, "x2c.function.body", _sdk_function_body);
     $lisp.bind(
-      _.macro_lisp, "_x2c.foreach.protocol-member",
-      _sdk_protocol_member);
-    $lisp.bind(_.macro_lisp, "_x2c.type.integral?", _sdk_type_integral);
-    $lisp.bind(_.macro_lisp, "_x2c.type.pointer?", _sdk_type_pointer);
-    $lisp.bind(_.macro_lisp, "_x2c.type.element", _sdk_type_element);
-    $lisp.bind(_.macro_lisp, "_x2c.type.parameters", _sdk_type_parameters);
-    $lisp.bind(_.macro_lisp, "_x2c.type.return", _sdk_type_return);
-    $lisp.bind(
       _.macro_lisp, "_x2c.foreach.complete-iter-chain",
       _sdk_complete_iter_chain);
     $lisp.bind(
@@ -994,6 +997,25 @@ static void _ensure_lisp(Compiler compiler) {
     $lisp.bind(_.macro_lisp, "x2c.type.layout", _sdk_type_layout);
     $lisp.bind(_.macro_lisp, "x2c.type.value?", _sdk_type_value);
     $lisp.bind(_.macro_lisp, "x2c.type.tag-name", _sdk_type_tag_name);
+    /* One naming rule: a supported operation is `x2c.<noun>.<verb>` and an
+       internal primitive carries the `_x2c.` prefix instead of an infix
+       underscore. */
+    $lisp.bind(_.macro_lisp, "_x2c.source.text", _sdk_source_text);
+    $lisp.bind(_.macro_lisp, "_x2c.embed.text", _sdk_embed_text);
+    $lisp.bind(
+      _.macro_lisp, "_x2c.invocation.location", _sdk_invocation_location);
+    $lisp.bind(_.macro_lisp, "_x2c.symbol-set", _sdk_symbol_set);
+    $lisp.bind(_.macro_lisp, "_x2c.name.unique", _sdk_ident_unique);
+    $lisp.bind(
+      _.macro_lisp, "_x2c.declaration.bindings", _sdk_declaration_bindings);
+    $lisp.bind(_.macro_lisp, "x2c.literal.value", _sdk_literal_string);
+    $lisp.bind(_.macro_lisp, "x2c.diagnostic.warn", _sdk_diagnostic_warn);
+    $lisp.bind(_.macro_lisp, "x2c.protocol.member", _sdk_protocol_member);
+    $lisp.bind(_.macro_lisp, "x2c.type.integral?", _sdk_type_integral);
+    $lisp.bind(_.macro_lisp, "x2c.type.pointer?", _sdk_type_pointer);
+    $lisp.bind(_.macro_lisp, "x2c.type.element", _sdk_type_element);
+    $lisp.bind(_.macro_lisp, "x2c.type.parameters", _sdk_type_parameters);
+    $lisp.bind(_.macro_lisp, "x2c.type.return", _sdk_type_return);
   }
 }
 
@@ -1255,18 +1277,18 @@ static Var _sdk_identifier_result(Var value) {
 }
 
 static Var _sdk_symbol_set(List values) {
-  $_sdk_guard("x2c._symbol-set");
+  $_sdk_guard("_x2c.symbol-set");
   foreach (Var value, values)
     if (value is not <symbol>)
       return _sdk_reject(
-        "x2c._symbol-set requires Symbols",
+        "_x2c.symbol-set requires Symbols",
         %("value:" ${value.repr()}));
   int duplicate = -1;
   List expression = macro_sdk_compiler.symbol_set_expression(
     values, &duplicate);
   if (duplicate >= 0)
     return _sdk_reject(
-      "x2c._symbol-set requires distinct Symbols",
+      "_x2c.symbol-set requires distinct Symbols",
       %("symbol:" ${values.getindex(duplicate).repr()}));
   return expression;
 }
@@ -1799,7 +1821,7 @@ static Symbol _author_kind(String spelling) {
   if (kind == <statement>) return <block>;
   if (kind == <entry>) return <map-entry>;
   if (kind == <namedtype>) return <named-type>;
-  return author_kinds.contains(kind) ? kind : 0;
+  return kind in author_kinds ? kind : 0;
 }
 
 static const SymbolSet value_kinds = %<<expr name literal>>;
@@ -1807,7 +1829,7 @@ static const SymbolSet value_kinds = %<<expr name literal>>;
 static int _kind_accepts_role(Symbol kind, Symbol role) {
   Symbol expected = role == <statement> ? <block> : role;
   if (expected == <expression> || expected == <argument>)
-    return value_kinds.contains(kind);
+    return kind in value_kinds;
   return kind == expected ||
     (expected == <field> && kind == <decl>) ||
     (expected == <block> && kind == <decl>) ||
@@ -1955,7 +1977,7 @@ List Compiler.try_parse_macro_slot(Compiler c, Symbol role) {
   if (!c.macro_holes) return NULL;
   if (c.peek(0) == <"$(">) {
     int splice = _lisp_splice_follows(c);
-    if (declaration_roles.contains(role) && !splice)
+    if (role in declaration_roles && !splice)
       return NULL;
     if (role == <block> && c.macro_lisp_starts_declaration()) return NULL;
     if (role == <statement>) return NULL;
@@ -2804,6 +2826,11 @@ static List _parse_target_definition(
   Symbol kind = definition.assoc(<kind>);
   Symbol target_kind = definition.assoc(<target>);
   const MacroPos *place = _position(position);
+  /* A block decorator standing before a file-scope function decorates that
+     function's body, so one spelling covers a statement and a whole
+     function. */
+  int body_target =
+    kind == <decorator> && target_kind == <block> && position == AST_UNIT;
   if (kind != <decorator>) {
     if (kind != place.kind &&
         !(kind == <decl-unit> && position == AST_UNIT)) {
@@ -2816,7 +2843,7 @@ static List _parse_target_definition(
     }
     return _invoke_definition(c, definition, invocation, position);
   }
-  if (_result_kind(definition) != place.kind) {
+  if (!body_target && _result_kind(definition) != place.kind) {
     String spelling = name.str();
     c.report_error(
       <macro>,
@@ -2850,7 +2877,12 @@ static List _parse_target_definition(
         invocation, %(${_definition_note(definition)}));
     }
     target_start = c.token;
-    if (target_kind == <function>) target = c.parse_function_target();
+    List decorated = NULL;
+    if (body_target) {
+      decorated = c.parse_function_definition();
+      match (decorated) case %(function ? ? ?body): target = body;
+    }
+    else if (target_kind == <function>) target = c.parse_function_target();
     else if (target_kind == <named-type>) target = c.parse_named_type();
     else switch (position) {
       case AST_UNIT:       target = c.parse_top_level(); break;
@@ -2894,7 +2926,26 @@ static List _parse_target_definition(
       transaction.commit();
       return %(seq $node);
     }
-    List result = c.bind_syntax(node, position, c.return_type);
+    List result = NULL;
+    if (body_target) {
+      /* The body was bound with the function's own result type; bind the
+         produced items with it too, so a `return` that needs a conversion
+         still gets one. */
+      Type declared = NULL;
+      match (decorated) case %(function ?rtype ?declarator ?): {
+        List declaration = %(declare $rtype (bindings $declarator));
+        match (declaration.type_from_ast())
+          case %((func *) *result_type):
+            declared = result_type.type().declared();
+      }
+      $let(c.return_type, declared) {
+        result = c.bind_syntax(node, AST_BLOCK, c.return_type);
+      }
+      List items = result.car() == <seq> ? result.cdr() : %($result);
+      match (decorated) case %(function ?rtype ?declarator ?):
+        result = %(seq (function $rtype $declarator (block @items)));
+    }
+    else result = c.bind_syntax(node, position, c.return_type);
     $let(c.token, invocation) {
       transaction.commit();
     }

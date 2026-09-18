@@ -75,29 +75,6 @@ List List.cons_in(Pool pool, Var head, List tail) {
 #include <stdarg.h>
 #include <limits.h>
 
-/** Initializes the shared process-wide `String` and `List` pool root.
-    Raises: `<alloc-fail>` if the root cannot be constructed. Native mutex
-    initialization failure aborts.
-*/
-void List.initialize(void) {
-  x2c_pool_values_initialize();
-}
-
-/** Installs the existing process pool root in a newly created worker thread.
-    The root must already be initialized; otherwise the process aborts.
-*/
-void List.thread_initialize(void) {
-  x2c_pool_values_thread_initialize();
-}
-
-/** Releases every active nested pool and then the process root at shutdown.
-    No worker or canonical value may remain in use afterward. Repeated calls
-    after the root is gone do nothing.
-*/
-void List.shutdown(void) {
-  x2c_pool_values_shutdown();
-}
-
 /* In an ordinary shared-pool List.cons graph, an ancestor-owned cell can only
    reference ancestor-owned cars and tails, so the walk stops at the first
    cell the innermost pool does not own. List.cons_in callers can create
@@ -115,16 +92,15 @@ static void _promote_node(Var node) {
   }
   if (node is not <list>) return;
   for (List cur = node; cur; cur = cur.cdr) {
-    if (!x2c_pool_values_current().promote(cur, cur)) break;
+    if (!Pool.current().promote(cur, cur)) break;
     _promote_node(cur.car);
   }
 }
 
 /** Moves `lst` out of the innermost interning pool into its parent.
-    Cells, nested `List`s, interned `String` cars, and long `Atom` payloads all
-    move
-    together, so a promoted `List` keeps its complete identity graph across the
-    matching `String.pool_release`. Pointers never change and ancestor-owned
+    Cells, nested `List`s, interned `String` cars, and long `Atom` payloads
+    all move together, so a promoted `List` keeps its complete identity graph
+    across the matching `Pool.close`. Pointers never change and ancestor-owned
     structure is left where it is; the return value is `lst` itself.
 
     Cells are immutable, so an ancestor-owned cell can only reference
@@ -146,7 +122,7 @@ static int _try_own_node(Var node) {
   if (node is <lsym>) return node.str().try_own();
   if (node is not <list>) return 1;
   for (List cur = node; cur; cur = cur.cdr) {
-    if (!x2c_pool_values_current().own(cur, cur)) return 0;
+    if (!Pool.current().own(cur, cur)) return 0;
     if (!_try_own_node(cur.car)) return 0;
   }
   return 1;
@@ -174,7 +150,7 @@ int List.try_own(List lst) => !lst || _try_own_node(lst);
 */
 List cons(Var head, List tail) {
   if (head is void) raise %(void-op (owner "List.cons"));
-  Pool pool = x2c_pool_values_current();
+  Pool pool = Pool.current();
   /* Compiler construction is canonical-hit-heavy. Probe before allocation;
      the unique-miss path keeps a second probe until Pool can recycle it. */
   struct List query = { head, tail };
@@ -184,7 +160,7 @@ List cons(Var head, List tail) {
 }
 
 static int _is_active_canonical(List list) =>
-  x2c_pool_values_current().lookup(list) === list;
+  Pool.current().lookup(list) === list;
 
 /** Method form of `cons`, with the same identity, lifetime, and failures. */
 List List.cons(Var head, List tail) => cons(head, tail);

@@ -116,7 +116,7 @@ static Context _open(const char *name, int isolated) {
       if (_.match_state) MatchCache.context_close(_.match_state);
       if (_.error_state)
         Error.context_close(_.error_state, x2c_exception_unwinding());
-      if (_.pool)     String.pool_release();
+      if (_.pool)     Pool.close();
       if (pushed)     Scope.pop();
       if (_.scope)    Scope.destroy(_.scope);
       Scope.free(_);
@@ -125,7 +125,7 @@ static Context _open(const char *name, int isolated) {
     Scope.push(&_.scope);
     pushed = 1;
     if (isolated) {
-      _.pool = String.pool_retain_named(name);
+      _.pool = Pool.open_named(name);
       _.destination_pool = _.pool.up;
     }
     _.error_state = Error.context_open();
@@ -331,7 +331,7 @@ Var Context.export_scope(Scope source_scope, Pool pool, Var value) {
     .scope = source_scope,
     .pool = pool,
     .destination_scope = Scope.top(),
-    .destination_pool = String.pool_current()
+    .destination_pool = Pool.current()
   };
   return _export_value(value, &source);
 }
@@ -353,7 +353,7 @@ void Context.close(Context c) {
      can no longer observe this Context. */
   MatchCache.context_close(c.match_state);
   Error.context_close(c.error_state, x2c_exception_unwinding());
-  if (c.pool) String.pool_release();
+  if (c.pool) Pool.close();
 
   Scope scope = c.scope, Context parent = c.parent;
   /* Drop any slot the body pushed and never popped, as an `exit()` from

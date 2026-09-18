@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 static void raise_empty(void);
 
 _Noreturn static void raise_terminal(void);

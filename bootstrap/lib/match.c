@@ -29,6 +29,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 static List _13, _11, _9, _7, _6, _1;
 
 static Var _12, _10, _8, _5, _4, _3, _2, _0;
@@ -223,7 +225,11 @@ static int MatchPlan__replace(MatchPlan plan, List input, Var template, Var * ou
 
 static int MatchPlan__replace_all(MatchPlan plan, List input, Var template, List * out);
 
+static int _pattern_borrowable(Var value, int depth, int permanent_lists);
+
 static int _pattern_admissible(Var value, int depth);
+
+static int _cache_keyable(Var value, int depth);
 
 #define MATCH_ADMITTED_MEMO 256
 typedef struct MatchCacheEntry{
@@ -239,14 +245,16 @@ struct MatchCache{
   MatchCacheEntry * entries;
   int * buckets;
   int capacity, bucket_count, size, lru_head, lru_tail, active_leases;
-  unsigned long next_generation;
-  unsigned long admitted_memo[256];
+  unsigned long next_generation, pool_epoch;
+  unsigned long admitted_memo[256], refused_memo[256];
 }
 ;
 
 static unsigned long _cache_mix(unsigned long key);
 
 static int _memo_slot(unsigned long key);
+
+static int _cache_resync(MatchCache cache);
 
 static int _cache_admitted(MatchCache cache, Var pattern);
 
@@ -316,6 +324,8 @@ static void _capture_sites_initialize(void);
 
 static void _capture_site_prepare(MatchCaptureSite * site, Var pattern);
 
+static MatchPlan _site_published(MatchCaptureSite * site, Var pattern);
+
 static MatchPlan _capture_site_publish(MatchCaptureSite * site, Var pattern);
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
@@ -363,8 +373,7 @@ int x2c_match_try_capture(List input, Var pattern, MatchCaptureBuffer * captures
 int x2c_match_site_try_capture(MatchCaptureSite * site, List input, Var pattern, MatchCaptureBuffer * captures){
   if(! _init_guard_) _file_init_();
   if(! captures) return 0;
-  MatchPlan plan = site ? __atomic_load_n(& site -> plan, __ATOMIC_ACQUIRE) : NULL;
-  if(site && ! plan) plan = _capture_site_publish(site, pattern);
+  MatchPlan plan = _site_published(site, pattern);
   if(! plan) return x2c_match_try_capture(input, pattern, captures);
   if(plan -> status == MACHINE_MALFORMED) return 0;
   MatchCaptureLayout layout = plan -> layout;
@@ -376,9 +385,7 @@ int x2c_match_site_try_capture(MatchCaptureSite * site, List input, Var pattern,
 }
 
 static MatchPlan _site_plan(MatchCaptureSite * site, Var pattern){
-  if(! site) return NULL;
-  MatchPlan plan = __atomic_load_n(& site -> plan, __ATOMIC_ACQUIRE);
-  if(! plan) plan = _capture_site_publish(site, pattern);
+  MatchPlan plan = _site_published(site, pattern);
   return plan && plan -> status != MACHINE_INELIGIBLE ? plan : NULL;
 }
 
@@ -389,9 +396,7 @@ int x2c_match_pattern_retainable(Var pattern){
 
 MatchPlan x2c_match_site_prepare(MatchCaptureSite * site, Var pattern){
   if(! _init_guard_) _file_init_();
-  if(! site) return NULL;
-  MatchPlan plan = __atomic_load_n(& site -> plan, __ATOMIC_ACQUIRE);
-  return plan ? plan : _capture_site_publish(site, pattern);
+  return _site_published(site, pattern);
 }
 
 int x2c_match_site_try_match(MatchCaptureSite * site, List input, Var pat, List * out_bindings){
@@ -923,13 +928,7 @@ static Var _capture_replace(Var input, MatchCaptureLayout layout, MatchCaptureBu
 }
 
 static Var _apply_capture_template(MatchCaptureLayout layout, MatchCaptureBuffer * captures, Var template){
-  if(Var_is_row(template, 9, 7, 4)) return _capture_replace(template, layout, captures);
-  if(_named_binder(template)){
-    Var value =((void) 0, Void);
-    _capture_lookup(layout, captures, template, & value);
-    return value;
-  }
-  return template;
+  return _capture_replace(template, layout, captures);
 }
 
 int List_try_match_replace(List input, Var pat, Var template, Var * out){
@@ -1687,7 +1686,7 @@ Var String_var(String);
 _Noreturn static void _raise_ineligible(const char * reason, const char * owner){
   String fence = String_new(reason), site = String_new(owner);
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match.x",.function = "_raise_ineligible",.line = 1677};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match.x",.function = "_raise_ineligible",.line = 1671};
     x2c_error_raise_n(& _x2c_error_site_0, 1358596898646632, 2, Symbol_var(32993636), String_var(site), Symbol_var(12939466), String_var(fence));
     __builtin_unreachable();
   }
@@ -1966,9 +1965,9 @@ int String_is_permanent(String);
 
 String Var_string(Var);
 
-int x2c_pool_values_is_permanent(Var);
+int Pool_is_permanent(Var);
 
-static int _pattern_admissible(Var value, int depth){
+static int _pattern_borrowable(Var value, int depth, int permanent_lists){
   if(depth >= 128) return 0;
   Symbol kind = Var_kind(value);
   switch(kind){
@@ -1978,7 +1977,8 @@ static int _pattern_admissible(Var value, int depth){
       if(Var_is(value, 826970)) return String_is_permanent((String) Var_pointer(value));
       if(Var_is_row(value, 11, 7, 1)) return String_is_permanent(Var_string(value));
       if(! Var_is_row(value, 9, 7, 4)) return 0;
-      if(! x2c_pool_values_is_permanent(value)) return 0;
+      if(! Var_pointer(value)) return 1;
+      if(permanent_lists && ! Pool_is_permanent(value)) return 0;
       {
         Var part;
         List _x2c_macro_object_9 =(List) Var_pointer(value);
@@ -1986,7 +1986,7 @@ static int _pattern_admissible(Var value, int depth){
         Var _x2c_macro_cursor_output_9;
         while(List_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_9)){
           part = _x2c_macro_cursor_output_9;
-          if(! _pattern_admissible(part, depth + 1)) return 0;
+          if(! _pattern_borrowable(part, depth + 1, permanent_lists)) return 0;
         }
 
       }
@@ -1995,6 +1995,14 @@ static int _pattern_admissible(Var value, int depth){
 
   }
   return ! Var_is(value, 818062) && ! Var_is(value, 44858254) && ! Var_is(value, 25983886) && ! Var_is(value, 1435270030) && ! Var_is(value, 26071077642);
+}
+
+static int _pattern_admissible(Var value, int depth){
+  return _pattern_borrowable(value, depth, 1);
+}
+
+static int _cache_keyable(Var value, int depth){
+  return _pattern_borrowable(value, depth, 0);
 }
 
 static unsigned long _cache_mix(unsigned long key){
@@ -2009,12 +2017,32 @@ static int _memo_slot(unsigned long key){
   return(int)((key * 0x9e3779b97f4a7c15UL >> 48) &(MATCH_ADMITTED_MEMO - 1));
 }
 
+unsigned long Pool_epoch(void);
+
+static int _cache_resync(MatchCache cache){
+  unsigned long epoch = Pool_epoch();
+  if(cache -> pool_epoch == epoch) return 1;
+  if(cache -> active_leases) return 0;
+  for(int slot = 0;  slot < cache -> capacity;  slot ++) if(cache -> entries[slot].occupied) _cache_remove(cache, slot);
+  for(int i = 0;  i < MATCH_ADMITTED_MEMO;  i ++){
+    cache -> admitted_memo[i] = 0;
+    cache -> refused_memo[i] = 0;
+  }
+  cache -> pool_epoch = epoch;
+  return 1;
+}
+
 static int _cache_admitted(MatchCache cache, Var pattern){
   unsigned long key = pattern.u64;
   if(! key) return 0;
+  if(! _cache_resync(cache)) return 0;
   int slot = _memo_slot(key);
   if(cache -> admitted_memo[slot] == key) return 1;
-  if(! _pattern_admissible(pattern, 0)) return 0;
+  if(cache -> refused_memo[slot] == key) return 0;
+  if(! _cache_keyable(pattern, 0)){
+    cache -> refused_memo[slot] = key;
+    return 0;
+  }
   cache -> admitted_memo[slot] = key;
   return 1;
 }
@@ -2030,12 +2058,12 @@ void Scope_pop(void);
 MatchCache MatchCache_new(int capacity){
   if(! _init_guard_) _file_init_();
   if(capacity <= 0){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/match.x",.function = "MatchCache_new",.line = 2059};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/match.x",.function = "MatchCache_new",.line = 2093};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL))), Symbol_var(209381969202), int_var(capacity));
     __builtin_unreachable();
   }
   if(capacity >(INT_MAX - 1) / 2){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/match.x",.function = "MatchCache_new",.line = 2061};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/match.x",.function = "MatchCache_new",.line = 2095};
     x2c_error_raise_n(& _x2c_error_site_2, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.new")), NULL))), Symbol_var(209381969202), int_var(capacity));
     __builtin_unreachable();
   }
@@ -2046,6 +2074,7 @@ MatchCache MatchCache_new(int capacity){
   cache -> capacity = capacity;
   cache -> bucket_count = capacity * 2 + 1;
   cache -> lru_head = cache -> lru_tail = - 1;
+  cache -> pool_epoch = Pool_epoch();
   cache -> entries = Scope_calloc(capacity, sizeof(MatchCacheEntry));
   cache -> buckets = Scope_malloc(sizeof(int) * cache -> bucket_count);
   for(int i = 0;  i < capacity;  i ++){
@@ -2221,14 +2250,14 @@ static MatchPlan _lease_plan(MatchLease * lease){
 void MatchLease_release(MatchLease * lease){
   if(! _init_guard_) _file_init_();
   if(! lease){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2252};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2287};
     x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
     __builtin_unreachable();
   }
   if(! lease -> active) return;
   if(lease -> transient_plan){
     if(! lease -> cache || lease -> cache -> active_leases <= 0){
-      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2256};
+      static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2291};
       x2c_error_raise_n(& _x2c_error_site_4, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
       __builtin_unreachable();
     }
@@ -2240,7 +2269,7 @@ void MatchLease_release(MatchLease * lease){
   }
   MatchCacheEntry * entry = _lease_entry(lease);
   if(! entry || lease -> cache -> active_leases <= 0 || entry -> pin_count <= 0){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2266};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/match.x",.function = "MatchLease_release",.line = 2301};
     x2c_error_raise_n(& _x2c_error_site_5, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchLease.release")), NULL))));
     __builtin_unreachable();
   }
@@ -2255,7 +2284,7 @@ void MatchCache_dispose(MatchCache cache){
   if(! _init_guard_) _file_init_();
   if(! cache) return;
   if(cache -> active_leases){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/match.x",.function = "MatchCache_dispose",.line = 2282};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/match.x",.function = "MatchCache_dispose",.line = 2317};
     x2c_error_raise_n(& _x2c_error_site_6, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.dispose")), NULL))));
     __builtin_unreachable();
   }
@@ -2373,7 +2402,7 @@ void MatchCache_context_close(void * token){
   MatchContextState state = token;
   if(! state) return;
   if(_thread() -> context_top != state){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/match.x",.function = "MatchCache_context_close",.line = 2472};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/match.x",.function = "MatchCache_context_close",.line = 2507};
     x2c_error_raise_n(& _x2c_error_site_7, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchCache.context_close")), NULL))));
     __builtin_unreachable();
   }
@@ -2475,7 +2504,10 @@ static void _capture_sites_initialize(void){
 }
 
 static void _capture_site_prepare(MatchCaptureSite * site, Var pattern){
-  if(! _pattern_admissible(pattern, 0)) return;
+  if(! _pattern_admissible(pattern, 0)){
+    __atomic_store_n(& site -> refused, 1, __ATOMIC_RELEASE);
+    return;
+  }
   _capture_sites_initialize();
   MatchPlan plan = NULL;
   {
@@ -2502,6 +2534,14 @@ static void _capture_site_prepare(MatchCaptureSite * site, Var pattern){
 
   }
   __atomic_store_n(& site -> plan, plan, __ATOMIC_RELEASE);
+}
+
+static MatchPlan _site_published(MatchCaptureSite * site, Var pattern){
+  if(! site) return NULL;
+  MatchPlan plan = __atomic_load_n(& site -> plan, __ATOMIC_ACQUIRE);
+  if(plan) return plan;
+  if(__atomic_load_n(& site -> refused, __ATOMIC_ACQUIRE)) return NULL;
+  return _capture_site_publish(site, pattern);
 }
 
 static MatchPlan _capture_site_publish(MatchCaptureSite * site, Var pattern){

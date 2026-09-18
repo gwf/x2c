@@ -142,6 +142,8 @@ typedef struct Compiler {
   int in_pattern, match_is, runtime_literals, inline_header;
   int builtin_defs, in_proto, macro_count, recovery_depth;
   int declaration_projection, declaration_produced;
+  // Set when a cleanup region needs the exception runtime declarations.
+  int needs_exception;
   int local_macro_capture_scopes;
   String fn_name, Diagnostics diagnostics, Array braces, import_stack;
   // The unit's script record, and the same record on the compiler whose own
@@ -642,6 +644,19 @@ static void _retag_contextual_keywords(Tokenizer tokenizer) {
   }
 }
 
+/* A lexical failure truncates the token stream, so the parser reaches the
+   appended `<eof>` and blames the end of the file. Report the refused byte
+   instead. An `<incomplete>` token really did run out of source, so it keeps
+   the end-of-file diagnostic that describes it. */
+static void _report_malformed_token(Compiler c) {
+  if (c.tokenizer.status() != <malformed>) return;
+  for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
+    Token token = &((struct Token *) c.tokenizer.tokens)[i];
+    if (token.type == <error>)
+      c.report_error(<parse>, "invalid token", token, NULL);
+  }
+}
+
 /** Scans source and positions the compiler at its first non-trivia token.
 
     The compiler borrows `text` for diagnostics and macro source capture until
@@ -657,6 +672,7 @@ void Compiler.tokenize(Compiler c, char *text) {
   c.text = text;
   c.tokenizer = Tokenizer.new(c.text);
   c.tokenizer.scan();
+  _report_malformed_token(c);
   _scan_conditionals(c);
   _retag_contextual_keywords(c.tokenizer);
   c.token = _skip_forward(c.tokenizer.tokens);

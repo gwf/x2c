@@ -76,7 +76,7 @@ void Bench.sample(const char *label, long index) {
   }
   BenchSample *sample = &bench_samples[bench_count++];
   ScopeStats scope = Scope.stats();
-  PoolStats pool = Pool.stats(String.pool_current());
+  PoolStats pool = Pool.stats(Pool.current());
   sample.label = label;
   sample.index = index;
   sample.seconds = Bench.now() - bench_origin;

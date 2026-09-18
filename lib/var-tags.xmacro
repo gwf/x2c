@@ -190,7 +190,7 @@ $(defun var.tag.info (rows)
     `(,@(var.tag.map var.tag.info-row rows) ,(var.tag.info-sentinel))))
 
 $(defun var.tag.symbolset (rows)
-  (x2c._symbol-set
+  (_x2c.symbol-set
     (var.tag.map (lambda (row) (car row)) rows)))
 
 /* The descriptor table is the ledger's boxed rows in ledger order, so a
@@ -231,7 +231,7 @@ $(defun var.tag.numeric (rows)
     (map var.tag.numeric-row (var.tag.numeric-rows rows))))
 
 $(defun var.tag.numeric-symbolset (rows)
-  (x2c._symbol-set
+  (_x2c.symbol-set
     (map (lambda (row) (car row)) (var.tag.numeric-rows rows))))
 
 $(defun var.tag.decode-row? (row)

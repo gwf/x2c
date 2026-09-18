@@ -9,5 +9,7 @@
 #include "compiler.h"
 void Compiler_check_regions(Compiler c, List ast);
 
+List Compiler_region_escapes(Compiler c, List ast, List seed);
+
 
 #endif /* __GUARD_0x3FB21E3E__ */

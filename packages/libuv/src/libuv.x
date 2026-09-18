@@ -1197,7 +1197,7 @@ UvAddress UvAddress.ip4(String host, int port) {
     _uv_raise("ip4_addr", status);
   }
   address.length = sizeof(struct sockaddr_in);
-  _uv_address_name(address, String.pool_current());
+  _uv_address_name(address, Pool.current());
   return address;
 }
 
@@ -1215,7 +1215,7 @@ UvAddress UvAddress.ip6(String host, int port) {
     _uv_raise("ip6_addr", status);
   }
   address.length = sizeof(struct sockaddr_in6);
-  _uv_address_name(address, String.pool_current());
+  _uv_address_name(address, Pool.current());
   return address;
 }
 
@@ -1266,7 +1266,7 @@ UvLookup UvLoop.lookup(UvLoop loop, String node, String service) {
   UvLookup lookup = Scope.calloc(1, sizeof(struct UvLookup));
   lookup.loop = loop;
   lookup.owner_scope = *Scope.top();
-  lookup.strings = String.pool_current();
+  lookup.strings = Pool.current();
   lookup.node = String.new(node);
   lookup.service = String.new(service);
   lookup.hints.ai_family = AF_UNSPEC;
@@ -1572,7 +1572,7 @@ static UvAddress _uv_tcp_address(UvTcp tcp, int peer) {
   address.length = length;
   address.socket_type = SOCK_STREAM;
   address.protocol = IPPROTO_TCP;
-  _uv_address_name(address, String.pool_current());
+  _uv_address_name(address, Pool.current());
   (void) stream;
   return address;
 }
@@ -1952,7 +1952,7 @@ UvUdp UvLoop.udp(UvLoop loop) {
   }
   udp.loop = loop;
   udp.owner_scope = *Scope.top();
-  udp.strings = String.pool_current();
+  udp.strings = Pool.current();
   udp.receive_limit = 64 * 1024;
   udp.udp.data = udp;
   return udp;
@@ -2102,7 +2102,7 @@ static UvAddress _uv_udp_address(UvUdp udp, int peer) {
   address.length = length;
   address.socket_type = SOCK_DGRAM;
   address.protocol = IPPROTO_UDP;
-  _uv_address_name(address, String.pool_current());
+  _uv_address_name(address, Pool.current());
   return address;
 }
 
@@ -2145,7 +2145,7 @@ static UvFs _uv_fs_new_in(
   UvFs fs = Scope.calloc_in(owner, 1, sizeof(struct UvFs));
   fs.loop = loop;
   fs.owner_scope = *owner;
-  fs.strings = String.pool_current();
+  fs.strings = Pool.current();
   fs.value = value;
   fs.handler = handler;
   fs.operation = operation;

@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 static String _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 typedef struct _Option{

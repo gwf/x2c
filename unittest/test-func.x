@@ -59,7 +59,8 @@ static void func_new_direct_pointer(void) {
   Func fn = Func.new(
     _add_longs, %((func ((long) (long))) long)
   );
-  EXPECT_NOT_NULL(fn);
+  if (!EXPECT_NOT_NULL(fn)) return;
+  EXPECT_INT_EQ(_call_binary(fn, 4, 5).integer(), 9);
 }
 
 static void func_apply_converts_numeric_arguments(void) {

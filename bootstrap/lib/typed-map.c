@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 static String _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
@@ -1014,7 +1016,7 @@ Bytes Bytes_append(Bytes, const void *, size_t);
 static MapIntInt MapIntInt__core_new_capacity(MapIntInt _x2c_macro_unused_0, unsigned _x2c_macro_capacity_0){
   (void) _x2c_macro_unused_0;
   MapIntInt _x2c_macro_map_0 = Scope_malloc(sizeof(struct MapIntInt));
-  _x2c_macro_map_0 -> scope = Scope_top();
+  _x2c_macro_map_0 -> scope = * Scope_top();
   _x2c_macro_map_0 -> hashes = Bytes_new(sizeof(unsigned));
   _x2c_macro_map_0 -> hashes = Bytes_append(_x2c_macro_map_0 -> hashes, 0, _x2c_macro_capacity_0);
   _x2c_macro_map_0 -> entries = Bytes_new(sizeof(struct MapIntIntRecord));
@@ -1125,10 +1127,10 @@ static void MapIntInt__core_expand(MapIntInt _x2c_macro_map_0){
       _x2c_macro_expanded_0.mask = _x2c_macro_capacity_0 - 1;
       MapIntInt _x2c_macro_expanded_map_0 =(MapIntInt) & _x2c_macro_expanded_0;
       for(unsigned _x2c_macro_i_0 = 0;  _x2c_macro_i_0 < _x2c_macro_cap_0;  _x2c_macro_i_0 ++) if(_x2c_macro_hashes_0[_x2c_macro_i_0]) MapIntInt__core_reinsert(_x2c_macro_expanded_map_0, _x2c_macro_hashes_0[_x2c_macro_i_0], _x2c_macro_entries_0[_x2c_macro_i_0], 0);
-      Scope_move(Bytes_block(_x2c_macro_staged_hashes_0), _x2c_macro_map_0 -> scope);
-      Scope_move((unsigned char *) _x2c_macro_staged_hashes_0 - sizeof(Block), _x2c_macro_map_0 -> scope);
-      Scope_move(Bytes_block(_x2c_macro_staged_entries_0), _x2c_macro_map_0 -> scope);
-      Scope_move((unsigned char *) _x2c_macro_staged_entries_0 - sizeof(Block), _x2c_macro_map_0 -> scope);
+      Scope_move(Bytes_block(_x2c_macro_staged_hashes_0), & _x2c_macro_map_0 -> scope);
+      Scope_move((unsigned char *) _x2c_macro_staged_hashes_0 - sizeof(Block), & _x2c_macro_map_0 -> scope);
+      Scope_move(Bytes_block(_x2c_macro_staged_entries_0), & _x2c_macro_map_0 -> scope);
+      Scope_move((unsigned char *) _x2c_macro_staged_entries_0 - sizeof(Block), & _x2c_macro_map_0 -> scope);
       _x2c_macro_map_0 -> hashes = _x2c_macro_expanded_0.hashes;
       _x2c_macro_map_0 -> entries = _x2c_macro_expanded_0.entries;
       _x2c_macro_map_0 -> capacity = _x2c_macro_expanded_0.capacity;
@@ -1739,7 +1741,7 @@ static MapIntInt MapIntInt_export_context(MapIntInt _x2c_macro_map_4, Context _x
       _x2c_macro_staged_0 -> entries = _x2c_macro_old_entries_0;
       MapIntInt__core_free(_x2c_macro_staged_0);
     }
-    _x2c_macro_map_4 -> scope = _x2c_macro_destination_0;
+    _x2c_macro_map_4 -> scope = * _x2c_macro_destination_0;
     _x2c_macro_committed_0 = _x2c_macro_map_4;
     {
       MapIntInt _x2c_return_value_5 = _x2c_macro_map_4;
@@ -1770,7 +1772,7 @@ static void MapLongDouble__core_free(MapLongDouble _x2c_macro_map_5){
 static MapLongDouble MapLongDouble__core_new_capacity(MapLongDouble _x2c_macro_unused_1, unsigned _x2c_macro_capacity_2){
   (void) _x2c_macro_unused_1;
   MapLongDouble _x2c_macro_map_5 = Scope_malloc(sizeof(struct MapLongDouble));
-  _x2c_macro_map_5 -> scope = Scope_top();
+  _x2c_macro_map_5 -> scope = * Scope_top();
   _x2c_macro_map_5 -> hashes = Bytes_new(sizeof(unsigned));
   _x2c_macro_map_5 -> hashes = Bytes_append(_x2c_macro_map_5 -> hashes, 0, _x2c_macro_capacity_2);
   _x2c_macro_map_5 -> entries = Bytes_new(sizeof(struct MapLongDoubleRecord));
@@ -1877,10 +1879,10 @@ static void MapLongDouble__core_expand(MapLongDouble _x2c_macro_map_5){
       _x2c_macro_expanded_1.mask = _x2c_macro_capacity_2 - 1;
       MapLongDouble _x2c_macro_expanded_map_1 =(MapLongDouble) & _x2c_macro_expanded_1;
       for(unsigned _x2c_macro_i_2 = 0;  _x2c_macro_i_2 < _x2c_macro_cap_1;  _x2c_macro_i_2 ++) if(_x2c_macro_hashes_1[_x2c_macro_i_2]) MapLongDouble__core_reinsert(_x2c_macro_expanded_map_1, _x2c_macro_hashes_1[_x2c_macro_i_2], _x2c_macro_entries_2[_x2c_macro_i_2], 0);
-      Scope_move(Bytes_block(_x2c_macro_staged_hashes_1), _x2c_macro_map_5 -> scope);
-      Scope_move((unsigned char *) _x2c_macro_staged_hashes_1 - sizeof(Block), _x2c_macro_map_5 -> scope);
-      Scope_move(Bytes_block(_x2c_macro_staged_entries_1), _x2c_macro_map_5 -> scope);
-      Scope_move((unsigned char *) _x2c_macro_staged_entries_1 - sizeof(Block), _x2c_macro_map_5 -> scope);
+      Scope_move(Bytes_block(_x2c_macro_staged_hashes_1), & _x2c_macro_map_5 -> scope);
+      Scope_move((unsigned char *) _x2c_macro_staged_hashes_1 - sizeof(Block), & _x2c_macro_map_5 -> scope);
+      Scope_move(Bytes_block(_x2c_macro_staged_entries_1), & _x2c_macro_map_5 -> scope);
+      Scope_move((unsigned char *) _x2c_macro_staged_entries_1 - sizeof(Block), & _x2c_macro_map_5 -> scope);
       _x2c_macro_map_5 -> hashes = _x2c_macro_expanded_1.hashes;
       _x2c_macro_map_5 -> entries = _x2c_macro_expanded_1.entries;
       _x2c_macro_map_5 -> capacity = _x2c_macro_expanded_1.capacity;
@@ -2453,7 +2455,7 @@ static MapLongDouble MapLongDouble_export_context(MapLongDouble _x2c_macro_map_9
       _x2c_macro_staged_1 -> entries = _x2c_macro_old_entries_1;
       MapLongDouble__core_free(_x2c_macro_staged_1);
     }
-    _x2c_macro_map_9 -> scope = _x2c_macro_destination_1;
+    _x2c_macro_map_9 -> scope = * _x2c_macro_destination_1;
     _x2c_macro_committed_1 = _x2c_macro_map_9;
     {
       MapLongDouble _x2c_return_value_11 = _x2c_macro_map_9;
@@ -2484,7 +2486,7 @@ static void MapStringString__core_free(MapStringString _x2c_macro_map_10){
 static MapStringString MapStringString__core_new_capacity(MapStringString _x2c_macro_unused_2, unsigned _x2c_macro_capacity_4){
   (void) _x2c_macro_unused_2;
   MapStringString _x2c_macro_map_10 = Scope_malloc(sizeof(struct MapStringString));
-  _x2c_macro_map_10 -> scope = Scope_top();
+  _x2c_macro_map_10 -> scope = * Scope_top();
   _x2c_macro_map_10 -> hashes = Bytes_new(sizeof(unsigned));
   _x2c_macro_map_10 -> hashes = Bytes_append(_x2c_macro_map_10 -> hashes, 0, _x2c_macro_capacity_4);
   _x2c_macro_map_10 -> entries = Bytes_new(sizeof(struct MapStringStringRecord));
@@ -2591,10 +2593,10 @@ static void MapStringString__core_expand(MapStringString _x2c_macro_map_10){
       _x2c_macro_expanded_2.mask = _x2c_macro_capacity_4 - 1;
       MapStringString _x2c_macro_expanded_map_2 =(MapStringString) & _x2c_macro_expanded_2;
       for(unsigned _x2c_macro_i_4 = 0;  _x2c_macro_i_4 < _x2c_macro_cap_2;  _x2c_macro_i_4 ++) if(_x2c_macro_hashes_2[_x2c_macro_i_4]) MapStringString__core_reinsert(_x2c_macro_expanded_map_2, _x2c_macro_hashes_2[_x2c_macro_i_4], _x2c_macro_entries_4[_x2c_macro_i_4], 0);
-      Scope_move(Bytes_block(_x2c_macro_staged_hashes_2), _x2c_macro_map_10 -> scope);
-      Scope_move((unsigned char *) _x2c_macro_staged_hashes_2 - sizeof(Block), _x2c_macro_map_10 -> scope);
-      Scope_move(Bytes_block(_x2c_macro_staged_entries_2), _x2c_macro_map_10 -> scope);
-      Scope_move((unsigned char *) _x2c_macro_staged_entries_2 - sizeof(Block), _x2c_macro_map_10 -> scope);
+      Scope_move(Bytes_block(_x2c_macro_staged_hashes_2), & _x2c_macro_map_10 -> scope);
+      Scope_move((unsigned char *) _x2c_macro_staged_hashes_2 - sizeof(Block), & _x2c_macro_map_10 -> scope);
+      Scope_move(Bytes_block(_x2c_macro_staged_entries_2), & _x2c_macro_map_10 -> scope);
+      Scope_move((unsigned char *) _x2c_macro_staged_entries_2 - sizeof(Block), & _x2c_macro_map_10 -> scope);
       _x2c_macro_map_10 -> hashes = _x2c_macro_expanded_2.hashes;
       _x2c_macro_map_10 -> entries = _x2c_macro_expanded_2.entries;
       _x2c_macro_map_10 -> capacity = _x2c_macro_expanded_2.capacity;
@@ -3216,7 +3218,7 @@ static MapStringString MapStringString_export_context(MapStringString _x2c_macro
       _x2c_macro_staged_2 -> entries = _x2c_macro_old_entries_2;
       MapStringString__core_free(_x2c_macro_staged_2);
     }
-    _x2c_macro_map_14 -> scope = _x2c_macro_destination_2;
+    _x2c_macro_map_14 -> scope = * _x2c_macro_destination_2;
     _x2c_macro_committed_2 = _x2c_macro_map_14;
     {
       MapStringString _x2c_return_value_18 = _x2c_macro_map_14;
@@ -3247,7 +3249,7 @@ static void MapStringInt__core_free(MapStringInt _x2c_macro_map_15){
 static MapStringInt MapStringInt__core_new_capacity(MapStringInt _x2c_macro_unused_3, unsigned _x2c_macro_capacity_6){
   (void) _x2c_macro_unused_3;
   MapStringInt _x2c_macro_map_15 = Scope_malloc(sizeof(struct MapStringInt));
-  _x2c_macro_map_15 -> scope = Scope_top();
+  _x2c_macro_map_15 -> scope = * Scope_top();
   _x2c_macro_map_15 -> hashes = Bytes_new(sizeof(unsigned));
   _x2c_macro_map_15 -> hashes = Bytes_append(_x2c_macro_map_15 -> hashes, 0, _x2c_macro_capacity_6);
   _x2c_macro_map_15 -> entries = Bytes_new(sizeof(struct MapStringIntRecord));
@@ -3354,10 +3356,10 @@ static void MapStringInt__core_expand(MapStringInt _x2c_macro_map_15){
       _x2c_macro_expanded_3.mask = _x2c_macro_capacity_6 - 1;
       MapStringInt _x2c_macro_expanded_map_3 =(MapStringInt) & _x2c_macro_expanded_3;
       for(unsigned _x2c_macro_i_6 = 0;  _x2c_macro_i_6 < _x2c_macro_cap_3;  _x2c_macro_i_6 ++) if(_x2c_macro_hashes_3[_x2c_macro_i_6]) MapStringInt__core_reinsert(_x2c_macro_expanded_map_3, _x2c_macro_hashes_3[_x2c_macro_i_6], _x2c_macro_entries_6[_x2c_macro_i_6], 0);
-      Scope_move(Bytes_block(_x2c_macro_staged_hashes_3), _x2c_macro_map_15 -> scope);
-      Scope_move((unsigned char *) _x2c_macro_staged_hashes_3 - sizeof(Block), _x2c_macro_map_15 -> scope);
-      Scope_move(Bytes_block(_x2c_macro_staged_entries_3), _x2c_macro_map_15 -> scope);
-      Scope_move((unsigned char *) _x2c_macro_staged_entries_3 - sizeof(Block), _x2c_macro_map_15 -> scope);
+      Scope_move(Bytes_block(_x2c_macro_staged_hashes_3), & _x2c_macro_map_15 -> scope);
+      Scope_move((unsigned char *) _x2c_macro_staged_hashes_3 - sizeof(Block), & _x2c_macro_map_15 -> scope);
+      Scope_move(Bytes_block(_x2c_macro_staged_entries_3), & _x2c_macro_map_15 -> scope);
+      Scope_move((unsigned char *) _x2c_macro_staged_entries_3 - sizeof(Block), & _x2c_macro_map_15 -> scope);
       _x2c_macro_map_15 -> hashes = _x2c_macro_expanded_3.hashes;
       _x2c_macro_map_15 -> entries = _x2c_macro_expanded_3.entries;
       _x2c_macro_map_15 -> capacity = _x2c_macro_expanded_3.capacity;
@@ -3964,7 +3966,7 @@ static MapStringInt MapStringInt_export_context(MapStringInt _x2c_macro_map_19, 
       _x2c_macro_staged_3 -> entries = _x2c_macro_old_entries_3;
       MapStringInt__core_free(_x2c_macro_staged_3);
     }
-    _x2c_macro_map_19 -> scope = _x2c_macro_destination_3;
+    _x2c_macro_map_19 -> scope = * _x2c_macro_destination_3;
     _x2c_macro_committed_3 = _x2c_macro_map_19;
     {
       MapStringInt _x2c_return_value_25 = _x2c_macro_map_19;

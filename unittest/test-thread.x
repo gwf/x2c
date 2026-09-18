@@ -344,6 +344,43 @@ static void thread_join_raises_worker_errors(void) {
   thread.free();
 }
 
+static Var _thread_ignored_policy_worker(
+  const void *input, size_t input_size) {
+  (void) input;
+  (void) input_size;
+  Error.raise(<worker-ign>, NULL);
+  return 42;
+}
+
+static void thread_ignored_policy_resumes_in_worker(void) {
+  Error.policy_set(<worker-ign>, <ignore>);
+  Thread thread = Thread.start(_thread_ignored_policy_worker, NULL, 0);
+  EXPECT_INT_EQ(thread.join().integer(), 42);
+  thread.free();
+}
+
+/* Every shared cause transfers, so one raised in a worker leaves the callback
+   whatever the starting thread's policy table says. */
+static Var _thread_shared_cause_worker(const void *input, size_t input_size) {
+  (void) input;
+  (void) input_size;
+  raise %(bad-state (owner "shared cause worker"));
+  return 5;
+}
+
+static void thread_shared_cause_still_fails_join(void) {
+  Thread thread = Thread.start(_thread_shared_cause_worker, NULL, 0);
+  int caught = 0, error_count = -1;
+  try thread.join();
+  catch %(join-fail (errors ?errors)): {
+    caught = 1;
+    if (errors is <list>) error_count = errors.list().len();
+  }
+  EXPECT_TRUE(caught);
+  EXPECT_INT_EQ(error_count, 1);
+  thread.free();
+}
+
 static void thread_memory_sink_retains_worker_events(void) {
   List entries = nil;
   Logger logger = Logger.new(<trace>);
@@ -359,11 +396,10 @@ static void thread_memory_sink_retains_worker_events(void) {
     "worker-private log value"
   );
 
+  /* A `<log>` policy resolves the cause inside the worker as it does here:
+     the error is reported and the callback keeps its result. */
   Thread failure = Thread.start(_thread_logged_error_worker, NULL, 0);
-  int caught = 0;
-  try failure.join();
-  catch %(join-fail *): caught = 1;
-  EXPECT_TRUE(caught);
+  EXPECT_INT_EQ(failure.join().integer(), 91);
   List error_entry = entries.car();
   EXPECT_TRUE(error_entry[4].symbol() == <err-report>);
   EXPECT_TRUE(
@@ -377,7 +413,7 @@ static void thread_memory_sink_retains_worker_events(void) {
 }
 
 static void thread_results_stay_private_until_join(void) {
-  Pool root = String.pool_current();
+  Pool root = Pool.current();
   size_t before = root.stats().interned;
 
   Context destination = Context.open_isolated_named("Thread join target");
@@ -471,7 +507,7 @@ static void thread_join_runs_recursive_custom_exporter(void) {
 }
 
 static void thread_errors_stay_private_until_join(void) {
-  Pool root = String.pool_current();
+  Pool root = Pool.current();
   size_t before = root.stats().interned;
 
   Context destination = Context.open_isolated_named("Thread error target");
@@ -618,6 +654,8 @@ void thread_suite(void) {
   $test.run(thread_rejects_free_before_join_and_double_join);
   $test.run(thread_workers_isolate_and_join_results);
   $test.run(thread_join_raises_worker_errors);
+  $test.run(thread_ignored_policy_resumes_in_worker);
+  $test.run(thread_shared_cause_still_fails_join);
   $test.run(thread_memory_sink_retains_worker_events);
   $test.run(thread_results_stay_private_until_join);
   $test.run(thread_join_returns_void_worker_result);

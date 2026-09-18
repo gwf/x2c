@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/unknown-character.x:4:12: parse: invalid token
+    int value` = 1;
+             ^
+

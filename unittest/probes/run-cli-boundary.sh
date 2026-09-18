@@ -1076,8 +1076,11 @@ grep -Fq "$manifest/src/native.c" "$manifest/cdep.stderr"
   >"$manifest/override.stdout" 2>"$manifest/override.stderr"
 grep '^x2c: compile ' "$manifest/override.stderr" |
   grep -Fq -- '-O0'
-! grep '^x2c: compile ' "$manifest/override.stderr" |
-  grep -Fq -- '-O2'
+if grep '^x2c: compile ' "$manifest/override.stderr" |
+   grep -Fq -- '-O2'; then
+  echo "an -O0 override left -O2 on the compile command" >&2
+  exit 1
+fi
 
 (cd "$manifest/nested" && "$X2C" build -v) \
   >"$manifest/profile-change.stdout" \

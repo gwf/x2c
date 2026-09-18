@@ -11,13 +11,14 @@ of `make test`.
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PACKAGE = os.path.dirname(HERE)
 PROGRAM = os.path.join(PACKAGE, "builds", "verify-ops")
-DEFAULT_PYTHON = "/Users/gary/Git/Bonsai-demo/.venv/bin/python"
+DEFAULT_PYTHON = "python3"
 TOLERANCE = 1e-9
 
 PYTHON_SIDE = r'''
@@ -70,7 +71,8 @@ def main():
         if name:
             x2c[name] = float(value)
 
-    python = os.environ.get("TORCH_PYTHON", DEFAULT_PYTHON)
+    named = os.environ.get("TORCH_PYTHON", DEFAULT_PYTHON)
+    python = shutil.which(named) or named
     if not os.path.exists(python):
         print("no interpreter at %s; set TORCH_PYTHON" % python)
         return 1

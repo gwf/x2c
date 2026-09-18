@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 static String _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
@@ -585,7 +587,7 @@ void Path_copy_file(Path source, Path target){
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
     struct stat info, existing;
-    File_stat(input, & info);
+    if(File_stat(input, & info)) File_path_error(String_var(_12), source, errno);
     if(! stat(target, & existing) && existing.st_dev == info.st_dev && existing.st_ino == info.st_ino){
       x2c_cleanup_leave(& _x2c_defer_record_1);
       return;

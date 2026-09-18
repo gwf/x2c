@@ -16,6 +16,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 static List _26, _24, _23, _21, _19;
 
 static String _17, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;

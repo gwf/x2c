@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/inactive-arm-lexical-error.x:6:9: type: expected scalar type
+unittest/compiler-fixtures/inactive-arm-lexical-error.x:6:9: parse: invalid token
   this isn't code
           ^
 

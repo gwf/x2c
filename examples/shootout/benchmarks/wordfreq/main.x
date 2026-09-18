@@ -31,15 +31,15 @@ static String _make_text(int word_count) {
 }
 
 static uint64_t _count(String text) {
-  Scope.retain();
-  defer Scope.release();
-  Map counts = {};
-  foreach (String word, text.words()) counts[word] += 1;
+  $scope() {
+    Map counts = {};
+    foreach (String word, text.words()) counts[word] += 1;
 
-  uint64_t checksum = counts.len();
-  foreach (Var (word, count), counts)
-    checksum += word.string().len() * count.int();
-  return checksum;
+    uint64_t checksum = counts.len();
+    foreach (Var (word, count), counts)
+      checksum += word.string().len() * count.int();
+    return checksum;
+  }
 }
 
 int main(int argc, char **argv) {

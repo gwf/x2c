@@ -1770,7 +1770,7 @@ Source: `lib/typed-map.x:346`
 <a id="MapIntInt"></a>
 ### MapIntInt
 
-`typedef struct MapIntInt { Scope *scope, Bytes hashes, entries; unsigned used; unsigned capacity; unsigned mask; } *MapIntInt`
+`typedef struct MapIntInt { Scope scope, Bytes hashes, entries; unsigned used; unsigned capacity; unsigned mask; } *MapIntInt`
 
 A mutable, `Scope`-owned map from native `int` keys to `int` values.
 Keys and values are copied into native entry fields; assignment shares the
@@ -1783,7 +1783,7 @@ Source: `lib/typed-map.x:25`
 <a id="MapLongDouble"></a>
 ### MapLongDouble
 
-`typedef struct MapLongDouble { Scope *scope, Bytes hashes, entries; unsigned used; unsigned capacity; unsigned mask; } *MapLongDouble`
+`typedef struct MapLongDouble { Scope scope, Bytes hashes, entries; unsigned used; unsigned capacity; unsigned mask; } *MapLongDouble`
 
 A mutable, `Scope`-owned map from native `long` keys to `double` values.
 Keys and values are copied into native entry fields; assignment shares the
@@ -1796,7 +1796,7 @@ Source: `lib/typed-map.x:38`
 <a id="MapStringInt"></a>
 ### MapStringInt
 
-`typedef struct MapStringInt { Scope *scope, Bytes hashes, entries; unsigned used; unsigned capacity; unsigned mask; } *MapStringInt`
+`typedef struct MapStringInt { Scope scope, Bytes hashes, entries; unsigned used; unsigned capacity; unsigned mask; } *MapStringInt`
 
 A mutable, `Scope`-owned map from canonical `String` keys to native `int`
 values. Exporting an owned map rebuilds it with destination-canonical keys
@@ -1809,7 +1809,7 @@ Source: `lib/typed-map.x:68`
 <a id="MapStringString"></a>
 ### MapStringString
 
-`typedef struct MapStringString { Scope *scope, Bytes hashes, entries; unsigned used; unsigned capacity; unsigned mask; } *MapStringString`
+`typedef struct MapStringString { Scope scope, Bytes hashes, entries; unsigned used; unsigned capacity; unsigned mask; } *MapStringString`
 
 A mutable, `Scope`-owned map from canonical `String`s to canonical
 `String`s.

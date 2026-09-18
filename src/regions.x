@@ -3,7 +3,7 @@
     Copyright (c) 2026 Gary William Flake.
 
     A region is a `$scope()` block, a `Scope.retain` and `Scope.release`
-    pair, a `$scope(&slot)` push, a `String.pool_retain` bracket, an `$auto`
+    pair, a `$scope(&slot)` push, a `Pool.open` bracket, an `$auto`
     local, or a Scope local that `Scope.destroy` ends. The pass reads the
     typed forms the parser produced, before the transform driver rewrites
     them, so a region is still the call that opens it and the `defer` beside
@@ -15,7 +15,9 @@
     where each parameter is sunk. The unit's functions reach a fixpoint over
     their summaries. A call into another unit has a summary only through the
     runtime table, so a unit's warnings do not depend on which units were
-    translated before it.
+    translated before it. A tool that holds every unit at once can seed the
+    fixpoint with the other units' summaries through
+    `Compiler.region_escapes`.
 
     The warnings name departures from the lexical pattern. Raw C stores,
     pointer arithmetic, callbacks, and storage the runtime did not allocate
@@ -100,19 +102,18 @@ static Map runtime = %{
   "Var_block": (wrap),               "Block_var": (wrap),
   "Var_buffer": (wrap),              "Buffer_var": (wrap),
   "Array_free": (free),              "Array_list_free": (free),
-  "Array_cleanup": (free),           "Map_free": (free),
-  "Map_cleanup": (free),             "Block_free": (free),
-  "Block_cleanup": (free),           "Bytes_cleanup": (free),
-  "Buffer_free": (free),             "Buffer_cleanup": (free),
-  "Context_close": (free),           "Context_cleanup": (free),
-  "Scope_free": (free),
+  "Array_cleanup": (free),           "Map_cleanup": (free),
+  "Block_free": (free),              "Block_cleanup": (free),
+  "Bytes_cleanup": (free),           "Buffer_free": (free),
+  "Buffer_cleanup": (free),          "Context_close": (free),
+  "Context_cleanup": (free),         "Scope_free": (free),
   "Scope_destroy": (destroy),        "Scope_cleanup": (destroy),
   "Scope_retain": (open scope),      "Scope_release": (close scope),
-  "String_pool_retain": (open pool), "String_pool_release": (close pool),
+  "Pool_open": (open pool),          "Pool_close": (close pool),
   "Scope_push": (open slot),         "Scope_pop": (close slot),
   "Scope_move": (move),              "Context_export": (exit),
-  "List_promote": (exit),            "Var_promote": (exit),
-  "String_promote": (exit)
+  "List_promote": (exit),            "String_promote": (exit),
+  "Atom_promote": (exit)
 };
 
 // canonical forms the pass reads
@@ -792,18 +793,17 @@ static void _analyze(Walk w, List function) {
   w.changed = 1;
 }
 
-/** Warns about values that can outlive the region that allocated them.
-    `ast` must be the bound and typed top-level unit, before transform
-    lowering rewrites its `defer` and region forms. The call adds warnings to
-    `c` and does not change `ast`.
-*/
-void Compiler.check_regions(Compiler c, List ast) {
-  Array functions = $auto([]);
+/* The functions `ast` defines, walked against `seed`: `(NAME FRESH SINKS)`
+   rows for names another unit defines. A seeded name the unit defines
+   itself only starts the walk higher, because summaries grow. */
+static void _fixpoint(Walk w, List ast, List seed, Array functions) {
   _collect_functions(ast, functions);
-  struct Walk walk = {
-    .compiler = c, .summaries = {}, .pending = [], .freed = []};
-  Walk w = &walk;
-  foreach (List function, functions) w.summaries[function.car()] = %(0 ());
+  foreach (List row, seed)
+    match (row) case %(?name ?fresh ?sinks):
+      w.summaries[name] = %($fresh $sinks);
+  foreach (List function, functions)
+    if (w.summaries[function.car()] is void)
+      w.summaries[function.car()] = %(0 ());
   /* Summaries only grow, so a round that changes none walked every body
      against final summaries, and its warnings are the unit's. */
   do {
@@ -811,6 +811,19 @@ void Compiler.check_regions(Compiler c, List ast) {
     w.warnings = [];
     foreach (List function, functions) _analyze(w, function);
   } while (w.changed);
+}
+
+/** Warns about values that can outlive the region that allocated them.
+    `ast` must be the bound and typed top-level unit, before transform
+    lowering rewrites its `defer` and region forms. The call adds warnings to
+    `c` and does not change `ast`.
+*/
+void Compiler.check_regions(Compiler c, List ast) {
+  struct Walk walk = {
+    .compiler = c, .summaries = {}, .pending = [], .freed = []};
+  Walk w = &walk;
+  Array functions = $auto([]);
+  _fixpoint(w, ast, NULL, functions);
   int origin = c.origin;
   foreach (List warning, w.warnings) {
     (Symbol code, int at, String message, List notes) = warning;
@@ -818,4 +831,51 @@ void Compiler.check_regions(Compiler c, List ast) {
     c.report_warning(code, message, NULL, notes);
   }
   c.origin = origin;
+}
+
+/* Where an origin points, named as the caller's reports name it. */
+static List _located(Compiler c, int origin) {
+  List location = c.origin_location(origin);
+  Var file = location ? location.assoc(<file>) : void;
+  String path = file is <string>
+              ? c.display_path(file.str()) : String.new("");
+  return %(
+    at $path ${location ? location.assoc(<line>).int() : 0}
+    ${location ? location.assoc(<column>).int() : 0}
+  );
+}
+
+/** The region summaries the functions in `ast` have and the warnings they
+    produce, read against `seed`: `(NAME FRESH SINKS)` rows for the
+    functions other units define. `ast` must be what
+    `Compiler.check_regions` takes. The call reports nothing, so a caller
+    that walks a whole project can run it once a pass and report only the
+    last. Returns `(region-unit (summaries ROW...) (warnings WARNING...))`,
+    where a warning is
+    `(warning (at PATH LINE COLUMN) CODE MESSAGE (notes NOTE...))`.
+*/
+List Compiler.region_escapes(Compiler c, List ast, List seed) {
+  struct Walk walk = {
+    .compiler = c, .summaries = {}, .pending = [], .freed = []};
+  Walk w = &walk;
+  Array functions = $auto([]);
+  _fixpoint(w, ast, seed, functions);
+  Array summaries = [], warnings = [];
+  foreach (List function, functions) {
+    String name = function.car();
+    (Var fresh, List sinks) = w.summaries[name];
+    summaries.push(%($name $fresh $sinks));
+  }
+  foreach (List warning, w.warnings) {
+    (Symbol code, int at, String message, List notes) = warning;
+    warnings.push(%(
+      warning ${_located(c, at)} $code $message (notes @notes)
+    ));
+  }
+  summaries.sort();
+  warnings.sort();
+  return %(
+    region-unit (summaries @{summaries.list_free()})
+    (warnings @{warnings.list_free()})
+  );
 }

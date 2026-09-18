@@ -1,6 +1,10 @@
 # Region escape warnings
 
-> Status: active - 2026-09-17. Shipped in ac931c4: on by default, with
+> Status: done - shipped in ac931c4 on 2026-09-17. `Context` regions are
+> still not modeled, so the `lifetime-escapes` command in `tools/x2c-graph`
+> continues to serve them; that is a separate scope, not remaining work here.
+>
+> Shipped in ac931c4: on by default, with
 > `$let` taught to the pass. Summaries no longer cross units: a summary
 > recorded during transform and read back from interfaces made warnings
 > depend on input order, `-j`, and earlier `.xi` files, so each unit now

@@ -99,8 +99,8 @@ These cursors allocate one scope-owned traversal descriptor. There is no
 `List` and no object per field. Each yielded field is a canonical `String`.
 After a field has been interned once, finding an equal field of at most 256
 bytes needs no heap allocation. Distinct fields remain in the active `String`
-pool. For a large input, use `String.pool_retain()` and
-`String.pool_release()` to reclaim temporary fields, and promote the values
+pool. For a large input, use `Pool.open()` and
+`Pool.close()` to reclaim temporary fields, and promote the values
 that must survive.
 
 A `Var` is iterated through its descriptor, so a boxed `List` or `Array`
@@ -233,8 +233,7 @@ int main(void) {
   $scope() {
     Array values = range(1, 8, 1)
       .map(double_value)
-      .filter(divisible_by_four)
-      .array();
+      .filter(divisible_by_four);
     for (size_t i = 0; i < values.len(); i++)
       printf("%d\n", values[i].int());
   }
@@ -246,7 +245,9 @@ x2c inserts a distinct `struct Iter` compound literal for each missing final
 destination. Those objects have automatic storage and remain alive through
 the enclosing block. Completion applies only when the chain ends in
 `try_next`, `next`, `done`, `list`, `array`, `foldl`, `any`, `all`, `find`,
-`count`, `sum`, `product`, `min`, `max`, or `foreach`.
+`count`, `sum`, `product`, `min`, `max`, or `foreach`. A `List` or `Array`
+destination ends the chain the same way: it calls `list` or `array` for you,
+which is why the chain above needs no explicit collector.
 
 It does not apply when an iterator is assigned, returned, or passed as an
 argument. Then declare one `struct Iter` for each stage:
@@ -344,8 +345,8 @@ Constructing an iterator does not consume it. Collectors and aggregates do:
 ~static int over_two(Var value) { return value > 2; }
 ~
 ~int main(void) {
-List numbers = range(1, 4, 1).list();
-Array boxed = range(1, 4, 1).array();
+List numbers = range(1, 4, 1);
+Array boxed = range(1, 4, 1);
 printf("%s and %s\n", numbers.str(), boxed.str());
 
 printf("sum = %d\n", range(1, 10, 1).sum().int());
@@ -356,7 +357,8 @@ printf("first over two = %s\n",
 ```
 
 `iter.list()` and `iter.array()` build a fresh `List` or `Array` under the
-current scope. The aggregates are `count`, `sum`, `product`, `min`, `max`,
+current scope, and a `List` or `Array` destination calls them for you, as
+above. The aggregates are `count`, `sum`, `product`, `min`, `max`,
 `foldl`, `any`, `all`, and `find`. `sum` and `product` use `Var` arithmetic
 promotion. `min` and `max` use total `Var` ordering and keep the first of
 equal values. `min`, `max`, and `find` return `void` when there is nothing to

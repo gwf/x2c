@@ -60,6 +60,7 @@
     - [lib/match.x](library/modules/match.md)
     - [lib/mutex.x](library/modules/mutex.md)
     - [lib/path.x](library/modules/path.md)
+    - [lib/pool.x](library/modules/pool.md)
     - [lib/process.x](library/modules/process.md)
     - [lib/regex.x](library/modules/regex.md)
     - [lib/scope.x](library/modules/scope.md)

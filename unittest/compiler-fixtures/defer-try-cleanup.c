@@ -8,6 +8,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 static int cleanup;
 
 _x2c_initializer_choice_546EEC31_0((cleanup = 0))

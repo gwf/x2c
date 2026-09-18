@@ -214,8 +214,10 @@ receiver's address is passed, so `rec.bump(4)` reaches
 a pointer to the declared parameter is one level too far and is a type error;
 write `(*pointer).method()`. Normal pointer
 conversion rules still apply, including preservation of `const` and other
-qualifiers. Method syntax does not make every value dynamically dispatchable;
-only registered callbacks define custom behavior.
+qualifiers. A qualifier on the receiver itself does not change which methods
+and operators the type has, so a `const String` answers `len()` and `+` the
+way an unqualified one does. Method syntax does not make every value
+dynamically dispatchable; only registered callbacks define custom behavior.
 
 A method may use `Self` in its result and parameter types when it promises to
 preserve the receiver's static typedef:
@@ -258,8 +260,16 @@ conversion, cleanup, and lifetime rules as `return expression;`. The semicolon
 terminates the body; nested compound literals, collection literals, and lambda
 bodies do not terminate it.
 
-An expression is required; `=>;` is invalid. The rules for returning a value
-from a `void` function are unchanged. Use a compound body when a function needs
+A `void` function has no value to return, so its expression body is the
+shorthand for a compound body containing one expression statement:
+
+```x2c
+~typedef struct Counter { int value; } Counter;
+static void Counter.step(Counter *self) => self.value++;
+```
+
+An expression is required; `=>;` is invalid. The rules for writing `return` in
+a `void` function are unchanged. Use a compound body when a function needs
 declarations, several statements, or a comment inside the body.
 
 ### Reference parameters
@@ -962,6 +972,31 @@ appears where one statement is required, its production must likewise yield
 exactly one statement. A compound statement may contain the captured target
 plus any additional block items without requiring braces at the invocation.
 
+A `Statement` or `Block` decorator standing before a file-scope function
+definition decorates that function's body. The body is parsed as usual, the
+decorator's production replaces it, and the same function is rebuilt around
+the result, so parameters resolve inside the produced items and a `return`
+from within the body runs the decorator's deferred cleanup before leaving:
+
+```x2c
+~#include "x2c.x"
+$scope() static int total(List values, int bias) {
+  int sum = bias;
+  foreach (Var value, values) sum += value.int();
+  return sum;
+}
+~int main(void) { return total(%(1 2 3), 10) == 16 ? 0 : 1; }
+```
+
+An expression body works the same way. A decorator written this way before a
+declaration that is not a function definition is rejected.
+
+Block items the production places *after* the captured target are ordinary
+statements, so a body that returns or that a cause transfers out of never
+reaches them. A decorator with work to do once the body is finished puts that
+work in a `defer` written before the target; `$scope`, `$lock`, and `$time`
+are all written this way.
+
 A `.x` file may give a visible macro or decorator an identifier spelling:
 
 ```text
@@ -1206,7 +1241,25 @@ The compiler supplies these contextual Lisp operations:
 (x2c.type.tag-name name)
 (x2c.type.reverse-name base participant)
 (x2c.type.parts type)
+(x2c.type.parameters type)
+(x2c.type.return type)
+(x2c.type.element type)
+(x2c.type.integral? type)
+(x2c.type.pointer? type)
+(x2c.protocol.member participant base member)
+(x2c.literal.value literal)
+(x2c.type.members type)
+(x2c.diagnostic.warn message notes)
+(x2c.stmnt.make expression)
+(x2c.stmnt.return expression)
+(x2c.block.make items)
+(x2c.decl.make type name initializer)
+(x2c.param.make type name)
+(x2c.expr.cast type expression)
 ```
+
+A supported operation is spelled `x2c.<noun>.<verb>`. A name beginning `_x2c.`
+is a compiler internal with no compatibility promise.
 
 `x2c.syntax.type` returns the canonical semantic `Type` for supported typed
 syntax.
@@ -1261,7 +1314,38 @@ that representation, including unnamed members and padding. Each record is
 `(NAME DECLARED_TYPE)`; an unnamed field has an empty name. Use `fields` for
 named-member access and `layout` when every declared field affects a decision.
 `x2c.type.parts` separates a semantic type into its declaration base and
-declarator modifiers as `(BASE MODIFIERS)`.
+declarator modifiers as `(BASE MODIFIERS)`. `x2c.type.parameters` and
+`x2c.type.return` split a function type into its parameter types and its
+result. `x2c.type.element` returns a pointer or array element type, and
+`x2c.type.integral?` and `x2c.type.pointer?` classify a type without
+resolving it.
+
+`x2c.protocol.member` looks up one member of a participant's conformance to a
+base protocol and returns `nil` when the participant does not adopt it.
+
+`x2c.literal.value` returns a captured literal's value: a `String`, a number,
+or a `Symbol`, according to the literal. It is the inverse of
+`x2c.literal.string`, which builds a literal from a value. A literal whose text
+the parser has already consumed, such as a multi-line interpolated `%"..."`, is
+rejected; read its spelling with `x2c.source.text` instead.
+
+`x2c.type.members` returns an enum's members in source order as `(("NAME"
+VALUE) ...)`. `VALUE` is `nil` when the member takes its position's value, the
+literal's exact spelling as a `String` when the initializer is one literal,
+carrying its base, suffix, and character quotes, and otherwise the
+initializer's expression node, which a generator can splice or walk. Test it
+with `string?` when both kinds can occur. A non-enum `Type` is rejected.
+
+`x2c.diagnostic.warn` reports a macro warning at the invocation with `String`
+notes and returns, so expansion continues. `x2c.diagnostic.fail` does not
+return.
+
+The statement and declaration constructors build one node each from operands
+that are themselves nodes, as the `x2c.expr.*` family does. `x2c.block.make`
+takes a `List` of block items; `x2c.decl.make` and `x2c.param.make` take a
+`Type`, a name value from `x2c.ident`, and for a declaration an optional
+initializer expression. `x2c.expr.cast` applies a `Type` to an expression,
+carrying that type's declarator modifiers.
 
 `x2c.type.value?` recognizes numeric scalars and enums, Symbol, Var, Atom,
 String, List, and their typedef aliases. Pointer-shaped runtime handles such
@@ -1958,8 +2042,10 @@ A `Map` tests its keys, a `List` or `Array` its elements, and a `String` a
 substring. The left operand converts to the member's parameter type, so a
 `Var` holding the key works as well as a literal. A receiver whose type does
 not implement a `contains` member is rejected with
-`operator 'in' requires an implemented contains member`; `SymbolSet` is one
-such type today and uses `set.contains(name)`. There is no `not in`
+`operator 'in' requires an implemented contains member`. The member comes
+from a protocol the receiver adopts: `Var(T)` declares one, and the
+one-member `Contains(T)` protocol gives membership to a type that holds
+members without boxing them, as `SymbolSet` does. There is no `not in`
 spelling; write `!(name in ages)`.
 
 `in` is a keyword only between two operands, so `struct buffer *in` and
@@ -2494,7 +2580,7 @@ bind one name or destructure a key and value:
 foreach(int value, values) total += value;
 foreach(int key, map.keys()) printf("%d\n", key);
 foreach(Var (key, value), map)
-  printf("%d=%d\n", key.integer(), value.integer());
+  printf("%ld=%ld\n", key.integer(), value.integer());
 ~  return total == 6 ? 0 : 1;
 ~}
 ```
@@ -2614,11 +2700,13 @@ runs no cleanup. An outward `goto` runs every cleanup region it exits. A
 `goto` into a protected cleanup region, or into a sibling protected region,
 is rejected at compile time.
 
-Generated `Error` transfer preserves directly modified automatic locals and
-parameters under the repository's optimized build. The compiler supplies the
-required volatile C representation for those values and for the transfer
-state its frames carry; source code does not need optimization-specific
-qualifiers for ordinary direct assignments in `try`, `catch`, or `finally`.
+Generated `Error` transfer preserves the automatic locals and parameters a
+protected body modifies under the repository's optimized build, whether the
+body assigns them by name or writes through a pointer it holds the address
+in. The compiler supplies the required volatile C representation for those
+values and for the transfer state its frames carry; source code does not need
+optimization-specific qualifiers for ordinary assignments in `try`, `catch`,
+or `finally`.
 `Error` transfer does not restore the process signal mask; code that changes a
 signal mask owns restoring it.
 
@@ -2892,7 +2980,7 @@ Each is a warning: translation continues and the program still compiles.
 | Code | Reported for |
 | --- | --- |
 | `region` | A value allocated inside a region is reachable after the region ends. The message gives the way the value leaves, and the note gives the line that opened the region. |
-| `unbalanced` | A region is opened in one block and released in another. |
+| `unbalanced` | A region has no matching release in the block that opened it. |
 | `after-free` | A local is read after `Scope.free` or `Array.list_free` consumed it. |
 
 The check analyzes regions lexically and summarizes each function within its

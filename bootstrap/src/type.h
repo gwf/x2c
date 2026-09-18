@@ -17,6 +17,8 @@ String ast_addressed_identifier(Var value);
 
 String ast_direct_identifier(Var value);
 
+String ast_indirect_identifier(Var value);
+
 List ast_prototype_declarator(List declarator);
 
 List Type_parameter_ast(Type type, List binding);

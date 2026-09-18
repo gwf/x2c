@@ -49,12 +49,12 @@ static int _pool_probe_equal(Var a, Var b) {
 static void pool_lookup_shadows_outward(void) {
   Pool root = Pool.retain_named(NULL, "test-pool-root");
   EXPECT_STR_EQ(root.scope.name(), "test-pool-root");
-  EXPECT_TRUE(root.table.scope == &root.scope);
+  EXPECT_TRUE(root.table.scope == root.scope);
   String alpha = "pool-alpha";
   root.insert(alpha);
   Pool child = root.retain_named("test-pool-child");
   EXPECT_STR_EQ(child.scope.name(), "test-pool-child");
-  EXPECT_TRUE(child.table.scope == &child.scope);
+  EXPECT_TRUE(child.table.scope == child.scope);
   Var from_parent = alpha;
   EXPECT_TRUE(child.lookup(alpha) == from_parent);
   String beta = "pool-beta";
@@ -304,7 +304,7 @@ static void pool_null_owner_failures_are_handleable(void) {
 }
 
 static void pool_string_bracket_and_wipe(void) {
-  String.pool_retain_named("test-string-bracket");
+  Pool.open_named("test-string-bracket");
   String kept = NULL;
   for (int i = 0; i < 200; i++) {
     String transient = String.printf("pool-transient-%d", i);
@@ -313,7 +313,7 @@ static void pool_string_bracket_and_wipe(void) {
   ScopeStats during = Scope.stats();
   String promoted = kept.promote();
   EXPECT_TRUE(promoted == kept);  // promotion is pointer-stable
-  String.pool_release();
+  Pool.close();
   ScopeStats after = Scope.stats();
   EXPECT_TRUE(after.live_allocations < during.live_allocations);
   EXPECT_STR_EQ(kept, "pool-transient-137");
@@ -343,7 +343,7 @@ static void pool_string_free_reuses_small_slot(void) {
 }
 
 static void pool_list_bracket_promotes_result(void) {
-  String.pool_retain_named("test-list-bracket");
+  Pool.open_named("test-list-bracket");
   for (int i = 0; i < 100; i++) {
     String garbage = String.printf("pool-garbage-%d", i);
     List cell = %( $garbage $i );
@@ -354,7 +354,7 @@ static void pool_list_bracket_promotes_result(void) {
   List result = %( $label 42 $nested );
   List promoted = result.promote();
   EXPECT_TRUE(promoted == result);  // pointer stability
-  String.pool_release();
+  Pool.close();
   EXPECT_INT_EQ(result.len(), 3);
   EXPECT_STR_EQ(result.car().string(), "pool-keep-me");
   Var answer = 42;
@@ -369,10 +369,10 @@ static void pool_list_bracket_promotes_result(void) {
 static void pool_unpromoted_identity_is_wiped(void) {
   // volatile seed keeps these cells out of the static literal machinery
   volatile int seed = 9100;
-  String.pool_retain_named("test-list-wipe");
+  Pool.open_named("test-list-wipe");
   List doomed = cons(seed + 1, cons(seed + 2, cons(seed + 3, NULL)));
   EXPECT_INT_EQ(doomed.len(), 3);
-  String.pool_release();
+  Pool.close();
   PoolStats before = Pool.stats(NULL);
   List again = cons(seed + 1, cons(seed + 2, cons(seed + 3, NULL)));
   PoolStats after = Pool.stats(NULL);
@@ -398,14 +398,14 @@ static void pool_try_own_reports_lifetime_safety(void) {
   transient_list.cdr = NULL;
   EXPECT_FALSE(transient_list.try_own());
 
-  String.pool_retain_named("test-own-values");
+  Pool.open_named("test-own-values");
   EXPECT_TRUE(permanent_string.try_own());
   EXPECT_TRUE(permanent_list.try_own());
   String child_string = String.new("pool-child-string");
   List child_list = %($child_string pool-child-list);
   EXPECT_TRUE(child_string.try_own());
   EXPECT_TRUE(child_list.try_own());
-  String.pool_release();
+  Pool.close();
   EXPECT_STR_EQ(child_string, "pool-child-string");
   EXPECT_TRUE(child_list == %("pool-child-string" pool-child-list));
 }
@@ -421,11 +421,27 @@ static void string_is_permanent_asks_without_promoting(void) {
   EXPECT_FALSE(transient.is_permanent());
   transient.free();
 
-  String.pool_retain_named("test-is-permanent");
+  Pool.open_named("test-is-permanent");
   String nested = String.new("pool-nested-string");
   EXPECT_FALSE(nested.is_permanent());
   EXPECT_TRUE(permanent.is_permanent());
-  String.pool_release();
+  Pool.close();
+}
+
+static void pool_bracket_requires_an_open_child(void) {
+  int caught = 0;
+  try Pool.close();
+  catch %(bad-state *): caught++;
+  try Pool.detach();
+  catch %(bad-state *): caught++;
+  EXPECT_INT_EQ(caught, 2);
+  // The failures left the root active, so the bracket still works.
+  Pool root = Pool.current();
+  Pool nested = Pool.open_named("test-bracket-guard");
+  EXPECT_TRUE(Pool.current() == nested);
+  EXPECT_TRUE(Pool.detach() == nested);
+  EXPECT_TRUE(Pool.current() == root);
+  nested.release();
 }
 
 static void pool_release_and_parent_allocation_do_not_deadlock(void) {
@@ -434,7 +450,7 @@ static void pool_release_and_parent_allocation_do_not_deadlock(void) {
   pthread_t worker;
   /* Thread.start does this before pthread_create; without it Pool takes no
      lock at all and this test proves nothing about contention. */
-  x2c_pool_thread_start();
+  Pool.thread_start();
   int created = pthread_create(
     &worker, NULL, _pool_parent_allocator, &probe
   );
@@ -483,5 +499,6 @@ void pool_suite(void) {
   $test.run(pool_unpromoted_identity_is_wiped);
   $test.run(pool_try_own_reports_lifetime_safety);
   $test.run(string_is_permanent_asks_without_promoting);
+  $test.run(pool_bracket_requires_an_open_child);
   $test.run(pool_release_and_parent_allocation_do_not_deadlock);
 }

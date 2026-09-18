@@ -10,7 +10,7 @@ pointer whose target the compiler cannot identify, including a pointer that
 a called function stores into for the caller.
 
 A region is a `$scope()` block, a `Scope.retain` and `Scope.release` pair, a
-`$scope(&slot)` push, a `String.pool_retain` bracket, an `$auto` local, or the
+`$scope(&slot)` push, a `Pool.open` bracket, an `$auto` local, or the
 storage of a `Scope` local that `Scope.destroy` ends.
 `src/regions.x` analyzes these forms before the transform driver lowers
 them, so a region is still the call that opens it and the `defer` beside it
@@ -18,11 +18,11 @@ that closes it.
 
 ## Exemptions
 
-The pass exempts three ways of leaving a region.
+The pass exempts four ways of leaving a region.
 
 A `List` pool owns each canonical value, so ending a region never frees it.
 `String`, `List`, and `Symbol` results therefore cross a region boundary
-without a warning. A value consed inside a `String.pool_retain` bracket is the
+without a warning. A value consed inside a `Pool.open` bracket is the
 exception: that bracket's pool frees it, so the pass tracks pool-born values
 the same way it tracks scope-born ones. The exemption covers the List cells
 alone. `cons(a, rest)` and `%($a)` store `a` in a cell that outlives every
@@ -30,9 +30,12 @@ region, so the pass reports a region-born `a` at that store.
 
 `Scope.move` and `Context.export` change the storage's owner. After the
 move, the region the pass was tracking no longer holds the allocation, so
-the allocation survives the end of that region. Moving into a caller's slot
-is the ordinary way to return mutable storage, and the pass stops tracking
-the value there. Moving into a `Scope` local of the same function ties the
+the allocation survives the end of that region. The promote family -
+`String.promote`, `List.promote`, and `Atom.promote` - hands the value to an
+ancestor pool the same way and is exempt for the same reason. Moving into a
+caller's slot is the ordinary way to return mutable storage, and the pass
+stops tracking the value there. Moving into a `Scope` local of the same
+function ties the
 value to that local's storage, so a read after `Scope.destroy` reports.
 
 A typed conversion copies. Assigning a `Block`, `Buffer`, or `Array` into a
@@ -87,6 +90,12 @@ units, so an interface summary would make a unit's warnings depend on input
 order, the job count, and interfaces left by an earlier translation. As a
 result, the pass reports no warning when a caller passes a region-born value
 to a function in another unit that stores its argument into a static.
+
+The whole-project answer is a separate run over the sources at once. The
+`region-escapes` command of the `x2c-graph` tool walks every unit against the
+summaries the other units proved, repeating until no summary grows, and then
+reports. It finds the cross-unit store a translation cannot, and it changes
+nothing about how a translation behaves.
 
 ## Where the design sits
 

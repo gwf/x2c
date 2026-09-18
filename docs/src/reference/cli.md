@@ -234,7 +234,8 @@ initialization rules.
 The Cosmopolitan APE executable is an experiment for fun only. It can
 bootstrap a minimal native compiler and runtime without a repository checkout,
 but includes no examples, book, or optional packages. Use the full repository
-for normal development; this experiment is no substitute for it.
+for normal development; this experiment is no substitute for it. Releases do
+not publish the APE; `make ape-build` in a checkout produces it.
 
 To try the experiment:
 
@@ -476,10 +477,13 @@ lockfile left beside it is removed.
 
 A build whose lockfile already covers every pinned package, at the pinned
 version and installed in the home, reads no index and makes no network
-request. Any other state re-resolves through the index and rewrites the
-lockfile. A version the index cannot supply stops the build with an error
-that includes both versions. A dry run installs nothing and writes no
-lockfile, and the editor adapter never installs.
+request. A pin the lockfile covers but the home does not hold is installed
+from the url and sha256 that lockfile recorded, not from the index, so the
+archive is the one the lockfile pinned however the index has changed. Only a
+pin the lockfile does not cover reaches the index. The lockfile is then
+rewritten to the manifest's pins. A version the index cannot supply stops the
+build with an error that includes both versions. A dry run installs nothing
+and writes no lockfile, and the editor adapter never installs.
 
 ## Include and tool ownership
 
@@ -509,8 +513,12 @@ one operand: a local directory, a local `.tar.gz`, a URL with `--sha256
 <hex>`, or a name resolved through the index (`--index <url-or-path>`
 overrides the default). `--force` accepts a bundle built by another x2c
 version. `remove` takes one installed name; `list` prints `name version
-kind` lines. Refusals exit with status 2 and leave the installed set as it
-was.
+kind` lines on standard output, and the install and removal receipts go to
+standard error with the other action output. Refusals, including a package
+whose sources or install marker are damaged, exit with status 2 and leave
+the installed set as it was. One install or removal in a home runs at a
+time; the lock is released once the packages are in place, so a `run` that
+installed a dependency does not hold it while the program runs.
 
 A project manifest can pin packages instead of installing them by hand; see
 [pinned packages](#pinned-packages).
@@ -544,9 +552,11 @@ checkout's `include/x2c` names.
 
 There is no lowercase `-i`. `-D` and `-U` reach requested x2c preprocessing
 and C compilation. Optimization, debug, and `-Xcc` are compile-only; `-L`,
-`-l`, `--rpath`, `-Wl,`, and `-Xlinker` are link-only. Unknown options are
+`-l`, `--rpath`, `-Wl,`, `-Xlinker`, and `-framework` are link-only.
+`-pthread` reaches both the compile and the link. Unknown options are
 rejected. `--rpath <dir>` records `<dir>` in the program as a place to find
 shared libraries when it runs; a package bundle may include it.
+`-framework <name>` links a native framework on macOS.
 
 The C compiler selection order is `--cc`, `X2C_CC`, `CC`, the installed
 toolchain record, then `cc`. The archiver follows `--ar`, `X2C_AR`, `AR`, the
@@ -574,17 +584,19 @@ and there is no option to suppress or escalate one. A warning describes
 something the compiler can see and you may have arranged deliberately, so
 code that means what it says can be left as written.
 
-Five codes are reported as warnings:
+Six codes are reported as warnings:
 
 - `region` says a value allocated inside a region can still be reached after
   the region ends, and names how it leaves. Its note gives the line that
   opened the region.
 - `after-free` says a local was read after `Scope.free` or
   `Array.list_free` consumed it.
-- `unbalanced` says a region was opened in one block and released in
-  another, a shape the `region` check cannot follow.
+- `unbalanced` says a region has no matching release in the block that
+  opened it, a shape the `region` check cannot follow.
 - `literal` says a bare word inside a macro is a `Symbol` where a value was
   probably meant, and names the unquoted spelling that inserts the value.
+- `macro` carries what a macro reported through `x2c.diagnostic.warn`, at the
+  invocation, with the notes the macro supplied.
 - `warning` covers the remaining cases: an unnecessary conversion, and a
   protocol binder that shadows a visible type name.
 
@@ -610,8 +622,8 @@ no diagnostics leaves it empty. Each line is one JSON object:
   `protocol`, `xform`, `region`, `warning`, or `limit`.
 - `severity` is `error`, `warning`, or `note`. It records how the report was
   submitted, so each entry in a category with both severities, such as
-  `region` or `literal`, has its own severity. The `limit` notice is a
-  `note`.
+  `region`, `literal`, or `macro`, has its own severity. The `limit` notice
+  is a `note`.
 - `file` is relative to the working directory for a source inside it and
   absolute otherwise. A pseudo-source such as `<stdin>` keeps its name.
 - `line` and `column` are one-based, `length` is the token width in bytes,

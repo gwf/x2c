@@ -4,7 +4,7 @@
 
 #include "error.h"
 
-static int _init_guard_ = 0;
+#include "exception.h"
 
 #include "symbol.h"
 #include "atom.h"
@@ -225,35 +225,11 @@ Var Pool_intern(Pool, Var, void *);
 Var List_var(List);
 
 List List_cons_in(Pool pool, Var head, List tail){
-  if(! _init_guard_) List_initialize();
   if(! pool || Var_is_void(head)) return NULL;
   List cell = Pool_malloc(pool, sizeof(struct List));
   cell -> car = head;
   cell -> cdr = tail;
   return Var_list(Pool_intern(pool, List_var(cell), cell));
-}
-
-void x2c_pool_values_initialize(void);
-
-void List_initialize(void){
-  if(_init_guard_) return;
-  _init_guard_ = 1;
-  x2c_pool_values_initialize();
-  Scope_shutdown_hook(List_shutdown);
-}
-
-void x2c_pool_values_thread_initialize(void);
-
-void List_thread_initialize(void){
-  if(! _init_guard_) List_initialize();
-  x2c_pool_values_thread_initialize();
-}
-
-void x2c_pool_values_shutdown(void);
-
-void List_shutdown(void){
-  if(! _init_guard_) List_initialize();
-  x2c_pool_values_shutdown();
 }
 
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
@@ -270,7 +246,7 @@ int List_truth(List);
 
 int Pool_promote(Pool, Var, void *);
 
-Pool x2c_pool_values_current(void);
+Pool Pool_current(void);
 
 static void _promote_node(Var node){
   if(Var_is_row(node, 11, 7, 1)){
@@ -283,14 +259,13 @@ static void _promote_node(Var node){
   }
   if(! Var_is_row(node, 9, 7, 4)) return;
   for(List cur = Var_list(node);  List_truth(cur);  cur = cur -> cdr){
-    if(! Pool_promote(x2c_pool_values_current(), List_var(cur), cur)) break;
+    if(! Pool_promote(Pool_current(), List_var(cur), cur)) break;
     _promote_node(cur -> car);
   }
 
 }
 
 List List_promote(List lst){
-  if(! _init_guard_) List_initialize();
   if(! List_truth(lst)) return lst;
   _promote_node(List_var(lst));
   return lst;
@@ -307,14 +282,13 @@ static int _try_own_node(Var node){
   if(Var_is(node, 826970)) return String_try_own(Var_str(node));
   if(! Var_is_row(node, 9, 7, 4)) return 1;
   for(List cur = Var_list(node);  List_truth(cur);  cur = cur -> cdr){
-    if(! Pool_own(x2c_pool_values_current(), List_var(cur), cur)) return 0;
+    if(! Pool_own(Pool_current(), List_var(cur), cur)) return 0;
     if(! _try_own_node(cur -> car)) return 0;
   }
   return 1;
 }
 
 int List_try_own(List lst){
-  if(! _init_guard_) List_initialize();
   return ! List_truth(lst) || _try_own_node(List_var(lst));
 }
 
@@ -325,13 +299,12 @@ Var String_var(String);
 Var Pool_lookup(Pool, Var);
 
 List cons(Var head, List tail){
-  if(! _init_guard_) List_initialize();
   if(Var_is_void(head)){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/list.x",.function = "cons",.line = 176};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/list.x",.function = "cons",.line = 152};
     x2c_error_raise_n(& _x2c_error_site_0, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.cons")), NULL))));
     __builtin_unreachable();
   }
-  Pool pool = x2c_pool_values_current();
+  Pool pool = Pool_current();
   struct List query ={
     head, tail
   }
@@ -342,28 +315,24 @@ List cons(Var head, List tail){
 }
 
 static int _is_active_canonical(List list){
-  return Var_same(Pool_lookup(x2c_pool_values_current(), List_var(list)), List_var(list));
+  return Var_same(Pool_lookup(Pool_current(), List_var(list)), List_var(list));
 }
 
 List List_cons(Var head, List tail){
-  if(! _init_guard_) List_initialize();
   return cons(head, tail);
 }
 
 List Var_cons(Var head, List tail){
-  if(! _init_guard_) List_initialize();
   return cons(head, tail);
 }
 
 void * Var_pointer(Var);
 
 Var Var_car(Var var){
-  if(! _init_guard_) List_initialize();
   return car(Var_pointer(var));
 }
 
 List Var_cdr(Var var){
-  if(! _init_guard_) List_initialize();
   return cdr(Var_pointer(var));
 }
 
@@ -378,7 +347,6 @@ static List _prepend_array(Array values, List tail){
 Var Array_push(Array, Var);
 
 List List_append(List a, List b){
-  if(! _init_guard_) List_initialize();
   if(! List_truth(a)) return b;
   if(! List_truth(b)) return a;
   Array values = Array_new();
@@ -432,7 +400,7 @@ Var unsigned_var(unsigned);
 
 static List _concat_n_va(unsigned list_count, va_list ap){
   if(list_count > INT_MAX){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/list.x",.function = "_concat_n_va",.line = 265};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/list.x",.function = "_concat_n_va",.line = 241};
     x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.concat_n")), NULL))), Symbol_var(7318440), unsigned_var(list_count));
     __builtin_unreachable();
   }
@@ -463,7 +431,6 @@ static List _concat_n_va(unsigned list_count, va_list ap){
 }
 
 List List_concat_n(unsigned list_count, ...){
-  if(! _init_guard_) List_initialize();
   va_list ap;
   va_start(ap, list_count);
   List result = _concat_n_va(list_count, ap);
@@ -485,7 +452,7 @@ static List _n_va(unsigned element_count, va_list ap){
     for(unsigned i = 0;  i < element_count;  i ++){
       Var value = va_arg(ap, Var);
       if(Var_is_void(value)){
-        static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/list.x",.function = "_n_va",.line = 291};
+        static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/list.x",.function = "_n_va",.line = 267};
         x2c_error_raise_n(& _x2c_error_site_2, 48270474208, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.list_n")), NULL))), Symbol_var(19800432), unsigned_var(i));
         __builtin_unreachable();
       }
@@ -507,7 +474,6 @@ static List _n_va(unsigned element_count, va_list ap){
 }
 
 List List_list_n(unsigned element_count, ...){
-  if(! _init_guard_) List_initialize();
   va_list ap;
   va_start(ap, element_count);
   List result = _n_va(element_count, ap);
@@ -516,7 +482,6 @@ List List_list_n(unsigned element_count, ...){
 }
 
 List List_reverse(List lst){
-  if(! _init_guard_) List_initialize();
   List rev = NULL;
   {
     Var value;
@@ -536,7 +501,6 @@ List List_reverse(List lst){
 }
 
 Var List_last(List lst){
-  if(! _init_guard_) List_initialize();
   if(! List_truth(lst)) return((void) 0, Void);
   List tail;
   while(List_truth((tail = List_cdr(lst)))) lst = tail;
@@ -546,18 +510,15 @@ Var List_last(List lst){
 int Var_equal(Var, Var);
 
 int List_index(List l, Var key){
-  if(! _init_guard_) List_initialize();
   for(int index = 0;  List_truth(l);  l = List_cdr(l), index ++) if(Var_equal(l -> car, key)) return index;
   return - 1;
 }
 
 int List_contains(List lst, Var key){
-  if(! _init_guard_) List_initialize();
   return List_index(lst, key) != - 1;
 }
 
 int List_len(List lst){
-  if(! _init_guard_) List_initialize();
   int len = 0;
   for(List l = lst;  List_truth(l);  l = List_cdr(l)) len ++;
   return len;
@@ -568,7 +529,6 @@ FuncArg FuncArg_value(Var);
 Var Func_apply(Func, unsigned, const FuncArg *);
 
 List List_map(List lst, Func fn){
-  if(! _init_guard_) List_initialize();
   if(! List_truth(lst)) return NULL;
   Array values = Array_new();
   {
@@ -614,7 +574,6 @@ List List_map(List lst, Func fn){
 }
 
 Var List_foldl(List lst, Var seed, Func fn){
-  if(! _init_guard_) List_initialize();
   Var acc = seed;
   List cur = lst;
   if(Var_is_void(acc)){
@@ -647,7 +606,6 @@ Var List_foldl(List lst, Var seed, Func fn){
 int Var_truth(Var);
 
 Var List_find(List lst, Func pred){
-  if(! _init_guard_) List_initialize();
   if(! pred) return((void) 0, Void);
   {
     Var value;
@@ -671,7 +629,6 @@ Var List_find(List lst, Func pred){
 }
 
 int List_any(List lst, Func pred){
-  if(! _init_guard_) List_initialize();
   if(! pred) return 0;
   {
     Var value;
@@ -695,7 +652,6 @@ int List_any(List lst, Func pred){
 }
 
 int List_all(List lst, Func pred){
-  if(! _init_guard_) List_initialize();
   if(! List_truth(lst)) return 1;
   if(! pred) return 0;
   {
@@ -722,7 +678,6 @@ int List_all(List lst, Func pred){
 Array Array_sort(Array);
 
 List List_sort(List lst){
-  if(! _init_guard_) List_initialize();
   if(! List_truth(lst) || ! List_truth(List_cdr(lst))) return lst;
   Array values = Array_new();
   {
@@ -764,7 +719,6 @@ List List_sort(List lst){
 Array Array_sort_with(Array, Func);
 
 List List_sort_with(List lst, Func compare){
-  if(! _init_guard_) List_initialize();
   if(! List_truth(lst) || ! List_truth(List_cdr(lst))) return lst;
   Array values = Array_new();
   {
@@ -806,7 +760,6 @@ List List_sort_with(List lst, Func compare){
 Array Array_sort_by(Array, Func);
 
 List List_sort_by(List lst, Func key){
-  if(! _init_guard_) List_initialize();
   if(! List_truth(lst)) return lst;
   Array values = Array_new();
   {
@@ -846,12 +799,10 @@ List List_sort_by(List lst, Func key){
 }
 
 List Array_list(Array arr){
-  if(! _init_guard_) List_initialize();
   return _prepend_array(arr, NULL);
 }
 
 List Array_list_free(Array arr){
-  if(! _init_guard_) List_initialize();
   {
   _x2c_defer_env_0 _x2c_defer_env_30 = {._x2c_defer_capture_0 =(const void *) & arr};
 
@@ -879,7 +830,6 @@ List Array_list_free(Array arr){
 int Map_try_next(Map, unsigned *, Var *, Var *);
 
 List Map_list(Map map){
-  if(! _init_guard_) List_initialize();
   Array pairs = Array_new();
   {
     Var key, value;
@@ -898,7 +848,6 @@ List Map_list(Map map){
 }
 
 Array List_array(List lst){
-  if(! _init_guard_) List_initialize();
   Array array = Array_new();
   {
     Var value;
@@ -919,7 +868,6 @@ void Scope_retain(void);
 Iter Iter_unique(Iter, Iter);
 
 List List_unique(List lst){
-  if(! _init_guard_) List_initialize();
   if(! List_truth(lst) || ! List_truth(List_cdr(lst))) return lst;
   {
     Scope_retain();
@@ -958,7 +906,6 @@ List List_unique(List lst){
 }
 
 List List_zip_with(List a, List b, Func fn){
-  if(! _init_guard_) List_initialize();
   Array values = Array_new();
   {
   _x2c_defer_env_10 _x2c_defer_env_31 = {._x2c_defer_capture_10 =(const void *) & values};
@@ -997,7 +944,6 @@ List List_zip_with(List a, List b, Func fn){
 }
 
 List List_map2(List a, List b, Func fn){
-  if(! _init_guard_) List_initialize();
   if(! fn) return NULL;
   return List_zip_with(a, b, fn);
 }
@@ -1046,13 +992,11 @@ static Var _sublis_node(List alist, Var node){
 }
 
 List List_sublis(List alist, List tree){
-  if(! _init_guard_) List_initialize();
   if(! List_truth(tree)) return NULL;
   return Var_list(_sublis_node(alist, List_var(tree)));
 }
 
 List List_flatten(List lst){
-  if(! _init_guard_) List_initialize();
   if(! List_truth(lst)) return lst;
   Array values = Array_new();
   {
@@ -1128,7 +1072,6 @@ static void _flatten_all_collect(Array values, List lst){
 }
 
 List List_flatten_all(List lst){
-  if(! _init_guard_) List_initialize();
   if(! List_truth(lst)) return lst;
   Array values = Array_new();
   {
@@ -1157,13 +1100,11 @@ List List_flatten_all(List lst){
 }
 
 List List_nth_cdr(List list, int n){
-  if(! _init_guard_) List_initialize();
   while(n -- > 0 && List_truth(list)) list = List_cdr(list);
   return list;
 }
 
 Var List_getindex(List list, int index){
-  if(! _init_guard_) List_initialize();
   if(index < 0){
     unsigned distance =(unsigned) -(long) index;
     List lead = list;
@@ -1183,7 +1124,6 @@ Var List_getindex(List list, int index){
 }
 
 Var List_assoc(List list, Var key){
-  if(! _init_guard_) List_initialize();
   {
     List pair;
     List _x2c_macro_object_16 = list;
@@ -1211,7 +1151,6 @@ Symbol Var_kind(Var);
 long long Var_long_long(Var);
 
 Var List_get(List list, Var key){
-  if(! _init_guard_) List_initialize();
   if(Var_kind(key) != 20309162340) return List_assoc(list, key);
   long long index = Var_long_long(key);
   if(index !=(int) index) return((void) 0, Void);
@@ -1219,7 +1158,6 @@ Var List_get(List list, Var key){
 }
 
 List List_tail(List list, unsigned count){
-  if(! _init_guard_) List_initialize();
   List lead = list;
   for(unsigned i = 0;  i < count;  i ++){
     if(! List_truth(lead)) return list;
@@ -1234,7 +1172,6 @@ List List_tail(List list, unsigned count){
 }
 
 List List_head(List list, unsigned count){
-  if(! _init_guard_) List_initialize();
   List original = list;
   Array values = Array_new();
   {
@@ -1310,9 +1247,8 @@ Var int_var(int);
 int x2c_normalize_slice(int *, int *, int, int);
 
 List List_subseq(List list, int start, int stop, int step){
-  if(! _init_guard_) List_initialize();
   if(step < 1){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/list.x",.function = "List_subseq",.line = 747};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/list.x",.function = "List_subseq",.line = 723};
     x2c_error_raise_n(& _x2c_error_site_3, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.subseq")), NULL))), Symbol_var(1286496), int_var(step));
     __builtin_unreachable();
   }
@@ -1321,9 +1257,8 @@ List List_subseq(List list, int start, int stop, int step){
 }
 
 List List_getslice(List list, int start, int stop, int step){
-  if(! _init_guard_) List_initialize();
   if(! step){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/list.x",.function = "List_getslice",.line = 761};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/list.x",.function = "List_getslice",.line = 737};
     x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.getslice")), NULL))), Symbol_var(1286496), int_var(step));
     __builtin_unreachable();
   }
@@ -1374,7 +1309,7 @@ List List_getslice(List list, int start, int stop, int step){
 
 static int _unpack_n_va(List src, unsigned destination_count, va_list ap, int list_outputs){
   if(destination_count > INT_MAX){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/list.x",.function = "_unpack_n_va",.line = 776};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/list.x",.function = "_unpack_n_va",.line = 752};
     x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.unpack_n")), NULL))), Symbol_var(7318440), unsigned_var(destination_count));
     __builtin_unreachable();
   }
@@ -1395,7 +1330,6 @@ static int _unpack_n_va(List src, unsigned destination_count, va_list ap, int li
 }
 
 int List_unpack_n(List src, unsigned destination_count, ...){
-  if(! _init_guard_) List_initialize();
   va_list ap;
   va_start(ap, destination_count);
   int count = _unpack_n_va(src, destination_count, ap, 1);
@@ -1404,7 +1338,6 @@ int List_unpack_n(List src, unsigned destination_count, ...){
 }
 
 int List_unpack_vars_n(List src, unsigned destination_count, ...){
-  if(! _init_guard_) List_initialize();
   va_list ap;
   va_start(ap, destination_count);
   int count = _unpack_n_va(src, destination_count, ap, 0);
@@ -1413,7 +1346,6 @@ int List_unpack_vars_n(List src, unsigned destination_count, ...){
 }
 
 unsigned List_hash(List lst){
-  if(! _init_guard_) List_initialize();
   if(! List_truth(lst)) return 0;
   uint64_t h =(uint64_t)(uintptr_t) lst -> cdr;
   h ^= lst -> car.u64 + 0x9e3779b97f4a7c15ULL +(h << 6) +(h >> 2);
@@ -1423,7 +1355,6 @@ unsigned List_hash(List lst){
 }
 
 int List_equal(List a, List b){
-  if(! _init_guard_) List_initialize();
   if((void *) a ==(void *) b) return 1;
   if(! List_truth(a) || ! List_truth(b)) return 0;
   return Var_same(a -> car, b -> car) && a -> cdr == b -> cdr;
@@ -1432,7 +1363,6 @@ int List_equal(List a, List b){
 int Var_compare(Var, Var);
 
 int List_compare(List a, List b){
-  if(! _init_guard_) List_initialize();
   if((void *) a ==(void *) b) return 0;
   while(List_truth(a) && List_truth(b)){
     int c = Var_compare(List_car(a), List_car(b));
@@ -1588,7 +1518,6 @@ static void _serialize_nested_list(Var elem, Buffer buf, Symbol mode){
 String Buffer_str(Buffer);
 
 String List_str(List lst){
-  if(! _init_guard_) List_initialize();
   Buffer buf = Buffer_new(0);
   {
   _x2c_defer_env_19 _x2c_defer_env_42 = {._x2c_defer_capture_19 =(const void *) & buf};
@@ -1616,7 +1545,6 @@ String List_str(List lst){
 }
 
 Buffer List_write_str(List lst, Buffer out){
-  if(! _init_guard_) List_initialize();
   {
     size_t * _x2c_macro_address_0 = & out -> padding;
     size_t _x2c_macro_previous_0 = * _x2c_macro_address_0;
@@ -1651,7 +1579,6 @@ return out;
 }
 
 String List_repr(List lst){
-  if(! _init_guard_) List_initialize();
   Buffer buf = Buffer_new(0);
   {
   _x2c_defer_env_20 _x2c_defer_env_43 = {._x2c_defer_capture_20 =(const void *) & buf};
@@ -1679,7 +1606,6 @@ String List_repr(List lst){
 }
 
 Buffer List_write_repr(List lst, Buffer out){
-  if(! _init_guard_) List_initialize();
   _serialize_nested_list(List_var(lst), out, 1190948);
   return out;
 }
@@ -1694,7 +1620,6 @@ static int _next(Iter iter, Var * out){
 }
 
 int List_try_next(List lst, List * cursor, Var * out){
-  if(! _init_guard_) List_initialize();
   if(! cursor || ! out || ! List_truth(* cursor)) return 0;
   * out = List_car((* cursor));
   * cursor =(* cursor) -> cdr;
@@ -1706,7 +1631,6 @@ int Iter_truth(Iter);
 Iter Iter_init(Iter, Var, IterNextFn, Var);
 
 Iter List_iter(List lst, Iter dest){
-  if(! _init_guard_) List_initialize();
   if(! Iter_truth(dest)) return NULL;
   return Iter_init(dest, List_var(lst), _next, List_var(lst));
 }
@@ -1714,7 +1638,6 @@ Iter List_iter(List lst, Iter dest){
 int Iter_try_next(Iter, Var *);
 
 List Iter_list(Iter iter){
-  if(! _init_guard_) List_initialize();
   Array values = Array_new();
   {
   _x2c_defer_env_21 _x2c_defer_env_44 = {._x2c_defer_capture_21 =(const void *) & values};
@@ -1751,7 +1674,6 @@ List Iter_list(Iter iter){
 }
 
 List List_filter(List lst, Func pred){
-  if(! _init_guard_) List_initialize();
   if(! List_truth(lst)) return NULL;
   Array values = Array_new();
   {

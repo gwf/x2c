@@ -129,8 +129,11 @@ grep -Fq "$BUILD/bin/fake-ar" "$BUILD/ar-dry.stderr"
 "$X2C" build -### --build-dir "$BUILD/no defaults" \
   --output "$BUILD/no-defaults" "$BUILD/tool source.c" \
   >"$BUILD/no-defaults.stdout" 2>"$BUILD/no-defaults.stderr"
-! grep 'x2c: compile ' "$BUILD/no-defaults.stderr" |
-  grep -Eq -- '(^| )-O|(^| )-g( |$)'
+if grep 'x2c: compile ' "$BUILD/no-defaults.stderr" |
+   grep -Eq -- '(^| )-O|(^| )-g( |$)'; then
+  echo "a default -O or -g leaked into the compile command" >&2
+  exit 1
+fi
 
 : >"$tool_log"
 TOOL_ARGS_LOG="$tool_log" X2C_CC=wrong-cc CC=also-wrong \

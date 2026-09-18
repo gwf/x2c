@@ -58,14 +58,14 @@ int main(void) {
   String child_string = NULL;
   List child_list = NULL;
   Pool string_pool =
-    String.pool_retain_named("promoted-value-cache");
+    Pool.open_named("promoted-value-cache");
   Pool list_pool = string_pool;
   PoolStats string_before = string_pool.stats();
   PoolStats list_before = list_pool.stats();
   child_string = header_same();
   child_list = header_list();
   PoolStats string_after = string_pool.stats(), list_after = list_pool.stats();
-  String.pool_release();
+  Pool.close();
 
   printf("%d %d %d %d %d %d %d %d %d %d %s %s %s %s\n",
          header_direct() == header_same(),

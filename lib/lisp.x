@@ -42,7 +42,7 @@ $(import "private-keywords.xmacro")
 typedef struct Lisp *Lisp;
 
 macro Expression $lisp._standard.source() => (
-  $(x2c.literal.string (x2c._embed.text "../etc/init.xlisp"))
+  $(x2c.literal.string (_x2c.embed.text "../etc/init.xlisp"))
 )
 
 /** Reports cumulative automatic-evaluator activity for one `Lisp` session.

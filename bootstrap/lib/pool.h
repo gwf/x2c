@@ -29,7 +29,7 @@ typedef struct PoolStats{
 }
 PoolStats;
 
-void x2c_pool_thread_start(void);
+void Pool_thread_start(void);
 
 Pool Pool_retain_named(Pool inner, const char * name);
 
@@ -37,23 +37,25 @@ Pool Pool_retain(Pool inner);
 
 Pool Pool_release(Pool inner);
 
-Pool x2c_pool_values_current(void);
+Pool Pool_current(void);
 
-void x2c_pool_values_initialize(void);
+void Pool_initialize(void);
 
-void x2c_pool_values_thread_initialize(void);
+void Pool_thread_initialize(void);
 
-void x2c_pool_values_shutdown(void);
+void Pool_shutdown(void);
 
-Pool x2c_pool_values_retain_named(const char * name);
+Pool Pool_open_named(const char * name);
 
-Pool x2c_pool_values_retain(void);
+Pool Pool_open(void);
 
-void x2c_pool_values_release(void);
+void Pool_close(void);
 
-Pool x2c_pool_values_detach(void);
+Pool Pool_detach(void);
 
-int x2c_pool_values_is_permanent(Var value);
+int Pool_is_permanent(Var value);
+
+unsigned long Pool_epoch(void);
 
 Var Pool_lookup(Pool inner, Var key);
 

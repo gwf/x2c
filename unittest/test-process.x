@@ -352,6 +352,20 @@ static void process_failed_starts_close_descriptors(void) {
   EXPECT_INT_EQ(_open_descriptors(), before);
 }
 
+/* A middle stage that cannot spawn leaves its pipe behind unless both ends
+   are released on the transfer, and the count grew by one per attempt. */
+static void process_failed_pipeline_closes_both_pipe_ends(void) {
+  $test.scoped();
+  int before = _open_descriptors(), caught = 0;
+  for (int i = 0; i < 8; i++) {
+    try %((echo hi) (x2c-missing-program) (cat)).job().status();
+    catch %(not-found *): caught++;
+    catch %(io-fail *): caught++;
+  }
+  EXPECT_INT_EQ(caught, 8);
+  EXPECT_INT_EQ(_open_descriptors(), before);
+}
+
 static void process_child_stdio_without_parent_stdio(void) {
   $test.scoped();
   int saved[3];
@@ -471,6 +485,7 @@ void process_suite(void) {
   $test.run(process_empty_input_is_empty_stdin);
   $test.run(process_nul_capture_keeps_the_record);
   $test.run(process_failed_starts_close_descriptors);
+  $test.run(process_failed_pipeline_closes_both_pipe_ends);
   $test.run(process_child_stdio_without_parent_stdio);
   $test.run(process_cleanup_kills_a_job_ignoring_term);
 }

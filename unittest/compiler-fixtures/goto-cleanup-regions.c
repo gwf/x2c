@@ -4,6 +4,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 static int outward_defer(void);
 
 static int outward_finally(void);

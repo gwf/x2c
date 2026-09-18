@@ -1,0 +1,1 @@
+macro-hole-grouping.c: warning: multiple unsequenced modifications to 'a' [-Wunsequenced]

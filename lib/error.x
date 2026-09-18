@@ -467,7 +467,7 @@ static const SymbolSet error_nonreturning_causes =
   $error.nonreturning.causes();
 
 static int _never_returns(Symbol code) =>
-  error_nonreturning_causes.contains(code);
+  code in error_nonreturning_causes;
 
 static void _initialize_policies(void) {
   foreach (Symbol code, error_nonreturning_causes)
@@ -861,6 +861,88 @@ Symbol Error.policy_get(Symbol code) {
   return found;
 }
 
+/* A capture holds only `Symbol` pairs and its own allocation, so it crosses a
+   thread boundary without borrowing `Error`, `Scope`, or `Pool` storage. The
+   pairs follow the header in the same block. */
+typedef struct ErrorPolicyCapture {
+  int count;
+  Symbol *pairs;
+} *ErrorPolicyCapture;
+
+static int _policy_fill(Map policy, Symbol *pairs, int at, int capacity) {
+  unsigned cursor = 0;
+  Var key = void, value = void;
+  while (policy.try_next(&cursor, &key, &value)) {
+    if (at + 2 > capacity) break;
+    pairs[at++] = key;
+    pairs[at++] = value;
+  }
+  return at;
+}
+
+/* Outermost context first, so replaying the pairs in order reproduces the
+   overlays an inner context placed over an outer one. */
+static int _policy_fill_contexts(
+  ErrorContextState state, Symbol *pairs, int at, int capacity) {
+  if (!state) return at;
+  at = _policy_fill_contexts(state.prev, pairs, at, capacity);
+  return _policy_fill(state.policy, pairs, at, capacity);
+}
+
+/** Captures the calling thread's `Error` policy for another thread to adopt.
+    Policy is per-thread state, so a worker starts with only the shared
+    non-returning causes locked to `<abort>`; a capture carries the starting
+    thread's dispositions across. `Error.policy_adopt` consumes the capture and
+    `Error.policy_release` discards one that no thread adopted. An unavailable
+    `Error` runtime captures nothing and answers NULL.
+    Raises: `<alloc-fail>` when the capture cannot be allocated.
+*/
+void *Error.policy_capture(void) {
+  if (!Error.ready()) return NULL;
+  ErrorThreadState state = _thread();
+  int capacity = state.policy.len();
+  for (ErrorContextState at = state.context_top; at; at = at.prev)
+    capacity += at.policy.len();
+  capacity *= 2;
+  ErrorPolicyCapture capture = malloc(
+    sizeof(struct ErrorPolicyCapture) + (size_t) capacity * sizeof(Symbol));
+  if (!capture) raise %(alloc-fail (owner "Error.policy_capture"));
+  capture.pairs = (Symbol *) (capture + 1);
+  int written = _policy_fill(state.policy, capture.pairs, 0, capacity);
+  capture.count = _policy_fill_contexts(
+    state.context_top, capture.pairs, written, capacity);
+  return capture;
+}
+
+/** Adopts a policy capture on the calling thread and releases it.
+    Each captured code takes its captured disposition; codes the capture does
+    not name keep the disposition this thread already has. A NULL capture, or
+    one adopted while `Error` is unavailable, is released without effect.
+    Failure to update `Error`-owned storage reaches the non-reentrant error
+    floor.
+*/
+void Error.policy_adopt(void *capture) {
+  ErrorPolicyCapture adopted = capture;
+  if (!adopted) return;
+  if (Error.ready()) {
+    ErrorThreadState state = _thread();
+    Map policy = state.context_top ? state.context_top.policy : state.policy;
+    state.floor_only++;
+    int pushed = _scope_push(
+      <invariant>, "could not enter error scope while adopting policy");
+    for (int i = 0; i + 1 < adopted.count; i += 2)
+      policy.setindex(adopted.pairs[i], adopted.pairs[i + 1]);
+    if (pushed) Scope.pop();
+    state.floor_only--;
+  }
+  free(adopted);
+}
+
+/** Releases a policy capture that no thread adopted. A NULL capture is
+    accepted and does nothing.
+*/
+void Error.policy_release(void *capture) { free(capture); }
+
 /** Returns the maximum number of errors that may remain accumulated. */
 int Error.bound(void) {
   ErrorThreadState state = _thread();
@@ -1079,7 +1161,7 @@ static Symbol _catch_match(ErrorHandler h) {
   ErrorThreadState state = _thread();
   state.floor_only++;
   List projection = _cons(&record.region, code, detail);
-  String.pool_retain_named("Error catch bindings");
+  Pool.open_named("Error catch bindings");
   ErrorCatchSite *site = h.site;
   MatchPlan *plans = (void *) h.plans != NULL ? h.plans.bytes : NULL;
   for (int i = 0; i < site.arm_count; i++) {
@@ -1103,12 +1185,12 @@ static Symbol _catch_match(ErrorHandler h) {
     _catch_commit_captures(h, record, layout, &captures);
     if (values) Scope.free(values);
     h.selected = i;
-    String.pool_release();
+    Pool.close();
     _catch_retain(h);
     state.floor_only--;
     return <unwind>;
   }
-  String.pool_release();
+  Pool.close();
   state.floor_only--;
   return <declined>;
 }

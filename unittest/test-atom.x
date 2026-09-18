@@ -196,14 +196,14 @@ static void atom_list_and_lisp_readers_canonicalize(void) {
 
 
 static void atom_list_promotion_preserves_long_payload(void) {
-  String.pool_retain_named("test-atom-promotion-values");
+  Pool.open_named("test-atom-promotion-values");
   String spelling = String.printf("pool-owned-long-atom-%d", 314159);
   Atom atom = Atom.intern(spelling);
   List result = cons(atom, NULL);
   EXPECT_TRUE(atom is <lsym>);
   EXPECT_TRUE(atom.pointer() == spelling);
   EXPECT_TRUE(result.promote() == result);
-  String.pool_release();
+  Pool.close();
 
   EXPECT_STR_EQ(atom.str(), "pool-owned-long-atom-314159");
   EXPECT_TRUE(result.car().u64 == atom.u64);

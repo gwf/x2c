@@ -30,6 +30,14 @@ protocol Iter(T) {
   Iter T.iter(T, Iter dest);
 }
 
+/* Membership for a type that is not a `Var` container. `Var` participants
+   already declare `contains`; this adoption gives the `in` operator to a
+   type that holds members without boxing them. */
+protocol Contains(T) {
+  associated Needle = Var;
+  int T.contains(T, Needle);
+}
+
 /* Participation is explicit. The Var forward converters, Iter methods, and
    Block storage-view converters below are declared in common.x and resolve
    within this unit. Adoptions whose converters are defined elsewhere remain

@@ -557,6 +557,35 @@ static void map_iterates_values_keys_and_pairs(void) {
   EXPECT_INT_EQ(pair_values, values);
 }
 
+/* A `Map` created in one scope and grown inside a retained region keeps its
+   rebuilt arrays. The release must not take them: they belong to the scope
+   the map was created in, not to whichever region is open when the table
+   happens to expand. Growth replaces both backing Blocks, so a table that
+   kept them ends the region holding the same number of allocations it
+   started with, and one that lost them ends four short. */
+static void map_growth_survives_a_nested_region(void) {
+  $test.scoped();
+  Map map = {};
+  Var anchor = 999;
+  map[anchor] = 42;
+  size_t before = Scope.stats().live_allocations;
+
+  Scope.retain();
+  for (int i = 0; i < 512; i++) {
+    Var key = i + 1000, val = i;
+    map[key] = val;
+  }
+  Scope.release();
+
+  size_t after = Scope.stats().live_allocations;
+  EXPECT_INT_EQ(after, before);
+  EXPECT_INT_EQ(map.len(), 513);
+  Var kept = map[anchor];
+  EXPECT_INT_EQ(kept.integer(), 42);
+  Var last = 1511, grown = map[last];
+  EXPECT_INT_EQ(grown.integer(), 511);
+}
+
 void map_suite(void) {
   $test.run(map_iterates_values_keys_and_pairs);
   $test.run(map_empty_literal_identity);
@@ -569,6 +598,7 @@ void map_suite(void) {
   $test.run(map_updateindex_hashes_existing_key_once);
   $test.run(map_reports_exhausted_probe_invariant);
   $test.run(map_growth_preserves_entries);
+  $test.run(map_growth_survives_a_nested_region);
   $test.run(map_collision_backshift_and_reuse);
   $test.run(map_reference_model_churn);
   $test.run(map_stable_traversal_visits_every_entry);

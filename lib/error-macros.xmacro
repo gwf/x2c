@@ -31,7 +31,7 @@ $(def error.nonreturning.causes '(
 ))
 
 macro Expression $error.nonreturning.causes() => (
-  $(x2c._symbol-set error.nonreturning.causes)
+  $(_x2c.symbol-set error.nonreturning.causes)
 )
 
 macro Decorator $error.fallback(Statement $target, Expr $fallback) => {

@@ -686,6 +686,36 @@ if grep -q '(binding \|(cache \|(origin ' "$tmp/lifetime-summaries-line"; then
   exit 1
 fi
 
+region_sources="$fixtures/region-holder.x $fixtures/region-user.x"
+$tool region-escapes $region_sources >"$tmp/region-escapes"
+$tool region-escapes "$fixtures/region-user.x" \
+  "$fixtures/region-holder.x" >"$tmp/region-escapes-reversed"
+cmp "$tmp/region-escapes" "$tmp/region-escapes-reversed"
+tr '\n' ' ' <"$tmp/region-escapes" | sed 's/  */ /g' \
+  >"$tmp/region-escapes-line"
+summary='^(region-escapes (summary (units 2) (passes 2) (settled 1) '
+summary="$summary(functions 6) (ambiguous 0) (warnings 2))"
+grep -q "$summary" "$tmp/region-escapes-line"
+
+# A single translation sees neither store, because both are in the unit the
+# calls reach.
+static_escape='(at .*region-user.x" 10 5) region .*stored through an '
+static_escape="$static_escape"'unknown pointer" (notes "region opened at '
+static_escape="$static_escape"'line 8")'
+grep -q "$static_escape" "$tmp/region-escapes-line"
+parameter_escape='(at .*region-user.x" 17 5) region .*stored through a '
+parameter_escape="$parameter_escape"'parameter" (notes "region opened at '
+parameter_escape="$parameter_escape"'line 15")'
+grep -q "$parameter_escape" "$tmp/region-escapes-line"
+if grep -q 'region-user.x" 2[34] ' "$tmp/region-escapes-line"; then
+  echo "region-escapes reported a store inside one region" >&2
+  exit 1
+fi
+if grep -q '(binding \|(cache \|(origin ' "$tmp/region-escapes-line"; then
+  echo "region-escapes exposed compiler identities" >&2
+  exit 1
+fi
+
 flow_sources="$fixtures/flows-a.x $fixtures/flows-b.x \
 $fixtures/flows-ambiguous.x"
 $tool flows flow_produce flow_consume $flow_sources >"$tmp/flows"
@@ -811,6 +841,24 @@ if $tool lifetime-escapes "$fixtures/lifetime-escapes.x" \
 fi
 test ! -s "$tmp/lifetime-missing.out"
 grep -q 'cannot read input file' "$tmp/lifetime-missing.err"
+
+if $tool region-escapes "$fixtures/region-holder.x" \
+     "$fixtures/malformed.x" >"$tmp/region-bad.out" \
+     2>"$tmp/region-bad.err"; then
+  echo "malformed region-escapes input unexpectedly succeeded" >&2
+  exit 1
+fi
+test ! -s "$tmp/region-bad.out"
+test -s "$tmp/region-bad.err"
+
+if $tool region-escapes "$fixtures/region-holder.x" \
+     "$fixtures/missing.x" >"$tmp/region-missing.out" \
+     2>"$tmp/region-missing.err"; then
+  echo "missing region-escapes input unexpectedly succeeded" >&2
+  exit 1
+fi
+test ! -s "$tmp/region-missing.out"
+grep -q 'cannot read input file' "$tmp/region-missing.err"
 
 if $tool allocation-returns lifetime_scope_alias \
      "$fixtures/lifetime-escapes.x" \

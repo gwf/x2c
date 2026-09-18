@@ -8,6 +8,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 #include "array.h"
 #include "atom.h"
 #include "block.h"
@@ -160,7 +162,7 @@ Scope Scope_new(void);
 
 void Scope_push(Scope *);
 
-Pool String_pool_retain_named(const char *);
+Pool Pool_open_named(const char *);
 
 void * Error_context_open(void);
 
@@ -186,7 +188,7 @@ static Context _open(const char * name, int isolated){
       Scope_push(&(context) -> scope);
       pushed = 1;
       if(isolated){
-        (context) -> pool = String_pool_retain_named(name);
+        (context) -> pool = Pool_open_named(name);
         (context) -> destination_pool =(context) -> pool -> up;
       }
       (context) -> error_state = Error_context_open();
@@ -477,12 +479,12 @@ Var Context_export(Context context, Var value){
   return _export_value(value, context);
 }
 
-Pool String_pool_current(void);
+Pool Pool_current(void);
 
 Var Context_export_scope(Scope source_scope, Pool pool, Var value){
   if(! _init_guard_) Context_initialize();
   struct Context source ={
-    .scope = source_scope, .pool = pool, .destination_scope = Scope_top(), .destination_pool = String_pool_current()
+    .scope = source_scope, .pool = pool, .destination_scope = Scope_top(), .destination_pool = Pool_current()
   }
   ;
   return _export_value(value, & source);
@@ -494,7 +496,7 @@ void Error_context_close(void *, int);
 
 int x2c_exception_unwinding(void);
 
-void String_pool_release(void);
+void Pool_close(void);
 
 void Scope_pop(void);
 
@@ -511,7 +513,7 @@ void Context_close(Context c){
   }
   MatchCache_context_close(c -> match_state);
   Error_context_close(c -> error_state, x2c_exception_unwinding());
-  if(c -> pool) String_pool_release();
+  if(c -> pool) Pool_close();
   Scope scope = c -> scope;
   Context parent = c -> parent;
   while(Scope_top() != & c -> scope) Scope_pop();
@@ -531,7 +533,7 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   if(!(*(int *) _x2c_defer_data_0->_x2c_defer_capture_0)){
     if(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> match_state) MatchCache_context_close(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> match_state);
     if(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> error_state) Error_context_close(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> error_state, x2c_exception_unwinding());
-    if(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> pool) String_pool_release();
+    if(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> pool) Pool_close();
     if((*(int *) _x2c_defer_data_0->_x2c_defer_capture_2)) Scope_pop();
     if(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> scope) Scope_destroy(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)) -> scope);
     Scope_free(((*(Context *) _x2c_defer_data_0->_x2c_defer_capture_1)));

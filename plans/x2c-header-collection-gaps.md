@@ -5,10 +5,13 @@
 > `plans/archive/x2c-c-on-ramp-corpus.md` (f6f029f) fixed the empty and
 > storage-class prefix macros, macros among parameters, and the
 > `__cplusplus`-guarded linkage group. On 2026-09-17 the syntax cleanup made
-> the attribute macro invocation, the leading `__attribute__`, and
-> `_Noreturn` rows parse in headers and units alike (fixtures
-> `c-annotation-macro` and `c-trailing-attribute`). The two remaining rows
-> still fail. No package build hits them today.
+> the attribute macro invocation and the `_Noreturn` row parse in headers and
+> units alike (fixtures `c-annotation-macro`, `c-trailing-attribute`, and
+> `native-noreturn`). The leading `__attribute__` row turned out to be the
+> repository review's Group 1 miscompile, fixed separately in `1956007c` by
+> keeping a leading attribute out of the declared and bound types
+> (fixture `leading-attribute-types`). The two remaining rows still fail.
+> No package build hits them today.
 
 ## Result
 
@@ -26,7 +29,7 @@ read with `--dump-symbols`.
 | Header form | Result |
 | --- | --- |
 | `#define ATTR(x)` or `#define ATTR(x) __attribute__((deprecated))`, then `ATTR(1) void f(int a);`, as libcurl's `CURL_DEPRECATED(...)` at `curl.h:157` | fixed 2026-09-17 |
-| `__attribute__((visibility("default"))) void f(int a);` | fixed 2026-09-17 |
+| `__attribute__((visibility("default"))) void f(int a);` | fixed 2026-09-17 in `1956007c` |
 | `_Noreturn void f(int a);` | fixed 2026-09-17 |
 | `E void f(int); E int v;` with `E` a macro collection cannot see | status 0, but the keys are `( void )` and `( int )`, not `( f )` and `( v )` |
 | `extern "C" {` / `#include "inner.h"` / `}` with no `__cplusplus` guard | "missing '}'": each include-delimited segment checks its braces alone |
@@ -91,8 +94,9 @@ excludes those sites; see
 - Facts: `_note_object_macro` already records each definition from the
   source; the new skips consume only names and invocations whose recorded
   definitions contribute no declaration syntax, and nothing rechecks them.
-- Reuse: extends the existing macro map, `_skip_empty_macro`, the trailing
-  attribute carrier, and `Compiler.skip_linkage_brace`; no new traversal or
-  cache.
+- Reuse: extends the existing `object_macros` map and its `<annotation>` and
+  `<wrapper>` markers (`src/compiler.x:1493`), the prefix-word scan
+  (`src/parse.x:272`), the trailing attribute carrier, and
+  `Compiler.skip_linkage_brace`; no new traversal or cache.
 - Idiom: a direct parser skip over recorded facts, not a preprocessor.
 - Validators and diagnostics: none proposed.

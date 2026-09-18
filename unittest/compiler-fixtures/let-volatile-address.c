@@ -2,6 +2,8 @@
 
 #include "let-volatile-address.h"
 
+#include "exception.h"
+
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
   const void * _x2c_defer_capture_1;

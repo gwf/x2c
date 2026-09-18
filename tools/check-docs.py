@@ -18,6 +18,29 @@ DOCS = (
     *sorted((ROOT / "docs").glob("*.md")),
     *sorted((ROOT / "docs" / "src").rglob("*.md")),
 )
+# Markdown outside DOCS whose links are checked, but whose paths, flags,
+# counts, and other claims are not audited. Link targets are resolved without
+# their anchors, here as everywhere else.
+# `site/` is absent on purpose: its Markdown links are URLs on the rendered
+# site, not repository paths, and `make site-check` already resolves every
+# rendered link and fragment against the built output.
+LINK_DIRS = (
+    ROOT / "agents" / "skills",
+    ROOT / "plans",
+    ROOT / "packages",
+)
+# Fetched, installed, or rendered trees grow inside those directories and
+# carry Markdown that is not ours to repair.
+UNTRACKED_DIR_NAMES = {"build", "builds", "deps", "dist", "node_modules"}
+LINK_DOCS = (
+    *DOCS,
+    *sorted(
+        path
+        for directory in LINK_DIRS
+        for path in directory.rglob("*.md")
+        if not UNTRACKED_DIR_NAMES & set(path.relative_to(ROOT).parts)
+    ),
+)
 PATH_AUDIT = {
     ROOT / "README.md",
     ROOT / "AGENTS.md",
@@ -36,6 +59,8 @@ PATH_AUDIT = {
     ROOT / "docs" / "src" / "internals" / "implementation-map.md",
     ROOT / "docs" / "src" / "library" / "overview.md",
     ROOT / "agents" / "logger-and-diagnostics-guide.md",
+    ROOT / "agents" / "adapters-macros-decorators.md",
+    ROOT / "agents" / "replacing-manual-ast-walks-with-match.md",
 }
 GENERATED_PATHS = {
     ROOT / "unittest" / "build",
@@ -84,6 +109,8 @@ PATH_PATTERN = re.compile(
 # The project is named "x2c" only. It is pronounced like a certain drug, and
 # voice-to-text keeps introducing that spelling; it must never reach the tree.
 BANNED_NAME_PATTERN = re.compile(r"\becstas(?:y|ies)\b", re.IGNORECASE)
+CITED_LINES_PATTERN = re.compile(r":(\d+(?:\s*[-,]\s*\d+)*)$")
+LINE_COUNTS: dict[pathlib.Path, int] = {}
 LINK_PATTERN = re.compile(r"!?\[[^]]*\]\(([^)]+)\)")
 FLAG_PATTERN = re.compile(r"(?<![a-zA-Z0-9-])--[a-zA-Z][a-zA-Z0-9-]*")
 EXAMPLE_PATTERN = re.compile(r"`(examples/([a-zA-Z0-9_/-]+)\.x)`")
@@ -105,14 +132,24 @@ def location(path: pathlib.Path, text: str, offset: int) -> str:
     return f"{path.relative_to(ROOT)}:{line}"
 
 
-def clean_repo_path(raw: str) -> str:
+def clean_repo_path(raw: str) -> tuple[str, int]:
+    """Split a cited repository path from the last line number it names."""
     value = raw.rstrip(".,;:)")
-    value = re.sub(r":\d+(?:-\d+)?$", "", value)
-    return value
+    cited = CITED_LINES_PATTERN.search(value)
+    if not cited:
+        return value, 0
+    last = int(re.findall(r"\d+", cited.group(1))[-1])
+    return value[: cited.start()], last
+
+
+def line_count(path: pathlib.Path) -> int:
+    if path not in LINE_COUNTS:
+        LINE_COUNTS[path] = len(path.read_bytes().splitlines())
+    return LINE_COUNTS[path]
 
 
 def check_links(errors: list[str]) -> None:
-    for path in DOCS:
+    for path in LINK_DOCS:
         text = path.read_text(encoding="utf-8")
         for match in LINK_PATTERN.finditer(text):
             target = match.group(1).strip().strip("<>").split()[0]
@@ -129,7 +166,7 @@ def check_paths(errors: list[str]) -> None:
     for path in sorted(PATH_AUDIT):
         text = path.read_text(encoding="utf-8")
         for match in PATH_PATTERN.finditer(text):
-            raw = clean_repo_path(match.group(1))
+            raw, cited = clean_repo_path(match.group(1))
             if any(char in raw for char in "*?[<"):
                 continue
             resolved = ROOT / raw
@@ -141,6 +178,12 @@ def check_paths(errors: list[str]) -> None:
                     continue
                 where = location(path, text, match.start())
                 errors.append(f"{where}: missing path {raw}")
+            elif cited and resolved.is_file() and cited > line_count(resolved):
+                where = location(path, text, match.start())
+                errors.append(
+                    f"{where}: {raw} has {line_count(resolved)} lines, "
+                    f"so line {cited} does not exist"
+                )
 
 
 def compiler_options() -> set[str]:
@@ -402,6 +445,7 @@ def main() -> int:
         return 1
     print(
         f"documentation audit passed: {len(DOCS)} files, "
+        f"{len(LINK_DOCS)} link-checked files, "
         f"{len(PATH_AUDIT)} path-audited entry points"
     )
     return 0

@@ -28,7 +28,7 @@ top-level unit whose `defer` and `try` forms are final; the pass rewrites
 transfers, so it runs once, after the transform driver reaches its fixed
 point.
 
-Source: `src/cleanup.x:702`
+Source: `src/cleanup.x:757`
 
 <a id="Compiler.static_value_is_runtime"></a>
 #### Compiler.static_value_is_runtime
@@ -40,7 +40,7 @@ runtime, because it reads an automatic object or another static this
 function initializes. `runtime` holds the statics already known to run
 that way, and gains this one's bindings.
 
-Source: `src/cleanup.x:267`
+Source: `src/cleanup.x:269`
 
 ## Design notes
 

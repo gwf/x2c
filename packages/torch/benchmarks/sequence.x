@@ -164,34 +164,34 @@ static void _train(List layers, Optimizer adam, Tensor streams, int count,
 /* Held-out MSE of the next observation, with the state carried through
    the whole stream under inference mode. */
 static double _score(List layers, Tensor streams) {
-  Scope.retain();
-  defer Scope.release();
-  Torch.inference_mode();
-  long count = streams.size(0), steps = streams.size(1);
-  Tensor h = _zero_state(count);
-  double total = 0.0;
-  for (long t = 0; t + 1 < steps; t++) {
-    h = _cell(layers, streams.select(1, t), h);
-    total += Tensor.mse_loss(_predict(layers, h),
-                             streams.select(1, t + 1)).item().double();
+  $scope() {
+    Torch.inference_mode();
+    long count = streams.size(0), steps = streams.size(1);
+    Tensor h = _zero_state(count);
+    double total = 0.0;
+    for (long t = 0; t + 1 < steps; t++) {
+      h = _cell(layers, streams.select(1, t), h);
+      total += Tensor.mse_loss(_predict(layers, h),
+                               streams.select(1, t + 1)).item().double();
+    }
+    return total / (double) (steps - 1);
   }
-  return total / (double) (steps - 1);
 }
 
 /* The constant-mean and last-value predictors. Both are reported even
    when last-value wins. */
 static void _baselines(Tensor train, Tensor val) {
-  Scope.retain();
-  defer Scope.release();
-  Torch.inference_mode();
-  long steps = val.size(1);
-  Tensor target = val.slice(1, 1, steps, 1);
-  Tensor mean = train.mean_dim(0, 0).mean_dim(0, 0);
-  Bench.record("mean_val_mse",
-               (target - mean).pow(2.0).mean().item().double());
-  Bench.record("last_value_val_mse",
-               Tensor.mse_loss(val.slice(1, 0, steps - 1, 1),
-                               target).item().double());
+  $scope() {
+    Torch.inference_mode();
+    long steps = val.size(1);
+    Tensor target = val.slice(1, 1, steps, 1);
+    Tensor mean = train.mean_dim(0, 0).mean_dim(0, 0);
+    Bench.record("mean_val_mse",
+                 (target - mean).pow(2.0).mean().item().double());
+    Bench.record("last_value_val_mse",
+                 Tensor.mse_loss(val.slice(1, 0, steps - 1, 1),
+                                 target).item().double());
+  }
 }
 
 static void _record_profile(void) {
@@ -245,14 +245,14 @@ static int _check(String artifacts, String out) {
          0, 1, 0);
   Bench.record("trained_val_mse", _score(trained_layers, val));
   {
-    Scope.retain();
-    defer Scope.release();
-    Map final = {};
-    foreach (List pair, trained.named_parameters()) {
-      String name = pair[0].str();
-      final[%"final.$name"] = pair[1].tensor().clone();
+    $scope() {
+      Map final = {};
+      foreach (List pair, trained.named_parameters()) {
+        String name = pair[0].str();
+        final[%"final.$name"] = pair[1].tensor().clone();
+      }
+      Checkpoint.save(final, %"$out/sequence-x2c-final.pt");
     }
-    Checkpoint.save(final, %"$out/sequence-x2c-final.pt");
   }
 
   Module resumed = _built(artifacts, "sequence-init.pt");
@@ -356,11 +356,11 @@ static int _diagnose(String artifacts, String out, int count) {
   Tensor streams = data["data.train"].tensor();
   Bench.record("load_seconds", Bench.now() - start);
   {
-    Scope.retain();
-    defer Scope.release();
-    Module warm = _built(artifacts, "sequence-init.pt");
-    _train(_layers(warm), Optimizer.adam(warm, LR), streams, 50, WINDOW,
-           0, 1, 0);
+    $scope() {
+      Module warm = _built(artifacts, "sequence-init.pt");
+      _train(_layers(warm), Optimizer.adam(warm, LR), streams, 50, WINDOW,
+             0, 1, 0);
+    }
   }
   start = Bench.now();
   Module model = _built(artifacts, "sequence-init.pt");
@@ -423,20 +423,20 @@ static int _diagnose(String artifacts, String out, int count) {
   restored_adam.load(saved_adam);
   Bench.record("checkpoint_load_seconds", Bench.now() - start);
   {
-    Scope.retain();
-    defer Scope.release();
-    Torch.no_grad();
-    Tensor inputs = streams.slice(1, 0, WINDOW, 1);
-    Tensor targets = streams.slice(1, 1, WINDOW + 1, 1);
-    Tensor state = _zero_state(stream_count), ended = NULL;
-    double original = _window(layers, inputs, targets, state, &ended)
-                        .item().double();
-    double reloaded = _window(_layers(restored), inputs, targets, state,
-                               &ended).item().double();
-    double difference = original - reloaded;
-    Bench.record("diagnostic_reloaded_loss", reloaded);
-    Bench.record("diagnostic_reload_difference",
-                 difference < 0 ? -difference : difference);
+    $scope() {
+      Torch.no_grad();
+      Tensor inputs = streams.slice(1, 0, WINDOW, 1);
+      Tensor targets = streams.slice(1, 1, WINDOW + 1, 1);
+      Tensor state = _zero_state(stream_count), ended = NULL;
+      double original = _window(layers, inputs, targets, state, &ended)
+                          .item().double();
+      double reloaded = _window(_layers(restored), inputs, targets, state,
+                                 &ended).item().double();
+      double difference = original - reloaded;
+      Bench.record("diagnostic_reloaded_loss", reloaded);
+      Bench.record("diagnostic_reload_difference",
+                   difference < 0 ? -difference : difference);
+    }
   }
   return 0;
 }
@@ -444,35 +444,35 @@ static int _diagnose(String artifacts, String out, int count) {
 #pragma public
 
 int main(int argc, char **argv) {
-  Scope.retain();
-  defer Scope.release();
-  if (argc < 4) {
-    fprintf(stderr, "usage: sequence <check|time|memory|diagnose|startup> <artifacts> <out>"
-                    " [variant] [count]\n");
+  $scope() {
+    if (argc < 4) {
+      fprintf(stderr, "usage: sequence <check|time|memory|diagnose|startup> <artifacts> <out>"
+                      " [variant] [count]\n");
+      return 2;
+    }
+    const char *threads = getenv("X2C_TORCH_THREADS");
+    Torch.set_num_threads(threads ? atoi(threads) : 1);
+    /* Inter-op threads are fixed before any work, so the only parallelism
+       either language uses is the intra-op pool the runner sets. */
+    Torch.set_num_interop_threads(1);
+    Torch.manual_seed(0);
+    Bench.begin(4096);
+    Bench.record_text("language", "x2c");
+    Bench.record_text("torch_version", Torch.version());
+    _record_profile();
+    Bench.record_int("threads", Torch.num_threads());
+    Bench.record_int("interop_threads", Torch.num_interop_threads());
+    if (!strcmp(argv[1], "startup")) return 0;
+
+    String artifacts = String.new(argv[2]), out = String.new(argv[3]);
+    if (!strcmp(argv[1], "check")) return _check(artifacts, out);
+    if (!strcmp(argv[1], "diagnose"))
+      return _diagnose(artifacts, out, atoi(argv[4]));
+    if (!strcmp(argv[1], "time"))
+      return _time(artifacts, out, String.new(argv[4]), atoi(argv[5]));
+    if (!strcmp(argv[1], "memory"))
+      return _memory(artifacts, out, atoi(argv[4]), atoi(argv[5]));
+    fprintf(stderr, "sequence: no mode %s\n", argv[1]);
     return 2;
   }
-  const char *threads = getenv("X2C_TORCH_THREADS");
-  Torch.set_num_threads(threads ? atoi(threads) : 1);
-  /* Inter-op threads are fixed before any work, so the only parallelism
-     either language uses is the intra-op pool the runner sets. */
-  Torch.set_num_interop_threads(1);
-  Torch.manual_seed(0);
-  Bench.begin(4096);
-  Bench.record_text("language", "x2c");
-  Bench.record_text("torch_version", Torch.version());
-  _record_profile();
-  Bench.record_int("threads", Torch.num_threads());
-  Bench.record_int("interop_threads", Torch.num_interop_threads());
-  if (!strcmp(argv[1], "startup")) return 0;
-
-  String artifacts = String.new(argv[2]), out = String.new(argv[3]);
-  if (!strcmp(argv[1], "check")) return _check(artifacts, out);
-  if (!strcmp(argv[1], "diagnose"))
-    return _diagnose(artifacts, out, atoi(argv[4]));
-  if (!strcmp(argv[1], "time"))
-    return _time(artifacts, out, String.new(argv[4]), atoi(argv[5]));
-  if (!strcmp(argv[1], "memory"))
-    return _memory(artifacts, out, atoi(argv[4]), atoi(argv[5]));
-  fprintf(stderr, "sequence: no mode %s\n", argv[1]);
-  return 2;
 }

@@ -53,15 +53,17 @@ if [[ ${1:-} == --one ]]; then
     echo "output mismatch: $src" >&2
     fail
   fi
+  : >"$BUILD/done/$key"
   exit 0
 fi
 
 rm -rf "$BUILD"
-mkdir -p "$BUILD/failed"
+mkdir -p "$BUILD/failed" "$BUILD/done"
 
 total=0
 required=0
 excluded=0
+reported=0
 failures=0
 declare -A exclusions
 
@@ -118,15 +120,23 @@ for src in "$ROOT"/src/*.x "$ROOT"/lib/*.x "$ROOT"/examples/*.x \
   sources+=("$src")
 done
 
-# A failing worker reports one line and leaves a marker, so the output stays
-# readable without buffering and the tally does not depend on xargs status.
+# Every worker leaves a receipt: a comparison that passed writes $BUILD/done,
+# and one that failed reports one line and writes $BUILD/failed, so the output
+# stays readable without buffering. The parent requires one success receipt per
+# required source, so an xargs that never spawns cannot score green.
 if ((required)); then
   printf '%s\n' "${sources[@]}" | \
     xargs -P "${JOBS:-$(getconf _NPROCESSORS_ONLN)}" -n 1 \
       "$ROOT/unittest/probes/run-raw-symbol-sweep.sh" --one || true
   failures=$(find "$BUILD/failed" -type f | grep -c '' || true)
+  reported=$(find "$BUILD/done" -type f | grep -c '' || true)
+fi
+
+missing=$((required - reported - failures))
+if ((missing > 0)); then
+  echo "raw symbol sweep: $missing source(s) did not report a result" >&2
 fi
 
 echo "raw symbol sweep: $required required, $excluded classified exclusions," \
-  "$failures failures ($total total)"
-[ "$failures" -eq 0 ]
+  "$reported compared, $failures failures ($total total)"
+[ "$failures" -eq 0 ] && [ "$reported" -eq "$required" ]

@@ -45,7 +45,9 @@ lib/dispatch.x|advanced|RenderPath.enter,RenderPath.leave
 lib/dispatch.x|advanced|x2c_register_tagged_descriptor
 lib/dispatch.x|advanced|Var.str,Var.write_repr
 lib/error.x|advanced|Error.bound,Error.bound_set,Error.count,Error.depth
-lib/error.x|advanced|Error.mark,Error.policy_get,Error.policy_set,Error.pop
+lib/error.x|advanced|Error.mark,Error.policy_adopt,Error.policy_capture
+lib/error.x|advanced|Error.policy_get,Error.policy_release,Error.policy_set
+lib/error.x|advanced|Error.pop
 lib/error.x|advanced|Error.push,Error.raise,Error.ready,Error.since
 lib/error.x|advanced|Error.snapshot
 lib/file.x|advanced|File.equal,File.fdopen,File.gets,File.hash,File.popen
@@ -81,8 +83,7 @@ lib/list.x|advanced|List.flatten,List.flatten_all,List.hash,List.nth_cdr
 lib/list.x|advanced|List.promote,List.repr,List.str,List.sublis,List.subseq
 lib/list.x|advanced|List.write_repr,Var.caar,Var.caddr,Var.cadr,Var.car
 lib/list.x|advanced|Var.cddr,Var.cdr,Var.cons
-lib/list.x|internal|List.initialize,List.shutdown,List.try_own
-lib/list.x|internal|List.thread_initialize
+lib/list.x|internal|List.try_own
 lib/logger.x|advanced|Logger.add_file_sink,Logger.add_memory_sink
 lib/logger.x|advanced|Logger.add_sink,Logger.add_stderr_sink,Logger.clear_sinks
 lib/logger.x|advanced|Logger.debug,Logger.error,Logger.fatal,Logger.flush
@@ -126,9 +127,7 @@ lib/string.x|advanced|String.hash,String.intern,String.intern_free
 lib/string.x|advanced|String.malloc,String.new_fill,String.new_len,String.parse
 lib/string.x|advanced|String.parse_char,String.printf,String.promote
 lib/string.x|advanced|String.repr,String.str,String.symbol,String.write_repr
-lib/string.x|internal|String.initialize,String.shutdown,String.pool_detach,String.pool_release,String.pool_retain
-lib/string.x|internal|String.is_permanent,String.pool_current
-lib/string.x|internal|String.pool_retain_named,String.try_own
+lib/string.x|internal|String.is_permanent,String.try_own
 lib/symbol.x|advanced|Symbol.compare,Symbol.decode,Symbol.first,Symbol.new_len
 lib/symbol.x|advanced|Symbol.parse,Symbol.repr,Symbol.str,Symbol.write_repr
 lib/var.x|advanced|Var.box_long_double,Var.box_long_long,Var.box_long
@@ -196,5 +195,9 @@ lib/error.x|internal|Error.snapshot_in
 lib/exception.x|internal|x2c_exception_unwinding
 lib/map.x|internal|Map.export_to
 lib/scope.x|internal|Scope.owner
-lib/string.x|internal|String.thread_initialize
+lib/pool.x|advanced|Pool.retain,Pool.retain_named,Pool.release
+lib/pool.x|internal|Pool.initialize,Pool.thread_initialize,Pool.shutdown
+lib/pool.x|internal|Pool.thread_start,Pool.is_permanent,Pool.owns
+lib/pool.x|internal|Pool.lookup,Pool.insert,Pool.intern,Pool.malloc
+lib/pool.x|internal|Pool.free,Pool.promote,Pool.own
 lib/var.x|internal|Var.move_wide_to,Var.wide_owner

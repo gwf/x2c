@@ -81,3 +81,6 @@ site/node_modules/
 etc/vsc-extension/node_modules/
 __pycache__/
 .envrc
+
+# Local build-mode switch written by `make debug` / `make optimize`
+etc/build-mode.local

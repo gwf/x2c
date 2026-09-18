@@ -5,7 +5,7 @@ $(import "../../lib/map-generics.xmacro")
 #include <stdlib.h>
 
 typedef struct ProbeMapShortLong {
-  Scope *scope;
+  Scope scope;
   Bytes hashes, entries;
   unsigned used;
   unsigned capacity;

@@ -51,7 +51,7 @@ int main(void) {
   Map beta_result = beta_thread.join();
 
   printf("counter: %d\n", counter);
-  printf("events: %zu\n", events.len());
+  printf("events: %d\n", events.len());
   printf("alpha: %s\n", alpha_result[<message>].string());
   printf("beta: %s\n", beta_result[<message>].string());
   printf("parent strings reused: %s\n",

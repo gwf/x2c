@@ -24,7 +24,9 @@ instructions.
 | [blis](../../packages/blis/examples/) | Matrix and vector computations | [BLIS](../../packages/blis/README.md) |
 | [libuv](../../packages/libuv/examples/) | Event loops, processes, and networking | [libuv](../../packages/libuv/README.md) |
 | [raylib](../../packages/raylib/examples/) | Images, charts, and optional windows | [raylib](../../packages/raylib/README.md) |
+| [sqlite](../../packages/sqlite/examples/) | Databases, bound parameters, and row Lists | [SQLite](../../packages/sqlite/README.md) |
 | [torch](../../packages/torch/examples/) | Tensors, training, MNIST, and TorchScript over libtorch | [torch](../../packages/torch/README.md) |
+| [cstar](../../packages/cstar/examples/) | Contracts and proofs checked by `cstar-verify` | [cstar](../../packages/cstar/README.md) |
 
 ## Build and run
 
@@ -51,6 +53,7 @@ Use the package Makefile rather than running its source directly with
 settings.
 
 Each package README lists its example commands. The first build may download
-its pinned native dependency; later builds reuse the shared cache. These
-examples are checked by the optional `make packages-check`, outside ordinary
-`make examples`.
+its pinned native dependency; later builds reuse the shared cache. The
+optional `make packages-check` runs the checked adapters listed in
+`packages/Makefile`, outside ordinary `make examples`; SQLite and cstar build
+with `make packages` and are checked from their own package Makefiles.

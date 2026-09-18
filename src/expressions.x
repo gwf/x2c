@@ -212,25 +212,38 @@ const PrintfFn *List.printf_family(List l) {
   return NULL;
 }
 
-/* The format a printf-family call consumes, when the transform reads it at
-   translation time: a quoted C string literal, or the canonical String one
-   becomes. Any other format, such as a variable or an object macro, leaves
-   the call's `Var` values unlowered, so nothing there converts them. */
-static int _static_printf_format(Compiler c, Var format) {
-  match (format) case %(expr ("String") (cache ?id)): {
-    List key = c.id_keys[id];
-    format = key.cadr();
-  }
-  match (format) case %(expr ? (call "String_new" (args ?literal))):
-    format = literal;
+/** Returns the format a printf-family call consumes when it is known at
+    translation time, or `NULL`. That is a quoted C string literal, the
+    canonical `String` one becomes, or the `String_new` of one; any other
+    format, such as a variable or an object macro, is not readable here.
+    `raw` reports C spelling, whose quotes and escape sequences the caller
+    steps over.
+*/
+String Compiler.printf_static_format(
+  Compiler compiler, Var format, int *raw) {
   match (format) {
-    case %(expr (* char) (literal ? ?spelled)): {
-      String text = spelled;
-      return text.startswith("\"");
+    case %(expr (* char) (literal (* char) ?spelled)): {
+      String spelling = spelled;
+      int length = spelling ? spelling.len() : 0;
+      if (length < 2 || spelling[0] != '"' || spelling[length - 1] != '"')
+        return NULL;
+      *raw = 1;
+      return spelling;
     }
-    case %(expr ("String") (literal ? ?)): return 1;
+    case %(expr ("String") (cache ?id)): {
+      List key = compiler.id_keys[id];
+      match (key)
+        case %(string (expr ("String") (literal ("String") ?text))): {
+          *raw = 0;
+          return text;
+        }
+      match (key)
+        case %(string (expr ("String") (call "String_new" (args ?literal)))):
+          return compiler.printf_static_format(literal, raw);
+      return NULL;
+    }
   }
-  return 0;
+  return NULL;
 }
 
 /* Each argument of a call spelled in source is checked against its declared
@@ -257,9 +270,11 @@ static void _check_explicit_converter_arguments(
   }
   /* A static printf-family format converts each Var value it consumes. The
      family's positions count the receiver a method call spells before the
-     dot, which `arguments` has already dropped. */
-  const PrintfFn *info = callee.printf_family();
-  if (!info || !_static_printf_format(compiler, supplied[info.fmt_arg]))
+     dot, which `arguments` has already dropped. A format the transform
+     cannot read leaves those values unlowered, so nothing converts them. */
+  const PrintfFn *info = callee.printf_family(), int raw = 0;
+  if (!info ||
+      !compiler.printf_static_format(supplied[info.fmt_arg], &raw))
     return;
   int first = info.first_arg - method, index = 0;
   for (List a = arguments, n = notes; a; a = cdr(a), n = cdr(n)) {
@@ -983,13 +998,20 @@ static Type _shared_participant(
 /* A binary operator whose one operand is a converting participant converts
    the other operand to that type through its declared converter, so
    `x * 2.0` and `2.0 - x` resolve like `x * two`. The converted operand
-   replaces the original through `lhs` and `rhs`. */
+   replaces the original through `lhs` and `rhs`. An operand's qualifier
+   describes its storage, not the type that adopts the operator, so the
+   participant is the unqualified type both here and in the operands'
+   comparison. */
 static List _resolve_protocol_operator(
   Compiler compiler, Symbol op, List *lhs, List *rhs, Symbol *derived) {
   if (derived) *derived = 0;
   Type lhs_type = (*lhs).cadr();
+  lhs_type = lhs_type.canonicalize();
   Type participant = lhs_type, rhs_type = NULL;
-  if (*rhs) rhs_type = (*rhs).cadr();
+  if (*rhs) {
+    rhs_type = (*rhs).cadr();
+    rhs_type = rhs_type.canonicalize();
+  }
   Symbol member = 0;
   if (!*rhs) {
     if (op != <->) return NULL;
@@ -1080,6 +1102,7 @@ static List Compiler._protocol_operator_expression(
     Symbol member = rhs ? c.operator_member(op) : <neg>;
     if (!member) member = c.derived_member(op);
     Type participant = lhs.cadr();
+    participant = participant.canonicalize();
     List helper = c.protocol_discard_helper(
       participant, member, which);
     if (helper) (binding, signature) = helper;

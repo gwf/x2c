@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 typedef struct MapIntInt{
-  Scope * scope;
+  Scope scope;
   Bytes hashes, entries;
   unsigned used;
   unsigned capacity;
@@ -18,7 +18,7 @@ typedef struct MapIntInt{
 * MapIntInt;
 
 typedef struct MapLongDouble{
-  Scope * scope;
+  Scope scope;
   Bytes hashes, entries;
   unsigned used;
   unsigned capacity;
@@ -27,7 +27,7 @@ typedef struct MapLongDouble{
 * MapLongDouble;
 
 typedef struct MapStringString{
-  Scope * scope;
+  Scope scope;
   Bytes hashes, entries;
   unsigned used;
   unsigned capacity;
@@ -36,7 +36,7 @@ typedef struct MapStringString{
 * MapStringString;
 
 typedef struct MapStringInt{
-  Scope * scope;
+  Scope scope;
   Bytes hashes, entries;
   unsigned used;
   unsigned capacity;

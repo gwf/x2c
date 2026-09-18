@@ -115,7 +115,7 @@ captures a value; by itself it does not establish that value's type.
 | Malformed splice | verified | literal parser | diagnostic fixture |
 | Promoted immutable literal caching | verified | expression lowering, cache and generator | promoted-string-cache fixture |
 | Match transform dump | verified | `String.repr` | transform fixture |
-| Pooled interning | verified | `lib/pool.x` (`Pool.retain*`/`.release`/`.insert`/`.lookup`/`.owns`), `String.pool_retain*`, `List.promote` | Pool suite |
+| Pooled interning | verified | `lib/pool.x` (`Pool.retain*`/`.release`/`.insert`/`.lookup`/`.owns`), `String.promote`, `List.promote` | Pool suite |
 | Unit interfaces | verified | `interface_text`/`_interface_read` (`src/collect.x`), `<stem>.xi` beside generated C | `run-header-cache.sh`, `run-artifact-atomicity.sh` |
 | Batch-compilation memory brackets | partial | `src/main.x` per-unit `Scope`/pool brackets, the per-unit `Context` in `src/frontend.x` | batch/solo output parity in `run-header-cache.sh`; no probe yet asserts the pool-release/no-leak discipline directly |
 
@@ -627,8 +627,15 @@ Generated `try` uses POSIX `sigsetjmp(env, 0)`/`siglongjmp`, so Error
 transfer preserves registers and stack state without restoring a signal mask.
 `src/cleanup.x` owns the C rule that automatic state changed across that
 boundary must be volatile. It qualifies directly modified named locals and
-parameters in the definition; a prototype drops the parameter qualifier,
-which C ignores when it compares the two.
+parameters in the definition, and locals the body writes through a pointer it
+holds, along with that pointer's pointee type; a prototype drops the parameter
+qualifier, which C ignores when it compares the two. A local that only a
+callee writes through an address the body hands it is not qualified: taking
+its address already forces it to memory, so the register a transfer would
+restore is not where its value lives, and qualifying it would instead discard
+the qualifier at every such call.
+[The language reference](../docs/src/reference/language.md) records the rule
+the generated code follows.
 `ExceptionFrame` owns the volatile transfer state, the unwind target, and the
 run-once cleanup claim, written before transfer and read afterward.
 Native-runtime fixtures compile with the active repository build flags, so
@@ -667,10 +674,11 @@ saved value.
 A `Pool` pairs a `Scope` that owns storage with a `Map` that owns canonical
 identities, linked to an enclosing parent pool. `lib/pool.x` owns lookup
 (shadowing outward through the parent chain), creation (always landing in the
-innermost pool), and release. `String.pool_retain`/`pool_retain_named`
-establish a named pooling scope for the shared `String` and `List`
-canonicalization tables; `String.promote` and `List.promote`
-move a value owned by an inner pool up to an ancestor pool so it survives that
+innermost pool), and release. `Pool.retain`/`Pool.retain_named`
+establish a pooling scope for the shared `String` and `List`
+canonicalization tables, and `Pool.release` ends it; `String.promote` and
+`List.promote` move a value owned by an inner pool up to an ancestor pool so
+it survives that
 inner pool's release. `String.try_own` and `List.try_own` report whether the
 complete value is proven safe beyond every active pool; zero means not proven
 safe, while any promotion failure cause remains in the ambient Error channel.
@@ -705,9 +713,10 @@ diagnostics, and the terminal boundary.
 
 Tokens establish one-based lines and columns. Compiler locations preserve
 `file`, `line`, `column`, `length`, and absolute `position`; the source
-renderer uses the token `length` as the caret width. The compiler records one
-ordinary error by default and then its limit notice. Exact diagnostic fixtures
-own this output boundary.
+renderer uses the token `length` as the caret width. The CLI records twenty
+ordinary errors by default (`src/cli.x`, applied in `src/frontend.x`) and then
+its limit notice; a bare `Compiler.new` records one until a caller raises the
+limit. Exact diagnostic fixtures own this output boundary.
 
 `String.repr` is total for the canonical empty String: it prints the quoted
 empty literal `""`, while `String.str` and empty-String canonicalization remain

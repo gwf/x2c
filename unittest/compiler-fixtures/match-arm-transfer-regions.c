@@ -6,6 +6,8 @@
 
 #include "match-arm-transfer-regions.h"
 
+#include "exception.h"
+
 static List _17, _16, _15, _13, _12, _11, _7, _5, _3, _1;
 
 static Var _14, _10, _9, _8, _6, _4, _2, _0;

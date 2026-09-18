@@ -378,20 +378,6 @@ void Build.record_translation(Build state, String input, String directory) {
     _state_write(%"${state.state_root}/x-${_key(input)}", hash);
 }
 
-/* The one line of link flags the package needs besides its archive. Both
-   files come from the package's build target, so a missing one is the same
-   unbuilt-package mistake the archive check above reports; dropping the
-   flags instead leaves the consumer with undefined symbols at link. */
-static void _package_link_flags(Build b, String name, String path) {
-  String text = NULL;
-  try text = Path.read_text(path);
-  catch %(not-found *):
-    x2c_driver_error(%"package '$name' is not built: $path");
-  Array flags = [];
-  foreach (Var word, text.words()) flags.push(word);
-  b.toolchain.ld_args = b.toolchain.ld_args.append(flags.list_free());
-}
-
 /* Imported packages reach the build through the unit's recorded
    dependencies. Only an import pulls a package file into a consumer, and
    the record is present even when the translation result was reused. */
@@ -426,10 +412,13 @@ static void Build._link_packages(Build state, String input, String directory) {
     String archive = %"$builds/lib$name.a";
     if (access(archive, R_OK))
       x2c_driver_error(%"package '$name' is not built: $archive");
+    // The response file carries the link inputs the archive needs, so a
+    // package built before it existed is the same unbuilt-package mistake
+    // and is rebuilt; dropping them leaves undefined symbols at link.
+    if (!native)
+      x2c_driver_error(%"package '$name' is not built: $response");
     state.native_inputs.push(archive);
-    if (native)
-      state.toolchain.ld_args = state.toolchain.ld_args.append(native.ld_args);
-    else _package_link_flags(state, name, %"$builds/$name.link");
+    state.toolchain.ld_args = state.toolchain.ld_args.append(native.ld_args);
   }
 }
 

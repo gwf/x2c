@@ -3,8 +3,27 @@
 #include "x2c.x"
 #include "test-support.x"
 #include <time.h>
+#include <unistd.h>
 $(import "test-macros.xmacro")
 $(import "system-macros.xmacro")
+
+/* Stderr goes to a temporary file between the two calls, so a test reads
+   exactly what $time streamed. */
+static int _capture_stderr(File *file) {
+  fflush(stderr);
+  *file = tmpfile();
+  int saved = dup(STDERR_FILENO);
+  dup2(fileno(*file), STDERR_FILENO);
+  return saved;
+}
+
+static String _captured_stderr(File file, int saved) {
+  fflush(stderr);
+  dup2(saved, STDERR_FILENO);
+  close(saved);
+  rewind(file);
+  return file.string_close();
+}
 
 static String _classify(int code) {
   String reached = "none";
@@ -96,6 +115,70 @@ static void system_macro_time_runs_its_target(void) {
   EXPECT_TRUE(total == 499500);
 }
 
+$time("returning-body")
+static int _timed_returning(int n) { return n * 2; }
+
+$time("raising-body")
+static int _timed_raising(void) {
+  raise %(bad-arg (note "timed body transfer"));
+}
+
+/* The report sits in a defer, so a body that returns and a body a cause
+   transfers out of both reach it. */
+static void system_macro_time_reports_a_body_that_leaves(void) {
+  $test.scoped();
+
+  File file;
+  int saved = _capture_stderr(&file);
+  int doubled = _timed_returning(21);
+  String returned = _captured_stderr(file, saved);
+  EXPECT_INT_EQ(doubled, 42);
+  EXPECT_TRUE(returned.contains("[time] returning-body"));
+
+  String note = NULL;
+  saved = _capture_stderr(&file);
+  try _timed_raising();
+  catch %(bad-arg (note ?text)): note = text;
+  String raised = _captured_stderr(file, saved);
+  EXPECT_TRUE(note == "timed body transfer");
+  EXPECT_TRUE(raised.contains("[time] raising-body"));
+}
+
+typedef enum Shade { DIM, MID = 5, BRIGHT } Shade;
+
+typedef enum Span {
+  SPAN_SUFFIX = 1L,
+  SPAN_LARGE = 3000000000,
+  SPAN_HEX = 0x10,
+  SPAN_CHAR = 'x',
+  SPAN_NEGATIVE = -1,
+  SPAN_RELATIVE = SPAN_HEX + 1
+} Span;
+
+// A literal initializer reads as its spelling; any other initializer reads
+// as its expression node, which this table renders as a placeholder.
+macro Expression $member_table(Type $T) => (
+  $(x2c.literal.string (foldl
+     (lambda (text row)
+       (string-append text (car row) "="
+         (let ((value (cadr row)))
+           (if (not value) "-" (if (string? value) value "<expr>")))
+         ","))
+     "" (x2c.type.members $T)))
+)
+
+static void system_macro_type_members_reads_an_enum(void) {
+  String table = $member_table(Shade);
+  EXPECT_TRUE(table == "DIM=-,MID=5,BRIGHT=-,");
+}
+
+static void system_macro_type_members_reads_every_initializer(void) {
+  String table = $member_table(Span);
+  EXPECT_TRUE(table == "SPAN_SUFFIX=1L,SPAN_LARGE=3000000000,SPAN_HEX=0x10,"
+                       "SPAN_CHAR='x',SPAN_NEGATIVE=<expr>,"
+                       "SPAN_RELATIVE=<expr>,");
+}
+
 void system_macros_suite(void) {
   $test.run(system_macro_switch_scopes_and_breaks_each_run);
   $test.run(system_macro_dedent_folds_and_defers);
@@ -103,4 +186,7 @@ void system_macros_suite(void) {
   $test.run(system_macro_assert_passes_a_true_check);
   $test.run(system_macro_todo_and_unreachable_carry_a_note);
   $test.run(system_macro_time_runs_its_target);
+  $test.run(system_macro_time_reports_a_body_that_leaves);
+  $test.run(system_macro_type_members_reads_an_enum);
+  $test.run(system_macro_type_members_reads_every_initializer);
 }

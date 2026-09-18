@@ -31,9 +31,9 @@ macro Unit $list.typed.family(Type $list, Type $element,
   $list List.$lower(List);
   $list Var.$lower(Var);
 
-  /* `car` of nil is void, whose bits are all ones, so the guard decides the
-     answer instead of avoiding a null read. Reading a nil car as $zero
-     follows the runtime's silent-reader convention: an empty list
+  /* `car` and `last` of nil are void, whose bits are all ones, so the guard
+     decides the answer instead of avoiding a null read. Reading a nil end as
+     $zero follows the runtime's silent-reader convention: an empty list
      terminates a loop and is not a caller error. */
   /** Returns the first `$element` in `xs`, or `$zero` when `xs` is `nil`.
       A nonempty `xs` must retain the `$list` element-tag invariant.
@@ -54,8 +54,13 @@ macro Unit $list.typed.family(Type $list, Type $element,
     return ($list) cons($encode(value), (List) tail);
   }
 
-  /** Returns the final `$element` in nonempty `xs` after an O(n) walk. */
-  $element $list.last($list xs)  { return $decode(List.last((List) xs)); }
+  /** Returns the final `$element` in `xs`, or `$zero` when `xs` is `nil`,
+      after an O(n) walk.
+      A nonempty `xs` must retain the `$list` element-tag invariant.
+  */
+  $element $list.last($list xs) {
+    return xs ? $decode(List.last((List) xs)) : $zero;
+  }
   /** Returns the first zero-based index of `value`, or -1 when absent. */
   int $list.index($list xs, $element value) {
     return List.index((List) xs, $encode(value));

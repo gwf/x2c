@@ -7,7 +7,7 @@
 
 ## Scope and method
 
-This work follows [the research agenda](../research-agenda.md). Its two questions
+This work follows [the research agenda](research-agenda.md). Its two questions
 have separate owners: intentional Pool backing retention and the unexplained
 process-footprint excess in the historical Torch comparison. One is not
 assumed to cause the other.

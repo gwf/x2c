@@ -36,6 +36,8 @@
 
 #include "error.h"
 
+#include "exception.h"
+
 static int user_gensym_12;
 
 _x2c_initializer_choice_7317C61F_0((user_gensym_12 = 1))

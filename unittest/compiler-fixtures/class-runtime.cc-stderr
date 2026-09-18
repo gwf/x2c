@@ -1,0 +1,2 @@
+class-runtime.c: warning: passing 'ConstVarPointer' (aka 'const union Var *') to parameter of type 'void *' discards qualifiers [-Wincompatible-pointer-types-discards-qualifiers]
+class-runtime.c: note: passing argument to parameter here

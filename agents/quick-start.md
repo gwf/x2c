@@ -34,6 +34,8 @@ required sequence.
 | `make doc-examples` | Compile the book's code examples; optional. |
 | `make packages-check` | Check packages with their prepared dependency cache; outside `check`. |
 | `make sanity-check` | Refresh bootstrap, rebuild stage 0, and build through stage 3 without checks. |
+| `make build-recovery` | Check that an interrupted stage build removes partial objects and replaces archives. |
+| `python3 tools/test-configure.py` | Check `./configure` prerequisite reporting and its ordering before the core build. |
 
 For an optional focused unit run, build with `make -C unittest test-all`, then
 pass exact suite names, for example

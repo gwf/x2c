@@ -154,12 +154,12 @@ static void ops_lifetimes(void) {
   $test.scoped();
   ScopeStats before = Scope.stats();
   {
-    Scope.retain();
-    defer Scope.release();
-    Tensor a = _grid();
-    for (int i = 0; i < 50; i++) {
-      List rows = a.split(1, 0);
-      (void) rows[0].tensor().softmax(1).sum();
+    $scope() {
+      Tensor a = _grid();
+      for (int i = 0; i < 50; i++) {
+        List rows = a.split(1, 0);
+        (void) rows[0].tensor().softmax(1).sum();
+      }
     }
   }
   ScopeStats after = Scope.stats();

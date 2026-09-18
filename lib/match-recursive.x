@@ -313,6 +313,15 @@ static int _first(
   return 1;
 }
 
+/* A whole template follows the same rule as a template element: a binder
+   the match left unbound is retained, so no result is ever void. */
+static Var _replace_template(Var template, List bindings) {
+  if (template is <list>) return template.list().replace(bindings);
+  if (!template.is_binder()) return template;
+  Var value = bindings.assoc(template);
+  return value is void ? template : value;
+}
+
 static Var _replace_all(
   Var input, Var pattern, Var template, int include_empty) {
   if (input is <list>) {
@@ -326,9 +335,7 @@ static Var _replace_all(
   }
   List bindings;
   if (!_try_value(input, pattern, &bindings)) return input;
-  if (template is <list>) return template.list().replace(bindings);
-  if (template.is_binder()) return bindings.assoc(template);
-  return template;
+  return _replace_template(template, bindings);
 }
 
 #pragma public
@@ -390,9 +397,7 @@ int match_recursive_try_match_replace(
   if (!out) return 0;
   List bindings;
   if (!match_recursive_try_match(input, pattern, &bindings)) return 0;
-  if (template is <list>) *out = template.list().replace(bindings);
-  else if (template.is_binder()) *out = bindings.assoc(template);
-  else *out = template;
+  *out = _replace_template(template, bindings);
   return 1;
 }
 

@@ -15,6 +15,7 @@
 #include "protocols.x"
 
 protocol Iter(SymbolSet);
+protocol Contains(SymbolSet);
 
 #pragma private
 

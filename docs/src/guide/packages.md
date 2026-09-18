@@ -64,9 +64,10 @@ include ../package.mk
 `make build` translates every `src/*.x` in package mode and produces:
 
 ```text
-builds/greet.h        the generated public header
-builds/libgreet.a     the archive a consumer links
-builds/greet.link     the one line of extra link flags, empty when none
+builds/greet.h           the generated public header
+builds/libgreet.a        the archive a consumer links
+builds/greet.native.rsp  the native arguments a consumer needs, one per
+                         line, empty when none
 ```
 
 `make test` builds and runs `tests/test-*.x`, and `make clean` removes
@@ -97,10 +98,10 @@ x2c build --package-dir packages --output greeter greeter.x
 
 The driver reads the unit's recorded dependencies, adds the package's
 `builds` and `src` directories to the C include path, and links
-`libgreet.a` together with the line in `greet.link`. It never rebuilds the
-package. Build it once, and a read-only package tree still serves every
-consumer. A target in `x2c.toml` can set `package-dirs` instead of passing
-the flag.
+`libgreet.a` together with the arguments in `greet.native.rsp`. It never
+rebuilds the package. Build it once, and a read-only package tree still
+serves every consumer. A target in `x2c.toml` can set `package-dirs` instead
+of passing the flag.
 
 `as` is optional; `import "greet";` binds the alias `greet`. The alias is
 only a way to spell names. The generated C always uses the package's own
@@ -340,7 +341,9 @@ it unless `--force`, because a bundle carries no ABI promise across releases.
 A source package is a `<name>/src/<name>.x` tree with no `dependency*.json`.
 The compiler translates it in package mode and archives it, the same two
 commands `packages/package.mk` runs, and records the origin and digest in
-`SOURCE.json`. A source package with native dependencies is refused; publish
+`SOURCE.json`. A directory or archive carries no version of its own, so
+installing one over an installed package keeps the version that package
+recorded and a first install records none, which `x2c list` shows as `-`. A source package with native dependencies is refused; publish
 its bundle instead.
 
 Installed packages are not owned by the compiler's install inventory, so a
@@ -367,8 +370,9 @@ pcre2 = "10.48"
 `x2c build` and `x2c run` install anything missing through the index before
 planning the build, then write `x2c.lock` beside the manifest recording what
 they resolved. Commit that file. A later build whose lockfile is already
-satisfied by the installed packages reads no index, so it works offline and
-gives everyone the same packages.
+satisfied by the installed packages reads no index, so it works offline, and
+one that has to reinstall a package takes it from the archive the lockfile
+recorded, so everyone gets the same packages.
 
 To change a version, edit the manifest and build again; the lockfile is
 rewritten. `x2c remove` still deletes an installed package, and the next
@@ -411,14 +415,16 @@ against it records a run-time search path to that directory. The program
 loads libtorch from the installed package, so moving or removing that package
 breaks the program.
 
-Bundles carry `builds/<name>.native.rsp`. The compiler reads its quoted native
-arguments, expands the literal `{package}` to the resolved package directory,
-and applies C include/define options during native compilation and ordered
-archives/system options during final linking. Arguments remain individual argv
-values even when an expanded path contains spaces. They are not shell commands
-and `@` does not expand another response file. Definitions do not change the
-preceding x2c source preprocessing. A new bundle needs a compiler supporting
-this format; older source packages continue using their existing `.link` file.
+Every package carries `builds/<name>.native.rsp`. The compiler reads its
+quoted native arguments, expands the literal `{package}` to the resolved
+package directory, and applies C include/define options during native
+compilation and ordered archives/system options during final linking.
+Arguments remain individual argv values even when an expanded path contains
+spaces. They are not shell commands and `@` does not expand another response
+file. Definitions do not change the preceding x2c source preprocessing.
+A package built before 0.15.0 carries the earlier `<name>.link` file instead;
+the compiler no longer reads it, so rebuild such a package with `make build`
+or reinstall it.
 
 Native bundle metadata covers yyjson, PCRE2, BLIS, libuv, termbox2,
 libcurl, raylib, and torch. Releases publish torch for macOS arm64 and Linux

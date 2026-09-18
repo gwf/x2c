@@ -48,10 +48,18 @@ set -e
 [[ $broken_status == 2 ]] || fail "unrunnable tar exited $broken_status"
 grep -q "extract failed (tar)" "$BUILD/broken-tar.stderr" ||
   fail "unrunnable tar diagnostic"
-"$x2c" install -q "$BUILD/src/greet"
+# A receipt is action output, so it goes to standard error.
+"$x2c" install "$BUILD/src/greet" >"$BUILD/receipt.stdout" \
+  2>"$BUILD/receipt.stderr"
+[[ ! -s "$BUILD/receipt.stdout" ]] || fail "install receipt on stdout"
+grep -q "^x2c: installed .*/packages/greet$" "$BUILD/receipt.stderr" ||
+  fail "install receipt on stderr"
 [[ "$("$x2c" list)" == "greet - source" ]] || fail "list after directory"
 [[ -f "$BUILD/home/packages/greet/builds/libgreet.a" ]] || fail "no archive"
-[[ ! -s "$BUILD/home/packages/greet/builds/greet.link" ]] || fail "link file"
+[[ -f "$BUILD/home/packages/greet/builds/greet.native.rsp" ]] ||
+  fail "no native response file"
+[[ ! -s "$BUILD/home/packages/greet/builds/greet.native.rsp" ]] ||
+  fail "a source package recorded native arguments"
 "$x2c" run -q "$ROOT/examples/power/greet-client.x" >"$BUILD/client.stdout"
 grep -q "ping ping ping" "$BUILD/client.stdout" || fail "client output"
 "$x2c" remove -q greet
@@ -88,6 +96,54 @@ grep -q "not an installed package" "$BUILD/mine.stderr" || fail "mine diagnostic
 [[ -z "$(ls -A "$BUILD/home/packages" | grep '^\.install')" ]] ||
   fail "staging directory left behind"
 
+# A failed install removes its own staging directory, download and all,
+# instead of leaving it for the next install to collect.
+set +e
+"$x2c" install "file://$BUILD/src/greet.tar.gz" --sha256 0 \
+  2>"$BUILD/badsha2.stderr"
+[[ $? == 2 ]] || fail "bad digest accepted"
+set -e
+[[ -z "$(ls -A "$BUILD/home/packages" | grep '^\.install')" ]] ||
+  fail "a failed install left its staging directory"
+
+# A damaged package or marker is a refusal, not an abort, and one damaged
+# marker leaves list and the lock check working.
+mkdir -p "$BUILD/broken/nosrc" "$BUILD/broken/badbundle/builds"
+printf 'not json\n' >"$BUILD/broken/badbundle/BUNDLE.json"
+: >"$BUILD/broken/badbundle/builds/libbadbundle.a"
+set +e
+"$x2c" install "$BUILD/broken/nosrc" 2>"$BUILD/nosrc.stderr"
+[[ $? == 2 ]] || fail "a package without src/ did not refuse with 2"
+"$x2c" install --force "$BUILD/broken/badbundle" 2>"$BUILD/badbundle.stderr"
+[[ $? == 2 ]] || fail "an unreadable BUNDLE.json did not refuse with 2"
+set -e
+grep -q "has no src/nosrc.x entry unit" "$BUILD/nosrc.stderr" ||
+  fail "missing src diagnostic"
+grep -q "no readable BUNDLE.json" "$BUILD/badbundle.stderr" ||
+  fail "unreadable bundle diagnostic"
+mkdir -p "$BUILD/home/packages/damaged"
+printf '[1, 2]\n' >"$BUILD/home/packages/damaged/SOURCE.json"
+[[ "$("$x2c" list)" == $'damaged - source\ngreet - source' ]] ||
+  fail "a damaged marker broke list"
+printf 'not json\n' >"$BUILD/home/packages/damaged/SOURCE.json"
+[[ "$("$x2c" list)" == $'damaged - source\ngreet - source' ]] ||
+  fail "an unreadable marker broke list"
+rm -rf "$BUILD/home/packages/damaged"
+
+# Only what this compiler builds is archived: a builds directory the source
+# tree carried is not installed with it.
+mkdir -p "$BUILD/src/greet/builds"
+printf 'int greet__stale(void) { return 7; }\n' \
+  >"$BUILD/src/greet/builds/stale.c"
+"$x2c" install -q "$BUILD/src/greet"
+rm -rf "$BUILD/src/greet/builds"
+[[ ! -e "$BUILD/home/packages/greet/builds/stale.c" ]] ||
+  fail "a stale generated file was installed"
+if nm "$BUILD/home/packages/greet/builds/libgreet.a" 2>/dev/null |
+   grep -q "greet__stale"; then
+  fail "a stale symbol reached the archive"
+fi
+
 # Reinstalling leaves a user's <name>.previous alone.
 mkdir -p "$BUILD/home/packages/greet.previous"
 : >"$BUILD/home/packages/greet.previous/precious"
@@ -122,6 +178,30 @@ wait "$remover" || fail "removal after the lock failed"
 # The index resolves a name and records its version.
 "$x2c" install -q greet --index "$BUILD/index.txt"
 [[ "$("$x2c" list)" == "greet 1.0 source" ]] || fail "index version"
+
+# A reinstall from a local path keeps the version the package it replaces
+# recorded, and the marker records an absolute source and nothing empty.
+(cd "$BUILD/src" && "$x2c" install -q ./greet)
+[[ "$("$x2c" list)" == "greet 1.0 source" ]] ||
+  fail "a reinstall from a path lost the version"
+grep -q '"source": "/' "$BUILD/home/packages/greet/SOURCE.json" ||
+  fail "SOURCE.json recorded a relative source"
+if grep -q '": ""' "$BUILD/home/packages/greet/SOURCE.json"; then
+  fail "SOURCE.json recorded an empty field"
+fi
+
+# Two removals of one package cannot both report success.
+set +e
+"$x2c" remove greet >"$BUILD/remove-1.out" 2>&1 &
+first=$!
+"$x2c" remove greet >"$BUILD/remove-2.out" 2>&1 &
+second=$!
+wait $first; one=$?
+wait $second; two=$?
+set -e
+[[ $((one + two)) == 2 ]] ||
+  fail "concurrent removals returned $one and $two"
+"$x2c" install -q greet --index "$BUILD/index.txt"
 
 # A bundle is checked against this compiler's version.
 mkdir -p "$BUILD/bundle/fake/builds" "$BUILD/bundle/fake/src"
@@ -162,6 +242,69 @@ cd "$BUILD/project"
 grep -q '^greet 1.0 source - ' x2c.lock || fail "lockfile row"
 "$BUILD/project/client" >"$BUILD/project/client.stdout"
 grep -q "ping ping ping" "$BUILD/project/client.stdout" || fail "client output"
+
+# The lockfile's own url and digest are what a later build installs, so a
+# second index offering another archive for the same version changes neither
+# the installed package nor the lockfile.
+mkdir -p "$BUILD/other"
+cp -R "$ROOT/examples/packages/greet" "$BUILD/other/greet"
+rm -rf "$BUILD/other/greet/builds"
+sed 's/hello, /other build, /' "$BUILD/other/greet/src/greet.x" \
+  >"$BUILD/other/greet/src/greet.next"
+mv "$BUILD/other/greet/src/greet.next" "$BUILD/other/greet/src/greet.x"
+(cd "$BUILD/other" && tar -czf "$BUILD/greet-other.tar.gz" greet)
+other=$(shasum -a 256 "$BUILD/greet-other.tar.gz" | cut -d' ' -f1)
+printf '# name version kind platform url sha256\n' >"$BUILD/index-other.txt"
+printf 'greet 1.0 source - file://%s/greet-other.tar.gz %s\n' \
+  "$BUILD" "$other" >>"$BUILD/index-other.txt"
+cp x2c.lock "$BUILD/lock.before"
+"$x2c" remove -q greet
+rm -rf .x2c-build
+"$x2c" build -q --index "$BUILD/index-other.txt" --output "$BUILD/project/client"
+cmp -s x2c.lock "$BUILD/lock.before" ||
+  fail "a second index rewrote the lockfile"
+"$BUILD/project/client" >"$BUILD/project/pinned.stdout"
+if grep -q "other build" "$BUILD/project/pinned.stdout"; then
+  fail "a second index replaced the pinned package"
+fi
+grep -q "hello, x2c" "$BUILD/project/pinned.stdout" || fail "pinned output"
+
+# `run` releases the packages lock before the program starts, so an install
+# does not wait for the program to finish.
+cat >"$BUILD/project/src/client.x" <<EOF
+import "greet" as g;
+
+#include <unistd.h>
+
+int main(void) {
+  g.Greeting greeting = g.Greeting.new("x2c");
+  printf("%s", %"\${greeting.line()}\n");
+  fflush(stdout);
+  for (int i = 0; i < 400 && access("$BUILD/release-run", F_OK); i++)
+    usleep(50000);
+  return 0;
+}
+EOF
+rm -f "$BUILD/release-run"
+rm -rf .x2c-build
+"$x2c" remove -q greet
+"$x2c" run -q --index "$BUILD/index.txt" >"$BUILD/run.stdout" \
+  2>"$BUILD/run.stderr" &
+runner=$!
+for _ in $(seq 1 600); do
+  [[ -s "$BUILD/run.stdout" ]] && break
+  sleep 0.1
+done
+[[ -s "$BUILD/run.stdout" ]] || fail "the run never started its program"
+"$x2c" install -q "$BUILD/src/greet"
+kill -0 "$runner" 2>/dev/null ||
+  fail "the install waited for the running program"
+touch "$BUILD/release-run"
+wait "$runner" || fail "run failed"
+cp "$ROOT/examples/power/greet-client.x" "$BUILD/project/src/client.x"
+"$x2c" remove -q greet
+rm -rf .x2c-build
+"$x2c" build -q --index "$BUILD/index.txt" --output "$BUILD/project/client"
 
 # A satisfied lockfile reaches no index, so an unreachable one still builds.
 rm -rf .x2c-build

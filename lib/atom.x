@@ -31,7 +31,7 @@ Self Atom.promote(Self atom) {
 /* True when a spelling can be written bare and read back identically
    by the Lisp reader: the first byte is printable and not a delimiter, the
    spelling has no numeric prefix, and both reader scanners consume it whole.
-   The snapshot writer delegates its bare-symbol decision here. */
+   The unit-interface writer delegates its bare-symbol decision here. */
 /** Reports whether a spelling can round-trip as a bare Lisp `Atom`. */
 int Atom.bare_spelling(String spelling) {
   if (!spelling || !*spelling || _numeric_prefix(spelling)) return 0;

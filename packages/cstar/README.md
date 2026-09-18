@@ -15,7 +15,7 @@ HOL Light prover server, and the MIT proof libraries that ship with
 or assertion language of its own; assertions are terms in C*'s logical
 syntax.
 
-Milestones 2 to 5 of [the plan](../../plans/x2c-cstar-verification.md).
+Milestones 2 to 5 of [the plan](../../plans/archive/x2c-cstar-verification.md).
 
 ## The applications
 

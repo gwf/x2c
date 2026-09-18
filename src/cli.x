@@ -65,9 +65,13 @@ enum {
   CLI_NATIVE    = CLI_BUILD | CLI_RUN | CLI_SCRIPT
 };
 
+/* `spelling` is the text an argument must match, and is also the help label
+   unless `label` overrides it. `alias` is a second accepted spelling, and
+   `prefix` matches an option whose text continues in the same argument. */
 typedef struct CliOption {
-  Symbol id, int commands, Symbol group, const char *spelling, *value;
-  const char *description, int hidden;
+  Symbol id, int commands, Symbol group, String spelling;
+  const char *value, *description, int hidden;
+  String alias, label, int prefix;
 } CliOption;
 
 typedef struct CliCommand {
@@ -94,18 +98,18 @@ static CliCommand cli_commands[] = {
 static CliOption cli_options[] = {
   { <help>, CLI_TOP | CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP |
     CLI_ENV | CLI_INSTALL | CLI_REMOVE | CLI_LIST | CLI_NEW, <general>,
-    "-h, --help", NULL, "Show help and exit", 0 },
-  { <version>, CLI_TOP, <global>, "-V, --version", NULL,
-    "Show the x2c version and exit", 0 },
+    "-h", NULL, "Show help and exit", 0, .alias = "--help" },
+  { <version>, CLI_TOP, <global>, "-V", NULL,
+    "Show the x2c version and exit", 0, .alias = "--version" },
   { <verbose>, CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
-    <general>, "-v, --verbose", NULL,
-    "Show commands as they are executed", 0 },
+    <general>, "-v", NULL,
+    "Show commands as they are executed", 0, .alias = "--verbose" },
   { <dry-run>, CLI_TRANSLATE | CLI_NATIVE,
     <general>, "-###", NULL, "Show commands without executing them", 0 },
   { <quiet>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_BOOTSTRAP |
     CLI_INSTALL | CLI_REMOVE | CLI_NEW,
-    <general>, "-q, --quiet", NULL,
-    "Suppress successful progress and receipts", 0 },
+    <general>, "-q", NULL,
+    "Suppress successful progress and receipts", 0, .alias = "--quiet" },
   { <plain>, CLI_TRANSLATE | CLI_NATIVE | CLI_BOOTSTRAP,
     <general>, "--plain", NULL,
     "Use stable output without terminal rendering", 0 },
@@ -138,10 +142,12 @@ static CliOption cli_options[] = {
     "Apply the named manifest build profile", 0 },
   { <kind>, CLI_BUILD, <target>, "--kind", "<kind>",
     "executable or static-library", 0 },
-  { <compile>, CLI_BUILD, <target>, "-c, --compile-only",
-    NULL, "Produce object files without linking", 0 },
-  { <jobs>, CLI_TRANSLATE | CLI_NATIVE, <target>, "-j, --jobs",
-    "<count>", "Maximum parallel translation and compilation jobs", 0 },
+  { <compile>, CLI_BUILD, <target>, "-c",
+    NULL, "Produce object files without linking", 0,
+    .alias = "--compile-only" },
+  { <jobs>, CLI_TRANSLATE | CLI_NATIVE, <target>, "-j",
+    "<count>", "Maximum parallel translation and compilation jobs", 0,
+    .alias = "--jobs" },
   { <output>, CLI_BUILD | CLI_RUN, <output>, "--output", "<file>",
     "Name the executable, library, or single object", 0 },
   { <rebuild>, CLI_SCRIPT, <output>, "--rebuild", NULL,
@@ -153,8 +159,9 @@ static CliOption cli_options[] = {
   { <cc-db>, CLI_BUILD | CLI_RUN, <output>, "--compile-commands",
     "<file>", "Write native compile commands and retain generated files", 0 },
   { <save-temp>, CLI_BUILD | CLI_RUN, <output>,
-    "--save-temps[=<dir>]", NULL,
-    "Keep generated C and other intermediate files", 0 },
+    "--save-temps", NULL,
+    "Keep generated C and other intermediate files", 0,
+    .label = "--save-temps[=<dir>]" },
   { <sha256>, CLI_INSTALL, <package>, "--sha256", "<hex>",
     "Require this digest of a downloaded or local archive", 0 },
   { <index>, CLI_INSTALL | CLI_BUILD | CLI_RUN, <package>, "--index",
@@ -189,7 +196,8 @@ static CliOption cli_options[] = {
     "Use <program> as the static-library archiver", 0 },
   { <opt>, CLI_NATIVE | CLI_BOOTSTRAP,
     <c-compiler>,
-    "-O0, -O1, -O2, -O3, -Os", NULL, "Set C optimization", 0 },
+    "-O", NULL, "Set C optimization", 0,
+    .label = "-O0, -O1, -O2, -O3, -Os", .prefix = 1 },
   { <g>, CLI_NATIVE, <c-compiler>, "-g", NULL,
     "Emit debug information", 0 },
   { <define>, CLI_NATIVE, <c-compiler>, "-D",
@@ -204,8 +212,9 @@ static CliOption cli_options[] = {
     "Link library <name>", 0 },
   { <rpath>, CLI_NATIVE, <linker>, "--rpath", "<dir>",
     "Search <dir> for shared libraries when the program runs", 0 },
-  { <wl>, CLI_NATIVE, <linker>, "-Wl,<arg>[,<arg>...]",
-    NULL, "Pass comma-separated arguments to the linker", 0 },
+  { <wl>, CLI_NATIVE, <linker>, "-Wl,",
+    NULL, "Pass comma-separated arguments to the linker", 0,
+    .label = "-Wl,<arg>[,<arg>...]", .prefix = 1 },
   { <pthread>, CLI_NATIVE, <c-compiler>, "-pthread", NULL,
     "Enable native threading for compilation and linking", 0 },
   { <framework>, CLI_NATIVE, <linker>, "-framework", "<name>",
@@ -307,12 +316,11 @@ static void _print_help_row(
 }
 
 static void _print_option(const CliOption *option) {
-  char label[128];
-  if (option.value)
-    snprintf(label, sizeof(label), "%s %s", option.spelling, option.value);
-  else snprintf(label, sizeof(label), "%s", option.spelling);
-  int indent = label[0] == '-' && label[1] == '-' ? 6 : 2;
-  _print_help_row(label, option.description, indent);
+  String spelled = option.label ? option.label :
+                   option.alias ? %"${option.spelling}, ${option.alias}" :
+                   option.spelling;
+  String label = option.value ? %"$spelled ${option.value}" : spelled;
+  _print_help_row(label, option.description, label.startswith("--") ? 6 : 2);
 }
 
 static void _print_options(Symbol command) {
@@ -728,36 +736,24 @@ static void _expand_argument(Array output, String argument, List stack) {
 
 // parsing
 
+/* Finds the option `spelling` names for `mask`. A two-letter option that
+   takes a value also accepts it in the same argument, as `-Idir`, and
+   reports the remainder through `attached`. */
 static CliOption *_find_option(
-  const char *spelling, int command_mask, const char **attached) {
-  size_t spelling_length = strlen(spelling);
+  String spelling, int command_mask, String *attached) {
   *attached = NULL;
   for (CliOption *option = cli_options; option.spelling; option++) {
     if (!(option.commands & command_mask)) continue;
-    const char *start = option.spelling;
-    while (*start) {
-      const char *comma = strstr(start, ", ");
-      const char *end = comma ? comma : start + strlen(start);
-      const char *suffix = strchr(start, '[');
-      if (suffix && suffix < end) end = suffix;
-      const char *placeholder = strchr(start, '<');
-      if (placeholder && placeholder < end &&
-          strncmp(spelling, start, (size_t) (placeholder - start)) == 0)
-        return option;
-      size_t length = (size_t) (end - start);
-      if (spelling_length == length && strncmp(spelling, start, length) == 0)
-        return option;
-      if (option.value && length == 2 &&
-          spelling_length > 2 &&
-          strncmp(spelling, start, 2) == 0) {
-        *attached = spelling + 2;
-        return option;
-      }
-      if (length >= 2 && start[0] == '-' && start[1] == 'O' &&
-          spelling[0] == '-' && spelling[1] == 'O' && spelling[2])
-        return option;
-      if (!comma) break;
-      start = comma + 2;
+    String form = option.spelling;
+    int longer = spelling.len() > form.len() && spelling.startswith(form);
+    if (option.prefix) {
+      if (longer) return option;
+      continue;
+    }
+    if (spelling == form || spelling == option.alias) return option;
+    if (option.value && form.len() == 2 && longer) {
+      *attached = spelling[2:];
+      return option;
     }
   }
   return NULL;
@@ -766,8 +762,8 @@ static CliOption *_find_option(
 /* Reads the option at `*index` for `mask`, advancing it past a separate
    value argument. Returns NULL for an unknown spelling so each command can
    phrase its own diagnostic. The driver asks for `spelling` and `attached`
-   because it forwards the argument as written to the C compiler and linker;
-   translate and bootstrap pass NULL. */
+   because it forwards the argument as written to the C compiler and
+   linker. */
 static CliOption *_take_option(
   Array args, int *index, int mask,
   String *spelling, String *value, int *attached) {
@@ -780,7 +776,7 @@ static CliOption *_take_option(
     joined = arg[equals + 1:];
     if (joined && !joined[0]) joined = NULL;
   }
-  const char *suffix = NULL;
+  String suffix = NULL;
   CliOption *option = _find_option(written, mask, &suffix);
   if (!option) return NULL;
   if (equals > 2 && !option.value)
@@ -934,8 +930,9 @@ static void _apply_option(
 
 /** Reads a package's native response options, expanding literal `{package}`
     after tokenization. Only native include/define/thread options, ordered
-    archive/library/framework inputs, and run-time library search
-    directories are admitted. `cc_args` and `ld_args`
+    archive/library/framework inputs, run-time library search directories,
+    and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
+    `cc_args` and `ld_args`
     serve native actions; no source-preprocessing options are returned.
 */
 CliRequest cli_package_options(String path, String package) {
@@ -961,7 +958,8 @@ CliRequest cli_package_options(String path, String package) {
     switch (option.id) {
       case <include>: case <c-include>: case <c-system>:
       case <define>: case <undefine>: case <lib-dir>: case <library>:
-      case <rpath>: case <pthread>: case <framework>: break;
+      case <rpath>: case <pthread>: case <framework>:
+      case <wl>: case <xlinker>: break;
       default:
         x2c_driver_error(%"unsupported package native argument '$argument'");
     }
@@ -985,8 +983,8 @@ static int _default_build_jobs(void) {
 /* translate reports the diagnostic for x2c's single-dash long-option
    spellings. */
 static void _one_dash_removed(String arg) {
-  const char *attached;
-  if (strlen(arg) > 2 && arg[0] == '-' && arg[1] != '-' &&
+  String attached;
+  if (arg.len() > 2 && arg[0] == '-' && arg[1] != '-' &&
       _find_option(%"-$arg", CLI_TRANSLATE, &attached)) {
     fprintf(
       stderr,
@@ -1137,8 +1135,8 @@ CliRequest cli_parse(int argc, char **argv) {
   CliCommand *command = _command_row(first);
   if (command) return _parse_command(args, command);
   if (first == "-o") _removed_output();
-  const char *attached;
-  if (strlen(first) > 2 && first[0] == '-' && first[1] != '-' &&
+  String attached;
+  if (first.len() > 2 && first[0] == '-' && first[1] != '-' &&
       _find_option(%"-$first", CLI_TRANSLATE, &attached)) {
     fprintf(
       stderr,

@@ -56,18 +56,22 @@ meta static Var _dedent_fold(String source) {
 macro Expression $dedent(Expr $text) => ($(dedent.expand $text))
 
 /* Reports how long the following statement took on stderr. The caller
-   includes <time.h>. */
+   includes <time.h>. The stop clock and the report run from a `defer`, so
+   they still run when the decorated statement is a function body that
+   returns or a body a raise transfers out of. */
 macro Decorator $time(Statement $target, Literal $label)
   using $started, $stopped, $elapsed => {
   {
     struct timespec $started, $stopped;
     clock_gettime(CLOCK_MONOTONIC, &$started);
+    defer {
+      clock_gettime(CLOCK_MONOTONIC, &$stopped);
+      double $elapsed =
+        ($stopped.tv_sec - $started.tv_sec) * 1000.0 +
+        ($stopped.tv_nsec - $started.tv_nsec) / 1000000.0;
+      Stderr.printf("[time] %s %.3f ms\n", $label, $elapsed);
+    }
     $target
-    clock_gettime(CLOCK_MONOTONIC, &$stopped);
-    double $elapsed =
-      ($stopped.tv_sec - $started.tv_sec) * 1000.0 +
-      ($stopped.tv_nsec - $started.tv_nsec) / 1000000.0;
-    Stderr.printf("[time] %s %.3f ms\n", $label, $elapsed);
   }
 }
 

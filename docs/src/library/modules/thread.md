@@ -24,7 +24,7 @@ Frees a `Thread` handle after its consuming join has completed.
 
 **Raises:** `<bad-state>` for NULL, running, or joining handles.
 
-Source: `lib/thread.x:269`
+Source: `lib/thread.x:305`
 
 <a id="Thread.join"></a>
 #### Thread.join
@@ -44,7 +44,7 @@ fails, any cause from result or error export, and
 here. A callback that returns `void` joins as `void`; a handled worker
 failure transfers instead of returning a sentinel.
 
-Source: `lib/thread.x:241`
+Source: `lib/thread.x:277`
 
 <a id="Thread.start"></a>
 #### Thread.start
@@ -57,10 +57,12 @@ callback. Pointees within those bytes remain shared and must outlive the
 worker. Copied storage has `max_align_t` alignment, so over-aligned input
 types are unsupported. A worker runs on an 8 MiB stack on every platform,
 so library recursion limits are reached the same way on a worker as on the
-main thread. An attempt that reaches `pthread_create` permanently
-enables canonical-pool locking; the first successful start also freezes
-`Var`
-descriptor registration.
+main thread. The worker also adopts this thread's `Error` policy, so a
+cause set to `<ignore>`, `<log>`, or `<collect>` resumes inside the
+callback as it does here.
+An attempt that reaches `pthread_create` permanently enables canonical-pool
+locking; the first successful start also freezes `Var` descriptor
+registration.
 
 **Raises:** `<bad-arg>` for a NULL function or missing nonempty input,
 `<size-limit>` when the handle size or shutdown-hook registry overflows,
@@ -68,7 +70,7 @@ descriptor registration.
 `<io-fail>` when `pthread_create` fails. Failure during native once
 initialization or mutex setup aborts the process.
 
-Source: `lib/thread.x:192`
+Source: `lib/thread.x:221`
 
 ## Public types
 
@@ -86,7 +88,7 @@ A heap-owned native worker handle with one consuming join.
 A started `Thread` must be joined, including after its callback finishes,
 and then released with `Thread.free`.
 
-Source: `lib/thread.x:26`
+Source: `lib/thread.x:27`
 
 <a id="ThreadFn"></a>
 ### ThreadFn
@@ -96,9 +98,10 @@ Source: `lib/thread.x:26`
 Computes one `Thread` result from a borrowed copy of the start input bytes.
 The input is valid only during the call. The returned value is exported by
 `Thread.join`; an `Error` escaping the callback is reported as
-`<join-fail>`.
+`<join-fail>`. A cause the worker's `Error` policy resolves returns to its
+raise and does not end the callback.
 
-Source: `lib/thread.x:20`
+Source: `lib/thread.x:21`
 
 ## Design notes
 

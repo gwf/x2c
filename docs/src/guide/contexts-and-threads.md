@@ -154,10 +154,12 @@ An `Error` that reaches the callback's outer `catch` makes `Thread.join` raise
 `<join-fail>` with the worker's captured errors. That `raise` does not return
 to the joiner. `Thread.join` yields the worker's exported result or transfers.
 A callback that returns `void` joins as `void`; a handled failure transfers
-instead of returning a sentinel. The outer `catch` runs before the worker's
-default `Error` policy, so even `<collect>`, `<log>`, and `<ignore>` errors
-that reach it end the callback. Catch or otherwise handle a resumable `Error`
-inside the callback when execution should continue. Captured values use the
+instead of returning a sentinel. A worker adopts the starting thread's `Error`
+policy, so a cause set to `<collect>`, `<log>`, or `<ignore>` returns to its
+raise inside the callback and the callback keeps its result, exactly as on the
+starting thread. A cause whose policy is `<abort>`, which is every shared
+non-returning cause and every code no policy names, leaves the callback and
+becomes the `<join-fail>` above. Captured values use the
 same sealed worker storage as an ordinary result and enter the joining pools
 only during `Thread.join`. A worker `Error` whose policy is `<log>` also passes
 through the global `Logger` error handler. `Logger` serializes its sinks; in

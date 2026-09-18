@@ -112,9 +112,14 @@ associative-list fields:
 | Field | Value |
 | --- | --- |
 | `code` | Symbol identifying the compiler boundary |
+| `severity` | Symbol the submitting operation chose: `error`, `warning`, or `note` |
 | `message` | String presented to the user |
 | `location` | location List, or typed nil/List when absent |
 | `notes` | List of note Strings, or typed nil/List when absent |
+
+The severity belongs to the submitting operation, not to the code, so a
+category such as `literal`, `region`, or `macro` carries both errors and
+warnings and each entry states its own.
 
 When present, a compiler location has exactly these fields:
 

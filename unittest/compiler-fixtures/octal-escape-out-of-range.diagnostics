@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/octal-escape-out-of-range.x:2:19: parse: unexpected end of file
+unittest/compiler-fixtures/octal-escape-out-of-range.x:2:19: parse: invalid token
     String text = %"a\400b";
                     ^
 

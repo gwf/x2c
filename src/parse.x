@@ -1401,7 +1401,10 @@ static List _parse_expression_function_body(Compiler compiler) {
       defer _.sym.pop_scope();
       List expression = _.parse_expression();
       _.expect(<;>);
-      result = _.finish_return_statement(expression);
+      /* A `void` result has no value to return, and C rejects a returned
+         value there, so the expression stands as the body's statement. */
+      result = _.return_type === %(void)
+             ? %(stmnt $expression) : _.finish_return_statement(expression);
     }
     return %(block ${_.anchor_origin(result, origin)});
   }
