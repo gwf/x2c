@@ -27,12 +27,15 @@
 /* One lowering. `env` maps a binding id to the Lisp form that produces it;
    `locals` are the ids the function declares, so an id outside it is
    file-scope state. `on_loop` records whether the current point is on a
-   loop's iteration path, where a binding form would cost frame reuse. */
+   loop's iteration path, where a binding form would cost frame reuse.
+   `on_break` and `on_continue` are the continuations the nearest enclosing
+   loop or `switch` gave, or nothing outside one. */
 typedef struct Lowering {
   Compiler compiler;
   Map env, locals, cells, arrays;
   Array definitions;
   String own;
+  List on_break, on_continue;
   int counter, declined, on_loop, in_loop, rejected, uncallable;
 } *Lowering;
 
@@ -150,7 +153,7 @@ static void _lower_scan(Lowering l, Var form) {
   List items = form;
   if (!items) return;
   Var head = items.car();
-  if (head == <while> || head == <for>) {
+  if (head == <while> || head == <for> || head == <do>) {
     int was = l.in_loop;
     l.in_loop = 1;
     _lower_scan_each(l, items);
@@ -160,9 +163,7 @@ static void _lower_scan(Lowering l, Var form) {
   if (head == <bind>) _lower_scan_bind(l, items);
   else if (head == <op>) _lower_scan_op(l, items);
   else if (head == <call>) _lower_scan_call(l, items);
-  else if (head == <switch> || head == <do> || head == <break> ||
-           head == <continue> || head == <goto>)
-    l.rejected = 1;
+  else if (head == <goto>) l.rejected = 1;
   _lower_scan_each(l, items);
 }
 
@@ -589,6 +590,18 @@ static void _lower_env_restore(Lowering l, Map saved) {
 static Var _lower_apply_k(Lowering l, List k) {
   match (k) {
     case %(end): return 0;
+    /* Statements to run before the continuation they were given: a loop's
+       step, or the block a `switch` exits into. Inlining them keeps the
+       `again` that may follow a direct self call. They carry the `break`
+       that was in force where they were written, because a step belongs to
+       its loop however deep inside the body the continuation is reached. */
+    case %(then ?(List steps) ?(List next) ?(List breaking)): {
+      List was = l.on_break;
+      l.on_break = breaking;
+      Var result = _lower_block(l, steps, next);
+      l.on_break = was;
+      return result;
+    }
     case %(again ?name (*ids)): {
       Array values = [];
       defer values.free();
@@ -776,8 +789,22 @@ static void _lower_loop_cells(Lowering l, Var form, Array out) {
   foreach (Var part, items) _lower_loop_cells(l, part, out);
 }
 
+/* A `break` binds to the nearest enclosing loop or `switch`, so this stops
+   at one rather than counting a `break` that belongs to it. */
+static int _lower_breaks(Var form) {
+  if (form is not <list>) return 0;
+  List items = form;
+  if (!items) return 0;
+  Var head = items.car();
+  if (head == <break>) return 1;
+  if (head == <while> || head == <for> || head == <do> || head == <switch>)
+    return 0;
+  foreach (Var part, items) if (_lower_breaks(part)) return 1;
+  return 0;
+}
+
 static Var _lower_loop(
-  Lowering l, Var test, List body, List rest, List k) {
+  Lowering l, Var test, List body, List step, List rest, List k) {
   Var name = _lower_name(l, "loop");
   Array boxes = [];
   defer boxes.free();
@@ -800,20 +827,40 @@ static Var _lower_loop(
   Map outer = l.env;
   l.env = inside;
   Var guard = _lower_truth(l, test);
+  /* The exit is a function over the same live locals only when a `break`
+     reaches it from inside the body; otherwise the cond inlines it. */
+  Var exit = 0;
+  List breaking = NULL;
+  if (_lower_breaks(body) || _lower_breaks(step)) {
+    exit = _lower_name(l, "after");
+    breaking = %(again $exit ${ids.list()});
+  }
+  List turn = %(again $name ${ids.list()});
+  if (step) turn = %(then ${step} ${turn} ${breaking});
+  List saved_break = l.on_break, saved_continue = l.on_continue;
+  l.on_break = breaking;
+  l.on_continue = turn;
   int was_on_loop = l.on_loop;
   l.on_loop = 1;
   Map before = _lower_env_copy(l);
-  Var iterate = _lower_block(l, body, %(again $name ${ids.list()}));
+  Var iterate = _lower_block(l, body, turn);
   _lower_env_restore(l, before);
   l.on_loop = was_on_loop;
+  l.on_break = saved_break;
+  l.on_continue = saved_continue;
   Var leave = _lower_block(l, rest, k);
   l.env = outer;
   if (_lower_failed(l, guard) || _lower_failed(l, iterate) ||
       _lower_failed(l, leave))
     return void;
+  Var exiting = leave;
+  if (breaking) {
+    l.definitions.push(%(def $exit (lambda ${slots.list()} $leave)));
+    exiting = cons(exit, slots);
+  }
   l.definitions.push(
     %(def $name (lambda ${slots.list()} (cond ($guard $iterate)
-                                              (true $leave)))));
+                                              (true $exiting)))));
   Var call = cons(name, entry.list_free());
   if (!boxes.len()) return call;
   Array empty = [];
@@ -822,6 +869,133 @@ static Var _lower_loop(
     empty.push(%(C.cell 0));
   }
   return %((lambda ${boxes.list()} $call) @{empty.list_free()});
+}
+
+/* --- switch ------------------------------------------------------------- */
+
+/* A statement without the position its parser recorded, so a `switch` label
+   reads the same whether or not it carries one. */
+static Var _lower_bare(Var form) {
+  match (form) case %(at ? ?node): return _lower_bare(node);
+  return form;
+}
+
+/* C runs on into the arm below when one does not transfer control. This
+   pass refuses that rather than reordering the arms into a state machine,
+   so every arm but the last has to end by transferring control. */
+static int _lower_terminated(List body) {
+  if (!body) return 0;
+  match (_lower_bare(body.last())) {
+    case %(block *items): return _lower_terminated(items);
+    case %(!or (break) (continue) (return *)): return 1;
+  }
+  return 0;
+}
+
+/* One arm: the case values that select it, and its statements. This takes
+   both arrays over. A `default` selects on no value, so it carries none
+   even where a `case` label shares the arm with it. */
+static Var _lower_arm(Array tests, Array body, int fallback) {
+  if (!fallback) return %(${tests.list_free()} ${body.list_free()});
+  tests.free();
+  return %(() ${body.list_free()});
+}
+
+/* A `switch` is a `cond` over the subject, which the labels compare against
+   and the arms never read, so it is bound only when it cannot be repeated.
+   The arms sit in one flat block with their labels as markers, so an arm is
+   the statements between one label run and the next. */
+static Var _lower_switch(
+  Lowering l, Var subject, List items, List rest, List k) {
+  Var value = _lower_expr(l, subject);
+  if (_lower_failed(l, value)) return void;
+  int bound = !_lower_pure(value);
+  if (bound && l.on_loop)
+    return _lower_decline(l, "a switch subject needing a binding is on a "
+                             "loop path");
+  Var slot = value;
+  if (bound) slot = _lower_name(l, "subject");
+  Array arms = [];
+  defer arms.free();
+  Array tests = [];
+  Array body = [];
+  int fallback = 0;
+  foreach (Var item, items) {
+    Var label = 0;
+    int is_case = 0, is_default = 0;
+    match (_lower_bare(item)) {
+      case %(case ?node): {
+        label = node;
+        is_case = 1;
+      }
+      case %(default): is_default = 1;
+    }
+    if (!is_case && !is_default) {
+      body.push(item);
+      continue;
+    }
+    if (body.len()) {
+      arms.push(_lower_arm(tests, body, fallback));
+      tests = [];
+      body = [];
+      fallback = 0;
+    }
+    if (is_case) tests.push(label);
+    else fallback = 1;
+  }
+  if (tests.len() || body.len() || fallback)
+    arms.push(_lower_arm(tests, body, fallback));
+  else {
+    tests.free();
+    body.free();
+  }
+  List exit = %(then ${rest} ${k} ${l.on_break});
+  List saved_break = l.on_break;
+  l.on_break = exit;
+  Array clauses = [];
+  defer clauses.free();
+  Var otherwise = void;
+  int count = (int) arms.len();
+  for (int i = 0; i < count; i++) {
+    List arm = arms[i];
+    List cases = arm.car();
+    List statements = arm.cadr();
+    if (i + 1 < count && !_lower_terminated(statements)) {
+      _lower_decline(l, "a switch arm that falls through into the next");
+      break;
+    }
+    Array conditions = [];
+    foreach (Var node, cases) {
+      Var constant = _lower_expr(l, node);
+      if (_lower_failed(l, constant)) break;
+      conditions.push(%(equal? $slot $constant));
+    }
+    Map saved = _lower_env_copy(l);
+    Var taken = _lower_block(l, statements, exit);
+    _lower_env_restore(l, saved);
+    List tested = conditions.list_free();
+    if (_lower_failed(l, taken)) break;
+    if (!tested) {
+      otherwise = taken;
+      continue;
+    }
+    Var test = tested.car();
+    if (tested.cdr()) test = cons(<or>, tested);
+    clauses.push(%($test $taken));
+  }
+  l.on_break = saved_break;
+  if (l.declined) return void;
+  Var chain = otherwise;
+  if (chain is void) {
+    Map saved = _lower_env_copy(l);
+    chain = _lower_block(l, rest, k);
+    _lower_env_restore(l, saved);
+    if (_lower_failed(l, chain)) return void;
+  }
+  clauses.push(%(true $chain));
+  Var result = cons(<cond>, clauses);
+  if (!bound) return result;
+  return %((lambda ($slot) $result) $value);
 }
 
 /* A cell local's declaration allocates its box; every other local keeps the
@@ -1089,17 +1263,37 @@ static Var _lower_stmnt(Lowering l, Var form, List rest, List k) {
     case %(if ?test ?then ?alt):
       return _lower_branch(l, test, %($then), %($alt), rest, k);
     case %(while ?test ?body):
-      return _lower_loop(l, test, %($body), rest, k);
+      return _lower_loop(l, test, %($body), %(), rest, k);
     case %(match ?subject ?arms):
       return _lower_arms(l, subject, arms, rest, k);
-    /* A `for` is the same loop with its step at the end of the body; the
-       subset has no `continue`, so nothing can skip that step. */
+    case %(switch ?subject (block *items)):
+      return _lower_switch(l, subject, items, rest, k);
+    case %(break): {
+      if (!l.on_break)
+        return _lower_decline(l, "break outside a loop or switch");
+      return _lower_apply_k(l, l.on_break);
+    }
+    case %(continue): {
+      if (!l.on_continue) return _lower_decline(l, "continue outside a loop");
+      return _lower_apply_k(l, l.on_continue);
+    }
+    /* `do BODY while (TEST)` checks the test after the body, which is the
+       same loop with the test as its step: the body's end and every
+       `continue` reach it, and a failing test leaves through its `break`. */
+    case %(do ?body ?test):
+      return _lower_loop(
+        l, %(expr (int) (literal (int) "1")), %($body),
+        %((if $test (empty) (break))), rest, k);
+    /* A `for` is the same loop with its step as the continuation the body
+       and every `continue` reach, so nothing can skip it. The init declares
+       into the enclosing block, so it is lowered ahead of the loop. */
     case %(for ?init ?test ?step ?body): {
-      List start = init ? %(${_lower_for_init(init)}) : %();
-      List turn = step ? %($body (stmnt $step)) : %($body);
+      if (init)
+        return _lower_block(
+          l, %(${_lower_for_init(init)} (for () $test $step $body) @rest), k);
       List guard = test ? test : %(expr (int) (literal (int) "1"));
-      return _lower_block(
-        l, %(@start (while $guard (block @turn)) @rest), k);
+      return _lower_loop(
+        l, guard, %($body), step ? %((stmnt $step)) : %(), rest, k);
     }
   }
   return _lower_decline(l, "unsupported statement");
@@ -1131,7 +1325,8 @@ List Compiler.lower_comptime(Compiler compiler, List fn) {
   struct Lowering state = {
     .compiler = compiler, .env = {}, .locals = {}, .cells = {},
     .arrays = {}, .definitions = [], .counter = 0, .declined = 0,
-    .own = NULL, .on_loop = 0, .in_loop = 0, .rejected = 0, .uncallable = 0
+    .own = NULL, .on_break = NULL, .on_continue = NULL, .on_loop = 0,
+    .in_loop = 0, .rejected = 0, .uncallable = 0
   };
   Lowering l = &state;
   match (fn) {
@@ -1142,7 +1337,7 @@ List Compiler.lower_comptime(Compiler compiler, List fn) {
       l.own = name;
       _lower_scan(l, fn);
       _lower_scan(l, fn);
-      if (l.rejected) lower_declined_reason = "unsupported construct";
+      if (l.rejected) lower_declined_reason = "a goto has no lowering";
       else if (l.uncallable)
         lower_declined_reason = "no binding for " + lower_missing_callee;
       if (l.rejected || l.uncallable) {
