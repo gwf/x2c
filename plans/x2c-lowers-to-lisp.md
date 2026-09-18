@@ -369,8 +369,33 @@ head is still a cache id and something is still needed to read it. The
 remaining choice is therefore narrower than it was: patterns need no API,
 and only interpolated templates do.
 
-The experiment is reverted; the accessor stays as branch scaffolding with a
-range check, and nothing ships until Gary decides.
+**Both remaining options built and measured, on `src/transform.x`.**
+
+| | 1: accessor keyed on the node | 2: `(cache id key)` |
+|---|---|---|
+| reads patterns | yes | yes |
+| reads templates | yes | yes |
+| translate | 0.44 s | 0.48 s |
+| generated C | 156,758 B | 156,737 B |
+| peak RSS | 46.8 MB | 47.2 MB |
+| fixtures | 716 pass, nothing to regenerate | 54 artifacts to regenerate, no behavior failure |
+| the change | 1 file, 14 lines | 7 files |
+| new API | `x2c.cache.value` | none |
+
+Option 2 costs about 10% of translation time on every unit, permanently,
+and its output is the same size, so the AST it grows is pure overhead. It
+also changes a node shape that eight places match on: the first attempt
+missed `src/transform.x:85`, which broke `printf-var-lowering` until it was
+found, and every future matcher written as `%(cache ?id)` instead of
+`%(cache ?id *)` would break the same way.
+
+Option 1 measures identical to doing nothing, because it changes no syntax.
+Its concession is one documented operation whose argument is a node the
+macro was handed rather than an index it invented.
+
+**Adopted: option 1**, together with the free pattern fix. Purity is worth
+paying for, but not 10% of every translation plus a shape that every future
+consumer has to remember.
 
 ### M3 - port `autodiff.xmacro`
 
