@@ -314,6 +314,10 @@ List ad_fwd_update(List s, List update, List names) {
   return %($tangent ${ad_unbind(s)});
 }
 
+/* One item can expand to several statements, so the loop concatenates
+   instead of pushing: `foreach` cannot nest, so an `Array` has no way to
+   take them one at a time. Every builder below that splices reads this way;
+   the ones that produce exactly one item per input push to an `Array`. */
 $comptime()
 List ad_fwd_items(List items, List names) {
   List out = %();
@@ -379,9 +383,9 @@ List ad_declarator_names(List decls) {
 }
 
 /* Every plain double declaration in the body is differentiated too; any
-   other double identifier is a constant. This pair walks the whole tree, so
-   it stays recursive: a loop would have to concatenate a list per node, and
-   `foreach` cannot nest, which is what an `Array` would need here. */
+   other double identifier is a constant. This pair walks the whole
+   tree, so it stays recursive; concatenating once per node, which is what a
+   loop would do here, costs more than the recursion it replaces. */
 $comptime()
 List ad_declared_doubles(Var form) {
   if (!form.is(<list>)) return %();
