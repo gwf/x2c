@@ -599,6 +599,30 @@ replaces. The port carries a 2.89 s fixed cost for lowering its thirty
 functions once, against 93 ms to load the `.xmacro`, and the two cross at
 about 36 derivations in a unit.
 
+### Prelowering would not help: it already happens
+
+The lowering's own Lisp is already compiled. Reading the macro session's
+statistics after lowering thirty functions: 72,044 evaluator invocations,
+50,308 of them machine entries, 8,518 analyses, 8,511 programs published,
+7 ineligible. So the machine compiles essentially all of it, lazily, after
+each lambda's second call.
+
+Publishing is not the cost either. Replacing the closures the walks passed
+to `map` with named recursion halved the published programs, 8,511 to
+4,214, and left the time unchanged.
+
+What costs is calls. Lowering thirty functions of about 7,500 AST nodes
+takes roughly 123,000 Lisp calls, about sixteen per node, and per-call
+overhead is what fills the 2.9 s. Compiling the same thirty functions as
+ordinary x2c, parse and type with no lowering, costs 162 ms, so the pass is
+about seventeen times its own subject.
+
+Closing that means fewer calls per node, or writing the pass in x2c and
+compiling it, which is where this plan was always going. Compiling the Lisp
+ahead of time is not the lever, because the Lisp is already compiled.
+
+### What the word machine contributes
+
 The pipeline is x2c source, to Lisp lambdas, to the word machine, and the
 machine is doing real work. Disabling it with `Lisp.auto_disable` on the
 compiler's own macro session:
