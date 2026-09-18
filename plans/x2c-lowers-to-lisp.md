@@ -430,8 +430,28 @@ enclosing environment and must not shadow it. And eligibility no longer
 rejects every call: it rejects a callee with no compile-time binding, which
 is the case expression translation would raise on.
 
-Still missing before the port: mutable file-scope state, which autodiff
-uses in 19 places to accumulate across invocations.
+### M3 groundwork - file-scope state  (DONE 2026-09-17)
+
+A global is an id the function never declares. Its value cannot be
+substituted, because a write between two reads changes it, so a read stays
+a read and a write is an effect. The effect rides a `cond` test that always
+fails, which keeps the rest of the block in tail position and introduces no
+binding form, so a global write is legal on a loop's iteration path.
+Globals live in a `Map` keyed by binding id, which avoids inventing names
+under the seven-character limit. A unit-level initializer is not part of
+the function, so an unwritten global reads as zero.
+
+`.context/spike/globals-lower.x` calls `bump(5)`, `bump(3)`, `bump(2)` at
+translation time and gets 5, 8, 10.
+
+One defect this exposed, worth recording because it was silent. The scan
+that decides which ids are local stopped at the first `bind` node it
+matched, and a function's own binding carries its parameters underneath, so
+every parameter looked like a global. `gcd` then wrote its parameters to
+the global store and looped forever instead of updating them. The walk now
+collects an id and still descends.
+
+All eight spike programs agree with native execution.
 
 ### M3 - port `autodiff.xmacro`
 
