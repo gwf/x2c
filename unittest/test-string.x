@@ -221,7 +221,7 @@ static void string_noop_construction_preserves_owner(void) {
   Pool.close();
 }
 
-static void string_invalid_bytes_transfer(void) {
+static void string_invalid_input_transfer(void) {
   int caught = 0;
   try String.new_fill('\0', 3);
   catch %(bad-arg *): caught++;
@@ -232,13 +232,17 @@ static void string_invalid_bytes_transfer(void) {
   try String.new("a\\400b").unescape();
   catch %(bad-arg *): caught++;
 
+  /* count + 1 would overflow the allocation length. */
+  try String.new_fill('x', INT_MAX);
+  catch %(size-limit *): caught++;
+
   try "abc".map(_string_test_nul);
   catch %(bad-result *): caught++;
   /* 256 is nonzero but truncates to NUL; the stored byte decides. */
   try "abc".map(_string_wide_nul);
   catch %(bad-result *): caught++;
 
-  EXPECT_INT_EQ(caught, 6);
+  EXPECT_INT_EQ(caught, 7);
 }
 
 static void _callback_transfer_round(int measure) {
@@ -298,6 +302,8 @@ static void string_escape_sequences(void) {
 
   EXPECT_INT_EQ(%"'\\x41'".parse_char(), 'A');
   EXPECT_INT_EQ(%"'\\7'".parse_char(), '\a');
+  EXPECT_INT_EQ(%"'\\377'".parse_char(), 0377);
+  EXPECT_INT_EQ(%"'\\400'".parse_char(), -1);
 }
 
 static void string_multiline_literals(void) {
@@ -605,7 +611,7 @@ void string_suite(void) {
   $test.run(string_slice_stack_probe_boundaries);
   $test.run(string_withindex_copies_and_leaves_input_intact);
   $test.run(string_noop_construction_preserves_owner);
-  $test.run(string_invalid_bytes_transfer);
+  $test.run(string_invalid_input_transfer);
   $test.run(string_callback_transfer_releases_temporary);
   $test.run(string_escape_sequences);
   $test.run(string_multiline_literals);

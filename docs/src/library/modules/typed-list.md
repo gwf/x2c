@@ -19,31 +19,31 @@ Typed cons chains generated from typed methods.
 | [`ListChar.car`](#ListChar.car) | Returns the first `char` in `xs`, or `0` when `xs` is `nil`. |
 | [`ListChar.cons`](#ListChar.cons) | Returns the canonical `ListChar` formed by prepending `value` to `tail`. |
 | [`ListChar.index`](#ListChar.index) | Returns the first zero-based index of `value`, or -1 when absent. |
-| [`ListChar.last`](#ListChar.last) | Returns the final `char` in nonempty `xs` after an O(n) walk. |
+| [`ListChar.last`](#ListChar.last) | Returns the final `char` in `xs`, or `0` when `xs` is `nil`, after an O(n) walk. |
 | [`ListDbl.car`](#ListDbl.car) | Returns the first `double` in `xs`, or `0.0` when `xs` is `nil`. |
 | [`ListDbl.cons`](#ListDbl.cons) | Returns the canonical `ListDbl` formed by prepending `value` to `tail`. |
 | [`ListDbl.index`](#ListDbl.index) | Returns the first zero-based index of `value`, or -1 when absent. |
-| [`ListDbl.last`](#ListDbl.last) | Returns the final `double` in nonempty `xs` after an O(n) walk. |
+| [`ListDbl.last`](#ListDbl.last) | Returns the final `double` in `xs`, or `0.0` when `xs` is `nil`, after an O(n) walk. |
 | [`ListFloat.car`](#ListFloat.car) | Returns the first `float` in `xs`, or `0.0f` when `xs` is `nil`. |
 | [`ListFloat.cons`](#ListFloat.cons) | Returns the canonical `ListFloat` formed by prepending `value` to `tail`. |
 | [`ListFloat.index`](#ListFloat.index) | Returns the first zero-based index of `value`, or -1 when absent. |
-| [`ListFloat.last`](#ListFloat.last) | Returns the final `float` in nonempty `xs` after an O(n) walk. |
+| [`ListFloat.last`](#ListFloat.last) | Returns the final `float` in `xs`, or `0.0f` when `xs` is `nil`, after an O(n) walk. |
 | [`ListInt.car`](#ListInt.car) | Returns the first `int` in `xs`, or `0` when `xs` is `nil`. |
 | [`ListInt.cons`](#ListInt.cons) | Returns the canonical `ListInt` formed by prepending `value` to `tail`. |
 | [`ListInt.index`](#ListInt.index) | Returns the first zero-based index of `value`, or -1 when absent. |
-| [`ListInt.last`](#ListInt.last) | Returns the final `int` in nonempty `xs` after an O(n) walk. |
+| [`ListInt.last`](#ListInt.last) | Returns the final `int` in `xs`, or `0` when `xs` is `nil`, after an O(n) walk. |
 | [`ListShort.car`](#ListShort.car) | Returns the first `short` in `xs`, or `0` when `xs` is `nil`. |
 | [`ListShort.cons`](#ListShort.cons) | Returns the canonical `ListShort` formed by prepending `value` to `tail`. |
 | [`ListShort.index`](#ListShort.index) | Returns the first zero-based index of `value`, or -1 when absent. |
-| [`ListShort.last`](#ListShort.last) | Returns the final `short` in nonempty `xs` after an O(n) walk. |
+| [`ListShort.last`](#ListShort.last) | Returns the final `short` in `xs`, or `0` when `xs` is `nil`, after an O(n) walk. |
 | [`ListString.car`](#ListString.car) | Returns the first `String` in `xs`, or `NULL` when `xs` is `nil`. |
 | [`ListString.cons`](#ListString.cons) | Returns the canonical `ListString` formed by prepending `value` to `tail`. |
 | [`ListString.index`](#ListString.index) | Returns the first zero-based index of `value`, or -1 when absent. |
-| [`ListString.last`](#ListString.last) | Returns the final `String` in nonempty `xs` after an O(n) walk. |
+| [`ListString.last`](#ListString.last) | Returns the final `String` in `xs`, or `NULL` when `xs` is `nil`, after an O(n) walk. |
 | [`ListSymbol.car`](#ListSymbol.car) | Returns the first `Symbol` in `xs`, or `0` when `xs` is `nil`. |
 | [`ListSymbol.cons`](#ListSymbol.cons) | Returns the canonical `ListSymbol` formed by prepending `value` to `tail`. |
 | [`ListSymbol.index`](#ListSymbol.index) | Returns the first zero-based index of `value`, or -1 when absent. |
-| [`ListSymbol.last`](#ListSymbol.last) | Returns the final `Symbol` in nonempty `xs` after an O(n) walk. |
+| [`ListSymbol.last`](#ListSymbol.last) | Returns the final `Symbol` in `xs`, or `0` when `xs` is `nil`, after an O(n) walk. |
 | [`Var.listchar`](#Var.listchar) | Extracts and validates `value` as `ListChar` without copying its cells. |
 | [`Var.listdbl`](#Var.listdbl) | Extracts and validates `value` as `ListDbl` without copying its cells. |
 | [`Var.listfloat`](#Var.listfloat) | Extracts and validates `value` as `ListFloat` without copying its cells. |
@@ -200,7 +200,9 @@ Source: `lib/typed-list.x:97`
 
 `char ListChar.last(ListChar xs)`
 
-Returns the final `char` in nonempty `xs` after an O(n) walk.
+Returns the final `char` in `xs`, or `0` when `xs` is `nil`,
+after an O(n) walk.
+A nonempty `xs` must retain the `ListChar` element-tag invariant.
 
 Source: `lib/typed-list.x:97`
 
@@ -245,7 +247,9 @@ Source: `lib/typed-list.x:113`
 
 `double ListDbl.last(ListDbl xs)`
 
-Returns the final `double` in nonempty `xs` after an O(n) walk.
+Returns the final `double` in `xs`, or `0.0` when `xs` is `nil`,
+after an O(n) walk.
+A nonempty `xs` must retain the `ListDbl` element-tag invariant.
 
 Source: `lib/typed-list.x:113`
 
@@ -290,7 +294,9 @@ Source: `lib/typed-list.x:109`
 
 `float ListFloat.last(ListFloat xs)`
 
-Returns the final `float` in nonempty `xs` after an O(n) walk.
+Returns the final `float` in `xs`, or `0.0f` when `xs` is `nil`,
+after an O(n) walk.
+A nonempty `xs` must retain the `ListFloat` element-tag invariant.
 
 Source: `lib/typed-list.x:109`
 
@@ -335,7 +341,9 @@ Source: `lib/typed-list.x:105`
 
 `int ListInt.last(ListInt xs)`
 
-Returns the final `int` in nonempty `xs` after an O(n) walk.
+Returns the final `int` in `xs`, or `0` when `xs` is `nil`,
+after an O(n) walk.
+A nonempty `xs` must retain the `ListInt` element-tag invariant.
 
 Source: `lib/typed-list.x:105`
 
@@ -380,7 +388,9 @@ Source: `lib/typed-list.x:101`
 
 `short ListShort.last(ListShort xs)`
 
-Returns the final `short` in nonempty `xs` after an O(n) walk.
+Returns the final `short` in `xs`, or `0` when `xs` is `nil`,
+after an O(n) walk.
+A nonempty `xs` must retain the `ListShort` element-tag invariant.
 
 Source: `lib/typed-list.x:101`
 
@@ -425,7 +435,9 @@ Source: `lib/typed-list.x:117`
 
 `String ListString.last(ListString xs)`
 
-Returns the final `String` in nonempty `xs` after an O(n) walk.
+Returns the final `String` in `xs`, or `NULL` when `xs` is `nil`,
+after an O(n) walk.
+A nonempty `xs` must retain the `ListString` element-tag invariant.
 
 Source: `lib/typed-list.x:117`
 
@@ -470,7 +482,9 @@ Source: `lib/typed-list.x:121`
 
 `Symbol ListSymbol.last(ListSymbol xs)`
 
-Returns the final `Symbol` in nonempty `xs` after an O(n) walk.
+Returns the final `Symbol` in `xs`, or `0` when `xs` is `nil`,
+after an O(n) walk.
+A nonempty `xs` must retain the `ListSymbol` element-tag invariant.
 
 Source: `lib/typed-list.x:121`
 

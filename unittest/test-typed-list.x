@@ -38,13 +38,23 @@ static void typed_list_reads_elements_natively(void) {
 static void typed_list_reads_nil_as_zero(void) {
   $test.scoped();
 
-  /* car of nil is void, whose bits are all ones, so the guard decides the
-     answer rather than merely avoiding a null read. */
-  EXPECT_INT_EQ(ListInt.car(NULL), 0);
+  /* car and last of nil are void, whose bits are all ones, so the guard
+     decides the answer rather than merely avoiding a null read. */
+  EXPECT_INT_EQ(ListChar.car(NULL), 0);
   EXPECT_INT_EQ(ListShort.car(NULL), 0);
+  EXPECT_INT_EQ(ListInt.car(NULL), 0);
+  EXPECT_TRUE(ListFloat.car(NULL) == 0.0f);
   EXPECT_TRUE(ListDbl.car(NULL) == 0.0);
-  EXPECT_TRUE(ListString.car(NULL) == NULL);
-  EXPECT_TRUE(ListChar.car(NULL) == 0);
+  EXPECT_NULL(ListString.car(NULL));
+  EXPECT_TRUE(ListSymbol.car(NULL) == 0);
+
+  EXPECT_INT_EQ(ListChar.last(NULL), 0);
+  EXPECT_INT_EQ(ListShort.last(NULL), 0);
+  EXPECT_INT_EQ(ListInt.last(NULL), 0);
+  EXPECT_TRUE(ListFloat.last(NULL) == 0.0f);
+  EXPECT_TRUE(ListDbl.last(NULL) == 0.0);
+  EXPECT_NULL(ListString.last(NULL));
+  EXPECT_TRUE(ListSymbol.last(NULL) == 0);
 }
 
 static void typed_list_structural_results_stay_typed(void) {

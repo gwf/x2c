@@ -400,15 +400,16 @@ String String.new_len(const char *str, int len) {
 }
 
 /** Returns the canonical `String` containing `count` copies of `fill`.
-    `count` must be less than `INT_MAX`, because the allocation includes one
-    trailing NUL byte.
-    Raises: `<bad-arg>` when `fill` is NUL, or `<alloc-fail>` when canonical
-    storage cannot be allocated. A nonpositive `count` returns NULL without
-    raising.
+    Raises: `<bad-arg>` when `fill` is NUL, `<size-limit>` when `count` is
+    `INT_MAX`, because the allocation includes one trailing NUL byte, or
+    `<alloc-fail>` when canonical storage cannot be allocated. A nonpositive
+    `count` returns NULL without raising.
 */
 String String.new_fill(char fill, int count) {
   if (count <= 0) return NULL;
   if (fill == '\0') raise %(bad-arg (owner "String.new_fill"));
+  if (count == INT_MAX)
+    raise %(size-limit (owner "String.new_fill") (count $count));
   String string = String.malloc(count + 1);
   memset(string, fill, count);
   return _finish(string, count);
@@ -1317,7 +1318,8 @@ Buffer String.write_repr(String str, Buffer out) {
 /** Parses one leading single-quoted escaped or literal byte, or returns -1.
     The opening quote, one decoded byte, and a closing quote are required.
     Text after that closing quote is ignored. A decoded NUL is returned as
-    zero; malformed and null input returns -1.
+    zero; malformed and null input returns -1, as does an octal escape above
+    `\377`, which does not fit a byte.
 */
 int String.parse_char(String str) {
   if (!str || !*str) return -1;
@@ -1329,7 +1331,7 @@ int String.parse_char(String str) {
     if (!*s) return -1;
     const char *cursor = s;
     int emit, esc = _decode_escape_char(&cursor, &emit);
-    if (!emit) return -1;
+    if (!emit || esc > 0377) return -1;
     value = esc;
     s = cursor;
   }
