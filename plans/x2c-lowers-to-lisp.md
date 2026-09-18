@@ -621,6 +621,51 @@ Closing that means fewer calls per node, or writing the pass in x2c and
 compiling it, which is where this plan was always going. Compiling the Lisp
 ahead of time is not the lever, because the Lisp is already compiled.
 
+### Scope of writing the pass in x2c
+
+Measured against the prototype as it stands, 1,057 lines of Lisp across
+five files.
+
+| | lines | becomes |
+|---|---|---|
+| `lower-direct.xlisp` | 385 | x2c, mostly `match` statements |
+| `c-from-ast.xlisp`, expression half | 277 | x2c, mostly `match` statements |
+| `cache-values.xlisp` | 40 | x2c, and shrinks: the pass holds `id_keys` |
+| `c-from-ast.xlisp`, SDK fallback | 102 | deleted |
+| `c-sdk.xlisp`, C-machine half | 77 | deleted |
+| `c-sdk.xlisp`, remainder | 29 | stays Lisp: the lowered code calls it |
+| `runtime-bridge.xlisp` | 88 | stays Lisp, or x2c data |
+
+So about 700 lines port, about 180 are deleted, and about 120 stay Lisp as
+the runtime the lowered code calls. The SDK fallback goes because it exists
+only to catch what the direct lowering declines, and a compiled pass should
+cover those cases instead.
+
+The ported 700 should not grow. x2c measured 24% larger than equivalent
+Lisp on the autodiff slice, but that comparison was against Lisp using
+`match-case`; the prototype has since had six dispatches rewritten as
+hand-rolled `cond` chains on the head to avoid its re-expansion cost. In
+x2c those go back to `match` statements over AST productions with `%()`
+output templates, which is both shorter than the `cond` chains and compiled
+to a decision tree.
+
+Work beyond transcription, which is where the estimate is softest:
+
+- a new `src/` module and its place in the pipeline;
+- invoking it from the macro path when a function is marked, instead of
+  from a decorator that calls Lisp;
+- the native name table, currently 88 lines of Lisp `C.native` rows;
+- extending the direct lowering to cover what the fallback covers today,
+  since the fallback is being deleted.
+
+Nothing here needs a language feature the checked-in bootstrap lacks, so
+there is no staged-capability problem. The seven-character limit on a
+generated `Symbol` still applies.
+
+Expected result: compiling those same thirty functions as ordinary x2c,
+parse and type, costs 162 ms, and the pass does comparable work, so
+100-200 ms against the prototype's 2.9 s.
+
 ### What the word machine contributes
 
 The pipeline is x2c source, to Lisp lambdas, to the word machine, and the
