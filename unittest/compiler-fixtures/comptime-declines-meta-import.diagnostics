@@ -1,5 +1,0 @@
-unittest/compiler-fixtures/comptime-declines-meta-import.xmacro:8:1: macro: a meta function in a macro import must be static
-  meta String mi_public(String text) => text.upper();
-  ^^^^
-  note: every unit that imports it emits its own copy of the definition, and two public copies collide at link
-

@@ -1047,22 +1047,6 @@ static Var _rebind_import_definition(Compiler compiler, Var stored) {
   return _replace_definition_bindings(definition, replacements);
 }
 
-/* Parses one `meta` function definition in a macro import. The parser
-   installs its compile-time form in the caller's session, which the importer
-   borrows, and returns the definition for the consuming unit to emit. Each
-   consuming unit emits its own copy, so the definition must be `static`. */
-static List _import_meta_definition(Compiler imported) {
-  Token marker = imported.token;
-  List definition = imported.parse_top_level();
-  match (definition)
-    case %(function ?type (bind ? *) *):
-      if (type.type().is_static()) return definition;
-  imported.report_error(
-    <macro>, "a meta function in a macro import must be static", marker,
-    %("every unit that imports it emits its own copy of the definition,"
-      "and two public copies collide at link"));
-}
-
 /* An import is cached only after it completes. Cached `.xmacro` aliases are
    replayed once per source alias map, while definitions and the Lisp session
    remain shared by the translation unit. CPP reads definitions and aliases;
@@ -1123,8 +1107,8 @@ static List _import(
          diagnostics are returned to the caller before release; lasting
          effects enter the shared definitions, aliases, dependencies, literal
          cache, and Lisp session. A `meta` definition the import returns is
-         emitted by the caller, so its `(cache id)` references have to index
-         the caller's keys. */
+         emitted by the caller when the caller reaches it, so its
+         `(cache id)` references have to index the caller's keys. */
       Compiler imported = Compiler.new_shared(c);
       defer c.close_child(imported);
       imported.filename = path;
@@ -1152,7 +1136,7 @@ static List _import(
           else if (imported.macro_form_is_definition())
             imported.parse_macro_definition();
           else if (imported.meta_form_is_definition())
-            meta_definitions.push(_import_meta_definition(imported));
+            meta_definitions.push(imported.parse_top_level());
           else if (imported.peek(0) == <"$(">) {
             if (c.collect_protocols || _import_path(imported, NULL)) {
               /* A nested import's own `meta` definitions belong to the same
@@ -1197,9 +1181,9 @@ static List _import(
 /** Consumes and evaluates one top-level compile-time Lisp form.
     `$(import ...)` loads a tracked `.xlisp` or `.xmacro` dependency; other
     results are discarded in the translation unit's Lisp session.
-    Returns a `%(seq ...)` of the `meta` definitions a macro import
-    contributed, for the consuming unit to emit, or NULL when it contributed
-    none.
+    Returns a `%(seq ...)` of the runtime `meta` definitions a macro import
+    contributed, or NULL when it contributed none. The consuming unit retains
+    them and emits the ones it reaches.
 */
 List Compiler.parse_macro_lisp_top_level(Compiler compiler) {
   Token invocation = compiler.token;

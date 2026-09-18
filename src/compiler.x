@@ -123,6 +123,11 @@ typedef struct Compiler {
   Array id_keys, inits;
   String init_fn, fini_fn;
   Array early_decls, int prelude;
+  /* `meta` function definitions the unit's macro imports contributed. Their
+     compile-time forms are already installed; these are the runtime forms,
+     kept until the unit is parsed and only then emitted where it reaches
+     them. */
+  Array meta_defs;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int in_pattern, match_is, runtime_literals, inline_header;
   int builtin_defs, in_proto, macro_count, recovery_depth;
@@ -331,6 +336,7 @@ static Compiler _new(Compiler owner) {
     }
     _.inits = [];
     _.early_decls = [];
+    _.meta_defs = [];
     _.collect_protocols = 1;
     _.diagnostics = Diagnostics.new(
       owner && owner.diagnostics.printer ? _ : NULL,
@@ -1602,6 +1608,48 @@ static void _sync_top_level(Compiler c, Token start, int braces) {
   }
 }
 
+/* Records every binding `node` names, so a `meta` definition is emitted only
+   where the unit reaches it. A definition's own binder is a `bind`, not an
+   `ident`, so a function does not name itself here. */
+static void _collect_binding_references(Var node, Map referenced) {
+  if (node is not <list>) return;
+  List syntax = node;
+  match (syntax) case %(ident (binding ?identity ?)): {
+    referenced[identity] = 1;
+    return;
+  }
+  foreach (Var child, syntax) _collect_binding_references(child, referenced);
+}
+
+/* Emits the runtime form of each imported `meta` function this unit reaches,
+   in import order. A `meta` function has two lifetimes: every importing unit
+   installs its compile-time form, and the runtime definition belongs where
+   it is called. A unit that calls one only during translation emits nothing
+   for it, and a definition an emitted one calls comes with it. */
+static void _append_meta_definitions(Compiler c, Array nodes) {
+  if (!c.meta_defs.len()) return;
+  Map referenced = {}, reached = {};
+  foreach (List node, nodes) _collect_binding_references(node, referenced);
+  /* The import loop takes a definition and refuses a prototype, so a meta
+     function calls only ones declared before it. One pass from the last
+     definition back therefore reaches every definition an emitted one
+     needs. */
+  for (size_t i = c.meta_defs.len(); i; i--) {
+    List definition = c.meta_defs[i - 1];
+    match (definition) case %(function ? (bind (binding ?identity ?) *) ?):
+      if (identity in referenced) {
+        reached[identity] = 1;
+        _collect_binding_references(definition, referenced);
+      }
+  }
+  foreach (List definition, c.meta_defs)
+    match (definition) case %(function ? (bind (binding ?identity ?) *) ?):
+      if (identity in reached) {
+        _record_top_level_function_state(c, definition);
+        nodes.push(definition);
+      }
+}
+
 /** Parses and types the positioned source against `globs`.
 
     The result is a source-ordered top-level AST. This resets per-parse
@@ -1611,6 +1659,7 @@ static void _sync_top_level(Compiler c, Token start, int braces) {
 List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   Array nodes = [];
   c.origins.clear();
+  c.meta_defs.clear();
   c.fixed = {};
   c.init_tokens = {};
   c.static_init_deps = {};
@@ -1700,6 +1749,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
     c.token = conflict;
     _report_script_statement(c);
   }
+  _append_meta_definitions(c, nodes);
   List ast = nodes.list_free();
   if (c.script && !c.script.defines_main && !c.error_count())
     _check_script_locals(c, ast);

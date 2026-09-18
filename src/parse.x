@@ -1710,7 +1710,8 @@ static void _track_conditional_arms(Compiler c) {
     Returns its AST, or NULL when a keyword definition, top-level Lisp form,
     or linkage brace only updates compiler state, with the first following
     token current. A macro import whose `.xmacro` declares `meta` functions
-    returns those definitions, so the consuming unit emits them here.
+    retains their runtime definitions, which the unit emits where it reaches
+    them.
 */
 List Compiler.parse_top_level(Compiler c) {
   if (!c.macro_holes) {
@@ -1732,7 +1733,12 @@ List Compiler.parse_top_level(Compiler c) {
   switch (c.peek(0)) {
     case <import>:   return c.parse_import_declaration();
     case <protocol>: return c.parse_protocol_declaration();
-    case <"$(">: return c.parse_macro_lisp_top_level();
+    case <"$(">: {
+      List imported = c.parse_macro_lisp_top_level();
+      if (imported) foreach (Var definition, imported.cdr())
+        c.meta_defs.push(definition);
+      return NULL;
+    }
     case <@>:
       c.report_error(
         <parse>, "top-level decorators are not supported", c.token,

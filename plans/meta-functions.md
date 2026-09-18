@@ -59,8 +59,9 @@ difference that matters: `keyword` resolves through the macro machinery, and
 `meta` must resolve in the parser, because the parser has to know before
 macro expansion runs.
 
-`meta` composes with a storage class rather than replacing one. Both forms are
-emitted, so `static` still says what it always said about the runtime form.
+`meta` composes with a storage class rather than replacing one, and never
+decides one. `static` still says only what it always said about the runtime
+form, which is emitted where a unit reaches it.
 
 There is no opt-out spelling. A meta function whose runtime form cannot be
 emitted has no caller today, and inventing `meta only` before one exists would
@@ -107,19 +108,72 @@ form. The branch calls `Compiler.parse_top_level`, so M1's marker performs
 the install; the importer already borrows the caller's `macro_lisp`, so it
 lands in the consuming unit's session.
 
-**The emission rule: an imported `meta` function must be `static`.** Each
-consuming unit emits its own copy, which is what a macro family's generated
-statics already do, and two public copies collide at link. The refusal is
-`a meta function in a macro import must be static`, sited on the marker, with
-the note `every unit that imports it emits its own copy of the definition,
-and two public copies collide at link`. The declaration-and-definition split
-was the alternative and buys nothing: a `.xmacro` is not a translation unit,
-so there is nowhere for the single definition to live.
+**The emission rule: a unit emits the runtime definitions it reaches, and
+the storage class the author wrote stands.** The two lifetimes are separated.
+Every importing unit installs the compile-time form, which emits no symbol.
+The runtime definition is emitted only where the unit's own code reaches the
+function, directly or through another meta function it emits; a unit that
+calls one only during translation emits nothing for it. `static` then gives
+that unit its own copy, and its absence names the one public copy the program
+links, exported by the reaching unit's generated header.
 
-`Compiler.parse_macro_lisp_top_level` returns the definitions a macro import
-contributed as a `%(seq ...)`, which `parse_top_level` hands to the unit
-driver, so they are emitted where the import stands. A nested import's
-definitions travel the same way.
+The first `static`-only rule was withdrawn by Gary on 2026-09-18. `static` is
+a statement about the runtime function alone, and a marker that decides it
+conflates the two lifetimes the word `meta` exists to keep apart.
+
+`Compiler.parse_macro_lisp_top_level` still returns the definitions a macro
+import contributed as a `%(seq ...)`, including a nested import's.
+`Compiler.parse_top_level` now retains them in `c.meta_defs` instead of
+handing them to the unit driver, and `Compiler.full_parse` appends the
+reached ones after the unit is parsed, since only then is reaching decided.
+`_collect_binding_references` records every binding an `(ident (binding ...))`
+names. One meta function calls another, so the retained definitions are then
+walked once from the last back: the import loop takes a definition and
+refuses a prototype, so a meta function calls only ones declared before it
+and no second pass can add anything.
+
+### Where the single public definition lives
+
+A public imported `meta` function needs one home, and no unit is a natural
+owner: a `.xmacro` is not a translation unit, and picking the first importer
+would depend on build order, which breaks incremental and parallel builds.
+The answer is the one the macro families already use, and it needs no new
+spelling.
+
+`$array.typed.family(ArrayDbl, double, 0.0, "ArrayDbl")` is invoked once, in
+`lib/typed-array.x`. That produces exactly one `double ArrayDbl_push(...)` in
+`bootstrap/lib/typed-array.c` and its prototype in the generated
+`typed-array.h` (checked 2026-09-18); every consumer links that one copy.
+Nothing in the compiler enforces the "once": invoking the same public family
+in a second unit gives a duplicate symbol at link. The single home is the
+author's, designated by writing the invocation in one unit.
+
+A meta function is designated the same way, by the **run-time call**. The
+disanalogy is why it has to be: a family macro's body reaches only the unit
+that invokes it, while a meta function's body is parsed in every importer,
+because that is how the compile-time form is installed. So the importers
+cannot be distinguished by who has the definition - they all do - and they
+are distinguished instead by who calls it. One unit reaches it, owns the
+public copy, and exports it; every other unit reaches it only during
+translation and emits nothing.
+
+The limit, measured: if a second unit also reaches the same public meta
+function, the two copies collide. Probed 2026-09-18 with `meta-import.c` and
+a second unit calling `mi_constant`: `ld` reports
+`duplicate symbol '_mi_flatten'` and names both objects. That is the same
+failure a twice-invoked public family gives, it names the function, and the
+plan already called it the right one. An author who wants many run-time users
+inside the import set writes `static` and gets a copy each.
+
+The alternative was a designation spelling - a top-level form naming the unit
+that owns the runtime copies, with prototypes emitted in the others. It buys
+"once for everyone" *within* the import set, and it costs a new compile-time
+form, per-unit designation state, synthesized prototype emission, and two
+failure modes the compiler still cannot catch (nobody designates, two units
+designate). Nothing in the repository wants it yet: `lib/autodiff.xmacro` is
+Lisp, and every meta function in the fixtures is either `static` or reached
+by one unit. Add it when a `.xmacro` ships a runtime helper several units
+call, not before.
 
 Three facts the work established.
 
@@ -140,6 +194,15 @@ Three facts the work established.
   `String.remove_prefix` are bound as values but have no `String_*` name for
   the pass to find, so a body using one declines. Widening that list is its
   own change.
+
+The fixtures own the emission evidence. `meta-import.phases` declares `h`
+and `c`, so `meta-import.h` and `meta-import.c` are checked in: the header
+exports `String mi_flatten(String path, String sep)`, the C defines it once
+and defines the four `static` functions the unit calls, and neither file
+mentions `mi_tag`, which only `$probe.tag` calls. `meta-import-second.x`
+imports the same file and its checked-in C defines only `mi_depth` and
+`mi_dashed`. `comptime-declines-meta-import` is gone with the refusal it
+pinned.
 
 This unblocks `plans/comptime-x2c-generalization.md` Phase 5 and reopens its
 Phase 7 verdict. Do not re-scope either until Gary asks.

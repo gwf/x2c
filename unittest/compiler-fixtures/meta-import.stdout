@@ -2,4 +2,4 @@ constant NET_HTTP_IDLE NET_HTTP_IDLE
 accessor get_net_http get_net_http
 depth    3 3
 dashed   net-http-idle net-http-idle
-flatten  one-two
+tag      <net/http/idle>
