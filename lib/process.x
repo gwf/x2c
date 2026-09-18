@@ -252,14 +252,19 @@ static void Job._start(Job job) {
   foreach (List stage, job.stages) {
     int link[2] = { -1, -1 };
     if (index < last) _pipe(link);
+    /* Both ends belong to this stage until it spawns. `spawned` rather than
+       a write into `link` keeps the array out of the transfer-preserved set,
+       whose qualifier `_pipe` would then discard. */
+    int spawned = 0;
     {
-      defer { _close(link[0]); _close(link[1]); }
+      defer if (!spawned) { _close(link[0]); _close(link[1]); }
       job._spawn(index, stage, previous, index < last ? link[1] : output,
                  errors);
-      _close(previous);
-      previous = link[0];
-      link[0] = -1;
+      spawned = 1;
     }
+    _close(link[1]);
+    _close(previous);
+    previous = link[0];
     index++;
   }
   launched = 1;
