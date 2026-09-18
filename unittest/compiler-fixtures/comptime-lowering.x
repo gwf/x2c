@@ -395,6 +395,25 @@ int ct_newline(void) => '\n';
 $comptime()
 int ct_is_dot(String s) => s[0] == '.' ? 1 : 0;
 
+/* A loop carries only the locals it names. `before` is read inside, `after`
+   only past the loop, and the `pad` locals nowhere after their own line, so
+   dropping a local that is still needed would decline as an unbound local
+   rather than answer wrongly. */
+$comptime()
+int ct_live_set(List xs, int seed) {
+  int pad1 = seed + 1;
+  int pad2 = pad1 + 1;
+  int pad3 = pad2 + 1;
+  int before = pad3;
+  int after = 100;
+  int n = 0;
+  foreach (Var v, xs) {
+    (void) v;
+    n = n + before;
+  }
+  return n + after;
+}
+
 /* An uninitialized local keeps its own type's zero. */
 $comptime()
 int ct_scalar_zero(void) { int z; return z; }
@@ -754,6 +773,7 @@ int main(void) {
   printf("c-array-pad  %d\n", $(ct_c_array_padded));
   printf("c-array-bare %d\n", $(ct_c_array_bare 4));
   printf("scalar-zero  %d\n", $(ct_scalar_zero));
+  printf("live-set     %d\n", $(ct_live_set '(a b c) 1));
   printf("character    %d %d  %d %d  %d %d\n",
          $(ct_letter), ct_letter(),
          $(ct_newline), ct_newline(),

@@ -852,18 +852,45 @@ static int _lower_breaks(Var form) {
   return 0;
 }
 
+/* The locals a loop has to carry: the ones its own forms name, the ones it
+   declares in a cell, and the ones an enclosing loop's continuation will ask
+   for. Carrying the whole environment instead spends a parameter on every
+   local in scope, and the word machine refuses a lambda of more than
+   `LISP_AUTO_PARAM_MAX`, so an unrelated local nine deep drops the loop onto
+   the evaluator. A local left out is never read, and would decline rather
+   than answer wrongly if that were wrong. */
+static void _lower_referenced(Var form, Map used) {
+  if (form is not <list>) return;
+  List items = form;
+  if (!items) return;
+  match (items) {
+    case %(ident (binding ?(int id) ?)):   used[id] = 1;
+    case %(bind (binding ?(int id) ?) *):  used[id] = 1;
+    case %(again ? (*ids)): foreach (Var id, ids) used[id] = 1;
+  }
+  foreach (Var part, items) _lower_referenced(part, used);
+}
+
 static Var _lower_loop(
   Lowering l, Var test, List body, List step, List rest, List k) {
   Var name = _lower_name(l, "loop");
   Array boxes = [];
   defer boxes.free();
   _lower_loop_cells(l, body, boxes);
+  Map used = {};
+  defer used.cleanup();
+  _lower_referenced(test, used);
+  _lower_referenced(body, used);
+  _lower_referenced(step, used);
+  _lower_referenced(rest, used);
+  _lower_referenced(k, used);
   Array ids = [];
   defer ids.free();
   Array slots = [];
   defer slots.free();
   Array entry = [];
   foreach (Var (id, form), l.env) {
+    if (!used.contains(id)) continue;
     ids.push(id);
     entry.push(form);
   }

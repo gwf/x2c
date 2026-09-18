@@ -731,7 +731,28 @@ Reopen this only if a shipped compile-time x2c unit becomes necessary for
 another reason. Then `class` is the first thing to move, `$scope` the second,
 and `foreach` last or never.
 
-## The loop parameter ceiling (investigated 2026-09-18, no change)
+## The loop parameter ceiling, and the narrowing that followed
+
+**A loop now carries only the locals it names** (`_lower_referenced` in
+`src/comptime.x`). The investigation below established that the constant was
+a symptom and `_lower_loop` was the lever: it built its parameter list from
+every entry of the environment, so a local nine deep anywhere in the function
+pushed the loop past `LISP_AUTO_PARAM_MAX` and onto the evaluator, whether or
+not the loop ever read it.
+
+The set is the locals named in the test, body, step and the rest of the block,
+plus those an enclosing loop's continuation asks for, plus those the body
+declares in a cell. A local left out is one that is never read; leaving one
+out wrongly declines as an unbound local rather than answering wrongly.
+
+Measured on a loop with twenty dead locals in scope: **135 ms before, 79 ms
+after.** On `comptime-autodiff.x` it does not move - about 995 ms either way,
+the same result raising the constant gave - because that corpus has no
+function whose loop is crowded by locals it does not use. The value is that
+the cliff is gone rather than moved, which matters to anyone writing a meta
+function by hand. `ct_live_set` in `comptime-lowering.x` pins the correctness.
+
+### The original investigation (investigated 2026-09-18, no change)
 
 **Do not raise `LISP_AUTO_PARAM_MAX`.** The cliff M4 found is real and the
 constant is only where it surfaces. `_lower_loop` passes the enclosing
