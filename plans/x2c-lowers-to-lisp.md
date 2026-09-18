@@ -461,15 +461,27 @@ and `ad_tangent`. All twelve lower directly, none fall back, and every
 result matches what the Lisp original computes, including the
 simplifications that make `0 + x` read back as `x` and `1 * x` as `x`.
 
-**The line count is parity, not a reduction.** 54 lines of x2c against 55
-lines of Lisp for the same functions, plus one `$comptime()` marker per
-function. The premise of this milestone was that the x2c version would be
-meaningfully shorter. It is not.
+**The line count is parity: 54 lines of x2c against 55 of Lisp**, plus one
+`$comptime()` marker per function. That was this milestone's stated
+measure, and on it the port does not pay.
 
-What the port did buy is types and the compiler checking the templates. A
-`case` pattern and a `%()` template are checked where Lisp's are data. That
-is real but it is a clarity argument, not a size one, and it has to carry
-the whole case on its own.
+**The stated measure was the wrong one.** Size is not what changes. What
+changes is that the x2c version is also a C function.
+`.context/spike/dual-use.x` calls the same `ad_mul` both ways and gets the
+same answer:
+
+```text
+compile time  ad_mul(0, x) = (expr (double) (literal (double) "0.0"))
+run time      ad_mul(0, x) = (expr (double) (literal (double) "0.0"))
+```
+
+One source, compiled to C and run, and lowered to Lisp and run during
+translation. The Lisp version can only ever do the second. That is a
+capability the Lisp cannot have, not a matter of taste, and it decides the
+milestone in a way line count cannot.
+
+The port also buys types and compiler-checked templates: a `case` pattern
+and a `%()` template are checked where Lisp's are data.
 
 **Five defects in the lowering surfaced only under real code**, which is
 worth recording because it says something about how much is left:
