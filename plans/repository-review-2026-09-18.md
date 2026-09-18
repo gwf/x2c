@@ -228,9 +228,34 @@ Files: the match engine and `lib/list.x` (row 1), `lib/scan.x` (row 2),
 | A raw `0xFF` byte in code position ends tokenization. | `undeclared_\xff = 1;` gives "unexpected end of file" pointing at the byte. | **The stated cause was wrong.** There is no `char`/`EOF` comparison in `lib/scan.x`, and 0xFF is not special - a backtick, 0x80 and 0xFE all gave the same message. A lexical failure appends zero-width `<error>` and `<eof>` tokens, nothing reports the `<error>`, and the parser blames the `<eof>`. `Compiler.tokenize` now reports the `<error>` as `parse: invalid token` when the tokenizer status is `<malformed>`, while `<incomplete>` keeps "unexpected end of file". Fixed; `unknown-character.x` pins it, and `inactive-arm-lexical-error` stopped emitting a nonsense `type: expected scalar type`. | me |
 | `binder?` misses binders of ten or more characters. | `(binder? '?abcdefghi)` is true; `(binder? '?abcdefghij)` is false, because `symbol?` is false for a spelling that does not fit a compact `Symbol`. A `match-case` clause using such a binder fails the build with `(unbound (name ?abcdefghij))`. | Fixed in `binder?` alone: `(or (symbol? value) (eq? (type value) 'lsym))`. `symbol?` itself was deliberately **not** widened - it has three other callers, including `x2c.literal.symbol`, which would then emit a wrong Symbol literal for a long atom. Proven: `etc/init.xlisp` is read from `root_dir` at translate time rather than compiled into bootstrap C, and stages 0, 1 and 2 stayed byte-identical across 178 generated C/H files. Why the AST-to-Lisp spike's own fix broke that spike was **not** established - its sources were uncommitted in a worktree that no longer exists - so the widened-`symbol?` explanation above is a supported hypothesis, not proof. | me |
 
-## Group 10: decisions for Gary
+## Group 10: decided 2026-09-18
 
-These are not implementation choices.
+Gary ruled on all nine on 2026-09-18; `a627b8ac..2a20245c` carries the work.
+
+1 not gated, recorded in `agents/README.md`. 2 done - `cc-stderr` is a
+compared sidecar. 3 both kept and added to the quick-start; `./configure` is
+live and `test-configure.py` is its only coverage, so the earlier
+delete recommendation was wrong. 4 left silent. 5 fixed rather than
+documented: `$time` reports from a `defer`, which also covers an error
+transfer, and the rule is in the language reference. 6 widened to
+`agents/skills`, `plans`, and `packages`; `site` stays with `site-check`,
+whose links are rendered URLs. 7 fixed - see below. 8 kept as shipped. 9 both
+kept: they are two of seven no-status wrappers with no production caller, so
+removing only these would be arbitrary.
+
+Item 7 had a second cause neither the review nor the plan saw: the policy
+table is per-thread, so `Error.policy_set` never reached a worker at all.
+Workers now inherit the starting thread's policy, and the backstop declines
+unless the policy is `<abort>`. That is a public `Thread` semantics change.
+
+Comparing `cc.stderr` immediately earned its keep: it caught
+`map-generator-family` still declaring `Scope *scope` where `16ab9663`
+changed the field to `Scope scope` that morning, which was generating
+type-incorrect C. Seven more warning sources are recorded as expectations and
+listed as open defects for follow-up, the `class-runtime` const-class `_free`
+being the only other compiler-side one.
+
+The original nine items follow, for the record.
 
 1. **`tools/x2c-graph` is compiled and tested by no gate.** Nothing in the
    Makefile, the workflows, `unittest/`, or `tools/` references it, though
