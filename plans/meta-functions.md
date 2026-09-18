@@ -109,31 +109,135 @@ whatever tree M3 selects.
 
 ## M4 - serialize the word-compiled form
 
-Today `_auto_analyze` word-compiles an eligible Lisp lambda after two calls
-and hangs the result on `lambda.auto_program` (`lib/lisp.x:1647`). Nothing
-persists it, so every process pays for it again.
+**Do not build this.** Scouted 2026-09-18 on branch `meta-m4-scout` with a
+throwaway probe in `lib/lisp.x` that dumped every frozen program the compiler
+produced while translating `unittest/compiler-fixtures/comptime-autodiff.x`,
+whose 106 `$comptime()` functions are the largest compile-time x2c corpus in
+the repository. The qualifying fraction is high, but the two premises this
+milestone rests on are both wrong: word compilation is not the cost, and the
+constant table is not a value table.
 
-A frozen `MachineProgram` is one allocation holding four ints, then code,
-constants and binders. The three sections serialize differently:
+### What the measurement found
 
-- **Code** is a flat `MachineWord` array, four `unsigned char` and two
-  `short` each. It emits directly as a C static initializer.
-- **Binders** are `Atom`. Emit their spellings and re-intern on load.
-- **Constants** are `Var`, and `lib/machine.x` says plainly that the copied
-  `Var` and `Atom` bits do not own their pointees. A constant holding a
-  `List` or `String` is a pointer, so the table cannot be copied out; it has
-  to be rebuilt. The compiler already rebuilds structured constants for
-  folded literals through `Compiler.id_keys` and the literal cache, so reuse
-  that path rather than writing a second value serializer.
+**Qualification is not the problem.** 102 of the 106 compile-time functions
+froze a program, and none of the 102 was rejected. The other four -
+`ad_assign`, `ad_call_adjoint`, `ad_fwd_update`, `ad_step` - never reached
+`_auto_apply`'s two-call threshold, so they were never analysed at all.
+Across the whole translation 887 of 895 analyses froze. The 8 declines were
+six rest-parameter lambdas from the Lisp standard library (`and`, `or`,
+`list`, `append`, `string-append`, `begin`) and two lowered loop helpers,
+`loop56-ad_call_tangent` and `loop244-ad_call_adjoint`, with 11 and 12
+parameters against `LISP_AUTO_PARAM_MAX` of 8. That second pair is worth
+keeping: a lowered loop takes one parameter per live variable, so a loop body
+with nine or more of them falls off the machine and runs its every iteration
+through the evaluator. `MACHINE_CODE_MAX` never came close to binding - the
+largest program was 511 words of 4096, the median 14.
 
-Scope it honestly. Only a program that actually froze can be serialized;
-`_auto_analyze` has eligibility rules and `MACHINE_CODE_MAX` is 4096 words,
-so a large meta function may simply not qualify. Emit what qualifies, skip
-what does not, and make the skip visible rather than silent.
+**The saving is 0.7%.** Word-compiling all 698 top-level programs costs
+6.8 ms of a 970 ms translation (five runs each: 6.5-7.1 ms against
+0.93-0.98 s). That 6.8 ms is the entire quantity M4 can remove, and it is
+below the noise floor of the benchmark lanes that would have to show it.
 
-Deliverable: a meta function's word-compiled form survives into the artifact
-and is executed on load without recompilation, proven by a fixture that
-observes the program is not rebuilt.
+**The constant table holds live process addresses.** Of the 6401 constants
+in the translation, 995 (15.5%) contain a `<func>` or `<lambda>` pointer
+transitively; of the 1808 belonging to the 106 functions, 387 (21.4%) do.
+Every single `MW_LEXPAND` constant does - all 798 of them - because
+`_auto_compile_special` stores `%($form (($head $expected)))` with
+`$expected` the address of the special-form `Func`, and `_auto_bindings_ok`
+compares it by raw `u64`. All 197 `MW_LLAMBDA` constants are live `Lambda`
+records, and `Lisp.immediate` dereferences their `params` and `body`.
+
+**More than half the table is the source program.** Classified by the opcode
+that names them, the 1808 constants of the 106 functions are 763
+`MW_LPRECALL` raw argument lists, 336 `MW_LEXPAND` guard sites, 1 `MW_LEVAL`
+form, 359 `MW_LGLOBAL` names, 291 `MW_LCONST` literals, 51 `MW_LLAMBDA`
+children and 7 shared between `MW_LPRECALL` and `MW_LCONST`. The first three
+- 1100 of 1808, 61% - are quoted sub-forms of the body. Rebuilding them at
+load is not cheaper than re-evaluating the `def` and word-compiling again,
+which is what the 6.8 ms already buys. No `MW_LCAPTURE` constant appeared at
+all: lowered compile-time functions have no closures.
+
+### The serializable shape, confirmed
+
+The code section is position-independent and pointer-free, as the plan
+assumed. `MachineWord` is four `unsigned char` and two `short`;
+`MachineBuilder.emit` range-checks `a` and `target` into
+`[-1, MACHINE_CODE_MAX)` and every other field into a byte. `root` is the
+entry pc and is always 0 for a Lisp program, which `_auto_analyze` sets
+directly; `length` is the code word count; `const_count` and `binder_count`
+size the two tables packed after the code in the same allocation. The 102
+programs are 4921 code words and 1808 constant slots, 55 KB in total.
+
+`binder_count` is always 0. Binders are a `Match` mechanism -
+`MachineBuilder.binder` is called only from `lib/match.x` - and all 887
+frozen Lisp programs carried none. The plan's "emit their spellings and
+re-intern on load" bullet describes work that does not exist.
+
+### The literal-fold path cannot rebuild the constants
+
+`Compiler.cache_literal_list` states what it takes: "`values` may contain
+nested `List`s, `String`s, and `Symbol`s." `_cache_literal_var` has exactly
+those three branches, and `Compiler.id_keys` holds exactly three key shapes,
+`(string ...)`, `(var ...)` and `(cons ...)`. Measured against that path, 538
+of the 106 functions' 1808 constants are expressible (29.8%), and **no
+function has a wholly expressible constant table** - 0 of 102. Three kinds
+are missing, counted as leaf occurrences within those 1808 constants:
+
+- **`Atom`**, tagged `<lsym>`; 930 occurrences, and 3783 across the whole
+  translation, the most common leaf in the corpus. It is every Lisp name in
+  every quoted form. An `Atom` falls into `_cache_literal_var`'s Symbol
+  branch, where `Var.symbol` returns 0 for it, so the spelling is lost
+  silently. It is re-internable by spelling, so this is a real but small gap:
+  one cache-key kind.
+- **integers**, tagged `<i32>`; 191 occurrences, 716 across the translation.
+  Same branch, same silent loss, also one small cache-key kind.
+- **`<func>` and `<lambda>`**; 336 and 53 occurrences, 798 and 318 across the
+  translation. These are not values. A `func` is the address the session held
+  for a special form at lowering time and exists only to be compared against a
+  fresh lookup; a `lambda` is a child record with its own `params`, `body`,
+  `captures` and `auto_program`. Neither has a spelling to re-intern, so no
+  cache-key kind reaches them.
+
+The `func` case is not merely mechanical. Storing the name and re-resolving it
+on load would change what the guard means, from "this binding is the same
+object as at lowering" to "this binding is whatever it is now", which silently
+accepts a redefinition that happened before the artifact loaded. The `lambda`
+case is circular: serializing an `MW_LLAMBDA` constant means serializing the
+child's body, which is the recompilation the milestone exists to avoid.
+
+### The program is not self-contained anyway
+
+`MW_LGLOBAL` loads a callee by name and `LispMachine._call` then asks
+`Lisp.program(callable)` for its program. A deserialized program therefore
+still needs the `Lambda` record - and so the `def`, and so the lowered body -
+both for itself and for every compile-time function it calls, or each call
+crosses back to the evaluator. Installing a word-compiled form without its
+Lisp body has no meaning in the current design.
+
+### What to measure, if this is revisited
+
+The quantity is load-to-first-call: from `Lisp` session open to the return of
+the first machine-executed call of one meta function. The instrument already
+exists - `LispAutoStats.analyses` plus a monotonic clock around
+`_auto_analyze` behind an environment variable, which is exactly the probe
+this scouting run used and discarded - and `Lisp.auto_disable`, which
+`unittest/test-lisp-auto.x` already drives, is the control arm.
+
+The baseline is recorded above: 6.8 ms for 698 programs, about 10 us each,
+against a 970 ms translation. Anything proposed here has to beat that, and
+the honest target is not the wordcode. If a later runtime should call a meta
+function without recompiling, the thing worth persisting is the **lowered
+Lisp forms**, which `$(x2c.comptime.lower fn)` already produces, which are
+pure data, and which re-word-compile in about 10 us each. That still needs
+the `Atom` and integer cache kinds named above, but it needs no story for
+process addresses. It is a different milestone and is not scoped here.
+
+### Consequences for the rest of the plan
+
+M5 does not depend on M4: constant-argument folding needs the compile-time
+form, which M1 and M3 supply. The M4 measurement in "Validation" and the
+"Plan review" sentences that reason from literal-fold reuse and from a
+per-function serialization diagnostic no longer apply.
 
 ## M5 - constant-argument folding
 
