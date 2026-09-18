@@ -479,12 +479,118 @@ the word-compiled form. Word compilation then happens on load, at roughly
 10 microseconds per program. Nothing in this plan builds that, and nothing
 needs to until a runtime asks for it.
 
-## M5 - constant-argument folding
+## M5 - constant-argument folding (done)
 
 With both forms present, a call whose arguments are all compile-time
-constants can be answered by the compile-time form at the call site. This is
-the benefit that motivates emitting both, and it is the last milestone
-because it needs M1 and nothing else needs it.
+constants is answered by the compile-time form at the call site.
+`Compiler.fold_meta_call` in `src/comptime.x` runs from `_finish_call` in
+`src/expressions.x` and returns either the answer as a literal or `NULL`,
+which leaves the call. Leaving the call is always correct, so every
+uncertainty declines that way.
+
+`_finish_call` is the only place the pass needs. It is the single funnel every
+call resolution ends at, it holds the resolved callee with its binding, the
+function type with its parameter types, and the arguments as bound
+expressions; and it runs before `Compiler.transform`, on the tree that still
+has the source's meaning. `Compiler.id_keys` is reachable from there through
+the compiler, which is what lets a `(cache id)` argument be read back.
+
+### What counts as a constant argument
+
+The reader is `_lower_constant`, which `src/comptime.x` already uses inside a
+`meta` body: integer, floating, character and string literals, a `Symbol`
+literal, and the `(cache id)` a folded constant leaves behind. A `(cache id)`
+does qualify. `Compiler.cache` interns only `cons`, `var`, `string` and `nil`
+keys, so the graph behind one is immutable compiler-owned data and the
+run-time call receives the same graph the reader returns. Measured in
+`meta-folding.x`: `mf_width("abcd", %(a b))` folds to `6`, where the `List`
+argument reaches the reader only as `(cache 4)`.
+
+An argument is used only when the parameter's type and the argument's type
+resolve to the same key through `Sym.resolve_key`. That is one comparison
+rather than a promotion table, and it keeps the int-to-double promotion a
+mixed conditional would apply out of the pass entirely: `f(3)` against
+`double f(double)` declines instead of guessing. It still accepts a `char *`
+literal for a `String` parameter, because `String` is `char *`.
+
+### What the result can be substituted as
+
+An `int`. That is the one return type whose value spells itself as the same
+literal an author would have written, and the milestone's own example returns
+one. The others were declined and the reasons are worth keeping:
+
+- A `String`, `List` or `Map` result has no literal form that also carries the
+  ownership the call would have returned. The run-time form of
+  `meta String mf_label(int n) => %"row-$n";` returns a value its caller may
+  free; the interned literal a fold would substitute is not one, so the two
+  are not observably identical and `mf_label(4)` stays a call.
+- A narrower or unsigned integer result would need the C conversion written
+  into the substituted syntax, and a floating result would need a text
+  round-trip. Neither has a user yet.
+
+A negative result is parenthesized, so a folded `-4` after a `-` cannot join
+into `--`.
+
+### The two forms have to agree
+
+- **File-scope state.** `_lower_read` lowers a non-local read to
+  `C.gread`, which reads the session's own `C._globals`; no unit initializer
+  writes it, so a `meta` function that reads a file-scope variable answers
+  differently in its two forms. The lowering now records that it reached
+  file-scope state, `Compiler.install_meta_function` records the function as
+  impure instead of foldable, and `_lower_scan_call` makes every later `meta`
+  function that calls it impure too. `meta-folding.x` pins both: `mf_offset`
+  and `mf_shifted` keep their calls, and the fixture's answers are the
+  run-time ones. This is a pre-existing disagreement rather than a new one -
+  `$(mf_offset 1)` already answers 1 today - and the pass only refuses to
+  spread it.
+- **A raise or a decline.** The evaluation runs under a `catch` that returns
+  `NULL`, so a compile-time failure leaves the call. A lowering that declined
+  never installs, so its function is never foldable.
+- **Arithmetic.** A lowered operator goes through `Var_binary`, the same
+  operation the runtime uses, so 32-bit wraparound, integer division and
+  remainder agree. Probed against the same calls with a local argument:
+  `7/2`, `-7/2`, `7%2`, `40000<<20` and `100000*100000` fold to exactly what
+  the emitted call returns.
+- **Across units, not at all.** `meta_folds` is keyed by binding id and lives
+  on the compiler that declared the function, and a macro import parses on its
+  own child compiler, so an imported `meta` function never folds. That is not
+  only the stated rule: M2 designates the unit that emits a public imported
+  definition *by its run-time call*, and folding that call would make emission
+  depend on whether the call's arguments happened to be constant.
+  `meta-import.c` and `meta-import-second.c` are unchanged, `mi_depth("a.b.c")`
+  included.
+
+The `$comptime()` decorator spelling does not fold. Its install runs from a
+Lisp native on a definition that is spliced back and re-bound afterwards, so
+the binding the call site resolves against is not the one the install saw.
+`comptime-lowering.x` prints `mt_poly(7)` beside `ct_poly(7)` and the
+generated C shows `71` against a call, which is the contrast.
+
+### What it costs and what it leaves
+
+`fold_meta_call` returns on an empty `meta_folds` before it allocates, so a
+unit with no `meta` function pays one `Map` length test per call resolution.
+`comptime-autodiff.x`, whose 106 compile-time functions are all `$comptime()`,
+translates in 0.94 s before and 0.95 s after, five interleaved pairs of the
+two compilers on the same tree, which is the benchmark's own noise. Timing
+the two builds in separate sessions read +2%, and the interleaved pairs are
+why that number is not recorded as a cost.
+
+One consequence to know about: a `meta static` function whose every call folds
+is emitted and never called, which is dead code a `-Wall` build would name.
+Not emitting it would mean extending M2's reachability walk to a unit's own
+definitions, where `static` means something the author wrote rather than
+something the pass decides. Left alone.
+
+### Evidence
+
+`unittest/compiler-fixtures/meta-folding.x` declares `c` in its `.phases`, so
+its generated C is checked in, and that C is the proof: the answers are equal
+either way, which is the point. `comptime-lowering.x` carries the ledger rows.
+`comptime-lowering.phases` stays `stdout status`; pinning its 1312 lines of
+generated C would churn on every unrelated emission change, and the small
+fixture says the same thing.
 
 ## Compatibility
 

@@ -145,7 +145,8 @@ translating a compile-time x2c function into Lisp.
 Public functions:
 
 `Compiler.lower_comptime`, `Compiler.lower_declined`,
-`Compiler.install_comptime`
+`Compiler.install_comptime`, `Compiler.lower_reached_globals`,
+`Compiler.fold_meta_call`
 
 ### [src/deps.x](../src/deps.x)
 

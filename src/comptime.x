@@ -36,13 +36,19 @@ typedef struct Lowering {
   Array definitions;
   String own;
   List on_break, on_continue;
-  int declined, on_loop, in_loop, rejected, uncallable;
+  int declined, on_loop, in_loop, rejected, uncallable, globals;
 } *Lowering;
 
 /* Why the last lowering declined, for the diagnostic at the invocation, and
    the callee that has no compile-time binding when that is the reason. */
 static String lower_declined_reason;
 static String lower_missing_callee;
+
+/* Whether the last lowering reached file-scope state, directly or through a
+   callee that does. The compile-time form reads its own `C._globals`, which
+   no unit initializer writes, so the two forms of such a function answer
+   differently and a call to it cannot be folded. */
+static int lower_reached_globals;
 
 /* --- names ------------------------------------------------------------- */
 
@@ -140,20 +146,26 @@ static int _lower_known(Lowering l, String name) {
   return l.compiler.macro_lisp.try_get(name, &value);
 }
 
+/* A callee this pass already installed carries its own reach to file-scope
+   state, so the caller inherits it. A callee is always installed first: the
+   scan refuses a name the session does not bind. */
+static void _lower_scan_callee(Lowering l, String name) {
+  if (!_lower_known(l, name)) {
+    l.uncallable = 1;
+    lower_missing_callee = name;
+    return;
+  }
+  if (l.compiler.meta_impure.contains(name)) l.globals = 1;
+}
+
 static void _lower_scan_call(Lowering l, List form) {
   match (form) {
     case %(call (expr ? (ident (binding ? ?(String name)))) ?): {
-      if (!_lower_known(l, name)) {
-        l.uncallable = 1;
-        lower_missing_callee = name;
-      }
+      _lower_scan_callee(l, name);
       return;
     }
     case %(call ?(String name) ?): {
-      if (!_lower_known(l, name)) {
-        l.uncallable = 1;
-        lower_missing_callee = name;
-      }
+      _lower_scan_callee(l, name);
       return;
     }
   }
@@ -229,7 +241,10 @@ static int _lower_failed(Lowering l, Var value) =>
 static Var _lower_read(Lowering l, int id) {
   Var form;
   if (l.env.try_get(id, &form)) return form;
-  if (!l.locals.contains(id)) return %(C.gread $id);
+  if (!l.locals.contains(id)) {
+    l.globals = 1;
+    return %(C.gread $id);
+  }
   return _lower_decline(l, "unbound local");
 }
 
@@ -1253,8 +1268,10 @@ static Var _lower_store(
   if (l.cells.contains(id))
     return _lower_effect(
       l, %(C.store ${_lower_address(l, id)} $value), rest, k);
-  if (!l.locals.contains(id))
+  if (!l.locals.contains(id)) {
+    l.globals = 1;
     return _lower_effect(l, %(C.gwrite $id $value), rest, k);
+  }
   return _lower_bind_value(l, id, value, rest, k);
 }
 
@@ -1266,6 +1283,7 @@ static Var _lower_update(
   if (id < 0) return _lower_decline(l, "update of a computed place");
   if (_lower_failed(l, right)) return void;
   if (!l.locals.contains(id)) {
+    l.globals = 1;
     Var combined = %(_binary (C.gread $id) (quote $operator) $right);
     return _lower_effect(l, %(C.gwrite $id $combined), rest, k);
   }
@@ -1433,9 +1451,10 @@ List Compiler.lower_comptime(Compiler compiler, List fn) {
     .compiler = compiler, .env = {}, .locals = {}, .cells = {},
     .arrays = {}, .definitions = [], .declined = 0, .own = NULL,
     .on_break = NULL, .on_continue = NULL, .on_loop = 0, .in_loop = 0,
-    .rejected = 0, .uncallable = 0
+    .rejected = 0, .uncallable = 0, .globals = 0
   };
   Lowering l = &state;
+  lower_reached_globals = 1;
   match (fn) {
     case %(function ?spec (bind (binding ? ?(String name))
                             ((fnmod (params *params)))) (block *items)): {
@@ -1472,6 +1491,7 @@ List Compiler.lower_comptime(Compiler compiler, List fn) {
       }
       l.definitions.push(
         %(def ${Atom.intern(name)} (lambda ${slots.list()} $body)));
+      lower_reached_globals = l.globals;
       return l.definitions.list_free();
     }
   }
@@ -1500,4 +1520,81 @@ int Compiler.install_comptime(Compiler compiler, List fn) {
   if (!forms) return 0;
   foreach (Var form, forms) compiler.macro_lisp.eval(form);
   return 1;
+}
+
+/** Returns whether the last `Compiler.lower_comptime` reached file-scope
+    state, directly or through a callee already recorded as reaching it.
+*/
+int Compiler.lower_reached_globals(Compiler compiler) {
+  (void) compiler;
+  return lower_reached_globals;
+}
+
+/* --- constant-argument folding ------------------------------------------ */
+
+/* The compile-time value behind a bound expression, or `void` when the
+   expression has none. This is the reader the lowering already uses for a
+   literal and for the `(cache id)` a folded constant leaves behind; a
+   throwaway `Lowering` gives it the key table and somewhere to decline. */
+static Var _meta_constant(Compiler compiler, List expression) {
+  struct Lowering state = { .compiler = compiler, .declined = 0 };
+  return _lower_constant(&state, expression);
+}
+
+/* A folded result substitutes for the call, so it has to occupy the same
+   syntax an ordinary literal does. `int` is the one return type whose value
+   spells itself: a narrower or unsigned type would need the C conversion
+   written out, and `String`, `List` and `Map` results have no literal form
+   that also carries the ownership the call would have returned. A negative
+   value is parenthesized so it cannot join a preceding `-` into `--`. */
+static List _meta_result(Compiler c, Type result, Var value) {
+  if (!value.is_integer()) return NULL;
+  Type scalar = c.sym.resolve_key(result).scalar();
+  if (scalar !== %(int)) return NULL;
+  long number = value.integer();
+  if (number != (int) number) return NULL;
+  List literal = %(expr $result (literal (int) ${%"$number"}));
+  if (number < 0) return %(expr $result (parens $literal));
+  return literal;
+}
+
+/** Answers a call to a `meta` function from its compile-time form when every
+    argument is a compile-time constant of the parameter's own type, or
+    returns `NULL` to leave the call alone.
+
+    `callee` is the resolved callee expression, `signature` its function type
+    and `result` the call's type. Only a `meta` function this compiler
+    installed folds, so an import's runtime definition keeps the run-time
+    call that designates the unit emitting it. Evaluation runs in the macro
+    session; a raise there leaves the call.
+*/
+List Compiler.fold_meta_call(
+  Compiler c, List callee, Type signature, Type result, List arguments) {
+  if (!c.meta_folds.len() || c.macro_holes) return NULL;
+  String name = NULL;
+  match (callee)
+    case %(expr ? (ident (binding ?(int id) ?(String spelling)))):
+      if (c.meta_folds.contains(id)) name = spelling;
+  Var callable;
+  if (!name || !c.macro_lisp.try_get(name, &callable)) return NULL;
+  List parameters = NULL;
+  match (signature) case %((func ?params) *): parameters = params;
+  if (arguments === %((expr (void) ()))) arguments = NULL;
+  if (parameters === %((void))) parameters = NULL;
+  if (parameters.len() != arguments.len()) return NULL;
+  Array values = [];
+  defer values.free();
+  for (List p = parameters, a = arguments; p; p = p.cdr(), a = a.cdr()) {
+    List argument = a.car();
+    Type declared = p.car(), supplied = argument.cadr();
+    if (!c.sym.resolve_key(declared).equal(c.sym.resolve_key(supplied)))
+      return NULL;
+    Var value = _meta_constant(c, argument);
+    if (value is void) return NULL;
+    values.push(value);
+  }
+  Var answer;
+  try answer = c.macro_lisp.apply(callable, values);
+  catch: return NULL;
+  return _meta_result(c, result, answer);
 }

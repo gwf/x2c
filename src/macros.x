@@ -1209,11 +1209,21 @@ void Compiler.evaluate_declaration_effect(
     compile-time Lisp under its own name. The refusal is the one the
     `$comptime()` decorator reports, sited on the marker the developer wrote.
     The caller still emits the function, which is what the decorator does.
+    A function whose two forms agree is recorded as foldable, so a call with
+    constant arguments can be answered from the compile-time form; one that
+    reaches file-scope state is recorded as impure instead, which also makes
+    every later `meta` function that calls it impure.
 */
 void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
   if (!c.collect_protocols) c.run_declaration_effects();
   _ensure_lisp(c);
-  if (c.install_comptime(fn)) return;
+  if (c.install_comptime(fn)) {
+    match (fn)
+      case %(function ? (bind (binding ?(int id) ?(String name)) *) ?):
+        if (c.lower_reached_globals()) c.meta_impure[name] = 1;
+        else c.meta_folds[id] = 1;
+    return;
+  }
   c.report_error(
     <macro>, "this function cannot run at compile time", marker,
     %("reason: ${c.lower_declined()}"));

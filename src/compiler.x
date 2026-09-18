@@ -128,6 +128,13 @@ typedef struct Compiler {
      kept until the unit is parsed and only then emitted where it reaches
      them. */
   Array meta_defs;
+  /* Which `meta` functions a constant-argument call may answer from the
+     compile-time form. `meta_folds` holds the binding ids this compiler
+     declared, so a macro import's own compiler keeps its entries and no unit
+     folds a call another unit's emission designates. `meta_impure` names the
+     functions that reach file-scope state, whose two forms disagree; it is
+     shared with an import's compiler, which installs into the same session. */
+  Map meta_folds, meta_impure;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int in_pattern, match_is, runtime_literals, inline_header;
   int builtin_defs, in_proto, macro_count, recovery_depth;
@@ -245,7 +252,9 @@ void Compiler.borrow_diagnostics(Compiler compiler, Compiler owner) {
     them into that unit. A `meta` definition in a macro import is bound here
     and emitted by `owner`, so both compilers must read one table: its
     `(cache id)` references index `owner`'s keys, and its operations resolve
-    through `owner`'s protocol rows.
+    through `owner`'s protocol rows. Both install into one macro session, so
+    they also read one record of which `meta` functions reach file-scope
+    state.
 */
 void Compiler.borrow_unit_semantics(Compiler compiler, Compiler owner) {
   compiler.sym = owner.sym;
@@ -257,6 +266,7 @@ void Compiler.borrow_unit_semantics(Compiler compiler, Compiler owner) {
   compiler.conforms = owner.conforms;
   compiler.protocol_helpers = owner.protocol_helpers;
   compiler.proto_cache = owner.proto_cache;
+  compiler.meta_impure = owner.meta_impure;
 }
 
 /** Moves collected child reports into the caller's store without re-emitting.
@@ -297,6 +307,8 @@ static Compiler _new(Compiler owner) {
     _.init_tokens = {};
     _.static_init_deps = {};
     _.fn_defs = {};
+    _.meta_folds = {};
+    _.meta_impure = {};
     if (owner) {
       /* A child compiler owns its tokens, symbols, and diagnostics. Package
          registries and generated-name state belong to the whole translation
@@ -1660,6 +1672,10 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   Array nodes = [];
   c.origins.clear();
   c.meta_defs.clear();
+  /* Binding ids are reissued by the reset below, so a fold recorded against
+     the previous pass's numbering would name a different binding. */
+  c.meta_folds = {};
+  c.meta_impure = {};
   c.fixed = {};
   c.init_tokens = {};
   c.static_init_deps = {};

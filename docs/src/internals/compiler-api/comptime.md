@@ -12,11 +12,30 @@ Translating a compile-time x2c function into Lisp.
 
 | Function | Summary |
 | --- | --- |
+| [`Compiler.fold_meta_call`](#Compiler.fold_meta_call) | Answers a call to a `meta` function from its compile-time form when every argument is a compile-time constant of the parameter's own type, or returns `NULL` to leave the call alone. |
 | [`Compiler.install_comptime`](#Compiler.install_comptime) | Lowers `fn` and evaluates the result in the macro session, so the function is callable from compile-time Lisp under its own name. |
 | [`Compiler.lower_comptime`](#Compiler.lower_comptime) | Lowers one compile-time function into the forms the macro session evaluates, or returns `NULL` when the substitution cannot carry it. |
 | [`Compiler.lower_declined`](#Compiler.lower_declined) | Returns why the last `Compiler.lower_comptime` declined, or `NULL`. |
+| [`Compiler.lower_reached_globals`](#Compiler.lower_reached_globals) | Returns whether the last `Compiler.lower_comptime` reached file-scope state, directly or through a callee already recorded as reaching it. |
 
 ### `Compiler`
+
+<a id="Compiler.fold_meta_call"></a>
+#### Compiler.fold_meta_call
+
+`List Compiler.fold_meta_call( Compiler c, List callee, Type signature, Type result, List arguments)`
+
+Answers a call to a `meta` function from its compile-time form when every
+argument is a compile-time constant of the parameter's own type, or
+returns `NULL` to leave the call alone.
+
+`callee` is the resolved callee expression, `signature` its function type
+and `result` the call's type. Only a `meta` function this compiler
+installed folds, so an import's runtime definition keeps the run-time
+call that designates the unit emitting it. Evaluation runs in the macro
+session; a raise there leaves the call.
+
+Source: `src/comptime.x:1571`
 
 <a id="Compiler.install_comptime"></a>
 #### Compiler.install_comptime
@@ -28,7 +47,7 @@ function is callable from compile-time Lisp under its own name.
 Returns whether the lowering succeeded. This method mutates the macro
 session and does not open a semantic transaction.
 
-Source: `src/comptime.x:1493`
+Source: `src/comptime.x:1513`
 
 <a id="Compiler.lower_comptime"></a>
 #### Compiler.lower_comptime
@@ -41,7 +60,7 @@ The result is the loop definitions the body needed followed by the
 function's own, in evaluation order. This method does not open a
 semantic transaction.
 
-Source: `src/comptime.x:1431`
+Source: `src/comptime.x:1449`
 
 <a id="Compiler.lower_declined"></a>
 #### Compiler.lower_declined
@@ -50,7 +69,17 @@ Source: `src/comptime.x:1431`
 
 Returns why the last `Compiler.lower_comptime` declined, or `NULL`.
 
-Source: `src/comptime.x:1483`
+Source: `src/comptime.x:1503`
+
+<a id="Compiler.lower_reached_globals"></a>
+#### Compiler.lower_reached_globals
+
+`int Compiler.lower_reached_globals(Compiler compiler)`
+
+Returns whether the last `Compiler.lower_comptime` reached file-scope
+state, directly or through a callee already recorded as reaching it.
+
+Source: `src/comptime.x:1528`
 
 ## Design notes
 
