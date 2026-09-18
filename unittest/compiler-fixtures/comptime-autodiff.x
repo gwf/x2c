@@ -308,9 +308,9 @@ List ad_fwd_decl(List declarator, List names) {
 $comptime()
 List ad_fwd_update(List s, List update, List names) {
   if (!update) return %(${ad_unbind(s)});
-  Var n = update.car();
+  Var n = update[0];
   if (!names.contains(n)) return %(${ad_unbind(s)});
-  List tangent = ad_assign(ad_dot(n), ad_tangent(update.getindex(1), names));
+  List tangent = ad_assign(ad_dot(n), ad_tangent(update[1], names));
   return %($tangent ${ad_unbind(s)});
 }
 
@@ -379,7 +379,9 @@ List ad_declarator_names(List decls) {
 }
 
 /* Every plain double declaration in the body is differentiated too; any
-   other double identifier is a constant. */
+   other double identifier is a constant. This pair walks the whole tree, so
+   it stays recursive: a loop would have to concatenate a list per node, and
+   `foreach` cannot nest, which is what an `Array` would need here. */
 $comptime()
 List ad_declared_doubles(Var form) {
   if (!form.is(<list>)) return %();
@@ -521,7 +523,7 @@ String ad_code(void) {
 $comptime()
 List ad_local_type(Var name) {
   foreach (List entry, ad_locals)
-    if (entry.car() == name) return entry[1];
+    if (entry[0] == name) return entry[1];
   return %(double);
 }
 
@@ -552,13 +554,13 @@ $comptime()
 List ad_none(void) { return %(() () ()); }
 
 $comptime()
-List ad_fwd_of(List t) { return t.car(); }
+List ad_fwd_of(List t) { return t[0]; }
 
 $comptime()
-List ad_rev_of(List t) { return t.cdr().car(); }
+List ad_rev_of(List t) { return t[1]; }
 
 $comptime()
-List ad_exits_of(List t) { return t.cdr().cdr().car(); }
+List ad_exits_of(List t) { return t[2]; }
 
 $comptime()
 List ad_exit(Var code, Var kind, List pruned) {
@@ -566,13 +568,13 @@ List ad_exit(Var code, Var kind, List pruned) {
 }
 
 $comptime()
-Var ad_exit_code(List x) { return x.car(); }
+Var ad_exit_code(List x) { return x[0]; }
 
 $comptime()
-Var ad_exit_kind(List x) { return x.cdr().car(); }
+Var ad_exit_kind(List x) { return x[1]; }
 
 $comptime()
-List ad_exit_pruned(List x) { return x.cdr().cdr().car(); }
+List ad_exit_pruned(List x) { return x[2]; }
 
 $comptime()
 List ad_with_pruned(List x, List pruned) {
@@ -846,12 +848,8 @@ List ad_through_exits(List exits, Var n, List dispatch) {
 $comptime()
 List ad_rev_loop(List init, List c, List step, List body, List names) {
   List head = init ? ad_rev_item(init, names) : ad_none();
-  List parts = ad_loop_parts(c, body, step, names);
-  Var n = parts.car();
-  List iteration = parts.cdr().car();
-  List dispatch = parts.cdr().cdr().car();
-  List through = parts.cdr().cdr().cdr().car();
-  List condition = parts.cdr().cdr().cdr().cdr().car();
+  (Var n, List iteration, List dispatch, List through, List condition) =
+    ad_loop_parts(c, body, step, names);
   List fwd = %(${ad_set(n, ad_int("0"))}
                (while $condition (block @iteration)) ${ad_push(ad_id(n))});
   List rev = %(${ad_restore(n, %(int))} ${ad_countdown(n, dispatch)});
@@ -871,7 +869,7 @@ List ad_rev_item(List s, List names) {
     case %(stmnt ?e): {
       List update = ad_update(e);
       if (update)
-        return ad_rev_assign(update.car(), update.cdr().car(), names);
+        return ad_rev_assign(update[0], update[1], names);
       return ad_triple(%(${ad_unbind(s)}), %(), %());
     }
     case %(expr ? ?):         return ad_rev_item(%(stmnt $s), names);
@@ -957,7 +955,7 @@ $comptime()
 List ad_hoisted(List locals, List params) {
   Array out = [];
   foreach (List entry, locals)
-    if (!(entry.car() in params)) out.push(entry);
+    if (!(entry[0] in params)) out.push(entry);
   return out;
 }
 
@@ -966,7 +964,7 @@ List ad_declare_locals(List locals) {
   Array out = [];
   foreach (List entry, locals) {
     List type = entry[1];
-    out.push(ad_declare(type, entry.car(), ad_zero_of(type)));
+    out.push(ad_declare(type, entry[0], ad_zero_of(type)));
   }
   return out;
 }
