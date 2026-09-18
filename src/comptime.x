@@ -33,7 +33,7 @@ typedef struct Lowering {
   Map env, locals, cells, arrays;
   Array definitions;
   String own;
-  int counter, declined, on_loop, in_loop, rejected, uncallable;
+  int declined, on_loop, in_loop, rejected, uncallable;
 } *Lowering;
 
 /* Why the last lowering declined, for the diagnostic at the invocation, and
@@ -44,15 +44,24 @@ static String lower_missing_callee;
 /* --- names ------------------------------------------------------------- */
 
 /* `Atom.intern` gives an `lsym` for a spelling too long to pack into a
-   Symbol, so a generated name is readable and cannot collide by truncation. */
+   Symbol, so a generated name is readable and cannot collide by truncation.
+
+   A loop becomes a session global, so the counter runs across the whole
+   session rather than restarting with each function. Two functions of the
+   same shape otherwise name their loops alike, and the second definition
+   silently replaces the first. */
+static int lower_counter;
+
 static Var _lower_name(Lowering l, String stem) {
-  l.counter++;
-  return Atom.intern(%"$stem${l.counter}");
+  (void) l;
+  lower_counter++;
+  return Atom.intern(%"$stem${lower_counter}");
 }
 
 /* --- the single scan --------------------------------------------------- */
 
 static void _lower_scan(Lowering l, Var form);
+static Var _lower_decline(Lowering l, String why);
 
 static void _lower_scan_each(Lowering l, List items) {
   foreach (Var item, items) _lower_scan(l, item);
@@ -108,6 +117,14 @@ static void _lower_scan_bind(Lowering l, List form) {
   }
 }
 
+/* A destructuring declaration names its targets directly rather than through
+   `bind`, so this is where they join the locals. Without them a later write
+   would read as file-scope state. */
+static void _lower_scan_targets(Lowering l, List targets) {
+  foreach (List target, targets)
+    match (target) case %(binding ?(int id) ?): l.locals[id] = 1;
+}
+
 /* A callee is reachable when the macro session already binds its name: a
    native from `etc/comptime.xlisp`, or a function this pass installed. The
    function being lowered is reachable from itself, because the definition
@@ -138,6 +155,17 @@ static void _lower_scan_call(Lowering l, List form) {
   l.uncallable = 1;
 }
 
+/* A struct has no compile-time representation. Making one a `Map` keyed by
+   field name would give a value reference semantics, so a declaration and a
+   field read are both refused here, where the reason is still plain. */
+static int _lower_scan_aggregate(List items) {
+  match (items) {
+    case %(declare (!or (struct *) (union *)) *): return 1;
+    case %(op . ? *):                             return 1;
+  }
+  return 0;
+}
+
 /* Everything the lowering needs before it starts, in one pass: which locals
    need a memory cell, which are arrays, which ids the function declares,
    whether it uses a construct the substitution cannot carry, and whether
@@ -147,6 +175,19 @@ static void _lower_scan(Lowering l, Var form) {
   List items = form;
   if (!items) return;
   Var head = items.car();
+  /* Both of these refuse the function outright, so the scan stops rather
+     than reporting what the refused statement happens to call. */
+  if (head == <defer>) {
+    (void) _lower_decline(
+      l, "defer, because a compile-time function does not free its "
+         "values: the evaluator owns them");
+    return;
+  }
+  if (_lower_scan_aggregate(items)) {
+    (void) _lower_decline(
+      l, "a struct or union, which has no compile-time representation");
+    return;
+  }
   if (head == <while> || head == <for>) {
     int was = l.in_loop;
     l.in_loop = 1;
@@ -155,6 +196,7 @@ static void _lower_scan(Lowering l, Var form) {
     return;
   }
   if (head == <bind>) _lower_scan_bind(l, items);
+  else if (head == <targets>) _lower_scan_targets(l, items.cdr());
   else if (head == <op>) _lower_scan_op(l, items);
   else if (head == <call>) _lower_scan_call(l, items);
   else if (head == <switch> || head == <do> || head == <break> ||
@@ -927,6 +969,49 @@ static Var _lower_declarator(
   return _lower_decline(l, "unsupported declarator");
 }
 
+/* A destructuring names its targets bare when one type covers them all and
+   through `param` when each carries its own. The type decides nothing
+   either way, because a Lisp value already is a `Var`. */
+static int _lower_destructure_id(Var target, int *out) {
+  match (target) {
+    case %(!or (binding ?(int id) ?)
+               (param ? (bind (binding ?(int id) ?) *))): {
+      *out = id;
+      return 1;
+    }
+  }
+  return 0;
+}
+
+/* `Var (a, b) = pair` converts its source to a `List` once and reads each
+   target out of it by position, which is what the transform does with the
+   same declaration. An element read is duplicable, so every target
+   substitutes; only a source that is not is held in a binding first. */
+static Var _lower_destructure(
+  Lowering l, List targets, Var init, List rest, List k) {
+  Var source = _lower_expr(l, init);
+  if (_lower_failed(l, source)) return void;
+  source = _lower_coerce(%("List"), init, source);
+  int hold = !_lower_pure(source);
+  if (hold && l.on_loop)
+    return _lower_decline(l, "a value needing a binding is on a loop path");
+  Var held = hold ? _lower_name(l, "hold") : source;
+  int index = 0;
+  foreach (List target, targets) {
+    int id;
+    if (!_lower_destructure_id(target, &id))
+      return _lower_decline(l, "unsupported destructuring target");
+    if (l.cells.contains(id))
+      return _lower_decline(l, "a destructured local that needs a cell");
+    l.env[id] = %(List_getindex $held $index);
+    index++;
+  }
+  Var after = _lower_block(l, rest, k);
+  if (_lower_failed(l, after)) return void;
+  if (!hold) return after;
+  return %((lambda ($held) $after) $source);
+}
+
 /* The binding id an lvalue names, or -1 when it is not a plain local. */
 static int _lower_target(Var form) {
   match (form)
@@ -1073,6 +1158,12 @@ static Var _lower_stmnt(Lowering l, Var form, List rest, List k) {
     case %(return ?):      return 0;
     case %(declare ?type (bindings ?declarator)):
       return _lower_declarator(l, type, declarator, rest, k);
+    /* Phase 3 owns these two cases; the rest of the statement grammar is
+       Phase 2's. */
+    case %(dstrdecl ? (targets *targets) ?init):
+      return _lower_destructure(l, targets, init, rest, k);
+    case %(dstrdecl (params *params) ?init):
+      return _lower_destructure(l, params, init, rest, k);
     case %(declare ?type (bindings *declarators)): {
       Array expanded = [];
       defer expanded.free();
@@ -1127,7 +1218,7 @@ static Var _lower_block(Lowering l, List items, List k) {
 List Compiler.lower_comptime(Compiler compiler, List fn) {
   struct Lowering state = {
     .compiler = compiler, .env = {}, .locals = {}, .cells = {},
-    .arrays = {}, .definitions = [], .counter = 0, .declined = 0,
+    .arrays = {}, .definitions = [], .declined = 0,
     .own = NULL, .on_loop = 0, .in_loop = 0, .rejected = 0, .uncallable = 0
   };
   Lowering l = &state;
@@ -1139,10 +1230,14 @@ List Compiler.lower_comptime(Compiler compiler, List fn) {
       l.own = name;
       _lower_scan(l, fn);
       _lower_scan(l, fn);
-      if (l.rejected) lower_declined_reason = "unsupported construct";
-      else if (l.uncallable)
-        lower_declined_reason = "no binding for " + lower_missing_callee;
-      if (l.rejected || l.uncallable) {
+      /* The scan records its own wording for a construct refused by
+         decision; the two flags below share one. */
+      if (!l.declined) {
+        if (l.rejected) lower_declined_reason = "unsupported construct";
+        else if (l.uncallable)
+          lower_declined_reason = "no binding for " + lower_missing_callee;
+      }
+      if (l.declined || l.rejected || l.uncallable) {
         l.definitions.free();
         return NULL;
       }

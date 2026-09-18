@@ -61,11 +61,35 @@
 (defun List_equal (a b) (if (equal? a b) 1 0))
 (defun List_contains (xs v) (if (member v xs) 1 0))
 (defun List_map (xs fn) (map fn xs))
+(defun List_filter (xs fn) (filter fn xs))
+
+// `foreach` expands to a `try_next` loop over three cells: the container,
+// an integer or List cursor, and one output per name. Each shim below
+// answers the same shape its x2c operation does, and none of them reads
+// past the end, where the container would answer `void`.
 (defun List_try_next (xs cursor out)
   (let ((rest (C.load cursor)))
     (if (null? rest) 0
         (begin (C.store out (car rest)) (C.store cursor (cdr rest)) 1))))
-(defun List_filter (xs fn) (filter fn xs))
+
+(defun Array_try_next (a cursor out)
+  (let ((i (C.load cursor)))
+    (if (>= i (Array.len a)) 0
+        (begin (C.store out (Array.getindex a i))
+               (C.store cursor (+ i 1))
+               1))))
+
+// A `Map` has no positional cursor, so the entries `Map.list` answers are
+// walked as a List. The x2c cursor starts at the integer zero, which is how
+// the first call tells a fresh walk from a partly consumed one.
+(defun Map_try_next (m cursor key val)
+  (let ((entries (let ((held (C.load cursor)))
+                   (if (number? held) (Map.list m) held))))
+    (if (null? entries) 0
+        (begin (C.store key (car (car entries)))
+               (C.store val (cadr (car entries)))
+               (C.store cursor (cdr entries))
+               1))))
 
 (def Array_new Array.new)
 (def Array_len Array.len)

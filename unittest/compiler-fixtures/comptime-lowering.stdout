@@ -28,6 +28,15 @@ c-array-bare 4
 scalar-zero  0
 accumulate   ((1 1) (2 2))
 table        (neg sin) ()
+pair         34
+pair-typed   34
+pair-held    34
+pair-short   7
+pair-array   56
+walk-array   15
+walk-map     6
+walk-pairs   406
+walk-empty   0
 is-list      1
 head         a
 len          3
