@@ -566,7 +566,29 @@ That is 330x. Splitting it says where it goes:
 So 97% of the cost is the lowering pass itself, not the generated code and
 not the derivation.
 
-**The cause is `match-case`, and it is not specific to this prototype.**
+**Optimised from 79 s to 2.9 s.** The causes, in the order they mattered:
+
+| change | 30 functions + 2 derivations |
+|---|---|
+| as first written | 79 s |
+| head dispatch instead of `match-case` in the hot paths | 22 s |
+| call table as a `Map` instead of an association list | 7.7 s |
+| one scan instead of six walks of the same tree | 4.0 s |
+| `foldl` instead of `map` for a walk done for effect | 2.9 s |
+
+The `Map` change is the one worth repeating: every call in a lowered
+program went through `C.call`, which scanned an association list of about
+seventy entries. Replacing it with a `Map` made *deriving* essentially
+free. Before it, five derivations cost 7.4 s more than zero derivations;
+after it, five cost 0.1 s more. The handwritten Lisp calls its helpers
+directly, so the lowering had been paying a search the original never pays.
+
+What remains is 2.9 s against the original's 241 ms, and all of it is the
+one-time lowering: 756 ms scanning and about 1.9 s lowering thirty
+functions. Running the lowered algorithm is no longer measurable.
+
+**The first cause was `match-case`, and it is not specific to this
+prototype.**
 `match-case` is a `defmacro`, and `_apply_lambda` in `lib/lisp.x` expands a
 macro and then evaluates the expansion on *every call*. The nested
 `cond`/`let` structure a `match-case` with sixteen clauses builds is
