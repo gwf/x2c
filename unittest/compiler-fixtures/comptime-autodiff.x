@@ -400,13 +400,14 @@ List ad_fwd_item(List s, List names) {
 /* A declarator's name, for the declared-double scan. */
 $comptime()
 List ad_declarator_names(List decls) {
-  if (!decls) return %();
-  List rest = ad_declarator_names(decls.cdr());
-  match (decls.car()) {
-    case %(op = (bind (binding ? ?n) ()) ?): return %($n @rest);
-    case %(bind (binding ? ?n) ()): return %($n @rest);
+  Array names = [];
+  foreach (List d, decls) {
+    match (d) {
+      case %(op = (bind (binding ? ?n) ()) ?): names.push(n);
+      case %(bind (binding ? ?n) ()): names.push(n);
+    }
   }
-  return rest;
+  return names;
 }
 
 /* Every plain double declaration in the body is differentiated too; any
@@ -440,12 +441,13 @@ List ad_declared_join(List items) {
 /* Every double parameter is a name to differentiate. */
 $comptime()
 List ad_param_doubles(List params) {
-  if (!params) return %();
-  List rest = ad_param_doubles(params.cdr());
-  match (params.car()) {
-    case %(param (double) (bind (binding ? ?n) ())): return %($n @rest);
+  Array names = [];
+  foreach (List param, params) {
+    match (param) {
+      case %(param (double) (bind (binding ? ?n) ())): names.push(n);
+    }
   }
-  return rest;
+  return names;
 }
 
 /* A double parameter is followed by its tangent. */
@@ -613,11 +615,10 @@ List ad_with_pruned(List x, List pruned) {
    reverse gains everything already reversed. */
 $comptime()
 List ad_move_exits(List exits, List rev) {
-  if (!exits) return %();
-  List rest = ad_move_exits(exits.cdr(), rev);
-  List x = exits.car();
-  List moved = ad_with_pruned(x, %(@{ad_exit_pruned(x)} @rev));
-  return %($moved @rest);
+  Array out = [];
+  foreach (List x, exits)
+    out.push(ad_with_pruned(x, %(@{ad_exit_pruned(x)} @rev)));
+  return out;
 }
 
 $comptime()
@@ -745,18 +746,16 @@ List ad_rev_decl(List type, List d, List names) {
 
 $comptime()
 List ad_rev_decls(List type, List decls, List names) {
-  if (!decls) return %();
-  List head = ad_rev_decl(type, decls.car(), names);
-  List tail = ad_rev_decls(type, decls.cdr(), names);
-  return %($head @tail);
+  Array out = [];
+  foreach (List d, decls) out.push(ad_rev_decl(type, d, names));
+  return out;
 }
 
 $comptime()
 List ad_rev_items(List items, List names) {
-  if (!items) return %();
-  List head = ad_rev_item(items.car(), names);
-  List tail = ad_rev_items(items.cdr(), names);
-  return %($head @tail);
+  Array out = [];
+  foreach (List item, items) out.push(ad_rev_item(item, names));
+  return out;
 }
 
 $comptime()
@@ -809,20 +808,18 @@ List ad_dispatch(List normal, List exits) {
 
 $comptime()
 List ad_loop_exits(List exits, int want) {
-  if (!exits) return %();
-  List rest = ad_loop_exits(exits.cdr(), want);
-  List x = exits.car();
-  if (ad_is_loop_exit(x) != want) return rest;
-  return %($x @rest);
+  Array out = [];
+  foreach (List x, exits)
+    if (ad_is_loop_exit(x) == want) out.push(x);
+  return out;
 }
 
 $comptime()
 List ad_return_exits(List exits) {
-  if (!exits) return %();
-  List rest = ad_return_exits(exits.cdr());
-  List x = exits.car();
-  if (ad_exit_kind(x) != <return>) return rest;
-  return %($x @rest);
+  Array out = [];
+  foreach (List x, exits)
+    if (ad_exit_kind(x) == <return>) out.push(x);
+  return out;
 }
 
 $comptime()
@@ -861,10 +858,9 @@ List ad_pruned_exit(List x, List s) {
 /* One iteration: count, body, step, then the exit code. */
 $comptime()
 List ad_pruned_exits(List exits, List s) {
-  if (!exits) return %();
-  List rest = ad_pruned_exits(exits.cdr(), s);
-  List one = ad_pruned_exit(exits.car(), s);
-  return %($one @rest);
+  Array out = [];
+  foreach (List x, exits) out.push(ad_pruned_exit(x, s));
+  return out;
 }
 
 $comptime()
@@ -889,12 +885,11 @@ List ad_loop_parts(List c, List body, List step, List names) {
 
 $comptime()
 List ad_through_exits(List exits, Var n, List dispatch) {
-  if (!exits) return %();
-  List rest = ad_through_exits(exits.cdr(), n, dispatch);
-  List x = exits.car();
-  List one = ad_with_pruned(x, %(@{ad_exit_pruned(x)} ${ad_count(n, <->)}
-                                 ${ad_countdown(n, dispatch)}));
-  return %($one @rest);
+  Array out = [];
+  foreach (List x, exits)
+    out.push(ad_with_pruned(x, %(@{ad_exit_pruned(x)} ${ad_count(n, <->)}
+                                 ${ad_countdown(n, dispatch)})));
+  return out;
 }
 
 $comptime()
