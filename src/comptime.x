@@ -1138,12 +1138,17 @@ static Var _lower_declarator(
       return _lower_bind_value(l, id, _lower_boxed(l, id, value), rest, k);
     }
     case %(bind (binding ?(int id) ?) *): {
-      if (l.arrays.contains(id)) {
-        Var empty = _lower_braced(l, type, id, %());
-        return _lower_bind_value(l, id, _lower_boxed(l, id, empty), rest, k);
-      }
-      Var zero = _lower_zero(type);
-      return _lower_bind_value(l, id, _lower_boxed(l, id, zero), rest, k);
+      Var initial;
+      if (l.arrays.contains(id)) initial = _lower_braced(l, type, id, %());
+      else initial = _lower_zero(type);
+      if (_lower_failed(l, initial)) return void;
+      /* A box the enclosing loop already allocated is filled, not rebound.
+         A `foreach` inside a `foreach` declares its output cell with no
+         initializer, so without this a nested loop cannot lower. */
+      if (l.cells.contains(id) && l.env.contains(id))
+        return _lower_effect(
+          l, %(C.store ${_lower_address(l, id)} $initial), rest, k);
+      return _lower_bind_value(l, id, _lower_boxed(l, id, initial), rest, k);
     }
   }
   return _lower_decline(l, "unsupported declarator");

@@ -502,7 +502,15 @@ their one caller now performs directly, and `ad_items_of` was dead. Every
 
 Three corrections to what this section said before the work.
 
-- **`foreach` cannot nest.** A `foreach` whose body holds another declines
+- **`foreach` can nest, as of the Phase 6 integration.** The limitation Phase 6
+reported was real and is now fixed: the declarator branch for a local with no
+initializer never checked whether the enclosing loop had already allocated its
+box, and a `foreach` output cell is declared without one, so a nested loop
+always asked for a binding on the iteration path. It fills the box instead.
+`ct_flatten` in `comptime-lowering.x` covers it. What follows is the finding
+as Phase 6 recorded it, and the rewrites it drove are still worth keeping.
+
+**`foreach` could not nest.** A `foreach` whose body holds another declines
   with "a value needing a binding is on a loop path", whatever the inner
   container is, because the inner loop's cells are values on the outer
   loop's iteration path. So a builder whose items expand to several

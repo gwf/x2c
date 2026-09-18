@@ -367,6 +367,19 @@ Var ct_table(String name) {
   return table[name];
 }
 
+/* A `foreach` inside a `foreach`. The inner loop declares its output cell
+   with no initializer, so the enclosing loop must fill the box it already
+   allocated rather than bind a new one. */
+$comptime()
+List ct_flatten(List rows) {
+  Array out = [];
+  foreach (Var row, rows) {
+    List cells = row;
+    foreach (Var cell, cells) out.push(cell);
+  }
+  return out;
+}
+
 /* An uninitialized local keeps its own type's zero. */
 $comptime()
 int ct_scalar_zero(void) { int z; return z; }
@@ -585,6 +598,7 @@ int main(void) {
   printf("c-array-pad  %d\n", $(ct_c_array_padded));
   printf("c-array-bare %d\n", $(ct_c_array_bare 4));
   printf("scalar-zero  %d\n", $(ct_scalar_zero));
+  printf("flatten      %s\n", $(repr (ct_flatten '((a b) (c) (d e)))));
   printf("accumulate   %s\n", $(repr (ct_accumulate '(1 2))));
   printf("table        %s %s\n",
          $(repr (ct_table "cos")), $(repr (ct_table "nope")));

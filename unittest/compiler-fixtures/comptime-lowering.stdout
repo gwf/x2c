@@ -36,6 +36,7 @@ c-array      14
 c-array-pad  7
 c-array-bare 4
 scalar-zero  0
+flatten      (a b c d e)
 accumulate   ((1 1) (2 2))
 table        (neg sin) ()
 pair         34
