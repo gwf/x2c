@@ -49,12 +49,12 @@ static int _pool_probe_equal(Var a, Var b) {
 static void pool_lookup_shadows_outward(void) {
   Pool root = Pool.retain_named(NULL, "test-pool-root");
   EXPECT_STR_EQ(root.scope.name(), "test-pool-root");
-  EXPECT_TRUE(root.table.scope == &root.scope);
+  EXPECT_TRUE(root.table.scope == root.scope);
   String alpha = "pool-alpha";
   root.insert(alpha);
   Pool child = root.retain_named("test-pool-child");
   EXPECT_STR_EQ(child.scope.name(), "test-pool-child");
-  EXPECT_TRUE(child.table.scope == &child.scope);
+  EXPECT_TRUE(child.table.scope == child.scope);
   Var from_parent = alpha;
   EXPECT_TRUE(child.lookup(alpha) == from_parent);
   String beta = "pool-beta";

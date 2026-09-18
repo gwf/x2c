@@ -50,7 +50,10 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
   static $map $map._core_new_capacity($map unused, unsigned capacity) {
     (void) unused;
     $map map = Scope_malloc(sizeof($storage));
-    map.scope = Scope_top();
+    /* The scope itself, not the active slot: a later `Scope.retain`
+       replaces what that slot holds, and growth would follow it into
+       the new region and be freed with it. */
+    map.scope = *Scope_top();
     map.hashes = Bytes_new(sizeof($hash_cell));
     map.hashes = map.hashes.append(0, capacity);
     map.entries = Bytes_new(sizeof($entry));
@@ -144,10 +147,10 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
     for (unsigned i = 0; i < cap; i++)
       if (hashes[i]) expanded_map._core_reinsert(hashes[i], entries[i], 0);
 
-    Scope_move(staged_hashes.block(), map.scope);
-    Scope_move((unsigned char *) staged_hashes - sizeof(Block), map.scope);
-    Scope_move(staged_entries.block(), map.scope);
-    Scope_move((unsigned char *) staged_entries - sizeof(Block), map.scope);
+    Scope_move(staged_hashes.block(), &map.scope);
+    Scope_move((unsigned char *) staged_hashes - sizeof(Block), &map.scope);
+    Scope_move(staged_entries.block(), &map.scope);
+    Scope_move((unsigned char *) staged_entries - sizeof(Block), &map.scope);
     map.hashes = expanded.hashes;
     map.entries = expanded.entries;
     map.capacity = expanded.capacity;
@@ -829,7 +832,7 @@ macro Unit $map.typed.publish(Type $map, Type $key, Type $value, Name $unbox,
       staged.entries = old_entries;
       staged._core_free();
     }
-    map.scope = destination;
+    map.scope = *destination;
     committed = map;
     return map;
   }

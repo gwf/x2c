@@ -38,7 +38,7 @@ $(import "private-keywords.xmacro")
     `Map` is allocated and distinct from NULL.
 */
 typedef struct Map {
-  Scope *scope, Bytes hashes, entries;
+  Scope scope, Bytes hashes, entries;
   unsigned used;
   unsigned capacity;
   unsigned mask;
@@ -480,7 +480,7 @@ void Map.export_to(
 
   map.hashes.block().move_to(scope);
   map.entries.block().move_to(scope);
-  map.scope = scope;
+  map.scope = *scope;
 }
 
 /** Copies every entry of `other` into `map` and returns `map`.

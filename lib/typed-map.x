@@ -23,7 +23,7 @@ $(import "integer-ops.xmacro")
     postfix increment and decrement.
 */
 typedef struct MapIntInt {
-  Scope *scope, Bytes hashes, entries;
+  Scope scope, Bytes hashes, entries;
   unsigned used;
   unsigned capacity;
   unsigned mask;
@@ -36,7 +36,7 @@ typedef struct MapIntInt {
     decrement.
 */
 typedef struct MapLongDouble {
-  Scope *scope, Bytes hashes, entries;
+  Scope scope, Bytes hashes, entries;
   unsigned used;
   unsigned capacity;
   unsigned mask;
@@ -53,7 +53,7 @@ typedef struct MapLongDouble {
     unsupported.
 */
 typedef struct MapStringString {
-  Scope *scope, Bytes hashes, entries;
+  Scope scope, Bytes hashes, entries;
   unsigned used;
   unsigned capacity;
   unsigned mask;
@@ -66,7 +66,7 @@ typedef struct MapStringString {
     decrement.
 */
 typedef struct MapStringInt {
-  Scope *scope, Bytes hashes, entries;
+  Scope scope, Bytes hashes, entries;
   unsigned used;
   unsigned capacity;
   unsigned mask;

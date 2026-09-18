@@ -245,7 +245,7 @@ Bytes Bytes_append(Bytes, const void *, size_t);
 static Map Map__core_new_capacity(Map _x2c_macro_unused_0, unsigned _x2c_macro_capacity_0){
   (void) _x2c_macro_unused_0;
   Map _x2c_macro_map_0 = Scope_malloc(sizeof(struct Map));
-  _x2c_macro_map_0 -> scope = Scope_top();
+  _x2c_macro_map_0 -> scope = * Scope_top();
   _x2c_macro_map_0 -> hashes = Bytes_new(sizeof(unsigned));
   _x2c_macro_map_0 -> hashes = Bytes_append(_x2c_macro_map_0 -> hashes, 0, _x2c_macro_capacity_0);
   _x2c_macro_map_0 -> entries = Bytes_new(sizeof(struct MapRecord));
@@ -356,10 +356,10 @@ static void Map__core_expand(Map _x2c_macro_map_0){
       _x2c_macro_expanded_0.mask = _x2c_macro_capacity_0 - 1;
       Map _x2c_macro_expanded_map_0 =(Map) & _x2c_macro_expanded_0;
       for(unsigned _x2c_macro_i_0 = 0;  _x2c_macro_i_0 < _x2c_macro_cap_0;  _x2c_macro_i_0 ++) if(_x2c_macro_hashes_0[_x2c_macro_i_0]) Map__core_reinsert(_x2c_macro_expanded_map_0, _x2c_macro_hashes_0[_x2c_macro_i_0], _x2c_macro_entries_0[_x2c_macro_i_0], 0);
-      Scope_move(Bytes_block(_x2c_macro_staged_hashes_0), _x2c_macro_map_0 -> scope);
-      Scope_move((unsigned char *) _x2c_macro_staged_hashes_0 - sizeof(Block), _x2c_macro_map_0 -> scope);
-      Scope_move(Bytes_block(_x2c_macro_staged_entries_0), _x2c_macro_map_0 -> scope);
-      Scope_move((unsigned char *) _x2c_macro_staged_entries_0 - sizeof(Block), _x2c_macro_map_0 -> scope);
+      Scope_move(Bytes_block(_x2c_macro_staged_hashes_0), & _x2c_macro_map_0 -> scope);
+      Scope_move((unsigned char *) _x2c_macro_staged_hashes_0 - sizeof(Block), & _x2c_macro_map_0 -> scope);
+      Scope_move(Bytes_block(_x2c_macro_staged_entries_0), & _x2c_macro_map_0 -> scope);
+      Scope_move((unsigned char *) _x2c_macro_staged_entries_0 - sizeof(Block), & _x2c_macro_map_0 -> scope);
       _x2c_macro_map_0 -> hashes = _x2c_macro_expanded_0.hashes;
       _x2c_macro_map_0 -> entries = _x2c_macro_expanded_0.entries;
       _x2c_macro_map_0 -> capacity = _x2c_macro_expanded_0.capacity;
@@ -783,7 +783,7 @@ void Map_export_to(Map map, Context source, VarExportContextFn export_value, Sco
       Bytes_free(old_entries);
       Block_move_to(Bytes_block(map -> hashes), scope);
       Block_move_to(Bytes_block(map -> entries), scope);
-      map -> scope = scope;
+      map -> scope = * scope;
     }
     x2c_cleanup_leave(& _x2c_defer_record_5);
 
