@@ -58,3 +58,8 @@ match-add    (sum 1 2)
 match-neg    (sub 0 7)
 match-miss   (other 5)
 binding      t
+typed-string x none
+typed-int    42 -1
+typed-nested y none
+typed-mixed  z none
+typed-symbol 1 0

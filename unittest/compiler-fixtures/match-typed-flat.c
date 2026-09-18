@@ -2,11 +2,11 @@
 
 #include "match-typed-flat.h"
 
-static List _55, _54, _53, _52, _49, _48, _47, _44, _43, _41, _40, _39, _37, _33, _32, _31, _30, _22, _21, _20, _19, _15, _14, _13, _11, _10, _8, _4;
+static List _62, _61, _60, _59, _56, _55, _54, _51, _50, _48, _47, _46, _44, _40, _39, _38, _36, _35, _34, _33, _25, _24, _23, _22, _18, _17, _16, _15, _13, _11, _10, _8, _4;
 
-static String _50, _34;
+static String _57, _41;
 
-static Var _51, _46, _45, _42, _38, _36, _35, _29, _24, _18, _17, _16, _12, _9, _7, _3, _1, _0;
+static Var _58, _53, _52, _49, _45, _43, _42, _37, _32, _27, _26, _21, _20, _19, _14, _12, _9, _7, _3, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -18,11 +18,11 @@ Var Symbol_var(Symbol);
 
 List cons(Var, List);
 
+Var List_var(List);
+
 Var String_var(String);
 
 Var int_var(int);
-
-Var List_var(List);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -39,43 +39,51 @@ __attribute__((constructor)) static void _file_init_(void){
   _11 = cons(_1, _10);
   _12 = Symbol_var(62054);
   _13 = cons(_12, _11);
-  _14 = cons(_1, _4);
-  _15 = cons(_0, _14);
-  _16 = Symbol_var(1051236);
-  _17 = Symbol_var(61614504);
-  _18 = Symbol_var(1328354264);
-  _19 = cons(_18, NULL);
-  _20 = cons(_9, _19);
-  _21 = cons(_17, _20);
-  _22 = cons(_12, _21);
-  _24 = Symbol_var(1984510504);
-  _29 = Symbol_var(3453797);
-  _30 = cons(_29, NULL);
-  _31 = cons(_9, _30);
-  _32 = cons(_24, _31);
-  _33 = cons(_12, _32);
-  _34 = String_new("f");
-  _35 = String_var(_34);
-  _36 = int_var(1);
-  _37 = cons(_36, NULL);
-  _38 = List_var(_37);
-  _39 = cons(_38, NULL);
-  _40 = cons(_35, _39);
-  _41 = cons(_0, _40);
-  _42 = Symbol_var(12);
-  _43 = cons(_42, _39);
-  _44 = cons(_0, _43);
-  _45 = Symbol_var(48);
-  _46 = int_var(2);
-  _47 = cons(_46, NULL);
-  _48 = cons(_45, _47);
-  _49 = cons(_16, _48);
-  _50 = String_new("x");
-  _51 = String_var(_50);
-  _52 = cons(_51, _47);
-  _53 = cons(_16, _52);
-  _54 = cons(_35, NULL);
-  _55 = cons(_0, _54);
+  _14 = List_var(_13);
+  _15 = cons(_14, _4);
+  _16 = cons(_0, _15);
+  _17 = cons(_1, _4);
+  _18 = cons(_0, _17);
+  _19 = Symbol_var(1051236);
+  _20 = Symbol_var(61614504);
+  _21 = Symbol_var(1328354264);
+  _22 = cons(_21, NULL);
+  _23 = cons(_9, _22);
+  _24 = cons(_20, _23);
+  _25 = cons(_12, _24);
+  _26 = List_var(_25);
+  _27 = Symbol_var(1984510504);
+  _32 = Symbol_var(3453797);
+  _33 = cons(_32, NULL);
+  _34 = cons(_9, _33);
+  _35 = cons(_27, _34);
+  _36 = cons(_12, _35);
+  _37 = List_var(_36);
+  _38 = cons(_37, NULL);
+  _39 = cons(_26, _38);
+  _40 = cons(_19, _39);
+  _41 = String_new("f");
+  _42 = String_var(_41);
+  _43 = int_var(1);
+  _44 = cons(_43, NULL);
+  _45 = List_var(_44);
+  _46 = cons(_45, NULL);
+  _47 = cons(_42, _46);
+  _48 = cons(_0, _47);
+  _49 = Symbol_var(12);
+  _50 = cons(_49, _46);
+  _51 = cons(_0, _50);
+  _52 = Symbol_var(48);
+  _53 = int_var(2);
+  _54 = cons(_53, NULL);
+  _55 = cons(_52, _54);
+  _56 = cons(_19, _55);
+  _57 = String_new("x");
+  _58 = String_var(_57);
+  _59 = cons(_58, _54);
+  _60 = cons(_19, _59);
+  _61 = cons(_42, NULL);
+  _62 = cons(_0, _61);
 }
 
 String Var_string(Var);
@@ -126,7 +134,7 @@ return 0;
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  printf("%d %d %d %d %d\n", classify(_41), classify(_44), classify(_49), classify(_53), classify(_55));
+  printf("%d %d %d %d %d\n", classify(_48), classify(_51), classify(_56), classify(_60), classify(_62));
   return 0;
 }
 

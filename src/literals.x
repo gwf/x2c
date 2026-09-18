@@ -84,6 +84,12 @@ static List _build_cons_cell(Compiler compiler, List head, List tail) {
   }
   if (head.match(%(expr (<macro-expr>) ?)))
     return %(expr ("List") (cons $head $tail));
+  /* A nested `List` that already folded enters the cache as its own key, the
+     way a parsed element does, so the enclosing cell folds too. Converting it
+     to `Var` first would leave a `List_var` call the cache cannot represent,
+     which is what stopped a rebuilt typed-capture pattern from folding. */
+  if (head.match(%(expr ("List") (expr ("List") (cache *)))))
+    head = compiler.cache(%(var $head));
   head = compiler.convert_expression(head, %("Var"));
   List cached = compiler.cache_cons_cell(head, tail);
   if (cached) return cached;
