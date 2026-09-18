@@ -58,9 +58,11 @@ Macro Lisp in the repository, measured 2026-09-18 by counting lines inside
 | `etc/lisp-values.xlisp` | 97 | name table, stays |
 | `etc/compiler-sdk.xlisp` | 43 | Phase 5 decides |
 | `etc/lisp-extras.xlisp` | 34 | Phase 5 decides |
-| `lib/error-macros.xmacro` | 32 | Phase 5 |
-| `lib/error-private.xmacro` | 20 | Phase 5 |
-| `lib/system-macros.xmacro` | 8 | Phase 5 |
+| `lib/system-macros.xlisp` | 145 | Phase 5 |
+| `lib/varops.xlisp` | 57 | Phase 5 |
+| `lib/error-macros.xmacro` | 32 | a data table, not logic |
+| `lib/error-private.xmacro` | 20 | `x2c.ident` calls in a macro body |
+| `lib/system-macros.xmacro` | 8 | an import and two call sites |
 | `etc/lisp-io.xlisp` | 5 | stays |
 
 Counting lines overstates the three name tables. Of the 78 definitions in
@@ -281,9 +283,30 @@ are name tables and stay.
 Each port keeps the macro's public surface identical and is verified by the
 suites that already cover it, not by new tests written for the port.
 
-Phase 7 shrank this phase considerably: with `etc/builtin-macros.xlisp` out of
-scope, about 355 lines remain rather than 860, so `lib/var-tags.xmacro` and
-the error and system macros are nearly all of it.
+Phase 7 took `etc/builtin-macros.xlisp` out of scope. Re-counting what is
+left, on 2026-09-18, changed the picture twice over. The original inventory
+covered `lib/*.xmacro` and `etc/*.xlisp` and so missed two files that are
+neither: `lib/system-macros.xlisp` (145 lines, 22 definitions) and
+`lib/varops.xlisp` (57 lines, 10 definitions), each imported by its own
+`.xmacro`. Being per-unit macro bodies rather than session libraries, they do
+not have Phase 7's ordering problem at all, which makes them the easiest
+targets here.
+
+Against that, three files counted before hold no logic to port:
+`lib/error-macros.xmacro` is one `$(def ...)` data table of cause names,
+`lib/error-private.xmacro` is `x2c.ident` calls inside a macro body, and
+`lib/system-macros.xmacro` is an import and two call sites.
+
+So the phase is about 497 lines of real logic: `lib/var-tags.xmacro` at 295,
+`lib/system-macros.xlisp` at 145, `lib/varops.xlisp` at 57.
+
+Start with `lib/system-macros.xlisp`. Its 22 definitions are the `dedent`
+implementation - `substring`, character tests, line splitting, prefix
+stripping - which is string processing written in Lisp because Lisp was the
+only compile-time language. It is the clearest case in the repository for
+what this campaign is for, and x2c's `String` operations already say all of
+it directly. `lib/varops.xlisp` is next: a data table plus row accessors,
+the same shape as `var-tags` and a smaller rehearsal for it.
 
 **One construct to know about before starting, scoped 2026-09-18.**
 `var-tags` passes procedures as values: `var.tag.map` and `var.tag.filter`
