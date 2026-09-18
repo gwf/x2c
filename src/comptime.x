@@ -33,7 +33,7 @@ typedef struct Lowering {
   Map env, locals, cells, arrays;
   Array definitions;
   String own;
-  int counter, declined, on_loop, in_loop, rejected, uncallable;
+  int declined, on_loop, in_loop, rejected, uncallable;
 } *Lowering;
 
 /* Why the last lowering declined, for the diagnostic at the invocation, and
@@ -44,10 +44,18 @@ static String lower_missing_callee;
 /* --- names ------------------------------------------------------------- */
 
 /* `Atom.intern` gives an `lsym` for a spelling too long to pack into a
-   Symbol, so a generated name is readable and cannot collide by truncation. */
+   Symbol, so a generated name is readable and cannot collide by truncation.
+
+   A loop becomes a session global, so the counter runs across the whole
+   session rather than restarting with each function. Two functions of the
+   same shape otherwise name their loops alike, and the second definition
+   silently replaces the first. */
+static int lower_counter;
+
 static Var _lower_name(Lowering l, String stem) {
-  l.counter++;
-  return Atom.intern(%"$stem${l.counter}");
+  (void) l;
+  lower_counter++;
+  return Atom.intern(%"$stem${lower_counter}");
 }
 
 /* --- the single scan --------------------------------------------------- */
@@ -1127,7 +1135,7 @@ static Var _lower_block(Lowering l, List items, List k) {
 List Compiler.lower_comptime(Compiler compiler, List fn) {
   struct Lowering state = {
     .compiler = compiler, .env = {}, .locals = {}, .cells = {},
-    .arrays = {}, .definitions = [], .counter = 0, .declined = 0,
+    .arrays = {}, .definitions = [], .declined = 0,
     .own = NULL, .on_loop = 0, .in_loop = 0, .rejected = 0, .uncallable = 0
   };
   Lowering l = &state;
