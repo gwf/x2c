@@ -348,6 +348,33 @@ form, which M1 already supplies. The M4 measurement in "Validation" and the
 "Plan review" sentences that reason from literal-fold reuse and from a
 per-function serialization diagnostic no longer apply.
 
+## What M3 and M4 together establish
+
+Both milestones were declined on evidence, and the two declines say the same
+thing from opposite ends: the word-compiled program and the transformed tree
+are each a lowering toward one target, and neither carries what compile-time
+code needs.
+
+The transform is a lowering toward C. It replaces a lambda with a `Func`
+handle and leaves the body in a separate static the AST does not associate
+with it, and it turns an interpolated string into raw C text - the literal
+fragment `"String_join(NULL, "` appears in the tree as a string. So the
+pre-transform tree is the correct input for this pass, and `_lower_coerce` is
+not a wart to be deleted: re-deriving `Array_list`, `List_array` and
+`Symbol_str` is the price of reading the tree that still has the source's
+meaning. It stays, and the plan review's claim that M3 would delete it is
+withdrawn.
+
+The word program is a lowering toward the machine. It holds live process
+addresses and resolves callees by name through the Lisp session, so it is an
+accelerator for a session rather than a portable artifact.
+
+The consequence for the third lifetime in "The result": shipping a meta
+function to an interpreted runtime means shipping the **lowered Lisp**, not
+the word-compiled form. Word compilation then happens on load, at roughly
+10 microseconds per program. Nothing in this plan builds that, and nothing
+needs to until a runtime asks for it.
+
 ## M5 - constant-argument folding
 
 With both forms present, a call whose arguments are all compile-time
