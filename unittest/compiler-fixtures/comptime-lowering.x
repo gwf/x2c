@@ -737,6 +737,40 @@ List meta = %(a b);
 
 struct MetaHolder { int meta; };
 
+/* --- conversions and updates the lowering has to carry ------------------- */
+
+/* An argument names the parameter type it has to reach and carries no
+   conversion of its own, so an `Array` handed to a `List` parameter reached
+   the native adapter as an `Array`. The adapter refused it by raising with
+   the `Array` in the error detail, which is not an admissible detail value,
+   so the compile terminated at the error floor with no diagnostic at all. */
+meta static String mt_join_array(String a, String b) {
+  Array out = [a, b];
+  return "/".join(out);
+}
+
+/* A compound assignment to a local that lives in a cell reads through its
+   box, the way every other read of that local does. Reading the slot itself
+   handed `_binary` the box and answered `(no-member (tag array) (member
+   add))`. `x` is a cell because its address is taken; `score` is one because
+   a loop assigns it a call's result. */
+meta static int mt_cell_update(int a) {
+  int x = a;
+  int *p = &x;
+  x += 5;
+  x++;
+  return *p;
+}
+
+meta static int mt_loop_update(String text) {
+  int score = 0;
+  foreach (Var part, text.split(",")) {
+    String piece = part;
+    score += String.len(piece);
+  }
+  return score;
+}
+
 /* --- the program reports what the pass produced -------------------------- */
 
 int main(void) {
@@ -855,6 +889,16 @@ int main(void) {
          $(mt_label "slot" 4), mt_label("slot", 4));
   int nine = 9;
   printf("meta-fold    %d %d\n", mt_fold(9), mt_fold(nine));
+  /* Each run-time call takes a local, so a constant argument cannot fold it
+     back into the compile-time answer the same line already prints. */
+  int one = 1;
+  String left = "x", right = "y", csv = "ab,cde";
+  printf("join-array   %s %s\n",
+         $(mt_join_array "x" "y"), mt_join_array(left, right));
+  printf("cell-update  %d %d\n",
+         $(mt_cell_update 1), mt_cell_update(one));
+  printf("loop-update  %d %d\n",
+         $(mt_loop_update "ab,cde"), mt_loop_update(csv));
   meta = %(a b c);
   struct MetaHolder holder = { .meta = 3 };
   printf("meta-ident   %d %d\n", meta.len(), holder.meta);

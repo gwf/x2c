@@ -158,6 +158,9 @@ static int _reference_type_accepts(List target, List source) {
     a reference, and
     `<alloc-fail>`, `<bad-enc>`, `<bad-target>`, `<conv-range>`, or
     `<no-convert>` from a numeric conversion. The result has tag `want`.
+    A detail names the argument's tag rather than the argument: any tag may
+    arrive here, and an identity-bearing detail value terminates at the error
+    floor instead of reaching the handler that would report it.
 */
 Var x2c_func_value_argument(
   Func fn, const FuncArg *argv, unsigned i, Symbol want) {
@@ -176,34 +179,34 @@ Var x2c_func_value_argument(
     }
     catch %(bad-enc *cause): {
       List lower = cons(<bad-enc>, cause);
-      raise %(bad-enc (sig $sig) (index $i) (value $value)
+      raise %(bad-enc (sig $sig) (index $i)
                        (want $want) (cause $lower));
     }
     catch %(void-op *cause): {
       List lower = cons(<void-op>, cause);
-      raise %(void-op (sig $sig) (index $i) (value $value)
+      raise %(void-op (sig $sig) (index $i)
                        (want $want) (cause $lower));
     }
     catch %(bad-target *cause): {
       List lower = cons(<bad-target>, cause);
-      raise %(bad-target (sig $sig) (index $i) (value $value)
+      raise %(bad-target (sig $sig) (index $i)
                           (want $want) (cause $lower));
     }
     catch %(conv-range *cause): {
       List lower = cons(<conv-range>, cause);
-      raise %(conv-range (sig $sig) (index $i) (value $value)
+      raise %(conv-range (sig $sig) (index $i)
                           (want $want) (cause $lower));
     }
     catch %(no-convert *cause): {
       List lower = cons(<no-convert>, cause);
-      raise %(no-convert (sig $sig) (index $i) (value $value)
+      raise %(no-convert (sig $sig) (index $i)
                           (want $want) (cause $lower));
     }
     return converted;
   }
   /* Object parameters require their declared tag, but nil is a legal List. */
   if (value is not want && !(want == <list> && value.is_null()))
-    raise %(bad-types (sig $sig) (index $i) (value $value)
+    raise %(bad-types (sig $sig) (index $i) (actual ${value.tag()})
                        (want $want));
   return value;
 }

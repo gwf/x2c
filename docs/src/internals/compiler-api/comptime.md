@@ -35,7 +35,7 @@ installed folds, so an import's runtime definition keeps the run-time
 call that designates the unit emitting it. Evaluation runs in the macro
 session; a raise there leaves the call.
 
-Source: `src/comptime.x:1674`
+Source: `src/comptime.x:1699`
 
 <a id="Compiler.install_comptime"></a>
 #### Compiler.install_comptime
@@ -47,7 +47,7 @@ function is callable from compile-time Lisp under its own name.
 Returns whether the lowering succeeded. This method mutates the macro
 session and does not open a semantic transaction.
 
-Source: `src/comptime.x:1605`
+Source: `src/comptime.x:1630`
 
 <a id="Compiler.lower_comptime"></a>
 #### Compiler.lower_comptime
@@ -60,7 +60,7 @@ The result is the loop definitions the body needed followed by the
 function's own, in evaluation order. This method does not open a
 semantic transaction.
 
-Source: `src/comptime.x:1482`
+Source: `src/comptime.x:1507`
 
 <a id="Compiler.lower_declined"></a>
 #### Compiler.lower_declined
@@ -69,7 +69,7 @@ Source: `src/comptime.x:1482`
 
 Returns why the last `Compiler.lower_comptime` declined, or `NULL`.
 
-Source: `src/comptime.x:1538`
+Source: `src/comptime.x:1563`
 
 <a id="Compiler.lower_reached_globals"></a>
 #### Compiler.lower_reached_globals
@@ -79,7 +79,7 @@ Source: `src/comptime.x:1538`
 Returns whether the last `Compiler.lower_comptime` reached file-scope
 state, directly or through a callee already recorded as reaching it.
 
-Source: `src/comptime.x:1631`
+Source: `src/comptime.x:1656`
 
 ## Design notes
 
