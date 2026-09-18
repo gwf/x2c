@@ -1,0 +1,1 @@
+macro-match-binder-literals.c: warning: left operand of comma operator has no effect [-Wunused-value]

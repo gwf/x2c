@@ -1,0 +1,1 @@
+macro-construction-regressions.c: warning: left operand of comma operator has no effect [-Wunused-value]

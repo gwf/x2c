@@ -1,0 +1,3 @@
+null-pointer-constants.c: warning: expression which evaluates to zero treated as a null pointer constant of type 'List' (aka 'struct List *') [-Wnon-literal-null-conversion]
+null-pointer-constants.c: warning: expression which evaluates to zero treated as a null pointer constant of type 'List' (aka 'struct List *') [-Wnon-literal-null-conversion]
+null-pointer-constants.c: warning: expression which evaluates to zero treated as a null pointer constant of type 'List' (aka 'struct List *') [-Wnon-literal-null-conversion]

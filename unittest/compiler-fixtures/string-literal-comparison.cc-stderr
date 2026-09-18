@@ -1,0 +1,4 @@
+string-literal-comparison.c: warning: result of comparison against a string literal is unspecified (use an explicit string comparison function instead) [-Wstring-compare]
+string-literal-comparison.c: warning: result of comparison against a string literal is unspecified (use an explicit string comparison function instead) [-Wstring-compare]
+string-literal-comparison.c: warning: result of comparison against a string literal is unspecified (use an explicit string comparison function instead) [-Wstring-compare]
+string-literal-comparison.c: warning: self-comparison always evaluates to true [-Wtautological-compare]

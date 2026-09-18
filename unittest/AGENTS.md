@@ -46,6 +46,11 @@ Use the [agent directory](../agents/README.md) for task routing and the
 - Fixtures and checked-in expectations are in `compiler-fixtures/`; generated
   actual artifacts are in `build/compiler-fixtures/`.
 - Each `.phases` file declares the exact sidecars owned by that fixture.
+- A fixture that runs its program must compile it without a C compiler
+  warning. A fixture whose generated C warns on purpose declares `cc-stderr`
+  and owns the warnings in `<name>.cc-stderr`; every other fixture fails on
+  any warning, in check and update alike, so a new one is declared
+  deliberately.
 - `make verify-fixtures` checks expectations and never rewrites them.
 - `make verify-fixtures-update` rewrites declared sidecars. Use it only for
   an intentional compiler change and review every resulting diff.

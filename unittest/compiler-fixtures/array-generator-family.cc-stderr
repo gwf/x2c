@@ -1,0 +1,2 @@
+array-generator-family.c: warning: format specifies type 'int' but the argument has type 'size_t' (aka 'unsigned long') [-Wformat]
+array-generator-family.c: warning: format specifies type 'int' but the argument has type 'size_t' (aka 'unsigned long') [-Wformat]

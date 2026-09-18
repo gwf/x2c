@@ -52,6 +52,17 @@ normalize_runtime_lines() {
   mv "$file.normalized" "$file"
 }
 
+# The C compiler's own warnings about the generated C. Keep the diagnostic
+# text and drop the build path, the line and column, the echoed source, and
+# the per-run summary, so an expectation survives an unrelated line shift and
+# never records this checkout's directory.
+normalize_cc_warnings() {
+  local file=$1
+  sed -E 's|^[^ ]*/([^/ ]+):[0-9]+:[0-9]+: |\1: |' "$file" \
+    | grep -E '^[^ ]+: (warning|note|error): ' >"$file.normalized" || true
+  mv "$file.normalized" "$file"
+}
+
 check_artifact() {
   local phase=$1
   local actual=$2
@@ -179,7 +190,7 @@ run_fixture() {
     case "$phase" in
       tokens|ast|transform|emit|symbols|h|c|compile-status|diagnostics)
         ;;
-      stdout|stderr|status)
+      cc-stderr|stdout|stderr|status)
         ;;
       *)
         record_failure "$name declares unknown phase '$phase'"
@@ -209,7 +220,8 @@ run_fixture() {
   has_phase symbols && run_symbol_dump
 
   need_compile=0
-  for phase in h c compile-status diagnostics stdout stderr status; do
+  for phase in h c compile-status diagnostics cc-stderr stdout stderr \
+      status; do
     has_phase "$phase" && need_compile=1
   done
   ((need_compile)) || return 0
@@ -238,7 +250,7 @@ run_fixture() {
       cat "$compile_stderr" >&2
       record_failure "$name compiler invocation failed"
     fi
-    for phase in h c stdout stderr status; do
+    for phase in h c cc-stderr stdout stderr status; do
       if has_phase "$phase"; then
         record_failure "$name/$phase unavailable after compiler failure"
       fi
@@ -250,7 +262,7 @@ run_fixture() {
   has_phase c && check_artifact c "$output/$name.c"
 
   need_run=0
-  for phase in stdout stderr status; do
+  for phase in cc-stderr stdout stderr status; do
     has_phase "$phase" && need_run=1
   done
   ((need_run)) || return 0
@@ -264,6 +276,16 @@ run_fixture() {
     cat "$case_build/cc.stderr" >&2
     record_failure "$name generated C did not compile"
     return 0
+  fi
+
+  # A fixture that declares cc-stderr owns the warnings its generated C
+  # provokes; every other fixture is expected to compile silently.
+  normalize_cc_warnings "$case_build/cc.stderr"
+  if has_phase cc-stderr; then
+    check_artifact cc-stderr "$case_build/cc.stderr"
+  elif [[ -s "$case_build/cc.stderr" ]]; then
+    cat "$case_build/cc.stderr" >&2
+    record_failure "$name generated C compiled with warnings"
   fi
 
   stderr_raw="$case_build/stderr.raw"
