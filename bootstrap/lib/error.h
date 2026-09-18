@@ -77,6 +77,12 @@ void Error_policy_set(Symbol code, Symbol disposition);
 
 Symbol Error_policy_get(Symbol code);
 
+void * Error_policy_capture(void);
+
+void Error_policy_adopt(void * capture);
+
+void Error_policy_release(void * capture);
+
 int Error_bound(void);
 
 void Error_bound_set(int bound);
