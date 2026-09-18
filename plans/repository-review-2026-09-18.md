@@ -1,10 +1,16 @@
 # Repository review remediation, 2026-09-18
 
-> Status: active - remediation catalog for the whole-repository review at
+> Status: done - remediation catalog for the whole-repository review at
 > `dbfc9cfc`. Every row below was reproduced at that commit. `make verify`
 > (918 suites), `make examples` (59), and `make check` (stages 0-3 identical
-> across 178 C/H files) were all green, so no current gate catches any of it.
-> Groups 1-9 are open. Group 10 records decisions that need Gary.
+> across 178 C/H files) were all green there, so no current gate caught any
+> of it. Groups 1-9 landed on 2026-09-18. Group 10 is not work; it records
+> decisions that still need Gary, and the work added three more to it.
+>
+> Three rows did not survive contact and are corrected in place below: the
+> `Thread.join` row in Group 1 was a misdiagnosis, Group 2's rule was
+> narrowed after it regressed generated C, and Group 9's row 2 had the wrong
+> cause. Each correction is recorded where the row is, not only here.
 
 ## Result
 
@@ -43,16 +49,25 @@ cause in `lib/error-macros.xmacro` transfers, so the release never runs.
 | A pipeline stage that fails to spawn leaks the pipe read end. | `%((echo hi) (no-such-program) (cat)).job().status()`. `_spawn` raises `<not-found>` (`process.x:208`) for stage 1; that stage's `link[0]` is never closed. A catch-and-retry loop leaks one descriptor per attempt until `EMFILE`. | `process.x:253-261` gives `link[1]` a dedicated `defer _close(link[1])` but closes `link[0]` only via the next iteration's `previous` assignment. The function-level defer at `:228-232` closes the *previous* iteration's read end. Bring `link[0]` under the same block defer and clear it before the loop hands it on. | read |
 | `Path.copy_file` uses an uninitialized `struct stat`. | Any `fstat` failure on the open source stream. The identity test then compares garbage `st_dev`/`st_ino`, which can make the copy return having silently done nothing, and `chmod(target, garbage & 07777)` can add or strip execute and setuid bits. `Path.copy_tree` (`:482`) funnels every regular file through it. | `path.x:453` discards `input.stat(&info)`; `File.stat` returns 0/-1 and raises nothing (`file.x:350`). `_open` ten lines earlier in the same file checks the same call before reading the struct. Check it and raise through `File.path_error` as the neighbouring failures do. | read |
 
-`Pool.lookup` is on the hot path: `String.new`, `List.cons`, and `Pool.intern`
-all reach it. Measure translation throughput after the change against the
-~1.4% run-to-run noise floor. If the per-iteration `defer` costs more than
-that, hoist a single `defer` over one `Pool locked` variable instead; do not
-adopt the hoisted form without a measurement, because it is harder to read.
+**Outcome.** Four of the five landed. `Pool.lookup` took the fallback form:
+over seven interleaved translations of `src/*.x` the per-iteration `defer`
+cost 4.2% and one hoisted `defer` over a `Pool locked` variable cost 2.7%,
+both above the ~1.4% noise floor, so the hoisted form is what shipped and the
+measurement is recorded in its source comment. The pipeline row was upgraded
+from `read` to reproduced - open descriptors grew 4, 5, 6, 7 over four
+catch-and-retry attempts - and is now covered by
+`process_failed_pipeline_closes_both_pipe_ends`, which reports 11 descriptors
+against 3 without the repair.
 
-Tests: extend `unittest/test-thread.x` with the policy-resolved worker, which
-must join to its result. The `Pool.lookup` row needs no unit test - a test
-that reproduces it hangs the suite - so record the probe here and rely on the
-`defer` being the file's established idiom.
+**The `Thread.join` row was a misdiagnosis.** The repair above was applied,
+changed nothing, and was reverted rather than landed as dead code. The
+mechanism it assumed cannot happen: `_dispatch` walks handlers innermost
+first, and `_run`'s bare `catch:` sits immediately outside `_capture_errors`
+and always matches, so the observer firing means the cause did unwind out of
+the callback. `<join-fail>` is therefore correct per `thread.x:17-19`.
+Verified directly: a worker that raises under `<ignore>` never resumes, while
+the identical raise on the main thread does. That difference is the real
+finding, and it is Group 10 item 7.
 
 ## Group 2: volatile preservation across a transfer
 
@@ -79,11 +94,33 @@ Residual limit to record in the source comment: a pointer assigned outside the
 a pointer that reaches a callee through a struct field or an array element is
 not. Say so rather than implying completeness.
 
-Fixture: extend `volatile-indirect-write.x` with the callee-write and
-uninitialized-declarator shapes and accept the artifact change through
-`make verify-fixtures-update` after reviewing the generated C. Twelve fixture
-`cc.stderr` files already hold C warnings no check reads; this group does not
-change that, and Group 10 asks whether it should.
+**Outcome: the rule was narrowed, and the first row did not land.** The
+address-escape widening was implemented and then dropped, because it regressed
+generated C: a plain `foreach (Var v, items)` inside a `try` went from zero C
+warnings to two, since the lowered cursor's address reaches `List_try_next`
+and the cursor is now `volatile`. That is far too common an idiom to regress,
+and the "over-qualifying is the accepted cost" line above was written about
+the qualifier on the local, not about propagating one into every callee
+signature. Silencing it would need a cast back to the unqualified type, and
+casting away a declared qualifier is undefined per C11 6.7.3p6 - a diagnostic
+traded for undefined behavior, which is worse.
+
+What landed is rows 2 and 3: `_preserve_pointee` is replaced by a predicate
+over the holder names `_collect_aliased` resolves to a preserved local, which
+closes the uninitialized, multi-declarator, and multi-level pointer shapes and
+*removes* an existing warning. The splitter also now splits before
+qualification, fixing a separate leak found on the way: `int *twins = &twin,
+*mates = &mate;` previously qualified both declarators.
+
+The residual, recorded in the source with its reason: a local only a callee
+writes through an address the body hands it is not qualified, because taking
+its address already forces it to memory, so the register a transfer would
+restore is not where its value lives. The formal C11 7.13.2.1 exposure remains
+and is Group 10 item 8.
+
+Fixture: `volatile-indirect-write.x` gained the uninitialized declarator and
+the two-declarator case; `cleanup-loop-boundary`, `foreach-macro-lowering`,
+and `exception-signal-mask` are byte-identical to `dbfc9cfc` again.
 
 ## Group 3: runtime value contracts
 
@@ -188,8 +225,8 @@ Files: the match engine and `lib/list.x` (row 1), `lib/scan.x` (row 2),
 | Defect | Reproduction | Cause and repair | R |
 | --- | --- | --- | --- |
 | A bare-binder template left unbound by a successful match aborts. | `%(outer (b)).search_replace(%(!or (a *x) (b)), <"*x">)` raises `<void-op>` from `List.cons` and exits 134 through the error floor. | `_apply_capture_template` and the reference's `bindings.assoc(template)`. An `!or` alternative that matches without binding the other alternative's binder must substitute the same value `try_match_replace` writes for that input rather than raising. Catalog Group 20 row 1. | me |
-| A raw `0xFF` byte in code position ends tokenization. | `undeclared_\xff = 1;` gives "unexpected end of file" pointing at the byte. | A `char` compared with `EOF` in the tokenizer. The input is invalid either way, so the consequence is a misleading diagnostic, not wrong output. Catalog Group 1, last row. | me |
-| `binder?` misses binders of ten or more characters. | `(binder? '?abcdefghi)` is true; `(binder? '?abcdefghij)` is false, because `symbol?` is false for a spelling that does not fit a compact `Symbol`. A `match-case` clause using such a binder fails the build with `(unbound (name ?abcdefghij))`. | `etc/init.xlisp:206-208`. The catalog records this as silent non-binding; correct that - it fails loudly. The checked-in bootstrap compiler reads `etc/init.xlisp` during stage 0, so a change there needs a bootstrap round, and the AST-to-Lisp spike reverted its own fix here for an unknown reason, so treat a fix as unproven rather than wrong. Catalog Group 20 row 3. | me |
+| A raw `0xFF` byte in code position ends tokenization. | `undeclared_\xff = 1;` gives "unexpected end of file" pointing at the byte. | **The stated cause was wrong.** There is no `char`/`EOF` comparison in `lib/scan.x`, and 0xFF is not special - a backtick, 0x80 and 0xFE all gave the same message. A lexical failure appends zero-width `<error>` and `<eof>` tokens, nothing reports the `<error>`, and the parser blames the `<eof>`. `Compiler.tokenize` now reports the `<error>` as `parse: invalid token` when the tokenizer status is `<malformed>`, while `<incomplete>` keeps "unexpected end of file". Fixed; `unknown-character.x` pins it, and `inactive-arm-lexical-error` stopped emitting a nonsense `type: expected scalar type`. | me |
+| `binder?` misses binders of ten or more characters. | `(binder? '?abcdefghi)` is true; `(binder? '?abcdefghij)` is false, because `symbol?` is false for a spelling that does not fit a compact `Symbol`. A `match-case` clause using such a binder fails the build with `(unbound (name ?abcdefghij))`. | Fixed in `binder?` alone: `(or (symbol? value) (eq? (type value) 'lsym))`. `symbol?` itself was deliberately **not** widened - it has three other callers, including `x2c.literal.symbol`, which would then emit a wrong Symbol literal for a long atom. Proven: `etc/init.xlisp` is read from `root_dir` at translate time rather than compiled into bootstrap C, and stages 0, 1 and 2 stayed byte-identical across 178 generated C/H files. Why the AST-to-Lisp spike's own fix broke that spike was **not** established - its sources were uncommitted in a worktree that no longer exists - so the widened-`symbol?` explanation above is a supported hypothesis, not proof. | me |
 
 ## Group 10: decisions for Gary
 
@@ -220,6 +257,20 @@ These are not implementation choices.
    production has code after the body.
 6. **`tools/check-docs.py` checks no anchors and skips `agents/skills/**`,
    `plans/**`, `packages/**`, and `site/**`.** Widening it is a gate change.
+7. **A resumable policy resumes on the main thread and not inside a worker.**
+   `Error.policy_set(<my-note>, <ignore>)` then `Error.raise` returns on the
+   main thread; the identical raise inside a `Thread` callback never resumes,
+   because `_run`'s bare `catch:` always matches and turns it into
+   `<join-fail>`, discarding the worker's result. `Error.policy_set` documents
+   no such limit. Making them agree means changing how `Thread` catches, which
+   is a public `Thread` semantics change.
+8. **A local only a callee writes is left unqualified across a transfer.**
+   See Group 2's outcome. The two available repairs are a C11 7.13.2.1
+   exposure that is mitigated in practice, or a warning on every such call
+   whose only cure is undefined behavior. Group 2 shipped the first.
+9. **Two scanners lost their last in-repo caller.** `scan_c_string` and
+   `scan_block_comment` in `lib/scan.x` are public API with no remaining
+   caller after Group 9 row 2. Keep or remove.
 
 ## Validation
 
@@ -239,6 +290,12 @@ Each group reproduces its rows first, then repairs, then verifies:
 
 Final tree: `tools/gate-state.py ensure agent-pr-check` for Groups 1-6 and
 8-9; `tools/gate-state.py ensure doc-check` for Group 7 if it lands alone.
+
+**As landed**, all nine groups were integrated into one tree, `bootstrap/` was
+regenerated once across them rather than nine times, and the tree was gated
+once. `make verify` reports 920 tests and 719 fixtures against the 918/719
+baseline. `make packages-check` was not run; Group 9 row 3 touches shared
+compile-time Lisp, which is the one surface a package client could see.
 
 ## Plan review
 
