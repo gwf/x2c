@@ -347,10 +347,9 @@ List ad_fwd_update(List s, List update, List names) {
 
 $comptime()
 List ad_fwd_items(List items, List names) {
-  if (!items) return %();
-  List head = ad_fwd_item(items.car(), names);
-  List tail = ad_fwd_items(items.cdr(), names);
-  return %(@head @tail);
+  List out = %();
+  foreach (List item, items) out = %(@out @{ad_fwd_item(item, names)});
+  return out;
 }
 
 $comptime()
@@ -453,14 +452,18 @@ List ad_param_doubles(List params) {
 /* A double parameter is followed by its tangent. */
 $comptime()
 List ad_fwd_params(List params) {
-  if (!params) return %();
-  List rest = ad_fwd_params(params.cdr());
-  match (params.car()) {
-    case %(param (double) (bind (binding ? ?n) ())):
-      return %((param (double) (bind ($n) ()))
-               (param (double) (bind (${ad_dot(n)}) ())) @rest);
+  Array out = [];
+  foreach (List param, params) {
+    match (param) {
+      case %(param (double) (bind (binding ? ?n) ())): {
+        out.push(%(param (double) (bind ($n) ())));
+        out.push(%(param (double) (bind (${ad_dot(n)}) ())));
+        continue;
+      }
+    }
+    out.push(ad_unbind(param));
   }
-  return %(${ad_unbind(params.car())} @rest);
+  return out;
 }
 
 $comptime()
@@ -547,15 +550,11 @@ String ad_code(void) {
 }
 
 $comptime()
-List ad_local_type_in(List entries, Var name) {
-  if (!entries) return %(double);
-  List entry = entries.car();
-  if (entry.car() == name) return entry.cdr().car();
-  return ad_local_type_in(entries.cdr(), name);
+List ad_local_type(Var name) {
+  foreach (List entry, ad_locals)
+    if (entry.car() == name) return entry[1];
+  return %(double);
 }
-
-$comptime()
-List ad_local_type(Var name) { return ad_local_type_in(ad_locals, name); }
 
 $comptime()
 List ad_push(List e) {
@@ -622,36 +621,32 @@ List ad_move_exits(List exits, List rev) {
 }
 
 $comptime()
-List ad_sequence_from(List triples, List fwd, List rev, List exits) {
-  if (!triples) return ad_triple(fwd, rev, exits);
-  List t = triples.car();
-  List moved = ad_move_exits(ad_exits_of(t), rev);
-  return ad_sequence_from(triples.cdr(),
-    %(@fwd @{ad_fwd_of(t)}), %(@{ad_rev_of(t)} @rev), %(@exits @moved));
-}
-
-$comptime()
 List ad_sequence(List triples) {
-  return ad_sequence_from(triples, %(), %(), %());
+  List fwd = %();
+  List rev = %();
+  List exits = %();
+  foreach (List t, triples) {
+    exits = %(@exits @{ad_move_exits(ad_exits_of(t), rev)});
+    fwd = %(@fwd @{ad_fwd_of(t)});
+    rev = %(@{ad_rev_of(t)} @rev);
+  }
+  return ad_triple(fwd, rev, exits);
 }
 
 /* --- adjoints ----------------------------------------------------------- */
 
 $comptime()
-List ad_call_partial_adjoints(
-  Var name, int i, List args, List unbound, List seed, List names) {
-  if (!args) return %();
-  List rest = ad_call_partial_adjoints(
-    name, i + 1, args.cdr(), unbound, seed, names);
-  List partial = ad_partial(name, i, unbound);
-  if (!partial) return rest;
-  List here = ad_adjoint(args.car(), ad_mul(seed, partial), names);
-  return %(@here @rest);
-}
-
-$comptime()
 List ad_call_adjoint(Var name, List args, List seed, List names) {
-  return ad_call_partial_adjoints(name, 0, args, ad_unbind(args), seed, names);
+  List unbound = ad_unbind(args);
+  List out = %();
+  int i = 0;
+  foreach (List argument, args) {
+    List partial = ad_partial(name, i, unbound);
+    if (partial)
+      out = %(@out @{ad_adjoint(argument, ad_mul(seed, partial), names)});
+    i = i + 1;
+  }
+  return out;
 }
 
 $comptime()
@@ -793,17 +788,12 @@ List ad_code_is(Var code) {
 
 /* The dispatch after popping one region's exit code. */
 $comptime()
-List ad_dispatch_from(List normal, List exits) {
-  if (!exits) return %(block @normal);
-  List x = exits.car();
-  List chain = ad_dispatch_from(normal, exits.cdr());
-  return %(if ${ad_code_is(ad_exit_code(x))}
-              (block @{ad_exit_pruned(x)}) $chain);
-}
-
-$comptime()
 List ad_dispatch(List normal, List exits) {
-  return ad_dispatch_from(normal, exits);
+  List chain = %(block @normal);
+  foreach (List x, exits.reverse())
+    chain = %(if ${ad_code_is(ad_exit_code(x))}
+                 (block @{ad_exit_pruned(x)}) $chain);
+  return chain;
 }
 
 $comptime()
@@ -837,14 +827,6 @@ $comptime()
 List ad_countdown(Var n, List dispatch) {
   return %(while (expr () (op > ${ad_id(n)} ${ad_int("0")}))
                  (block @dispatch));
-}
-
-$comptime()
-List ad_items_of(List body) {
-  match (body) {
-    case %(block *items): return %(@items);
-  }
-  return %($body);
 }
 
 /* `continue` also runs the step, so its pruned reverse begins with the
