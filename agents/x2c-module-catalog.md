@@ -275,16 +275,17 @@ Public functions:
 `Compiler.keyword_form_is_definition`, `Compiler.skip_macro_invocation`,
 `Compiler.macro_invocation_needs_shallow_expansion`,
 `Compiler.macro_starts_target_at`, `Compiler.parse_macro_lisp_top_level`,
-`Compiler.evaluate_declaration_effect`, `Compiler.parse_macro_lisp_shallow`,
-`Compiler.lift_macro_lisp_expression`, `Compiler.parse_macro_lisp_expression`,
-`Compiler.evaluate_declaration_recipe`, `Compiler.evaluate_macro_slot`,
-`Compiler.evaluate_macro_rows`, `Compiler.macro_introduced_name`,
-`Compiler.peek_macro_hole`, `Compiler.macro_lisp_starts_declaration`,
-`Compiler.try_parse_macro_slot`, `Compiler.parse_macro_definition`,
-`Compiler.publish_macro_definition_node`, `Compiler.parse_keyword_definition`,
-`Compiler.macro_targets_unit`, `Compiler.skip_named_type_declaration`,
-`Compiler.macro_invocation_site`, `Compiler.expand_macro_invocation_node`,
-`Compiler.try_parse_macro_expression`, `Compiler.try_parse_macro_target_at`
+`Compiler.evaluate_declaration_effect`, `Compiler.install_meta_function`,
+`Compiler.parse_macro_lisp_shallow`, `Compiler.lift_macro_lisp_expression`,
+`Compiler.parse_macro_lisp_expression`, `Compiler.evaluate_declaration_recipe`,
+`Compiler.evaluate_macro_slot`, `Compiler.evaluate_macro_rows`,
+`Compiler.macro_introduced_name`, `Compiler.peek_macro_hole`,
+`Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_slot`,
+`Compiler.parse_macro_definition`, `Compiler.publish_macro_definition_node`,
+`Compiler.parse_keyword_definition`, `Compiler.macro_targets_unit`,
+`Compiler.skip_named_type_declaration`, `Compiler.macro_invocation_site`,
+`Compiler.expand_macro_invocation_node`, `Compiler.try_parse_macro_expression`,
+`Compiler.try_parse_macro_target_at`
 
 ### [src/main.x](../src/main.x)
 
@@ -311,10 +312,10 @@ Public functions:
 `Compiler.parse_declaration_row`, `Compiler.finish_managed_declaration`,
 `Compiler.parse_declaration_argument`, `Compiler.parse_function_definition`,
 `Compiler.parse_function_target`, `Compiler.parse_import_declaration`,
-`Compiler.defines_main`, `Compiler.script_statement_starts`,
-`Compiler.script_statement_executes`, `Compiler.skip_linkage_brace`,
-`Compiler.parse_top_level`, `Compiler.finish_foreign_alias`,
-`Compiler.bind_syntax`
+`Compiler.defines_main`, `Compiler.meta_form_is_definition`,
+`Compiler.script_statement_starts`, `Compiler.script_statement_executes`,
+`Compiler.skip_linkage_brace`, `Compiler.parse_top_level`,
+`Compiler.finish_foreign_alias`, `Compiler.bind_syntax`
 
 ### [src/project.x](../src/project.x)
 

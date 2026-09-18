@@ -17,6 +17,7 @@ X2c recursive-descent parser core.
 | [`Compiler.defines_main`](#Compiler.defines_main) | Reports whether the unit's tokens define a function named `main` at file scope. |
 | [`Compiler.finish_foreign_alias`](#Compiler.finish_foreign_alias) | Constructs a foreign alias from one direct function declaration and target. |
 | [`Compiler.finish_managed_declaration`](#Compiler.finish_managed_declaration) | Lowers managed block declarations to declaration/defer pairs in source order, preserving their installed bindings and the enclosing lifetime. |
+| [`Compiler.meta_form_is_definition`](#Compiler.meta_form_is_definition) | Reports whether the current tokens begin a `meta` function declaration. |
 | [`Compiler.package_alias_spelling`](#Compiler.package_alias_spelling) | Returns the folded package-member spelling at the current token, or NULL. |
 | [`Compiler.parse_basic_identifier`](#Compiler.parse_basic_identifier) | Consumes one `ident` token and returns its spelling as a one-item `List`. |
 | [`Compiler.parse_complex_identifier`](#Compiler.parse_complex_identifier) | Parses the current identifier or dotted owner/member as a one-item name. |
@@ -56,7 +57,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:1996`
+Source: `src/parse.x:2038`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -89,7 +90,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:1930`
+Source: `src/parse.x:1972`
 
 <a id="Compiler.finish_managed_declaration"></a>
 #### Compiler.finish_managed_declaration
@@ -100,6 +101,19 @@ Lowers managed block declarations to declaration/defer pairs in source
 order, preserving their installed bindings and the enclosing lifetime.
 
 Source: `src/parse.x:1325`
+
+<a id="Compiler.meta_form_is_definition"></a>
+#### Compiler.meta_form_is_definition
+
+`int Compiler.meta_form_is_definition(Compiler c)`
+
+Reports whether the current tokens begin a `meta` function declaration.
+`meta` is contextual: it marks a function the compiler runs at compile
+time as well as emits, and stays an ordinary identifier wherever the
+tokens after it do not declare or define a function. This query does not
+consume tokens.
+
+Source: `src/parse.x:1639`
 
 <a id="Compiler.package_alias_spelling"></a>
 #### Compiler.package_alias_spelling
@@ -304,7 +318,7 @@ Returns its AST, or NULL when a keyword definition, top-level Lisp form,
 or linkage brace only updates compiler state, with the first following
 token current.
 
-Source: `src/parse.x:1682`
+Source: `src/parse.x:1714`
 
 <a id="Compiler.parse_type_name"></a>
 #### Compiler.parse_type_name
@@ -325,7 +339,7 @@ Reports whether the top-level item at the cursor is a script statement
 that runs, rather than a declaration: an expression, control flow, a
 `with` block, or a statement macro. This query does not consume tokens.
 
-Source: `src/parse.x:1641`
+Source: `src/parse.x:1673`
 
 <a id="Compiler.script_statement_starts"></a>
 #### Compiler.script_statement_starts
@@ -339,7 +353,7 @@ Lisp, file-scope macro invocations, `typedef`, `static`, and `extern`
 declarations, linkage braces, type definitions, and function prototypes
 and definitions stay at file scope. This query does not consume tokens.
 
-Source: `src/parse.x:1623`
+Source: `src/parse.x:1655`
 
 <a id="Compiler.skip_linkage_brace"></a>
 #### Compiler.skip_linkage_brace
@@ -353,7 +367,7 @@ its own braces. The declarations between them stay at file scope. The
 `#ifdef __cplusplus` arm of the usual header guard is skipped, so only an
 unguarded group reaches this operation.
 
-Source: `src/parse.x:1652`
+Source: `src/parse.x:1684`
 
 <a id="Compiler.test_declaration"></a>
 #### Compiler.test_declaration
