@@ -451,14 +451,18 @@ autodiff win is real but specific: it comes from the generated Lisp being
 better than the hand-written Lisp there - `match` compiled once instead of
 `match-case` re-expanded per call - not from x2c being faster than Lisp.
 
-Installing costs about 0.45 ms per meta function per importing unit, and
-about 2.5 ms when the function contains a loop, because each loop becomes its
-own lowered global. A Lisp `defun` costs about 0.02 ms.
+**The declaration cost was more than halved on 2026-09-18**, and the number
+above is superseded. The cost was never the install: it was parsing each
+definition and lowering it again in every importing unit, in both of that
+unit's passes. `src/comptime.x` now keeps the lowered forms for the process,
+so a file's function lowers once however many units import it.
+`plans/meta-functions.md` records the split, what makes the forms safe to
+share, and the measurements.
 
-**Corrected 2026-09-18.** An earlier version of this section put the importer
-counts at 32 and 9. Both were wrong by about eight times: the grep behind them
-counted copies under `unittest/build/`, which are build artifacts, and a file's
-own comment. Excluding those, the real counts are:
+**Corrected twice, 2026-09-18.** An earlier version of this section put the
+importer counts at 32 and 9. Both were wrong by about eight times: the grep
+behind them counted copies under `unittest/build/`, which are build artifacts,
+and a file's own comment. The real counts are:
 
 | library | importers |
 | --- | --- |
@@ -466,39 +470,41 @@ own comment. Excluding those, the real counts are:
 | `lib/varops.xlisp` | 1 - `lib/varops.x` |
 | `lib/system-macros.xmacro` | 1 - `unittest/test-system-macros.x` |
 
-So the per-unit install cost barely applies. The measured cost of the
-`dedent` port is **+11 ms on the one unit that imports it**, not the ~90 ms
-the nine-importer model implied, and `var-tags` would be roughly 120 ms rather
-than 630 ms. Phase 5 is a small regression, not a large one, and a per-process
-lowering cache would remove most of what remains.
+And the per-declaration cost is now 0.31 ms, down from 0.56 ms, after the
+process-wide lowering cache in `plans/meta-functions.md`. A Lisp `defun` costs
+0.04 ms.
 
-### Two defects the first port found, both reproduced
+Together those two corrections change the conclusion. Applied to the
+candidates:
 
-**`foreach` does not work inside a `.xmacro`.** A `meta` function in a macro
-import that iterates a `List` or `Array` reports `type ("List") is not
-iterable / declare an Iter protocol adoption`; the identical body in a `.x`
-unit lowers and runs. The import's child compiler is not seeing the `Iter`
-protocol adoptions, so this is the same class as the literal cache and
-`protocol_helpers` that M2 had to share through
-`Compiler.borrow_unit_semantics`. It matters out of proportion to its size:
-`foreach` is the iteration idiom, and without it the `dedent` port had to
-spell "strip the prefix from each line" as a `replace` over the whole text,
-which is the one function in that port that came out worse than its Lisp.
-Fix this before porting anything else.
+- `lib/var-tags.xmacro`: 44 functions over 4 importers, about **55 ms**, not
+  the 630 ms the wrong counts implied.
+- `lib/system-macros.xlisp`: measured at **+11 ms** on the one unit that
+  imports it.
 
-**A `meta` function aborts the compiler instead of declining.** Reproduced:
+Phase 5 costs tens of milliseconds, not hundreds. That is small enough that
+readability decides it, which is what the phase was always for. The
+autodiff-shaped win needs a body whose Lisp was doing something expensive and
+neither candidate has that shape, so do not expect a speedup - expect a wash.
 
-```x2c
-meta static String joined(String a, String b) {
-  Array out = [a, b];
-  return "/".join(out);
-}
-```
+### Two defects the first port found
 
-gives `x2c error floor: <bad-types>: error detail contains an identity-bearing
-value` and no diagnostic. `List out = [a, b];` is fine and the same call works
-at run time. An error floor is the worst failure this branch has produced -
-every other defect at least answered something.
+**`foreach` inside a `.xmacro`: fixed.** A `meta` function in a macro import
+that iterated a `List` or `Array` reported `type ("List") is not iterable`,
+while the identical body in a `.x` unit ran. The cause was not a missing
+shared field: `_shallow_parse_loop` opens with `rebuild_protocols(NULL)` and
+an empty `conforms` because collection parses no bodies - except a `meta`
+definition in an import, which is the one body it does parse. The import now
+installs the protocols visible to it on first use. `List`, `Array` and `Map`
+all iterate. A `Var` collection still declines, because its expansion needs
+`Var_iter` and `Iter`, neither of which has a compile-time representation;
+write the concrete type.
+
+That fix matters out of proportion to its size, because `foreach` is the
+iteration idiom and without it the `dedent` port had to spell "strip the
+prefix from each line" as a `replace` over the whole text - the one function
+in that port that came out worse than its Lisp. It should be rewritten as a
+loop now.
 
 ### Original scope, for when it is unblocked
 

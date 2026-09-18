@@ -32,7 +32,7 @@
    loop or `switch` gave, or nothing outside one. */
 typedef struct Lowering {
   Compiler compiler;
-  Map env, locals, cells, arrays;
+  Map env, locals, cells, arrays, callees;
   Array definitions;
   String own;
   List on_break, on_continue;
@@ -49,6 +49,10 @@ static String lower_missing_callee;
    no unit initializer writes, so the two forms of such a function answer
    differently and a call to it cannot be folded. */
 static int lower_reached_globals;
+
+/* The callee names the last successful lowering resolved through the macro
+   session, which is the only unit-dependent input it had. */
+static List lower_session_callees;
 
 /* --- names ------------------------------------------------------------- */
 
@@ -143,7 +147,9 @@ static void _lower_scan_targets(Lowering l, List targets) {
 static int _lower_known(Lowering l, String name) {
   Var value;
   if (l.own && l.own.equal(name)) return 1;
-  return l.compiler.macro_lisp.try_get(name, &value);
+  if (!l.compiler.macro_lisp.try_get(name, &value)) return 0;
+  l.callees[name] = 1;
+  return 1;
 }
 
 /* A callee this pass already installed carries its own reach to file-scope
@@ -1476,9 +1482,9 @@ static Var _lower_block(Lowering l, List items, List k) {
 List Compiler.lower_comptime(Compiler compiler, List fn) {
   struct Lowering state = {
     .compiler = compiler, .env = {}, .locals = {}, .cells = {},
-    .arrays = {}, .definitions = [], .declined = 0, .own = NULL,
-    .on_break = NULL, .on_continue = NULL, .on_loop = 0, .in_loop = 0,
-    .rejected = 0, .uncallable = 0, .globals = 0
+    .arrays = {}, .callees = {}, .definitions = [], .declined = 0,
+    .own = NULL, .on_break = NULL, .on_continue = NULL, .on_loop = 0,
+    .in_loop = 0, .rejected = 0, .uncallable = 0, .globals = 0
   };
   Lowering l = &state;
   lower_reached_globals = 1;
@@ -1487,6 +1493,7 @@ List Compiler.lower_comptime(Compiler compiler, List fn) {
                             ((fnmod (params *params)))) (block *items)): {
       (void) spec;
       lower_declined_reason = NULL;
+      lower_session_callees = NULL;
       l.own = name;
       _lower_scan(l, fn);
       _lower_scan(l, fn);
@@ -1519,6 +1526,7 @@ List Compiler.lower_comptime(Compiler compiler, List fn) {
       l.definitions.push(
         %(def ${Atom.intern(name)} (lambda ${slots.list()} $body)));
       lower_reached_globals = l.globals;
+      lower_session_callees = l.callees.keys();
       return l.definitions.list_free();
     }
   }
@@ -1532,19 +1540,87 @@ String Compiler.lower_declined(Compiler compiler) {
   return lower_declined_reason;
 }
 
+/* --- the process lowering cache ----------------------------------------- */
+
+/* A unit's collection pass and its full parse each read the same source, and
+   one process translates many units, so a `meta` function in an imported
+   `.xmacro` lowers once per pass per importing unit. The lowering reads the
+   definition's syntax, the literal values behind its `(cache id)` nodes, and
+   which callee names the macro session binds, so the forms it produces are
+   the same wherever that file is read. They are kept for the process and
+   evaluated again in each unit, because a Lisp session belongs to one unit.
+
+   Process cache: "path#name" -> `(forms callees)`. Entries outlive the
+   per-unit `Context`, so a retained entry belongs to `lowered_scope` and to
+   the outermost value pools. */
+static Map lowered_defs = NULL, static Scope lowered_scope = NULL;
+
+static void _lowered_shutdown(void) {
+  lowered_scope.destroy();
+  lowered_scope = NULL;
+  lowered_defs = NULL;
+}
+
+static Map _lowered_defs(void) {
+  if ((void *) lowered_defs != NULL) return lowered_defs;
+  Scope.push(&lowered_scope);
+  Scope.shutdown_hook(_lowered_shutdown);
+  lowered_defs = {};
+  Scope.pop();
+  return lowered_defs;
+}
+
+/* A wide numeric leaf, which a literal too large for an `int` produces, owns
+   a box in the unit's `Scope` that promotion to the value pools does not
+   reach. Such a lowering is not retained and is repeated in the next unit. */
+static int _lowered_portable(Var form) {
+  if (form.is_wide()) return 0;
+  if (form is not <list>) return 1;
+  for (List cur = form; cur; cur = cur.cdr())
+    if (!_lowered_portable(cur.car())) return 0;
+  return 1;
+}
+
+/* The session names the lowering resolved are its only unit-dependent input,
+   so a unit whose session lacks one lowers again and reports the refusal its
+   author would have seen without the cache. */
+static int _lowered_callable(Compiler compiler, List callees) {
+  Var value;
+  foreach (String name, callees)
+    if (!compiler.macro_lisp.try_get(name, &value)) return 0;
+  return 1;
+}
+
+static void _retain_lowering(String key, List forms, List callees) {
+  List entry = %($forms $callees);
+  if (!_lowered_portable(entry) || !key.try_own() || !entry.try_own()) return;
+  _lowered_defs()[key] = entry;
+}
+
 /** Lowers `fn` and evaluates the result in the macro session, so the
     function is callable from compile-time Lisp under its own name.
     Returns whether the lowering succeeded. This method mutates the macro
     session and does not open a semantic transaction.
 */
 int Compiler.install_comptime(Compiler compiler, List fn) {
+  String key = NULL;
   /* A recursive call resolves against the name before the body is lowered,
      the way a C prototype lets a function call itself. */
   match (fn)
-    case %(function ? (bind (binding ? ?(String name)) ?) ?):
+    case %(function ? (bind (binding ? ?(String name)) ?) ?): {
       compiler.macro_lisp.eval(%(def ${Atom.intern(name)} (lambda () 0)));
+      if (compiler.filename) key = %"${compiler.filename}#$name";
+    }
+  if (key)
+    match (_lowered_defs()[key])
+      case %(?(List forms) ?(List callees)):
+        if (_lowered_callable(compiler, callees)) {
+          foreach (Var form, forms) compiler.macro_lisp.eval(form);
+          return 1;
+        }
   List forms = compiler.lower_comptime(fn);
   if (!forms) return 0;
+  if (key) _retain_lowering(key, forms, lower_session_callees);
   foreach (Var form, forms) compiler.macro_lisp.eval(form);
   return 1;
 }

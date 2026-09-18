@@ -136,6 +136,9 @@ typedef struct Compiler {
      shared with an import's compiler, which installs into the same session. */
   Map meta_folds, meta_impure;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
+  /* A macro import whose protocol registries are installed on first use;
+     `Compiler.protocol_members_for` owns the installation. */
+  int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;
   int builtin_defs, in_proto, macro_count, recovery_depth;
   int declaration_projection, declaration_produced;
