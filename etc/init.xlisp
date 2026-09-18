@@ -202,9 +202,10 @@
 
 // A binder is a symbol spelled '?name' or '*name', which is the same rule
 // the reader and the matcher use. A bare '?' or '*' is a wildcard and
-// names nothing.
+// names nothing. A spelling past ten characters does not fit a compact
+// Symbol and reads as an 'lsym', which the matcher binds like any other.
 (defun binder? (value)
-  (and (symbol? value)
+  (and (or (symbol? value) (eq? (type value) 'lsym))
        (member (substring (str value) 0 1) '("?" "*"))
        (> (string-length (str value)) 1)))
 
