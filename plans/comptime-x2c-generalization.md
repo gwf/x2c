@@ -262,6 +262,53 @@ macro expander, and what would have to hold for that to be safe. The answer
 may be that this file stays Lisp; that is an acceptable outcome and should be
 recorded rather than worked around.
 
+## Handoff
+
+The branch is self-contained. Verified on 2026-09-18 by forking `d553a2f3`
+into a clean worktree with nothing from `.context/`: `make build-safe`
+succeeded, `make verify-fixtures` passed 719 fixtures, and
+`comptime-autodiff` derived its five siblings in 753 ms with every derivative
+matching. A fork needs no files that this branch does not carry.
+
+`x2c-lowers-to-lisp` has no upstream. A local worktree off this repository
+works as is; anything off this machine needs the branch pushed first.
+
+Give each agent one phase. Phase 1 goes first because 5 and 6 depend on it.
+Phases 2, 3 and 4 can run beside it and beside each other; 5, 6 and 7 wait,
+except that 7 is investigation and can start any time. Each agent gets the
+same brief:
+
+> You are working on branch `x2c-lowers-to-lisp` in the x2c repository. Read
+> `AGENTS.md`, then `plans/comptime-x2c-generalization.md`, then
+> `plans/x2c-lowers-to-lisp.md` for the design record. Implement **Phase N**
+> and only Phase N.
+>
+> The pass is `src/comptime.x` and its runtime is `etc/comptime.xlisp`. A
+> `Unit` decorator captures the pre-transform AST, so design against
+> `--dump-ast` from a decorator, never against `--dump-transforms`.
+>
+> Your evidence goes in `unittest/compiler-fixtures/comptime-lowering.x`: add
+> one `$comptime()` function per construct you land, call it from `main` in
+> expression position, and regenerate `comptime-lowering.stdout` by running
+> the built program. Run `make verify-fixtures` before you finish. Never run
+> `make verify-fixtures-update` to make a failure go away; it rewrites the
+> expectations you are supposed to be checking.
+>
+> Work on a branch off `x2c-lowers-to-lisp` and merge back into it. Nothing
+> reaches `main`; Gary has not given that green light. Do not edit a function
+> another phase owns without saying so.
+>
+> Report what you landed, what you verified, and anything you declined and
+> why.
+
+Two traps have already cost time on this branch and are worth repeating to
+whoever takes Phases 1 and 2. `*` is a sequence binder in a match pattern, so
+`%(op * ?operand)` matches every `op` form; match a unary operator by arity
+and then compare the operator symbol. And a decline is always better than a
+silent wrong answer: both defects found here — a pattern that never fired and
+a discarded operand whose call never ran — produced plausible output rather
+than an error.
+
 ## Validation
 
 Focused per phase: `make build`, that phase's fixture entries, and the whole
