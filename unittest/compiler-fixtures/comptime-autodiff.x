@@ -164,77 +164,54 @@ List ad_minus_one(List e) { return ad_sub(ad_lit("1.0"), e); }
 
 $comptime()
 List ad_sum_squares(List a) {
-  return ad_add(ad_square(a.car()), ad_square(a.cdr().car()));
+  return ad_add(ad_square(a[0]), ad_square(a[1]));
 }
 
 /* One partial per argument, indexed from zero, over the unbound argument
-   list. An unknown name or index gives nil. */
+   list. The table holds every primitive's derivative; an argument the
+   primitive does not have reads as nil, and an unknown name gives nil. */
 $comptime()
 List ad_partial(String name, int i, List a) {
-  List x = a.car();
-  if (name.equal("sin"))   return ad_call("cos", a);
-  if (name.equal("cos"))   return ad_neg(ad_call("sin", a));
-  if (name.equal("tan"))   return ad_recip(ad_square(ad_call("cos", a)));
-  if (name.equal("asin"))
-    return ad_recip(ad_call1("sqrt", ad_minus_one(ad_square(x))));
-  if (name.equal("acos"))
-    return ad_neg(ad_recip(ad_call1("sqrt", ad_minus_one(ad_square(x)))));
-  if (name.equal("atan"))  return ad_recip(ad_plus_one(ad_square(x)));
-  if (name.equal("atan2")) {
-    if (i == 0) return ad_div(a.cdr().car(), ad_sum_squares(a));
-    return ad_neg(ad_div(x, ad_sum_squares(a)));
-  }
-  if (name.equal("sinh"))  return ad_call("cosh", a);
-  if (name.equal("cosh"))  return ad_call("sinh", a);
-  if (name.equal("tanh"))  return ad_minus_one(ad_square(ad_call("tanh", a)));
-  if (name.equal("asinh"))
-    return ad_recip(ad_call1("sqrt", ad_plus_one(ad_square(x))));
-  if (name.equal("acosh"))
-    return ad_recip(
-      ad_call1("sqrt", ad_sub(ad_square(x), ad_lit("1.0"))));
-  if (name.equal("atanh")) return ad_recip(ad_minus_one(ad_square(x)));
-  if (name.equal("exp"))   return ad_call("exp", a);
-  if (name.equal("exp2"))
-    return ad_mul(ad_call("exp2", a), ad_lit("0.6931471805599453"));
-  if (name.equal("expm1")) return ad_call("exp", a);
-  if (name.equal("log"))   return ad_recip(x);
-  if (name.equal("log2"))
-    return ad_recip(ad_mul(x, ad_lit("0.6931471805599453")));
-  if (name.equal("log10"))
-    return ad_recip(ad_mul(x, ad_lit("2.302585092994046")));
-  if (name.equal("log1p")) return ad_recip(ad_plus_one(x));
-  if (name.equal("sqrt"))
-    return ad_div(ad_lit("0.5"), ad_call("sqrt", a));
-  if (name.equal("cbrt"))
-    return ad_recip(ad_mul(ad_lit("3.0"), ad_square(ad_call("cbrt", a))));
-  if (name.equal("hypot")) {
-    if (i == 0) return ad_div(x, ad_call("hypot", a));
-    return ad_div(a.cdr().car(), ad_call("hypot", a));
-  }
-  if (name.equal("fabs"))
-    return ad_select(ad_less(x, ad_lit("0.0")),
-                     ad_lit("-1.0"), ad_lit("1.0"));
-  if (name.equal("fmin")) {
-    if (i == 0)
-      return ad_select(ad_less_eq(x, a.cdr().car()),
-                       ad_lit("1.0"), ad_lit("0.0"));
-    return ad_select(ad_less(a.cdr().car(), x),
-                     ad_lit("1.0"), ad_lit("0.0"));
-  }
-  if (name.equal("fmax")) {
-    if (i == 0)
-      return ad_select(ad_less_eq(a.cdr().car(), x),
-                       ad_lit("1.0"), ad_lit("0.0"));
-    return ad_select(ad_less(x, a.cdr().car()),
-                     ad_lit("1.0"), ad_lit("0.0"));
-  }
-  if (name.equal("pow")) {
-    List n = a.cdr().car();
-    if (i == 0)
-      return ad_mul(n, ad_call("pow", %($x ${ad_sub(n, ad_lit("1.0"))})));
-    return ad_mul(ad_call("pow", a), ad_call1("log", x));
-  }
-  return %();
+  List x = a[0];
+  List y = a[1];
+  Map table = {
+    "sin":   ad_call("cos", a),
+    "cos":   ad_neg(ad_call("sin", a)),
+    "tan":   ad_recip(ad_square(ad_call("cos", a))),
+    "asin":  ad_recip(ad_call1("sqrt", ad_minus_one(ad_square(x)))),
+    "acos":  ad_neg(ad_recip(ad_call1("sqrt", ad_minus_one(ad_square(x))))),
+    "atan":  ad_recip(ad_plus_one(ad_square(x))),
+    "atan2": i == 0 ? ad_div(y, ad_sum_squares(a))
+                    : ad_neg(ad_div(x, ad_sum_squares(a))),
+    "sinh":  ad_call("cosh", a),
+    "cosh":  ad_call("sinh", a),
+    "tanh":  ad_minus_one(ad_square(ad_call("tanh", a))),
+    "asinh": ad_recip(ad_call1("sqrt", ad_plus_one(ad_square(x)))),
+    "acosh": ad_recip(ad_call1("sqrt", ad_sub(ad_square(x), ad_lit("1.0")))),
+    "atanh": ad_recip(ad_minus_one(ad_square(x))),
+    "exp":   ad_call("exp", a),
+    "exp2":  ad_mul(ad_call("exp2", a), ad_lit("0.6931471805599453")),
+    "expm1": ad_call("exp", a),
+    "log":   ad_recip(x),
+    "log2":  ad_recip(ad_mul(x, ad_lit("0.6931471805599453"))),
+    "log10": ad_recip(ad_mul(x, ad_lit("2.302585092994046"))),
+    "log1p": ad_recip(ad_plus_one(x)),
+    "sqrt":  ad_div(ad_lit("0.5"), ad_call("sqrt", a)),
+    "cbrt":  ad_recip(ad_mul(ad_lit("3.0"), ad_square(ad_call("cbrt", a)))),
+    "hypot": ad_div(i == 0 ? x : y, ad_call("hypot", a)),
+    "fabs":  ad_select(ad_less(x, ad_lit("0.0")),
+                       ad_lit("-1.0"), ad_lit("1.0")),
+    "fmin":  i == 0
+               ? ad_select(ad_less_eq(x, y), ad_lit("1.0"), ad_lit("0.0"))
+               : ad_select(ad_less(y, x), ad_lit("1.0"), ad_lit("0.0")),
+    "fmax":  i == 0
+               ? ad_select(ad_less_eq(y, x), ad_lit("1.0"), ad_lit("0.0"))
+               : ad_select(ad_less(x, y), ad_lit("1.0"), ad_lit("0.0")),
+    "pow":   i == 0
+               ? ad_mul(y, ad_call("pow", %($x ${ad_sub(y, ad_lit("1.0"))})))
+               : ad_mul(ad_call("pow", a), ad_call1("log", x)),
+  };
+  return table[name];
 }
 
 /* The chain rule over a primitive's arguments. */
