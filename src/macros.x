@@ -1319,20 +1319,30 @@ void Compiler.evaluate_declaration_effect(
     `$comptime()` decorator reports, sited on the marker the developer wrote.
     The caller still emits the function, which is what the decorator does.
     A function whose two forms agree is recorded as foldable, so a call with
-    constant arguments can be answered from the compile-time form; one that
-    reaches file-scope state is recorded as impure instead, which also makes
-    every later `meta` function that calls it impure. One that reaches a
-    `Meta` operation has no runtime form at all, which the caller reads to
-    emit nothing for it, and which spreads the same way.
+    constant arguments can be answered from the compile-time form. One that
+    reaches a `Meta` operation has no runtime form at all, which the caller
+    reads to emit nothing for it, and which spreads to its callers.
+
+    One that reaches file-scope state is refused. `meta` is the word for a
+    function with two forms that agree, and these two cannot: the
+    compile-time form reads the Lisp session's own table, which no unit
+    initializer writes, while the emitted function reads the program's
+    variable. Folding already declined on that, but a macro calling the same
+    function took the session's answer with nothing said. The `$comptime()`
+    decorator, which promises one form, keeps the state.
 */
 void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
   if (!c.collect_protocols) c.run_declaration_effects();
   _ensure_lisp(c);
   if (c.install_comptime(fn)) {
+    if (c.lower_reached_globals() && !c.lower_reached_meta())
+      c.report_error(
+        <macro>, "a meta function cannot reach file-scope state", marker,
+        %("reason: the compile-time form reads a table no unit initializer"
+          "writes, so the two forms answer differently"));
     match (fn)
       case %(function ? (bind (binding ?(int id) ?(String name)) *) ?):
         if (c.lower_reached_meta()) c.meta_comptime[name] = 1;
-        else if (c.lower_reached_globals()) c.meta_impure[name] = 1;
         else c.meta_folds[id] = 1;
     return;
   }

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/comptime-declines-meta-globals.x:17:1: macro: a meta function cannot reach file-scope state
+  meta static int dg_offset(int x) => x + dg_base;
+  ^^^^
+  note: reason: the compile-time form reads a table no unit initializer writes, so the two forms answer differently
+

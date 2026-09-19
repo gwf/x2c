@@ -16,11 +16,7 @@ static int mf_width(String text, List extra);
 
 static String mf_label(int n);
 
-int mf_base = 10;
-
-static int mf_offset(int x);
-
-static int mf_shifted(int x);
+static short mf_narrow(int n);
 
 Var Symbol_var(Symbol);
 
@@ -58,12 +54,8 @@ static String mf_label(int n){
   return String_join(NULL, cons(String_var(_0), cons(String_var(int_str(n)), NULL)));
 }
 
-static int mf_offset(int x){
-  return x + mf_base;
-}
-
-static int mf_shifted(int x){
-  return mf_offset(x) * 2;
+static short mf_narrow(int n){
+  return(short)(n * 30000);
 }
 
 int main(void){
@@ -74,8 +66,7 @@ int main(void){
   printf("poly    %d %d\n", 71, mf_poly(seven));
   printf("width   %d %d\n", 6, mf_width(text, _4));
   printf("label   %s\n", mf_label(4));
-  printf("offset  %d %d\n", mf_offset(1), mf_offset(one));
-  printf("shifted %d %d\n", mf_shifted(1), mf_shifted(one));
+  printf("narrow  %d %d\n", mf_narrow(3), mf_narrow(one + 2));
   return 0;
 }
 

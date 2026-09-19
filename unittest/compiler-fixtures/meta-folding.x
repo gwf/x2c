@@ -24,14 +24,10 @@ meta static int mf_width(String text, List extra) =>
    change what the program is allowed to do with the answer. */
 meta static String mf_label(int n) => %"row-$n";
 
-/* File-scope state is a disagreement the compiler can see. The compile-time
-   form reads its own table, which no unit initializer writes, so `mf_offset`
-   answers 1 during translation and 11 at run time. Its call stays a call,
-   and so does a call to `mf_shifted`, which reaches the same state through
-   it. */
-int mf_base = 10;
-meta static int mf_offset(int x) => x + mf_base;
-meta static int mf_shifted(int x) => mf_offset(x) * 2;
+/* A narrow or unsigned result is left alone for the same reason: the
+   literal a fold would substitute is an `int`, and writing the conversion
+   out is not what an author wrote. The answers are equal either way. */
+meta static short mf_narrow(int n) => (short) (n * 30000);
 
 int main(void) {
   int seven = 7, one = 1;
@@ -39,7 +35,6 @@ int main(void) {
   printf("poly    %d %d\n", mf_poly(7), mf_poly(seven));
   printf("width   %d %d\n", mf_width("abcd", %(a b)), mf_width(text, %(a b)));
   printf("label   %s\n", mf_label(4));
-  printf("offset  %d %d\n", mf_offset(1), mf_offset(one));
-  printf("shifted %d %d\n", mf_shifted(1), mf_shifted(one));
+  printf("narrow  %d %d\n", mf_narrow(3), mf_narrow(one + 2));
   return 0;
 }

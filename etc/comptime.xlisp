@@ -6,11 +6,27 @@
 // its calls are direct. These are the few operations it still needs, plus
 // the library names its calls resolve against.
 
+// A value reaching a C scalar type carries that type's `Var` tag, so every
+// later operation applies the usual arithmetic conversions the way C does.
+// `Var.convert` is the conversion: integer narrowing keeps low bits,
+// floating to integer truncates toward zero, and an integer widens.
+(defun C.conv (v tag) (Var.convert v tag))
+
+// C compares after the usual arithmetic conversions, which `_binary`'s
+// arithmetic already performs, so the tag of a sum names the common type.
+// The lowering emits this only where the two operand types differ.
+(defun C.compare (a op b)
+  (let ((tag (Var.tag (_binary a '+ b))))
+    (_binary (C.conv a tag) op (C.conv b tag))))
+
 // x2c truth: nil is false, a number is false at zero, anything else true.
-// The lowering inlines the numeric case and calls this for the rest.
+// The zero reaches the value's own type first: `eq?` compares a `Var` by
+// identity, so a `double` zero is not the `int` zero it was tested against.
+(defun C.nonzero? (a) (not (eq? (C.compare a '!= 0) 0)))
+
 (defun C.true? (a)
   (cond ((null? a) nil)
-        ((number? a) (not (eq? a 0)))
+        ((number? a) (C.nonzero? a))
         (true true)))
 
 (defun C.not (a) (if (C.true? a) 0 1))
