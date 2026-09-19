@@ -2070,6 +2070,13 @@ List Compiler.fold_meta_call(
      compile-time form did not finish, and the developer wrote something the
      compiler cannot answer, so the call stays and the reason is reported. */
   try answer = c.macro_lisp.apply(callable, values);
+  catch %(call-stack * (why "steps") *): {
+    c.report_warning(
+      <macro>, %"'$name' was not answered at compile time", c.token,
+      %("reason: its compile-time form made too many calls and was stopped;"
+        "the call stays and runs at run time"));
+    return NULL;
+  }
   catch %(call-stack *): {
     c.report_warning(
       <macro>, %"'$name' was not answered at compile time", c.token,

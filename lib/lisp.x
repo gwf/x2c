@@ -137,6 +137,16 @@ void Lisp.retarget(void *storage, Var callable, const Var *values, int count) {
   _machine_env_set(frame, lambda, values, count, frame.parent);
 }
 
+/** Counts one call made by the running machine and reports whether the
+    evaluation in progress has made too many.
+*/
+int Lisp.step(void *storage) {
+  Lisp lisp = ((LispMachineContext) storage).lisp;
+  if (++lisp.call_steps <= LISP_CALL_STEP_MAX) return 0;
+  lisp.call_steps = 0;
+  return 1;
+}
+
 /** Renames the live slots of the current shared-machine frame.
     `params` names every slot the frame holds: the Lambda's parameters first,
     then the bindings a lowered binding scope opened, in slot order. `count`
@@ -304,6 +314,9 @@ struct Lisp {
   LispExpansion *expansion;
   int machine_depth;    // machine invocations in progress on this session
   int call_depth;       // evaluator calls nested on this session
+  long call_steps;      // calls made by the evaluation in progress, reset
+                        // at each public entry so a long translation is a
+                        // sequence of budgets rather than one
   int auto_disabled;    // benchmark/test forced-evaluator arm only
   int protect_x2c;      // compiler SDK installed; x2c.* cannot be redefined
 };
@@ -1296,6 +1309,10 @@ static void _bind_params(Lambda lambda, List args, Map bindings) {
 }
 
 static Var _call_lambda(Lisp lisp, Lambda lambda, List args, LispEnv *env) {
+  if (++lisp.call_steps > LISP_CALL_STEP_MAX) {
+    lisp.call_steps = 0;
+    raise %(call-stack (operation "apply") (why "steps"));
+  }
   if (++lisp.call_depth > LISP_CALL_DEPTH_MAX) {
     lisp.call_depth--;
     raise %(call-stack (operation "apply") (value ${lambda.body}));
@@ -1481,6 +1498,10 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv *env) {
    code far deeper than any that exists while ending a runaway in an error
    the compiler can report instead of a crash. */
 #define LISP_CALL_DEPTH_MAX 1024
+// Calls one compile-time evaluation may make before it is stopped. A loop
+// that never ends makes calls without nesting any, so the depth budget above
+// never sees it.
+#define LISP_CALL_STEP_MAX 40000000
 
 typedef struct LispLower {
   Lisp lisp;
@@ -1932,6 +1953,10 @@ static void _raise_machine_error(Var error) {
       raise %(not-call (actual ${value.kind()}));
     case %(bad-types (actual ?actual)):
       raise %(bad-types (operation "quasiquote-splice") (actual $actual));
+    /* The budgets raise the same cause from the machine as from the
+       evaluator, so a caller reads one shape wherever it was stopped. */
+    case %(call-stack (operation ?operation) (why ?why)):
+      raise %(call-stack (operation $operation) (why $why));
   }
   raise %(invariant (owner "Machine") (cause $error));
 }
@@ -2176,7 +2201,10 @@ static void _install_specials(Lisp lisp) {
     operation, or called-procedure cause.
 */
 $lisp.entry("Lisp.eval")
-Var Lisp.eval(Lisp lisp, Var expression) => _eval(lisp, expression, NULL);
+Var Lisp.eval(Lisp lisp, Var expression) {
+  lisp.call_steps = 0;
+  return _eval(lisp, expression, NULL);
+}
 
 /** Applies `callable` to already evaluated `values`.
     Macros and evaluator special forms other than the built-in `apply` are not
@@ -2191,8 +2219,10 @@ Var Lisp.eval(Lisp lisp, Var expression) => _eval(lisp, expression, NULL);
     boundary, or a cause raised by the called procedure.
 */
 $lisp.entry("Lisp.apply")
-Var Lisp.apply(Lisp lisp, Var callable, List values) =>
-  _apply_values(lisp, callable, values, NULL);
+Var Lisp.apply(Lisp lisp, Var callable, List values) {
+  lisp.call_steps = 0;
+  return _apply_values(lisp, callable, values, NULL);
+}
 
 /** Reads and evaluates every form in `source`.
     Forms run in source order and the return value is the last result, or Lisp
@@ -2204,6 +2234,7 @@ Var Lisp.apply(Lisp lisp, Var callable, List values) =>
 $lisp.entry("Lisp.eval_string")
 Var Lisp.eval_string(Lisp lisp, String source) {
   if (!source) return %();
+  lisp.call_steps = 0;
   Scope tokens_scope = $auto(Scope.new_named("Lisp tokens"));
   Tokenizer tokenizer = _scan_lisp_tokens(source, &tokens_scope);
   unsigned cursor = 0;

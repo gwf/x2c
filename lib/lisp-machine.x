@@ -130,6 +130,11 @@ static void LispMachine._load(LispMachine m, const MachineWord *w) {
    room. Otherwise it crosses to the recursive evaluator; native Func values
    cross through Func.apply. A crossing can raise before stack cleanup. */
 static void LispMachine._call(LispMachine m, int argc) {
+  if (Lisp.step(m.lisp_context)) {
+    Symbol code = <call-stack>;
+    m._error_value(%($code (operation "apply") (why "steps")));
+    return;
+  }
   int callable_at = m.value_count - argc - 1;
   if (argc < 0 || callable_at < m.operand_base) {
     m._error(<call-stack>);
@@ -205,6 +210,11 @@ static void LispMachine._call(LispMachine m, int argc) {
    A callee that is not prepared, whose arity does not match, or whose slots
    do not fit the room this frame reserved goes through `_call` instead. */
 static void LispMachine._tail_call(LispMachine m, int argc) {
+  if (Lisp.step(m.lisp_context)) {
+    Symbol code = <call-stack>;
+    m._error_value(%($code (operation "apply") (why "steps")));
+    return;
+  }
   int callable_at = m.value_count - argc - 1;
   if (argc < 0 || callable_at < m.operand_base) {
     m._error(<call-stack>);
