@@ -57,6 +57,7 @@ typedef struct Compiler{
   Map proto_cache;
   Map adoptions;
   Map macro_holes;
+  int source_syntax;
   Map local_macro_captures;
   List lambda_scopes;
   Array match_types;
@@ -135,6 +136,8 @@ void Compiler_record_source_declaration(Compiler c, List binding, Token first, T
 void Compiler_record_source_reference(Compiler c, List binding, Type type, Token first, Token after);
 
 Map Compiler_semantic_binding_facts(Compiler c);
+
+int Compiler_parsing_source_syntax(Compiler c);
 
 Map Compiler_macro_definition_locals(Compiler compiler);
 

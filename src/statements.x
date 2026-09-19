@@ -162,6 +162,7 @@ static List _defer_statement(Compiler c) {
 */
 List Compiler.finish_return_statement(Compiler compiler, List expression) {
   if (!expression) return %(return);
+  if (compiler.parsing_source_syntax()) return %(return $expression);
   List resolved = compiler.resolve_expression(expression, compiler.token);
   compiler.check_explicit_converter(resolved, compiler.return_type, 0);
   return %(return ${compiler.return_type} $resolved);
@@ -221,6 +222,7 @@ static List _default_statement(Compiler compiler) {
    the diagnostics name. */
 static void _define_pattern_binders(
   Compiler compiler, List pattern, Token start, String role) {
+  if (compiler.parsing_source_syntax()) return;
   List possible = NULL;
   List definite = compiler.match_pattern_binders(pattern, &possible);
   foreach (Var binder, possible) {
@@ -311,8 +313,9 @@ static List _match_case(Compiler c) {
         types = captures;
       }
     }
-    if (types) pattern = c.typed_match_pattern(pattern, types);
-    match (pattern)
+    if (types && !c.parsing_source_syntax())
+      pattern = c.typed_match_pattern(pattern, types);
+    if (!c.parsing_source_syntax()) match (pattern)
       case %(!not (expr ("List") *)):
         c.report_error(
           <parse>, "match case pattern must be a %() list literal",
@@ -320,6 +323,12 @@ static List _match_case(Compiler c) {
   }
   else if (peek == <default>)  pattern = %(*);
   else                         goto error;
+  if (c.parsing_source_syntax()) {
+    List guard = c.peek(0) == <if> ? _keyword_paren_expr(c, <if>) : NULL;
+    c.expect(<:>);
+    List body = c.parse_governed(AST_STATEMENT);
+    return %(source-case $peek $pattern $types $guard $body);
+  }
   c.begin_match_arm(pattern, start, peek == <case>);
   List temporaries = NULL, declarations = NULL;
   if (types) {

@@ -43,6 +43,8 @@ are needed rather than maintaining another copy.
   discover and rank redundant checks without editing.
 - [release-x2c](skills/release-x2c/SKILL.md) - prepare, dry-run, and verify
   a release, or recover from a failed one.
+- [typesafe-ai](skills/typesafe-ai/SKILL.md) - design and build workflows with
+  TypeSafe System One models such as Jev.
 - [improve-x2c-agent-process](skills/improve-x2c-agent-process/SKILL.md) -
   review or improve agent guidance and tooling for the requested workflow.
 - [agent-failure](skills/agent-failure/SKILL.md) - capture a failure Gary

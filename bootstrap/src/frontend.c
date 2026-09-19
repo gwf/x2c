@@ -287,6 +287,7 @@ int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit){
   compiler -> source_map = frontend -> request -> source_map;
   compiler -> sources = frontend -> request -> sources;
   compiler -> source_facts = frontend -> request -> source_facts;
+  compiler -> source_syntax = frontend -> request -> dump == 1371473465773288;
   compiler -> source_primary = 1;
   if(compiler -> source_facts){
     compiler -> source_occurrences = Array_new();
