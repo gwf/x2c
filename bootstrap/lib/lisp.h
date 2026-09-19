@@ -43,6 +43,10 @@ Lisp Lisp_new(void);
 
 void Lisp_destroy(Lisp lisp);
 
+void Lisp_adopt(Lisp lisp, Lisp parent);
+
+void Lisp_freeze(Lisp lisp);
+
 Symbol Lisp_read(Lisp lisp, String source, unsigned * cursor, Var * out);
 
 Var lisp_atom(Var value);
@@ -110,6 +114,8 @@ LispAutoStats Lisp_auto_stats(Lisp lisp);
 void Lisp_auto_instrument(Lisp lisp, MachineStats * stats);
 
 void Lisp_auto_disable(Lisp lisp, int disabled);
+
+int Lisp_auto_prepare(Lisp lisp);
 
 Var Lisp_eval(Lisp lisp, Var expression);
 

@@ -21,6 +21,8 @@ int Compiler_macro_invocation_needs_shallow_expansion(Compiler c);
 
 int Compiler_macro_starts_target_at(Compiler c, AstPos position);
 
+void Compiler_preload_macro_libraries(Compiler compiler);
+
 List Compiler_parse_macro_lisp_top_level(Compiler compiler);
 
 void Compiler_evaluate_declaration_effect(Compiler compiler, String form, Token invocation);

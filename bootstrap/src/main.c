@@ -534,6 +534,10 @@ unsigned long report_now_us(void);
 
 Frontend Frontend_new(CliRequest);
 
+void Compiler_preload_macro_libraries(Compiler);
+
+Compiler Compiler_new(void);
+
 unsigned long long report_file_bytes(String);
 
 String report_duration(unsigned long);
@@ -565,6 +569,7 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build){
   if(c -> dry_run) return 0;
   Frontend frontend = Frontend_new(c);
   frontend -> preprocessor_errors = _preprocessor_errors;
+  Compiler_preload_macro_libraries(Compiler_new());
   int total = List_len(c -> inputs), completed = 0;
   unsigned long long gen_bytes = 0;
   int parallel = c -> jobs > 1 && total > 1 && ! c -> dump && ! CliRequest_inspects(c);
