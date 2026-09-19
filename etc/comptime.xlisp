@@ -238,6 +238,7 @@
 (defun Meta_expr_call (callee arguments)
   (apply x2c.expr.call (cons callee arguments)))
 (defun Meta_expr_composite (items) (x2c.expr.composite items))
+(defun Meta_expr_cast (type expression) (x2c.expr.cast type expression))
 
 (defun Meta_source_text (syntax) (x2c.source.text syntax))
 (defun Meta_binding_spelling (syntax) (x2c.binding.spelling syntax))

@@ -9,10 +9,14 @@
 #pragma once
 
 $(import "error-macros.xmacro")
-$(import "varops.xlisp")
 $(import "integer-ops.xmacro")
 #include "common.x"
+#include "meta.x"
 #include "varconvert.x"
+
+// After the includes: a `.xmacro` borrows this unit's symbol table, and the
+// `meta` functions in it call the compiler surface `meta.x` declares.
+$(import "varops.xmacro")
 
 // declared here because shallow symbol collection does not expand macros
 char x2c_var_update_i8(volatile char *lhs, Symbol op, Var rhs);
@@ -59,12 +63,11 @@ macro Unit $native.update(Type $type, Name $function, Literal $row)
       }));
     }
     Var $converted = _native_update(
-      $(native.update.box $row (x2c.expr.index
-        (x2c.expr.ident (x2c.ident "lhs")) (x2c.literal.int 0))),
-      $(native.update.tag $row), $(x2c.ident "op"), $(x2c.ident "rhs")
+      $(_update_box $row (x2c.ident "lhs")),
+      $(_update_tag $row), $(x2c.ident "op"), $(x2c.ident "rhs")
     );
-    if ($converted is void) return $(native.update.zero $row);
-    $type $value = $(native.update.decode $row (x2c.expr.ident $converted));
+    if ($converted is void) return $(_update_zero $row);
+    $type $value = $(_update_decode $row (x2c.expr.ident $converted));
     ($(x2c.ident "lhs"))[0] = $value;
     return $value;
   }

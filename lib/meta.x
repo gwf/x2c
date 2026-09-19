@@ -83,6 +83,11 @@ List Meta.expr_call(List callee, List arguments);
     `List` of expressions. */
 List Meta.expr_composite(List items);
 
+/** Returns `expression` cast to `type`, which is a declared type rather
+    than syntax. A generator needs it where the value it holds and the
+    parameter it reaches differ in width or sign. */
+List Meta.expr_cast(List type, List expression);
+
 /* --- reading what the macro captured ------------------------------------
    A macro receives bound syntax, and these are the four questions about it
    a body cannot answer by walking the List: the source the developer wrote,
