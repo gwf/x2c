@@ -2674,7 +2674,7 @@ static String _read_source(Compiler compiler, String path, String message, Token
 }
 
 static int _inherited_import(String path){
-  return ! library_filling && Map_truth(library_imports) && Map_contains(library_imports, String_var(path));
+  return ! library_filling &&(void *) library_imports != NULL && Map_contains(library_imports, String_var(path));
 }
 
 void Compiler_add_translation_dependency(Compiler, String);
@@ -2860,10 +2860,10 @@ void Compiler_publish_macro_library(Compiler compiler, Lisp shared){
 int Compiler_shared_definition(Compiler compiler, String key){
   if(! _init_guard_) _file_init_();
   (void) compiler;
-  if(! Map_truth(library_definitions)) return 0;
-  if(! library_filling) return Map_contains(library_definitions, String_var(key));
-  Map_setindex(library_definitions, String_var(key), int_var(1));
-  return 0;
+  if((void *) library_definitions == NULL) return 0;
+  int known = Map_contains(library_definitions, String_var(key));
+  if(library_filling) Map_setindex(library_definitions, String_var(key), int_var(1));
+  return known;
 }
 
 void Compiler_preload_macro_libraries(Compiler compiler){
@@ -3344,16 +3344,18 @@ void Compiler_install_meta_function(Compiler c, List fn, Token marker){
     static MatchCaptureSite _x2c_catch_arms_4[1];
     static ErrorCatchSite _x2c_catch_site_4 = {  _x2c_catch_arms_4, -1, 1, ERROR_CATCH_PENDING, -1 };
     Var _x2c_catch_patterns_4[1];
-    if (x2c_error_catch_site_pending(&_x2c_catch_site_4)) {List _x2c_catch_pattern_8 = cons(Symbol_var(1952558282), cons(Symbol_var(54), NULL));
+    if (x2c_error_catch_site_pending(&_x2c_catch_site_4)) {List _x2c_catch_pattern_8 = cons(Symbol_var(61045002), cons(Symbol_var(58262293080), NULL));
     _x2c_catch_patterns_4[0] = List_var(_x2c_catch_pattern_8);
   }
   ErrorHandler volatile _x2c_error_handler_4 = x2c_error_catch_site_push(&_x2c_exception_frame_4, &_x2c_catch_site_4, _x2c_catch_patterns_4);  x2c_exception_push(& _x2c_exception_frame_4);  if (!sigsetjmp(_x2c_exception_frame_4.env, 0)) installed = Compiler_install_comptime(c, fn);  else {x2c_exception_landed(& _x2c_exception_frame_4); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_4)){
       x2c_error_catch_detach(_x2c_error_handler_4);
       x2c_exception_mark_handled(&_x2c_exception_frame_4);
-       {Var cause = x2c_error_catch_capture(_x2c_error_handler_4, 0);
+       {Var code = x2c_error_catch_capture(_x2c_error_handler_4, 0);
+      List detail = Var_list(x2c_error_catch_capture(_x2c_error_handler_4, 1));
       {
-        Compiler_report_error(c, 27335838, _790, marker, cons(String_var(String_join(NULL, cons(String_var(_342), cons(String_var(Var_str(cause)), NULL)))), NULL));
+        List cause = cons(code, detail);
+        Compiler_report_error(c, 27335838, _790, marker, cons(String_var(String_join(NULL, cons(String_var(_342), cons(String_var(List_repr(cause)), NULL)))), NULL));
         {
           x2c_error_catch_close(_x2c_error_handler_4);
           _x2c_error_handler_4 = NULL;
