@@ -505,6 +505,15 @@ Writing the scan better helps and is not enough. Replacing the flattened
 the match took the nine-lookup row from 9.10 s to 1.52 s, still 125 ms per
 unit against a Lisp baseline too small to measure.
 
+**The four rows above could not be re-measured after the lowering engine
+work below.** The corpus that produced them is not in the repository. A
+rebuilt corpus of the same shape - a 104-row table of nested rows, scanned
+nine times per expansion through `List.assoc` - costs 23 ms per unit at
+`3e737e9a`, which is where the 760 ms row was measured, so the rebuilt corpus
+is not the same workload and nothing about the 760 ms row follows from it.
+Re-porting `lib/var-tags.xmacro` and translating `lib/` is the measurement
+that would settle it.
+
 **So the ledger's row lookup has to stay Lisp**, because `lib/common.x` is
 where it is used and it is used per unit. The projections are different: each
 runs once, in four units, at roughly 13 to 30 ms. Porting those alone is
@@ -931,6 +940,85 @@ form that declines, so it fails at any larger bound. Widening its two calls
 past the new bound restores it. A declining argument does not substitute -
 `_auto_compile` rewinds it to an interpreted word and the enclosing call
 still compiles.
+
+## The lowering engine, measured 2026-09-19
+
+Four commits changed how a compile-time Lisp body is lowered and how a free
+name resolves. They are `1aa017dd`, `7e046f3a`, `f05ac70f`, and `8bb3a4b7`,
+with the bootstrap refreshed in `d51d03f8`.
+
+**A binding scope is lowered into the frame it stands in.** `let` and the
+other binding macros expand to an immediately applied lambda literal, which
+used to compile as a call to a prepared child program whose free names could
+only resolve globally. `MW_LBIND` now moves the evaluated arguments into
+frame slots above the parameters and `MW_LUNBIND` drops them. Both words also
+rename the frame's live slots, which is load-bearing rather than an
+optimization: disabling only the rename fails a `src/` translate with
+`unbound (name owner)`. One `src/` translate executes 14,418 `MW_LBIND`
+words.
+
+Three defects surfaced while building it. The entry frame's environment
+pointed at the caller's argument array rather than the machine's own slots,
+so a read past the parameter count read uninitialized stack. `lambda` is an
+ordinary binding a program may rebind, so the lowered form needs its own site
+guard. And `name is not <atom>` is not the atom test.
+
+**A free name is lexical.** A lambda or macro body resolves through its own
+bindings, its captures, and the session's globals; the environment of the
+call is not in that chain. Generated C for every file in `src/` and `lib/` is
+byte-identical under either rule, and translating `src/`, `lib/`, and
+`unittest/test-autodiff.x` raises no unbound name. Five tests asserted the
+old rule and now assert the new one. The guard that declined an expansion
+reading a caller's runtime local is gone with the rule it served; the
+dependency note that invalidates a remembered expansion when a global it read
+changes stays, because 729 of 917 guard sites in a `src/` translate still
+carry a live row.
+
+**An inherited binding is settled.** A session may no longer replace a name an
+ancestor binds, so lowering reads a frozen ancestor's binding as a constant
+and an expansion whose every dependency comes from one needs no guard.
+`C._globals` is the one library name that is genuinely per-unit;
+`etc/comptime.xlisp` names it and the translating session defines it. Global
+reads in a `src/` translate fall from 402,026 to 321,287 and 188 of 917 guard
+sites fold away; in `lib/`, 169,057 to 139,802 and 191 of 920.
+
+**Wall times**, minimum of three runs on one host, each tree translating its
+own sources:
+
+| tree | `src/` | `lib/` | `unittest/test-autodiff.x` |
+| --- | --- | --- | --- |
+| `3e737e9a` | 4.12 s | 3.05 s | - |
+| `f1304e30` | 3.94 s | 2.86 s | - |
+| `a03018a6` | 3.65 s | 2.83 s | 8.49 s |
+| `ec790ba9` | 3.63 s | 2.77 s | 12.07 s |
+| `d51d03f8` | 3.47 s | 2.67 s | 1.94 s |
+
+The `src/` and `lib/` columns move by about 4 percent because those units run
+little compile-time Lisp. `test-autodiff.x` is 6.2x faster than at
+`ec790ba9`, which is what the engine work is for. `ec790ba9` is slower than
+`a03018a6` on autodiff because the capture walk it added does more work per
+lambda; the lowering pays that back and more.
+
+One `foreach` expansion and everything its output costs downstream, measured
+as the marginal cost of 100 of them in one unit: 1200 us at `3e737e9a`,
+900 us at both `a03018a6` and `ec790ba9`, 800 us now. This is not the same
+instrument as the 707 us expansion-only breakdown recorded earlier, which
+needed a profiler this measurement does not use.
+
+**Where a translate spends its time now**, `sample` over three seconds of one
+translate, `a03018a6` against `d51d03f8`:
+
+| share of samples | `src/` before | `src/` now | `lib/` before | `lib/` now |
+| --- | --- | --- | --- | --- |
+| macro expansion | 11.1% | 9.6% | 14.6% | 13.1% |
+| compile-time Lisp | 4.1% | 2.7% | 3.8% | 1.7% |
+| `Match` | 10.5% | 12.5% | 10.4% | 9.7% |
+| `Pool_lookup` | 28.5% | 30.4% | 27.9% | 28.6% |
+
+Compile-time Lisp is no longer where a `src/` or `lib/` translate spends its
+time. `Pool_lookup` is, and nothing here touched it. The largest self-time
+leaves are `Map__core_find_index` at 14.3%, `MatchMachine_step` at 11.1%, and
+`Var` decoding at 9.1%.
 
 ## Handoff
 
