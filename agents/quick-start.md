@@ -3,6 +3,11 @@
 Use this page for current commands and repository orientation. The root
 `AGENTS.md` owns workflow and publication rules.
 
+Everyday integration and requested PR bases target `dev`; fetch and integrate
+`origin/dev` before delivery. `main` advances only through Gary-authorized
+release promotion. Existing checkouts keep their work; use an explicit
+`HEAD:refs/heads/dev` push destination rather than relying on an old upstream.
+
 ## Build and validate
 
 From a fresh worktree, or after integrating a changed `bootstrap/`:
@@ -108,8 +113,8 @@ manifest, including the deterministic Lisp showcase.
 - `plans/` - active plans and archived decisions.
 - `etc/` - shared build rules, Lisp bootstrap, and SDK.
 - `packages/` - optional third-party adapters, outside `make check`.
-- `site/` - public website; it is not gated. A tagged release updates its
-  version file and package index; see [Releasing](releasing.md).
+- `site/` - public website; it is not gated. Candidate assembly retains complete destination sites; promotion deploys
+  their version file and package index together; see [Releasing](releasing.md).
 
 `agents/x2c-module-catalog.md` is generated from current source. Run
 `make doc-check` to verify it.

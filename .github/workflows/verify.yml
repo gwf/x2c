@@ -1,4 +1,4 @@
-# INACTIVE: shared release-only verification; no build or publication token.
+# Shared release-only verification; no build or publication token.
 name: verify live candidate
 on:
   workflow_call:

@@ -1,4 +1,4 @@
-# INACTIVE: install in source repository only during authorized cutover.
+# Publish and verify one explicitly selected immutable candidate.
 name: stage candidate
 on:
   workflow_dispatch:
@@ -49,7 +49,7 @@ jobs:
           run = json.load(open('run.json'))
           assert run['conclusion'] == 'success'
           assert run['event'] == 'workflow_dispatch'
-          assert run['path'] == '.github/workflows/release.yml'
+          assert run['path'] == '.github/workflows/candidate.yml'
           root = pathlib.Path('candidate')
           assert not list(root.glob('verified-*.json')), 'build cannot supply verification'
           manifest = json.loads((root / 'candidate.json').read_text())

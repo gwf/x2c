@@ -1,40 +1,54 @@
-# Inactive release workflow preparation
+# Public release operations
 
-Nothing in this directory is an installed GitHub workflow. The live workflows
-and ordinary routing remain unchanged. Gary's approval permits isolated
-implementation; it does not clear the two ongoing lowering/metafunction sessions
-or authorize cutover. Do not discover or guess their branch.
+The source workflows live in `.github/workflows`: `candidate.yml` builds an
+exact source commit, `stage.yml` publishes and verifies staging, `promote.yml`
+promotes tested archives, `verify.yml` supplies the shared platform checks, and
+`restore-pages.yml` restores a previously verified production site. This
+folder owns their transport helpers and the staging repository's Pages template.
+
+Gary has cleared the fresh-main checkpoint and dev cutover. Everyday integration
+uses dev; main remains the published-release branch. Do not inspect or alter the
+two unrelated lowering/metafunction sessions. Workflow installation does not
+publish a release or supply the staging App credential and domain configuration.
+The legacy `pages.yml` source remains unchanged, but its workflow registration
+is disabled. Retain it until first-release baseline recovery is settled.
 
 The governing design is [public-release-workflow.md](../../plans/public-release-workflow.md).
 The source repository stays public at `gwf/x2c`. `gwf/x2c-staging` stores generated
 output and immutable candidates; it is not another development source tree.
 
-## Read-only access observations (2026-09-19)
+## Provisioning state (2026-09-19)
 
-The local authenticated GitHub account reports ADMIN access to `gwf/x2c`, whose
-current default branch is main. Local access uses a keyring OAuth credential
-with repo/read:org scopes and SSH Git. Actions are enabled with all actions
-allowed and a read-only default workflow token. Production Pages uses Actions,
-`x2c-lang.dev`, approved/enforced HTTPS and a `github-pages` environment whose
-only deployment branch policy names main. Repository variables include
-`SITE_URL=https://x2c-lang.dev` and `SITE_BASE=/`; the repository-secret listing
-returned no names. None of these observations establishes GitHub App or DNS
-administration access.
+Local GitHub authentication is `gwf` with ADMIN access to `gwf/x2c`; it already
+covers repository administration. No additional personal token is needed.
+Remote `dev` was created at fresh main
+`b265e2582df4e6d9172f70de3add039e7df3b41b`. The public staging repository exists,
+with its Pages workflow installed at
+`294be71157d8b809c5f346d90b5f44a55715ac0d`. Pages is configured for
+`staging.x2c-lang.dev`.
 
-The authenticated staging repository lookup returned 404: it is absent or
-inaccessible to that account. `dig +short staging.x2c-lang.dev` returned no
-records; this alone is not an NXDOMAIN diagnosis. No repository, credential,
-DNS, branch policy or active workflow was provisioned or changed. Recheck these
-settings at authorized activation. In particular, production Pages' main-only
-policy must explicitly allow the chosen trusted dispatch ref before promotion
-or restore workflows can deploy from dev; plan approval alone does not change
-that account setting.
+Source `staging-publication` permits dev; `production-publication` permits main
+and requires Gary's review. Production Pages still permits only main and keeps
+its existing `x2c-lang.dev` configuration. Dispatch promotion and restoration
+with `--ref main`, after Gary's separately authorized main advance has carried
+their source there. They cannot run from pre-cutover main, which lacks them.
 
-## Account setup, after separate authorization
+The legacy tag-driven release and Pages workflow registrations are disabled.
+The legacy Pages source remains unchanged, so Gary can explicitly re-enable it
+for an agreed baseline recovery operation. It is not a callable competing
+publication path while disabled. No production deployment or release was run.
+Disabling a workflow leaves the currently served site intact.
+
+Remaining setup: Name.com DNS CNAME `staging` -> `gwf.github.io`, GitHub HTTPS
+provisioning, and the staging App ID/private key in source environment settings.
+The initial DNS query returned no staging records. Never paste the key in chat.
+These prerequisites must be verified before claiming live staging success.
+
+## Account setup
 
 Gary needs account access, not secrets pasted into a conversation:
 
-1. Authorize creation of public `gwf/x2c-staging`. Initialize `main` with its
+1. Create the authorized public `gwf/x2c-staging`. Initialize `main` with its
    minimal Pages workflow (the staging-pages.yml template installed as
    `.github/workflows/pages.yml`). Enable Actions and select GitHub Actions as
    its Pages source. The output publisher requires an existing main commit.
@@ -65,37 +79,32 @@ setup. Domain access and repository/environment administration are account
 permissions, not values to embed in source. Rotate/revoke the key in account
 settings, and never put it in logs, checkout files or chat.
 
-## Clearance and installation checklist
+## Activation checklist
 
-- Gary identifies a stable source checkpoint and explicitly clears cutover of
-  the two ongoing sessions. Record the exact SHA and production baseline;
-  inspect only the checkpoint Gary identifies. Do not retarget active work.
-- Reconcile this isolated preparation with that checkpoint. Review changed
-  compiler/package/site contracts; rerun the existing applicable gate. Preserve
-  individual commits and resolve non-fast-forward ancestry before activation.
-- Confirm initial dev SHA, whether dev becomes GitHub's default branch, branch
-  and tag restrictions, the first release version, environment reviewers and
-  approval for provisioning and release-only verification cost.
-- Create dev only at the approved checkpoint. Migrate current routing together:
-  root AGENTS.md, agents/quick-start.md, agents/releasing.md, execution/release
-  skills, contribution/setup docs and applicable Conductor setup. Change
-  everyday integration and PR bases to dev; reserve main for releases. Do not
-  rewrite historical plans or change user-owned settings without approval.
-- Replace source release.yml with this directory's release.yml. Install stage
-  and promotion workflows, restore-pages.yml and the shared verification
-  workflow. Remove the old
-  tag-triggered release build and main-checkout Pages workflow at the same
-  cutover; otherwise a tag would rebuild untested archives or Pages could
-  publish stale source pointers. No compiler or package builds run on tags.
-- Install staging-pages.yml only in the output repository. Review the exact
-  installed template revision and ensure dispatchable workflows are on each
-  repository's default branch. Configure environments before any dispatch.
-- Keep ordinary precommit, sanity-check, agent-pr-check and doc-check unchanged.
-  These are manually requested release jobs, never required ordinary statuses.
+- The approved initial dev baseline is fresh origin/main at
+  `b265e2582df4e6d9172f70de3add039e7df3b41b`. Preserve individual commits when
+  integrating this preparation and future work. Existing sessions retain their
+  own routing until Gary explicitly transitions them.
+- Dev is the chosen default branch for everyday integration and PR bases.
+  Keep main release-only and retain Gary's existing tag/promotion authority.
+  Configure the publication environments before dispatching their workflows.
+- Disable the legacy release workflow before activating candidate.yml; the
+  legacy release.yml is removed from dev. A v-tag must not trigger a second
+  compiler/package build through a workflow still registered on main.
+- Keep legacy pages.yml unchanged until the first-cutover recovery prerequisite
+  below is resolved. The new promotion/restore workflows deploy retained site
+  archives directly and never dispatch legacy pages.yml.
+- Install staging-pages.yml only in the output repository as
+  `.github/workflows/pages.yml`. Review the installed template revision and
+  ensure it is dispatchable from that repository's default branch.
+- Finish repository/account provisioning, routing documentation and the existing
+  applicable gate before publication. Keep ordinary precommit, sanity-check,
+  agent-pr-check and doc-check unchanged. These manually requested release jobs
+  are never required ordinary statuses.
 
 ## Candidate and release operation
 
-Run the source release workflow with a full reviewed source SHA. Each compiler
+Run `candidate.yml` from dev with a full reviewed source SHA. Each compiler
 and package job checks out that SHA; the existing four compiler and 26 package
 matrix jobs remain intact. Assembly uses the built Linux compiler once and
 retains the resulting archives, manifest, two index variants and two complete
@@ -145,13 +154,13 @@ Pages run is still running after a timeout, let it finish or have Gary resolve
 it before starting another publication. All ordinary publication workflows
 serialize per destination without cancelling running publication.
 
-After activation, `restore-pages.yml` supplies the executable production
+`restore-pages.yml` supplies the executable production
 rollback path for a previously promoted candidate. Gary selects its exact
 identity and the currently observed production version, then dispatches from
-the approved trusted workflow ref (dev after cutover), for example:
+the approved trusted workflow ref (dev), for example:
 
 ```sh
-gh workflow run restore-pages.yml --repo gwf/x2c --ref dev \
+gh workflow run restore-pages.yml --repo gwf/x2c --ref main \
   -f identity="$candidate" -f expected_version="$current_version"
 ```
 
@@ -202,10 +211,12 @@ retiring the old Pages workflow, capture its exact deployed Pages artifact,
 record its SHA-256 and deployment/run ID, and rehearse deploying that retained
 artifact through Pages without rebuilding the site. Preserve that baseline
 and its separate Gary-approved recovery procedure for the first release.
-If the old Pages artifact has expired, resolve baseline recovery with Gary
-before activation; do not label a fresh site rebuild the previously deployed
-site. This is part of the later checkpoint handoff, not permission to inspect
-or change the ongoing sessions now.
+The currently inspected legacy Pages artifact has expired. Baseline capture
+and its recovery procedure remain unresolved and must be settled with Gary
+before the first production promotion; do not label a fresh site rebuild the
+previously deployed site. Keep the legacy Pages source available with its registration disabled until
+this recovery decision is
+settled. It does not authorize inspection or changes to ongoing sessions.
 
 ## Local verification
 
@@ -213,8 +224,7 @@ Run `python3 tools/test-release-candidate.py` for offline candidate integrity,
 conflicting upload, receipt retry and restoration-proof cases. Run
 `npm --prefix site test` for destination rendering. The existing installer
 check covers same-version candidate selection as well as production defaults.
-Validate workflow templates in a temporary `.github/workflows` tree with
-`actionlint`; they intentionally cannot resolve reusable workflow paths from
-this inactive directory. None of these adds a gate. Finish with the unchanged
+Run `actionlint` against the installed source workflows. Validate the separate
+staging-pages.yml deployment template in a temporary workflow tree as needed. None of these adds a gate. Finish with the unchanged
 `tools/gate-state.py ensure agent-pr-check`; a sandboxed checkout can set
 `X2C_CACHE_DIR` to a writable scratch directory.

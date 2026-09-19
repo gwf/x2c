@@ -1,6 +1,7 @@
 # Repository Guidelines
 
-x2c is a shipped, self-hosting superset of C maintained on `main`. The
+x2c is a shipped, self-hosting superset of C developed on `dev`.
+`main` is release-only and advances deliberately during publication. The
 compiler (`src/`) and runtime (`lib/`) are working examples of the language.
 Make each requested change useful, idiomatic, and verified, moving the
 repository from one healthy state to the next.
@@ -130,7 +131,7 @@ question. A language transition that the checked-in bootstrap cannot consume
 needs explicit intermediate validation; ordinary publication uses the single
 command below.
 
-Before publishing, fetch and integrate current `origin/main`, review the
+Before publishing, fetch and integrate current `origin/dev`, review the
 resulting diff and generated changes, and run `git diff --check`. Commit
 subjects are short, lower-case, and present tense. Validate the final tree:
 
@@ -150,29 +151,31 @@ isolate the cause with focused checks, and report the failing command when
 work cannot continue within scope. Escalate an increase in failures or an
 unresolved consequential design choice rather than hiding it in output.
 
-Routine implementation includes validated delivery directly to `main` unless
+Routine implementation includes validated delivery directly to `dev` unless
 Gary requests a PR, review stop, or local-only work. Network actions needed
 for that delivery are authorized by the task. Use the explicit destination:
 
 ```sh
-git push origin HEAD:refs/heads/main
+git push origin HEAD:refs/heads/dev
 ```
 
-If the push is rejected because `main` advanced, fetch, integrate, review,
-and validate the new tree before retrying. Never force-push `main`.
+If the push is rejected because `dev` advanced, fetch, integrate, review,
+and validate the new tree before retrying. Never force-push `dev` or `main`.
+Do not advance `main` as ordinary delivery; Gary authorizes production
+promotion separately under [agents/releasing.md](agents/releasing.md).
 
 For a requested PR, push the current workspace branch to the same-named
-remote branch and use `main` as the base:
+remote branch and use `dev` as the base:
 
 ```sh
 branch="$(git branch --show-current)"
 git push -u origin "HEAD:refs/heads/$branch"
-gh pr create --draft --base main --head "$branch"
-gh pr view --json baseRefName --jq .baseRefName   # must print main
+gh pr create --draft --base dev --head "$branch"
+gh pr view --json baseRefName --jq .baseRefName   # must print dev
 ```
 
 Keep a requested PR available for review unless merging is also requested.
-Use `main` as the base even when another workspace has related changes.
+Use `dev` as the base even when another workspace has related changes.
 Choose push destinations explicitly; the branch's upstream does not choose
 where either form of delivery goes.
 

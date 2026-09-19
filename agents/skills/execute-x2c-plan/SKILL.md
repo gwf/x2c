@@ -48,7 +48,8 @@ Inspect generated changes against the authored changes that explain them.
 ## Deliver
 
 Follow root validation and publication instructions on the final tree. Routine
-implementation delivers to `main`; use a PR when requested. The work is
+implementation delivers to `dev`; use a PR when requested. The work is
 complete when the requested behavior works and the authorized delivery is
-verified. Report the behavior delivered, validation result, and any remaining
-limitation plainly.
+verified. Production promotion and advancement of `main` require Gary's
+separate release authorization. Report the behavior delivered, validation
+result, and any remaining limitation plainly.

@@ -1,124 +1,141 @@
 # Releasing x2c
 
-A release publishes one compiler version: tarballs for each platform, package
-bundles, a package index, and a site that points users at them. This page
-explains how those pieces fit and the order to produce them. The
-[release-x2c skill](skills/release-x2c/SKILL.md) is the task workflow; the
-[installation guide](../docs/src/guide/installation.md) is what users read.
+Everyday work integrates on `dev`. A release selects one exact source commit,
+fully builds and verifies it at `https://staging.x2c-lang.dev`, then promotes
+those same compiler and package archives to production. `main` advances only
+for a deliberate release, preserving individual commits, preferably by
+fast-forward. Development may continue after candidate selection.
 
-Gary publishes. Merging a pull request and pushing a tag are his. An agent
-prepares the version change, dispatches dry runs, verifies what was
-published, and hands him exact commands at each step.
+Gary authorizes production promotion, advances `main`, and creates release
+tags. Plan or implementation approval does not authorize those actions.
+Agents prepare candidates and carry out explicitly authorized staging or
+verification. The [release skill](skills/release-x2c/SKILL.md) owns task
+execution; [deployment operations](../etc/release/README.md) owns provisioning,
+recovery commands and the first-release rehearsal. Ordinary validation gates
+and their costs are unchanged.
 
 ## The pieces
 
-- **Version.** `cli_version` in `src/cli.x` is what `x2c --version` prints.
-  `unittest/probes/run-cli-boundary.sh` asserts the same string.
-- **Tag.** Pushing a tag named `v<version>` starts
-  `.github/workflows/release.yml` at the tagged commit. A manual run of the
-  same workflow is a dry run: it builds everything and publishes nothing.
-- **Workflow stages.**
-  - `compiler` builds `x2c-<version>-<platform>.tar.gz` and its `.sha256` on
-    `macos-15`, `macos-15-intel`, `ubuntu-24.04`, and `ubuntu-24.04-arm`. It
-    fails when the compiler's version differs from the tag, and proves each
-    tarball with `tools/check-install-script.sh`.
-  - `bundles` runs `make -C packages/<name> bundle` for pcre2, yyjson,
-    libcurl, termbox2, libuv, and blis on all four, and for torch on
-    `macos-15` and `ubuntu-24.04`, the platforms PyTorch ships prebuilt CPU
-    libtorch for. torch is also run against an installed copy with
-    `packages/tools/check-bundle.sh`. raylib is not released.
-  - `publish` runs only when every job above succeeded. It writes the
-    package index with `tools/gen-package-index.x`, run by the Linux
-    compiler from the release tarball, creates the GitHub
-    Release if absent, uploads every asset with `--clobber`, commits
-    `site/public/x2c-version.txt` and `site/public/packages/index.txt` to
-    `main`, and dispatches `pages.yml`. On a dry run it stops after
-    assembling the release.
-- **Site files.** `x2c-version.txt` is what `site/public/install.sh` treats as
-  the latest version; `install.sh --version <n>` bypasses it.
-  `packages/index.txt` is what `x2c install <name>` resolves. Both describe
-  only the newest release; the assets of every tag stay downloadable by URL.
+- `cli_version` in `src/cli.x` identifies the compiler version. The CLI
+  boundary probe and installer example carry corresponding version strings.
+- `candidate.yml` manually builds the selected full source SHA. It retains
+  the existing four compiler platforms and 26 native package bundles, then
+  assembles immutable archives, destination indexes and both complete sites.
+  It publishes nothing. Tags do not trigger a rebuild.
+- Candidate identity is `candidate-<full-sha>-<run-id>-<attempt>`, separate
+  from compiler version. A rebuild creates a new identity and requires fresh
+  verification, even when its version is unchanged.
+- `stage.yml` uploads the candidate to `gwf/x2c-staging`, deploys its complete
+  site, verifies live installation on four platforms, and retains proof.
+  Staging uses its own installer defaults, candidate URLs and explicit index.
+- `promote.yml` checks the selected candidate's proof and Gary's main/tag
+  state, uploads exactly the retained archives, publishes the release, deploys
+  the retained production site and verifies it. It builds nothing.
+- `verify.yml` supplies the release-only install/package checks;
+  `restore-pages.yml` restores a previously verified production site.
 
-Runner images are pinned rather than `-latest`, because a published
-executable carries the deployment target and C library of the machine that
-built it.
+The compiler matrix uses `macos-15`, `macos-15-intel`, `ubuntu-24.04`, and
+`ubuntu-24.04-arm`. Native packages are pcre2, yyjson, libcurl, termbox2, libuv,
+and blis on all four, plus torch on macos-15 and ubuntu-24.04. raylib is not
+released. Pinned runners preserve known deployment targets and C libraries.
+
+`candidate.json` binds archives to source SHA, workflow revision, run,
+version, sizes and hashes. Site and verification receipts bind destination
+output to that manifest. Named staging/production indexes preserve their
+separate URLs; the site publishes its selected index as `packages/index.txt`.
+Version, index, installer and site deploy together. They are no longer release
+pointer commits on `main`.
 
 ## Cut a release
 
-1. **Land the work** on `main` through ordinary pull requests.
-2. **Change the version** in its own pull request: `cli_version` in
-   `src/cli.x`, both strings in `unittest/probes/run-cli-boundary.sh`, and
-   the `--version` example in the comment at the top of
-   `site/public/install.sh`. `tools/gate-state.py ensure agent-pr-check`
-   regenerates the bootstrap copy of the string. Gary merges it.
-3. **Dry run** the commit to be released and note its SHA:
+1. Land intended work and version preparation on `dev`, including generated
+   bootstrap updates and the existing source gate. Update `src/cli.x`, the
+   version expectations in `unittest/probes/run-cli-boundary.sh`, and the
+   installer comment example when changing the version. Select a full source
+   SHA containing that work and the published history.
+2. Dispatch the full candidate build at that exact SHA:
 
    ```sh
-   gh workflow run release.yml --ref main
-   gh run list --workflow release.yml --limit 1 --json databaseId,headSha
+   gh workflow run candidate.yml --repo gwf/x2c --ref dev \
+     -f source_sha="$source_sha"
    ```
 
-   Every job must succeed, `publish` included. A green build with a failed
-   `publish` is a failed dry run.
-4. **Tag that exact commit** and push the tag. Gary runs this:
+   Record the specific successful run ID and candidate identity from its
+   manifest. Do not infer identity from whichever run happens to finish last.
+3. Stage the selected build using the current staging output commit:
 
    ```sh
-   git tag -a v<version> -m "x2c <version>" <sha>
-   git push origin v<version>
+   gh workflow run stage.yml --repo gwf/x2c --ref dev \
+     -f build_run="$build_run" -f identity="$candidate" \
+     -f expected_output="$staging_output_sha"
    ```
 
-   Tag the SHA the dry run built, not `main`. If `main` moved since, the tag
-   publishes commits no dry run tested.
-5. **Verify** once the tag run and the pages deploy finish:
+   This step needs the provisioned staging repository, Pages domain and
+   scoped publication credential described in deployment operations. A failed
+   stage or verification is not a promotable candidate. The final full build
+   must precede final staging verification; never rebuild after testing and
+   substitute the new bytes.
+4. Give Gary the exact candidate, version, source SHA, proof and current main
+   SHA. He checks ancestry and deliberately advances main and creates the
+   annotated tag. With those values confirmed, his commands are:
 
    ```sh
-   ./x2c script tools/check-release.x <version>
-   ./x2c script tools/check-release.x <version> torch
+   git fetch origin
+   git merge-base --is-ancestor origin/main "$source_sha"
+   git push origin "$source_sha:refs/heads/main"
+   git tag -a "v$version" -m "x2c $version" "$source_sha"
+   git push origin "refs/tags/v$version:refs/tags/v$version"
    ```
 
-   It checks that the site names the version, that the site's installer
-   installs that compiler into a scratch prefix, and that the site's index
-   installs a bundle for this platform. Run it on each platform available.
+   Stop on a rejected push, ancestry conflict or existing conflicting tag.
+   Never force main or move a public tag. This action does not publish assets
+   by itself and can temporarily put main ahead of the production site.
+5. With Gary's explicit promotion authorization, dispatch the selected
+   candidate against the observed current production version:
 
-Users upgrade by re-running `install.sh`, which replaces the compiler and
-keeps installed packages.
+   ```sh
+   gh workflow run promote.yml --repo gwf/x2c --ref main \
+     -f identity="$candidate" -f expected_version="$current_version"
+   ```
 
-## Versions and tags
+   Follow that exact run through upload, Pages, live checks and retained
+   proof. Report completion only after production verification succeeds.
+
+The retained legacy `pages.yml` source is only a baseline recovery tool during
+the first-release transition; its workflow registration stays disabled. It is not part of normal candidate promotion;
+never dispatch it as an alternative to deploying the selected site archive.
+The first release must establish its production baseline and recovery path
+under deployment operations before Gary advances main.
+
+## Versions and packages
 
 While x2c is `0.x`, bump the last number for fixes and the middle number when
-behavior users depend on changes.
+behavior users depend on changes. Correct defective published bytes with a
+new patch release. Preserve public tags, candidate assets and production
+archives for lockfiles; never overwrite them or delete them as rollback.
 
-Never move a tag once anyone may have installed from it. Moving a tag
-rebuilds and replaces its assets under the same version, with different
-checksums. Earlier installs then hold different binaries than new ones, and
-an `x2c.lock` written against the old assets fails verification. Correct a
-published release with the next patch version. Moving a tag is acceptable
-only while its run has published nothing, or before anyone outside the
-project has installed from it.
+A bundle records its compiler version, not candidate identity. Install matched
+candidate packages with an explicit staging index in a fresh prefix, without
+`--force`. Bare `x2c install <name>` defaults to production even when the
+compiler came from staging. A production user on an older version must upgrade
+before installing packages from the current index; lockfiles retain exact URLs.
 
-## Bundles follow the compiler
+## Recovery
 
-A bundle records the exact compiler version that built it, and
-`x2c install` refuses a bundle from another version unless `--force`. The
-site index always names the newest release's bundles, so a user on an older
-compiler must upgrade before installing packages by name. A project lockfile
-names specific asset URLs and keeps working for the release it was written
-against.
+Publication spans branches, tags, Releases and Pages and is not atomic.
+Upload and verify all assets before exposing release/site pointers. Repeating
+an interrupted upload accepts existing identical bytes and adds missing files;
+a digest conflict stops it. Rebuilding cannot repair a partial publication:
+resume from the retained candidate, or prepare a new candidate.
 
-## When something fails
+If assets are complete but Pages failed, retry the retained site deployment.
+If production verification fails, restore the previous complete verified site
+and latest-release designation using `restore-pages.yml`. Keep tags/assets
+available and report any discrepancy between main and the restored site.
+Legacy releases without retained candidate proof need the explicit baseline
+recovery procedure, not a fabricated receipt. A rollback cannot uninstall
+already downloaded bytes; prepare a patch release for broken public archives.
 
-- **A build job fails.** Nothing was published. Fix it on `main` and tag the
-  fixed commit. Moving a tag whose run published nothing is fine.
-- **`publish` fails partway.** Re-run the workflow for the same tag from the
-  Actions page. Uploads replace existing assets and the site commit is
-  skipped when nothing changed, so a re-run is safe.
-- **A published release is broken.** Publish the next patch version. To
-  withdraw a release entirely, delete the GitHub Release and its tag; the
-  site keeps naming it until the next release rewrites the site files.
-- **The first push to `main` is rejected.** The workflow token needs write
-  access to contents and actions. The repository default is read-only; the
-  job requests its own scopes, as `pages.yml` does.
-
-Two release steps can run only on a real tag: uploading assets and updating
-the site. A dry run cannot exercise them, so verification after publishing
-is required, not optional.
+Production fixes normally land on `dev` and select a new candidate. An urgent
+fix based on published main must merge back into dev before the next normal
+selection. Do not reset dev or discard newer integration commits.

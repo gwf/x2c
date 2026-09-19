@@ -1,4 +1,4 @@
-# INACTIVE: Gary advances main and creates the annotated tag before dispatch.
+# Gary advances main and creates the annotated tag before dispatch.
 # This workflow never builds compiler/package/site output or modifies branches.
 name: promote verified candidate
 on:

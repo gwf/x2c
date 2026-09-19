@@ -1,12 +1,11 @@
-> Status: blocked
-> Gary approved this plan on 2026-09-19; local tooling and inactive templates
-> are implemented. Local validation is recorded in the task; hosted validation
-> and reconciliation with the later checkpoint remain outstanding.
-> Live activation and cutover remain blocked; existing routing stays in force.
-> Cutover awaits Gary's explicit clearance and identification of a stable
-> checkpoint from the TWO ongoing X-to-C-to-Lisp and metafunctions sessions.
-> Their relevant/shared branch is UNIDENTIFIED. Do not inspect, contact,
-> interrupt, alter, rebase, or merge those sessions or branches for this plan.
+> Status: active
+> Gary cleared development/staging cutover on 2026-09-19 with a changed baseline:
+> create dev from freshly fetched origin/main, then integrate this work there.
+> Baseline: b265e2582df4e6d9172f70de3add039e7df3b41b. The earlier requirement
+> to wait for the language sessions' checkpoint is superseded. Their branches
+> and sessions remain untouched; Gary will redirect their later delivery.
+> Production release, tags and main advancement still require Gary's separate
+> decision. First staging deployment needs account provisioning and validation.
 
 # Public dev, staging, and production
 
@@ -21,15 +20,12 @@ Propose `gwf/x2c-staging` as a public deployment repository containing generated
 site output, immutable candidate assets, and minimal deployment plumbing, not
 another compiler source tree. No authentication or privacy layer is needed.
 
-The initial planning task authorized only this document. Gary subsequently
-approved isolated implementation in this checkout, without requiring the
-stable checkpoint first. This authorizes local tooling, inactive workflow
-templates and validation, but no commit, push, PR, repository creation, DNS
-change, dispatch, branch-policy change or interference with active sessions.
-Preparation must not change live routing. Cutover is
-separately conditional on clearance; do not create `dev` now or guess its
-starting branch. Gary's later identified stable checkpoint is his preferred
-initial `dev`.
+The original planning-only and isolated-preparation holds have been superseded
+by Gary's explicit execution clearance. Development delivery to `dev`, setting
+it as default, public staging repository/Pages provisioning and staging
+activation are authorized. Existing work in the two lowering/metafunction
+sessions must not be inspected, contacted, interrupted or merged. Gary will
+redirect it later. No production release or main advance is authorized.
 
 ## Evidence at the planning checkout
 
@@ -97,7 +93,7 @@ blocks promotion; a rebuild produces a new candidate and new verification.
 
 ## Small connected implementation
 
-1. **Candidate production: `.github/workflows/release.yml`.** Keep the existing
+1. **Candidate production: `.github/workflows/candidate.yml`.** Keep the existing
    compiler/bundle jobs and dependencies. Add explicit source SHA and operation
    inputs: build-only remains available; stage builds and publishes a candidate;
    promotion consumes an existing verified candidate. Resolve and checkout the
@@ -193,7 +189,8 @@ Configure staging Pages for `staging.x2c-lang.dev`, DNS CNAME to `gwf.github.io`
 (no repository path), and HTTPS; verify the domain in the owning account.
 Check that the production domain remains assigned to its current repository.
 Keep deployment configuration in source-controlled templates and document its
-installed revision. No DNS or repository setup is performed during planning.
+installed revision. The staging repository and Pages setup are authorized; DNS and the App key
+require the owning account action when existing access cannot perform them.
 
 ## Build, stage, verify, promote
 
@@ -266,48 +263,39 @@ assets users may have pinned. Re-running promotion is idempotent only for the
 same manifest, existing matching bytes and recorded publication state; remove
 today's unconditional `--clobber` and blanket "rerun is safe" guidance.
 
-## Sequencing and checkpoint handoff
+## Authorized activation and remaining handoff
 
-**Initial planning:** this local source-grounded plan only. No remote inspection was needed;
-no sessions or candidate branches were inspected. Do not apply future routing
-rules to current sessions.
-
-**Possible isolated preparation later:** only after separate authorization,
-prepare tooling/docs/templates on an isolated branch rooted at a checkpoint
-Gary supplies. Keep current live workflows/routing intact until activation;
-local fixtures can exercise candidate assembly, routing and recovery. No
-assumption that approval of isolated code preparation also approves dispatch,
-repository creation, DNS changes or cutover.
-
-**Cutover checklist, only after explicit clearance:**
-
-- Gary identifies both sessions and their relevant branch/checkpoint himself,
-  confirms they are stable and grants clearance. Record full source SHA and
-  scope of clearance. This plan supplies no guessed branch name.
-- Record last successful production version/tag/source SHA, actual main SHA,
-  site/version/index, remote rules and pending release/deployment operations.
-  Do not reset today's main to an old release just to establish the new model.
-- Verify Gary's preferred checkpoint contains intended work and published
-  history. If ancestry or release baseline differs, present the concrete
-  reconciliation choice to Gary before any branch manipulation.
-- Record authorizations for implementation delivery, staging repo/domain,
-  credential ownership, default-branch/routing changes and first promotion.
-  Settle open decisions below. Preserve existing release authority otherwise.
-- Coordinate the handoff with Gary; active agents keep their original routing
-  until he explicitly transitions them. Do not bulk retarget active work.
-- Create initial `dev` at the approved stable checkpoint only now; integrate
-  approved preparation with preserved commits. Activate docs/workflows/routing
-  together and confirm new work targets `dev`. If default branch changes,
-  verify dispatchable workflows exist there. Retain prior published assets.
-- Run the first-release rehearsal below and select a fresh final candidate;
-  perform the first deliberate main advance only through promotion.
+- Create `dev` from freshly fetched `origin/main`; never overwrite an existing
+  remote dev. The observed baseline is
+  `b265e2582df4e6d9172f70de3add039e7df3b41b`.
+- Integrate the prepared implementation, review the connected routing/docs
+  changes, validate the final tree and push explicitly to dev. Set dev as the
+  source repository default. Do not inspect or alter the ongoing sessions.
+- Use `candidate.yml` for explicit complete rebuilds and disable the legacy
+  `release.yml` registration. Remove that tag-driven path from dev. Keep the
+  legacy `pages.yml` source unchanged until production baseline recovery is
+  settled, but disable its registration to prevent competing publication.
+- Provision `gwf/x2c-staging`, its exact-output Pages workflow and custom domain;
+  configure source staging-publication for dev and production-publication for
+  main with Gary as reviewer. Production Pages remains main-only.
+- Supply the staging GitHub App credential through GitHub environment settings
+  and DNS through the domain account, never through chat. Verify HTTPS and run
+  the first public staging candidate and checks when those prerequisites exist.
+- Record production baseline before first promotion. The current published
+  site names 0.14.0; deployment 6512067985 built source
+  b9c395a6ef8337c8491fdac1aafd83cc3e7ec464. Its Pages artifact 10520340260 expired
+  on 2026-09-18. Preserve the legacy Pages workflow and agree the baseline
+  recovery procedure before retiring it. Do not present a rebuilt site as the
+  original artifact.
+- First production promotion, version/tag selection and main advance remain
+  Gary's separate decision. Production fixes flow back to dev.
 
 ## Validation and first-release rehearsal
 
 Planning used static inspection. Approved isolated implementation now runs
-local bootstrap, focused tests and the existing publication gate. No hosted
-release or deployment has run; staging credentials, DNS and Pages remain
-unprovisioned. See `etc/release/README.md` for activation and verification.
+local bootstrap, focused tests and the existing publication gate. Hosted staging validation follows authorized provisioning. The staging
+repository and Pages can be set up independently; DNS and App credentials
+remain account prerequisites until verified. See `etc/release/README.md` for activation and verification.
 
 Implementation validation reuses the existing install-script checks, source
 gate and site tests. Add focused cases to the existing tooling tests for a
@@ -351,21 +339,20 @@ insufficient, decide coverage explicitly rather than silently claiming full
 verification. Existing `agent-pr-check`, `doc-check`, `precommit` and
 `sanity-check` definitions stay unchanged.
 
-## Decisions still requiring Gary
+## Remaining user actions and production decisions
 
-- The stable checkpoint and explicit clearance for the two ongoing sessions;
-  unresolved ancestry/baseline reconciliation, if any, is a separate decision.
-- Isolated implementation is approved. Permission/timing to provision the
-  proposed public staging repository, DNS and credential remains held. Use the
-  repository-scoped GitHub App described above.
-- Whether `dev` becomes the GitHub default branch at cutover. Recommend yes
-  for contributor/PR routing; `main` remains the release branch. Exact branch
-  policies and any required bypass mechanism must be agreed, not invented.
-- Confirm first version/candidate and Gary's promotion authority. Existing
-  Gary-only merge/tag release guidance remains in force until explicitly revised.
-- Plan approval includes the proposed release-only verification cost and
-  durable retention contract. A later finite public-candidate retention policy
-  changes lockfile promises and needs a separate decision.
+- Add the Name.com CNAME `staging` -> `gwf.github.io` for `x2c-lang.dev`, then
+  allow GitHub to provision HTTPS. The public staging repository and intended
+  custom domain are already authorized.
+- Create/install the narrowly scoped staging GitHub App and enter its App ID
+  and private key directly in the source staging-publication environment.
+  Existing local GitHub authentication already has repository admin access.
+- Before the first production release, settle the legacy site's recovery
+  baseline and select an unpublished version and verified candidate. Main
+  advancement and tag/promotion authority remain Gary's.
+- Dev as default, delivery to dev, release-only verification cost and durable
+  public-candidate retention are approved. Changes to those contracts need a
+  separate decision; there is no remaining wait for the ongoing sessions.
 
 ## Plan review
 
@@ -395,5 +382,5 @@ wrong site/index/release routing (false staging success); interrupted publicatio
 (deliberate public release behavior). Reuse checksum and version checks already
 owned by installer/runtime. No new language validator or dedicated compiler
 diagnostic is proposed. Final authored-diff review precedes the unchanged
-publication gate. The outstanding decisions above block activation, not the
-usefulness of this local plan.
+publication gate. The remaining account actions block complete public staging verification;
+production-specific decisions do not block development/staging activation.

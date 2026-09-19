@@ -1,4 +1,4 @@
-# INACTIVE: recovery of a previously verified production site only.
+# Restore a previously verified production site without moving main/tags.
 # Does not modify main/tags, build archives or upload release assets.
 name: restore production site
 on:

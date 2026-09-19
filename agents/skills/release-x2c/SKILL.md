@@ -1,8 +1,8 @@
 ---
 name: release-x2c
 description: >-
-  Prepare, dry-run, and verify an x2c release, or recover from a failed or
-  broken one. Use when Gary asks to cut, publish, tag, or check a release,
+  Prepare, stage, promote, and verify an x2c release, or recover from a failed
+  or broken one. Use when Gary asks to cut, publish, tag, or check a release,
   to bump the compiler version for a release, or when a release workflow
   run or published release has failed. Do not use to change what the
   release workflow builds; use plan-x2c-change or execute-x2c-plan. Do not
@@ -11,41 +11,45 @@ description: >-
 
 # Release x2c
 
-Take one version from `main` to a verified public release.
-[agents/releasing.md](../../releasing.md) explains the workflow stages, site
-files, versioning, and recovery, and holds the commands for each step of
-[Cut a release](../../releasing.md#cut-a-release). Read it before starting.
+Take one selected commit from `dev` through staging to a verified production
+release. Read [agents/releasing.md](../../releasing.md) for the sequence and
+[deployment operations](../../../etc/release/README.md) for provisioning,
+recovery and first-release constraints.
 
-Gary merges pull requests and pushes tags. Do everything else, and at each
-point that needs him, give the exact command and what it will do.
+Gary authorizes production promotion, advancement of `main`, and release tags.
+Keep those actions separate from ordinary implementation delivery to `dev`.
+Give him exact candidate identities, source SHAs, effects and commands when
+his action is required. Do not infer release authorization from plan approval.
 
-## Prepare the version
+## Prepare and stage
 
-Confirm the work to ship is on `main`, then make the version change in its
-own pull request (step 2). Skip this step when the version already names an
-unpublished release, such as a re-run after a failed build. Gary merges it.
+Land version preparation on `dev` through the root delivery policy and existing
+gate. Skip a bump when the intended version remains unpublished. Dispatch
+`candidate.yml` only for the selected full SHA; record its successful run,
+manifest and independent candidate identity. Staging is a separate explicit
+`stage.yml` operation, bound to the expected current staging output.
 
-## Dry run the commit
+Wait for the entire staging workflow, including four-platform verification
+and durable receipts. A final rebuild invalidates earlier verification and
+requires a new candidate. Diagnose failed jobs and repair on dev; never
+substitute fresh archives into a previously verified identity.
 
-After Gary merges, fetch `main`. When integrating changed `bootstrap/`, run
-`make build-safe` before any local check. Dispatch the dry run (step 3),
-record the SHA it built, and wait for it. On a failure, read the failing
-job's log, fix the cause through an ordinary pull request, and dry run
-again.
+## Promote and verify
 
-## Hand over the tag
+Hand Gary the main fast-forward and annotated-tag commands pinned to the
+verified candidate SHA. Check ancestry and current main first; stop on a
+conflicting published version or tag. A tag triggers no rebuild.
 
-Give Gary the tag commands from step 4, pinned to the dry run's SHA. If the
-tag already exists, check whether its run published anything with
-`gh release view v<version>`, apply
-[Versions and tags](../../releasing.md#versions-and-tags), and say which case
-applies: move the tag, or prepare the next patch version.
+With explicit release authorization, dispatch `promote.yml` for that candidate
+and the observed previous production version. Follow asset upload, complete
+site deployment, live verification and retained proof. Report success only
+after all finish; a green build, tag or visible release alone is insufficient.
 
-## Verify the release
+## Recover
 
-Watch the tag's run and the `pages` run it dispatches, then run both checks
-from step 5, the torch one on a platform torch supports. Report failures with
-the step that failed.
-
-The release is complete when both runs succeeded and the checks pass. A
-merged pull request or a green build is not completion.
+Use the recovery instructions in deployment operations. Preserve immutable
+archives and resume missing identical uploads. Restore a previous verified
+complete site when necessary, retaining public tags/assets and reporting any
+main/site discrepancy. Prepare a patch candidate for defective published bytes
+and ensure production fixes return to dev. Never force main, move a public tag,
+clobber release assets or treat a fresh build as promotion of tested bytes.

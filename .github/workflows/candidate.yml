@@ -1,4 +1,4 @@
-# INACTIVE: install as release.yml only during Gary-authorized cutover.
+# Explicit full candidate rebuild. Tags never compile or publish.
 # Manual full rebuild only. Tags never compile or publish.
 name: release candidate
 
