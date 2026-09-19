@@ -58,6 +58,7 @@ The executable accepts explicit x2c source files and optional include paths:
 ```sh
 builds/x2c-graph graph [-I DIR] FILE...
 builds/x2c-graph digest [-I DIR] FILE...
+builds/x2c-graph clones [--min-size N] [-I DIR] FILE...
 builds/x2c-graph datasets OUTPUT [-I DIR] SRC_FILE... -- LIB_FILE...
 builds/x2c-graph architecture [-I DIR] FILE...
 builds/x2c-graph structure UNIT [-I DIR] FILE...
@@ -83,6 +84,69 @@ missing or ambiguous definitions remain external.
 
 `digest` condenses that graph into per-unit function counts, internal and
 cross-unit call counts, unresolved and indirect calls, and cross-unit cycles.
+
+### Repeated syntax experiment
+
+`clones` constructs an analysis-only canonical cons graph from the parsed
+inputs. Each cell holds a head, a tail, and an inline 64-bit occurrence
+counter: three words instead of the runtime List's two. The runtime List
+layout is unchanged. Hashing and equality use only the head and tail.
+Every normalized occurrence is constructed, including children of previously
+seen subtrees; the counter measures occurrences in this representation, not
+runtime references or compiler allocation activity.
+
+Source origins are kept out of structural identity. Automatic local bindings
+are replaced by one placeholder for indexing; reported matches also preserve
+the correspondence between repeated uses of those bindings. Operators,
+types, literals, members, and global names remain significant. Static
+functions remain qualified by their input unit.
+
+The default minimum size is 24 expanded cons cells. Results rank by
+`size * (verified occurrences - 1)`, with larger size breaking ties. The
+report shows up to 25 groups and eight sites per group. A group is omitted
+when every occurrence is contained in an already reported group; the reported
+occurrence count still includes sites beyond the eight shown. `span` is a
+half-open preorder interval within the named input `unit`, not a byte range.
+Unlocated generated roots are excluded from the candidate listing and counted
+in `unlocated-root-occurrences`; they remain in the structural counts.
+Locations for otherwise unanchored bodies use their first anchored descendant.
+
+`size-distribution` covers every canonical cons cell, including list tails.
+Its buckets have inclusive lower bounds 1, 2, 4, and so on, and exclusive
+upper bounds at the next power of two. Each reports distinct cells, cells
+occurring more than once, and total occurrences. The candidate listing covers
+selected syntax roots, so its totals differ from the all-cell distribution.
+
+For example, run over the compiler and runtime, omitting the generated prelude:
+
+```sh
+set -- x2c/src/*.x
+for unit in x2c/lib/*.x; do
+  [ "$unit" = x2c/lib/x2c.x ] || set -- "$@" "$unit"
+done
+builds/x2c-graph clones --min-size 100 "$@"
+python3 tests/test-clones.py  # optional focused experiment checks
+```
+
+The [initial experiment results](clones-experiment.md) include measured
+storage, timing, the size distribution, and source-checked examples.
+
+This is an investigation aid for macro-expanded, typed syntax. Repetition
+introduced by a shared macro can be intentional. Equal normalized fragments
+do not prove that extracting a helper preserves lifetime, evaluation context,
+or other surrounding obligations. It does not match reordered statements or
+arbitrary consecutive statement sequences.
+Public bindings are compared by emitted name, assuming consistent project
+linkage; this command does not resolve ambiguous public definitions. Generated
+names can also prevent a match. This is not a semantic-equivalence proof.
+
+The basic interning pass takes expected linear time in the expanded input
+representation. Binding correspondence and report construction are separate
+work; their cost is not covered by that claim. Reported storage for the native
+cell table is not total process memory: parsing, atom keys, and source records
+also consume memory.
+
+### Export datasets
 
 `datasets` writes one node table and two directed edge tables under `OUTPUT`:
 

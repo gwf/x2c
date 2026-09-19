@@ -27,10 +27,10 @@ $(DEV_ARCHIVE): x2c-build | $(BUILD)
 		$(COMPILER_OBJECTS)
 
 $(BUILD)/x2c-graph: x2c-graph.x flows.x lifetime.x loop-allocations.x \
-		targets.x $(DEV_ARCHIVE)
+		targets.x clones.x $(DEV_ARCHIVE)
 	@$(X2C) build --plain --build-dir $(BUILD)/graph-cc \
 		--output $@ $(X_FLAGS) x2c-graph.x flows.x lifetime.x \
-		loop-allocations.x targets.x $(DEV_ARCHIVE)
+		loop-allocations.x targets.x clones.x $(DEV_ARCHIVE)
 
 $(BUILD)/ast-parity: tests/ast-parity.x $(DEV_ARCHIVE)
 	@$(X2C) build --plain --build-dir $(BUILD)/ast-parity-cc \
