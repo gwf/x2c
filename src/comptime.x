@@ -389,11 +389,15 @@ static Var _lower_value(Lowering l, int id) {
 
 /* --- literals ----------------------------------------------------------- */
 
+/* A hexadecimal spelling carries `e` and `E` as digits, so the exponent
+   test has to skip it: `0x000E` is fourteen, not a floating literal. */
 static Var _lower_number(Lowering l, List type, String text) {
   long integer;
   double floating;
-  if (type.match(%((!or double float))) || text.contains(".") ||
-      text.contains("e") || text.contains("E")) {
+  int hex = text.startswith("0x") || text.startswith("0X");
+  if (type.match(%((!or double float))) ||
+      (!hex && (text.contains(".") ||
+                text.contains("e") || text.contains("E")))) {
     if (text.try_double(&floating)) return floating;
     return _lower_decline(l, "unreadable floating literal");
   }

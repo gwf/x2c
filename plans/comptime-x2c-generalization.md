@@ -82,7 +82,7 @@ Macro Lisp in the repository, measured 2026-09-18 by counting lines inside
 | --- | --- | --- |
 | `lib/autodiff.xmacro` | 754 | ported (Phase 6 decides whether it replaces the original) |
 | `etc/builtin-macros.xlisp` | 504 | stays Lisp; Phase 7 answered it |
-| `lib/var-tags.xmacro` | 295 | Phase 5 declined it; see below |
+| `lib/var-tags.xmacro` | 295 | ported; two `symbol-set` rows remain |
 | `etc/init.xlisp` | 237 | substrate, stays |
 | `etc/comptime.xlisp` | 121 | name table, stays |
 | `etc/lisp-bindings.xlisp` | 119 | name table, stays |
@@ -423,7 +423,7 @@ agent to say: a four-line comment in `_lower_constant_leaf` (`src/comptime.x`)
 named the typed capture as its example of an unfoldable node, which is no
 longer true.
 
-## Phase 5 - port the remaining macro Lisp (done; var-tags declined)
+## Phase 5 - port the remaining macro Lisp (done)
 
 `lib/system-macros.xlisp` is ported: 12 of its 13 `dedent.*` definitions are
 now four `meta` functions in `lib/system-macros.xmacro`, the file went 145 to
@@ -447,235 +447,82 @@ includes `lib/meta.x`, because the import borrows the unit's symbol table.
 And a `meta` function anywhere in `lib/` needs the checked-in bootstrap to
 carry the comptime lowering first; see "Capability before callers" below.
 
-`lib/var-tags.xmacro` is **declined on evidence**, recorded below.
+`lib/var-tags.xmacro` is ported too, recorded below.
 
-### Why `lib/var-tags.xmacro` stays Lisp
+### `lib/var-tags.xmacro`, ported after three compiler changes
 
-Attempted twice on 2026-09-18 and reverted both times. The obstacle is not
-the file, and it is not an ABI question: it is where in the runtime the
-ledger is consumed.
+Declined twice on 2026-09-18 and then done, after Gary read the obstacle
+correctly: it was declaration ordering, not structure, and the answer was to
+land the capability, refresh the bootstrap, and only then use it.
 
-**A `meta` function that reads a table needs `Array.push` and
-`List.getindex`, and every module that projects the ledger sits below those
-types.** Reproduced against `builds/0` in three of them, each reporting
-`type ("Array") has no method push`:
+The file is 295 Lisp lines and is now 446 lines of x2c: one literal-template
+table, ten row accessors, and the projections that build the ID enumerator,
+the descriptor table, the numeric table, the decoder and the constant rows.
+Two `$(_x2c.symbol-set ...)` invocations are the only Lisp left, because that
+native is private by M6's decision and has no `Meta` spelling.
 
-- `lib/common.x` is the base module, so nothing exists at any point in its
-  parse: the import fails at line 18 and still fails at line 614, beside the
-  `$var.tag.unbox` invocations that use it.
-- `lib/var.x` declares `Var` itself, and `lib/array.x` and `lib/list.x`
-  include it, so they are above it by construction.
-- `lib/dispatch.x` is the same, and adding `#include "array.x"` immediately
-  above the import does not help, because that include is a cycle and
-  resolves to nothing.
+**The evidence is `builds/0/lib/var.c`, byte-identical** to what the Lisp
+produced: the ID enumerator, the 104-row descriptor table, the tag set and
+the whole built-in decode switch. `varconvert.c`, `dispatch.c`, `common.c`
+and `src/type.c` differ only in literal-cache numbering and in the
+declarations `common.x` gained, each checked by normalizing the numbering.
 
-Only `lib/varconvert.x` and `src/type.x`, the two highest consumers, could
-host one. The ledger has five importers, not the four this plan recorded:
-`src/type.x` projects `$var.tag.constant.rows()`.
+### What had to change first
 
-**The second attempt was the ABI route and it does not reach the wall.**
-Gary authorized moving the nine `$var.tag.unbox` accessors out of
-`lib/common.x` on 2026-09-18: make them non-inline, define them in a proper
-home, and leave the forward declarations in `common.h` so the 46 to 48 units
-that call `Var_list` and `Var_string` still compile. That is a better shape
-than the split this plan first tried, and it does free `lib/common.x` -
-which matters, because `common.x` calls `Var_array` itself in the protocol
-adapters it generates, so the accessors could never simply leave. But
-`lib/var.x` and `lib/dispatch.x` still project the ledger for their own
-tables, and they hit the same wall. Freeing `common.x` alone buys nothing.
+Every module that projects the ledger - `lib/common.x`, `lib/var.x`,
+`lib/dispatch.x` - sits below `lib/array.x` and `lib/list.x`, so none of
+them has `Array.push` or `List.getindex` by inclusion. `lib/common.x`
+declares them now, under "the compile-time surface the tag ledger reads",
+which puts them in `common.h` where every such unit already looks. The
+definitions stay where they were.
 
-**A third wall stands behind both.** `lib/common.x` cannot include
-`lib/meta.x`: `meta.x` includes `common.x`, so the include is a cycle and
-`lib/varconvert.x` then fails to parse `Symbol Var.integer_tag(int rank,
-...)` because `Symbol` is never declared. Including `meta.x` late enough in
-`common.x` does work, and costs one `#include "meta.h"` in `common.h` -
-which puts `Meta` in the implicit prelude and makes it a reserved type name
-in every program. `plans/meta-functions.md` states the opposite under
-"Compatibility".
+**`Meta` is now in the implicit prelude**, which Gary approved on
+2026-09-18. `lib/meta.x` included `common.x`, `list.x`, `string.x` and
+`symbol.x`; the last three made the include a cycle, so `common.x` could not
+reach it. It includes only `common.x` now, which supplies every typedef its
+signatures name, and `common.x` includes it. `Meta` is therefore a reserved
+type name in every program, and `src/type.x` needed no change at all because
+the surface reaches it through `common.h`.
 
-Two smaller obstacles are recorded for whoever revisits it. `_x2c.symbol-set`
-is a private native with no `Meta` spelling by M6's decision, so
-`$var.tag.symbolset` and `$var.tag.numeric.symbolset` would stay Lisp in any
-case. And the ledger owes its callers one diagnostic, "unknown Var tag".
+**The nine unbox accessors are declared rather than projected.** A `Var`
+bound to a `List` name converts through `Var.list`, so that conversion has to
+resolve before the ledger is imported, and `$var.tag.unbox` comes from the
+ledger. Declaring the nine by hand breaks the circle; the macro still defines
+them a few lines below.
 
-What both attempts did establish, in case the wall comes down: the table
-transcribes cleanly into one literal template, `<ldouble**>` round-trips
-through a `Symbol` without truncating, a hex literal in a template is an int,
-a Lisp symbol from a `$(def ...)` table compares equal to an x2c `<symbol>`
-literal, and a `meta` function can take that table as an argument from the
-macro body, so the data need not be reachable by name.
+### Three compiler defects this found, each fixed
 
-**What would reopen it.** A `meta` function whose body reaches no collection
-operation, or moving the collection types below `Var`. Neither is a port.
+Each needed a bootstrap refresh before `lib/` could rely on it, which is the
+"capability before callers" rule below, applied three times in one session.
 
-### Why this section used to say blocked
+- **A hexadecimal literal containing `e` or `E` lowered to a floating
+  value.** `_lower_number` in `src/comptime.x` tested for an exponent by
+  looking for those letters anywhere in the spelling, so `0x000E` became
+  `14.0` and the switch label built from it was rejected by the C compiler as
+  a double. This was a silent wrong answer wherever the value was not a
+  label. The test now skips a `0x` prefix. `mt_hex`, `mt_hex_upper` and
+  `mt_floats` in `comptime-lowering.x` pin it.
+- **A `.xmacro` holding both `meta` functions and macro definitions collided
+  with itself.** A file that contributes a `meta` function is read again in
+  each pass rather than replayed, and the second read reported every macro as
+  "collides with a visible macro". `_import` in `src/macros.x` now drops the
+  macros that import previously contributed before re-reading. Every build
+  exercises this, since `common.x` and `dispatch.x` both import the ledger.
+- **An import's generated names moved the unit's counters.** A `meta` body in
+  an import is parsed in every importing unit and in none built from the
+  `.xi` prelude, so `unittest/probes/run-symbol-snapshot.sh` saw the two
+  modes emit different `_x2c_macro_*` numbers. `Compiler.fresh_name` counts
+  import names separately and spells them `_x2c_m<stem>_<n>`, which also
+  makes a collision with a unit's own name impossible. `meta-import.c` is the
+  checked-in evidence; its five generated locals were renamed and nothing
+  else moved.
 
+### Two smaller things, unchanged
 
-**Blocked, and the capability is now planned in `plans/meta-functions.md`.**
-That plan's M2 adds the import-loop branch this phase needs. One correction to
-what follows: the branch does not need to emit nothing. `x2c.comptime.install`
-already returns `%($fn)`, so a compile-time function is emitted as a native
-function today, and emission from an import is the ordinary header problem.
-
-**Blocked on a missing capability, established 2026-09-18.** There is nowhere
-to put a compile-time function that a shipped macro can rely on. Three probes,
-all against the merged pass:
-
-- A `.xmacro` cannot hold one. `$ct()` above a function definition inside a
-  macro import fails with `unexpected form in macro import`; a macro import
-  carries macro definitions and `$(...)` Lisp, not x2c function definitions.
-- `#include` of a `.x` that defines one does not install it. The including
-  unit reports `(unbound (name shout_width))`, so an include does not run the
-  decorator.
-- What does work is the consuming unit defining it: a macro imported from a
-  `.xmacro` calls a compile-time function the consuming unit installed, and
-  returns the right answer. That is the only shape available today.
-
-So the campaign reaches Lisp inside a translation unit, which the autodiff
-port demonstrates, and not Lisp inside a shipped macro library, which is
-where all 497 remaining lines live. `lib/system-macros.xlisp`,
-`lib/varops.xlisp` and `lib/var-tags.xmacro` are each the body of a macro
-every consumer imports; requiring each consumer to define the functions first
-would change their public surface, which the phase forbids.
-
-This is Phase 7's ordering finding one level down, and it generalizes: the
-blocking capability is installing a compile-time function from a shipped
-library. Three candidate routes, none built, none costed:
-
-1. The compiler sub-translates a named `.x` at import time.
-2. `#include` runs a decorator in the including unit.
-3. A `.xmacro` form carries x2c function source for the compiler to translate.
-   There is no SDK binding that parses x2c text into an AST today;
-   `x2c.source.text` goes the other way.
-
-Route 1 is the same mechanism Phase 7 wanted for `etc/builtin-macros.xlisp`,
-so one capability unblocks both. Decide it before scheduling this phase.
-
-### The economics, measured 2026-09-18 after M2 unblocked it
-
-Porting a shipped macro's Lisp body to meta functions is a **translation-time
-regression**, and the case for doing it is readability rather than speed.
-
-| | Lisp | meta |
-| --- | --- | --- |
-| declaring 44 accessors | +1 ms | +20 ms |
-| per call, accessor work | 0.075 ms | 0.075 ms |
-| autodiff, per derivation | 581 ms | 79 ms |
-
-Per-call cost is identical for ordinary work, because a Lisp `defun` is
-word-compiled by `_auto_analyze` just as a lowered meta function is. The
-autodiff win is real but specific: it comes from the generated Lisp being
-better than the hand-written Lisp there - `match` compiled once instead of
-`match-case` re-expanded per call - not from x2c being faster than Lisp.
-
-**The declaration cost was more than halved on 2026-09-18**, and the number
-above is superseded. The cost was never the install: it was parsing each
-definition and lowering it again in every importing unit, in both of that
-unit's passes. `src/comptime.x` now keeps the lowered forms for the process,
-so a file's function lowers once however many units import it.
-`plans/meta-functions.md` records the split, what makes the forms safe to
-share, and the measurements.
-
-**Corrected twice, 2026-09-18.** An earlier version of this section put the
-importer counts at 32 and 9. Both were wrong by about eight times: the grep
-behind them counted copies under `unittest/build/`, which are build artifacts,
-and a file's own comment. The real counts are:
-
-| library | importers |
-| --- | --- |
-| `lib/var-tags.xmacro` | 4 - `lib/common.x`, `lib/dispatch.x`, `lib/varconvert.x`, `lib/var.x` |
-| `lib/varops.xlisp` | 1 - `lib/varops.x` |
-| `lib/system-macros.xmacro` | 1 - `unittest/test-system-macros.x` |
-
-And the per-declaration cost is now 0.31 ms, down from 0.56 ms, after the
-process-wide lowering cache in `plans/meta-functions.md`. A Lisp `defun` costs
-0.04 ms.
-
-Together those two corrections change the conclusion. Applied to the
-candidates:
-
-- `lib/var-tags.xmacro`: 44 functions over 4 importers, about **55 ms**, not
-  the 630 ms the wrong counts implied.
-- `lib/system-macros.xlisp`: measured at **+11 ms** on the one unit that
-  imports it.
-
-Phase 5 costs tens of milliseconds, not hundreds. That is small enough that
-readability decides it, which is what the phase was always for. The
-autodiff-shaped win needs a body whose Lisp was doing something expensive and
-neither candidate has that shape, so do not expect a speedup - expect a wash.
-
-### Two defects the first port found
-
-**`foreach` inside a `.xmacro`: fixed.** A `meta` function in a macro import
-that iterated a `List` or `Array` reported `type ("List") is not iterable`,
-while the identical body in a `.x` unit ran. The cause was not a missing
-shared field: `_shallow_parse_loop` opens with `rebuild_protocols(NULL)` and
-an empty `conforms` because collection parses no bodies - except a `meta`
-definition in an import, which is the one body it does parse. The import now
-installs the protocols visible to it on first use. `List`, `Array` and `Map`
-all iterate. A `Var` collection still declines, because its expansion needs
-`Var_iter` and `Iter`, neither of which has a compile-time representation;
-write the concrete type.
-
-That fix matters out of proportion to its size, because `foreach` is the
-iteration idiom and without it the `dedent` port had to spell "strip the
-prefix from each line" as a `replace` over the whole text - the one function
-in that port that came out worse than its Lisp. It should be rewritten as a
-loop now.
-
-### Original scope, for when it is unblocked
-
-
-Depends on Phases 1-3. `lib/var-tags.xmacro` at 295 Lisp lines is the real
-one; the error and system macros are small. `etc/compiler-sdk.xlisp` and
-`etc/lisp-extras.xlisp` are judged during this phase: some of their contents
-are name tables and stay.
-
-Each port keeps the macro's public surface identical and is verified by the
-suites that already cover it, not by new tests written for the port.
-
-Phase 7 took `etc/builtin-macros.xlisp` out of scope. Re-counting what is
-left, on 2026-09-18, changed the picture twice over. The original inventory
-covered `lib/*.xmacro` and `etc/*.xlisp` and so missed two files that are
-neither: `lib/system-macros.xlisp` (145 lines, 22 definitions) and
-`lib/varops.xlisp` (57 lines, 10 definitions), each imported by its own
-`.xmacro`. Being per-unit macro bodies rather than session libraries, they do
-not have Phase 7's ordering problem at all, which makes them the easiest
-targets here.
-
-Against that, three files counted before hold no logic to port:
-`lib/error-macros.xmacro` is one `$(def ...)` data table of cause names,
-`lib/error-private.xmacro` is `x2c.ident` calls inside a macro body, and
-`lib/system-macros.xmacro` is an import and two call sites.
-
-So the phase is about 497 lines of real logic: `lib/var-tags.xmacro` at 295,
-`lib/system-macros.xlisp` at 145, `lib/varops.xlisp` at 57.
-
-Start with `lib/system-macros.xlisp`. Its 22 definitions are the `dedent`
-implementation - `substring`, character tests, line splitting, prefix
-stripping - which is string processing written in Lisp because Lisp was the
-only compile-time language. It is the clearest case in the repository for
-what this campaign is for, and x2c's `String` operations already say all of
-it directly. `lib/varops.xlisp` is next: a data table plus row accessors,
-the same shape as `var-tags` and a smaller rehearsal for it.
-
-**One construct to know about before starting, scoped 2026-09-18.**
-`var-tags` passes procedures as values: `var.tag.map` and `var.tag.filter`
-each take one. Calling a `Func` held in a parameter does not lower, and
-binding a name for it would not help, because `f(v)` is not a call in the
-AST at all. It expands to a statement-expression that declares a `FuncArg`,
-probes the reference type through `x2c_func_reference_type`, takes the
-address of the argument, and only then reaches `Func.apply` - the whole C
-calling convention, with struct locals and address-of. Reproduce it with
-`Var call1(Func f, Var v) { return f(v); }` under a `$c.show` decorator.
-
-The port does not need it. `var.tag.map` and `var.tag.filter` are `map` and
-`filter`, so write them as `List.map` and `List.filter` with a `%!(Var x) =>`
-lambda, which the pass already lowers because the receiving operation is a
-bound native; `comptime-lowering.x`'s `map` case and the autodiff port's
-`ad_unbind` both do this today, including calling another compile-time
-function from inside the lambda. Take that route rather than teaching the
-pass a calling convention for one caller.
+`_x2c.symbol-set` has no `Meta` spelling, so the two tag sets stay Lisp. And
+`x is <tag>` compiles to the `Var.is_row` fast path, which has no
+compile-time meaning, so the ledger reads `bits.tag() == <list>` instead;
+that is a decline worth knowing about for any `meta` function.
 
 ## Capability before callers: the bootstrap had to carry the lowering
 

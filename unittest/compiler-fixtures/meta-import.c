@@ -92,11 +92,11 @@ static int mi_score(String path){
   int score = 0;
   {
     Var part;
-    List _x2c_macro_object_1 = String_split(path, _10);
-    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
-    Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
-      part = _x2c_macro_cursor_output_1;
+    List _x2c_mmacro_object_1 = String_split(path, _10);
+    List _x2c_mmacro_cursor_1 = _x2c_mmacro_object_1;
+    Var _x2c_mmacro_cursor_output_1;
+    while(List_try_next(_x2c_mmacro_object_1, & _x2c_mmacro_cursor_1, & _x2c_mmacro_cursor_output_1)){
+      part = _x2c_mmacro_cursor_output_1;
       score = score + String_len(Var_string(part));
     }
 

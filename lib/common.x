@@ -15,7 +15,6 @@
 #pragma once
 
 $(import "error-macros.xmacro")
-$(import "var-tags.xmacro")
 
 #include <float.h>
 #include <limits.h>
@@ -611,6 +610,45 @@ inline String long.repr(long l)          => l.var().repr();
 inline int Var.is_row(
   Var value, unsigned top, unsigned long mask, unsigned long bottom) =>
   value.u64 >> 48 == top && (value.u64 & mask) == bottom;
+
+/* --- the compile-time surface the tag ledger reads -----------------------
+   `var-tags.xmacro` reads its ledger with `meta` functions, and every unit
+   that imports it sits below `lib/array.x` and `lib/list.x` in the include
+   graph, so none of them has these operations by inclusion. Declaring them
+   here puts them in `common.h`, which every such unit already has; the
+   definitions stay where they are. Add a row when a projection needs one.
+*/
+int List.len(List lst);
+Var List.getindex(List list, int index);
+int List.contains(List list, Var value);
+int List.try_next(List lst, List *cursor, Var *out);
+Var Array.push(Array array, Var elem);
+List Array.list(Array array);
+int Array.try_next(Array array, int *cursor, Var *out);
+int String.startswith(String text, String prefix);
+String Var.str(Var value);
+Symbol Var.tag(Var v);
+
+/* The nine unbox accessors, declared rather than projected: a `Var` bound to
+   a `List` name converts through `Var.list`, so that conversion has to
+   resolve before the ledger is imported. The macro below defines them. */
+Array Var.array(Var value);
+Block Var.block(Var value);
+Buffer Var.buffer(Var value);
+Bytes Var.bytes(Var value);
+File Var.file(Var value);
+Iter Var.as_iter(Var value);
+List Var.list(Var value);
+Map Var.map(Var value);
+String Var.string(Var value);
+
+/* `Meta` reaches the compiler from a `meta` function. It is declared here,
+   and so in every unit, because the ledger's projections build syntax with
+   it and the modules that project the ledger cannot include `lib/meta.x`
+   any other way. */
+#include "meta.x"
+
+$(import "var-tags.xmacro")
 
 $var.tag.unbox(Array, array, <array>);
 $var.tag.unbox(Block, block, <block>);

@@ -1087,7 +1087,16 @@ static List _import(
         /* A `meta` definition is bound in the current symbol table and
            emitted where its import stands, so a pass that has not seen this
            path yet reads the file again instead of replaying definitions. */
-        if (meta) replay = !c.kw_seen.contains(path);
+        if (meta) {
+          replay = !c.kw_seen.contains(path);
+          /* The re-read defines this import's macros again, so the ones the
+             previous pass left behind are dropped first. Without that the
+             second definition reads as a collision with another import,
+             which is what the check below the parse loop is for. */
+          if (replay)
+            foreach (Var (name, definition), definitions.map())
+              c.macros.del(name);
+        }
         else if (!c.kw_seen.contains(path)) {
           foreach (Var (name, definition), definitions.map())
             c.macros[name] = _rebind_import_definition(c, definition);

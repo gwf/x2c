@@ -72,6 +72,7 @@ int Var.known_tag(Symbol tag) =>
 
 $(import "var-tags.xmacro")
 
+
 /* Symbol tags are unique but sparse. `var-tags.xmacro` assigns their dense
    IDs, coarse kinds, encoding fields, and lookups in one compile-time
    table. */

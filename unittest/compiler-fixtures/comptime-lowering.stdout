@@ -94,6 +94,9 @@ meta-fold    19 19
 join-array   x/y x/y
 cell-update  7 7
 loop-update  5 5
+hex          282 282
+hex-upper    479 479
+floats       1000.000000 0.250000 0.750000 1000.000000 0.250000 0.750000
 func-none    5 5
 func-one     17 17
 func-two     3-x 3-x

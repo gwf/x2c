@@ -771,6 +771,20 @@ meta static int mt_loop_update(String text) {
   return score;
 }
 
+/* --- number spellings ---------------------------------------------------- */
+
+/* A hexadecimal literal carries `e` and `E` as digits, and the exponent test
+   read them as a floating spelling, so `0x000E` lowered to 14.0 and a switch
+   label built from one was rejected by the C compiler as a double. Every
+   answer below has to be an integer. */
+meta static int mt_hex(void) => 0x000E + 0x00E0 + 0xE + 0x1E;
+
+meta static int mt_hex_upper(void) => 0X00FE + 0XE1;
+
+/* The floating spellings the same test still has to accept. */
+meta static String mt_floats(void) =>
+  %"${1e3} ${2.5E-1} ${0.75}";
+
 /* --- callable values ----------------------------------------------------- */
 
 /* `f(x)` is not a call in the AST. It expands to a stored callee, a
@@ -976,6 +990,9 @@ int main(void) {
          $(mt_cell_update 1), mt_cell_update(one));
   printf("loop-update  %d %d\n",
          $(mt_loop_update "ab,cde"), mt_loop_update(csv));
+  printf("hex          %d %d\n", $(mt_hex), mt_hex());
+  printf("hex-upper    %d %d\n", $(mt_hex_upper), mt_hex_upper());
+  printf("floats       %s %s\n", $(mt_floats), mt_floats());
   int zero = 0, seven = 7, three = 3, ten = 10;
   String ex = "x", ay = "a", bee = "b";
   printf("func-none    %d %d\n", $(mt_call_none 0), mt_call_none(zero));

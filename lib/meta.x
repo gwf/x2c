@@ -29,10 +29,11 @@
 
 #pragma once
 
+/* Only `common.x`, which supplies every typedef these signatures name. A
+   wider include set would be a cycle: `lib/common.x` includes this file so
+   that `Meta` is reachable from the modules that project the Var tag
+   ledger, and those sit below `list.x` and `string.x`. */
 #include "common.x"
-#include "list.x"
-#include "string.x"
-#include "symbol.x"
 
 /** The namespace the compile-time operations below belong to. It is a type
     only so that its operations spell as `Meta.operation`; no value of it
