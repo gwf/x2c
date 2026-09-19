@@ -939,7 +939,8 @@ static Map library_imports = NULL, static int library_filling = 0;
 static Map library_definitions = NULL;
 
 static int _inherited_import(String path) {
-  return !library_filling && library_imports &&
+  /* An empty `Map` is false, so the test is for the allocation. */
+  return !library_filling && (void *) library_imports != NULL &&
          library_imports.contains(path);
 }
 
@@ -1036,17 +1037,19 @@ void Compiler.publish_macro_library(Compiler compiler, Lisp shared) {
 }
 
 /** Records or reports one compile-time definition of the shared session.
-    While that session is being filled every definition is recorded and the
-    answer is 0. Afterwards the answer is whether it holds `key`, which is a
-    file and a name, so a unit that reads the same file again installs
-    nothing: the definition it would install is the one it already inherits.
+    The answer is whether that session already holds `key`, which is a file
+    and a name, and while the session is being filled the key is recorded as
+    well. A reader that reads the same file again therefore installs nothing,
+    whether it is a later unit or the filling itself reaching the file twice:
+    the definition it would install is the one it already has.
 */
 int Compiler.shared_definition(Compiler compiler, String key) {
   (void) compiler;
-  if (!library_definitions) return 0;
-  if (!library_filling) return library_definitions.contains(key);
-  library_definitions[key] = 1;
-  return 0;
+  /* An empty `Map` is false, so the test is for the allocation. */
+  if ((void *) library_definitions == NULL) return 0;
+  int known = library_definitions.contains(key);
+  if (library_filling) library_definitions[key] = 1;
+  return known;
 }
 
 /** Evaluates the compile-time Lisp libraries once for this process. */
@@ -1415,10 +1418,11 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
      here, at the marker, rather than as an uncaught cause at the error
      floor. */
   try installed = c.install_comptime(fn);
-  catch %(?cause *): {
+  catch %(?code *detail): {
+    List cause = cons(code, detail);
     c.report_error(
       <macro>, "this meta function could not be installed", marker,
-      %("reason: $cause"));
+      %("reason: ${cause.repr()}"));
     return;
   }
   if (installed) {
