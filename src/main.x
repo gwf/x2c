@@ -129,6 +129,9 @@ static void _compile_file(
     case <symbols>:
       compiler.dump_symbol_table(compiler.sym.current_symbols());
       return;
+    case <source-ast>:
+      foreach (List node, ast) printf("\n%s\n", node.repr());
+      return;
     case <dump-ast>:
       foreach (List node, ast) printf("\n%s\n", _ast_inspection_repr(node));
       return;

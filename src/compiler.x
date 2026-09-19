@@ -114,6 +114,7 @@ typedef struct Compiler {
   // Visible protocol adoptions indexed by base and participant.
   Map adoptions;
   Map macro_holes;
+  int source_syntax;
   Map local_macro_captures;
   List lambda_scopes;
   Array match_types;
@@ -469,6 +470,10 @@ void Compiler.record_source_reference(
 */
 Map Compiler.semantic_binding_facts(Compiler c) => c.sym.binding_facts;
 
+/** Reports the outer deferred source parser, excluding macro templates. */
+int Compiler.parsing_source_syntax(Compiler c) => c.source_syntax &&
+  c.macro_holes && c.macro_holes.contains(%(source-ast));
+
 /** Returns the active macro definition's borrowed local map, or `NULL`. */
 Map Compiler.macro_definition_locals(Compiler compiler) {
   Var stored = compiler.macro_holes[%(locals)];
@@ -806,7 +811,8 @@ int Compiler.record_origin(Compiler c, Token token) {
 */
 List Compiler.anchor_origin(Compiler compiler, List node, Token token) {
   if (!node) return node;
-  if (compiler.macro_holes) return %(at m-origin $node);
+  if (compiler.macro_holes && !compiler.parsing_source_syntax())
+    return %(at m-origin $node);
   int occurrence = compiler.record_origin(token);
   if (!occurrence) return node;
   return %(at $occurrence $node);
@@ -1624,6 +1630,16 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   c.source_private = 0;
   c.resolve_protocols();
   if (generated_symbols) c.install_generated_protocol_symbols();
+  Map saved_holes = c.macro_holes;
+  defer c.macro_holes = saved_holes;
+  int saved_runtime_literals = c.runtime_literals;
+  defer c.runtime_literals = saved_runtime_literals;
+  if (c.source_syntax) {
+    c.runtime_literals = 1;
+    c.macro_holes = {};
+    c.macro_holes[%(locals)] = (Map) {};
+    c.macro_holes[%(source-ast)] = 1;
+  }
   Token conflict = NULL;
   $let(c.recovery_depth, c.recovery_depth + 1) {
     _append_preproc(c, nodes);
@@ -1650,7 +1666,22 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
             if (c.script && c.script.defines_main &&
                 c.script_statement_executes())
               _report_script_statement(c);
-            Ast node = _replay_declaration_bundle(c);
+            Ast node = NULL;
+            if (c.source_syntax) {
+              // Establish generated grammar, then retain the source invocation.
+              $let(c.macro_holes, NULL)
+              $let(c.runtime_literals, saved_runtime_literals)
+              $let(c.token, c.token) {
+                if (!_replay_declaration_bundle(c)) {
+                  if (c.peek(0) == <"$(">)
+                    c.parse_macro_lisp_top_level();
+                  else if (c.macro_starts_target_at(AST_UNIT) &&
+                           c.macro_targets_unit())
+                    (void) c.parse_top_level();
+                }
+              }
+            }
+            else node = _replay_declaration_bundle(c);
             if (!node) node = c.parse_top_level();
             if (node && node.car() == <seq>) {
               foreach (List item, node.cdr()) {
@@ -1698,7 +1729,8 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   if (c.script && !c.script.defines_main && !c.error_count())
     _check_script_locals(c, ast);
   _check_unmatched_braces(c);
-  if (!c.error_count()) _validate_static_object_initializers(c);
+  if (!c.source_syntax && !c.error_count())
+    _validate_static_object_initializers(c);
   return ast;
 }
 

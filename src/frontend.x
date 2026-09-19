@@ -225,6 +225,7 @@ int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) {
   compiler.source_map = frontend.request.source_map;
   compiler.sources = frontend.request.sources;
   compiler.source_facts = frontend.request.source_facts;
+  compiler.source_syntax = frontend.request.dump == <source-ast>;
   compiler.source_primary = 1;
   if (compiler.source_facts) {
     compiler.source_occurrences = [];
