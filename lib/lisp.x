@@ -1657,18 +1657,6 @@ static int LispLower._auto_expand(LispLower l, Var head, List args,
   return 1;
 }
 
-/* A tail call may reuse its own frame only when the callee is the lambda
-   being compiled: the frame it replaces then holds the same parameters,
-   so a free name resolving through the caller chain still finds what it
-   found before. Calling a different lambda in tail position would drop
-   the caller's locals out of that chain, which the evaluator keeps. */
-static int LispLower._auto_self_call(LispLower l, Var head) {
-  Var value;
-  if (!_lookup(l.lisp, l.env, head, &value) || value is not <lambda>) return 0;
-  if (value.lambda() != l.lambda) return 0;
-  return 1;
-}
-
 /* Undo a declined attempt. Only LLAMBDA words own a callee, so the rewind
    frees those programs; constants intern in emission order, so every index
    the retained words name was added before the mark. */
@@ -1787,8 +1775,7 @@ static int LispLower._auto_lower(LispLower l, Var expression, int tail) {
       return 1;
     }
   if (!l._auto_load_name(head)) return 0;
-  return l._auto_compile_call(
-    form.cdr(), tail && l._auto_self_call(head));
+  return l._auto_compile_call(form.cdr(), tail);
 }
 
 /* Earlier forms and call arguments may rebind a special. Check at the

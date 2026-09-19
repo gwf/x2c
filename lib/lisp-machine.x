@@ -195,13 +195,15 @@ static void LispMachine._call(LispMachine m, int argc) {
   m._push_value(result);
 }
 
-/* A self-call in tail position reuses the frame it is standing in. The
-   caller's locals and operands are dead, and its environment frame is
-   replaced in place. Frames, locals, and values stay flat, so the loop runs
-   in constant space and never reaches the crossing in `_call`. The lowering
-   emits this only when the callee is the lambda being compiled. The
-   environment frame it replaces holds the same parameters, and free-name
-   resolution is unchanged. */
+/* A call in tail position reuses the frame it is standing in, whatever
+   prepared Lambda it names. The caller's locals and operands are dead and
+   its environment frame is replaced in place, which is sound because a free
+   name is lexical: the callee never reads the frame it lands in. Frames,
+   locals, and values stay flat, so a loop that leaves one lambda for another
+   runs in constant space instead of nesting a frame per turn.
+
+   A callee that is not prepared, whose arity does not match, or whose slots
+   do not fit the room this frame reserved goes through `_call` instead. */
 static void LispMachine._tail_call(LispMachine m, int argc) {
   int callable_at = m.value_count - argc - 1;
   if (argc < 0 || callable_at < m.operand_base) {
@@ -212,8 +214,8 @@ static void LispMachine._tail_call(LispMachine m, int argc) {
   MachineView view;
   int params = 0;
   Var body = void;
-  if (!Lisp.program(callable, &view, &params, &body) ||
-      view.code != m.program.code || argc != params) {
+  if (!Lisp.program(callable, &view, &params, &body) || argc != params ||
+      m.local_base + argc + MACHINE_LOCAL_RESERVE > MACHINE_LOCAL_MAX) {
     m._call(argc);
     return;
   }
@@ -224,7 +226,8 @@ static void LispMachine._tail_call(LispMachine m, int argc) {
   m.value_count = m.operand_base;
   m.local_count = m.local_base + argc;
   Lisp.retarget(m.lisp_context, callable, m.locals + m.local_base, argc);
-  m.pc = m.program.root;
+  m.program = view;
+  m.pc = view.root;
   if (m.stats) m.stats.prepared_calls++;
 }
 

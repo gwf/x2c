@@ -104,7 +104,9 @@ static void lisp_auto_second_call_transition(void) {
   EXPECT_INT_EQ((int) mstats.global_loads, 4);
   EXPECT_INT_EQ((int) mstats.prepared_calls, 1);
   EXPECT_INT_EQ((int) mstats.native_calls, 2);
-  EXPECT_INT_EQ((int) mstats.lisp_returns, 4);
+  // Three returns: the helper's call is in tail position and reuses the
+  // frame it stands in rather than returning from one of its own.
+  EXPECT_INT_EQ((int) mstats.lisp_returns, 3);
   lisp.destroy();
 }
 
@@ -249,9 +251,9 @@ static void lisp_auto_recursion_and_effects(void) {
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(brancher 7)")), 12);
   EXPECT_INT_EQ((int) mstats.prepared_calls, 2);
   EXPECT_INT_EQ((int) mstats.native_calls, 1);
-  // Three returns, not four: helper's recursive call is in tail position
-  // and reuses its own frame.
-  EXPECT_INT_EQ((int) mstats.lisp_returns, 3);
+  // Two returns: helper's recursive call and its tail call back out both
+  // reuse the frame they stand in, so only the entries return.
+  EXPECT_INT_EQ((int) mstats.lisp_returns, 2);
 
   // Left-to-right effects: top-level arguments through the shared
   // owner, nested arguments through the machine.
@@ -470,11 +472,11 @@ static void lisp_auto_tail_calls_stay_flat(void) {
   lisp.destroy();
 }
 
-static void lisp_auto_tail_call_only_to_self(void) {
-  // A tail call to a different lambda still stacks a frame: the callee's
-  // slots are its own, so the caller's frame cannot be reused for them.
-  // `leaf` reads the global `x`; the caller's parameter of the same name is
-  // not part of its environment.
+static void lisp_auto_tail_call_to_another(void) {
+  // A tail call reuses the frame it stands in whatever lambda it names. The
+  // callee writes its own slots over the caller's dead ones, and a free name
+  // is lexical, so `leaf` reads the global `x` rather than the `x` its
+  // caller was passed. One frame serves the whole chain.
   Lisp lisp = Lisp.new();
   MachineStats mstats;
   memset(&mstats, 0, sizeof(mstats));
@@ -484,7 +486,7 @@ static void lisp_auto_tail_call_only_to_self(void) {
   _ev(lisp, "(defun mid (x) (leaf))");
   for (int i = 0; i < 3; i++)
     EXPECT_INT_EQ(Var.integer(_ev(lisp, "(mid 99)")), 1);
-  EXPECT_TRUE(mstats.max_frames > 1);
+  EXPECT_INT_EQ(mstats.max_frames, 1);
   lisp.destroy();
 }
 
@@ -945,7 +947,7 @@ void lisp_auto_suite(void) {
   $test.run(lisp_auto_expands_macro_heads);
   $test.run(lisp_auto_macro_rebinding_guard);
   $test.run(lisp_auto_tail_calls_stay_flat);
-  $test.run(lisp_auto_tail_call_only_to_self);
+  $test.run(lisp_auto_tail_call_to_another);
   $test.run(lisp_auto_forced_evaluator_arm);
   $test.run(lisp_auto_local_bindings);
   $test.run(lisp_auto_local_bindings_inline);
