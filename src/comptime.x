@@ -820,6 +820,13 @@ static Var _lower_content(Lowering l, List type, Var content) {
     case %(ident (binding ?(int id) ?(String name))): {
       if (!l.locals.contains(id) && type.match(%((func *) *)))
         return Atom.intern(name);
+      /* An enumerator's value lives only in the enum declaration it was
+         written in: the symbol table records the enum type and that the name
+         is an enumerator, never the number. Reading it as file-scope state
+         answered zero, which is a wrong value rather than a refusal. */
+      Type named = type;
+      if (!l.locals.contains(id) && named.is_enum())
+        return _lower_decline(l, "an enum constant has no compile-time value");
       return _lower_value(l, id);
     }
     case %(parens (block *)):             return _lower_application(l, content);
@@ -1844,17 +1851,27 @@ static void _retain_lowering(String key, List forms, List callees) {
   _lowered_defs()[key] = entry;
 }
 
+/* Every install records a function that reached file-scope state, whichever
+   spelling installed it, because `_lower_scan_callee` reads that back to
+   give a caller the same reach. Both spellings reach the same lowering, so
+   the recording belongs here rather than beside one of them. */
+static int _installed_comptime(Compiler compiler, String name) {
+  if (name && lower_reached_globals) compiler.meta_impure[name] = 1;
+  return 1;
+}
+
 /** Lowers `fn` and evaluates the result in the macro session, so the
     function is callable from compile-time Lisp under its own name.
     Returns whether the lowering succeeded. This method mutates the macro
     session and does not open a semantic transaction.
 */
 int Compiler.install_comptime(Compiler compiler, List fn) {
-  String key = NULL;
+  String key = NULL, own = NULL;
   /* A recursive call resolves against the name before the body is lowered,
      the way a C prototype lets a function call itself. */
   match (fn)
     case %(function ? (bind (binding ? ?(String name)) ?) ?): {
+      own = name;
       compiler.macro_lisp.eval(%(def ${Atom.intern(name)} (lambda () 0)));
       if (compiler.filename) key = %"${compiler.filename}#$name";
     }
@@ -1865,13 +1882,13 @@ int Compiler.install_comptime(Compiler compiler, List fn) {
           foreach (Var form, forms) compiler.macro_lisp.eval(form);
           lower_reached_globals = globals;
           lower_reached_meta = meta;
-          return 1;
+          return _installed_comptime(compiler, own);
         }
   List forms = compiler.lower_comptime(fn);
   if (!forms) return 0;
   if (key) _retain_lowering(key, forms, lower_session_callees);
   foreach (Var form, forms) compiler.macro_lisp.eval(form);
-  return 1;
+  return _installed_comptime(compiler, own);
 }
 
 /** Returns whether the last `Compiler.install_comptime` reached file-scope

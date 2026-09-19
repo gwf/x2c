@@ -643,14 +643,32 @@ into `--`.
 - **File-scope state.** `_lower_read` lowers a non-local read to
   `C.gread`, which reads the session's own `C._globals`; no unit initializer
   writes it, so a `meta` function that reads a file-scope variable answers
-  differently in its two forms. The lowering now records that it reached
-  file-scope state, `Compiler.install_meta_function` records the function as
-  impure instead of foldable, and `_lower_scan_call` makes every later `meta`
-  function that calls it impure too. `meta-folding.x` pins both: `mf_offset`
-  and `mf_shifted` keep their calls, and the fixture's answers are the
-  run-time ones. This is a pre-existing disagreement rather than a new one -
-  `$(mf_offset 1)` already answers 1 today - and the pass only refuses to
-  spread it.
+  differently in its two forms. The lowering records that it reached
+  file-scope state and `_lower_scan_call` gives every caller the same reach.
+
+  Recording such a function as impure rather than foldable was not enough,
+  and it was **corrected**: folding declined, but a macro calling the same
+  function still took the session's answer with nothing said. A `meta`
+  declaration that reaches file-scope state is now refused outright, since
+  `meta` is the word for a function whose two forms agree. The `$comptime()`
+  decorator promises one form and keeps the state, which `ct_next` and
+  `ct_discard` in `comptime-lowering.x` exercise; `install_comptime` records
+  the reach for either spelling, so a `meta` function calling a decorated
+  impure one is refused too. `comptime-declines-meta-globals` pins the
+  refusal, and `meta-folding.x`'s `mf_offset` and `mf_shifted` are gone with
+  the rule they illustrated - `mf_narrow` took their place, showing a result
+  type that is left alone rather than a body that disagrees.
+
+  The `const` exemption a review asked for is not available: a file-scope
+  initializer is unit syntax that the symbol table does not keep, so nothing
+  at lowering time can tell a `const` variable's value from a mutable one's.
+
+- **An enum constant.** Same shape, found the same way: an enumerator is an
+  `ident` whose binding the function does not declare, so it reached
+  `C.gread` and answered zero. Its value is not available either -
+  `Sym.declare_enumerator` records the owner and `Sym.declare` the enum
+  type, and the number stays in the enum declaration's own syntax - so the
+  lowering refuses it by name. `comptime-declines-meta-enum` pins it.
 - **A raise or a decline.** The evaluation runs under a `catch` that returns
   `NULL`, so a compile-time failure leaves the call. A lowering that declined
   never installs, so its function is never foldable.
