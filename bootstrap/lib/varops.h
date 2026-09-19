@@ -6,6 +6,7 @@
 #define __GUARD_0x8326F35F__
 
 #include "common.h"
+#include "meta.h"
 #include "varconvert.h"
 char x2c_var_update_i8(volatile char * lhs, Symbol op, Var rhs);
 

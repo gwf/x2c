@@ -30,8 +30,8 @@ and no others:
 Everything else is a candidate, including the parts of `etc/init.xlisp` and
 `etc/builtin-macros.xlisp` that earlier revisions of this plan called
 permanent. M7, callable values, is built; M8, installing a compile-time
-function at session start, is what still gates most of the rest. Both are
-scoped in `plans/meta-functions.md`.
+function at session start, is scoped and not built, and is what still gates
+the rest. Both are in `plans/meta-functions.md`.
 
 Nothing here is done for speed. Measured, a rewrite is neutral on the call
 side because a Lisp `defun` is word-compiled too, and costs about 0.31 ms per
@@ -896,6 +896,7 @@ ordinary functions.
 - **The rest needed M7, which is built.** The first five are `map`, `filter`,
   `foldl`, `member` and `assoc`; three take a function, and those three are
   written as meta functions in `comptime-lowering.x` and answer correctly.
+  What they still need is somewhere to be installed, which is M8.
 - **The 7 `defmacro`s are a different mechanism.** A Lisp `defmacro` expands
   when the evaluator meets a form; an x2c `macro` expands x2c source at parse
   time. They are not two spellings of one thing. They exist to serve

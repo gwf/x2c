@@ -1051,21 +1051,77 @@ a lambda over two boxed arguments writes naturally - and `List_str`, which
 
 ## M8 - installing a compile-time function at session start
 
-The other gating capability, and the one that decides how much of the goal is
-reachable. A `meta` function installs when the compiler parses its
-declaration, so it serves the unit it is written in and any unit that imports
-its `.xmacro`. It cannot serve a unit that imports nothing, which is what
-`foreach`, `$scope` and `class` do today from `etc/builtin-macros.xlisp`, and
-what `etc/init.xlisp` would have to do.
+**Scoped 2026-09-18, not built.** Both of Phase 7's walls are down, and a
+third one is up that Phase 7 did not name. The route that remains is real but
+it is a new entry point, and its cost is per process rather than per unit.
 
-Phase 7 established the two walls: `x2c.comptime.install` is bound *after*
-`_ensure_lisp` evaluates the libraries, and the checked-in `bin/x2c` has no
-comptime install at all, so every future bootstrap binary would carry the
-lowering permanently. Read that section before scoping this.
+### Phase 7's first wall does not apply to `meta`
 
-A session-start library also settles the emission question `meta` raises for a
-unit's own definitions: there is no translation unit, so there is nothing to
-emit into.
+Phase 7 recorded that a session-start install "cannot happen during the
+library load as `_ensure_lisp` is written, because `x2c.comptime.install` is
+not bound until after the five libraries are evaluated". That is true of the
+`$comptime()` decorator, whose install goes through the Lisp native. It is not
+true of `meta`: `Compiler.install_meta_function` in `src/macros.x` calls
+`_ensure_lisp` and then `Compiler.install_comptime` directly, in x2c, and
+never touches the native. M1 moved the install off that path and the wall went
+with it.
+
+### Phase 7's second wall is down, and the coupling it warned about is now real
+
+Phase 7 recorded that "the checked-in `bin/x2c` has no `etc/comptime.xlisp`
+and no comptime install at all", so moving `foreach` out of Lisp would break
+the bootstrap chain until a refresh landed the capability. The refresh landed
+on this branch as `e4db6c78`, for Phase 5 rather than for this milestone:
+`bin/x2c` is a symlink to `bin/x2c-bootstrap`, which is built from
+`bootstrap/*.c`, and it now parses `meta` and carries `bootstrap/src/comptime.c`.
+
+Phase 7 also said this is a permanent coupling rather than a one-time
+transition, and that is now the state of the tree: every future bootstrap
+binary carries the comptime lowering.
+
+### The wall Phase 7 did not name: a meta function needs the unit's types
+
+A `meta` function that reads a table needs `Array.push` and `List.getindex`,
+and a `.xmacro` gets them from the consuming unit's symbol table. Phase 5
+reproduced what happens when the unit has not declared them: `lib/common.x`
+reports `type ("Array") has no method push`, at line 18 and still at line 614.
+
+`_ensure_lisp` runs for every unit, `lib/common.x` included, and a session-start
+install has no unit at all. So the shipped file cannot borrow a symbol table
+the way a `.xmacro` does; it has to be its own translation unit that includes
+`lib/x2c.x`, parsed on a child compiler whose only output is the lowered Lisp.
+That is Phase 5's route 1, "the compiler sub-translates a named `.x` at import
+time", and it is the only route left.
+
+Whether `etc/init.xlisp`'s own candidates need any of that is a separate
+question and the answer may be no: `map`, `filter`, `foldl`, `caar`, `cadr`
+and the rest take and return `List`, and M7 established that all three of the
+function-taking ones lower and answer correctly. They still need `List`
+declared to be parsed.
+
+### What it would cost
+
+Phase 7 measured 158 ms of install for 111 functions on top of 231 ms of parse
+and type, and a trivial unit at 62 ms, most of which is the prelude. A
+session-start unit pays the prelude once per process rather than per unit,
+because `src/comptime.x` keeps the lowered forms for the process, so the cost
+to beat is one prelude parse plus the per-session `eval` of the definitions.
+Neither has been measured for this shape.
+
+### What would settle it
+
+One probe, on a branch: give `_ensure_lisp` a final step that parses a shipped
+`etc/init.x` on a child compiler the way `_import` parses a `.xmacro`, and
+measure `x2c translate` on one trivial unit and on `src/*.x`, against the same
+tree without the step. If the per-process prelude is the whole cost, the
+20 `defun`s in `etc/init.xlisp` that need no function argument become `meta`
+and the five that take one follow. If it is per unit, this stays Lisp for the
+same reason `etc/builtin-macros.xlisp` does.
+
+`protect_x2c` in `lib/lisp.x` is unchanged and still refuses a `def` of an
+`x2c.`-prefixed name once the first native is bound, so the
+`etc/builtin-macros.xlisp` direction is still closed. Phase 7 declined that on
+its own evidence and this milestone does not reopen it.
 
 ## The emission gap `meta` leaves in a unit
 
