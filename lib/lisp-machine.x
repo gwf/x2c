@@ -148,7 +148,7 @@ static void LispMachine._call(LispMachine m, int argc) {
       return;
     }
     int old_locals = m.local_count;
-    int room = old_locals + argc <= MACHINE_LOCAL_MAX &&
+    int room = old_locals + argc + MACHINE_LOCAL_RESERVE <= MACHINE_LOCAL_MAX &&
                m.fp + 1 < MACHINE_FRAME_MAX &&
                callable_at + MACHINE_CALL_RESERVE <= MACHINE_VALUE_MAX;
     if (room && m._push_frame()) {
@@ -267,7 +267,7 @@ void LispMachine.begin(
     m._error(<not-idle>);
     return;
   }
-  if (argc < 0 || argc > MACHINE_LOCAL_MAX)
+  if (argc < 0 || argc + MACHINE_LOCAL_RESERVE > MACHINE_LOCAL_MAX)
     raise %(bad-arity (owner "LispMachine.begin") (actual $argc));
   m.program = program;
   m.pc = program.root;
@@ -298,6 +298,29 @@ int LispMachine.step(LispMachine m) {
   const MachineWord *w = &p.code[m.pc++];
   switch (w.op) {
     case MW_JUMP: m.pc = w.target;
+      break;
+
+    case MW_LBIND: {
+      int count = w.b;
+      if (m.value_count - m.operand_base < count) {
+        m._error(<no-operand>);
+        break;
+      }
+      for (int i = 0; i < count; i++)
+        m.locals[m.local_count + i] = m.values[m.value_count - count + i];
+      m.value_count -= count;
+      m.local_count += count;
+      Lisp.reslot(m.lisp_context, m.program.consts[w.a],
+                  m.local_count - m.local_base);
+      break;
+    }
+
+    case MW_LUNBIND:
+      for (int i = m.local_count - w.b; i < m.local_count; i++)
+        m.locals[i] = (Var) { .u64 = 0 };
+      m.local_count -= w.b;
+      Lisp.reslot(m.lisp_context, m.program.consts[w.a],
+                  m.local_count - m.local_base);
       break;
 
     case MW_LCONST:

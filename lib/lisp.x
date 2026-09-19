@@ -54,6 +54,8 @@ typedef struct LispAutoStats {
   long invocations, machine_entries, machine_errors;
   long analyses, published, ineligible;
   long guard_failures, remembered_fallbacks;
+  long inlined_scopes;  // binding scopes lowered into a caller's slots
+  long inline_declines; // binding scopes the evaluator took instead
   long program_bytes;   // live published AUTO program bytes
 } LispAutoStats;
 
@@ -122,6 +124,19 @@ void Lisp.retarget(void *storage, Var callable, const Var *values, int count) {
   LispEnv *frame = _machine_env(context);
   Lambda lambda = callable;
   _machine_env_set(frame, lambda, values, count, frame.parent);
+}
+
+/** Renames the live slots of the current shared-machine frame.
+    `params` names every slot the frame holds: the Lambda's parameters first,
+    then the bindings a lowered binding scope opened, in slot order. `count`
+    is how many of those slots are live. The evaluator resolves a free name
+    through this list, so a form that leaves the machine from inside a lowered
+    binding scope still reads that scope's bindings.
+*/
+void Lisp.reslot(void *storage, List params, int count) {
+  LispEnv *frame = _machine_env((LispMachineContext) storage);
+  frame.params = params;
+  frame.value_count = count;
 }
 
 /** Applies a Lisp callable to already evaluated shared-machine values.
@@ -1432,7 +1447,20 @@ typedef struct LispLower {
   MachineBuilder b;
   List locals;
   int depth;            // macro expansions open on this path
+  List scope_params;    // every live slot's name, in slot order
+  int slots;            // inlined slots bound above the parameters
+  Var slot_names[MACHINE_LOCAL_RESERVE];
 } *LispLower;
+
+/* Answers the frame slot the innermost inlined binding of `name` owns, or
+   -1 when no inlined scope binds it. Later bindings sit at higher slots, so
+   the downward scan finds the one that shadows. */
+static int LispLower._auto_inlined_slot(LispLower l, Var name) {
+  for (int i = l.slots - 1; i >= 0; i--)
+    if (l.slot_names[i].u64 == name.u64)
+      return l.lambda.params.len() + i;
+  return -1;
+}
 
 static int _auto_param_index(Lambda lambda, Var name) {
   int index = -1, at = 0;
@@ -1442,7 +1470,8 @@ static int _auto_param_index(Lambda lambda, Var name) {
 }
 
 static int LispLower._auto_load_name(LispLower l, Var name) {
-  int local = _auto_param_index(l.lambda, name);
+  int local = l._auto_inlined_slot(name);
+  if (local < 0) local = _auto_param_index(l.lambda, name);
   if (local >= 0) return l.b.emit(MW_LLOCAL, local, 0, 0, 0, 0) >= 0;
   Var captured;
   if (l.lambda.captures.try_get(name, &captured)) {
@@ -1455,6 +1484,7 @@ static int LispLower._auto_load_name(LispLower l, Var name) {
 }
 
 static int LispLower._auto_local_name(LispLower l, Var name) =>
+  l._auto_inlined_slot(name) >= 0 ||
   _auto_param_index(l.lambda, name) >= 0 ||
   name in l.lambda.captures;
 
@@ -1616,6 +1646,60 @@ static int LispLower._auto_compile(LispLower l, Var expression, int tail) {
   return constant >= 0 && b.emit(MW_LEVAL, constant, 0, 0, 0, 0) >= 0;
 }
 
+/* Lowers an immediately applied lambda literal, which is what `let` and the
+   other binding macros expand to, into the frame it stands in. The arguments
+   are expressions of the enclosing scope and are lowered there; MW_LBIND
+   moves them into fresh slots above the parameters, the body reads those
+   slots like parameters, and MW_LUNBIND drops them.
+
+   A call is the alternative and is not available: the callee's free names
+   are the enclosing frame's slots, which no callee can reach. Both words
+   also rename the frame's slots, so a form that leaves the machine from
+   inside the scope reads its bindings through the environment. */
+static int LispLower._auto_compile_inline(
+  LispLower l, List form, int tail) {
+  MachineBuilder b = l.b;
+  List literal = form.car(), args = form.cdr();
+  List params = literal.cadr();
+  int count = params.len();
+  if (count != args.len() || l.slots + count > MACHINE_LOCAL_RESERVE)
+    return 0;
+  /* `lambda` is an ordinary binding and a program may rebind it. The site
+     guard re-evaluates the whole form when it no longer names the lambda
+     constructor, before any argument of this form has run. */
+  Var expected = l.lisp.specials[LISP_LAMBDA];
+  int site = b.constant(%($form (($lsym_lambda $expected))));
+  if (site < 0) return 0;
+  int guard = b.emit(MW_LEXPAND, site, 0, 0, 0, -1);
+  if (guard < 0) return 0;
+  List scope = l.scope_params, locals = l.locals;
+  foreach (Var name, params) {
+    if (!name.is_atom()) return 0;
+    scope = scope.append(cons(name, NULL));
+    locals = cons(name, locals);
+  }
+  int enter = count ? b.constant(scope) : 0;
+  int leave = count ? b.constant(l.scope_params) : 0;
+  if (enter < 0 || leave < 0) return 0;
+  foreach (Var argument, args)
+    if (!l._auto_compile(argument, 0)) return 0;
+  if (count && b.emit(MW_LBIND, enter, count, 0, 0, 0) < 0) return 0;
+  foreach (Var name, params) l.slot_names[l.slots++] = name;
+  int ok;
+  $let(l.scope_params, scope)
+    $let(l.locals, locals)
+      ok = l._auto_compile(literal.caddr(), tail);
+  l.slots -= count;
+  if (!ok) {
+    if (b.status == MACHINE_PREPARED) l.lisp.auto_stats.inline_declines++;
+    return 0;
+  }
+  if (count && b.emit(MW_LUNBIND, leave, count, 0, 0, 0) < 0) return 0;
+  b.set_target(guard, b.length);
+  l.lisp.auto_stats.inlined_scopes++;
+  return 1;
+}
+
 static int LispLower._auto_lower(LispLower l, Var expression, int tail) {
   MachineBuilder b = l.b;
   if (expression.is_atom()) return l._auto_load_name(expression);
@@ -1626,19 +1710,9 @@ static int LispLower._auto_lower(LispLower l, Var expression, int tail) {
   if (head is <list>) {
     List literal = head;
     if (literal.len() != 3 || literal.car() != lsym_lambda ||
-        literal.cadr() is not <list> || l.depth >= LISP_AUTO_EXPAND_MAX)
+        literal.cadr() is not <list>)
       return 0;
-    Lambda immediate = _make_lambda(l.lisp, literal.cdr(), NULL, 0);
-    int retained = 0;
-    defer if (!retained) _auto_discard(l.lisp, immediate);
-    if (_auto_analyze(l.lisp, immediate, l.env, l.depth + 1, l.locals) !=
-        MACHINE_PREPARED)
-      return 0;
-    int constant = b.constant(immediate);
-    if (constant < 0 || b.emit(MW_LLAMBDA, constant, 0, 0, 0, 0) < 0)
-      return 0;
-    retained = 1;
-    return l._auto_compile_call(form.cdr(), 0);
+    return l._auto_compile_inline(form, tail);
   }
   /* A computed head, a head naming a runtime local, and the mutating,
      binding, and reflective special forms have no wordcode; each declines
@@ -1760,7 +1834,8 @@ static int _auto_analyze(
     locals = lambda.params.append(locals);
     foreach (Var (name, value), lambda.captures)
       locals = cons(name, locals);
-    struct LispLower storage = { lisp, env, lambda, b, locals, depth };
+    struct LispLower storage =
+      { lisp, env, lambda, b, locals, depth, lambda.params };
     LispLower lower = &storage;
     int ok = lower._auto_compile(lambda.body, 1) &&
              b.emit(MW_LRETURN, 0, 0, 0, 0, 0) >= 0;
@@ -1883,7 +1958,6 @@ static int _auto_apply(
   LispMachineContext context = &slot.context;
   bzero(context, sizeof(struct LispMachineContext));
   context.lisp = lisp;
-  _machine_env_set(context.frames, lambda, argv, argc, env);
   m.open();
   /* Only a Lisp callback can raise out of the machine, and that leaves it
      marked running. Clear the flag ahead of the release below, so its
@@ -1891,6 +1965,10 @@ static int _auto_apply(
   defer m.running = 0;
   m.stats = lisp.auto_machine_stats;
   m.begin(lambda.auto_program.view(), context, argv, argc);
+  /* The frame reads the machine's own slots, not the argument array `begin`
+     copied from: a lowered binding scope opens slots above the parameters
+     and names them for the evaluator. */
+  _machine_env_set(context.frames, lambda, m.locals, argc, env);
   lisp.auto_stats.machine_entries++;
   m.run();
   if (m.status == <ok>) {

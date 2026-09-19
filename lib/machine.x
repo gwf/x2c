@@ -37,6 +37,9 @@
 #define MACHINE_INT_REGS        2
 #define MACHINE_VALUE_MAX     256
 #define MACHINE_LOCAL_MAX     256
+// Local slots one Lisp frame may hold above its parameters. A frame that
+// enters keeps this much room so an inlined scope always has slots.
+#define MACHINE_LOCAL_RESERVE 32
 /* Operand slots a Lisp call leaves for the callee before crossing to the
    evaluator. A caller's live operands stay below the callee's operand base,
    so recursion consumes the value stack along with frames and locals. The
@@ -109,7 +112,14 @@ enum MachineOp {
   MW_LRETURN,
   MW_LLAMBDA,
   MW_LEXPAND,
-  MW_LEVAL
+  MW_LEVAL,
+  /* An immediately applied lambda literal is lowered into the frame it
+     stands in: BIND moves `b` evaluated arguments off the value stack into
+     fresh local slots, and UNBIND drops them when the scope closes. Each
+     names the frame's live slots from the constant at `a`, so the evaluator
+     resolves the scope's bindings when a form crosses to it. */
+  MW_LBIND,
+  MW_LUNBIND
 };
 
 /* Selects the binder predicate applied by MW_MATCH_KIND. */

@@ -524,6 +524,20 @@ static void lisp_auto_local_bindings(void) {
   }
 }
 
+static void lisp_auto_local_bindings_inline(void) {
+  // A `let` expands to an immediately applied lambda literal. Lowering
+  // binds its values in slots of the frame it stands in, so the body costs
+  // no call and no frame of its own.
+  Lisp lisp = Lisp.new();
+  _ev(lisp, "(defun sum3 (a) (let ((b (+ a 1)) (c (+ a 2))) (+ b c)))");
+  for (int i = 0; i < 3; i++)
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(sum3 10)")), 23);
+  EXPECT_TRUE(lisp.auto_stats().machine_entries > 0);
+  EXPECT_INT_EQ((int) lisp.auto_stats().inlined_scopes, 1);
+  EXPECT_INT_EQ((int) lisp.auto_stats().inline_declines, 0);
+  lisp.destroy();
+}
+
 static void lisp_auto_local_dynamic_and_capture(void) {
   for (int disabled = 0; disabled < 2; disabled++) {
     Lisp lisp = Lisp.new();
@@ -925,6 +939,7 @@ void lisp_auto_suite(void) {
   $test.run(lisp_auto_tail_call_only_to_self);
   $test.run(lisp_auto_forced_evaluator_arm);
   $test.run(lisp_auto_local_bindings);
+  $test.run(lisp_auto_local_bindings_inline);
   $test.run(lisp_auto_local_dynamic_and_capture);
   $test.run(lisp_auto_local_match_and_redefinition);
   $test.run(lisp_auto_immediate_constructor_rebinding);
