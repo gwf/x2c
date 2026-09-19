@@ -2,6 +2,13 @@
 
 > Status: active
 >
+> Objective set by Gary 2026-09-18: **replace essentially all hand-written
+> compile-time Lisp with `meta` functions.** If it does not need to be Lisp,
+> make it `meta`. Three exemptions and no others: the irreducible core that
+> lowered code is written in, the name tables that map a lowered call to an
+> operation, and anything an attempt shows to be genuinely problematic, with
+> the evidence recorded the way M3, M4 and Phase 7 record theirs.
+>
 > Scoped 2026-09-18 on branch `x2c-lowers-to-lisp`, after Phases 0-4, 6 and 7
 > of `plans/comptime-x2c-generalization.md` landed and Phase 5 blocked on the
 > capability this plan supplies. The word and the three-lifetime design are
@@ -924,6 +931,86 @@ failure go away.
 M4 needs one measurement rather than a count: the artifact's load-to-first-call
 time with and without the serialized program, on a meta function that
 qualifies.
+
+## M6 - the x2c surface onto the compiler (done)
+
+Landed as `da334992`. 30 operations in `lib/meta.x` under a `Meta` namespace,
+each forwarded in `etc/comptime.xlisp` to the operation the compiler already
+binds: the 16 public `$lisp.bind` rows other than `x2c.comptime.install` and
+`x2c.comptime.lower`, plus the 14 public wrappers from
+`etc/compiler-sdk.xlisp`. The private `_x2c.*` names are left out.
+
+This closes the gap that made the first Phase 5 port partial. A macro's
+implementation can now ask the compiler things from x2c instead of dropping
+into Lisp, so `dedent.expand`, `var-tags`' six SDK calls and `varops`' two
+become portable.
+
+Two rows needed shaping rather than aliasing, and the second is worth knowing:
+`x2c.expr.call` takes a Lisp rest parameter, so its row spreads a `List` with
+`apply`; and `x2c.type.value?` answers a Lisp truth value, which an `int`
+surface would have read wrongly, because `_lower_truth` inlines an `int` test
+as a comparison against zero and nil compares unequal to zero. The row answers
+1 or 0. The rows are `defun`s rather than `def`s because the natives are bound
+after every library file is read.
+
+A meta function reaching a `Meta.*` operation is **compile-time only** and its
+runtime form is not emitted, derived transitively through the mechanism M5
+already built for file-scope state. No keyword, one constant, one place.
+
+## M7 - callable values
+
+**The gating capability for everything left.** A meta function taking a `Func`
+and calling it declines with `no binding for Func_apply`, because `f(x)` is not
+a call in the AST: it expands to a `FuncArg` array, a reference-type probe
+through `x2c_func_reference_type`, an address-of, and only then `Func.apply`.
+
+Three callers are already waiting, which is why this is next rather than
+speculative:
+
+- `etc/init.xlisp`'s first five functions are `map`, `filter`, `foldl`,
+  `member` and `assoc`; three take a function.
+- Phase 6 gave back 149 ms because `ad_partial`'s `Map` is eager. A `Map` of
+  thunks would recover it, and needs exactly this.
+- `lib/var-tags.xmacro` passes procedures to `var.tag.map` and
+  `var.tag.filter`. Those two can be written as `List.map`/`List.filter` with
+  a `%!(Var x) =>` lambda, which already lowers, so the port does not have to
+  wait - but a general port does.
+
+The shape to establish first is whether the pass can recognise the expansion
+and collapse it to a direct Lisp application, or whether a `Func` in a
+compile-time function should lower to the Lisp lambda it already is.
+
+## M8 - installing a compile-time function at session start
+
+The other gating capability, and the one that decides how much of the goal is
+reachable. A `meta` function installs when the compiler parses its
+declaration, so it serves the unit it is written in and any unit that imports
+its `.xmacro`. It cannot serve a unit that imports nothing, which is what
+`foreach`, `$scope` and `class` do today from `etc/builtin-macros.xlisp`, and
+what `etc/init.xlisp` would have to do.
+
+Phase 7 established the two walls: `x2c.comptime.install` is bound *after*
+`_ensure_lisp` evaluates the libraries, and the checked-in `bin/x2c` has no
+comptime install at all, so every future bootstrap binary would carry the
+lowering permanently. Read that section before scoping this.
+
+A session-start library also settles the emission question `meta` raises for a
+unit's own definitions: there is no translation unit, so there is nothing to
+emit into.
+
+## The emission gap `meta` leaves in a unit
+
+A meta function declared **in a unit** is emitted unconditionally, so one whose
+every call folds is dead code a `-Wall` build would name. An **imported** one
+is emitted only where a run-time call reaches it - verified: the four ported
+`dedent` functions appear nowhere in the C of the one unit that imports them.
+
+The fix is to extend that same reachability walk from imported definitions to
+a unit's own, which is one mechanism reused. It is not a second keyword: a
+`func`-style spelling for "compile-time only, never emitted" was considered
+and rejected, because non-emission is derivable from reachability and a second
+spelling would mean two ways to say "compile-time function". M6 already refuses
+emission in both places for one derived property.
 
 ## Plan review
 
