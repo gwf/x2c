@@ -12,6 +12,7 @@ Translating a compile-time x2c function into Lisp.
 
 | Function | Summary |
 | --- | --- |
+| [`Compiler.check_meta_call`](#Compiler.check_meta_call) | Refuses a run-time call to a `meta` function this compiler derived compile-time only. |
 | [`Compiler.fold_meta_call`](#Compiler.fold_meta_call) | Answers a call to a `meta` function from its compile-time form when every argument is a compile-time constant of the parameter's own type, or returns `NULL` to leave the call alone. |
 | [`Compiler.install_comptime`](#Compiler.install_comptime) | Lowers `fn` and evaluates the result in the macro session, so the function is callable from compile-time Lisp under its own name. |
 | [`Compiler.lower_comptime`](#Compiler.lower_comptime) | Lowers one compile-time function into the forms the macro session evaluates, or returns `NULL` when the substitution cannot carry it. |
@@ -21,6 +22,23 @@ Translating a compile-time x2c function into Lisp.
 | [`Compiler.meta_is_comptime_only`](#Compiler.meta_is_comptime_only) | Returns whether `fn` is a `meta` function this compiler recorded as compile-time only, whose runtime form the unit does not emit. |
 
 ### `Compiler`
+
+<a id="Compiler.check_meta_call"></a>
+#### Compiler.check_meta_call
+
+`void Compiler.check_meta_call(Compiler c, List callee, Token origin)`
+
+Refuses a run-time call to a `meta` function this compiler derived
+compile-time only.
+
+Such a function reaches a `Meta` operation, so it exists only inside a
+compiler and the unit emits no definition for it. The call used to reach
+the linker as an undefined symbol, which names the C spelling and not the
+source. Another `meta` function may call it: calling one is what makes
+the caller compile-time only too, so a body being parsed under the marker
+is left alone.
+
+Source: `src/comptime.x:1958`
 
 <a id="Compiler.fold_meta_call"></a>
 #### Compiler.fold_meta_call
@@ -37,7 +55,7 @@ installed folds, so an import's runtime definition keeps the run-time
 call that designates the unit emitting it. Evaluation runs in the macro
 session; a raise there leaves the call.
 
-Source: `src/comptime.x:1881`
+Source: `src/comptime.x:1980`
 
 <a id="Compiler.install_comptime"></a>
 #### Compiler.install_comptime
@@ -49,7 +67,7 @@ function is callable from compile-time Lisp under its own name.
 Returns whether the lowering succeeded. This method mutates the macro
 session and does not open a semantic transaction.
 
-Source: `src/comptime.x:1792`
+Source: `src/comptime.x:1868`
 
 <a id="Compiler.lower_comptime"></a>
 #### Compiler.lower_comptime
@@ -62,7 +80,7 @@ The result is the loop definitions the body needed followed by the
 function's own, in evaluation order. This method does not open a
 semantic transaction.
 
-Source: `src/comptime.x:1663`
+Source: `src/comptime.x:1730`
 
 <a id="Compiler.lower_declined"></a>
 #### Compiler.lower_declined
@@ -71,7 +89,7 @@ Source: `src/comptime.x:1663`
 
 Returns why the last `Compiler.lower_comptime` declined, or `NULL`.
 
-Source: `src/comptime.x:1722`
+Source: `src/comptime.x:1789`
 
 <a id="Compiler.lower_reached_globals"></a>
 #### Compiler.lower_reached_globals
@@ -81,7 +99,7 @@ Source: `src/comptime.x:1722`
 Returns whether the last `Compiler.install_comptime` reached file-scope
 state, directly or through a callee already recorded as reaching it.
 
-Source: `src/comptime.x:1820`
+Source: `src/comptime.x:1897`
 
 <a id="Compiler.lower_reached_meta"></a>
 #### Compiler.lower_reached_meta
@@ -91,7 +109,7 @@ Source: `src/comptime.x:1820`
 Returns whether the last `Compiler.install_comptime` reached a `Meta`
 operation, directly or through a callee already recorded as reaching one.
 
-Source: `src/comptime.x:1828`
+Source: `src/comptime.x:1905`
 
 <a id="Compiler.meta_is_comptime_only"></a>
 #### Compiler.meta_is_comptime_only
@@ -101,7 +119,7 @@ Source: `src/comptime.x:1828`
 Returns whether `fn` is a `meta` function this compiler recorded as
 compile-time only, whose runtime form the unit does not emit.
 
-Source: `src/comptime.x:1836`
+Source: `src/comptime.x:1913`
 
 ## Design notes
 

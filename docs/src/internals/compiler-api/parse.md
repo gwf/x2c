@@ -57,7 +57,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:2049`
+Source: `src/parse.x:2052`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -90,7 +90,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:1983`
+Source: `src/parse.x:1986`
 
 <a id="Compiler.finish_managed_declaration"></a>
 #### Compiler.finish_managed_declaration

@@ -22,6 +22,7 @@ magic/imported-macros|showcase|run||expected/compile-time-macros.stdout|Imported
 magic/keywords|showcase|run||expected/magic-keywords.stdout|Standalone magic keywords gallery example.
 magic/lambdas|showcase|run||expected/lambdas.stdout|Expression lambdas, captured values, and inferred Var results.
 magic/macros|showcase|run||expected/magic-macros.stdout|Standalone magic macros gallery example.
+magic/meta-functions|showcase|run||expected/magic-meta-functions.stdout|Meta functions implementing a macro in x2c through the Meta surface.
 magic/operators|showcase|run||expected/magic-operators.stdout|Standalone magic operators gallery example.
 magic/protocols|showcase|run||expected/protocols.stdout|Protocol declaration, adoption, base defaults, and an override.
 magic/range-and-swap|showcase|run||expected/keyword-aliases.stdout|Local range and swap constructs implemented with macros.

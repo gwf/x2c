@@ -147,7 +147,7 @@ Public functions:
 `Compiler.lower_comptime`, `Compiler.lower_declined`,
 `Compiler.install_comptime`, `Compiler.lower_reached_globals`,
 `Compiler.lower_reached_meta`, `Compiler.meta_is_comptime_only`,
-`Compiler.fold_meta_call`
+`Compiler.check_meta_call`, `Compiler.fold_meta_call`
 
 ### [src/deps.x](../src/deps.x)
 

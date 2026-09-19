@@ -16,6 +16,7 @@
 - [Protocols](guide/protocols.md)
 - [Classes and System Macros](guide/system-macros.md)
 - [Compile-time Macros](guide/macros.md)
+- [Meta Functions](guide/meta-functions.md)
 - [Packages](guide/packages.md)
 - [Wrapping a C Library](guide/wrapping-c-libraries.md)
 - [Commands and Files](guide/scripting.md)

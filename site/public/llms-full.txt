@@ -2540,10 +2540,51 @@ comma-separated initializer. Compose a call to an existing spelling with
 Names under `x2c.*` or `_x2c.*` with a component beginning `_` are private
 implementation details.
 
+### `meta` functions
+
+A function definition may be marked `meta`. The marker precedes the whole
+declaration, ahead of any storage class:
+
+```text
+meta int poly(int n) => n * n + 3 * n + 1;
+meta static String label(String stem, int n) => %"$stem-$n";
+```
+
+`meta` is contextual. It marks a function only when a function definition
+follows it, and is an ordinary identifier everywhere else, including as a
+file-scope name, an assignment target, and a struct field. A `meta`
+declaration without a body is diagnosed, because the compiler has nothing to
+run. `meta` marks a definition only; the same effect is also available through
+a decorator that calls `x2c.comptime.install`.
+
+Marking a function `meta` has three consequences.
+
+- The compiler translates the body into a compile-time form and installs it in
+  the translation unit's macro session. It is then callable during translation,
+  by `$(name args)` from an x2c body and as an ordinary call from Lisp or from
+  a macro body. A construct with no compile-time form is diagnosed at the
+  `meta` marker, with the reason.
+- The function is also emitted as C and behaves as an ordinary function at run
+  time, unless it reaches a `Meta` operation, directly or through another
+  `meta` function. A function that reaches one has no runtime form and none is
+  emitted for it.
+- A call to it whose arguments are all compile-time constants may be replaced
+  by the answer its compile-time form computes. The compiler folds only where
+  the two forms agree; a function that reads file-scope state, or that returns
+  an owned value such as a `String`, keeps its call.
+
+A `meta` declaration in an imported `.xmacro` installs its compile-time form in
+every consuming unit. The runtime forms are independent: a unit emits a
+definition only for those it reaches, and the storage class written on the
+declaration says what it emits. Importing the same file twice contributes one
+copy of each definition.
+
+See [Meta Functions](https://x2c-lang.dev/docs/guide/meta-functions.html) for the authoring guide.
+
 ### The same operations from x2c
 
 Every public operation above is also declared in x2c, in the optional module
-`lib/meta.x`, so a compile-time function that includes it calls the compiler
+`lib/meta.x`, so a `meta` function that includes it calls the compiler
 directly and a macro's implementation does not have to be written in Lisp. The
 declarations are the signatures; the semantics are the ones described above.
 
@@ -2561,10 +2602,11 @@ Two answers differ in shape because x2c has no spelling for the Lisp one:
 because they run the pass that translates the calling function.
 
 These operations exist only inside a compiler, so they have no runtime
-definition anywhere. A compile-time function that reaches one, directly or
-through another compile-time function, therefore has no runtime form and none
-is emitted for it; the compiler derives this and needs no spelling for it.
-Calling such a function at run time is a link error that names it.
+definition anywhere. A `meta` function that reaches one, directly or through
+another `meta` function, therefore has no runtime form and none is emitted for
+it; the compiler derives this and needs no spelling for it. A call to one
+from a run-time body is diagnosed where it is written, naming the function and
+the reason.
 
 Compiler facilities load before author imports, and macro code cannot redefine
 them.
