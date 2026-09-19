@@ -928,6 +928,20 @@ static String _read_source(
   return text;
 }
 
+/* The paths whose top-level Lisp the shared session evaluated while it was
+   being filled. A unit that reaches one of these registers the file's macro
+   definitions as usual and leaves its Lisp alone: the shared session already
+   holds those definitions, and a session cannot replace a name an ancestor
+   binds. The key is the path the loader resolved, which is the identity the
+   import cache itself uses, so a file that shadows a library name through
+   another include path is a different key and evaluates normally. */
+static Map library_imports = NULL, static int library_filling = 0;
+
+static int _inherited_import(String path) {
+  return !library_filling && library_imports &&
+         library_imports.contains(path);
+}
+
 /* A home Lisp library is evaluated once, when `loaded` is zero, but every use
    records it, so a file's dependencies do not depend on whether an earlier
    file loaded it. */
@@ -935,28 +949,14 @@ static void _eval_library(
   Compiler compiler, int loaded, String relative, String message) {
   String path = %"${compiler.root_dir}/$relative";
   compiler.add_translation_dependency(path);
-  if (loaded) return;
+  if (library_filling) library_imports[path] = 1;
+  if (loaded || _inherited_import(path)) return;
   String text = _source_text(
     compiler, path, message, compiler.token, %("path:" $path));
   _eval_string(compiler, text, compiler.token);
 }
 
 static Lisp library_session = NULL, static Scope library_scope = NULL;
-
-/* The canonical paths whose top-level Lisp the shared session evaluated
-   while it was being filled. A unit that imports one of these registers its
-   macro definitions as usual and leaves its top-level Lisp alone: the shared
-   session already holds those definitions and a session cannot replace a
-   name an ancestor binds. The key is the canonical path, which is the
-   identity the import cache itself uses, so a file that shadows a library
-   name through another include path is a different key and evaluates
-   normally. */
-static Map library_imports = NULL, static int library_filling = 0;
-
-static int _inherited_import(String path) {
-  return !library_filling && library_imports &&
-         library_imports.contains(path);
-}
 
 static void _library_shutdown(void) {
   Lisp.destroy(library_session);
@@ -1231,7 +1231,11 @@ static List _import(
       String text = _read_source(
         c, path, "cannot open compile-time Lisp import", invocation,
         %( "path: ${c.display_path(path)}" ));
-      if (c.collect_protocols) _eval_string(c, text, invocation);
+      /* The shared session evaluated this file once for the process, and a
+         session cannot replace a name an ancestor binds. The read above
+         still reports a file that has gone missing. */
+      if (_inherited_import(path)) { }
+      else if (c.collect_protocols) _eval_string(c, text, invocation);
       else c.queue_declaration_effect(text, invocation, invocation);
     }
     else if (path.endswith(".xmacro")) {
