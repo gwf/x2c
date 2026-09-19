@@ -257,6 +257,7 @@ static Symbol _raised_code(Lisp lisp, const char *text) {
   try _ev(lisp, text);
   catch %(bad-arity *): code = <bad-arity>;
   catch %(bad-sig *): code = <bad-sig>;
+  catch %(call-stack *): code = <call-stack>;
   catch %(bad-types *): code = <bad-types>;
   catch %(malformed *): code = <malformed>;
   catch %(no-symbol *): code = <no-symbol>;
@@ -395,6 +396,23 @@ static void lisp_apply_uses_evaluated_values(void) {
   Var plus = void;
   EXPECT_TRUE(lisp.try_get("+", &plus));
   EXPECT_INT_EQ(Var.integer(lisp.apply(plus, %(20 22))), 42);
+  lisp.destroy();
+}
+
+static void lisp_call_budget_stops_a_loop(void) {
+  // A loop that recurses in tail position reuses its frame and nests
+  // nothing, so the call-depth budget never sees it. The call budget does.
+  // The default is large enough that only a computation that does not end
+  // reaches it, so this session sets a small one.
+  Lisp lisp = Lisp.kernel();
+  lisp.call_budget(4000);
+  _ev(lisp, "(def spin (lambda (n) (spin n)))");
+  EXPECT_INT_EQ(_raised_code(lisp, "(spin 0)"), <call-stack>);
+
+  // The budget is per evaluation, not per session: a later call that stays
+  // inside it answers normally.
+  _ev(lisp, "(def once (lambda (n) n))");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(once 3)")), 3);
   lisp.destroy();
 }
 
@@ -1110,6 +1128,7 @@ void lisp_suite(void) {
   $test.run(lisp_eval_cond_nil_only_false);
   $test.run(lisp_eval_lambda_application);
   $test.run(lisp_apply_uses_evaluated_values);
+  $test.run(lisp_call_budget_stops_a_loop);
   $test.run(lisp_eval_rest_parameters);
   $test.run(lisp_eval_capture_semantics);
   $test.run(lisp_eval_globals_shadow_reserved);

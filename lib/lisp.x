@@ -142,7 +142,7 @@ void Lisp.retarget(void *storage, Var callable, const Var *values, int count) {
 */
 int Lisp.step(void *storage) {
   Lisp lisp = ((LispMachineContext) storage).lisp;
-  if (++lisp.call_steps <= LISP_CALL_STEP_MAX) return 0;
+  if (++lisp.call_steps <= lisp.call_step_max) return 0;
   lisp.call_steps = 0;
   return 1;
 }
@@ -317,6 +317,7 @@ struct Lisp {
   long call_steps;      // calls made by the evaluation in progress, reset
                         // at each public entry so a long translation is a
                         // sequence of budgets rather than one
+  long call_step_max;   // calls one evaluation may make
   int auto_disabled;    // benchmark/test forced-evaluator arm only
   int protect_x2c;      // compiler SDK installed; x2c.* cannot be redefined
 };
@@ -578,6 +579,7 @@ Lisp Lisp.kernel(void) {
   lisp.auto_disabled = 0;
   lisp.parent = NULL;
   lisp.frozen = 0;
+  lisp.call_step_max = LISP_CALL_STEP_MAX;
   $scope(&lisp.scope) {
     lisp.globals = {};
     lisp.reserved = {};
@@ -1309,7 +1311,7 @@ static void _bind_params(Lambda lambda, List args, Map bindings) {
 }
 
 static Var _call_lambda(Lisp lisp, Lambda lambda, List args, LispEnv *env) {
-  if (++lisp.call_steps > LISP_CALL_STEP_MAX) {
+  if (++lisp.call_steps > lisp.call_step_max) {
     lisp.call_steps = 0;
     raise %(call-stack (operation "apply") (why "steps"));
   }
@@ -2066,6 +2068,16 @@ LispAutoStats Lisp.auto_stats(Lisp lisp) => lisp.auto_stats;
 */
 void Lisp.auto_instrument(Lisp lisp, MachineStats *stats) {
   lisp.auto_machine_stats = stats;
+}
+
+/** Sets how many calls one evaluation of `lisp` may make before it is
+    stopped. `lisp` must be a live session and `budget` must be positive.
+    The default is `LISP_CALL_STEP_MAX`, which is large enough that only a
+    computation that does not end reaches it; a test sets a small one to
+    reach it quickly.
+*/
+void Lisp.call_budget(Lisp lisp, long budget) {
+  if (lisp && budget > 0) lisp.call_step_max = budget;
 }
 
 /* Benchmark and test control for the forced-evaluator comparison arm;
