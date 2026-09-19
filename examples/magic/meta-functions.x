@@ -1,8 +1,8 @@
 #include "meta.x"
 #include <assert.h>
 // A macro implemented in x2c rather than in compile-time Lisp. `meta` marks
-// a function the compiler runs during translation; `Meta` is the compiler
-// surface those functions call.
+// a function the compiler runs during translation, and the `x2c_*` functions
+// `meta.x` declares are the compiler surface those functions call.
 
 typedef struct Response {
   int code;
@@ -12,28 +12,28 @@ typedef struct Response {
 // The named fields of a struct-typed expression, in declaration order. The
 // answer comes from the compiler's symbol table.
 meta static List fields_of(List receiver) =>
-  Meta.type_fields(Meta.syntax_type(receiver));
+  x2c_type_fields(x2c_syntax_type(receiver));
 
 // The field names as one comma-joined String literal.
 meta static List field_names(List receiver) {
   Array names = [];
   foreach (List field, fields_of(receiver)) names.push(field.car());
-  return Meta.literal_string(String.join(", ", names));
+  return x2c_literal_string(String.join(", ", names));
 }
 
 // `{ r.code, r.label }`, built from the fields rather than written out.
 meta static List field_reads(List receiver) {
   Array reads = [];
   foreach (List field, fields_of(receiver))
-    reads.push(Meta.expr_field(receiver, field.car()));
-  return Meta.expr_composite(reads);
+    reads.push(x2c_expr_field(receiver, field.car()));
+  return x2c_expr_composite(reads);
 }
 
 macro Expression $shape.names(Expr $value) => ($(field_names $value))
 
 macro Expression $shape.reads(Expr $value) => ($(field_reads $value))
 
-// A `meta` function that reaches no `Meta` operation keeps both of its
+// A `meta` function that reaches no compiler operation keeps both of its
 // forms, so the program below calls it at run time and the compiler may
 // answer a constant call from the compile-time form.
 meta static String tag(String name, int n) => %"$name-$n";

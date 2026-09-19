@@ -227,71 +227,25 @@
 (defun Func_var (v) v)
 (defun Var_func (v) v)
 
-// The compiler surface `lib/meta.x` declares, under the names the typed AST
-// uses for `Meta.operation`. Each row forwards to the operation the compiler
-// already binds, and each is a `defun` rather than a `def` because the
-// natives are bound into the session after this file is read, so a `def`
-// would capture an unbound name.
+// The compiler surface `lib/meta.x` declares needs no forwarding: an
+// `x2c_<path>` call lowers to the `x2c.<path>` operation the compiler binds,
+// each `_` becoming a `.`. Two operations cannot be reached that way, and
+// these are the adapters for them. Each is a `defun` rather than a `def`
+// because the natives are bound into the session after this file is read, so
+// a `def` would capture an unbound name.
 //
-// These operations exist only inside a compiler, so a `meta` function that
-// reaches one has no runtime form; `src/comptime.x` derives that from the
-// `Meta_` namespace and the compiler emits no definition for it.
-//
-// None of them answers `void` for an absent result. Where there is no
-// answer they answer nil, and where the request is wrong they reject, which
-// reaches the developer as a diagnostic at the macro invocation.
+// None of the compiler operations answers `void` for an absent result. Where
+// there is no answer they answer nil, and where the request is wrong they
+// reject, which reaches the developer as a diagnostic at the macro
+// invocation.
 
-// The two operations an `x2c_*` call cannot reach by the mechanical name
-// rule: one spreads a rest parameter, one answers an `int` where Lisp
-// answers a truth value.
-(defun _x2c.expr.call-list (callee arguments)
-  (apply x2c.expr.call (cons callee arguments)))
-(defun _x2c.type.value-int (value) (if (x2c.type.value? value) 1 0))
-
-(defun Meta_ident (spelling) (x2c.ident spelling))
-(defun Meta_literal_string (value) (x2c.literal.string value))
-(defun Meta_literal_int (value) (x2c.literal.int value))
-(defun Meta_literal_symbol (value) (x2c.literal.symbol value))
-
-(defun Meta_expr_ident (name) (x2c.expr.ident name))
-(defun Meta_expr_index (base subscript) (x2c.expr.index base subscript))
-(defun Meta_expr_field (receiver name) (x2c.expr.field receiver name))
 // `x2c.expr.call` takes its arguments as a rest parameter, which x2c cannot
 // spell in a prototype, so the x2c surface takes the `List` and this spreads
-// it the way the Lisp caller does.
-(defun Meta_expr_call (callee arguments)
+// it the way a Lisp caller does.
+(defun _x2c.expr.call-list (callee arguments)
   (apply x2c.expr.call (cons callee arguments)))
-(defun Meta_expr_composite (items) (x2c.expr.composite items))
-(defun Meta_expr_cast (type expression) (x2c.expr.cast type expression))
 
-(defun Meta_source_text (syntax) (x2c.source.text syntax))
-(defun Meta_binding_spelling (syntax) (x2c.binding.spelling syntax))
-(defun Meta_syntax_type (value) (x2c.syntax.type value))
-(defun Meta_cache_value (node) (x2c.cache.value node))
-
-(defun Meta_function_name (function) (x2c.function.name function))
-(defun Meta_function_parameter (function wanted)
-  (x2c.function.parameter function wanted))
-(defun Meta_function_body (function) (x2c.function.body function))
-(defun Meta_parameters_arguments (value) (x2c.parameters.arguments value))
-
-(defun Meta_type_fields (value) (x2c.type.fields value))
-(defun Meta_type_layout (value) (x2c.type.layout value))
-(defun Meta_type_parts (value) (x2c.type.parts value))
-(defun Meta_type_resolve (value) (x2c.type.resolve value))
-// This answers a Lisp truth value, and the x2c surface returns `int`, whose
-// test the lowering inlines as a comparison against zero. Nil compares
-// unequal to zero, so the answer is normalized here instead.
-(defun Meta_type_value (value) (if (x2c.type.value? value) 1 0))
-(defun Meta_type_tag_name (name) (x2c.type.tag-name name))
-(defun Meta_type_reverse_name (base participant)
-  (x2c.type.reverse-name base participant))
-(defun Meta_method_resolve (type name) (x2c.method.resolve type name))
-
-(defun Meta_invocation_file () (x2c.invocation.file))
-(defun Meta_invocation_line () (x2c.invocation.line))
-(defun Meta_invocation_column () (x2c.invocation.column))
-(defun Meta_embed_text (path) (x2c.embed.text path))
-
-(defun Meta_diagnostic_fail (message notes)
-  (x2c.diagnostic.fail message notes))
+// `x2c.type.value?` answers a Lisp truth value and the x2c surface returns
+// `int`, whose test the lowering inlines as a comparison against zero. Nil
+// compares unequal to zero, so the answer is normalized here.
+(defun _x2c.type.value-int (value) (if (x2c.type.value? value) 1 0))

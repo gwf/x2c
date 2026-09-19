@@ -11,7 +11,7 @@
 #include "x2c.x"
 #include "meta.x"
 
-meta static List mc_name(String text) => Meta.literal_string(text);
+meta static List mc_name(String text) => x2c_literal_string(text);
 
 meta static List mc_wrap(String text) => mc_name(text);
 

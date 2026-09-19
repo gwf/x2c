@@ -263,10 +263,10 @@ static String _lower_operation_name(String name) {
 /* Whether a callee names a compiler operation rather than a function this
    translation has. `lib/meta.x` declares the surface as `x2c_*` prototypes
    with no body, so a name with no definition whose Lisp operation the session
-   binds is one. The prefix does not decide it: give one of those declarations
-   a body and the body is found first, in the caller below. */
+   binds is one. A prefix does not decide it: give one of those declarations a
+   `meta` body and the body is found first, below. */
 static int _lower_compiler_operation(Lowering l, String name) {
-  if (!name.startswith("x2c_")) return name.startswith("Meta_");
+  if (!name.startswith("x2c_")) return 0;
   Var value;
   return l.compiler.macro_lisp.try_get(_lower_operation_name(name), &value);
 }
@@ -296,9 +296,7 @@ static void _lower_scan_callee(Lowering l, String name) {
     return;
   }
   if (l.compiler.meta_impure.contains(name)) l.globals = 1;
-  if (_lower_compiler_operation(l, name) ||
-      l.compiler.meta_comptime.contains(name))
-    l.meta_only = 1;
+  if (l.compiler.meta_comptime.contains(name)) l.meta_only = 1;
 }
 
 /* A function named where a value is wanted rather than called: `Func f = g;`
@@ -1995,8 +1993,8 @@ void Compiler.check_meta_call(Compiler c, List callee, Token origin) {
       if (c.meta_comptime.contains(name))
         c.report_error(
           <macro>, %"'$name' can only be called at compile time", origin,
-          %("reason: it reaches the Meta compiler surface, so no unit emits"
-            "a definition for it; call it from a macro or another meta"
+          %("reason: it reaches a compiler operation, so no unit emits a"
+            "definition for it; call it from a macro or another meta"
             "function"));
 }
 

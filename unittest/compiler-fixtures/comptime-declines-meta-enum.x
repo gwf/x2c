@@ -13,6 +13,6 @@
 
 enum { K = 10 };
 
-meta static List de_literal(void) => Meta.literal_int(K);
+meta static List de_literal(void) => x2c_literal_int(K);
 
 int main(void) { return 0; }

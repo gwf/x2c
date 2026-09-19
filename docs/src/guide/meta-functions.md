@@ -19,21 +19,21 @@ macros that call them. `shape_fields` asks the compiler what a struct holds.
 ```x2c,ignore
 /* The named fields of a struct-typed expression, in declaration order. */
 meta static List shape_fields(List receiver) =>
-  Meta.type_fields(Meta.syntax_type(receiver));
+  x2c_type_fields(x2c_syntax_type(receiver));
 
 /* One `String` literal holding those field names, comma separated. */
 meta static List shape_names(List receiver) {
   Array names = [];
   foreach (List field, shape_fields(receiver)) names.push(field.car());
-  return Meta.literal_string(String.join(", ", names));
+  return x2c_literal_string(String.join(", ", names));
 }
 
 /* `{ p.x, p.y, p.z }`, built from the fields rather than written out. */
 meta static List shape_reads(List receiver) {
   Array reads = [];
   foreach (List field, shape_fields(receiver))
-    reads.push(Meta.expr_field(receiver, field.car()));
-  return Meta.expr_composite(reads);
+    reads.push(x2c_expr_field(receiver, field.car()));
+  return x2c_expr_composite(reads);
 }
 
 macro Expression $shape.names(Expr $value) => ($(shape_names $value))
@@ -140,7 +140,7 @@ function name first, then the holes.
 typedef struct Point { int x, y, z; } Point;
 
 meta static List field_count(List receiver) =>
-  Meta.literal_int(Meta.type_fields(Meta.syntax_type(receiver)).len());
+  x2c_literal_int(x2c_type_fields(x2c_syntax_type(receiver)).len());
 
 macro Expression $probe.count(Expr $value) => ($(field_count $value))
 
@@ -159,9 +159,9 @@ The macro body is one call and nothing else. That is the usual shape: the
 macro declares the holes and the result kind, and the `meta` function does
 the work.
 
-What the function returns decides what the expansion is. A `List` built by
-`Meta` is syntax. `Meta.literal_int`, `Meta.literal_string` and
-`Meta.literal_symbol` each return an expression holding a value.
+What the function returns decides what the expansion is. A `List` one of the
+compiler operations built is syntax. `x2c_literal_int`, `x2c_literal_string`
+and `x2c_literal_symbol` each return an expression holding a value.
 
 ## Importing from a `.xmacro`
 
@@ -186,19 +186,21 @@ for the `meta` functions it calls at run time. The storage class says what
 it emits: `static` gives that unit its own copy, and a public name is the
 one copy the program links, exported by the reaching unit's header.
 
-## What `Meta` answers
+## What the compiler answers
 
 `lib/meta.x` declares the compiler operations a `meta` function can call.
-They are grouped here by the task, not by signature; the
+Each is a plain function whose name is the compile-time Lisp name with `_`
+for `.`, so `x2c.type.fields` is `x2c_type_fields` from x2c. They are grouped
+here by the task, not by signature; the
 [module reference](../library/modules/meta.md) lists every declaration, and
 the [language reference](../reference/language.md#the-same-operations-from-x2c)
 gives their semantics.
 
-**Building identifiers, literals and expressions.** `Meta.ident` checks a
-spelling and returns identifier syntax. `Meta.literal_int`,
-`Meta.literal_string` and `Meta.literal_symbol` return an expression holding
-a value. `Meta.expr_ident`, `Meta.expr_field`, `Meta.expr_index`,
-`Meta.expr_call`, `Meta.expr_composite` and `Meta.expr_cast` assemble the
+**Building identifiers, literals and expressions.** `x2c_ident` checks a
+spelling and returns identifier syntax. `x2c_literal_int`,
+`x2c_literal_string` and `x2c_literal_symbol` return an expression holding
+a value. `x2c_expr_ident`, `x2c_expr_field`, `x2c_expr_index`,
+`x2c_expr_call`, `x2c_expr_composite` and `x2c_expr_cast` assemble the
 six expression shapes a generator needs. Compose them rather than writing
 node shapes by hand, so the compiler binds and types the result:
 
@@ -207,7 +209,7 @@ node shapes by hand, so the compiler binds and types the result:
 #include "meta.x"
 
 meta static List call_of(String callee, List argument) =>
-  Meta.expr_call(Meta.expr_ident(Meta.ident(callee)), %($argument));
+  x2c_expr_call(x2c_expr_ident(x2c_ident(callee)), %($argument));
 
 macro Expression $probe.twice(Expr $value) => ($(call_of "twice" $value))
 
@@ -224,23 +226,23 @@ int main(void) {
 twice 42
 ```
 
-**Asking about types and fields.** `Meta.syntax_type` answers the canonical
-`Type` of an expression or binding. `Meta.type_fields` answers the named
+**Asking about types and fields.** `x2c_syntax_type` answers the canonical
+`Type` of an expression or binding. `x2c_type_fields` answers the named
 fields of a struct or union `Type`, each as a metadata row whose first
-element is the field name. `Meta.type_layout`, `Meta.type_parts`,
-`Meta.type_resolve` and `Meta.type_value` answer the remaining
-generated-code questions. `Meta.method_resolve` answers which operation a
+element is the field name. `x2c_type_layout`, `x2c_type_parts`,
+`x2c_type_resolve` and `x2c_type_value` answer the remaining
+generated-code questions. `x2c_method_resolve` answers which operation a
 member call selects. These answers live in the compiler's symbol table, so
 a macro body cannot derive them from the syntax it captured.
 
-**Source text and location.** `Meta.source_text` returns the text the
-developer wrote for a captured hole. `Meta.binding_spelling` returns the
-name a binding was declared with. `Meta.invocation_file`,
-`Meta.invocation_line` and `Meta.invocation_column` give the site of the
-macro invocation. `Meta.embed_text` reads a file beside the source and
+**Source text and location.** `x2c_source_text` returns the text the
+developer wrote for a captured hole. `x2c_binding_spelling` returns the
+name a binding was declared with. `x2c_invocation_file`,
+`x2c_invocation_line` and `x2c_invocation_column` give the site of the
+macro invocation. `x2c_embed_text` reads a file beside the source and
 records it as a translation dependency.
 
-**Failing with a diagnostic.** `Meta.diagnostic_fail` reports a message at
+**Failing with a diagnostic.** `x2c_diagnostic_fail` reports a message at
 the invocation and stops the expansion. It does not return. Use it when the
 argument is wrong in a way the macro can see:
 
@@ -249,10 +251,10 @@ argument is wrong in a way the macro can see:
 #include "meta.x"
 
 meta static List one_word(Var node) {
-  String text = Meta.source_text(node);
+  String text = x2c_source_text(node);
   if (text.contains(" "))
-    Meta.diagnostic_fail("this argument must be one word", %());
-  return Meta.literal_string(text);
+    x2c_diagnostic_fail("this argument must be one word", %());
+  return x2c_literal_string(text);
 }
 
 macro Expression $probe.word(Expr $value) => ($(one_word $value))
@@ -277,29 +279,30 @@ sample.x:15:23: macro: this argument must be one word
                       ^
 ```
 
-Two `Meta` signatures differ in shape from their Lisp spellings.
-`Meta.expr_call` takes its arguments as one `List`, and `Meta.type_value`
+Two signatures differ in shape from their Lisp spellings.
+`x2c_expr_call` takes its arguments as one `List`, and `x2c_type_value`
 returns `int`.
 
-## A function that reaches `Meta` has no run-time form
+## A function that reaches a compiler operation has no run-time form
 
-The `Meta` operations exist only inside a compiler. A `meta` function that
+The compiler operations exist only inside a compiler. A `meta` function that
 calls one, directly or through another `meta` function, therefore has no
-valid run-time form, and the compiler emits no definition for it. Calling
-such a function at run time is a link error naming it. Calling `field_count`
-from an earlier section at run time gives:
+valid run-time form, and the compiler emits no definition for it. A call to
+one from a run-time body is diagnosed where it is written. Calling
+`field_count` from an earlier section at run time gives:
 
 ```text
-Undefined symbols for architecture arm64:
-  "_field_count", referenced from:
-      _main in sample-c7d9e0a3.o
-ld: symbol(s) not found for architecture arm64
+sample.x:19:22: macro: 'field_count' can only be called at compile time
+    int n = field_count(point);
+                       ^
+  note: reason: it reaches a compiler operation, so no unit emits a
+  definition for it; call it from a macro or another meta function
 ```
 
 In the first example, the generated C mentions none of `shape_fields`,
 `shape_names` or `shape_reads`.
 
-A `meta` function that reaches no `Meta` operation, like `label` above,
+A `meta` function that reaches no compiler operation, like `label` above,
 keeps both forms and is emitted normally.
 
 ## Constant calls are folded

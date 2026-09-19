@@ -2565,7 +2565,7 @@ Marking a function `meta` has three consequences.
   a macro body. A construct with no compile-time form is diagnosed at the
   `meta` marker, with the reason.
 - The function is also emitted as C and behaves as an ordinary function at run
-  time, unless it reaches a `Meta` operation, directly or through another
+  time, unless it reaches a compiler operation, directly or through another
   `meta` function. A function that reaches one has no runtime form and none is
   emitted for it.
 - A call to it whose arguments are all compile-time constants may be replaced
@@ -2588,18 +2588,18 @@ Every public operation above is also declared in x2c, in the optional module
 directly and a macro's implementation does not have to be written in Lisp. The
 declarations are the signatures; the semantics are the ones described above.
 
-The name is mechanical: drop the `x2c.` prefix, put the rest under `Meta`, and
-replace each remaining `.` with `_`. `x2c.type.fields` is `Meta.type_fields`,
-`x2c.invocation.line` is `Meta.invocation_line`, `x2c.ident` is `Meta.ident`.
-Two answers differ in shape because x2c has no spelling for the Lisp one:
+The name is mechanical: each `.` becomes `_`. `x2c.type.fields` is
+`x2c_type_fields`, `x2c.invocation.line` is `x2c_invocation_line`, `x2c.ident`
+is `x2c_ident`. Two answers differ in shape because x2c has no spelling for
+the Lisp one:
 
-- `Meta.expr_call(List callee, List arguments)` takes its arguments as one
+- `x2c_expr_call(List callee, List arguments)` takes its arguments as one
   `List` rather than as a rest parameter.
-- `Meta.type_value(List value)` returns `int`, 1 or 0, rather than a Lisp
+- `x2c_type_value(List value)` returns `int`, 1 or 0, rather than a Lisp
   truth value.
 
-`x2c.comptime.install` and `x2c.comptime.lower` have no `Meta` spelling,
-because they run the pass that translates the calling function.
+`x2c.comptime.install` and `x2c.comptime.lower` have no x2c spelling, because
+they run the pass that translates the calling function.
 
 These operations exist only inside a compiler, so they have no runtime
 definition anywhere. A `meta` function that reaches one, directly or through

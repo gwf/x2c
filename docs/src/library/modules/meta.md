@@ -5,23 +5,6 @@
 
 The compiler surface a `meta` function calls.
 
-## Public types
-
-| Type | Kind | Summary |
-| --- | --- | --- |
-| [`Meta`](#Meta) | struct | The namespace the compile-time operations below belong to. |
-
-<a id="Meta"></a>
-### Meta
-
-`typedef struct Meta *Meta`
-
-The namespace the compile-time operations below belong to. It is a type
-only so that its operations spell as `Meta.operation`; no value of it
-exists and none is ever made.
-
-Source: `lib/meta.x:40`
-
 ## Design notes
 
 A `meta` function runs inside the compiler, so it can ask the compiler
@@ -29,14 +12,15 @@ questions and build syntax for it to bind. Those operations were
 reachable only from compile-time Lisp, under names like `x2c.ident` and
 `x2c.type.fields`, which made Lisp the authoring language for any macro
 whose implementation needed them. The declarations below name the same
-operations from x2c, so a macro's implementation is x2c.
+operations from x2c, so a macro's implementation is x2c. Each x2c name is
+its Lisp name with `_` for `.`, and the lowering maps one to the other.
 
 Nothing here has a runtime definition: each name resolves to a compiler
-operation through `etc/comptime.xlisp`, and there is no such function in
-a linked program. A `meta` function that reaches one, directly or through
-another `meta` function, is therefore compile-time only, and the compiler
-derives that and emits no runtime form for it. The consequence to know
-about is that such a function cannot be called at run time at all.
+operation, and there is no such function in a linked program. A
+declaration here with no body is what makes it one. A `meta` function that
+reaches one, directly or through another `meta` function, is therefore
+compile-time only, the compiler derives that and emits no runtime form for
+it, and a run-time call to it is diagnosed where it is written.
 
 This module is not part of the implicit prelude. Include it where the
 `meta` functions are parsed: a `.xmacro` borrows the consuming unit's

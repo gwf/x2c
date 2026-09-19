@@ -727,14 +727,14 @@ authoring language rather than the engine, and it is why the first Phase 5 port
 left `dedent.expand` in Lisp. The implementations already existed in x2c as the
 private `_sdk_*` statics; they needed declaring, not writing.
 
-`lib/meta.x` declares them under a `Meta` namespace - `Meta` was free as a type
+`lib/meta.x` declared them under a `Meta` namespace - `Meta` was free as a type
 name - and `etc/comptime.xlisp` maps each mangled name to the operation the
 compiler already binds. With that, a macro body is one call and the
 implementation is x2c:
 
 ```x2c
 meta static List ms_fields(List receiver) =>
-  Meta.type_fields(Meta.syntax_type(receiver));
+  x2c_type_fields(x2c_syntax_type(receiver));
 ```
 ```lisp
 (defun Meta_type_fields (value) (x2c.type.fields value))
@@ -745,6 +745,17 @@ natives are `$lisp.bind`ed **after** every library file is read, so
 `(def Meta_ident x2c.ident)` fails at load with `(unbound (name x2c.ident))`. A
 `defun` resolves at call time. The forwarding layer is also where the two
 shape adjustments live, below.
+
+**Superseded 2026-09-19.** Gary decided the x2c spelling is a plain function
+`x2c_<path>`, so `Meta.type_fields` is `x2c_type_fields`, and the Lisp names
+stay dotted and unchanged. The `Meta` namespace type and all 31 forwarding
+`defun`s are gone. The lowering maps `x2c_a_b` to `x2c.a.b` mechanically, with
+four exceptions: `x2c.type.tag-name` and `x2c.type.reverse-name` carry a
+hyphen, and `x2c_expr_call` and `x2c_type_value` keep an adapter in
+`etc/comptime.xlisp` under `_x2c.expr.call-list` and `_x2c.type.value-int`.
+The derivation below is superseded with it: a callee with no definition whose
+mapped Lisp operation the session binds is a compiler operation, so giving one
+of these declarations a body makes it an ordinary function.
 
 ### What is exposed, and what is not
 
@@ -780,12 +791,12 @@ Two shapes needed adjusting rather than aliasing, and both adjustments are in
 the forwarding `defun`:
 
 - **`x2c.expr.call` takes a rest parameter**, which no x2c prototype can
-  spell. `Meta.expr_call(List callee, List arguments)` takes the `List` and the
+  spell. `x2c_expr_call(List callee, List arguments)` takes the `List` and the
   row spreads it with `apply`, which is what a Lisp caller writes anyway.
 - **`x2c.type.value?` answers a Lisp truth value**, and the x2c surface returns
   `int`, whose test `_lower_truth` inlines as a comparison against zero. Nil
   compares unequal to zero, so an unnormalized alias would have made
-  `if (Meta.type_value(t))` true for "no". The row answers 1 or 0, the way
+  `if (x2c_type_value(t))` true for "no". The row answers 1 or 0, the way
   `List_equal` does.
 
 **The `void` hazard does not apply to this surface, which was checked before
@@ -796,7 +807,7 @@ operation does that: where there is no answer it answers nil
 (`method_resolve`), and where the request is wrong it rejects. A reject is the
 SDK's designed failure channel and it reaches the developer as a located
 diagnostic even from inside a lowered `meta` function. Probed 2026-09-18:
-`Meta.type_fields` on an `int` reported
+`x2c_type_fields` on an `int` reported
 `x2c.type.fields requires a struct or union Type` with `note: value: (int)` at
 the macro invocation, and exited 1.
 
@@ -903,10 +914,10 @@ static String ms_label(String name, int n);
 ```
 
 `{ p.x, p.y, p.z }` and `ms_total(p.x, p.y, p.z)` were built by
-`Meta.type_fields`, `Meta.syntax_type`, `Meta.expr_field`, `Meta.expr_composite`,
-`Meta.expr_call`, `Meta.expr_ident` and `Meta.ident`; `"x, y, z"` and
-`"p.y + 1"` by `Meta.literal_string` and `Meta.source_text`; `3` by
-`Meta.literal_int`. The file defines `ms_total`, which the unit wrote itself,
+`x2c_type_fields`, `x2c_syntax_type`, `x2c_expr_field`, `x2c_expr_composite`,
+`x2c_expr_call`, `x2c_expr_ident` and `x2c_ident`; `"x, y, z"` and
+`"p.y + 1"` by `x2c_literal_string` and `x2c_source_text`; `3` by
+`x2c_literal_int`. The file defines `ms_total`, which the unit wrote itself,
 and `ms_label`, the one `meta` function that reaches no `Meta` operation and so
 keeps both forms. It mentions none of `ms_fields`, `ms_field_reads`, `ms_reads`,
 `ms_total_call`, `ms_names`, `ms_count` or `ms_spelling`, and the program prints
