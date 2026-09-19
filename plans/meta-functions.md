@@ -957,28 +957,97 @@ A meta function reaching a `Meta.*` operation is **compile-time only** and its
 runtime form is not emitted, derived transitively through the mechanism M5
 already built for file-scope state. No keyword, one constant, one place.
 
-## M7 - callable values
+## M7 - callable values (done)
 
-**The gating capability for everything left.** A meta function taking a `Func`
-and calling it declines with `no binding for Func_apply`, because `f(x)` is not
-a call in the AST: it expands to a `FuncArg` array, a reference-type probe
-through `x2c_func_reference_type`, an address-of, and only then `Func.apply`.
+**The pass recognises the expansion and collapses it.** That was the first of
+the two shapes this milestone offered, and it is the right one, because the
+second is already true: a `Func` in a compile-time function *is* the Lisp
+lambda the pass lowered, so there is nothing to convert and the only work is
+reading the callee and the arguments back out of the expansion.
 
-Three callers are already waiting, which is why this is next rather than
-speculative:
+`f(x)` is not a call in the AST. `_resolve_func_call` in `src/expressions.x`
+turns it into a statement expression that stores the callee, queries a
+reference carrier per argument through `x2c_func_reference_type`, boxes each
+argument into a `FuncArg`, and reaches `Func_apply` last; a call with no
+arguments needs no locals and is the bare `Func_apply`. `_lower_func_parts` in
+`src/comptime.x` recognises both spellings and answers the callee followed by
+each argument's value form. `_lower_application` lowers that to `(callee
+arg...)`, which the evaluator applies the way it already applies a lambda this
+pass puts in head position.
 
-- `etc/init.xlisp`'s first five functions are `map`, `filter`, `foldl`,
-  `member` and `assoc`; three take a function.
-- Phase 6 gave back 149 ms because `ad_partial`'s `Map` is eager. A `Map` of
-  thunks would recover it, and needs exactly this.
-- `lib/var-tags.xmacro` passes procedures to `var.tag.map` and
-  `var.tag.filter`. Those two can be written as `List.map`/`List.filter` with
-  a `%!(Var x) =>` lambda, which already lowers, so the port does not have to
-  wait - but a general port does.
+**The recognition has one owner because the scan needs it too.** Scanning the
+expansion would read the reference branch's `&argument` as an address-taken
+local and put an ordinary parameter in a cell, and would refuse the function
+over the four callees the expansion names - which is what `no binding for
+Func_apply` was. The scan now scans the application instead. The argument
+count `Func_apply` receives cross-checks the groups the recognition found, so
+a block of another shape answers nothing rather than a truncated call.
 
-The shape to establish first is whether the pass can recognise the expansion
-and collapse it to a direct Lisp application, or whether a `Func` in a
-compile-time function should lower to the Lisp lambda it already is.
+**The reference branch is dropped rather than lowered**, and that is the one
+place the two forms of a `meta` function can disagree. A `Func` whose
+signature declares a reference parameter takes that branch at run time and its
+value branch at compile time. Every `Func` a compile-time session can produce
+is a lowered lambda over values, where they agree. An argument whose type has
+no `Var` tag cannot cross at all - `x2c_func_unrepresentable_argument` stands
+in for the boxing - and that is refused with its own wording, verified against
+a function-pointer argument.
+
+**A function named where a value is wanted is the other half**, and without it
+only a lambda could produce a compile-time `Func`. `Func g = mt_bump;` lowered
+to `C.gread` on the function's binding id, which read nothing and produced
+`(not-call (actual integer))` at the call - a wrong answer, not a decline. A
+non-local `ident` whose `expr` type is a function type now lowers to the Lisp
+name the definition already binds, and `_lower_scan_function_value` establishes
+that callee the way `_lower_scan_call` establishes a called one, so it carries
+the same reach to file-scope state and the compiler surface. A file-scope
+function *pointer* is untouched: its type is `(* (func ...) ...)`, not
+`((func ...) ...)`, so it stays a `C.gread`.
+
+**Two rows in `etc/comptime.xlisp`**, `Func_var` and `Var_func`, both the
+identity, because a Lisp lambda already is a value. They are what a `Func`
+stored in a `Map` and read back needs.
+
+### What it costs
+
+Nothing measurable. `comptime-autodiff.x`, whose 106 compile-time functions
+are the largest corpus in the repository, translates in 0.70 s before and
+0.70 s after - the minimum of five interleaved pairs of the two binaries in
+`builds/0` on one host. The added work is two match attempts per scanned node,
+and the scan runs twice.
+
+### Evidence
+
+Six rows in `unittest/compiler-fixtures/comptime-lowering.x`, each printing
+the compile-time answer beside the same function's run-time answer:
+
+| row | construct |
+| --- | --- |
+| `func-none` | `f()`, the bare `Func_apply` spelling |
+| `func-one` | `f(v)` with a `Var` argument |
+| `func-two` | `f(a, b)` with an `int` and a `String` |
+| `func-named` | a meta function reaching a `Func` by name |
+| `func-higher` | `map`, `filter` and `foldl` as meta functions |
+| `func-thunk` | a `Func` stored in a `Map` and read back |
+
+`make build` is clean with no new warnings, `make verify-fixtures` reports 731
+passed, `make verify` 924 passed, and the documentation audit passes.
+
+### What this unblocks
+
+- `etc/init.xlisp`'s `map`, `filter` and `foldl` are written as meta functions
+  in the fixture and answer correctly, which was the shape M8 needs.
+- A `Map` of thunks lowers, which is what Phase 6 gave back 149 ms for. Whether
+  `ad_partial` recovers it is not measured here.
+- A general `lib/var-tags.xmacro` port no longer needs `var.tag.map` and
+  `var.tag.filter` rewritten as `List.map` and `List.filter`.
+
+### Two dictionary gaps this found, not fixed here
+
+Neither is about callable values, and each is a row in `etc/comptime.xlisp`
+that no caller has yet asked for. `Var_add` - arithmetic on two `Var`s, which
+a lambda over two boxed arguments writes naturally - and `List_str`, which
+`%"${someList}"` needs. `x + 1` on one `Var` is unaffected, because that is an
+`op` node rather than a protocol call.
 
 ## M8 - installing a compile-time function at session start
 

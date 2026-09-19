@@ -771,6 +771,83 @@ meta static int mt_loop_update(String text) {
   return score;
 }
 
+/* --- callable values ----------------------------------------------------- */
+
+/* `f(x)` is not a call in the AST. It expands to a stored callee, a
+   reference-carrier probe and a boxed `FuncArg` per argument, and
+   `Func.apply` last; a call with no arguments needs none of that and is the
+   bare `Func.apply`. A compile-time `Func` is the Lisp lambda this pass
+   lowered, so both spellings collapse back to the application they stand
+   for. One applier per arity, because `src/expressions.x` builds them
+   differently. */
+meta static Var mt_apply0(Func f) => f();
+
+meta static Var mt_apply1(Func f, Var v) => f(v);
+
+meta static Var mt_apply2(Func f, int a, String b) => f(a, b);
+
+meta static int mt_call_none(int bias) {
+  Func k = %!() => 5;
+  return bias + (int) mt_apply0(k);
+}
+
+meta static int mt_call_one(int n) {
+  Func bump = %!(Var x) => x + 10;
+  return mt_apply1(bump, n);
+}
+
+meta static String mt_call_two(int n, String tail) {
+  Func join = %!(Var a, Var b) => %"$a-$b";
+  return mt_apply2(join, n, tail);
+}
+
+/* A function named where a value is wanted is the definition this pass
+   installed, so it reaches a `Func` without a lambda around it. */
+meta static Var mt_bump(Var x) => x + 1;
+
+meta static int mt_named(int n) {
+  Func g = mt_bump;
+  return mt_apply1(g, n);
+}
+
+/* The three shapes `etc/init.xlisp` needs, each calling its procedure from
+   inside a loop. */
+meta static List mt_map(List values, Func fn) {
+  Array out = [];
+  foreach (Var v, values) out.push(fn(v));
+  return out;
+}
+
+meta static List mt_filter(List values, Func keep) {
+  Array out = [];
+  foreach (Var v, values) if (keep(v)) out.push(v);
+  return out;
+}
+
+meta static Var mt_foldl(Func step, Var seed, List values) {
+  Var total = seed;
+  foreach (Var v, values) total = step(total, v);
+  return total;
+}
+
+meta static int mt_higher(int seed) {
+  List doubled = mt_map(%(1 2 3), %!(Var x) => (int) x * 2);
+  List big = mt_filter(doubled, %!(Var x) => x > 2);
+  return mt_foldl(%!(Var a, Var b) => (int) a + (int) b, seed, big);
+}
+
+/* A `Func` stored in a `Map` and read back: boxing it and reading it back
+   are both the identity, because a Lisp lambda already is a value. */
+meta static int mt_thunk(String which) {
+  Func a = %!() => 1;
+  Func b = %!() => 2;
+  Map table = {};
+  table["a"] = a;
+  table["b"] = b;
+  Func chosen = table[which];
+  return chosen();
+}
+
 /* --- the program reports what the pass produced -------------------------- */
 
 int main(void) {
@@ -899,6 +976,16 @@ int main(void) {
          $(mt_cell_update 1), mt_cell_update(one));
   printf("loop-update  %d %d\n",
          $(mt_loop_update "ab,cde"), mt_loop_update(csv));
+  int zero = 0, seven = 7, three = 3, ten = 10;
+  String ex = "x", ay = "a", bee = "b";
+  printf("func-none    %d %d\n", $(mt_call_none 0), mt_call_none(zero));
+  printf("func-one     %d %d\n", $(mt_call_one 7), mt_call_one(seven));
+  printf("func-two     %s %s\n",
+         $(mt_call_two 3 "x"), mt_call_two(three, ex));
+  printf("func-named   %d %d\n", $(mt_named 10), mt_named(ten));
+  printf("func-higher  %d %d\n", $(mt_higher 0), mt_higher(zero));
+  printf("func-thunk   %d %d %d %d\n",
+         $(mt_thunk "a"), $(mt_thunk "b"), mt_thunk(ay), mt_thunk(bee));
   meta = %(a b c);
   struct MetaHolder holder = { .meta = 3 };
   printf("meta-ident   %d %d\n", meta.len(), holder.meta);

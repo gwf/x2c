@@ -79,6 +79,95 @@ static Var _lower_name(Lowering l, String stem) {
   return Atom.intern(%"$stem${lower_counter}-${l.own}");
 }
 
+/* --- a dynamic Func call ------------------------------------------------ */
+
+static Var _lower_decline(Lowering l, String why);
+
+/* `f(x)` is not a call in the AST. `_resolve_func_call` in
+   `src/expressions.x` expands it into a statement expression that stores the
+   callee once, queries a reference carrier per argument through
+   `x2c_func_reference_type`, boxes each argument into a `FuncArg`, and
+   reaches `Func_apply` last. None of that has a compile-time meaning: a
+   `Func` here is the Lisp lambda this pass lowered, and a Lisp lambda takes
+   its arguments by value, so the expansion collapses back to the application
+   it stands for. Only the callee and each argument's value form survive.
+
+   The reference branch is dropped rather than lowered. A `Func` whose
+   signature declares a reference parameter would take that branch at run
+   time and its value branch at compile time, so the two forms of a `meta`
+   function disagree there; every `Func` a compile-time session can produce
+   is a lowered lambda over values, where they agree.
+
+   One recognition serves the scan as well, which needs it: scanning the
+   expansion would read the reference branch's `&argument` as an
+   address-taken local and put an ordinary parameter in a cell, and would
+   refuse the function over the four callees the expansion names. The
+   argument count `Func_apply` receives cross-checks the groups this found,
+   so a block of another shape answers nothing rather than a truncated call.
+
+   An argument whose type has no `Var` tag is boxed by
+   `x2c_func_unrepresentable_argument` instead, and cannot cross to the
+   compile-time form at all. That is refused here, where the reason is still
+   plain: the scan runs first, and reading the expansion instead would report
+   whichever of its callees the session happens not to bind. */
+
+/* The argument one group boxes by value, or nothing where that stand-in
+   took its place. */
+static Var _lower_func_value(Var boxed) {
+  match (boxed)
+    case %(expr ("FuncArg")
+           (call (expr ? (ident (binding ? "FuncArg_value"))) (args ?value))):
+      return value;
+  return void;
+}
+
+static List _lower_func_block(Lowering l, List body) {
+  Array parts = [];
+  defer parts.free();
+  if (!body) return NULL;
+  match (body.car())
+    case %(declare ("Func") (bindings (op = (bind ? ()) ?callee))):
+      parts.push(callee);
+  if (!parts.len()) return NULL;
+  List rest = body.cdr();
+  for (; rest && rest.cdr(); rest = rest.cdr())
+    match (rest.car())
+      case %(if ? ? (stmnt (expr ("FuncArg") (op = ? ?boxed)))): {
+        Var value = _lower_func_value(boxed);
+        if (value is void) {
+          (void) _lower_decline(
+            l, "a dynamic Func call whose argument has a type with no "
+               "compile-time representation");
+          return NULL;
+        }
+        parts.push(value);
+      }
+  if (!rest) return NULL;
+  match (rest.car())
+    case %(stmnt (expr ?
+                  (call (expr ? (ident (binding ? "Func_apply")))
+                        (args ? (expr ? (literal ? ?(String count))) ?)))): {
+      long arity;
+      if (!count.try_long(&arity) || arity != parts.len() - 1) return NULL;
+      return parts;
+    }
+  return NULL;
+}
+
+/* The callee followed by the argument values, or nothing where this is not a
+   dynamic `Func` call. A call with no arguments needs no locals, so
+   `_resolve_func_call` returns the bare `Func_apply` for it. */
+static List _lower_func_parts(Lowering l, Var content) {
+  match (content) {
+    case %(parens (block *body)): return _lower_func_block(l, body);
+    case %(call (expr ? (ident (binding ? "Func_apply")))
+                (args ?callee (expr ? (literal ? "0"))
+                      (expr ? (ident (binding ? "NULL"))))):
+      return %($callee);
+  }
+  return NULL;
+}
+
 /* --- the single scan --------------------------------------------------- */
 
 static void _lower_scan(Lowering l, Var form);
@@ -179,6 +268,18 @@ static void _lower_scan_callee(Lowering l, String name) {
     l.meta_only = 1;
 }
 
+/* A function named where a value is wanted rather than called: `Func f = g;`
+   or `g` handed to an operation that calls it. The scan sees no `call`, so
+   this is where that callee is established, and it carries the same reach as
+   a call to it would. A local of function-pointer type holds a value rather
+   than naming a definition. */
+static void _lower_scan_function_value(Lowering l, List form) {
+  match (form)
+    case %(expr ((func *) *) (ident (binding ?(int id) ?(String name)))): {
+      if (!l.locals.contains(id)) _lower_scan_callee(l, name);
+    }
+}
+
 static void _lower_scan_call(Lowering l, List form) {
   match (form) {
     case %(call (expr ? (ident (binding ? ?(String name)))) ?): {
@@ -212,6 +313,13 @@ static void _lower_scan(Lowering l, Var form) {
   if (form is not <list>) return;
   List items = form;
   if (!items) return;
+  /* A dynamic `Func` call is scanned as the application it stands for, so
+     the machinery its expansion names is never read. */
+  List application = _lower_func_parts(l, items);
+  if (application) {
+    _lower_scan_each(l, application);
+    return;
+  }
   Var head = items.car();
   /* Both of these refuse the function outright, so the scan stops rather
      than reporting what the refused statement happens to call. */
@@ -237,6 +345,7 @@ static void _lower_scan(Lowering l, Var form) {
   else if (head == <targets>) _lower_scan_targets(l, items.cdr());
   else if (head == <op>) _lower_scan_op(l, items);
   else if (head == <call>) _lower_scan_call(l, items);
+  else if (head == <expr>) _lower_scan_function_value(l, items);
   else if (head == <goto>) l.rejected = 1;
   _lower_scan_each(l, items);
 }
@@ -434,6 +543,24 @@ static Var _lower_call(Lowering l, List callee, String name, List args) {
   List values = _lower_args(l, params, args);
   if (l.declined) return void;
   return cons(Atom.intern(name), values);
+}
+
+/* The application a dynamic `Func` call stands for. The callee is an
+   expression rather than a name, which the evaluator applies the way it
+   applies a lambda this pass already puts in head position. The scan reached
+   this form first and kept whatever reason it refused for; the decline here
+   only answers a statement expression no producer writes today. */
+static Var _lower_application(Lowering l, Var content) {
+  List parts = _lower_func_parts(l, content);
+  if (!parts) return _lower_decline(l, "not a dynamic Func call");
+  Array values = [];
+  defer values.free();
+  foreach (List part, parts) {
+    Var value = _lower_expr(l, part);
+    if (_lower_failed(l, value)) return void;
+    values.push(value);
+  }
+  return values.list();
 }
 
 static Var _lower_operands(Lowering l, Var operator, List operands) {
@@ -639,7 +766,15 @@ static Var _lower_content(Lowering l, List type, Var content) {
     case %(literal ?ltype ?(String text) ?):
       return _lower_number(l, ltype, text);
     case %(segments *parts):              return _lower_segments(l, parts);
-    case %(ident (binding ?(int id) ?)): return _lower_value(l, id);
+    /* A function named where a value is wanted is the Lisp definition this
+       pass installed, and its own name names it. The scan established that
+       the session binds it. */
+    case %(ident (binding ?(int id) ?(String name))): {
+      if (!l.locals.contains(id) && type.match(%((func *) *)))
+        return Atom.intern(name);
+      return _lower_value(l, id);
+    }
+    case %(parens (block *)):             return _lower_application(l, content);
     case %(parens ?inner):                return _lower_expr(l, inner);
     case %(cast ? ?inner):                return _lower_expr(l, inner);
     case %(expr ?inner ?within):          return _lower_content(l, inner, within);
@@ -652,6 +787,8 @@ static Var _lower_content(Lowering l, List type, Var content) {
       if (operator == <"*">) return %(C.load ${_lower_expr(l, operand)});
       return _lower_operands(l, operator, %($operand));
     }
+    case %(call (expr ? (ident (binding ? "Func_apply"))) ?):
+      return _lower_application(l, content);
     case %(call (expr ?callee (ident (binding ? ?(String name))))
                 (args *args)):
       return _lower_call(l, callee, name, args);
