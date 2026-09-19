@@ -6,9 +6,6 @@
 #define __GUARD_0xD219AB39__
 
 #include "common.h"
-#include "list.h"
-#include "string.h"
-#include "symbol.h"
 typedef struct Meta * Meta;
 
 List Meta_ident(String spelling);
