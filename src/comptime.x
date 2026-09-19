@@ -177,39 +177,20 @@ static void _lower_scan_each(Lowering l, List items) {
   foreach (Var item, items) _lower_scan(l, item);
 }
 
-/* A call's result and a cell's contents cannot be substituted, so a local
-   the loop assigns one to would need a binding form on the iteration path.
-   It gets a cell instead, where the assignment is an ordinary effect. The
-   scan runs twice so this sees the cells the first pass found. */
-static int _lower_scan_impure(Lowering l, Var form) {
-  if (form is not <list>) return 0;
-  List items = form;
-  if (!items) return 0;
-  if (items.car() == <call>) return 1;
-  match (items)
-    case %(ident (binding ?(int id) ?)): return l.cells.contains(id);
-  foreach (Var part, items) if (_lower_scan_impure(l, part)) return 1;
-  return 0;
-}
 
 /* Address-of is the one-operand `&`; three operands is bitwise and. */
+/* A local whose address is taken has to live somewhere a pointer can reach,
+   which is a cell. An ordinary assignment does not, even on a loop's
+   iteration path and even when its value comes from a call: the binding it
+   needs is an immediately applied lambda, and the lowering puts one of those
+   in the frame's own slots. */
 static void _lower_scan_op(Lowering l, List form) {
   match (form) {
     case %(op & (expr ? (ident (binding ?(int id) ?)))): {
       l.cells[id] = 1;
       return;
     }
-    case %(op ?operator ?target ?value): {
-      if (!l.in_loop || !_lower_scan_impure(l, value)) return;
-      if (operator != <"="> && operator != <"+="> && operator != <"-="> &&
-          operator != <"*="> && operator != <"/=">)
-        return;
-      match (target) {
-        case %(expr ? (ident (binding ?(int id) ?))): l.cells[id] = 1;
-        case %(bind (binding ?(int id) ?) *):         l.cells[id] = 1;
-      }
-      return;
-    }
+
   }
 }
 
@@ -996,8 +977,6 @@ static Var _lower_bind_value(
     l.env[id] = value;
     return _lower_block(l, rest, k);
   }
-  if (l.on_loop)
-    return _lower_decline(l, "a value needing a binding is on a loop path");
   Var slot = _lower_name(l, "hold");
   l.env[id] = slot;
   Var after = _lower_block(l, rest, k);
