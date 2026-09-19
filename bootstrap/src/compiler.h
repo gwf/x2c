@@ -69,6 +69,7 @@ typedef struct Compiler{
   Array meta_defs;
   Map meta_folds, meta_impure, meta_comptime;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
+  int meta_body;
   int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;
   int builtin_defs, in_proto, macro_count, recovery_depth;

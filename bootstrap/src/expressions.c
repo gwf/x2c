@@ -2967,6 +2967,7 @@ if(! which) return callee;  String stem = binding_identity_spelling(binding);  i
 }
 
 Type Type_apply(Type);
+void Compiler_check_meta_call(Compiler, List, Token);
 List Compiler_fold_meta_call(Compiler, List, Type, Type, List);
 static List _finish_call(Compiler compiler, Type result_type, List callee, Type callee_type, List receiver, List supplied, Token origin){
   if(result_type == _116) result_type = NULL;  Type applied = Type_apply(callee_type);  if(! List_truth(Type_list(applied)) && List_truth(Type_list(callee_type))) applied = Type_apply(Sym_resolve_key(compiler -> sym, callee_type));  List arguments = _resolve_call_arguments(compiler, receiver, supplied, origin);  if(_deferred_receiver(callee) ||(List_truth(receiver) && _deferred_receiver(receiver))) result_type = List_type(_116); {
@@ -2978,7 +2979,7 @@ static List _finish_call(Compiler compiler, Type result_type, List callee, Type 
     }
 
   }
-  if(! List_truth(Type_list(result_type))) result_type = applied;  List folded = Compiler_fold_meta_call(compiler, callee, callee_type, result_type, arguments);  if(List_truth(folded)) return folded;  callee = _discarding_callee(compiler, callee, callee_type, arguments);  return cons(_0, cons(List_var(result_type), cons(List_var(cons(_70, cons(List_var(callee), cons(List_var(cons(_101, List_append(arguments, NULL))), NULL)))), NULL)));
+  if(! List_truth(Type_list(result_type))) result_type = applied;  Compiler_check_meta_call(compiler, callee, origin);  List folded = Compiler_fold_meta_call(compiler, callee, callee_type, result_type, arguments);  if(List_truth(folded)) return folded;  callee = _discarding_callee(compiler, callee, callee_type, arguments);  return cons(_0, cons(List_var(result_type), cons(List_var(cons(_70, cons(List_var(callee), cons(List_var(cons(_101, List_append(arguments, NULL))), NULL)))), NULL)));
 }
 
 String int_str(int);
