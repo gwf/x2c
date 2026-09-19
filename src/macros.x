@@ -941,26 +941,82 @@ static void _eval_library(
   _eval_string(compiler, text, compiler.token);
 }
 
+static Lisp library_session = NULL, static Scope library_scope = NULL;
+
+static void _library_shutdown(void) {
+  Lisp.destroy(library_session);
+  library_session = NULL;
+  library_scope.destroy();
+  library_scope = NULL;
+}
+
+static void _reset_unit_state(Compiler compiler) {
+  compiler.macro_lisp.eval(%(def C._globals (Map.new)));
+}
+
+/* The five libraries and the message each failure reports, in the order a
+   session needs them. */
+static List _library_files(void) => %(
+  ("etc/init.xlisp" "cannot open the compile-time Lisp environment")
+  ("etc/lisp-values.xlisp" "cannot open the compile-time value operations")
+  ("etc/comptime.xlisp" "cannot open the compile-time function runtime")
+  ("etc/compiler-sdk.xlisp" "cannot open the compile-time Lisp SDK")
+  ("etc/builtin-macros.xlisp" "cannot open the built-in macro support"));
+
+static Lisp _library_session(Compiler compiler) {
+  if ((void *) library_session != NULL) return library_session;
+  Lisp was = compiler.macro_lisp;
+  defer compiler.macro_lisp = was;
+  Scope.push(&library_scope);
+  defer Scope.pop();
+  Scope.shutdown_hook(_library_shutdown);
+  Lisp shared = Lisp.kernel();
+  compiler.macro_lisp = shared;
+  /* A home without the runtime sources cannot preload, and that is not this
+     step's failure to report: leaving the parent unbuilt puts every unit
+     back on its own load, which reports against the unit that needed it. */
+  try {
+    foreach (Var (relative, message), _library_files())
+      _eval_library(compiler, 0, relative, message);
+  }
+  catch %(? *): return NULL;
+  /* Still inside the process Context, so every program's constants belong
+     to it. After the freeze a unit only ever compiles its own lambdas. */
+  (void) shared.auto_prepare();
+  shared.freeze();
+  return library_session = shared;
+}
+
+/** Evaluates the compile-time Lisp libraries once for this process. */
+void Compiler.preload_macro_libraries(Compiler compiler) {
+  (void) _library_session(compiler);
+}
+
 /* Each Compiler initializes one Lisp session lazily. An `.xmacro` import
    parser borrows that session; the parent Compiler frees it. */
 static void _ensure_lisp(Compiler compiler) {
   with compiler {
     int loaded = _.macro_lisp != NULL;
-    if (!loaded) _.macro_lisp = Lisp.kernel();
+    int shared = (void *) library_session != NULL;
+    if (!loaded) {
+      _.macro_lisp = Lisp.kernel();
+      _.macro_lisp.adopt(library_session);
+      if (shared) _reset_unit_state(_);
+    }
     _eval_library(
-      _, loaded, "etc/init.xlisp",
+      _, loaded || shared, "etc/init.xlisp",
       "cannot open the compile-time Lisp environment");
     _eval_library(
-      _, loaded, "etc/lisp-values.xlisp",
+      _, loaded || shared, "etc/lisp-values.xlisp",
       "cannot open the compile-time value operations");
     _eval_library(
-      _, loaded, "etc/comptime.xlisp",
+      _, loaded || shared, "etc/comptime.xlisp",
       "cannot open the compile-time function runtime");
     _eval_library(
-      _, loaded, "etc/compiler-sdk.xlisp",
+      _, loaded || shared, "etc/compiler-sdk.xlisp",
       "cannot open the compile-time Lisp SDK");
     _eval_library(
-      _, loaded, "etc/builtin-macros.xlisp",
+      _, loaded || shared, "etc/builtin-macros.xlisp",
       "cannot open the built-in macro support");
     if (loaded) return;
     $lisp.bind(_.macro_lisp, "_x2c.import-hook", _lisp_import_hook);

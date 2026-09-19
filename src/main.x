@@ -283,6 +283,7 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build) {
   if (c.dry_run) return 0;
   Frontend frontend = Frontend.new(c);
   frontend.preprocessor_errors = _preprocessor_errors;
+  Compiler.new().preload_macro_libraries();
   int total = c.inputs.len(), completed = 0;
   unsigned long long gen_bytes = 0;
   /* A dump writes one ordered stream to stdout, and inspection modes report
