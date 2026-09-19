@@ -61,6 +61,8 @@ Var Pool_lookup(Pool inner, Var key);
 
 void Pool_insert(Pool inner, Var object);
 
+Var Pool_intern_new(Pool inner, Var object, void * alloc);
+
 Var Pool_intern(Pool inner, Var object, void * alloc);
 
 void * Pool_malloc(Pool inner, size_t size);

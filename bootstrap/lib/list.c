@@ -216,20 +216,28 @@ static void _x2c_defer_cleanup_23(void * _x2c_defer_opaque_23);
 
 int Var_is_void(Var);
 
-void * Pool_malloc(Pool, size_t);
-
-List Var_list(Var);
-
-Var Pool_intern(Pool, Var, void *);
+Var Pool_lookup(Pool, Var);
 
 Var List_var(List);
 
+List Var_list(Var);
+
+void * Pool_malloc(Pool, size_t);
+
+Var Pool_intern_new(Pool, Var, void *);
+
 List List_cons_in(Pool pool, Var head, List tail){
   if(! pool || Var_is_void(head)) return NULL;
+  struct List query ={
+    head, tail
+  }
+  ;
+  Var existing = Pool_lookup(pool, List_var((List) & query));
+  if(! Var_is_void(existing)) return Var_list(existing);
   List cell = Pool_malloc(pool, sizeof(struct List));
   cell -> car = head;
   cell -> cdr = tail;
-  return Var_list(Pool_intern(pool, List_var(cell), cell));
+  return Var_list(Pool_intern_new(pool, List_var(cell), cell));
 }
 
 int Var_is_row(Var, unsigned, unsigned long, unsigned long);
@@ -296,22 +304,13 @@ Var Symbol_var(Symbol);
 
 Var String_var(String);
 
-Var Pool_lookup(Pool, Var);
-
 List cons(Var head, List tail){
   if(Var_is_void(head)){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/list.x",.function = "cons",.line = 152};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/list.x",.function = "cons",.line = 158};
     x2c_error_raise_n(& _x2c_error_site_0, 48270474208, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("List.cons")), NULL))));
     __builtin_unreachable();
   }
-  Pool pool = Pool_current();
-  struct List query ={
-    head, tail
-  }
-  ;
-  Var existing = Pool_lookup(pool, List_var((List) & query));
-  if(! Var_is_void(existing)) return Var_list(existing);
-  return List_cons_in(pool, head, tail);
+  return List_cons_in(Pool_current(), head, tail);
 }
 
 static int _is_active_canonical(List list){
