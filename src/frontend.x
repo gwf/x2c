@@ -213,11 +213,14 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
     it before opening the next unit; Type and collection caches are
     process-global.
 */
-int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) {
+static int _start(
+  Frontend frontend, String filename, ParsedUnit *unit, int shared_values) {
   *unit = (ParsedUnit) { 0 };
   unit.generated_symbols =
     !frontend.request.no_cpp && !frontend.request.dump;
-  unit.context = Context.open_isolated_named("translation unit");
+  unit.context = shared_values
+    ? Context.open_named("shared translation unit")
+    : Context.open_isolated_named("translation unit");
   Type.begin_unit();
   unit.compiler = Compiler.new();
   Compiler compiler = unit.compiler;
@@ -239,6 +242,38 @@ int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) {
   }
   catch %(malformed *): return 0;
   return !compiler.error_count();
+}
+
+int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) =>
+  _start(frontend, filename, unit, 0);
+
+/* Installs the compile-time forms `lib/meta.x` defines into the shared
+   session. The builders there are ordinary definitions, so reaching their
+   compile-time forms means parsing the file; this does it once for the
+   process. The values it interns belong to the current canonical pool rather
+   than a unit's own, which is why this unit shares the process pool: a
+   Lambda the session keeps outlives every unit that calls it. */
+static void _preload_meta_surface(Frontend frontend, Lisp shared) {
+  ParsedUnit unit;
+  String path = %"${x2c_get_root()}/lib/meta.x";
+  if (!_start(frontend, path, &unit, 1)) {
+    unit.close();
+    return;
+  }
+  unit.compiler.macro_lisp = shared;
+  unit.compiler.borrowed_lisp = 1;
+  defer unit.close();
+  if (unit.collect(frontend)) (void) unit.parse();
+}
+
+/** Evaluates the compile-time libraries and installs the compiler surface's
+    own definitions, once for this process.
+*/
+void Frontend.preload_macro_libraries(Frontend frontend) {
+  Compiler compiler = Compiler.new();
+  Lisp shared = compiler.open_macro_library();
+  if (shared) _preload_meta_surface(frontend, shared);
+  compiler.publish_macro_library(shared);
 }
 
 /** Collects symbols and retains preprocessor outputs for adapter
