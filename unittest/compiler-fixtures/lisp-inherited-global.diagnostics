@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/lisp-inherited-global.x:5:1: macro: compile-time Lisp evaluation failed
+  $(def let 1)
+  ^^
+  note: form: (def let 1) error: (bad-state (operation "def") (why "inherited") (name let))
+

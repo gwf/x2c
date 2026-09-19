@@ -1113,6 +1113,25 @@ static int _env_lookup(Lisp lisp, LispEnv *env, Var name, Var *out) {
   return 0;
 }
 
+/* A session inherits its parent's definitions and cannot replace one. The
+   parent outlives every child and is shared by all of them, so a child that
+   rebound an inherited name would change what its siblings read, and nothing
+   lowered against that name could be trusted. */
+static int _inherited(Lisp lisp, Var name) {
+  for (Lisp s = lisp.parent; s; s = s.parent)
+    if (name in s.globals || name in s.reserved) return 1;
+  return 0;
+}
+
+/* The binding an ancestor supplies, when that ancestor is frozen and the
+   rule above therefore makes it final for this session's whole life. */
+static int _frozen_binding(Lisp lisp, Var name, Var *out) {
+  for (Lisp s = lisp.parent; s; s = s.parent)
+    if (s.globals.try_get(name, out) || s.reserved.try_get(name, out))
+      return s.frozen;
+  return 0;
+}
+
 static int _global_lookup(Lisp lisp, Var name, Var *out) {
   for (Lisp s = lisp; s; s = s.parent)
     if (s.globals.try_get(name, out)) return 1;
@@ -1332,6 +1351,8 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv *env) {
       }
       if (lisp.protect_x2c && name.str().startswith("x2c."))
         raise %(bad-state (operation "def") (name $name));
+      if (_inherited(lisp, name))
+        raise %(bad-state (operation "def") (why "inherited") (name $name));
       /* A frozen session is complete, and a value produced now belongs to a
          narrower Context than it does, so the binding would outlive what it
          names. A child session is where a later definition goes. */
@@ -1485,6 +1506,11 @@ static int LispLower._auto_load_name(LispLower l, Var name) {
     int constant = l.b.constant(captured);
     return constant >= 0 && l.b.emit(MW_LCAPTURE, constant, 0, 0, 0, 0) >= 0;
   }
+  /* A frozen ancestor's binding cannot be replaced, so the value stands in
+     for the read and no guard has to watch it. */
+  Var inherited;
+  if (_frozen_binding(l.lisp, name, &inherited))
+    return l._auto_compile_constant(inherited);
   int constant = l.b.constant(name);
   if (constant < 0) return 0;
   return l.b.emit(MW_LGLOBAL, constant, 0, 0, 0, 0) >= 0;
@@ -1596,6 +1622,22 @@ static int LispLower._auto_compile_qq(
 /* Expand only through the effect-restricted evaluator. A declined expansion
    stays an ordinary runtime macro call; successful immutable syntax carries
    the bindings that must still hold when the compiled expansion executes. */
+/* Drops the rows a frozen ancestor supplies. Those bindings are final for
+   this session, so nothing has to re-check them at execution; an expansion
+   whose every row drops needs no site guard at all. */
+static List LispLower._auto_live_bindings(LispLower l, List bindings) {
+  List live = NULL;
+  foreach (List pair, bindings) {
+    Var (name, expected) = pair;
+    Var settled;
+    if (_frozen_binding(l.lisp, name, &settled) &&
+        settled.u64 == expected.u64)
+      continue;
+    live = cons(pair, live);
+  }
+  return live;
+}
+
 static int LispLower._auto_expand(LispLower l, Var head, List args,
                                   Var *expansion, List *dependencies) {
   Var value;
@@ -1675,9 +1717,10 @@ static int LispLower._auto_compile_inline(
      guard re-evaluates the whole form when it no longer names the lambda
      constructor, before any argument of this form has run. */
   Var expected = l.lisp.specials[LISP_LAMBDA];
-  int site = b.constant(%($form (($lsym_lambda $expected))));
+  List live = l._auto_live_bindings(%(($lsym_lambda $expected)));
+  int site = live ? b.constant(%($form $live)) : 0;
   if (site < 0) return 0;
-  int guard = b.emit(MW_LEXPAND, site, 0, 0, 0, -1);
+  int guard = live ? b.emit(MW_LEXPAND, site, 0, 0, 0, -1) : 0;
   if (guard < 0) return 0;
   List scope = l.scope_params;
   foreach (Var name, params) {
@@ -1700,7 +1743,7 @@ static int LispLower._auto_compile_inline(
     return 0;
   }
   if (count && b.emit(MW_LUNBIND, leave, count, 0, 0, 0) < 0) return 0;
-  b.set_target(guard, b.length);
+  if (live) b.set_target(guard, b.length);
   l.lisp.auto_stats.inlined_scopes++;
   return 1;
 }
@@ -1733,16 +1776,17 @@ static int LispLower._auto_lower(LispLower l, Var expression, int tail) {
   List dependencies;
   if (l._auto_expand(head, form.cdr(), &expansion, &dependencies))
     $let(l.depth, l.depth + 1) {
-      int guard = b.emit(MW_LEXPAND, 0, 0, 0, 0, -1);
+      List live = l._auto_live_bindings(dependencies);
+      int guard = live ? b.emit(MW_LEXPAND, 0, 0, 0, 0, -1) : 0;
       if (guard < 0 || !l._auto_compile(expansion, tail)) return 0;
-      int site = b.constant(%($form $dependencies));
+      if (!live) return 1;
+      int site = b.constant(%($form $live));
       if (site < 0) return 0;
       b.code[guard].a = site;
       b.set_target(guard, b.length);
       return 1;
     }
-  int name = b.constant(head);
-  if (name < 0 || b.emit(MW_LGLOBAL, name, 0, 0, 0, 0) < 0) return 0;
+  if (!l._auto_load_name(head)) return 0;
   return l._auto_compile_call(
     form.cdr(), tail && l._auto_self_call(head));
 }
@@ -1756,9 +1800,10 @@ static int LispLower._auto_compile_special(LispLower l, List form, int tail) {
               : head == lsym_cond ? LISP_COND : LISP_QUASIQUOTE;
   Var expected = l.lisp.specials[special];
   MachineBuilder b = l.b;
-  int site = b.constant(%($form (($head $expected))));
+  List live = l._auto_live_bindings(%(($head $expected)));
+  int site = live ? b.constant(%($form $live)) : 0;
   if (site < 0) return 0;
-  int guard = b.emit(MW_LEXPAND, site, 0, 0, 0, -1);
+  int guard = live ? b.emit(MW_LEXPAND, site, 0, 0, 0, -1) : 0;
   if (guard < 0) return 0;
   int ok = 0;
   if (special == LISP_COND)
@@ -1767,7 +1812,7 @@ static int LispLower._auto_compile_special(LispLower l, List form, int tail) {
     ok = special == LISP_QUOTE ? l._auto_compile_constant(argument)
                                : l._auto_compile_qq(argument, 0, 0, 0);
   if (!ok) return 0;
-  b.set_target(guard, b.length);
+  if (live) b.set_target(guard, b.length);
   return 1;
 }
 
@@ -2226,7 +2271,11 @@ void Lisp.set_global(Lisp lisp, String name, Var value) {
     raise %(bad-state (operation "Lisp.set_global") (why "frozen"));
 
   $scope(&lisp.scope) {
-    lisp.globals[Atom.intern(name)] = value;
+    Var interned = Atom.intern(name);
+    if (_inherited(lisp, interned))
+      raise %(bad-state (operation "Lisp.set_global") (why "inherited")
+                        (name $interned));
+    lisp.globals[interned] = value;
     if (name.startswith("x2c.")) lisp.protect_x2c = 1;
   }
 }

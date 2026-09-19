@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/lisp-free-name-is-lexical.x:7:1: macro: compile-time Lisp evaluation failed
+  $(caller)
+  ^^
+  note: form: (caller) error: (unbound (name free-name))
+

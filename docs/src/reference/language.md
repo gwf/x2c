@@ -1212,6 +1212,12 @@ changes nothing about what the body reads. A lambda written inside a binding
 form reads that form's bindings and keeps the values it was made with. A macro
 that needs a value from its caller takes it as an argument.
 
+The session that translates a unit inherits the compile-time library and
+cannot replace one of its definitions: `def` on an inherited name reports a
+diagnostic. A unit's own definitions live in its own session, so one unit
+never changes what another reads, and the compiler treats an inherited
+binding as final.
+
 Compile-time Lisp is trusted code. It runs with the compiler user's authority,
 including the existing native bindings and file operations; there is no
 sandbox. Lisp may also construct canonical AST `List`s directly, including

@@ -950,6 +950,9 @@ static void _library_shutdown(void) {
   library_scope = NULL;
 }
 
+/* The compile-time file-scope table belongs to this unit. `etc/comptime.xlisp`
+   names it but does not define it, so each session defines its own and a unit
+   never writes into the shared library session's definitions. */
 static void _reset_unit_state(Compiler compiler) {
   compiler.macro_lisp.eval(%(def C._globals (Map.new)));
 }
@@ -1001,7 +1004,7 @@ static void _ensure_lisp(Compiler compiler) {
     if (!loaded) {
       _.macro_lisp = Lisp.kernel();
       _.macro_lisp.adopt(library_session);
-      if (shared) _reset_unit_state(_);
+      _reset_unit_state(_);
     }
     _eval_library(
       _, loaded || shared, "etc/init.xlisp",

@@ -26,8 +26,9 @@
 (defun C.store (box v) (Array.setindex box 0 v))
 
 // File-scope state, keyed by binding id. A unit-level initializer is not
-// part of the function, so an unwritten global reads as zero.
-(def C._globals (Map.new))
+// part of the function, so an unwritten global reads as zero. The table
+// belongs to one translation unit, so the session that translates the unit
+// defines it rather than the shared library session.
 
 (defun C.gread (id)
   (if (eq? (Map.contains C._globals id) 0) 0
