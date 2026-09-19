@@ -8,6 +8,33 @@
 > without Gary's explicit green light. The design in
 > `plans/x2c-lowers-to-lisp.md` is settled and this plan does not revisit it.
 
+## The objective, set 2026-09-18
+
+**Replace essentially all hand-written compile-time Lisp with `meta`
+functions.** If it does not need to be Lisp, make it `meta`. Three exemptions
+and no others:
+
+1. **The irreducible core** that lowered code is written in: the special forms
+   `lambda`, `cond`, `quote`, `begin`, `def`, and the natives the lowering
+   emits - `car`, `cdr`, `cons`, `list`, `append`, `match`, `eq?`, `not`, and
+   arithmetic. A meta function cannot be written in itself.
+2. **The name tables** that map a lowered call to an operation:
+   `etc/comptime.xlisp`, `etc/lisp-bindings.xlisp`, `etc/lisp-values.xlisp`,
+   `etc/lisp-io.xlisp`. These are a dictionary, not logic.
+3. **Anything an attempt shows to be genuinely problematic**, with the
+   evidence recorded. M3, M4 and Phase 7 are the existing examples; each
+   records what was measured and why the answer was no.
+
+Everything else is a candidate, including the parts of `etc/init.xlisp` and
+`etc/builtin-macros.xlisp` that earlier revisions of this plan called
+permanent. Two capabilities gate most of it, both scoped in
+`plans/meta-functions.md`: M7 callable values, and M8 installing a
+compile-time function at session start.
+
+Nothing here is done for speed. Measured, a rewrite is neutral on the call
+side because a Lisp `defun` is word-compiled too, and costs about 0.31 ms per
+declaration per importing unit. The case is readability.
+
 ## The result
 
 A compile-time function written in x2c can use the language the way the rest
@@ -392,7 +419,24 @@ agent to say: a four-line comment in `_lower_constant_leaf` (`src/comptime.x`)
 named the typed capture as its example of an unfoldable node, which is no
 longer true.
 
-## Phase 5 - port the remaining macro Lisp (blocked)
+## Phase 5 - port the remaining macro Lisp (one of three done)
+
+`lib/system-macros.xlisp` is ported: 12 of its 13 `dedent.*` definitions are
+now four `meta` functions in `lib/system-macros.xmacro`, the file went 145 to
+69 lines, and `unittest/test-system-macros.x` passes unchanged. Measured cost
++19 ms, of which +12 ms is the `foreach` spelling over the `replace` spelling
+it replaced; the loop was kept because it reads better, which is the trade this
+phase exists to make.
+
+`lib/var-tags.xmacro` (295 lines, 4 importers, 6 SDK calls) and
+`lib/varops.xlisp` (57 lines, 1 importer, 2 SDK calls) remain. M6 makes their
+SDK calls portable. Neither needs M7: their two procedure-taking helpers,
+`var.tag.map` and `var.tag.filter`, are `map` and `filter` and should be
+written as `List.map` and `List.filter` with a `%!(Var x) =>` lambda, which
+already lowers.
+
+### Why this section used to say blocked
+
 
 **Blocked, and the capability is now planned in `plans/meta-functions.md`.**
 That plan's M2 adds the import-loop branch this phase needs. One correction to
@@ -769,6 +813,27 @@ is no: the machinery does not earn 316 lines.
 Reopen this only if a shipped compile-time x2c unit becomes necessary for
 another reason. Then `class` is the first thing to move, `$scope` the second,
 and `foreach` last or never.
+
+## etc/init.xlisp, measured 2026-09-18
+
+Earlier revisions called all 248 lines permanent substrate. That was wrong.
+The file holds 3 native aliases, 7 `defmacro` and 36 `defun`, so the bulk is
+ordinary functions.
+
+- **About 20 of the 36 `defun`s port today**: `caar`, `cadr`, `cddr`, `last`,
+  `length`, `str`, `repr`, `substring` and the rest that take no function.
+- **The rest need M7.** The first five are `map`, `filter`, `foldl`, `member`
+  and `assoc`; three take a function.
+- **The 7 `defmacro`s are a different mechanism.** A Lisp `defmacro` expands
+  when the evaluator meets a form; an x2c `macro` expands x2c source at parse
+  time. They are not two spellings of one thing. They exist to serve
+  hand-written Lisp, so they shrink as it shrinks rather than porting in place.
+- **No circularity** for the functions. A meta function whose body reaches only
+  the core lowers to `car`/`cdr`/`cond`, so `map` as a meta function is not
+  self-referential. The core in the objective above is the real floor.
+
+All of it needs M8, because these are session-start definitions with no
+importing unit.
 
 ## The loop parameter ceiling, and the narrowing that followed
 
