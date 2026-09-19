@@ -72,6 +72,7 @@
 - [lib/map.x](https://x2c-lang.dev/docs/library/modules/map.html)
 - [lib/match-recursive.x](https://x2c-lang.dev/docs/library/modules/match-recursive.html)
 - [lib/match.x](https://x2c-lang.dev/docs/library/modules/match.html)
+- [lib/meta.x](https://x2c-lang.dev/docs/library/modules/meta.html)
 - [lib/mutex.x](https://x2c-lang.dev/docs/library/modules/mutex.html)
 - [lib/path.x](https://x2c-lang.dev/docs/library/modules/path.html)
 - [lib/pool.x](https://x2c-lang.dev/docs/library/modules/pool.html)

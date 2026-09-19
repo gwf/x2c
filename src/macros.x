@@ -1110,7 +1110,11 @@ static List _import(
   Map previous_dependencies = c.deps.copy();
   c.import_stack.push(path);
   Map imported_aliases = NULL;
-  Array meta_definitions = [];
+  /* `meta_installed` records that the file contributed a `meta` function,
+     which is what makes the next pass read it again rather than replay a
+     cached entry. A compile-time-only one installs and contributes no
+     runtime definition, so the two are counted separately. */
+  Array meta_definitions = [], int meta_installed = 0;
   {
     defer c.import_stack.take_last();
     if (path.endswith(".xlisp")) {
@@ -1162,15 +1166,20 @@ static List _import(
           }
           else if (imported.macro_form_is_definition())
             imported.parse_macro_definition();
-          else if (imported.meta_form_is_definition())
-            meta_definitions.push(imported.parse_top_level());
+          else if (imported.meta_form_is_definition()) {
+            meta_installed = 1;
+            List definition = imported.parse_top_level();
+            if (definition) meta_definitions.push(definition);
+          }
           else if (imported.peek(0) == <"$(">) {
             if (c.collect_protocols || _import_path(imported, NULL)) {
               /* A nested import's own `meta` definitions belong to the same
                  consuming unit. */
               List nested = imported.parse_macro_lisp_top_level();
-              if (nested)
+              if (nested) {
+                meta_installed = 1;
                 foreach (Var form, nested.cdr()) meta_definitions.push(form);
+              }
             }
             else imported.parse_macro_lisp_shallow();
           }
@@ -1197,10 +1206,13 @@ static List _import(
     if (previous_dependencies[dependency] != hash)
       dependencies[dependency] = hash;
   Var aliases = imported_aliases ? imported_aliases : %();
-  int meta = !!meta_definitions.len();
-  c.imports[path] = %(imported $aliases $definitions $dependencies $meta);
+  c.imports[path] =
+    %(imported $aliases $definitions $dependencies $meta_installed);
   c.kw_seen[path] = 1;
-  if (!meta) return NULL;
+  if (!meta_installed) {
+    meta_definitions.free();
+    return NULL;
+  }
   List forms = meta_definitions.list_free();
   return %(seq @forms);
 }
@@ -1209,8 +1221,10 @@ static List _import(
     `$(import ...)` loads a tracked `.xlisp` or `.xmacro` dependency; other
     results are discarded in the translation unit's Lisp session.
     Returns a `%(seq ...)` of the runtime `meta` definitions a macro import
-    contributed, or NULL when it contributed none. The consuming unit retains
-    them and emits the ones it reaches.
+    contributed, or NULL when the import declared no `meta` function at all.
+    The consuming unit retains them and emits the ones it reaches. An import
+    whose `meta` functions are all compile-time only answers an empty `seq`,
+    because the next pass still has to read it to install them.
 */
 List Compiler.parse_macro_lisp_top_level(Compiler compiler) {
   Token invocation = compiler.token;
@@ -1239,7 +1253,9 @@ void Compiler.evaluate_declaration_effect(
     A function whose two forms agree is recorded as foldable, so a call with
     constant arguments can be answered from the compile-time form; one that
     reaches file-scope state is recorded as impure instead, which also makes
-    every later `meta` function that calls it impure.
+    every later `meta` function that calls it impure. One that reaches a
+    `Meta` operation has no runtime form at all, which the caller reads to
+    emit nothing for it, and which spreads the same way.
 */
 void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
   if (!c.collect_protocols) c.run_declaration_effects();
@@ -1247,7 +1263,8 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
   if (c.install_comptime(fn)) {
     match (fn)
       case %(function ? (bind (binding ?(int id) ?(String name)) *) ?):
-        if (c.lower_reached_globals()) c.meta_impure[name] = 1;
+        if (c.lower_reached_meta()) c.meta_comptime[name] = 1;
+        else if (c.lower_reached_globals()) c.meta_impure[name] = 1;
         else c.meta_folds[id] = 1;
     return;
   }

@@ -39,6 +39,7 @@ points used by generated code, native callers, and compiler setup.
 | [`lib/map.x`](map.md) | hash table mapping `Var` keys to `Var` values. |
 | [`lib/match-recursive.x`](match-recursive.md) | optional reference matcher. |
 | [`lib/match.x`](match.md) | pattern matching and transformation utilities for lists. |
+| [`lib/meta.x`](meta.md) | the compiler surface a `meta` function calls. |
 | [`lib/mutex.x`](mutex.md) | shared mutable-state coordination. |
 | [`lib/path.x`](path.md) | filesystem locations and the operations on them. |
 | [`lib/pool.x`](pool.md) | nested interning pools with region-backed object storage. |
@@ -72,6 +73,7 @@ prelude. Include one explicitly to use its declarations.
 - [`lib/json.x`](json.md) - JSON text to and from ordinary `Map`, `Array`, `String`, and number values; explicitly include `json.x` to use it.
 - [`lib/list-selectors.x`](list-selectors.md) - Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
 - [`lib/match-recursive.x`](match-recursive.md) - Readable recursive `Match` reference; explicitly include `match-recursive.x` for differential testing.
+- [`lib/meta.x`](meta.md) - The compiler operations a `meta` function calls; declarations only, with no runtime definition. Explicitly include `meta.x` where the `meta` functions are parsed.
 - [`lib/path.x`](path.md) - Filesystem operations on path `String`s; explicitly include `path.x` to use them.
 - [`lib/process.x`](process.md) - Commands, pipelines, and background jobs without a shell; explicitly include `process.x` to use them.
 - [`lib/regex.x`](regex.md) - Regular expressions over the bytes of a `String`; explicitly include `regex.x` to use them.

@@ -691,10 +691,223 @@ either way, which is the point. `comptime-lowering.x` carries the ledger rows.
 generated C would churn on every unrelated emission change, and the small
 fixture says the same thing.
 
+## M6 - the compiler surface in x2c (done)
+
+Gary's decision, taken 2026-09-18. The SDK a macro implementation calls was
+reachable only from Lisp: `x2c.ident`, `x2c.source.text`, `x2c.type.fields` and
+the rest are `$lisp.bind` rows in `src/macros.x`, and `x2c.function.name` did
+not resolve from x2c source at all. That was the one place where Lisp was the
+authoring language rather than the engine, and it is why the first Phase 5 port
+left `dedent.expand` in Lisp. The implementations already existed in x2c as the
+private `_sdk_*` statics; they needed declaring, not writing.
+
+`lib/meta.x` declares them under a `Meta` namespace - `Meta` was free as a type
+name - and `etc/comptime.xlisp` maps each mangled name to the operation the
+compiler already binds. With that, a macro body is one call and the
+implementation is x2c:
+
+```x2c
+meta static List ms_fields(List receiver) =>
+  Meta.type_fields(Meta.syntax_type(receiver));
+```
+```lisp
+(defun Meta_type_fields (value) (x2c.type.fields value))
+```
+
+The rows are `defun`s rather than `def`s, which the design called for. The
+natives are `$lisp.bind`ed **after** every library file is read, so
+`(def Meta_ident x2c.ident)` fails at load with `(unbound (name x2c.ident))`. A
+`defun` resolves at call time. The forwarding layer is also where the two
+shape adjustments live, below.
+
+### What is exposed, and what is not
+
+Thirty operations: the 16 public `x2c.*` bind rows other than
+`x2c.comptime.install` and `x2c.comptime.lower`, plus the 14 public wrappers in
+`etc/compiler-sdk.xlisp`. Each group earns its place by the question a macro
+implementation cannot answer without it.
+
+| group | operations | why a macro needs it |
+| --- | --- | --- |
+| identifiers and literals | `ident`, `literal_string`, `literal_int`, `literal_symbol` | the only way to hand an answer back as syntax |
+| expression construction | `expr_ident`, `expr_index`, `expr_field`, `expr_call`, `expr_composite` | a rewrite needs the shape, not text, because the compiler binds and types the result |
+| reading the capture | `source_text`, `binding_spelling`, `syntax_type`, `cache_value` | four questions about received syntax that walking the `List` cannot answer |
+| reading a function | `function_name`, `function_parameter`, `function_body`, `parameters_arguments` | what a decorator takes apart and forwards |
+| reading a type | `type_fields`, `type_layout`, `type_parts`, `type_resolve`, `type_value`, `type_tag_name`, `type_reverse_name`, `method_resolve` | the answers live in the symbol table, not in syntax; this is the group a macro family needs |
+| the invocation site | `invocation_file`, `invocation_line`, `invocation_column`, `embed_text` | where the developer wrote the call, and what is beside it |
+| failing | `diagnostic_fail` | says what is wrong at the site, which no return value can |
+
+Left out, with the reason:
+
+- **`x2c.comptime.install` and `x2c.comptime.lower`** recurse into this pass.
+- **The `_x2c.*` privates** - the `foreach` helpers, `_x2c.function.reference`,
+  `_x2c.function.native-type`, `_x2c.type.integral?`, `_x2c.type.pointer?`,
+  `_x2c.type.element`, `_x2c.type.parameters`, `_x2c.type.return`,
+  `_x2c.literal.string`, `_x2c.symbol-set`, `_x2c.import-hook`. The language
+  reference already states that a component beginning `_` is a private
+  implementation detail; exposing them from x2c would make thirteen of them
+  public without a caller asking.
+- **`x2c._fail`, `x2c._params` and `x2c._arg`**, the private wrappers, for the
+  same reason. `x2c._fail` is one line over `diagnostic_fail`.
+
+Two shapes needed adjusting rather than aliasing, and both adjustments are in
+the forwarding `defun`:
+
+- **`x2c.expr.call` takes a rest parameter**, which no x2c prototype can
+  spell. `Meta.expr_call(List callee, List arguments)` takes the `List` and the
+  row spreads it with `apply`, which is what a Lisp caller writes anyway.
+- **`x2c.type.value?` answers a Lisp truth value**, and the x2c surface returns
+  `int`, whose test `_lower_truth` inlines as a comparison against zero. Nil
+  compares unequal to zero, so an unnormalized alias would have made
+  `if (Meta.type_value(t))` true for "no". The row answers 1 or 0, the way
+  `List_equal` does.
+
+**The `void` hazard does not apply to this surface, which was checked before
+aliasing.** `Array_getindex`, `Map_get`, `List_get`, `List_last` and
+`List_assoc` are wrapped in `etc/comptime.xlisp` because their x2c operations
+answer `void` for an *absent* element, which has no Lisp value. No SDK
+operation does that: where there is no answer it answers nil
+(`method_resolve`), and where the request is wrong it rejects. A reject is the
+SDK's designed failure channel and it reaches the developer as a located
+diagnostic even from inside a lowered `meta` function. Probed 2026-09-18:
+`Meta.type_fields` on an `int` reported
+`x2c.type.fields requires a struct or union Type` with `note: value: (int)` at
+the macro invocation, and exited 1.
+
+### Compile-time only, derived rather than spelled
+
+These operations exist only inside a compiler, so a `meta` function that
+reaches one has **no valid runtime form**. There is no `meta only` keyword: a
+spelling would be a second source of truth for a fact the compiler can see.
+
+M5 already built this mechanism for a different property, and M6 reuses its
+shape rather than inventing a second propagation. Where M5 records
+`lower_reached_globals` from `Lowering.globals`, `meta_impure` by name, and
+spreads it in `_lower_scan_call`, M6 records `lower_reached_meta` from
+`Lowering.meta_only`, `Compiler.meta_comptime` by name, and spreads it in the
+same place. `_lower_scan_callee` gained two lines.
+
+The derivation itself is the namespace: `_lower_compiler_operation` answers
+whether a callee's binding spelling begins `Meta_`, because `Meta` names this
+surface and nothing else declares into it. One constant, one place.
+
+`Compiler.install_meta_function` is now a three-way choice. A function that
+reaches a `Meta` operation is compile-time only; otherwise one that reaches
+file-scope state is impure; otherwise it folds. Compile-time only comes first
+and excludes folding, which matters: `fold_meta_call` runs from `_finish_call`,
+where `macro_sdk_compiler` is null, so every SDK operation would reject. The
+catch would swallow the raise and leave `macro_sdk_failure_message` set, and
+`_report_lisp_failure` would then report that stale message on the next
+unrelated failure.
+
+Emission is refused in the two places a runtime definition can arrive.
+`Compiler.parse_top_level` returns `NULL` for the unit's own compile-time-only
+definition, the way it already does for a keyword definition, so nothing enters
+the unit's AST and no prototype reaches the header.
+`_append_meta_definitions` skips an imported one. A unit that calls such a
+function at run time gets the link error that names it, which is the failure
+the plan already called the right one.
+
+One thing had to change in the import loop for this. `_import` decided "this
+file contributed `meta` definitions" from the count of runtime definitions it
+collected, and that flag is what makes the next pass read the file again rather
+than replay a cached entry - which is how the install happens in each pass. A
+file whose `meta` functions are all compile-time only contributes no runtime
+definition, so the count was zero and the install was skipped on the second
+pass. `_import` now records that it *installed* one, and answers an empty
+`%(seq)` rather than `NULL`.
+
+### The lowering cache had to carry the facts
+
+The process cache `src/comptime.x` added for the install cost returns 1 from
+`Compiler.install_comptime` without lowering, so `lower_reached_globals` held
+whatever the previous lowering left. That is a pre-existing defect of the cache
+- an imported function's impurity was read from the wrong lowering - and
+M6 cannot inherit it, because a stale answer here decides emission. The entry
+is now `(forms callees globals meta)` and a reused entry restores both.
+
+### One defect found and fixed
+
+`String.join(sep, someArray)` inside a `meta` function aborted the compiler:
+`x2c error floor: <bad-types>: error detail contains an identity-bearing
+value`, exit 134, no diagnostic. Reproduced 2026-09-18 with an eight-line
+function and no `Meta` operation involved, so it predates this milestone.
+
+The cause is an inventory that was one entry short. `_lower_coerce`'s own
+comment said "a declaration and a return both name a type the value has to
+reach, and neither carries the conversion the transform would insert later ...
+so this sees only the two places that do not." An **argument** is a third such
+place: the x2c type system converts at a converting destination - writing
+`.list()` there earns the `unnecessary conversion` warning - and the lowering
+passed the `Array` straight through, so `String.join` received an `Array` where
+it wanted a `List` and raised with the value in the detail.
+
+`_lower_args` now takes the callee's parameter types out of the call's
+signature and coerces each argument through `_lower_coerce`, which adds no
+pair: the closed list of `Array`/`List`, `List`/`Array` and `Symbol`/`String`
+is what it was. `parameters` runs out before `args` for a variadic callee,
+whose extra arguments name no type to reach. The only behaviour that changes is
+the three pairs, each of which produced a wrong type before.
+
+### Evidence
+
+`unittest/compiler-fixtures/meta-sdk.xmacro` and `meta-sdk.x`, modelled on
+`meta-import.*`, with `c stdout status` in the `.phases`. The macro bodies are
+one call each; the implementations are x2c. The checked-in `meta-sdk.c` is the
+proof of the emission rule:
+
+```c
+static int ms_total(int a, int b, int c);
+static String ms_label(String name, int n);
+...
+  int reads[3] ={ p.x, p.y, p.z };
+  printf("names    %s\n", _1);              /* "x, y, z" */
+  printf("count    %d\n", 3);
+  printf("total    %d\n", ms_total(p.x, p.y, p.z));
+  printf("spelling %s\n", _2);              /* "p.y + 1" */
+  printf("label    %s\n", ms_label(_3, 7));
+```
+
+`{ p.x, p.y, p.z }` and `ms_total(p.x, p.y, p.z)` were built by
+`Meta.type_fields`, `Meta.syntax_type`, `Meta.expr_field`, `Meta.expr_composite`,
+`Meta.expr_call`, `Meta.expr_ident` and `Meta.ident`; `"x, y, z"` and
+`"p.y + 1"` by `Meta.literal_string` and `Meta.source_text`; `3` by
+`Meta.literal_int`. The file defines `ms_total`, which the unit wrote itself,
+and `ms_label`, the one `meta` function that reaches no `Meta` operation and so
+keeps both forms. It mentions none of `ms_fields`, `ms_field_reads`, `ms_reads`,
+`ms_total_call`, `ms_names`, `ms_count` or `ms_spelling`, and the program prints
+the same answers a runtime implementation would.
+
+### What it costs
+
+`make build` is clean with no new warnings, `make verify-fixtures` reports 727
+passed against 726 before - the new fixture - with `comptime-autodiff.stdout`
+byte-identical, and `make verify` reports 915 passed, 0 failed.
+
+Two measurements, each the minimum of interleaved runs of the two compilers on
+one host whose load average was about 9, so read the difference between the
+columns rather than the absolute numbers.
+
+| what | without M6 | with M6 |
+| --- | --- | --- |
+| `comptime-autodiff.x`, 106 compile-time functions | 928 ms | 921 ms |
+| `meta-import.x`, the 30 rows' own session cost | 81 ms | 80 ms |
+
+The first is eight interleaved pairs and isolates the compiler change,
+including the extra `_lower_coerce` per argument. The second swaps
+`etc/comptime.xlisp` under one binary, so it is the cost of evaluating 30 more
+`defun` forms in every compile-time Lisp session; it does not register.
+
+Both binaries have to sit in `builds/0` for this. The same binary run from
+`debug/bin` translated `comptime-autodiff.x` in 1.5 s rather than 0.93 s,
+because the repository root it discovers decides whether it replays
+`lib/x2c.xi` as the prelude.
+
 ## Compatibility
 
 `meta` is contextual, so no identifier breaks; the one in-tree use is a `List`
-in an example and it keeps working. The decorator spelling keeps working
+in an example and it keeps working. `Meta` becomes a reserved type name only in
+a unit that includes `lib/meta.x`, which is not in the implicit prelude. The decorator spelling keeps working
 through M1-M3 and is removed only when the plan's own fixtures use `meta`.
 `lib/autodiff.xmacro` is untouched. Whether the ported autodiff replaces it
 remains Gary's call and is not part of this plan.
@@ -728,9 +941,15 @@ milestone is declined. M4 expected to reuse the literal-fold cache rather
 than add a value serializer; its own scouting found the cache cannot
 represent the constants, and it is declined too. Both are recorded above
 rather than removed, because each names what a later design would have to
-beat. The only lasting new mechanism is the contextual `meta` marker, and it
-exists because the parser must know a fact before macro expansion that no
-macro can tell it.
+beat. M6 wrote no implementation at all: the `_sdk_*` operations already
+existed, so it is a declaration file and a table of forwarding rows, and it
+reuses M5's propagation rather than adding a second one.
+
+Two lasting new mechanisms. The contextual `meta` marker exists because the
+parser must know a fact before macro expansion that no macro can tell it. The
+`Meta` namespace exists because a declaration is how x2c names an operation,
+and it earns a second job: the namespace is what makes "compile-time only"
+derivable without a keyword.
 
 **Why this is idiomatic x2c.** `meta` sits where `static` and `inline` sit and
 states the same kind of fact about a declaration. Contextual recognition

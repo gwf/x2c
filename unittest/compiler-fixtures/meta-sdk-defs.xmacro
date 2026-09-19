@@ -1,0 +1,65 @@
+/*  meta-sdk-defs.xmacro -- macro implementations written in x2c
+
+    Each macro body below does nothing but call a `meta` function, and the
+    `meta` functions do the work through `Meta`, the compiler surface
+    `lib/meta.x` declares. Before that surface existed the same bodies had to
+    be written in compile-time Lisp, because `x2c.type.fields`,
+    `x2c.expr.field` and the rest were reachable only from there.
+
+    Every `meta` function here reaches a `Meta` operation, directly or through
+    another one, so none of them has a valid runtime form and no unit emits a
+    definition for any of them. `ms_label` reaches none and is the contrast:
+    the consuming unit calls it at run time, so its definition is the only one
+    in the generated C. See `plans/meta-functions.md`.
+*/
+
+/* The named fields of a struct-typed expression, in declaration order. The
+   answer is in the symbol table, not in the syntax the macro received. */
+meta static List ms_fields(List receiver) =>
+  Meta.type_fields(Meta.syntax_type(receiver));
+
+/* One field-read expression per field, through the receiver the caller
+   wrote, so the generated code is ordinary typed access. */
+meta static List ms_field_reads(List receiver) {
+  Array reads = [];
+  foreach (List field, ms_fields(receiver))
+    reads.push(Meta.expr_field(receiver, field.car()));
+  return reads;
+}
+
+/* `{ p.x, p.y, p.z }`, built from the fields rather than written out. */
+meta static List ms_reads(List receiver) =>
+  Meta.expr_composite(ms_field_reads(receiver));
+
+/* `ms_total(p.x, p.y, p.z)`, a call the unit defines the callee for. */
+meta static List ms_total_call(List receiver) =>
+  Meta.expr_call(
+    Meta.expr_ident(Meta.ident("ms_total")), ms_field_reads(receiver));
+
+/* The field names as one comma-joined String literal. */
+meta static List ms_names(List receiver) {
+  Array names = [];
+  foreach (List field, ms_fields(receiver)) names.push(field.car());
+  return Meta.literal_string(String.join(", ", names));
+}
+
+meta static List ms_count(List receiver) =>
+  Meta.literal_int(ms_fields(receiver).len());
+
+/* The spelling the developer wrote, which only the source text answers. */
+meta static List ms_spelling(Var node) =>
+  Meta.literal_string(Meta.source_text(node));
+
+/* A `meta` function that reaches no `Meta` operation, so it keeps both of
+   its forms the way M1 and M2 left it. */
+meta static String ms_label(String name, int n) => %"$name-$n";
+
+macro Expression $probe.reads(Expr $value) => ($(ms_reads $value))
+
+macro Expression $probe.total(Expr $value) => ($(ms_total_call $value))
+
+macro Expression $probe.names(Expr $value) => ($(ms_names $value))
+
+macro Expression $probe.count(Expr $value) => ($(ms_count $value))
+
+macro Expression $probe.spelling(Expr $value) => ($(ms_spelling $value))

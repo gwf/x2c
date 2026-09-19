@@ -2527,6 +2527,32 @@ comma-separated initializer. Compose a call to an existing spelling with
 Names under `x2c.*` or `_x2c.*` with a component beginning `_` are private
 implementation details.
 
+### The same operations from x2c
+
+Every public operation above is also declared in x2c, in the optional module
+`lib/meta.x`, so a compile-time function that includes it calls the compiler
+directly and a macro's implementation does not have to be written in Lisp. The
+declarations are the signatures; the semantics are the ones described above.
+
+The name is mechanical: drop the `x2c.` prefix, put the rest under `Meta`, and
+replace each remaining `.` with `_`. `x2c.type.fields` is `Meta.type_fields`,
+`x2c.invocation.line` is `Meta.invocation_line`, `x2c.ident` is `Meta.ident`.
+Two answers differ in shape because x2c has no spelling for the Lisp one:
+
+- `Meta.expr_call(List callee, List arguments)` takes its arguments as one
+  `List` rather than as a rest parameter.
+- `Meta.type_value(List value)` returns `int`, 1 or 0, rather than a Lisp
+  truth value.
+
+`x2c.comptime.install` and `x2c.comptime.lower` have no `Meta` spelling,
+because they run the pass that translates the calling function.
+
+These operations exist only inside a compiler, so they have no runtime
+definition anywhere. A compile-time function that reaches one, directly or
+through another compile-time function, therefore has no runtime form and none
+is emitted for it; the compiler derives this and needs no spelling for it.
+Calling such a function at run time is a link error that names it.
+
 Compiler facilities load before author imports, and macro code cannot redefine
 them.
 

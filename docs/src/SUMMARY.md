@@ -58,6 +58,7 @@
     - [lib/map.x](library/modules/map.md)
     - [lib/match-recursive.x](library/modules/match-recursive.md)
     - [lib/match.x](library/modules/match.md)
+    - [lib/meta.x](library/modules/meta.md)
     - [lib/mutex.x](library/modules/mutex.md)
     - [lib/path.x](library/modules/path.md)
     - [lib/pool.x](library/modules/pool.md)

@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 34
-- Runtime modules: 55
+- Runtime modules: 56
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -146,6 +146,7 @@ Public functions:
 
 `Compiler.lower_comptime`, `Compiler.lower_declined`,
 `Compiler.install_comptime`, `Compiler.lower_reached_globals`,
+`Compiler.lower_reached_meta`, `Compiler.meta_is_comptime_only`,
 `Compiler.fold_meta_call`
 
 ### [src/deps.x](../src/deps.x)
@@ -856,6 +857,14 @@ Public functions:
 `MatchCache.search_replace`, `x2c_match_thread_release`,
 `MatchCache.context_open`, `MatchCache.context_close`,
 `MatchCache.flush_default`, `x2c_match_initialize`
+
+### [lib/meta.x](../lib/meta.x)
+
+the compiler surface a `meta` function calls.
+
+Public functions:
+
+None. This module has no non-static function definitions.
 
 ### [lib/mutex.x](../lib/mutex.x)
 
