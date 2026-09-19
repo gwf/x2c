@@ -1,0 +1,194 @@
+# INACTIVE: install as release.yml only during Gary-authorized cutover.
+# Manual full rebuild only. Tags never compile or publish.
+name: release candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact reviewed source commit (40 hex digits)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  CC: clang
+
+jobs:
+  select:
+    runs-on: ubuntu-24.04
+    outputs:
+      source_sha: ${{ steps.select.outputs.source_sha }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - id: select
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git fetch origin "$SOURCE_SHA"
+          test "$(git rev-parse FETCH_HEAD)" = "$SOURCE_SHA"
+          echo "source_sha=$SOURCE_SHA" >> "$GITHUB_OUTPUT"
+
+  compiler:
+    needs: select
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-15-intel, ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.select.outputs.source_sha }}
+          persist-credentials: false
+      - name: Install build tools
+        run: |
+          if [ "$RUNNER_OS" = Linux ]; then
+            sudo apt-get update
+            sudo apt-get install -y clang make python3 git diffutils
+            mkdir -p "$RUNNER_TEMP/x2c-clang"
+            ln -s "$(command -v clang)" "$RUNNER_TEMP/x2c-clang/cc"
+            echo "$RUNNER_TEMP/x2c-clang" >> "$GITHUB_PATH"
+          fi
+      - name: Build from checked-in bootstrap
+        run: make build-safe
+      - name: Build the release tarball and check the install script
+        run: tools/check-install-script.sh
+      - name: Keep the release tarball
+        uses: actions/upload-artifact@v7
+        with:
+          retention-days: 30
+          name: compiler-${{ matrix.os }}
+          path: |
+            dist/x2c-*.tar.gz
+            dist/x2c-*.tar.gz.sha256
+
+  bundles:
+    needs: select
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-15-intel, ubuntu-24.04, ubuntu-24.04-arm]
+        package: [pcre2, yyjson, libcurl, termbox2, libuv, blis]
+        # Upstream publishes prebuilt CPU libtorch only for these two.
+        include:
+          - os: macos-15
+            package: torch
+          - os: ubuntu-24.04
+            package: torch
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.select.outputs.source_sha }}
+          persist-credentials: false
+      - name: Install build tools
+        run: |
+          if [ "$RUNNER_OS" = Linux ]; then
+            sudo apt-get update
+            sudo apt-get install -y build-essential clang python3 git \
+              autoconf automake libtool pkg-config perl jq file patch \
+              ca-certificates unzip diffutils
+            mkdir -p "$RUNNER_TEMP/x2c-clang"
+            ln -s "$(command -v clang)" "$RUNNER_TEMP/x2c-clang/cc"
+            echo "$RUNNER_TEMP/x2c-clang" >> "$GITHUB_PATH"
+          else
+            brew install autoconf automake libtool pkg-config jq
+          fi
+      - name: Build from checked-in bootstrap
+        run: make build-safe
+      - name: Bundle the package for this platform
+        run: make -C packages/${{ matrix.package }} bundle
+      # torch carries shared libraries, so its bundle is only proven by a
+      # program that loads them from an installed copy.
+      - name: Run a program against the installed torch bundle
+        if: matrix.package == 'torch'
+        run: |
+          packages/tools/check-bundle.sh \
+            packages/torch/builds/bundle/torch-native.tar.gz \
+            packages/torch/examples/fit-line.x
+      - name: Keep the bundle
+        uses: actions/upload-artifact@v7
+        with:
+          retention-days: 30
+          name: bundle-${{ matrix.package }}-${{ matrix.os }}
+          path: packages/${{ matrix.package }}/builds/bundle/*-native.tar.gz
+
+  assemble:
+    needs: [select, compiler, bundles]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out reviewed release tooling
+        uses: actions/checkout@v5
+        with:
+          path: trusted
+          persist-credentials: false
+      - name: Check out selected source
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.select.outputs.source_sha }}
+          path: source
+          persist-credentials: false
+      - uses: actions/download-artifact@v8
+        with:
+          path: built
+      - name: Assemble once with the candidate compiler
+        env:
+          SOURCE_SHA: ${{ needs.select.outputs.source_sha }}
+          WORKFLOW_SHA: ${{ github.sha }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/candidate-compiler"
+          tar -xzf built/compiler-ubuntu-24.04/x2c-*-linux-x86_64.tar.gz \
+            -C "$RUNNER_TEMP/candidate-compiler"
+          compiler="$(echo "$RUNNER_TEMP"/candidate-compiler/*/bin/x2c)"
+          python3 trusted/tools/release-candidate.py assemble \
+            --built built --source source --output candidate \
+            --source-sha "$SOURCE_SHA" --workflow-sha "$WORKFLOW_SHA" \
+            --run-id "$GITHUB_RUN_ID" --attempt "$GITHUB_RUN_ATTEMPT" \
+            --x2c "$compiler"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: source/site/package-lock.json
+      - name: Install site build dependencies
+        env:
+          MDBOOK_SHA256: 3f28de05dafca9d0f2eab99c662116b0e37b89b1d96a08f8f430b9eeae958cd7
+        run: |
+          curl -fsSL https://github.com/rust-lang/mdBook/releases/download/v0.5.4/mdbook-v0.5.4-x86_64-unknown-linux-gnu.tar.gz \
+            -o "$RUNNER_TEMP/mdbook.tar.gz"
+          echo "$MDBOOK_SHA256  $RUNNER_TEMP/mdbook.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/mdbook.tar.gz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+          sudo apt-get update
+          sudo apt-get install -y cloc
+          npm ci --prefix source/site
+      - name: Build both destination sites at selected source
+        env:
+          SOURCE_SHA: ${{ needs.select.outputs.source_sha }}
+        run: |
+          for destination in staging production; do
+            if [ "$destination" = staging ]; then
+              site_url=https://staging.x2c-lang.dev
+            else
+              site_url=https://x2c-lang.dev
+            fi
+            SITE_URL="$site_url" SITE_BASE=/ \
+              SITE_SOURCE_REF="$SOURCE_SHA" SITE_RELEASE_CHANNEL="$destination" \
+              SITE_CANDIDATE_ID="$(python3 -c 'import json; print(json.load(open("candidate/candidate.json"))["identity"])')" \
+              npm --prefix source/site run build
+            python3 trusted/tools/release-candidate.py site \
+              --candidate candidate --destination "$destination" \
+              --site-dir source/site/dist
+          done
+          python3 trusted/tools/release-candidate.py verify --candidate candidate
+      - uses: actions/upload-artifact@v7
+        with:
+          name: candidate
+          path: candidate
+          retention-days: 30

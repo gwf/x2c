@@ -18,6 +18,7 @@ mkdir -p "$WORK/releases/v$version"
 cp "$ROOT/dist/$asset" "$ROOT/dist/$asset.sha256" "$WORK/releases/v$version/"
 printf '%s\n' "$version" >"$WORK/releases/x2c-version.txt"
 
+unset X2C_RELEASE_TAG X2C_VERSION
 export X2C_PREFIX="$WORK/prefix" X2C_RELEASES="file://$WORK/releases"
 export X2C_VERSION_URL="file://$WORK/releases/x2c-version.txt"
 sh "$ROOT/site/public/install.sh" >"$WORK/install.stdout"
@@ -37,6 +38,25 @@ sh "$ROOT/site/public/install.sh" --version "$version" >/dev/null
 [[ "$(x2c list)" == "greet - source" ]]
 x2c run -q "$ROOT/examples/power/greet-client.x" >"$WORK/greet.stdout"
 grep -q "ping ping ping" "$WORK/greet.stdout"
+
+# Candidates sharing a version select distinct bytes, never the vVERSION path.
+for candidate in candidate-one candidate-two; do
+  mkdir -p "$WORK/candidate-tree" "$WORK/releases/$candidate"
+  tar -xzf "$ROOT/dist/$asset" -C "$WORK/candidate-tree"
+  tree=$(find "$WORK/candidate-tree" -mindepth 1 -maxdepth 1 -type d)
+  printf '%s\n' "$candidate" >"$tree/candidate-test.txt"
+  tar -czf "$WORK/releases/$candidate/$asset" \
+    -C "$WORK/candidate-tree" "$(basename "$tree")"
+  (cd "$WORK/releases/$candidate" && shasum -a 256 "$asset" >"$asset.sha256")
+  X2C_RELEASE_TAG="$candidate" sh "$ROOT/site/public/install.sh" >/dev/null
+  [[ "$(cat "$WORK/prefix/candidate-test.txt")" == "$candidate" ]]
+  [[ "$(x2c list)" == "greet - source" ]]
+  rm -rf "$WORK/candidate-tree"
+done
+# Selecting the earlier candidate still installs its original bytes.
+X2C_RELEASE_TAG=candidate-one sh "$ROOT/site/public/install.sh" \
+  --version "$version" >/dev/null
+[[ "$(cat "$WORK/prefix/candidate-test.txt")" == candidate-one ]]
 
 # A bad checksum is refused before anything is replaced.
 printf 'bad\n' >"$WORK/releases/v$version/$asset.sha256"

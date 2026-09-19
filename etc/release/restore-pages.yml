@@ -1,0 +1,154 @@
+# INACTIVE: recovery of a previously verified production site only.
+# Does not modify main/tags, build archives or upload release assets.
+name: restore production site
+on:
+  workflow_dispatch:
+    inputs:
+      identity:
+        description: Previously promoted candidate whose complete site to restore
+        required: true
+        type: string
+      expected_version:
+        description: Current production site version (stale-selection guard)
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: production-publication
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    environment: production-publication
+    outputs:
+      version: ${{ steps.prepare.outputs.version }}
+      source_sha: ${{ steps.prepare.outputs.source_sha }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Verify prior production proof and expected current site
+        id: prepare
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IDENTITY: ${{ inputs.identity }}
+          EXPECTED_VERSION: ${{ inputs.expected_version }}
+        run: |
+          python3 tools/release-candidate.py fetch \
+            --repository gwf/x2c-staging --identity "$IDENTITY" --output candidate
+          version="$(python3 -c 'import json; print(json.load(open("candidate/candidate.json"))["version"])')"
+          gh release download "v$version" --repo gwf/x2c \
+            --pattern 'verified-production-*.json' --dir candidate
+          python3 tools/release-candidate.py proof \
+            --candidate candidate --destination production
+          python3 - <<'PYCODE'
+          import json, os, subprocess
+          from urllib.request import urlopen
+          manifest = json.load(open('candidate/candidate.json'))
+          release = json.loads(subprocess.check_output(['gh', 'release', 'view',
+            'v' + manifest['version'], '--repo', 'gwf/x2c', '--json', 'isDraft,tagName']))
+          assert not release['isDraft'], 'target production release is not public'
+          current = urlopen('https://x2c-lang.dev/x2c-version.txt').read().decode().strip()
+          assert current == os.environ['EXPECTED_VERSION'], 'production site changed'
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+            output.write('version=' + manifest['version'] + '\n')
+            output.write('source_sha=' + manifest['source_sha'] + '\n')
+          PYCODE
+      - uses: actions/upload-artifact@v7
+        with:
+          name: production-site
+          path: |
+            candidate/site-production.tar.gz
+            candidate/site-production.json
+            candidate/candidate.json
+          retention-days: 30
+  pages:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: production-site
+          path: candidate
+      - name: Verify and extract the retained site
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, pathlib, tarfile
+          root = pathlib.Path('candidate')
+          archive = root / 'site-production.tar.gz'
+          receipt = json.loads((root / 'site-production.json').read_text())
+          assert hashlib.sha256(archive.read_bytes()).hexdigest() == receipt['sha256']
+          assert hashlib.sha256((root / 'candidate.json').read_bytes()).hexdigest() == receipt['manifest_sha256']
+          with tarfile.open(archive) as tar:
+            for member in tar.getmembers():
+              path = pathlib.Path(member.name)
+              assert not path.is_absolute() and '..' not in path.parts
+              assert member.isfile() or member.isdir()
+            tar.extractall('public', filter='data')
+          PY
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: public
+      - id: deployment
+        uses: actions/deploy-pages@v5
+  verify:
+    needs: pages
+    uses: ./.github/workflows/verify.yml
+    with:
+      identity: ${{ inputs.identity }}
+      destination: production
+  restore-latest:
+    needs: [prepare, verify]
+    runs-on: ubuntu-24.04
+    environment: production-publication
+    permissions:
+      contents: write
+    steps:
+      - name: Restore latest designation after successful site verification
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          SOURCE_SHA: ${{ needs.prepare.outputs.source_sha }}
+          IDENTITY: ${{ inputs.identity }}
+          PREVIOUS_VERSION: ${{ inputs.expected_version }}
+        run: |
+          gh release edit "v$VERSION" --repo gwf/x2c --latest
+          main_sha="$(gh api repos/gwf/x2c/git/ref/heads/main --jq .object.sha)"
+          export RESTORE_MAIN_SHA="$main_sha"
+          python3 - <<'PYCODE'
+          import json, os
+          receipt = {
+            'candidate': os.environ['IDENTITY'],
+            'previous_site_version': os.environ['PREVIOUS_VERSION'],
+            'restored_version': os.environ['VERSION'],
+            'restored_source': os.environ['SOURCE_SHA'],
+            'current_main': os.environ['RESTORE_MAIN_SHA'],
+            'run_url': os.environ['GITHUB_SERVER_URL'] + '/' + os.environ['GITHUB_REPOSITORY']
+              + '/actions/runs/' + os.environ['GITHUB_RUN_ID'],
+            'state': 'site-verified-and-latest-restored'
+          }
+          with open('restoration.json', 'w') as output:
+            json.dump(receipt, output, indent=2)
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as output:
+            output.write('Restored the verified site and latest release designation.\n')
+            if receipt['current_main'] != receipt['restored_source']:
+              output.write('Main still points to ' + receipt['current_main']
+                + ', while the restored site represents ' + receipt['restored_source']
+                + '. Main and public tags were not moved; resolve with a patch release.\n')
+          PYCODE
+      - uses: actions/upload-artifact@v7
+        with:
+          name: restoration-receipt
+          path: restoration.json
+          retention-days: 30

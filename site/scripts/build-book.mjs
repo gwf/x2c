@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { finalizeDestination } from "../release-destination.mjs";
 import { analyticsSnippet } from "../analytics-snippet.mjs";
 
 import {
@@ -161,6 +162,11 @@ async function finalizeBook() {
 
 async function writePublicationFiles() {
   const files = await htmlFiles(siteOutput);
+  for (const file of files) {
+    const filename = path.join(siteOutput, file);
+    const html = await readFile(filename, "utf8");
+    await writeFile(filename, finalizeDestination(html));
+  }
   const urls = files
     .map((file) => file.split(path.sep).join("/"))
     .filter(isIndexedHtmlFile)

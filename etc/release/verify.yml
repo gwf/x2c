@@ -1,0 +1,40 @@
+# INACTIVE: shared release-only verification; no build or publication token.
+name: verify live candidate
+on:
+  workflow_call:
+    inputs:
+      identity:
+        required: true
+        type: string
+      destination:
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-15-intel, ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install native program tools
+        run: |
+          if [ "$RUNNER_OS" = Linux ]; then
+            sudo apt-get update
+            sudo apt-get install -y clang make
+          fi
+      - name: Verify live installation and installed package programs
+        env:
+          IDENTITY: ${{ inputs.identity }}
+          DESTINATION: ${{ inputs.destination }}
+        run: |
+          python3 etc/release/verify-live.py \
+            --identity "$IDENTITY" --destination "$DESTINATION"

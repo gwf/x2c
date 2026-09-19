@@ -1,0 +1,118 @@
+# INACTIVE: install in source repository only during authorized cutover.
+name: stage candidate
+on:
+  workflow_dispatch:
+    inputs:
+      build_run:
+        description: Successful candidate build run ID
+        required: true
+        type: string
+      identity:
+        description: Exact candidate identity selected from build manifest
+        required: true
+        type: string
+      expected_output:
+        description: Current staging repository main commit (compare-and-swap)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: staging-publication
+  cancel-in-progress: false
+
+jobs:
+  stage:
+    runs-on: ubuntu-24.04
+    environment: staging-publication
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v8
+        with:
+          name: candidate
+          path: candidate
+          run-id: ${{ inputs.build_run }}
+          github-token: ${{ github.token }}
+      - name: Validate selected build and candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_RUN: ${{ inputs.build_run }}
+          IDENTITY: ${{ inputs.identity }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN" > run.json
+          python3 - <<'PY'
+          import json, pathlib
+          run = json.load(open('run.json'))
+          assert run['conclusion'] == 'success'
+          assert run['event'] == 'workflow_dispatch'
+          assert run['path'] == '.github/workflows/release.yml'
+          root = pathlib.Path('candidate')
+          assert not list(root.glob('verified-*.json')), 'build cannot supply verification'
+          manifest = json.loads((root / 'candidate.json').read_text())
+          assert str(manifest['run_id']) == str(run['id'])
+          assert str(manifest['attempt']) == str(run['run_attempt'])
+          assert manifest['workflow_sha'] == run['head_sha']
+          PY
+          python3 tools/release-candidate.py verify \
+            --candidate candidate --identity "$IDENTITY"
+      - uses: actions/create-github-app-token@v2
+        id: staging-token
+        with:
+          app-id: ${{ vars.STAGING_APP_ID }}
+          private-key: ${{ secrets.STAGING_APP_PRIVATE_KEY }}
+          owner: gwf
+          repositories: x2c-staging
+      - name: Upload immutable assets, then deploy the complete site
+        env:
+          GH_TOKEN: ${{ steps.staging-token.outputs.token }}
+          EXPECTED_OUTPUT: ${{ inputs.expected_output }}
+        run: |
+          python3 tools/release-candidate.py publish \
+            --candidate candidate --repository gwf/x2c-staging \
+            --destination staging
+          python3 etc/release/deploy-staging.py --candidate candidate \
+            --expected-output "$EXPECTED_OUTPUT"
+      - name: Keep partial or completed deployment receipt
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: staging-deployment
+          path: candidate/staging-deployment.json
+          retention-days: 30
+  verify:
+    needs: stage
+    uses: ./.github/workflows/verify.yml
+    with:
+      identity: ${{ inputs.identity }}
+      destination: staging
+  record:
+    needs: verify
+    runs-on: ubuntu-24.04
+    environment: staging-publication
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/create-github-app-token@v2
+        id: staging-token
+        with:
+          app-id: ${{ vars.STAGING_APP_ID }}
+          private-key: ${{ secrets.STAGING_APP_PRIVATE_KEY }}
+          owner: gwf
+          repositories: x2c-staging
+      - name: Retain successful four-platform staging verification
+        env:
+          GH_TOKEN: ${{ steps.staging-token.outputs.token }}
+          IDENTITY: ${{ inputs.identity }}
+        run: |
+          python3 tools/release-candidate.py fetch \
+            --repository gwf/x2c-staging --identity "$IDENTITY" --output candidate
+          python3 tools/release-candidate.py receipt --candidate candidate \
+            --destination staging \
+            --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          python3 tools/release-candidate.py publish --candidate candidate \
+            --repository gwf/x2c-staging --destination staging
