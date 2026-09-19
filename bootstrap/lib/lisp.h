@@ -119,6 +119,8 @@ LispAutoStats Lisp_auto_stats(Lisp lisp);
 
 void Lisp_auto_instrument(Lisp lisp, MachineStats * stats);
 
+void Lisp_call_budget(Lisp lisp, long budget);
+
 void Lisp_auto_disable(Lisp lisp, int disabled);
 
 int Lisp_auto_prepare(Lisp lisp);
