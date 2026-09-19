@@ -2042,7 +2042,18 @@ List Compiler.fold_meta_call(
     values.push(value);
   }
   Var answer;
+  /* An ordinary decline keeps the call and says nothing: the two forms
+     simply did not agree here. Running out of call depth is different. The
+     compile-time form did not finish, and the developer wrote something the
+     compiler cannot answer, so the call stays and the reason is reported. */
   try answer = c.macro_lisp.apply(callable, values);
+  catch %(call-stack *): {
+    c.report_warning(
+      <macro>, %"'$name' was not answered at compile time", c.token,
+      %("reason: its compile-time form nested too deep and was stopped;"
+        "the call stays and runs at run time"));
+    return NULL;
+  }
   catch: return NULL;
   return _meta_result(c, result, answer);
 }

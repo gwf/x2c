@@ -1,0 +1,10 @@
+unittest/compiler-fixtures/meta-call-depth.x:24:34: macro: 'md_deep' was not answered at compile time
+    printf("%d %d\n", md_deep(4000), md_nest(2000, 2));
+                                   ^
+  note: reason: its compile-time form nested too deep and was stopped; the call stays and runs at run time
+
+unittest/compiler-fixtures/meta-call-depth.x:24:52: macro: 'md_nest' was not answered at compile time
+    printf("%d %d\n", md_deep(4000), md_nest(2000, 2));
+                                                     ^
+  note: reason: its compile-time form nested too deep and was stopped; the call stays and runs at run time
+

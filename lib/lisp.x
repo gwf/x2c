@@ -303,6 +303,7 @@ struct Lisp {
   LispMachineSlot machine_free;   // reusable machine slots, innermost first
   LispExpansion *expansion;
   int machine_depth;    // machine invocations in progress on this session
+  int call_depth;       // evaluator calls nested on this session
   int auto_disabled;    // benchmark/test forced-evaluator arm only
   int protect_x2c;      // compiler SDK installed; x2c.* cannot be redefined
 };
@@ -1295,6 +1296,11 @@ static void _bind_params(Lambda lambda, List args, Map bindings) {
 }
 
 static Var _call_lambda(Lisp lisp, Lambda lambda, List args, LispEnv *env) {
+  if (++lisp.call_depth > LISP_CALL_DEPTH_MAX) {
+    lisp.call_depth--;
+    raise %(call-stack (operation "apply") (value ${lambda.body}));
+  }
+  defer lisp.call_depth--;
   LispExpansion *trace = lisp.expansion;
   if (trace && ++trace.calls >= MACHINE_FRAME_MAX) _expansion_decline();
   defer if (trace) trace.calls--;
@@ -1468,6 +1474,13 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv *env) {
 // Macro expansions nested along one path before analysis stops. A macro
 // that expands to a call to itself would otherwise never terminate.
 #define LISP_AUTO_EXPAND_MAX 32
+/* Evaluator calls nested along one path. Each costs about 2 KB of C stack,
+   measured by running a compile-time loop nest until it died: an 8 MB stack
+   carries a little over 4,000. The deepest legitimate nesting anywhere in
+   this repository is 158, in the autodiff tests, so this leaves room for
+   code far deeper than any that exists while ending a runaway in an error
+   the compiler can report instead of a crash. */
+#define LISP_CALL_DEPTH_MAX 1024
 
 typedef struct LispLower {
   Lisp lisp;
