@@ -943,9 +943,25 @@ static void _eval_library(
 
 static Lisp library_session = NULL, static Scope library_scope = NULL;
 
+/* The canonical paths whose top-level Lisp the shared session evaluated
+   while it was being filled. A unit that imports one of these registers its
+   macro definitions as usual and leaves its top-level Lisp alone: the shared
+   session already holds those definitions and a session cannot replace a
+   name an ancestor binds. The key is the canonical path, which is the
+   identity the import cache itself uses, so a file that shadows a library
+   name through another include path is a different key and evaluates
+   normally. */
+static Map library_imports = NULL, static int library_filling = 0;
+
+static int _inherited_import(String path) {
+  return !library_filling && library_imports &&
+         library_imports.contains(path);
+}
+
 static void _library_shutdown(void) {
   Lisp.destroy(library_session);
   library_session = NULL;
+  library_imports = NULL;
   library_scope.destroy();
   library_scope = NULL;
 }
@@ -966,33 +982,58 @@ static List _library_files(void) => %(
   ("etc/compiler-sdk.xlisp" "cannot open the compile-time Lisp SDK")
   ("etc/builtin-macros.xlisp" "cannot open the built-in macro support"));
 
-static Lisp _library_session(Compiler compiler) {
-  if ((void *) library_session != NULL) return library_session;
-  Lisp was = compiler.macro_lisp;
-  defer compiler.macro_lisp = was;
+/** Builds the shared compile-time session, leaving it open for the caller to
+    fill and then publish. Returns the session, or null when this home cannot
+    preload, in which case every unit falls back to its own load, which
+    reports against the unit that needed it.
+
+    The session is not published until `Compiler.publish_macro_library`, so a
+    unit opened in between still builds its own.
+*/
+Lisp Compiler.open_macro_library(Compiler compiler) {
+  if ((void *) library_session != NULL) return NULL;
   Scope.push(&library_scope);
   defer Scope.pop();
   Scope.shutdown_hook(_library_shutdown);
   Lisp shared = Lisp.kernel();
+  library_imports = {};
+  Lisp was = compiler.macro_lisp;
+  defer compiler.macro_lisp = was;
   compiler.macro_lisp = shared;
-  /* A home without the runtime sources cannot preload, and that is not this
-     step's failure to report: leaving the parent unbuilt puts every unit
-     back on its own load, which reports against the unit that needed it. */
+  library_filling = 1;
   try {
     foreach (Var (relative, message), _library_files())
       _eval_library(compiler, 0, relative, message);
   }
-  catch %(? *): return NULL;
+  catch %(? *): {
+    library_filling = 0;
+    return NULL;
+  }
+  return shared;
+}
+
+/** Prepares and freezes the shared session and makes it every unit's parent.
+    `shared` must be the session `Compiler.open_macro_library` returned.
+*/
+void Compiler.publish_macro_library(Compiler compiler, Lisp shared) {
+  (void) compiler;
+  library_filling = 0;
+  if (!shared) {
+    library_imports = NULL;
+    return;
+  }
+  Scope.push(&library_scope);
+  defer Scope.pop();
   /* Still inside the process Context, so every program's constants belong
      to it. After the freeze a unit only ever compiles its own lambdas. */
   (void) shared.auto_prepare();
   shared.freeze();
-  return library_session = shared;
+  library_session = shared;
 }
 
 /** Evaluates the compile-time Lisp libraries once for this process. */
 void Compiler.preload_macro_libraries(Compiler compiler) {
-  (void) _library_session(compiler);
+  compiler.publish_macro_library(compiler.open_macro_library());
 }
 
 /* Each Compiler initializes one Lisp session lazily. An `.xmacro` import
@@ -1137,6 +1178,7 @@ static List _import(
   _ensure_lisp(c);
   String path = _canonical_path(c, requested);
   c.add_translation_dependency(path);
+  if (library_filling) library_imports[path] = 1;
   Var cached;
   int replay = 0;
   if (c.imports.try_get(path, &cached)) {
@@ -1221,6 +1263,7 @@ static List _import(
         imported.macro_lisp = c.macro_lisp;
         imported.borrowed_lisp = 1;
         imported.import_src = path;
+        imported.inherited_lisp = _inherited_import(path);
         imported.imports = c.imports;
         imported.import_stack = c.import_stack;
         imported.declaration_effects = c.declaration_effects;
@@ -1300,6 +1343,10 @@ List Compiler.parse_macro_lisp_top_level(Compiler compiler) {
   int is_import = _import_path(compiler, &import_path);
   String form = _lisp_form(compiler);
   if (is_import) return _import(compiler, import_path, invocation);
+  /* The shared session evaluated this file's forms once for the process and
+     every unit inherits them, so evaluating this one again would only try to
+     replace a name an ancestor binds. */
+  if (compiler.inherited_lisp) return NULL;
   _ensure_lisp(compiler);
   _eval_string(compiler, form, invocation);
   return NULL;

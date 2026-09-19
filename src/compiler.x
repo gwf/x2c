@@ -156,6 +156,7 @@ typedef struct Compiler {
   // file is that script; both NULL for an ordinary unit.
   ScriptUnit unit_script, script;
   Lisp macro_lisp, String import_src, int borrowed_lisp;
+  int inherited_lisp;   // the shared session evaluated this import
   GenNames names;
   Array origins, int origin, source_map;
   // The request view outlives the unit; semantic stores die with this unit.
