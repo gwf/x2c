@@ -9,6 +9,7 @@
 #pragma once
 
 $(import "error-macros.xmacro")
+$(import "var-tags.xmacro")
 #include "common.x"
 
 /** Describes one numeric `Var` family without holding a value.
@@ -136,8 +137,6 @@ Var Var.integer_box(Symbol target, unsigned long long raw) {
 /* Both projections walk the tag ledger's numeric rows in the same order, so
    the SymbolSet index is the metadata-table index. Promotion and conversion
    read widths and ranks from these rows. */
-$(import "var-tags.xmacro")
-
 static const SymbolSet numeric_tags = $var.tag.numeric.symbolset();
 static const X2CVarNumericInfo numerics[] = $var.tag.numeric();
 

@@ -14,6 +14,7 @@
 #pragma once
 
 $(import "error-macros.xmacro")
+$(import "var-tags.xmacro")
 #include "common.x"
 #include "map.x"
 
@@ -248,8 +249,6 @@ typedef struct VarDescriptor {
   VarMethods methods;
   String name;
 } VarDescriptor;
-
-$(import "var-tags.xmacro")
 
 /* One row per boxed ledger tag, in ledger order, so a decoded value indexes
    the table without another tag search. */

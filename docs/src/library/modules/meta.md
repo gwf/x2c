@@ -20,7 +20,7 @@ The namespace the compile-time operations below belong to. It is a type
 only so that its operations spell as `Meta.operation`; no value of it
 exists and none is ever made.
 
-Source: `lib/meta.x:41`
+Source: `lib/meta.x:40`
 
 ## Design notes
 

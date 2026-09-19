@@ -82,7 +82,7 @@ Macro Lisp in the repository, measured 2026-09-18 by counting lines inside
 | --- | --- | --- |
 | `lib/autodiff.xmacro` | 754 | ported (Phase 6 decides whether it replaces the original) |
 | `etc/builtin-macros.xlisp` | 504 | stays Lisp; Phase 7 answered it |
-| `lib/var-tags.xmacro` | 295 | ported; two `symbol-set` rows remain |
+| `lib/var-tags.xmacro` | 295 | ported and reverted on cost; see below |
 | `etc/init.xlisp` | 237 | substrate, stays |
 | `etc/comptime.xlisp` | 121 | name table, stays |
 | `etc/lisp-bindings.xlisp` | 119 | name table, stays |
@@ -423,7 +423,7 @@ agent to say: a four-line comment in `_lower_constant_leaf` (`src/comptime.x`)
 named the typed capture as its example of an unfoldable node, which is no
 longer true.
 
-## Phase 5 - port the remaining macro Lisp (done)
+## Phase 5 - port the remaining macro Lisp (two of three)
 
 `lib/system-macros.xlisp` is ported: 12 of its 13 `dedent.*` definitions are
 now four `meta` functions in `lib/system-macros.xmacro`, the file went 145 to
@@ -447,82 +447,91 @@ includes `lib/meta.x`, because the import borrows the unit's symbol table.
 And a `meta` function anywhere in `lib/` needs the checked-in bootstrap to
 carry the comptime lowering first; see "Capability before callers" below.
 
-`lib/var-tags.xmacro` is ported too, recorded below.
+`lib/var-tags.xmacro` was ported and reverted on cost, recorded below.
 
-### `lib/var-tags.xmacro`, ported after three compiler changes
+### `lib/var-tags.xmacro`: ported, measured, reverted
 
-Declined twice on 2026-09-18 and then done, after Gary read the obstacle
-correctly: it was declaration ordering, not structure, and the answer was to
-land the capability, refresh the bootstrap, and only then use it.
+Built and landed on 2026-09-18, then reverted the same day because it cost
+3.4x on `lib/`. The port itself was correct - `builds/0/lib/var.c` came out
+byte-identical, the gate passed end to end - so what follows is a cost
+finding, not a correctness one. The x2c ledger is kept in the session record
+and the work is one import-cache change away from being usable.
 
-The file is 295 Lisp lines and is now 446 lines of x2c: one literal-template
-table, ten row accessors, and the projections that build the ID enumerator,
-the descriptor table, the numeric table, the decoder and the constant rows.
-Two `$(_x2c.symbol-set ...)` invocations are the only Lisp left, because that
-native is private by M6's decision and has no `Meta` spelling.
+**The measurement**, `x2c translate` over all 57 `lib/*.x` in one process,
+minimum of three runs on one host with the same compiler binary:
 
-**The evidence is `builds/0/lib/var.c`, byte-identical** to what the Lisp
-produced: the ID enumerator, the 104-row descriptor table, the tag set and
-the whole built-in decode switch. `varconvert.c`, `dispatch.c`, `common.c`
-and `src/type.c` differ only in literal-cache numbering and in the
-declarations `common.x` gained, each checked by normalizing the numbering.
+| ledger | lib/ | one small unit |
+| --- | --- | --- |
+| Lisp | 3.07 s | 0.05 s |
+| x2c | 10.48 s | 2.48 s |
 
-### What had to change first
+Two separate costs, and the plan's own 0.31 ms per declaration per importing
+unit does not describe either:
 
-Every module that projects the ledger - `lib/common.x`, `lib/var.x`,
-`lib/dispatch.x` - sits below `lib/array.x` and `lib/list.x`, so none of
-them has `Array.push` or `List.getindex` by inclusion. `lib/common.x`
-declares them now, under "the compile-time surface the tag ledger reads",
-which puts them in `common.h` where every such unit already looks. The
-definitions stay where they were.
+- **About 2.4 s once per process**, dominated by the 104-row table. Cutting
+  the table to 11 rows dropped one unit from 2.48 s to 0.53 s, so the cost
+  tracks the table rather than the function count.
+- **About 0.14 s per unit thereafter**, which is the re-parse M2 recorded as
+  its open item: "What is left is the parse, still done twice per unit."
+  `lib/common.x` has to carry the import, because it projects
+  `$var.tag.unbox`, and every one of the 57 units includes `common.x`.
 
-**`Meta` is now in the implicit prelude**, which Gary approved on
-2026-09-18. `lib/meta.x` included `common.x`, `list.x`, `string.x` and
-`symbol.x`; the last three made the include a cycle, so `common.x` could not
-reach it. It includes only `common.x` now, which supplies every typedef its
-signatures name, and `common.x` includes it. `Meta` is therefore a reserved
-type name in every program, and `src/type.x` needed no change at all because
-the surface reaches it through `common.h`.
+Moving the import to the four other projections would not save it: four units
+still pay the 2.4 s plus 0.6 s, against a 3.07 s baseline.
 
-**The nine unbox accessors are declared rather than projected.** A `Var`
-bound to a `List` name converts through `Var.list`, so that conversion has to
-resolve before the ledger is imported, and `$var.tag.unbox` comes from the
-ledger. Declaring the nine by hand breaks the circle; the macro still defines
-them a few lines below.
+**What would make it viable.** A later unit needs the ledger's `meta`
+functions installed, not re-parsed. The lowered forms are already cached
+process-wide by `src/comptime.x`; the import cache re-reads the file anyway,
+because a `meta` definition binds in the current symbol table and its runtime
+form is emitted where the import stands. An import whose `meta` functions are
+all compile-time only, or which no unit reaches at run time, needs neither,
+and could replay the cached forms into the new session instead. That is one
+change in `_import`, and it is what to build before trying this again. The
+table cost is separate and needs its own look at literal folding.
 
-### Three compiler defects this found, each fixed
+### What the port did establish, and what was kept
 
-Each needed a bootstrap refresh before `lib/` could rely on it, which is the
-"capability before callers" rule below, applied three times in one session.
+Three compiler defects, each found by the port and each fixed. Two are kept
+because they are correct regardless; the third was reverted with the port.
 
 - **A hexadecimal literal containing `e` or `E` lowered to a floating
-  value.** `_lower_number` in `src/comptime.x` tested for an exponent by
-  looking for those letters anywhere in the spelling, so `0x000E` became
-  `14.0` and the switch label built from it was rejected by the C compiler as
-  a double. This was a silent wrong answer wherever the value was not a
-  label. The test now skips a `0x` prefix. `mt_hex`, `mt_hex_upper` and
-  `mt_floats` in `comptime-lowering.x` pin it.
+  value** (kept). `_lower_number` in `src/comptime.x` looked for an exponent
+  anywhere in the spelling, so `0x000E` became `14.0`. It surfaced as a C
+  compiler error only because the value was a switch label; anywhere else it
+  was a silent wrong answer. `mt_hex`, `mt_hex_upper` and `mt_floats` in
+  `comptime-lowering.x` pin it.
 - **A `.xmacro` holding both `meta` functions and macro definitions collided
-  with itself.** A file that contributes a `meta` function is read again in
-  each pass rather than replayed, and the second read reported every macro as
-  "collides with a visible macro". `_import` in `src/macros.x` now drops the
-  macros that import previously contributed before re-reading. Every build
-  exercises this, since `common.x` and `dispatch.x` both import the ledger.
-- **An import's generated names moved the unit's counters.** A `meta` body in
-  an import is parsed in every importing unit and in none built from the
-  `.xi` prelude, so `unittest/probes/run-symbol-snapshot.sh` saw the two
-  modes emit different `_x2c_macro_*` numbers. `Compiler.fresh_name` counts
-  import names separately and spells them `_x2c_m<stem>_<n>`, which also
-  makes a collision with a unit's own name impossible. `meta-import.c` is the
-  checked-in evidence; its five generated locals were renamed and nothing
-  else moved.
+  with itself** (kept). A file that contributes a `meta` function is read
+  again in each pass rather than replayed, and the second read reported every
+  macro as "collides with a visible macro". `_import` in `src/macros.x` now
+  drops the macros that import previously contributed before re-reading.
+- **An import's generated names moved the unit's counters** (reverted with
+  the port, which was its only caller). A `meta` body in an import is parsed
+  in every importing unit and in none built from the `.xi` prelude, so
+  `unittest/probes/run-symbol-snapshot.sh` saw the two modes emit different
+  `_x2c_macro_*` numbers. The fix was to count import names separately as
+  `_x2c_m<stem>_<n>`; it renamed five generated locals in `meta-import.c`,
+  which is churn without a caller. Restore it with the port.
 
-### Two smaller things, unchanged
+Two facts about writing the ledger in x2c, for whoever returns to it.
+`_x2c.symbol-set` is a private native with no `Meta` spelling, so the two tag
+sets stay Lisp either way. And `x is <tag>` compiles to the `Var.is_row` fast
+path, which has no compile-time meaning, so a `meta` function reads
+`value.tag() == <tag>` instead.
 
-`_x2c.symbol-set` has no `Meta` spelling, so the two tag sets stay Lisp. And
-`x is <tag>` compiles to the `Var.is_row` fast path, which has no
-compile-time meaning, so the ledger reads `bits.tag() == <list>` instead;
-that is a decline worth knowing about for any `meta` function.
+### The structural obstacle, and how it was removed
+
+Recorded because it cost two earlier attempts and the removal is the reusable
+part. Every module that projects the ledger - `lib/common.x`, `lib/var.x`,
+`lib/dispatch.x` - sits below `lib/array.x` and `lib/list.x`, so none has
+`Array.push` or `List.getindex` by inclusion, and a `meta` function that
+reads a table needs them. Declaring them in `lib/common.x` puts them in
+`common.h`, where every such unit already looks, and the definitions stay
+where they are. `Meta` needs the same treatment and Gary approved putting it
+in the implicit prelude; `lib/meta.x` must then include only `common.x`,
+because its `list.x`, `string.x` and `symbol.x` includes are the cycle that
+stops `common.x` reaching it. None of that is in the tree now, since it went
+back with the port.
 
 ## Capability before callers: the bootstrap had to carry the lowering
 
