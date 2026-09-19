@@ -259,6 +259,16 @@ typedef struct LispMachineSlot {
 
 struct Lisp {
   Scope scope;          // semantic session scope
+  /* A session may read a parent's globals, reserved names and special
+     forms. The parent holds definitions built once, before any child
+     exists, and a child holds only its own, so a name the child defines
+     shadows the parent's and nothing a child writes reaches another child.
+     A parent outlives every child that names it. */
+  Lisp parent;
+  /* Set once the parent is complete. Nothing a child does may produce a
+     value the parent reaches, because a child's values belong to a
+     narrower Context than the parent's. */
+  int frozen;
   Map globals;          // global bindings, Lisp name -> value
   Map reserved;         // reserved special forms, Lisp name -> <func> Var
   Func specials[LISP_SPECIAL_COUNT];
@@ -278,6 +288,7 @@ struct Lisp {
    starts a fresh AUTO threshold because state is stored on the new Lambda, and
    a recycled allocation address cannot observe an earlier Lambda's state. */
 typedef struct Lambda {
+  Lisp owner;
   List params;
   Var body;
   Map captures, int macro, auto_calls, auto_status;
@@ -525,6 +536,8 @@ Lisp Lisp.kernel(void) {
   lisp.auto_stats = (LispAutoStats) {0};
   lisp.auto_machine_stats = NULL;
   lisp.auto_disabled = 0;
+  lisp.parent = NULL;
+  lisp.frozen = 0;
   $scope(&lisp.scope) {
     lisp.globals = {};
     lisp.reserved = {};
@@ -552,6 +565,37 @@ Lisp Lisp.new(void) {
     Destroying its still-active `Scope` raises `<bad-state>`.
 */
 void Lisp.destroy(Lisp lisp) { if (lisp) Scope.destroy(lisp.scope); }
+
+/** Makes `lisp` read `parent`'s definitions for names it does not bind.
+
+    A name the child defines shadows the parent's, and a write always lands
+    in the child, so one child never observes another's definitions. The
+    child also takes the parent's special forms rather than its own, because
+    `_auto_bindings_ok` compares a binding's identity and a program the
+    parent compiled has to keep guarding correctly under a child.
+
+    The caller keeps `parent` alive for as long as any child names it, and
+    freezes it with `Lisp.freeze` before the first child runs: a child's
+    values belong to a narrower `Context` than the parent's, so nothing a
+    child produces may become reachable from the parent.
+*/
+void Lisp.adopt(Lisp lisp, Lisp parent) {
+  if (!lisp || !parent) return;
+  lisp.parent = parent;
+  $scope(&lisp.scope) lisp.reserved = {};
+  for (int i = 0; i < LISP_SPECIAL_COUNT; i++)
+    lisp.specials[i] = parent.specials[i];
+}
+
+/** Marks `lisp` complete, so nothing produced later may reach it.
+
+    Word compilation is what this guards: a program's frozen constants do
+    not own their pointees, so one compiled while a unit's `Context` is
+    current would leave a frozen session holding values that die with that
+    unit. After this, `Lisp.auto_prepare` is the only way a lambda this
+    session owns gains a program.
+*/
+void Lisp.freeze(Lisp lisp) { if (lisp) lisp.frozen = 1; }
 
 /** Reads one Lisp form and returns `<value>` or `<eof>`.
     A nonnull `out` receives the form only for `<value>`; it is otherwise
@@ -1043,9 +1087,25 @@ static int _env_lookup(Lisp lisp, LispEnv *env, Var name, Var *out) {
   return 0;
 }
 
+static int _global_lookup(Lisp lisp, Var name, Var *out) {
+  for (Lisp s = lisp; s; s = s.parent)
+    if (s.globals.try_get(name, out)) return 1;
+  return 0;
+}
+
+/* A reserved special form, from this session or the nearest parent. A child
+   that inherits its parent's specials also inherits their identity, which is
+   what `_auto_bindings_ok` compares, so a program the parent compiled still
+   guards correctly when a child runs it. */
+static int _reserved_lookup(Lisp lisp, Var name, Var *out) {
+  for (Lisp s = lisp; s; s = s.parent)
+    if (s.reserved.try_get(name, out)) return 1;
+  return 0;
+}
+
 static int _lookup(Lisp lisp, LispEnv *env, Var name, Var *out) {
   if (_env_lookup(lisp, env, name, out)) return 1;
-  if (!lisp.globals.try_get(name, out) && !lisp.reserved.try_get(name, out))
+  if (!_global_lookup(lisp, name, out) && !_reserved_lookup(lisp, name, out))
     return 0;
   _expansion_note(lisp, name, *out);
   return 1;
@@ -1118,6 +1178,7 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
   Var result = void;
   lambda.captures = NULL;
   defer if (result is void) Scope.free(lambda);
+  lambda.owner = lisp;
   (List params, Var body) = args;
   lambda.params = params;
   lambda.body = body;
@@ -1200,6 +1261,11 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv *env) {
       }
       if (lisp.protect_x2c && name.str().startswith("x2c."))
         raise %(bad-state (operation "def") (name $name));
+      /* A frozen session is complete, and a value produced now belongs to a
+         narrower Context than it does, so the binding would outlive what it
+         names. A child session is where a later definition goes. */
+      if (lisp.frozen)
+        raise %(bad-state (operation "def") (why "frozen") (name $name));
       Var value = _eval(lisp, expression, env);
       lisp.globals[name] = value;
       return value;
@@ -1283,7 +1349,7 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv *env) {
     raise %(bad-types (operation "import") (actual ${path.kind()})
                        (want "String"));
   Var hook;
-  if (lisp.globals.try_get(Atom.intern("_x2c.import-hook"), &hook))
+  if (_global_lookup(lisp, Atom.intern("_x2c.import-hook"), &hook))
     return lisp.apply(hook, %($path));
   Var result;
   {
@@ -1617,6 +1683,14 @@ static void _auto_discard(Lisp lisp, Lambda lambda) {
 static int _auto_analyze(
   Lisp lisp, Lambda lambda, LispEnv *env, int depth, List locals) {
   if (lambda.auto_status >= 0) return lambda.auto_status;
+  /* A frozen session's lambda is only compiled by `Lisp.auto_prepare`,
+     while the Context that owns the session is still current. Compiling one
+     now would freeze this unit's constants into a program that outlives the
+     unit, and `lib/machine.x` states that a program's constants do not own
+     their pointees. The evaluator runs it instead, and the status is left
+     unset so the next process can still prepare it. */
+  if (lambda.owner && lambda.owner.frozen && lambda.owner != lisp)
+    return MACHINE_INELIGIBLE;
   lisp.auto_stats.analyses++;
   /* Body fallback does not remove frame limits: a rest parameter has no
      fixed slot and the local frame is bounded. */
@@ -1633,7 +1707,7 @@ static int _auto_analyze(
     lisp.auto_stats.ineligible++;
     return lambda.auto_status;
   }
-  $scope(&lisp.scope) {
+  $scope(&lambda.owner.scope) {
     MachineBuilder b = $auto(MachineBuilder.new());
     locals = lambda.params.append(locals);
     foreach (Var (name, value), lambda.captures)
@@ -1805,6 +1879,29 @@ void Lisp.auto_instrument(Lisp lisp, MachineStats *stats) {
 */
 void Lisp.auto_disable(Lisp lisp, int disabled) {
   lisp.auto_disabled = disabled;
+}
+
+/** Word-compiles every lambda this session's globals name, in place.
+
+    Call it while the `Context` that owns `lisp` is current and before any
+    child session runs, so each program's frozen constants belong to that
+    `Context`. Returns the number of lambdas that gained a program.
+
+    A lambda a global holds indirectly, inside a `List` or a `Map` value, is
+    not reached: the globals a library defines are the callables a child
+    resolves by name, and those are what a shared program guards against.
+*/
+int Lisp.auto_prepare(Lisp lisp) {
+  if (!lisp || lisp.auto_disabled) return 0;
+  int prepared = 0;
+  foreach (Var (name, value), lisp.globals) {
+    (void) name;
+    if (value is not <lambda>) continue;
+    Lambda lambda = value;
+    if (_auto_analyze(lisp, lambda, NULL, 0, NULL) == MACHINE_PREPARED)
+      prepared++;
+  }
+  return prepared;
 }
 
 static Var _apply(Lisp lisp, Var callable, List raw, LispEnv *env) {
@@ -1981,7 +2078,7 @@ Var Lisp.eval_file(Lisp lisp, File source) {
     canonicalized.
 */
 int Lisp.try_get(Lisp lisp, String name, Var *out) =>
-  lisp && name && out && lisp.globals.try_get(Atom.intern(name), out);
+  lisp && name && out && _global_lookup(lisp, Atom.intern(name), out);
 
 /** Binds `name` to `value` in the embedded Lisp global environment.
     The `Map` retains the canonicalized name and `Var` value without taking
@@ -1997,6 +2094,8 @@ void Lisp.set_global(Lisp lisp, String name, Var value) {
   if (!lisp || !name) raise %(bad-arg (operation "Lisp.set_global"));
 
   if (value is void) raise %(void-op (operation "Lisp.set_global"));
+  if (lisp.frozen)
+    raise %(bad-state (operation "Lisp.set_global") (why "frozen"));
 
   $scope(&lisp.scope) {
     lisp.globals[Atom.intern(name)] = value;
