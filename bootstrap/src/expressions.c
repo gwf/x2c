@@ -14,6 +14,7 @@ static Var _1497, _1492, _1489, _1485, _1476, _1474, _1472, _1470, _1467, _1462,
 #include "literals.h"
 #include "protocol.h"
 #include "lambda.h"
+#include "comptime.h"
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
@@ -2937,6 +2938,7 @@ if(! which) return callee;  String stem = binding_identity_spelling(binding);  i
 }
 
 Type Type_apply(Type);
+List Compiler_fold_meta_call(Compiler, List, Type, Type, List);
 static List _finish_call(Compiler compiler, Type result_type, List callee, Type callee_type, List receiver, List supplied, Token origin){
   if(result_type == _116) result_type = NULL;  Type applied = Type_apply(callee_type);  if(! List_truth(Type_list(applied)) && List_truth(Type_list(callee_type))) applied = Type_apply(Sym_resolve_key(compiler -> sym, callee_type));  List arguments = _resolve_call_arguments(compiler, receiver, supplied, origin);  if(_deferred_receiver(callee) ||(List_truth(receiver) && _deferred_receiver(receiver))) result_type = List_type(_116); {
     Var argument;  List _x2c_macro_object_12 = arguments;  List _x2c_macro_cursor_12 = _x2c_macro_object_12;  Var _x2c_macro_cursor_output_12;  while(List_try_next(_x2c_macro_object_12, & _x2c_macro_cursor_12, & _x2c_macro_cursor_output_12)){
@@ -2947,7 +2949,7 @@ static List _finish_call(Compiler compiler, Type result_type, List callee, Type 
     }
 
   }
-  if(! List_truth(Type_list(result_type))) result_type = applied;  callee = _discarding_callee(compiler, callee, callee_type, arguments);  return cons(_0, cons(List_var(result_type), cons(List_var(cons(_70, cons(List_var(callee), cons(List_var(cons(_101, List_append(arguments, NULL))), NULL)))), NULL)));
+  if(! List_truth(Type_list(result_type))) result_type = applied;  List folded = Compiler_fold_meta_call(compiler, callee, callee_type, result_type, arguments);  if(List_truth(folded)) return folded;  callee = _discarding_callee(compiler, callee, callee_type, arguments);  return cons(_0, cons(List_var(result_type), cons(List_var(cons(_70, cons(List_var(callee), cons(List_var(cons(_101, List_append(arguments, NULL))), NULL)))), NULL)));
 }
 
 String int_str(int);

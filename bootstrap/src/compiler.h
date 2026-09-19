@@ -66,7 +66,10 @@ typedef struct Compiler{
   String init_fn, fini_fn;
   Array early_decls;
   int prelude;
+  Array meta_defs;
+  Map meta_folds, meta_impure, meta_comptime;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
+  int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;
   int builtin_defs, in_proto, macro_count, recovery_depth;
   int declaration_projection, declaration_produced;
@@ -105,6 +108,8 @@ void Compiler_free_lisp(Compiler c);
 void Compiler_own_diagnostics(Compiler compiler);
 
 void Compiler_borrow_diagnostics(Compiler compiler, Compiler owner);
+
+void Compiler_borrow_unit_semantics(Compiler compiler, Compiler owner);
 
 void Compiler_take_diagnostics(Compiler compiler, Compiler child);
 

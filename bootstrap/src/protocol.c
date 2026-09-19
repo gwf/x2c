@@ -164,6 +164,8 @@ static void _resolve_protocol_record(Compiler compiler, Type base, Type particip
 
 static void _resolve_declared_adoption(Compiler compiler, Type base, Type participant, List location);
 
+static void _install_import_protocols(Compiler c);
+
 static const SymbolSet operator_ops =(SymbolSet) "\001\000\000\000\014\000\000\000\007\000\000\000\025\174\112\177\271\171\067\236\015\004\000\005\001\012\000\000\012\012\000\001\000\000\000\000\001\011\000\002\000\002\000\000\070\000\000\000\000\000\000\000\076\000\000\000\000\000\000\000\066\000\000\000\000\000\000\000\137\000\000\000\000\000\000\000\113\000\000\000\000\000\000\000\201\000\000\000\000\000\000\000\173\075\000\000\000\000\000\000\173\041\000\000\000\000\000\000\171\000\000\000\000\000\000\000\173\074\000\000\000\000\000\000\175\000\000\000\000\000\000\000\173\076\000\000\000\000\000\000";
 
 static const struct{
@@ -2153,14 +2155,25 @@ static void _resolve_declared_adoption(Compiler compiler, Type base, Type partic
   }
 }
 
+Map Sym_base_symbols(Sym);
+Map Sym_current_symbols(Sym);
+Map Map_merge(Map, Map);
+static void _install_import_protocols(Compiler c){
+  c -> import_protocols = 0;  Map symbols = Sym_base_symbols(c -> sym);  Map current = Sym_current_symbols(c -> sym);  if(Map_truth(current)) Map_merge(symbols, current);  Compiler_rebuild_protocols(c, symbols);
+}
+
+int Var_is_void(Var);
 List Compiler_protocol_members_for(Compiler c, Type participant, Type base){
-  if(! _init_guard_) _file_init_();  participant = Type_canonicalize(participant);  Type owner = participant;  if(! Compiler__is_adopted(c, base, owner)){
+  if(! _init_guard_) _file_init_();  participant = Type_canonicalize(participant);  if(c -> import_protocols) _install_import_protocols(c);  Type owner = participant;  if(! Compiler__is_adopted(c, base, owner)){
     List ancestry = List_cdr(_ancestry(c, participant));  for(;  List_truth(ancestry);  ancestry = List_cdr(ancestry)){
       owner = Var_type(List_car(ancestry));  if(Compiler__is_adopted(c, base, owner)) break;
     }
     if(! List_truth(ancestry)) return NULL;
   }
-  Var stored = Map_getindex(c -> conforms, List_var(cons(List_var(base), cons(List_var(owner), NULL))));  if(! Var_is_row(stored, 9, 7, 4)) return NULL;  List conformance = Var_list(stored);  _install_native_bindings(c, owner, List_cdr(Var_list(List_last(conformance))));  return conformance;
+  List key = cons(List_var(base), cons(List_var(owner), NULL));  Var stored = Map_getindex(c -> conforms, List_var(key));  if(Var_is_void(stored)){
+    _resolve_declared_adoption(c, base, owner, NULL);  stored = Map_getindex(c -> conforms, List_var(key));
+  }
+  if(! Var_is_row(stored, 9, 7, 4)) return NULL;  List conformance = Var_list(stored);  _install_native_bindings(c, owner, List_cdr(Var_list(List_last(conformance))));  return conformance;
 }
 
 int Compiler_protocol_rejects_direct_member(Compiler compiler, Type participant, String member){

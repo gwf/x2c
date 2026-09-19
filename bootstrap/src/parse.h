@@ -56,6 +56,8 @@ List Compiler_parse_import_declaration(Compiler c);
 
 int Compiler_defines_main(Compiler c);
 
+int Compiler_meta_form_is_definition(Compiler c);
+
 int Compiler_script_statement_starts(Compiler c);
 
 int Compiler_script_statement_executes(Compiler c);
