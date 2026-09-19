@@ -17,6 +17,15 @@ macro Unit $map.var.family(
 
   static int $key_equal(Var *a, Var *b) {
     if (a[0] === b[0]) return 1;
+    /* `List` and `String` keys are nearly all of what the pool tables
+       compare, and unboxing a known tag is one mask and compare where the
+       general path decodes the tag twice before reaching the same
+       operation. `nil`, the empty `String`, and two keys of different
+       kinds unbox as NULL and take the general path unchanged. */
+    List alist = a[0], blist = b[0];
+    if (alist && blist) return alist.equal(blist);
+    String astr = a[0], bstr = b[0];
+    if (astr && bstr) return astr.equal(bstr);
     return a[0] is not <array> && a[0] is not <map> && a[0] == b[0];
   }
 
