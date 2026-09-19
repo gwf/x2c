@@ -51,6 +51,7 @@ protocol Cleanup(Map);
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "var.x"
 #include "exception.x"
@@ -428,6 +429,25 @@ Self Map.update_n(Self map, unsigned pair_count, ...) {
     equality.
 */
 Self Map.copy(Self map) => map._core_copy();
+
+/** Returns a bucket-for-bucket copy of `map` in the current scope.
+    `Pool` uses this internal constructor to take over an ancestor's table
+    without paying to rehash it. The result has the same capacity and the same
+    traversal order as the source; `Map.copy` is the public operation and the
+    one to use when the copy may be smaller than the original. A null source
+    returns a fresh empty `Map`.
+    Raises: `<alloc-fail>` or `<size-limit>` when the copy cannot be
+    allocated.
+*/
+Map Map.duplicate(Map map) {
+  if ((void *) map == NULL) return Map.new();
+  Map copy = Map.new_capacity(map.capacity);
+  memcpy(copy.hashes, map.hashes, (size_t) map.capacity * sizeof(unsigned));
+  memcpy(copy.entries, map.entries,
+         (size_t) map.capacity * sizeof(struct MapRecord));
+  copy.used = map.used;
+  return copy;
+}
 
 /** Exports every key and value, rebuilds the table, then moves its `Block`s.
     The borrowed `export_value` callback runs synchronously for each stored

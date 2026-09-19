@@ -38,6 +38,10 @@ $(import "private-keywords.xmacro")
 typedef struct Pool {
   Scope scope, Map table, struct Pool *up, pthread_mutex_t mutex;
   unsigned child_capacity;  // last released direct child's table capacity
+  int cloned;               // the table also answers for every ancestor
+  size_t escapes, clone_at; // outward probes paid, and the count that clones
+  unsigned long *owned;     // identities installed here, once cloned
+  unsigned owned_mask, owned_used;
   size_t interned, promoted, void *blocks, *current[10], *promotions;
 } *Pool;
 
@@ -142,6 +146,7 @@ static threaded struct PoolValueThreadState value_thread;
    worker sees it and every lock taken afterwards is real. It never clears,
    because a value interned while it was clear was published without one. */
 static int pool_multithreaded;
+
 
 /** Makes `Pool` lock from here on, for a process about to start a worker.
     `Thread.start` calls this before `pthread_create`. It never clears.
@@ -451,6 +456,62 @@ static void _release_blocks(Pool inner) {
   for (int i = 0; i < POOL_CLASS_COUNT; i++) inner.current[i] = NULL;
 }
 
+/* Once a level's table also answers for its ancestors, table membership no
+   longer means this level installed the identity. The identities it did
+   install are recorded here instead, in an open-addressed set of the `Var`
+   bits themselves: ownership is an identity question, so this needs none of
+   `Map`'s content hashing or equality, and it costs one multiply and a linear
+   probe per insert. A zero slot is empty, which no canonical identity is. */
+static unsigned _owned_start(unsigned long bits, unsigned mask) =>
+  (unsigned) ((bits * 0x9E3779B97F4A7C15ul) >> 40) & mask;
+
+static int _owned_has(Pool pool, unsigned long bits) {
+  if (!pool.owned) return 0;
+  unsigned at = _owned_start(bits, pool.owned_mask);
+  while (pool.owned[at]) {
+    if (pool.owned[at] == bits) return 1;
+    at = (at + 1) & pool.owned_mask;
+  }
+  return 0;
+}
+
+static void _owned_place(
+  unsigned long *slots, unsigned mask, unsigned long bits) {
+  unsigned at = _owned_start(bits, mask);
+  while (slots[at]) at = (at + 1) & mask;
+  slots[at] = bits;
+}
+
+/* Keeps the set under half full so a probe always meets a free slot. */
+static void _owned_reserve(Pool pool, unsigned entries) {
+  unsigned slots = 64;
+  while (slots < entries * 2) slots *= 2;
+  if (pool.owned && slots <= pool.owned_mask + 1) return;
+  unsigned long *fresh = Scope.malloc_in(
+    &pool.scope, (size_t) slots * sizeof(unsigned long));
+  memset(fresh, 0, (size_t) slots * sizeof(unsigned long));
+  for (unsigned at = 0; pool.owned && at <= pool.owned_mask; at++)
+    if (pool.owned[at]) _owned_place(fresh, slots - 1, pool.owned[at]);
+  if (pool.owned) Scope.free(pool.owned);
+  pool.owned = fresh;
+  pool.owned_mask = slots - 1;
+}
+
+static void _owned_add(Pool pool, unsigned long bits) {
+  _owned_reserve(pool, pool.owned_used + 1);
+  _owned_place(pool.owned, pool.owned_mask, bits);
+  pool.owned_used++;
+}
+
+/* The size a sibling should start its own table at. A cloned level's table
+   counts its ancestors too, so the recorded identities answer instead. */
+static unsigned _own_capacity(Pool pool) {
+  if (!pool.cloned) return pool.table.capacity;
+  unsigned capacity = 2;
+  while (capacity < pool.owned_used * 2) capacity *= 2;
+  return capacity;
+}
+
 /** Returns a new named child of `inner` without making it thread-active.
     The child owns its control `Scope`, `Map`, and mutex and must be released
     before `inner`. Use `Pool.open_named` instead to open a bracket that the
@@ -498,6 +559,10 @@ Pool Pool.retain_named(Pool inner, const char *name) {
   pool.table = table;
   pool.up = inner;
   pool.child_capacity = 2;
+  pool.cloned = 0;
+  pool.escapes = pool.clone_at = 0;
+  pool.owned = NULL;
+  pool.owned_mask = pool.owned_used = 0;
   pool.interned = pool.promoted = 0;
   pool.blocks = NULL;
   for (int i = 0; i < POOL_CLASS_COUNT; i++) pool.current[i] = NULL;
@@ -529,7 +594,7 @@ Pool Pool.release(Pool inner) {
   Pool up = inner.up;
   if (up) {
     _lock(up);
-    up.child_capacity = inner.table.capacity;
+    up.child_capacity = _own_capacity(inner);
     _unlock(up);
   }
   _release_blocks(inner);
@@ -651,10 +716,86 @@ int Pool.is_permanent(Var value) => value_root && value_root.owns(value);
 unsigned long Pool.epoch(void) =>
   __atomic_load_n(&value_epoch, __ATOMIC_ACQUIRE);
 
+/* A level whose table has been extended with a copy of its ancestors' entries
+   answers any lookup in one probe of one table. The copy is a snapshot, so it
+   is a complete view only while no ancestor can gain an entry behind it. The
+   child's own promotions go through this level and land in the copy, and in a
+   single-threaded process nothing else inserts into an ancestor. A worker
+   thread can, so `Pool.thread_start` retires every existing clone by clearing
+   this test: the entries a clone holds are still correct canonical pointers,
+   so falling back to the outward walk from this level is enough. */
+static inline int _authoritative(Pool pool) =>
+  pool && pool.cloned && !pool_multithreaded;
+
+enum PoolCloneConstant { POOL_CLONE_DEPTH = 32 };
+
+static size_t _view_size(Pool pool) {
+  size_t total = 0;
+  for (Pool p = pool; p; p = p.up) {
+    total += p.table.len();
+    if (_authoritative(p)) break;
+  }
+  return total;
+}
+
+/* Replaces `inner`'s table with one that also holds every ancestor entry.
+   Levels merge outermost first so the innermost entry wins, which is the
+   order `Pool.lookup` answers in. The deepest authoritative ancestor is
+   already a whole view, so it is copied bucket for bucket and only the levels
+   below it are rehashed. Only reached with `pool_multithreaded` clear, so no
+   ancestor can change while this runs and no lock is taken. */
+static void _clone_view(Pool inner) {
+  Pool base = inner.up;
+  while (base.up && !_authoritative(base)) base = base.up;
+  Pool chain[POOL_CLONE_DEPTH];
+  int count = 0;
+  for (Pool p = inner; p != base; p = p.up) {
+    if (count == POOL_CLONE_DEPTH) return;
+    chain[count++] = p;
+  }
+  Map merged;
+  $scope(&inner.scope) {
+    merged = Map.duplicate(base.table);
+    for (int i = count - 1; i >= 0; i--) merged.merge(chain[i].table);
+  }
+  /* The identities this level installed move to the owned set before the
+     merged table takes over, so ownership keeps answering exactly what table
+     membership answered until now. */
+  _owned_reserve(inner, inner.table.len() + 1);
+  foreach (Var (key, value), inner.table) {
+    (void) value;
+    _owned_place(inner.owned, inner.owned_mask, key.u64);
+    inner.owned_used++;
+  }
+  inner.table = merged;
+  inner.cloned = 1;
+}
+
+/* Counts one lookup this level could not answer alone and clones once those
+   outward probes have cost about what the copy will. A short-lived level that
+   interns a handful of values under a large parent therefore never pays for a
+   table it will not use, and a level that keeps probing pays the copy at most
+   once for work it has already done. */
+static void _note_escape(Pool inner) {
+  if (!inner || !inner.up || inner.cloned || pool_multithreaded) return;
+  if (++inner.escapes < inner.clone_at) return;
+  size_t view = _view_size(inner.up);
+  if (inner.escapes < view) {
+    inner.clone_at = view;
+    return;
+  }
+  _clone_view(inner);
+}
+
 /** Returns the first value equal to `key` from `inner` outward, or `void`.
     The returned identity remains owned by the level where it was found.
 */
 Var Pool.lookup(Pool inner, Var key) {
+  if (_authoritative(inner)) {
+    _lock(inner);
+    defer _unlock(inner);
+    return inner.table[key];
+  }
   /* `Map.getindex` raises for a void key and for any cause from custom
      hashing or equality, so the branch mutex is released through one hoisted
      `defer` rather than a per-iteration one, which measured 4% of a
@@ -668,14 +809,19 @@ Var Pool.lookup(Pool inner, Var key) {
     Var found = pool.table[key];
     _unlock(pool);
     locked = NULL;
-    if (found is not void) return found;
+    if (found is not void) {
+      if (pool != inner) _note_escape(inner);
+      return found;
+    }
   }
+  _note_escape(inner);
   return void;
 }
 
 /* Map insertion causes propagate and leave the object unregistered. */
 static void _insert_locked(Pool inner, Var object) {
   inner.table.setindex(object, object);
+  if (inner.cloned) _owned_add(inner, object.u64);
   inner.interned++;
 }
 
@@ -698,8 +844,12 @@ void Pool.insert(Pool inner, Var object) {
 static Var _intern_locked(Pool inner, Var object, int *discard) {
   unsigned before = inner.table.len();
   Var stored = inner.table.setdefault(object, object);
-  if (inner.table.len() != before) inner.interned++;
-  else *discard = 1;
+  if (inner.table.len() == before) {
+    *discard = 1;
+    return stored;
+  }
+  if (inner.cloned) _owned_add(inner, object.u64);
+  inner.interned++;
   return stored;
 }
 
@@ -749,12 +899,18 @@ Var Pool.intern(Pool inner, Var object, void *alloc) {
   {
     _lock(inner);
     defer _unlock(inner);
-    Var existing = Pool.lookup(inner.up, object);
-    if (existing is not void) {
-      canonical = existing;
-      discard = 1;
+    /* An authoritative table already holds the ancestors' entries, so the one
+       fused operation decides both questions. */
+    if (_authoritative(inner))
+      canonical = _intern_locked(inner, object, &discard);
+    else {
+      Var existing = Pool.lookup(inner.up, object);
+      if (existing is not void) {
+        canonical = existing;
+        discard = 1;
+      }
+      else canonical = _intern_locked(inner, object, &discard);
     }
-    else canonical = _intern_locked(inner, object, &discard);
   }
   // See Pool.intern_new: the losing candidate is freed outside the lock.
   if (discard) inner.free(alloc);
@@ -833,6 +989,7 @@ void Pool.free(Pool inner, void *alloc) {
 }
 
 static int _owns_locked(Pool pool, Var key) {
+  if (pool.cloned) return _owned_has(pool, key.u64);
   Var found = pool.table[key];
   return found is not void && found === key;
 }
