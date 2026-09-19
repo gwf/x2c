@@ -244,7 +244,7 @@ static void LispMachine__tail_call(LispMachine m, int argc){
   MachineView view;
   int params = 0;
   Var body =((void) 0, Void);
-  if(! Lisp_program(callable, & view, & params, & body) || view.code != m -> program.code || argc != params){
+  if(! Lisp_program(callable, & view, & params, & body) || argc != params || m -> local_base + argc + MACHINE_LOCAL_RESERVE > MACHINE_LOCAL_MAX){
     LispMachine__call(m, argc);
     return;
   }
@@ -256,7 +256,8 @@ static void LispMachine__tail_call(LispMachine m, int argc){
   m -> value_count = m -> operand_base;
   m -> local_count = m -> local_base + argc;
   Lisp_retarget(m -> lisp_context, callable, m -> locals + m -> local_base, argc);
-  m -> pc = m -> program.root;
+  m -> program = view;
+  m -> pc = view.root;
   if(m -> stats) m -> stats -> prepared_calls ++;
 }
 
@@ -300,7 +301,7 @@ void LispMachine_begin(LispMachine m, MachineView program, void * lisp_context, 
     return;
   }
   if(argc < 0 || argc + MACHINE_LOCAL_RESERVE > MACHINE_LOCAL_MAX){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/lisp-machine.x",.function = "LispMachine_begin",.line = 270};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/lisp-machine.x",.function = "LispMachine_begin",.line = 273};
     x2c_error_raise_n(& _x2c_error_site_0, 4477439593778, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("LispMachine.begin")), NULL))), Symbol_var(74754136), int_var(argc));
     __builtin_unreachable();
   }
@@ -475,7 +476,7 @@ void LispMachine_run(LispMachine m){
 
 void LispMachine_finish(LispMachine m){
   if(m -> running){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/lisp-machine.x",.function = "LispMachine_finish",.line = 442};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/lisp-machine.x",.function = "LispMachine_finish",.line = 445};
     x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("LispMachine.finish")), NULL))));
     __builtin_unreachable();
   }
