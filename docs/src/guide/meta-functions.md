@@ -163,12 +163,18 @@ What the function returns decides what the expansion is. A `List` one of the
 compiler operations built is syntax. `x2c_literal_int`, `x2c_literal_string`
 and `x2c_literal_symbol` each return an expression holding a value.
 
-## Importing from a `.xmacro`
+## Sharing a `meta` function between units
 
-A `.xmacro` file may hold `meta` functions beside the macros that call them.
-Importing it installs their compile-time forms in the importing unit. The
-unit that imports the file includes `meta.x`, because a `.xmacro` borrows
-the consuming unit's symbol table:
+A `meta` function written in a `.x` file belongs to that unit. Including that
+file elsewhere shares its declaration, the way including any `.x` file does,
+and the declaration alone has no compile-time form: another unit can call it
+at run time, and cannot call it during translation.
+
+To share one, put it in a `.xmacro` that each unit imports. A `.xmacro` file
+may hold `meta` functions beside the macros that call them, and importing it
+installs their compile-time forms in the importing unit. The unit that imports
+the file includes `meta.x`, because a `.xmacro` borrows the consuming unit's
+symbol table:
 
 ```text
 #include "x2c.x"
