@@ -2798,7 +2798,7 @@ static void _ensure_lisp(Compiler compiler){
     if(! loaded){
       (compiler) -> macro_lisp = Lisp_kernel();
       Lisp_adopt((compiler) -> macro_lisp, library_session);
-      if(shared) _reset_unit_state((compiler));
+      _reset_unit_state((compiler));
     }
     _eval_library((compiler), loaded || shared, _744, _745);
     _eval_library((compiler), loaded || shared, _746, _747);

@@ -13,6 +13,8 @@ typedef struct LispAutoStats{
   long invocations, machine_entries, machine_errors;
   long analyses, published, ineligible;
   long guard_failures, remembered_fallbacks;
+  long inlined_scopes;
+  long inline_declines;
   long program_bytes;
 }
 LispAutoStats;
@@ -26,6 +28,8 @@ void Lisp_enter(void * storage, Var callable, const Var * values, int count);
 void Lisp_leave(void * storage);
 
 void Lisp_retarget(void * storage, Var callable, const Var * values, int count);
+
+void Lisp_reslot(void * storage, List params, int count);
 
 Var Lisp_apply_values(void * storage, Var callable, const Var * values, int count);
 

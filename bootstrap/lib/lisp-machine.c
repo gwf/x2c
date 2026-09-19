@@ -191,7 +191,7 @@ static void LispMachine__call(LispMachine m, int argc){
       return;
     }
     int old_locals = m -> local_count;
-    int room = old_locals + argc <= MACHINE_LOCAL_MAX && m -> fp + 1 < MACHINE_FRAME_MAX && callable_at + MACHINE_CALL_RESERVE <= MACHINE_VALUE_MAX;
+    int room = old_locals + argc + MACHINE_LOCAL_RESERVE <= MACHINE_LOCAL_MAX && m -> fp + 1 < MACHINE_FRAME_MAX && callable_at + MACHINE_CALL_RESERVE <= MACHINE_VALUE_MAX;
     if(room && LispMachine__push_frame(m)){
       m -> frames[m -> fp - 1].caller_value_count = callable_at;
       for(int i = 0;  i < argc;  i ++) m -> locals[old_locals + i] = m -> values[callable_at + 1 + i];
@@ -299,7 +299,7 @@ void LispMachine_begin(LispMachine m, MachineView program, void * lisp_context, 
     LispMachine__error(m, 995692716810);
     return;
   }
-  if(argc < 0 || argc > MACHINE_LOCAL_MAX){
+  if(argc < 0 || argc + MACHINE_LOCAL_RESERVE > MACHINE_LOCAL_MAX){
     static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/lisp-machine.x",.function = "LispMachine_begin",.line = 270};
     x2c_error_raise_n(& _x2c_error_site_0, 4477439593778, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("LispMachine.begin")), NULL))), Symbol_var(74754136), int_var(argc));
     __builtin_unreachable();
@@ -323,11 +323,13 @@ void LispMachine_begin(LispMachine m, MachineView program, void * lisp_context, 
 
 }
 
+void Lisp_reslot(void *, List, int);
+
+List Var_list(Var);
+
 int Var_is_nil(Var);
 
 int Lisp_precall(void *, Var, List, Var *);
-
-List Var_list(Var);
 
 Var Lisp_immediate(void *, Var);
 
@@ -348,6 +350,25 @@ int LispMachine_step(LispMachine m){
   const MachineWord * w = & p -> code[m -> pc ++];
   switch(w -> op){
     case MW_JUMP : m -> pc = w -> target;
+    break;
+    case MW_LBIND :{
+      int count = w -> b;
+      if(m -> value_count - m -> operand_base < count){
+        LispMachine__error(m, 1020311368764296);
+        break;
+      }
+      for(int i = 0;  i < count;  i ++) m -> locals[m -> local_count + i] = m -> values[m -> value_count - count + i];
+      m -> value_count -= count;
+      m -> local_count += count;
+      Lisp_reslot(m -> lisp_context, Var_list(m -> program.consts[w -> a]), m -> local_count - m -> local_base);
+      break;
+    }
+    case MW_LUNBIND : for(int i = m -> local_count - w -> b;  i < m -> local_count;  i ++) m -> locals[i] =(Var){
+      .u64 = 0
+    }
+    ;
+    m -> local_count -= w -> b;
+    Lisp_reslot(m -> lisp_context, Var_list(m -> program.consts[w -> a]), m -> local_count - m -> local_base);
     break;
     case MW_LCONST : case MW_LLOCAL : case MW_LCAPTURE : case MW_LGLOBAL : LispMachine__load(m, w);
     break;
@@ -454,7 +475,7 @@ void LispMachine_run(LispMachine m){
 
 void LispMachine_finish(LispMachine m){
   if(m -> running){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/lisp-machine.x",.function = "LispMachine_finish",.line = 419};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/lisp-machine.x",.function = "LispMachine_finish",.line = 442};
     x2c_error_raise_n(& _x2c_error_site_1, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("LispMachine.finish")), NULL))));
     __builtin_unreachable();
   }
