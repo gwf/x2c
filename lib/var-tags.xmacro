@@ -353,19 +353,30 @@ $(defun var.tag.list (items)
   (if (null? items) '(expr ("List") (nil))
       `(expr ("List") (cons ,(car items) ,(var.tag.list (cdr items))))))
 
-$(defun var.tag.row-entry (row rows)
-  (let ((siblings (filter
-                    (lambda (other) (= (var.tag.top other) (var.tag.top row)))
-                    rows)))
-    `(map-entry ,(x2c.literal.symbol (car row))
-       ,(var.tag.list (list
-          (x2c.literal.int (var.tag.top row))
-          (x2c.literal.int (var.tag.group-mask (length siblings)))
-          (x2c.literal.int (var.tag.bottom row)))))))
+/* How many decode rows share each top, counted in one pass. The mask below
+   needs the count for a row's own top, so a scan per row would read the
+   whole ledger once per row. */
+$(defun var.tag.sibling-counts (rows)
+  (let ((counts (Map.new)))
+    (begin
+      (map (lambda (row)
+             (Map.setindex counts (var.tag.top row)
+               (+ 1 (Map.getdefault counts (var.tag.top row) 0))))
+           rows)
+      counts)))
+
+$(defun var.tag.row-entry (row counts)
+  `(map-entry ,(x2c.literal.symbol (car row))
+     ,(var.tag.list (list
+        (x2c.literal.int (var.tag.top row))
+        (x2c.literal.int
+          (var.tag.group-mask (Map.getindex counts (var.tag.top row))))
+        (x2c.literal.int (var.tag.bottom row))))))
 
 $(defun var.tag.constant-rows (groups)
-  (let ((rows (var.tag.filter var.tag.decode-row? groups)))
-    (map (lambda (row) (var.tag.row-entry row rows))
+  (let* ((rows (var.tag.filter var.tag.decode-row? groups))
+         (counts (var.tag.sibling-counts rows)))
+    (map (lambda (row) (var.tag.row-entry row counts))
       (filter var.tag.constant-row? rows))))
 
 /* The rows a caller holding a statically known tag can test without
