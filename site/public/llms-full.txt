@@ -2328,6 +2328,13 @@ relative to the importing file, canonicalized, loaded once, and checked for
 cycles. Direct Lisp file operations remain available but are not tracked as
 compiler dependencies.
 
+A free name in a lambda or macro body reads the definitions the body was
+written next to, and then the session's globals. The environment the call was
+written in is not part of that chain, so a caller that binds the same name
+changes nothing about what the body reads. A lambda written inside a binding
+form reads that form's bindings and keeps the values it was made with. A macro
+that needs a value from its caller takes it as an argument.
+
 Compile-time Lisp is trusted code. It runs with the compiler user's authority,
 including the existing native bindings and file operations; there is no
 sandbox. Lisp may also construct canonical AST `List`s directly, including

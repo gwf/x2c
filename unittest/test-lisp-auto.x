@@ -4,10 +4,9 @@
     ordinary public evaluation, no fixture dispatcher.  The recursive
     evaluator remains the semantic oracle; every row checks results,
     exact raised errors, hook telemetry, and machine counters where the
-    frozen matrix pinned them.  The added shadowing rows pin the
-    production-only guard: a name that the evaluator would resolve
-    dynamically through the caller chain declines to the evaluator
-    before any effect. */
+    frozen matrix pinned them.  The scoping rows pin the lexical rule: a
+    free name reads what the body was written next to, so a caller's
+    binding of the same name changes nothing. */
 
 #include "test-support.x"
 
@@ -394,17 +393,19 @@ static void lisp_auto_session_isolation(void) {
   b.destroy();
 }
 
-static void lisp_auto_caller_shadowing_declines(void) {
-  // Production-only guard: the evaluator resolves free names through
-  // the caller chain, so a caller parameter shadowing a guarded name
-  // must decline before effects — on every call, not just the first.
+static void lisp_auto_caller_binding_is_invisible(void) {
+  // A caller binding a name the callee reads freely changes nothing: the
+  // callee's `add` is still the global one. The call stays on the machine,
+  // so there is no guard to fail and no effect to hold back.
   Lisp lisp = _auto_session(1);
   _ev(lisp, "(def wrapper (lambda (add) (brancher 7)))");
-  EXPECT_INT_EQ(_raised(lisp, "(wrapper 99)"), <not-call>);
-  EXPECT_INT_EQ(_raised(lisp, "(wrapper 99)"), <not-call>);
-  EXPECT_INT_EQ(_raised(lisp, "(wrapper 99)"), <not-call>);
+  LispAutoStats before = lisp.auto_stats();
+  for (int i = 0; i < 3; i++)
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(wrapper 99)")), 12);
+  EXPECT_INT_EQ((int) (lisp.auto_stats().guard_failures -
+                       before.guard_failures), 0);
 
-  // The same call through a non-shadowing wrapper stays prepared.
+  // The same call through a non-shadowing wrapper answers the same.
   _ev(lisp, "(def clean (lambda (unused) (brancher 7)))");
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(clean 1)")), 12);
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(clean 1)")), 12);
@@ -470,9 +471,10 @@ static void lisp_auto_tail_calls_stay_flat(void) {
 }
 
 static void lisp_auto_tail_call_only_to_self(void) {
-  // A tail call to a different lambda still stacks a frame. Dropping the
-  // caller's would drop its locals out of free-name lookup, which the
-  // evaluator keeps: `leaf` reads the caller's `x`, not the global.
+  // A tail call to a different lambda still stacks a frame: the callee's
+  // slots are its own, so the caller's frame cannot be reused for them.
+  // `leaf` reads the global `x`; the caller's parameter of the same name is
+  // not part of its environment.
   Lisp lisp = Lisp.new();
   MachineStats mstats;
   memset(&mstats, 0, sizeof(mstats));
@@ -481,7 +483,7 @@ static void lisp_auto_tail_call_only_to_self(void) {
   _ev(lisp, "(defun leaf () x)");
   _ev(lisp, "(defun mid (x) (leaf))");
   for (int i = 0; i < 3; i++)
-    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(mid 99)")), 99);
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(mid 99)")), 1);
   EXPECT_TRUE(mstats.max_frames > 1);
   lisp.destroy();
 }
@@ -538,19 +540,22 @@ static void lisp_auto_local_bindings_inline(void) {
   lisp.destroy();
 }
 
-static void lisp_auto_local_dynamic_and_capture(void) {
+static void lisp_auto_local_binding_is_lexical(void) {
+  // `read-x` reads the global `x` wherever it is called from: a `let` in the
+  // caller binds a name in the caller, not in the callee. A lambda written
+  // inside the `let` does read that binding, and keeps the value it was
+  // made with.
   for (int disabled = 0; disabled < 2; disabled++) {
     Lisp lisp = Lisp.new();
     lisp.auto_disable(disabled);
     _ev(lisp, "(def x 1)");
     _ev(lisp, "(defun read-x () x)");
-    _ev(lisp, "(defun make-reader () (lambda () (+ x 0)))");
     _ev(lisp, "(defun local-read (v) (let ((x v)) (read-x)))");
-    _ev(lisp, "(defun local-maker (v) (let ((x v)) (make-reader)))");
+    _ev(lisp, "(defun local-closure (v) (let ((x v)) (lambda () (+ x 0))))");
     for (int i = 0; i < 3; i++) {
-      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(local-read 9)")), 9);
-      _ev(lisp, "(def saved (local-maker 11))");
-      _ev(lisp, "(local-maker 22)");
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(local-read 9)")), 1);
+      _ev(lisp, "(def saved (local-closure 11))");
+      _ev(lisp, "(local-closure 22)");
       EXPECT_INT_EQ(Var.integer(_ev(lisp, "(saved)")), 11);
       EXPECT_INT_EQ(Var.integer(_ev(lisp, "(read-x)")), 1);
     }
@@ -625,7 +630,10 @@ static void lisp_auto_immediate_effects_and_fallback(void) {
   }
 }
 
-static void lisp_auto_macro_reads_local_binding(void) {
+static void lisp_auto_macro_is_lexical(void) {
+  // A macro body is a lambda body: its free names read the globals it was
+  // written next to, whatever the caller happens to bind. A macro that needs
+  // the caller's value takes it as an argument.
   for (int disabled = 0; disabled < 2; disabled++) {
     Lisp lisp = Lisp.new();
     lisp.auto_disable(disabled);
@@ -633,19 +641,18 @@ static void lisp_auto_macro_reads_local_binding(void) {
     _ev(lisp, "(defmacro get-y () (list 'quote y))");
     _ev(lisp, "(defun quoted-y () (list 'quote y))");
     _ev(lisp, "(defmacro helper-y () (quoted-y))");
-    _ev(lisp, "(defun direct (v) (let ((y v)) (get-y)))");
-    _ev(lisp, "(defun indirect (v) (let ((y v)) (helper-y)))");
     _ev(lisp, "(defmacro captured-y ()"
               " ((lambda () (list 'quote y))))");
-    _ev(lisp, "(defun capture-local () (let ((y 42)) (captured-y)))");
-    _ev(lisp, "(defun wrap-capture (y) (capture-local))");
+    _ev(lisp, "(defmacro quote-it (v) (list 'quote v))");
+    _ev(lisp, "(defun direct (v) (let ((y v)) (get-y)))");
+    _ev(lisp, "(defun indirect (v) (let ((y v)) (helper-y)))");
+    _ev(lisp, "(defun captured (v) (let ((y v)) (captured-y)))");
+    _ev(lisp, "(defun passed () (quote-it 7))");
     for (int i = 0; i < 3; i++) {
-      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(direct 7)")), 7);
-      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(direct 8)")), 8);
-      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(indirect 9)")), 9);
-      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(indirect 10)")), 10);
-      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(wrap-capture 1)")), 42);
-      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(wrap-capture 2)")), 42);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(direct 7)")), 1);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(indirect 9)")), 1);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(captured 8)")), 1);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(passed)")), 7);
     }
     EXPECT_INT_EQ(Var.integer(_ev(lisp, "(get-y)")), 1);
     lisp.destroy();
@@ -653,6 +660,8 @@ static void lisp_auto_macro_reads_local_binding(void) {
 }
 
 static void lisp_auto_local_macro_effects_once(void) {
+  // A macro body with an effect runs once per call, whether the call runs
+  // on the machine or through the evaluator. Its free `y` is the global.
   for (int disabled = 0; disabled < 2; disabled++) {
     Lisp lisp = Lisp.new();
     lisp.auto_disable(disabled);
@@ -662,7 +671,7 @@ static void lisp_auto_local_macro_effects_once(void) {
               " (cond ((def count (+ count 1)) (list 'quote y))))");
     _ev(lisp, "(defun local-effect () (let ((y 42)) (get-y)))");
     for (int i = 0; i < 4; i++) {
-      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(local-effect)")), 42);
+      EXPECT_INT_EQ(Var.integer(_ev(lisp, "(local-effect)")), 1);
       EXPECT_INT_EQ(Var.integer(_ev(lisp, "count")), i + 1);
     }
     lisp.destroy();
@@ -932,7 +941,7 @@ void lisp_auto_suite(void) {
   $test.run(lisp_auto_macro_calls);
   $test.run(lisp_auto_quasiquote_capacity);
   $test.run(lisp_auto_session_isolation);
-  $test.run(lisp_auto_caller_shadowing_declines);
+  $test.run(lisp_auto_caller_binding_is_invisible);
   $test.run(lisp_auto_expands_macro_heads);
   $test.run(lisp_auto_macro_rebinding_guard);
   $test.run(lisp_auto_tail_calls_stay_flat);
@@ -940,11 +949,11 @@ void lisp_auto_suite(void) {
   $test.run(lisp_auto_forced_evaluator_arm);
   $test.run(lisp_auto_local_bindings);
   $test.run(lisp_auto_local_bindings_inline);
-  $test.run(lisp_auto_local_dynamic_and_capture);
+  $test.run(lisp_auto_local_binding_is_lexical);
   $test.run(lisp_auto_local_match_and_redefinition);
   $test.run(lisp_auto_immediate_constructor_rebinding);
   $test.run(lisp_auto_immediate_effects_and_fallback);
-  $test.run(lisp_auto_macro_reads_local_binding);
+  $test.run(lisp_auto_macro_is_lexical);
   $test.run(lisp_auto_local_macro_effects_once);
   $test.run(lisp_auto_macro_native_effects);
   $test.run(lisp_auto_macro_unchosen_effects);

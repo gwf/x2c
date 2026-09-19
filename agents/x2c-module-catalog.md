@@ -277,18 +277,18 @@ Public functions:
 `Compiler.local_macro_form_is_definition`,
 `Compiler.keyword_form_is_definition`, `Compiler.skip_macro_invocation`,
 `Compiler.macro_invocation_needs_shallow_expansion`,
-`Compiler.macro_starts_target_at`, `Compiler.parse_macro_lisp_top_level`,
-`Compiler.evaluate_declaration_effect`, `Compiler.install_meta_function`,
-`Compiler.parse_macro_lisp_shallow`, `Compiler.lift_macro_lisp_expression`,
-`Compiler.parse_macro_lisp_expression`, `Compiler.evaluate_declaration_recipe`,
-`Compiler.evaluate_macro_slot`, `Compiler.evaluate_macro_rows`,
-`Compiler.macro_introduced_name`, `Compiler.peek_macro_hole`,
-`Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_slot`,
-`Compiler.parse_macro_definition`, `Compiler.publish_macro_definition_node`,
-`Compiler.parse_keyword_definition`, `Compiler.macro_targets_unit`,
-`Compiler.skip_named_type_declaration`, `Compiler.macro_invocation_site`,
-`Compiler.expand_macro_invocation_node`, `Compiler.try_parse_macro_expression`,
-`Compiler.try_parse_macro_target_at`
+`Compiler.macro_starts_target_at`, `Compiler.preload_macro_libraries`,
+`Compiler.parse_macro_lisp_top_level`, `Compiler.evaluate_declaration_effect`,
+`Compiler.install_meta_function`, `Compiler.parse_macro_lisp_shallow`,
+`Compiler.lift_macro_lisp_expression`, `Compiler.parse_macro_lisp_expression`,
+`Compiler.evaluate_declaration_recipe`, `Compiler.evaluate_macro_slot`,
+`Compiler.evaluate_macro_rows`, `Compiler.macro_introduced_name`,
+`Compiler.peek_macro_hole`, `Compiler.macro_lisp_starts_declaration`,
+`Compiler.try_parse_macro_slot`, `Compiler.parse_macro_definition`,
+`Compiler.publish_macro_definition_node`, `Compiler.parse_keyword_definition`,
+`Compiler.macro_targets_unit`, `Compiler.skip_named_type_declaration`,
+`Compiler.macro_invocation_site`, `Compiler.expand_macro_invocation_node`,
+`Compiler.try_parse_macro_expression`, `Compiler.try_parse_macro_target_at`
 
 ### [src/main.x](../src/main.x)
 
@@ -717,18 +717,18 @@ the Lisp runtime: reader, session, and evaluator.
 Public functions:
 
 `Lisp.program`, `Lisp.resolve`, `Lisp.enter`, `Lisp.leave`, `Lisp.retarget`,
-`Lisp.apply_values`, `Lisp.precall`, `Lisp.immediate`, `Lisp.evaluate`,
-`Lisp.expanded`, `Lisp.kernel`, `Lisp.new`, `Lisp.destroy`, `Lisp.read`,
-`lisp_atom`, `lisp_car`, `lisp_cdr`, `lisp_eq`, `lisp_pair`, `lisp_list`,
-`lisp_number`, `lisp_string`, `lisp_symbol`, `lisp_procedure`, `lisp_compare`,
-`lisp_type`, `lisp_add`, `lisp_plus`, `lisp_minus`, `lisp_times`,
-`lisp_divide`, `lisp_eq_chain`, `lisp_lt_chain`, `lisp_le_chain`,
-`lisp_gt_chain`, `lisp_ge_chain`, `lisp_str`, `lisp_repr`,
-`lisp_string_append`, `lisp_substring`, `lisp_string_downcase`,
+`Lisp.reslot`, `Lisp.apply_values`, `Lisp.precall`, `Lisp.immediate`,
+`Lisp.evaluate`, `Lisp.expanded`, `Lisp.kernel`, `Lisp.new`, `Lisp.destroy`,
+`Lisp.adopt`, `Lisp.freeze`, `Lisp.read`, `lisp_atom`, `lisp_car`, `lisp_cdr`,
+`lisp_eq`, `lisp_pair`, `lisp_list`, `lisp_number`, `lisp_string`,
+`lisp_symbol`, `lisp_procedure`, `lisp_compare`, `lisp_type`, `lisp_add`,
+`lisp_plus`, `lisp_minus`, `lisp_times`, `lisp_divide`, `lisp_eq_chain`,
+`lisp_lt_chain`, `lisp_le_chain`, `lisp_gt_chain`, `lisp_ge_chain`, `lisp_str`,
+`lisp_repr`, `lisp_string_append`, `lisp_substring`, `lisp_string_downcase`,
 `lisp_match_replace`, `lisp_read_file`, `lisp_write_file`, `Lisp.auto_stats`,
-`Lisp.auto_instrument`, `Lisp.auto_disable`, `Lisp.eval`, `Lisp.apply`,
-`Lisp.eval_string`, `Lisp.eval_file`, `Lisp.try_get`, `Lisp.set_global`,
-`Lisp.bind`, `Lisp.cleanup`
+`Lisp.auto_instrument`, `Lisp.auto_disable`, `Lisp.auto_prepare`, `Lisp.eval`,
+`Lisp.apply`, `Lisp.eval_string`, `Lisp.eval_file`, `Lisp.try_get`,
+`Lisp.set_global`, `Lisp.bind`, `Lisp.cleanup`
 
 ### [lib/list-selectors.x](../lib/list-selectors.x)
 

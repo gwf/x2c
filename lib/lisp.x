@@ -94,7 +94,9 @@ int Lisp.resolve(void *storage, Var name, Var *value) {
 void Lisp.enter(void *storage, Var callable, const Var *values, int count) {
   LispMachineContext context = (LispMachineContext) storage;
   Lambda lambda = callable;
-  LispEnv *parent = _machine_env(context);
+  // A callee's free names are lexical: they resolve through its captures
+  // and then the globals, never through the frame that called it.
+  LispEnv *parent = NULL;
   // The machine's own frame guard bounds this: Lisp.enter runs only after
   // LispMachine._push_frame accepted a frame.
   assert(context.depth + 1 < MACHINE_FRAME_MAX);
@@ -244,7 +246,7 @@ typedef struct LispEnv {
 
 typedef struct LispExpansion {
   LispEnv *boundary;
-  List locals, dependencies;
+  List dependencies;
   int calls, steps;
 } LispExpansion;
 
@@ -1038,15 +1040,10 @@ static int _local_lookup(LispEnv *env, Var name, Var *out) {
   return found || (env.bindings && env.bindings.try_get(name, out));
 }
 
-/* Macro parameters are known raw syntax; the caller's runtime locals are
-   not. An expansion reading one cannot be baked into a shared program. */
+/* An expansion whose result depends on something the program can change
+   later cannot be baked into a shared program. */
 static void _expansion_decline(void) {
   raise %(bad-state (operation "Lisp AUTO expansion"));
-}
-
-static void _expansion_lookup(Lisp lisp, Var name) {
-  if (lisp.expansion && _param_has(lisp.expansion.locals, name))
-    _expansion_decline();
 }
 
 static void _expansion_note(Lisp lisp, Var name, Var value) {
@@ -1098,14 +1095,12 @@ static int _env_lookup(Lisp lisp, LispEnv *env, Var name, Var *out) {
   int external = 0;
   for (LispEnv *cur = env; cur; cur = cur.parent) {
     if (lisp.expansion && cur == lisp.expansion.boundary) external = 1;
-    if (external) _expansion_lookup(lisp, name);
     if (_local_lookup(cur, name, out) ||
         (cur.captures && cur.captures.try_get(name, out))) {
       if (external) _expansion_note(lisp, name, *out);
       return 1;
     }
   }
-  _expansion_lookup(lisp, name);
   return 0;
 }
 
@@ -1277,9 +1272,13 @@ static Var _call_lambda(Lisp lisp, Lambda lambda, List args, LispEnv *env) {
   defer if (trace) trace.calls--;
   Scope frame = $auto(Scope.new_named("Lisp frame")), Map bindings = NULL;
   $scope(&frame) { bindings = {}; }
+  /* A free name the lambda did not capture is a global. The environment the
+     call was written in is not part of the chain, so a caller's binding
+     cannot change what the body reads. */
+  (void) env;
   LispEnv captured = {
     .bindings = lambda.captures,
-    .parent = env
+    .parent = NULL
   };
   LispEnv local = {
     .bindings = bindings,
@@ -1445,7 +1444,6 @@ typedef struct LispLower {
   LispEnv *env;         // the call site that triggered analysis
   Lambda lambda;
   MachineBuilder b;
-  List locals;
   int depth;            // macro expansions open on this path
   List scope_params;    // every live slot's name, in slot order
   int slots;            // inlined slots bound above the parameters
@@ -1599,7 +1597,7 @@ static int LispLower._auto_expand(LispLower l, Var head, List args,
   /* The evaluator expands only the calls it reaches, so a macro call in a
      branch that never runs fails nowhere today. Analysis reaches every
      branch; keep its failures local by rejecting rather than raising. */
-  LispExpansion trace = { l.env, l.locals, %(( $head $value )), 0, 0 };
+  LispExpansion trace = { l.env, %(( $head $value )), 0, 0 };
   try $let(l.lisp.expansion, &trace)
     *expansion = _call_lambda(l.lisp, macro, args, l.env);
   catch: return 0;
@@ -1672,11 +1670,10 @@ static int LispLower._auto_compile_inline(
   if (site < 0) return 0;
   int guard = b.emit(MW_LEXPAND, site, 0, 0, 0, -1);
   if (guard < 0) return 0;
-  List scope = l.scope_params, locals = l.locals;
+  List scope = l.scope_params;
   foreach (Var name, params) {
     if (!name.is_atom()) return 0;
     scope = scope.append(cons(name, NULL));
-    locals = cons(name, locals);
   }
   int enter = count ? b.constant(scope) : 0;
   int leave = count ? b.constant(l.scope_params) : 0;
@@ -1687,8 +1684,7 @@ static int LispLower._auto_compile_inline(
   foreach (Var name, params) l.slot_names[l.slots++] = name;
   int ok;
   $let(l.scope_params, scope)
-    $let(l.locals, locals)
-      ok = l._auto_compile(literal.caddr(), tail);
+    ok = l._auto_compile(literal.caddr(), tail);
   l.slots -= count;
   if (!ok) {
     if (b.status == MACHINE_PREPARED) l.lisp.auto_stats.inline_declines++;
@@ -1803,7 +1799,7 @@ static void _auto_discard(Lisp lisp, Lambda lambda) {
 }
 
 static int _auto_analyze(
-  Lisp lisp, Lambda lambda, LispEnv *env, int depth, List locals) {
+  Lisp lisp, Lambda lambda, LispEnv *env, int depth) {
   if (lambda.auto_status >= 0) return lambda.auto_status;
   /* A frozen session's lambda is only compiled by `Lisp.auto_prepare`,
      while the Context that owns the session is still current. Compiling one
@@ -1831,11 +1827,8 @@ static int _auto_analyze(
   }
   $scope(&lambda.owner.scope) {
     MachineBuilder b = $auto(MachineBuilder.new());
-    locals = lambda.params.append(locals);
-    foreach (Var (name, value), lambda.captures)
-      locals = cons(name, locals);
     struct LispLower storage =
-      { lisp, env, lambda, b, locals, depth, lambda.params };
+      { lisp, env, lambda, b, depth, lambda.params };
     LispLower lower = &storage;
     int ok = lower._auto_compile(lambda.body, 1) &&
              b.emit(MW_LRETURN, 0, 0, 0, 0, 0) >= 0;
@@ -1934,7 +1927,7 @@ static int _auto_apply(
   if (lambda.auto_calls < 2) lambda.auto_calls++;
   if (lambda.auto_calls < 2) return 0;
   if (lambda.auto_status < 0) {
-    if (_auto_analyze(lisp, lambda, env, 0, NULL) != MACHINE_PREPARED)
+    if (_auto_analyze(lisp, lambda, env, 0) != MACHINE_PREPARED)
       return 0;
   }
   else if (lambda.auto_status != MACHINE_PREPARED) {
@@ -1968,7 +1961,7 @@ static int _auto_apply(
   /* The frame reads the machine's own slots, not the argument array `begin`
      copied from: a lowered binding scope opens slots above the parameters
      and names them for the evaluator. */
-  _machine_env_set(context.frames, lambda, m.locals, argc, env);
+  _machine_env_set(context.frames, lambda, m.locals, argc, NULL);
   lisp.auto_stats.machine_entries++;
   m.run();
   if (m.status == <ok>) {
@@ -2024,7 +2017,7 @@ int Lisp.auto_prepare(Lisp lisp) {
     (void) name;
     if (value is not <lambda>) continue;
     Lambda lambda = value;
-    if (_auto_analyze(lisp, lambda, NULL, 0, NULL) == MACHINE_PREPARED)
+    if (_auto_analyze(lisp, lambda, NULL, 0) == MACHINE_PREPARED)
       prepared++;
   }
   return prepared;
