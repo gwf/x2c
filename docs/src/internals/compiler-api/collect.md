@@ -31,7 +31,7 @@ NULL. Home files mirror their home-relative path under the compiler's
 stage directory when it runs from `<home>/builds/`, otherwise under the
 home. Call it before opening any translation unit's Context.
 
-Source: `src/collect.x:690`
+Source: `src/collect.x:707`
 
 #### interface_prelude
 
@@ -39,7 +39,7 @@ Source: `src/collect.x:690`
 
 Returns the readable prelude interface path, or NULL when none exists.
 
-Source: `src/collect.x:715`
+Source: `src/collect.x:732`
 
 #### interface_text
 
@@ -49,7 +49,7 @@ Returns the compiler's own collected contribution as interface text, or
 NULL when the unit has not collected its symbols. A contribution that
 the interface grammar cannot spell is reported as an `emit` diagnostic.
 
-Source: `src/collect.x:937`
+Source: `src/collect.x:954`
 
 ### `Compiler`
 
@@ -67,7 +67,7 @@ protocol rows enter the current symbol state, and dependencies enter the
 importing compiler. Replay also merges recorded function definitions.
 `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:638`
+Source: `src/collect.x:655`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -84,7 +84,7 @@ is `globs`. Collection also updates dependencies, function definitions,
 and macro state. Keyword alias maps and seen-name state are file-local
 and restored when each file walk ends.
 
-Source: `src/collect.x:478`
+Source: `src/collect.x:495`
 
 <a id="Compiler.record_generated_symbol"></a>
 #### Compiler.record_generated_symbol
@@ -96,7 +96,7 @@ current file's collected entry contributes, which is the map its
 interface publishes. A file without a collected declaration map records
 nothing. The cache retains `signature`.
 
-Source: `src/collect.x:332`
+Source: `src/collect.x:349`
 
 ## Design notes
 

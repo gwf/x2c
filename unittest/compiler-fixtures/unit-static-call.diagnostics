@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/unit-static-call.x:6:28: type: 'above_boundary' is a static function private to its unit
+    return shared_value(1) + above_boundary(2);
+                             ^^^^^^^^^^^^^^
+  note: it is defined in 'unittest/compiler-fixtures/unit-static-call/source.x'; remove 'static' so other units can call it
+

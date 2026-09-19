@@ -473,7 +473,7 @@ macro Expression $cache.child(Expr $value) => (99)
 keyword child $cache.child;
 EOF
 cat >"$BUILD/keyword/src/nested.x" <<'EOF'
-static int child(int value) { return value; }
+int child(int value) { return value; }
 EOF
 cat >"$BUILD/keyword/src/alias.x" <<'EOF'
 #include "x2c.x"
@@ -844,7 +844,9 @@ done
 # the generated header, and only they reach an including unit; a private
 # include still splices, because the includer may call its functions through
 # the prototypes x2c emits. The includer walks the file cold in its batch or
-# replays its interface; either way x2c reports each other private name.
+# replays its interface; either way x2c reports each other private name. A
+# static function publishes only a marker naming its file, which is what
+# turns a call from an including unit into a diagnostic.
 private="$BUILD/private"
 mkdir -p "$private/src" "$private/cold" "$private/warm"
 cat >"$private/src/hidden.x" <<'EOF'
@@ -875,8 +877,10 @@ grep -q '"defined_value"' "$private/warm/owner.xi" ||
   fail "private external definition is missing from its interface"
 grep -q 'src/hidden.x' "$private/warm/owner.xi" ||
   fail "private include is missing from its interface"
-! grep -q 'H_TWO\|SECRET\|Inner\|helper' "$private/warm/owner.xi" ||
+! grep -q 'H_TWO\|SECRET\|Inner\|int helper' "$private/warm/owner.xi" ||
   fail "a private declaration was written to its interface"
+grep -q '"unit-static" "helper"' "$private/warm/owner.xi" ||
+  fail "a static function is missing its interface marker"
 (cd "$private" && "$X2C" translate --out-dir cold src/public.x src/owner.x &&
   "$X2C" translate --out-dir warm src/public.x) ||
   fail "an includer lost the public part of a private-region file"
@@ -888,9 +892,13 @@ int call_helper(void) { return helper(1); }
 EOF
 for out in cold-helper warm; do
   mkdir -p "$private/$out"
-  (cd "$private" && "$X2C" translate --out-dir "$out" src/call-helper.x)
-  ! grep -q 'int helper(int)' "$private/$out/call-helper.c" ||
-    fail "a private static function was declared in an includer ($out)"
+  log="$private/$out-call-helper.log"
+  if (cd "$private" && "$X2C" translate --out-dir "$out" \
+      src/call-helper.x) >"$log" 2>&1; then
+    fail "a private static function reached an includer ($out)"
+  fi
+  grep -q "'helper' is a static function private to its unit" "$log" ||
+    fail "calling a private static function was not reported ($out)"
 done
 index=0
 for use in H_TWO SECRET; do
