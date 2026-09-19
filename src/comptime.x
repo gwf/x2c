@@ -1921,14 +1921,24 @@ static int _installed_comptime(Compiler compiler, String name) {
 */
 int Compiler.install_comptime(Compiler compiler, List fn) {
   String key = NULL, own = NULL;
-  /* A recursive call resolves against the name before the body is lowered,
-     the way a C prototype lets a function call itself. */
   match (fn)
     case %(function ? (bind (binding ? ?(String name)) ?) ?): {
       own = name;
-      compiler.macro_lisp.eval(%(def ${Atom.intern(name)} (lambda () 0)));
       if (compiler.filename) key = %"${compiler.filename}#$name";
     }
+  /* The shared session installed this definition, from this file, before any
+     unit opened. Installing it again would only try to replace a name an
+     ancestor binds; the unit reads the shared one. */
+  if (key && compiler.shared_definition(key))
+    match (_lowered_defs()[key])
+      case %(? ? ?(int shared_globals) ?(int shared_meta)): {
+        lower_reached_globals = shared_globals;
+        lower_reached_meta = shared_meta;
+        return _installed_comptime(compiler, own);
+      }
+  /* A recursive call resolves against the name before the body is lowered,
+     the way a C prototype lets a function call itself. */
+  if (own) compiler.macro_lisp.eval(%(def ${Atom.intern(own)} (lambda () 0)));
   if (key)
     match (_lowered_defs()[key])
       case %(?(List forms) ?(List callees) ?(int globals) ?(int meta)):

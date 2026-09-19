@@ -936,6 +936,7 @@ static String _read_source(
    import cache itself uses, so a file that shadows a library name through
    another include path is a different key and evaluates normally. */
 static Map library_imports = NULL, static int library_filling = 0;
+static Map library_definitions = NULL;
 
 static int _inherited_import(String path) {
   return !library_filling && library_imports &&
@@ -962,6 +963,7 @@ static void _library_shutdown(void) {
   Lisp.destroy(library_session);
   library_session = NULL;
   library_imports = NULL;
+  library_definitions = NULL;
   library_scope.destroy();
   library_scope = NULL;
 }
@@ -997,6 +999,7 @@ Lisp Compiler.open_macro_library(Compiler compiler) {
   Scope.shutdown_hook(_library_shutdown);
   Lisp shared = Lisp.kernel();
   library_imports = {};
+  library_definitions = {};
   Lisp was = compiler.macro_lisp;
   defer compiler.macro_lisp = was;
   compiler.macro_lisp = shared;
@@ -1020,6 +1023,7 @@ void Compiler.publish_macro_library(Compiler compiler, Lisp shared) {
   library_filling = 0;
   if (!shared) {
     library_imports = NULL;
+    library_definitions = NULL;
     return;
   }
   Scope.push(&library_scope);
@@ -1029,6 +1033,20 @@ void Compiler.publish_macro_library(Compiler compiler, Lisp shared) {
   (void) shared.auto_prepare();
   shared.freeze();
   library_session = shared;
+}
+
+/** Records or reports one compile-time definition of the shared session.
+    While that session is being filled every definition is recorded and the
+    answer is 0. Afterwards the answer is whether it holds `key`, which is a
+    file and a name, so a unit that reads the same file again installs
+    nothing: the definition it would install is the one it already inherits.
+*/
+int Compiler.shared_definition(Compiler compiler, String key) {
+  (void) compiler;
+  if (!library_definitions) return 0;
+  if (!library_filling) return library_definitions.contains(key);
+  library_definitions[key] = 1;
+  return 0;
 }
 
 /** Evaluates the compile-time Lisp libraries once for this process. */
@@ -1391,7 +1409,19 @@ void Compiler.evaluate_declaration_effect(
 void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
   if (!c.collect_protocols) c.run_declaration_effects();
   _ensure_lisp(c);
-  if (c.install_comptime(fn)) {
+  int installed = 0;
+  /* Installing evaluates the lowered body's definitions, and a session
+     refuses to replace a name an ancestor binds. That reaches the developer
+     here, at the marker, rather than as an uncaught cause at the error
+     floor. */
+  try installed = c.install_comptime(fn);
+  catch %(?cause *): {
+    c.report_error(
+      <macro>, "this meta function could not be installed", marker,
+      %("reason: $cause"));
+    return;
+  }
+  if (installed) {
     if (c.lower_reached_globals() && !c.lower_reached_meta())
       c.report_error(
         <macro>, "a meta function cannot reach file-scope state", marker,
