@@ -3096,9 +3096,11 @@ static Type _resolve_key_helper(
     Type type = _typedef_target(sym, key);
     if (type) return _resolve_key_helper(sym, type, stop, origin, hops + 1);
   }
-  match (key) case %((!set ?kind (!or struct union))
-      (binding ? ?spelling)):
-    if (!sym.field_order(key)) return %($kind $spelling);
+  if (key && (key.car() === <struct> || key.car() === <union>)) {
+    match (key) case %((!set ?kind (!or struct union))
+        (binding ? ?spelling)):
+      if (!sym.field_order(key)) return %($kind $spelling);
+  }
   return key;
 }
 

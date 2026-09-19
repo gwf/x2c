@@ -698,8 +698,9 @@ static void _collect_forward_dependencies(
   Array resume = $auto([]);
   List node = value;
   for (;;) {
-    match (node) {
-      case %(!set ?binding (binding ? ?)): {
+    Var head = node.car();
+    if (head === <binding>) {
+      match (node) case %(!set ?binding (binding ? ?)): {
         String spelling = binding_identity_spelling(binding);
         List native = %(native $spelling);
         if (binding in statics)
@@ -726,15 +727,23 @@ static void _collect_forward_dependencies(
           }
         }
       }
-      case %(vcompound ? ? ? ?name):
+    }
+    else if (head === <vcompound>) {
+      match (node) case %(vcompound ? ? ? ?name):
         _forward_declaration(compiler, %(native $name),
           locals, statics, seen, prototypes);
-      case %(vpostfix ? ? ?name):
+    }
+    else if (head === <vpostfix>) {
+      match (node) case %(vpostfix ? ? ?name):
         _forward_declaration(compiler, %(native $name),
           locals, statics, seen, prototypes);
-      case %((!or expr declare typedef function cast param) ?type *):
-        if (type is <list>)
-          _forward_types(compiler, type, locals, statics, seen, prototypes);
+    }
+    else if (head === <expr> || head === <declare> || head === <typedef> ||
+             head === <function> || head === <cast> || head === <param>) {
+      match (node)
+        case %((!or expr declare typedef function cast param) ?type *):
+          if (type is <list>)
+            _forward_types(compiler, type, locals, statics, seen, prototypes);
     }
     List rest = node;
     for (;;) {

@@ -3957,16 +3957,18 @@ static Type _resolve_key_helper(Sym sym, Type key, Type stop, Type origin, int h
   if(hops > RESOLVE_KEY_MAX_HOPS) _typedef_budget_error(sym, origin);  if(List_truth(Type_list(stop)) && List_equal(Type_list(key), Type_list(stop))) return key;  if(Type_is_typedef_name(key) || Type_is_typedef(key)){
     Type type = _typedef_target(sym, key);  if(List_truth(Type_list(type))) return _resolve_key_helper(sym, type, stop, origin, hops + 1);
   }
+  if(List_truth(Type_list(key)) &&(Var_same(List_car(Type_list(key)), Symbol_var(1318234344)) || Var_same(List_car(Type_list(key)), Symbol_var(44977116)))){
 
   {
     List _x2c_match_expr = Type_list(key);
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_53;  if (x2c_match_site_try_capture(& _x2c_match_site_53, _x2c_match_expr, List_var(_575), &_x2c_match_capture)) {Var kind = _x2c_match_values[0];  Var spelling = _x2c_match_values[1];  if(! List_truth(Sym_field_order(sym, key))) return List_type(cons(kind, cons(spelling, NULL)));  break;
-}
+  }
 
     }
   }
+}
 return key;
 }
 

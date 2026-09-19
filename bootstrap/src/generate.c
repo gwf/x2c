@@ -1500,31 +1500,63 @@ static void _collect_forward_dependencies(Compiler compiler, Var value, Map loca
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
     List node = Var_list(value);  for(; ; ){
+      Var head = List_car(node);  if(Var_same(head, Symbol_var(4928588686))){
 
   {
     List _x2c_match_expr = node;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (0) {
       default: ;  static MatchCaptureSite _x2c_match_site_34;  if (x2c_match_site_try_capture(& _x2c_match_site_34, _x2c_match_expr, List_var(_377), &_x2c_match_capture)) {Var binding = _x2c_match_values[0]; {
-        String spelling = binding_identity_spelling(Var_list(binding));  List native = cons(_395, cons(String_var(spelling), NULL));  if(Map_contains(statics, binding)) _forward_declaration(compiler, binding, locals, statics, seen, prototypes);  else if(Map_contains(statics, List_var(native))) _forward_declaration(compiler, List_var(native), locals, statics, seen, prototypes);  else{
-          Type type = NULL;  List global = String_truth(spelling) ? Sym_resolve_global(compiler -> sym, cons(String_var(spelling), NULL), & type) : NULL;  if(List_truth(global) && List_equal(global, Var_list(binding)) && Type_is_function(type) && ! Map_contains(locals, List_var(global)) && ! Map_contains(seen, List_var(global)) && ! List_truth(Sym_get(compiler -> sym, cons(_411, cons(String_var(spelling), NULL))))){
-            Map_setindex(seen, List_var(global), int_var(1));  _forward_types(compiler, Type_list(type), locals, statics, seen, prototypes);  Array_push(prototypes, List_var(ast_prototype_declarator(Type_declaration_ast(type, global))));
+          String spelling = binding_identity_spelling(Var_list(binding));  List native = cons(_395, cons(String_var(spelling), NULL));  if(Map_contains(statics, binding)) _forward_declaration(compiler, binding, locals, statics, seen, prototypes);  else if(Map_contains(statics, List_var(native))) _forward_declaration(compiler, List_var(native), locals, statics, seen, prototypes);  else{
+            Type type = NULL;  List global = String_truth(spelling) ? Sym_resolve_global(compiler -> sym, cons(String_var(spelling), NULL), & type) : NULL;  if(List_truth(global) && List_equal(global, Var_list(binding)) && Type_is_function(type) && ! Map_contains(locals, List_var(global)) && ! Map_contains(seen, List_var(global)) && ! List_truth(Sym_get(compiler -> sym, cons(_411, cons(String_var(spelling), NULL))))){
+              Map_setindex(seen, List_var(global), int_var(1));  _forward_types(compiler, Type_list(type), locals, statics, seen, prototypes);  Array_push(prototypes, List_var(ast_prototype_declarator(Type_declaration_ast(type, global))));
+            }
+
           }
 
         }
-
+        break;
       }
-      break;
+
     }
-    static MatchCaptureSite _x2c_match_site_35;  if (x2c_match_site_try_capture(& _x2c_match_site_35, _x2c_match_expr, List_var(_415), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  _forward_declaration(compiler, List_var(cons(_395, cons(name, NULL))), locals, statics, seen, prototypes);  break;
   }
-  static MatchCaptureSite _x2c_match_site_36;  if (x2c_match_site_try_capture(& _x2c_match_site_36, _x2c_match_expr, List_var(_417), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  _forward_declaration(compiler, List_var(cons(_395, cons(name, NULL))), locals, statics, seen, prototypes);  break;
+    }
+    else if(Var_same(head, Symbol_var(48617789303688))){
+
+  {
+    List _x2c_match_expr = node;
+    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+    switch (Var_symbol(car(_x2c_match_expr))) {
+      case 48617789303688: ;  static MatchCaptureSite _x2c_match_site_35;  if (x2c_match_site_try_capture(& _x2c_match_site_35, _x2c_match_expr, List_var(_415), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  _forward_declaration(compiler, List_var(cons(_395, cons(name, NULL))), locals, statics, seen, prototypes);  break;
+    }
+    default: break;
+    }
+  }
+  }
+  else if(Var_same(head, Symbol_var(1547236029040))){
+
+  {
+    List _x2c_match_expr = node;
+    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+    switch (Var_symbol(car(_x2c_match_expr))) {
+      case 1547236029040: ;  static MatchCaptureSite _x2c_match_site_36;  if (x2c_match_site_try_capture(& _x2c_match_site_36, _x2c_match_expr, List_var(_417), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  _forward_declaration(compiler, List_var(cons(_395, cons(name, NULL))), locals, statics, seen, prototypes);  break;
+  }
+  default: break;
+    }
+  }
 }
-static MatchCaptureSite _x2c_match_site_37;  if (x2c_match_site_try_capture(& _x2c_match_site_37, _x2c_match_expr, List_var(_428), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  if(Var_is_row(type, 9, 7, 4)) _forward_types(compiler, Var_list(type), locals, statics, seen, prototypes);  break;
+else if(Var_same(head, Symbol_var(377892)) || Var_same(head, Symbol_var(8932560010)) || Var_same(head, Symbol_var(44661285196)) || Var_same(head, Symbol_var(458361162716)) || Var_same(head, Symbol_var(199912)) || Var_same(head, Symbol_var(33656922))){
+
+  {
+    List _x2c_match_expr = node;
+    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+    switch (0) {
+      default: ;  static MatchCaptureSite _x2c_match_site_37;  if (x2c_match_site_try_capture(& _x2c_match_site_37, _x2c_match_expr, List_var(_428), &_x2c_match_capture)) {Var type = _x2c_match_values[0];  if(Var_is_row(type, 9, 7, 4)) _forward_types(compiler, Var_list(type), locals, statics, seen, prototypes);  break;
 }
 
     }
   }
+}
 List rest = node;  for(; ; ){
   while(! List_truth(rest)){
     if(! Array_len(resume)){

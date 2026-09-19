@@ -200,8 +200,9 @@ void MatchMachine.begin(MatchMachine m, MachineView program, Var input) {
    advances pc before dispatch, so calls save the following word and branches
    replace it. Machine invariant failures roll back all captures and store an
    error; predicates that raise can instead transfer out while the machine is
-   marked running. */
-int MatchMachine.step(MatchMachine m) {
+   marked running. Inlining keeps run's dispatch loop inside one native
+   function while sharing the instruction body with public single stepping. */
+static inline __attribute__((always_inline)) int _step(MatchMachine m) {
   if (!m.running) return 0;
   MachineView *p = &m.program;
   const MachineWord *w = &p.code[m.pc++];
@@ -470,9 +471,11 @@ int MatchMachine.step(MatchMachine m) {
   return m.running;
 }
 
+int MatchMachine.step(MatchMachine m) => _step(m);
+
 /* Execute Match words until success, failure, or a stored machine error. */
 void MatchMachine.run(MatchMachine m) {
-  while (m.step()) {}
+  while (_step(m)) {}
 }
 // spans, cleanup, and invariants
 

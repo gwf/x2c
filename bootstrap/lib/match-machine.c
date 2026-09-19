@@ -39,6 +39,8 @@ static void MatchMachine__pop_frame(MatchMachine m);
 
 static void MatchMachine__return_from_call(MatchMachine m, int success);
 
+static inline __attribute__((always_inline)) int _step(MatchMachine m);
+
 static void MatchMachine__ensure_scratch(MatchMachine m, int length);
 
 static List * MatchMachine__cursor(MatchMachine m, int reg){
@@ -241,7 +243,7 @@ int Var_is_binder(Var);
 
 int Var_is_match_op(Var);
 
-int MatchMachine_step(MatchMachine m){
+static inline __attribute__((always_inline)) int _step(MatchMachine m){
   if(! m -> running) return 0;
   MachineView * p = & m -> program;
   const MachineWord * w = & p -> code[m -> pc ++];
@@ -450,8 +452,12 @@ int MatchMachine_step(MatchMachine m){
   return m -> running;
 }
 
+int MatchMachine_step(MatchMachine m){
+  return _step(m);
+}
+
 void MatchMachine_run(MatchMachine m){
-  while(MatchMachine_step(m)){
+  while(_step(m)){
 
   }
 
@@ -513,7 +519,7 @@ Var String_var(String);
 
 void MatchMachine_finish(MatchMachine m){
   if(m -> running){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_finish",.line = 534};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/match-machine.x",.function = "MatchMachine_finish",.line = 537};
     x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("MatchMachine.finish")), NULL))));
     __builtin_unreachable();
   }
