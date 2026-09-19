@@ -479,15 +479,38 @@ unit does not describe either:
 Moving the import to the four other projections would not save it: four units
 still pay the 2.4 s plus 0.6 s, against a 3.07 s baseline.
 
-**What would make it viable.** A later unit needs the ledger's `meta`
-functions installed, not re-parsed. The lowered forms are already cached
-process-wide by `src/comptime.x`; the import cache re-reads the file anyway,
-because a `meta` definition binds in the current symbol table and its runtime
-form is emitted where the import stands. An import whose `meta` functions are
-all compile-time only, or which no unit reaches at run time, needs neither,
-and could replay the cached forms into the new session instead. That is one
-change in `_import`, and it is what to build before trying this again. The
-table cost is separate and needs its own look at literal folding.
+**What would make it viable, measured 2026-09-19.** Not the import cache.
+Four synthetic measurements, each one unit against twelve in one process, so
+the second number gives the marginal per-unit cost:
+
+| what the import holds | 1 unit | 12 units | marginal per unit |
+| --- | --- | --- | --- |
+| 40 trivial `meta` functions | 0.04 s | 0.17 s | 12 ms |
+| the 104-row table, unused | 0.04 s | 0.18 s | 13 ms |
+| the table plus one row lookup | 0.06 s | 0.38 s | 29 ms |
+| the table plus nine row lookups | 0.78 s | 9.10 s | 760 ms |
+
+The first row is 0.3 ms per declaration, which is what this plan already
+recorded, so **parsing and installing the definitions is not the cost and the
+import cache would not have helped**. The cost is compile-time execution: one
+scan of the 104-row ledger costs about 13 ms, because a lowered `foreach`
+walks a constant list through the evaluator.
+
+`lib/common.x` expands `$var.tag.unbox` nine times, each needing a top and a
+bottom, and every unit that includes `common.x` expands them again. That is
+the 8 s.
+
+Writing the scan better helps and is not enough. Replacing the flattened
+`Array` copy and the no-early-exit scan with a direct walk that returns at
+the match took the nine-lookup row from 9.10 s to 1.52 s, still 125 ms per
+unit against a Lisp baseline too small to measure.
+
+**So the ledger's row lookup has to stay Lisp**, because `lib/common.x` is
+where it is used and it is used per unit. The projections are different: each
+runs once, in four units, at roughly 13 to 30 ms. Porting those alone is
+affordable, and it is the shape to try next - the Lisp table handed to `meta`
+functions as an argument, which was probed and works. What is not affordable
+is any `meta` function that scans the ledger on a path `common.x` reaches.
 
 ### What the port did establish, and what was kept
 
