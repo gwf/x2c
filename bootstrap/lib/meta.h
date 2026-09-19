@@ -9,69 +9,67 @@
 #include "list.h"
 #include "string.h"
 #include "symbol.h"
-typedef struct Meta * Meta;
+List x2c_ident(String spelling);
 
-List Meta_ident(String spelling);
+List x2c_literal_string(String value);
 
-List Meta_literal_string(String value);
+List x2c_literal_int(int value);
 
-List Meta_literal_int(int value);
+List x2c_literal_symbol(Symbol value);
 
-List Meta_literal_symbol(Symbol value);
+List x2c_expr_ident(List name);
 
-List Meta_expr_ident(List name);
+List x2c_expr_index(List base, List subscript);
 
-List Meta_expr_index(List base, List subscript);
+List x2c_expr_field(List receiver, String name);
 
-List Meta_expr_field(List receiver, String name);
+List x2c_expr_call(List callee, List arguments);
 
-List Meta_expr_call(List callee, List arguments);
+List x2c_expr_composite(List items);
 
-List Meta_expr_composite(List items);
+List x2c_expr_cast(List type, List expression);
 
-List Meta_expr_cast(List type, List expression);
+String x2c_source_text(Var syntax);
 
-String Meta_source_text(Var syntax);
+String x2c_binding_spelling(Var syntax);
 
-String Meta_binding_spelling(Var syntax);
+List x2c_syntax_type(List value);
 
-List Meta_syntax_type(List value);
+Var x2c_cache_value(List node);
 
-Var Meta_cache_value(List node);
+String x2c_function_name(List function);
 
-String Meta_function_name(List function);
+List x2c_function_parameter(List function, String wanted);
 
-List Meta_function_parameter(List function, String wanted);
+List x2c_function_body(List function);
 
-List Meta_function_body(List function);
+List x2c_parameters_arguments(List value);
 
-List Meta_parameters_arguments(List value);
+List x2c_type_fields(List value);
 
-List Meta_type_fields(List value);
+List x2c_type_layout(List value);
 
-List Meta_type_layout(List value);
+List x2c_type_parts(List value);
 
-List Meta_type_parts(List value);
+List x2c_type_resolve(List value);
 
-List Meta_type_resolve(List value);
+int x2c_type_value(List value);
 
-int Meta_type_value(List value);
+Symbol x2c_type_tag_name(String name);
 
-Symbol Meta_type_tag_name(String name);
+String x2c_type_reverse_name(String base, String participant);
 
-String Meta_type_reverse_name(String base, String participant);
+List x2c_method_resolve(List type, String name);
 
-List Meta_method_resolve(List type, String name);
+String x2c_invocation_file(void);
 
-String Meta_invocation_file(void);
+int x2c_invocation_line(void);
 
-int Meta_invocation_line(void);
+int x2c_invocation_column(void);
 
-int Meta_invocation_column(void);
+String x2c_embed_text(String path);
 
-String Meta_embed_text(String path);
-
-void Meta_diagnostic_fail(String message, List notes);
+void x2c_diagnostic_fail(String message, List notes);
 
 
 #endif /* __GUARD_0xD219AB39__ */
