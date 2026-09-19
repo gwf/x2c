@@ -29,6 +29,8 @@ void Lisp_leave(void * storage);
 
 void Lisp_retarget(void * storage, Var callable, const Var * values, int count);
 
+int Lisp_step(void * storage);
+
 void Lisp_reslot(void * storage, List params, int count);
 
 Var Lisp_apply_values(void * storage, Var callable, const Var * values, int count);
