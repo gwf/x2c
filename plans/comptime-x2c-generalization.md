@@ -3,12 +3,14 @@
 > Status: active
 >
 > Scoped 2026-09-18 on branch `x2c-lowers-to-lisp` after the autodiff port
-> landed. Phases 0-4 and 6 are done and merged, 7 is answered, and 5 is one of
-> three files done. `plans/meta-functions.md` carries the `meta` keyword work:
-> M1, M2, M5 and M6 built, M3 and M4 declined on evidence, M7 and M8 the two
-> capabilities that gate the rest of the objective below. Nothing on this
-> branch reaches `main` without Gary's explicit green light. The design in
-> `plans/x2c-lowers-to-lisp.md` is settled and this plan does not revisit it.
+> landed. Phases 0-4, 6 and 7 are done or answered; 5 ported two of its three
+> files and declined `lib/var-tags.xmacro` on evidence.
+> `plans/meta-functions.md` carries the `meta` keyword work: M1, M2, M5, M6
+> and M7 built, M3 and M4 declined on evidence, M8 scoped and not built.
+> `tools/gate-state.py ensure agent-pr-check` passes on this branch. Nothing
+> on this branch reaches `main` without Gary's explicit green light. The
+> design in `plans/x2c-lowers-to-lisp.md` is settled and this plan does not
+> revisit it.
 
 ## The objective, set 2026-09-18
 

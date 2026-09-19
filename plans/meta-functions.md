@@ -11,9 +11,10 @@
 >
 > Scoped 2026-09-18 on branch `x2c-lowers-to-lisp`, after Phases 0-4, 6 and 7
 > of `plans/comptime-x2c-generalization.md` landed and Phase 5 blocked on the
-> capability this plan supplies. The word and the three-lifetime design are
-> Gary's decisions, taken 2026-09-18. Nothing reaches `main` without his
-> explicit green light.
+> capability this plan supplies. M1, M2, M5, M6 and M7 are built, M3 and M4
+> are declined on evidence, and M8 is scoped and not built. The word and the
+> three-lifetime design are Gary's decisions, taken 2026-09-18. Nothing
+> reaches `main` without his explicit green light.
 
 ## The result
 
@@ -1073,7 +1074,8 @@ and no comptime install at all", so moving `foreach` out of Lisp would break
 the bootstrap chain until a refresh landed the capability. The refresh landed
 on this branch as `e4db6c78`, for Phase 5 rather than for this milestone:
 `bin/x2c` is a symlink to `bin/x2c-bootstrap`, which is built from
-`bootstrap/*.c`, and it now parses `meta` and carries `bootstrap/src/comptime.c`.
+`bootstrap/*.c`, and it now parses `meta` and carries
+`bootstrap/src/comptime.c`.
 
 Phase 7 also said this is a permanent coupling rather than a one-time
 transition, and that is now the state of the tree: every future bootstrap
@@ -1086,8 +1088,8 @@ and a `.xmacro` gets them from the consuming unit's symbol table. Phase 5
 reproduced what happens when the unit has not declared them: `lib/common.x`
 reports `type ("Array") has no method push`, at line 18 and still at line 614.
 
-`_ensure_lisp` runs for every unit, `lib/common.x` included, and a session-start
-install has no unit at all. So the shipped file cannot borrow a symbol table
+`_ensure_lisp` runs for every unit, `lib/common.x` included, and a
+session-start install has no unit at all. So the shipped file cannot borrow a symbol table
 the way a `.xmacro` does; it has to be its own translation unit that includes
 `lib/x2c.x`, parsed on a child compiler whose only output is the lowered Lisp.
 That is Phase 5's route 1, "the compiler sub-translates a named `.x` at import
