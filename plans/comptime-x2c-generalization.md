@@ -867,6 +867,18 @@ ninth parameter. Translate time, best of three:
 One more live local costs 20x. Every iteration of the loop runs through the
 evaluator instead of the machine.
 
+**Superseded 2026-09-19 for loop nests.** The parameter ceiling is still what
+puts one loop on the evaluator, and the table above still holds for a single
+loop with a dialable live set. It is not what killed a nest. Two other things
+were, and both are fixed: a `foreach` carried its cursor and its element in
+cells, which cost three parameters per loop and twelve crossings per element,
+and a tail call reused its frame only when the callee was the lambda being
+compiled, so an inner loop leaving for an outer one pushed a frame per turn.
+A `foreach` over a `List` now walks the list in the frame's own slots and any
+tail call reuses its frame. A `foreach` inside a `foreach` folded at about
+830 outer iterations before and folds at 100,000 now, and one element costs
+5.7 us against 58.5.
+
 ### Why the limit is 8
 
 It is a buffer someone sized, not an encoding. `Var argv[LISP_AUTO_PARAM_MAX]`

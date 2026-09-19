@@ -32,7 +32,7 @@
    loop or `switch` gave, or nothing outside one. */
 typedef struct Lowering {
   Compiler compiler;
-  Map env, locals, cells, arrays, callees;
+  Map env, locals, cells, arrays, callees, cursors;
   Array definitions;
   String own;
   List on_break, on_continue;
@@ -178,8 +178,28 @@ static void _lower_scan_each(Lowering l, List items) {
 }
 
 
-/* Address-of is the one-operand `&`; three operands is bitwise and. */
-/* A local whose address is taken has to live somewhere a pointer can reach,
+/* The `foreach` over a `List` that `foreach.cursor-loop` expands to, whose
+   test steps a cursor and writes an element through two pointers. Answers
+   the two locals it addresses, so the lowering can walk the list itself
+   instead: the cursor is the list that remains and the element is its head,
+   neither of which needs a cell. */
+static int _lower_list_cursor(Var test, int *cursor, int *item) {
+  match (test)
+    case %(expr ? (call (expr ? (ident (binding ? "List_try_next")))
+                        (args ?
+                          (expr ? (op & (expr ? (ident (binding ?(int c) ?)))))
+                          (expr ? (op & (expr ? (ident (binding ?(int i) ?)))))
+                        ))): {
+      *cursor = c;
+      *item = i;
+      return 1;
+    }
+  return 0;
+}
+
+/* Address-of is the one-operand `&`; three operands is bitwise and.
+
+   A local whose address is taken has to live somewhere a pointer can reach,
    which is a cell. An ordinary assignment does not, even on a loop's
    iteration path and even when its value comes from a call: the binding it
    needs is an immediately applied lambda, and the lowering puts one of those
@@ -187,10 +207,9 @@ static void _lower_scan_each(Lowering l, List items) {
 static void _lower_scan_op(Lowering l, List form) {
   match (form) {
     case %(op & (expr ? (ident (binding ?(int id) ?)))): {
-      l.cells[id] = 1;
+      if (!l.cursors.contains(id)) l.cells[id] = 1;
       return;
     }
-
   }
 }
 
@@ -349,6 +368,13 @@ static void _lower_scan(Lowering l, Var form) {
   if (head == <while> || head == <for> || head == <do>) {
     int was = l.in_loop;
     l.in_loop = 1;
+    match (items) case %(while ?test ?): {
+      int cursor = 0, item = 0;
+      if (_lower_list_cursor(test, &cursor, &item)) {
+        l.cursors[cursor] = 1;
+        l.cursors[item] = 1;
+      }
+    }
     _lower_scan_each(l, items);
     l.in_loop = was;
     return;
@@ -1149,6 +1175,10 @@ static Var _lower_loop(
   _lower_referenced(step, used);
   _lower_referenced(rest, used);
   _lower_referenced(k, used);
+  /* The element is read where it is used, so the loop does not carry it. */
+  int walk_cursor = 0, walk_item = 0;
+  if (_lower_list_cursor(test, &walk_cursor, &walk_item))
+    used.del(walk_item);
   Array ids = [];
   defer ids.free();
   Array slots = [];
@@ -1167,7 +1197,20 @@ static Var _lower_loop(
   }
   Map outer = l.env;
   l.env = inside;
-  Var guard = _lower_truth(l, test);
+  /* A `foreach` over a `List` walks the list itself: the cursor is the list
+     that remains, so the test is its own truth, the element is its head, and
+     the next turn carries its tail. Nothing is addressed, so nothing is
+     boxed, and the loop carries one parameter instead of three. */
+  int cursor_id = 0, item_id = 0;
+  Var guard;
+  if (_lower_list_cursor(test, &cursor_id, &item_id) &&
+      inside.contains(cursor_id)) {
+    Var walk = inside[cursor_id];
+    guard = %(C.true? $walk);
+    l.env[item_id] = %(car $walk);
+    l.env[cursor_id] = %(cdr $walk);
+  }
+  else guard = _lower_truth(l, test);
   /* The exit is a function over the same live locals only when a `break`
      reaches it from inside the body; otherwise the cond inlines it. */
   Var exit = 0;
@@ -1740,7 +1783,8 @@ static Var _lower_block(Lowering l, List items, List k) {
 List Compiler.lower_comptime(Compiler compiler, List fn) {
   struct Lowering state = {
     .compiler = compiler, .env = {}, .locals = {}, .cells = {},
-    .arrays = {}, .callees = {}, .definitions = [], .declined = 0,
+    .arrays = {}, .callees = {}, .cursors = {}, .definitions = [],
+    .declined = 0,
     .own = NULL, .on_break = NULL, .on_continue = NULL, .on_loop = 0,
     .in_loop = 0, .rejected = 0, .uncallable = 0, .globals = 0,
     .meta_only = 0
