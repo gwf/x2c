@@ -738,6 +738,18 @@ unsigned Var.fallback_hash(Var v) {
 unsigned Var.hash(Var v) {
   if (v.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.hash"));
   if (v.is_wide()) return v.wide_hash();
+  /* Canonical `List`s are most of what the pool tables hash, and both these
+     hashes are constant time. Unboxing a known tag is one mask and compare,
+     where the descriptor row costs a full decode. `nil` and the empty
+     `String` unbox as NULL and take the general path, which hashes them the
+     same way it always did. */
+  List lst = v;
+  if (lst) return List.hash(lst);
+  String str = v;
+  if (str) {
+    unsigned hash = str.hash();
+    return hash ? hash : -1;
+  }
   VarDescriptor *descriptor = _descriptor_for_value(v);
   if (descriptor && descriptor.methods.hash) {
     unsigned hash = descriptor.methods.hash(v);
