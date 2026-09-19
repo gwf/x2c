@@ -80,7 +80,7 @@ Macro Lisp in the repository, measured 2026-09-18 by counting lines inside
 | --- | --- | --- |
 | `lib/autodiff.xmacro` | 754 | ported (Phase 6 decides whether it replaces the original) |
 | `etc/builtin-macros.xlisp` | 504 | stays Lisp; Phase 7 answered it |
-| `lib/var-tags.xmacro` | 295 | Phase 5 |
+| `lib/var-tags.xmacro` | 295 | Phase 5 declined it; see below |
 | `etc/init.xlisp` | 237 | substrate, stays |
 | `etc/comptime.xlisp` | 121 | name table, stays |
 | `etc/lisp-bindings.xlisp` | 119 | name table, stays |
@@ -88,7 +88,7 @@ Macro Lisp in the repository, measured 2026-09-18 by counting lines inside
 | `etc/compiler-sdk.xlisp` | 43 | Phase 5 decides |
 | `etc/lisp-extras.xlisp` | 34 | Phase 5 decides |
 | `lib/system-macros.xlisp` | 145 | Phase 5 |
-| `lib/varops.xlisp` | 57 | Phase 5 |
+| `lib/varops.xlisp` | 57 | ported; the file is gone |
 | `lib/error-macros.xmacro` | 32 | a data table, not logic |
 | `lib/error-private.xmacro` | 20 | `x2c.ident` calls in a macro body |
 | `lib/system-macros.xmacro` | 8 | an import and two call sites |
@@ -421,7 +421,7 @@ agent to say: a four-line comment in `_lower_constant_leaf` (`src/comptime.x`)
 named the typed capture as its example of an unfoldable node, which is no
 longer true.
 
-## Phase 5 - port the remaining macro Lisp (one of three done)
+## Phase 5 - port the remaining macro Lisp (done; var-tags declined)
 
 `lib/system-macros.xlisp` is ported: 12 of its 13 `dedent.*` definitions are
 now four `meta` functions in `lib/system-macros.xmacro`, the file went 145 to
@@ -430,12 +430,62 @@ now four `meta` functions in `lib/system-macros.xmacro`, the file went 145 to
 it replaced; the loop was kept because it reads better, which is the trade this
 phase exists to make.
 
-`lib/var-tags.xmacro` (295 lines, 4 importers, 6 SDK calls) and
-`lib/varops.xlisp` (57 lines, 1 importer, 2 SDK calls) remain. M6 makes their
-SDK calls portable. Neither needs M7: their two procedure-taking helpers,
-`var.tag.map` and `var.tag.filter`, are `map` and `filter` and should be
-written as `List.map` and `List.filter` with a `%!(Var x) =>` lambda, which
-already lowers.
+`lib/varops.xlisp` is ported and the file is gone. Its 14 rows, five row
+accessors and two expression builders are ten `meta` functions in the new
+`lib/varops.xmacro`, and the one SDK shape it needed that M6 had left out,
+`x2c.expr.cast`, is now `Meta.expr_cast`. The evidence is the generated C:
+`bootstrap/lib/varops.c` and `builds/0/lib/varops.c` differ only in
+error-site line numbers, every one by the same three lines the file grew, and
+every generated body is byte-identical. Measured cost +2 ms on the one unit
+that imports it, the minimum of six interleaved pairs.
+
+Two things that port established for anyone doing the next one. A `.xmacro`
+holding `meta` functions that call `Meta` must be imported **after** the unit
+includes `lib/meta.x`, because the import borrows the unit's symbol table.
+And a `meta` function anywhere in `lib/` needs the checked-in bootstrap to
+carry the comptime lowering first; see "Capability before callers" below.
+
+`lib/var-tags.xmacro` is **declined on evidence**, recorded below.
+
+### Why `lib/var-tags.xmacro` stays Lisp
+
+Attempted 2026-09-18 and reverted. The ledger has five importers, not the
+four this plan recorded - `src/type.x` projects `$var.tag.constant.rows()` -
+and one of them is `lib/common.x`, which cannot host a `meta` function at
+all. Two independent walls, each reproduced against `builds/0`:
+
+- **No compiler surface.** `lib/common.x` cannot include `lib/meta.x`:
+  `meta.x` includes `common.x`, so the include is a cycle and
+  `lib/varconvert.x` then fails to parse `Symbol Var.integer_tag(int rank,
+  ...)`, because `Symbol` is never declared. Including `meta.x` late enough
+  in `common.x` does work, and costs one `#include "meta.h"` in `common.h` -
+  which puts `Meta` in the implicit prelude and makes it a reserved type name
+  in every program. `plans/meta-functions.md` states the opposite under
+  "Compatibility", so that is a public change rather than a port.
+- **No collections.** A `meta` function that reads a table needs `Array.push`
+  and `List.getindex`. `lib/common.x` is the base module, so neither exists
+  at any point in its parse: the import reports `type ("Array") has no method
+  push` at line 18 and still reports it when moved to line 614, beside the
+  `$var.tag.unbox` invocations that use it.
+
+Splitting the file does not remove either wall, because `lib/common.x` needs
+the rows themselves. The remaining routes each change something outside a
+port: move the nine `$var.tag.unbox` accessors out of `lib/common.x`, which
+moves nine public `inline Var.*` declarations from `common.h` to another
+header and `lib/CLAUDE.md` calls those effectively ABI; or give the ledger an
+x2c prototype header for `lib/common.x` to include, which is a third file and
+a second name for each accessor.
+
+Two smaller obstacles are recorded for whoever revisits it. `_x2c.symbol-set`
+is a private native with no `Meta` spelling by M6's decision, so
+`$var.tag.symbolset` and `$var.tag.numeric.symbolset` would stay Lisp in any
+case. And the ledger owes its callers one diagnostic, "unknown Var tag",
+which needs `x2c.diagnostic.fail`.
+
+What the attempt did establish, in case the walls come down: the table
+transcribes cleanly into one literal template, `<ldouble**>` round-trips
+through a `Symbol` without truncating, and a hex literal in a template is an
+int. The generated table is in the session log rather than the tree.
 
 ### Why this section used to say blocked
 
@@ -605,6 +655,25 @@ bound native; `comptime-lowering.x`'s `map` case and the autodiff port's
 `ad_unbind` both do this today, including calling another compile-time
 function from inside the lambda. Take that route rather than teaching the
 pass a calling convention for one caller.
+
+## Capability before callers: the bootstrap had to carry the lowering
+
+Established 2026-09-18, when Phase 5 first tried to put a `meta` function in
+`lib/`. The checked-in `bootstrap/` had no `comptime.c` and no
+`install_meta_function`, and `bin/x2c-bootstrap` - which `builds/stage.mk`
+uses to translate every `src/*.x` and `lib/*.x` into `builds/0` - reported
+`parse: missing closing parenthesis` on `meta static int f(int n)`. Nothing
+in `lib/` or `src/` had needed it before, because the only `meta` functions
+in the tree were in `lib/system-macros.xmacro`, which only
+`unittest/test-system-macros.x` imports.
+
+`make bootstrap-refresh && make build-safe` landed it as `e4db6c78`: ten
+regenerated files plus `bootstrap/src/comptime.{c,h}` and
+`bootstrap/lib/meta.{c,h}`. `make verify-fixtures` and `make verify` pass
+against the refreshed chain. This is the intermediate validation `AGENTS.md`
+asks for when a language transition is one the checked-in bootstrap cannot
+consume, and it is a permanent coupling: every future bootstrap binary now
+carries the comptime lowering, which is the second of Phase 7's two walls.
 
 ## Phase 6 - fold the AD port back (done)
 
