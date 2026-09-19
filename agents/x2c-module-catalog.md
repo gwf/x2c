@@ -720,18 +720,19 @@ the Lisp runtime: reader, session, and evaluator.
 Public functions:
 
 `Lisp.program`, `Lisp.resolve`, `Lisp.enter`, `Lisp.leave`, `Lisp.retarget`,
-`Lisp.reslot`, `Lisp.apply_values`, `Lisp.precall`, `Lisp.immediate`,
-`Lisp.evaluate`, `Lisp.expanded`, `Lisp.kernel`, `Lisp.new`, `Lisp.destroy`,
-`Lisp.adopt`, `Lisp.freeze`, `Lisp.read`, `lisp_atom`, `lisp_car`, `lisp_cdr`,
-`lisp_eq`, `lisp_pair`, `lisp_list`, `lisp_number`, `lisp_string`,
-`lisp_symbol`, `lisp_procedure`, `lisp_compare`, `lisp_type`, `lisp_add`,
-`lisp_plus`, `lisp_minus`, `lisp_times`, `lisp_divide`, `lisp_eq_chain`,
-`lisp_lt_chain`, `lisp_le_chain`, `lisp_gt_chain`, `lisp_ge_chain`, `lisp_str`,
-`lisp_repr`, `lisp_string_append`, `lisp_substring`, `lisp_string_downcase`,
-`lisp_match_replace`, `lisp_read_file`, `lisp_write_file`, `Lisp.auto_stats`,
-`Lisp.auto_instrument`, `Lisp.auto_disable`, `Lisp.auto_prepare`, `Lisp.eval`,
-`Lisp.apply`, `Lisp.eval_string`, `Lisp.eval_file`, `Lisp.try_get`,
-`Lisp.set_global`, `Lisp.bind`, `Lisp.cleanup`
+`Lisp.step`, `Lisp.reslot`, `Lisp.apply_values`, `Lisp.precall`,
+`Lisp.immediate`, `Lisp.evaluate`, `Lisp.expanded`, `Lisp.kernel`, `Lisp.new`,
+`Lisp.destroy`, `Lisp.adopt`, `Lisp.freeze`, `Lisp.read`, `lisp_atom`,
+`lisp_car`, `lisp_cdr`, `lisp_eq`, `lisp_pair`, `lisp_list`, `lisp_number`,
+`lisp_string`, `lisp_symbol`, `lisp_procedure`, `lisp_compare`, `lisp_type`,
+`lisp_add`, `lisp_plus`, `lisp_minus`, `lisp_times`, `lisp_divide`,
+`lisp_eq_chain`, `lisp_lt_chain`, `lisp_le_chain`, `lisp_gt_chain`,
+`lisp_ge_chain`, `lisp_str`, `lisp_repr`, `lisp_string_append`,
+`lisp_substring`, `lisp_string_downcase`, `lisp_match_replace`,
+`lisp_read_file`, `lisp_write_file`, `Lisp.auto_stats`, `Lisp.auto_instrument`,
+`Lisp.auto_disable`, `Lisp.auto_prepare`, `Lisp.eval`, `Lisp.apply`,
+`Lisp.eval_string`, `Lisp.eval_file`, `Lisp.try_get`, `Lisp.set_global`,
+`Lisp.bind`, `Lisp.cleanup`
 
 ### [lib/list-selectors.x](../lib/list-selectors.x)
 
