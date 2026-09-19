@@ -1150,7 +1150,11 @@ starts with `#pragma once` and also carries a conventional include guard, so
 A file that includes another sees what that file's header declares: everything
 above its `#pragma private` and the functions with external linkage it defines
 below it. Its private types, enumerators, objects, and static functions belong
-to that file, and naming one of them is an error in the including unit. An
+to that file, and naming one of them is an error in the including unit. A
+`static` function is private wherever it appears, above the boundary as well
+as below it, and the error names the file that defines it. A C header is not
+a unit, so the `static inline` functions it defines still belong to every
+file that includes it. An
 `#include` below `#pragma private` still splices, because the including file
 may call the functions it declares.
 
