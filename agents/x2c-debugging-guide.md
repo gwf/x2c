@@ -134,6 +134,36 @@ as an ordinary filesystem/include problem, not escaped as command text.
 
 ---
 
+## 4a. Probing a failure inside the compiler itself
+
+A translation that fails during `make build` is the work of `bin/x2c`, the
+prebuilt bootstrap binary. Two facts about it decide where a probe has to go,
+and each costs an hour to rediscover.
+
+`make build` does not always relink `bin/x2c`. A `fprintf` added to a file
+under `lib/` reaches the compiler that is failing only after
+`make build-safe`, which rebuilds the bootstrap chain. Check the binary's
+timestamp against the file you edited before trusting a probe that prints
+nothing.
+
+`bin/x2c` takes its compiler logic from the checked-in C under `bootstrap/`,
+which is never hand-edited, so a probe added to `src/` does not reach it at
+all. To probe compiler logic, build a stage-0 compiler on a tree **without**
+the change, then run `./builds/0/x2c` against a tree **with** it:
+
+```sh
+git stash push -u -m probe-aside   # or copy the changed files aside
+make build                         # builds/0/x2c now carries the probe
+git stash pop                      # restore the change
+./builds/0/x2c translate --out-dir /tmp/x2c-debug lib/var.x
+```
+
+The same asymmetry explains a diagnostic that looks less informative than the
+code that writes it: the message comes from the bootstrap compiler, so it
+reports what the checked-in C reported, not what the working tree would.
+
+---
+
 ## 5. Progressive Testing Pattern
 
 1. Start from the simplest expression or statement in `/tmp/test.x`.
