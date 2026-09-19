@@ -76,14 +76,23 @@ int Lisp.program(Var callable, MachineView *view, int *nparam, Var *body) {
   return 1;
 }
 
-/** Resolves one Lisp name for the active shared-machine environment.
+/** Resolves one global Lisp name for the running shared machine.
     `storage` must be the context of a running LispMachine and `value` must be
     nonnull. Returns 1 and writes the borrowed binding, or returns 0 and leaves
     the output unchanged.
+
+    Lowering emits this read only for a name that is none of the frame's
+    slots and none of the Lambda's captures. A free name is lexical, so the
+    only place left to look is the session and its parents, and the frame is
+    not consulted.
 */
 int Lisp.resolve(void *storage, Var name, Var *value) {
-  LispMachineContext context = (LispMachineContext) storage;
-  return _lookup(context.lisp, _machine_env(context), name, value);
+  Lisp lisp = ((LispMachineContext) storage).lisp;
+  if (!_global_lookup(lisp, name, value) &&
+      !_reserved_lookup(lisp, name, value))
+    return 0;
+  _expansion_note(lisp, name, *value);
+  return 1;
 }
 
 /** Pushes one prepared-Lambda environment for the shared machine.
