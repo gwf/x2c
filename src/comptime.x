@@ -247,10 +247,39 @@ static int _lower_known(Lowering l, String name) {
   return 1;
 }
 
-/* The compiler surface `lib/meta.x` declares is the `Meta` namespace, and
-   nothing else declares into it, so a callee spelled this way names an
-   operation that exists only inside a compiler. */
-static int _lower_compiler_operation(String name) => name.startswith("Meta_");
+/* The Lisp spelling of the compiler operation an x2c name stands for. The
+   rule is mechanical, each `_` after the prefix becoming a `.`, and these
+   four rows are the whole exception list: two Lisp names carry a hyphen, and
+   two operations need an adapter, one to spread a rest parameter and one to
+   answer an `int` where Lisp answers a truth value. */
+static String _lower_operation_name(String name) {
+  if (name == "x2c_expr_call")         return "_x2c.expr.call-list";
+  if (name == "x2c_type_value")        return "_x2c.type.value-int";
+  if (name == "x2c_type_tag_name")     return "x2c.type.tag-name";
+  if (name == "x2c_type_reverse_name") return "x2c.type.reverse-name";
+  return name.replace("_", ".");
+}
+
+/* Whether a callee names a compiler operation rather than a function this
+   translation has. `lib/meta.x` declares the surface as `x2c_*` prototypes
+   with no body, so a name with no definition whose Lisp operation the session
+   binds is one. The prefix does not decide it: give one of those declarations
+   a body and the body is found first, in the caller below. */
+static int _lower_compiler_operation(Lowering l, String name) {
+  if (!name.startswith("x2c_")) return name.startswith("Meta_");
+  Var value;
+  return l.compiler.macro_lisp.try_get(_lower_operation_name(name), &value);
+}
+
+/* The name a lowered call names in Lisp. A definition wins over the compiler
+   surface, so this maps only what the session cannot answer directly. */
+static String _lower_callee_name(Lowering l, String name) {
+  Var value;
+  if (l.own && l.own.equal(name)) return name;
+  if (l.compiler.macro_lisp.try_get(name, &value)) return name;
+  if (_lower_compiler_operation(l, name)) return _lower_operation_name(name);
+  return name;
+}
 
 /* A callee this pass already installed carries its own reach to file-scope
    state and to the compiler surface, so the caller inherits both. A callee is
@@ -258,12 +287,16 @@ static int _lower_compiler_operation(String name) => name.startswith("Meta_");
    bind. */
 static void _lower_scan_callee(Lowering l, String name) {
   if (!_lower_known(l, name)) {
+    if (_lower_compiler_operation(l, name)) {
+      l.meta_only = 1;
+      return;
+    }
     l.uncallable = 1;
     lower_missing_callee = name;
     return;
   }
   if (l.compiler.meta_impure.contains(name)) l.globals = 1;
-  if (_lower_compiler_operation(name) ||
+  if (_lower_compiler_operation(l, name) ||
       l.compiler.meta_comptime.contains(name))
     l.meta_only = 1;
 }
@@ -568,7 +601,7 @@ static Var _lower_call(Lowering l, List callee, String name, List args) {
   match (callee) case %((func ?declared) *): params = declared;
   List values = _lower_args(l, params, args);
   if (l.declined) return void;
-  return cons(Atom.intern(name), values);
+  return cons(Atom.intern(_lower_callee_name(l, name)), values);
 }
 
 /* The application a dynamic `Func` call stands for. The callee is an

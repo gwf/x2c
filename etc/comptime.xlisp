@@ -241,6 +241,13 @@
 // answer they answer nil, and where the request is wrong they reject, which
 // reaches the developer as a diagnostic at the macro invocation.
 
+// The two operations an `x2c_*` call cannot reach by the mechanical name
+// rule: one spreads a rest parameter, one answers an `int` where Lisp
+// answers a truth value.
+(defun _x2c.expr.call-list (callee arguments)
+  (apply x2c.expr.call (cons callee arguments)))
+(defun _x2c.type.value-int (value) (if (x2c.type.value? value) 1 0))
+
 (defun Meta_ident (spelling) (x2c.ident spelling))
 (defun Meta_literal_string (value) (x2c.literal.string value))
 (defun Meta_literal_int (value) (x2c.literal.int value))
