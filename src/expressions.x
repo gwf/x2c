@@ -1394,6 +1394,7 @@ static List _finish_call(
         result_type = %(<macro-expr>);
     }
   if (!result_type) result_type = applied;
+  compiler.check_meta_call(callee, origin);
   List folded = compiler.fold_meta_call(
     callee, callee_type, result_type, arguments);
   if (folded) return folded;

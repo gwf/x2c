@@ -1945,6 +1945,28 @@ static List _meta_result(Compiler c, Type result, Var value) {
   return literal;
 }
 
+/** Refuses a run-time call to a `meta` function this compiler derived
+    compile-time only.
+
+    Such a function reaches a `Meta` operation, so it exists only inside a
+    compiler and the unit emits no definition for it. The call used to reach
+    the linker as an undefined symbol, which names the C spelling and not the
+    source. Another `meta` function may call it: calling one is what makes
+    the caller compile-time only too, so a body being parsed under the marker
+    is left alone.
+*/
+void Compiler.check_meta_call(Compiler c, List callee, Token origin) {
+  if (c.meta_body || !c.meta_comptime.len()) return;
+  match (callee)
+    case %(expr ? (ident (binding ? ?(String name)))):
+      if (c.meta_comptime.contains(name))
+        c.report_error(
+          <macro>, %"'$name' can only be called at compile time", origin,
+          %("reason: it reaches the Meta compiler surface, so no unit emits"
+            "a definition for it; call it from a macro or another meta"
+            "function"));
+}
+
 /** Answers a call to a `meta` function from its compile-time form when every
     argument is a compile-time constant of the parameter's own type, or
     returns `NULL` to leave the call alone.

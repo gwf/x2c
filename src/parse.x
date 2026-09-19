@@ -1767,7 +1767,10 @@ List Compiler.parse_top_level(Compiler c) {
       c.report_error(
         <parse>, "a function definition cannot share a declaration row",
         c.token, NULL);
-    List function = _finish_function_definition(c, decl);
+    List function;
+    $let(c.meta_body, meta != NULL) {
+      function = _finish_function_definition(c, decl);
+    }
     if (meta) c.install_meta_function(function, meta);
     c.record_declaration_visibility(function);
     /* A `meta` function that reaches a `Meta` operation exists only inside

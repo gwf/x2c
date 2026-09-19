@@ -138,6 +138,10 @@ typedef struct Compiler {
      no runtime form at all: no unit emits one and no call to one folds. */
   Map meta_folds, meta_impure, meta_comptime;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
+  /* Whether the body being parsed belongs to a `meta` function, which is
+     what lets a call to a compile-time-only one be refused everywhere
+     else. */
+  int meta_body;
   /* A macro import whose protocol registries are installed on first use;
      `Compiler.protocol_members_for` owns the installation. */
   int import_protocols;

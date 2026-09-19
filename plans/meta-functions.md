@@ -826,6 +826,14 @@ catch would swallow the raise and leave `macro_sdk_failure_message` set, and
 `_report_lisp_failure` would then report that stale message on the next
 unrelated failure.
 
+A run-time call to such a function is refused at the call.
+`Compiler.check_meta_call` runs from `_finish_call` and names the function,
+which the link error it replaces did not: `Undefined symbols ... _mi_tag`
+names the C spelling and no source position. A body parsed under the `meta`
+marker is exempt, because calling a compile-time-only function is what makes
+its caller one too; `Compiler.meta_body` carries that for the parse.
+`meta-comptime-only-call` pins both halves.
+
 Emission is refused in the two places a runtime definition can arrive.
 `Compiler.parse_top_level` returns `NULL` for the unit's own compile-time-only
 definition, the way it already does for a keyword definition, so nothing enters
