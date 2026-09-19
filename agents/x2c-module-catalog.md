@@ -877,9 +877,9 @@ Public functions:
 `Pool.thread_start`, `Pool.retain_named`, `Pool.retain`, `Pool.release`,
 `Pool.current`, `Pool.initialize`, `Pool.thread_initialize`, `Pool.shutdown`,
 `Pool.open_named`, `Pool.open`, `Pool.close`, `Pool.detach`,
-`Pool.is_permanent`, `Pool.epoch`, `Pool.lookup`, `Pool.insert`, `Pool.intern`,
-`Pool.malloc`, `Pool.free`, `Pool.owns`, `Pool.promote`, `Pool.own`,
-`Pool.stats`
+`Pool.is_permanent`, `Pool.epoch`, `Pool.lookup`, `Pool.insert`,
+`Pool.intern_new`, `Pool.intern`, `Pool.malloc`, `Pool.free`, `Pool.owns`,
+`Pool.promote`, `Pool.own`, `Pool.stats`
 
 ### [lib/process.x](../lib/process.x)
 

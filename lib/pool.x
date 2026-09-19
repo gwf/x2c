@@ -693,6 +693,41 @@ void Pool.insert(Pool inner, Var object) {
   _insert_locked(inner, object);
 }
 
+/* Probes and installs in `inner` alone, with the pool locked. Sets `discard`
+   when a concurrent equal entry already holds the level. */
+static Var _intern_locked(Pool inner, Var object, int *discard) {
+  unsigned before = inner.table.len();
+  Var stored = inner.table.setdefault(object, object);
+  if (inner.table.len() != before) inner.interned++;
+  else *discard = 1;
+  return stored;
+}
+
+/** Returns the canonical value equal to `object`, installing it in `inner`.
+    This is `Pool.intern` for a caller that has already searched the whole
+    chain from `inner` outward and found nothing, so only the innermost level
+    is probed. The fused `Map` operation still decides the identity, which
+    keeps one canonical pointer per equal value in `inner` even when another
+    worker interns the same value first.
+
+    Raises: `<bad-arg>` when `inner` or `alloc` is NULL. `Map` insertion
+    causes propagate and leave the object unregistered.
+*/
+Var Pool.intern_new(Pool inner, Var object, void *alloc) {
+  if (!inner || !alloc) raise %(bad-arg (owner "Pool.intern_new"));
+  Var canonical;
+  int discard = 0;
+  {
+    _lock(inner);
+    defer _unlock(inner);
+    canonical = _intern_locked(inner, object, &discard);
+  }
+  // Pool.free takes storage before the pool. Do not call it while holding
+  // the pool mutex or another worker can complete the opposite lock order.
+  if (discard) inner.free(alloc);
+  return canonical;
+}
+
 /** Returns the canonical value equal to `object`, installing it when absent.
     A miss lands in `inner`. `alloc` is the object's `Pool`-owned allocation;
     a hit releases that losing candidate immediately. A failed insertion
@@ -702,6 +737,7 @@ void Pool.insert(Pool inner, Var object) {
     Ancestors are checked before the innermost fused `Map` operation. `Pool`'s
     single-canonical-pointer invariant makes that order equivalent to outward
     shadowing while allowing the innermost table to be probed exactly once.
+    A caller that has already searched the chain uses `Pool.intern_new`.
 
     Raises: `<bad-arg>` when `inner` or `alloc` is NULL. `Map` lookup and
     insertion causes propagate.
@@ -718,16 +754,9 @@ Var Pool.intern(Pool inner, Var object, void *alloc) {
       canonical = existing;
       discard = 1;
     }
-    else {
-      unsigned before = inner.table.len();
-      Var stored = inner.table.setdefault(object, object);
-      canonical = stored;
-      if (inner.table.len() != before) inner.interned++;
-      else discard = 1;
-    }
+    else canonical = _intern_locked(inner, object, &discard);
   }
-  // Pool.free takes storage before the pool. Do not call it while holding
-  // the pool mutex or another worker can complete the opposite lock order.
+  // See Pool.intern_new: the losing candidate is freed outside the lock.
   if (discard) inner.free(alloc);
   return canonical;
 }
