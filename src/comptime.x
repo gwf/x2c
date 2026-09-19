@@ -514,6 +514,28 @@ static Var _lower_quoted(Lowering l, Var node) {
 static Var _lower_expr(Lowering l, Var form);
 static Var _lower_coerce(List want, Var node, Var value);
 
+/* The type an expression node carries, or nothing for a node that is not
+   one. An lvalue names the type its store converts to. */
+static Type _lower_type_of(Var node) {
+  match (node) case %(expr ?type ?): return type;
+  return NULL;
+}
+
+/* A value reaching a C scalar type carries that type's `Var` tag, which is
+   what makes every later operation behave the way C does: `Var.binary`
+   applies the usual arithmetic conversions from the operand tags, so
+   unsigned division and comparison, narrow wraparound and the signed shift
+   all follow from the destination types the author wrote. `Var.convert` is
+   the conversion itself - integer narrowing keeps low bits, floating to
+   integer truncates toward zero, and an integer reaching a floating type
+   widens - so this pass names a tag and performs no arithmetic of its own.
+   A type with no scalar tag, a pointer or a library type, keeps its value. */
+static Var _lower_to_type(Type want, Var value) {
+  Symbol tag = want.scalar_tag();
+  if (!tag) return value;
+  return %(C.conv $value (quote $tag));
+}
+
 /* The parameter type at one argument's position, or nothing where the callee
    declares none: a variadic tail, or a call the compiler constructed. The two
    spellings are the ones `_typed_call` aligns its conversions against. */
@@ -567,6 +589,26 @@ static Var _lower_application(Lowering l, Var content) {
   return values.list();
 }
 
+/* `Var.binary` applies the usual arithmetic conversions itself for the
+   arithmetic operators, so only a comparison needs them written out: `==`
+   and `!=` compare `Var` identity there, which 1.0 and 1 fail, and the
+   relations compare the values as written rather than as C converts them,
+   so a negative signed operand does not become the large unsigned one C
+   makes of it. */
+static int _lower_relation(Var operator) =>
+  operator == <==> || operator == <!=> || operator == <"<"> ||
+  operator == <"<="> || operator == <">"> || operator == <">=">;
+
+/* Whether two operands are scalars of different families. An equal pair,
+   which is nearly every pair, needs no conversion and is left alone. */
+static int _lower_mixed_scalars(List operands) {
+  if (operands.len() != 2) return 0;
+  Type left = _lower_type_of(operands.car());
+  Type right = _lower_type_of(operands.cadr());
+  Symbol a = left.scalar_tag(), b = right.scalar_tag();
+  return a && b && a != b;
+}
+
 static Var _lower_operands(Lowering l, Var operator, List operands) {
   Array values = [];
   defer values.free();
@@ -587,6 +629,8 @@ static Var _lower_operands(Lowering l, Var operator, List operands) {
     Var left = values[0], right = values[1];
     if (operator == <&&>) return %(C.and $left $right);
     if (operator == <||>) return %(C.or $left $right);
+    if (_lower_relation(operator) && _lower_mixed_scalars(operands))
+      return %(C.compare $left (quote $operator) $right);
     return %(_binary $left (quote $operator) $right);
   }
   if (values.len() == 3) {
@@ -780,7 +824,13 @@ static Var _lower_content(Lowering l, List type, Var content) {
     }
     case %(parens (block *)):             return _lower_application(l, content);
     case %(parens ?inner):                return _lower_expr(l, inner);
-    case %(cast ? ?inner):                return _lower_expr(l, inner);
+    /* A cast is a conversion the author wrote, and the type it names is the
+       one the surrounding `expr` node already carries. */
+    case %(cast ? ?inner): {
+      Var value = _lower_expr(l, inner);
+      if (_lower_failed(l, value)) return void;
+      return _lower_coerce(type, inner, value);
+    }
     case %(expr ?inner ?within):          return _lower_content(l, inner, within);
     case %(at ? ?node):                   return _lower_content(l, type, node);
     case %(op & (expr ? (ident (binding ?(int id) ?)))):
@@ -867,16 +917,13 @@ static Var _lower_apply_k(Lowering l, List k) {
   return _lower_decline(l, "unknown continuation");
 }
 
-/* nil is the only false value in Lisp, so a C zero has to be compared. A
-   numeric test inlines that; anything else asks for x2c truth, because a
-   nil List is false and zero is not a meaningful comparison there. */
+/* nil is the only false value in Lisp, so a C zero has to be compared.
+   `C.true?` owns that comparison for every family: an inlined `(eq? v 0)`
+   here answered true for a `double` zero, because a boxed 0.0 is not the
+   `int` 0 that `eq?` tests. */
 static Var _lower_truth(Lowering l, Var test) {
   Var value = _lower_expr(l, test);
   if (_lower_failed(l, value)) return void;
-  match (test)
-    case %(expr (!or (int) (long) (char) (short) (unsigned)
-                     (double) (float)) ?):
-      return %(not (eq? $value 0));
   return %(C.true? $value);
 }
 
@@ -1328,12 +1375,12 @@ static Var _lower_braced(Lowering l, List type, int id, List items) {
   return _lower_decline(l, "a braced initializer for this type");
 }
 
-/* A declaration, a return, and an argument each name a type the value has to
-   reach, and none of them carries the conversion the transform would insert
-   later; an assignment does carry it. Only the pairs a Lisp value can tell
-   apart need one: a `Symbol` is not a `String`, and an `Array` is not a
-   `List`. Without the argument case an `Array` reached a `List` parameter and
-   the native adapter refused it. */
+/* A declaration, a cast, an assignment, a return and an argument each name a
+   type the value has to reach, and none of them carries the conversion the
+   transform would insert later. Beyond the numeric families, the pairs a
+   Lisp value can tell apart need one: a `Symbol` is not a `String`, and an
+   `Array` is not a `List`. Without the argument case an `Array` reached a
+   `List` parameter and the native adapter refused it. */
 static Var _lower_coerce(List want, Var node, Var value) {
   match (node)
     case %(expr ?from ?): {
@@ -1344,6 +1391,10 @@ static Var _lower_coerce(List want, Var node, Var value) {
         return %(List_array $value);
       if (want.equal(%("String")) && from.equal(%("Symbol")))
         return %(Symbol_str $value);
+      Type target = want, source = from;
+      Symbol tag = target.scalar_tag();
+      if (tag && source.scalar_tag() && tag != source.scalar_tag())
+        return _lower_to_type(want, value);
     }
   return value;
 }
@@ -1490,20 +1541,25 @@ static Var _lower_store(
 }
 
 /* `right` is already lowered: a step supplies its own one, and a compound
-   assignment supplies its lowered right-hand side. */
+   assignment supplies its lowered right-hand side. The operation promotes,
+   so the result converts back to the place's own type, which is what
+   `$native.update` in `lib/varops.x` does for each family. */
 static Var _lower_update(
   Lowering l, Var target, Var operator, Var right, List rest, List k) {
   int id = _lower_target(target);
   if (id < 0) return _lower_decline(l, "update of a computed place");
   if (_lower_failed(l, right)) return void;
+  Type want = _lower_type_of(target);
   if (!l.locals.contains(id)) {
     l.globals = 1;
-    Var combined = %(_binary (C.gread $id) (quote $operator) $right);
+    Var combined = _lower_to_type(
+      want, %(_binary (C.gread $id) (quote $operator) $right));
     return _lower_effect(l, %(C.gwrite $id $combined), rest, k);
   }
   Var current = _lower_value(l, id);
   if (_lower_failed(l, current)) return void;
-  Var combined = %(_binary $current (quote $operator) $right);
+  Var combined = _lower_to_type(
+    want, %(_binary $current (quote $operator) $right));
   if (l.cells.contains(id))
     return _lower_effect(
       l, %(C.store ${_lower_address(l, id)} $combined), rest, k);
@@ -1537,8 +1593,12 @@ static Var _lower_step_of(Var target) {
 static Var _lower_expression_stmnt(
   Lowering l, Var e, List rest, List k) {
   match (e) {
-    case %(expr ? (op = ?target ?rhs)):
-      return _lower_store(l, target, _lower_expr(l, rhs), rest, k);
+    case %(expr ? (op = ?target ?rhs)): {
+      Var value = _lower_expr(l, rhs);
+      if (!_lower_failed(l, value))
+        value = _lower_coerce(_lower_type_of(target), rhs, value);
+      return _lower_store(l, target, value, rest, k);
+    }
     case %(expr ? (!or (op ++ ?target) (postfix ++ ?target))):
       return _lower_update(l, target, <+>, _lower_step_of(target), rest, k);
     case %(expr ? (!or (op -- ?target) (postfix -- ?target))):
@@ -1901,6 +1961,14 @@ List Compiler.fold_meta_call(
       return NULL;
     Var value = _meta_constant(c, argument);
     if (value is void) return NULL;
+    /* The lowered body converts at every conversion position the source
+       has, and a parameter is one the call site owns: a character literal
+       reaching a `char` is its code as an `int` until this converts it. */
+    Symbol tag = declared.scalar_tag();
+    if (tag) {
+      try value = value.convert(tag);
+      catch: return NULL;
+    }
     values.push(value);
   }
   Var answer;
