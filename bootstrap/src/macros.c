@@ -285,22 +285,22 @@ static String _source_text(Compiler c, String path, String message, Token token,
 
 static String _read_source(Compiler compiler, String path, String message, Token token, List notes);
 
+static Map library_imports;
+
+_x2c_initializer_choice_28FCBFDC_12((library_imports = NULL))
+static int library_filling;
+
+_x2c_initializer_choice_28FCBFDC_13((library_filling = 0))
+static int _inherited_import(String path);
+
 static void _eval_library(Compiler compiler, int loaded, String relative, String message);
 
 static Lisp library_session;
 
-_x2c_initializer_choice_28FCBFDC_12((library_session = NULL))
+_x2c_initializer_choice_28FCBFDC_14((library_session = NULL))
 static Scope library_scope;
 
-_x2c_initializer_choice_28FCBFDC_13((library_scope = NULL))
-static Map library_imports;
-
-_x2c_initializer_choice_28FCBFDC_14((library_imports = NULL))
-static int library_filling;
-
-_x2c_initializer_choice_28FCBFDC_15((library_filling = 0))
-static int _inherited_import(String path);
-
+_x2c_initializer_choice_28FCBFDC_15((library_scope = NULL))
 static void _library_shutdown(void);
 
 static void _reset_unit_state(Compiler compiler);
@@ -2661,18 +2661,19 @@ static String _read_source(Compiler compiler, String path, String message, Token
   return text;
 }
 
+static int _inherited_import(String path){
+  return ! library_filling && Map_truth(library_imports) && Map_contains(library_imports, String_var(path));
+}
+
 void Compiler_add_translation_dependency(Compiler, String);
 
 static void _eval_library(Compiler compiler, int loaded, String relative, String message){
   String path = String_join(NULL, cons(String_var(compiler -> root_dir), cons(String_var(_244), cons(String_var(relative), NULL))));
   Compiler_add_translation_dependency(compiler, path);
-  if(loaded) return;
+  if(library_filling) Map_setindex(library_imports, String_var(path), int_var(1));
+  if(loaded || _inherited_import(path)) return;
   String text = _source_text(compiler, path, message, compiler -> token, cons(_346, cons(String_var(path), NULL)));
   _eval_string(compiler, text, compiler -> token);
-}
-
-static int _inherited_import(String path){
-  return ! library_filling && Map_truth(library_imports) && Map_contains(library_imports, String_var(path));
 }
 
 void Lisp_destroy(Lisp);
@@ -3111,7 +3112,10 @@ if(! replay) return NULL;
   {
       if(String_endswith(path, _781)){
         String text = _read_source(c, path, _782, invocation, cons(String_var(String_join(NULL, cons(String_var(_266), cons(String_var(Compiler_display_path(c, path)), NULL)))), NULL));
-        if(c -> collect_protocols) _eval_string(c, text, invocation);
+        if(_inherited_import(path)){
+
+        }
+        else if(c -> collect_protocols) _eval_string(c, text, invocation);
         else Compiler_queue_declaration_effect(c, text, invocation, invocation);
       }
       else if(String_endswith(path, _783)){
