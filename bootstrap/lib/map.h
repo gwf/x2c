@@ -28,6 +28,8 @@ Var Map_get(Map map, Var key);
 
 Var Map_getindex(Map map, Var key);
 
+Var Map_get_hashed(Map map, Var key, unsigned key_hash);
+
 Var Map_getdefault(Map map, Var key, Var defval);
 
 Var Map_setdefault(Map map, Var key, Var defval);

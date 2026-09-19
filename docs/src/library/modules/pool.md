@@ -88,7 +88,7 @@ worker interns the same value first.
 **Raises:** `<bad-arg>` when `inner` or `alloc` is NULL. `Map` insertion
 causes propagate and leave the object unregistered.
 
-Source: `lib/pool.x:716`
+Source: `lib/pool.x:720`
 
 <a id="Pool.open"></a>
 #### Pool.open
@@ -135,7 +135,7 @@ Returns this level's canonical counts plus process-wide storage counters.
 A null pool reports depth and per-level counts as zero. The counters are a
 snapshot; nothing in the result stays live with the pool.
 
-Source: `lib/pool.x:930`
+Source: `lib/pool.x:934`
 
 ## Advanced and interop API
 
@@ -223,7 +223,7 @@ freed this way. A null allocation does nothing.
 
 **Raises:** `<bad-arg>` when `inner` is NULL and `alloc` is not.
 
-Source: `lib/pool.x:819`
+Source: `lib/pool.x:823`
 
 <a id="Pool.initialize"></a>
 #### Pool.initialize
@@ -251,7 +251,7 @@ object storage.
 **Raises:** `<bad-arg>` when `inner` is NULL. Map insertion causes propagate
 and leave the object unregistered.
 
-Source: `lib/pool.x:689`
+Source: `lib/pool.x:693`
 
 <a id="Pool.intern"></a>
 #### Pool.intern
@@ -272,7 +272,7 @@ A caller that has already searched the chain uses `Pool.intern_new`.
 **Raises:** `<bad-arg>` when `inner` or `alloc` is NULL. `Map` lookup and
 insertion causes propagate.
 
-Source: `lib/pool.x:745`
+Source: `lib/pool.x:749`
 
 <a id="Pool.is_permanent"></a>
 #### Pool.is_permanent
@@ -308,7 +308,7 @@ ordinary `Scope` ownership.
 request overflows `Scope` storage, or `<alloc-fail>` when storage cannot
 be allocated.
 
-Source: `lib/pool.x:772`
+Source: `lib/pool.x:776`
 
 <a id="Pool.own"></a>
 #### Pool.own
@@ -325,7 +325,7 @@ levels: an earlier level remains promoted if a later promotion transfers.
 
 **Raises:** `<alloc-fail>` when promotion metadata cannot be allocated.
 
-Source: `lib/pool.x:911`
+Source: `lib/pool.x:915`
 
 <a id="Pool.owns"></a>
 #### Pool.owns
@@ -335,7 +335,7 @@ Source: `lib/pool.x:911`
 Reports whether this exact level stores `key` as its canonical identity.
 Ancestors are not searched, and a null pool reports zero.
 
-Source: `lib/pool.x:843`
+Source: `lib/pool.x:847`
 
 <a id="Pool.promote"></a>
 #### Pool.promote
@@ -349,7 +349,7 @@ zero for a missing owner, root pool, or null allocation.
 **Raises:** `<alloc-fail>`, `<size-limit>`, or `<invariant>` while recording
 the promotion; that transfer may happen before storage is marked or moved.
 
-Source: `lib/pool.x:896`
+Source: `lib/pool.x:900`
 
 <a id="Pool.shutdown"></a>
 #### Pool.shutdown
