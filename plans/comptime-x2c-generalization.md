@@ -451,43 +451,62 @@ carry the comptime lowering first; see "Capability before callers" below.
 
 ### Why `lib/var-tags.xmacro` stays Lisp
 
-Attempted 2026-09-18 and reverted. The ledger has five importers, not the
-four this plan recorded - `src/type.x` projects `$var.tag.constant.rows()` -
-and one of them is `lib/common.x`, which cannot host a `meta` function at
-all. Two independent walls, each reproduced against `builds/0`:
+Attempted twice on 2026-09-18 and reverted both times. The obstacle is not
+the file, and it is not an ABI question: it is where in the runtime the
+ledger is consumed.
 
-- **No compiler surface.** `lib/common.x` cannot include `lib/meta.x`:
-  `meta.x` includes `common.x`, so the include is a cycle and
-  `lib/varconvert.x` then fails to parse `Symbol Var.integer_tag(int rank,
-  ...)`, because `Symbol` is never declared. Including `meta.x` late enough
-  in `common.x` does work, and costs one `#include "meta.h"` in `common.h` -
-  which puts `Meta` in the implicit prelude and makes it a reserved type name
-  in every program. `plans/meta-functions.md` states the opposite under
-  "Compatibility", so that is a public change rather than a port.
-- **No collections.** A `meta` function that reads a table needs `Array.push`
-  and `List.getindex`. `lib/common.x` is the base module, so neither exists
-  at any point in its parse: the import reports `type ("Array") has no method
-  push` at line 18 and still reports it when moved to line 614, beside the
+**A `meta` function that reads a table needs `Array.push` and
+`List.getindex`, and every module that projects the ledger sits below those
+types.** Reproduced against `builds/0` in three of them, each reporting
+`type ("Array") has no method push`:
+
+- `lib/common.x` is the base module, so nothing exists at any point in its
+  parse: the import fails at line 18 and still fails at line 614, beside the
   `$var.tag.unbox` invocations that use it.
+- `lib/var.x` declares `Var` itself, and `lib/array.x` and `lib/list.x`
+  include it, so they are above it by construction.
+- `lib/dispatch.x` is the same, and adding `#include "array.x"` immediately
+  above the import does not help, because that include is a cycle and
+  resolves to nothing.
 
-Splitting the file does not remove either wall, because `lib/common.x` needs
-the rows themselves. The remaining routes each change something outside a
-port: move the nine `$var.tag.unbox` accessors out of `lib/common.x`, which
-moves nine public `inline Var.*` declarations from `common.h` to another
-header and `lib/CLAUDE.md` calls those effectively ABI; or give the ledger an
-x2c prototype header for `lib/common.x` to include, which is a third file and
-a second name for each accessor.
+Only `lib/varconvert.x` and `src/type.x`, the two highest consumers, could
+host one. The ledger has five importers, not the four this plan recorded:
+`src/type.x` projects `$var.tag.constant.rows()`.
+
+**The second attempt was the ABI route and it does not reach the wall.**
+Gary authorized moving the nine `$var.tag.unbox` accessors out of
+`lib/common.x` on 2026-09-18: make them non-inline, define them in a proper
+home, and leave the forward declarations in `common.h` so the 46 to 48 units
+that call `Var_list` and `Var_string` still compile. That is a better shape
+than the split this plan first tried, and it does free `lib/common.x` -
+which matters, because `common.x` calls `Var_array` itself in the protocol
+adapters it generates, so the accessors could never simply leave. But
+`lib/var.x` and `lib/dispatch.x` still project the ledger for their own
+tables, and they hit the same wall. Freeing `common.x` alone buys nothing.
+
+**A third wall stands behind both.** `lib/common.x` cannot include
+`lib/meta.x`: `meta.x` includes `common.x`, so the include is a cycle and
+`lib/varconvert.x` then fails to parse `Symbol Var.integer_tag(int rank,
+...)` because `Symbol` is never declared. Including `meta.x` late enough in
+`common.x` does work, and costs one `#include "meta.h"` in `common.h` -
+which puts `Meta` in the implicit prelude and makes it a reserved type name
+in every program. `plans/meta-functions.md` states the opposite under
+"Compatibility".
 
 Two smaller obstacles are recorded for whoever revisits it. `_x2c.symbol-set`
 is a private native with no `Meta` spelling by M6's decision, so
 `$var.tag.symbolset` and `$var.tag.numeric.symbolset` would stay Lisp in any
-case. And the ledger owes its callers one diagnostic, "unknown Var tag",
-which needs `x2c.diagnostic.fail`.
+case. And the ledger owes its callers one diagnostic, "unknown Var tag".
 
-What the attempt did establish, in case the walls come down: the table
+What both attempts did establish, in case the wall comes down: the table
 transcribes cleanly into one literal template, `<ldouble**>` round-trips
-through a `Symbol` without truncating, and a hex literal in a template is an
-int. The generated table is in the session log rather than the tree.
+through a `Symbol` without truncating, a hex literal in a template is an int,
+a Lisp symbol from a `$(def ...)` table compares equal to an x2c `<symbol>`
+literal, and a `meta` function can take that table as an argument from the
+macro body, so the data need not be reachable by name.
+
+**What would reopen it.** A `meta` function whose body reaches no collection
+operation, or moving the collection types below `Var`. Neither is a port.
 
 ### Why this section used to say blocked
 
