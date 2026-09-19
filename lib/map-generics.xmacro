@@ -17,6 +17,15 @@ macro Unit $map.var.family(
 
   static int $key_equal(Var *a, Var *b) {
     if (a[0] === b[0]) return 1;
+    /* `List` and `String` keys are nearly all of what the pool tables
+       compare, and unboxing a known tag is one mask and compare where the
+       general path decodes the tag twice before reaching the same
+       operation. `nil`, the empty `String`, and two keys of different
+       kinds unbox as NULL and take the general path unchanged. */
+    List alist = a[0], blist = b[0];
+    if (alist && blist) return alist.equal(blist);
+    String astr = a[0], bstr = b[0];
+    if (astr && bstr) return astr.equal(bstr);
     return a[0] is not <array> && a[0] is not <map> && a[0] == b[0];
   }
 
@@ -64,10 +73,12 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
     return map;
   }
 
-  /* Returns the bucket index of `key`, or -1. A probe reads only the hash
-     array; the entry is touched once a hash matches. */
-  static long $map._core_find_index($map map, $key *key, int *out_psl) {
-    unsigned key_hash = $hash(key);
+  /* Returns the bucket index of `key`, which must hash to `key_hash`, or -1.
+     A probe reads only the hash array; the entry is touched once a hash
+     matches. A caller searching several tables for one key hashes it once
+     and probes each of them through this operation. */
+  static long $map._core_find_hashed(
+    $map map, $key *key, unsigned key_hash) {
     $hash_cell *hashes = map.hashes;
     unsigned mask = map.mask, todo_start = key_hash & mask;
     unsigned cap = map.capacity;
@@ -76,10 +87,8 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
       unsigned index = (todo_start + todo_psl) & mask;
       $hash_cell stored = hashes[index];
       if (stored == 0) break;
-      if (stored == key_hash && $key_equal($key_at(map, index), key)) {
-        if (out_psl) *out_psl = todo_psl;
+      if (stored == key_hash && $key_equal($key_at(map, index), key))
         return (long) index;
-      }
       unsigned stored_start = stored & mask;
       int stored_psl = (cap + index - stored_start) & mask;
       if (stored_psl < todo_psl) break;
@@ -87,9 +96,14 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
     return -1;
   }
 
+  /* Returns the bucket index of `key`, or -1, hashing it first. */
+  static long $map._core_find_index($map map, $key *key) {
+    return map._core_find_hashed(key, $hash(key));
+  }
+
   static int $map._core_try_get($map map, $key *key, $value *out) {
     if ((void *) map == 0 || !out) return 0;
-    long index = map._core_find_index(key, 0);
+    long index = map._core_find_index(key);
     if (index < 0) return 0;
     *out = ($value) *$value_at(map, (unsigned) index);
     return 1;
@@ -221,7 +235,7 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
 
   static int $map._core_try_del($map map, $key *key, $value *out) {
     if ((void *) map == 0 || !out) return 0;
-    long found = map._core_find_index(key, 0);
+    long found = map._core_find_index(key);
     if (found < 0) return 0;
     $hash_cell *hashes = map.hashes;
     $entry *entries = map.entries;
@@ -434,7 +448,7 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
 
   /** Returns one when `key` is present, or zero for a null map. */
   int $map.contains($map map, $key key) {
-    return map && map._core_find_index(&key, 0) >= 0;
+    return map && map._core_find_index(&key) >= 0;
   }
 
   /** Copies `key` and `val` into the table, replacing an existing value.
@@ -474,7 +488,7 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
       if (inserted) return rhs;
       return $update(stored, op, rhs);
     }
-    long index = map._core_find_index(&key, 0);
+    long index = map._core_find_index(&key);
     if (index < 0) (void) $bad_arg($owner);
     return $update($value_at(map, (unsigned) index), op, rhs);
   }
@@ -487,7 +501,7 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
   */
   $value $map.postfixindex($map map, $key key, Symbol op) {
     if ((void *) map == 0) (void) $bad_arg($owner);
-    long index = map._core_find_index(&key, 0);
+    long index = map._core_find_index(&key);
     if (index < 0) (void) $bad_arg($owner);
     $value *stored = $value_at(map, (unsigned) index);
     $value old = stored[0];

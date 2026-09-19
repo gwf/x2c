@@ -791,12 +791,12 @@ hash table mapping `Var` keys to `Var` values.
 Public functions:
 
 `Map.new_capacity`, `Map.new`, `Map.len`, `Map.try_get`, `Map.get`,
-`Map.getindex`, `Map.getdefault`, `Map.setdefault`, `Map.contains`, `Map.set`,
-`Map.setindex`, `Map.updateindex`, `Map.postfixindex`, `Map.try_del`,
-`Map.del`, `Map.update_n`, `Map.copy`, `Map.export_to`, `Map.merge`,
-`Map.try_next`, `Map.truth`, `Map.compare`, `Map.iter`, `Map.keys`,
-`Map.enumerate`, `Map.equal`, `Map.write_repr`, `Map.write_str`, `Map.str`,
-`Map.repr`, `Map.cleanup`
+`Map.getindex`, `Map.get_hashed`, `Map.getdefault`, `Map.setdefault`,
+`Map.contains`, `Map.set`, `Map.setindex`, `Map.updateindex`,
+`Map.postfixindex`, `Map.try_del`, `Map.del`, `Map.update_n`, `Map.copy`,
+`Map.export_to`, `Map.merge`, `Map.try_next`, `Map.truth`, `Map.compare`,
+`Map.iter`, `Map.keys`, `Map.enumerate`, `Map.equal`, `Map.write_repr`,
+`Map.write_str`, `Map.str`, `Map.repr`, `Map.cleanup`
 
 ### [lib/match-machine.x](../lib/match-machine.x)
 
