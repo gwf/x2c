@@ -101,8 +101,8 @@ Public functions:
 `home_absolute_path`, `Compiler.copy_source_declaration`,
 `Compiler.merge_source_declarations`, `Compiler.record_source_declaration`,
 `Compiler.record_source_reference`, `Compiler.semantic_binding_facts`,
-`Compiler.macro_definition_locals`, `Compiler.fresh_name`,
-`Compiler.emitted_binding_name`, `Compiler.tokenize`,
+`Compiler.parsing_source_syntax`, `Compiler.macro_definition_locals`,
+`Compiler.fresh_name`, `Compiler.emitted_binding_name`, `Compiler.tokenize`,
 `Compiler.skip_trivia_from`, `Symbol.group_step`, `Token.group_close`,
 `Token.after_group`, `Compiler.peek`, `Compiler.expect`, `Compiler.next`,
 `Compiler.test`, `Compiler.record_origin`, `Compiler.anchor_origin`,
@@ -280,17 +280,18 @@ Public functions:
 `Compiler.macro_invocation_needs_shallow_expansion`,
 `Compiler.macro_starts_target_at`, `Compiler.open_macro_library`,
 `Compiler.publish_macro_library`, `Compiler.preload_macro_libraries`,
-`Compiler.parse_macro_lisp_top_level`, `Compiler.evaluate_declaration_effect`,
-`Compiler.install_meta_function`, `Compiler.parse_macro_lisp_shallow`,
-`Compiler.lift_macro_lisp_expression`, `Compiler.parse_macro_lisp_expression`,
-`Compiler.evaluate_declaration_recipe`, `Compiler.evaluate_macro_slot`,
-`Compiler.evaluate_macro_rows`, `Compiler.macro_introduced_name`,
-`Compiler.peek_macro_hole`, `Compiler.macro_lisp_starts_declaration`,
-`Compiler.try_parse_macro_slot`, `Compiler.parse_macro_definition`,
-`Compiler.publish_macro_definition_node`, `Compiler.parse_keyword_definition`,
-`Compiler.macro_targets_unit`, `Compiler.skip_named_type_declaration`,
-`Compiler.macro_invocation_site`, `Compiler.expand_macro_invocation_node`,
-`Compiler.try_parse_macro_expression`, `Compiler.try_parse_macro_target_at`
+`Compiler.parse_macro_lisp_top_level`, `Compiler.parse_source_lisp`,
+`Compiler.evaluate_declaration_effect`, `Compiler.install_meta_function`,
+`Compiler.parse_macro_lisp_shallow`, `Compiler.lift_macro_lisp_expression`,
+`Compiler.parse_macro_lisp_expression`, `Compiler.evaluate_declaration_recipe`,
+`Compiler.evaluate_macro_slot`, `Compiler.evaluate_macro_rows`,
+`Compiler.macro_introduced_name`, `Compiler.peek_macro_hole`,
+`Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_slot`,
+`Compiler.parse_macro_definition`, `Compiler.publish_macro_definition_node`,
+`Compiler.parse_keyword_definition`, `Compiler.macro_targets_unit`,
+`Compiler.skip_named_type_declaration`, `Compiler.macro_invocation_site`,
+`Compiler.expand_macro_invocation_node`, `Compiler.try_parse_macro_expression`,
+`Compiler.try_parse_macro_target_at`
 
 ### [src/main.x](../src/main.x)
 
@@ -900,9 +901,9 @@ Public functions:
 `Pool.thread_start`, `Pool.retain_named`, `Pool.retain`, `Pool.release`,
 `Pool.current`, `Pool.initialize`, `Pool.thread_initialize`, `Pool.shutdown`,
 `Pool.open_named`, `Pool.open`, `Pool.close`, `Pool.detach`,
-`Pool.is_permanent`, `Pool.epoch`, `Pool.lookup`, `Pool.insert`, `Pool.intern`,
-`Pool.malloc`, `Pool.free`, `Pool.owns`, `Pool.promote`, `Pool.own`,
-`Pool.stats`
+`Pool.is_permanent`, `Pool.epoch`, `Pool.lookup`, `Pool.insert`,
+`Pool.intern_new`, `Pool.intern`, `Pool.malloc`, `Pool.free`, `Pool.owns`,
+`Pool.promote`, `Pool.own`, `Pool.stats`
 
 ### [lib/process.x](../lib/process.x)
 

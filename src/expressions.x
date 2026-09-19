@@ -1180,6 +1180,23 @@ static List Compiler._binary_op_type(
   }
 }
 
+/* A `static` function belongs to the file that defines it, so an including
+   unit replays a marker row naming that file instead of a declaration.
+   Reporting the reference here names the function and its file, where C
+   would otherwise report only an undefined symbol at link time. A macro body
+   is the defining library's own syntax, bound wherever it expands, so only a
+   reference written in an `.x` unit is reported. */
+static void _check_unit_static(Compiler c, String spelling, Token origin) {
+  if (!x2c_source_file(c.filename)) return;
+  List owner = c.sym.get(%("unit-static" $spelling));
+  if (!owner) return;
+  String path = owner.car(), file = c.display_path(path);
+  c.report_error(
+    <type>, %"'$spelling' is a static function private to its unit", origin,
+    %("it is defined in '$file';"
+      "remove 'static' so other units can call it"));
+}
+
 /* Parsed identifiers arrive as spellings, while constructed syntax may carry
    producer-issued binding identities. Semantic binding facts validate those
    identities before resolution. A visible local replaces a stale local
@@ -1253,7 +1270,10 @@ static List _resolve_identifier(
     Var stored;
     if (binding_facts.try_get(%(type $binding), &stored) && stored is <list>)
       type = stored;
-    if (!type && spelling) type = c.sym.get(%($spelling));
+    if (!type && spelling) {
+      type = c.sym.get(%($spelling));
+      if (!type) _check_unit_static(c, spelling, origin);
+    }
   }
   if (!type && require_type)
     c.report_error(
@@ -1699,6 +1719,8 @@ List Compiler.var_tag_expression(Compiler c, Type target, Token origin) {
 /* Operands have been resolved in the caller's current semantic scope. */
 static List Compiler._binary_expression(
   Compiler c, Symbol operator, List lhs, List rhs, Token origin) {
+  if (c.parsing_source_syntax())
+    return %(expr () (op $operator $lhs $rhs));
   Type lhs_type = lhs.cadr(), rhs_type = rhs.cadr();
   if (lhs_type === %(<macro-expr>) ||
       rhs_type === %(<macro-expr>))
@@ -2196,6 +2218,7 @@ List Compiler.resolve_map_entry(Compiler compiler, List input, Token origin) {
     retain source position.
 */
 List Compiler.resolve_expression(Compiler c, List input, Token origin) {
+  if (c.parsing_source_syntax()) return input;
   match (input) {
     case %(decl *):
       return c.bind_syntax(input, AST_BLOCK, c.return_type);
@@ -3775,6 +3798,7 @@ static List _compound_literal(Compiler c, List composite, Type target) {
     bindings or immutable literal entries to compiler state.
 */
 List Compiler.convert_expression(Compiler c, List expr, Type target) {
+  if (c.parsing_source_syntax()) return expr;
   if (!target) return expr;
   Type type = expr.cadr();
   // Captured Func lambdas wait for reference-cell rewriting.

@@ -33,7 +33,7 @@ Opens a `Sym` scope for one catch arm and defines a nonempty filter's
 definite pattern binders. The caller must pop the scope after parsing or
 binding the arm body; binder diagnostics use `start`.
 
-Source: `src/statements.x:258`
+Source: `src/statements.x:260`
 
 <a id="Compiler.begin_match_arm"></a>
 #### Compiler.begin_match_arm
@@ -44,7 +44,7 @@ Opens a `Sym` scope for one match arm and optionally defines its definite
 pattern binders. The caller must pop the scope after parsing or binding the
 arm body; binder diagnostics use `start`.
 
-Source: `src/statements.x:248`
+Source: `src/statements.x:250`
 
 <a id="Compiler.finish_return_statement"></a>
 #### Compiler.finish_return_statement
@@ -66,7 +66,7 @@ Parses one block-position declaration, statement, or macro insertion.
 The caller owns the surrounding scope; a macro insertion may return a
 `(seq ...)` node containing several block items.
 
-Source: `src/statements.x:497`
+Source: `src/statements.x:506`
 
 <a id="Compiler.parse_block_items"></a>
 #### Compiler.parse_block_items
@@ -78,7 +78,7 @@ returns a `(block ...)` node. The call opens one lexical `Sym` scope;
 `anchor_items` records statement origins and distributes a macro sequence's
 invocation origin over its inserted items.
 
-Source: `src/statements.x:612`
+Source: `src/statements.x:621`
 
 <a id="Compiler.parse_compound_statement"></a>
 #### Compiler.parse_compound_statement
@@ -88,7 +88,7 @@ Source: `src/statements.x:612`
 Parses a compound body after its opening brace and consumes the closing
 `}`, returning an origin-anchored `(block ...)` node.
 
-Source: `src/statements.x:653`
+Source: `src/statements.x:662`
 
 <a id="Compiler.parse_governed"></a>
 #### Compiler.parse_governed
@@ -115,7 +115,7 @@ Parses and binds one statement or statement-position macro at the current
 token. On return, the cursor follows the complete statement and any
 temporary `Sym` scopes opened by the statement have been closed.
 
-Source: `src/statements.x:524`
+Source: `src/statements.x:533`
 
 <a id="Compiler.with_binding"></a>
 #### Compiler.with_binding
@@ -125,7 +125,7 @@ Source: `src/statements.x:524`
 Returns the binding of the current identifier when it names a live
 `with` expression, or NULL.
 
-Source: `src/statements.x:483`
+Source: `src/statements.x:492`
 
 ## Design notes
 

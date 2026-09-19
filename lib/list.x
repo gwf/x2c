@@ -48,10 +48,16 @@ typedef struct List {
 */
 List List.cons_in(Pool pool, Var head, List tail) {
   if (!pool || head is void) return NULL;
+  /* Compiler construction is canonical-hit-heavy. One stack-query probe of
+     the whole chain answers a hit without allocating and leaves the miss
+     path the innermost insert alone. */
+  struct List query = { head, tail };
+  Var existing = pool.lookup((List) &query);
+  if (existing is not void) return existing;
   List cell = pool.malloc(sizeof(struct List));
   cell.car = head;
   cell.cdr = tail;
-  return pool.intern(cell, cell);
+  return pool.intern_new(cell, cell);
 }
 
 #pragma private
@@ -150,13 +156,7 @@ int List.try_own(List lst) => !lst || _try_own_node(lst);
 */
 List cons(Var head, List tail) {
   if (head is void) raise %(void-op (owner "List.cons"));
-  Pool pool = Pool.current();
-  /* Compiler construction is canonical-hit-heavy. Probe before allocation;
-     the unique-miss path keeps a second probe until Pool can recycle it. */
-  struct List query = { head, tail };
-  Var existing = pool.lookup((List) &query);
-  if (existing is not void) return existing;
-  return List.cons_in(pool, head, tail);
+  return List.cons_in(Pool.current(), head, tail);
 }
 
 static int _is_active_canonical(List list) =>

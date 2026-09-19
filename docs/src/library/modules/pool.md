@@ -13,6 +13,7 @@ Nested interning pools with region-backed object storage.
 | [`Pool.current`](#Pool.current) | Returns the borrowed canonical-value pool active on this thread. |
 | [`Pool.detach`](#Pool.detach) | Removes the innermost open bracket without destroying it. |
 | [`Pool.epoch`](#Pool.epoch) | Returns a counter that changes whenever any pool level is destroyed. |
+| [`Pool.intern_new`](#Pool.intern_new) | Returns the canonical value equal to `object`, installing it in `inner`. |
 | [`Pool.open`](#Pool.open) | Opens a child of the shared `String` and `List` canonical-value pool. |
 | [`Pool.open_named`](#Pool.open_named) | Opens and returns a named child of the pool active on this thread. |
 | [`Pool.stats`](#Pool.stats) | Returns this level's canonical counts plus process-wide storage counters. |
@@ -72,6 +73,23 @@ reader needs no lock to tell that something was released.
 
 Source: `lib/pool.x:651`
 
+<a id="Pool.intern_new"></a>
+#### Pool.intern_new
+
+`Var Pool.intern_new(Pool inner, Var object, void *alloc)`
+
+Returns the canonical value equal to `object`, installing it in `inner`.
+This is `Pool.intern` for a caller that has already searched the whole
+chain from `inner` outward and found nothing, so only the innermost level
+is probed. The fused `Map` operation still decides the identity, which
+keeps one canonical pointer per equal value in `inner` even when another
+worker interns the same value first.
+
+**Raises:** `<bad-arg>` when `inner` or `alloc` is NULL. `Map` insertion
+causes propagate and leave the object unregistered.
+
+Source: `lib/pool.x:716`
+
 <a id="Pool.open"></a>
 #### Pool.open
 
@@ -117,7 +135,7 @@ Returns this level's canonical counts plus process-wide storage counters.
 A null pool reports depth and per-level counts as zero. The counters are a
 snapshot; nothing in the result stays live with the pool.
 
-Source: `lib/pool.x:901`
+Source: `lib/pool.x:930`
 
 ## Advanced and interop API
 
@@ -205,7 +223,7 @@ freed this way. A null allocation does nothing.
 
 **Raises:** `<bad-arg>` when `inner` is NULL and `alloc` is not.
 
-Source: `lib/pool.x:790`
+Source: `lib/pool.x:819`
 
 <a id="Pool.initialize"></a>
 #### Pool.initialize
@@ -249,11 +267,12 @@ runs.
 Ancestors are checked before the innermost fused `Map` operation. `Pool`'s
 single-canonical-pointer invariant makes that order equivalent to outward
 shadowing while allowing the innermost table to be probed exactly once.
+A caller that has already searched the chain uses `Pool.intern_new`.
 
 **Raises:** `<bad-arg>` when `inner` or `alloc` is NULL. `Map` lookup and
 insertion causes propagate.
 
-Source: `lib/pool.x:709`
+Source: `lib/pool.x:745`
 
 <a id="Pool.is_permanent"></a>
 #### Pool.is_permanent
@@ -289,7 +308,7 @@ ordinary `Scope` ownership.
 request overflows `Scope` storage, or `<alloc-fail>` when storage cannot
 be allocated.
 
-Source: `lib/pool.x:743`
+Source: `lib/pool.x:772`
 
 <a id="Pool.own"></a>
 #### Pool.own
@@ -306,7 +325,7 @@ levels: an earlier level remains promoted if a later promotion transfers.
 
 **Raises:** `<alloc-fail>` when promotion metadata cannot be allocated.
 
-Source: `lib/pool.x:882`
+Source: `lib/pool.x:911`
 
 <a id="Pool.owns"></a>
 #### Pool.owns
@@ -316,7 +335,7 @@ Source: `lib/pool.x:882`
 Reports whether this exact level stores `key` as its canonical identity.
 Ancestors are not searched, and a null pool reports zero.
 
-Source: `lib/pool.x:814`
+Source: `lib/pool.x:843`
 
 <a id="Pool.promote"></a>
 #### Pool.promote
@@ -330,7 +349,7 @@ zero for a missing owner, root pool, or null allocation.
 **Raises:** `<alloc-fail>`, `<size-limit>`, or `<invariant>` while recording
 the promotion; that transfer may happen before storage is marked or moved.
 
-Source: `lib/pool.x:867`
+Source: `lib/pool.x:896`
 
 <a id="Pool.shutdown"></a>
 #### Pool.shutdown

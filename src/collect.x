@@ -243,6 +243,7 @@ static void _parse_segment(
   /* This file has taken every row; what remains in the overlay is what it
      publishes to an including unit. */
   if (private) _keep_published_rows(shadow.sym.file_statics(), overlay);
+  if (unit) _publish_unit_statics(shadow.sym.file_statics(), overlay, path);
 }
 
 /* A private function row names a function that an including unit may call
@@ -270,6 +271,22 @@ static void _keep_published_rows(Map statics, Map overlay) {
   }
   foreach (Var key, dropped) overlay.del(key);
   dropped.free();
+}
+
+/* A `static` function belongs to the file that defines it, above and below
+   `#pragma private` alike, so its declaration row never crosses an include.
+   The published marker names the defining file, which lets an including unit
+   report a reference to the name instead of emitting a prototype that no
+   object defines. Only `.x` units publish markers; a C header's static
+   inline functions belong to every file that includes it. */
+static void _publish_unit_statics(Map statics, Map overlay, String path) {
+  List owner = %($path);
+  foreach (Var key, statics.keys())
+    match (%($key)) case %((function ?(String name))): {
+      overlay.del(%($name));
+      overlay.del(%(self $name));
+      overlay[%("unit-static" $name)] = owner;
+    }
 }
 
 /* Append one segment's nonempty published rows before the following

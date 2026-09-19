@@ -83,7 +83,7 @@ pointer.
 `<size-limit>`, or `<invariant>` when a new canonical cell cannot be
 installed.
 
-Source: `lib/list.x:151`
+Source: `lib/list.x:157`
 
 ### `Array`
 
@@ -786,7 +786,7 @@ therefore cheap. `Var` kinds other than `String`, `Atom`, and `List` are
 
 A null `lst` returns itself unchanged.
 
-Source: `lib/list.x:114`
+Source: `lib/list.x:120`
 
 <a id="List.repr"></a>
 #### List.repr
@@ -949,7 +949,7 @@ promotion of an earlier cell or child.
 
 **Raises:** `<alloc-fail>` when promotion metadata cannot be allocated.
 
-Source: `lib/list.x:139`
+Source: `lib/list.x:145`
 
 ## Public types
 

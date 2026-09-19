@@ -10,6 +10,7 @@
 #include "lifetime.x"
 #include "loop-allocations.x"
 #include "targets.x"
+#include "clones.x"
 
 #include <errno.h>
 #include <limits.h>
@@ -2599,6 +2600,7 @@ static void _write_datasets(
 
 static void _usage(String program) {
   Stderr.printf("usage: %s graph|digest [-I DIR] FILE...\n", program);
+  Stderr.printf("       %s clones [--min-size N] [-I DIR] FILE...\n", program);
   Stderr.printf(
     "       %s datasets OUTPUT [-I DIR] SRC_FILE... -- LIB_FILE...\n",
     program
@@ -2630,6 +2632,8 @@ static void _usage(String program) {
 }
 
 int main(int argc, char **argv) {
+  int clones = argc > 1 && !strcmp(argv[1], "clones");
+  int clone_minimum = 24;
   int datasets = argc > 1 && !strcmp(argv[1], "datasets");
   int architecture = argc > 1 && !strcmp(argv[1], "architecture");
   int structure = argc > 1 && !strcmp(argv[1], "structure");
@@ -2673,8 +2677,8 @@ int main(int argc, char **argv) {
       (datasets && (argc < 6 || separator < 4)) ||
       argc <= first_input ||
       (strcmp(argv[1], "graph") && strcmp(argv[1], "digest") &&
-       !datasets && !architecture && !structure && !between && !focus &&
-       !field &&
+       !clones && !datasets && !architecture && !structure && !between &&
+       !focus && !field &&
        !field_sites && !sites && !walks &&
        !tail_calls && !loop_allocations && !lifetime_escapes &&
        !region_escapes &&
@@ -2705,6 +2709,18 @@ int main(int argc, char **argv) {
       compare_operations.push(String.new(argv[i]));
   compare_operations.sort();
   for (int i = first_input; i < argc; i++) {
+    if (clones && !strcmp(argv[i], "--min-size")) {
+      if (++i == argc) { _usage(argv[0]); return 2; }
+      char *end;
+      errno = 0;
+      long value = strtol(argv[i], &end, 10);
+      if (errno || *end || value < 1 || value > INT_MAX) {
+        _usage(argv[0]);
+        return 2;
+      }
+      clone_minimum = value;
+      continue;
+    }
     if (datasets && !strcmp(argv[i], "--")) {
       if (i == separator) continue;
       _usage(argv[0]);
@@ -2759,7 +2775,9 @@ int main(int argc, char **argv) {
   int status = 0;
   try {
     List result = NULL;
-    if (field)
+    if (clones)
+      result = graph_clones(frontend, inputs, clone_minimum);
+    else if (field)
       result = _parse_field_units(
         frontend, inputs, receiver_name, field_name
       );

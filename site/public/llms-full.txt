@@ -1150,7 +1150,11 @@ starts with `#pragma once` and also carries a conventional include guard, so
 A file that includes another sees what that file's header declares: everything
 above its `#pragma private` and the functions with external linkage it defines
 below it. Its private types, enumerators, objects, and static functions belong
-to that file, and naming one of them is an error in the including unit. An
+to that file, and naming one of them is an error in the including unit. A
+`static` function is private wherever it appears, above the boundary as well
+as below it, and the error names the file that defines it. A C header is not
+a unit, so the `static inline` functions it defines still belong to every
+file that includes it. An
 `#include` below `#pragma private` still splices, because the including file
 may call the functions it declares.
 
@@ -4304,7 +4308,8 @@ Inspection modes print an intermediate result and stop translation:
 ```
 
 - `--dump-tokens` prints source tokens and stops.
-- `--dump-ast` prints the parsed AST and stops.
+- `--dump-source-ast` prints experimental deferred source syntax and stops.
+- `--dump-ast` prints the parsed, bound AST after macro expansion and stops.
 - `--dump-transforms` prints the transformed AST and stops.
 - `--dump-code` prints unformatted generated code and stops.
 - `--dump-symbols` prints the source symbol table and stops.
@@ -4314,6 +4319,23 @@ Inspection modes print an intermediate result and stop translation:
 - `--dump-cpp-symbols` prints the CPP symbol table and stops.
 - `--dump-cache` prints the compiler cache and stops.
 - `--dump-conformance` prints protocol conformance and stops.
+
+`--dump-source-ast` retains macro invocations, method spelling, literal
+construction, and source identifier spelling instead of expanding or resolving
+them in the inspected tree. It reuses the compiler's deferred template parser;
+it is an experimental analysis representation, not a lossless concrete syntax
+tree or an input format accepted by another compiler stage. Comments and
+whitespace are omitted. Identifier spellings do not establish binding identity,
+and expression types may be absent. Match arms and typed captures retain source
+forms instead of their ordinary binding operations.
+
+Collection, imports, and file-scope declaration producers still run to
+establish the grammar and visible types. Their generated trees are omitted
+from the inspected output, but they may execute compile-time Lisp or macros
+and report semantic errors. This option does not disable compile-time
+execution. The source tree retains top-level Lisp text and does not proceed
+to protocol adapters, transforms, or C emission. Use `--dump-ast` when the
+analysis needs resolved bindings and typed, expanded syntax.
 
 An inspection that does not write generated files does not need `--out-dir`.
 Only one inspection mode runs; the last option given wins.

@@ -169,8 +169,10 @@ static List _parse_typed_capture(Compiler c) {
   String name = c.token.text;
   c.expect(<ident>);
   c.expect(<")">);
-  List tag = c.var_tag_expression(type, start);
   Atom binder = Atom.intern(%"?$name");
+  if (c.parsing_source_syntax())
+    return %(expr ("Var") (typed-capture $type $binder));
+  List tag = c.var_tag_expression(type, start);
   if ((void *) c.match_types) {
     List row = %($name $type);
     int repeated = 0;
@@ -1142,6 +1144,11 @@ List Compiler.parse_lambda_literal(Compiler c) {
     c.next();
     do {
       c.expect(<&>);
+      if (c.parsing_source_syntax()) {
+        List name = c.parse_basic_identifier();
+        prescribed.push(%(source-capture & $name));
+        continue;
+      }
       if (c.macro_holes) {
         List name = NULL, value = NULL;
         Type reference = %(& <macro-expr>);
@@ -1175,7 +1182,8 @@ List Compiler.parse_lambda_literal(Compiler c) {
   }
   _lambda_expect_arrow(c);
   List previous = c.lambda_scopes;
-  c.begin_lambda_captures(references.list_free(), NULL);
+  if (!c.parsing_source_syntax())
+    c.begin_lambda_captures(references.list_free(), NULL);
   defer c.lambda_scopes = previous;
   c.sym.push_scope(params);
 
@@ -1190,8 +1198,11 @@ List Compiler.parse_lambda_literal(Compiler c) {
   List params_node = _lambda_params_node(names, typed_params, used_typed);
   List param_types = _signature_param_types(c, params_node.cdr());
   List ftype = %((func $param_types) @rtype);
-  List captures = c.end_lambda_captures();
-  c.check_lambda_captures(body);
+  List captures = NULL;
+  if (!c.parsing_source_syntax()) {
+    captures = c.end_lambda_captures();
+    c.check_lambda_captures(body);
+  }
   if (c.macro_holes) captures = prescribed.list_free();
   c.sym.pop_scope();
   if (captures)

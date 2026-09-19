@@ -30,7 +30,7 @@ Returns whether `argument` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli.x:804`
+Source: `src/cli.x:806`
 
 #### cli_package_options
 
@@ -43,7 +43,7 @@ and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
 `cc_args` and `ld_args`
 serve native actions; no source-preprocessing options are returned.
 
-Source: `src/cli.x:938`
+Source: `src/cli.x:940`
 
 #### cli_parse
 
@@ -58,7 +58,7 @@ canonical-pool lifetimes described by `CliRequest`.
 **Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
 constructing request values.
 
-Source: `src/cli.x:1097`
+Source: `src/cli.x:1099`
 
 #### cli_response_arguments
 
@@ -68,7 +68,7 @@ Reads response-file tokens with ordinary quoting and UTF-8 checks.
 Returns canonical Strings without expanding `@` references. Paths and
 arguments retain the producing pool lifetime.
 
-Source: `src/cli.x:706`
+Source: `src/cli.x:708`
 
 #### cli_version
 
@@ -76,7 +76,7 @@ Source: `src/cli.x:706`
 
 Returns the version line `--version` prints, without a newline.
 
-Source: `src/cli.x:1152`
+Source: `src/cli.x:1154`
 
 ### `CliRequest`
 
@@ -87,7 +87,7 @@ Source: `src/cli.x:1152`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:1155`
+Source: `src/cli.x:1157`
 
 <a id="CliRequest.package_roots"></a>
 #### CliRequest.package_roots
@@ -100,7 +100,7 @@ when it exists. A root named twice is searched twice and resolves the
 same entries. Explicit directories are borrowed; the result is a fresh
 `List` only when the home directory is appended.
 
-Source: `src/cli.x:1163`
+Source: `src/cli.x:1165`
 
 ## Public types
 

@@ -28,6 +28,7 @@ Inspection options:
       --dump-cpp-text         Alias for --dump-cpp
       --dump-cpp-tokens       Print host-preprocessed tokens and stop
       --dump-ast              Print the parsed AST and stop
+      --dump-source-ast       Print experimental source syntax with macro calls retained and stop
       --dump-transforms       Print the transformed AST and stop
       --dump-code             Print unformatted generated code and stop
       --dump-symbols          Print the source symbol table and stop
