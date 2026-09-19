@@ -244,6 +244,9 @@ static int _start(
   return !compiler.error_count();
 }
 
+/** Tokenizes one input into a fresh unit with its own isolated `Context`.
+    The caller must close the unit on either result.
+*/
 int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) =>
   _start(frontend, filename, unit, 0);
 

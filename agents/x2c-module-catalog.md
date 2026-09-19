@@ -221,7 +221,8 @@ configured compiler sessions and sequential source units.
 Public functions:
 
 `Frontend.load_support`, `Frontend.new`, `Frontend.start`,
-`ParsedUnit.collect`, `ParsedUnit.parse`, `Frontend.open`, `ParsedUnit.close`
+`Frontend.preload_macro_libraries`, `ParsedUnit.collect`, `ParsedUnit.parse`,
+`Frontend.open`, `ParsedUnit.close`
 
 ### [src/generate.x](../src/generate.x)
 
@@ -277,7 +278,8 @@ Public functions:
 `Compiler.local_macro_form_is_definition`,
 `Compiler.keyword_form_is_definition`, `Compiler.skip_macro_invocation`,
 `Compiler.macro_invocation_needs_shallow_expansion`,
-`Compiler.macro_starts_target_at`, `Compiler.preload_macro_libraries`,
+`Compiler.macro_starts_target_at`, `Compiler.open_macro_library`,
+`Compiler.publish_macro_library`, `Compiler.preload_macro_libraries`,
 `Compiler.parse_macro_lisp_top_level`, `Compiler.evaluate_declaration_effect`,
 `Compiler.install_meta_function`, `Compiler.parse_macro_lisp_shallow`,
 `Compiler.lift_macro_lisp_expression`, `Compiler.parse_macro_lisp_expression`,

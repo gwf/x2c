@@ -83,6 +83,7 @@ typedef struct Compiler{
   Lisp macro_lisp;
   String import_src;
   int borrowed_lisp;
+  int inherited_lisp;
   GenNames names;
   Array origins;
   int origin, source_map;

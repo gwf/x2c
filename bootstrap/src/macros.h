@@ -21,6 +21,10 @@ int Compiler_macro_invocation_needs_shallow_expansion(Compiler c);
 
 int Compiler_macro_starts_target_at(Compiler c, AstPos position);
 
+Lisp Compiler_open_macro_library(Compiler compiler);
+
+void Compiler_publish_macro_library(Compiler compiler, Lisp shared);
+
 void Compiler_preload_macro_libraries(Compiler compiler);
 
 List Compiler_parse_macro_lisp_top_level(Compiler compiler);

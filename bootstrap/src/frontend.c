@@ -6,7 +6,7 @@
 
 static List _15, _14, _9;
 
-static String _24, _23, _22, _21, _20, _19, _17, _16, _12, _10, _7, _6, _4, _3, _2, _1, _0;
+static String _25, _24, _23, _22, _21, _20, _19, _17, _16, _12, _10, _7, _6, _4, _3, _2, _1, _0;
 
 static Var _18, _13, _11, _8, _5;
 
@@ -34,6 +34,17 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
 static void _configure_package(Compiler c, CliRequest request, String filename);
 
 static Map _preprocess_input(Frontend frontend, ParsedUnit * unit);
+
+static int _start(Frontend frontend, String filename, ParsedUnit * unit, int shared_values);
+
+static void _preload_meta_surface(Frontend frontend, Lisp shared);
+
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+}
+_x2c_defer_env_0;
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
 Var String_var(String);
 
@@ -63,11 +74,12 @@ __attribute__((constructor)) static void _file_init_(void){
   _17 = String_new("stage: preprocess");
   _18 = String_var(_17);
   _19 = String_new("status: ");
-  _20 = String_new("\n");
-  _21 = String_new("cannot read input file");
-  _22 = String_new("#!");
-  _23 = String_new("script units use the default symbol collection");
-  _24 = String_new("failed to run C preprocessor");
+  _20 = String_new("/lib/meta.x");
+  _21 = String_new("\n");
+  _22 = String_new("cannot read input file");
+  _23 = String_new("#!");
+  _24 = String_new("script units use the default symbol collection");
+  _25 = String_new("failed to run C preprocessor");
 }
 
 int String_truth(String);
@@ -114,7 +126,7 @@ Frontend Frontend_new(CliRequest request){
 int String_find(String, String);
 
 static String _script_text(String text){
-  int end = String_find(text, _20);
+  int end = String_find(text, _21);
   return String_join(NULL, cons(String_var(_0), cons(String_var(end < 0 ? _1 : String_getslice(text, end, -2147483648, 1)), NULL)));
 }
 
@@ -143,9 +155,9 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
   int lib_length = lib_resolved ? strlen(lib_path) : 0;
   c -> runtime_inc = !(source_resolved && lib_resolved && ! strncmp(source_path, lib_path, lib_length) && source_path[lib_length] == '/');
   String text = NULL;
-  if(! Compiler_read_source(c, filename, & text)) Compiler_report_error(c, 306819428, _21, NULL, cons(_5, cons(String_var(String_join(NULL, cons(String_var(_6), cons(String_var(filename), NULL)))), _9)));
-  if(String_truth(text) && String_startswith(text, _22)){
-    int end = String_find(text, _20);
+  if(! Compiler_read_source(c, filename, & text)) Compiler_report_error(c, 306819428, _22, NULL, cons(_5, cons(String_var(String_join(NULL, cons(String_var(_6), cons(String_var(filename), NULL)))), _9)));
+  if(String_truth(text) && String_startswith(text, _23)){
+    int end = String_find(text, _21);
     ScriptUnit script = Scope_calloc(1, sizeof(struct ScriptUnit));
     script -> path = source_resolved ? String_new(source_path) : filename;
     script -> shebang = end < 0 ? text : String_getslice(text, -2147483648, end, 1);
@@ -214,7 +226,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   Map globs = NULL;
   int use_cpp = request -> cpp_symbols || request -> live_symbols || SymbolSet_contains(cpp_dumps, request -> dump);
   if(use_prelude && ! use_cpp) return Compiler_collect_symbols(c, NULL);
-  if(c -> script) Compiler_report_error(c, 306819428, _23, _first_preprocessor_token(c), _15);
+  if(c -> script) Compiler_report_error(c, 306819428, _24, _first_preprocessor_token(c), _15);
   Compiler cppcompiler = Compiler_new_shared(c);
   unit -> preprocessor = cppcompiler;
   cppcompiler -> filename = filename;
@@ -226,7 +238,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);
   if(status){
     List notes = cons(_18, cons(String_var(String_join(NULL, cons(String_var(_19), cons(String_var(int_str(status)), NULL)))), NULL));
-    Compiler_report_error(c, 306819428, _24, _first_preprocessor_token(c), notes);
+    Compiler_report_error(c, 306819428, _25, _first_preprocessor_token(c), notes);
   }
   {
     String dependency;
@@ -262,6 +274,8 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   return globs;
 }
 
+Context Context_open_named(const char *);
+
 Context Context_open_isolated_named(const char *);
 
 void Type_begin_unit(void);
@@ -272,14 +286,13 @@ Var Symbol_var(Symbol);
 
 int Compiler_error_count(Compiler);
 
-int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit){
-  if(! _init_guard_) _file_init_();
+static int _start(Frontend frontend, String filename, ParsedUnit * unit, int shared_values){
   * unit =(ParsedUnit){
     0
   }
   ;
   unit -> generated_symbols = ! frontend -> request -> no_cpp && ! frontend -> request -> dump;
-  unit -> context = Context_open_isolated_named("translation unit");
+  unit -> context = shared_values ? Context_open_named("shared translation unit") : Context_open_isolated_named("translation unit");
   Type_begin_unit();
   unit -> compiler = Compiler_new();
   Compiler compiler = unit -> compiler;
@@ -338,6 +351,48 @@ _x2c_error_handler_0 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_0);
 }
 return ! Compiler_error_count(compiler);
+}
+
+int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit){
+  if(! _init_guard_) _file_init_();
+  return _start(frontend, filename, unit, 0);
+}
+
+static void _preload_meta_surface(Frontend frontend, Lisp shared){
+  ParsedUnit unit;
+  String path = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_20), NULL)));
+  if(! _start(frontend, path, & unit, 1)){
+    ParsedUnit_close(&(unit));
+    return;
+  }
+  unit.compiler -> macro_lisp = shared;
+  unit.compiler -> borrowed_lisp = 1;
+  {
+  _x2c_defer_env_0 _x2c_defer_env_1 = {._x2c_defer_capture_0 =(const void *) & unit};
+
+  X2CCleanup _x2c_defer_record_0 = {
+    .fn = _x2c_defer_cleanup_0,
+    .env = & _x2c_defer_env_1
+  };
+  x2c_cleanup_push(&_x2c_defer_record_0);
+  {
+    if(ParsedUnit_collect(&(unit), frontend))(void) ParsedUnit_parse(&(unit));
+  }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
+
+}
+}
+
+Lisp Compiler_open_macro_library(Compiler);
+
+void Compiler_publish_macro_library(Compiler, Lisp);
+
+void Frontend_preload_macro_libraries(Frontend frontend){
+  if(! _init_guard_) _file_init_();
+  Compiler compiler = Compiler_new();
+  Lisp shared = Compiler_open_macro_library(compiler);
+  if(shared) _preload_meta_surface(frontend, shared);
+  Compiler_publish_macro_library(compiler, shared);
 }
 
 void Compiler_take_diagnostics(Compiler, Compiler);
@@ -470,5 +525,10 @@ void ParsedUnit_close(ParsedUnit * unit){
     0
   }
   ;
+}
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
+  ParsedUnit_close(&((*(ParsedUnit *) _x2c_defer_data_0->_x2c_defer_capture_0)));
 }
 
