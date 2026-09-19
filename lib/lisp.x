@@ -1123,14 +1123,55 @@ static int _param_has(List params, Var name) {
   return 0;
 }
 
+/* The names a body reads from the environment that defines it.
+
+   Only an evaluated position contributes one. A `quote`d subform is data,
+   and inside a `quasiquote` the data is the default: `depth` counts the
+   quasiquote nesting, an unquote lowers it, and a name is read only where it
+   reaches zero again. An inner `lambda` or `macro` binds its parameters for
+   its own body, so a name it rebinds is not free below it.
+
+   `bound` grows as the walk descends, so it is the enclosing binders at this
+   point rather than one flat set. */
+static void _free_names(
+  Lisp lisp, Var form, List bound, int depth, Array out) {
+  if (form.is_atom()) {
+    if (depth == 0 && !(form in lisp.reserved) && !_param_has(bound, form))
+      out.push(form);
+    return;
+  }
+  if (form is not <list>) return;
+  List items = form;
+  if (!items) return;
+  Var head = items.car();
+  if (head == lsym_quote) return;
+  if (head == lsym_quasiquote || head == lsym_unquote ||
+      head == lsym_splicing) {
+    int inner = head == lsym_quasiquote ? depth + 1 : depth - 1;
+    if (inner < 0) inner = 0;
+    foreach (Var part, items.cdr()) _free_names(lisp, part, bound, inner, out);
+    return;
+  }
+  if (depth == 0 && (head == lsym_lambda || head == lsym_macro)) {
+    List rest = items.cdr();
+    List extended = bound;
+    if (rest && rest.car() is <list>)
+      foreach (Var name, (List) rest.car()) extended = cons(name, extended);
+    foreach (Var part, rest.cdr())
+      _free_names(lisp, part, extended, depth, out);
+    return;
+  }
+  foreach (Var part, items) _free_names(lisp, part, bound, depth, out);
+}
+
 static void _capture(Lisp lisp, LispEnv *env, List params, Var body,
                      Map captures) {
   if (body is not <list>) return;
-  foreach (Var name, List.flatten(body)) {
+  Array names = $auto([]);
+  _free_names(lisp, body, params, 0, names);
+  foreach (Var name, names) {
     Var value;
-    if (!name.is_atom() || name in lisp.reserved ||
-        name in captures || _param_has(params, name))
-      continue;
+    if (name in captures) continue;
     if (_env_lookup(lisp, env, name, &value)) captures[name] = value;
   }
 }
