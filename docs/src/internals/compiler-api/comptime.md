@@ -38,7 +38,7 @@ source. Another `meta` function may call it: calling one is what makes
 the caller compile-time only too, so a body being parsed under the marker
 is left alone.
 
-Source: `src/comptime.x:2012`
+Source: `src/comptime.x:2022`
 
 <a id="Compiler.fold_meta_call"></a>
 #### Compiler.fold_meta_call
@@ -55,7 +55,7 @@ installed folds, so an import's runtime definition keeps the run-time
 call that designates the unit emitting it. Evaluation runs in the macro
 session; a raise there leaves the call.
 
-Source: `src/comptime.x:2034`
+Source: `src/comptime.x:2044`
 
 <a id="Compiler.install_comptime"></a>
 #### Compiler.install_comptime
@@ -99,7 +99,7 @@ Source: `src/comptime.x:1843`
 Returns whether the last `Compiler.install_comptime` reached file-scope
 state, directly or through a callee already recorded as reaching it.
 
-Source: `src/comptime.x:1951`
+Source: `src/comptime.x:1961`
 
 <a id="Compiler.lower_reached_meta"></a>
 #### Compiler.lower_reached_meta
@@ -109,7 +109,7 @@ Source: `src/comptime.x:1951`
 Returns whether the last `Compiler.install_comptime` reached a `Meta`
 operation, directly or through a callee already recorded as reaching one.
 
-Source: `src/comptime.x:1959`
+Source: `src/comptime.x:1969`
 
 <a id="Compiler.meta_is_comptime_only"></a>
 #### Compiler.meta_is_comptime_only
@@ -119,7 +119,7 @@ Source: `src/comptime.x:1959`
 Returns whether `fn` is a `meta` function this compiler recorded as
 compile-time only, whose runtime form the unit does not emit.
 
-Source: `src/comptime.x:1967`
+Source: `src/comptime.x:1977`
 
 ## Design notes
 
