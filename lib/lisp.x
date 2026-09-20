@@ -1220,7 +1220,6 @@ static void _free_names(
 
 static void _capture(Lisp lisp, LispEnv *env, List params, Var body,
                      Map captures) {
-  if (body is not <list>) return;
   Array names = $auto([]);
   _free_names(lisp, body, params, 0, names);
   foreach (Var name, names) {

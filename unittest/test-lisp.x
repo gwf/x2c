@@ -433,6 +433,10 @@ static void lisp_eval_capture_semantics(void) {
   _ev(lisp, "(def gf (lambda () gv))");
   _ev(lisp, "(def gv 2)");
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(gf)")), 2);
+
+  // A body that is one bare name is still a read of that name.
+  _ev(lisp, "(def mkk (lambda (k) (lambda () k)))");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "((mkk 2))")), 2);
   lisp.destroy();
 }
 
