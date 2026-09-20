@@ -4,11 +4,11 @@
 
 #include "exception.h"
 
-static List _15, _14, _9;
+static List _68, _67, _66, _65, _64, _63, _62, _61, _59, _58, _54, _53, _49, _48, _44, _43, _39, _38, _34, _33, _29, _28, _24, _23, _15, _14, _9;
 
-static String _25, _24, _23, _22, _21, _20, _19, _17, _16, _12, _10, _7, _6, _4, _3, _2, _1, _0;
+static String _73, _72, _71, _70, _69, _20, _19, _17, _16, _12, _10, _7, _6, _4, _3, _2, _1, _0;
 
-static Var _18, _13, _11, _8, _5;
+static Var _60, _57, _56, _55, _52, _51, _50, _47, _46, _45, _42, _41, _40, _37, _36, _35, _32, _31, _30, _27, _26, _25, _22, _21, _18, _13, _11, _8, _5;
 
 #include <limits.h>
 #include <stdio.h>
@@ -37,7 +37,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit);
 
 static int _start(Frontend frontend, String filename, ParsedUnit * unit, int shared_values);
 
-static void _preload_meta_surface(Frontend frontend, Lisp shared);
+static int _preload_meta_surface(Frontend frontend, Lisp shared);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -49,6 +49,8 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 Var String_var(String);
 
 List cons(Var, List);
+
+Var List_var(List);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -75,11 +77,59 @@ __attribute__((constructor)) static void _file_init_(void){
   _18 = String_var(_17);
   _19 = String_new("status: ");
   _20 = String_new("/lib/meta.x");
-  _21 = String_new("\n");
-  _22 = String_new("cannot read input file");
-  _23 = String_new("#!");
-  _24 = String_new("script units use the default symbol collection");
-  _25 = String_new("failed to run C preprocessor");
+  _21 = Atom_intern(String_new("x2c_expr_ident"));
+  _22 = Atom_intern(String_new("x2c.expr.ident"));
+  _23 = cons(_22, NULL);
+  _24 = cons(_21, _23);
+  _25 = List_var(_24);
+  _26 = Atom_intern(String_new("x2c_expr_index"));
+  _27 = Atom_intern(String_new("x2c.expr.index"));
+  _28 = cons(_27, NULL);
+  _29 = cons(_26, _28);
+  _30 = List_var(_29);
+  _31 = Atom_intern(String_new("x2c_expr_field"));
+  _32 = Atom_intern(String_new("x2c.expr.field"));
+  _33 = cons(_32, NULL);
+  _34 = cons(_31, _33);
+  _35 = List_var(_34);
+  _36 = Atom_intern(String_new("x2c_expr_call"));
+  _37 = Atom_intern(String_new("_x2c.expr.call-list"));
+  _38 = cons(_37, NULL);
+  _39 = cons(_36, _38);
+  _40 = List_var(_39);
+  _41 = Atom_intern(String_new("x2c_expr_composite"));
+  _42 = Atom_intern(String_new("x2c.expr.composite"));
+  _43 = cons(_42, NULL);
+  _44 = cons(_41, _43);
+  _45 = List_var(_44);
+  _46 = Atom_intern(String_new("x2c_expr_cast"));
+  _47 = Atom_intern(String_new("x2c.expr.cast"));
+  _48 = cons(_47, NULL);
+  _49 = cons(_46, _48);
+  _50 = List_var(_49);
+  _51 = Atom_intern(String_new("x2c_function_body"));
+  _52 = Atom_intern(String_new("x2c.function.body"));
+  _53 = cons(_52, NULL);
+  _54 = cons(_51, _53);
+  _55 = List_var(_54);
+  _56 = Atom_intern(String_new("x2c_parameters_arguments"));
+  _57 = Atom_intern(String_new("x2c.parameters.arguments"));
+  _58 = cons(_57, NULL);
+  _59 = cons(_56, _58);
+  _60 = List_var(_59);
+  _61 = cons(_60, NULL);
+  _62 = cons(_55, _61);
+  _63 = cons(_50, _62);
+  _64 = cons(_45, _63);
+  _65 = cons(_40, _64);
+  _66 = cons(_35, _65);
+  _67 = cons(_30, _66);
+  _68 = cons(_25, _67);
+  _69 = String_new("\n");
+  _70 = String_new("cannot read input file");
+  _71 = String_new("#!");
+  _72 = String_new("script units use the default symbol collection");
+  _73 = String_new("failed to run C preprocessor");
 }
 
 int String_truth(String);
@@ -126,7 +176,7 @@ Frontend Frontend_new(CliRequest request){
 int String_find(String, String);
 
 static String _script_text(String text){
-  int end = String_find(text, _21);
+  int end = String_find(text, _69);
   return String_join(NULL, cons(String_var(_0), cons(String_var(end < 0 ? _1 : String_getslice(text, end, -2147483648, 1)), NULL)));
 }
 
@@ -155,9 +205,9 @@ static void _tokenize_input(Frontend frontend, ParsedUnit * unit, String filenam
   int lib_length = lib_resolved ? strlen(lib_path) : 0;
   c -> runtime_inc = !(source_resolved && lib_resolved && ! strncmp(source_path, lib_path, lib_length) && source_path[lib_length] == '/');
   String text = NULL;
-  if(! Compiler_read_source(c, filename, & text)) Compiler_report_error(c, 306819428, _22, NULL, cons(_5, cons(String_var(String_join(NULL, cons(String_var(_6), cons(String_var(filename), NULL)))), _9)));
-  if(String_truth(text) && String_startswith(text, _23)){
-    int end = String_find(text, _21);
+  if(! Compiler_read_source(c, filename, & text)) Compiler_report_error(c, 306819428, _70, NULL, cons(_5, cons(String_var(String_join(NULL, cons(String_var(_6), cons(String_var(filename), NULL)))), _9)));
+  if(String_truth(text) && String_startswith(text, _71)){
+    int end = String_find(text, _69);
     ScriptUnit script = Scope_calloc(1, sizeof(struct ScriptUnit));
     script -> path = source_resolved ? String_new(source_path) : filename;
     script -> shebang = end < 0 ? text : String_getslice(text, -2147483648, end, 1);
@@ -226,7 +276,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   Map globs = NULL;
   int use_cpp = request -> cpp_symbols || request -> live_symbols || SymbolSet_contains(cpp_dumps, request -> dump);
   if(use_prelude && ! use_cpp) return Compiler_collect_symbols(c, NULL);
-  if(c -> script) Compiler_report_error(c, 306819428, _24, _first_preprocessor_token(c), _15);
+  if(c -> script) Compiler_report_error(c, 306819428, _72, _first_preprocessor_token(c), _15);
   Compiler cppcompiler = Compiler_new_shared(c);
   unit -> preprocessor = cppcompiler;
   cppcompiler -> filename = filename;
@@ -238,7 +288,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit * unit){
   if(String_truth(errors) && frontend -> preprocessor_errors) frontend -> preprocessor_errors(errors);
   if(status){
     List notes = cons(_18, cons(String_var(String_join(NULL, cons(String_var(_19), cons(String_var(int_str(status)), NULL)))), NULL));
-    Compiler_report_error(c, 306819428, _25, _first_preprocessor_token(c), notes);
+    Compiler_report_error(c, 306819428, _73, _first_preprocessor_token(c), notes);
   }
   {
     String dependency;
@@ -359,13 +409,38 @@ int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit){
   return _start(frontend, filename, unit, 0);
 }
 
-static void _preload_meta_surface(Frontend frontend, Lisp shared){
+Iter List_iter(List, Iter);
+
+Var int_var(int);
+
+int Iter_try_next(Iter, Var *);
+
+List Var_list(Var);
+
+Var List_getindex(List, int);
+
+int Lisp_try_get(Lisp, String, Var *);
+
+String Var_str(Var);
+
+void Lisp_set_global(Lisp, String, Var);
+
+List Compiler_diagnostics(Compiler);
+
+void Compiler_print_diagnostic(Compiler, List);
+
+Var Lisp_eval(Lisp, Var);
+
+static int _preload_meta_surface(Frontend frontend, Lisp shared){
+  struct CliRequest request = * frontend -> request;
+  request.dump = 0;
+  request.no_cpp = request.live_symbols = request.cpp_symbols = 0;
+  struct Frontend session = * frontend;
+  session.request = & request;
+  frontend = & session;
   ParsedUnit unit;
   String path = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_20), NULL)));
-  if(! _start(frontend, path, & unit, 1)){
-    ParsedUnit_close(&(unit));
-    return;
-  }
+  int started = _start(frontend, path, & unit, 1);
   unit.compiler -> macro_lisp = shared;
   unit.compiler -> borrowed_lisp = 1;
   {
@@ -377,7 +452,75 @@ static void _preload_meta_surface(Frontend frontend, Lisp shared){
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
-    if(ParsedUnit_collect(&(unit), frontend))(void) ParsedUnit_parse(&(unit));
+    List builders = _68;
+    {
+      Var name, alias;
+      Iter _x2c_macro_iterator_1 = List_iter(builders, &(struct Iter){
+        int_var(0)
+      }
+      );
+      Var _x2c_macro_item_1;
+      while(Iter_try_next(_x2c_macro_iterator_1, & _x2c_macro_item_1)){
+        List _x2c_macro_pair_1;
+        _x2c_macro_pair_1 = Var_list(_x2c_macro_item_1);
+        name = List_getindex(_x2c_macro_pair_1, 0);
+        alias = List_getindex(_x2c_macro_pair_1, 1);
+        {
+          Var initial;
+          if(! Lisp_try_get(shared, Var_str(name), & initial)) initial = List_var(NULL);
+          Lisp_set_global(shared, Var_str(alias), initial);
+        }
+
+      }
+
+    }
+    if(! started || ! ParsedUnit_collect(&(unit), frontend) || ! ParsedUnit_parse(&(unit))){
+      {
+        List diagnostic;
+        List _x2c_macro_object_2 = Compiler_diagnostics(unit.compiler);
+        List _x2c_macro_cursor_2 = _x2c_macro_object_2;
+        Var _x2c_macro_cursor_output_1;
+        while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_1)){
+          diagnostic = Var_list(_x2c_macro_cursor_output_1);
+          Compiler_print_diagnostic(unit.compiler, diagnostic);
+        }
+
+      }
+      {
+        int _x2c_return_value_1 = 0;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_0);
+          return _x2c_return_value_1;
+        }
+
+      }
+
+    }
+    {
+      Var name, alias;
+      Iter _x2c_macro_iterator_3 = List_iter(builders, &(struct Iter){
+        int_var(0)
+      }
+      );
+      Var _x2c_macro_item_3;
+      while(Iter_try_next(_x2c_macro_iterator_3, & _x2c_macro_item_3)){
+        List _x2c_macro_pair_3;
+        _x2c_macro_pair_3 = Var_list(_x2c_macro_item_3);
+        name = List_getindex(_x2c_macro_pair_3, 0);
+        alias = List_getindex(_x2c_macro_pair_3, 1);
+        Lisp_set_global(shared, Var_str(alias), Lisp_eval(shared, name));
+      }
+
+    }
+    {
+      int _x2c_return_value_2 = 1;
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return _x2c_return_value_2;
+      }
+
+    }
+
   }
   x2c_cleanup_leave(& _x2c_defer_record_0);
 
@@ -386,14 +529,21 @@ static void _preload_meta_surface(Frontend frontend, Lisp shared){
 
 Lisp Compiler_open_macro_library(Compiler);
 
+void Lisp_destroy(Lisp);
+
 void Compiler_publish_macro_library(Compiler, Lisp);
 
-void Frontend_preload_macro_libraries(Frontend frontend){
+int Frontend_preload_macro_libraries(Frontend frontend){
   if(! _init_guard_) _file_init_();
   Compiler compiler = Compiler_new();
   Lisp shared = Compiler_open_macro_library(compiler);
-  if(shared) _preload_meta_surface(frontend, shared);
+  if(shared && ! _preload_meta_surface(frontend, shared)){
+    Lisp_destroy(shared);
+    Compiler_publish_macro_library(compiler, NULL);
+    return 0;
+  }
   Compiler_publish_macro_library(compiler, shared);
+  return 1;
 }
 
 void Compiler_take_diagnostics(Compiler, Compiler);
@@ -426,12 +576,12 @@ int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend){
           unit -> preprocessor = NULL;
         }
         {
-          int _x2c_return_value_1 = 0;
+          int _x2c_return_value_3 = 0;
           {
             x2c_error_catch_close(_x2c_error_handler_1);
             _x2c_error_handler_1 = NULL;
             x2c_exception_leave(& _x2c_exception_frame_1);
-            return _x2c_return_value_1;
+            return _x2c_return_value_3;
           }
 
         }
@@ -475,12 +625,12 @@ int ParsedUnit_parse(ParsedUnit * p){
       x2c_error_catch_detach(_x2c_error_handler_2);
       x2c_exception_mark_handled(&_x2c_exception_frame_2);
        {{
-        int _x2c_return_value_2 = 0;
+        int _x2c_return_value_4 = 0;
         {
           x2c_error_catch_close(_x2c_error_handler_2);
           _x2c_error_handler_2 = NULL;
           x2c_exception_leave(& _x2c_exception_frame_2);
-          return _x2c_return_value_2;
+          return _x2c_return_value_4;
         }
 
       }

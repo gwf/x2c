@@ -388,7 +388,7 @@ static void _translate_unit(Frontend frontend, String filename, String output_di
 }
 }
 
-void Frontend_preload_macro_libraries(Frontend);
+int Frontend_preload_macro_libraries(Frontend);
 
 static void _compile_file(Frontend frontend, String filename, String output_dir){
   {
@@ -404,7 +404,7 @@ static void _compile_file(Frontend frontend, String filename, String output_dir)
       x2c_error_catch_detach(_x2c_error_handler_0);
       x2c_exception_mark_handled(&_x2c_exception_frame_0);
        {{
-        Frontend_preload_macro_libraries(frontend);
+        if(! Frontend_preload_macro_libraries(frontend)) exit(1);
         _translate_unit(frontend, filename, output_dir);
       }
 
@@ -627,7 +627,9 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build){
   unsigned long long gen_bytes = 0;
   int parallel = c -> jobs > 1 && total > 1 && ! c -> dump && ! CliRequest_inspects(c);
   void macro_library_defer(void);
-  if(parallel || c -> dump) Frontend_preload_macro_libraries(frontend);
+  if(parallel || c -> dump){
+    if(! Frontend_preload_macro_libraries(frontend)) return 1;
+  }
   else macro_library_defer();
   if(parallel){
     Array chunks = _translation_chunks(c -> inputs, total, Map_truth(unit_dirs) ? total : c -> jobs);

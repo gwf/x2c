@@ -11,6 +11,8 @@ List Compiler_lower_comptime(Compiler compiler, List fn);
 
 String Compiler_lower_declined(Compiler compiler);
 
+void Compiler_inherit_shared_meta(Compiler compiler);
+
 int Compiler_install_comptime(Compiler compiler, List fn);
 
 int Compiler_lower_reached_globals(Compiler compiler);

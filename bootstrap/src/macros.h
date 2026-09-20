@@ -31,6 +31,8 @@ void macro_library_defer(void);
 
 int macro_library_pending(void);
 
+Map Compiler_shared_definitions(Compiler compiler);
+
 List Compiler_parse_macro_lisp_top_level(Compiler compiler);
 
 List Compiler_parse_source_lisp(Compiler compiler);

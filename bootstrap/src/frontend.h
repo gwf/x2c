@@ -35,7 +35,7 @@ Frontend Frontend_new(CliRequest request);
 
 int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit);
 
-void Frontend_preload_macro_libraries(Frontend frontend);
+int Frontend_preload_macro_libraries(Frontend frontend);
 
 int ParsedUnit_collect(ParsedUnit * unit, Frontend frontend);
 

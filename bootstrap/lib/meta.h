@@ -7,6 +7,7 @@
 
 #include "common.h"
 #include "list.h"
+#include "match.h"
 #include "string.h"
 #include "symbol.h"
 List x2c_ident(String spelling);
@@ -21,55 +22,13 @@ List x2c_expr_ident(List name);
 
 List x2c_expr_index(List base, List subscript);
 
-List x2c_expr_field(List receiver, String name);
-
 List x2c_expr_call(List callee, List arguments);
 
 List x2c_expr_composite(List items);
 
-List x2c_expr_cast(List type, List expression);
-
-String x2c_source_text(Var syntax);
-
-String x2c_binding_spelling(Var syntax);
-
-List x2c_syntax_type(List value);
-
-Var x2c_cache_value(List node);
-
-String x2c_function_name(List function);
-
-List x2c_function_parameter(List function, String wanted);
-
 List x2c_function_body(List function);
 
 List x2c_parameters_arguments(List value);
-
-List x2c_type_fields(List value);
-
-List x2c_type_layout(List value);
-
-List x2c_type_parts(List value);
-
-List x2c_type_resolve(List value);
-
-int x2c_type_value(List value);
-
-Symbol x2c_type_tag_name(String name);
-
-String x2c_type_reverse_name(String base, String participant);
-
-List x2c_method_resolve(List type, String name);
-
-String x2c_invocation_file(void);
-
-int x2c_invocation_line(void);
-
-int x2c_invocation_column(void);
-
-String x2c_embed_text(String path);
-
-void x2c_diagnostic_fail(String message, List notes);
 
 
 #endif /* __GUARD_0xD219AB39__ */

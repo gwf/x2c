@@ -20,6 +20,7 @@ List Compiler_lift_func_expression(Compiler compiler, List expression);
 #include "parse.h"
 #include "protocol.h"
 #include "macros.h"
+#include "comptime.h"
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -1123,6 +1124,8 @@ void Compiler_close_child(Compiler compiler, Compiler child){
 
 void * Scope_malloc_finalized(size_t, void(*)(void *));
 
+void Compiler_inherit_shared_meta(Compiler);
+
 void * Scope_calloc(size_t, size_t);
 
 Block Block_new(size_t);
@@ -1150,6 +1153,7 @@ static Compiler _new(Compiler owner){
     (compiler) -> meta_folds = Map_new();
     (compiler) -> meta_impure = Map_new();
     (compiler) -> meta_comptime = Map_new();
+    if(! owner) Compiler_inherit_shared_meta((compiler));
     if(owner){
       (compiler) -> package = owner -> package;
       (compiler) -> package_dirs = owner -> package_dirs;
@@ -2719,7 +2723,7 @@ List List_cdr(List);
 int Diagnostics_reached_limit(Diagnostics);
 int Compiler_error_count(Compiler);
 List Compiler_full_parse(Compiler c, Map globs, int generated_symbols){
-  if(! _init_guard_) _file_init_();  Array nodes = Array_new();  Array_clear(c -> origins);  Array_clear(c -> meta_defs);  c -> meta_folds = Map_new();  c -> meta_impure = Map_new();  c -> meta_comptime = Map_new();  c -> fixed = Map_new();  c -> init_tokens = Map_new();  c -> static_init_deps = Map_new();  c -> origin = 0;  Array_clear(c -> braces);  c -> arms = NULL;  Sym_reset(c -> sym, globs);  Compiler_rebuild_protocols(c, globs);  c -> macros = Map_new();  c -> kw_aliases = Map_new();  c -> kw_seen = Map_new();  Compiler_install_builtin_macros(c);  if(! c -> declaration_produced) c -> imports = Map_new();  Array_clear(c -> import_stack);  c -> macro_count = 0;  c -> macro_stack = NULL;  c -> source_private = 0;  Compiler_resolve_protocols(c);  if(generated_symbols) Compiler_install_generated_protocol_symbols(c);  Map saved_holes = c -> macro_holes; {
+  if(! _init_guard_) _file_init_();  Array nodes = Array_new();  Array_clear(c -> origins);  Array_clear(c -> meta_defs);  c -> meta_folds = Map_new();  c -> meta_impure = Map_new();  c -> meta_comptime = Map_new();  Compiler_inherit_shared_meta(c);  c -> fixed = Map_new();  c -> init_tokens = Map_new();  c -> static_init_deps = Map_new();  c -> origin = 0;  Array_clear(c -> braces);  c -> arms = NULL;  Sym_reset(c -> sym, globs);  Compiler_rebuild_protocols(c, globs);  c -> macros = Map_new();  c -> kw_aliases = Map_new();  c -> kw_seen = Map_new();  Compiler_install_builtin_macros(c);  if(! c -> declaration_produced) c -> imports = Map_new();  Array_clear(c -> import_stack);  c -> macro_count = 0;  c -> macro_stack = NULL;  c -> source_private = 0;  Compiler_resolve_protocols(c);  if(generated_symbols) Compiler_install_generated_protocol_symbols(c);  Map saved_holes = c -> macro_holes; {
   _x2c_defer_env_9 _x2c_defer_env_23 = {._x2c_defer_capture_18 =(const void *) & c, ._x2c_defer_capture_19 =(const void *) & saved_holes};
   X2CCleanup _x2c_defer_record_8 = {
     .fn = _x2c_defer_cleanup_9,

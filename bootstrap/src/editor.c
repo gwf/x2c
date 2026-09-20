@@ -297,11 +297,11 @@ int SourceView_read(SourceView, String, volatile String *);
 
 void SourceView_set(SourceView, String, String, int);
 
-void Frontend_load_support(CliRequest);
+Frontend Frontend_new(CliRequest);
+
+int Frontend_preload_macro_libraries(Frontend);
 
 Context Context_open_isolated_named(const char *);
-
-Frontend Frontend_new(CliRequest);
 
 int Frontend_open(Frontend, String, ParsedUnit *);
 
@@ -333,9 +333,9 @@ int editor_request(int argc, char * * argv){
   }
   argv[boundary] = argv[0];
   CliRequest request = _configure(argc - boundary, argv + boundary, sources, source);
-  Frontend_load_support(request);
-  Context command = Context_open_isolated_named("editor request");
   Frontend frontend = Frontend_new(request);
+  if(! Frontend_preload_macro_libraries(frontend)) return 2;
+  Context command = Context_open_isolated_named("editor request");
   ParsedUnit unit;
   int parsed = Frontend_open(frontend, source, & unit);
   if((request -> live_symbols || request -> cpp_symbols) && _changed_dependency(unit.compiler, sources)){
