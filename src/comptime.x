@@ -172,29 +172,87 @@ static List _lower_func_parts(Lowering l, Var content) {
 
 static void _lower_scan(Lowering l, Var form);
 static Var _lower_decline(Lowering l, String why);
+static Var _lower_bare(Var form);
 
 static void _lower_scan_each(Lowering l, List items) {
   foreach (Var item, items) _lower_scan(l, item);
 }
 
 
-/* The `foreach` over a `List` that `foreach.cursor-loop` expands to, whose
-   test steps a cursor and writes an element through two pointers. Answers
-   the two locals it addresses, so the lowering can walk the list itself
-   instead: the cursor is the list that remains and the element is its head,
-   neither of which needs a cell. */
-static int _lower_list_cursor(Var test, int *cursor, int *item) {
-  match (test)
-    case %(expr ? (call (expr ? (ident (binding ? "List_try_next")))
-                        (args ?
-                          (expr ? (op & (expr ? (ident (binding ?(int c) ?)))))
-                          (expr ? (op & (expr ? (ident (binding ?(int i) ?)))))
-                        ))): {
-      *cursor = c;
-      *item = i;
+/* The ordinary cursor calls emitted by `foreach.cursor-loop`. Their
+   cursor and outputs can occupy frame slots instead of addressed cells. */
+struct LowerCursor {
+  Symbol kind;
+  int object, cursor, item, value;
+};
+
+static int _lower_cursor(Var test, struct LowerCursor *walk) {
+  match (test) {
+    case %(expr ? (call (expr ? (ident (binding ? ?(String name))))
+          (args (expr ? (ident (binding ?(int object) ?)))
+            (expr ? (op & (expr ? (ident (binding ?(int cursor) ?)))))
+            (expr ? (op & (expr ? (ident (binding ?(int item) ?)))))))): {
+      if (name != "List_try_next" && name != "Array_try_next") return 0;
+      walk.kind = name == "List_try_next" ? <list> : <array>;
+      walk.object = object;
+      walk.cursor = cursor;
+      walk.item = item;
+      walk.value = 0;
       return 1;
     }
+    case %(expr ? (call (expr ? (ident (binding ? "Map_try_next")))
+          (args (expr ? (ident (binding ?(int object) ?)))
+            (expr ? (op & (expr ? (ident (binding ?(int cursor) ?)))))
+            (expr ? (op & (expr ? (ident (binding ?(int item) ?)))))
+            (expr ? (op & (expr ? (ident (binding ?(int value) ?)))))))): {
+      walk.kind = <map>;
+      walk.object = object;
+      walk.cursor = cursor;
+      walk.item = item;
+      walk.value = value;
+      return 1;
+    }
+  }
   return 0;
+}
+
+/* A cursor's storage cannot escape its block or be addressed by the body.
+   Direct `try_next` loops whose outputs live after the loop keep cells. */
+static int _lower_cursor_addressed(Var form, struct LowerCursor *walk) {
+  if (form is not <list>) return 0;
+  List items = form;
+  match (items)
+    case %(op & (expr ? (ident (binding ?(int id) ?)))):
+      return id == walk.cursor || id == walk.item || id == walk.value;
+  foreach (Var part, items)
+    if (_lower_cursor_addressed(part, walk)) return 1;
+  return 0;
+}
+
+static void _lower_scan_cursor_block(Lowering l, List parts) {
+  if (!parts) return;
+  struct LowerCursor walk;
+  match (_lower_bare(parts.last())) case %(while ?test ?body): {
+    if (!_lower_cursor(test, &walk) || _lower_cursor_addressed(body, &walk))
+      return;
+    Map declared = {};
+    defer declared.cleanup();
+    for (List rest = parts; rest.cdr(); rest = rest.cdr()) {
+      Var part = _lower_bare(rest.car());
+      if (_lower_cursor_addressed(part, &walk)) return;
+      match (part) case %(declare ? (bindings *bindings)):
+        foreach (Var binding, bindings) {
+          match (binding) case %(op = ?target ?): binding = target;
+          match (binding) case %(bind (binding ?(int id) ?) ?):
+            declared[id] = 1;
+        }
+    }
+    if (!declared.contains(walk.cursor) || !declared.contains(walk.item) ||
+        (walk.value && !declared.contains(walk.value))) return;
+    l.cursors[walk.cursor] = 1;
+    l.cursors[walk.item] = 1;
+    if (walk.value) l.cursors[walk.value] = 1;
+  }
 }
 
 /* Address-of is the one-operand `&`; three operands is bitwise and.
@@ -365,14 +423,8 @@ static void _lower_scan(Lowering l, Var form) {
       l, "a struct or union, which has no compile-time representation");
     return;
   }
+  if (head == <block>) _lower_scan_cursor_block(l, items.cdr());
   if (head == <while> || head == <for> || head == <do>) {
-    match (items) case %(while ?test ?): {
-      int cursor = 0, item = 0;
-      if (_lower_list_cursor(test, &cursor, &item)) {
-        l.cursors[cursor] = 1;
-        l.cursors[item] = 1;
-      }
-    }
     _lower_scan_each(l, items);
     return;
   }
@@ -1194,9 +1246,12 @@ static Var _lower_loop(
   _lower_referenced(rest, used);
   _lower_referenced(k, used);
   /* The element is read where it is used, so the loop does not carry it. */
-  int walk_cursor = 0, walk_item = 0;
-  if (_lower_list_cursor(test, &walk_cursor, &walk_item))
-    used.del(walk_item);
+  struct LowerCursor walk;
+  int walking = _lower_cursor(test, &walk) && l.cursors.contains(walk.cursor);
+  if (walking) {
+    used.del(walk.item);
+    if (walk.value) used.del(walk.value);
+  }
   Array ids = [];
   defer ids.free();
   Array slots = [];
@@ -1205,6 +1260,10 @@ static Var _lower_loop(
   foreach (Var (id, form), l.env) {
     if (!used.contains(id)) continue;
     ids.push(id);
+    if (walking && walk.kind == <map> && id == walk.cursor) {
+      Var object = _lower_value(l, walk.object);
+      form = %(if (number? $form) (Map.list $object) $form);
+    }
     entry.push(form);
   }
   Map inside = {};
@@ -1215,18 +1274,25 @@ static Var _lower_loop(
   }
   Map outer = l.env;
   l.env = inside;
-  /* A `foreach` over a `List` walks the list itself: the cursor is the list
-     that remains, so the test is its own truth, the element is its head, and
-     the next turn carries its tail. Nothing is addressed, so nothing is
-     boxed, and the loop carries one parameter instead of three. */
-  int cursor_id = 0, item_id = 0;
+  /* List and Map carry the remaining list; Array carries an index and
+     observes its current length each turn, just as its cursor operation
+     does. Outputs read the current element before advancing the cursor. */
   Var guard;
-  if (_lower_list_cursor(test, &cursor_id, &item_id) &&
-      inside.contains(cursor_id)) {
-    Var walk = inside[cursor_id];
-    guard = %(C.true? $walk);
-    l.env[item_id] = %(car $walk);
-    l.env[cursor_id] = %(cdr $walk);
+  if (walking && inside.contains(walk.cursor)) {
+    Var cursor = inside[walk.cursor];
+    if (walk.kind == <array>) {
+      Var object = _lower_value(l, walk.object);
+      guard = %(< $cursor (Array.len $object));
+      l.env[walk.item] = %(Array.getindex $object $cursor);
+      l.env[walk.cursor] = %(+ $cursor 1);
+    }
+    else {
+      guard = %(C.true? $cursor);
+      l.env[walk.item] = walk.kind == <map>
+        ? %(car (car $cursor)) : %(car $cursor);
+      if (walk.value) l.env[walk.value] = %(cadr (car $cursor));
+      l.env[walk.cursor] = %(cdr $cursor);
+    }
   }
   else guard = _lower_truth(l, test);
   /* The exit is a function over the same live locals only when a `break`
