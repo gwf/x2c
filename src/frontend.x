@@ -253,7 +253,8 @@ int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) =>
 
 /* Installs the compile-time forms `lib/meta.x` defines into the shared
    session. Its values belong to the process pool because they outlive every
-   unit that calls them. Both builder spellings name the same lowered body. */
+   unit that calls them. Builder aliases name the same lowered bodies; the
+   literal spellings retain their checked Lisp adapters. */
 static int _preload_meta_surface(Frontend frontend, Lisp shared) {
   ParsedUnit unit;
   String path = %"${x2c_get_root()}/lib/meta.x";
@@ -262,9 +263,6 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared) {
   unit.compiler.borrowed_lisp = 1;
   defer unit.close();
   List builders = %(
-    (x2c_literal_string x2c.literal.string)
-    (x2c_literal_int x2c.literal.int)
-    (x2c_literal_symbol x2c.literal.symbol)
     (x2c_expr_ident x2c.expr.ident)
     (x2c_expr_index x2c.expr.index)
     (x2c_expr_field x2c.expr.field)

@@ -49,12 +49,20 @@ showed unchanged library time within noise and compiler-source translation
 workload measured 352 to 77 ms. Suffixed float literals now round at float
 precision before widening; differential coverage includes f/F and hex floats.
 
-Builder integration remains in progress. Its cold preload can use native
-literal builders compiled from the same meta bodies until the lowered bodies
-are installed. One compatibility choice remains: three thin Lisp argument
-checks preserve existing invalid-input rejection, while direct aliases can
-silently emit an empty string for `(x2c.literal.string 7)`. Staging preparation
-still needs working DNS/HTTPS and Gary's dispatch choice.
+**The 11 syntax builders** now have one `meta` body each in `lib/meta.x`.
+The shared parent binds both spellings to that body, with checked adapters
+for the three Lisp literal spellings and a rest-argument adapter for
+`x2c.expr.call`. Nine builders also run at runtime, while
+field and cast construction retain their compiler-query restrictions.
+Preloading installs native operations first. Cold declaration collection
+uses the three literal builders' native forms, compiled from those same
+bodies, until the lowered forms replace them. Source keys are canonical,
+and a failed preload stops instead of freezing a partial session. Fresh
+compiler passes inherit restrictions from existing shared lowering records.
+
+Gary approved the literal argument adapters and staging preparation on
+2026-09-20. Browser account provisioning is in progress; staging still needs
+working DNS/HTTPS and an exact validated candidate.
 
 ### Parked
 
@@ -82,15 +90,6 @@ below the acceptance condition. A temporary counter confirmed the skip ran
 copied-home timings lacked a normal prelude and are not acceptance evidence.
 The retained prototype is in worktree branch `codex/var-tags-probe`.
 
-**The 11 syntax builders** now have one `meta` body each in `lib/meta.x`.
-The shared parent binds both spellings to that body; `x2c.expr.call` keeps
-only its rest-argument adapter. Nine builders also run at runtime, while
-field and cast construction retain their compiler-query restrictions.
-Preloading installs native operations first. Cold declaration collection
-uses the three literal builders' native forms, compiled from those same
-bodies, until the lowered forms replace them. Source keys are canonical,
-and a failed preload stops instead of freezing a partial session. Fresh compiler passes inherit restrictions from existing shared
-lowering records.
 
 ### Decided
 
@@ -101,7 +100,7 @@ chapter.
 
 ### Open
 
-- Finish the 11-builder port without silently accepting invalid Lisp inputs.
+- Complete final validation and delivery of the integrated builder port.
 - Keep the var-tags port parked until a measured approach meets its condition.
 - Prepare and explicitly select a staging candidate.
 

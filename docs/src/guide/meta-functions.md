@@ -203,7 +203,8 @@ the [language reference](../reference/language.md#the-same-operations-from-x2c)
 gives their semantics.
 
 The syntax builders are `meta` bodies in `lib/meta.x`. Their Lisp spellings
-call those same bodies. Builders that only assemble Lists can also run in a
+call those same bodies; the three literal spellings retain their Lisp
+argument checks. Builders that only assemble Lists can also run in a
 linked program; `x2c_expr_field` and `x2c_expr_cast` still need compiler
 queries and therefore remain compile-time only.
 

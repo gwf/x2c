@@ -175,9 +175,9 @@ int editor_request(int argc, char **argv) {
   argv[boundary] = argv[0];
   CliRequest request = _configure(
     argc - boundary, argv + boundary, sources, source);
-  Frontend.load_support(request);
-  Context command = Context.open_isolated_named("editor request");
   Frontend frontend = Frontend.new(request);
+  if (!frontend.preload_macro_libraries()) return 2;
+  Context command = Context.open_isolated_named("editor request");
   ParsedUnit unit;
   int parsed = frontend.open(source, &unit);
   if ((request.live_symbols || request.cpp_symbols) &&

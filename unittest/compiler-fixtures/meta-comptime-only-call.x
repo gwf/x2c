@@ -12,9 +12,12 @@ meta static List mc_name(String text) => x2c_literal_string(text);
 meta static List mc_wrap(String text) => mc_name(text);
 
 macro Expression $builder.aliases() => ($(x2c.literal.int (if (and
-    (eq? x2c_literal_string x2c.literal.string)
-    (eq? x2c_literal_int x2c.literal.int)
-    (eq? x2c_literal_symbol x2c.literal.symbol)
+    (equal? (x2c_literal_string "hi")
+      (x2c.literal.string "hi"))
+    (equal? (x2c_literal_int 17)
+      (x2c.literal.int 17))
+    (equal? (x2c_literal_symbol '<builders>)
+      (x2c.literal.symbol '<builders>))
     (eq? x2c_expr_ident x2c.expr.ident)
     (eq? x2c_expr_index x2c.expr.index)
     (eq? x2c_expr_field x2c.expr.field)

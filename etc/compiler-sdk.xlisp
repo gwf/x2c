@@ -8,6 +8,17 @@
 (defun _x2c.fail (message value) (x2c.diagnostic.fail
   message (list (string-append "value: " (repr value)))))
 
+// The Lisp boundary retains its argument checks around the shared bodies.
+(defun x2c.literal.string (value) (if (string? value)
+  (x2c_literal_string value)
+  (_x2c.fail "x2c.literal.string requires a String" value)))
+(defun x2c.literal.int (value) (if (number? value)
+  (x2c_literal_int value)
+  (_x2c.fail "x2c.literal.int requires a number" value)))
+(defun x2c.literal.symbol (value) (if (symbol? value)
+  (x2c_literal_symbol value)
+  (_x2c.fail "x2c.literal.symbol requires a Symbol" value)))
+
 (defun x2c.source.text (syntax) (_x2c.source.text syntax))
 (defun x2c.embed.text (path) (_x2c.embed.text path))
 

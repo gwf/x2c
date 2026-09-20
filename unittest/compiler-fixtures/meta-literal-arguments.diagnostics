@@ -1,0 +1,15 @@
+unittest/compiler-fixtures/meta-literal-arguments.x:9:28: macro: x2c.literal.string requires a String
+  String bad_string(void) => $bad.string();
+                             ^
+  note: value: 7
+
+unittest/compiler-fixtures/meta-literal-arguments.x:10:22: macro: x2c.literal.int requires a number
+  int bad_int(void) => $bad.number();
+                       ^
+  note: value: "abc"
+
+unittest/compiler-fixtures/meta-literal-arguments.x:11:28: macro: x2c.literal.symbol requires a Symbol
+  Symbol bad_symbol(void) => $bad.symbol();
+                             ^
+  note: value: 7
+
