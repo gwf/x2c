@@ -531,14 +531,19 @@ Map Compiler.macro_definition_locals(Compiler compiler) {
 
 /** Allocates the next compiler-private C spelling for `stem`.
 
-    Related compilers increment the same per-stem counter.
+    Related compilers increment the same per-stem counter, except while a
+    macro import is being parsed, which counts separately. An import's `meta`
+    bodies are parsed in every unit that imports the file and in none that is
+    built from the `.xi` prelude, so a name minted there must not move the
+    unit's own counter or the two modes emit different C. Those names carry
+    an `m` before the stem, so they cannot collide with the unit's.
 */
 String Compiler.fresh_name(Compiler compiler, String stem) {
+  String key = compiler.import_src ? %"m$stem" : stem;
   Var stored;
-  int count = compiler.names.counters.try_get(stem, &stored)
-            ? stored : 0;
-  String name = %"_x2c_${stem}_${count++}";
-  compiler.names.counters[stem] = count;
+  int count = compiler.names.counters.try_get(key, &stored) ? stored : 0;
+  String name = %"_x2c_${key}_${count++}";
+  compiler.names.counters[key] = count;
   return name;
 }
 

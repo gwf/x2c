@@ -1566,11 +1566,19 @@ static List _parse_lisp_slot(
   );
 }
 
+/* Scratch names for one template evaluation. The count is process-wide
+   rather than per-compiler: a shared parent session holds every name its
+   filling bound, and a child cannot rebind an inherited one, so a per-
+   compiler count would refuse the second compiler that expanded the same
+   macro. */
+static unsigned long template_serial = 0;
+
 static Var _eval_template_form(
   Compiler compiler, String form, List bindings, Token invocation,
   String source_file, Var construction) {
   if (!compiler.collect_protocols) compiler.run_declaration_effects();
   _ensure_lisp(compiler);
+  unsigned long serial = template_serial++;
   /* Provenance lookup uses captured Var identity. Structural equality must
      not let constructed or selected syntax acquire a caller's source text. */
   List references = NULL, Map source_captures = {};
@@ -1578,8 +1586,7 @@ static Var _eval_template_form(
     if (!pair) continue;
     Var (binder, syntax) = pair;
     String spelling = binder.str()[1:];
-    String temporary =
-      %"_x2c_meta_${compiler.macro_count}_$spelling";
+    String temporary = %"_x2c_meta_${serial}_$spelling";
     Var unwrapped = _source_unwrap(syntax);
     List source = NULL;
     if (_source_capture_parts(syntax, &source, &unwrapped)) {
@@ -1618,8 +1625,7 @@ static Var _eval_template_form(
     form = rewritten;
   }
   if (construction is not void) {
-    String temporary = %"_x2c_meta_${
-      compiler.macro_count}_construction";
+    String temporary = %"_x2c_meta_${serial}_construction";
     compiler.macro_lisp.set_global(temporary, construction);
     form = %"(let ((x2c.ident (lambda (name)
       (list $temporary name)))) $form)";
