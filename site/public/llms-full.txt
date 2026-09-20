@@ -2339,6 +2339,15 @@ changes nothing about what the body reads. A lambda written inside a binding
 form reads that form's bindings and keeps the values it was made with. A macro
 that needs a value from its caller takes it as an argument.
 
+A `let` binding is not visible inside its own initializer. A lambda a `let`
+binds therefore cannot call itself by that name, and the self-call reports
+`(unbound (name h))`. Write such a helper as a `defun`.
+
+```text
+(let ((h (lambda (n) (h n)))) (h 3))   error: (unbound (name h))
+(defun h (n) (h n))                    reads its own name
+```
+
 The session that translates a unit inherits the compile-time library and
 cannot replace one of its definitions. `def` on an inherited name raises
 `(bad-state (operation "def") (why "inherited") (name NAME))`, which the

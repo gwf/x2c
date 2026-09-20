@@ -441,3 +441,11 @@ globals alone and does not see the bindings around the call:
 ```
 
 Pass the value instead of the name: `(eval (list (quote add) z 1))`.
+
+A `let` binding is not visible inside its own initializer, so a helper that
+calls itself by name must be a `defun`:
+
+```text
+(let ((h (lambda (n) (h n)))) (h 3))   error: (unbound (name h))
+(defun h (n) (h n))                    reads its own name
+```

@@ -13,8 +13,49 @@
 > of `plans/comptime-x2c-generalization.md` landed and Phase 5 blocked on the
 > capability this plan supplies. M1, M2, M5, M6, M7 and M8 are built, and M3
 > and M4 are declined on evidence. The word and the
-> three-lifetime design are Gary's decisions, taken 2026-09-18. Nothing
-> reaches `main` without his explicit green light.
+> three-lifetime design are Gary's decisions, taken 2026-09-18.
+>
+> **Delivery target: `dev`, not `main`.** The work reaches `main` through
+> `dev` and only with Gary's explicit green light.
+
+## Status, 2026-09-19
+
+The integration branch is `lowers-integration`. It carries the milestones
+above, the pre-merge fixes to the editor adapter ordering, two `_capture` and
+`_free_names` repairs in `lib/lisp.x`, bare lambda parameter lowering, and
+`List.get` agreement in `etc/comptime.xlisp`. It also carries the scratch-name
+serial fix, which gives each macro template evaluation a process-wide name and
+counts an import's fresh names apart from the unit's, and a latch that keeps
+an exhausted compile-time call budget exhausted for the rest of its public
+entry. `origin/dev` is merged in.
+
+### Parked
+
+**The var-tags port** stays on branch `report-var-tags` at `b96fc24d`. It
+measured +10.7% on a `lib/` translate and +2.3% on `src/`. About half of that
+is each importing unit re-parsing the ported `meta` bodies. The next step for
+it is to stop a unit re-parsing bodies the shared session already holds when
+that unit never calls them at run time. The port lands only if that removes
+roughly half the measured cost.
+
+**The 11 pure builders still in Lisp** in `etc/compiler-sdk.xlisp` were
+blocked by one fact: a body in `lib/meta.x` did not build. The scratch-name
+serial fix removes it. Tested 2026-09-19 on this branch: one throwaway `meta`
+body added to `lib/meta.x` built clean and all 741 compiler fixtures passed.
+The throwaway was removed. Porting the 11 builders is now ordinary work.
+
+### Decided
+
+A `let` binding is not visible inside its own initializer. A compile-time Lisp
+helper that calls itself by name must be a `defun`. This is the lexical rule,
+not a defect. It is stated in the language reference and in the meta-functions
+chapter.
+
+### Open
+
+- `$comptime()` still spells the same thing as `meta`. One of the two goes.
+- `Array` and `Map` `foreach` are not slot-lowered; only `List` is.
+- A suffixed float literal such as `3.0f` declines in a `meta` body.
 
 ## The result
 
