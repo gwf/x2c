@@ -9,6 +9,8 @@ The compiler surface a `meta` function calls.
 
 | Function | Summary |
 | --- | --- |
+| [`x2c_block_make`](#x2c_block_make) | Returns a block containing `items` in order. |
+| [`x2c_decl_make`](#x2c_decl_make) | Declares `name` with `type` and an optional initializer. |
 | [`x2c_expr_call`](#x2c_expr_call) | Returns the expression calling `callee` with `arguments`, a `List` of expressions. |
 | [`x2c_expr_cast`](#x2c_expr_cast) | Returns `expression` cast to `type`, which is a declared type rather than syntax. |
 | [`x2c_expr_composite`](#x2c_expr_composite) | Returns the comma-separated composite initializer holding `items`, a `List` of expressions. |
@@ -19,9 +21,29 @@ The compiler surface a `meta` function calls.
 | [`x2c_literal_int`](#x2c_literal_int) | Returns an `int` expression holding `value`. |
 | [`x2c_literal_string`](#x2c_literal_string) | Returns a `String` expression holding `value`. |
 | [`x2c_literal_symbol`](#x2c_literal_symbol) | Returns a `Symbol` expression holding `value`. |
+| [`x2c_param_make`](#x2c_param_make) | Returns a parameter named `name` with `type`. |
 | [`x2c_parameters_arguments`](#x2c_parameters_arguments) | Returns the argument expressions that forward a parameter list, which is a `params` form or the parameters themselves. |
+| [`x2c_stmnt_make`](#x2c_stmnt_make) | Returns an expression statement. |
+| [`x2c_stmnt_return`](#x2c_stmnt_return) | Returns a return statement carrying `expression`. |
+| [`x2c_type_members`](#x2c_type_members) | Returns enum members as `(name value)` rows in declaration order. |
 
 ### Functions
+
+#### x2c_block_make
+
+`meta List x2c_block_make(List items)`
+
+Returns a block containing `items` in order.
+
+Source: `lib/meta.x:110`
+
+#### x2c_decl_make
+
+`meta List x2c_decl_make(List type, Var name, List initializer)`
+
+Declares `name` with `type` and an optional initializer.
+
+Source: `lib/meta.x:113`
 
 #### x2c_expr_call
 
@@ -82,7 +104,7 @@ Source: `lib/meta.x:73`
 
 Returns the statements in the body of `function`.
 
-Source: `lib/meta.x:140`
+Source: `lib/meta.x:165`
 
 #### x2c_literal_int
 
@@ -108,6 +130,14 @@ Returns a `Symbol` expression holding `value`.
 
 Source: `lib/meta.x:59`
 
+#### x2c_param_make
+
+`meta List x2c_param_make(List type, Var name)`
+
+Returns a parameter named `name` with `type`.
+
+Source: `lib/meta.x:121`
+
 #### x2c_parameters_arguments
 
 `meta List x2c_parameters_arguments(List value)`
@@ -116,7 +146,32 @@ Returns the argument expressions that forward a parameter list, which is
 a `params` form or the parameters themselves. A `(void)` parameter list
 answers nothing.
 
-Source: `lib/meta.x:148`
+Source: `lib/meta.x:173`
+
+#### x2c_stmnt_make
+
+`meta List x2c_stmnt_make(List expression)`
+
+Returns an expression statement.
+
+Source: `lib/meta.x:104`
+
+#### x2c_stmnt_return
+
+`meta List x2c_stmnt_return(List expression)`
+
+Returns a return statement carrying `expression`.
+
+Source: `lib/meta.x:107`
+
+#### x2c_type_members
+
+`meta List x2c_type_members(List type)`
+
+Returns enum members as `(name value)` rows in declaration order.
+An implicit value is nil; a literal value retains its spelling.
+
+Source: `lib/meta.x:231`
 
 ## Design notes
 

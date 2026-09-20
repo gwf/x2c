@@ -63,8 +63,7 @@ example generates those observations from a known model, so there is a
 specific answer to recover: a rate of 0.9 and a capacity of 50.
 
 `$ad.checkpoint(64)` is a decorator implemented with x2c `meta` functions.
-It reads
-the typed syntax tree and generates `loss_grad` beside the original
+It reads the typed syntax tree and generates `loss_grad` beside the original
 function. The generated function returns the loss and writes its derivatives
 into `d_rate` and `d_capacity`. Those derivatives account for the entire
 simulation, including the branch that selects which steps contribute to

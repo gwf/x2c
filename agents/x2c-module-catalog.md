@@ -872,8 +872,10 @@ Public functions:
 
 `x2c_literal_string`, `x2c_literal_int`, `x2c_literal_symbol`,
 `x2c_expr_ident`, `x2c_expr_index`, `x2c_expr_field`, `x2c_expr_call`,
-`x2c_expr_composite`, `x2c_expr_cast`, `x2c_function_body`,
-`x2c_parameters_arguments`
+`x2c_expr_composite`, `x2c_expr_cast`, `x2c_stmnt_make`, `x2c_stmnt_return`,
+`x2c_block_make`, `x2c_decl_make`, `x2c_param_make`, `x2c_function_body`,
+`x2c_parameters_arguments`, `_meta_initializer`, `_meta_fail`, `_meta_member`,
+`x2c_type_members`
 
 ### [lib/mutex.x](../lib/mutex.x)
 

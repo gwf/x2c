@@ -26,6 +26,12 @@ List x2c_expr_call(List callee, List arguments);
 
 List x2c_expr_composite(List items);
 
+List x2c_stmnt_make(List expression);
+
+List x2c_stmnt_return(List expression);
+
+List x2c_block_make(List items);
+
 List x2c_function_body(List function);
 
 List x2c_parameters_arguments(List value);

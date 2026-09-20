@@ -145,7 +145,6 @@ $(def ad_fwd_for (lambda (. rest) 0))
 $(def ad_fwd_item (lambda (. rest) 0))
 $(def ad_declared_join (lambda (. rest) 0))
 
-$(def Var_repr repr)
 meta static void ad_fail(String message, Var form) {
   x2c_diagnostic_fail("ad: " + message, %(${form.repr()}));
 }
