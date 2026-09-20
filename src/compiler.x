@@ -77,6 +77,8 @@ typedef struct Compiler {
   String package, List package_dirs;
   Map package_roots, package_aliases, package_members;
   Token token;
+  // Optional end of supplied input; NULL keeps ordinary file diagnostics.
+  Token input_boundary;
   Tokenizer tokenizer;
   List return_type, include_dirs;
   // Canonical dependency path -> content hash for compile-time text reads,
@@ -690,6 +692,7 @@ void Compiler.tokenize(Compiler c, char *text) {
       (c.filename == c.unit_script.path ||
        Path.absolute(c.filename) == c.unit_script.path))
     c.script = c.unit_script;
+  c.input_boundary = NULL;
   c.text = text;
   c.tokenizer = Tokenizer.new(c.text);
   c.tokenizer.scan();
@@ -776,14 +779,24 @@ Symbol Compiler.peek(Compiler compiler, int steps) {
   return token.type;
 }
 
+/** Raises `<incomplete>` when a required grammar item reaches the supplied
+    input boundary. The caller sets a token in the current token stream after
+    tokenizing; tokenization clears it. Semantic failures do not call this.
+*/
+void Compiler.require_input(Compiler c) {
+  if (c.input_boundary && c.token >= c.input_boundary) raise %(incomplete);
+}
+
 /** Requires and consumes the current token type.
 
     A mismatch reports a parse diagnostic. An active recovery boundary raises
     `<malformed>`; without one, diagnostic reporting exits.
 */
 Symbol Compiler.expect(Compiler c, Symbol type) {
-  if (c.token.type != type)
+  if (c.token.type != type) {
+    c.require_input();
     c.report_error(<parse>, %"expected '$type'", c.token, NULL);
+  }
   c.next();
   return type;
 }

@@ -621,6 +621,7 @@ List Compiler.parse_statement(Compiler c) {
 List Compiler.parse_block_items(Compiler c, int anchor_items) {
   Array block = [], List stmt = NULL;
   c.sym.push_new_scope();
+  defer c.sym.pop_scope();
   loop {
     if (c.token != c.directives_taken)
       foreach (Var directive, c.leading_preproc()) block.push(directive);
@@ -652,7 +653,6 @@ List Compiler.parse_block_items(Compiler c, int anchor_items) {
       );
   }
   c.expect(<"}">);
-  c.sym.pop_scope();
   return cons(<block>, block.list_free());
 }
 

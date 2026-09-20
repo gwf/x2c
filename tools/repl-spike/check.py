@@ -24,6 +24,18 @@ def check(source, stdout, error="", code=0):
         assert not result.stderr, result.stderr
 
 
+api_binary = SEED.parent / "api-check"
+subprocess.run([str(ROOT / "builds/0/x2c"), "build", "--plain",
+                "--build-dir", str(SEED.parent / "api-native"),
+                "--output", str(api_binary), "--x-include-dir", "src",
+                "--c-include-dir", "builds/0/src",
+                "tools/repl-spike/api-check.x", "tools/repl-spike/session.x",
+                str(SEED.parent / "compiler.a")], cwd=ROOT, check=True,
+               capture_output=True, text=True)
+print(subprocess.check_output([str(api_binary), str(SEED)],
+                              cwd=ROOT, text=True).strip())
+
+
 check((ROOT / "tools/repl-spike/demo.txt").read_text(),
       "ok\nok\n=> 12\ndefined plus\n=> 15\ndefined twice\n=> 32\n"
       "=> 32\nok\n=> 48\n", "expected atomic expression")
@@ -38,8 +50,8 @@ check("int n = 10;\nint f(void) { n += 1; return 1/0; }\nf();\nn;\n",
 check("int n = 0;\nint next(void) { n += 1; return n; }\n"
       "int x = next();\nx;\nn;\nx;\nn;\n",
       "ok\ndefined next\nok\n=> 1\n=> 1\n=> 1\n=> 1\n")
-check("int y = 1/0;\ny;\ny=7;\ny;\n", "=> 0\nok\n=> 7\n",
-      "evaluation failed: (div-zero")
+check("int y = 1/0;\ny;\nint y=7;\ny;\n", "ok\n=> 7\n",
+      "unresolved identifier: y")
 check("int n = 10;\nunknown;\nn;\n", "ok\n=> 10\n",
       "unresolved identifier: unknown")
 check("int n = 10;\nint broken(\n:cancel\nn;\n", "ok\n=> 10\n")

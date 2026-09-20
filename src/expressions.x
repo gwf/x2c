@@ -511,6 +511,7 @@ static List _materialize_delegate_receiver(List receiver, List path) {
 }
 
 static List _parse_field_name(Compiler compiler, Symbol op_sym, List lhs_opt) {
+  compiler.require_input();
   List slot = compiler.try_parse_macro_slot(<name>);
   if (slot) return %($slot);
   String field_name = compiler.token.text;
@@ -2483,6 +2484,7 @@ static List _parse_c_string_literals(Compiler c) =>
     grouping, or macro parser and leaves the token after that primary form.
 */
 List Compiler.parse_primary(Compiler compiler) {
+  compiler.require_input();
   List slot = compiler.try_parse_macro_slot(<expression>);
   if (slot) return slot;
   switch (compiler.peek(0)) {

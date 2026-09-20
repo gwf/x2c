@@ -6,8 +6,10 @@ and unit Context across submissions. It does not replay accepted source or
 previous effects. This is research code, outside the CLI and repository gates.
 
 Started from `origin/dev` at `f3aa43a5f1dcc3f9860496a9a7cf7080c6edec89`.
-All authored changes are in this directory. Production compiler, runtime,
-bootstrap, and validation targets are unchanged.
+The second iteration adds an optional submission boundary to the compiler
+parser and fixes its parameter/block cleanup paths. Runtime and comptime
+coverage, bootstrap, and validation targets are unchanged. Comptime coverage
+is being developed separately.
 
 ## Run
 
@@ -16,12 +18,15 @@ From the repository root, after the ordinary fresh-worktree setup:
 ```sh
 mkdir -p debug
 make build-safe >debug/bootstrap.log 2>&1
+make build >debug/repl-session-compiler.log 2>&1
 tools/repl-spike/run
 ```
 
 The launcher builds a small compiler archive from stage 0 objects excluding
 `main.o`, then compiles the adapter. It keeps products under
-`unittest/build/repl-spike/`. A ready worktree only needs the last command.
+`unittest/build/repl-spike/`. A ready worktree with the current stage 0 compiler only needs the last
+command. This local branch changes parser sources without refreshing bootstrap;
+`make build` is needed after the initial bootstrap build.
 
 ```sh
 tools/repl-spike/run < tools/repl-spike/demo.txt
@@ -92,19 +97,67 @@ update a value. Function replacement and mutually recursive forward
 prototypes are outside the spike. Self recursion and calling earlier
 functions work. Names beginning `__repl_` are reserved by the adapter.
 
-Parse and lowering rejection roll back semantic bindings. The adapter also
-restores parameter capture and scope depth: ordinary one-shot parsing leaves
-these behind on some malformed function paths. Runtime failure keeps effects
-that already happened. Declarations commit before initialization: after
-`int y = 1/0;`, `y` exists and reads the current lowering's unwritten-global
-zero until assigned. This is an explicit prototype policy, not a proposed
-language guarantee. A production REPL needs a decision on failed declaration
-initialization and whether an uninitialized binding may be read.
+Parse and lowering rejection roll back semantic bindings. The compiler's
+`parse_submission` operation restores parameter capture and scope depth;
+parameter and block parsers also unwind their scopes at their own boundaries.
+The terminal no longer manipulates parser fields.
+
+A declaration publishes only after all its initializers succeed. For example,
+`int a=next(), b=1/0;` publishes neither `a` nor `b`, but any effect `next()`
+made on an existing variable remains. Provisional cells are removed before
+rollback allows their binding IDs to be reused. Both names may then be
+declared again. Runtime failures in ordinary statements likewise preserve
+completed effects on existing values.
 
 The unit Context stays alive until exit because lowered lambda syntax and
 values may borrow its canonical storage. Lisp owns its evaluated allocations.
-Inputs, failed parse attempts, and transient thunks accumulate storage for
-the session lifetime. Long-running reclamation is unresolved.
+Adapter scratch Arrays are freed after each call. Canonical syntax, compiler
+caches, token storage, and Lisp allocations remain session-lived. General
+per-input reclamation requires explicit compiler/Lisp root ownership; wrapping
+submit in a temporary Context would leave dangling references.
+
+Direct tests close and reopen three used sessions and compare them with three
+empty frontend sessions. No scopes remain open, and post-close allocation
+growth matches the measured empty-frontend baseline. Collection alone adds ten
+live allocations per round in this checkout; this reproduces without parsing
+or REPL use. Its cause is not diagnosed here. These tests do not claim complete
+memory stability.
+
+## Submission API
+
+`session.x` is reusable without the terminal. The caller first opens a
+`ParsedUnit` with the normal frontend and initialized macro session (the
+launcher's seed is `$(begin)`), then keeps it open while using results:
+
+```c
+ReplSession session = ReplSession.new(unit.compiler);
+ReplResult result = session.submit("int n = 10;");
+result = session.submit("n + 2;");
+// result.status == <value>, result.value == 12
+```
+
+`ReplResult.status` is one of:
+
+| Status | Meaning |
+| --- | --- |
+| `incomplete` | More source may complete the candidate; no bindings publish. |
+| `rejected` | Syntax, type, adapter policy, or lowering rejection. |
+| `defined` | A function definition was installed; `name` identifies it. |
+| `executed` | Initialization or statements completed without a displayed value. |
+| `value` | Execution completed with the expression's typed `value`. |
+| `failed` | Execution failed; `cause` records the evaluator error. |
+
+Results include ordinary compiler `diagnostics`, an adapter `message`, and
+optional tracing data (`syntax`, `lowered`). `submit` prints nothing and does
+not retain a pending prefix. Values borrow the unit Context until `unit.close`.
+The terminal renders diagnostics before submitting the next input, while the
+compiler still has the corresponding source text.
+
+`Compiler.parse_submission(end_position)` operates on the current token
+stream. It owns single-item parsing, supplied-input boundaries, and parser
+scratch restoration. The caller owns the semantic transaction so publication
+can wait for successful initialization. The terminal is now a client of
+`ReplSession.submit`; `api-check.x` is a separate direct API client.
 
 ## Subset and completeness
 
@@ -132,38 +185,45 @@ Known boundaries:
 - A one-million-step Lisp call budget interrupts a runaway loop and leaves
   prior values usable. Native callbacks are not a preemptible sandbox.
 
-Lexical incomplete input comes from `Tokenizer.status`. Otherwise the
-adapter attempts ordinary parsing and retains input when a parse diagnostic
-occurs at the source boundary. `expected scalar type` at that boundary also
-means more tokens may complete a parameter list. It never treats evaluation
-failure as incomplete input. This is a parser-based heuristic: the compiler
-has no dedicated complete/incomplete/error submission API, and an unrepaired
-prefix may keep prompting until `:cancel`. It cannot decide that a following
-line intends to extend an already complete construct such as an `if`.
+Lexical incomplete input comes from `Tokenizer.status`. Parser operations
+that require another token call `Compiler.require_input`; reaching the optional
+supplied-input boundary raises `incomplete`. Ordinary files leave that boundary
+unset and keep their usual diagnostics. The adapter no longer inspects error
+messages or guesses completeness from a diagnostic's category and position.
+Semantic and evaluation failures are not reclassified as incomplete.
+
+The hooks cover operands, types, field names, required delimiters, and
+declaration endings used by this subset. Custom macro/type/import/enum and
+some `with`/catch grammar paths have not been completed for incremental input.
+This remains a subset API. It cannot infer that a following line intends to
+extend an already complete `if`; put such a construct in a block.
 Statement diagnostics include the synthetic wrapper's extra line.
 
 ## Evidence and architecture review
 
-`check.py` passes 18 focused recovery/subset checks, then compiles the same
-three function examples natively and compares results: `15`, `32`, `499500`.
-The interpreted comparison reports 20 Lisp calls, 7 word-machine entries,
-and zero machine errors. Separate recovery checks cover malformed bodies and
-parameter lists, unknown identifiers, unsupported lowering, runtime division
-by zero, duplicate names, and the runaway-loop budget.
+`check.py` runs the direct API client and 18 terminal recovery/subset checks,
+then compiles the same three function examples natively and compares results:
+`15`, `32`, `499500`. The direct client checks 22 submission outcomes across
+three fresh sessions, including failed multi-binding initialization and ID
+reuse. The interpreted comparison reports 20 Lisp calls, 7 word-machine
+entries, and zero machine errors.
 
-On this macOS checkout, the latest warm-process startup median was 171.2 ms
-across seven runs. A batch of 1,002 submissions took 338.1 ms, about 0.167 ms
-per input after subtracting the startup estimate. These are exploratory wall
-times including process/input/output overhead, not a performance benchmark.
-Logs are under `debug/repl-build.log` and `debug/repl-check.log`.
+The shared parser changes also pass `make verify-fixtures`: 747 compiler
+fixtures and 1,746 expected artifacts, plus that target's existing probes.
+Expected artifacts were not rewritten.
 
-The 238-line adapter is enough to demonstrate composition. It uses these
-existing owners:
+Warm-process startup is approximately 170 ms on this checkout. The latest
+1,002-input batch took roughly 330 ms, about 0.16 ms per input after subtracting
+startup. These exploratory wall times include process/input/output overhead.
+Logs are under `debug/repl-session-build.log`, `debug/repl-session-check.log`,
+and `debug/repl-parser-fixtures.log`.
+
+The session adapter composes these owners:
 
 | Responsibility | Source |
 | --- | --- |
 | Prelude, shared macro libraries, unit lifetime | `src/frontend.x` |
-| Tokenization and semantic transactions | `src/compiler.x` |
+| Tokenization, semantic transactions, required-input signal | `src/compiler.x` |
 | Ordinary declarations, function bodies, typing and binding | `src/parse.x`, `src/expressions.x` |
 | Typed AST to Lisp | `Compiler.lower_comptime`, `src/comptime.x:1873` |
 | Persistent global table and scalar conversions | `etc/comptime.xlisp` |
@@ -177,11 +237,10 @@ expressions for initializer thunks and result returns. The extra unresolved
 identifier check prevents a reproduced wrong result; it is not a replacement
 binder. Keep the spike's policy checks at the adapter boundary.
 
-**Recommendation: continue.** No new evaluator is required for a useful
-value-oriented x2c REPL. The next bounded step should establish a supported
-submission API with explicit completeness and parser-state recovery, then
-resolve failed initialization and type/value parity at native-dependent
-boundaries. Definition replacement and memory reclamation need separate
-lifetime decisions. Full-language execution should not be promised from this
-prototype. This work is local-only; publication and production integration
-have not been validated or authorized.
+**Recommendation: continue with lifetime ownership and upstream comptime
+integration.** The structured session, explicit parser boundary, and failed
+initializer policy now work. Fine-grained reclamation needs a real ownership
+boundary; function replacement remains a separate semantic decision. Consume
+comptime improvements from the other session and rerun native/interpreted
+comparisons rather than implementing those features here. This work remains
+local; bootstrap refresh and full publication validation have not been run.

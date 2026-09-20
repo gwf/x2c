@@ -651,6 +651,7 @@ static List _enum(Compiler c) {
 }
 
 static List _type_specifier(Compiler c) {
+  c.require_input();
   List slot = c.try_parse_macro_slot(<type>);
   if (slot) return %($slot);
   List syntax = NULL;
@@ -720,6 +721,7 @@ static List _array_suffix(Compiler c) {
   }
   List expr = c.parse_expression();
   if (c.peek(0) != <]>) {
+    c.require_input();
     Symbol unexpected = c.peek(0);
     c.report_error(
       <parse>, "expected ']'",
@@ -792,10 +794,17 @@ static List _function_parameters(Compiler c) {
   if (c.peek(0) == <)>)
     c.report_error(
       <parse>, "empty parameter list; use (void)", c.token, NULL);
+  SymScope saved = c.params, parsed;
+  int complete = 0;
+  defer { if (!complete) c.params = saved; }
+  List params;
   c.sym.push_new_scope();
-  List params = c.parse_parameter_list();
-  c.params = c.sym.pop_scope();
+  {
+    defer parsed = c.sym.pop_scope();
+    params = c.parse_parameter_list();
+  }
   if (c.peek(0) != <)>) {
+    c.require_input();
     Symbol unexpected = c.peek(0);
     c.report_error(
       <parse>, "expected ')'",
@@ -803,6 +812,8 @@ static List _function_parameters(Compiler c) {
       %("parameters:" ${params.str()} "symbol:" ${unexpected.str()}));
   }
   else c.next();
+  c.params = parsed;
+  complete = 1;
   return params;
 }
 
@@ -840,6 +851,7 @@ static List _direct_declarator(
     List decl = _declarator(
       c, NULL, NULL, method_identity, source_first, source_after);
     if (c.peek(0) != <)>) {
+      c.require_input();
       /* One identifier followed by another is a parameter list whose type
          this unit cannot see, such as a package type named without its
          import alias, not a parenthesized declarator. */
@@ -1429,6 +1441,12 @@ static List _parse_expression_function_body(Compiler compiler) {
 static List _finish_function_parts(
   Compiler c, List declaration, List rtype, List declarator,
   List binding, List syntax) {
+  defer {
+    c.params.symbols = NULL;
+    c.params.bindings = NULL;
+    c.params.enumerators = NULL;
+    c.params.macros = NULL;
+  }
   if (c.parsing_source_syntax()) {
     c.sym.push_scope(c.params);
     defer c.sym.pop_scope();
@@ -1473,10 +1491,6 @@ static List _finish_function_parts(
     else if (expression_body) body = _parse_expression_function_body(c);
     else body = c.parse_compound_statement();
   }
-  c.params.symbols = NULL;
-  c.params.bindings = NULL;
-  c.params.enumerators = NULL;
-  c.params.macros = NULL;
   _publish_function_lifecycle(c, name, initializer_owner, shutdown_owner);
   return %(function $rtype $declarator $body);
 }
@@ -1811,11 +1825,37 @@ List Compiler.parse_top_level(Compiler c) {
     if (meta && c.meta_is_comptime_only(function)) return NULL;
     return function;
   }
+  c.require_input();
   Symbol unexpected = c.peek(0);
   c.report_error(
     <parse>, "expected ';', '{', or '=>'",
     c.token,
     %("token:" ${c.token.text} "symbol:" ${unexpected.str()}));
+}
+
+/** Parses one submission from the current token stream. `end_position` is
+    the byte offset after supplied input, before any synthetic closing text.
+    Missing required syntax raises `<incomplete>`; trailing items are rejected.
+    Temporary parser scopes and captured parameters are restored on every exit.
+    The caller owns the semantic transaction and commits after execution.
+*/
+List Compiler.parse_submission(Compiler c, int end_position) {
+  Token boundary = c.input_boundary;
+  SymScope params = c.params;
+  int scope_count = c.sym.scope_count();
+  defer {
+    while (c.sym.scope_count() > scope_count) (void) c.sym.pop_scope();
+    c.params = params;
+    c.input_boundary = boundary;
+  }
+  Token token = c.token;
+  while (token.type != <eof> && token.pos < end_position) token++;
+  c.input_boundary = token;
+  List result = c.parse_top_level();
+  if (c.peek(0) != <eof>)
+    c.report_error(
+      <parse>, "submit one top-level item at a time", c.token, NULL);
+  return result;
 }
 
 static List _finish_aggregate_type(

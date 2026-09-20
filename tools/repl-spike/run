@@ -11,7 +11,7 @@ builds/0/x2c build --plain --kind static-library \
   --output "$build/compiler.a" $objects
 builds/0/x2c build --plain --build-dir "$build/native" --output "$build/repl" \
   --x-include-dir src --c-include-dir builds/0/src \
-  tools/repl-spike/repl.x "$build/compiler.a"
+  tools/repl-spike/repl.x tools/repl-spike/session.x "$build/compiler.a"
 printf '%s\n' '$(begin)' > "$build/seed.x"
 if [ "${1-}" = --build-only ]; then exit 0; fi
 exec "$build/repl" "$build/seed.x" "$@"
