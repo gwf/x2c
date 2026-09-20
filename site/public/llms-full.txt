@@ -2589,11 +2589,32 @@ Marking a function `meta` has three consequences.
   time, unless it reaches a compiler operation, directly or through another
   `meta` function. A function that reaches one has no runtime form and none is
   emitted for it.
-- A call to it whose arguments are all compile-time constants may be replaced
-  by the answer its compile-time form computes. The compiler folds only where
-  the two forms agree; a function that returns an owned value such as a
-  `String` keeps its call. A function that reaches file-scope state is refused,
-  because the compile-time session cannot read the program's variables.
+- An ordinary call may be folded only for a locally installed eligible
+  definition, literal arguments already matching the parameter types, and
+  a declared `int` result fitting `int`. Other return types remain calls.
+  This optimization is separate from explicit evaluation and result insertion.
+
+The compile-time subset cuts across C and x2c constructs. Local mutation,
+represented collections, local address-taking/dereference, and resolved
+method calls are supported; native aggregate field access and operations
+without compile-time bindings are not. A supported type does not expose all
+of its runtime methods. See the guide's
+[capability and operation inventory](https://x2c-lang.dev/docs/guide/meta-functions.html#the-compile-time-subset).
+
+Meta functions may pass and return represented values such as wide integers,
+floating values, Strings and collections during compile-time execution.
+Explicit `$(...)` expression insertion currently accepts integers as `int`
+syntax, strings as quoted C string syntax, Symbols, identifiers and nonempty
+expression-syntax Lists. It does not directly insert floating values or
+arbitrary collection/callable values. This boundary does not limit internal
+returns to `int`; see
+[results](https://x2c-lang.dev/docs/guide/meta-functions.html#results-compute-insert-or-fold).
+
+Compile-time objects belong to the evaluator. Ordinary dual-form meta
+functions reject file-scope state because the program's initializers and
+future mutable state are not available to them. Compiler-only functions
+reaching compiler operations are exempt from that rejection, but use
+separate per-unit compile-time state, not the program's variables.
 
 A `meta` declaration in an imported `.xmacro` installs its compile-time form in
 every consuming unit. The runtime forms are independent: a unit emits a

@@ -1,5 +1,24 @@
 # Meta Functions
 
+x2c extends C. The subset that a `meta` function can execute during
+compilation cuts across both C features and x2c additions: integer loops,
+local pointer indirection, collection literals and method calls can work;
+a native struct field or an otherwise ordinary library call can stop it.
+There are three separate questions:
+
+1. **Can the body execute?** Its syntax and values need compile-time
+   representations. This includes parameters, locals, mutation and returns.
+2. **Can each operation execute?** Every resolved call needs a compile-time
+   binding. Having a supported receiver type does not expose its entire API.
+3. **Can the answer become program syntax?** Returning a value to another
+   meta function, inserting it with `$(...)`, and folding an ordinary call
+   have different limits.
+
+`meta` is not a purity annotation. A body can mutate locals, arrays and
+maps, and pass local addresses to other meta functions. Its compile-time
+objects belong to the evaluator; they are not the objects the eventual
+program allocates.
+
 Start with an ordinary function. This one takes an integer and returns an
 integer, using the same braces, `return`, and arithmetic as C:
 
@@ -106,8 +125,8 @@ printf("local    %d\n", poly(n));
 ```
 
 Here `poly(7)` becomes 71, while `poly(n)` remains a call. This automatic
-substitution is called folding. It is an optimization: you get the same
-answer either way. `$(poly 7)` explicitly requests compile-time evaluation;
+substitution is called folding. It is an optimization intended to preserve
+the runtime answer; the capability catalog below records current differences. `$(poly 7)` explicitly requests compile-time evaluation;
 `poly(7)` uses ordinary call syntax and leaves folding to the compiler.
 
 ## Use x2c conveniences
@@ -182,63 +201,281 @@ this way only when all of the following hold.
 - The return type is `int` and the answer fits an `int`. An `int` literal
   spells itself, which is what makes the substitution possible.
 
-This is an optimization. The answer is the same either way, so you do not
-need to arrange for it. A `String`, `List` or `Map` result keeps its call:
+This is an optimization, so you do not need to arrange for it. Its
+equivalence depends on staying within the supported operation semantics;
+see the native-array narrowing and missing-value differences below. A `String`, `List` or `Map` result keeps its call:
 the caller owns the value a call returns, and a literal carries no such
-ownership. A `meta` body cannot read file-scope variables.
-Pass the values it needs as arguments instead.
+ownership. This restriction on folding does not restrict internal meta
+return types or forbid explicit computed-string insertion.
 
-## What a meta body may not contain today
+## The compile-time subset
 
-The compiler translates the body into a compile-time form before it runs.
-Some constructs have no such form. The compiler reports this at the `meta`
-marker and names the reason. A body holding a struct or union gives:
+The following tables separate supported values, available operations and
+current refusals. They catalog the implemented surface and known differences;
+untested combinations are identified explicitly rather than implied to work.
 
-```text
-sample.x:3:1: macro: this function cannot run at compile time
-  meta static int mt_scan(int n) {
-  ^^^^
-  note: reason: a struct or union, which has no compile-time representation
+### Values, declarations and mutation
+
+The table describes current support, not a promise that every C operation
+on a listed type works. The operation inventory below further limits calls.
+
+| Value or construct | Construction, parameters and returns | Reads and changes during compilation |
+| --- | --- | --- |
+| Native integers, including `char`, narrow, unsigned and wide types | Numeric literals and typed locals; values can pass between meta functions and return from them. Width alone is not a prohibition. | Arithmetic, comparisons, casts, assignment and local compound updates. Literal spelling also matters: `10000000000` works in a tested wide calculation; `10000000000L` currently declines as an unreadable integer literal. |
+| `float`, `double` | Literals, locals, parameters and returns work, including `f`/`F` floating suffixes. | Arithmetic and scalar conversions work. Direct insertion of a floating result is a separate missing case. |
+| `long double` | A typed parameter/return and arithmetic via a `double` argument passed a focused probe; extended-precision parity is not established. | An `L`-suffixed floating literal such as `9.0L` currently declines. Treat this as limited coverage, not a full precision guarantee. |
+| `void` return | A meta helper may return no value, including a helper writing through an out-parameter. | The call can run for its effect; this is distinct from a `Var` containing runtime `void`. |
+| `String`, `Symbol` | String/symbol literals, computed strings and interpolation; parameters and returns. | String indexing reads character codes. Bound string methods work; indexed string writes do not. Symbols have the small method surface listed below. |
+| `List` | Templates, braced/list-compatible initialization, conversion from `Array`; parameters and returns. | Index/association reads, traversal, matching and bound methods. No indexed assignment; build a new List instead. A returned data List is not automatically an expression. |
+| `Array` | `[]`, `[a, b]`, `Array.new()`, conversion from `List`; parameters and returns. | Indexed reads/writes and the bound mutating methods. Contents can mix represented values and nest collections. |
+| `Map` | `{}`, keyed literals, `Map.new()`; parameters and returns. | Keyed reads/writes and bound methods; represented collections and callable values can be stored inside it. |
+| `Var` | Boxes represented numbers, strings, symbols, collections and callable values. | Only the exposed operations below. Compile-time `void` and an empty List share a representation; do not use this distinction to control a meta calculation. |
+| `Func` | Lambdas with typed or bare parameters, captures and references to available functions; parameters and returns between meta functions. | Dynamic calls and storage in collections work. This does not expose arbitrary native function-pointer calls or unrepresented argument types. |
+| Local native arrays | A literal-sized one-dimensional array, such as `int a[3] = {1, 2};`, has compile-time storage. Omitted elements are filled with zero-like values. | Indexing and simple assignment work; passing the array to an indexed pointer parameter works in the tested case. This is represented storage, not a native byte buffer. See element/dimension limits below. |
+| Pointers to locals | `int *p = &n;`, copying that pointer and passing it to another meta function work. | `*p` reads and `*p = value` writes the local. General pointer arithmetic, address-of an array element and native memory/layout access are not supplied by this cell representation. |
+| Native structs and unions | Native aggregate locals and native field access are rejected; a type name in a signature alone does not establish a usable value representation. | Dot **methods** resolve as calls and can work. Dot **fields** need native aggregate representation and do not. Compiler queries may inspect a struct's type and build future field access syntax without reading a struct value. |
+| `File`, buffers and other resource types | No general compile-time constructor/operation surface is installed for these types. A declaration or opaque type name alone does not make the resource usable. | For example, `File.open` has no binding. Use the compiler's explicit text-embedding operation for source-dependent text. |
+
+Collections hold values, not arbitrary native memory. Nested collections keep
+references to their contained objects; mutating a shared `Array` or `Map`
+changes that object. Native aggregates do not become legal collection
+contents merely because the container itself is supported.
+
+Native array coverage is narrower than C's array model. Integer arrays have
+fixture coverage; focused probes also cover `double` and `String` elements.
+A dimension such as `1 + 1` is rejected even though C can compute it, and a
+nested braced initializer for `int a[2][2]` is rejected. The implementation
+stores a local native array in a dynamic container, using its first declared
+dimension; this is not general multidimensional or native-layout support.
+Native-array initializer narrowing has a confirmed difference: with
+`unsigned char a[1] = { n }; return a[0];`, passing 257 produced 257 during
+compilation and 1 at run time. Convert the element explicitly before storing
+it when relying on narrowing; accepting the declaration does not establish
+C-equivalent initialization. This is an implementation gap. Other element
+types, array decay/alias combinations and every zero-initialization case
+remain coverage gaps.
+
+Even null pointers need care: a probe declaring `int *p = NULL` was rejected
+as reaching file-scope state. Do not extrapolate general null/address/cast
+support from the working local-address example below.
+
+These two functions demonstrate a supported address and a supported chain:
+
+```x2c
+meta static void meta_set(int *out) { *out = 9; }
+
+meta static int meta_address(void) {
+  int n = 1;
+  meta_set(&n);
+  return n;
+}
+
+meta static int meta_parts(String path) => path.split(".").len();
+
+int main(void) {
+  printf("%d %d\n", $(meta_address), $(meta_parts "a.b.c"));
+  return 0;
+}
 ```
 
-The refusals a body is most likely to meet:
+```text
+9 3
+```
 
-| Construct | Reason in the diagnostic |
+The chain calls `String.split`, then `List.len`. Neither dot reads a native
+struct field.
+
+### Which library operations are available
+
+A method uses its ordinary resolved call, so `text.len()` and
+`String.len(text)` reach the same operation. Chaining adds no separate
+restriction: every call in the chain must be available.
+
+The following is the shipped binding inventory for ordinary meta calls.
+Names in each row follow the type prefix, for example `Array.push`.
+It is an inventory of exposed operations, not evidence that every argument
+combination or callback has been tested. Consult the runtime module
+reference for signatures, then apply the compile-time qualifications here.
+
+| Type | Exposed operations |
 | --- | --- |
-| `goto` | `a goto has no lowering` |
-| `defer` | `defer, because a compile-time function does not free its values: the evaluator owns them` |
-| a struct or union local, or a `.` field read | `a struct or union, which has no compile-time representation` |
-| a `switch` arm running into the next | `a switch arm that falls through into the next` |
-| a call with no compile-time binding | `no binding for NAME` |
+| `String` | `new`, `equal`, `getindex`, `len`, `add`, `lower`, `upper`, `find`, `contains`, `startswith`, `endswith`, `getslice`, `replace`, `join`, `split`, `split_lines`, `partition`, `rpartition`, `find_all`, `rfind`, `count`, `capitalize`, `repeat`, `remove_prefix`, `remove_suffix`, `escape`, `unescape`, `var` |
+| `List` | `len`, `reverse`, `index`, `getindex`, `last`, `assoc`, `get`, `array`, `sort`, `match`, `search`, `equal`, `contains`, `map`, `filter`, `try_next`, `var` |
+| `Array` | `new`, `len`, `push`, `getindex`, `setindex`, `list`, `join`, `find`, `contains`, `count`, `unshift`, `take_last`, `shift`, `remove`, `insert`, `try_next`, `var` |
+| `Map` | `new`, `len`, `get`, `getindex`, `setindex`, `contains`, `del`, `getdefault`, `setdefault`, `list`, `try_next`, `var` |
+| `Symbol` | `str`, `var` |
+| `Var` | `car`, `cdr`, `tag`, `parse`, `convert`, `integer`, `floating`, `is`, `equal`, `str`, `list`, `func`, `repr` |
+| `int`, `long`, `double` | `str`, `var` |
+| `Func` | `var`; direct dynamic calls have their own support |
 
-A compile-time value is a Lisp value, so a struct would have to become a
-`Map` keyed by field name, which reads back as a reference where the source
-wrote a value. `defer` is refused because the evaluator owns every value a
-compile-time function makes, so freeing one would take it away. `goto` and
-a falling-through `switch` arm are refused because the compile-time form has
-no place to jump to.
+For example, `String.strip`, `String.try_long`, `Map.keys`, `Map.try_get`,
+`Array.cleanup`, `Symbol.len` and `Var.kind` have no ordinary meta binding.
+The existence of an operation at run time, or even in the underlying
+compile-time library under another spelling, is not sufficient.
+The same rule applies to native C functions and optional packages.
+Other installed meta functions and the compiler operations declared in
+`meta.x` extend this surface; including a normal function declaration does
+not install its body for compile-time execution.
 
-Ordinary control flow is carried: `if`, `while`, `for`, `do`, `switch` with
-`break` or `return` in each arm, `foreach`, `break`, `continue`, recursion,
-`match`, literal templates, lambdas and `Func` values with typed or bare
-parameters, and `String`, `List`, `Array` and `Map` operations.
-File-scope variables are not available to a `meta` body; pass their values
-as parameters or keep the working state in locals.
+The adapters normalize missing List/Array/Map lookups and removals to an
+empty List rather than runtime `void`. Keep calculations inside the defined
+bounds when they must agree with runtime code. The exact bindings and
+adapters live in `etc/comptime.xlisp`; supported body forms live in
+`src/comptime.x`.
 
-The last row covers the most common case. A call inside a `meta` body
-resolves against the compile-time library, and an operation with no binding
-there declines the whole function. A body calling `time` reports
-`reason: no binding for time`. Prefer the `String`, `List`, `Array` and
-`Map` operations the shipped macro files already use.
+### Control flow and current rejections
 
-## Compile-time arithmetic
+`if`, conditional expressions, short-circuit boolean operations, `while`,
+`for`, `do`, `break`, `continue`, recursion, `foreach`, `match`, templates,
+lambdas and destructuring have compile-time support. A `switch` may share
+labels and its final arm may end normally; an earlier arm must not execute
+through to the next one. Recursive calculations remain subject to the
+compiler's evaluation limits.
 
-The two forms agree on arithmetic. Narrow and unsigned integer types wrap
-and compare the way the emitted C does, floating values truncate and compare
-the same way, and every conversion position the source writes converts in
-both forms. `unittest/compiler-fixtures/meta-differential.x` prints each
-answer twice, once from the compile-time form and once from the emitted
-function, and the fixture owns the expected output.
+Some combinations still decline: `switch` with a subject needing a temporary
+binding on a loop path; destructuring a source needing such a binding on a
+loop path; and taking the address of a destructured local. Match patterns
+must fold at lowering time, so a pattern interpolating a local value is not
+generally supported. These are binding/lowering gaps, not fundamental
+restrictions on loops, destructuring or pattern matching.
+
+Mutation is position-sensitive. `n++` as a statement is supported, but
+`return n++;` is not. `a[i] = a[i] + 1;` and `*p = *p + 1;` are supported
+shapes; `a[i] += 1;` and `(*p)++;` are not. An assignment used as an
+expression is not a general substitute for a statement.
+
+The table separates present restrictions from design assessment. "Gap"
+means feasible in principle, not scheduled or promised support.
+
+| Currently unsupported | What would be needed; fundamental or gap? |
+| --- | --- |
+| `goto`, switch fallthrough | **Gap:** control-flow lowering that preserves the transfer. |
+| Postfix expression values, compound updates to indexed/dereferenced places | **Gap:** preserve the old result and evaluate the destination once. |
+| Computed native-array dimensions, general multidimensional arrays and missing element conversions | **Gap:** extend the represented array shape and typed operations. |
+| Native struct values/fields | **Gap:** a representation preserving value copying, identity where applicable, and field semantics. A Map alone would not preserve C value semantics. |
+| Unions, native layout and general pointers | **Representation gap:** model storage, aliasing and layout. A pointer to an actual future runtime object cannot be dereferenced during compilation; that is a **phase boundary**. Symbolic addresses would be different from accessing that object now. |
+| `defer` | **Gap** for deferred execution in general. Explicitly freeing evaluator-owned objects conflicts with the **current ownership model**; it is not an argument that all deferred actions are impossible. |
+| `try`, `catch`, `finally`, `raise` in a meta body | **Gap:** exception transfer and cleanup need compile-time modeling. Evaluation failures can still become compiler diagnostics. |
+| Missing library/resource operations, including `File.open` | **API gap:** implement bindings and appropriate resource lifetimes. Compile-time file I/O is possible in principle; it is not prohibited by the phase boundary. |
+| Loop-path temporary bindings, address-taken destructured locals, nonfolded match patterns | **Gap:** preserve required bindings and support pattern evaluation at the appropriate time. |
+| Native `sizeof` expressions | **Gap:** provide the compile-time value of the queried layout; `sizeof(int)` currently declines as an unsupported expression. |
+| Integer `L` and floating `L` literal suffixes tested above | **Gap:** read these literal spellings with the appropriate type and precision. |
+| Named enum values | **Gap:** make the enumerator's numeric value available to the lowerer. |
+| Reading future runtime mutable state | **Fundamental phase boundary:** that program state does not exist yet. Separate compile-time state is possible but is not the same state. |
+| Floating/other representable result insertion; folding beyond `int` | **Gap:** construct correctly typed program constants and preserve value/ownership semantics. See the next section. |
+
+For example, these are intentionally rejected definitions:
+
+<!-- ignore: native field access is unsupported in a meta body -->
+```x2c,ignore
+meta int meta_field(void) {
+  struct { int x; } value = { 1 };
+  return value.x;
+}
+```
+
+<!-- ignore: compound update of an indexed destination is unsupported -->
+```x2c,ignore
+meta int meta_update(void) {
+  int values[2] = { 1, 2 };
+  values[0] += 1;
+  return values[0];
+}
+```
+
+Their diagnostic reasons are respectively `a struct or union, which has no
+compile-time representation` and `update of a computed place`.
+The compiler checks the body when installing the meta definition, so an
+unused function or an untaken branch does not hide an unsupported construct.
+
+### Lifetime and state
+
+Compile-time allocations belong to the evaluator session. Do not free,
+close, or otherwise take over evaluator-owned objects: the ordinary resource
+cleanup API is not available, and `defer` is rejected. A returned collection
+can be consumed by another meta function while the session is alive; it does
+not become a pointer to the eventual program's heap. A local address is useful
+within the calculation, not a portable constant address to embed in C.
+
+The emitted runtime function still follows the runtime's ownership rules.
+Evaluator cleanup does not add cleanup to that function. In particular,
+allocating scratch collections in a dual-form body does not by itself prove
+that repeated runtime calls have the desired lifetime behavior.
+
+Ordinary dual-form meta functions cannot reach file-scope variables, directly
+or through another function. Pass values as arguments or use locals. There is
+an implementation exception for compiler-only functions that reach compiler
+operations: their state uses a separate per-unit compile-time table, without
+running the program's file-scope initializers. This does not grant access to
+future runtime state or establish a general shared-global contract.
+
+## Results: compute, insert, or fold
+
+A meta function can return more than `int`. Computation and return between
+meta functions can preserve floating, wide numeric, collection and callable
+values. The expression insertion boundary is narrower:
+
+| Result | Explicit `$(...)` expression insertion | Automatic ordinary-call folding |
+| --- | --- | --- |
+| Integer value, including a computed character code | Accepted as `int` expression syntax; the function's exact original scalar type is not preserved by this path. Do not infer correct typed-wide insertion from wide internal arithmetic. | Only declared `int` results fitting `int`, under the conditions above. |
+| `float`, `double` | No floating-result insertion branch today; direct insertion is diagnosed. | Keeps the call. |
+| Computed string | Accepted as quoted C string literal syntax. Existing computed-string support is independent of numeric insertion gaps. | Keeps the call, preserving runtime result ownership. |
+| `Symbol` | Accepted as Symbol literal syntax. | Keeps the call. |
+| Identifier or nonempty syntax `List` | Bound as identifier/expression syntax, subject to normal compiler binding and typing. An arbitrary data List is not an expression. | Keeps the call. |
+| `Array`, `Map`, `Func`, empty List or arbitrary native address | No direct value-to-expression insertion. Build appropriate program syntax when that expresses the intended result. | Keeps the call. |
+
+Here `meta_half` returns a `double` to another meta function, which converts
+it to an `int` before insertion. The second result is a computed string:
+
+```x2c
+meta static double meta_half(double n) => n / 2.0;
+meta static int meta_whole(void) => (int) meta_half(9.0);
+meta static String meta_label(String stem) => stem.upper() + "!";
+
+int main(void) {
+  printf("%d %s\n", $(meta_whole), $(meta_label "ready"));
+  return 0;
+}
+```
+
+```text
+4 READY!
+```
+
+Replacing `$(meta_whole)` with `$(meta_half 9.0)` is rejected with
+`compile-time Lisp result cannot fill an expression slot`. The calculation
+succeeded; inserting the floating answer is the missing operation.
+
+The broader design possibility is to insert any legal result that can be
+represented as a correctly typed program constant, including numeric,
+character, string and other representable results. This is not current
+support or a settled conversion design. It does not imply serializing
+arbitrary evaluator objects, and it must preserve computed strings already
+supported today.
+
+## Compile-time arithmetic and evidence
+
+Native scalar conversions are applied at typed declarations, assignments,
+casts, arguments between meta functions and returns. Array/List and
+Symbol/String conversions also have explicit support. This does not make
+all casts meaningful: reinterpreting a native address still needs a native
+storage representation.
+
+The `meta-differential` compiler fixture checks selected narrow/unsigned
+arithmetic, wide intermediate values, floating operations and conversions
+against runtime calls. The `comptime-lowering`, `meta-import` and
+`meta-cursors` fixtures cover collections, callable values, local addresses,
+method chaining and iteration. They do not prove every operation/type
+combination equivalent. Focused probes for this chapter additionally covered
+nested Array/Map contents, pointer out-parameters, `double`/`String` native
+array elements, wide and floating internal returns, and the rejected shapes
+shown above. Native-array initializer narrowing is a confirmed mismatch, not
+merely an untested case. Other native-array conversions, extended-precision parity,
+general pointer behavior, all callback signatures and resource lifetimes
+remain unverified. An `_Alignof(int)` probe failed during ordinary parsing,
+before meta lowering; that does not establish a meta-specific restriction.
+This catalog covers the installed operation surface and identified lowering
+boundaries, not an exhaustive proof of every combination of C and x2c syntax.
 
 ## From values to syntax
 
