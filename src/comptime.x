@@ -429,14 +429,18 @@ static Var _lower_value(Lowering l, int id) {
 static Var _lower_number(Lowering l, List type, String text) {
   long integer;
   double floating;
-  /* The tokenizer validated the suffix. Read a float at its own precision
-     before widening or arithmetic, just as the emitted C literal does. */
+  /* Round at the literal's own precision before widening or arithmetic. */
   if (type === %(float)) {
-    float value = strtof(text, NULL);
-    return value;
+    char *stop;
+    float value = strtof(text, &stop);
+    if (stop == (const char *) text)
+      return _lower_decline(l, "unreadable floating literal");
+    if (*stop == 'f' || *stop == 'F') stop++;
+    if (!String.new(stop).strip(NULL)) return value;
+    return _lower_decline(l, "unreadable floating literal");
   }
   int hex = text.startswith("0x") || text.startswith("0X");
-  if (type.match(%((!or double float))) ||
+  if (type === %(double) ||
       (!hex && (text.contains(".") ||
                 text.contains("e") || text.contains("E")))) {
     if (text.try_double(&floating)) return floating;
