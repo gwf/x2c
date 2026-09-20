@@ -950,4 +950,41 @@ for mode in cached cold live; do
     fail "generated call signatures changed under $mode collection"
 done
 
+# The shared compile-time parent is built between units, so a unit whose
+# first session comes after its declarations abandons its first attempt and
+# translates again. Its output and its diagnostics must not say which
+# attempt produced them: translating it alone must match translating it
+# after a unit that already built the parent.
+LATE="$BUILD/late"
+mkdir -p "$LATE/src" "$LATE/alone" "$LATE/after"
+cat >"$LATE/src/late-primer.x" <<'EOF_LATE_PRIMER'
+#include "x2c.x"
+List late_primer(void) { return %(1 2 3); }
+EOF_LATE_PRIMER
+cat >"$LATE/src/late-parent.x" <<'EOF_LATE_PARENT'
+#include "x2c.x"
+typedef struct LateRow { int key; String name; } LateRow;
+int LateRow.key(LateRow row) { return row.key; }
+String LateRow.name(LateRow row) { return row.name; }
+int late_sum(int a, int b) { return a + b; }
+int late_total(List items) {
+  int total = 0;
+  foreach (Var item, items) total = late_sum(total, item.int());
+  return total;
+}
+EOF_LATE_PARENT
+(cd "$LATE" && "$X2C" translate --out-dir alone src/late-parent.x) \
+  >"$LATE/alone.log" 2>&1 ||
+  fail "a unit whose first compile-time session comes late did not translate"
+(cd "$LATE" && "$X2C" translate --out-dir after src/late-primer.x \
+  src/late-parent.x) >"$LATE/after.log" 2>&1 ||
+  fail "a late-session unit did not translate after a primer"
+for artifact in late-parent.c late-parent.h; do
+  cmp -s "$LATE/alone/$artifact" "$LATE/after/$artifact" ||
+    fail "$artifact changed when the shared parent was built on demand"
+done
+if grep -q 'late-parent.x:' "$LATE/alone.log"; then
+  fail "a restarted unit reported something an eager one does not"
+fi
+
 echo "header cache probes passed"

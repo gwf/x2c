@@ -280,6 +280,7 @@ Public functions:
 `Compiler.macro_invocation_needs_shallow_expansion`,
 `Compiler.macro_starts_target_at`, `Compiler.open_macro_library`,
 `Compiler.publish_macro_library`, `Compiler.shared_definition`,
+`macro_library_defer`, `macro_library_pending`,
 `Compiler.parse_macro_lisp_top_level`, `Compiler.parse_source_lisp`,
 `Compiler.evaluate_declaration_effect`, `Compiler.install_meta_function`,
 `Compiler.parse_macro_lisp_shallow`, `Compiler.lift_macro_lisp_expression`,
