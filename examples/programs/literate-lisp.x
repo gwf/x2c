@@ -63,10 +63,9 @@ typedef struct Env {                                                            
   struct Env *parent;                                                           // Outer frame; borrowed pointer.
 } Env;
 
-/* Global bindings persist across top-level evaluations. The native
-   registry maps binding names to host functions. Reserved forms have
-   callable identities; name lookup and callable dispatch are separate
-   operations.
+/* Global bindings persist across top-level evaluations. The native registry
+   maps binding names to host functions. Reserved forms have callable
+   identities; name lookup and callable dispatch are separate operations.
 */
 typedef struct Interp {                                                         // Maps store Var keys and values.
   Map globals;                                                                  // Names -> global values.
@@ -109,14 +108,11 @@ static Var Interp.eval(Interp *self, Env *env, Var form) {
   List args = expr.cdr();                                                       // O(1) tail access; no List copy.
   if (fn is <lambda>) {                                                         // Runtime callable-type introspection.
     Fn closure = fn.pointer();                                                  // Unbox the stored pointer.
-    if (closure.macro)                                                          // Dot dereferences the heap pointer.
-      return self.eval(env, self.invoke(closure, args));                        // Expansion stays an ordinary Var.
+    if (closure.macro) return self.eval(env, self.invoke(closure, args));     // Expansion stays an ordinary Var.
   }
   else {
-    if (fn is not <func>)                                                       // Reject a non-callable Var tag.
-      raise %(not-call (actual ${fn.kind()}));                                  // ${...} evaluates an x2c expression.
-    if (fn in self.specials)                                                    // Map membership by key.
-      return self.special(env, self.specials[fn], args);                        // Map value converts to Symbol.
+    if (fn is not <func>) raise %(not-call (actual ${fn.kind()}));            // ${...} evaluates an x2c expression.
+    if (fn in self.specials) return self.special(env, self.specials[fn], args);  // Map value converts to Symbol.
   }
   List values = self.eval_args(env, args);                                      // Evaluate arguments left to right.
   return self.apply(fn, values);                                                // Apply to values, not source forms.
@@ -249,49 +245,36 @@ static Var Interp.lookup(Interp *self, Env *env, Var name) {
   raise %(unbound (name $name));                                                // $name interpolates one named value.
 }
 
-/* A closure saves the free local names its body reads, including a scalar
-   body or a name inside a nested expression. The walk follows evaluated
-   positions: quote is data, and quasiquote reads only through unquote.
-   Nested lambdas and macros introduce their own parameter bindings.
-
-   Global names are not copied. They resolve when the function runs, so a
-   later global definition is visible. Caller locals are never consulted.
+/* Capture free locals where the closure is defined. Quote is data; unquote
+   adjusts quotation depth, and nested parameters bind their own names.
+   Globals remain looked up at call time. Caller locals never participate.
 */
 static void Interp.capture(
   Interp *self, Env *env, Var form, List bound, int depth, Map captures) {
   if (form.is_atom()) {
-    if (depth || form in self.reserved || form in bound || form in captures)    // Skip data, bound names, and saved names.
-      return;
-    for (Env *local = env; local; local = local.parent) {                       // Search only the defining local frames.
-      if (form in local.bindings) {
-        captures[form] = local.bindings[form];                                  // Snapshot the Var, preserving object identity.
-        return;
-      }
-    }
+    if (!depth && !(form in self.reserved) && !(form in bound))                // Names in data or introduced by a binder are not free.
+      for (; env; env = env.parent)                                            // Only the defining local frames supply snapshots.
+        if (form in env.bindings) {
+          captures[form] = env.bindings[form];                                 // Save the Var; objects retain their ordinary identity.
+          break;
+        }
     return;
   }
   if (form is not <list>) return;
+  List parts = form;                                                           // Each pattern selects the children to inspect.
   match (form) {
-    case %(quote *) if (!depth): return;                                        // Quotation outside quasiquote is all data.
-    case %((!set ?head (!or quasiquote unquote unquote-splicing)) *parts): {
-      int inner = head == <quasiquote>.var() ? depth + 1 : depth - 1;           // Quasiquote nests; each unquote steps out.
-      if (inner < 0) inner = 0;
-      foreach (Var part, parts)
-        self.capture(env, part, bound, inner, captures);
-      return;
+    case %(quote *) if (!depth): return;                                       // Quoted code reads no names outside quasiquote.
+    case %((!set ?head (!or quasiquote unquote unquote-splicing)) *body): {
+      depth = head == <quasiquote>.var() ? depth + 1 : depth - 1;
+      if (depth < 0) depth = 0;                                                // An unquote outside quasiquote stays at zero.
+      parts = body;
     }
-    case %((!or lambda macro) ?params *body) if (!depth): {                     // Nested functions bind their own parameters.
-      List extended = bound;
-      if (params is <list>)
-        foreach (Var name, (List) params) extended = cons(name, extended);      // Extend without changing the outer binders.
-      foreach (Var part, body)
-        self.capture(env, part, extended, depth, captures);
-      return;
+    case %((!or lambda macro) ?params *body) if (!depth): {
+      if (params is <list>) bound = ((List) params).append(bound);             // Nested binders extend only this recursive branch.
+      parts = body;
     }
-    default:
-      foreach (Var part, (List) form)
-        self.capture(env, part, bound, depth, captures);
   }
+  foreach (Var part, parts) self.capture(env, part, bound, depth, captures);
 }
 
 static Var Interp.closure(
@@ -311,9 +294,7 @@ static Var Interp.closure(
 */
 static Var Interp.invoke(Interp *self, Fn closure, List values) {
   Map bindings = $auto({});                                                     // Map literal; cleanup on exit.
-  for (List params = closure.params;                                            // C for with a typed List handle.
-       params;                                                                  // Empty List is the null handle.
-       params = params.cdr()) {                                                 // Advance with an x2c List method.
+  for (List params = closure.params; params; params = params.cdr()) {          // Walk parameter cells until the empty List.
     Var (name, rest) = params;                                                  // Extract and convert by position.
     if (name.is_atom() && name.str() == ".") {                                  // Canonical String identity test.
       if (!params.cdr()) $fail(<bad-sig>, "apply", <value>, closure.body);     // Error detail needs an x2c String.
@@ -509,10 +490,9 @@ static Var Reader._form(Reader *self, Token token) {
   return self._error(<malformed>, self.base + token.pos);                       // C offset math inside a method call.
 }
 
-/* Tokens describe one source batch and may be discarded after it is read.
-   The constructed values must outlive them: a definition can save a body
-   for a later call. Token storage is released separately from the returned
-   forms.
+/* Tokens describe one source batch and may be discarded after it is read. The
+   constructed values must outlive them: a definition can save a body for a
+   later call. Token storage is released separately from the returned forms.
 */
 static Reader Reader.scan(String source, unsigned base, Scope *storage) {
   Reader reader = { .source = source, .base = base };                           // Named struct initializers.
@@ -530,8 +510,7 @@ static Reader Reader.scan(String source, unsigned base, Scope *storage) {
 */
 static Var Reader.read(Reader *self) {
   Token first = self.tokens.next();                                             // Receiver-style token access.
-  if (!first || first.type == <eof>)                                            // Constant-time integer Symbol test.
-    return void;                                                                // void differs from the empty List.
+  if (!first || first.type == <eof>) return void;                             // void differs from the empty List.
   self.start = self.base + first.pos;                                           // C arithmetic on source offsets.
   return self._form(first);                                                     // C pointer supports x2c dot calls.
 }
@@ -554,27 +533,21 @@ static Var _native_call(Func native, List values) {
   FuncArg *args = Scope.malloc(values.len() * sizeof(FuncArg));                 // C sizeof sizes Scope allocation.
   defer Scope.free(args);                                                       // Cleanup on every block exit.
   int count = 0;
-  foreach (Var value, values)                                                   // x2c iteration over a List.
-    args[count++] = FuncArg.value(value);                                       // C indexing; native argument packing.
+  foreach (Var value, values) args[count++] = FuncArg.value(value);           // C indexing; native argument packing.
   return native.apply(count, args);                                             // Checked native call through Func.
 }
 
-static int _is_number(Var v) {
-  Symbol k = v.kind();                                                          // Runtime type introspection.
-  return k == <integer> || k == <floating>;                                     // Symbol values compare as integers.
-}
+static int _is_number(Var v) => v.is_integer() || v.is_floating();             // Use the runtime's numeric-family predicates.
 
 static Var _bool(int x)      => x ? <true>.var() : %().var();                   // Explicit Var branches; => returns.
 
-static Var _car(Var v) {                                                        // Lisp applies car to any value, so the
-  if (v is not <list>)                                                          // tag decides before the cell is read.
-    $fail(<bad-types>, "car", <kind>, v.kind());                                // Macro emits the error record.
+static Var _car(Var v) {                                                        // Reject non-Lists before accessing a cell.
+  if (v is not <list>) $fail(<bad-types>, "car", <kind>, v.kind());           // Macro emits the error record.
   return v.car();                                                               // Receiver form of the List accessor.
 }
 
 static Var _cdr(Var v) {                                                        // The tail accessor takes the same check.
-  if (v is not <list>)                                                          // A String or number has no cell to read.
-    $fail(<bad-types>, "cdr", <kind>, v.kind());                                // Same cause as car reports.
+  if (v is not <list>) $fail(<bad-types>, "cdr", <kind>, v.kind());           // Same cause as car reports.
   return v.cdr();                                                               // List result boxes back into a Var.
 }
 
@@ -594,10 +567,8 @@ static Var _compare(Var a, Var b) {
   return a.compare(b);                                                          // Var comparison via receiver syntax.
 }
 
-static Var _add(Var a, Var b) =>
-  a is <string> || b is <string>                                                // Runtime type inspection.
-    ? %"$a$b".var()                                                             // $a/$b interpolate identifier values.
-    : a.binary(<+>, b);                                                         // Var arithmetic selected by Symbol.
+static Var _add(Var a, Var b) =>                                               // Strings concatenate; numbers use Var arithmetic.
+  a is <string> || b is <string> ? %"$a$b".var() : a.binary(<+>, b);
 
 static Var _plus(List values) {
   Var seed = 0;                                                                 // Implicit int -> Var conversion.
@@ -667,10 +638,9 @@ static Var _write_file(String path, String text) {
   return _bool(wrote && closed);                                                // C Boolean result -> Lisp truth.
 }
 
-/* Ordinary function conversion infers fixed native signatures. Rest
-   natives consume one List. The x2c compile-time macro $rest supplies that
-   signature when building the native registry; it does not perform Lisp
-   macro expansion.
+/* Ordinary function conversion infers fixed native signatures. Rest natives
+   consume one List. The x2c compile-time macro $rest supplies that signature
+   when building the native registry; it does not perform Lisp macro expansion.
 */
 macro Expression $rest(Expr $fn) =>                                             // Returns syntax at compile time.
   (Func.new_rest($fn, %((func (("List"))) "Var")))                              // Native signature as a List literal.
@@ -881,11 +851,10 @@ static Var _import_file(Interp *self, String path) {
 
 static Var _reserved(void) => Var.null();                                       // Expression body; void Var value.
 
-/* Special forms receive distinct callable identities before library
-   loading. Saving one under another name preserves its behavior; shadowing
-   its original name does not change the saved callable. The two lookup
-   Maps retain this distinction between a name and the callable value bound
-   to it.
+/* Special forms receive distinct callable identities before library loading.
+   Saving one under another name preserves its behavior; shadowing its original
+   name does not change the saved callable. The two lookup Maps retain this
+   distinction between a name and the callable value bound to it.
 */
 static Interp _interpreter(void) {
   Interp self = { {}, {}, {}, {} };                                             // Four independently allocated Maps.
@@ -949,9 +918,8 @@ static Var Repl.finish_batch(Repl *self) {
 }
 
 /* Read one form. void means no form is ready; done distinguishes EOF from
-   incomplete input or an exhausted batch. The storage scope owns the
-   tokens until the batch is finished; parsed forms use the surrounding
-   session.
+   incomplete input or an exhausted batch. The storage scope owns the tokens
+   until the batch is finished; parsed forms use the surrounding session.
 */
 static Var Repl.read_unit(Repl *self) {
   if (!self.reader.tokens && !self.read_line()) return void;                    // Receiver-style function call.
@@ -977,8 +945,7 @@ static Var Repl.read_unit(Repl *self) {
 
 static int _repl(Interp *self) {
   Buffer source = $auto(Buffer.new(0));                                         // Release Buffer on block exit.
-  Repl repl = { .source = source,                                               // C designated field initializer.
-                .interactive = isatty(Stdin.fileno()) };                        // x2c file descriptor -> POSIX call.
+  Repl repl = { .source = source, .interactive = isatty(Stdin.fileno()) };      // Named initializers; POSIX terminal detection.
   defer repl.storage.destroy();                                                 // Destroy remaining tokens on exit.
   while (!repl.done) {                                                          // Same dot for a stack struct value.
     Var form = repl.read_unit();                                                // Receiver call takes &repl.
@@ -1005,8 +972,7 @@ int main(int argc, char **argv) {                                               
   $scope() {                                                                    // Session-wide allocation region.
     try {                                                                       // Structured exception boundary.
       Array args = range(0, argc - 1, 1)                                        // Lazy range iterator.
-        .map(%!(int i) using &argv                                              // Typed lambda; capture C pointer.
-          => String.new(argv[i]));                                              // C indexing -> immutable String.
+        .map(%!(int i) using &argv => String.new(argv[i]));                    // Typed lambda captures argv and converts each argument.
       Interp self = _interpreter();                                             // Session record returned by value.
       String source;                                                            // Immutable String held by a handle.
       match (args.list()) {                                                     // Chain conversion into matching.
@@ -1024,8 +990,7 @@ int main(int argc, char **argv) {                                               
           return 1;
         }
       }
-      Stdout.printf("%s\n",                                                     // C format string; x2c File receiver.
-                    _eval_text(&self, source).repr());                          // C address; chain Var formatting.
+      Stdout.printf("%s\n", _eval_text(&self, source).repr());                 // Evaluate, format the Var, and print through File.
       return 0;
     }
     catch %(?code *detail):                                                     // Destructure the error as a List.
