@@ -1,0 +1,41 @@
+# Reproducible generated Lisp names
+
+> Status: reference - open backlog item, low priority.
+> Recorded 2026-09-20 at 231550b0. Defer until the next bootstrap/lowering
+> maintenance change; no semantic failure or release blocker demonstrated.
+
+## Observed issue
+
+Generating the three checked-in Lisp artifacts in a fresh source-only home
+changes generated local names relative to the built workspace. A second
+pass is stable. Token comparisons show only bijective name substitutions:
+57 names in init, 486 in builtins, and 99 in binding support. Behavior has
+not been shown to differ. The consequence is noisy artifact diffs and a
+limit on what warm-tree byte-reproducibility checks establish.
+
+Reproduction: archive 231550b0 into a fresh directory, load
+`tools/gen-lisp-init.py` as a Python module, set its ROOT to that directory,
+and call its three generate operations using the original workspace's
+`builds/0/x2c`. Compare each output with the archived artifact, then repeat.
+The complete archive includes src and include; missing source is not the
+explanation. The exact influence of available interfaces remains to isolate.
+
+## Proposed scope and acceptance
+
+Investigate the naming counter in `src/comptime.x` and generation entry
+points in `tools/gen-lisp-init.py`. Prefer a deterministic naming scope per
+artifact using existing lowering machinery, if it preserves uniqueness across
+functions, nested helpers, and imported definitions. This is a direction to
+validate, not a settled counter-reset design. Do not rename emitted Lisp text.
+
+Fresh-source, warm-interface, and stage-2 generation should produce identical
+bytes while preserving public names, semantics, and helper uniqueness. Use
+focused comparisons and the existing publication gate; add no recurring gate.
+
+## Plan review
+
+The lowerer already owns lexical/helper identity. Reuse that owner rather
+than introducing an output rewriter or another evaluator. Determine the scope
+of counter uniqueness before changing it. No new public validation or
+additional diagnostic is proposed. Implementation awaits the bounded design
+and reproduction above; this entry records follow-up work only.
