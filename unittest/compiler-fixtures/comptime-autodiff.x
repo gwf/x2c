@@ -1,7 +1,7 @@
 /*  comptime-autodiff.x -- lib/autodiff.xmacro written as compile-time x2c
 
     Forward and reverse mode, the primitive derivative table, and both
-    decorators, as `$comptime()` functions the lowering pass compiles to
+    decorators, as `meta` functions the lowering pass compiles to
     Lisp. Every derivative the decorators emit is checked here against a
     central finite difference, so a regression in the pass shows up as a
     number rather than as a decline.
@@ -16,8 +16,6 @@
 #include "typed-array.x"
 #include <math.h>
 
-macro Decorator $comptime(Unit $fn) => { $(x2c.comptime.install $fn)... }
-
 $(def ad_tangent (lambda (. rest) 0))
 $(def ad_adjoint (lambda (. rest) 0))
 $(def ad_rev_item (lambda (. rest) 0))
@@ -26,43 +24,34 @@ $(def ad_declared_join (lambda (. rest) 0))
 
 /* Forward mode from lib/autodiff.xmacro, as compile-time x2c. */
 
-$comptime()
-List ad_zero(void) { return %(expr (double) (literal (double) "0.0")); }
+meta List ad_zero(void) { return %(expr (double) (literal (double) "0.0")); }
 
-$comptime()
-List ad_one(void) { return %(expr (double) (literal (double) "1.0")); }
+meta List ad_one(void) { return %(expr (double) (literal (double) "1.0")); }
 
-$comptime()
-int ad_is_zero(List e) { return e.equal(ad_zero()); }
+meta int ad_is_zero(List e) { return e.equal(ad_zero()); }
 
-$comptime()
-int ad_is_one(List e) { return e.equal(ad_one()); }
+meta int ad_is_one(List e) { return e.equal(ad_one()); }
 
-$comptime()
-List ad_raw(Var op, List a, List b) { return %(expr () (op $op $a $b)); }
+meta List ad_raw(Var op, List a, List b) { return %(expr () (op $op $a $b)); }
 
-$comptime()
-List ad_neg(List a) {
+meta List ad_neg(List a) {
   if (ad_is_zero(a)) return a;
   return %(expr () (op - $a));
 }
 
-$comptime()
-List ad_add(List a, List b) {
+meta List ad_add(List a, List b) {
   if (ad_is_zero(a)) return b;
   if (ad_is_zero(b)) return a;
   return ad_raw(<+>, a, b);
 }
 
-$comptime()
-List ad_sub(List a, List b) {
+meta List ad_sub(List a, List b) {
   if (ad_is_zero(b)) return a;
   if (ad_is_zero(a)) return ad_neg(b);
   return ad_raw(<->, a, b);
 }
 
-$comptime()
-List ad_mul(List a, List b) {
+meta List ad_mul(List a, List b) {
   if (ad_is_zero(a)) return a;
   if (ad_is_zero(b)) return b;
   if (ad_is_one(a)) return b;
@@ -70,27 +59,21 @@ List ad_mul(List a, List b) {
   return ad_raw(<*>, a, b);
 }
 
-$comptime()
-List ad_div(List a, List b) {
+meta List ad_div(List a, List b) {
   if (ad_is_zero(a)) return a;
   if (ad_is_one(b)) return a;
   return ad_raw(</>, a, b);
 }
 
-$comptime()
-int ad_is_double(List e) { return e.match(%(expr (double) ?)) != NULL; }
+meta int ad_is_double(List e) { return !!e.match(%(expr (double) ?)); }
 
-$comptime()
-int ad_is_double_spec(List type) { return type.equal(%(double)); }
+meta int ad_is_double_spec(List type) { return type.equal(%(double)); }
 
-$comptime()
-String ad_dot(String name) { return name + "_dot"; }
+meta String ad_dot(String name) { return name + "_dot"; }
 
-$comptime()
-List ad_id(String name) { return %(expr () (ident ($name))); }
+meta List ad_id(String name) { return %(expr () (ident ($name))); }
 
-$comptime()
-List ad_unbind(Var form) {
+meta List ad_unbind(Var form) {
   if (!form.is(<list>)) return form;
   List items = form;
   if (!items) return items;
@@ -101,8 +84,7 @@ List ad_unbind(Var form) {
   return items.map(%!(Var part) => ad_unbind(part));
 }
 
-$comptime()
-Var ad_var_name(List e) {
+meta Var ad_var_name(List e) {
   match (e) {
     case %(expr ? (ident (binding ? ?n))): return n;
     case %(expr ? (ident (?n))): return n;
@@ -110,60 +92,46 @@ Var ad_var_name(List e) {
   return void;
 }
 
-$comptime()
-List ad_assign(String name, List value) {
+meta List ad_assign(String name, List value) {
   return %(stmnt (expr () (op = ${ad_id(name)} $value)));
 }
 
 /* --- the primitive derivative table ------------------------------------- */
 
-$comptime()
-List ad_lit(String text) { return %(expr (double) (literal (double) $text)); }
+meta List ad_lit(String text) { return %(expr (double) (literal (double) $text)); }
 
-$comptime()
-List ad_int(String text) { return %(expr (int) (literal (int) $text)); }
+meta List ad_int(String text) { return %(expr (int) (literal (int) $text)); }
 
-$comptime()
-List ad_call(String name, List args) {
+meta List ad_call(String name, List args) {
   return %(expr () (call (expr () (ident ($name))) (args @args)));
 }
 
-$comptime()
-List ad_call1(String name, List a) { return ad_call(name, %($a)); }
+meta List ad_call1(String name, List a) { return ad_call(name, %($a)); }
 
-$comptime()
-List ad_select(List test, List a, List b) {
+meta List ad_select(List test, List a, List b) {
   return %(expr () (op ? $test $a $b));
 }
 
-$comptime()
-List ad_less(List a, List b) { return %(expr () (op < $a $b)); }
+meta List ad_less(List a, List b) { return %(expr () (op < $a $b)); }
 
-$comptime()
-List ad_less_eq(List a, List b) { return %(expr () (op <= $a $b)); }
+meta List ad_less_eq(List a, List b) { return %(expr () (op <= $a $b)); }
 
-$comptime()
-List ad_square(List a) { return ad_mul(a, a); }
+meta List ad_square(List a) { return ad_mul(a, a); }
 
-$comptime()
-List ad_recip(List e) { return ad_div(ad_lit("1.0"), e); }
+meta List ad_recip(List e) { return ad_div(ad_lit("1.0"), e); }
 
-$comptime()
-List ad_plus_one(List e) { return ad_add(ad_lit("1.0"), e); }
+meta List ad_plus_one(List e) { return ad_add(ad_lit("1.0"), e); }
 
-$comptime()
-List ad_minus_one(List e) { return ad_sub(ad_lit("1.0"), e); }
+meta List ad_minus_one(List e) { return ad_sub(ad_lit("1.0"), e); }
 
-$comptime()
-List ad_sum_squares(List a) {
+meta List ad_sum_squares(List a) {
   return ad_add(ad_square(a[0]), ad_square(a[1]));
 }
 
 /* One partial per argument, indexed from zero, over the unbound argument
    list. The table holds every primitive's derivative; an argument the
    primitive does not have reads as nil, and an unknown name gives nil. */
-$comptime()
-List ad_partial(String name, int i, List a) {
+meta List ad_partial(String name, int i, List a) {
   List x = a[0];
   List y = a[1];
   Map table = {
@@ -207,8 +175,7 @@ List ad_partial(String name, int i, List a) {
 }
 
 /* The chain rule over a primitive's arguments. */
-$comptime()
-List ad_call_tangent(String name, List args, List names) {
+meta List ad_call_tangent(String name, List args, List names) {
   List unbound = ad_unbind(args);
   List total = ad_zero();
   int i = 0;
@@ -222,8 +189,7 @@ List ad_call_tangent(String name, List args, List names) {
 }
 
 /* The tangent of an expression, given the names being differentiated. */
-$comptime()
-List ad_tangent(List e, List names) {
+meta List ad_tangent(List e, List names) {
   if (!ad_is_double(e)) return ad_zero();
   match (e) {
     case %(expr ? (literal ? ?)): return ad_zero();
@@ -257,16 +223,14 @@ List ad_tangent(List e, List names) {
 }
 
 /* An assignment, compound assignment, or step, normalised to (name rhs). */
-$comptime()
-List ad_step(Var op, List target) {
+meta List ad_step(Var op, List target) {
   Var n = ad_var_name(target);
   if (!n) return %();
   List one = ad_is_double(target) ? ad_lit("1.0") : ad_int("1");
   return %($n (expr () (op $op $target $one)));
 }
 
-$comptime()
-List ad_update(List e) {
+meta List ad_update(List e) {
   match (e) {
     case %(expr ? (op ++ ?target)):      return ad_step(<+>, target);
     case %(expr ? (op -- ?target)):      return ad_step(<->, target);
@@ -291,8 +255,7 @@ List ad_update(List e) {
   return %();
 }
 
-$comptime()
-List ad_fwd_decl(List declarator, List names) {
+meta List ad_fwd_decl(List declarator, List names) {
   match (declarator) {
     case %(op = (bind (binding ? ?name) ()) ?init):
       return %(declare (double)
@@ -305,8 +268,7 @@ List ad_fwd_decl(List declarator, List names) {
   return %();
 }
 
-$comptime()
-List ad_fwd_update(List s, List update, List names) {
+meta List ad_fwd_update(List s, List update, List names) {
   if (!update) return %(${ad_unbind(s)});
   Var n = update[0];
   if (!names.contains(n)) return %(${ad_unbind(s)});
@@ -318,23 +280,20 @@ List ad_fwd_update(List s, List update, List names) {
    instead of pushing: `foreach` cannot nest, so an `Array` has no way to
    take them one at a time. Every builder below that splices reads this way;
    the ones that produce exactly one item per input push to an `Array`. */
-$comptime()
-List ad_fwd_items(List items, List names) {
+meta List ad_fwd_items(List items, List names) {
   List out = %();
   foreach (List item, items) out = %(@out @{ad_fwd_item(item, names)});
   return out;
 }
 
-$comptime()
-List ad_fwd_body(List s, List names) {
+meta List ad_fwd_body(List s, List names) {
   match (s) {
     case %(block *items): return %(block @{ad_fwd_items(items, names)});
   }
   return %(block @{ad_fwd_item(s, names)});
 }
 
-$comptime()
-List ad_fwd_item(List s, List names) {
+meta List ad_fwd_item(List s, List names) {
   match (s) {
     case %(at ? ?node): return ad_fwd_item(node, names);
     case %(declare ?type (bindings ?d)): {
@@ -370,8 +329,7 @@ List ad_fwd_item(List s, List names) {
 }
 
 /* A declarator's name, for the declared-double scan. */
-$comptime()
-List ad_declarator_names(List decls) {
+meta List ad_declarator_names(List decls) {
   Array names = [];
   foreach (List d, decls) {
     match (d) {
@@ -386,8 +344,7 @@ List ad_declarator_names(List decls) {
    other double identifier is a constant. This pair walks the whole
    tree, so it stays recursive; concatenating once per node, which is what a
    loop would do here, costs more than the recursion it replaces. */
-$comptime()
-List ad_declared_doubles(Var form) {
+meta List ad_declared_doubles(Var form) {
   if (!form.is(<list>)) return %();
   List items = form;
   if (!items) return %();
@@ -404,8 +361,7 @@ List ad_declared_doubles(Var form) {
   return ad_declared_join(items);
 }
 
-$comptime()
-List ad_declared_join(List items) {
+meta List ad_declared_join(List items) {
   if (!items) return %();
   List head = ad_declared_doubles(items.car());
   List tail = ad_declared_join(items.cdr());
@@ -413,8 +369,7 @@ List ad_declared_join(List items) {
 }
 
 /* Every double parameter is a name to differentiate. */
-$comptime()
-List ad_param_doubles(List params) {
+meta List ad_param_doubles(List params) {
   Array names = [];
   foreach (List param, params) {
     match (param) {
@@ -425,8 +380,7 @@ List ad_param_doubles(List params) {
 }
 
 /* A double parameter is followed by its tangent. */
-$comptime()
-List ad_fwd_params(List params) {
+meta List ad_fwd_params(List params) {
   Array out = [];
   foreach (List param, params) {
     match (param) {
@@ -441,8 +395,7 @@ List ad_fwd_params(List params) {
   return out;
 }
 
-$comptime()
-List ad_forward(List fn) {
+meta List ad_forward(List fn) {
   match (fn) {
     case %(function ?spec (bind (binding ? ?name)
                             ((fnmod (params *params)))) ?body): {
@@ -462,141 +415,114 @@ List ad_forward(List fn) {
 
 /* --- reverse mode ------------------------------------------------------- */
 
-/* Compile-time state for one derivation. `ad_reverse` resets all of it
-   before reading a function, the way the Lisp original rebinds its
-   module-level definitions. */
-static List ad_locals;
-static int ad_counter;
-static List ad_loop_step;
+/* `ad_reverse` owns one state Map per derivation. Recursive builders share
+   its locals, fresh-name counter, and the current loop's continue step. */
 
-$comptime()
-String ad_bar(Var name) { return name + "_bar"; }
+meta String ad_bar(Var name) { return name + "_bar"; }
 
-$comptime()
-String ad_grad(Var name) { return name + "_grad"; }
+meta String ad_grad(Var name) { return name + "_grad"; }
 
-$comptime()
-List ad_stmnt(List e) { return %(stmnt $e); }
+meta List ad_stmnt(List e) { return %(stmnt $e); }
 
-$comptime()
-List ad_accum(Var name, List value) {
+meta List ad_accum(Var name, List value) {
   return ad_stmnt(%(expr () (op += ${ad_id(name)} $value)));
 }
 
-$comptime()
-List ad_set(Var name, List value) {
+meta List ad_set(Var name, List value) {
   return ad_stmnt(%(expr () (op = ${ad_id(name)} $value)));
 }
 
-$comptime()
-List ad_cast(List type, List e) {
+meta List ad_cast(List type, List e) {
   return %(expr () (cast (decl $type (bindings (bind () ()))) $e));
 }
 
-$comptime()
-List ad_declare(List type, Var name, List init) {
+meta List ad_declare(List type, Var name, List init) {
   if (init) return %(declare $type (bindings (op = (bind ($name) ()) $init)));
   return %(declare $type (bindings (bind ($name) ())));
 }
 
-$comptime()
-List ad_zero_of(List type) {
+meta List ad_zero_of(List type) {
   if (ad_is_double_spec(type)) return ad_zero();
   return ad_int("0");
 }
 
-$comptime()
-Var ad_local(List type, Var name) {
+meta Var ad_local(Map state, List type, Var name) {
   List entry = %($name $type);
-  ad_locals = %($entry @ad_locals);
+  List locals = state["locals"];
+  state["locals"] = %($entry @locals);
   return name;
 }
 
-$comptime()
-Var ad_fresh(String stem, List type) {
-  ad_counter = ad_counter + 1;
-  return ad_local(type, %"$stem${ad_counter}");
+meta Var ad_fresh(Map state, String stem, List type) {
+  int counter = (int) state["counter"] + 1;
+  state["counter"] = counter;
+  return ad_local(state, type, %"$stem$counter");
 }
 
-$comptime()
-String ad_code(void) {
-  ad_counter = ad_counter + 1;
-  return %"${ad_counter}.0";
+meta String ad_code(Map state) {
+  int counter = (int) state["counter"] + 1;
+  state["counter"] = counter;
+  return %"${counter}.0";
 }
 
-$comptime()
-List ad_local_type(Var name) {
-  foreach (List entry, ad_locals)
+meta List ad_local_type(Map state, Var name) {
+  List locals = state["locals"];
+  foreach (List entry, locals)
     if (entry[0] == name) return entry[1];
   return %(double);
 }
 
-$comptime()
-List ad_push(List e) {
+meta List ad_push(List e) {
   return ad_stmnt(ad_call("ArrayDbl_push", %(${ad_id("_ad_tape")} $e)));
 }
 
-$comptime()
-List ad_pop(void) {
+meta List ad_pop(void) {
   return ad_call("ArrayDbl_take_last", %(${ad_id("_ad_tape")}));
 }
 
-$comptime()
-List ad_restore(Var name, List type) {
+meta List ad_restore(Var name, List type) {
   if (ad_is_double_spec(type)) return ad_set(name, ad_pop());
   return ad_set(name, ad_cast(type, ad_pop()));
 }
 
 /* An item's forward statements, its reverse statements, and one entry per
    exit inside it. */
-$comptime()
-List ad_triple(List fwd, List rev, List exits) {
+meta List ad_triple(List fwd, List rev, List exits) {
   return %($fwd $rev $exits);
 }
 
-$comptime()
-List ad_none(void) { return %(() () ()); }
+meta List ad_none(void) { return %(() () ()); }
 
-$comptime()
-List ad_fwd_of(List t) { return t[0]; }
+meta List ad_fwd_of(List t) { return t[0]; }
 
-$comptime()
-List ad_rev_of(List t) { return t[1]; }
+meta List ad_rev_of(List t) { return t[1]; }
 
-$comptime()
-List ad_exits_of(List t) { return t[2]; }
+meta List ad_exits_of(List t) { return t[2]; }
 
-$comptime()
-List ad_exit(Var code, Var kind, List pruned) {
+meta List ad_exit(Var code, Var kind, List pruned) {
   return %($code $kind $pruned);
 }
 
-$comptime()
-Var ad_exit_code(List x) { return x[0]; }
+meta Var ad_exit_code(List x) { return x[0]; }
 
-$comptime()
-Var ad_exit_kind(List x) { return x[1]; }
+meta Var ad_exit_kind(List x) { return x[1]; }
 
-$comptime()
-List ad_exit_pruned(List x) { return x[2]; }
+meta List ad_exit_pruned(List x) { return x[2]; }
 
-$comptime()
-List ad_with_pruned(List x, List pruned) {
+meta List ad_with_pruned(List x, List pruned) {
   return ad_exit(ad_exit_code(x), ad_exit_kind(x), pruned);
 }
 
 /* An exit inside item i has run items 1..i-1 completely, so its pruned
    reverse gains everything already reversed. */
-$comptime()
-List ad_move_exits(List exits, List rev) {
+meta List ad_move_exits(List exits, List rev) {
   Array out = [];
   foreach (List x, exits)
     out.push(ad_with_pruned(x, %(@{ad_exit_pruned(x)} @rev)));
   return out;
 }
 
-$comptime()
-List ad_sequence(List triples) {
+meta List ad_sequence(List triples) {
   List fwd = %();
   List rev = %();
   List exits = %();
@@ -610,8 +536,7 @@ List ad_sequence(List triples) {
 
 /* --- adjoints ----------------------------------------------------------- */
 
-$comptime()
-List ad_call_adjoint(Var name, List args, List seed, List names) {
+meta List ad_call_adjoint(Var name, List args, List seed, List names) {
   List unbound = ad_unbind(args);
   List out = %();
   int i = 0;
@@ -624,8 +549,7 @@ List ad_call_adjoint(Var name, List args, List seed, List names) {
   return out;
 }
 
-$comptime()
-List ad_binary_adjoint(Var o, List x, List y, List seed, List names) {
+meta List ad_binary_adjoint(Var o, List x, List y, List seed, List names) {
   List a = ad_unbind(x);
   List b = ad_unbind(y);
   if (o == <+>) {
@@ -653,8 +577,7 @@ List ad_binary_adjoint(Var o, List x, List y, List seed, List names) {
 }
 
 /* The adjoint statements for `e` scaled by `seed`. */
-$comptime()
-List ad_adjoint(List e, List seed, List names) {
+meta List ad_adjoint(List e, List seed, List names) {
   if (!ad_is_double(e)) return %();
   match (e) {
     case %(expr ? (literal ? ?)): return %();
@@ -684,9 +607,8 @@ List ad_adjoint(List e, List seed, List names) {
 
 /* --- statements --------------------------------------------------------- */
 
-$comptime()
-List ad_rev_assign(Var name, List rhs, List names) {
-  List type = ad_local_type(name);
+meta List ad_rev_assign(Map state, Var name, List rhs, List names) {
+  List type = ad_local_type(state, name);
   List fwd = %(${ad_push(ad_id(name))} ${ad_set(name, ad_unbind(rhs))});
   if (ad_is_double_spec(type))
     if (name in names) {
@@ -699,54 +621,48 @@ List ad_rev_assign(Var name, List rhs, List names) {
   return ad_triple(fwd, %(${ad_restore(name, type)}), %());
 }
 
-$comptime()
-List ad_rev_decl(List type, List d, List names) {
+meta List ad_rev_decl(Map state, List type, List d, List names) {
   match (d) {
     case %(op = (bind (binding ? ?n) ()) ?init): {
-      ad_local(type, n);
-      return ad_rev_assign(n, init, names);
+      ad_local(state, type, n);
+      return ad_rev_assign(state, n, init, names);
     }
     case %(bind (binding ? ?n) ()): {
-      ad_local(type, n);
+      ad_local(state, type, n);
       return ad_none();
     }
   }
   return ad_none();
 }
 
-$comptime()
-List ad_rev_decls(List type, List decls, List names) {
+meta List ad_rev_decls(Map state, List type, List decls, List names) {
   Array out = [];
-  foreach (List d, decls) out.push(ad_rev_decl(type, d, names));
+  foreach (List d, decls) out.push(ad_rev_decl(state, type, d, names));
   return out;
 }
 
-$comptime()
-List ad_rev_items(List items, List names) {
+meta List ad_rev_items(Map state, List items, List names) {
   Array out = [];
-  foreach (List item, items) out.push(ad_rev_item(item, names));
+  foreach (List item, items) out.push(ad_rev_item(state, item, names));
   return out;
 }
 
-$comptime()
-List ad_rev_block(List items, List names) {
-  return ad_sequence(ad_rev_items(items, names));
+meta List ad_rev_block(Map state, List items, List names) {
+  return ad_sequence(ad_rev_items(state, items, names));
 }
 
-$comptime()
-List ad_rev_body(List s, List names) {
+meta List ad_rev_body(Map state, List s, List names) {
   match (s) {
-    case %(block *items): return ad_rev_block(items, names);
+    case %(block *items): return ad_rev_block(state, items, names);
   }
-  return ad_rev_item(s, names);
+  return ad_rev_item(state, s, names);
 }
 
 /* A branch pushes its flag after the body, so a completed `if` pops it
    first. */
-$comptime()
-List ad_rev_if(List c, List then, List alt, List names) {
-  List t = ad_rev_body(then, names);
-  List e = alt ? ad_rev_body(alt, names) : ad_none();
+meta List ad_rev_if(Map state, List c, List then, List alt, List names) {
+  List t = ad_rev_body(state, then, names);
+  List e = alt ? ad_rev_body(state, alt, names) : ad_none();
   List taken = %(@{ad_fwd_of(t)} ${ad_push(ad_lit("1.0"))});
   List other = %(@{ad_fwd_of(e)} ${ad_push(ad_lit("0.0"))});
   List back = %((if (expr () (op != ${ad_pop()} ${ad_lit("0.0")}))
@@ -756,14 +672,12 @@ List ad_rev_if(List c, List then, List alt, List names) {
     %(@{ad_exits_of(t)} @{ad_exits_of(e)}));
 }
 
-$comptime()
-List ad_code_is(Var code) {
+meta List ad_code_is(Var code) {
   return %(expr () (op == ${ad_id("_ad_code")} ${ad_lit(code)}));
 }
 
 /* The dispatch after popping one region's exit code. */
-$comptime()
-List ad_dispatch(List normal, List exits) {
+meta List ad_dispatch(List normal, List exits) {
   List chain = %(block @normal);
   foreach (List x, exits.reverse())
     chain = %(if ${ad_code_is(ad_exit_code(x))}
@@ -771,64 +685,56 @@ List ad_dispatch(List normal, List exits) {
   return chain;
 }
 
-$comptime()
-int ad_is_loop_exit(List x) {
+meta int ad_is_loop_exit(List x) {
   Var kind = ad_exit_kind(x);
   return kind == <break> || kind == <continue>;
 }
 
-$comptime()
-List ad_loop_exits(List exits, int want) {
+meta List ad_loop_exits(List exits, int want) {
   Array out = [];
   foreach (List x, exits)
     if (ad_is_loop_exit(x) == want) out.push(x);
   return out;
 }
 
-$comptime()
-List ad_return_exits(List exits) {
+meta List ad_return_exits(List exits) {
   Array out = [];
   foreach (List x, exits)
     if (ad_exit_kind(x) == <return>) out.push(x);
   return out;
 }
 
-$comptime()
-List ad_count(Var n, Var op) {
+meta List ad_count(Var n, Var op) {
   return ad_set(n, ad_raw(op, ad_id(n), ad_int("1")));
 }
 
-$comptime()
-List ad_countdown(Var n, List dispatch) {
+meta List ad_countdown(Var n, List dispatch) {
   return %(while (expr () (op > ${ad_id(n)} ${ad_int("0")}))
                  (block @dispatch));
 }
 
 /* `continue` also runs the step, so its pruned reverse begins with the
    step's reverse. */
-$comptime()
-List ad_pruned_exit(List x, List s) {
+meta List ad_pruned_exit(List x, List s) {
   if (ad_exit_kind(x) != <continue>) return x;
   return ad_with_pruned(x, %(@{ad_rev_of(s)} @{ad_exit_pruned(x)}));
 }
 
 /* One iteration: count, body, step, then the exit code. */
-$comptime()
-List ad_pruned_exits(List exits, List s) {
+meta List ad_pruned_exits(List exits, List s) {
   Array out = [];
   foreach (List x, exits) out.push(ad_pruned_exit(x, s));
   return out;
 }
 
-$comptime()
-List ad_loop_parts(List c, List body, List step, List names) {
-  List saved = ad_loop_step;
-  ad_loop_step = %();
-  List s = step ? ad_rev_item(step, names) : ad_none();
-  ad_loop_step = ad_fwd_of(s);
-  List b = ad_rev_body(body, names);
-  ad_loop_step = saved;
-  Var n = ad_fresh("_ad_trip", %(int));
+meta List ad_loop_parts(Map state, List c, List body, List step, List names) {
+  List saved = state["loop_step"];
+  state["loop_step"] = %();
+  List s = step ? ad_rev_item(state, step, names) : ad_none();
+  state["loop_step"] = ad_fwd_of(s);
+  List b = ad_rev_body(state, body, names);
+  state["loop_step"] = saved;
+  Var n = ad_fresh(state, "_ad_trip", %(int));
   List own = ad_loop_exits(ad_exits_of(b), 1);
   List through = ad_loop_exits(ad_exits_of(b), 0);
   List iteration = %(${ad_count(n, <+>)} @{ad_fwd_of(b)} @{ad_fwd_of(s)}
@@ -840,8 +746,7 @@ List ad_loop_parts(List c, List body, List step, List names) {
   return %($n $iteration $dispatch $through ${ad_unbind(c)});
 }
 
-$comptime()
-List ad_through_exits(List exits, Var n, List dispatch) {
+meta List ad_through_exits(List exits, Var n, List dispatch) {
   Array out = [];
   foreach (List x, exits)
     out.push(ad_with_pruned(x, %(@{ad_exit_pruned(x)} ${ad_count(n, <->)}
@@ -849,11 +754,11 @@ List ad_through_exits(List exits, Var n, List dispatch) {
   return out;
 }
 
-$comptime()
-List ad_rev_loop(List init, List c, List step, List body, List names) {
-  List head = init ? ad_rev_item(init, names) : ad_none();
+meta List ad_rev_loop(
+  Map state, List init, List c, List step, List body, List names) {
+  List head = init ? ad_rev_item(state, init, names) : ad_none();
   (Var n, List iteration, List dispatch, List through, List condition) =
-    ad_loop_parts(c, body, step, names);
+    ad_loop_parts(state, c, body, step, names);
   List fwd = %(${ad_set(n, ad_int("0"))}
                (while $condition (block @iteration)) ${ad_push(ad_id(n))});
   List rev = %(${ad_restore(n, %(int))} ${ad_countdown(n, dispatch)});
@@ -862,39 +767,40 @@ List ad_rev_loop(List init, List c, List step, List body, List names) {
   return ad_sequence(%($head $loop));
 }
 
-$comptime()
-List ad_rev_item(List s, List names) {
+meta List ad_rev_item(Map state, List s, List names) {
   match (s) {
-    case %(at ? ?node): return ad_rev_item(node, names);
+    case %(at ? ?node): return ad_rev_item(state, node, names);
     case %(declare ?type (bindings *decls)):
-      return ad_sequence(ad_rev_decls(type, %(@decls), names));
+      return ad_sequence(ad_rev_decls(state, type, %(@decls), names));
     case %(decl ?type (bindings *decls)):
-      return ad_sequence(ad_rev_decls(type, %(@decls), names));
+      return ad_sequence(ad_rev_decls(state, type, %(@decls), names));
     case %(stmnt ?e): {
       List update = ad_update(e);
       if (update)
-        return ad_rev_assign(update[0], update[1], names);
+        return ad_rev_assign(state, update[0], update[1], names);
       return ad_triple(%(${ad_unbind(s)}), %(), %());
     }
-    case %(expr ? ?):         return ad_rev_item(%(stmnt $s), names);
-    case %(if ?c ?then):      return ad_rev_if(c, then, %(), names);
-    case %(if ?c ?then ?alt): return ad_rev_if(c, then, alt, names);
-    case %(while ?c ?body):   return ad_rev_loop(%(), c, %(), body, names);
+    case %(expr ? ?):         return ad_rev_item(state, %(stmnt $s), names);
+    case %(if ?c ?then):      return ad_rev_if(state, c, then, %(), names);
+    case %(if ?c ?then ?alt): return ad_rev_if(state, c, then, alt, names);
+    case %(while ?c ?body):
+      return ad_rev_loop(state, %(), c, %(), body, names);
     case %(for ?init ?c ?step ?body):
-      return ad_rev_loop(init, c, step, body, names);
-    case %(block *items):     return ad_rev_block(items, names);
+      return ad_rev_loop(state, init, c, step, body, names);
+    case %(block *items):     return ad_rev_block(state, items, names);
     case %(break): {
-      String code = ad_code();
+      String code = ad_code(state);
       return ad_triple(%(${ad_push(ad_lit(code))} $s), %(),
                        %(${ad_exit(code, <break>, %())}));
     }
     case %(continue): {
-      String code = ad_code();
-      return ad_triple(%(@ad_loop_step ${ad_push(ad_lit(code))} $s), %(),
+      String code = ad_code(state);
+      List step = state["loop_step"];
+      return ad_triple(%(@step ${ad_push(ad_lit(code))} $s), %(),
                        %(${ad_exit(code, <continue>, %())}));
     }
     case %(return (double) ?e): {
-      String code = ad_code();
+      String code = ad_code(state);
       List back = ad_adjoint(e, ad_lit("1.0"), names);
       return ad_triple(
         %(${ad_set("_ad_result", ad_unbind(e))} ${ad_push(ad_lit(code))}
@@ -908,8 +814,7 @@ List ad_rev_item(List s, List names) {
 
 /* --- the emitted sibling ------------------------------------------------ */
 
-$comptime()
-List ad_grad_slots_params(List params) {
+meta List ad_grad_slots_params(List params) {
   Array slots = [];
   foreach (List param, params) {
     match (param) {
@@ -920,15 +825,13 @@ List ad_grad_slots_params(List params) {
   return slots;
 }
 
-$comptime()
-List ad_grad_params(List params) {
+meta List ad_grad_params(List params) {
   List unbound = ad_unbind(params);
   List slots = ad_grad_slots_params(params);
   return %(@unbound @slots);
 }
 
-$comptime()
-List ad_param_locals(List params) {
+meta List ad_param_locals(List params) {
   Array locals = [];
   foreach (List param, params) {
     match (param) {
@@ -938,8 +841,7 @@ List ad_param_locals(List params) {
   return locals;
 }
 
-$comptime()
-List ad_param_names(List params) {
+meta List ad_param_names(List params) {
   Array names = [];
   foreach (List param, params) {
     match (param) {
@@ -949,22 +851,19 @@ List ad_param_names(List params) {
   return names;
 }
 
-$comptime()
-List ad_write_slot(Var n) {
+meta List ad_write_slot(Var n) {
   return ad_stmnt(%(expr () (op = (expr () (op * ${ad_id(ad_grad(n))}))
                                   ${ad_id(ad_bar(n))})));
 }
 
-$comptime()
-List ad_hoisted(List locals, List params) {
+meta List ad_hoisted(List locals, List params) {
   Array out = [];
   foreach (List entry, locals)
     if (!(entry[0] in params)) out.push(entry);
   return out;
 }
 
-$comptime()
-List ad_declare_locals(List locals) {
+meta List ad_declare_locals(List locals) {
   Array out = [];
   foreach (List entry, locals) {
     List type = entry[1];
@@ -973,29 +872,28 @@ List ad_declare_locals(List locals) {
   return out;
 }
 
-$comptime()
-List ad_declare_bars(List names) {
+meta List ad_declare_bars(List names) {
   Array out = [];
   foreach (Var name, names)
     out.push(ad_declare(%(double), ad_bar(name), ad_zero()));
   return out;
 }
 
-$comptime()
-List ad_write_slots(List inputs) {
+meta List ad_write_slots(List inputs) {
   Array out = [];
   foreach (Var name, inputs) out.push(ad_write_slot(name));
   return out;
 }
 
-$comptime()
-List ad_reverse_function(List spec, Var name, List params, List items) {
+meta List ad_reverse_function(
+  Map state, List spec, Var name, List params, List items) {
   List inputs = ad_param_doubles(params);
   List declared = ad_declared_doubles(%(block @items));
   List names = %(@inputs @declared);
-  List sweep = ad_rev_block(items, names);
+  List sweep = ad_rev_block(state, items, names);
   List returns = ad_return_exits(ad_exits_of(sweep));
-  List hoisted = ad_hoisted(ad_locals.reverse(), ad_param_names(params));
+  List locals = state["locals"];
+  List hoisted = ad_hoisted(locals.reverse(), ad_param_names(params));
   List decls = ad_declare_locals(hoisted);
   List bars = ad_declare_bars(names);
   List writes = ad_write_slots(inputs);
@@ -1018,15 +916,13 @@ List ad_reverse_function(List spec, Var name, List params, List items) {
               (return (double) ${ad_id("_ad_result")})));
 }
 
-$comptime()
-List ad_reverse(List fn) {
+meta List ad_reverse(List fn) {
   match (fn) {
     case %(function ?spec (bind (binding ? ?name) ((fnmod (params *params))))
                     (block *items)): {
-      ad_locals = ad_param_locals(params);
-      ad_counter = 0;
-      ad_loop_step = %();
-      List one = ad_reverse_function(spec, name, params, items);
+      Map state = {"locals": ad_param_locals(params),
+                   "counter": 0, "loop_step": %()};
+      List one = ad_reverse_function(state, spec, name, params, items);
       return %($one);
     }
   }

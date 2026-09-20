@@ -1,5 +1,5 @@
-unittest/compiler-fixtures/comptime-declines.x:20:1: macro: this function cannot run at compile time
-  $comptime()
-  ^
-  note: function: "ct_goto" reason: a goto has no lowering
+unittest/compiler-fixtures/comptime-declines.x:18:1: macro: this function cannot run at compile time
+  meta int ct_goto(int n) {
+  ^^^^
+  note: reason: a goto has no lowering
 

@@ -1,5 +1,5 @@
-unittest/compiler-fixtures/comptime-declines-defer.x:16:1: macro: this function cannot run at compile time
-  $comptime()
-  ^
-  note: function: "ct_defer" reason: defer, because a compile-time function does not free its values: the evaluator owns them
+unittest/compiler-fixtures/comptime-declines-defer.x:14:1: macro: this function cannot run at compile time
+  meta int ct_defer(int n) {
+  ^^^^
+  note: reason: defer, because a compile-time function does not free its values: the evaluator owns them
 

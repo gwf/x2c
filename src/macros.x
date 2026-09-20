@@ -878,17 +878,6 @@ static Var _sdk_cache_value(List node) {
   return compiler.id_keys[(int) id];
 }
 
-/* Lowers a compile-time function and installs it in the macro session.
-   Returns the function itself so a decorator emits its target unchanged. */
-static Var _sdk_comptime_install(List fn) {
-  $_sdk_guard("x2c.comptime.install");
-  if (macro_sdk_compiler.install_comptime(fn)) return %($fn);
-  String why = macro_sdk_compiler.lower_declined();
-  return _sdk_reject(
-    "this function cannot run at compile time",
-    %("function: ${_sdk_function_name(fn).repr()}" "reason: $why"));
-}
-
 /* The forms a compile-time function lowers to, for inspection. */
 static Var _sdk_comptime_lower(List fn) {
   $_sdk_guard("x2c.comptime.lower");
@@ -1089,8 +1078,6 @@ static void _ensure_lisp(Compiler compiler) {
     $lisp.bind(_.macro_lisp, "x2c.ident", _sdk_ident);
     $lisp.bind(_.macro_lisp, "x2c.method.resolve", _sdk_method_resolve);
     $lisp.bind(_.macro_lisp, "x2c.cache.value", _sdk_cache_value);
-    $lisp.bind(
-      _.macro_lisp, "x2c.comptime.install", _sdk_comptime_install);
     $lisp.bind(
       _.macro_lisp, "x2c.comptime.lower", _sdk_comptime_lower);
     $lisp.bind(_.macro_lisp, "x2c.function.name", _sdk_function_name);
@@ -1390,22 +1377,11 @@ void Compiler.evaluate_declaration_effect(
   }
 }
 
-/** Installs a `meta` function in the macro session, so it is callable from
-    compile-time Lisp under its own name. The refusal is the one the
-    `$comptime()` decorator reports, sited on the marker the developer wrote.
-    The caller still emits the function, which is what the decorator does.
-    A function whose two forms agree is recorded as foldable, so a call with
-    constant arguments can be answered from the compile-time form. One that
-    reaches a `Meta` operation has no runtime form at all, which the caller
-    reads to emit nothing for it, and which spreads to its callers.
-
-    One that reaches file-scope state is refused. `meta` is the word for a
-    function with two forms that agree, and these two cannot: the
-    compile-time form reads the Lisp session's own table, which no unit
-    initializer writes, while the emitted function reads the program's
-    variable. Folding already declined on that, but a macro calling the same
-    function took the session's answer with nothing said. The `$comptime()`
-    decorator, which promises one form, keeps the state.
+/** Installs a `meta` function in the macro session under its own name.
+    A function whose two forms agree is foldable. One that reaches a compiler
+    operation has no runtime form, and neither do its callers. File-scope
+    state is refused because the compile-time session cannot read the
+    program's variables. Lowering failures are reported at the marker.
 */
 void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
   if (!c.collect_protocols) c.run_declaration_effects();

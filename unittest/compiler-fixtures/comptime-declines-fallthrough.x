@@ -10,10 +10,7 @@
 
 #include "x2c.x"
 
-macro Decorator $comptime(Unit $fn) => { $(x2c.comptime.install $fn)... }
-
-$comptime()
-int ct_fallthrough(int n) {
+meta int ct_fallthrough(int n) {
   int s = 0;
   switch (n) {
     case 1:

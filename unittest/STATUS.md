@@ -161,6 +161,11 @@
 
 ## Outstanding Items
 
+Compile-time lowering drops an assignment nested in a discarded expression:
+`meta int f(int n) { (void) (n = n + 2); return n; }` answers 1 for `f(1)`
+at compile time and 3 at run time. Reproduced on `b395865e` during the
+`meta` fixture migration; a focused lowering repair remains outstanding.
+
 No outstanding static-initialization defects are recorded. Bare unknown native
 macro names retain native C initializer rules; tags hidden inside an opaque
 native macro retain native scope. Pass lowered local objects explicitly to

@@ -7,14 +7,11 @@
 
 #include "x2c.x"
 
-macro Decorator $comptime(Unit $fn) => { $(x2c.comptime.install $fn)... }
-
 /* `Array a = []; defer a.free();` is correct x2c and wrong compile-time
    x2c. The evaluator owns every value a compile-time function makes, so
    freeing one would take the value out from under it. The refusal names
    `defer` rather than the operation the deferred statement calls. */
-$comptime()
-int ct_defer(int n) {
+meta int ct_defer(int n) {
   Array a = [];
   defer a.free();
   a.push(n);

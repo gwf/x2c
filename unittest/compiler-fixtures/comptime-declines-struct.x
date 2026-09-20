@@ -7,15 +7,12 @@
 
 #include "x2c.x"
 
-macro Decorator $comptime(Unit $fn) => { $(x2c.comptime.install $fn)... }
-
 struct Point { int x, y; };
 
 /* A compile-time value is a Lisp value, and the only thing a struct could
    become is a `Map` keyed by field name. That reads back as a reference
    where the source wrote a value, so the whole shape stays out. */
-$comptime()
-int ct_struct(int n) {
+meta int ct_struct(int n) {
   struct Point p = { .x = n, .y = n + 1 };
   return p.x + p.y;
 }

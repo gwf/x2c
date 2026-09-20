@@ -1,5 +1,5 @@
-unittest/compiler-fixtures/comptime-declines-struct.x:17:1: macro: this function cannot run at compile time
-  $comptime()
-  ^
-  note: function: "ct_struct" reason: a struct or union, which has no compile-time representation
+unittest/compiler-fixtures/comptime-declines-struct.x:15:1: macro: this function cannot run at compile time
+  meta int ct_struct(int n) {
+  ^^^^
+  note: reason: a struct or union, which has no compile-time representation
 

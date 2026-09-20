@@ -1,5 +1,5 @@
-unittest/compiler-fixtures/comptime-declines-fallthrough.x:15:1: macro: this function cannot run at compile time
-  $comptime()
-  ^
-  note: function: "ct_fallthrough" reason: a switch arm that falls through into the next
+unittest/compiler-fixtures/comptime-declines-fallthrough.x:13:1: macro: this function cannot run at compile time
+  meta int ct_fallthrough(int n) {
+  ^^^^
+  note: reason: a switch arm that falls through into the next
 

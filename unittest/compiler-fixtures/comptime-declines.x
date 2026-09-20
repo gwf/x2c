@@ -10,15 +10,12 @@
 
 #include "x2c.x"
 
-macro Decorator $comptime(Unit $fn) => { $(x2c.comptime.install $fn)... }
-
 /* `goto` is refused by decision, not for want of work: the lowering has no
    place to jump to, because a lowered function is one expression per live
    local ending in a tail call. Phases that add a construct move its function
    into `comptime-lowering.x`; each deliberate refusal gets its own fixture
    with its own wording. */
-$comptime()
-int ct_goto(int n) {
+meta int ct_goto(int n) {
   if (n) goto done;
   return 1;
 done:

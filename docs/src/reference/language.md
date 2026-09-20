@@ -1453,8 +1453,7 @@ meta static String label(String stem, int n) => %"$stem-$n";
 follows it, and is an ordinary identifier everywhere else, including as a
 file-scope name, an assignment target, and a struct field. A `meta`
 declaration without a body is diagnosed, because the compiler has nothing to
-run. `meta` marks a definition only; the same effect is also available through
-a decorator that calls `x2c.comptime.install`.
+run. `meta` marks a definition only.
 
 Marking a function `meta` has three consequences.
 
@@ -1469,8 +1468,9 @@ Marking a function `meta` has three consequences.
   emitted for it.
 - A call to it whose arguments are all compile-time constants may be replaced
   by the answer its compile-time form computes. The compiler folds only where
-  the two forms agree; a function that reads file-scope state, or that returns
-  an owned value such as a `String`, keeps its call.
+  the two forms agree; a function that returns an owned value such as a
+  `String` keeps its call. A function that reaches file-scope state is refused,
+  because the compile-time session cannot read the program's variables.
 
 A `meta` declaration in an imported `.xmacro` installs its compile-time form in
 every consuming unit. The runtime forms are independent: a unit emits a
@@ -1497,8 +1497,8 @@ the Lisp one:
 - `x2c_type_value(List value)` returns `int`, 1 or 0, rather than a Lisp
   truth value.
 
-`x2c.comptime.install` and `x2c.comptime.lower` have no x2c spelling, because
-they run the pass that translates the calling function.
+`x2c.comptime.lower` has no x2c spelling, because it runs the pass that
+translates the calling function.
 
 These operations exist only inside a compiler, so they have no runtime
 definition anywhere. A `meta` function that reaches one, directly or through
