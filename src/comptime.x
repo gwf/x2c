@@ -1033,13 +1033,16 @@ static Var _lower_apply_k(Lowering l, List k) {
   return _lower_decline(l, "unknown continuation");
 }
 
-/* nil is the only false value in Lisp, so a C zero has to be compared.
-   `C.true?` owns that comparison for every family: an inlined `(eq? v 0)`
-   here answered true for a `double` zero, because a boxed 0.0 is not the
-   `int` 0 that `eq?` tests. */
+/* The equality adapters box Lisp equality as an int. A guard needs only
+   the equality, without boxing and retesting it. Other values still need
+   C.true?: even a typed parameter may arrive through an uncoerced Lisp call. */
 static Var _lower_truth(Lowering l, Var test) {
   Var value = _lower_expr(l, test);
   if (_lower_failed(l, value)) return void;
+  match (value) {
+    case %(Var_equal ?a ?b): return %(eq? $a $b);
+    case %(List_equal ?a ?b): return %(eq? $a $b);
+  }
   return %(C.true? $value);
 }
 

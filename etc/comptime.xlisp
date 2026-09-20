@@ -56,10 +56,7 @@
 // the typed AST already uses.
 (def List_len length)
 (def Var_car car)
-(def List_car car)
 (def Var_cdr cdr)
-(def List_cdr cdr)
-(def Var_cons cons)
 (def List_reverse reverse)
 (def List_index List.index)
 // These return `void` for an absent element, which has no Lisp value, so

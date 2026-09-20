@@ -171,6 +171,8 @@ bootstrap-build:					## Build the bootstrap compiler
 	$(PARALLEL_MAKE) -C bootstrap
 
 bootstrap-refresh: build				## Refresh the portable bootstrap
+	python3 tools/gen-lisp-init.py --compiler $(STAGE0_X2C)
+	$(MAKE) build
 	$(MAKE) -C bootstrap realclean
 	cp builds/0/lib/*.[ch] bootstrap/lib/
 	cp builds/0/src/*.[ch] bootstrap/src/

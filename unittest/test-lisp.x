@@ -980,6 +980,31 @@ static void lisp_native_operators_match_their_lisp_definitions(void) {
   lisp.destroy();
 }
 
+static void lisp_generated_filter(void) {
+  for (int embedded = 0; embedded < 2; embedded++) {
+    Lisp lisp = embedded ? Lisp.new() : _boot_session();
+    defer lisp.destroy();
+    _install(lisp, "log!", _native_log, %((func (("Var"))) "Var"));
+    EXPECT_VAR_EQ(_ev(lisp, "(filter (lambda (x) 0) '(1 2 3))"),
+                  _ev(lisp, "'(1 2 3)"));
+    EXPECT_VAR_EQ(_ev(lisp, "(filter (lambda (x) \"\") '(1 2 3))"),
+                  _ev(lisp, "'(1 2 3)"));
+    EXPECT_TRUE(_ev(lisp, "(filter (lambda (x) nil) '(1 2 3))").is_nil());
+    order_log[0] = 0;
+    EXPECT_TRUE(_ev(lisp, "(filter log! '())").is_nil());
+    EXPECT_INT_EQ(order_log[0], 0);
+    EXPECT_VAR_EQ(_ev(lisp, "(filter log! '(1 2 3))"), _ev(lisp, "'(1 2 3)"));
+    EXPECT_STR_EQ(String.new(order_log), "123");
+    _ev(lisp, "(def car (lambda (x) 99))");
+    _ev(lisp, "(def cdr (lambda (x) nil))");
+    _ev(lisp, "(def cons (lambda (a b) nil))");
+    EXPECT_VAR_EQ(_ev(lisp, "(filter (lambda (x) true) '(1 2 3))"),
+                  _ev(lisp, "'(1 2 3)"));
+    _ev(lisp, "(def filter (lambda (p xs) 'changed))");
+    EXPECT_VAR_EQ(_ev(lisp, "(filter log! '(1 2 3))"), _ev(lisp, "'changed"));
+  }
+}
+
 static void lisp_bootstrap_collections_and_macros(void) {
   Lisp lisp = _boot_session();
   EXPECT_VAR_EQ(_ev(lisp, "(map (lambda (x) (* x x)) '(1 2 3))"),
@@ -1183,6 +1208,7 @@ void lisp_suite(void) {
   $test.run(lisp_bootstrap_arithmetic_and_strings);
   $test.run(lisp_deep_recursion_survives_stack);
   $test.run(lisp_native_operators_match_their_lisp_definitions);
+  $test.run(lisp_generated_filter);
   $test.run(lisp_bootstrap_collections_and_macros);
   $test.run(lisp_bootstrap_predicates_are_exact);
   $test.run(lisp_optional_layers_are_explicit);

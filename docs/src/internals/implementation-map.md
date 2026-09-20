@@ -317,3 +317,18 @@ policy; `src/cli.x` owns the option table, command selection, and help rendering
 
 Each feature entry lists the relevant parser, transforms, runtime code, and
 tests so you can follow its complete implementation.
+
+## Shared Lisp initialization
+
+The compiler and `Lisp.new()` load the same generated `etc/init.xlisp`. Its
+handwritten primitives and evaluator macros live in `etc/init-core.xlisp`.
+The `filter` algorithm lives in `etc/init.x`; `tools/gen-lisp-init.py` uses the
+compiler's existing lowering to append its Lisp definition. Other standard
+algorithms remain in the core while their migration is evaluated.
+
+`make bootstrap-refresh` regenerates this artifact with the current stage-0
+compiler and rebuilds its embedded runtime copy before refreshing bootstrap
+C. The artifact is checked in: installation and session startup do not need
+to translate the initial environment. Generated helpers use fixed primitive
+operations internally; their public Lisp names remain replaceable. In
+particular, rebinding `car`, `cdr`, or `cons` does not change `filter`.
