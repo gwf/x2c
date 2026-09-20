@@ -82,11 +82,15 @@ below the acceptance condition. A temporary counter confirmed the skip ran
 copied-home timings lacked a normal prelude and are not acceptance evidence.
 The retained prototype is in worktree branch `codex/var-tags-probe`.
 
-**The 11 pure builders still in Lisp** in `etc/compiler-sdk.xlisp` were
-blocked by one fact: a body in `lib/meta.x` did not build. The scratch-name
-serial fix removes it. Tested 2026-09-19 on this branch: one throwaway `meta`
-body added to `lib/meta.x` built clean and all 741 compiler fixtures passed.
-The throwaway was removed. Porting the 11 builders is now ordinary work.
+**The 11 syntax builders** now have one `meta` body each in `lib/meta.x`.
+The shared parent binds both spellings to that body; `x2c.expr.call` keeps
+only its rest-argument adapter. Nine builders also run at runtime, while
+field and cast construction retain their compiler-query restrictions.
+Preloading installs native operations first. Cold declaration collection
+uses the three literal builders' native forms, compiled from those same
+bodies, until the lowered forms replace them. Source keys are canonical,
+and a failed preload stops instead of freezing a partial session. Fresh compiler passes inherit restrictions from existing shared
+lowering records.
 
 ### Decided
 

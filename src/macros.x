@@ -13,6 +13,7 @@ $(import "../src/ast-rewrite.xmacro")
 #include "expressions.x"
 #include "literals.x"
 #include "comptime.x"
+#include "meta.x"
 #include "parse.x"
 #include "statements.x"
 #include "utils.x"
@@ -503,9 +504,6 @@ static Var _sdk_function_parameter(List function, String wanted) {
     %("function: ${_sdk_function_name(function).repr()}"));
 }
 
-static Var _sdk_function_body(List function) =>
-  function.match_replace(%(function ? ? (block *body)), %(*body));
-
 /* An SDK rejection outside an expansion has no scope to clear it, so the
    report consumes it; a later failure must not repeat a stale message. */
 static void _report_lisp_failure(
@@ -975,6 +973,69 @@ static List _library_files(void) => %(
   ("etc/compiler-sdk.xlisp" "cannot open the compile-time Lisp SDK")
   ("etc/builtin-macros.xlisp" "cannot open the built-in macro support"));
 
+/* Native operations use the active expansion context, not the session
+   that owns their callable. The shared parent therefore owns them once. */
+static void _install_native_operations(Compiler compiler) {
+  with compiler {
+    /* Cold declaration collection needs literals before the meta surface is
+       parsed. These native forms have the same authored bodies; preload
+       replaces their aliases with the lowered forms. */
+    $lisp.bind(_.macro_lisp, "x2c_literal_string", x2c_literal_string);
+    $lisp.bind(_.macro_lisp, "x2c_literal_int", x2c_literal_int);
+    $lisp.bind(_.macro_lisp, "x2c_literal_symbol", x2c_literal_symbol);
+    $lisp.bind(_.macro_lisp, "_x2c.import-hook", _lisp_import_hook);
+    $lisp.bind(_.macro_lisp, "x2c.syntax.type", _sdk_syntax_type);
+    $lisp.bind(_.macro_lisp, "x2c.binding.spelling", _sdk_binding_spelling);
+    $lisp.bind(_.macro_lisp, "x2c.diagnostic.fail", _sdk_diagnostic_fail);
+    $lisp.bind(_.macro_lisp, "x2c.ident", _sdk_ident);
+    $lisp.bind(_.macro_lisp, "x2c.method.resolve", _sdk_method_resolve);
+    $lisp.bind(_.macro_lisp, "x2c.cache.value", _sdk_cache_value);
+    $lisp.bind(
+      _.macro_lisp, "x2c.comptime.lower", _sdk_comptime_lower);
+    $lisp.bind(_.macro_lisp, "x2c.function.name", _sdk_function_name);
+    $lisp.bind(
+      _.macro_lisp, "_x2c.function.reference", _sdk_function_reference);
+    $lisp.bind(
+      _.macro_lisp, "_x2c.function.native-type",
+      _sdk_native_function_type);
+    $lisp.bind(
+      _.macro_lisp, "x2c.function.parameter",
+      _sdk_function_parameter);
+    $lisp.bind(
+      _.macro_lisp, "_x2c.foreach.complete-iter-chain",
+      _sdk_complete_iter_chain);
+    $lisp.bind(
+      _.macro_lisp, "_x2c.foreach.string-collection",
+      _sdk_string_collection);
+    $lisp.bind(_.macro_lisp, "x2c.type.fields", _sdk_type_fields);
+    $lisp.bind(_.macro_lisp, "x2c.type.parts", _sdk_type_parts);
+    $lisp.bind(_.macro_lisp, "x2c.type.reverse-name", _sdk_type_reverse_name);
+    $lisp.bind(_.macro_lisp, "x2c.type.resolve", _sdk_type_resolve);
+    $lisp.bind(_.macro_lisp, "x2c.type.layout", _sdk_type_layout);
+    $lisp.bind(_.macro_lisp, "x2c.type.value?", _sdk_type_value);
+    $lisp.bind(_.macro_lisp, "x2c.type.tag-name", _sdk_type_tag_name);
+    /* One naming rule: a supported operation is `x2c.<noun>.<verb>` and an
+       internal primitive carries the `_x2c.` prefix instead of an infix
+       underscore. */
+    $lisp.bind(_.macro_lisp, "_x2c.source.text", _sdk_source_text);
+    $lisp.bind(_.macro_lisp, "_x2c.embed.text", _sdk_embed_text);
+    $lisp.bind(
+      _.macro_lisp, "_x2c.invocation.location", _sdk_invocation_location);
+    $lisp.bind(_.macro_lisp, "_x2c.symbol-set", _sdk_symbol_set);
+    $lisp.bind(_.macro_lisp, "_x2c.name.unique", _sdk_ident_unique);
+    $lisp.bind(
+      _.macro_lisp, "_x2c.declaration.bindings", _sdk_declaration_bindings);
+    $lisp.bind(_.macro_lisp, "x2c.literal.value", _sdk_literal_string);
+    $lisp.bind(_.macro_lisp, "x2c.diagnostic.warn", _sdk_diagnostic_warn);
+    $lisp.bind(_.macro_lisp, "x2c.protocol.member", _sdk_protocol_member);
+    $lisp.bind(_.macro_lisp, "x2c.type.integral?", _sdk_type_integral);
+    $lisp.bind(_.macro_lisp, "x2c.type.pointer?", _sdk_type_pointer);
+    $lisp.bind(_.macro_lisp, "x2c.type.element", _sdk_type_element);
+    $lisp.bind(_.macro_lisp, "x2c.type.parameters", _sdk_type_parameters);
+    $lisp.bind(_.macro_lisp, "x2c.type.return", _sdk_type_return);
+  }
+}
+
 /** Builds the shared compile-time session, leaving it open for the caller to
     fill and then publish. Returns the session, or null when this home cannot
     preload, in which case every unit falls back to its own load, which
@@ -998,6 +1059,7 @@ Lisp Compiler.open_macro_library(Compiler compiler) {
   try {
     foreach (Var (relative, message), _library_files())
       _eval_library(compiler, 0, relative, message);
+    _install_native_operations(compiler);
   }
   catch %(? *): {
     library_filling = 0;
@@ -1056,6 +1118,14 @@ void macro_library_defer(void) {
 /** Answers whether a unit started now may still raise `<lisp-late>`. */
 int macro_library_pending(void) => library_restartable && !library_settled;
 
+/** Returns the published definition keys, or null before publication.
+    The borrowed map is the shared session's source identity table.
+*/
+Map Compiler.shared_definitions(Compiler compiler) {
+  (void) compiler;
+  return library_session ? library_definitions : NULL;
+}
+
 /* Each Compiler initializes one Lisp session lazily. An `.xmacro` import
    parser borrows that session; the parent Compiler frees it. */
 static void _ensure_lisp(Compiler compiler) {
@@ -1091,57 +1161,7 @@ static void _ensure_lisp(Compiler compiler) {
        defines is reset only once that library is in reach, whether it came
        from the shared parent or from the loads above. */
     _reset_unit_state(_);
-    $lisp.bind(_.macro_lisp, "_x2c.import-hook", _lisp_import_hook);
-    $lisp.bind(_.macro_lisp, "x2c.syntax.type", _sdk_syntax_type);
-    $lisp.bind(_.macro_lisp, "x2c.binding.spelling", _sdk_binding_spelling);
-    $lisp.bind(_.macro_lisp, "x2c.diagnostic.fail", _sdk_diagnostic_fail);
-    $lisp.bind(_.macro_lisp, "x2c.ident", _sdk_ident);
-    $lisp.bind(_.macro_lisp, "x2c.method.resolve", _sdk_method_resolve);
-    $lisp.bind(_.macro_lisp, "x2c.cache.value", _sdk_cache_value);
-    $lisp.bind(
-      _.macro_lisp, "x2c.comptime.lower", _sdk_comptime_lower);
-    $lisp.bind(_.macro_lisp, "x2c.function.name", _sdk_function_name);
-    $lisp.bind(
-      _.macro_lisp, "_x2c.function.reference", _sdk_function_reference);
-    $lisp.bind(
-      _.macro_lisp, "_x2c.function.native-type",
-      _sdk_native_function_type);
-    $lisp.bind(
-      _.macro_lisp, "x2c.function.parameter",
-      _sdk_function_parameter);
-    $lisp.bind(_.macro_lisp, "x2c.function.body", _sdk_function_body);
-    $lisp.bind(
-      _.macro_lisp, "_x2c.foreach.complete-iter-chain",
-      _sdk_complete_iter_chain);
-    $lisp.bind(
-      _.macro_lisp, "_x2c.foreach.string-collection",
-      _sdk_string_collection);
-    $lisp.bind(_.macro_lisp, "x2c.type.fields", _sdk_type_fields);
-    $lisp.bind(_.macro_lisp, "x2c.type.parts", _sdk_type_parts);
-    $lisp.bind(_.macro_lisp, "x2c.type.reverse-name", _sdk_type_reverse_name);
-    $lisp.bind(_.macro_lisp, "x2c.type.resolve", _sdk_type_resolve);
-    $lisp.bind(_.macro_lisp, "x2c.type.layout", _sdk_type_layout);
-    $lisp.bind(_.macro_lisp, "x2c.type.value?", _sdk_type_value);
-    $lisp.bind(_.macro_lisp, "x2c.type.tag-name", _sdk_type_tag_name);
-    /* One naming rule: a supported operation is `x2c.<noun>.<verb>` and an
-       internal primitive carries the `_x2c.` prefix instead of an infix
-       underscore. */
-    $lisp.bind(_.macro_lisp, "_x2c.source.text", _sdk_source_text);
-    $lisp.bind(_.macro_lisp, "_x2c.embed.text", _sdk_embed_text);
-    $lisp.bind(
-      _.macro_lisp, "_x2c.invocation.location", _sdk_invocation_location);
-    $lisp.bind(_.macro_lisp, "_x2c.symbol-set", _sdk_symbol_set);
-    $lisp.bind(_.macro_lisp, "_x2c.name.unique", _sdk_ident_unique);
-    $lisp.bind(
-      _.macro_lisp, "_x2c.declaration.bindings", _sdk_declaration_bindings);
-    $lisp.bind(_.macro_lisp, "x2c.literal.value", _sdk_literal_string);
-    $lisp.bind(_.macro_lisp, "x2c.diagnostic.warn", _sdk_diagnostic_warn);
-    $lisp.bind(_.macro_lisp, "x2c.protocol.member", _sdk_protocol_member);
-    $lisp.bind(_.macro_lisp, "x2c.type.integral?", _sdk_type_integral);
-    $lisp.bind(_.macro_lisp, "x2c.type.pointer?", _sdk_type_pointer);
-    $lisp.bind(_.macro_lisp, "x2c.type.element", _sdk_type_element);
-    $lisp.bind(_.macro_lisp, "x2c.type.parameters", _sdk_type_parameters);
-    $lisp.bind(_.macro_lisp, "x2c.type.return", _sdk_type_return);
+    if (!shared) _install_native_operations(_);
   }
 }
 

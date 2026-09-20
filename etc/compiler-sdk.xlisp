@@ -8,39 +8,8 @@
 (defun _x2c.fail (message value) (x2c.diagnostic.fail
   message (list (string-append "value: " (repr value)))))
 
-(defun x2c.literal.string (value) (if (string? value)
-  `(expr ("String") (segments
-    (segexp (expr ("String") (literal ("String") ,value)))))
-  (_x2c.fail "x2c.literal.string requires a String" value)))
-(defun x2c.literal.int (value) (if (number? value)
-  `(expr (int) (literal (int) ,(str value)))
-  (_x2c.fail "x2c.literal.int requires a number" value)))
-(defun x2c.literal.symbol (value) (if (symbol? value)
-  `(expr ("Symbol") (literal ("Symbol") ,(str value) ,value))
-  (_x2c.fail "x2c.literal.symbol requires a Symbol" value)))
 (defun x2c.source.text (syntax) (_x2c.source.text syntax))
 (defun x2c.embed.text (path) (_x2c.embed.text path))
-
-// Expression construction. Every operand is itself an expression AST.
-(defun x2c.expr.ident (name) `(expr () (ident ,name)))
-(defun x2c.expr.index (base subscript)
-  `(expr () (index ,base ,subscript)))
-(defun x2c.expr.field (receiver name) (let
-  ((checked (x2c.ident name)))
-  `(expr () (op . ,receiver (,(cadr checked))))))
-(defun x2c.expr.call (callee . arguments)
-  `(expr () (call ,callee (args ,@arguments))))
-(defun x2c.expr.composite (items)
-  `(expr () (composite (commas ,@items))))
-
-(defun _x2c.params (value)
-  (if (eq? (car value) 'params) (cdr value) value))
-(defun _x2c.arg (parameter)
-  `(expr () (ident ,(cadr (car (cddr parameter))))))
-(defun x2c.parameters.arguments (value) (let ((items (_x2c.params value)))
-  (if (match items '((param (void) (bind () ?mods))))
-      nil
-      (map _x2c.arg items))))
 
 // Statement, declaration, and type construction. A generator composes these
 // instead of writing canonical node shapes by hand.
@@ -55,11 +24,6 @@
 (defun x2c.param.make (type name)
   (let ((parts (x2c.type.parts type)))
     `(param ,(car parts) (bind (,name) ,(cadr parts)))))
-(defun x2c.expr.cast (type expression)
-  (let ((parts (x2c.type.parts type)))
-    `(expr ,type (cast (decl ,(car parts)
-       (bindings (bind () ,(cadr parts)))) ,expression))))
-
 // Enum members as (("NAME" VALUE) ...), with VALUE nil when the member takes
 // its position's value. The member list is the resolved enum's last part.
 // A single literal initializer reads as its spelling; any other initializer

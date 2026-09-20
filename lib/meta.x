@@ -10,10 +10,9 @@
     operations from x2c, so a macro's implementation is x2c. Each x2c name is
     its Lisp name with `_` for `.`, and the lowering maps one to the other.
 
-    Nothing here has a runtime definition: each name resolves to a compiler
-    operation, and there is no such function in a linked program. A
-    declaration here with no body is what makes it one. A `meta` function that
-    reaches one, directly or through another `meta` function, is therefore
+    Syntax builders have `meta` bodies shared by compile time and runtime.
+    A declaration with no body names a compiler operation. A `meta` function
+    that reaches one, directly or through another `meta` function, is therefore
     compile-time only, the compiler derives that and emits no runtime form for
     it, and a run-time call to it is diagnosed where it is written.
 
@@ -32,6 +31,7 @@
 
 #include "common.x"
 #include "list.x"
+#include "match.x"
 #include "string.x"
 #include "symbol.x"
 
@@ -47,13 +47,17 @@
 List x2c_ident(String spelling);
 
 /** Returns a `String` expression holding `value`. */
-List x2c_literal_string(String value);
+meta List x2c_literal_string(String value) =>
+  %(expr ("String") (segments
+    (segexp (expr ("String") (literal ("String") $value)))));
 
 /** Returns an `int` expression holding `value`. */
-List x2c_literal_int(int value);
+meta List x2c_literal_int(int value) =>
+  %(expr (int) (literal (int) ${value.str()}));
 
 /** Returns a `Symbol` expression holding `value`. */
-List x2c_literal_symbol(Symbol value);
+meta List x2c_literal_symbol(Symbol value) =>
+  %(expr ("Symbol") (literal ("Symbol") ${value.str()} $value));
 
 /* --- expression construction --------------------------------------------
    The five expression shapes a macro assembles from parts it was given. A
@@ -63,26 +67,36 @@ List x2c_literal_symbol(Symbol value);
 
 /** Returns an expression reading the identifier `name`, which is the syntax
     `x2c_ident` returned or a binding the compiler resolved. */
-List x2c_expr_ident(List name);
+meta List x2c_expr_ident(List name) => %(expr () (ident $name));
 
 /** Returns the expression `base[subscript]`. */
-List x2c_expr_index(List base, List subscript);
+meta List x2c_expr_index(List base, List subscript) =>
+  %(expr () (index $base $subscript));
 
 /** Returns the expression `receiver.name`. */
-List x2c_expr_field(List receiver, String name);
+meta List x2c_expr_field(List receiver, String name) {
+  List checked = x2c_ident(name);
+  return %(expr () (op . $receiver (${checked[1]})));
+}
 
 /** Returns the expression calling `callee` with `arguments`, a `List` of
     expressions. */
-List x2c_expr_call(List callee, List arguments);
+meta List x2c_expr_call(List callee, List arguments) =>
+  %(expr () (call $callee (args @arguments)));
 
 /** Returns the comma-separated composite initializer holding `items`, a
     `List` of expressions. */
-List x2c_expr_composite(List items);
+meta List x2c_expr_composite(List items) =>
+  %(expr () (composite (commas @items)));
 
 /** Returns `expression` cast to `type`, which is a declared type rather
     than syntax. A generator needs it where the value it holds and the
     parameter it reaches differ in width or sign. */
-List x2c_expr_cast(List type, List expression);
+meta List x2c_expr_cast(List type, List expression) {
+  List parts = x2c_type_parts(type);
+  return %(expr $type
+    (cast (decl ${parts[0]} (bindings (bind () ${parts[1]}))) $expression));
+}
 
 /* --- reading what the macro captured ------------------------------------
    A macro receives bound syntax, and these are the four questions about it
@@ -123,12 +137,25 @@ String x2c_function_name(List function);
 List x2c_function_parameter(List function, String wanted);
 
 /** Returns the statements in the body of `function`. */
-List x2c_function_body(List function);
+meta List x2c_function_body(List function) {
+  match (function) case %(function ? ? (block *body)): return body;
+  return %();
+}
 
 /** Returns the argument expressions that forward a parameter list, which is
     a `params` form or the parameters themselves. A `(void)` parameter list
     answers nothing. */
-List x2c_parameters_arguments(List value);
+meta List x2c_parameters_arguments(List value) {
+  match (value) case %(params *items): value = items;
+  match (value) case %((param (void) (bind () ?))): return %();
+  List arguments = %();
+  foreach (List parameter, value) {
+    match (parameter)
+      case %(param ? (bind ?identity *)):
+        arguments = cons(x2c_expr_ident(identity), arguments);
+  }
+  return arguments.reverse();
+}
 
 /* --- reading a type -----------------------------------------------------
    The generated-code questions: what a struct holds, what its declaration

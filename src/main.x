@@ -171,7 +171,7 @@ static void _compile_file(
   Frontend frontend, String filename, String output_dir) {
   try _translate_unit(frontend, filename, output_dir);
   catch %(lisp-late *): {
-    frontend.preload_macro_libraries();
+    if (!frontend.preload_macro_libraries()) exit(1);
     _translate_unit(frontend, filename, output_dir);
   }
 }
@@ -318,7 +318,7 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build) {
      translated in this process otherwise builds the parent only when it
      needs one, which many small programs never do. */
   void macro_library_defer(void);
-  if (parallel || c.dump) frontend.preload_macro_libraries();
+  if ((parallel || c.dump) && !frontend.preload_macro_libraries()) return 1;
   else macro_library_defer();
   if (parallel) {
     Array chunks =

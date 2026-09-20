@@ -1,5 +1,0 @@
-unittest/compiler-fixtures/meta-comptime-only-call.x:19:22: macro: 'mc_name' can only be called at compile time
-    List node = mc_name("hi");
-                       ^
-  note: reason: it reaches a compiler operation, so no unit emits a definition for it; call it from a macro or another meta function
-

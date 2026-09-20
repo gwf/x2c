@@ -23,6 +23,7 @@
 #include "lisp.x"
 #include "atom.x"
 #include "logger.x"
+#include "path.x"
 
 /* One lowering. `env` maps a binding id to the Lisp form that produces it;
    `locals` are the ids the function declares, so an id outside it is
@@ -1960,6 +1961,23 @@ static Map _lowered_defs(void) {
   return lowered_defs;
 }
 
+/** Restores the shared definitions' derived call restrictions into a fresh
+    compiler pass. Reads existing process tables without opening Lisp or
+    creating a lowering cache in the unit's Context.
+*/
+void Compiler.inherit_shared_meta(Compiler compiler) {
+  if ((void *) lowered_defs == NULL) return;
+  Map definitions = compiler.shared_definitions();
+  if (!definitions) return;
+  foreach (String key, definitions.keys())
+    match (lowered_defs[key])
+      case %(? ? ?(int globals) ?(int meta)): {
+        String name = key.rpartition("#")[2];
+        if (globals) compiler.meta_impure[name] = 1;
+        if (meta) compiler.meta_comptime[name] = 1;
+      }
+}
+
 /* A wide numeric leaf, which a literal too large for an `int` produces, owns
    a box in the unit's `Scope` that promotion to the value pools does not
    reach. Such a lowering is not retained and is repeated in the next unit. */
@@ -2007,7 +2025,8 @@ int Compiler.install_comptime(Compiler compiler, List fn) {
   match (fn)
     case %(function ? (bind (binding ? ?(String name)) ?) ?): {
       own = name;
-      if (compiler.filename) key = %"${compiler.filename}#$name";
+      if (compiler.filename)
+        key = %"${Path.absolute(compiler.filename)}#$name";
     }
   /* The shared session installed this definition, from this file, before any
      unit opened. Installing it again would only try to replace a name an

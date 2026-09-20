@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/meta-builder-compiler-only.x:10:14: macro: 'wrap' can only be called at compile time
+    return wrap(%()).len();
+               ^
+  note: reason: it reaches a compiler operation, so no unit emits a definition for it; call it from a macro or another meta function
+

@@ -252,33 +252,57 @@ int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) =>
   _start(frontend, filename, unit, 0);
 
 /* Installs the compile-time forms `lib/meta.x` defines into the shared
-   session. The declarations there have no bodies: each names a compiler
-   operation, and the compile-time form that reaches it comes from parsing
-   the file. This does that once for the process. The values it interns
-   belong to the current canonical pool rather
-   than a unit's own, which is why this unit shares the process pool: a
-   Lambda the session keeps outlives every unit that calls it. */
-static void _preload_meta_surface(Frontend frontend, Lisp shared) {
+   session. Its values belong to the process pool because they outlive every
+   unit that calls them. Both builder spellings name the same lowered body. */
+static int _preload_meta_surface(Frontend frontend, Lisp shared) {
   ParsedUnit unit;
   String path = %"${x2c_get_root()}/lib/meta.x";
-  if (!_start(frontend, path, &unit, 1)) {
-    unit.close();
-    return;
-  }
+  int started = _start(frontend, path, &unit, 1);
   unit.compiler.macro_lisp = shared;
   unit.compiler.borrowed_lisp = 1;
   defer unit.close();
-  if (unit.collect(frontend)) (void) unit.parse();
+  List builders = %(
+    (x2c_literal_string x2c.literal.string)
+    (x2c_literal_int x2c.literal.int)
+    (x2c_literal_symbol x2c.literal.symbol)
+    (x2c_expr_ident x2c.expr.ident)
+    (x2c_expr_index x2c.expr.index)
+    (x2c_expr_field x2c.expr.field)
+    (x2c_expr_call _x2c.expr.call-list)
+    (x2c_expr_composite x2c.expr.composite)
+    (x2c_expr_cast x2c.expr.cast)
+    (x2c_function_body x2c.function.body)
+    (x2c_parameters_arguments x2c.parameters.arguments));
+  /* Imported helpers can lower calls before the builders are parsed. */
+  foreach (Var (name, alias), builders) {
+    Var initial;
+    if (!shared.try_get(name.str(), &initial)) initial = %();
+    shared.set_global(alias.str(), initial);
+  }
+  if (!started || !unit.collect(frontend) || !unit.parse()) {
+    foreach (List diagnostic, unit.compiler.diagnostics())
+      unit.compiler.print_diagnostic(diagnostic);
+    return 0;
+  }
+  foreach (Var (name, alias), builders)
+    shared.set_global(alias.str(), shared.eval(name));
+  return 1;
 }
 
 /** Evaluates the compile-time libraries and installs the compiler surface's
-    own definitions, once for this process.
+    own definitions, once for this process. Returns zero after reporting a
+    failed preload, without publishing a partial session.
 */
-void Frontend.preload_macro_libraries(Frontend frontend) {
+int Frontend.preload_macro_libraries(Frontend frontend) {
   Compiler compiler = Compiler.new();
   Lisp shared = compiler.open_macro_library();
-  if (shared) _preload_meta_surface(frontend, shared);
+  if (shared && !_preload_meta_surface(frontend, shared)) {
+    shared.destroy();
+    compiler.publish_macro_library(NULL);
+    return 0;
+  }
   compiler.publish_macro_library(shared);
+  return 1;
 }
 
 /** Collects symbols and retains preprocessor outputs for adapter

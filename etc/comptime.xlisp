@@ -224,6 +224,7 @@
 (defun int_var (v) v)
 (defun long_var (v) v)
 (defun double_var (v) v)
+(defun Symbol_var (v) v)
 (defun String_var (v) v)
 (defun List_var (v) v)
 (defun Var_list (v) v)
@@ -248,11 +249,9 @@
 // reject, which reaches the developer as a diagnostic at the macro
 // invocation.
 
-// `x2c.expr.call` takes its arguments as a rest parameter, which x2c cannot
-// spell in a prototype, so the x2c surface takes the `List` and this spreads
-// it the way a Lisp caller does.
-(defun _x2c.expr.call-list (callee arguments)
-  (apply x2c.expr.call (cons callee arguments)))
+// The Lisp spelling keeps its rest parameter around the shared meta body.
+(defun x2c.expr.call (callee . arguments)
+  (x2c_expr_call callee arguments))
 
 // `x2c.type.value?` answers a Lisp truth value and the x2c surface returns
 // `int`, whose test the lowering inlines as a comparison against zero. Nil

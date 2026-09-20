@@ -1500,10 +1500,14 @@ the Lisp one:
 `x2c.comptime.lower` has no x2c spelling, because it runs the pass that
 translates the calling function.
 
-These operations exist only inside a compiler, so they have no runtime
-definition anywhere. A `meta` function that reaches one, directly or through
-another `meta` function, therefore has no runtime form and none is emitted for
-it; the compiler derives this and needs no spelling for it. A call to one
+The syntax builders have `meta` bodies in `lib/meta.x`, shared by both
+spellings. The literal builders, identifier, index, call and composite
+builders, function-body reader and parameter-argument builder also run at
+runtime. The field and cast builders call compiler queries.
+
+Operations declared without bodies exist only inside a compiler. A `meta`
+function that reaches one, directly or through another `meta` function, has
+no runtime form and none is emitted for it; the compiler derives this and needs no spelling for it. A call to one
 from a run-time body is diagnosed where it is written, naming the function and
 the reason.
 

@@ -187,6 +187,7 @@ List Compiler.lift_func_expression(Compiler compiler, List expression);
 #include "parse.x"
 #include "protocol.x"
 #include "macros.x"
+#include "comptime.x"
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -324,6 +325,7 @@ static Compiler _new(Compiler owner) {
     _.meta_folds = {};
     _.meta_impure = {};
     _.meta_comptime = {};
+    if (!owner) _.inherit_shared_meta();
     if (owner) {
       /* A child compiler owns its tokens, symbols, and diagnostics. Package
          registries and generated-name state belong to the whole translation
@@ -1718,6 +1720,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   c.meta_folds = {};
   c.meta_impure = {};
   c.meta_comptime = {};
+  c.inherit_shared_meta();
   c.fixed = {};
   c.init_tokens = {};
   c.static_init_deps = {};
