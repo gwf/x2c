@@ -1043,25 +1043,24 @@ static Var _lower_truth(Lowering l, Var test) {
   return %(C.true? $value);
 }
 
-/* Substitution duplicates an expression at every read, so a value that
-   cannot be duplicated is bound instead. A binding costs one lambda, which
-   is free once per entry and fatal once per iteration, so on a loop's path
-   the function is declined. */
+/* Substitution can move, repeat, or discard evaluation. Only the known
+   arithmetic and control operations below allow it when their operands do.
+   Other calls need a binding regardless of their spelling; quoted data is
+   already a value, not an expression to inspect. */
 static int _lower_pure(Var form) {
   if (form is not <list>) return 1;
   List items = form;
   if (!items) return 1;
   Var head = items.car();
-  if (head == <C.gread> || head == <C.load> || head == <C.cell> ||
-      head == <lambda>)
+  if (head is not <lsym> && head is not <symbol>) return 0;
+  String name = head.str();
+  if (name == "quote") return 1;
+  if (name != "_binary" && name != "C.conv" && name != "C.compare" &&
+      name != "C.nonzero?" && name != "C.true?" && name != "C.not" &&
+      name != "C.and" && name != "C.or" && name != "C.ternary" &&
+      name != "not" && name != "eq?")
     return 0;
-  if (head is <lsym> || head is <symbol>) {
-    String spelling = head.str();
-    if (spelling && !spelling.startswith("C.") && !spelling.startswith("_") &&
-        spelling != "quote" && spelling != "not" && spelling != "eq?")
-      return 0;
-  }
-  foreach (Var part, items) if (!_lower_pure(part)) return 0;
+  foreach (Var operand, items.cdr()) if (!_lower_pure(operand)) return 0;
   return 1;
 }
 
