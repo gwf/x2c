@@ -50,8 +50,9 @@ x2c is C with batteries and without the bullshit.
 It is a strict superset of C that compiles to C, keeping C's
 native performance, tooling, ecosystem, and portability while adding the
 conveniences of a modern language. x2c extends C's syntax with a few new
-keywords, but the real magic is in the `%` and `$` sigils, which let you write
-code that combines static types, dynamic values, and compile-time computation.
+keywords, but the real magic is in `meta`: functions that run at compile time
+as well as in the finished program. Write ordinary x2c to compute values and
+construct code while the compiler builds your program.
 
 x2c's main features are summarized in the table on the right. Everything is
 optional and works with plain C as well. Hence, you can take existing C code and

@@ -42,15 +42,9 @@ export function finalizeDestination(html, config = destination) {
         `https://github.com/gwf/x2c/archive/${config.sourceRef}.zip`);
   }
   if (config.staging) {
-    const banner = `<aside aria-label="Release candidate" style="padding:1rem;` +
-      `background:#fff1bf;color:#241c00;font:14px/1.5 monospace;` +
-      `overflow-wrap:anywhere"><strong>Public staging: ` +
-      `${escapeHtml(config.candidate)}</strong><p>Source: ` +
-      `${config.sourceRef}. Use a fresh scratch installation and the explicit ` +
-      `candidate index below. Bare x2c install commands and production URLs ` +
-      `in the book refer to production.</p><pre style="overflow:auto">` +
-      `${escapeHtml(installExample("", config))}</pre></aside>`;
-    html = html.replace(/(<body\b[^>]*>)/i, `$1${banner}`);
+    const metadata = `<meta name="x2c-release-channel" content="staging">` +
+      `<meta name="x2c-candidate" content="${escapeHtml(config.candidate)}">`;
+    html = html.replace(/(<head\b[^>]*>)/i, `$1${metadata}`);
   }
   return html;
 }

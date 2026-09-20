@@ -16,8 +16,8 @@ test("ordinary builds preserve production examples and main links", () => {
   assert.equal(installExample("production command", config), "production command");
 });
 
-test("candidate builds pin source links and expose isolated install guidance", () => {
-  const html = finalizeDestination('<body class="book">' +
+test("candidate builds pin source links and retain invisible provenance", () => {
+  const html = finalizeDestination('<html><head></head><body class="book">' +
     '<a href="https://github.com/gwf/x2c/blob/main/lib/a.x">a</a>' +
     '<a href="https://github.com/gwf/x2c/archive/refs/heads/main.zip">zip</a>',
   staging);
@@ -25,9 +25,9 @@ test("candidate builds pin source links and expose isolated install guidance", (
   assert.ok(html.includes(`/archive/${sha}.zip`));
   assert.ok(!html.includes("/main"));
   assert.ok(html.includes(candidate));
-  assert.ok(html.includes("mktemp -d"));
-  assert.ok(html.includes("--index"));
-  assert.ok(html.includes('aria-label="Release candidate"'));
+  assert.ok(html.includes('name="x2c-candidate"'));
+  assert.ok(!html.includes("<aside"));
+  assert.ok(!html.includes("<pre"));
 });
 
 test("staging cannot silently use moving main or missing candidate identity", () => {
