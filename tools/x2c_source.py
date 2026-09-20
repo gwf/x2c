@@ -1014,7 +1014,7 @@ def split_signature(signature: str) -> tuple[str, str, tuple[str, ...]]:
         raise ValueError(f"no callable name in {signature!r}")
     name = match.group(1)
     ret = signature[:match.start(1)].strip()
-    for qualifier in ("inline ", "extern "):
+    for qualifier in ("meta ", "inline ", "extern "):
         while ret.startswith(qualifier):
             ret = ret[len(qualifier):].strip()
     open_paren = signature.index("(", match.end(1) - 1)

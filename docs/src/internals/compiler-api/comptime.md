@@ -14,6 +14,7 @@ Translating a compile-time x2c function into Lisp.
 | --- | --- |
 | [`Compiler.check_meta_call`](#Compiler.check_meta_call) | Refuses a run-time call to a `meta` function this compiler derived compile-time only. |
 | [`Compiler.fold_meta_call`](#Compiler.fold_meta_call) | Answers a call to a `meta` function from its compile-time form when every argument is a compile-time constant of the parameter's own type, or returns `NULL` to leave the call alone. |
+| [`Compiler.inherit_shared_meta`](#Compiler.inherit_shared_meta) | Restores the shared definitions' derived call restrictions into a fresh compiler pass. |
 | [`Compiler.install_comptime`](#Compiler.install_comptime) | Lowers `fn` and evaluates the result in the macro session, so the function is callable from compile-time Lisp under its own name. |
 | [`Compiler.lower_comptime`](#Compiler.lower_comptime) | Lowers one compile-time function into the forms the macro session evaluates, or returns `NULL` when the substitution cannot carry it. |
 | [`Compiler.lower_declined`](#Compiler.lower_declined) | Returns why the last `Compiler.lower_comptime` declined, or `NULL`. |
@@ -38,7 +39,7 @@ source. Another `meta` function may call it: calling one is what makes
 the caller compile-time only too, so a body being parsed under the marker
 is left alone.
 
-Source: `src/comptime.x:2105`
+Source: `src/comptime.x:2124`
 
 <a id="Compiler.fold_meta_call"></a>
 #### Compiler.fold_meta_call
@@ -55,7 +56,18 @@ installed folds, so an import's runtime definition keeps the run-time
 call that designates the unit emitting it. Evaluation runs in the macro
 session; a raise there leaves the call.
 
-Source: `src/comptime.x:2127`
+Source: `src/comptime.x:2146`
+
+<a id="Compiler.inherit_shared_meta"></a>
+#### Compiler.inherit_shared_meta
+
+`void Compiler.inherit_shared_meta(Compiler compiler)`
+
+Restores the shared definitions' derived call restrictions into a fresh
+compiler pass. Reads existing process tables without opening Lisp or
+creating a lowering cache in the unit's Context.
+
+Source: `src/comptime.x:1968`
 
 <a id="Compiler.install_comptime"></a>
 #### Compiler.install_comptime
@@ -67,7 +79,7 @@ function is callable from compile-time Lisp under its own name.
 Returns whether the lowering succeeded. This method mutates the macro
 session and does not open a semantic transaction.
 
-Source: `src/comptime.x:2005`
+Source: `src/comptime.x:2023`
 
 <a id="Compiler.lower_comptime"></a>
 #### Compiler.lower_comptime
@@ -80,7 +92,7 @@ The result is the loop definitions the body needed followed by the
 function's own, in evaluation order. This method does not open a
 semantic transaction.
 
-Source: `src/comptime.x:1867`
+Source: `src/comptime.x:1868`
 
 <a id="Compiler.lower_declined"></a>
 #### Compiler.lower_declined
@@ -89,7 +101,7 @@ Source: `src/comptime.x:1867`
 
 Returns why the last `Compiler.lower_comptime` declined, or `NULL`.
 
-Source: `src/comptime.x:1926`
+Source: `src/comptime.x:1927`
 
 <a id="Compiler.lower_reached_globals"></a>
 #### Compiler.lower_reached_globals
@@ -99,7 +111,7 @@ Source: `src/comptime.x:1926`
 Returns whether the last `Compiler.install_comptime` reached file-scope
 state, directly or through a callee already recorded as reaching it.
 
-Source: `src/comptime.x:2044`
+Source: `src/comptime.x:2063`
 
 <a id="Compiler.lower_reached_meta"></a>
 #### Compiler.lower_reached_meta
@@ -109,7 +121,7 @@ Source: `src/comptime.x:2044`
 Returns whether the last `Compiler.install_comptime` reached a `Meta`
 operation, directly or through a callee already recorded as reaching one.
 
-Source: `src/comptime.x:2052`
+Source: `src/comptime.x:2071`
 
 <a id="Compiler.meta_is_comptime_only"></a>
 #### Compiler.meta_is_comptime_only
@@ -119,7 +131,7 @@ Source: `src/comptime.x:2052`
 Returns whether `fn` is a `meta` function this compiler recorded as
 compile-time only, whose runtime form the unit does not emit.
 
-Source: `src/comptime.x:2060`
+Source: `src/comptime.x:2079`
 
 ## Design notes
 

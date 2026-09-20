@@ -37,7 +37,7 @@ lib/map.x|api|
 lib/match-machine.x|internal|Private `Match` wordcode decoder.
 lib/match.x|api|
 lib/match-recursive.x|optional|Readable recursive `Match` reference; explicitly include `match-recursive.x` for differential testing.
-lib/meta.x|optional|The compiler operations a `meta` function calls; declarations only, with no runtime definition. Explicitly include `meta.x` where the `meta` functions are parsed.
+lib/meta.x|optional|Syntax builders and compiler operations for `meta` functions. Pure builders also run at runtime; operations that query the compiler remain compile-time only. Explicitly include `meta.x` where the functions are parsed.
 lib/mutex.x|api|
 lib/pool.x|api|
 lib/protocols.x|internal|The built-in `Cleanup`, `Block`, `Iter`, and `Var` protocol declarations used to generate runtime dispatch adapters.

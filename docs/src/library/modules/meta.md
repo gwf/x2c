@@ -5,6 +5,119 @@
 
 The compiler surface a `meta` function calls.
 
+## Primary API
+
+| Function | Summary |
+| --- | --- |
+| [`x2c_expr_call`](#x2c_expr_call) | Returns the expression calling `callee` with `arguments`, a `List` of expressions. |
+| [`x2c_expr_cast`](#x2c_expr_cast) | Returns `expression` cast to `type`, which is a declared type rather than syntax. |
+| [`x2c_expr_composite`](#x2c_expr_composite) | Returns the comma-separated composite initializer holding `items`, a `List` of expressions. |
+| [`x2c_expr_field`](#x2c_expr_field) | Returns the expression `receiver.name`. |
+| [`x2c_expr_ident`](#x2c_expr_ident) | Returns an expression reading the identifier `name`, which is the syntax `x2c_ident` returned or a binding the compiler resolved. |
+| [`x2c_expr_index`](#x2c_expr_index) | Returns the expression `base[subscript]`. |
+| [`x2c_function_body`](#x2c_function_body) | Returns the statements in the body of `function`. |
+| [`x2c_literal_int`](#x2c_literal_int) | Returns an `int` expression holding `value`. |
+| [`x2c_literal_string`](#x2c_literal_string) | Returns a `String` expression holding `value`. |
+| [`x2c_literal_symbol`](#x2c_literal_symbol) | Returns a `Symbol` expression holding `value`. |
+| [`x2c_parameters_arguments`](#x2c_parameters_arguments) | Returns the argument expressions that forward a parameter list, which is a `params` form or the parameters themselves. |
+
+### Functions
+
+#### x2c_expr_call
+
+`meta List x2c_expr_call(List callee, List arguments)`
+
+Returns the expression calling `callee` with `arguments`, a `List` of
+expressions.
+
+Source: `lib/meta.x:84`
+
+#### x2c_expr_cast
+
+`meta List x2c_expr_cast(List type, List expression)`
+
+Returns `expression` cast to `type`, which is a declared type rather
+than syntax. A generator needs it where the value it holds and the
+parameter it reaches differ in width or sign.
+
+Source: `lib/meta.x:95`
+
+#### x2c_expr_composite
+
+`meta List x2c_expr_composite(List items)`
+
+Returns the comma-separated composite initializer holding `items`, a
+`List` of expressions.
+
+Source: `lib/meta.x:89`
+
+#### x2c_expr_field
+
+`meta List x2c_expr_field(List receiver, String name)`
+
+Returns the expression `receiver.name`.
+
+Source: `lib/meta.x:77`
+
+#### x2c_expr_ident
+
+`meta List x2c_expr_ident(List name)`
+
+Returns an expression reading the identifier `name`, which is the syntax
+`x2c_ident` returned or a binding the compiler resolved.
+
+Source: `lib/meta.x:70`
+
+#### x2c_expr_index
+
+`meta List x2c_expr_index(List base, List subscript)`
+
+Returns the expression `base[subscript]`.
+
+Source: `lib/meta.x:73`
+
+#### x2c_function_body
+
+`meta List x2c_function_body(List function)`
+
+Returns the statements in the body of `function`.
+
+Source: `lib/meta.x:140`
+
+#### x2c_literal_int
+
+`meta List x2c_literal_int(int value)`
+
+Returns an `int` expression holding `value`.
+
+Source: `lib/meta.x:55`
+
+#### x2c_literal_string
+
+`meta List x2c_literal_string(String value)`
+
+Returns a `String` expression holding `value`.
+
+Source: `lib/meta.x:50`
+
+#### x2c_literal_symbol
+
+`meta List x2c_literal_symbol(Symbol value)`
+
+Returns a `Symbol` expression holding `value`.
+
+Source: `lib/meta.x:59`
+
+#### x2c_parameters_arguments
+
+`meta List x2c_parameters_arguments(List value)`
+
+Returns the argument expressions that forward a parameter list, which is
+a `params` form or the parameters themselves. A `(void)` parameter list
+answers nothing.
+
+Source: `lib/meta.x:148`
+
 ## Design notes
 
 A `meta` function runs inside the compiler, so it can ask the compiler
@@ -15,10 +128,9 @@ whose implementation needed them. The declarations below name the same
 operations from x2c, so a macro's implementation is x2c. Each x2c name is
 its Lisp name with `_` for `.`, and the lowering maps one to the other.
 
-Nothing here has a runtime definition: each name resolves to a compiler
-operation, and there is no such function in a linked program. A
-declaration here with no body is what makes it one. A `meta` function that
-reaches one, directly or through another `meta` function, is therefore
+Syntax builders have `meta` bodies shared by compile time and runtime.
+A declaration with no body names a compiler operation. A `meta` function
+that reaches one, directly or through another `meta` function, is therefore
 compile-time only, the compiler derives that and emits no runtime form for
 it, and a run-time call to it is diagnosed where it is written.
 
@@ -31,3 +143,7 @@ those of the compile-time Lisp operation of the same name, specified under
 "Compile-time Lisp and imports" in the language reference, which also gives
 the naming rule and the two answers whose shape differs.
 See `plans/meta-functions.md`.
+
+## Tests and examples
+
+`make verify` (`meta-comptime-only-call`, `meta-builder-compiler-only`, and `meta-literal-arguments` compiler fixtures).

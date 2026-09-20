@@ -110,6 +110,11 @@ PRIMARY_EVIDENCE = {
         "`make verify` (`unittest/test-map.x`) and `make examples` "
         "(`docs-word-count`)."
     ),
+    "meta": (
+        "`make verify` (`meta-comptime-only-call`, "
+        "`meta-builder-compiler-only`, and `meta-literal-arguments` "
+        "compiler fixtures)."
+    ),
     "match": (
         "`make verify` (`unittest/test-match.x`) and `make examples` "
         "(`match-nested`)."
