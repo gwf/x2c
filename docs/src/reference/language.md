@@ -1459,17 +1459,29 @@ Marking a function `meta` has three consequences.
 
 - The compiler translates the body into a compile-time form and installs it in
   the translation unit's macro session. It is then callable during translation,
-  by `$(name args)` from an x2c body and as an ordinary call from Lisp or from
-  a macro body. A construct with no compile-time form is diagnosed at the
+  by `$name(args)` or `$(name args)` from an x2c body, or from another
+  executing meta function. A construct with no compile-time form is diagnosed at the
   `meta` marker, with the reason.
 - The function is also emitted as C and behaves as an ordinary function at run
-  time, unless it reaches a compiler operation, directly or through another
-  `meta` function. A function that reaches one has no runtime form and none is
-  emitted for it.
+  time, unless it reaches a compiler query, an explicit dollar-prefixed meta
+  call or a source-template constructor, directly or through another meta
+  function. Such a function has no runtime form and none is emitted for it.
 - An ordinary call may be folded only for a locally installed eligible
-  definition, literal arguments already matching the parameter types, and
-  a declared `int` result fitting `int`. Other return types remain calls.
+  definition, available constant arguments matching the parameter types, and
+  a representable scalar, String, Symbol, immutable List or boxed result.
+  Mutable container, callable and native-address results remain calls.
   This optimization is separate from explicit evaluation and result insertion.
+
+A dollar-prefixed function call requires compile-time evaluation. Arguments
+may compute values from other resolvable values and meta calls; unresolved
+runtime inputs are diagnosed. Visible macros retain precedence over meta
+functions with the same name. In a macro body, forwarding a captured hole
+directly passes its code rather than evaluating the future runtime expression.
+
+Inside meta bodies, Unit and Statement source macros used in expression
+positions construct deferred invocation Lists from computed arguments. Normal
+binding expands them when inserted into a program. Existing Expression macros
+still expand normally. See [source templates](../guide/meta-functions.md#source-templates-from-meta-functions).
 
 The compile-time subset cuts across C and x2c constructs. Local mutation,
 represented collections, local address-taking/dereference, and resolved
@@ -1480,10 +1492,10 @@ of its runtime methods. See the guide's
 
 Meta functions may pass and return represented values such as wide integers,
 floating values, Strings and collections during compile-time execution.
-Explicit `$(...)` expression insertion currently accepts integers as `int`
-syntax, strings as quoted C string syntax, Symbols, identifiers and nonempty
-expression-syntax Lists. It does not directly insert floating values or
-arbitrary collection/callable values. This boundary does not limit internal
+Explicit `$(...)` expression insertion accepts numeric values with their
+native Var family, computed strings as C string literals, Symbols, identifiers
+and nonempty expression-code Lists. It does not directly materialize mutable
+collections, callable values or evaluator addresses. This boundary does not limit internal
 returns to `int`; see
 [results](../guide/meta-functions.md#results-compute-insert-or-fold).
 
@@ -1518,17 +1530,20 @@ the Lisp one:
 - `x2c_type_value(List value)` returns `int`, 1 or 0, rather than a Lisp
   truth value.
 
-`x2c.comptime.lower` has no x2c spelling, because it runs the pass that
+`x2c.comptime.lower` has no x2c wrapper, because it runs the pass that
 translates the calling function.
 
-The syntax builders have `meta` bodies in `lib/meta.x`, shared by both
-spellings. The literal builders, identifier, index, call and composite
+The code builders have `meta` bodies in `lib/meta.x`, shared by the x2c
+and Lisp functions. The literal builders, identifier, index, call and composite
 builders, function-body reader and parameter-argument builder also run at
 runtime. The field and cast builders call compiler queries.
 
 Operations declared without bodies exist only inside a compiler. A `meta`
 function that reaches one, directly or through another `meta` function, has
-no runtime form and none is emitted for it; the compiler derives this and needs no spelling for it. A call to one
+no runtime form and none is emitted for it. The compiler infers this
+restriction; no additional annotation is needed. Explicit meta calls and
+source-template constructors also make their enclosing meta bodies
+compile-time-only. A call to one
 from a run-time body is diagnosed where it is written, naming the function and
 the reason.
 

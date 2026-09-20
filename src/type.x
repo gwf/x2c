@@ -456,6 +456,37 @@ static Type _integer_literal_type(
   return %(unsigned long long);
 }
 
+static int _integer_literal_end(String text) {
+  int end = text.len();
+  while (end > 0) {
+    int ch = text[end - 1];
+    if (ch != 'u' && ch != 'U' && ch != 'l' && ch != 'L') break;
+    end--;
+  }
+  return end;
+}
+
+/** Reads a validated numeric literal at its semantic type's precision.
+    Returns `void` when its magnitude exceeds the integer representation.
+*/
+Var Type.numeric_literal_value(Type type, String text) {
+  Symbol tag = type.scalar_tag();
+  if (tag == <f32>) { float value = strtof(text, NULL); return value; }
+  if (tag == <f64>) { double value = strtod(text, NULL); return value; }
+  if (tag == <ldouble>) {
+    long double value = strtold(text, NULL);
+    return value;
+  }
+  int negative = text[0] == '-';
+  if (negative || text[0] == '+') text = text[1:];
+  unsigned long long magnitude;
+  int decimal;
+  if (!_literal_magnitude(text, _integer_literal_end(text),
+                          &magnitude, &decimal)) return void;
+  Var value = negative ? 0ULL - magnitude : magnitude;
+  return value.convert(tag);
+}
+
 /** Returns the native type selected by a validated numeric token.
     `floating` selects floating suffix rules; an integer outside all supported
     native families returns `NULL`.
@@ -468,12 +499,7 @@ Type Type.numeric_literal(String text, int floating) {
     if (last == 'l' || last == 'L') return %(long double);
     return %(double);
   }
-  int suffix = length;
-  while (suffix > 0) {
-    int ch = text[suffix - 1];
-    if (ch != 'u' && ch != 'U' && ch != 'l' && ch != 'L') break;
-    suffix--;
-  }
+  int suffix = _integer_literal_end(text);
   int is_unsigned = 0, longs = 0;
   for (int i = suffix; i < length; i++) {
     int ch = text[i];

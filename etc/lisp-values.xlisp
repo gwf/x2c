@@ -39,6 +39,7 @@
 (def Array.count     (bind "Array_count" nil))
 (def Array.join      (bind "Array_join" nil))
 (def Array.list      (bind "Array_list" nil))
+(defun Array.map (a fn) (List.array (map fn (Array.list a))))
 
 // Map
 
@@ -66,6 +67,7 @@
 (def String.getslice      (bind "String_getslice" nil))
 (def String.add           (bind "String_add" nil))
 (def String.lower         (bind "String_lower" nil))
+(def String.strip (bind "lisp_string_strip" nil))
 (def String.upper         (bind "String_upper" nil))
 (def String.capitalize    (bind "String_capitalize" nil))
 (def String.repeat        (bind "String_repeat" nil))

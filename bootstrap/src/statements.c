@@ -869,10 +869,15 @@ static List _raise_statement(Compiler compiler){
   return result;
 }
 
+List Compiler_peek_macro_hole(Compiler);
+
+List Compiler_try_parse_macro_slot(Compiler, Symbol);
+
 static List _optional_label_statement(Compiler compiler){
   Token head = compiler -> token;
-  if(Compiler_peek(compiler, 0) == 19147688){
-    List label = Compiler_parse_optional_identifier(compiler);
+  if(Compiler_peek(compiler, 0) == 19147688 ||(Map_truth(compiler -> macro_holes) && List_truth(Compiler_peek_macro_hole(compiler)) && Compiler_peek(compiler, 2) == 117)){
+    List label = Compiler_try_parse_macro_slot(compiler, 920394);
+    if(! List_truth(label)) label = Compiler_parse_optional_identifier(compiler);
     if(Compiler_test(compiler, 117)) return cons(_87, cons(List_var(label), NULL));
     compiler -> token = head;
   }
@@ -906,8 +911,6 @@ List Compiler_with_binding(Compiler c){
 int Compiler_test_static_assert(Compiler);
 
 List Compiler_parse_static_assert(Compiler);
-
-List Compiler_try_parse_macro_slot(Compiler, Symbol);
 
 int Compiler_local_macro_form_is_definition(Compiler);
 
@@ -946,8 +949,6 @@ List Sym_define(Sym, List, List);
 Var Map_setindex(Map, Var, Var);
 
 int Compiler_macro_starts_target_at(Compiler, AstPos);
-
-List Compiler_peek_macro_hole(Compiler);
 
 Var List_assoc(List, Var);
 

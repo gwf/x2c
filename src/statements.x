@@ -470,8 +470,11 @@ static List _raise_statement(Compiler compiler) {
 
 static List _optional_label_statement(Compiler compiler) {
   Token head = compiler.token;
-  if (compiler.peek(0) == <ident>) {
-    List label = compiler.parse_optional_identifier();
+  if (compiler.peek(0) == <ident> ||
+      (compiler.macro_holes && compiler.peek_macro_hole() &&
+       compiler.peek(2) == <:>)) {
+    List label = compiler.try_parse_macro_slot(<name>);
+    if (!label) label = compiler.parse_optional_identifier();
     if (compiler.test(<:>)) return %(label $label);
     compiler.token = head;
   }

@@ -890,6 +890,13 @@ Var lisp_substring(String string, int start, int stop) =>
 /** Returns a boxed lower-case copy of `string`. */
 Var lisp_string_downcase(String string) => string.lower();
 
+/** Trims the bytes in `chars`, using whitespace for an empty String. */
+String lisp_string_strip(String string, Var chars) {
+  char *set = chars.is_nil() || (chars.is_integer() && !chars.integer())
+            ? NULL : chars.string();
+  return string.strip(set);
+}
+
 /** Returns the instantiated `template` when `input` matches `pat`.
     `List.match_replace` returns a `List`, so a template that is a bare binder
     loses a scalar result. Lisp sees the replacement itself. A miss, malformed
@@ -1011,6 +1018,7 @@ $(def lisp.native.target.rows '(
   (String_add)
   (String_lower)
   (String_upper)
+  (lisp_string_strip)
   (String_capitalize)
   (String_repeat)
   (String_replace)

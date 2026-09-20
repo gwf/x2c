@@ -147,7 +147,8 @@ Public functions:
 `Compiler.lower_comptime`, `Compiler.lower_declined`,
 `Compiler.inherit_shared_meta`, `Compiler.install_comptime`,
 `Compiler.lower_reached_globals`, `Compiler.lower_reached_meta`,
-`Compiler.meta_is_comptime_only`, `Compiler.check_meta_call`,
+`Compiler.meta_is_comptime_only`, `Compiler.lower_meta_expression`,
+`Compiler.meta_value_expression`, `Compiler.check_meta_call`,
 `Compiler.fold_meta_call`
 
 ### [src/deps.x](../src/deps.x)
@@ -285,15 +286,15 @@ Public functions:
 `Compiler.parse_macro_lisp_top_level`, `Compiler.parse_source_lisp`,
 `Compiler.evaluate_declaration_effect`, `Compiler.install_meta_function`,
 `Compiler.parse_macro_lisp_shallow`, `Compiler.lift_macro_lisp_expression`,
-`Compiler.parse_macro_lisp_expression`, `Compiler.evaluate_declaration_recipe`,
-`Compiler.evaluate_macro_slot`, `Compiler.evaluate_macro_rows`,
-`Compiler.macro_introduced_name`, `Compiler.peek_macro_hole`,
-`Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_slot`,
-`Compiler.parse_macro_definition`, `Compiler.publish_macro_definition_node`,
-`Compiler.parse_keyword_definition`, `Compiler.macro_targets_unit`,
-`Compiler.skip_named_type_declaration`, `Compiler.macro_invocation_site`,
-`Compiler.expand_macro_invocation_node`, `Compiler.try_parse_macro_expression`,
-`Compiler.try_parse_macro_target_at`
+`Compiler.parse_macro_lisp_expression`, `Compiler.evaluate_meta_expression`,
+`Compiler.evaluate_declaration_recipe`, `Compiler.evaluate_macro_slot`,
+`Compiler.evaluate_macro_rows`, `Compiler.macro_introduced_name`,
+`Compiler.peek_macro_hole`, `Compiler.macro_lisp_starts_declaration`,
+`Compiler.try_parse_macro_slot`, `Compiler.parse_macro_definition`,
+`Compiler.publish_macro_definition_node`, `Compiler.parse_keyword_definition`,
+`Compiler.macro_targets_unit`, `Compiler.skip_named_type_declaration`,
+`Compiler.macro_invocation_site`, `Compiler.expand_macro_invocation_node`,
+`Compiler.try_parse_macro_expression`, `Compiler.try_parse_macro_target_at`
 
 ### [src/main.x](../src/main.x)
 
@@ -434,15 +435,16 @@ Public functions:
 `Type.is_enum_tag`, `Type.is_enum_tag_body`, `Type.is_pointer`,
 `Type.is_array`, `Type.is_function`, `Type.is_bitfield`, `Type.scalar`,
 `Type.scalar_tag`, `Type.var_numeric_extractor`,
-`Type.var_numeric_update_helper`, `Type.numeric_literal`, `Type.tag`,
-`Type.body`, `Type.var_tag_row`, `Type.begin_unit`, `Type.end_unit`,
-`Type.register_var_tag`, `Type.register_var_adoption`, `Type.var_converter`,
-`Type.fixed_var_tag`, `Type.var_tag`, `Type.base_type`, `Type.canonicalize`,
-`Type.declared`, `Type.discards_qualifiers`, `Type.is_builtin`,
-`Type.is_typedef_name`, `Type.is_bare_typedef_name`, `Type.is_typedef`,
-`Type.is_number`, `Type.is_integral`, `Type.dereference`, `Type.reference`,
-`Type.apply`, `Type.promote`, `Type.widest`, `Type.is_static`,
-`Type.is_inline`, `Type.is_extern`, `Type.is_threaded`, `List.type_from_ast`
+`Type.var_numeric_update_helper`, `Type.numeric_literal_value`,
+`Type.numeric_literal`, `Type.tag`, `Type.body`, `Type.var_tag_row`,
+`Type.begin_unit`, `Type.end_unit`, `Type.register_var_tag`,
+`Type.register_var_adoption`, `Type.var_converter`, `Type.fixed_var_tag`,
+`Type.var_tag`, `Type.base_type`, `Type.canonicalize`, `Type.declared`,
+`Type.discards_qualifiers`, `Type.is_builtin`, `Type.is_typedef_name`,
+`Type.is_bare_typedef_name`, `Type.is_typedef`, `Type.is_number`,
+`Type.is_integral`, `Type.dereference`, `Type.reference`, `Type.apply`,
+`Type.promote`, `Type.widest`, `Type.is_static`, `Type.is_inline`,
+`Type.is_extern`, `Type.is_threaded`, `List.type_from_ast`
 
 ### [src/utils.x](../src/utils.x)
 
@@ -730,11 +732,12 @@ Public functions:
 `lisp_add`, `lisp_plus`, `lisp_minus`, `lisp_times`, `lisp_divide`,
 `lisp_eq_chain`, `lisp_lt_chain`, `lisp_le_chain`, `lisp_gt_chain`,
 `lisp_ge_chain`, `lisp_str`, `lisp_repr`, `lisp_string_append`,
-`lisp_substring`, `lisp_string_downcase`, `lisp_match_replace`,
-`lisp_read_file`, `lisp_write_file`, `Lisp.auto_stats`, `Lisp.auto_instrument`,
-`Lisp.call_budget`, `Lisp.auto_disable`, `Lisp.auto_prepare`, `Lisp.eval`,
-`Lisp.apply`, `Lisp.eval_string`, `Lisp.eval_file`, `Lisp.try_get`,
-`Lisp.set_global`, `Lisp.bind`, `Lisp.cleanup`
+`lisp_substring`, `lisp_string_downcase`, `lisp_string_strip`,
+`lisp_match_replace`, `lisp_read_file`, `lisp_write_file`, `Lisp.auto_stats`,
+`Lisp.auto_instrument`, `Lisp.call_budget`, `Lisp.auto_disable`,
+`Lisp.auto_prepare`, `Lisp.eval`, `Lisp.apply`, `Lisp.eval_string`,
+`Lisp.eval_file`, `Lisp.try_get`, `Lisp.set_global`, `Lisp.bind`,
+`Lisp.cleanup`
 
 ### [lib/list-selectors.x](../lib/list-selectors.x)
 

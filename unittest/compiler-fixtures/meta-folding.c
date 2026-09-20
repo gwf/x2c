@@ -97,8 +97,8 @@ int main(void){
   String text = _23;
   printf("poly    %d %d\n", 71, mf_poly(seven));
   printf("width   %d %d\n", 6, mf_width(text, _22));
-  printf("label   %s\n", mf_label(4));
-  printf("narrow  %d %d\n", mf_narrow(3), mf_narrow(one + 2));
+  printf("label   %s\n", "row-4");
+  printf("narrow  %d %d\n", ((short) 24464ULL), mf_narrow(one + 2));
   printf("get     %d %d\n", 302, mf_get(one + 1));
   return 0;
 }

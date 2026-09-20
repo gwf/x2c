@@ -76,6 +76,8 @@ static int _literal_magnitude(String text, int end, unsigned long long * value, 
 
 static Type _integer_literal_type(unsigned long long value, int decimal, int is_unsigned, int longs);
 
+static int _integer_literal_end(String text);
+
 static Map typetags;
 
 Var Symbol_var(Symbol);
@@ -980,14 +982,34 @@ static Type _integer_literal_type(unsigned long long value, int decimal, int is_
 }
 
 int String_len(String);
+static int _integer_literal_end(String text){
+  int end = String_len(text);  while(end > 0){
+    int ch = String_getindex(text, end - 1);  if(ch != 'u' && ch != 'U' && ch != 'l' && ch != 'L') break;  end --;
+  }
+  return end;
+}
+
+Var float_var(float);
+Var double_var(double);
+Var Var_convert(Var, Symbol);
+Var Type_numeric_literal_value(Type type, String text){
+  if(! _init_guard_) _file_init_();  Symbol tag = Type_scalar_tag(type);  if(tag == 3355493){
+    float value = strtof(text, NULL);  return float_var(value);
+  }
+  if(tag == 3356265){
+    double value = strtod(text, NULL);  return double_var(value);
+  }
+  if(tag == 26071077642){
+    long double value = strtold(text, NULL);  return Var_box_long_double(value);
+  }
+  int negative = String_getindex(text, 0) == '-';  if(negative || String_getindex(text, 0) == '+') text = String_getslice(text, 1, -2147483648, 1);  unsigned long long magnitude;  int decimal;  if(! _literal_magnitude(text, _integer_literal_end(text), & magnitude, & decimal)) return((void) 0, Void);  Var value = Var_box_ulong_long(negative ? 0ULL - magnitude : magnitude);  return Var_convert(value, tag);
+}
+
 Type Type_numeric_literal(String text, int floating){
   if(! _init_guard_) _file_init_();  int length = String_len(text);  if(floating){
     int last = String_getindex(text, length - 1);  if(last == 'f' || last == 'F') return List_type(_137);  if(last == 'l' || last == 'L') return List_type(_141);  return List_type(_140);
   }
-  int suffix = length;  while(suffix > 0){
-    int ch = String_getindex(text, suffix - 1);  if(ch != 'u' && ch != 'U' && ch != 'l' && ch != 'L') break;  suffix --;
-  }
-  int is_unsigned = 0, longs = 0;  for(int i = suffix;  i < length;  i ++){
+  int suffix = _integer_literal_end(text);  int is_unsigned = 0, longs = 0;  for(int i = suffix;  i < length;  i ++){
     int ch = String_getindex(text, i);  if(ch == 'u' || ch == 'U') is_unsigned = 1;  else longs ++;
   }
   unsigned long long value;  int decimal;  if(! _literal_magnitude(text, suffix, & value, & decimal)) return NULL;  return _integer_literal_type(value, decimal, is_unsigned, longs);

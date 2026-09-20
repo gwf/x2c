@@ -23,6 +23,7 @@
 - [Classes and System Macros](https://x2c-lang.dev/docs/guide/system-macros.html)
 - [Compile-time Macros](https://x2c-lang.dev/docs/guide/macros.html)
 - [Meta Functions](https://x2c-lang.dev/docs/guide/meta-functions.html)
+- [Meta API Coverage](https://x2c-lang.dev/docs/guide/meta-api-coverage.html)
 - [Packages](https://x2c-lang.dev/docs/guide/packages.html)
 - [Wrapping a C Library](https://x2c-lang.dev/docs/guide/wrapping-c-libraries.html)
 - [Commands and Files](https://x2c-lang.dev/docs/guide/scripting.html)

@@ -54,6 +54,7 @@
 
 // The library operations a lowered call resolves against, under the names
 // the typed AST already uses.
+(def List_cons cons)
 (def List_len length)
 (def List_reverse reverse)
 (def List_index List.index)
@@ -128,6 +129,7 @@
   (let ((j (_array_index a i)))
     (if (_array_holds a j) (Array.setindex a j v) ())))
 (def Array_list Array.list)
+(def Array_map Array.map)
 (def Array_join Array.join)
 (def Array_find Array.find)
 (def Array_contains Array.contains)
@@ -179,6 +181,7 @@
 (def String_getindex String.getindex)
 (def String_add String.add)
 (def String_lower String.lower)
+(def String_strip String.strip)
 (def String_upper String.upper)
 (def String_find String.find)
 (def String_contains String.contains)
@@ -203,6 +206,7 @@
 (defun String_new (text) text)
 (defun String_equal (a b) (if (equal? a b) 1 0))
 
+(def Symbol_len Symbol.len)
 (def Symbol_str Symbol.str)
 (def Var_tag Var.tag)
 (def Var_parse Var.parse)

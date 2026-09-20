@@ -46,10 +46,11 @@ its opening status and this index distinguish them from current execution.
 - [Public release workflow](public-release-workflow.md): active in the Dev
   Staging Workflow task. Account activation and production decisions remain;
   source files alone do not establish that deployment is complete.
-- **Meta authoring and coverage**: active in a separate execution task, with
-  source-code template calls and representable literal results as the top
-  priorities. Its new plan will join dev with that implementation. The older
-  [meta milestones](archive/meta-functions.md) are the delivered baseline.
+- [Meta authoring and coverage](meta-authoring-and-coverage.md): source-code
+  template calls, representable literal results, and the API inventory are
+  implemented. Mutable container results, iterator state, and full fold parity
+  remain bounded follow-ups. The older
+  [meta milestones](archive/meta-functions.md) record the preceding baseline.
 - **Lisp REPL follow-up**: separately assigned; no durable plan recorded here
   yet. The lexical-scope repair to the literate example shipped in `144a833d`.
 
