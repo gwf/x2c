@@ -60,9 +60,18 @@ bodies, until the lowered forms replace them. Source keys are canonical,
 and a failed preload stops instead of freezing a partial session. Fresh
 compiler passes inherit restrictions from existing shared lowering records.
 
-Gary approved the literal argument adapters and staging preparation on
-2026-09-20. Browser account provisioning is in progress; staging still needs
-working DNS/HTTPS and an exact validated candidate.
+The builder integration is delivered on `dev` at `44fa25e3`. The full
+`agent-pr-check` passed, including 928 unit tests, 743 compiler fixtures,
+556 raw-symbol comparisons, self-host checks, and 66 documentation examples.
+Editor direct and worker checks also passed.
+
+Gary approved the literal argument adapters and staging on 2026-09-20.
+Staging DNS, HTTPS, domain ownership, and the repository-scoped publisher App
+are configured. Candidate build `35510273856` selects the exact delivered
+source `44fa25e30ed593683c7e4269d41af2b0bec47842`. Staging run
+`35510839910`, attempt 2, deployed that candidate and passed installation
+verification on Linux and macOS, on both Intel and ARM. Production promotion
+remains a separate decision.
 
 ### Parked
 
@@ -90,7 +99,6 @@ below the acceptance condition. A temporary counter confirmed the skip ran
 copied-home timings lacked a normal prelude and are not acceptance evidence.
 The retained prototype is in worktree branch `codex/var-tags-probe`.
 
-
 ### Decided
 
 A `let` binding is not visible inside its own initializer. A compile-time Lisp
@@ -100,9 +108,8 @@ chapter.
 
 ### Open
 
-- Complete final validation and delivery of the integrated builder port.
 - Keep the var-tags port parked until a measured approach meets its condition.
-- Prepare and explicitly select a staging candidate.
+- Promote to production only with separate authorization.
 
 ## The result
 

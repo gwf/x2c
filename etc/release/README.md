@@ -39,10 +39,16 @@ for an agreed baseline recovery operation. It is not a callable competing
 publication path while disabled. No production deployment or release was run.
 Disabling a workflow leaves the currently served site intact.
 
-Remaining setup: Name.com DNS CNAME `staging` -> `gwf.github.io`, GitHub HTTPS
-provisioning, and the staging App ID/private key in source environment settings.
-The initial DNS query returned no staging records. Never paste the key in chat.
-These prerequisites must be verified before claiming live staging success.
+Staging provisioning completed 2026-09-20 through the account settings:
+Name.com CNAME `staging` -> `gwf.github.io` (TTL 300), GitHub Pages HTTPS
+enforcement, and verified ownership of `staging.x2c-lang.dev`. The
+`x2c-staging-publisher` App (ID `5010037`) is installed only on
+`gwf/x2c-staging`, with Contents and Actions read/write access. Its App ID
+and private key are configured in the source `staging-publication`
+environment. Staging run `35510839910`, attempt 2, deployed candidate build
+`35510273856` from source `44fa25e30ed593683c7e4269d41af2b0bec47842`.
+HTTPS responds successfully, and installation verification passed on all
+four Linux/macOS Intel/ARM platforms. Production promotion remains separate.
 
 ## Account setup
 
