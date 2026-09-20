@@ -1179,8 +1179,9 @@ static int _param_has(List params, Var name) {
 
 /* The names a body reads from the environment that defines it.
 
-   Only an evaluated position contributes one. A `quote`d subform is data,
-   and inside a `quasiquote` the data is the default: `depth` counts the
+   Only an evaluated position contributes one. Outside a `quasiquote` a
+   `quote`d subform is data; inside one the data is the default and a
+   `quote`d subform may still hold an unquote. `depth` counts the
    quasiquote nesting, an unquote lowers it, and a name is read only where it
    reaches zero again. An inner `lambda` or `macro` binds its parameters for
    its own body, so a name it rebinds is not free below it.
@@ -1198,7 +1199,9 @@ static void _free_names(
   List items = form;
   if (!items) return;
   Var head = items.car();
-  if (head == lsym_quote) return;
+  /* Quoted data reads nothing on its own, but inside a quasiquote an
+     unquote below it is still evaluated, so the walk continues there. */
+  if (head == lsym_quote && depth == 0) return;
   if (head == lsym_quasiquote || head == lsym_unquote ||
       head == lsym_splicing) {
     int inner = head == lsym_quasiquote ? depth + 1 : depth - 1;

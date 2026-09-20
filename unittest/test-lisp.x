@@ -437,6 +437,11 @@ static void lisp_eval_capture_semantics(void) {
   // A body that is one bare name is still a read of that name.
   _ev(lisp, "(def mkk (lambda (k) (lambda () k)))");
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "((mkk 2))")), 2);
+
+  // A quasiquote evaluates an unquote inside a quoted subform, so a name
+  // read there belongs to the closure too.
+  _ev(lisp, "(def mkq (lambda (a) (lambda () `(quote ,a))))");
+  EXPECT_VAR_EQ(_ev(lisp, "((mkq 5))"), _ev(lisp, "(quote (quote 5))"));
   lisp.destroy();
 }
 
