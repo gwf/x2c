@@ -479,6 +479,46 @@ static void map_typed_empty_keys(void) {
 
 }
 
+/* Key equality unboxes List and String keys directly and sends every other
+   combination down the general path. */
+static void map_key_equality_across_kinds(void) {
+  $test.scoped();
+
+  Map map = {};
+  Var list_key = %(1 2), twin = %(1 2), text = "abc";
+  Var chars = %("a" "b" "c"), nested = %{1: 2};
+
+  map[list_key] = "list";
+  map[text] = "string";
+  map[chars] = "chars";
+  map[nested] = "map";
+
+  EXPECT_INT_EQ(map.len(), 4);
+  /* An equal List is the same key, and a longer one is not. */
+  EXPECT_TRUE(map[twin] == "list");
+  EXPECT_TRUE(map[%(1 2 3)] is void);
+  /* A String never matches a List, whatever either one renders as. */
+  EXPECT_TRUE(map[text] == "string");
+  EXPECT_TRUE(map["abc"] == "string");
+  EXPECT_TRUE(map[chars] == "chars");
+  /* A Map key is found only through the very same object. */
+  EXPECT_TRUE(map[nested] == "map");
+  Var other = %{1: 2};
+  EXPECT_TRUE(map[other] is void);
+
+  /* nil and the empty String unbox as NULL and stay distinct keys. */
+  List nil = NULL;
+  String blank = NULL;
+  Var nil_key = nil, blank_key = blank;
+  map[nil_key] = "nil";
+  map[blank_key] = "blank";
+  EXPECT_INT_EQ(map.len(), 6);
+  EXPECT_TRUE(map[nil_key] == "nil");
+  EXPECT_TRUE(map[blank_key] == "blank");
+  EXPECT_TRUE(map[list_key] == "list");
+
+}
+
 static void map_null_pair_status_iteration(void) {
   $test.scoped();
   Map map = {};
@@ -608,5 +648,6 @@ void map_suite(void) {
   $test.run(map_compare_structural_laws);
   $test.run(map_mutable_keys_use_identity);
   $test.run(map_typed_empty_keys);
+  $test.run(map_key_equality_across_kinds);
   $test.run(map_null_pair_status_iteration);
 }

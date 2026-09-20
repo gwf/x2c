@@ -121,3 +121,26 @@ starting with `~` is compiled but not shown, which is how a nine-line sample
 can still be a complete program. A sample that genuinely cannot compile must
 be tagged ```` ```x2c,ignore ```` with an `<!-- ignore: reason -->` comment
 above it.
+
+## Prepared release destinations
+
+Release tooling can set `SITE_SOURCE_REF` to the selected full source SHA.
+The complete build pins rendered source links and source ZIP downloads to
+that revision, including Markdown slides and book pages. Source checkout
+examples explicitly check out the same SHA. Ordinary development builds
+retain their existing defaults.
+
+For candidate output, also set `SITE_RELEASE_CHANNEL=staging`,
+`SITE_CANDIDATE_ID=candidate-<full-sha>-<run-id>-<attempt>`,
+`SITE_URL=https://staging.x2c-lang.dev` and `SITE_BASE=/`. Every rendered page
+shows the candidate identity and instructions using a fresh `X2C_PREFIX` and
+explicit staging package index. Book examples continue documenting ordinary
+production behavior; the staging banner identifies those defaults and supplies
+the candidate commands. The compiler's default package index does not change.
+
+Run the complete `npm run build`, not just `astro build`: the final book step
+also applies destination links and banners across the complete site. Release
+assembly must then overlay the selected version, index, candidate metadata and
+installer with candidate-specific defaults before archiving the whole output.
+The site build alone does not produce a publishable candidate installation.
+These options do not activate workflows or change live routing.

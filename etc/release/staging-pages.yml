@@ -1,0 +1,51 @@
+# INACTIVE: install only in the authorized gwf/x2c-staging repository.
+name: staging pages
+run-name: staging ${{ inputs.output_sha }}
+on:
+  workflow_dispatch:
+    inputs:
+      output_sha:
+        description: Exact generated-output commit selected for deployment
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: staging-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.output_sha }}
+          persist-credentials: false
+      - name: Reject a superseded output commit
+        env:
+          OUTPUT_SHA: ${{ inputs.output_sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [[ "$OUTPUT_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$OUTPUT_SHA"
+          current="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)"
+          test "$current" = "$OUTPUT_SHA"
+          test -f public/release-candidate.json
+          test -f public/x2c-version.txt
+          test -f public/packages/index.txt
+          test "$(cat public/CNAME)" = staging.x2c-lang.dev
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: public
+      - name: Deploy complete generated output
+        id: deployment
+        uses: actions/deploy-pages@v5

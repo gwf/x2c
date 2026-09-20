@@ -222,6 +222,21 @@ Var Map.get(Map map, Var key) {
 */
 Var Map.getindex(Map map, Var key) => map.get(key);
 
+/** Returns the value stored under `key`, or `void` when absent, probing with
+    the caller's precomputed `key_hash`.
+    `key_hash` must be `Var.hash` of `key`; another value reports the key as
+    absent. This serves a caller that probes several `Map`s with one key,
+    such as `Pool.lookup` walking its chain, and is `Map.get` in every other
+    respect. A null `Map` reports absence.
+    Raises: a cause raised by custom key equality. Hashing happens in the
+    caller, so a `void` key raises there instead.
+*/
+Var Map.get_hashed(Map map, Var key, unsigned key_hash) {
+  if ((void *) map == NULL) return void;
+  long index = map._core_find_hashed(&key, key_hash);
+  return index < 0 ? void : *_record_value(map, (unsigned) index);
+}
+
 /** Returns the value stored under `key`, or `defval` when it is absent.
     Nothing is inserted and `Map.len` does not change, unlike `Map.setdefault`.
     For counting, numeric `map[k] += amount` initializes an absent key from
@@ -266,7 +281,7 @@ Var Map.setdefault(Map map, Var key, Var defval) {
     Raises: `<void-op>` when `key` is `void`, or a cause raised by custom key
     hashing or equality.
 */
-int Map.contains(Map m, Var key) => m && m._core_find_index(&key, NULL) >= 0;
+int Map.contains(Map m, Var key) => m && m._core_find_index(&key) >= 0;
 
 static void _set(Map map, Var key, Var val) {
   if ((void *) map == NULL) raise %(bad-arg);
@@ -344,7 +359,7 @@ Var Map.updateindex(Map map, Var key, Symbol op, Var rhs) {
     if (inserted) return rhs;
     return stored.update(op, rhs);
   }
-  long index = map._core_find_index(&key, NULL);
+  long index = map._core_find_index(&key);
   if (index < 0) raise %(bad-arg (key $key));
   struct MapRecord *recs = map.entries;
   return Var.update(&recs[index].val, op, rhs);
@@ -360,7 +375,7 @@ Var Map.updateindex(Map map, Var key, Symbol op, Var rhs) {
 Var Map.postfixindex(Map map, Var key, Symbol op) {
   if ((void *) map == NULL) raise %(bad-arg);
   if (key is void) raise %(void-op);
-  long index = map._core_find_index(&key, NULL);
+  long index = map._core_find_index(&key);
   if (index < 0) raise %(bad-arg (key $key));
   struct MapRecord *recs = map.entries;
   return Var.postfix(&recs[index].val, op);

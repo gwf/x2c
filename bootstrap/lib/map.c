@@ -40,7 +40,9 @@ static void Map__core_free(Map _x2c_macro_map_0);
 
 static Map Map__core_new_capacity(Map _x2c_macro_unused_0, unsigned _x2c_macro_capacity_0);
 
-static long Map__core_find_index(Map _x2c_macro_map_0, Var * _x2c_macro_key_1, int * _x2c_macro_out_psl_0);
+static long Map__core_find_hashed(Map _x2c_macro_map_0, Var * _x2c_macro_key_1, unsigned _x2c_macro_key_hash_0);
+
+static long Map__core_find_index(Map _x2c_macro_map_0, Var * _x2c_macro_key_1);
 
 static int Map__core_try_get(Map _x2c_macro_map_0, Var * _x2c_macro_key_1, Var * _x2c_macro_out_0);
 
@@ -201,12 +203,28 @@ static unsigned _map_key_hash(Var * _x2c_macro_key_0){
   return Var_hash(_x2c_macro_key_0[0]);
 }
 
+List Var_list(Var);
+
+int List_truth(List);
+
+int List_equal(List, List);
+
+String Var_string(Var);
+
+int String_truth(String);
+
+int String_equal(String, String);
+
 int Var_is(Var, Symbol);
 
 int Var_equal(Var, Var);
 
 static int _map_key_equal(Var * _x2c_macro_a_0, Var * _x2c_macro_b_0){
   if(Var_same(_x2c_macro_a_0[0], _x2c_macro_b_0[0])) return 1;
+  List _x2c_macro_alist_0 = Var_list(_x2c_macro_a_0[0]), _x2c_macro_blist_0 = Var_list(_x2c_macro_b_0[0]);
+  if(List_truth(_x2c_macro_alist_0) && List_truth(_x2c_macro_blist_0)) return List_equal(_x2c_macro_alist_0, _x2c_macro_blist_0);
+  String _x2c_macro_astr_0 = Var_string(_x2c_macro_a_0[0]), _x2c_macro_bstr_0 = Var_string(_x2c_macro_b_0[0]);
+  if(String_truth(_x2c_macro_astr_0) && String_truth(_x2c_macro_bstr_0)) return String_equal(_x2c_macro_astr_0, _x2c_macro_bstr_0);
   return ! Var_is(_x2c_macro_a_0[0], 3313778) && ! Var_is(_x2c_macro_a_0[0], 26720) && Var_equal(_x2c_macro_a_0[0], _x2c_macro_b_0[0]);
 }
 
@@ -256,8 +274,7 @@ static Map Map__core_new_capacity(Map _x2c_macro_unused_0, unsigned _x2c_macro_c
   return _x2c_macro_map_0;
 }
 
-static long Map__core_find_index(Map _x2c_macro_map_0, Var * _x2c_macro_key_1, int * _x2c_macro_out_psl_0){
-  unsigned _x2c_macro_key_hash_0 = _map_key_hash(_x2c_macro_key_1);
+static long Map__core_find_hashed(Map _x2c_macro_map_0, Var * _x2c_macro_key_1, unsigned _x2c_macro_key_hash_0){
   unsigned * _x2c_macro_hashes_0 = _x2c_macro_map_0 -> hashes;
   unsigned _x2c_macro_mask_0 = _x2c_macro_map_0 -> mask, _x2c_macro_todo_start_0 = _x2c_macro_key_hash_0 & _x2c_macro_mask_0;
   unsigned _x2c_macro_cap_0 = _x2c_macro_map_0 -> capacity;
@@ -265,10 +282,7 @@ static long Map__core_find_index(Map _x2c_macro_map_0, Var * _x2c_macro_key_1, i
     unsigned _x2c_macro_index_0 =(_x2c_macro_todo_start_0 + _x2c_macro_todo_psl_0) & _x2c_macro_mask_0;
     unsigned _x2c_macro_stored_0 = _x2c_macro_hashes_0[_x2c_macro_index_0];
     if(_x2c_macro_stored_0 == 0) break;
-    if(_x2c_macro_stored_0 == _x2c_macro_key_hash_0 && _map_key_equal(_record_key(_x2c_macro_map_0, _x2c_macro_index_0), _x2c_macro_key_1)){
-      if(_x2c_macro_out_psl_0) * _x2c_macro_out_psl_0 = _x2c_macro_todo_psl_0;
-      return(long) _x2c_macro_index_0;
-    }
+    if(_x2c_macro_stored_0 == _x2c_macro_key_hash_0 && _map_key_equal(_record_key(_x2c_macro_map_0, _x2c_macro_index_0), _x2c_macro_key_1)) return(long) _x2c_macro_index_0;
     unsigned _x2c_macro_stored_start_0 = _x2c_macro_stored_0 & _x2c_macro_mask_0;
     int _x2c_macro_stored_psl_0 =(_x2c_macro_cap_0 + _x2c_macro_index_0 - _x2c_macro_stored_start_0) & _x2c_macro_mask_0;
     if(_x2c_macro_stored_psl_0 < _x2c_macro_todo_psl_0) break;
@@ -276,9 +290,13 @@ static long Map__core_find_index(Map _x2c_macro_map_0, Var * _x2c_macro_key_1, i
   return - 1;
 }
 
+static long Map__core_find_index(Map _x2c_macro_map_0, Var * _x2c_macro_key_1){
+  return Map__core_find_hashed(_x2c_macro_map_0, _x2c_macro_key_1, _map_key_hash(_x2c_macro_key_1));
+}
+
 static int Map__core_try_get(Map _x2c_macro_map_0, Var * _x2c_macro_key_1, Var * _x2c_macro_out_0){
   if((void *) _x2c_macro_map_0 == 0 || ! _x2c_macro_out_0) return 0;
-  long _x2c_macro_index_0 = Map__core_find_index(_x2c_macro_map_0, _x2c_macro_key_1, 0);
+  long _x2c_macro_index_0 = Map__core_find_index(_x2c_macro_map_0, _x2c_macro_key_1);
   if(_x2c_macro_index_0 < 0) return 0;
   * _x2c_macro_out_0 = * _record_value(_x2c_macro_map_0, (unsigned) _x2c_macro_index_0);
   return 1;
@@ -433,7 +451,7 @@ static void Map__core_set(Map _x2c_macro_map_0, Var * _x2c_macro_key_1, Var * _x
 
 static int Map__core_try_del(Map _x2c_macro_map_0, Var * _x2c_macro_key_1, Var * _x2c_macro_out_0){
   if((void *) _x2c_macro_map_0 == 0 || ! _x2c_macro_out_0) return 0;
-  long _x2c_macro_found_0 = Map__core_find_index(_x2c_macro_map_0, _x2c_macro_key_1, 0);
+  long _x2c_macro_found_0 = Map__core_find_index(_x2c_macro_map_0, _x2c_macro_key_1);
   if(_x2c_macro_found_0 < 0) return 0;
   unsigned * _x2c_macro_hashes_0 = _x2c_macro_map_0 -> hashes;
   struct MapRecord * _x2c_macro_entries_0 = _x2c_macro_map_0 -> entries;
@@ -590,6 +608,12 @@ Var Map_getindex(Map map, Var key){
   return Map_get(map, key);
 }
 
+Var Map_get_hashed(Map map, Var key, unsigned key_hash){
+  if((void *) map == NULL) return((void) 0, Void);
+  long index = Map__core_find_hashed(map, & key, key_hash);
+  return index < 0 ?((void) 0, Void) : * _record_value(map, (unsigned) index);
+}
+
 Var Map_getdefault(Map map, Var key, Var defval){
   Var val;
   return Map_try_get(map, key, & val) ? val : defval;
@@ -597,12 +621,12 @@ Var Map_getdefault(Map map, Var key, Var defval){
 
 Var Map_setdefault(Map map, Var key, Var defval){
   if((void *) map == NULL){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/map.x",.function = "Map_setdefault",.line = 254};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/map.x",.function = "Map_setdefault",.line = 269};
     x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 0);
     __builtin_unreachable();
   }
   if(Var_is_void(key)){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/map.x",.function = "Map_setdefault",.line = 255};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/map.x",.function = "Map_setdefault",.line = 270};
     x2c_error_raise_n(& _x2c_error_site_6, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -612,17 +636,17 @@ Var Map_setdefault(Map map, Var key, Var defval){
 }
 
 int Map_contains(Map m, Var key){
-  return Map_truth(m) && Map__core_find_index(m, & key, NULL) >= 0;
+  return Map_truth(m) && Map__core_find_index(m, & key) >= 0;
 }
 
 static void _set(Map map, Var key, Var val){
   if((void *) map == NULL){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/map.x",.function = "_set",.line = 272};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/map.x",.function = "_set",.line = 287};
     x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 0);
     __builtin_unreachable();
   }
   if(Var_is_void(key) || Var_is_void(val)){
-    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/map.x",.function = "_set",.line = 273};
+    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/map.x",.function = "_set",.line = 288};
     x2c_error_raise_n(& _x2c_error_site_8, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -648,12 +672,12 @@ Var Var_update(Var *, Symbol, Var);
 
 Var Map_updateindex(Map map, Var key, Symbol op, Var rhs){
   if((void *) map == NULL){
-    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 337};
+    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 352};
     x2c_error_raise_n(& _x2c_error_site_9, 4372499598, 0);
     __builtin_unreachable();
   }
   if(Var_is_void(key) || Var_is_void(rhs)){
-    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 338};
+    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 353};
     x2c_error_raise_n(& _x2c_error_site_10, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -665,9 +689,9 @@ Var Map_updateindex(Map map, Var key, Symbol op, Var rhs){
     if(inserted) return rhs;
     return Var_update(stored, op, rhs);
   }
-  long index = Map__core_find_index(map, & key, NULL);
+  long index = Map__core_find_index(map, & key);
   if(index < 0){
-    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 348};
+    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 363};
     x2c_error_raise_n(& _x2c_error_site_11, 4372499598, 1, Symbol_var(22898), key);
     __builtin_unreachable();
   }
@@ -679,18 +703,18 @@ Var Var_postfix(Var *, Symbol);
 
 Var Map_postfixindex(Map map, Var key, Symbol op){
   if((void *) map == NULL){
-    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 361};
+    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 376};
     x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 0);
     __builtin_unreachable();
   }
   if(Var_is_void(key)){
-    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 362};
+    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 377};
     x2c_error_raise_n(& _x2c_error_site_13, 48270474208, 0);
     __builtin_unreachable();
   }
-  long index = Map__core_find_index(map, & key, NULL);
+  long index = Map__core_find_index(map, & key);
   if(index < 0){
-    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 364};
+    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 379};
     x2c_error_raise_n(& _x2c_error_site_14, 4372499598, 1, Symbol_var(22898), key);
     __builtin_unreachable();
   }

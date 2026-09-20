@@ -655,17 +655,21 @@ unsigned long Pool.epoch(void) =>
     The returned identity remains owned by the level where it was found.
 */
 Var Pool.lookup(Pool inner, Var key) {
-  /* `Map.getindex` raises for a void key and for any cause from custom
-     hashing or equality, so the branch mutex is released through one hoisted
-     `defer` rather than a per-iteration one, which measured 4% of a
-     translation against 3% for this form. `locked` is the level whose mutex
-     this call still holds. */
+  /* Every level probes the same key, so it is hashed once here rather than
+     once per level. An empty chain probes nothing and hashes nothing, which
+     is also why a void key still raises exactly where it used to. */
+  if (!inner) return void;
+  unsigned key_hash = key.hash();
+  /* `Map.get_hashed` raises for any cause from custom equality, so the
+     branch mutex is released through one hoisted `defer` rather than a
+     per-iteration one, which measured 4% of a translation against 3% for
+     this form. `locked` is the level whose mutex this call still holds. */
   Pool locked = NULL;
   defer _unlock(locked);
   for (Pool pool = inner; pool; pool = pool.up) {
     _lock(pool);
     locked = pool;
-    Var found = pool.table[key];
+    Var found = pool.table.get_hashed(key, key_hash);
     _unlock(pool);
     locked = NULL;
     if (found is not void) return found;

@@ -122,7 +122,9 @@ supported.
 
 ## Developer workflow
 
-A source checkout is the development install. After `make build-safe`, the
+The `dev` branch is the everyday integration branch; `main` is reserved for
+releases. Start new development checkouts and branches from `dev`. A source
+checkout is the development install. After `make build-safe`, the
 checkout is a complete home with its own `packages/` directory, and `bin/x2c`
 is the bootstrap compiler. Run `make build-install` before putting `bin/` on
 `PATH`; it links `bin/x2c` to a copy of the current branch's compiler. A
@@ -137,9 +139,12 @@ X2C_HOME="$HOME/src/x2c" x2c env
 
 Keep the global prefix on a release. Install it from a tagged `main`, never
 from a working branch, so a bug seen through it reproduces for every user.
-Validate a release candidate in a scratch prefix and remove that prefix
-afterwards. Compiler development itself runs through `make` inside the
-checkout and does not depend on which compiler `PATH` selects.
+Validate a staging candidate in a fresh scratch prefix and use its explicit
+package index, then remove that prefix afterwards. The staging site supplies
+the candidate installer and commands; bare `x2c install` still uses the
+production package index. Compiler version alone does not distinguish two
+candidates of the same version. Compiler development itself runs through
+`make` inside the checkout and does not depend on which compiler `PATH` selects.
 
 Releases publish the compiler for macOS and Linux on arm64 and x86_64. The
 installer's default is the newest release; `--version <n>` installs an

@@ -91,7 +91,7 @@ PCRE2 import example. Prepare that optional package first with
 prepared dependency includes. It does not fetch dependencies itself.
 
 For testing, style, debugging, and bootstrap-refresh instructions, start with
-[`agents/README.md`](https://github.com/gwf/x2c/blob/main/agents/README.md).
+[`agents/README.md`](https://github.com/gwf/x2c/blob/dev/agents/README.md).
 
 See [Compiler Architecture](architecture.md) for the translation phases and
 the [Implementation Map](implementation-map.md) for feature ownership.

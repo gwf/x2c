@@ -1,6 +1,8 @@
 ---
 import { Code } from "astro:components";
 import { execFileSync } from "node:child_process";
+import { absoluteSiteUrl } from "../../site-config.mjs";
+import { destination, installExample } from "../../release-destination.mjs";
 import { coreSetup, corePrerequisites } from "../content/core-setup";
 import { x2cDarkTheme } from "../../shiki-x2c-theme.mjs";
 import BaseLayout from "../layouts/BaseLayout.astro";
@@ -178,8 +180,12 @@ const [titleHtml, kickerHtml] = await Promise.all([
         <p>
           <strong>Install a release.</strong>{" "}
           One command downloads the compiler, runtime, headers, and
-          examples for your platform into <code>~/.local/x2c</code>.
-          <code>x2c install &lt;package&gt;</code> then adds packages from
+          examples for your platform into <code>{destination.staging
+            ? "$X2C_PREFIX (fresh scratch directory)" : "~/.local/x2c"}</code>.
+          <code>{destination.staging
+            ? "x2c install <package> --index " +
+              absoluteSiteUrl("/packages/index.txt")
+            : "x2c install <package>"}</code> then adds packages from
           the <a href={local("docs/guide/packages.html#install-packages")}>
           package index</a>.
         </p>
@@ -206,7 +212,7 @@ const [titleHtml, kickerHtml] = await Promise.all([
       <figure class="install-window">
         <figcaption>{install.caption}</figcaption>
         <div class="install-code">
-          <Code code={`${coreSetup}\n\n${install.run.trim()}`} lang="sh"
+          <Code code={`${coreSetup}\n\n${installExample(install.run.trim())}`} lang="sh"
             theme={x2cDarkTheme} />
         </div>
       </figure>

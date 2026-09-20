@@ -7,6 +7,10 @@ the official project. Unsolicited code submissions may be closed without
 review. The public source remains available for use, study, modification, and
 forking under its applicable licenses.
 
+The public `dev` branch contains everyday integration work. `main` is
+release-only; production promotion preserves the selected source commits.
+This branch arrangement does not change the contribution policy above.
+
 Security reports must follow [`SECURITY.md`](SECURITY.md) and must not include
 vulnerability details or secrets in a public issue.
 
