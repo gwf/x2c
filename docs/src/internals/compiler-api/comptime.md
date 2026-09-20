@@ -39,7 +39,7 @@ source. Another `meta` function may call it: calling one is what makes
 the caller compile-time only too, so a body being parsed under the marker
 is left alone.
 
-Source: `src/comptime.x:2126`
+Source: `src/comptime.x:2129`
 
 <a id="Compiler.fold_meta_call"></a>
 #### Compiler.fold_meta_call
@@ -56,7 +56,7 @@ installed folds, so an import's runtime definition keeps the run-time
 call that designates the unit emitting it. Evaluation runs in the macro
 session; a raise there leaves the call.
 
-Source: `src/comptime.x:2148`
+Source: `src/comptime.x:2151`
 
 <a id="Compiler.inherit_shared_meta"></a>
 #### Compiler.inherit_shared_meta
@@ -67,7 +67,7 @@ Restores the shared definitions' derived call restrictions into a fresh
 compiler pass. Reads existing process tables without opening Lisp or
 creating a lowering cache in the unit's Context.
 
-Source: `src/comptime.x:1970`
+Source: `src/comptime.x:1973`
 
 <a id="Compiler.install_comptime"></a>
 #### Compiler.install_comptime
@@ -79,7 +79,7 @@ function is callable from compile-time Lisp under its own name.
 Returns whether the lowering succeeded. This method mutates the macro
 session and does not open a semantic transaction.
 
-Source: `src/comptime.x:2025`
+Source: `src/comptime.x:2028`
 
 <a id="Compiler.lower_comptime"></a>
 #### Compiler.lower_comptime
@@ -92,7 +92,7 @@ The result is the loop definitions the body needed followed by the
 function's own, in evaluation order. This method does not open a
 semantic transaction.
 
-Source: `src/comptime.x:1870`
+Source: `src/comptime.x:1873`
 
 <a id="Compiler.lower_declined"></a>
 #### Compiler.lower_declined
@@ -101,7 +101,7 @@ Source: `src/comptime.x:1870`
 
 Returns why the last `Compiler.lower_comptime` declined, or `NULL`.
 
-Source: `src/comptime.x:1929`
+Source: `src/comptime.x:1932`
 
 <a id="Compiler.lower_reached_globals"></a>
 #### Compiler.lower_reached_globals
@@ -111,7 +111,7 @@ Source: `src/comptime.x:1929`
 Returns whether the last `Compiler.install_comptime` reached file-scope
 state, directly or through a callee already recorded as reaching it.
 
-Source: `src/comptime.x:2065`
+Source: `src/comptime.x:2068`
 
 <a id="Compiler.lower_reached_meta"></a>
 #### Compiler.lower_reached_meta
@@ -121,7 +121,7 @@ Source: `src/comptime.x:2065`
 Returns whether the last `Compiler.install_comptime` reached a `Meta`
 operation, directly or through a callee already recorded as reaching one.
 
-Source: `src/comptime.x:2073`
+Source: `src/comptime.x:2076`
 
 <a id="Compiler.meta_is_comptime_only"></a>
 #### Compiler.meta_is_comptime_only
@@ -131,7 +131,7 @@ Source: `src/comptime.x:2073`
 Returns whether `fn` is a `meta` function this compiler recorded as
 compile-time only, whose runtime form the unit does not emit.
 
-Source: `src/comptime.x:2081`
+Source: `src/comptime.x:2084`
 
 ## Design notes
 

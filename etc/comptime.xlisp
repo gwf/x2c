@@ -55,8 +55,6 @@
 // The library operations a lowered call resolves against, under the names
 // the typed AST already uses.
 (def List_len length)
-(def Var_car car)
-(def Var_cdr cdr)
 (def List_reverse reverse)
 (def List_index List.index)
 // These return `void` for an absent element, which has no Lisp value, so
@@ -179,7 +177,6 @@
 (def Map_list Map.list)
 
 (def String_getindex String.getindex)
-(def String_len String.len)
 (def String_add String.add)
 (def String_lower String.lower)
 (def String_upper String.upper)
@@ -217,13 +214,11 @@
 (def int_str str)
 (def long_str str)
 (def double_str str)
-(def Var_str str)
 (defun int_var (v) v)
 (defun long_var (v) v)
 (defun double_var (v) v)
 (defun Symbol_var (v) v)
 (defun String_var (v) v)
-(defun List_var (v) v)
 (defun Var_list (v) v)
 (defun Array_var (v) v)
 (defun Map_var (v) v)

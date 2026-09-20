@@ -1005,6 +1005,43 @@ static void lisp_generated_filter(void) {
   }
 }
 
+static void lisp_generated_algorithms(void) {
+  for (int embedded = 0; embedded < 2; embedded++) {
+    Lisp lisp = embedded ? Lisp.new() : _boot_session();
+    defer lisp.destroy();
+    _install(lisp, "log!", _native_log, %((func (("Var"))) "Var"));
+    order_log[0] = 0;
+    EXPECT_VAR_EQ(_ev(lisp, "(map log! '(1 2 3))"), _ev(lisp, "'(1 2 3)"));
+    EXPECT_STR_EQ(String.new(order_log), "123");
+    order_log[0] = 0;
+    EXPECT_INT_EQ(Var.integer(_ev(lisp,
+      "(foldl (lambda (a x) (+ (* a 10) (log! x))) 0 '(1 2 3))")), 123);
+    EXPECT_STR_EQ(String.new(order_log), "123");
+    order_log[0] = 0;
+    EXPECT_TRUE(_ev(lisp, "(map log! nil)").is_nil());
+    EXPECT_INT_EQ(Var.integer(_ev(lisp,
+      "(foldl (lambda (a x) (log! x)) 7 nil)")), 7);
+    EXPECT_INT_EQ(order_log[0], 0);
+
+    EXPECT_VAR_EQ(_ev(lisp, "(assoc 'key '(7 nil other (key 9)))"),
+                  _ev(lisp, "'(key 9)"));
+    EXPECT_TRUE(_ev(lisp, "(assoc 'missing '(7 nil other (key 9)))").is_nil());
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(append 7)")), 7);
+    EXPECT_INT_EQ(Var.integer(_ev(lisp, "(append nil nil 7)")), 7);
+    EXPECT_INT_EQ(_raised_code(lisp, "(append 7 '(1))"), <bad-types>);
+    EXPECT_TRUE(_ev(lisp, "(eq? not null?)").is_nil());
+    EXPECT_TRUE(_ev(lisp, "(not 0)").is_nil());
+    EXPECT_TRUE(_ev(lisp, "(null? 0)").is_nil());
+    EXPECT_VAR_EQ(_ev(lisp, "(not nil)"), Symbol.var(<true>));
+    EXPECT_VAR_EQ(_ev(lisp, "(null? nil)"), Symbol.var(<true>));
+    EXPECT_VAR_EQ(_ev(lisp, "(_binders '(?a (*b ?a) ? * ?abcdefghij))"),
+                  _ev(lisp, "'(?a *b ?a ?abcdefghij)"));
+    EXPECT_VAR_EQ(_ev(lisp, "(_binder-lets 'subject '(?a *b ?a))"),
+      _ev(lisp, "'((?a (bound subject '?a)) (*b (bound subject '*b)) "
+                "(?a (bound subject '?a)))"));
+  }
+}
+
 static void lisp_bootstrap_collections_and_macros(void) {
   Lisp lisp = _boot_session();
   EXPECT_VAR_EQ(_ev(lisp, "(map (lambda (x) (* x x)) '(1 2 3))"),
@@ -1209,6 +1246,7 @@ void lisp_suite(void) {
   $test.run(lisp_deep_recursion_survives_stack);
   $test.run(lisp_native_operators_match_their_lisp_definitions);
   $test.run(lisp_generated_filter);
+  $test.run(lisp_generated_algorithms);
   $test.run(lisp_bootstrap_collections_and_macros);
   $test.run(lisp_bootstrap_predicates_are_exact);
   $test.run(lisp_optional_layers_are_explicit);

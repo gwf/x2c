@@ -322,9 +322,11 @@ tests so you can follow its complete implementation.
 
 The compiler and `Lisp.new()` load the same generated `etc/init.xlisp`. Its
 handwritten primitives and evaluator macros live in `etc/init-core.xlisp`.
-The `filter` algorithm lives in `etc/init.x`; `tools/gen-lisp-init.py` uses the
-compiler's existing lowering to append its Lisp definition. Other standard
-algorithms remain in the core while their migration is evaluated.
+List traversal, numeric wrappers, selectors, predicates, and pattern helpers
+live in `etc/init.x`. `tools/gen-lisp-init.py` uses the compiler's existing
+lowering to assemble their Lisp definitions between the core primitives and
+public aliases. The core retains evaluator macros, native bindings, four
+rest-argument adapters, and the identity conversion used by generated code.
 
 `make bootstrap-refresh` regenerates this artifact with the current stage-0
 compiler and rebuilds its embedded runtime copy before refreshing bootstrap

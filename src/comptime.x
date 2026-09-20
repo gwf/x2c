@@ -71,11 +71,14 @@ static List lower_session_callees;
    shape define the same loop and the second silently replaced the first. The
    counter runs across the session, which makes the name unique on its own;
    the function it belongs to follows, which makes the lowered Lisp readable
-   when something goes wrong. */
+   when something goes wrong. Lexical slots use shorter names with a hyphen
+   so they cannot shadow an ordinary C identifier. */
 static int lower_counter;
 
 static Var _lower_name(Lowering l, String stem) {
   lower_counter++;
+  if (stem != "loop" && stem != "after")
+    return Atom.intern(%"$stem-${lower_counter}");
   if (!l.own) return Atom.intern(%"$stem${lower_counter}");
   return Atom.intern(%"$stem${lower_counter}-${l.own}");
 }
