@@ -38,7 +38,8 @@ interleaved runs, x2c.x hello-world translation measured 31.27 ms against
 36.21 ms on old dev and 45.59 ms eager. All library and compiler C/H outputs
 matched across batch, per-unit, and `-j 8` translation; editor tests passed.
 
-The current follow-up removes `$comptime()` and its install hook. Existing
+The follow-up delivered at `c2eddebf` removes `$comptime()` and its install
+hook. Existing
 fixtures use `meta`; autodiff passes one Map through reverse-mode helpers
 instead of using file-scope state. Array and Map foreach cursors now use
 frame slots when their storage stays inside the loop block. Other cursor
@@ -48,19 +49,38 @@ showed unchanged library time within noise and compiler-source translation
 workload measured 352 to 77 ms. Suffixed float literals now round at float
 precision before widening; differential coverage includes f/F and hex floats.
 
-Builder integration and the conditional var-tags measurement remain in
-progress. The builder port exposed missing native bindings during shared
-parent preload; that repair must precede a meaningful var-tags measurement.
-Staging preparation still needs working DNS/HTTPS and Gary's dispatch choice.
+Builder integration remains in progress. Its cold preload can use native
+literal builders compiled from the same meta bodies until the lowered bodies
+are installed. One compatibility choice remains: three thin Lisp argument
+checks preserve existing invalid-input rejection, while direct aliases can
+silently emit an empty string for `(x2c.literal.string 7)`. Staging preparation
+still needs working DNS/HTTPS and Gary's dispatch choice.
 
 ### Parked
 
-**The var-tags port** stays on branch `report-var-tags` at `b96fc24d`. It
-measured +10.7% on a `lib/` translate and +2.3% on `src/`. About half of that
-is each importing unit re-parsing the ported `meta` bodies. The next step for
-it is to stop a unit re-parsing bodies the shared session already holds when
-that unit never calls them at run time. The port lands only if that removes
-roughly half the measured cost.
+**The var-tags port** stays on branch `report-var-tags` at `b96fc24d`.
+The collection-only body-skip prototype did not meet Gary's condition that
+removing repeated parsing cut roughly half the port's translation overhead.
+Neither the port nor that skip machinery is delivered.
+
+Measured on `df276ad4` with shared-parent native registration and canonical
+filename keys repaired, using real source homes and their built preludes.
+Both macro files had the same harmless post-build edit to match import-cache
+state. One warmup preceded six interleaved measurements with other agents
+paused. All 182 library/compiler C/H outputs matched between the port with
+and without skipping, and header-cache probes passed.
+
+| Batch | No port | Port | Port + body skip | Overhead removed |
+| --- | ---: | ---: | ---: | ---: |
+| 57 library units | 2.302 s | 2.576 s | 2.572 s | 1.39% |
+| 34 compiler units | 3.154 s | 3.348 s | 3.297 s | 26.02% |
+
+Library IQRs were 40.5/18.9/16.4 ms, so the 3.8 ms improvement is below
+noise. Compiler IQRs were 16.5/12.8/11.0 ms; its 50.4 ms improvement remains
+below the acceptance condition. A temporary counter confirmed the skip ran
+43 times for `varconvert.x`; it was removed after the experiment. Earlier
+copied-home timings lacked a normal prelude and are not acceptance evidence.
+The retained prototype is in worktree branch `codex/var-tags-probe`.
 
 **The 11 pure builders still in Lisp** in `etc/compiler-sdk.xlisp` were
 blocked by one fact: a body in `lib/meta.x` did not build. The scratch-name
@@ -78,7 +98,7 @@ chapter.
 ### Open
 
 - Finish the 11-builder port without silently accepting invalid Lisp inputs.
-- Measure the var-tags port with a working shared parent and ordinary prelude.
+- Keep the var-tags port parked until a measured approach meets its condition.
 - Prepare and explicitly select a staging candidate.
 
 ## The result
