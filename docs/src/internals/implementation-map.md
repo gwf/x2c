@@ -344,3 +344,10 @@ and SDK; it is not part of `Lisp.new()`. Scope expansion, foreach lowering,
 and deferred class defaults reuse the ordinary compiler queries and syntax
 builders. The wrappers defer native-operation lookup until expansion because
 native operations are registered after the libraries are loaded.
+
+Native Lisp signature and binding algorithms live in `etc/lisp-bindings.x`.
+The generator combines their lowering with the adapters in
+`etc/lisp-bindings-core.xlisp` to produce `etc/lisp-bindings.xlisp`. Importing
+that artifact loads only functions. The compiler initializes binding rows and
+sealed groups when it installs the binding macros for each translation unit,
+so signature preloading cannot put mutable group state in the shared parent.

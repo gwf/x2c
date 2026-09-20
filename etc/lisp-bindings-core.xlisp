@@ -1,0 +1,37 @@
+// Pure binding algorithms and entry wrappers; state starts at macro installation.
+
+(defun binding_parameters (type) (x2c.type.parameters type))
+(defun binding_return (type) (x2c.type.return type))
+(defun binding_reference (name) (_x2c.function.reference name))
+(defun binding_native_type (function) (_x2c.function.native-type function))
+(defun binding_literal_value (node) (x2c.literal.value node))
+(defun binding_fail (message node) (_x2c.fail message node))
+
+// Generated algorithms belong here.
+
+(defun lisp.native.call (name . arguments)
+  (binding_call name arguments))
+(def lisp.native.list-item binding_list_item)
+(def lisp.native.signature binding_signature)
+(def lisp.native.normalize-type binding_normalize_type)
+(def lisp.native.function-signature binding_function_signature)
+(def lisp.native.name-signature binding_name_signature)
+(def lisp.binding.name binding_name)
+(defun lisp.binding.rows-for (group)
+  (binding_rows_for group lisp.binding.rows))
+(defun lisp.binding.record (group name function)
+  (begin
+    (def lisp.binding.rows
+      (binding_record group name function lisp.binding.rows lisp.binding.sealed))
+    nil))
+(def lisp.binding.call binding_statement)
+(defun lisp.binding.install (lisp group)
+  (let* ((group-name (x2c.binding.spelling group))
+         (rows (binding_install_rows group-name lisp.binding.rows)))
+    (begin
+      (if (member group-name lisp.binding.sealed) nil
+        (def lisp.binding.sealed (cons group-name lisp.binding.sealed)))
+      (binding_statements lisp rows))))
+(def lisp.native._target binding_target)
+(def lisp.native.target binding_target_row)
+(def lisp.native.targets binding_targets)

@@ -479,6 +479,41 @@ for value in 1 2 3; do
   fi
 done
 
+# Binding groups belong to a translation unit, not the shared Lisp parent.
+bindings="$BUILD/binding-units"
+mkdir -p "$bindings"
+for unit in first second; do
+  value=1
+  if [[ $unit == second ]]; then value=2; fi
+  printf '#define UNIT %s\n#define VALUE %s\n' "$unit" "$value" \
+    >"$bindings/$unit.x"
+  cat >>"$bindings/$unit.x" <<'EOF'
+#include "x2c.x"
+$lisp.binding(shared, "same")
+static int value(void) { return VALUE; }
+int UNIT(void) {
+  Lisp first = Lisp.new(), second = Lisp.new();
+  $lisp.install(first, shared);
+  $lisp.install(first, shared);
+  $lisp.install(second, shared);
+  int result = first.eval_string("(same)").integer();
+  int other = second.eval_string("(same)").integer();
+  first.destroy();
+  second.destroy();
+  return result == other ? result : -1;
+}
+EOF
+done
+cat >"$bindings/main.x" <<'EOF'
+int first(void);
+int second(void);
+int main(void) { return first() != 1 || second() != 2; }
+EOF
+"$X2C" build -j 1 --quiet --build-dir "$bindings/build" \
+  --output "$bindings/app" "$bindings/first.x" "$bindings/second.x" \
+  "$bindings/main.x" >"$bindings/build.stdout" 2>"$bindings/build.stderr"
+"$bindings/app"
+
 # Reuse follows the native preprocessor, including newly selected headers
 # and availability tests that do not add an included file to the depfile.
 python3 - "$X2C" "$BUILD/native-reuse" <<'PY_NATIVE_REUSE'

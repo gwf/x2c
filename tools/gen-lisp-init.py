@@ -17,6 +17,7 @@ def main():
     compiler = Path(args.compiler).resolve()
     generate(compiler, "init", "init-core", "init")
     generate(compiler, "builtin-macros", "builtin-core", "builtins")
+    generate(compiler, "lisp-bindings", "lisp-bindings-core", "bindings")
 
 
 def generate(compiler, name, core, emitted):

@@ -332,7 +332,7 @@ def run_gate(gate: str) -> int:
 
 # Tracked outputs that the gate itself regenerates from digested sources.
 GATE_OUTPUTS = ("bootstrap/", "lib/x2c.x", "etc/init.xlisp",
-                "etc/builtin-macros.xlisp")
+                "etc/builtin-macros.xlisp", "etc/lisp-bindings.xlisp")
 
 
 def sources(record: dict) -> dict:
