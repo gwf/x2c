@@ -1217,10 +1217,19 @@ form reads that form's bindings and keeps the values it was made with. A macro
 that needs a value from its caller takes it as an argument.
 
 The session that translates a unit inherits the compile-time library and
-cannot replace one of its definitions: `def` on an inherited name reports a
-diagnostic. A unit's own definitions live in its own session, so one unit
-never changes what another reads, and the compiler treats an inherited
-binding as final.
+cannot replace one of its definitions. `def` on an inherited name raises
+`(bad-state (operation "def") (why "inherited") (name NAME))`, which the
+compiler reports as a failed compile-time evaluation at the defining form.
+This covers `defun` and `defmacro`, which are `def`. The library defines
+many ordinary words, including `filter`, `last`, `map`, `search`, `len` and
+`apply`, so a macro file needs its own names for its own definitions. A
+unit's own definitions live in its own session, so one unit never changes
+what another reads, and the compiler treats an inherited binding as final.
+
+`eval` is an ordinary procedure. The form it is given is evaluated in the
+session's globals, not in the bindings around the call, so
+`(let ((z 7)) (eval (quote (add z 1))))` reports `(unbound (name z))`. Build
+the form with the value in it when a local has to reach `eval`.
 
 Compile-time Lisp is trusted code. It runs with the compiler user's authority,
 including the existing native bindings and file operations; there is no

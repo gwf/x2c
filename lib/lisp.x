@@ -125,7 +125,9 @@ void Lisp.leave(void *storage) {
   context.depth--;
 }
 
-/** Replaces the current shared-machine environment for a self tail call.
+/** Replaces the current shared-machine environment for a tail call.
+    The callee may be any prepared Lambda, not only the running one, because
+    a free name is lexical and the callee never reads the frame it lands in.
     The parent environment is preserved. `callable` must be its prepared
     Lambda, `count` must match its parameters, and the borrowed `values` remain
     live until another retarget or the environment is left.

@@ -3,9 +3,9 @@
     Copyright (c) 2026 Gary William Flake.
 
     A function marked for compile-time use is lowered here into the Lisp the
-    macro session evaluates. The evaluator reuses a frame only for a direct
-    self tail call, so a loop must reach its recursive call with nothing in
-    between: no binding form, no continuation call. A block is therefore
+    macro session evaluates. A call in tail position reuses the frame it
+    stands in, so a loop runs in constant space when its recursive call is
+    in tail position and nothing accumulates around it. A block is therefore
     reduced by substitution to one expression per live local, and an
     iteration ends in `(loop e1 e2 ...)` directly.
 
@@ -1120,9 +1120,9 @@ static Var _lower_branch(
 }
 
 /* A loop is a global function over the live locals. Its body ends in a
-   direct self call, the only shape the evaluator runs in constant space,
-   and its exit inlines the rest of the block rather than calling a
-   continuation, which would accumulate environment once per loop. */
+   self call in tail position, which reuses the frame, and its exit inlines
+   the rest of the block rather than calling a continuation, which would
+   accumulate environment once per loop. */
 /* A cell the body declares is allocated once before the loop runs, so the
    declaration inside it is a store rather than a binding form. */
 static void _lower_loop_cells(Lowering l, Var form, Array out) {

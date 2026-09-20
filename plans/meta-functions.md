@@ -11,8 +11,8 @@
 >
 > Scoped 2026-09-18 on branch `x2c-lowers-to-lisp`, after Phases 0-4, 6 and 7
 > of `plans/comptime-x2c-generalization.md` landed and Phase 5 blocked on the
-> capability this plan supplies. M1, M2, M5, M6 and M7 are built, M3 and M4
-> are declined on evidence, and M8 is scoped and not built. The word and the
+> capability this plan supplies. M1, M2, M5, M6, M7 and M8 are built, and M3
+> and M4 are declined on evidence. The word and the
 > three-lifetime design are Gary's decisions, taken 2026-09-18. Nothing
 > reaches `main` without his explicit green light.
 
@@ -1089,7 +1089,12 @@ a lambda over two boxed arguments writes naturally - and `List_str`, which
 
 ## M8 - installing a compile-time function at session start
 
-**Scoped 2026-09-18, not built.** Both of Phase 7's walls are down, and a
+**Built.** The route is `Frontend._preload_meta_surface` in `src/frontend.x`,
+called once per process from `Frontend.preload_macro_libraries` and wired at
+`src/main.x`. It parses `lib/meta.x` as its own unit against the shared
+session, which is the answer to the third wall below.
+
+Both of Phase 7's walls are down, and a
 third one is up that Phase 7 did not name. The route that remains is real but
 it is a new entry point, and its cost is per process rather than per unit.
 

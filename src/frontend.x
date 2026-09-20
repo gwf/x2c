@@ -252,9 +252,10 @@ int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) =>
   _start(frontend, filename, unit, 0);
 
 /* Installs the compile-time forms `lib/meta.x` defines into the shared
-   session. The builders there are ordinary definitions, so reaching their
-   compile-time forms means parsing the file; this does it once for the
-   process. The values it interns belong to the current canonical pool rather
+   session. The declarations there have no bodies: each names a compiler
+   operation, and the compile-time form that reaches it comes from parsing
+   the file. This does that once for the process. The values it interns
+   belong to the current canonical pool rather
    than a unit's own, which is why this unit shares the process pool: a
    Lambda the session keeps outlives every unit that calls it. */
 static void _preload_meta_surface(Frontend frontend, Lisp shared) {

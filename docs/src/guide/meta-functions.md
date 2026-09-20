@@ -314,8 +314,22 @@ keeps both forms and is emitted normally.
 ## Constant calls are folded
 
 Where both forms agree, the compiler may answer a call from the
-compile-time form. A call whose arguments are all compile-time constants is
-replaced by its answer; the same call with a local stays a call.
+compile-time form and put the answer in the call's place. A call is answered
+this way only when all of the following hold.
+
+- The callee is a `meta` function this unit defines. An imported one keeps
+  the run-time call to the unit that emits it.
+- Every argument is a literal: a number, a character, a string, `nil`, or a
+  literal template. An argument the compiler would have to compute first is
+  not one, even when its value is fixed. `twice(7)` is answered;
+  `twice(-7)`, `twice(BLUE)` for an enumerator `BLUE`, and
+  `twice((int) sizeof(int))` are not, because a negation, a name and a cast
+  are expressions rather than literals.
+- Every argument already has its parameter's declared type.
+- The return type is `int` and the answer fits an `int`. An `int` literal
+  spells itself, which is what makes the substitution possible.
+
+The same call with a local stays a call.
 
 ```x2c
 meta static int width(String text) => text.len() * 2;
@@ -341,10 +355,10 @@ printf("local    %d\n", width(name));
 ```
 
 This is an optimization. The answer is the same either way, so you do not
-need to arrange for it. The compiler leaves a call alone when the two forms
-could disagree: a `String` result is left alone because its caller owns the
-value, and a function reading file-scope state is left alone because the
-compile-time form reads its own table.
+need to arrange for it. A `String`, `List` or `Map` result keeps its call:
+the caller owns the value a call returns, and a literal carries no such
+ownership. A function reading file-scope state keeps its call too, because
+the compile-time form reads its own table.
 
 ## What a meta body may not contain today
 
@@ -378,8 +392,9 @@ no place to jump to.
 
 Ordinary control flow is carried: `if`, `while`, `for`, `do`, `switch` with
 `break` or `return` in each arm, `foreach`, `break`, `continue`, recursion,
-`match`, literal templates, lambdas and `Func` values, `String`, `List`,
-`Array` and `Map` operations, and file-scope state.
+`match`, literal templates, lambdas and `Func` values with typed or bare
+parameters, `String`, `List`, `Array` and `Map` operations, and file-scope
+state.
 
 The last row covers the most common case. A call inside a `meta` body
 resolves against the compile-time library, and an operation with no binding
@@ -387,8 +402,42 @@ there declines the whole function. A body calling `time` reports
 `reason: no binding for time`. Prefer the `String`, `List`, `Array` and
 `Map` operations the shipped macro files already use.
 
-## Compile-time arithmetic today
+## Compile-time arithmetic
 
-Keep compile-time arithmetic in a `meta` function to `int` for now.
-Arithmetic on narrow and unsigned integer types and on floating values does
-not yet agree between the two forms, and is being corrected on this branch.
+The two forms agree on arithmetic. Narrow and unsigned integer types wrap
+and compare the way the emitted C does, floating values truncate and compare
+the same way, and every conversion position the source writes converts in
+both forms. `unittest/compiler-fixtures/meta-differential.x` prints each
+answer twice, once from the compile-time form and once from the emitted
+function, and the fixture owns the expected output.
+
+## Names the compile-time library already defines
+
+A unit's compile-time session inherits the compiler's own Lisp library and
+cannot replace one of its definitions. A macro file or a `$(...)` form that
+defines an inherited name reports:
+
+```text
+sample.x:2:1: macro: compile-time Lisp evaluation failed
+  $(defun filter (a b) 42)
+  ^^
+  note: form: (defun filter (a b) 42) error: (bad-state (operation "def")
+  (why "inherited") (name filter))
+```
+
+The library holds many ordinary words, so the name to avoid is often one you
+would reach for first: `filter`, `last`, `map`, `search`, `len` and `apply`
+are all defined. Give your own definition a different name, or a prefix of
+your own.
+
+## `eval` reads globals only
+
+A lambda's body reads its captures and then the session's globals. `eval`
+is an ordinary procedure, so the form it is given is evaluated in the
+globals alone and does not see the bindings around the call:
+
+```text
+(let ((z 7)) (eval (quote (add z 1))))   error: (unbound (name z))
+```
+
+Pass the value instead of the name: `(eval (list (quote add) z 1))`.

@@ -5,8 +5,8 @@
 > Scoped 2026-09-18 on branch `x2c-lowers-to-lisp` after the autodiff port
 > landed. Phases 0-4, 6 and 7 are done or answered; 5 ported two of its three
 > files and declined `lib/var-tags.xmacro` on evidence.
-> `plans/meta-functions.md` carries the `meta` keyword work: M1, M2, M5, M6
-> and M7 built, M3 and M4 declined on evidence, M8 scoped and not built.
+> `plans/meta-functions.md` carries the `meta` keyword work: M1, M2, M5, M6,
+> M7 and M8 built, M3 and M4 declined on evidence.
 > `tools/gate-state.py ensure agent-pr-check` passes on this branch. Nothing
 > on this branch reaches `main` without Gary's explicit green light. The
 > design in `plans/x2c-lowers-to-lisp.md` is settled and this plan does not
@@ -31,9 +31,9 @@ and no others:
 
 Everything else is a candidate, including the parts of `etc/init.xlisp` and
 `etc/builtin-macros.xlisp` that earlier revisions of this plan called
-permanent. M7, callable values, is built; M8, installing a compile-time
-function at session start, is scoped and not built, and is what still gates
-the rest. Both are in `plans/meta-functions.md`.
+permanent. M7, callable values, and M8, installing a compile-time
+function at session start, are both built. Both are in
+`plans/meta-functions.md`.
 
 Nothing here is done for speed. Measured, a rewrite is neutral on the call
 side because a Lisp `defun` is word-compiled too, and costs about 0.31 ms per

@@ -99,6 +99,12 @@ that expands to direct forms.
 
 ### Nothing may stand between a loop and its recursive call
 
+**Superseded by the evaluator.** A call in tail position now reuses the
+frame whatever prepared Lambda it names, and `let` lowers into slots of the
+frame it stands in, so neither shape below accumulates environment. The
+lowering the section describes is still what `src/comptime.x` emits; the
+measurements are kept as the record of why it was chosen.
+
 Measured 2026-09-17 while starting M0, and it constrains the lowering more
 than anything else. The evaluator reuses a frame only for a **direct self
 tail call**. A tail call to any other lambda retains the caller's
@@ -331,6 +337,10 @@ arm with two or three binders that is cheaper than it looks, and naming the
 result would cost more on a loop path than it saves.
 
 ### Open question for Gary: how a macro should read a folded literal
+
+**Answered.** The accessor is bound as `x2c.cache.value`, without the
+`_x2c.` prefix, so it is public compile-time surface. The rest of the
+section records the alternatives that were weighed.
 
 Raised by the review session and worth deciding before M3 builds on it.
 
