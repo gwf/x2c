@@ -266,7 +266,6 @@ typedef struct LispEnv {
 } LispEnv;
 
 typedef struct LispExpansion {
-  LispEnv *boundary;
   List dependencies;
   int calls, steps;
 } LispExpansion;
@@ -1118,16 +1117,15 @@ static void _expansion_argument(Lisp lisp, Var value) {
     _expansion_decline();
 }
 
-static int _env_lookup(Lisp lisp, LispEnv *env, Var name, Var *out) {
-  int external = 0;
-  for (LispEnv *cur = env; cur; cur = cur.parent) {
-    if (lisp.expansion && cur == lisp.expansion.boundary) external = 1;
+/* A prepared expansion records the globals it read, because the session can
+   change one later. Slots and captures need no record: a call's environment
+   chain ends at its Lambda's captures, which are the values the Lambda was
+   made with and do not change afterwards. */
+static int _env_lookup(LispEnv *env, Var name, Var *out) {
+  for (LispEnv *cur = env; cur; cur = cur.parent)
     if (_local_lookup(cur, name, out) ||
-        (cur.captures && cur.captures.try_get(name, out))) {
-      if (external) _expansion_note(lisp, name, *out);
+        (cur.captures && cur.captures.try_get(name, out)))
       return 1;
-    }
-  }
   return 0;
 }
 
@@ -1167,7 +1165,7 @@ static int _reserved_lookup(Lisp lisp, Var name, Var *out) {
 }
 
 static int _lookup(Lisp lisp, LispEnv *env, Var name, Var *out) {
-  if (_env_lookup(lisp, env, name, out)) return 1;
+  if (_env_lookup(env, name, out)) return 1;
   if (!_global_lookup(lisp, name, out) && !_reserved_lookup(lisp, name, out))
     return 0;
   _expansion_note(lisp, name, *out);
@@ -1230,7 +1228,7 @@ static void _capture(Lisp lisp, LispEnv *env, List params, Var body,
   foreach (Var name, names) {
     Var value;
     if (name in captures) continue;
-    if (_env_lookup(lisp, env, name, &value)) captures[name] = value;
+    if (_env_lookup(env, name, &value)) captures[name] = value;
   }
 }
 
@@ -1314,7 +1312,7 @@ static void _bind_params(Lambda lambda, List args, Map bindings) {
   if (args) raise %(bad-arity (operation "apply") (value ${lambda.body}));
 }
 
-static Var _call_lambda(Lisp lisp, Lambda lambda, List args, LispEnv *env) {
+static Var _call_lambda(Lisp lisp, Lambda lambda, List args) {
   if (++lisp.call_steps > lisp.call_step_max) {
     lisp.call_steps = 0;
     raise %(call-stack (operation "apply") (why "steps"));
@@ -1330,9 +1328,8 @@ static Var _call_lambda(Lisp lisp, Lambda lambda, List args, LispEnv *env) {
   Scope frame = $auto(Scope.new_named("Lisp frame")), Map bindings = NULL;
   $scope(&frame) { bindings = {}; }
   /* A free name the lambda did not capture is a global. The environment the
-     call was written in is not part of the chain, so a caller's binding
+     call was written in is not a parameter here, so a caller's binding
      cannot change what the body reads. */
-  (void) env;
   LispEnv captured = {
     .bindings = lambda.captures,
     .parent = NULL
@@ -1348,7 +1345,7 @@ static Var _call_lambda(Lisp lisp, Lambda lambda, List args, LispEnv *env) {
 static Var _apply_lambda(Lisp lisp, Lambda lambda, List raw, LispEnv *env) {
   List args = raw;
   if (!lambda.macro) _eval_args(lisp, raw, env, &args);
-  Var result = _call_lambda(lisp, lambda, args, env);
+  Var result = _call_lambda(lisp, lambda, args);
   return lambda.macro ? _eval(lisp, result, env) : result;
 }
 
@@ -1688,9 +1685,9 @@ static int LispLower._auto_expand(LispLower l, Var head, List args,
   /* The evaluator expands only the calls it reaches, so a macro call in a
      branch that never runs fails nowhere today. Analysis reaches every
      branch; keep its failures local by rejecting rather than raising. */
-  LispExpansion trace = { l.env, %(( $head $value )), 0, 0 };
+  LispExpansion trace = { %(( $head $value )), 0, 0 };
   try $let(l.lisp.expansion, &trace)
-    *expansion = _call_lambda(l.lisp, macro, args, l.env);
+    *expansion = _call_lambda(l.lisp, macro, args);
   catch: return 0;
   if (!_expansion_value(*expansion, 0)) return 0;
   *dependencies = trace.dependencies;
@@ -2151,7 +2148,7 @@ static Var _apply_values(Lisp lisp, Var callable, List values, LispEnv *env) {
     Lambda lambda = callable;
     if (lambda.macro)
       raise %(not-call (operation "apply") (actual ${callable.kind()}));
-    return _call_lambda(lisp, lambda, values, env);
+    return _call_lambda(lisp, lambda, values);
   }
   if (callable is not <func>) raise %(not-call (actual ${callable.kind()}));
   Func function = (Func) callable.pointer();

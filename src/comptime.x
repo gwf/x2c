@@ -36,7 +36,7 @@ typedef struct Lowering {
   Array definitions;
   String own;
   List on_break, on_continue;
-  int declined, on_loop, in_loop, rejected, uncallable, globals, meta_only;
+  int declined, on_loop, rejected, uncallable, globals, meta_only;
 } *Lowering;
 
 /* Why the last lowering declined, for the diagnostic at the invocation, and
@@ -366,8 +366,6 @@ static void _lower_scan(Lowering l, Var form) {
     return;
   }
   if (head == <while> || head == <for> || head == <do>) {
-    int was = l.in_loop;
-    l.in_loop = 1;
     match (items) case %(while ?test ?): {
       int cursor = 0, item = 0;
       if (_lower_list_cursor(test, &cursor, &item)) {
@@ -376,7 +374,6 @@ static void _lower_scan(Lowering l, Var form) {
       }
     }
     _lower_scan_each(l, items);
-    l.in_loop = was;
     return;
   }
   if (head == <bind>) _lower_scan_bind(l, items);
@@ -1797,7 +1794,7 @@ List Compiler.lower_comptime(Compiler compiler, List fn) {
     .arrays = {}, .callees = {}, .cursors = {}, .definitions = [],
     .declined = 0,
     .own = NULL, .on_break = NULL, .on_continue = NULL, .on_loop = 0,
-    .in_loop = 0, .rejected = 0, .uncallable = 0, .globals = 0,
+    .rejected = 0, .uncallable = 0, .globals = 0,
     .meta_only = 0
   };
   Lowering l = &state;
@@ -1810,7 +1807,6 @@ List Compiler.lower_comptime(Compiler compiler, List fn) {
       lower_declined_reason = NULL;
       lower_session_callees = NULL;
       l.own = name;
-      _lower_scan(l, fn);
       _lower_scan(l, fn);
       /* The scan records its own wording for a construct refused by
          decision; `rejected` now means only `goto`. */

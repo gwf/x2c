@@ -1052,11 +1052,6 @@ int Compiler.shared_definition(Compiler compiler, String key) {
   return known;
 }
 
-/** Evaluates the compile-time Lisp libraries once for this process. */
-void Compiler.preload_macro_libraries(Compiler compiler) {
-  compiler.publish_macro_library(compiler.open_macro_library());
-}
-
 /* Each Compiler initializes one Lisp session lazily. An `.xmacro` import
    parser borrows that session; the parent Compiler frees it. */
 static void _ensure_lisp(Compiler compiler) {
