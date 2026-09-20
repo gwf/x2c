@@ -10,57 +10,6 @@
       (x2c.expr.call (x2c.expr.field node "dedent"))
       (x2c.literal.string text))))
 
-// $switch rewrites the flat item list of a switch body. A run of case and
-// default labels keeps its position; the statements that follow it become one
-// block, which scopes their declarations and carries the break the run needs.
-// Items before the first label stay as they are, so a declaration shared by
-// every case keeps its scope.
-
-(defun cases.label? (item) (match-case item
-  ((at ?line (case ?value)) true)
-  ((at ?line (default)) true)
-  (else nil)))
-
-(defun cases.transfers? (item) (match-case item
-  ((at ?line (break)) true)
-  ((at ?line (continue)) true)
-  ((at ?line (goto ?target)) true)
-  ((at ?line (return ?type ?value)) true)
-  ((at ?line (return ?type)) true)
-  (else nil)))
-
-(defun cases.run (items)
-  (if (or (null? items) (cases.label? (car items)))
-      nil
-      (cons (car items) (cases.run (cdr items)))))
-
-(defun cases.after (items)
-  (if (or (null? items) (cases.label? (car items)))
-      items
-      (cases.after (cdr items))))
-
-(defun cases.wrap (run)
-  (if (null? run)
-      nil
-      (list (cons 'block
-        (if (cases.transfers? (car (reverse run)))
-            run
-            (append run (list (list 'break))))))))
-
-(defun cases.split (items labelled) (cond
-  ((null? items) nil)
-  ((cases.label? (car items))
-   (cons (car items) (cases.split (cdr items) true)))
-  (labelled
-   (append (cases.wrap (cases.run items))
-           (cases.split (cases.after items) nil)))
-  (true (cons (car items) (cases.split (cdr items) nil)))))
-
-(defun cases.rewrite (body) (cons 'block (cases.split (cdr body) nil)))
-
-(defun cases.switch (condition body)
-  (list (list 'switch condition (cases.rewrite body))))
-
 // Location and source text for the diagnostic macros. x2c.invocation.* names
 // the caller, so an imported macro still reports where it was written.
 

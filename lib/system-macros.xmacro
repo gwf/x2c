@@ -75,10 +75,48 @@ macro Decorator $time(Statement $target, Literal $label)
   }
 }
 
+meta static int _cases_label(List item) {
+  match (item) {
+    case %(at ? (case ?)): return 1;
+    case %(at ? (default)): return 1;
+  }
+  return 0;
+}
+
+meta static int _cases_transfers(List item) {
+  match (item) {
+    case %(at ? (break)): return 1;
+    case %(at ? (continue)): return 1;
+    case %(at ? (goto ?)): return 1;
+    case %(at ? (return ? ?)): return 1;
+    case %(at ? (return ?)): return 1;
+  }
+  return 0;
+}
+
+meta static List _cases_split(List items, int labelled) {
+  if (!items) return %();
+  List item = items.car();
+  if (_cases_label(item))
+    return %($item @{_cases_split(items.cdr(), 1)});
+  if (!labelled)
+    return %($item @{_cases_split(items.cdr(), 0)});
+  Array run = [];
+  while (items && !_cases_label(items.car())) {
+    run.push(items.car());
+    items = items.cdr();
+  }
+  if (!_cases_transfers(run[-1])) run.push(%(break));
+  return %((block @run) @{_cases_split(items, 0)});
+}
+
+meta static List _cases_switch(List condition, List body) =>
+  %((switch $condition (block @{_cases_split(body.cdr(), 0)})));
+
 /* Gives every case run its own block and its own break. Deliberate
    fallthrough is written by nesting an ordinary switch. */
 macro Decorator $switch(Block $body, Expr $condition) => {
-  $(cases.switch $condition $body)...
+  $(_cases_switch $condition $body)...
 }
 
 /* Marks a path that is not written yet. Reaching it raises `<invariant>`
