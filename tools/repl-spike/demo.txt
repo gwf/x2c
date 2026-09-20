@@ -1,0 +1,13 @@
+int total = 10;
+total += 2;
+total;
+int plus(int x) { return total + x; }
+plus(3);
+int twice(int x) {
+  return plus(x) * 2;
+}
+twice(4);
+int broken = ;
+twice(4);
+total = 20;
+twice(4);
