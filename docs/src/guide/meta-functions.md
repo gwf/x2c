@@ -1,86 +1,145 @@
 # Meta Functions
 
-A `meta` function is an x2c function the compiler can also run during
-translation. It lets you write a macro's implementation in x2c instead of in
-compile-time Lisp. The body is ordinary x2c: parameters, locals, `foreach`,
-`match`, `String`, `List`, `Array` and `Map`. A macro body calls it the way
-it calls a Lisp procedure.
+Start with an ordinary function. This one takes an integer and returns an
+integer, using the same braces, `return`, and arithmetic as C:
 
-This chapter assumes you have read [Compile-time Macros](macros.md). It does
-not assume you know Lisp.
-
-## A complete example
-
-Two files. The first is a `.xmacro` holding the `meta` functions and the
-macros that call them. `shape_fields` asks the compiler what a struct holds.
-`shape_names` and `shape_reads` turn that answer into syntax.
-
-<!-- ignore: shape.xmacro is the external file being illustrated -->
-```x2c,ignore
-/* The named fields of a struct-typed expression, in declaration order. */
-meta static List shape_fields(List receiver) =>
-  x2c_type_fields(x2c_syntax_type(receiver));
-
-/* One `String` literal holding those field names, comma separated. */
-meta static List shape_names(List receiver) {
-  Array names = [];
-  foreach (List field, shape_fields(receiver)) names.push(field.car());
-  return x2c_literal_string(String.join(", ", names));
+```x2c
+int poly(int n) {
+  return n * n + 3 * n + 1;
 }
-
-/* `{ p.x, p.y, p.z }`, built from the fields rather than written out. */
-meta static List shape_reads(List receiver) {
-  Array reads = [];
-  foreach (List field, shape_fields(receiver))
-    reads.push(x2c_expr_field(receiver, field.car()));
-  return x2c_expr_composite(reads);
-}
-
-macro Expression $shape.names(Expr $value) => ($(shape_names $value))
-
-macro Expression $shape.reads(Expr $value) => ($(shape_reads $value))
 ```
 
-The second file imports it and uses the macros.
+Calling `poly(7)` gives 71. Now put `meta` before its definition:
 
-<!-- ignore: this program imports the shape.xmacro file above -->
-```x2c,ignore
-#include "x2c.x"
-#include "meta.x"
+```x2c
+meta int poly(int n) {
+  return n * n + 3 * n + 1;
+}
+```
 
-$(import "shape.xmacro")
+The body has not changed. `meta` makes it available to the compiler during
+translation as well as to the finished program. You can use it for an
+ordinary calculation; it does not have to inspect types or generate code.
 
-typedef struct Point { int x, y, z; } Point;
+## Call it in the program
+
+An ordinary call uses parentheses and commas, just as before. Here the
+argument is a local variable:
+
+```x2c
+meta int poly(int n) {
+  return n * n + 3 * n + 1;
+}
 
 int main(void) {
-  Point p = { 2, 3, 4 };
-  int reads[3] = $shape.reads(p);
-  printf("names %s\n", $shape.names(p));
-  printf("reads %d %d %d\n", reads[0], reads[1], reads[2]);
+  int n = 7;
+  printf("%d\n", poly(n));
   return 0;
 }
 ```
 
 ```text
-names x, y, z
-reads 2 3 4
+71
 ```
 
-The field names never appear in the program. The compiler supplied them, and
-the `meta` functions built `"x, y, z"` and `{ p.x, p.y, p.z }` from them.
+This uses the function's run-time form. The compiler emits C for the body,
+and the finished program calls it.
 
-## The `meta` word
+## Ask the compiler to calculate it
 
-Write `meta` first on a function definition. A storage class follows it:
+Use `$(poly 7)` to call the same function during translation:
+
+```x2c
+meta int poly(int n) {
+  return n * n + 3 * n + 1;
+}
+
+int main(void) {
+  printf("%d\n", $(poly 7));
+  return 0;
+}
+```
+
+```text
+71
+```
+
+`$(...)` asks the compiler to evaluate what is inside and insert the result.
+Inside it, a call is written with the name first and space-separated
+arguments: `poly 7`, rather than `poly(7)`. That is Lisp call syntax; you do
+not need to write the function's implementation in Lisp. Here the compiler
+runs the x2c body and inserts the integer 71 before the program is built.
+
+These are the two forms of a `meta` function: one runs in your program,
+and one runs in the compiler. Both come from the same body. Functions that
+need the compiler's own type information are an exception: they can only
+run during translation. We will reach those after ordinary calculations.
+
+## Constant calls are folded
+
+An ordinary call with literal arguments can also be calculated during
+translation. You do not have to write `$(...)` to benefit from it:
+
+```x2c
+meta int poly(int n) {
+  return n * n + 3 * n + 1;
+}
+
+int main(void) {
+  int n = 7;
+  printf("constant %d\n", poly(7));
+  printf("local    %d\n", poly(n));
+  return 0;
+}
+```
+
+```text
+constant 71
+local    71
+```
+
+The generated C shows the difference:
+
+```text
+printf("constant %d\n", 71);
+printf("local    %d\n", poly(n));
+```
+
+Here `poly(7)` becomes 71, while `poly(n)` remains a call. This automatic
+substitution is called folding. It is an optimization: you get the same
+answer either way. `$(poly 7)` explicitly requests compile-time evaluation;
+`poly(7)` uses ordinary call syntax and leaves folding to the compiler.
+
+## Use x2c conveniences
+
+The body can also use familiar x2c conveniences. An expression-bodied
+function uses `=>` in place of braces and `return`:
 
 ```x2c
 meta int poly(int n) => n * n + 3 * n + 1;
-
-meta static String label(String stem, int n) => %"$stem-$n";
 ```
 
-`static` still means what it always meant about the emitted function. `meta`
-adds the compile-time form.
+A `String` parameter gives access to string operations through dot syntax:
+
+```x2c
+meta static int width(String text) => text.len() * 2;
+
+int main(void) {
+  printf("%d\n", $(width "abcd"));
+  return 0;
+}
+```
+
+```text
+8
+```
+
+`static` follows `meta` and keeps its usual meaning for the emitted
+function. A body can use local variables, ordinary control flow, `foreach`,
+and `String`, `List`, `Array`, and `Map` operations with compile-time
+bindings. The restrictions below describe where this stops.
+
+## Where to write `meta`
 
 `meta` is contextual. It marks a function only when a function definition
 follows it. Everywhere else it is an ordinary identifier:
@@ -105,27 +164,92 @@ int main(void) {
 A `meta` declaration needs a body. A prototype is an error, because the
 compiler has nothing to run.
 
-## One body, two forms
+## When folding applies
 
-A `meta` function has a compile-time form and a run-time form. They come
-from the same body, so they compute the same answer. `$(name args)` calls
-the compile-time form; ordinary call syntax calls the run-time one.
+Where both forms agree, the compiler may answer a call from the
+compile-time form and put the answer in the call's place. A call is answered
+this way only when all of the following hold.
 
-```x2c
-meta int poly(int n) => n * n + 3 * n + 1;
+- The callee is a `meta` function this unit defines. An imported one keeps
+  the run-time call to the unit that emits it.
+- Every argument is a literal: a number, a character, a string, `nil`, or a
+  literal template. An argument the compiler would have to compute first is
+  not one, even when its value is fixed. `poly(7)` is answered;
+  `poly(-7)`, `poly(BLUE)` for an enumerator `BLUE`, and
+  `poly((int) sizeof(int))` are not, because a negation, a name and a cast
+  are expressions rather than literals.
+- Every argument already has its parameter's declared type.
+- The return type is `int` and the answer fits an `int`. An `int` literal
+  spells itself, which is what makes the substitution possible.
 
-int main(void) {
-  int seven = 7;
-  printf("compile time %d\n", $(poly 7));
-  printf("run time     %d\n", poly(seven));
-  return 0;
-}
-```
+This is an optimization. The answer is the same either way, so you do not
+need to arrange for it. A `String`, `List` or `Map` result keeps its call:
+the caller owns the value a call returns, and a literal carries no such
+ownership. A `meta` body cannot read file-scope variables.
+Pass the values it needs as arguments instead.
+
+## What a meta body may not contain today
+
+The compiler translates the body into a compile-time form before it runs.
+Some constructs have no such form. The compiler reports this at the `meta`
+marker and names the reason. A body holding a struct or union gives:
 
 ```text
-compile time 71
-run time     71
+sample.x:3:1: macro: this function cannot run at compile time
+  meta static int mt_scan(int n) {
+  ^^^^
+  note: reason: a struct or union, which has no compile-time representation
 ```
+
+The refusals a body is most likely to meet:
+
+| Construct | Reason in the diagnostic |
+| --- | --- |
+| `goto` | `a goto has no lowering` |
+| `defer` | `defer, because a compile-time function does not free its values: the evaluator owns them` |
+| a struct or union local, or a `.` field read | `a struct or union, which has no compile-time representation` |
+| a `switch` arm running into the next | `a switch arm that falls through into the next` |
+| a call with no compile-time binding | `no binding for NAME` |
+
+A compile-time value is a Lisp value, so a struct would have to become a
+`Map` keyed by field name, which reads back as a reference where the source
+wrote a value. `defer` is refused because the evaluator owns every value a
+compile-time function makes, so freeing one would take it away. `goto` and
+a falling-through `switch` arm are refused because the compile-time form has
+no place to jump to.
+
+Ordinary control flow is carried: `if`, `while`, `for`, `do`, `switch` with
+`break` or `return` in each arm, `foreach`, `break`, `continue`, recursion,
+`match`, literal templates, lambdas and `Func` values with typed or bare
+parameters, and `String`, `List`, `Array` and `Map` operations.
+File-scope variables are not available to a `meta` body; pass their values
+as parameters or keep the working state in locals.
+
+The last row covers the most common case. A call inside a `meta` body
+resolves against the compile-time library, and an operation with no binding
+there declines the whole function. A body calling `time` reports
+`reason: no binding for time`. Prefer the `String`, `List`, `Array` and
+`Map` operations the shipped macro files already use.
+
+## Compile-time arithmetic
+
+The two forms agree on arithmetic. Narrow and unsigned integer types wrap
+and compare the way the emitted C does, floating values truncate and compare
+the same way, and every conversion position the source writes converts in
+both forms. `unittest/compiler-fixtures/meta-differential.x` prints each
+answer twice, once from the compile-time form and once from the emitted
+function, and the fixture owns the expected output.
+
+## From values to syntax
+
+So far we have passed values in and calculated values out. A macro works
+with something different: the syntax of the program being compiled. A
+`meta` function can take that syntax as a `List`, inspect it, and return new
+syntax for the compiler to insert.
+
+For this part, read [Compile-time Macros](macros.md) first. The macro declares
+what syntax to capture; the `meta` function implements the transformation
+in x2c. Include `meta.x` to use the compiler's `x2c_*` operations.
 
 ## Calling a meta function from a macro body
 
@@ -162,35 +286,6 @@ the work.
 What the function returns decides what the expansion is. A `List` one of the
 compiler operations built is syntax. `x2c_literal_int`, `x2c_literal_string`
 and `x2c_literal_symbol` each return an expression holding a value.
-
-## Sharing a `meta` function between units
-
-A `meta` function written in a `.x` file belongs to that unit. Including that
-file elsewhere shares its declaration, the way including any `.x` file does,
-and the declaration alone has no compile-time form: another unit can call it
-at run time, and cannot call it during translation.
-
-To share one, put it in a `.xmacro` that each unit imports. A `.xmacro` file
-may hold `meta` functions beside the macros that call them, and importing it
-installs their compile-time forms in the importing unit. The unit that imports
-the file includes `meta.x`, because a `.xmacro` borrows the consuming unit's
-symbol table:
-
-```text
-#include "x2c.x"
-#include "meta.x"
-
-$(import "shape.xmacro")
-```
-
-Importing the same file twice contributes one copy of each definition. A
-`.xmacro` may import another `.xmacro`, and a `meta` function two levels
-down reaches the consuming unit the same way.
-
-The run-time forms are separate from this. A unit emits a definition only
-for the `meta` functions it calls at run time. The storage class says what
-it emits: `static` gives that unit its own copy, and a public name is the
-one copy the program links, exported by the reaching unit's header.
 
 ## What the compiler answers
 
@@ -295,9 +390,9 @@ Two signatures differ in shape from their Lisp spellings.
 `x2c_expr_call` takes its arguments as one `List`, and `x2c_type_value`
 returns `int`.
 
-## A function that reaches a compiler operation has no run-time form
+## Functions that need the compiler
 
-The compiler operations exist only inside a compiler. A `meta` function that
+Compiler queries exist only inside a compiler. A `meta` function that
 calls one, directly or through another `meta` function, therefore has no
 valid run-time form, and the compiler emits no definition for it. A call to
 one from a run-time body is diagnosed where it is written. Calling
@@ -311,111 +406,100 @@ sample.x:19:22: macro: 'field_count' can only be called at compile time
   definition for it; call it from a macro or another meta function
 ```
 
-In the first example, the generated C mentions none of `shape_fields`,
+In the complete shape example below, the generated C mentions none of `shape_fields`,
 `shape_names` or `shape_reads`.
 
-A `meta` function that reaches no compiler operation, like `label` above,
+A `meta` function that needs no compiler query, like `poly` above,
 keeps both forms and is emitted normally.
 
-## Constant calls are folded
+## A complete example
 
-Where both forms agree, the compiler may answer a call from the
-compile-time form and put the answer in the call's place. A call is answered
-this way only when all of the following hold.
+Two files. The first is a `.xmacro` holding the `meta` functions and the
+macros that call them. `shape_fields` asks the compiler what a struct holds.
+`shape_names` and `shape_reads` turn that answer into syntax.
 
-- The callee is a `meta` function this unit defines. An imported one keeps
-  the run-time call to the unit that emits it.
-- Every argument is a literal: a number, a character, a string, `nil`, or a
-  literal template. An argument the compiler would have to compute first is
-  not one, even when its value is fixed. `twice(7)` is answered;
-  `twice(-7)`, `twice(BLUE)` for an enumerator `BLUE`, and
-  `twice((int) sizeof(int))` are not, because a negation, a name and a cast
-  are expressions rather than literals.
-- Every argument already has its parameter's declared type.
-- The return type is `int` and the answer fits an `int`. An `int` literal
-  spells itself, which is what makes the substitution possible.
+<!-- ignore: shape.xmacro is the external file being illustrated -->
+```x2c,ignore
+/* The named fields of a struct-typed expression, in declaration order. */
+meta static List shape_fields(List receiver) =>
+  x2c_type_fields(x2c_syntax_type(receiver));
 
-The same call with a local stays a call.
+/* One `String` literal holding those field names, comma separated. */
+meta static List shape_names(List receiver) {
+  Array names = [];
+  foreach (List field, shape_fields(receiver)) names.push(field.car());
+  return x2c_literal_string(String.join(", ", names));
+}
 
-```x2c
-meta static int width(String text) => text.len() * 2;
+/* `{ p.x, p.y, p.z }`, built from the fields rather than written out. */
+meta static List shape_reads(List receiver) {
+  Array reads = [];
+  foreach (List field, shape_fields(receiver))
+    reads.push(x2c_expr_field(receiver, field.car()));
+  return x2c_expr_composite(reads);
+}
+
+macro Expression $shape.names(Expr $value) => ($(shape_names $value))
+
+macro Expression $shape.reads(Expr $value) => ($(shape_reads $value))
+```
+
+The second file imports it and uses the macros.
+
+<!-- ignore: this program imports the shape.xmacro file above -->
+```x2c,ignore
+#include "x2c.x"
+#include "meta.x"
+
+$(import "shape.xmacro")
+
+typedef struct Point { int x, y, z; } Point;
 
 int main(void) {
-  String name = "abcd";
-  printf("constant %d\n", width("abcd"));
-  printf("local    %d\n", width(name));
+  Point p = { 2, 3, 4 };
+  int reads[3] = $shape.reads(p);
+  printf("names %s\n", $shape.names(p));
+  printf("reads %d %d %d\n", reads[0], reads[1], reads[2]);
   return 0;
 }
 ```
 
 ```text
-constant 8
-local    8
+names x, y, z
+reads 2 3 4
 ```
 
-The generated C shows the difference:
+The field names never appear in the program. The compiler supplied them, and
+the `meta` functions built `"x, y, z"` and `{ p.x, p.y, p.z }` from them.
+
+## Sharing a `meta` function between units
+
+A `meta` function written in a `.x` file belongs to that unit. Including that
+file elsewhere shares its declaration, the way including any `.x` file does,
+and the declaration alone has no compile-time form: another unit can call it
+at run time, and cannot call it during translation.
+
+To share one, put it in a `.xmacro` that each unit imports. A `.xmacro` file
+may hold `meta` functions beside the macros that call them, and importing it
+installs their compile-time forms in the importing unit. The unit that imports
+the file includes `meta.x`, because a `.xmacro` borrows the consuming unit's
+symbol table:
 
 ```text
-printf("constant %d\n", 8);
-printf("local    %d\n", width(name));
+#include "x2c.x"
+#include "meta.x"
+
+$(import "shape.xmacro")
 ```
 
-This is an optimization. The answer is the same either way, so you do not
-need to arrange for it. A `String`, `List` or `Map` result keeps its call:
-the caller owns the value a call returns, and a literal carries no such
-ownership. A function reading file-scope state keeps its call too, because
-the compile-time form reads its own table.
+Importing the same file twice contributes one copy of each definition. A
+`.xmacro` may import another `.xmacro`, and a `meta` function two levels
+down reaches the consuming unit the same way.
 
-## What a meta body may not contain today
-
-The compiler translates the body into a compile-time form before it runs.
-Some constructs have no such form. The compiler reports this at the `meta`
-marker and names the reason. A body holding a struct or union gives:
-
-```text
-sample.x:3:1: macro: this function cannot run at compile time
-  meta static int mt_scan(int n) {
-  ^^^^
-  note: reason: a struct or union, which has no compile-time representation
-```
-
-The refusals a body is most likely to meet:
-
-| Construct | Reason in the diagnostic |
-| --- | --- |
-| `goto` | `a goto has no lowering` |
-| `defer` | `defer, because a compile-time function does not free its values: the evaluator owns them` |
-| a struct or union local, or a `.` field read | `a struct or union, which has no compile-time representation` |
-| a `switch` arm running into the next | `a switch arm that falls through into the next` |
-| a call with no compile-time binding | `no binding for NAME` |
-
-A compile-time value is a Lisp value, so a struct would have to become a
-`Map` keyed by field name, which reads back as a reference where the source
-wrote a value. `defer` is refused because the evaluator owns every value a
-compile-time function makes, so freeing one would take it away. `goto` and
-a falling-through `switch` arm are refused because the compile-time form has
-no place to jump to.
-
-Ordinary control flow is carried: `if`, `while`, `for`, `do`, `switch` with
-`break` or `return` in each arm, `foreach`, `break`, `continue`, recursion,
-`match`, literal templates, lambdas and `Func` values with typed or bare
-parameters, `String`, `List`, `Array` and `Map` operations, and file-scope
-state.
-
-The last row covers the most common case. A call inside a `meta` body
-resolves against the compile-time library, and an operation with no binding
-there declines the whole function. A body calling `time` reports
-`reason: no binding for time`. Prefer the `String`, `List`, `Array` and
-`Map` operations the shipped macro files already use.
-
-## Compile-time arithmetic
-
-The two forms agree on arithmetic. Narrow and unsigned integer types wrap
-and compare the way the emitted C does, floating values truncate and compare
-the same way, and every conversion position the source writes converts in
-both forms. `unittest/compiler-fixtures/meta-differential.x` prints each
-answer twice, once from the compile-time form and once from the emitted
-function, and the fixture owns the expected output.
+The run-time forms are separate from this. A unit emits a definition only
+for the `meta` functions it calls at run time. The storage class says what
+it emits: `static` gives that unit its own copy, and a public name is the
+one copy the program links, exported by the reaching unit's header.
 
 ## Names the compile-time library already defines
 
