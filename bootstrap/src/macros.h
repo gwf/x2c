@@ -27,8 +27,6 @@ void Compiler_publish_macro_library(Compiler compiler, Lisp shared);
 
 int Compiler_shared_definition(Compiler compiler, String key);
 
-void Compiler_preload_macro_libraries(Compiler compiler);
-
 List Compiler_parse_macro_lisp_top_level(Compiler compiler);
 
 List Compiler_parse_source_lisp(Compiler compiler);
