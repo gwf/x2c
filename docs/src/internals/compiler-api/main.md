@@ -26,7 +26,7 @@ successful translation, build, or bootstrap, one for compiler or tool
 failure, and the executed program's status for `run`. Help and version exit
 with zero, while invalid CLI and preflight input exit with status two.
 
-Source: `src/main.x:517`
+Source: `src/main.x:544`
 
 ## Design notes
 

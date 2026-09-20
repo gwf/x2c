@@ -58,7 +58,7 @@ Returns a report-order snapshot of all collected diagnostics.
 Snapshot cells are canonicalized through the active pool hierarchy and
 share entry values; each retains its actual producing-pool lifetime.
 
-Source: `src/diagnostics.x:455`
+Source: `src/diagnostics.x:459`
 
 <a id="Compiler.display_path"></a>
 #### Compiler.display_path
@@ -77,7 +77,7 @@ Source: `src/diagnostics.x:318`
 
 Prints each cached numeric identifier and its key to stdout.
 
-Source: `src/diagnostics.x:491`
+Source: `src/diagnostics.x:495`
 
 <a id="Compiler.dump_symbol_table"></a>
 #### Compiler.dump_symbol_table
@@ -86,7 +86,7 @@ Source: `src/diagnostics.x:491`
 
 Prints every entry in `map` to stdout in `Map` iteration order.
 
-Source: `src/diagnostics.x:486`
+Source: `src/diagnostics.x:490`
 
 <a id="Compiler.dump_tokens"></a>
 #### Compiler.dump_tokens
@@ -96,7 +96,7 @@ Source: `src/diagnostics.x:486`
 Prints every non-EOF token with its position and visible content.
 `Compiler.tokenize` must have populated the compiler's tokenizer.
 
-Source: `src/diagnostics.x:476`
+Source: `src/diagnostics.x:480`
 
 <a id="Compiler.error_count"></a>
 #### Compiler.error_count
@@ -106,7 +106,7 @@ Source: `src/diagnostics.x:476`
 Returns the number of counted diagnostics accepted since the last reset.
 Warnings and the generated limit notice are excluded.
 
-Source: `src/diagnostics.x:449`
+Source: `src/diagnostics.x:453`
 
 <a id="Compiler.origin_location"></a>
 #### Compiler.origin_location
@@ -158,7 +158,7 @@ Location selection matches `Compiler.report_error`; NULL code becomes
 `<warning>` and NULL message becomes `"compiler warning"`. This operation
 returns without raising or changing the process exit status.
 
-Source: `src/diagnostics.x:382`
+Source: `src/diagnostics.x:386`
 
 <a id="Compiler.report_warning_at"></a>
 #### Compiler.report_warning_at
@@ -169,7 +169,7 @@ Records and emits a warning at a location built earlier by
 `Compiler.token_location`, for a report raised after its token has been
 consumed. Defaults match `Compiler.report_warning`.
 
-Source: `src/diagnostics.x:391`
+Source: `src/diagnostics.x:395`
 
 <a id="Compiler.token_location"></a>
 #### Compiler.token_location

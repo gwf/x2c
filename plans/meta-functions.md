@@ -1260,3 +1260,27 @@ reports why, because a silent skip would look like a performance bug later.
 No new validator; a meta function that cannot link its runtime form is a link
 error, which is the right failure and needs nothing added. No negative fixture
 beyond the existing `comptime-declines-*` family.
+
+## The shared parent is built between units
+
+The frozen parent session is still mandatory for any unit that opens a
+compile-time session, and it is still built while the process Context and
+root pool are current. It is no longer built before the first unit. A
+translate request that runs its units in this process defers it: the first
+unit that reaches `_ensure_lisp` raises `<lisp-late>` before it has written
+anything, `_compile_file` catches that after the unit's Context has closed,
+builds the parent, and translates the same unit again. A unit restarts at
+most once, because the parent is settled by then, built or recorded as
+unavailable. Behaviour does not depend on how many files the process was
+given or on which unit needed Lisp first.
+
+Parallel translation and every dump still preload up front: a worker
+inherits what the parent process built, and a dump interleaves diagnostics
+with its own stream. A unit whose diagnostics could be printed by an attempt
+that is later abandoned holds them until it finishes; the error floor in
+`Compiler.report_error` flushes what it collected when no printer is
+installed.
+
+A program that never opens a session no longer pays for the parent: a hello
+world translates in 34 ms where it took 47 ms. A program that does opens it
+about 6 ms later than it would have, which is its abandoned first parse.

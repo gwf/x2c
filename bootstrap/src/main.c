@@ -39,6 +39,8 @@ static String _ast_inspection_repr(List node);
 
 static List _transform_ast(Compiler compiler, List ast);
 
+static void _translate_unit(Frontend frontend, String filename, String output_dir);
+
 static void _compile_file(Frontend frontend, String filename, String output_dir);
 
 static void _preflight_translation(CliRequest c, Map unit_dirs);
@@ -247,7 +249,7 @@ char * Compiler_code_pretty_string(Compiler, List, String);
 List Compiler_emit(Compiler, List);
 void generate_code(Compiler, List, String);
 int translation_depfile_write(CliRequest, Compiler, String, String);
-static void _compile_file(Frontend frontend, String filename, String output_dir){
+static void _translate_unit(Frontend frontend, String filename, String output_dir){
   CliRequest request = frontend -> request;  ParsedUnit unit;  int ok = Frontend_start(frontend, filename, & unit); {
   _x2c_defer_env_0 _x2c_defer_env_2 = {._x2c_defer_capture_0 =(const void *) & unit};
 
@@ -262,7 +264,9 @@ static void _compile_file(Frontend frontend, String filename, String output_dir)
       _report_diagnostics(compiler);
       exit(1);
     }
-    Compiler_own_diagnostics(compiler);
+    int macro_library_pending(void);
+    int deferred = macro_library_pending();
+    if(! deferred) Compiler_own_diagnostics(compiler);
     if(request -> dump == 1374366630){
       Compiler_dump_tokens(compiler);
       {
@@ -272,7 +276,7 @@ static void _compile_file(Frontend frontend, String filename, String output_dir)
 
     }
     ok = ParsedUnit_collect(&(unit), frontend);
-    _report_diagnostics(compiler);
+    if(! deferred || ! ok) _report_diagnostics(compiler);
     if(! ok) exit(1);
     switch(request -> dump){
       case 320883072032 : if(String_truth(unit.preprocessor_output)) printf("%s", unit.preprocessor_output);
@@ -377,9 +381,48 @@ static void _compile_file(Frontend frontend, String filename, String output_dir)
     }
     generate_code(compiler, ast, output_dir);
     if(! translation_depfile_write(request, compiler, filename, output_dir)) exit(1);
+    if(deferred) _report_diagnostics(compiler);
   }
   x2c_cleanup_leave(& _x2c_defer_record_0);
 
+}
+}
+
+void Frontend_preload_macro_libraries(Frontend);
+
+static void _compile_file(Frontend frontend, String filename, String output_dir){
+  {
+    ExceptionFrame _x2c_exception_frame_0;
+    static MatchCaptureSite _x2c_catch_arms_0[1];
+    static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 1, ERROR_CATCH_PENDING, -1 };
+    Var _x2c_catch_patterns_0[1];
+    if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(27048696089866), cons(Symbol_var(54), NULL));
+    _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
+  }
+  ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)) _translate_unit(frontend, filename, output_dir);  else {x2c_exception_landed(& _x2c_exception_frame_0); {
+    if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
+      x2c_error_catch_detach(_x2c_error_handler_0);
+      x2c_exception_mark_handled(&_x2c_exception_frame_0);
+       {{
+        Frontend_preload_macro_libraries(frontend);
+        _translate_unit(frontend, filename, output_dir);
+      }
+
+    }
+
+  }
+  else{
+    x2c_error_catch_close(_x2c_error_handler_0);
+    _x2c_error_handler_0 = NULL;
+    x2c_exception_leave(& _x2c_exception_frame_0);
+    __builtin_unreachable();
+  }
+
+}
+}
+x2c_error_catch_close(_x2c_error_handler_0);
+_x2c_error_handler_0 = NULL;
+x2c_exception_leave(& _x2c_exception_frame_0);
 }
 }
 
@@ -549,8 +592,6 @@ unsigned long report_now_us(void);
 
 Frontend Frontend_new(CliRequest);
 
-void Frontend_preload_macro_libraries(Frontend);
-
 unsigned long long report_file_bytes(String);
 
 String report_duration(unsigned long);
@@ -582,10 +623,12 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build){
   if(c -> dry_run) return 0;
   Frontend frontend = Frontend_new(c);
   frontend -> preprocessor_errors = _preprocessor_errors;
-  Frontend_preload_macro_libraries(frontend);
   int total = List_len(c -> inputs), completed = 0;
   unsigned long long gen_bytes = 0;
   int parallel = c -> jobs > 1 && total > 1 && ! c -> dump && ! CliRequest_inspects(c);
+  void macro_library_defer(void);
+  if(parallel || c -> dump) Frontend_preload_macro_libraries(frontend);
+  else macro_library_defer();
   if(parallel){
     Array chunks = _translation_chunks(c -> inputs, total, Map_truth(unit_dirs) ? total : c -> jobs);
     int failed = _translate_workers(frontend, chunks, unit_dirs, total, build);

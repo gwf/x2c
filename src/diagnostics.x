@@ -371,6 +371,10 @@ void Compiler.report_error(
   List loc = _compiler_location(compiler, token);
   diag.report(code, message, loc, notes);
   if (compiler.recovery_depth > 0) raise %(malformed (category $code));
+  /* A unit that holds its diagnostics until it finishes has no printer yet.
+     The floor reports what it collected before it leaves. */
+  if (!diag.printer)
+    foreach (Var held, diag.entries()) compiler.print_diagnostic(held);
   exit(1);
 }
 
