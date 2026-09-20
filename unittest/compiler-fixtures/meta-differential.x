@@ -48,6 +48,9 @@ meta static int d_deq(int n) { double d = 1.0 + n; return d == 1; }
 meta static int d_dcmp(int n) { double d = n - 1; return d < 0; }
 meta static int d_trunc(int n) { double d = -7.9 + n; return (int) d; }
 meta static int d_widen(int n) { double d = n + 1; return (int) (d / 2.0 * 6); }
+meta static int d_fsuffix(int n) => (int) (3.0f + 2.0F + n);
+meta static int d_fhex(int n) => (int) (0x1.8p2f + n);
+meta static int d_fround(int n) => (int) ((double) 16777217.0f - 16777216 + n);
 
 /* Control flow: a conditional, the short-circuit operators, a loop with
    both of its exits, and a switch. */
@@ -126,6 +129,9 @@ int main(int argc, char **argv) {
   $row("d_dcmp", d_dcmp, 0);
   $row("d_trunc", d_trunc, 0);
   $row("d_widen", d_widen, 1);
+  $row("d_fsuffix", d_fsuffix, 0);
+  $row("d_fhex", d_fhex, 0);
+  $row("d_fround", d_fround, 0);
   $row("d_ternary", d_ternary, 0);
   $row("d_and", d_and, 0);
   $row("d_or", d_or, 0);

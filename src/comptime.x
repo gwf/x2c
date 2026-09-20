@@ -429,6 +429,12 @@ static Var _lower_value(Lowering l, int id) {
 static Var _lower_number(Lowering l, List type, String text) {
   long integer;
   double floating;
+  /* The tokenizer validated the suffix. Read a float at its own precision
+     before widening or arithmetic, just as the emitted C literal does. */
+  if (type === %(float)) {
+    float value = strtof(text, NULL);
+    return value;
+  }
   int hex = text.startswith("0x") || text.startswith("0X");
   if (type.match(%((!or double float))) ||
       (!hex && (text.contains(".") ||

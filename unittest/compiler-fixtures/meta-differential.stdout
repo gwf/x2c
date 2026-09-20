@@ -17,6 +17,9 @@ d_deq     1 1
 d_dcmp    1 1
 d_trunc   -7 -7
 d_widen   6 6
+d_fsuffix 5 5
+d_fhex    6 6
+d_fround  0 0
 d_ternary 20 20
 d_and     1 1
 d_or      1 1
