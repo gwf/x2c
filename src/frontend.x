@@ -256,6 +256,12 @@ int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) =>
    unit that calls them. Builder aliases name the same lowered bodies; the
    literal spellings retain their checked Lisp adapters. */
 static int _preload_meta_surface(Frontend frontend, Lisp shared) {
+  struct CliRequest request = *frontend.request;
+  request.dump = 0;
+  request.no_cpp = request.live_symbols = request.cpp_symbols = 0;
+  struct Frontend session = *frontend;
+  session.request = &request;
+  frontend = &session;
   ParsedUnit unit;
   String path = %"${x2c_get_root()}/lib/meta.x";
   int started = _start(frontend, path, &unit, 1);
