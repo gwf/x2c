@@ -82,6 +82,12 @@ meta static int d_switch(int n) {
   }
 }
 
+/* A bare lambda parameter is a `Var` local in both forms. */
+meta static int d_lambda(int n) {
+  Func f = %!(x) => x + 1;
+  return (int) f(n + 41);
+}
+
 /* `runtime_zero` is zero, and `main` takes it from `argc` so neither
    compiler can fold it. `$row` prints the folded constant call beside the
    same call through it, so the two columns are the two forms. */
@@ -119,5 +125,6 @@ int main(int argc, char **argv) {
   $row("d_loop", d_loop, 0);
   $row("d_while", d_while, 0);
   $row("d_switch", d_switch, 1);
+  $row("d_lambda", d_lambda, 0);
   return 0;
 }

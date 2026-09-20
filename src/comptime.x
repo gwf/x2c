@@ -693,13 +693,24 @@ static Var _lower_lambda(Lowering l, List params, List held, Var body) {
         saved.push(%($id $value));
       }
   }
+  /* A declared parameter carries its type; a bare one is the binding
+     itself, which the book documents as a `Var`. Both name a local. */
   foreach (List parameter, params) {
-    match (parameter)
-      case %(param ? (bind (binding ?(int id) ?) *)): {
-        Var slot = _lower_name(l, "arg");
-        names.push(slot);
-        saved.push(%($id $slot));
+    int id = 0, int named = 0;
+    match (parameter) {
+      case %(param ? (bind (binding ?(int declared) ?) *)): {
+        id = declared;
+        named = 1;
       }
+      case %(binding ?(int bare) ?): {
+        id = bare;
+        named = 1;
+      }
+    }
+    if (!named) continue;
+    Var slot = _lower_name(l, "arg");
+    names.push(slot);
+    saved.push(%($id $slot));
   }
   Array shadowed = [];
   defer shadowed.free();
