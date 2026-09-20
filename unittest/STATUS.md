@@ -166,6 +166,11 @@ Compile-time lowering drops an assignment nested in a discarded expression:
 at compile time and 3 at run time. Reproduced on `b395865e` during the
 `meta` fixture migration; a focused lowering repair remains outstanding.
 
+A separate inherited meta comparison gap remains: `a.len() == 2` can be
+false for a two-element Array during compile-time execution, although the
+native comparison is true. This was reproduced while checking cursor
+mutation; the cursor optimization preserves existing comparison behavior.
+
 No outstanding static-initialization defects are recorded. Bare unknown native
 macro names retain native C initializer rules; tags hidden inside an opaque
 native macro retain native scope. Pass lowered local objects explicitly to

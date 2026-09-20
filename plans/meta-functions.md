@@ -29,6 +29,30 @@ counts an import's fresh names apart from the unit's, and a latch that keeps
 an exhausted compile-time call budget exhausted for the rest of its public
 entry. `origin/dev` is merged in.
 
+### Campaign follow-up, 2026-09-19
+
+Lazy parent loading is delivered on `dev` at `df276ad4`. Across 60
+interleaved runs, x2c.x hello-world translation measured 31.27 ms against
+31.34 ms on old dev and 43.01 ms with eager preload. Bare hello measured
+31.08/30.99/43.05 ms. The foreach case pays for restarting: 52.95 ms against
+36.21 ms on old dev and 45.59 ms eager. All library and compiler C/H outputs
+matched across batch, per-unit, and `-j 8` translation; editor tests passed.
+
+The current follow-up removes `$comptime()` and its install hook. Existing
+fixtures use `meta`; autodiff passes one Map through reverse-mode helpers
+instead of using file-scope state. Array and Map foreach cursors now use
+frame slots when their storage stays inside the loop block. Other cursor
+calls retain the ordinary pointer path. Six interleaved real translations
+showed unchanged library time within noise and compiler-source translation
+3.164 to 2.910 seconds, with identical generated C/H. A separate Array/Map
+workload measured 352 to 77 ms. Suffixed float literals now round at float
+precision before widening; differential coverage includes f/F and hex floats.
+
+Builder integration and the conditional var-tags measurement remain in
+progress. The builder port exposed missing native bindings during shared
+parent preload; that repair must precede a meaningful var-tags measurement.
+Staging preparation still needs working DNS/HTTPS and Gary's dispatch choice.
+
 ### Parked
 
 **The var-tags port** stays on branch `report-var-tags` at `b96fc24d`. It
@@ -53,9 +77,9 @@ chapter.
 
 ### Open
 
-- `$comptime()` still spells the same thing as `meta`. One of the two goes.
-- `Array` and `Map` `foreach` are not slot-lowered; only `List` is.
-- A suffixed float literal such as `3.0f` declines in a `meta` body.
+- Finish the 11-builder port without silently accepting invalid Lisp inputs.
+- Measure the var-tags port with a working shared parent and ordinary prelude.
+- Prepare and explicitly select a staging candidate.
 
 ## The result
 
