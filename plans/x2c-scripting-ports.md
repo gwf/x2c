@@ -1,6 +1,7 @@
 # Porting the repository's tooling to x2c scripts
 
-> Status: active - 2026-09-16. The survey is done and the first three items
+> Status: reference - open porting backlog; no current dispatch recorded.
+> The 2026-09-16 survey is done and the first three items
 > landed: `lib/regex.x` (`31f9b95`), `lib/diff.x` with the first gate probe
 > and the package bundler as scripts (`9b3a0fa`), and script files of any
 > name (`e777f99`). The rest of this plan is the ordered work that remains.

@@ -67,7 +67,7 @@ and delete those arrows, and it is a prerequisite for any `sizeof` or field
 access against an upstream C type. Until then, `->` on a native handle is
 correct and the style guide says so. The dogfooding campaign therefore
 excludes those sites; see
-[x2c-dogfooding-remediation](x2c-dogfooding-remediation.md).
+[x2c-dogfooding-remediation](archive/x2c-dogfooding-remediation.md).
 
 ## Decisions needed
 

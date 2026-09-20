@@ -1,6 +1,7 @@
 # Compile-time Lisp SDK completion and system-wide macros
 
-> Status: active - 2026-09-17. Phases 1 and 3 and most of Phase 4 are
+> Status: reference - diagnostic-location and enum-consumer follow-ups remain
+> open; no current dispatch recorded. Phases 1 and 3 and most of Phase 4 are
 > shipped. Phase 1 landed in four commits, `f3623b66` through `765e2cdc`:
 > both spellings bound and refreshed into `bootstrap/`, then every caller
 > switched and the old rows dropped, then the transitional entry-point
@@ -8,8 +9,9 @@
 > in `unittest/test-system-macros.x` and a chapter section in
 > `docs/src/guide/system-macros.md`. Phase 2 shipped smaller than scoped,
 > because `$switch` showed that captured syntax is an ordinary walkable List.
-> `$table` is dropped. What remains is the diagnostic location argument, the
-> `lib/varops.xlisp` row accessor, and the enum consumers, all recorded below.
+> `$table` is dropped. What remains is the diagnostic location argument and
+> enum consumers. The old `lib/varops.xlisp` row-accessor task was superseded
+> by ed863ce0, which replaced that file with `lib/varops.xmacro`.
 > Scoped 2026-09-17 from a read of
 > `etc/compiler-sdk.xlisp`, `etc/lisp-bindings.xlisp`, `etc/builtin-macros.xlisp`,
 > the 33 `$lisp.bind` calls at `src/macros.x:894`, and the shipped generator in
@@ -160,11 +162,11 @@ on the reader refusing a non-String, and the fixture
 name must be a String literal. `lisp.binding.name` now makes that check where
 the requirement lives.
 
-Two follow-ups, both waiting on a bootstrap that carries the widened reader:
+Follow-ups from the original scope:
 
-- `lib/varops.xlisp:32` reads its row tag with `(car (cdddr (caddr id)))`. It
-  becomes `(x2c.literal.value id)` once the building compiler accepts a Symbol
-  literal there.
+- The `lib/varops.xlisp:32` row-accessor change is obsolete: ed863ce0
+  replaced that file with meta functions in `lib/varops.xmacro`. No bootstrap
+  wait for this edit remains.
 - The location argument on `x2c.diagnostic.fail` and `.warn` is not built. A
   diagnostic location comes from a `Token` (`src/diagnostics.x:351`) while a
   capture records byte offsets (`src/macros.x:364`), so reporting against

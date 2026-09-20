@@ -9,7 +9,7 @@
 > optional check until it can replace the Python analyzers, and the 31-class
 > ceiling gets a diagnostic rather than a runtime change. Rule inventory comes
 > from the 2026-09-17 dogfooding survey; the adoption work it feeds is
-> [x2c-dogfooding-remediation](x2c-dogfooding-remediation.md).
+> [x2c-dogfooding-remediation](archive/x2c-dogfooding-remediation.md).
 
 ## The result
 

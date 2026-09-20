@@ -1,6 +1,17 @@
 # Repository review, 2026-09-17
 
-> Status: done - catalog of reproduced defects from a whole-repository review
+> Status: done - review catalog archived 2026-09-20.
+> Remediation and corrections are recorded per group. Findings carried into
+> [the September 18 catalog](repository-review-2026-09-18.md) were subsequently
+> handled there; this file is historical evidence, not a live defect queue.
+> Original baselines and corrected findings remain below.
+
+## Original status context
+
+The following notes describe the implementation at the time of this plan.
+Current disposition is the status above.
+
+> catalog of reproduced defects from a whole-repository review
 > at ea10e89, rechecked at a0e5641 on 2026-09-17, and rechecked again at
 > dbfc9cfc on 2026-09-18. Every group's own note is authoritative and records
 > what landed; an earlier version of this header contradicted those notes by
@@ -9,7 +20,7 @@
 > defects was caught by a current gate.
 >
 > Five rows remain open and are carried into
-> `plans/repository-review-2026-09-18.md`: the raw 0xFF byte in Group 1, the
+> `plans/archive/repository-review-2026-09-18.md`: the raw 0xFF byte in Group 1, the
 > `make debug` and autocrlf rows in Group 13, `String.parse_char`'s octal
 > escape in Group 19, and the bare-binder template and `binder?` length rows
 > in Group 20. Group 3's two `_Generic` rows and Group 19's indirect-write
@@ -369,7 +380,7 @@ rows are compiler work and stay here. Reproduced at ecdcea9 with
 | `class C enum { ... };` fails and no enum spelling works. | `class Color enum { RED, GREEN };` gives "enumerator 'RED' is already bound in this scope"; naming a declared enum gives "Var representation has no fixed tag". | The enumerators are bound by the capture and again by the re-emitted declaration. Support it, or reject it with a message that names the limit instead of blaming the enumerator. | me |
 | `protocol Var(Compiler);` spends a descriptor row nothing can select. | 31 classes plus this shape aborts as above; the boxed value reports `tag=p48 custom=-1`. | `src/compiler.x:151-156` boxes raw `p64`, so the registered row is unreachable. Use `protocol Var(Compiler) as void *;`, the spelling `lib/iter.x:93` and `lib/logger.x:108` already use, and keep the converters. | me |
 | `unittest/test-file.x` releases the caller's region on eight failure branches. | `$test.scoped()` already defers a release; lines 187, 196, 202, 290, 405, 427, 447, 474 call `Scope.release()` again before an early `return`. | Delete the eight explicit releases. Latent: the branches run only after an `EXPECT` already failed. | me |
-| `x2c` parses `#include` inside a conditional branch that is false. | A header with `#if defined(X2C_NEVER_DEFINED_MACRO)` / `#include "never.h"` / `#endif` fails on the contents of `never.h`. | This is why a real third-party header cannot be made visible to x2c: pointing the compiler at `uv.h` dies inside `uv/win.h`, which sits behind `#if defined(_WIN32)`. It keeps ~190 package `->` sites that `.` would otherwise replace. Scoped in [x2c-header-collection-gaps](x2c-header-collection-gaps.md). | me |
+| `x2c` parses `#include` inside a conditional branch that is false. | A header with `#if defined(X2C_NEVER_DEFINED_MACRO)` / `#include "never.h"` / `#endif` fails on the contents of `never.h`. | This is why a real third-party header cannot be made visible to x2c: pointing the compiler at `uv.h` dies inside `uv/win.h`, which sits behind `#if defined(_WIN32)`. It keeps ~190 package `->` sites that `.` would otherwise replace. Scoped in [x2c-header-collection-gaps](../x2c-header-collection-gaps.md). | me |
 
 Two diagnostics in the same area: the "managed initializer requires Cleanup
 participation" message points at the token after the declaration, because
@@ -526,7 +537,7 @@ Open questions with no owner yet, recorded so they are not lost:
   all along without a `<(>` and is unaffected. Reproduced by the review
   author at 93a42de5; the conversion is reverted with a comment saying why,
   so the page is whole. This is the regex pseudo-parser that
-  [x2c-lint-and-format](x2c-lint-and-format.md) proposes to replace, and it
+  [x2c-lint-and-format](../x2c-lint-and-format.md) proposes to replace, and it
   is a concrete argument for doing so.
 - **A namespace call does not resolve inside a macro template.**
   `Block.new(...)`, `Var.new(...)`, `Bytes.new(...)` and the `Scope.*` calls

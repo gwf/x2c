@@ -1,6 +1,19 @@
 # x2c dogfooding remediation
 
-> Status: active - Phases 1 through 8 and Phase 10 have landed: ebb7007
+> Status: done - bounded adoption campaign archived 2026-09-20.
+> Phases 1-8 and 10 landed through 08518552; SymbolSet membership landed in
+> a424e455. Phase 9's opportunistic declaration grouping remains in
+> [the linter backlog](../x2c-lint-and-format.md), not a separate campaign.
+> Function-body decorators also shipped in fb4a8d82 and 59d00970; remaining
+> whole-function adoption is ordinary source cleanup. Counts below describe
+> the original survey, not a current inventory.
+
+## Original status context
+
+The following notes describe the implementation at the time of this plan.
+Current disposition is the status above.
+
+> Phases 1 through 8 and Phase 10 have landed: ebb7007
 > (guidance and book), 2b68db4 (package Cleanup), 4c8d5d5 (package call
 > sites), 3b32b3c (exemplar examples and slides), 2084195 (`in`, arrows,
 > percent), and this change (initializers, receivers, showcase coverage).
@@ -16,7 +29,7 @@
 ## The result
 
 The compiler and runtime adopted the current language on 2026-09-11 in
-[core-system-macro-adoption](archive/core-system-macro-adoption.md); nothing
+[core-system-macro-adoption](core-system-macro-adoption.md); nothing
 else did. Agents read the periphery and the guidance rather than the archive,
 so the repository teaches an older x2c than it implements: `packages/` holds
 511 `defer` statements, zero `$auto`, and no `Cleanup(T)` adoption at all; the
@@ -30,7 +43,7 @@ because agents reproduce what they read. Phases are ordered by how many future
 authored lines each one steers per unit of delivery cost: the guidance an
 agent opens on every task first, the book second, the package adoption that
 unblocks users third, bulk mechanical adoption last.
-[examples/programs/literate-lisp.x](../examples/programs/literate-lisp.x) is
+[examples/programs/literate-lisp.x](../../examples/programs/literate-lisp.x) is
 the style reference throughout.
 
 Two cost facts govern execution and belong in every executing session:
@@ -48,7 +61,7 @@ Two cost facts govern execution and belong in every executing session:
 These files are read on every task, none is gated, and two of them contradict
 each other about pointer member access.
 
-[agents/x2c-coding-style-guide.md](../agents/x2c-coding-style-guide.md):
+[agents/x2c-coding-style-guide.md](../../agents/x2c-coding-style-guide.md):
 add the acquire-and-cleanup rule under `### Trust supported conversions` -
 prefer `$auto`, `$scope()`, `$lock`, `$let` to a hand-written pair, keeping
 `defer` for native releases, conditional rollbacks, consuming parameters, and
@@ -68,16 +81,16 @@ function-pointer field whose name collides with a method, and inside a
 `#define` body. Keep `(*p).field` where one `.` cannot reach through two
 pointer levels.
 
-[agents/x2c-debugging-guide.md](../agents/x2c-debugging-guide.md) `### 1.3
+[agents/x2c-debugging-guide.md](../../agents/x2c-debugging-guide.md) `### 1.3
 Pointer Access` states universal `.` and needs the same four limits.
-[agents/x2c-philosophy.md](../agents/x2c-philosophy.md) pairs an inner
+[agents/x2c-philosophy.md](../../agents/x2c-philosophy.md) pairs an inner
 `Scope.retain` with a guaranteed release, which predates `$scope`, and its
 exemplars should name `literate-lisp.x` and `examples/magic/system-macros.x`.
-[packages/AGENTS.md](../packages/AGENTS.md) requires "`defer` beside native
+[packages/AGENTS.md](../../packages/AGENTS.md) requires "`defer` beside native
 acquisition", which is the rule that produced 320 hand-written defers; it must
 require `protocol Cleanup(T)` for every handle wrapper that owns native
 storage, explicitly not for borrowed views.
-[integrate-x2c-package](../agents/skills/integrate-x2c-package/SKILL.md)
+[integrate-x2c-package](../../agents/skills/integrate-x2c-package/SKILL.md)
 follows.
 
 Do not change: the guide's `cadr` examples, which follow its own advice; the
@@ -89,7 +102,7 @@ added claim cites the probe or file that establishes it.
 
 ## Phase 2 - the book chapters that teach superseded spellings
 
-[idioms.md](../docs/src/guide/idioms.md) `## Put cleanup beside acquisition`
+[idioms.md](../../docs/src/guide/idioms.md) `## Put cleanup beside acquisition`
 is the last place that teaches the manual pair as the idiom; rewrite it around
 `$scope()` and `$auto`, keeping `defer` as the general mechanism. The same
 treatment for `exceptions.md`, `memory.md`, `torch.md`, `iteration.md`,
@@ -357,7 +370,7 @@ which keeps this out of a gallery redesign. `make examples` stays optional.
 ## Excluded from the campaign
 
 - **Class conversions in src and lib.**
-  [core-system-macro-adoption](archive/core-system-macro-adoption.md)
+  [core-system-macro-adoption](core-system-macro-adoption.md)
   deferred them as policy and the measurement agrees: a record or heap class
   spends one of 31 shared descriptor rows whether or not it is ever boxed, and
   the compiler's bootstrap already spends about 20. Across 944 authored
@@ -375,9 +388,11 @@ which keeps this out of a gallery redesign. `make examples` stays optional.
   which owner holds symbol state, and a future name collision would resolve
   silently.
 
-## Open decisions
+## Decisions and later outcomes
 
-1. **May `$scope` decorate a function definition?** Sixty package regions and
+1. **May `$scope` decorate a function definition?** Yes: fb4a8d82 and
+   59d00970 implemented it, covered by `decorator-function-body.x`. The
+   original question follows for context. Sixty package regions and
    most example regions are whole-function, and converting them today
    re-indents the entire body. Logger's private `synchronized` decorator is
    the precedent for a function-target decorator. This is language surface and
