@@ -1066,7 +1066,6 @@ static void _ensure_lisp(Compiler compiler) {
     if (!loaded) {
       _.macro_lisp = Lisp.kernel();
       _.macro_lisp.adopt(library_session);
-      _reset_unit_state(_);
     }
     _eval_library(
       _, loaded || shared, "etc/init.xlisp",
@@ -1084,6 +1083,10 @@ static void _ensure_lisp(Compiler compiler) {
       _, loaded || shared, "etc/builtin-macros.xlisp",
       "cannot open the built-in macro support");
     if (loaded) return;
+    /* `Map.new` comes from `etc/lisp-values.xlisp`, so the table this unit
+       defines is reset only once that library is in reach, whether it came
+       from the shared parent or from the loads above. */
+    _reset_unit_state(_);
     $lisp.bind(_.macro_lisp, "_x2c.import-hook", _lisp_import_hook);
     $lisp.bind(_.macro_lisp, "x2c.syntax.type", _sdk_syntax_type);
     $lisp.bind(_.macro_lisp, "x2c.binding.spelling", _sdk_binding_spelling);
