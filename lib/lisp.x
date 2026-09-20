@@ -140,12 +140,14 @@ void Lisp.retarget(void *storage, Var callable, const Var *values, int count) {
 }
 
 /** Counts one call made by the running machine and reports whether the
-    evaluation in progress has made too many.
+    evaluation in progress has made too many. An exhausted budget stays
+    exhausted until the entry that opened it returns.
 */
 int Lisp.step(void *storage) {
   Lisp lisp = ((LispMachineContext) storage).lisp;
+  if (lisp.call_exhausted) return 1;
   if (++lisp.call_steps <= lisp.call_step_max) return 0;
-  lisp.call_steps = 0;
+  lisp.call_exhausted = 1;
   return 1;
 }
 
@@ -318,6 +320,8 @@ struct Lisp {
   long call_steps;      // calls made by the evaluation in progress, reset
                         // at each public entry so a long translation is a
                         // sequence of budgets rather than one
+  int call_exhausted;   // the budget ran out and no call may renew it until
+                        // the public entry that opened it returns
   long call_step_max;   // calls one evaluation may make
   int auto_disabled;    // benchmark/test forced-evaluator arm only
   int protect_x2c;      // compiler SDK installed; x2c.* cannot be redefined
@@ -1313,8 +1317,8 @@ static void _bind_params(Lambda lambda, List args, Map bindings) {
 }
 
 static Var _call_lambda(Lisp lisp, Lambda lambda, List args) {
-  if (++lisp.call_steps > lisp.call_step_max) {
-    lisp.call_steps = 0;
+  if (lisp.call_exhausted || ++lisp.call_steps > lisp.call_step_max) {
+    lisp.call_exhausted = 1;
     raise %(call-stack (operation "apply") (why "steps"));
   }
   if (++lisp.call_depth > LISP_CALL_DEPTH_MAX) {
@@ -2076,6 +2080,10 @@ void Lisp.auto_instrument(Lisp lisp, MachineStats *stats) {
     The default is `LISP_CALL_STEP_MAX`, which is large enough that only a
     computation that does not end reaches it; a test sets a small one to
     reach it quickly.
+
+    The budget belongs to the public entry. `Lisp.eval`, `Lisp.apply`, and
+    `Lisp.eval_string` each open one, and a call that runs it out does not
+    renew it, so one entry reports a runaway once however many calls follow.
 */
 void Lisp.call_budget(Lisp lisp, long budget) {
   if (lisp && budget > 0) lisp.call_step_max = budget;
@@ -2206,6 +2214,14 @@ static void _install_specials(Lisp lisp) {
   }
 }
 
+/* Opens one budget. Only a public entry does this: a call that runs out
+   raises, and whoever catches that raise continues under the same exhausted
+   budget rather than a fresh one, so one runaway reports once. */
+static void _open_call_budget(Lisp lisp) {
+  lisp.call_steps = 0;
+  lisp.call_exhausted = 0;
+}
+
 /** Evaluates one Lisp form in `lisp`.
     Evaluation is synchronous and may retain the expression or values it
     reaches in session globals, Lambdas, or captures as described by the module
@@ -2215,7 +2231,7 @@ static void _install_specials(Lisp lisp) {
 */
 $lisp.entry("Lisp.eval")
 Var Lisp.eval(Lisp lisp, Var expression) {
-  lisp.call_steps = 0;
+  _open_call_budget(lisp);
   return _eval(lisp, expression, NULL);
 }
 
@@ -2233,7 +2249,7 @@ Var Lisp.eval(Lisp lisp, Var expression) {
 */
 $lisp.entry("Lisp.apply")
 Var Lisp.apply(Lisp lisp, Var callable, List values) {
-  lisp.call_steps = 0;
+  _open_call_budget(lisp);
   return _apply_values(lisp, callable, values, NULL);
 }
 
@@ -2247,7 +2263,7 @@ Var Lisp.apply(Lisp lisp, Var callable, List values) {
 $lisp.entry("Lisp.eval_string")
 Var Lisp.eval_string(Lisp lisp, String source) {
   if (!source) return %();
-  lisp.call_steps = 0;
+  _open_call_budget(lisp);
   Scope tokens_scope = $auto(Scope.new_named("Lisp tokens"));
   Tokenizer tokenizer = _scan_lisp_tokens(source, &tokens_scope);
   unsigned cursor = 0;

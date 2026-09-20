@@ -416,6 +416,21 @@ static void lisp_call_budget_stops_a_loop(void) {
   lisp.destroy();
 }
 
+static void lisp_call_budget_stays_exhausted(void) {
+  // The budget belongs to the public entry, not to the call that ran it out.
+  // One entry naming several runaways spends one budget between them and
+  // reports once: the first exhausts it and no later call renews it. A
+  // fresh entry opens a fresh budget.
+  Lisp lisp = Lisp.kernel();
+  lisp.call_budget(4000);
+  _ev(lisp, "(def spin (lambda (n) (spin n)))");
+  _ev(lisp, "(def once (lambda (n) n))");
+  EXPECT_INT_EQ(
+    _raised_code(lisp, "(spin 0) (spin 1) (spin 2) (once 3)"), <call-stack>);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(once 3)")), 3);
+  lisp.destroy();
+}
+
 static void lisp_eval_rest_parameters(void) {
   Lisp lisp = Lisp.kernel();
   EXPECT_VAR_EQ(_ev(lisp, "((lambda (a . r) r) 1 2 3)"),
@@ -1138,6 +1153,7 @@ void lisp_suite(void) {
   $test.run(lisp_eval_lambda_application);
   $test.run(lisp_apply_uses_evaluated_values);
   $test.run(lisp_call_budget_stops_a_loop);
+  $test.run(lisp_call_budget_stays_exhausted);
   $test.run(lisp_eval_rest_parameters);
   $test.run(lisp_eval_capture_semantics);
   $test.run(lisp_eval_globals_shadow_reserved);
