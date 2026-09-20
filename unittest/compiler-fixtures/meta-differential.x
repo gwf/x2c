@@ -82,6 +82,13 @@ meta static int d_switch(int n) {
   }
 }
 
+/* An integer key indexes the list and every other key is an association. */
+meta static int d_listget(int n) {
+  List xs = %(10 20 30 40);
+  List pairs = %((a 1) (b 2));
+  return (int) xs.get(2 + n) * 10 + (int) pairs.get(<b>);
+}
+
 /* A bare lambda parameter is a `Var` local in both forms. */
 meta static int d_lambda(int n) {
   Func f = %!(x) => x + 1;
@@ -125,6 +132,7 @@ int main(int argc, char **argv) {
   $row("d_loop", d_loop, 0);
   $row("d_while", d_while, 0);
   $row("d_switch", d_switch, 1);
+  $row("d_listget", d_listget, 0);
   $row("d_lambda", d_lambda, 0);
   return 0;
 }

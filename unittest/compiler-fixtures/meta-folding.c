@@ -2,11 +2,11 @@
 
 #include "meta-folding.h"
 
-static List _4, _3;
+static List _22, _21, _20, _19, _17, _16, _12, _11, _8, _7, _6, _5;
 
-static String _5, _0;
+static String _23, _0;
 
-static Var _2, _1;
+static Var _18, _15, _14, _13, _10, _9, _4, _3, _2, _1;
 
 static int _init_guard_ = 0;
 
@@ -18,20 +18,44 @@ static String mf_label(int n);
 
 static short mf_narrow(int n);
 
-Var Symbol_var(Symbol);
+static int mf_get(int n);
+
+Var int_var(int);
 
 List cons(Var, List);
+
+Var Symbol_var(Symbol);
+
+Var List_var(List);
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
   _0 = String_new("row-");
-  _1 = Symbol_var(2);
-  _2 = Symbol_var(4);
-  _3 = cons(_2, NULL);
-  _4 = cons(_1, _3);
-  _5 = String_new("abcd");
+  _1 = int_var(10);
+  _2 = int_var(20);
+  _3 = int_var(30);
+  _4 = int_var(40);
+  _5 = cons(_4, NULL);
+  _6 = cons(_3, _5);
+  _7 = cons(_2, _6);
+  _8 = cons(_1, _7);
+  _9 = Symbol_var(2);
+  _10 = int_var(1);
+  _11 = cons(_10, NULL);
+  _12 = cons(_9, _11);
+  _13 = List_var(_12);
+  _14 = Symbol_var(4);
+  _15 = int_var(2);
+  _16 = cons(_15, NULL);
+  _17 = cons(_14, _16);
+  _18 = List_var(_17);
+  _19 = cons(_18, NULL);
+  _20 = cons(_13, _19);
+  _21 = cons(_14, NULL);
+  _22 = cons(_9, _21);
+  _23 = String_new("abcd");
 }
 
 int mf_poly(int x){
@@ -58,15 +82,24 @@ static short mf_narrow(int n){
   return(short)(n * 30000);
 }
 
+Var List_get(List, Var);
+
+static int mf_get(int n){
+  List xs = _8;
+  List pairs = _20;
+  return Var_int(Var_convert(List_get(xs, int_var(n)), 3453797)) * 10 + Var_int(Var_convert(List_get(pairs, Symbol_var(4)), 3453797));
+}
+
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   int seven = 7, one = 1;
-  String text = _5;
+  String text = _23;
   printf("poly    %d %d\n", 71, mf_poly(seven));
-  printf("width   %d %d\n", 6, mf_width(text, _4));
+  printf("width   %d %d\n", 6, mf_width(text, _22));
   printf("label   %s\n", mf_label(4));
   printf("narrow  %d %d\n", mf_narrow(3), mf_narrow(one + 2));
+  printf("get     %d %d\n", 302, mf_get(one + 1));
   return 0;
 }
 

@@ -29,6 +29,15 @@ meta static String mf_label(int n) => %"row-$n";
    out is not what an author wrote. The answers are equal either way. */
 meta static short mf_narrow(int n) => (short) (n * 30000);
 
+/* `List.get` reads an integer key as an index and every other key as an
+   association, so the compile-time form has to route the key the same way
+   for a constant call to fold. */
+meta static int mf_get(int n) {
+  List xs = %(10 20 30 40);
+  List pairs = %((a 1) (b 2));
+  return (int) xs.get(n) * 10 + (int) pairs.get(<b>);
+}
+
 int main(void) {
   int seven = 7, one = 1;
   String text = "abcd";
@@ -36,5 +45,6 @@ int main(void) {
   printf("width   %d %d\n", mf_width("abcd", %(a b)), mf_width(text, %(a b)));
   printf("label   %s\n", mf_label(4));
   printf("narrow  %d %d\n", mf_narrow(3), mf_narrow(one + 2));
+  printf("get     %d %d\n", mf_get(2), mf_get(one + 1));
   return 0;
 }

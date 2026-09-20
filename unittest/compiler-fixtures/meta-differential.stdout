@@ -23,4 +23,5 @@ d_or      1 1
 d_loop    18 18
 d_while   26 26
 d_switch  200 200
+d_listget 302 302
 d_lambda  42 42

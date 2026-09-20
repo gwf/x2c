@@ -64,13 +64,22 @@
 (def List_index List.index)
 // These return `void` for an absent element, which has no Lisp value, so
 // each answers nil the way an absent Lisp lookup does.
+// A negative index counts from the end, as `List.getindex` does.
 (defun List_getindex (xs i)
-  (cond ((null? xs) ())
-        ((eq? i 0) (car xs))
-        (true (List_getindex (cdr xs) (- i 1)))))
+  (let ((n (if (< i 0) (+ (length xs) i) i)))
+    (cond ((< n 0) ())
+          ((null? xs) ())
+          ((eq? n 0) (car xs))
+          (true (List_getindex (cdr xs) (- n 1))))))
 (defun List_last (xs) (if (null? xs) () (car (reverse xs))))
-(defun List_get (xs key) (let ((p (assoc key xs))) (if p (cadr p) ())))
 (defun List_assoc (xs key) (let ((p (assoc key xs))) (if p (cadr p) ())))
+// `List.get` routes an integer key to the index and every other key to the
+// association. A key's kind decides that, so a float looks up an
+// association the way it does at run time.
+(defun List_get (xs key)
+  (if (eq? (Var.kind key) (Var.kind 0))
+      (List_getindex xs key)
+      (List_assoc xs key)))
 (def List_array List.array)
 (def List_sort List.sort)
 (def List_match match)
