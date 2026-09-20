@@ -16,6 +16,8 @@
     statements, and `f_grad` records the forward sweep on a typed array tape
     and accumulates adjoints in reverse. Both read the typed AST, so `int`
     control flow is copied and only `double` arithmetic is differentiated.
+    The transformations are meta functions. Lisp entry points retain the
+    unit's sibling registries and pass them into each derivation.
 */
 
 /** Generates the dual-number members of `$D` over the scalar type `$S`.
@@ -133,870 +135,1218 @@ macro Unit $ad.dual(
   protocol Var($D);
 }
 
-/* Compile-time support shared by both transformations. Constructed syntax
-   uses spelled names, which the compiler rebinds and retypes after the
-   expansion, so copied subtrees drop their binding records first. Nesting an
-   operation states how it groups; the emitter parenthesizes C output from
-   operator precedence, so these constructors carry no `parens` of their
-   own. */
+$(def ad_tangent (lambda (. rest) 0))
+$(def ad_grad_slots (lambda (. rest) 0))
+$(def ad_adjoint (lambda (. rest) 0))
+$(def ad_loop (lambda (. rest) 0))
+$(def ad_rev_do (lambda (. rest) 0))
+$(def ad_rev_item (lambda (. rest) 0))
+$(def ad_fwd_for (lambda (. rest) 0))
+$(def ad_fwd_item (lambda (. rest) 0))
+$(def ad_declared_join (lambda (. rest) 0))
 
-$(defun ad._dot (name) (string-append name "_dot"))
-$(defun ad._bar (name) (string-append name "_bar"))
-$(defun ad._grad (name) (string-append name "_grad"))
+$(def Var_repr repr)
+meta static void ad_fail(String message, Var form) {
+  x2c_diagnostic_fail("ad: " + message, %(${form.repr()}));
+}
 
-$(defun ad._unbind (form)
-  (cond ((not (list? form)) form)
-        ((null? form) form)
-        ((and (eq? (car form) 'binding) (= (length form) 3))
-         (list (car (cddr form))))
-        ((and (eq? (car form) 'at) (= (length form) 3))
-         (ad._unbind (car (cddr form))))
-        (true (map ad._unbind form))))
+meta static int ad_mutates(Var form) {
+  if (!form.is(<list>)) return 0;
+  List node = form;
+  match (node) {
+    case %(op ?op (expr ? ?) *rest):
+      if (%(= += -= *= /= %= ++ --).contains(op)) return 1;
+    case %(postfix ?op *rest):
+      if (%(++ --).contains(op)) return 1;
+  }
+  foreach (Var child, node) if (ad_mutates(child)) return 1;
+  return 0;
+}
 
-$(defun ad._fail (message form)
-  (x2c.diagnostic.fail (string-append "ad: " message) (list (repr form))))
+meta static List ad_pure(List e) {
+  if (ad_mutates(e)) ad_fail("assignment inside an expression", e);
+  return e;
+}
 
-$(defun ad._lit (text) `(expr (double) (literal (double) ,text)))
-$(defun ad._int (text) `(expr (int) (literal (int) ,text)))
-$(defun ad._zero () (ad._lit "0.0"))
-$(defun ad._zero? (e) (equal? e (ad._zero)))
-$(defun ad._one? (e) (equal? e (ad._lit "1.0")))
-$(defun ad._id (name) `(expr () (ident (,name))))
-$(defun ad._raw (op a b) `(expr () (op ,op ,a ,b)))
-$(defun ad._neg (a)
-  (if (ad._zero? a) a `(expr () (op - ,a))))
-$(defun ad._add (a b)
-  (cond ((ad._zero? a) b)
-        ((ad._zero? b) a)
-        (true (ad._raw '+ a b))))
-$(defun ad._sub (a b)
-  (cond ((ad._zero? b) a)
-        ((ad._zero? a) (ad._neg b))
-        (true (ad._raw '- a b))))
-$(defun ad._mul (a b)
-  (cond ((or (ad._zero? a) (ad._zero? b)) (ad._zero))
-        ((ad._one? a) b)
-        ((ad._one? b) a)
-        (true (ad._raw '* a b))))
-$(defun ad._div (a b)
-  (cond ((ad._zero? a) a)
-        ((ad._one? b) a)
-        (true (ad._raw '/ a b))))
-$(defun ad._call (name args)
-  `(expr () (call (expr () (ident (,name))) (args ,@args))))
-$(defun ad._cast (type e)
-  `(expr () (cast (decl ,type (bindings (bind () ()))) ,e)))
-$(defun ad._stmnt (e) `(stmnt ,e))
-$(defun ad._assign (name value)
-  (ad._stmnt `(expr () (op = ,(ad._id name) ,value))))
-$(defun ad._accum (name value)
-  (ad._stmnt `(expr () (op += ,(ad._id name) ,value))))
-$(defun ad._declare (type name init)
-  (if init
-      `(declare ,type (bindings (op = (bind (,name) ()) ,init)))
-      `(declare ,type (bindings (bind (,name) ())))))
-$(defun ad._double? (e) (match e '(expr (double) ?)))
-$(defun ad._double-type? (type) (equal? type '(double)))
-$(defun ad._zero-of (type)
-  (if (ad._double-type? type) (ad._zero) (ad._int "0")))
-$(defun ad._concat (lists) (foldl append '() lists))
-$(defun ad._zip (f a b)
-  (if (or (null? a) (null? b)) '()
-      (cons (f (car a) (car b)) (ad._zip f (cdr a) (cdr b)))))
+/* Syntax constructors shared by the forward and reverse transformations. */
 
-/* Every entry names a primitive and one partial derivative per argument.
-   Each partial receives the unbound argument list. */
-$(defun ad._select (test a b) `(expr () (op ? ,test ,a ,b)))
-$(defun ad._less (a b) `(expr () (op < ,a ,b)))
-$(defun ad._less-eq (a b) `(expr () (op <= ,a ,b)))
-$(defun ad._square (a) (ad._mul a a))
-$(defun ad._recip (e) (ad._div (ad._lit "1.0") e))
-$(defun ad._plus-one (e) (ad._add (ad._lit "1.0") e))
-$(defun ad._minus-one (e) (ad._sub (ad._lit "1.0") e))
-$(defun ad._sum-squares (a)
-  (ad._add (ad._square (car a)) (ad._square (cadr a))))
-$(def ad._primitives (list
-  (list "sin" (lambda (a) (ad._call "cos" a)))
-  (list "cos" (lambda (a) (ad._neg (ad._call "sin" a))))
-  (list "tan" (lambda (a) (ad._recip (ad._square (ad._call "cos" a)))))
-  (list "asin" (lambda (a)
-    (ad._recip (ad._call "sqrt" (list (ad._minus-one (ad._square (car a))))))))
-  (list "acos" (lambda (a)
-    (ad._neg (ad._recip
-      (ad._call "sqrt" (list (ad._minus-one (ad._square (car a)))))))))
-  (list "atan" (lambda (a) (ad._recip (ad._plus-one (ad._square (car a))))))
-  (list "atan2"
-    (lambda (a) (ad._div (cadr a) (ad._sum-squares a)))
-    (lambda (a) (ad._neg (ad._div (car a) (ad._sum-squares a)))))
-  (list "sinh" (lambda (a) (ad._call "cosh" a)))
-  (list "cosh" (lambda (a) (ad._call "sinh" a)))
-  (list "tanh" (lambda (a) (ad._minus-one (ad._square (ad._call "tanh" a)))))
-  (list "asinh" (lambda (a)
-    (ad._recip (ad._call "sqrt" (list (ad._plus-one (ad._square (car a))))))))
-  (list "acosh" (lambda (a)
-    (ad._recip (ad._call "sqrt"
-      (list (ad._sub (ad._square (car a)) (ad._lit "1.0")))))))
-  (list "atanh" (lambda (a) (ad._recip (ad._minus-one (ad._square (car a))))))
-  (list "exp" (lambda (a) (ad._call "exp" a)))
-  (list "exp2" (lambda (a)
-    (ad._mul (ad._call "exp2" a) (ad._lit "0.6931471805599453"))))
-  (list "expm1" (lambda (a) (ad._call "exp" a)))
-  (list "log" (lambda (a) (ad._recip (car a))))
-  (list "log2" (lambda (a)
-    (ad._recip (ad._mul (car a) (ad._lit "0.6931471805599453")))))
-  (list "log10" (lambda (a)
-    (ad._recip (ad._mul (car a) (ad._lit "2.302585092994046")))))
-  (list "log1p" (lambda (a) (ad._recip (ad._plus-one (car a)))))
-  (list "sqrt" (lambda (a) (ad._div (ad._lit "0.5") (ad._call "sqrt" a))))
-  (list "cbrt" (lambda (a)
-    (ad._recip (ad._mul (ad._lit "3.0") (ad._square (ad._call "cbrt" a))))))
-  (list "hypot"
-    (lambda (a) (ad._div (car a) (ad._call "hypot" a)))
-    (lambda (a) (ad._div (cadr a) (ad._call "hypot" a))))
-  (list "fabs" (lambda (a)
-    (ad._select (ad._less (car a) (ad._lit "0.0"))
-                (ad._lit "-1.0") (ad._lit "1.0"))))
-  (list "fmin"
-    (lambda (a) (ad._select (ad._less-eq (car a) (cadr a))
-                            (ad._lit "1.0") (ad._lit "0.0")))
-    (lambda (a) (ad._select (ad._less (cadr a) (car a))
-                            (ad._lit "1.0") (ad._lit "0.0"))))
-  (list "fmax"
-    (lambda (a) (ad._select (ad._less-eq (cadr a) (car a))
-                            (ad._lit "1.0") (ad._lit "0.0")))
-    (lambda (a) (ad._select (ad._less (car a) (cadr a))
-                            (ad._lit "1.0") (ad._lit "0.0"))))
-  (list "pow"
-    (lambda (a)
-      (ad._mul (cadr a)
-               (ad._call "pow"
-                         (list (car a) (ad._sub (cadr a) (ad._lit "1.0"))))))
-    (lambda (a)
-      (ad._mul (ad._call "pow" a) (ad._call "log" (list (car a))))))))
+meta static List ad_zero(void) => %(expr (double) (literal (double) "0.0"));
 
+meta static List ad_one(void) => %(expr (double) (literal (double) "1.0"));
+
+meta static int ad_is_zero(List e) => e.equal(ad_zero());
+
+meta static int ad_is_one(List e) => e.equal(ad_one());
+
+meta static List ad_raw(Var op, List a, List b) => %(expr () (op $op $a $b));
+
+meta static List ad_neg(List a) {
+  if (ad_is_zero(a)) return a;
+  return %(expr () (op - $a));
+}
+
+meta static List ad_add(List a, List b) {
+  if (ad_is_zero(a)) return b;
+  if (ad_is_zero(b)) return a;
+  return ad_raw(<+>, a, b);
+}
+
+meta static List ad_sub(List a, List b) {
+  if (ad_is_zero(b)) return a;
+  if (ad_is_zero(a)) return ad_neg(b);
+  return ad_raw(<->, a, b);
+}
+
+meta static List ad_mul(List a, List b) {
+  if (ad_is_zero(a)) return a;
+  if (ad_is_zero(b)) return b;
+  if (ad_is_one(a)) return b;
+  if (ad_is_one(b)) return a;
+  return ad_raw(<*>, a, b);
+}
+
+meta static List ad_div(List a, List b) {
+  if (ad_is_zero(a)) return a;
+  if (ad_is_one(b)) return a;
+  return ad_raw(</>, a, b);
+}
+
+meta static int ad_is_double(List e) => !!e.match(%(expr (double) ?));
+
+meta static int ad_is_double_spec(List type) {
+  return type.equal(%(double)) || type.equal(%(const double));
+}
+
+meta static String ad_dot(String name) => name + "_dot";
+
+meta static List ad_id(String name) => %(expr () (ident ($name)));
+
+meta static List ad_unbind(Var form) {
+  if (!form.is(<list>)) return form;
+  List items = form;
+  if (!items) return items;
+  match (items) {
+    case %(binding ? ?name): return %($name);
+    case %(at ? ?node): return ad_unbind(node);
+  }
+  return items.map(%!(Var part) => ad_unbind(part));
+}
+
+meta static Var ad_var_name(List e) {
+  match (e) {
+    case %(expr ? (ident (binding ? ?n))): return n;
+    case %(expr ? (ident (?n))):
+      if (n.is(<string>)) return n;
+  }
+  return void;
+}
+
+meta static List ad_assign(String name, List value) {
+  return %(stmnt (expr () (op = ${ad_id(name)} $value)));
+}
+
+/* Math primitive derivatives. */
+
+meta static List ad_lit(String text) =>
+  %(expr (double) (literal (double) $text));
+
+meta static List ad_int(String text) => %(expr (int) (literal (int) $text));
+
+meta static List ad_call(String name, List args) {
+  return %(expr () (call (expr () (ident ($name))) (args @args)));
+}
+
+meta static List ad_call1(String name, List a) => ad_call(name, %($a));
+
+meta static List ad_select(List test, List a, List b) {
+  return %(expr () (op ? $test $a $b));
+}
+
+meta static List ad_less(List a, List b) => %(expr () (op < $a $b));
+
+meta static List ad_less_eq(List a, List b) => %(expr () (op <= $a $b));
+
+meta static List ad_square(List a) => ad_mul(a, a);
+
+meta static List ad_recip(List e) => ad_div(ad_lit("1.0"), e);
+
+meta static List ad_plus_one(List e) => ad_add(ad_lit("1.0"), e);
+
+meta static List ad_minus_one(List e) => ad_sub(ad_lit("1.0"), e);
+
+meta static List ad_sum_squares(List a) {
+  return ad_add(ad_square(a[0]), ad_square(a[1]));
+}
+
+/* Build only the requested partial of a known math primitive. Callers pass
+   its typed arguments and their zero-based position; an unknown name has no
+   primitive derivative. */
+meta static List ad_partial(String name, int i, List a) {
+  List x = a[0];
+  List y = a[1];
+  if (name == "sin") return ad_call("cos", a);
+  if (name == "cos") return ad_neg(ad_call("sin", a));
+  if (name == "tan") return ad_recip(ad_square(ad_call("cos", a)));
+  if (name == "asin")
+    return ad_recip(ad_call1("sqrt", ad_minus_one(ad_square(x))));
+  if (name == "acos")
+    return ad_neg(ad_recip(ad_call1("sqrt", ad_minus_one(ad_square(x)))));
+  if (name == "atan") return ad_recip(ad_plus_one(ad_square(x)));
+  if (name == "atan2") return i == 0 ? ad_div(y, ad_sum_squares(a))
+                    : ad_neg(ad_div(x, ad_sum_squares(a)));
+  if (name == "sinh") return ad_call("cosh", a);
+  if (name == "cosh") return ad_call("sinh", a);
+  if (name == "tanh") return ad_minus_one(ad_square(ad_call("tanh", a)));
+  if (name == "asinh")
+    return ad_recip(ad_call1("sqrt", ad_plus_one(ad_square(x))));
+  if (name == "acosh")
+    return ad_recip(ad_call1("sqrt",
+      ad_sub(ad_square(x), ad_lit("1.0"))));
+  if (name == "atanh") return ad_recip(ad_minus_one(ad_square(x)));
+  if (name == "exp") return ad_call("exp", a);
+  if (name == "exp2")
+    return ad_mul(ad_call("exp2", a), ad_lit("0.6931471805599453"));
+  if (name == "expm1") return ad_call("exp", a);
+  if (name == "log") return ad_recip(x);
+  if (name == "log2")
+    return ad_recip(ad_mul(x, ad_lit("0.6931471805599453")));
+  if (name == "log10")
+    return ad_recip(ad_mul(x, ad_lit("2.302585092994046")));
+  if (name == "log1p") return ad_recip(ad_plus_one(x));
+  if (name == "sqrt") return ad_div(ad_lit("0.5"), ad_call("sqrt", a));
+  if (name == "cbrt")
+    return ad_recip(ad_mul(ad_lit("3.0"), ad_square(ad_call("cbrt", a))));
+  if (name == "hypot") return ad_div(i == 0 ? x : y, ad_call("hypot", a));
+  if (name == "fabs") return ad_select(ad_less(x, ad_lit("0.0")),
+                       ad_lit("-1.0"), ad_lit("1.0"));
+  if (name == "fmin") return i == 0
+               ? ad_select(ad_less_eq(x, y), ad_lit("1.0"), ad_lit("0.0"))
+               : ad_select(ad_less(y, x), ad_lit("1.0"), ad_lit("0.0"));
+  if (name == "fmax") return i == 0
+               ? ad_select(ad_less_eq(y, x), ad_lit("1.0"), ad_lit("0.0"))
+               : ad_select(ad_less(x, y), ad_lit("1.0"), ad_lit("0.0"));
+  if (name == "pow") return i == 0
+               ? ad_mul(y, ad_call("pow",
+                   %($x ${ad_sub(y, ad_lit("1.0"))})))
+               : ad_mul(ad_call("pow", a), ad_call1("log", x));
+  return %();
+}
+
+/* The chain rule over a primitive's arguments. */
+meta static List ad_call_tangent(
+  Map state, String name, List ftype, List args, List names) {
+  List unbound = ad_unbind(args);
+  List partial = ad_partial(name, 0, unbound);
+  if (partial) {
+    List total = ad_zero();
+    int i = 0;
+    foreach (List argument, args) {
+      List da = ad_tangent(state, argument, names);
+      if (!ad_is_zero(da)) {
+        List term = ad_select(%(expr () (op == $da ${ad_zero()})),
+          ad_zero(), ad_mul(da, ad_partial(name, i, unbound)));
+        total = ad_add(total, term);
+      }
+      i++;
+    }
+    return total;
+  }
+  List siblings = state["siblings"];
+  if (name in siblings) {
+    List ptypes = ((List) ftype[0])[1];
+    Array out = [];
+    foreach (List argument, args) {
+      out.push(ad_unbind(argument));
+      if (((List) ptypes.car()).equal(%(double)))
+        out.push(ad_tangent(state, argument, names));
+      ptypes = ptypes.cdr();
+    }
+    return ad_call(ad_dot(name), out);
+  }
+  ad_fail("call to a function without a derivative", name);
+}
+
+/* The tangent of an expression, given the names being differentiated. */
+meta static List ad_tangent(Map state, List e, List names) {
+  if (!ad_is_double(e)) return ad_zero();
+  match (e) {
+    case %(expr ? (literal ? ?)): return ad_zero();
+    case %(expr ? (ident ?)): {
+      Var n = ad_var_name(e);
+      if (n)
+        if (n in names) return ad_id(ad_dot(n));
+      return ad_zero();
+    }
+    case %(expr ? (parens ?a)): return ad_tangent(state, a, names);
+    case %(expr ? (cast ? ?a)): return ad_tangent(state, a, names);
+    case %(expr ? (op - ?a)):   return ad_neg(ad_tangent(state, a, names));
+    case %(expr ? (op + ?a)):   return ad_tangent(state, a, names);
+    case %(expr ? (call (expr ?ft (ident (binding ? ?fname))) (args *cargs))):
+      return ad_call_tangent(state, fname, ft, cargs, names);
+    case %(expr ? (op ?o ?c ?a ?b)): {
+      if (o != <"?">) ad_fail("unsupported expression", e);
+      return ad_select(ad_unbind(ad_pure(c)),
+        ad_tangent(state, a, names), ad_tangent(state, b, names));
+    }
+    case %(expr ? (op ?o ?a ?b)): {
+      List da = ad_tangent(state, a, names);
+      List db = ad_tangent(state, b, names);
+      List ua = ad_unbind(a);
+      List ub = ad_unbind(b);
+      if (o == <+>) return ad_add(da, db);
+      if (o == <->) return ad_sub(da, db);
+      if (o == <*>) return ad_add(ad_mul(da, ub), ad_mul(ua, db));
+      if (o == </>)
+        return ad_div(ad_sub(ad_mul(da, ub), ad_mul(ua, db)),
+                      ad_mul(ub, ub));
+      ad_fail("unsupported operator", e);
+    }
+  }
+  ad_fail("unsupported expression", e);
+}
+
+/* An assignment, compound assignment, or step, normalised to (name rhs). */
+meta static List ad_step(List e, Var op, List target) {
+  Var n = ad_var_name(target);
+  if (!n) return %();
+  List one = ad_is_double(target) ? ad_lit("1.0") : ad_int("1");
+  return %($n (expr ${e[1]} (op $op $target $one)));
+}
+
+meta static List ad_update(List e) {
+  match (e) {
+    case %(expr ? (op ++ ?target)):      return ad_step(e, <+>, target);
+    case %(expr ? (op -- ?target)):      return ad_step(e, <->, target);
+    case %(expr ? (postfix ++ ?target)): return ad_step(e, <+>, target);
+    case %(expr ? (postfix -- ?target)): return ad_step(e, <->, target);
+    case %(expr ? (op = ?target ?rhs)): {
+      Var n = ad_var_name(target);
+      if (!n) return %();
+      return %($n $rhs);
+    }
+    case %(expr ?t (op += ?target ?rhs)): {
+      Var n = ad_var_name(target);
+      if (!n) return %();
+      return %($n (expr $t (op + $target $rhs)));
+    }
+    case %(expr ?t (op -= ?target ?rhs)): {
+      Var n = ad_var_name(target);
+      if (!n) return %();
+      return %($n (expr $t (op - $target $rhs)));
+    }
+    case %(expr ?t (op ?op ?target ?rhs)): {
+      Var n = ad_var_name(target);
+      if (!n) return %();
+      if (op == <"*=">) return %($n (expr $t (op * $target $rhs)));
+      if (op == <"/=">) return %($n (expr $t (op / $target $rhs)));
+    }
+  }
+  return %();
+}
+
+meta static List ad_fwd_decl(Map state, List declarator, List names) {
+  match (declarator) {
+    case %(op = (bind (binding ? ?name) ()) ?init):
+      return %(declare (double)
+                (bindings (op = (bind (${ad_dot(name)}) ())
+                           ${ad_tangent(state, ad_pure(init), names)})));
+    case %(bind (binding ? ?name) ()):
+      return %(declare (double)
+                (bindings (op = (bind (${ad_dot(name)}) ()) ${ad_zero()})));
+  }
+  ad_fail("unsupported declarator", declarator);
+}
+
+meta static List ad_fwd_update(Map state, List s, List update, List names) {
+  if (!update) return %(${ad_unbind(ad_pure(s))});
+  Var n = update[0];
+  ad_pure(update[1]);
+  if (!names.contains(n)) return %(${ad_unbind(s)});
+  List tangent = ad_assign(ad_dot(n), ad_tangent(state, update[1], names));
+  return %($tangent ${ad_unbind(s)});
+}
+
+/* One source item can contribute several generated statements. */
+meta static List ad_fwd_items(Map state, List items, List names) {
+  List out = %();
+  foreach (List item, items) out = %(@out @{ad_fwd_item(state, item, names)});
+  return out;
+}
+
+meta static List ad_fwd_body(Map state, List s, List names) {
+  match (s) {
+    case %(block *items):
+      return %(block @{ad_fwd_items(state, items, names)});
+  }
+  return %(block @{ad_fwd_item(state, s, names)});
+}
+
+meta static List ad_fwd_item(Map state, List s, List names) {
+  match (s) {
+    case %(at ? ?node): return ad_fwd_item(state, node, names);
+    case %(declare ?type (bindings *decls)): {
+      List out = %(${ad_unbind(s)});
+      if (!ad_is_double_spec(type)) { ad_pure(s); return out; }
+      foreach (List d, decls)
+        out = %(@out ${ad_fwd_decl(state, d, names)});
+      return out;
+    }
+    case %(stmnt ?e): return ad_fwd_update(state, s, ad_update(e), names);
+    case %(if ?c ?then):
+      return %((if ${ad_unbind(ad_pure(c))}
+        ${ad_fwd_body(state, then, names)}));
+    case %(if ?c ?then ?alt):
+      return %((if ${ad_unbind(ad_pure(c))}
+        ${ad_fwd_body(state, then, names)}
+        ${ad_fwd_body(state, alt, names)}));
+    case %(while ?c ?body):
+      return %((while ${ad_unbind(ad_pure(c))}
+        ${ad_fwd_body(state, body, names)}));
+    case %(do ?body ?c):
+      return %((do ${ad_fwd_body(state, body, names)}
+        ${ad_unbind(ad_pure(c))}));
+    case %(for ?init ?c ?step ?body):
+      return ad_fwd_for(state, init, c, step, body, names);
+    case %(block *items):
+      return %((block @{ad_fwd_items(state, items, names)}));
+    case %(return (double) ?e):
+      return %((return (double) ${ad_tangent(state, ad_pure(e), names)}));
+    case %(return ? ?): ad_fail("return must produce double", s);
+    case %(empty): return %();
+    case %(break): return %($s);
+    case %(continue): return %($s);
+  }
+  ad_fail("unsupported statement", s);
+}
+
+/* A declarator's name, for the declared-double scan. */
+meta static List ad_declarator_names(List decls) {
+  Array names = [];
+  foreach (List d, decls) {
+    match (d) {
+      case %(op = (bind (binding ? ?n) ()) ?): names.push(n);
+      case %(bind (binding ? ?n) ()): names.push(n);
+    }
+  }
+  return names;
+}
+
+/* Every plain double declaration in the body is differentiated too; any
+   other double identifier is a constant. This pair walks the whole
+   tree, so it stays recursive; concatenating once per node, which is what a
+   loop would do here, costs more than the recursion it replaces. */
+meta static List ad_declared_doubles(Var form) {
+  if (!form.is(<list>)) return %();
+  List items = form;
+  if (!items) return %();
+  match (items) {
+    case %(declare ?type (bindings *decls)): {
+      if (ad_is_double_spec(type)) return ad_declarator_names(decls);
+      return %();
+    }
+    case %(decl ?type (bindings *decls)): {
+      if (ad_is_double_spec(type)) return ad_declarator_names(decls);
+      return %();
+    }
+  }
+  return ad_declared_join(items);
+}
+
+meta static List ad_declared_join(List items) {
+  if (!items) return %();
+  List head = ad_declared_doubles(items.car());
+  List tail = ad_declared_join(items.cdr());
+  return %(@head @tail);
+}
+
+/* Every double parameter is a name to differentiate. */
+meta static List ad_param_doubles(List params) {
+  Array names = [];
+  foreach (List param, params) {
+    match (param) {
+      case %(param (double) (bind (binding ? ?n) ())): names.push(n);
+    }
+  }
+  return names;
+}
+
+/* A double parameter is followed by its tangent. */
+meta static List ad_fwd_params(List params) {
+  Array out = [];
+  foreach (List param, params) {
+    match (param) {
+      case %(param (double) (bind (binding ? ?n) ())): {
+        out.push(%(param (double) (bind ($n) ())));
+        out.push(%(param (double) (bind (${ad_dot(n)}) ())));
+        continue;
+      }
+    }
+    out.push(ad_unbind(param));
+  }
+  return out;
+}
+
+meta static List ad_forward(Var form, List siblings) {
+  if (!form.is(<list>)) return %();
+  List fn = form;
+  match (fn) {
+    case %(function ?spec (bind (binding ? ?name)
+                            ((fnmod (params *params)))) ?body): {
+      Map state = {"siblings": siblings};
+      List params_doubles = ad_param_doubles(params);
+      List body_doubles = ad_declared_doubles(body);
+      List names = %(@params_doubles @body_doubles);
+      List one = %(function $spec
+                    (bind (${ad_dot(name)})
+                      ((fnmod (params @{ad_fwd_params(params)}))))
+                    ${ad_fwd_body(state, body, names)});
+      return %($one);
+    }
+  }
+  ad_fail("expected a function definition", fn);
+}
+
+
+/* --- reverse mode ------------------------------------------------------- */
+
+/* `ad_reverse` owns one state Map per derivation. Recursive builders share
+   its locals, fresh-name counter, and the current loop's continue step. */
+
+meta static String ad_bar(Var name) => name + "_bar";
+
+meta static String ad_grad(Var name) => name + "_grad";
+
+meta static List ad_stmnt(List e) => %(stmnt $e);
+
+meta static List ad_accum(Var name, List value) {
+  return ad_stmnt(%(expr () (op += ${ad_id(name)} $value)));
+}
+
+meta static List ad_set(Var name, List value) {
+  return ad_stmnt(%(expr () (op = ${ad_id(name)} $value)));
+}
+
+meta static List ad_cast(List type, List e) {
+  return %(expr () (cast (decl $type (bindings (bind () ()))) $e));
+}
+
+meta static List ad_declare(List type, Var name, List init) {
+  if (init) return %(declare $type (bindings (op = (bind ($name) ()) $init)));
+  return %(declare $type (bindings (bind ($name) ())));
+}
+
+meta static List ad_zero_of(List type) {
+  if (ad_is_double_spec(type)) return ad_zero();
+  return ad_int("0");
+}
+
+meta static Var ad_local(Map state, List type, Var name) {
+  List locals = state["locals"];
+  foreach (List prior, locals)
+    if (prior[0] == name) ad_fail("duplicate local name", name);
+  List entry = %($name $type);
+  state["locals"] = %($entry @locals);
+  return name;
+}
+
+meta static Var ad_fresh(Map state, String stem, List type) {
+  int counter = (int) state["counter"] + 1;
+  state["counter"] = counter;
+  return ad_local(state, type, %"$stem$counter");
+}
+
+meta static String ad_code(Map state) {
+  int counter = (int) state["counter"] + 1;
+  state["counter"] = counter;
+  return %"${counter}.0";
+}
+
+meta static List ad_local_type(Map state, Var name) {
+  List locals = state["locals"];
+  foreach (List entry, locals)
+    if (entry[0] == name) return entry[1];
+  ad_fail("assignment to an undeclared name", name);
+}
+
+meta static List ad_push(List e) {
+  return ad_stmnt(ad_call("ArrayDbl_push", %(${ad_id("_ad_tape")} $e)));
+}
+
+meta static List ad_pop(void) {
+  return ad_call("ArrayDbl_take_last", %(${ad_id("_ad_tape")}));
+}
+
+meta static List ad_restore(Var name, List type) {
+  if (ad_is_double_spec(type)) return ad_set(name, ad_pop());
+  return ad_set(name, ad_cast(type, ad_pop()));
+}
+
+/* An item's forward statements, its reverse statements, and one entry per
+   exit inside it. */
+meta static List ad_triple(List fwd, List rev, List exits) {
+  return %($fwd $rev $exits);
+}
+
+meta static List ad_none(void) => %(() () ());
+
+meta static List ad_fwd_of(List t) => t[0];
+
+meta static List ad_rev_of(List t) => t[1];
+
+meta static List ad_exits_of(List t) => t[2];
+
+meta static List ad_exit(Var code, Var kind, List pruned) {
+  return %($code $kind $pruned);
+}
+
+meta static Var ad_exit_code(List x) => x[0];
+
+meta static Var ad_exit_kind(List x) => x[1];
+
+meta static List ad_exit_pruned(List x) => x[2];
+
+meta static List ad_with_pruned(List x, List pruned) {
+  return ad_exit(ad_exit_code(x), ad_exit_kind(x), pruned);
+}
+
+/* An exit inside item i has run items 1..i-1 completely, so its pruned
+   reverse gains everything already reversed. */
+meta static List ad_move_exits(List exits, List rev) {
+  Array out = [];
+  foreach (List x, exits)
+    out.push(ad_with_pruned(x, %(@{ad_exit_pruned(x)} @rev)));
+  return out;
+}
+
+meta static List ad_sequence(List triples) {
+  List fwd = %();
+  List rev = %();
+  List exits = %();
+  foreach (List t, triples) {
+    exits = %(@exits @{ad_move_exits(ad_exits_of(t), rev)});
+    fwd = %(@fwd @{ad_fwd_of(t)});
+    rev = %(@{ad_rev_of(t)} @rev);
+  }
+  return ad_triple(fwd, rev, exits);
+}
+
+/* --- adjoints ----------------------------------------------------------- */
+
+meta static List ad_call_adjoint(
+  Map state, String name, List ftype, List args, List seed, List names) {
+  List unbound = ad_unbind(args);
+  if (ad_partial(name, 0, unbound)) {
+    List out = %();
+    int i = 0;
+    foreach (List argument, args) {
+      List partial = ad_partial(name, i, unbound);
+      out = %(@out @{ad_adjoint(state, argument,
+        ad_mul(seed, partial), names)});
+      i++;
+    }
+    return out;
+  }
+  List siblings = state["siblings"];
+  if (name in siblings) {
+    List ptypes = ((List) ftype[0])[1];
+    List slots = ad_grad_slots(state, ptypes, args);
+    Var value = ad_fresh(state, "_ad_call", %(double));
+    Array addresses = [];
+    foreach (List slot, slots)
+      addresses.push(%(expr () (op & ${ad_id(slot[0])})));
+    List out = %(${ad_set(value,
+      ad_call(ad_grad(name), %(@unbound @addresses)))});
+    foreach (List slot, slots)
+      out = %(@out @{ad_adjoint(state, slot[1],
+        ad_mul(seed, ad_id(slot[0])), names)});
+    return out;
+  }
+  ad_fail("call to a function without a gradient", name);
+}
+
+meta static List ad_binary_adjoint(
+  Map state, Var o, List x, List y, List seed, List names) {
+  List a = ad_unbind(x);
+  List b = ad_unbind(y);
+  if (o == <+>) {
+    List da = ad_adjoint(state, x, seed, names);
+    List db = ad_adjoint(state, y, seed, names);
+    return %(@da @db);
+  }
+  if (o == <->) {
+    List da = ad_adjoint(state, x, seed, names);
+    List db = ad_adjoint(state, y, ad_neg(seed), names);
+    return %(@da @db);
+  }
+  if (o == <*>) {
+    List da = ad_adjoint(state, x, ad_mul(seed, b), names);
+    List db = ad_adjoint(state, y, ad_mul(seed, a), names);
+    return %(@da @db);
+  }
+  if (o == </>) {
+    List da = ad_adjoint(state, x, ad_div(seed, b), names);
+    List db = ad_adjoint(state,
+      y, ad_neg(ad_div(ad_mul(seed, a), ad_mul(b, b))), names);
+    return %(@da @db);
+  }
+  ad_fail("unsupported operator", o);
+}
+
+/* The adjoint statements for `e` scaled by `seed`. */
+meta static List ad_adjoint(Map state, List e, List seed, List names) {
+  if (!ad_is_double(e)) return %();
+  match (e) {
+    case %(expr ? (literal ? ?)): return %();
+    case %(expr ? (ident ?)): {
+      Var n = ad_var_name(e);
+      if (n)
+        if (n in names) return %(${ad_accum(ad_bar(n), seed)});
+      return %();
+    }
+    case %(expr ? (parens ?a)): return ad_adjoint(state, a, seed, names);
+    case %(expr ? (cast ? ?a)): return ad_adjoint(state, a, seed, names);
+    case %(expr ? (op - ?a)):
+      return ad_adjoint(state, a, ad_neg(seed), names);
+    case %(expr ? (op + ?a)):   return ad_adjoint(state, a, seed, names);
+    case %(expr ? (op ?o ?c ?a ?b)): {
+      if (o != <"?">) ad_fail("unsupported expression", e);
+      List then = ad_adjoint(state, a, seed, names);
+      List alt = ad_adjoint(state, b, seed, names);
+      return %((if ${ad_unbind(ad_pure(c))} (block @then) (block @alt)));
+    }
+    case %(expr ? (call (expr ?ft (ident (binding ? ?fname))) (args *cargs))):
+      return ad_call_adjoint(state, fname, ft, cargs, seed, names);
+    case %(expr ? (op ?o ?a ?b)):
+      return ad_binary_adjoint(state, o, a, b, seed, names);
+  }
+  ad_fail("unsupported expression", e);
+}
+
+/* --- statements --------------------------------------------------------- */
+
+meta static List ad_rev_assign(Map state, Var name, List rhs, List names) {
+  List type = ad_local_type(state, name);
+  List fwd = %(${ad_push(ad_id(name))}
+    ${ad_set(name, ad_unbind(ad_pure(rhs)))});
+  if (ad_is_double_spec(type))
+    if (name in names) {
+      List back = ad_adjoint(state, rhs, ad_id("_ad_seed"), names);
+      return ad_triple(fwd,
+        %(${ad_restore(name, type)}
+          ${ad_set("_ad_seed", ad_id(ad_bar(name)))}
+          ${ad_set(ad_bar(name), ad_zero())} @back), %());
+    }
+  return ad_triple(fwd, %(${ad_restore(name, type)}), %());
+}
+
+meta static List ad_rev_decl(Map state, List type, List d, List names) {
+  if (<const> in type)
+    ad_fail("const locals are not supported in reverse mode", d);
+  match (d) {
+    case %(op = (bind (binding ? ?n) ()) ?init): {
+      ad_local(state, type, n);
+      return ad_rev_assign(state, n, init, names);
+    }
+    case %(bind (binding ? ?n) ()): {
+      ad_local(state, type, n);
+      return ad_none();
+    }
+  }
+  ad_fail("unsupported declarator", d);
+}
+
+meta static List ad_rev_decls(Map state, List type, List decls, List names) {
+  Array out = [];
+  foreach (List d, decls) out.push(ad_rev_decl(state, type, d, names));
+  return out;
+}
+
+meta static List ad_rev_items(Map state, List items, List names) {
+  Array out = [];
+  foreach (List item, items) out.push(ad_rev_item(state, item, names));
+  return out;
+}
+
+meta static List ad_rev_block(Map state, List items, List names) {
+  return ad_sequence(ad_rev_items(state, items, names));
+}
+
+meta static List ad_rev_body(Map state, List s, List names) {
+  match (s) {
+    case %(block *items): return ad_rev_block(state, items, names);
+  }
+  return ad_rev_item(state, s, names);
+}
+
+/* A branch pushes its flag after the body, so a completed `if` pops it
+   first. */
+meta static List ad_rev_if(
+  Map state, List c, List then, List alt, List names) {
+  List t = ad_rev_body(state, then, names);
+  List e = alt ? ad_rev_body(state, alt, names) : ad_none();
+  List taken = %(@{ad_fwd_of(t)} ${ad_push(ad_lit("1.0"))});
+  List other = %(@{ad_fwd_of(e)} ${ad_push(ad_lit("0.0"))});
+  List back = %((if (expr () (op != ${ad_pop()} ${ad_lit("0.0")}))
+                    (block @{ad_rev_of(t)}) (block @{ad_rev_of(e)})));
+  return ad_triple(
+    %((if ${ad_unbind(ad_pure(c))} (block @taken) (block @other))), back,
+    %(@{ad_exits_of(t)} @{ad_exits_of(e)}));
+}
+
+meta static List ad_code_is(Var code) {
+  return %(expr () (op == ${ad_id("_ad_code")} ${ad_lit(code)}));
+}
+
+/* The dispatch after popping one region's exit code. */
+meta static List ad_dispatch(List normal, List exits) {
+  List chain = %(block @normal);
+  foreach (List x, exits.reverse())
+    chain = %(if ${ad_code_is(ad_exit_code(x))}
+                 (block @{ad_exit_pruned(x)}) $chain);
+  return chain;
+}
+
+meta static int ad_is_loop_exit(List x) {
+  Var kind = ad_exit_kind(x);
+  return kind == <break> || kind == <continue>;
+}
+
+meta static List ad_loop_exits(List exits, int want) {
+  Array out = [];
+  foreach (List x, exits)
+    if (ad_is_loop_exit(x) == want) out.push(x);
+  return out;
+}
+
+meta static List ad_return_exits(List exits) {
+  Array out = [];
+  foreach (List x, exits)
+    if (ad_exit_kind(x) == <return>) out.push(x);
+  return out;
+}
+
+meta static List ad_count(Var n, Var op) {
+  return ad_set(n, ad_raw(op, ad_id(n), ad_int("1")));
+}
+
+meta static List ad_countdown(Var n, List dispatch) {
+  return %(while (expr () (op > ${ad_id(n)} ${ad_int("0")}))
+                 (block @dispatch));
+}
+
+/* `continue` also runs the step, so its pruned reverse begins with the
+   step's reverse. */
+meta static List ad_pruned_exit(List x, List s) {
+  if (ad_exit_kind(x) != <continue>) return x;
+  return ad_with_pruned(x, %(@{ad_rev_of(s)} @{ad_exit_pruned(x)}));
+}
+
+/* One iteration: count, body, step, then the exit code. */
+meta static List ad_pruned_exits(List exits, List s) {
+  Array out = [];
+  foreach (List x, exits) out.push(ad_pruned_exit(x, s));
+  return out;
+}
+
+meta static List ad_loop_parts(
+  Map state, List c, List body, List step, List names) {
+  List saved = state["loop_step"];
+  state["loop_step"] = %();
+  List s = step ? ad_rev_item(state, step, names) : ad_none();
+  state["loop_step"] = ad_fwd_of(s);
+  List b = ad_rev_body(state, body, names);
+  state["loop_step"] = saved;
+  Var n = ad_fresh(state, "_ad_trip", %(int));
+  List own = ad_loop_exits(ad_exits_of(b), 1);
+  List through = ad_loop_exits(ad_exits_of(b), 0);
+  List iteration = %(${ad_count(n, <+>)} @{ad_fwd_of(b)} @{ad_fwd_of(s)}
+                     ${ad_push(ad_lit("0.0"))});
+  List pruned = ad_pruned_exits(own, s);
+  List normal = %(@{ad_rev_of(s)} @{ad_rev_of(b)});
+  List dispatch = %(${ad_set("_ad_code", ad_pop())}
+                    ${ad_dispatch(normal, pruned)} ${ad_count(n, <->)});
+  return %($n $iteration $dispatch $through ${ad_unbind(ad_pure(c))});
+}
+
+meta static List ad_through_exits(List exits, Var n, List dispatch) {
+  Array out = [];
+  foreach (List x, exits)
+    out.push(ad_with_pruned(x, %(@{ad_exit_pruned(x)} ${ad_count(n, <->)}
+                                 ${ad_countdown(n, dispatch)})));
+  return out;
+}
+
+meta static List ad_rev_loop(
+  Map state, List init, List c, List step, List body, List names) {
+  List head = init ? ad_rev_item(state, init, names) : ad_none();
+  (Var n, List iteration, List dispatch, List through, List condition) =
+    ad_loop_parts(state, c, body, step, names);
+  List fwd = %(${ad_set(n, ad_int("0"))}
+               (while $condition (block @iteration)) ${ad_push(ad_id(n))});
+  List rev = %(${ad_restore(n, %(int))} ${ad_countdown(n, dispatch)});
+  List exits = ad_through_exits(through, n, dispatch);
+  List loop = ad_triple(fwd, rev, exits);
+  return ad_sequence(%($head $loop));
+}
+
+meta static List ad_rev_item(Map state, List s, List names) {
+  match (s) {
+    case %(at ? ?node): return ad_rev_item(state, node, names);
+    case %(declare ?type (bindings *decls)):
+      return ad_sequence(ad_rev_decls(state, type, %(@decls), names));
+    case %(decl ?type (bindings *decls)):
+      return ad_sequence(ad_rev_decls(state, type, %(@decls), names));
+    case %(stmnt ?e): {
+      List update = ad_update(e);
+      if (update)
+        return ad_rev_assign(state, update[0], update[1], names);
+      return ad_triple(%(${ad_unbind(ad_pure(s))}), %(), %());
+    }
+    case %(expr ? ?):         return ad_rev_item(state, %(stmnt $s), names);
+    case %(if ?c ?then):      return ad_rev_if(state, c, then, %(), names);
+    case %(if ?c ?then ?alt): return ad_rev_if(state, c, then, alt, names);
+    case %(while ?c ?body):
+      return ad_loop(state, %(), c, %(), body, names);
+    case %(do ?body ?c): return ad_rev_do(state, body, c, names);
+    case %(for ?init ?c ?step ?body):
+      return ad_loop(state, init, c, step, body, names);
+    case %(block *items):     return ad_rev_block(state, items, names);
+    case %(break): {
+      String code = ad_code(state);
+      return ad_triple(%(${ad_push(ad_lit(code))} $s), %(),
+                       %(${ad_exit(code, <break>, %())}));
+    }
+    case %(continue): {
+      String code = ad_code(state);
+      List step = state["loop_step"];
+      return ad_triple(%(@step ${ad_push(ad_lit(code))} $s), %(),
+                       %(${ad_exit(code, <continue>, %())}));
+    }
+    case %(return (double) ?e): {
+      String code = ad_code(state);
+      List back = ad_adjoint(state, e, ad_lit("1.0"), names);
+      return ad_triple(
+        %(${ad_set("_ad_result", ad_unbind(ad_pure(e)))}
+          ${ad_push(ad_lit(code))}
+          (goto ("_ad_reverse"))), %(),
+        %(${ad_exit(code, <return>, back)}));
+    }
+    case %(return ? ?): ad_fail("return must produce double", s);
+    case %(empty): return ad_none();
+  }
+  ad_fail("unsupported statement in reverse mode", s);
+}
+
+/* --- the emitted sibling ------------------------------------------------ */
+
+meta static List ad_grad_slots_params(List params) {
+  Array slots = [];
+  foreach (List param, params) {
+    match (param) {
+      case %(param (double) (bind (binding ? ?n) ())):
+        slots.push(%(param (double) (bind (${ad_grad(n)}) (*))));
+    }
+  }
+  return slots;
+}
+
+meta static List ad_grad_params(List params) {
+  List unbound = ad_unbind(params);
+  List slots = ad_grad_slots_params(params);
+  return %(@unbound @slots);
+}
+
+meta static List ad_param_locals(List params) {
+  Array locals = [];
+  foreach (List param, params) {
+    match (param) {
+      case %(param ?type (bind (binding ? ?n) ())): {
+        locals.push(%($n $type));
+        continue;
+      }
+    }
+    ad_fail("unsupported parameter", param);
+  }
+  return locals;
+}
+
+meta static List ad_param_names(List params) {
+  Array names = [];
+  foreach (List param, params) {
+    match (param) {
+      case %(param ? (bind (binding ? ?n) ?)): {
+        names.push(n);
+        continue;
+      }
+    }
+    ad_fail("unsupported parameter", param);
+  }
+  return names;
+}
+
+meta static List ad_write_slot(Var n) {
+  return ad_stmnt(%(expr () (op = (expr () (op * ${ad_id(ad_grad(n))}))
+                                  ${ad_id(ad_bar(n))})));
+}
+
+meta static List ad_hoisted(List locals, List params) {
+  Array out = [];
+  foreach (List entry, locals)
+    if (!(entry[0] in params)) out.push(entry);
+  return out;
+}
+
+meta static List ad_declare_locals(List locals) {
+  Array out = [];
+  foreach (List entry, locals) {
+    List type = entry[1];
+    out.push(ad_declare(type, entry[0], ad_zero_of(type)));
+  }
+  return out;
+}
+
+meta static List ad_declare_bars(List names) {
+  Array out = [];
+  foreach (Var name, names)
+    out.push(ad_declare(%(double), ad_bar(name), ad_zero()));
+  return out;
+}
+
+meta static List ad_write_slots(List inputs) {
+  Array out = [];
+  foreach (Var name, inputs) out.push(ad_write_slot(name));
+  return out;
+}
+
+meta static List ad_reverse_function(
+  Map state, List spec, Var name, List params, List items) {
+  List inputs = ad_param_doubles(params);
+  List declared = ad_declared_doubles(%(block @items));
+  List names = %(@inputs @declared);
+  List sweep = ad_rev_block(state, items, names);
+  List returns = ad_return_exits(ad_exits_of(sweep));
+  foreach (List exit, ad_exits_of(sweep))
+    if (ad_exit_kind(exit) != <return>)
+      ad_fail("break or continue outside a loop", name);
+  if (!returns) ad_fail("function has no return", name);
+  List locals = state["locals"];
+  List hoisted = ad_hoisted(locals.reverse(), ad_param_names(params));
+  List decls = ad_declare_locals(hoisted);
+  List bars = ad_declare_bars(names);
+  List writes = ad_write_slots(inputs);
+  return %(function $spec
+            (bind (${ad_grad(name)})
+              ((fnmod (params @{ad_grad_params(params)}))))
+            (block
+              ${ad_declare(%("ArrayDbl"), "_ad_tape",
+                           ad_call("ArrayDbl_new", %()))}
+              ${ad_declare(%(double), "_ad_result", ad_zero())}
+              ${ad_declare(%(double), "_ad_seed", ad_zero())}
+              ${ad_declare(%(double), "_ad_code", ad_zero())}
+              @decls @bars
+              @{ad_fwd_of(sweep)}
+              (label ("_ad_reverse"))
+              ${ad_set("_ad_code", ad_pop())}
+              ${ad_dispatch(%(), returns)}
+              @writes
+              ${ad_stmnt(ad_call("ArrayDbl_free", %(${ad_id("_ad_tape")})))}
+              (return (double) ${ad_id("_ad_result")})));
+}
+
+meta static List ad_reverse(Var form, List siblings, String checkpoint) {
+  if (!form.is(<list>)) return %();
+  List fn = form;
+  match (fn) {
+    case %(function ?spec (bind (binding ? ?name) ((fnmod (params *params))))
+                    (block *items)): {
+      Map state = {"siblings": siblings, "checkpoint": checkpoint,
+                   "locals": ad_param_locals(params),
+                   "counter": 0, "loop_step": %()};
+      List one = ad_reverse_function(state, spec, name, params, items);
+      return %($one);
+    }
+  }
+  ad_fail("expected a function definition", fn);
+}
+
+
+meta static List ad_fwd_clause(Map state, List e, List names) {
+  if (!e) return e;
+  match (e) {
+    case %(expr ? (commas *items)): {
+      Array out = [];
+      foreach (List item, items) out.push(ad_fwd_clause(state, item, names));
+      return %(expr () (commas @out));
+    }
+  }
+  List updates = ad_fwd_update(state, ad_stmnt(e), ad_update(e), names);
+  if (!updates.cdr()) return ((List) updates.car())[1];
+  Array out = [];
+  foreach (List update, updates) out.push(update[1]);
+  return %(expr () (commas @out));
+}
+
+meta static List ad_fwd_for(
+  Map state, List init, List c, List step, List body, List names) {
+  List condition = ad_unbind(ad_pure(c));
+  List tail = ad_fwd_clause(state, step, names);
+  List inside = ad_fwd_body(state, body, names);
+  match (init) {
+    case %(decl ?type (bindings *decls)): {
+      if (ad_is_double_spec(type))
+        return %((block
+          @{ad_fwd_item(state, %(declare $type (bindings @decls)), names)}
+          (for () $condition $tail $inside)));
+      return %((for ${ad_unbind(init)} $condition $tail $inside));
+    }
+  }
+  return %((for ${ad_fwd_clause(state, init, names)}
+    $condition $tail $inside));
+}
+
+
+meta static List ad_grad_slots(Map state, List ptypes, List args) {
+  if (!args) return %();
+  List rest = ad_grad_slots(state, ptypes.cdr(), args.cdr());
+  if (((List) ptypes.car()).equal(%(double))) {
+    Var slot = ad_fresh(state, "_ad_partial", %(double));
+    return %(($slot ${args.car()}) @rest);
+  }
+  return rest;
+}
+
+meta static List ad_assigned(Var form, List acc) {
+  if (!form.is(<list>)) return acc;
+  List node = form;
+  match (node) {
+    case %(expr ? ?): {
+      List update = ad_update(node);
+      if (update && !(update.car() in acc))
+        return ad_assigned(node.cdr(), %(${update.car()} @acc));
+    }
+  }
+  foreach (Var child, node) acc = ad_assigned(child, acc);
+  return acc;
+}
+
+meta static List ad_declared_names(Var form, List acc) {
+  if (!form.is(<list>)) return acc;
+  List node = form;
+  match (node) {
+    case %(declare ? (bindings *decls)):
+      return %(@{ad_declarator_names(decls)} @acc);
+    case %(decl ? (bindings *decls)):
+      return %(@{ad_declarator_names(decls)} @acc);
+  }
+  foreach (Var child, node) acc = ad_declared_names(child, acc);
+  return acc;
+}
+
+meta static List ad_items(List body) {
+  match (body) { case %(block *items): return items; }
+  return %($body);
+}
+
+meta static List ad_rev_checkpoint(
+  Map state, List init, List c, List step, List body, List names,
+  String block) {
+  List head = init ? ad_rev_item(state, init, names) : ad_none();
+  (Var n, List iteration, List dispatch, List through, List condition) =
+    ad_loop_parts(state, c, body, step, names);
+  List inner = ad_declared_names(%($body $step), %());
+  Array changed = [];
+  foreach (Var name, ad_assigned(%($body $step), %()))
+    if (!(name in inner)) changed.push(name);
+  Var total = ad_fresh(state, "_ad_total", %(int));
+  Var blocks = ad_fresh(state, "_ad_blocks", %(int));
+  Var remaining = ad_fresh(state, "_ad_remaining", %(int));
+  Var replay = ad_fresh(state, "_ad_replay", %(int));
+  List size = ad_int(block);
+  Array snapshot = [];
+  List recover = %();
+  foreach (Var name, changed) {
+    snapshot.push(ad_push(ad_id(name)));
+    recover = %(${ad_restore(name, ad_local_type(state, name))} @recover);
+  }
+  if (through) ad_fail("a checkpointed loop cannot contain return", body);
+  List fwd = %(${ad_set(total, ad_int("0"))}
+    ${ad_set(blocks, ad_int("0"))}
+    (for () $condition ${ad_unbind(step)}
+      (block
+        (if (expr () (op == (expr () (op % ${ad_id(total)} $size))
+                           ${ad_int("0")}))
+          (block @snapshot ${ad_count(blocks, <+>)}))
+        ${ad_count(total, <+>)} @{ad_unbind(ad_items(body))}))
+    ${ad_push(ad_id(total))} ${ad_push(ad_id(blocks))});
+  List rev = %(${ad_restore(blocks, %(int))}
+    ${ad_restore(total, %(int))}
+    (while (expr () (op > ${ad_id(blocks)} ${ad_int("0")}))
+      (block @recover
+        ${ad_set(remaining, ad_raw(<->, ad_id(total),
+          ad_raw(<*>, ad_raw(<->, ad_id(blocks), ad_int("1")), size)))}
+        ${ad_set(replay, ad_int("0"))} ${ad_set(n, ad_int("0"))}
+        (while (expr () (op < ${ad_id(replay)} ${ad_id(remaining)}))
+          (block ${ad_count(replay, <+>)} @iteration))
+        ${ad_countdown(n, dispatch)}
+        ${ad_set(total, ad_raw(<->, ad_id(total), ad_id(remaining)))}
+        ${ad_count(blocks, <->)})));
+  return ad_sequence(%($head ${ad_triple(fwd, rev, %())}));
+}
+
+meta static List ad_loop(
+  Map state, List init, List c, List step, List body, List names) {
+  String block = state["checkpoint"];
+  if (block)
+    return ad_rev_checkpoint(state, init, c, step, body, names, block);
+  return ad_rev_loop(state, init, c, step, body, names);
+}
+
+meta static List ad_rev_do(Map state, List body, List c, List names) {
+  Var first = ad_fresh(state, "_ad_first", %(int));
+  List head = ad_triple(%(${ad_set(first, ad_int("1"))}), %(), %());
+  List loop = ad_loop(state, %(),
+    %(expr (int) (op || (expr (int) (ident ($first))) $c)), %(),
+    %(block ${ad_set(first, ad_int("0"))} $body), names);
+  return ad_sequence(%($head $loop));
+}
+
+meta static String ad_literal_text(List form) {
+  match (form) {
+    case %(expr ? (literal ? ?text)): return text;
+    case %(expr (macro-expr) ?inner): return ad_literal_text(inner);
+  }
+  ad_fail("expected an integer literal", form);
+}
+
+/* The registries belong to this unit's Lisp session. Each derivation takes
+   them as arguments and keeps its temporary working state in a local Map. */
 $(def ad._forward-siblings '())
 $(def ad._reverse-siblings '())
-
-/* Differentiable names are the `double` parameters and every plain `double`
-   declaration in the body. Other `double` identifiers are constants. */
-$(defun ad._double-spec? (type)
-  (or (equal? type '(double)) (equal? type '(const double))))
-$(defun ad._declared-doubles (form)
-  (match-case form
-    ((declare ?type (bindings *decls))
-     (if (ad._double-spec? ?type) (ad._declarator-names *decls) '()))
-    ((decl ?type (bindings *decls))
-     (if (ad._double-spec? ?type) (ad._declarator-names *decls) '()))
-    (else (if (list? form)
-              (ad._concat (map ad._declared-doubles form))
-              '()))))
-
-$(defun ad._param-doubles (params)
-  (ad._concat (map (lambda (p)
-    (match-case p
-      ((param (double) (bind (binding ? ?n) ())) (list ?n))
-      (else '()))) params)))
-
-$(defun ad._param-names (params)
-  (map (lambda (p)
-    (match-case p
-      ((param ? (bind (binding ? ?n) ?)) ?n)
-      (else (ad._fail "unsupported parameter" p)))) params))
-
-$(defun ad._check-result (spec fn)
-  (if (eq? (last spec) 'double) nil
-      (ad._fail "function must return double" fn)))
-
-/* Assignment forms are normalized to `v = v OP rhs` so one rule covers
-   `=`, compound assignment, and increments. Returns (name rhs) or nil. */
-$(defun ad._compound (op)
-  (cond ((eq? op '+=) '+)
-        ((eq? op '-=) '-)
-        ((eq? op '*=) '*)
-        ((eq? op '/=) '/)
-        (true nil)))
-$(defun ad._var-name (e)
-  (match-case e
-    ((expr ? (ident (binding ? ?n))) ?n)
-    ((expr ? (ident (?n))) (if (string? ?n) ?n nil))
-    (else nil)))
-$(defun ad._one-of (target)
-  (if (ad._double? target) (ad._lit "1.0") (ad._int "1")))
-$(defun ad._typed (e op a b)
-  (list 'expr (cadr e) (list 'op op a b)))
-$(defun ad._step (e op target)
-  (let ((n (ad._var-name target)))
-    (if n (list n (ad._typed e op target (ad._one-of target))) nil)))
-$(defun ad._update (e)
-  (match-case e
-    ((expr ? (op = ?target ?rhs))
-     (let ((n (ad._var-name ?target))) (if n (list n ?rhs) nil)))
-    ((expr ? (op ?o ?target ?rhs))
-     (let ((n (ad._var-name ?target)) (op (ad._compound ?o)))
-       (if (and n op) (list n (ad._typed e op ?target ?rhs)) nil)))
-    ((expr ? (op ++ ?target)) (ad._step e '+ ?target))
-    ((expr ? (op -- ?target)) (ad._step e '- ?target))
-    ((expr ? (postfix ++ ?target)) (ad._step e '+ ?target))
-    ((expr ? (postfix -- ?target)) (ad._step e '- ?target))
-    (else nil)))
-
-/* An assignment nested inside a larger expression would escape the
-   statement rules, so expressions are checked before they are copied. */
-$(defun ad._mutates? (form)
-  (cond ((not (list? form)) nil)
-        ((null? form) nil)
-        ((and (eq? (car form) 'op)
-              (member (cadr form) '(= += -= *= /= %= ++ --))
-              (match (car (cddr form)) '(expr ? ?)))
-         true)
-        ((and (eq? (car form) 'postfix) (member (cadr form) '(++ --))) true)
-        (true (foldl (lambda (acc x) (or acc (ad._mutates? x))) nil form))))
-$(defun ad._pure (e)
-  (if (ad._mutates? e) (ad._fail "assignment inside an expression" e) e))
-
-/* Forward mode: the tangent of an expression under `names`. */
-$(defun ad._tangent (e names)
-  (if (not (ad._double? e)) (ad._zero)
-    (match-case e
-      ((expr ? (literal ? ?)) (ad._zero))
-      ((expr ? (ident ?))
-       (let ((n (ad._var-name e)))
-         (if (and n (member n names)) (ad._id (ad._dot n)) (ad._zero))))
-      ((expr ? (parens ?a)) (ad._tangent ?a names))
-      ((expr ? (cast ? ?a)) (ad._tangent ?a names))
-      ((expr ? (op - ?a)) (ad._neg (ad._tangent ?a names)))
-      ((expr ? (op + ?a)) (ad._tangent ?a names))
-      ((expr ? (op ?o ?c ?a ?b))
-       (if (eq? ?o '?)
-           `(expr () (op ? ,(ad._unbind (ad._pure ?c))
-              ,(ad._tangent ?a names) ,(ad._tangent ?b names)))
-           (ad._fail "unsupported expression" e)))
-      ((expr ? (op ?o ?a ?b))
-       (let ((da (ad._tangent ?a names)) (db (ad._tangent ?b names))
-             (a (ad._unbind ?a)) (b (ad._unbind ?b)))
-         (cond ((eq? ?o '+) (ad._add da db))
-               ((eq? ?o '-) (ad._sub da db))
-               ((eq? ?o '*) (ad._add (ad._mul da b) (ad._mul a db)))
-               ((eq? ?o '/)
-                (ad._div (ad._sub (ad._mul da b) (ad._mul a db))
-                         (ad._mul b b)))
-               (true (ad._fail "unsupported operator" e)))))
-      ((expr ? (call (expr ?ft (ident (binding ? ?name))) (args *args)))
-       (ad._call-tangent ?name ?ft *args names))
-      (else (ad._fail "unsupported expression" e)))))
-
-/* A primitive's partial can be infinite or NaN where its argument has no
-   tangent, as `sqrt` is at 0, so a zero tangent skips the product. */
-$(defun ad._along (da partial)
-  (if (ad._zero? da) da
-      (ad._select `(expr () (op == ,da ,(ad._zero)))
-                  (ad._zero) (ad._mul da partial))))
-
-$(defun ad._call-tangent (name ftype args names)
-  (let ((prim (assoc name ad._primitives))
-        (unbound (map ad._unbind args))
-        (tangents (map (lambda (a) (ad._tangent a names)) args)))
-    (cond (prim
-           (foldl ad._add (ad._zero)
-             (ad._zip (lambda (partial da) (ad._along da (partial unbound)))
-                      (cdr prim) tangents)))
-          ((member name ad._forward-siblings)
-           (ad._call (ad._dot name)
-                     (ad._dot-args (cadr (car ftype)) unbound tangents)))
-          (true (ad._fail "call to a function without a derivative" name)))))
-
-$(defun ad._dot-args (ptypes args tangents)
-  (if (null? args) '()
-    (let ((rest (ad._dot-args (cdr ptypes) (cdr args) (cdr tangents))))
-      (if (ad._double-type? (car ptypes))
-          (cons (car args) (cons (car tangents) rest))
-          (cons (car args) rest)))))
-
-$(defun ad._fwd-params (params)
-  (ad._concat (map (lambda (p)
-    (match-case p
-      ((param (double) (bind (binding ? ?n) ()))
-       (list `(param (double) (bind (,?n) ()))
-             `(param (double) (bind (,(ad._dot ?n)) ()))))
-      (else (list (ad._unbind p))))) params)))
-
-$(defun ad._fwd-body (s names)
-  (match-case s
-    ((block *items) `(block ,@(ad._fwd-items *items names)))
-    (else `(block ,@(ad._fwd-item s names)))))
-$(defun ad._fwd-items (items names)
-  (ad._concat (map (lambda (s) (ad._fwd-item s names)) items)))
-
-$(defun ad._fwd-decl (d names)
-  (match-case d
-    ((op = (bind (binding ? ?n) ()) ?init)
-     (list (ad._declare '(double) (ad._dot ?n)
-                        (ad._tangent (ad._pure ?init) names))))
-    ((bind (binding ? ?n) ())
-     (list (ad._declare '(double) (ad._dot ?n) (ad._zero))))
-    (else (ad._fail "unsupported declarator" d))))
-
-$(defun ad._fwd-update (s update names)
-  (cond ((not update) (list (ad._unbind (ad._pure s))))
-        ((member (car update) names)
-         (list (ad._assign (ad._dot (car update))
-                           (ad._tangent (ad._pure (cadr update)) names))
-               (ad._unbind s)))
-        (true (begin (ad._pure (cadr update)) (list (ad._unbind s))))))
-
-$(defun ad._fwd-item (s names)
-  (match-case s
-    ((at ? ?node) (ad._fwd-item ?node names))
-    ((declare ?type (bindings *decls))
-     (if (ad._double-spec? ?type)
-         (cons (ad._unbind s)
-               (ad._concat (map (lambda (d) (ad._fwd-decl d names)) *decls)))
-         (list (ad._unbind (ad._pure s)))))
-    ((stmnt ?e) (ad._fwd-update s (ad._update ?e) names))
-    ((if ?c ?then)
-     (list `(if ,(ad._unbind (ad._pure ?c)) ,(ad._fwd-body ?then names))))
-    ((if ?c ?then ?else)
-     (list `(if ,(ad._unbind (ad._pure ?c)) ,(ad._fwd-body ?then names)
-              ,(ad._fwd-body ?else names))))
-    ((while ?c ?body)
-     (list `(while ,(ad._unbind (ad._pure ?c)) ,(ad._fwd-body ?body names))))
-    ((do ?body ?c)
-     (list `(do ,(ad._fwd-body ?body names) ,(ad._unbind (ad._pure ?c)))))
-    ((for ?init ?c ?step ?body) (ad._fwd-for ?init ?c ?step ?body names))
-    ((block *items) (list `(block ,@(ad._fwd-items *items names))))
-    ((return (double) ?e)
-     (list `(return (double) ,(ad._tangent (ad._pure ?e) names))))
-    ((return ? ?) (ad._fail "return must produce double" s))
-    ((empty) '())
-    ((break) (list s))
-    ((continue) (list s))
-    (else (ad._fail "unsupported statement" s))))
-
-/* Keep updates in the native loop clause so `continue` executes them too. */
-$(defun ad._fwd-clause (e names)
-  (if (null? e) e
-    (match-case e
-      ((expr ? (commas *items))
-       `(expr () (commas
-          ,@(map (lambda (item) (ad._fwd-clause item names)) *items))))
-      (else
-       (let ((updates (ad._fwd-update (ad._stmnt e) (ad._update e) names)))
-         (if (null? (cdr updates)) (cadr (car updates))
-             `(expr () (commas ,@(map cadr updates)))))))))
-
-/* A `for` that declares a double needs its tangent declared beside it, so
-   the loop becomes a block: the declarations, then a `for` without them. */
-$(defun ad._fwd-for (init c step body names)
-  (match-case init
-    ((decl ?type (bindings *decls))
-     (if (ad._double-spec? ?type)
-         (list `(block
-                  ,@(ad._fwd-item `(declare ,?type (bindings ,@*decls)) names)
-                  (for () ,(ad._unbind (ad._pure c))
-                    ,(ad._fwd-clause step names)
-                    ,(ad._fwd-body body names))))
-         (list `(for ,(ad._unbind init) ,(ad._unbind (ad._pure c))
-                  ,(ad._fwd-clause step names)
-                  ,(ad._fwd-body body names)))))
-    (else (list `(for ,(ad._fwd-clause init names)
-                   ,(ad._unbind (ad._pure c)) ,(ad._fwd-clause step names)
-                   ,(ad._fwd-body body names))))))
-
-$(defun ad._forward-function (spec name params body)
-  (let ((names (append (ad._param-doubles params)
-                       (ad._declared-doubles body))))
-    `(function ,spec
-       (bind (,(ad._dot name)) ((fnmod (params ,@(ad._fwd-params params)))))
-       ,(ad._fwd-body body names))))
-
 $(defun ad.forward (fn)
-  (if (not (list? fn)) '()
+  (begin
     (match-case fn
-      ((function ?spec (bind (binding ? ?name) ((fnmod (params *params))))
-         ?body)
+      ((function ?spec (bind (binding ? ?name) ?) ?)
        (begin
-         (ad._check-result ?spec fn)
-         (def ad._forward-siblings (cons ?name ad._forward-siblings))
-         (list (ad._forward-function ?spec ?name *params ?body))))
-      (else (ad._fail "expected a function definition" fn)))))
-
-/* Reverse mode. The forward sweep runs the original statements, pushing
-   each overwritten value and each control decision onto a typed array
-   tape. The reverse sweep pops them back in order, so every adjoint reads
-   the values the forward sweep saw. Locals are hoisted to the function
-   head because a body declared inside a loop must outlive its iteration.
-
-   Control flow is recorded as exit codes. Each loop iteration ends by
-   pushing 0, or the code of the `break` or `continue` that left it; each
-   `return` pushes its own code before jumping to the reverse sweep. The
-   reverse of a region reads the code and runs the reverse of exactly the
-   statements that executed, which is computed statically for every exit.
-
-   Each item yields a triple (forward reverse exits). `forward` and
-   `reverse` are statement lists, `reverse` already in reverse order for
-   an item that completed. `exits` lists (code kind pruned) for every exit
-   inside the item, where `pruned` is the reverse of the part of the item
-   that ran before that exit. A loop consumes its `break` and `continue`
-   exits; the function consumes `return`. */
-
-$(def ad._locals '())
-$(def ad._counter 0)
-$(def ad._loop-step '())
-$(defun ad._local (type name)
-  (begin
-    (if (assoc name ad._locals) (ad._fail "duplicate local name" name) nil)
-    (def ad._locals (cons (list name type) ad._locals))
-    name))
-$(defun ad._fresh (stem type)
-  (begin
-    (def ad._counter (+ ad._counter 1))
-    (ad._local type (string-append stem (str ad._counter)))))
-$(defun ad._code ()
-  (begin
-    (def ad._counter (+ ad._counter 1))
-    (string-append (str ad._counter) ".0")))
-$(defun ad._local-type (name)
-  (let ((entry (assoc name ad._locals)))
-    (if entry (cadr entry)
-        (ad._fail "assignment to an undeclared name" name))))
-
-$(defun ad._push (e)
-  (ad._stmnt (ad._call "ArrayDbl_push" (list (ad._id "_ad_tape") e))))
-$(defun ad._pop () (ad._call "ArrayDbl_take_last" (list (ad._id "_ad_tape"))))
-$(defun ad._restore (name type)
-  (ad._assign name
-              (if (ad._double-type? type) (ad._pop)
-                  (ad._cast type (ad._pop)))))
-$(defun ad._triple (fwd rev exits) (list fwd rev exits))
-$(defun ad._none () (ad._triple '() '() '()))
-$(defun ad._fwd-of (t) (car t))
-$(defun ad._rev-of (t) (cadr t))
-$(defun ad._exits-of (t) (car (cddr t)))
-$(defun ad._exit (code kind pruned) (list code kind pruned))
-$(defun ad._exit-code (x) (car x))
-$(defun ad._exit-kind (x) (cadr x))
-$(defun ad._exit-pruned (x) (car (cddr x)))
-$(defun ad._with-pruned (x pruned)
-  (ad._exit (ad._exit-code x) (ad._exit-kind x) pruned))
-
-/* Sequencing: an exit inside item i has run items 1..i-1 completely. */
-$(defun ad._sequence (triples)
-  (ad._sequence-from triples '() '() '()))
-$(defun ad._sequence-from (triples fwd rev exits)
-  (if (null? triples) (ad._triple fwd rev exits)
-    (let ((t (car triples)))
-      (ad._sequence-from (cdr triples)
-        (append fwd (ad._fwd-of t))
-        (append (ad._rev-of t) rev)
-        (append exits
-          (map (lambda (x)
-                 (ad._with-pruned x (append (ad._exit-pruned x) rev)))
-               (ad._exits-of t)))))))
-
-/* Adjoint statements for `e` scaled by `seed`. */
-$(defun ad._adjoint (e seed names)
-  (if (not (ad._double? e)) '()
-    (match-case e
-      ((expr ? (literal ? ?)) '())
-      ((expr ? (ident ?))
-       (let ((n (ad._var-name e)))
-         (if (and n (member n names))
-             (list (ad._accum (ad._bar n) seed))
-             '())))
-      ((expr ? (parens ?a)) (ad._adjoint ?a seed names))
-      ((expr ? (cast ? ?a)) (ad._adjoint ?a seed names))
-      ((expr ? (op - ?a)) (ad._adjoint ?a (ad._neg seed) names))
-      ((expr ? (op + ?a)) (ad._adjoint ?a seed names))
-      ((expr ? (op ?o ?c ?a ?b))
-       (if (eq? ?o '?)
-           (list `(if ,(ad._unbind ?c)
-                    (block ,@(ad._adjoint ?a seed names))
-                    (block ,@(ad._adjoint ?b seed names))))
-           (ad._fail "unsupported expression" e)))
-      ((expr ? (op ?o ?a ?b)) (ad._binary-adjoint ?o ?a ?b seed names))
-      ((expr ? (call (expr ?ft (ident (binding ? ?name))) (args *args)))
-       (ad._call-adjoint ?name ?ft *args seed names))
-      (else (ad._fail "unsupported expression" e)))))
-
-$(defun ad._binary-adjoint (op x y seed names)
-  (let ((a (ad._unbind x)) (b (ad._unbind y)))
-    (cond ((eq? op '+)
-           (append (ad._adjoint x seed names) (ad._adjoint y seed names)))
-          ((eq? op '-)
-           (append (ad._adjoint x seed names)
-                   (ad._adjoint y (ad._neg seed) names)))
-          ((eq? op '*)
-           (append (ad._adjoint x (ad._mul seed b) names)
-                   (ad._adjoint y (ad._mul seed a) names)))
-          ((eq? op '/)
-           (append (ad._adjoint x (ad._div seed b) names)
-                   (ad._adjoint y (ad._neg (ad._div (ad._mul seed a)
-                                                    (ad._mul b b)))
-                                names)))
-          (true (ad._fail "unsupported operator" op)))))
-
-$(defun ad._call-adjoint (name ftype args seed names)
-  (let ((prim (assoc name ad._primitives)) (unbound (map ad._unbind args)))
-    (cond (prim
-           (ad._concat (ad._zip (lambda (partial arg)
-             (ad._adjoint arg (ad._mul seed (partial unbound)) names))
-             (cdr prim) args)))
-          ((member name ad._reverse-siblings)
-           (ad._sibling-adjoint name (cadr (car ftype)) args unbound seed
-                                names))
-          (true (ad._fail "call to a function without a gradient" name)))))
-
-/* A gradient sibling recomputes its primal into a scratch local and fills
-   one partial slot per `double` argument. */
-$(defun ad._sibling-adjoint (name ptypes args unbound seed names)
-  (let ((slots (ad._grad-slots ptypes args))
-        (value (ad._fresh "_ad_call" '(double))))
-    (cons (ad._assign value
-            (ad._call (ad._grad name)
-              (append unbound
-                      (map (lambda (s) `(expr () (op & ,(ad._id (car s)))))
-                           slots))))
-          (ad._concat (map (lambda (s)
-            (ad._adjoint (cadr s) (ad._mul seed (ad._id (car s))) names))
-            slots)))))
-
-$(defun ad._grad-slots (ptypes args)
-  (if (null? args) '()
-    (let ((rest (ad._grad-slots (cdr ptypes) (cdr args))))
-      (if (ad._double-type? (car ptypes))
-          (cons (list (ad._fresh "_ad_partial" '(double)) (car args)) rest)
-          rest))))
-
-$(defun ad._rev-items (items names)
-  (ad._sequence (map (lambda (s) (ad._rev-item s names)) items)))
-$(defun ad._rev-body (s names)
-  (match-case s
-    ((block *items) (ad._rev-items *items names))
-    (else (ad._rev-item s names))))
-
-$(defun ad._rev-assign (name rhs names)
-  (let ((type (ad._local-type name)) (value (ad._unbind (ad._pure rhs))))
-    (ad._triple
-      (list (ad._push (ad._id name)) (ad._assign name value))
-      (if (and (ad._double-type? type) (member name names))
-          (append (list (ad._restore name type)
-                        (ad._assign "_ad_seed" (ad._id (ad._bar name)))
-                        (ad._assign (ad._bar name) (ad._zero)))
-                  (ad._adjoint rhs (ad._id "_ad_seed") names))
-          (list (ad._restore name type)))
-      '())))
-
-$(defun ad._rev-decl (type d names)
-  (begin
-    (if (and (list? type) (member 'const type))
-        (ad._fail "const locals are not supported in reverse mode" d)
-        nil)
-    (match-case d
-      ((op = (bind (binding ? ?n) ()) ?init)
-       (begin (ad._local type ?n) (ad._rev-assign ?n ?init names)))
-      ((bind (binding ? ?n) ()) (begin (ad._local type ?n) (ad._none)))
-      (else (ad._fail "unsupported declarator" d)))))
-
-$(defun ad._rev-optional (s names)
-  (if s (ad._rev-item s names) (ad._none)))
-
-/* Branches push their flag after the body so a completed `if` pops it
-   first; an exit inside a branch never pushes, and its pruned reverse
-   knows the branch statically. */
-$(defun ad._rev-if (c then else names)
-  (let ((t (ad._rev-body then names))
-        (e (if else (ad._rev-body else names) (ad._none))))
-    (ad._triple
-      (list `(if ,(ad._unbind (ad._pure c))
-               (block ,@(ad._fwd-of t) ,(ad._push (ad._lit "1.0")))
-               (block ,@(ad._fwd-of e) ,(ad._push (ad._lit "0.0")))))
-      (list `(if (expr () (op != ,(ad._pop) ,(ad._lit "0.0")))
-               (block ,@(ad._rev-of t))
-               (block ,@(ad._rev-of e))))
-      (append (ad._exits-of t) (ad._exits-of e)))))
-
-$(defun ad._code-is (code)
-  `(expr () (op == ,(ad._id "_ad_code") ,(ad._lit code))))
-
-/* The dispatch after popping one iteration's exit code. */
-$(defun ad._dispatch (normal exits)
-  (foldl (lambda (chain x)
-           `(if ,(ad._code-is (ad._exit-code x))
-              (block ,@(ad._exit-pruned x)) ,chain))
-         `(block ,@normal)
-         (reverse exits)))
-
-$(defun ad._loop-exit? (x)
-  (or (eq? (ad._exit-kind x) 'break) (eq? (ad._exit-kind x) 'continue)))
-
-/* A loop iteration: count, body, step, then the normal code. `continue`
-   also runs the step, so its pruned reverse begins with the step's. */
-$(defun ad._loop-parts (c body step names)
-  (let* ((saved ad._loop-step)
-         (s (begin (def ad._loop-step '()) (ad._rev-optional step names)))
-         (b (begin (def ad._loop-step (ad._fwd-of s))
-                   (ad._rev-body body names)))
-         (restored (def ad._loop-step saved))
-         (n (ad._fresh "_ad_trip" '(int)))
-         (own (filter ad._loop-exit? (ad._exits-of b)))
-         (through (filter (lambda (x) (not (ad._loop-exit? x)))
-                          (ad._exits-of b)))
-         (iteration (append (list (ad._count n '+))
-                            (ad._fwd-of b) (ad._fwd-of s)
-                            (list (ad._push (ad._lit "0.0")))))
-         (dispatch (list (ad._assign "_ad_code" (ad._pop))
-                         (ad._dispatch (append (ad._rev-of s) (ad._rev-of b))
-                           (map (lambda (x)
-                                  (if (eq? (ad._exit-kind x) 'continue)
-                                      (ad._with-pruned x
-                                        (append (ad._rev-of s)
-                                                (ad._exit-pruned x)))
-                                      x))
-                                own))
-                         (ad._count n '-))))
-    (list n iteration dispatch through (ad._unbind (ad._pure c)))))
-
-$(defun ad._count (n op)
-  (ad._assign n (ad._raw op (ad._id n) (ad._int "1"))))
-$(defun ad._items (body)
-  (match-case body ((block *items) *items) (else (list body))))
-$(defun ad._countdown (n dispatch)
-  `(while (expr () (op > ,(ad._id n) ,(ad._int "0"))) (block ,@dispatch)))
-
-$(defun ad._rev-loop (init c step body names)
-  (let* ((head (ad._rev-optional init names))
-         (parts (ad._loop-parts c body step names))
-         (n (car parts)) (iteration (cadr parts))
-         (dispatch (car (cddr parts))) (through (cadr (cddr parts)))
-         (condition (car (cddr (cddr parts))))
-         (loop (ad._triple
-                 (list (ad._assign n (ad._int "0"))
-                       `(while ,condition (block ,@iteration))
-                       (ad._push (ad._id n)))
-                 (list (ad._restore n '(int)) (ad._countdown n dispatch))
-                 (map (lambda (x)
-                        (ad._with-pruned x
-                          (append (ad._exit-pruned x)
-                                  (list (ad._count n '-)
-                                        (ad._countdown n dispatch)))))
-                      through))))
-    (ad._sequence (list head loop))))
-
-/* `do` runs its body once before testing: a flag makes it a `while`. */
-$(defun ad._rev-do (body c names)
-  (let ((first (ad._fresh "_ad_first" '(int))))
-    (ad._sequence (list
-      (ad._triple (list (ad._assign first (ad._int "1"))) '() '())
-      (ad._loop nil `(expr (int) (op || (expr (int) (ident (,first))) ,c))
-                    nil `(block ,(ad._assign first (ad._int "0")) ,body)
-                    names)))))
-
-/* Checkpointed loops record nothing while running. Every `block`
-   iterations the variables the loop assigns are pushed, and the reverse
-   restores each block from its snapshot, replays it with recording, and
-   reverses the replay. Memory is one snapshot per block plus one block's
-   tape, at the cost of running the loop twice. */
-$(defun ad._assigned (form acc)
-  (cond ((not (list? form)) acc)
-        ((null? form) acc)
-        (true
-         (let ((update (if (match form '(expr ? ?)) (ad._update form) nil)))
-           (if (and update (not (member (car update) acc)))
-               (ad._assigned (cdr form) (cons (car update) acc))
-               (foldl (lambda (a x) (ad._assigned x a)) acc form))))))
-$(defun ad._declared-names (form acc)
-  (match-case form
-    ((declare ? (bindings *decls)) (append (ad._declarator-names *decls) acc))
-    ((decl ? (bindings *decls)) (append (ad._declarator-names *decls) acc))
-    (else (if (list? form)
-              (foldl (lambda (a x) (ad._declared-names x a)) acc form)
-              acc))))
-$(defun ad._declarator-names (decls)
-  (ad._concat (map (lambda (d)
-    (match-case d
-      ((op = (bind (binding ? ?n) ()) ?) (list ?n))
-      ((bind (binding ? ?n) ()) (list ?n))
-      (else '()))) decls)))
-$(defun ad._rev-loop-checkpointed (init c step body names block)
-  (let* ((head (ad._rev-optional init names))
-         (parts (ad._loop-parts c body step names))
-         (n (car parts)) (iteration (cadr parts))
-         (dispatch (car (cddr parts))) (through (cadr (cddr parts)))
-         (condition (car (cddr (cddr parts))))
-         (inner (ad._declared-names (list body step) '()))
-         (state (filter (lambda (v) (not (member v inner)))
-                        (ad._assigned (list body step) '())))
-         (total (ad._fresh "_ad_total" '(int)))
-         (blocks (ad._fresh "_ad_blocks" '(int)))
-         (remaining (ad._fresh "_ad_remaining" '(int)))
-         (replay (ad._fresh "_ad_replay" '(int)))
-         (size (ad._int block))
-         (snapshot (map (lambda (v) (ad._push (ad._id v))) state))
-         (recover (map (lambda (v) (ad._restore v (ad._local-type v)))
-                       (reverse state))))
-    (begin
-    (if through
-        (ad._fail "a checkpointed loop cannot contain return" body)
-        nil)
-    (ad._sequence (list head
-      (ad._triple
-        (list (ad._assign total (ad._int "0"))
-              (ad._assign blocks (ad._int "0"))
-              `(for () ,condition ,(if step (ad._unbind step) '())
-                 (block
-                   (if (expr () (op == (expr () (op % ,(ad._id total) ,size))
-                                    ,(ad._int "0")))
-                     (block ,@snapshot ,(ad._count blocks '+)))
-                   ,(ad._count total '+)
-                   ,@(ad._unbind (ad._items body))))
-              (ad._push (ad._id total))
-              (ad._push (ad._id blocks)))
-        (list (ad._restore blocks '(int))
-              (ad._restore total '(int))
-              `(while (expr () (op > ,(ad._id blocks) ,(ad._int "0")))
-                 (block
-                   ,@recover
-                   ,(ad._assign remaining
-                      (ad._raw '- (ad._id total)
-                        (ad._raw '* (ad._raw '- (ad._id blocks) (ad._int "1"))
-                                 size)))
-                   ,(ad._assign replay (ad._int "0"))
-                   ,(ad._assign n (ad._int "0"))
-                   (while (expr () (op < ,(ad._id replay) ,(ad._id remaining)))
-                     (block ,(ad._count replay '+) ,@iteration))
-                   ,(ad._countdown n dispatch)
-                   ,(ad._assign total
-                      (ad._raw '- (ad._id total) (ad._id remaining)))
-                   ,(ad._count blocks '-))))
-        '()))))))
-
-$(def ad._checkpoint nil)
-$(defun ad._loop (init c step body names)
-  (if ad._checkpoint
-      (ad._rev-loop-checkpointed init c step body names ad._checkpoint)
-      (ad._rev-loop init c step body names)))
-
-$(defun ad._rev-item (s names)
-  (match-case s
-    ((at ? ?node) (ad._rev-item ?node names))
-    ((declare ?type (bindings *decls))
-     (ad._sequence (map (lambda (d) (ad._rev-decl ?type d names)) *decls)))
-    ((decl ?type (bindings *decls))
-     (ad._sequence (map (lambda (d) (ad._rev-decl ?type d names)) *decls)))
-    ((stmnt ?e)
-     (let ((update (ad._update ?e)))
-       (if update
-           (ad._rev-assign (car update) (cadr update) names)
-           (ad._triple (list (ad._unbind (ad._pure s))) '() '()))))
-    ((expr ? ?) (ad._rev-item `(stmnt ,s) names))
-    ((if ?c ?then) (ad._rev-if ?c ?then nil names))
-    ((if ?c ?then ?else) (ad._rev-if ?c ?then ?else names))
-    ((while ?c ?body) (ad._loop nil ?c nil ?body names))
-    ((do ?body ?c) (ad._rev-do ?body ?c names))
-    ((for ?init ?c ?step ?body) (ad._loop ?init ?c ?step ?body names))
-    ((block *items) (ad._rev-items *items names))
-    ((break)
-     (let ((code (ad._code)))
-       (ad._triple (list (ad._push (ad._lit code)) s) '()
-                   (list (ad._exit code 'break '())))))
-    ((continue)
-     (let ((code (ad._code)))
-       (ad._triple (append ad._loop-step
-                           (list (ad._push (ad._lit code)) s))
-                   '() (list (ad._exit code 'continue '())))))
-    ((return (double) ?e)
-     (let ((code (ad._code)))
-       (ad._triple
-         (list (ad._assign "_ad_result" (ad._unbind (ad._pure ?e)))
-               (ad._push (ad._lit code))
-               '(goto ("_ad_reverse")))
-         '()
-         (list (ad._exit code 'return
-                         (ad._adjoint ?e (ad._lit "1.0") names))))))
-    ((return ? ?) (ad._fail "return must produce double" s))
-    ((empty) (ad._none))
-    (else (ad._fail "unsupported statement in reverse mode" s))))
-
-$(defun ad._grad-params (params)
-  (append (map ad._unbind params)
-    (ad._concat (map (lambda (p)
-      (match-case p
-        ((param (double) (bind (binding ? ?n) ()))
-         (list `(param (double) (bind (,(ad._grad ?n)) (*)))))
-        (else '()))) params))))
-
-$(defun ad._param-locals (params)
-  (map (lambda (p)
-    (match-case p
-      ((param ?type (bind (binding ? ?n) ())) (list ?n ?type))
-      (else (ad._fail "unsupported parameter" p)))) params))
-
-$(defun ad._write-slot (n)
-  (ad._stmnt `(expr () (op = (expr () (op * ,(ad._id (ad._grad n))))
-                            ,(ad._id (ad._bar n))))))
-
-$(defun ad._reverse-function (spec name params items)
-  (let* ((inputs (ad._param-doubles params))
-         (names (append inputs (ad._declared-doubles `(block ,@items))))
-         (sweep (ad._rev-items items names))
-         (returns (filter (lambda (x) (eq? (ad._exit-kind x) 'return))
-                          (ad._exits-of sweep)))
-         (stray (filter (lambda (x) (not (eq? (ad._exit-kind x) 'return)))
-                        (ad._exits-of sweep)))
-         (hoisted (filter (lambda (l)
-                            (not (member (car l) (ad._param-names params))))
-                          (reverse ad._locals))))
-    (begin
-    (if stray (ad._fail "break or continue outside a loop" name) nil)
-    (if (null? returns) (ad._fail "function has no return" name) nil)
-    `(function ,spec
-       (bind (,(ad._grad name)) ((fnmod (params ,@(ad._grad-params params)))))
-       (block
-         ,(ad._declare '("ArrayDbl") "_ad_tape" (ad._call "ArrayDbl_new" '()))
-         ,(ad._declare '(double) "_ad_result" (ad._zero))
-         ,(ad._declare '(double) "_ad_seed" (ad._zero))
-         ,(ad._declare '(double) "_ad_code" (ad._zero))
-         ,@(map (lambda (l) (ad._declare (cadr l) (car l)
-                                         (ad._zero-of (cadr l))))
-                hoisted)
-         ,@(map (lambda (n) (ad._declare '(double) (ad._bar n) (ad._zero)))
-                names)
-         ,@(ad._fwd-of sweep)
-         (label ("_ad_reverse"))
-         ,(ad._assign "_ad_code" (ad._pop))
-         ,(ad._dispatch '() returns)
-         ,@(map ad._write-slot inputs)
-         ,(ad._stmnt (ad._call "ArrayDbl_free" (list (ad._id "_ad_tape"))))
-         (return (double) ,(ad._id "_ad_result")))))))
-
-$(defun ad._literal-text (form)
-  (match-case form
-    ((expr ? (literal ? ?text)) ?text)
-    ((expr (macro-expr) ?inner) (ad._literal-text ?inner))
-    (else (ad._fail "expected an integer literal" form))))
-
+         (if (eq? (last ?spec) 'double) nil
+             (ad_fail "function must return double" fn))
+         (def ad._forward-siblings (cons ?name ad._forward-siblings)))))
+    (ad_forward fn ad._forward-siblings)))
 $(defun ad._reverse-with (fn checkpoint)
-  (if (not (list? fn)) '()
+  (begin
     (match-case fn
-      ((function ?spec (bind (binding ? ?name) ((fnmod (params *params))))
-         (block *items))
+      ((function ?spec (bind (binding ? ?name) ?) ?)
        (begin
-         (ad._check-result ?spec fn)
-         (def ad._reverse-siblings (cons ?name ad._reverse-siblings))
-         (def ad._locals (ad._param-locals *params))
-         (def ad._counter 0)
-         (def ad._loop-step '())
-         (def ad._checkpoint checkpoint)
-         (list (ad._reverse-function ?spec ?name *params *items))))
-      (else (ad._fail "expected a function definition" fn)))))
-
+         (if (eq? (last ?spec) 'double) nil
+             (ad_fail "function must return double" fn))
+         (def ad._reverse-siblings (cons ?name ad._reverse-siblings)))))
+    (ad_reverse fn ad._reverse-siblings checkpoint)))
 $(defun ad.reverse (fn) (ad._reverse-with fn nil))
 $(defun ad.checkpoint (fn block)
-  (ad._reverse-with fn (if (list? block) (ad._literal-text block) nil)))
+  (ad._reverse-with fn (if (list? block) (ad_literal_text block) nil)))
 
 /** Emits `NAME_dot` beside a `double` function: every `double` parameter `p`
     is followed by `p_dot`, and the result is the directional derivative.
-    Statements, `if`, loops, casts, the primitives in `ad._primitives`, and
+    Statements, `if`, loops, casts, the supported math primitives, and
     calls to earlier `$ad.forward()` functions are supported; anything else
     is a diagnostic at the invocation.
 */
