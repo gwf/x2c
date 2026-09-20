@@ -334,3 +334,13 @@ C. The artifact is checked in: installation and session startup do not need
 to translate the initial environment. Generated helpers use fixed primitive
 operations internally; their public Lisp names remain replaceable. In
 particular, rebinding `car`, `cdr`, or `cons` does not change `filter`.
+
+
+The compiler's built-in macro algorithms live in `etc/builtin-macros.x`.
+The same generator assembles their lowering and the thin forwarding wrappers
+in `etc/builtin-core.xlisp` into `etc/builtin-macros.xlisp`. This artifact
+loads at the existing compiler-only boundary after the compile-time runtime
+and SDK; it is not part of `Lisp.new()`. Scope expansion, foreach lowering,
+and deferred class defaults reuse the ordinary compiler queries and syntax
+builders. The wrappers defer native-operation lookup until expansion because
+native operations are registered after the libraries are loaded.

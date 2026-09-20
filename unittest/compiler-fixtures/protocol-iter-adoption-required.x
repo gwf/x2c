@@ -15,3 +15,10 @@ int main(void) {
     (void) value;
   return 0;
 }
+
+int Bag.try_next(Bag bag, unsigned *cursor, int *out) {
+  if (*cursor >= bag.values.len()) return 0;
+  *out = bag.values[*cursor].integer();
+  ++*cursor;
+  return 1;
+}

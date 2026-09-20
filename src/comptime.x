@@ -183,7 +183,7 @@ static void _lower_scan_each(Lowering l, List items) {
 }
 
 
-/* The ordinary cursor calls emitted by `foreach.cursor-loop`. Their
+/* The ordinary cursor calls emitted by the foreach expansion. Their
    cursor and outputs can occupy frame slots instead of addressed cells. */
 struct LowerCursor {
   Symbol kind;

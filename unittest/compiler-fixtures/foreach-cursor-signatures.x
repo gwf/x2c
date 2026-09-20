@@ -149,6 +149,29 @@ long WrongReturn.try_next(WrongReturn bag, unsigned *cursor, int *out) {
 
 protocol Iter(WrongReturn);
 
+static int direct_three_calls;
+
+typedef struct DirectThree {
+  List values;
+} *DirectThree;
+
+Iter DirectThree.iter(DirectThree bag, Iter dest) {
+  return bag.values.iter(dest);
+}
+
+int DirectThree.try_next(DirectThree bag, unsigned *cursor,
+                         int *first, int *second, int *last) {
+  direct_three_calls++;
+  if (*cursor >= bag.values.len()) return 0;
+  *first = 100;
+  *second = 200;
+  *last = bag.values[*cursor].integer();
+  ++*cursor;
+  return 1;
+}
+
+protocol Iter(DirectThree);
+
 int main(void) {
   DirectOne direct_one = Scope.malloc(sizeof(struct DirectOne));
   direct_one.values = %(1 2 3);
@@ -173,6 +196,11 @@ int main(void) {
   WrongReturn wrong_return = Scope.malloc(sizeof(struct WrongReturn));
   wrong_return.values = %(1 2 3);
 
+  DirectThree direct_three = Scope.malloc(sizeof(struct DirectThree));
+  direct_three.values = %(7 8 9);
+  int three_total = 0;
+  foreach(int value, direct_three) three_total += value;
+
   int fallback_total = 0;
   foreach(int value, value_cursor) fallback_total += value;
   foreach(int value, float_cursor) fallback_total += value;
@@ -183,7 +211,8 @@ int main(void) {
 
   printf("%ld %d %d %d %d %d\n", one_total, two_total,
          fallback_total, direct_one_calls, direct_two_calls, invalid_calls);
-  return one_total == 6 && two_total == 63 && fallback_total == 36 &&
+  return one_total == 6 && two_total == 63 && three_total == 24 &&
+         fallback_total == 36 && direct_three_calls == 4 &&
          direct_one_calls == 4 && direct_two_calls == 4 && !invalid_calls
     ? 0 : 1;
 }

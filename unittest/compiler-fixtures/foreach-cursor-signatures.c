@@ -2,9 +2,9 @@
 
 #include "foreach-cursor-signatures.h"
 
-static List _11, _10, _9, _5, _4, _3;
+static List _17, _16, _15, _11, _10, _9, _5, _4, _3;
 
-static Var _8, _7, _6, _2, _1, _0;
+static Var _14, _13, _12, _8, _7, _6, _2, _1, _0;
 
 static int direct_one_calls;
 
@@ -15,6 +15,8 @@ static int invalid_calls;
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
+
+static int direct_three_calls;
 
 Var int_var(int);
 
@@ -36,6 +38,12 @@ __attribute__((constructor)) static void _file_init_(void){
   _9 = cons(_8, NULL);
   _10 = cons(_7, _9);
   _11 = cons(_6, _10);
+  _12 = int_var(7);
+  _13 = int_var(8);
+  _14 = int_var(9);
+  _15 = cons(_14, NULL);
+  _16 = cons(_13, _15);
+  _17 = cons(_12, _16);
 }
 
 Iter List_iter(List, Iter);
@@ -143,6 +151,20 @@ long WrongReturn_try_next(WrongReturn bag, unsigned * cursor, int * out){
   return 0;
 }
 
+Iter DirectThree_iter(DirectThree bag, Iter dest){
+  return List_iter(bag -> values, dest);
+}
+
+int DirectThree_try_next(DirectThree bag, unsigned * cursor, int * first, int * second, int * last){
+  direct_three_calls ++;
+  if(* cursor >= List_len(bag -> values)) return 0;
+  * first = 100;
+  * second = 200;
+  * last = Var_integer(List_getindex(bag -> values, * cursor));
+  ++ * cursor;
+  return 1;
+}
+
 void * Scope_malloc(size_t);
 
 int Iter_try_next(Iter, Var *);
@@ -192,23 +214,26 @@ int main(void){
   value_output -> values = _5;
   WrongReturn wrong_return = Scope_malloc(sizeof(struct WrongReturn));
   wrong_return -> values = _5;
-  int fallback_total = 0;
+  DirectThree direct_three = Scope_malloc(sizeof(struct DirectThree));
+  direct_three -> values = _17;
+  int three_total = 0;
   {
     int value;
-    Iter _x2c_macro_iterator_2 = ValueCursor_iter(value_cursor, &(struct Iter){
-      int_var(0)
-    }
-    );
-    Var _x2c_macro_item_2;
-    while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
-      value = Var_int(Var_convert(_x2c_macro_item_2, 3453797));
-      fallback_total += value;
+    DirectThree _x2c_macro_object_2 = direct_three;
+    unsigned _x2c_macro_cursor_2 = 0;
+    int _x2c_macro_cursor_output_3;
+    int _x2c_macro_cursor_output_4;
+    int _x2c_macro_cursor_output_5;
+    while(DirectThree_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_3, & _x2c_macro_cursor_output_4, & _x2c_macro_cursor_output_5)){
+      value = _x2c_macro_cursor_output_5;
+      three_total += value;
     }
 
   }
+  int fallback_total = 0;
   {
     int value;
-    Iter _x2c_macro_iterator_3 = FloatCursor_iter(float_cursor, &(struct Iter){
+    Iter _x2c_macro_iterator_3 = ValueCursor_iter(value_cursor, &(struct Iter){
       int_var(0)
     }
     );
@@ -221,7 +246,7 @@ int main(void){
   }
   {
     int value;
-    Iter _x2c_macro_iterator_4 = StringCursor_iter(string_cursor, &(struct Iter){
+    Iter _x2c_macro_iterator_4 = FloatCursor_iter(float_cursor, &(struct Iter){
       int_var(0)
     }
     );
@@ -234,7 +259,7 @@ int main(void){
   }
   {
     int value;
-    Iter _x2c_macro_iterator_5 = VoidCursor_iter(void_cursor, &(struct Iter){
+    Iter _x2c_macro_iterator_5 = StringCursor_iter(string_cursor, &(struct Iter){
       int_var(0)
     }
     );
@@ -247,7 +272,7 @@ int main(void){
   }
   {
     int value;
-    Iter _x2c_macro_iterator_6 = ValueOutput_iter(value_output, &(struct Iter){
+    Iter _x2c_macro_iterator_6 = VoidCursor_iter(void_cursor, &(struct Iter){
       int_var(0)
     }
     );
@@ -260,7 +285,7 @@ int main(void){
   }
   {
     int value;
-    Iter _x2c_macro_iterator_7 = WrongReturn_iter(wrong_return, &(struct Iter){
+    Iter _x2c_macro_iterator_7 = ValueOutput_iter(value_output, &(struct Iter){
       int_var(0)
     }
     );
@@ -271,7 +296,20 @@ int main(void){
     }
 
   }
+  {
+    int value;
+    Iter _x2c_macro_iterator_8 = WrongReturn_iter(wrong_return, &(struct Iter){
+      int_var(0)
+    }
+    );
+    Var _x2c_macro_item_8;
+    while(Iter_try_next(_x2c_macro_iterator_8, & _x2c_macro_item_8)){
+      value = Var_int(Var_convert(_x2c_macro_item_8, 3453797));
+      fallback_total += value;
+    }
+
+  }
   printf("%ld %d %d %d %d %d\n", one_total, two_total, fallback_total, direct_one_calls, direct_two_calls, invalid_calls);
-  return one_total == 6 && two_total == 63 && fallback_total == 36 && direct_one_calls == 4 && direct_two_calls == 4 && ! invalid_calls ? 0 : 1;
+  return one_total == 6 && two_total == 63 && three_total == 24 && fallback_total == 36 && direct_three_calls == 4 && direct_one_calls == 4 && direct_two_calls == 4 && ! invalid_calls ? 0 : 1;
 }
 
