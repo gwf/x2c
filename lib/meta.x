@@ -98,6 +98,31 @@ meta List x2c_expr_cast(List type, List expression) {
     (cast (decl ${parts[0]} (bindings (bind () ${parts[1]}))) $expression));
 }
 
+/* --- statement and declaration construction ----------------------------- */
+
+/** Returns an expression statement. */
+meta List x2c_stmnt_make(List expression) => %(stmnt $expression);
+
+/** Returns a return statement carrying `expression`. */
+meta List x2c_stmnt_return(List expression) => %(return () $expression);
+
+/** Returns a block containing `items` in order. */
+meta List x2c_block_make(List items) => %(block @items);
+
+/** Declares `name` with `type` and an optional initializer. */
+meta List x2c_decl_make(List type, Var name, List initializer) {
+  List parts = x2c_type_parts(type);
+  List binding = %(bind ($name) ${parts[1]});
+  if (initializer) binding = %(op = $binding $initializer);
+  return %(declare ${parts[0]} (bindings $binding));
+}
+
+/** Returns a parameter named `name` with `type`. */
+meta List x2c_param_make(List type, Var name) {
+  List parts = x2c_type_parts(type);
+  return %(param ${parts[0]} (bind ($name) ${parts[1]}));
+}
+
 /* --- reading what the macro captured ------------------------------------
    A macro receives bound syntax, and these are the four questions about it
    a body cannot answer by walking the List: the source the developer wrote,
@@ -127,7 +152,7 @@ Var x2c_cache_value(List node);
    A decorator receives a whole function, and these four take it apart: its
    name, one parameter by spelling, its body, and the argument list that
    forwards its parameters. A decorator that wraps or forwards a function
-   needs all four; `lib/autodiff.xmacro` uses the Lisp spellings today. */
+   needs all four; `lib/autodiff.xmacro` uses this compiler surface. */
 
 /** Returns the spelling of the function `function` defines. */
 String x2c_function_name(List function);
@@ -179,6 +204,39 @@ List x2c_type_parts(List value);
 
 /** Returns the `Type` the type key `value` resolves to. */
 List x2c_type_resolve(List value);
+
+meta static Var _meta_initializer(List node) {
+  match (node) {
+    case %(expr ? (literal ? ?text)): return text;
+    case %(?text): return text;
+  }
+  return node;
+}
+
+meta static void _meta_fail(String message, Var value) {
+  x2c_diagnostic_fail(message, %("value: ${value.repr()}"));
+}
+
+meta static List _meta_member(List node) {
+  match (node) {
+    case %(op = (?name) ?value):
+      return %($name ${_meta_initializer(value)});
+    case %(?name): return %($name ());
+  }
+  _meta_fail("x2c.type.members found an unreadable member", node);
+}
+
+/** Returns enum members as `(name value)` rows in declaration order.
+    An implicit value is nil; a literal value retains its spelling. */
+meta List x2c_type_members(List type) {
+  List resolved = x2c_type_resolve(type);
+  if (resolved.car() != <enum>)
+    _meta_fail("x2c.type.members requires an enum Type", type);
+  List members = resolved.reverse().car();
+  List rows = %();
+  foreach (List member, members) rows = cons(_meta_member(member), rows);
+  return rows.reverse();
+}
 
 /** Returns whether a value of the `Type` `value` can be held in a `Var`. */
 int x2c_type_value(List value);

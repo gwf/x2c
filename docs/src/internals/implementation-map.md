@@ -111,7 +111,8 @@ is listed under [compiler options](../reference/cli.md).
 ### Compile-time macros and decorators
 
 - Parse, import, hygiene, and expand: `src/macros.x`
-- Compile-time Lisp operations: `etc/compiler-sdk.xlisp`
+- Shared compile-time syntax builders: `lib/meta.x`
+- Compile-time Lisp boundary adapters: `etc/compiler-sdk.xlisp`
 - Embedded native bindings: `etc/lisp-bindings.xmacro`,
   `etc/lisp-bindings.xlisp`, `lib/lisp.x`, and `lib/func.x`
 - Tests: macro import, template, decorator, inline-Lisp, and inferred-binding

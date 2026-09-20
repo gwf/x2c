@@ -276,7 +276,13 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared) {
     (x2c_expr_composite x2c.expr.composite)
     (x2c_expr_cast x2c.expr.cast)
     (x2c_function_body x2c.function.body)
-    (x2c_parameters_arguments x2c.parameters.arguments));
+    (x2c_parameters_arguments x2c.parameters.arguments)
+    (x2c_stmnt_make x2c.stmnt.make)
+    (x2c_stmnt_return x2c.stmnt.return)
+    (x2c_block_make x2c.block.make)
+    (x2c_decl_make x2c.decl.make)
+    (x2c_param_make x2c.param.make)
+    (x2c_type_members x2c.type.members));
   /* Imported helpers can lower calls before the builders are parsed. */
   foreach (Var (name, alias), builders) {
     Var initial;

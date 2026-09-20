@@ -21,36 +21,3 @@
 
 (defun x2c.source.text (syntax) (_x2c.source.text syntax))
 (defun x2c.embed.text (path) (_x2c.embed.text path))
-
-// Statement, declaration, and type construction. A generator composes these
-// instead of writing canonical node shapes by hand.
-(defun x2c.stmnt.make (expression) `(stmnt ,expression))
-(defun x2c.stmnt.return (expression) `(return () ,expression))
-(defun x2c.block.make (items) (cons 'block items))
-(defun x2c.decl.make (type name initializer)
-  (let* ((parts (x2c.type.parts type))
-         (binding `(bind (,name) ,(cadr parts))))
-    `(declare ,(car parts) (bindings
-      ,(if initializer `(op = ,binding ,initializer) binding)))))
-(defun x2c.param.make (type name)
-  (let ((parts (x2c.type.parts type)))
-    `(param ,(car parts) (bind (,name) ,(cadr parts)))))
-// Enum members as (("NAME" VALUE) ...), with VALUE nil when the member takes
-// its position's value. The member list is the resolved enum's last part.
-// A single literal initializer reads as its spelling; any other initializer
-// reads as its expression node, which a generator can splice or inspect.
-(defun _x2c.initializer (node) (match-case node
-  ((expr ? (literal ? ?text)) ?text)
-  ((?text) ?text)
-  (else node)))
-
-(defun _x2c.member (node) (match-case node
-  ((op = (?name) ?value) (list ?name (_x2c.initializer ?value)))
-  ((?name) (list ?name nil))
-  (else (_x2c.fail "x2c.type.members found an unreadable member" node))))
-
-(defun x2c.type.members (type) (let
-  ((resolved (x2c.type.resolve type)))
-  (if (not (eq? (car resolved) 'enum))
-      (_x2c.fail "x2c.type.members requires an enum Type" type)
-      (map _x2c.member (car (reverse resolved))))))

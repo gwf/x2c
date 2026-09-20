@@ -237,6 +237,9 @@
 (defun Func_var (v) v)
 (defun Var_func (v) v)
 
+// Preserve printed syntax in meta diagnostics.
+(def Var_repr repr)
+
 // The compiler surface `lib/meta.x` declares needs no forwarding: an
 // `x2c_<path>` call lowers to the `x2c.<path>` operation the compiler binds,
 // each `_` becoming a `.`. Two operations cannot be reached that way, and
