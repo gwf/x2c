@@ -105,10 +105,11 @@ The reference follows x2c Lisp, including behavior that differs from Scheme:
 - Only the empty List is false; zero and the empty String are true.
 - Ordinary arguments run left to right. Macros receive unevaluated forms.
 - Special forms are callable identities, so aliases and shadowing work.
-- A closure captures local names found by flattening its List body, including
-  quoted and nested forms. Its own parameters and reserved names are excluded.
-  A scalar body captures nothing. Lookup continues through caller environments
-  for names absent from the call's bindings and captures.
+- Closures capture free local names in evaluated positions, including scalar
+  bodies and nested expressions. Quoted data contributes no names; quasiquote
+  captures through unquote. Nested function parameters bind their own names.
+  Calls resolve parameters, captures, globals, and reserved names, without
+  searching caller locals. Globals remain visible after rebinding.
 - `def` writes globals. `eval` evaluates its supplied expression globally.
 - `apply` consumes evaluated values and rejects macros and special forms,
   except for the built-in `apply` itself.
@@ -131,7 +132,8 @@ possible program behaves identically.
 The production evaluator can prepare repeated Lambda calls as word code.
 Preparation can mix lowered operations with ordinary evaluation: when a form
 has no lowering, its partial words are discarded and that form runs through
-the evaluator with the current parameters, captures, and caller environment.
+the evaluator with the current parameters and captures. Free names then resolve
+through the session globals and reserved names, never through caller locals.
 For example, an interpreted `def` can sit inside a lowered `cond`; it does
 not prevent preparation of the whole body. This changes execution, not
 which Lisp forms are legal or when their effects occur.

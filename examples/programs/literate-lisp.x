@@ -110,7 +110,7 @@ static Var Interp.eval(Interp *self, Env *env, Var form) {
   if (fn is <lambda>) {                                                         // Runtime callable-type introspection.
     Fn closure = fn.pointer();                                                  // Unbox the stored pointer.
     if (closure.macro)                                                          // Dot dereferences the heap pointer.
-      return self.eval(env, self.invoke(env, closure, args));                   // Expansion stays an ordinary Var.
+      return self.eval(env, self.invoke(closure, args));                        // Expansion stays an ordinary Var.
   }
   else {
     if (fn is not <func>)                                                       // Reject a non-callable Var tag.
@@ -119,7 +119,7 @@ static Var Interp.eval(Interp *self, Env *env, Var form) {
       return self.special(env, self.specials[fn], args);                        // Map value converts to Symbol.
   }
   List values = self.eval_args(env, args);                                      // Evaluate arguments left to right.
-  return self.apply(env, fn, values);                                           // Apply to values, not source forms.
+  return self.apply(fn, values);                                                // Apply to values, not source forms.
 }
 
 /* Evaluation proceeds left to right. When arguments define globals, read
@@ -173,7 +173,7 @@ static Var Interp.special(Interp *self, Env *env, Symbol op, List args) {
     case %(apply ?fn ?values): {                                                // Pattern binds callable/value forms.
       Var callable = self.eval(env, fn),                                        // Evaluate the callable expression.
           actual = self.eval(env, values);                                      // Evaluate the argument expression.
-      return self.apply(env, callable, _list_argument(actual, "apply"));        // Check List; apply evaluated values.
+      return self.apply(callable, _list_argument(actual, "apply"));             // Check List; apply evaluated values.
     }
     case %(bind ?name ?sig): {                                                  // Bind two unevaluated forms.
       Var target = self.eval(env, name),                                        // Binding name as a dynamic value.
@@ -185,7 +185,7 @@ static Var Interp.special(Interp *self, Env *env, Symbol op, List args) {
       Atom hook = Atom.intern("_x2c.import-hook");                              // Exact names beyond Symbol capacity.
       _string_argument(path, "import");                                         // C literal promotes to String.
       if (hook in self.globals)                                                 // Map membership by key.
-        return self.apply(NULL, self.globals[hook], %($path));                  // Construct a one-argument List.
+        return self.apply(self.globals[hook], %($path));                        // Construct a one-argument List.
       return _import_file(self, path);                                          // Var path converts to String.
     }
   }
@@ -206,18 +206,18 @@ static Var Interp.special(Interp *self, Env *env, Symbol op, List args) {
 
                                                                                        * invokes supplied callable
 */
-static Var Interp.apply(Interp *self, Env *env, Var fn, List values) {
+static Var Interp.apply(Interp *self, Var fn, List values) {
   if (fn is <lambda>) {                                                         // Inspect the callable tag.
     Fn closure = fn.pointer();                                                  // Unbox the closure pointer.
     if (closure.macro) $fail(<not-call>, "apply", <actual>, fn.kind());        // kind() supplies runtime type data.
-    return self.invoke(env, closure, values);                                   // Receiver call passes self first.
+    return self.invoke(closure, values);                                        // Receiver call passes self first.
   }
   if (fn is not <func>) raise %(not-call (actual ${fn.kind()}));                // Structured error with interpolation.
   if (fn in self.specials) {                                                    // Map membership by callable value.
     if (self.specials[fn] != <apply>.var())                                     // Box a Symbol for Var comparison.
       $fail(<not-call>, "apply", <actual>, fn.kind());                         // Compile-time macro; runtime error.
     match (values) case %(?callable ?args):                                     // Destructure by pattern.
-      return self.apply(env, callable, _list_argument(args, "apply"));          // C literal promotes to String.
+      return self.apply(callable, _list_argument(args, "apply"));               // C literal promotes to String.
     return _bad_form(<apply>, values);                                          // <apply> is a Symbol literal.
   }
   return _native_call(fn, values);                                              // Implicit Var -> Func conversion.
@@ -249,31 +249,55 @@ static Var Interp.lookup(Interp *self, Env *env, Var name) {
   raise %(unbound (name $name));                                                // $name interpolates one named value.
 }
 
-/* x2c Lisp collects captures by flattening one level of a List body. It
-   copies values for locally bound names exposed by that step, excluding
-   parameters and reserved names. Quotation does not prevent capture, but
-   names in deeper Lists are not collected. Global bindings are looked up
-   during evaluation rather than copied into closures.
+/* A closure saves the free local names its body reads, including a scalar
+   body or a name inside a nested expression. The walk follows evaluated
+   positions: quote is data, and quasiquote reads only through unquote.
+   Nested lambdas and macros introduce their own parameter bindings.
 
-   This is not a free-variable analysis or a purely lexical environment.
-   Names absent from the captures may still resolve in the caller. A scalar
-   body captures nothing. Consequently, a lambda's result can differ from
-   the result under lexical scope rules used by other Lisp implementations.
+   Global names are not copied. They resolve when the function runs, so a
+   later global definition is visible. Caller locals are never consulted.
 */
-static Var Interp.closure(
-  Interp *self, Env *env, List params, Var body, int macro) {
-  Map captures = {};                                                            // Mutable Map; Var keys and values.
-  if (body is <list>)                                                           // Test before converting the Var.
-    foreach (Var name, body.list().flatten()) {                                 // Chain conversion and traversal.
-      if (!name.is_atom() || name in self.reserved ||                           // Receiver predicate; Map membership.
-          name in captures || name in params) continue;                         // in works on Maps and Lists.
-      for (Env *local = env; local; local = local.parent) {                     // C pointer walks the outer frames.
-        if (name in local.bindings) {                                           // Map access through a C pointer.
-          captures[name] = local.bindings[name];                                // Copy a Var between Maps.
-          break;
-        }
+static void Interp.capture(
+  Interp *self, Env *env, Var form, List bound, int depth, Map captures) {
+  if (form.is_atom()) {
+    if (depth || form in self.reserved || form in bound || form in captures)    // Skip data, bound names, and saved names.
+      return;
+    for (Env *local = env; local; local = local.parent) {                       // Search only the defining local frames.
+      if (form in local.bindings) {
+        captures[form] = local.bindings[form];                                  // Snapshot the Var, preserving object identity.
+        return;
       }
     }
+    return;
+  }
+  if (form is not <list>) return;
+  match (form) {
+    case %(quote *) if (!depth): return;                                        // Quotation outside quasiquote is all data.
+    case %((!set ?head (!or quasiquote unquote unquote-splicing)) *parts): {
+      int inner = head == <quasiquote>.var() ? depth + 1 : depth - 1;           // Quasiquote nests; each unquote steps out.
+      if (inner < 0) inner = 0;
+      foreach (Var part, parts)
+        self.capture(env, part, bound, inner, captures);
+      return;
+    }
+    case %((!or lambda macro) ?params *body) if (!depth): {                     // Nested functions bind their own parameters.
+      List extended = bound;
+      if (params is <list>)
+        foreach (Var name, (List) params) extended = cons(name, extended);      // Extend without changing the outer binders.
+      foreach (Var part, body)
+        self.capture(env, part, extended, depth, captures);
+      return;
+    }
+    default:
+      foreach (Var part, (List) form)
+        self.capture(env, part, bound, depth, captures);
+  }
+}
+
+static Var Interp.closure(
+  Interp *self, Env *env, List params, Var body, int macro) {
+  Map captures = {};                                                            // Each closure owns its captured bindings.
+  self.capture(env, body, params, 0, captures);                                 // Capture before the defining call returns.
   Fn closure = Scope.malloc(sizeof(struct Fn));                                 // Allocate in the current Scope.
   *closure = (struct Fn) { params, body, captures, macro };                     // C dereference and compound literal.
   return Var.new(<lambda>, closure);                                            // Tag an already allocated pointer.
@@ -281,11 +305,11 @@ static Var Interp.closure(
 
 /* Invocation pairs parameters with values. A dotted parameter, as in
    (lambda (first . rest) ...), binds the remaining arguments as one List.
-   The body's lookup order is parameters, captures, caller frames, globals,
-   and reserved names. A captured value takes precedence over a caller
-   binding of the same name.
+   The body's lookup order is parameters, captures, globals, and reserved
+   names. Its frames have no link to the caller, whose local bindings cannot
+   change what a free name means.
 */
-static Var Interp.invoke(Interp *self, Env *env, Fn closure, List values) {
+static Var Interp.invoke(Interp *self, Fn closure, List values) {
   Map bindings = $auto({});                                                     // Map literal; cleanup on exit.
   for (List params = closure.params;                                            // C for with a typed List handle.
        params;                                                                  // Empty List is the null handle.
@@ -302,7 +326,7 @@ static Var Interp.invoke(Interp *self, Env *env, Fn closure, List values) {
     values = values.cdr();                                                      // Advance the argument tail too.
   }
   if (values) $fail(<bad-arity>, "apply", <value>, closure.body);              // Macro constructs the error record.
-  Env captured = { closure.captures, env };                                     // C aggregate with x2c Map handle.
+  Env captured = { closure.captures, NULL };                                    // No link to the caller's environment.
   Env local = { bindings, &captured };                                          // & takes a stack frame's C address.
   return self.eval(&local, closure.body);                                       // C stack address passed to eval.
 }
@@ -1009,4 +1033,3 @@ int main(int argc, char **argv) {                                               
   }
   return 1;
 }
-/* line 1000! */

@@ -64,6 +64,32 @@ def cases():
     yield 'dynamic-caller', (
         '(def f (lambda () (+ absent 1))) ((lambda (absent) (f)) 41)'
     )
+    yield 'deep-capture-warm', (
+        '(def n 100) (def f ((lambda (n) (lambda () (list (list (+ n 1))))) '
+        '5)) (list (f) ((lambda (n) (f)) 7) (f))'
+    )
+    yield 'nested-parameter-capture', (
+        '(def make ((lambda (x) (lambda (x) (lambda () x))) 5)) '
+        '(def f (make 9)) (list (f) ((lambda (x) (f)) 7))'
+    )
+    yield 'quoted-local', (
+        "(def f ((lambda (x) (lambda () (list 'x))) 5)) (f)"
+    )
+    yield 'quasiquote-capture', (
+        '(def f ((lambda (x) (lambda () `(data x ,(+ x 1) ,@(list x)))) '
+        '5)) (f)'
+    )
+    yield 'macro-introduced-name', (
+        "(def x 100) (defmacro read-x () 'x) "
+        '(def f ((lambda (x) (lambda () (read-x))) 5)) (f)'
+    )
+    yield 'macro-definition-capture', (
+        "(def m ((lambda (x) (macro () (list 'quote x))) 5)) "
+        '((lambda (x) (m)) 7)'
+    )
+    yield 'macro-scalar-capture', (
+        "(def m ((lambda (form) (macro () form)) '(+ 20 22))) (m)"
+    )
     yield 'global-rebind', (
         '(def x 1) (def f (lambda () (+ x 1))) (def x 9) (f)'
     )
