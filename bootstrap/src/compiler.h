@@ -40,6 +40,7 @@ typedef struct Compiler{
   List package_dirs;
   Map package_roots, package_aliases, package_members;
   Token token;
+  Token input_boundary;
   Tokenizer tokenizer;
   List return_type, include_dirs;
   Map deps;
@@ -164,6 +165,8 @@ Token Token_after_group(Token t);
 
 Symbol Compiler_peek(Compiler compiler, int steps);
 
+void Compiler_require_input(Compiler c);
+
 Symbol Compiler_expect(Compiler c, Symbol type);
 
 void Compiler_next(Compiler compiler);
@@ -231,6 +234,8 @@ List Compiler_init_statements(Compiler compiler, Symbol phase);
 SymTxn Compiler_begin_semantic_transaction(Compiler c);
 
 void SymTxn_commit(SymTxn s);
+
+void SymTxn_commit_transient(SymTxn s);
 
 int SymTxn_local_macros_changed(SymTxn s);
 

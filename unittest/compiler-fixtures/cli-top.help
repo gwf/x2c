@@ -11,6 +11,7 @@ Commands:
   run         Build an executable and run it
   new         Create a project that builds and runs
   script      Build a script when it changes and run it
+  repl        Evaluate a supported x2c subset (experimental)
   bootstrap   Install a native x2c from an APE binary
   env         Show the resolved home, layout, and tools
   install     Install a package into the home

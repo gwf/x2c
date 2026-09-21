@@ -30,7 +30,7 @@ Returns whether `argument` contains a driver-owned dependency option.
 Recognizes `-MMD`, `-MP`, `-MF`, and `-MT` as leading spellings or in a
 comma-delimited pass-through argument; `NULL` returns zero.
 
-Source: `src/cli.x:806`
+Source: `src/cli.x:828`
 
 #### cli_package_options
 
@@ -43,7 +43,7 @@ and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
 `cc_args` and `ld_args`
 serve native actions; no source-preprocessing options are returned.
 
-Source: `src/cli.x:940`
+Source: `src/cli.x:964`
 
 #### cli_parse
 
@@ -58,7 +58,7 @@ canonical-pool lifetimes described by `CliRequest`.
 **Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
 constructing request values.
 
-Source: `src/cli.x:1099`
+Source: `src/cli.x:1123`
 
 #### cli_response_arguments
 
@@ -68,7 +68,7 @@ Reads response-file tokens with ordinary quoting and UTF-8 checks.
 Returns canonical Strings without expanding `@` references. Paths and
 arguments retain the producing pool lifetime.
 
-Source: `src/cli.x:708`
+Source: `src/cli.x:730`
 
 #### cli_version
 
@@ -76,7 +76,7 @@ Source: `src/cli.x:708`
 
 Returns the version line `--version` prints, without a newline.
 
-Source: `src/cli.x:1154`
+Source: `src/cli.x:1178`
 
 ### `CliRequest`
 
@@ -87,7 +87,7 @@ Source: `src/cli.x:1154`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:1157`
+Source: `src/cli.x:1181`
 
 <a id="CliRequest.package_roots"></a>
 #### CliRequest.package_roots
@@ -100,7 +100,7 @@ when it exists. A root named twice is searched twice and resolves the
 same entries. Explicit directories are borrowed; the result is a fresh
 `List` only when the home directory is appended.
 
-Source: `src/cli.x:1165`
+Source: `src/cli.x:1189`
 
 ## Public types
 
@@ -111,7 +111,7 @@ Source: `src/cli.x:1165`
 <a id="CliRequest"></a>
 ### CliRequest
 
-`typedef struct CliRequest { Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args; List cc_args, ld_args, String out_dir, dep_file, dep_target, manifest; String target, profile, output, build_dir, temps_dir, label, state_seed; String prefix, cc, ar, compile_commands, sha256, index, Symbol kind; String diagnostics_file; Symbol color_mode; Symbol dump; int jobs, debugging, verbose, dry_run, quiet, plain, no_deps; int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp; int max_errors; int source_map, source_facts, live_symbols, cpp_symbols, force, rebuild, clean; SourceView sources; } *CliRequest`
+`typedef struct CliRequest { Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args; List cc_args, ld_args, String out_dir, dep_file, dep_target, manifest; String target, profile, output, build_dir, temps_dir, label, state_seed; String prefix, cc, ar, compile_commands, sha256, index, Symbol kind; String diagnostics_file; Symbol color_mode; Symbol dump; int jobs, debugging, verbose, dry_run, quiet, plain, no_deps; int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp; int repl_dump, repl_stats; int max_errors; int source_map, source_facts, live_symbols, cpp_symbols, force, rebuild, clean; SourceView sources; } *CliRequest`
 
 Holds one compiler command and its command-specific inputs and options.
 `List`s produced by `cli_parse` preserve CLI order. Copies are shallow:

@@ -1,21 +1,30 @@
 #!/usr/bin/env python3
-"""Optional focused checks for the local REPL spike; not a repository gate."""
+"""Optional focused checks for the integrated experimental REPL; not a repository gate."""
+import os
 import pathlib
+import pty
+import select
+import signal
+import tempfile
 import statistics
 import subprocess
 import time
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-BINARY = ROOT / "unittest/build/repl-spike/repl"
-SEED = ROOT / "unittest/build/repl-spike/seed.x"
+BINARY = pathlib.Path(os.environ.get("X2C", ROOT / "builds/0/x2c")).resolve()
+BUILD = ROOT / "unittest/build/repl-spike"
+BUILD.mkdir(parents=True, exist_ok=True)
+
 
 
 def run(source, *args):
-    return subprocess.run([str(BINARY), str(SEED), *args], input=source,
-                          text=True, capture_output=True, cwd=ROOT, timeout=20)
+    return subprocess.run([str(BINARY), "repl", *args], input=source,
+                          text=True, capture_output=True, cwd=tempfile.gettempdir(), timeout=20)
 
 
-def check(source, stdout, error="", code=0):
+def check(source, stdout, error="", code=None):
+    if code is None:
+        code = int(bool(error))
     result = run(source)
     assert result.returncode == code, result
     assert result.stdout == stdout, result
@@ -24,15 +33,21 @@ def check(source, stdout, error="", code=0):
         assert not result.stderr, result.stderr
 
 
-api_binary = SEED.parent / "api-check"
+objects = sorted(p for p in (ROOT / "builds/0/src").glob("*.o")
+                 if p.name != "main.o")
 subprocess.run([str(ROOT / "builds/0/x2c"), "build", "--plain",
-                "--build-dir", str(SEED.parent / "api-native"),
+                "--kind", "static-library", "--output", str(BUILD / "compiler.a"),
+                *map(str, objects)], cwd=ROOT, check=True,
+               capture_output=True, text=True)
+api_binary = BUILD / "api-check"
+subprocess.run([str(ROOT / "builds/0/x2c"), "build", "--plain",
+                "--build-dir", str(BUILD / "api-native"),
                 "--output", str(api_binary), "--x-include-dir", "src",
                 "--c-include-dir", "builds/0/src",
-                "tools/repl-spike/api-check.x", "tools/repl-spike/session.x",
-                str(SEED.parent / "compiler.a")], cwd=ROOT, check=True,
+                "tools/repl-spike/api-check.x",
+                str(BUILD / "compiler.a")], cwd=ROOT, check=True,
                capture_output=True, text=True)
-print(subprocess.check_output([str(api_binary), str(SEED)],
+print(subprocess.check_output([str(api_binary)],
                               cwd=ROOT, text=True).strip())
 
 
@@ -102,7 +117,7 @@ assert typed.startswith("typed: %(function "), result
 assert lowered.startswith("(") and typed[len("typed: %"):] != lowered, result
 result = run("int n=2;\n1 +\n:ast\n:lowered f extra\n:unknown\n"
              ":ast missing\n:lowered n\n:symbols extra\n:symbols\n2;\n")
-assert result.returncode == 0, result
+assert result.returncode == 1, result
 assert result.stdout == 'ok\n%((value "n"))\n=> 3\n', result
 assert result.stderr.splitlines() == [
     "usage: :ast NAME", "usage: :lowered NAME",
@@ -114,6 +129,53 @@ assert result.returncode == 0 and not result.stderr, result
 assert result.stdout.startswith("defined f\ntyped: %(function "), result
 assert "\nlowered: (" in result.stdout, result
 assert result.stdout.endswith("=> 3\n"), result
+
+check("unknown;\nint pending =\n:quit\n", "", "unresolved identifier")
+check(":unknown\n:quit\n", "", "unknown command")
+
+check("int counter(void) { static int n=0; n+=1; return n; }\n"
+      "int missing(void) { extern int absent; return absent; }\n"
+      "int thread(void) { threaded int n=0; return n; }\n:symbols\n"
+      "int counter(void) { return 7; }\ncounter();\n",
+      "%()\ndefined counter\n=> 7\n", "storage need native execution")
+result = run("", "--help")
+assert result.returncode == 0 and "x2c repl" in result.stdout, result
+result = run("", "source.x")
+assert result.returncode == 2 and "repl accepts no operands" in result.stderr, result
+
+# A pseudo-terminal exercises interactive status and a real prompt before SIGINT.
+for source in (b"unknown;\n:quit\n", None, b"int forever(void) { while (1) {} return 0; }\nforever();\n"):
+    master, slave = pty.openpty()
+    with subprocess.Popen([str(BINARY), "repl"], stdin=slave, stdout=slave,
+                          stderr=slave, cwd=tempfile.gettempdir()) as process:
+        os.close(slave)
+        try:
+            output = b""
+            deadline = time.monotonic() + 20
+            while b"x2c> " not in output:
+                assert time.monotonic() < deadline, output
+                ready, _, _ = select.select([master], [], [], 1)
+                if ready:
+                    output += os.read(master, 4096)
+            if source:
+                os.write(master, source)
+            if source and b":quit" in source:
+                assert process.wait(timeout=20) == 0
+            else:
+                if source:
+                    while b"defined forever" not in output:
+                        assert time.monotonic() < deadline, output
+                        ready, _, _ = select.select([master], [], [], 1)
+                        if ready:
+                            output += os.read(master, 4096)
+                    time.sleep(0.02)
+                process.send_signal(signal.SIGINT)
+                assert process.wait(timeout=5) == -signal.SIGINT
+        finally:
+            os.close(master)
+            if process.poll() is None:
+                process.kill()
+                process.wait()
 
 # The same authored functions execute through native compilation and lowering.
 functions = """int total = 12;
@@ -127,8 +189,8 @@ result = run(functions + "\n".join(e + ";" for e in expressions) + "\n",
 interpreted = [line[3:] for line in result.stdout.splitlines()
                if line.startswith("=> ")]
 assert result.returncode == 0 and len(interpreted) == 3, result
-native_source = SEED.parent / "parity.x"
-native_binary = SEED.parent / "parity"
+native_source = BUILD / "parity.x"
+native_binary = BUILD / "parity"
 native_source.write_text('#include <stdio.h>\n' + functions +
                          'int main(void) {\n' +
                          '\n'.join('printf("%d\\n", ' + e + ');'
@@ -139,7 +201,7 @@ subprocess.run([str(ROOT / "builds/0/x2c"), "build", "--output",
 native = subprocess.check_output([str(native_binary)], text=True).splitlines()
 assert interpreted == native, (interpreted, native)
 assert "machine entries=0 " not in result.stderr, result.stderr
-print("31 terminal checks and native parity passed:", ", ".join(native))
+print("39 terminal checks and native parity passed:", ", ".join(native))
 print(result.stderr.strip())
 
 startup = []

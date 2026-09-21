@@ -2357,12 +2357,13 @@ static List _materialize_delegate_receiver(List receiver, List path){
   return receiver;
 }
 
+void Compiler_require_input(Compiler);
 int String_is_identifier(String);
 String List_str(List);
 String Symbol_str(Symbol);
 void Compiler_next(Compiler);
 static List _parse_field_name(Compiler compiler, Symbol op_sym, List lhs_opt){
-  List slot = Compiler_try_parse_macro_slot(compiler, 920394);  if(List_truth(slot)) return cons(List_var(slot), NULL);  String field_name = compiler -> token -> text;  if(! String_truth(field_name) || ! String_is_identifier(field_name)){
+  Compiler_require_input(compiler);  List slot = Compiler_try_parse_macro_slot(compiler, 920394);  if(List_truth(slot)) return cons(List_var(slot), NULL);  String field_name = compiler -> token -> text;  if(! String_truth(field_name) || ! String_is_identifier(field_name)){
     List notes = cons(_273, cons(String_var(compiler -> token -> text), NULL));  if(List_truth(lhs_opt)) notes = cons(List_var(cons(_275, cons(String_var(List_str(lhs_opt)), NULL))), notes);  String msg = String_join(NULL, cons(String_var(_276), cons(String_var(Symbol_str(op_sym)), cons(String_var(_263), NULL))));  Compiler_report_error(compiler, 33658058, msg, compiler -> token, notes);
   }
   List field = cons(String_var(field_name), NULL);  Compiler_next(compiler);  return field;
@@ -3769,7 +3770,7 @@ List Compiler_parse_map_literal(Compiler);
 List Compiler_parse_string_literal(Compiler);
 List Compiler_parse_lambda_literal(Compiler);
 List Compiler_parse_primary(Compiler compiler){
-  if(! _init_guard_) _file_init_();  List slot = Compiler_try_parse_macro_slot(compiler, 405758822009820);  if(List_truth(slot)) return slot;  switch(Compiler_peek(compiler, 0)){
+  if(! _init_guard_) _file_init_();  Compiler_require_input(compiler);  List slot = Compiler_try_parse_macro_slot(compiler, 405758822009820);  if(List_truth(slot)) return slot;  switch(Compiler_peek(compiler, 0)){
     case 9297 : return Compiler_parse_macro_lisp_expression(compiler);  case 27051791223990 : return _parse_c_string_literals(compiler);  case 73 : return Compiler_try_parse_macro_expression(compiler);  case 19147688 :{
       List binding = Compiler_with_binding(compiler);  Var stored;  if(List_truth(binding) && Map_try_get(Compiler_semantic_binding_facts(compiler), List_var(cons(_1035, cons(List_var(binding), NULL))), & stored)){
         List expression = Var_list(stored);  Compiler_next(compiler);

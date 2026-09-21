@@ -2,7 +2,7 @@
 
     Copyright (c) 2026 Gary William Flake.
 */
-#include "session.x"
+#include "repl-session.x"
 #include "scope.x"
 #include "pool.x"
 #include "lisp.x"
@@ -38,10 +38,10 @@ static void _sample(String mode, int count, double started) {
 }
 
 int main(int argc, char **argv) {
-  if (argc != 4) return 2;
+  if (argc != 3) return 2;
   x2c_initialize_environment(argv[0]);
-  String mode = String.new(argv[2]);
-  int limit = atoi(argv[3]);
+  String mode = String.new(argv[1]);
+  int limit = atoi(argv[2]);
   if (limit <= 0) return 2;
   if (mode != "fixed" && mode != "values" && mode != "functions" &&
       mode != "rejected" && mode != "incomplete" && mode != "evaluate" &&
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
   Frontend frontend = Frontend.new(request);
   if (!frontend.preload_macro_libraries()) return 1;
   ParsedUnit unit;
-  if (!frontend.open(String.new(argv[1]), &unit)) return 1;
+  if (!frontend.open_session(&unit)) return 1;
   defer unit.close();
   ReplSession session = ReplSession.new(unit.compiler);
   if (session.submit("int n=0;").status != <executed>) return 1;

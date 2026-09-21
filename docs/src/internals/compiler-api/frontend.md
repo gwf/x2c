@@ -15,6 +15,7 @@ Configured compiler sessions and sequential source units.
 | [`Frontend.load_support`](#Frontend.load_support) | Loads process-owned collection support before units. |
 | [`Frontend.new`](#Frontend.new) | Borrows a configured request for sequential units. |
 | [`Frontend.open`](#Frontend.open) | Runs the source stages. |
+| [`Frontend.open_session`](#Frontend.open_session) | Opens an empty submission unit with the ordinary runtime prelude. |
 | [`Frontend.preload_macro_libraries`](#Frontend.preload_macro_libraries) | Evaluates the compile-time libraries and installs the compiler surface's own definitions, once for this process. |
 | [`Frontend.start`](#Frontend.start) | Tokenizes one input into a fresh unit with its own isolated `Context`. |
 | [`ParsedUnit.close`](#ParsedUnit.close) | Releases the unit after its caller has inspected or exported its results. |
@@ -51,7 +52,18 @@ Source: `src/frontend.x:77`
 Runs the source stages. On either result, the caller must close the
 unit.
 
-Source: `src/frontend.x:353`
+Source: `src/frontend.x:361`
+
+<a id="Frontend.open_session"></a>
+#### Frontend.open_session
+
+`int Frontend.open_session(Frontend frontend, ParsedUnit *unit)`
+
+Opens an empty submission unit with the ordinary runtime prelude.
+Preload macro libraries first. The caller must close the unit on either
+result; submissions and inspection results borrow its Context.
+
+Source: `src/frontend.x:367`
 
 <a id="Frontend.preload_macro_libraries"></a>
 #### Frontend.preload_macro_libraries
@@ -62,7 +74,7 @@ Evaluates the compile-time libraries and installs the compiler surface's
 own definitions, once for this process. Returns zero after reporting a
 failed preload, without publishing a partial session.
 
-Source: `src/frontend.x:306`
+Source: `src/frontend.x:314`
 
 <a id="Frontend.start"></a>
 #### Frontend.start
@@ -72,7 +84,7 @@ Source: `src/frontend.x:306`
 Tokenizes one input into a fresh unit with its own isolated `Context`.
 The caller must close the unit on either result.
 
-Source: `src/frontend.x:251`
+Source: `src/frontend.x:259`
 
 ### `ParsedUnit`
 
@@ -84,7 +96,7 @@ Source: `src/frontend.x:251`
 Releases the unit after its caller has inspected or exported its
 results.
 
-Source: `src/frontend.x:359`
+Source: `src/frontend.x:373`
 
 <a id="ParsedUnit.collect"></a>
 #### ParsedUnit.collect
@@ -94,7 +106,7 @@ Source: `src/frontend.x:359`
 Collects symbols and retains preprocessor outputs for adapter
 inspection.
 
-Source: `src/frontend.x:321`
+Source: `src/frontend.x:329`
 
 <a id="ParsedUnit.parse"></a>
 #### ParsedUnit.parse
@@ -104,7 +116,7 @@ Source: `src/frontend.x:321`
 Parses a collected unit, retaining both its AST and unsuccessful
 reports.
 
-Source: `src/frontend.x:342`
+Source: `src/frontend.x:350`
 
 ## Public types
 

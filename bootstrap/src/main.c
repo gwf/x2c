@@ -1010,6 +1010,8 @@ int list_command(CliRequest);
 
 int new_command(CliRequest);
 
+int repl_run(CliRequest);
+
 int script_run(CliRequest);
 
 int main(int argc, char * * argv){
@@ -1034,7 +1036,7 @@ int main(int argc, char * * argv){
   _configure_logging(request -> debugging);
   Frontend_load_support(request);
   Context command = Context_open_isolated_named("compiler command");
-  int result = request -> command == 45220543335690 ? _run_translation(request, NULL, NULL) : _run_build(request);
+  int result = request -> command == 45220543335690 ? _run_translation(request, NULL, NULL) : request -> command == 1190936 ? repl_run(request) : _run_build(request);
   Context_close(command);
   if(request -> command == 1282559016 && ! result) result = script_run(request);
 #ifdef __COSMOPOLITAN__

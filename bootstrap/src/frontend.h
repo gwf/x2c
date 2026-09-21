@@ -43,6 +43,8 @@ int ParsedUnit_parse(ParsedUnit * p);
 
 int Frontend_open(Frontend f, String filename, ParsedUnit * unit);
 
+int Frontend_open_session(Frontend frontend, ParsedUnit * unit);
+
 void ParsedUnit_close(ParsedUnit * unit);
 
 

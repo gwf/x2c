@@ -14,6 +14,7 @@
 #include "editor.x"
 #include "install.x"
 #include "script.x"
+#include "repl.x"
 #include "toolchain.x"
 #pragma private
 
@@ -572,7 +573,7 @@ int main(int argc, char **argv) {
   Context command = Context.open_isolated_named("compiler command");
   int result = request.command == <translate>
     ? _run_translation(request, NULL, NULL)
-    : _run_build(request);
+    : request.command == <repl> ? repl_run(request) : _run_build(request);
   command.close();
   if (request.command == <script> && !result) result = script_run(request);
 #ifdef __COSMOPOLITAN__

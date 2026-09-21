@@ -1,4 +1,4 @@
-/*  session.x -- persistent compiler submissions for the REPL research spike
+/*  repl-session.x -- persistent compiler submissions and inspection
 
     Copyright (c) 2026 Gary William Flake.
 */
@@ -30,6 +30,9 @@ typedef struct ReplResult {
 #include "lisp.x"
 #include "scope.x"
 
+/** Borrows an initialized submission compiler until its unit closes.
+    Source-fact collection must be disabled because submission scratch maps
+    are reclaimed after each call. */
 ReplSession ReplSession.new(Compiler compiler) {
   if (compiler.source_facts)
     raise %(bad-arg (operation "ReplSession.new")
@@ -70,7 +73,7 @@ static List _thunk(List items) =>
     (bind (binding -1 "__repl_eval") ((fnmod (params))))
     (block @items));
 
-static void _refuse(String why) { raise %(spike (why $why)); }
+static void _refuse(String why) { raise %(repl (why $why)); }
 
 static void _tokenize(Compiler c, String source, Scope scratch) {
   Scope.push(&scratch);
@@ -78,13 +81,18 @@ static void _tokenize(Compiler c, String source, Scope scratch) {
   c.tokenize(source);
 }
 
-// Native C can resolve an untyped name later; this evaluator cannot.
-static void _require_bound(Var syntax) {
-  match (syntax)
+// Native name resolution and persistent local storage need native execution.
+static void _require_evaluable(Var syntax) {
+  match (syntax) {
     case %(expr () (ident (binding ? ?name))):
       _refuse(%"unresolved identifier: $name");
+    case %(declare ?spec ?):
+      if (spec.contains(<static>) || spec.contains(<extern>) ||
+          spec.contains(<threaded>))
+        _refuse("static, extern, and threaded storage need native execution");
+  }
   if (syntax is <list>) foreach (Var child, syntax.list())
-    _require_bound(child);
+    _require_evaluable(child);
 }
 
 static List _initializers(List node, Map names, Array added, Array ids) {
@@ -111,7 +119,7 @@ static List _initializers(List node, Map names, Array added, Array ids) {
       return _thunk(statements);
     }
   }
-  _refuse("this top-level form is outside the spike");
+  _refuse("this top-level form is outside the REPL subset");
   return NULL;
 }
 
@@ -194,7 +202,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
       if (token.type == <preproc> || token.type == <"$(">)
         _refuse("preprocessor and direct Lisp input are unsupported");
       if (token.type == <const> || token.type == <volatile>)
-        _refuse("const and volatile need native checks outside this spike");
+        _refuse("const and volatile need native checks outside the REPL");
     }
     if (c.peek(0) == <eof>) {
       result.status = <executed>;
@@ -203,11 +211,11 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     if (c.peek(0) == <import> || c.peek(0) == <protocol> ||
         c.peek(0) == <"$("> || c.meta_form_is_definition() ||
         c.macro_form_is_definition() || c.keyword_form_is_definition())
-      _refuse("compiler-session definitions are outside the spike");
+      _refuse("compiler-session definitions are outside the REPL subset");
     if (c.peek(0) == <typedef> || c.peek(0) == <struct> ||
         c.peek(0) == <union> || c.peek(0) == <enum> ||
         c.peek(0) == <extern> || c.peek(0) == <static>)
-      _refuse("type and storage declarations are outside the spike");
+      _refuse("type and storage declarations are outside the REPL subset");
     int declaration = c.test_declaration();
     if (!declaration) {
       String prefix = "void __repl_eval(void) {\n";
@@ -216,6 +224,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
       _tokenize(c, result.source, scratch);
     }
     List node = c.parse_submission(end);
+    _require_evaluable(node);
     if (!declaration) {
       fn = _result_body(node, &prints);
       execute = 1;
@@ -237,7 +246,6 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
         execute = 1;
       }
     }
-    _require_bound(fn);
     result.diagnostics = c.diagnostics();
   }
   catch %(incomplete *): {
@@ -248,7 +256,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     result.diagnostics = c.diagnostics();
     return result;
   }
-  catch %(spike (why ?why)): {
+  catch %(repl (why ?why)): {
     result.diagnostics = c.diagnostics();
     result.message = why;
     return result;

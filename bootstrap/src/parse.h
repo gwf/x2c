@@ -66,6 +66,8 @@ int Compiler_skip_linkage_brace(Compiler c);
 
 List Compiler_parse_top_level(Compiler c);
 
+List Compiler_parse_submission(Compiler c, int end_position);
+
 List Compiler_finish_foreign_alias(Compiler c, List declaration, List native_syntax);
 
 List Compiler_bind_syntax(Compiler c, Var syntax, AstPos context, Type return_type);

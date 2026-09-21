@@ -21,6 +21,7 @@
 - [Packages](guide/packages.md)
 - [Wrapping a C Library](guide/wrapping-c-libraries.md)
 - [Commands and Files](guide/scripting.md)
+- [Experimental REPL](guide/repl.md)
 - [Programming Idioms](guide/idioms.md)
 
 # Language reference
@@ -116,6 +117,8 @@
   - [src/project.x](internals/compiler-api/project.md)
   - [src/protocol.x](internals/compiler-api/protocol.md)
   - [src/regions.x](internals/compiler-api/regions.md)
+  - [src/repl-session.x](internals/compiler-api/repl-session.md)
+  - [src/repl.x](internals/compiler-api/repl.md)
   - [src/report.x](internals/compiler-api/report.md)
   - [src/script.x](internals/compiler-api/script.md)
   - [src/sourceview.x](internals/compiler-api/sourceview.md)

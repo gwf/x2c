@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 34
+- Compiler modules: 36
 - Runtime modules: 56
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -104,22 +104,23 @@ Public functions:
 `Compiler.parsing_source_syntax`, `Compiler.macro_definition_locals`,
 `Compiler.fresh_name`, `Compiler.emitted_binding_name`, `Compiler.tokenize`,
 `Compiler.skip_trivia_from`, `Symbol.group_step`, `Token.group_close`,
-`Token.after_group`, `Compiler.peek`, `Compiler.expect`, `Compiler.next`,
-`Compiler.test`, `Compiler.record_origin`, `Compiler.anchor_origin`,
-`Compiler._at_function_arrow`, `Compiler._skip_shallow_expression`,
-`Compiler.skip_script_statement`, `Compiler.freeze_declaration_syntax`,
-`Compiler.thaw_declaration_syntax`, `Compiler.queue_declaration_effect`,
-`Compiler.run_declaration_effects`, `Compiler.select_declaration_defaults`,
-`Compiler.shallow_parse`, `Compiler.shallow_parse_overlay`,
-`Compiler.leading_preproc`, `Compiler.update_source_visibility`,
-`Compiler.full_parse`, `Compiler.cache`, `Compiler.cache_cons_cell`,
-`Compiler.cache_literal_list`, `Compiler.match_pattern_value`,
-`Compiler.match_pattern_is_static`, `Compiler.match_pattern_head_symbol`,
-`Compiler.match_pattern_flat_head`, `Compiler.match_pattern_binders`,
-`Compiler.define_match_binders`, `Compiler.add_early`, `Compiler.add_init`,
-`Compiler.init_statements`, `Compiler.begin_semantic_transaction`,
-`SymTxn.commit`, `SymTxn.local_macros_changed`, `SymTxn.rollback`, `Sym.reset`,
-`Sym.global_symbols`, `Sym.base_symbols`, `Sym.file_statics`,
+`Token.after_group`, `Compiler.peek`, `Compiler.require_input`,
+`Compiler.expect`, `Compiler.next`, `Compiler.test`, `Compiler.record_origin`,
+`Compiler.anchor_origin`, `Compiler._at_function_arrow`,
+`Compiler._skip_shallow_expression`, `Compiler.skip_script_statement`,
+`Compiler.freeze_declaration_syntax`, `Compiler.thaw_declaration_syntax`,
+`Compiler.queue_declaration_effect`, `Compiler.run_declaration_effects`,
+`Compiler.select_declaration_defaults`, `Compiler.shallow_parse`,
+`Compiler.shallow_parse_overlay`, `Compiler.leading_preproc`,
+`Compiler.update_source_visibility`, `Compiler.full_parse`, `Compiler.cache`,
+`Compiler.cache_cons_cell`, `Compiler.cache_literal_list`,
+`Compiler.match_pattern_value`, `Compiler.match_pattern_is_static`,
+`Compiler.match_pattern_head_symbol`, `Compiler.match_pattern_flat_head`,
+`Compiler.match_pattern_binders`, `Compiler.define_match_binders`,
+`Compiler.add_early`, `Compiler.add_init`, `Compiler.init_statements`,
+`Compiler.begin_semantic_transaction`, `SymTxn.commit`,
+`SymTxn.commit_transient`, `SymTxn.local_macros_changed`, `SymTxn.rollback`,
+`Sym.reset`, `Sym.global_symbols`, `Sym.base_symbols`, `Sym.file_statics`,
 `Sym.mark_static`, `Sym.current_symbols`, `Sym.current_binding`,
 `Sym.enumerator_owner`, `Sym.declare_enumerator`, `Sym.define_macro`,
 `Sym.has_local_macros`, `Sym.scope_count`, `Sym.lookup_macro`, `Sym.set`,
@@ -224,7 +225,7 @@ Public functions:
 
 `Frontend.load_support`, `Frontend.new`, `Frontend.start`,
 `Frontend.preload_macro_libraries`, `ParsedUnit.collect`, `ParsedUnit.parse`,
-`Frontend.open`, `ParsedUnit.close`
+`Frontend.open`, `Frontend.open_session`, `ParsedUnit.close`
 
 ### [src/generate.x](../src/generate.x)
 
@@ -324,7 +325,8 @@ Public functions:
 `Compiler.defines_main`, `Compiler.meta_form_is_definition`,
 `Compiler.script_statement_starts`, `Compiler.script_statement_executes`,
 `Compiler.skip_linkage_brace`, `Compiler.parse_top_level`,
-`Compiler.finish_foreign_alias`, `Compiler.bind_syntax`
+`Compiler.parse_submission`, `Compiler.finish_foreign_alias`,
+`Compiler.bind_syntax`
 
 ### [src/project.x](../src/project.x)
 
@@ -357,6 +359,23 @@ values that can outlive the region that allocated them.
 Public functions:
 
 `Compiler.check_regions`, `Compiler.region_escapes`
+
+### [src/repl-session.x](../src/repl-session.x)
+
+persistent compiler submissions and inspection.
+
+Public functions:
+
+`ReplSession.new`, `ReplSession.symbols`, `ReplSession.inspect`,
+`ReplSession.submit`
+
+### [src/repl.x](../src/repl.x)
+
+terminal client for persistent compiler submissions.
+
+Public functions:
+
+`repl_run`
 
 ### [src/report.x](../src/report.x)
 

@@ -238,8 +238,16 @@ static int _start(
   }
   compiler.recovery_depth++;
   try {
-    _configure_package(compiler, frontend.request, filename);
-    _tokenize_input(frontend, unit, filename);
+    if (filename) {
+      _configure_package(compiler, frontend.request, filename);
+      _tokenize_input(frontend, unit, filename);
+    }
+    else {
+      compiler.filename = "<repl>";
+      compiler.prelude = compiler.runtime_inc = 1;
+      compiler.include_dirs = frontend.include_dirs;
+      compiler.tokenize("$(begin)");
+    }
   }
   catch %(malformed *): return 0;
   return !compiler.error_count();
@@ -352,6 +360,12 @@ int ParsedUnit.parse(ParsedUnit *p) {
 */
 int Frontend.open(Frontend f, String filename, ParsedUnit *unit) =>
   f.start(filename, unit) && unit.collect(f) && unit.parse();
+
+/** Opens an empty submission unit with the ordinary runtime prelude.
+    Preload macro libraries first. The caller must close the unit on either
+    result; submissions and inspection results borrow its Context. */
+int Frontend.open_session(Frontend frontend, ParsedUnit *unit) =>
+  _start(frontend, NULL, unit, 0) && unit.collect(frontend) && unit.parse();
 
 /** Releases the unit after its caller has inspected or exported its
     results.

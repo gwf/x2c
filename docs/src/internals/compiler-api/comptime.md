@@ -41,7 +41,7 @@ source. Another `meta` function may call it: calling one is what makes
 the caller compile-time only too, so a body being parsed under the marker
 is left alone.
 
-Source: `src/comptime.x:2238`
+Source: `src/comptime.x:2252`
 
 <a id="Compiler.fold_meta_call"></a>
 #### Compiler.fold_meta_call
@@ -58,7 +58,7 @@ installed folds, so an import's runtime definition keeps the run-time
 call that designates the unit emitting it. Evaluation runs in the macro
 session; a raise there leaves the call.
 
-Source: `src/comptime.x:2260`
+Source: `src/comptime.x:2274`
 
 <a id="Compiler.inherit_shared_meta"></a>
 #### Compiler.inherit_shared_meta
@@ -69,7 +69,7 @@ Restores the shared definitions' derived call restrictions into a fresh
 compiler pass. Reads existing process tables without opening Lisp or
 creating a lowering cache in the unit's Context.
 
-Source: `src/comptime.x:1989`
+Source: `src/comptime.x:2003`
 
 <a id="Compiler.install_comptime"></a>
 #### Compiler.install_comptime
@@ -81,7 +81,7 @@ function is callable from compile-time Lisp under its own name.
 Returns whether the lowering succeeded. This method mutates the macro
 session and does not open a semantic transaction.
 
-Source: `src/comptime.x:2044`
+Source: `src/comptime.x:2058`
 
 <a id="Compiler.lower_comptime"></a>
 #### Compiler.lower_comptime
@@ -94,7 +94,7 @@ The result is the loop definitions the body needed followed by the
 function's own, in evaluation order. This method does not open a
 semantic transaction.
 
-Source: `src/comptime.x:1889`
+Source: `src/comptime.x:1898`
 
 <a id="Compiler.lower_declined"></a>
 #### Compiler.lower_declined
@@ -103,7 +103,7 @@ Source: `src/comptime.x:1889`
 
 Returns why the last `Compiler.lower_comptime` declined, or `NULL`.
 
-Source: `src/comptime.x:1948`
+Source: `src/comptime.x:1962`
 
 <a id="Compiler.lower_meta_expression"></a>
 #### Compiler.lower_meta_expression
@@ -112,7 +112,7 @@ Source: `src/comptime.x:1948`
 
 Lowers a closed expression for explicit compile-time evaluation.
 
-Source: `src/comptime.x:2108`
+Source: `src/comptime.x:2122`
 
 <a id="Compiler.lower_reached_globals"></a>
 #### Compiler.lower_reached_globals
@@ -122,7 +122,7 @@ Source: `src/comptime.x:2108`
 Returns whether the last `Compiler.install_comptime` reached file-scope
 state, directly or through a callee already recorded as reaching it.
 
-Source: `src/comptime.x:2084`
+Source: `src/comptime.x:2098`
 
 <a id="Compiler.lower_reached_meta"></a>
 #### Compiler.lower_reached_meta
@@ -132,7 +132,7 @@ Source: `src/comptime.x:2084`
 Returns whether the last `Compiler.install_comptime` reached a `Meta`
 operation, directly or through a callee already recorded as reaching one.
 
-Source: `src/comptime.x:2092`
+Source: `src/comptime.x:2106`
 
 <a id="Compiler.meta_is_comptime_only"></a>
 #### Compiler.meta_is_comptime_only
@@ -142,7 +142,7 @@ Source: `src/comptime.x:2092`
 Returns whether `fn` is a `meta` function this compiler recorded as
 compile-time only, whose runtime form the unit does not emit.
 
-Source: `src/comptime.x:2100`
+Source: `src/comptime.x:2114`
 
 <a id="Compiler.meta_value_expression"></a>
 #### Compiler.meta_value_expression
@@ -154,7 +154,7 @@ preserving `declared`
 when supplied. Returns NULL for values requiring code insertion or a
 representation other than a scalar literal.
 
-Source: `src/comptime.x:2164`
+Source: `src/comptime.x:2178`
 
 ## Design notes
 

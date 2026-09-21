@@ -18,20 +18,25 @@ parser.add_argument("modes", nargs="*", choices=MODES)
 args = parser.parse_args()
 if args.count <= 0:
     parser.error("input count must be positive")
+BUILD.mkdir(parents=True, exist_ok=True)
 LOGS.mkdir(parents=True, exist_ok=True)
 with (LOGS / "build.log").open("w") as log:
-    subprocess.run([str(ROOT / "tools/repl-spike/run"), "--build-only"],
+    objects = sorted(p for p in (ROOT / "builds/0/src").glob("*.o")
+                     if p.name != "main.o")
+    subprocess.run([str(ROOT / "builds/0/x2c"), "build", "--plain",
+                    "--kind", "static-library",
+                    "--output", str(BUILD / "compiler.a"), *map(str, objects)],
                    cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True)
     subprocess.run([str(ROOT / "builds/0/x2c"), "build", "--plain",
                     "--build-dir", str(BUILD / "retention-native"),
                     "--output", str(BUILD / "retention"),
                     "--x-include-dir", "src", "--c-include-dir", "builds/0/src",
-                    "tools/repl-spike/retention.x", "tools/repl-spike/session.x",
+                    "tools/repl-spike/retention.x",
                     str(BUILD / "compiler.a")], cwd=ROOT, stdout=log,
                    stderr=subprocess.STDOUT, check=True)
 print("workload       inputs  seconds  peak MiB  retained allocations")
 for mode in args.modes or MODES:
-    result = subprocess.run([str(BUILD / "retention"), str(BUILD / "seed.x"),
+    result = subprocess.run([str(BUILD / "retention"),
                              mode, str(args.count)], cwd=ROOT, capture_output=True,
                             text=True, timeout=120)
     (LOGS / f"{mode}.csv").write_text(result.stdout)

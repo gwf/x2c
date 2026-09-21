@@ -2,7 +2,7 @@
 
     Copyright (c) 2026 Gary William Flake.
 */
-#include "session.x"
+#include "repl-session.x"
 #include "lisp.x"
 #include "scope.x"
 #include <stdio.h>
@@ -151,7 +151,7 @@ int main(int argc, char **argv) {
   for (int phase = 0; phase < 2; phase++) {
     for (int run = 0; run < 3; run++) {
       ParsedUnit unit;
-      if (!frontend.open(String.new(argv[1]), &unit)) return 1;
+      if (!frontend.open_session(&unit)) return 1;
       if (phase) {
         _transaction_deletion(unit.compiler);
         ReplSession session = ReplSession.new(unit.compiler);
