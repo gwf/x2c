@@ -32,18 +32,18 @@ does not imply that a similarly named direct method works.
 
 Loaded layers: `etc/init.xlisp`, `etc/lisp-values.xlisp`, `etc/comptime.xlisp`, `etc/compiler-sdk.xlisp`, `etc/builtin-macros.xlisp`.
 
-Source fingerprint: `978a9cfd2afbad93dbdf21d6a78f9b2408e9c81524f0f2357d5dddbc536d920b`.
+Source fingerprint: `793824378a78738aab2d71c731a04bc7e6ac0b06bdbd9c99561273acd011e904`.
 
 Compiler fingerprint: `1e2926c596a6461b7a1ec335f9c49b5673c31c82deb14e25a99ab53a19b33408`.
 
 | Type | Callables | Binding found | No binding found |
 | --- | ---: | ---: | ---: |
-| String | 89 | 29 | 60 |
-| List | 95 | 22 | 73 |
-| Array | 61 | 18 | 43 |
-| Map | 38 | 12 | 26 |
-| Symbol | 14 | 3 | 11 |
-| Var | 186 | 14 | 172 |
+| String | 89 | 31 | 58 |
+| List | 95 | 28 | 67 |
+| Array | 61 | 20 | 41 |
+| Map | 38 | 14 | 24 |
+| Symbol | 14 | 5 | 9 |
+| Var | 186 | 19 | 167 |
 
 ## What a missing operation may need
 
@@ -69,32 +69,32 @@ explicit checks before claiming runtime equivalence.
 
 **reproduced failure:** `strip`.
 
-**bound, unverified:** `add`, `capitalize`, `contains`, `count`, `endswith`, `equal`, `escape`, `find`, `find_all`, `getindex`, `getslice`, `join`, `lower`, `new`, `partition`, `remove_prefix`, `remove_suffix`, `repeat`, `replace`, `rfind`, `rpartition`, `split`, `split_lines`, `startswith`, `unescape`, `upper`, `var`.
+**bound, unverified:** `add`, `capitalize`, `contains`, `count`, `endswith`, `equal`, `escape`, `find`, `find_all`, `getindex`, `getslice`, `join`, `lower`, `new`, `partition`, `remove_prefix`, `remove_suffix`, `repeat`, `replace`, `repr`, `rfind`, `rpartition`, `split`, `split_lines`, `startswith`, `str`, `unescape`, `upper`, `var`.
 
-**no binding found:** `c_compare`, `c_find`, `c_len`, `compare`, `contains_digit`, `dedent`, `filter`, `find_within`, `free`, `hash`, `intern`, `intern_free`, `is_alnum`, `is_alnum_under`, `is_alpha`, `is_alpha_under`, `is_digit`, `is_identifier`, `is_lower`, `is_lower_under`, `is_permanent`, `is_space`, `is_upper`, `is_upper_under`, `iter`, `keep`, `lines`, `lstrip`, `malloc`, `map`, `new_fill`, `new_in`, `new_len`, `open`, `pad_center`, `pad_left`, `pad_right`, `parse`, `parse_char`, `printf`, `promote`, `reject`, `replace_n`, `repr`, `rstrip`, `sha256`, `split_n`, `splits`, `squeeze`, `str`, `symbol`, `truth`, `try_double`, `try_long`, `try_next`, `try_own`, `withindex`, `words`, `write_repr`, `write_str`.
+**no binding found:** `c_compare`, `c_find`, `c_len`, `compare`, `contains_digit`, `dedent`, `filter`, `find_within`, `free`, `hash`, `intern`, `intern_free`, `is_alnum`, `is_alnum_under`, `is_alpha`, `is_alpha_under`, `is_digit`, `is_identifier`, `is_lower`, `is_lower_under`, `is_permanent`, `is_space`, `is_upper`, `is_upper_under`, `iter`, `keep`, `lines`, `lstrip`, `malloc`, `map`, `new_fill`, `new_in`, `new_len`, `open`, `pad_center`, `pad_left`, `pad_right`, `parse`, `parse_char`, `printf`, `promote`, `reject`, `replace_n`, `rstrip`, `sha256`, `split_n`, `splits`, `squeeze`, `symbol`, `truth`, `try_double`, `try_long`, `try_next`, `try_own`, `withindex`, `words`, `write_repr`, `write_str`.
 
 | Direct callable | State | Binding provenance | Considerations | Tier/module | Source |
 | --- | --- | --- | --- | --- | --- |
-| `String String.add(String str, String other)` | bound, unverified | etc/comptime.xlisp:182 | binding | primary/api | lib/string.x:575 |
+| `String String.add(String str, String other)` | bound, unverified | etc/comptime.xlisp:194 | binding | primary/api | lib/string.x:575 |
 | `int String.c_compare(const char *, const char *)` | no binding found | none found | pointer | unclassified generated/api | lib/common.x (interface) |
 | `char * String.c_find(const char *, int)` | no binding found | none found | pointer | unclassified generated/api | lib/common.x (interface) |
 | `size_t String.c_len(const char *)` | no binding found | none found | pointer | unclassified generated/api | lib/common.x (interface) |
-| `String String.capitalize(String str)` | bound, unverified | etc/comptime.xlisp:200 | binding | primary/api | lib/string.x:718 |
+| `String String.capitalize(String str)` | bound, unverified | etc/comptime.xlisp:212 | binding | primary/api | lib/string.x:718 |
 | `int String.compare(String x, String y)` | no binding found | none found | binding | advanced/api | lib/string.x:1398 |
-| `int String.contains(String str, String sub)` | bound, unverified | etc/comptime.xlisp:187 | binding | primary/api | lib/string.x:530 |
+| `int String.contains(String str, String sub)` | bound, unverified | etc/comptime.xlisp:199 | binding | primary/api | lib/string.x:530 |
 | `int String.contains_digit(String str)` | no binding found | none found | binding | primary/api | lib/string-classify.x:19 |
-| `int String.count(String str, String sub)` | bound, unverified | etc/comptime.xlisp:199 | binding | primary/api | lib/string.x:505 |
+| `int String.count(String str, String sub)` | bound, unverified | etc/comptime.xlisp:211 | binding | primary/api | lib/string.x:505 |
 | `String String.dedent(String str)` | no binding found | none found | binding | primary/api | lib/string.x:779 |
-| `int String.endswith(String str, String suffix)` | bound, unverified | etc/comptime.xlisp:189 | binding | primary/api | lib/string.x:553 |
-| `int String.equal(String x, String y)` | bound, unverified | etc/comptime.xlisp:207 | binding | advanced/api | lib/string.x:1386 |
-| `String String.escape(String str)` | bound, unverified | etc/comptime.xlisp:204 | binding | advanced/api | lib/string.x:1266 |
+| `int String.endswith(String str, String suffix)` | bound, unverified | etc/comptime.xlisp:201 | binding | primary/api | lib/string.x:553 |
+| `int String.equal(String x, String y)` | bound, unverified | etc/comptime.xlisp:219 | binding | advanced/api | lib/string.x:1386 |
+| `String String.escape(String str)` | bound, unverified | etc/comptime.xlisp:216 | binding | advanced/api | lib/string.x:1266 |
 | `String String.filter(String str, Func fn)` | no binding found | none found | callback | primary/api | lib/string.x:825 |
-| `int String.find(String str, String sub)` | bound, unverified | etc/comptime.xlisp:186 | binding | primary/api | lib/string.x:455 |
-| `List String.find_all(String str, String sub, int start, int end)` | bound, unverified | etc/comptime.xlisp:197 | binding | primary/api | lib/string.x:477 |
+| `int String.find(String str, String sub)` | bound, unverified | etc/comptime.xlisp:198 | binding | primary/api | lib/string.x:455 |
+| `List String.find_all(String str, String sub, int start, int end)` | bound, unverified | etc/comptime.xlisp:209 | binding | primary/api | lib/string.x:477 |
 | `int String.find_within(String str, String sub, int start, int end)` | no binding found | none found | binding | primary/api | lib/string.x:434 |
 | `void String.free(String str)` | no binding found | none found | ownership | advanced/api | lib/string.x:227 |
-| `int String.getindex(String str, int index)` | bound, unverified | etc/comptime.xlisp:181 | binding | primary/api | lib/string.x:519 |
-| `String String.getslice(String s, int start, int stop, int step)` | bound, unverified | etc/comptime.xlisp:190 | binding | primary/api | lib/string.x:655 |
+| `int String.getindex(String str, int index)` | bound, unverified | etc/comptime.xlisp:191 | binding | primary/api | lib/string.x:519 |
+| `String String.getslice(String s, int start, int stop, int step)` | bound, unverified | etc/comptime.xlisp:202 | binding | primary/api | lib/string.x:655 |
 | `unsigned String.hash(String str)` | no binding found | none found | binding | advanced/api | lib/string.x:1373 |
 | `Self String.intern(Self string)` | no binding found | none found | binding | advanced/api | lib/string.x:283 |
 | `Self String.intern_free(Self string)` | no binding found | none found | ownership | advanced/api | lib/string.x:308 |
@@ -111,15 +111,15 @@ explicit checks before claiming runtime equivalence.
 | `int String.is_upper(String s)` | no binding found | none found | binding | primary/api | lib/string-classify.x:91 |
 | `int String.is_upper_under(String s)` | no binding found | none found | binding | primary/api | lib/string-classify.x:96 |
 | `Iter String.iter(String x, Iter dest)` | no binding found | none found | resource | primary/api | lib/string.x:1445 |
-| `String String.join(String sep, List strings)` | bound, unverified | etc/comptime.xlisp:192 | binding | primary/api | lib/string.x:1002 |
+| `String String.join(String sep, List strings)` | bound, unverified | etc/comptime.xlisp:204 | binding | primary/api | lib/string.x:1002 |
 | `String String.keep(String str, String chars)` | no binding found | none found | binding | primary/api | lib/string.x:863 |
 | `int String.len(String str)` | verified example | etc/init.xlisp:107 | binding | primary/api | lib/string.x:248 |
 | `Split String.lines(String str)` | no binding found | none found | resource | primary/api | lib/split.x:205 |
-| `String String.lower(String str)` | bound, unverified | etc/comptime.xlisp:183 | binding | primary/api | lib/string.x:699 |
+| `String String.lower(String str)` | bound, unverified | etc/comptime.xlisp:195 | binding | primary/api | lib/string.x:699 |
 | `String String.lstrip(String str, char *negChars)` | no binding found | none found | pointer | primary/api | lib/string.x:727 |
 | `String String.malloc(int len)` | no binding found | none found | ownership | advanced/api | lib/string.x:207 |
 | `String String.map(String str, Func fn)` | no binding found | none found | callback | primary/api | lib/string.x:841 |
-| `String String.new(const char *str)` | bound, unverified | etc/comptime.xlisp:206 | pointer | primary/api | lib/string.x:378 |
+| `String String.new(const char *str)` | bound, unverified | etc/comptime.xlisp:218 | pointer | primary/api | lib/string.x:378 |
 | `String String.new_fill(char fill, int count)` | no binding found | none found | binding | advanced/api | lib/string.x:408 |
 | `String String.new_in(Pool pool, const char *bytes, int length)` | no binding found | none found | ownership, resource, pointer | advanced/api | lib/string.x:61 |
 | `String String.new_len(const char *str, int len)` | no binding found | none found | pointer | advanced/api | lib/string.x:395 |
@@ -129,37 +129,37 @@ explicit checks before claiming runtime equivalence.
 | `String String.pad_right(String str, int width, char fill)` | no binding found | none found | binding | primary/api | lib/string.x:916 |
 | `String String.parse(String str)` | no binding found | none found | binding | advanced/api | lib/string.x:1359 |
 | `int String.parse_char(String str)` | no binding found | none found | binding | advanced/api | lib/string.x:1324 |
-| `List String.partition(String str, String sep)` | bound, unverified | etc/comptime.xlisp:195 | binding | primary/api | lib/string.x:959 |
+| `List String.partition(String str, String sep)` | bound, unverified | etc/comptime.xlisp:207 | binding | primary/api | lib/string.x:959 |
 | `String String.printf(String fmt, ...)` | no binding found | none found | pointer | advanced/api | lib/string.x:1108 |
 | `Self String.promote(Self str)` | no binding found | none found | ownership | advanced/api | lib/string.x:117 |
 | `String String.reject(String str, String chars)` | no binding found | none found | binding | primary/api | lib/string.x:874 |
-| `String String.remove_prefix(String str, String prefix)` | bound, unverified | etc/comptime.xlisp:202 | binding | primary/api | lib/string.x:931 |
-| `String String.remove_suffix(String str, String suffix)` | bound, unverified | etc/comptime.xlisp:203 | binding | primary/api | lib/string.x:941 |
-| `String String.repeat(String str, int count)` | bound, unverified | etc/comptime.xlisp:201 | binding | primary/api | lib/string.x:599 |
-| `String String.replace(String str, String old, String replacement)` | bound, unverified | etc/comptime.xlisp:191 | binding | primary/api | lib/string.x:1094 |
+| `String String.remove_prefix(String str, String prefix)` | bound, unverified | etc/comptime.xlisp:214 | binding | primary/api | lib/string.x:931 |
+| `String String.remove_suffix(String str, String suffix)` | bound, unverified | etc/comptime.xlisp:215 | binding | primary/api | lib/string.x:941 |
+| `String String.repeat(String str, int count)` | bound, unverified | etc/comptime.xlisp:213 | binding | primary/api | lib/string.x:599 |
+| `String String.replace(String str, String old, String replacement)` | bound, unverified | etc/comptime.xlisp:203 | binding | primary/api | lib/string.x:1094 |
 | `String String.replace_n( String str, String old, String replacement, int max_replacements)` | no binding found | none found | binding | primary/api | lib/string.x:1044 |
-| `String String.repr(String str)` | no binding found | none found | binding | advanced/api | lib/string.x:1289 |
-| `int String.rfind(String str, String sub)` | bound, unverified | etc/comptime.xlisp:198 | binding | primary/api | lib/string.x:463 |
-| `List String.rpartition(String str, String sep)` | bound, unverified | etc/comptime.xlisp:196 | binding | primary/api | lib/string.x:979 |
+| `String String.repr(String str)` | bound, unverified | etc/comptime.xlisp:193 | binding | advanced/api | lib/string.x:1289 |
+| `int String.rfind(String str, String sub)` | bound, unverified | etc/comptime.xlisp:210 | binding | primary/api | lib/string.x:463 |
+| `List String.rpartition(String str, String sep)` | bound, unverified | etc/comptime.xlisp:208 | binding | primary/api | lib/string.x:979 |
 | `String String.rstrip(String str, char *negChars)` | no binding found | none found | pointer | primary/api | lib/string.x:740 |
 | `String String.sha256(String text)` | no binding found | none found | binding | primary/optional | lib/digest.x:110 |
-| `List String.split(String str, String sep)` | bound, unverified | etc/comptime.xlisp:193 | binding | primary/api | lib/split.x:111 |
-| `List String.split_lines(String str, int keep_ends)` | bound, unverified | etc/comptime.xlisp:194 | binding | primary/api | lib/split.x:124 |
+| `List String.split(String str, String sep)` | bound, unverified | etc/comptime.xlisp:205 | binding | primary/api | lib/split.x:111 |
+| `List String.split_lines(String str, int keep_ends)` | bound, unverified | etc/comptime.xlisp:206 | binding | primary/api | lib/split.x:124 |
 | `List String.split_n(String str, String sep, int max_splits)` | no binding found | none found | binding | primary/api | lib/split.x:81 |
 | `Split String.splits(String str, String sep)` | no binding found | none found | resource | primary/api | lib/split.x:219 |
 | `String String.squeeze(String str, String chars)` | no binding found | none found | binding | primary/api | lib/string.x:884 |
-| `int String.startswith(String str, String prefix)` | bound, unverified | etc/comptime.xlisp:188 | binding | primary/api | lib/string.x:542 |
-| `String String.str(String str)` | no binding found | none found | binding | advanced/api | lib/string.x:1283 |
-| `String String.strip(String str, char *negChars)` | reproduced failure | etc/comptime.xlisp:184 | pointer | primary/api | lib/string.x:758 |
+| `int String.startswith(String str, String prefix)` | bound, unverified | etc/comptime.xlisp:200 | binding | primary/api | lib/string.x:542 |
+| `String String.str(String str)` | bound, unverified | etc/comptime.xlisp:192 | binding | advanced/api | lib/string.x:1283 |
+| `String String.strip(String str, char *negChars)` | reproduced failure | etc/comptime.xlisp:196 | pointer | primary/api | lib/string.x:758 |
 | `Symbol String.symbol(String str)` | no binding found | none found | binding | advanced/api | lib/string.x:1347 |
 | `inline int String.truth(String string)` | no binding found | none found | syntax | advanced/api | lib/common.x:402 |
 | `int String.try_double(String str, double *out)` | no binding found | none found | pointer | advanced/api | lib/string-number.x:89 |
 | `int String.try_long(String str, long *out)` | no binding found | none found | pointer | advanced/api | lib/string-number.x:39 |
 | `int String.try_next(String str, int *cursor, int *out)` | no binding found | none found | pointer | primary/api | lib/string.x:1422 |
 | `int String.try_own(String str)` | no binding found | none found | ownership, internal | internal/api | lib/string.x:131 |
-| `String String.unescape(String str)` | bound, unverified | etc/comptime.xlisp:205 | binding | primary/api | lib/string.x:1235 |
-| `String String.upper(String str)` | bound, unverified | etc/comptime.xlisp:185 | binding | primary/api | lib/string.x:709 |
-| `inline Var String.var(String x)` | bound, unverified | etc/comptime.xlisp:225 | binding | advanced/api | lib/common.x:541 |
+| `String String.unescape(String str)` | bound, unverified | etc/comptime.xlisp:217 | binding | primary/api | lib/string.x:1235 |
+| `String String.upper(String str)` | bound, unverified | etc/comptime.xlisp:197 | binding | primary/api | lib/string.x:709 |
+| `inline Var String.var(String x)` | bound, unverified | etc/comptime.xlisp:244 | binding | advanced/api | lib/common.x:541 |
 | `String String.withindex(String str, int index, char value)` | no binding found | none found | binding | primary/api | lib/string.x:630 |
 | `Split String.words(String str)` | no binding found | none found | resource | primary/api | lib/split.x:190 |
 | `Buffer String.write_repr(String str, Buffer out)` | no binding found | none found | resource | advanced/api | lib/string.x:1308 |
@@ -173,35 +173,35 @@ explicit checks before claiming runtime equivalence.
 
 ## List
 
-**verified example:** `car`, `cdr`, `cons`.
+**verified example:** `caar`, `caddr`, `car`, `cddr`, `cdr`, `cons`.
 
-**reproduced failure:** `foldl`.
+**reproduced failure:** `cadr`, `foldl`.
 
-**bound, unverified:** `append`, `array`, `assoc`, `contains`, `equal`, `filter`, `get`, `getindex`, `index`, `last`, `len`, `map`, `match`, `reverse`, `search`, `search_replace`, `sort`, `try_next`, `var`.
+**bound, unverified:** `append`, `array`, `assoc`, `contains`, `equal`, `filter`, `get`, `getindex`, `index`, `last`, `len`, `map`, `match`, `repr`, `reverse`, `search`, `search_replace`, `sort`, `str`, `try_next`, `var`.
 
-**no binding found:** `all`, `any`, `caaaar`, `caaadr`, `caaar`, `caadar`, `caaddr`, `caadr`, `caar`, `cadaar`, `cadadr`, `cadar`, `caddar`, `cadddr`, `caddr`, `cadr`, `cdaaar`, `cdaadr`, `cdaar`, `cdadar`, `cdaddr`, `cdadr`, `cdar`, `cddaar`, `cddadr`, `cddar`, `cdddar`, `cddddr`, `cdddr`, `cddr`, `compare`, `concat_n`, `cons_in`, `find`, `flatten`, `flatten_all`, `getslice`, `hash`, `head`, `iter`, `job`, `list_n`, `listchar`, `listdbl`, `listfloat`, `listint`, `listshort`, `liststring`, `listsymbol`, `map2`, `match_replace`, `nth_cdr`, `promote`, `replace`, `repr`, `sort_by`, `sort_with`, `str`, `sublis`, `subseq`, `tail`, `truth`, `try_match`, `try_match_replace`, `try_own`, `try_search`, `unique`, `unpack_n`, `unpack_vars_n`, `write_repr`, `write_str`, `zip_with`.
+**no binding found:** `all`, `any`, `caaaar`, `caaadr`, `caaar`, `caadar`, `caaddr`, `caadr`, `cadaar`, `cadadr`, `cadar`, `caddar`, `cadddr`, `cdaaar`, `cdaadr`, `cdaar`, `cdadar`, `cdaddr`, `cdadr`, `cdar`, `cddaar`, `cddadr`, `cddar`, `cdddar`, `cddddr`, `cdddr`, `compare`, `concat_n`, `cons_in`, `find`, `flatten`, `flatten_all`, `getslice`, `hash`, `head`, `iter`, `job`, `list_n`, `listchar`, `listdbl`, `listfloat`, `listint`, `listshort`, `liststring`, `listsymbol`, `map2`, `match_replace`, `nth_cdr`, `promote`, `replace`, `sort_by`, `sort_with`, `sublis`, `subseq`, `tail`, `truth`, `try_match`, `try_match_replace`, `try_own`, `try_search`, `unique`, `unpack_n`, `unpack_vars_n`, `write_repr`, `write_str`, `zip_with`.
 
 | Direct callable | State | Binding provenance | Considerations | Tier/module | Source |
 | --- | --- | --- | --- | --- | --- |
 | `int List.all(List lst, Func pred)` | no binding found | none found | callback | primary/api | lib/list.x:407 |
 | `int List.any(List lst, Func pred)` | no binding found | none found | callback | primary/api | lib/list.x:392 |
 | `Self List.append(Self a, Self b)` | bound, unverified | etc/builtin-macros.xlisp:18 | binding | primary/api | lib/list.x:223 |
-| `Array List.array(List lst)` | bound, unverified | etc/comptime.xlisp:79 | binding | primary/api | lib/list.x:497 |
-| `Var List.assoc(List list, Var key)` | bound, unverified | etc/comptime.xlisp:71 | binding | advanced/api | lib/list.x:649 |
+| `Array List.array(List lst)` | bound, unverified | etc/comptime.xlisp:85 | binding | primary/api | lib/list.x:497 |
+| `Var List.assoc(List list, Var key)` | bound, unverified | etc/comptime.xlisp:77 | binding | advanced/api | lib/list.x:649 |
 | `inline Var List.caaaar(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:33 |
 | `inline Var List.caaadr(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:35 |
 | `inline Var List.caaar(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:18 |
 | `inline Var List.caadar(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:37 |
 | `inline Var List.caaddr(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:39 |
 | `inline Var List.caadr(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:20 |
-| `inline Var List.caar(List lst)` | no binding found | none found | binding | advanced/api | lib/list.x:187 |
+| `inline Var List.caar(List lst)` | verified example | etc/comptime.xlisp:73 | binding | advanced/api | lib/list.x:187 |
 | `inline Var List.cadaar(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:41 |
 | `inline Var List.cadadr(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:43 |
 | `inline Var List.cadar(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:22 |
 | `inline Var List.caddar(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:45 |
 | `inline Var List.cadddr(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:47 |
-| `inline Var List.caddr(List lst)` | no binding found | none found | binding | advanced/api | lib/list.x:193 |
-| `inline Var List.cadr(List lst)` | no binding found | none found | binding | advanced/api | lib/list.x:189 |
+| `inline Var List.caddr(List lst)` | verified example | etc/comptime.xlisp:75 | binding | advanced/api | lib/list.x:193 |
+| `inline Var List.cadr(List lst)` | reproduced failure | etc/comptime.xlisp:74 | binding | advanced/api | lib/list.x:189 |
 | `inline Var List.car(List lst)` | verified example | etc/init.xlisp:92 | binding | advanced/api | lib/list.x:180 |
 | `inline Self List.cdaaar(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:49 |
 | `inline Self List.cdaadr(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:51 |
@@ -216,29 +216,29 @@ explicit checks before claiming runtime equivalence.
 | `inline Self List.cdddar(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:61 |
 | `inline Self List.cddddr(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:63 |
 | `inline Self List.cdddr(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:30 |
-| `inline Self List.cddr(Self lst)` | no binding found | none found | binding | advanced/api | lib/list.x:191 |
+| `inline Self List.cddr(Self lst)` | verified example | etc/comptime.xlisp:58 | binding | advanced/api | lib/list.x:191 |
 | `inline Self List.cdr(Self lst)` | verified example | etc/init.xlisp:93 | binding | advanced/api | lib/list.x:182 |
 | `int List.compare(List a, List b)` | no binding found | none found | binding | advanced/api | lib/list.x:840 |
 | `List List.concat_n(unsigned list_count, ...)` | no binding found | none found | pointer | primary/api | lib/list.x:255 |
 | `List List.cons(Var head, List tail)` | verified example | etc/comptime.xlisp:57 | binding | advanced/api | lib/list.x:166 |
 | `List List.cons_in(Pool pool, Var head, List tail)` | no binding found | none found | ownership, resource | advanced/api | lib/list.x:49 |
-| `int List.contains(List lst, Var key)` | bound, unverified | etc/comptime.xlisp:84 | binding | primary/api | lib/list.x:315 |
-| `int List.equal(List a, List b)` | bound, unverified | etc/comptime.xlisp:83 | binding | advanced/api | lib/list.x:831 |
-| `Self List.filter(Self lst, Func pred)` | bound, unverified | etc/comptime.xlisp:86 | callback | primary/api | lib/list.x:1023 |
+| `int List.contains(List lst, Var key)` | bound, unverified | etc/comptime.xlisp:90 | binding | primary/api | lib/list.x:315 |
+| `int List.equal(List a, List b)` | bound, unverified | etc/comptime.xlisp:89 | binding | advanced/api | lib/list.x:831 |
+| `Self List.filter(Self lst, Func pred)` | bound, unverified | etc/comptime.xlisp:92 | callback | primary/api | lib/list.x:1023 |
 | `Var List.find(List lst, Func pred)` | no binding found | none found | callback | primary/api | lib/list.x:377 |
 | `Self List.flatten(Self lst)` | no binding found | none found | binding | advanced/api | lib/list.x:584 |
 | `Self List.flatten_all(Self lst)` | no binding found | none found | binding | advanced/api | lib/list.x:608 |
 | `Var List.foldl(List lst, Var seed, Func fn)` | reproduced failure | none found | callback | primary/api | lib/list.x:353 |
-| `Var List.get(List list, Var key)` | bound, unverified | etc/comptime.xlisp:75 | binding | primary/api | lib/list.x:663 |
-| `Var List.getindex(List list, int index)` | bound, unverified | etc/comptime.xlisp:64 | binding | primary/api | lib/list.x:626 |
+| `Var List.get(List list, Var key)` | bound, unverified | etc/comptime.xlisp:81 | binding | primary/api | lib/list.x:663 |
+| `Var List.getindex(List list, int index)` | bound, unverified | etc/comptime.xlisp:67 | binding | primary/api | lib/list.x:626 |
 | `Self List.getslice(Self list, int start, int stop, int step)` | no binding found | none found | binding | primary/api | lib/list.x:736 |
 | `unsigned List.hash(List lst)` | no binding found | none found | binding | advanced/api | lib/list.x:814 |
 | `Self List.head(Self list, unsigned count)` | no binding found | none found | binding | primary/api | lib/list.x:696 |
-| `int List.index(List l, Var key)` | bound, unverified | etc/comptime.xlisp:60 | binding | primary/api | lib/list.x:309 |
+| `int List.index(List l, Var key)` | bound, unverified | etc/comptime.xlisp:63 | binding | primary/api | lib/list.x:309 |
 | `Iter List.iter(List lst, Iter dest)` | no binding found | none found | resource | primary/api | lib/list.x:999 |
 | `Job List.job(List command)` | no binding found | none found | resource | primary/optional | lib/process.x:338 |
-| `Var List.last(List lst)` | bound, unverified | etc/comptime.xlisp:70 | binding | primary/api | lib/list.x:301 |
-| `int List.len(List lst)` | bound, unverified | etc/comptime.xlisp:58 | binding | primary/api | lib/list.x:318 |
+| `Var List.last(List lst)` | bound, unverified | etc/comptime.xlisp:76 | binding | primary/api | lib/list.x:301 |
+| `int List.len(List lst)` | bound, unverified | etc/comptime.xlisp:61 | binding | primary/api | lib/list.x:318 |
 | `List List.list_n(unsigned element_count, ...)` | no binding found | none found | pointer | primary/api | lib/list.x:279 |
 | `ListChar List.listchar(List xs)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:97 |
 | `ListDbl List.listdbl(List xs)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:113 |
@@ -247,28 +247,28 @@ explicit checks before claiming runtime equivalence.
 | `ListShort List.listshort(List xs)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:101 |
 | `ListString List.liststring(List xs)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:117 |
 | `ListSymbol List.listsymbol(List xs)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:121 |
-| `List List.map(List lst, Func fn)` | bound, unverified | etc/comptime.xlisp:85 | callback | primary/api | lib/list.x:333 |
+| `List List.map(List lst, Func fn)` | bound, unverified | etc/comptime.xlisp:91 | callback | primary/api | lib/list.x:333 |
 | `List List.map2(List a, List b, Func fn)` | no binding found | none found | callback | primary/api | lib/list.x:549 |
-| `List List.match(List input, Var pat)` | bound, unverified | etc/comptime.xlisp:81 | binding | advanced/api | lib/match.x:724 |
+| `List List.match(List input, Var pat)` | bound, unverified | etc/comptime.xlisp:87 | binding | advanced/api | lib/match.x:724 |
 | `List List.match_replace(List input, Var pat, Var template)` | no binding found | none found | binding | advanced/api | lib/match.x:823 |
 | `Self List.nth_cdr(Self list, int n)` | no binding found | none found | binding | advanced/api | lib/list.x:618 |
 | `Self List.promote(Self lst)` | no binding found | none found | ownership | advanced/api | lib/list.x:120 |
 | `List List.replace(List template, List bindings)` | no binding found | none found | binding | primary/api | lib/match.x:759 |
-| `String List.repr(List lst)` | no binding found | none found | binding | advanced/api | lib/list.x:958 |
-| `Self List.reverse(Self lst)` | bound, unverified | etc/comptime.xlisp:59 | binding | primary/api | lib/list.x:292 |
-| `List List.search(List input, Var pat)` | bound, unverified | etc/comptime.xlisp:82 | binding | primary/api | lib/match.x:994 |
+| `String List.repr(List lst)` | bound, unverified | etc/comptime.xlisp:60 | binding | advanced/api | lib/list.x:958 |
+| `Self List.reverse(Self lst)` | bound, unverified | etc/comptime.xlisp:62 | binding | primary/api | lib/list.x:292 |
+| `List List.search(List input, Var pat)` | bound, unverified | etc/comptime.xlisp:88 | binding | primary/api | lib/match.x:994 |
 | `List List.search_replace(List input, Var pat, Var template)` | bound, unverified | etc/init.xlisp:106 | binding | primary/api | lib/match.x:1019 |
-| `Self List.sort(Self lst)` | bound, unverified | etc/comptime.xlisp:80 | binding | primary/api | lib/list.x:424 |
+| `Self List.sort(Self lst)` | bound, unverified | etc/comptime.xlisp:86 | binding | primary/api | lib/list.x:424 |
 | `Self List.sort_by(Self lst, Func key)` | no binding found | none found | callback | primary/api | lib/list.x:449 |
 | `Self List.sort_with(Self lst, Func compare)` | no binding found | none found | callback | primary/api | lib/list.x:436 |
-| `String List.str(List lst)` | no binding found | none found | binding | advanced/api | lib/list.x:930 |
+| `String List.str(List lst)` | bound, unverified | etc/comptime.xlisp:59 | binding | advanced/api | lib/list.x:930 |
 | `List List.sublis(List alist, List tree)` | no binding found | none found | binding | advanced/api | lib/list.x:573 |
 | `Self List.subseq(Self list, int start, int stop, int step)` | no binding found | none found | binding | advanced/api | lib/list.x:722 |
 | `Self List.tail(Self list, unsigned count)` | no binding found | none found | binding | primary/api | lib/list.x:676 |
 | `inline int List.truth(List list)` | no binding found | none found | syntax | advanced/api | lib/common.x:398 |
 | `int List.try_match(List input, Var pat, List *out_bindings)` | no binding found | none found | pointer | primary/api | lib/match.x:717 |
 | `int List.try_match_replace(List input, Var pat, Var template, Var *out)` | no binding found | none found | pointer | primary/api | lib/match.x:813 |
-| `int List.try_next(List lst, List *cursor, Var *out)` | bound, unverified | etc/comptime.xlisp:92 | pointer | primary/api | lib/list.x:987 |
+| `int List.try_next(List lst, List *cursor, Var *out)` | bound, unverified | etc/comptime.xlisp:98 | pointer | primary/api | lib/list.x:987 |
 | `int List.try_own(List lst)` | no binding found | none found | ownership, internal | internal/api | lib/list.x:145 |
 | `int List.try_search(List input, Var pat, Var *out_match, List *out_bindings)` | no binding found | none found | pointer | primary/api | lib/match.x:1007 |
 | `Self List.unique(Self lst)` | no binding found | none found | binding | primary/api | lib/list.x:512 |
@@ -281,7 +281,12 @@ explicit checks before claiming runtime equivalence.
 
 ### Evaluated cases
 
+- `List.caar`: nested head; returned 7.
+- `List.caddr`: third element; returned 9.
+- `List.cadr`: second element; returned 8.
+- `List.cadr`: absent element distinguishes void from nil; returned 0, expected 1.
 - `List.car`: first element; returned 7.
+- `List.cddr`: empty second tail; returned 0.
 - `List.cdr`: tail; returned 1.
 - `List.cons`: prepend; returned 2.
 - `List.foldl`: ordered fold with explicit seed; note: reason: no binding for List_foldl.
@@ -292,9 +297,9 @@ explicit checks before claiming runtime equivalence.
 
 **reproduced failure:** `truth`.
 
-**bound, unverified:** `contains`, `count`, `find`, `getindex`, `insert`, `join`, `len`, `list`, `new`, `remove`, `setindex`, `shift`, `take_last`, `try_next`, `unshift`, `var`.
+**bound, unverified:** `contains`, `count`, `find`, `getindex`, `insert`, `join`, `len`, `list`, `new`, `remove`, `repr`, `setindex`, `shift`, `str`, `take_last`, `try_next`, `unshift`, `var`.
 
-**no binding found:** `arraychar`, `arraydbl`, `arrayfloat`, `arrayint`, `arraylong`, `arrayshort`, `arraystring`, `block`, `capacity`, `cleanup`, `clear`, `compare`, `concat`, `copy`, `equal`, `foldl`, `free`, `getslice`, `heap_pop`, `heap_push`, `heapify`, `indexof`, `iter`, `list_free`, `map2`, `pop`, `postfixindex`, `remslice`, `repr`, `resize`, `reverse`, `setslice`, `sort`, `sort_by`, `sort_with`, `splice`, `str`, `truncate`, `update_n`, `updateindex`, `write_repr`, `write_str`.
+**no binding found:** `arraychar`, `arraydbl`, `arrayfloat`, `arrayint`, `arraylong`, `arrayshort`, `arraystring`, `block`, `capacity`, `cleanup`, `clear`, `compare`, `concat`, `copy`, `equal`, `foldl`, `free`, `getslice`, `heap_pop`, `heap_push`, `heapify`, `indexof`, `iter`, `list_free`, `map2`, `pop`, `postfixindex`, `remslice`, `resize`, `reverse`, `setslice`, `sort`, `sort_by`, `sort_with`, `splice`, `truncate`, `update_n`, `updateindex`, `write_repr`, `write_str`.
 
 | Direct callable | State | Binding provenance | Considerations | Tier/module | Source |
 | --- | --- | --- | --- | --- | --- |
@@ -311,52 +316,52 @@ explicit checks before claiming runtime equivalence.
 | `void Array.clear(Array)` | no binding found | none found | binding | unclassified generated/api | lib/array.x (interface) |
 | `int Array.compare(Array a, Array b)` | no binding found | none found | binding | advanced/api | lib/array.x:518 |
 | `Self Array.concat(Self a, Self b)` | no binding found | none found | binding | primary/api | lib/array.x:433 |
-| `int Array.contains(Array array, Var value)` | bound, unverified | etc/comptime.xlisp:135 | binding | primary/api | lib/array.x:416 |
+| `int Array.contains(Array array, Var value)` | bound, unverified | etc/comptime.xlisp:143 | binding | primary/api | lib/array.x:416 |
 | `Self Array.copy(Self array)` | no binding found | none found | binding | primary/api | lib/array.x:311 |
-| `int Array.count(Array array, Var value)` | bound, unverified | etc/comptime.xlisp:136 | binding | primary/api | lib/array.x:419 |
+| `int Array.count(Array array, Var value)` | bound, unverified | etc/comptime.xlisp:144 | binding | primary/api | lib/array.x:419 |
 | `int Array.equal(Array a, Array b)` | no binding found | none found | binding | advanced/api | lib/array.x:732 |
-| `int Array.find(Array array, Var value)` | bound, unverified | etc/comptime.xlisp:134 | binding | primary/api | lib/array.x:405 |
+| `int Array.find(Array array, Var value)` | bound, unverified | etc/comptime.xlisp:142 | binding | primary/api | lib/array.x:405 |
 | `Var Array.foldl(Array array, Var seed, Func fn)` | no binding found | none found | callback | primary/api | lib/array.x:498 |
 | `void Array.free(Array)` | no binding found | none found | ownership | unclassified generated/api | lib/array.x (interface) |
-| `Var Array.getindex(Array array, int index)` | bound, unverified | etc/comptime.xlisp:125 | binding | primary/api | lib/array.x:128 |
+| `Var Array.getindex(Array array, int index)` | bound, unverified | etc/comptime.xlisp:131 | binding | primary/api | lib/array.x:128 |
 | `Self Array.getslice(Self array, int start, int end, int step)` | no binding found | none found | binding | primary/api | lib/array.x:336 |
 | `Var Array.heap_pop(Array heap)` | no binding found | none found | binding | advanced/api | lib/array.x:685 |
 | `void Array.heap_push(Array heap, Var val)` | no binding found | none found | binding | advanced/api | lib/array.x:671 |
 | `void Array.heapify(Array heap)` | no binding found | none found | binding | advanced/api | lib/array.x:704 |
 | `int Array.indexof(Array array, Var value)` | no binding found | none found | binding | primary/api | lib/array.x:425 |
-| `Var Array.insert(Array array, int index, Var elem)` | bound, unverified | etc/comptime.xlisp:152 | binding | primary/api | lib/array.x:278 |
+| `Var Array.insert(Array array, int index, Var elem)` | bound, unverified | etc/comptime.xlisp:160 | binding | primary/api | lib/array.x:278 |
 | `Iter Array.iter(Array x, Iter dest)` | no binding found | none found | resource | primary/api | lib/array.x:810 |
-| `String Array.join(Array array, String separator)` | bound, unverified | etc/comptime.xlisp:133 | binding | primary/api | lib/array.x:719 |
-| `size_t Array.len(Array)` | bound, unverified | etc/comptime.xlisp:117 | binding | unclassified generated/api | lib/array.x (interface) |
-| `List Array.list(Array arr)` | bound, unverified | etc/comptime.xlisp:131 | binding | primary/api | lib/list.x:463 |
+| `String Array.join(Array array, String separator)` | bound, unverified | etc/comptime.xlisp:141 | binding | primary/api | lib/array.x:719 |
+| `size_t Array.len(Array)` | bound, unverified | etc/comptime.xlisp:123 | binding | unclassified generated/api | lib/array.x (interface) |
+| `List Array.list(Array arr)` | bound, unverified | etc/comptime.xlisp:137 | binding | primary/api | lib/list.x:463 |
 | `List Array.list_free(Array arr)` | no binding found | none found | ownership | primary/api | lib/list.x:472 |
-| `Array Array.map(Array array, Func func)` | verified example | etc/comptime.xlisp:132 | callback | primary/api | lib/array.x:459 |
+| `Array Array.map(Array array, Func func)` | verified example | etc/comptime.xlisp:140 | callback | primary/api | lib/array.x:459 |
 | `Array Array.map2(Array a, Array b, Func func)` | no binding found | none found | callback | primary/api | lib/array.x:476 |
-| `Array Array.new(void)` | bound, unverified | etc/comptime.xlisp:116 | binding | primary/api | lib/array.x:64 |
+| `Array Array.new(void)` | bound, unverified | etc/comptime.xlisp:122 | binding | primary/api | lib/array.x:64 |
 | `void Array.pop(Array)` | no binding found | none found | binding | unclassified generated/api | lib/array.x (interface) |
 | `Var Array.postfixindex(Array array, int index, Symbol op)` | no binding found | none found | syntax | primary/api | lib/array.x:188 |
-| `Var Array.push(Array array, Var elem)` | verified example | etc/comptime.xlisp:118 | binding | primary/api | lib/array.x:213 |
-| `Var Array.remove(Array array, int index)` | bound, unverified | etc/comptime.xlisp:146 | binding | primary/api | lib/array.x:296 |
+| `Var Array.push(Array array, Var elem)` | verified example | etc/comptime.xlisp:124 | binding | primary/api | lib/array.x:213 |
+| `Var Array.remove(Array array, int index)` | bound, unverified | etc/comptime.xlisp:154 | binding | primary/api | lib/array.x:296 |
 | `Self Array.remslice(Self array, int start, int end)` | no binding found | none found | binding | advanced/api | lib/array.x:375 |
-| `String Array.repr(Array array)` | no binding found | none found | binding | advanced/api | lib/array.x:761 |
+| `String Array.repr(Array array)` | bound, unverified | etc/comptime.xlisp:139 | binding | advanced/api | lib/array.x:761 |
 | `void Array.resize(Array arr, size_t size)` | no binding found | none found | binding | primary/api | lib/array.x:71 |
 | `Self Array.reverse(Self array)` | no binding found | none found | binding | primary/api | lib/array.x:448 |
-| `Var Array.setindex(Array array, int index, Var elem)` | bound, unverified | etc/comptime.xlisp:128 | binding | primary/api | lib/array.x:148 |
+| `Var Array.setindex(Array array, int index, Var elem)` | bound, unverified | etc/comptime.xlisp:134 | binding | primary/api | lib/array.x:148 |
 | `Self Array.setslice(Self array, int start, int end, Self values)` | no binding found | none found | binding | primary/api | lib/array.x:365 |
-| `Var Array.shift(Array array)` | bound, unverified | etc/comptime.xlisp:145 | binding | primary/api | lib/array.x:243 |
+| `Var Array.shift(Array array)` | bound, unverified | etc/comptime.xlisp:153 | binding | primary/api | lib/array.x:243 |
 | `Self Array.sort(Self array)` | no binding found | none found | binding | primary/api | lib/array.x:539 |
 | `Self Array.sort_by(Self array, Func key)` | no binding found | none found | callback | primary/api | lib/array.x:605 |
 | `Self Array.sort_with(Self array, Func compare)` | no binding found | none found | callback | primary/api | lib/array.x:560 |
 | `Self Array.splice(Self array, int index, int remove_count, Self values)` | no binding found | none found | binding | primary/api | lib/array.x:391 |
-| `String Array.str(Array array)` | no binding found | none found | binding | advanced/api | lib/array.x:744 |
-| `Var Array.take_last(Array array)` | bound, unverified | etc/comptime.xlisp:144 | binding | primary/api | lib/array.x:229 |
+| `String Array.str(Array array)` | bound, unverified | etc/comptime.xlisp:138 | binding | advanced/api | lib/array.x:744 |
+| `Var Array.take_last(Array array)` | bound, unverified | etc/comptime.xlisp:152 | binding | primary/api | lib/array.x:229 |
 | `void Array.truncate(Array, size_t)` | no binding found | none found | binding | unclassified generated/api | lib/array.x (interface) |
 | `int Array.truth(Array)` | reproduced failure | none found | syntax | unclassified generated/api | lib/array.x (interface) |
-| `int Array.try_next(Array array, int *cursor, Var *out)` | bound, unverified | etc/comptime.xlisp:97 | pointer | primary/api | lib/array.x:786 |
-| `Var Array.unshift(Array array, Var elem)` | bound, unverified | etc/comptime.xlisp:139 | binding | primary/api | lib/array.x:256 |
+| `int Array.try_next(Array array, int *cursor, Var *out)` | bound, unverified | etc/comptime.xlisp:103 | pointer | primary/api | lib/array.x:786 |
+| `Var Array.unshift(Array array, Var elem)` | bound, unverified | etc/comptime.xlisp:147 | binding | primary/api | lib/array.x:256 |
 | `Self Array.update_n(Self array, unsigned element_count, ...)` | no binding found | none found | pointer | advanced/api | lib/array.x:95 |
 | `Var Array.updateindex(Array array, int index, Symbol op, Var rhs)` | no binding found | none found | syntax | primary/api | lib/array.x:168 |
-| `inline Var Array.var(Array x)` | bound, unverified | etc/comptime.xlisp:227 | binding | advanced/api | lib/common.x:526 |
+| `inline Var Array.var(Array x)` | bound, unverified | etc/comptime.xlisp:246 | binding | advanced/api | lib/common.x:526 |
 | `Buffer Array.write_repr(Array a, Buffer out)` | no binding found | none found | resource | advanced/api | lib/array.x:735 |
 | `Buffer Array.write_str(Array a, Buffer out)` | no binding found | none found | resource | primary/api | lib/array.x:741 |
 
@@ -372,48 +377,48 @@ explicit checks before claiming runtime equivalence.
 
 **reproduced failure:** `keys`.
 
-**bound, unverified:** `contains`, `del`, `get`, `getdefault`, `getindex`, `len`, `list`, `new`, `setdefault`, `try_next`, `var`.
+**bound, unverified:** `contains`, `del`, `get`, `getdefault`, `getindex`, `len`, `list`, `new`, `repr`, `setdefault`, `str`, `try_next`, `var`.
 
-**no binding found:** `cleanup`, `compare`, `copy`, `enumerate`, `equal`, `export_to`, `get_hashed`, `iter`, `mapintint`, `maplongdouble`, `mapstringint`, `mapstringstring`, `merge`, `new_capacity`, `postfixindex`, `repr`, `set`, `str`, `truth`, `try_del`, `try_get`, `update_n`, `updateindex`, `write_repr`, `write_str`.
+**no binding found:** `cleanup`, `compare`, `copy`, `enumerate`, `equal`, `export_to`, `get_hashed`, `iter`, `mapintint`, `maplongdouble`, `mapstringint`, `mapstringstring`, `merge`, `new_capacity`, `postfixindex`, `set`, `truth`, `try_del`, `try_get`, `update_n`, `updateindex`, `write_repr`, `write_str`.
 
 | Direct callable | State | Binding provenance | Considerations | Tier/module | Source |
 | --- | --- | --- | --- | --- | --- |
 | `void Map.cleanup(Map value)` | no binding found | none found | ownership | primary/api | lib/map.x:722 |
 | `int Map.compare(Map a, Map b)` | no binding found | none found | binding | advanced/api | lib/map.x:565 |
-| `int Map.contains(Map m, Var key)` | bound, unverified | etc/comptime.xlisp:174 | binding | primary/api | lib/map.x:284 |
+| `int Map.contains(Map m, Var key)` | bound, unverified | etc/comptime.xlisp:182 | binding | primary/api | lib/map.x:284 |
 | `Self Map.copy(Self map)` | no binding found | none found | binding | primary/api | lib/map.x:445 |
-| `Var Map.del(Map map, Var key)` | bound, unverified | etc/comptime.xlisp:176 | binding | compatibility/api | lib/map.x:405 |
+| `Var Map.del(Map map, Var key)` | bound, unverified | etc/comptime.xlisp:184 | binding | compatibility/api | lib/map.x:405 |
 | `Iter Map.enumerate(Map x, Iter dest)` | no binding found | none found | resource | primary/api | lib/map.x:648 |
 | `int Map.equal(Map map1, Map map2)` | no binding found | none found | binding | advanced/api | lib/map.x:663 |
 | `void Map.export_to( Map map, Context source, VarExportContextFn export_value, Scope *scope)` | no binding found | none found | ownership, resource, pointer, internal | internal/api | lib/map.x:464 |
-| `Var Map.get(Map map, Var key)` | bound, unverified | etc/comptime.xlisp:169 | binding | compatibility/api | lib/map.x:204 |
+| `Var Map.get(Map map, Var key)` | bound, unverified | etc/comptime.xlisp:177 | binding | compatibility/api | lib/map.x:204 |
 | `Var Map.get_hashed(Map map, Var key, unsigned key_hash)` | no binding found | none found | binding | primary/api | lib/map.x:234 |
-| `Var Map.getdefault(Map map, Var key, Var defval)` | bound, unverified | etc/comptime.xlisp:177 | binding | primary/api | lib/map.x:247 |
-| `Var Map.getindex(Map map, Var key)` | bound, unverified | etc/comptime.xlisp:172 | binding | compatibility/api | lib/map.x:223 |
+| `Var Map.getdefault(Map map, Var key, Var defval)` | bound, unverified | etc/comptime.xlisp:185 | binding | primary/api | lib/map.x:247 |
+| `Var Map.getindex(Map map, Var key)` | bound, unverified | etc/comptime.xlisp:180 | binding | compatibility/api | lib/map.x:223 |
 | `Iter Map.iter(Map x, Iter dest)` | no binding found | none found | resource | primary/api | lib/map.x:613 |
 | `Iter Map.keys(Map x, Iter dest)` | reproduced failure | none found | resource | primary/api | lib/map.x:628 |
-| `unsigned Map.len(Map map)` | bound, unverified | etc/comptime.xlisp:168 | binding | primary/api | lib/map.x:148 |
-| `List Map.list(Map map)` | bound, unverified | etc/comptime.xlisp:179 | binding | primary/api | lib/list.x:484 |
+| `unsigned Map.len(Map map)` | bound, unverified | etc/comptime.xlisp:176 | binding | primary/api | lib/map.x:148 |
+| `List Map.list(Map map)` | bound, unverified | etc/comptime.xlisp:187 | binding | primary/api | lib/list.x:484 |
 | `MapIntInt Map.mapintint(Map entries)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:280 |
 | `MapLongDouble Map.maplongdouble(Map entries)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:300 |
 | `MapStringInt Map.mapstringint(Map entries)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:358 |
 | `MapStringString Map.mapstringstring(Map entries)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:321 |
 | `Self Map.merge(Self map, Self other)` | no binding found | none found | binding | primary/api | lib/map.x:512 |
-| `Map Map.new(void)` | bound, unverified | etc/comptime.xlisp:167 | binding | primary/api | lib/map.x:139 |
+| `Map Map.new(void)` | bound, unverified | etc/comptime.xlisp:175 | binding | primary/api | lib/map.x:139 |
 | `Map Map.new_capacity(unsigned capacity)` | no binding found | none found | internal | internal/api | lib/map.x:114 |
 | `Var Map.postfixindex(Map map, Var key, Symbol op)` | no binding found | none found | syntax | primary/api | lib/map.x:375 |
-| `String Map.repr(Map map)` | no binding found | none found | binding | advanced/api | lib/map.x:715 |
+| `String Map.repr(Map map)` | bound, unverified | etc/comptime.xlisp:189 | binding | advanced/api | lib/map.x:715 |
 | `void Map.set(Map map, Var key, Var val)` | no binding found | none found | binding | primary/api | lib/map.x:316 |
-| `Var Map.setdefault(Map map, Var key, Var defval)` | bound, unverified | etc/comptime.xlisp:178 | binding | primary/api | lib/map.x:268 |
-| `Var Map.setindex(Map map, Var key, Var val)` | verified example | etc/comptime.xlisp:173 | binding | primary/api | lib/map.x:328 |
-| `String Map.str(Map map)` | no binding found | none found | binding | advanced/api | lib/map.x:695 |
+| `Var Map.setdefault(Map map, Var key, Var defval)` | bound, unverified | etc/comptime.xlisp:186 | binding | primary/api | lib/map.x:268 |
+| `Var Map.setindex(Map map, Var key, Var val)` | verified example | etc/comptime.xlisp:181 | binding | primary/api | lib/map.x:328 |
+| `String Map.str(Map map)` | bound, unverified | etc/comptime.xlisp:188 | binding | advanced/api | lib/map.x:695 |
 | `int Map.truth(Map map)` | no binding found | none found | syntax | primary/api | lib/map.x:550 |
 | `int Map.try_del(Map map, Var key, Var *out)` | no binding found | none found | pointer | primary/api | lib/map.x:395 |
 | `int Map.try_get(Map map, Var key, Var *out)` | no binding found | none found | pointer | primary/api | lib/map.x:178 |
-| `int Map.try_next(Map map, unsigned *cursor, Var *key, Var *val)` | bound, unverified | etc/comptime.xlisp:107 | pointer | primary/api | lib/map.x:544 |
+| `int Map.try_next(Map map, unsigned *cursor, Var *key, Var *val)` | bound, unverified | etc/comptime.xlisp:113 | pointer | primary/api | lib/map.x:544 |
 | `Self Map.update_n(Self map, unsigned pair_count, ...)` | no binding found | none found | pointer | advanced/api | lib/map.x:418 |
 | `Var Map.updateindex(Map map, Var key, Symbol op, Var rhs)` | no binding found | none found | syntax | primary/api | lib/map.x:351 |
-| `inline Var Map.var(Map x)` | bound, unverified | etc/comptime.xlisp:228 | binding | advanced/api | lib/common.x:539 |
+| `inline Var Map.var(Map x)` | bound, unverified | etc/comptime.xlisp:247 | binding | advanced/api | lib/common.x:539 |
 | `Buffer Map.write_repr(Map map, Buffer out)` | no binding found | none found | resource | advanced/api | lib/map.x:672 |
 | `Buffer Map.write_str(Map map, Buffer out)` | no binding found | none found | resource | primary/api | lib/map.x:682 |
 
@@ -424,42 +429,44 @@ explicit checks before claiming runtime equivalence.
 
 ## Symbol
 
-**verified example:** `len`.
+**verified example:** `compare`, `len`, `repr`.
 
 **bound, unverified:** `str`, `var`.
 
-**no binding found:** `compare`, `decode`, `first`, `last`, `new`, `new_len`, `parse`, `repr`, `try_new`, `write_repr`, `write_str`.
+**no binding found:** `decode`, `first`, `last`, `new`, `new_len`, `parse`, `try_new`, `write_repr`, `write_str`.
 
 | Direct callable | State | Binding provenance | Considerations | Tier/module | Source |
 | --- | --- | --- | --- | --- | --- |
-| `int Symbol.compare(Symbol a, Symbol b)` | no binding found | none found | binding | advanced/api | lib/symbol.x:174 |
+| `int Symbol.compare(Symbol a, Symbol b)` | verified example | etc/comptime.xlisp:222 | binding | advanced/api | lib/symbol.x:174 |
 | `void Symbol.decode(Symbol symbol, char *dest)` | no binding found | none found | pointer | advanced/api | lib/symbol.x:133 |
 | `char Symbol.first(Symbol symbol)` | no binding found | none found | binding | advanced/api | lib/symbol.x:235 |
 | `char Symbol.last(Symbol symbol)` | no binding found | none found | binding | primary/api | lib/symbol.x:246 |
-| `int Symbol.len(Symbol symbol)` | verified example | etc/comptime.xlisp:209 | binding | primary/api | lib/symbol.x:121 |
+| `int Symbol.len(Symbol symbol)` | verified example | etc/comptime.xlisp:221 | binding | primary/api | lib/symbol.x:121 |
 | `Symbol Symbol.new(const char *str)` | no binding found | none found | pointer | primary/api | lib/symbol.x:104 |
 | `Symbol Symbol.new_len(const char *str, int len)` | no binding found | none found | pointer | advanced/api | lib/symbol.x:78 |
 | `Symbol Symbol.parse(char *text)` | no binding found | none found | pointer | advanced/api | lib/symbol.x:260 |
-| `String Symbol.repr(Symbol symbol)` | no binding found | none found | binding | advanced/api | lib/symbol.x:194 |
-| `String Symbol.str(Symbol symbol)` | bound, unverified | etc/comptime.xlisp:210 | binding | advanced/api | lib/symbol.x:162 |
+| `String Symbol.repr(Symbol symbol)` | verified example | etc/comptime.xlisp:223 | binding | advanced/api | lib/symbol.x:194 |
+| `String Symbol.str(Symbol symbol)` | bound, unverified | etc/comptime.xlisp:224 | binding | advanced/api | lib/symbol.x:162 |
 | `int Symbol.try_new(String spelling, Symbol *out)` | no binding found | none found | pointer | primary/api | lib/symbol.x:112 |
-| `inline Var Symbol.var(Symbol x)` | bound, unverified | etc/comptime.xlisp:224 | binding | advanced/api | lib/common.x:544 |
+| `inline Var Symbol.var(Symbol x)` | bound, unverified | etc/comptime.xlisp:243 | binding | advanced/api | lib/common.x:544 |
 | `Buffer Symbol.write_repr(Symbol symbol, Buffer out)` | no binding found | none found | resource | advanced/api | lib/symbol.x:217 |
 | `Buffer Symbol.write_str(Symbol symbol, Buffer out)` | no binding found | none found | resource | primary/api | lib/symbol.x:205 |
 
 ### Evaluated cases
 
+- `Symbol.compare`: lexical comparison; returned 1.
 - `Symbol.len`: short symbol; returned 3.
+- `Symbol.repr`: symbol rendering; returned 1.
 
 ## Var
 
-**verified example:** `binary`, `cons`.
+**verified example:** `binary`, `cadr`, `cons`, `kind`.
 
 **reproduced failure:** `array`.
 
-**bound, unverified:** `car`, `cdr`, `convert`, `equal`, `floating`, `integer`, `is`, `list`, `parse`, `repr`, `str`, `tag`.
+**bound, unverified:** `caar`, `caddr`, `car`, `cddr`, `cdr`, `convert`, `equal`, `floating`, `integer`, `is`, `list`, `parse`, `repr`, `str`, `tag`.
 
-**no binding found:** `add`, `adnode`, `arraychar`, `arraydbl`, `arrayfloat`, `arrayint`, `arraylong`, `arrayshort`, `arraystring`, `as_iter`, `block`, `box_f32`, `box_f64`, `box_i16`, `box_i32_bits`, `box_i8`, `box_long`, `box_long_double`, `box_long_long`, `box_u16`, `box_u32`, `box_u8`, `box_ulong`, `box_ulong_long`, `buffer`, `bytes`, `caaaar`, `caaadr`, `caaar`, `caadar`, `caaddr`, `caadr`, `caar`, `cadaar`, `cadadr`, `cadar`, `caddar`, `cadddr`, `caddr`, `cadr`, `cdaaar`, `cdaadr`, `cdaar`, `cdadar`, `cdaddr`, `cdadr`, `cdar`, `cddaar`, `cddadr`, `cddar`, `cdddar`, `cddddr`, `cdddr`, `cddr`, `char`, `clone_wide`, `compare`, `contains`, `custom_descriptor_index`, `decode_f32`, `decode_f64`, `dispatch_truth`, `div`, `double`, `encoding_valid`, `fallback_compare`, `fallback_equal`, `fallback_hash`, `fallback_iter`, `fallback_repr`, `fallback_str`, `fallback_truth`, `fallback_write_repr`, `fallback_write_str`, `file`, `float`, `getindex`, `hash`, `int`, `integer_box`, `integer_compare`, `integer_floating_compare`, `integer_tag`, `is_atom`, `is_atom_binder`, `is_binder`, `is_floating`, `is_integer`, `is_list_binder`, `is_match_op`, `is_nil`, `is_null`, `is_object`, `is_pointer`, `is_reference`, `is_row`, `is_void`, `is_wide`, `iter`, `job`, `json`, `jsonbool`, `kind`, `known_tag`, `listchar`, `listdbl`, `listfloat`, `listint`, `listshort`, `liststring`, `listsymbol`, `long`, `long_double`, `long_double_value`, `long_long`, `long_long_value`, `long_value`, `map`, `mapintint`, `maplongdouble`, `mapstringint`, `mapstringstring`, `matmul`, `mod`, `move_wide_to`, `mul`, `neg`, `new`, `null`, `numeric_decode`, `numeric_info`, `payload32`, `pointer`, `pointer_string`, `postfix`, `postfixindex`, `pretty_json`, `regex`, `regexcapture`, `regexmatch`, `register_object_tag`, `same`, `setindex`, `short`, `signed_from_bits`, `string`, `sub`, `symbol`, `token`, `truth`, `try_dispatch_binary`, `try_dispatch_unary`, `try_export_context`, `uchar`, `uint`, `ulong`, `ulong_long`, `ulong_long_value`, `ulong_value`, `unsigned`, `update`, `updateindex`, `ushort`, `wide_compare`, `wide_equal`, `wide_hash`, `wide_owner`, `width_mask`, `write_pointer_repr`, `write_repr`, `write_str`.
+**no binding found:** `add`, `adnode`, `arraychar`, `arraydbl`, `arrayfloat`, `arrayint`, `arraylong`, `arrayshort`, `arraystring`, `as_iter`, `block`, `box_f32`, `box_f64`, `box_i16`, `box_i32_bits`, `box_i8`, `box_long`, `box_long_double`, `box_long_long`, `box_u16`, `box_u32`, `box_u8`, `box_ulong`, `box_ulong_long`, `buffer`, `bytes`, `caaaar`, `caaadr`, `caaar`, `caadar`, `caaddr`, `caadr`, `cadaar`, `cadadr`, `cadar`, `caddar`, `cadddr`, `cdaaar`, `cdaadr`, `cdaar`, `cdadar`, `cdaddr`, `cdadr`, `cdar`, `cddaar`, `cddadr`, `cddar`, `cdddar`, `cddddr`, `cdddr`, `char`, `clone_wide`, `compare`, `contains`, `custom_descriptor_index`, `decode_f32`, `decode_f64`, `dispatch_truth`, `div`, `double`, `encoding_valid`, `fallback_compare`, `fallback_equal`, `fallback_hash`, `fallback_iter`, `fallback_repr`, `fallback_str`, `fallback_truth`, `fallback_write_repr`, `fallback_write_str`, `file`, `float`, `getindex`, `hash`, `int`, `integer_box`, `integer_compare`, `integer_floating_compare`, `integer_tag`, `is_atom`, `is_atom_binder`, `is_binder`, `is_floating`, `is_integer`, `is_list_binder`, `is_match_op`, `is_nil`, `is_null`, `is_object`, `is_pointer`, `is_reference`, `is_row`, `is_void`, `is_wide`, `iter`, `job`, `json`, `jsonbool`, `known_tag`, `listchar`, `listdbl`, `listfloat`, `listint`, `listshort`, `liststring`, `listsymbol`, `long`, `long_double`, `long_double_value`, `long_long`, `long_long_value`, `long_value`, `map`, `mapintint`, `maplongdouble`, `mapstringint`, `mapstringstring`, `matmul`, `mod`, `move_wide_to`, `mul`, `neg`, `new`, `null`, `numeric_decode`, `numeric_info`, `payload32`, `pointer`, `pointer_string`, `postfix`, `postfixindex`, `pretty_json`, `regex`, `regexcapture`, `regexmatch`, `register_object_tag`, `same`, `setindex`, `short`, `signed_from_bits`, `string`, `sub`, `symbol`, `token`, `truth`, `try_dispatch_binary`, `try_dispatch_unary`, `try_export_context`, `uchar`, `uint`, `ulong`, `ulong_long`, `ulong_long_value`, `ulong_value`, `unsigned`, `update`, `updateindex`, `ushort`, `wide_compare`, `wide_equal`, `wide_hash`, `wide_owner`, `width_mask`, `write_pointer_repr`, `write_repr`, `write_str`.
 
 | Direct callable | State | Binding provenance | Considerations | Tier/module | Source |
 | --- | --- | --- | --- | --- | --- |
@@ -497,14 +504,14 @@ explicit checks before claiming runtime equivalence.
 | `inline Var Var.caadar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:87 |
 | `inline Var Var.caaddr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:89 |
 | `inline Var Var.caadr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:70 |
-| `inline Var Var.caar(Var var)` | no binding found | none found | binding | advanced/api | lib/list.x:200 |
+| `inline Var Var.caar(Var var)` | bound, unverified | etc/comptime.xlisp:227 | binding | advanced/api | lib/list.x:200 |
 | `inline Var Var.cadaar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:91 |
 | `inline Var Var.cadadr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:93 |
 | `inline Var Var.cadar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:72 |
 | `inline Var Var.caddar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:95 |
 | `inline Var Var.cadddr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:97 |
-| `inline Var Var.caddr(Var var)` | no binding found | none found | binding | advanced/api | lib/list.x:206 |
-| `inline Var Var.cadr(Var var)` | no binding found | none found | binding | advanced/api | lib/list.x:202 |
+| `inline Var Var.caddr(Var var)` | bound, unverified | etc/comptime.xlisp:230 | binding | advanced/api | lib/list.x:206 |
+| `inline Var Var.cadr(Var var)` | verified example | etc/comptime.xlisp:228 | binding | advanced/api | lib/list.x:202 |
 | `Var Var.car(Var var)` | bound, unverified | etc/init.xlisp:94 | binding | advanced/api | lib/list.x:196 |
 | `inline List Var.cdaaar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:99 |
 | `inline List Var.cdaadr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:101 |
@@ -519,14 +526,14 @@ explicit checks before claiming runtime equivalence.
 | `inline List Var.cdddar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:111 |
 | `inline List Var.cddddr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:113 |
 | `inline List Var.cdddr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:80 |
-| `inline List Var.cddr(Var var)` | no binding found | none found | binding | advanced/api | lib/list.x:204 |
+| `inline List Var.cddr(Var var)` | bound, unverified | etc/comptime.xlisp:229 | binding | advanced/api | lib/list.x:204 |
 | `List Var.cdr(Var var)` | bound, unverified | etc/init.xlisp:95 | binding | advanced/api | lib/list.x:198 |
 | `char Var.char(Var x)` | no binding found | none found | binding | advanced/api | lib/common.x:642 |
 | `Var Var.clone_wide(Var value)` | no binding found | none found | internal | internal/api | lib/var.x:542 |
 | `int Var.compare(Var a, Var b)` | no binding found | none found | binding | advanced/api | lib/dispatch.x:890 |
 | `List Var.cons(Var head, List tail)` | verified example | etc/init.xlisp:91 | binding | advanced/api | lib/list.x:168 |
 | `int Var.contains(Var value, Var needle)` | no binding found | none found | binding | primary/api | lib/dispatch.x:368 |
-| `Var Var.convert(Var value, Symbol target)` | bound, unverified | etc/comptime.xlisp:213 | binding | primary/api | lib/varconvert.x:273 |
+| `Var Var.convert(Var value, Symbol target)` | bound, unverified | etc/comptime.xlisp:232 | binding | primary/api | lib/varconvert.x:273 |
 | `int Var.custom_descriptor_index(Var value)` | no binding found | none found | internal | internal/api | lib/var.x:216 |
 | `inline float Var.decode_f32(Var value)` | no binding found | none found | internal | advanced/api | lib/common.x:462 |
 | `inline double Var.decode_f64(Var value)` | no binding found | none found | internal | advanced/api | lib/common.x:470 |
@@ -534,7 +541,7 @@ explicit checks before claiming runtime equivalence.
 | `Var Var.div(Var lhs, Var rhs)` | no binding found | none found | syntax | primary/api | lib/varops.x:426 |
 | `double Var.double(Var x)` | no binding found | none found | binding | advanced/api | lib/common.x:771 |
 | `int Var.encoding_valid(Var value)` | no binding found | none found | internal | advanced/api | lib/var.x:231 |
-| `int Var.equal(Var a, Var b)` | bound, unverified | etc/comptime.xlisp:217 | binding | advanced/api | lib/dispatch.x:762 |
+| `int Var.equal(Var a, Var b)` | bound, unverified | etc/comptime.xlisp:236 | binding | advanced/api | lib/dispatch.x:762 |
 | `int Var.fallback_compare(Var a, Var b)` | no binding found | none found | internal | primary/api | lib/dispatch.x:869 |
 | `int Var.fallback_equal(Var a, Var b)` | no binding found | none found | internal | primary/api | lib/dispatch.x:719 |
 | `unsigned Var.fallback_hash(Var v)` | no binding found | none found | internal | primary/api | lib/dispatch.x:729 |
@@ -546,16 +553,16 @@ explicit checks before claiming runtime equivalence.
 | `Buffer Var.fallback_write_str(Var v, Buffer out)` | no binding found | none found | resource, internal | primary/api | lib/dispatch.x:562 |
 | `inline File Var.file(Var value)` | no binding found | none found | resource | advanced/api | lib/common.x:619 |
 | `float Var.float(Var x)` | no binding found | none found | binding | advanced/api | lib/common.x:762 |
-| `double Var.floating(Var v)` | bound, unverified | etc/comptime.xlisp:215 | binding | advanced/api | lib/var.x:714 |
+| `double Var.floating(Var v)` | bound, unverified | etc/comptime.xlisp:234 | binding | advanced/api | lib/var.x:714 |
 | `Var Var.getindex(Var value, Var key)` | no binding found | none found | binding | primary/api | lib/dispatch.x:383 |
 | `unsigned Var.hash(Var v)` | no binding found | none found | binding | advanced/api | lib/dispatch.x:738 |
 | `int Var.int(Var x)` | no binding found | none found | binding | advanced/api | lib/common.x:678 |
-| `long Var.integer(Var v)` | bound, unverified | etc/comptime.xlisp:214 | binding | advanced/api | lib/var.x:759 |
+| `long Var.integer(Var v)` | bound, unverified | etc/comptime.xlisp:233 | binding | advanced/api | lib/var.x:759 |
 | `Var Var.integer_box(Symbol target, unsigned long long raw)` | no binding found | none found | internal | advanced/api | lib/varconvert.x:99 |
 | `int Var.integer_compare(Var a, Var b)` | no binding found | none found | binding | advanced/api | lib/var.x:939 |
 | `int Var.integer_floating_compare(Var integer, Var floating)` | no binding found | none found | binding | advanced/api | lib/var.x:967 |
 | `Symbol Var.integer_tag(int rank, int unsigned_value)` | no binding found | none found | internal | advanced/api | lib/varconvert.x:41 |
-| `int Var.is(Var var, Symbol tag)` | bound, unverified | etc/comptime.xlisp:216 | binding | primary/api | lib/var.x:296 |
+| `int Var.is(Var var, Symbol tag)` | bound, unverified | etc/comptime.xlisp:235 | binding | primary/api | lib/var.x:296 |
 | `int Var.is_atom(Var value)` | no binding found | none found | binding | primary/api | lib/atom.x:92 |
 | `int Var.is_atom_binder(Var atom)` | no binding found | none found | binding | advanced/api | lib/match.x:378 |
 | `int Var.is_binder(Var atom)` | no binding found | none found | binding | advanced/api | lib/match.x:388 |
@@ -575,9 +582,9 @@ explicit checks before claiming runtime equivalence.
 | `Job Var.job(Var)` | no binding found | none found | resource | unclassified generated/optional | lib/process.x (interface) |
 | `String Var.json(Var value)` | no binding found | none found | binding | primary/optional | lib/json.x:560 |
 | `JsonBool Var.jsonbool(Var value)` | no binding found | none found | resource | primary/optional | lib/json.x:57 |
-| `Symbol Var.kind(Var v)` | no binding found | none found | binding | advanced/api | lib/var.x:309 |
+| `Symbol Var.kind(Var v)` | verified example | etc/comptime.xlisp:226 | binding | advanced/api | lib/var.x:309 |
 | `int Var.known_tag(Symbol tag)` | no binding found | none found | internal | advanced/api | lib/var.x:61 |
-| `inline List Var.list(Var value)` | bound, unverified | etc/comptime.xlisp:226 | binding | advanced/api | lib/common.x:621 |
+| `inline List Var.list(Var value)` | bound, unverified | etc/comptime.xlisp:245 | binding | advanced/api | lib/common.x:621 |
 | `ListChar Var.listchar(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:97 |
 | `ListDbl Var.listdbl(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:113 |
 | `ListFloat Var.listfloat(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:109 |
@@ -605,7 +612,7 @@ explicit checks before claiming runtime equivalence.
 | `Var Var.null(void)` | no binding found | none found | binding | primary/api | lib/var.x:381 |
 | `void Var.numeric_decode(Var value, X2CVarNumeric *out)` | no binding found | none found | pointer, internal | advanced/api | lib/varconvert.x:79 |
 | `int Var.numeric_info(Symbol tag, X2CVarNumericInfo *out)` | no binding found | none found | pointer, internal | advanced/api | lib/varconvert.x:147 |
-| `Var Var.parse(String str, Symbol kind)` | bound, unverified | etc/comptime.xlisp:212 | binding | advanced/api | lib/var.x:1068 |
+| `Var Var.parse(String str, Symbol kind)` | bound, unverified | etc/comptime.xlisp:231 | binding | advanced/api | lib/var.x:1068 |
 | `inline unsigned Var.payload32(Var value)` | no binding found | none found | internal | advanced/api | lib/common.x:459 |
 | `void *Var.pointer(Var v)` | no binding found | none found | pointer, internal | advanced/api | lib/var.x:1022 |
 | `String Var.pointer_string(Var v)` | no binding found | none found | internal | advanced/api | lib/dispatch.x:211 |
@@ -616,7 +623,7 @@ explicit checks before claiming runtime equivalence.
 | `RegexCapture Var.regexcapture(Var value)` | no binding found | none found | resource | primary/optional | lib/regex.x:745 |
 | `RegexMatch Var.regexmatch(Var value)` | no binding found | none found | resource | primary/optional | lib/regex.x:748 |
 | `int Var.register_object_tag(Symbol tag)` | no binding found | none found | ownership | advanced/api | lib/var.x:240 |
-| `String Var.repr(Var v)` | bound, unverified | etc/comptime.xlisp:237 | binding | advanced/api | lib/dispatch.x:605 |
+| `String Var.repr(Var v)` | bound, unverified | etc/comptime.xlisp:256 | binding | advanced/api | lib/dispatch.x:605 |
 | `int Var.same(Var a, Var b)` | no binding found | none found | binding | advanced/api | lib/dispatch.x:786 |
 | `Var Var.setindex(Var value, Var key, Var replacement)` | no binding found | none found | binding | primary/api | lib/dispatch.x:398 |
 | `short Var.short(Var x)` | no binding found | none found | binding | advanced/api | lib/common.x:660 |
@@ -625,7 +632,7 @@ explicit checks before claiming runtime equivalence.
 | `inline String Var.string(Var value)` | no binding found | none found | binding | advanced/api | lib/common.x:623 |
 | `Var Var.sub(Var lhs, Var rhs)` | no binding found | none found | syntax | primary/api | lib/varops.x:406 |
 | `inline Symbol Var.symbol(Var x)` | no binding found | none found | binding | advanced/api | lib/common.x:628 |
-| `Symbol Var.tag(Var v)` | bound, unverified | etc/comptime.xlisp:211 | binding | advanced/api | lib/var.x:282 |
+| `Symbol Var.tag(Var v)` | bound, unverified | etc/comptime.xlisp:225 | binding | advanced/api | lib/var.x:282 |
 | `inline Token Var.token(Var x)` | no binding found | none found | resource, internal | primary/internal | lib/tokenizer.x:36 |
 | `int Var.truth(Var value)` | no binding found | none found | syntax | primary/api | lib/varops.x:360 |
 | `int Var.try_dispatch_binary(Var lhs, Symbol member, Var rhs, Var *result)` | no binding found | none found | pointer, internal | advanced/api | lib/dispatch.x:63 |
@@ -654,7 +661,9 @@ explicit checks before claiming runtime equivalence.
 
 - `Var.array`: explicit Array conversion; note: reason: no binding for Var_array.
 - `Var.binary`: integer addition; returned 5.
+- `Var.cadr`: boxed List selector; returned 8.
 - `Var.cons`: prepend; returned 2.
+- `Var.kind`: integer kind; returned 1.
 
 ## Remaining evidence gaps
 

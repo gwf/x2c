@@ -80,6 +80,12 @@ PROBES = {
     "String.strip#charset": ("explicit character set", 'return " a ".strip(" ").len();', 1),
     "List.car": ("first element", 'List xs = %(7 8); return xs.car();', 7),
     "List.cdr": ("tail", 'List xs = %(7 8); return xs.cdr().len();', 1),
+    "List.caar": ("nested head", 'List xs = %((7) 8); return xs.caar();', 7),
+    "List.cadr": ("second element", 'List xs = %(7 8); return xs.cadr();', 8),
+    "List.cadr#absent": ("absent element distinguishes void from nil",
+        'List xs = %(7); Var value = xs.cadr(); return value.kind() == <void>;', 1),
+    "List.cddr": ("empty second tail", 'List xs = %(7 8); return xs.cddr().len();', 0),
+    "List.caddr": ("third element", 'List xs = %(7 8 9); return xs.caddr();', 9),
     "List.cons": ("prepend", 'return List.cons(7, %(8)).len();', 2),
     "List.foldl": (
         "ordered fold with explicit seed",
@@ -99,6 +105,10 @@ PROBES = {
         'struct Iter storage; List keys = m.keys(&storage).list(); '
         'return keys.len();', 1),
     "Symbol.len": ("short symbol", 'return <abc>.len();', 3),
+    "Symbol.compare": ("lexical comparison", 'return <abc>.compare(<abd>) < 0;', 1),
+    "Symbol.repr": ("symbol rendering", 'return <abc>.repr().equal("<abc>");', 1),
+    "Var.kind": ("integer kind", 'Var value = 7; return value.kind() == <integer>;', 1),
+    "Var.cadr": ("boxed List selector", 'Var value = %(7 8); return value.cadr();', 8),
     "Var.cons": ("prepend", 'return Var.cons(7, %(8)).len();', 2),
     "Var.array": (
         "explicit Array conversion", 'Var xs = [7]; return xs.array().len();', 1),

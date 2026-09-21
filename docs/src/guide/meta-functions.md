@@ -345,6 +345,12 @@ The optional inventory tool reads every standard compiler session layer;
 searching only one binding file misses operations such as `List.car`,
 `List.cdr` and `Var.cons`.
 
+The ordinary `List` and `Var` selectors `caar`, `cadr`, `cddr` and `caddr`
+reuse those same operations. `String`, `List`, `Array` and `Map` expose their
+`str` and `repr` rendering; `Symbol` also exposes `repr` and `compare`, and
+`Var.kind` reports a value's kind. These calls use the existing value
+implementations rather than a separate formatting or comparison algorithm.
+
 A binding name is not proof of runtime-equivalent behavior. A missing binding
 also does not explain why it was omitted. Some operations need only an adapter
 over existing values; others need interpreted callbacks, native pointer
@@ -356,9 +362,10 @@ Other installed meta functions and the compiler operations declared in
 `meta.x` extend this surface; including a normal function declaration does
 not install its body for compile-time execution.
 
-The adapters normalize missing List/Array/Map lookups and removals to an
-empty List rather than runtime `void`. Keep calculations inside the defined
-bounds when they must agree with runtime code. The compiler loads several binding layers, including `etc/init.xlisp`,
+The adapters normalize missing List/Array/Map lookups and removals, including
+`caar`, `cadr` and `caddr`, to an empty List rather than runtime `void`. Keep
+calculations inside the defined bounds when they must agree with runtime code.
+The compiler loads several binding layers, including `etc/init.xlisp`,
 `etc/lisp-values.xlisp` and `etc/comptime.xlisp`; supported body forms live in
 `src/comptime.x`.
 
