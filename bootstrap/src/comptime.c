@@ -2211,9 +2211,10 @@ int String_len(String);
 int String_getindex(String, int);
 String String_unescape(String);
 String String_new_len(const char *, int);
+Var char_var(char);
 static Var _lower_text(String spelling){
   int len = String_len(spelling);  if(len >= 2 && String_getindex(spelling, 0) == '"') return String_var(String_unescape(String_new_len(spelling + 1, len - 2)));  if(len >= 3 && String_getindex(spelling, 0) == '\''){
-    String body = String_unescape(String_new_len(spelling + 1, len - 2));  return int_var(String_len(body) ? String_getindex(body, 0) : 0);
+    String body = String_unescape(String_new_len(spelling + 1, len - 2));  return char_var((char)(String_len(body) ? String_getindex(body, 0) : 0));
   }
   return String_var(spelling);
 }
