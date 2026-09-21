@@ -48,8 +48,10 @@ its opening status and this index distinguish them from current execution.
   source files alone do not establish that deployment is complete.
 - [Meta authoring and coverage](meta-authoring-and-coverage.md): source-code
   template calls, representable literal results, and the API inventory are
-  implemented. Mutable container results, iterator state, and full fold parity
-  remain bounded follow-ups. The older
+  implemented. The represented-operation campaign is complete; the remaining
+  methods are classified as excluded contracts, explicit adapters, defects, or
+  dependencies of the separate generalized-`meta` and lifetime-certification
+  work. The older
   [meta milestones](archive/meta-functions.md) record the preceding baseline.
 - [REPL fit, status, and runtime surface](repl-fit-and-runtime-surface.md):
   terminal UX, live statistics, and REPL-only output are implemented;
