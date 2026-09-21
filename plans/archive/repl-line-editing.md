@@ -1,8 +1,8 @@
 # REPL line editing
 
-> Status: active - implementation approved September 21, 2026.
-> Port the terminal-editing core of Linenoise into the integrated REPL, then
-> archive this plan with the delivered commit.
+> Status: done - implemented September 21, 2026 by `a04cbb07`.
+> Interactive line editing, history, terminal restoration, documentation,
+> licensing, and native and APE installation coverage are complete.
 
 ## Result
 
