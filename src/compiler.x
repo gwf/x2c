@@ -2343,6 +2343,33 @@ void SymTxn.commit(SymTxn s) {
   s.active = 0;
 }
 
+/* Copy the staged state back without retaining its container. Deletions
+   matter: a declaration can remove an earlier file-static designation. */
+static void _replace_transaction_map(Map original, Map staged) {
+  Array keys = original.keys();
+  defer keys.free();
+  foreach (Var key, keys) if (!staged.contains(key)) original.del(key);
+  original.merge(staged);
+}
+
+/** Commits an active transaction, retaining the original semantic-map owners.
+    The caller may then release the transaction's construction scope.
+    Source-fact collection must be disabled: its records retain staged maps.
+    Parsing and evaluation must allocate outside that temporary scope.
+*/
+void SymTxn.commit_transient(SymTxn s) {
+  Compiler c = s.compiler;
+  Map statics = c.sym.statics, facts = c.semantic_binding_facts();
+  Map counters = c.names.counters;
+  s.commit();
+  c.sym.statics = s.statics;
+  c.sym.binding_facts = s.binding_facts;
+  c.names.counters = s.counters;
+  _replace_transaction_map(s.statics, statics);
+  _replace_transaction_map(s.binding_facts, facts);
+  _replace_transaction_map(s.counters, counters);
+}
+
 /** Returns whether the transaction's active scope changed its macro map. */
 int SymTxn.local_macros_changed(SymTxn s) {
   SymScope *scope = _semantic_scope(s.compiler.sym, s.scope_index);

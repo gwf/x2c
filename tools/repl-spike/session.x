@@ -27,8 +27,12 @@ typedef struct ReplResult {
 #include "parse.x"
 #include "diagnostics.x"
 #include "lisp.x"
+#include "scope.x"
 
 ReplSession ReplSession.new(Compiler compiler) {
+  if (compiler.source_facts)
+    raise %(bad-arg (operation "ReplSession.new")
+                   (why "source facts retain temporary symbol maps"));
   ReplSession session = Scope.calloc(1, sizeof(struct ReplSession));
   session.compiler = compiler;
   session.names = {};
@@ -121,7 +125,14 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
   Map names = session.names;
   ReplResult result = { .status = <rejected>, .value = void };
   c.diagnostics.reset();
-  SymTxn transaction = c.begin_semantic_transaction();
+  Scope scratch = Scope.new();
+  defer scratch.destroy();
+  SymTxn transaction;
+  {
+    Scope.push(&scratch);
+    defer Scope.pop();
+    transaction = c.begin_semantic_transaction();
+  }
   defer transaction.rollback();
   Array added = [], ids = [];
   defer { added.free(); ids.free(); }
@@ -219,7 +230,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     return result;
   }
   if (function_name || added.len()) {
-    transaction.commit();
+    transaction.commit_transient();
     foreach (String name, added) names[name] = 1;
   }
   result.name = function_name;

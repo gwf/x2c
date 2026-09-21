@@ -111,7 +111,7 @@ completed effects on existing values.
 
 The unit Context stays alive until exit because lowered lambda syntax and
 values may borrow its canonical storage. Lisp owns its evaluated allocations.
-Adapter scratch Arrays are freed after each call. Canonical syntax, compiler
+Adapter scratch Arrays and outer transaction copies are freed after each call. Canonical syntax, compiler
 caches, token storage, and Lisp allocations remain session-lived. General
 per-input reclamation requires explicit compiler/Lisp root ownership; wrapping
 submit in a temporary Context would leave dangling references.
@@ -198,6 +198,22 @@ some `with`/catch grammar paths have not been completed for incremental input.
 This remains a subset API. It cannot infer that a following line intends to
 extend an already complete `if`; put such a construct in a block.
 Statement diagnostics include the synthetic wrapper's extra line.
+
+## Sustained sessions
+
+[The retention experiment](retention.md) compares eight workloads and records
+before/after evidence. Giving outer transaction copies a temporary Scope
+reduces fixed-update peak RSS from 155.5 to 62.2 MiB at 1,000 inputs. All eight
+workloads complete 5,000 inputs. Full submissions still retain other storage;
+this is not bounded-memory execution.
+
+```sh
+python3 tools/repl-spike/retention.py 5000
+```
+
+The session requires source-fact collection to be disabled because those
+records retain temporary map identity. Ordinary compiler callers keep the
+existing transaction behavior.
 
 ## Evidence and architecture review
 

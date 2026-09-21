@@ -20,6 +20,28 @@ static void _expect(
   }
 }
 
+static void _transaction_deletion(Compiler c) {
+  List key = %("__repl_probe");
+  Map original = c.sym.file_statics();
+  original[key] = 1;
+  Scope scratch = Scope.new();
+  SymTxn transaction;
+  {
+    Scope.push(&scratch);
+    defer Scope.pop();
+    transaction = c.begin_semantic_transaction();
+  }
+  c.sym.file_statics().del(key);
+  transaction.commit_transient();
+  transaction.rollback();
+  scratch.destroy();
+  if (original.contains(key) ||
+      (void *) original != (void *) c.sym.file_statics()) {
+    fputs("transient commit lost deletion or original map identity\n", stderr);
+    failures++;
+  }
+}
+
 static void _exercise(ReplSession s) {
   _expect(s, "int", <incomplete>, void);
   _expect(s, "int f(int", <incomplete>, void);
@@ -58,7 +80,10 @@ int main(int argc, char **argv) {
     for (int run = 0; run < 3; run++) {
       ParsedUnit unit;
       if (!frontend.open(String.new(argv[1]), &unit)) return 1;
-      if (phase) _exercise(ReplSession.new(unit.compiler));
+      if (phase) {
+        _transaction_deletion(unit.compiler);
+        _exercise(ReplSession.new(unit.compiler));
+      }
       unit.close();
       ScopeStats stats = Scope.stats();
       size_t live = stats.live_allocations;
