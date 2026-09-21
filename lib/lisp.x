@@ -890,12 +890,21 @@ Var lisp_substring(String string, int start, int stop) =>
 /** Returns a boxed lower-case copy of `string`. */
 Var lisp_string_downcase(String string) => string.lower();
 
+static char *_string_charset(Var chars) =>
+  chars.is_nil() || (chars.is_integer() && !chars.integer())
+    ? NULL : chars.string();
+
 /** Trims the bytes in `chars`, using whitespace for an empty String. */
-String lisp_string_strip(String string, Var chars) {
-  char *set = chars.is_nil() || (chars.is_integer() && !chars.integer())
-            ? NULL : chars.string();
-  return string.strip(set);
-}
+String lisp_string_strip(String string, Var chars) =>
+  string.strip(_string_charset(chars));
+
+/** Trims leading bytes, accepting the same charset values as `strip`. */
+String lisp_string_lstrip(String string, Var chars) =>
+  string.lstrip(_string_charset(chars));
+
+/** Trims trailing bytes, accepting the same charset values as `strip`. */
+String lisp_string_rstrip(String string, Var chars) =>
+  string.rstrip(_string_charset(chars));
 
 /** Returns the instantiated `template` when `input` matches `pat`.
     `List.match_replace` returns a `List`, so a template that is a bare binder
@@ -1007,6 +1016,34 @@ $(def lisp.native.target.rows '(
   (Map_getdefault)
   (Map_setdefault)
   (Map_list)
+  (String_contains_digit)
+  (String_is_alpha)
+  (String_is_alpha_under)
+  (String_is_digit)
+  (String_is_alnum)
+  (String_is_alnum_under)
+  (String_is_identifier)
+  (String_is_space)
+  (String_is_lower)
+  (String_is_lower_under)
+  (String_is_upper)
+  (String_is_upper_under)
+  (String_compare)
+  (String_hash)
+  (String_symbol)
+  (String_dedent)
+  (String_keep)
+  (String_reject)
+  (String_squeeze)
+  (String_pad_left)
+  (String_pad_right)
+  (String_pad_center)
+  (String_new_fill)
+  (String_find_within)
+  (String_replace_n)
+  (String_split_n)
+  (lisp_string_lstrip)
+  (lisp_string_rstrip)
   (String_find)
   (String_rfind)
   (String_count)
