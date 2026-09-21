@@ -67,6 +67,11 @@ internal slot order, so do not depend on the sequence, and do not insert or
 delete entries while a traversal is live. Structural mutation invalidates
 outstanding traversal state.
 
+The explicit destination keeps ordinary local traversal allocation-free. When
+an iterator itself must be stored or returned, `Iter.new()` allocates zeroed
+iterator storage in the active `Scope`; that scope, the source, and any
+callback must remain live until the last pull.
+
 A `String` yields its bytes as numeric `Var` values. Declare the loop
 variable as `int` when the byte is used numerically, or as `char` when it is
 passed to a character-oriented C API. Both forms traverse bytes, and neither

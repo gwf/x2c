@@ -142,6 +142,19 @@ Self Iter.init(Self iter, Var obj, IterNextFn next, Var state) {
   return iter;
 }
 
+/** Returns zeroed iterator storage owned by the active `Scope`.
+    Use this when an iterator itself must be returned or stored as a value.
+    Producers such as `Map.keys` initialize the result through their existing
+    destination argument. The iterator still borrows its source and callback,
+    which must outlive every pull. The active `Scope` must remain live for as
+    long as the returned handle is used.
+
+    Caller-supplied `struct Iter` storage remains preferable for a local
+    traversal because it allocates nothing.
+    Raises: `<alloc-fail>` when storage cannot be allocated.
+*/
+Iter Iter.new(void) => Scope.calloc(1, sizeof(struct Iter));
+
 static void _unzip_buffer_push(UnzipShared *shared, Var pair) {
   if (pair is not <list>)
     raise %(bad-types (owner "Iter.unzip") (want "two-element List")

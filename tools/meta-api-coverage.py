@@ -670,6 +670,12 @@ PROBES = {
     "String.len": ("nonempty text", 'return "abc".len();', 3),
     "String.strip#null": ("default whitespace through NULL", 'return " a ".strip(NULL).len();', 1),
     "String.strip#charset": ("explicit character set", 'return " a ".strip(" ").len();', 1),
+    "String.map": ("interpreted byte callback",
+        'return "abc".map(%!(x) => x.integer() + 1).equal("bcd");', 1),
+    "String.filter": ("native Var truth for x2c callback",
+        'return "abc".filter(%!(x) => x.integer() > 97).len();', 2),
+    "String.iter": ("Scope-owned lazy byte iterator",
+        'return "abc".iter().count();', 3),
     "List.car": ("first element", 'List xs = %(7 8); return xs.car();', 7),
     "List.cdr": ("tail", 'List xs = %(7 8); return xs.cdr().len();', 1),
     "List.caar": ("nested head", 'List xs = %((7) 8); return xs.caar();', 7),
@@ -679,6 +685,27 @@ PROBES = {
     "List.cddr": ("empty second tail", 'List xs = %(7 8); return xs.cddr().len();', 0),
     "List.caddr": ("third element", 'List xs = %(7 8 9); return xs.caddr();', 9),
     "List.cons": ("prepend", 'return List.cons(7, %(8)).len();', 2),
+    "List.map": ("interpreted callback",
+        'List ys = %(1 2).map(%!(x) => x.integer() + 1); return ys[1];', 3),
+    "List.filter": ("native Var truth for x2c callback",
+        'return %(0 1 2).filter(%!(x) => x).len();', 2),
+    "List.any": ("interpreted predicate",
+        'return %(0 0 2).any(%!(x) => x);', 1),
+    "List.all": ("interpreted predicate",
+        'return %(1 2 3).all(%!(x) => x);', 1),
+    "List.map2": ("pairwise interpreted callback",
+        'List ys = %(1 2).map2(%(10 20), '
+        '%!(a, b) => a.integer() + b.integer()); return ys[1];', 22),
+    "List.sort_by": ("interpreted key callback",
+        'return %(1 3 2).sort_by(%!(x) => -x.integer()).car();', 3),
+    "List.sort_with": ("interpreted comparator",
+        'return %(3 1 2).sort_with(%!(a, b) => '
+        'a.integer() - b.integer()).car();', 1),
+    "List.zip_with": ("interpreted pair callback",
+        'List ys = %(1 2).zip_with(%(10 20), '
+        '%!(a, b) => a.integer() + b.integer()); return ys[1];', 22),
+    "List.iter": ("Scope-owned lazy List iterator",
+        'return %(1 2 3).iter().sum();', 6),
     "List.foldl": (
         "ordered fold with explicit seed",
         'List xs = %(1 2); Func f = %!(a, b) => a * 10 + b; '
@@ -688,14 +715,28 @@ PROBES = {
     "Array.map": (
         "interpreted callback", 'Array xs = [1, 2]; '
         'Array ys = xs.map(%!(x) => x + 1); return ys[1];', 3),
+    "Array.map2": ("pairwise interpreted callback",
+        'Array ys = [1, 2].map2([10, 20], '
+        '%!(a, b) => a.integer() + b.integer()); return ys[1];', 22),
+    "Array.sort_by": ("interpreted key callback",
+        'Array xs = [1, 3, 2]; xs.sort_by(%!(x) => -x.integer()); '
+        'return xs[0];', 3),
+    "Array.sort_with": ("interpreted comparator",
+        'Array xs = [3, 1, 2]; xs.sort_with(%!(a, b) => '
+        'a.integer() - b.integer()); return xs[0];', 1),
+    "Array.iter": ("Scope-owned lazy Array iterator",
+        'return [1, 2, 3].iter().sum();', 6),
     "Array.truth": (
         "explicit empty-array method", 'Array xs = []; return xs.truth();', 0),
     "Map.setindex": (
         "store and read", 'Map m = {}; m.setindex("x", 7); return m["x"];', 7),
     "Map.keys": (
-        "one key through iterator", 'Map m = {"x": 7}; '
-        'struct Iter storage; List keys = m.keys(&storage).list(); '
-        'return keys.len();', 1),
+        "one key through Scope-owned iterator", 'Map m = {"x": 7}; '
+        'return m.keys().count();', 1),
+    "Map.iter": ("Scope-owned lazy value iterator",
+        'Map m = {"x": 7}; return m.iter().sum();', 7),
+    "Map.enumerate": ("Scope-owned lazy entry iterator",
+        'Map m = {"x": 7}; return m.enumerate().count();', 1),
     "Symbol.len": ("short symbol", 'return <abc>.len();', 3),
     "Symbol.compare": ("lexical comparison", 'return <abc>.compare(<abd>) < 0;', 1),
     "Symbol.repr": ("symbol rendering", 'return <abc>.repr().equal("<abc>");', 1),
@@ -708,6 +749,8 @@ PROBES = {
     "Var.kind": ("integer kind", 'Var value = 7; return value.kind() == <integer>;', 1),
     "Var.cadr": ("boxed List selector", 'Var value = %(7 8); return value.cadr();', 8),
     "Var.cons": ("prepend", 'return Var.cons(7, %(8)).len();', 2),
+    "Var.iter": ("Scope-owned lazy boxed iterator",
+        'Var value = %(1 2 3); return value.iter().sum();', 6),
     "Var.array": (
         "explicit Array conversion", 'Var xs = [7]; return xs.array().len();', 1),
     "Var.binary": ("integer addition", 'return Var.binary(2, <+>, 3);', 5),

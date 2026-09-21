@@ -259,11 +259,13 @@ Array.map and List.foldl, reuse interpreted callback invocation and preserve
 empty-input, seed, order and void behavior. Native Func argument machinery is
 not automatically a valid bridge to an interpreted callable.
 
-Treat general Iter support as a bounded representation task: account for state,
-next callbacks, auxiliary Func values and caller-owned lifetimes. Choose a
-representation using existing runtime/evaluator facilities before promising all
-iterator operations. The goal is principled functional coverage, not adding
-individual names until examples happen to pass.
+General Iter support uses `Iter.new` for session-`Scope` storage and private
+one-less-argument producer bindings. It preserves native lazy producers,
+callback state and source mutation semantics while leaving the allocation-free
+caller-storage APIs intact. The callback bridge uses the evaluator's internal
+application path so one public entry retains one call budget. Explicit native
+storage remains unrepresented and is refused. Operations whose result may be
+true runtime `void` wait for the value-transport decision.
 
 Correct the guide inventory: List.car, List.cdr and Var.cons were missed by a
 single-layer scan; an internal Var_func helper is not evidence of a public
@@ -366,7 +368,7 @@ limitation. The other 173 unbound rows have an explicit owner, contract group,
 disposition and next action. The optional inventory records every signature and
 distinguishes observed behavior from binding presence and absence.
 
-Three representation follow-ons remain explicit rather than being presented as
+Two representation follow-ons remain explicit rather than being presented as
 completed support:
 
 - Explicit Array/Map result insertion now constructs a fresh Scope-owned root
@@ -378,9 +380,6 @@ completed support:
   stay at runtime. Nested mutable descendants, sharing and cycles remain refused
   until a graph/identity contract is decided; no serializer or silent nested
   copy is introduced.
-- General Iter, including Map.keys, contains caller-owned state and a native next
-  callback. It needs an evaluator representation and adapter whose state/lifetime
-  contract matches native iteration. Map.keys is not a missing List-return alias.
 - List.foldl distinguishes a void seed from an empty List and permits a null
   callback. No-value transport now preserves that seed distinction. Full parity
   still needs the interpreted-callback bridge; ordinary seeded folds can already

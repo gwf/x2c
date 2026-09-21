@@ -353,12 +353,36 @@ reuse those same operations. `String`, `List`, `Array` and `Map` expose their
 `Var.kind` reports a value's kind. These calls use the existing value
 implementations rather than a separate formatting or comparison algorithm.
 
-A binding name is not proof of runtime-equivalent behavior. A missing binding
-also does not explain why it was omitted. Some operations need only an adapter
-over existing values; others need interpreted callbacks, native pointer
-arguments or resource ownership. In particular, `Map.keys` takes caller-owned
-iterator storage: exposing that contract requires an iterator representation,
-not simply an alias for returning a List of keys.
+Iterator producers and functional collection operations are also available in
+x2c-style meta functions. Omit the native destination argument when an
+iterator is consumed by the same expression. The compile-time binding allocates
+the iterator in the session `Scope`; it still uses the native lazy producer and
+borrows its source and any callback.
+
+```x2c
+meta int key_count(Map values) => values.keys().count();
+
+meta List shifted(int amount) {
+  List result = range(1, 3, 1)
+    .map(%!(Var value) => value + amount);
+  return result;
+}
+```
+
+`List`, `Array` and `String` mapping and filtering use the same native
+operations with an adapter for the interpreted callback. Lazy `Iter` mapping,
+filtering, pairing and collection work the same way. Calls made as Lisp keep
+Lisp's nil-only false value; callbacks in x2c-style meta functions retain
+ordinary `Var` truth.
+
+A binding name alone is not proof of runtime-equivalent behavior. A missing
+binding also does not explain why it was omitted. Some operations need only an
+adapter over existing values; others need native pointer arguments or resource
+ownership. Explicit caller-supplied `struct Iter` storage remains a runtime
+contract and has no compile-time representation. Use the destination-free form
+inside a meta function. `List.foldl` and the empty-result iterator operations
+still wait for true `void` transport, because Lisp nil must remain distinct
+from runtime `void`.
 
 Other installed meta functions and the compiler operations declared in
 `meta.x` extend this surface; including a normal function declaration does

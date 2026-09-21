@@ -120,6 +120,17 @@ static void iter_empty_and_unsupported_status(void) {
   EXPECT_TRUE(unsupported.next() is void);
 }
 
+static void iter_scope_owned_storage(void) {
+  $test.scoped();
+  Iter first = Iter.new(), second = Iter.new();
+  EXPECT_NOT_NULL(first);
+  EXPECT_NOT_NULL(second);
+  EXPECT_TRUE(first != second);
+  EXPECT_FALSE(first.try_next(NULL));
+  EXPECT_TRUE(range(1, 3, 1, first).list() == %(1 2 3));
+  EXPECT_TRUE(range(4, 5, 1, second).list() == %(4 5));
+}
+
 static void iter_exhaustion_is_terminal(void) {
   next_call_count = 0;
   struct Iter storage;
@@ -766,6 +777,7 @@ static void iter_range_boundaries(void) {
 
 void iter_suite(void) {
   $test.run(iter_empty_and_unsupported_status);
+  $test.run(iter_scope_owned_storage);
   $test.run(iter_exhaustion_is_terminal);
   $test.run(iter_rejects_void_from_source);
   $test.run(iter_map_lazy);

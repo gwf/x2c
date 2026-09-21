@@ -404,6 +404,11 @@ struct Lisp {
   int protect_x2c;      // compiler SDK installed; x2c.* cannot be redefined
 };
 
+/* Native value bindings may adapt an interpreted callable to Func. Public
+   entries set this thread-local for the whole evaluation, including native
+   calls made by the shared machine. Nested entries restore their caller. */
+static threaded Lisp lisp_active;
+
 /* The Lambda record, capture Map storage, and AUTO program belong to the
    session Scope. Parameter and body Lists and captured Var referents are
    borrowed: capture copies Var identity, not the referenced object or
@@ -636,6 +641,9 @@ macro Decorator $lisp.entry(Function $function, Expr $operation) => {
 
   Scope.push(&$(x2c.function.parameter $function "lisp").scope);
   defer Scope.pop();
+  Lisp prior_lisp = lisp_active;
+  lisp_active = $(x2c.function.parameter $function "lisp");
+  defer lisp_active = prior_lisp;
   $(x2c.function.body $function)...
 }
 
@@ -1044,6 +1052,149 @@ Var lisp_store(Var cell, Var value) {
   return value;
 }
 
+typedef struct LispCallbackContext {
+  Lisp lisp;
+  Var callable;
+} LispCallbackContext;
+
+static Var _lisp_callback_one(Func function, const FuncArg *arguments) {
+  LispCallbackContext *context = (void *) function.context();
+  if (!lisp_active || lisp_active != context.lisp)
+    raise %(bad-state (operation "Lisp callback") (why "wrong session"));
+  Var value = x2c_func_value_argument(function, arguments, 0, <var>);
+  return _apply_values(context.lisp, context.callable, %($value), NULL);
+}
+
+static Var _lisp_callback_two(Func function, const FuncArg *arguments) {
+  LispCallbackContext *context = (void *) function.context();
+  if (!lisp_active || lisp_active != context.lisp)
+    raise %(bad-state (operation "Lisp callback") (why "wrong session"));
+  Var left = x2c_func_value_argument(function, arguments, 0, <var>);
+  Var right = x2c_func_value_argument(function, arguments, 1, <var>);
+  return _apply_values(
+    context.lisp, context.callable, %($left $right), NULL);
+}
+
+static Var _lisp_predicate_one(Func function, const FuncArg *arguments) {
+  LispCallbackContext *context = (void *) function.context();
+  if (!lisp_active || lisp_active != context.lisp)
+    raise %(bad-state (operation "Lisp callback") (why "wrong session"));
+  Var value = x2c_func_value_argument(function, arguments, 0, <var>);
+  return _bool(
+    !_apply_values(context.lisp, context.callable, %($value), NULL).is_nil());
+}
+
+static Func _lisp_callback(Var callable, int arity) {
+  if (callable.is_nil()) return NULL;
+  if (!lisp_active)
+    raise %(bad-state (operation "Lisp callback") (why "no session"));
+  LispCallbackContext context = { lisp_active, callable };
+  if (arity == 1)
+    return Func.new_context(
+      _lisp_callback_one, %((func (("Var"))) "Var"),
+      &context, sizeof context);
+  return Func.new_context(
+    _lisp_callback_two, %((func (("Var") ("Var"))) "Var"),
+      &context, sizeof context);
+}
+
+static Func _lisp_predicate(Var callable) {
+  if (callable.is_nil()) return NULL;
+  if (!lisp_active)
+    raise %(bad-state (operation "Lisp callback") (why "no session"));
+  LispCallbackContext context = { lisp_active, callable };
+  return Func.new_context(
+    _lisp_predicate_one, %((func (("Var"))) "Var"),
+    &context, sizeof context);
+}
+
+static List _lisp_List_map(List values, Var callable) =>
+  values.map(_lisp_callback(callable, 1));
+static List _lisp_List_filter(List values, Var callable) =>
+  values.filter(_lisp_callback(callable, 1));
+static int _lisp_List_any(List values, Var callable) =>
+  values.any(_lisp_callback(callable, 1));
+static int _lisp_List_all(List values, Var callable) =>
+  values.all(_lisp_callback(callable, 1));
+static List _lisp_List_map2(List left, List right, Var callable) =>
+  left.map2(right, _lisp_callback(callable, 2));
+static List _lisp_List_sort_by(List values, Var callable) =>
+  values.sort_by(_lisp_callback(callable, 1));
+static List _lisp_List_sort_with(List values, Var callable) =>
+  values.sort_with(_lisp_callback(callable, 2));
+static List _lisp_List_zip_with(List left, List right, Var callable) =>
+  left.zip_with(right, _lisp_callback(callable, 2));
+
+static Array _lisp_Array_map(Array values, Var callable) =>
+  values.map(_lisp_callback(callable, 1));
+static Array _lisp_Array_map2(Array left, Array right, Var callable) =>
+  left.map2(right, _lisp_callback(callable, 2));
+static Array _lisp_Array_sort_by(Array values, Var callable) =>
+  values.sort_by(_lisp_callback(callable, 1));
+static Array _lisp_Array_sort_with(Array values, Var callable) =>
+  values.sort_with(_lisp_callback(callable, 2));
+
+static String _lisp_String_map(String value, Var callable) =>
+  value.map(_lisp_callback(callable, 1));
+static String _lisp_String_filter(String value, Var callable) =>
+  value.filter(_lisp_callback(callable, 1));
+
+static Iter _lisp_List_iter(List value) => value.iter(Iter.new());
+static Iter _lisp_Array_iter(Array value) => value.iter(Iter.new());
+static Iter _lisp_Map_iter(Map value) => value.iter(Iter.new());
+static Iter _lisp_Map_keys(Map value) => value.keys(Iter.new());
+static Iter _lisp_Map_enumerate(Map value) => value.enumerate(Iter.new());
+static Iter _lisp_String_iter(String value) => value.iter(Iter.new());
+static Iter _lisp_Var_iter(Var value) => value.iter(Iter.new());
+static Iter _lisp_range(int start, int end, int step) =>
+  range(start, end, step, Iter.new());
+
+static Iter _lisp_Iter_map(Iter iter, Var callable) =>
+  iter.map(_lisp_callback(callable, 1), Iter.new());
+static Iter _lisp_Iter_filter(Iter iter, Var callable) =>
+  iter.filter(_lisp_callback(callable, 1), Iter.new());
+static Iter _lisp_Iter_zip(Iter left, Iter right) =>
+  left.zip(right, Iter.new());
+static Iter _lisp_Iter_zip_with(Iter left, Iter right, Var callable) =>
+  left.zip_with(right, _lisp_callback(callable, 2), Iter.new());
+static Iter _lisp_Iter_map2(Iter left, Iter right, Var callable) =>
+  left.map2(right, _lisp_callback(callable, 2), Iter.new());
+static Iter _lisp_Iter_chain(Iter first, Iter second) =>
+  first.chain(second, Iter.new());
+static Iter _lisp_Iter_enumerate(Iter iter, int start) =>
+  iter.enumerate(start, Iter.new());
+static Iter _lisp_Iter_repeat(Var value, int count) =>
+  Iter.repeat(value, count, Iter.new());
+static Iter _lisp_Iter_head(Iter iter, int count) =>
+  iter.head(count, Iter.new());
+static Iter _lisp_Iter_accumulate(Iter iter, Var initial) =>
+  iter.accumulate(initial, Iter.new());
+static Iter _lisp_Iter_scan(Iter iter, Var seed, Var callable) =>
+  iter.scan(seed, _lisp_callback(callable, 2), Iter.new());
+static Iter _lisp_Iter_unique(Iter iter) => iter.unique(Iter.new());
+static int _lisp_Iter_any(Iter iter, Var callable) =>
+  iter.any(_lisp_callback(callable, 1));
+static int _lisp_Iter_all(Iter iter, Var callable) =>
+  iter.all(_lisp_callback(callable, 1));
+
+/* The x2c bindings above preserve native Var truth. Lisp surface calls keep
+   Lisp's nil-only falsehood by adapting a predicate result before native
+   collection code observes it. */
+static List _lisp_Lisp_List_filter(List values, Var callable) =>
+  values.filter(_lisp_predicate(callable));
+static int _lisp_Lisp_List_any(List values, Var callable) =>
+  values.any(_lisp_predicate(callable));
+static int _lisp_Lisp_List_all(List values, Var callable) =>
+  values.all(_lisp_predicate(callable));
+static String _lisp_Lisp_String_filter(String value, Var callable) =>
+  value.filter(_lisp_predicate(callable));
+static Iter _lisp_Lisp_Iter_filter(Iter iter, Var callable) =>
+  iter.filter(_lisp_predicate(callable), Iter.new());
+static int _lisp_Lisp_Iter_any(Iter iter, Var callable) =>
+  iter.any(_lisp_predicate(callable));
+static int _lisp_Lisp_Iter_all(Iter iter, Var callable) =>
+  iter.all(_lisp_predicate(callable));
+
 // The direct targets let the compiler generate their call adapters and
 // read each signature from the declared prototype.
 $(import "../etc/lisp-bindings.xlisp")
@@ -1094,6 +1245,57 @@ $(def lisp.native.target.rows '(
   (lisp_read_file)
   (lisp_write_file)
   (List_sort)
+
+  // Interpreted callbacks run through a session-bound Func. Iterator
+  // producers allocate their destination in that same session Scope.
+  (_lisp_List_map (as List_map))
+  (_lisp_List_filter (as List_filter))
+  (_lisp_List_any (as List_any))
+  (_lisp_List_all (as List_all))
+  (_lisp_List_map2 (as List_map2))
+  (_lisp_List_sort_by (as List_sort_by))
+  (_lisp_List_sort_with (as List_sort_with))
+  (_lisp_List_zip_with (as List_zip_with))
+  (_lisp_Array_map (as Array_map))
+  (_lisp_Array_map2 (as Array_map2))
+  (_lisp_Array_sort_by (as Array_sort_by))
+  (_lisp_Array_sort_with (as Array_sort_with))
+  (_lisp_String_map (as String_map))
+  (_lisp_String_filter (as String_filter))
+  (_lisp_List_iter (as List_iter))
+  (_lisp_Array_iter (as Array_iter))
+  (_lisp_Map_iter (as Map_iter))
+  (_lisp_Map_keys (as Map_keys))
+  (_lisp_Map_enumerate (as Map_enumerate))
+  (_lisp_String_iter (as String_iter))
+  (_lisp_Var_iter (as Var_iter))
+  (_lisp_range (as range))
+  (_lisp_Iter_map (as Iter_map))
+  (_lisp_Iter_filter (as Iter_filter))
+  (_lisp_Iter_zip (as Iter_zip))
+  (_lisp_Iter_zip_with (as Iter_zip_with))
+  (_lisp_Iter_map2 (as Iter_map2))
+  (_lisp_Iter_chain (as Iter_chain))
+  (_lisp_Iter_enumerate (as Iter_enumerate))
+  (_lisp_Iter_repeat (as Iter_repeat))
+  (_lisp_Iter_head (as Iter_head))
+  (_lisp_Iter_accumulate (as Iter_accumulate))
+  (_lisp_Iter_scan (as Iter_scan))
+  (_lisp_Iter_unique (as Iter_unique))
+  (_lisp_Iter_any (as Iter_any))
+  (_lisp_Iter_all (as Iter_all))
+  (_lisp_Lisp_List_filter (as Lisp_List_filter))
+  (_lisp_Lisp_List_any (as Lisp_List_any))
+  (_lisp_Lisp_List_all (as Lisp_List_all))
+  (_lisp_Lisp_String_filter (as Lisp_String_filter))
+  (_lisp_Lisp_Iter_filter (as Lisp_Iter_filter))
+  (_lisp_Lisp_Iter_any (as Lisp_Iter_any))
+  (_lisp_Lisp_Iter_all (as Lisp_Iter_all))
+  (Iter_list)
+  (Iter_array)
+  (Iter_count)
+  (Iter_sum)
+  (Iter_product)
 
   // The core value types: their operations are the library's own, so a
   // Lisp session and a compiled program build the same List, String, Map,

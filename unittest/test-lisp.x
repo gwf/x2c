@@ -257,6 +257,7 @@ static Symbol _raised_code(Lisp lisp, const char *text) {
   try _ev(lisp, text);
   catch %(bad-arity *): code = <bad-arity>;
   catch %(bad-sig *): code = <bad-sig>;
+  catch %(bad-state *): code = <bad-state>;
   catch %(call-stack *): code = <call-stack>;
   catch %(bad-types *): code = <bad-types>;
   catch %(malformed *): code = <malformed>;
@@ -1220,7 +1221,68 @@ static void lisp_value_layer_uses_library_operations(void) {
               "  (begin (Map.setindex m 'a 1) (Map.setindex m 'b 2)"
               "         (List.sort (Map.list m))))"),
     _ev(lisp, "'((a 1) (b 2))"));
+  EXPECT_VAR_EQ(
+    _ev(lisp, "(List.map '(1 2 3) (lambda (x) (+ x 10)))"),
+    _ev(lisp, "'(11 12 13)"));
+  EXPECT_VAR_EQ(
+    _ev(lisp, "(List.filter '(0 () 2) (lambda (x) x))"),
+    _ev(lisp, "'(0 2)"));
+  EXPECT_FALSE(_ev(lisp, "(List.any '(0) (lambda (x) x))").is_nil());
+  EXPECT_FALSE(_ev(lisp, "(List.all '(0) (lambda (x) x))").is_nil());
+  EXPECT_VAR_EQ(
+    _ev(lisp, "(Iter.list (Iter.map (range 1 3 1)"
+              "                     (lambda (x) (+ x 20))))"),
+    _ev(lisp, "'(21 22 23)"));
+  EXPECT_VAR_EQ(
+    _ev(lisp, "(Iter.list (Iter.filter (range 1 3 1) (lambda (x) 0)))"),
+    _ev(lisp, "'(1 2 3)"));
+  EXPECT_STR_EQ(
+    Var.string(_ev(lisp, "(String.filter \"abc\" (lambda (x) 0))")),
+    "abc");
   lisp.destroy();
+}
+
+static void lisp_iterator_callbacks_share_the_entry_budget(void) {
+  Lisp lisp = _boot_session();
+  if (!_load_lisp_layer(lisp, "../etc/lisp-values.xlisp")) return;
+  lisp.call_budget(40);
+  EXPECT_INT_EQ(
+    _raised_code(
+      lisp,
+      "(Iter.count (Iter.map (range 1 200 1) (lambda (x) x)))"),
+    <call-stack>);
+  lisp.destroy();
+}
+
+static void lisp_iterator_callbacks_stay_with_their_session(void) {
+  Lisp first = _boot_session(), second = _boot_session();
+  if (!_load_lisp_layer(first, "../etc/lisp-values.xlisp") ||
+      !_load_lisp_layer(second, "../etc/lisp-values.xlisp"))
+    return;
+  Var iter = _ev(first,
+    "(Iter.map (range 1 3 1) (lambda (x) (+ x 1)))");
+  second.set_global("foreign-iter", iter);
+  EXPECT_INT_EQ(
+    _raised_code(second, "(Iter.list foreign-iter)"), <bad-state>);
+  second.destroy();
+  first.destroy();
+}
+
+static void lisp_iterator_storage_leaves_with_the_session(void) {
+  Lisp warm = _boot_session();
+  if (!_load_lisp_layer(warm, "../etc/lisp-values.xlisp")) return;
+  _ev(warm, "(Iter.list (Iter.map (range 1 3 1) (lambda (x) x)))");
+  warm.destroy();
+
+  ScopeStats before = Scope.stats();
+  for (int i = 0; i < 3; i++) {
+    Lisp lisp = _boot_session();
+    if (!_load_lisp_layer(lisp, "../etc/lisp-values.xlisp")) return;
+    _ev(lisp, "(Iter.list (Iter.map (range 1 3 1) (lambda (x) x)))");
+    lisp.destroy();
+  }
+  ScopeStats after = Scope.stats();
+  EXPECT_INT_EQ((int) after.live_scopes, (int) before.live_scopes);
 }
 
 static void lisp_bootstrap_import_uses_current_session(void) {
@@ -1314,6 +1376,9 @@ void lisp_suite(void) {
   $test.run(lisp_bootstrap_predicates_are_exact);
   $test.run(lisp_optional_layers_are_explicit);
   $test.run(lisp_value_layer_uses_library_operations);
+  $test.run(lisp_iterator_callbacks_share_the_entry_budget);
+  $test.run(lisp_iterator_callbacks_stay_with_their_session);
+  $test.run(lisp_iterator_storage_leaves_with_the_session);
   $test.run(lisp_bootstrap_import_uses_current_session);
   $test.run(lisp_sessions_release_scopes);
 }

@@ -21,6 +21,15 @@
 (def List.get      (bind "List_get" nil))
 (def List.array    (bind "List_array" nil))
 (def List.sort     (bind "List_sort" nil))
+(def List.map      (bind "List_map" nil))
+(def List.filter   (bind "Lisp_List_filter" nil))
+(def List.any      (bind "Lisp_List_any" nil))
+(def List.all      (bind "Lisp_List_all" nil))
+(def List.map2     (bind "List_map2" nil))
+(def List.sort_by  (bind "List_sort_by" nil))
+(def List.sort_with (bind "List_sort_with" nil))
+(def List.zip_with (bind "List_zip_with" nil))
+(def List.iter     (bind "List_iter" nil))
 
 // Array
 
@@ -39,7 +48,11 @@
 (def Array.count     (bind "Array_count" nil))
 (def Array.join      (bind "Array_join" nil))
 (def Array.list      (bind "Array_list" nil))
-(defun Array.map (a fn) (List.array (map fn (Array.list a))))
+(def Array.map       (bind "Array_map" nil))
+(def Array.map2      (bind "Array_map2" nil))
+(def Array.sort_by   (bind "Array_sort_by" nil))
+(def Array.sort_with (bind "Array_sort_with" nil))
+(def Array.iter      (bind "Array_iter" nil))
 
 // Map
 
@@ -53,6 +66,9 @@
 (def Map.getdefault (bind "Map_getdefault" nil))
 (def Map.setdefault (bind "Map_setdefault" nil))
 (def Map.list       (bind "Map_list" nil))
+(def Map.iter       (bind "Map_iter" nil))
+(def Map.keys       (bind "Map_keys" nil))
+(def Map.enumerate  (bind "Map_enumerate" nil))
 
 // String
 
@@ -111,6 +127,33 @@
 (def String.split_n (bind "String_split_n" nil))
 (def String.lstrip (bind "lisp_string_lstrip" nil))
 (def String.rstrip (bind "lisp_string_rstrip" nil))
+(def String.map (bind "String_map" nil))
+(def String.filter (bind "Lisp_String_filter" nil))
+(def String.iter (bind "String_iter" nil))
+
+// Iter
+
+(def Var.iter (bind "Var_iter" nil))
+(def range (bind "range" nil))
+(def Iter.map (bind "Iter_map" nil))
+(def Iter.filter (bind "Lisp_Iter_filter" nil))
+(def Iter.zip (bind "Iter_zip" nil))
+(def Iter.zip_with (bind "Iter_zip_with" nil))
+(def Iter.map2 (bind "Iter_map2" nil))
+(def Iter.chain (bind "Iter_chain" nil))
+(def Iter.enumerate (bind "Iter_enumerate" nil))
+(def Iter.repeat (bind "Iter_repeat" nil))
+(def Iter.head (bind "Iter_head" nil))
+(def Iter.accumulate (bind "Iter_accumulate" nil))
+(def Iter.scan (bind "Iter_scan" nil))
+(def Iter.unique (bind "Iter_unique" nil))
+(def Iter.any (bind "Lisp_Iter_any" nil))
+(def Iter.all (bind "Lisp_Iter_all" nil))
+(def Iter.list (bind "Iter_list" nil))
+(def Iter.array (bind "Iter_array" nil))
+(def Iter.count (bind "Iter_count" nil))
+(def Iter.sum (bind "Iter_sum" nil))
+(def Iter.product (bind "Iter_product" nil))
 
 // Var and Symbol
 

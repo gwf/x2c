@@ -409,6 +409,36 @@ static int _lower_scan_aggregate(List items) {
   return 0;
 }
 
+/* Iterator-chain completion inserts this exact address of a zeroed compound
+   literal. At compile time the binding layer owns equivalent Scope storage,
+   so this one generated destination is omitted. An explicit destination has
+   another shape and keeps the ordinary no-struct-representation refusal. */
+static int _lower_iter_destination(Var argument) {
+  match (argument)
+    case %(expr (* struct "Iter")
+           (op & (expr (struct "Iter")
+                  (cast (struct "Iter")
+                   (expr (struct "Iter") (composite *)))))):
+      return 1;
+  return 0;
+}
+
+static int _lower_owned_iter_call(
+  List callee, List *parameters, List *arguments) {
+  List params = NULL, result = NULL;
+  match (callee) case %((func ?declared) ?returns): {
+    params = declared;
+    result = returns;
+  }
+  if (!params || !*arguments || !result.equal(%("Iter")) ||
+      !params.last().equal(%("Iter")) ||
+      !_lower_iter_destination((*arguments).last()))
+    return 0;
+  *parameters = params.head(params.len() - 1);
+  *arguments = (*arguments).head((*arguments).len() - 1);
+  return 1;
+}
+
 /* Everything the lowering needs before it starts, in one pass: which locals
    need a memory cell, which are arrays, which ids the function declares,
    whether it uses a construct the substitution cannot carry, and whether
@@ -422,6 +452,31 @@ static void _lower_scan(Lowering l, Var form) {
   List application = _lower_func_parts(l, items);
   if (application) {
     _lower_scan_each(l, application);
+    return;
+  }
+  List iter_callee = NULL, iter_args = NULL, iter_params = NULL;
+  match (items)
+    case %(call (expr ?callee (ident *)) (args *arguments)): {
+      iter_callee = callee;
+      iter_args = arguments;
+    }
+  if (iter_callee &&
+      _lower_owned_iter_call(iter_callee, &iter_params, &iter_args)) {
+    _lower_scan_call(l, items);
+    _lower_scan_each(l, iter_args);
+    return;
+  }
+  List iter_result = NULL;
+  match (iter_callee) case %((func ?parameters) ?result): {
+    iter_params = parameters;
+    iter_result = result;
+  }
+  if (iter_params && iter_result.equal(%("Iter")) &&
+      iter_params.last().equal(%("Iter")) &&
+      iter_args.len() == iter_params.len()) {
+    (void) _lower_decline(
+      l, "an explicit Iter destination, which has no compile-time "
+         "representation; omit the destination for a Scope-owned iterator");
     return;
   }
   Var head = items.car();
@@ -680,6 +735,7 @@ static List _lower_args(Lowering l, List params, List args) {
 static Var _lower_call(Lowering l, List callee, String name, List args) {
   List params = NULL;
   match (callee) case %((func ?declared) *): params = declared;
+  (void) _lower_owned_iter_call(callee, &params, &args);
   List values = _lower_args(l, params, args);
   if (l.declined) return void;
   return cons(Atom.intern(_lower_callee_name(l, name)), values);
