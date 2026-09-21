@@ -252,7 +252,7 @@ with PtyRepl() as repl:
     repl.expect(b"=> 7", mark)
     repl.ready(mark)
     mark = repl.send(b"kept.\t\t")
-    repl.expect(b"push", mark)
+    repl.expect(b"push\r\n", mark)
     repl.send(b"\x03")
     repl.ready(mark)
     mark = repl.send(b"int zebra(void) { return 9; }\r")

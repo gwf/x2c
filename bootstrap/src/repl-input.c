@@ -1249,7 +1249,7 @@ static void _show_completions(struct EditState * l, List candidates){
       candidate = Var_string(_x2c_macro_cursor_output_1);
       {
         _write_bytes(l -> input -> ofd, candidate, String_len(candidate));
-        _write_bytes(l -> input -> ofd, "\n", 1);
+        _write_bytes(l -> input -> ofd, "\r\n", 2);
       }
 
     }

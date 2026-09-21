@@ -1372,7 +1372,7 @@ static void _show_completions(struct EditState *l, List candidates) {
   _write_bytes(l.input.ofd, "\r", 1);
   foreach (String candidate, candidates) {
     _write_bytes(l.input.ofd, candidate, candidate.len());
-    _write_bytes(l.input.ofd, "\n", 1);
+    _write_bytes(l.input.ofd, "\r\n", 2);
   }
   l.oldrows = 0;
   l.oldrpos = 1;
