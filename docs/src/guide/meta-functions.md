@@ -539,8 +539,8 @@ in x2c. Include `meta.x` to use the compiler's `x2c_*` operations.
 A macro body can call a meta helper with `$helper(args)`. Passing a captured
 hole directly supplies its code to the helper; it does not evaluate the
 future runtime expression. This form works for code transformations such as
-the field query below. Queries that need original source text still require
-the Lisp call form, as the diagnostic example later explains.
+the field query below. Complete captures also retain their source information
+for text and location queries; constructed subtrees do not acquire it.
 
 ```x2c
 #include "x2c.x"
@@ -696,7 +696,7 @@ meta static List one_word(Var node) {
   return x2c_literal_string(text);
 }
 
-macro Expression $probe.word(Expr $value) => ($(one_word $value))
+macro Expression $probe.word(Expr $value) => ($one_word($value))
 
 int main(void) {
   int seconds = 90;
@@ -709,9 +709,9 @@ int main(void) {
 word seconds
 ```
 
-This example retains `$(one_word $value)`: that form preserves the capture
-information required by `x2c_source_text`. Forwarding the same hole through
-`$one_word($value)` currently loses that information and is rejected.
+The helper receives the complete capture, including the source information
+required by `x2c_source_text`. A computed subtree is code data, not a new
+source capture.
 
 Writing `$probe.word(seconds * 2)` instead reports the message at that
 invocation:

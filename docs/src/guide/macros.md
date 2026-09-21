@@ -269,11 +269,14 @@ temporaries:
 
 ```x2c
 ~
+#include "meta.x"
+meta static List project_type(List value) => x2c_syntax_type(value);
+
 macro Statement $project.swap(
   Expr $left,
   Expr $right
 ) using $temporary => {
-  $(x2c.syntax.type $left) $temporary = $left;
+  $project_type($left) $temporary = $left;
   $left = $right;
   $right = $temporary;
 }
@@ -286,8 +289,8 @@ macro Statement $project.swap(
 ~}
 ```
 
-The type-position query still uses Lisp: `$helper(...)` is currently parsed
-as an expression, so it cannot replace this type hole.
+The helper returns a type into the declaration's type slot. The same explicit
+call form also supplies expressions and generated names in their own slots.
 
 Each invocation receives a compiler-private binding for `$temporary`.
 Definition-local literal names resolve where the macro was defined, captured
@@ -323,6 +326,10 @@ first parameter. Invocation arguments follow normally:
 
 ```x2c
 ~
+#include "meta.x"
+meta static String project_name(List fn) => x2c_function_name(fn);
+meta static List project_body(List fn) => x2c_function_body(fn);
+
 macro Decorator $project.trace(
   Function $function,
   Expr $label
@@ -330,10 +337,10 @@ macro Decorator $project.trace(
   printf(
     "[%s] enter %s\n",
     $label,
-    $(x2c.literal.string (x2c.function.name $function))
+    $project_name($function)
   );
   defer printf("[%s] leave\n", $label);
-  $(x2c.function.body $function)...
+  $project_body($function)...
 }
 
 $project.trace("request")
@@ -346,9 +353,8 @@ int answer(int value) {
 ~}
 ```
 
-The function-name query and body splice retain Lisp because explicit meta
-calls currently parse their arguments as expressions, which conflicts with
-a captured `Function`. The decorator itself is an x2c source template.
+The helpers receive the complete captured function. One returns its name;
+the other returns its body as the sequence inserted by `...`.
 
 There is no semicolon after the decorator invocation. Decorators stack
 closest-first, and each expansion must leave exactly one target for the next.
@@ -422,11 +428,14 @@ Ordinary macros can use the same declaration. Their parentheses remain
 mandatory, even when they take no arguments:
 
 ```x2c
+#include "meta.x"
+meta static List project_type(List value) => x2c_syntax_type(value);
+
 macro Statement $control.swap(
   Expr $left,
   Expr $right
 ) using $temporary => {
-  $(x2c.syntax.type $left) $temporary = $left;
+  $project_type($left) $temporary = $left;
   $left = $right;
   $right = $temporary;
 }
@@ -561,9 +570,9 @@ To read the exact source text of a complete captured argument, use
 `x2c_source_text`:
 
 ```x2c
-macro Expression $project.source(Expr $value) => (
-  $(x2c.literal.string (x2c.source.text $value))
-)
+#include "meta.x"
+meta static String project_text(List value) => x2c_source_text(value);
+macro Expression $project.source(Expr $value) => ($project_text($value))
 
 int main(void) {
   return strcmp($project.source(1 /* kept */ + 2),
@@ -571,10 +580,10 @@ int main(void) {
 }
 ```
 
-This query retains the direct Lisp call: forwarding the captured expression
-through `$helper(...)` currently loses the source information it needs.
-Forwarding a capture through another source macro preserves its text. Constructing or selecting an AST
-subtree does not invent source text; use `List.repr()` to render code data.
+Passing a complete capture to a meta helper preserves the source information
+for this query. Forwarding it through another source macro does too.
+Constructing or selecting an AST subtree does not invent source text; use
+`List.repr()` to render code data.
 
 `x2c_embed_text` reads a regular text file into a compile-time String and
 records it as a build dependency. A captured String literal retains the
@@ -582,17 +591,16 @@ caller's file location for resolving a relative path:
 
 <!-- ignore: notice.txt is the external file being illustrated -->
 ```x2c,ignore
-macro Expression $project.notice(Literal $path) => (
-  $(x2c.literal.string (x2c.embed.text $path))
-)
+#include "meta.x"
+meta static String project_notice(String path) => x2c_embed_text(path);
+macro Expression $project.notice(Literal $path) => ($project_notice($path))
 
 String notice = $project.notice("notice.txt");
 ```
 
-The direct Lisp call preserves the captured path and its source location;
-forwarding it through `$helper(...)` currently does not. A meta function can
-call `x2c_embed_text` with a computed String, but that does not retain the
-captured literal's caller-relative path information.
+A captured path stays relative to its caller even when the macro is defined
+in an imported file. A computed String path instead resolves beside the
+macro definition, or beside the source file for a direct meta call.
 
 Empty files are valid. Directories, embedded NUL bytes, unreadable files and
 files too large for a String are rejected.

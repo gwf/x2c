@@ -703,7 +703,7 @@ static int _claims(Compiler c, List definition, AstPos position) {
   if (kind == _position(position).kind) return 1;
   if (position == AST_STATEMENT || position == AST_MAP_ENTRY) return 0;
   if (!definition) {
-    if (position == AST_BLOCK && c.peek(0) == <$>) {
+    if (c.peek(0) == <$> && (position == AST_BLOCK || c.macro_holes)) {
       String name;
       _scan_name(c, &name);
       Type type = name ? c.sym.get(%($name)) : NULL;
@@ -1538,6 +1538,19 @@ List Compiler.parse_macro_lisp_expression(Compiler compiler) {
   return compiler.lift_macro_lisp_expression(value, invocation);
 }
 
+/* Both entry forms expose source only for complete captures in the active
+   expansion. The keys are the same unwrapped values passed to the helper. */
+static Map _source_captures(List bindings) {
+  Map captures = {};
+  foreach (List pair, bindings) {
+    List source;
+    Var syntax;
+    if (pair && _source_capture_parts(pair.cadr(), &source, &syntax))
+      captures[((ulong) syntax.u64)] = source;
+  }
+  return captures;
+}
+
 static Var _evaluate_meta_value(Compiler c, List expression, Token site) {
   if (!c.collect_protocols) c.run_declaration_effects();
   _ensure_lisp(c);
@@ -1545,7 +1558,13 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site) {
   if (form is void)
     c.report_error(<macro>, "explicit meta call cannot be resolved", site,
       %(${c.lower_declined()}));
+  List active = c.macro_stack ? c.macro_stack.car() : NULL;
+  List bindings = active ? active.caddr() : NULL;
+  String source_file = active ? active.car().list().assoc(<file>) : c.filename;
   Var value;
+  $let(macro_sdk_has_references, !!bindings)
+  $let(macro_sdk_source_captures, _source_captures(bindings))
+  $let(macro_sdk_source_file, source_file)
   $let(macro_sdk_compiler, c)
   $let(macro_import_compiler, c)
   $let(macro_import_invocation, site) {
@@ -1641,18 +1660,15 @@ static Var _eval_template_form(
   unsigned long serial = template_serial++;
   /* Provenance lookup uses captured Var identity. Structural equality must
      not let constructed or selected syntax acquire a caller's source text. */
-  List references = NULL, Map source_captures = {};
+  List references = NULL, Map source_captures = _source_captures(bindings);
   foreach (List pair, bindings) {
     if (!pair) continue;
     Var (binder, syntax) = pair;
     String spelling = binder.str()[1:];
     String temporary = %"_x2c_meta_${serial}_$spelling";
-    Var unwrapped = _source_unwrap(syntax);
-    List source = NULL;
-    if (_source_capture_parts(syntax, &source, &unwrapped)) {
-      Var key = ((ulong) unwrapped.u64);
-      source_captures[key] = source;
-    }
+    Var unwrapped;
+    if (!_source_capture_parts(syntax, NULL, &unwrapped))
+      unwrapped = _source_unwrap(syntax);
     compiler.macro_lisp.set_global(temporary, unwrapped);
     references = cons(%($spelling $temporary), references);
   }
@@ -2224,12 +2240,19 @@ static int _lisp_splice_follows(Compiler compiler) =>
   compiler.peek(0) == <"$("> &&
          compiler.token.after_group().type == <...>;
 
-/** Returns whether tokens after the current Lisp form continue a declaration.
-    The balanced form and following trivia are inspected without moving the
-    compiler cursor.
+/** Returns whether tokens after a Lisp form or explicit meta call continue
+    a declaration. The balanced argument group is inspected without moving
+    the compiler cursor; a visible source macro retains its own grammar.
 */
 int Compiler.macro_lisp_starts_declaration(Compiler compiler) {
-  Token token = compiler.token.after_group();
+  Token opening = compiler.token;
+  if (opening.type == <$>) {
+    if (_peek_invocation(compiler)) return 0;
+    opening = compiler.skip_trivia_from(
+      compiler.skip_trivia_from(opening + 1) + 1);
+    if (opening.type != <(>) return 0;
+  }
+  Token token = opening.after_group();
   return token.type == <$> || token.type == <ident> ||
          token.type == <*> || token.type == <(>;
 }
@@ -3132,7 +3155,11 @@ List Compiler.try_parse_macro_expression(Compiler c) {
     c.expect(<(>);
     if (c.peek(0) != <)>) loop {
       List hole = c.peek_macro_hole();
-      List argument = c.parse_assignment();
+      int direct = hole && (c.peek(2) == <,> || c.peek(2) == <)>);
+      Symbol kind = hole ? hole.assoc(<kind>) : 0;
+      List argument = direct
+        ? %(expr (<macro-expr>) ${_parse_hole(c, kind ? kind : <argument>)})
+        : c.parse_assignment();
       if (hole && argument.match(%(expr ? (macro-bind ?)))) {
         Atom projection = _replacement_binder(
           hole.assoc(<binder>), "value", 0);

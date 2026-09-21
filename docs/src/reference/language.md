@@ -860,8 +860,11 @@ requirement; the compiler does not add braces. The invocation must occur in the
 matching position:
 
 ```x2c
+#include "meta.x"
+meta static List swap_type(List value) => x2c_syntax_type(value);
+
 macro Statement $swap(Expr $left, Expr $right) using $temporary => {
-  $(x2c.syntax.type $left) $temporary = $left;
+  $swap_type($left) $temporary = $left;
   $left = $right;
   $right = $temporary;
 }
@@ -886,10 +889,13 @@ explicit initializers, and commas separate literal members and sequence
 splices:
 
 ```x2c
+#include "meta.x"
+meta static List public_name(String name) => x2c_ident(name);
+
 macro Enumerator $status_values() => {
   private_start = 3,
-  $(x2c.ident "STATUS_READY") = private_start + 1,
-  $(x2c.ident "STATUS_DONE")
+  $public_name("STATUS_READY") = private_start + 1,
+  $public_name("STATUS_DONE")
 }
 
 typedef enum Status {
@@ -900,12 +906,11 @@ typedef enum Status {
 ```
 
 Literal names such as `private_start` are hygienic and may be referenced by
-later generated initializers in the same expansion. `x2c.ident` publishes the
-requested name. This generated-name position still requires `$(...)`;
-`$helper(...)` is currently accepted only in expression positions. Generated members participate in enum ordering and
-automatic value assignment, and successful exact members are available to
-following source. Duplicate generated names and collisions with source members
-are rejected. A malformed or failed sequence publishes none of its provisional
+later generated initializers in the same expansion. `x2c_ident` publishes the
+requested name through the generated-name slot. Generated members participate
+in enum ordering and automatic value assignment, and successful exact members
+are available to following source. Duplicate generated names and collisions
+with source members are rejected. A malformed or failed sequence publishes none of its provisional
 members.
 
 An `Entry` body contains zero or more comma-separated `Map` rows:
@@ -940,6 +945,10 @@ A decorator is a macro whose required first parameter is supplied implicitly
 from the expression or source item following its application:
 
 ```x2c
+#include "meta.x"
+meta static String trace_name(List fn) => x2c_function_name(fn);
+meta static List trace_body(List fn) => x2c_function_body(fn);
+
 macro Decorator $trace(
   Function $function,
   Expr $channel
@@ -947,9 +956,9 @@ macro Decorator $trace(
   printf(
     "[%s] %s\n",
     $channel,
-    $(x2c.literal.string (x2c.function.name $function))
+    $trace_name($function)
   );
-  $(x2c.function.body $function)...
+  $trace_body($function)...
 }
 
 $trace("request")
@@ -1114,11 +1123,13 @@ Decorators stack closest-first. The inner expansion must leave exactly one
 target of the required kind for the outer decorator:
 
 ```x2c
+~#include "meta.x"
+~meta static List old_body(List fn) => x2c_function_body(fn);
 ~macro Decorator $logged(Function $function) => {
-~  $(x2c.function.body $function)...
+~  $old_body($function)...
 ~}
 ~macro Decorator $validated(Function $function) => {
-~  $(x2c.function.body $function)...
+~  $old_body($function)...
 ~}
 $logged()
 $validated()
@@ -1490,10 +1501,11 @@ runtime inputs are diagnosed. Visible macros retain precedence over meta
 functions with the same name. In a macro body, forwarding a captured hole
 directly passes its code rather than evaluating the future runtime expression.
 
-Explicit calls currently accept expression arguments and results. Type-slot
-and generated-name insertion and captured `Function` forwarding still require
-the Lisp form, as do operations that need a capture's source text or
-source-relative path.
+A directly forwarded hole retains its declared capture kind, including
+`Function`, and complete captures retain their source text and path context.
+Inside a macro template, an explicit call can supply a type, generated name
+or syntax sequence as well as an expression; the ordinary slot binder checks
+the returned value for that position.
 
 Inside meta bodies, Unit and Statement source macros used in expression
 positions construct deferred invocation Lists from computed arguments. Normal
