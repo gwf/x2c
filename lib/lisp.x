@@ -253,10 +253,73 @@ protocol Cleanup(Lisp);
 
 #pragma private
 
-#include "typed-list.x"
-#include "list-selectors.x"
-#include "digest.x"
-#include "json.x"
+/* Optional modules stay outside the implicit prelude.  The compiler links
+   their runtime units, so private checked aliases can install their pure
+   value operations in the evaluator without importing their source APIs into
+   every program.  These C-only declarations do not enter the x2c interface;
+   typed List names are ABI aliases for List. */
+macro Unit $lisp.optional.native.declarations() => {
+  $(quote (
+    (preproc "extern List List_listchar(List);")
+    (preproc "extern List List_listshort(List);")
+    (preproc "extern List List_listint(List);")
+    (preproc "extern List List_listfloat(List);")
+    (preproc "extern List List_listdbl(List);")
+    (preproc "extern List List_liststring(List);")
+    (preproc "extern List List_listsymbol(List);")
+    (preproc "extern List Var_listchar(Var);")
+    (preproc "extern List Var_listshort(Var);")
+    (preproc "extern List Var_listint(Var);")
+    (preproc "extern List Var_listfloat(Var);")
+    (preproc "extern List Var_listdbl(Var);")
+    (preproc "extern List Var_liststring(Var);")
+    (preproc "extern List Var_listsymbol(Var);")
+    (preproc "extern String String_sha256(String);")
+    (preproc "extern String Var_json(Var);")
+    (preproc "extern String Var_pretty_json(Var);")))...
+}
+
+$lisp.optional.native.declarations();
+
+$x2c.foreign.alias(List_listchar)
+static List _lisp_list_listchar(List value);
+$x2c.foreign.alias(List_listshort)
+static List _lisp_list_listshort(List value);
+$x2c.foreign.alias(List_listint)
+static List _lisp_list_listint(List value);
+$x2c.foreign.alias(List_listfloat)
+static List _lisp_list_listfloat(List value);
+$x2c.foreign.alias(List_listdbl)
+static List _lisp_list_listdbl(List value);
+$x2c.foreign.alias(List_liststring)
+static List _lisp_list_liststring(List value);
+$x2c.foreign.alias(List_listsymbol)
+static List _lisp_list_listsymbol(List value);
+$x2c.foreign.alias(Var_listchar)
+static List _lisp_var_listchar(Var value);
+$x2c.foreign.alias(Var_listshort)
+static List _lisp_var_listshort(Var value);
+$x2c.foreign.alias(Var_listint)
+static List _lisp_var_listint(Var value);
+$x2c.foreign.alias(Var_listfloat)
+static List _lisp_var_listfloat(Var value);
+$x2c.foreign.alias(Var_listdbl)
+static List _lisp_var_listdbl(Var value);
+$x2c.foreign.alias(Var_liststring)
+static List _lisp_var_liststring(Var value);
+$x2c.foreign.alias(Var_listsymbol)
+static List _lisp_var_listsymbol(Var value);
+$x2c.foreign.alias(String_sha256)
+static String _lisp_string_sha256(String value);
+$x2c.foreign.alias(Var_json)
+static String _lisp_var_json(Var value);
+$x2c.foreign.alias(Var_pretty_json)
+static String _lisp_var_pretty_json(Var value);
+
+static List _lisp_list_cdddr(List value) => value.cdr().cdr().cdr();
+static List _lisp_list_cddddr(List value) => value.cdr().cdr().cdr().cdr();
+static List _lisp_var_cdddr(Var value) => value.cdr().cdr().cdr();
+static List _lisp_var_cddddr(Var value) => value.cdr().cdr().cdr().cdr();
 
 static String lisp_standard_source = $lisp._standard.source();
 
@@ -1046,6 +1109,7 @@ $(def lisp.native.target.rows '(
   (Map_updateindex)
   (Map_postfixindex)
   (Map_set)
+  (Var_list)
   (Var_array)
   (Var_map)
   (Var_string)
@@ -1096,27 +1160,27 @@ $(def lisp.native.target.rows '(
   (Var_updateindex)
   (Var_postfixindex)
   (List_truth)
-  (List_listchar)
-  (List_listshort)
-  (List_listint)
-  (List_listfloat)
-  (List_listdbl)
-  (List_liststring)
-  (List_listsymbol)
-  (List_cdddr)
-  (List_cddddr)
-  (Var_listchar)
-  (Var_listshort)
-  (Var_listint)
-  (Var_listfloat)
-  (Var_listdbl)
-  (Var_liststring)
-  (Var_listsymbol)
-  (Var_cdddr)
-  (Var_cddddr)
-  (Var_json)
-  (Var_pretty_json)
-  (String_sha256)
+  (_lisp_list_listchar (as List_listchar))
+  (_lisp_list_listshort (as List_listshort))
+  (_lisp_list_listint (as List_listint))
+  (_lisp_list_listfloat (as List_listfloat))
+  (_lisp_list_listdbl (as List_listdbl))
+  (_lisp_list_liststring (as List_liststring))
+  (_lisp_list_listsymbol (as List_listsymbol))
+  (_lisp_list_cdddr (as List_cdddr))
+  (_lisp_list_cddddr (as List_cddddr))
+  (_lisp_var_listchar (as Var_listchar))
+  (_lisp_var_listshort (as Var_listshort))
+  (_lisp_var_listint (as Var_listint))
+  (_lisp_var_listfloat (as Var_listfloat))
+  (_lisp_var_listdbl (as Var_listdbl))
+  (_lisp_var_liststring (as Var_liststring))
+  (_lisp_var_listsymbol (as Var_listsymbol))
+  (_lisp_var_cdddr (as Var_cdddr))
+  (_lisp_var_cddddr (as Var_cddddr))
+  (_lisp_var_json (as Var_json))
+  (_lisp_var_pretty_json (as Var_pretty_json))
+  (_lisp_string_sha256 (as String_sha256))
   (_lisp_string_new_len)
   (_lisp_symbol_new_len)
   (_lisp_symbol_parse)

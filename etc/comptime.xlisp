@@ -279,7 +279,7 @@
 (defun double_var (v) (C.conv v 'f64))
 (defun Symbol_var (v) v)
 (defun String_var (v) v)
-(defun Var_list (v) v)
+(def Var_list Var.list)
 (defun Array_var (v) v)
 (defun Map_var (v) v)
 

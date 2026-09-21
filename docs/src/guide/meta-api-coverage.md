@@ -18,6 +18,8 @@ The meta case declares `meta int audit_probe(void)` and invokes it as
 `$audit_probe()`. The corresponding native control calls `audit_probe()`
 without `meta`. Thus the examples exercise ordinary x2c function bodies
 and explicit x2c meta-call syntax, not hand-written Lisp calls.
+Each case below uses the `x2c.x` prelude; optional module includes are
+shown where needed. Invoke its displayed helper with `$audit_probe()`.
 
 ## What the states establish
 
@@ -37,18 +39,18 @@ does not imply that a similarly named direct method works.
 
 Loaded layers: `etc/init.xlisp`, `etc/lisp-values.xlisp`, `etc/comptime.xlisp`, `etc/compiler-sdk.xlisp`, `etc/builtin-macros.xlisp`.
 
-Source fingerprint: `fa12b178a237d644e97691722cf725f9bd675fdf59003b227fc84d28647b323c`.
+Source fingerprint: `6305f846a119deee6f6a328cd8e5be63c2ff1bed050bcb271591d236065d0c1e`.
 
-Compiler fingerprint: `fc4d9ec45bd794ec35a3c3eb64cc7a94caba171a025503e814b6984fdea18eee`.
+Compiler fingerprint: `9ca6c55f69c6f60d708fb2a7cad050897dd047f58c96720cbbc63562300d0f3d`.
 
 | Type | Callables | Binding found | No binding found |
 | --- | ---: | ---: | ---: |
-| String | 89 | 64 | 25 |
-| List | 95 | 42 | 53 |
+| String | 89 | 66 | 23 |
+| List | 95 | 51 | 44 |
 | Array | 61 | 41 | 20 |
 | Map | 38 | 23 | 15 |
-| Symbol | 14 | 7 | 7 |
-| Var | 186 | 69 | 117 |
+| Symbol | 14 | 9 | 5 |
+| Var | 186 | 115 | 71 |
 
 ## Exhaustive work ledger
 
@@ -61,38 +63,38 @@ its complete contract is shown to agree.
 
 | Evidence state | Signature rows |
 | --- | ---: |
-| verified example | 141 |
-| reproduced failure | 11 |
-| bound, unverified | 96 |
-| no binding found | 235 |
+| verified example | 295 |
+| reproduced failure | 15 |
+| bound, unverified | 0 |
+| no binding found | 173 |
 
 | Disposition | All rows | Missing binding | Bound, unverified |
 | --- | ---: | ---: | ---: |
-| implementable with current values | 250 | 31 | 78 |
-| needs callback adapter | 15 | 12 | 2 |
-| needs representation decision | 113 | 93 | 15 |
+| implementable with current values | 282 | 9 | 0 |
+| needs callback adapter | 15 | 12 | 0 |
+| needs representation decision | 118 | 96 | 0 |
 | native resource contract | 48 | 48 | 0 |
 | covered by alternate operation | 0 | 0 | 0 |
-| needs bounded probe | 57 | 53 | 1 |
+| needs bounded probe | 20 | 13 | 0 |
 
 ### Implementation groups
 
 | Group | Owners | Rows | Missing binding | Bound, unverified |
 | --- | --- | ---: | ---: | ---: |
 | Array interpreted callbacks | lib/array.x | 4 | 3 | 0 |
-| Array value operations | lib/array.x, lib/common.x, lib/list.x | 25 | 0 | 12 |
-| List interpreted callbacks | lib/list.x | 9 | 7 | 2 |
-| List value operations | lib/common.x, lib/list.x, lib/match.x | 28 | 0 | 14 |
-| Map value operations | lib/common.x, lib/list.x, lib/map.x | 15 | 0 | 9 |
+| Array value operations | lib/array.x, lib/common.x, lib/list.x | 25 | 0 | 0 |
+| List interpreted callbacks | lib/list.x | 9 | 7 | 0 |
+| List value operations | lib/common.x, lib/list.x, lib/match.x | 28 | 0 | 0 |
+| Map value operations | lib/common.x, lib/list.x, lib/map.x | 15 | 0 | 0 |
 | String interpreted callbacks | lib/string.x | 2 | 2 | 0 |
-| String value operations | lib/common.x, lib/digest.x, lib/split.x, lib/string-classify.x, lib/string.x | 60 | 1 | 28 |
-| Symbol value operations | lib/common.x, lib/symbol.x | 7 | 0 | 2 |
-| Var value operations | lib/atom.x, lib/common.x, lib/dispatch.x, lib/json.x, lib/list.x, lib/match.x, lib/var.x, lib/varconvert.x | 51 | 2 | 8 |
-| absence and null values | lib/array.x, lib/dispatch.x, lib/list.x, lib/map.x, lib/var.x | 17 | 5 | 12 |
+| String value operations | lib/common.x, lib/digest.x, lib/split.x, lib/string-classify.x, lib/string.x | 60 | 0 | 0 |
+| Symbol value operations | lib/common.x, lib/symbol.x | 7 | 0 | 0 |
+| Var value operations | lib/atom.x, lib/common.x, lib/dispatch.x, lib/json.x, lib/list.x, lib/match.x, lib/var.x, lib/varconvert.x | 49 | 0 | 0 |
+| absence and null values | lib/array.x, lib/dispatch.x, lib/list.x, lib/map.x, lib/var.x | 17 | 5 | 0 |
 | allocation and ownership contracts | lib/array.x, lib/dispatch.x, lib/list.x, lib/map.x, lib/string.x, lib/var.x | 19 | 19 | 0 |
 | boxed value extraction | lib/common.x | 4 | 0 | 0 |
-| canonical List selectors | lib/list-selectors.x; lib/list.x | 60 | 48 | 5 |
-| explicit syntax operations | lib/array.x, lib/common.x, lib/dispatch.x, lib/map.x, lib/varops.x | 19 | 1 | 0 |
+| canonical List selectors | lib/list-selectors.x; lib/list.x | 60 | 44 | 0 |
+| explicit syntax operations | lib/array.x, lib/common.x, lib/dispatch.x, lib/map.x, lib/varops.x | 18 | 0 | 0 |
 | lazy String split state | lib/split.x | 3 | 3 | 0 |
 | mutations returning no value | lib/array.x, lib/map.x | 7 | 0 | 0 |
 | native AdNode contracts | lib/autodiff.x | 1 | 1 | 0 |
@@ -109,12 +111,14 @@ its complete contract is shown to agree.
 | native iterator state | lib/array.x, lib/common.x, lib/dispatch.x, lib/list.x, lib/map.x, lib/string.x | 9 | 9 | 0 |
 | native pointer crossings | lib/dispatch.x, lib/var.x, lib/varconvert.x, lib/varops.x | 8 | 8 | 0 |
 | native variadic calls | lib/array.x, lib/list.x, lib/map.x, lib/string.x, lib/var.x | 8 | 8 | 0 |
-| numeric and descriptor internals | lib/common.x, lib/dispatch.x, lib/var.x, lib/varconvert.x, lib/varops.x | 37 | 37 | 0 |
+| numeric and descriptor internals | lib/common.x, lib/dispatch.x, lib/var.x, lib/varconvert.x, lib/varops.x | 37 | 2 | 0 |
 | packed typed collection conversions | lib/typed-array.x, lib/typed-map.x | 22 | 22 | 0 |
+| registered matrix protocols | lib/varops.x | 1 | 1 | 0 |
 | seeded folds | lib/array.x, lib/list.x | 2 | 2 | 0 |
-| status and output cells | lib/array.x, lib/list.x, lib/map.x, lib/match.x, lib/string-number.x, lib/string.x, lib/symbol.x | 12 | 9 | 3 |
-| text pointer boundaries | lib/common.x, lib/string.x, lib/symbol.x | 12 | 8 | 1 |
-| typed canonical List views | lib/typed-list.x | 14 | 14 | 0 |
+| source address tags | lib/var.x | 2 | 0 | 0 |
+| status and output cells | lib/array.x, lib/list.x, lib/map.x, lib/match.x, lib/string-number.x, lib/string.x, lib/symbol.x | 12 | 9 | 0 |
+| text pointer boundaries | lib/common.x, lib/string.x, lib/symbol.x | 12 | 5 | 0 |
+| typed canonical List views | lib/typed-list.x | 14 | 0 | 0 |
 
 ## What a missing operation may need
 
@@ -136,38 +140,36 @@ explicit checks before claiming runtime equivalence.
 
 ## String
 
-**verified example:** `compare`, `contains_digit`, `dedent`, `find_within`, `intern`, `is_alnum`, `is_alnum_under`, `is_alpha`, `is_alpha_under`, `is_digit`, `is_identifier`, `is_lower`, `is_lower_under`, `is_space`, `is_upper`, `is_upper_under`, `keep`, `len`, `new_fill`, `pad_center`, `pad_left`, `pad_right`, `parse`, `parse_char`, `reject`, `replace_n`, `split_n`, `squeeze`, `symbol`, `truth`, `withindex`.
+**verified example:** `add`, `capitalize`, `compare`, `contains`, `contains_digit`, `count`, `dedent`, `endswith`, `equal`, `escape`, `find`, `find_all`, `find_within`, `getindex`, `getslice`, `intern`, `is_alnum`, `is_alnum_under`, `is_alpha`, `is_alpha_under`, `is_digit`, `is_identifier`, `is_lower`, `is_lower_under`, `is_space`, `is_upper`, `is_upper_under`, `join`, `keep`, `len`, `lower`, `new`, `new_fill`, `new_len`, `pad_center`, `pad_left`, `pad_right`, `parse`, `parse_char`, `partition`, `reject`, `remove_prefix`, `remove_suffix`, `repeat`, `replace`, `replace_n`, `repr`, `rfind`, `rpartition`, `sha256`, `split`, `split_lines`, `split_n`, `squeeze`, `startswith`, `str`, `symbol`, `truth`, `unescape`, `upper`, `var`, `withindex`.
 
-**reproduced failure:** `hash`, `lstrip`, `rstrip`, `strip`.
+**reproduced failure:** `c_compare`, `c_len`, `hash`, `lstrip`, `rstrip`, `strip`.
 
-**bound, unverified:** `add`, `capitalize`, `contains`, `count`, `endswith`, `equal`, `escape`, `find`, `find_all`, `getindex`, `getslice`, `join`, `lower`, `new`, `partition`, `remove_prefix`, `remove_suffix`, `repeat`, `replace`, `repr`, `rfind`, `rpartition`, `split`, `split_lines`, `startswith`, `str`, `unescape`, `upper`, `var`.
-
-**no binding found:** `c_compare`, `c_find`, `c_len`, `filter`, `free`, `intern_free`, `is_permanent`, `iter`, `lines`, `malloc`, `map`, `new_in`, `new_len`, `open`, `printf`, `promote`, `sha256`, `splits`, `try_double`, `try_long`, `try_next`, `try_own`, `words`, `write_repr`, `write_str`.
+**no binding found:** `c_find`, `filter`, `free`, `intern_free`, `is_permanent`, `iter`, `lines`, `malloc`, `map`, `new_in`, `open`, `printf`, `promote`, `splits`, `try_double`, `try_long`, `try_next`, `try_own`, `words`, `write_repr`, `write_str`.
 
 | Direct callable | State | Binding provenance | Considerations | Tier/module | Source |
 | --- | --- | --- | --- | --- | --- |
-| `String String.add(String str, String other)` | bound, unverified | etc/comptime.xlisp:223 | binding | primary/api | lib/string.x:575 |
-| `int String.c_compare(const char *, const char *)` | no binding found | none found | pointer | unclassified generated/api | lib/common.x (interface) |
+| `String String.add(String str, String other)` | verified example | etc/comptime.xlisp:223 | binding | primary/api | lib/string.x:575 |
+| `int String.c_compare(const char *, const char *)` | reproduced failure | none found | pointer | unclassified generated/api | lib/common.x (interface) |
 | `char * String.c_find(const char *, int)` | no binding found | none found | pointer | unclassified generated/api | lib/common.x (interface) |
-| `size_t String.c_len(const char *)` | no binding found | none found | pointer | unclassified generated/api | lib/common.x (interface) |
-| `String String.capitalize(String str)` | bound, unverified | etc/comptime.xlisp:241 | binding | primary/api | lib/string.x:718 |
+| `size_t String.c_len(const char *)` | reproduced failure | none found | pointer | unclassified generated/api | lib/common.x (interface) |
+| `String String.capitalize(String str)` | verified example | etc/comptime.xlisp:241 | binding | primary/api | lib/string.x:718 |
 | `int String.compare(String x, String y)` | verified example | etc/comptime.xlisp:203 | binding | advanced/api | lib/string.x:1398 |
-| `int String.contains(String str, String sub)` | bound, unverified | etc/comptime.xlisp:228 | binding | primary/api | lib/string.x:530 |
+| `int String.contains(String str, String sub)` | verified example | etc/comptime.xlisp:228 | binding | primary/api | lib/string.x:530 |
 | `int String.contains_digit(String str)` | verified example | etc/comptime.xlisp:191 | binding | primary/api | lib/string-classify.x:19 |
-| `int String.count(String str, String sub)` | bound, unverified | etc/comptime.xlisp:240 | binding | primary/api | lib/string.x:505 |
+| `int String.count(String str, String sub)` | verified example | etc/comptime.xlisp:240 | binding | primary/api | lib/string.x:505 |
 | `String String.dedent(String str)` | verified example | etc/comptime.xlisp:206 | binding | primary/api | lib/string.x:779 |
-| `int String.endswith(String str, String suffix)` | bound, unverified | etc/comptime.xlisp:230 | binding | primary/api | lib/string.x:553 |
-| `int String.equal(String x, String y)` | bound, unverified | etc/comptime.xlisp:248 | binding | advanced/api | lib/string.x:1386 |
-| `String String.escape(String str)` | bound, unverified | etc/comptime.xlisp:245 | binding | advanced/api | lib/string.x:1266 |
+| `int String.endswith(String str, String suffix)` | verified example | etc/comptime.xlisp:230 | binding | primary/api | lib/string.x:553 |
+| `int String.equal(String x, String y)` | verified example | etc/comptime.xlisp:248 | binding | advanced/api | lib/string.x:1386 |
+| `String String.escape(String str)` | verified example | etc/comptime.xlisp:245 | binding | advanced/api | lib/string.x:1266 |
 | `String String.filter(String str, Func fn)` | no binding found | none found | callback | primary/api | lib/string.x:825 |
-| `int String.find(String str, String sub)` | bound, unverified | etc/comptime.xlisp:227 | binding | primary/api | lib/string.x:455 |
-| `List String.find_all(String str, String sub, int start, int end)` | bound, unverified | etc/comptime.xlisp:238 | binding | primary/api | lib/string.x:477 |
+| `int String.find(String str, String sub)` | verified example | etc/comptime.xlisp:227 | binding | primary/api | lib/string.x:455 |
+| `List String.find_all(String str, String sub, int start, int end)` | verified example | etc/comptime.xlisp:238 | binding | primary/api | lib/string.x:477 |
 | `int String.find_within(String str, String sub, int start, int end)` | verified example | etc/comptime.xlisp:214 | binding | primary/api | lib/string.x:434 |
 | `void String.free(String str)` | no binding found | none found | ownership | advanced/api | lib/string.x:227 |
-| `int String.getindex(String str, int index)` | bound, unverified | etc/comptime.xlisp:220 | binding | primary/api | lib/string.x:519 |
-| `String String.getslice(String s, int start, int stop, int step)` | bound, unverified | etc/comptime.xlisp:231 | binding | primary/api | lib/string.x:655 |
+| `int String.getindex(String str, int index)` | verified example | etc/comptime.xlisp:220 | binding | primary/api | lib/string.x:519 |
+| `String String.getslice(String s, int start, int stop, int step)` | verified example | etc/comptime.xlisp:231 | binding | primary/api | lib/string.x:655 |
 | `unsigned String.hash(String str)` | reproduced failure | etc/comptime.xlisp:204 | binding | advanced/api | lib/string.x:1373 |
-| `Self String.intern(Self string)` | verified example | etc/comptime.xlisp:336 | binding | advanced/api | lib/string.x:283 |
+| `Self String.intern(Self string)` | verified example | etc/comptime.xlisp:344 | binding | advanced/api | lib/string.x:283 |
 | `Self String.intern_free(Self string)` | no binding found | none found | ownership | advanced/api | lib/string.x:308 |
 | `int String.is_alnum(String s)` | verified example | etc/comptime.xlisp:195 | binding | primary/api | lib/string-classify.x:53 |
 | `int String.is_alnum_under(String s)` | verified example | etc/comptime.xlisp:196 | binding | primary/api | lib/string-classify.x:58 |
@@ -182,56 +184,56 @@ explicit checks before claiming runtime equivalence.
 | `int String.is_upper(String s)` | verified example | etc/comptime.xlisp:201 | binding | primary/api | lib/string-classify.x:91 |
 | `int String.is_upper_under(String s)` | verified example | etc/comptime.xlisp:202 | binding | primary/api | lib/string-classify.x:96 |
 | `Iter String.iter(String x, Iter dest)` | no binding found | none found | resource | primary/api | lib/string.x:1445 |
-| `String String.join(String sep, List strings)` | bound, unverified | etc/comptime.xlisp:233 | binding | primary/api | lib/string.x:1002 |
+| `String String.join(String sep, List strings)` | verified example | etc/comptime.xlisp:233 | binding | primary/api | lib/string.x:1002 |
 | `String String.keep(String str, String chars)` | verified example | etc/comptime.xlisp:207 | binding | primary/api | lib/string.x:863 |
 | `int String.len(String str)` | verified example | etc/init.xlisp:107 | binding | primary/api | lib/string.x:248 |
 | `Split String.lines(String str)` | no binding found | none found | resource | primary/api | lib/split.x:205 |
-| `String String.lower(String str)` | bound, unverified | etc/comptime.xlisp:224 | binding | primary/api | lib/string.x:699 |
+| `String String.lower(String str)` | verified example | etc/comptime.xlisp:224 | binding | primary/api | lib/string.x:699 |
 | `String String.lstrip(String str, char *negChars)` | reproduced failure | etc/comptime.xlisp:217 | pointer | primary/api | lib/string.x:727 |
 | `String String.malloc(int len)` | no binding found | none found | ownership | advanced/api | lib/string.x:207 |
 | `String String.map(String str, Func fn)` | no binding found | none found | callback | primary/api | lib/string.x:841 |
-| `String String.new(const char *str)` | bound, unverified | etc/comptime.xlisp:247 | pointer | primary/api | lib/string.x:378 |
+| `String String.new(const char *str)` | verified example | etc/comptime.xlisp:247 | pointer | primary/api | lib/string.x:378 |
 | `String String.new_fill(char fill, int count)` | verified example | etc/comptime.xlisp:213 | binding | advanced/api | lib/string.x:408 |
 | `String String.new_in(Pool pool, const char *bytes, int length)` | no binding found | none found | ownership, resource, pointer | advanced/api | lib/string.x:61 |
-| `String String.new_len(const char *str, int len)` | no binding found | none found | pointer | advanced/api | lib/string.x:395 |
+| `String String.new_len(const char *str, int len)` | verified example | etc/comptime.xlisp:440 | pointer | advanced/api | lib/string.x:395 |
 | `File String.open(String s, const char *mode)` | no binding found | none found | resource, pointer | primary/api | lib/file.x:236 |
 | `String String.pad_center(String str, int width, char fill)` | verified example | etc/comptime.xlisp:212 | binding | primary/api | lib/string.x:922 |
 | `String String.pad_left(String str, int width, char fill)` | verified example | etc/comptime.xlisp:210 | binding | primary/api | lib/string.x:910 |
 | `String String.pad_right(String str, int width, char fill)` | verified example | etc/comptime.xlisp:211 | binding | primary/api | lib/string.x:916 |
-| `String String.parse(String str)` | verified example | etc/comptime.xlisp:337 | binding | advanced/api | lib/string.x:1359 |
-| `int String.parse_char(String str)` | verified example | etc/comptime.xlisp:338 | binding | advanced/api | lib/string.x:1324 |
-| `List String.partition(String str, String sep)` | bound, unverified | etc/comptime.xlisp:236 | binding | primary/api | lib/string.x:959 |
+| `String String.parse(String str)` | verified example | etc/comptime.xlisp:345 | binding | advanced/api | lib/string.x:1359 |
+| `int String.parse_char(String str)` | verified example | etc/comptime.xlisp:346 | binding | advanced/api | lib/string.x:1324 |
+| `List String.partition(String str, String sep)` | verified example | etc/comptime.xlisp:236 | binding | primary/api | lib/string.x:959 |
 | `String String.printf(String fmt, ...)` | no binding found | none found | pointer | advanced/api | lib/string.x:1108 |
 | `Self String.promote(Self str)` | no binding found | none found | ownership | advanced/api | lib/string.x:117 |
 | `String String.reject(String str, String chars)` | verified example | etc/comptime.xlisp:208 | binding | primary/api | lib/string.x:874 |
-| `String String.remove_prefix(String str, String prefix)` | bound, unverified | etc/comptime.xlisp:243 | binding | primary/api | lib/string.x:931 |
-| `String String.remove_suffix(String str, String suffix)` | bound, unverified | etc/comptime.xlisp:244 | binding | primary/api | lib/string.x:941 |
-| `String String.repeat(String str, int count)` | bound, unverified | etc/comptime.xlisp:242 | binding | primary/api | lib/string.x:599 |
-| `String String.replace(String str, String old, String replacement)` | bound, unverified | etc/comptime.xlisp:232 | binding | primary/api | lib/string.x:1094 |
+| `String String.remove_prefix(String str, String prefix)` | verified example | etc/comptime.xlisp:243 | binding | primary/api | lib/string.x:931 |
+| `String String.remove_suffix(String str, String suffix)` | verified example | etc/comptime.xlisp:244 | binding | primary/api | lib/string.x:941 |
+| `String String.repeat(String str, int count)` | verified example | etc/comptime.xlisp:242 | binding | primary/api | lib/string.x:599 |
+| `String String.replace(String str, String old, String replacement)` | verified example | etc/comptime.xlisp:232 | binding | primary/api | lib/string.x:1094 |
 | `String String.replace_n( String str, String old, String replacement, int max_replacements)` | verified example | etc/comptime.xlisp:215 | binding | primary/api | lib/string.x:1044 |
-| `String String.repr(String str)` | bound, unverified | etc/comptime.xlisp:222 | binding | advanced/api | lib/string.x:1289 |
-| `int String.rfind(String str, String sub)` | bound, unverified | etc/comptime.xlisp:239 | binding | primary/api | lib/string.x:463 |
-| `List String.rpartition(String str, String sep)` | bound, unverified | etc/comptime.xlisp:237 | binding | primary/api | lib/string.x:979 |
+| `String String.repr(String str)` | verified example | etc/comptime.xlisp:222 | binding | advanced/api | lib/string.x:1289 |
+| `int String.rfind(String str, String sub)` | verified example | etc/comptime.xlisp:239 | binding | primary/api | lib/string.x:463 |
+| `List String.rpartition(String str, String sep)` | verified example | etc/comptime.xlisp:237 | binding | primary/api | lib/string.x:979 |
 | `String String.rstrip(String str, char *negChars)` | reproduced failure | etc/comptime.xlisp:218 | pointer | primary/api | lib/string.x:740 |
-| `String String.sha256(String text)` | no binding found | none found | binding | primary/optional | lib/digest.x:110 |
-| `List String.split(String str, String sep)` | bound, unverified | etc/comptime.xlisp:234 | binding | primary/api | lib/split.x:111 |
-| `List String.split_lines(String str, int keep_ends)` | bound, unverified | etc/comptime.xlisp:235 | binding | primary/api | lib/split.x:124 |
+| `String String.sha256(String text)` | verified example | etc/comptime.xlisp:439 | binding | primary/optional | lib/digest.x:110 |
+| `List String.split(String str, String sep)` | verified example | etc/comptime.xlisp:234 | binding | primary/api | lib/split.x:111 |
+| `List String.split_lines(String str, int keep_ends)` | verified example | etc/comptime.xlisp:235 | binding | primary/api | lib/split.x:124 |
 | `List String.split_n(String str, String sep, int max_splits)` | verified example | etc/comptime.xlisp:216 | binding | primary/api | lib/split.x:81 |
 | `Split String.splits(String str, String sep)` | no binding found | none found | resource | primary/api | lib/split.x:219 |
 | `String String.squeeze(String str, String chars)` | verified example | etc/comptime.xlisp:209 | binding | primary/api | lib/string.x:884 |
-| `int String.startswith(String str, String prefix)` | bound, unverified | etc/comptime.xlisp:229 | binding | primary/api | lib/string.x:542 |
-| `String String.str(String str)` | bound, unverified | etc/comptime.xlisp:221 | binding | advanced/api | lib/string.x:1283 |
+| `int String.startswith(String str, String prefix)` | verified example | etc/comptime.xlisp:229 | binding | primary/api | lib/string.x:542 |
+| `String String.str(String str)` | verified example | etc/comptime.xlisp:221 | binding | advanced/api | lib/string.x:1283 |
 | `String String.strip(String str, char *negChars)` | reproduced failure | etc/comptime.xlisp:225 | pointer | primary/api | lib/string.x:758 |
 | `Symbol String.symbol(String str)` | verified example | etc/comptime.xlisp:205 | binding | advanced/api | lib/string.x:1347 |
-| `inline int String.truth(String string)` | verified example | etc/comptime.xlisp:340 | syntax | advanced/api | lib/common.x:402 |
+| `inline int String.truth(String string)` | verified example | etc/comptime.xlisp:348 | syntax | advanced/api | lib/common.x:402 |
 | `int String.try_double(String str, double *out)` | no binding found | none found | pointer | advanced/api | lib/string-number.x:89 |
 | `int String.try_long(String str, long *out)` | no binding found | none found | pointer | advanced/api | lib/string-number.x:39 |
 | `int String.try_next(String str, int *cursor, int *out)` | no binding found | none found | pointer | primary/api | lib/string.x:1422 |
 | `int String.try_own(String str)` | no binding found | none found | ownership, internal | internal/api | lib/string.x:131 |
-| `String String.unescape(String str)` | bound, unverified | etc/comptime.xlisp:246 | binding | primary/api | lib/string.x:1235 |
-| `String String.upper(String str)` | bound, unverified | etc/comptime.xlisp:226 | binding | primary/api | lib/string.x:709 |
-| `inline Var String.var(String x)` | bound, unverified | etc/comptime.xlisp:273 | binding | advanced/api | lib/common.x:541 |
-| `String String.withindex(String str, int index, char value)` | verified example | etc/comptime.xlisp:339 | binding | primary/api | lib/string.x:630 |
+| `String String.unescape(String str)` | verified example | etc/comptime.xlisp:246 | binding | primary/api | lib/string.x:1235 |
+| `String String.upper(String str)` | verified example | etc/comptime.xlisp:226 | binding | primary/api | lib/string.x:709 |
+| `inline Var String.var(String x)` | verified example | etc/comptime.xlisp:281 | binding | advanced/api | lib/common.x:541 |
+| `String String.withindex(String str, int index, char value)` | verified example | etc/comptime.xlisp:347 | binding | primary/api | lib/string.x:630 |
 | `Split String.words(String str)` | no binding found | none found | resource | primary/api | lib/split.x:190 |
 | `Buffer String.write_repr(String str, Buffer out)` | no binding found | none found | resource | advanced/api | lib/string.x:1308 |
 | `Buffer String.write_str(String str, Buffer out)` | no binding found | none found | resource | primary/api | lib/string.x:1300 |
@@ -241,9 +243,9 @@ explicit checks before claiming runtime equivalence.
 | Callable | Implementation owner / group | Disposition | Runtime contract | Contract and next action |
 | --- | --- | --- | --- | --- |
 | `String.add` | lib/string.x / String value operations | implementable with current values | Returns `str` followed by `other`. This implements the `add` row of `protocol Var(String)`, so it is what `+` on two `String`s lowers to, and because the result is interned, `==` on a newly built result is a content comparison. Either operand may be the empty `String`, in which case the other pointer is returned unchanged with its existing ownership and canonical or transient state. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.add to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `String.c_compare` | lib/common.x / text pointer boundaries | needs bounded probe | Interface only; inspect the producer. | Canonical String storage is represented, but the native signature accepts raw character pointers or a writable destination. For String.c_compare, verify null/length/bounds and whether the pointer is read-only, interior or writable before choosing a String/cell adapter. |
-| `String.c_find` | lib/common.x / text pointer boundaries | needs bounded probe | Interface only; inspect the producer. | Canonical String storage is represented, but the native signature accepts raw character pointers or a writable destination. For String.c_find, verify null/length/bounds and whether the pointer is read-only, interior or writable before choosing a String/cell adapter. |
-| `String.c_len` | lib/common.x / text pointer boundaries | needs bounded probe | Interface only; inspect the producer. | Canonical String storage is represented, but the native signature accepts raw character pointers or a writable destination. For String.c_len, verify null/length/bounds and whether the pointer is read-only, interior or writable before choosing a String/cell adapter. |
+| `String.c_compare` | lib/common.x / text pointer boundaries | needs bounded probe | Interface only; inspect the producer. | The native owner requires nonnull C strings. Canonical empty String is NULL, unlike a nonnull empty C string; direct Func adapters also reject raw char-pointer parameters. Decide how source C-string pointers preserve nonnull empty storage before forwarding; a String-only alias would change valid empty-input behavior or reach strlen/strcmp with NULL. |
+| `String.c_find` | lib/common.x / text pointer boundaries | needs bounded probe | Interface only; inspect the producer. | strchr returns a borrowed interior C pointer or NULL. Such a pointer is not an interned String with a valid StringHeader. Specify borrowed interior-pointer identity and lifetime before exposing the result; copying into String would change the pointer contract. |
+| `String.c_len` | lib/common.x / text pointer boundaries | needs bounded probe | Interface only; inspect the producer. | The native owner requires nonnull C strings. Canonical empty String is NULL, unlike a nonnull empty C string; direct Func adapters also reject raw char-pointer parameters. Decide how source C-string pointers preserve nonnull empty storage before forwarding; a String-only alias would change valid empty-input behavior or reach strlen/strcmp with NULL. |
 | `String.capitalize` | lib/string.x / String value operations | implementable with current values | Upper-cases the first byte of `str` and lower-cases the remainder. Mapping is bytewise through C's `toupper` and `tolower`. `Null`, empty, and unchanged inputs are returned as-is. Raises: `<alloc-fail>` while constructing the result. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.capitalize to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `String.compare` | lib/string.x / String value operations | implementable with current values | Compares `x` and `y` bytewise, returning negative, zero, or positive. The ordering is C's `strcmp` on the raw bytes, so it is neither locale-aware nor Unicode collation, and only the sign of the result is meaningful. The empty `String`, being the null pointer, sorts before every non-empty `String`, and two empty `String`s compare equal. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.compare to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `String.contains` | lib/string.x / String value operations | implementable with current values | Reports whether the bytes of `sub` occur anywhere in `str`. An empty `sub` is contained in every `String`, including the empty one, so a truth test on user-supplied text should check for emptiness separately if that matters. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.contains to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
@@ -281,13 +283,13 @@ explicit checks before claiming runtime equivalence.
 | `String.len` | lib/string.x / String value operations | implementable with current values | Returns the byte length of `str`, excluding the terminating NUL. Constant time: the length is cached in the `String`'s private header. Lengths are bytes, not characters, so a multibyte UTF-8 sequence counts once per byte. On a transient `String.malloc` buffer this reports the writable byte count rather than the length of anything written so far. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.len to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `String.lines` | lib/split.x / lazy String split state | needs representation decision | Returns a lazy cursor over lines in `str`, with endings removed. LF, CR, and CRLF end a line, with CRLF counted as one ending. The yielded fields agree with `str.split_lines(0)`, including empty interior lines and the rule that a trailing ending does not add a final empty line. | Split is native lazy traversal state, not the List returned by String.split. Specify Split state/lifetime for String.lines; do not replace lazy traversal with an eager List. |
 | `String.lower` | lib/string.x / String value operations | implementable with current values | Returns `str` with every upper-case byte lowered. Case mapping runs byte by byte through C's `tolower`, so it covers ASCII in the default locale and leaves multibyte text alone rather than case-folding it. When no byte would change, `str` itself is returned after the unchanged temporary buffer is released. Raises: `<alloc-fail>` while constructing the result. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.lower to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `String.lstrip` | lib/string.x / text pointer boundaries | needs bounded probe | Removes leading bytes found in the C string `negChars`. Passing NULL uses `" \t\n\v\f\r"`. The result is canonical; null input returns NULL and an unchanged input is returned as-is. Raises: `<alloc-fail>` while constructing a changed result. | Canonical String storage is represented, but the native signature accepts raw character pointers or a writable destination. Validate the existing binding against this contract. Next: For String.lstrip, verify null/length/bounds and whether the pointer is read-only, interior or writable before choosing a String/cell adapter. |
+| `String.lstrip` | lib/string.x / text pointer boundaries | needs bounded probe | Removes leading bytes found in the C string `negChars`. Passing NULL uses `" \t\n\v\f\r"`. The result is canonical; null input returns NULL and an unchanged input is returned as-is. Raises: `<alloc-fail>` while constructing a changed result. | A String-typed adapter can forward represented bytes to the native nullable/length-aware owner; raw memory beyond those bytes remains the caller's precondition. Validate the existing binding against this contract. Next: Verify String.lstrip's zero, empty and valid length cases through the forwarding adapter; do not fabricate writable or out-of-bounds storage. |
 | `String.malloc` | lib/string.x / allocation and ownership contracts | native resource contract | Allocates a transient mutable buffer of `len` bytes, not a `String`. The byte count includes room for the terminating NUL, so `len - 1` bytes are writable and `String.len` on a fresh buffer reports `len - 1`. The buffer is not interned and has no cached hash, so `==` against a canonical `String` is meaningless until it is finalized. Fill it with native indexing, then call `String.intern_free` to canonicalize and release it, or `String.free` to discard it. The backing allocation belongs to the active `String`/`List` pool and is invalidated when that pool is released, even though the caller controls finalization. | The operation frees, allocates, observes or transfers storage/registry ownership that the evaluator currently owns. Define which session-owned objects String.malloc may observe or transfer; never alias a destructive native owner blindly. |
 | `String.map` | lib/string.x / String interpreted callbacks | needs callback adapter | Returns `str` with `fn` applied to every byte. Each byte is boxed from `char` and passed by value. Each result is converted to `int` and truncated to the byte that is stored, and that byte is what is checked, so a result such as 256 raises rather than storing NUL. A null or empty `str`, or a null `fn`, returns `str` without invoking the callback. Otherwise `fn` is called once per byte from left to right and is not retained. Each result must convert to a non-NUL byte. Raises: whatever `Func.apply`, `fn`, or result conversion raises, `<bad-result>` when the converted result is zero, or `<alloc-fail>` when the result cannot be allocated. | The runtime takes native Func while meta closures are evaluator callables. Use Lisp.apply through a reusable Func context for String.map; check its documented callback order, null callback and empty-input cases. |
-| `String.new` | lib/string.x / text pointer boundaries | needs bounded probe | Returns the canonical `String` holding the bytes of the C string `str`. The input is borrowed and copied, so `str` may be a stack buffer and mutating it afterwards does not disturb the result. Equal nonempty content visible in the active pool chain yields the same pointer, which is why `==` on canonical `String`s from that chain is a content comparison. A detached or sibling pool may hold a distinct equal pointer. Empty input canonicalizes to the null pointer, the empty `String`'s only representation. Raises: `<alloc-fail>` when canonical storage cannot be allocated. A null, empty, or oversized input returns NULL, which is indistinguishable from the empty `String`, without raising. | Canonical String storage is represented, but the native signature accepts raw character pointers or a writable destination. Validate the existing binding against this contract. Next: For String.new, verify null/length/bounds and whether the pointer is read-only, interior or writable before choosing a String/cell adapter. |
+| `String.new` | lib/string.x / text pointer boundaries | needs bounded probe | Returns the canonical `String` holding the bytes of the C string `str`. The input is borrowed and copied, so `str` may be a stack buffer and mutating it afterwards does not disturb the result. Equal nonempty content visible in the active pool chain yields the same pointer, which is why `==` on canonical `String`s from that chain is a content comparison. A detached or sibling pool may hold a distinct equal pointer. Empty input canonicalizes to the null pointer, the empty `String`'s only representation. Raises: `<alloc-fail>` when canonical storage cannot be allocated. A null, empty, or oversized input returns NULL, which is indistinguishable from the empty `String`, without raising. | A String-typed adapter can forward represented bytes to the native nullable/length-aware owner; raw memory beyond those bytes remains the caller's precondition. Validate the existing binding against this contract. Next: Verify String.new's zero, empty and valid length cases through the forwarding adapter; do not fabricate writable or out-of-bounds storage. |
 | `String.new_fill` | lib/string.x / String value operations | implementable with current values | Returns the canonical `String` containing `count` copies of `fill`. Raises: `<bad-arg>` when `fill` is NUL, `<size-limit>` when `count` is `INT_MAX`, because the allocation includes one trailing NUL byte, or `<alloc-fail>` when canonical storage cannot be allocated. A nonpositive `count` returns NULL without raising. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.new_fill to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `String.new_in` | lib/string.x / allocation and ownership contracts | native resource contract | Returns the canonical `String` for at most `length` borrowed bytes in `pool`. Copying stops at the first NUL. An existing equal `String` in `pool` or an ancestor is returned with that owner's lifetime; otherwise the new value is owned by `pool`. A null argument, nonpositive length, or empty input returns NULL. Raises: `<alloc-fail>`, `<size-limit>`, or `<invariant>` while interning. | The operation frees, allocates, observes or transfers storage/registry ownership that the evaluator currently owns. Define which session-owned objects String.new_in may observe or transfer; never alias a destructive native owner blindly. |
-| `String.new_len` | lib/string.x / text pointer boundaries | needs bounded probe | Returns the canonical `String` holding at most `len` bytes of `str`. Copying stops at `len` bytes or at the first NUL, whichever comes first, because a `String` cannot carry embedded NUL bytes: `String.new_len("ab\0cd", 5)` is the two-byte `String` `ab`. `str` need not be NUL-terminated, so it may be bounded C input or a window into a larger buffer. Raises: `<alloc-fail>` when canonical storage cannot be allocated. A null `str`, nonpositive `len`, or leading NUL returns NULL, the empty `String`, without raising. | Canonical String storage is represented, but the native signature accepts raw character pointers or a writable destination. For String.new_len, verify null/length/bounds and whether the pointer is read-only, interior or writable before choosing a String/cell adapter. |
+| `String.new_len` | lib/string.x / text pointer boundaries | needs bounded probe | Returns the canonical `String` holding at most `len` bytes of `str`. Copying stops at `len` bytes or at the first NUL, whichever comes first, because a `String` cannot carry embedded NUL bytes: `String.new_len("ab\0cd", 5)` is the two-byte `String` `ab`. `str` need not be NUL-terminated, so it may be bounded C input or a window into a larger buffer. Raises: `<alloc-fail>` when canonical storage cannot be allocated. A null `str`, nonpositive `len`, or leading NUL returns NULL, the empty `String`, without raising. | A String-typed adapter can forward represented bytes to the native nullable/length-aware owner; raw memory beyond those bytes remains the caller's precondition. Validate the existing binding against this contract. Next: Verify String.new_len's zero, empty and valid length cases through the forwarding adapter; do not fabricate writable or out-of-bounds storage. |
 | `String.open` | lib/file.x / native File contracts | native resource contract | Opens the filesystem path named by `s`. The caller owns a successful stream and must close it. A missing path raises `<not-found>`; another host failure raises `<io-fail>`; and a null path or mode raises `<bad-arg>`. Host failures carry the path, operation, and captured errno. | The signature crosses File handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/file.x's handle and effect contract for String.open; add only a scoped native adapter after those obligations are specified. |
 | `String.pad_center` | lib/string.x / String value operations | implementable with current values | Pads both sides of `str` to the requested width. Raises: the same causes as `String.pad_left`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.pad_center to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `String.pad_left` | lib/string.x / String value operations | implementable with current values | Pads the left side of `str` to the requested width. Raises: `<bad-arg>` when `fill` is NUL, `<size-limit>` when `width` cannot be represented, or `<alloc-fail>` when result storage cannot be allocated. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.pad_left to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
@@ -295,7 +297,7 @@ explicit checks before claiming runtime equivalence.
 | `String.parse` | lib/string.x / String value operations | implementable with current values | Returns the canonical unescaped contents of `str`. Matching outer `%"..."` or `"..."` delimiters are removed; unquoted input is unescaped directly. `Null` or empty input returns NULL. An unquoted input without backslashes is returned unchanged. Raises: `<alloc-fail>` while copying or decoding. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.parse to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `String.parse_char` | lib/string.x / String value operations | implementable with current values | Parses one leading single-quoted escaped or literal byte, or returns -1. The opening quote, one decoded byte, and a closing quote are required. Text after that closing quote is ignored. A decoded NUL is returned as zero; malformed and null input returns -1, as does an octal escape above `\377`, which does not fit a byte. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.parse_char to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `String.partition` | lib/string.x / String value operations | implementable with current values | Splits `str` at the first `sep` into a three-element `List`. The elements are the text before the separator, the separator itself, and the text after it. When `sep` does not occur, the result is `str` followed by two empty `String`s, so the shape is three elements either way and a caller can destructure it without testing for the separator first. A leading separator gives an empty first element and a missing separator gives two empty trailing elements, so compare the middle element against `sep` if you need to tell them apart. The result and any new substrings are canonical and follow their owning `List` and `String` pools. Unchanged `str` and `sep` elements are borrowed into the result, so a transient input must outlive the returned `List`. Raises: `<alloc-fail>` or `<size-limit>` while constructing the result. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.partition to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `String.printf` | lib/string.x / native variadic calls | needs bounded probe | Formats a canonical `String` from `fmt` and the trailing arguments. The receiver is the format `String`, so format-dependent construction reads `%"%-12s %.2f".printf(name, score)`. Conversions, promotion rules, and argument matching are C's, since the work is done by `vsnprintf`; canonical `String`s are NUL-terminated and satisfy `%s` directly. Prefer `%"$name has ${name.len()} bytes"` when interpolation already says what you want. Raises: `<alloc-fail>` when result storage cannot be allocated. An empty `fmt` or formatting error also returns NULL without raising. Arguments that do not match the conversions are undefined behavior as in C. | Native ellipsis arguments have no fixed Func adapter signature. Inspect String.printf's count/format owner and prototype a List/rest adapter preserving argument count, type and order. |
+| `String.printf` | lib/string.x / native variadic calls | needs bounded probe | Formats a canonical `String` from `fmt` and the trailing arguments. The receiver is the format `String`, so format-dependent construction reads `%"%-12s %.2f".printf(name, score)`. Conversions, promotion rules, and argument matching are C's, since the work is done by `vsnprintf`; canonical `String`s are NUL-terminated and satisfy `%s` directly. Prefer `%"$name has ${name.len()} bytes"` when interpolation already says what you want. Raises: `<alloc-fail>` when result storage cannot be allocated. An empty `fmt` or formatting error also returns NULL without raising. Arguments that do not match the conversions are undefined behavior as in C. | The native format controls C variadic argument types and promotions; a generic List of Var arguments is not a va_list. Reuse the runtime format owner through a typed bridge or define a format adapter preserving C conversions; do not substitute interpolation semantics. |
 | `String.promote` | lib/string.x / allocation and ownership contracts | native resource contract | Moves `str` from the active pool to its parent and returns the same pointer. Empty, transient, and ancestor-owned `String`s are returned unchanged. Raises: `<alloc-fail>`, `<size-limit>`, or `<invariant>` while recording the promotion. | The operation frees, allocates, observes or transfers storage/registry ownership that the evaluator currently owns. Define which session-owned objects String.promote may observe or transfer; never alias a destructive native owner blindly. |
 | `String.reject` | lib/string.x / String value operations | implementable with current values | Returns a canonical `String` after removing bytes found in `chars`. `Null` or empty `str`, or null `chars`, returns `str` unchanged. Raises: `<alloc-fail>` while constructing a changed result. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.reject to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `String.remove_prefix` | lib/string.x / String value operations | implementable with current values | Removes `prefix` when `str` starts with it and returns a canonical `String`. A null or absent prefix returns `str` unchanged; removing the complete `String` returns NULL. Raises: `<alloc-fail>` while constructing a changed result. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.remove_prefix to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
@@ -306,8 +308,8 @@ explicit checks before claiming runtime equivalence.
 | `String.repr` | lib/string.x / String value operations | implementable with current values | Returns a canonical quoted and escaped representation of `str`. Empty input returns the canonical literal spelling `"\"\""`. Raises: `<alloc-fail>` while escaping or formatting a nonempty `String`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.repr to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `String.rfind` | lib/string.x / String value operations | implementable with current values | Returns the index of the last occurrence of `sub` in `str`, or -1. Scanning runs backwards from the end, and the returned index still measures from the start of `str`. An empty `sub` reports the length of `str`, matching after the last byte and mirroring the forward search reporting 0. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.rfind to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `String.rpartition` | lib/string.x / String value operations | implementable with current values | Splits `str` around its final occurrence of `sep`. The three elements are the text before the separator, the separator itself, and the text after it. When `sep` is null or absent, two empty `String`s precede `str`. New substrings are canonical; the result follows its owning `List` and `String` pools. Unchanged `str` and `sep` elements are borrowed into the result, so a transient input must outlive the returned `List`. Raises: `<alloc-fail>` or `<size-limit>` while constructing the result. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.rpartition to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `String.rstrip` | lib/string.x / text pointer boundaries | needs bounded probe | Removes trailing bytes found in the C string `negChars`. Passing NULL uses `" \t\n\v\f\r"`. The result is canonical; null input returns NULL and an unchanged input is returned as-is. Raises: `<alloc-fail>` while constructing a changed result. | Canonical String storage is represented, but the native signature accepts raw character pointers or a writable destination. Validate the existing binding against this contract. Next: For String.rstrip, verify null/length/bounds and whether the pointer is read-only, interior or writable before choosing a String/cell adapter. |
-| `String.sha256` | lib/digest.x / String value operations | implementable with current values | Returns the SHA-256 digest of the bytes of `text`; NULL is empty text. | The signature uses represented values and an existing runtime owner. Bind String.sha256 to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
+| `String.rstrip` | lib/string.x / text pointer boundaries | needs bounded probe | Removes trailing bytes found in the C string `negChars`. Passing NULL uses `" \t\n\v\f\r"`. The result is canonical; null input returns NULL and an unchanged input is returned as-is. Raises: `<alloc-fail>` while constructing a changed result. | A String-typed adapter can forward represented bytes to the native nullable/length-aware owner; raw memory beyond those bytes remains the caller's precondition. Validate the existing binding against this contract. Next: Verify String.rstrip's zero, empty and valid length cases through the forwarding adapter; do not fabricate writable or out-of-bounds storage. |
+| `String.sha256` | lib/digest.x / String value operations | implementable with current values | Returns the SHA-256 digest of the bytes of `text`; NULL is empty text. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.sha256 to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `String.split` | lib/split.x / String value operations | implementable with current values | Splits `str` on every occurrence of `sep` into a `List` of `String`s. Separators are not coalesced, so adjacent ones produce empty fields and the result holds one more element than the number of separators found. An empty field is the empty `String`, the null pointer. An empty or null `sep` yields a one-element `List` holding `str`, and splitting the empty `String` yields the empty `List`. The canonical fields and `List` remain live until their actual `String` and `List` pools are released. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.split to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `String.split_lines` | lib/split.x / String value operations | implementable with current values | Splits `str` into a `List` of lines. LF, CR, and CRLF all end a line, and CRLF counts as one ending. A nonzero `keep_ends` leaves each line's ending attached to it. A trailing line ending does not produce a final empty line, so text that ends in a newline yields as many lines as it has endings. A null or empty `str` returns `nil`. The canonical fields and `List` remain live until their actual `String` and `List` pools are released. Raises: `<alloc-fail>` or `<size-limit>` while constructing fields or the result. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.split_lines to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `String.split_n` | lib/split.x / String value operations | implementable with current values | Splits `str` at no more than `max_splits` separators. A negative limit splits every occurrence; zero returns `str` as one field. A null `str` returns `nil`. A null or empty `sep` returns `str` as one field. The canonical fields and `List` remain live until their actual `String` and `List` pools are released. Raises: `<alloc-fail>` or `<size-limit>` while constructing the result. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.split_n to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
@@ -315,7 +317,7 @@ explicit checks before claiming runtime equivalence.
 | `String.squeeze` | lib/string.x / String value operations | implementable with current values | Collapses adjacent runs of each byte listed in `chars`. `Bytes` outside `chars` are preserved even when repeated. `Null` or empty `str`, or null `chars`, returns `str` unchanged. Raises: `<alloc-fail>` while constructing a changed result. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.squeeze to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `String.startswith` | lib/string.x / String value operations | implementable with current values | Reports whether `str` starts with `prefix`. An empty `prefix` is a prefix of every `String`. `String.remove_prefix` performs the same test and returns the remainder, so there is rarely a reason to run both. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.startswith to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `String.str` | lib/string.x / String value operations | implementable with current values | Returns `str` itself as its display `String` without copying or retaining it. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.str to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `String.strip` | lib/string.x / text pointer boundaries | needs bounded probe | Returns `str` with leading and trailing bytes in `negChars` removed. `negChars` is a NUL-terminated C string listing the bytes to remove, not a substring and not a pattern; order and repetition in it are irrelevant. Passing NULL uses the default whitespace set " \t\n\v\f\r". Trimming stops at each end on the first byte not in the set, and `str` itself is returned when nothing is trimmed. Raises: `<alloc-fail>` while constructing the result. A `String` made entirely of removable bytes trims to NULL, the empty `String`, without raising. | Canonical String storage is represented, but the native signature accepts raw character pointers or a writable destination. Validate the existing binding against this contract. Next: For String.strip, verify null/length/bounds and whether the pointer is read-only, interior or writable before choosing a String/cell adapter. |
+| `String.strip` | lib/string.x / text pointer boundaries | needs bounded probe | Returns `str` with leading and trailing bytes in `negChars` removed. `negChars` is a NUL-terminated C string listing the bytes to remove, not a substring and not a pattern; order and repetition in it are irrelevant. Passing NULL uses the default whitespace set " \t\n\v\f\r". Trimming stops at each end on the first byte not in the set, and `str` itself is returned when nothing is trimmed. Raises: `<alloc-fail>` while constructing the result. A `String` made entirely of removable bytes trims to NULL, the empty `String`, without raising. | A String-typed adapter can forward represented bytes to the native nullable/length-aware owner; raw memory beyond those bytes remains the caller's precondition. Validate the existing binding against this contract. Next: Verify String.strip's zero, empty and valid length cases through the forwarding adapter; do not fabricate writable or out-of-bounds storage. |
 | `String.symbol` | lib/string.x / String value operations | implementable with current values | Returns the compact `Symbol` encoded from `str`, or zero for empty input. `Symbol`'s restricted spelling folds case and `_` with `-`; other spellings use seven-bit bytes, and input beyond the selected encoding's capacity is truncated. Use `Symbol.try_new` when every byte must be preserved. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind String.symbol to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `String.truth` | lib/common.x / explicit syntax operations | implementable with current values | Returns nonzero when `string` contains at least one byte. The canonical empty String is null, with no allocated storage. | Syntax lowering exists separately; it does not install this explicitly named method. Validate the existing binding against this contract. Next: Bind String.truth's native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results. |
 | `String.try_double` | lib/string-number.x / status and output cells | implementable with current values | Parses all of `str` as a floating-point number, writing `out`. Returns 1 and writes `out` on success; returns 0 and leaves `out` untouched on failure. | The status result can separate success from absence while a compiler local cell carries the output. Wrap String.try_double with native temporary outputs and C.store only on success; test untouched outputs on failure. |
@@ -332,63 +334,455 @@ explicit checks before claiming runtime equivalence.
 
 ### Evaluated cases
 
+- `String.add`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "ab".add("cd").equal("abcd"); }
+```
+
+- `String.c_compare`: native canonical value contract; note: reason: no binding for String_c_compare.
+
+```x2c
+meta int audit_probe(void) { return "ab".c_compare("ac") < 0 && "ab".c_compare("ab") == 0; }
+```
+
+- `String.c_len`: native canonical value contract; note: reason: no binding for String_c_len.
+
+```x2c
+meta int audit_probe(void) { return "abcd".c_len() == 4; }
+```
+
+- `String.capitalize`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "hELLO".capitalize().equal("Hello"); }
+```
+
 - `String.compare`: native text contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "abc".compare("abd") < 0 && "abc".compare("abc") == 0; }
+```
+
+- `String.contains`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "abc".contains("bc") && !"abc".contains("z"); }
+```
+
 - `String.contains_digit`: positive, negative and empty bytes; returned 1.
+
+```x2c
+meta int audit_probe(void) { String empty = ""; return "a1".contains_digit() && !"abc".contains_digit() && !empty.contains_digit(); }
+```
+
+- `String.count`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "aaaa".count("aa") == 2; }
+```
+
 - `String.dedent`: native text contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "\n  a\n    b\n  ".dedent().equal("a\n  b\n"); }
+```
+
+- `String.endswith`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "abc".endswith("bc") && !"abc".endswith("ab"); }
+```
+
+- `String.equal`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "abc".equal("abc") && !"abc".equal("abd"); }
+```
+
+- `String.escape`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "a\nb".escape().equal("a\\nb"); }
+```
+
+- `String.find`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "abcabc".find("bc") == 1 && "abc".find("z") == -1; }
+```
+
+- `String.find_all`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "ababa".find_all("a", 0, -1).equal(%(0 2 4)); }
+```
+
 - `String.find_within`: native text contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "abcabc".find_within("c", -4, -1) == 2 && "abc".find_within("x", 0, -1) == -1; }
+```
+
+- `String.getindex`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "abc".getindex(-1) == 'c' && "abc".getindex(9) == -1; }
+```
+
+- `String.getslice`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "abcde".getslice(4, 0, -2).equal("ec"); }
+```
+
 - `String.hash`: native text contract and boundaries; note: reason: a constant did not fold.
+
+```x2c
+meta int audit_probe(void) { return "abc".hash() == ("a" + "bc").hash(); }
+```
+
 - `String.hash`: nonzero canonical String hash; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "abc".hash() != 0; }
+```
+
 - `String.intern`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { String s = "abc"; return s.intern() === s; }
+```
+
 - `String.is_alnum`: positive, negative and empty bytes; returned 1.
+
+```x2c
+meta int audit_probe(void) { String empty = ""; return "a1B".is_alnum() && !"a_".is_alnum() && !empty.is_alnum(); }
+```
+
 - `String.is_alnum_under`: positive, negative and empty bytes; returned 1.
+
+```x2c
+meta int audit_probe(void) { String empty = ""; return "a_1".is_alnum_under() && !"a-".is_alnum_under() && !empty.is_alnum_under(); }
+```
+
 - `String.is_alpha`: positive, negative and empty bytes; returned 1.
+
+```x2c
+meta int audit_probe(void) { String empty = ""; return "Ab".is_alpha() && !"a1".is_alpha() && !empty.is_alpha(); }
+```
+
 - `String.is_alpha_under`: positive, negative and empty bytes; returned 1.
+
+```x2c
+meta int audit_probe(void) { String empty = ""; return "a_B".is_alpha_under() && !"a1".is_alpha_under() && !empty.is_alpha_under(); }
+```
+
 - `String.is_digit`: positive, negative and empty bytes; returned 1.
+
+```x2c
+meta int audit_probe(void) { String empty = ""; return "123".is_digit() && !"12a".is_digit() && !empty.is_digit(); }
+```
+
 - `String.is_identifier`: positive, negative and empty bytes; returned 1.
+
+```x2c
+meta int audit_probe(void) { String empty = ""; return "_a1".is_identifier() && !"1a".is_identifier() && !empty.is_identifier(); }
+```
+
 - `String.is_lower`: positive, negative and empty bytes; returned 1.
+
+```x2c
+meta int audit_probe(void) { String empty = ""; return "abc".is_lower() && !"Ab".is_lower() && !empty.is_lower(); }
+```
+
 - `String.is_lower_under`: positive, negative and empty bytes; returned 1.
+
+```x2c
+meta int audit_probe(void) { String empty = ""; return "a_b".is_lower_under() && !"a_B".is_lower_under() && !empty.is_lower_under(); }
+```
+
 - `String.is_space`: positive, negative and empty bytes; returned 1.
+
+```x2c
+meta int audit_probe(void) { String empty = ""; return " \t".is_space() && !" a".is_space() && !empty.is_space(); }
+```
+
 - `String.is_upper`: positive, negative and empty bytes; returned 1.
+
+```x2c
+meta int audit_probe(void) { String empty = ""; return "ABC".is_upper() && !"aB".is_upper() && !empty.is_upper(); }
+```
+
 - `String.is_upper_under`: positive, negative and empty bytes; returned 1.
+
+```x2c
+meta int audit_probe(void) { String empty = ""; return "A_B".is_upper_under() && !"a_B".is_upper_under() && !empty.is_upper_under(); }
+```
+
+- `String.join`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return ":".join(%("a" "b")).equal("a:b") && ":".join(%()).len() == 0; }
+```
+
 - `String.keep`: native text contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "abacad".keep("ac").equal("aaca") && "x".keep("").len() == 0; }
+```
+
 - `String.len`: nonempty text; returned 3.
+
+```x2c
+meta int audit_probe(void) { return "abc".len(); }
+```
+
+- `String.lower`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "AbC".lower().equal("abc"); }
+```
+
 - `String.lstrip`: native text contract and boundaries; note: reason: the compile-time form reads a table no unit initializer writes, so the two forms answer differently.
+
+```x2c
+meta int audit_probe(void) { return "  a  ".lstrip(NULL).equal("a  ") && "xxax".lstrip("x").equal("ax") && " ".lstrip(NULL).len() == 0; }
+```
+
 - `String.lstrip`: explicit charset and typed null pointer; returned 1.
+
+```x2c
+meta int audit_probe(void) { return " a ".lstrip(" ").equal("a ") && " a ".lstrip((char *) 0).equal("a "); }
+```
+
+- `String.new`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return String.new("abc").equal("abc"); }
+```
+
 - `String.new_fill`: native text contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return String.new_fill('x', 3).equal("xxx") && String.new_fill('x', -1).len() == 0; }
+```
+
+- `String.new_len`: native canonical value contract; returned 1.
+
+```x2c
+meta int audit_probe(void) { return String.new_len("abcd", 2).equal("ab") && String.new_len("abcd", 0).len() == 0; }
+```
+
 - `String.pad_center`: native text contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "x".pad_center(4, '.').equal(".x.."); }
+```
+
 - `String.pad_left`: native text contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "x".pad_left(3, '.').equal("..x") && "abc".pad_left(1, '.').equal("abc"); }
+```
+
 - `String.pad_right`: native text contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "x".pad_right(3, '.').equal("x.."); }
+```
+
 - `String.parse`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "\"a\\nb\"".parse().equal("a\nb") && "".parse().len() == 0; }
+```
+
 - `String.parse_char`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "'a'tail".parse_char() == 'a' && "'\\n'".parse_char() == '\n' && "bad".parse_char() == -1; }
+```
+
+- `String.partition`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "a:b:c".partition(":").equal(%("a" ":" "b:c")); }
+```
+
 - `String.reject`: native text contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "abacad".reject("ac").equal("bd") && "x".reject("").equal("x"); }
+```
+
+- `String.remove_prefix`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "abc".remove_prefix("ab").equal("c") && "abc".remove_prefix("x").equal("abc"); }
+```
+
+- `String.remove_suffix`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "abc".remove_suffix("bc").equal("a") && "abc".remove_suffix("x").equal("abc"); }
+```
+
+- `String.repeat`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "ab".repeat(2).equal("abab") && "ab".repeat(0).len() == 0; }
+```
+
+- `String.replace`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "ababa".replace("a", "x").equal("xbxbx"); }
+```
+
 - `String.replace_n`: native text contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "aaaa".replace_n("a", "b", 2).equal("bbaa") && "aa".replace_n("a", "b", 0).equal("aa"); }
+```
+
+- `String.repr`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "abc".repr().equal("\"abc\""); }
+```
+
+- `String.rfind`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "abcabc".rfind("bc") == 4 && "abc".rfind("z") == -1; }
+```
+
+- `String.rpartition`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "a:b:c".rpartition(":").equal(%("a:b" ":" "c")); }
+```
+
 - `String.rstrip`: native text contract and boundaries; note: reason: the compile-time form reads a table no unit initializer writes, so the two forms answer differently.
+
+```x2c
+meta int audit_probe(void) { return "  a  ".rstrip(NULL).equal("  a") && "xaxx".rstrip("x").equal("xa") && " ".rstrip(NULL).len() == 0; }
+```
+
 - `String.rstrip`: explicit charset and typed null pointer; returned 1.
+
+```x2c
+meta int audit_probe(void) { return " a ".rstrip(" ").equal(" a") && " a ".rstrip((char *) 0).equal(" a"); }
+```
+
+- `String.sha256`: native canonical value contract; returned 1.
+
+```x2c
+#include "digest.x"
+meta int audit_probe(void) { return "abc".sha256().equal("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad") && "".sha256().equal("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"); }
+```
+
+- `String.split`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "a:b".split(":").equal(%("a" "b")); }
+```
+
+- `String.split_lines`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "a\nb\n".split_lines(0).equal(%("a" "b")); }
+```
+
 - `String.split_n`: native text contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "a:b:c".split_n(":", 1).equal(%("a" "b:c")) && "a:b".split_n(":", 0).equal(%("a:b")); }
+```
+
 - `String.squeeze`: native text contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "aaabbbccc".squeeze("ac").equal("abbbc") && "aa".squeeze("").equal("aa"); }
+```
+
+- `String.startswith`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "abc".startswith("ab") && !"abc".startswith("bc"); }
+```
+
+- `String.str`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { String s = "abc"; return s.str() === s; }
+```
+
 - `String.strip`: default whitespace through NULL; note: reason: the compile-time form reads a table no unit initializer writes, so the two forms answer differently.
+
+```x2c
+meta int audit_probe(void) { return " a ".strip(NULL).len(); }
+```
+
 - `String.strip`: explicit character set; returned 1.
+
+```x2c
+meta int audit_probe(void) { return " a ".strip(" ").len(); }
+```
+
 - `String.symbol`: native text contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "alpha".symbol() == <alpha>; }
+```
+
 - `String.truth`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { String empty = ""; return "x".truth() && !empty.truth(); }
+```
+
+- `String.unescape`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "a\\nb".unescape().equal("a\nb"); }
+```
+
+- `String.upper`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "Abc".upper().equal("ABC"); }
+```
+
+- `String.var`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { String s = "abc"; return s.var().tag() == <string> && s.var().string() === s; }
+```
+
 - `String.withindex`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return "abc".withindex(-1, 'x').equal("abx") && "abc".withindex(5, 'x').equal("abc"); }
+```
+
 
 ## List
 
-**verified example:** `caar`, `caddr`, `car`, `cddr`, `cdr`, `compare`, `cons`, `flatten`, `flatten_all`, `getslice`, `hash`, `head`, `match_replace`, `nth_cdr`, `replace`, `sublis`, `subseq`, `tail`, `truth`, `unique`.
+**verified example:** `append`, `array`, `assoc`, `caar`, `caddr`, `car`, `cddddr`, `cdddr`, `cddr`, `cdr`, `compare`, `cons`, `contains`, `equal`, `flatten`, `flatten_all`, `get`, `getindex`, `getslice`, `hash`, `head`, `index`, `last`, `len`, `listchar`, `listdbl`, `listfloat`, `listint`, `listshort`, `liststring`, `listsymbol`, `map`, `match`, `match_replace`, `nth_cdr`, `replace`, `repr`, `reverse`, `search`, `search_replace`, `sort`, `str`, `sublis`, `subseq`, `tail`, `truth`, `try_next`, `unique`, `var`.
 
-**reproduced failure:** `cadr`, `foldl`.
+**reproduced failure:** `cadr`, `filter`, `foldl`.
 
-**bound, unverified:** `append`, `array`, `assoc`, `contains`, `equal`, `filter`, `get`, `getindex`, `index`, `last`, `len`, `map`, `match`, `repr`, `reverse`, `search`, `search_replace`, `sort`, `str`, `try_next`, `var`.
-
-**no binding found:** `all`, `any`, `caaaar`, `caaadr`, `caaar`, `caadar`, `caaddr`, `caadr`, `cadaar`, `cadadr`, `cadar`, `caddar`, `cadddr`, `cdaaar`, `cdaadr`, `cdaar`, `cdadar`, `cdaddr`, `cdadr`, `cdar`, `cddaar`, `cddadr`, `cddar`, `cdddar`, `cddddr`, `cdddr`, `concat_n`, `cons_in`, `find`, `iter`, `job`, `list_n`, `listchar`, `listdbl`, `listfloat`, `listint`, `listshort`, `liststring`, `listsymbol`, `map2`, `promote`, `sort_by`, `sort_with`, `try_match`, `try_match_replace`, `try_own`, `try_search`, `unpack_n`, `unpack_vars_n`, `write_repr`, `write_str`, `zip_with`.
+**no binding found:** `all`, `any`, `caaaar`, `caaadr`, `caaar`, `caadar`, `caaddr`, `caadr`, `cadaar`, `cadadr`, `cadar`, `caddar`, `cadddr`, `cdaaar`, `cdaadr`, `cdaar`, `cdadar`, `cdaddr`, `cdadr`, `cdar`, `cddaar`, `cddadr`, `cddar`, `cdddar`, `concat_n`, `cons_in`, `find`, `iter`, `job`, `list_n`, `map2`, `promote`, `sort_by`, `sort_with`, `try_match`, `try_match_replace`, `try_own`, `try_search`, `unpack_n`, `unpack_vars_n`, `write_repr`, `write_str`, `zip_with`.
 
 | Direct callable | State | Binding provenance | Considerations | Tier/module | Source |
 | --- | --- | --- | --- | --- | --- |
 | `int List.all(List lst, Func pred)` | no binding found | none found | callback | primary/api | lib/list.x:407 |
 | `int List.any(List lst, Func pred)` | no binding found | none found | callback | primary/api | lib/list.x:392 |
-| `Self List.append(Self a, Self b)` | bound, unverified | etc/builtin-macros.xlisp:18 | binding | primary/api | lib/list.x:223 |
-| `Array List.array(List lst)` | bound, unverified | etc/comptime.xlisp:85 | binding | primary/api | lib/list.x:497 |
-| `Var List.assoc(List list, Var key)` | bound, unverified | etc/comptime.xlisp:77 | binding | advanced/api | lib/list.x:649 |
+| `Self List.append(Self a, Self b)` | verified example | etc/builtin-macros.xlisp:18 | binding | primary/api | lib/list.x:223 |
+| `Array List.array(List lst)` | verified example | etc/comptime.xlisp:85 | binding | primary/api | lib/list.x:497 |
+| `Var List.assoc(List list, Var key)` | verified example | etc/comptime.xlisp:77 | binding | advanced/api | lib/list.x:649 |
 | `inline Var List.caaaar(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:33 |
 | `inline Var List.caaadr(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:35 |
 | `inline Var List.caaar(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:18 |
@@ -415,67 +809,67 @@ explicit checks before claiming runtime equivalence.
 | `inline Self List.cddadr(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:59 |
 | `inline Self List.cddar(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:28 |
 | `inline Self List.cdddar(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:61 |
-| `inline Self List.cddddr(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:63 |
-| `inline Self List.cdddr(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:30 |
+| `inline Self List.cddddr(Self value)` | verified example | etc/comptime.xlisp:427 | binding | primary/optional | lib/list-selectors.x:63 |
+| `inline Self List.cdddr(Self value)` | verified example | etc/comptime.xlisp:426 | binding | primary/optional | lib/list-selectors.x:30 |
 | `inline Self List.cddr(Self lst)` | verified example | etc/comptime.xlisp:58 | binding | advanced/api | lib/list.x:191 |
 | `inline Self List.cdr(Self lst)` | verified example | etc/init.xlisp:93 | binding | advanced/api | lib/list.x:182 |
-| `int List.compare(List a, List b)` | verified example | etc/comptime.xlisp:318 | binding | advanced/api | lib/list.x:840 |
+| `int List.compare(List a, List b)` | verified example | etc/comptime.xlisp:326 | binding | advanced/api | lib/list.x:840 |
 | `List List.concat_n(unsigned list_count, ...)` | no binding found | none found | pointer | primary/api | lib/list.x:255 |
 | `List List.cons(Var head, List tail)` | verified example | etc/comptime.xlisp:57 | binding | advanced/api | lib/list.x:166 |
 | `List List.cons_in(Pool pool, Var head, List tail)` | no binding found | none found | ownership, resource | advanced/api | lib/list.x:49 |
-| `int List.contains(List lst, Var key)` | bound, unverified | etc/comptime.xlisp:90 | binding | primary/api | lib/list.x:315 |
-| `int List.equal(List a, List b)` | bound, unverified | etc/comptime.xlisp:89 | binding | advanced/api | lib/list.x:831 |
-| `Self List.filter(Self lst, Func pred)` | bound, unverified | etc/comptime.xlisp:92 | callback | primary/api | lib/list.x:1023 |
+| `int List.contains(List lst, Var key)` | verified example | etc/comptime.xlisp:90 | binding | primary/api | lib/list.x:315 |
+| `int List.equal(List a, List b)` | verified example | etc/comptime.xlisp:89 | binding | advanced/api | lib/list.x:831 |
+| `Self List.filter(Self lst, Func pred)` | reproduced failure | etc/comptime.xlisp:92 | callback | primary/api | lib/list.x:1023 |
 | `Var List.find(List lst, Func pred)` | no binding found | none found | callback | primary/api | lib/list.x:377 |
-| `Self List.flatten(Self lst)` | verified example | etc/comptime.xlisp:310 | binding | advanced/api | lib/list.x:584 |
-| `Self List.flatten_all(Self lst)` | verified example | etc/comptime.xlisp:311 | binding | advanced/api | lib/list.x:608 |
+| `Self List.flatten(Self lst)` | verified example | etc/comptime.xlisp:318 | binding | advanced/api | lib/list.x:584 |
+| `Self List.flatten_all(Self lst)` | verified example | etc/comptime.xlisp:319 | binding | advanced/api | lib/list.x:608 |
 | `Var List.foldl(List lst, Var seed, Func fn)` | reproduced failure | none found | callback | primary/api | lib/list.x:353 |
-| `Var List.get(List list, Var key)` | bound, unverified | etc/comptime.xlisp:81 | binding | primary/api | lib/list.x:663 |
-| `Var List.getindex(List list, int index)` | bound, unverified | etc/comptime.xlisp:67 | binding | primary/api | lib/list.x:626 |
-| `Self List.getslice(Self list, int start, int stop, int step)` | verified example | etc/comptime.xlisp:316 | binding | primary/api | lib/list.x:736 |
-| `unsigned List.hash(List lst)` | verified example | etc/comptime.xlisp:317 | binding | advanced/api | lib/list.x:814 |
-| `Self List.head(Self list, unsigned count)` | verified example | etc/comptime.xlisp:314 | binding | primary/api | lib/list.x:696 |
-| `int List.index(List l, Var key)` | bound, unverified | etc/comptime.xlisp:63 | binding | primary/api | lib/list.x:309 |
+| `Var List.get(List list, Var key)` | verified example | etc/comptime.xlisp:81 | binding | primary/api | lib/list.x:663 |
+| `Var List.getindex(List list, int index)` | verified example | etc/comptime.xlisp:67 | binding | primary/api | lib/list.x:626 |
+| `Self List.getslice(Self list, int start, int stop, int step)` | verified example | etc/comptime.xlisp:324 | binding | primary/api | lib/list.x:736 |
+| `unsigned List.hash(List lst)` | verified example | etc/comptime.xlisp:325 | binding | advanced/api | lib/list.x:814 |
+| `Self List.head(Self list, unsigned count)` | verified example | etc/comptime.xlisp:322 | binding | primary/api | lib/list.x:696 |
+| `int List.index(List l, Var key)` | verified example | etc/comptime.xlisp:63 | binding | primary/api | lib/list.x:309 |
 | `Iter List.iter(List lst, Iter dest)` | no binding found | none found | resource | primary/api | lib/list.x:999 |
 | `Job List.job(List command)` | no binding found | none found | resource | primary/optional | lib/process.x:338 |
-| `Var List.last(List lst)` | bound, unverified | etc/comptime.xlisp:76 | binding | primary/api | lib/list.x:301 |
-| `int List.len(List lst)` | bound, unverified | etc/comptime.xlisp:61 | binding | primary/api | lib/list.x:318 |
+| `Var List.last(List lst)` | verified example | etc/comptime.xlisp:76 | binding | primary/api | lib/list.x:301 |
+| `int List.len(List lst)` | verified example | etc/comptime.xlisp:61 | binding | primary/api | lib/list.x:318 |
 | `List List.list_n(unsigned element_count, ...)` | no binding found | none found | pointer | primary/api | lib/list.x:279 |
-| `ListChar List.listchar(List xs)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:97 |
-| `ListDbl List.listdbl(List xs)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:113 |
-| `ListFloat List.listfloat(List xs)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:109 |
-| `ListInt List.listint(List xs)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:105 |
-| `ListShort List.listshort(List xs)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:101 |
-| `ListString List.liststring(List xs)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:117 |
-| `ListSymbol List.listsymbol(List xs)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:121 |
-| `List List.map(List lst, Func fn)` | bound, unverified | etc/comptime.xlisp:91 | callback | primary/api | lib/list.x:333 |
+| `ListChar List.listchar(List xs)` | verified example | etc/comptime.xlisp:419 | resource | primary/optional | lib/typed-list.x:97 |
+| `ListDbl List.listdbl(List xs)` | verified example | etc/comptime.xlisp:423 | resource | primary/optional | lib/typed-list.x:113 |
+| `ListFloat List.listfloat(List xs)` | verified example | etc/comptime.xlisp:422 | resource | primary/optional | lib/typed-list.x:109 |
+| `ListInt List.listint(List xs)` | verified example | etc/comptime.xlisp:421 | resource | primary/optional | lib/typed-list.x:105 |
+| `ListShort List.listshort(List xs)` | verified example | etc/comptime.xlisp:420 | resource | primary/optional | lib/typed-list.x:101 |
+| `ListString List.liststring(List xs)` | verified example | etc/comptime.xlisp:424 | resource | primary/optional | lib/typed-list.x:117 |
+| `ListSymbol List.listsymbol(List xs)` | verified example | etc/comptime.xlisp:425 | resource | primary/optional | lib/typed-list.x:121 |
+| `List List.map(List lst, Func fn)` | verified example | etc/comptime.xlisp:91 | callback | primary/api | lib/list.x:333 |
 | `List List.map2(List a, List b, Func fn)` | no binding found | none found | callback | primary/api | lib/list.x:549 |
-| `List List.match(List input, Var pat)` | bound, unverified | etc/comptime.xlisp:87 | binding | advanced/api | lib/match.x:724 |
-| `List List.match_replace(List input, Var pat, Var template)` | verified example | etc/comptime.xlisp:320 | binding | advanced/api | lib/match.x:823 |
-| `Self List.nth_cdr(Self list, int n)` | verified example | etc/comptime.xlisp:312 | binding | advanced/api | lib/list.x:618 |
+| `List List.match(List input, Var pat)` | verified example | etc/comptime.xlisp:87 | binding | advanced/api | lib/match.x:724 |
+| `List List.match_replace(List input, Var pat, Var template)` | verified example | etc/comptime.xlisp:328 | binding | advanced/api | lib/match.x:823 |
+| `Self List.nth_cdr(Self list, int n)` | verified example | etc/comptime.xlisp:320 | binding | advanced/api | lib/list.x:618 |
 | `Self List.promote(Self lst)` | no binding found | none found | ownership | advanced/api | lib/list.x:120 |
-| `List List.replace(List template, List bindings)` | verified example | etc/comptime.xlisp:319 | binding | primary/api | lib/match.x:759 |
-| `String List.repr(List lst)` | bound, unverified | etc/comptime.xlisp:60 | binding | advanced/api | lib/list.x:958 |
-| `Self List.reverse(Self lst)` | bound, unverified | etc/comptime.xlisp:62 | binding | primary/api | lib/list.x:292 |
-| `List List.search(List input, Var pat)` | bound, unverified | etc/comptime.xlisp:88 | binding | primary/api | lib/match.x:994 |
-| `List List.search_replace(List input, Var pat, Var template)` | bound, unverified | etc/init.xlisp:106 | binding | primary/api | lib/match.x:1019 |
-| `Self List.sort(Self lst)` | bound, unverified | etc/comptime.xlisp:86 | binding | primary/api | lib/list.x:424 |
+| `List List.replace(List template, List bindings)` | verified example | etc/comptime.xlisp:327 | binding | primary/api | lib/match.x:759 |
+| `String List.repr(List lst)` | verified example | etc/comptime.xlisp:60 | binding | advanced/api | lib/list.x:958 |
+| `Self List.reverse(Self lst)` | verified example | etc/comptime.xlisp:62 | binding | primary/api | lib/list.x:292 |
+| `List List.search(List input, Var pat)` | verified example | etc/comptime.xlisp:88 | binding | primary/api | lib/match.x:994 |
+| `List List.search_replace(List input, Var pat, Var template)` | verified example | etc/init.xlisp:106 | binding | primary/api | lib/match.x:1019 |
+| `Self List.sort(Self lst)` | verified example | etc/comptime.xlisp:86 | binding | primary/api | lib/list.x:424 |
 | `Self List.sort_by(Self lst, Func key)` | no binding found | none found | callback | primary/api | lib/list.x:449 |
 | `Self List.sort_with(Self lst, Func compare)` | no binding found | none found | callback | primary/api | lib/list.x:436 |
-| `String List.str(List lst)` | bound, unverified | etc/comptime.xlisp:59 | binding | advanced/api | lib/list.x:930 |
-| `List List.sublis(List alist, List tree)` | verified example | etc/comptime.xlisp:309 | binding | advanced/api | lib/list.x:573 |
-| `Self List.subseq(Self list, int start, int stop, int step)` | verified example | etc/comptime.xlisp:315 | binding | advanced/api | lib/list.x:722 |
-| `Self List.tail(Self list, unsigned count)` | verified example | etc/comptime.xlisp:313 | binding | primary/api | lib/list.x:676 |
-| `inline int List.truth(List list)` | verified example | etc/comptime.xlisp:409 | syntax | advanced/api | lib/common.x:398 |
+| `String List.str(List lst)` | verified example | etc/comptime.xlisp:59 | binding | advanced/api | lib/list.x:930 |
+| `List List.sublis(List alist, List tree)` | verified example | etc/comptime.xlisp:317 | binding | advanced/api | lib/list.x:573 |
+| `Self List.subseq(Self list, int start, int stop, int step)` | verified example | etc/comptime.xlisp:323 | binding | advanced/api | lib/list.x:722 |
+| `Self List.tail(Self list, unsigned count)` | verified example | etc/comptime.xlisp:321 | binding | primary/api | lib/list.x:676 |
+| `inline int List.truth(List list)` | verified example | etc/comptime.xlisp:417 | syntax | advanced/api | lib/common.x:398 |
 | `int List.try_match(List input, Var pat, List *out_bindings)` | no binding found | none found | pointer | primary/api | lib/match.x:717 |
 | `int List.try_match_replace(List input, Var pat, Var template, Var *out)` | no binding found | none found | pointer | primary/api | lib/match.x:813 |
-| `int List.try_next(List lst, List *cursor, Var *out)` | bound, unverified | etc/comptime.xlisp:98 | pointer | primary/api | lib/list.x:987 |
+| `int List.try_next(List lst, List *cursor, Var *out)` | verified example | etc/comptime.xlisp:98 | pointer | primary/api | lib/list.x:987 |
 | `int List.try_own(List lst)` | no binding found | none found | ownership, internal | internal/api | lib/list.x:145 |
 | `int List.try_search(List input, Var pat, Var *out_match, List *out_bindings)` | no binding found | none found | pointer | primary/api | lib/match.x:1007 |
-| `Self List.unique(Self lst)` | verified example | etc/comptime.xlisp:308 | binding | primary/api | lib/list.x:512 |
+| `Self List.unique(Self lst)` | verified example | etc/comptime.xlisp:316 | binding | primary/api | lib/list.x:512 |
 | `int List.unpack_n(List src, unsigned destination_count, ...)` | no binding found | none found | pointer | primary/api | lib/list.x:780 |
 | `int List.unpack_vars_n(List src, unsigned destination_count, ...)` | no binding found | none found | pointer | primary/api | lib/list.x:795 |
-| `inline Var List.var(List x)` | bound, unverified | etc/init.xlisp:109 | binding | advanced/api | lib/common.x:534 |
+| `inline Var List.var(List x)` | verified example | etc/init.xlisp:109 | binding | advanced/api | lib/common.x:534 |
 | `Buffer List.write_repr(List lst, Buffer out)` | no binding found | none found | resource | advanced/api | lib/list.x:965 |
 | `Buffer List.write_str(List lst, Buffer out)` | no binding found | none found | resource | primary/api | lib/list.x:942 |
 | `List List.zip_with(List a, List b, Func fn)` | no binding found | none found | callback | primary/api | lib/list.x:528 |
@@ -515,12 +909,12 @@ explicit checks before claiming runtime equivalence.
 | `List.cddadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | needs representation decision | Returns `cdr(cdr(car(cdr(value))))`. | A car step may return runtime void; current adapters collapse that absence into an empty List. Use the value-contract decision before extending absent-selector adapters. |
 | `List.cddar` | lib/list-selectors.x; lib/list.x / canonical List selectors | needs representation decision | Returns `cdr(cdr(car(value)))`. | A car step may return runtime void; current adapters collapse that absence into an empty List. Use the value-contract decision before extending absent-selector adapters. |
 | `List.cdddar` | lib/list-selectors.x; lib/list.x / canonical List selectors | needs representation decision | Returns `cdr(cdr(cdr(car(value))))`. | A car step may return runtime void; current adapters collapse that absence into an empty List. Use the value-contract decision before extending absent-selector adapters. |
-| `List.cddddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(cdr(cdr(value))))`. | Only cdr steps occur; exhaustion is a representable empty List. Compose the existing nil-safe cdr owner for List.cddddr; test short chains. |
-| `List.cdddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(cdr(value)))`. | Only cdr steps occur; exhaustion is a representable empty List. Compose the existing nil-safe cdr owner for List.cdddr; test short chains. |
+| `List.cddddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(cdr(cdr(value))))`. | Only cdr steps occur; exhaustion is a representable empty List. Validate the existing binding against this contract. Next: Compose the existing nil-safe cdr owner for List.cddddr; test short chains. |
+| `List.cdddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(cdr(value)))`. | Only cdr steps occur; exhaustion is a representable empty List. Validate the existing binding against this contract. Next: Compose the existing nil-safe cdr owner for List.cdddr; test short chains. |
 | `List.cddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns the tail after two cells, or `nil`. | Only cdr steps occur; exhaustion is a representable empty List. Validate the existing binding against this contract. Next: Compose the existing nil-safe cdr owner for List.cddr; test short chains. |
 | `List.cdr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Method form of `cdr`: the tail of `lst`, or `nil` when `lst` is `nil`. | Only cdr steps occur; exhaustion is a representable empty List. Validate the existing binding against this contract. Next: Compose the existing nil-safe cdr owner for List.cdr; test short chains. |
 | `List.compare` | lib/list.x / List value operations | implementable with current values | Compares `a` and `b` lexicographically through `Var.compare`. Element comparison causes propagate. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind List.compare to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `List.concat_n` | lib/list.x / native variadic calls | needs bounded probe | Returns the concatenation of exactly `list_count` `List` arguments. Nil is a valid argument, no sentinel is read, and the final nonempty `List` becomes the shared tail of the result. Raises: `<size-limit>` when `list_count` exceeds the supported index range, or `<alloc-fail>` while constructing the result. | Native ellipsis arguments have no fixed Func adapter signature. Inspect List.concat_n's count/format owner and prototype a List/rest adapter preserving argument count, type and order. |
+| `List.concat_n` | lib/list.x / native variadic calls | needs bounded probe | Returns the concatenation of exactly `list_count` `List` arguments. Nil is a valid argument, no sentinel is read, and the final nonempty `List` becomes the shared tail of the result. Raises: `<size-limit>` when `list_count` exceeds the supported index range, or `<alloc-fail>` while constructing the result. | The count bounds exactly how many variadic values or pairs are consumed; argument evaluation, shared tails and partial mutations are observable. Prototype a counted List/rest bridge for List.concat_n reusing append/push/set owners; verify zero/excess counts, shared tails or partial mutation, and true-void rejection. |
 | `List.cons` | lib/list.x / List value operations | implementable with current values | Method form of `cons`, with the same identity, lifetime, and failures. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind List.cons to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `List.cons_in` | lib/list.x / allocation and ownership contracts | native resource contract | Returns the canonical cell for `head` and `tail` in `pool`'s chain. An ancestor hit keeps that ancestor's ownership; a miss is owned by `pool`. A null pool or `void` head returns `nil` without allocating. Any pool-managed graph reachable through `head` or `tail` is borrowed and must remain live for at least as long as the result. Raises: `<alloc-fail>`, `<size-limit>`, or `<invariant>` while installing a new cell. | The operation frees, allocates, observes or transfers storage/registry ownership that the evaluator currently owns. Define which session-owned objects List.cons_in may observe or transfer; never alias a destructive native owner blindly. |
 | `List.contains` | lib/list.x / List value operations | implementable with current values | Reports whether `lst` contains `key` by `Var` equality. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind List.contains to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
@@ -540,14 +934,14 @@ explicit checks before claiming runtime equivalence.
 | `List.job` | lib/process.x / native Job contracts | native resource contract | Returns a `Job` for `command`, a command or pipeline, without starting it. The job captures standard output and passes standard error through. Its first result starts it, waits, and records the run. A `Job` destination calls this converter, so the call is usually left implicit. | The signature crosses Job handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/process.x's handle and effect contract for List.job; add only a scoped native adapter after those obligations are specified. |
 | `List.last` | lib/list.x / absence and null values | needs representation decision | Returns the last value in `lst`, or `void` when it is empty. | Missing values or null tests can distinguish runtime void, Null and empty List, which current transport can conflate. Validate the existing binding against this contract. Next: Apply the value-contract decision to List.last; retain separate success, absence and empty-value probes. |
 | `List.len` | lib/list.x / List value operations | implementable with current values | Returns the number of cells in `lst` in O(n) time. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind List.len to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `List.list_n` | lib/list.x / native variadic calls | needs bounded probe | Builds a `List` from exactly `element_count` `Var` arguments. Every argument is data, so `void` raises instead of being read as a terminator. A zero count returns `nil`. Raises: `<void-op>` when an argument is `void`, or `<alloc-fail>` or `<size-limit>` while constructing the result. | Native ellipsis arguments have no fixed Func adapter signature. Inspect List.list_n's count/format owner and prototype a List/rest adapter preserving argument count, type and order. |
-| `List.listchar` | lib/typed-list.x / typed canonical List views | implementable with current values | Validates `xs` as `ListChar` and returns the identical canonical chain. Nil is valid. Every nonempty cell must hold a `<i8>` element; a foreign tag raises `<no-convert>` with its zero-based index. Validation is O(n), does not copy or mutate cells, and preserves their existing `List`-pool lifetime. | Typed Lists share ordinary canonical cells; conversion validates element tags. Load typed-list.x and bind List.listchar; test matching and rejected tags and shared identity. |
-| `List.listdbl` | lib/typed-list.x / typed canonical List views | implementable with current values | Validates `xs` as `ListDbl` and returns the identical canonical chain. Nil is valid. Every nonempty cell must hold a `<f64>` element; a foreign tag raises `<no-convert>` with its zero-based index. Validation is O(n), does not copy or mutate cells, and preserves their existing `List`-pool lifetime. | Typed Lists share ordinary canonical cells; conversion validates element tags. Load typed-list.x and bind List.listdbl; test matching and rejected tags and shared identity. |
-| `List.listfloat` | lib/typed-list.x / typed canonical List views | implementable with current values | Validates `xs` as `ListFloat` and returns the identical canonical chain. Nil is valid. Every nonempty cell must hold a `<f32>` element; a foreign tag raises `<no-convert>` with its zero-based index. Validation is O(n), does not copy or mutate cells, and preserves their existing `List`-pool lifetime. | Typed Lists share ordinary canonical cells; conversion validates element tags. Load typed-list.x and bind List.listfloat; test matching and rejected tags and shared identity. |
-| `List.listint` | lib/typed-list.x / typed canonical List views | implementable with current values | Validates `xs` as `ListInt` and returns the identical canonical chain. Nil is valid. Every nonempty cell must hold a `<i32>` element; a foreign tag raises `<no-convert>` with its zero-based index. Validation is O(n), does not copy or mutate cells, and preserves their existing `List`-pool lifetime. | Typed Lists share ordinary canonical cells; conversion validates element tags. Load typed-list.x and bind List.listint; test matching and rejected tags and shared identity. |
-| `List.listshort` | lib/typed-list.x / typed canonical List views | implementable with current values | Validates `xs` as `ListShort` and returns the identical canonical chain. Nil is valid. Every nonempty cell must hold a `<i16>` element; a foreign tag raises `<no-convert>` with its zero-based index. Validation is O(n), does not copy or mutate cells, and preserves their existing `List`-pool lifetime. | Typed Lists share ordinary canonical cells; conversion validates element tags. Load typed-list.x and bind List.listshort; test matching and rejected tags and shared identity. |
-| `List.liststring` | lib/typed-list.x / typed canonical List views | implementable with current values | Validates `xs` as `ListString` and returns the identical canonical chain. Nil is valid. Every nonempty cell must hold a `<string>` element; a foreign tag raises `<no-convert>` with its zero-based index. Validation is O(n), does not copy or mutate cells, and preserves their existing `List`-pool lifetime. | Typed Lists share ordinary canonical cells; conversion validates element tags. Load typed-list.x and bind List.liststring; test matching and rejected tags and shared identity. |
-| `List.listsymbol` | lib/typed-list.x / typed canonical List views | implementable with current values | Validates `xs` as `ListSymbol` and returns the identical canonical chain. Nil is valid. Every nonempty cell must hold a `<symbol>` element; a foreign tag raises `<no-convert>` with its zero-based index. Validation is O(n), does not copy or mutate cells, and preserves their existing `List`-pool lifetime. | Typed Lists share ordinary canonical cells; conversion validates element tags. Load typed-list.x and bind List.listsymbol; test matching and rejected tags and shared identity. |
+| `List.list_n` | lib/list.x / native variadic calls | needs bounded probe | Builds a `List` from exactly `element_count` `Var` arguments. Every argument is data, so `void` raises instead of being read as a terminator. A zero count returns `nil`. Raises: `<void-op>` when an argument is `void`, or `<alloc-fail>` or `<size-limit>` while constructing the result. | The count bounds exactly how many variadic values or pairs are consumed; argument evaluation, shared tails and partial mutations are observable. Prototype a counted List/rest bridge for List.list_n reusing append/push/set owners; verify zero/excess counts, shared tails or partial mutation, and true-void rejection. |
+| `List.listchar` | lib/typed-list.x / typed canonical List views | implementable with current values | Validates `xs` as `ListChar` and returns the identical canonical chain. Nil is valid. Every nonempty cell must hold a `<i8>` element; a foreign tag raises `<no-convert>` with its zero-based index. Validation is O(n), does not copy or mutate cells, and preserves their existing `List`-pool lifetime. | Typed Lists share ordinary canonical cells; conversion validates element tags. Validate the existing binding against this contract. Next: Load typed-list.x and bind List.listchar; test matching and rejected tags and shared identity. |
+| `List.listdbl` | lib/typed-list.x / typed canonical List views | implementable with current values | Validates `xs` as `ListDbl` and returns the identical canonical chain. Nil is valid. Every nonempty cell must hold a `<f64>` element; a foreign tag raises `<no-convert>` with its zero-based index. Validation is O(n), does not copy or mutate cells, and preserves their existing `List`-pool lifetime. | Typed Lists share ordinary canonical cells; conversion validates element tags. Validate the existing binding against this contract. Next: Load typed-list.x and bind List.listdbl; test matching and rejected tags and shared identity. |
+| `List.listfloat` | lib/typed-list.x / typed canonical List views | implementable with current values | Validates `xs` as `ListFloat` and returns the identical canonical chain. Nil is valid. Every nonempty cell must hold a `<f32>` element; a foreign tag raises `<no-convert>` with its zero-based index. Validation is O(n), does not copy or mutate cells, and preserves their existing `List`-pool lifetime. | Typed Lists share ordinary canonical cells; conversion validates element tags. Validate the existing binding against this contract. Next: Load typed-list.x and bind List.listfloat; test matching and rejected tags and shared identity. |
+| `List.listint` | lib/typed-list.x / typed canonical List views | implementable with current values | Validates `xs` as `ListInt` and returns the identical canonical chain. Nil is valid. Every nonempty cell must hold a `<i32>` element; a foreign tag raises `<no-convert>` with its zero-based index. Validation is O(n), does not copy or mutate cells, and preserves their existing `List`-pool lifetime. | Typed Lists share ordinary canonical cells; conversion validates element tags. Validate the existing binding against this contract. Next: Load typed-list.x and bind List.listint; test matching and rejected tags and shared identity. |
+| `List.listshort` | lib/typed-list.x / typed canonical List views | implementable with current values | Validates `xs` as `ListShort` and returns the identical canonical chain. Nil is valid. Every nonempty cell must hold a `<i16>` element; a foreign tag raises `<no-convert>` with its zero-based index. Validation is O(n), does not copy or mutate cells, and preserves their existing `List`-pool lifetime. | Typed Lists share ordinary canonical cells; conversion validates element tags. Validate the existing binding against this contract. Next: Load typed-list.x and bind List.listshort; test matching and rejected tags and shared identity. |
+| `List.liststring` | lib/typed-list.x / typed canonical List views | implementable with current values | Validates `xs` as `ListString` and returns the identical canonical chain. Nil is valid. Every nonempty cell must hold a `<string>` element; a foreign tag raises `<no-convert>` with its zero-based index. Validation is O(n), does not copy or mutate cells, and preserves their existing `List`-pool lifetime. | Typed Lists share ordinary canonical cells; conversion validates element tags. Validate the existing binding against this contract. Next: Load typed-list.x and bind List.liststring; test matching and rejected tags and shared identity. |
+| `List.listsymbol` | lib/typed-list.x / typed canonical List views | implementable with current values | Validates `xs` as `ListSymbol` and returns the identical canonical chain. Nil is valid. Every nonempty cell must hold a `<symbol>` element; a foreign tag raises `<no-convert>` with its zero-based index. Validation is O(n), does not copy or mutate cells, and preserves their existing `List`-pool lifetime. | Typed Lists share ordinary canonical cells; conversion validates element tags. Validate the existing binding against this contract. Next: Load typed-list.x and bind List.listsymbol; test matching and rejected tags and shared identity. |
 | `List.map` | lib/list.x / List interpreted callbacks | needs callback adapter | Returns a canonical `List` holding `fn` applied front to back. Elements are passed as values, and mapping `nil` gives `nil` without invoking or checking `fn`. A null `fn` on nonempty input raises `<bad-arg>`, and a callback result of `void` raises `<void-op>` when the result `List` is built. Raises: those causes, whatever `Func.apply` or `fn` raises, or `<alloc-fail>` or `<size-limit>` while constructing the result. | The runtime takes native Func while meta closures are evaluator callables. Validate the existing binding against this contract. Next: Use Lisp.apply through a reusable Func context for List.map; check its documented callback order, null callback and empty-input cases. |
 | `List.map2` | lib/list.x / List interpreted callbacks | needs callback adapter | Maps `fn` over aligned pairs from `a` and `b`. A null callback returns `nil` without examining either `List`; otherwise this has the length, order, ownership, and failures of `List.zip_with`. | The runtime takes native Func while meta closures are evaluator callables. Use Lisp.apply through a reusable Func context for List.map2; check its documented callback order, null callback and empty-input cases. |
 | `List.match` | lib/match.x / List value operations | implementable with current values | Returns bindings when `input` matches `pat`, or `nil` on a miss. A binder-free success returns the nonnull `%(())` sentinel with no associations. Binding order and failures follow `List.try_match`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind List.match to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
@@ -573,8 +967,8 @@ explicit checks before claiming runtime equivalence.
 | `List.try_own` | lib/list.x / allocation and ownership contracts | native resource contract | Proves `lst` and its canonical children safe beyond every active pool. Returns 1 when the complete value is `nil`, already permanent, or can be promoted to the outermost `List` and `String` pools. Returns 0 when an active pool does not own part of the value. A zero result may follow successful promotion of an earlier cell or child. Raises: `<alloc-fail>` when promotion metadata cannot be allocated. | The operation frees, allocates, observes or transfers storage/registry ownership that the evaluator currently owns. Define which session-owned objects List.try_own may observe or transfer; never alias a destructive native owner blindly. |
 | `List.try_search` | lib/match.x / status and output cells | implementable with current values | Searches `input` for `pat`, writing the first match and bindings. The depth-first order is head, tail, then containing `List`, with the same explicit-`nil` rule as `List.search`. Returns 1 on success; otherwise returns 0 and leaves both outputs unchanged. Either null output returns 0. Raises: the same causes as `List.search`. | The status result can separate success from absence while a compiler local cell carries the output. Wrap List.try_search with native temporary outputs and C.store only on success; test untouched outputs on failure. |
 | `List.unique` | lib/list.x / List value operations | implementable with current values | Returns a copy of `lst` with later duplicates removed. The first occurrence of each value is kept and the original order is preserved. Duplicate detection runs through `Iter.unique`, whose state is held inside a `Scope` bracket that is released before returning. A `List` of fewer than two cells is returned as it stands. Raises: causes from `Map` hashing or equality, or `<alloc-fail>` or `<size-limit>` while constructing the result. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind List.unique to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `List.unpack_n` | lib/list.x / native variadic calls | needs bounded probe | Writes at most `destination_count` elements through `List` pointers. Returns the number written. Extra source cells are left unread, and a short source leaves remaining destinations untouched. Each source value is decoded as a `List`, so another tag writes `nil`; a null destination is skipped but still counted. Raises: `<size-limit>` when `destination_count` exceeds `INT_MAX`. The failure occurs before any destination is written. | Native ellipsis arguments have no fixed Func adapter signature. Inspect List.unpack_n's count/format owner and prototype a List/rest adapter preserving argument count, type and order. |
-| `List.unpack_vars_n` | lib/list.x / native variadic calls | needs bounded probe | Writes at most `destination_count` elements through `Var` pointers. Returns the number written. Extra source cells are left unread, and a short source leaves remaining destinations untouched. A null destination is skipped but still counted. Raises: `<size-limit>` when `destination_count` exceeds `INT_MAX`. The failure occurs before any destination is written. | Native ellipsis arguments have no fixed Func adapter signature. Inspect List.unpack_vars_n's count/format owner and prototype a List/rest adapter preserving argument count, type and order. |
+| `List.unpack_n` | lib/list.x / native variadic calls | needs bounded probe | Writes at most `destination_count` elements through `List` pointers. Returns the number written. Extra source cells are left unread, and a short source leaves remaining destinations untouched. Each source value is decoded as a `List`, so another tag writes `nil`; a null destination is skipped but still counted. Raises: `<size-limit>` when `destination_count` exceeds `INT_MAX`. The failure occurs before any destination is written. | Each variadic argument is a nullable native output pointer. Short input leaves later outputs untouched and skipped null outputs still count. After the cell/null decision, adapt destinations with the correct List-versus-Var conversion and preserve partial writes/counts. |
+| `List.unpack_vars_n` | lib/list.x / native variadic calls | needs bounded probe | Writes at most `destination_count` elements through `Var` pointers. Returns the number written. Extra source cells are left unread, and a short source leaves remaining destinations untouched. A null destination is skipped but still counted. Raises: `<size-limit>` when `destination_count` exceeds `INT_MAX`. The failure occurs before any destination is written. | Each variadic argument is a nullable native output pointer. Short input leaves later outputs untouched and skipped null outputs still count. After the cell/null decision, adapt destinations with the correct List-versus-Var conversion and preserve partial writes/counts. |
 | `List.var` | lib/common.x / List value operations | implementable with current values | Boxes a `List` value as `Var`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind List.var to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `List.write_repr` | lib/list.x / native Buffer contracts | native resource contract | Appends the readable representation of `List` to a `Buffer`. | The signature crosses Buffer handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/list.x's handle and effect contract for List.write_repr; add only a scoped native adapter after those obligations are specified. |
 | `List.write_str` | lib/list.x / native Buffer contracts | native resource contract | Appends the `List` display text to `out`, using each element's `write_str`. `List.str` calls this to build its result. The display form has one space inside each parenthesis, as in `( a b )`, including when nested in another container. This method temporarily sets the destination `Buffer`'s padding to one and restores it afterward. | The signature crosses Buffer handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/list.x's handle and effect contract for List.write_str; add only a scoped native adapter after those obligations are specified. |
@@ -582,35 +976,337 @@ explicit checks before claiming runtime equivalence.
 
 ### Evaluated cases
 
+- `List.append`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { List a = %(1), b = %(2 3); List c = a.append(b); return c.equal(%(1 2 3)) && c.cdr() === b; }
+```
+
+- `List.array`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { List xs = %(1 2); Array a = xs.array(); a[0] = 7; return xs.car() == 1 && a[0] == 7; }
+```
+
+- `List.assoc`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %((a 1) (b 2)).assoc(<b>) == 2; }
+```
+
 - `List.caar`: nested head; returned 7.
+
+```x2c
+meta int audit_probe(void) { List xs = %((7) 8); return xs.caar(); }
+```
+
 - `List.caddr`: third element; returned 9.
+
+```x2c
+meta int audit_probe(void) { List xs = %(7 8 9); return xs.caddr(); }
+```
+
 - `List.cadr`: second element; returned 8.
+
+```x2c
+meta int audit_probe(void) { List xs = %(7 8); return xs.cadr(); }
+```
+
 - `List.cadr`: absent element distinguishes void from nil; returned 0, expected 1.
+
+```x2c
+meta int audit_probe(void) { List xs = %(7); Var value = xs.cadr(); return value.kind() == <void>; }
+```
+
 - `List.car`: first element; returned 7.
+
+```x2c
+meta int audit_probe(void) { List xs = %(7 8); return xs.car(); }
+```
+
+- `List.cddddr`: native canonical value contract; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %(1 2 3 4 5), short_list = %(1); return xs.cddddr().equal(%(5)) && short_list.cddddr().len() == 0; }
+```
+
+- `List.cdddr`: native canonical value contract; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %(1 2 3 4 5), short_list = %(1); return xs.cdddr().equal(%(4 5)) && short_list.cdddr().len() == 0; }
+```
+
 - `List.cddr`: empty second tail; returned 0.
+
+```x2c
+meta int audit_probe(void) { List xs = %(7 8); return xs.cddr().len(); }
+```
+
 - `List.cdr`: tail; returned 1.
+
+```x2c
+meta int audit_probe(void) { List xs = %(7 8); return xs.cdr().len(); }
+```
+
 - `List.compare`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(1 2).compare(%(1 3)) < 0 && %().compare(%()) == 0; }
+```
+
 - `List.cons`: prepend; returned 2.
+
+```x2c
+meta int audit_probe(void) { return List.cons(7, %(8)).len(); }
+```
+
+- `List.contains`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(1 2).contains(2) && !%(1 2).contains(3); }
+```
+
+- `List.equal`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(1 2).equal(%(1 2)) && !%(1 2).equal(%(2 1)); }
+```
+
+- `List.filter`: existing binding with native control; returned 0, expected 1.
+
+```x2c
+meta int audit_probe(void) { Func pred = %!(v) => v > 1; return %(1 2 3).filter(pred).equal(%(2 3)); }
+```
+
 - `List.flatten`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(1 (2 (3)) ()).flatten().equal(%(1 2 (3))); }
+```
+
 - `List.flatten_all`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(1 (2 (3)) ()).flatten_all().equal(%(1 2 3)); }
+```
+
 - `List.foldl`: ordered fold with explicit seed; note: reason: no binding for List_foldl.
+
+```x2c
+meta int audit_probe(void) { List xs = %(1 2); Func f = %!(a, b) => a * 10 + b; return xs.foldl(3, f); }
+```
+
+- `List.get`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(1 2).get(-1) == 2 && %((a 7)).get(<a>) == 7; }
+```
+
+- `List.getindex`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(1 2).getindex(-1) == 2; }
+```
+
 - `List.getslice`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(0 1 2 3 4 5).getslice(5, 1, -2).equal(%(5 3)); }
+```
+
 - `List.hash`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(1 2).hash() != 0; }
+```
+
 - `List.head`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { List xs = %(1 2 3); return xs.head(2).equal(%(1 2)) && xs.head(9) === xs && xs.head(0).len() == 0; }
+```
+
+- `List.index`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(1 2 1).index(1) == 0 && %(1 2).index(9) == -1; }
+```
+
+- `List.last`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(1 2).last() == 2; }
+```
+
+- `List.len`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(1 2).len() == 2 && %().len() == 0; }
+```
+
+- `List.listchar`: native canonical value contract; returned 1.
+
+```x2c
+#include "typed-list.x"
+meta int audit_probe(void) { List xs = %(${(char) 65}); ListChar view = xs.listchar(), empty = %().listchar(); return view === xs && empty.len() == 0; }
+```
+
+- `List.listdbl`: native canonical value contract; returned 1.
+
+```x2c
+#include "typed-list.x"
+meta int audit_probe(void) { List xs = %(${1.5}); ListDbl view = xs.listdbl(), empty = %().listdbl(); return view === xs && empty.len() == 0; }
+```
+
+- `List.listfloat`: native canonical value contract; returned 1.
+
+```x2c
+#include "typed-list.x"
+meta int audit_probe(void) { List xs = %(${(float) 1.5}); ListFloat view = xs.listfloat(), empty = %().listfloat(); return view === xs && empty.len() == 0; }
+```
+
+- `List.listint`: native canonical value contract; returned 1.
+
+```x2c
+#include "typed-list.x"
+meta int audit_probe(void) { List xs = %(${65}); ListInt view = xs.listint(), empty = %().listint(); return view === xs && empty.len() == 0; }
+```
+
+- `List.listshort`: native canonical value contract; returned 1.
+
+```x2c
+#include "typed-list.x"
+meta int audit_probe(void) { List xs = %(${(short) 65}); ListShort view = xs.listshort(), empty = %().listshort(); return view === xs && empty.len() == 0; }
+```
+
+- `List.liststring`: native canonical value contract; returned 1.
+
+```x2c
+#include "typed-list.x"
+meta int audit_probe(void) { List xs = %(${"abc"}); ListString view = xs.liststring(), empty = %().liststring(); return view === xs && empty.len() == 0; }
+```
+
+- `List.listsymbol`: native canonical value contract; returned 1.
+
+```x2c
+#include "typed-list.x"
+meta int audit_probe(void) { List xs = %(${<abc>}); ListSymbol view = xs.listsymbol(), empty = %().listsymbol(); return view === xs && empty.len() == 0; }
+```
+
+- `List.map`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Func twice = %!(v) => v * 2; return %(1 2).map(twice).equal(%(2 4)); }
+```
+
+- `List.match`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(a 7).match(%(a ?x)).assoc(<?x>) == 7; }
+```
+
 - `List.match_replace`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(a 7).match_replace(%(a ?x), %(b ?x)).equal(%(b 7)); }
+```
+
 - `List.nth_cdr`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { List xs = %(1 2 3); return xs.nth_cdr(1).equal(%(2 3)) && xs.nth_cdr(9).len() == 0 && xs.nth_cdr(-1) === xs; }
+```
+
 - `List.replace`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(a *m b).replace(%((*m (1 2)))).equal(%(a 1 2 b)); }
+```
+
+- `List.repr`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(1 2).repr().contains("1") && %(1 2).repr().contains("2"); }
+```
+
+- `List.reverse`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(1 2 3).reverse().equal(%(3 2 1)); }
+```
+
+- `List.search`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(a (a 7)).search(%(a ?x)).len() == 2; }
+```
+
+- `List.search_replace`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(a (b 7)).search_replace(%(b ?x), %(c ?x)).equal(%(a (c 7))); }
+```
+
+- `List.sort`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(3 1 2).sort().equal(%(1 2 3)); }
+```
+
+- `List.str`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(1 2).str().contains("1") && %(1 2).str().contains("2"); }
+```
+
 - `List.sublis`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { List rules = %((a 7) (b (8 9))); return rules.sublis(%(a (b c))).equal(%(7 ((8 9) c))); }
+```
+
 - `List.subseq`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return %(0 1 2 3 4 5).subseq(-4, -1, 2).equal(%(2 4)); }
+```
+
 - `List.tail`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { List xs = %(1 2 3); return xs.tail(2).equal(%(2 3)) && xs.tail(9) === xs && xs.tail(0).len() == 0; }
+```
+
 - `List.truth`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { return !%().truth() && %(1).truth(); }
+```
+
+- `List.try_next`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { List xs = %(7), cursor = xs; Var value = 0; int first = xs.try_next(&cursor, &value); int last = xs.try_next(&cursor, &value); return first == 1 && last == 0 && value == 7; }
+```
+
 - `List.unique`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { List xs = %(2 1 2 3 1); return xs.unique().equal(%(2 1 3)) && %().unique().len() == 0; }
+```
+
+- `List.var`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { List xs = %(1 2); return xs.var().tag() == <list> && xs.var().list() === xs; }
+```
+
 
 ## Array
 
-**verified example:** `capacity`, `clear`, `compare`, `concat`, `copy`, `equal`, `getslice`, `heap_push`, `heapify`, `indexof`, `map`, `pop`, `postfixindex`, `push`, `remslice`, `resize`, `reverse`, `setslice`, `sort`, `splice`, `truncate`, `truth`, `updateindex`.
-
-**bound, unverified:** `contains`, `count`, `find`, `getindex`, `insert`, `join`, `len`, `list`, `new`, `remove`, `repr`, `setindex`, `shift`, `str`, `take_last`, `try_next`, `unshift`, `var`.
+**verified example:** `capacity`, `clear`, `compare`, `concat`, `contains`, `copy`, `count`, `equal`, `find`, `getindex`, `getslice`, `heap_push`, `heapify`, `indexof`, `insert`, `join`, `len`, `list`, `map`, `new`, `pop`, `postfixindex`, `push`, `remove`, `remslice`, `repr`, `resize`, `reverse`, `setindex`, `setslice`, `shift`, `sort`, `splice`, `str`, `take_last`, `truncate`, `truth`, `try_next`, `unshift`, `updateindex`, `var`.
 
 **no binding found:** `arraychar`, `arraydbl`, `arrayfloat`, `arrayint`, `arraylong`, `arrayshort`, `arraystring`, `block`, `cleanup`, `foldl`, `free`, `heap_pop`, `iter`, `list_free`, `map2`, `sort_by`, `sort_with`, `update_n`, `write_repr`, `write_str`.
 
@@ -624,57 +1320,57 @@ explicit checks before claiming runtime equivalence.
 | `ArrayShort Array.arrayshort(Array values)` | no binding found | none found | resource | primary/optional | lib/typed-array.x:120 |
 | `ArrayString Array.arraystring(Array values)` | no binding found | none found | resource | primary/optional | lib/typed-array.x:165 |
 | `inline Block Array.block(Array x)` | no binding found | none found | resource, internal | internal/api | lib/array.x:56 |
-| `size_t Array.capacity(Array)` | verified example | etc/comptime.xlisp:343 | binding | unclassified generated/api | lib/array.x (interface) |
+| `size_t Array.capacity(Array)` | verified example | etc/comptime.xlisp:351 | binding | unclassified generated/api | lib/array.x (interface) |
 | `void Array.cleanup(Array value)` | no binding found | none found | ownership | advanced/api | lib/array.x:824 |
-| `void Array.clear(Array)` | verified example | etc/comptime.xlisp:349 | binding | unclassified generated/api | lib/array.x (interface) |
-| `int Array.compare(Array a, Array b)` | verified example | etc/comptime.xlisp:325 | binding | advanced/api | lib/array.x:518 |
-| `Self Array.concat(Self a, Self b)` | verified example | etc/comptime.xlisp:323 | binding | primary/api | lib/array.x:433 |
-| `int Array.contains(Array array, Var value)` | bound, unverified | etc/comptime.xlisp:143 | binding | primary/api | lib/array.x:416 |
-| `Self Array.copy(Self array)` | verified example | etc/comptime.xlisp:321 | binding | primary/api | lib/array.x:311 |
-| `int Array.count(Array array, Var value)` | bound, unverified | etc/comptime.xlisp:144 | binding | primary/api | lib/array.x:419 |
-| `int Array.equal(Array a, Array b)` | verified example | etc/comptime.xlisp:327 | binding | advanced/api | lib/array.x:732 |
-| `int Array.find(Array array, Var value)` | bound, unverified | etc/comptime.xlisp:142 | binding | primary/api | lib/array.x:405 |
+| `void Array.clear(Array)` | verified example | etc/comptime.xlisp:357 | binding | unclassified generated/api | lib/array.x (interface) |
+| `int Array.compare(Array a, Array b)` | verified example | etc/comptime.xlisp:333 | binding | advanced/api | lib/array.x:518 |
+| `Self Array.concat(Self a, Self b)` | verified example | etc/comptime.xlisp:331 | binding | primary/api | lib/array.x:433 |
+| `int Array.contains(Array array, Var value)` | verified example | etc/comptime.xlisp:143 | binding | primary/api | lib/array.x:416 |
+| `Self Array.copy(Self array)` | verified example | etc/comptime.xlisp:329 | binding | primary/api | lib/array.x:311 |
+| `int Array.count(Array array, Var value)` | verified example | etc/comptime.xlisp:144 | binding | primary/api | lib/array.x:419 |
+| `int Array.equal(Array a, Array b)` | verified example | etc/comptime.xlisp:335 | binding | advanced/api | lib/array.x:732 |
+| `int Array.find(Array array, Var value)` | verified example | etc/comptime.xlisp:142 | binding | primary/api | lib/array.x:405 |
 | `Var Array.foldl(Array array, Var seed, Func fn)` | no binding found | none found | callback | primary/api | lib/array.x:498 |
 | `void Array.free(Array)` | no binding found | none found | ownership | unclassified generated/api | lib/array.x (interface) |
-| `Var Array.getindex(Array array, int index)` | bound, unverified | etc/comptime.xlisp:131 | binding | primary/api | lib/array.x:128 |
-| `Self Array.getslice(Self array, int start, int end, int step)` | verified example | etc/comptime.xlisp:322 | binding | primary/api | lib/array.x:336 |
+| `Var Array.getindex(Array array, int index)` | verified example | etc/comptime.xlisp:131 | binding | primary/api | lib/array.x:128 |
+| `Self Array.getslice(Self array, int start, int end, int step)` | verified example | etc/comptime.xlisp:330 | binding | primary/api | lib/array.x:336 |
 | `Var Array.heap_pop(Array heap)` | no binding found | none found | binding | advanced/api | lib/array.x:685 |
-| `void Array.heap_push(Array heap, Var val)` | verified example | etc/comptime.xlisp:350 | binding | advanced/api | lib/array.x:671 |
-| `void Array.heapify(Array heap)` | verified example | etc/comptime.xlisp:351 | binding | advanced/api | lib/array.x:704 |
-| `int Array.indexof(Array array, Var value)` | verified example | etc/comptime.xlisp:328 | binding | primary/api | lib/array.x:425 |
-| `Var Array.insert(Array array, int index, Var elem)` | bound, unverified | etc/comptime.xlisp:160 | binding | primary/api | lib/array.x:278 |
+| `void Array.heap_push(Array heap, Var val)` | verified example | etc/comptime.xlisp:358 | binding | advanced/api | lib/array.x:671 |
+| `void Array.heapify(Array heap)` | verified example | etc/comptime.xlisp:359 | binding | advanced/api | lib/array.x:704 |
+| `int Array.indexof(Array array, Var value)` | verified example | etc/comptime.xlisp:336 | binding | primary/api | lib/array.x:425 |
+| `Var Array.insert(Array array, int index, Var elem)` | verified example | etc/comptime.xlisp:160 | binding | primary/api | lib/array.x:278 |
 | `Iter Array.iter(Array x, Iter dest)` | no binding found | none found | resource | primary/api | lib/array.x:810 |
-| `String Array.join(Array array, String separator)` | bound, unverified | etc/comptime.xlisp:141 | binding | primary/api | lib/array.x:719 |
-| `size_t Array.len(Array)` | bound, unverified | etc/comptime.xlisp:123 | binding | unclassified generated/api | lib/array.x (interface) |
-| `List Array.list(Array arr)` | bound, unverified | etc/comptime.xlisp:137 | binding | primary/api | lib/list.x:463 |
+| `String Array.join(Array array, String separator)` | verified example | etc/comptime.xlisp:141 | binding | primary/api | lib/array.x:719 |
+| `size_t Array.len(Array)` | verified example | etc/comptime.xlisp:123 | binding | unclassified generated/api | lib/array.x (interface) |
+| `List Array.list(Array arr)` | verified example | etc/comptime.xlisp:137 | binding | primary/api | lib/list.x:463 |
 | `List Array.list_free(Array arr)` | no binding found | none found | ownership | primary/api | lib/list.x:472 |
 | `Array Array.map(Array array, Func func)` | verified example | etc/comptime.xlisp:140 | callback | primary/api | lib/array.x:459 |
 | `Array Array.map2(Array a, Array b, Func func)` | no binding found | none found | callback | primary/api | lib/array.x:476 |
-| `Array Array.new(void)` | bound, unverified | etc/comptime.xlisp:122 | binding | primary/api | lib/array.x:64 |
-| `void Array.pop(Array)` | verified example | etc/comptime.xlisp:352 | binding | unclassified generated/api | lib/array.x (interface) |
-| `Var Array.postfixindex(Array array, int index, Symbol op)` | verified example | etc/comptime.xlisp:348 | syntax | primary/api | lib/array.x:188 |
+| `Array Array.new(void)` | verified example | etc/comptime.xlisp:122 | binding | primary/api | lib/array.x:64 |
+| `void Array.pop(Array)` | verified example | etc/comptime.xlisp:360 | binding | unclassified generated/api | lib/array.x (interface) |
+| `Var Array.postfixindex(Array array, int index, Symbol op)` | verified example | etc/comptime.xlisp:356 | syntax | primary/api | lib/array.x:188 |
 | `Var Array.push(Array array, Var elem)` | verified example | etc/comptime.xlisp:124 | binding | primary/api | lib/array.x:213 |
-| `Var Array.remove(Array array, int index)` | bound, unverified | etc/comptime.xlisp:154 | binding | primary/api | lib/array.x:296 |
-| `Self Array.remslice(Self array, int start, int end)` | verified example | etc/comptime.xlisp:344 | binding | advanced/api | lib/array.x:375 |
-| `String Array.repr(Array array)` | bound, unverified | etc/comptime.xlisp:139 | binding | advanced/api | lib/array.x:761 |
-| `void Array.resize(Array arr, size_t size)` | verified example | etc/comptime.xlisp:353 | binding | primary/api | lib/array.x:71 |
-| `Self Array.reverse(Self array)` | verified example | etc/comptime.xlisp:324 | binding | primary/api | lib/array.x:448 |
-| `Var Array.setindex(Array array, int index, Var elem)` | bound, unverified | etc/comptime.xlisp:134 | binding | primary/api | lib/array.x:148 |
-| `Self Array.setslice(Self array, int start, int end, Self values)` | verified example | etc/comptime.xlisp:345 | binding | primary/api | lib/array.x:365 |
-| `Var Array.shift(Array array)` | bound, unverified | etc/comptime.xlisp:153 | binding | primary/api | lib/array.x:243 |
-| `Self Array.sort(Self array)` | verified example | etc/comptime.xlisp:326 | binding | primary/api | lib/array.x:539 |
+| `Var Array.remove(Array array, int index)` | verified example | etc/comptime.xlisp:154 | binding | primary/api | lib/array.x:296 |
+| `Self Array.remslice(Self array, int start, int end)` | verified example | etc/comptime.xlisp:352 | binding | advanced/api | lib/array.x:375 |
+| `String Array.repr(Array array)` | verified example | etc/comptime.xlisp:139 | binding | advanced/api | lib/array.x:761 |
+| `void Array.resize(Array arr, size_t size)` | verified example | etc/comptime.xlisp:361 | binding | primary/api | lib/array.x:71 |
+| `Self Array.reverse(Self array)` | verified example | etc/comptime.xlisp:332 | binding | primary/api | lib/array.x:448 |
+| `Var Array.setindex(Array array, int index, Var elem)` | verified example | etc/comptime.xlisp:134 | binding | primary/api | lib/array.x:148 |
+| `Self Array.setslice(Self array, int start, int end, Self values)` | verified example | etc/comptime.xlisp:353 | binding | primary/api | lib/array.x:365 |
+| `Var Array.shift(Array array)` | verified example | etc/comptime.xlisp:153 | binding | primary/api | lib/array.x:243 |
+| `Self Array.sort(Self array)` | verified example | etc/comptime.xlisp:334 | binding | primary/api | lib/array.x:539 |
 | `Self Array.sort_by(Self array, Func key)` | no binding found | none found | callback | primary/api | lib/array.x:605 |
 | `Self Array.sort_with(Self array, Func compare)` | no binding found | none found | callback | primary/api | lib/array.x:560 |
-| `Self Array.splice(Self array, int index, int remove_count, Self values)` | verified example | etc/comptime.xlisp:346 | binding | primary/api | lib/array.x:391 |
-| `String Array.str(Array array)` | bound, unverified | etc/comptime.xlisp:138 | binding | advanced/api | lib/array.x:744 |
-| `Var Array.take_last(Array array)` | bound, unverified | etc/comptime.xlisp:152 | binding | primary/api | lib/array.x:229 |
-| `void Array.truncate(Array, size_t)` | verified example | etc/comptime.xlisp:354 | binding | unclassified generated/api | lib/array.x (interface) |
-| `int Array.truth(Array)` | verified example | etc/comptime.xlisp:329 | syntax | unclassified generated/api | lib/array.x (interface) |
-| `int Array.try_next(Array array, int *cursor, Var *out)` | bound, unverified | etc/comptime.xlisp:103 | pointer | primary/api | lib/array.x:786 |
-| `Var Array.unshift(Array array, Var elem)` | bound, unverified | etc/comptime.xlisp:147 | binding | primary/api | lib/array.x:256 |
+| `Self Array.splice(Self array, int index, int remove_count, Self values)` | verified example | etc/comptime.xlisp:354 | binding | primary/api | lib/array.x:391 |
+| `String Array.str(Array array)` | verified example | etc/comptime.xlisp:138 | binding | advanced/api | lib/array.x:744 |
+| `Var Array.take_last(Array array)` | verified example | etc/comptime.xlisp:152 | binding | primary/api | lib/array.x:229 |
+| `void Array.truncate(Array, size_t)` | verified example | etc/comptime.xlisp:362 | binding | unclassified generated/api | lib/array.x (interface) |
+| `int Array.truth(Array)` | verified example | etc/comptime.xlisp:337 | syntax | unclassified generated/api | lib/array.x (interface) |
+| `int Array.try_next(Array array, int *cursor, Var *out)` | verified example | etc/comptime.xlisp:103 | pointer | primary/api | lib/array.x:786 |
+| `Var Array.unshift(Array array, Var elem)` | verified example | etc/comptime.xlisp:147 | binding | primary/api | lib/array.x:256 |
 | `Self Array.update_n(Self array, unsigned element_count, ...)` | no binding found | none found | pointer | advanced/api | lib/array.x:95 |
-| `Var Array.updateindex(Array array, int index, Symbol op, Var rhs)` | verified example | etc/comptime.xlisp:347 | syntax | primary/api | lib/array.x:168 |
-| `inline Var Array.var(Array x)` | bound, unverified | etc/comptime.xlisp:275 | binding | advanced/api | lib/common.x:526 |
+| `Var Array.updateindex(Array array, int index, Symbol op, Var rhs)` | verified example | etc/comptime.xlisp:355 | syntax | primary/api | lib/array.x:168 |
+| `inline Var Array.var(Array x)` | verified example | etc/comptime.xlisp:283 | binding | advanced/api | lib/common.x:526 |
 | `Buffer Array.write_repr(Array a, Buffer out)` | no binding found | none found | resource | advanced/api | lib/array.x:735 |
 | `Buffer Array.write_str(Array a, Buffer out)` | no binding found | none found | resource | primary/api | lib/array.x:741 |
 
@@ -692,7 +1388,7 @@ explicit checks before claiming runtime equivalence.
 | `Array.block` | lib/array.x / native Block contracts | native resource contract | Returns the same object as a `Block` view; no copy or transfer occurs. | The signature crosses Block handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/array.x's handle and effect contract for Array.block; add only a scoped native adapter after those obligations are specified. |
 | `Array.capacity` | lib/array.x / Array value operations | implementable with current values | Interface only; inspect the producer. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Array.capacity to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Array.cleanup` | lib/array.x / allocation and ownership contracts | native resource contract | Ends the owned lifetime when a managed local leaves its block. | The operation frees, allocates, observes or transfers storage/registry ownership that the evaluator currently owns. Define which session-owned objects Array.cleanup may observe or transfer; never alias a destructive native owner blindly. |
-| `Array.clear` | lib/array.x / mutations returning no value | implementable with current values | Interface only; inspect the producer. | The function mutates an existing represented object and returns no C value, not a Var containing void. Validate the existing binding against this contract. Next: Use an effect adapter for Array.clear; preserve mutation and return the evaluator's established statement result. |
+| `Array.clear` | lib/array.x / mutations returning no value | implementable with current values | Interface only; inspect the producer. | The function mutates an existing represented object and returns C void. The existing Func adapter returns Var.null for that C result. Validate the existing binding against this contract. Next: Reuse the generated native Func adapter for Array.clear; verify mutation and distinguish this return from a Var containing void. |
 | `Array.compare` | lib/array.x / Array value operations | implementable with current values | Compares `Array`s lexicographically with `Var.compare`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Array.compare to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Array.concat` | lib/array.x / Array value operations | implementable with current values | Returns a new `Array` holding the elements of `a` followed by those of `b`. Neither input is modified and the result is a fresh object. A null or empty `b` yields a copy of `a`. Raises: `<size-limit>` or `<alloc-fail>` when the result cannot be represented or allocated. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Array.concat to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Array.contains` | lib/array.x / Array value operations | implementable with current values | Returns nonzero when some element of `array` equals `value`. Uses the same linear search and structural `Var` equality as `Array.find`. Use a `Map` for frequent membership tests. Raises: `<size-limit>` when `array` exceeds the `INT_MAX` index limit that `Array.getindex` describes. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Array.contains to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
@@ -705,8 +1401,8 @@ explicit checks before claiming runtime equivalence.
 | `Array.getindex` | lib/array.x / absence and null values | needs representation decision | Returns the element at `index`, or `void` when `index` is out of range. This is what `array[index]` lowers to. A negative `index` counts from the end, so `-1` is the last element and `-array.len()` is the first. An index that still falls outside the array after that normalization yields `void`. | Missing values or null tests can distinguish runtime void, Null and empty List, which current transport can conflate. Validate the existing binding against this contract. Next: Apply the value-contract decision to Array.getindex; retain separate success, absence and empty-value probes. |
 | `Array.getslice` | lib/array.x / Array value operations | implementable with current values | Returns a new `Array` holding the elements `array[start:end:step]`. This is what `array[start:end:step]` lowers to; a part omitted from that literal form becomes the whole-array default. Negative bounds count from the end and a negative `step` walks backwards, normalized the same way `List` and `String` slicing normalize them, so the rules match across the three types. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Array.getslice to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Array.heap_pop` | lib/array.x / absence and null values | needs representation decision | Removes and returns the smallest element of `heap`, or `void` when it is empty. The remaining elements are re-heaped in O(log n), so repeated calls yield ascending order and draining a heap is a sort. An `Array` that never satisfied the heap invariant gives a meaningless answer instead of an error. Call `Array.heapify` first if it was not built with `Array.heap_push`. Raises: any cause reported by element comparison while restoring the heap. The heap may already have removed its root when a catch receives the error. | Missing values or null tests can distinguish runtime void, Null and empty List, which current transport can conflate. Apply the value-contract decision to Array.heap_pop; retain separate success, absence and empty-value probes. |
-| `Array.heap_push` | lib/array.x / mutations returning no value | implementable with current values | Adds `val` to `heap`, an `Array` maintained as a binary min-heap. The heap operations arrange an `Array` as a priority queue in place, with no second data structure and no extra allocation. The elements stay in the `Array` with the smallest at index 0. Ordering is `Var.compare`, the same rule `Array.sort` uses. | The function mutates an existing represented object and returns no C value, not a Var containing void. Validate the existing binding against this contract. Next: Use an effect adapter for Array.heap_push; preserve mutation and return the evaluator's established statement result. |
-| `Array.heapify` | lib/array.x / mutations returning no value | implementable with current values | Rearranges `heap` in place so that it satisfies the min-heap invariant. Use this before the first `Array.heap_pop` on an `Array` that was built by `Array.push`, read in from somewhere else, or disturbed by a positional operation. It is O(n), cheaper than pushing the same elements one at a time. Raises: `<size-limit>` when `heap` exceeds the `INT_MAX` index limit that `Array.getindex` describes, or a cause from element comparison. Comparison failure may leave a partially rearranged `Array`. | The function mutates an existing represented object and returns no C value, not a Var containing void. Validate the existing binding against this contract. Next: Use an effect adapter for Array.heapify; preserve mutation and return the evaluator's established statement result. |
+| `Array.heap_push` | lib/array.x / mutations returning no value | implementable with current values | Adds `val` to `heap`, an `Array` maintained as a binary min-heap. The heap operations arrange an `Array` as a priority queue in place, with no second data structure and no extra allocation. The elements stay in the `Array` with the smallest at index 0. Ordering is `Var.compare`, the same rule `Array.sort` uses. | The function mutates an existing represented object and returns C void. The existing Func adapter returns Var.null for that C result. Validate the existing binding against this contract. Next: Reuse the generated native Func adapter for Array.heap_push; verify mutation and distinguish this return from a Var containing void. |
+| `Array.heapify` | lib/array.x / mutations returning no value | implementable with current values | Rearranges `heap` in place so that it satisfies the min-heap invariant. Use this before the first `Array.heap_pop` on an `Array` that was built by `Array.push`, read in from somewhere else, or disturbed by a positional operation. It is O(n), cheaper than pushing the same elements one at a time. Raises: `<size-limit>` when `heap` exceeds the `INT_MAX` index limit that `Array.getindex` describes, or a cause from element comparison. Comparison failure may leave a partially rearranged `Array`. | The function mutates an existing represented object and returns C void. The existing Func adapter returns Var.null for that C result. Validate the existing binding against this contract. Next: Reuse the generated native Func adapter for Array.heapify; verify mutation and distinguish this return from a Var containing void. |
 | `Array.indexof` | lib/array.x / Array value operations | implementable with current values | Returns `Array.find(array, value)`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Array.indexof to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Array.insert` | lib/array.x / Array value operations | implementable with current values | Inserts `elem` at `index` and returns it, or `void` when out of range. Elements at and after `index` move up one position. An insertion may also land past the last element, so the accepted range is one wider than for reading. `index` may equal `array.len()`, which appends. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Array.insert to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Array.iter` | lib/array.x / native iterator state | needs representation decision | Initializes `dest` as an iterator over the elements of `x`. The caller owns the storage: declare a `struct Iter` and pass its address. The return value is that same `dest`, or `NULL` when `dest` is null, as in every iterator constructor in the library. `foreach (Var item, array)` uses this, and the lazy combinators start here. | Iter contains caller-owned state and a native next callback; collection producers are lazy. Give Array.iter real bounded Iter storage and lifetime; preserve source mutation and exhaustion semantics. |
@@ -717,13 +1413,13 @@ explicit checks before claiming runtime equivalence.
 | `Array.map` | lib/array.x / Array interpreted callbacks | needs callback adapter | Returns a new `Array` holding `func` applied to each element of `array`. `array` itself is untouched, and elements are passed as values. An empty input returns a fresh empty `Array` without invoking or checking `func`. The callback is invoked front to back and is not retained. It must not mutate `array` while the walk is in progress; `Func` rejects a `void` result. Raises: whatever `Func.apply` or `func` raises, or an allocation cause while constructing the result. The partial result is freed. | The runtime takes native Func while meta closures are evaluator callables. Validate the existing binding against this contract. Next: Use Lisp.apply through a reusable Func context for Array.map; check its documented callback order, null callback and empty-input cases. |
 | `Array.map2` | lib/array.x / Array interpreted callbacks | needs callback adapter | Maps `func` over corresponding elements up to the shorter `Array`. The callback receives left then right, runs front to back, and is not retained. An empty input does not invoke or check it; neither input may be structurally mutated during the walk. Raises: whatever `Func.apply` or `func` raises, or an allocation cause while constructing the result. The partial result is freed. | The runtime takes native Func while meta closures are evaluator callables. Use Lisp.apply through a reusable Func context for Array.map2; check its documented callback order, null callback and empty-input cases. |
 | `Array.new` | lib/array.x / Array value operations | implementable with current values | Returns a fresh empty `Array` with its own identity. The literal `%[]` calls this constructor. Test emptiness with `Array.len`. Raises: `<alloc-fail>` if the backing `Block` cannot be allocated. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Array.new to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Array.pop` | lib/array.x / mutations returning no value | implementable with current values | Interface only; inspect the producer. | The function mutates an existing represented object and returns no C value, not a Var containing void. Validate the existing binding against this contract. Next: Use an effect adapter for Array.pop; preserve mutation and return the evaluator's established statement result. |
+| `Array.pop` | lib/array.x / mutations returning no value | implementable with current values | Interface only; inspect the producer. | The function mutates an existing represented object and returns C void. The existing Func adapter returns Var.null for that C result. Validate the existing binding against this contract. Next: Reuse the generated native Func adapter for Array.pop; verify mutation and distinguish this return from a Var containing void. |
 | `Array.postfixindex` | lib/array.x / explicit syntax operations | implementable with current values | Applies postfix `Array` element increment or decrement. The returned value is the original element. The slot remains unchanged if the index or operation is invalid. Raises: `<bad-arg>` for a null `Array` or invalid index, `<size-limit>` when its length cannot be indexed, or any cause from `Var.postfix`. The element is unchanged on failure. | Syntax lowering exists separately; it does not install this explicitly named method. Validate the existing binding against this contract. Next: Bind Array.postfixindex's native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results. |
 | `Array.push` | lib/array.x / Array value operations | implementable with current values | Appends `elem` to the end of `array` and returns it. Returning the appended value lets a push be used directly in another expression. The array grows as needed; capacity is an implementation detail. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Array.push to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Array.remove` | lib/array.x / absence and null values | needs representation decision | Removes and returns the element at `index`, or `void` when out of range. Elements after `index` move down one position, so this is O(n) unless `index` is the last one. Negative indices count from the end as in `Array.getindex`, so `-1` removes the last element. `Array.insert` uses a different rule. An empty array yields `void`. Raises: `<size-limit>` when `array` exceeds the `INT_MAX` index limit that `Array.getindex` describes. | Missing values or null tests can distinguish runtime void, Null and empty List, which current transport can conflate. Validate the existing binding against this contract. Next: Apply the value-contract decision to Array.remove; retain separate success, absence and empty-value probes. |
 | `Array.remslice` | lib/array.x / Array value operations | implementable with current values | Removes the region `array[start:end]` and returns a fresh `Array`. Bounds are normalized the way that slice normalizes them, so a negative `end` is a stop. A reversed pair is swapped. Allocation or size failure occurs before `array` is changed. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Array.remslice to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Array.repr` | lib/array.x / Array value operations | implementable with current values | Returns the readable `[ a, b, c ]` representation of `array`. Each element is rendered with its own `repr`, so `String`s appear quoted and `Symbol`s in angle brackets. The result is for reading and for diagnostics; unlike the `List` reader syntax it does not round-trip back through a parser. An empty `Array` renders as `[ ]`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Array.repr to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Array.resize` | lib/array.x / mutations returning no value | implementable with current values | Resizes `arr`, truncating or appending `Null` elements as needed. Raises: `<size-limit>` when `size` exceeds the `Array` index domain, plus any cause from `Block` growth. Allocation and size failure do not return here. A growth failure leaves the length and existing elements unchanged. | The function mutates an existing represented object and returns no C value, not a Var containing void. Validate the existing binding against this contract. Next: Use an effect adapter for Array.resize; preserve mutation and return the evaluator's established statement result. |
+| `Array.resize` | lib/array.x / mutations returning no value | implementable with current values | Resizes `arr`, truncating or appending `Null` elements as needed. Raises: `<size-limit>` when `size` exceeds the `Array` index domain, plus any cause from `Block` growth. Allocation and size failure do not return here. A growth failure leaves the length and existing elements unchanged. | The function mutates an existing represented object and returns C void. The existing Func adapter returns Var.null for that C result. Validate the existing binding against this contract. Next: Reuse the generated native Func adapter for Array.resize; verify mutation and distinguish this return from a Var containing void. |
 | `Array.reverse` | lib/array.x / Array value operations | implementable with current values | Reverses `array` in place and returns that same `Array`. To preserve the original order, slice with a negative step (`array[::-1]`), which builds a fresh `Array`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Array.reverse to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Array.setindex` | lib/array.x / Array value operations | implementable with current values | Stores `elem` at `index` and returns it, or `void` when out of range. This is what `array[index] = elem` lowers to. Negative indices count from the end as in `Array.getindex`. An out-of-range index changes nothing and is reported by the `void` result. `setindex` never grows the array; use `Array.push` or `Array.insert` to add an element. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Array.setindex to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Array.setslice` | lib/array.x / Array value operations | implementable with current values | Replaces the region `array[start:end]` with the elements of `values` and returns `array`. The replacement need not match the length of the region it replaces. The array grows or shrinks and the tail moves to fit. A null or empty `values` deletes the region, and an empty region inserts. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Array.setslice to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
@@ -734,11 +1430,11 @@ explicit checks before claiming runtime equivalence.
 | `Array.splice` | lib/array.x / Array value operations | implementable with current values | Replaces `remove_count` elements at `index` with `values` and returns what was removed. The returned `Array` is fresh and holds the removed region in order. `index` is normalized as a slice bound, so a negative value counts from the end and a value past the end clamps to it. A `remove_count` of zero or less removes nothing, making `splice` an insertion; a null `values` makes it a deletion. Raises: `<size-limit>` when either `Array` or the result cannot be represented, or `<alloc-fail>` while copying or growing. These failures leave `array` unchanged. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Array.splice to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Array.str` | lib/array.x / Array value operations | implementable with current values | Returns an `Array` display `String` using each element's `str`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Array.str to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Array.take_last` | lib/array.x / absence and null values | needs representation decision | Takes and returns the last element of `array`, or `void` if it is empty. With `Array.push` this makes a stack. Both work at the end of the array, move no other elements, and are amortized O(1). Capacity is retained after taking the element, so taking and pushing again does not reallocate. | Missing values or null tests can distinguish runtime void, Null and empty List, which current transport can conflate. Validate the existing binding against this contract. Next: Apply the value-contract decision to Array.take_last; retain separate success, absence and empty-value probes. |
-| `Array.truncate` | lib/array.x / mutations returning no value | implementable with current values | Interface only; inspect the producer. | The function mutates an existing represented object and returns no C value, not a Var containing void. Validate the existing binding against this contract. Next: Use an effect adapter for Array.truncate; preserve mutation and return the evaluator's established statement result. |
+| `Array.truncate` | lib/array.x / mutations returning no value | implementable with current values | Interface only; inspect the producer. | The function mutates an existing represented object and returns C void. The existing Func adapter returns Var.null for that C result. Validate the existing binding against this contract. Next: Reuse the generated native Func adapter for Array.truncate; verify mutation and distinguish this return from a Var containing void. |
 | `Array.truth` | lib/array.x / explicit syntax operations | implementable with current values | Interface only; inspect the producer. | Syntax lowering exists separately; it does not install this explicitly named method. Validate the existing binding against this contract. Next: Bind Array.truth's native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results. |
 | `Array.try_next` | lib/array.x / status and output cells | implementable with current values | Writes the next element, advances `cursor`, and returns one. Initialize the caller-owned cursor to zero. A null `Array`, a null pointer, a negative cursor, or exhaustion returns zero without changing `cursor` or `out`. Structural mutation invalidates an outstanding cursor. | The status result can separate success from absence while a compiler local cell carries the output. Validate the existing binding against this contract. Next: Wrap Array.try_next with native temporary outputs and C.store only on success; test untouched outputs on failure. |
 | `Array.unshift` | lib/array.x / Array value operations | implementable with current values | Inserts `elem` at the front of `array` and returns it. Existing elements move up one position, so this is O(n); `Array.push` is the amortized O(1) end of the array. Returning `elem` lets an unshift be used directly in another expression, as `Array.push` does. Raises: `<void-op>` when `elem` is `void`, or `<size-limit>` when the `Array` cannot grow within its index domain, or `<alloc-fail>` when storage cannot grow. These failures leave `array` unchanged. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Array.unshift to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Array.update_n` | lib/array.x / native variadic calls | needs bounded probe | Appends exactly `element_count` variadic values to `array`. Values appended before a later `<void-op>`, `<size-limit>`, or `<alloc-fail>` remain in `array`. The caller must supply that many `Var` arguments. | Native ellipsis arguments have no fixed Func adapter signature. Inspect Array.update_n's count/format owner and prototype a List/rest adapter preserving argument count, type and order. |
+| `Array.update_n` | lib/array.x / native variadic calls | needs bounded probe | Appends exactly `element_count` variadic values to `array`. Values appended before a later `<void-op>`, `<size-limit>`, or `<alloc-fail>` remain in `array`. The caller must supply that many `Var` arguments. | The count bounds exactly how many variadic values or pairs are consumed; argument evaluation, shared tails and partial mutations are observable. Prototype a counted List/rest bridge for Array.update_n reusing append/push/set owners; verify zero/excess counts, shared tails or partial mutation, and true-void rejection. |
 | `Array.updateindex` | lib/array.x / explicit syntax operations | implementable with current values | Updates one `Array` element in place. The index is normalized once, including negative indexing, and the element slot is delegated to `Var.update`. The stored `Var` tag is therefore preserved and the slot remains unchanged on failure. Raises: `<bad-arg>` for a null `Array` or invalid index, `<size-limit>` when its length cannot be indexed, `<void-op>` for a `void` right operand, or any cause from `Var.update`. These failures leave the element unchanged . | Syntax lowering exists separately; it does not install this explicitly named method. Validate the existing binding against this contract. Next: Bind Array.updateindex's native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results. |
 | `Array.var` | lib/common.x / Array value operations | implementable with current values | Boxes an `Array` value as `Var`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Array.var to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Array.write_repr` | lib/array.x / native Buffer contracts | native resource contract | Appends the readable `Array` representation to `out`. | The signature crosses Buffer handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/array.x's handle and effect contract for Array.write_repr; add only a scoped native adapter after those obligations are specified. |
@@ -747,79 +1443,310 @@ explicit checks before claiming runtime equivalence.
 ### Evaluated cases
 
 - `Array.capacity`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; return a.capacity() >= a.len(); }
+```
+
 - `Array.clear`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; a.clear(); a.push(3); return a.list().equal(%(3)); }
+```
+
 - `Array.compare`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; Array b = [1, 3]; return a.compare(b) < 0; }
+```
+
 - `Array.concat`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1]; Array b = [2]; Array c = a.concat(b); return c.list().equal(%(1 2)) && a.len() == 1 && b.len() == 1 && !(a === c); }
+```
+
 - `Array.concat`: fresh concatenation with native size conversion; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1]; Array b = [2]; Array c = a.concat(b); return c.list().equal(%(1 2)) && (int) a.len() == 1 && (int) b.len() == 1 && !(a === c); }
+```
+
+- `Array.contains`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; return a.contains(2) && !a.contains(3); }
+```
+
 - `Array.copy`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; Array b = a.copy(); b[0] = 9; return a[0] == 1 && b[0] == 9 && !(a === b); }
+```
+
+- `Array.count`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2, 1]; return a.count(1) == 2 && a.count(3) == 0; }
+```
+
 - `Array.equal`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; Array b = [1, 2]; return a.equal(b) && !(a === b); }
+```
+
+- `Array.find`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2, 1]; return a.find(1) == 0 && a.find(3) == -1; }
+```
+
+- `Array.getindex`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; return a.getindex(-1) == 2; }
+```
+
 - `Array.getslice`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [0, 1, 2, 3]; Array b = a.getslice(3, 0, -2); return b.list().equal(%(3 1)) && !(a === b); }
+```
+
 - `Array.heap_push`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = []; a.heap_push(3); a.heap_push(1); a.heap_push(2); return a[0] == 1 && a.len() == 3; }
+```
+
 - `Array.heapify`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [3, 1, 2]; a.heapify(); return a[0] == 1 && a.len() == 3; }
+```
+
 - `Array.indexof`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2, 1]; return a.indexof(1) == 0 && a.indexof(9) == -1; }
+```
+
+- `Array.insert`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; return a.insert(-1, 3) == 3 && a.list().equal(%(1 2 3)); }
+```
+
+- `Array.join`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = ["a", "b"]; return a.join(":").equal("a:b"); }
+```
+
+- `Array.len`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; return a.len() == 2; }
+```
+
+- `Array.list`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; List xs = a.list(); a[0] = 7; return xs.equal(%(1 2)); }
+```
+
 - `Array.map`: interpreted callback; returned 3.
+
+```x2c
+meta int audit_probe(void) { Array xs = [1, 2]; Array ys = xs.map(%!(x) => x + 1); return ys[1]; }
+```
+
+- `Array.new`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = Array.new(), b = Array.new(); return a.len() == 0 && !(a === b); }
+```
+
 - `Array.pop`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; a.pop(); return a.list().equal(%(1)); }
+```
+
 - `Array.postfixindex`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; return a.postfixindex(-1, <++>) == 2 && a[1] == 3; }
+```
+
 - `Array.push`: append and read; returned 7.
+
+```x2c
+meta int audit_probe(void) { Array xs = []; xs.push(7); return xs[0]; }
+```
+
+- `Array.remove`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; return a.remove(-1) == 2 && a.list().equal(%(1)); }
+```
+
 - `Array.remslice`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [0, 1, 2, 3]; Array removed = a.remslice(1, 3); return !(removed === a) && removed.list().equal(%(1 2)) && a.list().equal(%(0 3)); }
+```
+
+- `Array.repr`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; return a.repr().contains("1") && a.repr().contains("2"); }
+```
+
 - `Array.resize`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1]; a.resize(3); Var v = a[2]; a.resize(1); return v.is_null() && a.list().equal(%(1)); }
+```
+
 - `Array.reverse`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2, 3]; Array b = a.reverse(); return a === b && a.list().equal(%(3 2 1)); }
+```
+
+- `Array.setindex`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; return a.setindex(-1, 7) == 7 && a[1] == 7; }
+```
+
 - `Array.setslice`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [0, 1, 2]; Array b = [8, 9]; return a.setslice(1, 2, b) === a && a.list().equal(%(0 8 9 2)); }
+```
+
+- `Array.shift`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; return a.shift() == 1 && a.list().equal(%(2)); }
+```
+
 - `Array.sort`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [3, 1, 2]; Array b = a.sort(); return a === b && a.list().equal(%(1 2 3)); }
+```
+
 - `Array.splice`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [0, 1, 2]; Array b = [8]; Array removed = a.splice(1, 1, b); return removed.list().equal(%(1)) && !(removed === a) && a.list().equal(%(0 8 2)); }
+```
+
+- `Array.str`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; return a.str().contains("1") && a.str().contains("2"); }
+```
+
+- `Array.take_last`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; return a.take_last() == 2 && a.list().equal(%(1)); }
+```
+
 - `Array.truncate`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2, 3]; a.truncate(1); return a.list().equal(%(1)); }
+```
+
 - `Array.truth`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = []; Array b = [1]; return !a.truth() && b.truth(); }
+```
+
 - `Array.truth`: explicit empty-array method; returned 0.
+
+```x2c
+meta int audit_probe(void) { Array xs = []; return xs.truth(); }
+```
+
+- `Array.try_next`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [7]; int cursor = 0; Var value = 0; int first = a.try_next(&cursor, &value); int last = a.try_next(&cursor, &value); return first == 1 && last == 0 && value == 7 && cursor == 1; }
+```
+
+- `Array.unshift`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; return a.unshift(7) == 7 && a.list().equal(%(7 1 2)); }
+```
+
 - `Array.updateindex`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1, 2]; return a.updateindex(-1, <+>, 3) == 5 && a[1] == 5; }
+```
+
+- `Array.var`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1]; return a.var().tag() == <array> && a.var().array() === a; }
+```
+
 
 ## Map
 
-**verified example:** `compare`, `copy`, `equal`, `merge`, `new_capacity`, `postfixindex`, `set`, `setindex`, `truth`, `updateindex`.
+**verified example:** `compare`, `contains`, `copy`, `del`, `equal`, `get`, `getdefault`, `getindex`, `len`, `list`, `merge`, `new`, `new_capacity`, `postfixindex`, `repr`, `set`, `setdefault`, `setindex`, `str`, `truth`, `try_next`, `updateindex`, `var`.
 
 **reproduced failure:** `keys`.
-
-**bound, unverified:** `contains`, `del`, `get`, `getdefault`, `getindex`, `len`, `list`, `new`, `repr`, `setdefault`, `str`, `try_next`, `var`.
 
 **no binding found:** `cleanup`, `enumerate`, `export_to`, `get_hashed`, `iter`, `mapintint`, `maplongdouble`, `mapstringint`, `mapstringstring`, `try_del`, `try_get`, `update_n`, `write_repr`, `write_str`.
 
 | Direct callable | State | Binding provenance | Considerations | Tier/module | Source |
 | --- | --- | --- | --- | --- | --- |
 | `void Map.cleanup(Map value)` | no binding found | none found | ownership | primary/api | lib/map.x:722 |
-| `int Map.compare(Map a, Map b)` | verified example | etc/comptime.xlisp:332 | binding | advanced/api | lib/map.x:565 |
-| `int Map.contains(Map m, Var key)` | bound, unverified | etc/comptime.xlisp:182 | binding | primary/api | lib/map.x:284 |
-| `Self Map.copy(Self map)` | verified example | etc/comptime.xlisp:330 | binding | primary/api | lib/map.x:445 |
-| `Var Map.del(Map map, Var key)` | bound, unverified | etc/comptime.xlisp:184 | binding | compatibility/api | lib/map.x:405 |
+| `int Map.compare(Map a, Map b)` | verified example | etc/comptime.xlisp:340 | binding | advanced/api | lib/map.x:565 |
+| `int Map.contains(Map m, Var key)` | verified example | etc/comptime.xlisp:182 | binding | primary/api | lib/map.x:284 |
+| `Self Map.copy(Self map)` | verified example | etc/comptime.xlisp:338 | binding | primary/api | lib/map.x:445 |
+| `Var Map.del(Map map, Var key)` | verified example | etc/comptime.xlisp:184 | binding | compatibility/api | lib/map.x:405 |
 | `Iter Map.enumerate(Map x, Iter dest)` | no binding found | none found | resource | primary/api | lib/map.x:648 |
-| `int Map.equal(Map map1, Map map2)` | verified example | etc/comptime.xlisp:333 | binding | advanced/api | lib/map.x:663 |
+| `int Map.equal(Map map1, Map map2)` | verified example | etc/comptime.xlisp:341 | binding | advanced/api | lib/map.x:663 |
 | `void Map.export_to( Map map, Context source, VarExportContextFn export_value, Scope *scope)` | no binding found | none found | ownership, resource, pointer, internal | internal/api | lib/map.x:464 |
-| `Var Map.get(Map map, Var key)` | bound, unverified | etc/comptime.xlisp:177 | binding | compatibility/api | lib/map.x:204 |
+| `Var Map.get(Map map, Var key)` | verified example | etc/comptime.xlisp:177 | binding | compatibility/api | lib/map.x:204 |
 | `Var Map.get_hashed(Map map, Var key, unsigned key_hash)` | no binding found | none found | binding | primary/api | lib/map.x:234 |
-| `Var Map.getdefault(Map map, Var key, Var defval)` | bound, unverified | etc/comptime.xlisp:185 | binding | primary/api | lib/map.x:247 |
-| `Var Map.getindex(Map map, Var key)` | bound, unverified | etc/comptime.xlisp:180 | binding | compatibility/api | lib/map.x:223 |
+| `Var Map.getdefault(Map map, Var key, Var defval)` | verified example | etc/comptime.xlisp:185 | binding | primary/api | lib/map.x:247 |
+| `Var Map.getindex(Map map, Var key)` | verified example | etc/comptime.xlisp:180 | binding | compatibility/api | lib/map.x:223 |
 | `Iter Map.iter(Map x, Iter dest)` | no binding found | none found | resource | primary/api | lib/map.x:613 |
 | `Iter Map.keys(Map x, Iter dest)` | reproduced failure | none found | resource | primary/api | lib/map.x:628 |
-| `unsigned Map.len(Map map)` | bound, unverified | etc/comptime.xlisp:176 | binding | primary/api | lib/map.x:148 |
-| `List Map.list(Map map)` | bound, unverified | etc/comptime.xlisp:187 | binding | primary/api | lib/list.x:484 |
+| `unsigned Map.len(Map map)` | verified example | etc/comptime.xlisp:176 | binding | primary/api | lib/map.x:148 |
+| `List Map.list(Map map)` | verified example | etc/comptime.xlisp:187 | binding | primary/api | lib/list.x:484 |
 | `MapIntInt Map.mapintint(Map entries)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:280 |
 | `MapLongDouble Map.maplongdouble(Map entries)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:300 |
 | `MapStringInt Map.mapstringint(Map entries)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:358 |
 | `MapStringString Map.mapstringstring(Map entries)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:321 |
-| `Self Map.merge(Self map, Self other)` | verified example | etc/comptime.xlisp:331 | binding | primary/api | lib/map.x:512 |
-| `Map Map.new(void)` | bound, unverified | etc/comptime.xlisp:175 | binding | primary/api | lib/map.x:139 |
-| `Map Map.new_capacity(unsigned capacity)` | verified example | etc/comptime.xlisp:355 | internal | internal/api | lib/map.x:114 |
-| `Var Map.postfixindex(Map map, Var key, Symbol op)` | verified example | etc/comptime.xlisp:357 | syntax | primary/api | lib/map.x:375 |
-| `String Map.repr(Map map)` | bound, unverified | etc/comptime.xlisp:189 | binding | advanced/api | lib/map.x:715 |
-| `void Map.set(Map map, Var key, Var val)` | verified example | etc/comptime.xlisp:358 | binding | primary/api | lib/map.x:316 |
-| `Var Map.setdefault(Map map, Var key, Var defval)` | bound, unverified | etc/comptime.xlisp:186 | binding | primary/api | lib/map.x:268 |
+| `Self Map.merge(Self map, Self other)` | verified example | etc/comptime.xlisp:339 | binding | primary/api | lib/map.x:512 |
+| `Map Map.new(void)` | verified example | etc/comptime.xlisp:175 | binding | primary/api | lib/map.x:139 |
+| `Map Map.new_capacity(unsigned capacity)` | verified example | etc/comptime.xlisp:363 | internal | internal/api | lib/map.x:114 |
+| `Var Map.postfixindex(Map map, Var key, Symbol op)` | verified example | etc/comptime.xlisp:365 | syntax | primary/api | lib/map.x:375 |
+| `String Map.repr(Map map)` | verified example | etc/comptime.xlisp:189 | binding | advanced/api | lib/map.x:715 |
+| `void Map.set(Map map, Var key, Var val)` | verified example | etc/comptime.xlisp:366 | binding | primary/api | lib/map.x:316 |
+| `Var Map.setdefault(Map map, Var key, Var defval)` | verified example | etc/comptime.xlisp:186 | binding | primary/api | lib/map.x:268 |
 | `Var Map.setindex(Map map, Var key, Var val)` | verified example | etc/comptime.xlisp:181 | binding | primary/api | lib/map.x:328 |
-| `String Map.str(Map map)` | bound, unverified | etc/comptime.xlisp:188 | binding | advanced/api | lib/map.x:695 |
-| `int Map.truth(Map map)` | verified example | etc/comptime.xlisp:334 | syntax | primary/api | lib/map.x:550 |
+| `String Map.str(Map map)` | verified example | etc/comptime.xlisp:188 | binding | advanced/api | lib/map.x:695 |
+| `int Map.truth(Map map)` | verified example | etc/comptime.xlisp:342 | syntax | primary/api | lib/map.x:550 |
 | `int Map.try_del(Map map, Var key, Var *out)` | no binding found | none found | pointer | primary/api | lib/map.x:395 |
 | `int Map.try_get(Map map, Var key, Var *out)` | no binding found | none found | pointer | primary/api | lib/map.x:178 |
-| `int Map.try_next(Map map, unsigned *cursor, Var *key, Var *val)` | bound, unverified | etc/comptime.xlisp:113 | pointer | primary/api | lib/map.x:544 |
+| `int Map.try_next(Map map, unsigned *cursor, Var *key, Var *val)` | verified example | etc/comptime.xlisp:113 | pointer | primary/api | lib/map.x:544 |
 | `Self Map.update_n(Self map, unsigned pair_count, ...)` | no binding found | none found | pointer | advanced/api | lib/map.x:418 |
-| `Var Map.updateindex(Map map, Var key, Symbol op, Var rhs)` | verified example | etc/comptime.xlisp:356 | syntax | primary/api | lib/map.x:351 |
-| `inline Var Map.var(Map x)` | bound, unverified | etc/comptime.xlisp:276 | binding | advanced/api | lib/common.x:539 |
+| `Var Map.updateindex(Map map, Var key, Symbol op, Var rhs)` | verified example | etc/comptime.xlisp:364 | syntax | primary/api | lib/map.x:351 |
+| `inline Var Map.var(Map x)` | verified example | etc/comptime.xlisp:284 | binding | advanced/api | lib/common.x:539 |
 | `Buffer Map.write_repr(Map map, Buffer out)` | no binding found | none found | resource | advanced/api | lib/map.x:672 |
 | `Buffer Map.write_str(Map map, Buffer out)` | no binding found | none found | resource | primary/api | lib/map.x:682 |
 
@@ -852,7 +1779,7 @@ explicit checks before claiming runtime equivalence.
 | `Map.new_capacity` | lib/map.x / Map value operations | implementable with current values | Returns a fresh empty `Map` with exactly `capacity` slots. `Pool` uses this internal constructor to reuse a previous child's proven power-of-two table size. `capacity` must be a power of two of at least two. The public constructor is `Map.new`. Raises: `<bad-arg>` when `capacity` is not a valid table capacity, or `<alloc-fail>` / `<size-limit>` when initial storage cannot be allocated. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Map.new_capacity to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Map.postfixindex` | lib/map.x / explicit syntax operations | implementable with current values | Applies postfix increment or decrement to one existing `Map` value. The key is looked up once and the original value is returned. A missing key is not inserted. Raises: `<bad-arg>` for a null `Map` or missing key, `<void-op>` for a `void` key, a custom key callback cause, or any cause from `Var.postfix`. These failures leave the existing value unchanged. | Syntax lowering exists separately; it does not install this explicitly named method. Validate the existing binding against this contract. Next: Bind Map.postfixindex's native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results. |
 | `Map.repr` | lib/map.x / Map value operations | implementable with current values | Returns the readable `{ key: value, ... }` representation of `map`. Keys and values are rendered with their own `repr`, so `String`s appear quoted and `Symbol`s in angle brackets. Entries appear in hash-slot order, which keeps the entry order stable only while that table remains unchanged; separately built `Map`s may use a different order. Use `Map.equal` to compare contents. An empty `Map` renders as `{ }`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Map.repr to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Map.set` | lib/map.x / mutations returning no value | implementable with current values | Stores `val` under `key`, replacing any value already there. A `void` key or value raises. That refusal is what makes `void` usable as the missing-key answer everywhere else in this module. Raw `Null` is `Map` data on either side. | The function mutates an existing represented object and returns no C value, not a Var containing void. Validate the existing binding against this contract. Next: Use an effect adapter for Map.set; preserve mutation and return the evaluator's established statement result. |
+| `Map.set` | lib/map.x / mutations returning no value | implementable with current values | Stores `val` under `key`, replacing any value already there. A `void` key or value raises. That refusal is what makes `void` usable as the missing-key answer everywhere else in this module. Raw `Null` is `Map` data on either side. | The function mutates an existing represented object and returns C void. The existing Func adapter returns Var.null for that C result. Validate the existing binding against this contract. Next: Reuse the generated native Func adapter for Map.set; verify mutation and distinguish this return from a Var containing void. |
 | `Map.setdefault` | lib/map.x / Map value operations | implementable with current values | Returns the value stored under `key`, inserting `defval` first when the key is absent. Lookup and insertion share one Robin Hood probe. When insertion occurs, `Map.len` grows and an outstanding `Map.try_next` cursor is invalidated. `key` may not be `void`, and `defval` may not be `void` when it must be inserted; an existing-key read never stores or validates the fallback. Use `Map.getdefault` when the fallback should not be stored. Allocation, validation, and callback failures do not insert a pair, although capacity and traversal order may change if growth finished before a retrying key callback transferred. An `<invariant>` raised after Robin Hood displacement begins does not promise rollback. Raises: `<void-op>` when `key` is `void`, or when the key is absent and `defval` is `void`; `<bad-arg>` for a null `Map`; `<size-limit>`, `<alloc-fail>`, or `<invariant>` while inserting; or a cause raised by custom key hashing or equality. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Map.setdefault to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Map.setindex` | lib/map.x / Map value operations | implementable with current values | Stores `val` under `key` and returns `val` as the expression result. This is what `map[key] = val` lowers to. The storing half is `Map.set`, including its rejection of a `void` key or value and its invalidation of outstanding cursors whenever a new key is inserted. Raises: `<bad-arg>` for a null `Map`, `<void-op>` when `key` or `val` is `void`; `<size-limit>`, `<alloc-fail>`, or `<invariant>` while inserting; or a cause raised by custom key hashing or equality. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Map.setindex to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Map.str` | lib/map.x / Map value operations | implementable with current values | Returns the display `String` of `map`. Any empty `Map` renders as `{ }`, one space narrower than the `{ }` that `Map.repr` gives for the same `Map`. The test is `Map.truth`, so emptiness selects it, not null. Nonempty entries appear in bucket order and use their display forms. Raises: `<alloc-fail>` or `<size-limit>` while constructing the result, or a cause raised while rendering an entry. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Map.str to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
@@ -860,7 +1787,7 @@ explicit checks before claiming runtime equivalence.
 | `Map.try_del` | lib/map.x / status and output cells | implementable with current values | Removes `key`, writes the value it held to `out`, and returns nonzero when the key was present. Removal with a status result, symmetric with `Map.try_get`. `out` is untouched when the key is absent, and a null `map` or `out` reports absence rather than failing. | The status result can separate success from absence while a compiler local cell carries the output. Wrap Map.try_del with native temporary outputs and C.store only on success; test untouched outputs on failure. |
 | `Map.try_get` | lib/map.x / status and output cells | implementable with current values | Writes the value stored under `key` to `out` and returns nonzero when the key is present. Prefer this form. It reports presence separately from the payload, so it stays correct for every storable value, raw `Null` included. `out` is left untouched when the key is absent, and a null `map` or a null `out` reports absence rather than failing. | The status result can separate success from absence while a compiler local cell carries the output. Wrap Map.try_get with native temporary outputs and C.store only on success; test untouched outputs on failure. |
 | `Map.try_next` | lib/map.x / status and output cells | implementable with current values | Yields the next occupied entry at or after `cursor`, advances it, and returns nonzero while entries remain. The cursor belongs to the caller: declare an `unsigned`, initialize it to zero, and pass its address. Status comes back separately from `key` and `val`, so an entry may hold raw `Null` on either side without that looking like exhaustion, and the outputs are left untouched once the walk is done. | The status result can separate success from absence while a compiler local cell carries the output. Validate the existing binding against this contract. Next: Wrap Map.try_next with native temporary outputs and C.store only on success; test untouched outputs on failure. |
-| `Map.update_n` | lib/map.x / native variadic calls | needs bounded probe | Adds exactly `pair_count` key/value pairs to `map` in argument order. Arguments alternate `Var` keys and values. A null `Map` returns NULL without reading them. Each completed pair remains if a later pair fails. Inserting a new key invalidates active traversal; replacing an existing value does not. Raises: the same causes as `Map.set`. | Native ellipsis arguments have no fixed Func adapter signature. Inspect Map.update_n's count/format owner and prototype a List/rest adapter preserving argument count, type and order. |
+| `Map.update_n` | lib/map.x / native variadic calls | needs bounded probe | Adds exactly `pair_count` key/value pairs to `map` in argument order. Arguments alternate `Var` keys and values. A null `Map` returns NULL without reading them. Each completed pair remains if a later pair fails. Inserting a new key invalidates active traversal; replacing an existing value does not. Raises: the same causes as `Map.set`. | The count bounds exactly how many variadic values or pairs are consumed; argument evaluation, shared tails and partial mutations are observable. Prototype a counted List/rest bridge for Map.update_n reusing append/push/set owners; verify zero/excess counts, shared tails or partial mutation, and true-void rejection. |
 | `Map.updateindex` | lib/map.x / explicit syntax operations | implementable with current values | Updates one `Map` value in place. The key is looked up once and an existing record-value slot is delegated to `Var.update`. Numeric `+` inserts a missing key with `rhs` as its initial value, equivalent to adding it to zero; the inserted value keeps the right-hand side's numeric tag. Other operations require an existing key. | Syntax lowering exists separately; it does not install this explicitly named method. Validate the existing binding against this contract. Next: Bind Map.updateindex's native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results. |
 | `Map.var` | lib/common.x / Map value operations | implementable with current values | Boxes a `Map` value as `Var`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Map.var to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Map.write_repr` | lib/map.x / native Buffer contracts | native resource contract | Appends the readable representation of `map` to `out` in bucket order. Keys and values use `write_repr`; a null or empty `Map` appends `{ }`. `out` must be nonnull. Raises: `<alloc-fail>` or `<size-limit>` while growing `out`, or a cause raised while rendering an entry. A failure leaves any prefix already appended. | The signature crosses Buffer handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/map.x's handle and effect contract for Map.write_repr; add only a scoped native adapter after those obligations are specified. |
@@ -869,41 +1796,172 @@ explicit checks before claiming runtime equivalence.
 ### Evaluated cases
 
 - `Map.compare`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map a = {"x": 1}; Map b = {"x": 1}; return a.compare(b) == 0; }
+```
+
+- `Map.contains`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map m = {"a": 1}; return m.contains("a") && !m.contains("b"); }
+```
+
 - `Map.copy`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map a = {"x": 1}; Map b = a.copy(); b["x"] = 2; return a["x"] == 1 && b["x"] == 2 && !(a === b); }
+```
+
+- `Map.del`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map m = {"a": 1}; return m.del("a") == 1 && m.len() == 0; }
+```
+
 - `Map.equal`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map a = {"x": 1}; Map b = {"x": 1}; return a.equal(b) && !(a === b); }
+```
+
+- `Map.get`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map m = {"a": 1}; return m.get("a") == 1; }
+```
+
+- `Map.getdefault`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map m = {"a": 1}; return m.getdefault("a", 7) == 1 && m.getdefault("b", 7) == 7; }
+```
+
+- `Map.getindex`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map m = {"a": 1}; return m.getindex("a") == 1; }
+```
+
 - `Map.keys`: one key through iterator; note: reason: a struct or union, which has no compile-time representation.
+
+```x2c
+meta int audit_probe(void) { Map m = {"x": 7}; struct Iter storage; List keys = m.keys(&storage).list(); return keys.len(); }
+```
+
+- `Map.len`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map m = {"a": 1}; return m.len() == 1; }
+```
+
+- `Map.list`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map m = {"a": 1}; return m.list().len() == 1; }
+```
+
 - `Map.merge`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map a = {"x": 1}; Map b = {"x": 2, "y": 3}; Map c = a.merge(b); return a === c && a["x"] == 2 && a["y"] == 3 && b.len() == 2; }
+```
+
+- `Map.new`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map a = Map.new(), b = Map.new(); return a.len() == 0 && !(a === b); }
+```
+
 - `Map.new_capacity`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map m = Map.new_capacity(8); m.set("x", 7); return m.len() == 1 && m["x"] == 7; }
+```
+
 - `Map.postfixindex`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map m = {"x": 2}; return m.postfixindex("x", <++>) == 2 && m["x"] == 3; }
+```
+
+- `Map.repr`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map m = {"a": 1}; return m.repr().contains("a") && m.repr().contains("1"); }
+```
+
 - `Map.set`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map m = {}; m.set("x", 2); m.set("x", 3); return m.len() == 1 && m["x"] == 3; }
+```
+
+- `Map.setdefault`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map m = {"a": 1}; return m.setdefault("a", 7) == 1 && m.setdefault("b", 7) == 7 && m.len() == 2; }
+```
+
 - `Map.setindex`: store and read; returned 7.
+
+```x2c
+meta int audit_probe(void) { Map m = {}; m.setindex("x", 7); return m["x"]; }
+```
+
+- `Map.str`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map m = {"a": 1}; return m.str().contains("a") && m.str().contains("1"); }
+```
+
 - `Map.truth`: collection contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map a = {}; Map b = {"x": 1}; return !a.truth() && b.truth(); }
+```
+
+- `Map.try_next`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map m = {"a": 7}; unsigned cursor = 0; Var key = 0, value = 0; int first = m.try_next(&cursor, &key, &value); int last = m.try_next(&cursor, &key, &value); return first == 1 && last == 0 && key == "a" && value == 7; }
+```
+
 - `Map.updateindex`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map m = {"x": 2}; return m.updateindex("x", <+>, 3) == 5 && m["x"] == 5; }
+```
+
+- `Map.var`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map m = {"a": 1}; return m.var().tag() == <map> && m.var().map() === m; }
+```
+
 
 ## Symbol
 
-**verified example:** `compare`, `len`, `repr`.
+**verified example:** `compare`, `len`, `new_len`, `parse`, `repr`, `str`, `var`.
 
-**reproduced failure:** `first`, `last`.
+**reproduced failure:** `first`, `last`, `new`.
 
-**bound, unverified:** `str`, `var`.
-
-**no binding found:** `decode`, `new`, `new_len`, `parse`, `try_new`, `write_repr`, `write_str`.
+**no binding found:** `decode`, `try_new`, `write_repr`, `write_str`.
 
 | Direct callable | State | Binding provenance | Considerations | Tier/module | Source |
 | --- | --- | --- | --- | --- | --- |
 | `int Symbol.compare(Symbol a, Symbol b)` | verified example | etc/comptime.xlisp:251 | binding | advanced/api | lib/symbol.x:174 |
 | `void Symbol.decode(Symbol symbol, char *dest)` | no binding found | none found | pointer | advanced/api | lib/symbol.x:133 |
-| `char Symbol.first(Symbol symbol)` | reproduced failure | etc/comptime.xlisp:341 | binding | advanced/api | lib/symbol.x:235 |
-| `char Symbol.last(Symbol symbol)` | reproduced failure | etc/comptime.xlisp:342 | binding | primary/api | lib/symbol.x:246 |
+| `char Symbol.first(Symbol symbol)` | reproduced failure | etc/comptime.xlisp:349 | binding | advanced/api | lib/symbol.x:235 |
+| `char Symbol.last(Symbol symbol)` | reproduced failure | etc/comptime.xlisp:350 | binding | primary/api | lib/symbol.x:246 |
 | `int Symbol.len(Symbol symbol)` | verified example | etc/comptime.xlisp:250 | binding | primary/api | lib/symbol.x:121 |
-| `Symbol Symbol.new(const char *str)` | no binding found | none found | pointer | primary/api | lib/symbol.x:104 |
-| `Symbol Symbol.new_len(const char *str, int len)` | no binding found | none found | pointer | advanced/api | lib/symbol.x:78 |
-| `Symbol Symbol.parse(char *text)` | no binding found | none found | pointer | advanced/api | lib/symbol.x:260 |
+| `Symbol Symbol.new(const char *str)` | reproduced failure | none found | pointer | primary/api | lib/symbol.x:104 |
+| `Symbol Symbol.new_len(const char *str, int len)` | verified example | etc/comptime.xlisp:441 | pointer | advanced/api | lib/symbol.x:78 |
+| `Symbol Symbol.parse(char *text)` | verified example | etc/comptime.xlisp:442 | pointer | advanced/api | lib/symbol.x:260 |
 | `String Symbol.repr(Symbol symbol)` | verified example | etc/comptime.xlisp:252 | binding | advanced/api | lib/symbol.x:194 |
-| `String Symbol.str(Symbol symbol)` | bound, unverified | etc/comptime.xlisp:253 | binding | advanced/api | lib/symbol.x:162 |
+| `String Symbol.str(Symbol symbol)` | verified example | etc/comptime.xlisp:253 | binding | advanced/api | lib/symbol.x:162 |
 | `int Symbol.try_new(String spelling, Symbol *out)` | no binding found | none found | pointer | primary/api | lib/symbol.x:112 |
-| `inline Var Symbol.var(Symbol x)` | bound, unverified | etc/comptime.xlisp:272 | binding | advanced/api | lib/common.x:544 |
+| `inline Var Symbol.var(Symbol x)` | verified example | etc/comptime.xlisp:280 | binding | advanced/api | lib/common.x:544 |
 | `Buffer Symbol.write_repr(Symbol symbol, Buffer out)` | no binding found | none found | resource | advanced/api | lib/symbol.x:217 |
 | `Buffer Symbol.write_str(Symbol symbol, Buffer out)` | no binding found | none found | resource | primary/api | lib/symbol.x:205 |
 
@@ -912,13 +1970,13 @@ explicit checks before claiming runtime equivalence.
 | Callable | Implementation owner / group | Disposition | Runtime contract | Contract and next action |
 | --- | --- | --- | --- | --- |
 | `Symbol.compare` | lib/symbol.x / Symbol value operations | implementable with current values | Compares decoded `Symbol` spellings bytewise. Zero sorts before nonzero values. Equal decoded lengths and bytes are ordered by the encoded value, so distinct encodings still have a total order. The result is -1, 0, or 1. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Symbol.compare to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Symbol.decode` | lib/symbol.x / text pointer boundaries | needs bounded probe | Decodes `symbol` into caller-owned byte storage. `dest` must hold at least `SYMBOL_MAX_5BIT + 1` bytes. A nonzero `Symbol` is NUL-terminated there. A null destination or zero `Symbol` leaves storage unchanged. | Canonical String storage is represented, but the native signature accepts raw character pointers or a writable destination. For Symbol.decode, verify null/length/bounds and whether the pointer is read-only, interior or writable before choosing a String/cell adapter. |
+| `Symbol.decode` | lib/symbol.x / text pointer boundaries | needs representation decision | Decodes `symbol` into caller-owned byte storage. `dest` must hold at least `SYMBOL_MAX_5BIT + 1` bytes. A nonzero `Symbol` is NUL-terminated there. A null destination or zero `Symbol` leaves storage unchanged. | The caller supplies writable byte storage of SYMBOL_MAX_5BIT + 1 bytes; canonical String storage is immutable and no length is passed. Provide an owned writable byte-buffer view with sufficient capacity, preserving untouched output for zero Symbol or null destination. |
 | `Symbol.first` | lib/symbol.x / Symbol value operations | implementable with current values | Returns the first decoded byte of `symbol`, or NUL for zero. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Symbol.first to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Symbol.last` | lib/symbol.x / Symbol value operations | implementable with current values | Returns the final decoded byte of `symbol`, or NUL for zero. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Symbol.last to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Symbol.len` | lib/symbol.x / Symbol value operations | implementable with current values | Returns the number of decoded bytes in `symbol`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Symbol.len to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Symbol.new` | lib/symbol.x / text pointer boundaries | needs bounded probe | Encodes the nonnull NUL-terminated spelling `str` as a compact `Symbol`. Encoding and truncation follow `Symbol.new_len`. | Canonical String storage is represented, but the native signature accepts raw character pointers or a writable destination. For Symbol.new, verify null/length/bounds and whether the pointer is read-only, interior or writable before choosing a String/cell adapter. |
-| `Symbol.new_len` | lib/symbol.x / text pointer boundaries | needs bounded probe | Encodes at most `len` bytes of `str` as a compact `Symbol`. A null `str` or nonpositive `len` returns zero. All `len` readable bytes select the encoding before the result is truncated to ten restricted or seven general bytes. The restricted encoding folds ASCII case and treats underscore as hyphen; the general encoding retains each low seven bits, including embedded NUL. `String` and `Buffer` conversions stop at the first decoded NUL. | Canonical String storage is represented, but the native signature accepts raw character pointers or a writable destination. For Symbol.new_len, verify null/length/bounds and whether the pointer is read-only, interior or writable before choosing a String/cell adapter. |
-| `Symbol.parse` | lib/symbol.x / text pointer boundaries | needs bounded probe | Parses the first compact `Symbol` spelling from `text`. The parser accepts an angled literal or a bare `Atom` prefix and ignores trailing text. Quoted angled literals use `String` escape rules. The parsed bytes then take `Symbol.new_len` folding and truncation. `Null`, empty, or malformed input returns zero. Zero is also the empty `Symbol`. Raises: `<alloc-fail>` while unescaping a quoted literal. | Canonical String storage is represented, but the native signature accepts raw character pointers or a writable destination. For Symbol.parse, verify null/length/bounds and whether the pointer is read-only, interior or writable before choosing a String/cell adapter. |
+| `Symbol.new` | lib/symbol.x / text pointer boundaries | needs bounded probe | Encodes the nonnull NUL-terminated spelling `str` as a compact `Symbol`. Encoding and truncation follow `Symbol.new_len`. | The native owner requires nonnull C strings. Canonical empty String is NULL, unlike a nonnull empty C string; direct Func adapters also reject raw char-pointer parameters. Decide how source C-string pointers preserve nonnull empty storage before forwarding; a String-only alias would change valid empty-input behavior or reach strlen/strcmp with NULL. |
+| `Symbol.new_len` | lib/symbol.x / text pointer boundaries | needs bounded probe | Encodes at most `len` bytes of `str` as a compact `Symbol`. A null `str` or nonpositive `len` returns zero. All `len` readable bytes select the encoding before the result is truncated to ten restricted or seven general bytes. The restricted encoding folds ASCII case and treats underscore as hyphen; the general encoding retains each low seven bits, including embedded NUL. `String` and `Buffer` conversions stop at the first decoded NUL. | A String-typed adapter can forward represented bytes to the native nullable/length-aware owner; raw memory beyond those bytes remains the caller's precondition. Validate the existing binding against this contract. Next: Verify Symbol.new_len's zero, empty and valid length cases through the forwarding adapter; do not fabricate writable or out-of-bounds storage. |
+| `Symbol.parse` | lib/symbol.x / text pointer boundaries | needs bounded probe | Parses the first compact `Symbol` spelling from `text`. The parser accepts an angled literal or a bare `Atom` prefix and ignores trailing text. Quoted angled literals use `String` escape rules. The parsed bytes then take `Symbol.new_len` folding and truncation. `Null`, empty, or malformed input returns zero. Zero is also the empty `Symbol`. Raises: `<alloc-fail>` while unescaping a quoted literal. | A String-typed adapter can forward represented bytes to the native nullable/length-aware owner; raw memory beyond those bytes remains the caller's precondition. Validate the existing binding against this contract. Next: Verify Symbol.parse's zero, empty and valid length cases through the forwarding adapter; do not fabricate writable or out-of-bounds storage. |
 | `Symbol.repr` | lib/symbol.x / Symbol value operations | implementable with current values | Returns the canonical readable representation of `symbol`. Zero becomes `<>`; other values use the form emitted by `Symbol.write_repr`. The result follows the canonical pool-chain lifetime described by `Symbol.str`. Raises: `<alloc-fail>` while constructing the result. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Symbol.repr to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Symbol.str` | lib/symbol.x / Symbol value operations | implementable with current values | Returns the decoded spelling as a canonical `String`. Conversion stops at the first decoded NUL. The result follows the canonical pool chain: it may already belong to an ancestor and lives until its actual owning pool is released. A zero `Symbol` returns NULL, the empty `String`. Raises: `<alloc-fail>` while canonicalizing the spelling. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Symbol.str to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Symbol.try_new` | lib/symbol.x / status and output cells | implementable with current values | Encodes `spelling` only when the `Symbol` preserves every byte. Returns 1 and writes `out` on success; returns 0 and leaves `out` untouched when case folding, `_`/`-` folding, or truncation would change the spelling. The null `String` is the empty `Symbol`. Raises: `<alloc-fail>` while checking the decoded spelling. | The status result can separate success from absence while a compiler local cell carries the output. Wrap Symbol.try_new with native temporary outputs and C.store only on success; test untouched outputs on failure. |
@@ -929,28 +1987,91 @@ explicit checks before claiming runtime equivalence.
 ### Evaluated cases
 
 - `Symbol.compare`: lexical comparison; returned 1.
+
+```x2c
+meta int audit_probe(void) { return <abc>.compare(<abd>) < 0; }
+```
+
 - `Symbol.first`: core value contract and boundaries; <probe>/probe.x:3:33: macro: compile-time Lisp evaluation failed.
+
+```x2c
+meta int audit_probe(void) { Symbol empty = 0; return <abc>.first() == 'a' && empty.first() == 0; }
+```
+
 - `Symbol.first`: represented Symbol, including empty payload; returned 1.
+
+```x2c
+meta int audit_probe(void) { Symbol empty = "".symbol(); return <abc>.first() == 'a' && empty.first() == 0; }
+```
+
 - `Symbol.last`: core value contract and boundaries; <probe>/probe.x:3:33: macro: compile-time Lisp evaluation failed.
+
+```x2c
+meta int audit_probe(void) { Symbol empty = 0; return <abc>.last() == 'c' && empty.last() == 0; }
+```
+
 - `Symbol.last`: represented Symbol, including empty payload; returned 1.
+
+```x2c
+meta int audit_probe(void) { Symbol empty = "".symbol(); return <abc>.last() == 'c' && empty.last() == 0; }
+```
+
 - `Symbol.len`: short symbol; returned 3.
+
+```x2c
+meta int audit_probe(void) { return <abc>.len(); }
+```
+
+- `Symbol.new`: native canonical value contract; note: reason: no binding for Symbol_new.
+
+```x2c
+meta int audit_probe(void) { return Symbol.new("abc") == <abc>; }
+```
+
+- `Symbol.new_len`: native canonical value contract; returned 1.
+
+```x2c
+meta int audit_probe(void) { return Symbol.new_len("abcdef", 3) == <abc> && Symbol.new_len("abc", 0) == "".symbol(); }
+```
+
+- `Symbol.parse`: native canonical value contract; returned 1.
+
+```x2c
+meta int audit_probe(void) { return Symbol.parse("<abc>") == <abc> && Symbol.parse("abc") == <abc>; }
+```
+
 - `Symbol.repr`: symbol rendering; returned 1.
+
+```x2c
+meta int audit_probe(void) { return <abc>.repr().equal("<abc>"); }
+```
+
+- `Symbol.str`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { return <abc>.str().equal("abc"); }
+```
+
+- `Symbol.var`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Symbol s = <abc>; return s.var().tag() == <symbol> && s.var().symbol() == s; }
+```
+
 
 ## Var
 
-**verified example:** `add`, `array`, `binary`, `cadr`, `char`, `compare`, `cons`, `contains`, `div`, `double`, `float`, `floating`, `hash`, `int`, `integer`, `is_atom`, `is_atom_binder`, `is_binder`, `is_floating`, `is_integer`, `is_list_binder`, `is_match_op`, `is_nil`, `is_null`, `is_object`, `is_wide`, `kind`, `long`, `long_double`, `long_double_value`, `long_long`, `long_long_value`, `long_value`, `map`, `mod`, `mul`, `neg`, `postfixindex`, `same`, `setindex`, `short`, `string`, `sub`, `symbol`, `truth`, `uchar`, `uint`, `ulong`, `ulong_long`, `ulong_long_value`, `ulong_value`, `unsigned`, `updateindex`, `ushort`.
+**verified example:** `add`, `array`, `binary`, `box_f32`, `box_f64`, `box_i16`, `box_i32_bits`, `box_i8`, `box_long`, `box_long_double`, `box_long_long`, `box_u16`, `box_u32`, `box_u8`, `box_ulong`, `box_ulong_long`, `caar`, `caddr`, `cadr`, `car`, `cddddr`, `cdddr`, `cddr`, `cdr`, `char`, `compare`, `cons`, `contains`, `convert`, `custom_descriptor_index`, `decode_f32`, `decode_f64`, `div`, `double`, `encoding_valid`, `equal`, `fallback_compare`, `fallback_equal`, `fallback_hash`, `fallback_repr`, `fallback_str`, `fallback_truth`, `float`, `floating`, `hash`, `int`, `integer`, `integer_box`, `integer_compare`, `integer_floating_compare`, `integer_tag`, `is`, `is_atom`, `is_atom_binder`, `is_binder`, `is_floating`, `is_integer`, `is_list_binder`, `is_match_op`, `is_nil`, `is_null`, `is_object`, `is_row`, `is_wide`, `json`, `kind`, `known_tag`, `list`, `listchar`, `listdbl`, `listfloat`, `listint`, `listshort`, `liststring`, `listsymbol`, `long`, `long_double`, `long_double_value`, `long_long`, `long_long_value`, `long_value`, `map`, `mod`, `mul`, `neg`, `parse`, `payload32`, `postfixindex`, `pretty_json`, `repr`, `same`, `setindex`, `short`, `signed_from_bits`, `str`, `string`, `sub`, `symbol`, `tag`, `truth`, `uchar`, `uint`, `ulong`, `ulong_long`, `ulong_long_value`, `ulong_value`, `unsigned`, `updateindex`, `ushort`, `wide_compare`, `wide_equal`, `wide_hash`, `width_mask`.
 
 **reproduced failure:** `is_pointer`, `is_reference`.
 
-**bound, unverified:** `caar`, `caddr`, `car`, `cddr`, `cdr`, `convert`, `equal`, `is`, `list`, `parse`, `repr`, `str`, `tag`.
-
-**no binding found:** `adnode`, `arraychar`, `arraydbl`, `arrayfloat`, `arrayint`, `arraylong`, `arrayshort`, `arraystring`, `as_iter`, `block`, `box_f32`, `box_f64`, `box_i16`, `box_i32_bits`, `box_i8`, `box_long`, `box_long_double`, `box_long_long`, `box_u16`, `box_u32`, `box_u8`, `box_ulong`, `box_ulong_long`, `buffer`, `bytes`, `caaaar`, `caaadr`, `caaar`, `caadar`, `caaddr`, `caadr`, `cadaar`, `cadadr`, `cadar`, `caddar`, `cadddr`, `cdaaar`, `cdaadr`, `cdaar`, `cdadar`, `cdaddr`, `cdadr`, `cdar`, `cddaar`, `cddadr`, `cddar`, `cdddar`, `cddddr`, `cdddr`, `clone_wide`, `custom_descriptor_index`, `decode_f32`, `decode_f64`, `dispatch_truth`, `encoding_valid`, `fallback_compare`, `fallback_equal`, `fallback_hash`, `fallback_iter`, `fallback_repr`, `fallback_str`, `fallback_truth`, `fallback_write_repr`, `fallback_write_str`, `file`, `getindex`, `integer_box`, `integer_compare`, `integer_floating_compare`, `integer_tag`, `is_row`, `is_void`, `iter`, `job`, `json`, `jsonbool`, `known_tag`, `listchar`, `listdbl`, `listfloat`, `listint`, `listshort`, `liststring`, `listsymbol`, `mapintint`, `maplongdouble`, `mapstringint`, `mapstringstring`, `matmul`, `move_wide_to`, `new`, `null`, `numeric_decode`, `numeric_info`, `payload32`, `pointer`, `pointer_string`, `postfix`, `pretty_json`, `regex`, `regexcapture`, `regexmatch`, `register_object_tag`, `signed_from_bits`, `token`, `try_dispatch_binary`, `try_dispatch_unary`, `try_export_context`, `update`, `wide_compare`, `wide_equal`, `wide_hash`, `wide_owner`, `width_mask`, `write_pointer_repr`, `write_repr`, `write_str`.
+**no binding found:** `adnode`, `arraychar`, `arraydbl`, `arrayfloat`, `arrayint`, `arraylong`, `arrayshort`, `arraystring`, `as_iter`, `block`, `buffer`, `bytes`, `caaaar`, `caaadr`, `caaar`, `caadar`, `caaddr`, `caadr`, `cadaar`, `cadadr`, `cadar`, `caddar`, `cadddr`, `cdaaar`, `cdaadr`, `cdaar`, `cdadar`, `cdaddr`, `cdadr`, `cdar`, `cddaar`, `cddadr`, `cddar`, `cdddar`, `clone_wide`, `dispatch_truth`, `fallback_iter`, `fallback_write_repr`, `fallback_write_str`, `file`, `getindex`, `is_void`, `iter`, `job`, `jsonbool`, `mapintint`, `maplongdouble`, `mapstringint`, `mapstringstring`, `matmul`, `move_wide_to`, `new`, `null`, `numeric_decode`, `numeric_info`, `pointer`, `pointer_string`, `postfix`, `regex`, `regexcapture`, `regexmatch`, `register_object_tag`, `token`, `try_dispatch_binary`, `try_dispatch_unary`, `try_export_context`, `update`, `wide_owner`, `write_pointer_repr`, `write_repr`, `write_str`.
 
 | Direct callable | State | Binding provenance | Considerations | Tier/module | Source |
 | --- | --- | --- | --- | --- | --- |
-| `Var Var.add(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:399 | syntax | primary/api | lib/varops.x:400 |
+| `Var Var.add(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:407 | syntax | primary/api | lib/varops.x:400 |
 | `AdNode Var.adnode(Var value)` | no binding found | none found | resource | primary/optional | lib/autodiff.x:43 |
-| `inline Array Var.array(Var value)` | verified example | etc/comptime.xlisp:359 | binding | advanced/api | lib/common.x:615 |
+| `inline Array Var.array(Var value)` | verified example | etc/comptime.xlisp:367 | binding | advanced/api | lib/common.x:615 |
 | `inline ArrayChar Var.arraychar(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-array.x:111 |
 | `inline ArrayDbl Var.arraydbl(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-array.x:156 |
 | `inline ArrayFloat Var.arrayfloat(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-array.x:147 |
@@ -961,19 +2082,19 @@ explicit checks before claiming runtime equivalence.
 | `inline Iter Var.as_iter(Var value)` | no binding found | none found | resource | advanced/api | lib/common.x:620 |
 | `Var Var.binary(Var lhs, Symbol op, Var rhs)` | verified example | etc/init.xlisp:96 | syntax | primary/api | lib/varops.x:472 |
 | `inline Block Var.block(Var value)` | no binding found | none found | resource | advanced/api | lib/common.x:616 |
-| `inline Var Var.box_f32(float value)` | no binding found | none found | internal | advanced/api | lib/common.x:508 |
-| `inline Var Var.box_f64(double value)` | no binding found | none found | internal | advanced/api | lib/common.x:515 |
-| `inline Var Var.box_i16(short value)` | no binding found | none found | internal | advanced/api | lib/common.x:499 |
-| `inline Var Var.box_i32_bits(unsigned value)` | no binding found | none found | internal | advanced/api | lib/common.x:503 |
-| `inline Var Var.box_i8(char value)` | no binding found | none found | internal | advanced/api | lib/common.x:495 |
-| `Var Var.box_long(long value)` | no binding found | none found | internal | advanced/api | lib/var.x:478 |
-| `Var Var.box_long_double(long double value)` | no binding found | none found | internal | advanced/api | lib/var.x:530 |
-| `Var Var.box_long_long(long long value)` | no binding found | none found | internal | advanced/api | lib/var.x:504 |
-| `inline Var Var.box_u16(ushort value)` | no binding found | none found | internal | advanced/api | lib/common.x:501 |
-| `inline Var Var.box_u32(unsigned value)` | no binding found | none found | internal | advanced/api | lib/common.x:505 |
-| `inline Var Var.box_u8(uchar value)` | no binding found | none found | internal | advanced/api | lib/common.x:497 |
-| `Var Var.box_ulong(unsigned long value)` | no binding found | none found | internal | advanced/api | lib/var.x:493 |
-| `Var Var.box_ulong_long(unsigned long long value)` | no binding found | none found | internal | advanced/api | lib/var.x:515 |
+| `inline Var Var.box_f32(float value)` | verified example | etc/comptime.xlisp:444 | internal | advanced/api | lib/common.x:508 |
+| `inline Var Var.box_f64(double value)` | verified example | etc/comptime.xlisp:445 | internal | advanced/api | lib/common.x:515 |
+| `inline Var Var.box_i16(short value)` | verified example | etc/comptime.xlisp:446 | internal | advanced/api | lib/common.x:499 |
+| `inline Var Var.box_i32_bits(unsigned value)` | verified example | etc/comptime.xlisp:447 | internal | advanced/api | lib/common.x:503 |
+| `inline Var Var.box_i8(char value)` | verified example | etc/comptime.xlisp:448 | internal | advanced/api | lib/common.x:495 |
+| `Var Var.box_long(long value)` | verified example | etc/comptime.xlisp:449 | internal | advanced/api | lib/var.x:478 |
+| `Var Var.box_long_double(long double value)` | verified example | etc/comptime.xlisp:450 | internal | advanced/api | lib/var.x:530 |
+| `Var Var.box_long_long(long long value)` | verified example | etc/comptime.xlisp:451 | internal | advanced/api | lib/var.x:504 |
+| `inline Var Var.box_u16(ushort value)` | verified example | etc/comptime.xlisp:452 | internal | advanced/api | lib/common.x:501 |
+| `inline Var Var.box_u32(unsigned value)` | verified example | etc/comptime.xlisp:453 | internal | advanced/api | lib/common.x:505 |
+| `inline Var Var.box_u8(uchar value)` | verified example | etc/comptime.xlisp:454 | internal | advanced/api | lib/common.x:497 |
+| `Var Var.box_ulong(unsigned long value)` | verified example | etc/comptime.xlisp:455 | internal | advanced/api | lib/var.x:493 |
+| `Var Var.box_ulong_long(unsigned long long value)` | verified example | etc/comptime.xlisp:456 | internal | advanced/api | lib/var.x:515 |
 | `inline Buffer Var.buffer(Var value)` | no binding found | none found | resource | advanced/api | lib/common.x:617 |
 | `inline Bytes Var.bytes(Var value)` | no binding found | none found | resource | advanced/api | lib/common.x:618 |
 | `inline Var Var.caaaar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:83 |
@@ -982,15 +2103,15 @@ explicit checks before claiming runtime equivalence.
 | `inline Var Var.caadar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:87 |
 | `inline Var Var.caaddr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:89 |
 | `inline Var Var.caadr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:70 |
-| `inline Var Var.caar(Var var)` | bound, unverified | etc/comptime.xlisp:256 | binding | advanced/api | lib/list.x:200 |
+| `inline Var Var.caar(Var var)` | verified example | etc/comptime.xlisp:256 | binding | advanced/api | lib/list.x:200 |
 | `inline Var Var.cadaar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:91 |
 | `inline Var Var.cadadr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:93 |
 | `inline Var Var.cadar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:72 |
 | `inline Var Var.caddar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:95 |
 | `inline Var Var.cadddr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:97 |
-| `inline Var Var.caddr(Var var)` | bound, unverified | etc/comptime.xlisp:259 | binding | advanced/api | lib/list.x:206 |
+| `inline Var Var.caddr(Var var)` | verified example | etc/comptime.xlisp:259 | binding | advanced/api | lib/list.x:206 |
 | `inline Var Var.cadr(Var var)` | verified example | etc/comptime.xlisp:257 | binding | advanced/api | lib/list.x:202 |
-| `Var Var.car(Var var)` | bound, unverified | etc/init.xlisp:94 | binding | advanced/api | lib/list.x:196 |
+| `Var Var.car(Var var)` | verified example | etc/init.xlisp:94 | binding | advanced/api | lib/list.x:196 |
 | `inline List Var.cdaaar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:99 |
 | `inline List Var.cdaadr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:101 |
 | `inline List Var.cdaar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:74 |
@@ -1002,135 +2123,135 @@ explicit checks before claiming runtime equivalence.
 | `inline List Var.cddadr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:109 |
 | `inline List Var.cddar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:78 |
 | `inline List Var.cdddar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:111 |
-| `inline List Var.cddddr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:113 |
-| `inline List Var.cdddr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:80 |
-| `inline List Var.cddr(Var var)` | bound, unverified | etc/comptime.xlisp:258 | binding | advanced/api | lib/list.x:204 |
-| `List Var.cdr(Var var)` | bound, unverified | etc/init.xlisp:95 | binding | advanced/api | lib/list.x:198 |
-| `char Var.char(Var x)` | verified example | etc/comptime.xlisp:363 | binding | advanced/api | lib/common.x:642 |
+| `inline List Var.cddddr(Var value)` | verified example | etc/comptime.xlisp:436 | binding | primary/optional | lib/list-selectors.x:113 |
+| `inline List Var.cdddr(Var value)` | verified example | etc/comptime.xlisp:435 | binding | primary/optional | lib/list-selectors.x:80 |
+| `inline List Var.cddr(Var var)` | verified example | etc/comptime.xlisp:258 | binding | advanced/api | lib/list.x:204 |
+| `List Var.cdr(Var var)` | verified example | etc/init.xlisp:95 | binding | advanced/api | lib/list.x:198 |
+| `char Var.char(Var x)` | verified example | etc/comptime.xlisp:371 | binding | advanced/api | lib/common.x:642 |
 | `Var Var.clone_wide(Var value)` | no binding found | none found | internal | internal/api | lib/var.x:542 |
-| `int Var.compare(Var a, Var b)` | verified example | etc/comptime.xlisp:382 | binding | advanced/api | lib/dispatch.x:890 |
+| `int Var.compare(Var a, Var b)` | verified example | etc/comptime.xlisp:390 | binding | advanced/api | lib/dispatch.x:890 |
 | `List Var.cons(Var head, List tail)` | verified example | etc/init.xlisp:91 | binding | advanced/api | lib/list.x:168 |
-| `int Var.contains(Var value, Var needle)` | verified example | etc/comptime.xlisp:383 | binding | primary/api | lib/dispatch.x:368 |
-| `Var Var.convert(Var value, Symbol target)` | bound, unverified | etc/comptime.xlisp:261 | binding | primary/api | lib/varconvert.x:273 |
-| `int Var.custom_descriptor_index(Var value)` | no binding found | none found | internal | internal/api | lib/var.x:216 |
-| `inline float Var.decode_f32(Var value)` | no binding found | none found | internal | advanced/api | lib/common.x:462 |
-| `inline double Var.decode_f64(Var value)` | no binding found | none found | internal | advanced/api | lib/common.x:470 |
+| `int Var.contains(Var value, Var needle)` | verified example | etc/comptime.xlisp:391 | binding | primary/api | lib/dispatch.x:368 |
+| `Var Var.convert(Var value, Symbol target)` | verified example | etc/comptime.xlisp:261 | binding | primary/api | lib/varconvert.x:273 |
+| `int Var.custom_descriptor_index(Var value)` | verified example | etc/comptime.xlisp:457 | internal | internal/api | lib/var.x:216 |
+| `inline float Var.decode_f32(Var value)` | verified example | etc/comptime.xlisp:458 | internal | advanced/api | lib/common.x:462 |
+| `inline double Var.decode_f64(Var value)` | verified example | etc/comptime.xlisp:459 | internal | advanced/api | lib/common.x:470 |
 | `int Var.dispatch_truth(Var value, int *handled)` | no binding found | none found | pointer | advanced/api | lib/dispatch.x:47 |
-| `Var Var.div(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:402 | syntax | primary/api | lib/varops.x:426 |
-| `double Var.double(Var x)` | verified example | etc/comptime.xlisp:375 | binding | advanced/api | lib/common.x:771 |
-| `int Var.encoding_valid(Var value)` | no binding found | none found | internal | advanced/api | lib/var.x:231 |
-| `int Var.equal(Var a, Var b)` | bound, unverified | etc/comptime.xlisp:265 | binding | advanced/api | lib/dispatch.x:762 |
-| `int Var.fallback_compare(Var a, Var b)` | no binding found | none found | internal | primary/api | lib/dispatch.x:869 |
-| `int Var.fallback_equal(Var a, Var b)` | no binding found | none found | internal | primary/api | lib/dispatch.x:719 |
-| `unsigned Var.fallback_hash(Var v)` | no binding found | none found | internal | primary/api | lib/dispatch.x:729 |
+| `Var Var.div(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:410 | syntax | primary/api | lib/varops.x:426 |
+| `double Var.double(Var x)` | verified example | etc/comptime.xlisp:383 | binding | advanced/api | lib/common.x:771 |
+| `int Var.encoding_valid(Var value)` | verified example | etc/comptime.xlisp:460 | internal | advanced/api | lib/var.x:231 |
+| `int Var.equal(Var a, Var b)` | verified example | etc/comptime.xlisp:265 | binding | advanced/api | lib/dispatch.x:762 |
+| `int Var.fallback_compare(Var a, Var b)` | verified example | etc/comptime.xlisp:461 | internal | primary/api | lib/dispatch.x:869 |
+| `int Var.fallback_equal(Var a, Var b)` | verified example | etc/comptime.xlisp:462 | internal | primary/api | lib/dispatch.x:719 |
+| `unsigned Var.fallback_hash(Var v)` | verified example | etc/comptime.xlisp:463 | internal | primary/api | lib/dispatch.x:729 |
 | `Iter Var.fallback_iter(Var x, Iter dest)` | no binding found | none found | resource, internal | primary/api | lib/dispatch.x:921 |
-| `String Var.fallback_repr(Var v)` | no binding found | none found | internal | primary/api | lib/dispatch.x:594 |
-| `String Var.fallback_str(Var v)` | no binding found | none found | internal | primary/api | lib/dispatch.x:525 |
-| `int Var.fallback_truth(Var value)` | no binding found | none found | internal | primary/api | lib/varops.x:323 |
+| `String Var.fallback_repr(Var v)` | verified example | etc/comptime.xlisp:464 | internal | primary/api | lib/dispatch.x:594 |
+| `String Var.fallback_str(Var v)` | verified example | etc/comptime.xlisp:465 | internal | primary/api | lib/dispatch.x:525 |
+| `int Var.fallback_truth(Var value)` | verified example | etc/comptime.xlisp:466 | internal | primary/api | lib/varops.x:323 |
 | `Buffer Var.fallback_write_repr(Var v, Buffer out)` | no binding found | none found | resource, internal | primary/api | lib/dispatch.x:684 |
 | `Buffer Var.fallback_write_str(Var v, Buffer out)` | no binding found | none found | resource, internal | primary/api | lib/dispatch.x:562 |
 | `inline File Var.file(Var value)` | no binding found | none found | resource | advanced/api | lib/common.x:619 |
-| `float Var.float(Var x)` | verified example | etc/comptime.xlisp:374 | binding | advanced/api | lib/common.x:762 |
+| `float Var.float(Var x)` | verified example | etc/comptime.xlisp:382 | binding | advanced/api | lib/common.x:762 |
 | `double Var.floating(Var v)` | verified example | etc/comptime.xlisp:263 | binding | advanced/api | lib/var.x:714 |
 | `Var Var.getindex(Var value, Var key)` | no binding found | none found | binding | primary/api | lib/dispatch.x:383 |
-| `unsigned Var.hash(Var v)` | verified example | etc/comptime.xlisp:384 | binding | advanced/api | lib/dispatch.x:738 |
-| `int Var.int(Var x)` | verified example | etc/comptime.xlisp:365 | binding | advanced/api | lib/common.x:678 |
+| `unsigned Var.hash(Var v)` | verified example | etc/comptime.xlisp:392 | binding | advanced/api | lib/dispatch.x:738 |
+| `int Var.int(Var x)` | verified example | etc/comptime.xlisp:373 | binding | advanced/api | lib/common.x:678 |
 | `long Var.integer(Var v)` | verified example | etc/comptime.xlisp:262 | binding | advanced/api | lib/var.x:759 |
-| `Var Var.integer_box(Symbol target, unsigned long long raw)` | no binding found | none found | internal | advanced/api | lib/varconvert.x:99 |
-| `int Var.integer_compare(Var a, Var b)` | no binding found | none found | binding | advanced/api | lib/var.x:939 |
-| `int Var.integer_floating_compare(Var integer, Var floating)` | no binding found | none found | binding | advanced/api | lib/var.x:967 |
-| `Symbol Var.integer_tag(int rank, int unsigned_value)` | no binding found | none found | internal | advanced/api | lib/varconvert.x:41 |
-| `int Var.is(Var var, Symbol tag)` | bound, unverified | etc/comptime.xlisp:264 | binding | primary/api | lib/var.x:296 |
-| `int Var.is_atom(Var value)` | verified example | etc/comptime.xlisp:386 | binding | primary/api | lib/atom.x:92 |
-| `int Var.is_atom_binder(Var atom)` | verified example | etc/comptime.xlisp:387 | binding | advanced/api | lib/match.x:378 |
-| `int Var.is_binder(Var atom)` | verified example | etc/comptime.xlisp:388 | binding | advanced/api | lib/match.x:388 |
-| `int Var.is_floating(Var v)` | verified example | etc/comptime.xlisp:391 | binding | primary/api | lib/var.x:321 |
-| `int Var.is_integer(Var v)` | verified example | etc/comptime.xlisp:392 | binding | primary/api | lib/var.x:329 |
-| `int Var.is_list_binder(Var atom)` | verified example | etc/comptime.xlisp:389 | binding | advanced/api | lib/match.x:383 |
-| `int Var.is_match_op(Var atom)` | verified example | etc/comptime.xlisp:390 | binding | advanced/api | lib/match.x:391 |
-| `int Var.is_nil(Var v)` | verified example | etc/comptime.xlisp:397 | binding | primary/api | lib/var.x:393 |
-| `int Var.is_null(Var v)` | verified example | etc/comptime.xlisp:398 | binding | primary/api | lib/var.x:376 |
-| `int Var.is_object(Var v)` | verified example | etc/comptime.xlisp:395 | binding | primary/api | lib/var.x:343 |
-| `int Var.is_pointer(Var v)` | reproduced failure | etc/comptime.xlisp:393 | internal | primary/api | lib/var.x:332 |
-| `int Var.is_reference(Var v)` | reproduced failure | etc/comptime.xlisp:394 | binding | primary/api | lib/var.x:334 |
-| `inline int Var.is_row( Var value, unsigned top, unsigned long mask, unsigned long bottom)` | no binding found | none found | internal | advanced/api | lib/common.x:611 |
+| `Var Var.integer_box(Symbol target, unsigned long long raw)` | verified example | etc/comptime.xlisp:467 | internal | advanced/api | lib/varconvert.x:99 |
+| `int Var.integer_compare(Var a, Var b)` | verified example | etc/comptime.xlisp:468 | binding | advanced/api | lib/var.x:939 |
+| `int Var.integer_floating_compare(Var integer, Var floating)` | verified example | etc/comptime.xlisp:469 | binding | advanced/api | lib/var.x:967 |
+| `Symbol Var.integer_tag(int rank, int unsigned_value)` | verified example | etc/comptime.xlisp:470 | internal | advanced/api | lib/varconvert.x:41 |
+| `int Var.is(Var var, Symbol tag)` | verified example | etc/comptime.xlisp:264 | binding | primary/api | lib/var.x:296 |
+| `int Var.is_atom(Var value)` | verified example | etc/comptime.xlisp:394 | binding | primary/api | lib/atom.x:92 |
+| `int Var.is_atom_binder(Var atom)` | verified example | etc/comptime.xlisp:395 | binding | advanced/api | lib/match.x:378 |
+| `int Var.is_binder(Var atom)` | verified example | etc/comptime.xlisp:396 | binding | advanced/api | lib/match.x:388 |
+| `int Var.is_floating(Var v)` | verified example | etc/comptime.xlisp:399 | binding | primary/api | lib/var.x:321 |
+| `int Var.is_integer(Var v)` | verified example | etc/comptime.xlisp:400 | binding | primary/api | lib/var.x:329 |
+| `int Var.is_list_binder(Var atom)` | verified example | etc/comptime.xlisp:397 | binding | advanced/api | lib/match.x:383 |
+| `int Var.is_match_op(Var atom)` | verified example | etc/comptime.xlisp:398 | binding | advanced/api | lib/match.x:391 |
+| `int Var.is_nil(Var v)` | verified example | etc/comptime.xlisp:405 | binding | primary/api | lib/var.x:393 |
+| `int Var.is_null(Var v)` | verified example | etc/comptime.xlisp:406 | binding | primary/api | lib/var.x:376 |
+| `int Var.is_object(Var v)` | verified example | etc/comptime.xlisp:403 | binding | primary/api | lib/var.x:343 |
+| `int Var.is_pointer(Var v)` | reproduced failure | etc/comptime.xlisp:401 | internal | primary/api | lib/var.x:332 |
+| `int Var.is_reference(Var v)` | reproduced failure | etc/comptime.xlisp:402 | binding | primary/api | lib/var.x:334 |
+| `inline int Var.is_row( Var value, unsigned top, unsigned long mask, unsigned long bottom)` | verified example | etc/comptime.xlisp:471 | internal | advanced/api | lib/common.x:611 |
 | `int Var.is_void(Var v)` | no binding found | none found | binding | primary/api | lib/var.x:365 |
-| `inline int Var.is_wide(Var v)` | verified example | etc/comptime.xlisp:396 | binding | advanced/api | lib/common.x:453 |
+| `inline int Var.is_wide(Var v)` | verified example | etc/comptime.xlisp:404 | binding | advanced/api | lib/common.x:453 |
 | `Iter Var.iter(Var x, Iter dest)` | no binding found | none found | resource | primary/api | lib/dispatch.x:931 |
 | `Job Var.job(Var)` | no binding found | none found | resource | unclassified generated/optional | lib/process.x (interface) |
-| `String Var.json(Var value)` | no binding found | none found | binding | primary/optional | lib/json.x:560 |
+| `String Var.json(Var value)` | verified example | etc/comptime.xlisp:437 | binding | primary/optional | lib/json.x:560 |
 | `JsonBool Var.jsonbool(Var value)` | no binding found | none found | resource | primary/optional | lib/json.x:57 |
 | `Symbol Var.kind(Var v)` | verified example | etc/comptime.xlisp:255 | binding | advanced/api | lib/var.x:309 |
-| `int Var.known_tag(Symbol tag)` | no binding found | none found | internal | advanced/api | lib/var.x:61 |
-| `inline List Var.list(Var value)` | bound, unverified | etc/comptime.xlisp:274 | binding | advanced/api | lib/common.x:621 |
-| `ListChar Var.listchar(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:97 |
-| `ListDbl Var.listdbl(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:113 |
-| `ListFloat Var.listfloat(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:109 |
-| `ListInt Var.listint(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:105 |
-| `ListShort Var.listshort(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:101 |
-| `ListString Var.liststring(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:117 |
-| `ListSymbol Var.listsymbol(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-list.x:121 |
-| `long Var.long(Var x)` | verified example | etc/comptime.xlisp:366 | binding | advanced/api | lib/common.x:705 |
-| `long double Var.long_double(Var x)` | verified example | etc/comptime.xlisp:376 | binding | advanced/api | lib/common.x:752 |
-| `long double Var.long_double_value(Var v)` | verified example | etc/comptime.xlisp:381 | binding | advanced/api | lib/var.x:831 |
-| `long long Var.long_long(Var x)` | verified example | etc/comptime.xlisp:367 | binding | advanced/api | lib/common.x:728 |
-| `long long Var.long_long_value(Var v)` | verified example | etc/comptime.xlisp:379 | binding | advanced/api | lib/var.x:817 |
-| `long Var.long_value(Var v)` | verified example | etc/comptime.xlisp:377 | binding | advanced/api | lib/var.x:802 |
-| `inline Map Var.map(Var value)` | verified example | etc/comptime.xlisp:360 | binding | advanced/api | lib/common.x:622 |
+| `int Var.known_tag(Symbol tag)` | verified example | etc/comptime.xlisp:472 | internal | advanced/api | lib/var.x:61 |
+| `inline List Var.list(Var value)` | verified example | etc/comptime.xlisp:282 | binding | advanced/api | lib/common.x:621 |
+| `ListChar Var.listchar(Var value)` | verified example | etc/comptime.xlisp:428 | resource | primary/optional | lib/typed-list.x:97 |
+| `ListDbl Var.listdbl(Var value)` | verified example | etc/comptime.xlisp:432 | resource | primary/optional | lib/typed-list.x:113 |
+| `ListFloat Var.listfloat(Var value)` | verified example | etc/comptime.xlisp:431 | resource | primary/optional | lib/typed-list.x:109 |
+| `ListInt Var.listint(Var value)` | verified example | etc/comptime.xlisp:430 | resource | primary/optional | lib/typed-list.x:105 |
+| `ListShort Var.listshort(Var value)` | verified example | etc/comptime.xlisp:429 | resource | primary/optional | lib/typed-list.x:101 |
+| `ListString Var.liststring(Var value)` | verified example | etc/comptime.xlisp:433 | resource | primary/optional | lib/typed-list.x:117 |
+| `ListSymbol Var.listsymbol(Var value)` | verified example | etc/comptime.xlisp:434 | resource | primary/optional | lib/typed-list.x:121 |
+| `long Var.long(Var x)` | verified example | etc/comptime.xlisp:374 | binding | advanced/api | lib/common.x:705 |
+| `long double Var.long_double(Var x)` | verified example | etc/comptime.xlisp:384 | binding | advanced/api | lib/common.x:752 |
+| `long double Var.long_double_value(Var v)` | verified example | etc/comptime.xlisp:389 | binding | advanced/api | lib/var.x:831 |
+| `long long Var.long_long(Var x)` | verified example | etc/comptime.xlisp:375 | binding | advanced/api | lib/common.x:728 |
+| `long long Var.long_long_value(Var v)` | verified example | etc/comptime.xlisp:387 | binding | advanced/api | lib/var.x:817 |
+| `long Var.long_value(Var v)` | verified example | etc/comptime.xlisp:385 | binding | advanced/api | lib/var.x:802 |
+| `inline Map Var.map(Var value)` | verified example | etc/comptime.xlisp:368 | binding | advanced/api | lib/common.x:622 |
 | `MapIntInt Var.mapintint(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:289 |
 | `MapLongDouble Var.maplongdouble(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:309 |
 | `MapStringInt Var.mapstringint(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:383 |
 | `MapStringString Var.mapstringstring(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:346 |
 | `Var Var.matmul(Var lhs, Var rhs)` | no binding found | none found | syntax | primary/api | lib/varops.x:418 |
-| `Var Var.mod(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:403 | syntax | primary/api | lib/varops.x:433 |
+| `Var Var.mod(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:411 | syntax | primary/api | lib/varops.x:433 |
 | `Self Var.move_wide_to(Self value, Scope *scope)` | no binding found | none found | ownership, resource, pointer, internal | internal/api | lib/var.x:567 |
-| `Var Var.mul(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:401 | syntax | primary/api | lib/varops.x:412 |
-| `Var Var.neg(Var value)` | verified example | etc/comptime.xlisp:404 | syntax | primary/api | lib/varops.x:442 |
+| `Var Var.mul(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:409 | syntax | primary/api | lib/varops.x:412 |
+| `Var Var.neg(Var value)` | verified example | etc/comptime.xlisp:412 | syntax | primary/api | lib/varops.x:442 |
 | `Var Var.new(Symbol tag, ...)` | no binding found | none found | pointer | primary/api | lib/var.x:649 |
 | `Var Var.null(void)` | no binding found | none found | binding | primary/api | lib/var.x:381 |
 | `void Var.numeric_decode(Var value, X2CVarNumeric *out)` | no binding found | none found | pointer, internal | advanced/api | lib/varconvert.x:79 |
 | `int Var.numeric_info(Symbol tag, X2CVarNumericInfo *out)` | no binding found | none found | pointer, internal | advanced/api | lib/varconvert.x:147 |
-| `Var Var.parse(String str, Symbol kind)` | bound, unverified | etc/comptime.xlisp:260 | binding | advanced/api | lib/var.x:1068 |
-| `inline unsigned Var.payload32(Var value)` | no binding found | none found | internal | advanced/api | lib/common.x:459 |
+| `Var Var.parse(String str, Symbol kind)` | verified example | etc/comptime.xlisp:260 | binding | advanced/api | lib/var.x:1068 |
+| `inline unsigned Var.payload32(Var value)` | verified example | etc/comptime.xlisp:473 | internal | advanced/api | lib/common.x:459 |
 | `void *Var.pointer(Var v)` | no binding found | none found | pointer, internal | advanced/api | lib/var.x:1022 |
 | `String Var.pointer_string(Var v)` | no binding found | none found | internal | advanced/api | lib/dispatch.x:211 |
 | `Var Var.postfix(Var *lhs, Symbol op)` | no binding found | none found | pointer, syntax | primary/api | lib/varops.x:560 |
-| `Var Var.postfixindex(Var value, Var key, Symbol op)` | verified example | etc/comptime.xlisp:408 | syntax | primary/api | lib/dispatch.x:432 |
-| `String Var.pretty_json(Var value)` | no binding found | none found | binding | primary/optional | lib/json.x:565 |
+| `Var Var.postfixindex(Var value, Var key, Symbol op)` | verified example | etc/comptime.xlisp:416 | syntax | primary/api | lib/dispatch.x:432 |
+| `String Var.pretty_json(Var value)` | verified example | etc/comptime.xlisp:438 | binding | primary/optional | lib/json.x:565 |
 | `Regex Var.regex(Var)` | no binding found | none found | resource | unclassified generated/optional | lib/regex.x (interface) |
 | `RegexCapture Var.regexcapture(Var value)` | no binding found | none found | resource | primary/optional | lib/regex.x:745 |
 | `RegexMatch Var.regexmatch(Var value)` | no binding found | none found | resource | primary/optional | lib/regex.x:748 |
 | `int Var.register_object_tag(Symbol tag)` | no binding found | none found | ownership | advanced/api | lib/var.x:240 |
-| `String Var.repr(Var v)` | bound, unverified | etc/comptime.xlisp:285 | binding | advanced/api | lib/dispatch.x:605 |
-| `int Var.same(Var a, Var b)` | verified example | etc/comptime.xlisp:385 | binding | advanced/api | lib/dispatch.x:786 |
-| `Var Var.setindex(Var value, Var key, Var replacement)` | verified example | etc/comptime.xlisp:406 | binding | primary/api | lib/dispatch.x:398 |
-| `short Var.short(Var x)` | verified example | etc/comptime.xlisp:364 | binding | advanced/api | lib/common.x:660 |
-| `long long Var.signed_from_bits(unsigned long long raw, int bits)` | no binding found | none found | internal | advanced/api | lib/varconvert.x:60 |
-| `String Var.str(Var v)` | bound, unverified | etc/init.xlisp:108 | binding | advanced/api | lib/dispatch.x:536 |
-| `inline String Var.string(Var value)` | verified example | etc/comptime.xlisp:361 | binding | advanced/api | lib/common.x:623 |
-| `Var Var.sub(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:400 | syntax | primary/api | lib/varops.x:406 |
-| `inline Symbol Var.symbol(Var x)` | verified example | etc/comptime.xlisp:362 | binding | advanced/api | lib/common.x:628 |
-| `Symbol Var.tag(Var v)` | bound, unverified | etc/comptime.xlisp:254 | binding | advanced/api | lib/var.x:282 |
+| `String Var.repr(Var v)` | verified example | etc/comptime.xlisp:293 | binding | advanced/api | lib/dispatch.x:605 |
+| `int Var.same(Var a, Var b)` | verified example | etc/comptime.xlisp:393 | binding | advanced/api | lib/dispatch.x:786 |
+| `Var Var.setindex(Var value, Var key, Var replacement)` | verified example | etc/comptime.xlisp:414 | binding | primary/api | lib/dispatch.x:398 |
+| `short Var.short(Var x)` | verified example | etc/comptime.xlisp:372 | binding | advanced/api | lib/common.x:660 |
+| `long long Var.signed_from_bits(unsigned long long raw, int bits)` | verified example | etc/comptime.xlisp:474 | internal | advanced/api | lib/varconvert.x:60 |
+| `String Var.str(Var v)` | verified example | etc/init.xlisp:108 | binding | advanced/api | lib/dispatch.x:536 |
+| `inline String Var.string(Var value)` | verified example | etc/comptime.xlisp:369 | binding | advanced/api | lib/common.x:623 |
+| `Var Var.sub(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:408 | syntax | primary/api | lib/varops.x:406 |
+| `inline Symbol Var.symbol(Var x)` | verified example | etc/comptime.xlisp:370 | binding | advanced/api | lib/common.x:628 |
+| `Symbol Var.tag(Var v)` | verified example | etc/comptime.xlisp:254 | binding | advanced/api | lib/var.x:282 |
 | `inline Token Var.token(Var x)` | no binding found | none found | resource, internal | primary/internal | lib/tokenizer.x:36 |
-| `int Var.truth(Var value)` | verified example | etc/comptime.xlisp:405 | syntax | primary/api | lib/varops.x:360 |
+| `int Var.truth(Var value)` | verified example | etc/comptime.xlisp:413 | syntax | primary/api | lib/varops.x:360 |
 | `int Var.try_dispatch_binary(Var lhs, Symbol member, Var rhs, Var *result)` | no binding found | none found | pointer, internal | advanced/api | lib/dispatch.x:63 |
 | `int Var.try_dispatch_unary(Var value, Symbol member, Var *result)` | no binding found | none found | pointer, internal | advanced/api | lib/dispatch.x:88 |
 | `int Var.try_export_context(Var value, Context source, Var *out)` | no binding found | none found | resource, pointer, internal | internal/api | lib/dispatch.x:944 |
-| `uchar Var.uchar(Var x)` | verified example | etc/comptime.xlisp:370 | binding | advanced/api | lib/common.x:651 |
-| `uint Var.uint(Var x)` | verified example | etc/comptime.xlisp:371 | binding | advanced/api | lib/common.x:687 |
-| `ulong Var.ulong(Var x)` | verified example | etc/comptime.xlisp:372 | binding | advanced/api | lib/common.x:717 |
-| `unsigned long long Var.ulong_long(Var x)` | verified example | etc/comptime.xlisp:373 | binding | advanced/api | lib/common.x:740 |
-| `unsigned long long Var.ulong_long_value(Var v)` | verified example | etc/comptime.xlisp:380 | binding | advanced/api | lib/var.x:821 |
-| `unsigned long Var.ulong_value(Var v)` | verified example | etc/comptime.xlisp:378 | binding | advanced/api | lib/var.x:813 |
-| `unsigned Var.unsigned(Var x)` | verified example | etc/comptime.xlisp:368 | binding | advanced/api | lib/common.x:696 |
+| `uchar Var.uchar(Var x)` | verified example | etc/comptime.xlisp:378 | binding | advanced/api | lib/common.x:651 |
+| `uint Var.uint(Var x)` | verified example | etc/comptime.xlisp:379 | binding | advanced/api | lib/common.x:687 |
+| `ulong Var.ulong(Var x)` | verified example | etc/comptime.xlisp:380 | binding | advanced/api | lib/common.x:717 |
+| `unsigned long long Var.ulong_long(Var x)` | verified example | etc/comptime.xlisp:381 | binding | advanced/api | lib/common.x:740 |
+| `unsigned long long Var.ulong_long_value(Var v)` | verified example | etc/comptime.xlisp:388 | binding | advanced/api | lib/var.x:821 |
+| `unsigned long Var.ulong_value(Var v)` | verified example | etc/comptime.xlisp:386 | binding | advanced/api | lib/var.x:813 |
+| `unsigned Var.unsigned(Var x)` | verified example | etc/comptime.xlisp:376 | binding | advanced/api | lib/common.x:696 |
 | `Var Var.update(Var *lhs, Symbol op, Var rhs)` | no binding found | none found | pointer, syntax | primary/api | lib/varops.x:528 |
-| `Var Var.updateindex(Var value, Var key, Symbol op, Var rhs)` | verified example | etc/comptime.xlisp:407 | syntax | primary/api | lib/dispatch.x:416 |
-| `ushort Var.ushort(Var x)` | verified example | etc/comptime.xlisp:369 | binding | advanced/api | lib/common.x:669 |
-| `int Var.wide_compare(Var a, Var b)` | no binding found | none found | internal | advanced/api | lib/var.x:991 |
-| `int Var.wide_equal(Var a, Var b)` | no binding found | none found | internal | advanced/api | lib/var.x:874 |
-| `unsigned Var.wide_hash(Var v)` | no binding found | none found | internal | advanced/api | lib/var.x:841 |
+| `Var Var.updateindex(Var value, Var key, Symbol op, Var rhs)` | verified example | etc/comptime.xlisp:415 | syntax | primary/api | lib/dispatch.x:416 |
+| `ushort Var.ushort(Var x)` | verified example | etc/comptime.xlisp:377 | binding | advanced/api | lib/common.x:669 |
+| `int Var.wide_compare(Var a, Var b)` | verified example | etc/comptime.xlisp:475 | internal | advanced/api | lib/var.x:991 |
+| `int Var.wide_equal(Var a, Var b)` | verified example | etc/comptime.xlisp:476 | internal | advanced/api | lib/var.x:874 |
+| `unsigned Var.wide_hash(Var v)` | verified example | etc/comptime.xlisp:477 | internal | advanced/api | lib/var.x:841 |
 | `Scope Var.wide_owner(Var v)` | no binding found | none found | ownership, resource, internal | internal/api | lib/var.x:574 |
-| `unsigned long long Var.width_mask(int bits)` | no binding found | none found | internal | advanced/api | lib/varconvert.x:53 |
+| `unsigned long long Var.width_mask(int bits)` | verified example | etc/comptime.xlisp:478 | internal | advanced/api | lib/varconvert.x:53 |
 | `Buffer Var.write_pointer_repr(Var v, Buffer out)` | no binding found | none found | resource, internal | advanced/api | lib/dispatch.x:218 |
 | `Buffer Var.write_repr(Var v, Buffer out)` | no binding found | none found | resource | advanced/api | lib/dispatch.x:697 |
 | `Buffer Var.write_str(Var v, Buffer out)` | no binding found | none found | resource | primary/api | lib/dispatch.x:581 |
@@ -1152,19 +2273,19 @@ explicit checks before claiming runtime equivalence.
 | `Var.as_iter` | lib/common.x / native iterator state | needs representation decision | Extracts the `Iter` payload of `value`, or NULL for another tag. | Iter contains caller-owned state and a native next callback; collection producers are lazy. Give Var.as_iter real bounded Iter storage and lifetime; preserve source mutation and exhaustion semantics. |
 | `Var.binary` | lib/varops.x / explicit syntax operations | implementable with current values | Applies a dynamic arithmetic, bitwise, comparison, or logical operator. Integers use C-style promotion and wrap to the result type's width; shifts use the promoted left operand's type and sign-fill signed right shifts. Floating arithmetic uses the widest floating-point operand type. The logical operators are eager in this direct API. Equality and identity are the only operations that accept `void` and return an `<i32>` predicate. Immediate results are self-contained, canonical `String`s keep their pool lifetime, and newly boxed wide results belong to the active `Scope`. | Syntax lowering exists separately; it does not install this explicitly named method. Validate the existing binding against this contract. Next: Bind Var.binary's native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results. |
 | `Var.block` | lib/common.x / native Block contracts | native resource contract | Extracts the `Block` payload of `value`, or NULL for another tag. | The signature crosses Block handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/common.x's handle and effect contract for Var.block; add only a scoped native adapter after those obligations are specified. |
-| `Var.box_f32` | lib/common.x / numeric and descriptor internals | needs bounded probe | Boxes a native `float` as an immediate `<f32>` `Var`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.box_f32 in lib/common.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.box_f64` | lib/common.x / numeric and descriptor internals | needs bounded probe | Boxes a native `double` as an immediate `<f64>` `Var`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.box_f64 in lib/common.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.box_i16` | lib/common.x / numeric and descriptor internals | needs bounded probe | Boxes a native `short` as an immediate `<i16>` `Var`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.box_i16 in lib/common.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.box_i32_bits` | lib/common.x / numeric and descriptor internals | needs bounded probe | Boxes an unsigned 32-bit pattern as an immediate `<i32>` `Var`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.box_i32_bits in lib/common.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.box_i8` | lib/common.x / numeric and descriptor internals | needs bounded probe | Boxes a native `char` as an immediate `<i8>` `Var`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.box_i8 in lib/common.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.box_long` | lib/var.x / numeric and descriptor internals | needs bounded probe | Boxes a `long` into a scope-owned `<long>` value. A `Var` is eight bytes, and the tag consumes some of them. The five widest native families, `long`, `unsigned long`, `long long`, `unsigned long long`, and `long double`, cannot be stored inline. Boxing one allocates a small immutable box in the active scope, and the result lives for that scope's lifetime like any other scope allocation. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.box_long in lib/var.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.box_long_double` | lib/var.x / numeric and descriptor internals | needs bounded probe | Boxes a `long double` into a scope-owned `<ldouble>` value. This is the only family that keeps a full `long double` payload. The tag names that C family; it does not promise a bit width. `Var.floating` narrows the value to `double`; `Var.long_double_value` preserves the extra precision. Raises: `<alloc-fail>` when the box cannot be allocated and `<bad-enc>` when its address cannot be represented in a `Var`. Before `Error` initialization, allocation failure uses the raw fatal floor. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.box_long_double in lib/var.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.box_long_long` | lib/var.x / numeric and descriptor internals | needs bounded probe | Boxes a native signed long-long value without losing precision. Raises: `<alloc-fail>` when the box cannot be allocated and `<bad-enc>` when its address cannot be represented in a `Var`. Before `Error` initialization, allocation failure uses the raw fatal floor. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.box_long_long in lib/var.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.box_u16` | lib/common.x / numeric and descriptor internals | needs bounded probe | Boxes a native `ushort` as an immediate `<u16>` `Var`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.box_u16 in lib/common.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.box_u32` | lib/common.x / numeric and descriptor internals | needs bounded probe | Boxes a native `uint` as an immediate `<u32>` `Var`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.box_u32 in lib/common.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.box_u8` | lib/common.x / numeric and descriptor internals | needs bounded probe | Boxes a native `uchar` as an immediate `<u8>` `Var`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.box_u8 in lib/common.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.box_ulong` | lib/var.x / numeric and descriptor internals | needs bounded probe | Boxes an `unsigned long` into a scope-owned `<ulong>` value. `<ulong>` is a distinct family from `<long>`, so a box made here never compares equal to one made by `Var.box_long` even when both hold the same bit pattern; `Var.wide_equal` requires matching tags. Read it back with `Var.ulong_value`, the one reader that returns the payload unsigned. Raises: `<alloc-fail>` when the box cannot be allocated and `<bad-enc>` when its address cannot be represented in a `Var`. Before `Error` initialization, allocation failure uses the raw fatal floor. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.box_ulong in lib/var.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.box_ulong_long` | lib/var.x / numeric and descriptor internals | needs bounded probe | Boxes a native unsigned long-long value without losing precision. Raises: `<alloc-fail>` when the box cannot be allocated and `<bad-enc>` when its address cannot be represented in a `Var`. Before `Error` initialization, allocation failure uses the raw fatal floor. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.box_ulong_long in lib/var.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
+| `Var.box_f32` | lib/common.x / numeric and descriptor internals | implementable with current values | Boxes a native `float` as an immediate `<f32>` `Var`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.box_f32's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.box_f64` | lib/common.x / numeric and descriptor internals | implementable with current values | Boxes a native `double` as an immediate `<f64>` `Var`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.box_f64's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.box_i16` | lib/common.x / numeric and descriptor internals | implementable with current values | Boxes a native `short` as an immediate `<i16>` `Var`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.box_i16's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.box_i32_bits` | lib/common.x / numeric and descriptor internals | implementable with current values | Boxes an unsigned 32-bit pattern as an immediate `<i32>` `Var`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.box_i32_bits's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.box_i8` | lib/common.x / numeric and descriptor internals | implementable with current values | Boxes a native `char` as an immediate `<i8>` `Var`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.box_i8's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.box_long` | lib/var.x / numeric and descriptor internals | implementable with current values | Boxes a `long` into a scope-owned `<long>` value. A `Var` is eight bytes, and the tag consumes some of them. The five widest native families, `long`, `unsigned long`, `long long`, `unsigned long long`, and `long double`, cannot be stored inline. Boxing one allocates a small immutable box in the active scope, and the result lives for that scope's lifetime like any other scope allocation. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.box_long's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.box_long_double` | lib/var.x / numeric and descriptor internals | implementable with current values | Boxes a `long double` into a scope-owned `<ldouble>` value. This is the only family that keeps a full `long double` payload. The tag names that C family; it does not promise a bit width. `Var.floating` narrows the value to `double`; `Var.long_double_value` preserves the extra precision. Raises: `<alloc-fail>` when the box cannot be allocated and `<bad-enc>` when its address cannot be represented in a `Var`. Before `Error` initialization, allocation failure uses the raw fatal floor. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.box_long_double's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.box_long_long` | lib/var.x / numeric and descriptor internals | implementable with current values | Boxes a native signed long-long value without losing precision. Raises: `<alloc-fail>` when the box cannot be allocated and `<bad-enc>` when its address cannot be represented in a `Var`. Before `Error` initialization, allocation failure uses the raw fatal floor. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.box_long_long's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.box_u16` | lib/common.x / numeric and descriptor internals | implementable with current values | Boxes a native `ushort` as an immediate `<u16>` `Var`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.box_u16's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.box_u32` | lib/common.x / numeric and descriptor internals | implementable with current values | Boxes a native `uint` as an immediate `<u32>` `Var`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.box_u32's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.box_u8` | lib/common.x / numeric and descriptor internals | implementable with current values | Boxes a native `uchar` as an immediate `<u8>` `Var`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.box_u8's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.box_ulong` | lib/var.x / numeric and descriptor internals | implementable with current values | Boxes an `unsigned long` into a scope-owned `<ulong>` value. `<ulong>` is a distinct family from `<long>`, so a box made here never compares equal to one made by `Var.box_long` even when both hold the same bit pattern; `Var.wide_equal` requires matching tags. Read it back with `Var.ulong_value`, the one reader that returns the payload unsigned. Raises: `<alloc-fail>` when the box cannot be allocated and `<bad-enc>` when its address cannot be represented in a `Var`. Before `Error` initialization, allocation failure uses the raw fatal floor. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.box_ulong's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.box_ulong_long` | lib/var.x / numeric and descriptor internals | implementable with current values | Boxes a native unsigned long-long value without losing precision. Raises: `<alloc-fail>` when the box cannot be allocated and `<bad-enc>` when its address cannot be represented in a `Var`. Before `Error` initialization, allocation failure uses the raw fatal floor. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.box_ulong_long's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
 | `Var.buffer` | lib/common.x / native Buffer contracts | native resource contract | Extracts the `Buffer` payload of `value`, or NULL for another tag. | The signature crosses Buffer handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/common.x's handle and effect contract for Var.buffer; add only a scoped native adapter after those obligations are specified. |
 | `Var.bytes` | lib/common.x / native Bytes contracts | native resource contract | Extracts the `Bytes` payload of `value`, or NULL for another tag. | The signature crosses Bytes handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/common.x's handle and effect contract for Var.bytes; add only a scoped native adapter after those obligations are specified. |
 | `Var.caaaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | needs representation decision | Returns `car(car(car(car(value))))` after treating `value` as a `List`. | A car step may return runtime void; current adapters collapse that absence into an empty List. Use the value-contract decision before extending absent-selector adapters. |
@@ -1193,31 +2314,31 @@ explicit checks before claiming runtime equivalence.
 | `Var.cddadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | needs representation decision | Returns `cdr(cdr(car(cdr(value))))` after treating `value` as a `List`. | A car step may return runtime void; current adapters collapse that absence into an empty List. Use the value-contract decision before extending absent-selector adapters. |
 | `Var.cddar` | lib/list-selectors.x; lib/list.x / canonical List selectors | needs representation decision | Returns `cdr(cdr(car(value)))` after treating `value` as a `List`. | A car step may return runtime void; current adapters collapse that absence into an empty List. Use the value-contract decision before extending absent-selector adapters. |
 | `Var.cdddar` | lib/list-selectors.x; lib/list.x / canonical List selectors | needs representation decision | Returns `cdr(cdr(cdr(car(value))))` after treating `value` as a `List`. | A car step may return runtime void; current adapters collapse that absence into an empty List. Use the value-contract decision before extending absent-selector adapters. |
-| `Var.cddddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(cdr(cdr(value))))` after treating `value` as a `List`. | Only cdr steps occur; exhaustion is a representable empty List. Compose the existing nil-safe cdr owner for Var.cddddr; test short chains. |
-| `Var.cdddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(cdr(value)))` after treating `value` as a `List`. | Only cdr steps occur; exhaustion is a representable empty List. Compose the existing nil-safe cdr owner for Var.cdddr; test short chains. |
+| `Var.cddddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(cdr(cdr(value))))` after treating `value` as a `List`. | Only cdr steps occur; exhaustion is a representable empty List. Validate the existing binding against this contract. Next: Compose the existing nil-safe cdr owner for Var.cddddr; test short chains. |
+| `Var.cdddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(cdr(value)))` after treating `value` as a `List`. | Only cdr steps occur; exhaustion is a representable empty List. Validate the existing binding against this contract. Next: Compose the existing nil-safe cdr owner for Var.cdddr; test short chains. |
 | `Var.cddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Applies the `cddr` selector chain to `Var`. | Only cdr steps occur; exhaustion is a representable empty List. Validate the existing binding against this contract. Next: Compose the existing nil-safe cdr owner for Var.cddr; test short chains. |
 | `Var.cdr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Treats `var` as a `List` and returns its tail. | Only cdr steps occur; exhaustion is a representable empty List. Validate the existing binding against this contract. Next: Compose the existing nil-safe cdr owner for Var.cdr; test short chains. |
 | `Var.char` | lib/common.x / Var value operations | implementable with current values | Returns `x` as a native `char` under the `Var.convert` rules. Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out of floating range, or invalidly encoded. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.char to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Var.clone_wide` | lib/var.x / numeric and descriptor internals | needs bounded probe | Clones the wide numeric `value` into a new box in the active `Scope`. The clone compares equal but not identical to `value`. Returns `void` when `value` is not wide. Raises: `<alloc-fail>` when the clone cannot be allocated, or `<bad-enc>` if its address cannot be represented in a `Var`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.clone_wide in lib/var.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
+| `Var.clone_wide` | lib/var.x / numeric and descriptor internals | needs representation decision | Clones the wide numeric `value` into a new box in the active `Scope`. The clone compares equal but not identical to `value`. Returns `void` when `value` is not wide. Raises: `<alloc-fail>` when the clone cannot be allocated, or `<bad-enc>` if its address cannot be represented in a `Var`. | Valid wide inputs allocate a fresh box in the active Scope; a nonwide input returns true void. Settle true-void transport, then verify fresh identity, equal payload and session-owned lifetime for wide inputs. |
 | `Var.compare` | lib/dispatch.x / Var value operations | implementable with current values | Compares `a` and `b` by runtime value group and registered ordering. Raises: `<void-op>` when either operand is `void`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.compare to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.cons` | lib/list.x / Var value operations | implementable with current values | Returns `cons(head, tail)`, with the same identity and failures. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.cons to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.contains` | lib/dispatch.x / Var value operations | implementable with current values | Tests dynamic membership through the receiver's registered protocol row. Raises: `<bad-enc>`, `<void-op>`, or `<no-member>` when the dynamic receiver cannot perform membership. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.contains to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.convert` | lib/varconvert.x / Var value operations | implementable with current values | Converts `value` to a numeric `target`, or returns exact-tag identity. All fifteen numeric families cross through the rules in this module. Integer narrowing keeps low bits, floating-to-integer truncates toward zero with a range check, and floating results follow host conversion. Identity returns the original `Var` and preserves its ownership; a newly boxed wide numeric result belongs to the active `Scope`. Converting a discrete `<nan>`, `<-inf>`, or `<+inf>` value to `<f64>` also returns the original `Var`, preserving its discrete tag. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.convert to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Var.custom_descriptor_index` | lib/var.x / numeric and descriptor internals | needs bounded probe | Returns a registered custom object's row, or `-1` for another value. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.custom_descriptor_index in lib/var.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.decode_f32` | lib/common.x / numeric and descriptor internals | needs bounded probe | Decodes an immediate `<f32>` `Var`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.decode_f32 in lib/common.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.decode_f64` | lib/common.x / numeric and descriptor internals | needs bounded probe | Decodes an immediate `<f64>` `Var`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.decode_f64 in lib/common.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
+| `Var.custom_descriptor_index` | lib/var.x / numeric and descriptor internals | implementable with current values | Returns a registered custom object's row, or `-1` for another value. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.custom_descriptor_index's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.decode_f32` | lib/common.x / numeric and descriptor internals | implementable with current values | Decodes an immediate `<f32>` `Var`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.decode_f32's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.decode_f64` | lib/common.x / numeric and descriptor internals | implementable with current values | Decodes an immediate `<f64>` `Var`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.decode_f64's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
 | `Var.dispatch_truth` | lib/dispatch.x / native pointer crossings | needs representation decision | Tries the registered truth callback for `value`. A null `handled`, missing descriptor, or missing callback returns zero. Otherwise `handled` is set to one and the synchronous callback result is returned; an available `handled` is cleared before lookup. | The signature passes an actual native address; a lowered local cell is not that address. Specify the pointee layout, mutation and lifetime for Var.dispatch_truth; reuse status/cell adapters only where the complete signature permits. |
 | `Var.div` | lib/varops.x / explicit syntax operations | implementable with current values | Divides dynamic values through numeric or registered `div` behavior. Numeric integer zero divisors raise; floating division uses host infinity and NaN behavior. Other promotion, failure, and ownership follow `Var.binary`. | Syntax lowering exists separately; it does not install this explicitly named method. Validate the existing binding against this contract. Next: Bind Var.div's native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results. |
 | `Var.double` | lib/common.x / Var value operations | implementable with current values | Returns `x` as a native `double` under the `Var.convert` rules. Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, or invalidly encoded. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.double to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Var.encoding_valid` | lib/var.x / numeric and descriptor internals | needs bounded probe | Reports whether `value` has a valid structural `Var` encoding. An address-bearing encoding must still refer to live storage of the right type; wide encodings in particular require a readable `Scope`-owned box. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.encoding_valid in lib/var.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
+| `Var.encoding_valid` | lib/var.x / numeric and descriptor internals | implementable with current values | Reports whether `value` has a valid structural `Var` encoding. An address-bearing encoding must still refer to live storage of the right type; wide encodings in particular require a readable `Scope`-owned box. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.encoding_valid's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
 | `Var.equal` | lib/dispatch.x / Var value operations | implementable with current values | Applies the registered equality operation for `a` and `b`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.equal to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Var.fallback_compare` | lib/dispatch.x / numeric and descriptor internals | needs bounded probe | Compares without consulting a runtime descriptor. Raises: `<void-op>` when either operand is `void`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.fallback_compare in lib/dispatch.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.fallback_equal` | lib/dispatch.x / numeric and descriptor internals | needs bounded probe | Applies non-dispatch equality to `a` and `b`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.fallback_equal in lib/dispatch.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.fallback_hash` | lib/dispatch.x / numeric and descriptor internals | needs bounded probe | Returns the non-dispatch runtime hash of `Var`. Raises: `<void-op>` for `void`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.fallback_hash in lib/dispatch.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
+| `Var.fallback_compare` | lib/dispatch.x / numeric and descriptor internals | implementable with current values | Compares without consulting a runtime descriptor. Raises: `<void-op>` when either operand is `void`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.fallback_compare's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.fallback_equal` | lib/dispatch.x / numeric and descriptor internals | implementable with current values | Applies non-dispatch equality to `a` and `b`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.fallback_equal's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.fallback_hash` | lib/dispatch.x / numeric and descriptor internals | implementable with current values | Returns the non-dispatch runtime hash of `Var`. Raises: `<void-op>` for `void`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.fallback_hash's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
 | `Var.fallback_iter` | lib/dispatch.x / native iterator state | needs representation decision | Returns a non-dispatch iterator over `Var`. Raises: `<void-op>` for `void`. A null `dest` returns NULL without raising. | Iter contains caller-owned state and a native next callback; collection producers are lazy. Give Var.fallback_iter real bounded Iter storage and lifetime; preserve source mutation and exhaustion semantics. |
-| `Var.fallback_repr` | lib/dispatch.x / numeric and descriptor internals | needs bounded probe | Returns the non-dispatch readable representation of `Var`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.fallback_repr in lib/dispatch.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.fallback_str` | lib/dispatch.x / numeric and descriptor internals | needs bounded probe | Returns the non-dispatch display `String` of `Var`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.fallback_str in lib/dispatch.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.fallback_truth` | lib/varops.x / numeric and descriptor internals | needs bounded probe | Returns built-in truthiness without consulting a registered descriptor. Numeric and `Symbol` zero and null pointer-bearing values are false; other supported built-ins are true. Container-specific truth comes from dispatch. Raises: `<bad-enc>` for invalid `Var` bits, `<void-op>` for `void`, or `<bad-types>` when no truthiness rule exists. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.fallback_truth in lib/varops.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
+| `Var.fallback_repr` | lib/dispatch.x / numeric and descriptor internals | implementable with current values | Returns the non-dispatch readable representation of `Var`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.fallback_repr's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.fallback_str` | lib/dispatch.x / numeric and descriptor internals | implementable with current values | Returns the non-dispatch display `String` of `Var`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.fallback_str's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.fallback_truth` | lib/varops.x / numeric and descriptor internals | implementable with current values | Returns built-in truthiness without consulting a registered descriptor. Numeric and `Symbol` zero and null pointer-bearing values are false; other supported built-ins are true. Container-specific truth comes from dispatch. Raises: `<bad-enc>` for invalid `Var` bits, `<void-op>` for `void`, or `<bad-types>` when no truthiness rule exists. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.fallback_truth's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
 | `Var.fallback_write_repr` | lib/dispatch.x / native Buffer contracts | native resource contract | Appends the non-dispatch representation of `Var` to a `Buffer`. | The signature crosses Buffer handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/dispatch.x's handle and effect contract for Var.fallback_write_repr; add only a scoped native adapter after those obligations are specified. |
 | `Var.fallback_write_str` | lib/dispatch.x / native Buffer contracts | native resource contract | Appends the non-dispatch display text of `Var` to a `Buffer`. A primitive, pointer, or `void` renders straight into `out` instead of through an intermediate `String`. | The signature crosses Buffer handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/dispatch.x's handle and effect contract for Var.fallback_write_str; add only a scoped native adapter after those obligations are specified. |
 | `Var.file` | lib/common.x / native File contracts | native resource contract | Extracts the `File` payload of `value`, or NULL for another tag. | The signature crosses File handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/common.x's handle and effect contract for Var.file; add only a scoped native adapter after those obligations are specified. |
@@ -1227,10 +2348,10 @@ explicit checks before claiming runtime equivalence.
 | `Var.hash` | lib/dispatch.x / Var value operations | implementable with current values | Returns the runtime hash of `Var`. Raises: `<void-op>` for `void`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.hash to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.int` | lib/common.x / Var value operations | implementable with current values | Returns `x` as a native `int` under the `Var.convert` rules. Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out of floating range, or invalidly encoded. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.int to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.integer` | lib/var.x / Var value operations | implementable with current values | Returns `v`'s payload as a `long` when its tag is integral, or 0. This reads the payload; it does not convert. It decodes every integer family, from `<u8>` through `<ullong>`, including the scope-owned boxes, and returns 0 for a tag it does not handle. A `double` reads as 0, and so does a `String`; nothing reports the mismatch. A `<ullong>` or `<llong>` payload is truncated to `long`, and a `<ulong>` above `LONG_MAX` comes back negative. `Var.ulong_value` preserves the unsigned payload. A `Symbol` reads as its numeric `Symbol` value. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.integer to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Var.integer_box` | lib/varconvert.x / numeric and descriptor internals | needs bounded probe | Boxes the low target-width bits of `raw` using integer `target`. Signed targets interpret those bits as two's-complement. Immediate targets return self-contained values; wide targets allocate their boxes in the active `Scope`. Raises: `<bad-target>` for a noninteger target, or `<alloc-fail>` or `<bad-enc>` while boxing a wide result. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.integer_box in lib/varconvert.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.integer_compare` | lib/var.x / numeric and descriptor internals | needs bounded probe | Orders the integer payloads of `a` and `b`, returning -1, 0, or 1. Each value is decomposed into a sign and an unsigned magnitude first, so the whole integer range orders correctly, including a `<ullong>` above `LONG_MAX` against a negative `<long>`. Subtracting in a fixed-width integer type could overflow. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.integer_compare in lib/var.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.integer_floating_compare` | lib/var.x / numeric and descriptor internals | needs bounded probe | Orders an integer-kinded `integer` against a floating `floating`. Returns -1, 0, or 1 for less, equal, and greater. The integer is never converted to floating point, so a large `<ullong>` and a nearby `double` order by their true values. A floating value with a fractional part is never equal to an integer. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.integer_floating_compare in lib/var.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.integer_tag` | lib/varconvert.x / numeric and descriptor internals | needs bounded probe | Returns the integer tag selected by `rank` and signedness. `rank` must be positive. Ranks one through three map to `<i32>` or `<u32>`; callers applying integer promotion must first select its resulting signedness. Ranks four through six select the 48-bit, `long`, and `long long` families. A rank above six returns the null `Symbol`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.integer_tag in lib/varconvert.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
+| `Var.integer_box` | lib/varconvert.x / numeric and descriptor internals | implementable with current values | Boxes the low target-width bits of `raw` using integer `target`. Signed targets interpret those bits as two's-complement. Immediate targets return self-contained values; wide targets allocate their boxes in the active `Scope`. Raises: `<bad-target>` for a noninteger target, or `<alloc-fail>` or `<bad-enc>` while boxing a wide result. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.integer_box's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.integer_compare` | lib/var.x / numeric and descriptor internals | implementable with current values | Orders the integer payloads of `a` and `b`, returning -1, 0, or 1. Each value is decomposed into a sign and an unsigned magnitude first, so the whole integer range orders correctly, including a `<ullong>` above `LONG_MAX` against a negative `<long>`. Subtracting in a fixed-width integer type could overflow. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.integer_compare's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.integer_floating_compare` | lib/var.x / numeric and descriptor internals | implementable with current values | Orders an integer-kinded `integer` against a floating `floating`. Returns -1, 0, or 1 for less, equal, and greater. The integer is never converted to floating point, so a large `<ullong>` and a nearby `double` order by their true values. A floating value with a fractional part is never equal to an integer. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.integer_floating_compare's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.integer_tag` | lib/varconvert.x / numeric and descriptor internals | implementable with current values | Returns the integer tag selected by `rank` and signedness. `rank` must be positive. Ranks one through three map to `<i32>` or `<u32>`; callers applying integer promotion must first select its resulting signedness. Ranks four through six select the 48-bit, `long`, and `long long` families. A rank above six returns the null `Symbol`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.integer_tag's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
 | `Var.is` | lib/var.x / Var value operations | implementable with current values | Reports whether `value` has the requested runtime tag. This tests one family. A `Var` holding an `unsigned char` answers 0 for `<i32>` even though both are integers. When any integer will do, ask `Var.is_integer`, or compare `Var.kind`. As with `Var.tag`, validate externally constructed bits first: an invalid encoding uses the `<f64>` fallback. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.is to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.is_atom` | lib/atom.x / Var value operations | implementable with current values | Reports whether `value` is an exact-spelling `Atom`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.is_atom to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.is_atom_binder` | lib/match.x / Var value operations | implementable with current values | Reports whether `atom` is a valid named or anonymous `?` binder. Raises: `<alloc-fail>` while decoding a compact `Atom`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.is_atom_binder to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
@@ -1242,25 +2363,25 @@ explicit checks before claiming runtime equivalence.
 | `Var.is_nil` | lib/var.x / Var value operations | implementable with current values | Reports whether `v` is the typed empty `List`. The empty `List` is a native null pointer carrying the `<list>` tag. `Var.is_null` answers 0 and `Var.tag` answers `<list>`. Every `%()` and every exhausted `List.cdr` yields this one value, so an identity test on the bits is a valid emptiness test. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.is_nil to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.is_null` | lib/var.x / Var value operations | implementable with current values | Reports whether `v` is the all-zero `Null` value. `Null` is a value: the null pointer and the external `nil`. It is legal collection data, iterating a `List` can return it, and it is false in a condition. Its tag decodes as `<p48>`, so there is no dedicated null family for `Var.is` to match. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.is_null to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.is_object` | lib/var.x / Var value operations | implementable with current values | Reports whether `v` holds a registered boxed object. True for the builtin classes such as `String`, `List`, `Array`, `Map`, `File`, and `Iter`, and for any tag registered with `Var.register_object_tag`. A pointer to a handle, such as `<string*>`, is `<reference>` instead and answers 0 here. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.is_object to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Var.is_pointer` | lib/var.x / Var value operations | implementable with current values | Reports whether `v` holds a native pointer. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.is_pointer to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Var.is_reference` | lib/var.x / Var value operations | implementable with current values | Reports whether `v` holds a pointer to a boxed handle. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.is_reference to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Var.is_row` | lib/common.x / numeric and descriptor internals | needs bounded probe | Reports whether `value` occupies the encoding row at `top`/`bottom`. `mask` selects the bits the decoder discriminates on within `top`'s group, so a caller that already knows the row tests it with two compares instead of a decode. `var-tags.xmacro` projects the rows that qualify; a row whose decoded form carries a validity clause is not one of them and must ask `Var.is`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.is_row in lib/common.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
+| `Var.is_pointer` | lib/var.x / source address tags | needs representation decision | Reports whether `v` holds a native pointer. | The native predicate reads its argument tag correctly, but meta local addresses currently use evaluator cells instead of their declared native pointer/reference tag. Validate the existing binding against this contract. Next: Preserve the declared pointee tag when representing addresses; compare int and String local addresses with native execution. |
+| `Var.is_reference` | lib/var.x / source address tags | needs representation decision | Reports whether `v` holds a pointer to a boxed handle. | The native predicate reads its argument tag correctly, but meta local addresses currently use evaluator cells instead of their declared native pointer/reference tag. Validate the existing binding against this contract. Next: Preserve the declared pointee tag when representing addresses; compare int and String local addresses with native execution. |
+| `Var.is_row` | lib/common.x / numeric and descriptor internals | implementable with current values | Reports whether `value` occupies the encoding row at `top`/`bottom`. `mask` selects the bits the decoder discriminates on within `top`'s group, so a caller that already knows the row tests it with two compares instead of a decode. `var-tags.xmacro` projects the rows that qualify; a row whose decoded form carries a validity clause is not one of them and must ask `Var.is`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.is_row's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
 | `Var.is_void` | lib/var.x / absence and null values | needs representation decision | Reports whether `v` is the absence sentinel `void`. An API returns `void` to say there is nothing here. It is excluded from every collection and iterator value domain: it cannot be pushed into an `Array` or stored in a `Map`. Equality and identity still inspect it. Two sentinels compare equal and identical, while one sentinel and one ordinary value compare unequal. Truthiness, hashing, ordering, conversion, and iteration on `void` raise to a matching catch or terminate. | Missing values or null tests can distinguish runtime void, Null and empty List, which current transport can conflate. Apply the value-contract decision to Var.is_void; retain separate success, absence and empty-value probes. |
 | `Var.is_wide` | lib/common.x / Var value operations | implementable with current values | Reports whether `v` uses a scope-owned wide numeric box. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.is_wide to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.iter` | lib/dispatch.x / native iterator state | needs representation decision | Returns an iterator over `Var`. Raises: `<void-op>` for `void`. A null `dest` returns NULL without raising. | Iter contains caller-owned state and a native next callback; collection producers are lazy. Give Var.iter real bounded Iter storage and lifetime; preserve source mutation and exhaustion semantics. |
 | `Var.job` | lib/process.x / native Job contracts | native resource contract | Interface only; inspect the producer. | The signature crosses Job handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/process.x's handle and effect contract for Var.job; add only a scoped native adapter after those obligations are specified. |
-| `Var.json` | lib/json.x / Var value operations | implementable with current values | Returns `value` as compact JSON text. `Map` names are written in byte order and must be `String`s or `Symbol`s with distinct spellings; a `Symbol` value is written as a string. A `List` is written as an array. A `double` is written with the fewest digits that read back to the same value. Each maximal ill-formed UTF-8 subsequence in a string is written as U+FFFD, as Python and JavaScript decoders replace it. Raises: `<bad-types>` for a value or name JSON cannot hold, `<bad-arg>` for a `String` and a `Symbol` name with the same spelling, `<conv-range>` for NaN or an infinity, or `<size-limit>` for nesting deeper than 512 levels. | The signature uses represented values and an existing runtime owner. Bind Var.json to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
+| `Var.json` | lib/json.x / Var value operations | implementable with current values | Returns `value` as compact JSON text. `Map` names are written in byte order and must be `String`s or `Symbol`s with distinct spellings; a `Symbol` value is written as a string. A `List` is written as an array. A `double` is written with the fewest digits that read back to the same value. Each maximal ill-formed UTF-8 subsequence in a string is written as U+FFFD, as Python and JavaScript decoders replace it. Raises: `<bad-types>` for a value or name JSON cannot hold, `<bad-arg>` for a `String` and a `Symbol` name with the same spelling, `<conv-range>` for NaN or an infinity, or `<size-limit>` for nesting deeper than 512 levels. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.json to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.jsonbool` | lib/json.x / native JsonBool contracts | native resource contract | Unboxes a JSON boolean from a `Var` produced by `JsonBool.var`. | The signature crosses JsonBool handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/json.x's handle and effect contract for Var.jsonbool; add only a scoped native adapter after those obligations are specified. |
 | `Var.kind` | lib/var.x / Var value operations | implementable with current values | Returns the `Symbol` naming the coarse category of `v`'s payload. The categories are `<integer>`, `<floating>`, `<symbol>`, `<object>`, `<pointer>`, `<reference>`, and `<void>`, and every tag belongs to exactly one. Use kind when a group of families is treated alike. All twelve integer widths answer `<integer>`, and every builtin class handle such as `String`, `List`, `Map`, and `File` answers `<object>`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.kind to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Var.known_tag` | lib/var.x / numeric and descriptor internals | needs bounded probe | Reports whether `tag` has a built-in encoding or registered custom row. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.known_tag in lib/var.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
+| `Var.known_tag` | lib/var.x / numeric and descriptor internals | implementable with current values | Reports whether `tag` has a built-in encoding or registered custom row. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.known_tag's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
 | `Var.list` | lib/common.x / Var value operations | implementable with current values | Extracts the `List` payload of `value`, or NULL for another tag. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.list to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Var.listchar` | lib/typed-list.x / typed canonical List views | implementable with current values | Extracts and validates `value` as `ListChar` without copying its cells. A `Var` without the `<list>` tag becomes `nil`. A `List` payload follows the same element validation, identity, and lifetime rules as `List.listchar`. | Typed Lists share ordinary canonical cells; conversion validates element tags. Load typed-list.x and bind Var.listchar; test matching and rejected tags and shared identity. |
-| `Var.listdbl` | lib/typed-list.x / typed canonical List views | implementable with current values | Extracts and validates `value` as `ListDbl` without copying its cells. A `Var` without the `<list>` tag becomes `nil`. A `List` payload follows the same element validation, identity, and lifetime rules as `List.listdbl`. | Typed Lists share ordinary canonical cells; conversion validates element tags. Load typed-list.x and bind Var.listdbl; test matching and rejected tags and shared identity. |
-| `Var.listfloat` | lib/typed-list.x / typed canonical List views | implementable with current values | Extracts and validates `value` as `ListFloat` without copying its cells. A `Var` without the `<list>` tag becomes `nil`. A `List` payload follows the same element validation, identity, and lifetime rules as `List.listfloat`. | Typed Lists share ordinary canonical cells; conversion validates element tags. Load typed-list.x and bind Var.listfloat; test matching and rejected tags and shared identity. |
-| `Var.listint` | lib/typed-list.x / typed canonical List views | implementable with current values | Extracts and validates `value` as `ListInt` without copying its cells. A `Var` without the `<list>` tag becomes `nil`. A `List` payload follows the same element validation, identity, and lifetime rules as `List.listint`. | Typed Lists share ordinary canonical cells; conversion validates element tags. Load typed-list.x and bind Var.listint; test matching and rejected tags and shared identity. |
-| `Var.listshort` | lib/typed-list.x / typed canonical List views | implementable with current values | Extracts and validates `value` as `ListShort` without copying its cells. A `Var` without the `<list>` tag becomes `nil`. A `List` payload follows the same element validation, identity, and lifetime rules as `List.listshort`. | Typed Lists share ordinary canonical cells; conversion validates element tags. Load typed-list.x and bind Var.listshort; test matching and rejected tags and shared identity. |
-| `Var.liststring` | lib/typed-list.x / typed canonical List views | implementable with current values | Extracts and validates `value` as `ListString` without copying its cells. A `Var` without the `<list>` tag becomes `nil`. A `List` payload follows the same element validation, identity, and lifetime rules as `List.liststring`. | Typed Lists share ordinary canonical cells; conversion validates element tags. Load typed-list.x and bind Var.liststring; test matching and rejected tags and shared identity. |
-| `Var.listsymbol` | lib/typed-list.x / typed canonical List views | implementable with current values | Extracts and validates `value` as `ListSymbol` without copying its cells. A `Var` without the `<list>` tag becomes `nil`. A `List` payload follows the same element validation, identity, and lifetime rules as `List.listsymbol`. | Typed Lists share ordinary canonical cells; conversion validates element tags. Load typed-list.x and bind Var.listsymbol; test matching and rejected tags and shared identity. |
+| `Var.listchar` | lib/typed-list.x / typed canonical List views | implementable with current values | Extracts and validates `value` as `ListChar` without copying its cells. A `Var` without the `<list>` tag becomes `nil`. A `List` payload follows the same element validation, identity, and lifetime rules as `List.listchar`. | Typed Lists share ordinary canonical cells; conversion validates element tags. Validate the existing binding against this contract. Next: Load typed-list.x and bind Var.listchar; test matching and rejected tags and shared identity. |
+| `Var.listdbl` | lib/typed-list.x / typed canonical List views | implementable with current values | Extracts and validates `value` as `ListDbl` without copying its cells. A `Var` without the `<list>` tag becomes `nil`. A `List` payload follows the same element validation, identity, and lifetime rules as `List.listdbl`. | Typed Lists share ordinary canonical cells; conversion validates element tags. Validate the existing binding against this contract. Next: Load typed-list.x and bind Var.listdbl; test matching and rejected tags and shared identity. |
+| `Var.listfloat` | lib/typed-list.x / typed canonical List views | implementable with current values | Extracts and validates `value` as `ListFloat` without copying its cells. A `Var` without the `<list>` tag becomes `nil`. A `List` payload follows the same element validation, identity, and lifetime rules as `List.listfloat`. | Typed Lists share ordinary canonical cells; conversion validates element tags. Validate the existing binding against this contract. Next: Load typed-list.x and bind Var.listfloat; test matching and rejected tags and shared identity. |
+| `Var.listint` | lib/typed-list.x / typed canonical List views | implementable with current values | Extracts and validates `value` as `ListInt` without copying its cells. A `Var` without the `<list>` tag becomes `nil`. A `List` payload follows the same element validation, identity, and lifetime rules as `List.listint`. | Typed Lists share ordinary canonical cells; conversion validates element tags. Validate the existing binding against this contract. Next: Load typed-list.x and bind Var.listint; test matching and rejected tags and shared identity. |
+| `Var.listshort` | lib/typed-list.x / typed canonical List views | implementable with current values | Extracts and validates `value` as `ListShort` without copying its cells. A `Var` without the `<list>` tag becomes `nil`. A `List` payload follows the same element validation, identity, and lifetime rules as `List.listshort`. | Typed Lists share ordinary canonical cells; conversion validates element tags. Validate the existing binding against this contract. Next: Load typed-list.x and bind Var.listshort; test matching and rejected tags and shared identity. |
+| `Var.liststring` | lib/typed-list.x / typed canonical List views | implementable with current values | Extracts and validates `value` as `ListString` without copying its cells. A `Var` without the `<list>` tag becomes `nil`. A `List` payload follows the same element validation, identity, and lifetime rules as `List.liststring`. | Typed Lists share ordinary canonical cells; conversion validates element tags. Validate the existing binding against this contract. Next: Load typed-list.x and bind Var.liststring; test matching and rejected tags and shared identity. |
+| `Var.listsymbol` | lib/typed-list.x / typed canonical List views | implementable with current values | Extracts and validates `value` as `ListSymbol` without copying its cells. A `Var` without the `<list>` tag becomes `nil`. A `List` payload follows the same element validation, identity, and lifetime rules as `List.listsymbol`. | Typed Lists share ordinary canonical cells; conversion validates element tags. Validate the existing binding against this contract. Next: Load typed-list.x and bind Var.listsymbol; test matching and rejected tags and shared identity. |
 | `Var.long` | lib/common.x / Var value operations | implementable with current values | Returns `x` as a native `long` under the `Var.convert` rules. Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out of floating range, or invalidly encoded. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.long to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.long_double` | lib/common.x / Var value operations | implementable with current values | Returns `x` as a native `long double` under the `Var.convert` rules. Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, or invalidly encoded. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.long_double to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.long_double_value` | lib/var.x / Var value operations | implementable with current values | Returns the payload of an `<ldouble>` box, or 0.0 if `v` has another tag. This is the only reader that preserves a `long double`. Every other floating tag, `<f64>` included, yields 0.0 here instead of being widened. `Var.floating` is the general floating reader. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.long_double_value to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
@@ -1272,22 +2393,22 @@ explicit checks before claiming runtime equivalence.
 | `Var.maplongdouble` | lib/typed-map.x / packed typed collection conversions | needs representation decision | Returns the typed-map pointer carried by `value`. `value` must carry this family's registered tag; the converter does not validate the tag before reading its pointer payload. | The target owns packed native storage, not the ordinary Array/Map element layout. Specify a tagged handle and owner for Var.maplongdouble's target before exposing its conversion and accessors. |
 | `Var.mapstringint` | lib/typed-map.x / packed typed collection conversions | needs representation decision | Returns the typed-map pointer carried by `value`. `value` must carry this family's registered tag; the converter does not validate the tag before reading its pointer payload. | The target owns packed native storage, not the ordinary Array/Map element layout. Specify a tagged handle and owner for Var.mapstringint's target before exposing its conversion and accessors. |
 | `Var.mapstringstring` | lib/typed-map.x / packed typed collection conversions | needs representation decision | Returns the typed-map pointer carried by `value`. `value` must carry this family's registered tag; the converter does not validate the tag before reading its pointer payload. | The target owns packed native storage, not the ordinary Array/Map element layout. Specify a tagged handle and owner for Var.mapstringstring's target before exposing its conversion and accessors. |
-| `Var.matmul` | lib/varops.x / explicit syntax operations | implementable with current values | Multiplies matrices through a registered `matmul` behavior. `@` has no numeric meaning, so numeric operands raise `<bad-op>`; a protocol result keeps the ownership chosen by its callback. | Syntax lowering exists separately; it does not install this explicitly named method. Bind Var.matmul's native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results. |
+| `Var.matmul` | lib/varops.x / registered matrix protocols | needs bounded probe | Multiplies matrices through a registered `matmul` behavior. `@` has no numeric meaning, so numeric operands raise `<bad-op>`; a protocol result keeps the ownership chosen by its callback. | The native owner only dispatches a registered matmul behavior; builtin numeric values raise bad-op. Identify a session-owned represented matrix protocol and verify its result lifetime before installing and testing this entry point. |
 | `Var.mod` | lib/varops.x / explicit syntax operations | implementable with current values | Computes dynamic remainder through integer or registered `mod` behavior. Numeric operands use the common promoted integer type and reject a zero divisor; floating operands are not accepted. Other failure and ownership follow `Var.binary`. | Syntax lowering exists separately; it does not install this explicitly named method. Validate the existing binding against this contract. Next: Bind Var.mod's native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results. |
 | `Var.move_wide_to` | lib/var.x / allocation and ownership contracts | native resource contract | Moves a wide numeric box into the destination `Scope` held by `scope`. The box is not copied and `value` keeps its identity. If the destination slot is NULL, a new `Scope` is created there. Returns `value` unchanged for another family. For a wide value, raises `<bad-arg>` when `scope` is NULL, or `<alloc-fail>` when a new destination `Scope` cannot be allocated. Ownership is unchanged on failure. | The operation frees, allocates, observes or transfers storage/registry ownership that the evaluator currently owns. Define which session-owned objects Var.move_wide_to may observe or transfer; never alias a destructive native owner blindly. |
 | `Var.mul` | lib/varops.x / explicit syntax operations | implementable with current values | Multiplies dynamic values through numeric or registered `mul` behavior. Numeric promotion, failure, and result ownership follow `Var.binary`; a protocol result keeps the ownership chosen by its callback. | Syntax lowering exists separately; it does not install this explicitly named method. Validate the existing binding against this contract. Next: Bind Var.mul's native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results. |
 | `Var.neg` | lib/varops.x / explicit syntax operations | implementable with current values | Negates a dynamic value through registered `neg` or numeric subtraction. Without a selected protocol, this computes `0 - value` with ordinary `Var` promotion and wrapping, so a narrow integer promotes before negation. Raises: `<bad-enc>` for invalid bits, `<void-op>` for `void`, `<no-member>` for an object without `neg`, or any cause from protocol or numeric subtraction. | Syntax lowering exists separately; it does not install this explicitly named method. Validate the existing binding against this contract. Next: Bind Var.neg's native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results. |
-| `Var.new` | lib/var.x / native variadic calls | needs bounded probe | Constructs a `Var` with `tag` from its tag-directed variadic payload. The tag chooses how the argument is read, so pass exactly the C type the tag names: an `int` for `<i32>`, an `unsigned long` for `<u48>`, a `double` for `<f64>`, a `long double` for `<ldouble>`, a pointer for any pointer, reference, or object family, and a `Symbol`'s numeric value for `<symbol>`. `<void>` consumes no payload. Variadic arguments are not converted for you. Assignment, `Var boxed = 42;`, is the usual way to box a value. Use this constructor when the tag is computed at run time. | Native ellipsis arguments have no fixed Func adapter signature. Inspect Var.new's count/format owner and prototype a List/rest adapter preserving argument count, type and order. |
+| `Var.new` | lib/var.x / native variadic calls | needs bounded probe | Constructs a `Var` with `tag` from its tag-directed variadic payload. The tag chooses how the argument is read, so pass exactly the C type the tag names: an `int` for `<i32>`, an `unsigned long` for `<u48>`, a `double` for `<f64>`, a `long double` for `<ldouble>`, a pointer for any pointer, reference, or object family, and a `Symbol`'s numeric value for `<symbol>`. `<void>` consumes no payload. Variadic arguments are not converted for you. Assignment, `Var boxed = 42;`, is the usual way to box a value. Use this constructor when the tag is computed at run time. | The tag selects the actual C variadic payload type; numeric values, object handles and custom tags have different native contracts. Dispatch represented families through existing boxing owners and account separately for native/custom pointer payloads; no generic va_list forwarding is valid. |
 | `Var.null` | lib/var.x / absence and null values | needs representation decision | Returns `Null`, the all-zero `Var` that stands for external `nil`. Generated call adapters return it for a `void` target. | Missing values or null tests can distinguish runtime void, Null and empty List, which current transport can conflate. Apply the value-contract decision to Var.null; retain separate success, absence and empty-value probes. |
 | `Var.numeric_decode` | lib/varconvert.x / native pointer crossings | needs representation decision | Decodes a numeric `value` into caller-owned `out` storage. The result retains no pointer into `value`; integer and floating payloads use the members described by `X2CVarNumeric`. Raises: `<bad-arg>` for a null output, `<bad-enc>` for invalid `Var` bits, `<void-op>` for `void`, or `<bad-types>` for a nonnumeric tag. These failures leave `out` unchanged. | The signature passes an actual native address; a lowered local cell is not that address. Specify the pointee layout, mutation and lifetime for Var.numeric_decode; reuse status/cell adapters only where the complete signature permits. |
 | `Var.numeric_info` | lib/varconvert.x / native pointer crossings | needs representation decision | Writes numeric-family metadata for `tag` and returns nonzero. The special `<nan>`, `<-inf>`, and `<+inf>` tags report the `<f64>` family. A null `out` or nonnumeric tag returns zero and leaves storage untouched. | The signature passes an actual native address; a lowered local cell is not that address. Specify the pointee layout, mutation and lifetime for Var.numeric_info; reuse status/cell adapters only where the complete signature permits. |
 | `Var.parse` | lib/var.x / Var value operations | implementable with current values | Parses `str` as source text of kind `kind` and returns the boxed value. The kinds understood are `<int>`, `<float>`, `<double>`, `<string>`, `<symbol>`, and `<char>`. For `<string>`, matching `%"..."` or `"..."` delimiters are removed; unquoted input is also accepted, and either form is unescaped. `<char>` expects `'a'` complete with its quotes and produces an `<i32>`. Both `<float>` and `<double>` produce an `<f64>`; there is no path here to `<f32>`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.parse to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Var.payload32` | lib/common.x / numeric and descriptor internals | needs bounded probe | Returns the low 32 payload bits of an immediate `Var`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.payload32 in lib/common.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
+| `Var.payload32` | lib/common.x / numeric and descriptor internals | implementable with current values | Returns the low 32 payload bits of an immediate `Var`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.payload32's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
 | `Var.pointer` | lib/var.x / native pointer crossings | needs representation decision | Returns the raw address stored in `v`, or NULL if it holds no address. Every pointer, reference, and object family shares one decoder: the payload is masked free of the subtype bits its family reserves, so the result is the stored low-48-bit address for a `<u8*>`, a `<string>` handle, and a registered custom object. The returned pointer is borrowed; this operation does not retain it or change its lifetime. A value that is not address-shaped, such as an integer, a double, a `Symbol`, a wide box, or `void`, reads as NULL, and nothing distinguishes that from a stored null pointer. | The signature passes an actual native address; a lowered local cell is not that address. Specify the pointee layout, mutation and lifetime for Var.pointer; reuse status/cell adapters only where the complete signature permits. |
-| `Var.pointer_string` | lib/dispatch.x / numeric and descriptor internals | needs bounded probe | Formats the fallback display `String` for a pointer-bearing `Var`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.pointer_string in lib/dispatch.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
+| `Var.pointer_string` | lib/dispatch.x / numeric and descriptor internals | needs representation decision | Formats the fallback display `String` for a pointer-bearing `Var`. | The result formats a raw address; meta locals and native pointer/reference values do not yet share their declared tags or address identity. Specify which native-address observations are supported; do not claim numerical address parity across separate executions. |
 | `Var.postfix` | lib/varops.x / native pointer crossings | needs representation decision | Applies dynamic postfix `++` or `--` and returns the prior value. The update adds or subtracts an `<i32>` one through `Var.update`, preserving the destination tag. If a delegated protocol operation returns `void`, the function leaves the destination unchanged and returns `void`. Raises: `<bad-arg>` for a null destination, `<bad-enc>` for invalid `Var` bits, `<void-op>` for `void`, `<bad-op>` for an operator other than `++` or `--`, or any cause from `Var.update`. These failures leave the stored value unchanged. | The signature passes an actual native address; a lowered local cell is not that address. Specify the pointee layout, mutation and lifetime for Var.postfix; reuse status/cell adapters only where the complete signature permits. |
 | `Var.postfixindex` | lib/dispatch.x / explicit syntax operations | implementable with current values | Applies a dynamic postfix update at `key` and returns its prior value. Raises: `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the receiver's indexed update. | Syntax lowering exists separately; it does not install this explicitly named method. Validate the existing binding against this contract. Next: Bind Var.postfixindex's native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results. |
-| `Var.pretty_json` | lib/json.x / Var value operations | implementable with current values | Returns `value` as JSON text indented two spaces per level. Raises: the causes of `Var.json`. | The signature uses represented values and an existing runtime owner. Bind Var.pretty_json to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
+| `Var.pretty_json` | lib/json.x / Var value operations | implementable with current values | Returns `value` as JSON text indented two spaces per level. Raises: the causes of `Var.json`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.pretty_json to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.regex` | lib/regex.x / native Regex contracts | native resource contract | Interface only; inspect the producer. | The signature crosses Regex handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/regex.x's handle and effect contract for Var.regex; add only a scoped native adapter after those obligations are specified. |
 | `Var.regexcapture` | lib/regex.x / native RegexCapture contracts | native resource contract | Reads a `RegexCapture` back out of a `Var`, as `foreach` does. | The signature crosses RegexCapture handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/regex.x's handle and effect contract for Var.regexcapture; add only a scoped native adapter after those obligations are specified. |
 | `Var.regexmatch` | lib/regex.x / native RegexMatch contracts | native resource contract | Reads a `RegexMatch` back out of a `Var`, as `foreach` does. | The signature crosses RegexMatch handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/regex.x's handle and effect contract for Var.regexmatch; add only a scoped native adapter after those obligations are specified. |
@@ -1296,7 +2417,7 @@ explicit checks before claiming runtime equivalence.
 | `Var.same` | lib/dispatch.x / Var value operations | implementable with current values | Reports whether `a` and `b` have identical `Var` bits. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.same to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.setindex` | lib/dispatch.x / Var value operations | implementable with current values | Stores and returns a dynamic indexed value through its protocol row. Raises: `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the receiver's indexed assignment. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.setindex to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.short` | lib/common.x / Var value operations | implementable with current values | Returns `x` as a native `short` under the `Var.convert` rules. Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out of floating range, or invalidly encoded. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.short to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Var.signed_from_bits` | lib/varconvert.x / numeric and descriptor internals | needs bounded probe | Interprets the low `bits` of `raw` as a two's-complement signed value. `bits` must be between one and the width of `unsigned long long`. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.signed_from_bits in lib/varconvert.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
+| `Var.signed_from_bits` | lib/varconvert.x / numeric and descriptor internals | implementable with current values | Interprets the low `bits` of `raw` as a two's-complement signed value. `bits` must be between one and the width of `unsigned long long`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.signed_from_bits's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
 | `Var.str` | lib/dispatch.x / Var value operations | implementable with current values | Returns the display `String` of `Var`. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.str to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.string` | lib/common.x / boxed value extraction | implementable with current values | Extracts the `String` payload of `value`, or NULL for another tag. | The native extractor decodes a represented payload. Pointer forms borrow storage and do not prove the target family or lifetime. Validate the existing binding against this contract. Next: Preserve Var.string's caller preconditions; test valid typed handles and shared mutation, and inspect raw mismatch results without dereferencing them. |
 | `Var.sub` | lib/varops.x / explicit syntax operations | implementable with current values | Subtracts dynamic values through numeric or registered `sub` behavior. Numeric promotion, failure, and result ownership follow `Var.binary`; a protocol result keeps the ownership chosen by its callback. | Syntax lowering exists separately; it does not install this explicitly named method. Validate the existing binding against this contract. Next: Bind Var.sub's native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results. |
@@ -1317,11 +2438,11 @@ explicit checks before claiming runtime equivalence.
 | `Var.update` | lib/varops.x / native pointer crossings | needs representation decision | Applies a failure-atomic dynamic compound update and returns the new value. The operation is limited to arithmetic, remainder, bitwise, and shift operators. The result is converted back to the destination's original tag and stored only after both computation and conversion complete; this does not provide thread synchronization. If a delegated protocol operation returns `void`, the function leaves the destination unchanged. Raises: `<bad-arg>` for a null destination, or any cause from `Var.binary` and `Var.convert`. These failures leave the stored value unchanged. | The signature passes an actual native address; a lowered local cell is not that address. Specify the pointee layout, mutation and lifetime for Var.update; reuse status/cell adapters only where the complete signature permits. |
 | `Var.updateindex` | lib/dispatch.x / explicit syntax operations | implementable with current values | Applies the registered dynamic compound update at `key` and returns its result. Mutation and failure behavior belong to that callback; this dispatch adds no thread or failure atomicity guarantee. Raises: `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the receiver's indexed update. | Syntax lowering exists separately; it does not install this explicitly named method. Validate the existing binding against this contract. Next: Bind Var.updateindex's native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results. |
 | `Var.ushort` | lib/common.x / Var value operations | implementable with current values | Returns `x` as a native `ushort` under the `Var.convert` rules. Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out of floating range, or invalidly encoded. | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.ushort to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Var.wide_compare` | lib/var.x / numeric and descriptor internals | needs bounded probe | Orders two wide boxes carrying the same tag, returning -1, 0, or 1. Integer families delegate to `Var.integer_compare`. An `<ldouble>` pair compares as `long double` and falls back to a byte comparison when neither operand is less than the other, so distinct NaN representations still order deterministically. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.wide_compare in lib/var.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.wide_equal` | lib/var.x / numeric and descriptor internals | needs bounded probe | Reports content equality for supported wide scalar boxes. Boxed `<long>`, `<ulong>`, `<llong>`, `<ullong>`, and `<ldouble>` values are separate allocations, so bit identity says nothing about their contents. This is the payload comparison that `==` uses for those tags. An `<ldouble>` pair is compared byte for byte, so two NaNs sharing one representation compare equal here. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.wide_equal in lib/var.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
-| `Var.wide_hash` | lib/var.x / numeric and descriptor internals | needs bounded probe | Returns a supported wide scalar box's content hash, or 0 otherwise. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.wide_hash in lib/var.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
+| `Var.wide_compare` | lib/var.x / numeric and descriptor internals | implementable with current values | Orders two wide boxes carrying the same tag, returning -1, 0, or 1. Integer families delegate to `Var.integer_compare`. An `<ldouble>` pair compares as `long double` and falls back to a byte comparison when neither operand is less than the other, so distinct NaN representations still order deterministically. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.wide_compare's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.wide_equal` | lib/var.x / numeric and descriptor internals | implementable with current values | Reports content equality for supported wide scalar boxes. Boxed `<long>`, `<ulong>`, `<llong>`, `<ullong>`, and `<ldouble>` values are separate allocations, so bit identity says nothing about their contents. This is the payload comparison that `==` uses for those tags. An `<ldouble>` pair is compared byte for byte, so two NaNs sharing one representation compare equal here. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.wide_equal's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
+| `Var.wide_hash` | lib/var.x / numeric and descriptor internals | implementable with current values | Returns a supported wide scalar box's content hash, or 0 otherwise. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.wide_hash's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
 | `Var.wide_owner` | lib/var.x / allocation and ownership contracts | native resource contract | Returns the `Scope` owning a live wide numeric box, or NULL otherwise. | The operation frees, allocates, observes or transfers storage/registry ownership that the evaluator currently owns. Define which session-owned objects Var.wide_owner may observe or transfer; never alias a destructive native owner blindly. |
-| `Var.width_mask` | lib/varconvert.x / numeric and descriptor internals | needs bounded probe | Returns a mask containing the low `bits` bits. Zero yields zero and a width at least `unsigned long long` yields `ULLONG_MAX`; `bits` must not be negative. | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.width_mask in lib/varconvert.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
+| `Var.width_mask` | lib/varconvert.x / numeric and descriptor internals | implementable with current values | Returns a mask containing the low `bits` bits. Zero yields zero and a width at least `unsigned long long` yields `ULLONG_MAX`; `bits` must not be negative. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. Validate the existing binding against this contract. Next: Use Var.width_mask's native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads. |
 | `Var.write_pointer_repr` | lib/dispatch.x / native Buffer contracts | native resource contract | Writes the fallback readable form of a pointer-bearing `Var`. | The signature crosses Buffer handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/dispatch.x's handle and effect contract for Var.write_pointer_repr; add only a scoped native adapter after those obligations are specified. |
 | `Var.write_repr` | lib/dispatch.x / native Buffer contracts | native resource contract | Appends the readable representation of `Var` to a `Buffer`. | The signature crosses Buffer handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/dispatch.x's handle and effect contract for Var.write_repr; add only a scoped native adapter after those obligations are specified. |
 | `Var.write_str` | lib/dispatch.x / native Buffer contracts | native resource contract | Appends the display text of `Var` to a `Buffer`. A descriptor that registers `write_str` streams straight into `out`. One that registers only `str` writes its `String` through, which materializes the text but keeps existing custom descriptors working. Neither fallback re-enters this function, so a descriptor providing neither cannot recurse. | The signature crosses Buffer handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/dispatch.x's handle and effect contract for Var.write_str; add only a scoped native adapter after those obligations are specified. |
@@ -1329,62 +2450,712 @@ explicit checks before claiming runtime equivalence.
 ### Evaluated cases
 
 - `Var.add`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7; return a.add(2) == 9; }
+```
+
 - `Var.array`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1]; Var v = a; return v.array() === a; }
+```
+
 - `Var.array`: explicit Array conversion; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var xs = [7]; return xs.array().len(); }
+```
+
 - `Var.binary`: integer addition; returned 5.
+
+```x2c
+meta int audit_probe(void) { return Var.binary(2, <+>, 3); }
+```
+
+- `Var.box_f32`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = Var.box_f32(1.25); return v.tag() == <f32> && v.decode_f32() == 1.25; }
+```
+
+- `Var.box_f64`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = Var.box_f64(1.25); return v.tag() == <f64> && v.decode_f64() == 1.25; }
+```
+
+- `Var.box_i16`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = Var.box_i16(-300); return v.tag() == <i16> && v.integer() == -300; }
+```
+
+- `Var.box_i32_bits`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = Var.box_i32_bits(0xfffffff9u); return v.tag() == <i32> && v.integer() == -7; }
+```
+
+- `Var.box_i8`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = Var.box_i8(-7); return v.tag() == <i8> && v.integer() == -7; }
+```
+
+- `Var.box_long`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = Var.box_long(-7); return v.tag() == <long> && v.long_value() == -7; }
+```
+
+- `Var.box_long_double`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = Var.box_long_double(1.25); return v.tag() == <ldouble> && v.long_double_value() == 1.25; }
+```
+
+- `Var.box_long_long`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = Var.box_long_long(-7); return v.tag() == <llong> && v.long_long_value() == -7; }
+```
+
+- `Var.box_u16`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = Var.box_u16(65535); return v.tag() == <u16> && v.integer() == 65535; }
+```
+
+- `Var.box_u32`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = Var.box_u32(4000000000u); return v.tag() == <u32> && v.unsigned() == 4000000000u; }
+```
+
+- `Var.box_u8`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = Var.box_u8(255); return v.tag() == <u8> && v.integer() == 255; }
+```
+
+- `Var.box_ulong`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = Var.box_ulong(7); return v.tag() == <ulong> && v.ulong_value() == 7; }
+```
+
+- `Var.box_ulong_long`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = Var.box_ulong_long(7); return v.tag() == <ullong> && v.ulong_long_value() == 7; }
+```
+
+- `Var.caar`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = %((7)); return v.caar() == 7; }
+```
+
+- `Var.caddr`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = %(1 2 3); return v.caddr() == 3; }
+```
+
 - `Var.cadr`: boxed List selector; returned 8.
+
+```x2c
+meta int audit_probe(void) { Var value = %(7 8); return value.cadr(); }
+```
+
+- `Var.car`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = %(7); return v.car() == 7; }
+```
+
+- `Var.cddddr`: native canonical value contract; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %(1 2 3 4 5), short_list = %(1); return xs.cddddr().equal(%(5)) && short_list.cddddr().len() == 0; }
+```
+
+- `Var.cdddr`: native canonical value contract; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %(1 2 3 4 5), short_list = %(1); return xs.cdddr().equal(%(4 5)) && short_list.cdddr().len() == 0; }
+```
+
+- `Var.cddr`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = %(1 2 3); return v.cddr().equal(%(3)); }
+```
+
+- `Var.cdr`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = %(1 2 3); return v.cdr().equal(%(2 3)); }
+```
+
 - `Var.char`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = 65; return (int) v.char() == 65; }
+```
+
 - `Var.compare`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 1, b = 2; return a.compare(b) < 0 && b.compare(a) > 0 && a.compare(a) == 0; }
+```
+
 - `Var.cons`: prepend; returned 2.
+
+```x2c
+meta int audit_probe(void) { return Var.cons(7, %(8)).len(); }
+```
+
 - `Var.contains`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = %(1 2); return a.contains(2) && !a.contains(3); }
+```
+
+- `Var.convert`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = 257; Var narrowed = v.convert(<u8>); return narrowed.tag() == <u8> && narrowed.integer() == 1; }
+```
+
+- `Var.custom_descriptor_index`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7, b = "x"; return a.custom_descriptor_index() == -1 && b.custom_descriptor_index() == -1; }
+```
+
+- `Var.decode_f32`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = (float) 1.25; return a.decode_f32() == 1.25; }
+```
+
+- `Var.decode_f64`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 1.25; return a.decode_f64() == 1.25; }
+```
+
 - `Var.div`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7; return a.div(2) == 3; }
+```
+
 - `Var.double`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = 1.5; return v.double() == 1.5; }
+```
+
+- `Var.encoding_valid`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7, b = "x", c = 1.25; return a.encoding_valid() && b.encoding_valid() && c.encoding_valid(); }
+```
+
+- `Var.equal`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7, b = 8; return a.equal(a) && !a.equal(b); }
+```
+
+- `Var.fallback_compare`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7, b = 8; return a.fallback_compare(b) < 0 && a.fallback_compare(a) == 0; }
+```
+
+- `Var.fallback_equal`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7, b = 8; return a.fallback_equal(a) && !a.fallback_equal(b); }
+```
+
+- `Var.fallback_hash`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7, b = 7; return a.fallback_hash() == b.fallback_hash(); }
+```
+
+- `Var.fallback_repr`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7; return a.fallback_repr().equal("7"); }
+```
+
+- `Var.fallback_str`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7; return a.fallback_str().equal("7"); }
+```
+
+- `Var.fallback_truth`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 0, b = 7; return !a.fallback_truth() && b.fallback_truth(); }
+```
+
 - `Var.float`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = 1.5; return v.float() == 1.5; }
+```
+
 - `Var.floating`: raw floating payload and wrong-tag zero; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var integer = 7; Var floating = 3.5; return floating.floating() == 3.5 && integer.floating() == 0.0; }
+```
+
 - `Var.hash`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = "abc"; return a.hash() != 0; }
+```
+
 - `Var.int`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = 65; return (int) v.int() == 65; }
+```
+
 - `Var.integer`: raw integer payload and wrong-tag zero; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var integer = 7; Var floating = 3.5; return integer.integer() == 7 && floating.integer() == 0; }
+```
+
+- `Var.integer_box`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = Var.integer_box(<i8>, 255); return a.tag() == <i8> && a.integer() == -1; }
+```
+
+- `Var.integer_compare`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = -1, b = 1u; return a.integer_compare(b) < 0 && b.integer_compare(a) > 0; }
+```
+
+- `Var.integer_floating_compare`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7, b = 7.5; return a.integer_floating_compare(b) < 0; }
+```
+
+- `Var.integer_tag`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { return Var.integer_tag(1, 0) == <i32> && Var.integer_tag(5, 1) == <ulong>; }
+```
+
+- `Var.is`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7; return a.is(<i32>) && !a.is(<string>); }
+```
+
 - `Var.is_atom`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = %(abc).car(), b = 1; return a.is_atom() && !b.is_atom(); }
+```
+
 - `Var.is_atom_binder`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = %(?x).car(), b = %(abc).car(); return a.is_atom_binder() && !b.is_atom_binder(); }
+```
+
 - `Var.is_binder`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = %(?x).car(), b = %(*xs).car(), c = 1; return a.is_binder() && b.is_binder() && !c.is_binder(); }
+```
+
 - `Var.is_floating`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 1.5, b = 1; return a.is_floating() && !b.is_floating(); }
+```
+
 - `Var.is_integer`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 1, b = 1.5; return a.is_integer() && !b.is_integer(); }
+```
+
 - `Var.is_list_binder`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = %(*xs).car(), b = %(?x).car(); return a.is_list_binder() && !b.is_list_binder(); }
+```
+
 - `Var.is_match_op`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = <!is>, b = 1; return a.is_match_op() && !b.is_match_op(); }
+```
+
 - `Var.is_nil`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = %(), b = %(1); return a.is_nil() && !b.is_nil(); }
+```
+
 - `Var.is_null`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = []; a.resize(1); Var v = a[0], b = %(); return v.is_null() && !b.is_null(); }
+```
+
 - `Var.is_object`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = "x", b = 1; return a.is_object() && !b.is_object(); }
+```
+
 - `Var.is_pointer`: core value contract and boundaries; returned 0, expected 1.
+
+```x2c
+meta int audit_probe(void) { int n = 7; Var a = &n, b = 1; return a.is_pointer() && !b.is_pointer(); }
+```
+
 - `Var.is_reference`: core value contract and boundaries; returned 0, expected 1.
+
+```x2c
+meta int audit_probe(void) { String s = "x"; Var a = &s, b = 1; return a.is_reference() && !b.is_reference(); }
+```
+
+- `Var.is_row`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7, b = (float) 7; return a.is_row(0x8002u, 0xffff00000000ul, 0x600000000ul) && !b.is_row(0x8002u, 0xffff00000000ul, 0x600000000ul); }
+```
+
 - `Var.is_wide`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 1L, b = 1; return a.is_wide() && !b.is_wide(); }
+```
+
+- `Var.json`: native canonical value contract; returned 1.
+
+```x2c
+#include "json.x"
+meta int audit_probe(void) { Var v = {"b": 2, "a": 1}; return v.json().equal("{\"a\":1,\"b\":2}"); }
+```
+
 - `Var.kind`: integer kind; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var value = 7; return value.kind() == <integer>; }
+```
+
+- `Var.known_tag`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { return Var.known_tag(<i32>) && !Var.known_tag(<bogus>); }
+```
+
+- `Var.list`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = %(1 2), b = 7; return a.list().equal(%(1 2)) && b.list().len() == 0; }
+```
+
+- `Var.listchar`: native canonical value contract; returned 1.
+
+```x2c
+#include "typed-list.x"
+meta int audit_probe(void) { List xs = %(${(char) 65}); Var value = xs, other = 7; ListChar view = value.listchar(), empty = other.listchar(); return view === xs && empty.len() == 0; }
+```
+
+- `Var.listdbl`: native canonical value contract; returned 1.
+
+```x2c
+#include "typed-list.x"
+meta int audit_probe(void) { List xs = %(${1.5}); Var value = xs, other = 7; ListDbl view = value.listdbl(), empty = other.listdbl(); return view === xs && empty.len() == 0; }
+```
+
+- `Var.listfloat`: native canonical value contract; returned 1.
+
+```x2c
+#include "typed-list.x"
+meta int audit_probe(void) { List xs = %(${(float) 1.5}); Var value = xs, other = 7; ListFloat view = value.listfloat(), empty = other.listfloat(); return view === xs && empty.len() == 0; }
+```
+
+- `Var.listint`: native canonical value contract; returned 1.
+
+```x2c
+#include "typed-list.x"
+meta int audit_probe(void) { List xs = %(${65}); Var value = xs, other = 7; ListInt view = value.listint(), empty = other.listint(); return view === xs && empty.len() == 0; }
+```
+
+- `Var.listshort`: native canonical value contract; returned 1.
+
+```x2c
+#include "typed-list.x"
+meta int audit_probe(void) { List xs = %(${(short) 65}); Var value = xs, other = 7; ListShort view = value.listshort(), empty = other.listshort(); return view === xs && empty.len() == 0; }
+```
+
+- `Var.liststring`: native canonical value contract; returned 1.
+
+```x2c
+#include "typed-list.x"
+meta int audit_probe(void) { List xs = %(${"abc"}); Var value = xs, other = 7; ListString view = value.liststring(), empty = other.liststring(); return view === xs && empty.len() == 0; }
+```
+
+- `Var.listsymbol`: native canonical value contract; returned 1.
+
+```x2c
+#include "typed-list.x"
+meta int audit_probe(void) { List xs = %(${<abc>}); Var value = xs, other = 7; ListSymbol view = value.listsymbol(), empty = other.listsymbol(); return view === xs && empty.len() == 0; }
+```
+
 - `Var.long`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = 65; return (int) v.long() == 65; }
+```
+
 - `Var.long_double`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = 1.5; return v.long_double() == 1.5; }
+```
+
 - `Var.long_double_value`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = (long double) 7, b = "x"; return (int) a.long_double_value() == 7 && (int) b.long_double_value() == 0; }
+```
+
 - `Var.long_long`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = 65; return (int) v.long_long() == 65; }
+```
+
 - `Var.long_long_value`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = (long long) 7, b = "x"; return (int) a.long_long_value() == 7 && (int) b.long_long_value() == 0; }
+```
+
 - `Var.long_value`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = (long) 7, b = "x"; return (int) a.long_value() == 7 && (int) b.long_value() == 0; }
+```
+
 - `Var.map`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Map m = {"x": 1}; Var v = m; return v.map() === m; }
+```
+
 - `Var.mod`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7; return a.mod(2) == 1; }
+```
+
 - `Var.mul`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7; return a.mul(2) == 14; }
+```
+
 - `Var.neg`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7; return a.neg() == -7; }
+```
+
+- `Var.parse`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = Var.parse("42", <int>); return a.tag() == <i32> && a.integer() == 42; }
+```
+
+- `Var.payload32`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = -7; return a.payload32() == 0xfffffff9u; }
+```
+
 - `Var.postfixindex`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1]; Var v = a; return v.postfixindex(0, <++>) == 1 && a[0] == 2; }
+```
+
+- `Var.pretty_json`: native canonical value contract; returned 1.
+
+```x2c
+#include "json.x"
+meta int audit_probe(void) { Var v = [1, 2]; return v.pretty_json().contains("\n") && v.pretty_json().contains("1"); }
+```
+
+- `Var.repr`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7; return a.repr().equal("7"); }
+```
+
 - `Var.same`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1], b = [1]; Var x = a, y = b; return x.same(x) && !x.same(y); }
+```
+
 - `Var.setindex`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1]; Var v = a; v.setindex(0, 3); return a[0] == 3; }
+```
+
 - `Var.short`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = 65537; return (int) v.short() == 1; }
+```
+
+- `Var.signed_from_bits`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { return Var.signed_from_bits(255, 8) == -1 && Var.signed_from_bits(127, 8) == 127; }
+```
+
+- `Var.str`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7; return a.str().equal("7"); }
+```
+
 - `Var.string`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = "abc"; return v.string().equal("abc"); }
+```
+
 - `Var.sub`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7; return a.sub(2) == 5; }
+```
+
 - `Var.symbol`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = <abc>; return v.symbol() == <abc>; }
+```
+
+- `Var.tag`: existing binding with native control; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7, b = "x"; return a.tag() == <i32> && b.tag() == <string>; }
+```
+
 - `Var.truth`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 0, b = 1, c = %(); return !a.truth() && b.truth() && !c.truth(); }
+```
+
 - `Var.uchar`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = 257; return (int) v.uchar() == 1; }
+```
+
 - `Var.uint`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = 65; return (int) v.uint() == 65; }
+```
+
 - `Var.ulong`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = 65; return (int) v.ulong() == 65; }
+```
+
 - `Var.ulong_long`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = 65; return (int) v.ulong_long() == 65; }
+```
+
 - `Var.ulong_long_value`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = (unsigned long long) 7, b = "x"; return (int) a.ulong_long_value() == 7 && (int) b.ulong_long_value() == 0; }
+```
+
 - `Var.ulong_value`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = (unsigned long) 7, b = "x"; return (int) a.ulong_value() == 7 && (int) b.ulong_value() == 0; }
+```
+
 - `Var.unsigned`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = 65; return (int) v.unsigned() == 65; }
+```
+
 - `Var.updateindex`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Array a = [1]; Var v = a; return v.updateindex(0, <+>, 3) == 4 && a[0] == 4; }
+```
+
 - `Var.ushort`: core value contract and boundaries; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var v = 65537; return (int) v.ushort() == 1; }
+```
+
+- `Var.wide_compare`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7L, b = 8L, c = 1; return a.wide_compare(b) < 0 && a.wide_compare(c) == 0; }
+```
+
+- `Var.wide_equal`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7L, b = 7L, c = 7; return a.wide_equal(b) && !a.wide_equal(c); }
+```
+
+- `Var.wide_hash`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { Var a = 7L, b = 7L, c = 7; return a.wide_hash() == b.wide_hash() && c.wide_hash() == 0; }
+```
+
+- `Var.width_mask`: valid numeric encoding and boundary values; returned 1.
+
+```x2c
+meta int audit_probe(void) { return Var.width_mask(0) == 0 && Var.width_mask(8) == 255 && Var.width_mask(16) == 65535; }
+```
+
 
 ## Remaining evidence gaps
 

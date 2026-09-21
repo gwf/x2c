@@ -431,6 +431,12 @@ meta int core_Symbol_last(int unused) {
   return <abc>.last() == 'c'
     && empty.last() == 0;
 }
+meta int core_Var_list(int unused) {
+  (void) unused;
+  Var list = %(1 2), empty = %(), number = 7, array = [1];
+  return list.list().equal(%(1 2)) && empty.list().len() == 0
+    && number.list().len() == 0 && array.list().len() == 0;
+}
 int main(int argc, char **argv) {
   (void) argv;
   printf("%d %d\n", $core_String_intern(0),
@@ -577,5 +583,6 @@ int main(int argc, char **argv) {
     core_Symbol_first(argc - 1));
   printf("%d %d\n", $core_Symbol_last(0),
     core_Symbol_last(argc - 1));
+  printf("%d %d\n", $core_Var_list(0), core_Var_list(argc - 1));
   return 0;
 }

@@ -5,7 +5,9 @@
 > The initial implementation shipped in 8ebb323d. Value aliases and further
 > AD source templates shipped through 8c2a8054; x2c-first examples followed in
 > 95e73d18. Capture-call repairs and remaining API/representation work extend
-> that baseline. Implemented behavior and open follow-ons are recorded below.
+> that baseline. The exhaustive value-operation continuation now accounts for
+> all 483 signatures with 305 bindings and behavioral evidence for every bound
+> row. Implemented behavior and open follow-ons are recorded below.
 
 
 ## Outcome and priorities
@@ -354,8 +356,15 @@ String.strip, Array.map, List.cons and Symbol.len filled the first binding gaps.
 The next delivered batch added 19 selector, rendering, kind and comparison
 bindings, retaining the documented nil-versus-void limits. That batch did not
 complete the API surface.
-The optional inventory records every signature and distinguishes observed behavior
-from binding presence and absence.
+The exhaustive continuation binds the remaining ordinary operations over
+represented scalar, String, Symbol, List, Array, Map and Var values, including
+the pure optional-module operations, without importing those optional source
+APIs into the implicit prelude. The resulting inventory has 305 binding matches
+and 178 unmatched signatures. Its fixed native/meta comparisons leave no bound
+row unverified: 295 rows have a verified example and 15 retain a reproduced
+limitation. The other 173 unbound rows have an explicit owner, contract group,
+disposition and next action. The optional inventory records every signature and
+distinguishes observed behavior from binding presence and absence.
 
 Three representation follow-ons remain explicit rather than being presented as
 completed support:

@@ -182,6 +182,7 @@
 (def Map.updateindex (bind "Map_updateindex" nil))
 (def Map.postfixindex (bind "Map_postfixindex" nil))
 (def Map.set (bind "Map_set" nil))
+(def Var.list (bind "Var_list" nil))
 (def Var.array (bind "Var_array" nil))
 (def Var.map (bind "Var_map" nil))
 (def Var.string (bind "Var_string" nil))
