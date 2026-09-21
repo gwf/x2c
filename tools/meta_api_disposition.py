@@ -85,6 +85,11 @@ def disposition(row):
         kind = "needs representation decision"
         reason = "Missing values or null tests can distinguish runtime void, Null and empty List, which current transport can conflate."
         action = f"Apply the value-contract decision to {name}; retain separate success, absence and empty-value probes."
+    elif receiver == "Var" and method in {"is_pointer", "is_reference"}:
+        group = "source address tags"
+        kind = "needs representation decision"
+        reason = "The native predicate reads its argument tag correctly, but meta local addresses currently use evaluator cells instead of their declared native pointer/reference tag."
+        action = "Preserve the declared pointee tag when representing addresses; compare int and String local addresses with native execution."
     elif "..." in signature:
         group = "native variadic calls"
         kind = "needs bounded probe"
@@ -112,17 +117,30 @@ def disposition(row):
         action = f"Preserve {name}'s caller preconditions; test valid typed handles and shared mutation, and inspect raw mismatch results without dereferencing them."
     elif receiver == "Var" and (method.startswith(("box_", "decode_", "wide_", "fallback_")) or method in {"integer_box", "integer_compare", "integer_floating_compare", "integer_tag", "known_tag", "payload32", "encoding_valid", "is_row", "width_mask", "signed_from_bits", "clone_wide", "custom_descriptor_index", "pointer_string"}):
         group = "numeric and descriptor internals"
+        if method == "clone_wide":
+            kind = "needs representation decision"
+            reason = "Valid wide inputs allocate a fresh box in the active Scope; a nonwide input returns true void."
+            action = "Settle true-void transport, then verify fresh identity, equal payload and session-owned lifetime for wide inputs."
+        elif method == "pointer_string":
+            kind = "needs representation decision"
+            reason = "The result formats a raw address; meta locals and native pointer/reference values do not yet share their declared tags or address identity."
+            action = "Specify which native-address observations are supported; do not claim numerical address parity across separate executions."
+        else:
+            reason = "The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope."
+            action = f"Use {name}'s native Func adapter with valid tags/encodings; test width boundaries, signedness and the documented mismatch behavior without inventing raw invalid payloads."
+    elif receiver == "Var" and method == "matmul":
+        group = "registered matrix protocols"
         kind = "needs bounded probe"
-        reason = "This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract."
-        action = f"Trace {name} in {path} and probe only valid tags/encodings; bind directly if its existing value owner is sufficient."
+        reason = "The native owner only dispatches a registered matmul behavior; builtin numeric values raise bad-op."
+        action = "Identify a session-owned represented matrix protocol and verify its result lifetime before installing and testing this entry point."
     elif "syntax" in row["considerations"]:
         group = "explicit syntax operations"
         reason = "Syntax lowering exists separately; it does not install this explicitly named method."
         action = f"Bind {name}'s native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results."
     elif signature.startswith("void "):
         group = "mutations returning no value"
-        reason = "The function mutates an existing represented object and returns no C value, not a Var containing void."
-        action = f"Use an effect adapter for {name}; preserve mutation and return the evaluator's established statement result."
+        reason = "The function mutates an existing represented object and returns C void. The existing Func adapter returns Var.null for that C result."
+        action = f"Reuse the generated native Func adapter for {name}; verify mutation and distinguish this return from a Var containing void."
     elif path == "lib/common.x" and row["line"] == 0:
         group = "generated numeric/value interfaces"
         kind = "needs bounded probe"

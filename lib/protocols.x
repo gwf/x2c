@@ -50,8 +50,10 @@ protocol Iter(Map);    protocol Iter(String);
 protocol Var(Array);   protocol Var(Block);  protocol Var(Buffer);
 protocol Var(Bytes);   protocol Var(File);   protocol Var(Iter);
 protocol Var(List);    protocol Var(Map);    protocol Var(String);
-protocol Var(Symbol);  protocol Var(uchar);  protocol Var(uint);
-protocol Var(ulong);   protocol Var(ushort);
+protocol Var(Symbol);  protocol Var(ulong);
+protocol Var(uchar) tag <u8>;
+protocol Var(ushort) tag <u16>;
+protocol Var(uint) tag <u32>;
 
 protocol Var(T) {
   associated Key = Var;

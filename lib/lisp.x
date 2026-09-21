@@ -253,6 +253,11 @@ protocol Cleanup(Lisp);
 
 #pragma private
 
+#include "typed-list.x"
+#include "list-selectors.x"
+#include "digest.x"
+#include "json.x"
+
 static String lisp_standard_source = $lisp._standard.source();
 
 enum LispSpecial {
@@ -937,6 +942,13 @@ Var lisp_write_file(String path, String text) {
   return _bool(wrote && closed);
 }
 
+/* Native const-char pointers use represented String storage here. */
+static String _lisp_string_new_len(String text, int length) =>
+  String.new_len(text, length);
+static Symbol _lisp_symbol_parse(String text) => Symbol.parse(text);
+static Symbol _lisp_symbol_new_len(String text, int length) =>
+  Symbol.new_len(text, length);
+
 // The direct targets let the compiler generate their call adapters and
 // read each signature from the declared prototype.
 $(import "../etc/lisp-bindings.xlisp")
@@ -1084,6 +1096,65 @@ $(def lisp.native.target.rows '(
   (Var_updateindex)
   (Var_postfixindex)
   (List_truth)
+  (List_listchar)
+  (List_listshort)
+  (List_listint)
+  (List_listfloat)
+  (List_listdbl)
+  (List_liststring)
+  (List_listsymbol)
+  (List_cdddr)
+  (List_cddddr)
+  (Var_listchar)
+  (Var_listshort)
+  (Var_listint)
+  (Var_listfloat)
+  (Var_listdbl)
+  (Var_liststring)
+  (Var_listsymbol)
+  (Var_cdddr)
+  (Var_cddddr)
+  (Var_json)
+  (Var_pretty_json)
+  (String_sha256)
+  (_lisp_string_new_len)
+  (_lisp_symbol_new_len)
+  (_lisp_symbol_parse)
+  (Var_box_f32)
+  (Var_box_f64)
+  (Var_box_i16)
+  (Var_box_i32_bits)
+  (Var_box_i8)
+  (Var_box_long)
+  (Var_box_long_double)
+  (Var_box_long_long)
+  (Var_box_u16)
+  (Var_box_u32)
+  (Var_box_u8)
+  (Var_box_ulong)
+  (Var_box_ulong_long)
+  (Var_custom_descriptor_index)
+  (Var_decode_f32)
+  (Var_decode_f64)
+  (Var_encoding_valid)
+  (Var_fallback_compare)
+  (Var_fallback_equal)
+  (Var_fallback_hash)
+  (Var_fallback_repr)
+  (Var_fallback_str)
+  (Var_fallback_truth)
+  (Var_integer_box)
+  (Var_integer_compare)
+  (Var_integer_floating_compare)
+  (Var_integer_tag)
+  (Var_is_row)
+  (Var_known_tag)
+  (Var_payload32)
+  (Var_signed_from_bits)
+  (Var_wide_compare)
+  (Var_wide_equal)
+  (Var_wide_hash)
+  (Var_width_mask)
   (List_getindex)
   (List_last)
   (List_index)
