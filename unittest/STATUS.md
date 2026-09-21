@@ -166,10 +166,12 @@ Compile-time lowering drops an assignment nested in a discarded expression:
 at compile time and 3 at run time. Reproduced on `b395865e` during the
 `meta` fixture migration; a focused lowering repair remains outstanding.
 
-A separate inherited meta comparison gap remains: `a.len() == 2` can be
-false for a two-element Array during compile-time execution, although the
-native comparison is true. This was reproduced while checking cursor
-mutation; the cursor optimization preserves existing comparison behavior.
+The optional meta API inventory records two named-value conversion gaps:
+`Symbol empty = 0` retains an integer tag, so a native `Symbol` method
+rejects it; addresses of meta locals use evaluator cells, so native pointer
+and reference predicates do not receive their native tags. The source cases
+and diagnostics are retained by `tools/meta-api-coverage.py`. These are
+representation gaps, not evidence that installing the method name is enough.
 
 No outstanding static-initialization defects are recorded. Bare unknown native
 macro names retain native C initializer rules; tags hidden inside an opaque
@@ -177,6 +179,11 @@ native macro retain native scope. Pass lowered local objects explicitly to
 native macros. The language reference describes these native boundaries.
 
 ## Retired maintenance notes
+
+- Meta numeric comparisons resolve builtin typedefs before choosing C
+  arithmetic conversion. The former `Array.len()` versus integer mismatch
+  is covered by `meta-collection-operations`. `meta-core-operations` also
+  checks that lowered character literals retain the native character tag.
 
 - Deferred static initialization fixes the three cases recorded against
   published `1de90da`: delayed `__COUNTER__` expansion, inline tags emitted

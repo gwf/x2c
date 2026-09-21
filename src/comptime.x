@@ -517,7 +517,7 @@ static Var _lower_text(String spelling) {
     return String.new_len(spelling + 1, len - 2).unescape();
   if (len >= 3 && spelling[0] == '\'') {
     String body = String.new_len(spelling + 1, len - 2).unescape();
-    return body.len() ? body[0] : 0;
+    return (char) (body.len() ? body[0] : 0);
   }
   return spelling;
 }
@@ -2319,9 +2319,8 @@ List Compiler.fold_meta_call(
       return NULL;
     Var value = _meta_constant(c, argument);
     if (value is void) return NULL;
-    /* The lowered body converts at every conversion position the source
-       has, and a parameter is one the call site owns: a character literal
-       reaching a `char` is its code as an `int` until this converts it. */
+    /* The parameter type belongs to the call site, so apply its conversion
+       before passing a constant to the lowered body. */
     Symbol tag = declared.scalar_tag();
     if (tag) {
       try value = value.convert(tag);
