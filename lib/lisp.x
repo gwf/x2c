@@ -1336,6 +1336,7 @@ $(def lisp.native.target.rows '(
   (lisp_str)
   (lisp_repr)
   (String_len)
+  (String_format)
   (lisp_string_append)
   (lisp_substring)
   (lisp_string_downcase)

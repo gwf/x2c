@@ -107,7 +107,7 @@ static List _continued(Compiler c, List statement) {
 static List _if_statement(Compiler compiler) {
   List cond = _keyword_paren_expr(compiler, <if>);
   List ontrue = compiler.parse_governed(AST_STATEMENT);
-  compiler.complete_here(<continue>, %("else"));
+  compiler.__complete_here(<continue>, %("else"));
   if (compiler.peek(0) != <else>) return %(if $cond $ontrue);
   ontrue = _continued(compiler, ontrue);
   compiler.next();
@@ -172,7 +172,7 @@ List Compiler.finish_return_statement(Compiler compiler, List expression) {
 
 static List _return_statement(Compiler compiler) {
   compiler.expect(<return>);
-  compiler.complete_here(<expr>, %());
+  compiler.__complete_here(<expr>, %());
   if (compiler.peek(0) == <;>) {
     compiler.next();
     return compiler.finish_return_statement(NULL);
@@ -434,7 +434,7 @@ static List _filtered_catch_arm(Compiler c, int *is_default) {
   }
   c.begin_catch_arm(pattern, start);
   List body = c.parse_governed(AST_STATEMENT);
-  c.complete_here(<continue>, %("catch" "finally"));
+  c.__complete_here(<continue>, %("catch" "finally"));
   if (c.peek(0) == <catch> || c.peek(0) == <finally>)
     body = _continued(c, body);
   c.sym.pop_scope();
@@ -460,9 +460,9 @@ static List _filtered_catches(Compiler compiler) {
 static List _try_statement(Compiler c) {
   c.expect(<try>);
   List body = _continued(c, c.parse_governed(AST_STATEMENT)), ctch = NULL;
-  c.complete_here(<continue>, %("catch" "finally"));
+  c.__complete_here(<continue>, %("catch" "finally"));
   if (c.test(<catch>)) ctch = _filtered_catches(c);
-  c.complete_here(<continue>, %("finally"));
+  c.__complete_here(<continue>, %("finally"));
   List fnly = c.test(<finally>) ? c.parse_governed(AST_STATEMENT) : NULL;
   if (ctch || fnly) return %(try $body $ctch $fnly);
   c.report_error(
@@ -520,7 +520,7 @@ List Compiler.with_binding(Compiler c) {
     `(seq ...)` node containing several block items.
 */
 List Compiler.parse_block_item(Compiler c) {
-  c.complete_here(<block>, _block_completion_keywords());
+  c.__complete_here(<block>, _block_completion_keywords());
   if (c.test_static_assert()) return c.parse_static_assert();
   List slot = c.try_parse_macro_slot(<block>);
   if (slot) return slot;
@@ -548,7 +548,7 @@ List Compiler.parse_block_item(Compiler c) {
     temporary `Sym` scopes opened by the statement have been closed.
 */
 List Compiler.parse_statement(Compiler c) {
-  c.complete_here(<statement>, %(
+  c.__complete_here(<statement>, %(
     "if" "while" "for" "do" "return" "case" "break" "continue"
     "goto" "try" "raise" "defer" "match" "switch" "default" "with"
   ));
@@ -645,7 +645,7 @@ List Compiler.parse_block_items(Compiler c, int anchor_items) {
   c.sym.push_new_scope();
   defer c.sym.pop_scope();
   loop {
-    c.complete_here(<block>, _block_completion_keywords());
+    c.__complete_here(<block>, _block_completion_keywords());
     if (c.token != c.directives_taken)
       foreach (Var directive, c.leading_preproc()) block.push(directive);
     if (c.peek(0) == <"}">) break;

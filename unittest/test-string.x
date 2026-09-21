@@ -1,6 +1,7 @@
 /*  test-string.x -- unit tests for string helpers */
 
 #include <ctype.h>
+#include <math.h>
 #include <limits.h>
 #include <string.h>
 
@@ -602,6 +603,99 @@ static void string_dedent_normalizes_written_indentation(void) {
   EXPECT_NULL(String.dedent(NULL));
 }
 
+static void expect_format_failure(
+  String format, List values, int offset, int nested) {
+  List detail = NULL;
+  try format.format(values);
+  catch %(format *cause): detail = cause;
+  if (!EXPECT_NOT_NULL(detail)) return;
+  EXPECT_INT_EQ(detail.assoc(<offset>).integer(), offset);
+  EXPECT_NOT_NULL(detail.assoc(<reason>).string());
+  EXPECT_INT_EQ(detail.assoc(<cause>) is <list>, nested);
+}
+
+static void string_checked_format_integers(void) {
+  Var schar = -5, uchar = 250, sshort = -1234, ushort = 60000;
+  Var slong = Var.box_long(-1234567L);
+  Var ulong = Var.box_ulong(3456789UL);
+  Var sll = Var.box_long_long(-1234567890123LL);
+  Var ull = Var.box_ulong_long(12345678901234ULL);
+
+  EXPECT_TRUE("%hhd".format(%($schar)) ==
+              "%hhd".printf((int) (signed char) -5));
+  EXPECT_TRUE("%hhu".format(%($uchar)) ==
+              "%hhu".printf((unsigned int) (unsigned char) 250));
+  EXPECT_TRUE("%hd".format(%($sshort)) ==
+              "%hd".printf((int) (short) -1234));
+  EXPECT_TRUE("%hu".format(%($ushort)) ==
+              "%hu".printf((unsigned int) (unsigned short) 60000));
+  EXPECT_TRUE("%+08d".format(%(-42)) == "%+08d".printf(-42));
+  EXPECT_TRUE("% i".format(%(42)) == "% i".printf(42));
+  EXPECT_TRUE("%#o".format(%(42)) == "%#o".printf(42u));
+  EXPECT_TRUE("%u".format(%(42)) == "%u".printf(42u));
+  EXPECT_TRUE("%#x".format(%(48879)) == "%#x".printf(48879u));
+  EXPECT_TRUE("%#X".format(%(48879)) == "%#X".printf(48879u));
+  EXPECT_TRUE("%ld".format(%($slong)) == "%ld".printf(-1234567L));
+  EXPECT_TRUE("%lu".format(%($ulong)) == "%lu".printf(3456789UL));
+  EXPECT_TRUE("%lld".format(%($sll)) ==
+              "%lld".printf(-1234567890123LL));
+  EXPECT_TRUE("%llu".format(%($ull)) ==
+              "%llu".printf(12345678901234ULL));
+  EXPECT_TRUE("%*.*d".format(%(8 4 23)) == "%*.*d".printf(8, 4, 23));
+}
+
+static void string_checked_format_floating(void) {
+  double number = 12.375;
+  EXPECT_TRUE("%.2f".format(%($number)) == "%.2f".printf(number));
+  EXPECT_TRUE("%.2F".format(%($number)) == "%.2F".printf(number));
+  EXPECT_TRUE("%.3e".format(%($number)) == "%.3e".printf(number));
+  EXPECT_TRUE("%.3E".format(%($number)) == "%.3E".printf(number));
+  EXPECT_TRUE("%.5g".format(%($number)) == "%.5g".printf(number));
+  EXPECT_TRUE("%.5G".format(%($number)) == "%.5G".printf(number));
+  EXPECT_TRUE("%a".format(%($number)) == "%a".printf(number));
+  EXPECT_TRUE("%A".format(%($number)) == "%A".printf(number));
+  EXPECT_TRUE("%lf".format(%($number)) == "%lf".printf(number));
+  Var wide = Var.box_long_double(1.0L / 3.0L);
+  EXPECT_TRUE("%.8Lf".format(%($wide)) ==
+              "%.8Lf".printf(1.0L / 3.0L));
+  double nan = NAN, infinity = INFINITY;
+  EXPECT_TRUE("%f %f".format(%($nan $infinity)) ==
+              "%f %f".printf(nan, infinity));
+  EXPECT_TRUE("%*.*f".format(%(-10 -1 $number)) ==
+              "%-10f".printf(number));
+}
+
+static void string_checked_format_strings_and_boundaries(void) {
+  EXPECT_NULL(String.format(NULL, nil));
+  EXPECT_TRUE("plain %% text".format(nil) == "plain % text");
+  EXPECT_TRUE("%c:%s".format(%(65 "text")) == "A:text");
+  List object = %(one two);
+  EXPECT_TRUE("%.3s".format(%($object)) ==
+              "%.3s".printf(object.str()));
+  EXPECT_TRUE("%400s".format(%("x")) == "%400s".printf("x"));
+  EXPECT_TRUE("[%*s]".format(%(-5 "x")) == "[x    ]");
+}
+
+static void string_checked_format_failures(void) {
+  expect_format_failure("%d", nil, 0, 0);
+  expect_format_failure("text", %(1), 4, 0);
+  expect_format_failure("%", nil, 0, 0);
+  expect_format_failure("%p", %(1), 0, 0);
+  expect_format_failure("%n", %(1), 0, 0);
+  expect_format_failure("%ls", %("wide"), 0, 0);
+  expect_format_failure("%lc", %(65), 0, 0);
+  expect_format_failure("%+s", %("text"), 0, 0);
+  expect_format_failure("%.1c", %(65), 0, 0);
+  expect_format_failure("%1$d", %(1), 0, 0);
+  expect_format_failure("%jd", %(1), 0, 0);
+  expect_format_failure("%zd", %(1), 0, 0);
+  expect_format_failure("%td", %(1), 0, 0);
+  expect_format_failure("%c", %(0), 0, 0);
+  expect_format_failure("%2147483648d", %(1), 1, 0);
+  expect_format_failure("%d", %("not numeric"), 0, 1);
+  expect_format_failure("%*d", %("wide" 1), 0, 1);
+}
+
 void string_suite(void) {
   $test.run(string_canonical_identity);
   $test.run(string_empty_is_native_zero);
@@ -627,4 +721,8 @@ void string_suite(void) {
   $test.run(string_byte_escaping);
   $test.run(string_padding_removal_and_partition);
   $test.run(string_dedent_normalizes_written_indentation);
+  $test.run(string_checked_format_integers);
+  $test.run(string_checked_format_floating);
+  $test.run(string_checked_format_strings_and_boundaries);
+  $test.run(string_checked_format_failures);
 }

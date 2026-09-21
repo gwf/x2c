@@ -2532,7 +2532,7 @@ int Compiler_at_completion(Compiler);
 static List _parse_postfix_dot(Compiler compiler, List expr){
   Token origin = compiler -> token;  Compiler_expect(compiler, 93);  if(Compiler_at_completion(compiler)){
     Type receiver = Var_type(_expr_is_raw_string_literal(expr) ? List_var(_153) : List_cadr(expr));  List rows = Compiler_postfix_completions(compiler, receiver, 93); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/expressions.x",.function = "_parse_postfix_dot",.line = 636};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 2, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows));
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/expressions.x",.function = "_parse_postfix_dot",.line = 636};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -2542,7 +2542,7 @@ static List _parse_postfix_dot(Compiler compiler, List expr){
 static List _parse_postfix_arrow(Compiler compiler, List expr){
   Token origin = compiler -> token;  Compiler_expect(compiler, 11645);  if(Compiler_at_completion(compiler)){
     List rows = Compiler_postfix_completions(compiler, Var_type(List_cadr(expr)), 11645); {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/expressions.x",.function = "_parse_postfix_arrow",.line = 652};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 2, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows));
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/expressions.x",.function = "_parse_postfix_arrow",.line = 652};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -2653,8 +2653,9 @@ default: break;
 Type type = Var_type(List_cadr(operand)), numeric = Sym_resolve_numeric_type(c -> sym, type);  return List_truth(Type_list(type)) && ! Type_is_bitfield(type) && !(List_truth(Type_list(numeric)) && Type_is_enum(numeric));
 }
 
+void Compiler___complete_here(Compiler, Symbol, List);
 static List _parse_unary_op(Compiler c){
-  Symbol op = Compiler_peek(c, 0);  Token origin = c -> token;  if(op == 1295657932) return _parse_sizeof(c);  if(op == 1044119921612) return _parse_offsetof(c);  if(op != 1848 && op != 2046 && op != 253 && op != 54 && op != 77 && op != 62 && op != 56 && op != 60) return _parse_postfix(c);  Compiler_next(c);  List operand = op == 1848 || op == 2046 || op == 253 ? _parse_unary_op(c) : _parse_cast(c);  return Compiler_resolve_expression(c, cons(_0, cons(_16, cons(List_var(cons(_9, cons(Symbol_var(op), cons(List_var(operand), NULL)))), NULL))), origin);
+  Compiler___complete_here(c, 377892, NULL);  Symbol op = Compiler_peek(c, 0);  Token origin = c -> token;  if(op == 1295657932) return _parse_sizeof(c);  if(op == 1044119921612) return _parse_offsetof(c);  if(op != 1848 && op != 2046 && op != 253 && op != 54 && op != 77 && op != 62 && op != 56 && op != 60) return _parse_postfix(c);  Compiler_next(c);  List operand = op == 1848 || op == 2046 || op == 253 ? _parse_unary_op(c) : _parse_cast(c);  return Compiler_resolve_expression(c, cons(_0, cons(_16, cons(List_var(cons(_9, cons(Symbol_var(op), cons(List_var(operand), NULL)))), NULL))), origin);
 }
 
 static int _cast_operand_follows(Symbol s){
@@ -3939,7 +3940,7 @@ List Compiler_parse_map_literal(Compiler);
 List Compiler_parse_string_literal(Compiler);
 List Compiler_parse_lambda_literal(Compiler);
 List Compiler_parse_primary(Compiler compiler){
-  if(! _init_guard_) _file_init_();  Compiler_require_input(compiler);  List slot = Compiler_try_parse_macro_slot(compiler, 405758822009820);  if(List_truth(slot)) return slot;  switch(Compiler_peek(compiler, 0)){
+  if(! _init_guard_) _file_init_();  Compiler_require_input(compiler);  Compiler___complete_here(compiler, 377892, NULL);  List slot = Compiler_try_parse_macro_slot(compiler, 405758822009820);  if(List_truth(slot)) return slot;  switch(Compiler_peek(compiler, 0)){
     case 9297 : return Compiler_parse_macro_lisp_expression(compiler);  case 27051791223990 : return _parse_c_string_literals(compiler);  case 73 : return Compiler_try_parse_macro_expression(compiler);  case 19147688 :{
       List binding = Compiler_with_binding(compiler);  Var stored;  if(List_truth(binding) && Map_try_get(Compiler_semantic_binding_facts(compiler), List_var(cons(_1038, cons(List_var(binding), NULL))), & stored)){
         List expression = Var_list(stored);  Compiler_next(compiler);

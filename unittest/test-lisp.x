@@ -1211,6 +1211,9 @@ static void lisp_value_layer_uses_library_operations(void) {
                 _ev(lisp, "'(a b)"));
   EXPECT_STR_EQ(Var.string(_ev(lisp, "(String.join \"-\" '(\"a\" \"b\"))")),
                 "a-b");
+  EXPECT_STR_EQ(Var.string(_ev(
+    lisp, "(String.format \"%s=%04d\" '(\"answer\" 42))")),
+    "answer=0042");
   EXPECT_VAR_EQ(_ev(lisp, "(String.split \"a b\" \" \")"),
                 _ev(lisp, "'(\"a\" \"b\")"));
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(Var.convert 3.9 'i32)")), 3);

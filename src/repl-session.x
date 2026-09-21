@@ -196,7 +196,7 @@ ReplCompletion ReplSession.complete(
     _tokenize(c, marked, scratch);
     if (c.tokenizer.status() != <ok>) return result;
     c.mark_completion(marked.len() - marker.len());
-    c.complete_here(<submit>, %(
+    c.__complete_here(<submit>, %(
       "void" "char" "short" "int" "long" "float" "double"
       "signed" "unsigned" "if" "while" "for" "do" "return"
       "try" "raise" "defer" "match" "switch" "with"

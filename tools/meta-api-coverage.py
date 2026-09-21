@@ -191,6 +191,9 @@ PROBES = {
         'String empty = ""; return "A_B".is_upper_under() && !"a_B".is_upper_under() && !empty.is_upper_under();', 1),
     'String.compare': ('native text contract and boundaries',
         'return "abc".compare("abd") < 0 && "abc".compare("abc") == 0;', 1),
+    'String.format': ('checked runtime formatting and canonical empty output',
+        'return "%04d:%s:%%".format(%(7 "ok")).equal("0007:ok:%") && '
+        '"".format(%()).len() == 0;', 1),
     'String.hash#constant-receiver': ('native text contract and boundaries',
         'return "abc".hash() == ("a" + "bc").hash();', 1),
     'String.symbol': ('native text contract and boundaries',

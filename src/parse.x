@@ -335,7 +335,7 @@ static List _type_qualifiers(Compiler c) {
   Array quals = [];
   defer quals.free();
   loop {
-    c.complete_here(<type>, _type_completion_keywords());
+    c.__complete_here(<type>, _type_completion_keywords());
     Symbol symbol = c.peek(0);
     if (symbol.is_type_qualifier()) {
       quals.push(symbol);
@@ -787,7 +787,7 @@ List Compiler.parse_parameter_list(Compiler c) {
   Array parameters = [];
   defer parameters.free();
   while (1) {
-    c.complete_here(<type>, _type_completion_keywords());
+    c.__complete_here(<type>, _type_completion_keywords());
     List parameter = c.try_parse_macro_slot(<param>);
     if (!parameter) parameter = c.parse_parameter();
     parameters.push(parameter);
@@ -803,7 +803,7 @@ List Compiler.parse_parameter_list(Compiler c) {
    the captured scope. */
 static List _function_parameters(Compiler c) {
   c.next();
-  c.complete_here(<type>, _type_completion_keywords());
+  c.__complete_here(<type>, _type_completion_keywords());
   if (c.peek(0) == <)>)
     c.report_error(
       <parse>, "empty parameter list; use (void)", c.token, NULL);

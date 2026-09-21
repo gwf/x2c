@@ -8,7 +8,7 @@
 
 static List _25, _23, _22, _21, _20, _17, _14, _13, _11, _9, _8, _6;
 
-static String _34, _33, _32, _31, _30, _29, _28, _27;
+static String _35, _34, _33, _32, _31, _30, _29, _28, _27;
 
 static Var _24, _19, _15, _12, _10, _7, _5, _1, _0;
 
@@ -303,13 +303,14 @@ __attribute__((constructor)) static void _file_init_(void){
   _24 = List_var(_23);
   _25 = cons(_24, _17);
   _27 = String_new("Commands");
-  _28 = String_new("Session");
-  _29 = String_new("Types");
-  _30 = String_new("Functions and macros");
-  _31 = String_new("Names");
-  _32 = String_new("Members");
-  _33 = String_new("\r");
-  _34 = String_new("\n");
+  _28 = String_new("Keywords");
+  _29 = String_new("Session");
+  _30 = String_new("Types");
+  _31 = String_new("Functions and macros");
+  _32 = String_new("Names");
+  _33 = String_new("Members");
+  _34 = String_new("\r");
+  _35 = String_new("\n");
 }
 
 static int _utf8_byte_len(char c){
@@ -1331,7 +1332,7 @@ static int _show_completion_group(struct EditState * l, List candidates, Symbol 
 }
 
 static void _show_completions(struct EditState * l, List candidates){
-  _refresh_with_flags(l, REFRESH_CLEAN);  _write_bytes(l -> input -> ofd, "\r", 1);  _show_completion_group(l, candidates, 7477201800, _27);  _show_completion_group(l, candidates, 41178844124, _28);  _show_completion_group(l, candidates, 1362954, _29);  _show_completion_group(l, candidates, 209136456458, _30);  _show_completion_group(l, candidates, 920394, _31);  _show_completion_group(l, candidates, 883757412, _32);  l -> oldrows = 0;  l -> oldrpos = 1;  _refresh_line(l);
+  _refresh_with_flags(l, REFRESH_CLEAN);  _write_bytes(l -> input -> ofd, "\r", 1);  _show_completion_group(l, candidates, 7477201800, _27);  _show_completion_group(l, candidates, 24011832456, _28);  _show_completion_group(l, candidates, 41178844124, _29);  _show_completion_group(l, candidates, 1362954, _30);  _show_completion_group(l, candidates, 209136456458, _31);  _show_completion_group(l, candidates, 920394, _32);  _show_completion_group(l, candidates, 883757412, _33);  l -> oldrows = 0;  l -> oldrpos = 1;  _refresh_line(l);
 }
 
 String String_new_len(const char *, int);
@@ -1455,7 +1456,7 @@ ReplInputResult ReplInput_read(ReplInput r, String prompt, ReplInputComplete com
     _write_bytes(STDOUT_FILENO, prompt, String_len(prompt));  String text = File_readline(Stdin);  if(! String_truth(text)) return(ReplInputResult){
       .status = 11212
     }
-    ;  text = String_remove_suffix(String_remove_suffix(text, _34), _33);  return(ReplInputResult){
+    ;  text = String_remove_suffix(String_remove_suffix(text, _35), _34);  return(ReplInputResult){
       .status = 805770, .text = text
     }
     ;

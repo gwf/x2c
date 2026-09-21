@@ -29,7 +29,7 @@ Persistent compiler submissions and inspection.
 Completes the source namespace at byte `cursor` without publishing parse
 state. Invalid or non-code prefixes return no candidates.
 
-Source: `src/repl-session.x:140`
+Source: `src/repl-session.x:150`
 
 <a id="ReplSession.complete_functions"></a>
 #### ReplSession.complete_functions
@@ -38,7 +38,7 @@ Source: `src/repl-session.x:140`
 
 Returns sorted published session functions matching `prefix`.
 
-Source: `src/repl-session.x:124`
+Source: `src/repl-session.x:134`
 
 <a id="ReplSession.inspect"></a>
 #### ReplSession.inspect
@@ -70,7 +70,7 @@ Submits one complete candidate without printing or retaining a pending
 prefix. Only successfully initialized declarations publish new bindings;
 evaluation effects on previously published values survive failure.
 
-Source: `src/repl-session.x:304`
+Source: `src/repl-session.x:321`
 
 <a id="ReplSession.symbols"></a>
 #### ReplSession.symbols

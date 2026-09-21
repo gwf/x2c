@@ -744,7 +744,7 @@ int Compiler.at_completion(Compiler compiler) =>
 /* Transfers completion from the grammar production that owns the cursor.
    Rows retain semantic namespace facts; keywords are choices owned by that
    production rather than an editor-side copy of the grammar. */
-void Compiler.complete_here(Compiler compiler, Symbol role, List keywords) {
+void Compiler.__complete_here(Compiler compiler, Symbol role, List keywords) {
   if (!compiler.at_completion()) return;
   List rows = compiler.sym.visible_symbols();
   raise %(

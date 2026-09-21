@@ -76,6 +76,8 @@
 // String
 
 (def String.len           (bind "String_len" nil))
+(def String.format        (bind "String_format" nil))
+(def String_format String.format)
 (def String.find          (bind "String_find" nil))
 (def String.rfind         (bind "String_rfind" nil))
 (def String.count         (bind "String_count" nil))

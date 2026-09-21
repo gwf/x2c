@@ -286,6 +286,7 @@ Var Var.new(Symbol tag, ...);
 Symbol Symbol.new(const char *);
 String String.new(const char *);
 String String.join(String, List);
+String String.format(String, List);
 List Var.cons(Var, List);
 List List.cons(Var, List);
 List cons(Var, List);

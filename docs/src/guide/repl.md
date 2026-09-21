@@ -47,18 +47,24 @@ completed source submissions for the current process; adjacent duplicates are
 stored once, and history is not written to disk. A rejected or failed
 submission remains available for correction.
 
-Tab completes names from the compiler's live session namespace. This includes
-published session values and functions, visible types and macros, and fields or
-evaluator-callable methods on a typed receiver. At a blank primary prompt it
-also offers colon commands, grouped with session names, types, and other
-callables. A colon-prefixed line completes commands even at a continuation
-prompt; `:ast` and `:lowered` then complete published function names. A sole
-match replaces the current name; otherwise Tab inserts the common prefix, and
-another Tab lists compact, grouped choices. Completion parses only through the
-cursor and rolls back its semantic work, so it can use locals from pending
-multiline input without publishing them. APIs become candidates when their
-ordinary declarations and compile-time bindings become visible; the REPL
-keeps no separate API list.
+Tab completes names from the compiler's live session namespace. The parser's
+current grammar role filters that namespace: type positions offer types and
+type-producing macros, expression positions offer values and callable forms,
+and statement, block, and submission starts offer their legal union plus
+contextual keywords. Narrow continuation contexts offer `else`, `catch`, or
+`finally` where each is legal. Fields and evaluator-callable methods remain
+available on a typed receiver. At a blank primary prompt completion also
+offers colon commands, grouped with keywords, session names, types, and other
+callables. Unsupported REPL declarations and imports are not suggested.
+
+A colon-prefixed line completes commands even at a continuation prompt;
+`:ast` and `:lowered` then complete published function names, and `:stats`
+completes `verbose`. A sole match replaces the current name; otherwise Tab
+inserts the common prefix, and another Tab lists compact, grouped choices.
+Completion parses only through the cursor and rolls back its semantic work,
+so it can use locals from pending multiline input without publishing them.
+APIs become candidates when their ordinary declarations and compile-time
+bindings become visible; the REPL keeps no separate API or grammar model.
 
 Long input wraps across terminal rows. Bracketed paste keeps embedded newlines
 inside one editable entry, so a pasted multiline submission can be accepted
@@ -73,7 +79,7 @@ incomplete submission continues at a fresh `... ` prompt.
 | Command | Meaning |
 | --- | --- |
 | `:help` | Show session commands. |
-| `:stats` | Show live runtime statistics. |
+| `:stats [verbose]` | Show concise or detailed runtime statistics. |
 | `:symbols` | List successfully defined names and their kinds. |
 | `:ast plus` | Show `plus`'s typed x2c AST. |
 | `:lowered plus` | Show the Lisp forms used to execute `plus`. |
@@ -92,17 +98,22 @@ even inside an incomplete string or comment. Missing names, extra arguments,
 and unknown commands report errors.
 
 `--dump` prints each available typed AST and lowered Lisp form to standard
-error. `--stats` prints the same runtime report as `:stats` at exit, to
-standard error. The options can be combined.
+error. `--stats` prints the concise runtime report at exit, to standard error.
+`--verbose-stats` prints the detailed report and implies exit reporting; when
+both statistics options are present, one verbose report is printed. The
+options can be combined with `--dump`.
 
 The report separates absolute live or retained quantities from activity since
 the REPL opened. `live-program-bytes` is published evaluator program storage,
-not total evaluator memory. Scope allocation objects are process-wide runtime
-allocations, and `requested-traffic-bytes` is cumulative allocation traffic,
-not memory in use. Pool active and depot bytes partition retained backing
-capacity; they are not reachable payload. Scope and pool figures overlap and
-must not be summed. x2c has no garbage collector, so reuse and promotion
-counters are activity rather than collection counts.
+not total evaluator memory. Scope allocation objects and live requested bytes
+are process-wide runtime values; requested bytes count public managed payload,
+not allocator metadata. `requested-traffic-bytes` remains cumulative activity.
+Pool active and depot bytes partition retained backing capacity; they are not
+reachable payload. Scope, Pool, and Lisp figures overlap and must not be
+summed. x2c has no garbage collector, so reuse and promotion counters are
+activity rather than collection counts. Verbose reports add all evaluator
+AUTO fields, Scope creation and peak data, Pool traffic and capacity detail,
+and machine execution counters collected since the REPL opened.
 
 ## Supported subset
 
@@ -112,12 +123,30 @@ definitions, integer arithmetic and narrowing, assignment, conditionals,
 and length, List literals and indexing, and Array construction, mutation,
 and indexing are exercised by the focused checks.
 
+The whole interpreter exposes the fixed-signature
+`String.format(String fmt, List values)` operation. Call it as
+`fmt.format(values)`:
+
+```x2c
+~List values = %("answer" 42);
+String text = "%s=%04d".format(values);
+```
+
+It supports `%%`, flags `-+ #0`, numeric and `*` width and precision, integer
+conversions `d i o u x X` with `hh h l ll`, floating conversions
+`f F e E g G a A` with default, `l`, or `L`, plus `%c` and `%s`. It converts
+numeric `Var`s and uses `Var.str` for `%s`. Pointer and write-count
+conversions, wide strings and characters, positional formats, and `j z t`
+lengths are rejected. The result follows the process locale, and a failure
+publishes no partial String. Native `String.printf` retains its ordinary C
+varargs contract for compiled code.
+
 REPL sessions also provide `print(String)` and `println(String)`. `print`
 writes the String's bytes; `println` writes those bytes followed by one
 newline. Use String interpolation for formatting, such as
 `println(%"count=$count")`. Both functions are REPL-only, reserve their names
-in the session, and report `ok` rather than a synthetic value. They do not
-provide C `printf` formatting or varargs.
+in the session, and report `ok` rather than a synthetic value. They are not
+varargs aliases.
 
 Redefinition is disabled; assign to an existing variable to change its value.
 Function replacement and mutually recursive forward declarations are not

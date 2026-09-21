@@ -166,6 +166,7 @@ Var Var_new(Symbol tag, ...);
 Symbol Symbol_new(const char *);
 String String_new(const char *);
 String String_join(String, List);
+String String_format(String, List);
 List Var_cons(Var, List);
 List List_cons(Var, List);
 List cons(Var, List);

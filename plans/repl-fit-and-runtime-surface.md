@@ -1,8 +1,8 @@
 # REPL fit, status, and runtime surface
 
-> Status: active
-> Deliveries 1-3 were implemented and validated on 2026-09-21.
-> The standard-library and host candidates remain undispatched backlog.
+> Status: implemented through delivery 7
+> Deliveries 1-7 were implemented and validated on 2026-09-21.
+> The remaining standard-library and host candidates are undispatched backlog.
 
 ## Result
 
@@ -152,6 +152,48 @@ help cleanup.
    arguments. C varargs require format-dependent native types and default
    promotions; a List of boxed values cannot reproduce that contract.
 
+## Delivery 4: grammar-aware completion
+
+Completion now carries parser-owned expression, type, statement-start,
+block-start, submission-start, continuation, or member context through the
+existing rollback transfer. Each grammar owner supplies its legal keywords,
+and visible semantic rows are filtered by role while preserving the existing
+callability check. `else`, `catch`, and `finally` have narrow continuation
+hooks. The terminal groups these candidates under `Keywords`; it still offers
+no punctuation, snippets, labels, operators, or editor-side grammar.
+
+## Delivery 5: verbose statistics
+
+`:stats verbose` and `--verbose-stats` add the complete `LispAutoStats`,
+Scope, Pool, and `MachineStats` projections. Each REPL attaches a zeroed
+machine counter record for its lifetime and detaches it at teardown. The
+concise report remains the default, and combining both exit options prints one
+verbose report. Absolute values and since-open deltas remain separately
+labelled.
+
+## Delivery 6: exact live Scope bytes
+
+Every managed allocation now records its requested payload size beside the
+public allocation header. Process-wide atomic counters track current and peak
+live requested bytes across allocation, free, destruction, release, and
+successful realloc; moves preserve the count and zero-sized objects contribute
+zero bytes. The concise report adds current bytes and a signed since-open
+delta, while verbose output adds the peak. These payload bytes remain distinct
+from Pool retained capacity and Lisp program bytes; no total-memory number is
+synthesized.
+
+## Delivery 7: safe runtime formatting
+
+`String.format(String fmt, List values)`, called as `fmt.format(values)`, is a
+fixed-signature runtime and meta operation. It parses a documented C-style
+subset, converts numeric values with `Var.convert`, renders `%s` with
+`Var.str`, normalizes star width and precision, and sends each validated
+conversion to one correctly typed `Buffer.printf` branch. A private Buffer
+stages the complete result. Pointer, write-count, wide, positional, and other
+unsupported formats raise `<format>` with a byte offset and reason; nested
+conversion causes are retained. Native `String.printf` and compiler static
+format lowering are unchanged.
+
 ## Standard-library and host candidates
 
 These are ranked backlog candidates, not dispatched work. Each group requires
@@ -222,11 +264,11 @@ small output bridge do not depend on that decision.
 - Review and fix the completed authored diff before the required final-tree
   publication validation.
 
-Gary authorized the first three deliveries together; they form one coherent
-direct-to-`dev` change. The standard-library and host candidates remain
-separate, undispatched work. The authored diff receives one source review and
-one unchanged-tree `tools/gate-state.py ensure agent-pr-check` publication
-proof.
+Gary authorized deliveries 4-7 as one ordered direct-to-`dev` change after the
+first three deliveries. The remaining standard-library and host candidates
+remain separate, undispatched work. The authored diff receives one source
+review and one unchanged-tree `tools/gate-state.py ensure agent-pr-check`
+publication proof.
 
 ## Plan review
 

@@ -100,6 +100,7 @@ static void _exercise(ReplSession s) {
   _completion(s, "Str", "String", NULL);
   _completion(s, "pri", "print", NULL);
   _completion(s, "\"x\".le", "len", NULL);
+  _completion(s, "\"x\".for", "format", NULL);
   _completion_kind(s, "", <keyword>, "int");
   _completion_kind(s, "int f(void) { ret", <keyword>, "return");
   _completion_kind(s, "if (1) {} el", <keyword>, "else");

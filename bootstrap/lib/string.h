@@ -68,6 +68,7 @@ String String_join(String sep, List strings);
 String String_replace_n(String str, String old, String replacement, int max_replacements);
 String String_replace(String str, String old, String replacement);
 String String_printf(String fmt, ...);
+String String_format(String fmt, List values);
 String String_unescape(String str);
 String String_escape(String str);
 String String_str(String str);

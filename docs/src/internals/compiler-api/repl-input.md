@@ -26,7 +26,7 @@ Inline terminal editing for the x2c REPL.
 
 Restores the terminal and releases editor-owned history storage.
 
-Source: `src/repl-input.x:1700`
+Source: `src/repl-input.x:1701`
 
 <a id="ReplInput.new"></a>
 #### ReplInput.new
@@ -35,7 +35,7 @@ Source: `src/repl-input.x:1700`
 
 Creates an interactive terminal owner with empty in-memory history.
 
-Source: `src/repl-input.x:1640`
+Source: `src/repl-input.x:1641`
 
 <a id="ReplInput.read"></a>
 #### ReplInput.read
@@ -47,7 +47,7 @@ inline editing; other terminal types use the basic line reader. Terminal
 mode is restored before return or transfer of an allocation, size, or I/O
 cause.
 
-Source: `src/repl-input.x:1653`
+Source: `src/repl-input.x:1654`
 
 <a id="ReplInput.remember"></a>
 #### ReplInput.remember
@@ -57,7 +57,7 @@ Source: `src/repl-input.x:1653`
 Remembers one nonempty entry, suppressing an adjacent duplicate and
 evicting the oldest entry beyond 100.
 
-Source: `src/repl-input.x:1684`
+Source: `src/repl-input.x:1685`
 
 ## Public types
 

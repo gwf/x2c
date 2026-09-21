@@ -19,6 +19,7 @@ Canonical byte strings and core text operations.
 | [`String.find`](#String.find) | Returns the index of the first occurrence of `sub` in `str`, or -1. |
 | [`String.find_all`](#String.find_all) | Returns each non-overlapping starting index at which `sub` occurs. |
 | [`String.find_within`](#String.find_within) | Returns the first index of `sub` within `str[start:end]`, or -1. |
+| [`String.format`](#String.format) | Formats `values` through a checked, C-style subset of `fmt`. |
 | [`String.getindex`](#String.getindex) | Returns the byte at `index` in `str` as an int, or -1 if out of range. |
 | [`String.getslice`](#String.getslice) | Returns the canonical `String` `s[start:stop:step]`. |
 | [`String.iter`](#String.iter) | Initializes `dest` as a lazy iterator over the bytes of `x`. |
@@ -207,6 +208,31 @@ printf("%d %d %d\n", text.find_within("c", 0, -1),
 
 Source: `lib/string.x:434`
 
+<a id="String.format"></a>
+#### String.format
+
+`String String.format(String fmt, List values)`
+
+Formats `values` through a checked, C-style subset of `fmt`.
+The receiver is decoded runtime text, so this fixed-signature operation is
+safe to call through the interpreter as `fmt.format(values)`. It supports
+`%%`, flags `-+ #0`, numeric or `*` width and precision, integer
+conversions `d i o u x X` with `hh h l ll`, floating conversions
+`f F e E g G a A` with default, `l`, or `L`, and `%c` and `%s`.
+Numeric values are converted with `Var.convert`; `%s` uses `Var.str`.
+
+Pointer and write-count conversions, wide strings and characters,
+positional arguments, `j z t` lengths, malformed formats, and missing or
+excess values are rejected. `%c` also rejects NUL because canonical
+`String`s cannot contain it. Output is staged privately and no result is
+published on failure. Formatting follows the process locale.
+
+**Raises:** `<format>` with byte `offset` and `reason`; numeric and string
+conversion failures are nested as `cause`. Allocation failures may also
+transfer while staging or canonicalizing the result.
+
+Source: `lib/string.x:1337`
+
 <a id="String.getindex"></a>
 #### String.getindex
 
@@ -261,7 +287,7 @@ foreach (char ch, "abc") printf("%c\n", ch);
 
 This is byte traversal, not Unicode character iteration.
 
-Source: `lib/string.x:1443`
+Source: `lib/string.x:1766`
 
 <a id="String.join"></a>
 #### String.join
@@ -623,7 +649,7 @@ pointer, a negative cursor, or exhaustion returns zero without changing
 `foreach (int byte, str)` and `foreach (char ch, str)` compile to this
 loop.
 
-Source: `lib/string.x:1420`
+Source: `lib/string.x:1743`
 
 <a id="String.unescape"></a>
 #### String.unescape
@@ -641,7 +667,7 @@ is returned unchanged.
 **Raises:** `<bad-arg>` for an octal escape above `\377`, which does not fit
 a byte, or `<alloc-fail>` while constructing a changed result.
 
-Source: `lib/string.x:1233`
+Source: `lib/string.x:1556`
 
 <a id="String.upper"></a>
 #### String.upper
@@ -694,7 +720,7 @@ borrowed `out` is returned and not retained.
 
 **Raises:** any cause from `Buffer.write`.
 
-Source: `lib/string.x:1298`
+Source: `lib/string.x:1621`
 
 ## Advanced and interop API
 
@@ -733,7 +759,7 @@ locale-aware nor Unicode collation, and only the sign of the result is
 meaningful. The empty `String`, being the null pointer, sorts before
 every non-empty `String`, and two empty `String`s compare equal.
 
-Source: `lib/string.x:1396`
+Source: `lib/string.x:1719`
 
 <a id="String.equal"></a>
 #### String.equal
@@ -747,7 +773,7 @@ Interning already makes `x == y` a content test for two canonical
 are equal, since the null pointer is the empty `String`, and a null
 equals no non-empty `String`.
 
-Source: `lib/string.x:1384`
+Source: `lib/string.x:1707`
 
 <a id="String.escape"></a>
 #### String.escape
@@ -762,7 +788,7 @@ an oversized result returns NULL.
 
 **Raises:** `<alloc-fail>` while constructing the result.
 
-Source: `lib/string.x:1264`
+Source: `lib/string.x:1587`
 
 <a id="String.free"></a>
 #### String.free
@@ -789,7 +815,7 @@ Returns the content hash of `str`, or zero for the empty `String`.
 Canonical `String`s use the cached hash; transient buffers are hashed from
 their current NUL-terminated contents.
 
-Source: `lib/string.x:1371`
+Source: `lib/string.x:1694`
 
 <a id="String.intern"></a>
 #### String.intern
@@ -929,7 +955,7 @@ without backslashes is returned unchanged.
 
 **Raises:** `<alloc-fail>` while copying or decoding.
 
-Source: `lib/string.x:1357`
+Source: `lib/string.x:1680`
 
 <a id="String.parse_char"></a>
 #### String.parse_char
@@ -942,7 +968,7 @@ Text after that closing quote is ignored. A decoded NUL is returned as
 zero; malformed and null input returns -1, as does an octal escape above
 `\377`, which does not fit a byte.
 
-Source: `lib/string.x:1322`
+Source: `lib/string.x:1645`
 
 <a id="String.printf"></a>
 #### String.printf
@@ -987,7 +1013,7 @@ Empty input returns the canonical literal spelling `"\"\""`.
 
 **Raises:** `<alloc-fail>` while escaping or formatting a nonempty `String`.
 
-Source: `lib/string.x:1287`
+Source: `lib/string.x:1610`
 
 <a id="String.str"></a>
 #### String.str
@@ -997,7 +1023,7 @@ Source: `lib/string.x:1287`
 Returns `str` itself as its display `String` without copying or retaining
 it.
 
-Source: `lib/string.x:1281`
+Source: `lib/string.x:1604`
 
 <a id="String.symbol"></a>
 #### String.symbol
@@ -1009,7 +1035,7 @@ Returns the compact `Symbol` encoded from `str`, or zero for empty input.
 use seven-bit bytes, and input beyond the selected encoding's capacity is
 truncated. Use `Symbol.try_new` when every byte must be preserved.
 
-Source: `lib/string.x:1345`
+Source: `lib/string.x:1668`
 
 <a id="String.write_repr"></a>
 #### String.write_repr
@@ -1023,7 +1049,7 @@ remains in the `Buffer`.
 
 **Raises:** any cause from `Buffer.write_char` or `Buffer.write_len`.
 
-Source: `lib/string.x:1306`
+Source: `lib/string.x:1629`
 
 ## Runtime-internal callables
 

@@ -1131,6 +1131,329 @@ String String.printf(String fmt, ...) {
   return _finish(string, n);
 }
 
+typedef struct StringFormatSpec {
+  int flags, width, precision, has_width, has_precision, length;
+  char conversion;
+} StringFormatSpec;
+
+enum {
+  STRING_FORMAT_LEFT = 1,
+  STRING_FORMAT_PLUS = 2,
+  STRING_FORMAT_SPACE = 4,
+  STRING_FORMAT_ALT = 8,
+  STRING_FORMAT_ZERO = 16,
+  STRING_FORMAT_HH = 1,
+  STRING_FORMAT_H = 2,
+  STRING_FORMAT_L = 3,
+  STRING_FORMAT_LL = 4,
+  STRING_FORMAT_CAP_L = 5
+};
+
+static void _format_error(int offset, String reason) {
+  raise %(format (offset $offset) (reason $reason));
+}
+
+static Var _format_convert(Var value, Symbol target, int offset) {
+  Var converted = void;
+  try converted = value.convert(target);
+  catch %(?code *details): {
+    List cause = cons(code, details);
+    raise %(format (offset $offset) (reason "value conversion failed")
+                   (cause $cause));
+  }
+  return converted;
+}
+
+static String _format_string(Var value, int offset) {
+  String converted = NULL;
+  try converted = value.str();
+  catch %(?code *details): {
+    List cause = cons(code, details);
+    raise %(format (offset $offset) (reason "string conversion failed")
+                   (cause $cause));
+  }
+  return converted;
+}
+
+static int _format_decimal(
+  String fmt, int length, int *cursor, String label) {
+  int value = 0, start = *cursor;
+  while (*cursor < length && fmt[*cursor] >= '0' && fmt[*cursor] <= '9') {
+    int digit = fmt[*cursor] - '0';
+    if (value > (INT_MAX - digit) / 10)
+      _format_error(start, %"$label exceeds int range");
+    value = value * 10 + digit;
+    (*cursor)++;
+  }
+  return value;
+}
+
+static int _format_star(List *values, int offset) {
+  if (!*values) _format_error(offset, "missing star value");
+  Var value = (*values).car();
+  *values = (*values).cdr();
+  return (int) _format_convert(value, <i32>, offset).integer();
+}
+
+static void _format_specifier(char *out, StringFormatSpec spec) {
+  int length = 0;
+  out[length++] = '%';
+  if (spec.flags & STRING_FORMAT_LEFT) out[length++] = '-';
+  if (spec.flags & STRING_FORMAT_PLUS) out[length++] = '+';
+  if (spec.flags & STRING_FORMAT_SPACE) out[length++] = ' ';
+  if (spec.flags & STRING_FORMAT_ALT) out[length++] = '#';
+  if (spec.flags & STRING_FORMAT_ZERO) out[length++] = '0';
+  if (spec.has_width && spec.width)
+    length += snprintf(out + length, 16, "%d", spec.width);
+  if (spec.has_precision) {
+    out[length++] = '.';
+    length += snprintf(out + length, 16, "%d", spec.precision);
+  }
+  switch (spec.length) {
+    case STRING_FORMAT_HH: out[length++] = 'h'; out[length++] = 'h'; break;
+    case STRING_FORMAT_H: out[length++] = 'h'; break;
+    case STRING_FORMAT_L: out[length++] = 'l'; break;
+    case STRING_FORMAT_LL: out[length++] = 'l'; out[length++] = 'l'; break;
+    case STRING_FORMAT_CAP_L: out[length++] = 'L'; break;
+  }
+  out[length++] = spec.conversion;
+  out[length] = '\0';
+}
+
+static Buffer _format_integer(
+  Buffer out, const char *spec, StringFormatSpec parsed, Var value,
+  int offset) {
+  int unsigned_value = parsed.conversion == 'o' ||
+    parsed.conversion == 'u' || parsed.conversion == 'x' ||
+    parsed.conversion == 'X';
+  switch (parsed.length) {
+    case STRING_FORMAT_HH:
+      if (unsigned_value) {
+        unsigned int number = (unsigned char) _format_convert(
+          value, <u8>, offset).integer();
+        return out.printf(spec, number);
+      }
+      else {
+        int number = (signed char) _format_convert(
+          value, <i8>, offset).integer();
+        return out.printf(spec, number);
+      }
+    case STRING_FORMAT_H:
+      if (unsigned_value) {
+        unsigned int number = (unsigned short) _format_convert(
+          value, <u16>, offset).integer();
+        return out.printf(spec, number);
+      }
+      else {
+        int number = (short) _format_convert(
+          value, <i16>, offset).integer();
+        return out.printf(spec, number);
+      }
+    case STRING_FORMAT_L:
+      if (unsigned_value) {
+        unsigned long number = _format_convert(
+          value, <ulong>, offset).ulong_value();
+        return out.printf(spec, number);
+      }
+      else {
+        long number = _format_convert(value, <long>, offset).long_value();
+        return out.printf(spec, number);
+      }
+    case STRING_FORMAT_LL:
+      if (unsigned_value) {
+        unsigned long long number = _format_convert(
+          value, <ullong>, offset).ulong_long_value();
+        return out.printf(spec, number);
+      }
+      else {
+        long long number = _format_convert(
+          value, <llong>, offset).long_long_value();
+        return out.printf(spec, number);
+      }
+    default:
+      if (unsigned_value) {
+        unsigned int number = (unsigned int) _format_convert(
+          value, <u32>, offset).integer();
+        return out.printf(spec, number);
+      }
+      else {
+        int number = (int) _format_convert(
+          value, <i32>, offset).integer();
+        return out.printf(spec, number);
+      }
+  }
+}
+
+static Buffer _format_value(
+  Buffer out, const char *spec, StringFormatSpec parsed, Var value,
+  int offset) {
+  switch (parsed.conversion) {
+    case 'd': case 'i': case 'o': case 'u': case 'x': case 'X':
+      return _format_integer(out, spec, parsed, value, offset);
+    case 'f': case 'F': case 'e': case 'E': case 'g': case 'G':
+    case 'a': case 'A':
+      if (parsed.length == STRING_FORMAT_CAP_L) {
+        long double number = _format_convert(
+          value, <ldouble>, offset).long_double_value();
+        return out.printf(spec, number);
+      }
+      else {
+        double number = _format_convert(value, <f64>, offset).floating();
+        return out.printf(spec, number);
+      }
+    case 'c': {
+      int byte = (int) _format_convert(value, <i32>, offset).integer();
+      if (!(unsigned char) byte)
+        _format_error(offset, "%c cannot produce an embedded NUL");
+      return out.printf(spec, byte);
+    }
+    case 's': {
+      String string = _format_string(value, offset);
+      return out.printf(spec, string ? string : "");
+    }
+  }
+  _format_error(offset, "unsupported conversion");
+  return out;
+}
+
+/** Formats `values` through a checked, C-style subset of `fmt`.
+    The receiver is decoded runtime text, so this fixed-signature operation is
+    safe to call through the interpreter as `fmt.format(values)`. It supports
+    `%%`, flags `-+ #0`, numeric or `*` width and precision, integer
+    conversions `d i o u x X` with `hh h l ll`, floating conversions
+    `f F e E g G a A` with default, `l`, or `L`, and `%c` and `%s`.
+    Numeric values are converted with `Var.convert`; `%s` uses `Var.str`.
+
+    Pointer and write-count conversions, wide strings and characters,
+    positional arguments, `j z t` lengths, malformed formats, and missing or
+    excess values are rejected. `%c` also rejects NUL because canonical
+    `String`s cannot contain it. Output is staged privately and no result is
+    published on failure. Formatting follows the process locale.
+
+    Raises: `<format>` with byte `offset` and `reason`; numeric and string
+    conversion failures are nested as `cause`. Allocation failures may also
+    transfer while staging or canonicalizing the result.
+*/
+String String.format(String fmt, List values) {
+  if (!fmt || !*fmt) {
+    if (values) _format_error(0, "excess values");
+    return NULL;
+  }
+  Buffer out = $auto(Buffer.new(0));
+  int length = fmt.len(), literal = 0, cursor = 0;
+  while (cursor < length) {
+    if (fmt[cursor] != '%') { cursor++; continue; }
+    int offset = cursor;
+    out.write_len(fmt + literal, (size_t) (cursor - literal));
+    cursor++;
+    if (cursor == length) _format_error(offset, "incomplete conversion");
+    if (fmt[cursor] == '%') {
+      out.write_char('%');
+      cursor++;
+      literal = cursor;
+      continue;
+    }
+
+    StringFormatSpec parsed = { 0 };
+    for (;;) {
+      switch (fmt[cursor]) {
+        case '-': parsed.flags |= STRING_FORMAT_LEFT; break;
+        case '+': parsed.flags |= STRING_FORMAT_PLUS; break;
+        case ' ': parsed.flags |= STRING_FORMAT_SPACE; break;
+        case '#': parsed.flags |= STRING_FORMAT_ALT; break;
+        case '0': parsed.flags |= STRING_FORMAT_ZERO; break;
+        default: goto flags_done;
+      }
+      if (++cursor == length)
+        _format_error(offset, "incomplete conversion");
+    }
+flags_done:
+    if (fmt[cursor] == '*') {
+      int width = _format_star(&values, offset);
+      if (width == INT_MIN) _format_error(offset, "width exceeds int range");
+      if (width < 0) {
+        parsed.flags |= STRING_FORMAT_LEFT;
+        width = -width;
+      }
+      parsed.has_width = 1;
+      parsed.width = width;
+      cursor++;
+    }
+    else if (fmt[cursor] >= '0' && fmt[cursor] <= '9') {
+      parsed.has_width = 1;
+      parsed.width = _format_decimal(fmt, length, &cursor, "width");
+    }
+    if (cursor < length && fmt[cursor] == '.') {
+      parsed.has_precision = 1;
+      cursor++;
+      if (cursor == length) _format_error(offset, "incomplete conversion");
+      if (fmt[cursor] == '*') {
+        int precision = _format_star(&values, offset);
+        if (precision < 0) parsed.has_precision = 0;
+        else parsed.precision = precision;
+        cursor++;
+      }
+      else if (fmt[cursor] >= '0' && fmt[cursor] <= '9')
+        parsed.precision = _format_decimal(
+          fmt, length, &cursor, "precision");
+    }
+    if (cursor == length) _format_error(offset, "incomplete conversion");
+    if (fmt[cursor] == 'h') {
+      parsed.length = STRING_FORMAT_H;
+      if (++cursor < length && fmt[cursor] == 'h') {
+        parsed.length = STRING_FORMAT_HH;
+        cursor++;
+      }
+    }
+    else if (fmt[cursor] == 'l') {
+      parsed.length = STRING_FORMAT_L;
+      if (++cursor < length && fmt[cursor] == 'l') {
+        parsed.length = STRING_FORMAT_LL;
+        cursor++;
+      }
+    }
+    else if (fmt[cursor] == 'L') {
+      parsed.length = STRING_FORMAT_CAP_L;
+      cursor++;
+    }
+    else if (fmt[cursor] == 'j' || fmt[cursor] == 'z' || fmt[cursor] == 't')
+      _format_error(offset, "unsupported length modifier");
+    if (cursor == length) _format_error(offset, "incomplete conversion");
+    parsed.conversion = fmt[cursor++];
+    int integer = strchr("diouxX", parsed.conversion) != NULL;
+    int floating = strchr("fFeEgGaA", parsed.conversion) != NULL;
+    if (parsed.conversion == '$')
+      _format_error(offset, "positional formats are unsupported");
+    if (!integer && !floating && parsed.conversion != 'c' &&
+        parsed.conversion != 's')
+      _format_error(offset, "unsupported conversion");
+    if (integer && parsed.length == STRING_FORMAT_CAP_L)
+      _format_error(offset, "unsupported integer length");
+    if (floating && parsed.length != 0 &&
+        parsed.length != STRING_FORMAT_L &&
+        parsed.length != STRING_FORMAT_CAP_L)
+      _format_error(offset, "unsupported floating length");
+    if ((parsed.conversion == 'c' || parsed.conversion == 's') &&
+        parsed.length)
+      _format_error(offset, "wide strings and characters are unsupported");
+    if ((parsed.conversion == 'c' || parsed.conversion == 's') &&
+        (parsed.flags & ~STRING_FORMAT_LEFT))
+      _format_error(offset, "unsupported flag for conversion");
+    if (parsed.conversion == 'c' && parsed.has_precision)
+      _format_error(offset, "unsupported precision for %c");
+    if (!values) _format_error(offset, "missing value");
+    Var value = values.car();
+    values = values.cdr();
+    char spec[48];
+    _format_specifier(spec, parsed);
+    _format_value(out, spec, parsed, value, offset);
+    literal = cursor;
+  }
+  out.write_len(fmt + literal, (size_t) (length - literal));
+  if (values) _format_error(length, "excess values");
+  return out;
+}
+
 static inline int _hex_digit(int ch) {
   if (ch >= '0' && ch <= '9') return ch - '0';
   if (ch >= 'a' && ch <= 'f') return ch - 'a' + 10;

@@ -22,7 +22,7 @@ typedef struct Scope{
 typedef struct ScopeStats{
   size_t allocation_calls, reallocation_calls, free_calls, live_allocations;
   size_t scope_creations, scope_destructions, live_scopes, requested_bytes;
-  size_t largest_request;
+  size_t largest_request, live_requested_bytes, peak_live_requested_bytes;
 }
 ScopeStats;
 

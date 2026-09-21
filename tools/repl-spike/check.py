@@ -167,6 +167,10 @@ assert all(text in result.stdout for text in [
     "\nEditing\n", "\nOptions\n",
 ]) and not result.stderr, result
 check('String s = "hello";\ns.len();\ns;\n', 'ok\n=> 5\n=> "hello"\n')
+check('"%s=%04d".format(%("answer" 42));\n',
+      '=> "answer=0042"\n')
+check('"%d".format(%("bad"));\n1+2;\n', '=> 3\n',
+      'evaluation failed: (format (offset 0)')
 check('int count = 3;\nprint("value=");\nprintln(%"$count");\n',
       'ok\nvalue=ok\n3\nok\n')
 check('print("");\nprintln("");\n', 'ok\n\nok\n')
@@ -349,6 +353,10 @@ with PtyRepl() as repl:
     repl.ready(mark)
     mark = repl.send(b"kept.\t\t")
     repl.expect(b"  push", mark)
+    repl.send(b"\x03")
+    repl.ready(mark)
+    mark = repl.send(b'"x".for\t')
+    repl.expect(b'"x".format', mark)
     repl.send(b"\x03")
     repl.ready(mark)
     mark = repl.send(b"int zebra(void) { return 9; }\r")

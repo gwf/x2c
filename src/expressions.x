@@ -818,7 +818,7 @@ static int _c_type_known(Compiler c, List operand) {
 }
 
 static List _parse_unary_op(Compiler c) {
-  c.complete_here(<expr>, %());
+  c.__complete_here(<expr>, %());
   Symbol op = c.peek(0);
   Token origin = c.token;
   if (op == <sizeof>) return _parse_sizeof(c);
@@ -2602,7 +2602,7 @@ static List _parse_c_string_literals(Compiler c) =>
 */
 List Compiler.parse_primary(Compiler compiler) {
   compiler.require_input();
-  compiler.complete_here(<expr>, %());
+  compiler.__complete_here(<expr>, %());
   List slot = compiler.try_parse_macro_slot(<expression>);
   if (slot) return slot;
   switch (compiler.peek(0)) {

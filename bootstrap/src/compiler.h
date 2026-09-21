@@ -159,6 +159,8 @@ void Compiler_mark_completion(Compiler compiler, int position);
 
 int Compiler_at_completion(Compiler compiler);
 
+void Compiler___complete_here(Compiler compiler, Symbol role, List keywords);
+
 Token Compiler_skip_trivia_from(Compiler compiler, Token token);
 
 int Symbol_group_step(Symbol s);
