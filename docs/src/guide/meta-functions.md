@@ -270,15 +270,15 @@ on a listed type works. The operation inventory below further limits calls.
 | Native integers, including `char`, narrow, unsigned and wide types | Numeric literals and typed locals; values can pass between meta functions and return from them. Width alone is not a prohibition. | Arithmetic, comparisons, casts, assignment and local compound updates. Source numeric literals use the shared scanner and type conversion rules, including integer base prefixes and `U`, `L` and `LL` suffixes. |
 | `float`, `double` | Literals, locals, parameters and returns work, including `f`/`F` floating suffixes. | Arithmetic and scalar conversions work. Floating results can also be inserted as typed expressions. |
 | `long double` | Typed parameters, returns and `L`-suffixed floating literals work. | Decimal and hexadecimal floating literals use the declared numeric precision. The focused checks do not establish parity for every extended-precision calculation. |
-| `void` return | A meta helper may return no value, including a helper writing through an out-parameter. | The call can run for its effect; this is distinct from a `Var` containing runtime `void`. |
+| `void` return | A meta helper may return true no-value, including a helper writing through an out-parameter. Bare return and fallthrough preserve that result. | Raw evaluator slots, `Var` parameters and `Var` results transport `void` without changing it to an empty List. Concrete typed value parameters and ordinary collections still reject it. |
 | `String`, `Symbol` | String/symbol literals, computed strings and interpolation; parameters and returns. | String indexing reads character codes. Bound string methods work; indexed string writes do not. Symbols have the small method surface listed below. |
 | `List` | Templates, braced/list-compatible initialization, conversion from `Array`; parameters and returns. | Index/association reads, traversal, matching and bound methods. No indexed assignment; build a new List instead. A returned data List is not automatically an expression. |
 | `Array` | `[]`, `[a, b]`, `Array.new()`, conversion from `List`; parameters and returns. | Indexed reads/writes and the bound mutating methods. Contents can mix represented values and nest collections. |
 | `Map` | `{}`, keyed literals, `Map.new()`; parameters and returns. | Keyed reads/writes and bound methods; represented collections and callable values can be stored inside it. |
-| `Var` | Boxes represented numbers, strings, symbols, collections and callable values. | Only the exposed operations below. Compile-time `void` and an empty List share a representation; do not use this distinction to control a meta calculation. |
+| `Var` | Boxes represented numbers, strings, symbols, collections and callable values. | Only the exposed operations below. Compile-time `void` and an empty List remain distinct. Lisp conditions treat both as false; x2c runtime `Var.truth` still raises on `void`. |
 | `Func` | Lambdas with typed or bare parameters, captures and references to available functions; parameters and returns between meta functions. | Dynamic calls and storage in collections work. This does not expose arbitrary native function-pointer calls or unrepresented argument types. |
 | C-style array declarations | A literal-sized one-dimensional array, such as `int a[3] = {1, 2};`, has compile-time storage. Omitted elements are filled with zero-like values. | Indexing and simple assignment work; passing the array to an indexed pointer parameter works in the tested case. At compile time, a mutable evaluator cell holds a dynamic Array of Var values. Runtime uses native C array storage; the evaluator does not use `alloca`. See element/dimension limits below. |
-| Pointers to locals | `int *p = &n;`, copying that pointer and passing it to another meta function work. | `*p` reads and `*p = value` writes the local. General pointer arithmetic, address-of an array element and native memory/layout access are not supplied by this cell representation. |
+| Pointers to locals | `int *p = &n;`, copying that pointer and passing it to another meta function work. The evaluator exposes the source pointer tag while retaining its own cell. | `*p` reads and `*p = value` writes the local. General pointer arithmetic, address-of an array element and native memory/layout access are not supplied by this cell representation. |
 | Native structs and unions | Native aggregate locals and native field access are rejected; a type name in a signature alone does not establish a usable value representation. | Dot **methods** resolve as calls and can work. Dot **fields** need native aggregate representation and do not. Compiler queries may inspect a struct's type and build future field access code without reading a struct value. |
 | `File`, buffers and other resource types | No general compile-time constructor/operation surface is installed for these types. A declaration or opaque type name alone does not make the resource usable. | For example, `File.open` has no binding. Use the compiler's explicit text-embedding operation for source-dependent text. |
 
@@ -364,9 +364,16 @@ Other installed meta functions and the compiler operations declared in
 `meta.x` extend this surface; including a normal function declaration does
 not install its body for compile-time execution.
 
-The adapters normalize missing List/Array/Map lookups and removals, including
-`caar`, `cadr` and `caddr`, to an empty List rather than runtime `void`. Keep
-calculations inside the defined bounds when they must agree with runtime code.
+Missing List/Array/Map lookups and removals preserve runtime `void`; they no
+longer become an empty List in the evaluator. This covers List `getindex`,
+`last`, `assoc`, `get`, `caar`, `cadr` and `caddr`; Array `getindex`, `setindex`,
+`take_last`, `shift`, `remove` and `insert`; and Map `get`, `getindex` and `del`.
+`caar` stops when either selection is absent. Ordinary Lists, Arrays and Maps
+still reject `void` as an element, key or value, so a rest call cannot pack it
+into its argument List.
+Lisp conditions treat `void` as false while the normal x2c `Var.truth` contract
+still raises `<void-op>`; compare explicitly with `void` when both forms must
+agree.
 The compiler loads several binding layers, including `etc/init.xlisp`,
 `etc/lisp-values.xlisp` and `etc/comptime.xlisp`; supported body forms live in
 `src/comptime.x`.

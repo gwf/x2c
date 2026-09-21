@@ -16,6 +16,7 @@ switch-loop  4003
 nested-break 306
 foreach-brk  2
 pointer      12
+void-return  2
 foreach      4
 discard      3
 array-len    3
@@ -39,7 +40,7 @@ live-set     112
 character    65 65  10 10  1 1
 flatten      (a b c d e)
 accumulate   ((1 1) (2 2))
-table        (neg sin) ()
+table        (neg sin) void
 pair         34
 pair-typed   34
 pair-held    34

@@ -231,7 +231,7 @@ static void func_pointer_conversion_snapshots_and_handles_null(void) {
   Var void_result = void_function(9);
   EXPECT_INT_EQ(_func_pointer_evaluations, 1);
   EXPECT_INT_EQ(_side_effect, 9);
-  EXPECT_TRUE(void_result.is_null());
+  EXPECT_TRUE(void_result is void);
 
   FuncTestBinary absent = NULL;
   ScopeStats before = Scope.stats();
@@ -405,6 +405,15 @@ static void func_rest_accepts_values_and_rejects_references(void) {
   try fn.apply(1, reference);
   catch %(bad-types *): caught = 1;
   EXPECT_TRUE(caught);
+
+  FuncArg absent[2] = {
+    FuncArg.value(Var.new(<i32>, 1)), FuncArg.value(void)
+  };
+  List details = NULL;
+  try fn.apply(2, absent);
+  catch %(void-op *cause): details = cause;
+  if (!EXPECT_NOT_NULL(details)) return;
+  EXPECT_INT_EQ(details.assoc(<index>).integer(), 1);
 }
 
 /* A value already typed FuncAdapter passes through unadapted, which is how a
@@ -498,7 +507,7 @@ static void func_apply_conversion_range_fails(void) {
   EXPECT_TRUE(detail.assoc(<cause>) is <list>);
 }
 
-static void func_void_result_is_raw_null(void) {
+static void func_void_result_remains_no_value(void) {
   Func fn = Func.new(
     _bump_counter, %((func ((int))) void)
   );
@@ -507,15 +516,12 @@ static void func_void_result_is_raw_null(void) {
   argv[0] = FuncArg.value(Var.new(<i32>, 5));
   Var out = fn.apply(1, argv);
   EXPECT_INT_EQ(_side_effect, 5);
-  EXPECT_TRUE(out.is_null());
+  EXPECT_TRUE(out is void);
 }
 
-static void func_var_result_rejects_void(void) {
+static void func_var_result_transports_void(void) {
   Func fn = Func.new(_return_void_var, %((func ((void))) "Var"));
-  int caught = 0;
-  try fn.apply(0, NULL);
-  catch %(bad-result *): caught = 1;
-  EXPECT_TRUE(caught);
+  EXPECT_TRUE(fn.apply(0, NULL) is void);
 }
 
 static void func_list_argument_round_trips(void) {
@@ -778,8 +784,8 @@ void func_suite(void) {
   $test.run(func_apply_wrong_symbol_tag_fails);
   $test.run(func_apply_void_argument_fails);
   $test.run(func_apply_conversion_range_fails);
-  $test.run(func_void_result_is_raw_null);
-  $test.run(func_var_result_rejects_void);
+  $test.run(func_void_result_remains_no_value);
+  $test.run(func_var_result_transports_void);
   $test.run(func_list_argument_round_trips);
   $test.run(func_bad_signatures_rejected);
   $test.run(func_accepts_a_multi_token_result);

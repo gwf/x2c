@@ -257,13 +257,13 @@ static void iter_func_failures_and_empty_sources(void) {
   EXPECT_INT_EQ(reference_caught, 2);
   EXPECT_INT_EQ(conversion_caught, 2);
 
-  int transferred = 0, bad_result_caught = 0;
+  int transferred = 0, void_caught = 0;
   try range(76, 76, 1).map(_iter_raise).next();
   catch %(invariant (value ?value)): transferred = value.int() == 76;
   try range(1, 1, 1).map(_iter_void_result).next();
-  catch %(bad-result *): bad_result_caught = 1;
+  catch %(void-op *): void_caught = 1;
   EXPECT_TRUE(transferred);
-  EXPECT_TRUE(bad_result_caught);
+  EXPECT_TRUE(void_caught);
 }
 
 static void iter_func_lifetimes_and_allocations(void) {

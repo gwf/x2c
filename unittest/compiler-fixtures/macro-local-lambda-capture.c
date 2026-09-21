@@ -23,7 +23,7 @@ static Var _x2c_lambda_0(int base){
     int _x2c_binding_shadow_0 = 100;
     return int_var(base + 3);
   }
-  return Var_null();
+  return((void) 0, Void);
 }
 
 static Var _x2c_lambda_1(Var base){
@@ -31,6 +31,6 @@ static Var _x2c_lambda_1(Var base){
     int _x2c_binding_shadow_1 = 100;
     return Var_binary(base, 56, int_var(4));
   }
-  return Var_null();
+  return((void) 0, Void);
 }
 

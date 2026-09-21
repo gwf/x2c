@@ -39,7 +39,8 @@ typedef struct FuncArg {
     synchronously with borrowed `fn` and `argv`; the callback code must outlive
     the `Func`. Compiler-generated adapters use the checked value and reference
     readers, call their native target, and box its result. A returned `void`
-    is rejected. Adapters receive no count. Fixed bindings check arity first,
+    remains no-value. Adapters receive no count. Fixed bindings check arity
+    first,
     and rest bindings receive one packed `List` argument.
 */
 typedef Var (*FuncAdapter)(Func fn, const FuncArg *argv);
@@ -169,8 +170,8 @@ Var x2c_func_value_argument(
     raise %(bad-types (sig $sig) (index $i)
                       (want value));
   Var value = argv[i].data.value;
-  if (value is void) raise %(void-op (sig $sig) (index $i));
   if (want == <var>) return value;
+  if (value is void) raise %(void-op (sig $sig) (index $i));
   X2CVarNumericInfo info;
   if (Var.numeric_info(want, &info)) {
     Var converted = void;
@@ -357,8 +358,8 @@ const void *Func.context(Func function) {
     for the wrong argument count, `<void-op>`, `<bad-types>`, `<bad-enc>`,
     `<bad-target>`, `<no-convert>`, or `<conv-range>` while converting an
     argument, `<alloc-fail>` or `<size-limit>` while packing rest arguments,
-    `<bad-result>` when an adapter returns `void`, or any cause raised by the
-    adapter or native target. The result has the ownership of the value the
+    or any cause raised by the adapter or native target. A `void` adapter
+    result remains no-value. Other results have the ownership of the value the
     adapter returned. */
 Var Func.apply(Func f, unsigned argc, const FuncArg *argv) {
   if (!f || (argc && !argv)) raise %(bad-arg (operation "Func.apply"));
@@ -372,7 +373,13 @@ Var Func.apply(Func f, unsigned argc, const FuncArg *argv) {
         unsigned index = i - 1;
         raise %(bad-types (sig $sig) (index $index) (want value));
       }
-      rest = cons(argv[i - 1].data.value, rest);
+      Var value = argv[i - 1].data.value;
+      if (value is void) {
+        List sig = f.sig;
+        unsigned index = i - 1;
+        raise %(void-op (sig $sig) (index $index));
+      }
+      rest = cons(value, rest);
     }
     packed = rest;
     packed_argument = FuncArg.value(packed);
@@ -383,12 +390,7 @@ Var Func.apply(Func f, unsigned argc, const FuncArg *argv) {
     List sig = f.sig;
     raise %(bad-arity (sig $sig) (expected $expected) (actual $argc));
   }
-  Var result = f.adapter(f, argv);
-  if (result is void) {
-    List sig = f.sig;
-    raise %(bad-result (sig $sig));
-  }
-  return result;
+  return f.adapter(f, argv);
 }
 
 /** Boxes `function` without copying or retaining the `Func`.

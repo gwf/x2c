@@ -2569,10 +2569,10 @@ the comma expression itself is the lambda body.
 Current guarantees:
 
 - an expression body produces its value; a native C `void` expression runs
-  once and produces Null;
+  once and produces `void`;
 - a block body accepts statements, including declarations, control
   flow, `defer`, and nested lambdas. `return expression;` converts the result
-  to `Var`; bare `return;` and fallthrough produce Null;
+  to `Var`; bare `return;` and fallthrough produce `void`;
 - bare parameters are `Var` values;
 - nullary and multi-parameter forms work;
 - unlisted automatic values referenced by the body become read-only snapshots
@@ -2620,8 +2620,11 @@ binding. Variadic functions do not convert implicitly; use the advanced
 
 A capturing lambda has static type `Func`; calling it directly returns `Var`.
 The same is true after a noncapturing lambda converts to `Func`. Successful
-effect-only calls produce Null through either route. Explicitly returning
-the `void` sentinel still produces it, and `Func.apply` rejects that result.
+effect-only calls and explicit `void` results produce `void` through either
+route. `Func.apply` preserves that no-value result. A value parameter declared
+as `Var` may receive it; a concrete typed value parameter rejects it. Rest
+bindings reject it before constructing their argument `List`, since ordinary
+collections exclude `void`.
 A `Func` cannot be passed as a context-free C callback because that ABI has
 nowhere to carry its captured values. `List`, `Array`, `String`, and `Iter`
 higher-order methods accept `Func` instead, so they can use captured callbacks

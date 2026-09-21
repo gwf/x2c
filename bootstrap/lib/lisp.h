@@ -55,6 +55,8 @@ void Lisp_freeze(Lisp lisp);
 
 Symbol Lisp_read(Lisp lisp, String source, unsigned * cursor, Var * out);
 
+Var lisp_truth(Var value);
+
 Var lisp_atom(Var value);
 
 Var lisp_car(Var value);
@@ -120,6 +122,16 @@ Var lisp_match_replace(List input, Var pat, Var template);
 Var lisp_read_file(String path);
 
 Var lisp_write_file(String path, String text);
+
+Var lisp_void(void);
+
+Var lisp_cell(Var value);
+
+Var lisp_address(Var cell, Symbol tag);
+
+Var lisp_load(Var cell);
+
+Var lisp_store(Var cell, Var value);
 
 LispAutoStats Lisp_auto_stats(Lisp lisp);
 

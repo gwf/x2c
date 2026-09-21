@@ -330,39 +330,39 @@ static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda
   const _x2c_lambda_context_0 * _x2c_lambda_context_value_0 =(const _x2c_lambda_context_0 *) Func_context(_x2c_lambda_closure_0);
   Var_adnode(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_0) -> adjoint += Var_adnode(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_1) -> adjoint;
   Var_adnode(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_2) -> adjoint += Var_adnode(_x2c_lambda_context_value_0 -> _x2c_lambda_capture_1) -> adjoint;
-  return Var_null();
+  return((void) 0, Void);
 }
 
 static Var _x2c_lambda_1(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda_argv_1){
   const _x2c_lambda_context_2 * _x2c_lambda_context_value_1 =(const _x2c_lambda_context_2 *) Func_context(_x2c_lambda_closure_1);
   Var_adnode(_x2c_lambda_context_value_1 -> _x2c_lambda_capture_3) -> adjoint += Var_adnode(_x2c_lambda_context_value_1 -> _x2c_lambda_capture_4) -> adjoint;
   Var_adnode(_x2c_lambda_context_value_1 -> _x2c_lambda_capture_5) -> adjoint -= Var_adnode(_x2c_lambda_context_value_1 -> _x2c_lambda_capture_4) -> adjoint;
-  return Var_null();
+  return((void) 0, Void);
 }
 
 static Var _x2c_lambda_2(Func _x2c_lambda_closure_2, const FuncArg * _x2c_lambda_argv_2){
   const _x2c_lambda_context_4 * _x2c_lambda_context_value_2 =(const _x2c_lambda_context_4 *) Func_context(_x2c_lambda_closure_2);
   Var_adnode(_x2c_lambda_context_value_2 -> _x2c_lambda_capture_6) -> adjoint += Var_adnode(_x2c_lambda_context_value_2 -> _x2c_lambda_capture_7) -> adjoint * Var_adnode(_x2c_lambda_context_value_2 -> _x2c_lambda_capture_8) -> value;
   Var_adnode(_x2c_lambda_context_value_2 -> _x2c_lambda_capture_8) -> adjoint += Var_adnode(_x2c_lambda_context_value_2 -> _x2c_lambda_capture_7) -> adjoint * Var_adnode(_x2c_lambda_context_value_2 -> _x2c_lambda_capture_6) -> value;
-  return Var_null();
+  return((void) 0, Void);
 }
 
 static Var _x2c_lambda_3(Func _x2c_lambda_closure_3, const FuncArg * _x2c_lambda_argv_3){
   const _x2c_lambda_context_6 * _x2c_lambda_context_value_3 =(const _x2c_lambda_context_6 *) Func_context(_x2c_lambda_closure_3);
   Var_adnode(_x2c_lambda_context_value_3 -> _x2c_lambda_capture_9) -> adjoint += Var_adnode(_x2c_lambda_context_value_3 -> _x2c_lambda_capture_10) -> adjoint / Var_adnode(_x2c_lambda_context_value_3 -> _x2c_lambda_capture_11) -> value;
   Var_adnode(_x2c_lambda_context_value_3 -> _x2c_lambda_capture_11) -> adjoint -= Var_adnode(_x2c_lambda_context_value_3 -> _x2c_lambda_capture_10) -> adjoint * Var_adnode(_x2c_lambda_context_value_3 -> _x2c_lambda_capture_9) -> value /(Var_adnode(_x2c_lambda_context_value_3 -> _x2c_lambda_capture_11) -> value * Var_adnode(_x2c_lambda_context_value_3 -> _x2c_lambda_capture_11) -> value);
-  return Var_null();
+  return((void) 0, Void);
 }
 
 static Var _x2c_lambda_4(Func _x2c_lambda_closure_4, const FuncArg * _x2c_lambda_argv_4){
   const _x2c_lambda_context_8 * _x2c_lambda_context_value_4 =(const _x2c_lambda_context_8 *) Func_context(_x2c_lambda_closure_4);
   Var_adnode(_x2c_lambda_context_value_4 -> _x2c_lambda_capture_12) -> adjoint -= Var_adnode(_x2c_lambda_context_value_4 -> _x2c_lambda_capture_13) -> adjoint;
-  return Var_null();
+  return((void) 0, Void);
 }
 
 static Var _x2c_lambda_5(Func _x2c_lambda_closure_5, const FuncArg * _x2c_lambda_argv_5){
   const _x2c_lambda_context_10 * _x2c_lambda_context_value_5 =(const _x2c_lambda_context_10 *) Func_context(_x2c_lambda_closure_5);
   Var_adnode(_x2c_lambda_context_value_5 -> _x2c_lambda_capture_14) -> adjoint += Var_adnode(_x2c_lambda_context_value_5 -> _x2c_lambda_capture_15) -> adjoint * Var_floating(Var_convert(_x2c_lambda_context_value_5 -> _x2c_lambda_capture_16, 3356265));
-  return Var_null();
+  return((void) 0, Void);
 }
 

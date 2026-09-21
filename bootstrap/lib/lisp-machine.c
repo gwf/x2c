@@ -360,7 +360,9 @@ void Lisp_reslot(void *, List, int);
 
 List Var_list(Var);
 
-int Var_is_nil(Var);
+int Var_truth(Var);
+
+Var lisp_truth(Var);
 
 int Lisp_precall(void *, Var, List, Var *);
 
@@ -410,7 +412,7 @@ int LispMachine_step(LispMachine m){
       }
       Var condition = m -> values[m -> value_count - 1];
       if(m -> stats) m -> stats -> nil_edges ++;
-      if(Var_is_nil(condition)){
+      if(! Var_truth(lisp_truth(condition))){
         m -> values[-- m -> value_count] =(Var){
           .u64 = 0
         }

@@ -350,7 +350,7 @@ int LispMachine.step(LispMachine m) {
       }
       Var condition = m.values[m.value_count - 1];
       if (m.stats) m.stats.nil_edges++;
-      if (condition.is_nil()) {
+      if (!lisp_truth(condition)) {
         m.values[--m.value_count] = (Var) { .u64 = 0 };
         if (m.stats) m.stats.nil_taken++;
         m.pc = w.target;

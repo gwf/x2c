@@ -124,8 +124,13 @@ void Compiler.install_builtin_macros(Compiler compiler) {
 }
 
 static Var _sdk_reject(String message, List notes) {
-  macro_sdk_failure_message = message;
-  macro_sdk_failure_notes = notes;
+  /* A rejected inner SDK operation answers void so its caller can finish
+     evaluation, but the invocation still belongs to the first rejection.
+     Keep that diagnostic when a typed wrapper subsequently rejects void. */
+  if (!macro_sdk_failure_message) {
+    macro_sdk_failure_message = message;
+    macro_sdk_failure_notes = notes;
+  }
   return void;
 }
 
@@ -389,9 +394,7 @@ static Var _sdk_diagnostic_fail(String message, List notes) {
       return _sdk_reject(
         "x2c.diagnostic.fail notes must be Strings",
         %("value: ${note.repr()}" ));
-  macro_sdk_failure_message = message;
-  macro_sdk_failure_notes = notes;
-  return void;
+  return _sdk_reject(message, notes);
 }
 
 static Var _sdk_ident(String spelling) {
@@ -509,15 +512,21 @@ static Var _sdk_function_parameter(List function, String wanted) {
     %("function: ${_sdk_function_name(function).repr()}"));
 }
 
-/* An SDK rejection outside an expansion has no scope to clear it, so the
-   report consumes it; a later failure must not repeat a stale message. */
+/* Reports and consumes an SDK rejection. A later evaluation must not repeat
+   a stale message. */
+static int _report_sdk_rejection(Compiler compiler, Token invocation) {
+  String message = macro_sdk_failure_message;
+  List notes = macro_sdk_failure_notes;
+  macro_sdk_failure_message = NULL;
+  macro_sdk_failure_notes = NULL;
+  if (!message) return 0;
+  compiler.report_error(<macro>, message, invocation, notes);
+  return 1;
+}
+
 static void _report_lisp_failure(
   Compiler compiler, Token invocation, List error, String source) {
-  String message = macro_sdk_failure_message;
-  macro_sdk_failure_message = NULL;
-  if (message)
-    compiler.report_error(
-      <macro>, message, invocation, macro_sdk_failure_notes);
+  _report_sdk_rejection(compiler, invocation);
   String form_note = %"form: $source", error_note = %"error: ${error.repr()}";
   compiler.report_error(
     <macro>, "compile-time Lisp evaluation failed",
@@ -537,6 +546,7 @@ static Var _eval_string(
     catch %(?code *detail):
       _report_lisp_failure(compiler, invocation, cons(code, detail), source);
   }
+  _report_sdk_rejection(compiler, invocation);
   return result;
 }
 

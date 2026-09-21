@@ -374,7 +374,8 @@ static int _map_next(Iter iter, Var *out) {
 
     A null `dest` returns NULL. An empty source does not invoke or check
     `func`. Raises: whatever the source, `Func.apply`, or `func` raises while
-    pulling, including `<bad-result>` when `func` returns `void`.
+    pulling, including `<void-op>` when `func` returns `void` and the iterator
+    rejects it as an element.
 */
 Iter Iter.map(Iter iter, Func func, Iter dest) {
   if (!dest) return NULL;
@@ -599,8 +600,8 @@ static int _scan_next(Iter iter, Var *out) {
     The source and its storage, `dest`, and any dynamic or captured `fn` must
     remain valid while the result is used. Constructing the iterator does not
     invoke `fn`. Pulling may raise whatever `Func.apply`, the source, or `fn`
-    raises, including `<bad-result>` when `fn` returns `void`. A null `fn` or
-    `dest` returns NULL.
+    raises, including `<void-op>` when `fn` returns `void` and the iterator
+    rejects it as an element. A null `fn` or `dest` returns NULL.
 */
 Iter Iter.scan(Iter iter, Var seed, Func fn, Iter dest) {
   if (!dest || !fn) return NULL;

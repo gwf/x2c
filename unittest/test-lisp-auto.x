@@ -33,6 +33,8 @@ static Var _auto_native_log(Var v) {
   return v;
 }
 
+static Var _auto_native_void(void) => void;
+
 static Var _binary_signature(void) {
   return %((func (("Var") ("Var"))) "Var");
 }
@@ -132,6 +134,28 @@ static void lisp_auto_nil_path(void) {
   // zero is not nil and takes the hit arm.
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "(brancher 0)")), 5);
   lisp.destroy();
+}
+
+static void lisp_auto_transports_void_parameter_and_result(void) {
+  for (int disabled = 0; disabled < 2; disabled++) {
+    Lisp lisp = Lisp.new();
+    lisp.auto_disable(disabled);
+    lisp.set_global(
+      "no-value",
+      Func.var(_make_func(_auto_native_void,
+                          %((func ((void))) "Var")))
+    );
+    _ev(lisp, "(def identity (lambda (value) value))");
+    LispAutoStats before = lisp.auto_stats();
+    EXPECT_TRUE(_ev(lisp, "(identity (no-value))") is void);
+    EXPECT_TRUE(_ev(lisp, "(identity (no-value))") is void);
+    LispAutoStats after = lisp.auto_stats();
+    EXPECT_INT_EQ(
+      (int) (after.machine_entries - before.machine_entries),
+      disabled ? 0 : 1
+    );
+    lisp.destroy();
+  }
 }
 
 static void lisp_auto_replacement_guards(void) {
@@ -934,6 +958,7 @@ $(import "test-macros.xmacro")
 void lisp_auto_suite(void) {
   $test.run(lisp_auto_second_call_transition);
   $test.run(lisp_auto_nil_path);
+  $test.run(lisp_auto_transports_void_parameter_and_result);
   $test.run(lisp_auto_replacement_guards);
   $test.run(lisp_auto_cond_identity_guard);
   $test.run(lisp_auto_error_paths);

@@ -6,7 +6,7 @@
 
 (defun dedent.expand (node) (let
   ((text (_dedent_fold (x2c.source.text node))))
-  (if (null? text)
+  (if (equal? text (C.void))
       (x2c.expr.call (x2c.expr.field node "dedent"))
       (x2c.literal.string text))))
 

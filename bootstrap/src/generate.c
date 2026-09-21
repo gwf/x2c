@@ -1865,7 +1865,7 @@ static Var _x2c_lambda_0(Func _x2c_lambda_closure_0, const FuncArg * _x2c_lambda
 default: break;
     }
   }
-return List_var(unit);  return Var_null();
+return List_var(unit);  return((void) 0, Void);
 }
 
 List List_match(List, Var);

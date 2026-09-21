@@ -36,7 +36,7 @@ compiler-generated adapters establish both facts.
 would
 discard a qualifier. It does not return on failure.
 
-Source: `lib/func.x:223`
+Source: `lib/func.x:224`
 
 #### x2c_func_value_argument
 
@@ -57,7 +57,7 @@ A detail names the argument's tag rather than the argument: any tag may
 arrive here, and an identity-bearing detail value terminates at the error
 floor instead of reaching the handler that would report it.
 
-Source: `lib/func.x:165`
+Source: `lib/func.x:166`
 
 ### `Func`
 
@@ -77,11 +77,11 @@ exclude `void` from their element domain.
 for the wrong argument count, `<void-op>`, `<bad-types>`, `<bad-enc>`,
 `<bad-target>`, `<no-convert>`, or `<conv-range>` while converting an
 argument, `<alloc-fail>` or `<size-limit>` while packing rest arguments,
-`<bad-result>` when an adapter returns `void`, or any cause raised by the
-adapter or native target. The result has the ownership of the value the
+or any cause raised by the adapter or native target. A `void` adapter
+result remains no-value. Other results have the ownership of the value the
 adapter returned.
 
-Source: `lib/func.x:363`
+Source: `lib/func.x:364`
 
 <a id="Func.context"></a>
 #### Func.context
@@ -95,7 +95,7 @@ when the binding has no context.
 
 **Raises:** `<bad-arg>` for a null binding. It does not return on failure.
 
-Source: `lib/func.x:344`
+Source: `lib/func.x:345`
 
 <a id="Func.new"></a>
 #### Func.new
@@ -112,7 +112,7 @@ parameter count and types.
 **Raises:** `<bad-sig>` for a null adapter or a malformed signature, and
 `<alloc-fail>` when binding storage cannot be allocated.
 
-Source: `lib/func.x:305`
+Source: `lib/func.x:306`
 
 <a id="Func.new_context"></a>
 #### Func.new_context
@@ -130,7 +130,7 @@ borrowed for the `Func` lifetime.
 the allocation size overflows, `<bad-sig>` for a null adapter or malformed
 signature, or `<alloc-fail>` when storage cannot be allocated. None return.
 
-Source: `lib/func.x:333`
+Source: `lib/func.x:334`
 
 <a id="Func.new_rest"></a>
 #### Func.new_rest
@@ -150,7 +150,7 @@ The result belongs to the current `Scope`.
 signature whose parameters are anything but one `List`, and `<alloc-fail>`
 when binding storage cannot be allocated.
 
-Source: `lib/func.x:320`
+Source: `lib/func.x:321`
 
 <a id="Func.var"></a>
 #### Func.var
@@ -161,7 +161,7 @@ Boxes `function` without copying or retaining the `Func`.
 The returned `Var` carries the same pointer and shares its `Scope`
 lifetime.
 
-Source: `lib/func.x:398`
+Source: `lib/func.x:400`
 
 ### `FuncArg`
 
@@ -175,7 +175,7 @@ The address and canonical `type` must remain valid through `Func.apply`;
 this constructor performs no validation. Compiler-generated adapters use
 the checked reference reader before calling native code.
 
-Source: `lib/func.x:86`
+Source: `lib/func.x:87`
 
 <a id="FuncArg.value"></a>
 #### FuncArg.value
@@ -186,7 +186,7 @@ Constructs a `Func` argument by copying one `Var` value.
 Pointer-bearing payload storage is not copied or retained and must outlive
 the call that consumes the argument.
 
-Source: `lib/func.x:77`
+Source: `lib/func.x:78`
 
 ## Runtime-internal callables
 
@@ -212,7 +212,7 @@ read.
 **Raises:** `<bad-arg>` for a null `Func` or an index outside `argc`, or
 `<bad-arity>` when `argc` disagrees with a fixed signature.
 
-Source: `lib/func.x:112`
+Source: `lib/func.x:113`
 
 #### x2c_func_unrepresentable_argument
 
@@ -222,7 +222,7 @@ Rejects a value argument whose source type has no `Var` representation.
 Generated calls use this branch instead of compiling an impossible
 conversion. Raises: `<bad-types>`.
 
-Source: `lib/func.x:242`
+Source: `lib/func.x:243`
 
 ## Public types
 
@@ -242,10 +242,11 @@ A `Func` stores the callback pointer without retaining it and calls it
 synchronously with borrowed `fn` and `argv`; the callback code must outlive
 the `Func`. Compiler-generated adapters use the checked value and reference
 readers, call their native target, and box its result. A returned `void`
-is rejected. Adapters receive no count. Fixed bindings check arity first,
+remains no-value. Adapters receive no count. Fixed bindings check arity
+first,
 and rest bindings receive one packed `List` argument.
 
-Source: `lib/func.x:45`
+Source: `lib/func.x:46`
 
 <a id="FuncArg"></a>
 ### FuncArg

@@ -591,6 +591,14 @@ static Var _lower_address(Lowering l, int id) {
   return slot;
 }
 
+/* The cell stores a raw `Var`, but an address exposed to the function body
+   carries the pointer tag of the typed source expression. */
+static Var _lower_typed_address(Lowering l, List type, int id) {
+  Symbol tag = l.compiler.sym.var_tag_for_type(type, NULL);
+  if (!tag) return _lower_decline(l, "an address with no Var pointer tag");
+  return %(C.address ${_lower_address(l, id)} (quote $tag));
+}
+
 /* An interpolated string joins its parts; each part already carries the
    conversion the type needs. */
 static Var _lower_segments(Lowering l, List parts) {
@@ -922,9 +930,7 @@ static Var _lower_expr(Lowering l, Var form) {
 static Var _lower_content(Lowering l, List type, Var content) {
   match (content) {
     case %(literal ("Symbol") ? ?symbol): return %(quote $symbol);
-    /* x2c `void` has no Lisp counterpart; nil is the falsy stand-in, so a
-       lowered function cannot tell `void` from an empty List. */
-    case %(literal ("Var") "void"): return %(quote ());
+    case %(literal ("Var") "void"): return %(C.void);
     case %(literal (* char) ?(String text)):
       return _lower_text(text);
     case %(literal ("String") ?(String text)): return text;
@@ -962,7 +968,7 @@ static Var _lower_content(Lowering l, List type, Var content) {
     case %(expr ?inner ?within):          return _lower_content(l, inner, within);
     case %(at ? ?node):                   return _lower_content(l, type, node);
     case %(op & (expr ? (ident (binding ?(int id) ?)))):
-      return _lower_address(l, id);
+      return _lower_typed_address(l, type, id);
     /* `*` is a sequence binder in a pattern, so a unary deref is matched by
        arity and then by its operator. */
     case %(op ?operator ?operand): {
@@ -1025,7 +1031,7 @@ static void _lower_env_restore(Lowering l, Map saved) {
 
 static Var _lower_apply_k(Lowering l, List k) {
   match (k) {
-    case %(end): return 0;
+    case %(end): return %(C.void);
     /* Statements to run before the continuation they were given: a loop's
        step, or the block a `switch` exits into. Inlining them keeps the
        `again` that may follow a direct self call. They carry the `break`
@@ -1103,12 +1109,15 @@ static Var _lower_bind_value(
   return %((lambda ($slot) $after) $value);
 }
 
-/* An effect runs on a `cond` test that always fails, which keeps the rest
-   of the block in tail position and introduces no binding form. */
+/* A fixed-arity lambda discards an effect's result and keeps the rest of the
+   block in tail position. Its raw parameter slot can transport `void`; the
+   variadic `begin` helper cannot, because packing rest arguments into a List
+   deliberately rejects `void`. */
 static Var _lower_effect(Lowering l, Var effect, List rest, List k) {
   Var after = _lower_block(l, rest, k);
   if (_lower_failed(l, after)) return void;
-  return %(cond ((begin $effect false) ()) (true $after));
+  Var discarded = _lower_name(l, "discard");
+  return %((lambda ($discarded) $after) $effect);
 }
 
 static Var _lower_stmnt(Lowering l, Var form, List rest, List k);
@@ -1812,7 +1821,7 @@ static Var _lower_stmnt(Lowering l, Var form, List rest, List k) {
     case %(block *items):  return _lower_block(l, %(@items @rest), k);
     case %(return ?want ?value):
       return _lower_initializer(l, want, 0, value);
-    case %(return ?):      return 0;
+    case %(return):        return %(C.void);
     case %(declare ?type (bindings ?declarator)):
       return _lower_declarator(l, type, declarator, rest, k);
     /* Phase 3 owns these two cases; the rest of the statement grammar is

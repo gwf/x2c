@@ -499,7 +499,7 @@ static void lambda_mutable_capture_allocation_behavior(void) {
   EXPECT_INT_EQ(outer, 4);
 }
 
-static void lambda_block_body_returns_var_or_null(void) {
+static void lambda_block_body_returns_value_or_void(void) {
   Var explicit = (%!(int value) => {
     int doubled = value * 2;
     if (doubled == 42) return doubled;
@@ -511,13 +511,13 @@ static void lambda_block_body_returns_var_or_null(void) {
   })(1);
   Var fallthrough = (%!() => {})();
   EXPECT_INT_EQ(explicit.integer(), 42);
-  EXPECT_TRUE(bare.is_null());
-  EXPECT_TRUE(fallthrough.is_null());
+  EXPECT_TRUE(bare is void);
+  EXPECT_TRUE(fallthrough is void);
 
   Func dynamic_fallthrough = %!() => {};
-  EXPECT_TRUE(dynamic_fallthrough().is_null());
+  EXPECT_TRUE(dynamic_fallthrough() is void);
   Func dynamic_bare = %!() => { return; };
-  EXPECT_TRUE(dynamic_bare().is_null());
+  EXPECT_TRUE(dynamic_bare() is void);
 }
 
 static void _lambda_effect(int *count) { (*count)++; }
@@ -526,25 +526,25 @@ static void _lambda_call_native(int *count, void (*callback)(int *)) {
   callback(count);
 }
 
-static void lambda_effect_only_calls_return_null(void) {
+static void lambda_effect_only_calls_return_void(void) {
   int count = 0;
   Var direct = (%!(int *value) => _lambda_effect(value))(&count);
-  EXPECT_TRUE(direct.is_null());
+  EXPECT_TRUE(direct is void);
   EXPECT_INT_EQ(count, 1);
 
   Func native = _lambda_effect;
-  EXPECT_TRUE(native(&count).is_null());
+  EXPECT_TRUE(native(&count) is void);
   EXPECT_INT_EQ(count, 2);
 
   int *target = &count;
   Func expression = %!() => _lambda_effect(target);
-  EXPECT_TRUE(expression().is_null());
+  EXPECT_TRUE(expression() is void);
   EXPECT_INT_EQ(count, 3);
   Func block = %!() => {
     defer _lambda_effect(target);
     _lambda_effect(target);
   };
-  EXPECT_TRUE(block().is_null());
+  EXPECT_TRUE(block() is void);
   EXPECT_INT_EQ(count, 5);
 
   _lambda_call_native(&count, %!(int *value) => _lambda_effect(value));
@@ -555,10 +555,7 @@ static void lambda_explicit_void_result_remains_void(void) {
   Var direct = (%!() => { return void; })();
   EXPECT_TRUE(direct is void);
   Func dynamic = %!() => { return void; };
-  int caught = 0;
-  try dynamic();
-  catch %(bad-result *): caught = 1;
-  EXPECT_TRUE(caught);
+  EXPECT_TRUE(dynamic() is void);
 }
 
 static void lambda_block_body_preserves_closures_and_transfer(void) {
@@ -619,8 +616,8 @@ static void lambda_macro_block_uses_source_lowering(void) {
   source_bias = macro_bias = 9;
   EXPECT_INT_EQ(source(40).integer(), 42);
   EXPECT_INT_EQ(constructed(40).integer(), 42);
-  EXPECT_TRUE(source(-2).is_null());
-  EXPECT_TRUE(constructed(-2).is_null());
+  EXPECT_TRUE(source(-2) is void);
+  EXPECT_TRUE(constructed(-2) is void);
 }
 
 static void lambda_list_map(void) {
@@ -694,8 +691,8 @@ void lambda_suite(void) {
   $test.run(lambda_mutable_capture_preserves_declarations);
   $test.run(lambda_macro_mutable_capture_uses_same_lowering);
   $test.run(lambda_mutable_capture_allocation_behavior);
-  $test.run(lambda_block_body_returns_var_or_null);
-  $test.run(lambda_effect_only_calls_return_null);
+  $test.run(lambda_block_body_returns_value_or_void);
+  $test.run(lambda_effect_only_calls_return_void);
   $test.run(lambda_explicit_void_result_remains_void);
   $test.run(lambda_block_body_preserves_closures_and_transfer);
   $test.run(lambda_block_body_lifts_for_callbacks);

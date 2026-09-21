@@ -77,7 +77,7 @@ optional `captures` rows. A noncapturing lambda becomes a static
 helper and a `Func` whose copied context stores value snapshots and typed
 reference addresses; capture expressions run once from left to right.
 Nested lambdas lower inside out, block fallthrough and bare returns produce
-Null, and synthesized declarations enter the early queue. Parentheses
+no value, and synthesized declarations enter the early queue. Parentheses
 remain around lowered helpers; other non-lambda expressions pass through.
 
 Source: `src/lambda.x:1590`

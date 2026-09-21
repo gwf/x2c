@@ -27,9 +27,9 @@ meta int absent_selectors(int unused) {
   List short_list = %(1);
   List nested = %(());
   Var value = empty;
-  return empty.caar().equal(%()) && short_list.cadr().equal(%())
-    && short_list.caddr().equal(%()) && nested.caar().equal(%())
-    && value.cadr().equal(%()) && value.cddr().len() == 0;
+  return empty.caar() == void && short_list.cadr() == void
+    && short_list.caddr() == void && nested.caar() == void
+    && value.cadr() == void && value.cddr().len() == 0;
 }
 int main(int argc, char **argv) {
   (void) argv;

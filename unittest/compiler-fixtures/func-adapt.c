@@ -179,7 +179,7 @@ static Var _x2c_func_adapt_2(Func _x2c_func_binding_2, const FuncArg * _x2c_func
 static Var _x2c_func_adapt_3(Func _x2c_func_binding_3, const FuncArg * _x2c_func_argv_3){
   int a0 = Var_int(Var_convert(x2c_func_value_argument(_x2c_func_binding_3, _x2c_func_argv_3, 0, 3453797), 3453797));
   discard(a0);
-  return Var_null();
+  return((void) 0, Void);
 }
 
 static Var _x2c_func_adapt_4(Func _x2c_func_binding_4, const FuncArg * _x2c_func_argv_4){

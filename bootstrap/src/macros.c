@@ -219,6 +219,8 @@ static Var _sdk_native_function_type(List syntax);
 
 static Var _sdk_function_parameter(List function, String wanted);
 
+static int _report_sdk_rejection(Compiler compiler, Token invocation);
+
 static void _report_lisp_failure(Compiler compiler, Token invocation, List error, String source);
 
 static Var _eval_string(Compiler compiler, String source, Token invocation);
@@ -1786,8 +1788,10 @@ void Compiler_install_builtin_macros(Compiler compiler){
 }
 
 static Var _sdk_reject(String message, List notes){
-  macro_sdk_failure_message = message;
-  macro_sdk_failure_notes = notes;
+  if(! String_truth(macro_sdk_failure_message)){
+    macro_sdk_failure_message = message;
+    macro_sdk_failure_notes = notes;
+  }
   return((void) 0, Void);
 }
 
@@ -1903,7 +1907,7 @@ List Type_list(Type);
 int Type_is_function(Type);
 static Var _sdk_function_reference(String name){
   Compiler compiler = macro_import_compiler;  if(! compiler){
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "_sdk_function_reference",.line = 205};  x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("_x2c.function.reference")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/macros.x",.function = "_sdk_function_reference",.line = 210};  x2c_error_raise_n(& _x2c_error_site_0, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("_x2c.function.reference")), NULL))));  __builtin_unreachable();
   }
   Type type = NULL;  List binding = Sym_lookup(compiler -> sym, cons(String_var(name), NULL), & type);  if(! List_truth(binding) || ! List_truth(Type_list(type)) || ! Type_is_function(type)) return List_var(NULL);  return List_var(cons(_20, cons(List_var(type), cons(List_var(cons(_39, cons(List_var(binding), NULL))), NULL))));
 }
@@ -2109,7 +2113,7 @@ static Var _sdk_diagnostic_fail(String message, List notes){
     }
 
   }
-  macro_sdk_failure_message = message;  macro_sdk_failure_notes = notes;  return((void) 0, Void);
+  return _sdk_reject(message, notes);
 }
 
 String String_repr(String);
@@ -2120,8 +2124,7 @@ static Var _sdk_ident(String spelling){
 String Compiler_fresh_name(Compiler, String);
 List Sym_introduce(Sym, String);
 static Var _sdk_ident_unique(String stem){
-  if(! macro_sdk_compiler) return _sdk_reject(String_join(NULL, cons(String_var(_151), cons(String_var(_17), NULL))), NULL);
-  if(! String_is_identifier(stem)) return _sdk_reject(_774, cons(String_var(String_join(NULL, cons(String_var(_118), cons(String_var(String_repr(stem)), NULL)))), NULL));
+  if(! macro_sdk_compiler) return _sdk_reject(String_join(NULL, cons(String_var(_151), cons(String_var(_17), NULL))), NULL);  if(! String_is_identifier(stem)) return _sdk_reject(_774, cons(String_var(String_join(NULL, cons(String_var(_118), cons(String_var(String_repr(stem)), NULL)))), NULL));
   String spelling = Compiler_fresh_name(macro_sdk_compiler, String_join(NULL, cons(String_var(_152), cons(String_var(stem), NULL))));
   return List_var(Sym_introduce(macro_sdk_compiler -> sym, spelling));
 }
@@ -2261,8 +2264,12 @@ static Var _sdk_function_parameter(List function, String wanted){
 return _sdk_reject(String_join(NULL, cons(String_var(_235), cons(String_var(wanted), cons(String_var(_159), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_236), cons(String_var(Var_repr(_sdk_function_name(function))), NULL)))), NULL));
 }
 
+static int _report_sdk_rejection(Compiler compiler, Token invocation){
+  String message = macro_sdk_failure_message;  List notes = macro_sdk_failure_notes;  macro_sdk_failure_message = NULL;  macro_sdk_failure_notes = NULL;  if(! String_truth(message)) return 0;  Compiler_report_error(compiler, 27335838, message, invocation, notes);  return 1;
+}
+
 static void _report_lisp_failure(Compiler compiler, Token invocation, List error, String source){
-  String message = macro_sdk_failure_message;  macro_sdk_failure_message = NULL;  if(String_truth(message)) Compiler_report_error(compiler, 27335838, message, invocation, macro_sdk_failure_notes);  String form_note = String_join(NULL, cons(String_var(_237), cons(String_var(source), NULL))), error_note = String_join(NULL, cons(String_var(_238), cons(String_var(List_repr(error)), NULL)));
+  _report_sdk_rejection(compiler, invocation);  String form_note = String_join(NULL, cons(String_var(_237), cons(String_var(source), NULL))), error_note = String_join(NULL, cons(String_var(_238), cons(String_var(List_repr(error)), NULL)));
   Compiler_report_error(compiler, 27335838, _777, invocation, cons(String_var(form_note), cons(String_var(error_note), NULL)));
 }
 
@@ -2314,7 +2321,7 @@ static Var _eval_string(Compiler compiler, String source, Token invocation){
                 x2c_exception_mark_handled(&_x2c_exception_frame_0);
                 if (_x2c_catch_selected_0 == 0) {Var category = x2c_error_catch_capture(_x2c_error_handler_0, 0);
                 {
-                  static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_eval_string",.line = 534};
+                  static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_eval_string",.line = 543};
                   x2c_error_raise_n(& _x2c_error_site_1, 28682226919752, 1, Symbol_var(209659067570), category);
                   __builtin_unreachable();
                 }
@@ -2353,13 +2360,14 @@ x2c_cleanup_leave(& _x2c_defer_record_1);
 
 }
 }
+_report_sdk_rejection(compiler, invocation);
 return result;
 }
 
 static Var _lisp_import_hook(String path){
   Compiler compiler = macro_import_compiler;
   if(! compiler){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 545};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 555};
     x2c_error_raise_n(& _x2c_error_site_2, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));
     __builtin_unreachable();
   }
@@ -3097,7 +3105,7 @@ void Lisp_adopt(Lisp, Lisp);
 
 static void _ensure_lisp(Compiler compiler){
   if(macro_library_pending() && ! library_filling){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../src/macros.x",.function = "_ensure_lisp",.line = 1150};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../src/macros.x",.function = "_ensure_lisp",.line = 1160};
     x2c_error_raise_n(& _x2c_error_site_3, 27048696089866, 0);
   }
   {
@@ -3713,7 +3721,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site){
                                 x2c_exception_mark_handled(&_x2c_exception_frame_5);
                                 if (_x2c_catch_selected_5 == 0) {Var category = x2c_error_catch_capture(_x2c_error_handler_5, 0);
                                 {
-                                  static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 1572};
+                                  static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 1582};
                                   x2c_error_raise_n(& _x2c_error_site_4, 28682226919752, 1, Symbol_var(209659067570), category);
                                   __builtin_unreachable();
                                 }

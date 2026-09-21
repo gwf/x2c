@@ -392,7 +392,8 @@ static List _func_argument_locals(
 }
 
 /* One emitted FuncAdapter ABI. Callers order context setup around argument
-   locals; the ordinary helper body owner boxes results and normalizes Null. */
+   locals; the ordinary helper body owner boxes results and preserves
+   no-value returns. */
 static void _publish_func_adapter(
   Compiler compiler, List binding, List fn_binding, List argv_binding,
   List body, List setup) {
@@ -420,8 +421,7 @@ static List _build_func_adapter(
   return_type = return_type.canonicalize();
 
   foreach (String helper_name,
-           %("x2c_func_value_argument" "x2c_func_reference_argument"
-             "Var_null")) {
+           %("x2c_func_value_argument" "x2c_func_reference_argument")) {
     List helper_type = NULL;
     List helper = _adapter_helper(c, helper_name, &helper_type);
     if (!helper || !helper_type)
@@ -1396,17 +1396,17 @@ static List _lower_nested_lambdas(Compiler compiler, List ast) {
     ast, %!(List child) => _lower_nested_lambdas(compiler, child));
 }
 
-static List _null_return(void) => %(
-    return ("Var") (expr ("Var") (call "Var_null" (args)))
+static List _no_value_return(void) => %(
+    return ("Var") (expr ("Var") (literal ("Var") "void"))
   );
 
-/* A block lambda returns Null for a bare return and for
+/* A block lambda returns void for a bare return and for
    fallthrough. Nested lambdas normalize their own returns when lowered. */
 static List _block_returns(List ast) {
   if (!ast) return ast;
   match (ast) {
     case %(lambda *): return ast;
-    case %(return): return _null_return();
+    case %(return): return _no_value_return();
   }
   return Ast.rewrite_children(ast, _block_returns);
 }
@@ -1416,10 +1416,10 @@ static List _helper_body(
   match (body) {
     case %(block *items): {
       List normalized = _block_returns(items);
-      return %(block @setup @normalized ${_null_return()});
+      return %(block @setup @normalized ${_no_value_return()});
     }
     case %(expr (void) ?):
-      return %(block @setup (stmnt $body) ${_null_return()});
+      return %(block @setup (stmnt $body) ${_no_value_return()});
   }
   List result = compiler.convert_expression(body, %("Var"));
   return %(block @setup (stmnt (return $result)));
@@ -1584,7 +1584,7 @@ static List _lower_captured_lambda(
     helper and a `Func` whose copied context stores value snapshots and typed
     reference addresses; capture expressions run once from left to right.
     Nested lambdas lower inside out, block fallthrough and bare returns produce
-    Null, and synthesized declarations enter the early queue. Parentheses
+    no value, and synthesized declarations enter the early queue. Parentheses
     remain around lowered helpers; other non-lambda expressions pass through.
 */
 List Compiler.lower_lambda_expr(Compiler compiler, List expression) {

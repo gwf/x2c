@@ -3172,7 +3172,7 @@ static Var _x2c_lambda_1(Compiler * compiler){
     }
 
   }
-  Array_sort(ordered);  return List_var(Array_list_free(ordered));  return Var_null();
+  Array_sort(ordered);  return List_var(Array_list_free(ordered));  return((void) 0, Void);
 }
 
 void * x2c_func_reference_argument(Func, const FuncArg *, unsigned, List);
@@ -3185,14 +3185,14 @@ static Var _x2c_lambda_2(Func _x2c_lambda_closure_1, const FuncArg * _x2c_lambda
   struct Compiler * * compiler = x2c_func_reference_argument(_x2c_lambda_closure_1, _x2c_lambda_argv_1, 0, _574);  const _x2c_lambda_context_2 * _x2c_lambda_context_value_1 =(const _x2c_lambda_context_2 *) Func_context(_x2c_lambda_closure_1);  Array ancestry = Array_new();  Type current = Var_type(_x2c_lambda_context_value_1 -> _x2c_lambda_capture_2);  for(int distance = 0;  List_truth(Type_list(current)) && distance <= 128;  distance ++){
     Array_push(ancestry, List_var(current));  if(! Type_is_typedef_name(current) && ! Type_is_typedef(current)) break;  current = List_type(Sym_get((* compiler) -> sym, Type_list(current)));
   }
-  return List_var(Array_list_free(ancestry));  return Var_null();
+  return List_var(Array_list_free(ancestry));  return((void) 0, Void);
 }
 
 static Var _x2c_lambda_3(Func _x2c_lambda_closure_2, const FuncArg * _x2c_lambda_argv_2){
   struct Compiler * * compiler = x2c_func_reference_argument(_x2c_lambda_closure_2, _x2c_lambda_argv_2, 0, _574);  Type base = Var_type(x2c_func_value_argument(_x2c_lambda_closure_2, _x2c_lambda_argv_2, 1, 806120));  List row = Var_list(x2c_func_value_argument(_x2c_lambda_closure_2, _x2c_lambda_argv_2, 2, 806120));  const _x2c_lambda_context_4 * _x2c_lambda_context_value_2 =(const _x2c_lambda_context_4 *) Func_context(_x2c_lambda_closure_2); (void)(* compiler); (void) base;  if(Var_equal(List_car(row), String_var(Var_string(_x2c_lambda_context_value_2 -> _x2c_lambda_capture_3)))){
     (* _x2c_lambda_context_value_2 -> _x2c_lambda_capture_4) = row;  return int_var(1);
   }
-  return int_var(0);  return Var_null();
+  return int_var(0);  return((void) 0, Void);
 }
 
 Array Var_array(Var);
@@ -3225,7 +3225,7 @@ static Var _x2c_lambda_5(Func _x2c_lambda_closure_4, const FuncArg * _x2c_lambda
 
     }
   }
-return int_var(0);  return Var_null();
+return int_var(0);  return((void) 0, Void);
 }
 
 Var Array_var(Array);
@@ -3257,7 +3257,7 @@ static MatchCaptureSite _x2c_match_site_53;  if (x2c_match_site_try_capture(& _x
 
     }
   }
-return List_var((* _x2c_lambda_cell_1));  return Var_null();
+return List_var((* _x2c_lambda_cell_1));  return((void) 0, Void);
 }
 
 static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs){
@@ -3337,7 +3337,7 @@ return List_var(NULL);
 
 }
 }
-return List_var(NULL);  return Var_null();
+return List_var(NULL);  return((void) 0, Void);
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){

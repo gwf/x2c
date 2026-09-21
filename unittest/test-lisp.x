@@ -264,6 +264,7 @@ static Symbol _raised_code(Lisp lisp, const char *text) {
   catch %(not-call *): code = <not-call>;
   catch %(not-found *): code = <not-found>;
   catch %(unbound *): code = <unbound>;
+  catch %(void-op *): code = <void-op>;
   return code;
 }
 
@@ -275,6 +276,9 @@ static Symbol _raised_code2(Lisp lisp, const char *left, const char *right) {
 static Var _native_add2(Var a, Var b) {
   return a.binary(<+>, b);
 }
+
+static Var _native_identity(Var value) => value;
+static Var _native_void(void) => void;
 
 static char order_log[64];
 
@@ -361,6 +365,64 @@ static void lisp_eval_def_and_globals(void) {
   lisp.set_global("y", Var.new(<i32>, 5));
   EXPECT_INT_EQ(Var.integer(_ev(lisp, "y")), 5);
   EXPECT_INT_EQ(_raised_code(lisp, "unbound-name"), <unbound>);
+  lisp.destroy();
+}
+
+static void lisp_transports_void_outside_collections(void) {
+  Lisp lisp = _boot_session();
+  _install(lisp, "identity", _native_identity,
+           %((func (("Var"))) "Var"));
+  _install(lisp, "no-value", _native_void,
+           %((func ((void))) "Var"));
+  if (!_load_lisp_layer(lisp, "../etc/lisp-values.xlisp") ||
+      !_load_lisp_layer(lisp, "../etc/comptime.xlisp")) {
+    lisp.destroy();
+    return;
+  }
+
+  lisp.set_global("global-void", void);
+  Var stored = 7;
+  EXPECT_TRUE(lisp.try_get("global-void", &stored));
+  EXPECT_TRUE(stored is void);
+  EXPECT_TRUE(_ev(lisp, "global-void") is void);
+  EXPECT_TRUE(_ev(lisp, "(identity (no-value))") is void);
+  EXPECT_TRUE(_ev(lisp, "((lambda (value) value) (no-value))") is void);
+  EXPECT_TRUE(_ev(lisp, "(let ((value (no-value))) value)") is void);
+
+  EXPECT_TRUE(_ev(lisp,
+    "(def held (let ((value (no-value))) (lambda () value)))")
+    is <lambda>);
+  EXPECT_TRUE(_ev(lisp, "(held)") is void);
+  EXPECT_TRUE(_ev(lisp, "(def defined-void (no-value))") is void);
+  EXPECT_TRUE(_ev(lisp, "defined-void") is void);
+  EXPECT_INT_EQ(Var.integer(
+    _ev(lisp, "(cond ((no-value) 1) (true 2))")), 2);
+
+  EXPECT_INT_EQ(
+    _raised_code(lisp, "((lambda (head . rest) rest) 1 (no-value))"),
+    <void-op>);
+
+  EXPECT_TRUE(_ev(lisp, "(List_getindex '() 0)") is void);
+  EXPECT_TRUE(_ev(lisp, "(List_last '())") is void);
+  EXPECT_TRUE(_ev(lisp, "(List_assoc '() 'missing)") is void);
+  EXPECT_TRUE(_ev(lisp, "(List_get '() 0)") is void);
+  EXPECT_TRUE(_ev(lisp, "(Array_getindex (Array_new) 0)") is void);
+  EXPECT_TRUE(_ev(lisp, "(Array_setindex (Array_new) 0 1)") is void);
+  EXPECT_TRUE(_ev(lisp, "(Array_take_last (Array_new))") is void);
+  EXPECT_TRUE(_ev(lisp, "(Array_shift (Array_new))") is void);
+  EXPECT_TRUE(_ev(lisp, "(Array_remove (Array_new) 0)") is void);
+  EXPECT_TRUE(_ev(lisp, "(Array_insert (Array_new) 1 7)") is void);
+  EXPECT_TRUE(_ev(lisp, "(Map_get (Map_new) 'missing)") is void);
+  EXPECT_TRUE(_ev(lisp, "(Map_del (Map_new) 'missing)") is void);
+
+  EXPECT_INT_EQ(_raised_code(lisp, "(List_cons (no-value) '())"),
+                <void-op>);
+  EXPECT_INT_EQ(
+    _raised_code(lisp, "(Array_push (Array_new) (no-value))"), <void-op>);
+  EXPECT_INT_EQ(
+    _raised_code(lisp,
+                 "(Map_setindex (Map_new) 'key (no-value))"),
+    <void-op>);
   lisp.destroy();
 }
 
@@ -1211,6 +1273,7 @@ void lisp_suite(void) {
   $test.run(lisp_read_advances_cursor_across_forms);
   $test.run(lisp_eval_self_and_quote);
   $test.run(lisp_eval_def_and_globals);
+  $test.run(lisp_transports_void_outside_collections);
   $test.run(lisp_eval_cond_nil_only_false);
   $test.run(lisp_eval_lambda_application);
   $test.run(lisp_apply_uses_evaluated_values);

@@ -25,7 +25,8 @@
 (defun C.nonzero? (a) (not (eq? (C.compare a '!= 0) 0)))
 
 (defun C.true? (a)
-  (cond ((null? a) nil)
+  (cond ((eq? a (C.void)) nil)
+        ((null? a) nil)
         ((number? a) (C.nonzero? a))
         (true true)))
 
@@ -35,11 +36,13 @@
 (defmacro C.or (a b) `(if (C.true? ,a) 1 (if (C.true? ,b) 1 0)))
 (defmacro C.ternary (test a b) `(if (C.true? ,test) ,a ,b))
 
-// A local whose address is taken lives in a one-slot Array, so a call can
-// write through it the way an out-parameter does in C.
-(defun C.cell (v) (let ((box (Array.new))) (begin (Array.push box v) box)))
-(defun C.load (box) (Array.getindex box 0))
-(defun C.store (box v) (Array.setindex box 0 v))
+// A local whose address is taken lives in a raw evaluator cell, so a call can
+// write through it without putting terminal `void` in an ordinary collection.
+(def C.void (bind "lisp_void" nil))
+(def C.cell (bind "lisp_cell" nil))
+(def C.address (bind "lisp_address" nil))
+(def C.load (bind "lisp_load" nil))
+(def C.store (bind "lisp_store" nil))
 
 // File-scope state, keyed by binding id. A unit-level initializer is not
 // part of the function, so an unwritten global reads as zero. The table
@@ -61,27 +64,16 @@
 (def List_len length)
 (def List_reverse reverse)
 (def List_index List.index)
-// These return `void` for an absent element, which has no Lisp value, so
-// each answers nil the way an absent Lisp lookup does.
-// A negative index counts from the end, as `List.getindex` does.
-(defun List_getindex (xs i)
-  (let ((n (if (< i 0) (+ (length xs) i) i)))
-    (cond ((< n 0) ())
-          ((null? xs) ())
-          ((eq? n 0) (car xs))
-          (true (List_getindex (cdr xs) (- n 1))))))
-(defun List_caar (xs) (List_getindex (List_getindex xs 0) 0))
+// Absence stays `void`; the evaluator transports it outside ordinary Lists.
+(def List_getindex List.getindex)
+(defun List_caar (xs)
+  (let ((head (List_getindex xs 0)))
+    (if (eq? head (C.void)) head (List_getindex head 0))))
 (defun List_cadr (xs) (List_getindex xs 1))
 (defun List_caddr (xs) (List_getindex xs 2))
-(defun List_last (xs) (if (null? xs) () (car (reverse xs))))
-(defun List_assoc (xs key) (let ((p (assoc key xs))) (if p (cadr p) ())))
-// `List.get` routes an integer key to the index and every other key to the
-// association. A key's kind decides that, so a float looks up an
-// association the way it does at run time.
-(defun List_get (xs key)
-  (if (eq? (Var.kind key) (Var.kind 0))
-      (List_getindex xs key)
-      (List_assoc xs key)))
+(def List_last List.last)
+(def List_assoc List.assoc)
+(def List_get List.get)
 (def List_array List.array)
 (def List_sort List.sort)
 (def List_match match)
@@ -122,18 +114,8 @@
 (def Array_new Array.new)
 (def Array_len Array.len)
 (def Array_push Array.push)
-// Out of range these answer `void`, which has no Lisp value, so the index
-// is checked here and an absent element reads as nil. A negative index
-// counts from the end, as `Array.getindex` documents.
-(defun _array_index (a i)
-  (let ((n (Array.len a))) (if (< i 0) (+ n i) i)))
-(defun _array_holds (a j) (and (>= j 0) (< j (Array.len a))))
-(defun Array_getindex (a i)
-  (let ((j (_array_index a i)))
-    (if (_array_holds a j) (Array.getindex a j) ())))
-(defun Array_setindex (a i v)
-  (let ((j (_array_index a i)))
-    (if (_array_holds a j) (Array.setindex a j v) ())))
+(def Array_getindex Array.getindex)
+(def Array_setindex Array.setindex)
 (def Array_list Array.list)
 (def Array_str str)
 (def Array_repr repr)
@@ -146,21 +128,10 @@
 // by raising, so it never answers `void` itself.
 (def Array_unshift Array.unshift)
 
-// These four answer `void` where there is no such element, so each checks
-// its range first and an absent element reads as nil. `Array.len` answers an
-// unsigned length, so a length is compared rather than subtracted from.
-(defun Array_take_last (a) (if (> (Array.len a) 0) (Array.take_last a) ()))
-(defun Array_shift (a) (if (> (Array.len a) 0) (Array.shift a) ()))
-(defun Array_remove (a i)
-  (let ((j (_array_index a i)))
-    (if (_array_holds a j) (Array.remove a j) ())))
-// An insertion may also land past the last element, so its range is one
-// wider than a read's and `-1` appends. `Array.insert` normalizes a negative
-// index itself, so an accepted one is passed through as written.
-(defun Array_insert (a i v)
-  (if (< i 0)
-      (if (<= (- 0 i) (+ (Array.len a) 1)) (Array.insert a i v) ())
-      (if (<= i (Array.len a)) (Array.insert a i v) ())))
+(def Array_take_last Array.take_last)
+(def Array_shift Array.shift)
+(def Array_remove Array.remove)
+(def Array_insert Array.insert)
 
 // A map literal builds its entries in one expression, the way an array
 // literal does, so the lowering needs no statement sequence. The flat list
@@ -174,14 +145,11 @@
 
 (def Map_new Map.new)
 (def Map_len Map.len)
-(defun Map_get (m k) (if (eq? (Map.contains m k) 0) () (Map.getindex m k)))
-// `Map.getindex` is `Map.get` in every respect, including the `void` an
-// absent key answers, so it reads back the same way.
+(def Map_get Map.get)
 (def Map_getindex Map_get)
 (def Map_setindex Map.setindex)
 (def Map_contains Map.contains)
-// `Map.del` answers the removed value, or `void` when the key was absent.
-(defun Map_del (m k) (if (eq? (Map.contains m k) 0) () (Map.del m k)))
+(def Map_del Map.del)
 (def Map_getdefault Map.getdefault)
 (def Map_setdefault Map.setdefault)
 (def Map_list Map.list)

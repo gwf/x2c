@@ -204,6 +204,23 @@ meta int ct_through_pointer(int a) {
   return x;
 }
 
+meta void ct_void_bare(int *out) {
+  *out = 1;
+  return;
+  *out = 99;
+}
+
+meta void ct_void_fallthrough(int *out) {
+  *out = *out + 1;
+}
+
+meta int ct_void_calls(void) {
+  int result = 0;
+  ct_void_bare(&result);
+  ct_void_fallthrough(&result);
+  return result;
+}
+
 meta int ct_count(List xs) {
   int n = 0;
   foreach (Var item, xs) {
@@ -770,6 +787,7 @@ int main(void) {
   printf("nested-break %d\n", $(ct_nested_break 3));
   printf("foreach-brk  %d\n", $(ct_break_in_foreach '(a b stop c)));
   printf("pointer      %d\n", $(ct_through_pointer 7));
+  printf("void-return  %d\n", $(ct_void_calls));
   printf("foreach      %d\n", $(ct_count '(a b c d)));
   printf("discard      %d\n", $(ct_discard 1));
   printf("array-len    %d\n", $(ct_array_len 1));

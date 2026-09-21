@@ -382,13 +382,47 @@ completed support:
   callback. It needs an evaluator representation and adapter whose state/lifetime
   contract matches native iteration. Map.keys is not a missing List-return alias.
 - List.foldl distinguishes a void seed from an empty List and permits a null
-  callback. The current Lisp value channel cannot preserve true void. Full parity
-  requires that value representation decision before adding an alias; ordinary
-  seeded folds can already be written as meta functions.
+  callback. No-value transport now preserves that seed distinction. Full parity
+  still needs the interpreted-callback bridge; ordinary seeded folds can already
+  be written as meta functions.
 
 These limits prevent claiming the broader all-value-types goal complete. The
 current API report records other missing operations individually; no historical
 rationale is invented for an unbound operation.
+
+## No-value transport
+
+The transport implementation keeps the established truth contract. Lisp
+predicates still return Symbol `true` or nil, and Lisp conditions treat nil and
+`void` as false. It does not adopt numeric predicate results or change runtime
+`Var.truth`.
+
+Raw evaluator slots now preserve `void` through fixed calls, `Var` arguments and
+results, globals, locals and captures. Native declared-void functions, block
+lambda fallthrough and bare returns, and meta fallthrough and bare returns all
+produce the same no-value. Rest calls reject `void` before packing a List;
+concrete typed value arguments and ordinary List, Array and Map storage continue
+to reject it. Missing List/Array/Map reads and removals now preserve `void`
+instead of collapsing it to an empty List. Existing direct `Context.export(void)`
+behavior remains unchanged.
+
+The compiler transition is staged through the generated bootstrap rather than
+hand-editing it. Focused native, meta, interpreter, instrumented VM, absence and
+header-cache probes cover the transport and the first-failure diagnostic path.
+Integration with the API lane re-runs the self-host, corpus and publication
+gate. List.foldl still needs the callback bridge, and general Iter still needs
+its state and lifetime representation; no-value transport is no longer their
+representation blocker.
+
+The absence-wrapper audit has three dispositions:
+
+- List `getindex`, `last`, `assoc`, `get`, `caar`, `cadr` and `caddr` preserve
+  `void`; `caar` stops when either selection is absent.
+- Array `getindex`, `setindex`, `take_last`, `shift`, `remove` and `insert`, and
+  Map `get`, `getindex` and `del`, preserve `void`.
+- Predicates, indexes, default-taking operations and mutators that return a
+  receiver or count retain their native non-absence contracts; they need no
+  `void` wrapper.
 
 ## Plan review
 
