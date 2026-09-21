@@ -10,7 +10,26 @@
 #include <unistd.h>
 #include <string.h>
 
+static void _help(void) {
+  puts("Enter declarations or statements with semicolons.\n"
+       ":help    show this help\n"
+       ":cancel  discard incomplete input\n"
+       ":quit    leave the session\n"
+       "Options: --dump prints typed AST and lowered Lisp; --stats prints "
+       "execution counters.");
+}
+
 int main(int argc, char **argv) {
+  int dump = 0, stats = 0;
+  for (int i = 2; i < argc; i++) {
+    if (!strcmp(argv[i], "--dump")) dump = 1;
+    else if (!strcmp(argv[i], "--stats")) stats = 1;
+    else if (!strcmp(argv[i], "--help")) { _help(); return 0; }
+    else {
+      fprintf(stderr, "unknown option: %s; use --help\n", argv[i]);
+      return 2;
+    }
+  }
   x2c_initialize_environment(argv[0]);
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
   request.command = <translate>;
@@ -27,9 +46,8 @@ int main(int argc, char **argv) {
   ReplSession session = ReplSession.new(unit.compiler);
   String pending = "", line;
   int interactive = isatty(STDIN_FILENO);
-  int dump = argc > 2 && !strcmp(argv[2], "--dump");
   unit.compiler.macro_lisp.call_budget(1000000);
-  if (interactive) puts("x2c research REPL; :quit, :cancel; semicolons required");
+  if (interactive) puts("x2c research REPL; :help for commands");
   while (1) {
     if (interactive) {
       printf("%s", pending.len() ? "... " : "x2c> ");
@@ -37,8 +55,10 @@ int main(int argc, char **argv) {
     }
     line = Stdin.readline();
     if (!line) break;
-    if (line.strip(NULL) == ":quit") break;
-    if (line.strip(NULL) == ":cancel") { pending = ""; continue; }
+    String command = line.strip(NULL);
+    if (command == ":quit") { pending = ""; break; }
+    if (command == ":cancel") { pending = ""; continue; }
+    if (command == ":help") { _help(); continue; }
     pending += line + "\n";
     ReplResult result = session.submit(pending);
     if (dump && result.syntax) fprintf(stderr, "typed: %s\n", result.syntax.repr());
@@ -61,7 +81,7 @@ int main(int argc, char **argv) {
     if (result.status != <incomplete>) pending = "";
     fflush(stdout);
   }
-  if (argc > 2 && !strcmp(argv[2], "--stats")) {
+  if (stats) {
     LispAutoStats stats = unit.compiler.macro_lisp.auto_stats();
     fprintf(stderr, "Lisp calls=%ld machine entries=%ld machine errors=%ld\n",
             stats.invocations, stats.machine_entries, stats.machine_errors);

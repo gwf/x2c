@@ -36,7 +36,7 @@ python3 tools/repl-spike/check.py
 ```
 
 `--dump` shows the typed AST and lowered Lisp. `--stats` reports Lisp/word
-machine counters at exit. Build output precedes the session in the launcher;
+machine counters at exit. Both flags may be combined; `--help` lists commands. Build output precedes the session in the launcher;
 the built executable can be run directly with its seed file:
 
 ```sh
@@ -44,8 +44,9 @@ unittest/build/repl-spike/repl unittest/build/repl-spike/seed.x --stats
 ```
 
 One declaration or function is submitted at a time. Executable input may
-contain several statements. Semicolons are required. `:cancel` discards a
-pending multiline input; `:quit` exits. EOF with pending input exits with
+contain several statements. Semicolons are required. `:help` shows commands
+without changing pending input. `:cancel` discards pending multiline input;
+`:quit` exits and discards it. EOF with pending input exits with
 status 1. Rejected or failed individual inputs report an error and continue.
 
 ## Demonstrated result
@@ -267,3 +268,27 @@ local; bootstrap refresh and full publication validation have not been run.
 The [long-session assessment](long-session.md) records the latest ownership
 fixes, 50,000-input mixed sessions, retained-result checks, and the remaining
 design decisions before production integration.
+
+## Proposed next direction
+
+Make the existing session inspectable before adding lifetime or execution
+semantics. These are recommendations, not implemented commands:
+
+1. Expose user-defined names and their kinds through the session API, with a
+   terminal listing as its client. Distinguish this from enumerating every
+   inherited Lisp binding or compiler helper.
+2. Retrieve a named function's canonical syntax and show it with the familiar
+   list-template notation. Keep the typed AST and lowered Lisp available as
+   distinct views. Existing `ReplResult.syntax` and `.lowered` establish the
+   data path, but the session does not yet index results by function name.
+3. Let ordinary immutable List transformations produce new source syntax,
+   then bind, type-check, and lower it through the existing compiler owners
+   under a fresh name. Typed binding IDs cannot simply be reused in a changed
+   definition. No textual rewriting or second AST representation is needed.
+
+Scope push/pop alone is allocation control, not semantic rewind. A later
+input can mutate an earlier Array, global cell, or external resource. Rewind
+would need a stated mutation policy, symbol-state handling, and escape rules
+before reclaiming memory. Stop-and-copy and a new memory model remain deferred.
+The existing result lifetime stays at unit close while these inspection ideas
+are evaluated alongside ongoing terminal polish.

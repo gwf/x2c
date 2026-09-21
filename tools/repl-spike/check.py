@@ -62,6 +62,16 @@ check("int broken(int hidden,\n:cancel\nhidden;\n",
 check("1 +\n2;\n", "=> 3\n")
 check("1 + ;\n", "", "  1 + ;")
 check("int n =", "", "incomplete input at EOF", 1)
+check("int n =\n:quit\n", "")
+result = run("1+2;\n", "--dump", "--stats")
+assert result.returncode == 0 and result.stdout == "=> 3\n", result
+assert all(part in result.stderr for part in
+           ["typed:", "lowered:", "Lisp calls="]), result
+result = run("", "--unknown")
+assert result.returncode == 2 and "unknown option" in result.stderr, result
+result = run("1 +\n:help\n2;\n")
+assert result.returncode == 0 and result.stdout.endswith("=> 3\n"), result
+assert ":cancel" in result.stdout and not result.stderr, result
 check('String s = "hello";\ns.len();\ns;\n', 'ok\n=> 5\n=> "hello"\n')
 check('List xs = %(1 2 3);\nxs.len();\nxs[1];\n'
       'Array a = [];\na.push(7);\na[0] = 9;\na[0];\n',
@@ -97,7 +107,7 @@ subprocess.run([str(ROOT / "builds/0/x2c"), "build", "--output",
 native = subprocess.check_output([str(native_binary)], text=True).splitlines()
 assert interpreted == native, (interpreted, native)
 assert "machine entries=0 " not in result.stderr, result.stderr
-print("19 recovery/subset checks and native parity passed:", ", ".join(native))
+print("23 terminal checks and native parity passed:", ", ".join(native))
 print(result.stderr.strip())
 
 startup = []
