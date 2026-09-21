@@ -320,6 +320,22 @@ The holistic check would then combine:
 3. the object construction and finalizer invariant; and
 4. paired lifetime effects at native/evaluator boundaries.
 
+After the inventory establishes the actual gaps, the recommended delivery
+order is:
+
+1. Add an opt-in certification mode which combines whole-project
+   `region-escapes` results with the lifetime-effect inventory. Keep ordinary
+   region warnings compatible rather than turning them into unconditional
+   translation errors.
+2. Treat every reachable unknown call as unproved during certification instead
+   of assigning it an empty effect.
+3. Repair the finite set of resource-owning types the inventory finds without
+   allocation-attached finalization.
+4. Measure whether the certified subset is effectively identical to the
+   currently accepted meta-function subset. If it is, x2c can state that its
+   interpreted programs are, in practice, the programs for which native
+   compilation supplies a reusable lifetime proof.
+
 No second general-purpose borrow checker is implied. The native graph remains
 the authoritative analysis. The evaluator proof checks that lowering and the
 installed capability surface preserve that analysis under the coarsening map.
