@@ -149,6 +149,13 @@ Review every resulting artifact delta. Edits, regeneration, or integration
 that change the validated tree require ensuring the command again. A commit,
 review, push, or elapsed time does not invalidate an unchanged result.
 
+Performance evidence stays outside these correctness gates. Follow
+[agents/performance-checkpoints.md](agents/performance-checkpoints.md) for the
+nightly `dev` snapshot and before publishing a coherent batch that can affect
+compiler throughput, generated-code performance, runtime hot paths, or build
+orchestration. Do not require it for documentation, tests-only work,
+generated-only refreshes, or plainly non-hot-path changes.
+
 A failed required check stops publication. Preserve the changes and full log,
 isolate the cause with focused checks, and report the failing command when
 work cannot continue within scope. Escalate an increase in failures or an

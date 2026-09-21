@@ -40,6 +40,7 @@ required sequence.
 | `make packages-check` | Check packages with their prepared dependency cache; outside `check`. |
 | `make sanity-check` | Refresh bootstrap, rebuild stage 0, and build through stage 3 without checks. |
 | `make build-recovery` | Check that an interrupted stage build removes partial objects and replaces archives. |
+| `make performance-snapshot` | Record representative build, runtime, shootout, and compiler timings. |
 | `python3 tools/test-configure.py` | Check `./configure` prerequisite reporting and its ordering before the core build. |
 
 For an optional focused unit run, build with `make -C unittest test-all`, then
@@ -60,6 +61,11 @@ unchanged. The B4/B5 section of
 stage 2, and compares stages 0, 1, and 2. `agent-pr-check` runs it and the
 remaining extended checks. Stage 2 establishes self-host convergence; the
 fourth build is available on demand.
+
+Performance evidence is separate from these correctness gates. Use
+[`performance-snapshot`](performance-checkpoints.md) for the nightly `dev`
+history and for coherent authored batches that can affect compiler or runtime
+performance.
 
 Source changes can leave `stage-diff-0` red until bootstrap is regenerated:
 it compares checked-in bootstrap C/H with stage 0 output. The publication

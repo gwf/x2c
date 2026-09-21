@@ -27,7 +27,7 @@ BENCHMARK_TARGETS = bm-all bm-scan bm-string bm-list bm-block-buffer \
 	bm-scope bm-file bm-logger bm-iter bm-exception bm-var bm-varops \
 	bm-map bm-map-standard-smoke bm-map-standard-campaign \
 	bm-map-u32-smoke bm-map-u32-campaign bm-compiler \
-	bm-match-cache bm-lisp-auto
+	bm-match-cache bm-lisp-auto performance-snapshot performance-runtime
 SHOOTOUT_TARGETS = shoot-run shoot-update shoot-calibrate
 APE_TARGETS = ape-toolchain ape-build ape-verify
 CONFIG_TARGETS = configure configure-packages config-debug config-optimize \
@@ -285,10 +285,21 @@ examples-update: build					## Rewrite expected example output
 	$(MAKE) -C examples update
 
 ##@ Benchmarks
+PERFORMANCE_ARGS ?=
+
+performance-snapshot:					## Record representative performance
+	python3 tools/performance-snapshot.py $(PERFORMANCE_ARGS)
+
 RUNTIME_BENCHMARKS = bm-scan bm-string bm-list bm-block-buffer bm-scope \
 	bm-file bm-logger bm-iter bm-exception bm-var bm-varops
 
 bm-all: $(RUNTIME_BENCHMARKS)				## Run the current runtime timings
+
+performance-runtime: build
+	@set -e; for target in $(RUNTIME_BENCHMARKS); do \
+		echo "x2c-performance-target,$$target"; \
+		$(MAKE) $$target; \
+	done
 
 # Shared benchmark steps: translate + compile one focused benchmark
 # ($(1) = source stem, $(2) = target-specific compile flags), and the
