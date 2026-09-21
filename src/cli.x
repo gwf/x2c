@@ -26,7 +26,7 @@ typedef struct CliRequest {
   Symbol dump;
   int jobs, debugging, verbose, dry_run, quiet, plain, no_deps;
   int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp;
-  int repl_dump, repl_stats;
+  int repl_dump, repl_stats, repl_verbose_stats;
   // The translation error limit; 0 reports every recoverable error.
   int max_errors;
   int source_map, source_facts, live_symbols, cpp_symbols, force, rebuild,
@@ -131,6 +131,8 @@ static CliOption cli_options[] = {
     "Print typed syntax and lowered Lisp for each submission", 0 },
   { <repl-stats>, CLI_REPL, <inspection>, "--stats", NULL,
     "Print Lisp execution counters", 0 },
+  { <vstats>, CLI_REPL, <inspection>, "--verbose-stats", NULL,
+    "Print detailed runtime statistics", 0 },
   { <out-dir>, CLI_TRANSLATE, <output>, "--out-dir", "<dir>",
     "Write generated files under <dir> (default: .)", 0 },
   { <src-map>, CLI_TRANSLATE | CLI_NATIVE, <output>, "--source-map",
@@ -545,7 +547,7 @@ scripts that no longer exist.");
 static void _print_repl_help(void) {
   puts(
     %"Usage:
-  x2c repl [--dump] [--stats]
+  x2c repl [--dump] [--stats] [--verbose-stats]
 
 Evaluate a supported x2c subset in an experimental interactive session.
 Read submissions from standard input. Enter :help for session commands.");
@@ -873,6 +875,7 @@ static void _apply_option(
     case <debug>: c.debugging = 1; break;
     case <repl-dump>: c.repl_dump = 1; break;
     case <repl-stats>: c.repl_stats = 1; break;
+    case <vstats>: c.repl_verbose_stats = 1; break;
     case <out-dir>: c.out_dir = value; break;
     case <src-map>: c.source_map = 1; break;
     case <rebuild>: c.rebuild = 1; break;

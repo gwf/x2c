@@ -163,7 +163,7 @@ assert result.returncode == 2 and "unknown option" in result.stderr, result
 result = run("1 +\n:help\n2;\n")
 assert result.returncode == 0 and result.stdout.endswith("=> 3\n"), result
 assert all(text in result.stdout for text in [
-    "\nCommands\n", "  :help          Show this help.\n",
+    "\nCommands\n", "  :help             Show this help.\n",
     "\nEditing\n", "\nOptions\n",
 ]) and not result.stderr, result
 check('String s = "hello";\ns.len();\ns;\n', 'ok\n=> 5\n=> "hello"\n')
@@ -212,6 +212,23 @@ for field in ["allocation-calls", "free-calls", "reallocation-calls",
     values = [int(value) for value in
               re.findall(fr"\b{field}=(\d+)", result.stdout)]
     assert len(values) == 2 and values[1] >= values[0], (field, result)
+result = run("int hot(int x) { return x+1; }\n"
+             "hot(1);\nhot(2);\nhot(3);\n:stats verbose\n")
+assert result.returncode == 0 and not result.stderr, result
+for text in ["evaluation (verbose, since REPL open): analyses=",
+             "scope (process, verbose): live-scopes=",
+             "pool (verbose): depth=", "machine (since REPL open):",
+             "prepared-calls=", "native-calls=", "lisp-returns="]:
+    assert text in result.stdout, (text, result)
+assert re.search(r"machine-entries=[1-9]\d*", result.stdout), result
+result = run("int hot(int x) { return x+1; }\nhot(1);\nhot(2);\n",
+             "--stats", "--verbose-stats")
+assert result.returncode == 0, result
+assert result.stderr.count("session: definitions=") == 1, result
+assert "machine (since REPL open):" in result.stderr, result
+result = run(":stats detailed\n")
+assert result.returncode == 1 and result.stdout == "", result
+assert result.stderr == "usage: :stats [verbose]\n", result
 check("int z=1, a=2;\nint middle(void) { return a+z; }\n:symbols\n",
       'ok\ndefined middle\n%((value "a") (function "middle") (value "z"))\n')
 check("int lost=1, failed=1/0;\n:symbols\n",
@@ -234,7 +251,7 @@ assert result.returncode == 1, result
 assert result.stdout == 'ok\n%((value "n"))\n=> 3\n', result
 assert result.stderr.splitlines() == [
     "usage: :ast NAME", "usage: :lowered NAME",
-    "usage: :stats", "unknown command: :unknown",
+    "usage: :stats [verbose]", "unknown command: :unknown",
     "not a session function: missing",
     "not a session function: n", "usage: :symbols"], result
 result = run("int f(void) { return 3; }\n1 +\n  :ast\tf  \n"
