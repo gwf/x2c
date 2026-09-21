@@ -2266,7 +2266,7 @@ static int _test_declaration_start(Compiler c, int require_declarator){
     List hole = Compiler_peek_macro_hole(c);  if(List_truth(hole)){
       Symbol kind = Var_symbol(List_assoc(hole, Symbol_var(740232)));  if(kind) return kind == 1362954;  Symbol next = Compiler_peek(c, 2);  return next == 19147688 || next == 73 || next == 9297;
     }
-
+    return Compiler_macro_lisp_starts_declaration(c);
   }
   if(Symbol_is_storage_class(sym) || Symbol_is_type_qualifier(sym) || Symbol_is_builtin_type(sym) || sym == 634145674) return 1;  if(sym != 19147688) return 0;  if(String_equal(c -> token -> text, _41) && _attribute_starts(c)) return 1;  Var definition;  if(Map_try_get(c -> object_macros, String_var(c -> token -> text), & definition) &&(Var_is_row(definition, 9, 7, 4) || Var_equal(definition, Symbol_var(50603262308)))) return 1;  Token head = c -> token;  String alias = Compiler_package_alias_spelling(c);  String name = String_truth(alias) ? alias : Compiler_package_member_spelling(c, c -> token -> text);  Type lookup = List_type(Sym_get(c -> sym, cons(String_var(String_truth(name) ? name : c -> token -> text), NULL)));  if(List_truth(Type_list(lookup)) && ! Type_is_typedef(lookup)) return 0;  Compiler_next(c);  if(String_truth(alias)){
     Compiler_next(c);  Compiler_next(c);

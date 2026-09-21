@@ -2,8 +2,10 @@
 
 > Status: active
 > Gary approved execution and all five recommended decisions on 2026-09-20.
-> Implementation is in the isolated meta-authoring-execution worktree.
-> Implemented behavior and open representation follow-ons are recorded below.
+> The initial implementation shipped in 8ebb323d. Value aliases and further
+> AD source templates shipped through 8c2a8054; x2c-first examples followed in
+> 95e73d18. Capture-call repairs and remaining API/representation work extend
+> that baseline. Implemented behavior and open follow-ons are recorded below.
 
 
 ## Outcome and priorities
@@ -31,7 +33,10 @@ the generated built-in Lisp migration that has already landed. The separate
 [generated Lisp reproducibility plan](generated-lisp-reproducibility.md) is
 not an additional gate for this effort.
 
-## Current evidence
+## Planning evidence (historical)
+
+For current operation coverage, use the [API report](../docs/src/guide/meta-api-coverage.md).
+The counts and defects below record the pre-implementation baseline.
 
 Baseline: development commit `f3aa43a5`, with a fresh safe bootstrap rebuild.
 The following were refreshed against that compiler during planning:
@@ -328,6 +333,14 @@ as values. Unit and Statement template calls inside meta construct deferred
 invocations. Parameter and statement sequences can be computed through explicit
 meta slots, without adding ambiguous nonfinal sequence parameters.
 
+The capture-call follow-on uses the same source registration as Lisp evaluation,
+so complete captures retain source text and caller-relative embedded paths.
+Direct typed holes, including Function captures, keep their declared kind.
+Declaration lookahead and existing macro slots now admit explicit meta results
+in type and generated-name positions. The `meta-capture-calls` regression covers
+these paths, imported definition-relative paths, forwarding and decorator body
+splicing; the formerly Lisp-only guide examples now use x2c calls.
+
 The reverse-gradient generator now returns a source template. That template
 owns fresh tape, accumulator, exit-code and label bindings, which it passes to
 fragment helpers during expansion. The source function's specifiers and computed
@@ -337,7 +350,10 @@ inline function using the old scratch names, exercise the resulting native code.
 Scalar conversion covers integer families, floating families, strings, Symbols,
 immutable Lists and boxed representable values. Numeric lowering uses the existing
 typed literal owner. C-style arrays convert elements to their declared type.
-String.strip, Array.map, List.cons and Symbol.len fill coherent binding gaps.
+String.strip, Array.map, List.cons and Symbol.len filled the first binding gaps.
+The next delivered batch added 19 selector, rendering, kind and comparison
+bindings, retaining the documented nil-versus-void limits. That batch did not
+complete the API surface.
 The optional inventory records every signature and distinguishes observed behavior
 from binding presence and absence.
 

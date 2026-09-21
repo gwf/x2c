@@ -1090,6 +1090,7 @@ static int _test_declaration_start(Compiler c, int require_declarator) {
       Symbol next = c.peek(2);
       return next == <ident> || next == <$> || next == <"$(">;
     }
+    return c.macro_lisp_starts_declaration();
   }
   if (sym.is_storage_class() || sym.is_type_qualifier() ||
       sym.is_builtin_type() || sym == <inline>) return 1;
