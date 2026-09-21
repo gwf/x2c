@@ -265,6 +265,7 @@ with PtyRepl() as repl:
     repl.ready(mark)
     mark = repl.send(b"\t\t")
     repl.expect(b"Commands", mark)
+    repl.expect(b"Keywords", mark)
     repl.expect(b"Types", mark)
     repl.send(b"\x03")
     repl.ready(mark)

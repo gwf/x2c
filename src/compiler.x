@@ -741,6 +741,17 @@ void Compiler.mark_completion(Compiler compiler, int position) {
 int Compiler.at_completion(Compiler compiler) =>
   compiler.token.type == <replcomp>;
 
+/* Transfers completion from the grammar production that owns the cursor.
+   Rows retain semantic namespace facts; keywords are choices owned by that
+   production rather than an editor-side copy of the grammar. */
+void Compiler.complete_here(Compiler compiler, Symbol role, List keywords) {
+  if (!compiler.at_completion()) return;
+  List rows = compiler.sym.visible_symbols();
+  raise %(
+    replcomp (kind $role) (rows $rows) (keywords $keywords)
+  );
+}
+
 /** Returns the first non-trivia token at or after `token`. */
 Token Compiler.skip_trivia_from(Compiler compiler, Token token) =>
   _skip_forward(token);
@@ -786,7 +797,7 @@ Symbol Compiler.peek(Compiler compiler, int steps) {
   Token token = compiler.token;
   if (!steps && compiler.at_completion()) {
     List rows = compiler.sym.visible_symbols();
-    raise %(replcomp (kind <names>) (rows $rows));
+    raise %(replcomp (kind <names>) (rows $rows) (keywords ()));
   }
   while (steps > 0) {
     token = _skip_forward(token + 1);
@@ -2504,10 +2515,12 @@ List Sym.visible_symbols(Sym sym) {
             rows.push(%($name $value));
           }
     if ((void *) scope.macros != NULL)
-      foreach (Var (name, _), scope.macros)
+      foreach (Var (name, definition), scope.macros)
         if (name is <string> && !seen.contains(name)) {
           seen[name] = 1;
-          rows.push(%($name <macro>));
+          Symbol kind = definition is <list>
+                      ? definition.list().assoc(<kind>) : 0;
+          rows.push(%($name ${kind == <type> ? <typemacro> : <macro>}));
         }
   }
   return rows.list_free();

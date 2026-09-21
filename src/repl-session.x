@@ -88,8 +88,10 @@ List ReplSession.inspect(ReplSession session, String name) {
 }
 
 static List _completion_filter(
-  ReplSession session, Symbol kind, List rows, String prefix) {
+  ReplSession session, Symbol kind, List rows, List keywords, String prefix) {
   Array candidates = [];
+  foreach (String keyword, keywords)
+    if (keyword.startswith(prefix)) candidates.push(%(<keyword> $keyword));
   foreach (Var row, rows) {
     String name = NULL;
     Var type = void;
@@ -99,7 +101,14 @@ static List _completion_filter(
       type = semantic;
     }
     if (!name || !name.startswith(prefix)) continue;
-    if (kind == <names> && type is <list>) {
+    Type semantic_type = type is <list> ? type : NULL;
+    if (kind == <type> && type != <typemacro> &&
+        (!semantic_type || !semantic_type.is_typedef())) continue;
+    if ((kind == <expr> || kind == <statement>) &&
+        (type == <typemacro> ||
+         (semantic_type && semantic_type.is_typedef()))) continue;
+    if (kind == <continue>) continue;
+    if (type is <list>) {
       Type semantic = type;
       Var callable;
       if (semantic.is_function() && !session.names.contains(name) &&
@@ -114,6 +123,7 @@ static List _completion_filter(
       if (semantic.is_typedef()) candidate_kind = <type>;
       else if (semantic.is_function()) candidate_kind = <callable>;
     }
+    else if (type == <typemacro>) candidate_kind = <type>;
     else if (type == <macro>) candidate_kind = <callable>;
     candidates.push(%($candidate_kind $name));
   }
@@ -181,11 +191,16 @@ ReplCompletion ReplSession.complete(
   }
   defer transaction.rollback();
   Symbol kind = 0;
-  List rows = NULL;
+  List rows = NULL, keywords = NULL;
   try {
     _tokenize(c, marked, scratch);
     if (c.tokenizer.status() != <ok>) return result;
     c.mark_completion(marked.len() - marker.len());
+    c.complete_here(<submit>, %(
+      "void" "char" "short" "int" "long" "float" "double"
+      "signed" "unsigned" "if" "while" "for" "do" "return"
+      "try" "raise" "defer" "match" "switch" "with"
+    ));
     int declaration = c.test_declaration();
     int end = marked.len();
     if (!declaration) {
@@ -197,14 +212,16 @@ ReplCompletion ReplSession.complete(
     }
     (void) c.parse_submission(end);
   }
-  catch %(replcomp (kind ?(Symbol found_kind)) (rows ?found)): {
+  catch %(replcomp (kind ?(Symbol found_kind)) (rows ?found)
+                   (keywords ?found_keywords)): {
     kind = found_kind;
     rows = found;
+    keywords = found_keywords;
   }
   catch %(incomplete *): return result;
   catch %(malformed *): return result;
-  if (rows) result.candidates = _completion_filter(
-    session, kind, rows, prefix);
+  if (rows || keywords) result.candidates = _completion_filter(
+    session, kind, rows, keywords, prefix);
   return result;
 }
 

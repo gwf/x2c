@@ -15,6 +15,13 @@ static int _has_completion(List candidates, String spelling) {
   return 0;
 }
 
+static int _has_completion_kind(
+  List candidates, Symbol kind, String spelling) {
+  foreach (Var row, candidates)
+    match (row) case %($kind $spelling): return 1;
+  return 0;
+}
+
 static void _symbols(ReplSession session, List expected) {
   List actual = session.symbols();
   if (actual.repr() != expected.repr()) {
@@ -46,6 +53,26 @@ static void _completion(
   }
 }
 
+static void _completion_kind(
+  ReplSession session, String source, Symbol kind, String spelling) {
+  ReplCompletion result = session.complete(source, source.len());
+  if (!_has_completion_kind(result.candidates, kind, spelling)) {
+    fprintf(stderr, "completion kind for %s: %s\n",
+            source, result.candidates.repr());
+    failures++;
+  }
+}
+
+static void _completion_range(ReplSession session) {
+  ReplCompletion result = session.complete("pri trailing", 3);
+  if (result.start != 0 || result.end != 3 ||
+      !_has_completion(result.candidates, "print")) {
+    fprintf(stderr, "completion range: %zu:%zu %s\n",
+            result.start, result.end, result.candidates.repr());
+    failures++;
+  }
+}
+
 static void _transaction_deletion(Compiler c) {
   List key = %("__repl_probe");
   Map original = c.sym.file_statics();
@@ -73,6 +100,20 @@ static void _exercise(ReplSession s) {
   _completion(s, "Str", "String", NULL);
   _completion(s, "pri", "print", NULL);
   _completion(s, "\"x\".le", "len", NULL);
+  _completion_kind(s, "", <keyword>, "int");
+  _completion_kind(s, "int f(void) { ret", <keyword>, "return");
+  _completion_kind(s, "if (1) {} el", <keyword>, "else");
+  _completion_kind(s, "try {} ca", <keyword>, "catch");
+  _completion_kind(s, "try {} fi", <keyword>, "finally");
+  _completion_kind(s, "try {} catch: {} fi", <keyword>, "finally");
+  _completion(s, "return Str", NULL, "String");
+  _completion(s, "int f(pri", NULL, "print");
+  _completion(s, "int f(Str", "String", NULL);
+  _completion(s, "int f(const pri", NULL, "print");
+  _completion(s, "int f(const Str", "String", NULL);
+  _completion(s, "if (1) { Str", "String", NULL);
+  _completion(s, "int f(void) { int local=0; loc", "local", NULL);
+  _completion_range(s);
   _expect(s, "int", <incomplete>, void);
   _expect(s, "int f(int", <incomplete>, void);
   _expect(s, "int f(int x) {", <incomplete>, void);

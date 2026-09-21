@@ -1411,6 +1411,7 @@ static void _show_completions(struct EditState *l, List candidates) {
   _refresh_with_flags(l, REFRESH_CLEAN);
   _write_bytes(l.input.ofd, "\r", 1);
   _show_completion_group(l, candidates, <command>, "Commands");
+  _show_completion_group(l, candidates, <keyword>, "Keywords");
   _show_completion_group(l, candidates, <session>, "Session");
   _show_completion_group(l, candidates, <type>, "Types");
   _show_completion_group(l, candidates, <callable>, "Functions and macros");
