@@ -409,6 +409,7 @@ static int _run_build_request(CliRequest c, Array commands) {
      its Scope allocations and canonical values so a manifest dependency is
      reclaimed before the next target starts. */
   Context target = $auto(Context.open_isolated_named("build target"));
+  defer macro_library_reset();
   Build state = c.prepare();
   c.cc = target.export(c.cc);
   c.ar = target.export(c.ar);

@@ -70,12 +70,14 @@ _x2c_defer_env_0;
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
 
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+
 typedef struct _x2c_defer_env_1{
   const void * _x2c_defer_capture_1;
 }
 _x2c_defer_env_1;
 
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
 Var Symbol_var(Symbol);
 
@@ -781,77 +783,93 @@ static int _run_build_request(CliRequest c, Array commands){
   _x2c_defer_env_1 _x2c_defer_env_3 = {._x2c_defer_capture_1 =(const void *) & target};
 
   X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_1,
+    .fn = _x2c_defer_cleanup_2,
     .env = & _x2c_defer_env_3
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
-    Build state = CliRequest_prepare(c);
-    c -> cc = Var_string(Context_export(target, String_var(c -> cc)));
-    c -> ar = Var_string(Context_export(target, String_var(c -> ar)));
-    int result = _translate_units(c, state, c -> inputs);
-    if(! result && c -> command == 1282559016 && ! c -> dry_run) result = _translate_units(c, state, Build_script_helpers(state));
-    if(result){
-      Build_cleanup(state, 0);
-      {
-        int _x2c_return_value_0 = 1;
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_1);
-          return _x2c_return_value_0;
-        }
-
-      }
-
-    }
-    result = Build_finish(state);
-    if(result){
-      Build_cleanup(state, 0);
-      {
-        int _x2c_return_value_1 = result;
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_1);
-          return _x2c_return_value_1;
-        }
-
-      }
-
-    }
-    if((void *) commands != NULL){
-      String entry;
-      Array _x2c_macro_object_11 = state -> compile_commands;
-      int _x2c_macro_cursor_11 = 0;
-      Var _x2c_macro_cursor_output_11;
-      while(Array_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_11)){
-        entry = Var_string(_x2c_macro_cursor_output_11);
-        Array_push(commands, Context_export(target, String_var(entry)));
-      }
-
-    }
-    if((void *) commands != NULL && c -> command == 38236 && ! compile_commands_write(c -> compile_commands, commands)){
-      Build_cleanup(state, 0);
-      {
-        int _x2c_return_value_2 = 1;
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_1);
-          return _x2c_return_value_2;
-        }
-
-      }
-
-    }
-    Build_report_success(state);
-    if(c -> command == 38236) result = Build_run_program(state);
-    else if(c -> command == 1282559016 && ! c -> dry_run) Build_publish_script(state, String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_29), NULL))));
-    Build_cleanup(state, 1);
     {
-      int _x2c_return_value_3 = result;
+
+  X2CCleanup _x2c_defer_record_2 = {
+    .fn = _x2c_defer_cleanup_1,
+    .env = NULL
+  };
+  x2c_cleanup_push(&_x2c_defer_record_2);
+  {
+      Build state = CliRequest_prepare(c);
+      c -> cc = Var_string(Context_export(target, String_var(c -> cc)));
+      c -> ar = Var_string(Context_export(target, String_var(c -> ar)));
+      int result = _translate_units(c, state, c -> inputs);
+      if(! result && c -> command == 1282559016 && ! c -> dry_run) result = _translate_units(c, state, Build_script_helpers(state));
+      if(result){
+        Build_cleanup(state, 0);
+        {
+          int _x2c_return_value_0 = 1;
+          {
+            x2c_cleanup_leave(& _x2c_defer_record_2);
+            x2c_cleanup_leave(& _x2c_defer_record_1);
+            return _x2c_return_value_0;
+          }
+
+        }
+
+      }
+      result = Build_finish(state);
+      if(result){
+        Build_cleanup(state, 0);
+        {
+          int _x2c_return_value_1 = result;
+          {
+            x2c_cleanup_leave(& _x2c_defer_record_2);
+            x2c_cleanup_leave(& _x2c_defer_record_1);
+            return _x2c_return_value_1;
+          }
+
+        }
+
+      }
+      if((void *) commands != NULL){
+        String entry;
+        Array _x2c_macro_object_11 = state -> compile_commands;
+        int _x2c_macro_cursor_11 = 0;
+        Var _x2c_macro_cursor_output_11;
+        while(Array_try_next(_x2c_macro_object_11, & _x2c_macro_cursor_11, & _x2c_macro_cursor_output_11)){
+          entry = Var_string(_x2c_macro_cursor_output_11);
+          Array_push(commands, Context_export(target, String_var(entry)));
+        }
+
+      }
+      if((void *) commands != NULL && c -> command == 38236 && ! compile_commands_write(c -> compile_commands, commands)){
+        Build_cleanup(state, 0);
+        {
+          int _x2c_return_value_2 = 1;
+          {
+            x2c_cleanup_leave(& _x2c_defer_record_2);
+            x2c_cleanup_leave(& _x2c_defer_record_1);
+            return _x2c_return_value_2;
+          }
+
+        }
+
+      }
+      Build_report_success(state);
+      if(c -> command == 38236) result = Build_run_program(state);
+      else if(c -> command == 1282559016 && ! c -> dry_run) Build_publish_script(state, String_join(NULL, cons(String_var(c -> build_dir), cons(String_var(_29), NULL))));
+      Build_cleanup(state, 1);
       {
-        x2c_cleanup_leave(& _x2c_defer_record_1);
-        return _x2c_return_value_3;
+        int _x2c_return_value_3 = result;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_2);
+          x2c_cleanup_leave(& _x2c_defer_record_1);
+          return _x2c_return_value_3;
+        }
+
       }
 
     }
+    x2c_cleanup_leave(& _x2c_defer_record_2);
 
+}
   }
   x2c_cleanup_leave(& _x2c_defer_record_1);
 
@@ -1053,10 +1071,16 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   ParsedUnit_close(&((*(ParsedUnit *) _x2c_defer_data_0->_x2c_defer_capture_0)));
 }
 
-void Context_cleanup(Context);
+void macro_library_reset(void);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  macro_library_reset();
+}
+
+void Context_cleanup(Context);
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_2;
   Context_cleanup((*(Context *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 

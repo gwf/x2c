@@ -21,6 +21,8 @@ int Compiler_macro_invocation_needs_shallow_expansion(Compiler c);
 
 int Compiler_macro_starts_target_at(Compiler c, AstPos position);
 
+void macro_library_reset(void);
+
 Lisp Compiler_open_macro_library(Compiler compiler);
 
 void Compiler_publish_macro_library(Compiler compiler, Lisp shared);

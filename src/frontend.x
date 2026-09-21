@@ -260,9 +260,10 @@ int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) =>
   _start(frontend, filename, unit, 0);
 
 /* Installs the compile-time forms `lib/meta.x` defines into the shared
-   session. Its values belong to the process pool because they outlive every
-   unit that calls them. Builder aliases name the same lowered bodies; the
-   literal spellings retain their checked Lisp adapters. */
+   session. Its values belong to the build target's shared library scope
+   because they outlive every unit that calls them. Builder aliases name the
+   same lowered bodies; the literal spellings retain their checked Lisp
+   adapters. */
 static int _preload_meta_surface(Frontend frontend, Lisp shared) {
   struct CliRequest request = *frontend.request;
   request.dump = 0;
@@ -308,8 +309,9 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared) {
 }
 
 /** Evaluates the compile-time libraries and installs the compiler surface's
-    own definitions, once for this process. Returns zero after reporting a
-    failed preload, without publishing a partial session.
+    own definitions, once for the active build or translation target. Returns
+    zero after reporting a failed preload, without publishing a partial
+    session.
 */
 int Frontend.preload_macro_libraries(Frontend frontend) {
   Compiler compiler = Compiler.new();

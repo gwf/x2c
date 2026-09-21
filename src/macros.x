@@ -970,6 +970,7 @@ static void _eval_library(
 }
 
 static Lisp library_session = NULL, static Scope library_scope = NULL;
+static int library_shutdown_registered = 0;
 
 static void _library_shutdown(void) {
   Lisp.destroy(library_session);
@@ -978,6 +979,15 @@ static void _library_shutdown(void) {
   library_definitions = NULL;
   library_scope.destroy();
   library_scope = NULL;
+}
+
+/** Ends the shared compile-time library before its build-target Context is
+    reclaimed. A later target creates a fresh session in its own Context. */
+void macro_library_reset(void) {
+  _library_shutdown();
+  library_filling = 0;
+  library_restartable = 0;
+  library_settled = 0;
 }
 
 /* The compile-time file-scope table belongs to this unit. `etc/comptime.xlisp`
@@ -1072,7 +1082,10 @@ Lisp Compiler.open_macro_library(Compiler compiler) {
   if ((void *) library_session != NULL) return NULL;
   Scope.push(&library_scope);
   defer Scope.pop();
-  Scope.shutdown_hook(_library_shutdown);
+  if (!library_shutdown_registered) {
+    Scope.shutdown_hook(_library_shutdown);
+    library_shutdown_registered = 1;
+  }
   Lisp shared = Lisp.kernel();
   library_imports = {};
   library_definitions = {};
@@ -1106,8 +1119,8 @@ void Compiler.publish_macro_library(Compiler compiler, Lisp shared) {
   }
   Scope.push(&library_scope);
   defer Scope.pop();
-  /* Still inside the process Context, so every program's constants belong
-     to it. After the freeze a unit only ever compiles its own lambdas. */
+  /* Still inside the target Context, so every program's constants belong to
+     it. After the freeze a unit only ever compiles its own lambdas. */
   (void) shared.auto_prepare();
   shared.freeze();
   library_session = shared;
@@ -1129,7 +1142,7 @@ int Compiler.shared_definition(Compiler compiler, String key) {
   return known;
 }
 
-/** Records that this process builds the shared compile-time parent between
+/** Records that this target builds the shared compile-time parent between
     units rather than before the first one. A unit that needs a session
     while the parent is still pending raises `<lisp-late>`; its driver must
     catch that, call `Frontend.preload_macro_libraries`, and translate the
@@ -1153,7 +1166,7 @@ Map Compiler.shared_definitions(Compiler compiler) {
 /* Each Compiler initializes one Lisp session lazily. An `.xmacro` import
    parser borrows that session; the parent Compiler frees it. */
 static void _ensure_lisp(Compiler compiler) {
-  /* The parent's values must be interned while the process Context and pool
+  /* The parent's values must be interned while the target Context and pool
      are current, and this runs inside a unit's isolated Context. Unwind to
      the driver, which builds the parent and runs this unit again. The
      filling itself reaches here with the parent's own session in hand. */
@@ -1301,7 +1314,7 @@ static List _import(
       String text = _read_source(
         c, path, "cannot open compile-time Lisp import", invocation,
         %( "path: ${c.display_path(path)}" ));
-      /* The shared session evaluated this file once for the process, and a
+      /* The shared session evaluated this file once for the target, and a
          session cannot replace a name an ancestor binds. The read above
          still reports a file that has gone missing. */
       if (_inherited_import(path)) { }
@@ -1417,7 +1430,7 @@ List Compiler.parse_macro_lisp_top_level(Compiler compiler) {
   int is_import = _import_path(compiler, &import_path);
   String form = _lisp_form(compiler);
   if (is_import) return _import(compiler, import_path, invocation);
-  /* The shared session evaluated this file's forms once for the process and
+  /* The shared session evaluated this file's forms once for the target and
      every unit inherits them, so evaluating this one again would only try to
      replace a name an ancestor binds. */
   if (compiler.inherited_lisp) return NULL;

@@ -17,6 +17,7 @@ if [ ! -f "$APE" ]; then
 fi
 
 WORK=$(mktemp -d "${TMPDIR:-/tmp}/x2c-ape-verify.XXXXXX")
+WORK=$(CDPATH= cd -- "$WORK" && pwd -P)
 cleanup() {
   if [ "${X2C_APE_VERIFY_KEEP:-0}" = 1 ]; then
     printf 'x2c: kept APE verification workspace at %s\n' "$WORK"
