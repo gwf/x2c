@@ -111,6 +111,10 @@ Var lisp_string_downcase(String string);
 
 String lisp_string_strip(String string, Var chars);
 
+String lisp_string_lstrip(String string, Var chars);
+
+String lisp_string_rstrip(String string, Var chars);
+
 Var lisp_match_replace(List input, Var pat, Var template);
 
 Var lisp_read_file(String path);

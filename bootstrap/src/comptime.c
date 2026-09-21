@@ -135,7 +135,7 @@ static Var _lower_application(Lowering l, Var content);
 
 static int _lower_relation(Var operator);
 
-static int _lower_mixed_scalars(List operands);
+static int _lower_mixed_scalars(Lowering l, List operands);
 
 static Var _lower_operands(Lowering l, Var operator, List operands);
 
@@ -2419,9 +2419,10 @@ static int _lower_relation(Var operator){
 }
 
 int List_len(List);
+Type Sym_resolve_numeric_type(Sym, Type);
 Var List_cadr(List);
-static int _lower_mixed_scalars(List operands){
-  if(List_len(operands) != 2) return 0;  Type left = _lower_type_of(List_car(operands));  Type right = _lower_type_of(List_cadr(operands));  Symbol a = Type_scalar_tag(left), b = Type_scalar_tag(right);  return a && b && a != b;
+static int _lower_mixed_scalars(Lowering l, List operands){
+  if(List_len(operands) != 2) return 0;  Type left = Sym_resolve_numeric_type(l -> compiler -> sym, _lower_type_of(List_car(operands)));  Type right = Sym_resolve_numeric_type(l -> compiler -> sym, _lower_type_of(List_cadr(operands)));  Symbol a = Type_scalar_tag(left), b = Type_scalar_tag(right);  return a && b && a != b;
 }
 
 static Var _lower_operands(Lowering l, Var operator, List operands){
@@ -2494,7 +2495,7 @@ static Var _lower_operands(Lowering l, Var operator, List operands){
         }
 
       }
-      if(_lower_relation(operator) && _lower_mixed_scalars(operands)){
+      if(_lower_relation(operator) && _lower_mixed_scalars(l, operands)){
         Var _x2c_return_value_19 = List_var(cons(_708, cons(left, cons(List_var(cons(_680, cons(operator, NULL))), cons(right, NULL))))); {
           x2c_cleanup_leave(& _x2c_defer_record_4);  return _x2c_return_value_19;
         }
@@ -2781,7 +2782,6 @@ return _lower_decline(l, _1438);
 
 Type List_type(List);
 int Type_is_enum(Type);
-Type Sym_resolve_numeric_type(Sym, Type);
 static Var _lower_content(Lowering l, List type, Var content){
 
   {

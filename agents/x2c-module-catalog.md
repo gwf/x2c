@@ -733,11 +733,11 @@ Public functions:
 `lisp_eq_chain`, `lisp_lt_chain`, `lisp_le_chain`, `lisp_gt_chain`,
 `lisp_ge_chain`, `lisp_str`, `lisp_repr`, `lisp_string_append`,
 `lisp_substring`, `lisp_string_downcase`, `lisp_string_strip`,
-`lisp_match_replace`, `lisp_read_file`, `lisp_write_file`, `Lisp.auto_stats`,
-`Lisp.auto_instrument`, `Lisp.call_budget`, `Lisp.auto_disable`,
-`Lisp.auto_prepare`, `Lisp.eval`, `Lisp.apply`, `Lisp.eval_string`,
-`Lisp.eval_file`, `Lisp.try_get`, `Lisp.set_global`, `Lisp.bind`,
-`Lisp.cleanup`
+`lisp_string_lstrip`, `lisp_string_rstrip`, `lisp_match_replace`,
+`lisp_read_file`, `lisp_write_file`, `Lisp.auto_stats`, `Lisp.auto_instrument`,
+`Lisp.call_budget`, `Lisp.auto_disable`, `Lisp.auto_prepare`, `Lisp.eval`,
+`Lisp.apply`, `Lisp.eval_string`, `Lisp.eval_file`, `Lisp.try_get`,
+`Lisp.set_global`, `Lisp.bind`, `Lisp.cleanup`
 
 ### [lib/list-selectors.x](../lib/list-selectors.x)
 

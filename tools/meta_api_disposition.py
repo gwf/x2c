@@ -108,8 +108,8 @@ def disposition(row):
             action = f"Specify the pointee layout, mutation and lifetime for {name}; reuse status/cell adapters only where the complete signature permits."
     elif receiver == "Var" and method in {"array", "map", "string", "symbol"}:
         group = "boxed value extraction"
-        reason = "The result is an already represented value; extraction must preserve its tag checks and identity."
-        action = f"Bind the checked native {name} extraction; test matching tag, wrong tag and shared mutation where applicable."
+        reason = "The native extractor decodes a represented payload. Pointer forms borrow storage and do not prove the target family or lifetime."
+        action = f"Preserve {name}'s caller preconditions; test valid typed handles and shared mutation, and inspect raw mismatch results without dereferencing them."
     elif receiver == "Var" and (method.startswith(("box_", "decode_", "wide_", "fallback_")) or method in {"integer_box", "integer_compare", "integer_floating_compare", "integer_tag", "known_tag", "payload32", "encoding_valid", "is_row", "width_mask", "signed_from_bits", "clone_wide", "custom_descriptor_index", "pointer_string"}):
         group = "numeric and descriptor internals"
         kind = "needs bounded probe"

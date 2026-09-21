@@ -37,7 +37,7 @@ does not imply that a similarly named direct method works.
 
 Loaded layers: `etc/init.xlisp`, `etc/lisp-values.xlisp`, `etc/comptime.xlisp`, `etc/compiler-sdk.xlisp`, `etc/builtin-macros.xlisp`.
 
-Source fingerprint: `6ee9697a6841ce49df78cd6bc35e19dc8f850522d1235e7c275655aefc2f8f88`.
+Source fingerprint: `f6f328e5407d329da35c7651f547a792bf87a5cbab3dad736acedf19eda8cc21`.
 
 Compiler fingerprint: `e8ee00549e57637ba3d7da46d6746578136c8e89b21303cebe26f04c510c84d9`.
 
@@ -61,14 +61,14 @@ its complete contract is shown to agree.
 
 | Evidence state | Signature rows |
 | --- | ---: |
-| verified example | 69 |
+| verified example | 71 |
 | reproduced failure | 8 |
-| bound, unverified | 98 |
+| bound, unverified | 96 |
 | no binding found | 308 |
 
 | Disposition | All rows | Missing binding | Bound, unverified |
 | --- | ---: | ---: | ---: |
-| implementable with current values | 250 | 105 | 80 |
+| implementable with current values | 250 | 105 | 78 |
 | needs callback adapter | 15 | 12 | 2 |
 | needs representation decision | 113 | 93 | 15 |
 | native resource contract | 48 | 48 | 0 |
@@ -87,7 +87,7 @@ its complete contract is shown to agree.
 | String interpreted callbacks | lib/string.x | 2 | 2 | 0 |
 | String value operations | lib/common.x, lib/digest.x, lib/split.x, lib/string-classify.x, lib/string.x | 60 | 5 | 28 |
 | Symbol value operations | lib/common.x, lib/symbol.x | 7 | 2 | 2 |
-| Var value operations | lib/atom.x, lib/common.x, lib/dispatch.x, lib/json.x, lib/list.x, lib/match.x, lib/var.x, lib/varconvert.x | 51 | 39 | 10 |
+| Var value operations | lib/atom.x, lib/common.x, lib/dispatch.x, lib/json.x, lib/list.x, lib/match.x, lib/var.x, lib/varconvert.x | 51 | 39 | 8 |
 | absence and null values | lib/array.x, lib/dispatch.x, lib/list.x, lib/map.x, lib/var.x | 17 | 5 | 12 |
 | allocation and ownership contracts | lib/array.x, lib/dispatch.x, lib/list.x, lib/map.x, lib/string.x, lib/var.x | 19 | 19 | 0 |
 | boxed value extraction | lib/common.x | 4 | 4 | 0 |
@@ -910,11 +910,11 @@ explicit checks before claiming runtime equivalence.
 
 ## Var
 
-**verified example:** `binary`, `cadr`, `cons`, `kind`.
+**verified example:** `binary`, `cadr`, `cons`, `floating`, `integer`, `kind`.
 
 **reproduced failure:** `array`.
 
-**bound, unverified:** `caar`, `caddr`, `car`, `cddr`, `cdr`, `convert`, `equal`, `floating`, `integer`, `is`, `list`, `parse`, `repr`, `str`, `tag`.
+**bound, unverified:** `caar`, `caddr`, `car`, `cddr`, `cdr`, `convert`, `equal`, `is`, `list`, `parse`, `repr`, `str`, `tag`.
 
 **no binding found:** `add`, `adnode`, `arraychar`, `arraydbl`, `arrayfloat`, `arrayint`, `arraylong`, `arrayshort`, `arraystring`, `as_iter`, `block`, `box_f32`, `box_f64`, `box_i16`, `box_i32_bits`, `box_i8`, `box_long`, `box_long_double`, `box_long_long`, `box_u16`, `box_u32`, `box_u8`, `box_ulong`, `box_ulong_long`, `buffer`, `bytes`, `caaaar`, `caaadr`, `caaar`, `caadar`, `caaddr`, `caadr`, `cadaar`, `cadadr`, `cadar`, `caddar`, `cadddr`, `cdaaar`, `cdaadr`, `cdaar`, `cdadar`, `cdaddr`, `cdadr`, `cdar`, `cddaar`, `cddadr`, `cddar`, `cdddar`, `cddddr`, `cdddr`, `char`, `clone_wide`, `compare`, `contains`, `custom_descriptor_index`, `decode_f32`, `decode_f64`, `dispatch_truth`, `div`, `double`, `encoding_valid`, `fallback_compare`, `fallback_equal`, `fallback_hash`, `fallback_iter`, `fallback_repr`, `fallback_str`, `fallback_truth`, `fallback_write_repr`, `fallback_write_str`, `file`, `float`, `getindex`, `hash`, `int`, `integer_box`, `integer_compare`, `integer_floating_compare`, `integer_tag`, `is_atom`, `is_atom_binder`, `is_binder`, `is_floating`, `is_integer`, `is_list_binder`, `is_match_op`, `is_nil`, `is_null`, `is_object`, `is_pointer`, `is_reference`, `is_row`, `is_void`, `is_wide`, `iter`, `job`, `json`, `jsonbool`, `known_tag`, `listchar`, `listdbl`, `listfloat`, `listint`, `listshort`, `liststring`, `listsymbol`, `long`, `long_double`, `long_double_value`, `long_long`, `long_long_value`, `long_value`, `map`, `mapintint`, `maplongdouble`, `mapstringint`, `mapstringstring`, `matmul`, `mod`, `move_wide_to`, `mul`, `neg`, `new`, `null`, `numeric_decode`, `numeric_info`, `payload32`, `pointer`, `pointer_string`, `postfix`, `postfixindex`, `pretty_json`, `regex`, `regexcapture`, `regexmatch`, `register_object_tag`, `same`, `setindex`, `short`, `signed_from_bits`, `string`, `sub`, `symbol`, `token`, `truth`, `try_dispatch_binary`, `try_dispatch_unary`, `try_export_context`, `uchar`, `uint`, `ulong`, `ulong_long`, `ulong_long_value`, `ulong_value`, `unsigned`, `update`, `updateindex`, `ushort`, `wide_compare`, `wide_equal`, `wide_hash`, `wide_owner`, `width_mask`, `write_pointer_repr`, `write_repr`, `write_str`.
 
@@ -1003,11 +1003,11 @@ explicit checks before claiming runtime equivalence.
 | `Buffer Var.fallback_write_str(Var v, Buffer out)` | no binding found | none found | resource, internal | primary/api | lib/dispatch.x:562 |
 | `inline File Var.file(Var value)` | no binding found | none found | resource | advanced/api | lib/common.x:619 |
 | `float Var.float(Var x)` | no binding found | none found | binding | advanced/api | lib/common.x:762 |
-| `double Var.floating(Var v)` | bound, unverified | etc/comptime.xlisp:263 | binding | advanced/api | lib/var.x:714 |
+| `double Var.floating(Var v)` | verified example | etc/comptime.xlisp:263 | binding | advanced/api | lib/var.x:714 |
 | `Var Var.getindex(Var value, Var key)` | no binding found | none found | binding | primary/api | lib/dispatch.x:383 |
 | `unsigned Var.hash(Var v)` | no binding found | none found | binding | advanced/api | lib/dispatch.x:738 |
 | `int Var.int(Var x)` | no binding found | none found | binding | advanced/api | lib/common.x:678 |
-| `long Var.integer(Var v)` | bound, unverified | etc/comptime.xlisp:262 | binding | advanced/api | lib/var.x:759 |
+| `long Var.integer(Var v)` | verified example | etc/comptime.xlisp:262 | binding | advanced/api | lib/var.x:759 |
 | `Var Var.integer_box(Symbol target, unsigned long long raw)` | no binding found | none found | internal | advanced/api | lib/varconvert.x:99 |
 | `int Var.integer_compare(Var a, Var b)` | no binding found | none found | binding | advanced/api | lib/var.x:939 |
 | `int Var.integer_floating_compare(Var integer, Var floating)` | no binding found | none found | binding | advanced/api | lib/var.x:967 |
@@ -1113,7 +1113,7 @@ explicit checks before claiming runtime equivalence.
 | --- | --- | --- | --- |
 | `Var.add` | lib/varops.x / explicit syntax operations | implementable with current values | Syntax lowering exists separately; it does not install this explicitly named method. Bind Var.add's native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results. |
 | `Var.adnode` | lib/autodiff.x / native AdNode contracts | native resource contract | The signature crosses AdNode handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/autodiff.x's handle and effect contract for Var.adnode; add only a scoped native adapter after those obligations are specified. |
-| `Var.array` | lib/common.x / boxed value extraction | implementable with current values | The result is an already represented value; extraction must preserve its tag checks and identity. Bind the checked native Var.array extraction; test matching tag, wrong tag and shared mutation where applicable. |
+| `Var.array` | lib/common.x / boxed value extraction | implementable with current values | The native extractor decodes a represented payload. Pointer forms borrow storage and do not prove the target family or lifetime. Preserve Var.array's caller preconditions; test valid typed handles and shared mutation, and inspect raw mismatch results without dereferencing them. |
 | `Var.arraychar` | lib/typed-array.x / packed typed collection conversions | needs representation decision | The target owns packed native storage, not the ordinary Array/Map element layout. Specify a tagged handle and owner for Var.arraychar's target before exposing its conversion and accessors. |
 | `Var.arraydbl` | lib/typed-array.x / packed typed collection conversions | needs representation decision | The target owns packed native storage, not the ordinary Array/Map element layout. Specify a tagged handle and owner for Var.arraydbl's target before exposing its conversion and accessors. |
 | `Var.arrayfloat` | lib/typed-array.x / packed typed collection conversions | needs representation decision | The target owns packed native storage, not the ordinary Array/Map element layout. Specify a tagged handle and owner for Var.arrayfloat's target before exposing its conversion and accessors. |
@@ -1239,7 +1239,7 @@ explicit checks before claiming runtime equivalence.
 | `Var.long_long` | lib/common.x / Var value operations | implementable with current values | The signature uses represented values and an existing runtime owner. Bind Var.long_long to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.long_long_value` | lib/var.x / Var value operations | implementable with current values | The signature uses represented values and an existing runtime owner. Bind Var.long_long_value to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.long_value` | lib/var.x / Var value operations | implementable with current values | The signature uses represented values and an existing runtime owner. Bind Var.long_value to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Var.map` | lib/common.x / boxed value extraction | implementable with current values | The result is an already represented value; extraction must preserve its tag checks and identity. Bind the checked native Var.map extraction; test matching tag, wrong tag and shared mutation where applicable. |
+| `Var.map` | lib/common.x / boxed value extraction | implementable with current values | The native extractor decodes a represented payload. Pointer forms borrow storage and do not prove the target family or lifetime. Preserve Var.map's caller preconditions; test valid typed handles and shared mutation, and inspect raw mismatch results without dereferencing them. |
 | `Var.mapintint` | lib/typed-map.x / packed typed collection conversions | needs representation decision | The target owns packed native storage, not the ordinary Array/Map element layout. Specify a tagged handle and owner for Var.mapintint's target before exposing its conversion and accessors. |
 | `Var.maplongdouble` | lib/typed-map.x / packed typed collection conversions | needs representation decision | The target owns packed native storage, not the ordinary Array/Map element layout. Specify a tagged handle and owner for Var.maplongdouble's target before exposing its conversion and accessors. |
 | `Var.mapstringint` | lib/typed-map.x / packed typed collection conversions | needs representation decision | The target owns packed native storage, not the ordinary Array/Map element layout. Specify a tagged handle and owner for Var.mapstringint's target before exposing its conversion and accessors. |
@@ -1270,9 +1270,9 @@ explicit checks before claiming runtime equivalence.
 | `Var.short` | lib/common.x / Var value operations | implementable with current values | The signature uses represented values and an existing runtime owner. Bind Var.short to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.signed_from_bits` | lib/varconvert.x / numeric and descriptor internals | needs bounded probe | This exported helper exposes raw numeric encodings or descriptor fallback rules rather than a general ValueOps contract. Trace Var.signed_from_bits in lib/varconvert.x and probe only valid tags/encodings; bind directly if its existing value owner is sufficient. |
 | `Var.str` | lib/dispatch.x / Var value operations | implementable with current values | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.str to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
-| `Var.string` | lib/common.x / boxed value extraction | implementable with current values | The result is an already represented value; extraction must preserve its tag checks and identity. Bind the checked native Var.string extraction; test matching tag, wrong tag and shared mutation where applicable. |
+| `Var.string` | lib/common.x / boxed value extraction | implementable with current values | The native extractor decodes a represented payload. Pointer forms borrow storage and do not prove the target family or lifetime. Preserve Var.string's caller preconditions; test valid typed handles and shared mutation, and inspect raw mismatch results without dereferencing them. |
 | `Var.sub` | lib/varops.x / explicit syntax operations | implementable with current values | Syntax lowering exists separately; it does not install this explicitly named method. Bind Var.sub's native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results. |
-| `Var.symbol` | lib/common.x / boxed value extraction | implementable with current values | The result is an already represented value; extraction must preserve its tag checks and identity. Bind the checked native Var.symbol extraction; test matching tag, wrong tag and shared mutation where applicable. |
+| `Var.symbol` | lib/common.x / boxed value extraction | implementable with current values | The native extractor decodes a represented payload. Pointer forms borrow storage and do not prove the target family or lifetime. Preserve Var.symbol's caller preconditions; test valid typed handles and shared mutation, and inspect raw mismatch results without dereferencing them. |
 | `Var.tag` | lib/var.x / Var value operations | implementable with current values | The signature uses represented values and an existing runtime owner. Validate the existing binding against this contract. Next: Bind Var.tag to its native owner and compare normal, empty and boundary inputs without changing the public contract. |
 | `Var.token` | lib/tokenizer.x / native Token contracts | native resource contract | The signature crosses Token handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/tokenizer.x's handle and effect contract for Var.token; add only a scoped native adapter after those obligations are specified. |
 | `Var.truth` | lib/varops.x / explicit syntax operations | implementable with current values | Syntax lowering exists separately; it does not install this explicitly named method. Bind Var.truth's native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results. |
@@ -1304,6 +1304,8 @@ explicit checks before claiming runtime equivalence.
 - `Var.binary`: integer addition; returned 5.
 - `Var.cadr`: boxed List selector; returned 8.
 - `Var.cons`: prepend; returned 2.
+- `Var.floating`: raw floating payload and wrong-tag zero; returned 1.
+- `Var.integer`: raw integer payload and wrong-tag zero; returned 1.
 - `Var.kind`: integer kind; returned 1.
 
 ## Remaining evidence gaps

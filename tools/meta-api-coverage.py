@@ -231,6 +231,12 @@ PROBES = {
     "Symbol.len": ("short symbol", 'return <abc>.len();', 3),
     "Symbol.compare": ("lexical comparison", 'return <abc>.compare(<abd>) < 0;', 1),
     "Symbol.repr": ("symbol rendering", 'return <abc>.repr().equal("<abc>");', 1),
+    "Var.integer": ("raw integer payload and wrong-tag zero",
+        'Var integer = 7; Var floating = 3.5; '
+        'return integer.integer() == 7 && floating.integer() == 0;', 1),
+    "Var.floating": ("raw floating payload and wrong-tag zero",
+        'Var integer = 7; Var floating = 3.5; '
+        'return floating.floating() == 3.5 && integer.floating() == 0.0;', 1),
     "Var.kind": ("integer kind", 'Var value = 7; return value.kind() == <integer>;', 1),
     "Var.cadr": ("boxed List selector", 'Var value = %(7 8); return value.cadr();', 8),
     "Var.cons": ("prepend", 'return Var.cons(7, %(8)).len();', 2),
