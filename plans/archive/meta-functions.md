@@ -1,7 +1,18 @@
 # Meta functions
 
-> Status: active
->
+> Status: done - original milestones archived 2026-09-20.
+> M1, M2 and M5-M8 shipped; M3 and M4 record measured declines. The shared
+> parent, syntax builders and migration follow-ups reached dev through
+> 21775a9d and b4e36b50; generated Lisp migrations continued through 231550b0.
+> The new meta authoring and coverage campaign is active separately. The
+> parked var-tags work and production-promotion boundary remain visible in
+> [the index](../README.md); this archive is not a current execution plan.
+
+## Original status context
+
+The following notes describe the implementation at the time of this plan.
+Current disposition is the status above.
+
 > Objective set by Gary 2026-09-18: **replace essentially all hand-written
 > compile-time Lisp with `meta` functions.** If it does not need to be Lisp,
 > make it `meta`. Three exemptions and no others: the irreducible core that
@@ -10,7 +21,7 @@
 > the evidence recorded the way M3, M4 and Phase 7 record theirs.
 >
 > Scoped 2026-09-18 on branch `x2c-lowers-to-lisp`, after Phases 0-4, 6 and 7
-> of `plans/comptime-x2c-generalization.md` landed and Phase 5 blocked on the
+> of `plans/archive/comptime-x2c-generalization.md` landed and Phase 5 blocked on the
 > capability this plan supplies. M1, M2, M5, M6, M7 and M8 are built, and M3
 > and M4 are declined on evidence. The word and the
 > three-lifetime design are Gary's decisions, taken 2026-09-18.
@@ -135,7 +146,7 @@ the unit. Verified 2026-09-18: one `$meta()`-decorated `poly` answered a
 compile-time call, a run-time call, and a non-constant run-time call with the
 same value.
 
-Earlier drafts of `plans/comptime-x2c-generalization.md` asserted that a
+Earlier drafts of `plans/archive/comptime-x2c-generalization.md` asserted that a
 compile-time function emits no C, and reasoned from it. That was never true
 and nothing was built on it beyond the wording, which this plan supersedes.
 
@@ -307,7 +318,7 @@ imports the same file and its checked-in C defines only `mi_depth` and
 `mi_dashed`. `comptime-declines-meta-import` is gone with the refusal it
 pinned.
 
-This unblocks `plans/comptime-x2c-generalization.md` Phase 5 and reopens its
+This unblocks `plans/archive/comptime-x2c-generalization.md` Phase 5 and reopens its
 Phase 7 verdict. Do not re-scope either until Gary asks.
 
 One defect surfaced here and **fixed during integration**: a character
@@ -330,7 +341,7 @@ holding 44 one-line definitions, imported by a unit that calls none of them
 at run time, made an imported `meta` function cost about fifteen times what a
 Lisp `defun` costs, paid by every importing unit. `lib/var-tags.xmacro` has 32
 importers, which is what made Phase 5 of
-`plans/comptime-x2c-generalization.md` a net loss.
+`plans/archive/comptime-x2c-generalization.md` a net loss.
 
 **Where the time went.** Split with a sampling profile of one translation of a
 4400-definition import, and confirmed by a hit/miss probe:

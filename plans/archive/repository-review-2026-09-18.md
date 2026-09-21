@@ -1,6 +1,17 @@
 # Repository review remediation, 2026-09-18
 
-> Status: done - remediation catalog for the whole-repository review at
+> Status: done - remediation catalog archived 2026-09-20.
+> Groups 1-9 landed on September 18; Gary's nine Group 10 decisions were
+> recorded in 7948e686, with implementation through 2a20245c. Those decisions
+> are [preserved below](#group-10-decided-2026-09-18), not pending approval.
+> The original dbfc9cfc findings, corrections and validation remain below.
+
+## Original status context
+
+The following notes describe the implementation at the time of this plan.
+Current disposition is the status above.
+
+> remediation catalog for the whole-repository review at
 > `dbfc9cfc`. Every row below was reproduced at that commit. `make verify`
 > (918 suites), `make examples` (59), and `make check` (stages 0-3 identical
 > across 178 C/H files) were all green there, so no current gate caught any
@@ -15,8 +26,8 @@
 ## Result
 
 Nine fix changes, each owning files no other group touches, so groups can
-proceed in separate sessions. Group 10 is not work; it is the set of choices
-an implementer must not make alone.
+proceed in separate sessions. Group 10 records the choices Gary subsequently decided. The original questions
+and their answers are retained together.
 
 A fix reproduces its row first, repairs the cause, and extends a test or
 fixture only where the row is wrong output, a hang, a crash, or documented
@@ -27,7 +38,7 @@ established by source that was read rather than run. Line numbers are from
 
 Probes lived outside tracked source and are reconstructable from each row.
 
-This catalog follows `plans/repository-review-2026-09-17.md`, whose per-group
+This catalog follows `plans/archive/repository-review-2026-09-17.md`, whose per-group
 notes are accurate but whose top-level status header is stale: it lists
 Groups 3, 4, 5, 7, 9, 11, 12, and 14-17 as open when the notes and the probes
 below show them fixed. Correct that header as part of Group 7.
@@ -185,7 +196,7 @@ Files: `docs/src/reference/cli.md`, `docs/src/guide/collections.md`,
 `agents/x2c-coding-style-guide.md`, `agents/logger-and-diagnostics-guide.md`,
 `agents/adapters-macros-decorators.md`, `agents/x2c-debugging-guide.md`,
 `packages/README.md`, `packages/cstar/README.md`, `site/src/pages/index.astro`,
-`plans/repository-review-2026-09-17.md`.
+`plans/archive/repository-review-2026-09-17.md`.
 
 | Defect | Cause and repair | R |
 | --- | --- | --- |
@@ -200,7 +211,7 @@ Files: `docs/src/reference/cli.md`, `docs/src/guide/collections.md`,
 | `cli.md:555` omits `-framework`, and `-pthread` is undocumented. | Both are live rows in `src/cli.x`. | read |
 | `packages/README.md:88-90,135-137` say three packages carry a Lisp surface. | Five Makefiles define `lisp-example`; sqlite and torch also document `SqliteLisp.install` and `TorchLisp.install`. `packages/cstar/README.md:18` links `../../plans/x2c-cstar-verification.md`, which is in `plans/archive/`. | read |
 | "Builds are currently tested on macOS" in `site/src/pages/index.astro:238` and `packages/README.md:6`. | `.github/workflows/release.yml:66-73` builds six package bundles across `macos-15`, `macos-15-intel`, `ubuntu-24.04`, and `ubuntu-24.04-arm`. | read |
-| `plans/repository-review-2026-09-17.md`'s status header is stale. | It lists Groups 3, 4, 5, 7, 9, 11, 12, and 14-17 as open; the per-group notes say fixed, and both `_Generic` rows and the indirect-write `volatile` row were confirmed fixed at `dbfc9cfc`. Rewrite the header to match the notes and to name the rows this catalog carries forward. | me |
+| `plans/archive/repository-review-2026-09-17.md`'s status header is stale. | It lists Groups 3, 4, 5, 7, 9, 11, 12, and 14-17 as open; the per-group notes say fixed, and both `_Generic` rows and the indirect-write `volatile` row were confirmed fixed at `dbfc9cfc`. Rewrite the header to match the notes and to name the rows this catalog carries forward. | me |
 
 `tools/check-docs.py:14-20` scopes link checking to `README.md`, `AGENTS.md`,
 non-recursive `agents/*.md`, `docs/*.md`, and `docs/src/**`, so

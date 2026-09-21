@@ -35,6 +35,65 @@ structure, or measurements may justify a new prototype. Treat old phrases such
 as `do not reopen` or `no other candidate` as historical unless current
 `AGENTS.md`, agent guidance, or an active plan restates the exact restriction.
 
+## Current work and backlog
+
+Reviewed against dev through `144a833d` on 2026-09-20. A historical plan's
+original branch, baseline and authorization notes are evidence for that work;
+its opening status and this index distinguish them from current execution.
+
+### Current work
+
+- [Public release workflow](public-release-workflow.md): active in the Dev
+  Staging Workflow task. Account activation and production decisions remain;
+  source files alone do not establish that deployment is complete.
+- [Meta authoring and coverage](meta-authoring-and-coverage.md): source-code
+  template calls, representable literal results, and the API inventory are
+  implemented. Mutable container results, iterator state, and full fold parity
+  remain bounded follow-ups. The older
+  [meta milestones](archive/meta-functions.md) record the preceding baseline.
+- **Lisp REPL follow-up**: separately assigned; no durable plan recorded here
+  yet. The lexical-scope repair to the literate example shipped in `144a833d`.
+
+### Open backlog and scoped follow-ups
+
+| Record | What remains |
+| --- | --- |
+| [Generated Lisp reproducibility](generated-lisp-reproducibility.md) | Low-priority investigation of fresh-home generated names; no demonstrated semantic failure. |
+| [SDK and system macros](macro-sdk-and-system-macros.md) | Captured-code diagnostic locations and enum consumers; the removed varops Lisp file is no longer work. |
+| [Cleanup lowering](emit-cleanup-lowering.md) | Optional, unscheduled phases 2-3; phase 1 already shipped. |
+| [Lint and format](x2c-lint-and-format.md) | Needs author scoping; includes opportunistic declaration grouping from the completed dogfooding campaign. |
+| [Header collection gaps](x2c-header-collection-gaps.md) | Needs author scoping; retained unresolved cases were last reproduced September 17. This cleanup does not claim a new compiler probe. |
+| [Tooling ports](x2c-scripting-ports.md) | Remaining tool ports and consumer-driven library additions after the delivered regex/diff/script work. |
+| [C on-ramp](x2c-c-on-ramp.md) | Landing-page adoption examples; the parser/corpus work already shipped. |
+| [Var-tags experiment](archive/meta-functions.md#parked) | Parked until a measured approach meets the recorded translation-cost condition. |
+
+An entry here preserves remaining work; it does not dispatch it or add a gate.
+Production promotion remains separately authorized under the release workflow.
+
+### Decisions and completed records
+
+- [September 18 decisions](archive/repository-review-2026-09-18.md#group-10-decided-2026-09-18):
+  all nine were decided by Gary, with the original questions and implementation
+  outcomes retained. They are not a pending-approval list.
+- [September 17 review](archive/repository-review-2026-09-17.md) and
+  [September 18 remediation](archive/repository-review-2026-09-18.md): historical
+  findings, corrected diagnoses and delivered outcomes.
+- [Dogfooding adoption](archive/x2c-dogfooding-remediation.md): bounded campaign
+  complete; routine adoption and the linter backlog retain the optional work.
+- [Original lowering](archive/x2c-lowers-to-lisp.md),
+  [generalization](archive/comptime-x2c-generalization.md) and
+  [meta milestones](archive/meta-functions.md): implemented phases, measured
+  declines and integration history, superseded as execution plans by current
+  meta work.
+- [Generated environment](archive/generated-lisp-initial-environment.md),
+  [initial algorithms](archive/migrate-initial-lisp-algorithms.md),
+  [built-in macros](archive/migrate-builtin-macros.md) and
+  [native binding algorithms](archive/migrate-lisp-binding-algorithms.md):
+  completed September 20 migrations. Their generated Lisp is not unfinished
+  hand-authored migration work.
+- [Lowering spike findings](reference/lisp-lowering-spike-findings.md): historical
+  design evidence, including the limits of its temporary artifacts.
+
 ## Required plan review
 
 Before a plan is presented for approval, end it with a short `## Plan review`

@@ -702,7 +702,15 @@ static int _claims(Compiler c, List definition, AstPos position) {
   Symbol kind = definition ? _result_kind(definition) : 0;
   if (kind == _position(position).kind) return 1;
   if (position == AST_STATEMENT || position == AST_MAP_ENTRY) return 0;
-  if (!definition) return c.peek(0) == <$>;
+  if (!definition) {
+    if (position == AST_BLOCK && c.peek(0) == <$>) {
+      String name;
+      _scan_name(c, &name);
+      Type type = name ? c.sym.get(%($name)) : NULL;
+      if (type.is_function()) return 0;
+    }
+    return c.peek(0) == <$>;
+  }
   return !_bare(c.token, definition) &&
     (position != AST_BLOCK || kind != <expression> ||
      !definition.assoc(<local>).int());
@@ -1027,6 +1035,7 @@ static void _install_native_operations(Compiler compiler) {
     $lisp.bind(
       _.macro_lisp, "_x2c.invocation.location", _sdk_invocation_location);
     $lisp.bind(_.macro_lisp, "_x2c.symbol-set", _sdk_symbol_set);
+    $lisp.bind(_.macro_lisp, "_x2c.tpl-call", _sdk_template_call);
     $lisp.bind(_.macro_lisp, "_x2c.name.unique", _sdk_ident_unique);
     $lisp.bind(
       _.macro_lisp, "_x2c.declaration.bindings", _sdk_declaration_bindings);
@@ -1499,17 +1508,13 @@ static Var _sdk_symbol_set(List values) {
 }
 
 /** Converts a compile-time Lisp value into a bound expression AST.
-    Integers, `String`s, `Symbol`s, compiler-issued identifiers, and nonempty
+    Scalars, `String`s, `Symbol`s, compiler-issued identifiers, and nonempty
     syntax `List`s are accepted; `invocation` locates an unsupported result.
 */
 List Compiler.lift_macro_lisp_expression(
   Compiler compiler, Var value, Token invocation) {
-  if (value.is_integer()) return %(expr (int) (literal (int) ${value.str()}));
-  if (value is <string>)
-    return %(expr (* char) (literal (* char) ${value.repr()}));
-  if (value is <symbol>)
-    return %(expr ("Symbol") (literal ("Symbol")
-                  ${value.symbol().str()} ${value.symbol()}));
+  List literal = compiler.meta_value_expression(NULL, value);
+  if (literal) return literal;
   Var identifier = _sdk_identifier_result(value);
   if (identifier is not void) return %(expr () (ident $identifier));
   if (value is <list> && !value.is_nil())
@@ -1531,6 +1536,40 @@ List Compiler.parse_macro_lisp_expression(Compiler compiler) {
   _ensure_lisp(compiler);
   Var value = _eval_string(compiler, form, invocation);
   return compiler.lift_macro_lisp_expression(value, invocation);
+}
+
+static Var _evaluate_meta_value(Compiler c, List expression, Token site) {
+  if (!c.collect_protocols) c.run_declaration_effects();
+  _ensure_lisp(c);
+  Var form = c.lower_meta_expression(expression);
+  if (form is void)
+    c.report_error(<macro>, "explicit meta call cannot be resolved", site,
+      %(${c.lower_declined()}));
+  Var value;
+  $let(macro_sdk_compiler, c)
+  $let(macro_import_compiler, c)
+  $let(macro_import_invocation, site) {
+    try value = c.macro_lisp.eval(form);
+    catch %(malformed (category ?category)):
+      raise %(malformed (category $category));
+    catch %(?code *detail):
+      _report_lisp_failure(c, site, cons(code, detail), form.repr());
+  }
+  return value;
+}
+
+/** Executes an explicit meta call and inserts its result at a code boundary. */
+List Compiler.evaluate_meta_expression(Compiler c, List expression, Token site) {
+  Var value = _evaluate_meta_value(c, expression, site);
+  Type declared = expression.cadr();
+  match (expression) case %(expr ? (meta-call (expr ?signature ?) ?)):
+    declared = signature.cdr();
+  if (declared === %(void))
+    return %(expr (void) (cast (void) (expr (int) (literal (int) "0"))));
+  if (c.macro_stack && value is <list>)
+    return c.lift_macro_lisp_expression(value, site);
+  List result = c.meta_value_expression(declared, value);
+  return result ? result : c.lift_macro_lisp_expression(value, site);
 }
 
 static List _lisp_construction(Compiler compiler, String form) {
@@ -1718,14 +1757,16 @@ Var Compiler.evaluate_macro_slot(Compiler compiler, Var value) {
   if (slot.car() != <macro-slot>) return value;
   if (compiler.macro_holes || !compiler.macro_stack) return value;
   int splice = slot.cadr();
-  String form = slot.caddr();
+  Var form = slot.caddr();
   List active = compiler.macro_stack.car();
   (List definition, Var input, List bindings, Token invocation) = active;
   (void) input;
   String source_file = definition.assoc(<file>);
   Var required = slot.assoc(<construct>);
-  Var result = _eval_template_form(
-    compiler, form, bindings, invocation, source_file, required);
+  Var result = form is <list>
+    ? _evaluate_meta_value(compiler, form, invocation)
+    : _eval_template_form(
+        compiler, form, bindings, invocation, source_file, required);
   Var construction = slot.assoc(<target>);
   if (required is not void && splice) {
     construction = required;
@@ -2004,6 +2045,25 @@ static List _capture_row(Compiler compiler, List hole, List sources) {
   );
 }
 
+static List _sdk_template_call(Var stored, List values) {
+  Compiler c = macro_sdk_compiler ? macro_sdk_compiler : macro_import_compiler;
+  List definition = stored.is_atom()
+    ? _lookup(c, stored, macro_import_invocation) : stored;
+  Array rows = [];
+  List holes = definition.assoc(<parameters>);
+  for (; holes; holes = holes.cdr(), values = values.cdr()) {
+    List hole = holes.car();
+    Var value = values.car();
+    if (hole.assoc(<kind>) == <expr> &&
+        (value.is_integer() || value.is_floating() || value is <string> ||
+         value is <symbol>))
+      value = c.lift_macro_lisp_expression(value, macro_import_invocation);
+    List sources = hole.assoc(<sequence>).int() ? value.list() : %($value);
+    rows.push(_capture_row(c, hole, sources));
+  }
+  return %(macro-invoke $stored (args @{rows.list_free()}) m-invoke);
+}
+
 static List _lisp_bindings(List bindings) {
   Array result = [];
   foreach (List pair, bindings) {
@@ -2187,6 +2247,20 @@ static const SymbolSet untyped_roles = %<<expression argument type>>;
 */
 List Compiler.try_parse_macro_slot(Compiler c, Symbol role) {
   if (!c.macro_holes) return NULL;
+  if (role != <expression> && role != <statement> &&
+      c.peek(0) == <$> && c.peek(2) == <(> &&
+      !c.peek_macro_hole() && !_peek_invocation(c)) {
+    Token arguments = c.skip_trivia_from(c.skip_trivia_from(c.token + 1) + 1);
+    int follows_splice = arguments.after_group().type == <...>;
+    if (!follows_splice && (role == <block> || role in declaration_roles))
+      return NULL;
+    List call = c.try_parse_macro_expression();
+    int splice = c.test(<...>);
+    if (splice && !sequence_roles.contains(role))
+      c.report_error(<parse>, "sequence insertion is not legal in this syntax slot",
+        c.token, NULL);
+    return %(macro-slot $splice $call);
+  }
   if (c.peek(0) == <"$(">) {
     int splice = _lisp_splice_follows(c);
     if (role in declaration_roles && !splice)
@@ -2982,6 +3056,19 @@ static List _parse_expression_definition(
   Symbol kind = definition.assoc(<kind>);
   if (kind == <decorator> && definition.assoc(<target>) == <expr>)
     return _parse_expression_decorator(compiler, definition, invocation);
+  if (compiler.meta_body && (kind == <unit> || kind == <block-item>)) {
+    Array arguments = [];
+    compiler.expect(<(>);
+    foreach (List hole, definition.assoc(<parameters>).list()) {
+      if (arguments.len()) compiler.expect(<,>);
+      arguments.push(compiler.parse_assignment());
+    }
+    compiler.expect(<)>);
+    Var stored = definition.assoc(<local>).int()
+      ? definition : definition.assoc(<name>);
+    return %(expr ("List") (tpl-call $stored
+      (args @{arguments.list_free()})));
+  }
   List arguments = _invocation_arguments(compiler, definition, invocation);
   if (kind != <expression>) {
     String spelling = definition.assoc(<name>).str();
@@ -3031,6 +3118,38 @@ static List _take_invocation(Compiler c, AstPos position) {
 */
 List Compiler.try_parse_macro_expression(Compiler c) {
   Token invocation = c.token;
+  if (c.peek(0) == <$> && !_peek_invocation(c)) {
+    c.next();
+    List callee = c.parse_variable();
+    Type signature = callee.cadr();
+    if (!signature.is_function()) {
+      c.token = invocation;
+      Atom name = _name(c);
+      (void) _lookup(c, name, invocation);
+    }
+    List parameters = signature.car().list().cadr();
+    Array arguments = [];
+    c.expect(<(>);
+    if (c.peek(0) != <)>) loop {
+      List hole = c.peek_macro_hole();
+      List argument = c.parse_assignment();
+      if (hole && argument.match(%(expr ? (macro-bind ?)))) {
+        Atom projection = _replacement_binder(
+          hole.assoc(<binder>), "value", 0);
+        argument = %(expr ("List") (meta-cap $projection));
+      }
+      if (parameters && !c.macro_holes)
+        argument = c.convert_expression(argument, parameters.car());
+      parameters = parameters.cdr();
+      arguments.push(argument);
+      if (!c.test(<,>)) break;
+    }
+    c.expect(<)>);
+    Type result = c.macro_holes ? %(<macro-expr>) : signature.cdr();
+    List call = %(expr $result (meta-call $callee
+      (args @{arguments.list_free()})));
+    return c.resolve_expression(call, invocation);
+  }
   List definition = _take_invocation(c, AST_EXPRESSION);
   if (!definition) return NULL;
   return c.resolve_expression(

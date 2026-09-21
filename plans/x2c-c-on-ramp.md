@@ -1,7 +1,7 @@
 # The C on-ramp
 
-> Status: active - 4a landed on main as `8c6eccf` and `6cdd7c2` (2026-09-16).
-> 4b (the landing page) has not started. The failures under "End-to-end
+> Status: reference - landing-page follow-up remains open. 4a landed on main as `8c6eccf` and `6cdd7c2` (2026-09-16).
+> No delivery of 4b (the landing page) is recorded here. The failures under "End-to-end
 > result" and the rest of a 22-unit corpus were handled by
 > `plans/archive/x2c-c-on-ramp-corpus.md`, which replaced the linkage-guard
 > design below: the `__cplusplus` arm is skipped, so only an unguarded

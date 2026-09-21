@@ -24,6 +24,8 @@
 #include "atom.x"
 #include "logger.x"
 #include "path.x"
+#include "varconvert.x"
+#include <math.h>
 
 /* One lowering. `env` maps a binding id to the Lisp form that produces it;
    `locals` are the ids the function declares, so an id outside it is
@@ -444,7 +446,16 @@ static void _lower_scan(Lowering l, Var form) {
   if (head == <bind>) _lower_scan_bind(l, items);
   else if (head == <targets>) _lower_scan_targets(l, items.cdr());
   else if (head == <op>) _lower_scan_op(l, items);
-  else if (head == <call>) _lower_scan_call(l, items);
+  else if (head == <call> || head == <meta-call>) {
+    _lower_scan_call(l, cons(<call>, items.cdr()));
+    if (head == <meta-call>) l.meta_only = 1;
+  }
+  else if (head == <tpl-call>) {
+    l.meta_only = 1;
+    _lower_scan_each(l, items.caddr().cdr());
+    return;
+  }
+  else if (head == <meta-cap>) return;
   else if (head == <expr>) _lower_scan_function_value(l, items);
   else if (head == <goto>) l.rejected = 1;
   _lower_scan_each(l, items);
@@ -489,33 +500,10 @@ static Var _lower_value(Lowering l, int id) {
 
 /* --- literals ----------------------------------------------------------- */
 
-/* A hexadecimal spelling carries `e` and `E` as digits, so the exponent
-   test has to skip it: `0x000E` is fourteen, not a floating literal. */
 static Var _lower_number(Lowering l, List type, String text) {
-  long integer;
-  double floating;
-  /* Round at the literal's own precision before widening or arithmetic. */
-  if (type === %(float)) {
-    char *stop;
-    float value = strtof(text, &stop);
-    if (stop == (const char *) text)
-      return _lower_decline(l, "unreadable floating literal");
-    if (*stop == 'f' || *stop == 'F') stop++;
-    if (!String.new(stop).strip(NULL)) return value;
-    return _lower_decline(l, "unreadable floating literal");
-  }
-  int hex = text.startswith("0x") || text.startswith("0X");
-  if (type === %(double) ||
-      (!hex && (text.contains(".") ||
-                text.contains("e") || text.contains("E")))) {
-    if (text.try_double(&floating)) return floating;
-    return _lower_decline(l, "unreadable floating literal");
-  }
-  if (text.try_long(&integer)) {
-    if (integer == (int) integer) return (int) integer;
-    return integer;
-  }
-  return _lower_decline(l, "unreadable integer literal");
+  Var value = ((Type) type).numeric_literal_value(text);
+  if (value is not void) return value;
+  return _lower_decline(l, "unreadable numeric literal");
 }
 
 /* A String literal arrives as its source spelling, quotes included. */
@@ -544,6 +532,14 @@ static Var _lower_constant(Lowering l, Var node);
 
 static Var _lower_constant_leaf(Lowering l, List value) {
   match (value) {
+    case %(expr ? (parens ?inner)):
+      return _lower_constant_leaf(l, inner);
+    case %(expr ?type (cast ? ?inner)): {
+      Var constant = _lower_constant_leaf(l, inner);
+      if (constant is void) return void;
+      Symbol tag = ((Type) type).scalar_tag();
+      return tag ? constant.convert(tag) : constant;
+    }
     case %(expr ? (!set ?node (cache ?))):      return _lower_constant(l, node);
     case %(expr ? (!set ?node (expr ? (cache ?)))):
       return _lower_constant(l, node);
@@ -622,7 +618,7 @@ static Var _lower_quoted(Lowering l, Var node) {
 /* --- expressions -------------------------------------------------------- */
 
 static Var _lower_expr(Lowering l, Var form);
-static Var _lower_coerce(List want, Var node, Var value);
+static Var _lower_coerce(Lowering l, List want, Var node, Var value);
 
 /* The type an expression node carries, or nothing for a node that is not
    one. An lvalue names the type its store converts to. */
@@ -664,7 +660,7 @@ static List _lower_args(Lowering l, List params, List args) {
     match (argument) case %(expr (void) ()): continue;
     Var value = _lower_expr(l, argument);
     if (_lower_failed(l, value)) return NULL;
-    values.push(_lower_coerce(_lower_param_type(p), argument, value));
+    values.push(_lower_coerce(l, _lower_param_type(p), argument, value));
   }
   return values;
 }
@@ -701,7 +697,7 @@ static Var _lower_application(Lowering l, Var content) {
 
 /* `Var.binary` applies the usual arithmetic conversions itself for the
    arithmetic operators, so only a comparison needs them written out: `==`
-   and `!=` compare `Var` identity there, which 1.0 and 1 fail, and the
+   and `!=` compare represented values there, which 1.0 and 1 fail, and the
    relations compare the values as written rather than as C converts them,
    so a negative signed operand does not become the large unsigned one C
    makes of it. */
@@ -711,10 +707,12 @@ static int _lower_relation(Var operator) =>
 
 /* Whether two operands are scalars of different families. An equal pair,
    which is nearly every pair, needs no conversion and is left alone. */
-static int _lower_mixed_scalars(List operands) {
+static int _lower_mixed_scalars(Lowering l, List operands) {
   if (operands.len() != 2) return 0;
-  Type left = _lower_type_of(operands.car());
-  Type right = _lower_type_of(operands.cadr());
+  Type left = l.compiler.sym.resolve_numeric_type(
+    _lower_type_of(operands.car()));
+  Type right = l.compiler.sym.resolve_numeric_type(
+    _lower_type_of(operands.cadr()));
   Symbol a = left.scalar_tag(), b = right.scalar_tag();
   return a && b && a != b;
 }
@@ -739,7 +737,7 @@ static Var _lower_operands(Lowering l, Var operator, List operands) {
     Var left = values[0], right = values[1];
     if (operator == <&&>) return %(C.and $left $right);
     if (operator == <||>) return %(C.or $left $right);
-    if (_lower_relation(operator) && _lower_mixed_scalars(operands))
+    if (_lower_relation(operator) && _lower_mixed_scalars(l, operands))
       return %(C.compare $left (quote $operator) $right);
     return %(_binary $left (quote $operator) $right);
   }
@@ -957,7 +955,9 @@ static Var _lower_content(Lowering l, List type, Var content) {
     case %(cast ? ?inner): {
       Var value = _lower_expr(l, inner);
       if (_lower_failed(l, value)) return void;
-      return _lower_coerce(type, inner, value);
+      Type target = l.compiler.sym.resolve_numeric_type(type);
+      if (target && target.scalar_tag()) return _lower_to_type(target, value);
+      return _lower_coerce(l, type, inner, value);
     }
     case %(expr ?inner ?within):          return _lower_content(l, inner, within);
     case %(at ? ?node):                   return _lower_content(l, type, node);
@@ -971,6 +971,14 @@ static Var _lower_content(Lowering l, List type, Var content) {
     }
     case %(call (expr ? (ident (binding ? "Func_apply"))) ?):
       return _lower_application(l, content);
+    case %(meta-cap ?captured): return %(quote $captured);
+    case %(tpl-call ?definition (args *arguments)): {
+      List values = _lower_args(l, NULL, arguments);
+      return %(_x2c.tpl-call (quote $definition) (list @values));
+    }
+    case %(meta-call (expr ?callee (ident (binding ? ?(String name))))
+                    (args *args)):
+      return _lower_call(l, callee, name, args);
     case %(call (expr ?callee (ident (binding ? ?(String name))))
                 (args *args)):
       return _lower_call(l, callee, name, args);
@@ -1498,15 +1506,17 @@ static int _lower_dimension(Lowering l, int id, int *out) {
   Var size;
   if (!l.arrays.try_get(id, &size)) return 0;
   match (size)
-    case %(expr ? (literal ? ?(String text))): {
-      long count;
-      if (text.try_long(&count) && count >= 0 && count == (int) count) {
+    case %(expr ? (literal ?(List type) ?(String text))): {
+      Var count = ((Type) type).numeric_literal_value(text);
+      if (count is not void && count >= 0 && count <= (int) INT_MAX) {
         *out = (int) count;
         return 1;
       }
     }
   return 0;
 }
+
+static Var _lower_coerce(Lowering l, List want, Var node, Var value);
 
 /* A braced initializer carries no type of its own, so the declared type
    decides which container it builds. */
@@ -1521,7 +1531,12 @@ static Var _lower_braced(Lowering l, List type, int id, List items) {
       values.free();
       return _lower_decline(l, "more initializers than the array holds");
     }
-    Var zero = _lower_zero(type);
+    int index = 0;
+    foreach (Var item, items) {
+      values[index] = _lower_coerce(l, type, item, values[index]);
+      index++;
+    }
+    Var zero = _lower_to_type(type, _lower_zero(type));
     while (values.len() < size) values.push(zero);
     return %(List_array ${cons(<list>, values.list_free())});
   }
@@ -1540,7 +1555,7 @@ static Var _lower_braced(Lowering l, List type, int id, List items) {
    Lisp value can tell apart need one: a `Symbol` is not a `String`, and an
    `Array` is not a `List`. Without the argument case an `Array` reached a
    `List` parameter and the native adapter refused it. */
-static Var _lower_coerce(List want, Var node, Var value) {
+static Var _lower_coerce(Lowering l, List want, Var node, Var value) {
   match (node)
     case %(expr ?from ?): {
       if (want.equal(from)) return value;
@@ -1550,10 +1565,11 @@ static Var _lower_coerce(List want, Var node, Var value) {
         return %(List_array $value);
       if (want.equal(%("String")) && from.equal(%("Symbol")))
         return %(Symbol_str $value);
-      Type target = want, source = from;
-      Symbol tag = target.scalar_tag();
-      if (tag && source.scalar_tag() && tag != source.scalar_tag())
-        return _lower_to_type(want, value);
+      Type target = l.compiler.sym.resolve_numeric_type(want);
+      Type source = l.compiler.sym.resolve_numeric_type(from);
+      Symbol tag = target ? target.scalar_tag() : 0;
+      if (tag && source && tag != source.scalar_tag())
+        return _lower_to_type(target, value);
     }
   return value;
 }
@@ -1569,7 +1585,7 @@ static Var _lower_initializer(Lowering l, List type, int id, Var init) {
   }
   Var value = _lower_expr(l, init);
   if (_lower_failed(l, value)) return void;
-  return _lower_coerce(type, init, value);
+  return _lower_coerce(l, type, init, value);
 }
 
 static Var _lower_declarator(
@@ -1623,7 +1639,7 @@ static Var _lower_destructure(
   Lowering l, List targets, Var init, List rest, List k) {
   Var source = _lower_expr(l, init);
   if (_lower_failed(l, source)) return void;
-  source = _lower_coerce(%("List"), init, source);
+  source = _lower_coerce(l, %("List"), init, source);
   int hold = !_lower_pure(source);
   if (hold && l.on_loop)
     return _lower_decline(l, "a value needing a binding is on a loop path");
@@ -1755,7 +1771,7 @@ static Var _lower_expression_stmnt(
     case %(expr ? (op = ?target ?rhs)): {
       Var value = _lower_expr(l, rhs);
       if (!_lower_failed(l, value))
-        value = _lower_coerce(_lower_type_of(target), rhs, value);
+        value = _lower_coerce(l, _lower_type_of(target), rhs, value);
       return _lower_store(l, target, value, rest, k);
     }
     case %(expr ? (!or (op ++ ?target) (postfix ++ ?target))):
@@ -1797,7 +1813,7 @@ static Var _lower_stmnt(Lowering l, Var form, List rest, List k) {
     case %(return ?want ?value): {
       Var result = _lower_expr(l, value);
       if (_lower_failed(l, result)) return void;
-      return _lower_coerce(want, value, result);
+      return _lower_coerce(l, want, value, result);
     }
     case %(return ?):      return 0;
     case %(declare ?type (bindings ?declarator)):
@@ -2102,6 +2118,23 @@ int Compiler.meta_is_comptime_only(Compiler c, List fn) {
   return 0;
 }
 
+/** Lowers a closed expression for explicit compile-time evaluation. */
+Var Compiler.lower_meta_expression(Compiler c, List expression) {
+  struct Lowering state = {
+    .compiler = c, .env = {}, .locals = {}, .cells = {},
+    .arrays = {}, .callees = {}, .cursors = {}, .definitions = []
+  };
+  lower_declined_reason = NULL;
+  _lower_scan(&state, expression);
+  Var result = _lower_expr(&state, expression);
+  state.definitions.free();
+  if (state.uncallable)
+    return _lower_decline(&state, "no binding for " + lower_missing_callee);
+  if (state.globals)
+    return _lower_decline(&state, "runtime state has no compile-time value");
+  return state.declined ? void : result;
+}
+
 /* --- constant-argument folding ------------------------------------------ */
 
 /* The compile-time value behind a bound expression, or `void` when the
@@ -2113,21 +2146,97 @@ static Var _meta_constant(Compiler compiler, List expression) {
   return _lower_constant(&state, expression);
 }
 
-/* A folded result substitutes for the call, so it has to occupy the same
-   syntax an ordinary literal does. `int` is the one return type whose value
-   spells itself: a narrower or unsigned type would need the C conversion
-   written out, and `String`, `List` and `Map` results have no literal form
-   that also carries the ownership the call would have returned. A negative
-   value is parenthesized so it cannot join a preceding `-` into `--`. */
-static List _meta_result(Compiler c, Type result, Var value) {
-  if (!value.is_integer()) return NULL;
-  Type scalar = c.sym.resolve_key(result).scalar();
-  if (scalar !== %(int)) return NULL;
-  long number = value.integer();
-  if (number != (int) number) return NULL;
-  List literal = %(expr $result (literal (int) ${%"$number"}));
-  if (number < 0) return %(expr $result (parens $literal));
-  return literal;
+/* Untyped Lisp numbers retain their native Var family at the code boundary. */
+static Type _meta_value_type(Var value) {
+  switch (value.tag()) {
+    case <i8>: return %(signed char);
+    case <u8>: return %(unsigned char);
+    case <i16>: return %(short);
+    case <u16>: return %(unsigned short);
+    case <i32>: return %(int);
+    case <u32>: return %(unsigned);
+    case <long>: return %(long);
+    case <ulong>: return %(unsigned long);
+    case <llong>: return %(long long);
+    case <ullong>: return %(unsigned long long);
+    case <f32>: return %(float);
+    case <ldouble>: return %(long double);
+  }
+  if (value.is_floating()) return %(double);
+  if (value.is_integer()) {
+    long n = value.integer();
+    return n == (int) n ? %(int) : %(long long);
+  }
+  return NULL;
+}
+
+/** Returns code for scalar, String, Symbol, immutable List or boxed values,
+    preserving `declared`
+    when supplied. Returns NULL for values requiring code insertion or a
+    representation other than a scalar literal.
+*/
+List Compiler.meta_value_expression(Compiler c, Type declared, Var value) {
+  Type type = declared ? c.sym.resolve_key(declared) : _meta_value_type(value);
+  if ((value.is_integer() || value.is_floating()) &&
+      type !== %("Var")) {
+    Symbol tag = type.scalar_tag();
+    if (!tag) return NULL;
+    value = value.convert(tag);
+    if (type.scalar() === %(int)) {
+      long n = value.integer();
+      Type result = declared ? declared : type;
+      List literal = %(expr $result (literal (int) ${value.str()}));
+      if (n == INT_MIN)
+        return %(expr $result (parens (expr $result (cast (int) $literal))));
+      return n < 0 ? %(expr $result (parens $literal)) : literal;
+    }
+    X2CVarNumeric number;
+    value.numeric_decode(&number);
+    String text;
+    Type literal_type;
+    if (number.floating) {
+      literal_type = %(long double);
+      long double n = number.floating_value;
+      if (isnan(n)) text = "__builtin_nanl(\"\")";
+      else if (isinf(n))
+        text = n < 0 ? "(-__builtin_infl())" : "__builtin_infl()";
+      else text = "%LaL".printf(n);
+    }
+    else {
+      literal_type = %(unsigned long long);
+      text = "%lluULL".printf(number.raw);
+    }
+    List literal = %(expr $literal_type (literal $literal_type $text));
+    Type result = declared ? declared : type;
+    return %(expr $result (parens (expr $result (cast $type $literal))));
+  }
+  if (declared && type === %("Var")) {
+    Type inner = value is <string> ? %("String")
+      : value is <symbol> ? %("Symbol")
+      : value is <list> ? %("List") : _meta_value_type(value);
+    if (!inner) return NULL;
+    List expression = c.meta_value_expression(inner, value);
+    return expression ? c.convert_expression(expression, declared) : NULL;
+  }
+  if (declared && type === %("List") && value is <list>) {
+    List result = %(expr ("List") (nil));
+    foreach (Var item, value.list().reverse()) {
+      List head = c.meta_value_expression(%("Var"), item);
+      if (!head) return NULL;
+      result = %(expr ("List") (cons $head $result));
+    }
+    return result;
+  }
+  if (value is <string>) {
+    if (!declared || type === %(* char))
+      return %(expr (* char) (literal (* char) ${value.repr()}));
+    if (type === %("String"))
+      return %(expr $declared (literal ("String") $value));
+  }
+  if (value is <symbol> && (!declared || type === %("Symbol")))
+    return %(expr ("Symbol") (literal ("Symbol")
+                  ${value.symbol().str()} ${value.symbol()}));
+  return NULL;
 }
 
 /** Refuses a run-time call to a `meta` function this compiler derived
@@ -2216,5 +2325,5 @@ List Compiler.fold_meta_call(
     return NULL;
   }
   catch: return NULL;
-  return _meta_result(c, result, answer);
+  return c.meta_value_expression(result, answer);
 }

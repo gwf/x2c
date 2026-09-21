@@ -1,5 +1,8 @@
 # Spike: interpreting an x2c function AST in compile-time Lisp
 
+> Status: reference - historical spike findings, retained for design evidence.
+> The implementation is recorded in [the completed lowering plan](../archive/x2c-lowers-to-lisp.md).
+
 Date: 2026-09-17.  Worktree: `x2c-ast-lisp-spike-e1785b`.  The spike files
 here are uncommitted and `.context/` is git-excluded; the value surface the
 spike motivated was landed separately and is described under "This is now

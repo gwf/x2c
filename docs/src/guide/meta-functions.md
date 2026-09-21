@@ -10,8 +10,8 @@ There are three separate questions:
    representations. This includes parameters, locals, mutation and returns.
 2. **Can each operation execute?** Every resolved call needs a compile-time
    binding. Having a supported receiver type does not expose its entire API.
-3. **Can the answer become program syntax?** Returning a value to another
-   meta function, inserting it with `$(...)`, and folding an ordinary call
+3. **Can the answer become program code?** Returning a value to another
+   meta function, inserting it with `$helper(...)`, and folding an ordinary call
    have different limits.
 
 `meta` is not a purity annotation. A body can mutate locals, arrays and
@@ -66,7 +66,7 @@ and the finished program calls it.
 
 ## Ask the compiler to calculate it
 
-Use `$(poly 7)` to call the same function during translation:
+Use `$poly(7)` to call the same function during translation:
 
 ```x2c
 meta int poly(int n) {
@@ -74,7 +74,7 @@ meta int poly(int n) {
 }
 
 int main(void) {
-  printf("%d\n", $(poly 7));
+  printf("%d\n", $poly(7));
   return 0;
 }
 ```
@@ -83,21 +83,68 @@ int main(void) {
 71
 ```
 
-`$(...)` asks the compiler to evaluate what is inside and insert the result.
-Inside it, a call is written with the name first and space-separated
-arguments: `poly 7`, rather than `poly(7)`. That is Lisp call syntax; you do
-not need to write the function's implementation in Lisp. Here the compiler
-runs the x2c body and inserts the integer 71 before the program is built.
+The `$` prefix requires the compiler to run the function and insert its
+result. The call uses the same parentheses and commas as an ordinary x2c
+call. Here it inserts the integer 71 before the program is built.
+
+The optional Lisp equivalent is `$(poly 7)`. It calls the same implementation;
+use it when working with Lisp code already in the compiler session.
 
 These are the two forms of a `meta` function: one runs in your program,
 and one runs in the compiler. Both come from the same body. Functions that
-need the compiler's own type information are an exception: they can only
-run during translation. We will reach those after ordinary calculations.
+need compiler queries, explicit compile-time calls or source-template
+construction are exceptions: they only run during translation. We will reach those after ordinary calculations.
+
+## Compute the arguments too
+
+An explicit call can calculate its arguments before invoking the function:
+
+```x2c
+meta int twice(int n) => n * 2;
+
+int main(void) {
+  printf("%d\n", $twice(3 + 4));
+  return 0;
+}
+```
+
+```text
+14
+```
+
+The arguments must be resolvable during compilation. They may be computed
+expressions and calls to other meta functions, rather than only literals.
+An unresolved runtime input is an error; the explicit call cannot fall back
+to runtime execution. An existing macro with the same name takes precedence.
+Inside an executing meta body, arguments use that evaluation's current values.
+
+## Dynamic runtime calls
+
+A meta function can be stored in a `Func` and called with runtime arguments:
+
+```x2c
+meta int poly(int n) => n * n + 3 * n + 1;
+
+int main(void) {
+  Func calculate = poly;
+  printf("%d\n", calculate(7));
+  return 0;
+}
+```
+
+```text
+71
+```
+
+This dispatches the compiled implementation. It does not select the
+interpreted body used during compilation. An embedding program can apply an
+interpreted callable through the Lisp evaluator API, but converting a meta
+function to `Func` does not export that interpreted callable automatically.
 
 ## Constant calls are folded
 
 An ordinary call with literal arguments can also be calculated during
-translation. You do not have to write `$(...)` to benefit from it:
+translation. You do not have to prefix the name with `$` to benefit from it:
 
 ```x2c
 meta int poly(int n) {
@@ -126,8 +173,9 @@ printf("local    %d\n", poly(n));
 
 Here `poly(7)` becomes 71, while `poly(n)` remains a call. This automatic
 substitution is called folding. It is an optimization intended to preserve
-the runtime answer; the capability catalog below records current differences. `$(poly 7)` explicitly requests compile-time evaluation;
-`poly(7)` uses ordinary call syntax and leaves folding to the compiler.
+the runtime answer; the capability catalog below records current differences.
+`$poly(7)` requires compile-time evaluation; `poly(7)` leaves folding to the
+compiler.
 
 ## Use x2c conveniences
 
@@ -144,7 +192,7 @@ A `String` parameter gives access to string operations through dot syntax:
 meta static int width(String text) => text.len() * 2;
 
 int main(void) {
-  printf("%d\n", $(width "abcd"));
+  printf("%d\n", $width("abcd"));
   return 0;
 }
 ```
@@ -158,7 +206,7 @@ function. A body can use local variables, ordinary control flow, `foreach`,
 and `String`, `List`, `Array`, and `Map` operations with compile-time
 bindings. The restrictions below describe where this stops.
 
-## Where to write `meta`
+## When `meta` is a keyword
 
 `meta` is contextual. It marks a function only when a function definition
 follows it. Everywhere else it is an ordinary identifier:
@@ -191,22 +239,20 @@ this way only when all of the following hold.
 
 - The callee is a `meta` function this unit defines. An imported one keeps
   the run-time call to the unit that emits it.
-- Every argument is a literal: a number, a character, a string, `nil`, or a
-  literal template. An argument the compiler would have to compute first is
-  not one, even when its value is fixed. `poly(7)` is answered;
-  `poly(-7)`, `poly(BLUE)` for an enumerator `BLUE`, and
-  `poly((int) sizeof(int))` are not, because a negation, a name and a cast
-  are expressions rather than literals.
+- Every argument has a value available to the constant reader: a literal,
+  literal template, previously cached constant, or supported conversion of
+  one. This optional path does not evaluate every resolvable expression;
+  use an explicit dollar call when compile-time execution is required.
 - Every argument already has its parameter's declared type.
-- The return type is `int` and the answer fits an `int`. An `int` literal
-  spells itself, which is what makes the substitution possible.
+- The result can be represented as typed program code: a scalar, String,
+  Symbol, immutable List of representable elements, or boxed value.
 
 This is an optimization, so you do not need to arrange for it. Its
 equivalence depends on staying within the supported operation semantics;
-see the native-array narrowing and missing-value differences below. A `String`, `List` or `Map` result keeps its call:
-the caller owns the value a call returns, and a literal carries no such
-ownership. This restriction on folding does not restrict internal meta
-return types or forbid explicit computed-string insertion.
+see the missing-value differences below. Mutable Array and Map results,
+callable values and arbitrary native addresses keep their calls. Immutable Lists are rebuilt through ordinary cons expressions;
+String and boxed results use ordinary expression conversion and ownership.
+This restriction on folding does not restrict internal meta return types.
 
 ## The compile-time subset
 
@@ -221,9 +267,9 @@ on a listed type works. The operation inventory below further limits calls.
 
 | Value or construct | Construction, parameters and returns | Reads and changes during compilation |
 | --- | --- | --- |
-| Native integers, including `char`, narrow, unsigned and wide types | Numeric literals and typed locals; values can pass between meta functions and return from them. Width alone is not a prohibition. | Arithmetic, comparisons, casts, assignment and local compound updates. Literal spelling also matters: `10000000000` works in a tested wide calculation; `10000000000L` currently declines as an unreadable integer literal. |
-| `float`, `double` | Literals, locals, parameters and returns work, including `f`/`F` floating suffixes. | Arithmetic and scalar conversions work. Direct insertion of a floating result is a separate missing case. |
-| `long double` | A typed parameter/return and arithmetic via a `double` argument passed a focused probe; extended-precision parity is not established. | An `L`-suffixed floating literal such as `9.0L` currently declines. Treat this as limited coverage, not a full precision guarantee. |
+| Native integers, including `char`, narrow, unsigned and wide types | Numeric literals and typed locals; values can pass between meta functions and return from them. Width alone is not a prohibition. | Arithmetic, comparisons, casts, assignment and local compound updates. Source numeric literals use the shared scanner and type conversion rules, including integer base prefixes and `U`, `L` and `LL` suffixes. |
+| `float`, `double` | Literals, locals, parameters and returns work, including `f`/`F` floating suffixes. | Arithmetic and scalar conversions work. Floating results can also be inserted as typed expressions. |
+| `long double` | Typed parameters, returns and `L`-suffixed floating literals work. | Decimal and hexadecimal floating literals use the declared numeric precision. The focused checks do not establish parity for every extended-precision calculation. |
 | `void` return | A meta helper may return no value, including a helper writing through an out-parameter. | The call can run for its effect; this is distinct from a `Var` containing runtime `void`. |
 | `String`, `Symbol` | String/symbol literals, computed strings and interpolation; parameters and returns. | String indexing reads character codes. Bound string methods work; indexed string writes do not. Symbols have the small method surface listed below. |
 | `List` | Templates, braced/list-compatible initialization, conversion from `Array`; parameters and returns. | Index/association reads, traversal, matching and bound methods. No indexed assignment; build a new List instead. A returned data List is not automatically an expression. |
@@ -231,9 +277,9 @@ on a listed type works. The operation inventory below further limits calls.
 | `Map` | `{}`, keyed literals, `Map.new()`; parameters and returns. | Keyed reads/writes and bound methods; represented collections and callable values can be stored inside it. |
 | `Var` | Boxes represented numbers, strings, symbols, collections and callable values. | Only the exposed operations below. Compile-time `void` and an empty List share a representation; do not use this distinction to control a meta calculation. |
 | `Func` | Lambdas with typed or bare parameters, captures and references to available functions; parameters and returns between meta functions. | Dynamic calls and storage in collections work. This does not expose arbitrary native function-pointer calls or unrepresented argument types. |
-| Local native arrays | A literal-sized one-dimensional array, such as `int a[3] = {1, 2};`, has compile-time storage. Omitted elements are filled with zero-like values. | Indexing and simple assignment work; passing the array to an indexed pointer parameter works in the tested case. This is represented storage, not a native byte buffer. See element/dimension limits below. |
+| C-style array declarations | A literal-sized one-dimensional array, such as `int a[3] = {1, 2};`, has compile-time storage. Omitted elements are filled with zero-like values. | Indexing and simple assignment work; passing the array to an indexed pointer parameter works in the tested case. At compile time, a mutable evaluator cell holds a dynamic Array of Var values. Runtime uses native C array storage; the evaluator does not use `alloca`. See element/dimension limits below. |
 | Pointers to locals | `int *p = &n;`, copying that pointer and passing it to another meta function work. | `*p` reads and `*p = value` writes the local. General pointer arithmetic, address-of an array element and native memory/layout access are not supplied by this cell representation. |
-| Native structs and unions | Native aggregate locals and native field access are rejected; a type name in a signature alone does not establish a usable value representation. | Dot **methods** resolve as calls and can work. Dot **fields** need native aggregate representation and do not. Compiler queries may inspect a struct's type and build future field access syntax without reading a struct value. |
+| Native structs and unions | Native aggregate locals and native field access are rejected; a type name in a signature alone does not establish a usable value representation. | Dot **methods** resolve as calls and can work. Dot **fields** need native aggregate representation and do not. Compiler queries may inspect a struct's type and build future field access code without reading a struct value. |
 | `File`, buffers and other resource types | No general compile-time constructor/operation surface is installed for these types. A declaration or opaque type name alone does not make the resource usable. | For example, `File.open` has no binding. Use the compiler's explicit text-embedding operation for source-dependent text. |
 
 Collections hold values, not arbitrary native memory. Nested collections keep
@@ -245,19 +291,20 @@ Native array coverage is narrower than C's array model. Integer arrays have
 fixture coverage; focused probes also cover `double` and `String` elements.
 A dimension such as `1 + 1` is rejected even though C can compute it, and a
 nested braced initializer for `int a[2][2]` is rejected. The implementation
-stores a local native array in a dynamic container, using its first declared
+stores a C-style array in a dynamic container, using its first declared
 dimension; this is not general multidimensional or native-layout support.
-Native-array initializer narrowing has a confirmed difference: with
-`unsigned char a[1] = { n }; return a[0];`, passing 257 produced 257 during
-compilation and 1 at run time. Convert the element explicitly before storing
-it when relying on narrowing; accepting the declaration does not establish
-C-equivalent initialization. This is an implementation gap. Other element
-types, array decay/alias combinations and every zero-initialization case
-remain coverage gaps.
+Element initialization applies the declared scalar conversion. For example,
+`unsigned char a[1] = { n }; return a[0];` with 257 returns 1 both during
+compilation and at runtime. Signed-byte, float-rounding and floating-to-integer
+initialization also have differential checks. Other element types, array
+decay/alias combinations and every zero-initialization case remain coverage
+gaps.
 
-Even null pointers need care: a probe declaring `int *p = NULL` was rejected
-as reaching file-scope state. Do not extrapolate general null/address/cast
-support from the working local-address example below.
+A null-pointer constant such as `(char *) 0` can supply the default character
+set for `String.strip`. The preprocessor name `NULL` is not resolved by the
+compile-time expression reader; using that name alone still reaches the
+file-scope-state restriction. This does not imply a native pointer dereference
+or arbitrary address support.
 
 These two functions demonstrate a supported address and a supported chain:
 
@@ -273,7 +320,7 @@ meta static int meta_address(void) {
 meta static int meta_parts(String path) => path.split(".").len();
 
 int main(void) {
-  printf("%d %d\n", $(meta_address), $(meta_parts "a.b.c"));
+  printf("%d %d\n", $meta_address(), $meta_parts("a.b.c"));
   return 0;
 }
 ```
@@ -291,36 +338,37 @@ A method uses its ordinary resolved call, so `text.len()` and
 `String.len(text)` reach the same operation. Chaining adds no separate
 restriction: every call in the chain must be available.
 
-The following is the shipped binding inventory for ordinary meta calls.
-Names in each row follow the type prefix, for example `Array.push`.
-It is an inventory of exposed operations, not evidence that every argument
-combination or callback has been tested. Consult the runtime module
-reference for signatures, then apply the compile-time qualifications here.
+The [complete API coverage report](meta-api-coverage.md) lists every exported
+operation on String, List, Array, Map, Symbol and Var, including generated
+methods and advanced internals. It records signatures, binding locations,
+verified examples, reproduced failures and untested operations separately.
+The optional inventory tool reads every standard compiler session layer;
+searching only one binding file misses operations such as `List.car`,
+`List.cdr` and `Var.cons`.
 
-| Type | Exposed operations |
-| --- | --- |
-| `String` | `new`, `equal`, `getindex`, `len`, `add`, `lower`, `upper`, `find`, `contains`, `startswith`, `endswith`, `getslice`, `replace`, `join`, `split`, `split_lines`, `partition`, `rpartition`, `find_all`, `rfind`, `count`, `capitalize`, `repeat`, `remove_prefix`, `remove_suffix`, `escape`, `unescape`, `var` |
-| `List` | `len`, `reverse`, `index`, `getindex`, `last`, `assoc`, `get`, `array`, `sort`, `match`, `search`, `equal`, `contains`, `map`, `filter`, `try_next`, `var` |
-| `Array` | `new`, `len`, `push`, `getindex`, `setindex`, `list`, `join`, `find`, `contains`, `count`, `unshift`, `take_last`, `shift`, `remove`, `insert`, `try_next`, `var` |
-| `Map` | `new`, `len`, `get`, `getindex`, `setindex`, `contains`, `del`, `getdefault`, `setdefault`, `list`, `try_next`, `var` |
-| `Symbol` | `str`, `var` |
-| `Var` | `car`, `cdr`, `tag`, `parse`, `convert`, `integer`, `floating`, `is`, `equal`, `str`, `list`, `func`, `repr` |
-| `int`, `long`, `double` | `str`, `var` |
-| `Func` | `var`; direct dynamic calls have their own support |
+A recent batch added 19 bindings; it did not complete the API surface.
+The ordinary `List` and `Var` selectors `caar`, `cadr`, `cddr` and `caddr`
+reuse those same operations. `String`, `List`, `Array` and `Map` expose their
+`str` and `repr` rendering; `Symbol` also exposes `repr` and `compare`, and
+`Var.kind` reports a value's kind. These calls use the existing value
+implementations rather than a separate formatting or comparison algorithm.
 
-For example, `String.strip`, `String.try_long`, `Map.keys`, `Map.try_get`,
-`Array.cleanup`, `Symbol.len` and `Var.kind` have no ordinary meta binding.
-The existence of an operation at run time, or even in the underlying
-compile-time library under another spelling, is not sufficient.
-The same rule applies to native C functions and optional packages.
+A binding name is not proof of runtime-equivalent behavior. A missing binding
+also does not explain why it was omitted. Some operations need only an adapter
+over existing values; others need interpreted callbacks, native pointer
+arguments or resource ownership. In particular, `Map.keys` takes caller-owned
+iterator storage: exposing that contract requires an iterator representation,
+not simply an alias for returning a List of keys.
+
 Other installed meta functions and the compiler operations declared in
 `meta.x` extend this surface; including a normal function declaration does
 not install its body for compile-time execution.
 
-The adapters normalize missing List/Array/Map lookups and removals to an
-empty List rather than runtime `void`. Keep calculations inside the defined
-bounds when they must agree with runtime code. The exact bindings and
-adapters live in `etc/comptime.xlisp`; supported body forms live in
+The adapters normalize missing List/Array/Map lookups and removals, including
+`caar`, `cadr` and `caddr`, to an empty List rather than runtime `void`. Keep
+calculations inside the defined bounds when they must agree with runtime code.
+The compiler loads several binding layers, including `etc/init.xlisp`,
+`etc/lisp-values.xlisp` and `etc/comptime.xlisp`; supported body forms live in
 `src/comptime.x`.
 
 ### Control flow and current rejections
@@ -359,10 +407,9 @@ means feasible in principle, not scheduled or promised support.
 | Missing library/resource operations, including `File.open` | **API gap:** implement bindings and appropriate resource lifetimes. Compile-time file I/O is possible in principle; it is not prohibited by the phase boundary. |
 | Loop-path temporary bindings, address-taken destructured locals, nonfolded match patterns | **Gap:** preserve required bindings and support pattern evaluation at the appropriate time. |
 | Native `sizeof` expressions | **Gap:** provide the compile-time value of the queried layout; `sizeof(int)` currently declines as an unsupported expression. |
-| Integer `L` and floating `L` literal suffixes tested above | **Gap:** read these literal spellings with the appropriate type and precision. |
 | Named enum values | **Gap:** make the enumerator's numeric value available to the lowerer. |
 | Reading future runtime mutable state | **Fundamental phase boundary:** that program state does not exist yet. Separate compile-time state is possible but is not the same state. |
-| Floating/other representable result insertion; folding beyond `int` | **Gap:** construct correctly typed program constants and preserve value/ownership semantics. See the next section. |
+| Mutable container and callable result insertion | **Gap:** preserve ownership, mutability and identity when constructing a runtime value. See the next section. |
 
 For example, these are intentionally rejected definitions:
 
@@ -411,21 +458,21 @@ future runtime state or establish a general shared-global contract.
 
 ## Results: compute, insert, or fold
 
-A meta function can return more than `int`. Computation and return between
-meta functions can preserve floating, wide numeric, collection and callable
-values. The expression insertion boundary is narrower:
+A meta function can pass and return numeric, collection and callable values
+inside the evaluator. Inserting a result into the program adds a separate
+requirement: the compiler must construct code representing that value.
 
-| Result | Explicit `$(...)` expression insertion | Automatic ordinary-call folding |
+| Result | Explicit `$helper(...)` insertion | Automatic ordinary-call folding |
 | --- | --- | --- |
-| Integer value, including a computed character code | Accepted as `int` expression syntax; the function's exact original scalar type is not preserved by this path. Do not infer correct typed-wide insertion from wide internal arithmetic. | Only declared `int` results fitting `int`, under the conditions above. |
-| `float`, `double` | No floating-result insertion branch today; direct insertion is diagnosed. | Keeps the call. |
-| Computed string | Accepted as quoted C string literal syntax. Existing computed-string support is independent of numeric insertion gaps. | Keeps the call, preserving runtime result ownership. |
-| `Symbol` | Accepted as Symbol literal syntax. | Keeps the call. |
-| Identifier or nonempty syntax `List` | Bound as identifier/expression syntax, subject to normal compiler binding and typing. An arbitrary data List is not an expression. | Keeps the call. |
-| `Array`, `Map`, `Func`, empty List or arbitrary native address | No direct value-to-expression insertion. Build appropriate program syntax when that expresses the intended result. | Keeps the call. |
+| Native integers and floating values | Preserves the numeric Var family, including width, signedness and floating precision. | Uses the declared result type. |
+| Computed string | Inserts a quoted C string literal. | Constructs a String expression when the declared result is String. |
+| `Symbol` | Inserts a Symbol literal. | Constructs a Symbol expression. |
+| Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing. A data List is not automatically an expression. | A declared List result is reconstructed as data through ordinary cons expressions if every element is representable. |
+| Boxed `Var` | Insertion follows the contained value. | Converts a representable contained value to Var. |
+| `Array`, `Map`, `Func` or arbitrary native address | No direct materialization of the evaluator object. | Keeps the call. |
 
-Here `meta_half` returns a `double` to another meta function, which converts
-it to an `int` before insertion. The second result is a computed string:
+The same functions can be called during compilation or with ordinary C-style
+calls at runtime:
 
 ```x2c
 meta static double meta_half(double n) => n / 2.0;
@@ -433,25 +480,24 @@ meta static int meta_whole(void) => (int) meta_half(9.0);
 meta static String meta_label(String stem) => stem.upper() + "!";
 
 int main(void) {
-  printf("%d %s\n", $(meta_whole), $(meta_label "ready"));
+  printf("%.1f %d %s\n", $meta_half(9.0), $meta_whole(),
+    $meta_label("ready"));
+  printf("%d %s\n", meta_whole(), meta_label("ready").str());
   return 0;
 }
 ```
 
 ```text
+4.5 4 READY!
 4 READY!
 ```
 
-Replacing `$(meta_whole)` with `$(meta_half 9.0)` is rejected with
-`compile-time Lisp result cannot fill an expression slot`. The calculation
-succeeded; inserting the floating answer is the missing operation.
-
-The broader design possibility is to insert any legal result that can be
-represented as a correctly typed program constant, including numeric,
-character, string and other representable results. This is not current
-support or a settled conversion design. It does not imply serializing
-arbitrary evaluator objects, and it must preserve computed strings already
-supported today.
+Scalar conversion is shared by explicit evaluation and eligible folding.
+Floating constants retain their binary value using hexadecimal literals;
+nonfinite values use the native compiler's infinity/NaN expressions.
+The remaining container work must account for identity, shared references,
+mutation and ownership. A pointer into the evaluator is never a valid address
+to embed in the future program.
 
 ## Compile-time arithmetic and evidence
 
@@ -469,30 +515,32 @@ method chaining and iteration. They do not prove every operation/type
 combination equivalent. Focused probes for this chapter additionally covered
 nested Array/Map contents, pointer out-parameters, `double`/`String` native
 array elements, wide and floating internal returns, and the rejected shapes
-shown above. Native-array initializer narrowing is a confirmed mismatch, not
-merely an untested case. Other native-array conversions, extended-precision parity,
+shown above. The `meta-numeric-lowering` fixture checks numeric suffixes and
+array element conversions against runtime results. Other array conversions,
+extended-precision parity,
 general pointer behavior, all callback signatures and resource lifetimes
 remain unverified. An `_Alignof(int)` probe failed during ordinary parsing,
 before meta lowering; that does not establish a meta-specific restriction.
 This catalog covers the installed operation surface and identified lowering
 boundaries, not an exhaustive proof of every combination of C and x2c syntax.
 
-## From values to syntax
+## From values to code
 
 So far we have passed values in and calculated values out. A macro works
-with something different: the syntax of the program being compiled. A
-`meta` function can take that syntax as a `List`, inspect it, and return new
-syntax for the compiler to insert.
+with the code being compiled. A `meta` function can take that code as a
+`List`, inspect it, and return new code for the compiler to insert.
 
 For this part, read [Compile-time Macros](macros.md) first. The macro declares
-what syntax to capture; the `meta` function implements the transformation
+what code to capture; the `meta` function implements the transformation
 in x2c. Include `meta.x` to use the compiler's `x2c_*` operations.
 
 ## Calling a meta function from a macro body
 
-A macro body reaches compile-time code through `$(...)`. Inside it, `$name`
-is the hole's captured syntax. The call is spelled as a Lisp call: the
-function name first, then the holes.
+A macro body can call a meta helper with `$helper(args)`. Passing a captured
+hole directly supplies its code to the helper; it does not evaluate the
+future runtime expression. This form works for code transformations such as
+the field query below. Queries that need original source text still require
+the Lisp call form, as the diagnostic example later explains.
 
 ```x2c
 #include "x2c.x"
@@ -503,7 +551,7 @@ typedef struct Point { int x, y, z; } Point;
 meta static List field_count(List receiver) =>
   x2c_literal_int(x2c_type_fields(x2c_syntax_type(receiver)).len());
 
-macro Expression $probe.count(Expr $value) => ($(field_count $value))
+macro Expression $probe.count(Expr $value) => ($field_count($value))
 
 int main(void) {
   Point p = { 1, 2, 3 };
@@ -521,8 +569,52 @@ macro declares the holes and the result kind, and the `meta` function does
 the work.
 
 What the function returns decides what the expansion is. A `List` one of the
-compiler operations built is syntax. `x2c_literal_int`, `x2c_literal_string`
+compiler operations built represents code. `x2c_literal_int`, `x2c_literal_string`
 and `x2c_literal_symbol` each return an expression holding a value.
+
+## Source templates from meta functions
+
+A Unit or Statement macro used as an expression inside a meta function
+constructs a deferred template invocation. Its arguments are values computed
+by the meta function. The returned code expands when inserted into the
+program, using ordinary macro substitution, scope and binding rules.
+Expression macros retain their usual expansion behavior.
+
+```x2c
+macro Unit $make_function(Name $name, Expr $result) => {
+  int $name(void) { return $result; }
+}
+
+meta static List build_function(String name, int n) {
+  List node = $make_function(name, n * 2);
+  return %($node);
+}
+
+macro Unit $make_answer() => { $build_function("answer", 21)... }
+
+$make_answer();
+int main(void) {
+  printf("%d\n", answer());
+  return 0;
+}
+```
+
+```text
+42
+```
+
+The constructor returns one code node. The helper wraps it in a List because
+`...` inserts a sequence of nodes. It does not return an already expanded
+function declaration for the helper to inspect. Name, Type, parameter and
+statement captures still follow the source macro's declared hole kinds.
+
+The reverse gradient generator in `lib/autodiff.xmacro` uses this pattern.
+Its `ad_reverse_function` returns an invocation of the `ad.gradient` source
+macro. The macro contains the generated function declaration, tape storage,
+reverse-pass label and cleanup. Meta helpers compute the parameter and
+statement sequences. The macro owns the fresh scratch names and passes those
+same names to the fragment helpers, keeping all generated references in the
+intended function scope.
 
 ## What the compiler answers
 
@@ -534,17 +626,17 @@ here by the task, not by signature; the
 the [language reference](../reference/language.md#the-same-operations-from-x2c)
 gives their semantics.
 
-The syntax builders are `meta` bodies in `lib/meta.x`. Their Lisp spellings
-call those same bodies; the three literal spellings retain their Lisp
-argument checks. Builders that only assemble Lists can also run in a
+The code builders are `meta` bodies in `lib/meta.x`. The Lisp functions
+call those same implementations. The three literal-building functions also
+check their Lisp arguments. Builders that only assemble Lists can also run in a
 linked program; `x2c_expr_field` and `x2c_expr_cast` still need compiler
 queries and therefore remain compile-time only. The same is true of
 `x2c_decl_make`, `x2c_param_make` and `x2c_type_members`;
 `x2c_stmnt_make`, `x2c_stmnt_return` and `x2c_block_make` only assemble
-syntax.
+code.
 
 **Building identifiers, literals and expressions.** `x2c_ident` checks a
-spelling and returns identifier syntax. `x2c_literal_int`,
+name and returns identifier code. `x2c_literal_int`,
 `x2c_literal_string` and `x2c_literal_symbol` return an expression holding
 a value. `x2c_expr_ident`, `x2c_expr_field`, `x2c_expr_index`,
 `x2c_expr_call`, `x2c_expr_composite` and `x2c_expr_cast` assemble the
@@ -558,7 +650,7 @@ node shapes by hand, so the compiler binds and types the result:
 meta static List call_of(String callee, List argument) =>
   x2c_expr_call(x2c_expr_ident(x2c_ident(callee)), %($argument));
 
-macro Expression $probe.twice(Expr $value) => ($(call_of "twice" $value))
+macro Expression $probe.twice(Expr $value) => ($call_of("twice", $value))
 
 static int twice(int n) => n * 2;
 
@@ -580,7 +672,7 @@ element is the field name. `x2c_type_layout`, `x2c_type_parts`,
 `x2c_type_resolve` and `x2c_type_value` answer the remaining
 generated-code questions. `x2c_method_resolve` answers which operation a
 member call selects. These answers live in the compiler's symbol table, so
-a macro body cannot derive them from the syntax it captured.
+a macro body cannot derive them from the code it captured.
 
 **Source text and location.** `x2c_source_text` returns the text the
 developer wrote for a captured hole. `x2c_binding_spelling` returns the
@@ -617,6 +709,10 @@ int main(void) {
 word seconds
 ```
 
+This example retains `$(one_word $value)`: that form preserves the capture
+information required by `x2c_source_text`. Forwarding the same hole through
+`$one_word($value)` currently loses that information and is rejected.
+
 Writing `$probe.word(seconds * 2)` instead reports the message at that
 invocation:
 
@@ -626,7 +722,7 @@ sample.x:15:23: macro: this argument must be one word
                       ^
 ```
 
-Two signatures differ in shape from their Lisp spellings.
+Two signatures differ from the corresponding Lisp functions.
 `x2c_expr_call` takes its arguments as one `List`, and `x2c_type_value`
 returns `int`.
 
@@ -634,8 +730,10 @@ returns `int`.
 
 Compiler queries exist only inside a compiler. A `meta` function that
 calls one, directly or through another `meta` function, therefore has no
-valid run-time form, and the compiler emits no definition for it. A call to
-one from a run-time body is diagnosed where it is written. Calling
+valid runtime form, and the compiler emits no definition for it. A body
+containing an explicit dollar-prefixed meta call or a source-template
+constructor is also compile-time-only, as are its meta callers. A call to
+one from a runtime body is diagnosed where it is written. Calling
 `field_count` from an earlier section at run time gives:
 
 ```text
@@ -656,7 +754,7 @@ keeps both forms and is emitted normally.
 
 Two files. The first is a `.xmacro` holding the `meta` functions and the
 macros that call them. `shape_fields` asks the compiler what a struct holds.
-`shape_names` and `shape_reads` turn that answer into syntax.
+`shape_names` and `shape_reads` turn that answer into code.
 
 <!-- ignore: shape.xmacro is the external file being illustrated -->
 ```x2c,ignore
@@ -679,12 +777,14 @@ meta static List shape_reads(List receiver) {
   return x2c_expr_composite(reads);
 }
 
-macro Expression $shape.names(Expr $value) => ($(shape_names $value))
+macro Expression $shape.names(Expr $value) => ($shape_names($value))
 
-macro Expression $shape.reads(Expr $value) => ($(shape_reads $value))
+macro Expression $shape.reads(Expr $value) => ($shape_reads($value))
 ```
 
-The second file imports it and uses the macros.
+The second file imports it and uses the macros. Imports still use the
+compiler's `$(import "...")` form; this is a loading operation, not a meta
+function call.
 
 <!-- ignore: this program imports the shape.xmacro file above -->
 ```x2c,ignore
@@ -741,7 +841,19 @@ for the `meta` functions it calls at run time. The storage class says what
 it emits: `static` gives that unit its own copy, and a public name is the
 one copy the program links, exported by the reaching unit's header.
 
-## Names the compile-time library already defines
+## Lisp interoperability
+
+Use the x2c calls above for ordinary meta work. The following notes apply
+when importing or calling Lisp helpers, or working with the compiler session.
+
+The compiler loads Lisp support into an embedded evaluator. Some loaded files
+are generated output: `etc/builtin-macros.xlisp` comes from
+`etc/builtin-macros.x` and `etc/builtin-core.xlisp` through
+`tools/gen-lisp-init.py`. Seeing Lisp in that generated file does not mean the
+algorithms still need a separate handwritten Lisp implementation. The support
+layer and the generated functions have different source owners.
+
+### Names the compile-time library already defines
 
 A unit's compile-time session inherits the compiler's own Lisp library and
 cannot replace one of its definitions. A macro file or a `$(...)` form that
@@ -760,7 +872,7 @@ would reach for first: `filter`, `last`, `map`, `search`, `len` and `apply`
 are all defined. Give your own definition a different name, or a prefix of
 your own.
 
-## `eval` reads globals only
+### `eval` reads globals only
 
 A lambda's body reads its captures and then the session's globals. `eval`
 is an ordinary procedure, so the form it is given is evaluated in the

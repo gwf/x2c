@@ -1,6 +1,6 @@
 # Cleanup lowering out of `src/emit.x`
 
-> Status: active - Phase 1 done 2026-09-15 in 68eea0a; Phases 2 and 3 are
+> Status: reference - open, unscheduled follow-up. Phase 1 done 2026-09-15 in 68eea0a; Phases 2 and 3 are
 > optional and unscheduled. Item 2 of
 > `plans/archive/architecture-salvage.md`, the last surviving piece of the
 > declined compiler redesign.

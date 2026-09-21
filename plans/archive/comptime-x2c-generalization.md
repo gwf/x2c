@@ -1,15 +1,24 @@
 # Comptime x2c generalization
 
-> Status: active
->
+> Status: done - archived 2026-09-20.
+> The implemented phases and measured declines are historical outcomes;
+> meta integration closed at b4e36b50, with the generated environment and
+> algorithm migrations delivered through 231550b0. The var-tags experiment
+> remains parked, not silently completed; see [the index](../README.md).
+
+## Original status context
+
+The following notes describe the implementation at the time of this plan.
+Current disposition is the status above.
+
 > Scoped 2026-09-18 on branch `x2c-lowers-to-lisp` after the autodiff port
 > landed. Phases 0-4, 6 and 7 are done or answered; 5 ported two of its three
 > files and declined `lib/var-tags.xmacro` on evidence.
-> `plans/meta-functions.md` carries the `meta` keyword work: M1, M2, M5, M6,
+> `plans/archive/meta-functions.md` carries the `meta` keyword work: M1, M2, M5, M6,
 > M7 and M8 built, M3 and M4 declined on evidence.
 > `tools/gate-state.py ensure agent-pr-check` passes on this branch. Nothing
 > on this branch reaches `main` without Gary's explicit green light. The
-> design in `plans/x2c-lowers-to-lisp.md` is settled and this plan does not
+> design in `plans/archive/x2c-lowers-to-lisp.md` is settled and this plan does not
 > revisit it.
 
 ## The objective, set 2026-09-18
@@ -33,7 +42,7 @@ Everything else is a candidate, including the parts of `etc/init.xlisp` and
 `etc/builtin-macros.xlisp` that earlier revisions of this plan called
 permanent. M7, callable values, and M8, installing a compile-time
 function at session start, are both built. Both are in
-`plans/meta-functions.md`.
+`plans/archive/meta-functions.md`.
 
 Nothing here is done for speed. Measured, a rewrite is neutral on the call
 side because a Lisp `defun` is word-compiled too, and costs about 0.31 ms per
@@ -1048,8 +1057,8 @@ Phases 2, 3 and 4 can run beside it and beside each other; 5 and 6 wait.
 Phase 7 is answered and needs no agent. Each agent gets the same brief:
 
 > You are working on branch `x2c-lowers-to-lisp` in the x2c repository. Read
-> `AGENTS.md`, then `plans/comptime-x2c-generalization.md`, then
-> `plans/x2c-lowers-to-lisp.md` for the design record. Implement **Phase N**
+> `AGENTS.md`, then `plans/archive/comptime-x2c-generalization.md`, then
+> `plans/archive/x2c-lowers-to-lisp.md` for the design record. Implement **Phase N**
 > and only Phase N.
 >
 > The pass is `src/comptime.x` and its runtime is `etc/comptime.xlisp`. A
@@ -1081,7 +1090,7 @@ than an error.
 ## The decision that gates a reserved word (decided)
 
 **Decided 2026-09-18: the word is `meta`, contextual, and both forms are
-emitted.** See `plans/meta-functions.md`. The analysis below stands except
+emitted.** See `plans/archive/meta-functions.md`. The analysis below stands except
 for one claim it rests on: a compile-time function does *not* omit its
 runtime form, and never did.
 
@@ -1108,7 +1117,7 @@ than asserted:
   in source order, which is what makes a session-start install inexpressible.
 
 Two of those are really about **where in the pipeline the pass runs**, not how
-it is spelled. That decision is now settled: `plans/meta-functions.md` M3
+it is spelled. That decision is now settled: `plans/archive/meta-functions.md` M3
 scouted moving the lowering after the transform and declined it, because the
 transform erases a lambda's body into a generated sibling and an interpolated
 string into raw C text, both of which the pass lowers today. `_lower_coerce`

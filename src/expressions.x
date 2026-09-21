@@ -899,7 +899,7 @@ static int _expression_requires_resolution(Compiler compiler, Var value) {
       case %(expr (!or () (<macro-expr>)) ?): return 1;
       case %(at m-origin ?):
         if (compiler.source_map && !compiler.macro_holes) return 1;
-      case %((!or macro-bind macro-invoke macro-slot) *): return 1;
+      case %((!or macro-bind macro-invoke macro-slot meta-call) *): return 1;
       case %(ident ?(List binding)): {
         String spelling = binding_identity_spelling(binding);
         int retained_parameter =
@@ -1844,6 +1844,12 @@ static List _resolve_content(
       if (binding_identity_try_parts(binding, NULL, NULL))
         return _resolve_identifier(c, binding, input_type, origin);
     case %(literal *): return input;
+    case %(tpl-call *): return input;
+    case %(meta-call ?callee (args *arguments)): {
+      if (c.meta_body || c.macro_holes) return input;
+      return c.evaluate_meta_expression(input, origin);
+    }
+    case %(meta-cap *): return input;
     case %(macro-invoke ?definition ?arguments ?invocation): {
       Token site = c.macro_invocation_site(invocation);
       if (!site) return input;

@@ -197,7 +197,7 @@ The declarations below are the signatures. Each operation's semantics are
 those of the compile-time Lisp operation of the same name, specified under
 "Compile-time Lisp and imports" in the language reference, which also gives
 the naming rule and the two answers whose shape differs.
-See `plans/meta-functions.md`.
+See `plans/archive/meta-functions.md`.
 
 ## Tests and examples
 

@@ -16,11 +16,12 @@ accept and produce one declared kind of source.
 Choose according to what the code does:
 
 - a function computes with runtime values;
+- a meta function also computes during compilation;
 - a macro constructs source at translation time;
 - a decorator transforms the expression or source item immediately following
   it.
 
-Start with templates. Use compile-time Lisp only when the result requires
+Start with templates. Use meta functions when the result requires
 computation.
 
 ## A first expression macro
@@ -285,6 +286,9 @@ macro Statement $project.swap(
 ~}
 ```
 
+The type-position query still uses Lisp: `$helper(...)` is currently parsed
+as an expression, so it cannot replace this type hole.
+
 Each invocation receives a compiler-private binding for `$temporary`.
 Definition-local literal names resolve where the macro was defined, captured
 names keep their caller bindings, and generated names cannot collide with
@@ -294,8 +298,9 @@ spelling.
 
 ## Put reusable macros in imports
 
-An `.xmacro` file may contain macro definitions and top-level compile-time
-Lisp. Import it explicitly:
+An `.xmacro` file may contain macro definitions, meta functions and top-level
+compile-time Lisp. Imports currently use `$(import "...")`; authoring the
+macros and meta functions inside the imported file does not require Lisp:
 
 <!-- ignore: project-macros.xmacro is the external file being illustrated -->
 ```x2c,ignore
@@ -340,6 +345,10 @@ int answer(int value) {
 ~  return answer(21) == 42 ? 0 : 1;
 ~}
 ```
+
+The function-name query and body splice retain Lisp because explicit meta
+calls currently parse their arguments as expressions, which conflicts with
+a captured `Function`. The decorator itself is an x2c source template.
 
 There is no semicolon after the decorator invocation. Decorators stack
 closest-first, and each expansion must leave exactly one target for the next.
@@ -482,81 +491,94 @@ binding directly beside the expression or source item it affects.
 Do not use a decorator for type registration, protocol participation, or
 receiverless startup and shutdown. Those have their own declarations.
 
-## Compile-time Lisp is where computation happens
+## Compute with meta functions
 
-`$(...)` evaluates Lisp during translation. Inside a macro body, hole names
-refer to the captured syntax:
+Write compile-time calculations as ordinary x2c functions marked `meta`.
+A macro calls one with `$helper(...)`; its captured holes supply code rather
+than the future runtime values of those expressions:
 
 ```x2c
-~
-$(defun project-offset () 2)
+meta static int project_offset(void) => 2;
 
 macro Expression $project.answer(Expr $base) => (
-  $base + $(project-offset)
+  $base + $project_offset()
 )
-~
+
+int main(void) {
+  printf("%d\n", $project.answer(40));
+  return 0;
+}
+```
+
+```text
+42
+```
+
+Include `meta.x` when the calculation needs compiler operations for
+diagnostics, identifiers, types, bindings, source text or function bodies.
+The [meta-function guide](meta-functions.md) introduces these operations;
+the [language reference](../reference/language.md#the-same-operations-from-x2c)
+specifies them.
+
+`x2c_type_fields` returns a struct or union's fields in declaration order.
+Pair their names with `x2c_expr_field` to build typed field reads:
+
+```x2c
+#include "meta.x"
+meta static List project_fields(List receiver) {
+  Array reads = [];
+  foreach (List field, x2c_type_fields(x2c_syntax_type(receiver)))
+    reads.push(x2c_expr_field(receiver, field.car()));
+  return x2c_expr_composite(reads);
+}
+macro Expression $project.fields(Expr $value) => ($project_fields($value))
+~typedef struct Point { int x, y; } Point;
 ~int main(void) {
-~  return $project.answer(40) == 42 ? 0 : 1;
+~  Point p = { 2, 3 };
+~  int values[2] = $project.fields(p);
+~  return values[0] != 2 || values[1] != 3;
 ~}
 ```
 
-The compiler supplies operations for diagnostics, identifiers, types, bindings,
-literals, function projections, structural matching, and invocation location.
-The [language
-reference](../reference/language.md#compile-time-lisp-and-imports) lists them.
+`x2c_method_resolve` optionally looks up a direct dotted method. A generator
+can inspect the callee's function type or build a call; a missing method
+returns an empty List:
 
-Local macro names are lexical, but compile-time Lisp is not. A local macro may
-define or change Lisp state, and that state remains available for the rest of
-the translation unit after the block ends.
-
-`x2c.type.fields` lets a macro walk a complete struct or union in source
-order without reconstructing its declaration. Pair each returned name with
-`x2c.expr.field` when generated code needs ordinary typed access through a
-value or pointer receiver:
-
-```text
-(map (lambda (field)
-  (x2c.expr.field receiver (car field)))
-  (x2c.type.fields (x2c.syntax.type receiver)))
-```
-
-`x2c.method.resolve` is the optional form of direct dotted method lookup. A
-generator can inspect the returned callee's function `Type` or compose it with
-`x2c.expr.call`; a missing method returns `nil` instead of producing a type
-diagnostic:
-
-```text
-(let ((callee (x2c.method.resolve type "write")))
-  (if callee (x2c.expr.call callee receiver value) nil))
+```x2c
+#include "meta.x"
+meta static List project_write(List type, List receiver, List value) {
+  List callee = x2c_method_resolve(type, "write");
+  if (callee) return x2c_expr_call(callee, %($receiver $value));
+  return %();
+}
 ```
 
 It does not search delegate fields. A delegated result would also need the
-field-projected receiver, which this operation does not return. Macro-generated
-dotted call syntax still uses delegation when ordinary expression resolution
-later sees the call.
+field-projected receiver, which this operation does not return. Generated
+dotted calls still use delegation during ordinary expression resolution.
 
-When spelling matters rather than meaning, `x2c.source.text` reads the exact
-text of a complete captured argument:
+To read the exact source text of a complete captured argument, use
+`x2c_source_text`:
 
 ```x2c
-macro Expression $project.spelling(Expr $value) => (
+macro Expression $project.source(Expr $value) => (
   $(x2c.literal.string (x2c.source.text $value))
 )
 
 int main(void) {
-  return strcmp($project.spelling(1 /* kept */ + 2),
+  return strcmp($project.source(1 /* kept */ + 2),
                 "1 /* kept */ + 2");
 }
 ```
 
-Forwarding a capture through another macro preserves that text. Constructing
-or selecting an AST subtree does not invent source text; use standard Lisp
-`repr` when canonical AST rendering is intended.
+This query retains the direct Lisp call: forwarding the captured expression
+through `$helper(...)` currently loses the source information it needs.
+Forwarding a capture through another source macro preserves its text. Constructing or selecting an AST
+subtree does not invent source text; use `List.repr()` to render code data.
 
-`x2c.embed.text` reads a regular text file into a compile-time `String` and
-records the canonical file as a build dependency. A `String` path is relative
-to the file containing that Lisp form. A captured `String` literal is relative
-to the caller file where the literal was written:
+`x2c_embed_text` reads a regular text file into a compile-time String and
+records it as a build dependency. A captured String literal retains the
+caller's file location for resolving a relative path:
 
 <!-- ignore: notice.txt is the external file being illustrated -->
 ```x2c,ignore
@@ -567,26 +589,30 @@ macro Expression $project.notice(Literal $path) => (
 String notice = $project.notice("notice.txt");
 ```
 
-The returned value stays compile-time data; use `x2c.literal.string`
-explicitly when generated code needs a runtime `String`. Empty files are valid.
-Directories, embedded NUL bytes, unreadable files, and files too large for a
-`String` are rejected.
+The direct Lisp call preserves the captured path and its source location;
+forwarding it through `$helper(...)` currently does not. A meta function can
+call `x2c_embed_text` with a computed String, but that does not retain the
+captured literal's caller-relative path information.
 
-Most macros should not need those operations. A source-shaped template keeps
-the binding and generated result visible to a reader. Use Lisp when a template
-must compute a value, inspect a declaration, select among shapes, or generate a
-checked name. If the Lisp and AST manipulation is longer or harder to explain
-than the repeated source, keep the source.
+Empty files are valid. Directories, embedded NUL bytes, unreadable files and
+files too large for a String are rejected.
+
+Prefer source templates for generated code and meta functions for the
+calculations that supply their arguments. Use the optional `$(...)` Lisp
+entry when integrating existing Lisp helpers or changing the compiler's Lisp
+session. For example, `$(project_offset)` calls the helper above from Lisp.
+Local macro names are lexical; Lisp definitions instead remain available for
+the rest of the translation unit after the defining block ends.
 
 ### Generate several views from one table
 
-Compile-time Lisp can keep one table of facts from which small macros generate
+A meta function can keep one table of facts from which small macros generate
 enums, lookup tables, switch cases, declarations, and repetitive functions.
 Changing the table then changes every generated form.
 
 Use a table when the outputs repeat the same facts. Write names, types, and
 status values explicitly so a reader can understand the generated code without
-working through the Lisp. Keep unrelated outputs as direct source.
+working through the generator. Keep unrelated outputs as direct source.
 
 ## Declare methods and converters before adoption
 
@@ -608,6 +634,7 @@ need.
 Use:
 
 - a function for runtime computation;
+- a meta function for compile-time calculation and compiler queries;
 - a protocol for explicit participation in shared typed behavior;
 - a macro for repeated source whose invocation has one obvious expansion;
 - a decorator for uniform policy on one following expression or source item;
@@ -618,7 +645,7 @@ total, preserves useful diagnostics, and makes each binding clear.
 
 For a complete generator built from these pieces, see [Automatic
 Differentiation](autodiff.md): a `Type`-hole family for dual numbers, and
-`Unit` decorators whose compile-time Lisp rewrites a function's typed AST
+`Unit` decorators whose meta functions transform a function's typed code
 into its derivative.
 
 For the complete hole grammar, result validation, hygiene rules, limits, and

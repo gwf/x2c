@@ -1,7 +1,16 @@
 # x2c lowers to Lisp
 
-> Status: active
->
+> Status: done - archived 2026-09-20.
+> The lowering and autodiff implementation is delivered on dev; later meta
+> integration and migration evidence closed at b4e36b50. This is the original
+> design record, not an active branch or authorization hold. Follow-on work
+> is listed in [the current index](../README.md).
+
+## Original status context
+
+The following notes describe the implementation at the time of this plan.
+Current disposition is the status above.
+
 > Design decided and built. `src/comptime.x` is the compiled pass and
 > `etc/comptime.xlisp` its runtime; the whole of `lib/autodiff.xmacro`'s
 > forward and reverse modes is ported and exact. Work happens on the isolated
@@ -9,7 +18,7 @@
 > explicit green light. Measurements from 2026-09-17 against `82bd746b`
 > decide the design; those from 2026-09-18 record what the pass now does.
 > Making the pass general enough to replace the remaining macro Lisp is
-> scoped separately in `plans/comptime-x2c-generalization.md`.
+> scoped separately in `plans/archive/comptime-x2c-generalization.md`.
 >
 > This file is the design record and its narrative cites spike files under
 > `.context/spike/`, which were per-worktree working files and are gone. What
@@ -44,7 +53,7 @@ Two arguments, one from cost and one from fit.
 The cost is visible in the tree: about 1,000 lines of Lisp under `etc/`
 plus roughly 700 more inside `lib/autodiff.xmacro`, most of it
 re-deriving in Lisp what x2c already does. The
-[compile-time value surface](../etc/lisp-values.xlisp) shipped on
+[compile-time value surface](../../etc/lisp-values.xlisp) shipped on
 2026-09-17 is the clearest evidence: 69 names whose only purpose is to let
 Lisp stop reimplementing the x2c library.
 
