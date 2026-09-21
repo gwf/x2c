@@ -30,6 +30,15 @@ fail() {
   exit 1
 }
 
+copy_runtime_sources() {
+  local destination=$1 source
+  cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$destination"
+  for source in "$ROOT"/lib/*.xlisp; do
+    [[ -e "$source" ]] && cp "$source" "$destination"
+  done
+  return 0
+}
+
 if "$X2C" translate --out-dir "$BUILD/tag-scope" \
     "$SOURCE/tag-scope-a.x" "$SOURCE/tag-scope-b.x" \
     >"$BUILD/tag-scope/stdout" 2>"$BUILD/tag-scope/stderr"; then
@@ -104,7 +113,7 @@ mkdir -p "$FAKE/src" "$FAKE/include" "$FAKE/lib" "$FAKE/etc" \
   "$FAKE/builds/0" "$FAKE/artifact-out" "$FAKE/conflict-out"
 cp "$X2C" "$FAKE/builds/0/x2c"
 cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.xmacro "$FAKE/etc/"
-cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$ROOT"/lib/*.xlisp "$FAKE/lib/"
+copy_runtime_sources "$FAKE/lib/"
 cp "$SOURCE"/protocol-conflict-{a,b,primer-a,primer-b,unit}.x "$FAKE/src/"
 (cd "$FAKE" && ./builds/0/x2c translate --out-dir conflict-out \
   src/protocol-conflict-a.x src/protocol-conflict-b.x \

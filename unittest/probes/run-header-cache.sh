@@ -19,6 +19,15 @@ fail() {
   exit 1
 }
 
+copy_runtime_sources() {
+  local destination=$1 source
+  cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$destination"
+  for source in "$ROOT"/lib/*.xlisp; do
+    [[ -e "$source" ]] && cp "$source" "$destination"
+  done
+  return 0
+}
+
 # Scratch headers: hdr.x declares Foo then re-declares it via bar.x, so
 # the winning definition pins merge order; anon.x consumes shallow-parse
 # gensyms through anonymous aggregates.
@@ -165,7 +174,7 @@ mkdir -p "$FAKE/src" "$FAKE/include" "$FAKE/lib" "$FAKE/etc" \
   "$FAKE/builds/0"
 cp "$X2C" "$FAKE/builds/0/x2c"
 cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.xmacro "$FAKE/etc/"
-cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$ROOT"/lib/*.xlisp "$FAKE/lib/"
+copy_runtime_sources "$FAKE/lib/"
 cp "$BUILD/src/bar.x" "$BUILD/src/hdr.x" "$BUILD/src/anon.x" \
   "$BUILD/src/unit.x" "$FAKE/src/"
 
@@ -584,7 +593,7 @@ mkdir -p "$embed_root/src" "$embed_root/include" "$embed_root/lib" \
   "$embed_root/warm"
 cp "$X2C" "$embed_root/builds/0/x2c"
 cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.xmacro "$embed_root/etc/"
-cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$ROOT"/lib/*.xlisp "$embed_root/lib/"
+copy_runtime_sources "$embed_root/lib/"
 cat >"$embed_root/src/embed.xmacro" <<'EOF'
 macro Unit $cache.declare() {
   int $(x2c.ident (x2c.embed.text "name.txt"))(void);
@@ -762,8 +771,7 @@ mkdir -p "$declaration_root/src" "$declaration_root/etc" \
   "$declaration_root/builds/0" "$declaration_root/out"
 cp "$X2C" "$declaration_root/builds/0/x2c"
 cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.xmacro "$declaration_root/etc/"
-cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$ROOT"/lib/*.xlisp \
-  "$declaration_root/lib/"
+copy_runtime_sources "$declaration_root/lib/"
 cat >"$declaration_root/src/producer.xmacro" <<'EOF2'
 $(def read-file (bind "lisp_read_file" '((func (("String"))) "Var")))
 $(def write-file

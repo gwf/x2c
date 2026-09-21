@@ -5,6 +5,15 @@ ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 BUILD="$ROOT/unittest/build/symbol-probes"
 X2C=${X2C:-"$ROOT/builds/0/x2c"}
 
+copy_runtime_sources() {
+  local destination=$1 source
+  cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$destination"
+  for source in "$ROOT"/lib/*.xlisp; do
+    [[ -e "$source" ]] && cp "$source" "$destination"
+  done
+  return 0
+}
+
 rm -rf "$BUILD"
 mkdir -p "$BUILD/default" "$BUILD/live" "$BUILD/overlay-default" \
   "$BUILD/overlay-live" "$BUILD/main-default" "$BUILD/main-live"
@@ -90,7 +99,7 @@ mkdir -p "$cold_root/etc" "$cold_root/lib" "$cold_root/include" \
   "$cold_root/bin"
 cp "$X2C" "$cold_root/bin/x2c"
 cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.xmacro "$cold_root/etc/"
-cp "$ROOT/lib/"*.x "$ROOT/lib/"*.xmacro "$ROOT/lib/"*.xlisp "$cold_root/lib/"
+copy_runtime_sources "$cold_root/lib/"
 [[ -z "$("$cold_root/bin/x2c" env prelude)" ]]
 "$cold_root/bin/x2c" translate --out-dir "$BUILD/cold" "$ROOT/examples/foreach.x"
 diff -u "$BUILD/cold/foreach.c" "$BUILD/default/foreach.c"

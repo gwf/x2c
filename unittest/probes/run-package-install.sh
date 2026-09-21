@@ -10,14 +10,23 @@ X2C=${X2C:-"$ROOT/builds/0/x2c"}
 
 fail() { echo "package install: $*" >&2; exit 1; }
 
+copy_runtime_sources() {
+  local destination=$1 source
+  cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$destination"
+  for source in "$ROOT"/lib/*.xlisp; do
+    [[ -e "$source" ]] && cp "$source" "$destination"
+  done
+  return 0
+}
+
 rm -rf "$BUILD"
 mkdir -p "$BUILD/home/include/x2c" "$BUILD/home/etc" "$BUILD/home/lib" \
   "$BUILD/home/packages" "$BUILD/home/bin" "$BUILD/src"
 cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.xmacro "$BUILD/home/etc/"
-cp "$ROOT/lib/"*.x "$ROOT/lib/"*.xmacro "$ROOT/lib/"*.xlisp \
-  "$ROOT/builds/0/lib/"*.h "$BUILD/home/include/x2c/"
-cp "$ROOT/lib/"*.x "$ROOT/lib/"*.xmacro "$ROOT/lib/"*.xlisp \
-  "$ROOT/builds/0/libx2c.a" "$ROOT/builds/0/lib/"*.xi "$BUILD/home/lib/"
+copy_runtime_sources "$BUILD/home/include/x2c/"
+cp "$ROOT/builds/0/lib/"*.h "$BUILD/home/include/x2c/"
+copy_runtime_sources "$BUILD/home/lib/"
+cp "$ROOT/builds/0/libx2c.a" "$ROOT/builds/0/lib/"*.xi "$BUILD/home/lib/"
 cp "$X2C" "$BUILD/home/bin/x2c"
 x2c="$BUILD/home/bin/x2c"
 [[ "$("$x2c" env home)" == "$BUILD/home" ]] || fail "home not resolved"
