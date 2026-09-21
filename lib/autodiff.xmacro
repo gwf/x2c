@@ -632,9 +632,8 @@ meta static List ad_cast(List type, List e) {
   return %(expr () (cast (decl $type (bindings (bind () ()))) $e));
 }
 
-meta static List ad_declare(List type, Var name, List init) {
-  if (init) return %(declare $type (bindings (op = (bind ($name) ()) $init)));
-  return %(declare $type (bindings (bind ($name) ())));
+macro Statement $ad.local(Type $type, Name $name, Expr $initial) => {
+  $type $name = $initial;
 }
 
 meta static List ad_zero_of(List type) {
@@ -1086,9 +1085,8 @@ meta static List ad_param_names(List params) {
   return names;
 }
 
-meta static List ad_write_slot(Var n) {
-  return ad_stmnt(%(expr () (op = (expr () (op * ${ad_id(ad_grad(n))}))
-                                  ${ad_id(ad_bar(n))})));
+macro Statement $ad.write_slot(Name $gradient, Name $value) => {
+  *$gradient = $value;
 }
 
 meta static List ad_hoisted(List locals, List params) {
@@ -1102,7 +1100,7 @@ meta static List ad_declare_locals(List locals) {
   Array out = [];
   foreach (List entry, locals) {
     List type = entry[1];
-    out.push(ad_declare(type, entry[0], ad_zero_of(type)));
+    out.push($ad.local(type, entry[0], ad_zero_of(type)));
   }
   return out;
 }
@@ -1110,13 +1108,14 @@ meta static List ad_declare_locals(List locals) {
 meta static List ad_declare_bars(List names) {
   Array out = [];
   foreach (Var name, names)
-    out.push(ad_declare(%(double), ad_bar(name), ad_zero()));
+    out.push($ad.local(%(double), ad_bar(name), ad_zero()));
   return out;
 }
 
 meta static List ad_write_slots(List inputs) {
   Array out = [];
-  foreach (Var name, inputs) out.push(ad_write_slot(name));
+  foreach (Var name, inputs)
+    out.push($ad.write_slot(ad_grad(name), ad_bar(name)));
   return out;
 }
 
