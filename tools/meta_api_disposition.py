@@ -93,8 +93,18 @@ def disposition(row):
     elif "..." in signature:
         group = "native variadic calls"
         kind = "needs bounded probe"
-        reason = "Native ellipsis arguments have no fixed Func adapter signature."
-        action = f"Inspect {name}'s count/format owner and prototype a List/rest adapter preserving argument count, type and order."
+        if name == "String.printf":
+            reason = "The native format controls C variadic argument types and promotions; a generic List of Var arguments is not a va_list."
+            action = "Reuse the runtime format owner through a typed bridge or define a format adapter preserving C conversions; do not substitute interpolation semantics."
+        elif name in {"List.unpack_n", "List.unpack_vars_n"}:
+            reason = "Each variadic argument is a nullable native output pointer. Short input leaves later outputs untouched and skipped null outputs still count."
+            action = "After the cell/null decision, adapt destinations with the correct List-versus-Var conversion and preserve partial writes/counts."
+        elif name == "Var.new":
+            reason = "The tag selects the actual C variadic payload type; numeric values, object handles and custom tags have different native contracts."
+            action = "Dispatch represented families through existing boxing owners and account separately for native/custom pointer payloads; no generic va_list forwarding is valid."
+        else:
+            reason = "The count bounds exactly how many variadic values or pairs are consumed; argument evaluation, shared tails and partial mutations are observable."
+            action = f"Prototype a counted List/rest bridge for {name} reusing append/push/set owners; verify zero/excess counts, shared tails or partial mutation, and true-void rejection."
     elif "*" in signature:
         if method.startswith("try_") and receiver != "Var":
             group = "status and output cells"
@@ -104,8 +114,19 @@ def disposition(row):
         elif receiver in ("String", "Symbol") and method in {"new", "new_len", "parse", "c_compare", "c_len", "c_find", "decode", "lstrip", "rstrip", "strip"}:
             group = "text pointer boundaries"
             kind = "needs bounded probe"
-            reason = "Canonical String storage is represented, but the native signature accepts raw character pointers or a writable destination."
-            action = f"For {name}, verify null/length/bounds and whether the pointer is read-only, interior or writable before choosing a String/cell adapter."
+            if name in {"String.c_len", "String.c_compare", "Symbol.new"}:
+                reason = "The native owner requires nonnull C strings. Canonical empty String is NULL, unlike a nonnull empty C string; direct Func adapters also reject raw char-pointer parameters."
+                action = "Decide how source C-string pointers preserve nonnull empty storage before forwarding; a String-only alias would change valid empty-input behavior or reach strlen/strcmp with NULL."
+            elif name == "String.c_find":
+                reason = "strchr returns a borrowed interior C pointer or NULL. Such a pointer is not an interned String with a valid StringHeader."
+                action = "Specify borrowed interior-pointer identity and lifetime before exposing the result; copying into String would change the pointer contract."
+            elif name == "Symbol.decode":
+                kind = "needs representation decision"
+                reason = "The caller supplies writable byte storage of SYMBOL_MAX_5BIT + 1 bytes; canonical String storage is immutable and no length is passed."
+                action = "Provide an owned writable byte-buffer view with sufficient capacity, preserving untouched output for zero Symbol or null destination."
+            else:
+                reason = "A String-typed adapter can forward represented bytes to the native nullable/length-aware owner; raw memory beyond those bytes remains the caller's precondition."
+                action = f"Verify {name}'s zero, empty and valid length cases through the forwarding adapter; do not fabricate writable or out-of-bounds storage."
         else:
             group = "native pointer crossings"
             kind = "needs representation decision"
