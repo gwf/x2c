@@ -1051,6 +1051,80 @@ Var lisp_store(Var cell, Var value) {
   return value;
 }
 
+/* Status bindings publish native outputs only after the operation succeeds,
+   preserving the evaluator cell when the native contract leaves it alone. */
+static int _lisp_String_try_long(String str, Var out) {
+  long value;
+  int status = str.try_long(&value);
+  if (status) lisp_store(out, value);
+  return status;
+}
+
+static int _lisp_String_try_double(String str, Var out) {
+  double value;
+  int status = str.try_double(&value);
+  if (status) lisp_store(out, value);
+  return status;
+}
+
+static int _lisp_String_try_next(String str, Var cursor, Var out) {
+  int native_cursor = lisp_load(cursor).int(), value;
+  int status = str.try_next(&native_cursor, &value);
+  if (status) {
+    lisp_store(cursor, native_cursor);
+    lisp_store(out, value);
+  }
+  return status;
+}
+
+static int _lisp_List_try_match(List input, Var pattern, Var out) {
+  List bindings;
+  int status = input.try_match(pattern, &bindings);
+  if (status) lisp_store(out, bindings);
+  return status;
+}
+
+static int _lisp_List_try_match_replace(
+  List input, Var pattern, Var template, Var out) {
+  Var result;
+  int status = input.try_match_replace(pattern, template, &result);
+  if (status) lisp_store(out, result);
+  return status;
+}
+
+static int _lisp_List_try_search(
+  List input, Var pattern, Var out_match, Var out_bindings) {
+  Var match;
+  List bindings;
+  int status = input.try_search(pattern, &match, &bindings);
+  if (status) {
+    lisp_store(out_match, match);
+    lisp_store(out_bindings, bindings);
+  }
+  return status;
+}
+
+static int _lisp_Map_try_get(Map map, Var key, Var out) {
+  Var value;
+  int status = map.try_get(key, &value);
+  if (status) lisp_store(out, value);
+  return status;
+}
+
+static int _lisp_Map_try_del(Map map, Var key, Var out) {
+  Var value;
+  int status = map.try_del(key, &value);
+  if (status) lisp_store(out, value);
+  return status;
+}
+
+static int _lisp_Symbol_try_new(String spelling, Var out) {
+  Symbol symbol;
+  int status = Symbol.try_new(spelling, &symbol);
+  if (status) lisp_store(out, symbol);
+  return status;
+}
+
 typedef struct LispCallbackContext {
   Lisp lisp;
   Var callable;
@@ -1220,6 +1294,15 @@ $(def lisp.native.target.rows '(
   (lisp_address)
   (lisp_load)
   (lisp_store)
+  (_lisp_String_try_long (as String_try_long))
+  (_lisp_String_try_double (as String_try_double))
+  (_lisp_String_try_next (as String_try_next))
+  (_lisp_List_try_match (as List_try_match))
+  (_lisp_List_try_match_replace (as List_try_match_replace))
+  (_lisp_List_try_search (as List_try_search))
+  (_lisp_Map_try_get (as Map_try_get))
+  (_lisp_Map_try_del (as Map_try_del))
+  (_lisp_Symbol_try_new (as Symbol_try_new))
   (lisp_car (as Var_car))
   (lisp_cdr (as Var_cdr))
   (Var_cons)
@@ -1367,6 +1450,7 @@ $(def lisp.native.target.rows '(
   (Array_clear)
   (Array_heap_push)
   (Array_heapify)
+  (Array_heap_pop)
   (Array_pop)
   (Array_resize)
   (Array_truncate)
@@ -1374,6 +1458,7 @@ $(def lisp.native.target.rows '(
   (Map_updateindex)
   (Map_postfixindex)
   (Map_set)
+  (Map_get_hashed)
   (Var_list)
   (Var_array)
   (Var_map)
@@ -1484,6 +1569,9 @@ $(def lisp.native.target.rows '(
   (Var_wide_equal)
   (Var_wide_hash)
   (Var_width_mask)
+  (Var_clone_wide)
+  (Var_getindex)
+  (Var_null)
   (List_getindex)
   (List_last)
   (List_index)

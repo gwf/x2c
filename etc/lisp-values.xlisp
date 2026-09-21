@@ -175,6 +175,18 @@
 (def Var.is_null  (bind "Var_is_null" nil))
 (def Var.is_void  (bind "Var_is_void" nil))
 
+// Status/output bindings use evaluator cells for source addresses. Their
+// native shims publish outputs only on success, preserving failed-call cells.
+(def String.try_long (bind "String_try_long" nil))
+(def String.try_double (bind "String_try_double" nil))
+(def String.try_next (bind "String_try_next" nil))
+(def List.try_match (bind "List_try_match" nil))
+(def List.try_match_replace (bind "List_try_match_replace" nil))
+(def List.try_search (bind "List_try_search" nil))
+(def Map.try_get (bind "Map_try_get" nil))
+(def Map.try_del (bind "Map_try_del" nil))
+(def Symbol.try_new (bind "Symbol_try_new" nil))
+
 // Compound selectors use raw slots so exhaustion keeps `void` distinct from
 // `nil`. The source declarations remain in the optional list-selectors module.
 (defun _selector_car (value)
@@ -344,6 +356,7 @@
 (def Array.clear (bind "Array_clear" nil))
 (def Array.heap_push (bind "Array_heap_push" nil))
 (def Array.heapify (bind "Array_heapify" nil))
+(def Array.heap_pop (bind "Array_heap_pop" nil))
 (def Array.pop (bind "Array_pop" nil))
 (def Array.resize (bind "Array_resize" nil))
 (def Array.truncate (bind "Array_truncate" nil))
@@ -351,6 +364,7 @@
 (def Map.updateindex (bind "Map_updateindex" nil))
 (def Map.postfixindex (bind "Map_postfixindex" nil))
 (def Map.set (bind "Map_set" nil))
+(def Map.get_hashed (bind "Map_get_hashed" nil))
 (def Var.list (bind "Var_list" nil))
 (def Var.array (bind "Var_array" nil))
 (def Var.map (bind "Var_map" nil))
@@ -467,3 +481,6 @@
 (def Var.wide_equal (bind "Var_wide_equal" nil))
 (def Var.wide_hash (bind "Var_wide_hash" nil))
 (def Var.width_mask (bind "Var_width_mask" nil))
+(def Var.clone_wide (bind "Var_clone_wide" nil))
+(def Var.getindex (bind "Var_getindex" nil))
+(def Var.null (bind "Var_null" nil))

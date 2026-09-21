@@ -179,7 +179,7 @@ values keep their existing owners. The caller retains responsibility for
 evaluator-only callable, `<bad-arity>` or `<bad-types>` at the call
 boundary, or a cause raised by the called procedure.
 
-Source: `lib/lisp.x:2832`
+Source: `lib/lisp.x:2920`
 
 <a id="Lisp.auto_prepare"></a>
 #### Lisp.auto_prepare
@@ -196,7 +196,7 @@ A lambda a global holds indirectly, inside a `List` or a `Map` value, is
 not reached: the globals a library defines are the callables a child
 resolves by name, and those are what a shared program guards against.
 
-Source: `lib/lisp.x:2695`
+Source: `lib/lisp.x:2783`
 
 <a id="Lisp.bind"></a>
 #### Lisp.bind
@@ -212,7 +212,7 @@ the pointer while the session lives. Values inside the `Func`, including
 its
 signature graph, retain their existing owners.
 
-Source: `lib/lisp.x:2932`
+Source: `lib/lisp.x:3020`
 
 <a id="Lisp.call_budget"></a>
 #### Lisp.call_budget
@@ -229,7 +229,7 @@ The budget belongs to the public entry. `Lisp.eval`, `Lisp.apply`, and
 `Lisp.eval_string` each open one, and a call that runs it out does not
 renew it, so one entry reports a runaway once however many calls follow.
 
-Source: `lib/lisp.x:2670`
+Source: `lib/lisp.x:2758`
 
 <a id="Lisp.eval"></a>
 #### Lisp.eval
@@ -243,7 +243,7 @@ ownership rule. Effects completed before a later failure are not rolled
 back. Raises: `<bad-arg>` for a null session, or any evaluator, imported
 operation, or called-procedure cause.
 
-Source: `lib/lisp.x:2814`
+Source: `lib/lisp.x:2902`
 
 <a id="Lisp.eval_file"></a>
 #### Lisp.eval_file
@@ -262,7 +262,7 @@ has been consumed.
 `<size-limit>`, or `<alloc-fail>` while reading, or any cause from
 `Lisp.eval_string`.
 
-Source: `lib/lisp.x:2872`
+Source: `lib/lisp.x:2960`
 
 <a id="Lisp.eval_string"></a>
 #### Lisp.eval_string
@@ -277,7 +277,7 @@ completed before a later reader or evaluator failure remain installed.
 **Raises:** `<bad-arg>` for a null session, `<incomplete>` or `<malformed>`
 while reading, or any cause from `Lisp.eval`.
 
-Source: `lib/lisp.x:2845`
+Source: `lib/lisp.x:2933`
 
 <a id="Lisp.freeze"></a>
 #### Lisp.freeze
@@ -359,7 +359,7 @@ output, or an absent name returns 0 and leaves `out` unchanged. Raises
 `<alloc-fail>` or `<bad-enc>` when a nonempty lookup name cannot be
 canonicalized.
 
-Source: `lib/lisp.x:2894`
+Source: `lib/lisp.x:2982`
 
 ## Advanced and interop API
 
@@ -407,7 +407,7 @@ Forces calls through the recursive evaluator when `disabled` is nonzero.
 Re-enabling AUTO preserves published programs, thresholds, statistics, and
 the instrumentation pointer.
 
-Source: `lib/lisp.x:2681`
+Source: `lib/lisp.x:2769`
 
 <a id="Lisp.auto_instrument"></a>
 #### Lisp.auto_instrument
@@ -419,7 +419,7 @@ Selects optional detailed machine statistics for later AUTO executions.
 `stats` is borrowed, retained without initialization, and updated in place;
 it must outlive every evaluation until replaced or cleared with NULL.
 
-Source: `lib/lisp.x:2656`
+Source: `lib/lisp.x:2744`
 
 <a id="Lisp.auto_stats"></a>
 #### Lisp.auto_stats
@@ -430,7 +430,7 @@ Returns the current cumulative automatic-evaluator statistics for `lisp`.
 `lisp` must be a live session. The returned structure is a value snapshot
 and does not reset any counter.
 
-Source: `lib/lisp.x:2649`
+Source: `lib/lisp.x:2737`
 
 <a id="Lisp.cleanup"></a>
 #### Lisp.cleanup
@@ -439,7 +439,7 @@ Source: `lib/lisp.x:2649`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/lisp.x:2940`
+Source: `lib/lisp.x:3028`
 
 <a id="Lisp.destroy"></a>
 #### Lisp.destroy
@@ -573,7 +573,7 @@ may replace such a binding.
 **Raises:** `<bad-arg>` for a null session or name, or `<alloc-fail>`,
 `<size-limit>`, or `<bad-enc>` while canonicalizing or storing the binding.
 
-Source: `lib/lisp.x:2907`
+Source: `lib/lisp.x:2995`
 
 ## Runtime-internal callables
 

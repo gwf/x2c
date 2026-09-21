@@ -99,6 +99,72 @@ def _selector_probe(owner: str, method: str) -> tuple:
 
 
 PROBES = {
+    'String.try_long': ('success and unchanged output on parse failure',
+        'long value = 9; int parsed = "42".try_long(&value); '
+        'int failed = "bad".try_long(&value); '
+        'return parsed && value == 42 && !failed;', 1),
+    'String.try_double': ('success and unchanged output on parse failure',
+        'double value = 9.0; int parsed = "1.25".try_double(&value); '
+        'int failed = "bad".try_double(&value); '
+        'return parsed && value == 1.25 && !failed;', 1),
+    'String.try_next': ('cursor advance and unchanged exhausted outputs',
+        "int cursor = 0, value = 9; int advanced = \"A\".try_next(&cursor, &value); "
+        'int exhausted = "A".try_next(&cursor, &value); '
+        "return advanced && cursor == 1 && value == 'A' && !exhausted;", 1),
+    'List.try_match': ('binding result and unchanged output on miss',
+        'List bindings = %(old); int matched = %(tag value).try_match('
+        '%(tag ?item), &bindings); int captured = '
+        'bindings.assoc(<?item>) == <value>; List prior = bindings; '
+        'int missed = %(tag value).try_match(%(other), &bindings); '
+        'return matched && captured && !missed && bindings === prior;', 1),
+    'List.try_match_replace': ('scalar result and unchanged output on miss',
+        'Var result = <old>; int matched = %(tag value).try_match_replace('
+        '%(tag ?item), <?item>, &result); int captured = result == <value>; '
+        'result = <old>; int missed = %(tag value).try_match_replace('
+        '%(other), <changed>, &result); '
+        'return matched && captured && !missed && result == <old>;', 1),
+    'List.try_search': ('dual outputs publish atomically on success',
+        'Var found = <old>; List bindings = %(old); '
+        'int matched = %((item 7)).try_search(%(item ?value), '
+        '&found, &bindings); int captured = found == %(item 7).var() && '
+        'bindings.assoc(<?value>) == 7; found = <old>; bindings = %(old); '
+        'List prior = bindings; int missed = %((item 7)).try_search('
+        '%(missing), &found, &bindings); return matched && captured && '
+        '!missed && found == <old> && bindings === prior;', 1),
+    'Array.heap_pop': ('heap order and true-void exhaustion',
+        'Array heap = [3, 1, 2]; heap.heapify(); '
+        'return heap.heap_pop() == 1 && heap.heap_pop() == 2 && '
+        'heap.heap_pop() == 3 && heap.heap_pop() is void;', 1),
+    'Map.get_hashed': ('hashed hit, raw Null value and true-void miss',
+        'Map map = {}; Var key = "x"; map[key] = Var.null(); '
+        'Var hit = map.get_hashed(key, key.hash()); '
+        'Var miss = map.get_hashed("y", ((Var) "y").hash()); '
+        'return hit.is_null() && miss is void;', 1),
+    'Map.try_get': ('raw Null hit and unchanged output on miss',
+        'Map map = {}; map["x"] = Var.null(); Var value = 7; '
+        'int found = map.try_get("x", &value); int was_null = value.is_null(); '
+        'value = 9; int missed = map.try_get("y", &value); '
+        'return found && was_null && !missed && value == 9;', 1),
+    'Map.try_del': ('removal and unchanged output on miss',
+        'Map map = {"x": 7}; Var value = 9; '
+        'int removed = map.try_del("x", &value); int got = value == 7; '
+        'value = 9; int missed = map.try_del("x", &value); '
+        'return removed && got && !missed && value == 9 && map.len() == 0;', 1),
+    'Symbol.try_new': ('exact symbol and unchanged output on lossy spelling',
+        'Symbol value = <old>; int exact = Symbol.try_new("valid", &value); '
+        'int got = value == <valid>; value = <old>; '
+        'int lossy = Symbol.try_new("read_only", &value); '
+        'return exact && got && !lossy && value == <old>;', 1),
+    'Var.clone_wide': ('fresh wide identity and true-void narrow result',
+        'Var source = Var.box_long(7), clone = source.clone_wide(); '
+        'Var narrow = 7; return clone.compare(source) == 0 && '
+        '!clone.same(source) && narrow.clone_wide() is void;', 1),
+    'Var.getindex': ('dynamic indexed hit and true-void absence',
+        'Var values = %(7 8); return values.getindex(1) == 8 && '
+        'values.getindex(9) is void;', 1),
+    'Var.null': ('Null remains distinct from void and typed nil',
+        'Var value = Var.null(); return value.is_null() && '
+        '!value.is_void() && !value.is_nil();', 1),
     'String.contains_digit': ('positive, negative and empty bytes',
         'String empty = ""; return "a1".contains_digit() && !"abc".contains_digit() && !empty.contains_digit();', 1),
     'String.is_alpha': ('positive, negative and empty bytes',

@@ -395,6 +395,19 @@ longer become an empty List in the evaluator. This covers List `getindex`,
 `caar` stops when either selection is absent. Ordinary Lists, Arrays and Maps
 still reject `void` as an element, key or value, so a rest call cannot pack it
 into its argument List.
+
+Status operations with output parameters use evaluator cells for source local
+addresses. `String.try_long`, `String.try_double`, `String.try_next`, the three
+`List.try_*` match operations, `Map.try_get`, `Map.try_del` and
+`Symbol.try_new` compute into native temporaries and publish them only after
+success. A failed call therefore leaves every output unchanged;
+`String.try_next` and `List.try_search` publish their paired outputs together.
+
+`Array.heap_pop`, `Map.get_hashed`, `Var.getindex` and `Var.null` preserve
+their native `void`-versus-`Null` results. `Var.clone_wide` creates a fresh
+session-`Scope` box for a wide value and returns true `void` for a nonwide
+value.
+
 Lisp conditions treat `void` as false while the normal x2c `Var.truth` contract
 still raises `<void-op>`; compare explicitly with `void` when both forms must
 agree.

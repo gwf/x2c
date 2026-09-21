@@ -6,7 +6,7 @@
 > AD source templates shipped through 8c2a8054; x2c-first examples followed in
 > 95e73d18. Capture-call repairs and remaining API/representation work extend
 > that baseline. The exhaustive value-operation continuation now accounts for
-> all 483 signatures. The current tree has 371 rows with bindings and behavioral
+> all 483 signatures. The current tree has 385 rows with bindings and behavioral
 > evidence for every bound row. Implemented behavior and open follow-ons are
 > recorded below.
 
@@ -364,14 +364,17 @@ represented scalar, String, Symbol, List, Array, Map and Var values, including
 the pure optional-module operations, without importing those optional source
 APIs into the implicit prelude. The compound-selector continuation adds the 44
 remaining List and Var selector bindings while leaving their source declarations
-in the optional `list-selectors.x` module. The integrated inventory has 371
-signature rows with bindings and 112 without bindings. Its fixed native/meta
-comparisons leave no bound row unverified: 365 rows have a verified example and
-9 retain a reproduced limitation, including 3 rows without bindings. Every
-binding-absent row has an explicit owner, contract group, disposition and next
-action. Fourteen of those rows are classified as implementable with current
-values. The optional inventory records every signature and distinguishes
-observed behavior from binding presence and absence.
+in the optional `list-selectors.x` module. Status-cell adapters then add nine
+operations with unchanged-on-failure output contracts; direct bindings add
+`Array.heap_pop`, `Map.get_hashed`, `Var.clone_wide`, `Var.getindex` and
+`Var.null`. The integrated inventory has 385 signature rows with bindings and
+98 without bindings. Its fixed native/meta comparisons leave no bound row
+unverified: 379 rows have a verified example and 9 retain a reproduced
+limitation, including 3 rows without bindings. Every binding-absent row has an
+explicit owner, contract group, disposition and next action. No binding-absent
+row remains classified as implementable with current values. The optional
+inventory records every signature and distinguishes observed behavior from
+binding presence and absence.
 
 One representation follow-on remains explicit rather than being presented as
 completed support:
