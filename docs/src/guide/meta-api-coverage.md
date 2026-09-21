@@ -39,18 +39,18 @@ does not imply that a similarly named direct method works.
 
 Loaded layers: `etc/init.xlisp`, `etc/lisp-values.xlisp`, `etc/comptime.xlisp`, `etc/compiler-sdk.xlisp`, `etc/builtin-macros.xlisp`.
 
-Source fingerprint: `053995f82ba97d7e5d714f776db38c3f0efd4f04e0a673ad38659e07f0936161`.
+Source fingerprint: `21e8d6aa2e1447786ae2b2851d72de52984c00681fe42cc087dfb0a97fc572c4`.
 
-Compiler fingerprint: `9c2ea997fa43ce8dc293d5ffeeaec10657a48bb42a3a0ecf613013aeec2da8e1`.
+Compiler fingerprint: `a617430ec4e7f869b7142118c762dcd847905ca5b071568bf0a3555de0e6220e`.
 
 | Type | Callables | Binding found | No binding found |
 | --- | ---: | ---: | ---: |
 | String | 89 | 69 | 20 |
-| List | 95 | 60 | 35 |
+| List | 95 | 82 | 13 |
 | Array | 61 | 46 | 15 |
 | Map | 38 | 26 | 12 |
 | Symbol | 14 | 9 | 5 |
-| Var | 186 | 117 | 69 |
+| Var | 186 | 139 | 47 |
 
 ## Exhaustive work ledger
 
@@ -63,14 +63,14 @@ its complete contract is shown to agree.
 
 | Evidence state | Signature rows |
 | --- | ---: |
-| verified example | 321 |
+| verified example | 365 |
 | reproduced failure | 9 |
 | bound, unverified | 0 |
-| no binding found | 153 |
+| no binding found | 109 |
 
-| Disposition | All rows | Missing binding | Bound, unverified |
+| Disposition | All rows | Binding absent | Bound, unverified |
 | --- | ---: | ---: | ---: |
-| implementable with current values | 352 | 58 | 0 |
+| implementable with current values | 352 | 14 | 0 |
 | needs callback adapter | 17 | 0 | 0 |
 | needs representation decision | 46 | 37 | 0 |
 | native resource contract | 48 | 48 | 0 |
@@ -79,7 +79,7 @@ its complete contract is shown to agree.
 
 ### Implementation groups
 
-| Group | Owners | Rows | Missing binding | Bound, unverified |
+| Group | Owners | Rows | Binding absent | Bound, unverified |
 | --- | --- | ---: | ---: | ---: |
 | Array interpreted callbacks | lib/array.x | 4 | 0 | 0 |
 | Array value operations | lib/array.x, lib/common.x, lib/list.x | 25 | 0 | 0 |
@@ -93,7 +93,7 @@ its complete contract is shown to agree.
 | absence and null values | lib/array.x, lib/dispatch.x, lib/list.x, lib/map.x, lib/var.x | 17 | 4 | 0 |
 | allocation and ownership contracts | lib/array.x, lib/dispatch.x, lib/list.x, lib/map.x, lib/string.x, lib/var.x | 19 | 19 | 0 |
 | boxed value extraction | lib/common.x | 4 | 0 | 0 |
-| canonical List selectors | lib/list-selectors.x; lib/list.x | 60 | 44 | 0 |
+| canonical List selectors | lib/list-selectors.x; lib/list.x | 60 | 0 | 0 |
 | explicit syntax operations | lib/array.x, lib/common.x, lib/dispatch.x, lib/map.x, lib/varops.x | 18 | 0 | 0 |
 | lazy String split state | lib/split.x | 3 | 3 | 0 |
 | mutations returning no value | lib/array.x, lib/map.x | 7 | 0 | 0 |
@@ -195,7 +195,7 @@ still need explicit checks before claiming runtime equivalence.
 | `String String.new(const char *str)` | verified example | etc/comptime.xlisp:263 | pointer | primary/api | lib/string.x:378 |
 | `String String.new_fill(char fill, int count)` | verified example | etc/comptime.xlisp:229 | binding | advanced/api | lib/string.x:408 |
 | `String String.new_in(Pool pool, const char *bytes, int length)` | no binding found | none found | ownership, resource, pointer | advanced/api | lib/string.x:61 |
-| `String String.new_len(const char *str, int len)` | verified example | etc/comptime.xlisp:457 | pointer | advanced/api | lib/string.x:395 |
+| `String String.new_len(const char *str, int len)` | verified example | etc/comptime.xlisp:501 | pointer | advanced/api | lib/string.x:395 |
 | `File String.open(String s, const char *mode)` | no binding found | none found | resource, pointer | primary/api | lib/file.x:236 |
 | `String String.pad_center(String str, int width, char fill)` | verified example | etc/comptime.xlisp:228 | binding | primary/api | lib/string.x:922 |
 | `String String.pad_left(String str, int width, char fill)` | verified example | etc/comptime.xlisp:226 | binding | primary/api | lib/string.x:910 |
@@ -215,7 +215,7 @@ still need explicit checks before claiming runtime equivalence.
 | `int String.rfind(String str, String sub)` | verified example | etc/comptime.xlisp:255 | binding | primary/api | lib/string.x:463 |
 | `List String.rpartition(String str, String sep)` | verified example | etc/comptime.xlisp:253 | binding | primary/api | lib/string.x:979 |
 | `String String.rstrip(String str, char *negChars)` | reproduced failure | etc/comptime.xlisp:234 | pointer | primary/api | lib/string.x:740 |
-| `String String.sha256(String text)` | verified example | etc/comptime.xlisp:456 | binding | primary/optional | lib/digest.x:110 |
+| `String String.sha256(String text)` | verified example | etc/comptime.xlisp:500 | binding | primary/optional | lib/digest.x:110 |
 | `List String.split(String str, String sep)` | verified example | etc/comptime.xlisp:250 | binding | primary/api | lib/split.x:111 |
 | `List String.split_lines(String str, int keep_ends)` | verified example | etc/comptime.xlisp:251 | binding | primary/api | lib/split.x:124 |
 | `List String.split_n(String str, String sep, int max_splits)` | verified example | etc/comptime.xlisp:232 | binding | primary/api | lib/split.x:81 |
@@ -788,9 +788,9 @@ meta int audit_probe(void) { return "abc".withindex(-1, 'x').equal("abx") && "ab
 
 ## List
 
-**verified example:** `all`, `any`, `append`, `array`, `assoc`, `caar`, `caddr`, `cadr`, `car`, `cddddr`, `cdddr`, `cddr`, `cdr`, `compare`, `cons`, `contains`, `equal`, `filter`, `find`, `flatten`, `flatten_all`, `foldl`, `get`, `getindex`, `getslice`, `hash`, `head`, `index`, `iter`, `last`, `len`, `listchar`, `listdbl`, `listfloat`, `listint`, `listshort`, `liststring`, `listsymbol`, `map`, `map2`, `match`, `match_replace`, `nth_cdr`, `replace`, `repr`, `reverse`, `search`, `search_replace`, `sort`, `sort_by`, `sort_with`, `str`, `sublis`, `subseq`, `tail`, `truth`, `try_next`, `unique`, `var`, `zip_with`.
+**verified example:** `all`, `any`, `append`, `array`, `assoc`, `caaaar`, `caaadr`, `caaar`, `caadar`, `caaddr`, `caadr`, `caar`, `cadaar`, `cadadr`, `cadar`, `caddar`, `cadddr`, `caddr`, `cadr`, `car`, `cdaaar`, `cdaadr`, `cdaar`, `cdadar`, `cdaddr`, `cdadr`, `cdar`, `cddaar`, `cddadr`, `cddar`, `cdddar`, `cddddr`, `cdddr`, `cddr`, `cdr`, `compare`, `cons`, `contains`, `equal`, `filter`, `find`, `flatten`, `flatten_all`, `foldl`, `get`, `getindex`, `getslice`, `hash`, `head`, `index`, `iter`, `last`, `len`, `listchar`, `listdbl`, `listfloat`, `listint`, `listshort`, `liststring`, `listsymbol`, `map`, `map2`, `match`, `match_replace`, `nth_cdr`, `replace`, `repr`, `reverse`, `search`, `search_replace`, `sort`, `sort_by`, `sort_with`, `str`, `sublis`, `subseq`, `tail`, `truth`, `try_next`, `unique`, `var`, `zip_with`.
 
-**no binding found:** `caaaar`, `caaadr`, `caaar`, `caadar`, `caaddr`, `caadr`, `cadaar`, `cadadr`, `cadar`, `caddar`, `cadddr`, `cdaaar`, `cdaadr`, `cdaar`, `cdadar`, `cdaddr`, `cdadr`, `cdar`, `cddaar`, `cddadr`, `cddar`, `cdddar`, `concat_n`, `cons_in`, `job`, `list_n`, `promote`, `try_match`, `try_match_replace`, `try_own`, `try_search`, `unpack_n`, `unpack_vars_n`, `write_repr`, `write_str`.
+**no binding found:** `concat_n`, `cons_in`, `job`, `list_n`, `promote`, `try_match`, `try_match_replace`, `try_own`, `try_search`, `unpack_n`, `unpack_vars_n`, `write_repr`, `write_str`.
 
 | Direct callable | State | Binding provenance | Considerations | Tier/module | Source |
 | --- | --- | --- | --- | --- | --- |
@@ -799,32 +799,32 @@ meta int audit_probe(void) { return "abc".withindex(-1, 'x').equal("abx") && "ab
 | `Self List.append(Self a, Self b)` | verified example | etc/builtin-macros.xlisp:18 | binding | primary/api | lib/list.x:223 |
 | `Array List.array(List lst)` | verified example | etc/comptime.xlisp:77 | binding | primary/api | lib/list.x:497 |
 | `Var List.assoc(List list, Var key)` | verified example | etc/comptime.xlisp:75 | binding | advanced/api | lib/list.x:649 |
-| `inline Var List.caaaar(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:33 |
-| `inline Var List.caaadr(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:35 |
-| `inline Var List.caaar(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:18 |
-| `inline Var List.caadar(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:37 |
-| `inline Var List.caaddr(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:39 |
-| `inline Var List.caadr(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:20 |
+| `inline Var List.caaaar(List value)` | verified example | etc/comptime.xlisp:445 | binding | primary/optional | lib/list-selectors.x:33 |
+| `inline Var List.caaadr(List value)` | verified example | etc/comptime.xlisp:446 | binding | primary/optional | lib/list-selectors.x:35 |
+| `inline Var List.caaar(List value)` | verified example | etc/comptime.xlisp:447 | binding | primary/optional | lib/list-selectors.x:18 |
+| `inline Var List.caadar(List value)` | verified example | etc/comptime.xlisp:448 | binding | primary/optional | lib/list-selectors.x:37 |
+| `inline Var List.caaddr(List value)` | verified example | etc/comptime.xlisp:449 | binding | primary/optional | lib/list-selectors.x:39 |
+| `inline Var List.caadr(List value)` | verified example | etc/comptime.xlisp:450 | binding | primary/optional | lib/list-selectors.x:20 |
 | `inline Var List.caar(List lst)` | verified example | etc/comptime.xlisp:69 | binding | advanced/api | lib/list.x:187 |
-| `inline Var List.cadaar(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:41 |
-| `inline Var List.cadadr(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:43 |
-| `inline Var List.cadar(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:22 |
-| `inline Var List.caddar(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:45 |
-| `inline Var List.cadddr(List value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:47 |
+| `inline Var List.cadaar(List value)` | verified example | etc/comptime.xlisp:451 | binding | primary/optional | lib/list-selectors.x:41 |
+| `inline Var List.cadadr(List value)` | verified example | etc/comptime.xlisp:452 | binding | primary/optional | lib/list-selectors.x:43 |
+| `inline Var List.cadar(List value)` | verified example | etc/comptime.xlisp:453 | binding | primary/optional | lib/list-selectors.x:22 |
+| `inline Var List.caddar(List value)` | verified example | etc/comptime.xlisp:454 | binding | primary/optional | lib/list-selectors.x:45 |
+| `inline Var List.cadddr(List value)` | verified example | etc/comptime.xlisp:455 | binding | primary/optional | lib/list-selectors.x:47 |
 | `inline Var List.caddr(List lst)` | verified example | etc/comptime.xlisp:73 | binding | advanced/api | lib/list.x:193 |
 | `inline Var List.cadr(List lst)` | verified example | etc/comptime.xlisp:72 | binding | advanced/api | lib/list.x:189 |
 | `inline Var List.car(List lst)` | verified example | etc/init.xlisp:92 | binding | advanced/api | lib/list.x:180 |
-| `inline Self List.cdaaar(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:49 |
-| `inline Self List.cdaadr(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:51 |
-| `inline Self List.cdaar(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:24 |
-| `inline Self List.cdadar(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:53 |
-| `inline Self List.cdaddr(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:55 |
-| `inline Self List.cdadr(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:26 |
-| `inline Self List.cdar(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:16 |
-| `inline Self List.cddaar(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:57 |
-| `inline Self List.cddadr(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:59 |
-| `inline Self List.cddar(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:28 |
-| `inline Self List.cdddar(Self value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:61 |
+| `inline Self List.cdaaar(Self value)` | verified example | etc/comptime.xlisp:456 | binding | primary/optional | lib/list-selectors.x:49 |
+| `inline Self List.cdaadr(Self value)` | verified example | etc/comptime.xlisp:457 | binding | primary/optional | lib/list-selectors.x:51 |
+| `inline Self List.cdaar(Self value)` | verified example | etc/comptime.xlisp:458 | binding | primary/optional | lib/list-selectors.x:24 |
+| `inline Self List.cdadar(Self value)` | verified example | etc/comptime.xlisp:459 | binding | primary/optional | lib/list-selectors.x:53 |
+| `inline Self List.cdaddr(Self value)` | verified example | etc/comptime.xlisp:460 | binding | primary/optional | lib/list-selectors.x:55 |
+| `inline Self List.cdadr(Self value)` | verified example | etc/comptime.xlisp:461 | binding | primary/optional | lib/list-selectors.x:26 |
+| `inline Self List.cdar(Self value)` | verified example | etc/comptime.xlisp:462 | binding | primary/optional | lib/list-selectors.x:16 |
+| `inline Self List.cddaar(Self value)` | verified example | etc/comptime.xlisp:463 | binding | primary/optional | lib/list-selectors.x:57 |
+| `inline Self List.cddadr(Self value)` | verified example | etc/comptime.xlisp:464 | binding | primary/optional | lib/list-selectors.x:59 |
+| `inline Self List.cddar(Self value)` | verified example | etc/comptime.xlisp:465 | binding | primary/optional | lib/list-selectors.x:28 |
+| `inline Self List.cdddar(Self value)` | verified example | etc/comptime.xlisp:466 | binding | primary/optional | lib/list-selectors.x:61 |
 | `inline Self List.cddddr(Self value)` | verified example | etc/comptime.xlisp:444 | binding | primary/optional | lib/list-selectors.x:63 |
 | `inline Self List.cdddr(Self value)` | verified example | etc/comptime.xlisp:443 | binding | primary/optional | lib/list-selectors.x:30 |
 | `inline Self List.cddr(Self lst)` | verified example | etc/comptime.xlisp:61 | binding | advanced/api | lib/list.x:191 |
@@ -899,32 +899,32 @@ meta int audit_probe(void) { return "abc".withindex(-1, 'x').equal("abx") && "ab
 | `List.append` | lib/list.x / List value operations | implementable with current values | Returns the concatenation of `a` and `b`. Neither input is modified. `b` becomes the shared tail of the result, so only `a`'s cells are rebuilt, O(len(a)) of them. When either side is `nil` the other side is returned as it stands. Raises: `<alloc-fail>` or `<size-limit>` while constructing the copied prefix. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `List.array` | lib/list.x / List value operations | implementable with current values | Returns a new `Array` holding the elements of `lst` in order. The `Array` is a fresh mutable container the caller owns and should free; the elements are shared, since they are only `Var`s. Convert when you need indexed access or in-place mutation. Raises: `<alloc-fail>` or `<size-limit>` while constructing the result. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `List.assoc` | lib/list.x / absence and null values | implementable with current values | Returns the second value of the first association whose key equals `key`. Nil entries are skipped. A missing association and a missing second value both return `void`, so the two cases look the same here. | Raw evaluator slots keep runtime void, Null and empty List distinct. The listed native/meta comparison is verified; no binding work remains for that case. |
-| `List.caaaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(car(car(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.caaaar and verify present, short and empty chains. |
-| `List.caaadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(car(cdr(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.caaadr and verify present, short and empty chains. |
-| `List.caaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(car(value)))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.caaar and verify present, short and empty chains. |
-| `List.caadar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(cdr(car(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.caadar and verify present, short and empty chains. |
-| `List.caaddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(cdr(cdr(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.caaddr and verify present, short and empty chains. |
-| `List.caadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(cdr(value)))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.caadr and verify present, short and empty chains. |
+| `List.caaaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(car(car(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.caaadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(car(cdr(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.caaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(car(value)))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.caadar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(cdr(car(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.caaddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(cdr(cdr(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.caadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(cdr(value)))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `List.caar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(lst))`. Compound accessors read from right to left: `a` applies `car` and `d` applies `cdr`. Every step is `nil`-safe. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
-| `List.cadaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(car(car(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.cadaar and verify present, short and empty chains. |
-| `List.cadadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(car(cdr(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.cadadr and verify present, short and empty chains. |
-| `List.cadar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(car(value)))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.cadar and verify present, short and empty chains. |
-| `List.caddar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(cdr(car(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.caddar and verify present, short and empty chains. |
-| `List.cadddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(cdr(cdr(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.cadddr and verify present, short and empty chains. |
+| `List.cadaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(car(car(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.cadadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(car(cdr(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.cadar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(car(value)))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.caddar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(cdr(car(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.cadddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(cdr(cdr(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `List.caddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns the third element, or `void`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `List.cadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(lst))`, or `void` when there is no second element. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `List.car` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Method form of `car`: the head of `lst`, or `void` when `lst` is `nil`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
-| `List.cdaaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(car(car(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.cdaaar and verify present, short and empty chains. |
-| `List.cdaadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(car(cdr(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.cdaadr and verify present, short and empty chains. |
-| `List.cdaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(car(value)))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.cdaar and verify present, short and empty chains. |
-| `List.cdadar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(cdr(car(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.cdadar and verify present, short and empty chains. |
-| `List.cdaddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(cdr(cdr(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.cdaddr and verify present, short and empty chains. |
-| `List.cdadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(cdr(value)))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.cdadr and verify present, short and empty chains. |
-| `List.cdar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(value))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.cdar and verify present, short and empty chains. |
-| `List.cddaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(car(car(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.cddaar and verify present, short and empty chains. |
-| `List.cddadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(car(cdr(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.cddadr and verify present, short and empty chains. |
-| `List.cddar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(car(value)))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.cddar and verify present, short and empty chains. |
-| `List.cdddar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(cdr(car(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind List.cdddar and verify present, short and empty chains. |
+| `List.cdaaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(car(car(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.cdaadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(car(cdr(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.cdaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(car(value)))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.cdadar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(cdr(car(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.cdaddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(cdr(cdr(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.cdadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(cdr(value)))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.cdar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(value))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.cddaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(car(car(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.cddadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(car(cdr(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.cddar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(car(value)))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.cdddar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(cdr(car(value))))`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `List.cddddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(cdr(cdr(value))))`. | Only cdr steps occur; exhaustion is a representable empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `List.cdddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(cdr(value)))`. | Only cdr steps occur; exhaustion is a representable empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `List.cddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns the tail after two cells, or `nil`. | Only cdr steps occur; exhaustion is a representable empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
@@ -1022,10 +1022,87 @@ meta int audit_probe(void) { List xs = %(1 2); Array a = xs.array(); a[0] = 7; r
 meta int audit_probe(void) { return %((a 1) (b 2)).assoc(<b>) == 2; }
 ```
 
+- `List.caaaar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %((((7)))), empty = %(); return xs.caaaar() == 7 && empty.caaaar() is void; }
+```
+
+- `List.caaadr`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %(0 ((7))), empty = %(); return xs.caaadr() == 7 && empty.caaadr() is void; }
+```
+
+- `List.caaar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %(((7))), empty = %(); return xs.caaar() == 7 && empty.caaar() is void; }
+```
+
+- `List.caadar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %((0 (7))), empty = %(); return xs.caadar() == 7 && empty.caadar() is void; }
+```
+
+- `List.caaddr`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %(0 0 (7)), empty = %(); return xs.caaddr() == 7 && empty.caaddr() is void; }
+```
+
+- `List.caadr`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %(0 (7)), empty = %(); return xs.caadr() == 7 && empty.caadr() is void; }
+```
+
 - `List.caar`: nested head; returned 7.
 
 ```x2c
 meta int audit_probe(void) { List xs = %((7) 8); return xs.caar(); }
+```
+
+- `List.cadaar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %(((0 7))), empty = %(); return xs.cadaar() == 7 && empty.cadaar() is void; }
+```
+
+- `List.cadadr`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %(0 (0 7)), empty = %(); return xs.cadadr() == 7 && empty.cadadr() is void; }
+```
+
+- `List.cadar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %((0 7)), empty = %(); return xs.cadar() == 7 && empty.cadar() is void; }
+```
+
+- `List.caddar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %((0 0 7)), empty = %(); return xs.caddar() == 7 && empty.caddar() is void; }
+```
+
+- `List.cadddr`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %(0 0 0 7), empty = %(); return xs.cadddr() == 7 && empty.cadddr() is void; }
 ```
 
 - `List.caddr`: third element; returned 9.
@@ -1050,6 +1127,83 @@ meta int audit_probe(void) { List xs = %(7); Var value = xs.cadr(); return value
 
 ```x2c
 meta int audit_probe(void) { List xs = %(7 8); return xs.car(); }
+```
+
+- `List.cdaaar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %((((0 7 8)))), empty = %(); return xs.cdaaar().equal(%(7 8)) && empty.cdaaar().len() == 0; }
+```
+
+- `List.cdaadr`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %(0 ((0 7 8))), empty = %(); return xs.cdaadr().equal(%(7 8)) && empty.cdaadr().len() == 0; }
+```
+
+- `List.cdaar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %(((0 7 8))), empty = %(); return xs.cdaar().equal(%(7 8)) && empty.cdaar().len() == 0; }
+```
+
+- `List.cdadar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %((0 (0 7 8))), empty = %(); return xs.cdadar().equal(%(7 8)) && empty.cdadar().len() == 0; }
+```
+
+- `List.cdaddr`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %(0 0 (0 7 8)), empty = %(); return xs.cdaddr().equal(%(7 8)) && empty.cdaddr().len() == 0; }
+```
+
+- `List.cdadr`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %(0 (0 7 8)), empty = %(); return xs.cdadr().equal(%(7 8)) && empty.cdadr().len() == 0; }
+```
+
+- `List.cdar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %((0 7 8)), empty = %(); return xs.cdar().equal(%(7 8)) && empty.cdar().len() == 0; }
+```
+
+- `List.cddaar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %(((0 0 7 8))), empty = %(); return xs.cddaar().equal(%(7 8)) && empty.cddaar().len() == 0; }
+```
+
+- `List.cddadr`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %(0 (0 0 7 8)), empty = %(); return xs.cddadr().equal(%(7 8)) && empty.cddadr().len() == 0; }
+```
+
+- `List.cddar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %((0 0 7 8)), empty = %(); return xs.cddar().equal(%(7 8)) && empty.cddar().len() == 0; }
+```
+
+- `List.cdddar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { List xs = %((0 0 0 7 8)), empty = %(); return xs.cdddar().equal(%(7 8)) && empty.cdddar().len() == 0; }
 ```
 
 - `List.cddddr`: native canonical value contract; returned 1.
@@ -2072,8 +2226,8 @@ meta int audit_probe(void) { Map m = {"a": 1}; return m.var().tag() == <map> && 
 | `char Symbol.last(Symbol symbol)` | reproduced failure | etc/comptime.xlisp:366 | binding | primary/api | lib/symbol.x:246 |
 | `int Symbol.len(Symbol symbol)` | verified example | etc/comptime.xlisp:266 | binding | primary/api | lib/symbol.x:121 |
 | `Symbol Symbol.new(const char *str)` | reproduced failure | none found | pointer | primary/api | lib/symbol.x:104 |
-| `Symbol Symbol.new_len(const char *str, int len)` | verified example | etc/comptime.xlisp:458 | pointer | advanced/api | lib/symbol.x:78 |
-| `Symbol Symbol.parse(char *text)` | verified example | etc/comptime.xlisp:459 | pointer | advanced/api | lib/symbol.x:260 |
+| `Symbol Symbol.new_len(const char *str, int len)` | verified example | etc/comptime.xlisp:502 | pointer | advanced/api | lib/symbol.x:78 |
+| `Symbol Symbol.parse(char *text)` | verified example | etc/comptime.xlisp:503 | pointer | advanced/api | lib/symbol.x:260 |
 | `String Symbol.repr(Symbol symbol)` | verified example | etc/comptime.xlisp:268 | binding | advanced/api | lib/symbol.x:194 |
 | `String Symbol.str(Symbol symbol)` | verified example | etc/comptime.xlisp:269 | binding | advanced/api | lib/symbol.x:162 |
 | `int Symbol.try_new(String spelling, Symbol *out)` | no binding found | none found | pointer | primary/api | lib/symbol.x:112 |
@@ -2177,9 +2331,9 @@ meta int audit_probe(void) { Symbol s = <abc>; return s.var().tag() == <symbol> 
 
 ## Var
 
-**verified example:** `add`, `array`, `binary`, `box_f32`, `box_f64`, `box_i16`, `box_i32_bits`, `box_i8`, `box_long`, `box_long_double`, `box_long_long`, `box_u16`, `box_u32`, `box_u8`, `box_ulong`, `box_ulong_long`, `caar`, `caddr`, `cadr`, `car`, `cddddr`, `cdddr`, `cddr`, `cdr`, `char`, `compare`, `cons`, `contains`, `convert`, `custom_descriptor_index`, `decode_f32`, `decode_f64`, `div`, `double`, `encoding_valid`, `equal`, `fallback_compare`, `fallback_equal`, `fallback_hash`, `fallback_repr`, `fallback_str`, `fallback_truth`, `float`, `floating`, `hash`, `int`, `integer`, `integer_box`, `integer_compare`, `integer_floating_compare`, `integer_tag`, `is`, `is_atom`, `is_atom_binder`, `is_binder`, `is_floating`, `is_integer`, `is_list_binder`, `is_match_op`, `is_nil`, `is_null`, `is_object`, `is_pointer`, `is_reference`, `is_row`, `is_void`, `is_wide`, `iter`, `json`, `kind`, `known_tag`, `list`, `listchar`, `listdbl`, `listfloat`, `listint`, `listshort`, `liststring`, `listsymbol`, `long`, `long_double`, `long_double_value`, `long_long`, `long_long_value`, `long_value`, `map`, `mod`, `mul`, `neg`, `parse`, `payload32`, `postfixindex`, `pretty_json`, `repr`, `same`, `setindex`, `short`, `signed_from_bits`, `str`, `string`, `sub`, `symbol`, `tag`, `truth`, `uchar`, `uint`, `ulong`, `ulong_long`, `ulong_long_value`, `ulong_value`, `unsigned`, `updateindex`, `ushort`, `wide_compare`, `wide_equal`, `wide_hash`, `width_mask`.
+**verified example:** `add`, `array`, `binary`, `box_f32`, `box_f64`, `box_i16`, `box_i32_bits`, `box_i8`, `box_long`, `box_long_double`, `box_long_long`, `box_u16`, `box_u32`, `box_u8`, `box_ulong`, `box_ulong_long`, `caaaar`, `caaadr`, `caaar`, `caadar`, `caaddr`, `caadr`, `caar`, `cadaar`, `cadadr`, `cadar`, `caddar`, `cadddr`, `caddr`, `cadr`, `car`, `cdaaar`, `cdaadr`, `cdaar`, `cdadar`, `cdaddr`, `cdadr`, `cdar`, `cddaar`, `cddadr`, `cddar`, `cdddar`, `cddddr`, `cdddr`, `cddr`, `cdr`, `char`, `compare`, `cons`, `contains`, `convert`, `custom_descriptor_index`, `decode_f32`, `decode_f64`, `div`, `double`, `encoding_valid`, `equal`, `fallback_compare`, `fallback_equal`, `fallback_hash`, `fallback_repr`, `fallback_str`, `fallback_truth`, `float`, `floating`, `hash`, `int`, `integer`, `integer_box`, `integer_compare`, `integer_floating_compare`, `integer_tag`, `is`, `is_atom`, `is_atom_binder`, `is_binder`, `is_floating`, `is_integer`, `is_list_binder`, `is_match_op`, `is_nil`, `is_null`, `is_object`, `is_pointer`, `is_reference`, `is_row`, `is_void`, `is_wide`, `iter`, `json`, `kind`, `known_tag`, `list`, `listchar`, `listdbl`, `listfloat`, `listint`, `listshort`, `liststring`, `listsymbol`, `long`, `long_double`, `long_double_value`, `long_long`, `long_long_value`, `long_value`, `map`, `mod`, `mul`, `neg`, `parse`, `payload32`, `postfixindex`, `pretty_json`, `repr`, `same`, `setindex`, `short`, `signed_from_bits`, `str`, `string`, `sub`, `symbol`, `tag`, `truth`, `uchar`, `uint`, `ulong`, `ulong_long`, `ulong_long_value`, `ulong_value`, `unsigned`, `updateindex`, `ushort`, `wide_compare`, `wide_equal`, `wide_hash`, `width_mask`.
 
-**no binding found:** `adnode`, `arraychar`, `arraydbl`, `arrayfloat`, `arrayint`, `arraylong`, `arrayshort`, `arraystring`, `as_iter`, `block`, `buffer`, `bytes`, `caaaar`, `caaadr`, `caaar`, `caadar`, `caaddr`, `caadr`, `cadaar`, `cadadr`, `cadar`, `caddar`, `cadddr`, `cdaaar`, `cdaadr`, `cdaar`, `cdadar`, `cdaddr`, `cdadr`, `cdar`, `cddaar`, `cddadr`, `cddar`, `cdddar`, `clone_wide`, `dispatch_truth`, `fallback_iter`, `fallback_write_repr`, `fallback_write_str`, `file`, `getindex`, `job`, `jsonbool`, `mapintint`, `maplongdouble`, `mapstringint`, `mapstringstring`, `matmul`, `move_wide_to`, `new`, `null`, `numeric_decode`, `numeric_info`, `pointer`, `pointer_string`, `postfix`, `regex`, `regexcapture`, `regexmatch`, `register_object_tag`, `token`, `try_dispatch_binary`, `try_dispatch_unary`, `try_export_context`, `update`, `wide_owner`, `write_pointer_repr`, `write_repr`, `write_str`.
+**no binding found:** `adnode`, `arraychar`, `arraydbl`, `arrayfloat`, `arrayint`, `arraylong`, `arrayshort`, `arraystring`, `as_iter`, `block`, `buffer`, `bytes`, `clone_wide`, `dispatch_truth`, `fallback_iter`, `fallback_write_repr`, `fallback_write_str`, `file`, `getindex`, `job`, `jsonbool`, `mapintint`, `maplongdouble`, `mapstringint`, `mapstringstring`, `matmul`, `move_wide_to`, `new`, `null`, `numeric_decode`, `numeric_info`, `pointer`, `pointer_string`, `postfix`, `regex`, `regexcapture`, `regexmatch`, `register_object_tag`, `token`, `try_dispatch_binary`, `try_dispatch_unary`, `try_export_context`, `update`, `wide_owner`, `write_pointer_repr`, `write_repr`, `write_str`.
 
 | Direct callable | State | Binding provenance | Considerations | Tier/module | Source |
 | --- | --- | --- | --- | --- | --- |
@@ -2196,49 +2350,49 @@ meta int audit_probe(void) { Symbol s = <abc>; return s.var().tag() == <symbol> 
 | `inline Iter Var.as_iter(Var value)` | no binding found | none found | resource | advanced/api | lib/common.x:620 |
 | `Var Var.binary(Var lhs, Symbol op, Var rhs)` | verified example | etc/init.xlisp:96 | syntax | primary/api | lib/varops.x:472 |
 | `inline Block Var.block(Var value)` | no binding found | none found | resource | advanced/api | lib/common.x:616 |
-| `inline Var Var.box_f32(float value)` | verified example | etc/comptime.xlisp:461 | internal | advanced/api | lib/common.x:508 |
-| `inline Var Var.box_f64(double value)` | verified example | etc/comptime.xlisp:462 | internal | advanced/api | lib/common.x:515 |
-| `inline Var Var.box_i16(short value)` | verified example | etc/comptime.xlisp:463 | internal | advanced/api | lib/common.x:499 |
-| `inline Var Var.box_i32_bits(unsigned value)` | verified example | etc/comptime.xlisp:464 | internal | advanced/api | lib/common.x:503 |
-| `inline Var Var.box_i8(char value)` | verified example | etc/comptime.xlisp:465 | internal | advanced/api | lib/common.x:495 |
-| `Var Var.box_long(long value)` | verified example | etc/comptime.xlisp:466 | internal | advanced/api | lib/var.x:478 |
-| `Var Var.box_long_double(long double value)` | verified example | etc/comptime.xlisp:467 | internal | advanced/api | lib/var.x:530 |
-| `Var Var.box_long_long(long long value)` | verified example | etc/comptime.xlisp:468 | internal | advanced/api | lib/var.x:504 |
-| `inline Var Var.box_u16(ushort value)` | verified example | etc/comptime.xlisp:469 | internal | advanced/api | lib/common.x:501 |
-| `inline Var Var.box_u32(unsigned value)` | verified example | etc/comptime.xlisp:470 | internal | advanced/api | lib/common.x:505 |
-| `inline Var Var.box_u8(uchar value)` | verified example | etc/comptime.xlisp:471 | internal | advanced/api | lib/common.x:497 |
-| `Var Var.box_ulong(unsigned long value)` | verified example | etc/comptime.xlisp:472 | internal | advanced/api | lib/var.x:493 |
-| `Var Var.box_ulong_long(unsigned long long value)` | verified example | etc/comptime.xlisp:473 | internal | advanced/api | lib/var.x:515 |
+| `inline Var Var.box_f32(float value)` | verified example | etc/comptime.xlisp:505 | internal | advanced/api | lib/common.x:508 |
+| `inline Var Var.box_f64(double value)` | verified example | etc/comptime.xlisp:506 | internal | advanced/api | lib/common.x:515 |
+| `inline Var Var.box_i16(short value)` | verified example | etc/comptime.xlisp:507 | internal | advanced/api | lib/common.x:499 |
+| `inline Var Var.box_i32_bits(unsigned value)` | verified example | etc/comptime.xlisp:508 | internal | advanced/api | lib/common.x:503 |
+| `inline Var Var.box_i8(char value)` | verified example | etc/comptime.xlisp:509 | internal | advanced/api | lib/common.x:495 |
+| `Var Var.box_long(long value)` | verified example | etc/comptime.xlisp:510 | internal | advanced/api | lib/var.x:478 |
+| `Var Var.box_long_double(long double value)` | verified example | etc/comptime.xlisp:511 | internal | advanced/api | lib/var.x:530 |
+| `Var Var.box_long_long(long long value)` | verified example | etc/comptime.xlisp:512 | internal | advanced/api | lib/var.x:504 |
+| `inline Var Var.box_u16(ushort value)` | verified example | etc/comptime.xlisp:513 | internal | advanced/api | lib/common.x:501 |
+| `inline Var Var.box_u32(unsigned value)` | verified example | etc/comptime.xlisp:514 | internal | advanced/api | lib/common.x:505 |
+| `inline Var Var.box_u8(uchar value)` | verified example | etc/comptime.xlisp:515 | internal | advanced/api | lib/common.x:497 |
+| `Var Var.box_ulong(unsigned long value)` | verified example | etc/comptime.xlisp:516 | internal | advanced/api | lib/var.x:493 |
+| `Var Var.box_ulong_long(unsigned long long value)` | verified example | etc/comptime.xlisp:517 | internal | advanced/api | lib/var.x:515 |
 | `inline Buffer Var.buffer(Var value)` | no binding found | none found | resource | advanced/api | lib/common.x:617 |
 | `inline Bytes Var.bytes(Var value)` | no binding found | none found | resource | advanced/api | lib/common.x:618 |
-| `inline Var Var.caaaar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:83 |
-| `inline Var Var.caaadr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:85 |
-| `inline Var Var.caaar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:68 |
-| `inline Var Var.caadar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:87 |
-| `inline Var Var.caaddr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:89 |
-| `inline Var Var.caadr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:70 |
+| `inline Var Var.caaaar(Var value)` | verified example | etc/comptime.xlisp:476 | binding | primary/optional | lib/list-selectors.x:83 |
+| `inline Var Var.caaadr(Var value)` | verified example | etc/comptime.xlisp:477 | binding | primary/optional | lib/list-selectors.x:85 |
+| `inline Var Var.caaar(Var value)` | verified example | etc/comptime.xlisp:478 | binding | primary/optional | lib/list-selectors.x:68 |
+| `inline Var Var.caadar(Var value)` | verified example | etc/comptime.xlisp:479 | binding | primary/optional | lib/list-selectors.x:87 |
+| `inline Var Var.caaddr(Var value)` | verified example | etc/comptime.xlisp:480 | binding | primary/optional | lib/list-selectors.x:89 |
+| `inline Var Var.caadr(Var value)` | verified example | etc/comptime.xlisp:481 | binding | primary/optional | lib/list-selectors.x:70 |
 | `inline Var Var.caar(Var var)` | verified example | etc/comptime.xlisp:272 | binding | advanced/api | lib/list.x:200 |
-| `inline Var Var.cadaar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:91 |
-| `inline Var Var.cadadr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:93 |
-| `inline Var Var.cadar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:72 |
-| `inline Var Var.caddar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:95 |
-| `inline Var Var.cadddr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:97 |
+| `inline Var Var.cadaar(Var value)` | verified example | etc/comptime.xlisp:482 | binding | primary/optional | lib/list-selectors.x:91 |
+| `inline Var Var.cadadr(Var value)` | verified example | etc/comptime.xlisp:483 | binding | primary/optional | lib/list-selectors.x:93 |
+| `inline Var Var.cadar(Var value)` | verified example | etc/comptime.xlisp:484 | binding | primary/optional | lib/list-selectors.x:72 |
+| `inline Var Var.caddar(Var value)` | verified example | etc/comptime.xlisp:485 | binding | primary/optional | lib/list-selectors.x:95 |
+| `inline Var Var.cadddr(Var value)` | verified example | etc/comptime.xlisp:486 | binding | primary/optional | lib/list-selectors.x:97 |
 | `inline Var Var.caddr(Var var)` | verified example | etc/comptime.xlisp:275 | binding | advanced/api | lib/list.x:206 |
 | `inline Var Var.cadr(Var var)` | verified example | etc/comptime.xlisp:273 | binding | advanced/api | lib/list.x:202 |
 | `Var Var.car(Var var)` | verified example | etc/init.xlisp:94 | binding | advanced/api | lib/list.x:196 |
-| `inline List Var.cdaaar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:99 |
-| `inline List Var.cdaadr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:101 |
-| `inline List Var.cdaar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:74 |
-| `inline List Var.cdadar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:103 |
-| `inline List Var.cdaddr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:105 |
-| `inline List Var.cdadr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:76 |
-| `inline List Var.cdar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:66 |
-| `inline List Var.cddaar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:107 |
-| `inline List Var.cddadr(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:109 |
-| `inline List Var.cddar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:78 |
-| `inline List Var.cdddar(Var value)` | no binding found | none found | binding | primary/optional | lib/list-selectors.x:111 |
-| `inline List Var.cddddr(Var value)` | verified example | etc/comptime.xlisp:453 | binding | primary/optional | lib/list-selectors.x:113 |
-| `inline List Var.cdddr(Var value)` | verified example | etc/comptime.xlisp:452 | binding | primary/optional | lib/list-selectors.x:80 |
+| `inline List Var.cdaaar(Var value)` | verified example | etc/comptime.xlisp:487 | binding | primary/optional | lib/list-selectors.x:99 |
+| `inline List Var.cdaadr(Var value)` | verified example | etc/comptime.xlisp:488 | binding | primary/optional | lib/list-selectors.x:101 |
+| `inline List Var.cdaar(Var value)` | verified example | etc/comptime.xlisp:489 | binding | primary/optional | lib/list-selectors.x:74 |
+| `inline List Var.cdadar(Var value)` | verified example | etc/comptime.xlisp:490 | binding | primary/optional | lib/list-selectors.x:103 |
+| `inline List Var.cdaddr(Var value)` | verified example | etc/comptime.xlisp:491 | binding | primary/optional | lib/list-selectors.x:105 |
+| `inline List Var.cdadr(Var value)` | verified example | etc/comptime.xlisp:492 | binding | primary/optional | lib/list-selectors.x:76 |
+| `inline List Var.cdar(Var value)` | verified example | etc/comptime.xlisp:493 | binding | primary/optional | lib/list-selectors.x:66 |
+| `inline List Var.cddaar(Var value)` | verified example | etc/comptime.xlisp:494 | binding | primary/optional | lib/list-selectors.x:107 |
+| `inline List Var.cddadr(Var value)` | verified example | etc/comptime.xlisp:495 | binding | primary/optional | lib/list-selectors.x:109 |
+| `inline List Var.cddar(Var value)` | verified example | etc/comptime.xlisp:496 | binding | primary/optional | lib/list-selectors.x:78 |
+| `inline List Var.cdddar(Var value)` | verified example | etc/comptime.xlisp:497 | binding | primary/optional | lib/list-selectors.x:111 |
+| `inline List Var.cddddr(Var value)` | verified example | etc/comptime.xlisp:475 | binding | primary/optional | lib/list-selectors.x:113 |
+| `inline List Var.cdddr(Var value)` | verified example | etc/comptime.xlisp:474 | binding | primary/optional | lib/list-selectors.x:80 |
 | `inline List Var.cddr(Var var)` | verified example | etc/comptime.xlisp:274 | binding | advanced/api | lib/list.x:204 |
 | `List Var.cdr(Var var)` | verified example | etc/init.xlisp:95 | binding | advanced/api | lib/list.x:198 |
 | `char Var.char(Var x)` | verified example | etc/comptime.xlisp:387 | binding | advanced/api | lib/common.x:642 |
@@ -2247,21 +2401,21 @@ meta int audit_probe(void) { Symbol s = <abc>; return s.var().tag() == <symbol> 
 | `List Var.cons(Var head, List tail)` | verified example | etc/init.xlisp:91 | binding | advanced/api | lib/list.x:168 |
 | `int Var.contains(Var value, Var needle)` | verified example | etc/comptime.xlisp:407 | binding | primary/api | lib/dispatch.x:368 |
 | `Var Var.convert(Var value, Symbol target)` | verified example | etc/comptime.xlisp:277 | binding | primary/api | lib/varconvert.x:273 |
-| `int Var.custom_descriptor_index(Var value)` | verified example | etc/comptime.xlisp:474 | internal | internal/api | lib/var.x:216 |
-| `inline float Var.decode_f32(Var value)` | verified example | etc/comptime.xlisp:475 | internal | advanced/api | lib/common.x:462 |
-| `inline double Var.decode_f64(Var value)` | verified example | etc/comptime.xlisp:476 | internal | advanced/api | lib/common.x:470 |
+| `int Var.custom_descriptor_index(Var value)` | verified example | etc/comptime.xlisp:518 | internal | internal/api | lib/var.x:216 |
+| `inline float Var.decode_f32(Var value)` | verified example | etc/comptime.xlisp:519 | internal | advanced/api | lib/common.x:462 |
+| `inline double Var.decode_f64(Var value)` | verified example | etc/comptime.xlisp:520 | internal | advanced/api | lib/common.x:470 |
 | `int Var.dispatch_truth(Var value, int *handled)` | no binding found | none found | pointer | advanced/api | lib/dispatch.x:47 |
 | `Var Var.div(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:427 | syntax | primary/api | lib/varops.x:426 |
 | `double Var.double(Var x)` | verified example | etc/comptime.xlisp:399 | binding | advanced/api | lib/common.x:771 |
-| `int Var.encoding_valid(Var value)` | verified example | etc/comptime.xlisp:477 | internal | advanced/api | lib/var.x:231 |
+| `int Var.encoding_valid(Var value)` | verified example | etc/comptime.xlisp:521 | internal | advanced/api | lib/var.x:231 |
 | `int Var.equal(Var a, Var b)` | verified example | etc/comptime.xlisp:281 | binding | advanced/api | lib/dispatch.x:762 |
-| `int Var.fallback_compare(Var a, Var b)` | verified example | etc/comptime.xlisp:478 | internal | primary/api | lib/dispatch.x:869 |
-| `int Var.fallback_equal(Var a, Var b)` | verified example | etc/comptime.xlisp:479 | internal | primary/api | lib/dispatch.x:719 |
-| `unsigned Var.fallback_hash(Var v)` | verified example | etc/comptime.xlisp:480 | internal | primary/api | lib/dispatch.x:729 |
+| `int Var.fallback_compare(Var a, Var b)` | verified example | etc/comptime.xlisp:522 | internal | primary/api | lib/dispatch.x:869 |
+| `int Var.fallback_equal(Var a, Var b)` | verified example | etc/comptime.xlisp:523 | internal | primary/api | lib/dispatch.x:719 |
+| `unsigned Var.fallback_hash(Var v)` | verified example | etc/comptime.xlisp:524 | internal | primary/api | lib/dispatch.x:729 |
 | `Iter Var.fallback_iter(Var x, Iter dest)` | no binding found | none found | resource, internal | primary/api | lib/dispatch.x:921 |
-| `String Var.fallback_repr(Var v)` | verified example | etc/comptime.xlisp:481 | internal | primary/api | lib/dispatch.x:594 |
-| `String Var.fallback_str(Var v)` | verified example | etc/comptime.xlisp:482 | internal | primary/api | lib/dispatch.x:525 |
-| `int Var.fallback_truth(Var value)` | verified example | etc/comptime.xlisp:483 | internal | primary/api | lib/varops.x:323 |
+| `String Var.fallback_repr(Var v)` | verified example | etc/comptime.xlisp:525 | internal | primary/api | lib/dispatch.x:594 |
+| `String Var.fallback_str(Var v)` | verified example | etc/comptime.xlisp:526 | internal | primary/api | lib/dispatch.x:525 |
+| `int Var.fallback_truth(Var value)` | verified example | etc/comptime.xlisp:527 | internal | primary/api | lib/varops.x:323 |
 | `Buffer Var.fallback_write_repr(Var v, Buffer out)` | no binding found | none found | resource, internal | primary/api | lib/dispatch.x:684 |
 | `Buffer Var.fallback_write_str(Var v, Buffer out)` | no binding found | none found | resource, internal | primary/api | lib/dispatch.x:562 |
 | `inline File Var.file(Var value)` | no binding found | none found | resource | advanced/api | lib/common.x:619 |
@@ -2271,10 +2425,10 @@ meta int audit_probe(void) { Symbol s = <abc>; return s.var().tag() == <symbol> 
 | `unsigned Var.hash(Var v)` | verified example | etc/comptime.xlisp:408 | binding | advanced/api | lib/dispatch.x:738 |
 | `int Var.int(Var x)` | verified example | etc/comptime.xlisp:389 | binding | advanced/api | lib/common.x:678 |
 | `long Var.integer(Var v)` | verified example | etc/comptime.xlisp:278 | binding | advanced/api | lib/var.x:759 |
-| `Var Var.integer_box(Symbol target, unsigned long long raw)` | verified example | etc/comptime.xlisp:484 | internal | advanced/api | lib/varconvert.x:99 |
-| `int Var.integer_compare(Var a, Var b)` | verified example | etc/comptime.xlisp:485 | binding | advanced/api | lib/var.x:939 |
-| `int Var.integer_floating_compare(Var integer, Var floating)` | verified example | etc/comptime.xlisp:486 | binding | advanced/api | lib/var.x:967 |
-| `Symbol Var.integer_tag(int rank, int unsigned_value)` | verified example | etc/comptime.xlisp:487 | internal | advanced/api | lib/varconvert.x:41 |
+| `Var Var.integer_box(Symbol target, unsigned long long raw)` | verified example | etc/comptime.xlisp:528 | internal | advanced/api | lib/varconvert.x:99 |
+| `int Var.integer_compare(Var a, Var b)` | verified example | etc/comptime.xlisp:529 | binding | advanced/api | lib/var.x:939 |
+| `int Var.integer_floating_compare(Var integer, Var floating)` | verified example | etc/comptime.xlisp:530 | binding | advanced/api | lib/var.x:967 |
+| `Symbol Var.integer_tag(int rank, int unsigned_value)` | verified example | etc/comptime.xlisp:531 | internal | advanced/api | lib/varconvert.x:41 |
 | `int Var.is(Var var, Symbol tag)` | verified example | etc/comptime.xlisp:280 | binding | primary/api | lib/var.x:296 |
 | `int Var.is_atom(Var value)` | verified example | etc/comptime.xlisp:410 | binding | primary/api | lib/atom.x:92 |
 | `int Var.is_atom_binder(Var atom)` | verified example | etc/comptime.xlisp:411 | binding | advanced/api | lib/match.x:378 |
@@ -2288,23 +2442,23 @@ meta int audit_probe(void) { Symbol s = <abc>; return s.var().tag() == <symbol> 
 | `int Var.is_object(Var v)` | verified example | etc/comptime.xlisp:419 | binding | primary/api | lib/var.x:343 |
 | `int Var.is_pointer(Var v)` | verified example | etc/comptime.xlisp:417 | internal | primary/api | lib/var.x:332 |
 | `int Var.is_reference(Var v)` | verified example | etc/comptime.xlisp:418 | binding | primary/api | lib/var.x:334 |
-| `inline int Var.is_row( Var value, unsigned top, unsigned long mask, unsigned long bottom)` | verified example | etc/comptime.xlisp:488 | internal | advanced/api | lib/common.x:611 |
+| `inline int Var.is_row( Var value, unsigned top, unsigned long mask, unsigned long bottom)` | verified example | etc/comptime.xlisp:532 | internal | advanced/api | lib/common.x:611 |
 | `int Var.is_void(Var v)` | verified example | etc/comptime.xlisp:423 | binding | primary/api | lib/var.x:365 |
 | `inline int Var.is_wide(Var v)` | verified example | etc/comptime.xlisp:420 | binding | advanced/api | lib/common.x:453 |
 | `Iter Var.iter(Var x, Iter dest)` | verified example | etc/comptime.xlisp:179 | resource | primary/api | lib/dispatch.x:931 |
 | `Job Var.job(Var)` | no binding found | none found | resource | unclassified generated/optional | lib/process.x (interface) |
-| `String Var.json(Var value)` | verified example | etc/comptime.xlisp:454 | binding | primary/optional | lib/json.x:560 |
+| `String Var.json(Var value)` | verified example | etc/comptime.xlisp:498 | binding | primary/optional | lib/json.x:560 |
 | `JsonBool Var.jsonbool(Var value)` | no binding found | none found | resource | primary/optional | lib/json.x:57 |
 | `Symbol Var.kind(Var v)` | verified example | etc/comptime.xlisp:271 | binding | advanced/api | lib/var.x:309 |
-| `int Var.known_tag(Symbol tag)` | verified example | etc/comptime.xlisp:489 | internal | advanced/api | lib/var.x:61 |
+| `int Var.known_tag(Symbol tag)` | verified example | etc/comptime.xlisp:533 | internal | advanced/api | lib/var.x:61 |
 | `inline List Var.list(Var value)` | verified example | etc/comptime.xlisp:298 | binding | advanced/api | lib/common.x:621 |
-| `ListChar Var.listchar(Var value)` | verified example | etc/comptime.xlisp:445 | resource | primary/optional | lib/typed-list.x:97 |
-| `ListDbl Var.listdbl(Var value)` | verified example | etc/comptime.xlisp:449 | resource | primary/optional | lib/typed-list.x:113 |
-| `ListFloat Var.listfloat(Var value)` | verified example | etc/comptime.xlisp:448 | resource | primary/optional | lib/typed-list.x:109 |
-| `ListInt Var.listint(Var value)` | verified example | etc/comptime.xlisp:447 | resource | primary/optional | lib/typed-list.x:105 |
-| `ListShort Var.listshort(Var value)` | verified example | etc/comptime.xlisp:446 | resource | primary/optional | lib/typed-list.x:101 |
-| `ListString Var.liststring(Var value)` | verified example | etc/comptime.xlisp:450 | resource | primary/optional | lib/typed-list.x:117 |
-| `ListSymbol Var.listsymbol(Var value)` | verified example | etc/comptime.xlisp:451 | resource | primary/optional | lib/typed-list.x:121 |
+| `ListChar Var.listchar(Var value)` | verified example | etc/comptime.xlisp:467 | resource | primary/optional | lib/typed-list.x:97 |
+| `ListDbl Var.listdbl(Var value)` | verified example | etc/comptime.xlisp:471 | resource | primary/optional | lib/typed-list.x:113 |
+| `ListFloat Var.listfloat(Var value)` | verified example | etc/comptime.xlisp:470 | resource | primary/optional | lib/typed-list.x:109 |
+| `ListInt Var.listint(Var value)` | verified example | etc/comptime.xlisp:469 | resource | primary/optional | lib/typed-list.x:105 |
+| `ListShort Var.listshort(Var value)` | verified example | etc/comptime.xlisp:468 | resource | primary/optional | lib/typed-list.x:101 |
+| `ListString Var.liststring(Var value)` | verified example | etc/comptime.xlisp:472 | resource | primary/optional | lib/typed-list.x:117 |
+| `ListSymbol Var.listsymbol(Var value)` | verified example | etc/comptime.xlisp:473 | resource | primary/optional | lib/typed-list.x:121 |
 | `long Var.long(Var x)` | verified example | etc/comptime.xlisp:390 | binding | advanced/api | lib/common.x:705 |
 | `long double Var.long_double(Var x)` | verified example | etc/comptime.xlisp:400 | binding | advanced/api | lib/common.x:752 |
 | `long double Var.long_double_value(Var v)` | verified example | etc/comptime.xlisp:405 | binding | advanced/api | lib/var.x:831 |
@@ -2326,12 +2480,12 @@ meta int audit_probe(void) { Symbol s = <abc>; return s.var().tag() == <symbol> 
 | `void Var.numeric_decode(Var value, X2CVarNumeric *out)` | no binding found | none found | pointer, internal | advanced/api | lib/varconvert.x:79 |
 | `int Var.numeric_info(Symbol tag, X2CVarNumericInfo *out)` | no binding found | none found | pointer, internal | advanced/api | lib/varconvert.x:147 |
 | `Var Var.parse(String str, Symbol kind)` | verified example | etc/comptime.xlisp:276 | binding | advanced/api | lib/var.x:1068 |
-| `inline unsigned Var.payload32(Var value)` | verified example | etc/comptime.xlisp:490 | internal | advanced/api | lib/common.x:459 |
+| `inline unsigned Var.payload32(Var value)` | verified example | etc/comptime.xlisp:534 | internal | advanced/api | lib/common.x:459 |
 | `void *Var.pointer(Var v)` | no binding found | none found | pointer, internal | advanced/api | lib/var.x:1022 |
 | `String Var.pointer_string(Var v)` | no binding found | none found | internal | advanced/api | lib/dispatch.x:211 |
 | `Var Var.postfix(Var *lhs, Symbol op)` | no binding found | none found | pointer, syntax | primary/api | lib/varops.x:560 |
 | `Var Var.postfixindex(Var value, Var key, Symbol op)` | verified example | etc/comptime.xlisp:433 | syntax | primary/api | lib/dispatch.x:432 |
-| `String Var.pretty_json(Var value)` | verified example | etc/comptime.xlisp:455 | binding | primary/optional | lib/json.x:565 |
+| `String Var.pretty_json(Var value)` | verified example | etc/comptime.xlisp:499 | binding | primary/optional | lib/json.x:565 |
 | `Regex Var.regex(Var)` | no binding found | none found | resource | unclassified generated/optional | lib/regex.x (interface) |
 | `RegexCapture Var.regexcapture(Var value)` | no binding found | none found | resource | primary/optional | lib/regex.x:745 |
 | `RegexMatch Var.regexmatch(Var value)` | no binding found | none found | resource | primary/optional | lib/regex.x:748 |
@@ -2340,7 +2494,7 @@ meta int audit_probe(void) { Symbol s = <abc>; return s.var().tag() == <symbol> 
 | `int Var.same(Var a, Var b)` | verified example | etc/comptime.xlisp:409 | binding | advanced/api | lib/dispatch.x:786 |
 | `Var Var.setindex(Var value, Var key, Var replacement)` | verified example | etc/comptime.xlisp:431 | binding | primary/api | lib/dispatch.x:398 |
 | `short Var.short(Var x)` | verified example | etc/comptime.xlisp:388 | binding | advanced/api | lib/common.x:660 |
-| `long long Var.signed_from_bits(unsigned long long raw, int bits)` | verified example | etc/comptime.xlisp:491 | internal | advanced/api | lib/varconvert.x:60 |
+| `long long Var.signed_from_bits(unsigned long long raw, int bits)` | verified example | etc/comptime.xlisp:535 | internal | advanced/api | lib/varconvert.x:60 |
 | `String Var.str(Var v)` | verified example | etc/init.xlisp:108 | binding | advanced/api | lib/dispatch.x:536 |
 | `inline String Var.string(Var value)` | verified example | etc/comptime.xlisp:385 | binding | advanced/api | lib/common.x:623 |
 | `Var Var.sub(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:425 | syntax | primary/api | lib/varops.x:406 |
@@ -2361,11 +2515,11 @@ meta int audit_probe(void) { Symbol s = <abc>; return s.var().tag() == <symbol> 
 | `Var Var.update(Var *lhs, Symbol op, Var rhs)` | no binding found | none found | pointer, syntax | primary/api | lib/varops.x:528 |
 | `Var Var.updateindex(Var value, Var key, Symbol op, Var rhs)` | verified example | etc/comptime.xlisp:432 | syntax | primary/api | lib/dispatch.x:416 |
 | `ushort Var.ushort(Var x)` | verified example | etc/comptime.xlisp:393 | binding | advanced/api | lib/common.x:669 |
-| `int Var.wide_compare(Var a, Var b)` | verified example | etc/comptime.xlisp:492 | internal | advanced/api | lib/var.x:991 |
-| `int Var.wide_equal(Var a, Var b)` | verified example | etc/comptime.xlisp:493 | internal | advanced/api | lib/var.x:874 |
-| `unsigned Var.wide_hash(Var v)` | verified example | etc/comptime.xlisp:494 | internal | advanced/api | lib/var.x:841 |
+| `int Var.wide_compare(Var a, Var b)` | verified example | etc/comptime.xlisp:536 | internal | advanced/api | lib/var.x:991 |
+| `int Var.wide_equal(Var a, Var b)` | verified example | etc/comptime.xlisp:537 | internal | advanced/api | lib/var.x:874 |
+| `unsigned Var.wide_hash(Var v)` | verified example | etc/comptime.xlisp:538 | internal | advanced/api | lib/var.x:841 |
 | `Scope Var.wide_owner(Var v)` | no binding found | none found | ownership, resource, internal | internal/api | lib/var.x:574 |
-| `unsigned long long Var.width_mask(int bits)` | verified example | etc/comptime.xlisp:495 | internal | advanced/api | lib/varconvert.x:53 |
+| `unsigned long long Var.width_mask(int bits)` | verified example | etc/comptime.xlisp:539 | internal | advanced/api | lib/varconvert.x:53 |
 | `Buffer Var.write_pointer_repr(Var v, Buffer out)` | no binding found | none found | resource, internal | advanced/api | lib/dispatch.x:218 |
 | `Buffer Var.write_repr(Var v, Buffer out)` | no binding found | none found | resource | advanced/api | lib/dispatch.x:697 |
 | `Buffer Var.write_str(Var v, Buffer out)` | no binding found | none found | resource | primary/api | lib/dispatch.x:581 |
@@ -2402,32 +2556,32 @@ meta int audit_probe(void) { Symbol s = <abc>; return s.var().tag() == <symbol> 
 | `Var.box_ulong_long` | lib/var.x / numeric and descriptor internals | implementable with current values | Boxes a native unsigned long-long value without losing precision. Raises: `<alloc-fail>` when the box cannot be allocated and `<bad-enc>` when its address cannot be represented in a `Var`. Before `Error` initialization, allocation failure uses the raw fatal floor. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Var.buffer` | lib/common.x / native Buffer contracts | native resource contract | Extracts the `Buffer` payload of `value`, or NULL for another tag. | The signature crosses Buffer handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/common.x's handle and effect contract for Var.buffer; add only a scoped native adapter after those obligations are specified. |
 | `Var.bytes` | lib/common.x / native Bytes contracts | native resource contract | Extracts the `Bytes` payload of `value`, or NULL for another tag. | The signature crosses Bytes handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/common.x's handle and effect contract for Var.bytes; add only a scoped native adapter after those obligations are specified. |
-| `Var.caaaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(car(car(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.caaaar and verify present, short and empty chains. |
-| `Var.caaadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(car(cdr(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.caaadr and verify present, short and empty chains. |
-| `Var.caaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(car(value)))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.caaar and verify present, short and empty chains. |
-| `Var.caadar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(cdr(car(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.caadar and verify present, short and empty chains. |
-| `Var.caaddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(cdr(cdr(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.caaddr and verify present, short and empty chains. |
-| `Var.caadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(cdr(value)))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.caadr and verify present, short and empty chains. |
+| `Var.caaaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(car(car(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.caaadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(car(cdr(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.caaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(car(value)))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.caadar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(cdr(car(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.caaddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(cdr(cdr(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.caadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(car(cdr(value)))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Var.caar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Applies the `caar` selector chain to `Var`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
-| `Var.cadaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(car(car(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.cadaar and verify present, short and empty chains. |
-| `Var.cadadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(car(cdr(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.cadadr and verify present, short and empty chains. |
-| `Var.cadar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(car(value)))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.cadar and verify present, short and empty chains. |
-| `Var.caddar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(cdr(car(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.caddar and verify present, short and empty chains. |
-| `Var.cadddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(cdr(cdr(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.cadddr and verify present, short and empty chains. |
+| `Var.cadaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(car(car(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.cadadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(car(cdr(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.cadar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(car(value)))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.caddar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(cdr(car(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.cadddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `car(cdr(cdr(cdr(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Var.caddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Applies the `caddr` selector chain to `Var`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Var.cadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Applies the `cadr` selector chain to `Var`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Var.car` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Treats `var` as a `List` and returns its first element. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
-| `Var.cdaaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(car(car(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.cdaaar and verify present, short and empty chains. |
-| `Var.cdaadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(car(cdr(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.cdaadr and verify present, short and empty chains. |
-| `Var.cdaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(car(value)))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.cdaar and verify present, short and empty chains. |
-| `Var.cdadar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(cdr(car(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.cdadar and verify present, short and empty chains. |
-| `Var.cdaddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(cdr(cdr(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.cdaddr and verify present, short and empty chains. |
-| `Var.cdadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(cdr(value)))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.cdadr and verify present, short and empty chains. |
-| `Var.cdar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(value))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.cdar and verify present, short and empty chains. |
-| `Var.cddaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(car(car(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.cddaar and verify present, short and empty chains. |
-| `Var.cddadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(car(cdr(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.cddadr and verify present, short and empty chains. |
-| `Var.cddar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(car(value)))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.cddar and verify present, short and empty chains. |
-| `Var.cdddar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(cdr(car(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. Bind Var.cdddar and verify present, short and empty chains. |
+| `Var.cdaaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(car(car(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.cdaadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(car(cdr(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.cdaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(car(value)))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.cdadar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(cdr(car(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.cdaddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(cdr(cdr(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.cdadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(cdr(value)))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.cdar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(car(value))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.cddaar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(car(car(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.cddadr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(car(cdr(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.cddar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(car(value)))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.cdddar` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(cdr(car(value))))` after treating `value` as a `List`. | A car step may return runtime void; raw evaluator slots now preserve that absence separately from an empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Var.cddddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(cdr(cdr(value))))` after treating `value` as a `List`. | Only cdr steps occur; exhaustion is a representable empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Var.cdddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Returns `cdr(cdr(cdr(value)))` after treating `value` as a `List`. | Only cdr steps occur; exhaustion is a representable empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Var.cddr` | lib/list-selectors.x; lib/list.x / canonical List selectors | implementable with current values | Applies the `cddr` selector chain to `Var`. | Only cdr steps occur; exhaustion is a representable empty List. The listed native/meta comparison is verified; no binding work remains for that case. |
@@ -2665,10 +2819,87 @@ meta int audit_probe(void) { Var v = Var.box_ulong(7); return v.tag() == <ulong>
 meta int audit_probe(void) { Var v = Var.box_ulong_long(7); return v.tag() == <ullong> && v.ulong_long_value() == 7; }
 ```
 
+- `Var.caaaar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %((((7)))), empty = %(); return xs.caaaar() == 7 && empty.caaaar() is void; }
+```
+
+- `Var.caaadr`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %(0 ((7))), empty = %(); return xs.caaadr() == 7 && empty.caaadr() is void; }
+```
+
+- `Var.caaar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %(((7))), empty = %(); return xs.caaar() == 7 && empty.caaar() is void; }
+```
+
+- `Var.caadar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %((0 (7))), empty = %(); return xs.caadar() == 7 && empty.caadar() is void; }
+```
+
+- `Var.caaddr`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %(0 0 (7)), empty = %(); return xs.caaddr() == 7 && empty.caaddr() is void; }
+```
+
+- `Var.caadr`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %(0 (7)), empty = %(); return xs.caadr() == 7 && empty.caadr() is void; }
+```
+
 - `Var.caar`: existing binding with native control; returned 1.
 
 ```x2c
 meta int audit_probe(void) { Var v = %((7)); return v.caar() == 7; }
+```
+
+- `Var.cadaar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %(((0 7))), empty = %(); return xs.cadaar() == 7 && empty.cadaar() is void; }
+```
+
+- `Var.cadadr`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %(0 (0 7)), empty = %(); return xs.cadadr() == 7 && empty.cadadr() is void; }
+```
+
+- `Var.cadar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %((0 7)), empty = %(); return xs.cadar() == 7 && empty.cadar() is void; }
+```
+
+- `Var.caddar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %((0 0 7)), empty = %(); return xs.caddar() == 7 && empty.caddar() is void; }
+```
+
+- `Var.cadddr`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %(0 0 0 7), empty = %(); return xs.cadddr() == 7 && empty.cadddr() is void; }
 ```
 
 - `Var.caddr`: existing binding with native control; returned 1.
@@ -2687,6 +2918,83 @@ meta int audit_probe(void) { Var value = %(7 8); return value.cadr(); }
 
 ```x2c
 meta int audit_probe(void) { Var v = %(7); return v.car() == 7; }
+```
+
+- `Var.cdaaar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %((((0 7 8)))), empty = %(); return xs.cdaaar().equal(%(7 8)) && empty.cdaaar().len() == 0; }
+```
+
+- `Var.cdaadr`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %(0 ((0 7 8))), empty = %(); return xs.cdaadr().equal(%(7 8)) && empty.cdaadr().len() == 0; }
+```
+
+- `Var.cdaar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %(((0 7 8))), empty = %(); return xs.cdaar().equal(%(7 8)) && empty.cdaar().len() == 0; }
+```
+
+- `Var.cdadar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %((0 (0 7 8))), empty = %(); return xs.cdadar().equal(%(7 8)) && empty.cdadar().len() == 0; }
+```
+
+- `Var.cdaddr`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %(0 0 (0 7 8)), empty = %(); return xs.cdaddr().equal(%(7 8)) && empty.cdaddr().len() == 0; }
+```
+
+- `Var.cdadr`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %(0 (0 7 8)), empty = %(); return xs.cdadr().equal(%(7 8)) && empty.cdadr().len() == 0; }
+```
+
+- `Var.cdar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %((0 7 8)), empty = %(); return xs.cdar().equal(%(7 8)) && empty.cdar().len() == 0; }
+```
+
+- `Var.cddaar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %(((0 0 7 8))), empty = %(); return xs.cddaar().equal(%(7 8)) && empty.cddaar().len() == 0; }
+```
+
+- `Var.cddadr`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %(0 (0 0 7 8)), empty = %(); return xs.cddadr().equal(%(7 8)) && empty.cddadr().len() == 0; }
+```
+
+- `Var.cddar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %((0 0 7 8)), empty = %(); return xs.cddar().equal(%(7 8)) && empty.cddar().len() == 0; }
+```
+
+- `Var.cdddar`: present and exhausted selector chain; returned 1.
+
+```x2c
+#include "list-selectors.x"
+meta int audit_probe(void) { Var xs = %((0 0 0 7 8)), empty = %(); return xs.cdddar().equal(%(7 8)) && empty.cdddar().len() == 0; }
 ```
 
 - `Var.cddddr`: native canonical value contract; returned 1.

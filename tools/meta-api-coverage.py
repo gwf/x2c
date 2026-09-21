@@ -76,6 +76,28 @@ RESOURCES = re.compile(
 
 # Each body returns a small integer checked through explicit evaluation.
 # No file, process, arbitrary pointer, or ownership-transfer calls belong here.
+SELECTOR_CHAINS = (
+    "caaaar", "caaadr", "caaar", "caadar", "caaddr", "caadr",
+    "cadaar", "cadadr", "cadar", "caddar", "cadddr", "cdaaar",
+    "cdaadr", "cdaar", "cdadar", "cdaddr", "cdadr", "cdar",
+    "cddaar", "cddadr", "cddar", "cdddar",
+)
+
+
+def _selector_probe(owner: str, method: str) -> tuple:
+    value = "7" if method[1] == "a" else "(7 8)"
+    for operation in method[1:-1]:
+        value = f"({value})" if operation == "a" else "(0 " + value[1:]
+    if method[1] == "a":
+        result = f"xs.{method}() == 7 && empty.{method}() is void"
+    else:
+        result = (f"xs.{method}().equal(%(7 8)) && "
+                  f"empty.{method}().len() == 0")
+    body = f"{owner} xs = %{value}, empty = %(); return {result};"
+    return ("present and exhausted selector chain", body, 1,
+            ("list-selectors.x",))
+
+
 PROBES = {
     'String.contains_digit': ('positive, negative and empty bytes',
         'String empty = ""; return "a1".contains_digit() && !"abc".contains_digit() && !empty.contains_digit();', 1),
@@ -678,6 +700,8 @@ PROBES = {
         'return "abc".iter().count();', 3),
     "List.car": ("first element", 'List xs = %(7 8); return xs.car();', 7),
     "List.cdr": ("tail", 'List xs = %(7 8); return xs.cdr().len();', 1),
+    **{f"{owner}.{method}": _selector_probe(owner, method)
+       for owner in ("List", "Var") for method in SELECTOR_CHAINS},
     "List.caar": ("nested head", 'List xs = %((7) 8); return xs.caar();', 7),
     "List.cadr": ("second element", 'List xs = %(7 8); return xs.cadr();', 8),
     "List.cadr#absent": ("absent element distinguishes void from nil",
@@ -1075,7 +1099,7 @@ def markdown(report: dict) -> str:
               "| Evidence state | Signature rows |", "| --- | ---: |"]
     state_counts = Counter(row["state"] for row in report["rows"])
     lines += [f"| {state} | {state_counts[state]} |" for state in STATES]
-    lines += ["", "| Disposition | All rows | Missing binding | Bound, unverified |",
+    lines += ["", "| Disposition | All rows | Binding absent | Bound, unverified |",
               "| --- | ---: | ---: | ---: |"]
     for kind in KINDS:
         assigned = [r for r in report["rows"] if r["disposition"] == kind]
@@ -1083,7 +1107,7 @@ def markdown(report: dict) -> str:
                   f"{sum(not r['binding'] for r in assigned)} | "
                   f"{sum(r['state'] == 'bound, unverified' for r in assigned)} |"]
     lines += ["", "### Implementation groups", "",
-              "| Group | Owners | Rows | Missing binding | Bound, unverified |",
+              "| Group | Owners | Rows | Binding absent | Bound, unverified |",
               "| --- | --- | ---: | ---: | ---: |"]
     for group in sorted({r["group"] for r in report["rows"]}):
         assigned = [r for r in report["rows"] if r["group"] == group]

@@ -175,6 +175,123 @@
 (def Var.is_null  (bind "Var_is_null" nil))
 (def Var.is_void  (bind "Var_is_void" nil))
 
+// Compound selectors use raw slots so exhaustion keeps `void` distinct from
+// `nil`. The source declarations remain in the optional list-selectors module.
+(defun _selector_car (value)
+  (if (= (Var.is_void value) 1) value (car value)))
+(defun _selector_cdr (value)
+  (if (= (Var.is_void value) 1) nil (cdr value)))
+(defun _selector_caaaar (value)
+  (_selector_car
+    (_selector_car (_selector_car (_selector_car value)))))
+(defun _selector_caaadr (value)
+  (_selector_car
+    (_selector_car (_selector_car (_selector_cdr value)))))
+(defun _selector_caaar (value)
+  (_selector_car
+    (_selector_car (_selector_car value))))
+(defun _selector_caadar (value)
+  (_selector_car
+    (_selector_car (_selector_cdr (_selector_car value)))))
+(defun _selector_caaddr (value)
+  (_selector_car
+    (_selector_car (_selector_cdr (_selector_cdr value)))))
+(defun _selector_caadr (value)
+  (_selector_car
+    (_selector_car (_selector_cdr value))))
+(defun _selector_cadaar (value)
+  (_selector_car
+    (_selector_cdr (_selector_car (_selector_car value)))))
+(defun _selector_cadadr (value)
+  (_selector_car
+    (_selector_cdr (_selector_car (_selector_cdr value)))))
+(defun _selector_cadar (value)
+  (_selector_car
+    (_selector_cdr (_selector_car value))))
+(defun _selector_caddar (value)
+  (_selector_car
+    (_selector_cdr (_selector_cdr (_selector_car value)))))
+(defun _selector_cadddr (value)
+  (_selector_car
+    (_selector_cdr (_selector_cdr (_selector_cdr value)))))
+(defun _selector_cdaaar (value)
+  (_selector_cdr
+    (_selector_car (_selector_car (_selector_car value)))))
+(defun _selector_cdaadr (value)
+  (_selector_cdr
+    (_selector_car (_selector_car (_selector_cdr value)))))
+(defun _selector_cdaar (value)
+  (_selector_cdr
+    (_selector_car (_selector_car value))))
+(defun _selector_cdadar (value)
+  (_selector_cdr
+    (_selector_car (_selector_cdr (_selector_car value)))))
+(defun _selector_cdaddr (value)
+  (_selector_cdr
+    (_selector_car (_selector_cdr (_selector_cdr value)))))
+(defun _selector_cdadr (value)
+  (_selector_cdr
+    (_selector_car (_selector_cdr value))))
+(defun _selector_cdar (value)
+  (_selector_cdr
+    (_selector_car value)))
+(defun _selector_cddaar (value)
+  (_selector_cdr
+    (_selector_cdr (_selector_car (_selector_car value)))))
+(defun _selector_cddadr (value)
+  (_selector_cdr
+    (_selector_cdr (_selector_car (_selector_cdr value)))))
+(defun _selector_cddar (value)
+  (_selector_cdr
+    (_selector_cdr (_selector_car value))))
+(defun _selector_cdddar (value)
+  (_selector_cdr
+    (_selector_cdr (_selector_cdr (_selector_car value)))))
+(def List.caaaar _selector_caaaar)
+(def List.caaadr _selector_caaadr)
+(def List.caaar _selector_caaar)
+(def List.caadar _selector_caadar)
+(def List.caaddr _selector_caaddr)
+(def List.caadr _selector_caadr)
+(def List.cadaar _selector_cadaar)
+(def List.cadadr _selector_cadadr)
+(def List.cadar _selector_cadar)
+(def List.caddar _selector_caddar)
+(def List.cadddr _selector_cadddr)
+(def List.cdaaar _selector_cdaaar)
+(def List.cdaadr _selector_cdaadr)
+(def List.cdaar _selector_cdaar)
+(def List.cdadar _selector_cdadar)
+(def List.cdaddr _selector_cdaddr)
+(def List.cdadr _selector_cdadr)
+(def List.cdar _selector_cdar)
+(def List.cddaar _selector_cddaar)
+(def List.cddadr _selector_cddadr)
+(def List.cddar _selector_cddar)
+(def List.cdddar _selector_cdddar)
+(def Var.caaaar _selector_caaaar)
+(def Var.caaadr _selector_caaadr)
+(def Var.caaar _selector_caaar)
+(def Var.caadar _selector_caadar)
+(def Var.caaddr _selector_caaddr)
+(def Var.caadr _selector_caadr)
+(def Var.cadaar _selector_cadaar)
+(def Var.cadadr _selector_cadadr)
+(def Var.cadar _selector_cadar)
+(def Var.caddar _selector_caddar)
+(def Var.cadddr _selector_cadddr)
+(def Var.cdaaar _selector_cdaaar)
+(def Var.cdaadr _selector_cdaadr)
+(def Var.cdaar _selector_cdaar)
+(def Var.cdadar _selector_cdadar)
+(def Var.cdaddr _selector_cdaddr)
+(def Var.cdadr _selector_cdadr)
+(def Var.cdar _selector_cdar)
+(def Var.cddaar _selector_cddaar)
+(def Var.cddadr _selector_cddadr)
+(def Var.cddar _selector_cddar)
+(def Var.cdddar _selector_cdddar)
+
 (def Symbol.len     (bind "Symbol_len" nil))
 (def Symbol.str     (bind "Symbol_str" nil))
 (def Symbol.compare (bind "Symbol_compare" nil))
