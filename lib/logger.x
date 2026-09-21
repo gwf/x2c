@@ -139,7 +139,7 @@ static void _unlock(void) {
   }
 }
 
-macro Decorator $logger.synchronized(Function $function) => {
+macro Decorator $logger.synchronized(Function $function) {
   _lock();
   defer _unlock();
   $(x2c.function.body $function)...
@@ -718,7 +718,7 @@ void log_warn(Symbol, List);
 void log_error(Symbol, List);
 void log_fatal(Symbol, List);
 
-macro Unit $logger.method(Name $method, Literal $level) => {
+macro Unit $logger.method(Name $method, Literal $level) {
   /** Logs borrowed `fields` synchronously at $method level under `category`.
       Delivery and failure behavior follow `Logger.log`.
   */
@@ -763,7 +763,7 @@ void log_event(Symbol level, Symbol category, List fields) {
   global_logger.log(level, category, fields);
 }
 
-macro Unit $logger.global(Name $method, Name $function, Literal $level) => {
+macro Unit $logger.global(Name $method, Name $function, Literal $level) {
   /** Logs borrowed `fields` globally at $method level under `category`.
       Delivery and failure behavior follow `log_event`.
   */

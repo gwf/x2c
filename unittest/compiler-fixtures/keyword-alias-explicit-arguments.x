@@ -3,7 +3,7 @@
 macro Decorator $fixture.tag(
   Function $target,
   Expr $value
-) => {
+) {
   printf("%d ", $value);
   $(x2c.function.body $target)...
 }
@@ -11,7 +11,7 @@ macro Decorator $fixture.tag(
 macro Decorator $fixture.annotate_field(
   Field $target,
   Name $extra
-) => {
+) {
   $target
   int $extra;
 }
@@ -19,7 +19,7 @@ macro Decorator $fixture.annotate_field(
 macro Decorator $fixture.annotate_unit(
   Unit $target,
   Name $extra
-) => {
+) {
   $target
   static int $extra = 1;
 }

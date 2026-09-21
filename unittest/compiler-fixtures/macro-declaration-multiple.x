@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Statement $scoped(Decl $declaration) => {
+macro Statement $scoped(Decl $declaration) {
   $declaration
 }
 

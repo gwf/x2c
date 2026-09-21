@@ -1,5 +1,5 @@
 #include <assert.h>
-macro Decorator $trace(Function $function) => {
+macro Decorator $trace(Function $function) {
   printf("enter %s\n",
     $(x2c.literal.string (x2c.function.name $function)));
   defer printf("leave %s\n",

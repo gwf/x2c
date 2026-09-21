@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Unit $bitfield() => {
+macro Unit $bitfield() {
   $(list
     `(declare (unsigned)
       (bindings

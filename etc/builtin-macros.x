@@ -9,7 +9,7 @@ $(defun builtin.emit (fn)
     (if forms
         (begin (Array.push builtin.forms forms) (list fn))
         (x2c.diagnostic.fail "cannot lower built-in macro function" nil))))
-macro Decorator $builtin.emit(Unit $fn) => {
+macro Decorator $builtin.emit(Unit $fn) {
   $(builtin.emit $fn)...
 }
 

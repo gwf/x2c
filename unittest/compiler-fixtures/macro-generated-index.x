@@ -1,9 +1,8 @@
 #include "x2c.x"
 #include <stdio.h>
 
-macro Expression $macro_index_read(Expr $values, Expr $index) => (
-  $values[$index]
-)
+macro Expression $macro_index_read(Expr $values, Expr $index) =>
+  $values[$index];
 
 macro Unit $define_generated_index_helpers(
   Name $pointer_read,
@@ -13,7 +12,7 @@ macro Unit $define_generated_index_helpers(
   Name $array_write,
   Name $map_read,
   Name $map_write
-) => {
+) {
   static int $pointer_read(int *values, int index) {
     return values[index];
   }

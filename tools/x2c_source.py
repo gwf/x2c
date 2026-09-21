@@ -305,6 +305,14 @@ def _statement_spans(masked: str) -> list[tuple[int, int]]:
             index += 1
             continue
         if char == "{" and not parens and not brackets:
+            prefix = masked[start:index].lstrip()
+            if prefix.startswith("macro "):
+                close = _matching_delimiter(masked, index, "{", "}")
+                if close is None:
+                    return spans
+                start = close + 1
+                index = start
+                continue
             spans.append((start, index))
             depth = 1
             index += 1
@@ -320,15 +328,11 @@ def _statement_spans(masked: str) -> list[tuple[int, int]]:
             body = arrow + 1
             while body < len(masked) and masked[body].isspace():
                 body += 1
-            if prefix.startswith("macro ") and body < len(masked) \
-                    and masked[body] in "({[":
-                pairs = {"(": ")", "{": "}", "[": "]"}
-                close = _matching_delimiter(
-                    masked, body, masked[body], pairs[masked[body]]
-                )
-                if close is None:
+            if prefix.startswith("macro "):
+                end = _macro_arrow_body_end(masked, body)
+                if end is None:
                     return spans
-                start = close + 1
+                start = end
                 index = start
                 continue
             end = _expression_semicolon(masked, body)
@@ -340,6 +344,40 @@ def _statement_spans(masked: str) -> list[tuple[int, int]]:
             continue
         index += 1
     return spans
+
+
+def _macro_arrow_body_end(masked: str, start: int) -> int | None:
+    """Return the end after either spelling of an arrow macro body.
+
+    Legacy expression bodies are one balanced parenthesized form without a
+    semicolon. Canonical expression bodies end at a semicolon, including when
+    their first operand is parenthesized. Braced bodies are balanced in both
+    the legacy `=> {}` spelling and the compatibility scanner.
+    """
+    if start >= len(masked):
+        return None
+    if masked[start] == "{":
+        close = _matching_delimiter(masked, start, "{", "}")
+        return None if close is None else close + 1
+    if masked[start] != "(":
+        semicolon = _expression_semicolon(masked, start)
+        return None if semicolon is None else semicolon + 1
+
+    close = _matching_delimiter(masked, start, "(", ")")
+    if close is None:
+        return None
+    following = close + 1
+    while following < len(masked) and masked[following].isspace():
+        following += 1
+    if following < len(masked) and masked[following] == ";":
+        return following + 1
+    if following < len(masked) and (
+        masked[following] in "([.?,:+-*/%&|^<>=!@" or
+        re.match(r"(?:in|is)\b", masked[following:])
+    ):
+        semicolon = _expression_semicolon(masked, start)
+        return None if semicolon is None else semicolon + 1
+    return close + 1
 
 
 def _expression_semicolon(masked: str, start: int) -> int | None:
@@ -675,7 +713,7 @@ def _unit_macro_definitions(
         if params_close is None:
             continue
         unit = re.match(
-            r"\s*(?:using\s+[^=]+)?\s*=>\s*\{",
+            r"\s*(?:(?:using\s+[^=]+)?\s*=>\s*)?\{",
             masked[params_close + 1:]
         )
         if not unit:
@@ -684,6 +722,9 @@ def _unit_macro_definitions(
         body_close = _matching_delimiter(masked, body_open, "{", "}")
         if body_close is None:
             continue
+        body_start = _macro_body_content_start(
+            masked, body_open + 1, body_close
+        )
 
         holes: list[str] = []
         for first, last in _comma_spans(
@@ -715,7 +756,7 @@ def _unit_macro_definitions(
             arguments = [
                 text[first:last].strip() for first, last in spans
             ]
-            expanded = text[body_open + 1:body_close]
+            expanded = text[body_start:body_close]
             for hole, argument in zip(holes, arguments):
                 expanded = re.sub(
                     rf"\${re.escape(hole)}\b", argument, expanded
@@ -734,6 +775,21 @@ def _unit_macro_definitions(
                     doc=definition.doc or call_doc,
                 ))
     return tuple(found)
+
+
+def _macro_body_content_start(masked: str, start: int, end: int) -> int:
+    """Skip contiguous generated-name directives at a macro body's start."""
+    directive = re.compile(
+        r"\s*using\s+\$[A-Za-z_][A-Za-z0-9_]*"
+        r"(?:\s*,\s*\$[A-Za-z_][A-Za-z0-9_]*)*\s*;"
+    )
+    cursor = start
+    while cursor < end:
+        match = directive.match(masked, cursor, end)
+        if not match:
+            break
+        cursor = match.end()
+    return cursor
 
 
 def function_spans(masked: str, include_static: bool = False

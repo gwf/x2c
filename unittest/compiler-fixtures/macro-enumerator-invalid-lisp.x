@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Enumerator $invalid_enumerator_lisp() => {
+macro Enumerator $invalid_enumerator_lisp() {
   $(list 42)...
 }
 

@@ -4,7 +4,7 @@ typedef int Base;
 
 static int increment(int value) => value + 1;
 
-macro Unit $constructed_types() => {
+macro Unit $constructed_types() {
   static int $(x2c.ident "constructed_types")(void) {
     $(quote (
       (typedef (int) (bindings (bind ("Count") ())))
@@ -21,16 +21,15 @@ macro Unit $constructed_types() => {
   }
 }
 
-macro Expression $constructed_capture(Expr $value) => (
+macro Expression $constructed_capture(Expr $value) =>
   $(let* ((binding (car (cdr (car (cdr (cdr $value))))))
           (type (x2c.syntax.type $value)))
     `(expr ("Func")
       (lambda (params)
         (captures (capture ,binding ,type ,$value))
-        ,$value)))
-)
+        ,$value)));
 
-macro Expression $constructed_reference(Expr $value) => (
+macro Expression $constructed_reference(Expr $value) =>
   $(let* ((binding (car (cdr (car (cdr (cdr $value))))))
           (value-type (x2c.syntax.type $value))
           (type (cons '& value-type))
@@ -40,8 +39,7 @@ macro Expression $constructed_reference(Expr $value) => (
      `(expr ("Func")
        (lambda (params)
          (captures (capture ,binding ,type ,address))
-         ,read)))
-)
+         ,read)));
 
 $constructed_types();
 

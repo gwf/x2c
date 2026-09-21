@@ -236,7 +236,7 @@ int tagged = value is <string>;
 int untagged = value is not <string>;
 //                   ^^^^^^ keyword.operator.is.x2c
 
-macro expression $project.make(expr $value, type $kind) => ($value)
+macro expression $project.make(expr $value, type $kind) => ($value) + 1;
 // <---- keyword.declaration.macro.x2c
 //    ^^^^^^^^^^ storage.type.macro.result.x2c
 //               ^ punctuation.definition.macro.sigil.x2c
@@ -245,8 +245,9 @@ macro expression $project.make(expr $value, type $kind) => ($value)
 //                                  ^ punctuation.definition.macro.sigil.x2c
 //                                          ^^^^ storage.type.macro.hole.x2c
 //                                               ^ punctuation.definition.macro.sigil.x2c
+//                                                      ^^ keyword.operator.arrow.x2c
 static int local_macro_grammar(void) {
-  macro Expression local_value(Expr $value) => ($value)
+  macro Expression local_value(Expr $value) => $value;
 //^^^^^ keyword.declaration.macro.x2c
 //      ^^^^^^^^^^ storage.type.macro.result.x2c
 //                 ^^^^^^^^^^^ entity.name.function.macro.x2c
@@ -269,28 +270,38 @@ macro Statement $holes(
   Enumerator $enum, Unit $k...
 //^^^^^^^^^^ storage.type.macro.hole.x2c
 //                  ^^^^ storage.type.macro.hole.x2c
-) using $temporary => {
+) {
+  using $temporary, $cursor;
 //^^^^^ keyword.other.macro.using.x2c
 //      ^ punctuation.definition.macro.sigil.x2c
-//       ^^^^^^^^^ variable.other.macro.hole.x2c
-//                 ^^ keyword.operator.arrow.x2c
+//       ^^^^^^^^^ variable.parameter.macro.x2c
+//                  ^ punctuation.definition.macro.sigil.x2c
+//                   ^^^^^^ variable.parameter.macro.x2c
   $k...
 //  ^^^ punctuation.definition.macro.splice.x2c
 }
 
-macro Block $block() => {}
+macro Block $block() {}
 //    ^^^^^ storage.type.macro.result.x2c
 //    ^^^^^ - support.type.prelude.x2c
-macro Field $field() => {}
+macro Field $field() {}
 //    ^^^^^ storage.type.macro.result.x2c
-macro Entry $entry() => {}
+macro Entry $entry() {}
 //    ^^^^^ storage.type.macro.result.x2c
-macro Enumerator $enumerator() => {}
+macro Enumerator $enumerator() {}
 //    ^^^^^^^^^^ storage.type.macro.result.x2c
-macro Unit $unit() => {}
+macro Unit $unit() {}
 //    ^^^^ storage.type.macro.result.x2c
-macro Decorator $decorator(Expr $target) => ($target)
+macro Decorator $decorator(Expr $target) => $target;
 //    ^^^^^^^^^ storage.type.macro.result.x2c
+
+macro Statement $legacy_using() using $temporary => {}
+//                              ^^^^^ keyword.other.macro.using.x2c
+//                                    ^ punctuation.definition.macro.sigil.x2c
+//                                     ^^^^^^^^^ variable.other.macro.hole.x2c
+//                                               ^^ keyword.operator.arrow.x2c
+macro Expression $legacy_expression(Expr $value) => ($value)
+//                                               ^^ keyword.operator.arrow.x2c
 
 List list = %(root (child 42) [1 2] {key $value} "$value ${call()}"
 //          ^^ punctuation.definition.literal.list.begin.x2c
@@ -340,6 +351,9 @@ SymbolSet shifts = %<<"<<=" ">>=">>;
 Lambda lambda = %!(int value) => value + 1;
 //              ^^ punctuation.definition.literal.lambda.x2c
 //                            ^^ keyword.operator.arrow.x2c
+Lambda shared = %!() using &captured => captured;
+//                   ^^^^^ keyword.control.capture.x2c
+//                                   ^^ keyword.operator.arrow.x2c
 
 int value = $project.make(42);
 //          ^ punctuation.definition.macro.sigil.x2c
@@ -392,7 +406,7 @@ $(def lisp.native.target.rows '(
 ))
 // <- punctuation.section.list.end.lisp.x2c
 // <~- punctuation.definition.embedded.lisp.end.x2c
-macro Expression $after.embedded.lisp() => (0)
+macro Expression $after.embedded.lisp() => 0;
 // <---- keyword.declaration.macro.x2c
 //               ^ punctuation.definition.macro.sigil.x2c
 Var sequence = $(list $items...);

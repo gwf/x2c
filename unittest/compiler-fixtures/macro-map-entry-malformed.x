@@ -1,5 +1,5 @@
 #include "x2c.x"
 
-macro Entry $broken() => {
+macro Entry $broken() {
   "missing value"
 }

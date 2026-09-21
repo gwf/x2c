@@ -2,7 +2,7 @@
    Protocol adoption rows may be macro-generated; see the macro-generated
    typed array families entry in agents/adapters-macros-decorators.md. */
 
-macro Unit $var.pointer(Type $type, Name $extractor, Literal $tag) => {
+macro Unit $var.pointer(Type $type, Name $extractor, Literal $tag) {
   static inline Var $type.var($type value) {
     return Var.new($tag, value);
   }
@@ -12,7 +12,7 @@ macro Unit $var.pointer(Type $type, Name $extractor, Literal $tag) => {
   }
 }
 
-macro Unit $var.raw.pointer(Type $type, Name $extractor) => {
+macro Unit $var.raw.pointer(Type $type, Name $extractor) {
   static inline Var $type.var($type pointer) {
     Var value;
     value.p64 = pointer;

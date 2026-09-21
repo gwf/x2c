@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Decorator $fixture.twice(Expr $target) => ($target * 2)
+macro Decorator $fixture.twice(Expr $target) => $target * 2;
 
 keyword twice $fixture.twice;
 

@@ -2,14 +2,14 @@
 
 int main(void) {
   Var typed = (%!(int base) => {
-    macro Expression plus(Expr $value) => (base + $value)
+    macro Expression plus(Expr $value) => base + $value;
     {
       int base = 100;
       return plus(3);
     }
   })(10);
   Var bare = (%!(base) => {
-    macro Expression plus(Expr $value) => (base + $value)
+    macro Expression plus(Expr $value) => base + $value;
     {
       int base = 100;
       return plus(4);

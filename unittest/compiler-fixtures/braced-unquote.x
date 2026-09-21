@@ -7,9 +7,8 @@ static int answer(int value) {
   return value;
 }
 
-macro Expression $fixture.identity(Expr $value) => (
-  $value
-)
+macro Expression $fixture.identity(Expr $value) =>
+  $value;
 
 int main(void) {
   int base = 40;

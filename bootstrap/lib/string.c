@@ -634,7 +634,7 @@ String String_map(String str, Func fn){
       char ch = Var_char(Var_convert(_apply(fn, src[i]), 26993));
       if(! ch){
         {
-          static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/string.x",.function = "String_map",.line = 850};
+          static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/string.x",.function = "String_map",.line = 848};
           x2c_error_raise_n(& _x2c_error_site_4, 143279181245224, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))), Symbol_var(19800432), int_var(i));
           __builtin_unreachable();
         }
@@ -762,14 +762,14 @@ String String_squeeze(String str, String chars){
 
 static String _pad(String str, int width, char fill, int left_padding){
   if(fill == '\0'){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "_pad",.line = 891};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/string.x",.function = "_pad",.line = 889};
     x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));
     __builtin_unreachable();
   }
   int length = String_len(str);
   if(width <= length) return str;
   if(width == INT_MAX){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "_pad",.line = 894};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/string.x",.function = "_pad",.line = 892};
     x2c_error_raise_n(& _x2c_error_site_6, 1358596898646632, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))), Symbol_var(48833808), int_var(width));
     __builtin_unreachable();
   }
@@ -1075,7 +1075,7 @@ String String_unescape(String str){
       if(esc > 0377){
         _free_unchecked(string);
         {
-          static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/string.x",.function = "String_unescape",.line = 1249};
+          static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/string.x",.function = "String_unescape",.line = 1247};
           x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));
           __builtin_unreachable();
         }

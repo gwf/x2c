@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/macro-kind-ambiguous.x:3:1: parse: macro hole 'value' has no inferred kind
-  macro Expression $ambiguous($value) => (
+  macro Expression $ambiguous($value) =>
   ^^^^^
   note: annotate holes used only by compile-time Lisp
 

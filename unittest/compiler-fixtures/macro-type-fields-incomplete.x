@@ -2,7 +2,7 @@
 
 struct IncompleteRecord;
 
-macro Unit $inspect(Type $type) => {
+macro Unit $inspect(Type $type) {
   $(x2c.type.fields $type)...
 }
 

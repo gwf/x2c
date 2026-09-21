@@ -5,20 +5,20 @@ macro Decorator $control.range(
   Name $index,
   Expr $start,
   Expr $stop
-) using $begin, $end => {
+) {
   {
-    int $begin = $start, $end = $stop;
-    for (int $index = $begin; $index < $end; $index++) $body
+    int begin = $start, end = $stop;
+    for (int $index = begin; $index < end; $index++) $body
   }
 }
 
 macro Statement $control.swap(
   Expr $left,
   Expr $right
-) using $temporary => {
-  $(x2c.syntax.type $left) $temporary = $left;
+) {
+  $(x2c.syntax.type $left) temporary = $left;
   $left = $right;
-  $right = $temporary;
+  $right = temporary;
 }
 
 keyword range $control.range;

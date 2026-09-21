@@ -11,7 +11,7 @@ meta static List mc_name(String text) => x2c_literal_string(text);
 
 meta static List mc_wrap(String text) => mc_name(text);
 
-macro Expression $builder.aliases() => ($(x2c.literal.int (if (and
+macro Expression $builder.aliases() =>$(x2c.literal.int (if (and
     (equal? (x2c_literal_string "hi")
       (x2c.literal.string "hi"))
     (equal? (x2c_literal_int 17)
@@ -25,7 +25,7 @@ macro Expression $builder.aliases() => ($(x2c.literal.int (if (and
     (eq? x2c_expr_composite x2c.expr.composite)
     (eq? x2c_expr_cast x2c.expr.cast)
     (eq? x2c_function_body x2c.function.body)
-    (eq? x2c_parameters_arguments x2c.parameters.arguments)) 1 0)))
+    (eq? x2c_parameters_arguments x2c.parameters.arguments)) 1 0));
 
 int main(void) {
   List node = mc_wrap("hi");

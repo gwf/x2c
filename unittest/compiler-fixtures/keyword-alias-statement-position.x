@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Expression $fixture.bump(Expr $value) => ($value += 2)
+macro Expression $fixture.bump(Expr $value) => $value += 2;
 
 keyword bump $fixture.bump;
 

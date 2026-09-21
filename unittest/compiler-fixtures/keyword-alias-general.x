@@ -14,25 +14,24 @@ static int identity(int value) {
   return value;
 }
 
-macro Expression $fixture.call(Expr $callee, Expr $arguments...) => (
-  $callee($arguments...)
-)
+macro Expression $fixture.call(Expr $callee, Expr $arguments...) =>
+  $callee($arguments...);
 
-macro Statement $fixture.swap(Expr $left, Expr $right) using $temporary => {
-  $(x2c.syntax.type $left) $temporary = $left;
+macro Statement $fixture.swap(Expr $left, Expr $right) {
+  $(x2c.syntax.type $left) temporary = $left;
   $left = $right;
-  $right = $temporary;
+  $right = temporary;
 }
 
-macro Field $fixture.field(Name $name) => {
+macro Field $fixture.field(Name $name) {
   int $name;
 }
 
-macro Enumerator $fixture.enumerator(Name $name, Literal $value) => {
+macro Enumerator $fixture.enumerator(Name $name, Literal $value) {
   $name = $value
 }
 
-macro Unit $fixture.define(Name $name, Literal $value) => {
+macro Unit $fixture.define(Name $name, Literal $value) {
   static int $name(void) {
     return $value;
   }
@@ -43,17 +42,17 @@ macro Decorator $fixture.range(
   Name $index,
   Expr $start,
   Expr $stop
-) using $begin, $end => {
+) {
   {
-    int $begin = $start, $end = $stop;
-    for (int $index = $begin; $index < $end; $index++) $body
+    int begin = $start, end = $stop;
+    for (int $index = begin; $index < end; $index++) $body
   }
 }
 
 macro Decorator $fixture.invoke(
   Expr $target,
   Expr $arguments...
-) => ($target($arguments...))
+) => $target($arguments...);
 
 keyword call $fixture.call;
 keyword swap $fixture.swap;

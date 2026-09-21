@@ -12,9 +12,12 @@ const x2cMarkdown = [
   "",
   "```x2c,ignore",
   "~Array hidden = %[1, 2, 3];",
-  "macro Statement $show(Expr $value) using $temporary => {",
+  "macro Statement $show(Expr $value) {",
+  "  using $temporary;",
   "  List shown = %($value);",
   "}",
+  "macro Expression $twice(Expr $value) => $value + $value;",
+  "Func shared = %!() using &shown => shown;",
   "```",
   "",
   "```text",
@@ -95,6 +98,11 @@ test("highlights mdBook x2c fences with the extension grammar", () => {
   assert.match(
     highlighted,
     /--shiki-dark:#FF4FD8;--shiki-dark-font-weight:bold[">]/
+  );
+  assert.equal(
+    [...highlighted.matchAll(/font-weight:bold">(?:  )?using<\/span>/g)]
+      .length,
+    2
   );
   assert.match(highlighted, /--shiki-light:#007C8A;--shiki-dark:#29D3E2/);
   assert.match(

@@ -1,5 +1,5 @@
 macro Statement $ast.rewrite_children(
-  Expr $input, Name $child, Expr $replacement) => {
+  Expr $input, Name $child, Expr $replacement) {
   List original = $input;
   Array rewritten = NULL;
   for (List cursor = original; cursor; cursor = cursor.cdr()) {

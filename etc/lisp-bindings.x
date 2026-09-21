@@ -12,7 +12,7 @@ $(defun binding.emit (fn)
     (if forms
         (begin (Array.push binding.forms forms) (list fn))
         (x2c.diagnostic.fail "cannot lower Lisp binding function" nil))))
-macro Decorator $binding.emit(Unit $fn) => {
+macro Decorator $binding.emit(Unit $fn) {
   $(binding.emit $fn)...
 }
 

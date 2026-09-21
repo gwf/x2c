@@ -1,8 +1,8 @@
-macro Expression $fixture.private.first(Expr $value) => ($value + 1)
+macro Expression $fixture.private.first(Expr $value) => $value + 1;
 
-macro Expression $fixture.private.second(Expr $value) => ($value + 2)
+macro Expression $fixture.private.second(Expr $value) => $value + 2;
 
-macro Decorator $fixture.private.scope(Block $target) => {
+macro Decorator $fixture.private.scope(Block $target) {
   {
     $target
   }

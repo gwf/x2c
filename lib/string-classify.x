@@ -27,7 +27,7 @@ int String.contains_digit(String str) {
     `$reject` holds. Naming the cursor lets each predicate write its own test
     against the C classifiers.
 */
-macro Statement $string.classify(Expr $value, Name $byte, Expr $reject) => {
+macro Statement $string.classify(Expr $value, Name $byte, Expr $reject) {
   if (!$value) return 0;
   for (unsigned char *$byte = (unsigned char *) $value; *$byte; $byte++)
     if ($reject) return 0;

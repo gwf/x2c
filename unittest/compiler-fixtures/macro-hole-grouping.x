@@ -5,23 +5,23 @@ typedef struct Point { int x; int y; } Point;
 // An Expr hole is one operand wherever the template places it. The argument
 // keeps the meaning it has at the call site, and emission parenthesizes it
 // only where C precedence would otherwise regroup the result.
-macro Statement $guard(Expr $condition) => {
+macro Statement $guard(Expr $condition) {
   if (!$condition) return 0;
 }
 
-macro Statement $show(Expr $value) => {
+macro Statement $show(Expr $value) {
   printf("%d %d %d %d\n", $value * 2, -$value, !$value, $value);
 }
 
-macro Statement $members(Expr $point, Expr $index) => {
+macro Statement $members(Expr $point, Expr $index) {
   printf("%d %d %d\n", $point.x, (int) $index, $index ? 1 : 2);
 }
 
-macro Statement $when(Expr $condition, Expr $target, Expr $value) => {
+macro Statement $when(Expr $condition, Expr $target, Expr $value) {
   if ($condition) $target = $value;
 }
 
-macro Statement $forward(Expr $value) => {
+macro Statement $forward(Expr $value) {
   $show(-$value);
 }
 

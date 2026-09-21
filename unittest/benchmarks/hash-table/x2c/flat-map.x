@@ -162,7 +162,7 @@ static int _flat_update(volatile int *slot, Symbol op, int rhs) {
 macro Unit $flat.family(
   Type $map, Type $storage, Type $bucket, Literal $owner,
   Name $reinsert_error, Name $insert_error
-) => {
+) {
   $map $map.new(void);
   $map $map.new_capacity(unsigned);
   void $map.free($map);

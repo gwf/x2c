@@ -6,7 +6,7 @@
 typedef Block ExportOne;
 typedef Block ExportTwo;
 
-macro Unit $export.array(Type $array, Name $unbox, Literal $tag) => {
+macro Unit $export.array(Type $array, Name $unbox, Literal $tag) {
   Var $array.var($array);
   $array Var.$unbox(Var);
   int $array.equal($array, $array);

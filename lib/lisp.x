@@ -41,9 +41,8 @@ $(import "private-keywords.xmacro")
 */
 typedef struct Lisp *Lisp;
 
-macro Expression $lisp._standard.source() => (
-  $(x2c.literal.string (_x2c.embed.text "../etc/init.xlisp"))
-)
+macro Expression $lisp._standard.source() =>
+  $(x2c.literal.string (_x2c.embed.text "../etc/init.xlisp"));
 
 /** Reports cumulative automatic-evaluator activity for one `Lisp` session.
     Counter values are snapshots since session creation. `program_bytes`
@@ -267,7 +266,7 @@ protocol Cleanup(Lisp);
    value operations in the evaluator without importing their source APIs into
    every program.  These C-only declarations do not enter the x2c interface;
    typed List names are ABI aliases for List. */
-macro Unit $lisp.optional.native.declarations() => {
+macro Unit $lisp.optional.native.declarations() {
   $(quote (
     (preproc "extern List List_listchar(List);")
     (preproc "extern List List_listshort(List);")
@@ -635,7 +634,7 @@ static Var _bad_session(String operation) {
   raise %(bad-arg (operation $operation));
 }
 
-macro Decorator $lisp.entry(Function $function, Expr $operation) => {
+macro Decorator $lisp.entry(Function $function, Expr $operation) {
   if (!$(x2c.function.parameter $function "lisp"))
     return _bad_session($operation);
 
@@ -1583,9 +1582,8 @@ $(def lisp.native.target.rows '(
   (Symbol_compare)
 ))
 
-macro Expression $lisp.native.target.map() => (
-  $(lisp.native.targets lisp.native.target.rows)
-)
+macro Expression $lisp.native.target.map() =>
+  $(lisp.native.targets lisp.native.target.rows);
 
 static Map lisp_native_targets = $lisp.native.target.map();
 

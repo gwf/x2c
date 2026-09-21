@@ -21,34 +21,33 @@ $(defun fixture.private-before-sibling ()
       (op = (bind ,(x2c.ident "private_before_lisp_sibling") ())
             (expr (int) (literal (int) "13"))))))
 
-macro Expression $call(Expr $callee, Expr $arguments...) => (
-  $callee($arguments...)
-)
+macro Expression $call(Expr $callee, Expr $arguments...) =>
+  $callee($arguments...);
 
-macro Expression $type_size(Type $value) => (sizeof($value))
-macro Expression $outer(Expr $value) => ($type_size(int) + $value)
-macro Expression $increment(Expr $value) => (($value) + 1)
-macro Expression $nested_comma(Expr $value) => ((0, $increment($value)))
-macro Expression $nested_size(Expr $value) => (sizeof($increment($value)))
-macro Expression $list_value(Expr $value) => (%(${$value}))
-macro Expression $array_value(Expr $value) => (%[${$increment($value)}, 2])
-macro Expression $lambda_value(Expr $value) => (%!() => $increment($value))
-macro Expression $parenthesized($value) => (($value))
-macro Expression $absolute(Expr $value) => (abs($value))
+macro Expression $type_size(Type $value) => sizeof($value);
+macro Expression $outer(Expr $value) => $type_size(int) + $value;
+macro Expression $increment(Expr $value) => ($value) + 1;
+macro Expression $nested_comma(Expr $value) => (0, $increment($value));
+macro Expression $nested_size(Expr $value) => sizeof($increment($value));
+macro Expression $list_value(Expr $value) => %(${$value});
+macro Expression $array_value(Expr $value) => %[${$increment($value)}, 2];
+macro Expression $lambda_value(Expr $value) => %!() => $increment($value);
+macro Expression $parenthesized($value) => ($value);
+macro Expression $absolute(Expr $value) => abs($value);
 
-macro Decorator $drop(Unit $target) => {
+macro Decorator $drop(Unit $target) {
 }
 
-macro Decorator $keep(Unit $target) => {
+macro Decorator $keep(Unit $target) {
   $target
 }
 
-macro Decorator $private_exact(Unit $target) => {
+macro Decorator $private_exact(Unit $target) {
   $target
   static int $(x2c.ident "private_exact_helper") = 7;
 }
 
-macro Unit $nested_decorator_declarations() => {
+macro Unit $nested_decorator_declarations() {
   static int nested_before = 1;
   $keep()
   static int nested_after = 2;
@@ -58,32 +57,32 @@ macro Unit $nested_decorator_declarations() => {
   }
 }
 
-macro Decorator $preserve_lisp(Unit $target) => {
+macro Decorator $preserve_lisp(Unit $target) {
   $(list $target)...
 }
 
-macro Unit $preserve_nested_lisp_target(Unit $target) => {
+macro Unit $preserve_nested_lisp_target(Unit $target) {
   $(list $target)...
 }
 
-macro Unit $preserve_nested_lisp_targets(Unit $targets...) => {
+macro Unit $preserve_nested_lisp_targets(Unit $targets...) {
   $(append $targets (list))...
 }
 
-macro Decorator $preserve_nested_lisp(Unit $target) => {
+macro Decorator $preserve_nested_lisp(Unit $target) {
   $preserve_nested_lisp_target($target);
 }
 
-macro Decorator $preserve_nested_lisp_variadic(Unit $target) => {
+macro Decorator $preserve_nested_lisp_variadic(Unit $target) {
   $preserve_nested_lisp_targets($target);
 }
 
-macro Decorator $private_name_sibling(Unit $target) => {
+macro Decorator $private_name_sibling(Unit $target) {
   $target
   static int $(x2c.ident "private_name_sibling") = 10;
 }
 
-macro Decorator $private_lisp_sibling(Unit $target) => {
+macro Decorator $private_lisp_sibling(Unit $target) {
   $(list $target
     `(declare (static int)
       (bindings
@@ -91,42 +90,42 @@ macro Decorator $private_lisp_sibling(Unit $target) => {
               (expr (int) (literal (int) "11"))))))...
 }
 
-macro Decorator $private_generated_lisp_sibling(Unit $target) => {
+macro Decorator $private_generated_lisp_sibling(Unit $target) {
   $(list $target (fixture.private-sibling))...
 }
 
-macro Decorator $private_before_lisp_sibling(Unit $target) => {
+macro Decorator $private_before_lisp_sibling(Unit $target) {
   $(list (fixture.private-before-sibling) $target)...
 }
 
-macro Unit $preserve_target(Unit $target) => {
+macro Unit $preserve_target(Unit $target) {
   $target
 }
 
-macro Decorator $preserve_nested(Unit $target) => {
+macro Decorator $preserve_nested(Unit $target) {
   $preserve_target($target);
 }
 
-macro Unit $discard_target(Unit $target) => {
+macro Unit $discard_target(Unit $target) {
 }
 
-macro Decorator $discard_nested(Unit $target) => {
+macro Decorator $discard_nested(Unit $target) {
   $discard_target($target);
 }
 
-macro Unit $preserve_targets(Unit $targets...) => {
+macro Unit $preserve_targets(Unit $targets...) {
   $targets...
 }
 
-macro Unit $relay_targets(Unit $targets...) => {
+macro Unit $relay_targets(Unit $targets...) {
   $preserve_targets($targets...);
 }
 
-macro Decorator $preserve_variadic(Unit $target) => {
+macro Decorator $preserve_variadic(Unit $target) {
   $relay_targets($target);
 }
 
-macro Decorator $preserve_variadic_direct(Unit $target) => {
+macro Decorator $preserve_variadic_direct(Unit $target) {
   $preserve_targets($target);
 }
 
@@ -179,15 +178,15 @@ $drop()
 int discarded_private = 2;
 #pragma public
 
-macro Statement $bare_return() => {
+macro Statement $bare_return() {
   $(quote ((return)))...
 }
 
-macro Statement $statement_item(Expr $value) => {
+macro Statement $statement_item(Expr $value) {
   statement_result = $value;
 }
 
-macro Statement $statement_outer(Name $statement_item) => {
+macro Statement $statement_outer(Name $statement_item) {
   $statement_item(13);
 }
 

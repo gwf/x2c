@@ -1,5 +1,5 @@
 #include "x2c.x"
-macro Expression $snapshot(Expr $value) => (%!() => $value)
+macro Expression $snapshot(Expr $value) => %!() => $value;
 static Func snapshot(int &value) => $snapshot(value);
 int main(void) {
   int value = 1;

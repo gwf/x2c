@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Enumerator $published_enumerator() => {
+macro Enumerator $published_enumerator() {
   $(x2c.ident "LATER_SOURCE_ENUM")
 }
 

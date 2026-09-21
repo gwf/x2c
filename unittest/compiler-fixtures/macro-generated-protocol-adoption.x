@@ -20,7 +20,7 @@ static inline MacroRow Var.macrorow(Var value) {
 
 macro Unit $generated.array(
   Type $array, Type $element, Name $unbox, Literal $tag
-) => {
+) {
   inline Var $array.var($array array) {
     return Var.new($tag, array);
   }
@@ -53,7 +53,7 @@ macro Unit $generated.array(
 
 macro Unit $generated.representation(
   Type $base, Type $participant, Type $representation
-) => {
+) {
   protocol $base($participant) as $representation;
 }
 

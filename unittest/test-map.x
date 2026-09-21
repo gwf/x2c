@@ -41,7 +41,7 @@ static void map_empty_literal_identity(void) {
 typedef Map MapTestEnv;
 typedef struct MapTestPair { int left, right; } MapTestPair;
 
-macro Entry $map_test_row(Literal $key, Expr $value) => {
+macro Entry $map_test_row(Literal $key, Expr $value) {
   $key: $value
 }
 

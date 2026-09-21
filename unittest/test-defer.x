@@ -328,9 +328,9 @@ static void managed_local_cleans_before_failed_later_acquisition(void) {
   EXPECT_INT_EQ(defer_log[0], 1);
 }
 
-macro Expression $managed_nested(Expr $value) => ($auto($value))
+macro Expression $managed_nested(Expr $value) => $auto($value);
 
-macro Statement $managed_declaration(Name $name, Expr $value) => {
+macro Statement $managed_declaration(Name $name, Expr $value) {
   ManagedResource $name = $auto($value);
 }
 

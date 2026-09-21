@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Expression $fixture.value() => (42)
+macro Expression $fixture.value() => 42;
 keyword with $fixture.value;
 
 int main(void) {

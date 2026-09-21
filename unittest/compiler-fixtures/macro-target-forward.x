@@ -4,7 +4,7 @@ static int source(int value) {
   return value + 1;
 }
 
-macro Unit $forward(Function $definition) => {
+macro Unit $forward(Function $definition) {
   $definition
 }
 

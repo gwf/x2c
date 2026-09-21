@@ -321,7 +321,7 @@ bindings visible:
 
 ```x2c
 ~
-macro Expression $minutes(Expr $value) => ($value * 60)
+macro Expression $minutes(Expr $value) => $value * 60;
 ~
 ~int main(void) {
 ~  int seconds = $minutes(2);

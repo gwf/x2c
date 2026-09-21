@@ -1,16 +1,16 @@
 #include "x2c.x"
 
-macro Expression $expression_result() => (10)
+macro Expression $expression_result() => 10;
 
-macro Statement $block_result(Expr $target, Expr $amount) => {
+macro Statement $block_result(Expr $target, Expr $amount) {
   $target += $amount;
 }
 
-macro Field $field_result() => {
+macro Field $field_result() {
   int generated_field;
 }
 
-macro Unit $unit_result() => {
+macro Unit $unit_result() {
   static int $(x2c.ident "unit_value") = 12;
 }
 

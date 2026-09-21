@@ -11,10 +11,9 @@ static String indexed[2] = {
 };
 
 typedef struct Pair { String value; } Pair;
-macro Expression $canonical(Expr $value) => (
+macro Expression $canonical(Expr $value) =>
   $(list 'expr '("Pair") (list 'cast '("Pair")
-    (list 'expr '("Pair") (list 'composite (list 'commas $value)))))
-)
+    (list 'expr '("Pair") (list 'composite (list 'commas $value)))));
 
 int main(void) {
   NativeRows row = {.names[0] = "one", "two", "three"};

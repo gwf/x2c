@@ -6,7 +6,7 @@ static int outer_value(void) {
   return generated_shadow;
 }
 
-macro Statement $shadow(Expr $output, Expr $value) => {
+macro Statement $shadow(Expr $output, Expr $value) {
   int $(x2c.ident "generated_shadow") = $value;
   $output = $(x2c.ident "generated_shadow");
 }

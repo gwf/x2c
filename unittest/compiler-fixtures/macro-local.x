@@ -6,7 +6,7 @@ static int fixture_select(int value) {
   return 1000 + value;
 }
 
-macro Expression $fixture_select(Expr $value) => (2000 + $value)
+macro Expression $fixture_select(Expr $value) => 2000 + $value;
 
 static int local_macros(int base) {
   int before = fixture_select(1);
@@ -19,48 +19,47 @@ static int local_macros(int base) {
   {
     int offset = 2;
 
-    macro Expression fixture_select(Expr $value) => (
-      base + offset + $value + $(local-bias)
-    )
+    macro Expression fixture_select(Expr $value) =>
+      base + offset + $value + $(local-bias);
 
-    macro Expression mixed(Expr $value) => (offset + $value)
+    macro Expression mixed(Expr $value) => offset + $value;
 
-    macro Statement assign(Expr $target, Expr $value) using $temporary => {
-      int $temporary = base + $value;
-      int generated = $temporary;
+    macro Statement assign(Expr $target, Expr $value) {
+      int temporary = base + $value;
+      int generated = temporary;
       $target = generated;
     }
 
-    macro Statement define_generated() => {
-      macro Expression generated(Expr $value) => (base + $value)
+    macro Statement define_generated() {
+      macro Expression generated(Expr $value) => base + $value;
     }
 
-    macro Statement define_and_use(Expr $target) => {
-      macro Expression generated_here(Expr $value) => (base + $value)
+    macro Statement define_and_use(Expr $target) {
+      macro Expression generated_here(Expr $value) => base + $value;
       $target = generated_here(13);
     }
 
-    macro Decorator repeat(Block $target) => {
+    macro Decorator repeat(Block $target) {
       $target
       $target
     }
 
-    macro Decorator nonzero(Expr $target) => ($target != 0)
+    macro Decorator nonzero(Expr $target) => $target != 0;
 
-    macro Field field() => {
+    macro Field field() {
       int $(x2c.ident "value");
     }
 
-    macro Decorator keep_field(Field $target) => {
+    macro Decorator keep_field(Field $target) {
       $target
     }
 
-    macro Enumerator states() => {
+    macro Enumerator states() {
       $(x2c.ident "LOCAL_READY") = 3,
       $(x2c.ident "LOCAL_DONE")
     }
 
-    macro Entry pair(Expr $key, Expr $value) => {
+    macro Entry pair(Expr $key, Expr $value) {
       $key: $value
     }
 
@@ -71,15 +70,14 @@ static int local_macros(int base) {
       int offset = 100;
       call_site = fixture_select(offset);
 
-      macro Expression fixture_select(Expr $value) => (
-        base + offset + $value
-      )
+      macro Expression fixture_select(Expr $value) =>
+        base + offset + $value;
 
       nested = fixture_select(6);
     }
     restored = fixture_select(7);
 
-    macro Expression fixture_select(Expr $value) => (base + $value)
+    macro Expression fixture_select(Expr $value) => base + $value;
 
     replaced = fixture_select(9);
     assign(assigned, 8);

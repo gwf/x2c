@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Entry $row() => {
+macro Entry $row() {
   "key": 1
 }
 

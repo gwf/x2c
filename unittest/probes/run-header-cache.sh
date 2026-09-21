@@ -47,10 +47,9 @@ cat >"$BUILD/src/unit.x" <<'EOF'
 #include "anon.x"
 int cache_external(int value);
 int cache_call_external(int value) { return cache_external(value); }
-macro Statement $cache_add(Expr $target, Expr $amount)
-  using $temporary => {
-  int $temporary = $amount;
-  $target += $temporary;
+macro Statement $cache_add(Expr $target, Expr $amount) {
+  int temporary = $amount;
+  $target += temporary;
 }
 int probe_use(Foo x, AnonFirst a) {
   int result = x.len() + a.first;
@@ -417,7 +416,7 @@ grep -q "probe.xmacro" "$BUILD/imports/out/second.d" ||
 mkdir -p "$BUILD/package-import/packages/depcache/src" \
   "$BUILD/package-import/src" "$BUILD/package-import/out"
 cat >"$BUILD/package-import/packages/depcache/src/helper.xmacro" <<'EOF'
-macro Expression $depcache.answer() => (7)
+macro Expression $depcache.answer() => 7;
 EOF
 cat >"$BUILD/package-import/packages/depcache/src/helper.xlisp" <<'EOF'
 (def depcache-helper 1)
@@ -459,17 +458,17 @@ grep -q 'depcache__Var_cachedvalue' \
 mkdir -p "$BUILD/keyword/src" "$BUILD/keyword/alias-first" \
   "$BUILD/keyword/main-first"
 cat >"$BUILD/keyword/src/private-keywords.xmacro" <<'EOF'
-macro Decorator $cache.identity(Function $target) => {
+macro Decorator $cache.identity(Function $target) {
   $(x2c.function.body $target)...
 }
-macro Decorator $cache.outer(Function $target) => {
+macro Decorator $cache.outer(Function $target) {
   $(x2c.function.body $target)...
 }
 keyword identity $cache.identity;
 keyword outer $cache.outer;
 EOF
 cat >"$BUILD/keyword/src/child-keywords.xmacro" <<'EOF'
-macro Expression $cache.child(Expr $value) => (99)
+macro Expression $cache.child(Expr $value) => 99;
 keyword child $cache.child;
 EOF
 cat >"$BUILD/keyword/src/nested.x" <<'EOF'
@@ -534,9 +533,8 @@ grep -Fq "macro-embed-text-data.txt" "$embed_dep" ||
 
 mkdir -p "$BUILD/embed-invalid/src" "$BUILD/embed-invalid/out"
 cat >"$BUILD/embed-invalid/src/embed.xmacro" <<'EOF'
-macro Expression $probe.embed(Literal $path) => (
-  $(x2c.literal.string (x2c.embed.text $path))
-)
+macro Expression $probe.embed(Literal $path) =>
+  $(x2c.literal.string (x2c.embed.text $path));
 EOF
 printf 'plain text' >"$BUILD/embed-invalid/src/plain.txt"
 printf 'bad\0text' >"$BUILD/embed-invalid/src/nul.txt"
@@ -588,7 +586,7 @@ cp "$X2C" "$embed_root/builds/0/x2c"
 cp "$ROOT/etc/"*.xlisp "$ROOT/etc/"*.xmacro "$embed_root/etc/"
 cp "$ROOT"/lib/*.x "$ROOT"/lib/*.xmacro "$ROOT"/lib/*.xlisp "$embed_root/lib/"
 cat >"$embed_root/src/embed.xmacro" <<'EOF'
-macro Unit $cache.declare() => {
+macro Unit $cache.declare() {
   int $(x2c.ident (x2c.embed.text "name.txt"))(void);
 }
 EOF
@@ -647,8 +645,8 @@ cat >"$declarations/src/producer.xmacro" <<'EOF2'
 $(import "effects.xlisp")
 $(write-file projection-effect-path
   (string-append (read-file projection-effect-path) "m"))
-macro Field $projection.field() => { int $(projection-field); }
-macro Declaration $projection.inner(Expr $value) => {
+macro Field $projection.field() { int $(projection-field); }
+macro Declaration $projection.inner(Expr $value) {
   int $(projection-name)(void) { return $(car (list $value)); }
   $(quote (
     (default (function (int) (bind ("selected_answer") ((fnmod (params))))
@@ -657,7 +655,7 @@ macro Declaration $projection.inner(Expr $value) => {
       (block (return () (expr (int) (literal (int) "9"))))))
   ))...
 }
-macro Declaration $projection.outer(Expr $value) => {
+macro Declaration $projection.outer(Expr $value) {
   $projection.inner($value);
 }
 EOF2
@@ -675,11 +673,11 @@ $projection.outer(42);
 class ProjectedField { $projection.field(); };
 int field_value(ProjectedField value) { return value.value; }
 #include "boundary.x"
-macro Declaration $projection.local() => {
+macro Declaration $projection.local() {
   int $(projection-local-name)(void) { return 23; }
 }
 $projection.local();
-macro Declaration $projection.late() => {
+macro Declaration $projection.late() {
   $(quote ((declaration-recipe projection-late ())))...
 }
 $projection.late();
@@ -733,7 +731,7 @@ cat >"$declarations/src/private.x" <<'EOF2'
 $(defun projection-data (data)
   `(return () ,(x2c.literal.int
     (if (equal? data '(declaration-void)) 17 19))))
-macro Declaration $projection.data() => {
+macro Declaration $projection.data() {
   $(quote ((function (int) (bind ("data_answer") ((fnmod (params))))
     (block (syntax-recipe projection-data ((declaration-void)))))))...
 }
@@ -771,7 +769,7 @@ $(def read-file (bind "lisp_read_file" '((func (("String"))) "Var")))
 $(def write-file
   (bind "lisp_write_file" '((func (("String") ("String"))) "Var")))
 $(write-file "effects" (string-append (read-file "effects") "x"))
-macro Declaration $projection.persist() => {
+macro Declaration $projection.persist() {
   $(quote (
     (default (function (int) (bind ("persisted_answer") ((fnmod (params))))
       (block (return () (expr (int) (literal (int) "13"))))))

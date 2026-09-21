@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Expression $twice($value) => ($value + $value)
+macro Expression $twice($value) => $value + $value;
 
 int main(void) {
   int value = 21;

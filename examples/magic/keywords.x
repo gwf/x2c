@@ -1,9 +1,8 @@
 #include <assert.h>
-macro Decorator $control.with_lock(Block $body, Expr $lock)
-  using $held => { {
-    Mutex $held = $lock;
-    $held.lock();
-    defer $held.unlock();
+macro Decorator $control.with_lock(Block $body, Expr $lock) { {
+    Mutex held = $lock;
+    held.lock();
+    defer held.unlock();
     $body
   } }
 

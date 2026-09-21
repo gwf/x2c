@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Unit $broken_fields() => {
+macro Unit $broken_fields() {
   typedef struct RollbackRecord {
     int stale;
   } RollbackRecord;

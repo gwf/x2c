@@ -63,7 +63,8 @@ test("a kept macro declaration retains its included source definition", async (t
   const header = path.join(root, "kept.x");
   const helper = path.join(root, "keep.xmacro");
   const text = '#include "kept.x"\nint main(void) { return supplied; }\n';
-  const macro = 'macro Unit $keep(Decl $target) => { $target }\n';
+  const macro = 'macro Unit $keep(Decl $target) {\n' +
+    '  using $private;\n  $target\n}\n';
   const included = '$(import "keep.xmacro")\n$keep(int supplied);\n';
   const service = configured(t, root, ["translate", file]);
   service.update(file, text, 1);
@@ -87,7 +88,7 @@ test("a kept macro declaration retains its included source definition", async (t
 test("a discarded macro declaration cannot navigate to a later reused binding", async (t) => {
   const root = await workspace(t);
   const file = path.join(root, "main.x");
-  const text = 'macro Unit $drop(Decl $target) => {}\n$drop(int erased);\n' +
+  const text = 'macro Unit $drop(Decl $target) {}\n$drop(int erased);\n' +
     'int erased;\nint main(void) { return erased; }\n';
   const service = configured(t, root, ["translate", file]);
   service.update(file, text, 1);
@@ -140,7 +141,8 @@ test("unsaved macro import errors remain inspectable and repairable", async (t) 
   const root = await workspace(t);
   const file = path.join(root, "main.x");
   const macro = path.join(root, "helper.xmacro");
-  const definition = "macro Expression $twice($value) => ($value + $value)\n";
+  const definition =
+    "macro Expression $twice($value) => $value + $value;\n";
   const text = '$(import "helper.xmacro")\nint main(void) { return $twice(2); }\n';
   await fs.writeFile(macro, definition);
   const service = configured(t, root, ["translate", file]);

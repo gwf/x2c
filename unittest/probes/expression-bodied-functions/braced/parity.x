@@ -6,19 +6,19 @@ typedef struct Counter {
 
 typedef int (*Callback)(int);
 
-macro Expression $plus_one(Expr $value) => ($value + 1)
+macro Expression $plus_one(Expr $value) => $value + 1;
 
-macro Unit $define_generated(Name $name) => {
+macro Unit $define_generated(Name $name) {
   int $name(int value) {
     return value + 2;
   }
 }
 
-macro Unit $forward(Function $definition) => {
+macro Unit $forward(Function $definition) {
   $definition
 }
 
-macro Decorator $identity(Function $function) => {
+macro Decorator $identity(Function $function) {
   $(x2c.function.body $function)...
 }
 

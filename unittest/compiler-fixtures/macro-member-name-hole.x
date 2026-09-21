@@ -5,13 +5,11 @@ typedef struct MacroMemberName {
   int value;
 } MacroMemberName;
 
-macro Expression $read_member(Expr $record, Name $member) => (
-  $record.$member
-)
+macro Expression $read_member(Expr $record, Name $member) =>
+  $record.$member;
 
-macro Expression $read_pointer_member(Expr $record, Name $member) => (
-  $record->$member
-)
+macro Expression $read_pointer_member(Expr $record, Name $member) =>
+  $record->$member;
 
 int main(void) {
   MacroMemberName record = { .value = 42 }, *pointer = &record;

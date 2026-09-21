@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Unit $inspect(Type $type) => {
+macro Unit $inspect(Type $type) {
   $(x2c.type.fields $type)...
 }
 

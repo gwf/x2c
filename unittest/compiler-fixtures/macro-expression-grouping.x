@@ -5,17 +5,16 @@ typedef struct Point { int x; int y; } Point;
 // An Expression macro's result is one operand at its call site, whether the
 // body was written in the definition or built by compile-time Lisp. Neither
 // producer records grouping: emission parenthesizes from C precedence.
-macro Expression $twice($value) => ($value + $value)
+macro Expression $twice($value) => $value + $value;
 
-macro Expression $wider(Expr $value) => ($value + 1)
+macro Expression $wider(Expr $value) => $value + 1;
 
 $(defun sum-expr (a b) `(expr () (op + ,a ,b)))
 
-macro Expression $lispsum(Expr $a, Expr $b) => (
-  $(sum-expr $a $b)
-)
+macro Expression $lispsum(Expr $a, Expr $b) =>
+  $(sum-expr $a $b);
 
-macro Expression $origin() => ((Point) { 3, 4 })
+macro Expression $origin() => (Point) { 3, 4 };
 
 static int doubled(int value) => value * 2;
 

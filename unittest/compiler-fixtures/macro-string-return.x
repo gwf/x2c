@@ -4,9 +4,9 @@
    type annotation. The enclosing function must still supply one, or the
    returned value crosses to String or Var unconverted. */
 
-macro Statement $probe.string_return() => { return "NaN"; }
+macro Statement $probe.string_return() { return "NaN"; }
 
-macro Statement $probe.var_return() => { return 42; }
+macro Statement $probe.var_return() { return 42; }
 
 static String from_macro(void) { $probe.string_return(); }
 

@@ -1,10 +1,10 @@
 #include "x2c.x"
 
-macro Statement $item() => {
+macro Statement $item() {
   ;
 }
 
-macro Statement $broken(Expr $item) => {
+macro Statement $broken(Expr $item) {
   $item;
 }
 

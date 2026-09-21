@@ -1,22 +1,22 @@
 macro Decorator $x2c.foreign.alias(
   Unit $declaration,
   Expr $native
-) => {
+) {
   $(list (list 'falias $declaration $native))...
 }
 
 macro Expression $x2c.callback.adapt(
   Expr $target,
   Expr $source
-) => (
-  $(list 'expr nil (list 'tadapt $target $source))
-)
+) =>
+  $(list 'expr nil (list 'tadapt $target $source));
 
 macro Decorator $x2c.foreach(
   Block $body,
   Decl $declaration,
   Expr $collection
-) using $iterator, $item, $pair, $object, $cursor => {
+) {
+  using $iterator, $item, $pair, $object, $cursor;
   $(foreach.expand
     $declaration $collection $body
     $iterator $item $pair $object $cursor)...
@@ -24,35 +24,33 @@ macro Decorator $x2c.foreach(
 
 keyword foreach $x2c.foreach;
 
-macro Decorator $scope(Block $body, Expr $destination...) => {
+macro Decorator $scope(Block $body, Expr $destination...) {
   $(scope.expand $body $destination)...
 }
 
-macro Decorator $let(Block $body, Expr $place, Expr $value)
-  using $address, $previous => {
+macro Decorator $let(Block $body, Expr $place, Expr $value) {
   {
-    $(x2c.syntax.type $place) *$address = &$place;
-    $(x2c.syntax.type $place) $previous = *$address;
-    defer *$address = $previous;
-    *$address = $value;
+    $(x2c.syntax.type $place) *address = &$place;
+    $(x2c.syntax.type $place) previous = *address;
+    defer *address = previous;
+    *address = $value;
     $body
   }
 }
 
-macro Decorator $lock(Block $body, Expr $mutex) using $held => {
+macro Decorator $lock(Block $body, Expr $mutex) {
   {
-    $(list "Mutex") $held = $mutex;
-    $held.lock();
-    defer $held.unlock();
+    $(list "Mutex") held = $mutex;
+    held.lock();
+    defer held.unlock();
     $body
   }
 }
 
-macro Expression $auto(Expr $value) => (
-  $(list 'managed-init $value)
-)
+macro Expression $auto(Expr $value) =>
+  $(list 'managed-init $value);
 
-macro Decorator $class(NamedType $definition) => {
+macro Decorator $class(NamedType $definition) {
   $(class.expand $definition)...
 }
 

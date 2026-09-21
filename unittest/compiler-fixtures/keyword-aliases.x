@@ -2,28 +2,28 @@
 
 $(import "keyword-aliases-import.xmacro")
 
-macro Decorator $fixture.increment(Expr $target) => ($target + 1)
+macro Decorator $fixture.increment(Expr $target) => $target + 1;
 
-macro Decorator $fixture.twice_value(Expr $target) => ($target * 2)
+macro Decorator $fixture.twice_value(Expr $target) => $target * 2;
 
-macro Decorator $fixture.frozen(Expr $target) => ($target + 4)
+macro Decorator $fixture.frozen(Expr $target) => $target + 4;
 
-macro Decorator $fixture.repeat(Statement $target) => {
+macro Decorator $fixture.repeat(Statement $target) {
   $target
   $target
 }
 
-macro Decorator $fixture.once(Statement $target) => {
+macro Decorator $fixture.once(Statement $target) {
   {
     $target
   }
 }
 
-macro Decorator $fixture.preserve_field(Field $target) => {
+macro Decorator $fixture.preserve_field(Field $target) {
   $target
 }
 
-macro Decorator $fixture.preserve_unit(Unit $target) => {
+macro Decorator $fixture.preserve_unit(Unit $target) {
   $target
 }
 
@@ -53,7 +53,7 @@ static int frozen_before_redefinition(void) {
   return frozen 1;
 }
 
-macro Decorator $fixture.frozen(Expr $target) => ($target * 10)
+macro Decorator $fixture.frozen(Expr $target) => $target * 10;
 
 static int frozen_after_redefinition(void) {
   return frozen 1;

@@ -41,13 +41,12 @@ static U32MapProfile _u32_map_profile;
 
 #pragma private
 
-macro Expression $u32.unlikely(Expr $condition) => (
-  __builtin_expect(!!($condition), 0)
-)
+macro Expression $u32.unlikely(Expr $condition) =>
+  __builtin_expect(!!($condition), 0);
 
 macro Unit $u32.record_accessor(
   Name $method, Param $map, Param $itr, Expr $body
-) => {
+) {
   static inline uint32_t *U32Map.$method($map, $itr) {
     return $body;
   }

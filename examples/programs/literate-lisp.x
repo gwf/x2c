@@ -77,7 +77,7 @@ typedef struct Interp {                                                         
 /* $fail adds the operation name to an error's detail fields.
    The caller supplies the error code and any additional key/value pairs.
 */
-macro Statement $fail(Expr $cause, Expr $op, Expr $fields...) => {              // Expr parameters capture syntax.
+macro Statement $fail(Expr $cause, Expr $op, Expr $fields...) {                 // Expr parameters capture syntax.
   raise %($cause (operation ${$op}) $fields...);                                // Template holes and sequence splice.
 }
 
@@ -643,7 +643,7 @@ static Var _write_file(String path, String text) {
    when building the native registry; it does not perform Lisp macro expansion.
 */
 macro Expression $rest(Expr $fn) =>                                             // Returns syntax at compile time.
-  (Func.new_rest($fn, %((func (("List"))) "Var")))                              // Native signature as a List literal.
+  Func.new_rest($fn, %((func (("List"))) "Var"));                              // Native signature as a List literal.
 
 static void _install_natives(Interp *self) {
   List natives = %(                                                             // Rows: Lisp name, bind name, Func.

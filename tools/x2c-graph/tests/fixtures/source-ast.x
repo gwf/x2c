@@ -1,4 +1,4 @@
-macro expression $source_twice(expr $value) => ($value + $value)
+macro expression $source_twice(expr $value) => $value + $value;
 
 $(def source_ast_probe 1)
 

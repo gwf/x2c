@@ -6,11 +6,10 @@ tab: macros
 
 ```x2c
 ~#include <assert.h>
-macro Statement $swap(Expr $left, Expr $right)
-  using $temporary => {
-    $(x2c.syntax.type $left) $temporary = $left;
-    $left = $right;
-    $right = $temporary;
+macro Statement $swap(Expr $left, Expr $right) {
+  $(x2c.syntax.type $left) temporary = $left;
+  $left = $right;
+  $right = temporary;
 }
 
 ~int main(void) {
@@ -28,6 +27,6 @@ printf("%d %d; %s %s\n", left, right, first, last);
 ```
 
 `$swap` receives parsed expressions, and `x2c.syntax.type` supplies
-the temporary's type. `using` gives it a name that cannot collide with
-caller names. The same three generated statements swap integers or
-strings, without a separate macro for each type.
+the temporary's type. A declaration written in a macro body is hygienic,
+so `temporary` cannot collide with caller names. The same three generated
+statements swap integers or strings, without a separate macro for each type.

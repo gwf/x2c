@@ -1,5 +1,5 @@
 #include "x2c.x"
-macro Expression $unused(Name $binding) => (%!() using &$binding => 42)
+macro Expression $unused(Name $binding) => %!() using &$binding => 42;
 int main(void) {
   int unused;
   ScopeStats before = Scope.stats();

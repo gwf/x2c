@@ -10,7 +10,7 @@ typedef struct method_self_Record {
 } method_self_Record;
 typedef method_self_Record method_self_RecordLeaf;
 
-macro Decorator $self_identity(Function $function) => {
+macro Decorator $self_identity(Function $function) {
   $(x2c.function.body $function)...
 }
 

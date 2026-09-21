@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Enumerator $bad() => {
+macro Enumerator $bad() {
   $(list)
 }
 

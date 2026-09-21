@@ -1,19 +1,17 @@
 #include "x2c.x"
 
-macro Decorator $increment(Expr $target) => ($target + 1)
+macro Decorator $increment(Expr $target) => $target + 1;
 
 macro Decorator $scale(
   Expr $target,
   Expr $factor
-) => ($target * $factor)
+) => $target * $factor;
 
-macro Decorator $through_lisp(Expr $target) => (
-  $(car (list $target))
-)
+macro Decorator $through_lisp(Expr $target) =>
+  $(car (list $target));
 
-macro Expression $wrapped(Expr $target) => (
-  $increment() $target
-)
+macro Expression $wrapped(Expr $target) =>
+  $increment() $target;
 
 static int next(void) {
   return 3;

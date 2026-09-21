@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Entry $fixture.row() => {
+macro Entry $fixture.row() {
   "macro": 12
 }
 

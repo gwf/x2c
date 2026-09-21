@@ -1,4 +1,4 @@
-macro Decorator $fixture.identity(Function $target) => {
+macro Decorator $fixture.identity(Function $target) {
   $(x2c.function.body $target)...
 }
 

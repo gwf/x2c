@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Statement $bad() => {
+macro Statement $bad() {
   $(quote ((protocol bogus)))...
 }
 

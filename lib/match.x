@@ -290,10 +290,9 @@ List x2c_match_site_search_replace(
 #include "scope.x"
 #include "block.x"
 
-macro Statement $match.machine(Name $instance, Expr $stats)
-  using $storage => {
-  struct MatchMachine $storage;
-  MatchMachine $instance = &$storage;
+macro Statement $match.machine(Name $instance, Expr $stats) {
+  struct MatchMachine storage;
+  MatchMachine $instance = &storage;
   $instance.open();
   $instance.stats = $stats;
 }
@@ -301,9 +300,9 @@ macro Statement $match.machine(Name $instance, Expr $stats)
 macro Statement $match.lease(
   Type $lease_type, Name $lease_ptr,
   Name $acquire_status, Expr $cache, Expr $pattern,
-  Expr $owner) using $storage => {
-  $lease_type $storage;
-  $lease_type *$lease_ptr = &$storage;
+  Expr $owner) {
+  $lease_type storage;
+  $lease_type *$lease_ptr = &storage;
   int $acquire_status = $cache.acquire($pattern, $lease_ptr, $owner);
 }
 
@@ -849,11 +848,11 @@ static List _walk_bindings(MatchWalk walk, Var input) =>
 
 /* A prepared walk stages every node through one positional stack buffer. */
 macro Statement $match.walk_buffer(
-  Expr $plan, Expr $machine, Name $walk) using $values, $captures => {
-  Var $values[MACHINE_BINDER_MAX];
-  MatchCaptureBuffer $captures = { $values, 0, MACHINE_BINDER_MAX };
+  Expr $plan, Expr $machine, Name $walk) {
+  Var values[MACHINE_BINDER_MAX];
+  MatchCaptureBuffer captures = { values, 0, MACHINE_BINDER_MAX };
   struct MatchWalk $walk = {
-    $plan, ($plan).program.view(), &$captures, $machine,
+    $plan, ($plan).program.view(), &captures, $machine,
     Block.new(sizeof(Var))
   };
 }

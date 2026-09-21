@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/macro-binding-spelling-arbitrary.x:7:13: macro: x2c.binding.spelling requires an identifier or binding
+unittest/compiler-fixtures/macro-binding-spelling-arbitrary.x:6:13: macro: x2c.binding.spelling requires an identifier or binding
   int value = $spelling(40 + 2);
               ^
   note: value: (expr (int) 

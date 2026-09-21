@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/macro-diagnostic-fail.x:8:13: macro: chosen compile-time failure
+unittest/compiler-fixtures/macro-diagnostic-fail.x:7:13: macro: chosen compile-time failure
   int value = $reject(1);
               ^
   note: first note second note

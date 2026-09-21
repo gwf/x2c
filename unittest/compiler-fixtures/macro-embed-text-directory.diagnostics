@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/macro-embed-text-directory.x:7:16: macro: embedded text is not a regular file
+unittest/compiler-fixtures/macro-embed-text-directory.x:6:16: macro: embedded text is not a regular file
   String value = $embed.directory();
                  ^
   note: path: unittest/compiler-fixtures/macro-embed-text-definition

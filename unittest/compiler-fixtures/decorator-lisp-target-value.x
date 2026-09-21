@@ -6,7 +6,7 @@
 
 $(defun keep (fn) (list fn))
 
-macro Decorator $keep.target(Unit $fn) => { $(keep $fn)... }
+macro Decorator $keep.target(Unit $fn) { $(keep $fn)... }
 
 $keep.target()
 int scaled(int x) {

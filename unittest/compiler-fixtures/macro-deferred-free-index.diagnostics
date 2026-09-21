@@ -1,8 +1,8 @@
-unittest/compiler-fixtures/macro-deferred-free-index.x:5:1: parse: type () does not support indexing
-  )
-  ^
+unittest/compiler-fixtures/macro-deferred-free-index.x:4:20: parse: type () does not support indexing
+    missing_values[0];
+                     ^
 
-unittest/compiler-fixtures/macro-deferred-free-index.x:7:13: parse: expected syntax
+unittest/compiler-fixtures/macro-deferred-free-index.x:6:13: parse: expected syntax
   int value = $read_free_name();
               ^
 

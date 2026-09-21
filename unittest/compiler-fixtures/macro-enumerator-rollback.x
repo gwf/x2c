@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Enumerator $duplicate_enumerator() => {
+macro Enumerator $duplicate_enumerator() {
   $(x2c.ident "ROLLBACK_ENUM"),
   $(x2c.ident "ROLLBACK_ENUM")
 }

@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Statement $not_an_enumerator() => {
+macro Statement $not_an_enumerator() {
   return;
 }
 

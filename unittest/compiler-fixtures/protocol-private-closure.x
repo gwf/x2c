@@ -44,7 +44,7 @@ static PublicBase PrivateParticipant.publicbase(PrivateParticipant value) {
   return (PublicBase) value;
 }
 
-macro Unit $adopt_private_participant() => {
+macro Unit $adopt_private_participant() {
   protocol PublicBase(PrivateParticipant);
 }
 

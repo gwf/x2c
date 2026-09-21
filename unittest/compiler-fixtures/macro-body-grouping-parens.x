@@ -4,7 +4,7 @@ typedef struct Box { int value; } *Box;
 
 // A macro body installs no bindings, so its ordinary locals must still group
 // with parentheses instead of reading as casts to an unknown type.
-macro Unit $define_grouping(Type $box) => {
+macro Unit $define_grouping(Type $box) {
   static int $box._power_of_two(unsigned n) {
     if (n < 2 || (n & (n - 1))) return 0;
     return ((n)) != 0;

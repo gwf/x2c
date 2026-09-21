@@ -1,10 +1,10 @@
 #include "x2c.x"
 
-macro Decorator $outer(Unit $target) => {
+macro Decorator $outer(Unit $target) {
   $target
 }
 
-macro Decorator $discard(Unit $target) => {
+macro Decorator $discard(Unit $target) {
 }
 
 $outer()

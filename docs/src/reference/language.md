@@ -656,7 +656,7 @@ twice. A definition's left side looks like its invocation, and its body is x2c
 with `$hole` markers:
 
 ```x2c
-macro Expression $twice($value) => ($value + $value)
+macro Expression $twice($value) => $value + $value;
 
 int main(void) {
   printf("%d\n", $twice(21));
@@ -669,8 +669,20 @@ contain a local definition whose name has no `$`. Both forms emit no runtime
 declaration. `macro` is a contextual introducer only when the surrounding
 grammar accepts a definition and a result kind and macro name follow it. It
 remains legal as an ordinary typedef, variable, parameter, field, or function
-name everywhere else. A definition ends with its parenthesized or braced body
-and has no trailing semicolon.
+name everywhere else. A braced definition places `{ ... }` directly after the
+signature. An expression definition places `=> expression;` after it,
+including the trailing semicolon.
+
+For source compatibility, the compiler also accepts the former `=> { ... }`
+braced form and a complete parenthesized expression body written as
+`=> (expression)` without a semicolon. New code should use the forms above.
+
+```x2c
+macro Statement $legacy.guard(Expr $condition) => {
+  if (!$condition) return 0;
+}
+macro Expression $legacy.twice(Expr $value) => ($value * 2)
+```
 
 Ordinary global invocation is `$qualified.name(arguments)`. A local macro is
 invoked as `name(arguments)`. A source file may also give a visible global
@@ -694,7 +706,7 @@ A local definition uses one bare identifier and is a compound-statement item:
 
 ```x2c
 static int scaled_sum(int scale, int value) {
-  macro Expression scaled(Expr $input) => ($input * scale)
+  macro Expression scaled(Expr $input) => $input * scale;
 
   return scaled(value);
 }
@@ -719,7 +731,8 @@ retain their definition-site binding identities. A later same-spelled inner
 declaration is emitted under a private shadow name when necessary, so the
 template still reaches the captured declaration. Hole arguments retain their
 call-site identities. Declarations written in the body and names declared by
-`using` retain the ordinary hygiene rules described below.
+a leading body `using` directive retain the ordinary hygiene rules described
+below.
 
 Local `Expression`, `Statement` or `Block`, `Field`, `Entry`, and `Enumerator`
 results use their usual positions. A local decorator may target any syntax
@@ -765,7 +778,7 @@ argument even though it is not an expression.
 
 An `Expr` argument stays one operand. With the argument `value > 0`, the body
 `!$condition` means `!(value > 0)`. The same holds for a macro's own result:
-`macro Expression $twice($value) => ($value + $value)` makes `$twice(21) * 2`
+`macro Expression $twice($value) => $value + $value;` makes `$twice(21) * 2`
 mean `(21 + 21) * 2`. Generated C carries these parentheses only where C
 precedence would otherwise regroup the expression.
 
@@ -818,9 +831,8 @@ static int sum(int a, int b) {
   return a + b;
 }
 
-macro Expression $call(Expr $callee, Expr $arguments...) => (
-  $callee($arguments...)
-)
+macro Expression $call(Expr $callee, Expr $arguments...) =>
+  $callee($arguments...);
 
 static int answer(void) {
   return $call(sum, 19, 23);
@@ -839,7 +851,7 @@ A macro has one result kind as well as argument kinds:
 
 | Annotation | Body | Legal invocation position |
 | --- | --- | --- |
-| `Expression` | parenthesized expression | expression |
+| `Expression` | `=>` expression `;` | expression |
 | `Statement` or `Block` | braced block items | statement |
 | `Field` | braced field declarations | struct or union body |
 | `Entry` | braced, comma-separated `key: value` rows | `Map` literal |
@@ -849,9 +861,9 @@ A macro has one result kind as well as argument kinds:
 
 The result kind is required between `macro` and the `$` name. `Statement` is
 the canonical spelling for block-item results; `Block` remains a synonym in
-result and hole positions. Parenthesized bodies require `Expression`; braced
-bodies require `Statement`, `Block`, `Field`, `Entry`, `Enumerator`, `Unit`,
-or `Declaration`.
+result and hole positions. Arrow-expression bodies require `Expression`;
+braced bodies require `Statement`, `Block`, `Field`, `Entry`, `Enumerator`,
+`Unit`, or `Declaration`.
 Inside a compound statement, a `Statement` or `Block` macro may produce zero or
 more block items. Where the grammar requires one statement, such as an `if`,
 `else`, or loop body, the expansion must contain exactly one statement. An
@@ -863,13 +875,13 @@ matching position:
 #include "meta.x"
 meta static List swap_type(List value) => x2c_syntax_type(value);
 
-macro Statement $swap(Expr $left, Expr $right) using $temporary => {
-  $swap_type($left) $temporary = $left;
+macro Statement $swap(Expr $left, Expr $right) {
+  $swap_type($left) temporary = $left;
   $left = $right;
-  $right = $temporary;
+  $right = temporary;
 }
 
-macro Field $timestamps() => {
+macro Field $timestamps() {
   long created_at;
   long updated_at;
 }
@@ -892,7 +904,7 @@ splices:
 #include "meta.x"
 meta static List public_name(String name) => x2c_ident(name);
 
-macro Enumerator $status_values() => {
+macro Enumerator $status_values() {
   private_start = 3,
   $public_name("STATUS_READY") = private_start + 1,
   $public_name("STATUS_DONE")
@@ -916,7 +928,7 @@ members.
 An `Entry` body contains zero or more comma-separated `Map` rows:
 
 ```x2c
-macro Entry $handler(Literal $key, Expr $value) => {
+macro Entry $handler(Literal $key, Expr $value) {
   $key: $value
 }
 
@@ -952,7 +964,7 @@ meta static List trace_body(List fn) => x2c_function_body(fn);
 macro Decorator $trace(
   Function $function,
   Expr $channel
-) => {
+) {
   printf(
     "[%s] %s\n",
     $channel,
@@ -978,9 +990,12 @@ singular, explicitly annotated, and one of:
 | `Unit` | one top-level declaration or definition | zero or more top-level items |
 | `NamedType` | name and type definition, ending in `;` | retained top-level declarations |
 
-Parameters after the target are explicit invocation arguments. `using` follows
-the complete parameter list, just as it does for other macros. A decorator
-application has no semicolon; that omission pairs it with the following target.
+Parameters after the target are explicit invocation arguments. When a braced
+macro needs a generated name before any declaration can introduce it, a
+leading `using $name;` directive in the body creates that expansion-private
+name. The former signature `using` clause remains accepted for compatibility.
+A decorator application has no semicolon; that omission pairs it with the
+following target.
 Only whitespace and comments may separate them. When a statement decorator
 appears where one statement is required, its production must likewise yield
 exactly one statement. A compound statement may contain the captured target
@@ -1097,14 +1112,14 @@ lambda facilities cannot lift a local block with captured variables into a C
 callback. A decorator may wrap an existing callback or a noncapturing
 construct; captured thread blocks require a separate compiler feature.
 
-An `Expr` decorator has a parenthesized body and is parsed as a prefix unary
-form. Its target is the following C cast expression, including primary and
-postfix expressions, unary expressions, and casts. It therefore binds before
-binary, conditional, assignment, and comma operators. Parentheses widen the
-target explicitly:
+An `Expr` decorator has an arrow-expression body and is parsed as a prefix
+unary form. Its target is the following C cast expression, including primary
+and postfix expressions, unary expressions, and casts. It therefore binds
+before binary, conditional, assignment, and comma operators. Parentheses widen
+the target explicitly:
 
 ```x2c
-macro Decorator $nonzero(Expr $target) => ($target != 0)
+macro Decorator $nonzero(Expr $target) => $target != 0;
 
 ~int main(void) {
 ~  int value = 1;
@@ -1125,10 +1140,10 @@ target of the required kind for the outer decorator:
 ```x2c
 ~#include "meta.x"
 ~meta static List old_body(List fn) => x2c_function_body(fn);
-~macro Decorator $logged(Function $function) => {
+~macro Decorator $logged(Function $function) {
 ~  $old_body($function)...
 ~}
-~macro Decorator $validated(Function $function) => {
+~macro Decorator $validated(Function $function) {
 ~  $old_body($function)...
 ~}
 $logged()
@@ -1160,11 +1175,15 @@ parameters and preceding declarations captured by a local macro. A declaration
 written in a body receives a fresh binding identity and a private generated C
 spelling for each expansion.
 
-The `using` clause declares one or more compiler-allocated name holes. Every
-occurrence of one such hole within an expansion receives the same binding;
-different expansions receive different bindings. A `using` name may not
-duplicate an argument hole or another `using` name. These holes are singular
-`Name` holes and take no kind annotation and no `...`.
+Most generated declarations need no directive: writing `int temporary` in a
+body makes both that declaration and its literal references hygienic. When
+compile-time Lisp or a nested macro needs a private name before an ordinary
+declaration can introduce it, place `using $name, $other;` at the start of the
+braced body. Each name is a compiler-allocated singular `Name` hole. Every
+occurrence within one expansion receives the same binding, while different
+expansions receive different bindings. A generated name may not duplicate an
+argument hole or another generated name and takes no kind annotation or
+`...`. The directives must precede all other body items.
 
 Compile-time Lisp uses `x2c.ident` to mark an exact public spelling. In a
 declarator slot that spelling creates a declaration and is normally rejected if
@@ -1176,9 +1195,9 @@ The definition reuses that prototype's binding once; a mismatch, a second
 definition, or a collision with another binding kind is rejected at the
 invocation. A nested scope may still shadow an outer declaration normally. In
 an identifier expression `x2c.ident` resolves the existing spelling and rejects
-an unknown one. Use a macro `using` hole for a compiler-private name that
-cannot collide. A bare Lisp `String` does not become a name when returned into
-a name-capable position.
+an unknown one. Use a body `using` hole for a compiler-private name that cannot
+collide when no ordinary declaration introduces it first. A bare Lisp `String`
+does not become a name when returned into a name-capable position.
 
 The compiler parses and types arguments before expanding a macro. It then
 matches syntax, evaluates compile-time Lisp, and binds the generated syntax.
@@ -1214,7 +1233,7 @@ expression grammar: `${$helper(...)}` calls a meta function, while
 $(import "helpers.xlisp")
 $(import "project-macros.xmacro")
 
-macro Expression $computed(Expr $value) => ($(car (list $value)))
+macro Expression $computed(Expr $value) => $(car (list $value));
 ```
 
 `.xlisp` files execute in the translation unit's Lisp session. `.xmacro`
@@ -2308,8 +2327,8 @@ occupy the selector position. An expanded type is resolved in the invocation
 context, including pointer types:
 
 ```x2c
-macro Expression $has_type(Expr $value, Type $T) => ($value is $T)
-macro Expression $has_tag(Expr $value, Expr $tag) => ($value is $tag)
+macro Expression $has_type(Expr $value, Type $T) => $value is $T;
+macro Expression $has_tag(Expr $value, Expr $tag) => $value is $tag;
 
 static int has_pointer_type(void) {
   int number = 0;

@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Decorator $add_public(Unit $target) => {
+macro Decorator $add_public(Unit $target) {
   $target
   int $(x2c.ident "unexpected_public");
 }

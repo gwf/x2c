@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Unit $unit_result() => {
+macro Unit $unit_result() {
   int value;
 }
 

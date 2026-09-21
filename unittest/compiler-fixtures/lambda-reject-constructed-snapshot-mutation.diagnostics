@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/lambda-reject-constructed-snapshot-mutation.x:9:17: type: captured value requires 'using &name' for reference access
+unittest/compiler-fixtures/lambda-reject-constructed-snapshot-mutation.x:8:17: type: captured value requires 'using &name' for reference access
     Func change = $raw_snapshot(++value);
                   ^
   note: binding: value

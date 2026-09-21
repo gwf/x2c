@@ -8,13 +8,13 @@ static int sdk_sum(int left, int right) {
   return left + right;
 }
 
-macro Unit $sdk_functions(Expr $value) using $private => {
+macro Unit $sdk_functions(Expr $value) {
   static $(x2c.syntax.type $value)
   $(x2c.ident "sdk_exact")(void) {
     return $value;
   }
 
-  static int $private(void) {
+  static int private(void) {
     return 0;
   }
 
@@ -33,13 +33,13 @@ macro Unit $sdk_functions(Expr $value) using $private => {
   }
 }
 
-macro Expression $call_existing() => ($(x2c.ident "sdk_existing")())
+macro Expression $call_existing() => $(x2c.ident "sdk_existing")();
 
-macro Statement $print_value(Expr $value) => {
+macro Statement $print_value(Expr $value) {
   printf("%d\n", $value);
 }
 
-macro Unit $project_parameters(Name $name, Param $parameters...) => {
+macro Unit $project_parameters(Name $name, Param $parameters...) {
   static int $name($parameters...) {
     return sdk_sum(
       $(x2c.parameters.arguments $parameters)...

@@ -157,15 +157,14 @@ typedef enum Span {
 
 // A literal initializer reads as its spelling; any other initializer reads
 // as its expression node, which this table renders as a placeholder.
-macro Expression $member_table(Type $T) => (
+macro Expression $member_table(Type $T) =>
   $(x2c.literal.string (foldl
      (lambda (text row)
        (string-append text (car row) "="
          (let ((value (cadr row)))
            (if (not value) "-" (if (string? value) value "<expr>")))
          ","))
-     "" (x2c.type.members $T)))
-)
+     "" (x2c.type.members $T)));
 
 static void system_macro_type_members_reads_an_enum(void) {
   String table = $member_table(Shade);

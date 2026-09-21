@@ -4,7 +4,7 @@ typedef int Box;
 
 macro Unit $box(
   Type $type, Literal $tag, Param $parameter
-) => {
+) {
   inline Var $type.var($parameter) {
     return Var.new(
       $tag, $(x2c.parameters.arguments (list $parameter))...

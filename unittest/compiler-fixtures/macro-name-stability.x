@@ -1,9 +1,8 @@
 #include "x2c.x"
 
-macro Statement $stable_assign(Expr $target, Expr $value)
-  using $temporary => {
-  int $temporary = $value;
-  $target = $temporary;
+macro Statement $stable_assign(Expr $target, Expr $value) {
+  int temporary = $value;
+  $target = temporary;
 }
 
 int main(void) {

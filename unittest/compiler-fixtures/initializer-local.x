@@ -94,7 +94,7 @@ static void global_alias(void) {
   }
 }
 
-macro Statement $loop_scope() => {
+macro Statement $loop_scope() {
   for (struct Record { String text; } value = {"macro"}; 0;)
     (void)value;
 }

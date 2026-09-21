@@ -5,10 +5,10 @@
 #include "x2c.x"
 $(import "../src/cstar.xmacro")
 
-macro Decorator $demo.append(Function $function) using $unused => {
+macro Decorator $demo.append(Function $function) {
   $(x2c.function.body $function)...
-  int $unused = 0;
-  (void) $unused;
+  int unused = 0;
+  (void) unused;
 }
 
 $demo.append()

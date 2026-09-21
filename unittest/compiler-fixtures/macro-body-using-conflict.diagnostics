@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-body-using-conflict.x:4:10: parse: duplicate macro hole 'value'
+    using $value;
+           ^^^^^
+

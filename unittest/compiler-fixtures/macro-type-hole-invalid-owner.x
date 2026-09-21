@@ -2,7 +2,7 @@
 
 typedef int MacroInvalidOwner;
 
-macro Unit $box_pointer(Type $type) => {
+macro Unit $box_pointer(Type $type) {
   inline Var $type.var(MacroInvalidOwner value) {
     return Var.new(<i32>, value);
   }

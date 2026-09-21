@@ -1,9 +1,9 @@
 #include "x2c.x"
 
-macro Statement $keep_body_target() => {
+macro Statement $keep_body_target() {
 }
 
-macro Unit $define_body_local(Type $T) => {
+macro Unit $define_body_local(Type $T) {
   static $T $(x2c.ident "macro_body_local")($T value) {
     $T local = value;
     $keep_body_target();
@@ -11,14 +11,14 @@ macro Unit $define_body_local(Type $T) => {
   }
 }
 
-macro Unit $define_inferred_body_local($T) => {
+macro Unit $define_inferred_body_local($T) {
   static long $(x2c.ident "macro_body_inferred_local")(void) {
     $T local = 43;
     return local;
   }
 }
 
-macro Unit $define_inferred_cast($T) => {
+macro Unit $define_inferred_cast($T) {
   static long $(x2c.ident "macro_body_inferred_cast")(long value) {
     return ($T)value;
   }
@@ -26,11 +26,11 @@ macro Unit $define_inferred_cast($T) => {
 
 // A parenthesized hole before `[` subscripts its value; only a `Type` hole
 // casts the array literal that follows.
-macro Expression $first($items) => (($items)[0])
+macro Expression $first($items) => ($items)[0];
 
-macro Expression $literal_of(Type $T) => (($T)[1, 2])
+macro Expression $literal_of(Type $T) => ($T)[1, 2];
 
-macro Unit $define_annotated_pointer(Type $T) => {
+macro Unit $define_annotated_pointer(Type $T) {
   static $T $(x2c.ident "macro_body_annotated_pointer")($T *value) {
     $T *local = value;
     return *local;

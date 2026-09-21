@@ -3,7 +3,7 @@
 
 // Leading specifier text is written with a declaration but is no part of the
 // type its names, return values, and prototypes are checked against.
-macro Statement $scoped(Decl $declaration, Block $body) => {
+macro Statement $scoped(Decl $declaration, Block $body) {
   {
     $declaration;
     $body

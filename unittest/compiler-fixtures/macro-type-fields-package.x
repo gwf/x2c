@@ -2,7 +2,7 @@
 
 import "geo" as g;
 
-macro Unit $check_imported(Type $type) => {
+macro Unit $check_imported(Type $type) {
   $(let ((actual (x2c.type.fields $type)))
      (if (equal? actual
            '(("a" (struct "geo__VecData"))

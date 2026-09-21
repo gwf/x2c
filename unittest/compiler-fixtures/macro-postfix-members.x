@@ -14,27 +14,22 @@ static int add_one(int value) {
   return value + 1;
 }
 
-macro Expression $project.math.increment(Expr $value) => ($value + 1)
+macro Expression $project.math.increment(Expr $value) => $value + 1;
 
-macro Expression $macro_postfix_field(Expr $box) => (
-  $project.math.increment($box.value)
-)
+macro Expression $macro_postfix_field(Expr $box) =>
+  $project.math.increment($box.value);
 
-macro Expression $macro_postfix_arrow(Expr $box) => (
-  $box->value
-)
+macro Expression $macro_postfix_arrow(Expr $box) =>
+  $box->value;
 
-macro Expression $macro_postfix_method(Expr $box, Expr $delta) => (
-  $box.bump($delta)
-)
+macro Expression $macro_postfix_method(Expr $box, Expr $delta) =>
+  $box.bump($delta);
 
-macro Expression $macro_postfix_callable(Expr $box, Expr $value) => (
-  $box.callable($value)
-)
+macro Expression $macro_postfix_callable(Expr $box, Expr $value) =>
+  $box.callable($value);
 
-macro Expression $macro_postfix_keyword(Expr $value) => (
-  $value.int()
-)
+macro Expression $macro_postfix_keyword(Expr $value) =>
+  $value.int();
 
 int main(void) {
   MacroPostfixBox box = {

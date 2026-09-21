@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Decorator $drop(Unit $target) => {
+macro Decorator $drop(Unit $target) {
 }
 
 $drop()

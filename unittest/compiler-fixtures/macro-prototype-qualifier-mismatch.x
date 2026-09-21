@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Unit $define_read() => {
+macro Unit $define_read() {
   int $(x2c.ident "generated_read")(int *value) {
     return *value;
   }

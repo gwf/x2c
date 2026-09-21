@@ -1,4 +1,4 @@
-macro Decorator $private.loop(Block $body) => {
+macro Decorator $private.loop(Block $body) {
   while (1) $body
 }
 

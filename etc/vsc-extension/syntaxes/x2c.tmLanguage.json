@@ -18,6 +18,9 @@
 			"include": "#x2c_macro_definition"
 		},
 		{
+			"include": "#x2c_macro_using_directive"
+		},
+		{
 			"include": "#x2c_macro_context"
 		},
 		{
@@ -3861,6 +3864,23 @@
 				"6": { "name": "entity.name.function.macro.x2c" },
 				"7": { "name": "entity.name.function.macro.x2c" }
 			}
+		},
+		"x2c_macro_using_directive": {
+			"begin": "\\b(using)(?=\\s+\\$[A-Za-z_][A-Za-z0-9_]*(?:\\s*,\\s*\\$[A-Za-z_][A-Za-z0-9_]*)*\\s*;)",
+			"beginCaptures": {
+				"1": { "name": "keyword.other.macro.using.x2c" }
+			},
+			"end": ";",
+			"patterns": [
+				{
+					"match": "(\\$)([A-Za-z_][A-Za-z0-9_]*)",
+					"captures": {
+						"1": { "name": "punctuation.definition.macro.sigil.x2c" },
+						"2": { "name": "variable.parameter.macro.x2c" }
+					}
+				},
+				{ "include": "#comments" }
+			]
 		},
 		"x2c_macro_context": {
 			"patterns": [

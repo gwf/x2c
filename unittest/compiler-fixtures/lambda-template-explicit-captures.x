@@ -1,12 +1,10 @@
 #include "x2c.x"
 
-macro Expression $snapshot(Name $binding) => (%!() => $binding)
-macro Expression $increment(Name $binding) => (
-  %!() using &$binding => ++$binding
-)
-macro Expression $shared_reader(Name $binding) => (
-  %!() using &$binding => $binding
-)
+macro Expression $snapshot(Name $binding) => %!() => $binding;
+macro Expression $increment(Name $binding) =>
+  %!() using &$binding => ++$binding;
+macro Expression $shared_reader(Name $binding) =>
+  %!() using &$binding => $binding;
 
 int main(void) {
   int value = 1;

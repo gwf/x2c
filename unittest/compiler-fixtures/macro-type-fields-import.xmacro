@@ -1,4 +1,4 @@
-macro Unit $imported_record() => {
+macro Unit $imported_record() {
   struct ReflectedImported {
     short $(x2c.ident "included");
   };

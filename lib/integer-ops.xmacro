@@ -7,7 +7,7 @@
     counts, and result storage or boxing.
 */
 
-macro Unit $integer.raw(Name $name) => {
+macro Unit $integer.raw(Name $name) {
   static inline unsigned long long $name(
     Symbol op, unsigned long long a, unsigned long long b,
     int bits, int unsigned_value) {

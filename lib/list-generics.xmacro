@@ -23,7 +23,7 @@
 macro Unit $list.typed.family(Type $list, Type $element,
   Name $encode, Name $decode, Literal $tag, Name $lower,
   Expr $zero, Literal $owner
-) => {
+) {
   $element $list.car($list);
   $list $list.cons($element, $list);
   $element $list.last($list);

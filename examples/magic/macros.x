@@ -1,9 +1,8 @@
 #include <assert.h>
-macro Statement $swap(Expr $left, Expr $right)
-  using $temporary => {
-    $(x2c.syntax.type $left) $temporary = $left;
-    $left = $right;
-    $right = $temporary;
+macro Statement $swap(Expr $left, Expr $right) {
+  $(x2c.syntax.type $left) temporary = $left;
+  $left = $right;
+  $right = temporary;
 }
 
 int main(void) {

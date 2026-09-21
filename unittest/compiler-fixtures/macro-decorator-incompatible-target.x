@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Decorator $identity(Function $function) => {
+macro Decorator $identity(Function $function) {
   $(x2c.function.body $function)...
 }
 

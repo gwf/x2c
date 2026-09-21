@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Decorator $identity(Unit $target) => {
+macro Decorator $identity(Unit $target) {
   $target
 }
 

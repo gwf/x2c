@@ -4,7 +4,7 @@ typedef enum ExistingRows {
   SOURCE_ENUM
 } ExistingRows;
 
-macro Enumerator $colliding_enumerator() => {
+macro Enumerator $colliding_enumerator() {
   $(x2c.ident "SOURCE_ENUM")
 }
 

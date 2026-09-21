@@ -19,7 +19,7 @@ int RepeatTwo.getindex(RepeatTwo, int);
 
 macro Unit $repeat.array(
   Type $array, Name $unbox, Literal $tag
-) => {
+) {
   inline Var $array.var($array array) {
     return Var.new($tag, array);
   }
@@ -50,7 +50,7 @@ macro Unit $repeat.array(
   protocol Var($array);
 }
 
-macro Unit $repeat.proto(Type $base) => {
+macro Unit $repeat.proto(Type $base) {
   protocol $base(T) {
     int T.read(T);
   }

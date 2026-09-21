@@ -80,7 +80,7 @@ static uint32_t *U32Map.value(U32Map map, U32MapItr itr) {
 ACCESS_NEW = """\
 macro Unit $u32.record_accessor(
   Name $method, Param $map, Param $itr, Expr $body
-) => {
+) {
   static inline uint32_t *U32Map.$method($map, $itr) {
     return $body;
   }
@@ -132,9 +132,8 @@ PRIVATE_OLD = "#pragma private\n"
 PRIVATE_HINT_NEW = """\
 #pragma private
 
-macro Expression $u32.unlikely(Expr $condition) => (
-  __builtin_expect(!!($condition), 0)
-)
+macro Expression $u32.unlikely(Expr $condition) =>
+  __builtin_expect(!!($condition), 0);
 """
 GROWTH_OLD = "if (map.used >= map.capacity / 2)"
 GROWTH_NEW = "if ($u32.unlikely(map.used >= map.capacity / 2))"

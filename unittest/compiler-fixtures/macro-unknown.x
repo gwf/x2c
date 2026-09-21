@@ -2,4 +2,4 @@
 
 int value = $later(1);
 
-macro Expression $later($value) => ($value)
+macro Expression $later($value) => $value;

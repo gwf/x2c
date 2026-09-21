@@ -26,7 +26,7 @@
 */
 macro Unit $array.typed.update.integer(
   Type $array, Type $element, Type $unsigned
-) => {
+) {
   inline $element $array.updateindex($array, int, Symbol, $element);
   inline $element $array.postfixindex($array, int, Symbol);
 
@@ -90,7 +90,7 @@ macro Unit $array.typed.update.integer(
     Only the four arithmetic operators are defined on a float; the rest
     raise `<bad-types>`, matching the boxed path.
 */
-macro Unit $array.typed.update.floating(Type $array, Type $element) => {
+macro Unit $array.typed.update.floating(Type $array, Type $element) {
   inline $element $array.updateindex($array, int, Symbol, $element);
   inline $element $array.postfixindex($array, int, Symbol);
 
@@ -126,7 +126,7 @@ macro Unit $array.typed.update.floating(Type $array, Type $element) => {
 
 /* Generates String concatenation for compound update. Postfix update has no
    String operation and always raises before touching the array. */
-macro Unit $array.typed.update.string(Type $array) => {
+macro Unit $array.typed.update.string(Type $array) {
   inline String $array.updateindex($array, int, Symbol, String);
   inline String $array.postfixindex($array, int, Symbol);
 
@@ -151,7 +151,7 @@ macro Unit $array.typed.update.string(Type $array) => {
   }
 }
 
-macro Unit $array.core.family(Type $array, Type $element) => {
+macro Unit $array.core.family(Type $array, Type $element) {
   static int $array._core_shift($array array, $element *out) {
     if ((void *) array == NULL || !array.length || !out) return 0;
     size_t n = array.length;
@@ -344,7 +344,7 @@ macro Unit $array.core.family(Type $array, Type $element) => {
 
 macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
   Literal $owner
-) => {
+) {
   $array $array.new(void);
   int $array.try_get($array, int, $element *);
   int $array.try_next($array, int *, $element *);
@@ -641,7 +641,7 @@ macro Unit $array.typed.family(Type $array, Type $element, Literal $zero,
 
 macro Unit $array.core.observe(
   Type $array, Type $element, Name $compare_element
-) => {
+) {
   static int $array._core_compare($array a, $array b) {
     if ((void *) a == (void *) b) return 0;
     if ((void *) a == NULL) return -1;
@@ -680,7 +680,7 @@ macro Unit $array.core.observe(
 macro Unit $array.typed.observe(
   Type $family, Type $element, Literal $owner, Name $compare_element,
   Name $new_buffer, Name $finish_buffer
-) => {
+) {
   $array.core.observe($family, $element, $compare_element);
   Array $family.array($family);
   int $family.compare($family, $family);
@@ -740,7 +740,7 @@ macro Unit $array.typed.observe(
 
 macro Unit $array.typed.publish(Type $array, Type $element, Name $unbox,
   Literal $tag, Name $prepare_export
-) using $next => {
+) {
   Var $array.var($array);
   Block $array.block($array);
   $array Var.$unbox(Var);
@@ -781,7 +781,7 @@ macro Unit $array.typed.publish(Type $array, Type $element, Name $unbox,
     return result = packed;
   }
 
-  static int $next(Iter iter, Var *out) {
+  static int next(Iter iter, Var *out) {
     $array array = iter.obj.$unbox();
     int index = iter.state.int();
     $element element;
@@ -803,7 +803,7 @@ macro Unit $array.typed.publish(Type $array, Type $element, Name $unbox,
   */
   Iter $array.iter($array array, Iter dest) {
     if ((void *) dest == NULL) return NULL;
-    return Iter_init(dest, array, $next, 0);
+    return Iter_init(dest, array, next, 0);
   }
 
   static $array $array.export_context($array array, Context source) {

@@ -1,7 +1,7 @@
-macro Statement $fail(Expr $cause, Expr $op, Expr $fields...) => {
+macro Statement $fail(Expr $cause, Expr $op, Expr $fields...) {
   raise %($cause (operation ${$op}) $fields...);
 }
-macro Statement $keyed(Expr $cause, Expr $key, Expr $value) => {
+macro Statement $keyed(Expr $cause, Expr $key, Expr $value) {
   raise %($cause ($key ${$value}));
 }
 int main(void) {

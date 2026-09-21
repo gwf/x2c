@@ -31,7 +31,7 @@
 macro Unit $ad.dual(
   Type $D, Name $d, Literal $tag, Type $S,
   Expr $sin, Expr $cos, Expr $exp, Expr $log, Expr $sqrt, Expr $tanh
-) => {
+) {
   Var $D.var($D value) {
     $D *boxed = Scope.malloc(sizeof($D));
     *boxed = value;
@@ -632,7 +632,7 @@ meta static List ad_cast(List type, List e) {
   return %(expr () (cast (decl $type (bindings (bind () ()))) $e));
 }
 
-macro Statement $ad.local(Type $type, Name $name, Expr $initial) => {
+macro Statement $ad.local(Type $type, Name $name, Expr $initial) {
   $type $name = $initial;
 }
 
@@ -1085,7 +1085,7 @@ meta static List ad_param_names(List params) {
   return names;
 }
 
-macro Statement $ad.write_slot(Name $gradient, Name $value) => {
+macro Statement $ad.write_slot(Name $gradient, Name $value) {
   *$gradient = $value;
 }
 
@@ -1154,7 +1154,8 @@ meta static List ad_reverse_finish(Map state) {
 macro Unit $ad.gradient(
   Type $spec, Name $name, Type $tape_type, Name $tape_new,
   Expr $params, Expr $state, Expr $items
-) using $tape, $result, $seed, $code, $reverse => {
+) {
+  using $tape, $result, $seed, $code, $reverse;
   $spec $name($ad_grad_params($params)...) {
     $tape_type $tape = $tape_new();
     double $result = 0.0, $seed = 0.0, $code = 0.0;
@@ -1372,7 +1373,7 @@ $(defun ad.checkpoint (fn block)
     calls to earlier `$ad.forward()` functions are supported; anything else
     is a diagnostic at the invocation.
 */
-macro Decorator $ad.forward(Unit $fn) => {
+macro Decorator $ad.forward(Unit $fn) {
   $fn
   $(ad.forward $fn)...
 }
@@ -1384,7 +1385,7 @@ macro Decorator $ad.forward(Unit $fn) => {
     names must be unique within the function. Loops, `break`, `continue`,
     and `return` anywhere in the body replay from recorded exit codes.
 */
-macro Decorator $ad.reverse(Unit $fn) => {
+macro Decorator $ad.reverse(Unit $fn) {
   $fn
   $(ad.reverse $fn)...
 }
@@ -1396,7 +1397,7 @@ macro Decorator $ad.reverse(Unit $fn) => {
     per block, and the loop runs twice. A checkpointed loop cannot contain
     `return`.
 */
-macro Decorator $ad.checkpoint(Unit $fn, Literal $block) => {
+macro Decorator $ad.checkpoint(Unit $fn, Literal $block) {
   $fn
   $(ad.checkpoint $fn $block)...
 }
@@ -1405,7 +1406,7 @@ macro Decorator $ad.checkpoint(Unit $fn, Literal $block) => {
     produces several items, so this is the spelling for a function that
     needs both derivatives.
 */
-macro Decorator $ad.both(Unit $fn) => {
+macro Decorator $ad.both(Unit $fn) {
   $fn
   $(append (ad.forward $fn) (ad.reverse $fn))...
 }

@@ -596,7 +596,7 @@ typedef struct Point { int x, y, z; } Point;
 meta static List field_count(List receiver) =>
   x2c_literal_int(x2c_type_fields(x2c_syntax_type(receiver)).len());
 
-macro Expression $probe.count(Expr $value) => ($field_count($value))
+macro Expression $probe.count(Expr $value) => $field_count($value);
 
 int main(void) {
   Point p = { 1, 2, 3 };
@@ -626,7 +626,7 @@ program, using ordinary macro substitution, scope and binding rules.
 Expression macros retain their usual expansion behavior.
 
 ```x2c
-macro Unit $make_function(Name $name, Expr $result) => {
+macro Unit $make_function(Name $name, Expr $result) {
   int $name(void) { return $result; }
 }
 
@@ -635,7 +635,7 @@ meta static List build_function(String name, int n) {
   return %($node);
 }
 
-macro Unit $make_answer() => { $build_function("answer", 21)... }
+macro Unit $make_answer() { $build_function("answer", 21)... }
 
 $make_answer();
 int main(void) {
@@ -695,7 +695,7 @@ node shapes by hand, so the compiler binds and types the result:
 meta static List call_of(String callee, List argument) =>
   x2c_expr_call(x2c_expr_ident(x2c_ident(callee)), %($argument));
 
-macro Expression $probe.twice(Expr $value) => ($call_of("twice", $value))
+macro Expression $probe.twice(Expr $value) => $call_of("twice", $value);
 
 static int twice(int n) => n * 2;
 
@@ -741,7 +741,7 @@ meta static List one_word(Var node) {
   return x2c_literal_string(text);
 }
 
-macro Expression $probe.word(Expr $value) => ($one_word($value))
+macro Expression $probe.word(Expr $value) => $one_word($value);
 
 int main(void) {
   int seconds = 90;
@@ -822,9 +822,9 @@ meta static List shape_reads(List receiver) {
   return x2c_expr_composite(reads);
 }
 
-macro Expression $shape.names(Expr $value) => ($shape_names($value))
+macro Expression $shape.names(Expr $value) => $shape_names($value);
 
-macro Expression $shape.reads(Expr $value) => ($shape_reads($value))
+macro Expression $shape.reads(Expr $value) => $shape_reads($value);
 ```
 
 The second file imports it and uses the macros. Imports still use the

@@ -87,7 +87,7 @@ macro Decorator $cstar.verify(
   Function $function,
   Expr $pre,
   Expr $post
-) => {
+) {
   $(cstar._record-function $function "" $pre $post)...
 }
 
@@ -98,18 +98,18 @@ macro Decorator $cstar.verify_with(
   Expr $ghosts,
   Expr $pre,
   Expr $post
-) => {
+) {
   $(cstar._record-function $function (cstar._text $ghosts) $pre $post)...
 }
 
 /** Records an intermediate assertion at this program point. */
-macro Statement $cstar.assert(Expr $text) => {
+macro Statement $cstar.assert(Expr $text) {
   cstar_marker($(cstar._record-inner 'assert $text));
 }
 
 /** Runs one of the session's own proof steps, such as the array-fill steps
     the package ships, with logical term arguments. */
-macro Statement $cstar.proof(Name $step, Expr $arguments...) => {
+macro Statement $cstar.proof(Name $step, Expr $arguments...) {
   cstar_marker($(cstar._record-proof 'proof $step $arguments));
 }
 
@@ -117,13 +117,13 @@ macro Statement $cstar.proof(Name $step, Expr $arguments...) => {
     receives the session and then the logical term arguments. The helper is
     resolved when the generated proof program is compiled; the verified unit
     needs no declaration of it. */
-macro Statement $cstar.helper(Name $helper, Expr $arguments...) => {
+macro Statement $cstar.helper(Name $helper, Expr $arguments...) {
   cstar_marker($(cstar._record-proof 'helper $helper $arguments));
 }
 
 /** Records the invariant of the decorated loop as a proposition over program
     variables; each named variable contributes its own ownership frame. */
-macro Decorator $cstar.invariant(Statement $target, Expr $text) => {
+macro Decorator $cstar.invariant(Statement $target, Expr $text) {
   {
     cstar_marker($(cstar._record-inner 'invariant $text));
     $target
@@ -133,7 +133,7 @@ macro Decorator $cstar.invariant(Statement $target, Expr $text) => {
 /** Records the invariant of the decorated loop as a complete separation-logic
     assertion, which states its own ownership and may bind existentials. It
     cuts the state only partially, so the surrounding frame survives. */
-macro Decorator $cstar.invariant_sl(Statement $target, Expr $text) => {
+macro Decorator $cstar.invariant_sl(Statement $target, Expr $text) {
   {
     cstar_marker($(cstar._record-inner 'invariant_sl $text));
     $target

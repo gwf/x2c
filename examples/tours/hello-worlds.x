@@ -1,7 +1,7 @@
 /*  hello-worlds.x -- twelve idiomatic paths to Hello, World! */
 
 /*  hello-world: hello machine  */
-macro Expression $loud(Expr $s) => ($s.upper())                 // typed macro
+macro Expression $loud(Expr $s) => $s.upper();                  // typed macro
 
 static Var bang(Var s) { return %"${s.string()}!"; }            // Var -> Var
 
@@ -121,7 +121,7 @@ static void _compile_time_lisp(void) {
 }
 
 /*  hello-world: greeting macro  */
-macro Expression $greet(Literal $who) => (%"Hello, ${$who}!")   // literal hole
+macro Expression $greet(Literal $who) => %"Hello, ${$who}!";    // literal hole
 
 static void _greeting_macro(void) {
   puts($greet("World"));

@@ -4,20 +4,19 @@ static int sum(int a, int b) {
   return a + b;
 }
 
-macro Expression $call(Expr $callee, Expr $arguments...) => (
-  $callee($arguments...)
-)
+macro Expression $call(Expr $callee, Expr $arguments...) =>
+  $callee($arguments...);
 
-macro Unit $same_use(Expr $values...) => {
+macro Unit $same_use(Expr $values...) {
   static int $(x2c.ident "answer")(void) {
     return sum($values...);
   }
 }
 
-macro Statement $swap(Expr $left, Expr $right) using $temporary => {
-  $(x2c.syntax.type $left) $temporary = $left;
+macro Statement $swap(Expr $left, Expr $right) {
+  $(x2c.syntax.type $left) temporary = $left;
   $left = $right;
-  $right = $temporary;
+  $right = temporary;
 }
 
 int first = 20;

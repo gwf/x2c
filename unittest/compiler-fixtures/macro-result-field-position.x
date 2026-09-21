@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Field $field_result() => {
+macro Field $field_result() {
   int value;
 }
 

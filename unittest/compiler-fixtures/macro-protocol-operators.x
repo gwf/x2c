@@ -56,7 +56,7 @@ int report(
   return 0;
 }
 
-macro Expression $report_ops(Expr $lhs, Expr $rhs, Expr $values) => (
+macro Expression $report_ops(Expr $lhs, Expr $rhs, Expr $values) =>
   report(
     $lhs + $rhs,
     -$lhs,
@@ -64,8 +64,7 @@ macro Expression $report_ops(Expr $lhs, Expr $rhs, Expr $values) => (
     $lhs != $rhs,
     $lhs < $rhs,
     2 in $values
-  )
-)
+  );
 
 int main(void) {
   Vec lhs = Vec.new(2), rhs = Vec.new(5);

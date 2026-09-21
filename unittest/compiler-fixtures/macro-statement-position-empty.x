@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Statement $empty() => {
+macro Statement $empty() {
 }
 
 int main(void) {

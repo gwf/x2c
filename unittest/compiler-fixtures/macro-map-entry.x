@@ -2,31 +2,31 @@
 
 $(import "macro-map-entry-import.xmacro")
 
-macro Entry $handler(Name $name) => {
+macro Entry $handler(Name $name) {
   $(x2c.literal.string (x2c.binding.spelling $name)): $name
 }
 
-macro Entry $two() => {
+macro Entry $two() {
   "left": 3,
   "right": 4,
 }
 
-macro Entry $none() => {
+macro Entry $none() {
 }
 
-macro Entry $forward(Entry $rows...) => {
+macro Entry $forward(Entry $rows...) {
   $rows...
 }
 
-macro Entry $forward_one(Entry $row) => {
+macro Entry $forward_one(Entry $row) {
   $row
 }
 
-macro Entry $nested_rows() => {
+macro Entry $nested_rows() {
   $two()
 }
 
-macro Entry $lisp_rows() => {
+macro Entry $lisp_rows() {
   $(list
     (list 'map-entry (x2c.literal.string "lisp-a")
                      (x2c.literal.int 7))
@@ -34,7 +34,7 @@ macro Entry $lisp_rows() => {
                      (x2c.literal.int 8)))...
 }
 
-macro Expression $expression_key() => ("expression")
+macro Expression $expression_key() => "expression";
 
 keyword pair $two;
 

@@ -6,6 +6,6 @@ protocol Marker(T) {
 
 typedef int Marked;
 
-macro Unit $bad.representation() => {
+macro Unit $bad.representation() {
   protocol Marker(Marked) as int;
 }

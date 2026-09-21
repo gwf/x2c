@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-body-using-late.x:5:9: parse: expected ';'
+    using $temporary;
+          ^
+

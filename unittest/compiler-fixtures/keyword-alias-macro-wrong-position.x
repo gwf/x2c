@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Unit $fixture.generate() => {
+macro Unit $fixture.generate() {
   static int generated = 42;
 }
 

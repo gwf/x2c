@@ -1,24 +1,24 @@
 #include "x2c.x"
 
 static Func parameter_snapshot(int &parameter) {
-  macro Expression read() => (%!() => parameter)
+  macro Expression read() => %!() => parameter;
   ++parameter;
   return read();
 }
 
 static Func parameter_reader(int &parameter) {
-  macro Expression read() => (%!() using &parameter => parameter)
+  macro Expression read() => %!() using &parameter => parameter;
   return read();
 }
 
 static Func parameter_writer(int &parameter) {
-  macro Expression bump() => (%!() using &parameter => ++parameter)
+  macro Expression bump() => %!() using &parameter => ++parameter;
   return bump();
 }
 
 static Func nested_reference(int value) {
   Func factory = %!() using &value => {
-    macro Expression nested() => (%!() using &value => ++value)
+    macro Expression nested() => %!() using &value => ++value;
     return nested();
   };
   return factory();
@@ -27,10 +27,10 @@ static Func nested_reference(int value) {
 int main(void) {
   int value = 1;
   int unused;
-  macro Expression read_snapshot() => (%!() => value)
-  macro Expression read_shared() => (%!() using &value => value)
-  macro Expression increment() => (%!() using &value => ++value)
-  macro Expression ignore_unused() => (%!() using &unused => 41)
+  macro Expression read_snapshot() => %!() => value;
+  macro Expression read_shared() => %!() using &value => value;
+  macro Expression increment() => %!() using &value => ++value;
+  macro Expression ignore_unused() => %!() using &unused => 41;
 
   value = 2;
   Func snapshot2 = read_snapshot();

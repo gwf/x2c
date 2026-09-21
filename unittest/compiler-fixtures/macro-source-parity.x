@@ -37,7 +37,7 @@ int direct_function(int value) {
   return value + DIRECT_KIND;
 }
 
-macro Unit $generated_protocol() => {
+macro Unit $generated_protocol() {
   protocol GeneratedProtocol(T) {
     int T.read(T);
   }
@@ -45,7 +45,7 @@ macro Unit $generated_protocol() => {
   protocol GeneratedProtocol(DirectValue);
 }
 
-macro Unit $generated_units() => {
+macro Unit $generated_units() {
   #define GENERATED_SOURCE_FLAG 1
 
   typedef enum GeneratedKind {
@@ -74,8 +74,8 @@ macro Unit $generated_units() => {
   }
 }
 
-macro Unit $generated_macro_definition() => {
-  macro Expression $generated_read(Expr $value) => ($value.read())
+macro Unit $generated_macro_definition() {
+  macro Expression $generated_read(Expr $value) => $value.read();
 }
 
 $generated_protocol();

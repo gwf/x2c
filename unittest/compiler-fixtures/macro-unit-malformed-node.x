@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Unit $malformed() => {
+macro Unit $malformed() {
   $(quote ((bogus 42)))...
 }
 

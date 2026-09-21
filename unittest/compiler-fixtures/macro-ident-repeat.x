@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Unit $define_repeat(Literal $value) => {
+macro Unit $define_repeat(Literal $value) {
   static int $(x2c.ident "generated_repeat") = $value;
 }
 

@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Statement $local_alias(Expr $result) => {
+macro Statement $local_alias(Expr $result) {
   typedef Var Value;
   Value value = (Value) 3;
   if (sizeof(Value) != sizeof(Var)) return 3;
@@ -8,7 +8,7 @@ macro Statement $local_alias(Expr $result) => {
   $result = value;
 }
 
-macro Unit $constructed_alias() => {
+macro Unit $constructed_alias() {
   static int $(x2c.ident "constructed")(void) {
     $(quote (
       (typedef ("Var") (bindings (bind ("Value") ())))

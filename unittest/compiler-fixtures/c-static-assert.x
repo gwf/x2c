@@ -2,11 +2,11 @@
 
 _Static_assert(sizeof(int) >= 2, "int " "width");
 
-macro Unit $check_width(Expr $condition) => {
+macro Unit $check_width(Expr $condition) {
   _Static_assert($condition, "macro width");
 }
 
-macro Unit $constructed_check(Expr $condition) => {
+macro Unit $constructed_check(Expr $condition) {
   $(list (list 'c-assert $condition
      '(expr (* char) (literal (* char) "\"constructed width\""))))...
 }

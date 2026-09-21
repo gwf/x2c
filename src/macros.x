@@ -34,13 +34,11 @@ static int macro_sdk_has_references = 0;
 static Compiler macro_import_compiler = NULL;
 static Token macro_import_invocation = NULL;
 
-macro Expression $_embed_lisp_binding_macros() => (
-  $(x2c.literal.string (_x2c.embed.text "../etc/lisp-bindings.xmacro"))
-)
+macro Expression $_embed_lisp_binding_macros() =>
+  $(x2c.literal.string (_x2c.embed.text "../etc/lisp-bindings.xmacro"));
 
-macro Expression $_embed_builtin_macros() => (
-  $(x2c.literal.string (_x2c.embed.text "../etc/builtin-macros.xmacro"))
-)
+macro Expression $_embed_builtin_macros() =>
+  $(x2c.literal.string (_x2c.embed.text "../etc/builtin-macros.xmacro"));
 
 static String lisp_binding_macros = $_embed_lisp_binding_macros();
 static String lisp_binding_macros_marker = NULL;
@@ -136,7 +134,7 @@ static Var _sdk_reject(String message, List notes) {
 
 /* SDK operations reject use outside an active expansion. The guard returns
    from its caller. A helper cannot do that, so this is a statement macro. */
-macro Statement $_sdk_guard(Expr $operation) => {
+macro Statement $_sdk_guard(Expr $operation) {
   if (!macro_sdk_compiler)
     return _sdk_reject(%"${$operation} used outside macro expansion", NULL);
 }
@@ -2336,8 +2334,23 @@ List Compiler.try_parse_macro_slot(Compiler c, Symbol role) {
        ? %(expr (<macro-expr>) $syntax) : syntax;
 }
 
-static List _parse_body(Compiler c, Symbol result_kind) {
+static void _parse_body_using(Compiler c, Array binders) {
+  while (c.peek(0) == <ident> && c.token.text == "using" &&
+         c.peek(1) == <$>) {
+    c.next();
+    loop {
+      List hole = _parse_signature_hole(c, 1);
+      binders.push(hole.assoc(<binder>));
+      if (!c.test(<,>)) break;
+    }
+    c.expect(<;>);
+  }
+}
+
+static List _parse_body(
+  Compiler c, Symbol result_kind, Array using_binders) {
   c.expect(<"{">);
+  _parse_body_using(c, using_binders);
   if (result_kind == <block-item>) {
     List block = c.parse_block_items(0);
     return cons(<seq>, block.cdr());
@@ -2366,6 +2379,31 @@ static List _parse_body(Compiler c, Symbol result_kind) {
   }
   c.expect(<"}">);
   return %(seq @{items.list_free()});
+}
+
+/* A leading parenthesized group is the complete legacy expression body when
+   the following token cannot extend that expression. A semicolon always
+   selects the canonical form. */
+static int _macro_expression_continues(Token token) {
+  Symbol type = token.type;
+  if (type.is_assignment_op()) return 1;
+  switch (type) {
+    case <[>: case <(>: case <"{">: case <"->">: case <.>:
+    case <++>: case <-->:
+    case <||>: case <&&>: case <|>: case <^>: case <&>:
+    case <==>: case <!=>: case <===>: case <!==>:
+    case <"<">: case <">">: case <in>: case <"<=">: case <">=">:
+    case <"<<">: case <">>">: case <+>: case <->: case <*>: case </>:
+    case <%>: case <@>: case <?>: case <,>:
+      return 1;
+  }
+  return type == <ident> && token.text == "is";
+}
+
+static int _legacy_expression_body(Compiler c) {
+  if (c.peek(0) != <(>) return 0;
+  Token after = c.token.after_group();
+  return after.type != <;> && !_macro_expression_continues(after);
 }
 
 static const SymbolSet direct_result_kinds =
@@ -2543,21 +2581,34 @@ List Compiler.parse_macro_definition(Compiler c) {
       <parse>,
       "macro result kind belongs after 'macro', before the '$' name",
       c.token, NULL);
-  c.expect(<=>);
-  c.expect(<">">);
   Symbol target_kind = 0;
   if (target_hole) target_kind = target_hole.assoc(<kind>);
   int expression_result = result_kind == <expression> ||
     (result_kind == <decorator> && target_kind == <expr>);
-  if (c.peek(0) == <(>) {
-    if (!expression_result)
+  int legacy_expression = 0;
+  if (expression_result) {
+    if (c.peek(0) == <"{">)
+      c.report_error(
+        <parse>,
+        "braced macro body requires Statement, Block, Field, Entry, " +
+        "Enumerator, Unit, or non-Expression Decorator result",
+        c.token, NULL
+      );
+    c.expect(<=>);
+    c.expect(<">">);
+    legacy_expression = _legacy_expression_body(c);
+  }
+  else {
+    if (c.peek(0) == <=>) {
+      c.expect(<=>);
+      c.expect(<">">);
+    }
+    if (c.peek(0) == <(>)
       c.report_error(
         <parse>,
         "parenthesized macro body requires Expression result or target",
         c.token, NULL);
-  }
-  else if (c.peek(0) == <"{">) {
-    if (expression_result)
+    if (c.peek(0) != <"{">)
       c.report_error(
         <parse>,
         "braced macro body requires Statement, Block, Field, Entry, " +
@@ -2565,13 +2616,8 @@ List Compiler.parse_macro_definition(Compiler c) {
         c.token, NULL
       );
   }
-  else
-    c.report_error(
-      <parse>, "expected parenthesized or braced macro body",
-      c.token, NULL);
 
   List parameters = parameter_holes.list_free();
-  List using_holes = using_binders.list_free();
   (void) c.record_origin(start);
   List origin = c.token_location(start);
   String source_file = _source_file(c, c.filename);
@@ -2599,7 +2645,13 @@ List Compiler.parse_macro_definition(Compiler c) {
       c.local_macro_capture_scopes = old_local_macro_capture_scopes;
     }
     if (expression_result) {
-      c.expect(<(>); replacement = c.parse_expression(); c.expect(<)>);
+      if (legacy_expression) {
+        c.expect(<(>); replacement = c.parse_expression(); c.expect(<)>);
+      }
+      else {
+        replacement = c.parse_expression();
+        c.expect(<;>);
+      }
     }
     else {
       Symbol replacement_kind = result_kind;
@@ -2607,13 +2659,14 @@ List Compiler.parse_macro_definition(Compiler c) {
         replacement_kind =
           target_kind == <function> || target_kind == <block>
             ? <block-item> : target_kind;
-      replacement = _parse_body(c, replacement_kind);
+      replacement = _parse_body(c, replacement_kind, using_binders);
     }
     parameters = _parameter_rows(c, parameters);
     Var local_order = definition_locals[<order>];
     local_names = local_order is <list>
                 ? local_order.list().reverse() : NULL;
   }
+  List using_holes = using_binders.list_free();
 
   if (result_kind == <decorator> && target_kind == <function>) {
     Var target_binder = target_hole.assoc(<binder>);

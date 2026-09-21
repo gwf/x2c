@@ -43,28 +43,22 @@ meta static int mi_score(String path) {
    so no unit emits a runtime definition for it. */
 meta static String mi_tag(String path) => %"<${path.replace(".", "/")}>";
 
-macro Expression $probe.constant(Expr $path) => (
-  $(x2c.literal.string (mi_constant (x2c.source.text $path)))
-)
+macro Expression $probe.constant(Expr $path) =>
+  $(x2c.literal.string (mi_constant (x2c.source.text $path)));
 
-macro Expression $probe.accessor(Expr $path) => (
-  $(x2c.literal.string (mi_accessor (x2c.source.text $path)))
-)
+macro Expression $probe.accessor(Expr $path) =>
+  $(x2c.literal.string (mi_accessor (x2c.source.text $path)));
 
-macro Expression $probe.depth(Expr $path) => (
-  $(x2c.literal.int (mi_depth (x2c.source.text $path)))
-)
+macro Expression $probe.depth(Expr $path) =>
+  $(x2c.literal.int (mi_depth (x2c.source.text $path)));
 
-macro Expression $probe.score(Expr $path) => (
-  $(x2c.literal.int (mi_score (x2c.source.text $path)))
-)
+macro Expression $probe.score(Expr $path) =>
+  $(x2c.literal.int (mi_score (x2c.source.text $path)));
 
-macro Expression $probe.tag(Expr $path) => (
-  $(x2c.literal.string (mi_tag (x2c.source.text $path)))
-)
+macro Expression $probe.tag(Expr $path) =>
+  $(x2c.literal.string (mi_tag (x2c.source.text $path)));
 
 /* `mi_dashed` arrives through this file's own import, so the nested
    definition has to reach the consuming unit too. */
-macro Expression $probe.dashed(Expr $path) => (
-  $(x2c.literal.string (mi_dashed (x2c.source.text $path)))
-)
+macro Expression $probe.dashed(Expr $path) =>
+  $(x2c.literal.string (mi_dashed (x2c.source.text $path)));

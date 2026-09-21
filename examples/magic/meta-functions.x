@@ -29,9 +29,9 @@ meta static List field_reads(List receiver) {
   return x2c_expr_composite(reads);
 }
 
-macro Expression $shape.names(Expr $value) => ($(field_names $value))
+macro Expression $shape.names(Expr $value) => $(field_names $value);
 
-macro Expression $shape.reads(Expr $value) => ($(field_reads $value))
+macro Expression $shape.reads(Expr $value) => $(field_reads $value);
 
 // A `meta` function that reaches no compiler operation keeps both of its
 // forms, so the program below calls it at run time and the compiler may

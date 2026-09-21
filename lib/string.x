@@ -670,23 +670,22 @@ String String.getslice(String s, int start, int stop, int step) {
     itself is returned.
 */
 macro Statement $string.remap(
-  Expr $subject, Name $index, Name $byte, Expr $mapped)
-  using $length, $changed, $string, $out, $src => {
+  Expr $subject, Name $index, Name $byte, Expr $mapped) {
   if (!$subject || !*$subject) return $subject;
-  int $length = $subject.len(), $changed = 0;
-  String $string = String.malloc($length + 1);
-  char *$out = $string;
-  const char *$src = $subject;
-  for (int $index = 0; $index < $length; $index++) {
-    int $byte = (unsigned char) $src[$index];
-    ($out)[$index] = $mapped;
-    if (($out)[$index] != $src[$index]) $changed = 1;
+  int length = $subject.len(), changed = 0;
+  String string = String.malloc(length + 1);
+  char *out = string;
+  const char *src = $subject;
+  for (int $index = 0; $index < length; $index++) {
+    int $byte = (unsigned char) src[$index];
+    (out)[$index] = $mapped;
+    if ((out)[$index] != src[$index]) changed = 1;
   }
-  if (!$changed) {
-    _free_unchecked($string);
+  if (!changed) {
+    _free_unchecked(string);
     return $subject;
   }
-  return _finish($string, $length);
+  return _finish(string, length);
 }
 
 /** Returns `str` with every upper-case byte lowered.
@@ -795,18 +794,17 @@ String String.dedent(String str) {
 
 /* Builds a filtered copy, leaving each caller to give only its byte test. */
 macro Statement $string.select(
-  Expr $subject, Name $index, Expr $selected)
-  using $length, $string, $dst, $done, $result => {
-  int $length = $subject.len();
-  String $string = String.malloc($length + 1);
-  int $done = 0;
-  defer if (!$done) $string.free();
-  char *$dst = $string;
-  for (int $index = 0; $index < $length; $index++)
-    if ($selected) *$dst++ = $subject[$index];
-  String $result = _finish($string, (int) ($dst - $string));
-  $done = 1;
-  return $result;
+  Expr $subject, Name $index, Expr $selected) {
+  int length = $subject.len();
+  String string = String.malloc(length + 1);
+  int done = 0;
+  defer if (!done) string.free();
+  char *dst = string;
+  for (int $index = 0; $index < length; $index++)
+    if ($selected) *dst++ = $subject[$index];
+  String result = _finish(string, (int) (dst - string));
+  done = 1;
+  return result;
 }
 
 static Var _apply(Func fn, char value) {

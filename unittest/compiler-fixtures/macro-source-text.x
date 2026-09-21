@@ -2,18 +2,15 @@
 
 $(import "macro-source-text-import.xmacro")
 
-macro Expression $source(Expr $syntax) => (
-  $(x2c.literal.string (x2c.source.text $syntax))
-)
+macro Expression $source(Expr $syntax) =>
+  $(x2c.literal.string (x2c.source.text $syntax));
 
-macro Expression $forward(Expr $syntax) => (
-  $source($syntax)
-)
+macro Expression $forward(Expr $syntax) =>
+  $source($syntax);
 
-macro Expression $source_local(Expr $syntax) => (
+macro Expression $source_local(Expr $syntax) =>
   $(let ((saved $syntax))
-    (x2c.literal.string (x2c.source.text saved)))
-)
+    (x2c.literal.string (x2c.source.text saved)));
 
 keyword source_alias $imported.source;
 

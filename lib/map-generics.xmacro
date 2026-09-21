@@ -10,7 +10,7 @@
 
 macro Unit $map.var.family(
   Name $hash, Name $key_equal, Name $value_equal, Name $value_valid
-) => {
+) {
   static unsigned $hash(Var *key) {
     return key[0].hash();
   }
@@ -48,7 +48,7 @@ macro Unit $map.core.family(Type $map, Type $storage, Type $key, Type $value,
   Name $value_at,
   Name $reinsert_error,
   Name $insert_error
-) => {
+) {
   static void $map._core_free($map map) {
     if ((void *) map == 0) return;
     map.hashes.free();
@@ -332,7 +332,7 @@ macro Unit $map.typed.family(Type $map, Type $key, Type $value, Name $update,
   Literal $one,
   Literal $postfix,
   Literal $owner
-) => {
+) {
   $map $map.new(void);
   $map $map.new_capacity(unsigned);
   $map Map.$unbox(Map);
@@ -576,8 +576,8 @@ macro Unit $map.core.observe(
   Type $map, Type $key, Type $value, Type $entry,
   Name $box_key, Name $box_value,
   Name $compare_key, Name $compare_value
-) using $record_compare => {
-  static int $record_compare(const void *ap, const void *bp) {
+) {
+  static int record_compare(const void *ap, const void *bp) {
     const $entry *a = ap, *b = bp;
     int comparison = $compare_key(a.key, b.key);
     return comparison ? comparison : $compare_value(a.val, b.val);
@@ -604,10 +604,10 @@ macro Unit $map.core.observe(
     while (b.try_next(&cursor, &key, &value))
       brecs[index++] = ($entry) { .key = key, .val = value };
 
-    qsort(arecs, asz, sizeof($entry), $record_compare);
-    qsort(brecs, bsz, sizeof($entry), $record_compare);
+    qsort(arecs, asz, sizeof($entry), record_compare);
+    qsort(brecs, bsz, sizeof($entry), record_compare);
     for (unsigned i = 0; i < asz; i++) {
-      int comparison = $record_compare(arecs + i, brecs + i);
+      int comparison = record_compare(arecs + i, brecs + i);
       if (comparison) return comparison;
     }
     return 0;
@@ -645,7 +645,7 @@ macro Unit $map.core.observe(
 macro Unit $map.typed.observe(
   Type $map, Type $key, Type $value,
   Name $box_key, Name $box_value
-) => {
+) {
   Map $map.map($map);
   int $map.compare($map, $map);
   String $map.str($map);
@@ -711,7 +711,7 @@ macro Unit $map.typed.publish(Type $map, Type $key, Type $value, Name $unbox,
   Name $box_key,
   Name $box_value,
   Name $prepare_export
-) using $next, $keys_next, $enumerate_next => {
+) {
   Var $map.var($map);
   void $map.cleanup($map);
   $map Var.$unbox(Var);
@@ -735,7 +735,7 @@ macro Unit $map.typed.publish(Type $map, Type $key, Type $value, Name $unbox,
     return ($map) value.pointer();
   }
 
-  static int $next(Iter iter, Var *out) {
+  static int next(Iter iter, Var *out) {
     $map map = iter.obj.$unbox();
     if ((void *) map == 0 || !out) return 0;
     unsigned cursor = iter.state;
@@ -747,7 +747,7 @@ macro Unit $map.typed.publish(Type $map, Type $key, Type $value, Name $unbox,
     return 1;
   }
 
-  static int $keys_next(Iter iter, Var *out) {
+  static int keys_next(Iter iter, Var *out) {
     $map map = iter.obj.$unbox();
     if ((void *) map == 0 || !out) return 0;
     unsigned cursor = iter.state;
@@ -759,7 +759,7 @@ macro Unit $map.typed.publish(Type $map, Type $key, Type $value, Name $unbox,
     return 1;
   }
 
-  static int $enumerate_next(Iter iter, Var *out) {
+  static int enumerate_next(Iter iter, Var *out) {
     $map map = iter.obj.$unbox();
     if ((void *) map == 0 || !out) return 0;
     unsigned cursor = iter.state;
@@ -780,7 +780,7 @@ macro Unit $map.typed.publish(Type $map, Type $key, Type $value, Name $unbox,
   */
   Iter $map.iter($map map, Iter dest) {
     if ((void *) dest == 0) return 0;
-    return Iter_init(dest, map, $next, 0);
+    return Iter_init(dest, map, next, 0);
   }
 
   /** Initializes `dest` as a single-pass iterator over boxed keys.
@@ -798,7 +798,7 @@ macro Unit $map.typed.publish(Type $map, Type $key, Type $value, Name $unbox,
   */
   Iter $map.keys($map map, Iter dest) {
     if ((void *) dest == 0) return 0;
-    return Iter_init(dest, map, $keys_next, 0);
+    return Iter_init(dest, map, keys_next, 0);
   }
 
   /** Initializes `dest` to yield canonical `(key value)` `List`s in bucket
@@ -818,7 +818,7 @@ macro Unit $map.typed.publish(Type $map, Type $key, Type $value, Name $unbox,
   */
   Iter $map.enumerate($map map, Iter dest) {
     if ((void *) dest == 0) return 0;
-    return Iter_init(dest, map, $enumerate_next, 0);
+    return Iter_init(dest, map, enumerate_next, 0);
   }
 
   static $map $map.export_context($map map, Context source) {

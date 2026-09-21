@@ -3,13 +3,13 @@
 
 typedef int MacroDynamicOwner;
 
-macro Unit $dynamic(Type $type, Name $method) => {
+macro Unit $dynamic(Type $type, Name $method) {
   inline Var $type.$method($type value) {
     return Var.new(<i32>, value);
   }
 }
 
-macro Unit $literal_owner(Name $method) => {
+macro Unit $literal_owner(Name $method) {
   inline Var MacroDynamicOwner.$method(MacroDynamicOwner value) {
     return Var.new(<i32>, value);
   }

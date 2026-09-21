@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Decorator $fixture.identity(Statement $target) => {
+macro Decorator $fixture.identity(Statement $target) {
   $target
 }
 

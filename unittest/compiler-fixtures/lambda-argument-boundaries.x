@@ -25,7 +25,7 @@ static int counted(int value) {
   return value;
 }
 
-macro Expression $callback() => (%!(int x) => x + 1)
+macro Expression $callback() => %!(int x) => x + 1;
 
 int main(void) {
   int first = apply_twice(%!(int x) => x + 1, 5);

@@ -1,51 +1,51 @@
 #include "x2c.x"
 
-macro expression $expression_arg(expr $value) => ($value)
+macro expression $expression_arg(expr $value) => $value;
 
-macro Unit $type_arg(Type $type) => {
+macro Unit $type_arg(Type $type) {
   static $type $(x2c.ident "typed_value") = 1;
 }
 
-macro Unit $declaration_arg(Decl $declaration) => {
+macro Unit $declaration_arg(Decl $declaration) {
   $declaration
 }
 
-macro Unit $function_arg(Function $definition) => {
+macro Unit $function_arg(Function $definition) {
   $definition
 }
 
-macro Unit $name_arg(Name $name) => {
+macro Unit $name_arg(Name $name) {
   static int $name = 4;
 }
 
-macro Unit $name_expression(Name $name, Name $reader) => {
+macro Unit $name_expression(Name $name, Name $reader) {
   static int $name = 10;
   static int $reader(void) {
     return $name;
   }
 }
 
-macro Expression $literal_arg(Literal $value) => ($value)
+macro Expression $literal_arg(Literal $value) => $value;
 
-macro Unit $parameter_arg(Param $parameter) => {
+macro Unit $parameter_arg(Param $parameter) {
   static int $(x2c.ident "parameter_value")($parameter) {
     return 6;
   }
 }
 
-macro Statement $block_arg(Block $item) => {
+macro Statement $block_arg(Block $item) {
   $item
 }
 
-macro Field $field_arg(Field $field) => {
+macro Field $field_arg(Field $field) {
   $field
 }
 
-macro Unit $unit_arg(Unit $item) => {
+macro Unit $unit_arg(Unit $item) {
   $item
 }
 
-macro Unit $unit_sequence(Unit $items...) => {
+macro Unit $unit_sequence(Unit $items...) {
   $items...
 }
 

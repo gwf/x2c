@@ -486,7 +486,7 @@ Var Var.box_i16(short); Var Var.box_u16(ushort);
 Var Var.box_i32_bits(unsigned); Var Var.box_u32(unsigned);
 
 macro Unit $var.immediate(
-  Type $type, Name $method, Expr $prefix, Type $payload, Name $value) => {
+  Type $type, Name $method, Expr $prefix, Type $payload, Name $value) {
   inline Var Var.$method($type $value) {
     return (Var) { .u64 = $prefix | ($payload) $value };
   }
@@ -561,7 +561,7 @@ String unsigned.repr(unsigned);
 Var float.var(float); String float.str(float); String float.repr(float);
 Var double.var(double); String double.str(double); String double.repr(double);
 
-macro Unit $scalar(Type $type, Literal $tag, Param $parameter) => {
+macro Unit $scalar(Type $type, Literal $tag, Param $parameter) {
   /** Boxes a native `$type` value as `Var`. */
   inline Var $type.var($parameter) {
     return Var.new($tag, $(x2c.parameters.arguments (list $parameter))...);

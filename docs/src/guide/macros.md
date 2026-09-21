@@ -30,9 +30,8 @@ The result kind follows `macro`; typed holes appear in the invocation pattern:
 
 ```x2c
 ~
-macro Expression $project.minutes(Expr $value) => (
-  $value * 60
-)
+macro Expression $project.minutes(Expr $value) =>
+  $value * 60;
 ~
 ~int main(void) {
 ~  int seconds = $project.minutes(2);
@@ -87,9 +86,8 @@ Use a local macro when one function or nested block needs a typed generator:
 
 ```x2c
 ~static int scaled_sum(int scale, int value) {
-macro Expression scaled(Expr $input) => (
-  $input * scale
-)
+macro Expression scaled(Expr $input) =>
+  $input * scale;
 
 return scaled(value);
 ~}
@@ -145,9 +143,8 @@ same ellipsis to splice the captured sequence:
 macro Expression $project.call(
   Expr $callee,
   Expr $arguments...
-) => (
-  $callee($arguments...)
-)
+) =>
+  $callee($arguments...);
 ~
 ~static int add(int left, int right) {
 ~  return left + right;
@@ -163,7 +160,7 @@ field keys. A sequence hole between field pairs supplies alternating key and
 value expressions, in source order:
 
 ```x2c
-macro Statement $fail(Expr $cause, Expr $op, Expr $fields...) => {
+macro Statement $fail(Expr $cause, Expr $op, Expr $fields...) {
   raise %($cause (operation ${$op}) $fields...);
 }
 ```
@@ -185,7 +182,7 @@ ordinary declarations and functions specialized to the types it receives:
 ~typedef struct { int value; } IntValue;
 ~typedef struct { double value; } DoubleValue;
 ~
-macro Unit $value.family(Type $box, Type $item) => {
+macro Unit $value.family(Type $box, Type $item) {
   static inline $box $box.new($item value) {
     $box box = { value };
     return box;
@@ -231,7 +228,7 @@ a row sequence. A `Map` literal reads quoted data, so `${...}` crosses into
 x2c before invoking either a `$handler(...)` or a keyword alias:
 
 ```x2c
-macro Entry $project.handler(Literal $key, Expr $value) => {
+macro Entry $project.handler(Literal $key, Expr $value) {
   $key: $value
 }
 
@@ -249,7 +246,7 @@ int main(void) {
 
 ```x2c
 ~
-macro Statement $project.guard(Expr $condition) => {
+macro Statement $project.guard(Expr $condition) {
   if (!$condition) return 0;
 }
 ~
@@ -264,8 +261,9 @@ inside a function. The compiler diagnoses the mismatch at the invocation.
 
 ### Generated names and `using`
 
-Declare scratch bindings after `using` when a template needs caller-local
-temporaries:
+Declare scratch bindings normally. A declaration written literally in a macro
+body and every literal reference to it receive a private binding for each
+expansion:
 
 ```x2c
 ~
@@ -275,10 +273,10 @@ meta static List project_type(List value) => x2c_syntax_type(value);
 macro Statement $project.swap(
   Expr $left,
   Expr $right
-) using $temporary => {
-  $project_type($left) $temporary = $left;
+) {
+  $project_type($left) temporary = $left;
   $left = $right;
-  $right = $temporary;
+  $right = temporary;
 }
 ~
 ~int main(void) {
@@ -292,12 +290,29 @@ macro Statement $project.swap(
 The helper returns a type into the declaration's type slot. The same explicit
 call form also supplies expressions and generated names in their own slots.
 
-Each invocation receives a compiler-private binding for `$temporary`.
+Each invocation receives a compiler-private binding for `temporary`.
 Definition-local literal names resolve where the macro was defined, captured
 names keep their caller bindings, and generated names cannot collide with
 caller source. A local macro's literal references to parameters and preceding
 locals also keep those exact bindings when an inner declaration uses the same
 spelling.
+
+Use a leading body directive only when compile-time Lisp or a nested macro
+needs a private `Name` hole before an ordinary declaration can introduce it:
+
+<!-- ignore: project_generate is the external generator being illustrated -->
+```x2c,ignore
+macro Unit $project.generated() {
+  using $private;
+  $project_generate($private)...
+}
+```
+
+The directive creates syntax identity, not runtime storage. It can therefore
+name a generated helper function or label as well as an automatic variable.
+All `using` directives must precede the body's ordinary items. The older
+signature `using` form remains accepted for compatibility; lambdas separately
+use `using &name` for reference capture.
 
 ## Put reusable macros in imports
 
@@ -333,7 +348,7 @@ meta static List project_body(List fn) => x2c_function_body(fn);
 macro Decorator $project.trace(
   Function $function,
   Expr $label
-) => {
+) {
   printf(
     "[%s] enter %s\n",
     $label,
@@ -373,9 +388,8 @@ An `Expr` target makes the decorator a prefix expression:
 ~static int checked(int value) {
 ~  return value;
 ~}
-macro Decorator $project.checked(Expr $target) => (
-  checked($target)
-)
+macro Decorator $project.checked(Expr $target) =>
+  checked($target);
 ~int main(void) {
 ~  int value = $project.checked() (20 + 22);
 ~  return value == 42 ? 0 : 1;
@@ -401,10 +415,10 @@ macro Decorator $control.range(
   Name $index,
   Expr $start,
   Expr $stop
-) using $begin, $end => {
+) {
   {
-    int $begin = $start, $end = $stop;
-    for (int $index = $begin; $index < $end; $index++) $body
+    int begin = $start, end = $stop;
+    for (int $index = begin; $index < end; $index++) $body
   }
 }
 
@@ -434,10 +448,10 @@ meta static List project_type(List value) => x2c_syntax_type(value);
 macro Statement $control.swap(
   Expr $left,
   Expr $right
-) using $temporary => {
-  $project_type($left) $temporary = $left;
+) {
+  $project_type($left) temporary = $left;
   $left = $right;
-  $right = $temporary;
+  $right = temporary;
 }
 
 keyword swap $control.swap;
@@ -509,9 +523,8 @@ than the future runtime values of those expressions:
 ```x2c
 meta static int project_offset(void) => 2;
 
-macro Expression $project.answer(Expr $base) => (
-  $base + $project_offset()
-)
+macro Expression $project.answer(Expr $base) =>
+  $base + $project_offset();
 
 int main(void) {
   printf("%d\n", $project.answer(40));
@@ -540,7 +553,7 @@ meta static List project_fields(List receiver) {
     reads.push(x2c_expr_field(receiver, field.car()));
   return x2c_expr_composite(reads);
 }
-macro Expression $project.fields(Expr $value) => ($project_fields($value))
+macro Expression $project.fields(Expr $value) => $project_fields($value);
 ~typedef struct Point { int x, y; } Point;
 ~int main(void) {
 ~  Point p = { 2, 3 };
@@ -572,7 +585,7 @@ To read the exact source text of a complete captured argument, use
 ```x2c
 #include "meta.x"
 meta static String project_text(List value) => x2c_source_text(value);
-macro Expression $project.source(Expr $value) => ($project_text($value))
+macro Expression $project.source(Expr $value) => $project_text($value);
 
 int main(void) {
   return strcmp($project.source(1 /* kept */ + 2),
@@ -593,7 +606,7 @@ caller's file location for resolving a relative path:
 ```x2c,ignore
 #include "meta.x"
 meta static String project_notice(String path) => x2c_embed_text(path);
-macro Expression $project.notice(Literal $path) => ($project_notice($path))
+macro Expression $project.notice(Literal $path) => $project_notice($path);
 
 String notice = $project.notice("notice.txt");
 ```

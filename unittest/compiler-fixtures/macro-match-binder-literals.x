@@ -1,9 +1,8 @@
 #include "x2c.x"
 
-macro Expression $binder_literals(Expr $value, Expr $items...) => (
+macro Expression $binder_literals(Expr $value, Expr $items...) =>
   ($value, %(literal ?__macro_expression_value
-                     *__macro_splice_items))
-)
+                     *__macro_splice_items));
 
 int main(void) {
   List result = $binder_literals(0, 1, 2);

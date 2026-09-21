@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Entry $invalid_rows() => {
+macro Entry $invalid_rows() {
   $(list 42)...
 }
 

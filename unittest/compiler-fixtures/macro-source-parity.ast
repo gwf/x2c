@@ -77,12 +77,12 @@
   "T" (associated) (members ("read" ((func (("T"))) int) ""))) 
  external 
  ((file "unittest/compiler-fixtures/macro-source-parity.x") 
-  (line 41) (column 3) (length 8) (position 627)))
+  (line 41) (column 3) (length 8) (position 624)))
 
 (adopt ("GeneratedProtocol") ("DirectValue") 
  external 
  ((file "unittest/compiler-fixtures/macro-source-parity.x") 
-  (line 45) (column 3) (length 8) (position 685)))
+  (line 45) (column 3) (length 8) (position 682)))
 
 (preproc "#define GENERATED_SOURCE_FLAG 1")
 

@@ -1,32 +1,32 @@
-unittest/compiler-fixtures/diagnostics-recovery.x:9:42: parse: sequence macro hole must be the final argument
-  macro Expression $call(Expr $arguments..., Expr $final) => ($final)
+unittest/compiler-fixtures/diagnostics-recovery.x:8:42: parse: sequence macro hole must be the final argument
+  macro Expression $call(Expr $arguments..., Expr $final) => $final;
                                            ^
 
-unittest/compiler-fixtures/diagnostics-recovery.x:12:17: parse: expected atomic expression
+unittest/compiler-fixtures/diagnostics-recovery.x:11:17: parse: expected atomic expression
     int sum = 42 +;
                   ^
   note: token: ; kind: ;
 
-unittest/compiler-fixtures/diagnostics-recovery.x:17:16: type: operator 'is' requires Var on the left
+unittest/compiler-fixtures/diagnostics-recovery.x:16:16: type: operator 'is' requires Var on the left
     return value is int;
                  ^^
   note: operand type: (int)
 
-unittest/compiler-fixtures/diagnostics-recovery.x:20:15: macro: x2c.embed.text requires a non-empty path
+unittest/compiler-fixtures/diagnostics-recovery.x:19:15: macro: x2c.embed.text requires a non-empty path
   String path = $embed.empty_path();
                 ^
 
-unittest/compiler-fixtures/diagnostics-recovery.x:23:21: type: operator 'is' requires Var on the left
+unittest/compiler-fixtures/diagnostics-recovery.x:22:21: type: operator 'is' requires Var on the left
     int first = value is int;
                       ^^
   note: operand type: (int)
 
-unittest/compiler-fixtures/diagnostics-recovery.x:28:33: parse: expected atomic expression
+unittest/compiler-fixtures/diagnostics-recovery.x:27:33: parse: expected atomic expression
   int same_line(void) { return 1 +; } int next_on_line(void) { return 2 +; }
                                   ^
   note: token: ; kind: ;
 
-unittest/compiler-fixtures/diagnostics-recovery.x:28:72: parse: expected atomic expression
+unittest/compiler-fixtures/diagnostics-recovery.x:27:72: parse: expected atomic expression
   int same_line(void) { return 1 +; } int next_on_line(void) { return 2 +; }
                                                                          ^
   note: token: ; kind: ;

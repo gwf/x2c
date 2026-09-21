@@ -1,4 +1,4 @@
-macro Unit $error.private.types() => {
+macro Unit $error.private.types() {
   typedef struct ErrorRegion {
     Scope $(x2c.ident "values");
     Pool $(x2c.ident "lists");

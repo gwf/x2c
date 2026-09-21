@@ -1,4 +1,4 @@
 unittest/compiler-fixtures/macro-local-with-name.x:4:3: macro: 'with' cannot be a local macro name
-    macro Statement with() => {
+    macro Statement with() {
     ^^^^^
 

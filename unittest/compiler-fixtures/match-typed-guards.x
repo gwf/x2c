@@ -4,18 +4,18 @@ typedef String Text;
 
 static void bad_guard(void) { raise %(failed); }
 
-macro Statement $typed_arm(Expr $subject, Name $result) => {
+macro Statement $typed_arm(Expr $subject, Name $result) {
   match ($subject)
     case %(text ?(String text)) if (text.len() == 4):
       $result = text.len();
 }
 
-macro Statement $typed_size(Type $T, Expr $subject, Name $result) => {
+macro Statement $typed_size(Type $T, Expr $subject, Name $result) {
   match ($subject)
     case %(?($T value)): $result = sizeof(value);
 }
 
-macro Statement $constructed_guard(Expr $subject, Name $result) => {
+macro Statement $constructed_guard(Expr $subject, Name $result) {
   $(list
     `(match ,$subject
       (((*)

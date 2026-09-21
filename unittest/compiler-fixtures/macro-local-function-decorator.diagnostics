@@ -1,4 +1,4 @@
 unittest/compiler-fixtures/macro-local-function-decorator.x:4:3: macro: local decorators cannot target Function syntax
-    macro Decorator decorate(Function $target) => {
+    macro Decorator decorate(Function $target) {
     ^^^^^
 

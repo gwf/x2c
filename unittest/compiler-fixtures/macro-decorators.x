@@ -1,20 +1,20 @@
 #include "x2c.x"
 
-macro Decorator $field_identity(Field $target) => {
+macro Decorator $field_identity(Field $target) {
   $target
 }
 
-macro Decorator $private_helper(Unit $target) using $helper => {
+macro Decorator $private_helper(Unit $target) {
   $target
-  static int $helper = 5;
+  static int helper = 5;
 }
 
-macro Decorator $twice(Statement $target) => {
+macro Decorator $twice(Statement $target) {
   $target
   $target
 }
 
-macro Decorator $named(Function $function) => {
+macro Decorator $named(Function $function) {
   printf(
     "%s\n",
     $(x2c.literal.string (x2c.function.name $function))
@@ -25,7 +25,7 @@ macro Decorator $named(Function $function) => {
 macro Decorator $return_parameter(
   Function $function,
   Name $parameter
-) => {
+) {
   $(x2c.syntax.type (x2c.function.parameter $function $parameter)) result =
     $(x2c.function.parameter $function $parameter);
   return result;
@@ -34,7 +34,7 @@ macro Decorator $return_parameter(
 macro Decorator $return_parameter_direct(
   Function $function,
   Name $parameter
-) => {
+) {
   return $(x2c.function.parameter $function $parameter);
 }
 

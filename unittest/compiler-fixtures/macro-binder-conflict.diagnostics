@@ -1,4 +1,4 @@
 unittest/compiler-fixtures/macro-binder-conflict.x:3:37: parse: duplicate macro hole 'value'
-  macro Expression $conflict($value, $value...) => ($value)
+  macro Expression $conflict($value, $value...) => $value;
                                       ^^^^^
 

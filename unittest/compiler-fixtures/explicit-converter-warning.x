@@ -40,7 +40,7 @@ int main(void) {
 
   // A converter call that takes further postfix syntax is a receiver, and a
   // call the macro builds is not the one source spelled.
-  macro Expression as_text(Expr $value) => ($value.str())
+  macro Expression as_text(Expr $value) => $value.str();
   int width = v.str().len();
   String built = as_text(v);
 

@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Expression $raw_reference(Expr $value) => (
+macro Expression $raw_reference(Expr $value) =>
   $(let* ((binding (car (cdr (car (cdr (cdr $value))))))
           (type (cons '& (x2c.syntax.type $value)))
           (address (list 'expr type (list 'op '& $value)))
@@ -9,8 +9,7 @@ macro Expression $raw_reference(Expr $value) => (
           (read (list 'expr (x2c.syntax.type $value)
                   (list 'op '* alias))))
      (list 'expr '("Func")
-       (list 'lambda '(params) (list 'captures capture) read)))
-)
+       (list 'lambda '(params) (list 'captures capture) read)));
 
 int main(void) {
   int value = 1;

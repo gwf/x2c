@@ -3,11 +3,11 @@
 $(import "macro-type-fields-import.xmacro")
 $imported_record();
 
-macro Field $generated_field() => {
+macro Field $generated_field() {
   long $(x2c.ident "generated");
 }
 
-macro Unit $check_record(Type $type) => {
+macro Unit $check_record(Type $type) {
   $(let ((actual (x2c.type.fields $type)))
      (if (equal? actual
            '(("first" (int))
@@ -20,7 +20,7 @@ macro Unit $check_record(Type $type) => {
          (x2c.diagnostic.fail "record fields differ" (list (repr actual)))))...
 }
 
-macro Unit $check_union(Type $type) => {
+macro Unit $check_union(Type $type) {
   $(let ((actual (x2c.type.fields $type)))
      (if (equal? actual
            '(("integer" (int)) ("floating" (float))))
@@ -28,7 +28,7 @@ macro Unit $check_union(Type $type) => {
          (x2c.diagnostic.fail "union fields differ" (list (repr actual)))))...
 }
 
-macro Unit $check_included(Type $type) => {
+macro Unit $check_included(Type $type) {
   $(let ((actual (x2c.type.fields $type)))
      (if (equal? actual '(("included" (short))))
          nil
@@ -36,9 +36,8 @@ macro Unit $check_included(Type $type) => {
                               (list (repr actual)))))...
 }
 
-macro Expression $first(Expr $receiver) => (
-  $(x2c.expr.field $receiver "first")
-)
+macro Expression $first(Expr $receiver) =>
+  $(x2c.expr.field $receiver "first");
 
 typedef struct ReflectedRecord {
   int first, second;

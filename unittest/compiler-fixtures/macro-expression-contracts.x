@@ -2,11 +2,10 @@
 
 int macro_offset = 3;
 
-macro Expression $project.math.increment($value) => ($value + 1)
-macro Expression $double_increment($value) => (
-  $project.math.increment($project.math.increment($value))
-)
-macro Expression $with_offset($value) => ($value + macro_offset)
+macro Expression $project.math.increment($value) => $value + 1;
+macro Expression $double_increment($value) =>
+  $project.math.increment($project.math.increment($value));
+macro Expression $with_offset($value) => $value + macro_offset;
 
 int main(void) {
   int macro_offset = 100, value = 5;

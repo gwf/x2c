@@ -1,0 +1,90 @@
+
+(preproc "#include \"x2c.x\"")
+
+(macrodef <macro assign>)
+
+(macrodef <macro twice>)
+
+(macrodef <macro grouped>)
+
+(macrodef <macro increment>)
+
+(macrodef <macro define_generated>)
+
+(macrodef <macro legacy_assign>)
+
+(macrodef <macro legacy_increment>)
+
+(function (int) 
+ (bind (binding 1 "generated") ((fnmod (params (param (void) (bind () ())))))) 
+ (block (at 8 (return (int) (expr (int) (literal (int) "7"))))))
+
+(function (static int) 
+ (bind (binding 2 "local_macro") 
+  ((fnmod (params (param (int) (bind (binding 3 "value") ())))))) 
+ (block 
+  (at 10 
+   (stmnt 
+    (expr (void) 
+     (cast (decl (void) (bindings (bind () ()))) 
+      (expr (int) (parens (expr (int) (ident (binding 3 "value"))))))))) 
+  (at 12 
+   (return (int) 
+    (expr (int) 
+     (op + (expr (int) (ident (binding 3 "value"))) 
+      (expr (int) (literal (int) "1"))))))))
+
+(function (int) 
+ (bind (binding 4 "main") ((fnmod (params (param (void) (bind () ())))))) 
+ (block 
+  (at 13 
+   (declare (int) 
+    (bindings 
+     (op = (bind (binding 5 "result") ()) (expr (int) (literal (int) "0")))))) 
+  (at 15 
+   (declare (int) 
+    (bindings 
+     (op = (bind (binding 6 "_x2c_macro_temporary_0") ()) 
+      (expr (int) (literal (int) "5")))))) 
+  (at 16 
+   (stmnt 
+    (expr (int) 
+     (op = (expr (int) (ident (binding 5 "result"))) 
+      (expr (int) (ident (binding 6 "_x2c_macro_temporary_0"))))))) 
+  (at 18 
+   (declare (int) 
+    (bindings 
+     (op = (bind (binding 7 "_x2c_macro_temporary_1") ()) 
+      (expr (int) 
+       (op + (expr (int) (ident (binding 5 "result"))) 
+        (expr (int) (literal (int) "1")))))))) 
+  (at 19 
+   (stmnt 
+    (expr (int) 
+     (op = (expr (int) (ident (binding 5 "result"))) 
+      (expr (int) (ident (binding 7 "_x2c_macro_temporary_1"))))))) 
+  (at 24 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 8 "printf"))) 
+      (args (expr (* char) (literal (* char) "\"%d %d %d %d %d %d %d\\n\"")) 
+       (expr (int) (ident (binding 5 "result"))) 
+       (expr (int) 
+        (op * (expr (int) (literal (int) "4")) (expr (int) (literal (int) "2")))) 
+       (expr (int) 
+        (op + (expr (int) (parens (expr (int) (literal (int) "4")))) 
+         (expr (int) (literal (int) "2")))) 
+       (expr (int) 
+        (parens 
+         (expr (int) 
+          (op + (expr (int) (literal (int) "4")) 
+           (expr (int) (literal (int) "1")))))) 
+       (expr (int) 
+        (op + (expr (int) (literal (int) "4")) (expr (int) (literal (int) "1")))) 
+       (expr (int) 
+        (call (expr ((func ((void))) int) (ident (binding 1 "generated"))) 
+         (args (expr (void) ())))) 
+       (expr (int) 
+        (call (expr ((func ((int))) int) (ident (binding 2 "local_macro"))) 
+         (args (expr (int) (literal (int) "4")))))))))) 
+  (at 25 (return (int) (expr (int) (literal (int) "0"))))))

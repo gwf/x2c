@@ -8,7 +8,7 @@ $(defun init.emit (fn)
     (if forms
         (begin (Array.push init.forms forms) (list fn))
         (x2c.diagnostic.fail "cannot lower initial-environment function" nil))))
-macro Decorator $init.emit(Unit $fn) => {
+macro Decorator $init.emit(Unit $fn) {
   $(init.emit $fn)...
 }
 

@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Unit $bad() => {
+macro Unit $bad() {
   $(quote ((break)))...
 }
 

@@ -54,12 +54,12 @@ meta static List ms_spelling(Var node) =>
    its forms the way M1 and M2 left it. */
 meta static String ms_label(String name, int n) => %"$name-$n";
 
-macro Expression $probe.reads(Expr $value) => ($(ms_reads $value))
+macro Expression $probe.reads(Expr $value) => $(ms_reads $value);
 
-macro Expression $probe.total(Expr $value) => ($(ms_total_call $value))
+macro Expression $probe.total(Expr $value) => $(ms_total_call $value);
 
-macro Expression $probe.names(Expr $value) => ($(ms_names $value))
+macro Expression $probe.names(Expr $value) => $(ms_names $value);
 
-macro Expression $probe.count(Expr $value) => ($(ms_count $value))
+macro Expression $probe.count(Expr $value) => $(ms_count $value);
 
-macro Expression $probe.spelling(Expr $value) => ($(ms_spelling $value))
+macro Expression $probe.spelling(Expr $value) => $(ms_spelling $value);

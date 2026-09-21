@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/keyword-alias-too-few-arguments.x:10:15: parse: macro invocation has too few arguments
+unittest/compiler-fixtures/keyword-alias-too-few-arguments.x:9:15: parse: macro invocation has too few arguments
     return add(1);
                 ^
 

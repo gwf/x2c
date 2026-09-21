@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Statement $declaration() => {
+macro Statement $declaration() {
   int generated = 1;
 }
 

@@ -1,8 +1,8 @@
 #include "x2c.x"
 
-macro Expression $identity_lambda() => (%!(value) => value)
+macro Expression $identity_lambda() => %!(value) => value;
 
-macro Unit $build_control(Expr $amount) => {
+macro Unit $build_control(Expr $amount) {
   static int $(x2c.ident "generated")(void) {
     int result = 0;
     for (int index = 0; index < 1; index++)

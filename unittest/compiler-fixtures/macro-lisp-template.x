@@ -1,12 +1,10 @@
 #include "x2c.x"
 
-macro Expression $through_lisp(Expr $value) => ($(car (list $value)))
-macro Expression $binding_name(Expr $value) => (
-  $(x2c.binding.spelling $value)
-)
-macro Expression $prefix_names(Expr $value, Expr $values) => (
-  $(car (list $values))
-)
+macro Expression $through_lisp(Expr $value) => $(car (list $value));
+macro Expression $binding_name(Expr $value) =>
+  $(x2c.binding.spelling $value);
+macro Expression $prefix_names(Expr $value, Expr $values) =>
+  $(car (list $values));
 
 int main(void) {
   int value = 42;

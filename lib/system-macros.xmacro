@@ -53,23 +53,22 @@ meta static Var _dedent_fold(String source) {
    is dedented during translation when its spelling carries no escape and no
    interpolation hole; every other form calls String.dedent at run time, so
    both spellings mean the same thing. */
-macro Expression $dedent(Expr $text) => ($(dedent.expand $text))
+macro Expression $dedent(Expr $text) => $(dedent.expand $text);
 
 /* Reports how long the following statement took on stderr. The caller
    includes <time.h>. The stop clock and the report run from a `defer`, so
    they still run when the decorated statement is a function body that
    returns or a body a raise transfers out of. */
-macro Decorator $time(Statement $target, Literal $label)
-  using $started, $stopped, $elapsed => {
+macro Decorator $time(Statement $target, Literal $label) {
   {
-    struct timespec $started, $stopped;
-    clock_gettime(CLOCK_MONOTONIC, &$started);
+    struct timespec started, stopped;
+    clock_gettime(CLOCK_MONOTONIC, &started);
     defer {
-      clock_gettime(CLOCK_MONOTONIC, &$stopped);
-      double $elapsed =
-        ($stopped.tv_sec - $started.tv_sec) * 1000.0 +
-        ($stopped.tv_nsec - $started.tv_nsec) / 1000000.0;
-      Stderr.printf("[time] %s %.3f ms\n", $label, $elapsed);
+      clock_gettime(CLOCK_MONOTONIC, &stopped);
+      double elapsed =
+        (stopped.tv_sec - started.tv_sec) * 1000.0 +
+        (stopped.tv_nsec - started.tv_nsec) / 1000000.0;
+      Stderr.printf("[time] %s %.3f ms\n", $label, elapsed);
     }
     $target
   }
@@ -115,26 +114,26 @@ meta static List _cases_switch(List condition, List body) =>
 
 /* Gives every case run its own block and its own break. Deliberate
    fallthrough is written by nesting an ordinary switch. */
-macro Decorator $switch(Block $body, Expr $condition) => {
+macro Decorator $switch(Block $body, Expr $condition) {
   $(_cases_switch $condition $body)...
 }
 
 /* Marks a path that is not written yet. Reaching it raises `<invariant>`
    naming the note and the source line the macro was written on. */
-macro Statement $todo(Expr $note) => {
+macro Statement $todo(Expr $note) {
   raise %(invariant (note ${$note})
     (at ${$(x2c.literal.string (macros.location))}));
 }
 
 /* Marks a path the surrounding logic excludes. */
-macro Statement $unreachable() => {
+macro Statement $unreachable() {
   raise %(invariant (note "unreachable")
     (at ${$(x2c.literal.string (macros.location))}));
 }
 
 /* Checks an invariant and reports the failing expression as it was written.
    Unlike C `assert` this transfers to a catch and is not compiled out. */
-macro Statement $assert(Expr $check) => {
+macro Statement $assert(Expr $check) {
   {
     if (!($check)) {
       raise %(invariant

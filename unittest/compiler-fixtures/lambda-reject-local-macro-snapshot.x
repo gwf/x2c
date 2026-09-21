@@ -2,7 +2,7 @@
 
 int main(void) {
   int value = 1;
-  macro Expression change() => (%!() => ++value)
+  macro Expression change() => %!() => ++value;
   Func mutation = change();
   return 0;
 }

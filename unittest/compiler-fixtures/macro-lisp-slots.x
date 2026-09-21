@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Unit $computed(Expr $value, Name $public) => {
+macro Unit $computed(Expr $value, Name $public) {
   static $(x2c.syntax.type $value)
   $(x2c.ident "macro_slot_helper")(void) {
     return $value;
@@ -10,7 +10,7 @@ macro Unit $computed(Expr $value, Name $public) => {
   }
 }
 
-macro Unit $through_sequence(Unit $target) => {
+macro Unit $through_sequence(Unit $target) {
   $(list $target)...
 }
 

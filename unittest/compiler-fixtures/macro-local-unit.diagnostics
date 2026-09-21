@@ -1,4 +1,4 @@
 unittest/compiler-fixtures/macro-local-unit.x:4:3: macro: local macros cannot have Unit results
-    macro Unit generated() => {
+    macro Unit generated() {
     ^^^^^
 

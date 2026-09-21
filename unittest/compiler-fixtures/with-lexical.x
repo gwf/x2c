@@ -45,17 +45,17 @@ static void contextual_as(Point *as) {
   }
 }
 
-macro Statement $fixture.set_x(Expr $target, Expr $value) => {
+macro Statement $fixture.set_x(Expr $target, Expr $value) {
   with $target {
     _.x = $value;
   }
 }
 
-macro Statement $fixture.assign(Expr $target, Expr $value) => {
+macro Statement $fixture.assign(Expr $target, Expr $value) {
   $target = $value;
 }
 
-macro Statement $fixture.template_shadow(Expr $target) => {
+macro Statement $fixture.template_shadow(Expr $target) {
   Point _ = { 0 };
   with $target {
     _.x += 1;
@@ -68,7 +68,7 @@ macro Statement $fixture.template_shadow(Expr $target) => {
   _.z = 3;
 }
 
-macro Expression $fixture.keyword_value() => (99)
+macro Expression $fixture.keyword_value() => 99;
 keyword point $fixture.keyword_value;
 
 int main(void) {

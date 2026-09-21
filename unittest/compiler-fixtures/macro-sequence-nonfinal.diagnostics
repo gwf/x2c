@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/macro-sequence-nonfinal.x:3:42: parse: sequence macro hole must be the final argument
-  macro Expression $call(Expr $arguments..., Expr $final) => ($final)
+  macro Expression $call(Expr $arguments..., Expr $final) => $final;
                                            ^
 
 unittest/compiler-fixtures/macro-sequence-nonfinal.x:6:10: parse: unknown or forward-referenced macro 'call'

@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-expression-semicolon.x:5:1: parse: expected ';'
+  int main(void) { return $missing(41); }
+  ^^^
+

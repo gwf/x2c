@@ -3,7 +3,7 @@
 typedef int MacroBoxFirst;
 typedef int MacroBoxSecond;
 
-macro Unit $box(Type $type, Literal $tag) => {
+macro Unit $box(Type $type, Literal $tag) {
   inline Var $type.var($type value) {
     return Var.new($tag, value);
   }

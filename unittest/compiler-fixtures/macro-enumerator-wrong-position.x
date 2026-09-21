@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Enumerator $file_enumerator() => {
+macro Enumerator $file_enumerator() {
   generated_row
 }
 

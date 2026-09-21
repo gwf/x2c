@@ -1,6 +1,6 @@
 #include "x2c.x"
 
-macro Decorator $fixture.wrap(Statement $target) => {
+macro Decorator $fixture.wrap(Statement $target) {
   raise %(genloc);
   $target
 }

@@ -28,29 +28,28 @@ $(defun fixture.case-row (row)
         (literal ("Symbol") ,(str (car row)) ,(car row))))
     `(return (int) ,(fixture.int-expr (fixture.row.value row)))))
 
-macro Enumerator $fixture.empty() => {
+macro Enumerator $fixture.empty() {
   $(list)...
 }
 
-macro Enumerator $fixture.one() => {
+macro Enumerator $fixture.one() {
   $(x2c.ident "ROW_ONE") = 2
 }
 
-macro Enumerator $fixture.enumerators() => {
+macro Enumerator $fixture.enumerators() {
   private_row = 3,
   $(list (fixture.enum-row fixture.row))...,
   $(x2c.ident "ROW_AUTO") = private_row + 5
 }
 
-macro Enumerator $fixture.forward(Enumerator $row) => {
+macro Enumerator $fixture.forward(Enumerator $row) {
   $row
 }
 
-macro Expression $fixture.initializer() => (
-  $(fixture.initializer fixture.row)
-)
+macro Expression $fixture.initializer() =>
+  $(fixture.initializer fixture.row);
 
-macro Statement $fixture.cases() => {
+macro Statement $fixture.cases() {
   $(fixture.case-row fixture.row)...
 }
 

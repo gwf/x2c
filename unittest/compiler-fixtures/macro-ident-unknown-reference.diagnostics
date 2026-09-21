@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/macro-ident-unknown-reference.x:7:13: type: identifier "missing_generated_reference" has no semantic type
+unittest/compiler-fixtures/macro-ident-unknown-reference.x:6:13: type: identifier "missing_generated_reference" has no semantic type
   int value = $unknown_reference();
               ^
 

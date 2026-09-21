@@ -3,10 +3,9 @@
 typedef struct Bits { unsigned small : 3; } Bits;
 enum Color { RED, GREEN };
 
-macro Expression $kind(Expr $value) => (
+macro Expression $kind(Expr $value) =>
   _Generic(($value), int: "int", double: "double", char *: "char *",
-           const char *: "const char *", default: "other")
-)
+           const char *: "const char *", default: "other");
 
 static const char *file_scope = _Generic((long) 0, long: "long",
                                          default: "other");

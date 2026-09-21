@@ -1,4 +1,4 @@
 unittest/compiler-fixtures/macro-decorator-variadic-target.x:3:1: parse: decorator target parameter must be singular
-  macro Decorator $variadic(Function $target...) => {
+  macro Decorator $variadic(Function $target...) {
   ^^^^^
 

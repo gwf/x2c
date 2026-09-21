@@ -95,6 +95,7 @@ const distinctScopes = [
   "storage.type.self.x2c",
   "keyword.declaration.macro.x2c",
   "keyword.other.macro.using.x2c",
+  "keyword.control.capture.x2c",
   "keyword.operator.arrow.x2c"
 ];
 

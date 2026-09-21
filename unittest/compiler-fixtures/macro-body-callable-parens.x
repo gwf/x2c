@@ -4,7 +4,7 @@ static int increment(int value) {
   return value + 1;
 }
 
-macro Unit $define_body_callers(Expr $callable) => {
+macro Unit $define_body_callers(Expr $callable) {
   static int $(x2c.ident "macro_body_parens")(int parens_value) {
     return ($callable)(parens_value);
   }
@@ -14,9 +14,8 @@ macro Unit $define_body_callers(Expr $callable) => {
   }
 }
 
-macro Expression $call_parenthesized(Expr $callable, Expr $value) => (
-  ($callable)($value)
-)
+macro Expression $call_parenthesized(Expr $callable, Expr $value) =>
+  ($callable)($value);
 
 $define_body_callers(increment);
 

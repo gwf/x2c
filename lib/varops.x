@@ -42,8 +42,8 @@ long double x2c_var_update_long_double(
    `_native_update` performs the operation and the conversion back. Keeping
    both here makes compiler-lowered native lvalues and direct Var compound
    updates behave the same way. */
-macro Unit $native.update(Type $type, Name $function, Literal $row)
-  using $converted, $value => {
+macro Unit $native.update(Type $type, Name $function, Literal $row) {
+  using $converted;
   /** Applies a dynamic compound `op` to a native `$type` lvalue.
       The current value is boxed in its declared family, combined with `rhs`,
       converted back to that family, and stored only after all steps succeed.
@@ -67,9 +67,9 @@ macro Unit $native.update(Type $type, Name $function, Literal $row)
       $(_update_tag $row), $(x2c.ident "op"), $(x2c.ident "rhs")
     );
     if ($converted is void) return $(_update_zero $row);
-    $type $value = $(_update_decode $row (x2c.expr.ident $converted));
-    ($(x2c.ident "lhs"))[0] = $value;
-    return $value;
+    $type value = $(_update_decode $row (x2c.expr.ident $converted));
+    ($(x2c.ident "lhs"))[0] = value;
+    return value;
   }
 }
 
