@@ -76,6 +76,12 @@ static void system_macro_dedent_folds_and_defers(void) {
       indented
   ");
   EXPECT_TRUE(deferred == "hello world\n  indented\n");
+
+  String escaped = $dedent("  first\n  second");
+  EXPECT_TRUE(escaped == "first\nsecond");
+  String input = "  left\n  right";
+  String computed = $dedent(input);
+  EXPECT_TRUE(computed == "left\nright");
 }
 
 static void system_macro_assert_reports_the_written_check(void) {

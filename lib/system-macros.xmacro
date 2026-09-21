@@ -1,8 +1,6 @@
 // System macros that remove boilerplate C leaves to every caller.
 // Import this file to use them: $(import "system-macros.xmacro")
 
-$(import "system-macros.xlisp")
-
 /* The width of the leading spaces and tabs `line` was written with. */
 meta static int _dedent_width(String line) {
   int length = line.len(), width = 0;
@@ -32,28 +30,28 @@ meta static String _dedent_apply(String text) {
   return lines.join("\n");
 }
 
-/* Dedents the text the literal `source` was written as, or answers `void`
-   where there is none to fold. The fold is exact only when the spelling
-   carries no escape and no interpolation hole, which is how a dedented block
-   is normally written; every other spelling keeps its meaning by going to
+/* Dedents the literal `node` was written as when its spelling is exact.
+   Escaped, interpolated and computed values keep their meaning by calling
    String.dedent at run time. */
-meta static Var _dedent_fold(String source) {
+meta static List _dedent_expand(List node) {
+  String source = x2c_source_text(node);
   int length = source.len(), open = 0;
   if (length >= 3 && source.startswith("%\""))
     open = 2;
   else if (length >= 2 && source.startswith("\""))
     open = 1;
-  if (open == 0 || !source.endswith("\"")) return void;
+  if (open == 0 || !source.endswith("\"") || source.contains("\\") ||
+      source.contains("$"))
+    return x2c_expr_call(x2c_expr_field(node, "dedent"), %());
   String body = source.getslice(open, length - 1, 1);
-  if (body.contains("\\") || body.contains("$")) return void;
-  return _dedent_apply(body);
+  return x2c_literal_string(_dedent_apply(body));
 }
 
 /* Normalizes the indentation a block of text was written with. The literal
    is dedented during translation when its spelling carries no escape and no
    interpolation hole; every other form calls String.dedent at run time, so
    both spellings mean the same thing. */
-macro Expression $dedent(Expr $text) => $(dedent.expand $text);
+macro Expression $dedent(Expr $text) => $(_dedent_expand $text);
 
 /* Reports how long the following statement took on stderr. The caller
    includes <time.h>. The stop clock and the report run from a `defer`, so
@@ -118,17 +116,21 @@ macro Decorator $switch(Block $body, Expr $condition) {
   $(_cases_switch $condition $body)...
 }
 
+meta static List _macros_location(void) =>
+  x2c_literal_string(
+    x2c_invocation_file() + ":" + x2c_invocation_line().str());
+
 /* Marks a path that is not written yet. Reaching it raises `<invariant>`
    naming the note and the source line the macro was written on. */
 macro Statement $todo(Expr $note) {
   raise %(invariant (note ${$note})
-    (at ${$(x2c.literal.string (macros.location))}));
+    (at ${$(_macros_location)}));
 }
 
 /* Marks a path the surrounding logic excludes. */
 macro Statement $unreachable() {
   raise %(invariant (note "unreachable")
-    (at ${$(x2c.literal.string (macros.location))}));
+    (at ${$(_macros_location)}));
 }
 
 /* Checks an invariant and reports the failing expression as it was written.
@@ -138,7 +140,7 @@ macro Statement $assert(Expr $check) {
     if (!($check)) {
       raise %(invariant
         (check ${$(x2c.literal.string (x2c.source.text $check))})
-        (at ${$(x2c.literal.string (macros.location))}));
+        (at ${$(_macros_location)}));
     }
   }
 }
