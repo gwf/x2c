@@ -69,6 +69,7 @@ static Symbol _arm_end(List run) {
 */
 List Compiler.parse_governed(Compiler c, AstPos position) {
   Array items = [];
+  defer items.free();
   int depth = _take_directives(c, items);
   loop {
     Token start = c.token;
@@ -92,7 +93,7 @@ List Compiler.parse_governed(Compiler c, AstPos position) {
         c.peek(0) == <eof>)
       break;
   }
-  return items.len() == 1 ? items[0] : %(group @{items.list_free()});
+  return items.len() == 1 ? items[0] : %(group @{items.list()});
 }
 
 /* Directives written before the `else`, `while`, `catch`, or `finally` that
@@ -620,6 +621,7 @@ List Compiler.parse_statement(Compiler c) {
 */
 List Compiler.parse_block_items(Compiler c, int anchor_items) {
   Array block = [], List stmt = NULL;
+  defer block.free();
   c.sym.push_new_scope();
   defer c.sym.pop_scope();
   loop {
@@ -653,7 +655,7 @@ List Compiler.parse_block_items(Compiler c, int anchor_items) {
       );
   }
   c.expect(<"}">);
-  return cons(<block>, block.list_free());
+  return cons(<block>, block);
 }
 
 /** Parses a compound body after its opening brace and consumes the closing

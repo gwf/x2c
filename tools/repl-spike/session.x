@@ -14,11 +14,12 @@ typedef struct ReplSession {
 
 /** status is incomplete, rejected, defined, executed, value, or failed.
     diagnostics are ordinary compiler reports; message/cause describe the
-    adapter or evaluator failure. syntax and lowered support optional tracing. */
+    adapter or evaluator failure. source retains diagnostic source text;
+    syntax and lowered support optional tracing. */
 typedef struct ReplResult {
   Symbol status;
   Var value;
-  String name, message;
+  String name, message, source;
   List diagnostics, cause, syntax, lowered;
 } ReplResult;
 
@@ -50,6 +51,12 @@ static List _thunk(List items) =>
     (block @items));
 
 static void _refuse(String why) { raise %(spike (why $why)); }
+
+static void _tokenize(Compiler c, String source, Scope scratch) {
+  Scope.push(&scratch);
+  defer Scope.pop();
+  c.tokenize(source);
+}
 
 // Native C can resolve an untyped name later; this evaluator cannot.
 static void _require_bound(Var syntax) {
@@ -127,10 +134,27 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
   c.diagnostics.reset();
   Scope scratch = Scope.new();
   defer scratch.destroy();
+  Tokenizer tokenizer = c.tokenizer;
+  Token token = c.token, boundary = c.input_boundary;
+  Token directives = c.directives_taken;
+  String text = c.text;
+  Map arms = c.arm_stacks;
+  Array braces = c.braces;
+  defer {
+    c.tokenizer = tokenizer;
+    c.token = token;
+    c.input_boundary = boundary;
+    c.directives_taken = directives;
+    c.text = text;
+    c.arm_stacks = arms;
+    c.braces = braces;
+  }
+  c.directives_taken = NULL;
   SymTxn transaction;
   {
     Scope.push(&scratch);
     defer Scope.pop();
+    c.braces = [];
     transaction = c.begin_semantic_transaction();
   }
   defer transaction.rollback();
@@ -140,7 +164,8 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
   String function_name = NULL;
   int execute = 0, prints = 0, end = source.len();
   try {
-    c.tokenize(source);
+    result.source = source;
+    _tokenize(c, result.source, scratch);
     if (c.tokenizer.status() == <incomplete>) {
       result.status = <incomplete>;
       return result;
@@ -167,7 +192,8 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     if (!declaration) {
       String prefix = "void __repl_eval(void) {\n";
       end += prefix.len();
-      c.tokenize(prefix + source + "\n}");
+      result.source = prefix + source + "\n}";
+      _tokenize(c, result.source, scratch);
     }
     List node = c.parse_submission(end);
     if (!declaration) {

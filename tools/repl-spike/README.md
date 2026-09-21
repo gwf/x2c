@@ -111,8 +111,10 @@ completed effects on existing values.
 
 The unit Context stays alive until exit because lowered lambda syntax and
 values may borrow its canonical storage. Lisp owns its evaluated allocations.
-Adapter scratch Arrays and outer transaction copies are freed after each call. Canonical syntax, compiler
-caches, token storage, and Lisp allocations remain session-lived. General
+Adapter scratch Arrays, tokenization containers, and outer transaction copies
+are freed after each call. Lowering scratch maps have their own short lifetime.
+Canonical syntax, compiler caches, lexical maps, and Lisp allocations remain
+session-lived. General
 per-input reclamation requires explicit compiler/Lisp root ownership; wrapping
 submit in a temporary Context would leave dangling references.
 
@@ -147,11 +149,12 @@ result = session.submit("n + 2;");
 | `value` | Execution completed with the expression's typed `value`. |
 | `failed` | Execution failed; `cause` records the evaluator error. |
 
-Results include ordinary compiler `diagnostics`, an adapter `message`, and
-optional tracing data (`syntax`, `lowered`). `submit` prints nothing and does
+Results include ordinary compiler `diagnostics`, their `source` text, an
+adapter `message`, and optional tracing data (`syntax`, `lowered`). `submit` prints nothing and does
 not retain a pending prefix. Values borrow the unit Context until `unit.close`.
-The terminal renders diagnostics before submitting the next input, while the
-compiler still has the corresponding source text.
+The terminal selects `result.source` as `compiler.text` while rendering its
+diagnostics. The adapter restores the compiler's previous tokenization state
+before returning; retained results can be inspected after later submissions.
 
 `Compiler.parse_submission(end_position)` operates on the current token
 stream. It owns single-item parsing, supplied-input boundaries, and parser
@@ -260,3 +263,7 @@ boundary; function replacement remains a separate semantic decision. Consume
 comptime improvements from the other session and rerun native/interpreted
 comparisons rather than implementing those features here. This work remains
 local; bootstrap refresh and full publication validation have not been run.
+
+The [long-session assessment](long-session.md) records the latest ownership
+fixes, 50,000-input mixed sessions, retained-result checks, and the remaining
+design decisions before production integration.

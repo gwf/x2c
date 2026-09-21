@@ -43,7 +43,10 @@ int main(int argc, char **argv) {
     ReplResult result = session.submit(pending);
     if (dump && result.syntax) fprintf(stderr, "typed: %s\n", result.syntax.repr());
     if (dump && result.lowered) fprintf(stderr, "lowered: %s\n", result.lowered.repr());
-    foreach (Var entry, result.diagnostics) unit.compiler.print_diagnostic(entry);
+    $let(unit.compiler.text, result.source) {
+      foreach (Var entry, result.diagnostics)
+        unit.compiler.print_diagnostic(entry);
+    }
     switch (result.status) {
       case <defined>: printf("defined %s\n", result.name); break;
       case <value>: printf("=> %s\n", result.value.repr()); break;

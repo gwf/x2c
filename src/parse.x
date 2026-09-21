@@ -202,17 +202,18 @@ static List _lower_self_declaration(Compiler compiler, List declaration) {
 static List _declaration_base(Type t, List *modifiers) {
   // Source specifier text, such as `("_Noreturn")`, follows the storage.
   Array storage = [], text = [], typed = [];
+  defer { storage.free(); text.free(); typed.free(); }
   foreach (Var item, t)
     if (item is <list> && car(item) is <string>) text.push(item);
     else typed.push(item);
-  List (base, mods) = typed.list_free().type().declared().declaration_parts();
+  List (base, mods) = typed.list().type().declared().declaration_parts();
   *modifiers = mods;
   if (!mods) return t;
   foreach (Var item, t)
     if (item is <symbol> &&
         (Symbol.is_storage_class(item) || Symbol.is_inline(item)))
       storage.push(item);
-  return %( @{storage.list_free()} @{text.list_free()} @base );
+  return %( @{storage.list()} @{text.list()} @base );
 }
 
 static List _append_declarator_modifiers(List declarator, List modifiers) {
@@ -302,6 +303,7 @@ static int _prefix_macro_words(Compiler c, int rank, Array words) {
    `static extern` is diagnosed instead of passed to C. */
 static List _storage_class(Compiler c) {
   Array storage = [], text = [], int seen_threaded = 0, seen_ordinary = 0;
+  defer { storage.free(); text.free(); }
   loop {
     Symbol symbol = c.peek(0);
     String attribute = _attribute(c);
@@ -320,11 +322,12 @@ static List _storage_class(Compiler c) {
     }
     else if (!_prefix_macro_words(c, 0, storage)) break;
   }
-  return %( @{storage.list_free()} @{text.list_free()} );
+  return %( @{storage.list()} @{text.list()} );
 }
 
 static List _type_qualifiers(Compiler c) {
   Array quals = [];
+  defer quals.free();
   loop {
     Symbol symbol = c.peek(0);
     if (symbol.is_type_qualifier()) {
@@ -333,7 +336,7 @@ static List _type_qualifiers(Compiler c) {
     }
     else if (!_prefix_macro_words(c, 1, quals)) break;
   }
-  return quals.list_free();
+  return quals;
 }
 
 static int _is_scalar_specifier(Symbol symbol) {
@@ -775,6 +778,7 @@ List Compiler.parse_parameter(Compiler compiler) {
 */
 List Compiler.parse_parameter_list(Compiler c) {
   Array parameters = [];
+  defer parameters.free();
   while (1) {
     List parameter = c.try_parse_macro_slot(<param>);
     if (!parameter) parameter = c.parse_parameter();
@@ -782,7 +786,7 @@ List Compiler.parse_parameter_list(Compiler c) {
     if (c.peek(0) != <,>) break;
     c.expect(<,>);
   }
-  return parameters.list_free();
+  return parameters;
 }
 
 /* Parameter declarations bind into a temporary scope. The declarator cannot
@@ -1062,11 +1066,12 @@ static List _declarator_init(
 static List _declarator_list(
   Compiler compiler, List type, List context, int row) {
   Array bindings = [];
+  defer bindings.free();
   loop {
     bindings.push(_declarator_init(compiler, type, context));
     if ((row && _test_declaration_group_comma(compiler)) ||
         !compiler.test(<,>))
-      return bindings.list_free();
+      return bindings;
   }
 }
 

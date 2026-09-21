@@ -596,6 +596,7 @@ static Symbol _never_active_arm(String s) {
    `#else` will be, and 0 otherwise. */
 static void _scan_conditionals(Compiler c) {
   Array stack = [];
+  defer stack.free();
   int hidden = 0, serial = 0;
   c.arm_stacks = {};
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {

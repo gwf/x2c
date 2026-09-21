@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Optional sustained-session measurements; no repository gate is added."""
 import csv
+import argparse
 import io
 import pathlib
 import subprocess
@@ -9,9 +10,14 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 BUILD = ROOT / "unittest/build/repl-spike"
 LOGS = ROOT / "debug/repl-retention"
-COUNT = int(sys.argv[1]) if len(sys.argv) == 2 else 5000
-if len(sys.argv) > 2 or COUNT <= 0:
-    raise SystemExit("usage: retention.py [positive input count]")
+MODES = ["fixed", "values", "functions", "rejected", "incomplete",
+         "evaluate", "transaction", "lisp", "mixed", "lower", "rebind"]
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("count", nargs="?", type=int, default=5000)
+parser.add_argument("modes", nargs="*", choices=MODES)
+args = parser.parse_args()
+if args.count <= 0:
+    parser.error("input count must be positive")
 LOGS.mkdir(parents=True, exist_ok=True)
 with (LOGS / "build.log").open("w") as log:
     subprocess.run([str(ROOT / "tools/repl-spike/run"), "--build-only"],
@@ -24,10 +30,9 @@ with (LOGS / "build.log").open("w") as log:
                     str(BUILD / "compiler.a")], cwd=ROOT, stdout=log,
                    stderr=subprocess.STDOUT, check=True)
 print("workload       inputs  seconds  peak MiB  retained allocations")
-for mode in ["fixed", "values", "functions", "rejected", "incomplete",
-             "evaluate", "transaction", "lisp"]:
+for mode in args.modes or MODES:
     result = subprocess.run([str(BUILD / "retention"), str(BUILD / "seed.x"),
-                             mode, str(COUNT)], cwd=ROOT, capture_output=True,
+                             mode, str(args.count)], cwd=ROOT, capture_output=True,
                             text=True, timeout=120)
     (LOGS / f"{mode}.csv").write_text(result.stdout)
     (LOGS / f"{mode}.stderr").write_text(result.stderr)

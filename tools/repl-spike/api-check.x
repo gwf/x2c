@@ -67,6 +67,34 @@ static void _exercise(ReplSession s) {
   _expect(s, "n;", <value>, 5);
 }
 
+static void _retained_results(ReplSession s) {
+  _expect(s, "long wide(void) { return 5000000000; }", <defined>, void);
+  _expect(s, "Func capture(int x) { return %!(int y) => x+y; }",
+          <defined>, void);
+  _expect(s, "Func captured = capture(7);", <executed>, void);
+  ReplResult closure = s.submit("captured;");
+  ReplResult wide = s.submit("wide();");
+  ReplResult array = s.submit("Array kept = [];");
+  _expect(s, "kept.push(17);", <value>, 17);
+  array = s.submit("kept;");
+  ReplResult bad = s.submit("int broken = ;");
+  String syntax = wide.syntax.repr(), lowered = wide.lowered.repr();
+  String diagnostic = bad.diagnostics.repr();
+  for (int i = 0; i < 200; i++) {
+    _expect(s, "n+=1;", <executed>, void);
+    _expect(s, "int incomplete(int x,", <incomplete>, void);
+    _expect(s, "int invalid = ;", <rejected>, void);
+  }
+  _expect(s, "wide();", <value>, 5000000000L);
+  if (wide.value != 5000000000L || wide.syntax.repr() != syntax ||
+      wide.lowered.repr() != lowered || bad.diagnostics.repr() != diagnostic ||
+      bad.source != "int broken = ;" || array.value.array()[0] != 17 ||
+      s.compiler.macro_lisp.apply(closure.value, %(5)) != 12) {
+    fputs("retained result changed after later submissions\n", stderr);
+    failures++;
+  }
+}
+
 int main(int argc, char **argv) {
   (void) argc;
   x2c_initialize_environment(argv[0]);
@@ -82,7 +110,9 @@ int main(int argc, char **argv) {
       if (!frontend.open(String.new(argv[1]), &unit)) return 1;
       if (phase) {
         _transaction_deletion(unit.compiler);
-        _exercise(ReplSession.new(unit.compiler));
+        ReplSession session = ReplSession.new(unit.compiler);
+        _exercise(session);
+        _retained_results(session);
       }
       unit.close();
       ScopeStats stats = Scope.stats();

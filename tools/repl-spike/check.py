@@ -60,6 +60,7 @@ check("int broken(int hidden) { return hidden + ; }\nhidden;\n",
 check("int broken(int hidden,\n:cancel\nhidden;\n",
       "", "unresolved identifier: hidden")
 check("1 +\n2;\n", "=> 3\n")
+check("1 + ;\n", "", "  1 + ;")
 check("int n =", "", "incomplete input at EOF", 1)
 check('String s = "hello";\ns.len();\ns;\n', 'ok\n=> 5\n=> "hello"\n')
 check('List xs = %(1 2 3);\nxs.len();\nxs[1];\n'
@@ -96,7 +97,7 @@ subprocess.run([str(ROOT / "builds/0/x2c"), "build", "--output",
 native = subprocess.check_output([str(native_binary)], text=True).splitlines()
 assert interpreted == native, (interpreted, native)
 assert "machine entries=0 " not in result.stderr, result.stderr
-print("18 recovery/subset checks and native parity passed:", ", ".join(native))
+print("19 recovery/subset checks and native parity passed:", ", ".join(native))
 print(result.stderr.strip())
 
 startup = []

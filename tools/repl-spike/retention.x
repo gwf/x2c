@@ -45,7 +45,8 @@ int main(int argc, char **argv) {
   if (limit <= 0) return 2;
   if (mode != "fixed" && mode != "values" && mode != "functions" &&
       mode != "rejected" && mode != "incomplete" && mode != "evaluate" &&
-      mode != "transaction" && mode != "lisp")
+      mode != "transaction" && mode != "lisp" && mode != "mixed" &&
+      mode != "lower" && mode != "rebind")
     return 2;
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
   request.command = <translate>;
@@ -58,6 +59,18 @@ int main(int argc, char **argv) {
   if (session.submit("int n=0;").status != <executed>) return 1;
   if (mode == "lisp" && session.submit(
       "int tick(void) { n+=1; return n; }").status != <defined>) return 1;
+  if (mode == "mixed") {
+    if (session.submit("int bump(void) { n+=1; return n; }").status !=
+        <defined>) return 1;
+    if (session.submit("long wide(void) { return 5000000000; }").status !=
+        <defined>) return 1;
+  }
+  ReplResult prepared = { 0 };
+  if (mode == "lower" || mode == "rebind") {
+    prepared = session.submit("n+=1;");
+    if (prepared.status != <executed>) return 1;
+  }
+  int mixed_value = 0;
   double started = _seconds();
   puts("mode,count,seconds,live_allocations,requested_bytes,interned,"
        "pool_active_bytes,peak_rss_bytes");
@@ -82,6 +95,34 @@ int main(int argc, char **argv) {
       source = "n + 1;";
       expected = <value>;
     }
+    else if (mode == "mixed") {
+      switch ((i - 1) % 10) {
+        case 0: mixed_value++; break;
+        case 1:
+          source = "int failed=bump(), other=1/0;";
+          expected = <failed>;
+          mixed_value++;
+          break;
+        case 2: source = "failed;"; expected = <rejected>; break;
+        case 3:
+          source = "int broken(int x,";
+          expected = <incomplete>;
+          break;
+        case 4: source = "n+=2;"; mixed_value += 2; break;
+        case 5: source = "n;"; expected = <value>; break;
+        case 6: source = "wide();"; expected = <value>; break;
+        case 7:
+          source = "if(n<0) { n=0; } else { n+=1; }";
+          mixed_value++;
+          break;
+        case 8: source = "int invalid = ;"; expected = <rejected>; break;
+        case 9:
+          source = "bump();";
+          expected = <value>;
+          mixed_value++;
+          break;
+      }
+    }
     ReplResult result = { .status = <executed> };
     if (mode == "transaction") {
       Scope scratch = Scope.new();
@@ -94,12 +135,28 @@ int main(int argc, char **argv) {
       transaction.rollback();
       scratch.destroy();
     }
+    else if (mode == "lower") {
+      if (!unit.compiler.lower_comptime(prepared.syntax)) return 1;
+    }
+    else if (mode == "rebind") {
+      foreach (Var form, prepared.lowered) unit.compiler.macro_lisp.eval(form);
+      unit.compiler.macro_lisp.eval(%(__repl_eval));
+    }
     else if (mode == "lisp") (void) unit.compiler.macro_lisp.eval(%(tick));
     else result = session.submit(source);
     if (result.status != expected) {
       fprintf(stderr, "unexpected result at input %d: %s\n", i,
               result.status.str());
       return 1;
+    }
+    if (mode == "mixed" && expected == <value>) {
+      Var want = mixed_value;
+      if ((i - 1) % 10 == 6) want = 5000000000L;
+      if (result.value != want) {
+        fprintf(stderr, "wrong value at input %d: expected %s, got %s\n",
+                i, want.repr(), result.value.repr());
+        return 1;
+      }
     }
     if (i % 100 == 0 || i == limit) _sample(mode, i, started);
     if (_peak_bytes() > 512L * 1024 * 1024) {
@@ -113,6 +170,9 @@ int main(int argc, char **argv) {
   int want = mode == "fixed" || mode == "values" || mode == "functions" ||
     mode == "lisp"
     ? limit : 0;
+  if (mode == "mixed") want = mixed_value;
+  if (mode == "lower") want = 1;
+  if (mode == "rebind") want = limit + 1;
   ReplResult final = session.submit(final_source);
   return final.status != <value> || final.value != want;
 }

@@ -1,5 +1,8 @@
 # Sustained session experiment
 
+This records the first retention fix. See the [long-session assessment](long-session.md)
+for subsequent fixes, larger workloads, and current integration limits.
+
 The largest measured retention cost was the outer semantic transaction's map
 copies. Reclaiming those copies reduced peak resident storage substantially.
 The session still grows with repeated input; parser and Lisp storage remains

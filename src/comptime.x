@@ -33,12 +33,21 @@
    loop or `switch` gave, or nothing outside one. */
 typedef struct Lowering {
   Compiler compiler;
+  Scope scratch;
   Map env, locals, cells, arrays, callees, cursors;
   Array definitions;
   String own;
   List on_break, on_continue;
   int declined, on_loop, rejected, uncallable, globals, meta_only;
 } *Lowering;
+
+/* Only map containers belong here; forms and wide numeric boxes retain the
+   caller's lifetime. Map growth follows the scope used at construction. */
+static Map _lower_scratch_map(Scope scratch) {
+  Scope.push(&scratch);
+  defer Scope.pop();
+  return {};
+}
 
 /* Why the last lowering declined, for the diagnostic at the invocation, and
    the callee that has no compile-time binding when that is the reason. */
@@ -997,7 +1006,7 @@ static Var _lower_content(Lowering l, List type, Var content) {
 static Var _lower_block(Lowering l, List items, List k);
 
 static Map _lower_env_copy(Lowering l) {
-  Map copy = {};
+  Map copy = _lower_scratch_map(l.scratch);
   foreach (Var (id, form), l.env) copy[id] = form;
   return copy;
 }
@@ -1272,7 +1281,7 @@ static Var _lower_loop(
     }
     entry.push(form);
   }
-  Map inside = {};
+  Map inside = _lower_scratch_map(l.scratch);
   foreach (Var id, ids) {
     Var slot = _lower_name(l, "live");
     slots.push(slot);
@@ -1871,9 +1880,14 @@ static Var _lower_block(Lowering l, List items, List k) {
     semantic transaction.
 */
 List Compiler.lower_comptime(Compiler compiler, List fn) {
+  Scope scratch = Scope.new();
+  defer scratch.destroy();
   struct Lowering state = {
-    .compiler = compiler, .env = {}, .locals = {}, .cells = {},
-    .arrays = {}, .callees = {}, .cursors = {}, .definitions = [],
+    .compiler = compiler, .scratch = scratch,
+    .env = _lower_scratch_map(scratch), .locals = _lower_scratch_map(scratch),
+    .cells = _lower_scratch_map(scratch), .arrays = _lower_scratch_map(scratch),
+    .callees = _lower_scratch_map(scratch), .cursors = _lower_scratch_map(scratch),
+    .definitions = [],
     .declined = 0,
     .own = NULL, .on_break = NULL, .on_continue = NULL, .on_loop = 0,
     .rejected = 0, .uncallable = 0, .globals = 0,
