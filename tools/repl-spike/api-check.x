@@ -9,6 +9,12 @@
 
 static int failures;
 
+static int _has_completion(List candidates, String spelling) {
+  foreach (Var row, candidates)
+    match (row) case %(? $spelling): return 1;
+  return 0;
+}
+
 static void _symbols(ReplSession session, List expected) {
   List actual = session.symbols();
   if (actual.repr() != expected.repr()) {
@@ -32,8 +38,8 @@ static void _expect(
 static void _completion(
   ReplSession session, String source, String present, String absent) {
   ReplCompletion result = session.complete(source, source.len());
-  if ((present && !result.candidates.contains(present)) ||
-      (absent && result.candidates.contains(absent))) {
+  if ((present && !_has_completion(result.candidates, present)) ||
+      (absent && _has_completion(result.candidates, absent))) {
     fprintf(stderr, "completion for %s: %s\n",
             source, result.candidates.repr());
     failures++;
@@ -65,6 +71,7 @@ static void _transaction_deletion(Compiler c) {
 static void _exercise(ReplSession s) {
   _symbols(s, %());
   _completion(s, "Str", "String", NULL);
+  _completion(s, "pri", "print", NULL);
   _completion(s, "\"x\".le", "len", NULL);
   _expect(s, "int", <incomplete>, void);
   _expect(s, "int f(int", <incomplete>, void);

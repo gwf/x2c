@@ -3,6 +3,7 @@
 import os
 import pathlib
 import pty
+import re
 import fcntl
 import select
 import signal
@@ -153,13 +154,25 @@ check("int n =\n:quit\n", "")
 result = run("1+2;\n", "--dump", "--stats")
 assert result.returncode == 0 and result.stdout == "=> 3\n", result
 assert all(part in result.stderr for part in
-           ["typed:", "lowered:", "Lisp calls="]), result
+           ["typed:", "lowered:", "session: definitions=0",
+            "evaluation (since REPL open): calls=",
+            "scope (process): live-allocation-objects=",
+            "pool (process): backing-capacity-bytes="]), result
 result = run("", "--unknown")
 assert result.returncode == 2 and "unknown option" in result.stderr, result
 result = run("1 +\n:help\n2;\n")
 assert result.returncode == 0 and result.stdout.endswith("=> 3\n"), result
-assert ":cancel" in result.stdout and not result.stderr, result
+assert all(text in result.stdout for text in [
+    "\nCommands\n", "  :help          Show this help.\n",
+    "\nEditing\n", "\nOptions\n",
+]) and not result.stderr, result
 check('String s = "hello";\ns.len();\ns;\n', 'ok\n=> 5\n=> "hello"\n')
+check('int count = 3;\nprint("value=");\nprintln(%"$count");\n',
+      'ok\nvalue=ok\n3\nok\n')
+check('print("");\nprintln("");\n', 'ok\n\nok\n')
+check('void nothing(void) {}\nnothing();\n', 'defined nothing\nok\n')
+check('void print(String text) {}\nprintln("still usable");\n',
+      'still usable\nok\n', 'function redeclaration is disabled')
 check('List xs = %(1 2 3);\nxs.len();\nxs[1];\n'
       'Array a = [];\na.push(7);\na[0] = 9;\na[0];\n',
       'ok\n=> 3\n=> 2\nok\n=> 7\nok\n=> 9\n')
@@ -171,6 +184,34 @@ check("int forever(void) { while (1) {} return 0; }\nforever();\n2+3;\n",
       "defined forever\n=> 5\n", '(why "steps")')
 
 check(":symbols\n", "%()\n")
+result = run("int tracked=1;\n:stats\n")
+assert result.returncode == 0 and not result.stderr, result
+assert result.stdout.startswith("ok\nsession: definitions=1\n"), result
+for pattern in [
+        r"evaluation \(since REPL open\): calls=\d+ machine-entries=\d+ "
+        r"machine-errors=\d+",
+        r"evaluation: live-program-bytes=\d+",
+        r"scope \(process\): live-allocation-objects=\d+ "
+        r"delta-since-open=[+-]\d+",
+        r"scope \(process, since REPL open\): allocation-calls=\d+ "
+        r"free-calls=\d+ reallocation-calls=\d+ "
+        r"requested-traffic-bytes=\d+",
+        r"pool \(current level, since REPL open\): "
+        r"interned-identities=\d+ promotions=\d+",
+        r"pool \(process\): backing-capacity-bytes=\d+ active-bytes=\d+ "
+        r"active-blocks=\d+ depot-bytes=\d+ depot-blocks=\d+",
+        r"pool \(process, since REPL open\): block-allocations=\d+ "
+        r"block-reuses=\d+ slot-reuses=\d+",
+]:
+    assert re.search(pattern, result.stdout), (pattern, result)
+result = run(":stats\nint after_stats=1;\n:stats\n")
+assert result.returncode == 0 and not result.stderr, result
+for field in ["allocation-calls", "free-calls", "reallocation-calls",
+              "requested-traffic-bytes", "block-allocations",
+              "block-reuses", "slot-reuses"]:
+    values = [int(value) for value in
+              re.findall(fr"\b{field}=(\d+)", result.stdout)]
+    assert len(values) == 2 and values[1] >= values[0], (field, result)
 check("int z=1, a=2;\nint middle(void) { return a+z; }\n:symbols\n",
       'ok\ndefined middle\n%((value "a") (function "middle") (value "z"))\n')
 check("int lost=1, failed=1/0;\n:symbols\n",
@@ -187,13 +228,14 @@ assert before == after, result
 typed, lowered = before.split("\nlowered: ")
 assert typed.startswith("typed: %(function "), result
 assert lowered.startswith("(") and typed[len("typed: %"):] != lowered, result
-result = run("int n=2;\n1 +\n:ast\n:lowered f extra\n:unknown\n"
+result = run("int n=2;\n1 +\n:ast\n:lowered f extra\n:stats extra\n:unknown\n"
              ":ast missing\n:lowered n\n:symbols extra\n:symbols\n2;\n")
 assert result.returncode == 1, result
 assert result.stdout == 'ok\n%((value "n"))\n=> 3\n', result
 assert result.stderr.splitlines() == [
     "usage: :ast NAME", "usage: :lowered NAME",
-    "unknown command: :unknown", "not a session function: missing",
+    "usage: :stats", "unknown command: :unknown",
+    "not a session function: missing",
     "not a session function: n", "usage: :symbols"], result
 result = run("int f(void) { return 3; }\n1 +\n  :ast\tf  \n"
              "\t:lowered \t f\t\n2;\n")
@@ -217,6 +259,41 @@ assert result.returncode == 2 and "repl accepts no operands" in result.stderr, r
 
 # Interactive editing and history run through a pseudo-terminal. Markers make
 # each assertion independent of redisplay escape sequences already observed.
+with PtyRepl() as repl:
+    mark = repl.send(b":he\t\r")
+    repl.expect(b"Commands", mark)
+    repl.ready(mark)
+    mark = repl.send(b"\t\t")
+    repl.expect(b"Commands", mark)
+    repl.expect(b"Types", mark)
+    repl.send(b"\x03")
+    repl.ready(mark)
+    repl.send(b":quit\r")
+    repl.wait()
+
+with PtyRepl() as repl:
+    mark = repl.send(b"int zebra(void) { return 9; }\r")
+    repl.expect(b"defined zebra", mark)
+    repl.ready(mark)
+    mark = repl.send(b"int zed=1;\r")
+    repl.expect(b"ok", mark)
+    repl.ready(mark)
+    mark = repl.send(b"\t\t")
+    for heading in [b"Commands", b"Session", b"Types",
+                    b"Functions and macros"]:
+        repl.expect(heading, mark)
+    repl.send(b"\x03")
+    repl.ready(mark)
+    mark = repl.send(b":ast z\t\r")
+    repl.expect(b"typed: %(function", mark)
+    repl.ready(mark)
+    mark = repl.send(b"1 +\r")
+    repl.expect(b"... ", mark)
+    mark = repl.send(b":ca\t\r")
+    repl.ready(mark)
+    repl.send(b":quit\r")
+    repl.wait()
+
 with PtyRepl() as repl:
     mark = repl.send(b"143;\x1b[H\x1b[C\x1b[3~2\x1b[F\x1b[D\x1b[D\x1b[C\r")
     repl.expect(b"=> 123", mark)
@@ -252,7 +329,7 @@ with PtyRepl() as repl:
     repl.expect(b"=> 7", mark)
     repl.ready(mark)
     mark = repl.send(b"kept.\t\t")
-    repl.expect(b"push\r\n", mark)
+    repl.expect(b"  push", mark)
     repl.send(b"\x03")
     repl.ready(mark)
     mark = repl.send(b"int zebra(void) { return 9; }\r")
@@ -394,7 +471,7 @@ subprocess.run([str(ROOT / "builds/0/x2c"), "build", "--output",
                check=True, capture_output=True, text=True)
 native = subprocess.check_output([str(native_binary)], text=True).splitlines()
 assert interpreted == native, (interpreted, native)
-assert "machine entries=0 " not in result.stderr, result.stderr
+assert not re.search(r"machine-entries=0\b", result.stderr), result.stderr
 print("REPL terminal checks and native parity passed:", ", ".join(native))
 print(result.stderr.strip())
 

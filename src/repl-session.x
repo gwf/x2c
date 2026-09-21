@@ -23,8 +23,9 @@ typedef struct ReplResult {
   List diagnostics, cause, syntax, lowered;
 } ReplResult;
 
-/** Byte range and sorted replacement spellings for one completion request.
-    Candidate storage is borrowed until the session unit closes. */
+/** Byte range and sorted `(kind "spelling")` replacement candidates for one
+    completion request. Candidate storage is borrowed until the session unit
+    closes. */
 typedef struct ReplCompletion {
   size_t start, end;
   List candidates;
@@ -36,6 +37,20 @@ typedef struct ReplCompletion {
 #include "diagnostics.x"
 #include "lisp.x"
 #include "scope.x"
+#include <errno.h>
+#include <stdio.h>
+
+static void _write_stdout(String text, int newline, Symbol operation) {
+  size_t length = text.len();
+  if ((length && fwrite(text, 1, length, stdout) != length) ||
+      (newline && fputc('\n', stdout) == EOF) || ferror(stdout)) {
+    int error = errno;
+    raise %(io-fail (operation $operation) (errno $error));
+  }
+}
+
+static void _repl_print(String text) => _write_stdout(text, 0, <print>);
+static void _repl_println(String text) => _write_stdout(text, 1, <println>);
 
 /** Borrows an initialized submission compiler until its unit closes.
     Source-fact collection must be disabled because submission scratch maps
@@ -47,6 +62,8 @@ ReplSession ReplSession.new(Compiler compiler) {
   ReplSession session = Scope.calloc(1, sizeof(struct ReplSession));
   session.compiler = compiler;
   session.names = {};
+  $lisp.bind(compiler.macro_lisp, "print", _repl_print);
+  $lisp.bind(compiler.macro_lisp, "println", _repl_println);
   return session;
 }
 
@@ -72,7 +89,7 @@ List ReplSession.inspect(ReplSession session, String name) {
 
 static List _completion_filter(
   ReplSession session, Symbol kind, List rows, String prefix) {
-  Array names = [];
+  Array candidates = [];
   foreach (Var row, rows) {
     String name = NULL;
     Var type = void;
@@ -89,10 +106,33 @@ static List _completion_filter(
           !session.compiler.macro_lisp.try_get(name, &callable))
         continue;
     }
-    names.push(name);
+    Symbol candidate_kind = <name>;
+    if (kind == <members>) candidate_kind = <member>;
+    else if (session.names.contains(name)) candidate_kind = <session>;
+    else if (type is <list>) {
+      Type semantic = type;
+      if (semantic.is_typedef()) candidate_kind = <type>;
+      else if (semantic.is_function()) candidate_kind = <callable>;
+    }
+    else if (type == <macro>) candidate_kind = <callable>;
+    candidates.push(%($candidate_kind $name));
   }
-  names.sort();
-  return names.list_free();
+  return candidates.sort().list_free();
+}
+
+/** Returns sorted published session functions matching `prefix`. */
+List ReplSession.complete_functions(ReplSession session, String prefix) {
+  Array names = [], candidates = [];
+  defer names.free();
+  foreach (Var (candidate, stored), session.names) {
+    if (!(candidate is <string>) || !(stored is <list>)) continue;
+    String name = candidate;
+    List entry = stored;
+    if (entry.car() == <function> && name.startswith(prefix)) names.push(name);
+  }
+  foreach (String name, names.sort())
+    candidates.push(%(<session> $name));
+  return candidates.list_free();
 }
 
 /** Completes the source namespace at byte `cursor` without publishing parse
@@ -237,6 +277,7 @@ static List _result_body(List fn, int *prints) {
         List last = _bare(items[items.len() - 1]);
         match (last) {
           case %(stmnt (expr ?spec ?value)): {
+            if (spec === %(void)) return _thunk(items);
             int effect = 0;
             match (value) {
               case %(op ?operator *):

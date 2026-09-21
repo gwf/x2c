@@ -26,7 +26,7 @@ Inline terminal editing for the x2c REPL.
 
 Restores the terminal and releases editor-owned history storage.
 
-Source: `src/repl-input.x:1658`
+Source: `src/repl-input.x:1700`
 
 <a id="ReplInput.new"></a>
 #### ReplInput.new
@@ -35,7 +35,7 @@ Source: `src/repl-input.x:1658`
 
 Creates an interactive terminal owner with empty in-memory history.
 
-Source: `src/repl-input.x:1598`
+Source: `src/repl-input.x:1640`
 
 <a id="ReplInput.read"></a>
 #### ReplInput.read
@@ -47,7 +47,7 @@ inline editing; other terminal types use the basic line reader. Terminal
 mode is restored before return or transfer of an allocation, size, or I/O
 cause.
 
-Source: `src/repl-input.x:1611`
+Source: `src/repl-input.x:1653`
 
 <a id="ReplInput.remember"></a>
 #### ReplInput.remember
@@ -57,7 +57,7 @@ Source: `src/repl-input.x:1611`
 Remembers one nonempty entry, suppressing an adjacent duplicate and
 evicting the oldest entry beyond 100.
 
-Source: `src/repl-input.x:1642`
+Source: `src/repl-input.x:1684`
 
 ## Public types
 
@@ -65,7 +65,7 @@ Source: `src/repl-input.x:1642`
 | --- | --- | --- |
 | [`ReplInput`](#ReplInput) | struct | Owns terminal restoration and the current process's bounded REPL history. |
 | [`ReplInputComplete`](#ReplInputComplete) | callback | Computes completion synchronously from borrowed text and a byte cursor. |
-| [`ReplInputCompletion`](#ReplInputCompletion) | struct | Completion candidates replace `[start,end)` in the edited UTF-8 buffer. |
+| [`ReplInputCompletion`](#ReplInputCompletion) | struct | Completion candidates are `(kind "spelling")` rows that replace `[start,end)` in the edited UTF-8 buffer. |
 | [`ReplInputResult`](#ReplInputResult) | struct | `status` is line, eof, or cancelled. |
 
 <a id="ReplInput"></a>
@@ -86,16 +86,17 @@ Computes completion synchronously from borrowed text and a byte cursor.
 Returned candidates must remain live through the editor's synchronous
 completion handling.
 
-Source: `src/repl-input.x:67`
+Source: `src/repl-input.x:68`
 
 <a id="ReplInputCompletion"></a>
 ### ReplInputCompletion
 
 `typedef struct ReplInputCompletion { size_t start, end; List candidates; } ReplInputCompletion`
 
-Completion candidates replace `[start,end)` in the edited UTF-8 buffer.
+Completion candidates are `(kind "spelling")` rows that replace
+`[start,end)` in the edited UTF-8 buffer.
 
-Source: `src/repl-input.x:59`
+Source: `src/repl-input.x:60`
 
 <a id="ReplInputResult"></a>
 ### ReplInputResult

@@ -6,7 +6,7 @@
 
 static List _105, _104, _103, _102, _101, _100, _99, _98, _97, _96, _95, _94, _93, _92, _90, _89, _85, _84, _80, _79, _75, _74, _70, _69, _65, _64, _60, _59, _55, _54, _50, _49, _45, _44, _40, _39, _35, _34, _30, _29, _25, _24, _15, _14, _9;
 
-static String _110, _109, _108, _107, _106, _21, _20, _19, _17, _16, _12, _10, _7, _6, _4, _3, _2, _1, _0;
+static String _111, _110, _109, _108, _107, _106, _21, _20, _19, _17, _16, _12, _10, _7, _6, _4, _3, _2, _1, _0;
 
 static Var _91, _88, _87, _86, _83, _82, _81, _78, _77, _76, _73, _72, _71, _68, _67, _66, _63, _62, _61, _58, _57, _56, _53, _52, _51, _48, _47, _46, _43, _42, _41, _38, _37, _36, _33, _32, _31, _28, _27, _26, _23, _22, _18, _13, _11, _8, _5;
 
@@ -35,7 +35,7 @@ static void _configure_package(Compiler c, CliRequest request, String filename);
 
 static Map _preprocess_input(Frontend frontend, ParsedUnit * unit);
 
-static int _start(Frontend frontend, String filename, ParsedUnit * unit, int shared_values);
+static int _start(Frontend frontend, String filename, ParsedUnit * unit, int shared_values, String session_source);
 
 static int _preload_meta_surface(Frontend frontend, Lisp shared);
 
@@ -167,6 +167,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _108 = String_new("#!");
   _109 = String_new("script units use the default symbol collection");
   _110 = String_new("failed to run C preprocessor");
+  _111 = String_new("$(begin)\n" "void print(String text);\n" "void println(String text);\n");
 }
 
 int String_truth(String);
@@ -373,7 +374,7 @@ Var Symbol_var(Symbol);
 
 int Compiler_error_count(Compiler);
 
-static int _start(Frontend frontend, String filename, ParsedUnit * unit, int shared_values){
+static int _start(Frontend frontend, String filename, ParsedUnit * unit, int shared_values, String session_source){
   * unit =(ParsedUnit){
     0
   }
@@ -409,7 +410,7 @@ static int _start(Frontend frontend, String filename, ParsedUnit * unit, int sha
       _configure_package(compiler, frontend -> request, filename);  _tokenize_input(frontend, unit, filename);
     }
     else{
-      compiler -> filename = _20;  compiler -> prelude = compiler -> runtime_inc = 1;  compiler -> include_dirs = frontend -> include_dirs;  Compiler_tokenize(compiler, "$(begin)");
+      compiler -> filename = _20;  compiler -> prelude = compiler -> runtime_inc = 1;  compiler -> include_dirs = frontend -> include_dirs;  Compiler_tokenize(compiler, String_truth(session_source) ? session_source : "$(begin)");
     }
 
   }
@@ -449,7 +450,7 @@ return ! Compiler_error_count(compiler);
 
 int Frontend_start(Frontend frontend, String filename, ParsedUnit * unit){
   if(! _init_guard_) _file_init_();
-  return _start(frontend, filename, unit, 0);
+  return _start(frontend, filename, unit, 0, NULL);
 }
 
 Iter List_iter(List, Iter);
@@ -483,7 +484,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared){
   frontend = & session;
   ParsedUnit unit;
   String path = String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_21), NULL)));
-  int started = _start(frontend, path, & unit, 1);
+  int started = _start(frontend, path, & unit, 1, NULL);
   unit.compiler -> macro_lisp = shared;
   unit.compiler -> borrowed_lisp = 1;
   {
@@ -704,7 +705,7 @@ int Frontend_open(Frontend f, String filename, ParsedUnit * unit){
 
 int Frontend_open_session(Frontend frontend, ParsedUnit * unit){
   if(! _init_guard_) _file_init_();
-  return _start(frontend, NULL, unit, 0) && ParsedUnit_collect(unit, frontend) && ParsedUnit_parse(unit);
+  return _start(frontend, NULL, unit, 0, _111) && ParsedUnit_collect(unit, frontend) && ParsedUnit_parse(unit);
 }
 
 void Compiler_free_lisp(Compiler);

@@ -6,7 +6,11 @@
 
 #include "exception.h"
 
-static String _2, _1;
+static List _25, _23, _22, _21, _20, _17, _14, _13, _11, _9, _8, _6;
+
+static String _34, _33, _32, _31, _30, _29, _28, _27;
+
+static Var _24, _19, _15, _12, _10, _7, _5, _1, _0;
 
 #include <stdint.h>
 #include <errno.h>
@@ -216,7 +220,13 @@ static void _paste(struct EditState * l);
 
 static void _replace_completion(struct EditState * l, size_t start, size_t end, String replacement);
 
+static String _completion_spelling(Var candidate);
+
+static Symbol _completion_kind(Var candidate);
+
 static size_t _completion_common(List candidates);
+
+static int _show_completion_group(struct EditState * l, List candidates, Symbol kind, String heading);
 
 static void _show_completions(struct EditState * l, List candidates);
 
@@ -261,12 +271,45 @@ _x2c_defer_env_4;
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
 
+Var Symbol_var(Symbol);
+
+List cons(Var, List);
+
+Var List_var(List);
+
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
   if(_init_guard_) return;
   _init_guard_ = 1;
-  _1 = String_new("\r");
-  _2 = String_new("\n");
+  _0 = Symbol_var(58);
+  _1 = Symbol_var(65112065723278);
+  _5 = Symbol_var(1318210446);
+  _6 = cons(_5, NULL);
+  _7 = Symbol_var(1362954);
+  _8 = cons(_7, _6);
+  _9 = cons(_1, _8);
+  _10 = Symbol_var(62054);
+  _11 = cons(_10, _9);
+  _12 = List_var(_11);
+  _13 = cons(_12, NULL);
+  _14 = cons(_0, _13);
+  _15 = Symbol_var(61557640);
+  _17 = cons(_0, NULL);
+  _19 = Symbol_var(1328354264);
+  _20 = cons(_19, NULL);
+  _21 = cons(_7, _20);
+  _22 = cons(_15, _21);
+  _23 = cons(_10, _22);
+  _24 = List_var(_23);
+  _25 = cons(_24, _17);
+  _27 = String_new("Commands");
+  _28 = String_new("Session");
+  _29 = String_new("Types");
+  _30 = String_new("Functions and macros");
+  _31 = String_new("Names");
+  _32 = String_new("Members");
+  _33 = String_new("\r");
+  _34 = String_new("\n");
 }
 
 static int _utf8_byte_len(char c){
@@ -474,14 +517,12 @@ static int _unsupported_terminal(void){
   return 0;
 }
 
-Var Symbol_var(Symbol);
-
 Var int_var(int);
 
 _Noreturn static void _io_fail(Symbol operation){
   int error = errno;
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/repl-input.x",.function = "_io_fail",.line = 485};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/repl-input.x",.function = "_io_fail",.line = 486};
     x2c_error_raise_n(& _x2c_error_site_0, 20399393368, 2, Symbol_var(34096809266140), Symbol_var(operation), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
@@ -921,7 +962,7 @@ Var String_var(String);
 
 static void _insert(struct EditState * l, const char * c, size_t clen){
   if(_insert_raw(l, c, clen) == - 1){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/repl-input.x",.function = "_insert",.line = 1054};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/repl-input.x",.function = "_insert",.line = 1055};
     x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("ReplInput.read")), NULL))), Symbol_var(25782888), int_var(1048576));
     __builtin_unreachable();
   }
@@ -982,7 +1023,7 @@ static void _recall(struct EditState * l, int dir){
     src = l -> history[l -> history_len - 1 - l -> history_index];
     len = strlen(src);
     if(_grow(l, len) == - 1){
-      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/repl-input.x",.function = "_recall",.line = 1119};
+      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/repl-input.x",.function = "_recall",.line = 1120};
       x2c_error_raise_n(& _x2c_error_site_2, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("ReplInput.read")), NULL))), Symbol_var(25782888), int_var(1048576));
       __builtin_unreachable();
     }
@@ -1152,7 +1193,7 @@ static void _paste(struct EditState * l){
       if(! overflowed && _append_paste(l, & buf, & cap, & len, & c, 1, maxlen) == - 1) overflowed = 1;
     }
     if(overflowed){
-      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../src/repl-input.x",.function = "_paste",.line = 1316};
+      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../src/repl-input.x",.function = "_paste",.line = 1317};
       x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("ReplInput.read")), NULL))), Symbol_var(25782888), int_var(1048576));
       __builtin_unreachable();
     }
@@ -1174,7 +1215,7 @@ static void _paste(struct EditState * l){
     if(_should_fold(buf, len)){
       size_t start = l -> pos;
       if(_insert_raw(l, buf, len) == - 1){
-        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/repl-input.x",.function = "_paste",.line = 1336};
+        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/repl-input.x",.function = "_paste",.line = 1337};
         x2c_error_raise_n(& _x2c_error_site_4, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("ReplInput.read")), NULL))), Symbol_var(25782888), int_var(1048576));
         __builtin_unreachable();
       }
@@ -1192,7 +1233,7 @@ static void _replace_completion(struct EditState * l, size_t start, size_t end, 
   size_t added = String_len(replacement), removed = end - start;
   size_t length = l -> len - removed + added;
   if(_grow(l, length) == - 1){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/repl-input.x",.function = "_replace_completion",.line = 1348};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/repl-input.x",.function = "_replace_completion",.line = 1349};
     x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("ReplInput.read")), NULL))), Symbol_var(25782888), int_var(1048576));
     __builtin_unreachable();
   }
@@ -1204,31 +1245,61 @@ static void _replace_completion(struct EditState * l, size_t start, size_t end, 
   _refresh_line(l);
 }
 
+List Var_list(Var);
+
 String Var_string(Var);
 
-Var List_car(List);
+static String _completion_spelling(Var candidate){
 
-List List_cdr(List);
-
-int List_try_next(List, List *, Var *);
-
-int String_getindex(String, int);
-
-static size_t _completion_common(List candidates){
-  String first = Var_string(List_car(candidates));
-  size_t common = String_len(first);
   {
-    String candidate;
-    List _x2c_macro_object_0 = List_cdr(candidates);
-    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
-    Var _x2c_macro_cursor_output_0;
-    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
-      candidate = Var_string(_x2c_macro_cursor_output_0);
-      {
-        if(String_len(candidate) < common) common = String_len(candidate);
-        size_t i = 0;
-        while(i < common && String_getindex(first, i) == String_getindex(candidate, i)) i ++;
-        common = i;
+    List _x2c_match_expr = Var_list(candidate);
+    Var _x2c_match_values[1];
+  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+
+    switch (0) {
+      default: ;  static MatchCaptureSite _x2c_match_site_0;  if (x2c_match_site_try_capture(& _x2c_match_site_0, _x2c_match_expr, List_var(_14), &_x2c_match_capture)) {Var spelling = _x2c_match_values[0]; {
+    Var _x2c_match_value_0 = spelling; {
+      String spelling = Var_string(_x2c_match_value_0);  return spelling;
+    }
+
+  }
+  break;
+}
+
+    }
+  }
+return NULL;
+}
+
+static Symbol _completion_kind(Var candidate){
+
+  {
+    List _x2c_match_expr = Var_list(candidate);
+    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
+    switch (0) {
+      default: ;  static MatchCaptureSite _x2c_match_site_1;  if (x2c_match_site_try_capture(& _x2c_match_site_1, _x2c_match_expr, List_var(_25), &_x2c_match_capture)) {Var kind = _x2c_match_values[0]; {
+    Var _x2c_match_value_1 = kind; {
+      Symbol kind = Var_symbol(_x2c_match_value_1);  return kind;
+    }
+
+  }
+  break;
+}
+
+    }
+  }
+return 0;
+}
+
+Var List_car(List);
+List List_cdr(List);
+int List_try_next(List, List *, Var *);
+int String_getindex(String, int);
+static size_t _completion_common(List candidates){
+  String first = _completion_spelling(List_car(candidates));  size_t common = String_len(first); {
+    Var row;  List _x2c_macro_object_0 = List_cdr(candidates);  List _x2c_macro_cursor_0 = _x2c_macro_object_0;  Var _x2c_macro_cursor_output_0;  while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      row = _x2c_macro_cursor_output_0; {
+        String candidate = _completion_spelling(row);  if(String_len(candidate) < common) common = String_len(candidate);  size_t i = 0;  while(i < common && String_getindex(first, i) == String_getindex(candidate, i)) i ++;  common = i;
       }
 
     }
@@ -1237,144 +1308,77 @@ static size_t _completion_common(List candidates){
   return common;
 }
 
-static void _show_completions(struct EditState * l, List candidates){
-  _refresh_with_flags(l, REFRESH_CLEAN);
-  _write_bytes(l -> input -> ofd, "\r", 1);
-  {
-    String candidate;
-    List _x2c_macro_object_1 = candidates;
-    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
-    Var _x2c_macro_cursor_output_1;
-    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
-      candidate = Var_string(_x2c_macro_cursor_output_1);
-      {
-        _write_bytes(l -> input -> ofd, candidate, String_len(candidate));
-        _write_bytes(l -> input -> ofd, "\r\n", 2);
+static int _show_completion_group(struct EditState * l, List candidates, Symbol kind, String heading){
+  int found = 0;  size_t column = 2; {
+    Var row;  List _x2c_macro_object_1 = candidates;  List _x2c_macro_cursor_1 = _x2c_macro_object_1;  Var _x2c_macro_cursor_output_1;  while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+      row = _x2c_macro_cursor_output_1; {
+        if(_completion_kind(row) != kind) continue;  String spelling = _completion_spelling(row);  size_t width = _display_width(spelling, String_len(spelling));  if(! found){
+          _write_bytes(l -> input -> ofd, heading, String_len(heading));  _write_bytes(l -> input -> ofd, ":\r\n  ", 5);  found = 1;
+        }
+        else if(column + 2 + width > l -> cols){
+          _write_bytes(l -> input -> ofd, "\r\n  ", 4);  column = 2;
+        }
+        else{
+          _write_bytes(l -> input -> ofd, "  ", 2);  column += 2;
+        }
+        _write_bytes(l -> input -> ofd, spelling, String_len(spelling));  column += width;
       }
 
     }
 
   }
-  l -> oldrows = 0;
-  l -> oldrpos = 1;
-  _refresh_line(l);
+  if(found) _write_bytes(l -> input -> ofd, "\r\n", 2);  return found;
+}
+
+static void _show_completions(struct EditState * l, List candidates){
+  _refresh_with_flags(l, REFRESH_CLEAN);  _write_bytes(l -> input -> ofd, "\r", 1);  _show_completion_group(l, candidates, 7477201800, _27);  _show_completion_group(l, candidates, 41178844124, _28);  _show_completion_group(l, candidates, 1362954, _29);  _show_completion_group(l, candidates, 209136456458, _30);  _show_completion_group(l, candidates, 920394, _31);  _show_completion_group(l, candidates, 883757412, _32);  l -> oldrows = 0;  l -> oldrpos = 1;  _refresh_line(l);
 }
 
 String String_new_len(const char *, int);
-
 int List_truth(List);
-
 static void _complete(struct EditState * l){
   if(! l -> complete){
-    _beep();
-    return;
+    _beep();  return;
   }
-  String text = String_new_len(l -> buf, l -> len);
-  ReplInputCompletion completion = l -> complete(l -> completion_context, text, l -> pos);
-  List candidates = completion.candidates;
-  if(! List_truth(candidates) || completion.start > completion.end || completion.end > l -> len){
-    l -> completion_pending = 0;
-    _beep();
-    return;
+  String text = String_new_len(l -> buf, l -> len);  ReplInputCompletion completion = l -> complete(l -> completion_context, text, l -> pos);  List candidates = completion.candidates;  if(! List_truth(candidates) || completion.start > completion.end || completion.end > l -> len){
+    l -> completion_pending = 0;  _beep();  return;
   }
-  size_t common = _completion_common(candidates);
-  size_t present = completion.end - completion.start;
-  if(! List_truth(List_cdr(candidates)) || common > present){
-    String first = Var_string(List_car(candidates));
-    String replacement = String_new_len(first, common);
-    _replace_completion(l, completion.start, completion.end, replacement);
-    l -> completion_pending = 0;
-    return;
+  size_t common = _completion_common(candidates);  size_t present = completion.end - completion.start;  if(! List_truth(List_cdr(candidates)) || common > present){
+    String first = _completion_spelling(List_car(candidates));  String replacement = String_new_len(first, common);  _replace_completion(l, completion.start, completion.end, replacement);  l -> completion_pending = 0;  return;
   }
   if(l -> completion_pending){
-    _show_completions(l, candidates);
-    l -> completion_pending = 0;
+    _show_completions(l, candidates);  l -> completion_pending = 0;
   }
   else{
-    l -> completion_pending = 1;
-    _beep();
+    l -> completion_pending = 1;  _beep();
   }
 
 }
 
 static Symbol _edit_feed(struct EditState * l){
-  char c, seq[3];
-  if(! _read_byte(l, & c)) return 11212;
-  if(c != TAB) l -> completion_pending = 0;
-  switch(c){
-    case KEY_NULL : break;
-    case TAB : _complete(l);
-    break;
-    case ENTER : _move_end(l);
-    return 805770;
-    case CTRL_C : return 6696066638152;
-    case BACKSPACE : case 8 : _backspace(l);
-    break;
-    case CTRL_D : if(l -> len > 0) _delete(l);
-    else return 11212;
-    break;
-    case CTRL_T : if(l -> pos > 0 && l -> pos < l -> len){
-      char tmp[32];
-      size_t prevlen = _previous_edit_len(l, l -> pos);
-      size_t currlen = _next_edit_len(l, l -> pos);
-      size_t prevstart = l -> pos - prevlen;
-      if(prevlen > sizeof(tmp) || currlen > sizeof(tmp)) break;
-      if(_overlaps_fold(l, prevstart, prevlen + currlen)){
-        _beep();
-        break;
+  char c, seq[3];  if(! _read_byte(l, & c)) return 11212;  if(c != TAB) l -> completion_pending = 0;  switch(c){
+    case KEY_NULL : break;  case TAB : _complete(l);  break;  case ENTER : _move_end(l);  return 805770;  case CTRL_C : return 6696066638152;  case BACKSPACE : case 8 : _backspace(l);  break;  case CTRL_D : if(l -> len > 0) _delete(l);  else return 11212;  break;  case CTRL_T : if(l -> pos > 0 && l -> pos < l -> len){
+      char tmp[32];  size_t prevlen = _previous_edit_len(l, l -> pos);  size_t currlen = _next_edit_len(l, l -> pos);  size_t prevstart = l -> pos - prevlen;  if(prevlen > sizeof(tmp) || currlen > sizeof(tmp)) break;  if(_overlaps_fold(l, prevstart, prevlen + currlen)){
+        _beep();  break;
       }
-      memcpy(tmp, l -> buf + l -> pos, currlen);
-      memmove(l -> buf + prevstart + currlen, l -> buf + prevstart, prevlen);
-      memcpy(l -> buf + prevstart, tmp, currlen);
-      if(l -> pos + currlen <= l -> len) l -> pos += currlen;
-      _refresh_line(l);
+      memcpy(tmp, l -> buf + l -> pos, currlen);  memmove(l -> buf + prevstart + currlen, l -> buf + prevstart, prevlen);  memcpy(l -> buf + prevstart, tmp, currlen);  if(l -> pos + currlen <= l -> len) l -> pos += currlen;  _refresh_line(l);
     }
-    break;
-    case CTRL_B : _move_left(l);
-    break;
-    case CTRL_F : _move_right(l);
-    break;
-    case CTRL_P : _recall(l, LINENOISE_HISTORY_PREV);
-    break;
-    case CTRL_N : _recall(l, LINENOISE_HISTORY_NEXT);
-    break;
-    case ESC : if(! _read_byte(l, seq) || ! _read_byte(l, seq + 1)) break;
-    if(seq[0] == '['){
+    break;  case CTRL_B : _move_left(l);  break;  case CTRL_F : _move_right(l);  break;  case CTRL_P : _recall(l, LINENOISE_HISTORY_PREV);  break;  case CTRL_N : _recall(l, LINENOISE_HISTORY_NEXT);  break;  case ESC : if(! _read_byte(l, seq) || ! _read_byte(l, seq + 1)) break;  if(seq[0] == '['){
       if(seq[1] >= '0' && seq[1] <= '9'){
-        char param[8];
-        size_t plen = 1;
-        char final = 0;
-        param[0] = seq[1];
-        while(plen < sizeof(param)){
-          char p;
-          if(! _read_byte(l, & p)) break;
-          if(p >= '0' && p <= '9') param[plen ++] = p;
-          else{
-            final = p;
-            break;
+        char param[8];  size_t plen = 1;  char final = 0;  param[0] = seq[1];  while(plen < sizeof(param)){
+          char p;  if(! _read_byte(l, & p)) break;  if(p >= '0' && p <= '9') param[plen ++] = p;  else{
+            final = p;  break;
           }
 
         }
         if(final == '~'){
-          if(plen == 1 && param[0] == '3') _delete(l);
-          else if(plen == 3 && memcmp(param, "200", 3) == 0) _paste(l);
+          if(plen == 1 && param[0] == '3') _delete(l);  else if(plen == 3 && memcmp(param, "200", 3) == 0) _paste(l);
         }
 
       }
       else{
         switch(seq[1]){
-          case 'A' : _recall(l, LINENOISE_HISTORY_PREV);
-          break;
-          case 'B' : _recall(l, LINENOISE_HISTORY_NEXT);
-          break;
-          case 'C' : _move_right(l);
-          break;
-          case 'D' : _move_left(l);
-          break;
-          case 'H' : _move_home(l);
-          break;
-          case 'F' : _move_end(l);
-          break;
+          case 'A' : _recall(l, LINENOISE_HISTORY_PREV);  break;  case 'B' : _recall(l, LINENOISE_HISTORY_NEXT);  break;  case 'C' : _move_right(l);  break;  case 'D' : _move_left(l);  break;  case 'H' : _move_home(l);  break;  case 'F' : _move_end(l);  break;
         }
 
       }
@@ -1382,153 +1386,82 @@ static Symbol _edit_feed(struct EditState * l){
     }
     else if(seq[0] == 'O'){
       switch(seq[1]){
-        case 'H' : _move_home(l);
-        break;
-        case 'F' : _move_end(l);
-        break;
+        case 'H' : _move_home(l);  break;  case 'F' : _move_end(l);  break;
       }
 
     }
-    break;
-    default:{
-      char utf8[4];
-      int utf8len = _utf8_byte_len(c);
-      utf8[0] = c;
-      int length = 1;
-      while(length < utf8len && _read_byte(l, utf8 + length)) length ++;
-      _insert(l, utf8, length);
+    break;  default:{
+      char utf8[4];  int utf8len = _utf8_byte_len(c);  utf8[0] = c;  int length = 1;  while(length < utf8len && _read_byte(l, utf8 + length)) length ++;  _insert(l, utf8, length);
     }
-    break;
-    case CTRL_U : l -> buf[0] = '\0';
-    l -> pos = l -> len = 0;
-    _fold_clear(l);
-    _refresh_line(l);
-    break;
-    case CTRL_K : _adjust_folds_after_delete(l, l -> pos, l -> len - l -> pos);
-    l -> buf[l -> pos] = '\0';
-    l -> len = l -> pos;
-    _refresh_line(l);
-    break;
-    case CTRL_A : _move_home(l);
-    break;
-    case CTRL_E : _move_end(l);
-    break;
-    case CTRL_L : _clear_screen(l);
-    _refresh_line(l);
-    break;
-    case CTRL_W : _delete_previous_word(l);
-    break;
+    break;  case CTRL_U : l -> buf[0] = '\0';  l -> pos = l -> len = 0;  _fold_clear(l);  _refresh_line(l);  break;  case CTRL_K : _adjust_folds_after_delete(l, l -> pos, l -> len - l -> pos);  l -> buf[l -> pos] = '\0';  l -> len = l -> pos;  _refresh_line(l);  break;  case CTRL_A : _move_home(l);  break;  case CTRL_E : _move_end(l);  break;  case CTRL_L : _clear_screen(l);  _refresh_line(l);  break;  case CTRL_W : _delete_previous_word(l);  break;
   }
   return 11026058126;
 }
 
 String String_new(const char *);
-
 static ReplInputResult _read_interactive(ReplInput input, String prompt, ReplInputComplete complete, void * completion_context){
-  struct EditState edit;
-  _edit_prepare(& edit, input, prompt, complete, completion_context);
-  {
+  struct EditState edit;  _edit_prepare(& edit, input, prompt, complete, completion_context); {
   _x2c_defer_env_4 _x2c_defer_env_8 = {._x2c_defer_capture_4 =(const void *) & edit};
-
   X2CCleanup _x2c_defer_record_3 = {
     .fn = _x2c_defer_cleanup_4,
     .env = & _x2c_defer_env_8
   };
   x2c_cleanup_push(&_x2c_defer_record_3);
   {
-    _enable_raw(input);
-    {
+    _enable_raw(input); {
   _x2c_defer_env_3 _x2c_defer_env_9 = {._x2c_defer_capture_3 =(const void *) & input};
-
   X2CCleanup _x2c_defer_record_4 = {
     .fn = _x2c_defer_cleanup_3,
     .env = & _x2c_defer_env_9
   };
   x2c_cleanup_push(&_x2c_defer_record_4);
   {
-      _write_bytes(input -> ofd, "\x1b[?2004h", 8);
-      edit.cols = _terminal_columns(input -> ifd, input -> ofd);
-      _write_bytes(input -> ofd, prompt, String_len(prompt));
-      Symbol status;
-      while((status = _edit_feed(& edit)) == 11026058126){
+      _write_bytes(input -> ofd, "\x1b[?2004h", 8);  edit.cols = _terminal_columns(input -> ifd, input -> ofd);  _write_bytes(input -> ofd, prompt, String_len(prompt));  Symbol status;  while((status = _edit_feed(& edit)) == 11026058126){
 
       }
-      String text = status == 805770 ? String_new(edit.buf) : NULL;
-      _restore(input);
-      _write_bytes(input -> ofd, "\n", 1);
-      {
+      String text = status == 805770 ? String_new(edit.buf) : NULL;  _restore(input);  _write_bytes(input -> ofd, "\n", 1); {
         ReplInputResult _x2c_return_value_0 =(ReplInputResult){
           .status = status, .text = text
         }
-        ;
-        {
-          x2c_cleanup_leave(& _x2c_defer_record_4);
-          x2c_cleanup_leave(& _x2c_defer_record_3);
-          return _x2c_return_value_0;
+        ; {
+          x2c_cleanup_leave(& _x2c_defer_record_4);  x2c_cleanup_leave(& _x2c_defer_record_3);  return _x2c_return_value_0;
         }
 
       }
 
     }
     x2c_cleanup_leave(& _x2c_defer_record_4);
-
 }
   }
   x2c_cleanup_leave(& _x2c_defer_record_3);
-
 }
 }
 
 Scope Scope_new_named(const char *);
-
 void * Scope_calloc_in(Scope *, size_t, size_t);
-
 ReplInput ReplInput_new(void){
-  ReplInput input = Scope_calloc(1, sizeof(struct ReplInput));
-  input -> storage = Scope_new_named("repl-input");
-  input -> history = Scope_calloc_in(& input -> storage, REPL_HISTORY_MAX, sizeof(char *));
-  input -> open = 1;
-  return input;
+  ReplInput input = Scope_calloc(1, sizeof(struct ReplInput));  input -> storage = Scope_new_named("repl-input");  input -> history = Scope_calloc_in(& input -> storage, REPL_HISTORY_MAX, sizeof(char *));  input -> open = 1;  return input;
 }
 
 String File_readline(File);
-
 int String_truth(String);
-
 String String_remove_suffix(String, String);
-
 Symbol Error_raise(Symbol, List);
-
 ReplInputResult ReplInput_read(ReplInput r, String prompt, ReplInputComplete complete, void * completion_context){
-  if(! _init_guard_) _file_init_();
-  if(! r || ! r -> open) return(ReplInputResult){
+  if(! _init_guard_) _file_init_();  if(! r || ! r -> open) return(ReplInputResult){
     .status = 11212
   }
-  ;
-  if(_unsupported_terminal()){
-    _write_bytes(STDOUT_FILENO, prompt, String_len(prompt));
-    String text = File_readline(Stdin);
-    if(! String_truth(text)) return(ReplInputResult){
+  ;  if(_unsupported_terminal()){
+    _write_bytes(STDOUT_FILENO, prompt, String_len(prompt));  String text = File_readline(Stdin);  if(! String_truth(text)) return(ReplInputResult){
       .status = 11212
     }
-    ;
-    text = String_remove_suffix(String_remove_suffix(text, _2), _1);
-    return(ReplInputResult){
+    ;  text = String_remove_suffix(String_remove_suffix(text, _34), _33);  return(ReplInputResult){
       .status = 805770, .text = text
     }
     ;
   }
   {
-    ExceptionFrame _x2c_exception_frame_0;
-    static MatchCaptureSite _x2c_catch_arms_0[3];
-    static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 3, ERROR_CATCH_PENDING, -1 };
-    Var _x2c_catch_patterns_0[3];
-    if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(97614135954008), cons(Symbol_var(1864393378598), NULL));
-    _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);
-    List _x2c_catch_pattern_1 = cons(Symbol_var(1358596898646632), cons(Symbol_var(1864393378598), NULL));
-    _x2c_catch_patterns_0[1] = List_var(_x2c_catch_pattern_1);
-    List _x2c_catch_pattern_2 = cons(Symbol_var(20399393368), cons(Symbol_var(1864393378598), NULL));
-    _x2c_catch_patterns_0[2] = List_var(_x2c_catch_pattern_2);
+    ExceptionFrame _x2c_exception_frame_0;  static MatchCaptureSite _x2c_catch_arms_0[3];  static ErrorCatchSite _x2c_catch_site_0 = {  _x2c_catch_arms_0, -1, 3, ERROR_CATCH_PENDING, -1 };  Var _x2c_catch_patterns_0[3];  if (x2c_error_catch_site_pending(&_x2c_catch_site_0)) {List _x2c_catch_pattern_0 = cons(Symbol_var(97614135954008), cons(Symbol_var(1864393378598), NULL));  _x2c_catch_patterns_0[0] = List_var(_x2c_catch_pattern_0);  List _x2c_catch_pattern_1 = cons(Symbol_var(1358596898646632), cons(Symbol_var(1864393378598), NULL));  _x2c_catch_patterns_0[1] = List_var(_x2c_catch_pattern_1);  List _x2c_catch_pattern_2 = cons(Symbol_var(20399393368), cons(Symbol_var(1864393378598), NULL));  _x2c_catch_patterns_0[2] = List_var(_x2c_catch_pattern_2);
   }
   ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
     {
@@ -1541,42 +1474,28 @@ ReplInputResult ReplInput_read(ReplInput r, String prompt, ReplInputComplete com
   }
   else {x2c_exception_landed(& _x2c_exception_frame_0); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_0)){
-      int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);
-      x2c_error_catch_detach(_x2c_error_handler_0);
-      x2c_exception_mark_handled(&_x2c_exception_frame_0);
-      if (_x2c_catch_selected_0 == 0) {List details = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
-      {
-        _restore(r);
-        Error_raise(97614135954008, details);
+      int _x2c_catch_selected_0 = x2c_error_catch_selected(_x2c_error_handler_0);  x2c_error_catch_detach(_x2c_error_handler_0);  x2c_exception_mark_handled(&_x2c_exception_frame_0);  if (_x2c_catch_selected_0 == 0) {List details = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0)); {
+        _restore(r);  Error_raise(97614135954008, details);
       }
 
     }
-    else if (_x2c_catch_selected_0 == 1) {List details = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
-    {
-      _restore(r);
-      Error_raise(1358596898646632, details);
+    else if (_x2c_catch_selected_0 == 1) {List details = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0)); {
+      _restore(r);  Error_raise(1358596898646632, details);
     }
 
   }
-  else {List details = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0));
-  {
-    _restore(r);
-    Error_raise(20399393368, details);
+  else {List details = Var_list(x2c_error_catch_capture(_x2c_error_handler_0, 0)); {
+    _restore(r);  Error_raise(20399393368, details);
   }
 
 }
 }
 else{
-  x2c_error_catch_close(_x2c_error_handler_0);
-  _x2c_error_handler_0 = NULL;
-  x2c_exception_leave(& _x2c_exception_frame_0);
-  __builtin_unreachable();
+  x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);  __builtin_unreachable();
 }
 }
 }
-x2c_error_catch_close(_x2c_error_handler_0);
-_x2c_error_handler_0 = NULL;
-x2c_exception_leave(& _x2c_exception_frame_0);
+x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);
 }
 return(ReplInputResult){
   .status = 11212
@@ -1585,52 +1504,35 @@ return(ReplInputResult){
 }
 
 void * Scope_memdup_in(Scope *, const void *, size_t);
-
 void ReplInput_remember(ReplInput r, String text){
-  if(! r || ! r -> open || ! String_truth(text) || ! String_len(text)) return;
-  if(r -> history_len && ! strcmp(r -> history[r -> history_len - 1], text)) return;
-  char * copy = Scope_memdup_in(& r -> storage, text, String_len(text) + 1);
-  if(r -> history_len == REPL_HISTORY_MAX){
-    Scope_free(r -> history[0]);
-    memmove(r -> history, r -> history + 1, sizeof(char *) *(REPL_HISTORY_MAX - 1));
-    r -> history_len --;
+  if(! r || ! r -> open || ! String_truth(text) || ! String_len(text)) return;  if(r -> history_len && ! strcmp(r -> history[r -> history_len - 1], text)) return;  char * copy = Scope_memdup_in(& r -> storage, text, String_len(text) + 1);  if(r -> history_len == REPL_HISTORY_MAX){
+    Scope_free(r -> history[0]);  memmove(r -> history, r -> history + 1, sizeof(char *) *(REPL_HISTORY_MAX - 1));  r -> history_len --;
   }
   r -> history[r -> history_len ++] = copy;
 }
 
 void Scope_destroy(Scope);
-
 void ReplInput_close(ReplInput r){
-  if(! r || ! r -> open) return;
-  _restore(r);
-  Scope_destroy(r -> storage);
-  r -> history = NULL;
-  r -> history_len = 0;
-  r -> open = 0;
+  if(! r || ! r -> open) return;  _restore(r);  Scope_destroy(r -> storage);  r -> history = NULL;  r -> history_len = 0;  r -> open = 0;
 }
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  _render_buffer_close(&(*(struct RenderBuffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  _render_buffer_close(&(*(struct RenderBuffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  Scope_free((*(char * *) _x2c_defer_data_1->_x2c_defer_capture_1));
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;  Scope_free((*(char * *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
-  Scope_free((*(char * *) _x2c_defer_data_2->_x2c_defer_capture_2));
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;  Scope_free((*(char * *) _x2c_defer_data_2->_x2c_defer_capture_2));
 }
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
-  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
-  _restore((*(ReplInput *) _x2c_defer_data_3->_x2c_defer_capture_3));
+  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;  _restore((*(ReplInput *) _x2c_defer_data_3->_x2c_defer_capture_3));
 }
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
-  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
-  _edit_close(&(*(struct EditState *) _x2c_defer_data_4->_x2c_defer_capture_4));
+  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;  _edit_close(&(*(struct EditState *) _x2c_defer_data_4->_x2c_defer_capture_4));
 }
 

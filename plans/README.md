@@ -51,8 +51,10 @@ its opening status and this index distinguish them from current execution.
   implemented. Mutable container results, iterator state, and full fold parity
   remain bounded follow-ups. The older
   [meta milestones](archive/meta-functions.md) record the preceding baseline.
-- **Lisp REPL follow-up**: separately assigned; no durable plan recorded here
-  yet. The lexical-scope repair to the literate example shipped in `144a833d`.
+- [REPL fit, status, and runtime surface](repl-fit-and-runtime-surface.md):
+  terminal UX, live statistics, and REPL-only output are implemented;
+  standard-library and host exposure remain undispatched recommendations. The
+  lexical-scope repair to the literate example shipped in `144a833d`.
 
 ### Open backlog and scoped follow-ups
 

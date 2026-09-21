@@ -49,12 +49,16 @@ submission remains available for correction.
 
 Tab completes names from the compiler's live session namespace. This includes
 published session values and functions, visible types and macros, and fields or
-evaluator-callable methods on a typed receiver. A sole match replaces the
-current name; otherwise Tab inserts the common prefix, and another Tab lists
-the sorted choices. Completion parses only through the cursor and rolls back
-its semantic work, so it can use locals from pending multiline input without
-publishing them. APIs become candidates when their ordinary declarations and
-compile-time bindings become visible; the REPL keeps no separate API list.
+evaluator-callable methods on a typed receiver. At a blank primary prompt it
+also offers colon commands, grouped with session names, types, and other
+callables. A colon-prefixed line completes commands even at a continuation
+prompt; `:ast` and `:lowered` then complete published function names. A sole
+match replaces the current name; otherwise Tab inserts the common prefix, and
+another Tab lists compact, grouped choices. Completion parses only through the
+cursor and rolls back its semantic work, so it can use locals from pending
+multiline input without publishing them. APIs become candidates when their
+ordinary declarations and compile-time bindings become visible; the REPL
+keeps no separate API list.
 
 Long input wraps across terminal rows. Bracketed paste keeps embedded newlines
 inside one editable entry, so a pasted multiline submission can be accepted
@@ -69,6 +73,7 @@ incomplete submission continues at a fresh `... ` prompt.
 | Command | Meaning |
 | --- | --- |
 | `:help` | Show session commands. |
+| `:stats` | Show live runtime statistics. |
 | `:symbols` | List successfully defined names and their kinds. |
 | `:ast plus` | Show `plus`'s typed x2c AST. |
 | `:lowered plus` | Show the Lisp forms used to execute `plus`. |
@@ -87,8 +92,17 @@ even inside an incomplete string or comment. Missing names, extra arguments,
 and unknown commands report errors.
 
 `--dump` prints each available typed AST and lowered Lisp form to standard
-error. `--stats` prints Lisp calls, word-machine entries, and machine errors
-at exit. The options can be combined.
+error. `--stats` prints the same runtime report as `:stats` at exit, to
+standard error. The options can be combined.
+
+The report separates absolute live or retained quantities from activity since
+the REPL opened. `live-program-bytes` is published evaluator program storage,
+not total evaluator memory. Scope allocation objects are process-wide runtime
+allocations, and `requested-traffic-bytes` is cumulative allocation traffic,
+not memory in use. Pool active and depot bytes partition retained backing
+capacity; they are not reachable payload. Scope and pool figures overlap and
+must not be summed. x2c has no garbage collector, so reuse and promotion
+counters are activity rather than collection counts.
 
 ## Supported subset
 
@@ -97,6 +111,13 @@ definitions, integer arithmetic and narrowing, assignment, conditionals,
 `for` loops, self recursion, and calls to earlier functions. String values
 and length, List literals and indexing, and Array construction, mutation,
 and indexing are exercised by the focused checks.
+
+REPL sessions also provide `print(String)` and `println(String)`. `print`
+writes the String's bytes; `println` writes those bytes followed by one
+newline. Use String interpolation for formatting, such as
+`println(%"count=$count")`. Both functions are REPL-only, reserve their names
+in the session, and report `ok` rather than a synthetic value. They do not
+provide C `printf` formatting or varargs.
 
 Redefinition is disabled; assign to an existing variable to change its value.
 Function replacement and mutually recursive forward declarations are not
@@ -111,7 +132,7 @@ the evaluator cannot provide their native lifetime or linkage semantics.
 Other constructs depend on the existing lowering and may be declined. Full
 native execution and reference/lifecycle parity are not established; for
 example, the evaluator loses the distinction between `Var void` and an
-empty List. A void function currently displays the lowering's zero sentinel.
+empty List.
 
 ## Failure and lifetime
 

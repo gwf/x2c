@@ -214,7 +214,8 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
     process-global.
 */
 static int _start(
-  Frontend frontend, String filename, ParsedUnit *unit, int shared_values) {
+  Frontend frontend, String filename, ParsedUnit *unit, int shared_values,
+  String session_source) {
   *unit = (ParsedUnit) { 0 };
   unit.generated_symbols =
     !frontend.request.no_cpp && !frontend.request.dump;
@@ -246,7 +247,7 @@ static int _start(
       compiler.filename = "<repl>";
       compiler.prelude = compiler.runtime_inc = 1;
       compiler.include_dirs = frontend.include_dirs;
-      compiler.tokenize("$(begin)");
+      compiler.tokenize(session_source ? session_source : "$(begin)");
     }
   }
   catch %(malformed *): return 0;
@@ -257,7 +258,7 @@ static int _start(
     The caller must close the unit on either result.
 */
 int Frontend.start(Frontend frontend, String filename, ParsedUnit *unit) =>
-  _start(frontend, filename, unit, 0);
+  _start(frontend, filename, unit, 0, NULL);
 
 /* Installs the compile-time forms `lib/meta.x` defines into the shared
    session. Its values belong to the build target's shared library scope
@@ -273,7 +274,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared) {
   frontend = &session;
   ParsedUnit unit;
   String path = %"${x2c_get_root()}/lib/meta.x";
-  int started = _start(frontend, path, &unit, 1);
+  int started = _start(frontend, path, &unit, 1, NULL);
   unit.compiler.macro_lisp = shared;
   unit.compiler.borrowed_lisp = 1;
   defer unit.close();
@@ -367,7 +368,10 @@ int Frontend.open(Frontend f, String filename, ParsedUnit *unit) =>
     Preload macro libraries first. The caller must close the unit on either
     result; submissions and inspection results borrow its Context. */
 int Frontend.open_session(Frontend frontend, ParsedUnit *unit) =>
-  _start(frontend, NULL, unit, 0) && unit.collect(frontend) && unit.parse();
+  _start(frontend, NULL, unit, 0, "$(begin)\n"
+    "void print(String text);\n"
+    "void println(String text);\n") &&
+  unit.collect(frontend) && unit.parse();
 
 /** Releases the unit after its caller has inspected or exported its
     results.

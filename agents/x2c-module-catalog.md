@@ -378,7 +378,7 @@ persistent compiler submissions and inspection.
 Public functions:
 
 `ReplSession.new`, `ReplSession.symbols`, `ReplSession.inspect`,
-`ReplSession.complete`, `ReplSession.submit`
+`ReplSession.complete_functions`, `ReplSession.complete`, `ReplSession.submit`
 
 ### [src/repl.x](../src/repl.x)
 

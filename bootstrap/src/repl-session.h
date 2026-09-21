@@ -33,6 +33,8 @@ List ReplSession_symbols(ReplSession session);
 
 List ReplSession_inspect(ReplSession session, String name);
 
+List ReplSession_complete_functions(ReplSession session, String prefix);
+
 ReplCompletion ReplSession_complete(ReplSession session, String source, size_t cursor);
 
 ReplResult ReplSession_submit(ReplSession session, String source);

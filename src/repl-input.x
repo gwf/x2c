@@ -55,7 +55,8 @@ typedef struct ReplInputResult {
   String text;
 } ReplInputResult;
 
-/** Completion candidates replace `[start,end)` in the edited UTF-8 buffer. */
+/** Completion candidates are `(kind "spelling")` rows that replace
+    `[start,end)` in the edited UTF-8 buffer. */
 typedef struct ReplInputCompletion {
   size_t start, end;
   List candidates;
@@ -1355,10 +1356,21 @@ static void _replace_completion(
   _refresh_line(l);
 }
 
+static String _completion_spelling(Var candidate) {
+  match (candidate) case %(? ?(String spelling)): return spelling;
+  return NULL;
+}
+
+static Symbol _completion_kind(Var candidate) {
+  match (candidate) case %(?(Symbol kind) ?): return kind;
+  return 0;
+}
+
 static size_t _completion_common(List candidates) {
-  String first = candidates.car();
+  String first = _completion_spelling(candidates.car());
   size_t common = first.len();
-  foreach (String candidate, candidates.cdr()) {
+  foreach (Var row, candidates.cdr()) {
+    String candidate = _completion_spelling(row);
     if (candidate.len() < common) common = candidate.len();
     size_t i = 0;
     while (i < common && first[i] == candidate[i]) i++;
@@ -1367,13 +1379,43 @@ static size_t _completion_common(List candidates) {
   return common;
 }
 
+static int _show_completion_group(
+  struct EditState *l, List candidates, Symbol kind, String heading) {
+  int found = 0;
+  size_t column = 2;
+  foreach (Var row, candidates) {
+    if (_completion_kind(row) != kind) continue;
+    String spelling = _completion_spelling(row);
+    size_t width = _display_width(spelling, spelling.len());
+    if (!found) {
+      _write_bytes(l.input.ofd, heading, heading.len());
+      _write_bytes(l.input.ofd, ":\r\n  ", 5);
+      found = 1;
+    }
+    else if (column + 2 + width > l.cols) {
+      _write_bytes(l.input.ofd, "\r\n  ", 4);
+      column = 2;
+    }
+    else {
+      _write_bytes(l.input.ofd, "  ", 2);
+      column += 2;
+    }
+    _write_bytes(l.input.ofd, spelling, spelling.len());
+    column += width;
+  }
+  if (found) _write_bytes(l.input.ofd, "\r\n", 2);
+  return found;
+}
+
 static void _show_completions(struct EditState *l, List candidates) {
   _refresh_with_flags(l, REFRESH_CLEAN);
   _write_bytes(l.input.ofd, "\r", 1);
-  foreach (String candidate, candidates) {
-    _write_bytes(l.input.ofd, candidate, candidate.len());
-    _write_bytes(l.input.ofd, "\r\n", 2);
-  }
+  _show_completion_group(l, candidates, <command>, "Commands");
+  _show_completion_group(l, candidates, <session>, "Session");
+  _show_completion_group(l, candidates, <type>, "Types");
+  _show_completion_group(l, candidates, <callable>, "Functions and macros");
+  _show_completion_group(l, candidates, <name>, "Names");
+  _show_completion_group(l, candidates, <member>, "Members");
   l.oldrows = 0;
   l.oldrpos = 1;
   _refresh_line(l);
@@ -1394,7 +1436,7 @@ static void _complete(struct EditState *l) {
   size_t common = _completion_common(candidates);
   size_t present = completion.end - completion.start;
   if (!candidates.cdr() || common > present) {
-    String first = candidates.car();
+    String first = _completion_spelling(candidates.car());
     String replacement = String.new_len(first, common);
     _replace_completion(
       l, completion.start, completion.end, replacement);
