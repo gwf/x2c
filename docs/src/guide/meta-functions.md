@@ -11,7 +11,7 @@ There are three separate questions:
 2. **Can each operation execute?** Every resolved call needs a compile-time
    binding. Having a supported receiver type does not expose its entire API.
 3. **Can the answer become program code?** Returning a value to another
-   meta function, inserting it with `$(...)`, and folding an ordinary call
+   meta function, inserting it with `$helper(...)`, and folding an ordinary call
    have different limits.
 
 `meta` is not a purity annotation. A body can mutate locals, arrays and
@@ -66,7 +66,7 @@ and the finished program calls it.
 
 ## Ask the compiler to calculate it
 
-Use `$(poly 7)` to call the same function during translation:
+Use `$poly(7)` to call the same function during translation:
 
 ```x2c
 meta int poly(int n) {
@@ -74,7 +74,7 @@ meta int poly(int n) {
 }
 
 int main(void) {
-  printf("%d\n", $(poly 7));
+  printf("%d\n", $poly(7));
   return 0;
 }
 ```
@@ -83,21 +83,21 @@ int main(void) {
 71
 ```
 
-`$(...)` asks the compiler to evaluate what is inside and insert the result.
-Inside it, a call is written with the name first and space-separated
-arguments: `poly 7`, rather than `poly(7)`. That is Lisp call syntax; you do
-not need to write the function's implementation in Lisp. Here the compiler
-runs the x2c body and inserts the integer 71 before the program is built.
+The `$` prefix requires the compiler to run the function and insert its
+result. The call uses the same parentheses and commas as an ordinary x2c
+call. Here it inserts the integer 71 before the program is built.
+
+The optional Lisp equivalent is `$(poly 7)`. It calls the same implementation;
+use it when working with Lisp code already in the compiler session.
 
 These are the two forms of a `meta` function: one runs in your program,
 and one runs in the compiler. Both come from the same body. Functions that
 need compiler queries, explicit compile-time calls or source-template
 construction are exceptions: they only run during translation. We will reach those after ordinary calculations.
 
-## Explicit compile-time calls
+## Compute the arguments too
 
-Prefix the function name with `$` to require compile-time execution, using
-ordinary parentheses and commas:
+An explicit call can calculate its arguments before invoking the function:
 
 ```x2c
 meta int twice(int n) => n * 2;
@@ -144,7 +144,7 @@ function to `Func` does not export that interpreted callable automatically.
 ## Constant calls are folded
 
 An ordinary call with literal arguments can also be calculated during
-translation. You do not have to write `$(...)` to benefit from it:
+translation. You do not have to prefix the name with `$` to benefit from it:
 
 ```x2c
 meta int poly(int n) {
@@ -173,8 +173,9 @@ printf("local    %d\n", poly(n));
 
 Here `poly(7)` becomes 71, while `poly(n)` remains a call. This automatic
 substitution is called folding. It is an optimization intended to preserve
-the runtime answer; the capability catalog below records current differences. `$(poly 7)` explicitly requests compile-time evaluation;
-`poly(7)` uses ordinary call syntax and leaves folding to the compiler.
+the runtime answer; the capability catalog below records current differences.
+`$poly(7)` requires compile-time evaluation; `poly(7)` leaves folding to the
+compiler.
 
 ## Use x2c conveniences
 
@@ -191,7 +192,7 @@ A `String` parameter gives access to string operations through dot syntax:
 meta static int width(String text) => text.len() * 2;
 
 int main(void) {
-  printf("%d\n", $(width "abcd"));
+  printf("%d\n", $width("abcd"));
   return 0;
 }
 ```
@@ -319,7 +320,7 @@ meta static int meta_address(void) {
 meta static int meta_parts(String path) => path.split(".").len();
 
 int main(void) {
-  printf("%d %d\n", $(meta_address), $(meta_parts "a.b.c"));
+  printf("%d %d\n", $meta_address(), $meta_parts("a.b.c"));
   return 0;
 }
 ```
@@ -345,6 +346,7 @@ The optional inventory tool reads every standard compiler session layer;
 searching only one binding file misses operations such as `List.car`,
 `List.cdr` and `Var.cons`.
 
+A recent batch added 19 bindings; it did not complete the API surface.
 The ordinary `List` and `Var` selectors `caar`, `cadr`, `cddr` and `caddr`
 reuse those same operations. `String`, `List`, `Array` and `Map` expose their
 `str` and `repr` rendering; `Symbol` also exposes `repr` and `compare`, and
@@ -460,7 +462,7 @@ A meta function can pass and return numeric, collection and callable values
 inside the evaluator. Inserting a result into the program adds a separate
 requirement: the compiler must construct code representing that value.
 
-| Result | Explicit `$(...)` expression insertion | Automatic ordinary-call folding |
+| Result | Explicit `$helper(...)` insertion | Automatic ordinary-call folding |
 | --- | --- | --- |
 | Native integers and floating values | Preserves the numeric Var family, including width, signedness and floating precision. | Uses the declared result type. |
 | Computed string | Inserts a quoted C string literal. | Constructs a String expression when the declared result is String. |
@@ -478,8 +480,8 @@ meta static int meta_whole(void) => (int) meta_half(9.0);
 meta static String meta_label(String stem) => stem.upper() + "!";
 
 int main(void) {
-  printf("%.1f %d %s\n", $(meta_half 9.0), $(meta_whole),
-    $(meta_label "ready"));
+  printf("%.1f %d %s\n", $meta_half(9.0), $meta_whole(),
+    $meta_label("ready"));
   printf("%d %s\n", meta_whole(), meta_label("ready").str());
   return 0;
 }
@@ -536,7 +538,9 @@ in x2c. Include `meta.x` to use the compiler's `x2c_*` operations.
 
 A macro body can call a meta helper with `$helper(args)`. Passing a captured
 hole directly supplies its code to the helper; it does not evaluate the
-future runtime expression. Existing `$(helper $hole)` Lisp calls remain valid.
+future runtime expression. This form works for code transformations such as
+the field query below. Queries that need original source text still require
+the Lisp call form, as the diagnostic example later explains.
 
 ```x2c
 #include "x2c.x"
@@ -646,7 +650,7 @@ node shapes by hand, so the compiler binds and types the result:
 meta static List call_of(String callee, List argument) =>
   x2c_expr_call(x2c_expr_ident(x2c_ident(callee)), %($argument));
 
-macro Expression $probe.twice(Expr $value) => ($(call_of "twice" $value))
+macro Expression $probe.twice(Expr $value) => ($call_of("twice", $value))
 
 static int twice(int n) => n * 2;
 
@@ -704,6 +708,10 @@ int main(void) {
 ```text
 word seconds
 ```
+
+This example retains `$(one_word $value)`: that form preserves the capture
+information required by `x2c_source_text`. Forwarding the same hole through
+`$one_word($value)` currently loses that information and is rejected.
 
 Writing `$probe.word(seconds * 2)` instead reports the message at that
 invocation:
@@ -774,7 +782,9 @@ macro Expression $shape.names(Expr $value) => ($shape_names($value))
 macro Expression $shape.reads(Expr $value) => ($shape_reads($value))
 ```
 
-The second file imports it and uses the macros.
+The second file imports it and uses the macros. Imports still use the
+compiler's `$(import "...")` form; this is a loading operation, not a meta
+function call.
 
 <!-- ignore: this program imports the shape.xmacro file above -->
 ```x2c,ignore
@@ -831,7 +841,10 @@ for the `meta` functions it calls at run time. The storage class says what
 it emits: `static` gives that unit its own copy, and a public name is the
 one copy the program links, exported by the reaching unit's header.
 
-## The compiler's Lisp support
+## Lisp interoperability
+
+Use the x2c calls above for ordinary meta work. The following notes apply
+when importing or calling Lisp helpers, or working with the compiler session.
 
 The compiler loads Lisp support into an embedded evaluator. Some loaded files
 are generated output: `etc/builtin-macros.xlisp` comes from
@@ -840,7 +853,7 @@ are generated output: `etc/builtin-macros.xlisp` comes from
 algorithms still need a separate handwritten Lisp implementation. The support
 layer and the generated functions have different source owners.
 
-## Names the compile-time library already defines
+### Names the compile-time library already defines
 
 A unit's compile-time session inherits the compiler's own Lisp library and
 cannot replace one of its definitions. A macro file or a `$(...)` form that
@@ -859,7 +872,7 @@ would reach for first: `filter`, `last`, `map`, `search`, `len` and `apply`
 are all defined. Give your own definition a different name, or a prefix of
 your own.
 
-## `eval` reads globals only
+### `eval` reads globals only
 
 A lambda's body reads its captures and then the session's globals. `eval`
 is an ordinary procedure, so the form it is given is evaluated in the

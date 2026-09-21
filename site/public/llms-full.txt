@@ -2023,8 +2023,9 @@ typedef enum Status {
 ```
 
 Literal names such as `private_start` are hygienic and may be referenced by
-later generated initializers in the same expansion. `x2c.ident` publishes an
-exact source spelling. Generated members participate in enum ordering and
+later generated initializers in the same expansion. `x2c.ident` publishes the
+requested name. This generated-name position still requires `$(...)`;
+`$helper(...)` is currently accepted only in expression positions. Generated members participate in enum ordering and
 automatic value assignment, and successful exact members are available to
 following source. Duplicate generated names and collisions with source members
 are rejected. A malformed or failed sequence publishes none of its provisional
@@ -2307,7 +2308,8 @@ spellings fail before C generation.
 
 ### Compile-time Lisp and imports
 
-`$(...)` is the only entry from an x2c body into compile-time Lisp. At top
+Use `$helper(...)` to execute an x2c meta function. The `$(...)` form enters
+compile-time Lisp for Lisp interoperability, imports and session setup. At top
 level its result is discarded. Inside a macro body, `$name` refers to the
 hole's exact AST, and the result is inserted according to the recorded body
 position. A syntax `List` inserts syntax, a scalar becomes an expression
@@ -2317,7 +2319,8 @@ text to be reparsed.
 
 Inside `%(...)` and `%"..."`, `$name` and `${expression}` are runtime literal
 unquote. To place a compile-time result there, the outer `${` first enters x2c
-expression grammar and the inner `$(` enters Lisp: `${$(...)}`.
+expression grammar: `${$helper(...)}` calls a meta function, while
+`${$(...)}` enters Lisp.
 
 ```text
 $(import "helpers.xlisp")
@@ -2327,7 +2330,7 @@ macro Expression $computed(Expr $value) => ($(car (list $value)))
 ```
 
 `.xlisp` files execute in the translation unit's Lisp session. `.xmacro`
-files may contain macro definitions and top-level Lisp forms. Import paths are
+files may contain macro definitions, meta functions and top-level Lisp forms. Import paths are
 relative to the importing file, canonicalized, loaded once, and checked for
 cycles. Direct Lisp file operations remain available but are not tracked as
 compiler dependencies.
@@ -2567,9 +2570,18 @@ implementation details.
 A function definition may be marked `meta`. The marker precedes the whole
 declaration, ahead of any storage class:
 
-```text
+```x2c
 meta int poly(int n) => n * n + 3 * n + 1;
 meta static String label(String stem, int n) => %"$stem-$n";
+
+int main(void) {
+  printf("%d %s\n", $poly(7), $label("item", 2));
+  return 0;
+}
+```
+
+```text
+71 item-2
 ```
 
 `meta` is contextual. It marks a function only when a function definition
@@ -2582,8 +2594,8 @@ Marking a function `meta` has three consequences.
 
 - The compiler translates the body into a compile-time form and installs it in
   the translation unit's macro session. It is then callable during translation,
-  by `$name(args)` or `$(name args)` from an x2c body, or from another
-  executing meta function. A construct with no compile-time form is diagnosed at the
+  by `$name(args)` from an x2c body or from another executing meta function.
+  Existing Lisp code can call the same function with `$(name args)`. A construct with no compile-time form is diagnosed at the
   `meta` marker, with the reason.
 - The function is also emitted as C and behaves as an ordinary function at run
   time, unless it reaches a compiler query, an explicit dollar-prefixed meta
@@ -2601,6 +2613,11 @@ runtime inputs are diagnosed. Visible macros retain precedence over meta
 functions with the same name. In a macro body, forwarding a captured hole
 directly passes its code rather than evaluating the future runtime expression.
 
+Explicit calls currently accept expression arguments and results. Type-slot
+and generated-name insertion and captured `Function` forwarding still require
+the Lisp form, as do operations that need a capture's source text or
+source-relative path.
+
 Inside meta bodies, Unit and Statement source macros used in expression
 positions construct deferred invocation Lists from computed arguments. Normal
 binding expands them when inserted into a program. Existing Expression macros
@@ -2615,8 +2632,9 @@ of its runtime methods. See the guide's
 
 Meta functions may pass and return represented values such as wide integers,
 floating values, Strings and collections during compile-time execution.
-Explicit `$(...)` expression insertion accepts numeric values with their
-native Var family, computed strings as C string literals, Symbols, identifiers
+Explicit `$name(args)` insertion, and the optional `$(name args)` Lisp form,
+accept numeric values with their native Var family, computed strings as C
+string literals, Symbols, identifiers
 and nonempty expression-code Lists. It does not directly materialize mutable
 collections, callable values or evaluator addresses. This boundary does not limit internal
 returns to `int`; see
