@@ -19,6 +19,8 @@ import subprocess
 import sys
 import tempfile
 
+from meta_api_disposition import KINDS, disposition
+
 from x2c_source import definitions_for_path, function_spans, mask_non_code, split_signature
 from x2c_symbols import (content_hash, load, _strip_param_name,
                          _unqualified, normalize_type)
@@ -139,6 +141,64 @@ PROBES = {
     "String.rstrip": ("explicit charset and typed null pointer",
         'return " a ".rstrip(" ").equal(" a") && '
         '" a ".rstrip((char *) 0).equal(" a");', 1),
+    'List.unique#collection': ("collection contract and boundaries",
+        'List xs = %(2 1 2 3 1); return xs.unique().equal(%(2 1 3)) && %().unique().len() == 0;', 1),
+    'List.sublis#collection': ("collection contract and boundaries",
+        'List rules = %((a 7) (b (8 9))); return rules.sublis(%(a (b c))).equal(%(7 ((8 9) c)));', 1),
+    'List.flatten#collection': ("collection contract and boundaries",
+        'return %(1 (2 (3)) ()).flatten().equal(%(1 2 (3)));', 1),
+    'List.flatten_all#collection': ("collection contract and boundaries",
+        'return %(1 (2 (3)) ()).flatten_all().equal(%(1 2 3));', 1),
+    'List.nth_cdr#collection': ("collection contract and boundaries",
+        'List xs = %(1 2 3); return xs.nth_cdr(1).equal(%(2 3)) && xs.nth_cdr(9).len() == 0 && xs.nth_cdr(-1) === xs;', 1),
+    'List.tail#collection': ("collection contract and boundaries",
+        'List xs = %(1 2 3); return xs.tail(2).equal(%(2 3)) && xs.tail(9) === xs && xs.tail(0).len() == 0;', 1),
+    'List.head#collection': ("collection contract and boundaries",
+        'List xs = %(1 2 3); return xs.head(2).equal(%(1 2)) && xs.head(9) === xs && xs.head(0).len() == 0;', 1),
+    'List.subseq#collection': ("collection contract and boundaries",
+        'return %(0 1 2 3 4 5).subseq(-4, -1, 2).equal(%(2 4));', 1),
+    'List.getslice#collection': ("collection contract and boundaries",
+        'return %(0 1 2 3 4 5).getslice(5, 1, -2).equal(%(5 3));', 1),
+    'List.hash#collection': ("collection contract and boundaries",
+        'return %(1 2).hash() != 0;', 1),
+    'List.compare#collection': ("collection contract and boundaries",
+        'return %(1 2).compare(%(1 3)) < 0 && %().compare(%()) == 0;', 1),
+    'List.replace#collection': ("collection contract and boundaries",
+        'return %(a *m b).replace(%((*m (1 2)))).equal(%(a 1 2 b));', 1),
+    'List.match_replace#collection': ("collection contract and boundaries",
+        'return %(a 7).match_replace(%(a ?x), %(b ?x)).equal(%(b 7));', 1),
+    'Array.copy#collection': ("collection contract and boundaries",
+        'Array a = [1, 2]; Array b = a.copy(); b[0] = 9; return a[0] == 1 && b[0] == 9 && !(a === b);', 1),
+    'Array.getslice#collection': ("collection contract and boundaries",
+        'Array a = [0, 1, 2, 3]; Array b = a.getslice(3, 0, -2); return b.list().equal(%(3 1)) && !(a === b);', 1),
+    'Array.concat#size_t-comparison': ("collection contract and boundaries",
+        'Array a = [1]; Array b = [2]; Array c = a.concat(b); return c.list().equal(%(1 2)) && a.len() == 1 && b.len() == 1 && !(a === c);', 1),
+    'Array.reverse#collection': ("collection contract and boundaries",
+        'Array a = [1, 2, 3]; Array b = a.reverse(); return a === b && a.list().equal(%(3 2 1));', 1),
+    'Array.compare#collection': ("collection contract and boundaries",
+        'Array a = [1, 2]; Array b = [1, 3]; return a.compare(b) < 0;', 1),
+    'Array.sort#collection': ("collection contract and boundaries",
+        'Array a = [3, 1, 2]; Array b = a.sort(); return a === b && a.list().equal(%(1 2 3));', 1),
+    'Array.equal#collection': ("collection contract and boundaries",
+        'Array a = [1, 2]; Array b = [1, 2]; return a.equal(b) && !(a === b);', 1),
+    'Array.indexof#collection': ("collection contract and boundaries",
+        'Array a = [1, 2, 1]; return a.indexof(1) == 0 && a.indexof(9) == -1;', 1),
+    'Array.truth#collection': ("collection contract and boundaries",
+        'Array a = []; Array b = [1]; return !a.truth() && b.truth();', 1),
+    'Map.copy#collection': ("collection contract and boundaries",
+        'Map a = {"x": 1}; Map b = a.copy(); b["x"] = 2; return a["x"] == 1 && b["x"] == 2 && !(a === b);', 1),
+    'Map.merge#collection': ("collection contract and boundaries",
+        'Map a = {"x": 1}; Map b = {"x": 2, "y": 3}; Map c = a.merge(b); return a === c && a["x"] == 2 && a["y"] == 3 && b.len() == 2;', 1),
+    'Map.compare#collection': ("collection contract and boundaries",
+        'Map a = {"x": 1}; Map b = {"x": 1}; return a.compare(b) == 0;', 1),
+    'Map.equal#collection': ("collection contract and boundaries",
+        'Map a = {"x": 1}; Map b = {"x": 1}; return a.equal(b) && !(a === b);', 1),
+    'Map.truth#collection': ("collection contract and boundaries",
+        'Map a = {}; Map b = {"x": 1}; return !a.truth() && b.truth();', 1),
+    "Array.concat": ("fresh concatenation with native size conversion",
+        'Array a = [1]; Array b = [2]; Array c = a.concat(b); '
+        'return c.list().equal(%(1 2)) && (int) a.len() == 1 && '
+        '(int) b.len() == 1 && !(a === c);', 1),
     "String.len": ("nonempty text", 'return "abc".len();', 3),
     "String.strip#null": ("default whitespace through NULL", 'return " a ".strip(NULL).len();', 1),
     "String.strip#charset": ("explicit character set", 'return " a ".strip(" ").len();', 1),
@@ -313,6 +373,7 @@ def inventory(stage: Path) -> dict:
         row["state"] = "bound, unverified" if row["binding"] else "no binding found"
         row["considerations"] = classify(row)
         row["evidence"] = []
+        row.update(disposition(row))
         if path not in symbols.paths() or native not in symbols.functions(path):
             warnings.append(f"{name}: no matching callable in {path}'s interface")
         elif row["line"]:
@@ -331,7 +392,7 @@ def inventory(stage: Path) -> dict:
     for path in paths:
         if path in symbols.paths() and content_hash((ROOT / path).read_bytes()) != symbols.file_hash(path):
             warnings.append(f"{path}: source differs from the stage interface")
-    paths += ["tools/meta-api-coverage.py", "docs/library-api-tiers.txt",
+    paths += ["tools/meta-api-coverage.py", "tools/meta_api_disposition.py", "docs/library-api-tiers.txt",
               "docs/library-manifest.txt"] + files + ["src/macros.x", "src/comptime.x", "src/expressions.x",
                      "src/parse.x", "src/type.x", "lib/lisp.x"]
     digest = hashlib.sha256()
@@ -462,6 +523,32 @@ def markdown(report: dict) -> str:
         rows = [r for r in report["rows"] if r["name"].startswith(owner + ".")]
         found = sum(bool(r["binding"]) for r in rows)
         lines += [f"| {owner} | {len(rows)} | {found} | {len(rows) - found} |"]
+    lines += ["", "## Exhaustive work ledger", "",
+              "Every signature below retains its source and binding evidence and",
+              "has an implementation owner, contract group and next action. The",
+              "disposition is a work assignment, not a claim that all argument",
+              "combinations have been tested. A resource contract is not a claim",
+              "of impossibility. No alternate operation counts as coverage until",
+              "its complete contract is shown to agree.", "",
+              "| Evidence state | Signature rows |", "| --- | ---: |"]
+    state_counts = Counter(row["state"] for row in report["rows"])
+    lines += [f"| {state} | {state_counts[state]} |" for state in STATES]
+    lines += ["", "| Disposition | All rows | Missing binding | Bound, unverified |",
+              "| --- | ---: | ---: | ---: |"]
+    for kind in KINDS:
+        assigned = [r for r in report["rows"] if r["disposition"] == kind]
+        lines += [f"| {kind} | {len(assigned)} | "
+                  f"{sum(not r['binding'] for r in assigned)} | "
+                  f"{sum(r['state'] == 'bound, unverified' for r in assigned)} |"]
+    lines += ["", "### Implementation groups", "",
+              "| Group | Owners | Rows | Missing binding | Bound, unverified |",
+              "| --- | --- | ---: | ---: | ---: |"]
+    for group in sorted({r["group"] for r in report["rows"]}):
+        assigned = [r for r in report["rows"] if r["group"] == group]
+        owners = ", ".join(sorted({r["owner"] for r in assigned}))
+        lines += [f"| {group} | {owners} | {len(assigned)} | "
+                  f"{sum(not r['binding'] for r in assigned)} | "
+                  f"{sum(r['state'] == 'bound, unverified' for r in assigned)} |"]
     lines += ["", "## What a missing operation may need", "",
               "These are contract and signature considerations, not claims about",
               "why an operation was historically omitted. Multiple considerations",
@@ -484,6 +571,12 @@ def markdown(report: dict) -> str:
             provenance = "; ".join(row["binding"]) or "none found"
             lines += [f"| `{row['signature']}` | {row['state']} | {provenance} | "
                       f"{', '.join(row['considerations'])} | {row['tier']}/{row['visibility']} | {source} |"]
+        lines += ["", "### Contract and next action for every signature", "",
+                  "| Callable | Implementation owner / group | Disposition | Contract and next action |",
+                  "| --- | --- | --- | --- |"]
+        for row in rows:
+            lines += [f"| `{row['name']}` | {row['owner']} / {row['group']} | "
+                      f"{row['disposition']} | {row['contract']} {row['next_action']} |"]
         cases = [r for r in rows if r["evidence"]]
         if cases:
             lines += ["", "### Evaluated cases", ""]

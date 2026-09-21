@@ -688,7 +688,7 @@ static Var _lower_application(Lowering l, Var content) {
 
 /* `Var.binary` applies the usual arithmetic conversions itself for the
    arithmetic operators, so only a comparison needs them written out: `==`
-   and `!=` compare `Var` identity there, which 1.0 and 1 fail, and the
+   and `!=` compare represented values there, which 1.0 and 1 fail, and the
    relations compare the values as written rather than as C converts them,
    so a negative signed operand does not become the large unsigned one C
    makes of it. */
@@ -698,10 +698,12 @@ static int _lower_relation(Var operator) =>
 
 /* Whether two operands are scalars of different families. An equal pair,
    which is nearly every pair, needs no conversion and is left alone. */
-static int _lower_mixed_scalars(List operands) {
+static int _lower_mixed_scalars(Lowering l, List operands) {
   if (operands.len() != 2) return 0;
-  Type left = _lower_type_of(operands.car());
-  Type right = _lower_type_of(operands.cadr());
+  Type left = l.compiler.sym.resolve_numeric_type(
+    _lower_type_of(operands.car()));
+  Type right = l.compiler.sym.resolve_numeric_type(
+    _lower_type_of(operands.cadr()));
   Symbol a = left.scalar_tag(), b = right.scalar_tag();
   return a && b && a != b;
 }
@@ -726,7 +728,7 @@ static Var _lower_operands(Lowering l, Var operator, List operands) {
     Var left = values[0], right = values[1];
     if (operator == <&&>) return %(C.and $left $right);
     if (operator == <||>) return %(C.or $left $right);
-    if (_lower_relation(operator) && _lower_mixed_scalars(operands))
+    if (_lower_relation(operator) && _lower_mixed_scalars(l, operands))
       return %(C.compare $left (quote $operator) $right);
     return %(_binary $left (quote $operator) $right);
   }
