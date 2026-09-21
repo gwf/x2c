@@ -475,8 +475,8 @@ requirement: the compiler must construct code representing that value.
 An inserted Array or Map is a snapshot of the compile-time result. Each runtime
 execution of that expression allocates a fresh root in the current Scope, just
 like `[]` or `{}`; assigning it to another variable still aliases that root.
-Array order and element types are preserved. Map keys keep their ordinary
-content equality, but reconstruction does not promise the same traversal order.
+Array order and element types are preserved. Map keys use their ordinary runtime
+key semantics, but reconstruction does not promise the same traversal order.
 A boxed Var may contain the resulting root.
 
 Elements, keys and values may contain scalars, Strings, Symbols, or immutable

@@ -1509,7 +1509,8 @@ static Var _sdk_symbol_set(List values) {
 
 /** Converts a compile-time Lisp value into a bound expression AST.
     Scalars, immutable values, representable Array/Map roots, compiler-issued
-    identifiers, and nonempty code `List`s are accepted; `invocation` locates an unsupported result.
+    identifiers, and nonempty code `List`s are accepted; `invocation` locates
+    an unsupported result.
 */
 List Compiler.lift_macro_lisp_expression(
   Compiler compiler, Var value, Token invocation) {

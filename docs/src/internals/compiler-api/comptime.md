@@ -22,7 +22,7 @@ Translating a compile-time x2c function into Lisp.
 | [`Compiler.lower_reached_globals`](#Compiler.lower_reached_globals) | Returns whether the last `Compiler.install_comptime` reached file-scope state, directly or through a callee already recorded as reaching it. |
 | [`Compiler.lower_reached_meta`](#Compiler.lower_reached_meta) | Returns whether the last `Compiler.install_comptime` reached a `Meta` operation, directly or through a callee already recorded as reaching one. |
 | [`Compiler.meta_is_comptime_only`](#Compiler.meta_is_comptime_only) | Returns whether `fn` is a `meta` function this compiler recorded as compile-time only, whose runtime form the unit does not emit. |
-| [`Compiler.meta_value_expression`](#Compiler.meta_value_expression) | Returns code for scalar, String, Symbol, immutable List or boxed values, preserving `declared` when supplied. |
+| [`Compiler.meta_value_expression`](#Compiler.meta_value_expression) | Returns literal code preserving `declared` when supplied. |
 
 ### `Compiler`
 
@@ -41,7 +41,7 @@ source. Another `meta` function may call it: calling one is what makes
 the caller compile-time only too, so a body being parsed under the marker
 is left alone.
 
-Source: `src/comptime.x:2252`
+Source: `src/comptime.x:2277`
 
 <a id="Compiler.fold_meta_call"></a>
 #### Compiler.fold_meta_call
@@ -58,7 +58,7 @@ installed folds, so an import's runtime definition keeps the run-time
 call that designates the unit emitting it. Evaluation runs in the macro
 session; a raise there leaves the call.
 
-Source: `src/comptime.x:2274`
+Source: `src/comptime.x:2299`
 
 <a id="Compiler.inherit_shared_meta"></a>
 #### Compiler.inherit_shared_meta
@@ -69,7 +69,7 @@ Restores the shared definitions' derived call restrictions into a fresh
 compiler pass. Reads existing process tables without opening Lisp or
 creating a lowering cache in the unit's Context.
 
-Source: `src/comptime.x:2003`
+Source: `src/comptime.x:2000`
 
 <a id="Compiler.install_comptime"></a>
 #### Compiler.install_comptime
@@ -81,7 +81,7 @@ function is callable from compile-time Lisp under its own name.
 Returns whether the lowering succeeded. This method mutates the macro
 session and does not open a semantic transaction.
 
-Source: `src/comptime.x:2058`
+Source: `src/comptime.x:2055`
 
 <a id="Compiler.lower_comptime"></a>
 #### Compiler.lower_comptime
@@ -94,7 +94,7 @@ The result is the loop definitions the body needed followed by the
 function's own, in evaluation order. This method does not open a
 semantic transaction.
 
-Source: `src/comptime.x:1898`
+Source: `src/comptime.x:1895`
 
 <a id="Compiler.lower_declined"></a>
 #### Compiler.lower_declined
@@ -103,7 +103,7 @@ Source: `src/comptime.x:1898`
 
 Returns why the last `Compiler.lower_comptime` declined, or `NULL`.
 
-Source: `src/comptime.x:1962`
+Source: `src/comptime.x:1959`
 
 <a id="Compiler.lower_meta_expression"></a>
 #### Compiler.lower_meta_expression
@@ -112,7 +112,7 @@ Source: `src/comptime.x:1962`
 
 Lowers a closed expression for explicit compile-time evaluation.
 
-Source: `src/comptime.x:2122`
+Source: `src/comptime.x:2119`
 
 <a id="Compiler.lower_reached_globals"></a>
 #### Compiler.lower_reached_globals
@@ -122,7 +122,7 @@ Source: `src/comptime.x:2122`
 Returns whether the last `Compiler.install_comptime` reached file-scope
 state, directly or through a callee already recorded as reaching it.
 
-Source: `src/comptime.x:2098`
+Source: `src/comptime.x:2095`
 
 <a id="Compiler.lower_reached_meta"></a>
 #### Compiler.lower_reached_meta
@@ -132,7 +132,7 @@ Source: `src/comptime.x:2098`
 Returns whether the last `Compiler.install_comptime` reached a `Meta`
 operation, directly or through a callee already recorded as reaching one.
 
-Source: `src/comptime.x:2106`
+Source: `src/comptime.x:2103`
 
 <a id="Compiler.meta_is_comptime_only"></a>
 #### Compiler.meta_is_comptime_only
@@ -142,19 +142,19 @@ Source: `src/comptime.x:2106`
 Returns whether `fn` is a `meta` function this compiler recorded as
 compile-time only, whose runtime form the unit does not emit.
 
-Source: `src/comptime.x:2114`
+Source: `src/comptime.x:2111`
 
 <a id="Compiler.meta_value_expression"></a>
 #### Compiler.meta_value_expression
 
-`List Compiler.meta_value_expression(Compiler c, Type declared, Var value)`
+`List Compiler.meta_value_expression( Compiler c, Type declared, Var value, int mutable_root)`
 
-Returns code for scalar, String, Symbol, immutable List or boxed values,
-preserving `declared`
-when supplied. Returns NULL for values requiring code insertion or a
-representation other than a scalar literal.
+Returns literal code preserving `declared` when supplied.
+`mutable_root` permits a fresh Array or Map at an explicit code boundary;
+its descendants must be immutable representable values. Returns NULL for
+code Lists or values without the requested literal representation.
 
-Source: `src/comptime.x:2178`
+Source: `src/comptime.x:2175`
 
 ## Design notes
 

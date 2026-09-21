@@ -3593,11 +3593,11 @@ static Var _sdk_symbol_set(List values){
   int duplicate = - 1;  List expression = Compiler_symbol_set_expression(macro_sdk_compiler, values, & duplicate);  if(duplicate >= 0) return _sdk_reject(_837, cons(_471, cons(String_var(Var_repr(List_getindex(values, duplicate))), NULL)));  return List_var(expression);
 }
 
-List Compiler_meta_value_expression(Compiler, Type, Var);
+List Compiler_meta_value_expression(Compiler, Type, Var, int);
 int Var_is_void(Var);
 List Compiler_bind_syntax(Compiler, Var, AstPos, Type);
 List Compiler_lift_macro_lisp_expression(Compiler compiler, Var value, Token invocation){
-  if(! _init_guard_) _file_init_();  List literal = Compiler_meta_value_expression(compiler, NULL, value);  if(List_truth(literal)) return literal;  Var identifier = _sdk_identifier_result(value);  if(! Var_is_void(identifier)) return cons(_20, cons(_4, cons(List_var(cons(_39, cons(identifier, NULL))), NULL)));  if(Var_is_row(value, 9, 7, 4) && ! Var_is_nil(value)) return Compiler_bind_syntax(compiler, value, AST_EXPRESSION, NULL);  Compiler_report_error(compiler, 27335838, _838, invocation, cons(_469, cons(String_var(Var_repr(value)), NULL)));
+  if(! _init_guard_) _file_init_();  List literal = Compiler_meta_value_expression(compiler, NULL, value, 1);  if(List_truth(literal)) return literal;  Var identifier = _sdk_identifier_result(value);  if(! Var_is_void(identifier)) return cons(_20, cons(_4, cons(List_var(cons(_39, cons(identifier, NULL))), NULL)));  if(Var_is_row(value, 9, 7, 4) && ! Var_is_nil(value)) return Compiler_bind_syntax(compiler, value, AST_EXPRESSION, NULL);  Compiler_report_error(compiler, 27335838, _838, invocation, cons(_469, cons(String_var(Var_repr(value)), NULL)));
 }
 
 List Compiler_parse_macro_lisp_expression(Compiler compiler){
@@ -3713,7 +3713,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site){
                                 x2c_exception_mark_handled(&_x2c_exception_frame_5);
                                 if (_x2c_catch_selected_5 == 0) {Var category = x2c_error_catch_capture(_x2c_error_handler_5, 0);
                                 {
-                                  static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 1571};
+                                  static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 1572};
                                   x2c_error_raise_n(& _x2c_error_site_4, 28682226919752, 1, Symbol_var(209659067570), category);
                                   __builtin_unreachable();
                                 }
@@ -3799,7 +3799,7 @@ List Compiler_evaluate_meta_expression(Compiler c, List expression, Token site){
 default: break;
     }
   }
-if(declared == _488) return _507;  if(List_truth(c -> macro_stack) && Var_is_row(value, 9, 7, 4)) return Compiler_lift_macro_lisp_expression(c, value, site);  List result = Compiler_meta_value_expression(c, declared, value);  return List_truth(result) ? result : Compiler_lift_macro_lisp_expression(c, value, site);
+if(declared == _488) return _507;  if(List_truth(c -> macro_stack) && Var_is_row(value, 9, 7, 4)) return Compiler_lift_macro_lisp_expression(c, value, site);  List result = Compiler_meta_value_expression(c, declared, value, 1);  return List_truth(result) ? result : Compiler_lift_macro_lisp_expression(c, value, site);
 }
 
 Tokenizer Tokenizer_new_mode(char *, Symbol);

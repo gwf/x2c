@@ -1810,11 +1810,8 @@ static Var _lower_stmnt(Lowering l, Var form, List rest, List k) {
     case %(at ? ?node):    return _lower_stmnt(l, node, rest, k);
     case %(empty):         return _lower_block(l, rest, k);
     case %(block *items):  return _lower_block(l, %(@items @rest), k);
-    case %(return ?want ?value): {
-      Var result = _lower_expr(l, value);
-      if (_lower_failed(l, result)) return void;
-      return _lower_coerce(l, want, value, result);
-    }
+    case %(return ?want ?value):
+      return _lower_initializer(l, want, 0, value);
     case %(return ?):      return 0;
     case %(declare ?type (bindings ?declarator)):
       return _lower_declarator(l, type, declarator, rest, k);
@@ -2178,6 +2175,8 @@ static Type _meta_value_type(Var value) {
 List Compiler.meta_value_expression(
   Compiler c, Type declared, Var value, int mutable_root) {
   Type type = declared ? declared : _meta_value_type(value);
+  if (c.sym.is_var_type(type)) type = %("Var");
+  else c.sym.var_tag_for_type(type, &type);
   if ((value.is_integer() || value.is_floating()) &&
       type !== %("Var")) {
     type = c.sym.resolve_numeric_type(type);
@@ -2250,7 +2249,8 @@ List Compiler.meta_value_expression(
       if (!key_code || !value_code) { entries.free(); return NULL; }
       entries.push(%(map-entry $key_code $value_code));
     }
-    return %(expr ("Map") (map @{entries.list_free()}));
+    // Bucket layout must not change the emitted code.
+    return %(expr ("Map") (map @{entries.sort().list_free()}));
   }
   if (value is <string>) {
     if (!declared || type === %(* char))

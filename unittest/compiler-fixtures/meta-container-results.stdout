@@ -6,3 +6,4 @@ map-mutation 8 -7
 empty 1 1 0 0
 boxed array 9
 lisp 0
+aliases 2 ready 5 key

@@ -363,7 +363,9 @@ completed support:
 - Explicit Array/Map result insertion now constructs a fresh Scope-owned root
   through ordinary literal constructors, preserving types, Array order and Map
   key equality. Only immutable representable descendants are accepted, including
-  immutable Lists; a boxed Var may hold the root. Ordinary mutable-return calls
+  immutable Lists; a boxed Var may hold the root. Typedef aliases retain their
+  value representation, and scalar boxing retains the source numeric tag.
+  Empty braced returns use the ordinary initializer lowering. Ordinary mutable-return calls
   stay at runtime. Nested mutable descendants, sharing and cycles remain refused
   until a graph/identity contract is decided; no serializer or silent nested
   copy is introduced.
