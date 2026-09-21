@@ -21,11 +21,19 @@ typedef struct ReplResult{
 }
 ReplResult;
 
+typedef struct ReplCompletion{
+  size_t start, end;
+  List candidates;
+}
+ReplCompletion;
+
 ReplSession ReplSession_new(Compiler compiler);
 
 List ReplSession_symbols(ReplSession session);
 
 List ReplSession_inspect(ReplSession session, String name);
+
+ReplCompletion ReplSession_complete(ReplSession session, String source, size_t cursor);
 
 ReplResult ReplSession_submit(ReplSession session, String source);
 

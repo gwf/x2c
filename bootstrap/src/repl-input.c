@@ -38,6 +38,9 @@ struct EditState{
   const char * prompt;
   size_t plen, pos, oldpos, len, cols, oldrows;
   int oldrpos, history_index, history_len, fold_count;
+  ReplInputComplete complete;
+  void * completion_context;
+  int completion_pending;
   size_t fold_start[LINENOISE_MAX_FOLDS];
   size_t fold_end[LINENOISE_MAX_FOLDS];
 }
@@ -199,7 +202,7 @@ static void _delete_previous_word(struct EditState * l);
 
 static char * _copy_text(const char * text);
 
-static void _edit_prepare(struct EditState * l, ReplInput input, String prompt);
+static void _edit_prepare(struct EditState * l, ReplInput input, String prompt, ReplInputComplete complete, void * completion_context);
 
 static void _edit_close(struct EditState * l);
 
@@ -211,9 +214,17 @@ static int _read_byte(struct EditState * l, char * out);
 
 static void _paste(struct EditState * l);
 
+static void _replace_completion(struct EditState * l, size_t start, size_t end, String replacement);
+
+static size_t _completion_common(List candidates);
+
+static void _show_completions(struct EditState * l, List candidates);
+
+static void _complete(struct EditState * l);
+
 static Symbol _edit_feed(struct EditState * l);
 
-static ReplInputResult _read_interactive(ReplInput input, String prompt);
+static ReplInputResult _read_interactive(ReplInput input, String prompt, ReplInputComplete complete, void * completion_context);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -470,7 +481,7 @@ Var int_var(int);
 _Noreturn static void _io_fail(Symbol operation){
   int error = errno;
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/repl-input.x",.function = "_io_fail",.line = 470};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/repl-input.x",.function = "_io_fail",.line = 485};
     x2c_error_raise_n(& _x2c_error_site_0, 20399393368, 2, Symbol_var(34096809266140), Symbol_var(operation), Symbol_var(11703198), int_var(error));
     __builtin_unreachable();
   }
@@ -910,7 +921,7 @@ Var String_var(String);
 
 static void _insert(struct EditState * l, const char * c, size_t clen){
   if(_insert_raw(l, c, clen) == - 1){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/repl-input.x",.function = "_insert",.line = 1039};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/repl-input.x",.function = "_insert",.line = 1054};
     x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("ReplInput.read")), NULL))), Symbol_var(25782888), int_var(1048576));
     __builtin_unreachable();
   }
@@ -971,7 +982,7 @@ static void _recall(struct EditState * l, int dir){
     src = l -> history[l -> history_len - 1 - l -> history_index];
     len = strlen(src);
     if(_grow(l, len) == - 1){
-      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/repl-input.x",.function = "_recall",.line = 1104};
+      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/repl-input.x",.function = "_recall",.line = 1119};
       x2c_error_raise_n(& _x2c_error_site_2, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("ReplInput.read")), NULL))), Symbol_var(25782888), int_var(1048576));
       __builtin_unreachable();
     }
@@ -1030,7 +1041,7 @@ int String_len(String);
 
 void * Scope_calloc(size_t, size_t);
 
-static void _edit_prepare(struct EditState * l, ReplInput input, String prompt){
+static void _edit_prepare(struct EditState * l, ReplInput input, String prompt, ReplInputComplete complete, void * completion_context){
   * l =(struct EditState){
     0
   }
@@ -1043,6 +1054,8 @@ static void _edit_prepare(struct EditState * l, ReplInput input, String prompt){
   l -> buflen_max = LINENOISE_MAX_LINE;
   l -> prompt = prompt;
   l -> plen = String_len(prompt);
+  l -> complete = complete;
+  l -> completion_context = completion_context;
   l -> oldrpos = 1;
   l -> buf[0] = '\0';
   l -> history_len = input -> history_len + 1;
@@ -1139,7 +1152,7 @@ static void _paste(struct EditState * l){
       if(! overflowed && _append_paste(l, & buf, & cap, & len, & c, 1, maxlen) == - 1) overflowed = 1;
     }
     if(overflowed){
-      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../src/repl-input.x",.function = "_paste",.line = 1298};
+      static const X2CErrorSite _x2c_error_site_3 = {.file = "../../src/repl-input.x",.function = "_paste",.line = 1316};
       x2c_error_raise_n(& _x2c_error_site_3, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("ReplInput.read")), NULL))), Symbol_var(25782888), int_var(1048576));
       __builtin_unreachable();
     }
@@ -1161,7 +1174,7 @@ static void _paste(struct EditState * l){
     if(_should_fold(buf, len)){
       size_t start = l -> pos;
       if(_insert_raw(l, buf, len) == - 1){
-        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/repl-input.x",.function = "_paste",.line = 1318};
+        static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/repl-input.x",.function = "_paste",.line = 1336};
         x2c_error_raise_n(& _x2c_error_site_4, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("ReplInput.read")), NULL))), Symbol_var(25782888), int_var(1048576));
         __builtin_unreachable();
       }
@@ -1175,11 +1188,123 @@ static void _paste(struct EditState * l){
 }
 }
 
+static void _replace_completion(struct EditState * l, size_t start, size_t end, String replacement){
+  size_t added = String_len(replacement), removed = end - start;
+  size_t length = l -> len - removed + added;
+  if(_grow(l, length) == - 1){
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/repl-input.x",.function = "_replace_completion",.line = 1348};
+    x2c_error_raise_n(& _x2c_error_site_5, 1358596898646632, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("ReplInput.read")), NULL))), Symbol_var(25782888), int_var(1048576));
+    __builtin_unreachable();
+  }
+  memmove(l -> buf + start + added, l -> buf + end, l -> len - end + 1);
+  memcpy(l -> buf + start, replacement, added);
+  l -> len = length;
+  l -> pos = start + added;
+  _fold_clear(l);
+  _refresh_line(l);
+}
+
+String Var_string(Var);
+
+Var List_car(List);
+
+List List_cdr(List);
+
+int List_try_next(List, List *, Var *);
+
+int String_getindex(String, int);
+
+static size_t _completion_common(List candidates){
+  String first = Var_string(List_car(candidates));
+  size_t common = String_len(first);
+  {
+    String candidate;
+    List _x2c_macro_object_0 = List_cdr(candidates);
+    List _x2c_macro_cursor_0 = _x2c_macro_object_0;
+    Var _x2c_macro_cursor_output_0;
+    while(List_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_0, & _x2c_macro_cursor_output_0)){
+      candidate = Var_string(_x2c_macro_cursor_output_0);
+      {
+        if(String_len(candidate) < common) common = String_len(candidate);
+        size_t i = 0;
+        while(i < common && String_getindex(first, i) == String_getindex(candidate, i)) i ++;
+        common = i;
+      }
+
+    }
+
+  }
+  return common;
+}
+
+static void _show_completions(struct EditState * l, List candidates){
+  _refresh_with_flags(l, REFRESH_CLEAN);
+  _write_bytes(l -> input -> ofd, "\r", 1);
+  {
+    String candidate;
+    List _x2c_macro_object_1 = candidates;
+    List _x2c_macro_cursor_1 = _x2c_macro_object_1;
+    Var _x2c_macro_cursor_output_1;
+    while(List_try_next(_x2c_macro_object_1, & _x2c_macro_cursor_1, & _x2c_macro_cursor_output_1)){
+      candidate = Var_string(_x2c_macro_cursor_output_1);
+      {
+        _write_bytes(l -> input -> ofd, candidate, String_len(candidate));
+        _write_bytes(l -> input -> ofd, "\n", 1);
+      }
+
+    }
+
+  }
+  l -> oldrows = 0;
+  l -> oldrpos = 1;
+  _refresh_line(l);
+}
+
+String String_new_len(const char *, int);
+
+int List_truth(List);
+
+static void _complete(struct EditState * l){
+  if(! l -> complete){
+    _beep();
+    return;
+  }
+  String text = String_new_len(l -> buf, l -> len);
+  ReplInputCompletion completion = l -> complete(l -> completion_context, text, l -> pos);
+  List candidates = completion.candidates;
+  if(! List_truth(candidates) || completion.start > completion.end || completion.end > l -> len){
+    l -> completion_pending = 0;
+    _beep();
+    return;
+  }
+  size_t common = _completion_common(candidates);
+  size_t present = completion.end - completion.start;
+  if(! List_truth(List_cdr(candidates)) || common > present){
+    String first = Var_string(List_car(candidates));
+    String replacement = String_new_len(first, common);
+    _replace_completion(l, completion.start, completion.end, replacement);
+    l -> completion_pending = 0;
+    return;
+  }
+  if(l -> completion_pending){
+    _show_completions(l, candidates);
+    l -> completion_pending = 0;
+  }
+  else{
+    l -> completion_pending = 1;
+    _beep();
+  }
+
+}
+
 static Symbol _edit_feed(struct EditState * l){
   char c, seq[3];
   if(! _read_byte(l, & c)) return 11212;
+  if(c != TAB) l -> completion_pending = 0;
   switch(c){
     case KEY_NULL : break;
+    case TAB : _complete(l);
+    break;
     case ENTER : _move_end(l);
     return 805770;
     case CTRL_C : return 6696066638152;
@@ -1299,9 +1424,9 @@ static Symbol _edit_feed(struct EditState * l){
 
 String String_new(const char *);
 
-static ReplInputResult _read_interactive(ReplInput input, String prompt){
+static ReplInputResult _read_interactive(ReplInput input, String prompt, ReplInputComplete complete, void * completion_context){
   struct EditState edit;
-  _edit_prepare(& edit, input, prompt);
+  _edit_prepare(& edit, input, prompt, complete, completion_context);
   {
   _x2c_defer_env_4 _x2c_defer_env_8 = {._x2c_defer_capture_4 =(const void *) & edit};
 
@@ -1374,7 +1499,7 @@ String String_remove_suffix(String, String);
 
 Symbol Error_raise(Symbol, List);
 
-ReplInputResult ReplInput_read(ReplInput r, String prompt){
+ReplInputResult ReplInput_read(ReplInput r, String prompt, ReplInputComplete complete, void * completion_context){
   if(! _init_guard_) _file_init_();
   if(! r || ! r -> open) return(ReplInputResult){
     .status = 11212
@@ -1407,7 +1532,7 @@ ReplInputResult ReplInput_read(ReplInput r, String prompt){
   }
   ErrorHandler volatile _x2c_error_handler_0 = x2c_error_catch_site_push(&_x2c_exception_frame_0, &_x2c_catch_site_0, _x2c_catch_patterns_0);  x2c_exception_push(& _x2c_exception_frame_0);  if (!sigsetjmp(_x2c_exception_frame_0.env, 0)){
     {
-      ReplInputResult _x2c_return_value_1 = _read_interactive(r, prompt); {
+      ReplInputResult _x2c_return_value_1 = _read_interactive(r, prompt, complete, completion_context); {
         x2c_error_catch_close(_x2c_error_handler_0);  _x2c_error_handler_0 = NULL;  x2c_exception_leave(& _x2c_exception_frame_0);  return _x2c_return_value_1;
       }
 

@@ -23,6 +23,13 @@ typedef struct ReplResult {
   List diagnostics, cause, syntax, lowered;
 } ReplResult;
 
+/** Byte range and sorted replacement spellings for one completion request.
+    Candidate storage is borrowed until the session unit closes. */
+typedef struct ReplCompletion {
+  size_t start, end;
+  List candidates;
+} ReplCompletion;
+
 #pragma private
 #include "comptime.x"
 #include "parse.x"
@@ -61,6 +68,104 @@ List ReplSession.symbols(ReplSession session) {
 List ReplSession.inspect(ReplSession session, String name) {
   Var entry;
   return session.names.try_get(name, &entry) ? entry.list() : NULL;
+}
+
+static List _completion_filter(
+  ReplSession session, Symbol kind, List rows, String prefix) {
+  Array names = [];
+  foreach (Var row, rows) {
+    String name = NULL;
+    Var type = void;
+    if (kind == <members>) name = row;
+    else match (row) case %(?(String spelling) ?semantic): {
+      name = spelling;
+      type = semantic;
+    }
+    if (!name || !name.startswith(prefix)) continue;
+    if (kind == <names> && type is <list>) {
+      Type semantic = type;
+      Var callable;
+      if (semantic.is_function() && !session.names.contains(name) &&
+          !session.compiler.macro_lisp.try_get(name, &callable))
+        continue;
+    }
+    names.push(name);
+  }
+  names.sort();
+  return names.list_free();
+}
+
+/** Completes the source namespace at byte `cursor` without publishing parse
+    state. Invalid or non-code prefixes return no candidates. */
+ReplCompletion ReplSession.complete(
+  ReplSession session, String source, size_t cursor) {
+  if (!session || cursor > source.len())
+    raise %(bad-arg (operation "ReplSession.complete"));
+  size_t start = cursor;
+  while (start && (source[start - 1] == '_' ||
+         scan_ascii_alpha((unsigned char) source[start - 1]) ||
+         scan_ascii_digit((unsigned char) source[start - 1]))) start--;
+  String prefix = String.new_len(source + start, cursor - start);
+  String marker = "__x2c_completion__";
+  String marked = String.new_len(source, start) + marker;
+  ReplCompletion result = {
+    .start = start, .end = cursor, .candidates = %()
+  };
+  Compiler c = session.compiler;
+  DiagnosticsHold diagnostics = c.diagnostics.hold();
+  defer c.diagnostics.release(diagnostics, 0);
+  Scope scratch = Scope.new();
+  defer scratch.destroy();
+  Tokenizer tokenizer = c.tokenizer;
+  Token token = c.token, boundary = c.input_boundary;
+  Token directives = c.directives_taken;
+  String text = c.text;
+  Map arms = c.arm_stacks;
+  Array braces = c.braces;
+  defer {
+    c.tokenizer = tokenizer;
+    c.token = token;
+    c.input_boundary = boundary;
+    c.directives_taken = directives;
+    c.text = text;
+    c.arm_stacks = arms;
+    c.braces = braces;
+  }
+  c.directives_taken = NULL;
+  SymTxn transaction;
+  {
+    Scope.push(&scratch);
+    defer Scope.pop();
+    c.braces = [];
+    transaction = c.begin_semantic_transaction();
+  }
+  defer transaction.rollback();
+  Symbol kind = 0;
+  List rows = NULL;
+  try {
+    _tokenize(c, marked, scratch);
+    if (c.tokenizer.status() != <ok>) return result;
+    c.mark_completion(marked.len() - marker.len());
+    int declaration = c.test_declaration();
+    int end = marked.len();
+    if (!declaration) {
+      String head = "void __repl_eval(void) {\n";
+      end += head.len();
+      marked = head + marked + "\n}";
+      _tokenize(c, marked, scratch);
+      c.mark_completion(head.len() + start);
+    }
+    (void) c.parse_submission(end);
+  }
+  catch %(replcomp (kind ?(Symbol found_kind)) (rows ?found)): {
+    kind = found_kind;
+    rows = found;
+  }
+  catch %(incomplete *): return result;
+  catch %(malformed *): return result;
+  if (rows) result.candidates = _completion_filter(
+    session, kind, rows, prefix);
+  return result;
 }
 
 static List _bare(List node) {

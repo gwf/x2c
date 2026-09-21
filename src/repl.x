@@ -14,6 +14,26 @@
 #include <stdio.h>
 #include <unistd.h>
 
+struct ReplCompleteContext {
+  ReplSession session;
+  String pending;
+};
+
+static ReplInputCompletion _complete_input(
+  void *raw, String text, size_t cursor) {
+  struct ReplCompleteContext *context = raw;
+  size_t offset = context.pending.len();
+  ReplCompletion completion = context.session.complete(
+    context.pending + text, offset + cursor);
+  if (completion.start < offset)
+    return (ReplInputCompletion) { .candidates = %() };
+  return (ReplInputCompletion) {
+    .start = completion.start - offset,
+    .end = completion.end - offset,
+    .candidates = completion.candidates
+  };
+}
+
 static void _help(void) {
   puts(
     "Enter declarations or statements with semicolons.\n"
@@ -23,7 +43,8 @@ static void _help(void) {
     ":lowered NAME show a function's lowered Lisp\n"
     ":cancel  discard incomplete input\n"
     ":quit    leave the session\n"
-    "Editing: arrows, Home/End, Backspace/Delete; up/down recall history.\n"
+    "Editing: Tab completes names; repeat Tab to list choices.\n"
+    "Arrows, Home/End, Backspace/Delete; up/down recall history.\n"
     "Ctrl-C cancels input; Ctrl-D exits from an empty line.\n"
     "Options: --dump prints typed AST and lowered Lisp; --stats prints "
     "execution counters.");
@@ -78,12 +99,16 @@ int repl_run(CliRequest request) {
   ReplInput input = ReplInput.new();
   defer input.close();
   String pending = "", line;
+  struct ReplCompleteContext completion = { .session = session };
   int interactive = isatty(STDIN_FILENO), failed = 0;
   unit.compiler.macro_lisp.call_budget(1000000);
   if (interactive) puts("x2c experimental REPL; :help for commands");
   while (1) {
     if (interactive) {
-      ReplInputResult read = input.read(pending.len() ? "... " : "x2c> ");
+      completion.pending = pending;
+      ReplInputResult read = input.read(
+        pending.len() ? "... " : "x2c> ",
+        _complete_input, &completion);
       if (read.status == <cancelled>) {
         pending = "";
         continue;

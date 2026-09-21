@@ -47,6 +47,15 @@ completed source submissions for the current process; adjacent duplicates are
 stored once, and history is not written to disk. A rejected or failed
 submission remains available for correction.
 
+Tab completes names from the compiler's live session namespace. This includes
+published session values and functions, visible types and macros, and fields or
+evaluator-callable methods on a typed receiver. A sole match replaces the
+current name; otherwise Tab inserts the common prefix, and another Tab lists
+the sorted choices. Completion parses only through the cursor and rolls back
+its semantic work, so it can use locals from pending multiline input without
+publishing them. APIs become candidates when their ordinary declarations and
+compile-time bindings become visible; the REPL keeps no separate API list.
+
 Long input wraps across terminal rows. Bracketed paste keeps embedded newlines
 inside one editable entry, so a pasted multiline submission can be accepted
 with one Enter. Recalled multiline submissions are also one entry. The editor

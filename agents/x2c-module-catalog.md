@@ -103,6 +103,7 @@ Public functions:
 `Compiler.record_source_reference`, `Compiler.semantic_binding_facts`,
 `Compiler.parsing_source_syntax`, `Compiler.macro_definition_locals`,
 `Compiler.fresh_name`, `Compiler.emitted_binding_name`, `Compiler.tokenize`,
+`Compiler.mark_completion`, `Compiler.at_completion`,
 `Compiler.skip_trivia_from`, `Symbol.group_step`, `Token.group_close`,
 `Token.after_group`, `Compiler.peek`, `Compiler.require_input`,
 `Compiler.expect`, `Compiler.next`, `Compiler.test`, `Compiler.record_origin`,
@@ -121,13 +122,13 @@ Public functions:
 `Compiler.begin_semantic_transaction`, `SymTxn.commit`,
 `SymTxn.commit_transient`, `SymTxn.local_macros_changed`, `SymTxn.rollback`,
 `Sym.reset`, `Sym.global_symbols`, `Sym.base_symbols`, `Sym.file_statics`,
-`Sym.mark_static`, `Sym.current_symbols`, `Sym.current_binding`,
-`Sym.enumerator_owner`, `Sym.declare_enumerator`, `Sym.define_macro`,
-`Sym.has_local_macros`, `Sym.scope_count`, `Sym.lookup_macro`, `Sym.set`,
-`Sym.seed_var_tags`, `Sym.define`, `Sym.define_global`, `Sym.get_exact`,
-`Sym.get`, `Sym.lookup`, `Sym.reference`, `Sym.resolve_global`,
-`Sym.reference_global`, `Sym.binding_is_local`, `Sym.binding_is_local_before`,
-`Sym.introduce`, `Compiler.package_spelling`,
+`Sym.mark_static`, `Sym.current_symbols`, `Sym.visible_symbols`,
+`Sym.current_binding`, `Sym.enumerator_owner`, `Sym.declare_enumerator`,
+`Sym.define_macro`, `Sym.has_local_macros`, `Sym.scope_count`,
+`Sym.lookup_macro`, `Sym.set`, `Sym.seed_var_tags`, `Sym.define`,
+`Sym.define_global`, `Sym.get_exact`, `Sym.get`, `Sym.lookup`, `Sym.reference`,
+`Sym.resolve_global`, `Sym.reference_global`, `Sym.binding_is_local`,
+`Sym.binding_is_local_before`, `Sym.introduce`, `Compiler.package_spelling`,
 `Compiler.register_package_alias`, `Compiler.register_package_member`,
 `Compiler.package_member_spelling`, `Compiler.imported_providers`,
 `Compiler.imported_spelling`, `Sym.declare`, `Sym.bind_identity`,
@@ -198,16 +199,17 @@ Public functions:
 
 `Compiler.complete_iter_chain`, `List.printf_family`,
 `Compiler.printf_static_format`, `Compiler.resolve_postfix_member`,
-`Compiler.parse_macro_expression_target`, `Compiler.promote_string_literal`,
-`Compiler.check_explicit_converter`, `Compiler.require_var_tag`,
-`Compiler.var_tag_expression`, `Compiler.resolve_map_entry`,
-`Compiler.resolve_expression`, `Compiler.parse_variable`,
-`Compiler.parse_conditional`, `Compiler.parse_assignment`,
-`Compiler.parse_primary`, `Compiler.parse_expression`,
-`Compiler.parse_parenthesized_statement`, `Compiler.initializer_native_types`,
-`Compiler.initializer_slot`, `Compiler.initializer_rows`,
-`Compiler.convert_initializer`, `Compiler.convert_compound_literal`,
-`Compiler.convert_expression`, `Compiler.convert_segment_to_string`
+`Compiler.postfix_completions`, `Compiler.parse_macro_expression_target`,
+`Compiler.promote_string_literal`, `Compiler.check_explicit_converter`,
+`Compiler.require_var_tag`, `Compiler.var_tag_expression`,
+`Compiler.resolve_map_entry`, `Compiler.resolve_expression`,
+`Compiler.parse_variable`, `Compiler.parse_conditional`,
+`Compiler.parse_assignment`, `Compiler.parse_primary`,
+`Compiler.parse_expression`, `Compiler.parse_parenthesized_statement`,
+`Compiler.initializer_native_types`, `Compiler.initializer_slot`,
+`Compiler.initializer_rows`, `Compiler.convert_initializer`,
+`Compiler.convert_compound_literal`, `Compiler.convert_expression`,
+`Compiler.convert_segment_to_string`
 
 ### [src/format.x](../src/format.x)
 
@@ -348,10 +350,10 @@ Public functions:
 `Compiler.resolve_protocols`, `Compiler.install_generated_protocol_symbols`,
 `Compiler.protocol_members_for`, `Compiler.protocol_rejects_direct_member`,
 `Compiler.operator_member`, `Compiler.dump_conformance`,
-`Compiler.derived_member`, `Compiler.resolve_protocol_member`,
-`Compiler.protocol_update_helper`, `Compiler.discard_helper`,
-`Compiler.protocol_discard_helper`, `Compiler.generate_protocol_adapters`,
-`Compiler.parse_protocol_declaration`
+`Compiler.derived_member`, `Compiler.protocol_member_names`,
+`Compiler.resolve_protocol_member`, `Compiler.protocol_update_helper`,
+`Compiler.discard_helper`, `Compiler.protocol_discard_helper`,
+`Compiler.generate_protocol_adapters`, `Compiler.parse_protocol_declaration`
 
 ### [src/regions.x](../src/regions.x)
 
@@ -376,7 +378,7 @@ persistent compiler submissions and inspection.
 Public functions:
 
 `ReplSession.new`, `ReplSession.symbols`, `ReplSession.inspect`,
-`ReplSession.submit`
+`ReplSession.complete`, `ReplSession.submit`
 
 ### [src/repl.x](../src/repl.x)
 

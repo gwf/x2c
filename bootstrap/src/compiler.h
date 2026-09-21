@@ -155,6 +155,10 @@ String Compiler_emitted_binding_name(Compiler compiler, List binding);
 
 void Compiler_tokenize(Compiler c, char * text);
 
+void Compiler_mark_completion(Compiler compiler, int position);
+
+int Compiler_at_completion(Compiler compiler);
+
 Token Compiler_skip_trivia_from(Compiler compiler, Token token);
 
 int Symbol_group_step(Symbol s);
@@ -252,6 +256,8 @@ Map Sym_file_statics(Sym sym);
 void Sym_mark_static(Sym sym, List key);
 
 Map Sym_current_symbols(Sym sym);
+
+List Sym_visible_symbols(Sym sym);
 
 List Sym_current_binding(Sym sym, List key);
 

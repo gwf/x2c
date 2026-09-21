@@ -15,9 +15,17 @@ typedef struct ReplInputResult{
 }
 ReplInputResult;
 
+typedef struct ReplInputCompletion{
+  size_t start, end;
+  List candidates;
+}
+ReplInputCompletion;
+
+typedef ReplInputCompletion(* ReplInputComplete)(void * context, String text, size_t cursor);
+
 ReplInput ReplInput_new(void);
 
-ReplInputResult ReplInput_read(ReplInput r, String prompt);
+ReplInputResult ReplInput_read(ReplInput r, String prompt, ReplInputComplete complete, void * completion_context);
 
 void ReplInput_remember(ReplInput r, String text);
 

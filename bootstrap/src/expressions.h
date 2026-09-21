@@ -22,6 +22,8 @@ String Compiler_printf_static_format(Compiler compiler, Var format, int * raw);
 
 List Compiler_resolve_postfix_member(Compiler c, Type receiver_type, List field, Symbol access, int call_context);
 
+List Compiler_postfix_completions(Compiler compiler, Type receiver, Symbol access);
+
 List Compiler_parse_macro_expression_target(Compiler c);
 
 List Compiler_promote_string_literal(Compiler c, List expr);

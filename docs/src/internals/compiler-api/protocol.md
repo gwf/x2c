@@ -20,6 +20,7 @@ Protocol collection and per-unit semantic registry.
 | [`Compiler.operator_member`](#Compiler.operator_member) | Returns the protocol member corresponding to a direct binary operator. |
 | [`Compiler.parse_protocol_declaration`](#Compiler.parse_protocol_declaration) | Parses a protocol body or concrete adoption at the current token. |
 | [`Compiler.protocol_discard_helper`](#Compiler.protocol_discard_helper) | The `discard_helper` for `participant`'s protocol `member`. |
+| [`Compiler.protocol_member_names`](#Compiler.protocol_member_names) | Returns unique member spellings from the participant's visible adopted conformances. |
 | [`Compiler.protocol_members_for`](#Compiler.protocol_members_for) | Returns the resolved conformance for `participant` and `base`, if any. |
 | [`Compiler.protocol_rejects_direct_member`](#Compiler.protocol_rejects_direct_member) | Reports whether conformance supersedes an ambient direct member. |
 | [`Compiler.protocol_update_helper`](#Compiler.protocol_update_helper) | Returns a generated helper for a direct protocol-backed update. |
@@ -56,7 +57,7 @@ its `discard` member may release what it owns before the enclosing scope
 ends. Returns null when no selected argument type has a `discard` member,
 or an ordinary pointer or aggregate result may borrow an argument.
 
-Source: `src/protocol.x:1762`
+Source: `src/protocol.x:1786`
 
 <a id="Compiler.dump_conformance"></a>
 #### Compiler.dump_conformance
@@ -80,7 +81,7 @@ Native aliases are inserted at the participant's inferred public or
 private boundary. Ordinary adapters and descriptor thunks are added to the
 compiler's early output. Returns `ast` with native insertions applied.
 
-Source: `src/protocol.x:2238`
+Source: `src/protocol.x:2262`
 
 <a id="Compiler.install_generated_protocol_symbols"></a>
 #### Compiler.install_generated_protocol_symbols
@@ -113,7 +114,7 @@ publishes the normalized row immediately. Macro-hole parsing returns syntax
 for later binding; shallow parsing publishes only when protocol collection
 is enabled and otherwise returns the uninstalled node.
 
-Source: `src/protocol.x:2369`
+Source: `src/protocol.x:2393`
 
 <a id="Compiler.protocol_discard_helper"></a>
 #### Compiler.protocol_discard_helper
@@ -122,7 +123,17 @@ Source: `src/protocol.x:2369`
 
 The `discard_helper` for `participant`'s protocol `member`.
 
-Source: `src/protocol.x:1826`
+Source: `src/protocol.x:1850`
+
+<a id="Compiler.protocol_member_names"></a>
+#### Compiler.protocol_member_names
+
+`List Compiler.protocol_member_names(Compiler compiler, Type participant)`
+
+Returns unique member spellings from the participant's visible adopted
+conformances. Resolution remains responsible for selecting a binding.
+
+Source: `src/protocol.x:1494`
 
 <a id="Compiler.protocol_members_for"></a>
 #### Compiler.protocol_members_for
@@ -158,7 +169,7 @@ A matching helper is emitted once into the compiler's early declarations;
 `postfix` selects whether it returns the old or stored value. Returns null
 when the member cannot implement this update shape.
 
-Source: `src/protocol.x:1684`
+Source: `src/protocol.x:1708`
 
 <a id="Compiler.publish_protocol_node"></a>
 #### Compiler.publish_protocol_node
@@ -207,7 +218,7 @@ null when no eligible resolved member exists; positive and negative
 results are cached. Inside the selected implementation itself the result
 is null, so the member's own body keeps the native operation.
 
-Source: `src/protocol.x:1667`
+Source: `src/protocol.x:1691`
 
 <a id="Compiler.resolve_protocols"></a>
 #### Compiler.resolve_protocols

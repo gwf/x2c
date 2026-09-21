@@ -50,6 +50,14 @@ Lists borrow the same unit Context. Function inspection returns the canonical
 Lists from successful submission, without parsing or lowering them again.
 The existing name map owns inspection entries and redeclaration checks.
 
+`session.complete(source, cursor)` returns byte replacement bounds and sorted
+candidate strings from the live semantic namespace. It parses through the
+cursor in a rollback-only transaction, so pending locals participate without
+being published. Function and method candidates require bindings in the
+session's compile-time Lisp environment; types, macros, fields, enumerators,
+and published values follow their source visibility. Results borrow the unit
+Context.
+
 The session composes the ordinary frontend, parser, semantic transaction,
 `Compiler.lower_comptime`, and Lisp evaluator. Stable binding IDs identify
 session global cells. Publication waits for successful initialization;

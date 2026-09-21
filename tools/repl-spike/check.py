@@ -245,6 +245,26 @@ with PtyRepl() as repl:
     repl.wait()
 
 with PtyRepl() as repl:
+    mark = repl.send(b"Array kept=[];\r")
+    repl.expect(b"ok", mark)
+    repl.ready(mark)
+    mark = repl.send(b"kept.pu\t(7);\r")
+    repl.expect(b"=> 7", mark)
+    repl.ready(mark)
+    mark = repl.send(b"kept.\t\t")
+    repl.expect(b"push", mark)
+    repl.send(b"\x03")
+    repl.ready(mark)
+    mark = repl.send(b"int zebra(void) { return 9; }\r")
+    repl.expect(b"defined zebra", mark)
+    repl.ready(mark)
+    mark = repl.send(b"zeb\t();\r")
+    repl.expect(b"=> 9", mark)
+    repl.ready(mark)
+    repl.send(b":quit\r")
+    repl.wait()
+
+with PtyRepl() as repl:
     mark = repl.send(b"1 +\r")
     repl.expect(b"... ", mark)
     mark = repl.send(b"2;\r")

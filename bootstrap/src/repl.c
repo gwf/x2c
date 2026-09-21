@@ -17,9 +17,17 @@ static Var _13, _10, _9, _8, _5, _4, _3;
 #include "file.h"
 #include <stdio.h>
 #include <unistd.h>
+struct ReplCompleteContext{
+  ReplSession session;
+  String pending;
+}
+;
+
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
+
+static ReplInputCompletion _complete_input(void * raw, String text, size_t cursor);
 
 static void _help(void);
 
@@ -93,8 +101,28 @@ __attribute__((constructor)) static void _file_init_(void){
   _24 = String_new(":");
 }
 
+int String_len(String);
+
+ReplCompletion ReplSession_complete(ReplSession, String, size_t);
+
+String String_add(String, String);
+
+static ReplInputCompletion _complete_input(void * raw, String text, size_t cursor){
+  struct ReplCompleteContext * context = raw;
+  size_t offset = String_len(context -> pending);
+  ReplCompletion completion = ReplSession_complete(context -> session, String_add(context -> pending, text), offset + cursor);
+  if(completion.start < offset) return(ReplInputCompletion){
+    .candidates = NULL
+  }
+  ;
+  return(ReplInputCompletion){
+    .start = completion.start - offset, .end = completion.end - offset, .candidates = completion.candidates
+  }
+  ;
+}
+
 static void _help(void){
-  puts("Enter declarations or statements with semicolons.\n" ":help    show this help\n" ":symbols list session-defined names and kinds\n" ":ast NAME show a function's typed AST\n" ":lowered NAME show a function's lowered Lisp\n" ":cancel  discard incomplete input\n" ":quit    leave the session\n" "Editing: arrows, Home/End, Backspace/Delete; up/down recall history.\n" "Ctrl-C cancels input; Ctrl-D exits from an empty line.\n" "Options: --dump prints typed AST and lowered Lisp; --stats prints " "execution counters.");
+  puts("Enter declarations or statements with semicolons.\n" ":help    show this help\n" ":symbols list session-defined names and kinds\n" ":ast NAME show a function's typed AST\n" ":lowered NAME show a function's lowered Lisp\n" ":cancel  discard incomplete input\n" ":quit    leave the session\n" "Editing: Tab completes names; repeat Tab to list choices.\n" "Arrows, Home/End, Backspace/Delete; up/down recall history.\n" "Ctrl-C cancels input; Ctrl-D exits from an empty line.\n" "Options: --dump prints typed AST and lowered Lisp; --stats prints " "execution counters.");
 }
 
 Split String_words(String);
@@ -219,14 +247,12 @@ List Var_list(Var);
 ReplSession ReplSession_new(Compiler);
 ReplInput ReplInput_new(void);
 void Lisp_call_budget(Lisp, long);
-ReplInputResult ReplInput_read(ReplInput, String);
-int String_len(String);
+ReplInputResult ReplInput_read(ReplInput, String, ReplInputComplete, void *);
 String File_readline(File);
 int String_truth(String);
 String String_strip(String, char *);
 int String_startswith(String, String);
 void ReplInput_remember(ReplInput, String);
-String String_add(String, String);
 ReplResult ReplSession_submit(ReplSession, String);
 int List_truth(List);
 String String_remove_suffix(String, String);
@@ -265,12 +291,17 @@ int repl_run(CliRequest request){
   x2c_cleanup_push(&_x2c_defer_record_2);
   {
       String pending = _17, line;
+      struct ReplCompleteContext completion ={
+        .session = session
+      }
+      ;
       int interactive = isatty(STDIN_FILENO), failed = 0;
       Lisp_call_budget(unit.compiler -> macro_lisp, 1000000);
       if(interactive) puts("x2c experimental REPL; :help for commands");
       while(1){
         if(interactive){
-          ReplInputResult read = ReplInput_read(input, String_len(pending) ? _22 : _23);
+          completion.pending = pending;
+          ReplInputResult read = ReplInput_read(input, String_len(pending) ? _22 : _23, _complete_input, & completion);
           if(read.status == 6696066638152){
             pending = _17;
             continue;

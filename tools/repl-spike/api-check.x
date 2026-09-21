@@ -29,6 +29,17 @@ static void _expect(
   }
 }
 
+static void _completion(
+  ReplSession session, String source, String present, String absent) {
+  ReplCompletion result = session.complete(source, source.len());
+  if ((present && !result.candidates.contains(present)) ||
+      (absent && result.candidates.contains(absent))) {
+    fprintf(stderr, "completion for %s: %s\n",
+            source, result.candidates.repr());
+    failures++;
+  }
+}
+
 static void _transaction_deletion(Compiler c) {
   List key = %("__repl_probe");
   Map original = c.sym.file_statics();
@@ -53,6 +64,8 @@ static void _transaction_deletion(Compiler c) {
 
 static void _exercise(ReplSession s) {
   _symbols(s, %());
+  _completion(s, "Str", "String", NULL);
+  _completion(s, "\"x\".le", "len", NULL);
   _expect(s, "int", <incomplete>, void);
   _expect(s, "int f(int", <incomplete>, void);
   _expect(s, "int f(int x) {", <incomplete>, void);
@@ -65,7 +78,9 @@ static void _exercise(ReplSession s) {
   _symbols(s, %());
   _expect(s, "int n=0;", <executed>, void);
   _expect(s, "int next(void) { n+=1; return n; }", <defined>, void);
+  _completion(s, "ne", "next", NULL);
   _expect(s, "int bad=next(), second=1/0;", <failed>, void);
+  _completion(s, "ba", NULL, "bad");
   _symbols(s, %((value "n") (function "next")));
   if (s.inspect("bad") || s.inspect("second") || s.inspect("f") ||
       s.inspect("a") || s.inspect("__repl_eval") || s.inspect("String") ||
@@ -116,6 +131,8 @@ static void _retained_results(ReplSession s) {
   ReplResult closure = s.submit("captured;");
   ReplResult wide = s.submit("wide();");
   ReplResult array = s.submit("Array kept = [];");
+  _completion(s, "kept.pu", "push", "free");
+  _completion(s, "if (1) { String local = \"x\"; local.le", "len", NULL);
   _expect(s, "kept.push(17);", <value>, 17);
   array = s.submit("kept;");
   ReplResult bad = s.submit("int broken = ;");

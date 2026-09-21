@@ -499,6 +499,106 @@ static List _resolve_delegate_method(
   return NULL;
 }
 
+static void _completion_add(Map seen, Array names, String name) {
+  if (!name || seen.contains(name)) return;
+  seen[name] = 1;
+  names.push(name);
+}
+
+static void _completion_fields(
+  Compiler compiler, Type type, Map seen, Array names, Map visited) {
+  type = compiler.sym.resolve_key(type);
+  if (!type || !type.is_aggregate_tag() || visited.contains(type)) return;
+  visited[type] = 1;
+  List order = compiler.sym.field_order(type);
+  foreach (List row, order ? order.cdr() : NULL) {
+    String name = row.car();
+    if (name) _completion_add(seen, names, name);
+    else _completion_fields(compiler, row.cadr(), seen, names, visited);
+  }
+}
+
+static void _completion_methods(
+  Compiler compiler, Type receiver, Map seen, Array names) {
+  Type type = receiver.canonicalize();
+  int hops = 0;
+  while (type) {
+    if (type.is_typedef_name() || type.is_builtin()) {
+      String owner = type.base_type().car();
+      String prefix = %"${owner}_";
+      foreach (List row, compiler.sym.visible_symbols()) {
+        (String spelling, Var raw) = row;
+        if (raw is not <list>) continue;
+        Type signature = raw;
+        if (signature.is_function() && spelling.startswith(prefix))
+          _completion_add(seen, names, spelling.remove_prefix(prefix));
+        foreach (Var (raw_package, _), compiler.package_roots) {
+          String package = raw_package;
+          String imported = %"${package}__$prefix";
+          if (signature.is_function() && spelling.startswith(imported))
+            _completion_add(
+              seen, names, spelling.remove_prefix(imported));
+        }
+      }
+      foreach (String name, compiler.protocol_member_names(type))
+        _completion_add(seen, names, name);
+    }
+    if (type.is_pointer() || type.is_aggregate()) type = NULL;
+    else type = compiler.sym.next_typedef(type, &hops);
+  }
+}
+
+static void _completion_delegates(
+  Compiler compiler, Type receiver, Map seen, Array names, Map visited) {
+  Type aggregate = compiler.sym.delegate_aggregate(receiver);
+  if (!aggregate || visited.contains(aggregate)) return;
+  visited[aggregate] = 1;
+  List order = compiler.sym.field_order(aggregate);
+  foreach (List row, order ? order.cdr() : NULL) {
+    String field = row.car();
+    if (!field ||
+        !compiler.sym.get(%(@aggregate delegate $field))) continue;
+    Type type = row.cadr();
+    _completion_methods(compiler, type, seen, names);
+    _completion_fields(compiler, type, seen, names, {});
+    _completion_delegates(compiler, type, seen, names, visited);
+  }
+}
+
+/** Returns sorted visible postfix names whose selected method is callable in
+    the compiler's Lisp session. Fields remain eligible without a binding. */
+List Compiler.postfix_completions(
+  Compiler compiler, Type receiver, Symbol access) {
+  Map seen = {}, visited = {};
+  Array names = [], accepted = [];
+  defer names.free();
+  Type fields = compiler.sym.resolve_key(receiver);
+  if (fields.is_pointer()) fields = fields.dereference();
+  _completion_fields(compiler, fields, seen, names, {});
+  if (access == <.>) {
+    _completion_methods(compiler, receiver, seen, names);
+    _completion_delegates(compiler, receiver, seen, names, visited);
+  }
+  names.sort();
+  foreach (String name, names) {
+    List resolution = compiler.resolve_postfix_member(
+      receiver, %($name), access, 1);
+    if (!resolution && access == <.>)
+      resolution = _resolve_delegate_method(
+        compiler, receiver, name, compiler.token);
+    match (resolution) {
+      case %(field ? ?): accepted.push(name);
+      case %(method ?binding ?): {
+        Var callable;
+        if (compiler.macro_lisp.try_get(
+              binding_identity_spelling(binding), &callable))
+          accepted.push(name);
+      }
+    }
+  }
+  return accepted.list_free();
+}
+
 static List _materialize_delegate_receiver(List receiver, List path) {
   foreach (List step, path.cdr()) {
     (Symbol access, String name, Type type) = step.cdr();
@@ -529,6 +629,12 @@ static List _parse_field_name(Compiler compiler, Symbol op_sym, List lhs_opt) {
 static List _parse_postfix_dot(Compiler compiler, List expr) {
   Token origin = compiler.token;
   compiler.expect(<.>);
+  if (compiler.at_completion()) {
+    Type receiver = _expr_is_raw_string_literal(expr)
+                  ? %("String") : expr.cadr();
+    List rows = compiler.postfix_completions(receiver, <.>);
+    raise %(replcomp (kind <members>) (rows $rows));
+  }
   List field = _parse_field_name(compiler, <.>, expr);
   List result = %(expr () (op . $expr $field));
   if (compiler.peek(0) != <(>)
@@ -541,6 +647,10 @@ static List _parse_postfix_dot(Compiler compiler, List expr) {
 static List _parse_postfix_arrow(Compiler compiler, List expr) {
   Token origin = compiler.token;
   compiler.expect(<"->">);
+  if (compiler.at_completion()) {
+    List rows = compiler.postfix_completions(expr.cadr(), <"->">);
+    raise %(replcomp (kind <members>) (rows $rows));
+  }
   List field = _parse_field_name(compiler, <"->">, expr);
   return compiler.resolve_expression(%(expr () (op -> $expr $field)), origin);
 }

@@ -12,12 +12,23 @@ Persistent compiler submissions and inspection.
 
 | Function | Summary |
 | --- | --- |
+| [`ReplSession.complete`](#ReplSession.complete) | Completes the source namespace at byte `cursor` without publishing parse state. |
 | [`ReplSession.inspect`](#ReplSession.inspect) | Returns (value), (function (typed AST) (lowered FORMS)), or NULL if absent. |
 | [`ReplSession.new`](#ReplSession.new) | Borrows an initialized submission compiler until its unit closes. |
 | [`ReplSession.submit`](#ReplSession.submit) | Submits one complete candidate without printing or retaining a pending prefix. |
 | [`ReplSession.symbols`](#ReplSession.symbols) | Returns an immutable snapshot of (kind "name") entries, sorted by name. |
 
 ### `ReplSession`
+
+<a id="ReplSession.complete"></a>
+#### ReplSession.complete
+
+`ReplCompletion ReplSession.complete( ReplSession session, String source, size_t cursor)`
+
+Completes the source namespace at byte `cursor` without publishing parse
+state. Invalid or non-code prefixes return no candidates.
+
+Source: `src/repl-session.x:100`
 
 <a id="ReplSession.inspect"></a>
 #### ReplSession.inspect
@@ -27,7 +38,7 @@ Persistent compiler submissions and inspection.
 Returns (value), (function (typed AST) (lowered FORMS)), or NULL if absent.
 These are the original canonical Lists, borrowed until unit close.
 
-Source: `src/repl-session.x:61`
+Source: `src/repl-session.x:68`
 
 <a id="ReplSession.new"></a>
 #### ReplSession.new
@@ -38,7 +49,7 @@ Borrows an initialized submission compiler until its unit closes.
 Source-fact collection must be disabled because submission scratch maps
 are reclaimed after each call.
 
-Source: `src/repl-session.x:36`
+Source: `src/repl-session.x:43`
 
 <a id="ReplSession.submit"></a>
 #### ReplSession.submit
@@ -49,7 +60,7 @@ Submits one complete candidate without printing or retaining a pending
 prefix. Only successfully initialized declarations publish new bindings;
 evaluation effects on previously published values survive failure.
 
-Source: `src/repl-session.x:158`
+Source: `src/repl-session.x:263`
 
 <a id="ReplSession.symbols"></a>
 #### ReplSession.symbols
@@ -59,14 +70,25 @@ Source: `src/repl-session.x:158`
 Returns an immutable snapshot of (kind "name") entries, sorted by name.
 Only session definitions appear; storage is borrowed until unit close.
 
-Source: `src/repl-session.x:48`
+Source: `src/repl-session.x:55`
 
 ## Public types
 
 | Type | Kind | Summary |
 | --- | --- | --- |
+| [`ReplCompletion`](#ReplCompletion) | struct | Byte range and sorted replacement spellings for one completion request. |
 | [`ReplResult`](#ReplResult) | struct | status is incomplete, rejected, defined, executed, value, or failed. |
 | [`ReplSession`](#ReplSession) | struct | The caller keeps the compiler's unit Context open until every result and this session are finished. |
+
+<a id="ReplCompletion"></a>
+### ReplCompletion
+
+`typedef struct ReplCompletion { size_t start, end; List candidates; } ReplCompletion`
+
+Byte range and sorted replacement spellings for one completion request.
+Candidate storage is borrowed until the session unit closes.
+
+Source: `src/repl-session.x:28`
 
 <a id="ReplResult"></a>
 ### ReplResult

@@ -26,7 +26,7 @@ Inline terminal editing for the x2c REPL.
 
 Restores the terminal and releases editor-owned history storage.
 
-Source: `src/repl-input.x:1559`
+Source: `src/repl-input.x:1658`
 
 <a id="ReplInput.new"></a>
 #### ReplInput.new
@@ -35,19 +35,19 @@ Source: `src/repl-input.x:1559`
 
 Creates an interactive terminal owner with empty in-memory history.
 
-Source: `src/repl-input.x:1502`
+Source: `src/repl-input.x:1598`
 
 <a id="ReplInput.read"></a>
 #### ReplInput.read
 
-`ReplInputResult ReplInput.read(ReplInput r, String prompt)`
+`ReplInputResult ReplInput.read( ReplInput r, String prompt, ReplInputComplete complete, void *completion_context)`
 
 Reads one accepted line, EOF, or cancellation. Supported terminals use
 inline editing; other terminal types use the basic line reader. Terminal
 mode is restored before return or transfer of an allocation, size, or I/O
 cause.
 
-Source: `src/repl-input.x:1515`
+Source: `src/repl-input.x:1611`
 
 <a id="ReplInput.remember"></a>
 #### ReplInput.remember
@@ -57,13 +57,15 @@ Source: `src/repl-input.x:1515`
 Remembers one nonempty entry, suppressing an adjacent duplicate and
 evicting the oldest entry beyond 100.
 
-Source: `src/repl-input.x:1543`
+Source: `src/repl-input.x:1642`
 
 ## Public types
 
 | Type | Kind | Summary |
 | --- | --- | --- |
 | [`ReplInput`](#ReplInput) | struct | Owns terminal restoration and the current process's bounded REPL history. |
+| [`ReplInputComplete`](#ReplInputComplete) | callback | Computes completion synchronously from borrowed text and a byte cursor. |
+| [`ReplInputCompletion`](#ReplInputCompletion) | struct | Completion candidates replace `[start,end)` in the edited UTF-8 buffer. |
 | [`ReplInputResult`](#ReplInputResult) | struct | `status` is line, eof, or cancelled. |
 
 <a id="ReplInput"></a>
@@ -74,6 +76,26 @@ Source: `src/repl-input.x:1543`
 Owns terminal restoration and the current process's bounded REPL history.
 
 Source: `src/repl-input.x:49`
+
+<a id="ReplInputComplete"></a>
+### ReplInputComplete
+
+`typedef ReplInputCompletion (*ReplInputComplete)( void *context, String text, size_t cursor)`
+
+Computes completion synchronously from borrowed text and a byte cursor.
+Returned candidates must remain live through the editor's synchronous
+completion handling.
+
+Source: `src/repl-input.x:67`
+
+<a id="ReplInputCompletion"></a>
+### ReplInputCompletion
+
+`typedef struct ReplInputCompletion { size_t start, end; List candidates; } ReplInputCompletion`
+
+Completion candidates replace `[start,end)` in the edited UTF-8 buffer.
+
+Source: `src/repl-input.x:59`
 
 <a id="ReplInputResult"></a>
 ### ReplInputResult

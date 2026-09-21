@@ -1489,6 +1489,30 @@ static void _each_adopted_row(
   }
 }
 
+/** Returns unique member spellings from the participant's visible adopted
+    conformances. Resolution remains responsible for selecting a binding. */
+List Compiler.protocol_member_names(Compiler compiler, Type participant) {
+  Map seen = {};
+  Array names = [];
+  List protocols = _ordered_occurrences(compiler);
+  foreach (Type current, _ancestry(compiler, participant.canonicalize()))
+    foreach (List entry, protocols) {
+      Type base = entry.car();
+      if (!compiler._is_adopted(base, current)) continue;
+      List conformance = compiler.protocol_members_for(current, base);
+      if (!conformance) continue;
+      foreach (List row, conformance.last().list().cdr()) {
+        String name = row.car();
+        if (name && !seen.contains(name)) {
+          seen[name] = 1;
+          names.push(name);
+        }
+      }
+    }
+  names.sort();
+  return names.list_free();
+}
+
 static List _member_row(
   Compiler compiler, List protocols, Type participant, String member) {
   List found = NULL;

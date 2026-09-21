@@ -55,6 +55,18 @@ typedef struct ReplInputResult {
   String text;
 } ReplInputResult;
 
+/** Completion candidates replace `[start,end)` in the edited UTF-8 buffer. */
+typedef struct ReplInputCompletion {
+  size_t start, end;
+  List candidates;
+} ReplInputCompletion;
+
+/** Computes completion synchronously from borrowed text and a byte cursor.
+    Returned candidates must remain live through the editor's synchronous
+    completion handling. */
+typedef ReplInputCompletion (*ReplInputComplete)(
+  void *context, String text, size_t cursor);
+
 #pragma private
 #include <stdint.h>
 #include <errno.h>
@@ -88,6 +100,9 @@ struct EditState {
   const char *prompt;
   size_t plen, pos, oldpos, len, cols, oldrows;
   int oldrpos, history_index, history_len, fold_count;
+  ReplInputComplete complete;
+  void *completion_context;
+  int completion_pending;
   size_t fold_start[LINENOISE_MAX_FOLDS];
   size_t fold_end[LINENOISE_MAX_FOLDS];
 };
@@ -1167,7 +1182,8 @@ static char *_copy_text(const char *text) =>
   Scope.memdup(text, strlen(text) + 1);
 
 static void _edit_prepare(
-  struct EditState *l, ReplInput input, String prompt) {
+  struct EditState *l, ReplInput input, String prompt,
+  ReplInputComplete complete, void *completion_context) {
   *l = (struct EditState) {0};
   l.input = input;
   input.ifd = STDIN_FILENO;
@@ -1177,6 +1193,8 @@ static void _edit_prepare(
   l.buflen_max = LINENOISE_MAX_LINE;
   l.prompt = prompt;
   l.plen = prompt.len();
+  l.complete = complete;
+  l.completion_context = completion_context;
   l.oldrpos = 1;
   l.buf[0] = '\0';
 
@@ -1322,12 +1340,88 @@ static void _paste(struct EditState *l) {
     _refresh_line(l);
   } else _insert(l,buf,len);
 }
+
+static void _replace_completion(
+  struct EditState *l, size_t start, size_t end, String replacement) {
+  size_t added = replacement.len(), removed = end - start;
+  size_t length = l.len - removed + added;
+  if (_grow(l, length) == -1)
+    raise %(size-limit (operation "ReplInput.read") (limit 1048576));
+  memmove(l.buf + start + added, l.buf + end, l.len - end + 1);
+  memcpy(l.buf + start, replacement, added);
+  l.len = length;
+  l.pos = start + added;
+  _fold_clear(l);
+  _refresh_line(l);
+}
+
+static size_t _completion_common(List candidates) {
+  String first = candidates.car();
+  size_t common = first.len();
+  foreach (String candidate, candidates.cdr()) {
+    if (candidate.len() < common) common = candidate.len();
+    size_t i = 0;
+    while (i < common && first[i] == candidate[i]) i++;
+    common = i;
+  }
+  return common;
+}
+
+static void _show_completions(struct EditState *l, List candidates) {
+  _refresh_with_flags(l, REFRESH_CLEAN);
+  _write_bytes(l.input.ofd, "\r", 1);
+  foreach (String candidate, candidates) {
+    _write_bytes(l.input.ofd, candidate, candidate.len());
+    _write_bytes(l.input.ofd, "\n", 1);
+  }
+  l.oldrows = 0;
+  l.oldrpos = 1;
+  _refresh_line(l);
+}
+
+static void _complete(struct EditState *l) {
+  if (!l.complete) { _beep(); return; }
+  String text = String.new_len(l.buf, l.len);
+  ReplInputCompletion completion =
+    l.complete(l.completion_context, text, l.pos);
+  List candidates = completion.candidates;
+  if (!candidates || completion.start > completion.end ||
+      completion.end > l.len) {
+    l.completion_pending = 0;
+    _beep();
+    return;
+  }
+  size_t common = _completion_common(candidates);
+  size_t present = completion.end - completion.start;
+  if (!candidates.cdr() || common > present) {
+    String first = candidates.car();
+    String replacement = String.new_len(first, common);
+    _replace_completion(
+      l, completion.start, completion.end, replacement);
+    l.completion_pending = 0;
+    return;
+  }
+  if (l.completion_pending) {
+    _show_completions(l, candidates);
+    l.completion_pending = 0;
+  }
+  else {
+    l.completion_pending = 1;
+    _beep();
+  }
+}
+
 static Symbol _edit_feed(struct EditState *l) {
   char c, seq[3];
   if (!_read_byte(l, &c)) return <eof>;
 
+  if (c != TAB) l.completion_pending = 0;
+
   switch(c) {
   case KEY_NULL: break;
+  case TAB:
+    _complete(l);
+    break;
   case ENTER:
     _move_end(l);
     return <line>;
@@ -1479,9 +1573,11 @@ static Symbol _edit_feed(struct EditState *l) {
   return <editing>;
 }
 
-static ReplInputResult _read_interactive(ReplInput input, String prompt) {
+static ReplInputResult _read_interactive(
+  ReplInput input, String prompt, ReplInputComplete complete,
+  void *completion_context) {
   struct EditState edit;
-  _edit_prepare(&edit, input, prompt);
+  _edit_prepare(&edit, input, prompt, complete, completion_context);
   defer _edit_close(&edit);
 
   _enable_raw(input);
@@ -1512,7 +1608,9 @@ ReplInput ReplInput.new(void) {
     inline editing; other terminal types use the basic line reader. Terminal
     mode is restored before return or transfer of an allocation, size, or I/O
     cause. */
-ReplInputResult ReplInput.read(ReplInput r, String prompt) {
+ReplInputResult ReplInput.read(
+  ReplInput r, String prompt, ReplInputComplete complete,
+  void *completion_context) {
   if (!r || !r.open)
     return (ReplInputResult) { .status = <eof> };
   if (_unsupported_terminal()) {
@@ -1522,7 +1620,8 @@ ReplInputResult ReplInput.read(ReplInput r, String prompt) {
     text = text.remove_suffix("\n").remove_suffix("\r");
     return (ReplInputResult) { .status = <line>, .text = text };
   }
-  try { return _read_interactive(r, prompt); }
+  try { return _read_interactive(
+    r, prompt, complete, completion_context); }
   catch %(alloc-fail *details): {
     _restore(r);
     Error.raise(<alloc-fail>, details);

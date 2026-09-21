@@ -726,6 +726,21 @@ static Token _skip_forward(Token token) {
   }
 }
 
+/** Retags the token beginning at `position` as a private completion marker. */
+void Compiler.mark_completion(Compiler compiler, int position) {
+  for (size_t i = 0; i < compiler.tokenizer.tokens.len(); i++) {
+    Token token = &((struct Token *) compiler.tokenizer.tokens)[i];
+    if (token.pos == position && token.type == <ident>) {
+      token.type = <replcomp>;
+      return;
+    }
+  }
+}
+
+/** Reports whether the parser is at the private REPL completion marker. */
+int Compiler.at_completion(Compiler compiler) =>
+  compiler.token.type == <replcomp>;
+
 /** Returns the first non-trivia token at or after `token`. */
 Token Compiler.skip_trivia_from(Compiler compiler, Token token) =>
   _skip_forward(token);
@@ -769,6 +784,10 @@ Token Token.after_group(Token t) {
 */
 Symbol Compiler.peek(Compiler compiler, int steps) {
   Token token = compiler.token;
+  if (!steps && compiler.at_completion()) {
+    List rows = compiler.sym.visible_symbols();
+    raise %(replcomp (kind <names>) (rows $rows));
+  }
   while (steps > 0) {
     token = _skip_forward(token + 1);
     steps--;
@@ -2468,6 +2487,30 @@ void Sym.mark_static(Sym sym, List key) {
 Map Sym.current_symbols(Sym sym) {
   SymScope *scope = _semantic_scope(sym, -1);
   return scope ? scope.symbols : NULL;
+}
+
+/** Returns the visible one-part source names and their semantic types.
+    Inner scopes win. The result is a fresh List; types remain borrowed. */
+List Sym.visible_symbols(Sym sym) {
+  Map seen = {};
+  Array rows = [];
+  for (int i = (int) sym.scopes.len() - 1; i >= 0; i--) {
+    SymScope *scope = _semantic_scope(sym, i);
+    foreach (Var (key, value), scope.symbols)
+      match (key)
+        case %(?(String name)):
+          if (!seen.contains(name)) {
+            seen[name] = 1;
+            rows.push(%($name $value));
+          }
+    if ((void *) scope.macros != NULL)
+      foreach (Var (name, _), scope.macros)
+        if (name is <string> && !seen.contains(name)) {
+          seen[name] = 1;
+          rows.push(%($name <macro>));
+        }
+  }
+  return rows.list_free();
 }
 
 /** Returns `key`'s binding in the current scope, or `NULL`. */
