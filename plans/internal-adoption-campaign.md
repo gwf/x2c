@@ -1,7 +1,8 @@
 # Internal adoption campaign
 
-> Status: active - phase 1 implemented for delivery; phases 2-4 remain ready.
-> Refreshed against dev at `b7e9ed46` on 2026-09-21. Generalized meta adoption
+> Status: active - phase 1 implemented and validated as the first campaign
+> milestone; phases 2-4 remain queued.
+> Refreshed against dev at `d985caa6` on 2026-09-21. Generalized meta adoption
 > depends on rebasing, reviewing and landing `codex/meta-values-types`;
 > lifetime-sensitive adoption depends on the certification work described
 > below.
