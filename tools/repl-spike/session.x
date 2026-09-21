@@ -9,7 +9,7 @@
     this session are finished. Results borrow that Context's storage. */
 typedef struct ReplSession {
   Compiler compiler;
-  Map names;
+  Map names;  // Published name -> (value) or (function (typed ...) (lowered ...)).
 } *ReplSession;
 
 /** status is incomplete, rejected, defined, executed, value, or failed.
@@ -38,6 +38,26 @@ ReplSession ReplSession.new(Compiler compiler) {
   session.compiler = compiler;
   session.names = {};
   return session;
+}
+
+/** Returns an immutable snapshot of (kind "name") entries, sorted by name.
+    Only session definitions appear; storage is borrowed until unit close. */
+List ReplSession.symbols(ReplSession session) {
+  Array names = [], entries = [];
+  defer names.free();
+  foreach (Var (name, entry), session.names) names.push(name);
+  foreach (String name, names.sort()) {
+    List entry = session.names[name];
+    entries.push(%(${entry.car()} $name));
+  }
+  return entries.list_free();
+}
+
+/** Returns (value), (function (typed AST) (lowered FORMS)), or NULL if absent.
+    These are the original canonical Lists, borrowed until unit close. */
+List ReplSession.inspect(ReplSession session, String name) {
+  Var entry;
+  return session.names.try_get(name, &entry) ? entry.list() : NULL;
 }
 
 static List _bare(List node) {
@@ -257,7 +277,10 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
   }
   if (function_name || added.len()) {
     transaction.commit_transient();
-    foreach (String name, added) names[name] = 1;
+    foreach (String name, added)
+      names[name] = function_name
+        ? %(function (typed ${result.syntax}) (lowered ${result.lowered}))
+        : %(value);
   }
   result.name = function_name;
   result.status = function_name ? <defined> : prints ? <value> : <executed>;

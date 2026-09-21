@@ -129,3 +129,17 @@ Results go to `debug/repl-retention/`; reruns replace matching workload logs.
 Local evidence for this assessment is preserved in `debug/repl-long-*.log`,
 `debug/repl-long-5000-samples/`, and `debug/repl-long-50000-samples/`.
 No recurring validation requirement was added.
+
+## Named inspection follow-up
+
+The inspection pass replaces name-map markers with immutable kind entries;
+function entries reference the already-retained typed AST and lowered Lisp.
+It introduces no shorter lifetime and no claim of bounded memory. Symbol
+listing creates a canonical snapshot, while named lookup returns the stored
+entry. Both remain borrowed until unit close. Existing measurements above
+predate this pass and have not been remeasured.
+
+Direct checks retain a named function entry and symbol snapshot across 600
+later submissions and additional definitions, and verify that rejected,
+incomplete, and failed definitions publish no entry. The existing three-session
+teardown comparison also includes these inspection calls.

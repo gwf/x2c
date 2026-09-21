@@ -221,10 +221,10 @@ existing transaction behavior.
 
 ## Evidence and architecture review
 
-`check.py` runs the direct API client and 18 terminal recovery/subset checks,
+`check.py` runs the direct API client and 31 terminal checks,
 then compiles the same three function examples natively and compares results:
-`15`, `32`, `499500`. The direct client checks 22 submission outcomes across
-three fresh sessions, including failed multi-binding initialization and ID
+`15`, `32`, `499500`. The direct client checks submission and inspection
+outcomes across three fresh sessions, including failed multi-binding initialization and ID
 reuse. The interpreted comparison reports 20 Lisp calls, 7 word-machine
 entries, and zero machine errors.
 
@@ -269,26 +269,60 @@ The [long-session assessment](long-session.md) records the latest ownership
 fixes, 50,000-input mixed sessions, retained-result checks, and the remaining
 design decisions before production integration.
 
-## Proposed next direction
+## Symbol discovery and named inspection
 
-Make the existing session inspectable before adding lifetime or execution
-semantics. These are recommendations, not implemented commands:
+`session.symbols()` returns an immutable snapshot sorted by name, containing
+only successfully published session definitions:
 
-1. Expose user-defined names and their kinds through the session API, with a
-   terminal listing as its client. Distinguish this from enumerating every
-   inherited Lisp binding or compiler helper.
-2. Retrieve a named function's canonical syntax and show it with the familiar
-   list-template notation. Keep the typed AST and lowered Lisp available as
-   distinct views. Existing `ReplResult.syntax` and `.lowered` establish the
-   data path, but the session does not yet index results by function name.
-3. Let ordinary immutable List transformations produce new source syntax,
-   then bind, type-check, and lower it through the existing compiler owners
-   under a fresh name. Typed binding IDs cannot simply be reused in a changed
-   definition. No textual rewriting or second AST representation is needed.
+```c
+List names = session.symbols();
+// %((value "n") (function "plus"))
+List entry = session.inspect("plus");
+match (entry) {
+  case %(function (typed ?syntax) (lowered ?forms)):
+    printf("typed: %%%s\n", syntax.repr());
+}
+```
+
+`inspect(name)` returns `(value)` for an initialized value,
+`(function (typed AST) (lowered FORMS))` for a function, or NULL for an absent
+name. The AST and lowered forms are the same canonical Lists returned by the
+successful submission, not reparsed source or newly lowered code. Inspection
+and symbol snapshots borrow the unit Context until `unit.close`, just like
+submission results. A value's entry records its kind, not its current value.
+
+The existing name map owns these entries and also checks redeclaration; there
+is no second function index. Entries publish after successful initialization.
+Rejected, incomplete, or failed submissions add nothing, and later submissions
+leave earlier function syntax inspectable. Prelude names, function locals,
+parameters, and evaluator helpers are excluded.
+
+The terminal is a thin client of these two operations:
+
+| Command | Output |
+| --- | --- |
+| `:symbols` | A list template such as `%((value "n") (function "plus"))`. |
+| `:ast plus` | `typed: %(function ...)`, the typed x2c AST. |
+| `:lowered plus` | `lowered: ((def ...))`, the executable Lisp forms. |
+
+Lists may span multiple lines. Typed AST output uses the familiar `%()`
+notation; lowered Lisp is labeled separately and printed as Lisp. Missing
+names and values passed to a function command report `not a session function`.
+Missing or extra arguments report usage; unknown colon commands report an
+error. All inspection commands, including errors, preserve pending multiline
+source. `:cancel` still discards it; `:quit` still exits. Commands are handled
+at line boundaries even while a source string or comment is incomplete.
+
+## Deferred direction
+
+Immutable List transformations can produce new source syntax, but installing
+changed definitions still requires binding, typing, and lowering through the
+ordinary compiler owners under a fresh name. Edited typed ASTs cannot blindly
+reuse binding IDs. This pass adds inspection only.
 
 Scope push/pop alone is allocation control, not semantic rewind. A later
 input can mutate an earlier Array, global cell, or external resource. Rewind
-would need a stated mutation policy, symbol-state handling, and escape rules
-before reclaiming memory. Stop-and-copy and a new memory model remain deferred.
-The existing result lifetime stays at unit close while these inspection ideas
-are evaluated alongside ongoing terminal polish.
+needs a mutation policy, symbol-state handling, and escape rules before
+reclaiming memory. Stop-and-copy and a general collector remain deferred.
+Compile-time execution coverage continues separately; result lifetimes and
+execution semantics are unchanged.

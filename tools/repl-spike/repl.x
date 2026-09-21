@@ -13,10 +13,40 @@
 static void _help(void) {
   puts("Enter declarations or statements with semicolons.\n"
        ":help    show this help\n"
+       ":symbols list session-defined names and kinds\n"
+       ":ast NAME show a function's typed AST\n"
+       ":lowered NAME show a function's lowered Lisp\n"
        ":cancel  discard incomplete input\n"
        ":quit    leave the session\n"
        "Options: --dump prints typed AST and lowered Lisp; --stats prints "
        "execution counters.");
+}
+
+static void _inspect(ReplSession session, String command) {
+  Array words = [];
+  defer words.free();
+  foreach (String word, command.words()) words.push(word);
+  String operation = words[0];
+  if (operation == ":symbols") {
+    if (words.len() != 1) fputs("usage: :symbols\n", stderr);
+    else printf("%%%s\n", session.symbols().repr());
+  }
+  else if (operation == ":ast" || operation == ":lowered") {
+    if (words.len() != 2) {
+      fprintf(stderr, "usage: %s NAME\n", operation);
+      return;
+    }
+    String name = words[1];
+    match (session.inspect(name)) {
+      case %(function (typed ?syntax) (lowered ?forms)): {
+        if (operation == ":ast") printf("typed: %%%s\n", syntax.repr());
+        else printf("lowered: %s\n", forms.repr());
+        return;
+      }
+    }
+    fprintf(stderr, "not a session function: %s\n", name);
+  }
+  else fprintf(stderr, "unknown command: %s\n", command);
 }
 
 int main(int argc, char **argv) {
@@ -59,6 +89,11 @@ int main(int argc, char **argv) {
     if (command == ":quit") { pending = ""; break; }
     if (command == ":cancel") { pending = ""; continue; }
     if (command == ":help") { _help(); continue; }
+    if (command.startswith(":")) {
+      _inspect(session, command);
+      fflush(stdout);
+      continue;
+    }
     pending += line + "\n";
     ReplResult result = session.submit(pending);
     if (dump && result.syntax) fprintf(stderr, "typed: %s\n", result.syntax.repr());

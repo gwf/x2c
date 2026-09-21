@@ -83,6 +83,38 @@ check("int fact(int n) { return n < 2 ? 1 : n * fact(n-1); }\nfact(6);\n",
 check("int forever(void) { while (1) {} return 0; }\nforever();\n2+3;\n",
       "defined forever\n=> 5\n", '(why "steps")')
 
+check(":symbols\n", "%()\n")
+check("int z=1, a=2;\nint middle(void) { return a+z; }\n:symbols\n",
+      'ok\ndefined middle\n%((value "a") (function "middle") (value "z"))\n')
+check("int lost=1, failed=1/0;\n:symbols\n",
+      "%()\n", "evaluation failed:")
+check("int bad(void) { goto end; end: return 0; }\n:symbols\n",
+      "%()\n", "a goto has no lowering")
+check("int pending(\n:symbols\n:cancel\n:symbols\n", "%()\n%()\n")
+result = run("int f(int x) { return x+1; }\n:ast f\n:lowered f\n"
+             "int later=3;\nf(later);\n:ast f\n:lowered f\n")
+assert result.returncode == 0 and not result.stderr, result
+assert result.stdout.startswith("defined f\n"), result
+before, after = result.stdout[len("defined f\n"):].split("ok\n=> 4\n")
+assert before == after, result
+typed, lowered = before.split("\nlowered: ")
+assert typed.startswith("typed: %(function "), result
+assert lowered.startswith("(") and typed[len("typed: %"):] != lowered, result
+result = run("int n=2;\n1 +\n:ast\n:lowered f extra\n:unknown\n"
+             ":ast missing\n:lowered n\n:symbols extra\n:symbols\n2;\n")
+assert result.returncode == 0, result
+assert result.stdout == 'ok\n%((value "n"))\n=> 3\n', result
+assert result.stderr.splitlines() == [
+    "usage: :ast NAME", "usage: :lowered NAME",
+    "unknown command: :unknown", "not a session function: missing",
+    "not a session function: n", "usage: :symbols"], result
+result = run("int f(void) { return 3; }\n1 +\n  :ast\tf  \n"
+             "\t:lowered \t f\t\n2;\n")
+assert result.returncode == 0 and not result.stderr, result
+assert result.stdout.startswith("defined f\ntyped: %(function "), result
+assert "\nlowered: (" in result.stdout, result
+assert result.stdout.endswith("=> 3\n"), result
+
 # The same authored functions execute through native compilation and lowering.
 functions = """int total = 12;
 int plus(int x) { return total + x; }
@@ -107,7 +139,7 @@ subprocess.run([str(ROOT / "builds/0/x2c"), "build", "--output",
 native = subprocess.check_output([str(native_binary)], text=True).splitlines()
 assert interpreted == native, (interpreted, native)
 assert "machine entries=0 " not in result.stderr, result.stderr
-print("23 terminal checks and native parity passed:", ", ".join(native))
+print("31 terminal checks and native parity passed:", ", ".join(native))
 print(result.stderr.strip())
 
 startup = []

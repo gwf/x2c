@@ -9,6 +9,15 @@
 
 static int failures;
 
+static void _symbols(ReplSession session, List expected) {
+  List actual = session.symbols();
+  if (actual.repr() != expected.repr()) {
+    fprintf(stderr, "expected symbols %s, got %s\n",
+            expected.repr(), actual.repr());
+    failures++;
+  }
+}
+
 static void _expect(
   ReplSession session, String source, Symbol status, Var value) {
   ReplResult result = session.submit(source);
@@ -43,6 +52,7 @@ static void _transaction_deletion(Compiler c) {
 }
 
 static void _exercise(ReplSession s) {
+  _symbols(s, %());
   _expect(s, "int", <incomplete>, void);
   _expect(s, "int f(int", <incomplete>, void);
   _expect(s, "int f(int x) {", <incomplete>, void);
@@ -52,9 +62,17 @@ static void _exercise(ReplSession s) {
   _expect(s, "1 +", <incomplete>, void);
   _expect(s, "1 + ;", <rejected>, void);
   _expect(s, "unknown[0];", <rejected>, void);
+  _symbols(s, %());
   _expect(s, "int n=0;", <executed>, void);
   _expect(s, "int next(void) { n+=1; return n; }", <defined>, void);
   _expect(s, "int bad=next(), second=1/0;", <failed>, void);
+  _symbols(s, %((value "n") (function "next")));
+  if (s.inspect("bad") || s.inspect("second") || s.inspect("f") ||
+      s.inspect("a") || s.inspect("__repl_eval") || s.inspect("String") ||
+      s.inspect("n").repr() != %(value).repr()) {
+    fputs("inspection published a failed binding or wrong kind\n", stderr);
+    failures++;
+  }
   _expect(s, "n;", <value>, 1);
   _expect(s, "bad;", <rejected>, void);
   _expect(s, "second;", <rejected>, void);
@@ -65,10 +83,33 @@ static void _exercise(ReplSession s) {
   _expect(s, "n;", <value>, 2);
   _expect(s, "n+=3;", <executed>, void);
   _expect(s, "n;", <value>, 5);
+  _expect(s, "int rejected(void) { goto end; end: return 0; }",
+          <rejected>, void);
+  _expect(s, "int twice(int x) { return 99; }", <rejected>, void);
+  _symbols(s, %((value "bad") (value "n") (function "next")
+               (value "second") (function "twice")));
+  if (s.inspect("rejected")) {
+    fputs("inspection published a function that failed lowering\n", stderr);
+    failures++;
+  }
 }
 
 static void _retained_results(ReplSession s) {
-  _expect(s, "long wide(void) { return 5000000000; }", <defined>, void);
+  ReplResult definition = s.submit("long wide(void) { return 5000000000; }");
+  List entry = s.inspect("wide"), symbols = s.symbols();
+  String inspected = entry.repr(), published = symbols.repr();
+  int matched = 0;
+  match (entry) {
+    case %(function (typed ?syntax) (lowered ?forms)):
+      matched = definition.status == <defined> &&
+                syntax.repr() == definition.syntax.repr() &&
+                forms.repr() == definition.lowered.repr() &&
+                syntax.repr() != forms.repr();
+  }
+  if (!matched) {
+    fputs("named inspection lost typed AST or lowered Lisp\n", stderr);
+    failures++;
+  }
   _expect(s, "Func capture(int x) { return %!(int y) => x+y; }",
           <defined>, void);
   _expect(s, "Func captured = capture(7);", <executed>, void);
@@ -89,7 +130,10 @@ static void _retained_results(ReplSession s) {
   if (wide.value != 5000000000L || wide.syntax.repr() != syntax ||
       wide.lowered.repr() != lowered || bad.diagnostics.repr() != diagnostic ||
       bad.source != "int broken = ;" || array.value.array()[0] != 17 ||
-      s.compiler.macro_lisp.apply(closure.value, %(5)) != 12) {
+      s.compiler.macro_lisp.apply(closure.value, %(5)) != 12 ||
+      s.inspect("wide").repr() != inspected || entry.repr() != inspected ||
+      symbols.repr() != published || s.inspect("incomplete") ||
+      s.inspect("invalid") || s.inspect("broken")) {
     fputs("retained result changed after later submissions\n", stderr);
     failures++;
   }
