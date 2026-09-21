@@ -29,6 +29,8 @@
 (def List.sort_by  (bind "List_sort_by" nil))
 (def List.sort_with (bind "List_sort_with" nil))
 (def List.zip_with (bind "List_zip_with" nil))
+(def List.foldl   (bind "List_foldl" nil))
+(def List.find    (bind "Lisp_List_find" nil))
 (def List.iter     (bind "List_iter" nil))
 
 // Array
@@ -52,6 +54,7 @@
 (def Array.map2      (bind "Array_map2" nil))
 (def Array.sort_by   (bind "Array_sort_by" nil))
 (def Array.sort_with (bind "Array_sort_with" nil))
+(def Array.foldl    (bind "Array_foldl" nil))
 (def Array.iter      (bind "Array_iter" nil))
 
 // Map
@@ -149,6 +152,11 @@
 (def Iter.unique (bind "Iter_unique" nil))
 (def Iter.any (bind "Lisp_Iter_any" nil))
 (def Iter.all (bind "Lisp_Iter_all" nil))
+(def Iter.foldl (bind "Iter_foldl" nil))
+(def Iter.find (bind "Lisp_Iter_find" nil))
+(def Iter.next (bind "Iter_next" nil))
+(def Iter.min (bind "Iter_min" nil))
+(def Iter.max (bind "Iter_max" nil))
 (def Iter.list (bind "Iter_list" nil))
 (def Iter.array (bind "Iter_array" nil))
 (def Iter.count (bind "Iter_count" nil))
@@ -165,6 +173,7 @@
 (def Var.integer  (bind "Var_integer" nil))
 (def Var.floating (bind "Var_floating" nil))
 (def Var.is_null  (bind "Var_is_null" nil))
+(def Var.is_void  (bind "Var_is_void" nil))
 
 (def Symbol.len     (bind "Symbol_len" nil))
 (def Symbol.str     (bind "Symbol_str" nil))

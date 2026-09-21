@@ -371,18 +371,18 @@ meta List shifted(int amount) {
 
 `List`, `Array` and `String` mapping and filtering use the same native
 operations with an adapter for the interpreted callback. Lazy `Iter` mapping,
-filtering, pairing and collection work the same way. Calls made as Lisp keep
-Lisp's nil-only false value; callbacks in x2c-style meta functions retain
-ordinary `Var` truth.
+filtering, pairing and collection work the same way. Calls made as Lisp treat
+nil and `void` as false; callbacks in x2c-style meta functions retain ordinary
+`Var` truth.
 
 A binding name alone is not proof of runtime-equivalent behavior. A missing
 binding also does not explain why it was omitted. Some operations need only an
 adapter over existing values; others need native pointer arguments or resource
 ownership. Explicit caller-supplied `struct Iter` storage remains a runtime
 contract and has no compile-time representation. Use the destination-free form
-inside a meta function. `List.foldl` and the empty-result iterator operations
-still wait for true `void` transport, because Lisp nil must remain distinct
-from runtime `void`.
+inside a meta function. `List`, `Array` and `Iter` folds preserve a true `void`
+no-seed argument. Empty or exhausted `Iter.next`, `find`, `min` and `max` calls
+return true runtime `void`, distinct from Lisp nil.
 
 Other installed meta functions and the compiler operations declared in
 `meta.x` extend this surface; including a normal function declaration does

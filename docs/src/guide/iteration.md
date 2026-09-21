@@ -4,10 +4,11 @@ x2c has two ways to walk a collection. `foreach(T name, collection)` is the
 short form and covers most cases. `Iter` chains combine operations that process
 one element at a time, then collect, aggregate, or loop over the result.
 
-Neither one allocates iterator state on the heap. For an immediately
-consumed chain, x2c supplies stack storage for every stage. Name that
-storage yourself when the iterator has to stay live between expressions. The
-[storage convention](#the-storage-convention) covers both forms.
+At runtime, an immediately consumed chain uses caller stack storage for every
+stage. Name that storage yourself when the iterator has to stay live between
+expressions. In a meta function, the destination-free form allocates iterator
+state in the compile-time session `Scope`. The
+[storage convention](#the-storage-convention) covers the runtime forms.
 
 [The language reference](../reference/language.md) states the `foreach` rules,
 and the [standard library overview](../library/overview.md) links to every

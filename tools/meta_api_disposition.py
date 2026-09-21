@@ -29,18 +29,17 @@ def disposition(row):
         group = "canonical List selectors"
         owner = "lib/list-selectors.x; lib/list.x"
         if "a" in method[1:-1]:
-            kind = "needs representation decision"
-            reason = ("A car step may return runtime void; current adapters collapse "
-                      "that absence into an empty List.")
-            action = "Use the value-contract decision before extending absent-selector adapters."
+            reason = ("A car step may return runtime void; raw evaluator slots now "
+                      "preserve that absence separately from an empty List.")
+            action = f"Bind {name} and verify present, short and empty chains."
         else:
             reason = "Only cdr steps occur; exhaustion is a representable empty List."
             action = f"Compose the existing nil-safe cdr owner for {name}; test short chains."
     elif method == "foldl":
         group = "seeded folds"
-        kind = "needs representation decision"
-        reason = "Runtime void means no seed; an empty List is a distinct valid seed; null callbacks are permitted."
-        action = "Settle true-void transport, then bridge the callback preserving seed, order and empty-input behavior."
+        kind = "needs callback adapter"
+        reason = "Raw evaluator slots preserve the void no-seed marker; the remaining crossing is the interpreted callback."
+        action = "Bridge the callback while preserving seed, order, null-callback and empty-input behavior."
     elif "Func" in signature:
         group = f"{receiver} interpreted callbacks"
         kind = "needs callback adapter"
@@ -82,9 +81,8 @@ def disposition(row):
         "take_last", "shift", "remove", "del", "is_void", "null"
     }):
         group = "absence and null values"
-        kind = "needs representation decision"
-        reason = "Missing values or null tests can distinguish runtime void, Null and empty List, which current transport can conflate."
-        action = f"Apply the value-contract decision to {name}; retain separate success, absence and empty-value probes."
+        reason = "Raw evaluator slots keep runtime void, Null and empty List distinct."
+        action = f"Bind {name}; retain separate success, absence and empty-value probes."
     elif receiver == "Var" and method in {"is_pointer", "is_reference"}:
         group = "source address tags"
         kind = "needs representation decision"
@@ -139,9 +137,8 @@ def disposition(row):
     elif receiver == "Var" and (method.startswith(("box_", "decode_", "wide_", "fallback_")) or method in {"integer_box", "integer_compare", "integer_floating_compare", "integer_tag", "known_tag", "payload32", "encoding_valid", "is_row", "width_mask", "signed_from_bits", "clone_wide", "custom_descriptor_index", "pointer_string"}):
         group = "numeric and descriptor internals"
         if method == "clone_wide":
-            kind = "needs representation decision"
-            reason = "Valid wide inputs allocate a fresh box in the active Scope; a nonwide input returns true void."
-            action = "Settle true-void transport, then verify fresh identity, equal payload and session-owned lifetime for wide inputs."
+            reason = "Valid wide inputs allocate a fresh box in the active Scope; raw evaluator slots preserve the true-void result for a nonwide input."
+            action = "Verify fresh identity, equal payload and session-owned lifetime for wide inputs."
         elif method == "pointer_string":
             kind = "needs representation decision"
             reason = "The result formats a raw address; meta locals and native pointer/reference values do not yet share their declared tags or address identity."
@@ -160,8 +157,8 @@ def disposition(row):
         action = f"Bind {name}'s native operation or prove exact equivalence with its lowering, including mutation, coercion and failure results."
     elif signature.startswith("void "):
         group = "mutations returning no value"
-        reason = "The function mutates an existing represented object and returns C void. The existing Func adapter returns Var.null for that C result."
-        action = f"Reuse the generated native Func adapter for {name}; verify mutation and distinguish this return from a Var containing void."
+        reason = "The function mutates an existing represented object, and the Func adapter transports its C void result as true runtime void."
+        action = f"Reuse the generated native Func adapter for {name}; verify both the mutation and true-void result."
     elif path == "lib/common.x" and row["line"] == 0:
         group = "generated numeric/value interfaces"
         kind = "needs bounded probe"
@@ -169,6 +166,11 @@ def disposition(row):
         action = f"Trace {name} through generated stage code to its macro/foreign owner and verify conversion or alias semantics before binding."
 
     if row["binding"]:
-        action = f"Validate the existing binding against this contract. Next: {action}"
+        if group.endswith("interpreted callbacks") or group == "seeded folds":
+            reason += " The binding uses a session-bound Func adapter."
+        elif group == "native iterator state":
+            reason += (" The binding allocates private iterator storage in the "
+                       "session Scope and leaves the public caller-storage API unchanged.")
+        action = f"Validate the existing binding against this contract: {action}"
     return dict(owner=owner, group=group, disposition=kind,
                 contract=reason, next_action=action)

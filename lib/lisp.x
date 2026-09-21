@@ -1080,8 +1080,8 @@ static Var _lisp_predicate_one(Func function, const FuncArg *arguments) {
   if (!lisp_active || lisp_active != context.lisp)
     raise %(bad-state (operation "Lisp callback") (why "wrong session"));
   Var value = x2c_func_value_argument(function, arguments, 0, <var>);
-  return _bool(
-    !_apply_values(context.lisp, context.callable, %($value), NULL).is_nil());
+  return lisp_truth(
+    _apply_values(context.lisp, context.callable, %($value), NULL));
 }
 
 static Func _lisp_callback(Var callable, int arity) {
@@ -1124,6 +1124,10 @@ static List _lisp_List_sort_with(List values, Var callable) =>
   values.sort_with(_lisp_callback(callable, 2));
 static List _lisp_List_zip_with(List left, List right, Var callable) =>
   left.zip_with(right, _lisp_callback(callable, 2));
+static Var _lisp_List_foldl(List values, Var seed, Var callable) =>
+  values.foldl(seed, _lisp_callback(callable, 2));
+static Var _lisp_List_find(List values, Var callable) =>
+  values.find(_lisp_callback(callable, 1));
 
 static Array _lisp_Array_map(Array values, Var callable) =>
   values.map(_lisp_callback(callable, 1));
@@ -1133,6 +1137,8 @@ static Array _lisp_Array_sort_by(Array values, Var callable) =>
   values.sort_by(_lisp_callback(callable, 1));
 static Array _lisp_Array_sort_with(Array values, Var callable) =>
   values.sort_with(_lisp_callback(callable, 2));
+static Var _lisp_Array_foldl(Array values, Var seed, Var callable) =>
+  values.foldl(seed, _lisp_callback(callable, 2));
 
 static String _lisp_String_map(String value, Var callable) =>
   value.map(_lisp_callback(callable, 1));
@@ -1176,16 +1182,22 @@ static int _lisp_Iter_any(Iter iter, Var callable) =>
   iter.any(_lisp_callback(callable, 1));
 static int _lisp_Iter_all(Iter iter, Var callable) =>
   iter.all(_lisp_callback(callable, 1));
+static Var _lisp_Iter_foldl(Iter iter, Var seed, Var callable) =>
+  iter.foldl(seed, _lisp_callback(callable, 2));
+static Var _lisp_Iter_find(Iter iter, Var callable) =>
+  iter.find(_lisp_callback(callable, 1));
 
-/* The x2c bindings above preserve native Var truth. Lisp surface calls keep
-   Lisp's nil-only falsehood by adapting a predicate result before native
-   collection code observes it. */
+/* The x2c bindings above preserve native Var truth. Lisp surface calls adapt
+   predicate results through Lisp truth before native collection code observes
+   them, so nil and void are false while every other value remains true. */
 static List _lisp_Lisp_List_filter(List values, Var callable) =>
   values.filter(_lisp_predicate(callable));
 static int _lisp_Lisp_List_any(List values, Var callable) =>
   values.any(_lisp_predicate(callable));
 static int _lisp_Lisp_List_all(List values, Var callable) =>
   values.all(_lisp_predicate(callable));
+static Var _lisp_Lisp_List_find(List values, Var callable) =>
+  values.find(_lisp_predicate(callable));
 static String _lisp_Lisp_String_filter(String value, Var callable) =>
   value.filter(_lisp_predicate(callable));
 static Iter _lisp_Lisp_Iter_filter(Iter iter, Var callable) =>
@@ -1194,6 +1206,8 @@ static int _lisp_Lisp_Iter_any(Iter iter, Var callable) =>
   iter.any(_lisp_predicate(callable));
 static int _lisp_Lisp_Iter_all(Iter iter, Var callable) =>
   iter.all(_lisp_predicate(callable));
+static Var _lisp_Lisp_Iter_find(Iter iter, Var callable) =>
+  iter.find(_lisp_predicate(callable));
 
 // The direct targets let the compiler generate their call adapters and
 // read each signature from the declared prototype.
@@ -1202,6 +1216,7 @@ $(def lisp.native.target.rows '(
   (lisp_void)
   (lisp_truth)
   (Var_truth)
+  (Var_is_void)
   (lisp_cell)
   (lisp_address)
   (lisp_load)
@@ -1256,10 +1271,13 @@ $(def lisp.native.target.rows '(
   (_lisp_List_sort_by (as List_sort_by))
   (_lisp_List_sort_with (as List_sort_with))
   (_lisp_List_zip_with (as List_zip_with))
+  (_lisp_List_foldl (as List_foldl))
+  (_lisp_List_find (as List_find))
   (_lisp_Array_map (as Array_map))
   (_lisp_Array_map2 (as Array_map2))
   (_lisp_Array_sort_by (as Array_sort_by))
   (_lisp_Array_sort_with (as Array_sort_with))
+  (_lisp_Array_foldl (as Array_foldl))
   (_lisp_String_map (as String_map))
   (_lisp_String_filter (as String_filter))
   (_lisp_List_iter (as List_iter))
@@ -1284,13 +1302,20 @@ $(def lisp.native.target.rows '(
   (_lisp_Iter_unique (as Iter_unique))
   (_lisp_Iter_any (as Iter_any))
   (_lisp_Iter_all (as Iter_all))
+  (_lisp_Iter_foldl (as Iter_foldl))
+  (_lisp_Iter_find (as Iter_find))
+  (Iter_next)
+  (Iter_min)
+  (Iter_max)
   (_lisp_Lisp_List_filter (as Lisp_List_filter))
   (_lisp_Lisp_List_any (as Lisp_List_any))
   (_lisp_Lisp_List_all (as Lisp_List_all))
+  (_lisp_Lisp_List_find (as Lisp_List_find))
   (_lisp_Lisp_String_filter (as Lisp_String_filter))
   (_lisp_Lisp_Iter_filter (as Lisp_Iter_filter))
   (_lisp_Lisp_Iter_any (as Lisp_Iter_any))
   (_lisp_Lisp_Iter_all (as Lisp_Iter_all))
+  (_lisp_Lisp_Iter_find (as Lisp_Iter_find))
   (Iter_list)
   (Iter_array)
   (Iter_count)

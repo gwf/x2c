@@ -6,7 +6,7 @@
 > AD source templates shipped through 8c2a8054; x2c-first examples followed in
 > 95e73d18. Capture-call repairs and remaining API/representation work extend
 > that baseline. The exhaustive value-operation continuation now accounts for
-> all 483 signatures with 305 bindings and behavioral evidence for every bound
+> all 483 signatures with 330 bound rows and behavioral evidence for every bound
 > row. Implemented behavior and open follow-ons are recorded below.
 
 
@@ -264,8 +264,8 @@ one-less-argument producer bindings. It preserves native lazy producers,
 callback state and source mutation semantics while leaving the allocation-free
 caller-storage APIs intact. The callback bridge uses the evaluator's internal
 application path so one public entry retains one call budget. Explicit native
-storage remains unrepresented and is refused. Operations whose result may be
-true runtime `void` wait for the value-transport decision.
+storage remains unrepresented and is refused. True-void transport carries
+absent iterator results and no-seed folds.
 
 Correct the guide inventory: List.car, List.cdr and Var.cons were missed by a
 single-layer scan; an internal Var_func helper is not evidence of a public
@@ -361,14 +361,14 @@ complete the API surface.
 The exhaustive continuation binds the remaining ordinary operations over
 represented scalar, String, Symbol, List, Array, Map and Var values, including
 the pure optional-module operations, without importing those optional source
-APIs into the implicit prelude. The resulting inventory has 305 binding matches
-and 178 unmatched signatures. Its fixed native/meta comparisons leave no bound
-row unverified: 295 rows have a verified example and 15 retain a reproduced
-limitation. The other 173 unbound rows have an explicit owner, contract group,
+APIs into the implicit prelude. The integrated inventory has 330 bound signature
+rows and 153 unbound rows. Its fixed native/meta comparisons leave no bound row
+unverified: 321 rows have a verified example and 9 retain a reproduced
+limitation. Every unbound row has an explicit owner, contract group,
 disposition and next action. The optional inventory records every signature and
 distinguishes observed behavior from binding presence and absence.
 
-Two representation follow-ons remain explicit rather than being presented as
+One representation follow-on remains explicit rather than being presented as
 completed support:
 
 - Explicit Array/Map result insertion now constructs a fresh Scope-owned root
@@ -380,10 +380,6 @@ completed support:
   stay at runtime. Nested mutable descendants, sharing and cycles remain refused
   until a graph/identity contract is decided; no serializer or silent nested
   copy is introduced.
-- List.foldl distinguishes a void seed from an empty List and permits a null
-  callback. No-value transport now preserves that seed distinction. Full parity
-  still needs the interpreted-callback bridge; ordinary seeded folds can already
-  be written as meta functions.
 
 These limits prevent claiming the broader all-value-types goal complete. The
 current API report records other missing operations individually; no historical
@@ -408,10 +404,11 @@ behavior remains unchanged.
 The compiler transition is staged through the generated bootstrap rather than
 hand-editing it. Focused native, meta, interpreter, instrumented VM, absence and
 header-cache probes cover the transport and the first-failure diagnostic path.
-Integration with the API lane re-runs the self-host, corpus and publication
-gate. List.foldl still needs the callback bridge, and general Iter still needs
-its state and lifetime representation; no-value transport is no longer their
-representation blocker.
+The iterator integration adds a session-bound callback bridge and private
+Scope-owned iterator destinations while preserving the public caller-storage
+APIs. List, Array and Iter folds retain the void no-seed marker; empty Iter
+`next`, `find`, `min` and `max` results remain true void. Focused probes cover
+null callbacks, empty inputs, callback truth, laziness and session lifetime.
 
 The absence-wrapper audit has three dispositions:
 

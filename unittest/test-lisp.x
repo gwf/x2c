@@ -1199,6 +1199,8 @@ static void lisp_optional_layers_are_explicit(void) {
 
 static void lisp_value_layer_uses_library_operations(void) {
   Lisp lisp = _boot_session();
+  _install(lisp, "no-value", _native_void,
+           %((func ((void))) "Var"));
   Var value = void;
   EXPECT_FALSE(lisp.try_get("Map.new", &value));
   if (!_load_lisp_layer(lisp, "../etc/lisp-values.xlisp")) return;
@@ -1229,6 +1231,15 @@ static void lisp_value_layer_uses_library_operations(void) {
     _ev(lisp, "'(0 2)"));
   EXPECT_FALSE(_ev(lisp, "(List.any '(0) (lambda (x) x))").is_nil());
   EXPECT_FALSE(_ev(lisp, "(List.all '(0) (lambda (x) x))").is_nil());
+  EXPECT_INT_EQ(
+    Var.integer(_ev(lisp,
+      "(List.foldl '(1 2 3) (no-value) (lambda (a b) (+ a b)))")),
+    6);
+  EXPECT_TRUE(_ev(lisp, "(List.foldl '() (no-value) nil)") is void);
+  EXPECT_INT_EQ(Var.integer(
+    _ev(lisp, "(List.foldl '(4 5) (no-value) nil)")), 4);
+  EXPECT_INT_EQ(Var.integer(
+    _ev(lisp, "(List.find '(0 2) (lambda (x) x))")), 0);
   EXPECT_VAR_EQ(
     _ev(lisp, "(Iter.list (Iter.map (range 1 3 1)"
               "                     (lambda (x) (+ x 20))))"),
@@ -1239,6 +1250,17 @@ static void lisp_value_layer_uses_library_operations(void) {
   EXPECT_STR_EQ(
     Var.string(_ev(lisp, "(String.filter \"abc\" (lambda (x) 0))")),
     "abc");
+  EXPECT_TRUE(_ev(lisp,
+    "(Iter.next (Iter.head (range 1 3 1) 0))") is void);
+  EXPECT_TRUE(_ev(lisp,
+    "(Iter.find (range 1 3 1) (lambda (x) (no-value)))") is void);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp,
+    "(Iter.foldl (range 1 3 1) (no-value) (lambda (a b) (+ a b)))")),
+    6);
+  EXPECT_TRUE(_ev(lisp,
+    "(Iter.min (Iter.head (range 1 3 1) 0))") is void);
+  EXPECT_TRUE(_ev(lisp,
+    "(Iter.max (Iter.head (range 1 3 1) 0))") is void);
   lisp.destroy();
 }
 

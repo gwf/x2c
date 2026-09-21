@@ -707,9 +707,11 @@ PROBES = {
     "List.iter": ("Scope-owned lazy List iterator",
         'return %(1 2 3).iter().sum();', 6),
     "List.foldl": (
-        "ordered fold with explicit seed",
-        'List xs = %(1 2); Func f = %!(a, b) => a * 10 + b; '
-        'return xs.foldl(3, f);', 312),
+        "ordered fold with true void seed",
+        'return %(1 2 3).foldl(void, '
+        '%!(a, b) => a.integer() + b.integer());', 6),
+    "List.find": ("interpreted predicate with native Var truth",
+        'return %(0 2 3).find(%!(x) => x);', 2),
     "Array.push": (
         "append and read", 'Array xs = []; xs.push(7); return xs[0];', 7),
     "Array.map": (
@@ -726,6 +728,9 @@ PROBES = {
         'a.integer() - b.integer()); return xs[0];', 1),
     "Array.iter": ("Scope-owned lazy Array iterator",
         'return [1, 2, 3].iter().sum();', 6),
+    "Array.foldl": ("ordered fold with true void seed",
+        'return [1, 2, 3].foldl(void, '
+        '%!(a, b) => a.integer() + b.integer());', 6),
     "Array.truth": (
         "explicit empty-array method", 'Array xs = []; return xs.truth();', 0),
     "Map.setindex": (
@@ -737,6 +742,17 @@ PROBES = {
         'Map m = {"x": 7}; return m.iter().sum();', 7),
     "Map.enumerate": ("Scope-owned lazy entry iterator",
         'Map m = {"x": 7}; return m.enumerate().count();', 1),
+    "Iter.next": ("true void on exhausted iterator",
+        'return range(1, 0, 1).next() is void;', 1),
+    "Iter.foldl": ("ordered fold with true void seed",
+        'return range(1, 3, 1).foldl(void, '
+        '%!(a, b) => a.integer() + b.integer());', 6),
+    "Iter.find": ("interpreted predicate and true void absence",
+        'return range(1, 3, 1).find(%!(x) => x.integer() > 1);', 2),
+    "Iter.min": ("true void on empty iterator",
+        'return range(1, 0, 1).min() is void;', 1),
+    "Iter.max": ("maximum remaining element",
+        'return range(1, 3, 1).max();', 3),
     "Symbol.len": ("short symbol", 'return <abc>.len();', 3),
     "Symbol.compare": ("lexical comparison", 'return <abc>.compare(<abd>) < 0;', 1),
     "Symbol.repr": ("symbol rendering", 'return <abc>.repr().equal("<abc>");', 1),
@@ -747,6 +763,9 @@ PROBES = {
         'Var integer = 7; Var floating = 3.5; '
         'return floating.floating() == 3.5 && integer.floating() == 0.0;', 1),
     "Var.kind": ("integer kind", 'Var value = 7; return value.kind() == <integer>;', 1),
+    "Var.is_void": ("true void stays distinct from nil",
+        'Var value = void, nil = %(); '
+        'return value.is_void() && !nil.is_void();', 1),
     "Var.cadr": ("boxed List selector", 'Var value = %(7 8); return value.cadr();', 8),
     "Var.cons": ("prepend", 'return Var.cons(7, %(8)).len();', 2),
     "Var.iter": ("Scope-owned lazy boxed iterator",
@@ -1077,9 +1096,9 @@ def markdown(report: dict) -> str:
               "why an operation was historically omitted. Multiple considerations",
               "can apply. No label promises that adding an alias is sufficient.", ""]
     lines += [f"- **{name}:** {text}" for name, text in CONSIDERATIONS.items()]
-    lines += ["", "The existing adapters also merge runtime `void` with an empty",
-              "List. Missing values, null arguments, callbacks and ownership need",
-              "explicit checks before claiming runtime equivalence.", ""]
+    lines += ["", "Raw evaluator slots preserve runtime `void` separately from an",
+              "empty List. Missing values, null arguments, callbacks and ownership",
+              "still need explicit checks before claiming runtime equivalence.", ""]
     for owner in TYPES:
         rows = [r for r in report["rows"] if r["name"].startswith(owner + ".")]
         lines += [f"## {owner}", ""]
@@ -1100,8 +1119,12 @@ def markdown(report: dict) -> str:
         for row in rows:
             runtime_contract = row["runtime_contract"].split("\n\n", 1)[0]
             runtime_contract = " ".join(runtime_contract.split()).replace("|", "&#124;")
+            next_action = row["next_action"]
+            if row["state"] == "verified example":
+                next_action = ("The listed native/meta comparison is verified; no "
+                               "binding work remains for that case.")
             lines += [f"| `{row['name']}` | {row['owner']} / {row['group']} | "
-                      f"{row['disposition']} | {runtime_contract or 'Interface only; inspect the producer.'} | {row['contract']} {row['next_action']} |"]
+                      f"{row['disposition']} | {runtime_contract or 'Interface only; inspect the producer.'} | {row['contract']} {next_action} |"]
         cases = [r for r in rows if r["evidence"]]
         if cases:
             lines += ["", "### Evaluated cases", ""]

@@ -37,6 +37,8 @@ struct UnzipShared{
 
 Iter Iter_init(Iter iter, Var obj, IterNextFn next, Var state);
 
+Iter Iter_new(void);
+
 int Iter_try_next(Iter iter, Var * out);
 
 Var Iter_next(Iter iter);
