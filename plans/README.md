@@ -50,8 +50,8 @@ its opening status and this index distinguish them from current execution.
   template calls, representable literal results, and the API inventory are
   implemented. The represented-operation campaign is complete; the remaining
   methods are classified as excluded contracts, explicit adapters, defects, or
-  dependencies of the separate generalized-`meta` and lifetime-certification
-  work. The older
+  dependencies of the separate generalized-`meta`, meta-capable protocol and
+  lifetime-certification work. The older
   [meta milestones](archive/meta-functions.md) record the preceding baseline.
 - [REPL fit, status, and runtime surface](repl-fit-and-runtime-surface.md):
   terminal UX, live statistics, and REPL-only output are implemented;

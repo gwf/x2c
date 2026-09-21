@@ -467,6 +467,68 @@ its native form is region-clean under complete summaries and its interpreted
 bindings have equivalent or safer ownership effects. The current region pass
 is advisory, so compilation alone does not yet establish that premise.
 
+### Meta-capable protocol opportunity
+
+Generalized `meta` declarations and protocols should compose rather than own
+parallel registries. Their roles are orthogonal:
+
+- `meta` says that a declaration is available during translation;
+- a protocol says how a type behaves;
+- `protocol Var(T)` supplies representation, boxing, unboxing, identity or
+  value-copy behavior and dynamic tags;
+- `protocol Cleanup(T)` identifies destruction that must participate in the
+  type's ownership contract; and
+- other protocols supply methods, forwarding and associated types.
+
+The opportunity is to make a protocol, or selected protocol requirements,
+meta-capable. The exact syntax remains a design choice; an illustrative form
+is:
+
+```x2c
+meta protocol Iter(T) {
+  associated Value = Var;
+  int T.try_next(T, Value *);
+}
+
+meta Split;
+protocol Iter(Split);
+```
+
+Adopting that protocol could generate both the native witness and its
+compile-time witness from the same conformance. The compiler could resolve the
+associated types, verify that each crossing is representable, generate any
+required output-cell thunk, install the callable entries in the compiler
+session and attach the same ownership-effect summaries to both realizations.
+An `as` adoption could reuse the represented type's witness instead of
+building another adapter. REPL discovery could follow visible meta-capable
+conformances rather than a separate API list.
+
+This composition could make protocol witnesses the canonical source of many
+generated meta bindings. It would reuse the existing owners of conformance,
+associated types, forwarding, placement, visibility and generated thunks.
+Binding-specific metadata would remain only for real representation-changing
+adapters. Lifetime certification could record allocation, borrowing,
+retention, transfer, provenance and finalization on a protocol requirement or
+implementation once, then reuse that fact in native region analysis and the
+evaluator-equivalence check.
+
+Meta availability must remain explicit. Marking a type `meta` should not
+expose every method it happens to have; a method must be individually marked
+or reached through a deliberately meta-capable protocol. Associated types must
+also have a valid meta representation. File, process, mutation and unsafe
+operations remain trust decisions even when their signatures and lifetimes
+are representable. Ordinary source order, protocol placement and visibility
+continue to govern what a unit can see.
+
+Do not introduce a public `protocol Meta(T)`. That would duplicate the
+contextual keyword and conflate phase availability with behavioral
+conformance. Field accessors for evaluator or native records are generated
+representation machinery, while protocols describe the behavior intentionally
+published for the type. The generalized type/function work should preserve a
+metadata seam for protocol witnesses before its registries and native-record
+descriptors harden, but this opportunity does not add implementation to the
+completed represented-value campaign.
+
 This campaign therefore stops at the represented-value boundary it delivered.
 Generalized declarations, evaluator records, native record descriptors and
 lifetime certification are coordinated compiler, runtime and analysis work in
