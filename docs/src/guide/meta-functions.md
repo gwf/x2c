@@ -469,7 +469,21 @@ requirement: the compiler must construct code representing that value.
 | `Symbol` | Inserts a Symbol literal. | Constructs a Symbol expression. |
 | Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing. A data List is not automatically an expression. | A declared List result is reconstructed as data through ordinary cons expressions if every element is representable. |
 | Boxed `Var` | Insertion follows the contained value. | Converts a representable contained value to Var. |
-| `Array`, `Map`, `Func` or arbitrary native address | No direct materialization of the evaluator object. | Keeps the call. |
+| `Array` or `Map` with immutable representable descendants | Constructs a fresh mutable root through the ordinary literal constructors. | Keeps the call. |
+| Nested mutable collections, `Func` or arbitrary native address | No direct materialization of the evaluator object. | Keeps the call. |
+
+An inserted Array or Map is a snapshot of the compile-time result. Each runtime
+execution of that expression allocates a fresh root in the current Scope, just
+like `[]` or `{}`; assigning it to another variable still aliases that root.
+Array order and element types are preserved. Map keys keep their ordinary
+content equality, but reconstruction does not promise the same traversal order.
+A boxed Var may contain the resulting root.
+
+Elements, keys and values may contain scalars, Strings, Symbols, or immutable
+Lists of those values. Nested mutable objects, including mutable objects hidden
+inside Lists, remain unsupported. That restriction prevents silently copying
+shared objects or cyclic graphs. Ordinary calls returning mutable containers
+remain runtime calls; explicit insertion does not authorize that optimization.
 
 The same functions can be called during compilation or with ordinary C-style
 calls at runtime:

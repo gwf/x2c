@@ -360,10 +360,13 @@ from binding presence and absence.
 Three representation follow-ons remain explicit rather than being presented as
 completed support:
 
-- Mutable Array/Map return materialization needs an identity and sharing contract,
-  cycle handling and a specified runtime owner. A compile-time pointer cannot be
-  embedded in program code. Immutable List and scalar Var results are implemented;
-  no generic serializer or silent mutable copy is introduced.
+- Explicit Array/Map result insertion now constructs a fresh Scope-owned root
+  through ordinary literal constructors, preserving types, Array order and Map
+  key equality. Only immutable representable descendants are accepted, including
+  immutable Lists; a boxed Var may hold the root. Ordinary mutable-return calls
+  stay at runtime. Nested mutable descendants, sharing and cycles remain refused
+  until a graph/identity contract is decided; no serializer or silent nested
+  copy is introduced.
 - General Iter, including Map.keys, contains caller-owned state and a native next
   callback. It needs an evaluator representation and adapter whose state/lifetime
   contract matches native iteration. Map.keys is not a missing List-return alias.

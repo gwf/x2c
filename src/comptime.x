@@ -2170,16 +2170,18 @@ static Type _meta_value_type(Var value) {
   return NULL;
 }
 
-/** Returns code for scalar, String, Symbol, immutable List or boxed values,
-    preserving `declared`
-    when supplied. Returns NULL for values requiring code insertion or a
-    representation other than a scalar literal.
+/** Returns literal code preserving `declared` when supplied.
+    `mutable_root` permits a fresh Array or Map at an explicit code boundary;
+    its descendants must be immutable representable values. Returns NULL for
+    code Lists or values without the requested literal representation.
 */
-List Compiler.meta_value_expression(Compiler c, Type declared, Var value) {
-  Type type = declared ? c.sym.resolve_key(declared) : _meta_value_type(value);
+List Compiler.meta_value_expression(
+  Compiler c, Type declared, Var value, int mutable_root) {
+  Type type = declared ? declared : _meta_value_type(value);
   if ((value.is_integer() || value.is_floating()) &&
       type !== %("Var")) {
-    Symbol tag = type.scalar_tag();
+    type = c.sym.resolve_numeric_type(type);
+    Symbol tag = type ? type.scalar_tag() : 0;
     if (!tag) return NULL;
     value = value.convert(tag);
     if (type.scalar() === %(int)) {
@@ -2213,19 +2215,42 @@ List Compiler.meta_value_expression(Compiler c, Type declared, Var value) {
   if (declared && type === %("Var")) {
     Type inner = value is <string> ? %("String")
       : value is <symbol> ? %("Symbol")
-      : value is <list> ? %("List") : _meta_value_type(value);
+      : value is <list> ? %("List")
+      : value is <array> ? %("Array")
+      : value is <map> ? %("Map") : _meta_value_type(value);
     if (!inner) return NULL;
-    List expression = c.meta_value_expression(inner, value);
+    List expression = c.meta_value_expression(inner, value, mutable_root);
     return expression ? c.convert_expression(expression, declared) : NULL;
   }
   if (declared && type === %("List") && value is <list>) {
     List result = %(expr ("List") (nil));
     foreach (Var item, value.list().reverse()) {
-      List head = c.meta_value_expression(%("Var"), item);
+      List head = c.meta_value_expression(%("Var"), item, 0);
       if (!head) return NULL;
       result = %(expr ("List") (cons $head $result));
     }
     return result;
+  }
+  if (mutable_root && value is <array> &&
+      (!declared || type === %("Array"))) {
+    Array items = [];
+    foreach (Var item, value.array()) {
+      List expression = c.meta_value_expression(%("Var"), item, 0);
+      if (!expression) { items.free(); return NULL; }
+      items.push(expression);
+    }
+    return %(expr ("Array") (array @{items.list_free()}));
+  }
+  if (mutable_root && value is <map> &&
+      (!declared || type === %("Map"))) {
+    Array entries = [];
+    foreach (Var (key, item), value.map()) {
+      List key_code = c.meta_value_expression(%("Var"), key, 0);
+      List value_code = c.meta_value_expression(%("Var"), item, 0);
+      if (!key_code || !value_code) { entries.free(); return NULL; }
+      entries.push(%(map-entry $key_code $value_code));
+    }
+    return %(expr ("Map") (map @{entries.list_free()}));
   }
   if (value is <string>) {
     if (!declared || type === %(* char))
@@ -2325,5 +2350,5 @@ List Compiler.fold_meta_call(
     return NULL;
   }
   catch: return NULL;
-  return c.meta_value_expression(result, answer);
+  return c.meta_value_expression(result, answer, 0);
 }

@@ -1,0 +1,8 @@
+array 1 1 255 ready key 2
+tags u8 list
+mutation 7 255 1
+map 1 1 ready -7 42 i16
+map-mutation 8 -7
+empty 1 1 0 0
+boxed array 9
+lisp 0
