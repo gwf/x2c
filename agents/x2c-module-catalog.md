@@ -8,7 +8,7 @@ non-static function definition discovered in source order. It does
 not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
-- Compiler modules: 36
+- Compiler modules: 37
 - Runtime modules: 56
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
@@ -360,6 +360,14 @@ values that can outlive the region that allocated them.
 Public functions:
 
 `Compiler.check_regions`, `Compiler.region_escapes`
+
+### [src/repl-input.x](../src/repl-input.x)
+
+inline terminal editing for the x2c REPL.
+
+Public functions:
+
+`ReplInput.new`, `ReplInput.read`, `ReplInput.remember`, `ReplInput.close`
 
 ### [src/repl-session.x](../src/repl-session.x)
 

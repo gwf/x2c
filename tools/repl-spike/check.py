@@ -3,11 +3,14 @@
 import os
 import pathlib
 import pty
+import fcntl
 import select
 import signal
+import struct
 import tempfile
 import statistics
 import subprocess
+import termios
 import time
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -31,6 +34,75 @@ def check(source, stdout, error="", code=None):
     assert error in result.stderr, result
     if not error:
         assert not result.stderr, result.stderr
+
+
+class PtyRepl:
+    def __init__(self, columns=80, term="xterm-256color"):
+        self.master, self.slave = pty.openpty()
+        window = struct.pack("HHHH", 24, columns, 0, 0)
+        fcntl.ioctl(self.slave, termios.TIOCSWINSZ, window)
+        self.original = termios.tcgetattr(self.slave)
+        env = {**os.environ, "TERM": term}
+        self.process = subprocess.Popen(
+            [str(BINARY), "repl"], stdin=self.slave, stdout=self.slave,
+            stderr=self.slave, cwd=tempfile.gettempdir(), env=env,
+            start_new_session=True)
+        self.output = b""
+
+    def send(self, data):
+        start = len(self.output)
+        sent = 0
+        while sent < len(data):
+            sent += os.write(self.master, data[sent:])
+        return start
+
+    def expect(self, text, start=0, timeout=20):
+        deadline = time.monotonic() + timeout
+        while text not in self.output[start:]:
+            assert time.monotonic() < deadline, (text, self.output[start:])
+            ready, _, _ = select.select([self.master], [], [], 0.2)
+            if not ready:
+                continue
+            try:
+                self.output += os.read(self.master, 65536)
+            except OSError:
+                break
+        assert text in self.output[start:], (text, self.output[start:])
+        return len(self.output)
+
+    def wait(self, code=0, timeout=20):
+        deadline = time.monotonic() + timeout
+        while self.process.poll() is None:
+            assert time.monotonic() < deadline, self.output
+            ready, _, _ = select.select([self.master], [], [], 0.2)
+            if ready:
+                try:
+                    self.output += os.read(self.master, 65536)
+                except OSError:
+                    pass
+        actual = self.process.returncode
+        assert actual == code, (actual, self.output)
+        return actual
+
+    def ready(self, start=0):
+        return self.expect(b"\x1b[?2004hx2c> ", start)
+
+    def attributes(self):
+        return termios.tcgetattr(self.slave)
+
+    def close(self):
+        if self.process.poll() is None:
+            os.killpg(self.process.pid, signal.SIGKILL)
+            self.process.wait()
+        os.close(self.master)
+        os.close(self.slave)
+
+    def __enter__(self):
+        self.expect(b"x2c> ")
+        return self
+
+    def __exit__(self, *_):
+        self.close()
 
 
 objects = sorted(p for p in (ROOT / "builds/0/src").glob("*.o")
@@ -143,39 +215,141 @@ assert result.returncode == 0 and "x2c repl" in result.stdout, result
 result = run("", "source.x")
 assert result.returncode == 2 and "repl accepts no operands" in result.stderr, result
 
-# A pseudo-terminal exercises interactive status and a real prompt before SIGINT.
-for source in (b"unknown;\n:quit\n", None, b"int forever(void) { while (1) {} return 0; }\nforever();\n"):
-    master, slave = pty.openpty()
-    with subprocess.Popen([str(BINARY), "repl"], stdin=slave, stdout=slave,
-                          stderr=slave, cwd=tempfile.gettempdir()) as process:
-        os.close(slave)
-        try:
-            output = b""
-            deadline = time.monotonic() + 20
-            while b"x2c> " not in output:
-                assert time.monotonic() < deadline, output
-                ready, _, _ = select.select([master], [], [], 1)
-                if ready:
-                    output += os.read(master, 4096)
-            if source:
-                os.write(master, source)
-            if source and b":quit" in source:
-                assert process.wait(timeout=20) == 0
-            else:
-                if source:
-                    while b"defined forever" not in output:
-                        assert time.monotonic() < deadline, output
-                        ready, _, _ = select.select([master], [], [], 1)
-                        if ready:
-                            output += os.read(master, 4096)
-                    time.sleep(0.02)
-                process.send_signal(signal.SIGINT)
-                assert process.wait(timeout=5) == -signal.SIGINT
-        finally:
-            os.close(master)
-            if process.poll() is None:
-                process.kill()
-                process.wait()
+# Interactive editing and history run through a pseudo-terminal. Markers make
+# each assertion independent of redisplay escape sequences already observed.
+with PtyRepl() as repl:
+    mark = repl.send(b"143;\x1b[H\x1b[C\x1b[3~2\x1b[F\x1b[D\x1b[D\x1b[C\r")
+    repl.expect(b"=> 123", mark)
+    repl.ready(mark)
+    mark = repl.send(b"\"\xc3\xa9\";\x1b[D\x1b[D\x7f\r")
+    repl.expect(b'=> ""', mark)
+    repl.ready(mark)
+    mark = repl.send(b":quit\r")
+    repl.wait()
+    assert repl.attributes() == repl.original
+
+with PtyRepl() as repl:
+    mark = repl.send(b"41+1;\r")
+    repl.expect(b"=> 42", mark)
+    repl.ready(mark)
+    mark = repl.send(b"\x1b[A\r")
+    repl.expect(b"=> 42", mark)
+    repl.ready(mark)
+    mark = repl.send(b":symbols\r")
+    repl.expect(b"%()", mark)
+    repl.ready(mark)
+    mark = repl.send(b"\x1b[A\r")
+    repl.expect(b"%()", mark)
+    repl.ready(mark)
+    repl.send(b":quit\r")
+    repl.wait()
+
+with PtyRepl() as repl:
+    mark = repl.send(b"1 +\r")
+    repl.expect(b"... ", mark)
+    mark = repl.send(b"2;\r")
+    repl.expect(b"=> 3", mark)
+    repl.ready(mark)
+    mark = repl.send(b"\x1b[A\r")
+    repl.expect(b"=> 3", mark)
+    repl.ready(mark)
+    repl.send(b":quit\r")
+    repl.wait()
+
+with PtyRepl() as repl:
+    mark = repl.send(b"1 + ;\r")
+    repl.expect(b"1 + ;", mark)
+    repl.ready(mark)
+    mark = repl.send(b"\x1b[A\x1b[D\x1b[D2\r")
+    repl.expect(b"=> 3", mark)
+    repl.ready(mark)
+    repl.send(b":quit\r")
+    repl.wait()
+
+with PtyRepl(columns=12) as repl:
+    mark = repl.send(b"1234567890+1;\x1b[D\x7f2\r")
+    repl.expect(b"=> 1234567892", mark)
+    repl.ready(mark)
+    assert b"\x1b[1A" in repl.output[mark:], repl.output[mark:]
+    repl.send(b":quit\r")
+    repl.wait()
+
+with PtyRepl() as repl:
+    mark = repl.send(b"\x1b[200~1 +\n2;\x1b[201~\r")
+    repl.expect(b"=> 3", mark)
+    assert b"\x1b[?2004l" in repl.output[mark:]
+    repl.ready(mark)
+    mark = repl.send(b"\x1b[A\r")
+    repl.expect(b"=> 3", mark)
+    repl.ready(mark)
+    repl.send(b":quit\r")
+    repl.wait()
+
+with PtyRepl() as repl:
+    mark = repl.send(b"int pending(\r")
+    repl.expect(b"... ", mark)
+    mark = repl.send(b"discard me\x03")
+    repl.ready(mark)
+    mark = repl.send(b":symbols\r")
+    repl.expect(b"%()", mark)
+    repl.ready(mark)
+    repl.send(b":quit\r")
+    repl.wait()
+
+with PtyRepl() as repl:
+    repl.send(b"\x04")
+    repl.wait()
+    assert repl.attributes() == repl.original
+
+with PtyRepl() as repl:
+    mark = repl.send(b"unknown;\r")
+    repl.expect(b"unresolved identifier: unknown", mark)
+    repl.ready(mark)
+    repl.send(b"\x04")
+    repl.wait()
+    assert repl.attributes() == repl.original
+
+with PtyRepl() as repl:
+    mark = repl.send(b"\x1b[200~" + b"x" * (1024 * 1024 + 1) +
+                     b"\x1b[201~")
+    repl.expect(b"size-limit", mark, timeout=30)
+    repl.wait(-signal.SIGABRT, timeout=30)
+    assert repl.attributes() == repl.original
+
+with PtyRepl() as repl:
+    mark = repl.send(b"int pending =\r")
+    repl.expect(b"... ", mark)
+    repl.send(b"\x04")
+    repl.wait(1)
+    assert b"incomplete input at EOF" in repl.output
+    assert repl.attributes() == repl.original
+
+# Raw mode is active while editing, but evaluation runs in the original
+# canonical mode. SIGINT during evaluation therefore keeps terminating x2c.
+with PtyRepl() as repl:
+    lflag = repl.attributes()[3]
+    assert not lflag & termios.ICANON and not lflag & termios.ECHO
+    mark = repl.send(b"int forever(void) { while (1) {} return 0; }\r")
+    repl.expect(b"defined forever", mark)
+    repl.ready(mark)
+    mark = repl.send(b"forever();\r")
+    repl.expect(b"\x1b[?2004l", mark)
+    deadline = time.monotonic() + 5
+    while True:
+        lflag = repl.attributes()[3]
+        if lflag & termios.ICANON and lflag & termios.ECHO:
+            break
+        assert time.monotonic() < deadline, lflag
+        time.sleep(0.01)
+    assert lflag & termios.ICANON and lflag & termios.ECHO
+    os.killpg(repl.process.pid, signal.SIGINT)
+    repl.wait(-signal.SIGINT, timeout=5)
+    assert repl.attributes() == repl.original
+
+with PtyRepl(term="dumb") as repl:
+    assert b"\x1b[?2004h" not in repl.output
+    repl.send(b":quit\n")
+    repl.wait()
 
 # The same authored functions execute through native compilation and lowering.
 functions = """int total = 12;
@@ -201,7 +375,7 @@ subprocess.run([str(ROOT / "builds/0/x2c"), "build", "--output",
 native = subprocess.check_output([str(native_binary)], text=True).splitlines()
 assert interpreted == native, (interpreted, native)
 assert "machine entries=0 " not in result.stderr, result.stderr
-print("39 terminal checks and native parity passed:", ", ".join(native))
+print("REPL terminal checks and native parity passed:", ", ".join(native))
 print(result.stderr.strip())
 
 startup = []

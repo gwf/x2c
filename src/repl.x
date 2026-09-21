@@ -7,6 +7,7 @@
 
 #pragma private
 #include "repl-session.x"
+#include "repl-input.x"
 #include "diagnostics.x"
 #include "lisp.x"
 #include "file.x"
@@ -14,15 +15,18 @@
 #include <unistd.h>
 
 static void _help(void) {
-  puts("Enter declarations or statements with semicolons.\n"
-       ":help    show this help\n"
-       ":symbols list session-defined names and kinds\n"
-       ":ast NAME show a function's typed AST\n"
-       ":lowered NAME show a function's lowered Lisp\n"
-       ":cancel  discard incomplete input\n"
-       ":quit    leave the session\n"
-       "Options: --dump prints typed AST and lowered Lisp; --stats prints "
-       "execution counters.");
+  puts(
+    "Enter declarations or statements with semicolons.\n"
+    ":help    show this help\n"
+    ":symbols list session-defined names and kinds\n"
+    ":ast NAME show a function's typed AST\n"
+    ":lowered NAME show a function's lowered Lisp\n"
+    ":cancel  discard incomplete input\n"
+    ":quit    leave the session\n"
+    "Editing: arrows, Home/End, Backspace/Delete; up/down recall history.\n"
+    "Ctrl-C cancels input; Ctrl-D exits from an empty line.\n"
+    "Options: --dump prints typed AST and lowered Lisp; --stats prints "
+    "execution counters.");
 }
 
 static int _inspect(ReplSession session, String command) {
@@ -71,18 +75,28 @@ int repl_run(CliRequest request) {
     return 1;
   }
   ReplSession session = ReplSession.new(unit.compiler);
+  ReplInput input = ReplInput.new();
+  defer input.close();
   String pending = "", line;
   int interactive = isatty(STDIN_FILENO), failed = 0;
   unit.compiler.macro_lisp.call_budget(1000000);
   if (interactive) puts("x2c experimental REPL; :help for commands");
   while (1) {
     if (interactive) {
-      printf("%s", pending.len() ? "... " : "x2c> ");
-      fflush(stdout);
+      ReplInputResult read = input.read(pending.len() ? "... " : "x2c> ");
+      if (read.status == <cancelled>) {
+        pending = "";
+        continue;
+      }
+      if (read.status == <eof>) break;
+      line = read.text;
     }
-    line = Stdin.readline();
-    if (!line) break;
+    else {
+      line = Stdin.readline();
+      if (!line) break;
+    }
     String command = line.strip(NULL);
+    if (interactive && command.startswith(":")) input.remember(command);
     if (command == ":quit") { pending = ""; break; }
     if (command == ":cancel") { pending = ""; continue; }
     if (command == ":help") { _help(); continue; }
@@ -114,13 +128,17 @@ int repl_run(CliRequest request) {
         fprintf(stderr, "evaluation failed: %s\n", result.cause.repr());
         break;
     }
-    if (result.status != <incomplete>) pending = "";
+    if (result.status != <incomplete>) {
+      if (interactive) input.remember(pending.remove_suffix("\n"));
+      pending = "";
+    }
     fflush(stdout);
   }
   if (request.repl_stats) {
     LispAutoStats stats = unit.compiler.macro_lisp.auto_stats();
-    fprintf(stderr, "Lisp calls=%ld machine entries=%ld machine errors=%ld\n",
-            stats.invocations, stats.machine_entries, stats.machine_errors);
+    fprintf(
+      stderr, "Lisp calls=%ld machine entries=%ld machine errors=%ld\n",
+      stats.invocations, stats.machine_entries, stats.machine_errors);
   }
   if (pending.len()) { fputs("incomplete input at EOF\n", stderr); return 1; }
   return !interactive && failed;

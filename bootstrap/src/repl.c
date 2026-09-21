@@ -6,11 +6,12 @@
 
 static List _16, _15, _14, _12, _11, _7, _6;
 
-static String _22, _21, _20, _19, _18, _17, _2, _1, _0;
+static String _24, _23, _22, _21, _20, _19, _18, _17, _2, _1, _0;
 
 static Var _13, _10, _9, _8, _5, _4, _3;
 
 #include "repl-session.h"
+#include "repl-input.h"
 #include "diagnostics.h"
 #include "lisp.h"
 #include "file.h"
@@ -38,15 +39,22 @@ _x2c_defer_env_1;
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
 
-static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs);
-
 typedef struct _x2c_defer_env_2{
   const void * _x2c_defer_capture_2;
-  const void * _x2c_defer_capture_3;
 }
 _x2c_defer_env_2;
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+
+static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs);
+
+typedef struct _x2c_defer_env_3{
+  const void * _x2c_defer_capture_3;
+  const void * _x2c_defer_capture_4;
+}
+_x2c_defer_env_3;
+
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 
 Var Symbol_var(Symbol);
 
@@ -75,16 +83,18 @@ __attribute__((constructor)) static void _file_init_(void){
   _14 = cons(_13, NULL);
   _15 = cons(_8, _14);
   _16 = cons(_3, _15);
-  _17 = String_new(":quit");
-  _18 = String_new("");
+  _17 = String_new("");
+  _18 = String_new(":quit");
   _19 = String_new(":cancel");
   _20 = String_new(":help");
   _21 = String_new("\n");
-  _22 = String_new(":");
+  _22 = String_new("... ");
+  _23 = String_new("x2c> ");
+  _24 = String_new(":");
 }
 
 static void _help(void){
-  puts("Enter declarations or statements with semicolons.\n" ":help    show this help\n" ":symbols list session-defined names and kinds\n" ":ast NAME show a function's typed AST\n" ":lowered NAME show a function's lowered Lisp\n" ":cancel  discard incomplete input\n" ":quit    leave the session\n" "Options: --dump prints typed AST and lowered Lisp; --stats prints " "execution counters.");
+  puts("Enter declarations or statements with semicolons.\n" ":help    show this help\n" ":symbols list session-defined names and kinds\n" ":ast NAME show a function's typed AST\n" ":lowered NAME show a function's lowered Lisp\n" ":cancel  discard incomplete input\n" ":quit    leave the session\n" "Editing: arrows, Home/End, Backspace/Delete; up/down recall history.\n" "Ctrl-C cancels input; Ctrl-D exits from an empty line.\n" "Options: --dump prints typed AST and lowered Lisp; --stats prints " "execution counters.");
 }
 
 Split String_words(String);
@@ -112,11 +122,11 @@ String Var_repr(Var);
 static int _inspect(ReplSession session, String command){
   Array words = Array_new();
   {
-  _x2c_defer_env_0 _x2c_defer_env_3 = {._x2c_defer_capture_0 =(const void *) & words};
+  _x2c_defer_env_0 _x2c_defer_env_4 = {._x2c_defer_capture_0 =(const void *) & words};
 
   X2CCleanup _x2c_defer_record_0 = {
     .fn = _x2c_defer_cleanup_0,
-    .env = & _x2c_defer_env_3
+    .env = & _x2c_defer_env_4
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
@@ -207,22 +217,26 @@ int List_try_next(List, List *, Var *);
 void Compiler_print_diagnostic(Compiler, List);
 List Var_list(Var);
 ReplSession ReplSession_new(Compiler);
+ReplInput ReplInput_new(void);
 void Lisp_call_budget(Lisp, long);
+ReplInputResult ReplInput_read(ReplInput, String);
 int String_len(String);
 String File_readline(File);
 int String_truth(String);
 String String_strip(String, char *);
 int String_startswith(String, String);
+void ReplInput_remember(ReplInput, String);
 String String_add(String, String);
 ReplResult ReplSession_submit(ReplSession, String);
 int List_truth(List);
+String String_remove_suffix(String, String);
 LispAutoStats Lisp_auto_stats(Lisp);
 int repl_run(CliRequest request){
   if(! _init_guard_) _file_init_();  Frontend frontend = Frontend_new(request);  if(! Frontend_preload_macro_libraries(frontend)) return 1;  ParsedUnit unit;  int opened = Frontend_open_session(frontend, & unit); {
-  _x2c_defer_env_1 _x2c_defer_env_4 = {._x2c_defer_capture_1 =(const void *) & unit};
+  _x2c_defer_env_2 _x2c_defer_env_5 = {._x2c_defer_capture_2 =(const void *) & unit};
   X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_1,
-    .env = & _x2c_defer_env_4
+    .fn = _x2c_defer_cleanup_2,
+    .env = & _x2c_defer_env_5
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
@@ -241,95 +255,140 @@ int repl_run(CliRequest request){
       }
 
     }
-    ReplSession session = ReplSession_new(unit.compiler);  String pending = _18, line;  int interactive = isatty(STDIN_FILENO), failed = 0;  Lisp_call_budget(unit.compiler -> macro_lisp, 1000000);  if(interactive) puts("x2c experimental REPL; :help for commands");  while(1){
-      if(interactive){
-        printf("%s", String_len(pending) ? "... " : "x2c> ");  fflush(stdout);
-      }
-      line = File_readline(Stdin);  if(! String_truth(line)) break;  String command = String_strip(line, NULL);  if(String_equal(command, _17)){
-        pending = _18;  break;
-      }
-      if(String_equal(command, _19)){
-        pending = _18;  continue;
-      }
-      if(String_equal(command, _20)){
-        _help();  continue;
-      }
-      if(String_startswith(command, _22)){
-        if(! _inspect(session, command)) failed = 1;  fflush(stdout);  continue;
-      }
-      _x2c_proto_string_add_update(&(pending), 56, String_add(line, _21));  ReplResult result = ReplSession_submit(session, pending);  if(request -> repl_dump && List_truth(result.syntax)) fprintf(stderr, "typed: %%%s\n", List_repr(result.syntax));  if(request -> repl_dump && List_truth(result.lowered)) fprintf(stderr, "lowered: %s\n", List_repr(result.lowered)); {
-        String * _x2c_macro_address_0 = & unit.compiler -> text;  String _x2c_macro_previous_0 = * _x2c_macro_address_0; {
-  _x2c_defer_env_2 _x2c_defer_env_5 = {._x2c_defer_capture_2 =(const void *) & _x2c_macro_address_0, ._x2c_defer_capture_3 =(const void *) & _x2c_macro_previous_0};
+    ReplSession session = ReplSession_new(unit.compiler);  ReplInput input = ReplInput_new(); {
+  _x2c_defer_env_1 _x2c_defer_env_6 = {._x2c_defer_capture_1 =(const void *) & input};
 
   X2CCleanup _x2c_defer_record_2 = {
-    .fn = _x2c_defer_cleanup_2,
-    .env = & _x2c_defer_env_5
+    .fn = _x2c_defer_cleanup_1,
+    .env = & _x2c_defer_env_6
   };
   x2c_cleanup_push(&_x2c_defer_record_2);
   {
-          * _x2c_macro_address_0 = result.source;
+      String pending = _17, line;
+      int interactive = isatty(STDIN_FILENO), failed = 0;
+      Lisp_call_budget(unit.compiler -> macro_lisp, 1000000);
+      if(interactive) puts("x2c experimental REPL; :help for commands");
+      while(1){
+        if(interactive){
+          ReplInputResult read = ReplInput_read(input, String_len(pending) ? _22 : _23);
+          if(read.status == 6696066638152){
+            pending = _17;
+            continue;
+          }
+          if(read.status == 11212) break;
+          line = read.text;
+        }
+        else{
+          line = File_readline(Stdin);
+          if(! String_truth(line)) break;
+        }
+        String command = String_strip(line, NULL);
+        if(interactive && String_startswith(command, _24)) ReplInput_remember(input, command);
+        if(String_equal(command, _18)){
+          pending = _17;
+          break;
+        }
+        if(String_equal(command, _19)){
+          pending = _17;
+          continue;
+        }
+        if(String_equal(command, _20)){
+          _help();
+          continue;
+        }
+        if(String_startswith(command, _24)){
+          if(! _inspect(session, command)) failed = 1;
+          fflush(stdout);
+          continue;
+        }
+        _x2c_proto_string_add_update(&(pending), 56, String_add(line, _21));
+        ReplResult result = ReplSession_submit(session, pending);
+        if(request -> repl_dump && List_truth(result.syntax)) fprintf(stderr, "typed: %%%s\n", List_repr(result.syntax));
+        if(request -> repl_dump && List_truth(result.lowered)) fprintf(stderr, "lowered: %s\n", List_repr(result.lowered));
+        {
+          String * _x2c_macro_address_0 = & unit.compiler -> text;
+          String _x2c_macro_previous_0 = * _x2c_macro_address_0;
           {
+  _x2c_defer_env_3 _x2c_defer_env_7 = {._x2c_defer_capture_3 =(const void *) & _x2c_macro_address_0, ._x2c_defer_capture_4 =(const void *) & _x2c_macro_previous_0};
+
+  X2CCleanup _x2c_defer_record_3 = {
+    .fn = _x2c_defer_cleanup_3,
+    .env = & _x2c_defer_env_7
+  };
+  x2c_cleanup_push(&_x2c_defer_record_3);
+  {
+            * _x2c_macro_address_0 = result.source;
             {
-              Var entry;
-              List _x2c_macro_object_2 = result.diagnostics;
-              List _x2c_macro_cursor_2 = _x2c_macro_object_2;
-              Var _x2c_macro_cursor_output_2;
-              while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
-                entry = _x2c_macro_cursor_output_2;
-                Compiler_print_diagnostic(unit.compiler, Var_list(entry));
+              {
+                Var entry;
+                List _x2c_macro_object_2 = result.diagnostics;
+                List _x2c_macro_cursor_2 = _x2c_macro_object_2;
+                Var _x2c_macro_cursor_output_2;
+                while(List_try_next(_x2c_macro_object_2, & _x2c_macro_cursor_2, & _x2c_macro_cursor_output_2)){
+                  entry = _x2c_macro_cursor_output_2;
+                  Compiler_print_diagnostic(unit.compiler, Var_list(entry));
+                }
+
               }
 
             }
 
           }
-
-        }
-        x2c_cleanup_leave(& _x2c_defer_record_2);
+          x2c_cleanup_leave(& _x2c_defer_record_3);
 
 }
+        }
+        switch(result.status){
+          case 8938680648 : printf("defined %s\n", result.name);
+          break;
+          case 46228810 : printf("=> %s\n", Var_repr(result.value));
+          break;
+          case 395480244552 : puts("ok");
+          break;
+          case 1248369811784 : failed = 1;
+          if(String_truth(result.message)) fprintf(stderr, "rejected: %s\n", result.message);
+          break;
+          case 405365064 : failed = 1;
+          fprintf(stderr, "evaluation failed: %s\n", List_repr(result.cause));
+          break;
+        }
+        if(result.status != 664344300629258){
+          if(interactive) ReplInput_remember(input, String_remove_suffix(pending, _21));
+          pending = _17;
+        }
+        fflush(stdout);
       }
-      switch(result.status){
-        case 8938680648 : printf("defined %s\n", result.name);
-        break;
-        case 46228810 : printf("=> %s\n", Var_repr(result.value));
-        break;
-        case 395480244552 : puts("ok");
-        break;
-        case 1248369811784 : failed = 1;
-        if(String_truth(result.message)) fprintf(stderr, "rejected: %s\n", result.message);
-        break;
-        case 405365064 : failed = 1;
-        fprintf(stderr, "evaluation failed: %s\n", List_repr(result.cause));
-        break;
+      if(request -> repl_stats){
+        LispAutoStats stats = Lisp_auto_stats(unit.compiler -> macro_lisp);
+        fprintf(stderr, "Lisp calls=%ld machine entries=%ld machine errors=%ld\n", stats.invocations, stats.machine_entries, stats.machine_errors);
       }
-      if(result.status != 664344300629258) pending = _18;
-      fflush(stdout);
-    }
-    if(request -> repl_stats){
-      LispAutoStats stats = Lisp_auto_stats(unit.compiler -> macro_lisp);
-      fprintf(stderr, "Lisp calls=%ld machine entries=%ld machine errors=%ld\n", stats.invocations, stats.machine_entries, stats.machine_errors);
-    }
-    if(String_len(pending)){
-      fputs("incomplete input at EOF\n", stderr);
-      {
-        int _x2c_return_value_5 = 1;
+      if(String_len(pending)){
+        fputs("incomplete input at EOF\n", stderr);
         {
+          int _x2c_return_value_5 = 1;
+          {
+            x2c_cleanup_leave(& _x2c_defer_record_2);
+            x2c_cleanup_leave(& _x2c_defer_record_1);
+            return _x2c_return_value_5;
+          }
+
+        }
+
+      }
+      {
+        int _x2c_return_value_6 = ! interactive && failed;
+        {
+          x2c_cleanup_leave(& _x2c_defer_record_2);
           x2c_cleanup_leave(& _x2c_defer_record_1);
-          return _x2c_return_value_5;
+          return _x2c_return_value_6;
         }
 
       }
 
     }
-    {
-      int _x2c_return_value_6 = ! interactive && failed;
-      {
-        x2c_cleanup_leave(& _x2c_defer_record_1);
-        return _x2c_return_value_6;
-      }
+    x2c_cleanup_leave(& _x2c_defer_record_2);
 
-    }
-
+}
   }
   x2c_cleanup_leave(& _x2c_defer_record_1);
 
@@ -341,11 +400,18 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   Array_free((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
 }
 
-void ParsedUnit_close(ParsedUnit *);
+void ReplInput_close(ReplInput);
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  ParsedUnit_close(&((*(ParsedUnit *) _x2c_defer_data_1->_x2c_defer_capture_1)));
+  ReplInput_close((*(ReplInput *) _x2c_defer_data_1->_x2c_defer_capture_1));
+}
+
+void ParsedUnit_close(ParsedUnit *);
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
+  ParsedUnit_close(&((*(ParsedUnit *) _x2c_defer_data_2->_x2c_defer_capture_2)));
 }
 
 static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs){
@@ -353,8 +419,8 @@ static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, Str
   return lhs[0];
 }
 
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
-  *(*(String * *) _x2c_defer_data_2->_x2c_defer_capture_2) =(*(String *) _x2c_defer_data_2->_x2c_defer_capture_3);
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
+  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
+  *(*(String * *) _x2c_defer_data_3->_x2c_defer_capture_3) =(*(String *) _x2c_defer_data_3->_x2c_defer_capture_4);
 }
 

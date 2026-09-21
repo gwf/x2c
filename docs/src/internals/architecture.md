@@ -456,8 +456,9 @@ The modules under `src/` divide ownership as follows:
   the per-file translation loop, and output/exit policy;
 - `src/frontend.x` -- configured source stages, process translation support,
   and sequential unit Context/Type lifetimes;
-- `src/repl.x`, `src/repl-session.x` -- terminal interaction, persistent
-  submissions, and named inspection over the frontend and evaluator;
+- `src/repl.x`, `src/repl-input.x`, `src/repl-session.x` -- terminal
+  interaction, inline editing and history, persistent submissions, and named
+  inspection over the frontend and evaluator;
 - `src/project.x`, `src/build.x`, `src/toolchain.x` -- manifest membership and
   target relationships, typed native build requests and incremental state,
   and host compile/archive/link actions;

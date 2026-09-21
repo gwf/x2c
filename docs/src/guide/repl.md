@@ -41,6 +41,20 @@ the `... ` prompt until it forms a complete submission. Put a multiline
 `if`/`else` in a block when necessary: a complete `if` can execute before the
 next line supplies an `else`.
 
+Interactive terminals support the arrow keys, Home, End, Backspace, Delete,
+and up/down history recall. History holds the last 100 nonempty commands and
+completed source submissions for the current process; adjacent duplicates are
+stored once, and history is not written to disk. A rejected or failed
+submission remains available for correction.
+
+Long input wraps across terminal rows. Bracketed paste keeps embedded newlines
+inside one editable entry, so a pasted multiline submission can be accepted
+with one Enter. Recalled multiline submissions are also one entry. The editor
+folds these entries for display and moves over the folded range as a unit; it
+does not provide arbitrary cursor movement among every line of a whole
+submission. Typing Enter still submits the current edited entry, and an
+incomplete submission continues at a fresh `... ` prompt.
+
 ## Inspect and control the session
 
 | Command | Meaning |
@@ -107,5 +121,12 @@ are not a preemptible sandbox.
 EOF exits successfully unless input is incomplete, which exits with status
 1. With piped input, any submission or command error makes the final status
 1, while later input still runs. In an interactive session, recovered errors
-do not change a normal exit's status from 0. Ctrl-C terminates the process;
-use `:cancel` to discard pending input and keep working.
+do not change a normal exit's status from 0.
+
+During interactive editing, Ctrl-C clears both the current edit buffer and any
+pending incomplete submission, then returns to the `x2c> ` prompt without a
+diagnostic. Ctrl-D on an empty edit buffer exits; pending incomplete source
+still makes that exit status 1. Terminal canonical mode is restored before a
+submission runs, so Ctrl-C during evaluation continues to terminate the
+process. Terminals without the required escape-sequence support use the basic
+line reader instead. Piped input retains the same output and exit behavior.

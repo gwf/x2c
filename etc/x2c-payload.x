@@ -77,6 +77,7 @@ static void copy_support(Path destination, int sources) {
     ("builds/0/lib" ("*.h") ("include/x2c"))
     ("builds/0/lib" ("*.xi") ("lib"))
     ("etc" ("*.xlisp" "*.xmacro") ("etc"))
+    ("LICENSES" ("*.txt") ("licenses"))
     ("." ("LICENSE") ("licenses")));
   if (sources) rows = %(("src" ("*.x" "*.xmacro") ("src")) @rows);
   foreach (List row, rows) {
