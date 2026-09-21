@@ -32,9 +32,8 @@ The September 21 refresh changed the earlier audit in three ways.
   `$auto`, up from 46.
 - Meta-capable protocols are documented on dev, but generalized meta values,
   adopted records/types and bodyless native prototypes are not. They exist on
-  `codex/meta-values-types`, which is four commits ahead and eight dev commits
-  behind this baseline. That branch is a dependency to integrate, not a
-  capability the campaign may assume.
+  the independently moving `codex/meta-values-types` branch. That work is a
+  dependency to land, not a capability the campaign may assume from dev.
 
 The rest of the earlier findings still reproduce on current dev:
 
@@ -160,12 +159,12 @@ use proves the missing association material.
 
 ## Generalized-meta tranche
 
-These deliveries begin only after `codex/meta-values-types` is rebased onto
-current dev, reviewed for its stated representation limits, and passes the
-exact-tree gate. The dependency currently supplies per-unit meta values,
-adopted meta types and records, bodyless native prototypes, and a curated
-native-record bridge. Evaluator records are not native layout, ordinary calls
-do not fold, and native crossings still require trusted descriptors.
+These deliveries begin only after `codex/meta-values-types` or its successor
+lands on dev with a review of its stated representation limits and an
+exact-tree proof. The dependency supplies per-unit meta values, adopted meta
+types and records, bodyless native prototypes, and a curated native-record
+bridge. Evaluator records are not native layout, ordinary calls do not fold,
+and native crossings still require trusted descriptors.
 
 ### 5. Make Autodiff the first generalized-meta adopter
 
