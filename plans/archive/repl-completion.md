@@ -1,9 +1,9 @@
 # REPL semantic completion
 
-> Status: active
-> Implementation is authorized on `codex/repl-spike`.
-> Delivery is limited to local commits until Gary clears integration after the
-> repository-wide syntax change.
+> Status: done
+> Implemented in `3b9218dc` on 2026-09-21.
+> Delivery remains limited to local commits until Gary clears integration after
+> the repository-wide syntax change.
 
 ## Result
 
