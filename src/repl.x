@@ -157,6 +157,8 @@ static void _write_stats(
     now.evaluation.machine_errors - baseline.evaluation.machine_errors;
   ReplSizeDelta live = _size_delta(
     now.scope.live_allocations, baseline.scope.live_allocations);
+  ReplSizeDelta live_bytes = _size_delta(
+    now.scope.live_requested_bytes, baseline.scope.live_requested_bytes);
   size_t allocations =
     now.scope.allocation_calls - baseline.scope.allocation_calls;
   size_t frees = now.scope.free_calls - baseline.scope.free_calls;
@@ -176,8 +178,10 @@ static void _write_stats(
   out.printf("evaluation: live-program-bytes=%ld\n",
     now.evaluation.program_bytes);
   out.printf("scope (process): live-allocation-objects=%zu "
-    "delta-since-open=%c%zu\n",
-    now.scope.live_allocations, live.sign, live.magnitude);
+    "delta-since-open=%c%zu live-requested-bytes=%zu "
+    "byte-delta-since-open=%c%zu\n",
+    now.scope.live_allocations, live.sign, live.magnitude,
+    now.scope.live_requested_bytes, live_bytes.sign, live_bytes.magnitude);
   out.printf("scope (process, since REPL open): allocation-calls=%zu "
     "free-calls=%zu reallocation-calls=%zu requested-traffic-bytes=%zu\n",
     allocations, frees, reallocations, requested);
@@ -203,11 +207,12 @@ static void _write_stats(
     now.evaluation.inlined_scopes - baseline.evaluation.inlined_scopes,
     now.evaluation.inline_declines - baseline.evaluation.inline_declines);
   out.printf("scope (process, verbose): live-scopes=%zu "
-    "scope-creations=%zu scope-destructions=%zu largest-request-bytes=%zu\n",
+    "scope-creations=%zu scope-destructions=%zu largest-request-bytes=%zu "
+    "peak-live-requested-bytes=%zu\n",
     now.scope.live_scopes,
     now.scope.scope_creations - baseline.scope.scope_creations,
     now.scope.scope_destructions - baseline.scope.scope_destructions,
-    now.scope.largest_request);
+    now.scope.largest_request, now.scope.peak_live_requested_bytes);
   out.printf("pool (verbose): depth=%d allocation-calls=%zu free-calls=%zu "
     "requested-traffic-bytes=%zu\n", now.pool.depth,
     now.pool.allocation_calls - baseline.pool.allocation_calls,

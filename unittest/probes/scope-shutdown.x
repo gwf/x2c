@@ -62,7 +62,8 @@ int main(int argc, char **argv) {
     Scope.release();
     Scope_shutdown();
     ScopeStats stats = Scope.stats();
-    return stats.live_scopes || stats.live_allocations;
+    return stats.live_scopes || stats.live_allocations ||
+           stats.live_requested_bytes;
   }
 
   if (!strcmp(argv[1], "leak")) {
@@ -70,14 +71,16 @@ int main(int argc, char **argv) {
     Scope.malloc_in(&leaked, 8);
     Scope_shutdown();
     ScopeStats stats = Scope.stats();
-    return stats.live_scopes != 1 || stats.live_allocations != 1;
+    return stats.live_scopes != 1 || stats.live_allocations != 1 ||
+           stats.live_requested_bytes != 8;
   }
 
   if (!strcmp(argv[1], "repeat")) {
     Scope_shutdown();
     Scope_shutdown();
     ScopeStats stats = Scope.stats();
-    return stats.live_scopes || stats.live_allocations;
+    return stats.live_scopes || stats.live_allocations ||
+           stats.live_requested_bytes;
   }
 
   if (!strcmp(argv[1], "thread-state")) {
@@ -85,10 +88,12 @@ int main(int argc, char **argv) {
     (void) Error.ready();
     Scope_shutdown();
     ScopeStats stats = Scope.stats();
-    if (stats.live_scopes || stats.live_allocations) return 1;
+    if (stats.live_scopes || stats.live_allocations ||
+        stats.live_requested_bytes) return 1;
     x2c_thread_state_release();
     stats = Scope.stats();
-    return stats.live_scopes || stats.live_allocations;
+    return stats.live_scopes || stats.live_allocations ||
+           stats.live_requested_bytes;
   }
 
   if (!strcmp(argv[1], "hooks")) {
@@ -161,7 +166,8 @@ int main(int argc, char **argv) {
     Scope.malloc_finalized(8, print_drop);
     Scope_shutdown();
     ScopeStats stats = Scope.stats();
-    return stats.live_scopes || stats.live_allocations;
+    return stats.live_scopes || stats.live_allocations ||
+           stats.live_requested_bytes;
   }
 
   if (!strcmp(argv[1], "finalizer-thread")) {
@@ -169,7 +175,8 @@ int main(int argc, char **argv) {
     Var result = Thread.join(thread);
     Scope_shutdown();
     ScopeStats stats = Scope.stats();
-    return result.int() != 1 || stats.live_scopes || stats.live_allocations;
+    return result.int() != 1 || stats.live_scopes || stats.live_allocations ||
+           stats.live_requested_bytes;
   }
 
   if (!strcmp(argv[1], "completed-thread")) {

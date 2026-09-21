@@ -176,6 +176,8 @@ static void scope_named_direct_allocation(void) {
   EXPECT_INT_EQ(during.allocation_calls, before.allocation_calls + 2);
   EXPECT_INT_EQ(during.live_scopes, before.live_scopes + 1);
   EXPECT_INT_EQ(during.live_allocations, before.live_allocations + 2);
+  EXPECT_INT_EQ(
+    during.live_requested_bytes, before.live_requested_bytes + 21);
   EXPECT_INT_EQ(during.requested_bytes, before.requested_bytes + 21);
   named.destroy();
   ScopeStats after = Scope.stats();
@@ -184,9 +186,11 @@ static void scope_named_direct_allocation(void) {
   EXPECT_INT_EQ(after.scope_destructions, before.scope_destructions + 1);
   EXPECT_INT_EQ(after.live_scopes, before.live_scopes);
   EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
+  EXPECT_INT_EQ(after.live_requested_bytes, before.live_requested_bytes);
 }
 
 static void scope_allocator_edge_behavior(void) {
+  ScopeStats before = Scope.stats();
   Scope.retain();
   void *zero = Scope.malloc(0);
   void *zeroed = Scope.calloc(0, sizeof(int));
@@ -197,10 +201,14 @@ static void scope_allocator_edge_behavior(void) {
   EXPECT_NOT_NULL(from_null);
   EXPECT_NULL(Scope.memdup(NULL, 4));
   EXPECT_NULL(Scope.memdup("x", 0));
+  EXPECT_INT_EQ(
+    Scope.stats().live_requested_bytes, before.live_requested_bytes + 8);
   EXPECT_NULL(Scope.realloc(from_null, 0));
   Scope.free(zero);
   Scope.free(zeroed);
   Scope.release();
+  EXPECT_INT_EQ(
+    Scope.stats().live_requested_bytes, before.live_requested_bytes);
 }
 
 static void scope_size_limits_are_terminal(void) {
@@ -217,11 +225,14 @@ static void scope_nested_stats_restore(void) {
   ScopeStats nested = Scope.stats();
   EXPECT_INT_EQ(nested.live_scopes, before.live_scopes + 2);
   EXPECT_INT_EQ(nested.live_allocations, before.live_allocations + 1);
+  EXPECT_INT_EQ(
+    nested.live_requested_bytes, before.live_requested_bytes + 16);
   Scope.release();
   Scope.release();
   ScopeStats after = Scope.stats();
   EXPECT_INT_EQ(after.live_scopes, before.live_scopes);
   EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
+  EXPECT_INT_EQ(after.live_requested_bytes, before.live_requested_bytes);
 }
 
 static void scope_release_requires_matching_retain(void) {
@@ -328,9 +339,11 @@ static void scope_destroy_detached_contract(void) {
 }
 
 static int drop_count;
+static size_t drop_live_bytes;
 static void *drop_order[4];
 
 static void _count_drop(void *ptr) {
+  drop_live_bytes = Scope.stats().live_requested_bytes;
   drop_order[drop_count < 4 ? drop_count : 3] = ptr;
   drop_count++;
 }
@@ -358,6 +371,7 @@ static void scope_finalizer_runs_once(void) {
   Scope.release();
   EXPECT_INT_EQ(drop_count, 1);
   EXPECT_TRUE(drop_order[0] == a);
+  EXPECT_INT_EQ(drop_live_bytes, before.live_requested_bytes);
 
   drop_count = 0;
   Scope.retain();
@@ -372,6 +386,7 @@ static void scope_finalizer_runs_once(void) {
 
   ScopeStats after = Scope.stats();
   EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
+  EXPECT_INT_EQ(after.live_requested_bytes, before.live_requested_bytes);
   EXPECT_INT_EQ(after.free_calls, before.free_calls + 3);
   EXPECT_TRUE(_scope_rejected(_finalize_without_drop));
 }
@@ -388,6 +403,8 @@ static void scope_finalizer_order_and_move(void) {
   Scope.move(b, &to);  // middle of the source list
   Scope.move(c, &to);  // head of the source list
   Scope.move(c, &to);  // self-move keeps the finalizer
+  EXPECT_INT_EQ(
+    Scope.stats().live_requested_bytes, before.live_requested_bytes + 32);
   from.destroy();
   EXPECT_INT_EQ(drop_count, 1);
   EXPECT_TRUE(drop_order[0] == a);
@@ -397,6 +414,7 @@ static void scope_finalizer_order_and_move(void) {
   EXPECT_TRUE(drop_order[2] == b);
   ScopeStats after = Scope.stats();
   EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
+  EXPECT_INT_EQ(after.live_requested_bytes, before.live_requested_bytes);
   EXPECT_INT_EQ(after.live_scopes, before.live_scopes);
 }
 
@@ -409,8 +427,14 @@ static void scope_finalizer_realloc_and_scratch(void) {
   Scope.malloc(8);
   fill(a, "grow");
   a = Scope.realloc(a, 4096);
+  EXPECT_INT_EQ(
+    Scope.stats().live_requested_bytes,
+    before.live_requested_bytes + 8 + 4096 + 8);
   EXPECT_STR_EQ(a, "grow");
   a = Scope.realloc(a, 8);
+  EXPECT_INT_EQ(
+    Scope.stats().live_requested_bytes,
+    before.live_requested_bytes + 24);
   EXPECT_STR_EQ(a, "grow");
   Scope.release();
   EXPECT_INT_EQ(drop_count, 1);
@@ -423,8 +447,11 @@ static void scope_finalizer_realloc_and_scratch(void) {
   EXPECT_INT_EQ(drop_count, 2);
   ScopeStats after = Scope.stats();
   EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
+  EXPECT_INT_EQ(after.live_requested_bytes, before.live_requested_bytes);
   EXPECT_INT_EQ(after.live_scopes, before.live_scopes);
   EXPECT_INT_EQ(after.reallocation_calls, before.reallocation_calls + 2);
+  EXPECT_TRUE(
+    after.peak_live_requested_bytes >= before.live_requested_bytes + 4112);
 }
 
 $(import "test-macros.xmacro")

@@ -192,7 +192,8 @@ for pattern in [
         r"machine-errors=\d+",
         r"evaluation: live-program-bytes=\d+",
         r"scope \(process\): live-allocation-objects=\d+ "
-        r"delta-since-open=[+-]\d+",
+        r"delta-since-open=[+-]\d+ live-requested-bytes=\d+ "
+        r"byte-delta-since-open=[+-]\d+",
         r"scope \(process, since REPL open\): allocation-calls=\d+ "
         r"free-calls=\d+ reallocation-calls=\d+ "
         r"requested-traffic-bytes=\d+",

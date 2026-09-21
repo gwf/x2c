@@ -41,12 +41,15 @@ typedef struct Scope {
 } *Scope;
 
 /** Value snapshot of process-wide `Scope` allocation and lifetime counters.
-    It owns no storage; live counts are derived when the snapshot is taken.
+    It owns no storage; live object and scope counts are derived when the
+    snapshot is taken.
+    Live and peak requested bytes count public payload only, excluding Scope
+    metadata, native allocator overhead, and Pool's direct small-object blocks.
 */
 typedef struct ScopeStats {
   size_t allocation_calls, reallocation_calls, free_calls, live_allocations;
   size_t scope_creations, scope_destructions, live_scopes, requested_bytes;
-  size_t largest_request;
+  size_t largest_request, live_requested_bytes, peak_live_requested_bytes;
 } ScopeStats;
 
 #include <stdlib.h>
@@ -69,22 +72,20 @@ protocol Cleanup(Scope);
 #define UNTAG_POINTER(p) ((void *) ((uintptr_t) (p) & ~(uintptr_t) 1))
 #define IS_TAGGED(p) ((uintptr_t) (p) & (uintptr_t) 1)
 
-/* A finalized allocation keeps its destructor in a prefix ahead of the
-   public header, so the header layout and payload alignment are unchanged
-   and only finalized blocks pay for the field. Bit 0 of `next` marks one;
-   every read or write of `next` goes through NEXT and SET_NEXT. */
-typedef struct ScopeFinalizer {
+/* Every allocation keeps its requested payload size and optional destructor
+   before the public header. ScopeAlloc remains immediately before the payload
+   and the combined prefix preserves native allocation alignment. */
+typedef struct ScopeMetadata {
+  size_t requested_size;
   void (*drop)(void *);
-  void *pad;
-} ScopeFinalizer;
+} ScopeMetadata;
 
-#define IS_FINALIZED(a)   ((uintptr_t) (a)->next & (uintptr_t) 1)
-#define NEXT(a)           ((ScopeAlloc) UNTAG_POINTER((a)->next))
-#define SET_NEXT(a, n) \
-  ((a)->next = (ScopeAlloc) ((uintptr_t) (n) | IS_FINALIZED(a)))
-#define ALLOC_BASE(a) \
-  ((void *) ((char *) (a) - (IS_FINALIZED(a) ? sizeof(ScopeFinalizer) : 0)))
-#define ALLOC_DROP(a)     (((ScopeFinalizer *) (a))[-1].drop)
+_Static_assert(
+  (sizeof(ScopeMetadata) + sizeof(struct ScopeAlloc)) %
+    _Alignof(max_align_t) == 0,
+  "Scope allocation prefix must preserve payload alignment");
+
+#define ALLOC_META(a) (((ScopeMetadata *) (a)) - 1)
 
 typedef struct ScopeName {
   Scope scope, char *name, struct ScopeName *next;
@@ -115,6 +116,8 @@ static ScopeName scope_names;
 static atomic_size_t scope_allocation_calls, scope_reallocation_calls;
 static atomic_size_t scope_free_calls, scope_creations, scope_destructions;
 static atomic_size_t scope_requested_bytes, scope_largest_request;
+static atomic_size_t scope_live_requested_bytes;
+static atomic_size_t scope_peak_live_requested_bytes;
 static atomic_size_t raw_alloc_count, raw_free_count;
 static pthread_mutex_t scope_metadata_mutex =
   (pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER;
@@ -135,6 +138,19 @@ static void _record_request(size_t size) {
   size_t old = atomic_load(&scope_largest_request);
   while (size > old && !atomic_compare_exchange_weak(
     &scope_largest_request, &old, size)) {}
+}
+
+static void _record_live_add(size_t size) {
+  size_t live = atomic_fetch_add_explicit(
+    &scope_live_requested_bytes, size, memory_order_relaxed) + size;
+  size_t old = atomic_load(&scope_peak_live_requested_bytes);
+  while (live > old && !atomic_compare_exchange_weak(
+    &scope_peak_live_requested_bytes, &old, live)) {}
+}
+
+static void _record_live_remove(size_t size) {
+  atomic_fetch_sub_explicit(
+    &scope_live_requested_bytes, size, memory_order_relaxed);
 }
 
 static void _raw_fatal(const char *message) {
@@ -290,27 +306,25 @@ static Scope _new_scope(const char *name) {
 }
 
 static void *_malloc_in(Scope *slot, size_t size, void (*drop)(void *)) {
-  size_t extra = drop ? sizeof(ScopeFinalizer) : 0;
   if (!slot) raise %(bad-arg);
-  if (size > SIZE_MAX - sizeof(struct ScopeAlloc) - extra) {
+  if (size > SIZE_MAX - sizeof(ScopeMetadata) - sizeof(struct ScopeAlloc)) {
     if (x2c_error_runtime_ready) raise %(size-limit);
     _raw_fatal("allocation size overflow");
   }
   if (!*slot) *slot = _new_scope(NULL);
   Scope scope = *slot;
-  char *base = _data_malloc(size + sizeof(struct ScopeAlloc) + extra);
-  ScopeAlloc alloc = (ScopeAlloc) (base + extra);
-  if (drop) {
-    ScopeFinalizer *finalizer = (ScopeFinalizer *) base;
-    finalizer.drop = drop;
-    alloc.next = TAG_POINTER(scope.first);
-  }
-  else alloc.next = scope.first;
+  ScopeMetadata *meta = _data_malloc(
+    sizeof(ScopeMetadata) + sizeof(struct ScopeAlloc) + size);
+  meta.requested_size = size;
+  meta.drop = drop;
+  ScopeAlloc alloc = (ScopeAlloc) (meta + 1);
+  alloc.next = scope.first;
   alloc.prev = TAG_POINTER(scope);
   if (scope.first) scope.first.prev = alloc;
   scope.first = alloc;
   atomic_fetch_add(&scope_allocation_calls, 1);
   _record_request(size);
+  _record_live_add(size);
   return ALLOC_PTR(alloc);
 }
 
@@ -334,19 +348,22 @@ static void *_memdup_in(Scope *slot, const void *ptr, size_t size) {
 /* The block is already unlinked, so a drop that allocates or frees other
    storage sees a consistent list. */
 static void _release_alloc(ScopeAlloc alloc) {
-  void *base = ALLOC_BASE(alloc);
+  ScopeMetadata *meta = ALLOC_META(alloc);
+  size_t size = meta.requested_size;
+  void (*drop)(void *) = meta.drop;
   atomic_fetch_add(&scope_free_calls, 1);
-  if (IS_FINALIZED(alloc)) ALLOC_DROP(alloc)(ALLOC_PTR(alloc));
-  free(base);
+  _record_live_remove(size);
+  if (drop) drop(ALLOC_PTR(alloc));
+  free(meta);
 }
 
 static void _free_alloc(ScopeAlloc old) {
-  ScopeAlloc next = NEXT(old), prev = old.prev;
+  ScopeAlloc next = old.next, prev = old.prev;
   if (IS_TAGGED(prev)) {
     Scope scope = UNTAG_POINTER(prev);
     scope.first = next;
   }
-  else if (prev) SET_NEXT(prev, next);
+  else if (prev) prev.next = next;
   if (next) next.prev = prev;
   _release_alloc(old);
 }
@@ -358,7 +375,7 @@ static void _destroy_chain(Scope scope) {
     Scope down = scope.down;
     ScopeAlloc alloc;
     while ((alloc = scope.first)) {
-      scope.first = NEXT(alloc);
+      scope.first = alloc.next;
       if (scope.first) scope.first.prev = TAG_POINTER(scope);
       _release_alloc(alloc);
     }
@@ -390,7 +407,7 @@ void x2c_scope_thread_release(void) {
 static size_t _allocation_count(Scope scope) {
   size_t count = 0;
   for (ScopeAlloc alloc = scope ? scope.first : NULL; alloc;
-       alloc = NEXT(alloc))
+       alloc = alloc.next)
     count++;
   return count;
 }
@@ -483,8 +500,11 @@ const char *Scope.name(Scope scope) {
     read them before and after a routine to check that it leaves nothing
     behind. The snapshot also carries
     `allocation_calls`, `reallocation_calls`, `free_calls`,
-    `scope_creations`, `scope_destructions`, `requested_bytes`, and
-    `largest_request`. Stats remain valid after shutdown.
+    `scope_creations`, `scope_destructions`, `requested_bytes`,
+    `largest_request`, `live_requested_bytes`, and
+    `peak_live_requested_bytes`. Requested bytes are cumulative traffic;
+    live requested bytes are the exact current managed payload total. Stats
+    remain valid after shutdown.
 
     ```x2c
     ~int main(void) {
@@ -502,7 +522,10 @@ ScopeStats Scope.stats(void) {
   ScopeStats result = {
     .reallocation_calls = atomic_load(&scope_reallocation_calls),
     .requested_bytes = atomic_load(&scope_requested_bytes),
-    .largest_request = atomic_load(&scope_largest_request)
+    .largest_request = atomic_load(&scope_largest_request),
+    .live_requested_bytes = atomic_load(&scope_live_requested_bytes),
+    .peak_live_requested_bytes =
+      atomic_load(&scope_peak_live_requested_bytes)
   };
   do {
     result.allocation_calls = atomic_load(&scope_allocation_calls);
@@ -914,14 +937,14 @@ void Scope.move(void *ptr, Scope *slot) {
   if (!slot) raise %(bad-arg);
   if (!*slot) *slot = _new_scope(NULL);
   Scope scope = *slot;
-  ScopeAlloc alloc = PTR_ALLOC(ptr), next = NEXT(alloc), prev = alloc.prev;
+  ScopeAlloc alloc = PTR_ALLOC(ptr), next = alloc.next, prev = alloc.prev;
   if (IS_TAGGED(prev)) {
     Scope owner = UNTAG_POINTER(prev);
     owner.first = next;
   }
-  else SET_NEXT(prev, next);
+  else prev.next = next;
   if (next) next.prev = prev;
-  SET_NEXT(alloc, scope.first);
+  alloc.next = scope.first;
   alloc.prev = TAG_POINTER(scope);
   if (scope.first) scope.first.prev = alloc;
   scope.first = alloc;
@@ -946,23 +969,27 @@ void *Scope.realloc(void *ptr, size_t size) {
     _free_alloc(PTR_ALLOC(ptr));
     return NULL;
   }
-  ScopeAlloc old = PTR_ALLOC(ptr), next = NEXT(old), prev = old.prev;
-  size_t extra = IS_FINALIZED(old) ? sizeof(ScopeFinalizer) : 0;
-  if (size > SIZE_MAX - sizeof(struct ScopeAlloc) - extra)
+  ScopeAlloc old = PTR_ALLOC(ptr), next = old.next, prev = old.prev;
+  ScopeMetadata *old_meta = ALLOC_META(old);
+  size_t old_size = old_meta.requested_size;
+  if (size > SIZE_MAX - sizeof(ScopeMetadata) - sizeof(struct ScopeAlloc))
     raise %(size-limit);
-  char *base =
-    _data_realloc(ALLOC_BASE(old), size + sizeof(struct ScopeAlloc) + extra);
-  ScopeAlloc replacement = (ScopeAlloc) (base + extra);
-  SET_NEXT(replacement, next);
+  ScopeMetadata *meta = _data_realloc(
+    old_meta, sizeof(ScopeMetadata) + sizeof(struct ScopeAlloc) + size);
+  meta.requested_size = size;
+  ScopeAlloc replacement = (ScopeAlloc) (meta + 1);
+  replacement.next = next;
   replacement.prev = prev;
   if (next) next.prev = replacement;
   if (IS_TAGGED(prev)) {
     Scope scope = UNTAG_POINTER(prev);
     scope.first = replacement;
   }
-  else SET_NEXT(prev, replacement);
+  else prev.next = replacement;
   atomic_fetch_add(&scope_reallocation_calls, 1);
   _record_request(size);
+  if (size >= old_size) _record_live_add(size - old_size);
+  else _record_live_remove(old_size - size);
   return ALLOC_PTR(replacement);
 }
 /** Releases resources owned by `Scope`.
