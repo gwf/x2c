@@ -1002,27 +1002,51 @@ void x2c_driver_error(const char *);
 
 static void _print_help(Symbol command){
   switch(command){
-    case 0 : _print_top_help();
-    break;
-    case 45220543335690 : _print_translate_help();
-    break;
-    case 5589768 : case 38236 : _print_driver_help(command);
-    break;
-    case 29038 : _print_new_help();
-    break;
-    case 1282559016 : _print_script_help();
-    break;
-    case 1190936 : _print_repl_help();
-    break;
-    case 5462434287712 : _print_bootstrap_help();
-    break;
-    case 11180 : _print_env_help();
-    break;
-    case 20308036376 : case 1219329418 : case 806120 : _print_package_help(command);
-    break;
-    case 535328 : puts(_200);
-    break;
-    default: x2c_driver_error(String_join(NULL, cons(String_var(_74), cons(String_var(Symbol_str(command)), cons(String_var(_75), NULL)))));
+    case 0 :{
+      _print_top_help();
+      break;
+    }
+    case 45220543335690 :{
+      _print_translate_help();
+      break;
+    }
+    case 5589768 : case 38236 :{
+      _print_driver_help(command);
+      break;
+    }
+    case 29038 :{
+      _print_new_help();
+      break;
+    }
+    case 1282559016 :{
+      _print_script_help();
+      break;
+    }
+    case 1190936 :{
+      _print_repl_help();
+      break;
+    }
+    case 5462434287712 :{
+      _print_bootstrap_help();
+      break;
+    }
+    case 11180 :{
+      _print_env_help();
+      break;
+    }
+    case 20308036376 : case 1219329418 : case 806120 :{
+      _print_package_help(command);
+      break;
+    }
+    case 535328 :{
+      puts(_200);
+      break;
+    }
+    default:{
+      x2c_driver_error(String_join(NULL, cons(String_var(_74), cons(String_var(Symbol_str(command)), cons(String_var(_75), NULL)))));
+      break;
+    }
+
   }
 
 }
@@ -1326,128 +1350,236 @@ static int _driver_count(String value, int minimum, String noun){
 
 static void _apply_option(CliRequest c, CliOption * option, String spelling, String value, int attached, Array x_paths, Array cpp_args, Array cc_args, Array ld_args){
   switch(option -> id){
-    case 535328 : _print_help(c -> command);
-    exit(0);
-    case 47618096330 : c -> verbose = 1;
-    break;
-    case 9852392796 : c -> dry_run = 1;
-    break;
-    case 37046632 : c -> quiet = 1;
-    break;
-    case 34343516 : c -> plain = 1;
-    break;
-    case 7300068 : if(! String_truth(value)) x2c_driver_error("--color requires auto, always, or never");
-    if(String_equal(value, _84)) c -> color_mode = 109854;
-    else if(String_equal(value, _85)) c -> color_mode = 93785702;
-    else if(String_equal(value, _86)) c -> color_mode = 29733220;
-    else x2c_driver_error(String_join(NULL, cons(String_var(_87), cons(String_var(value), cons(String_var(_75), NULL)))));
-    break;
-    case 8721742 : c -> debugging = 1;
-    break;
-    case 39961246346080 : c -> repl_dump = 1;
-    break;
-    case 1278759914442022 : c -> repl_stats = 1;
-    break;
-    case 1517554982 : c -> repl_verbose_stats = 1;
-    break;
-    case 33665524324 : c -> out_dir = value;
-    break;
-    case 42018498656 : c -> source_map = 1;
-    break;
-    case 38995839752 : c -> rebuild = 1;
-    break;
-    case 7088220 : c -> clean = 1;
-    break;
-    case 31136689190 : c -> no_deps = 1;
-    break;
-    case 286754491146 : c -> dep_file = value;
-    break;
-    case 293637522078056 : c -> dep_target = value;
-    break;
-    case 996399414194 : c -> no_phony_deps = 1;
-    break;
-    case 20273998090 : Array_push(x_paths, String_var(value));
-    if(c -> command != 45220543335690) _push_pair(cc_args, _142, value);
-    break;
-    case 54927135910154 : Array_push(x_paths, String_var(value));
-    break;
-    case 35114656356 : c -> package_dirs = cons(String_var(value), c -> package_dirs);
-    break;
-    case 973020192 : c -> no_cpp = 1;
-    break;
-    case 27054400850790 : c -> live_symbols = 1;
-    break;
-    case 241658219366 : c -> cpp_symbols = 1;
-    break;
-    case 1374366630 : case 320883072032 : case 247458062609318 : case 320883068136 : case 1447057375073126 : case 10268258302218 : case 42507336486 : case 10268258311770 : case 328584264751626 : case 7478869146 : case 1371473465773288 : c -> dump = option -> id;
-    break;
-    case 1111831152 : c -> prefix = value;
-    break;
-    case 7958982899053 : c -> sha256 = value;
-    break;
-    case 19800432 : c -> index = value;
-    break;
-    case 13603018 : c -> force = 1;
-    break;
-    case 896459484392 : c -> manifest = value;
-    break;
-    case 1345468776 : c -> target = value;
-    break;
-    case 35599567626 : c -> profile = value;
-    break;
-    case 740232 : _driver_kind(c, value);
-    break;
-    case 7477414666 : c -> compile_only = 1;
-    break;
-    case 686246 : c -> jobs = _driver_count(value, 1, _210);
-    break;
-    case 918708911504550 : c -> max_errors = _driver_count(value, 0, _211);
-    break;
-    case 9417250982666 : c -> diagnostics_file = value;
-    break;
-    case 1052018024 : c -> output = value;
-    break;
-    case 5861298610788 : c -> build_dir = value;
-    break;
-    case 6551812 : c -> compile_commands = value;
-    c -> save_temps = 1;
-    break;
-    case 41897807850336 : c -> save_temps = 1;
-    break;
-    case 8747647543562 : _push_pair(cc_args, _142, value);
-    break;
-    case 274059207002 : _push_pair(cc_args, _212, value);
-    break;
-    case 198 : c -> cc = value;
-    break;
-    case 100 : c -> ar = value;
-    break;
-    case 31784 : case 14 : Array_push(cc_args, String_var(spelling));
-    break;
-    case 279333770 : case 1473453116298 : if(attached){
-      Array_push(cpp_args, String_var(spelling));
+    case 535328 :{
+      _print_help(c -> command);
+      exit(0);
+      break;
+    }
+    case 47618096330 :{
+      c -> verbose = 1;
+      break;
+    }
+    case 9852392796 :{
+      c -> dry_run = 1;
+      break;
+    }
+    case 37046632 :{
+      c -> quiet = 1;
+      break;
+    }
+    case 34343516 :{
+      c -> plain = 1;
+      break;
+    }
+    case 7300068 :{
+      if(! String_truth(value)) x2c_driver_error("--color requires auto, always, or never");
+      if(String_equal(value, _84)) c -> color_mode = 109854;
+      else if(String_equal(value, _85)) c -> color_mode = 93785702;
+      else if(String_equal(value, _86)) c -> color_mode = 29733220;
+      else x2c_driver_error(String_join(NULL, cons(String_var(_87), cons(String_var(value), cons(String_var(_75), NULL)))));
+      break;
+    }
+    case 8721742 :{
+      c -> debugging = 1;
+      break;
+    }
+    case 39961246346080 :{
+      c -> repl_dump = 1;
+      break;
+    }
+    case 1278759914442022 :{
+      c -> repl_stats = 1;
+      break;
+    }
+    case 1517554982 :{
+      c -> repl_verbose_stats = 1;
+      break;
+    }
+    case 33665524324 :{
+      c -> out_dir = value;
+      break;
+    }
+    case 42018498656 :{
+      c -> source_map = 1;
+      break;
+    }
+    case 38995839752 :{
+      c -> rebuild = 1;
+      break;
+    }
+    case 7088220 :{
+      c -> clean = 1;
+      break;
+    }
+    case 31136689190 :{
+      c -> no_deps = 1;
+      break;
+    }
+    case 286754491146 :{
+      c -> dep_file = value;
+      break;
+    }
+    case 293637522078056 :{
+      c -> dep_target = value;
+      break;
+    }
+    case 996399414194 :{
+      c -> no_phony_deps = 1;
+      break;
+    }
+    case 20273998090 :{
+      Array_push(x_paths, String_var(value));
+      if(c -> command != 45220543335690) _push_pair(cc_args, _142, value);
+      break;
+    }
+    case 54927135910154 :{
+      Array_push(x_paths, String_var(value));
+      break;
+    }
+    case 35114656356 :{
+      c -> package_dirs = cons(String_var(value), c -> package_dirs);
+      break;
+    }
+    case 973020192 :{
+      c -> no_cpp = 1;
+      break;
+    }
+    case 27054400850790 :{
+      c -> live_symbols = 1;
+      break;
+    }
+    case 241658219366 :{
+      c -> cpp_symbols = 1;
+      break;
+    }
+    case 1374366630 : case 320883072032 : case 247458062609318 : case 320883068136 : case 1447057375073126 : case 10268258302218 : case 42507336486 : case 10268258311770 : case 328584264751626 : case 7478869146 : case 1371473465773288 :{
+      c -> dump = option -> id;
+      break;
+    }
+    case 1111831152 :{
+      c -> prefix = value;
+      break;
+    }
+    case 7958982899053 :{
+      c -> sha256 = value;
+      break;
+    }
+    case 19800432 :{
+      c -> index = value;
+      break;
+    }
+    case 13603018 :{
+      c -> force = 1;
+      break;
+    }
+    case 896459484392 :{
+      c -> manifest = value;
+      break;
+    }
+    case 1345468776 :{
+      c -> target = value;
+      break;
+    }
+    case 35599567626 :{
+      c -> profile = value;
+      break;
+    }
+    case 740232 :{
+      _driver_kind(c, value);
+      break;
+    }
+    case 7477414666 :{
+      c -> compile_only = 1;
+      break;
+    }
+    case 686246 :{
+      c -> jobs = _driver_count(value, 1, _210);
+      break;
+    }
+    case 918708911504550 :{
+      c -> max_errors = _driver_count(value, 0, _211);
+      break;
+    }
+    case 9417250982666 :{
+      c -> diagnostics_file = value;
+      break;
+    }
+    case 1052018024 :{
+      c -> output = value;
+      break;
+    }
+    case 5861298610788 :{
+      c -> build_dir = value;
+      break;
+    }
+    case 6551812 :{
+      c -> compile_commands = value;
+      c -> save_temps = 1;
+      break;
+    }
+    case 41897807850336 :{
+      c -> save_temps = 1;
+      break;
+    }
+    case 8747647543562 :{
+      _push_pair(cc_args, _142, value);
+      break;
+    }
+    case 274059207002 :{
+      _push_pair(cc_args, _212, value);
+      break;
+    }
+    case 198 :{
+      c -> cc = value;
+      break;
+    }
+    case 100 :{
+      c -> ar = value;
+      break;
+    }
+    case 31784 : case 14 :{
       Array_push(cc_args, String_var(spelling));
+      break;
     }
-    else{
-      _push_pair(cpp_args, spelling, value);
-      _push_pair(cc_args, spelling, value);
+    case 279333770 : case 1473453116298 :{
+      if(attached){
+        Array_push(cpp_args, String_var(spelling));
+        Array_push(cc_args, String_var(spelling));
+      }
+      else{
+        _push_pair(cpp_args, spelling, value);
+        _push_pair(cc_args, spelling, value);
+      }
+      break;
     }
-    break;
-    case 49350 : if(cli_dependency_pass_through(value)) x2c_driver_error(String_join(NULL, cons(String_var(_88), cons(String_var(value), cons(String_var(_75), NULL)))));
-    Array_push(cc_args, String_var(value));
-    break;
-    case 26380018276 : case 26379160754 : if(attached) Array_push(ld_args, String_var(spelling));
-    else _push_pair(ld_args, spelling, value);
-    break;
-    case 38800656 : Array_push(ld_args, String_var(String_join(NULL, cons(String_var(_89), cons(String_var(value), NULL)))));
-    break;
-    case 35719882824 : Array_push(cc_args, String_var(spelling));
-    Array_push(ld_args, String_var(spelling));
-    break;
-    case 14434122038422 : case 52364728676 : _push_pair(ld_args, spelling, value);
-    break;
-    case 1496 : Array_push(ld_args, String_var(spelling));
-    break;
+    case 49350 :{
+      if(cli_dependency_pass_through(value)) x2c_driver_error(String_join(NULL, cons(String_var(_88), cons(String_var(value), cons(String_var(_75), NULL)))));
+      Array_push(cc_args, String_var(value));
+      break;
+    }
+    case 26380018276 : case 26379160754 :{
+      if(attached) Array_push(ld_args, String_var(spelling));
+      else _push_pair(ld_args, spelling, value);
+      break;
+    }
+    case 38800656 :{
+      Array_push(ld_args, String_var(String_join(NULL, cons(String_var(_89), cons(String_var(value), NULL)))));
+      break;
+    }
+    case 35719882824 :{
+      Array_push(cc_args, String_var(spelling));
+      Array_push(ld_args, String_var(spelling));
+      break;
+    }
+    case 14434122038422 : case 52364728676 :{
+      _push_pair(ld_args, spelling, value);
+      break;
+    }
+    case 1496 :{
+      Array_push(ld_args, String_var(spelling));
+      break;
+    }
+
   }
 
 }

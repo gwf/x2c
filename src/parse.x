@@ -1874,11 +1874,8 @@ static List _finish_aggregate_type(
   name = c.evaluate_macro_slot(name);
   if (tag != <enum>) name = c.aggregate_name(tag, name, 1);
   List type = %($tag $name);
-  List previous = c.aggregate_type;
-  c.aggregate_type = type;
   Array bound = [];
-  {
-    defer c.aggregate_type = previous;
+  $let(c.aggregate_type, type) {
     foreach (List member, members) {
       foreach (Var row, c.evaluate_macro_rows(member)) {
         if (tag == <enum>)

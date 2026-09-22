@@ -1,8 +1,8 @@
 # Internal adoption campaign
 
-> Status: ready tranche complete and validated; generalized-meta and
-> lifetime-certified tranches remain dependency-gated.
-> Refreshed against dev at `c51a1532` on 2026-09-22. Generalized meta adoption
+> Status: ready tranche and system-macro follow-up complete and validated;
+> generalized-meta and lifetime-certified tranches remain dependency-gated.
+> Refreshed against dev at `2d188c42` on 2026-09-22. Generalized meta adoption
 > depends on rebasing, reviewing and landing `codex/meta-values-types`;
 > lifetime-sensitive adoption depends on the certification work described
 > below.
@@ -46,6 +46,9 @@ The ready-tranche findings now stand as follows:
 - Phase 4 renamed the two executable x2c tools to `tools/check-release` and
   `tools/gen-package-index`. Both use the existing suffix-independent script
   classifier and launcher.
+- The ready-tranche follow-up adopted `$switch` in the two largest CLI
+  dispatches, deleting 62 explicit terminal `break`s, and replaced eight
+  manual temporary parser and analysis state bindings with `$let`.
 
 ## Campaign boundaries
 
@@ -154,6 +157,27 @@ Editor association by first line is a useful follow-up, but it is not a
 condition for the rename: the VS Code extension is suffix-oriented and lives
 in its own Node environment. Plan that behavior separately if ordinary editor
 use proves the missing association material.
+
+### Ready-tranche system-macro follow-up (complete)
+
+Use `$switch` for `_print_help` and `_apply_option` in `src/cli.x`, which
+already imports the system macro pack for `$dedent`. Remove only each case
+run's terminal switch `break`; preserve grouped labels and any early or nested
+control transfer. The remaining return-only switches and switches with
+deliberate fallthrough gain no useful deletion and stay direct.
+
+Use `$let` for the exact temporary-state regions in the list, raise and catch
+literal parsers, aggregate-member binding, and the two recursive
+`lifetime.origin` walks. This makes their documented temporary state restore
+on every exit without adding helpers or another state owner. Raw pthread
+locks, native assertions, structured timing and native unreachable markers
+retain semantics that `$lock`, `$assert`, `$time` and `$unreachable` do not
+replace.
+
+Acceptance is CLI boundary parity, focused literal/match/error and aggregate
+fixtures, the existing system-macro suite, graph-tool translation, and the
+final exact-tree gate. The nested computed-capture replay limitation found in
+`$lisp.entry` remains tracked separately and is not worked around here.
 
 ## Generalized-meta tranche
 

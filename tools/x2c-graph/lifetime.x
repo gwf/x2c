@@ -432,10 +432,9 @@ static void _lifetime_scan_calls(Lifetime lifetime, Var value) {
   match (node) {
     case %(function *): return;
     case %(at ?origin ?inner): {
-      int saved = lifetime.origin;
-      lifetime.origin = origin.integer();
-      _lifetime_scan_calls(lifetime, inner);
-      lifetime.origin = saved;
+      $let(lifetime.origin, origin.integer()) {
+        _lifetime_scan_calls(lifetime, inner);
+      }
       return;
     }
     case %(cast *): return;
@@ -703,10 +702,9 @@ static void _lifetime_statement(Lifetime lifetime, Var value, int nested) {
   List node = value;
   match (node) {
     case %(at ?origin ?inner): {
-      int saved = lifetime.origin;
-      lifetime.origin = origin.integer();
-      _lifetime_statement(lifetime, inner, nested);
-      lifetime.origin = saved;
+      $let(lifetime.origin, origin.integer()) {
+        _lifetime_statement(lifetime, inner, nested);
+      }
       return;
     }
     case %(block *statements): {

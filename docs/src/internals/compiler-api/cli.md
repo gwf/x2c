@@ -43,7 +43,7 @@ and the `-Wl,` and `-Xlinker` linker pass-throughs are admitted.
 `cc_args` and `ld_args`
 serve native actions; no source-preprocessing options are returned.
 
-Source: `src/cli.x:990`
+Source: `src/cli.x:978`
 
 #### cli_parse
 
@@ -58,7 +58,7 @@ canonical-pool lifetimes described by `CliRequest`.
 **Raises:** `<alloc-fail>` or `<size-limit>` while expanding response files or
 constructing request values.
 
-Source: `src/cli.x:1149`
+Source: `src/cli.x:1137`
 
 #### cli_response_arguments
 
@@ -76,7 +76,7 @@ Source: `src/cli.x:755`
 
 Returns the version line `--version` prints, without a newline.
 
-Source: `src/cli.x:1204`
+Source: `src/cli.x:1192`
 
 ### `CliRequest`
 
@@ -87,7 +87,7 @@ Source: `src/cli.x:1204`
 
 Returns whether `request` selects a terminating inspection or dump mode.
 
-Source: `src/cli.x:1207`
+Source: `src/cli.x:1195`
 
 <a id="CliRequest.package_roots"></a>
 #### CliRequest.package_roots
@@ -100,7 +100,7 @@ when it exists. A root named twice is searched twice and resolves the
 same entries. Explicit directories are borrowed; the result is a fresh
 `List` only when the home directory is appended.
 
-Source: `src/cli.x:1215`
+Source: `src/cli.x:1203`
 
 ## Public types
 

@@ -579,19 +579,20 @@ static void _print_repl_help(void) {
 }
 
 static void _print_help(Symbol command) {
-  switch (command) {
-    case 0:            _print_top_help();             break;
-    case <translate>:  _print_translate_help();       break;
+  $switch(command)
+  {
+    case 0:            _print_top_help();
+    case <translate>:  _print_translate_help();
     case <build>:
-    case <run>:        _print_driver_help(command);   break;
-    case <new>:        _print_new_help();             break;
-    case <script>:     _print_script_help();          break;
-    case <repl>:       _print_repl_help();             break;
-    case <bootstrap>:  _print_bootstrap_help();       break;
-    case <env>:        _print_env_help();             break;
+    case <run>:        _print_driver_help(command);
+    case <new>:        _print_new_help();
+    case <script>:     _print_script_help();
+    case <repl>:       _print_repl_help();
+    case <bootstrap>:  _print_bootstrap_help();
+    case <env>:        _print_env_help();
     case <install>:
     case <remove>:
-    case <list>:       _print_package_help(command);  break;
+    case <list>:       _print_package_help(command);
     case <help>:
       puts(
         $dedent(%"
@@ -600,7 +601,6 @@ static void _print_help(Symbol command) {
 
           Show top-level help, or help for translate, build, run, new, script, repl,
           bootstrap, env, install, remove, or list."));
-      break;
     default: x2c_driver_error(%"unknown help command '${command}'");
   }
 }
@@ -880,13 +880,14 @@ static int _driver_count(String value, int minimum, String noun) {
 static void _apply_option(
   CliRequest c, CliOption *option, String spelling, String value,
   int attached, Array x_paths, Array cpp_args, Array cc_args, Array ld_args) {
-  switch (option.id) {
+  $switch(option.id)
+  {
     case <help>: _print_help(c.command);
       exit(0);
-    case <verbose>: c.verbose = 1; break;
-    case <dry-run>: c.dry_run = 1; break;
-    case <quiet>: c.quiet = 1; break;
-    case <plain>: c.plain = 1; break;
+    case <verbose>: c.verbose = 1;
+    case <dry-run>: c.dry_run = 1;
+    case <quiet>: c.quiet = 1;
+    case <plain>: c.plain = 1;
     case <color>:
       if (!value)
         x2c_driver_error("--color requires auto, always, or never");
@@ -894,64 +895,55 @@ static void _apply_option(
       else if (value == "always") c.color_mode = <always>;
       else if (value == "never") c.color_mode = <never>;
       else x2c_driver_error(%"invalid color mode '$value'");
-      break;
-    case <debug>: c.debugging = 1; break;
-    case <repl-dump>: c.repl_dump = 1; break;
-    case <repl-stats>: c.repl_stats = 1; break;
-    case <vstats>: c.repl_verbose_stats = 1; break;
-    case <out-dir>: c.out_dir = value; break;
-    case <src-map>: c.source_map = 1; break;
-    case <rebuild>: c.rebuild = 1; break;
-    case <clean>: c.clean = 1; break;
-    case <no-deps>: c.no_deps = 1; break;
-    case <dep-file>: c.dep_file = value; break;
-    case <dep-target>: c.dep_target = value; break;
-    case <no-phony>: c.no_phony_deps = 1; break;
+    case <debug>: c.debugging = 1;
+    case <repl-dump>: c.repl_dump = 1;
+    case <repl-stats>: c.repl_stats = 1;
+    case <vstats>: c.repl_verbose_stats = 1;
+    case <out-dir>: c.out_dir = value;
+    case <src-map>: c.source_map = 1;
+    case <rebuild>: c.rebuild = 1;
+    case <clean>: c.clean = 1;
+    case <no-deps>: c.no_deps = 1;
+    case <dep-file>: c.dep_file = value;
+    case <dep-target>: c.dep_target = value;
+    case <no-phony>: c.no_phony_deps = 1;
     case <include>: x_paths.push(value);
       // build and run also hand the directory to the C compiler.
       if (c.command != <translate>) _push_pair(cc_args, "-I", value);
-      break;
-    case <x-include>: x_paths.push(value); break;
+    case <x-include>: x_paths.push(value);
     case <pkg-dir>:
       c.package_dirs = cons(value, c.package_dirs);
-      break;
-    case <no-cpp>: c.no_cpp = 1; break;
-    case <live-syms>: c.live_symbols = 1; break;
-    case <cpp-syms>: c.cpp_symbols = 1; break;
+    case <no-cpp>: c.no_cpp = 1;
+    case <live-syms>: c.live_symbols = 1;
+    case <cpp-syms>: c.cpp_symbols = 1;
     case <tokens>: case <dump-cpp>: case <cpp-tokens>: case <dump-ast>:
     case <transforms>: case <dump-code>: case <symbols>: case <dump-csym>:
     case <dump-cache>: case <conform>: case <source-ast>:
       c.dump = option.id;
-      break;
-    case <prefix>: c.prefix = value; break;
-    case <sha256>: c.sha256 = value; break;
-    case <index>: c.index = value; break;
-    case <force>: c.force = 1; break;
-    case <manifest>: c.manifest = value; break;
-    case <target>: c.target = value; break;
-    case <profile>: c.profile = value; break;
-    case <kind>: _driver_kind(c, value); break;
-    case <compile>: c.compile_only = 1; break;
-    case <jobs>: c.jobs = _driver_count(value, 1, "job count"); break;
+    case <prefix>: c.prefix = value;
+    case <sha256>: c.sha256 = value;
+    case <index>: c.index = value;
+    case <force>: c.force = 1;
+    case <manifest>: c.manifest = value;
+    case <target>: c.target = value;
+    case <profile>: c.profile = value;
+    case <kind>: _driver_kind(c, value);
+    case <compile>: c.compile_only = 1;
+    case <jobs>: c.jobs = _driver_count(value, 1, "job count");
     case <max-errors>:
       c.max_errors = _driver_count(value, 0, "error limit");
-      break;
-    case <diag-file>: c.diagnostics_file = value; break;
-    case <output>: c.output = value; break;
-    case <build-dir>: c.build_dir = value; break;
+    case <diag-file>: c.diagnostics_file = value;
+    case <output>: c.output = value;
+    case <build-dir>: c.build_dir = value;
     case <cc-db>:
       c.compile_commands = value;
       c.save_temps = 1;
-      break;
-    case <save-temp>: c.save_temps = 1; break;
+    case <save-temp>: c.save_temps = 1;
     case <c-include>: _push_pair(cc_args, "-I", value);
-      break;
     case <c-system>: _push_pair(cc_args, "-isystem", value);
-      break;
-    case <cc>: c.cc = value; break;
-    case <ar>: c.ar = value; break;
+    case <cc>: c.cc = value;
+    case <ar>: c.ar = value;
     case <opt>: case <g>: cc_args.push(spelling);
-      break;
     case <define>:
     case <undefine>:
       if (attached) {
@@ -962,21 +954,17 @@ static void _apply_option(
         _push_pair(cpp_args, spelling, value);
         _push_pair(cc_args, spelling, value);
       }
-      break;
     case <xcc>:
       if (cli_dependency_pass_through(value))
         x2c_driver_error(%"C dependency option is driver-owned '$value'");
       cc_args.push(value);
-      break;
     case <lib-dir>: case <library>: if (attached) ld_args.push(spelling);
       else _push_pair(ld_args, spelling, value);
-      break;
-    case <rpath>: ld_args.push(%"-Wl,-rpath,$value"); break;
-    case <pthread>: cc_args.push(spelling); ld_args.push(spelling); break;
+    case <rpath>: ld_args.push(%"-Wl,-rpath,$value");
+    case <pthread>: cc_args.push(spelling); ld_args.push(spelling);
     case <framework>:
     case <xlinker>: _push_pair(ld_args, spelling, value);
-      break;
-    case <wl>: ld_args.push(spelling); break;
+    case <wl>: ld_args.push(spelling);
   }
 }
 

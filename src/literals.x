@@ -309,25 +309,18 @@ List Compiler.parse_list_literal(Compiler c) {
   int runtime_literal = c.peek(0) == <"%(">;
   c.next();
   if (c.test(<)>)) return %(expr ("List") (nil));
-  int old_match_is = c.match_is;
-  Array old_match_types = c.match_types;
   Symbol operator = _match_operator_head(c);
-  c.match_is = operator == <!is>;
-  if (operator == <!quote>) c.match_types = NULL;
-  List reader_form = runtime_literal
-    ? _parse_list_reader_prefix(c)
-    : NULL;
-  if (reader_form && c.test(<)>)) {
-    c.match_is = old_match_is;
-    c.match_types = old_match_types;
-    return reader_form;
+  $let(c.match_is, operator == <!is>)
+  $let(c.match_types, operator == <!quote> ? NULL : c.match_types) {
+    List reader_form = runtime_literal
+      ? _parse_list_reader_prefix(c)
+      : NULL;
+    if (reader_form && c.test(<)>)) return reader_form;
+    List head = reader_form ? reader_form : _parse_list_head(c);
+    List tail = _parse_list_tail(c);
+    c.expect(<)>);
+    return %(expr ("List") ${_build_cons_cell(c, head, tail)});
   }
-  List head = reader_form ? reader_form : _parse_list_head(c);
-  List tail = _parse_list_tail(c);
-  c.expect(<)>);
-  c.match_is = old_match_is;
-  c.match_types = old_match_types;
-  return %(expr ("List") ${_build_cons_cell(c, head, tail)});
 }
 
 // Symbol-set literal generation
@@ -531,45 +524,45 @@ static List _parse_error_symbol(
 */
 List Compiler.parse_raise_literal(Compiler c) {
   c.expect(<"%(">);
-  int old_runtime = c.runtime_literals;
-  c.runtime_literals = 1;
-  List code = _parse_error_symbol(
-    c, "raise", "code", "use raise %(code (key value)...);");
+  $let(c.runtime_literals, 1) {
+    List code = _parse_error_symbol(
+      c, "raise", "code", "use raise %(code (key value)...);");
 
-  Array args = [];
-  while (c.peek(0) != <)>) {
-    List slot = c.try_parse_macro_slot(<argument>);
-    if (slot) {
-      args.push(slot);
-      continue;
+    Array args = [];
+    while (c.peek(0) != <)>) {
+      List slot = c.try_parse_macro_slot(<argument>);
+      if (slot) {
+        args.push(slot);
+        continue;
+      }
+      Token pair_token = c.token;
+      c.expect(<(>);
+      List key = _parse_error_symbol(
+        c, "raise", "detail key",
+        "use raise %(code (key value)...);");
+      if (c.peek(0) == <)>)
+        c.report_error(
+          <parse>, "raise detail requires exactly one value",
+          pair_token, NULL);
+      List value = _parse_list_head(c);
+      if (value.match(%(expr ("List") (splice *))) ||
+          value.match(%(splice *)))
+        c.report_error(
+          <parse>, "raise detail value cannot splice",
+          pair_token, %("pass one value expression"));
+      if (c.peek(0) != <)>)
+        c.report_error(
+          <parse>, "raise detail requires exactly one value",
+          pair_token, NULL);
+      c.expect(<)>);
+      args.push(key);
+      args.push(value);
     }
-    Token pair_token = c.token;
-    c.expect(<(>);
-    List key = _parse_error_symbol(
-      c, "raise", "detail key",
-      "use raise %(code (key value)...);");
-    if (c.peek(0) == <)>)
-      c.report_error(
-        <parse>, "raise detail requires exactly one value",
-        pair_token, NULL);
-    List value = _parse_list_head(c);
-    if (value.match(%(expr ("List") (splice *))) || value.match(%(splice *)))
-      c.report_error(
-        <parse>, "raise detail value cannot splice",
-        pair_token, %("pass one value expression"));
-    if (c.peek(0) != <)>)
-      c.report_error(
-        <parse>, "raise detail requires exactly one value",
-        pair_token, NULL);
     c.expect(<)>);
-    args.push(key);
-    args.push(value);
+    List values = args;
+    args.free();
+    return %(raise $code (args @values));
   }
-  c.expect(<)>);
-  List values = args;
-  args.free();
-  c.runtime_literals = old_runtime;
-  return %(raise $code (args @values));
 }
 
 static List _build_error_pattern_list(Compiler compiler, Array values) {
@@ -581,58 +574,57 @@ static List _build_error_pattern_list(Compiler compiler, Array values) {
 
 /** Parses a filtered-catch `%()` payload into a typed `List` pattern.
     The call consumes the closing `)`. A bare code `Symbol` may be followed by
-    `*` patterns or `(key pattern)` pairs; pattern and runtime-literal state is
-    restored on success.
+    `*` patterns or `(key pattern)` pairs; pattern and runtime-literal state
+    is restored on every exit.
 */
 List Compiler.parse_catch_pattern_literal(Compiler c) {
   c.expect(<"%(">);
-  int previous = c.in_pattern, old_runtime = c.runtime_literals;
-  c.in_pattern = 1;
-  c.runtime_literals = 1;
-  List code = _parse_error_symbol(
-    c, "catch filter", "code",
-    "use catch %(code (key pattern)...):");
-
-  Array elements = [];
-  elements.push(code);
-  while (c.peek(0) != <)>) {
-    Token detail_token = c.token;
-    if (c.peek(0) == <lit-atom> &&
-        c.token.text.unescape()[0] == '*') {
-      elements.push(_parse_list_head(c));
-      continue;
-    }
-    if (!c.test(<(>))
-      c.report_error(
-        <parse>, "catch filter detail must be '*' or '(key pattern)'",
-        detail_token, %("wrap keyed detail patterns in parentheses"));
-    List key = _parse_error_symbol(
-      c, "catch filter", "detail key",
+  $let(c.in_pattern, 1)
+  $let(c.runtime_literals, 1) {
+    List code = _parse_error_symbol(
+      c, "catch filter", "code",
       "use catch %(code (key pattern)...):");
-    if (c.peek(0) == <)>)
-      c.report_error(
-        <parse>, "catch filter detail requires exactly one pattern",
-        detail_token, NULL);
-    List value = _parse_list_head(c);
-    if (value.match(%(expr ("List") (splice *))) || value.match(%(splice *)))
-      c.report_error(
-        <parse>, "catch filter detail pattern cannot splice",
-        detail_token, %("write one match pattern"));
-    if (c.peek(0) != <)>)
-      c.report_error(
-        <parse>, "catch filter detail requires exactly one pattern",
-        detail_token, NULL);
+
+    Array elements = [];
+    elements.push(code);
+    while (c.peek(0) != <)>) {
+      Token detail_token = c.token;
+      if (c.peek(0) == <lit-atom> &&
+          c.token.text.unescape()[0] == '*') {
+        elements.push(_parse_list_head(c));
+        continue;
+      }
+      if (!c.test(<(>))
+        c.report_error(
+          <parse>, "catch filter detail must be '*' or '(key pattern)'",
+          detail_token, %("wrap keyed detail patterns in parentheses"));
+      List key = _parse_error_symbol(
+        c, "catch filter", "detail key",
+        "use catch %(code (key pattern)...):");
+      if (c.peek(0) == <)>)
+        c.report_error(
+          <parse>, "catch filter detail requires exactly one pattern",
+          detail_token, NULL);
+      List value = _parse_list_head(c);
+      if (value.match(%(expr ("List") (splice *))) ||
+          value.match(%(splice *)))
+        c.report_error(
+          <parse>, "catch filter detail pattern cannot splice",
+          detail_token, %("write one match pattern"));
+      if (c.peek(0) != <)>)
+        c.report_error(
+          <parse>, "catch filter detail requires exactly one pattern",
+          detail_token, NULL);
+      c.expect(<)>);
+      Array pair = [key, value];
+      elements.push(_build_error_pattern_list(c, pair));
+      pair.free();
+    }
     c.expect(<)>);
-    Array pair = [key, value];
-    elements.push(_build_error_pattern_list(c, pair));
-    pair.free();
+    List result = _build_error_pattern_list(c, elements);
+    elements.free();
+    return result;
   }
-  c.expect(<)>);
-  List result = _build_error_pattern_list(c, elements);
-  elements.free();
-  c.in_pattern = previous;
-  c.runtime_literals = old_runtime;
-  return result;
 }
 
 static List _parse_quoted_array_elements(Compiler compiler) {

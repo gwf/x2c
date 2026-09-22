@@ -47,8 +47,9 @@ its opening status and this index distinguish them from current execution.
   macro, managed-lifetime and extensionless-script dogfooding, followed by
   dependency-gated generalized-meta and lifetime-certified adoption. Phases
   1-4, system-macro Lisp deletion, command-help `$dedent`, managed lifetimes,
-  and extensionless tool names, are complete and validated. Generalized-meta
-  and lifetime-certified adoption remain dependency-gated.
+  extensionless tool names, CLI `$switch` dispatches and temporary-state
+  `$let` regions are complete and validated. Generalized-meta and
+  lifetime-certified adoption remain dependency-gated.
 - [Public release workflow](public-release-workflow.md): active in the Dev
   Staging Workflow task. Account activation and production decisions remain;
   source files alone do not establish that deployment is complete.
