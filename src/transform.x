@@ -1542,10 +1542,8 @@ static Ast _finish(Compiler compiler, Ast ast) {
    transform the deepest term, and rebuild upward. Entered only for chain
    heads, with expression rewrites already applied. */
 static Ast _op_chain(Compiler compiler, Ast ast) {
-  Array levels = [];
-  Array types = [];
-  defer levels.free();
-  defer types.free();
+  Array levels = $auto([]);
+  Array types = $auto([]);
   Ast rebuilt = NULL;
   for (;;) {
     List first = NULL;

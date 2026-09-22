@@ -332,8 +332,7 @@ static List _type_completion_keywords(void) => %(
 );
 
 static List _type_qualifiers(Compiler c) {
-  Array quals = [];
-  defer quals.free();
+  Array quals = $auto([]);
   loop {
     c.__complete_here(<type>, _type_completion_keywords());
     Symbol symbol = c.peek(0);
@@ -784,8 +783,7 @@ List Compiler.parse_parameter(Compiler compiler) {
     current.
 */
 List Compiler.parse_parameter_list(Compiler c) {
-  Array parameters = [];
-  defer parameters.free();
+  Array parameters = $auto([]);
   while (1) {
     c.__complete_here(<type>, _type_completion_keywords());
     List parameter = c.try_parse_macro_slot(<param>);
@@ -1074,8 +1072,7 @@ static List _declarator_init(
 
 static List _declarator_list(
   Compiler compiler, List type, List context, int row) {
-  Array bindings = [];
-  defer bindings.free();
+  Array bindings = $auto([]);
   loop {
     bindings.push(_declarator_init(compiler, type, context));
     if ((row && _test_declaration_group_comma(compiler)) ||
@@ -1318,8 +1315,7 @@ static void _append_managed_declaration(
       return;
     }
     case %(declare ?base (bindings *declarators)): {
-      Array ordinary = [];
-      defer ordinary.free();
+      Array ordinary = $auto([]);
       foreach (List declarator, declarators) {
         List initializer = NULL, binding = NULL, modifiers = NULL;
         match (declarator)

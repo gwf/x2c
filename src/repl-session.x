@@ -70,8 +70,7 @@ ReplSession ReplSession.new(Compiler compiler) {
 /** Returns an immutable snapshot of (kind "name") entries, sorted by name.
     Only session definitions appear; storage is borrowed until unit close. */
 List ReplSession.symbols(ReplSession session) {
-  Array names = [], entries = [];
-  defer names.free();
+  Array names = $auto([]), entries = [];
   foreach (Var (name, entry), session.names) names.push(name);
   foreach (String name, names.sort()) {
     List entry = session.names[name];
@@ -132,8 +131,7 @@ static List _completion_filter(
 
 /** Returns sorted published session functions matching `prefix`. */
 List ReplSession.complete_functions(ReplSession session, String prefix) {
-  Array names = [], candidates = [];
-  defer names.free();
+  Array names = $auto([]), candidates = [];
   foreach (Var (candidate, stored), session.names) {
     if (!(candidate is <string>) || !(stored is <list>)) continue;
     String name = candidate;
@@ -164,8 +162,7 @@ ReplCompletion ReplSession.complete(
   Compiler c = session.compiler;
   DiagnosticsHold diagnostics = c.diagnostics.hold();
   defer c.diagnostics.release(diagnostics, 0);
-  Scope scratch = Scope.new();
-  defer scratch.destroy();
+  Scope scratch = $auto(Scope.new());
   Tokenizer tokenizer = c.tokenizer;
   Token token = c.token, boundary = c.input_boundary;
   Token directives = c.directives_taken;
@@ -183,9 +180,7 @@ ReplCompletion ReplSession.complete(
   }
   c.directives_taken = NULL;
   SymTxn transaction;
-  {
-    Scope.push(&scratch);
-    defer Scope.pop();
+  $scope(&scratch) {
     c.braces = [];
     transaction = c.begin_semantic_transaction();
   }
@@ -238,9 +233,7 @@ static List _thunk(List items) =>
 static void _refuse(String why) { raise %(repl (why $why)); }
 
 static void _tokenize(Compiler c, String source, Scope scratch) {
-  Scope.push(&scratch);
-  defer Scope.pop();
-  c.tokenize(source);
+  $scope(&scratch) { c.tokenize(source); }
 }
 
 // Native name resolution and persistent local storage need native execution.
@@ -258,8 +251,7 @@ static void _require_evaluable(Var syntax) {
 }
 
 static List _initializers(List node, Map names, Array added, Array ids) {
-  Array statements = [];
-  defer statements.free();
+  Array statements = $auto([]);
   match (node) {
     case %(declare ?spec (bindings *bindings)): {
       foreach (List item, bindings) {
@@ -288,8 +280,7 @@ static List _initializers(List node, Map names, Array added, Array ids) {
 static List _result_body(List fn, int *prints) {
   match (fn) {
     case %(function ? ? (block *body)): {
-      Array items = body;
-      defer items.free();
+      Array items = $auto(body);
       if (items.len()) {
         List last = _bare(items[items.len() - 1]);
         match (last) {
@@ -323,8 +314,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
   Map names = session.names;
   ReplResult result = { .status = <rejected>, .value = void };
   c.diagnostics.reset();
-  Scope scratch = Scope.new();
-  defer scratch.destroy();
+  Scope scratch = $auto(Scope.new());
   Tokenizer tokenizer = c.tokenizer;
   Token token = c.token, boundary = c.input_boundary;
   Token directives = c.directives_taken;
@@ -342,9 +332,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
   }
   c.directives_taken = NULL;
   SymTxn transaction;
-  {
-    Scope.push(&scratch);
-    defer Scope.pop();
+  $scope(&scratch) {
     c.braces = [];
     transaction = c.begin_semantic_transaction();
   }

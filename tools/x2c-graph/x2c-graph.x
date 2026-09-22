@@ -2505,8 +2505,7 @@ static void _dataset_mkdirs(String path) {
 
 static void _dataset_write_rows(
   String path, String header, Array rows) {
-  File output = path.open("w");
-  defer output.close();
+  File output = $auto(path.open("w"));
   output.printf("%s\n", header);
   foreach (String row, rows) output.printf("%s\n", row);
 }

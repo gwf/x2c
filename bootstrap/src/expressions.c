@@ -328,12 +328,6 @@ static List _compound_literal(Compiler c, List composite, Type target);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
-}
-_x2c_defer_env_0;
-
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
-
-typedef struct _x2c_defer_env_1{
   const void * _x2c_defer_capture_1;
   const void * _x2c_defer_capture_2;
   const void * _x2c_defer_capture_3;
@@ -343,6 +337,12 @@ typedef struct _x2c_defer_env_1{
   const void * _x2c_defer_capture_7;
   const void * _x2c_defer_capture_8;
   const void * _x2c_defer_capture_9;
+}
+_x2c_defer_env_0;
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+typedef struct _x2c_defer_env_1{
   const void * _x2c_defer_capture_10;
 }
 _x2c_defer_env_1;
@@ -2440,16 +2440,17 @@ int Array_try_next(Array, int *, Var *);
 int Lisp_try_get(Lisp, String, Var *);
 List Compiler_postfix_completions(Compiler compiler, Type receiver, Symbol access){
   if(! _init_guard_) _file_init_();  Map seen = Map_new(), visited = Map_new();
-  Array names = Array_new(), accepted = Array_new();
+  Array names = Array_new();
   {
-  _x2c_defer_env_0 _x2c_defer_env_5 = {._x2c_defer_capture_0 =(const void *) & names};
+  _x2c_defer_env_1 _x2c_defer_env_5 = {._x2c_defer_capture_10 =(const void *) & names};
 
   X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
+    .fn = _x2c_defer_cleanup_1,
     .env = & _x2c_defer_env_5
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
+    Array accepted = Array_new();
     Type fields = Sym_resolve_key(compiler -> sym, receiver);
     if(Type_is_pointer(fields)) fields = Type_dereference(fields);
     _completion_fields(compiler, fields, seen, names, Map_new());
@@ -2532,7 +2533,7 @@ int Compiler_at_completion(Compiler);
 static List _parse_postfix_dot(Compiler compiler, List expr){
   Token origin = compiler -> token;  Compiler_expect(compiler, 93);  if(Compiler_at_completion(compiler)){
     Type receiver = Var_type(_expr_is_raw_string_literal(expr) ? List_var(_153) : List_cadr(expr));  List rows = Compiler_postfix_completions(compiler, receiver, 93); {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/expressions.x",.function = "_parse_postfix_dot",.line = 636};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/expressions.x",.function = "_parse_postfix_dot",.line = 635};  x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -2542,7 +2543,7 @@ static List _parse_postfix_dot(Compiler compiler, List expr){
 static List _parse_postfix_arrow(Compiler compiler, List expr){
   Token origin = compiler -> token;  Compiler_expect(compiler, 11645);  if(Compiler_at_completion(compiler)){
     List rows = Compiler_postfix_completions(compiler, Var_type(List_cadr(expr)), 11645); {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/expressions.x",.function = "_parse_postfix_arrow",.line = 652};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/expressions.x",.function = "_parse_postfix_arrow",.line = 651};  x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
   }
@@ -4621,9 +4622,9 @@ default: break;
   }
 SymTxn transaction = Compiler_begin_semantic_transaction(c);  Map keys = c -> key_ids, adapters = c -> names -> adapters;  int key_count = Array_len(c -> id_keys), declarations = Array_len(c -> early_decls);  c -> key_ids = Map_copy(keys);  c -> names -> adapters = Map_copy(adapters);  DiagnosticsHold hold = Diagnostics_hold(c -> diagnostics);  int depth = c -> recovery_depth;  int volatile completed = 0;  int volatile rejected = 0;  List volatile result = NULL; {
   {
-  _x2c_defer_env_1 _x2c_defer_env_8 = {._x2c_defer_capture_1 =(const void *) & c, ._x2c_defer_capture_2 =(const void *) & depth, ._x2c_defer_capture_3 =(const void *) & hold, ._x2c_defer_capture_4 =(const void *) & rejected, ._x2c_defer_capture_5 =(const void *) & completed, ._x2c_defer_capture_6 =(const void *) & keys, ._x2c_defer_capture_7 =(const void *) & adapters, ._x2c_defer_capture_8 =(const void *) & key_count, ._x2c_defer_capture_9 =(const void *) & declarations, ._x2c_defer_capture_10 =(const void *) & transaction};
+  _x2c_defer_env_0 _x2c_defer_env_8 = {._x2c_defer_capture_0 =(const void *) & c, ._x2c_defer_capture_1 =(const void *) & depth, ._x2c_defer_capture_2 =(const void *) & hold, ._x2c_defer_capture_3 =(const void *) & rejected, ._x2c_defer_capture_4 =(const void *) & completed, ._x2c_defer_capture_5 =(const void *) & keys, ._x2c_defer_capture_6 =(const void *) & adapters, ._x2c_defer_capture_7 =(const void *) & key_count, ._x2c_defer_capture_8 =(const void *) & declarations, ._x2c_defer_capture_9 =(const void *) & transaction};
   X2CCleanup _x2c_defer_record_3 = {
-    .fn = _x2c_defer_cleanup_1,
+    .fn = _x2c_defer_cleanup_0,
     .env = & _x2c_defer_env_8
   };
   x2c_cleanup_push(&_x2c_defer_record_3);
@@ -5079,24 +5080,24 @@ List Compiler_convert_segment_to_string(Compiler compiler, List expr){
   if(! _init_guard_) _file_init_();  Type type = Type_canonicalize(Var_type(List_cadr(expr)));  if(Sym_is_var_type(compiler -> sym, type)) return cons(_0, cons(_169, cons(List_var(cons(_70, cons(_1546, cons(List_var(cons(_101, cons(List_var(expr), NULL))), NULL)))), NULL)));  if(! List_truth(Type_list(Sym_resolve_numeric_type(compiler -> sym, type)))) return Compiler_convert_expression(compiler, expr, List_type(_153));  List converted = _converter_call(compiler, expr, type, List_type(_153));  if(List_truth(converted)) return converted;  List boxed = Compiler_convert_expression(compiler, expr, List_type(_460));  return cons(_0, cons(_169, cons(List_var(cons(_70, cons(_1546, cons(List_var(cons(_101, cons(List_var(boxed), NULL))), NULL)))), NULL)));
 }
 
-static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
-  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;  Array_free((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
-}
-
 void Diagnostics_release(Diagnostics, DiagnosticsHold, int);
 void Array_resize(Array, size_t);
 void SymTxn_rollback(SymTxn);
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1; {
-    (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> recovery_depth =(*(int *) _x2c_defer_data_1->_x2c_defer_capture_2);  Diagnostics_release((*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> diagnostics, (*(DiagnosticsHold *) _x2c_defer_data_1->_x2c_defer_capture_3), !(*(int *) _x2c_defer_data_1->_x2c_defer_capture_4));  if(!(*(int *) _x2c_defer_data_1->_x2c_defer_capture_5)){
-      (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> key_ids =(*(Map *) _x2c_defer_data_1->_x2c_defer_capture_6); (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> names -> adapters =(*(Map *) _x2c_defer_data_1->_x2c_defer_capture_7);  Array_resize((*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> id_keys, (*(int *) _x2c_defer_data_1->_x2c_defer_capture_8));  Array_resize((*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> early_decls, (*(int *) _x2c_defer_data_1->_x2c_defer_capture_9));
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0; {
+    (*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> recovery_depth =(*(int *) _x2c_defer_data_0->_x2c_defer_capture_1);  Diagnostics_release((*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> diagnostics, (*(DiagnosticsHold *) _x2c_defer_data_0->_x2c_defer_capture_2), !(*(int *) _x2c_defer_data_0->_x2c_defer_capture_3));  if(!(*(int *) _x2c_defer_data_0->_x2c_defer_capture_4)){
+      (*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> key_ids =(*(Map *) _x2c_defer_data_0->_x2c_defer_capture_5); (*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> names -> adapters =(*(Map *) _x2c_defer_data_0->_x2c_defer_capture_6);  Array_resize((*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> id_keys, (*(int *) _x2c_defer_data_0->_x2c_defer_capture_7));  Array_resize((*(Compiler *) _x2c_defer_data_0->_x2c_defer_capture_0) -> early_decls, (*(int *) _x2c_defer_data_0->_x2c_defer_capture_8));
     }
-    SymTxn_rollback((*(SymTxn *) _x2c_defer_data_1->_x2c_defer_capture_10));
+    SymTxn_rollback((*(SymTxn *) _x2c_defer_data_0->_x2c_defer_capture_9));
   }
 
 }
 
 void Array_cleanup(Array);
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;  Array_cleanup((*(Array *) _x2c_defer_data_1->_x2c_defer_capture_10));
+}
+
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;  Array_cleanup((*(Array *) _x2c_defer_data_2->_x2c_defer_capture_11));
 }

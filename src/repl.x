@@ -279,8 +279,7 @@ static void _help(void) {
 }
 
 static int _stats_mode(String command, int *verbose) {
-  Array words = [];
-  defer words.free();
+  Array words = $auto([]);
   foreach (String word, command.words()) words.push(word);
   if (words.len() == 1) {
     *verbose = 0;
@@ -295,8 +294,7 @@ static int _stats_mode(String command, int *verbose) {
 
 static int _inspect(
   ReplSession session, const struct ReplCommand *descriptor, String command) {
-  Array words = [];
-  defer words.free();
+  Array words = $auto([]);
   foreach (String word, command.words()) words.push(word);
   if (descriptor->dispatch == <symbols>) {
     if (words.len() != 1)

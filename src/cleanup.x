@@ -267,9 +267,7 @@ static int _automatic_static_input(Compiler c, List binding) {
     that way, and gains this one's bindings.
 */
 int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime) {
-  Array pending = [], modes = [];
-  defer pending.free();
-  defer modes.free();
+  Array pending = $auto([]), modes = $auto([]);
   pending.push(value);
   modes.push(0);
   while (pending.len()) {

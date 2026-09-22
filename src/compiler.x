@@ -595,8 +595,7 @@ static Symbol _never_active_arm(String s) {
    state is 2 while its arm is hidden, 1 when the arms after its first
    `#else` will be, and 0 otherwise. */
 static void _scan_conditionals(Compiler c) {
-  Array stack = [];
-  defer stack.free();
+  Array stack = $auto([]);
   int hidden = 0, serial = 0;
   c.arm_stacks = {};
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
@@ -2377,8 +2376,7 @@ void SymTxn.commit(SymTxn s) {
 /* Copy the staged state back without retaining its container. Deletions
    matter: a declaration can remove an earlier file-static designation. */
 static void _replace_transaction_map(Map original, Map staged) {
-  Array keys = original.keys();
-  defer keys.free();
+  Array keys = $auto(original.keys());
   foreach (Var key, keys) if (!staged.contains(key)) original.del(key);
   original.merge(staged);
 }

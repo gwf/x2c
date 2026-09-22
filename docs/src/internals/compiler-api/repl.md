@@ -24,4 +24,4 @@ Runs the experimental REPL on stdin. Piped input continues after errors
 and exits with status one if any submission or command failed. Interactive
 errors leave the session usable; SIGINT retains its process-exit action.
 
-Source: `src/repl.x:332`
+Source: `src/repl.x:330`

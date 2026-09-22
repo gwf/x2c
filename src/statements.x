@@ -68,8 +68,7 @@ static Symbol _arm_end(List run) {
     as in C.
 */
 List Compiler.parse_governed(Compiler c, AstPos position) {
-  Array items = [];
-  defer items.free();
+  Array items = $auto([]);
   int depth = _take_directives(c, items);
   loop {
     Token start = c.token;
@@ -640,8 +639,7 @@ List Compiler.parse_statement(Compiler c) {
     invocation origin over its inserted items.
 */
 List Compiler.parse_block_items(Compiler c, int anchor_items) {
-  Array block = [], List stmt = NULL;
-  defer block.free();
+  Array block = $auto([]), List stmt = NULL;
   c.sym.push_new_scope();
   defer c.sym.pop_scope();
   loop {

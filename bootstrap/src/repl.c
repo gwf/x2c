@@ -154,24 +154,24 @@ _x2c_defer_env_2;
 
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
 
+static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs);
+
 typedef struct _x2c_defer_env_3{
   const void * _x2c_defer_capture_3;
+  const void * _x2c_defer_capture_4;
 }
 _x2c_defer_env_3;
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3);
 
 typedef struct _x2c_defer_env_4{
-  const void * _x2c_defer_capture_4;
+  const void * _x2c_defer_capture_5;
 }
 _x2c_defer_env_4;
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4);
 
-static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs);
-
 typedef struct _x2c_defer_env_5{
-  const void * _x2c_defer_capture_5;
   const void * _x2c_defer_capture_6;
 }
 _x2c_defer_env_5;
@@ -472,10 +472,10 @@ Var Array_getindex(Array, int);
 static int _stats_mode(String command, int * verbose){
   Array words = Array_new();
   {
-  _x2c_defer_env_0 _x2c_defer_env_6 = {._x2c_defer_capture_0 =(const void *) & words};
+  _x2c_defer_env_4 _x2c_defer_env_6 = {._x2c_defer_capture_5 =(const void *) & words};
 
   X2CCleanup _x2c_defer_record_0 = {
-    .fn = _x2c_defer_cleanup_0,
+    .fn = _x2c_defer_cleanup_4,
     .env = & _x2c_defer_env_6
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
@@ -543,10 +543,10 @@ String Var_repr(Var);
 static int _inspect(ReplSession session, const struct ReplCommand * descriptor, String command){
   Array words = Array_new();
   {
-  _x2c_defer_env_1 _x2c_defer_env_7 = {._x2c_defer_capture_1 =(const void *) & words};
+  _x2c_defer_env_5 _x2c_defer_env_7 = {._x2c_defer_capture_6 =(const void *) & words};
 
   X2CCleanup _x2c_defer_record_1 = {
-    .fn = _x2c_defer_cleanup_1,
+    .fn = _x2c_defer_cleanup_5,
     .env = & _x2c_defer_env_7
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
@@ -650,9 +650,9 @@ int List_truth(List);
 String String_remove_suffix(String, String);
 int repl_run(CliRequest request){
   if(! _init_guard_) _file_init_();  Frontend frontend = Frontend_new(request);  if(! Frontend_preload_macro_libraries(frontend)) return 1;  ParsedUnit unit;  int opened = Frontend_open_session(frontend, & unit); {
-  _x2c_defer_env_4 _x2c_defer_env_8 = {._x2c_defer_capture_4 =(const void *) & unit};
+  _x2c_defer_env_2 _x2c_defer_env_8 = {._x2c_defer_capture_2 =(const void *) & unit};
   X2CCleanup _x2c_defer_record_2 = {
-    .fn = _x2c_defer_cleanup_4,
+    .fn = _x2c_defer_cleanup_2,
     .env = & _x2c_defer_env_8
   };
   x2c_cleanup_push(&_x2c_defer_record_2);
@@ -673,10 +673,10 @@ int repl_run(CliRequest request){
 
     }
     ReplSession session = ReplSession_new(unit.compiler);  ReplInput input = ReplInput_new(); {
-  _x2c_defer_env_3 _x2c_defer_env_9 = {._x2c_defer_capture_3 =(const void *) & input};
+  _x2c_defer_env_1 _x2c_defer_env_9 = {._x2c_defer_capture_1 =(const void *) & input};
 
   X2CCleanup _x2c_defer_record_3 = {
-    .fn = _x2c_defer_cleanup_3,
+    .fn = _x2c_defer_cleanup_1,
     .env = & _x2c_defer_env_9
   };
   x2c_cleanup_push(&_x2c_defer_record_3);
@@ -694,10 +694,10 @@ int repl_run(CliRequest request){
       ;
       Lisp_auto_instrument(unit.compiler -> macro_lisp, & machine_stats);
       {
-  _x2c_defer_env_2 _x2c_defer_env_10 = {._x2c_defer_capture_2 =(const void *) & unit};
+  _x2c_defer_env_0 _x2c_defer_env_10 = {._x2c_defer_capture_0 =(const void *) & unit};
 
   X2CCleanup _x2c_defer_record_4 = {
-    .fn = _x2c_defer_cleanup_2,
+    .fn = _x2c_defer_cleanup_0,
     .env = & _x2c_defer_env_10
   };
   x2c_cleanup_push(&_x2c_defer_record_4);
@@ -761,10 +761,10 @@ int repl_run(CliRequest request){
             String * _x2c_macro_address_0 = & unit.compiler -> text;
             String _x2c_macro_previous_0 = * _x2c_macro_address_0;
             {
-  _x2c_defer_env_5 _x2c_defer_env_11 = {._x2c_defer_capture_5 =(const void *) & _x2c_macro_address_0, ._x2c_defer_capture_6 =(const void *) & _x2c_macro_previous_0};
+  _x2c_defer_env_3 _x2c_defer_env_11 = {._x2c_defer_capture_3 =(const void *) & _x2c_macro_address_0, ._x2c_defer_capture_4 =(const void *) & _x2c_macro_previous_0};
 
   X2CCleanup _x2c_defer_record_5 = {
-    .fn = _x2c_defer_cleanup_5,
+    .fn = _x2c_defer_cleanup_3,
     .env = & _x2c_defer_env_11
   };
   x2c_cleanup_push(&_x2c_defer_record_5);
@@ -852,31 +852,21 @@ int repl_run(CliRequest request){
 
 static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
   _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
-  Array_free((*(Array *) _x2c_defer_data_0->_x2c_defer_capture_0));
-}
-
-static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
-  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
-  Array_free((*(Array *) _x2c_defer_data_1->_x2c_defer_capture_1));
-}
-
-static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
-  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
-  Lisp_auto_instrument((*(ParsedUnit *) _x2c_defer_data_2->_x2c_defer_capture_2).compiler -> macro_lisp, NULL);
+  Lisp_auto_instrument((*(ParsedUnit *) _x2c_defer_data_0->_x2c_defer_capture_0).compiler -> macro_lisp, NULL);
 }
 
 void ReplInput_close(ReplInput);
 
-static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
-  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
-  ReplInput_close((*(ReplInput *) _x2c_defer_data_3->_x2c_defer_capture_3));
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  ReplInput_close((*(ReplInput *) _x2c_defer_data_1->_x2c_defer_capture_1));
 }
 
 void ParsedUnit_close(ParsedUnit *);
 
-static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
-  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
-  ParsedUnit_close(&((*(ParsedUnit *) _x2c_defer_data_4->_x2c_defer_capture_4)));
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
+  ParsedUnit_close(&((*(ParsedUnit *) _x2c_defer_data_2->_x2c_defer_capture_2)));
 }
 
 static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, String rhs){
@@ -884,9 +874,21 @@ static String _x2c_proto_string_add_update(volatile String * lhs, Symbol op, Str
   return lhs[0];
 }
 
+static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
+  _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
+  *(*(String * *) _x2c_defer_data_3->_x2c_defer_capture_3) =(*(String *) _x2c_defer_data_3->_x2c_defer_capture_4);
+}
+
+void Array_cleanup(Array);
+
+static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
+  _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;
+  Array_cleanup((*(Array *) _x2c_defer_data_4->_x2c_defer_capture_5));
+}
+
 static void _x2c_defer_cleanup_5(void * _x2c_defer_opaque_5){
   _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_5;
-  *(*(String * *) _x2c_defer_data_5->_x2c_defer_capture_5) =(*(String *) _x2c_defer_data_5->_x2c_defer_capture_6);
+  Array_cleanup((*(Array *) _x2c_defer_data_5->_x2c_defer_capture_6));
 }
 
 #undef _x2c_initializer_choice_26EB69E4_0_expanded

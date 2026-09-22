@@ -2017,10 +2017,10 @@ Var Array_take_last(Array);
 static int _source_type_definition(List value){
   Array pending = Array_new();
   {
-  _x2c_defer_env_4 _x2c_defer_env_9 = {._x2c_defer_capture_6 =(const void *) & pending};
+  _x2c_defer_env_2 _x2c_defer_env_9 = {._x2c_defer_capture_4 =(const void *) & pending};
 
   X2CCleanup _x2c_defer_record_2 = {
-    .fn = _x2c_defer_cleanup_4,
+    .fn = _x2c_defer_cleanup_2,
     .env = & _x2c_defer_env_9
   };
   x2c_cleanup_push(&_x2c_defer_record_2);
@@ -2256,18 +2256,18 @@ static List Emitter__operand(Emitter e, Var node, int level){
 
 Var Array_getindex(Array, int);
 static List Emitter__op_spine(Emitter e, Var operator, Var left, Var right){
-  Array operators = Array_new();  Array rights = Array_new(); {
-  _x2c_defer_env_3 _x2c_defer_env_10 = {._x2c_defer_capture_5 =(const void *) & operators};
+  Array operators = Array_new(); {
+  _x2c_defer_env_5 _x2c_defer_env_10 = {._x2c_defer_capture_7 =(const void *) & operators};
   X2CCleanup _x2c_defer_record_3 = {
-    .fn = _x2c_defer_cleanup_3,
+    .fn = _x2c_defer_cleanup_5,
     .env = & _x2c_defer_env_10
   };
   x2c_cleanup_push(&_x2c_defer_record_3);
   {
-    {
-  _x2c_defer_env_2 _x2c_defer_env_11 = {._x2c_defer_capture_4 =(const void *) & rights};
+    Array rights = Array_new(); {
+  _x2c_defer_env_4 _x2c_defer_env_11 = {._x2c_defer_capture_6 =(const void *) & rights};
   X2CCleanup _x2c_defer_record_4 = {
-    .fn = _x2c_defer_cleanup_2,
+    .fn = _x2c_defer_cleanup_4,
     .env = & _x2c_defer_env_11
   };
   x2c_cleanup_push(&_x2c_defer_record_4);
@@ -2289,9 +2289,9 @@ static List Emitter__op_spine(Emitter e, Var operator, Var left, Var right){
 if(! deeper) break;
     }
     List result = Emitter__operand(e, left_item, level);  Array pieces = Array_new(); {
-  _x2c_defer_env_5 _x2c_defer_env_12 = {._x2c_defer_capture_7 =(const void *) & pieces};
+  _x2c_defer_env_3 _x2c_defer_env_12 = {._x2c_defer_capture_5 =(const void *) & pieces};
   X2CCleanup _x2c_defer_record_5 = {
-    .fn = _x2c_defer_cleanup_5,
+    .fn = _x2c_defer_cleanup_3,
     .env = & _x2c_defer_env_12
   };
   x2c_cleanup_push(&_x2c_defer_record_5);
@@ -2601,17 +2601,17 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   *(*(int * *) _x2c_defer_data_1->_x2c_defer_capture_2) =(*(int *) _x2c_defer_data_1->_x2c_defer_capture_3);
 }
 
+void Array_cleanup(Array);
+
 static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
   _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
-  Array_free((*(Array *) _x2c_defer_data_2->_x2c_defer_capture_4));
+  Array_cleanup((*(Array *) _x2c_defer_data_2->_x2c_defer_capture_4));
 }
 
 static void _x2c_defer_cleanup_3(void * _x2c_defer_opaque_3){
   _x2c_defer_env_3 * _x2c_defer_data_3 =(_x2c_defer_env_3 *) _x2c_defer_opaque_3;
-  Array_free((*(Array *) _x2c_defer_data_3->_x2c_defer_capture_5));
+  Array_cleanup((*(Array *) _x2c_defer_data_3->_x2c_defer_capture_5));
 }
-
-void Array_cleanup(Array);
 
 static void _x2c_defer_cleanup_4(void * _x2c_defer_opaque_4){
   _x2c_defer_env_4 * _x2c_defer_data_4 =(_x2c_defer_env_4 *) _x2c_defer_opaque_4;

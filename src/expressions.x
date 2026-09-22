@@ -570,8 +570,7 @@ static void _completion_delegates(
 List Compiler.postfix_completions(
   Compiler compiler, Type receiver, Symbol access) {
   Map seen = {}, visited = {};
-  Array names = [], accepted = [];
-  defer names.free();
+  Array names = $auto([]), accepted = [];
   Type fields = compiler.sym.resolve_key(receiver);
   if (fields.is_pointer()) fields = fields.dereference();
   _completion_fields(compiler, fields, seen, names, {});

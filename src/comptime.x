@@ -46,9 +46,7 @@ typedef struct Lowering {
 /* Only map containers belong here; forms and wide numeric boxes retain the
    caller's lifetime. Map growth follows the scope used at construction. */
 static Map _lower_scratch_map(Scope scratch) {
-  Scope.push(&scratch);
-  defer Scope.pop();
-  return {};
+  $scope(&scratch) { return {}; }
 }
 
 /* Why the last lowering declined, for the diagnostic at the invocation, and
@@ -137,8 +135,7 @@ static Var _lower_func_value(Var boxed) {
 }
 
 static List _lower_func_block(Lowering l, List body) {
-  Array parts = [];
-  defer parts.free();
+  Array parts = $auto([]);
   if (!body) return NULL;
   match (body.car())
     case %(declare ("Func") (bindings (op = (bind ? ()) ?callee))):
@@ -250,8 +247,7 @@ static void _lower_scan_cursor_block(Lowering l, List parts) {
   match (_lower_bare(parts.last())) case %(while ?test ?body): {
     if (!_lower_cursor(test, &walk) || _lower_cursor_addressed(body, &walk))
       return;
-    Map declared = {};
-    defer declared.cleanup();
+    Map declared = $auto({});
     for (List rest = parts; rest.cdr(); rest = rest.cdr()) {
       Var part = _lower_bare(rest.car());
       if (_lower_cursor_addressed(part, &walk)) return;
@@ -716,8 +712,7 @@ static List _lower_param_type(List params) {
 }
 
 static List _lower_args(Lowering l, List params, List args) {
-  Array values = [];
-  defer values.free();
+  Array values = $auto([]);
   for (List p = params, a = args; a; p = p.cdr(), a = a.cdr()) {
     List argument = a.car();
     match (argument) case %(expr (void) ()): continue;
@@ -749,8 +744,7 @@ static Var _lower_call(Lowering l, List callee, String name, List args) {
 static Var _lower_application(Lowering l, Var content) {
   List parts = _lower_func_parts(l, content);
   if (!parts) return _lower_decline(l, "not a dynamic Func call");
-  Array values = [];
-  defer values.free();
+  Array values = $auto([]);
   foreach (List part, parts) {
     Var value = _lower_expr(l, part);
     if (_lower_failed(l, value)) return void;
@@ -782,8 +776,7 @@ static int _lower_mixed_scalars(Lowering l, List operands) {
 }
 
 static Var _lower_operands(Lowering l, Var operator, List operands) {
-  Array values = [];
-  defer values.free();
+  Array values = $auto([]);
   foreach (Var operand, operands) {
     Var value = _lower_expr(l, operand);
     if (_lower_failed(l, value)) return void;
@@ -815,10 +808,8 @@ static Var _lower_operands(Lowering l, Var operator, List operands) {
 /* A lambda's free locals are substituted, which is the by-value snapshot
    x2c gives a captured scalar. Its parameters get fresh slots. */
 static Var _lower_lambda(Lowering l, List params, List held, Var body) {
-  Array names = [];
-  defer names.free();
-  Array saved = [];
-  defer saved.free();
+  Array names = $auto([]);
+  Array saved = $auto([]);
   foreach (List capture, held) {
     match (capture)
       case %(capture (binding ?(int id) ?) ? ?source): {
@@ -846,10 +837,8 @@ static Var _lower_lambda(Lowering l, List params, List held, Var body) {
     names.push(slot);
     saved.push(%($id $slot));
   }
-  Array shadowed = [];
-  defer shadowed.free();
-  Map previous = {};
-  defer previous.cleanup();
+  Array shadowed = $auto([]);
+  Map previous = $auto({});
   foreach (List pair, saved) {
     Var (id, value) = pair;
     Var was;
@@ -1101,8 +1090,7 @@ static Var _lower_apply_k(Lowering l, List k) {
       return result;
     }
     case %(again ?name (*ids)): {
-      Array values = [];
-      defer values.free();
+      Array values = $auto([]);
       values.push(name);
       foreach (Var id, ids) {
         Var value = _lower_read(l, id);
@@ -1227,15 +1215,13 @@ static Var _lower_arms(
   Var value = _lower_expr(l, subject);
   if (_lower_failed(l, value)) return void;
   Var result = %(match $value (quote $pattern));
-  Array binders = [];
-  defer binders.free();
+  Array binders = $auto([]);
   _lower_binders(pattern, binders);
   Map saved = _lower_env_copy(l);
   foreach (Var binder, binders) {
     String name = NULL;
     _lower_binder(binder, &name);
-    Array ids = [];
-    defer ids.free();
+    Array ids = $auto([]);
     _lower_arm_ids(arm.cadr(), name, ids);
     foreach (Var id, ids) l.env[id] = %(bound $result (quote $binder));
   }
@@ -1323,11 +1309,9 @@ static void _lower_referenced(Var form, Map used) {
 static Var _lower_loop(
   Lowering l, Var test, List body, List step, List rest, List k) {
   Var name = _lower_name(l, "loop");
-  Array boxes = [];
-  defer boxes.free();
+  Array boxes = $auto([]);
   _lower_loop_cells(l, body, boxes);
-  Map used = {};
-  defer used.cleanup();
+  Map used = $auto({});
   _lower_referenced(test, used);
   _lower_referenced(body, used);
   _lower_referenced(step, used);
@@ -1340,10 +1324,8 @@ static Var _lower_loop(
     used.del(walk.item);
     if (walk.value) used.del(walk.value);
   }
-  Array ids = [];
-  defer ids.free();
-  Array slots = [];
-  defer slots.free();
+  Array ids = $auto([]);
+  Array slots = $auto([]);
   Array entry = [];
   foreach (Var (id, form), l.env) {
     if (!used.contains(id)) continue;
@@ -1474,8 +1456,7 @@ static Var _lower_switch(
                              "loop path");
   Var slot = value;
   if (bound) slot = _lower_name(l, "subject");
-  Array arms = [];
-  defer arms.free();
+  Array arms = $auto([]);
   Array tests = [];
   Array body = [];
   int fallback = 0;
@@ -1511,8 +1492,7 @@ static Var _lower_switch(
   List exit = %(then ${rest} ${k} ${l.on_break});
   List saved_break = l.on_break;
   l.on_break = exit;
-  Array clauses = [];
-  defer clauses.free();
+  Array clauses = $auto([]);
   Var otherwise = void;
   int count = (int) arms.len();
   for (int i = 0; i < count; i++) {
@@ -1887,8 +1867,7 @@ static Var _lower_stmnt(Lowering l, Var form, List rest, List k) {
     case %(dstrdecl (params *params) ?init):
       return _lower_destructure(l, params, init, rest, k);
     case %(declare ?type (bindings *declarators)): {
-      Array expanded = [];
-      defer expanded.free();
+      Array expanded = $auto([]);
       foreach (List declarator, declarators)
         expanded.push(%(declare $type (bindings $declarator)));
       return _lower_block(l, %(@{expanded.list()} @rest), k);
@@ -1958,8 +1937,7 @@ static Var _lower_block(Lowering l, List items, List k) {
     semantic transaction.
 */
 List Compiler.lower_comptime(Compiler compiler, List fn) {
-  Scope scratch = Scope.new();
-  defer scratch.destroy();
+  Scope scratch = $auto(Scope.new());
   struct Lowering state = {
     .compiler = compiler, .scratch = scratch,
     .env = _lower_scratch_map(scratch), .locals = _lower_scratch_map(scratch),
@@ -1993,8 +1971,7 @@ List Compiler.lower_comptime(Compiler compiler, List fn) {
         l.definitions.free();
         return NULL;
       }
-      Array slots = [];
-      defer slots.free();
+      Array slots = $auto([]);
       foreach (List parameter, params) {
         match (parameter)
           case %(param ? (bind (binding ?(int id) ?) *)): {
@@ -2375,8 +2352,7 @@ List Compiler.fold_meta_call(
   if (arguments === %((expr (void) ()))) arguments = NULL;
   if (parameters === %((void))) parameters = NULL;
   if (parameters.len() != arguments.len()) return NULL;
-  Array values = [];
-  defer values.free();
+  Array values = $auto([]);
   for (List p = parameters, a = arguments; p; p = p.cdr(), a = a.cdr()) {
     List argument = a.car();
     Type declared = p.car(), supplied = argument.cadr();

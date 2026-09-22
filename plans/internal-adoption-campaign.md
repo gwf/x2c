@@ -1,8 +1,7 @@
 # Internal adoption campaign
 
-> Status: active - phases 1-2 complete and validated; phases 3-4 remain
-> queued.
-> Refreshed against dev at `d985caa6` on 2026-09-21. Generalized meta adoption
+> Status: active - phases 1-3 complete and validated; phase 4 remains queued.
+> Refreshed against dev at `c51a1532` on 2026-09-22. Generalized meta adoption
 > depends on rebasing, reviewing and landing `codex/meta-values-types`;
 > lifetime-sensitive adoption depends on the certification work described
 > below.
@@ -22,29 +21,27 @@ stand alone; later phases start only when their stated dependency has landed.
 
 ## Current baseline
 
-The September 21 refresh changed the earlier audit in three ways.
+The September 22 refresh records the first three campaign deliveries.
 
 - Dev now includes safe runtime formatting, but `String.format` is already
   used by the runtime/meta session and its probes. There is no production
   hand-formatter with runtime format text and a boxed `List` worth replacing.
   Typed interpolation and `printf` remain the more direct operations.
-- The new REPL statistics code adds one managed local. There are now 47
-  high-confidence `defer local.free/destroy/cleanup/close()` sites that can use
-  `$auto`, up from 46.
+- Phase 3 replaced 47 high-confidence
+  `defer local.free/destroy/cleanup/close()` sites with `$auto` and four exact
+  `Scope.push` / deferred `Scope.pop` pairs with `$scope`.
 - Meta-capable protocols are documented on dev, but generalized meta values,
   adopted records/types and bodyless native prototypes are not. They exist on
   the independently moving `codex/meta-values-types` branch. That work is a
   dependency to land, not a capability the campaign may assume from dev.
 
-The rest of the earlier findings still reproduce on current dev:
+The ready-tranche findings now stand as follows:
 
-- `src/cli.x` has 23 multiline help literals and no `$dedent` use. Three
-  intentionally begin with a newline and need explicit preservation.
-- Four exact `Scope.push` / deferred `Scope.pop` pairs are direct `$scope`
-  candidates: one in `src/comptime.x` and three in `src/repl-session.x`.
-- The audit found `lib/system-macros.xlisp`, an 18-line compatibility shim for
-  `dedent.expand` and `macros.location`. Phase 1 removes it using current meta
-  functions.
+- Phase 2 converted all 23 multiline command-help literals to `$dedent`; the
+  three leading separators are explicit blank writes and help output remains
+  byte-identical.
+- Phase 1 removed the 18-line `lib/system-macros.xlisp` compatibility shim for
+  `dedent.expand` and `macros.location` using current meta functions.
 - `x2c script` already accepts any shebang file regardless of suffix through
   the single classifier in `src/utils.x`. `tools/check-release.x` and
   `tools/gen-package-index.x` are executable x2c scripts whose names have not
@@ -115,7 +112,7 @@ or leave the literal direct if the result is less clear.
 `unittest/probes/run-cli-boundary.sh` is the acceptance proof because it covers
 all command help snapshots. No new help formatter or fixture is needed.
 
-### 3. Adopt managed-lifetime macros
+### 3. Adopt managed-lifetime macros (complete)
 
 Convert the 47 high-confidence managed locals to `$auto` with a binding-aware
 edit. The count is reproducible from the 56 direct local cleanup defers after

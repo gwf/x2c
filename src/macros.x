@@ -1766,8 +1766,7 @@ Var Compiler.evaluate_declaration_recipe(
 static Var _decorator_target_replaced(Var produced, Var target, Var required) {
   if (produced is not <list>) return void;
   List produced_items = produced;
-  Array items = produced_items;
-  defer items.free();
+  Array items = $auto(produced_items);
   int at = produced_items.index(target);
   if (at >= 0) {
     items[at] = required;

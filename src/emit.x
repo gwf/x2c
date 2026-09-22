@@ -1123,10 +1123,8 @@ static List Emitter._operand(Emitter e, Var node, int level) {
    stops where the nested operator needs parentheses, leaving that operand to
    the ordinary recursion. */
 static List Emitter._op_spine(Emitter e, Var operator, Var left, Var right) {
-  Array operators = [];
-  Array rights = [];
-  defer operators.free();
-  defer rights.free();
+  Array operators = $auto([]);
+  Array rights = $auto([]);
   Var op_item = operator, left_item = left, right_item = right;
   int level = 0;
   for (;;) {
