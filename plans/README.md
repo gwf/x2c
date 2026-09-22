@@ -58,10 +58,13 @@ its opening status and this index distinguish them from current execution.
   implemented. The represented-operation campaign is complete; the remaining
   methods are classified as excluded contracts, explicit adapters, defects, or
   dependencies of the separate meta-capable protocol and lifetime-certification
-  work. Generalized `meta` declarations are implemented by the
-  [meta recovery](meta-recovery.md) and await review before delivery; native
-  extension loading is the campaign's last stage. The older
+  work. Generalized `meta` declarations landed as `db86d4b7` through the
+  [meta recovery](archive/meta-recovery.md). The older
   [meta milestones](archive/meta-functions.md) record the preceding baseline.
+- [Meta follow-ups](meta-followups.md): four parallel implementation tracks
+  (scalar ledger and layout cleanup, numeric Func argument cost, small
+  defects, `--system-headers` cost) and three design tracks for Gary
+  (meta-capable protocols, lifetime certification, native extensions last).
 - [REPL fit, status, and runtime surface](repl-fit-and-runtime-surface.md):
   terminal UX, live statistics, and REPL-only output are implemented;
   standard-library and host exposure remain undispatched recommendations. The
@@ -98,8 +101,8 @@ does not dispatch fixes or approve every proposed design.
 
 - [Meta values, types, and native records](archive/meta-values-types.md):
   rejected local implementation; session-owned records and a hardcoded native
-  bridge failed the requested storage and lifetime contract. Continued work is
-  tracked in [the recovery plan](meta-recovery.md).
+  bridge failed the requested storage and lifetime contract.
+- [Meta recovery](archive/meta-recovery.md): done; delivered as `db86d4b7`.
 - [Meta recovery checkpoints](archive/meta-recovery-checkpoints.md),
   [design](archive/meta-recovery-design.md) and
   [review](archive/meta-recovery-review.md): obsolete; their record wrapper

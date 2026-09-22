@@ -19,7 +19,7 @@ Campaign sequencing update (2026-09-22): user-provided native extension build
 and dynamic loading belong to the final campaign stage, not the current
 record/type/lifetime recovery. Compiler-linked bindings with compiler rebuilds
 are sufficient for current internal use. The workflow and deferred decisions
-are recorded in [meta recovery](meta-recovery.md#campaign-sequencing-decision-native-extensions-last).
+are recorded in [meta recovery](archive/meta-recovery.md#campaign-sequencing-decision-native-extensions-last).
 
 Make ordinary macro and meta programming possible using readable x2c source.
 Meta functions compute values; macros emit code and turn values into code.
@@ -538,7 +538,7 @@ completed represented-value campaign.
 This campaign therefore stops at the represented-value boundary it delivered.
 The local generalized declaration and record implementation was rejected before
 publication; its repair is tracked by the
-[meta recovery plan](meta-recovery.md). Meta-capable protocol
+[meta recovery plan](archive/meta-recovery.md). Meta-capable protocol
 witnesses and lifetime certification remain coordinated compiler, runtime and
 analysis work; do not maintain temporary manual rows that work is intended to
 delete.

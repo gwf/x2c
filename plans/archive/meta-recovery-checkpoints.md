@@ -3,7 +3,7 @@
 > Status: obsolete
 > The recovery checkpoints written before 2026-09-22's review, kept as
 > evidence. The work they describe was superseded by the byte-storage
-> implementation in [meta recovery](../meta-recovery.md).
+> implementation in [meta recovery](meta-recovery.md).
 
 ## Required result
 

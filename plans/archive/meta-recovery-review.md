@@ -2,7 +2,7 @@
 
 > Status: obsolete
 > Superseded on 2026-09-22 by the byte-storage implementation recorded in
-> [meta recovery](../meta-recovery.md). This review kept a record
+> [meta recovery](meta-recovery.md). This review kept a record
 > wrapper, a per-allocation tracker and a runtime scalar dispatch that the
 > independent review rejected; it is preserved as evidence only.
 

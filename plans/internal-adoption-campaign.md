@@ -2,10 +2,9 @@
 
 > Status: ready tranche and system-macro follow-up complete and validated;
 > generalized-meta and lifetime-certified tranches remain dependency-gated.
-> Refreshed against dev at `2d188c42` on 2026-09-22. Generalized meta adoption
-> depends on rebasing, reviewing and landing `codex/meta-values-types`;
-> lifetime-sensitive adoption depends on the certification work described
-> below.
+> Refreshed against dev at `2d188c42` on 2026-09-22. The generalized-meta
+> dependency landed as `db86d4b7`; lifetime-sensitive adoption still depends
+> on the certification work described below.
 
 ## The result
 
@@ -181,19 +180,19 @@ final exact-tree gate. The nested computed-capture replay limitation found in
 
 ## Generalized-meta tranche
 
-These deliveries begin only after `codex/meta-values-types` or its successor
-lands on dev with a review of its stated representation limits and an
-exact-tree proof. The dependency supplies per-unit meta values, adopted meta
-types and records, bodyless native prototypes, and a curated native-record
-bridge. Evaluator records are not native layout, ordinary calls do not fold,
-and native crossings still require trusted descriptors.
+The dependency landed on dev as `db86d4b7` (see
+[meta recovery](archive/meta-recovery.md)). It supplies per-unit `meta
+static` values, compile-time structs in native bytes with C semantics for
+any complete struct (types take no `meta` marker), and bodyless native
+prototypes for the functions the compiler links. Ordinary calls to native
+functions do not fold.
 
 ### 5. Make Autodiff the first generalized-meta adopter
 
 First replace the remaining forward/reverse sibling Lisp registries and their
 four wrappers with per-unit `meta static List` state and x2c meta helpers.
 Then replace the string-keyed state map threaded through Autodiff with a typed
-`meta struct AdState`, splitting forward and reverse state only if doing so
+`struct AdState`, splitting forward and reverse state only if doing so
 actually removes fields or branches.
 
 The early dummy Lisp definitions used for mutual recursion are a distinct

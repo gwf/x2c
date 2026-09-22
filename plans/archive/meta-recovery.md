@@ -1,14 +1,12 @@
 # Meta recovery
 
-> Status: active
-> Implemented on branch `gwf/codex-session-recovery-f35529` on 2026-09-22
-> and awaiting Gary's review before delivery to `dev`. Native extension
-> loading and meta-capable protocol witnesses remain later stages.
-> Earlier designs and checkpoints are archived as
-> [values and types](archive/meta-values-types.md),
-> [checkpoints](archive/meta-recovery-checkpoints.md),
-> [design](archive/meta-recovery-design.md) and
-> [review](archive/meta-recovery-review.md).
+> Status: done
+> Delivered to `dev` as `db86d4b7` on 2026-09-22 after the full gate and two
+> independent reviews. Follow-up work is dispatched from
+> [meta follow-ups](../meta-followups.md). Earlier designs and checkpoints
+> are archived as [values and types](meta-values-types.md),
+> [checkpoints](meta-recovery-checkpoints.md),
+> [design](meta-recovery-design.md) and [review](meta-recovery-review.md).
 
 ## Required result
 
@@ -126,4 +124,4 @@ struct in its body takes 2.0 s.
 
 1. Native extension build and load (above).
 2. Meta-capable protocol witnesses, recorded in
-   [meta authoring and coverage](meta-authoring-and-coverage.md).
+   [meta authoring and coverage](../meta-authoring-and-coverage.md).

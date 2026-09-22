@@ -5,7 +5,7 @@
 > Session-owned records and a hardcoded timespec bridge did not meet the
 > requested generic storage and execution lifetime. The historical proposal
 > below is preserved as evidence, not implementation guidance or approval.
-> See [the recovery plan](../meta-recovery.md).
+> See [the recovery plan](meta-recovery.md).
 
 ## Result
 
