@@ -63,7 +63,8 @@ $error.private.types();
 
 /* A site is bound on its first registration: `static` when `Match` retains a
    plan for every arm, `transient` when some pattern is built at run time and
-   each registration must prepare its own plans. */
+   each registration must prepare its own plans. A pending site's patterns are
+   literals, so binding promotes them out of any nested `Pool` first. */
 #define ERROR_CATCH_PENDING 0
 #define ERROR_CATCH_STATIC 1
 #define ERROR_CATCH_TRANSIENT 2
@@ -79,7 +80,8 @@ static void _catch_site_bind(ErrorCatchSite *site, Var *patterns) {
   int retainable = 1;
   for (int i = 0; i < site.arm_count; i++)
     if (i != site.default_arm &&
-        !x2c_match_pattern_retainable(patterns[i]))
+        !(List.try_own(patterns[i]) &&
+          x2c_match_pattern_retainable(patterns[i])))
       retainable = 0;
   if (retainable)
     for (int i = 0; i < site.arm_count; i++) {
