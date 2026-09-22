@@ -125,7 +125,7 @@ def assemble(args):
     x2c = str(Path(args.x2c).resolve())
     if run(x2c, '--version') != f'x2c {version}':
         raise ValueError('index generator compiler version differs')
-    run(x2c, 'script', str(source / 'tools/gen-package-index.x'),
+    run(x2c, 'script', str(source / 'tools/gen-package-index'),
         '--output', str(candidate.resolve()), '--base', base(manifest, 'staging'),
         '--x2c-version', f'x2c {version}',
         '--package-dir', str(source / 'examples/packages'),

@@ -1,6 +1,7 @@
 # Internal adoption campaign
 
-> Status: active - phases 1-3 complete and validated; phase 4 remains queued.
+> Status: ready tranche complete and validated; generalized-meta and
+> lifetime-certified tranches remain dependency-gated.
 > Refreshed against dev at `c51a1532` on 2026-09-22. Generalized meta adoption
 > depends on rebasing, reviewing and landing `codex/meta-values-types`;
 > lifetime-sensitive adoption depends on the certification work described
@@ -42,10 +43,9 @@ The ready-tranche findings now stand as follows:
   byte-identical.
 - Phase 1 removed the 18-line `lib/system-macros.xlisp` compatibility shim for
   `dedent.expand` and `macros.location` using current meta functions.
-- `x2c script` already accepts any shebang file regardless of suffix through
-  the single classifier in `src/utils.x`. `tools/check-release.x` and
-  `tools/gen-package-index.x` are executable x2c scripts whose names have not
-  adopted that behavior.
+- Phase 4 renamed the two executable x2c tools to `tools/check-release` and
+  `tools/gen-package-index`. Both use the existing suffix-independent script
+  classifier and launcher.
 
 ## Campaign boundaries
 
@@ -135,7 +135,7 @@ REPL spike check for REPL-owned locals, and generated-output inspection where
 multiple resources share a scope. The final exact-tree gate remains the
 publication proof.
 
-### 4. Name x2c tools like scripts
+### 4. Name x2c tools like scripts (complete)
 
 Rename `tools/check-release.x` to `tools/check-release` and
 `tools/gen-package-index.x` to `tools/gen-package-index`. Preserve their

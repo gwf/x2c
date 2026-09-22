@@ -1,5 +1,5 @@
 #!/usr/bin/env -S x2c script
-/*  gen-package-index.x -- write the index `x2c install <name>` resolves
+/*  gen-package-index -- write the index `x2c install <name>` resolves
 
     Each row is `name version kind platform url sha256`. Source rows come from
     pure-x2c packages (a `src/<name>.x` tree with no dependency manifest);

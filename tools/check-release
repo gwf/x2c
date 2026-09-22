@@ -1,10 +1,10 @@
 #!/usr/bin/env -S x2c script
-/*  check-release.x -- check a published release the way a user meets it
+/*  check-release -- check a published release the way a user meets it
 
     The site names the version, the site's installer installs that compiler,
     and the site's package index installs a bundle for this platform.
 
-      tools/check-release.x <version> [package]
+      tools/check-release <version> [package]
 
     <version> has no leading v; [package] defaults to pcre2. X2C_SITE selects
     another site and requires X2C_RELEASES and X2C_RELEASE_TAG for it.
@@ -17,7 +17,7 @@ static int fail(String message) {
   return 1;
 }
 
-if (!args) return fail("usage: tools/check-release.x <version> [package]");
+if (!args) return fail("usage: tools/check-release <version> [package]");
 String version = args.car().str().remove_prefix("v");
 String package = args.cdr() ? args.cadr().str() : "pcre2";
 String site = Env.get("X2C_SITE");

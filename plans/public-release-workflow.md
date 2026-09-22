@@ -38,9 +38,9 @@ These are checkout facts, not a claim about current remote settings or sessions.
 | Release `compiler` / `bundles` jobs | Four compiler platforms: macos-15, macos-15-intel, ubuntu-24.04, ubuntu-24.04-arm. Six packages on all four: pcre2, yyjson, libcurl, termbox2, libuv, blis; torch on macos-15 and ubuntu-24.04. Thus four compiler and 26 bundle jobs; raylib excluded. Preserve this matrix and pinned runners. |
 | `.github/workflows/pages.yml` | Manual workflow always checks out `main`; Pages concurrency cancels an in-progress deployment. An arbitrary candidate SHA is not supported. |
 | `site/public/install.sh` | `X2C_RELEASES` and `X2C_VERSION_URL` override production endpoints, but archive base is always `$releases/v$version`. A separate candidate tag cannot currently be selected. |
-| `tools/check-release.x` | `X2C_SITE` selects fetched site files; installer subprocess sets only prefix and passes version. Package install has no `--index`. A staging check can install production compiler and packages with the same version and falsely pass. |
+| `tools/check-release` | `X2C_SITE` selects fetched site files; installer subprocess sets only prefix and passes version. Package install has no `--index`. A staging check can install production compiler and packages with the same version and falsely pass. |
 | `src/cli.x`, `src/install.x` | CLI already supports `--index`; `_index_row` defaults to production. `_check_bundle` compares the bundle compiler version with `cli_version`, not source SHA or candidate identity. |
-| `tools/gen-package-index.x` | Existing `--base` controls archive URLs; it also creates source archives and copies bundles. Re-running it during promotion could recreate source archives. |
+| `tools/gen-package-index` | Existing `--base` controls archive URLs; it also creates source archives and copies bundles. Re-running it during promotion could recreate source archives. |
 | `tools/check-install-script.sh` | Builds a distribution, proves install/upgrade/package survival, and rejects a bad checksum against a local release layout. Reuse this coverage. |
 | `site/site-config.mjs`, `site/scripts/build-book.mjs` | URL/base configuration exists and is used for site/book metadata. Custom domain needs `SITE_BASE=/`, not the `/x2c` fallback. Source/download links and install examples also contain literal production/main URLs. |
 | `AGENTS.md`, `agents/releasing.md`, release and execution skills | Ordinary delivery currently targets `main`; release guidance reserves merges/tags to Gary. Routing and release authority need coordinated documentation changes, not an implicit change by this plan. |
@@ -114,7 +114,7 @@ blocks promotion; a rebuild produces a new candidate and new verification.
    operations; do not build a general release service or persistent database.
 
 3. **Installer and verification: `site/public/install.sh`,
-   `tools/check-release.x`, `tools/check-install-script.sh`.** Add optional
+   `tools/check-release`, `tools/check-install-script.sh`.** Add optional
    `X2C_RELEASE_TAG`, defaulting to `v$version`, to select the download path
    independently of archive filename/version. Generate the staging installer
    with staging version URL, staging releases base and candidate tag defaults;

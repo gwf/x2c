@@ -85,7 +85,7 @@ compare status and output.
 | `unittest/probes/run-error-floor.sh` | 100 | gate |
 | `unittest/probes/run-build-recovery.sh` | 77 | optional |
 | `tools/check-conformance-coherence.sh` | 50 | `Diff.unified`; see the ruling above |
-| release.yml "assemble the release directory" step | ~40 | already calls `gen-package-index.x`; version agreement and `SHA256SUMS` are the same job |
+| release.yml "assemble the release directory" step | ~40 | already calls `gen-package-index`; version agreement and `SHA256SUMS` are the same job |
 | `packages/libcurl/verify-profile.sh` | 39 | file checks |
 | `packages/blis/verify-archive.sh` | 46 | `nm` through a job, `json.x` |
 

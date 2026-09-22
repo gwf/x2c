@@ -46,8 +46,9 @@ its opening status and this index distinguish them from current execution.
 - [Internal adoption campaign](internal-adoption-campaign.md): ready-now
   macro, managed-lifetime and extensionless-script dogfooding, followed by
   dependency-gated generalized-meta and lifetime-certified adoption. Phases
-  1-3, system-macro Lisp deletion, command-help `$dedent`, and managed
-  lifetimes, are complete and validated; extensionless tool names are next.
+  1-4, system-macro Lisp deletion, command-help `$dedent`, managed lifetimes,
+  and extensionless tool names, are complete and validated. Generalized-meta
+  and lifetime-certified adoption remain dependency-gated.
 - [Public release workflow](public-release-workflow.md): active in the Dev
   Staging Workflow task. Account activation and production decisions remain;
   source files alone do not establish that deployment is complete.
