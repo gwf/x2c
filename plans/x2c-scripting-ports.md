@@ -1,10 +1,9 @@
 # Porting the repository's tooling to x2c scripts
 
-> Status: reference - open porting backlog; no current dispatch recorded.
-> The 2026-09-16 survey is done and the first three items
-> landed: `lib/regex.x` (`31f9b95`), `lib/diff.x` with the first gate probe
-> and the package bundler as scripts (`9b3a0fa`), and script files of any
-> name (`e777f99`). The rest of this plan is the ordered work that remains.
+> Status: active - refreshed against dev at `b988a85b` on 2026-09-22.
+> The extensionless tool rename is delivered. The documentation-tooling
+> tranche below is decision-complete and ready for implementation; later
+> release, gate and compiler-backed ports remain separately sequenced.
 > Continues `plans/archive/x2c-scripting-library.md`, whose four phases shipped the
 > scripting primitives; this plan decides where the remaining effort goes.
 
@@ -33,6 +32,83 @@ lines. Three findings decided the ranking.
 
 Everything else the tools do, the scripting library already covered.
 
+## September 22 refresh
+
+The rename campaign is complete. Commit `2d188c42` renamed the only two
+executable x2c scripts under `tools/` to `tools/check-release` and
+`tools/gen-package-index`, retaining their x2c shebangs and executable bits.
+Direct execution and explicit `x2c script <path>` produce the same output and
+status for both. `src/utils.x` already classifies any shebang file as x2c
+source, so no suffix fallback or second launcher was needed.
+
+The remaining `.x` files under `tools/` are not missed rename candidates.
+`tools/repl-spike/api-check.x` and `retention.x` are non-executable compiler
+inputs. `tools/x2c-graph/*.x` are modules linked into one native executable,
+and the files below its tests directory are fixtures.
+
+The current tree also changes the porting order recorded by the September 16
+survey:
+
+- `tools/gen-llms-txt.py` does not wrap prose and therefore never needed
+  `String.wrap`; current `Regex`, `Diff`, `Path` and `Args` cover the port.
+- `Job.wait_any` now supplies the concurrency operation that
+  `tools/check-doc-examples.py` was waiting for.
+- `tools/release-candidate.py`, `tools/gen-lisp-init.py` and
+  `tools/performance-snapshot.py` were added after the survey and need an
+  explicit disposition rather than silently falling outside the campaign.
+- The meta coverage tools and the expanded REPL probes reinforce the existing
+  compiler-interface and host-PTY boundaries; they do not create simple
+  translation candidates.
+
+## Next campaign: documentation tooling parity
+
+Deliver this campaign in two independently reviewable changes. Both changes
+name the resulting scripts without `.x`, keep an x2c shebang and executable
+bit, update every live caller, and delete the replaced Python file after
+parity is established.
+
+### 1. Port the llms.txt generator
+
+Replace `tools/gen-llms-txt.py` with `tools/gen-llms-txt`. Preserve the
+default stdout mode, `--write`, `--check`, diagnostics, chapter ordering,
+absolute link rewriting and byte-identical `site/public/llms.txt` and
+`llms-full.txt` output. Use `Regex`, `Diff`, `Path` and `Args`; keep URL-path
+normalization as a small private operation in this script rather than adding
+a general URL library.
+
+Before deleting the Python owner, run both implementations on the same tree
+and compare status, stdout and stderr in all three modes. Save the Python
+generated files, run the x2c writer, and compare both output files byte for
+byte. `make doc-check` and `make site-check` cover the live callers after the
+rename.
+
+### 2. Port the documentation sample checks
+
+Replace `tools/check-doc-examples.py` and `tools/check-gallery-examples.py`
+with extensionless x2c scripts. Add one non-executable
+`tools/doc-samples.x` module for the code-fence parser, `Sample` record,
+dedenting and hidden-line handling that the current gallery checker imports
+from the example checker. Compilation and execution stay in
+`check-doc-examples`; gallery mappings, links, manifest coverage and
+`--update` stay in `check-gallery-examples`.
+
+Run independent samples as `Job`s up to the existing `JOBS` limit and collect
+them with `Job.wait_any`. Store results by input index so diagnostics remain
+in document order. Do not add a worker framework or another process API.
+
+Run the Python and x2c implementations on the same complete tree and compare
+status, stdout and stderr for the ordinary and `--outputs` example checks and
+the ordinary and `--update` gallery paths. Exercise `--update` in a temporary
+copy so the repository is not rewritten during parity testing. Finish each
+delivery with `git diff --check` and
+`tools/gate-state.py ensure agent-pr-check` on the exact final tree.
+
+`tools/check-docs.py` follows this tranche rather than joining it. Its runtime
+needs are now available, but it owns part of `doc-check`, invokes the catalog
+and API generators, and audits repository-wide paths. Porting it separately
+keeps a failed gate migration distinguishable from sample-runner or generated
+output differences.
+
 ## Ruling on gate tooling
 
 `plans/archive/x2c-scripting-library.md` kept `check-generated-stages.sh`,
@@ -57,12 +133,14 @@ not a routine port.
    wrapper for dates. `lib/logger.x` has both privately in `_capture_time`
    and `_write_absolute_time`; the module lifts them. Consumers: the eight
    `unittest/benchmarks/run-*.sh` drivers, `tools/harness-metrics.py`,
-   `tools/agent-failure.py`, and the timestamped result directories in
-   `unittest/benchmarks/hash-table/direct/run.sh`. Ship it with the first of
-   those ports, as `lib/time.x` was deferred until a consumer existed.
+   `tools/agent-failure.py`, `tools/performance-snapshot.py`, and the
+   timestamped result directories in
+   `unittest/benchmarks/hash-table/direct/run.sh`. Ship it with the first
+   ordinary consumer; the performance collector also needs host locking,
+   signals and timeout behavior and is not that first port.
 2. **`String.wrap(width)` and a median.** Consumers: `gen-api-reference.py`,
-   `gen-module-catalog.py`, `gen-llms-txt.py`, the `make help` Python in
-   `etc/help.mk`, and the benchmark drivers' awk statistics.
+   `gen-module-catalog.py`, the `make help` Python in `etc/help.mk`, and the
+   benchmark drivers' awk statistics.
 3. **Byte reads on `Path`.** `Path.read_text` refuses binary files.
    Consumers: `packages/raylib/verify-renders.sh` and the mode bits in
    `tools/gate-state.py`.
@@ -78,8 +156,10 @@ compare status and output.
 
 | Tool | Lines | Notes |
 | --- | --- | --- |
-| `examples/programs/check-reference-lisp.py` | 235 | `Args`, job capture, `Path.temp_dir` |
-| `tools/check-gallery-examples.py` | 112 | the gallery data it loads with `importlib` becomes a JSON or `.x` table |
+| `examples/programs/check-reference-lisp.py` | 261 | `Args`, job capture, `Path.temp_dir` |
+| `tools/gen-llms-txt.py` | 236 | first documentation-tooling delivery |
+| `tools/check-gallery-examples.py` | 112 | second documentation-tooling delivery; share the sample parser |
+| `tools/check-doc-examples.py` | 263 | second documentation-tooling delivery; `Job.wait_any` has landed |
 | `unittest/probes/run-artifact-atomicity.sh` | 52 | gate |
 | `unittest/probes/run-scope-shutdown.sh` | 140 | gate |
 | `unittest/probes/run-error-floor.sh` | 100 | gate |
@@ -100,18 +180,27 @@ by hand today; the module is the first thing the larger probes will need.
 
 | Tool | Lines | Needs |
 | --- | --- | --- |
-| `tools/gen-module-catalog.py`, `gen-llms-txt.py` | 134, 236 | wrap; `Diff.unified` for `--check` |
-| `tools/check-docs.py` | 395 | regex, done |
-| `tools/gate-state.py` | 360 | mode bits, uuid; see the ruling |
-| `tools/repo-metrics.py` | 375 | column formatting |
-| `tools/check-doc-examples.py` | 199 | threads and `Job.wait_any` replace the pool |
+| `tools/gen-module-catalog.py` | 134 | wrap and the compiler-backed source rewrite |
+| `tools/check-docs.py` | 455 | no library gap; sequence after the documentation-tooling tranche |
+| `tools/gate-state.py` | 390 | mode bits, uuid; see the ruling |
+| `tools/repo-metrics.py` | 373 | column formatting |
 | `unittest/compiler-fixtures/run.sh`, `examples/check.sh` | 314, 257 | `Diff.unified`; the awk manifest parsing is `String.split` |
 | `run-package-install.sh`, `run-preprocessor-boundary.sh`, `run-symbol-snapshot.sh`, `run-raw-symbol-sweep.sh`, `run-varops-fatal.sh`, `run-expression-bodied-functions.sh` | 87-237 | the probe module; `wait_any` replaces `xargs -P` |
 | `run-protocol-boundaries.sh`, `run-header-cache.sh`, `run-cli-boundary.sh` | 536-1344 | the probe module; volume, and nine inline Python snippets in the CLI probe |
 | `unittest/benchmarks/run-*.sh` (8) | 28-122 | clock, median |
 | `tools/harness-metrics.py`, `tools/agent-failure.py` | 509, 503 | date formatting |
 | `etc/cosmopolitan/verify-ape.sh`, `build-ape.sh` | 82, 60 | nothing; low value alone |
-| `tools/x2c-graph/tests/run.sh` | 947 | volume only |
+| `tools/x2c-graph/tests/run.sh` | 1001 | volume only |
+
+## Post-survey tools
+
+| Tool | Disposition |
+| --- | --- |
+| `tools/release-candidate.py` | A real x2c candidate with no known library gap. Plan it as a release-safety delivery with its offline fake-`gh` tests and immutable-byte checks, not as routine cleanup. |
+| `tools/gen-lisp-init.py` | Keep in Python for now. It is a small bootstrap generator invoked during bootstrap refresh; moving it behind script compilation adds bootstrap coupling without meaningful source deletion. |
+| `tools/performance-snapshot.py` | Keep in Python until clock/date, host locking, process-group timeout and streamed-output behavior have ordinary x2c owners. |
+| `tools/meta-api-coverage.py`, `meta_api_disposition.py` | Join the compiler-backed source-analysis rewrite; do not translate their regular-expression parser. |
+| `tools/repl-spike/check.py`, `retention.py` | Keep as host-side PTY and measurement drivers. The x2c programs they exercise are already x2c source. |
 
 ## Rewrite on the compiler instead of translating
 
@@ -125,12 +214,12 @@ comments, and spans, on which the tools' own logic is rewritten, the way
 | Tool | Lines | `re.` sites |
 | --- | --- | --- |
 | `agents/skills/find-redundant-validation/scripts/redundant_validation.py` | 1042 | 57 |
-| `tools/x2c_source.py` (imported by five tools) | 1051 | 31 |
+| `tools/x2c_source.py` (imported by five tools) | 1107 | 31 |
 | `tools/audit-source-bloat.py` | 860 | 30 |
 | `agents/skills/find-comment-slop/scripts/comment_slop.py` | 569 | 19 |
-| `agents/skills/clean-x2c-source/scripts/source_style.py` | 385 | 15 |
+| `agents/skills/clean-x2c-source/scripts/source_style.py` | 604 | 15 |
 | `tools/x2c_symbols.py` | 566 | 13 |
-| `tools/gen-api-reference.py` | 1296 | 4, plus wrap and difflib |
+| `tools/gen-api-reference.py` | 1247 | 4, plus wrap and difflib |
 
 `x2c_source.py` is the keystone: `gen-api-reference.py`,
 `gen-module-catalog.py`, `repo-metrics.py`, `audit-source-bloat.py`, and
@@ -169,8 +258,8 @@ before implementation.
 - `x2c script` runs a file of any name whose first line is a shebang;
   `x2c_source_file` in `src/utils.x` is the one classifier. The two new
   tools are `unittest/probes/run-suite-coverage` and `packages/tools/bundle`,
-  without an extension and executable; the older `tools/*.x` scripts keep
-  their names.
+  without an extension and executable. Commit `2d188c42` subsequently gave
+  the two executable x2c scripts under `tools/` extensionless names as well.
 - `packages/tools/bundle` is byte for byte the Python bundler's output on
   pcre2, and BUNDLE.json now has one owner beside `src/install.x`.
 - Two defects fixed: a script under a package directory was linked as a
@@ -186,11 +275,13 @@ before implementation.
   itself by running both versions on the same inputs. The gate ruling above
   is Gary's decision, recorded once.
 - **Reuse and deletion.** Every port deletes its Python or shell source and
-  a Makefile or workflow line changes to call the script. The probe module
-  replaces a prelude copied into seventeen shell files. No registry, cache,
-  or second launch path is added.
+  a Makefile or workflow line changes to call the script. The documentation
+  sample module replaces code the gallery checker currently imports from the
+  example checker; the probe module replaces a prelude copied into seventeen
+  shell files. No registry, cache, or second launch path is added.
 - **Idiomatic.** Ports use `Job`, `Path`, `Args`, `Json`, `Regex`, and
   `Diff` as any script does; the compiler-backed rewrite reads `.xi` data
   through `List` and `Match` as `tools/x2c-graph` does.
-- **Validators and fixtures.** None proposed beyond the CLI boundary case
-  already landed for extensionless scripts.
+- **Validators and fixtures.** The documentation tranche uses the Python
+  implementations as temporary parity oracles and existing doc/site gates as
+  the durable proof. It adds no recurring gate or dedicated negative fixture.
