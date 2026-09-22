@@ -1,6 +1,6 @@
 # Internal adoption campaign
 
-> Status: active - phase 1 implemented and validated as the first campaign
+> Status: active - phase 1 delivered and validated as the first campaign
 > milestone; phases 2-4 remain queued.
 > Refreshed against dev at `d985caa6` on 2026-09-21. Generalized meta adoption
 > depends on rebasing, reviewing and landing `codex/meta-values-types`;
@@ -89,7 +89,7 @@ The campaign explicitly holds the following work:
 
 These deliveries depend only on capabilities already on dev.
 
-### 1. Make the system macros x2c-first (implemented for delivery)
+### 1. Make the system macros x2c-first (delivered)
 
 Move `dedent.expand` and `macros.location` from
 `lib/system-macros.xlisp` into `meta static` helpers in

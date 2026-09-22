@@ -46,7 +46,7 @@ its opening status and this index distinguish them from current execution.
 - [Internal adoption campaign](internal-adoption-campaign.md): ready-now
   macro, managed-lifetime and extensionless-script dogfooding, followed by
   dependency-gated generalized-meta and lifetime-certified adoption. Phase 1,
-  the system-macro Lisp deletion, is implemented and validated; the next
+  the system-macro Lisp deletion, is delivered and validated; the next
   campaign phase is not dispatched.
 - [Public release workflow](public-release-workflow.md): active in the Dev
   Staging Workflow task. Account activation and production decisions remain;
