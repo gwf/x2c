@@ -36,6 +36,8 @@ typedef struct CliRequest {
 
 #pragma private
 
+$(import "../lib/system-macros.xmacro")
+
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
@@ -363,66 +365,71 @@ static void _print_options(Symbol command) {
 
 static void _print_top_help(void) {
   puts(
-    %"Usage:
-  x2c <command> [options]
+    $dedent(%"
+      Usage:
+        x2c <command> [options]
 
-x2c translates x2c source to C and can optionally compile and link the
-result with the host C toolchain.
+      x2c translates x2c source to C and can optionally compile and link the
+      result with the host C toolchain.
 
-Commands:
-");
+      Commands:
+    "));
   for (CliCommand *command = cli_commands; command.name; command++)
     printf("  %-12s%s\n", command.name.str(), command.description);
   _print_options(0);
-  puts(
-    %"
-Input syntax:
-");
+  puts("");
+  puts($dedent(%"
+    Input syntax:
+  "));
   _print_help_row(
     "@<file>", "Read additional arguments from a response file", 2);
   _print_help_row("--", "End option parsing", 2);
-  puts(
-    %"
-Run 'x2c help <command>' or 'x2c <command> --help' for command help.");
+  puts("");
+  puts($dedent(%"
+    Run 'x2c help <command>' or 'x2c <command> --help' for command help."));
 }
 
 static void _print_translate_help(void) {
   puts(
-    %"Usage:
-  x2c translate [options] <input.x>...
+    $dedent(%"
+      Usage:
+        x2c translate [options] <input.x>...
 
-Translate each x2c input into a matching C source and header.");
+      Translate each x2c input into a matching C source and header."));
   _print_options(<translate>);
   _print_help_row(
     "@<file>", "Read additional arguments from a response file", 2);
   _print_help_row("--", "End option parsing", 2);
   puts("");
   puts(
-    %"The output directory defaults to the current directory and must already
-exist. Use --out-dir to select another directory.
-Shell wildcards are allowed because the shell expands them; x2c does not
-interpret wildcard characters in input operands.");
+    $dedent(%"
+      The output directory defaults to the current directory and must already
+      exist. Use --out-dir to select another directory.
+      Shell wildcards are allowed because the shell expands them; x2c does not
+      interpret wildcard characters in input operands."));
 }
 
 static void _print_driver_help(Symbol command) {
   if (command == <build>)
     puts(
-      %"Usage:
-  x2c build [options] <input>...
-  x2c build [options] [--target <name>]
+      $dedent(%"
+        Usage:
+          x2c build [options] <input>...
+          x2c build [options] [--target <name>]
 
-Translate x2c sources, compile C sources, and link one target.
-With explicit inputs, the default target is an executable. Without
-inputs, x2c reads the nearest x2c.toml and builds its default
-target.");
+        Translate x2c sources, compile C sources, and link one target.
+        With explicit inputs, the default target is an executable. Without
+        inputs, x2c reads the nearest x2c.toml and builds its default
+        target."));
   else
     puts(
-      %"Usage:
-  x2c run [build-options] <input>... [-- <argument>...]
-  x2c run [build-options] [--target <name>] [-- <argument>...]
+      $dedent(%"
+        Usage:
+          x2c run [build-options] <input>... [-- <argument>...]
+          x2c run [build-options] [--target <name>] [-- <argument>...]
 
-Build one executable and run it. Arguments after -- are passed
-unchanged to the executable.");
+        Build one executable and run it. Arguments after -- are passed
+        unchanged to the executable."));
   _print_options(command);
   _print_help_row(
     "@<file>", "Read additional arguments from a response file", 2);
@@ -432,125 +439,140 @@ unchanged to the executable.");
   puts("");
   if (command == <build>)
     puts(
-      %"Inputs may be .x, .c, .o, or .a files. x2c links its runtime and
-required platform libraries automatically. Directory operands and
-unexpanded wildcard operands are rejected.");
+      $dedent(%"
+        Inputs may be .x, .c, .o, or .a files. x2c links its runtime and
+        required platform libraries automatically. Directory operands and
+        unexpanded wildcard operands are rejected."));
   else
     puts(
-      %"The selected target must be executable. After a successful build,
-x2c returns the program's exit status.");
+      $dedent(%"
+        The selected target must be executable. After a successful build,
+        x2c returns the program's exit status."));
 }
 
 static void _print_bootstrap_help(void) {
   puts(
-    %"Usage:
-  x2c bootstrap --prefix <dir> [options]
+    $dedent(%"
+      Usage:
+        x2c bootstrap --prefix <dir> [options]
 
-Extract the source distribution carried by this APE and use the host
-C compiler and archiver to install a native x2c under <dir>.");
+      Extract the source distribution carried by this APE and use the host
+      C compiler and archiver to install a native x2c under <dir>."));
   _print_options(<bootstrap>);
   _print_help_row(
     "@<file>", "Read additional arguments from a response file", 2);
   puts("");
   puts(
-    %"The seed supplies x2c sources and headers. A GCC- or Clang-compatible
-C compiler and a compatible archiver must be installed.");
+    $dedent(%"
+      The seed supplies x2c sources and headers. A GCC- or Clang-compatible
+      C compiler and a compatible archiver must be installed."));
 }
 
 static void _print_env_help(void) {
   puts(
-    %"Usage:
-  x2c env [options] [name]
+    $dedent(%"
+      Usage:
+        x2c env [options] [name]
 
-Print the home, executable, include directory, runtime archive,
-package roots, host tools, and script cache this compiler resolved, one
-'name = value' line each, or only the value of one name.");
+      Print the home, executable, include directory, runtime archive,
+      package roots, host tools, and script cache this compiler resolved, one
+      'name = value' line each, or only the value of one name."));
   _print_options(<env>);
   _print_help_row(
     "@<file>", "Read additional arguments from a response file", 2);
   puts("");
   puts(
-    %"The home is X2C_HOME when set; otherwise the nearest directory above
-the executable, then above the current directory, holding include/
-and etc/compiler-sdk.xlisp. Package roots join with ':'.");
+    $dedent(%"
+      The home is X2C_HOME when set; otherwise the nearest directory above
+      the executable, then above the current directory, holding include/
+      and etc/compiler-sdk.xlisp. Package roots join with ':'."));
 }
 
 static void _print_package_help(Symbol command) {
   if (command == <install>)
     puts(
-      %"Usage:
-  x2c install [options] <package>
+      $dedent(%"
+        Usage:
+          x2c install [options] <package>
 
-Install one package under <home>/packages. The package is a local
-directory, a local .tar.gz, a URL with --sha256, or a name resolved
-through the package index. A bundle installs as built; a pure-x2c
-source package is built by this compiler.");
+        Install one package under <home>/packages. The package is a local
+        directory, a local .tar.gz, a URL with --sha256, or a name resolved
+        through the package index. A bundle installs as built; a pure-x2c
+        source package is built by this compiler."));
   else if (command == <remove>)
     puts(
-      %"Usage:
-  x2c remove [options] <name>
+      $dedent(%"
+        Usage:
+          x2c remove [options] <name>
 
-Remove one installed package from <home>/packages.");
+        Remove one installed package from <home>/packages."));
   else
     puts(
-      %"Usage:
-  x2c list
+      $dedent(%"
+        Usage:
+          x2c list
 
-List installed packages as 'name version kind' lines.");
+        List installed packages as 'name version kind' lines."));
   _print_options(command);
   _print_help_row(
     "@<file>", "Read additional arguments from a response file", 2);
   if (command != <install>) return;
   puts("");
   puts(
-    %"A bundle records the x2c version that built it and is refused for
-another version unless --force. A source package with native
-dependencies is refused; install its bundle instead.");
+    $dedent(%"
+      A bundle records the x2c version that built it and is refused for
+      another version unless --force. A source package with native
+      dependencies is refused; install its bundle instead."));
 }
 
 static void _print_new_help(void) {
   puts(
-    %"Usage:
-  x2c new [options] <dir>
+    $dedent(%"
+      Usage:
+        x2c new [options] <dir>
 
-Create a project in <dir> that builds and runs as written: x2c.toml,
-src/main.x, and .gitignore. The directory may be missing or empty.");
+      Create a project in <dir> that builds and runs as written: x2c.toml,
+      src/main.x, and .gitignore. The directory may be missing or empty."));
   _print_options(<new>);
   _print_help_row(
     "@<file>", "Read additional arguments from a response file", 2);
   puts("");
   puts(
-    %"The target is named after the last component of <dir>, which may
-contain letters, digits, '_', and '-'. Run 'x2c run' in <dir> next.");
+    $dedent(%"
+      The target is named after the last component of <dir>, which may
+      contain letters, digits, '_', and '-'. Run 'x2c run' in <dir> next."));
 }
 
 static void _print_script_help(void) {
   puts(
-    %"Usage:
-  x2c script [options] <file> [<argument>...]
+    $dedent(%"
+      Usage:
+        x2c script [options] <file> [<argument>...]
 
-Run an x2c source file as a script. The first run builds an executable in
-the per-user cache; later runs start it directly until the script, a file
-it includes or imports, the compiler, the runtime, or an option changes.");
+      Run an x2c source file as a script. The first run builds an executable in
+      the per-user cache; later runs start it directly until the script, a file
+      it includes or imports, the compiler, the runtime, or an option changes."));
   _print_options(<script>);
   _print_help_row(
     "@<file>", "Read additional options from a response file", 2);
+  puts("");
   puts(
-    %"
-Every word after <file> is passed unchanged to the script, including
-words that begin with - or @. A script whose first line is the shebang
-'#!/usr/bin/env -S x2c script' runs directly. The cache is X2C_CACHE_DIR,
-XDG_CACHE_HOME/x2c, or ~/.cache/x2c. Builds remove the entries of
-scripts that no longer exist.");
+    $dedent(%"
+      Every word after <file> is passed unchanged to the script, including
+      words that begin with - or @. A script whose first line is the shebang
+      '#!/usr/bin/env -S x2c script' runs directly. The cache is X2C_CACHE_DIR,
+      XDG_CACHE_HOME/x2c, or ~/.cache/x2c. Builds remove the entries of
+      scripts that no longer exist."));
 }
 
 static void _print_repl_help(void) {
   puts(
-    %"Usage:
-  x2c repl [--dump] [--stats] [--verbose-stats]
+    $dedent(%"
+      Usage:
+        x2c repl [--dump] [--stats] [--verbose-stats]
 
-Evaluate a supported x2c subset in an experimental interactive session.
-Read submissions from standard input. Enter :help for session commands.");
+      Evaluate a supported x2c subset in an experimental interactive session.
+      Read submissions from standard input. Enter :help for session commands."));
   _print_options(<repl>);
   _print_help_row(
     "@<file>", "Read additional options from a response file", 2);
@@ -572,11 +594,12 @@ static void _print_help(Symbol command) {
     case <list>:       _print_package_help(command);  break;
     case <help>:
       puts(
-        %"Usage:
-  x2c help [command]
+        $dedent(%"
+          Usage:
+            x2c help [command]
 
-Show top-level help, or help for translate, build, run, new, script, repl,
-bootstrap, env, install, remove, or list.");
+          Show top-level help, or help for translate, build, run, new, script, repl,
+          bootstrap, env, install, remove, or list."));
       break;
     default: x2c_driver_error(%"unknown help command '${command}'");
   }

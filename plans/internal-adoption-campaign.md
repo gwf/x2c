@@ -1,7 +1,7 @@
 # Internal adoption campaign
 
-> Status: active - phase 1 delivered and validated as the first campaign
-> milestone; phases 2-4 remain queued.
+> Status: active - phases 1-2 complete and validated; phases 3-4 remain
+> queued.
 > Refreshed against dev at `d985caa6` on 2026-09-21. Generalized meta adoption
 > depends on rebasing, reviewing and landing `codex/meta-values-types`;
 > lifetime-sensitive adoption depends on the certification work described
@@ -104,7 +104,7 @@ system-macros example and expected output, and existing source-location
 diagnostics. This delivery is the small independent proof that current meta
 functions can replace a remaining Lisp helper without generalized meta types.
 
-### 2. Adopt `$dedent` in command help
+### 2. Adopt `$dedent` in command help (complete)
 
 Import the system macro where `src/cli.x` defines command help and replace all
 23 awkward multiline literals with `$dedent`. Preserve help output byte for
