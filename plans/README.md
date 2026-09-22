@@ -74,7 +74,7 @@ its opening status and this index distinguish them from current execution.
 | [Cleanup lowering](emit-cleanup-lowering.md) | Optional, unscheduled phases 2-3; phase 1 already shipped. |
 | [Lint and format](x2c-lint-and-format.md) | Needs author scoping; includes opportunistic declaration grouping from the completed dogfooding campaign. |
 | [Header collection gaps](x2c-header-collection-gaps.md) | Needs author scoping; retained unresolved cases were last reproduced September 17. This cleanup does not claim a new compiler probe. |
-| [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names are delivered; the refreshed documentation-tooling parity tranche is ready, followed by separately sequenced release, gate and compiler-backed ports. |
+| [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names and the llms.txt generator port are delivered; documentation sample checks are next, followed by separately sequenced release, gate and compiler-backed ports. |
 | [C on-ramp](x2c-c-on-ramp.md) | Landing-page adoption examples; the parser/corpus work already shipped. |
 | [Var-tags experiment](archive/meta-functions.md#parked) | Parked until a measured approach meets the recorded translation-cost condition. |
 

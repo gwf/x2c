@@ -232,11 +232,11 @@ stage-diff-all: stage-3				## Compare every generated stage
 doc-generate:						## Regenerate derived documentation
 	python3 tools/gen-module-catalog.py --write
 	python3 tools/gen-api-reference.py --write
-	python3 tools/gen-llms-txt.py --write
+	$(STAGE0_X2C) script tools/gen-llms-txt --write
 
 doc-check:						## Check documentation for drift
 	python3 tools/check-docs.py
-	python3 tools/gen-llms-txt.py --check
+	$(STAGE0_X2C) script tools/gen-llms-txt --check
 
 doc-examples: build					## Compile every example in the book
 	python3 tools/check-doc-examples.py

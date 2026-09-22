@@ -32,8 +32,8 @@ either; run `make doc-generate`.
 chapter's entry page, and the generator only owns its table-of-contents line.
 
 `make doc-generate` also writes `site/public/llms.txt` and
-`site/public/llms-full.txt` with `tools/gen-llms-txt.py`, from `SUMMARY.md`
-and the chapters its `FULL_TEXT` names. Never hand-edit either file.
+`site/public/llms-full.txt` with `tools/gen-llms-txt`, from `SUMMARY.md`
+and its core chapter list. Never hand-edit either file.
 
 The generator also owns the Libraries and Packages navigation hierarchy,
 including the links to authored advanced topics. Its landing pages under

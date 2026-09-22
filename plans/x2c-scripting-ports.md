@@ -1,8 +1,8 @@
 # Porting the repository's tooling to x2c scripts
 
-> Status: active - refreshed against dev at `b988a85b` on 2026-09-22.
-> The extensionless tool rename is delivered. The documentation-tooling
-> tranche below is decision-complete and ready for implementation; later
+> Status: active - refreshed against dev at `28c5336c` on 2026-09-22.
+> The extensionless tool rename and llms.txt generator port are delivered.
+> The documentation sample checks are the next independent delivery; later
 > release, gate and compiler-backed ports remain separately sequenced.
 > Continues `plans/archive/x2c-scripting-library.md`, whose four phases shipped the
 > scripting primitives; this plan decides where the remaining effort goes.
@@ -49,8 +49,9 @@ and the files below its tests directory are fixtures.
 The current tree also changes the porting order recorded by the September 16
 survey:
 
-- `tools/gen-llms-txt.py` does not wrap prose and therefore never needed
-  `String.wrap`; current `Regex`, `Diff`, `Path` and `Args` cover the port.
+- The former `tools/gen-llms-txt.py` did not wrap prose and therefore never
+  needed `String.wrap`; current `Regex`, `Diff`, `Path` and `Args` covered its
+  completed port to `tools/gen-llms-txt`.
 - `Job.wait_any` now supplies the concurrency operation that
   `tools/check-doc-examples.py` was waiting for.
 - `tools/release-candidate.py`, `tools/gen-lisp-init.py` and
@@ -67,20 +68,19 @@ name the resulting scripts without `.x`, keep an x2c shebang and executable
 bit, update every live caller, and delete the replaced Python file after
 parity is established.
 
-### 1. Port the llms.txt generator
+### 1. Port the llms.txt generator - delivered
 
-Replace `tools/gen-llms-txt.py` with `tools/gen-llms-txt`. Preserve the
+`tools/gen-llms-txt` replaces `tools/gen-llms-txt.py` and preserves the
 default stdout mode, `--write`, `--check`, diagnostics, chapter ordering,
 absolute link rewriting and byte-identical `site/public/llms.txt` and
 `llms-full.txt` output. Use `Regex`, `Diff`, `Path` and `Args`; keep URL-path
 normalization as a small private operation in this script rather than adding
 a general URL library.
 
-Before deleting the Python owner, run both implementations on the same tree
-and compare status, stdout and stderr in all three modes. Save the Python
-generated files, run the x2c writer, and compare both output files byte for
-byte. `make doc-check` and `make site-check` cover the live callers after the
-rename.
+Before the Python owner was deleted, both implementations ran on the same tree
+with matching status, stdout and stderr in all three modes. The saved Python
+generated files and x2c writer output also matched byte for byte. `make
+doc-check` and `make site-check` cover the live callers after the rename.
 
 ### 2. Port the documentation sample checks
 
@@ -157,7 +157,6 @@ compare status and output.
 | Tool | Lines | Notes |
 | --- | --- | --- |
 | `examples/programs/check-reference-lisp.py` | 261 | `Args`, job capture, `Path.temp_dir` |
-| `tools/gen-llms-txt.py` | 236 | first documentation-tooling delivery |
 | `tools/check-gallery-examples.py` | 112 | second documentation-tooling delivery; share the sample parser |
 | `tools/check-doc-examples.py` | 263 | second documentation-tooling delivery; `Job.wait_any` has landed |
 | `unittest/probes/run-artifact-atomicity.sh` | 52 | gate |
