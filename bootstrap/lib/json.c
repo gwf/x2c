@@ -290,6 +290,8 @@ static void _JsonReader__expect(_JsonReader j, char byte, const char * why){
   j -> at ++;
 }
 
+int strncmp(const char *, const char *, unsigned long);
+
 static void _JsonReader__word(_JsonReader j, const char * word){
   size_t length = strlen(word);
   if(strncmp(j -> text + j -> at, word, length)) _JsonReader__fail(j, _2);
@@ -632,6 +634,8 @@ static void _write_string(Buffer out, String text){
   if(run < length) Buffer_write_len(out, text + run, length - run);
   Buffer_write_char(out, '"');
 }
+
+int atoi(const char *);
 
 static void _write_double(Buffer out, double number){
   if(! isfinite(number)){

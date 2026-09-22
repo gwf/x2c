@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/comptime-declines-native-meta-signature.x:1:1: type: native meta function declaration does not match its target
+  meta double sin(int);
+  ^^^^
+  note: name: sin signature: ((func ((int))) double)
+

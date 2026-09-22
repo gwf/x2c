@@ -1,5 +1,0 @@
-unittest/compiler-fixtures/meta-iterator-explicit-storage.x:3:1: macro: this function cannot run at compile time
-  meta int explicit_storage(void) {
-  ^^^^
-  note: reason: a struct or union, which has no compile-time representation
-

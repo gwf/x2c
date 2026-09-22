@@ -9,6 +9,8 @@
 #include "compiler.h"
 List Compiler_lower_comptime(Compiler compiler, List fn);
 
+List Compiler_lower_repl(Compiler compiler, List fn);
+
 String Compiler_lower_declined(Compiler compiler);
 
 void Compiler_inherit_shared_meta(Compiler compiler);
@@ -20,6 +22,8 @@ int Compiler_lower_reached_globals(Compiler compiler);
 int Compiler_lower_reached_meta(Compiler compiler);
 
 int Compiler_meta_is_comptime_only(Compiler c, List fn);
+
+Var Compiler_lower_meta_initializer(Compiler c, Type type, int id, List initializer);
 
 Var Compiler_lower_meta_expression(Compiler c, List expression);
 

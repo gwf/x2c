@@ -71,9 +71,20 @@ meta int found(void) {
     range(1, 3, 1).find(%!(Var value) => value > 1).integer();
 }
 
-int main(void) {
-  printf("%s\n%d %d %d %d %d\n%d %d %d\n", mapped(10).str(),
+/* Each iterator here gets the Iter storage the compiler supplies. */
+meta int sequences(int bias) {
+  Array values = [1, 2, 3];
+  Var boxed = %(4 5);
+  long total = 0;
+  foreach (Var value, range(0, 5, 1)) total += value.integer();
+  return "abc".iter().count() + %(1 2 3).iter().sum() +
+    values.iter().sum() + boxed.iter().sum() + total + bias;
+}
+
+int main(int argc, char **argv) {
+  (void) argv;
+  printf("%s\n%d %d %d %d %d\n%d %d %d\n%d %d\n", mapped(10).str(),
     keys_valid(), independent(), lazy(), live_map(), x2c_truth(), folds(),
-    void_consumers(), found());
+    void_consumers(), found(), $sequences(0), sequences(argc - 1));
   return 0;
 }

@@ -2,8 +2,8 @@
 
 x2c extends C. The subset that a `meta` function can execute during
 compilation cuts across both C features and x2c additions: integer loops,
-local pointer indirection, collection literals and method calls can work;
-a native struct field or an otherwise ordinary library call can stop it.
+local pointer indirection, structs, collection literals and method calls
+can work; a union or an otherwise ordinary library call can stop it.
 There are three separate questions:
 
 1. **Can the body execute?** Its syntax and values need compile-time
@@ -14,10 +14,10 @@ There are three separate questions:
    meta function, inserting it with `$helper(...)`, and folding an ordinary call
    have different limits.
 
-`meta` is not a purity annotation. A body can mutate locals, arrays and
-maps, and pass local addresses to other meta functions. Its compile-time
-objects belong to the evaluator; they are not the objects the eventual
-program allocates.
+`meta` is not a purity annotation. A body can mutate locals, arrays, maps
+and structs, and pass local addresses to other meta functions. Its
+compile-time objects belong to the evaluator; they are not the objects the
+eventual program allocates.
 
 Start with an ordinary function. This one takes an integer and returns an
 integer, using the same braces, `return`, and arithmetic as C:
@@ -208,8 +208,9 @@ bindings. The restrictions below describe where this stops.
 
 ## When `meta` is a keyword
 
-`meta` is contextual. It marks a function only when a function definition
-follows it. Everywhere else it is an ordinary identifier:
+`meta` is contextual. Besides functions, it can mark the file-static values
+and type declarations described below. Outside those declaration forms it
+remains an ordinary identifier:
 
 ```x2c
 List meta = %(a b);
@@ -228,8 +229,226 @@ int main(void) {
 3 3
 ```
 
-A `meta` declaration needs a body. A prototype is an error, because the
-compiler has nothing to run.
+A bodyless `meta` prototype declares a native C function for compile-time
+code. [Native C functions](#native-c-functions) below describes which
+functions the compiler provides.
+
+At file scope, `meta` can also advertise one initialized static value to
+compile-time code:
+
+```c
+meta static const double pi = 3.1415;
+meta static int compile_counter = 0;
+```
+
+The emitted program keeps the ordinary C declarations and initializers.
+Compile-time code gets separate per-translation-unit values built from the
+same source initializers, so compile-time mutation never changes the
+eventual program's object. A function that reaches either a const or mutable
+meta value is conservatively not folded; an explicit dollar call can still
+run it during translation. Each value lives in bytes the compile-time session
+owns, so taking its address and reading or writing through a correctly typed
+pointer has the same aliasing effect as in C. `const` prevents compile-time
+writes.
+
+`meta` marks functions and values, not types. Compile-time code can use any
+type the compiler sees: scalars, typedefs, classes with a `Var`
+representation, and any complete struct, including an anonymous inline
+`struct { ... } value`. A struct keeps its C layout; see
+[C objects during compilation](#c-objects-during-compilation). Elsewhere
+`meta` remains an ordinary identifier.
+
+A type's methods are not callable at compile time on their own. Each
+function needs its own `meta`:
+
+```x2c
+struct Cell { int value; };
+typedef struct Cell Cell;
+
+meta int Cell.twice(Cell cell) => cell.value * 2;
+
+meta static int doubled(void) {
+  Cell cell = { 21 };
+  return cell.twice();
+}
+
+int main(void) {
+  printf("%d\n", $doubled());
+  return 0;
+}
+```
+
+```text
+42
+```
+
+Without `meta` on `Cell.twice`, the definition of `doubled` reports
+`no binding for Cell_twice`.
+
+## Native C functions
+
+A bodyless `meta` prototype binds to the function of the same name that the
+compiler itself links:
+
+```x2c
+meta double sin(double);
+```
+
+Compile-time code that calls `sin` runs the compiler's native copy. The
+declared signature must match that function exactly. A mismatch is reported
+at the declaration:
+
+```text
+sample.x:1:1: type: native meta function declaration does not match its target
+  meta float sin(double);
+  ^^^^
+  note: name: sin signature: ((func ((double))) float)
+```
+
+The compiler links every function declared in `lib/cmath.x` and
+`lib/clibc.x`. Both are part of the implicit prelude, so their functions need
+no declaration of your own:
+
+- `lib/cmath.x` declares all of C99 `<math.h>`, in both the `double` and
+  `float` forms. This includes functions that return a second result through
+  a pointer, such as `frexp`, `modf` and `remquo`.
+- `lib/clibc.x` declares `abs`, `labs`, `llabs`, `atoi`, `atol`, `atoll`,
+  `atof`, `strcmp`, `strncmp` and `timespec_get`.
+
+The `<ctype.h>` functions are not included, because a C library may define
+them as macros. A compile-time `String` passes to a `const char *` parameter,
+so `$atoi("42")` answers 42.
+
+A pointer argument can be the address of a compile-time local. The native
+function writes through it, and the caller reads the result afterward:
+
+```x2c
+meta static double parts(double x) {
+  int exponent;
+  double mantissa = frexp(x, &exponent);
+  return mantissa + exponent;
+}
+
+int main(void) {
+  printf("%g %g\n", $parts(8.0), $sin(0.0));
+  return 0;
+}
+```
+
+```text
+4.5 0
+```
+
+A prototype for a function the compiler does not link is accepted. A meta
+function that calls it is diagnosed where it is defined:
+
+```text
+sample.x:2:1: macro: this function cannot run at compile time
+  meta static int roll(void) => rand();
+  ^^^^
+  note: reason: no binding for rand
+```
+
+Other native functions will come from native extensions, which are not
+available yet.
+
+A native function binds into the compile-time session the first time
+compile-time code calls it. An ordinary call to a native meta function is
+never folded: `sin(1.0)` stays a call in the generated C. Write `$sin(1.0)`
+to compute the value during translation.
+
+## C objects during compilation
+
+Compile-time code keeps C objects the way C does. Every struct local, and
+every local whose address is taken, lives in native bytes. The compiler lays
+out a struct in natural C layout, with the field order, sizes and alignment
+from its own type information. The bytes belong to the running function's
+frame and are released when that function returns, normally or by an error.
+
+Field reads and writes, `&x`, `&s.f`, `p->f` and `*p` operate on those bytes.
+Struct assignment copies bytes into the destination's existing storage, so an
+address taken earlier stays valid. Passing a struct by value gives the callee
+its own copy. Returning a struct copies it into the caller's storage before
+the callee's storage ends:
+
+```x2c
+struct Pair { int x; int y; };
+
+meta static struct Pair pair(int x) {
+  struct Pair p = { x, x + 1 };
+  return p;
+}
+
+meta static void bump(struct Pair *p) { p->x += 10; }
+
+meta static int spare(struct Pair p) {
+  p.x = 0;
+  return p.y;
+}
+
+meta static int pairs(void) {
+  struct Pair a = pair(1);
+  int *ax = &a.x;
+  a = pair(5);
+  bump(&a);
+  return *ax * 100 + spare(a) + a.x;
+}
+
+int main(void) {
+  printf("%d %d\n", $pairs(), pairs());
+  return 0;
+}
+```
+
+```text
+1521 1521
+```
+
+`ax` still points into `a` after the assignment, so `*ax` reads 15. `spare`
+changes its own copy and returns 6, and `a.x` is still 15.
+
+A pointer is a real address. Passing `&value` to a native function lets the
+native code fill the object in place:
+
+<!-- ignore: struct timespec needs the --system-headers translation option -->
+```x2c,ignore
+#include <time.h>
+
+meta static long seconds_now(void) {
+  struct timespec now;
+  timespec_get(&now, 1);
+  return now.tv_sec;
+}
+```
+
+Compile-time code cannot read the `TIME_UTC` macro, so the sample passes its
+value, which is 1 on the supported hosts. A struct from a system header needs
+the `--system-headers` option, so that the compiler sees its declaration.
+Without it, the definition reports that a struct or union has no
+compile-time representation.
+
+A pointer into a local whose function has returned is dangling, as in C;
+using it is undefined behavior. A struct inside a `meta static` value, or in
+a value that persists across REPL submissions, lives in storage the
+compile-time session owns.
+
+A struct result stays inside compile-time code. Inserting one into the
+program with `$pair(3)` is diagnosed, because the compiler cannot write a
+struct value as code.
+
+These C shapes are not available at compile time:
+
+- Unions.
+- Structs with bitfields, array members or anonymous members. A meta function
+  that uses one reports `a compile-time struct with no host layout`.
+- Structs with alignment attributes.
+- Structs under `#pragma pack`. The compiler does not detect packing and
+  would lay such a struct out with natural alignment, so do not pass one to a
+  native function from compile-time code.
+- Arrays of structs, which a meta function reports as `an array of
+  structs`, the address of an array element, and pointer arithmetic.
+- `sizeof`, which is not evaluated at compile time. The parser does not
+  accept `_Alignof`.
 
 ## When folding applies
 
@@ -276,16 +495,17 @@ on a listed type works. The operation inventory below further limits calls.
 | `Array` | `[]`, `[a, b]`, `Array.new()`, conversion from `List`; parameters and returns. | Indexed reads/writes and the bound mutating methods. Contents can mix represented values and nest collections. |
 | `Map` | `{}`, keyed literals, `Map.new()`; parameters and returns. | Keyed reads/writes and bound methods; represented collections and callable values can be stored inside it. |
 | `Var` | Boxes represented numbers, strings, symbols, collections and callable values. | Only the exposed operations below. Compile-time `void` and an empty List remain distinct. Lisp conditions treat both as false; x2c runtime `Var.truth` still raises on `void`. |
-| `Func` | Lambdas with typed or bare parameters, captures and references to available functions; parameters and returns between meta functions. | Dynamic calls and storage in collections work. This does not expose arbitrary native function-pointer calls or unrepresented argument types. |
-| C-style array declarations | A literal-sized one-dimensional array, such as `int a[3] = {1, 2};`, has compile-time storage. Omitted elements are filled with zero-like values. | Indexing and simple assignment work; passing the array to an indexed pointer parameter works in the tested case. At compile time, a mutable evaluator cell holds a dynamic Array of Var values. Runtime uses native C array storage; the evaluator does not use `alloca`. See element/dimension limits below. |
-| Pointers to locals | `int *p = &n;`, copying that pointer and passing it to another meta function work. The evaluator exposes the source pointer tag while retaining its own cell. | `*p` reads and `*p = value` writes the local. General pointer arithmetic, address-of an array element and native memory/layout access are not supplied by this cell representation. |
-| Native structs and unions | Native aggregate locals and native field access are rejected; a type name in a signature alone does not establish a usable value representation. | Dot **methods** resolve as calls and can work. Dot **fields** need native aggregate representation and do not. Compiler queries may inspect a struct's type and build future field access code without reading a struct value. |
+| `Func` | Lambdas with typed or bare parameters, captures and references to available functions; parameters and returns between meta functions. | Dynamic calls and storage in collections work. This does not expose arbitrary native function-pointer calls. |
+| C-style array declarations | A literal-sized one-dimensional array, such as `int a[3] = {1, 2};`, has compile-time storage. Omitted elements are filled with zero-like values. | Indexing and simple assignment work; passing the array to an indexed pointer parameter works in the tested case. At compile time the array is a dynamic Array of Var values, not native bytes; the running program uses native C array storage. See element/dimension limits below. |
+| Pointers to locals | `int *p = &n;`, copying that pointer, and passing it to another meta function or a native function work. A local whose address is taken lives in native bytes, and the pointer is its real address. | `*p` reads and `*p = value` writes the local. Pointer arithmetic and the address of an array element are not supported. |
+| Structs | Named, inline and nested locals; initialization, assignment, by-value arguments and returns, with C copy behavior. | Fields and addresses refer to native bytes in C layout. Assignment keeps existing field addresses; storage ends when the function returns. See [C objects during compilation](#c-objects-during-compilation). |
+| Native functions | The functions in `lib/cmath.x` and `lib/clibc.x`, which the compiler links. | Explicit dollar evaluation and meta bodies can call them, including through output pointers. Ordinary calls are not folded. See [Native C functions](#native-c-functions). |
+| System-header structs | `--system-headers` supplies the header declarations. A local `struct timespec` can be passed to `timespec_get`. | Unions and structs with bitfields, array members, anonymous members or alignment attributes are not available. |
 | `File`, buffers and other resource types | No general compile-time constructor/operation surface is installed for these types. A declaration or opaque type name alone does not make the resource usable. | For example, `File.open` has no binding. Use the compiler's explicit text-embedding operation for source-dependent text. |
 
 Collections hold values, not arbitrary native memory. Nested collections keep
 references to their contained objects; mutating a shared `Array` or `Map`
-changes that object. Native aggregates do not become legal collection
-contents merely because the container itself is supported.
+changes that object.
 
 Native array coverage is narrower than C's array model. Integer arrays have
 fixture coverage; focused probes also cover `double` and `String` elements.
@@ -329,8 +549,7 @@ int main(void) {
 9 3
 ```
 
-The chain calls `String.split`, then `List.len`. Neither dot reads a native
-struct field.
+The chain calls `String.split`, then `List.len`.
 
 ### Which library operations are available
 
@@ -396,12 +615,13 @@ longer become an empty List in the evaluator. This covers List `getindex`,
 still reject `void` as an element, key or value, so a rest call cannot pack it
 into its argument List.
 
-Status operations with output parameters use evaluator cells for source local
-addresses. `String.try_long`, `String.try_double`, `String.try_next`, the three
-`List.try_*` match operations, `Map.try_get`, `Map.try_del` and
-`Symbol.try_new` compute into native temporaries and publish them only after
-success. A failed call therefore leaves every output unchanged;
-`String.try_next` and `List.try_search` publish their paired outputs together.
+Status operations with output parameters receive the addresses of
+compile-time locals. `String.try_long`, `String.try_double`,
+`String.try_next`, the three `List.try_*` match operations, `Map.try_get`,
+`Map.try_del` and `Symbol.try_new` are the native operations themselves,
+writing through those addresses as they do at run time. A failed call
+therefore leaves every output unchanged; `String.try_next` and
+`List.try_search` write their paired outputs together.
 
 `Array.heap_pop`, `Map.get_hashed`, `Var.getindex` and `Var.null` preserve
 their native `void`-versus-`Null` results. `Var.clone_wide` creates a fresh
@@ -444,8 +664,8 @@ means feasible in principle, not scheduled or promised support.
 | `goto`, switch fallthrough | **Gap:** control-flow lowering that preserves the transfer. |
 | Postfix expression values, compound updates to indexed/dereferenced places | **Gap:** preserve the old result and evaluate the destination once. |
 | Computed native-array dimensions, general multidimensional arrays and missing element conversions | **Gap:** extend the represented array shape and typed operations. |
-| Native struct values/fields | **Gap:** a representation preserving value copying, identity where applicable, and field semantics. A Map alone would not preserve C value semantics. |
-| Unions, native layout and general pointers | **Representation gap:** model storage, aliasing and layout. A pointer to an actual future runtime object cannot be dereferenced during compilation; that is a **phase boundary**. Symbolic addresses would be different from accessing that object now. |
+| Structs with bitfields, array members, anonymous members or layout attributes; arrays of structs | **Gap:** compute a layout for these shapes. Other structs use native bytes in C layout. |
+| Unions, pointer arithmetic and addresses of array elements | **Gap:** model overlapping storage and arrays in native bytes. A pointer to an actual future runtime object cannot be dereferenced during compilation; that is a **phase boundary**. |
 | `defer` | **Gap** for deferred execution in general. Explicitly freeing evaluator-owned objects conflicts with the **current ownership model**; it is not an argument that all deferred actions are impossible. |
 | `try`, `catch`, `finally`, `raise` in a meta body | **Gap:** exception transfer and cleanup need compile-time modeling. Evaluation failures can still become compiler diagnostics. |
 | Missing library/resource operations, including `File.open` | **API gap:** implement bindings and appropriate resource lifetimes. Compile-time file I/O is possible in principle; it is not prohibited by the phase boundary. |
@@ -455,13 +675,15 @@ means feasible in principle, not scheduled or promised support.
 | Reading future runtime mutable state | **Fundamental phase boundary:** that program state does not exist yet. Separate compile-time state is possible but is not the same state. |
 | Mutable container and callable result insertion | **Gap:** preserve ownership, mutability and identity when constructing a runtime value. See the next section. |
 
-For example, these are intentionally rejected definitions:
+For example, these are rejected definitions:
 
-<!-- ignore: native field access is unsupported in a meta body -->
+<!-- ignore: a union has no compile-time representation -->
 ```x2c,ignore
-meta int meta_field(void) {
-  struct { int x; } value = { 1 };
-  return value.x;
+union Bits { int i; float f; };
+
+meta int meta_union(void) {
+  union Bits bits = { 1 };
+  return bits.i;
 }
 ```
 
@@ -474,8 +696,8 @@ meta int meta_update(void) {
 }
 ```
 
-Their diagnostic reasons are respectively `a struct or union, which has no
-compile-time representation` and `update of a computed place`.
+Their diagnostic reasons identify the union and the unsupported indexed
+update respectively.
 The compiler checks the body when installing the meta definition, so an
 unused function or an untaken branch does not hide an unsupported construct.
 
@@ -485,20 +707,22 @@ Compile-time allocations belong to the evaluator session. Do not free,
 close, or otherwise take over evaluator-owned objects: the ordinary resource
 cleanup API is not available, and `defer` is rejected. A returned collection
 can be consumed by another meta function while the session is alive; it does
-not become a pointer to the eventual program's heap. A local address is useful
-within the calculation, not a portable constant address to embed in C.
+not become a pointer to the eventual program's heap. Struct locals and
+address-taken locals are released when their function returns, as described
+in [C objects during compilation](#c-objects-during-compilation). A local
+address is useful within the calculation, not a portable constant address to
+embed in C.
 
 The emitted runtime function still follows the runtime's ownership rules.
 Evaluator cleanup does not add cleanup to that function. In particular,
 allocating scratch collections in a dual-form body does not by itself prove
 that repeated runtime calls have the desired lifetime behavior.
 
-Ordinary dual-form meta functions cannot reach file-scope variables, directly
-or through another function. Pass values as arguments or use locals. There is
-an implementation exception for compiler-only functions that reach compiler
-operations: their state uses a separate per-unit compile-time table, without
-running the program's file-scope initializers. This does not grant access to
-future runtime state or establish a general shared-global contract.
+Ordinary file-scope variables remain unavailable, directly or through another
+function. Mark one `meta static` when compile-time access is intended. Its
+evaluator instance uses a separate per-unit table and does not expose future
+runtime state. Compiler-only functions that reach compiler operations use the
+same isolated table.
 
 ## Results: compute, insert, or fold
 
@@ -514,6 +738,7 @@ requirement: the compiler must construct code representing that value.
 | Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing. A data List is not automatically an expression. | A declared List result is reconstructed as data through ordinary cons expressions if every element is representable. |
 | Boxed `Var` | Insertion follows the contained value. | Converts a representable contained value to Var. |
 | `Array` or `Map` with immutable representable descendants | Constructs a fresh mutable root through the ordinary literal constructors. | Keeps the call. |
+| Struct value | Diagnosed; the compiler cannot write a struct value as code. | Keeps the call. |
 | Nested mutable collections, `Func` or arbitrary native address | No direct materialization of the evaluator object. | Keeps the call. |
 
 An inserted Array or Map is a snapshot of the compile-time result. Each runtime
@@ -562,25 +787,22 @@ to embed in the future program.
 Native scalar conversions are applied at typed declarations, assignments,
 casts, arguments between meta functions and returns. Array/List and
 Symbol/String conversions also have explicit support. This does not make
-all casts meaningful: reinterpreting a native address still needs a native
-storage representation.
+all casts meaningful: pointer arithmetic and reinterpreting an address are
+not supported.
 
 The `meta-differential` compiler fixture checks selected narrow/unsigned
 arithmetic, wide intermediate values, floating operations and conversions
 against runtime calls. The `comptime-lowering`, `meta-import` and
 `meta-cursors` fixtures cover collections, callable values, local addresses,
 method chaining and iteration. They do not prove every operation/type
-combination equivalent. Focused probes for this chapter additionally covered
-nested Array/Map contents, pointer out-parameters, `double`/`String` native
-array elements, wide and floating internal returns, and the rejected shapes
-shown above. The `meta-numeric-lowering` fixture checks numeric suffixes and
-array element conversions against runtime results. Other array conversions,
-extended-precision parity,
-general pointer behavior, all callback signatures and resource lifetimes
-remain unverified. An `_Alignof(int)` probe failed during ordinary parsing,
-before meta lowering; that does not establish a meta-specific restriction.
-This catalog covers the installed operation surface and identified lowering
-boundaries, not an exhaustive proof of every combination of C and x2c syntax.
+combination equivalent. The `meta-records` and `meta-record-*` fixtures
+cover struct layout, copies and addresses, and the `meta-native-*` fixtures
+cover native calls. The `meta-numeric-lowering` fixture checks numeric
+suffixes and array element conversions against runtime results. Other array
+conversions, extended-precision parity, all callback signatures and resource
+lifetimes are not covered. This catalog covers the installed operation
+surface and identified lowering boundaries, not an exhaustive proof of every
+combination of C and x2c syntax.
 
 ## From values to code
 

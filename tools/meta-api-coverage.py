@@ -39,8 +39,8 @@ CONSIDERATIONS = {
     "callback": "An interpreted callback needs a compatible call adapter, "
                 "including order, empty input, and missing-value behavior.",
     "pointer": "Native pointer, output-parameter, or varargs arguments need "
-               "representation-aware adaptation; evaluator cells are not C "
-               "addresses.",
+               "a binding whose parameters take the C objects compile-time "
+               "code keeps in native bytes.",
     "ownership": "Allocation ownership or lifetime transfer needs deliberate "
                  "compile-time semantics; evaluator objects cannot simply "
                  "be freed by their callers.",

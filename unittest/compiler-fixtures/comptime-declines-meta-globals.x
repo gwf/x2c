@@ -1,11 +1,10 @@
 /*  comptime-declines-meta-globals.x -- file-scope state in a `meta` body
 
-    `meta` names a function with two forms that agree. These two cannot: the
-    compile-time form reads the Lisp session's own table, which no unit
-    initializer writes, while the emitted function reads the program's
-    variable. The declaration is refused instead of returning a different
-    answer at compile time.
-    See `plans/meta-functions.md`.
+    `meta` names a function with two forms that agree. An ordinary runtime
+    static has no advertised compile-time instance, so this definition is
+    refused instead of treating an absent evaluator value as zero. Marked
+    `meta static` values are covered by meta-globals.x.
+    See `plans/meta-values-types.md`.
 */
 
 #include "x2c.x"

@@ -190,6 +190,10 @@ ReplCompletion ReplSession.complete(
   try {
     _tokenize(c, marked, scratch);
     if (c.tokenizer.status() != <ok>) return result;
+    /* Parsing a meta declaration can run its declaration effect. Completion
+       has no publication path, so leave those forms to complete after a
+       declaration is submitted instead. */
+    if (c.meta_form_is_declaration()) return result;
     c.mark_completion(marked.len() - marker.len());
     c.__complete_here(<submit>, %(
       "void" "char" "short" "int" "long" "float" "double"
@@ -232,6 +236,27 @@ static List _thunk(List items) =>
 
 static void _refuse(String why) { raise %(repl (why $why)); }
 
+static int _type_submission_names(List node, Array added) {
+  match (node) {
+    case %(typedef ? (bindings *bindings)): {
+      foreach (List binding, bindings)
+        match (binding) case %(bind (binding ? ?(String name)) *):
+          added.push(name);
+      return 1;
+    }
+    case %(declare ?spec (bindings (bind () ()))): {
+      Type type = node.type_from_ast().base_type();
+      if (type.car() != <struct>) return 0;
+      Var name = type.cadr();
+      if (name is <string>) added.push(name);
+      else if (name is <list>)
+        added.push(binding_identity_spelling(name));
+      return 1;
+    }
+  }
+  return 0;
+}
+
 static void _tokenize(Compiler c, String source, Scope scratch) {
   $scope(&scratch) { c.tokenize(source); }
 }
@@ -256,15 +281,18 @@ static List _initializers(List node, Map names, Array added, Array ids) {
     case %(declare ?spec (bindings *bindings)): {
       foreach (List item, bindings) {
         match (item) {
-          case %(op = (bind (binding ?id ?(String name)) ()) ?value): {
+          case %(op = (bind (binding ?id ?(String name)) ?mods) ?value): {
             if (names.contains(name) || added.contains(name) ||
                 name.startswith("__repl_"))
               _refuse("redeclaration is disabled; use assignment");
             added.push(name);
             ids.push(id);
-            statements.push(%(stmnt
-              (expr $spec (op = (expr $spec (ident (binding $id $name)))
-                               $value))));
+            /* Keep the declaration's declarator and initializer together.
+               Braced initialization has meaning only in that type context;
+               the compile-time lowering consumes this private wrapper with
+               the same initializer path used by ordinary declarations. */
+            statements.push(%(repl-init $spec
+              (bind (binding $id $name) $mods) $value));
             continue;
           }
         }
@@ -360,11 +388,10 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
       return result;
     }
     if (c.peek(0) == <import> || c.peek(0) == <protocol> ||
-        c.peek(0) == <"$("> || c.meta_form_is_definition() ||
+        c.peek(0) == <"$("> || c.meta_form_is_declaration() ||
         c.macro_form_is_definition() || c.keyword_form_is_definition())
       _refuse("compiler-session definitions are outside the REPL subset");
-    if (c.peek(0) == <typedef> || c.peek(0) == <struct> ||
-        c.peek(0) == <union> || c.peek(0) == <enum> ||
+    if (c.peek(0) == <union> || c.peek(0) == <enum> ||
         c.peek(0) == <extern> || c.peek(0) == <static>)
       _refuse("type and storage declarations are outside the REPL subset");
     int declaration = c.test_declaration();
@@ -376,6 +403,17 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     }
     List node = c.parse_submission(end);
     _require_evaluable(node);
+    if (_type_submission_names(node, added)) {
+      foreach (String name, added)
+        if (names.contains(name))
+          _refuse("a type cannot be redefined; the session keeps its layout");
+      transaction.commit_transient();
+      foreach (String name, added) names[name] = %(type);
+      result.syntax = node;
+      result.name = added.len() ? added[0].str() : NULL;
+      result.status = <defined>;
+      return result;
+    }
     if (!declaration) {
       fn = _result_body(node, &prints);
       execute = 1;
@@ -413,7 +451,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     return result;
   }
   result.syntax = fn;
-  List forms = c.lower_comptime(fn);
+  List forms = c.lower_repl(fn);
   if (!forms) {
     result.message = "unsupported: " + c.lower_declined();
     return result;

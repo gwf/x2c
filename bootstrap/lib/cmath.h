@@ -119,5 +119,119 @@ long long llrint(double);
 
 long long llround(double);
 
+float acosf(float);
+
+float asinf(float);
+
+float atanf(float);
+
+float atan2f(float, float);
+
+float cosf(float);
+
+float sinf(float);
+
+float tanf(float);
+
+float acoshf(float);
+
+float asinhf(float);
+
+float atanhf(float);
+
+float coshf(float);
+
+float sinhf(float);
+
+float tanhf(float);
+
+float expf(float);
+
+float exp2f(float);
+
+float expm1f(float);
+
+float logf(float);
+
+float log10f(float);
+
+float log1pf(float);
+
+float log2f(float);
+
+float logbf(float);
+
+float frexpf(float, int *);
+
+float ldexpf(float, int);
+
+float modff(float, float *);
+
+float scalbnf(float, int);
+
+float scalblnf(float, long);
+
+float cbrtf(float);
+
+float fabsf(float);
+
+float hypotf(float, float);
+
+float powf(float, float);
+
+float sqrtf(float);
+
+float erff(float);
+
+float erfcf(float);
+
+float lgammaf(float);
+
+float tgammaf(float);
+
+float ceilf(float);
+
+float floorf(float);
+
+float nearbyintf(float);
+
+float rintf(float);
+
+float roundf(float);
+
+float truncf(float);
+
+float fmodf(float, float);
+
+float remainderf(float, float);
+
+float remquof(float, float, int *);
+
+float copysignf(float, float);
+
+float nanf(const char *);
+
+float nextafterf(float, float);
+
+float nexttowardf(float, long double);
+
+float fdimf(float, float);
+
+float fmaxf(float, float);
+
+float fminf(float, float);
+
+float fmaf(float, float, float);
+
+int ilogbf(float);
+
+long lrintf(float);
+
+long lroundf(float);
+
+long long llrintf(float);
+
+long long llroundf(float);
+
 
 #endif /* __GUARD_0x6CC1E60B__ */

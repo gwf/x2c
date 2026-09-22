@@ -14,9 +14,9 @@ mapped onto evaluator frames and the native ambient `Scope` is mapped onto the
 Lisp session `Scope`.
 
 Under that mapping, the evaluator generally coarsens lifetimes: a native local
-becomes a word-machine slot or evaluator cell, and storage which native
-execution might release earlier can remain owned by the session until the
-session ends. Coarsening is safe when it never shortens an owner's lifetime,
+becomes a word-machine slot or native bytes in its frame, and storage which
+native execution might release earlier can remain owned by the session until
+the session ends. Coarsening is safe when it never shortens an owner's lifetime,
 never loses a finalizer, and never introduces an unmodelled retaining edge.
 
 The candidate guarantee is therefore:
@@ -172,7 +172,7 @@ The relevant abstraction is therefore this mapping:
 | --- | --- |
 | C stack activation | Evaluator or word-machine frame |
 | Ordinary local | Evaluator binding or machine slot |
-| Address-taken local | Session-owned evaluator cell |
+| Address-taken local or struct | Native bytes owned by the frame's `Scope` |
 | Active native `Scope` | Lisp session `Scope` |
 | Direct source call | Lisp lambda, alias, adapter, or native binding |
 | Scope-managed allocation | Session-owned allocation unless explicitly moved |
@@ -200,8 +200,9 @@ The compile-time environment contains several kinds of entry:
 - adapters which materialize or reshape a result; and
 - evaluator primitives with no ordinary source-level representation.
 
-For example, iterator helpers adapt C out-parameters to evaluator cells,
-`Map.try_next` presents an evaluator-friendly aggregate result, and some
+For example, plain Lisp status bindings publish C out-parameters into
+evaluator cells, while lowered source passes its C objects to the native
+operations directly, and some
 String construction is an identity operation over the Lisp representation.
 Dynamic `Func` invocation and explicit iterator destinations are also lowered
 differently from native C execution.

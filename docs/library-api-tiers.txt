@@ -60,7 +60,9 @@ lib/file.x|internal|File.initialize
 lib/func.x|advanced|Func.apply,Func.context,Func.new,Func.new_context
 lib/func.x|advanced|Func.new_rest,Func.var,FuncArg.reference,FuncArg.value
 lib/func.x|advanced|x2c_func_reference_argument,x2c_func_value_argument
+lib/func.x|advanced|Var.func,x2c_func_pointer_argument,x2c_func_record_result
 lib/func.x|internal|x2c_func_reference_type,x2c_func_unrepresentable_argument
+lib/func.x|internal|Func.signature
 lib/iter.x|advanced|Iter.init,Iter.unzip
 lib/iter.x|compatibility|Iter.accumulate,Iter.next
 lib/lib.x|advanced|DisjointSet.find,DisjointSet.free,DisjointSet.new

@@ -165,6 +165,8 @@ static Func counter(int value){
   );
 }
 
+Func Var_func(Var);
+
 List x2c_func_reference_type(Func, unsigned, unsigned);
 
 int List_truth(List);
@@ -183,7 +185,7 @@ int main(void){
   Func add_three = add_to(3);
   Func combined = combine(10, 20);
   Func middle = nest(4);
-  Func inner = Var_pointer(({
+  Func inner = Var_func(({
     Func _x2c_func_call_0 = middle;  List _x2c_func_reference_type_0 = x2c_func_reference_type(_x2c_func_call_0, 1, 0);  FuncArg _x2c_func_argument_0;  if(List_truth(_x2c_func_reference_type_0)) _x2c_func_argument_0 = FuncArg_reference(NULL, _1);  else _x2c_func_argument_0 = FuncArg_value(int_var(5));  Func_apply(_x2c_func_call_0, 1, (FuncArg[]){
       _x2c_func_argument_0
     }

@@ -208,48 +208,48 @@
     (bindings 
      (op = (bind (binding 32 "inner") ()) 
       (expr ("Func") 
-       (call "Var_pointer" 
+       (call (expr ((func (("Var"))) "Func") (ident (binding 33 "Var_func"))) 
         (args (expr ("Var") 
                (parens 
                 (block 
                  (declare ("Func") 
                   (bindings 
-                   (op = (bind (binding 33 "_x2c_func_call_0") ()) 
+                   (op = (bind (binding 34 "_x2c_func_call_0") ()) 
                     (expr ("Func") (ident (binding 31 "middle")))))) 
                  (declare ("List") 
                   (bindings 
-                   (op = (bind (binding 34 "_x2c_func_reference_type_0") ()) 
+                   (op = (bind (binding 35 "_x2c_func_reference_type_0") ()) 
                     (expr ("List") 
                      (call (expr ((func (("Func") (unsigned) (unsigned))) 
                                   "List") 
-                            (ident (binding 35 "x2c_func_reference_type"))) 
+                            (ident (binding 36 "x2c_func_reference_type"))) 
                       (args (expr ("Func") 
-                             (ident (binding 33 "_x2c_func_call_0"))) 
+                             (ident (binding 34 "_x2c_func_call_0"))) 
                        (expr (unsigned) (literal (unsigned) "1")) 
                        (expr (unsigned) (literal (unsigned) "0")))))))) 
                  (declare ("FuncArg") 
-                  (bindings (bind (binding 36 "_x2c_func_argument_0") ()))) 
+                  (bindings (bind (binding 37 "_x2c_func_argument_0") ()))) 
                  (if (expr (int) 
                       (call (expr ((func (("List"))) int) 
-                             (ident (binding 37 "List_truth"))) 
+                             (ident (binding 38 "List_truth"))) 
                        (args (expr ("List") 
-                              (ident (binding 34 "_x2c_func_reference_type_0")))))) 
+                              (ident (binding 35 "_x2c_func_reference_type_0")))))) 
                   (stmnt 
                    (expr ("FuncArg") 
                     (op = (expr ("FuncArg") 
-                           (ident (binding 36 "_x2c_func_argument_0"))) 
+                           (ident (binding 37 "_x2c_func_argument_0"))) 
                      (expr ("FuncArg") 
                       (call (expr ((func ((* const void) ("List"))) "FuncArg") 
-                             (ident (binding 38 "FuncArg_reference"))) 
-                       (args (expr () (ident (binding 39 "NULL"))) 
+                             (ident (binding 39 "FuncArg_reference"))) 
+                       (args (expr () (ident (binding 40 "NULL"))) 
                         (expr ("List") (expr ("List") (cache 1))))))))) 
                   (stmnt 
                    (expr ("FuncArg") 
                     (op = (expr ("FuncArg") 
-                           (ident (binding 36 "_x2c_func_argument_0"))) 
+                           (ident (binding 37 "_x2c_func_argument_0"))) 
                      (expr ("FuncArg") 
                       (call (expr ((func (("Var"))) "FuncArg") 
-                             (ident (binding 40 "FuncArg_value"))) 
+                             (ident (binding 41 "FuncArg_value"))) 
                        (args (expr ("Var") 
                               (call (expr ((func ((int))) "Var") 
                                      (ident (binding 5 "int_var"))) 
@@ -257,8 +257,8 @@
                  (stmnt 
                   (expr ("Var") 
                    (call (expr ((func (("Func") (unsigned) (* const "FuncArg"))) 
-                                "Var") (ident (binding 41 "Func_apply"))) 
-                    (args (expr ("Func") (ident (binding 33 "_x2c_func_call_0"))) 
+                                "Var") (ident (binding 42 "Func_apply"))) 
+                    (args (expr ("Func") (ident (binding 34 "_x2c_func_call_0"))) 
                      (expr (unsigned) (literal (unsigned) "1")) 
                      (expr ((dim) "FuncArg") 
                       (cast ((dim) "FuncArg") 
@@ -266,30 +266,30 @@
                         (composite 
                          (commas 
                           (expr ("FuncArg") 
-                           (ident (binding 36 "_x2c_func_argument_0")))))))))))))))))))))) 
+                           (ident (binding 37 "_x2c_func_argument_0")))))))))))))))))))))) 
   (at 9 (declare ("Func") 
          (bindings 
-          (op = (bind (binding 42 "count") ()) 
+          (op = (bind (binding 43 "count") ()) 
            (expr ("Func") 
             (call (expr ((func ((int))) "Func") (ident (binding 21 "counter"))) 
              (args (expr (int) (literal (int) "0"))))))))) 
   (at 10 
    (declare (int) 
     (bindings 
-     (op = (bind (binding 43 "direct_bias") ()) 
+     (op = (bind (binding 44 "direct_bias") ()) 
       (expr (int) (literal (int) "2"))) 
-     (op = (bind (binding 44 "zero_value") ()) 
+     (op = (bind (binding 45 "zero_value") ()) 
       (expr (int) (literal (int) "11")))))) 
   (at 21 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 45 "direct") ()) 
+     (op = (bind (binding 46 "direct") ()) 
       (expr ("Var") 
        (parens 
         (block 
          (declare ("Func") 
           (bindings 
-           (op = (bind (binding 46 "_x2c_func_call_1") ()) 
+           (op = (bind (binding 47 "_x2c_func_call_1") ()) 
             (expr ("Func") 
              (parens 
               (expr ("Func") 
@@ -297,64 +297,64 @@
                 (block 
                  (declare ("Var") 
                   (bindings 
-                   (op = (bind (binding 47 "_x2c_lambda_capture_value_7") ()) 
+                   (op = (bind (binding 48 "_x2c_lambda_capture_value_7") ()) 
                     (expr ("Var") 
                      (call (expr ((func ((int))) "Var") 
                             (ident (binding 5 "int_var"))) 
-                      (args (expr (int) (ident (binding 43 "direct_bias"))))))))) 
+                      (args (expr (int) (ident (binding 44 "direct_bias"))))))))) 
                  (declare ("_x2c_lambda_context_10") 
                   (bindings 
-                   (op = (bind (binding 48 "_x2c_lambda_context_11") ()) 
+                   (op = (bind (binding 49 "_x2c_lambda_context_11") ()) 
                     (expr ("_x2c_lambda_context_10") 
                      (composite 
                       (commas 
                        (expr ("Var") 
-                        (ident (binding 47 "_x2c_lambda_capture_value_7"))))))))) 
+                        (ident (binding 48 "_x2c_lambda_capture_value_7"))))))))) 
                  (stmnt 
                   (expr ("Func") 
                    (call (expr ((func (("FuncAdapter") ("List") 
                                        (* const void) ("size_t"))) "Func") 
                           (ident (binding 7 "Func_new_context"))) 
                     (args (expr (* (func (("Func") (* const "FuncArg"))) "Var") 
-                           (ident (binding 49 "_x2c_lambda_5"))) 
+                           (ident (binding 50 "_x2c_lambda_5"))) 
                      (expr ("List") (expr ("List") (cache 12))) 
                      (expr (* "_x2c_lambda_context_10") 
                       (op & (expr ("_x2c_lambda_context_10") 
-                             (ident (binding 48 "_x2c_lambda_context_11"))))) 
+                             (ident (binding 49 "_x2c_lambda_context_11"))))) 
                      (expr (size_t) 
                       (sizeof 
                        (expr ("_x2c_lambda_context_10") 
-                        (ident (binding 48 "_x2c_lambda_context_11"))))))))))))))))) 
+                        (ident (binding 49 "_x2c_lambda_context_11"))))))))))))))))) 
          (declare ("List") 
           (bindings 
-           (op = (bind (binding 50 "_x2c_func_reference_type_1") ()) 
+           (op = (bind (binding 51 "_x2c_func_reference_type_1") ()) 
             (expr ("List") 
              (call (expr ((func (("Func") (unsigned) (unsigned))) "List") 
-                    (ident (binding 35 "x2c_func_reference_type"))) 
-              (args (expr ("Func") (ident (binding 46 "_x2c_func_call_1"))) 
+                    (ident (binding 36 "x2c_func_reference_type"))) 
+              (args (expr ("Func") (ident (binding 47 "_x2c_func_call_1"))) 
                (expr (unsigned) (literal (unsigned) "1")) 
                (expr (unsigned) (literal (unsigned) "0")))))))) 
          (declare ("FuncArg") 
-          (bindings (bind (binding 51 "_x2c_func_argument_1") ()))) 
+          (bindings (bind (binding 52 "_x2c_func_argument_1") ()))) 
          (if (expr (int) 
               (call (expr ((func (("List"))) int) 
-                     (ident (binding 37 "List_truth"))) 
+                     (ident (binding 38 "List_truth"))) 
                (args (expr ("List") 
-                      (ident (binding 50 "_x2c_func_reference_type_1")))))) 
+                      (ident (binding 51 "_x2c_func_reference_type_1")))))) 
           (stmnt 
            (expr ("FuncArg") 
-            (op = (expr ("FuncArg") (ident (binding 51 "_x2c_func_argument_1"))) 
+            (op = (expr ("FuncArg") (ident (binding 52 "_x2c_func_argument_1"))) 
              (expr ("FuncArg") 
               (call (expr ((func ((* const void) ("List"))) "FuncArg") 
-                     (ident (binding 38 "FuncArg_reference"))) 
-               (args (expr () (ident (binding 39 "NULL"))) 
+                     (ident (binding 39 "FuncArg_reference"))) 
+               (args (expr () (ident (binding 40 "NULL"))) 
                 (expr ("List") (expr ("List") (cache 1))))))))) 
           (stmnt 
            (expr ("FuncArg") 
-            (op = (expr ("FuncArg") (ident (binding 51 "_x2c_func_argument_1"))) 
+            (op = (expr ("FuncArg") (ident (binding 52 "_x2c_func_argument_1"))) 
              (expr ("FuncArg") 
               (call (expr ((func (("Var"))) "FuncArg") 
-                     (ident (binding 40 "FuncArg_value"))) 
+                     (ident (binding 41 "FuncArg_value"))) 
                (args (expr ("Var") 
                       (call (expr ((func ((int))) "Var") 
                              (ident (binding 5 "int_var"))) 
@@ -362,22 +362,22 @@
          (stmnt 
           (expr ("Var") 
            (call (expr ((func (("Func") (unsigned) (* const "FuncArg"))) "Var") 
-                  (ident (binding 41 "Func_apply"))) 
-            (args (expr ("Func") (ident (binding 46 "_x2c_func_call_1"))) 
+                  (ident (binding 42 "Func_apply"))) 
+            (args (expr ("Func") (ident (binding 47 "_x2c_func_call_1"))) 
              (expr (unsigned) (literal (unsigned) "1")) 
              (expr ((dim) "FuncArg") 
               (cast ((dim) "FuncArg") 
                (expr ((dim) "FuncArg") 
                 (composite 
                  (commas 
-                  (expr ("FuncArg") (ident (binding 51 "_x2c_func_argument_1"))))))))))))))))))) 
+                  (expr ("FuncArg") (ident (binding 52 "_x2c_func_argument_1"))))))))))))))))))) 
   (at 22 
    (declare ("Var") 
     (bindings 
-     (op = (bind (binding 52 "zero") ()) 
+     (op = (bind (binding 53 "zero") ()) 
       (expr ("Var") 
        (call (expr ((func (("Func") (unsigned) (* const "FuncArg"))) "Var") 
-              (ident (binding 41 "Func_apply"))) 
+              (ident (binding 42 "Func_apply"))) 
         (args (expr ("Func") 
                (parens 
                 (expr ("Func") 
@@ -385,36 +385,36 @@
                   (block 
                    (declare ("Var") 
                     (bindings 
-                     (op = (bind (binding 53 "_x2c_lambda_capture_value_8") ()) 
+                     (op = (bind (binding 54 "_x2c_lambda_capture_value_8") ()) 
                       (expr ("Var") 
                        (call (expr ((func ((int))) "Var") 
                               (ident (binding 5 "int_var"))) 
-                        (args (expr (int) (ident (binding 44 "zero_value"))))))))) 
+                        (args (expr (int) (ident (binding 45 "zero_value"))))))))) 
                    (declare ("_x2c_lambda_context_12") 
                     (bindings 
-                     (op = (bind (binding 54 "_x2c_lambda_context_13") ()) 
+                     (op = (bind (binding 55 "_x2c_lambda_context_13") ()) 
                       (expr ("_x2c_lambda_context_12") 
                        (composite 
                         (commas 
                          (expr ("Var") 
-                          (ident (binding 53 "_x2c_lambda_capture_value_8"))))))))) 
+                          (ident (binding 54 "_x2c_lambda_capture_value_8"))))))))) 
                    (stmnt 
                     (expr ("Func") 
                      (call (expr ((func (("FuncAdapter") ("List") 
                                          (* const void) ("size_t"))) "Func") 
                             (ident (binding 7 "Func_new_context"))) 
                       (args (expr (* (func (("Func") (* const "FuncArg"))) 
-                                   "Var") (ident (binding 55 "_x2c_lambda_6"))) 
+                                   "Var") (ident (binding 56 "_x2c_lambda_6"))) 
                        (expr ("List") (expr ("List") (cache 21))) 
                        (expr (* "_x2c_lambda_context_12") 
                         (op & (expr ("_x2c_lambda_context_12") 
-                               (ident (binding 54 "_x2c_lambda_context_13"))))) 
+                               (ident (binding 55 "_x2c_lambda_context_13"))))) 
                        (expr (size_t) 
                         (sizeof 
                          (expr ("_x2c_lambda_context_12") 
-                          (ident (binding 54 "_x2c_lambda_context_13")))))))))))))) 
+                          (ident (binding 55 "_x2c_lambda_context_13")))))))))))))) 
          (expr (unsigned) (literal (unsigned) "0")) 
-         (expr () (ident (binding 39 "NULL")))))))))) 
+         (expr () (ident (binding 40 "NULL")))))))))) 
   (at 13 
    (stmnt 
     (expr (int) 
@@ -423,52 +423,52 @@
   (at 23 
    (stmnt 
     (expr () 
-     (call (expr () (ident (binding 56 "printf"))) 
+     (call (expr () (ident (binding 57 "printf"))) 
       (args (expr (* char) 
              (literal (* char) "\"%ld %ld %ld %ld %ld %ld %ld\\n\"")) 
        (expr (long) 
-        (call (expr ((func (("Var"))) (long)) (ident (binding 57 "Var_integer"))) 
+        (call (expr ((func (("Var"))) (long)) (ident (binding 58 "Var_integer"))) 
          (args (expr ("Var") 
                 (parens 
                  (block 
                   (declare ("Func") 
                    (bindings 
-                    (op = (bind (binding 58 "_x2c_func_call_2") ()) 
+                    (op = (bind (binding 59 "_x2c_func_call_2") ()) 
                      (expr ("Func") (ident (binding 29 "add_three")))))) 
                   (declare ("List") 
                    (bindings 
-                    (op = (bind (binding 59 "_x2c_func_reference_type_2") ()) 
+                    (op = (bind (binding 60 "_x2c_func_reference_type_2") ()) 
                      (expr ("List") 
                       (call (expr ((func (("Func") (unsigned) (unsigned))) 
                                    "List") 
-                             (ident (binding 35 "x2c_func_reference_type"))) 
+                             (ident (binding 36 "x2c_func_reference_type"))) 
                        (args (expr ("Func") 
-                              (ident (binding 58 "_x2c_func_call_2"))) 
+                              (ident (binding 59 "_x2c_func_call_2"))) 
                         (expr (unsigned) (literal (unsigned) "1")) 
                         (expr (unsigned) (literal (unsigned) "0")))))))) 
                   (declare ("FuncArg") 
-                   (bindings (bind (binding 60 "_x2c_func_argument_2") ()))) 
+                   (bindings (bind (binding 61 "_x2c_func_argument_2") ()))) 
                   (if (expr (int) 
                        (call (expr ((func (("List"))) int) 
-                              (ident (binding 37 "List_truth"))) 
+                              (ident (binding 38 "List_truth"))) 
                         (args (expr ("List") 
-                               (ident (binding 59 "_x2c_func_reference_type_2")))))) 
+                               (ident (binding 60 "_x2c_func_reference_type_2")))))) 
                    (stmnt 
                     (expr ("FuncArg") 
                      (op = (expr ("FuncArg") 
-                            (ident (binding 60 "_x2c_func_argument_2"))) 
+                            (ident (binding 61 "_x2c_func_argument_2"))) 
                       (expr ("FuncArg") 
                        (call (expr ((func ((* const void) ("List"))) "FuncArg") 
-                              (ident (binding 38 "FuncArg_reference"))) 
-                        (args (expr () (ident (binding 39 "NULL"))) 
+                              (ident (binding 39 "FuncArg_reference"))) 
+                        (args (expr () (ident (binding 40 "NULL"))) 
                          (expr ("List") (expr ("List") (cache 1))))))))) 
                    (stmnt 
                     (expr ("FuncArg") 
                      (op = (expr ("FuncArg") 
-                            (ident (binding 60 "_x2c_func_argument_2"))) 
+                            (ident (binding 61 "_x2c_func_argument_2"))) 
                       (expr ("FuncArg") 
                        (call (expr ((func (("Var"))) "FuncArg") 
-                              (ident (binding 40 "FuncArg_value"))) 
+                              (ident (binding 41 "FuncArg_value"))) 
                         (args (expr ("Var") 
                                (call (expr ((func ((int))) "Var") 
                                       (ident (binding 5 "int_var"))) 
@@ -476,9 +476,9 @@
                   (stmnt 
                    (expr ("Var") 
                     (call (expr ((func (("Func") (unsigned) (* const "FuncArg"))) 
-                                 "Var") (ident (binding 41 "Func_apply"))) 
+                                 "Var") (ident (binding 42 "Func_apply"))) 
                      (args (expr ("Func") 
-                            (ident (binding 58 "_x2c_func_call_2"))) 
+                            (ident (binding 59 "_x2c_func_call_2"))) 
                       (expr (unsigned) (literal (unsigned) "1")) 
                       (expr ((dim) "FuncArg") 
                        (cast ((dim) "FuncArg") 
@@ -486,50 +486,50 @@
                          (composite 
                           (commas 
                            (expr ("FuncArg") 
-                            (ident (binding 60 "_x2c_func_argument_2")))))))))))))))))) 
+                            (ident (binding 61 "_x2c_func_argument_2")))))))))))))))))) 
        (expr (long) 
-        (call (expr ((func (("Var"))) (long)) (ident (binding 57 "Var_integer"))) 
+        (call (expr ((func (("Var"))) (long)) (ident (binding 58 "Var_integer"))) 
          (args (expr ("Var") 
                 (parens 
                  (block 
                   (declare ("Func") 
                    (bindings 
-                    (op = (bind (binding 61 "_x2c_func_call_3") ()) 
+                    (op = (bind (binding 62 "_x2c_func_call_3") ()) 
                      (expr ("Func") (ident (binding 30 "combined")))))) 
                   (declare ("List") 
                    (bindings 
-                    (op = (bind (binding 62 "_x2c_func_reference_type_3") ()) 
+                    (op = (bind (binding 63 "_x2c_func_reference_type_3") ()) 
                      (expr ("List") 
                       (call (expr ((func (("Func") (unsigned) (unsigned))) 
                                    "List") 
-                             (ident (binding 35 "x2c_func_reference_type"))) 
+                             (ident (binding 36 "x2c_func_reference_type"))) 
                        (args (expr ("Func") 
-                              (ident (binding 61 "_x2c_func_call_3"))) 
+                              (ident (binding 62 "_x2c_func_call_3"))) 
                         (expr (unsigned) (literal (unsigned) "1")) 
                         (expr (unsigned) (literal (unsigned) "0")))))))) 
                   (declare ("FuncArg") 
-                   (bindings (bind (binding 63 "_x2c_func_argument_3") ()))) 
+                   (bindings (bind (binding 64 "_x2c_func_argument_3") ()))) 
                   (if (expr (int) 
                        (call (expr ((func (("List"))) int) 
-                              (ident (binding 37 "List_truth"))) 
+                              (ident (binding 38 "List_truth"))) 
                         (args (expr ("List") 
-                               (ident (binding 62 "_x2c_func_reference_type_3")))))) 
+                               (ident (binding 63 "_x2c_func_reference_type_3")))))) 
                    (stmnt 
                     (expr ("FuncArg") 
                      (op = (expr ("FuncArg") 
-                            (ident (binding 63 "_x2c_func_argument_3"))) 
+                            (ident (binding 64 "_x2c_func_argument_3"))) 
                       (expr ("FuncArg") 
                        (call (expr ((func ((* const void) ("List"))) "FuncArg") 
-                              (ident (binding 38 "FuncArg_reference"))) 
-                        (args (expr () (ident (binding 39 "NULL"))) 
+                              (ident (binding 39 "FuncArg_reference"))) 
+                        (args (expr () (ident (binding 40 "NULL"))) 
                          (expr ("List") (expr ("List") (cache 1))))))))) 
                    (stmnt 
                     (expr ("FuncArg") 
                      (op = (expr ("FuncArg") 
-                            (ident (binding 63 "_x2c_func_argument_3"))) 
+                            (ident (binding 64 "_x2c_func_argument_3"))) 
                       (expr ("FuncArg") 
                        (call (expr ((func (("Var"))) "FuncArg") 
-                              (ident (binding 40 "FuncArg_value"))) 
+                              (ident (binding 41 "FuncArg_value"))) 
                         (args (expr ("Var") 
                                (call (expr ((func ((int))) "Var") 
                                       (ident (binding 5 "int_var"))) 
@@ -537,9 +537,9 @@
                   (stmnt 
                    (expr ("Var") 
                     (call (expr ((func (("Func") (unsigned) (* const "FuncArg"))) 
-                                 "Var") (ident (binding 41 "Func_apply"))) 
+                                 "Var") (ident (binding 42 "Func_apply"))) 
                      (args (expr ("Func") 
-                            (ident (binding 61 "_x2c_func_call_3"))) 
+                            (ident (binding 62 "_x2c_func_call_3"))) 
                       (expr (unsigned) (literal (unsigned) "1")) 
                       (expr ((dim) "FuncArg") 
                        (cast ((dim) "FuncArg") 
@@ -547,50 +547,50 @@
                          (composite 
                           (commas 
                            (expr ("FuncArg") 
-                            (ident (binding 63 "_x2c_func_argument_3")))))))))))))))))) 
+                            (ident (binding 64 "_x2c_func_argument_3")))))))))))))))))) 
        (expr (long) 
-        (call (expr ((func (("Var"))) (long)) (ident (binding 57 "Var_integer"))) 
+        (call (expr ((func (("Var"))) (long)) (ident (binding 58 "Var_integer"))) 
          (args (expr ("Var") 
                 (parens 
                  (block 
                   (declare ("Func") 
                    (bindings 
-                    (op = (bind (binding 64 "_x2c_func_call_4") ()) 
+                    (op = (bind (binding 65 "_x2c_func_call_4") ()) 
                      (expr ("Func") (ident (binding 32 "inner")))))) 
                   (declare ("List") 
                    (bindings 
-                    (op = (bind (binding 65 "_x2c_func_reference_type_4") ()) 
+                    (op = (bind (binding 66 "_x2c_func_reference_type_4") ()) 
                      (expr ("List") 
                       (call (expr ((func (("Func") (unsigned) (unsigned))) 
                                    "List") 
-                             (ident (binding 35 "x2c_func_reference_type"))) 
+                             (ident (binding 36 "x2c_func_reference_type"))) 
                        (args (expr ("Func") 
-                              (ident (binding 64 "_x2c_func_call_4"))) 
+                              (ident (binding 65 "_x2c_func_call_4"))) 
                         (expr (unsigned) (literal (unsigned) "1")) 
                         (expr (unsigned) (literal (unsigned) "0")))))))) 
                   (declare ("FuncArg") 
-                   (bindings (bind (binding 66 "_x2c_func_argument_4") ()))) 
+                   (bindings (bind (binding 67 "_x2c_func_argument_4") ()))) 
                   (if (expr (int) 
                        (call (expr ((func (("List"))) int) 
-                              (ident (binding 37 "List_truth"))) 
+                              (ident (binding 38 "List_truth"))) 
                         (args (expr ("List") 
-                               (ident (binding 65 "_x2c_func_reference_type_4")))))) 
+                               (ident (binding 66 "_x2c_func_reference_type_4")))))) 
                    (stmnt 
                     (expr ("FuncArg") 
                      (op = (expr ("FuncArg") 
-                            (ident (binding 66 "_x2c_func_argument_4"))) 
+                            (ident (binding 67 "_x2c_func_argument_4"))) 
                       (expr ("FuncArg") 
                        (call (expr ((func ((* const void) ("List"))) "FuncArg") 
-                              (ident (binding 38 "FuncArg_reference"))) 
-                        (args (expr () (ident (binding 39 "NULL"))) 
+                              (ident (binding 39 "FuncArg_reference"))) 
+                        (args (expr () (ident (binding 40 "NULL"))) 
                          (expr ("List") (expr ("List") (cache 1))))))))) 
                    (stmnt 
                     (expr ("FuncArg") 
                      (op = (expr ("FuncArg") 
-                            (ident (binding 66 "_x2c_func_argument_4"))) 
+                            (ident (binding 67 "_x2c_func_argument_4"))) 
                       (expr ("FuncArg") 
                        (call (expr ((func (("Var"))) "FuncArg") 
-                              (ident (binding 40 "FuncArg_value"))) 
+                              (ident (binding 41 "FuncArg_value"))) 
                         (args (expr ("Var") 
                                (call (expr ((func ((int))) "Var") 
                                       (ident (binding 5 "int_var"))) 
@@ -598,9 +598,9 @@
                   (stmnt 
                    (expr ("Var") 
                     (call (expr ((func (("Func") (unsigned) (* const "FuncArg"))) 
-                                 "Var") (ident (binding 41 "Func_apply"))) 
+                                 "Var") (ident (binding 42 "Func_apply"))) 
                      (args (expr ("Func") 
-                            (ident (binding 64 "_x2c_func_call_4"))) 
+                            (ident (binding 65 "_x2c_func_call_4"))) 
                       (expr (unsigned) (literal (unsigned) "1")) 
                       (expr ((dim) "FuncArg") 
                        (cast ((dim) "FuncArg") 
@@ -608,46 +608,46 @@
                          (composite 
                           (commas 
                            (expr ("FuncArg") 
-                            (ident (binding 66 "_x2c_func_argument_4")))))))))))))))))) 
+                            (ident (binding 67 "_x2c_func_argument_4")))))))))))))))))) 
        (expr (long) 
-        (call (expr ((func (("Var"))) (long)) (ident (binding 57 "Var_integer"))) 
-         (args (expr ("Var") (ident (binding 45 "direct")))))) 
+        (call (expr ((func (("Var"))) (long)) (ident (binding 58 "Var_integer"))) 
+         (args (expr ("Var") (ident (binding 46 "direct")))))) 
        (expr (long) 
-        (call (expr ((func (("Var"))) (long)) (ident (binding 57 "Var_integer"))) 
-         (args (expr ("Var") (ident (binding 52 "zero")))))) 
+        (call (expr ((func (("Var"))) (long)) (ident (binding 58 "Var_integer"))) 
+         (args (expr ("Var") (ident (binding 53 "zero")))))) 
        (expr (long) 
-        (call (expr ((func (("Var"))) (long)) (ident (binding 57 "Var_integer"))) 
+        (call (expr ((func (("Var"))) (long)) (ident (binding 58 "Var_integer"))) 
          (args (expr ("Var") 
                 (call (expr ((func (("Func") (unsigned) (* const "FuncArg"))) 
-                             "Var") (ident (binding 41 "Func_apply"))) 
-                 (args (expr ("Func") (ident (binding 42 "count"))) 
+                             "Var") (ident (binding 42 "Func_apply"))) 
+                 (args (expr ("Func") (ident (binding 43 "count"))) 
                   (expr (unsigned) (literal (unsigned) "0")) 
-                  (expr () (ident (binding 39 "NULL"))))))))) 
+                  (expr () (ident (binding 40 "NULL"))))))))) 
        (expr (long) 
-        (call (expr ((func (("Var"))) (long)) (ident (binding 57 "Var_integer"))) 
+        (call (expr ((func (("Var"))) (long)) (ident (binding 58 "Var_integer"))) 
          (args (expr ("Var") 
                 (call (expr ((func (("Func") (unsigned) (* const "FuncArg"))) 
-                             "Var") (ident (binding 41 "Func_apply"))) 
-                 (args (expr ("Func") (ident (binding 42 "count"))) 
+                             "Var") (ident (binding 42 "Func_apply"))) 
+                 (args (expr ("Func") (ident (binding 43 "count"))) 
                   (expr (unsigned) (literal (unsigned) "0")) 
-                  (expr () (ident (binding 39 "NULL")))))))))))))) 
+                  (expr () (ident (binding 40 "NULL")))))))))))))) 
   (at 24 (return (expr (int) (literal (int) "0"))))))
 
 (typedef 
  (struct "_x2c_lambda_context_0" 
   (fields 
-   (declare ("Var") (bindings (bind (binding 67 "_x2c_lambda_capture_0") ()))))) 
- (bindings (bind (binding 68 "_x2c_lambda_context_0") ())))
+   (declare ("Var") (bindings (bind (binding 68 "_x2c_lambda_capture_0") ()))))) 
+ (bindings (bind (binding 69 "_x2c_lambda_context_0") ())))
 
 (function (static ("Var")) 
  (bind (binding 8 "_x2c_lambda_0") 
   ((fnmod 
-    (params (param ("Func") (bind (binding 69 "_x2c_lambda_closure_0") ())) 
-     (param (const "FuncArg") (bind (binding 70 "_x2c_lambda_argv_0") (*))))))) 
+    (params (param ("Func") (bind (binding 70 "_x2c_lambda_closure_0") ())) 
+     (param (const "FuncArg") (bind (binding 71 "_x2c_lambda_argv_0") (*))))))) 
  (block 
   (declare (int) 
    (bindings 
-    (op = (bind (binding 71 "value") ()) 
+    (op = (bind (binding 72 "value") ()) 
      (expr (int) 
       (call "Var_int" 
        (args (expr ("Var") 
@@ -655,30 +655,30 @@
                (args (expr ("Var") 
                       (call (expr ((func (("Func") (* const "FuncArg") 
                                           (unsigned) ("Symbol"))) "Var") 
-                             (ident (binding 72 "x2c_func_value_argument"))) 
+                             (ident (binding 73 "x2c_func_value_argument"))) 
                        (args (expr ("Func") 
-                              (ident (binding 69 "_x2c_lambda_closure_0"))) 
+                              (ident (binding 70 "_x2c_lambda_closure_0"))) 
                         (expr (* const "FuncArg") 
-                         (ident (binding 70 "_x2c_lambda_argv_0"))) 
+                         (ident (binding 71 "_x2c_lambda_argv_0"))) 
                         (expr (int) (literal (int) "0")) 
                         (expr ("Symbol") "3453797")))) 
                 (expr ("Symbol") "3453797")))))))))) 
   (declare (const "_x2c_lambda_context_0") 
    (bindings 
-    (op = (bind (binding 73 "_x2c_lambda_context_value_0") (*)) 
+    (op = (bind (binding 74 "_x2c_lambda_context_value_0") (*)) 
      (expr (* const "_x2c_lambda_context_0") 
       (cast (* const "_x2c_lambda_context_0") 
        (expr (* const void) 
         (call (expr ((func (("Func"))) * const void) 
-               (ident (binding 74 "Func_context"))) 
-         (args (expr ("Func") (ident (binding 69 "_x2c_lambda_closure_0"))))))))))) 
+               (ident (binding 75 "Func_context"))) 
+         (args (expr ("Func") (ident (binding 70 "_x2c_lambda_closure_0"))))))))))) 
   (stmnt 
    (return 
     (expr ("Var") 
      (call (expr ((func ((int))) "Var") (ident (binding 5 "int_var"))) 
       (args (expr (int) 
              (op + (expr (int) 
-                    (op + (expr (int) (ident (binding 71 "value"))) 
+                    (op + (expr (int) (ident (binding 72 "value"))) 
                      (expr (int) 
                       (call "Var_int" 
                        (args (expr ("Var") 
@@ -687,7 +687,7 @@
                                       (op -> 
                                        (expr (* const "_x2c_lambda_context_0") 
                                         (ident 
-                                         (binding 73 
+                                         (binding 74 
                                           "_x2c_lambda_context_value_0"))) 
                                        ("_x2c_lambda_capture_0"))) 
                                 (expr ("Symbol") "3453797"))))))))) 
@@ -696,19 +696,19 @@
 (typedef 
  (struct "_x2c_lambda_context_2" 
   (fields 
-   (declare ("Var") (bindings (bind (binding 75 "_x2c_lambda_capture_1") ()))) 
-   (declare ("Var") (bindings (bind (binding 76 "_x2c_lambda_capture_2") ()))))) 
- (bindings (bind (binding 77 "_x2c_lambda_context_2") ())))
+   (declare ("Var") (bindings (bind (binding 76 "_x2c_lambda_capture_1") ()))) 
+   (declare ("Var") (bindings (bind (binding 77 "_x2c_lambda_capture_2") ()))))) 
+ (bindings (bind (binding 78 "_x2c_lambda_context_2") ())))
 
 (function (static ("Var")) 
  (bind (binding 15 "_x2c_lambda_1") 
   ((fnmod 
-    (params (param ("Func") (bind (binding 78 "_x2c_lambda_closure_1") ())) 
-     (param (const "FuncArg") (bind (binding 79 "_x2c_lambda_argv_1") (*))))))) 
+    (params (param ("Func") (bind (binding 79 "_x2c_lambda_closure_1") ())) 
+     (param (const "FuncArg") (bind (binding 80 "_x2c_lambda_argv_1") (*))))))) 
  (block 
   (declare (int) 
    (bindings 
-    (op = (bind (binding 80 "value") ()) 
+    (op = (bind (binding 81 "value") ()) 
      (expr (int) 
       (call "Var_int" 
        (args (expr ("Var") 
@@ -716,23 +716,23 @@
                (args (expr ("Var") 
                       (call (expr ((func (("Func") (* const "FuncArg") 
                                           (unsigned) ("Symbol"))) "Var") 
-                             (ident (binding 72 "x2c_func_value_argument"))) 
+                             (ident (binding 73 "x2c_func_value_argument"))) 
                        (args (expr ("Func") 
-                              (ident (binding 78 "_x2c_lambda_closure_1"))) 
+                              (ident (binding 79 "_x2c_lambda_closure_1"))) 
                         (expr (* const "FuncArg") 
-                         (ident (binding 79 "_x2c_lambda_argv_1"))) 
+                         (ident (binding 80 "_x2c_lambda_argv_1"))) 
                         (expr (int) (literal (int) "0")) 
                         (expr ("Symbol") "3453797")))) 
                 (expr ("Symbol") "3453797")))))))))) 
   (declare (const "_x2c_lambda_context_2") 
    (bindings 
-    (op = (bind (binding 81 "_x2c_lambda_context_value_1") (*)) 
+    (op = (bind (binding 82 "_x2c_lambda_context_value_1") (*)) 
      (expr (* const "_x2c_lambda_context_2") 
       (cast (* const "_x2c_lambda_context_2") 
        (expr (* const void) 
         (call (expr ((func (("Func"))) * const void) 
-               (ident (binding 74 "Func_context"))) 
-         (args (expr ("Func") (ident (binding 78 "_x2c_lambda_closure_1"))))))))))) 
+               (ident (binding 75 "Func_context"))) 
+         (args (expr ("Func") (ident (binding 79 "_x2c_lambda_closure_1"))))))))))) 
   (stmnt 
    (return 
     (expr ("Var") 
@@ -740,7 +740,7 @@
       (args (expr (int) 
              (op + (expr (int) 
                     (op + (expr (int) 
-                           (op + (expr (int) (ident (binding 80 "value"))) 
+                           (op + (expr (int) (ident (binding 81 "value"))) 
                             (expr (int) 
                              (call "Var_int" 
                               (args (expr ("Var") 
@@ -750,7 +750,7 @@
                                               (expr (* const 
                                                      "_x2c_lambda_context_2") 
                                                (ident 
-                                                (binding 81 
+                                                (binding 82 
                                                  "_x2c_lambda_context_value_1"))) 
                                               ("_x2c_lambda_capture_1"))) 
                                        (expr ("Symbol") "3453797"))))))))) 
@@ -762,7 +762,7 @@
                                       (op -> 
                                        (expr (* const "_x2c_lambda_context_2") 
                                         (ident 
-                                         (binding 81 
+                                         (binding 82 
                                           "_x2c_lambda_context_value_1"))) 
                                        ("_x2c_lambda_capture_2"))) 
                                 (expr ("Symbol") "3453797"))))))))) 
@@ -774,32 +774,32 @@
                                (op -> 
                                 (expr (* const "_x2c_lambda_context_2") 
                                  (ident 
-                                  (binding 81 "_x2c_lambda_context_value_1"))) 
+                                  (binding 82 "_x2c_lambda_context_value_1"))) 
                                 ("_x2c_lambda_capture_1"))) 
                          (expr ("Symbol") "3453797"))))))))))))))))
 
 (typedef 
  (struct "_x2c_lambda_context_4" 
   (fields 
-   (declare ("Var") (bindings (bind (binding 82 "_x2c_lambda_capture_3") ()))))) 
- (bindings (bind (binding 83 "_x2c_lambda_context_4") ())))
+   (declare ("Var") (bindings (bind (binding 83 "_x2c_lambda_capture_3") ()))))) 
+ (bindings (bind (binding 84 "_x2c_lambda_context_4") ())))
 
 (typedef 
  (struct "_x2c_lambda_context_5" 
   (fields 
-   (declare ("Var") (bindings (bind (binding 84 "_x2c_lambda_capture_4") ()))) 
-   (declare ("Var") (bindings (bind (binding 85 "_x2c_lambda_capture_5") ()))))) 
- (bindings (bind (binding 86 "_x2c_lambda_context_5") ())))
+   (declare ("Var") (bindings (bind (binding 85 "_x2c_lambda_capture_4") ()))) 
+   (declare ("Var") (bindings (bind (binding 86 "_x2c_lambda_capture_5") ()))))) 
+ (bindings (bind (binding 87 "_x2c_lambda_context_5") ())))
 
 (function (static ("Var")) 
- (bind (binding 87 "_x2c_lambda_3") 
+ (bind (binding 88 "_x2c_lambda_3") 
   ((fnmod 
-    (params (param ("Func") (bind (binding 88 "_x2c_lambda_closure_3") ())) 
-     (param (const "FuncArg") (bind (binding 89 "_x2c_lambda_argv_3") (*))))))) 
+    (params (param ("Func") (bind (binding 89 "_x2c_lambda_closure_3") ())) 
+     (param (const "FuncArg") (bind (binding 90 "_x2c_lambda_argv_3") (*))))))) 
  (block 
   (declare (int) 
    (bindings 
-    (op = (bind (binding 90 "value") ()) 
+    (op = (bind (binding 91 "value") ()) 
      (expr (int) 
       (call "Var_int" 
        (args (expr ("Var") 
@@ -807,30 +807,30 @@
                (args (expr ("Var") 
                       (call (expr ((func (("Func") (* const "FuncArg") 
                                           (unsigned) ("Symbol"))) "Var") 
-                             (ident (binding 72 "x2c_func_value_argument"))) 
+                             (ident (binding 73 "x2c_func_value_argument"))) 
                        (args (expr ("Func") 
-                              (ident (binding 88 "_x2c_lambda_closure_3"))) 
+                              (ident (binding 89 "_x2c_lambda_closure_3"))) 
                         (expr (* const "FuncArg") 
-                         (ident (binding 89 "_x2c_lambda_argv_3"))) 
+                         (ident (binding 90 "_x2c_lambda_argv_3"))) 
                         (expr (int) (literal (int) "0")) 
                         (expr ("Symbol") "3453797")))) 
                 (expr ("Symbol") "3453797")))))))))) 
   (declare (const "_x2c_lambda_context_5") 
    (bindings 
-    (op = (bind (binding 91 "_x2c_lambda_context_value_3") (*)) 
+    (op = (bind (binding 92 "_x2c_lambda_context_value_3") (*)) 
      (expr (* const "_x2c_lambda_context_5") 
       (cast (* const "_x2c_lambda_context_5") 
        (expr (* const void) 
         (call (expr ((func (("Func"))) * const void) 
-               (ident (binding 74 "Func_context"))) 
-         (args (expr ("Func") (ident (binding 88 "_x2c_lambda_closure_3"))))))))))) 
+               (ident (binding 75 "Func_context"))) 
+         (args (expr ("Func") (ident (binding 89 "_x2c_lambda_closure_3"))))))))))) 
   (stmnt 
    (return 
     (expr ("Var") 
      (call (expr ((func ((int))) "Var") (ident (binding 5 "int_var"))) 
       (args (expr (int) 
              (op + (expr (int) 
-                    (op + (expr (int) (ident (binding 90 "value"))) 
+                    (op + (expr (int) (ident (binding 91 "value"))) 
                      (expr (int) 
                       (call "Var_int" 
                        (args (expr ("Var") 
@@ -839,7 +839,7 @@
                                       (op -> 
                                        (expr (* const "_x2c_lambda_context_5") 
                                         (ident 
-                                         (binding 91 
+                                         (binding 92 
                                           "_x2c_lambda_context_value_3"))) 
                                        ("_x2c_lambda_capture_4"))) 
                                 (expr ("Symbol") "3453797"))))))))) 
@@ -851,19 +851,19 @@
                                (op -> 
                                 (expr (* const "_x2c_lambda_context_5") 
                                  (ident 
-                                  (binding 91 "_x2c_lambda_context_value_3"))) 
+                                  (binding 92 "_x2c_lambda_context_value_3"))) 
                                 ("_x2c_lambda_capture_5"))) 
                          (expr ("Symbol") "3453797"))))))))))))))))
 
 (function (static ("Var")) 
  (bind (binding 20 "_x2c_lambda_2") 
   ((fnmod 
-    (params (param ("Func") (bind (binding 92 "_x2c_lambda_closure_2") ())) 
-     (param (const "FuncArg") (bind (binding 93 "_x2c_lambda_argv_2") (*))))))) 
+    (params (param ("Func") (bind (binding 93 "_x2c_lambda_closure_2") ())) 
+     (param (const "FuncArg") (bind (binding 94 "_x2c_lambda_argv_2") (*))))))) 
  (block 
   (declare (int) 
    (bindings 
-    (op = (bind (binding 94 "second") ()) 
+    (op = (bind (binding 95 "second") ()) 
      (expr (int) 
       (call "Var_int" 
        (args (expr ("Var") 
@@ -871,33 +871,33 @@
                (args (expr ("Var") 
                       (call (expr ((func (("Func") (* const "FuncArg") 
                                           (unsigned) ("Symbol"))) "Var") 
-                             (ident (binding 72 "x2c_func_value_argument"))) 
+                             (ident (binding 73 "x2c_func_value_argument"))) 
                        (args (expr ("Func") 
-                              (ident (binding 92 "_x2c_lambda_closure_2"))) 
+                              (ident (binding 93 "_x2c_lambda_closure_2"))) 
                         (expr (* const "FuncArg") 
-                         (ident (binding 93 "_x2c_lambda_argv_2"))) 
+                         (ident (binding 94 "_x2c_lambda_argv_2"))) 
                         (expr (int) (literal (int) "0")) 
                         (expr ("Symbol") "3453797")))) 
                 (expr ("Symbol") "3453797")))))))))) 
   (declare (const "_x2c_lambda_context_4") 
    (bindings 
-    (op = (bind (binding 95 "_x2c_lambda_context_value_2") (*)) 
+    (op = (bind (binding 96 "_x2c_lambda_context_value_2") (*)) 
      (expr (* const "_x2c_lambda_context_4") 
       (cast (* const "_x2c_lambda_context_4") 
        (expr (* const void) 
         (call (expr ((func (("Func"))) * const void) 
-               (ident (binding 74 "Func_context"))) 
-         (args (expr ("Func") (ident (binding 92 "_x2c_lambda_closure_2"))))))))))) 
+               (ident (binding 75 "Func_context"))) 
+         (args (expr ("Func") (ident (binding 93 "_x2c_lambda_closure_2"))))))))))) 
   (stmnt 
    (return 
     (expr ("Var") 
-     (call (expr ((func (("Func"))) "Var") (ident (binding 96 "Func_var"))) 
+     (call (expr ((func (("Func"))) "Var") (ident (binding 97 "Func_var"))) 
       (args (expr ("Func") 
              (parens 
               (block 
                (declare ("Var") 
                 (bindings 
-                 (op = (bind (binding 97 "_x2c_lambda_capture_value_4") ()) 
+                 (op = (bind (binding 98 "_x2c_lambda_capture_value_4") ()) 
                   (expr ("Var") 
                    (call (expr ((func ((int))) "Var") 
                           (ident (binding 5 "int_var"))) 
@@ -910,64 +910,64 @@
                                             (expr (* const 
                                                    "_x2c_lambda_context_4") 
                                              (ident 
-                                              (binding 95 
+                                              (binding 96 
                                                "_x2c_lambda_context_value_2"))) 
                                             ("_x2c_lambda_capture_3"))) 
                                      (expr ("Symbol") "3453797"))))))))))))) 
                (declare ("Var") 
                 (bindings 
-                 (op = (bind (binding 98 "_x2c_lambda_capture_value_5") ()) 
+                 (op = (bind (binding 99 "_x2c_lambda_capture_value_5") ()) 
                   (expr ("Var") 
                    (call (expr ((func ((int))) "Var") 
                           (ident (binding 5 "int_var"))) 
-                    (args (expr (int) (ident (binding 94 "second"))))))))) 
+                    (args (expr (int) (ident (binding 95 "second"))))))))) 
                (declare ("_x2c_lambda_context_5") 
                 (bindings 
-                 (op = (bind (binding 99 "_x2c_lambda_context_6") ()) 
+                 (op = (bind (binding 100 "_x2c_lambda_context_6") ()) 
                   (expr ("_x2c_lambda_context_5") 
                    (composite 
                     (commas 
                      (expr ("Var") 
-                      (ident (binding 97 "_x2c_lambda_capture_value_4"))) 
+                      (ident (binding 98 "_x2c_lambda_capture_value_4"))) 
                      (expr ("Var") 
-                      (ident (binding 98 "_x2c_lambda_capture_value_5"))))))))) 
+                      (ident (binding 99 "_x2c_lambda_capture_value_5"))))))))) 
                (stmnt 
                 (expr ("Func") 
                  (call (expr ((func (("FuncAdapter") ("List") 
                                      (* const void) ("size_t"))) "Func") 
                         (ident (binding 7 "Func_new_context"))) 
                   (args (expr (* (func (("Func") (* const "FuncArg"))) "Var") 
-                         (ident (binding 87 "_x2c_lambda_3"))) 
+                         (ident (binding 88 "_x2c_lambda_3"))) 
                    (expr ("List") (expr ("List") (cache 12))) 
                    (expr (* "_x2c_lambda_context_5") 
                     (op & (expr ("_x2c_lambda_context_5") 
-                           (ident (binding 99 "_x2c_lambda_context_6"))))) 
+                           (ident (binding 100 "_x2c_lambda_context_6"))))) 
                    (expr (size_t) 
                     (sizeof 
                      (expr ("_x2c_lambda_context_5") 
-                      (ident (binding 99 "_x2c_lambda_context_6")))))))))))))))))))
+                      (ident (binding 100 "_x2c_lambda_context_6")))))))))))))))))))
 
 (typedef 
  (struct "_x2c_lambda_context_8" 
   (fields 
-   (declare (int) (bindings (bind (binding 100 "_x2c_lambda_capture_6") (*)))))) 
- (bindings (bind (binding 101 "_x2c_lambda_context_8") ())))
+   (declare (int) (bindings (bind (binding 101 "_x2c_lambda_capture_6") (*)))))) 
+ (bindings (bind (binding 102 "_x2c_lambda_context_8") ())))
 
 (function (static ("Var")) 
  (bind (binding 27 "_x2c_lambda_4") 
   ((fnmod 
-    (params (param ("Func") (bind (binding 102 "_x2c_lambda_closure_4") ())) 
-     (param (const "FuncArg") (bind (binding 103 "_x2c_lambda_argv_4") (*))))))) 
+    (params (param ("Func") (bind (binding 103 "_x2c_lambda_closure_4") ())) 
+     (param (const "FuncArg") (bind (binding 104 "_x2c_lambda_argv_4") (*))))))) 
  (block 
   (declare (const "_x2c_lambda_context_8") 
    (bindings 
-    (op = (bind (binding 104 "_x2c_lambda_context_value_4") (*)) 
+    (op = (bind (binding 105 "_x2c_lambda_context_value_4") (*)) 
      (expr (* const "_x2c_lambda_context_8") 
       (cast (* const "_x2c_lambda_context_8") 
        (expr (* const void) 
         (call (expr ((func (("Func"))) * const void) 
-               (ident (binding 74 "Func_context"))) 
-         (args (expr ("Func") (ident (binding 102 "_x2c_lambda_closure_4"))))))))))) 
+               (ident (binding 75 "Func_context"))) 
+         (args (expr ("Func") (ident (binding 103 "_x2c_lambda_closure_4"))))))))))) 
   (stmnt 
    (return 
     (expr ("Var") 
@@ -980,24 +980,24 @@
                  (op * (expr (& int) 
                         (op -> 
                          (expr (* const "_x2c_lambda_context_8") 
-                          (ident (binding 104 "_x2c_lambda_context_value_4"))) 
+                          (ident (binding 105 "_x2c_lambda_context_value_4"))) 
                          ("_x2c_lambda_capture_6"))))))))))))))))
 
 (typedef 
  (struct "_x2c_lambda_context_10" 
   (fields 
-   (declare ("Var") (bindings (bind (binding 105 "_x2c_lambda_capture_7") ()))))) 
- (bindings (bind (binding 106 "_x2c_lambda_context_10") ())))
+   (declare ("Var") (bindings (bind (binding 106 "_x2c_lambda_capture_7") ()))))) 
+ (bindings (bind (binding 107 "_x2c_lambda_context_10") ())))
 
 (function (static ("Var")) 
- (bind (binding 49 "_x2c_lambda_5") 
+ (bind (binding 50 "_x2c_lambda_5") 
   ((fnmod 
-    (params (param ("Func") (bind (binding 107 "_x2c_lambda_closure_5") ())) 
-     (param (const "FuncArg") (bind (binding 108 "_x2c_lambda_argv_5") (*))))))) 
+    (params (param ("Func") (bind (binding 108 "_x2c_lambda_closure_5") ())) 
+     (param (const "FuncArg") (bind (binding 109 "_x2c_lambda_argv_5") (*))))))) 
  (block 
   (declare (int) 
    (bindings 
-    (op = (bind (binding 109 "value") ()) 
+    (op = (bind (binding 110 "value") ()) 
      (expr (int) 
       (call "Var_int" 
        (args (expr ("Var") 
@@ -1005,29 +1005,29 @@
                (args (expr ("Var") 
                       (call (expr ((func (("Func") (* const "FuncArg") 
                                           (unsigned) ("Symbol"))) "Var") 
-                             (ident (binding 72 "x2c_func_value_argument"))) 
+                             (ident (binding 73 "x2c_func_value_argument"))) 
                        (args (expr ("Func") 
-                              (ident (binding 107 "_x2c_lambda_closure_5"))) 
+                              (ident (binding 108 "_x2c_lambda_closure_5"))) 
                         (expr (* const "FuncArg") 
-                         (ident (binding 108 "_x2c_lambda_argv_5"))) 
+                         (ident (binding 109 "_x2c_lambda_argv_5"))) 
                         (expr (int) (literal (int) "0")) 
                         (expr ("Symbol") "3453797")))) 
                 (expr ("Symbol") "3453797")))))))))) 
   (declare (const "_x2c_lambda_context_10") 
    (bindings 
-    (op = (bind (binding 110 "_x2c_lambda_context_value_5") (*)) 
+    (op = (bind (binding 111 "_x2c_lambda_context_value_5") (*)) 
      (expr (* const "_x2c_lambda_context_10") 
       (cast (* const "_x2c_lambda_context_10") 
        (expr (* const void) 
         (call (expr ((func (("Func"))) * const void) 
-               (ident (binding 74 "Func_context"))) 
-         (args (expr ("Func") (ident (binding 107 "_x2c_lambda_closure_5"))))))))))) 
+               (ident (binding 75 "Func_context"))) 
+         (args (expr ("Func") (ident (binding 108 "_x2c_lambda_closure_5"))))))))))) 
   (stmnt 
    (return 
     (expr ("Var") 
      (call (expr ((func ((int))) "Var") (ident (binding 5 "int_var"))) 
       (args (expr (int) 
-             (op + (expr (int) (ident (binding 109 "value"))) 
+             (op + (expr (int) (ident (binding 110 "value"))) 
               (expr (int) 
                (call "Var_int" 
                 (args (expr ("Var") 
@@ -1036,31 +1036,31 @@
                                (op -> 
                                 (expr (* const "_x2c_lambda_context_10") 
                                  (ident 
-                                  (binding 110 "_x2c_lambda_context_value_5"))) 
+                                  (binding 111 "_x2c_lambda_context_value_5"))) 
                                 ("_x2c_lambda_capture_7"))) 
                          (expr ("Symbol") "3453797"))))))))))))))))
 
 (typedef 
  (struct "_x2c_lambda_context_12" 
   (fields 
-   (declare ("Var") (bindings (bind (binding 111 "_x2c_lambda_capture_8") ()))))) 
- (bindings (bind (binding 112 "_x2c_lambda_context_12") ())))
+   (declare ("Var") (bindings (bind (binding 112 "_x2c_lambda_capture_8") ()))))) 
+ (bindings (bind (binding 113 "_x2c_lambda_context_12") ())))
 
 (function (static ("Var")) 
- (bind (binding 55 "_x2c_lambda_6") 
+ (bind (binding 56 "_x2c_lambda_6") 
   ((fnmod 
-    (params (param ("Func") (bind (binding 113 "_x2c_lambda_closure_6") ())) 
-     (param (const "FuncArg") (bind (binding 114 "_x2c_lambda_argv_6") (*))))))) 
+    (params (param ("Func") (bind (binding 114 "_x2c_lambda_closure_6") ())) 
+     (param (const "FuncArg") (bind (binding 115 "_x2c_lambda_argv_6") (*))))))) 
  (block 
   (declare (const "_x2c_lambda_context_12") 
    (bindings 
-    (op = (bind (binding 115 "_x2c_lambda_context_value_6") (*)) 
+    (op = (bind (binding 116 "_x2c_lambda_context_value_6") (*)) 
      (expr (* const "_x2c_lambda_context_12") 
       (cast (* const "_x2c_lambda_context_12") 
        (expr (* const void) 
         (call (expr ((func (("Func"))) * const void) 
-               (ident (binding 74 "Func_context"))) 
-         (args (expr ("Func") (ident (binding 113 "_x2c_lambda_closure_6"))))))))))) 
+               (ident (binding 75 "Func_context"))) 
+         (args (expr ("Func") (ident (binding 114 "_x2c_lambda_closure_6"))))))))))) 
   (stmnt 
    (return 
     (expr ("Var") 
@@ -1073,6 +1073,6 @@
                              (op -> 
                               (expr (* const "_x2c_lambda_context_12") 
                                (ident 
-                                (binding 115 "_x2c_lambda_context_value_6"))) 
+                                (binding 116 "_x2c_lambda_context_value_6"))) 
                               ("_x2c_lambda_capture_8"))) 
                        (expr ("Symbol") "3453797"))))))))))))))

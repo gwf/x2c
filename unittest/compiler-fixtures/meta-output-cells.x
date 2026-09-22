@@ -1,6 +1,8 @@
 /* Native and meta status cells and represented absence values agree. */
 #include "x2c.x"
 
+struct SymbolCell { Symbol value; };
+
 meta int output_cells(int unused) {
   (void) unused;
   long integer = 9;
@@ -56,7 +58,13 @@ meta int output_cells(int unused) {
   Symbol symbol = <old>;
   if (!Symbol.try_new("valid", &symbol) || symbol != <valid>) return 0;
   symbol = <old>;
-  return !Symbol.try_new("read_only", &symbol) && symbol == <old>;
+  if (Symbol.try_new("read_only", &symbol) || symbol != <old>) return 0;
+
+  struct SymbolCell cell = { <old> };
+  if (!Symbol.try_new("field", &cell.value) || cell.value != <field>)
+    return 0;
+  cell.value = <old>;
+  return !Symbol.try_new("read_only", &cell.value) && cell.value == <old>;
 }
 
 meta int represented_results(int unused) {

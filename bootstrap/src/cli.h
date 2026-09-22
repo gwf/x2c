@@ -22,7 +22,8 @@ typedef struct CliRequest{
   int no_phony_deps, compile_only, kind_explicit, save_temps, no_cpp;
   int repl_dump, repl_stats, repl_verbose_stats;
   int max_errors;
-  int source_map, source_facts, live_symbols, cpp_symbols, force, rebuild, clean;
+  int source_map, source_facts, live_symbols, cpp_symbols, system_headers;
+  int force, rebuild, clean;
   SourceView sources;
 }
 * CliRequest;

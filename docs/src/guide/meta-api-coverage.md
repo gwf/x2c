@@ -39,18 +39,18 @@ does not imply that a similarly named direct method works.
 
 Loaded layers: `etc/init.xlisp`, `etc/lisp-values.xlisp`, `etc/comptime.xlisp`, `etc/compiler-sdk.xlisp`, `etc/builtin-macros.xlisp`.
 
-Source fingerprint: `c9894522e05f66c15c96ca761b697b985de71ebf016fc4daff06032fd592fbde`.
+Source fingerprint: `a3d0020467c10dd929a130a8f1f8caaf562805fb269ba11353394b777f00185e`.
 
-Compiler fingerprint: `9affb6a28599aa7feef14573b6728394e5c57155f5c30c10cdd6b17eb8645249`.
+Compiler fingerprint: `e0e51580df98fe7155289aae2b6ef3d943deca8b715ef5d4a9e82a8fda682a10`.
 
 | Type | Callables | Binding found | No binding found |
 | --- | ---: | ---: | ---: |
-| String | 90 | 73 | 17 |
-| List | 95 | 85 | 10 |
-| Array | 61 | 47 | 14 |
-| Map | 38 | 29 | 9 |
+| String | 90 | 72 | 18 |
+| List | 95 | 84 | 11 |
+| Array | 61 | 46 | 15 |
+| Map | 38 | 26 | 12 |
 | Symbol | 14 | 10 | 4 |
-| Var | 186 | 142 | 44 |
+| Var | 187 | 142 | 45 |
 
 ## Exhaustive work ledger
 
@@ -65,14 +65,14 @@ its complete contract is shown to agree.
 | --- | ---: |
 | verified example | 380 |
 | reproduced failure | 9 |
-| bound, unverified | 0 |
+| bound, unverified | 1 |
 | no binding found | 95 |
 
 | Disposition | All rows | Binding absent | Bound, unverified |
 | --- | ---: | ---: | ---: |
 | implementable with current values | 353 | 0 | 0 |
-| needs callback adapter | 17 | 0 | 0 |
-| needs representation decision | 46 | 37 | 0 |
+| needs callback adapter | 18 | 0 | 1 |
+| needs representation decision | 46 | 44 | 0 |
 | native resource contract | 48 | 48 | 0 |
 | covered by alternate operation | 0 | 0 | 0 |
 | needs bounded probe | 20 | 13 | 0 |
@@ -89,6 +89,7 @@ its complete contract is shown to agree.
 | String interpreted callbacks | lib/string.x | 2 | 0 | 0 |
 | String value operations | lib/common.x, lib/digest.x, lib/split.x, lib/string-classify.x, lib/string.x | 61 | 0 | 0 |
 | Symbol value operations | lib/common.x, lib/symbol.x | 7 | 0 | 0 |
+| Var interpreted callbacks | lib/func.x | 1 | 0 | 1 |
 | Var value operations | lib/atom.x, lib/common.x, lib/dispatch.x, lib/json.x, lib/list.x, lib/match.x, lib/var.x, lib/varconvert.x | 49 | 0 | 0 |
 | absence and null values | lib/array.x, lib/dispatch.x, lib/list.x, lib/map.x, lib/var.x | 17 | 0 | 0 |
 | allocation and ownership contracts | lib/array.x, lib/dispatch.x, lib/list.x, lib/map.x, lib/string.x, lib/var.x | 19 | 19 | 0 |
@@ -108,7 +109,7 @@ its complete contract is shown to agree.
 | native RegexCapture contracts | lib/regex.x | 1 | 1 | 0 |
 | native RegexMatch contracts | lib/regex.x | 1 | 1 | 0 |
 | native Token contracts | lib/tokenizer.x | 1 | 1 | 0 |
-| native iterator state | lib/array.x, lib/common.x, lib/dispatch.x, lib/list.x, lib/map.x, lib/string.x | 9 | 2 | 0 |
+| native iterator state | lib/array.x, lib/common.x, lib/dispatch.x, lib/list.x, lib/map.x, lib/string.x | 9 | 9 | 0 |
 | native pointer crossings | lib/dispatch.x, lib/var.x, lib/varconvert.x, lib/varops.x | 8 | 8 | 0 |
 | native variadic calls | lib/array.x, lib/list.x, lib/map.x, lib/string.x, lib/var.x | 8 | 8 | 0 |
 | numeric and descriptor internals | lib/common.x, lib/dispatch.x, lib/var.x, lib/varconvert.x, lib/varops.x | 37 | 1 | 0 |
@@ -128,7 +129,7 @@ can apply. No label promises that adding an alias is sufficient.
 
 - **binding:** A binding/adapter candidate over represented values; inspect its contract before assuming a direct alias is sufficient.
 - **callback:** An interpreted callback needs a compatible call adapter, including order, empty input, and missing-value behavior.
-- **pointer:** Native pointer, output-parameter, or varargs arguments need representation-aware adaptation; evaluator cells are not C addresses.
+- **pointer:** Native pointer, output-parameter, or varargs arguments need a binding whose parameters take the C objects compile-time code keeps in native bytes.
 - **ownership:** Allocation ownership or lifetime transfer needs deliberate compile-time semantics; evaluator objects cannot simply be freed by their callers.
 - **resource:** Another resource or value type needs a supported representation and lifetime before this signature is useful.
 - **syntax:** Related language syntax has lowering, but this does not establish availability of the explicitly named method.
@@ -148,93 +149,93 @@ still need explicit checks before claiming runtime equivalence.
 
 | Direct callable | State | Binding provenance | Considerations | Tier/module | Source |
 | --- | --- | --- | --- | --- | --- |
-| `String String.add(String str, String other)` | verified example | etc/comptime.xlisp:239 | binding | primary/api | lib/string.x:575 |
+| `String String.add(String str, String other)` | verified example | etc/comptime.xlisp:263 | binding | primary/api | lib/string.x:575 |
 | `int String.c_compare(const char *, const char *)` | reproduced failure | none found | pointer | unclassified generated/api | lib/common.x (interface) |
 | `char * String.c_find(const char *, int)` | no binding found | none found | pointer | unclassified generated/api | lib/common.x (interface) |
 | `size_t String.c_len(const char *)` | reproduced failure | none found | pointer | unclassified generated/api | lib/common.x (interface) |
-| `String String.capitalize(String str)` | verified example | etc/comptime.xlisp:257 | binding | primary/api | lib/string.x:717 |
-| `int String.compare(String x, String y)` | verified example | etc/comptime.xlisp:219 | binding | advanced/api | lib/string.x:1719 |
-| `int String.contains(String str, String sub)` | verified example | etc/comptime.xlisp:244 | binding | primary/api | lib/string.x:530 |
-| `int String.contains_digit(String str)` | verified example | etc/comptime.xlisp:207 | binding | primary/api | lib/string-classify.x:19 |
-| `int String.count(String str, String sub)` | verified example | etc/comptime.xlisp:256 | binding | primary/api | lib/string.x:505 |
-| `String String.dedent(String str)` | verified example | etc/comptime.xlisp:222 | binding | primary/api | lib/string.x:778 |
-| `int String.endswith(String str, String suffix)` | verified example | etc/comptime.xlisp:246 | binding | primary/api | lib/string.x:553 |
-| `int String.equal(String x, String y)` | verified example | etc/comptime.xlisp:267 | binding | advanced/api | lib/string.x:1707 |
-| `String String.escape(String str)` | verified example | etc/comptime.xlisp:261 | binding | advanced/api | lib/string.x:1587 |
-| `String String.filter(String str, Func fn)` | verified example | etc/comptime.xlisp:177 | callback | primary/api | lib/string.x:823 |
-| `int String.find(String str, String sub)` | verified example | etc/comptime.xlisp:243 | binding | primary/api | lib/string.x:455 |
-| `List String.find_all(String str, String sub, int start, int end)` | verified example | etc/comptime.xlisp:254 | binding | primary/api | lib/string.x:477 |
-| `int String.find_within(String str, String sub, int start, int end)` | verified example | etc/comptime.xlisp:230 | binding | primary/api | lib/string.x:434 |
+| `String String.capitalize(String str)` | verified example | etc/comptime.xlisp:281 | binding | primary/api | lib/string.x:717 |
+| `int String.compare(String x, String y)` | verified example | etc/comptime.xlisp:243 | binding | advanced/api | lib/string.x:1719 |
+| `int String.contains(String str, String sub)` | verified example | etc/comptime.xlisp:268 | binding | primary/api | lib/string.x:530 |
+| `int String.contains_digit(String str)` | verified example | etc/comptime.xlisp:231 | binding | primary/api | lib/string-classify.x:19 |
+| `int String.count(String str, String sub)` | verified example | etc/comptime.xlisp:280 | binding | primary/api | lib/string.x:505 |
+| `String String.dedent(String str)` | verified example | etc/comptime.xlisp:246 | binding | primary/api | lib/string.x:778 |
+| `int String.endswith(String str, String suffix)` | verified example | etc/comptime.xlisp:270 | binding | primary/api | lib/string.x:553 |
+| `int String.equal(String x, String y)` | verified example | etc/comptime.xlisp:291 | binding | advanced/api | lib/string.x:1707 |
+| `String String.escape(String str)` | verified example | etc/comptime.xlisp:285 | binding | advanced/api | lib/string.x:1587 |
+| `String String.filter(String str, Func fn)` | verified example | etc/comptime.xlisp:194 | callback | primary/api | lib/string.x:823 |
+| `int String.find(String str, String sub)` | verified example | etc/comptime.xlisp:267 | binding | primary/api | lib/string.x:455 |
+| `List String.find_all(String str, String sub, int start, int end)` | verified example | etc/comptime.xlisp:278 | binding | primary/api | lib/string.x:477 |
+| `int String.find_within(String str, String sub, int start, int end)` | verified example | etc/comptime.xlisp:254 | binding | primary/api | lib/string.x:434 |
 | `String String.format(String fmt, List values)` | verified example | etc/lisp-values.xlisp:80 | binding | primary/api | lib/string.x:1337 |
 | `void String.free(String str)` | no binding found | none found | ownership | advanced/api | lib/string.x:227 |
-| `int String.getindex(String str, int index)` | verified example | etc/comptime.xlisp:236 | binding | primary/api | lib/string.x:519 |
-| `String String.getslice(String s, int start, int stop, int step)` | verified example | etc/comptime.xlisp:247 | binding | primary/api | lib/string.x:655 |
-| `unsigned String.hash(String str)` | reproduced failure | etc/comptime.xlisp:220 | binding | advanced/api | lib/string.x:1694 |
-| `Self String.intern(Self string)` | verified example | etc/comptime.xlisp:370 | binding | advanced/api | lib/string.x:283 |
+| `int String.getindex(String str, int index)` | verified example | etc/comptime.xlisp:260 | binding | primary/api | lib/string.x:519 |
+| `String String.getslice(String s, int start, int stop, int step)` | verified example | etc/comptime.xlisp:271 | binding | primary/api | lib/string.x:655 |
+| `unsigned String.hash(String str)` | reproduced failure | etc/comptime.xlisp:244 | binding | advanced/api | lib/string.x:1694 |
+| `Self String.intern(Self string)` | verified example | etc/comptime.xlisp:394 | binding | advanced/api | lib/string.x:283 |
 | `Self String.intern_free(Self string)` | no binding found | none found | ownership | advanced/api | lib/string.x:308 |
-| `int String.is_alnum(String s)` | verified example | etc/comptime.xlisp:211 | binding | primary/api | lib/string-classify.x:53 |
-| `int String.is_alnum_under(String s)` | verified example | etc/comptime.xlisp:212 | binding | primary/api | lib/string-classify.x:58 |
-| `int String.is_alpha(String s)` | verified example | etc/comptime.xlisp:208 | binding | primary/api | lib/string-classify.x:38 |
-| `int String.is_alpha_under(String s)` | verified example | etc/comptime.xlisp:209 | binding | primary/api | lib/string-classify.x:43 |
-| `int String.is_digit(String s)` | verified example | etc/comptime.xlisp:210 | binding | primary/api | lib/string-classify.x:48 |
-| `int String.is_identifier(String s)` | verified example | etc/comptime.xlisp:213 | binding | primary/api | lib/string-classify.x:66 |
-| `int String.is_lower(String s)` | verified example | etc/comptime.xlisp:215 | binding | primary/api | lib/string-classify.x:81 |
-| `int String.is_lower_under(String s)` | verified example | etc/comptime.xlisp:216 | binding | primary/api | lib/string-classify.x:86 |
+| `int String.is_alnum(String s)` | verified example | etc/comptime.xlisp:235 | binding | primary/api | lib/string-classify.x:53 |
+| `int String.is_alnum_under(String s)` | verified example | etc/comptime.xlisp:236 | binding | primary/api | lib/string-classify.x:58 |
+| `int String.is_alpha(String s)` | verified example | etc/comptime.xlisp:232 | binding | primary/api | lib/string-classify.x:38 |
+| `int String.is_alpha_under(String s)` | verified example | etc/comptime.xlisp:233 | binding | primary/api | lib/string-classify.x:43 |
+| `int String.is_digit(String s)` | verified example | etc/comptime.xlisp:234 | binding | primary/api | lib/string-classify.x:48 |
+| `int String.is_identifier(String s)` | verified example | etc/comptime.xlisp:237 | binding | primary/api | lib/string-classify.x:66 |
+| `int String.is_lower(String s)` | verified example | etc/comptime.xlisp:239 | binding | primary/api | lib/string-classify.x:81 |
+| `int String.is_lower_under(String s)` | verified example | etc/comptime.xlisp:240 | binding | primary/api | lib/string-classify.x:86 |
 | `int String.is_permanent(String str)` | no binding found | none found | ownership, internal | internal/api | lib/string.x:142 |
-| `int String.is_space(String s)` | verified example | etc/comptime.xlisp:214 | binding | primary/api | lib/string-classify.x:76 |
-| `int String.is_upper(String s)` | verified example | etc/comptime.xlisp:217 | binding | primary/api | lib/string-classify.x:91 |
-| `int String.is_upper_under(String s)` | verified example | etc/comptime.xlisp:218 | binding | primary/api | lib/string-classify.x:96 |
-| `Iter String.iter(String x, Iter dest)` | verified example | etc/comptime.xlisp:178 | resource | primary/api | lib/string.x:1766 |
-| `String String.join(String sep, List strings)` | verified example | etc/comptime.xlisp:249 | binding | primary/api | lib/string.x:1000 |
-| `String String.keep(String str, String chars)` | verified example | etc/comptime.xlisp:223 | binding | primary/api | lib/string.x:861 |
+| `int String.is_space(String s)` | verified example | etc/comptime.xlisp:238 | binding | primary/api | lib/string-classify.x:76 |
+| `int String.is_upper(String s)` | verified example | etc/comptime.xlisp:241 | binding | primary/api | lib/string-classify.x:91 |
+| `int String.is_upper_under(String s)` | verified example | etc/comptime.xlisp:242 | binding | primary/api | lib/string-classify.x:96 |
+| `Iter String.iter(String x, Iter dest)` | verified example | none found | resource | primary/api | lib/string.x:1766 |
+| `String String.join(String sep, List strings)` | verified example | etc/comptime.xlisp:273 | binding | primary/api | lib/string.x:1000 |
+| `String String.keep(String str, String chars)` | verified example | etc/comptime.xlisp:247 | binding | primary/api | lib/string.x:861 |
 | `int String.len(String str)` | verified example | etc/init.xlisp:107 | binding | primary/api | lib/string.x:248 |
 | `Split String.lines(String str)` | no binding found | none found | resource | primary/api | lib/split.x:205 |
-| `String String.lower(String str)` | verified example | etc/comptime.xlisp:240 | binding | primary/api | lib/string.x:698 |
-| `String String.lstrip(String str, char *negChars)` | reproduced failure | etc/comptime.xlisp:233 | pointer | primary/api | lib/string.x:726 |
+| `String String.lower(String str)` | verified example | etc/comptime.xlisp:264 | binding | primary/api | lib/string.x:698 |
+| `String String.lstrip(String str, char *negChars)` | reproduced failure | etc/comptime.xlisp:257 | pointer | primary/api | lib/string.x:726 |
 | `String String.malloc(int len)` | no binding found | none found | ownership | advanced/api | lib/string.x:207 |
-| `String String.map(String str, Func fn)` | verified example | etc/comptime.xlisp:176 | callback | primary/api | lib/string.x:839 |
-| `String String.new(const char *str)` | verified example | etc/comptime.xlisp:266 | pointer | primary/api | lib/string.x:378 |
-| `String String.new_fill(char fill, int count)` | verified example | etc/comptime.xlisp:229 | binding | advanced/api | lib/string.x:408 |
+| `String String.map(String str, Func fn)` | verified example | etc/comptime.xlisp:193 | callback | primary/api | lib/string.x:839 |
+| `String String.new(const char *str)` | verified example | etc/comptime.xlisp:290 | pointer | primary/api | lib/string.x:378 |
+| `String String.new_fill(char fill, int count)` | verified example | etc/comptime.xlisp:253 | binding | advanced/api | lib/string.x:408 |
 | `String String.new_in(Pool pool, const char *bytes, int length)` | no binding found | none found | ownership, resource, pointer | advanced/api | lib/string.x:61 |
-| `String String.new_len(const char *str, int len)` | verified example | etc/comptime.xlisp:512 | pointer | advanced/api | lib/string.x:395 |
+| `String String.new_len(const char *str, int len)` | verified example | etc/comptime.xlisp:536 | pointer | advanced/api | lib/string.x:395 |
 | `File String.open(String s, const char *mode)` | no binding found | none found | resource, pointer | primary/api | lib/file.x:236 |
-| `String String.pad_center(String str, int width, char fill)` | verified example | etc/comptime.xlisp:228 | binding | primary/api | lib/string.x:920 |
-| `String String.pad_left(String str, int width, char fill)` | verified example | etc/comptime.xlisp:226 | binding | primary/api | lib/string.x:908 |
-| `String String.pad_right(String str, int width, char fill)` | verified example | etc/comptime.xlisp:227 | binding | primary/api | lib/string.x:914 |
-| `String String.parse(String str)` | verified example | etc/comptime.xlisp:371 | binding | advanced/api | lib/string.x:1680 |
-| `int String.parse_char(String str)` | verified example | etc/comptime.xlisp:372 | binding | advanced/api | lib/string.x:1645 |
-| `List String.partition(String str, String sep)` | verified example | etc/comptime.xlisp:252 | binding | primary/api | lib/string.x:957 |
+| `String String.pad_center(String str, int width, char fill)` | verified example | etc/comptime.xlisp:252 | binding | primary/api | lib/string.x:920 |
+| `String String.pad_left(String str, int width, char fill)` | verified example | etc/comptime.xlisp:250 | binding | primary/api | lib/string.x:908 |
+| `String String.pad_right(String str, int width, char fill)` | verified example | etc/comptime.xlisp:251 | binding | primary/api | lib/string.x:914 |
+| `String String.parse(String str)` | verified example | etc/comptime.xlisp:395 | binding | advanced/api | lib/string.x:1680 |
+| `int String.parse_char(String str)` | verified example | etc/comptime.xlisp:396 | binding | advanced/api | lib/string.x:1645 |
+| `List String.partition(String str, String sep)` | verified example | etc/comptime.xlisp:276 | binding | primary/api | lib/string.x:957 |
 | `String String.printf(String fmt, ...)` | no binding found | none found | pointer | advanced/api | lib/string.x:1106 |
 | `Self String.promote(Self str)` | no binding found | none found | ownership | advanced/api | lib/string.x:117 |
-| `String String.reject(String str, String chars)` | verified example | etc/comptime.xlisp:224 | binding | primary/api | lib/string.x:872 |
-| `String String.remove_prefix(String str, String prefix)` | verified example | etc/comptime.xlisp:259 | binding | primary/api | lib/string.x:929 |
-| `String String.remove_suffix(String str, String suffix)` | verified example | etc/comptime.xlisp:260 | binding | primary/api | lib/string.x:939 |
-| `String String.repeat(String str, int count)` | verified example | etc/comptime.xlisp:258 | binding | primary/api | lib/string.x:599 |
-| `String String.replace(String str, String old, String replacement)` | verified example | etc/comptime.xlisp:248 | binding | primary/api | lib/string.x:1092 |
-| `String String.replace_n( String str, String old, String replacement, int max_replacements)` | verified example | etc/comptime.xlisp:231 | binding | primary/api | lib/string.x:1042 |
-| `String String.repr(String str)` | verified example | etc/comptime.xlisp:238 | binding | advanced/api | lib/string.x:1610 |
-| `int String.rfind(String str, String sub)` | verified example | etc/comptime.xlisp:255 | binding | primary/api | lib/string.x:463 |
-| `List String.rpartition(String str, String sep)` | verified example | etc/comptime.xlisp:253 | binding | primary/api | lib/string.x:977 |
-| `String String.rstrip(String str, char *negChars)` | reproduced failure | etc/comptime.xlisp:234 | pointer | primary/api | lib/string.x:739 |
-| `String String.sha256(String text)` | verified example | etc/comptime.xlisp:511 | binding | primary/optional | lib/digest.x:110 |
-| `List String.split(String str, String sep)` | verified example | etc/comptime.xlisp:250 | binding | primary/api | lib/split.x:111 |
-| `List String.split_lines(String str, int keep_ends)` | verified example | etc/comptime.xlisp:251 | binding | primary/api | lib/split.x:124 |
-| `List String.split_n(String str, String sep, int max_splits)` | verified example | etc/comptime.xlisp:232 | binding | primary/api | lib/split.x:81 |
+| `String String.reject(String str, String chars)` | verified example | etc/comptime.xlisp:248 | binding | primary/api | lib/string.x:872 |
+| `String String.remove_prefix(String str, String prefix)` | verified example | etc/comptime.xlisp:283 | binding | primary/api | lib/string.x:929 |
+| `String String.remove_suffix(String str, String suffix)` | verified example | etc/comptime.xlisp:284 | binding | primary/api | lib/string.x:939 |
+| `String String.repeat(String str, int count)` | verified example | etc/comptime.xlisp:282 | binding | primary/api | lib/string.x:599 |
+| `String String.replace(String str, String old, String replacement)` | verified example | etc/comptime.xlisp:272 | binding | primary/api | lib/string.x:1092 |
+| `String String.replace_n( String str, String old, String replacement, int max_replacements)` | verified example | etc/comptime.xlisp:255 | binding | primary/api | lib/string.x:1042 |
+| `String String.repr(String str)` | verified example | etc/comptime.xlisp:262 | binding | advanced/api | lib/string.x:1610 |
+| `int String.rfind(String str, String sub)` | verified example | etc/comptime.xlisp:279 | binding | primary/api | lib/string.x:463 |
+| `List String.rpartition(String str, String sep)` | verified example | etc/comptime.xlisp:277 | binding | primary/api | lib/string.x:977 |
+| `String String.rstrip(String str, char *negChars)` | reproduced failure | etc/comptime.xlisp:258 | pointer | primary/api | lib/string.x:739 |
+| `String String.sha256(String text)` | verified example | etc/comptime.xlisp:535 | binding | primary/optional | lib/digest.x:110 |
+| `List String.split(String str, String sep)` | verified example | etc/comptime.xlisp:274 | binding | primary/api | lib/split.x:111 |
+| `List String.split_lines(String str, int keep_ends)` | verified example | etc/comptime.xlisp:275 | binding | primary/api | lib/split.x:124 |
+| `List String.split_n(String str, String sep, int max_splits)` | verified example | etc/comptime.xlisp:256 | binding | primary/api | lib/split.x:81 |
 | `Split String.splits(String str, String sep)` | no binding found | none found | resource | primary/api | lib/split.x:219 |
-| `String String.squeeze(String str, String chars)` | verified example | etc/comptime.xlisp:225 | binding | primary/api | lib/string.x:882 |
-| `int String.startswith(String str, String prefix)` | verified example | etc/comptime.xlisp:245 | binding | primary/api | lib/string.x:542 |
-| `String String.str(String str)` | verified example | etc/comptime.xlisp:237 | binding | advanced/api | lib/string.x:1604 |
-| `String String.strip(String str, char *negChars)` | reproduced failure | etc/comptime.xlisp:241 | pointer | primary/api | lib/string.x:757 |
-| `Symbol String.symbol(String str)` | verified example | etc/comptime.xlisp:221 | binding | advanced/api | lib/string.x:1668 |
-| `inline int String.truth(String string)` | verified example | etc/comptime.xlisp:374 | syntax | advanced/api | lib/common.x:403 |
-| `int String.try_double(String str, double *out)` | verified example | etc/comptime.xlisp:264 | pointer | advanced/api | lib/string-number.x:89 |
-| `int String.try_long(String str, long *out)` | verified example | etc/comptime.xlisp:263 | pointer | advanced/api | lib/string-number.x:39 |
-| `int String.try_next(String str, int *cursor, int *out)` | verified example | etc/comptime.xlisp:265 | pointer | primary/api | lib/string.x:1743 |
+| `String String.squeeze(String str, String chars)` | verified example | etc/comptime.xlisp:249 | binding | primary/api | lib/string.x:882 |
+| `int String.startswith(String str, String prefix)` | verified example | etc/comptime.xlisp:269 | binding | primary/api | lib/string.x:542 |
+| `String String.str(String str)` | verified example | etc/comptime.xlisp:261 | binding | advanced/api | lib/string.x:1604 |
+| `String String.strip(String str, char *negChars)` | reproduced failure | etc/comptime.xlisp:265 | pointer | primary/api | lib/string.x:757 |
+| `Symbol String.symbol(String str)` | verified example | etc/comptime.xlisp:245 | binding | advanced/api | lib/string.x:1668 |
+| `inline int String.truth(String string)` | verified example | etc/comptime.xlisp:398 | syntax | advanced/api | lib/common.x:403 |
+| `int String.try_double(String str, double *out)` | verified example | etc/comptime.xlisp:288 | pointer | advanced/api | lib/string-number.x:89 |
+| `int String.try_long(String str, long *out)` | verified example | etc/comptime.xlisp:287 | pointer | advanced/api | lib/string-number.x:39 |
+| `int String.try_next(String str, int *cursor, int *out)` | verified example | etc/comptime.xlisp:289 | pointer | primary/api | lib/string.x:1743 |
 | `int String.try_own(String str)` | no binding found | none found | ownership, internal | internal/api | lib/string.x:131 |
-| `String String.unescape(String str)` | verified example | etc/comptime.xlisp:262 | binding | primary/api | lib/string.x:1556 |
-| `String String.upper(String str)` | verified example | etc/comptime.xlisp:242 | binding | primary/api | lib/string.x:708 |
-| `inline Var String.var(String x)` | verified example | etc/comptime.xlisp:301 | binding | advanced/api | lib/common.x:542 |
-| `String String.withindex(String str, int index, char value)` | verified example | etc/comptime.xlisp:373 | binding | primary/api | lib/string.x:630 |
+| `String String.unescape(String str)` | verified example | etc/comptime.xlisp:286 | binding | primary/api | lib/string.x:1556 |
+| `String String.upper(String str)` | verified example | etc/comptime.xlisp:266 | binding | primary/api | lib/string.x:708 |
+| `inline Var String.var(String x)` | verified example | etc/comptime.xlisp:325 | binding | advanced/api | lib/common.x:542 |
+| `String String.withindex(String str, int index, char value)` | verified example | etc/comptime.xlisp:397 | binding | primary/api | lib/string.x:630 |
 | `Split String.words(String str)` | no binding found | none found | resource | primary/api | lib/split.x:190 |
 | `Buffer String.write_repr(String str, Buffer out)` | no binding found | none found | resource | advanced/api | lib/string.x:1629 |
 | `Buffer String.write_str(String str, Buffer out)` | no binding found | none found | resource | primary/api | lib/string.x:1621 |
@@ -279,7 +280,7 @@ still need explicit checks before claiming runtime equivalence.
 | `String.is_space` | lib/string-classify.x / String value operations | implementable with current values | Reports whether every byte of nonempty `s` is whitespace. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `String.is_upper` | lib/string-classify.x / String value operations | implementable with current values | Reports whether every byte of nonempty `s` is upper-case. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `String.is_upper_under` | lib/string-classify.x / String value operations | implementable with current values | Reports whether every byte of nonempty `s` is upper-case or underscore. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
-| `String.iter` | lib/string.x / native iterator state | needs representation decision | Initializes `dest` as a lazy iterator over the bytes of `x`. The caller owns `dest`; it borrows `x`, which must remain live through traversal. A null `dest` returns NULL, and null `x` is exhausted. Each pull yields the next byte as an `<i32>` `Var` in index order. The function retains neither argument. Foreach may convert each yielded byte to either `int` or `char`: | Iter contains caller-owned state and a native next callback; collection producers are lazy. The binding allocates private iterator storage in the session Scope and leaves the public caller-storage API unchanged. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `String.iter` | lib/string.x / native iterator state | needs representation decision | Initializes `dest` as a lazy iterator over the bytes of `x`. The caller owns `dest`; it borrows `x`, which must remain live through traversal. A null `dest` returns NULL, and null `x` is exhausted. Each pull yields the next byte as an `<i32>` `Var` in index order. The function retains neither argument. Foreach may convert each yielded byte to either `int` or `char`: | Iter contains caller-owned state and a native next callback; collection producers are lazy. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `String.join` | lib/string.x / String value operations | implementable with current values | Joins `strings` into one canonical `String` with `sep` between elements. The receiver is the separator, not the sequence, so this reads `sep.join(parts)`. A null `sep` joins with nothing between elements. Empty elements contribute no bytes but still count as positions, so joining a split result with the same separator reproduces the original text, adjacent separators included. `List` elements that are not `String`s convert to the empty `String`. Raises: `<alloc-fail>` when result storage cannot be allocated. A null or empty `List`, or an oversized result, also returns NULL, the empty `String`, without raising. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `String.keep` | lib/string.x / String value operations | implementable with current values | Returns a canonical `String` containing only bytes found in `chars`. `Null` `str` returns NULL; null `chars` returns NULL for any nonnull input. Raises: `<alloc-fail>` while constructing the result. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `String.len` | lib/string.x / String value operations | implementable with current values | Returns the byte length of `str`, excluding the terminating NUL. Constant time: the length is cached in the `String`'s private header. Lengths are bytes, not characters, so a multibyte UTF-8 sequence counts once per byte. On a transient `String.malloc` buffer this reports the writable byte count rather than the length of anything written so far. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
@@ -564,7 +565,7 @@ meta int audit_probe(void) { return "abc".len(); }
 meta int audit_probe(void) { return "AbC".lower().equal("abc"); }
 ```
 
-- `String.lstrip`: native text contract and boundaries; note: reason: the compile-time form reads a table no unit initializer writes, so the two forms answer differently.
+- `String.lstrip`: native text contract and boundaries; note: reason: file-scope state not declared meta.
 
 ```x2c
 meta int audit_probe(void) { return "  a  ".lstrip(NULL).equal("a  ") && "xxax".lstrip("x").equal("ax") && " ".lstrip(NULL).len() == 0; }
@@ -690,7 +691,7 @@ meta int audit_probe(void) { return "abcabc".rfind("bc") == 4 && "abc".rfind("z"
 meta int audit_probe(void) { return "a:b:c".rpartition(":").equal(%("a:b" ":" "c")); }
 ```
 
-- `String.rstrip`: native text contract and boundaries; note: reason: the compile-time form reads a table no unit initializer writes, so the two forms answer differently.
+- `String.rstrip`: native text contract and boundaries; note: reason: file-scope state not declared meta.
 
 ```x2c
 meta int audit_probe(void) { return "  a  ".rstrip(NULL).equal("  a") && "xaxx".rstrip("x").equal("xa") && " ".rstrip(NULL).len() == 0; }
@@ -745,7 +746,7 @@ meta int audit_probe(void) { return "abc".startswith("ab") && !"abc".startswith(
 meta int audit_probe(void) { String s = "abc"; return s.str() === s; }
 ```
 
-- `String.strip`: default whitespace through NULL; note: reason: the compile-time form reads a table no unit initializer writes, so the two forms answer differently.
+- `String.strip`: default whitespace through NULL; note: reason: file-scope state not declared meta.
 
 ```x2c
 meta int audit_probe(void) { return " a ".strip(NULL).len(); }
@@ -820,101 +821,101 @@ meta int audit_probe(void) { return "abc".withindex(-1, 'x').equal("abx") && "ab
 
 | Direct callable | State | Binding provenance | Considerations | Tier/module | Source |
 | --- | --- | --- | --- | --- | --- |
-| `int List.all(List lst, Func pred)` | verified example | etc/comptime.xlisp:86 | callback | primary/api | lib/list.x:407 |
-| `int List.any(List lst, Func pred)` | verified example | etc/comptime.xlisp:85 | callback | primary/api | lib/list.x:392 |
+| `int List.all(List lst, Func pred)` | verified example | etc/comptime.xlisp:125 | callback | primary/api | lib/list.x:407 |
+| `int List.any(List lst, Func pred)` | verified example | etc/comptime.xlisp:124 | callback | primary/api | lib/list.x:392 |
 | `Self List.append(Self a, Self b)` | verified example | etc/builtin-macros.xlisp:18 | binding | primary/api | lib/list.x:223 |
-| `Array List.array(List lst)` | verified example | etc/comptime.xlisp:77 | binding | primary/api | lib/list.x:497 |
-| `Var List.assoc(List list, Var key)` | verified example | etc/comptime.xlisp:75 | binding | advanced/api | lib/list.x:649 |
-| `inline Var List.caaaar(List value)` | verified example | etc/comptime.xlisp:456 | binding | primary/optional | lib/list-selectors.x:33 |
-| `inline Var List.caaadr(List value)` | verified example | etc/comptime.xlisp:457 | binding | primary/optional | lib/list-selectors.x:35 |
-| `inline Var List.caaar(List value)` | verified example | etc/comptime.xlisp:458 | binding | primary/optional | lib/list-selectors.x:18 |
-| `inline Var List.caadar(List value)` | verified example | etc/comptime.xlisp:459 | binding | primary/optional | lib/list-selectors.x:37 |
-| `inline Var List.caaddr(List value)` | verified example | etc/comptime.xlisp:460 | binding | primary/optional | lib/list-selectors.x:39 |
-| `inline Var List.caadr(List value)` | verified example | etc/comptime.xlisp:461 | binding | primary/optional | lib/list-selectors.x:20 |
-| `inline Var List.caar(List lst)` | verified example | etc/comptime.xlisp:69 | binding | advanced/api | lib/list.x:187 |
-| `inline Var List.cadaar(List value)` | verified example | etc/comptime.xlisp:462 | binding | primary/optional | lib/list-selectors.x:41 |
-| `inline Var List.cadadr(List value)` | verified example | etc/comptime.xlisp:463 | binding | primary/optional | lib/list-selectors.x:43 |
-| `inline Var List.cadar(List value)` | verified example | etc/comptime.xlisp:464 | binding | primary/optional | lib/list-selectors.x:22 |
-| `inline Var List.caddar(List value)` | verified example | etc/comptime.xlisp:465 | binding | primary/optional | lib/list-selectors.x:45 |
-| `inline Var List.cadddr(List value)` | verified example | etc/comptime.xlisp:466 | binding | primary/optional | lib/list-selectors.x:47 |
-| `inline Var List.caddr(List lst)` | verified example | etc/comptime.xlisp:73 | binding | advanced/api | lib/list.x:193 |
-| `inline Var List.cadr(List lst)` | verified example | etc/comptime.xlisp:72 | binding | advanced/api | lib/list.x:189 |
+| `Array List.array(List lst)` | verified example | etc/comptime.xlisp:116 | binding | primary/api | lib/list.x:497 |
+| `Var List.assoc(List list, Var key)` | verified example | etc/comptime.xlisp:114 | binding | advanced/api | lib/list.x:649 |
+| `inline Var List.caaaar(List value)` | verified example | etc/comptime.xlisp:480 | binding | primary/optional | lib/list-selectors.x:33 |
+| `inline Var List.caaadr(List value)` | verified example | etc/comptime.xlisp:481 | binding | primary/optional | lib/list-selectors.x:35 |
+| `inline Var List.caaar(List value)` | verified example | etc/comptime.xlisp:482 | binding | primary/optional | lib/list-selectors.x:18 |
+| `inline Var List.caadar(List value)` | verified example | etc/comptime.xlisp:483 | binding | primary/optional | lib/list-selectors.x:37 |
+| `inline Var List.caaddr(List value)` | verified example | etc/comptime.xlisp:484 | binding | primary/optional | lib/list-selectors.x:39 |
+| `inline Var List.caadr(List value)` | verified example | etc/comptime.xlisp:485 | binding | primary/optional | lib/list-selectors.x:20 |
+| `inline Var List.caar(List lst)` | verified example | etc/comptime.xlisp:108 | binding | advanced/api | lib/list.x:187 |
+| `inline Var List.cadaar(List value)` | verified example | etc/comptime.xlisp:486 | binding | primary/optional | lib/list-selectors.x:41 |
+| `inline Var List.cadadr(List value)` | verified example | etc/comptime.xlisp:487 | binding | primary/optional | lib/list-selectors.x:43 |
+| `inline Var List.cadar(List value)` | verified example | etc/comptime.xlisp:488 | binding | primary/optional | lib/list-selectors.x:22 |
+| `inline Var List.caddar(List value)` | verified example | etc/comptime.xlisp:489 | binding | primary/optional | lib/list-selectors.x:45 |
+| `inline Var List.cadddr(List value)` | verified example | etc/comptime.xlisp:490 | binding | primary/optional | lib/list-selectors.x:47 |
+| `inline Var List.caddr(List lst)` | verified example | etc/comptime.xlisp:112 | binding | advanced/api | lib/list.x:193 |
+| `inline Var List.cadr(List lst)` | verified example | etc/comptime.xlisp:111 | binding | advanced/api | lib/list.x:189 |
 | `inline Var List.car(List lst)` | verified example | etc/init.xlisp:92 | binding | advanced/api | lib/list.x:180 |
-| `inline Self List.cdaaar(Self value)` | verified example | etc/comptime.xlisp:467 | binding | primary/optional | lib/list-selectors.x:49 |
-| `inline Self List.cdaadr(Self value)` | verified example | etc/comptime.xlisp:468 | binding | primary/optional | lib/list-selectors.x:51 |
-| `inline Self List.cdaar(Self value)` | verified example | etc/comptime.xlisp:469 | binding | primary/optional | lib/list-selectors.x:24 |
-| `inline Self List.cdadar(Self value)` | verified example | etc/comptime.xlisp:470 | binding | primary/optional | lib/list-selectors.x:53 |
-| `inline Self List.cdaddr(Self value)` | verified example | etc/comptime.xlisp:471 | binding | primary/optional | lib/list-selectors.x:55 |
-| `inline Self List.cdadr(Self value)` | verified example | etc/comptime.xlisp:472 | binding | primary/optional | lib/list-selectors.x:26 |
-| `inline Self List.cdar(Self value)` | verified example | etc/comptime.xlisp:473 | binding | primary/optional | lib/list-selectors.x:16 |
-| `inline Self List.cddaar(Self value)` | verified example | etc/comptime.xlisp:474 | binding | primary/optional | lib/list-selectors.x:57 |
-| `inline Self List.cddadr(Self value)` | verified example | etc/comptime.xlisp:475 | binding | primary/optional | lib/list-selectors.x:59 |
-| `inline Self List.cddar(Self value)` | verified example | etc/comptime.xlisp:476 | binding | primary/optional | lib/list-selectors.x:28 |
-| `inline Self List.cdddar(Self value)` | verified example | etc/comptime.xlisp:477 | binding | primary/optional | lib/list-selectors.x:61 |
-| `inline Self List.cddddr(Self value)` | verified example | etc/comptime.xlisp:455 | binding | primary/optional | lib/list-selectors.x:63 |
-| `inline Self List.cdddr(Self value)` | verified example | etc/comptime.xlisp:454 | binding | primary/optional | lib/list-selectors.x:30 |
-| `inline Self List.cddr(Self lst)` | verified example | etc/comptime.xlisp:61 | binding | advanced/api | lib/list.x:191 |
+| `inline Self List.cdaaar(Self value)` | verified example | etc/comptime.xlisp:491 | binding | primary/optional | lib/list-selectors.x:49 |
+| `inline Self List.cdaadr(Self value)` | verified example | etc/comptime.xlisp:492 | binding | primary/optional | lib/list-selectors.x:51 |
+| `inline Self List.cdaar(Self value)` | verified example | etc/comptime.xlisp:493 | binding | primary/optional | lib/list-selectors.x:24 |
+| `inline Self List.cdadar(Self value)` | verified example | etc/comptime.xlisp:494 | binding | primary/optional | lib/list-selectors.x:53 |
+| `inline Self List.cdaddr(Self value)` | verified example | etc/comptime.xlisp:495 | binding | primary/optional | lib/list-selectors.x:55 |
+| `inline Self List.cdadr(Self value)` | verified example | etc/comptime.xlisp:496 | binding | primary/optional | lib/list-selectors.x:26 |
+| `inline Self List.cdar(Self value)` | verified example | etc/comptime.xlisp:497 | binding | primary/optional | lib/list-selectors.x:16 |
+| `inline Self List.cddaar(Self value)` | verified example | etc/comptime.xlisp:498 | binding | primary/optional | lib/list-selectors.x:57 |
+| `inline Self List.cddadr(Self value)` | verified example | etc/comptime.xlisp:499 | binding | primary/optional | lib/list-selectors.x:59 |
+| `inline Self List.cddar(Self value)` | verified example | etc/comptime.xlisp:500 | binding | primary/optional | lib/list-selectors.x:28 |
+| `inline Self List.cdddar(Self value)` | verified example | etc/comptime.xlisp:501 | binding | primary/optional | lib/list-selectors.x:61 |
+| `inline Self List.cddddr(Self value)` | verified example | etc/comptime.xlisp:479 | binding | primary/optional | lib/list-selectors.x:63 |
+| `inline Self List.cdddr(Self value)` | verified example | etc/comptime.xlisp:478 | binding | primary/optional | lib/list-selectors.x:30 |
+| `inline Self List.cddr(Self lst)` | verified example | etc/comptime.xlisp:100 | binding | advanced/api | lib/list.x:191 |
 | `inline Self List.cdr(Self lst)` | verified example | etc/init.xlisp:93 | binding | advanced/api | lib/list.x:182 |
-| `int List.compare(List a, List b)` | verified example | etc/comptime.xlisp:346 | binding | advanced/api | lib/list.x:840 |
+| `int List.compare(List a, List b)` | verified example | etc/comptime.xlisp:370 | binding | advanced/api | lib/list.x:840 |
 | `List List.concat_n(unsigned list_count, ...)` | no binding found | none found | pointer | primary/api | lib/list.x:255 |
-| `List List.cons(Var head, List tail)` | verified example | etc/comptime.xlisp:60 | binding | advanced/api | lib/list.x:166 |
+| `List List.cons(Var head, List tail)` | verified example | etc/comptime.xlisp:99 | binding | advanced/api | lib/list.x:166 |
 | `List List.cons_in(Pool pool, Var head, List tail)` | no binding found | none found | ownership, resource | advanced/api | lib/list.x:49 |
-| `int List.contains(List lst, Var key)` | verified example | etc/comptime.xlisp:82 | binding | primary/api | lib/list.x:315 |
-| `int List.equal(List a, List b)` | verified example | etc/comptime.xlisp:81 | binding | advanced/api | lib/list.x:831 |
-| `Self List.filter(Self lst, Func pred)` | verified example | etc/comptime.xlisp:84 | callback | primary/api | lib/list.x:1023 |
-| `Var List.find(List lst, Func pred)` | verified example | etc/comptime.xlisp:92 | callback | primary/api | lib/list.x:377 |
-| `Self List.flatten(Self lst)` | verified example | etc/comptime.xlisp:338 | binding | advanced/api | lib/list.x:584 |
-| `Self List.flatten_all(Self lst)` | verified example | etc/comptime.xlisp:339 | binding | advanced/api | lib/list.x:608 |
-| `Var List.foldl(List lst, Var seed, Func fn)` | verified example | etc/comptime.xlisp:91 | callback | primary/api | lib/list.x:353 |
-| `Var List.get(List list, Var key)` | verified example | etc/comptime.xlisp:76 | binding | primary/api | lib/list.x:663 |
-| `Var List.getindex(List list, int index)` | verified example | etc/comptime.xlisp:68 | binding | primary/api | lib/list.x:626 |
-| `Self List.getslice(Self list, int start, int stop, int step)` | verified example | etc/comptime.xlisp:344 | binding | primary/api | lib/list.x:736 |
-| `unsigned List.hash(List lst)` | verified example | etc/comptime.xlisp:345 | binding | advanced/api | lib/list.x:814 |
-| `Self List.head(Self list, unsigned count)` | verified example | etc/comptime.xlisp:342 | binding | primary/api | lib/list.x:696 |
-| `int List.index(List l, Var key)` | verified example | etc/comptime.xlisp:66 | binding | primary/api | lib/list.x:309 |
-| `Iter List.iter(List lst, Iter dest)` | verified example | etc/comptime.xlisp:93 | resource | primary/api | lib/list.x:999 |
+| `int List.contains(List lst, Var key)` | verified example | etc/comptime.xlisp:121 | binding | primary/api | lib/list.x:315 |
+| `int List.equal(List a, List b)` | verified example | etc/comptime.xlisp:120 | binding | advanced/api | lib/list.x:831 |
+| `Self List.filter(Self lst, Func pred)` | verified example | etc/comptime.xlisp:123 | callback | primary/api | lib/list.x:1023 |
+| `Var List.find(List lst, Func pred)` | verified example | etc/comptime.xlisp:131 | callback | primary/api | lib/list.x:377 |
+| `Self List.flatten(Self lst)` | verified example | etc/comptime.xlisp:362 | binding | advanced/api | lib/list.x:584 |
+| `Self List.flatten_all(Self lst)` | verified example | etc/comptime.xlisp:363 | binding | advanced/api | lib/list.x:608 |
+| `Var List.foldl(List lst, Var seed, Func fn)` | verified example | etc/comptime.xlisp:130 | callback | primary/api | lib/list.x:353 |
+| `Var List.get(List list, Var key)` | verified example | etc/comptime.xlisp:115 | binding | primary/api | lib/list.x:663 |
+| `Var List.getindex(List list, int index)` | verified example | etc/comptime.xlisp:107 | binding | primary/api | lib/list.x:626 |
+| `Self List.getslice(Self list, int start, int stop, int step)` | verified example | etc/comptime.xlisp:368 | binding | primary/api | lib/list.x:736 |
+| `unsigned List.hash(List lst)` | verified example | etc/comptime.xlisp:369 | binding | advanced/api | lib/list.x:814 |
+| `Self List.head(Self list, unsigned count)` | verified example | etc/comptime.xlisp:366 | binding | primary/api | lib/list.x:696 |
+| `int List.index(List l, Var key)` | verified example | etc/comptime.xlisp:105 | binding | primary/api | lib/list.x:309 |
+| `Iter List.iter(List lst, Iter dest)` | verified example | none found | resource | primary/api | lib/list.x:999 |
 | `Job List.job(List command)` | no binding found | none found | resource | primary/optional | lib/process.x:338 |
-| `Var List.last(List lst)` | verified example | etc/comptime.xlisp:74 | binding | primary/api | lib/list.x:301 |
-| `int List.len(List lst)` | verified example | etc/comptime.xlisp:64 | binding | primary/api | lib/list.x:318 |
+| `Var List.last(List lst)` | verified example | etc/comptime.xlisp:113 | binding | primary/api | lib/list.x:301 |
+| `int List.len(List lst)` | verified example | etc/comptime.xlisp:103 | binding | primary/api | lib/list.x:318 |
 | `List List.list_n(unsigned element_count, ...)` | no binding found | none found | pointer | primary/api | lib/list.x:279 |
-| `ListChar List.listchar(List xs)` | verified example | etc/comptime.xlisp:447 | resource | primary/optional | lib/typed-list.x:97 |
-| `ListDbl List.listdbl(List xs)` | verified example | etc/comptime.xlisp:451 | resource | primary/optional | lib/typed-list.x:113 |
-| `ListFloat List.listfloat(List xs)` | verified example | etc/comptime.xlisp:450 | resource | primary/optional | lib/typed-list.x:109 |
-| `ListInt List.listint(List xs)` | verified example | etc/comptime.xlisp:449 | resource | primary/optional | lib/typed-list.x:105 |
-| `ListShort List.listshort(List xs)` | verified example | etc/comptime.xlisp:448 | resource | primary/optional | lib/typed-list.x:101 |
-| `ListString List.liststring(List xs)` | verified example | etc/comptime.xlisp:452 | resource | primary/optional | lib/typed-list.x:117 |
-| `ListSymbol List.listsymbol(List xs)` | verified example | etc/comptime.xlisp:453 | resource | primary/optional | lib/typed-list.x:121 |
-| `List List.map(List lst, Func fn)` | verified example | etc/comptime.xlisp:83 | callback | primary/api | lib/list.x:333 |
-| `List List.map2(List a, List b, Func fn)` | verified example | etc/comptime.xlisp:87 | callback | primary/api | lib/list.x:549 |
-| `List List.match(List input, Var pat)` | verified example | etc/comptime.xlisp:79 | binding | advanced/api | lib/match.x:723 |
-| `List List.match_replace(List input, Var pat, Var template)` | verified example | etc/comptime.xlisp:348 | binding | advanced/api | lib/match.x:822 |
-| `Self List.nth_cdr(Self list, int n)` | verified example | etc/comptime.xlisp:340 | binding | advanced/api | lib/list.x:618 |
+| `ListChar List.listchar(List xs)` | verified example | etc/comptime.xlisp:471 | resource | primary/optional | lib/typed-list.x:97 |
+| `ListDbl List.listdbl(List xs)` | verified example | etc/comptime.xlisp:475 | resource | primary/optional | lib/typed-list.x:113 |
+| `ListFloat List.listfloat(List xs)` | verified example | etc/comptime.xlisp:474 | resource | primary/optional | lib/typed-list.x:109 |
+| `ListInt List.listint(List xs)` | verified example | etc/comptime.xlisp:473 | resource | primary/optional | lib/typed-list.x:105 |
+| `ListShort List.listshort(List xs)` | verified example | etc/comptime.xlisp:472 | resource | primary/optional | lib/typed-list.x:101 |
+| `ListString List.liststring(List xs)` | verified example | etc/comptime.xlisp:476 | resource | primary/optional | lib/typed-list.x:117 |
+| `ListSymbol List.listsymbol(List xs)` | verified example | etc/comptime.xlisp:477 | resource | primary/optional | lib/typed-list.x:121 |
+| `List List.map(List lst, Func fn)` | verified example | etc/comptime.xlisp:122 | callback | primary/api | lib/list.x:333 |
+| `List List.map2(List a, List b, Func fn)` | verified example | etc/comptime.xlisp:126 | callback | primary/api | lib/list.x:549 |
+| `List List.match(List input, Var pat)` | verified example | etc/comptime.xlisp:118 | binding | advanced/api | lib/match.x:723 |
+| `List List.match_replace(List input, Var pat, Var template)` | verified example | etc/comptime.xlisp:372 | binding | advanced/api | lib/match.x:822 |
+| `Self List.nth_cdr(Self list, int n)` | verified example | etc/comptime.xlisp:364 | binding | advanced/api | lib/list.x:618 |
 | `Self List.promote(Self lst)` | no binding found | none found | ownership | advanced/api | lib/list.x:120 |
-| `List List.replace(List template, List bindings)` | verified example | etc/comptime.xlisp:347 | binding | primary/api | lib/match.x:758 |
-| `String List.repr(List lst)` | verified example | etc/comptime.xlisp:63 | binding | advanced/api | lib/list.x:958 |
-| `Self List.reverse(Self lst)` | verified example | etc/comptime.xlisp:65 | binding | primary/api | lib/list.x:292 |
-| `List List.search(List input, Var pat)` | verified example | etc/comptime.xlisp:80 | binding | primary/api | lib/match.x:993 |
+| `List List.replace(List template, List bindings)` | verified example | etc/comptime.xlisp:371 | binding | primary/api | lib/match.x:758 |
+| `String List.repr(List lst)` | verified example | etc/comptime.xlisp:102 | binding | advanced/api | lib/list.x:958 |
+| `Self List.reverse(Self lst)` | verified example | etc/comptime.xlisp:104 | binding | primary/api | lib/list.x:292 |
+| `List List.search(List input, Var pat)` | verified example | etc/comptime.xlisp:119 | binding | primary/api | lib/match.x:993 |
 | `List List.search_replace(List input, Var pat, Var template)` | verified example | etc/init.xlisp:106 | binding | primary/api | lib/match.x:1018 |
-| `Self List.sort(Self lst)` | verified example | etc/comptime.xlisp:78 | binding | primary/api | lib/list.x:424 |
-| `Self List.sort_by(Self lst, Func key)` | verified example | etc/comptime.xlisp:88 | callback | primary/api | lib/list.x:449 |
-| `Self List.sort_with(Self lst, Func compare)` | verified example | etc/comptime.xlisp:89 | callback | primary/api | lib/list.x:436 |
-| `String List.str(List lst)` | verified example | etc/comptime.xlisp:62 | binding | advanced/api | lib/list.x:930 |
-| `List List.sublis(List alist, List tree)` | verified example | etc/comptime.xlisp:337 | binding | advanced/api | lib/list.x:573 |
-| `Self List.subseq(Self list, int start, int stop, int step)` | verified example | etc/comptime.xlisp:343 | binding | advanced/api | lib/list.x:722 |
-| `Self List.tail(Self list, unsigned count)` | verified example | etc/comptime.xlisp:341 | binding | primary/api | lib/list.x:676 |
-| `inline int List.truth(List list)` | verified example | etc/comptime.xlisp:445 | syntax | advanced/api | lib/common.x:399 |
-| `int List.try_match(List input, Var pat, List *out_bindings)` | verified example | etc/comptime.xlisp:349 | pointer | primary/api | lib/match.x:716 |
-| `int List.try_match_replace(List input, Var pat, Var template, Var *out)` | verified example | etc/comptime.xlisp:350 | pointer | primary/api | lib/match.x:812 |
-| `int List.try_next(List lst, List *cursor, Var *out)` | verified example | etc/comptime.xlisp:99 | pointer | primary/api | lib/list.x:987 |
+| `Self List.sort(Self lst)` | verified example | etc/comptime.xlisp:117 | binding | primary/api | lib/list.x:424 |
+| `Self List.sort_by(Self lst, Func key)` | verified example | etc/comptime.xlisp:127 | callback | primary/api | lib/list.x:449 |
+| `Self List.sort_with(Self lst, Func compare)` | verified example | etc/comptime.xlisp:128 | callback | primary/api | lib/list.x:436 |
+| `String List.str(List lst)` | verified example | etc/comptime.xlisp:101 | binding | advanced/api | lib/list.x:930 |
+| `List List.sublis(List alist, List tree)` | verified example | etc/comptime.xlisp:361 | binding | advanced/api | lib/list.x:573 |
+| `Self List.subseq(Self list, int start, int stop, int step)` | verified example | etc/comptime.xlisp:367 | binding | advanced/api | lib/list.x:722 |
+| `Self List.tail(Self list, unsigned count)` | verified example | etc/comptime.xlisp:365 | binding | primary/api | lib/list.x:676 |
+| `inline int List.truth(List list)` | verified example | etc/comptime.xlisp:469 | syntax | advanced/api | lib/common.x:399 |
+| `int List.try_match(List input, Var pat, List *out_bindings)` | verified example | etc/comptime.xlisp:373 | pointer | primary/api | lib/match.x:716 |
+| `int List.try_match_replace(List input, Var pat, Var template, Var *out)` | verified example | etc/comptime.xlisp:374 | pointer | primary/api | lib/match.x:812 |
+| `int List.try_next(List lst, List *cursor, Var *out)` | verified example | etc/comptime.xlisp:136 | pointer | primary/api | lib/list.x:987 |
 | `int List.try_own(List lst)` | no binding found | none found | ownership, internal | internal/api | lib/list.x:145 |
-| `int List.try_search(List input, Var pat, Var *out_match, List *out_bindings)` | verified example | etc/comptime.xlisp:351 | pointer | primary/api | lib/match.x:1006 |
-| `Self List.unique(Self lst)` | verified example | etc/comptime.xlisp:336 | binding | primary/api | lib/list.x:512 |
+| `int List.try_search(List input, Var pat, Var *out_match, List *out_bindings)` | verified example | etc/comptime.xlisp:375 | pointer | primary/api | lib/match.x:1006 |
+| `Self List.unique(Self lst)` | verified example | etc/comptime.xlisp:360 | binding | primary/api | lib/list.x:512 |
 | `int List.unpack_n(List src, unsigned destination_count, ...)` | no binding found | none found | pointer | primary/api | lib/list.x:780 |
 | `int List.unpack_vars_n(List src, unsigned destination_count, ...)` | no binding found | none found | pointer | primary/api | lib/list.x:795 |
 | `inline Var List.var(List x)` | verified example | etc/init.xlisp:109 | binding | advanced/api | lib/common.x:535 |
 | `Buffer List.write_repr(List lst, Buffer out)` | no binding found | none found | resource | advanced/api | lib/list.x:965 |
 | `Buffer List.write_str(List lst, Buffer out)` | no binding found | none found | resource | primary/api | lib/list.x:942 |
-| `List List.zip_with(List a, List b, Func fn)` | verified example | etc/comptime.xlisp:90 | callback | primary/api | lib/list.x:528 |
+| `List List.zip_with(List a, List b, Func fn)` | verified example | etc/comptime.xlisp:129 | callback | primary/api | lib/list.x:528 |
 
 ### Contract and next action for every signature
 
@@ -972,7 +973,7 @@ meta int audit_probe(void) { return "abc".withindex(-1, 'x').equal("abx") && "ab
 | `List.hash` | lib/list.x / List value operations | implementable with current values | Returns the stable hash of `List`'s exact head bits and tail identity. This is a constant-time hash of one cell, which canonical cells make sound. It reaches an element's content only when the `Var` word holds it: a small number, a `Symbol`, an `Atom`, a canonical `String`, or a nested `List`. An element the word points at hashes by identity, so a wide number boxed in a `Scope`, an `Array`, or a `Map` gives two equal-looking `List`s two hashes. Mutating an object referenced by the head does not change this hash. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `List.head` | lib/list.x / List value operations | implementable with current values | Returns the first `count` elements of `list`. When `count` reaches or exceeds the length, `list` itself comes back, the same pointer. `List`s are immutable, so sharing it is safe. Otherwise fresh canonical cells are built for the prefix. Raises: `<alloc-fail>` or `<size-limit>` while constructing that prefix. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `List.index` | lib/list.x / List value operations | implementable with current values | Returns the first index of `key`, or -1 when absent. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
-| `List.iter` | lib/list.x / native iterator state | needs representation decision | Initializes caller-owned `dest` as a forward iterator over `lst`. The iterator borrows the immutable cells and yields their stored `Var` bits without retaining them, so the owning pool must outlive iteration. A null `dest` returns NULL; `nil` produces an exhausted iterator. | Iter contains caller-owned state and a native next callback; collection producers are lazy. The binding allocates private iterator storage in the session Scope and leaves the public caller-storage API unchanged. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `List.iter` | lib/list.x / native iterator state | needs representation decision | Initializes caller-owned `dest` as a forward iterator over `lst`. The iterator borrows the immutable cells and yields their stored `Var` bits without retaining them, so the owning pool must outlive iteration. A null `dest` returns NULL; `nil` produces an exhausted iterator. | Iter contains caller-owned state and a native next callback; collection producers are lazy. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `List.job` | lib/process.x / native Job contracts | native resource contract | Returns a `Job` for `command`, a command or pipeline, without starting it. The job captures standard output and passes standard error through. Its first result starts it, waits, and records the run. A `Job` destination calls this converter, so the call is usually left implicit. | The signature crosses Job handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/process.x's handle and effect contract for List.job; add only a scoped native adapter after those obligations are specified. |
 | `List.last` | lib/list.x / absence and null values | implementable with current values | Returns the last value in `lst`, or `void` when it is empty. | Raw evaluator slots keep runtime void, Null and empty List distinct. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `List.len` | lib/list.x / List value operations | implementable with current values | Returns the number of cells in `lst` in O(n) time. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
@@ -1594,57 +1595,57 @@ meta int audit_probe(void) { List ys = %(1 2).zip_with(%(10 20), %!(a, b) => a.i
 | `ArrayShort Array.arrayshort(Array values)` | no binding found | none found | resource | primary/optional | lib/typed-array.x:120 |
 | `ArrayString Array.arraystring(Array values)` | no binding found | none found | resource | primary/optional | lib/typed-array.x:165 |
 | `inline Block Array.block(Array x)` | no binding found | none found | resource, internal | internal/api | lib/array.x:56 |
-| `size_t Array.capacity(Array)` | verified example | etc/comptime.xlisp:377 | binding | unclassified generated/api | lib/array.x (interface) |
+| `size_t Array.capacity(Array)` | verified example | etc/comptime.xlisp:401 | binding | unclassified generated/api | lib/array.x (interface) |
 | `void Array.cleanup(Array value)` | no binding found | none found | ownership | advanced/api | lib/array.x:824 |
-| `void Array.clear(Array)` | verified example | etc/comptime.xlisp:383 | binding | unclassified generated/api | lib/array.x (interface) |
-| `int Array.compare(Array a, Array b)` | verified example | etc/comptime.xlisp:356 | binding | advanced/api | lib/array.x:518 |
-| `Self Array.concat(Self a, Self b)` | verified example | etc/comptime.xlisp:354 | binding | primary/api | lib/array.x:433 |
-| `int Array.contains(Array array, Var value)` | verified example | etc/comptime.xlisp:139 | binding | primary/api | lib/array.x:416 |
-| `Self Array.copy(Self array)` | verified example | etc/comptime.xlisp:352 | binding | primary/api | lib/array.x:311 |
-| `int Array.count(Array array, Var value)` | verified example | etc/comptime.xlisp:140 | binding | primary/api | lib/array.x:419 |
-| `int Array.equal(Array a, Array b)` | verified example | etc/comptime.xlisp:358 | binding | advanced/api | lib/array.x:732 |
-| `int Array.find(Array array, Var value)` | verified example | etc/comptime.xlisp:138 | binding | primary/api | lib/array.x:405 |
-| `Var Array.foldl(Array array, Var seed, Func fn)` | verified example | etc/comptime.xlisp:135 | callback | primary/api | lib/array.x:498 |
+| `void Array.clear(Array)` | verified example | etc/comptime.xlisp:407 | binding | unclassified generated/api | lib/array.x (interface) |
+| `int Array.compare(Array a, Array b)` | verified example | etc/comptime.xlisp:380 | binding | advanced/api | lib/array.x:518 |
+| `Self Array.concat(Self a, Self b)` | verified example | etc/comptime.xlisp:378 | binding | primary/api | lib/array.x:433 |
+| `int Array.contains(Array array, Var value)` | verified example | etc/comptime.xlisp:156 | binding | primary/api | lib/array.x:416 |
+| `Self Array.copy(Self array)` | verified example | etc/comptime.xlisp:376 | binding | primary/api | lib/array.x:311 |
+| `int Array.count(Array array, Var value)` | verified example | etc/comptime.xlisp:157 | binding | primary/api | lib/array.x:419 |
+| `int Array.equal(Array a, Array b)` | verified example | etc/comptime.xlisp:382 | binding | advanced/api | lib/array.x:732 |
+| `int Array.find(Array array, Var value)` | verified example | etc/comptime.xlisp:155 | binding | primary/api | lib/array.x:405 |
+| `Var Array.foldl(Array array, Var seed, Func fn)` | verified example | etc/comptime.xlisp:152 | callback | primary/api | lib/array.x:498 |
 | `void Array.free(Array)` | no binding found | none found | ownership | unclassified generated/api | lib/array.x (interface) |
-| `Var Array.getindex(Array array, int index)` | verified example | etc/comptime.xlisp:126 | binding | primary/api | lib/array.x:128 |
-| `Self Array.getslice(Self array, int start, int end, int step)` | verified example | etc/comptime.xlisp:353 | binding | primary/api | lib/array.x:336 |
-| `Var Array.heap_pop(Array heap)` | verified example | etc/comptime.xlisp:386 | binding | advanced/api | lib/array.x:685 |
-| `void Array.heap_push(Array heap, Var val)` | verified example | etc/comptime.xlisp:384 | binding | advanced/api | lib/array.x:671 |
-| `void Array.heapify(Array heap)` | verified example | etc/comptime.xlisp:385 | binding | advanced/api | lib/array.x:704 |
-| `int Array.indexof(Array array, Var value)` | verified example | etc/comptime.xlisp:359 | binding | primary/api | lib/array.x:425 |
-| `Var Array.insert(Array array, int index, Var elem)` | verified example | etc/comptime.xlisp:148 | binding | primary/api | lib/array.x:278 |
-| `Iter Array.iter(Array x, Iter dest)` | verified example | etc/comptime.xlisp:136 | resource | primary/api | lib/array.x:810 |
-| `String Array.join(Array array, String separator)` | verified example | etc/comptime.xlisp:137 | binding | primary/api | lib/array.x:719 |
-| `size_t Array.len(Array)` | verified example | etc/comptime.xlisp:124 | binding | unclassified generated/api | lib/array.x (interface) |
-| `List Array.list(Array arr)` | verified example | etc/comptime.xlisp:128 | binding | primary/api | lib/list.x:463 |
+| `Var Array.getindex(Array array, int index)` | verified example | etc/comptime.xlisp:143 | binding | primary/api | lib/array.x:128 |
+| `Self Array.getslice(Self array, int start, int end, int step)` | verified example | etc/comptime.xlisp:377 | binding | primary/api | lib/array.x:336 |
+| `Var Array.heap_pop(Array heap)` | verified example | etc/comptime.xlisp:410 | binding | advanced/api | lib/array.x:685 |
+| `void Array.heap_push(Array heap, Var val)` | verified example | etc/comptime.xlisp:408 | binding | advanced/api | lib/array.x:671 |
+| `void Array.heapify(Array heap)` | verified example | etc/comptime.xlisp:409 | binding | advanced/api | lib/array.x:704 |
+| `int Array.indexof(Array array, Var value)` | verified example | etc/comptime.xlisp:383 | binding | primary/api | lib/array.x:425 |
+| `Var Array.insert(Array array, int index, Var elem)` | verified example | etc/comptime.xlisp:165 | binding | primary/api | lib/array.x:278 |
+| `Iter Array.iter(Array x, Iter dest)` | verified example | none found | resource | primary/api | lib/array.x:810 |
+| `String Array.join(Array array, String separator)` | verified example | etc/comptime.xlisp:154 | binding | primary/api | lib/array.x:719 |
+| `size_t Array.len(Array)` | verified example | etc/comptime.xlisp:141 | binding | unclassified generated/api | lib/array.x (interface) |
+| `List Array.list(Array arr)` | verified example | etc/comptime.xlisp:145 | binding | primary/api | lib/list.x:463 |
 | `List Array.list_free(Array arr)` | no binding found | none found | ownership | primary/api | lib/list.x:472 |
-| `Array Array.map(Array array, Func func)` | verified example | etc/comptime.xlisp:131 | callback | primary/api | lib/array.x:459 |
-| `Array Array.map2(Array a, Array b, Func func)` | verified example | etc/comptime.xlisp:132 | callback | primary/api | lib/array.x:476 |
-| `Array Array.new(void)` | verified example | etc/comptime.xlisp:123 | binding | primary/api | lib/array.x:64 |
-| `void Array.pop(Array)` | verified example | etc/comptime.xlisp:387 | binding | unclassified generated/api | lib/array.x (interface) |
-| `Var Array.postfixindex(Array array, int index, Symbol op)` | verified example | etc/comptime.xlisp:382 | syntax | primary/api | lib/array.x:188 |
-| `Var Array.push(Array array, Var elem)` | verified example | etc/comptime.xlisp:125 | binding | primary/api | lib/array.x:213 |
-| `Var Array.remove(Array array, int index)` | verified example | etc/comptime.xlisp:147 | binding | primary/api | lib/array.x:296 |
-| `Self Array.remslice(Self array, int start, int end)` | verified example | etc/comptime.xlisp:378 | binding | advanced/api | lib/array.x:375 |
-| `String Array.repr(Array array)` | verified example | etc/comptime.xlisp:130 | binding | advanced/api | lib/array.x:761 |
-| `void Array.resize(Array arr, size_t size)` | verified example | etc/comptime.xlisp:388 | binding | primary/api | lib/array.x:71 |
-| `Self Array.reverse(Self array)` | verified example | etc/comptime.xlisp:355 | binding | primary/api | lib/array.x:448 |
-| `Var Array.setindex(Array array, int index, Var elem)` | verified example | etc/comptime.xlisp:127 | binding | primary/api | lib/array.x:148 |
-| `Self Array.setslice(Self array, int start, int end, Self values)` | verified example | etc/comptime.xlisp:379 | binding | primary/api | lib/array.x:365 |
-| `Var Array.shift(Array array)` | verified example | etc/comptime.xlisp:146 | binding | primary/api | lib/array.x:243 |
-| `Self Array.sort(Self array)` | verified example | etc/comptime.xlisp:357 | binding | primary/api | lib/array.x:539 |
-| `Self Array.sort_by(Self array, Func key)` | verified example | etc/comptime.xlisp:133 | callback | primary/api | lib/array.x:605 |
-| `Self Array.sort_with(Self array, Func compare)` | verified example | etc/comptime.xlisp:134 | callback | primary/api | lib/array.x:560 |
-| `Self Array.splice(Self array, int index, int remove_count, Self values)` | verified example | etc/comptime.xlisp:380 | binding | primary/api | lib/array.x:391 |
-| `String Array.str(Array array)` | verified example | etc/comptime.xlisp:129 | binding | advanced/api | lib/array.x:744 |
-| `Var Array.take_last(Array array)` | verified example | etc/comptime.xlisp:145 | binding | primary/api | lib/array.x:229 |
-| `void Array.truncate(Array, size_t)` | verified example | etc/comptime.xlisp:389 | binding | unclassified generated/api | lib/array.x (interface) |
-| `int Array.truth(Array)` | verified example | etc/comptime.xlisp:360 | syntax | unclassified generated/api | lib/array.x (interface) |
-| `int Array.try_next(Array array, int *cursor, Var *out)` | verified example | etc/comptime.xlisp:104 | pointer | primary/api | lib/array.x:786 |
-| `Var Array.unshift(Array array, Var elem)` | verified example | etc/comptime.xlisp:143 | binding | primary/api | lib/array.x:256 |
+| `Array Array.map(Array array, Func func)` | verified example | etc/comptime.xlisp:148 | callback | primary/api | lib/array.x:459 |
+| `Array Array.map2(Array a, Array b, Func func)` | verified example | etc/comptime.xlisp:149 | callback | primary/api | lib/array.x:476 |
+| `Array Array.new(void)` | verified example | etc/comptime.xlisp:140 | binding | primary/api | lib/array.x:64 |
+| `void Array.pop(Array)` | verified example | etc/comptime.xlisp:411 | binding | unclassified generated/api | lib/array.x (interface) |
+| `Var Array.postfixindex(Array array, int index, Symbol op)` | verified example | etc/comptime.xlisp:406 | syntax | primary/api | lib/array.x:188 |
+| `Var Array.push(Array array, Var elem)` | verified example | etc/comptime.xlisp:142 | binding | primary/api | lib/array.x:213 |
+| `Var Array.remove(Array array, int index)` | verified example | etc/comptime.xlisp:164 | binding | primary/api | lib/array.x:296 |
+| `Self Array.remslice(Self array, int start, int end)` | verified example | etc/comptime.xlisp:402 | binding | advanced/api | lib/array.x:375 |
+| `String Array.repr(Array array)` | verified example | etc/comptime.xlisp:147 | binding | advanced/api | lib/array.x:761 |
+| `void Array.resize(Array arr, size_t size)` | verified example | etc/comptime.xlisp:412 | binding | primary/api | lib/array.x:71 |
+| `Self Array.reverse(Self array)` | verified example | etc/comptime.xlisp:379 | binding | primary/api | lib/array.x:448 |
+| `Var Array.setindex(Array array, int index, Var elem)` | verified example | etc/comptime.xlisp:144 | binding | primary/api | lib/array.x:148 |
+| `Self Array.setslice(Self array, int start, int end, Self values)` | verified example | etc/comptime.xlisp:403 | binding | primary/api | lib/array.x:365 |
+| `Var Array.shift(Array array)` | verified example | etc/comptime.xlisp:163 | binding | primary/api | lib/array.x:243 |
+| `Self Array.sort(Self array)` | verified example | etc/comptime.xlisp:381 | binding | primary/api | lib/array.x:539 |
+| `Self Array.sort_by(Self array, Func key)` | verified example | etc/comptime.xlisp:150 | callback | primary/api | lib/array.x:605 |
+| `Self Array.sort_with(Self array, Func compare)` | verified example | etc/comptime.xlisp:151 | callback | primary/api | lib/array.x:560 |
+| `Self Array.splice(Self array, int index, int remove_count, Self values)` | verified example | etc/comptime.xlisp:404 | binding | primary/api | lib/array.x:391 |
+| `String Array.str(Array array)` | verified example | etc/comptime.xlisp:146 | binding | advanced/api | lib/array.x:744 |
+| `Var Array.take_last(Array array)` | verified example | etc/comptime.xlisp:162 | binding | primary/api | lib/array.x:229 |
+| `void Array.truncate(Array, size_t)` | verified example | etc/comptime.xlisp:413 | binding | unclassified generated/api | lib/array.x (interface) |
+| `int Array.truth(Array)` | verified example | etc/comptime.xlisp:384 | syntax | unclassified generated/api | lib/array.x (interface) |
+| `int Array.try_next(Array array, int *cursor, Var *out)` | verified example | etc/comptime.xlisp:137 | pointer | primary/api | lib/array.x:786 |
+| `Var Array.unshift(Array array, Var elem)` | verified example | etc/comptime.xlisp:160 | binding | primary/api | lib/array.x:256 |
 | `Self Array.update_n(Self array, unsigned element_count, ...)` | no binding found | none found | pointer | advanced/api | lib/array.x:95 |
-| `Var Array.updateindex(Array array, int index, Symbol op, Var rhs)` | verified example | etc/comptime.xlisp:381 | syntax | primary/api | lib/array.x:168 |
-| `inline Var Array.var(Array x)` | verified example | etc/comptime.xlisp:303 | binding | advanced/api | lib/common.x:527 |
+| `Var Array.updateindex(Array array, int index, Symbol op, Var rhs)` | verified example | etc/comptime.xlisp:405 | syntax | primary/api | lib/array.x:168 |
+| `inline Var Array.var(Array x)` | verified example | etc/comptime.xlisp:327 | binding | advanced/api | lib/common.x:527 |
 | `Buffer Array.write_repr(Array a, Buffer out)` | no binding found | none found | resource | advanced/api | lib/array.x:735 |
 | `Buffer Array.write_str(Array a, Buffer out)` | no binding found | none found | resource | primary/api | lib/array.x:741 |
 
@@ -1679,7 +1680,7 @@ meta int audit_probe(void) { List ys = %(1 2).zip_with(%(10 20), %!(a, b) => a.i
 | `Array.heapify` | lib/array.x / mutations returning no value | implementable with current values | Rearranges `heap` in place so that it satisfies the min-heap invariant. Use this before the first `Array.heap_pop` on an `Array` that was built by `Array.push`, read in from somewhere else, or disturbed by a positional operation. It is O(n), cheaper than pushing the same elements one at a time. Raises: `<size-limit>` when `heap` exceeds the `INT_MAX` index limit that `Array.getindex` describes, or a cause from element comparison. Comparison failure may leave a partially rearranged `Array`. | The function mutates an existing represented object, and the Func adapter transports its C void result as true runtime void. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Array.indexof` | lib/array.x / Array value operations | implementable with current values | Returns `Array.find(array, value)`. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Array.insert` | lib/array.x / Array value operations | implementable with current values | Inserts `elem` at `index` and returns it, or `void` when out of range. Elements at and after `index` move up one position. An insertion may also land past the last element, so the accepted range is one wider than for reading. `index` may equal `array.len()`, which appends. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
-| `Array.iter` | lib/array.x / native iterator state | needs representation decision | Initializes `dest` as an iterator over the elements of `x`. The caller owns the storage: declare a `struct Iter` and pass its address. The return value is that same `dest`, or `NULL` when `dest` is null, as in every iterator constructor in the library. `foreach (Var item, array)` uses this, and the lazy combinators start here. | Iter contains caller-owned state and a native next callback; collection producers are lazy. The binding allocates private iterator storage in the session Scope and leaves the public caller-storage API unchanged. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Array.iter` | lib/array.x / native iterator state | needs representation decision | Initializes `dest` as an iterator over the elements of `x`. The caller owns the storage: declare a `struct Iter` and pass its address. The return value is that same `dest`, or `NULL` when `dest` is null, as in every iterator constructor in the library. `foreach (Var item, array)` uses this, and the lazy combinators start here. | Iter contains caller-owned state and a native next callback; collection producers are lazy. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Array.join` | lib/array.x / Array value operations | implementable with current values | Joins the elements of `array` into one `String` separated by `separator`. Elements are converted with their `str` form, so a `String` element contributes its bytes without quotes and a number contributes its digits. A null `separator` joins with nothing between elements, and an empty array yields the empty `String`. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Array.len` | lib/array.x / Array value operations | implementable with current values | Interface only; inspect the producer. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Array.list` | lib/list.x / Array value operations | implementable with current values | Returns a new `List` holding the elements of `arr` in order. Cells are built from the end backwards through `cons`, so the result is canonical and shares whatever tail it already has in common with another `List`. `arr` is neither consumed nor freed. Raises: `<alloc-fail>` while constructing the result. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
@@ -2020,41 +2021,41 @@ meta int audit_probe(void) { Array a = [1]; return a.var().tag() == <array> && a
 | Direct callable | State | Binding provenance | Considerations | Tier/module | Source |
 | --- | --- | --- | --- | --- | --- |
 | `void Map.cleanup(Map value)` | no binding found | none found | ownership | primary/api | lib/map.x:722 |
-| `int Map.compare(Map a, Map b)` | verified example | etc/comptime.xlisp:363 | binding | advanced/api | lib/map.x:565 |
-| `int Map.contains(Map m, Var key)` | verified example | etc/comptime.xlisp:165 | binding | primary/api | lib/map.x:284 |
-| `Self Map.copy(Self map)` | verified example | etc/comptime.xlisp:361 | binding | primary/api | lib/map.x:445 |
-| `Var Map.del(Map map, Var key)` | verified example | etc/comptime.xlisp:166 | binding | compatibility/api | lib/map.x:405 |
-| `Iter Map.enumerate(Map x, Iter dest)` | verified example | etc/comptime.xlisp:174 | resource | primary/api | lib/map.x:648 |
-| `int Map.equal(Map map1, Map map2)` | verified example | etc/comptime.xlisp:364 | binding | advanced/api | lib/map.x:663 |
+| `int Map.compare(Map a, Map b)` | verified example | etc/comptime.xlisp:387 | binding | advanced/api | lib/map.x:565 |
+| `int Map.contains(Map m, Var key)` | verified example | etc/comptime.xlisp:182 | binding | primary/api | lib/map.x:284 |
+| `Self Map.copy(Self map)` | verified example | etc/comptime.xlisp:385 | binding | primary/api | lib/map.x:445 |
+| `Var Map.del(Map map, Var key)` | verified example | etc/comptime.xlisp:183 | binding | compatibility/api | lib/map.x:405 |
+| `Iter Map.enumerate(Map x, Iter dest)` | verified example | none found | resource | primary/api | lib/map.x:648 |
+| `int Map.equal(Map map1, Map map2)` | verified example | etc/comptime.xlisp:388 | binding | advanced/api | lib/map.x:663 |
 | `void Map.export_to( Map map, Context source, VarExportContextFn export_value, Scope *scope)` | no binding found | none found | ownership, resource, pointer, internal | internal/api | lib/map.x:464 |
-| `Var Map.get(Map map, Var key)` | verified example | etc/comptime.xlisp:162 | binding | compatibility/api | lib/map.x:204 |
-| `Var Map.get_hashed(Map map, Var key, unsigned key_hash)` | verified example | etc/comptime.xlisp:366 | binding | primary/api | lib/map.x:234 |
-| `Var Map.getdefault(Map map, Var key, Var defval)` | verified example | etc/comptime.xlisp:167 | binding | primary/api | lib/map.x:247 |
-| `Var Map.getindex(Map map, Var key)` | verified example | etc/comptime.xlisp:163 | binding | compatibility/api | lib/map.x:223 |
-| `Iter Map.iter(Map x, Iter dest)` | verified example | etc/comptime.xlisp:172 | resource | primary/api | lib/map.x:613 |
-| `Iter Map.keys(Map x, Iter dest)` | verified example | etc/comptime.xlisp:173 | resource | primary/api | lib/map.x:628 |
-| `unsigned Map.len(Map map)` | verified example | etc/comptime.xlisp:161 | binding | primary/api | lib/map.x:148 |
-| `List Map.list(Map map)` | verified example | etc/comptime.xlisp:169 | binding | primary/api | lib/list.x:484 |
+| `Var Map.get(Map map, Var key)` | verified example | etc/comptime.xlisp:179 | binding | compatibility/api | lib/map.x:204 |
+| `Var Map.get_hashed(Map map, Var key, unsigned key_hash)` | verified example | etc/comptime.xlisp:390 | binding | primary/api | lib/map.x:234 |
+| `Var Map.getdefault(Map map, Var key, Var defval)` | verified example | etc/comptime.xlisp:184 | binding | primary/api | lib/map.x:247 |
+| `Var Map.getindex(Map map, Var key)` | verified example | etc/comptime.xlisp:180 | binding | compatibility/api | lib/map.x:223 |
+| `Iter Map.iter(Map x, Iter dest)` | verified example | none found | resource | primary/api | lib/map.x:613 |
+| `Iter Map.keys(Map x, Iter dest)` | verified example | none found | resource | primary/api | lib/map.x:628 |
+| `unsigned Map.len(Map map)` | verified example | etc/comptime.xlisp:178 | binding | primary/api | lib/map.x:148 |
+| `List Map.list(Map map)` | verified example | etc/comptime.xlisp:186 | binding | primary/api | lib/list.x:484 |
 | `MapIntInt Map.mapintint(Map entries)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:280 |
 | `MapLongDouble Map.maplongdouble(Map entries)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:300 |
 | `MapStringInt Map.mapstringint(Map entries)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:358 |
 | `MapStringString Map.mapstringstring(Map entries)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:321 |
-| `Self Map.merge(Self map, Self other)` | verified example | etc/comptime.xlisp:362 | binding | primary/api | lib/map.x:512 |
-| `Map Map.new(void)` | verified example | etc/comptime.xlisp:160 | binding | primary/api | lib/map.x:139 |
-| `Map Map.new_capacity(unsigned capacity)` | verified example | etc/comptime.xlisp:390 | internal | internal/api | lib/map.x:114 |
-| `Var Map.postfixindex(Map map, Var key, Symbol op)` | verified example | etc/comptime.xlisp:392 | syntax | primary/api | lib/map.x:375 |
-| `String Map.repr(Map map)` | verified example | etc/comptime.xlisp:171 | binding | advanced/api | lib/map.x:715 |
-| `void Map.set(Map map, Var key, Var val)` | verified example | etc/comptime.xlisp:393 | binding | primary/api | lib/map.x:316 |
-| `Var Map.setdefault(Map map, Var key, Var defval)` | verified example | etc/comptime.xlisp:168 | binding | primary/api | lib/map.x:268 |
-| `Var Map.setindex(Map map, Var key, Var val)` | verified example | etc/comptime.xlisp:164 | binding | primary/api | lib/map.x:328 |
-| `String Map.str(Map map)` | verified example | etc/comptime.xlisp:170 | binding | advanced/api | lib/map.x:695 |
-| `int Map.truth(Map map)` | verified example | etc/comptime.xlisp:365 | syntax | primary/api | lib/map.x:550 |
-| `int Map.try_del(Map map, Var key, Var *out)` | verified example | etc/comptime.xlisp:368 | pointer | primary/api | lib/map.x:395 |
-| `int Map.try_get(Map map, Var key, Var *out)` | verified example | etc/comptime.xlisp:367 | pointer | primary/api | lib/map.x:178 |
-| `int Map.try_next(Map map, unsigned *cursor, Var *key, Var *val)` | verified example | etc/comptime.xlisp:114 | pointer | primary/api | lib/map.x:544 |
+| `Self Map.merge(Self map, Self other)` | verified example | etc/comptime.xlisp:386 | binding | primary/api | lib/map.x:512 |
+| `Map Map.new(void)` | verified example | etc/comptime.xlisp:177 | binding | primary/api | lib/map.x:139 |
+| `Map Map.new_capacity(unsigned capacity)` | verified example | etc/comptime.xlisp:414 | internal | internal/api | lib/map.x:114 |
+| `Var Map.postfixindex(Map map, Var key, Symbol op)` | verified example | etc/comptime.xlisp:416 | syntax | primary/api | lib/map.x:375 |
+| `String Map.repr(Map map)` | verified example | etc/comptime.xlisp:188 | binding | advanced/api | lib/map.x:715 |
+| `void Map.set(Map map, Var key, Var val)` | verified example | etc/comptime.xlisp:417 | binding | primary/api | lib/map.x:316 |
+| `Var Map.setdefault(Map map, Var key, Var defval)` | verified example | etc/comptime.xlisp:185 | binding | primary/api | lib/map.x:268 |
+| `Var Map.setindex(Map map, Var key, Var val)` | verified example | etc/comptime.xlisp:181 | binding | primary/api | lib/map.x:328 |
+| `String Map.str(Map map)` | verified example | etc/comptime.xlisp:187 | binding | advanced/api | lib/map.x:695 |
+| `int Map.truth(Map map)` | verified example | etc/comptime.xlisp:389 | syntax | primary/api | lib/map.x:550 |
+| `int Map.try_del(Map map, Var key, Var *out)` | verified example | etc/comptime.xlisp:392 | pointer | primary/api | lib/map.x:395 |
+| `int Map.try_get(Map map, Var key, Var *out)` | verified example | etc/comptime.xlisp:391 | pointer | primary/api | lib/map.x:178 |
+| `int Map.try_next(Map map, unsigned *cursor, Var *key, Var *val)` | verified example | etc/comptime.xlisp:138 | pointer | primary/api | lib/map.x:544 |
 | `Self Map.update_n(Self map, unsigned pair_count, ...)` | no binding found | none found | pointer | advanced/api | lib/map.x:418 |
-| `Var Map.updateindex(Map map, Var key, Symbol op, Var rhs)` | verified example | etc/comptime.xlisp:391 | syntax | primary/api | lib/map.x:351 |
-| `inline Var Map.var(Map x)` | verified example | etc/comptime.xlisp:304 | binding | advanced/api | lib/common.x:540 |
+| `Var Map.updateindex(Map map, Var key, Symbol op, Var rhs)` | verified example | etc/comptime.xlisp:415 | syntax | primary/api | lib/map.x:351 |
+| `inline Var Map.var(Map x)` | verified example | etc/comptime.xlisp:328 | binding | advanced/api | lib/common.x:540 |
 | `Buffer Map.write_repr(Map map, Buffer out)` | no binding found | none found | resource | advanced/api | lib/map.x:672 |
 | `Buffer Map.write_str(Map map, Buffer out)` | no binding found | none found | resource | primary/api | lib/map.x:682 |
 
@@ -2067,15 +2068,15 @@ meta int audit_probe(void) { Array a = [1]; return a.var().tag() == <array> && a
 | `Map.contains` | lib/map.x / Map value operations | implementable with current values | Returns nonzero when `key` is present in `m`, whatever its value. A null `m` reports absence rather than failing. Key comparison follows `Map.get`: `Array`s and `Map`s compare structurally but hash by identity, so only same-object lookup is reliable. Raises: `<void-op>` when `key` is `void`, or a cause raised by custom key hashing or equality. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Map.copy` | lib/map.x / Map value operations | implementable with current values | Returns a new `Map` holding shallow copies of `map`'s key/value pairs. The copy is shallow and independent: inserting into one does not affect the other, but the two share whatever objects their keys and values point at. Because `Map`s are identity-bearing, plain assignment aliases instead of copying, so copy before handing a `Map` to code that may mutate it. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Map.del` | lib/map.x / absence and null values | implementable with current values | Removes `key` and returns its value, or `void` when absent. A convenience over `Map.try_del`, useful when the removed value is all you want and a missing key is unremarkable. It is otherwise identical, cursor invalidation included. Because `void` is not storable, the absence result is unambiguous. Prefer `Map.try_del` when the status should be explicit or the output must remain unchanged on absence. Raises: the same causes as `Map.try_del`. | Raw evaluator slots keep runtime void, Null and empty List distinct. The listed native/meta comparison is verified; no binding work remains for that case. |
-| `Map.enumerate` | lib/map.x / native iterator state | needs representation decision | Initializes `dest` as an iterator over `x`, yielding each entry as a `(key value)` two-element `List`. Destructure pairs with `foreach (Var (key, value), map.enumerate(&storage))` and `Var (key, value) = pair;`. | Iter contains caller-owned state and a native next callback; collection producers are lazy. The binding allocates private iterator storage in the session Scope and leaves the public caller-storage API unchanged. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Map.enumerate` | lib/map.x / native iterator state | needs representation decision | Initializes `dest` as an iterator over `x`, yielding each entry as a `(key value)` two-element `List`. Destructure pairs with `foreach (Var (key, value), map.enumerate(&storage))` and `Var (key, value) = pair;`. | Iter contains caller-owned state and a native next callback; collection producers are lazy. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Map.equal` | lib/map.x / Map value operations | implementable with current values | Returns nonzero when `map1` and `map2` hold the same key/value pairs. A structural comparison, independent of insertion order and of table layout, so two `Map`s built by different routes still compare equal. `==` uses this operation; `===` remains the identity test. When used as keys of another `Map`, separately built equal `Map`s remain distinct keys. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Map.export_to` | lib/map.x / allocation and ownership contracts | native resource contract | Exports every key and value, rebuilds the table, then moves its `Block`s. The borrowed `export_value` callback runs synchronously for each stored key and value and may return replacement `Var`s. Rebuilding is required because an exported key may hash differently. On success the old backing `Block`s are freed, the rebuilt `Block`s move into `scope`, and the `Map` identity remains unchanged. `Context` moves that identity before this call to break cycles. | The operation frees, allocates, observes or transfers storage/registry ownership that the evaluator currently owns. Define which session-owned objects Map.export_to may observe or transfer; never alias a destructive native owner blindly. |
 | `Map.get` | lib/map.x / absence and null values | implementable with current values | Returns the value stored under `key`, or `void` when absent. A convenience over `Map.try_get`, kept because it reads well inside a larger expression. `void` as the missing-key answer is unambiguous because `Map.set` refuses to store `void`. It says nothing else about the miss, so prefer `Map.try_get` where absence has to be handled. | Raw evaluator slots keep runtime void, Null and empty List distinct. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Map.get_hashed` | lib/map.x / absence and null values | implementable with current values | Returns the value stored under `key`, or `void` when absent, probing with the caller's precomputed `key_hash`. `key_hash` must be `Var.hash` of `key`; another value reports the key as absent. This serves a caller that probes several `Map`s with one key, such as `Pool.lookup` walking its chain, and is `Map.get` in every other respect. A null `Map` reports absence. Raises: a cause raised by custom key equality. Hashing happens in the caller, so a `void` key raises there instead. | Raw evaluator slots keep runtime void, Null and empty List distinct. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Map.getdefault` | lib/map.x / Map value operations | implementable with current values | Returns the value stored under `key`, or `defval` when it is absent. Nothing is inserted and `Map.len` does not change, unlike `Map.setdefault`. For counting, numeric `map[k] += amount` initializes an absent key from `amount`; use `getdefault` when a read needs a fallback without mutation. Raises: `<void-op>` when `key` is `void`, or a cause raised by custom key hashing or equality. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Map.getindex` | lib/map.x / absence and null values | implementable with current values | Returns the value selected by bracket indexing. This is what `map[key]` lowers to, and it is `Map.get` in every respect, including identity comparison for `Array` and `Map` keys. Bracket reads do not report status; prefer `Map.try_get` when an absent key and a `void` result must be told apart. | Raw evaluator slots keep runtime void, Null and empty List distinct. The listed native/meta comparison is verified; no binding work remains for that case. |
-| `Map.iter` | lib/map.x / native iterator state | needs representation decision | Initializes `dest` as an iterator over `x`, yielding each value. Keys come from `Map.enumerate`, which pairs each one with its value the way `Iter.enumerate` pairs an index with an element. | Iter contains caller-owned state and a native next callback; collection producers are lazy. The binding allocates private iterator storage in the session Scope and leaves the public caller-storage API unchanged. The listed native/meta comparison is verified; no binding work remains for that case. |
-| `Map.keys` | lib/map.x / native iterator state | needs representation decision | Initializes `dest` as an iterator over `x`, yielding each key. The mirror of `Map.iter`, and like it, it allocates nothing. | Iter contains caller-owned state and a native next callback; collection producers are lazy. The binding allocates private iterator storage in the session Scope and leaves the public caller-storage API unchanged. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Map.iter` | lib/map.x / native iterator state | needs representation decision | Initializes `dest` as an iterator over `x`, yielding each value. Keys come from `Map.enumerate`, which pairs each one with its value the way `Iter.enumerate` pairs an index with an element. | Iter contains caller-owned state and a native next callback; collection producers are lazy. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Map.keys` | lib/map.x / native iterator state | needs representation decision | Initializes `dest` as an iterator over `x`, yielding each key. The mirror of `Map.iter`, and like it, it allocates nothing. | Iter contains caller-owned state and a native next callback; collection producers are lazy. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Map.len` | lib/map.x / Map value operations | implementable with current values | Returns the number of key/value pairs in `map`. O(1), and the emptiness test for a `Map`, because an empty `Map` is a nonnull object. This counts live entries. The table keeps more slots than entries to hold its load factor, so `Map.len` is not the allocation size. `map` must be nonnull. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Map.list` | lib/list.x / Map value operations | implementable with current values | Returns the entries of `map` as a `List` of two-element `(key value)` `List`s, in the map's iteration order. This is the eager form of `Map.enumerate`, for a caller that wants the pairs as ordinary `List` data rather than a cursor. An empty `map` returns nil. The pair cells are new; the keys and values are shared. Raises: `<alloc-fail>` or `<size-limit>` while constructing the result. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Map.mapintint` | lib/typed-map.x / packed typed collection conversions | needs representation decision | Packs `entries` into a fresh typed map in the current `Scope`. A null input returns NULL. Each key and value goes through its `Var` conversion, and later entries in bucket order replace earlier equal keys. The input `Map` is unchanged. Raises: any conversion cause, or `<alloc-fail>`, `<size-limit>`, or `<invariant>` while inserting. | The target owns packed native storage, not the ordinary Array/Map element layout. Specify a tagged handle and owner for Map.mapintint's target before exposing its conversion and accessors. |
@@ -2288,18 +2289,18 @@ meta int audit_probe(void) { Map m = {"a": 1}; return m.var().tag() == <map> && 
 
 | Direct callable | State | Binding provenance | Considerations | Tier/module | Source |
 | --- | --- | --- | --- | --- | --- |
-| `int Symbol.compare(Symbol a, Symbol b)` | verified example | etc/comptime.xlisp:270 | binding | advanced/api | lib/symbol.x:174 |
+| `int Symbol.compare(Symbol a, Symbol b)` | verified example | etc/comptime.xlisp:294 | binding | advanced/api | lib/symbol.x:174 |
 | `void Symbol.decode(Symbol symbol, char *dest)` | no binding found | none found | pointer | advanced/api | lib/symbol.x:133 |
-| `char Symbol.first(Symbol symbol)` | reproduced failure | etc/comptime.xlisp:375 | binding | advanced/api | lib/symbol.x:235 |
-| `char Symbol.last(Symbol symbol)` | reproduced failure | etc/comptime.xlisp:376 | binding | primary/api | lib/symbol.x:246 |
-| `int Symbol.len(Symbol symbol)` | verified example | etc/comptime.xlisp:269 | binding | primary/api | lib/symbol.x:121 |
+| `char Symbol.first(Symbol symbol)` | reproduced failure | etc/comptime.xlisp:399 | binding | advanced/api | lib/symbol.x:235 |
+| `char Symbol.last(Symbol symbol)` | reproduced failure | etc/comptime.xlisp:400 | binding | primary/api | lib/symbol.x:246 |
+| `int Symbol.len(Symbol symbol)` | verified example | etc/comptime.xlisp:293 | binding | primary/api | lib/symbol.x:121 |
 | `Symbol Symbol.new(const char *str)` | reproduced failure | none found | pointer | primary/api | lib/symbol.x:104 |
-| `Symbol Symbol.new_len(const char *str, int len)` | verified example | etc/comptime.xlisp:513 | pointer | advanced/api | lib/symbol.x:78 |
-| `Symbol Symbol.parse(char *text)` | verified example | etc/comptime.xlisp:514 | pointer | advanced/api | lib/symbol.x:260 |
-| `String Symbol.repr(Symbol symbol)` | verified example | etc/comptime.xlisp:271 | binding | advanced/api | lib/symbol.x:194 |
-| `String Symbol.str(Symbol symbol)` | verified example | etc/comptime.xlisp:272 | binding | advanced/api | lib/symbol.x:162 |
-| `int Symbol.try_new(String spelling, Symbol *out)` | verified example | etc/comptime.xlisp:273 | pointer | primary/api | lib/symbol.x:112 |
-| `inline Var Symbol.var(Symbol x)` | verified example | etc/comptime.xlisp:300 | binding | advanced/api | lib/common.x:545 |
+| `Symbol Symbol.new_len(const char *str, int len)` | verified example | etc/comptime.xlisp:537 | pointer | advanced/api | lib/symbol.x:78 |
+| `Symbol Symbol.parse(char *text)` | verified example | etc/comptime.xlisp:538 | pointer | advanced/api | lib/symbol.x:260 |
+| `String Symbol.repr(Symbol symbol)` | verified example | etc/comptime.xlisp:295 | binding | advanced/api | lib/symbol.x:194 |
+| `String Symbol.str(Symbol symbol)` | verified example | etc/comptime.xlisp:296 | binding | advanced/api | lib/symbol.x:162 |
+| `int Symbol.try_new(String spelling, Symbol *out)` | verified example | etc/comptime.xlisp:297 | pointer | primary/api | lib/symbol.x:112 |
+| `inline Var Symbol.var(Symbol x)` | verified example | etc/comptime.xlisp:324 | binding | advanced/api | lib/common.x:545 |
 | `Buffer Symbol.write_repr(Symbol symbol, Buffer out)` | no binding found | none found | resource | advanced/api | lib/symbol.x:217 |
 | `Buffer Symbol.write_str(Symbol symbol, Buffer out)` | no binding found | none found | resource | primary/api | lib/symbol.x:205 |
 
@@ -2407,13 +2408,15 @@ meta int audit_probe(void) { Symbol s = <abc>; return s.var().tag() == <symbol> 
 
 **verified example:** `add`, `array`, `binary`, `box_f32`, `box_f64`, `box_i16`, `box_i32_bits`, `box_i8`, `box_long`, `box_long_double`, `box_long_long`, `box_u16`, `box_u32`, `box_u8`, `box_ulong`, `box_ulong_long`, `caaaar`, `caaadr`, `caaar`, `caadar`, `caaddr`, `caadr`, `caar`, `cadaar`, `cadadr`, `cadar`, `caddar`, `cadddr`, `caddr`, `cadr`, `car`, `cdaaar`, `cdaadr`, `cdaar`, `cdadar`, `cdaddr`, `cdadr`, `cdar`, `cddaar`, `cddadr`, `cddar`, `cdddar`, `cddddr`, `cdddr`, `cddr`, `cdr`, `char`, `clone_wide`, `compare`, `cons`, `contains`, `convert`, `custom_descriptor_index`, `decode_f32`, `decode_f64`, `div`, `double`, `encoding_valid`, `equal`, `fallback_compare`, `fallback_equal`, `fallback_hash`, `fallback_repr`, `fallback_str`, `fallback_truth`, `float`, `floating`, `getindex`, `hash`, `int`, `integer`, `integer_box`, `integer_compare`, `integer_floating_compare`, `integer_tag`, `is`, `is_atom`, `is_atom_binder`, `is_binder`, `is_floating`, `is_integer`, `is_list_binder`, `is_match_op`, `is_nil`, `is_null`, `is_object`, `is_pointer`, `is_reference`, `is_row`, `is_void`, `is_wide`, `iter`, `json`, `kind`, `known_tag`, `list`, `listchar`, `listdbl`, `listfloat`, `listint`, `listshort`, `liststring`, `listsymbol`, `long`, `long_double`, `long_double_value`, `long_long`, `long_long_value`, `long_value`, `map`, `mod`, `mul`, `neg`, `null`, `parse`, `payload32`, `postfixindex`, `pretty_json`, `repr`, `same`, `setindex`, `short`, `signed_from_bits`, `str`, `string`, `sub`, `symbol`, `tag`, `truth`, `uchar`, `uint`, `ulong`, `ulong_long`, `ulong_long_value`, `ulong_value`, `unsigned`, `updateindex`, `ushort`, `wide_compare`, `wide_equal`, `wide_hash`, `width_mask`.
 
+**bound, unverified:** `func`.
+
 **no binding found:** `adnode`, `arraychar`, `arraydbl`, `arrayfloat`, `arrayint`, `arraylong`, `arrayshort`, `arraystring`, `as_iter`, `block`, `buffer`, `bytes`, `dispatch_truth`, `fallback_iter`, `fallback_write_repr`, `fallback_write_str`, `file`, `job`, `jsonbool`, `mapintint`, `maplongdouble`, `mapstringint`, `mapstringstring`, `matmul`, `move_wide_to`, `new`, `numeric_decode`, `numeric_info`, `pointer`, `pointer_string`, `postfix`, `regex`, `regexcapture`, `regexmatch`, `register_object_tag`, `token`, `try_dispatch_binary`, `try_dispatch_unary`, `try_export_context`, `update`, `wide_owner`, `write_pointer_repr`, `write_repr`, `write_str`.
 
 | Direct callable | State | Binding provenance | Considerations | Tier/module | Source |
 | --- | --- | --- | --- | --- | --- |
-| `Var Var.add(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:435 | syntax | primary/api | lib/varops.x:400 |
+| `Var Var.add(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:459 | syntax | primary/api | lib/varops.x:400 |
 | `AdNode Var.adnode(Var value)` | no binding found | none found | resource | primary/optional | lib/autodiff.x:43 |
-| `inline Array Var.array(Var value)` | verified example | etc/comptime.xlisp:394 | binding | advanced/api | lib/common.x:616 |
+| `inline Array Var.array(Var value)` | verified example | etc/comptime.xlisp:418 | binding | advanced/api | lib/common.x:616 |
 | `inline ArrayChar Var.arraychar(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-array.x:111 |
 | `inline ArrayDbl Var.arraydbl(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-array.x:156 |
 | `inline ArrayFloat Var.arrayfloat(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-array.x:147 |
@@ -2424,176 +2427,177 @@ meta int audit_probe(void) { Symbol s = <abc>; return s.var().tag() == <symbol> 
 | `inline Iter Var.as_iter(Var value)` | no binding found | none found | resource | advanced/api | lib/common.x:621 |
 | `Var Var.binary(Var lhs, Symbol op, Var rhs)` | verified example | etc/init.xlisp:96 | syntax | primary/api | lib/varops.x:472 |
 | `inline Block Var.block(Var value)` | no binding found | none found | resource | advanced/api | lib/common.x:617 |
-| `inline Var Var.box_f32(float value)` | verified example | etc/comptime.xlisp:516 | internal | advanced/api | lib/common.x:509 |
-| `inline Var Var.box_f64(double value)` | verified example | etc/comptime.xlisp:517 | internal | advanced/api | lib/common.x:516 |
-| `inline Var Var.box_i16(short value)` | verified example | etc/comptime.xlisp:518 | internal | advanced/api | lib/common.x:500 |
-| `inline Var Var.box_i32_bits(unsigned value)` | verified example | etc/comptime.xlisp:519 | internal | advanced/api | lib/common.x:504 |
-| `inline Var Var.box_i8(char value)` | verified example | etc/comptime.xlisp:520 | internal | advanced/api | lib/common.x:496 |
-| `Var Var.box_long(long value)` | verified example | etc/comptime.xlisp:521 | internal | advanced/api | lib/var.x:478 |
-| `Var Var.box_long_double(long double value)` | verified example | etc/comptime.xlisp:522 | internal | advanced/api | lib/var.x:530 |
-| `Var Var.box_long_long(long long value)` | verified example | etc/comptime.xlisp:523 | internal | advanced/api | lib/var.x:504 |
-| `inline Var Var.box_u16(ushort value)` | verified example | etc/comptime.xlisp:524 | internal | advanced/api | lib/common.x:502 |
-| `inline Var Var.box_u32(unsigned value)` | verified example | etc/comptime.xlisp:525 | internal | advanced/api | lib/common.x:506 |
-| `inline Var Var.box_u8(uchar value)` | verified example | etc/comptime.xlisp:526 | internal | advanced/api | lib/common.x:498 |
-| `Var Var.box_ulong(unsigned long value)` | verified example | etc/comptime.xlisp:527 | internal | advanced/api | lib/var.x:493 |
-| `Var Var.box_ulong_long(unsigned long long value)` | verified example | etc/comptime.xlisp:528 | internal | advanced/api | lib/var.x:515 |
+| `inline Var Var.box_f32(float value)` | verified example | etc/comptime.xlisp:540 | internal | advanced/api | lib/common.x:509 |
+| `inline Var Var.box_f64(double value)` | verified example | etc/comptime.xlisp:541 | internal | advanced/api | lib/common.x:516 |
+| `inline Var Var.box_i16(short value)` | verified example | etc/comptime.xlisp:542 | internal | advanced/api | lib/common.x:500 |
+| `inline Var Var.box_i32_bits(unsigned value)` | verified example | etc/comptime.xlisp:543 | internal | advanced/api | lib/common.x:504 |
+| `inline Var Var.box_i8(char value)` | verified example | etc/comptime.xlisp:544 | internal | advanced/api | lib/common.x:496 |
+| `Var Var.box_long(long value)` | verified example | etc/comptime.xlisp:545 | internal | advanced/api | lib/var.x:478 |
+| `Var Var.box_long_double(long double value)` | verified example | etc/comptime.xlisp:546 | internal | advanced/api | lib/var.x:530 |
+| `Var Var.box_long_long(long long value)` | verified example | etc/comptime.xlisp:547 | internal | advanced/api | lib/var.x:504 |
+| `inline Var Var.box_u16(ushort value)` | verified example | etc/comptime.xlisp:548 | internal | advanced/api | lib/common.x:502 |
+| `inline Var Var.box_u32(unsigned value)` | verified example | etc/comptime.xlisp:549 | internal | advanced/api | lib/common.x:506 |
+| `inline Var Var.box_u8(uchar value)` | verified example | etc/comptime.xlisp:550 | internal | advanced/api | lib/common.x:498 |
+| `Var Var.box_ulong(unsigned long value)` | verified example | etc/comptime.xlisp:551 | internal | advanced/api | lib/var.x:493 |
+| `Var Var.box_ulong_long(unsigned long long value)` | verified example | etc/comptime.xlisp:552 | internal | advanced/api | lib/var.x:515 |
 | `inline Buffer Var.buffer(Var value)` | no binding found | none found | resource | advanced/api | lib/common.x:618 |
 | `inline Bytes Var.bytes(Var value)` | no binding found | none found | resource | advanced/api | lib/common.x:619 |
-| `inline Var Var.caaaar(Var value)` | verified example | etc/comptime.xlisp:487 | binding | primary/optional | lib/list-selectors.x:83 |
-| `inline Var Var.caaadr(Var value)` | verified example | etc/comptime.xlisp:488 | binding | primary/optional | lib/list-selectors.x:85 |
-| `inline Var Var.caaar(Var value)` | verified example | etc/comptime.xlisp:489 | binding | primary/optional | lib/list-selectors.x:68 |
-| `inline Var Var.caadar(Var value)` | verified example | etc/comptime.xlisp:490 | binding | primary/optional | lib/list-selectors.x:87 |
-| `inline Var Var.caaddr(Var value)` | verified example | etc/comptime.xlisp:491 | binding | primary/optional | lib/list-selectors.x:89 |
-| `inline Var Var.caadr(Var value)` | verified example | etc/comptime.xlisp:492 | binding | primary/optional | lib/list-selectors.x:70 |
-| `inline Var Var.caar(Var var)` | verified example | etc/comptime.xlisp:276 | binding | advanced/api | lib/list.x:200 |
-| `inline Var Var.cadaar(Var value)` | verified example | etc/comptime.xlisp:493 | binding | primary/optional | lib/list-selectors.x:91 |
-| `inline Var Var.cadadr(Var value)` | verified example | etc/comptime.xlisp:494 | binding | primary/optional | lib/list-selectors.x:93 |
-| `inline Var Var.cadar(Var value)` | verified example | etc/comptime.xlisp:495 | binding | primary/optional | lib/list-selectors.x:72 |
-| `inline Var Var.caddar(Var value)` | verified example | etc/comptime.xlisp:496 | binding | primary/optional | lib/list-selectors.x:95 |
-| `inline Var Var.cadddr(Var value)` | verified example | etc/comptime.xlisp:497 | binding | primary/optional | lib/list-selectors.x:97 |
-| `inline Var Var.caddr(Var var)` | verified example | etc/comptime.xlisp:279 | binding | advanced/api | lib/list.x:206 |
-| `inline Var Var.cadr(Var var)` | verified example | etc/comptime.xlisp:277 | binding | advanced/api | lib/list.x:202 |
+| `inline Var Var.caaaar(Var value)` | verified example | etc/comptime.xlisp:511 | binding | primary/optional | lib/list-selectors.x:83 |
+| `inline Var Var.caaadr(Var value)` | verified example | etc/comptime.xlisp:512 | binding | primary/optional | lib/list-selectors.x:85 |
+| `inline Var Var.caaar(Var value)` | verified example | etc/comptime.xlisp:513 | binding | primary/optional | lib/list-selectors.x:68 |
+| `inline Var Var.caadar(Var value)` | verified example | etc/comptime.xlisp:514 | binding | primary/optional | lib/list-selectors.x:87 |
+| `inline Var Var.caaddr(Var value)` | verified example | etc/comptime.xlisp:515 | binding | primary/optional | lib/list-selectors.x:89 |
+| `inline Var Var.caadr(Var value)` | verified example | etc/comptime.xlisp:516 | binding | primary/optional | lib/list-selectors.x:70 |
+| `inline Var Var.caar(Var var)` | verified example | etc/comptime.xlisp:300 | binding | advanced/api | lib/list.x:200 |
+| `inline Var Var.cadaar(Var value)` | verified example | etc/comptime.xlisp:517 | binding | primary/optional | lib/list-selectors.x:91 |
+| `inline Var Var.cadadr(Var value)` | verified example | etc/comptime.xlisp:518 | binding | primary/optional | lib/list-selectors.x:93 |
+| `inline Var Var.cadar(Var value)` | verified example | etc/comptime.xlisp:519 | binding | primary/optional | lib/list-selectors.x:72 |
+| `inline Var Var.caddar(Var value)` | verified example | etc/comptime.xlisp:520 | binding | primary/optional | lib/list-selectors.x:95 |
+| `inline Var Var.cadddr(Var value)` | verified example | etc/comptime.xlisp:521 | binding | primary/optional | lib/list-selectors.x:97 |
+| `inline Var Var.caddr(Var var)` | verified example | etc/comptime.xlisp:303 | binding | advanced/api | lib/list.x:206 |
+| `inline Var Var.cadr(Var var)` | verified example | etc/comptime.xlisp:301 | binding | advanced/api | lib/list.x:202 |
 | `Var Var.car(Var var)` | verified example | etc/init.xlisp:94 | binding | advanced/api | lib/list.x:196 |
-| `inline List Var.cdaaar(Var value)` | verified example | etc/comptime.xlisp:498 | binding | primary/optional | lib/list-selectors.x:99 |
-| `inline List Var.cdaadr(Var value)` | verified example | etc/comptime.xlisp:499 | binding | primary/optional | lib/list-selectors.x:101 |
-| `inline List Var.cdaar(Var value)` | verified example | etc/comptime.xlisp:500 | binding | primary/optional | lib/list-selectors.x:74 |
-| `inline List Var.cdadar(Var value)` | verified example | etc/comptime.xlisp:501 | binding | primary/optional | lib/list-selectors.x:103 |
-| `inline List Var.cdaddr(Var value)` | verified example | etc/comptime.xlisp:502 | binding | primary/optional | lib/list-selectors.x:105 |
-| `inline List Var.cdadr(Var value)` | verified example | etc/comptime.xlisp:503 | binding | primary/optional | lib/list-selectors.x:76 |
-| `inline List Var.cdar(Var value)` | verified example | etc/comptime.xlisp:504 | binding | primary/optional | lib/list-selectors.x:66 |
-| `inline List Var.cddaar(Var value)` | verified example | etc/comptime.xlisp:505 | binding | primary/optional | lib/list-selectors.x:107 |
-| `inline List Var.cddadr(Var value)` | verified example | etc/comptime.xlisp:506 | binding | primary/optional | lib/list-selectors.x:109 |
-| `inline List Var.cddar(Var value)` | verified example | etc/comptime.xlisp:507 | binding | primary/optional | lib/list-selectors.x:78 |
-| `inline List Var.cdddar(Var value)` | verified example | etc/comptime.xlisp:508 | binding | primary/optional | lib/list-selectors.x:111 |
-| `inline List Var.cddddr(Var value)` | verified example | etc/comptime.xlisp:486 | binding | primary/optional | lib/list-selectors.x:113 |
-| `inline List Var.cdddr(Var value)` | verified example | etc/comptime.xlisp:485 | binding | primary/optional | lib/list-selectors.x:80 |
-| `inline List Var.cddr(Var var)` | verified example | etc/comptime.xlisp:278 | binding | advanced/api | lib/list.x:204 |
+| `inline List Var.cdaaar(Var value)` | verified example | etc/comptime.xlisp:522 | binding | primary/optional | lib/list-selectors.x:99 |
+| `inline List Var.cdaadr(Var value)` | verified example | etc/comptime.xlisp:523 | binding | primary/optional | lib/list-selectors.x:101 |
+| `inline List Var.cdaar(Var value)` | verified example | etc/comptime.xlisp:524 | binding | primary/optional | lib/list-selectors.x:74 |
+| `inline List Var.cdadar(Var value)` | verified example | etc/comptime.xlisp:525 | binding | primary/optional | lib/list-selectors.x:103 |
+| `inline List Var.cdaddr(Var value)` | verified example | etc/comptime.xlisp:526 | binding | primary/optional | lib/list-selectors.x:105 |
+| `inline List Var.cdadr(Var value)` | verified example | etc/comptime.xlisp:527 | binding | primary/optional | lib/list-selectors.x:76 |
+| `inline List Var.cdar(Var value)` | verified example | etc/comptime.xlisp:528 | binding | primary/optional | lib/list-selectors.x:66 |
+| `inline List Var.cddaar(Var value)` | verified example | etc/comptime.xlisp:529 | binding | primary/optional | lib/list-selectors.x:107 |
+| `inline List Var.cddadr(Var value)` | verified example | etc/comptime.xlisp:530 | binding | primary/optional | lib/list-selectors.x:109 |
+| `inline List Var.cddar(Var value)` | verified example | etc/comptime.xlisp:531 | binding | primary/optional | lib/list-selectors.x:78 |
+| `inline List Var.cdddar(Var value)` | verified example | etc/comptime.xlisp:532 | binding | primary/optional | lib/list-selectors.x:111 |
+| `inline List Var.cddddr(Var value)` | verified example | etc/comptime.xlisp:510 | binding | primary/optional | lib/list-selectors.x:113 |
+| `inline List Var.cdddr(Var value)` | verified example | etc/comptime.xlisp:509 | binding | primary/optional | lib/list-selectors.x:80 |
+| `inline List Var.cddr(Var var)` | verified example | etc/comptime.xlisp:302 | binding | advanced/api | lib/list.x:204 |
 | `List Var.cdr(Var var)` | verified example | etc/init.xlisp:95 | binding | advanced/api | lib/list.x:198 |
-| `char Var.char(Var x)` | verified example | etc/comptime.xlisp:398 | binding | advanced/api | lib/common.x:643 |
-| `Var Var.clone_wide(Var value)` | verified example | etc/comptime.xlisp:551 | internal | internal/api | lib/var.x:542 |
-| `int Var.compare(Var a, Var b)` | verified example | etc/comptime.xlisp:417 | binding | advanced/api | lib/dispatch.x:890 |
+| `char Var.char(Var x)` | verified example | etc/comptime.xlisp:422 | binding | advanced/api | lib/common.x:643 |
+| `Var Var.clone_wide(Var value)` | verified example | etc/comptime.xlisp:575 | internal | internal/api | lib/var.x:542 |
+| `int Var.compare(Var a, Var b)` | verified example | etc/comptime.xlisp:441 | binding | advanced/api | lib/dispatch.x:890 |
 | `List Var.cons(Var head, List tail)` | verified example | etc/init.xlisp:91 | binding | advanced/api | lib/list.x:168 |
-| `int Var.contains(Var value, Var needle)` | verified example | etc/comptime.xlisp:418 | binding | primary/api | lib/dispatch.x:368 |
-| `Var Var.convert(Var value, Symbol target)` | verified example | etc/comptime.xlisp:281 | binding | primary/api | lib/varconvert.x:273 |
-| `int Var.custom_descriptor_index(Var value)` | verified example | etc/comptime.xlisp:529 | internal | internal/api | lib/var.x:216 |
-| `inline float Var.decode_f32(Var value)` | verified example | etc/comptime.xlisp:530 | internal | advanced/api | lib/common.x:463 |
-| `inline double Var.decode_f64(Var value)` | verified example | etc/comptime.xlisp:531 | internal | advanced/api | lib/common.x:471 |
+| `int Var.contains(Var value, Var needle)` | verified example | etc/comptime.xlisp:442 | binding | primary/api | lib/dispatch.x:368 |
+| `Var Var.convert(Var value, Symbol target)` | verified example | etc/comptime.xlisp:305 | binding | primary/api | lib/varconvert.x:273 |
+| `int Var.custom_descriptor_index(Var value)` | verified example | etc/comptime.xlisp:553 | internal | internal/api | lib/var.x:216 |
+| `inline float Var.decode_f32(Var value)` | verified example | etc/comptime.xlisp:554 | internal | advanced/api | lib/common.x:463 |
+| `inline double Var.decode_f64(Var value)` | verified example | etc/comptime.xlisp:555 | internal | advanced/api | lib/common.x:471 |
 | `int Var.dispatch_truth(Var value, int *handled)` | no binding found | none found | pointer | advanced/api | lib/dispatch.x:47 |
-| `Var Var.div(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:438 | syntax | primary/api | lib/varops.x:426 |
-| `double Var.double(Var x)` | verified example | etc/comptime.xlisp:410 | binding | advanced/api | lib/common.x:772 |
-| `int Var.encoding_valid(Var value)` | verified example | etc/comptime.xlisp:532 | internal | advanced/api | lib/var.x:231 |
-| `int Var.equal(Var a, Var b)` | verified example | etc/comptime.xlisp:285 | binding | advanced/api | lib/dispatch.x:762 |
-| `int Var.fallback_compare(Var a, Var b)` | verified example | etc/comptime.xlisp:533 | internal | primary/api | lib/dispatch.x:869 |
-| `int Var.fallback_equal(Var a, Var b)` | verified example | etc/comptime.xlisp:534 | internal | primary/api | lib/dispatch.x:719 |
-| `unsigned Var.fallback_hash(Var v)` | verified example | etc/comptime.xlisp:535 | internal | primary/api | lib/dispatch.x:729 |
+| `Var Var.div(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:462 | syntax | primary/api | lib/varops.x:426 |
+| `double Var.double(Var x)` | verified example | etc/comptime.xlisp:434 | binding | advanced/api | lib/common.x:772 |
+| `int Var.encoding_valid(Var value)` | verified example | etc/comptime.xlisp:556 | internal | advanced/api | lib/var.x:231 |
+| `int Var.equal(Var a, Var b)` | verified example | etc/comptime.xlisp:309 | binding | advanced/api | lib/dispatch.x:762 |
+| `int Var.fallback_compare(Var a, Var b)` | verified example | etc/comptime.xlisp:557 | internal | primary/api | lib/dispatch.x:869 |
+| `int Var.fallback_equal(Var a, Var b)` | verified example | etc/comptime.xlisp:558 | internal | primary/api | lib/dispatch.x:719 |
+| `unsigned Var.fallback_hash(Var v)` | verified example | etc/comptime.xlisp:559 | internal | primary/api | lib/dispatch.x:729 |
 | `Iter Var.fallback_iter(Var x, Iter dest)` | no binding found | none found | resource, internal | primary/api | lib/dispatch.x:921 |
-| `String Var.fallback_repr(Var v)` | verified example | etc/comptime.xlisp:536 | internal | primary/api | lib/dispatch.x:594 |
-| `String Var.fallback_str(Var v)` | verified example | etc/comptime.xlisp:537 | internal | primary/api | lib/dispatch.x:525 |
-| `int Var.fallback_truth(Var value)` | verified example | etc/comptime.xlisp:538 | internal | primary/api | lib/varops.x:323 |
+| `String Var.fallback_repr(Var v)` | verified example | etc/comptime.xlisp:560 | internal | primary/api | lib/dispatch.x:594 |
+| `String Var.fallback_str(Var v)` | verified example | etc/comptime.xlisp:561 | internal | primary/api | lib/dispatch.x:525 |
+| `int Var.fallback_truth(Var value)` | verified example | etc/comptime.xlisp:562 | internal | primary/api | lib/varops.x:323 |
 | `Buffer Var.fallback_write_repr(Var v, Buffer out)` | no binding found | none found | resource, internal | primary/api | lib/dispatch.x:684 |
 | `Buffer Var.fallback_write_str(Var v, Buffer out)` | no binding found | none found | resource, internal | primary/api | lib/dispatch.x:562 |
 | `inline File Var.file(Var value)` | no binding found | none found | resource | advanced/api | lib/common.x:620 |
-| `float Var.float(Var x)` | verified example | etc/comptime.xlisp:409 | binding | advanced/api | lib/common.x:763 |
-| `double Var.floating(Var v)` | verified example | etc/comptime.xlisp:283 | binding | advanced/api | lib/var.x:714 |
-| `Var Var.getindex(Var value, Var key)` | verified example | etc/comptime.xlisp:552 | binding | primary/api | lib/dispatch.x:383 |
-| `unsigned Var.hash(Var v)` | verified example | etc/comptime.xlisp:419 | binding | advanced/api | lib/dispatch.x:738 |
-| `int Var.int(Var x)` | verified example | etc/comptime.xlisp:400 | binding | advanced/api | lib/common.x:679 |
-| `long Var.integer(Var v)` | verified example | etc/comptime.xlisp:282 | binding | advanced/api | lib/var.x:759 |
-| `Var Var.integer_box(Symbol target, unsigned long long raw)` | verified example | etc/comptime.xlisp:539 | internal | advanced/api | lib/varconvert.x:99 |
-| `int Var.integer_compare(Var a, Var b)` | verified example | etc/comptime.xlisp:540 | binding | advanced/api | lib/var.x:939 |
-| `int Var.integer_floating_compare(Var integer, Var floating)` | verified example | etc/comptime.xlisp:541 | binding | advanced/api | lib/var.x:967 |
-| `Symbol Var.integer_tag(int rank, int unsigned_value)` | verified example | etc/comptime.xlisp:542 | internal | advanced/api | lib/varconvert.x:41 |
-| `int Var.is(Var var, Symbol tag)` | verified example | etc/comptime.xlisp:284 | binding | primary/api | lib/var.x:296 |
-| `int Var.is_atom(Var value)` | verified example | etc/comptime.xlisp:421 | binding | primary/api | lib/atom.x:92 |
-| `int Var.is_atom_binder(Var atom)` | verified example | etc/comptime.xlisp:422 | binding | advanced/api | lib/match.x:377 |
-| `int Var.is_binder(Var atom)` | verified example | etc/comptime.xlisp:423 | binding | advanced/api | lib/match.x:387 |
-| `int Var.is_floating(Var v)` | verified example | etc/comptime.xlisp:426 | binding | primary/api | lib/var.x:321 |
-| `int Var.is_integer(Var v)` | verified example | etc/comptime.xlisp:427 | binding | primary/api | lib/var.x:329 |
-| `int Var.is_list_binder(Var atom)` | verified example | etc/comptime.xlisp:424 | binding | advanced/api | lib/match.x:382 |
-| `int Var.is_match_op(Var atom)` | verified example | etc/comptime.xlisp:425 | binding | advanced/api | lib/match.x:390 |
-| `int Var.is_nil(Var v)` | verified example | etc/comptime.xlisp:432 | binding | primary/api | lib/var.x:393 |
-| `int Var.is_null(Var v)` | verified example | etc/comptime.xlisp:433 | binding | primary/api | lib/var.x:376 |
-| `int Var.is_object(Var v)` | verified example | etc/comptime.xlisp:430 | binding | primary/api | lib/var.x:343 |
-| `int Var.is_pointer(Var v)` | verified example | etc/comptime.xlisp:428 | internal | primary/api | lib/var.x:332 |
-| `int Var.is_reference(Var v)` | verified example | etc/comptime.xlisp:429 | binding | primary/api | lib/var.x:334 |
-| `inline int Var.is_row( Var value, unsigned top, unsigned long mask, unsigned long bottom)` | verified example | etc/comptime.xlisp:543 | internal | advanced/api | lib/common.x:612 |
-| `int Var.is_void(Var v)` | verified example | etc/comptime.xlisp:434 | binding | primary/api | lib/var.x:365 |
-| `inline int Var.is_wide(Var v)` | verified example | etc/comptime.xlisp:431 | binding | advanced/api | lib/common.x:454 |
-| `Iter Var.iter(Var x, Iter dest)` | verified example | etc/comptime.xlisp:179 | resource | primary/api | lib/dispatch.x:931 |
+| `float Var.float(Var x)` | verified example | etc/comptime.xlisp:433 | binding | advanced/api | lib/common.x:763 |
+| `double Var.floating(Var v)` | verified example | etc/comptime.xlisp:307 | binding | advanced/api | lib/var.x:714 |
+| `Func Var.func(Var value)` | bound, unverified | etc/comptime.xlisp:334 | callback | advanced/api | lib/func.x:439 |
+| `Var Var.getindex(Var value, Var key)` | verified example | etc/comptime.xlisp:576 | binding | primary/api | lib/dispatch.x:383 |
+| `unsigned Var.hash(Var v)` | verified example | etc/comptime.xlisp:443 | binding | advanced/api | lib/dispatch.x:738 |
+| `int Var.int(Var x)` | verified example | etc/comptime.xlisp:424 | binding | advanced/api | lib/common.x:679 |
+| `long Var.integer(Var v)` | verified example | etc/comptime.xlisp:306 | binding | advanced/api | lib/var.x:759 |
+| `Var Var.integer_box(Symbol target, unsigned long long raw)` | verified example | etc/comptime.xlisp:563 | internal | advanced/api | lib/varconvert.x:99 |
+| `int Var.integer_compare(Var a, Var b)` | verified example | etc/comptime.xlisp:564 | binding | advanced/api | lib/var.x:939 |
+| `int Var.integer_floating_compare(Var integer, Var floating)` | verified example | etc/comptime.xlisp:565 | binding | advanced/api | lib/var.x:967 |
+| `Symbol Var.integer_tag(int rank, int unsigned_value)` | verified example | etc/comptime.xlisp:566 | internal | advanced/api | lib/varconvert.x:41 |
+| `int Var.is(Var var, Symbol tag)` | verified example | etc/comptime.xlisp:308 | binding | primary/api | lib/var.x:296 |
+| `int Var.is_atom(Var value)` | verified example | etc/comptime.xlisp:445 | binding | primary/api | lib/atom.x:92 |
+| `int Var.is_atom_binder(Var atom)` | verified example | etc/comptime.xlisp:446 | binding | advanced/api | lib/match.x:377 |
+| `int Var.is_binder(Var atom)` | verified example | etc/comptime.xlisp:447 | binding | advanced/api | lib/match.x:387 |
+| `int Var.is_floating(Var v)` | verified example | etc/comptime.xlisp:450 | binding | primary/api | lib/var.x:321 |
+| `int Var.is_integer(Var v)` | verified example | etc/comptime.xlisp:451 | binding | primary/api | lib/var.x:329 |
+| `int Var.is_list_binder(Var atom)` | verified example | etc/comptime.xlisp:448 | binding | advanced/api | lib/match.x:382 |
+| `int Var.is_match_op(Var atom)` | verified example | etc/comptime.xlisp:449 | binding | advanced/api | lib/match.x:390 |
+| `int Var.is_nil(Var v)` | verified example | etc/comptime.xlisp:456 | binding | primary/api | lib/var.x:393 |
+| `int Var.is_null(Var v)` | verified example | etc/comptime.xlisp:457 | binding | primary/api | lib/var.x:376 |
+| `int Var.is_object(Var v)` | verified example | etc/comptime.xlisp:454 | binding | primary/api | lib/var.x:343 |
+| `int Var.is_pointer(Var v)` | verified example | etc/comptime.xlisp:452 | internal | primary/api | lib/var.x:332 |
+| `int Var.is_reference(Var v)` | verified example | etc/comptime.xlisp:453 | binding | primary/api | lib/var.x:334 |
+| `inline int Var.is_row( Var value, unsigned top, unsigned long mask, unsigned long bottom)` | verified example | etc/comptime.xlisp:567 | internal | advanced/api | lib/common.x:612 |
+| `int Var.is_void(Var v)` | verified example | etc/comptime.xlisp:458 | binding | primary/api | lib/var.x:365 |
+| `inline int Var.is_wide(Var v)` | verified example | etc/comptime.xlisp:455 | binding | advanced/api | lib/common.x:454 |
+| `Iter Var.iter(Var x, Iter dest)` | verified example | none found | resource | primary/api | lib/dispatch.x:931 |
 | `Job Var.job(Var)` | no binding found | none found | resource | unclassified generated/optional | lib/process.x (interface) |
-| `String Var.json(Var value)` | verified example | etc/comptime.xlisp:509 | binding | primary/optional | lib/json.x:560 |
+| `String Var.json(Var value)` | verified example | etc/comptime.xlisp:533 | binding | primary/optional | lib/json.x:560 |
 | `JsonBool Var.jsonbool(Var value)` | no binding found | none found | resource | primary/optional | lib/json.x:57 |
-| `Symbol Var.kind(Var v)` | verified example | etc/comptime.xlisp:275 | binding | advanced/api | lib/var.x:309 |
-| `int Var.known_tag(Symbol tag)` | verified example | etc/comptime.xlisp:544 | internal | advanced/api | lib/var.x:61 |
-| `inline List Var.list(Var value)` | verified example | etc/comptime.xlisp:302 | binding | advanced/api | lib/common.x:622 |
-| `ListChar Var.listchar(Var value)` | verified example | etc/comptime.xlisp:478 | resource | primary/optional | lib/typed-list.x:97 |
-| `ListDbl Var.listdbl(Var value)` | verified example | etc/comptime.xlisp:482 | resource | primary/optional | lib/typed-list.x:113 |
-| `ListFloat Var.listfloat(Var value)` | verified example | etc/comptime.xlisp:481 | resource | primary/optional | lib/typed-list.x:109 |
-| `ListInt Var.listint(Var value)` | verified example | etc/comptime.xlisp:480 | resource | primary/optional | lib/typed-list.x:105 |
-| `ListShort Var.listshort(Var value)` | verified example | etc/comptime.xlisp:479 | resource | primary/optional | lib/typed-list.x:101 |
-| `ListString Var.liststring(Var value)` | verified example | etc/comptime.xlisp:483 | resource | primary/optional | lib/typed-list.x:117 |
-| `ListSymbol Var.listsymbol(Var value)` | verified example | etc/comptime.xlisp:484 | resource | primary/optional | lib/typed-list.x:121 |
-| `long Var.long(Var x)` | verified example | etc/comptime.xlisp:401 | binding | advanced/api | lib/common.x:706 |
-| `long double Var.long_double(Var x)` | verified example | etc/comptime.xlisp:411 | binding | advanced/api | lib/common.x:753 |
-| `long double Var.long_double_value(Var v)` | verified example | etc/comptime.xlisp:416 | binding | advanced/api | lib/var.x:831 |
-| `long long Var.long_long(Var x)` | verified example | etc/comptime.xlisp:402 | binding | advanced/api | lib/common.x:729 |
-| `long long Var.long_long_value(Var v)` | verified example | etc/comptime.xlisp:414 | binding | advanced/api | lib/var.x:817 |
-| `long Var.long_value(Var v)` | verified example | etc/comptime.xlisp:412 | binding | advanced/api | lib/var.x:802 |
-| `inline Map Var.map(Var value)` | verified example | etc/comptime.xlisp:395 | binding | advanced/api | lib/common.x:623 |
+| `Symbol Var.kind(Var v)` | verified example | etc/comptime.xlisp:299 | binding | advanced/api | lib/var.x:309 |
+| `int Var.known_tag(Symbol tag)` | verified example | etc/comptime.xlisp:568 | internal | advanced/api | lib/var.x:61 |
+| `inline List Var.list(Var value)` | verified example | etc/comptime.xlisp:326 | binding | advanced/api | lib/common.x:622 |
+| `ListChar Var.listchar(Var value)` | verified example | etc/comptime.xlisp:502 | resource | primary/optional | lib/typed-list.x:97 |
+| `ListDbl Var.listdbl(Var value)` | verified example | etc/comptime.xlisp:506 | resource | primary/optional | lib/typed-list.x:113 |
+| `ListFloat Var.listfloat(Var value)` | verified example | etc/comptime.xlisp:505 | resource | primary/optional | lib/typed-list.x:109 |
+| `ListInt Var.listint(Var value)` | verified example | etc/comptime.xlisp:504 | resource | primary/optional | lib/typed-list.x:105 |
+| `ListShort Var.listshort(Var value)` | verified example | etc/comptime.xlisp:503 | resource | primary/optional | lib/typed-list.x:101 |
+| `ListString Var.liststring(Var value)` | verified example | etc/comptime.xlisp:507 | resource | primary/optional | lib/typed-list.x:117 |
+| `ListSymbol Var.listsymbol(Var value)` | verified example | etc/comptime.xlisp:508 | resource | primary/optional | lib/typed-list.x:121 |
+| `long Var.long(Var x)` | verified example | etc/comptime.xlisp:425 | binding | advanced/api | lib/common.x:706 |
+| `long double Var.long_double(Var x)` | verified example | etc/comptime.xlisp:435 | binding | advanced/api | lib/common.x:753 |
+| `long double Var.long_double_value(Var v)` | verified example | etc/comptime.xlisp:440 | binding | advanced/api | lib/var.x:831 |
+| `long long Var.long_long(Var x)` | verified example | etc/comptime.xlisp:426 | binding | advanced/api | lib/common.x:729 |
+| `long long Var.long_long_value(Var v)` | verified example | etc/comptime.xlisp:438 | binding | advanced/api | lib/var.x:817 |
+| `long Var.long_value(Var v)` | verified example | etc/comptime.xlisp:436 | binding | advanced/api | lib/var.x:802 |
+| `inline Map Var.map(Var value)` | verified example | etc/comptime.xlisp:419 | binding | advanced/api | lib/common.x:623 |
 | `MapIntInt Var.mapintint(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:289 |
 | `MapLongDouble Var.maplongdouble(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:309 |
 | `MapStringInt Var.mapstringint(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:383 |
 | `MapStringString Var.mapstringstring(Var value)` | no binding found | none found | resource | primary/optional | lib/typed-map.x:346 |
 | `Var Var.matmul(Var lhs, Var rhs)` | no binding found | none found | syntax | primary/api | lib/varops.x:418 |
-| `Var Var.mod(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:439 | syntax | primary/api | lib/varops.x:433 |
+| `Var Var.mod(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:463 | syntax | primary/api | lib/varops.x:433 |
 | `Self Var.move_wide_to(Self value, Scope *scope)` | no binding found | none found | ownership, resource, pointer, internal | internal/api | lib/var.x:567 |
-| `Var Var.mul(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:437 | syntax | primary/api | lib/varops.x:412 |
-| `Var Var.neg(Var value)` | verified example | etc/comptime.xlisp:440 | syntax | primary/api | lib/varops.x:442 |
+| `Var Var.mul(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:461 | syntax | primary/api | lib/varops.x:412 |
+| `Var Var.neg(Var value)` | verified example | etc/comptime.xlisp:464 | syntax | primary/api | lib/varops.x:442 |
 | `Var Var.new(Symbol tag, ...)` | no binding found | none found | pointer | primary/api | lib/var.x:649 |
-| `Var Var.null(void)` | verified example | etc/comptime.xlisp:553 | binding | primary/api | lib/var.x:381 |
+| `Var Var.null(void)` | verified example | etc/comptime.xlisp:577 | binding | primary/api | lib/var.x:381 |
 | `void Var.numeric_decode(Var value, X2CVarNumeric *out)` | no binding found | none found | pointer, internal | advanced/api | lib/varconvert.x:79 |
 | `int Var.numeric_info(Symbol tag, X2CVarNumericInfo *out)` | no binding found | none found | pointer, internal | advanced/api | lib/varconvert.x:147 |
-| `Var Var.parse(String str, Symbol kind)` | verified example | etc/comptime.xlisp:280 | binding | advanced/api | lib/var.x:1068 |
-| `inline unsigned Var.payload32(Var value)` | verified example | etc/comptime.xlisp:545 | internal | advanced/api | lib/common.x:460 |
+| `Var Var.parse(String str, Symbol kind)` | verified example | etc/comptime.xlisp:304 | binding | advanced/api | lib/var.x:1068 |
+| `inline unsigned Var.payload32(Var value)` | verified example | etc/comptime.xlisp:569 | internal | advanced/api | lib/common.x:460 |
 | `void *Var.pointer(Var v)` | no binding found | none found | pointer, internal | advanced/api | lib/var.x:1022 |
 | `String Var.pointer_string(Var v)` | no binding found | none found | internal | advanced/api | lib/dispatch.x:211 |
 | `Var Var.postfix(Var *lhs, Symbol op)` | no binding found | none found | pointer, syntax | primary/api | lib/varops.x:560 |
-| `Var Var.postfixindex(Var value, Var key, Symbol op)` | verified example | etc/comptime.xlisp:444 | syntax | primary/api | lib/dispatch.x:432 |
-| `String Var.pretty_json(Var value)` | verified example | etc/comptime.xlisp:510 | binding | primary/optional | lib/json.x:565 |
+| `Var Var.postfixindex(Var value, Var key, Symbol op)` | verified example | etc/comptime.xlisp:468 | syntax | primary/api | lib/dispatch.x:432 |
+| `String Var.pretty_json(Var value)` | verified example | etc/comptime.xlisp:534 | binding | primary/optional | lib/json.x:565 |
 | `Regex Var.regex(Var)` | no binding found | none found | resource | unclassified generated/optional | lib/regex.x (interface) |
 | `RegexCapture Var.regexcapture(Var value)` | no binding found | none found | resource | primary/optional | lib/regex.x:745 |
 | `RegexMatch Var.regexmatch(Var value)` | no binding found | none found | resource | primary/optional | lib/regex.x:748 |
 | `int Var.register_object_tag(Symbol tag)` | no binding found | none found | ownership | advanced/api | lib/var.x:240 |
-| `String Var.repr(Var v)` | verified example | etc/comptime.xlisp:313 | binding | advanced/api | lib/dispatch.x:605 |
-| `int Var.same(Var a, Var b)` | verified example | etc/comptime.xlisp:420 | binding | advanced/api | lib/dispatch.x:786 |
-| `Var Var.setindex(Var value, Var key, Var replacement)` | verified example | etc/comptime.xlisp:442 | binding | primary/api | lib/dispatch.x:398 |
-| `short Var.short(Var x)` | verified example | etc/comptime.xlisp:399 | binding | advanced/api | lib/common.x:661 |
-| `long long Var.signed_from_bits(unsigned long long raw, int bits)` | verified example | etc/comptime.xlisp:546 | internal | advanced/api | lib/varconvert.x:60 |
+| `String Var.repr(Var v)` | verified example | etc/comptime.xlisp:337 | binding | advanced/api | lib/dispatch.x:605 |
+| `int Var.same(Var a, Var b)` | verified example | etc/comptime.xlisp:444 | binding | advanced/api | lib/dispatch.x:786 |
+| `Var Var.setindex(Var value, Var key, Var replacement)` | verified example | etc/comptime.xlisp:466 | binding | primary/api | lib/dispatch.x:398 |
+| `short Var.short(Var x)` | verified example | etc/comptime.xlisp:423 | binding | advanced/api | lib/common.x:661 |
+| `long long Var.signed_from_bits(unsigned long long raw, int bits)` | verified example | etc/comptime.xlisp:570 | internal | advanced/api | lib/varconvert.x:60 |
 | `String Var.str(Var v)` | verified example | etc/init.xlisp:108 | binding | advanced/api | lib/dispatch.x:536 |
-| `inline String Var.string(Var value)` | verified example | etc/comptime.xlisp:396 | binding | advanced/api | lib/common.x:624 |
-| `Var Var.sub(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:436 | syntax | primary/api | lib/varops.x:406 |
-| `inline Symbol Var.symbol(Var x)` | verified example | etc/comptime.xlisp:397 | binding | advanced/api | lib/common.x:629 |
-| `Symbol Var.tag(Var v)` | verified example | etc/comptime.xlisp:274 | binding | advanced/api | lib/var.x:282 |
+| `inline String Var.string(Var value)` | verified example | etc/comptime.xlisp:420 | binding | advanced/api | lib/common.x:624 |
+| `Var Var.sub(Var lhs, Var rhs)` | verified example | etc/comptime.xlisp:460 | syntax | primary/api | lib/varops.x:406 |
+| `inline Symbol Var.symbol(Var x)` | verified example | etc/comptime.xlisp:421 | binding | advanced/api | lib/common.x:629 |
+| `Symbol Var.tag(Var v)` | verified example | etc/comptime.xlisp:298 | binding | advanced/api | lib/var.x:282 |
 | `inline Token Var.token(Var x)` | no binding found | none found | resource, internal | primary/internal | lib/tokenizer.x:36 |
-| `int Var.truth(Var value)` | verified example | etc/comptime.xlisp:441 | syntax | primary/api | lib/varops.x:360 |
+| `int Var.truth(Var value)` | verified example | etc/comptime.xlisp:465 | syntax | primary/api | lib/varops.x:360 |
 | `int Var.try_dispatch_binary(Var lhs, Symbol member, Var rhs, Var *result)` | no binding found | none found | pointer, internal | advanced/api | lib/dispatch.x:63 |
 | `int Var.try_dispatch_unary(Var value, Symbol member, Var *result)` | no binding found | none found | pointer, internal | advanced/api | lib/dispatch.x:88 |
 | `int Var.try_export_context(Var value, Context source, Var *out)` | no binding found | none found | resource, pointer, internal | internal/api | lib/dispatch.x:944 |
-| `uchar Var.uchar(Var x)` | verified example | etc/comptime.xlisp:405 | binding | advanced/api | lib/common.x:652 |
-| `uint Var.uint(Var x)` | verified example | etc/comptime.xlisp:406 | binding | advanced/api | lib/common.x:688 |
-| `ulong Var.ulong(Var x)` | verified example | etc/comptime.xlisp:407 | binding | advanced/api | lib/common.x:718 |
-| `unsigned long long Var.ulong_long(Var x)` | verified example | etc/comptime.xlisp:408 | binding | advanced/api | lib/common.x:741 |
-| `unsigned long long Var.ulong_long_value(Var v)` | verified example | etc/comptime.xlisp:415 | binding | advanced/api | lib/var.x:821 |
-| `unsigned long Var.ulong_value(Var v)` | verified example | etc/comptime.xlisp:413 | binding | advanced/api | lib/var.x:813 |
-| `unsigned Var.unsigned(Var x)` | verified example | etc/comptime.xlisp:403 | binding | advanced/api | lib/common.x:697 |
+| `uchar Var.uchar(Var x)` | verified example | etc/comptime.xlisp:429 | binding | advanced/api | lib/common.x:652 |
+| `uint Var.uint(Var x)` | verified example | etc/comptime.xlisp:430 | binding | advanced/api | lib/common.x:688 |
+| `ulong Var.ulong(Var x)` | verified example | etc/comptime.xlisp:431 | binding | advanced/api | lib/common.x:718 |
+| `unsigned long long Var.ulong_long(Var x)` | verified example | etc/comptime.xlisp:432 | binding | advanced/api | lib/common.x:741 |
+| `unsigned long long Var.ulong_long_value(Var v)` | verified example | etc/comptime.xlisp:439 | binding | advanced/api | lib/var.x:821 |
+| `unsigned long Var.ulong_value(Var v)` | verified example | etc/comptime.xlisp:437 | binding | advanced/api | lib/var.x:813 |
+| `unsigned Var.unsigned(Var x)` | verified example | etc/comptime.xlisp:427 | binding | advanced/api | lib/common.x:697 |
 | `Var Var.update(Var *lhs, Symbol op, Var rhs)` | no binding found | none found | pointer, syntax | primary/api | lib/varops.x:528 |
-| `Var Var.updateindex(Var value, Var key, Symbol op, Var rhs)` | verified example | etc/comptime.xlisp:443 | syntax | primary/api | lib/dispatch.x:416 |
-| `ushort Var.ushort(Var x)` | verified example | etc/comptime.xlisp:404 | binding | advanced/api | lib/common.x:670 |
-| `int Var.wide_compare(Var a, Var b)` | verified example | etc/comptime.xlisp:547 | internal | advanced/api | lib/var.x:991 |
-| `int Var.wide_equal(Var a, Var b)` | verified example | etc/comptime.xlisp:548 | internal | advanced/api | lib/var.x:874 |
-| `unsigned Var.wide_hash(Var v)` | verified example | etc/comptime.xlisp:549 | internal | advanced/api | lib/var.x:841 |
+| `Var Var.updateindex(Var value, Var key, Symbol op, Var rhs)` | verified example | etc/comptime.xlisp:467 | syntax | primary/api | lib/dispatch.x:416 |
+| `ushort Var.ushort(Var x)` | verified example | etc/comptime.xlisp:428 | binding | advanced/api | lib/common.x:670 |
+| `int Var.wide_compare(Var a, Var b)` | verified example | etc/comptime.xlisp:571 | internal | advanced/api | lib/var.x:991 |
+| `int Var.wide_equal(Var a, Var b)` | verified example | etc/comptime.xlisp:572 | internal | advanced/api | lib/var.x:874 |
+| `unsigned Var.wide_hash(Var v)` | verified example | etc/comptime.xlisp:573 | internal | advanced/api | lib/var.x:841 |
 | `Scope Var.wide_owner(Var v)` | no binding found | none found | ownership, resource, internal | internal/api | lib/var.x:574 |
-| `unsigned long long Var.width_mask(int bits)` | verified example | etc/comptime.xlisp:550 | internal | advanced/api | lib/varconvert.x:53 |
+| `unsigned long long Var.width_mask(int bits)` | verified example | etc/comptime.xlisp:574 | internal | advanced/api | lib/varconvert.x:53 |
 | `Buffer Var.write_pointer_repr(Var v, Buffer out)` | no binding found | none found | resource, internal | advanced/api | lib/dispatch.x:218 |
 | `Buffer Var.write_repr(Var v, Buffer out)` | no binding found | none found | resource | advanced/api | lib/dispatch.x:697 |
 | `Buffer Var.write_str(Var v, Buffer out)` | no binding found | none found | resource | primary/api | lib/dispatch.x:581 |
@@ -2686,6 +2690,7 @@ meta int audit_probe(void) { Symbol s = <abc>; return s.var().tag() == <symbol> 
 | `Var.file` | lib/common.x / native File contracts | native resource contract | Extracts the `File` payload of `value`, or NULL for another tag. | The signature crosses File handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/common.x's handle and effect contract for Var.file; add only a scoped native adapter after those obligations are specified. |
 | `Var.float` | lib/common.x / Var value operations | implementable with current values | Returns `x` as a native `float` under the `Var.convert` rules. Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, or invalidly encoded. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Var.floating` | lib/var.x / Var value operations | implementable with current values | Returns `v`'s payload as a `double` when its tag is floating, or 0.0. Handles `<f32>`, `<f64>`, and `<ldouble>`, and reconstructs NaN, `+Inf`, and `-Inf` from their discrete tags. An `<ldouble>` payload is narrowed to `double`; call `Var.long_double_value` to keep the full precision. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.func` | lib/func.x / Var interpreted callbacks | needs callback adapter | Returns the borrowed native callable carried by `value`. Raises: `<bad-types>` when the value is not a `Func`. | The runtime takes native Func while meta closures are evaluator callables. The binding uses a session-bound Func adapter. Validate the existing binding against this contract: Use Lisp.apply through a reusable Func context for Var.func; check its documented callback order, null callback and empty-input cases. |
 | `Var.getindex` | lib/dispatch.x / absence and null values | implementable with current values | Reads a dynamic indexed value through the receiver's protocol row. Raises: `<bad-enc>`, `<void-op>`, or `<no-member>` when the dynamic receiver cannot be indexed. | Raw evaluator slots keep runtime void, Null and empty List distinct. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Var.hash` | lib/dispatch.x / Var value operations | implementable with current values | Returns the runtime hash of `Var`. Raises: `<void-op>` for `void`. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Var.int` | lib/common.x / Var value operations | implementable with current values | Returns `x` as a native `int` under the `Var.convert` rules. Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out of floating range, or invalidly encoded. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
@@ -2710,7 +2715,7 @@ meta int audit_probe(void) { Symbol s = <abc>; return s.var().tag() == <symbol> 
 | `Var.is_row` | lib/common.x / numeric and descriptor internals | implementable with current values | Reports whether `value` occupies the encoding row at `top`/`bottom`. `mask` selects the bits the decoder discriminates on within `top`'s group, so a caller that already knows the row tests it with two compares instead of a decode. `var-tags.xmacro` projects the rows that qualify; a row whose decoded form carries a validity clause is not one of them and must ask `Var.is`. | The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Var.is_void` | lib/var.x / absence and null values | implementable with current values | Reports whether `v` is the absence sentinel `void`. An API returns `void` to say there is nothing here. It is excluded from every collection and iterator value domain: it cannot be pushed into an `Array` or stored in a `Map`. Equality and identity still inspect it. Two sentinels compare equal and identical, while one sentinel and one ordinary value compare unequal. Truthiness, hashing, ordering, conversion, and iteration on `void` raise to a matching catch or terminate. | Raw evaluator slots keep runtime void, Null and empty List distinct. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Var.is_wide` | lib/common.x / Var value operations | implementable with current values | Reports whether `v` uses a scope-owned wide numeric box. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
-| `Var.iter` | lib/dispatch.x / native iterator state | needs representation decision | Returns an iterator over `Var`. Raises: `<void-op>` for `void`. A null `dest` returns NULL without raising. | Iter contains caller-owned state and a native next callback; collection producers are lazy. The binding allocates private iterator storage in the session Scope and leaves the public caller-storage API unchanged. The listed native/meta comparison is verified; no binding work remains for that case. |
+| `Var.iter` | lib/dispatch.x / native iterator state | needs representation decision | Returns an iterator over `Var`. Raises: `<void-op>` for `void`. A null `dest` returns NULL without raising. | Iter contains caller-owned state and a native next callback; collection producers are lazy. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Var.job` | lib/process.x / native Job contracts | native resource contract | Interface only; inspect the producer. | The signature crosses Job handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/process.x's handle and effect contract for Var.job; add only a scoped native adapter after those obligations are specified. |
 | `Var.json` | lib/json.x / Var value operations | implementable with current values | Returns `value` as compact JSON text. `Map` names are written in byte order and must be `String`s or `Symbol`s with distinct spellings; a `Symbol` value is written as a string. A `List` is written as an array. A `double` is written with the fewest digits that read back to the same value. Each maximal ill-formed UTF-8 subsequence in a string is written as U+FFFD, as Python and JavaScript decoders replace it. Raises: `<bad-types>` for a value or name JSON cannot hold, `<bad-arg>` for a `String` and a `Symbol` name with the same spelling, `<conv-range>` for NaN or an infinity, or `<size-limit>` for nesting deeper than 512 levels. | The signature uses represented values and an existing runtime owner. The listed native/meta comparison is verified; no binding work remains for that case. |
 | `Var.jsonbool` | lib/json.x / native JsonBool contracts | native resource contract | Unboxes a JSON boolean from a `Var` produced by `JsonBool.var`. | The signature crosses JsonBool handles whose storage, lifetime or effects are outside ordinary value bindings. Review lib/json.x's handle and effect contract for Var.jsonbool; add only a scoped native adapter after those obligations are specified. |

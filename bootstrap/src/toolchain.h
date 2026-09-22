@@ -55,7 +55,7 @@ int ToolRun_wait(ToolRun execution);
 
 int ToolAction_run(ToolAction action);
 
-int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, const char * imacros, String * output, String * errors, String * dependencies);
+int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, const char * imacros, int expand_system_headers, String * output, String * errors, String * dependencies);
 
 
 #endif /* __GUARD_0x242786A8__ */

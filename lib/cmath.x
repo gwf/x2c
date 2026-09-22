@@ -2,67 +2,128 @@
 
     Copyright (c) 2026 Gary William Flake
 
-    x2c never reads system headers, so these prototypes are what let a `Var`
-    argument unbox at a `<math.h>` call. The unit still includes `<math.h>`
-    itself and links against libm where the host needs it.
+    Normal declaration collection does not expand system headers, so these
+    prototypes are what let a `Var` argument unbox at a `<math.h>` call.
+    Every one is marked `meta`, so the compiler links it and compile-time
+    code calls the native function, including through an output pointer
+    such as `frexp`'s. The unit still includes `<math.h>` itself and links
+    against libm where the host needs it.
 */
 
 #pragma once
 
-double acos(double);
-double asin(double);
-double atan(double);
-double atan2(double, double);
-double cos(double);
-double sin(double);
-double tan(double);
-double acosh(double);
-double asinh(double);
-double atanh(double);
-double cosh(double);
-double sinh(double);
-double tanh(double);
-double exp(double);
-double exp2(double);
-double expm1(double);
-double log(double);
-double log10(double);
-double log1p(double);
-double log2(double);
-double logb(double);
-double frexp(double, int *);
-double ldexp(double, int);
-double modf(double, double *);
-double scalbn(double, int);
-double scalbln(double, long);
-double cbrt(double);
-double fabs(double);
-double hypot(double, double);
-double pow(double, double);
-double sqrt(double);
-double erf(double);
-double erfc(double);
-double lgamma(double);
-double tgamma(double);
-double ceil(double);
-double floor(double);
-double nearbyint(double);
-double rint(double);
-double round(double);
-double trunc(double);
-double fmod(double, double);
-double remainder(double, double);
-double remquo(double, double, int *);
-double copysign(double, double);
-double nan(const char *);
-double nextafter(double, double);
-double nexttoward(double, long double);
-double fdim(double, double);
-double fmax(double, double);
-double fmin(double, double);
-double fma(double, double, double);
-int ilogb(double);
-long lrint(double);
-long lround(double);
-long long llrint(double);
-long long llround(double);
+meta double acos(double);
+meta double asin(double);
+meta double atan(double);
+meta double atan2(double, double);
+meta double cos(double);
+meta double sin(double);
+meta double tan(double);
+meta double acosh(double);
+meta double asinh(double);
+meta double atanh(double);
+meta double cosh(double);
+meta double sinh(double);
+meta double tanh(double);
+meta double exp(double);
+meta double exp2(double);
+meta double expm1(double);
+meta double log(double);
+meta double log10(double);
+meta double log1p(double);
+meta double log2(double);
+meta double logb(double);
+meta double frexp(double, int *);
+meta double ldexp(double, int);
+meta double modf(double, double *);
+meta double scalbn(double, int);
+meta double scalbln(double, long);
+meta double cbrt(double);
+meta double fabs(double);
+meta double hypot(double, double);
+meta double pow(double, double);
+meta double sqrt(double);
+meta double erf(double);
+meta double erfc(double);
+meta double lgamma(double);
+meta double tgamma(double);
+meta double ceil(double);
+meta double floor(double);
+meta double nearbyint(double);
+meta double rint(double);
+meta double round(double);
+meta double trunc(double);
+meta double fmod(double, double);
+meta double remainder(double, double);
+meta double remquo(double, double, int *);
+meta double copysign(double, double);
+meta double nan(const char *);
+meta double nextafter(double, double);
+meta double nexttoward(double, long double);
+meta double fdim(double, double);
+meta double fmax(double, double);
+meta double fmin(double, double);
+meta double fma(double, double, double);
+meta int ilogb(double);
+meta long lrint(double);
+meta long lround(double);
+meta long long llrint(double);
+meta long long llround(double);
+
+meta float acosf(float);
+meta float asinf(float);
+meta float atanf(float);
+meta float atan2f(float, float);
+meta float cosf(float);
+meta float sinf(float);
+meta float tanf(float);
+meta float acoshf(float);
+meta float asinhf(float);
+meta float atanhf(float);
+meta float coshf(float);
+meta float sinhf(float);
+meta float tanhf(float);
+meta float expf(float);
+meta float exp2f(float);
+meta float expm1f(float);
+meta float logf(float);
+meta float log10f(float);
+meta float log1pf(float);
+meta float log2f(float);
+meta float logbf(float);
+meta float frexpf(float, int *);
+meta float ldexpf(float, int);
+meta float modff(float, float *);
+meta float scalbnf(float, int);
+meta float scalblnf(float, long);
+meta float cbrtf(float);
+meta float fabsf(float);
+meta float hypotf(float, float);
+meta float powf(float, float);
+meta float sqrtf(float);
+meta float erff(float);
+meta float erfcf(float);
+meta float lgammaf(float);
+meta float tgammaf(float);
+meta float ceilf(float);
+meta float floorf(float);
+meta float nearbyintf(float);
+meta float rintf(float);
+meta float roundf(float);
+meta float truncf(float);
+meta float fmodf(float, float);
+meta float remainderf(float, float);
+meta float remquof(float, float, int *);
+meta float copysignf(float, float);
+meta float nanf(const char *);
+meta float nextafterf(float, float);
+meta float nexttowardf(float, long double);
+meta float fdimf(float, float);
+meta float fmaxf(float, float);
+meta float fminf(float, float);
+meta float fmaf(float, float, float);
+meta int ilogbf(float);
+meta long lrintf(float);
+meta long lroundf(float);
+meta long long llrintf(float);
+meta long long llroundf(float);

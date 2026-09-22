@@ -15,6 +15,9 @@
 #include "list.x"
 #include "string.x"
 
+Func Var.func(Var value);
+protocol Var(Func);
+
 /** Storage for either the value or reference member selected by `FuncArg`.
     Pointer-bearing `Var` storage and referenced objects belong to the caller.
 */
@@ -236,6 +239,30 @@ void *x2c_func_reference_argument(
   return (void *) argv[i].data.reference;
 }
 
+/** Returns the address value argument `i` carries. Generated adapters use it
+    for a pointer parameter with no `Var` tag of its own, such as
+    `const char *` or `struct timespec *`, and for a record passed by value,
+    whose bytes the adapter copies. Any pointer, reference, or `String`
+    argument is accepted, as C converts it to the parameter's pointer type.
+    Raises: `<bad-types>` for any other argument.
+*/
+void *x2c_func_pointer_argument(Func fn, const FuncArg *argv, unsigned i) {
+  Var value = argv[i].data.value;
+  Symbol kind = value.kind();
+  if (argv[i].reference_type ||
+      (kind != <pointer> && kind != <reference> && value is not <string>)) {
+    List sig = fn ? fn.sig : NULL;
+    raise %(bad-types (sig $sig) (index $i) (actual ${value.tag()})
+                      (want pointer));
+  }
+  return value.pointer();
+}
+
+/** Boxes a record result as a `<p48>` to a copy of its `size` bytes in the
+    active `Scope`. */
+Var x2c_func_record_result(const void *bytes, size_t size) =>
+  Var.new(<p48>, Scope.memdup(bytes, size));
+
 /** Rejects a value argument whose source type has no `Var` representation.
     Generated calls use this branch instead of compiling an impossible
     conversion. Raises: `<bad-types>`.
@@ -336,6 +363,14 @@ Func Func.new_context(
   const void *context, size_t context_size) =>
     _new(adapter, signature, 0, context, context_size);
 
+/** Returns a native binding's borrowed canonical signature.
+    The result has the `((func (PARAMETERS...)) RESULT...)` shape supplied to
+    the constructor and remains valid for the binding's lifetime. */
+List Func.signature(Func function) {
+  if (!function) raise %(bad-arg (operation "Func.signature"));
+  return function.sig;
+}
+
 /** Returns borrowed read-only access to a `Func`'s copied context.
     The pointer remains valid only for the `Func`'s `Scope` lifetime and is
     NULL
@@ -398,3 +433,11 @@ Var Func.apply(Func f, unsigned argc, const FuncArg *argv) {
     lifetime.
 */
 Var Func.var(Func function) => Var.new(<func>, function);
+
+/** Returns the borrowed native callable carried by `value`.
+    Raises: `<bad-types>` when the value is not a `Func`. */
+Func Var.func(Var value) {
+  if (value is not <func>)
+    raise %(bad-types (want func) (actual ${value.tag()}));
+  return value.pointer();
+}

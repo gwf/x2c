@@ -70,6 +70,9 @@ typedef struct Compiler{
   int prelude;
   Array meta_defs;
   Map meta_folds, meta_impure, meta_comptime;
+  Map meta_values;
+  Map meta_layouts;
+  Map native_meta;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   int meta_body;
   int import_protocols;
@@ -346,6 +349,8 @@ Type Sym_lookup_field(Sym sym, Type type, List field);
 void Sym_declare_field_order(Sym sym, Type type, List fields);
 
 List Sym_field_order(Sym sym, Type type);
+
+List Compiler_meta_type_layout(Compiler c, Type type);
 
 void Sym_declare_delegate_field(Sym sym, Type aggregate, String name);
 

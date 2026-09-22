@@ -347,6 +347,30 @@ static List _checked_func_argument(
     return compiler.convert_expression(picked, pointer);
   }
   Symbol tag = compiler.sym.var_tag_for_type(parameter_type, NULL);
+  Type resolved = compiler.sym.resolve_key(parameter_type);
+  if (!tag && resolved &&
+      (resolved.is_pointer() || resolved.car() == <struct>)) {
+    /* A pointer with no Var tag of its own arrives as `<p48>`, and so does
+       a record passed by value, as the address of its bytes. */
+    List pointer_type = NULL;
+    List pointer_helper = _adapter_helper(
+      compiler, "x2c_func_pointer_argument", &pointer_type);
+    List picked = %(
+      expr (* void)
+        (call (expr $pointer_type (ident $pointer_helper))
+              (args (expr ("Func") (ident $fn_binding))
+                    (expr (* const "FuncArg") (ident $argv_binding))
+                    ${_adapter_index_literal(index)}))
+    );
+    if (storage_type) *storage_type = parameter_type;
+    if (resolved.is_pointer())
+      return compiler.convert_expression(picked, parameter_type);
+    Symbol star = <"*">;
+    Type record_pointer = parameter_type.reference();
+    return %(expr $parameter_type
+               (op $star (expr $record_pointer
+                           (cast $record_pointer $picked))));
+  }
   if (!tag)
     _typed_adapter_error(
       compiler,
@@ -442,6 +466,25 @@ static List _build_func_adapter(
   List arguments = params.zip_with(
     names, %!(Type type, List binding) => %(expr $type (ident $binding)));
   List call = %(expr $return_type (call $target (args @arguments)));
+  Type resolved_result = c.sym.resolve_key(return_type);
+  if (resolved_result && resolved_result.car() == <struct>) {
+    /* A record result is returned as `<p48>` to a copy of its bytes. */
+    List result_type = NULL;
+    List result_helper = _adapter_helper(
+      c, "x2c_func_record_result", &result_type);
+    List result = c.sym.introduce(c.fresh_name("func_record"));
+    List (base, mods) = return_type.declaration_parts();
+    List address = %(expr ${return_type.reference()}
+                         (op & (expr $return_type (ident $result))));
+    call = %(block
+      (declare $base (bindings (op = (bind $result $mods) $call)))
+      (stmnt (return
+        (expr ("Var")
+          (call (expr $result_type (ident $result_helper))
+                (args $address
+                      (expr (unsigned long)
+                        (sizeof (expr $return_type (ident $result))))))))));
+  }
   _publish_func_adapter(
     c, adapter_binding, fn_binding, argv_binding, call, %(@prefix @locals));
   return adapter_binding;

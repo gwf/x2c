@@ -21,6 +21,7 @@ Source options:
       --no-cpp                Skip symbol collection and preprocessing
       --live-symbols          Collect symbols through the host preprocessor
       --cpp-symbols           Use CPP collection for this translation
+      --system-headers        Collect declarations from expanded system headers
 
 Inspection options:
       --dump-tokens           Print source tokens and stop

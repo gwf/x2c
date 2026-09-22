@@ -43,6 +43,10 @@ Var x2c_func_value_argument(Func fn, const FuncArg * argv, unsigned i, Symbol wa
 
 void * x2c_func_reference_argument(Func fn, const FuncArg * argv, unsigned i, List want);
 
+void * x2c_func_pointer_argument(Func fn, const FuncArg * argv, unsigned i);
+
+Var x2c_func_record_result(const void * bytes, size_t size);
+
 FuncArg x2c_func_unrepresentable_argument(Func fn, unsigned i, List source);
 
 Func Func_new(FuncAdapter adapter, List signature);
@@ -51,11 +55,15 @@ Func Func_new_rest(FuncAdapter adapter, List signature);
 
 Func Func_new_context(FuncAdapter adapter, List signature, const void * context, size_t context_size);
 
+List Func_signature(Func function);
+
 const void * Func_context(Func function);
 
 Var Func_apply(Func f, unsigned argc, const FuncArg * argv);
 
 Var Func_var(Func function);
+
+Func Var_func(Var value);
 
 
 #endif /* __GUARD_0xC7068438__ */

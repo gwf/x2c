@@ -465,17 +465,58 @@ static int _lisp_value_type(Type type) {
   return 0;
 }
 
-static Type _lisp_resolve_type(Type type) {
+static Type _lisp_resolve_type(Compiler compiler, Type type) {
   type = type.canonicalize();
   for (int hops = 0; hops < 128; hops++) {
     if (_lisp_value_type(type)) return type;
     if (!type.is_bare_typedef_name() && !type.is_typedef()) return type;
     Type next = NULL;
-    macro_sdk_compiler.sym.resolve_global(type, &next);
+    compiler.sym.resolve_global(type, &next);
     if (!next || next == type) return type;
     type = next.canonicalize();
   }
   return type;
+}
+
+/* Keep declaration-derived signatures identical to the generated Func
+   inventory, whose compact scalar tags are the Lisp calling convention. */
+static Type _lisp_signature_type(Compiler compiler, Type type) {
+  type = _lisp_resolve_type(compiler, type);
+  Type signature = type.var_signature_type();
+  return signature ? signature : type;
+}
+
+/* Returns the declared native targets advertised by `meta` interface rows.
+   Sorting makes the generated adapter inventory independent of Map order. */
+static List _sdk_native_meta_targets(void) {
+  Compiler compiler = macro_sdk_compiler
+                    ? macro_sdk_compiler : macro_import_compiler;
+  if (!compiler) return %();
+  Map selected = {};
+  foreach (Var (key, value), compiler.sym.base_symbols()) {
+    (void) key;
+    match (value) case %(native-meta ?(String name) ?): selected[name] = 1;
+  }
+  Array names = [];
+  foreach (Var (name, present), selected) {
+    (void) present;
+    names.push(name);
+  }
+  List rows = %();
+  foreach (String name, names.sort()) rows = cons(%($name), rows);
+  return rows.reverse();
+}
+
+/* Builds the canonical signature stored by `Func` for one declared native
+   function. The native Lisp binding macros generate this same shape. */
+static List _native_meta_signature(Compiler c, Type type) {
+  type = type.canonicalize();
+  List source_parameters = _sdk_function_type_parameters(type);
+  Type source_result = type.apply(), Array parameters = [];
+  foreach (Var parameter, source_parameters)
+    parameters.push(_lisp_signature_type(c, parameter));
+  Type result = _lisp_signature_type(c, source_result);
+  return %((func ${parameters.list_free()}) @result);
 }
 
 static Var _sdk_native_function_type(List syntax) {
@@ -484,13 +525,7 @@ static Var _sdk_native_function_type(List syntax) {
     case %(function ? ? ?): value = _sdk_function_type(syntax);
     default: value = _sdk_syntax_type(syntax);
   }
-  Type type = value.type().canonicalize();
-  List source_parameters = _sdk_function_type_parameters(type);
-  Type source_result = type.apply(), Array parameters = [];
-  foreach (Var parameter, source_parameters)
-    parameters.push(_lisp_resolve_type(parameter));
-  Type result = _lisp_resolve_type(source_result);
-  return cons(%(func ${parameters.list_free()}), result);
+  return _native_meta_signature(macro_sdk_compiler, value.type());
 }
 
 static Var _sdk_function_parameter(List function, String wanted) {
@@ -993,6 +1028,7 @@ void macro_library_reset(void) {
    never writes into the shared library session's definitions. */
 static void _reset_unit_state(Compiler compiler) {
   compiler.macro_lisp.eval(%(def C._globals (Map.new)));
+  compiler.macro_lisp.eval(%(def C._meta_globals (Map.new)));
 }
 
 /* The five libraries and the message each failure reports, in the order a
@@ -1029,6 +1065,8 @@ static void _install_native_operations(Compiler compiler) {
     $lisp.bind(
       _.macro_lisp, "_x2c.function.native-type",
       _sdk_native_function_type);
+    $lisp.bind(
+      _.macro_lisp, "_x2c.native-meta.targets", _sdk_native_meta_targets);
     $lisp.bind(
       _.macro_lisp, "x2c.function.parameter",
       _sdk_function_parameter);
@@ -1452,11 +1490,147 @@ void Compiler.evaluate_declaration_effect(
   }
 }
 
+/** Applies a contextual `meta` marker to one initialized file-static value,
+    which is evaluated into the unit-local compile-time globals table. */
+void Compiler.install_meta_declaration(
+  Compiler c, List declaration, Token marker) {
+  match (declaration) {
+    case %(declare ?spec
+           (bindings
+             (op =
+               (!set ?bound (bind (binding ?(int id) ?(String name)) *))
+               ?initializer))): {
+      if (!spec.type().is_static())
+        c.report_error(
+          <parse>, "a meta value must have file-static storage", marker,
+          %("declaration: '$name'"));
+      Type type =
+        %(declare $spec (bindings $bound)).type_from_ast().declared();
+      List layout = type.is_function() ? NULL : c.meta_type_layout(type);
+      if (!layout)
+        c.report_error(
+          <type>, "this meta value has no compile-time representation",
+          marker, %("type: ${type.repr()}"));
+      int mutable = !type.contains(<const>);
+      c.meta_values[id] = %($mutable $layout);
+      if (!c.collect_protocols) c.run_declaration_effects();
+      _ensure_lisp(c);
+      Var form = c.lower_meta_initializer(type, id, initializer);
+      if (form is void) {
+        c.meta_values.del(id);
+        c.report_error(
+          <macro>, "this meta value could not be initialized", marker,
+          %("reason: ${c.lower_declined()}"));
+      }
+      try {
+        Var value = c.macro_lisp.eval(form);
+        c.macro_lisp.eval(%(C.mgdefine $id (quote $value)));
+      }
+      catch %(?code *detail): {
+        c.meta_values.del(id);
+        c.report_error(
+          <macro>, "this meta value could not be initialized", marker,
+          %("reason: ${cons(code, detail).repr()}"));
+      }
+      return;
+    }
+  }
+  c.report_error(
+    <parse>, "meta requires a function or one initialized static value",
+    marker, NULL);
+}
+
+static String _native_meta_name(Compiler c, List declaration, Token marker) {
+  String name = NULL;
+  match (declaration)
+    case %(declare ? (bindings (bind (binding ? ?(String spelling)) *))):
+      name = spelling;
+  if (!name)
+    c.report_error(
+      <parse>, "native meta function requires one direct name", marker, NULL);
+  return name;
+}
+
+/** The shallow interface retains the advertisement separately from the C
+   declaration. That lets a client install the trusted evaluator binding
+   without repeating the marker in every translation unit. */
+void Compiler.record_native_meta_effect(
+  Compiler c, List declaration, Token marker) {
+  String path = home_portable_path(Path.absolute(c.filename));
+  List key = %("source-node" (declaration $path ${marker.pos}));
+  if (declaration.type_from_ast().is_function()) {
+    Type type = declaration.type_from_ast().canonicalize();
+    String name = _native_meta_name(c, declaration, marker);
+    List signature = _native_meta_signature(c, type);
+    c.sym.set(key, %(native-meta $name $signature));
+  }
+}
+
+/* Binds a declared native function to the compiler's own linked target of
+   the same name. A declaration the running compiler does not link binds
+   nothing, and a meta body that calls it reports the missing binding. */
+static void _bind_native_meta(
+  Compiler c, String name, List signature, Token marker) {
+  Var function;
+  if (!c.macro_lisp.try_get(name, &function)) {
+    try function = c.macro_lisp.eval(%(bind $name (quote $signature)));
+    catch %(no-symbol *): return;
+    c.macro_lisp.set_global(name, function);
+  }
+  if (function is not <func> ||
+      !((Func) function.pointer()).signature().equal(signature))
+    c.report_error(
+      <type>, "native meta function declaration does not match its target",
+      marker, %("name: $name" "signature: ${signature.repr()}"));
+}
+
+static int _native_meta_effect_is_local(Compiler c, Var key) {
+  match (key)
+    case %("source-node" (declaration ?(String path) ?)):
+      return home_absolute_path(path).equal(Path.absolute(c.filename));
+  return 0;
+}
+
+/** Records the native advertisements retained by included interfaces. Each
+    binds on first use, so a unit with no compile-time code pays nothing. */
+void Compiler.install_native_meta_effects(Compiler c, Map globs) {
+  foreach (Var (key, value), globs) {
+    if (_native_meta_effect_is_local(c, key)) continue;
+    match (value)
+      case %(native-meta ?(String name) ?signature):
+        c.native_meta[name] = signature;
+  }
+}
+
+/** Binds an included native `meta` function the first time lowered code
+    calls `name`. Returns whether the macro session now binds it. */
+int Compiler.bind_native_meta(Compiler c, String name) {
+  Var signature, bound;
+  if (!c.native_meta.try_get(name, &signature)) return 0;
+  _bind_native_meta(c, name, signature, NULL);
+  return c.macro_lisp.try_get(name, &bound);
+}
+
+/** Installs a prototype-only `meta` function from the compiler's trusted
+    native target registry. The declaration keeps its ordinary runtime form;
+    unlike a lowered definition, this opaque native target is never foldable.
+*/
+void Compiler.install_native_meta_function(
+  Compiler c, List declaration, Token marker) {
+  Type type = declaration.type_from_ast().canonicalize();
+  String name = _native_meta_name(c, declaration, marker);
+
+  if (!c.collect_protocols) c.run_declaration_effects();
+  _ensure_lisp(c);
+  List signature = _native_meta_signature(c, type);
+  _bind_native_meta(c, name, signature, marker);
+}
+
 /** Installs a `meta` function in the macro session under its own name.
     A function whose two forms agree is foldable. One that reaches a compiler
-    operation has no runtime form, and neither do its callers. File-scope
-    state is refused because the compile-time session cannot read the
-    program's variables. Lowering failures are reported at the marker.
+    operation has no runtime form, and neither do its callers. Only
+    explicitly advertised file-scope state can be lowered. Lowering failures
+    are reported at the marker.
 */
 void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
   if (!c.collect_protocols) c.run_declaration_effects();
@@ -1475,15 +1649,10 @@ void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
     return;
   }
   if (installed) {
-    if (c.lower_reached_globals() && !c.lower_reached_meta())
-      c.report_error(
-        <macro>, "a meta function cannot reach file-scope state", marker,
-        %("reason: the compile-time form reads a table no unit initializer"
-          "writes, so the two forms answer differently"));
     match (fn)
       case %(function ? (bind (binding ?(int id) ?(String name)) *) ?):
         if (c.lower_reached_meta()) c.meta_comptime[name] = 1;
-        else c.meta_folds[id] = 1;
+        else if (!c.lower_reached_globals()) c.meta_folds[id] = 1;
     return;
   }
   c.report_error(

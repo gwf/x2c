@@ -70,7 +70,7 @@ Submits one complete candidate without printing or retaining a pending
 prefix. Only successfully initialized declarations publish new bindings;
 evaluation effects on previously published values survive failure.
 
-Source: `src/repl-session.x:312`
+Source: `src/repl-session.x:340`
 
 <a id="ReplSession.symbols"></a>
 #### ReplSession.symbols

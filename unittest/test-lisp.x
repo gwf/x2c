@@ -307,6 +307,12 @@ static Var _lisp_bound_raise(Var value) {
   return void;
 }
 
+static Var _lisp_source_frame_cell(Var fail) {
+  lisp_bytes(16);
+  if (fail.truth()) raise %(bad-state (operation "source-frame-test"));
+  return 41;
+}
+
 static void _install(Lisp lisp, const char *name, FuncAdapter fn, List sig) {
   Func func = Func.new(fn, sig);
   lisp.set_global(String.new(name), Func.var(func));
@@ -878,6 +884,31 @@ static void lisp_binding_storage_belongs_to_session(void) {
   EXPECT_INT_EQ((int) after.live_allocations, (int) before.live_allocations);
 }
 
+static void lisp_source_function_reclaims_normal_and_error_frames(void) {
+  Lisp lisp = Lisp.kernel();
+  _install(lisp, "source-frame-cell", _lisp_source_frame_cell,
+           %((func (("Var"))) "Var"));
+  Var callable = lisp_source_function(
+    _ev(lisp, "(lambda (fail) (source-frame-cell fail))"));
+  lisp.set_global("source-frame", callable);
+  List normal = %(source-frame ()), failing = %(source-frame 1);
+
+  ScopeStats before = Scope.stats();
+  EXPECT_INT_EQ(Var.integer(lisp.eval(normal)), 41);
+  ScopeStats after_normal = Scope.stats();
+  EXPECT_INT_EQ((int) after_normal.live_scopes, (int) before.live_scopes);
+  EXPECT_INT_EQ(
+    (int) after_normal.live_allocations, (int) before.live_allocations);
+
+  int caught = 0;
+  try lisp.eval(failing);
+  catch %(bad-state *): caught = 1;
+  EXPECT_TRUE(caught);
+  ScopeStats after_error = Scope.stats();
+  EXPECT_INT_EQ((int) after_error.live_scopes, (int) before.live_scopes);
+  lisp.destroy();
+}
+
 static void lisp_eval_file_runs_forms(void) {
   Lisp lisp = Lisp.kernel();
   FILE *raw = fopen("/tmp/x2c-lisp-test.xlisp", "w");
@@ -1389,6 +1420,7 @@ void lisp_suite(void) {
   $test.run(lisp_group_installs_into_separate_sessions);
   $test.run(lisp_inferred_binding_transfers_native_error);
   $test.run(lisp_binding_storage_belongs_to_session);
+  $test.run(lisp_source_function_reclaims_normal_and_error_frames);
   $test.run(lisp_eval_file_runs_forms);
   $test.run(lisp_eval_file_transfers_read_failure);
   $test.run(lisp_eval_file_rejects_embedded_nul);

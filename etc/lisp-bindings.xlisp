@@ -16,18 +16,21 @@
 (def binding_list_item
  (lambda (arg-72)
   (cond ((C.true? (C.not (Var_equal (lisp_string arg-72) (quote ()))))
-         (binding_call "String_var"
-          (cons (List_var (x2c_literal_string (Var_str arg-72)))
-           (quote ()))))
+         (binding_call (C.address "String_var" (quote string))
+          (cons (List_var (x2c_literal_string (Var_str arg-72))) (quote ()))))
    (true (cond ((C.true? (C.not (Var_equal (lisp_symbol arg-72) (quote ()))))
-                (binding_call "Symbol_var"
-                 (cons (List_var (x2c_literal_symbol arg-72))
-                  (quote ()))))
-          (true (cond ((C.true?
-                        (C.not (Var_equal (lisp_list arg-72) (quote ()))))
-                       (binding_call "List_var"
-                        (cons (List_var (binding_signature arg-72))
-                         (quote ())))) (true (quote ())))))))))
+                (binding_call (C.address "Symbol_var" (quote string))
+                 (cons (List_var (x2c_literal_symbol arg-72)) (quote ()))))
+          (true (cond ((C.true? (Var_is_integer arg-72))
+                       (binding_call (C.address "int_var" (quote string))
+                        (cons (List_var (x2c_literal_int (Var_int arg-72)))
+                         (quote ()))))
+                 (true (cond ((C.true?
+                               (C.not (Var_equal (lisp_list arg-72) (quote ()))))
+                              (binding_call
+                               (C.address "List_var" (quote string))
+                               (cons (List_var (binding_signature arg-72))
+                                (quote ())))) (true (quote ())))))))))))
 (def binding_signature
  (lambda (arg-73)
   (cond ((C.true? (C.not arg-73))
@@ -38,250 +41,223 @@
                    (cons (quote (decl ("List") (bindings (bind () ()))))
                     (cons (List_var (x2c_literal_int 0)) (quote ())))))
             (quote ())))))
-   (true (binding_call "cons"
+   (true (binding_call (C.address "cons" (quote string))
           (cons (List_var (binding_list_item (List_car arg-73)))
            (cons (List_var (binding_signature (List_cdr arg-73))) (quote ()))))))))
-(def binding_normalize_type
- (lambda (arg-74)
-  (cond ((eq? arg-74 (quote (signed char))) (quote (schar)))
-   (true (cond ((eq? arg-74 (quote (unsigned char))) (quote (uchar)))
-          (true (cond ((eq? arg-74 (quote (unsigned short))) (quote (ushort)))
-                 (true (cond ((eq? arg-74 (quote (unsigned))) (quote (uint)))
-                        (true (cond ((eq? arg-74 (quote (unsigned long)))
-                                     (quote (ulong)))
-                               (true (cond ((eq? arg-74 (quote (long long)))
-                                            (quote (llong)))
-                                      (true (cond ((eq? arg-74
-                                                    (quote (unsigned long long)))
-                                                   (quote (ullong)))
-                                             (true arg-74))))))))))))))))
-(def loop78-binding_function_signature
- (lambda (live-79 live-80 live-81 live-82 live-83)
-  (cond ((C.true? live-83)
-         ((lambda (hold-84)
-           ((lambda (hold-85)
-             (loop78-binding_function_signature live-79
-              hold-85 hold-84 live-82 (cdr live-83)))
-            (cons (binding_normalize_type hold-84) live-80)))
-          (Var_list (car live-83))))
-   (true (cons (List_var
-                (cons (quote func)
-                 (cons (List_var (List_reverse live-80)) (quote ()))))
-          (append (binding_normalize_type live-79) (quote ())))))))
-(def binding_function_signature
+(def binding_name_signature
+ (lambda (arg-74) (binding_native_type (binding_reference arg-74))))
+(def binding_name
  (lambda (arg-75)
   ((lambda (hold-76)
-    ((lambda (hold-77)
-      (loop78-binding_function_signature hold-77
-       (quote ()) 0 hold-76 hold-76)) (binding_return arg-75)))
-   (binding_parameters arg-75))))
-(def binding_name_signature
- (lambda (arg-86)
-  (binding_function_signature (binding_native_type (binding_reference arg-86)))))
-(def binding_name
- (lambda (arg-87)
-  ((lambda (hold-88)
-    (cond ((C.true? (C.not (Var_equal (lisp_string hold-88) (quote ()))))
-           (Var_str hold-88))
-     (true ((lambda (discard-89) (C.void))
-            (binding_fail "native Lisp binding name requires a String literal"
-             arg-87))))) (binding_literal_value arg-87))))
-(def loop92-binding_rows_for
- (lambda (live-93 live-94 live-95 live-96 live-97)
-  (cond ((C.true? live-97)
-         ((lambda (hold-98)
-           (cond ((eq? (List_car hold-98) live-94)
-                  ((lambda (hold-99)
-                    (loop92-binding_rows_for hold-99 live-94
-                     hold-98 live-96 (cdr live-97))) (cons hold-98 live-93)))
-            (true (loop92-binding_rows_for live-93 live-94
-                   hold-98 live-96 (cdr live-97))))) (Var_list (car live-97))))
-   (true (List_reverse live-93)))))
+    (cond ((C.true? (C.not (Var_equal (lisp_string hold-76) (quote ()))))
+           (Var_str hold-76))
+     (true ((lambda (discard-77) (C.void))
+            (binding_fail
+             (C.address "native Lisp binding name requires a String literal"
+              (quote string)) arg-75))))) (binding_literal_value arg-75))))
+(def loop80-binding_rows_for
+ (lambda (live-81 live-82 live-83 live-84 live-85)
+  (cond ((C.true? live-85)
+         ((lambda (hold-86)
+           (cond ((eq? (List_car hold-86) live-84)
+                  ((lambda (hold-87)
+                    (loop80-binding_rows_for hold-87 live-82
+                     hold-86 live-84 (cdr live-85))) (cons hold-86 live-81)))
+            (true (loop80-binding_rows_for live-81 live-82
+                   hold-86 live-84 (cdr live-85))))) (Var_list (car live-85))))
+   (true (List_reverse live-81)))))
 (def binding_rows_for
- (lambda (arg-90 arg-91)
-  (loop92-binding_rows_for (quote ()) arg-90
-   0 arg-91 arg-91)))
-(def loop122-binding_record
- (lambda
-  (live-123 live-124 live-125 live-126 live-127
-   live-128 live-129 live-130)
-  (cond ((C.true? live-127)
-         ((lambda (hold-131)
-           (cond ((eq? (List_getindex hold-131 1) live-126)
-                  ((lambda (discard-132)
-                    (loop122-binding_record live-123 hold-131
-                     live-125 live-126 (cdr live-127) live-128
-                     live-129 live-130))
-                   (x2c.diagnostic.fail "duplicate native Lisp binding name"
-                    (cons (String_var (string-append (quote "group: ") live-129))
-                     (cons (String_var (string-append (quote "name: ") live-126))
-                      (quote ()))))))
-            (true (loop122-binding_record live-123 hold-131
-                   live-125 live-126 (cdr live-127) live-128
-                   live-129 live-130)))) (Var_list (car live-127))))
-   (true (cons (List_var
-                (cons (String_var live-129)
-                 (cons (String_var live-126)
-                  (cons (String_var live-123)
-                   (cons (List_var live-128) (quote ()))))))
-          (append live-130 (quote ())))))))
+ (lambda (arg-78 arg-79)
+  (loop80-binding_rows_for (quote ()) arg-79
+   0 arg-78 arg-79)))
 (def loop110-binding_record
  (lambda
   (live-111 live-112 live-113 live-114 live-115
-   live-116 live-117 live-118 live-119)
-  (cond ((C.true? live-116)
-         ((lambda (hold-120)
-           (cond ((eq? hold-120 live-117)
-                  ((lambda (discard-121)
-                    (loop110-binding_record live-111 live-112
-                     hold-120 live-114 live-115 (cdr live-116)
-                     live-117 live-118 live-119))
+   live-116 live-117 live-118)
+  (cond ((C.true? live-113)
+         ((lambda (hold-119)
+           (cond ((eq? (List_getindex hold-119 1) live-116)
+                  ((lambda (discard-120)
+                    (loop110-binding_record hold-119 live-112
+                     (cdr live-113) live-114 live-115 live-116
+                     live-117 live-118))
                    (x2c.diagnostic.fail
-                    "native Lisp binding appears after its group was installed"
-                    (cons (String_var (string-append (quote "group: ") live-117))
+                    (C.address "duplicate native Lisp binding name"
+                     (quote string))
+                    (cons (String_var (string-append (quote "group: ") live-115))
+                     (cons (String_var (string-append (quote "name: ") live-116))
+                      (quote ()))))))
+            (true (loop110-binding_record hold-119 live-112
+                   (cdr live-113) live-114 live-115 live-116
+                   live-117 live-118)))) (Var_list (car live-113))))
+   (true (cons (List_var
+                (cons (String_var live-115)
+                 (cons (String_var live-116)
+                  (cons (String_var live-118)
+                   (cons (List_var live-114) (quote ()))))))
+          (append live-117 (quote ())))))))
+(def loop98-binding_record
+ (lambda
+  (live-99 live-100 live-101 live-102 live-103
+   live-104 live-105 live-106 live-107)
+  (cond ((C.true? live-106)
+         ((lambda (hold-108)
+           (cond ((eq? hold-108 live-100)
+                  ((lambda (discard-109)
+                    (loop98-binding_record live-99 live-100 live-101
+                     live-102 live-103 hold-108 live-105 (cdr live-106)
+                     live-107))
+                   (x2c.diagnostic.fail
+                    (C.address
+                     "native Lisp binding appears after its group was installed"
+                     (quote string))
+                    (cons (String_var (string-append (quote "group: ") live-100))
                      (quote ())))))
-            (true (loop110-binding_record live-111 live-112
-                   hold-120 live-114 live-115 (cdr live-116)
-                   live-117 live-118 live-119)))) (car live-116)))
-   (true (loop122-binding_record live-111 0
-          live-115 live-112 live-115 live-118 live-117
-          live-119)))))
+            (true (loop98-binding_record live-99 live-100
+                   live-101 live-102 live-103 hold-108 live-105
+                   (cdr live-106) live-107)))) (car live-106)))
+   (true (loop110-binding_record 0 live-103
+          live-103 live-99 live-100 live-101 live-105
+          live-107)))))
 (def binding_record
- (lambda (arg-100 arg-101 arg-102 arg-103 arg-104)
-  ((lambda (hold-105)
-    ((lambda (hold-106)
-      ((lambda (hold-107)
-        ((lambda (hold-108)
-          ((lambda (hold-109)
-            (loop110-binding_record hold-107 hold-106
-             0 arg-104 hold-109 arg-104 hold-105 hold-108
-             arg-103)) (binding_rows_for hold-105 arg-103)))
-         (binding_native_type arg-102))) (x2c.function.name arg-102)))
-     (binding_name arg-101))) (x2c.binding.spelling arg-100))))
+ (lambda (arg-88 arg-89 arg-90 arg-91 arg-92)
+  ((lambda (hold-93)
+    ((lambda (hold-94)
+      ((lambda (hold-95)
+        ((lambda (hold-96)
+          ((lambda (hold-97)
+            (loop98-binding_record hold-96 hold-93 hold-94
+             arg-92 hold-97 0 arg-91 arg-92 hold-95))
+           (binding_rows_for hold-93 arg-91))) (binding_native_type arg-90)))
+       (x2c.function.name arg-90))) (binding_name arg-89)))
+   (x2c.binding.spelling arg-88))))
 (def binding_statement
- (lambda (arg-133 arg-134)
-  (cond ((match arg-134 (quote (?group ?name ?function ?type)))
+ (lambda (arg-121 arg-122)
+  (cond ((match arg-122 (quote (?group ?name ?function ?type)))
          (cons (quote stmnt)
           (cons (List_var
-                 (binding_call "Lisp_bind"
-                  (cons (List_var arg-133)
+                 (binding_call (C.address "Lisp_bind" (quote string))
+                  (cons (List_var arg-121)
                    (cons (List_var
                           (x2c_literal_string
                            (bound
-                            (match arg-134
+                            (match arg-122
                              (quote (?group ?name ?function ?type)))
                             (quote ?name))))
                     (cons (List_var
-                           (binding_call "Func_new"
+                           (binding_call (C.address "Func_new" (quote string))
                             (cons (List_var
                                    (x2c_expr_ident
                                     (x2c.ident
                                      (bound
-                                      (match arg-134
+                                      (match arg-122
                                        (quote (?group ?name ?function ?type)))
                                       (quote ?function)))))
                              (cons (List_var
                                     (binding_signature
-                                     (binding_function_signature
-                                      (bound
-                                       (match arg-134
-                                        (quote (?group ?name ?function ?type)))
-                                       (quote ?type))))) (quote ())))))
-                     (quote ())))))) (quote ())))) (true (quote ())))))
+                                     (bound
+                                      (match arg-122
+                                       (quote (?group ?name ?function ?type)))
+                                      (quote ?type)))) (quote ()))))) (quote ()))))))
+           (quote ())))) (true (quote ())))))
 (def binding_install_rows
- (lambda (arg-135 arg-136)
-  ((lambda (hold-137)
-    (cond ((C.true? (C.not hold-137))
-           ((lambda (discard-138) hold-137)
-            (x2c.diagnostic.fail "unknown native Lisp binding group"
-             (cons (String_var (string-append (quote "group: ") arg-135))
-              (quote ()))))) (true hold-137)))
-   (List_reverse (binding_rows_for arg-135 arg-136)))))
-(def loop141-binding_statements
- (lambda (live-142 live-143 live-144 live-145 live-146)
-  (cond ((C.true? live-145)
-         ((lambda (hold-147)
-           ((lambda (hold-148)
-             (loop141-binding_statements live-142 hold-147
-              live-144 (cdr live-145) hold-148))
-            (cons (binding_statement live-142 hold-147)
-             live-146))) (Var_list (car live-145))))
-   (true (List_reverse live-146)))))
+ (lambda (arg-123 arg-124)
+  ((lambda (hold-125)
+    (cond ((C.true? (C.not hold-125))
+           ((lambda (discard-126) hold-125)
+            (x2c.diagnostic.fail
+             (C.address "unknown native Lisp binding group"
+              (quote string))
+             (cons (String_var (string-append (quote "group: ") arg-123))
+              (quote ()))))) (true hold-125)))
+   (List_reverse (binding_rows_for arg-123 arg-124)))))
+(def loop129-binding_statements
+ (lambda (live-130 live-131 live-132 live-133 live-134)
+  (cond ((C.true? live-134)
+         ((lambda (hold-135)
+           ((lambda (hold-136)
+             (loop129-binding_statements live-130 hold-135
+              hold-136 live-133 (cdr live-134)))
+            (cons (binding_statement live-130 hold-135)
+             live-132))) (Var_list (car live-134))))
+   (true (List_reverse live-132)))))
 (def binding_statements
- (lambda (arg-139 arg-140)
-  (loop141-binding_statements arg-139 0 arg-140
-   arg-140 (quote ()))))
+ (lambda (arg-127 arg-128)
+  (loop129-binding_statements arg-127 0 (quote ())
+   arg-128 arg-128)))
 (def binding_target
- (lambda (arg-149 arg-150 arg-151)
+ (lambda (arg-137 arg-138 arg-139)
   (cons (List_var
-         (binding_call "String_var"
-          (cons (List_var (x2c_literal_string arg-149))
-           (quote ()))))
+         (binding_call (C.address "String_var" (quote string))
+          (cons (List_var (x2c_literal_string arg-137)) (quote ()))))
    (cons (List_var
-          (binding_call "Func_var"
+          (binding_call (C.address "Func_var" (quote string))
            (cons (List_var
-                  (binding_call arg-151
-                   (cons (List_var (x2c_expr_ident (x2c.ident arg-150)))
+                  (binding_call arg-139
+                   (cons (List_var (x2c_expr_ident (x2c.ident arg-138)))
                     (cons (List_var
-                           (binding_signature (binding_name_signature arg-150)))
+                           (binding_signature (binding_name_signature arg-138)))
                      (quote ()))))) (quote ())))) (quote ())))))
 (def binding_target_row
- (lambda (arg-152)
-  (cond ((match arg-152 (quote (?name (as ?bind))))
+ (lambda (arg-140)
+  (cond ((match arg-140 (quote (?name (as ?bind))))
          (binding_target
           (Var_str
-           (bound (match arg-152 (quote (?name (as ?bind))))
+           (bound (match arg-140 (quote (?name (as ?bind))))
             (quote ?bind)))
           (Var_str
-           (bound (match arg-152 (quote (?name (as ?bind))))
-            (quote ?name))) "Func_new"))
-   (true (cond ((match arg-152 (quote (?name)))
+           (bound (match arg-140 (quote (?name (as ?bind))))
+            (quote ?name))) (C.address "Func_new" (quote string))))
+   (true (cond ((match arg-140 (quote (?name)))
                 (binding_target
-                 (Var_str (bound (match arg-152 (quote (?name))) (quote ?name)))
-                 (Var_str (bound (match arg-152 (quote (?name))) (quote ?name)))
-                 "Func_new"))
-          (true (cond ((match arg-152 (quote (?name ?marker)))
+                 (Var_str (bound (match arg-140 (quote (?name))) (quote ?name)))
+                 (Var_str (bound (match arg-140 (quote (?name))) (quote ?name)))
+                 (C.address "Func_new" (quote string))))
+          (true (cond ((match arg-140 (quote (?name ?marker)))
                        (binding_target
                         (Var_str
-                         (bound (match arg-152 (quote (?name ?marker)))
+                         (bound (match arg-140 (quote (?name ?marker)))
                           (quote ?name)))
                         (Var_str
-                         (bound (match arg-152 (quote (?name ?marker)))
-                          (quote ?name))) "Func_new_rest")) (true (quote ())))))))))
-(def loop162-binding_targets
+                         (bound (match arg-140 (quote (?name ?marker)))
+                          (quote ?name)))
+                        (C.address "Func_new_rest" (quote string))))
+                 (true (quote ())))))))))
+(def loop150-binding_targets
  (lambda
-  (live-163 live-164 live-165 live-166 live-167
-   live-168 live-169 live-170)
-  (cond ((C.true? live-163)
-         ((lambda (hold-171)
-           ((lambda (hold-172)
-             (loop162-binding_targets (cdr live-163) live-164
-              hold-171 live-166 live-167 live-168 hold-172
-              live-170)) (cons hold-171 live-169))) (car live-163)))
-   (true (loop154-binding_targets live-168 live-169 live-170 live-164 live-167)))))
-(def loop154-binding_targets
- (lambda (live-155 live-156 live-157 live-158 live-159)
-  (cond ((C.true? live-158)
-         ((lambda (hold-160)
-           ((lambda (hold-161)
-             (loop162-binding_targets hold-161 (cdr live-158)
-              0 hold-161 hold-160 live-155 live-156 live-157))
-            (binding_target_row hold-160))) (Var_list (car live-158))))
-   (true (binding_call "Map_update_n"
-          (cons (List_var (binding_call "Map_new" (quote ())))
-           (cons (List_var (x2c_literal_int (List_len live-157)))
-            (append (List_reverse live-156) (quote ())))))))))
+  (live-151 live-152 live-153 live-154 live-155
+   live-156 live-157 live-158)
+  (cond ((C.true? live-151)
+         ((lambda (hold-159)
+           ((lambda (hold-160)
+             (loop150-binding_targets (cdr live-151) live-152
+              live-153 hold-159 live-155 live-156 hold-160
+              live-158)) (cons hold-159 live-157))) (car live-151)))
+   (true (loop142-binding_targets live-152 live-155 live-157 live-153 live-158)))))
+(def loop142-binding_targets
+ (lambda (live-143 live-144 live-145 live-146 live-147)
+  (cond ((C.true? live-147)
+         ((lambda (hold-148)
+           ((lambda (hold-149)
+             (loop150-binding_targets hold-149 live-143
+              hold-148 0 live-144 hold-149 live-145 (cdr live-147)))
+            (binding_target_row hold-148))) (Var_list (car live-147))))
+   (true (binding_call (C.address "Map_update_n" (quote string))
+          (cons (List_var
+                 (binding_call (C.address "Map_new" (quote string))
+                  (quote ())))
+           (cons (List_var (x2c_literal_int (List_len live-143)))
+            (append (List_reverse live-145) (quote ())))))))))
 (def binding_targets
- (lambda (arg-153)
-  (loop154-binding_targets arg-153 (quote ())
-   arg-153 arg-153 0)))
+ (lambda (arg-141)
+  (loop142-binding_targets arg-141 arg-141
+   (quote ()) 0 arg-141)))
 
 (defun lisp.native.call (name . arguments)
   (binding_call name arguments))
 (def lisp.native.list-item binding_list_item)
 (def lisp.native.signature binding_signature)
-(def lisp.native.normalize-type binding_normalize_type)
-(def lisp.native.function-signature binding_function_signature)
+(defun lisp.native.function-signature (type) type)
 (def lisp.native.name-signature binding_name_signature)
 (def lisp.binding.name binding_name)
 (defun lisp.binding.rows-for (group)

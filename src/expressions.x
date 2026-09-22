@@ -3252,6 +3252,14 @@ static List _initializer_named(
   return NULL;
 }
 
+/** Returns the initializer path selecting one visible aggregate field.
+    Anonymous aggregate members remain explicit path frames, so consumers
+    observe the same member promotion as native initializer conversion. */
+List Compiler.initializer_field_path(
+  Compiler c, Type type, List field) {
+  return _initializer_named(c, type, field.car(), NULL);
+}
+
 static List _initializer_designated(
   Compiler c, Type root, List node, List *value, List *normalized) {
   List path = NULL, selectors = NULL;

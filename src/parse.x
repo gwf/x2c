@@ -1705,6 +1705,17 @@ int Compiler.meta_form_is_definition(Compiler c) {
   return marker;
 }
 
+/** Reports whether the cursor begins a contextual top-level `meta`
+    declaration: a function or an initialized file-static value. */
+int Compiler.meta_form_is_declaration(Compiler c) {
+  if (c.peek(0) != <ident> || c.token.text != "meta") return 0;
+  Token head = c.token;
+  c.next();
+  int marker = c.test_declaration();
+  c.token = head;
+  return marker;
+}
+
 /** Reports whether the top-level item at the cursor is one of a script
     unit's statements, which become `main`'s body.
     Preprocessor lines, imports, protocols, compile-time definitions and
@@ -1719,7 +1730,7 @@ int Compiler.script_statement_starts(Compiler c) {
       return 0;
   }
   if (c.test_static_assert() || c.keyword_form_is_definition() ||
-      c.macro_form_is_definition() || c.meta_form_is_definition())
+      c.macro_form_is_definition() || c.meta_form_is_declaration())
     return 0;
   if (c.peek(0) == <ident> && c.token.text == "with") return 1;
   if (c.macro_starts_target_at(AST_UNIT)) return !c.macro_targets_unit();
@@ -1807,16 +1818,15 @@ List Compiler.parse_top_level(Compiler c) {
   }
   if (c.macro_form_is_definition()) return c.parse_macro_definition();
   Token meta = NULL;
-  if (c.meta_form_is_definition()) {
+  if (c.meta_form_is_declaration()) {
     meta = c.token;
     c.next();
   }
   List decl = c.parse_declaration_row();
   if (c.test(<;>)) {
-    if (meta)
-      c.report_error(
-        <parse>, "a meta function needs a body", meta,
-        %("the compiler runs the body, so a prototype has nothing to run"));
+    if (meta && decl.type_from_ast().is_function())
+      c.install_native_meta_function(decl, meta);
+    else if (meta) c.install_meta_declaration(decl, meta);
     c.record_declaration_visibility(decl);
     return decl;
   }

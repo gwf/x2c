@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/comptime-declines-native-meta-missing.x:2:1: macro: this function cannot run at compile time
+  meta static double calls_missing_target(void) => not_compiler_target(1.0);
+  ^^^^
+  note: reason: no binding for not_compiler_target
+

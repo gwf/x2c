@@ -2614,11 +2614,18 @@ int main(void) {
 71 item-2
 ```
 
-`meta` is contextual. It marks a function only when a function definition
-follows it, and is an ordinary identifier everywhere else, including as a
-file-scope name, an assignment target, and a struct field. A `meta`
-declaration without a body is diagnosed, because the compiler has nothing to
-run. `meta` marks a definition only.
+`meta` is contextual. It marks a function definition, a bodyless function
+prototype, or an initialized file-static value. Everywhere else it is an
+ordinary identifier, including as a file-scope name, an assignment target,
+and a struct field. Types need no marker: compile-time code can use any
+type the compiler sees.
+
+A bodyless `meta` prototype declares a native function that the compiler
+itself links, such as `meta double sin(double);`. Compile-time code then
+calls the compiler's copy. The declared signature must match that function
+exactly. A prototype for a function the compiler does not link is accepted,
+and compile-time code that calls it is diagnosed. See
+[native C functions](https://x2c-lang.dev/docs/guide/meta-functions.html#native-c-functions).
 
 Marking a function `meta` has three consequences.
 
@@ -2655,10 +2662,12 @@ binding expands them when inserted into a program. Existing Expression macros
 still expand normally. See [source templates](https://x2c-lang.dev/docs/guide/meta-functions.html#source-templates-from-meta-functions).
 
 The compile-time subset cuts across C and x2c constructs. Local mutation,
-represented collections, local address-taking/dereference, and resolved
-method calls are supported; native aggregate field access and operations
-without compile-time bindings are not. A supported type does not expose all
-of its runtime methods. See the guide's
+represented collections, struct locals, local address-taking/dereference,
+and resolved method calls are supported; unions and operations without
+compile-time bindings are not. Struct locals and address-taken locals live
+in native bytes with C layout; see
+[C objects during compilation](https://x2c-lang.dev/docs/guide/meta-functions.html#c-objects-during-compilation).
+A supported type does not expose all of its runtime methods. See the guide's
 [capability and operation inventory](https://x2c-lang.dev/docs/guide/meta-functions.html#the-compile-time-subset).
 
 Meta functions may pass and return represented values such as wide integers,
@@ -2673,9 +2682,11 @@ returns to `int`; see
 
 Compile-time objects belong to the evaluator. Ordinary dual-form meta
 functions reject file-scope state because the program's initializers and
-future mutable state are not available to them. Compiler-only functions
-reaching compiler operations are exempt from that rejection, but use
-separate per-unit compile-time state, not the program's variables.
+future mutable state are not available to them. A `meta static` value is the
+exception: it gives compile-time code its own separate instance.
+Compiler-only functions reaching compiler operations are exempt from that
+rejection, but use separate per-unit compile-time state, not the program's
+variables.
 
 A `meta` declaration in an imported `.xmacro` installs its compile-time form in
 every consuming unit. The runtime forms are independent: a unit emits a
@@ -3752,7 +3763,13 @@ Where a `Func` is expected, a fixed nonvariadic function or
 function-pointer value converts implicitly when the `Func` conversion supports
 its parameters and result. Value parameters and results need a lossless `Var`
 conversion, and reference
-parameters retain their typed lvalue address. A direct function or noncapturing
+parameters retain their typed lvalue address. A pointer parameter whose type
+has no `Var` tag of its own, such as `const char *` or `struct timespec *`,
+accepts any pointer or `String` argument. A struct parameter taken by value
+receives a `<p48>` pointer to the bytes to copy, and a struct result arrives
+as a `<p48>` pointer to a copy of its bytes in the active `Scope`. Native code
+passes such an address as a `void *`, because a struct pointer has no lossless
+`Var` conversion of its own. A direct function or noncapturing
 lambda has one file-static `Func` handle that every conversion reuses. A
 function-pointer expression is evaluated once and its exact pointer is copied
 into a new `Func`; later assignment to the source pointer does not retarget it.
@@ -4381,7 +4398,14 @@ Symbol collection options apply to `translate`, `build`, and `run`:
 --no-cpp                Skip symbol collection and preprocessing
 --live-symbols          Collect symbols through the host preprocessor
 --cpp-symbols           Use CPP collection for this translation
+--system-headers        Collect declarations from expanded system headers
 ```
+
+`--system-headers` expands system headers in the preprocessor and collects
+their declarations, so compile-time code can use a struct such as
+`struct timespec`. Translation is slower, because the compiler reads every
+expanded header. The other modes keep system `#include` lines for the C
+compiler.
 
 `--source-map` adds source locations to generated C for `translate`, `build`,
 and `run`. It is off by default. Combine it with native debug information to

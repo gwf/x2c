@@ -34,6 +34,8 @@ List binding_list_item(Var value) {
     return binding_call("String_var", %(${x2c_literal_string(value.str())}));
   if (!lisp_symbol(value).equal(%()))
     return binding_call("Symbol_var", %(${x2c_literal_symbol(value)}));
+  if (value.is_integer())
+    return binding_call("int_var", %(${x2c_literal_int(value.int())}));
   if (!lisp_list(value).equal(%()))
     return binding_call("List_var", %(${binding_signature(value)}));
   return %();
@@ -49,30 +51,8 @@ List binding_signature(List values) {
 }
 
 $binding.emit()
-List binding_normalize_type(List type) {
-  if (type.equal(%(signed char))) return %(schar);
-  if (type.equal(%(unsigned char))) return %(uchar);
-  if (type.equal(%(unsigned short))) return %(ushort);
-  if (type.equal(%(unsigned))) return %(uint);
-  if (type.equal(%(unsigned long))) return %(ulong);
-  if (type.equal(%(long long))) return %(llong);
-  if (type.equal(%(unsigned long long))) return %(ullong);
-  return type;
-}
-
-$binding.emit()
-List binding_function_signature(List type) {
-  List parameters = binding_parameters(type);
-  List result = binding_return(type);
-  List normalized = %();
-  foreach (List parameter, parameters)
-    normalized = cons(binding_normalize_type(parameter), normalized);
-  return %((func ${normalized.reverse()}) @{binding_normalize_type(result)});
-}
-
-$binding.emit()
 List binding_name_signature(String name) =>
-  binding_function_signature(binding_native_type(binding_reference(name)));
+  binding_native_type(binding_reference(name));
 
 $binding.emit()
 String binding_name(List node) {
@@ -115,7 +95,7 @@ List binding_statement(List lisp, List row) {
     return %(stmnt ${binding_call("Lisp_bind", %($lisp
       ${x2c_literal_string(name)}
       ${binding_call("Func_new", %(${x2c_expr_ident(x2c_ident(function))}
-        ${binding_signature(binding_function_signature(type))}))}))});
+        ${binding_signature(type)}))}))});
   return %();
 }
 

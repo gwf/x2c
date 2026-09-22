@@ -8,11 +8,11 @@
 
 #include "exception.h"
 
-static List _181, _179, _178, _176, _174, _171, _169, _168, _166, _164, _113, _112, _111, _110, _109, _97, _96, _95, _94, _30, _29, _28;
+static List _183, _181, _180, _178, _176, _173, _171, _170, _168, _166, _113, _112, _111, _110, _109, _97, _96, _95, _94, _30, _29, _28;
 
-static String _172, _162, _160, _159, _158, _157, _156, _155, _154, _153, _152, _151, _150, _149, _148, _147, _146, _145, _144, _143, _142, _141, _140, _139, _138, _137, _136, _135, _134, _133, _132, _131, _130, _129, _128, _127, _126, _125, _124, _123, _122, _118, _117, _116, _115, _114, _107, _105, _103, _101, _99, _98, _92, _90, _88, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _64, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _26, _24, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _174, _164, _162, _161, _160, _159, _158, _157, _156, _155, _154, _153, _152, _151, _150, _149, _148, _147, _146, _145, _144, _143, _142, _141, _140, _139, _138, _137, _136, _135, _134, _133, _132, _131, _130, _129, _128, _127, _126, _125, _124, _123, _122, _118, _117, _116, _115, _114, _107, _105, _103, _101, _99, _98, _92, _90, _88, _86, _85, _84, _83, _82, _81, _80, _79, _78, _77, _76, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _64, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _26, _24, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _180, _177, _175, _173, _170, _167, _165, _163, _161, _108, _106, _104, _102, _100, _93, _91, _89, _87, _65, _63, _27, _25, _23;
+static Var _182, _179, _177, _175, _172, _169, _167, _165, _163, _108, _106, _104, _102, _100, _93, _91, _89, _87, _65, _63, _27, _25, _23;
 
 #include <errno.h>
 #include <stdio.h>
@@ -104,7 +104,7 @@ static Func _x2c_func_handle_0;
 
 Func Func_new(FuncAdapter, List);
 
-_x2c_initializer_choice_8309C62D_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _171)))
+_x2c_initializer_choice_8309C62D_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _173)))
 typedef struct _x2c_lambda_context_0{
   Var _x2c_lambda_capture_0;
 }
@@ -256,53 +256,55 @@ __attribute__((constructor)) static void _file_init_(void){
   _132 = String_new("prelude");
   _133 = String_new("cpp-symbols");
   _134 = String_new("raw");
-  _135 = String_new("source-map");
-  _136 = String_new("generated-lines");
-  _137 = String_new("x2c file");
-  _138 = String_new("x2c files");
-  _139 = String_new(".");
-  _140 = String_new("C file");
-  _141 = String_new("C files");
-  _142 = String_new("-gdwarf");
-  _143 = String_new("#include \"");
-  _144 = String_new(".h\"");
-  _145 = String_new("object");
-  _146 = String_new("objects");
-  _147 = String_new("input");
-  _148 = String_new("inputs");
-  _149 = String_new(" (up to date)");
-  _150 = String_new("");
-  _151 = String_new("static library");
-  _152 = String_new("executable");
-  _153 = String_new("header");
-  _154 = String_new("headers");
-  _155 = String_new("1 job");
-  _156 = String_new("retained");
-  _157 = String_new("temporary; removed after run");
-  _158 = String_new("temporary; removed after build");
-  _159 = String_new("script");
-  _160 = String_new("absent");
-  _161 = Symbol_var(437126);
-  _162 = String_new("Var");
-  _163 = String_var(_162);
-  _164 = cons(_163, NULL);
-  _165 = List_var(_164);
+  _135 = String_new("system-headers");
+  _136 = String_new("kept-headers");
+  _137 = String_new("source-map");
+  _138 = String_new("generated-lines");
+  _139 = String_new("x2c file");
+  _140 = String_new("x2c files");
+  _141 = String_new(".");
+  _142 = String_new("C file");
+  _143 = String_new("C files");
+  _144 = String_new("-gdwarf");
+  _145 = String_new("#include \"");
+  _146 = String_new(".h\"");
+  _147 = String_new("object");
+  _148 = String_new("objects");
+  _149 = String_new("input");
+  _150 = String_new("inputs");
+  _151 = String_new(" (up to date)");
+  _152 = String_new("");
+  _153 = String_new("static library");
+  _154 = String_new("executable");
+  _155 = String_new("header");
+  _156 = String_new("headers");
+  _157 = String_new("1 job");
+  _158 = String_new("retained");
+  _159 = String_new("temporary; removed after run");
+  _160 = String_new("temporary; removed after build");
+  _161 = String_new("script");
+  _162 = String_new("absent");
+  _163 = Symbol_var(437126);
+  _164 = String_new("Var");
+  _165 = String_var(_164);
   _166 = cons(_165, NULL);
   _167 = List_var(_166);
   _168 = cons(_167, NULL);
-  _169 = cons(_161, _168);
-  _170 = List_var(_169);
-  _171 = cons(_170, _164);
-  _172 = String_new("String");
-  _173 = String_var(_172);
-  _174 = cons(_173, NULL);
-  _175 = List_var(_174);
+  _169 = List_var(_168);
+  _170 = cons(_169, NULL);
+  _171 = cons(_163, _170);
+  _172 = List_var(_171);
+  _173 = cons(_172, _166);
+  _174 = String_new("String");
+  _175 = String_var(_174);
   _176 = cons(_175, NULL);
   _177 = List_var(_176);
   _178 = cons(_177, NULL);
-  _179 = cons(_161, _178);
-  _180 = List_var(_179);
-  _181 = cons(_180, _164);
+  _179 = List_var(_178);
+  _180 = cons(_179, NULL);
+  _181 = cons(_163, _180);
+  _182 = List_var(_181);
+  _183 = cons(_182, _166);
   _x2c_static_initialize_0();
 }
 
@@ -829,7 +831,8 @@ static uint64_t _translation_fingerprint(Build state, String input, String direc
   hash = _state_text(hash, request -> no_cpp ? _129 : _130);
   hash = _state_text(hash, request -> live_symbols ? _131 : _132);
   hash = _state_text(hash, request -> cpp_symbols ? _133 : _134);
-  hash = _state_text(hash, request -> source_map ? _135 : _136);
+  hash = _state_text(hash, request -> system_headers ? _135 : _136);
+  hash = _state_text(hash, request -> source_map ? _137 : _138);
   String depfile = String_join(NULL, cons(String_var(directory), cons(String_var(_5), cons(String_var(Path_stem(input)), cons(String_var(_21), NULL)))));
   return _state_dependencies(hash, depfile, ok);
 }
@@ -953,7 +956,7 @@ void Build_end_translation(Build state, String input, int cached){
   report_progress(45220543335690, state -> xlat_done, state -> xlat_n, input);
   if(state -> xlat_done == state -> xlat_n){
     unsigned long elapsed = report_now_us() - state -> xlat_start;
-    report_phase(45220543335690, state -> xlat_n, state -> xlat_n == 1 ? _137 : _138, state -> xlat_cached, elapsed);
+    report_phase(45220543335690, state -> xlat_n, state -> xlat_n == 1 ? _139 : _140, state -> xlat_cached, elapsed);
   }
 
 }
@@ -1129,7 +1132,7 @@ ToolAction Toolchain_preprocess_action(Toolchain, String, String, List);
 void Scope_free(void *);
 
 static int _compile_sources(Build b){
-  if((void *) b -> compile_commands != NULL) b -> compile_directory = Path_absolute(_139);
+  if((void *) b -> compile_commands != NULL) b -> compile_directory = Path_absolute(_141);
   CcJob * running = Scope_calloc(b -> request -> jobs, sizeof(CcJob));
   int running_count = 0, failed = 0;
   b -> cc_n = Array_len(b -> c_sources);
@@ -1192,7 +1195,7 @@ static int _compile_sources(Build b){
   Scope_free(running);
   if(! failed && b -> cc_n){
     unsigned long elapsed = report_now_us() - b -> cc_start;
-    report_phase(7477414666, b -> cc_n, b -> cc_n == 1 ? _140 : _141, b -> cc_cached, elapsed);
+    report_phase(7477414666, b -> cc_n, b -> cc_n == 1 ? _142 : _143, b -> cc_cached, elapsed);
   }
   return failed;
 }
@@ -1237,7 +1240,7 @@ static int _mapped_debug(Build state){
       flag = Var_string(_x2c_macro_cursor_output_14);
       {
         if(String_equal(flag, _46) || String_equal(flag, _47)) enabled = 0;
-        else if(String_equal(flag, _48) || String_equal(flag, _49) || String_equal(flag, _50) || String_equal(flag, _51) || String_equal(flag, _52) || String_equal(flag, _53) || String_equal(flag, _54) || String_equal(flag, _55) || String_equal(flag, _56) || String_equal(flag, _57) || String_startswith(flag, _142)) enabled = 1;
+        else if(String_equal(flag, _48) || String_equal(flag, _49) || String_equal(flag, _50) || String_equal(flag, _51) || String_equal(flag, _52) || String_equal(flag, _53) || String_equal(flag, _54) || String_equal(flag, _55) || String_equal(flag, _56) || String_equal(flag, _57) || String_startswith(flag, _144)) enabled = 1;
       }
 
     }
@@ -1304,7 +1307,7 @@ static void Build__place_unit_headers(Build b){
                 line = Var_string(_x2c_macro_cursor_output_17);
                 {
                   String text = String_strip(line, " \t");
-                  if(! String_startswith(text, _143) || ! String_endswith(text, _144)) continue;
+                  if(! String_startswith(text, _145) || ! String_endswith(text, _146)) continue;
                   String target = String_getslice(text, 10, String_len(text) - 1, 1);
                   if(! String_contains(target, _122)) continue;
                   String source = String_join(NULL, cons(String_var(String_getslice(target, -2147483648, String_len(target) - 2, 1)), cons(String_var(_58), NULL)));
@@ -1385,7 +1388,7 @@ int Build_finish(Build b){
       b -> final_cached = 1;
       report_progress(action -> phase, 1, 1, b -> output);
       int input_count = List_len(inputs);
-      String noun = input_count == 1 ? _145 : _146;
+      String noun = input_count == 1 ? _147 : _148;
       report_phase(action -> phase, input_count, noun, input_count, report_now_us() - b -> final_at);
       return 0;
     }
@@ -1413,7 +1416,7 @@ int Build_finish(Build b){
   }
   report_progress(action -> phase, 1, 1, b -> output);
   int input_count = List_len(inputs);
-  String noun = action -> phase == 3362278794 ?(input_count == 1 ? _145 : _146) :(input_count == 1 ? _147 : _148);
+  String noun = action -> phase == 3362278794 ?(input_count == 1 ? _147 : _148) :(input_count == 1 ? _149 : _150);
   report_phase(action -> phase, input_count, noun, 0, report_now_us() - b -> final_at);
   if(String_truth(state_path)){
     int ok = 1;
@@ -1443,8 +1446,8 @@ void Build_report_success(Build b){
   if(! report_receipts()) return;
   unsigned long elapsed = report_now_us() - b -> started_at;
   String duration = report_duration(elapsed);
-  String cache = _all_cached(b) ? _149 : _150;
-  String label = String_truth(b -> request -> label) ? String_join(NULL, cons(String_var(_66), cons(String_var(b -> request -> label), cons(String_var(_67), NULL)))) : _150;
+  String cache = _all_cached(b) ? _151 : _152;
+  String label = String_truth(b -> request -> label) ? String_join(NULL, cons(String_var(_66), cons(String_var(b -> request -> label), cons(String_var(_67), NULL)))) : _152;
   String result;
   if(b -> request -> compile_only){
     int objects = Array_len(b -> objects);
@@ -1456,26 +1459,26 @@ void Build_report_success(Build b){
 
   }
   else{
-    String kind = b -> request -> kind == 1381098885964356 ? _151 : _152;
+    String kind = b -> request -> kind == 1381098885964356 ? _153 : _154;
     result = String_join(NULL, cons(String_var(_68), cons(String_var(label), cons(String_var(_71), cons(String_var(kind), cons(String_var(_71), cons(String_var(b -> output), cons(String_var(_70), cons(String_var(duration), cons(String_var(cache), NULL))))))))));
   }
   report_line(42217975014, result);
   if(b -> xlat_n){
     String size = report_size(b -> gen_bytes);
-    String c_noun = b -> xlat_n == 1 ? _140 : _141;
-    String h_noun = b -> xlat_n == 1 ? _153 : _154;
+    String c_noun = b -> xlat_n == 1 ? _142 : _143;
+    String h_noun = b -> xlat_n == 1 ? _155 : _156;
     report_line(28680520, String_join(NULL, cons(String_var(_73), cons(String_var(int_str(b -> xlat_n)), cons(String_var(_71), cons(String_var(c_noun), cons(String_var(_74), cons(String_var(int_str(b -> xlat_n)), cons(String_var(_71), cons(String_var(h_noun), cons(String_var(_75), cons(String_var(size), cons(String_var(_76), NULL)))))))))))));
   }
   if(b -> cc_n){
     int count = b -> request -> jobs;
-    String jobs = count == 1 ? _155 : String_join(NULL, cons(String_var(int_str(count)), cons(String_var(_77), NULL)));
+    String jobs = count == 1 ? _157 : String_join(NULL, cons(String_var(int_str(count)), cons(String_var(_77), NULL)));
     report_line(28680520, String_join(NULL, cons(String_var(_78), cons(String_var(b -> toolchain -> cc), cons(String_var(_79), cons(String_var(jobs), NULL))))));
   }
   if(! b -> request -> compile_only){
     if(b -> request -> kind == 1381098885964356) report_line(28680520, String_join(NULL, cons(String_var(_80), cons(String_var(b -> toolchain -> ar), NULL))));
     else report_line(28680520, String_join(NULL, cons(String_var(_81), cons(String_var(b -> toolchain -> cc), NULL))));
   }
-  String retention = ! b -> temporary ? _156 : b -> request -> command == 38236 ? _157 : _158;
+  String retention = ! b -> temporary ? _158 : b -> request -> command == 38236 ? _159 : _160;
   report_line(28680520, String_join(NULL, cons(String_var(_82), cons(String_var(b -> work_dir), cons(String_var(_75), cons(String_var(retention), cons(String_var(_76), NULL)))))));
   if(! b -> request -> compile_only){
     String size = report_size(report_file_bytes(b -> output));
@@ -1548,14 +1551,14 @@ String Env_get(String);
 
 static uint64_t _script_fingerprint(CliRequest c, String cc, List prerequisites, int * ok){
   uint64_t hash = _state_base(c, cc, ok);
-  hash = _state_text(hash, _159);
+  hash = _state_text(hash, _161);
   hash = _state_list(hash, c -> inputs);
   hash = _state_list(hash, c -> include_dirs);
   hash = _state_list(hash, CliRequest_package_roots(c));
   hash = _state_list(hash, c -> cpp_args);
   hash = _state_list(hash, c -> cc_args);
   hash = _state_list(hash, c -> ld_args);
-  hash = _state_text(hash, c -> source_map ? _135 : _136);
+  hash = _state_text(hash, c -> source_map ? _137 : _138);
   {
     String name;
     List _x2c_macro_object_21 = _97;
@@ -1580,7 +1583,7 @@ static uint64_t _script_fingerprint(CliRequest c, String cc, List prerequisites,
           continue;
         }
         hash = _state_text(hash, path);
-        hash = _state_text(hash, Path_is_dir(path) ? String_printf(_98, Path_modified_time(path)) : _160);
+        hash = _state_text(hash, Path_is_dir(path) ? String_printf(_98, Path_modified_time(path)) : _162);
       }
 
     }
@@ -1715,7 +1718,7 @@ List Build_script_helpers(Build b){
           Var _x2c_lambda_capture_value_0 = String_var(path);  _x2c_lambda_context_0 _x2c_lambda_context_1 ={
             _x2c_lambda_capture_value_0
           }
-          ;  Func_new_context(_x2c_lambda_1, _181, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
+          ;  Func_new_context(_x2c_lambda_1, _183, & _x2c_lambda_context_1, sizeof _x2c_lambda_context_1);
         }
         ))) continue;
         Array_push(helpers, String_var(path));

@@ -57,8 +57,10 @@ its opening status and this index distinguish them from current execution.
   template calls, representable literal results, and the API inventory are
   implemented. The represented-operation campaign is complete; the remaining
   methods are classified as excluded contracts, explicit adapters, defects, or
-  dependencies of the separate generalized-`meta`, meta-capable protocol and
-  lifetime-certification work. The older
+  dependencies of the separate meta-capable protocol and lifetime-certification
+  work. Generalized `meta` declarations are implemented by the
+  [meta recovery](meta-recovery.md) and await review before delivery; native
+  extension loading is the campaign's last stage. The older
   [meta milestones](archive/meta-functions.md) record the preceding baseline.
 - [REPL fit, status, and runtime surface](repl-fit-and-runtime-surface.md):
   terminal UX, live statistics, and REPL-only output are implemented;
@@ -94,6 +96,14 @@ does not dispatch fixes or approve every proposed design.
 
 ### Decisions and completed records
 
+- [Meta values, types, and native records](archive/meta-values-types.md):
+  rejected local implementation; session-owned records and a hardcoded native
+  bridge failed the requested storage and lifetime contract. Continued work is
+  tracked in [the recovery plan](meta-recovery.md).
+- [Meta recovery checkpoints](archive/meta-recovery-checkpoints.md),
+  [design](archive/meta-recovery-design.md) and
+  [review](archive/meta-recovery-review.md): obsolete; their record wrapper
+  and allocation tracker were replaced by native byte storage.
 - [September 18 decisions](archive/repository-review-2026-09-18.md#group-10-decided-2026-09-18):
   all nine were decided by Gary, with the original questions and implementation
   outcomes retained. They are not a pending-approval list.

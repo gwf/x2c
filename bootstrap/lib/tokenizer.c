@@ -545,6 +545,8 @@ static int Tokenizer__symbol_set_tokens(Tokenizer t){
   return Tokenizer_do_scanner(t, scan_symbol_set_atom, 845368370138);
 }
 
+int strncmp(const char *, const char *, unsigned long);
+
 int scan_symbol_literal_status(char *, Symbol *);
 
 int scan_atom_status(char *, Symbol *);

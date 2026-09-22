@@ -9,7 +9,7 @@ not claim that partial runtime contracts are complete; consult
 `agents/x2c-philosophy.md` for contract status.
 
 - Compiler modules: 37
-- Runtime modules: 56
+- Runtime modules: 57
 - Generated runtime aggregator: `lib/x2c.x` (`lib/Makefile` owns it)
 
 ## Compiler modules
@@ -137,8 +137,9 @@ Public functions:
 `Sym.normalize_declared_type`, `Sym.var_tag_for_type`, `Sym.is_var_type`,
 `Sym.is_string_type`, `Sym.is_array_type`, `Sym.is_map_type`,
 `Sym.is_named_value_type`, `Sym.lookup_field`, `Sym.declare_field_order`,
-`Sym.field_order`, `Sym.declare_delegate_field`, `Sym.delegate_aggregate`,
-`Compiler.gensym`, `Sym.push_new_scope`, `Sym.push_scope`, `Sym.pop_scope`
+`Sym.field_order`, `Compiler.meta_type_layout`, `Sym.declare_delegate_field`,
+`Sym.delegate_aggregate`, `Compiler.gensym`, `Sym.push_new_scope`,
+`Sym.push_scope`, `Sym.pop_scope`
 
 ### [src/comptime.x](../src/comptime.x)
 
@@ -146,12 +147,12 @@ translating a compile-time x2c function into Lisp.
 
 Public functions:
 
-`Compiler.lower_comptime`, `Compiler.lower_declined`,
+`Compiler.lower_comptime`, `Compiler.lower_repl`, `Compiler.lower_declined`,
 `Compiler.inherit_shared_meta`, `Compiler.install_comptime`,
 `Compiler.lower_reached_globals`, `Compiler.lower_reached_meta`,
-`Compiler.meta_is_comptime_only`, `Compiler.lower_meta_expression`,
-`Compiler.meta_value_expression`, `Compiler.check_meta_call`,
-`Compiler.fold_meta_call`
+`Compiler.meta_is_comptime_only`, `Compiler.lower_meta_initializer`,
+`Compiler.lower_meta_expression`, `Compiler.meta_value_expression`,
+`Compiler.check_meta_call`, `Compiler.fold_meta_call`
 
 ### [src/deps.x](../src/deps.x)
 
@@ -207,9 +208,9 @@ Public functions:
 `Compiler.parse_assignment`, `Compiler.parse_primary`,
 `Compiler.parse_expression`, `Compiler.parse_parenthesized_statement`,
 `Compiler.initializer_native_types`, `Compiler.initializer_slot`,
-`Compiler.initializer_rows`, `Compiler.convert_initializer`,
-`Compiler.convert_compound_literal`, `Compiler.convert_expression`,
-`Compiler.convert_segment_to_string`
+`Compiler.initializer_field_path`, `Compiler.initializer_rows`,
+`Compiler.convert_initializer`, `Compiler.convert_compound_literal`,
+`Compiler.convert_expression`, `Compiler.convert_segment_to_string`
 
 ### [src/format.x](../src/format.x)
 
@@ -288,17 +289,19 @@ Public functions:
 `Compiler.shared_definition`, `macro_library_defer`, `macro_library_pending`,
 `Compiler.shared_definitions`, `Compiler.parse_macro_lisp_top_level`,
 `Compiler.parse_source_lisp`, `Compiler.evaluate_declaration_effect`,
-`Compiler.install_meta_function`, `Compiler.parse_macro_lisp_shallow`,
-`Compiler.lift_macro_lisp_expression`, `Compiler.parse_macro_lisp_expression`,
-`Compiler.evaluate_meta_expression`, `Compiler.evaluate_declaration_recipe`,
-`Compiler.evaluate_macro_slot`, `Compiler.evaluate_macro_rows`,
-`Compiler.macro_introduced_name`, `Compiler.peek_macro_hole`,
-`Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_slot`,
-`Compiler.parse_macro_definition`, `Compiler.publish_macro_definition_node`,
-`Compiler.parse_keyword_definition`, `Compiler.macro_targets_unit`,
-`Compiler.skip_named_type_declaration`, `Compiler.macro_invocation_site`,
-`Compiler.expand_macro_invocation_node`, `Compiler.try_parse_macro_expression`,
-`Compiler.try_parse_macro_target_at`
+`Compiler.install_meta_declaration`, `Compiler.record_native_meta_effect`,
+`Compiler.install_native_meta_effects`, `Compiler.bind_native_meta`,
+`Compiler.install_native_meta_function`, `Compiler.install_meta_function`,
+`Compiler.parse_macro_lisp_shallow`, `Compiler.lift_macro_lisp_expression`,
+`Compiler.parse_macro_lisp_expression`, `Compiler.evaluate_meta_expression`,
+`Compiler.evaluate_declaration_recipe`, `Compiler.evaluate_macro_slot`,
+`Compiler.evaluate_macro_rows`, `Compiler.macro_introduced_name`,
+`Compiler.peek_macro_hole`, `Compiler.macro_lisp_starts_declaration`,
+`Compiler.try_parse_macro_slot`, `Compiler.parse_macro_definition`,
+`Compiler.publish_macro_definition_node`, `Compiler.parse_keyword_definition`,
+`Compiler.macro_targets_unit`, `Compiler.skip_named_type_declaration`,
+`Compiler.macro_invocation_site`, `Compiler.expand_macro_invocation_node`,
+`Compiler.try_parse_macro_expression`, `Compiler.try_parse_macro_target_at`
 
 ### [src/main.x](../src/main.x)
 
@@ -326,10 +329,10 @@ Public functions:
 `Compiler.parse_declaration_argument`, `Compiler.parse_function_definition`,
 `Compiler.parse_function_target`, `Compiler.parse_import_declaration`,
 `Compiler.defines_main`, `Compiler.meta_form_is_definition`,
-`Compiler.script_statement_starts`, `Compiler.script_statement_executes`,
-`Compiler.skip_linkage_brace`, `Compiler.parse_top_level`,
-`Compiler.parse_submission`, `Compiler.finish_foreign_alias`,
-`Compiler.bind_syntax`
+`Compiler.meta_form_is_declaration`, `Compiler.script_statement_starts`,
+`Compiler.script_statement_executes`, `Compiler.skip_linkage_brace`,
+`Compiler.parse_top_level`, `Compiler.parse_submission`,
+`Compiler.finish_foreign_alias`, `Compiler.bind_syntax`
 
 ### [src/project.x](../src/project.x)
 
@@ -465,16 +468,16 @@ Public functions:
 `Type.is_enum_tag`, `Type.is_enum_tag_body`, `Type.is_pointer`,
 `Type.is_array`, `Type.is_function`, `Type.is_bitfield`, `Type.scalar`,
 `Type.scalar_tag`, `Type.var_numeric_extractor`,
-`Type.var_numeric_update_helper`, `Type.numeric_literal_value`,
-`Type.numeric_literal`, `Type.tag`, `Type.body`, `Type.var_tag_row`,
-`Type.begin_unit`, `Type.end_unit`, `Type.register_var_tag`,
-`Type.register_var_adoption`, `Type.var_converter`, `Type.fixed_var_tag`,
-`Type.var_tag`, `Type.base_type`, `Type.canonicalize`, `Type.declared`,
-`Type.discards_qualifiers`, `Type.is_builtin`, `Type.is_typedef_name`,
-`Type.is_bare_typedef_name`, `Type.is_typedef`, `Type.is_number`,
-`Type.is_integral`, `Type.dereference`, `Type.reference`, `Type.apply`,
-`Type.promote`, `Type.widest`, `Type.is_static`, `Type.is_inline`,
-`Type.is_extern`, `Type.is_threaded`, `List.type_from_ast`
+`Type.var_numeric_update_helper`, `Type.var_signature_type`,
+`Type.numeric_literal_value`, `Type.numeric_literal`, `Type.tag`, `Type.body`,
+`Type.var_tag_row`, `Type.begin_unit`, `Type.end_unit`,
+`Type.register_var_tag`, `Type.register_var_adoption`, `Type.var_converter`,
+`Type.fixed_var_tag`, `Type.var_tag`, `Type.base_type`, `Type.canonicalize`,
+`Type.declared`, `Type.discards_qualifiers`, `Type.is_builtin`,
+`Type.is_typedef_name`, `Type.is_bare_typedef_name`, `Type.is_typedef`,
+`Type.is_number`, `Type.is_integral`, `Type.dereference`, `Type.reference`,
+`Type.apply`, `Type.promote`, `Type.widest`, `Type.is_static`,
+`Type.is_inline`, `Type.is_extern`, `Type.is_threaded`, `List.type_from_ast`
 
 ### [src/utils.x](../src/utils.x)
 
@@ -562,6 +565,14 @@ Public functions:
 `Buffer.pop`, `Buffer.tabstop`, `Buffer.try_get`, `Buffer.get`, `Buffer.len`,
 `Buffer.str`, `Buffer.str_free`, `Buffer.repr`, `Buffer.truth`,
 `Buffer.cleanup`
+
+### [lib/clibc.x](../lib/clibc.x)
+
+a basic set of C library prototypes for the compiler.
+
+Public functions:
+
+None. This module has no non-static function definitions.
 
 ### [lib/cmath.x](../lib/cmath.x)
 
@@ -704,8 +715,10 @@ Public functions:
 
 `FuncArg.value`, `FuncArg.reference`, `x2c_func_reference_type`,
 `x2c_func_value_argument`, `x2c_func_reference_argument`,
+`x2c_func_pointer_argument`, `x2c_func_record_result`,
 `x2c_func_unrepresentable_argument`, `Func.new`, `Func.new_rest`,
-`Func.new_context`, `Func.context`, `Func.apply`, `Func.var`
+`Func.new_context`, `Func.signature`, `Func.context`, `Func.apply`, `Func.var`,
+`Var.func`
 
 ### [lib/iter.x](../lib/iter.x)
 
@@ -765,7 +778,9 @@ Public functions:
 `lisp_string_append`, `lisp_substring`, `lisp_string_downcase`,
 `lisp_string_strip`, `lisp_string_lstrip`, `lisp_string_rstrip`,
 `lisp_match_replace`, `lisp_read_file`, `lisp_write_file`, `lisp_void`,
-`lisp_cell`, `lisp_address`, `lisp_load`, `lisp_store`, `Lisp.auto_stats`,
+`lisp_cell`, `lisp_address`, `lisp_load`, `lisp_store`, `lisp_bytes`,
+`lisp_at`, `lisp_zero`, `lisp_copy`, `lisp_record_result`, `lisp_session_copy`,
+`lisp_peek`, `lisp_poke`, `lisp_source_function`, `Lisp.auto_stats`,
 `Lisp.auto_instrument`, `Lisp.call_budget`, `Lisp.auto_disable`,
 `Lisp.auto_prepare`, `Lisp.eval`, `Lisp.apply`, `Lisp.eval_string`,
 `Lisp.eval_file`, `Lisp.try_get`, `Lisp.set_global`, `Lisp.bind`,

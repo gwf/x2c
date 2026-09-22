@@ -1010,6 +1010,8 @@ static int _run_bootstrap(CliRequest command){
 
 void x2c_initialize_environment(const char *);
 
+int strcmp(const char *, const char *);
+
 int editor_request(int, char * *);
 
 CliRequest cli_parse(int, char * *);

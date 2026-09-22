@@ -4395,6 +4395,10 @@ static List _initializer_named(Compiler c, Type type, Var name, List parent){
   return NULL;
 }
 
+List Compiler_initializer_field_path(Compiler c, Type type, List field){
+  if(! _init_guard_) _file_init_();  return _initializer_named(c, type, List_car(field), NULL);
+}
+
 static List _initializer_designated(Compiler c, Type root, List node, List * value, List * normalized){
   List path = NULL, selectors = NULL;  Type type = root;  while(1){
     Type owner = Sym_resolve_key(c -> sym, type);

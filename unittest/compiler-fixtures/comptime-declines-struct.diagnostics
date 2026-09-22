@@ -1,5 +1,0 @@
-unittest/compiler-fixtures/comptime-declines-struct.x:15:1: macro: this function cannot run at compile time
-  meta int ct_struct(int n) {
-  ^^^^
-  note: reason: a struct or union, which has no compile-time representation
-

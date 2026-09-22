@@ -338,6 +338,8 @@ static uint64_t _translation_fingerprint(
   hash = _state_text(hash, request.live_symbols ? "live" : "prelude");
   hash = _state_text(hash, request.cpp_symbols ? "cpp-symbols" : "raw");
   hash = _state_text(
+    hash, request.system_headers ? "system-headers" : "kept-headers");
+  hash = _state_text(
     hash, request.source_map ? "source-map" : "generated-lines");
   String depfile = %"$directory/${Path.stem(input)}.d";
   return _state_dependencies(hash, depfile, ok);

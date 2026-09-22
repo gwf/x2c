@@ -155,7 +155,7 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
   String root = x2c_get_root(), int use_prelude = !request.live_symbols;
   Map globs = NULL;
   int use_cpp = request.cpp_symbols || request.live_symbols ||
-                cpp_dumps.contains(request.dump);
+                request.system_headers || cpp_dumps.contains(request.dump);
   if (use_prelude && !use_cpp) return c.collect_symbols(NULL);
   if (c.script)
     c.report_error(
@@ -167,9 +167,15 @@ static Map _preprocess_input(Frontend frontend, ParsedUnit *unit) {
   unit.preprocessor = cppcompiler;
   cppcompiler.filename = filename;
   String text = NULL, errors = NULL, dependency_text = NULL;
-  String runtime = c.prelude ? %"$root/lib/x2c.x" : NULL, imacros = runtime;
+  String runtime = c.prelude ? %"$root/lib/x2c.x" : NULL;
+  /* `--system-headers` expands system headers so their declarations, such
+     as `struct timespec`, reach collection. Raw collection supplies the
+     prelude there, because reading it through -imacros would consume those
+     headers' guards while discarding their declarations. */
+  String imacros = request.system_headers ? NULL : runtime;
   int status = frontend.toolchain.preprocess(
-    filename, c.include_dirs, imacros, &text, &errors, &dependency_text);
+    filename, c.include_dirs, imacros, request.system_headers,
+    &text, &errors, &dependency_text);
   unit.preprocessor_output = text;
   unit.preprocessor_errors = errors;
   if (errors && frontend.preprocessor_errors)
@@ -269,6 +275,7 @@ static int _preload_meta_surface(Frontend frontend, Lisp shared) {
   struct CliRequest request = *frontend.request;
   request.dump = 0;
   request.no_cpp = request.live_symbols = request.cpp_symbols = 0;
+  request.system_headers = 0;
   struct Frontend session = *frontend;
   session.request = &request;
   frontend = &session;

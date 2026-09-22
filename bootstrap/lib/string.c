@@ -1630,6 +1630,8 @@ unsigned String_hash(String str){
   return header -> hash ? header -> hash : _hash_n(str, strlen(str));
 }
 
+int strcmp(const char *, const char *);
+
 int String_equal(String x, String y){
   if((void *) x ==(void *) y) return 1;
   if(! String_truth(x) || ! String_truth(y)) return 0;

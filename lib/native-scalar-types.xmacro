@@ -1,0 +1,210 @@
+/*  native-scalar-types.xmacro -- exact C scalar ledger
+
+    These are the native C scalar spellings the compiler can carry through a
+    Var.  The compiler projects its Type lookup from these rows, and
+    `lib/lisp.x` projects each type's native size, alignment, load, and store
+    for compile-time code that keeps C objects in bytes.  Var's i48/u48
+    numeric payload families are deliberately absent: neither is an exact C
+    type.
+
+    A row is:
+
+      (TYPE NAME TAG C-EXTRACTOR C-UPDATE SIGNATURE-TYPE)
+
+    TYPE is Type.scalar's canonical spelling. NAME only names generated
+    functions. C-EXTRACTOR and C-UPDATE retain the existing compiler emission
+    spellings. SIGNATURE-TYPE is the compact Type spelling used by Func's Var
+    calling convention.
+*/
+
+$(def native.scalar.rows '(
+  ((char)               char    i8      "Var_char"
+    "x2c_var_update_i8" (char))
+  ((signed char)        schar   i8      "Var_char"
+    "x2c_var_update_schar" (schar))
+  ((unsigned char)      uchar   u8      "Var_uchar"
+    "x2c_var_update_u8" (uchar))
+  ((short)              short   i16     "Var_short"
+    "x2c_var_update_i16" (short))
+  ((unsigned short)     ushort  u16     "Var_ushort"
+    "x2c_var_update_u16" (ushort))
+  ((int)                int     i32     "Var_int"
+    "x2c_var_update_i32" (int))
+  ((unsigned)           uint    u32     "Var_uint"
+    "x2c_var_update_u32" (uint))
+  ((long)               long    long    "Var_long"
+    "x2c_var_update_long" (long))
+  ((unsigned long)      ulong   ulong   "Var_ulong"
+    "x2c_var_update_ulong" (ulong))
+  ((long long)          llong   llong   "Var_long_long"
+    "x2c_var_update_long_long" (llong))
+  ((unsigned long long) ullong  ullong  "Var_ulong_long"
+    "x2c_var_update_ulong_long" (ullong))
+  ((float)              f32     f32     "Var_float"
+    "x2c_var_update_f32" (float))
+  ((double)             f64     f64     "Var_floating"
+    "x2c_var_update_f64" (double))
+  ((long double)        ldouble ldouble "Var_long_double"
+    "x2c_var_update_long_double" (long double))
+))
+
+$(defun native.scalar.type (row) (car row))
+$(defun native.scalar.name (row) (cadr row))
+$(defun native.scalar.tag (row) (caddr row))
+$(defun native.scalar.c-extractor (row) (car (cdddr row)))
+$(defun native.scalar.c-update (row) (cadr (cdddr row)))
+$(defun native.scalar.signature-type (row) (caddr (cdddr row)))
+
+$(defun native.scalar.list (items)
+  (if (null? items) '(expr ("List") (nil))
+      `(expr ("List")
+        (cons ,(car items) ,(native.scalar.list (cdr items))))))
+
+$(defun native.scalar.type-value (row)
+  (native.scalar.list (map x2c.literal.symbol (native.scalar.type row))))
+
+$(defun native.scalar.signature-value (row)
+  (native.scalar.list
+    (map x2c.literal.symbol (native.scalar.signature-type row))))
+
+$(defun native.scalar.type-entry (row)
+  `(map-entry ,(native.scalar.type-value row)
+    ,(native.scalar.list (list
+      (x2c.literal.symbol (native.scalar.tag row))
+      (x2c.literal.string (native.scalar.c-extractor row))
+      (x2c.literal.string (native.scalar.c-update row))
+      (native.scalar.signature-value row)))))
+
+/* Type's exact-C lookup projection. */
+macro Entry $native.scalar.type.rows() {
+  $(map native.scalar.type-entry native.scalar.rows)...
+}
+
+$(defun native.scalar.ident (prefix row)
+  (string-append prefix (str (native.scalar.name row))))
+
+$(defun native.scalar.expr-ident (name)
+  `(expr () (ident ,name)))
+
+$(defun native.scalar.member-call (receiver member arguments)
+  `(expr () (call
+    (expr () (op . ,receiver (,(str member))))
+    (args ,@arguments))))
+
+$(defun native.scalar.param (type name modifiers)
+  `(param ,type (bind (,name) ,modifiers)))
+
+$(defun native.scalar.function (result name parameters body)
+  `(function ,result
+    (bind (,name) ((fnmod (params ,@parameters))))
+    (block ,@body)))
+
+$(defun native.scalar.prototype (result name parameters)
+  `(declare ,result
+    (bindings (bind (,name) ((fnmod (params ,@parameters)))))))
+
+$(defun native.scalar.load-parameters ()
+  (list
+    (native.scalar.param '(const void) "bytes" '(*))
+    (native.scalar.param '("Scope") "owner" '(*))))
+
+$(defun native.scalar.store-parameters ()
+  (list
+    (native.scalar.param '(void) "bytes" '(*))
+    (native.scalar.param '("Var") "value" '())))
+
+$(defun native.scalar.prototypes (row)
+  (list
+    (native.scalar.prototype '(static "Var")
+      (native.scalar.ident "_native_scalar_load_" row)
+      (native.scalar.load-parameters))
+    (native.scalar.prototype '(static void)
+      (native.scalar.ident "_native_scalar_store_" row)
+      (native.scalar.store-parameters))))
+
+$(defun native.scalar.load (row)
+  (let* ((type (native.scalar.type row))
+         (load (native.scalar.ident "_native_scalar_load_" row))
+         (bytes "bytes")
+         (owner "owner")
+         (native "native")
+         (value "value")
+         (native-expr (native.scalar.expr-ident native))
+         (value-expr (native.scalar.expr-ident value)))
+    (native.scalar.function '(static "Var") load
+      (native.scalar.load-parameters)
+      (list
+        `(declare ,type (bindings (bind (,native) ())))
+        `(stmnt (expr () (call "memcpy" (args
+          (expr () (op & ,native-expr))
+          ,(native.scalar.expr-ident bytes)
+          (expr (unsigned long) (sizeof ,native-expr))))))
+        `(declare ("Var") (bindings
+          (op = (bind (,value) ()) ,native-expr)))
+        `(return () ,(native.scalar.member-call
+          value-expr 'move_wide_to
+          (list (native.scalar.expr-ident owner))))))))
+
+$(defun native.scalar.store (row)
+  (let* ((type (native.scalar.type row))
+         (store (native.scalar.ident "_native_scalar_store_" row))
+         (bytes "bytes")
+         (native "native")
+         (value "value")
+         (value-expr (native.scalar.expr-ident value))
+         (native-expr (native.scalar.expr-ident native)))
+    (native.scalar.function '(static void) store
+      (native.scalar.store-parameters)
+      (list
+        `(declare ,type (bindings (op = (bind (,native) ()) ,value-expr)))
+        `(stmnt (expr () (call "memcpy" (args
+          ,(native.scalar.expr-ident bytes)
+          (expr () (op & ,native-expr))
+          (expr (unsigned long) (sizeof ,native-expr))))))))))
+
+$(defun native.scalar.access-record (row)
+  (let ((record (native.scalar.ident "_native_scalar_access_" row))
+        (load (native.scalar.ident "_native_scalar_load_" row))
+        (store (native.scalar.ident "_native_scalar_store_" row))
+        (decl `(decl ,(native.scalar.type row)
+                (bindings (bind () ())))))
+    `(declare (static struct "NativeScalarAccess")
+      (bindings (op = (bind (,record) ())
+        (expr () (composite (commas
+          ,(x2c.literal.symbol (native.scalar.tag row))
+          (expr (unsigned long) (sizeof (parens ,decl)))
+          (expr (unsigned long) (call "_Alignof" (args ,decl)))
+          ,(native.scalar.expr-ident load)
+          ,(native.scalar.expr-ident store)))))))))
+
+$(defun native.scalar.access-definitions (row)
+  (list (native.scalar.load row)
+        (native.scalar.store row)
+        (native.scalar.access-record row)))
+
+$(defun native.scalar.access-case (row)
+  (let ((type (native.scalar.type-value row))
+        (record (native.scalar.ident "_native_scalar_access_" row))
+        (exact (native.scalar.expr-ident "exact_type")))
+    `(if ,(native.scalar.member-call exact 'equal (list type))
+      (return () (expr ()
+        (op & ,(native.scalar.expr-ident record)))))))
+
+$(defun native.scalar.access-lookup (rows)
+  (native.scalar.function '("NativeScalarAccess")
+    "native_scalar_access"
+    (list (native.scalar.param '("List") "exact_type" '()))
+    `(,@(map native.scalar.access-case rows)
+      (return () ,(x2c.literal.int 0)))))
+
+$(defun native.scalar.access-projection (rows)
+  (append (apply append (map native.scalar.prototypes rows))
+          (apply append (map native.scalar.access-definitions rows))
+          (list (native.scalar.access-lookup rows))))
+
+/* Native size, alignment, load, and store for each row, and the
+   `native_scalar_access` lookup. The importing unit declares
+   NativeScalarAccess and the lookup's prototype first. */
+macro Unit $native.scalar.access.rows() {
+  $(native.scalar.access-projection native.scalar.rows)...
+}

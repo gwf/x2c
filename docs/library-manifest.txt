@@ -16,6 +16,7 @@ lib/array.x|api|
 lib/atom.x|api|
 lib/block.x|api|
 lib/buffer.x|api|
+lib/clibc.x|internal|C library prototypes for integer and string conversions, string comparison, and `timespec_get`, marked `meta` so compile-time code calls the native functions; it includes the C headers it declares from.
 lib/cmath.x|internal|C99 `<math.h>` prototypes, declared so a `Var` argument unboxes at a math call; the unit still includes `<math.h>`.
 lib/common.x|api|
 lib/context.x|api|

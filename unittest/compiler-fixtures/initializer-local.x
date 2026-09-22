@@ -4,6 +4,8 @@
 struct Record { int integer; };
 struct Node { int integer; };
 struct Global { String text; };
+struct FileForward *file_forward_pointer;
+struct FileForward { int integer; };
 #define RECORD_SIZE sizeof(struct Record)
 
 static void shadowed(void) {
@@ -94,6 +96,19 @@ static void global_alias(void) {
   }
 }
 
+static int file_forward_shadow(void) {
+  struct FileForward *global = file_forward_pointer;
+  (void)global;
+  {
+    struct FileForward { String text; };
+    struct FileForward local = {"local"};
+    String expected = "local";
+    if ((void *)local.text != (void *)expected) return 0;
+  }
+  struct FileForward after = {13};
+  return after.integer == 13;
+}
+
 macro Statement $loop_scope() {
   for (struct Record { String text; } value = {"macro"}; 0;)
     (void)value;
@@ -129,5 +144,5 @@ int main(void) {
   implicit_forward();
   global_alias();
   loop_scope();
-  return !qualified();
+  return !qualified() || !file_forward_shadow();
 }

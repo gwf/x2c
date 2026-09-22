@@ -1,0 +1,143 @@
+
+(preproc "#include \"x2c.x\"")
+
+(declare 
+ (struct "MetaPoint" 
+  (fields (declare (int) (bindings (bind (binding 1 "x") ()))) 
+   (declare (int) (bindings (bind (binding 2 "y") ()))))) 
+ (bindings (bind () ())))
+
+(function (struct "MetaPoint") 
+ (bind (binding 3 "mr_make") 
+  ((fnmod 
+    (params (param (int) (bind (binding 4 "x") ())) 
+     (param (int) (bind (binding 5 "y") ())))))) 
+ (block 
+  (at 1 (declare (struct "MetaPoint") 
+         (bindings 
+          (op = (bind (binding 6 "result") ()) 
+           (expr () 
+            (composite 
+             (commas (dotinit ("x") (expr (int) (ident (binding 4 "x")))) 
+              (dotinit ("y") (expr (int) (ident (binding 5 "y"))))))))))) 
+  (at 2 (return (struct "MetaPoint") 
+         (expr (struct "MetaPoint") (ident (binding 6 "result")))))))
+
+(function (int) 
+ (bind (binding 7 "mr_sum") 
+  ((fnmod (params (param (struct "MetaPoint") (bind (binding 8 "point") ())))))) 
+ (block 
+  (at 3 (stmnt 
+         (expr (int) 
+          (op += 
+           (expr (int) 
+            (op . (expr (struct "MetaPoint") (ident (binding 8 "point"))) 
+             ("x"))) (expr (int) (literal (int) "1")))))) 
+  (at 4 (return (int) 
+         (expr (int) 
+          (op + (expr (int) 
+                 (op . (expr (struct "MetaPoint") (ident (binding 8 "point"))) 
+                  ("x"))) 
+           (expr (int) 
+            (op . (expr (struct "MetaPoint") (ident (binding 8 "point"))) 
+             ("y")))))))))
+
+(function (int) 
+ (bind (binding 9 "mr_probe") 
+  ((fnmod (params (param (int) (bind (binding 10 "seed") ())))))) 
+ (block 
+  (at 5 (declare (struct "MetaPoint") 
+         (bindings 
+          (op = (bind (binding 11 "original") ()) 
+           (expr (struct "MetaPoint") 
+            (call (expr ((func ((int) (int))) struct "MetaPoint") 
+                   (ident (binding 3 "mr_make"))) 
+             (args (expr (int) (ident (binding 10 "seed"))) 
+              (expr (int) 
+               (op + (expr (int) (ident (binding 10 "seed"))) 
+                (expr (int) (literal (int) "1"))))))))))) 
+  (at 6 (declare (struct "MetaPoint") 
+         (bindings 
+          (op = (bind (binding 12 "copy") ()) 
+           (expr (struct "MetaPoint") (ident (binding 11 "original"))))))) 
+  (at 7 (stmnt 
+         (expr (int) 
+          (op = (expr (int) 
+                 (op . (expr (struct "MetaPoint") (ident (binding 12 "copy"))) 
+                  ("x"))) (expr (int) (literal (int) "20")))))) 
+  (at 8 (declare (int) 
+         (bindings 
+          (op = (bind (binding 13 "field") (*)) 
+           (expr (* int) 
+            (op & (expr (int) 
+                   (op . (expr (struct "MetaPoint") 
+                          (ident (binding 11 "original"))) ("y"))))))))) 
+  (at 9 (stmnt 
+         (expr (int) 
+          (op += (expr (int) (op * (expr (* int) (ident (binding 13 "field"))))) 
+           (expr (int) (literal (int) "2")))))) 
+  (at 10 
+   (declare (struct "MetaPoint") 
+    (bindings 
+     (op = (bind (binding 14 "address") (*)) 
+      (expr (* struct "MetaPoint") 
+       (op & (expr (struct "MetaPoint") (ident (binding 12 "copy"))))))))) 
+  (at 11 
+   (stmnt 
+    (expr (int) 
+     (op = (expr (int) 
+            (op -> (expr (* struct "MetaPoint") (ident (binding 14 "address"))) 
+             ("y"))) (expr (int) (literal (int) "30")))))) 
+  (at 12 
+   (return (int) 
+    (expr (int) 
+     (op + (expr (int) 
+            (op + (expr (int) 
+                   (op + (expr (int) 
+                          (op + (expr (int) 
+                                 (op * (expr (int) 
+                                        (op . (expr (struct "MetaPoint") 
+                                               (ident (binding 11 "original"))) 
+                                         ("x"))) 
+                                  (expr (int) (literal (int) "1000")))) 
+                           (expr (int) 
+                            (op * (expr (int) 
+                                   (op . (expr (struct "MetaPoint") 
+                                          (ident (binding 11 "original"))) ("y"))) 
+                             (expr (int) (literal (int) "100")))))) 
+                    (expr (int) 
+                     (op * (expr (int) 
+                            (op . (expr (struct "MetaPoint") 
+                                   (ident (binding 12 "copy"))) ("x"))) 
+                      (expr (int) (literal (int) "10")))))) 
+             (expr (int) 
+              (op . (expr (struct "MetaPoint") (ident (binding 12 "copy"))) 
+               ("y"))))) 
+      (expr (int) 
+       (call (expr ((func ((struct "MetaPoint"))) int) 
+              (ident (binding 7 "mr_sum"))) 
+        (args (expr (struct "MetaPoint") (ident (binding 11 "original"))))))))))))
+
+(function (int) 
+ (bind (binding 15 "main") 
+  ((fnmod 
+    (params (param (int) (bind (binding 16 "argc") ())) 
+     (param (char) (bind (binding 17 "argv") (* *))))))) 
+ (block 
+  (at 13 
+   (stmnt 
+    (expr (void) 
+     (cast (decl (void) (bindings (bind () ()))) 
+      (expr (* * char) (ident (binding 17 "argv"))))))) 
+  (at 14 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 18 "printf"))) 
+      (args (expr (* char) (literal (* char) "\"%d %d\\n\"")) 
+       (expr (int) (literal (int) "3840")) 
+       (expr (int) 
+        (call (expr ((func ((int))) int) (ident (binding 9 "mr_probe"))) 
+         (args (expr (int) 
+                (op + (expr (int) (ident (binding 16 "argc"))) 
+                 (expr (int) (literal (int) "2")))))))))))) 
+  (at 15 (return (int) (expr (int) (literal (int) "0"))))))

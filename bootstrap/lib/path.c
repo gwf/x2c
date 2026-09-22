@@ -272,6 +272,8 @@ double Path_modified_time(Path path){
 
 }
 
+int strcmp(const char *, const char *);
+
 Var Array_push(Array, Var);
 
 List Array_list_free(Array);
@@ -394,6 +396,8 @@ static const char * _glob_step(const char * pattern, const char * text){
   if(* pattern == '\\' && pattern[1]) pattern ++;
   return * pattern == * text ? pattern + 1 : NULL;
 }
+
+int strncmp(const char *, const char *, unsigned long);
 
 static int _glob_match(const char * pattern, const char * text, const char * origin){
   const char * star = NULL, * resume = NULL, * next;

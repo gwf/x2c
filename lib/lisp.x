@@ -34,6 +34,29 @@ $(import "private-keywords.xmacro")
 #include "x2c.x"
 #include "machine.x"
 
+/** Reads one exact C scalar from `bytes`; a wide result is boxed in
+    `owner`. */
+typedef Var (*NativeScalarLoad)(const void *bytes, Scope *owner);
+/** Writes `value`, converted to one exact C scalar type, to `bytes`. */
+typedef void (*NativeScalarStore)(void *bytes, Var value);
+/** Describes one exact C scalar type in native bytes: its Var tag, size,
+    alignment, load, and store. Compile-time code that keeps C objects in
+    bytes, and the compiler's layouts, select a row with
+    `native_scalar_access`. */
+typedef struct NativeScalarAccess {
+  Symbol tag;
+  size_t size, alignment;
+  NativeScalarLoad load;
+  NativeScalarStore store;
+} *NativeScalarAccess;
+
+/** Returns the row for an exact C scalar type such as `(unsigned long)`, or
+    NULL for any other type. */
+NativeScalarAccess native_scalar_access(List exact_type);
+
+$(import "native-scalar-types.xmacro")
+$native.scalar.access.rows();
+
 /** Represents one isolated embedded `Lisp` session.
     Create it with `Lisp.new` or `Lisp.kernel` and end it with
     `Lisp.destroy`. The module header describes its owned and borrowed state.
@@ -66,7 +89,8 @@ typedef struct LispAutoStats {
 int Lisp.program(Var callable, MachineView *view, int *nparam, Var *body) {
   if (callable is not <lambda>) return 0;
   Lambda lambda = callable;
-  if (lambda.macro || lambda.auto_status != MACHINE_PREPARED ||
+  if (lambda.macro || lambda.source_function ||
+      lambda.auto_status != MACHINE_PREPARED ||
       !lambda.auto_program)
     return 0;
   *view = lambda.auto_program.view();
@@ -401,6 +425,8 @@ struct Lisp {
   long call_step_max;   // calls one evaluation may make
   int auto_disabled;    // benchmark/test forced-evaluator arm only
   int protect_x2c;      // compiler SDK installed; x2c.* cannot be redefined
+  Scope *automatic_owner; // borrowed frame of the running source function
+  Scope *result_owner;    // borrowed automatic storage of its caller
 };
 
 /* Native value bindings may adapt an interpreted callable to Func. Public
@@ -418,7 +444,8 @@ typedef struct Lambda {
   Lisp owner;
   List params;
   Var body;
-  Map captures, int macro, auto_calls, auto_status;
+  Map captures;
+  int macro, source_function, auto_calls, auto_status;
   MachineProgram auto_program;
 } *Lambda;
 
@@ -643,6 +670,13 @@ macro Decorator $lisp.entry(Function $function, Expr $operation) {
   Lisp prior_lisp = lisp_active;
   lisp_active = $(x2c.function.parameter $function "lisp");
   defer lisp_active = prior_lisp;
+  Scope *prior_automatic_owner = lisp_active.automatic_owner;
+  Scope *prior_result_owner = lisp_active.result_owner;
+  lisp_active.automatic_owner = lisp_active.result_owner = NULL;
+  defer {
+    lisp_active.automatic_owner = prior_automatic_owner;
+    lisp_active.result_owner = prior_result_owner;
+  }
   $(x2c.function.body $function)...
 }
 
@@ -666,6 +700,7 @@ Lisp Lisp.kernel(void) {
   lisp.auto_stats = (LispAutoStats) {0};
   lisp.auto_machine_stats = NULL;
   lisp.auto_disabled = 0;
+  lisp.automatic_owner = lisp.result_owner = NULL;
   lisp.parent = NULL;
   lisp.frozen = 0;
   lisp.call_step_max = LISP_CALL_STEP_MAX;
@@ -1035,6 +1070,7 @@ static Symbol _lisp_symbol_new_len(String text, int length) =>
    Map deliberately excludes void from its value domain. */
 /** Returns the `void` sentinel to the evaluator. */
 Var lisp_void(void) => void;
+
 /** Allocates one evaluator-owned raw `Var` slot initialized to `value`. */
 Var lisp_cell(Var value) {
   Var *slot = Scope.malloc(sizeof(Var));
@@ -1051,8 +1087,88 @@ Var lisp_store(Var cell, Var value) {
   return value;
 }
 
-/* Status bindings publish native outputs only after the operation succeeds,
-   preserving the evaluator cell when the native contract leaves it alone. */
+/* Lowered source keeps C objects in native bytes. The compiler supplies
+   every size, offset, and layout from `Compiler.meta_type_layout`, so these
+   operations only move bytes. The per-access operations take their offset
+   as a `Var`: a numeric Func parameter pays a checked conversion on every
+   call, which would dominate a field access. Automatic storage belongs to the frame of the
+   marked source function executing it, or to the session outside one. */
+static Scope *_lowered_owner(void) =>
+  lisp_active.automatic_owner ? lisp_active.automatic_owner
+                              : &lisp_active.scope;
+
+/** Allocates `size` zeroed bytes of lowered automatic storage. */
+Var lisp_bytes(long size) =>
+  Var.new(<p48>, Scope.calloc_in(_lowered_owner(), 1, (size_t) size));
+
+/** Returns `base` advanced by `offset` bytes, tagged as `tag`. */
+Var lisp_at(Var base, Var offset, Symbol tag) =>
+  Var.new(tag, (char *) base.pointer() + offset.long_long());
+
+/** Zeroes `size` bytes at `destination` and returns it. */
+Var lisp_zero(Var destination, Var size) {
+  memset(destination.pointer(), 0, (size_t) size.long_long());
+  return destination;
+}
+
+/** Copies `size` bytes from `source` to `destination`; returns the latter. */
+Var lisp_copy(Var destination, Var source, long size) {
+  memmove(destination.pointer(), source.pointer(), (size_t) size);
+  return destination;
+}
+
+/** Copies a returned record into its caller's automatic storage before the
+    returning frame ends. */
+Var lisp_record_result(Var source, long size) =>
+  Var.new(<p48>, Scope.memdup_in(
+    lisp_active.result_owner ? lisp_active.result_owner
+                             : &lisp_active.scope,
+    source.pointer(), (size_t) size));
+
+/** Copies a record into bytes the session owns, for file-scope state. */
+Var lisp_session_copy(Var source, long size) =>
+  Var.new(<p48>, Scope.memdup_in(
+    &lisp_active.scope, source.pointer(), (size_t) size));
+
+/** Reads the object of compiler layout `layout` at `offset` bytes past
+    `pointer`. A record reads as its own address, which is how lowered source
+    carries record values. */
+Var lisp_peek(Var pointer, Var offset, List layout) {
+  void *at = (char *) pointer.pointer() + offset.long_long();
+  Symbol kind = layout.car();
+  if (kind == <record>) return Var.new(<p48>, at);
+  if (kind == <var>) return *(Var *) at;
+  if (kind == <pointer>) return Var.new(layout[4], *(void **) at);
+  Var value = native_scalar_access(layout[4]).load(at, Scope.top());
+  return layout[5] == <symbol> ? Var.new(<symbol>, value.ulong()) : value;
+}
+
+/** Writes `value`, already converted to the layout's type, at `offset`
+    bytes past `pointer`. */
+Var lisp_poke(Var pointer, Var offset, List layout, Var value) {
+  void *at = (char *) pointer.pointer() + offset.long_long();
+  Symbol kind = layout.car();
+  if (kind == <record>) memmove(at, value.pointer(), layout[2].long_long());
+  else if (kind == <var>) *(Var *) at = value;
+  else if (kind == <pointer>) *(void **) at = value.pointer();
+  else native_scalar_access(layout[4]).store(
+    at, layout[5] == <symbol>
+          ? Var.new(<ulong>, (unsigned long) value.integer()) : value);
+  return value;
+}
+
+/** Marks the actual Lambda installed for one lowered source function. */
+Var lisp_source_function(Var callable) {
+  if (callable is not <lambda>)
+    raise %(bad-types (operation "lisp_source_function")
+                     (want "Lambda") (actual ${callable.kind()}));
+  ((Lambda) callable).source_function = 1;
+  return callable;
+}
+
+/* Plain Lisp passes each output as an evaluator cell, so these status
+   bindings publish a native output into the cell only after the operation
+   succeeds. Lowered source passes C objects and calls the natives directly. */
 static int _lisp_String_try_long(String str, Var out) {
   long value;
   int status = str.try_long(&value);
@@ -1181,6 +1297,39 @@ static Func _lisp_predicate(Var callable) {
     &context, sizeof context);
 }
 
+/* `Iter` keeps one Func context in its existing auxiliary field.  The native
+   pull ABI remains the library's IterNextFn; this adapter only carries its
+   iterator and output-cell arguments into the interpreted source function. */
+static Var _lisp_iter_next_callback(
+  Func function, const FuncArg *arguments
+) {
+  LispCallbackContext *context = (void *) function.context();
+  if (!lisp_active || lisp_active != context.lisp)
+    raise %(bad-state (operation "Lisp iterator callback")
+                     (why "wrong session"));
+  Var iter = x2c_func_value_argument(function, arguments, 0, <var>);
+  Var out = x2c_func_value_argument(function, arguments, 1, <var>);
+  return _apply_values(context.lisp, context.callable, %($iter $out), NULL);
+}
+
+static Func _lisp_iter_callback(Var callable) {
+  if (callable.is_nil()) return NULL;
+  if (!lisp_active)
+    raise %(bad-state (operation "Lisp iterator callback")
+                     (why "no session"));
+  LispCallbackContext context = { lisp_active, callable };
+  return Func.new_context(
+    _lisp_iter_next_callback, %((func (("Var") ("Var"))) "Var"),
+    &context, sizeof context);
+}
+
+static int _lisp_iter_next(Iter iter, Var *out) {
+  FuncArg arguments[2] = {
+    FuncArg.value(iter.var()), FuncArg.value(Var.new(<var*>, out))
+  };
+  return iter.aux.apply(2, arguments).int();
+}
+
 static List _lisp_List_map(List values, Var callable) =>
   values.map(_lisp_callback(callable, 1));
 static List _lisp_List_filter(List values, Var callable) =>
@@ -1227,17 +1376,41 @@ static Iter _lisp_String_iter(String value) => value.iter(Iter.new());
 static Iter _lisp_Var_iter(Var value) => value.iter(Iter.new());
 static Iter _lisp_range(int start, int end, int step) =>
   range(start, end, step, Iter.new());
+/* Lowered source passes its own Iter storage. The `_into` targets below
+   bind the native operations directly; only a callable argument needs this
+   session's Func bridge. */
+static Iter _lisp_Iter_init(
+  Iter destination, Var object, Var callable, Var state
+) {
+  if (!destination) return NULL;
+  Func callback = _lisp_iter_callback(callable);
+  destination.init(object, callback ? _lisp_iter_next : NULL, state);
+  destination.aux = callback;
+  return destination;
+}
 
 static Iter _lisp_Iter_map(Iter iter, Var callable) =>
   iter.map(_lisp_callback(callable, 1), Iter.new());
+static Iter _lisp_Iter_map_into(
+  Iter iter, Var callable, Iter destination
+) => iter.map(_lisp_callback(callable, 1), destination);
 static Iter _lisp_Iter_filter(Iter iter, Var callable) =>
   iter.filter(_lisp_callback(callable, 1), Iter.new());
+static Iter _lisp_Iter_filter_into(
+  Iter iter, Var callable, Iter destination
+) => iter.filter(_lisp_callback(callable, 1), destination);
 static Iter _lisp_Iter_zip(Iter left, Iter right) =>
   left.zip(right, Iter.new());
 static Iter _lisp_Iter_zip_with(Iter left, Iter right, Var callable) =>
   left.zip_with(right, _lisp_callback(callable, 2), Iter.new());
+static Iter _lisp_Iter_zip_with_into(
+  Iter left, Iter right, Var callable, Iter destination
+) => left.zip_with(right, _lisp_callback(callable, 2), destination);
 static Iter _lisp_Iter_map2(Iter left, Iter right, Var callable) =>
   left.map2(right, _lisp_callback(callable, 2), Iter.new());
+static Iter _lisp_Iter_map2_into(
+  Iter left, Iter right, Var callable, Iter destination
+) => left.map2(right, _lisp_callback(callable, 2), destination);
 static Iter _lisp_Iter_chain(Iter first, Iter second) =>
   first.chain(second, Iter.new());
 static Iter _lisp_Iter_enumerate(Iter iter, int start) =>
@@ -1250,6 +1423,9 @@ static Iter _lisp_Iter_accumulate(Iter iter, Var initial) =>
   iter.accumulate(initial, Iter.new());
 static Iter _lisp_Iter_scan(Iter iter, Var seed, Var callable) =>
   iter.scan(seed, _lisp_callback(callable, 2), Iter.new());
+static Iter _lisp_Iter_scan_into(
+  Iter iter, Var seed, Var callable, Iter destination
+) => iter.scan(seed, _lisp_callback(callable, 2), destination);
 static Iter _lisp_Iter_unique(Iter iter) => iter.unique(Iter.new());
 static int _lisp_Iter_any(Iter iter, Var callable) =>
   iter.any(_lisp_callback(callable, 1));
@@ -1285,24 +1461,45 @@ static Var _lisp_Lisp_Iter_find(Iter iter, Var callable) =>
 // The direct targets let the compiler generate their call adapters and
 // read each signature from the declared prototype.
 $(import "../etc/lisp-bindings.xlisp")
-$(def lisp.native.target.rows '(
+$(def lisp.native.target.rows (append '(
   (lisp_void)
   (lisp_truth)
   (Var_truth)
   (Var_is_void)
   (lisp_cell)
+  (lisp_source_function)
   (lisp_address)
   (lisp_load)
   (lisp_store)
-  (_lisp_String_try_long (as String_try_long))
-  (_lisp_String_try_double (as String_try_double))
-  (_lisp_String_try_next (as String_try_next))
-  (_lisp_List_try_match (as List_try_match))
-  (_lisp_List_try_match_replace (as List_try_match_replace))
-  (_lisp_List_try_search (as List_try_search))
-  (_lisp_Map_try_get (as Map_try_get))
-  (_lisp_Map_try_del (as Map_try_del))
-  (_lisp_Symbol_try_new (as Symbol_try_new))
+  (lisp_bytes)
+  (lisp_at)
+  (lisp_copy)
+  (lisp_zero)
+  (lisp_record_result)
+  (lisp_session_copy)
+  (lisp_peek)
+  (lisp_poke)
+  (_lisp_String_try_long (as String_try_long_cell))
+  (String_try_long)
+  (_lisp_String_try_double (as String_try_double_cell))
+  (String_try_double)
+  (_lisp_String_try_next (as String_try_next_cell))
+  (String_try_next)
+  (List_try_next)
+  (Array_try_next)
+  (Map_try_next)
+  (_lisp_List_try_match (as List_try_match_cell))
+  (List_try_match)
+  (_lisp_List_try_match_replace (as List_try_match_replace_cell))
+  (List_try_match_replace)
+  (_lisp_List_try_search (as List_try_search_cell))
+  (List_try_search)
+  (_lisp_Map_try_get (as Map_try_get_cell))
+  (Map_try_get)
+  (_lisp_Map_try_del (as Map_try_del_cell))
+  (Map_try_del)
+  (_lisp_Symbol_try_new (as Symbol_try_new_cell))
+  (Symbol_try_new)
   (lisp_car (as Var_car))
   (lisp_cdr (as Var_cdr))
   (Var_cons)
@@ -1364,29 +1561,52 @@ $(def lisp.native.target.rows '(
   (_lisp_String_map (as String_map))
   (_lisp_String_filter (as String_filter))
   (_lisp_List_iter (as List_iter))
+  (List_iter (as List_iter_into))
   (_lisp_Array_iter (as Array_iter))
+  (Array_iter (as Array_iter_into))
   (_lisp_Map_iter (as Map_iter))
+  (Map_iter (as Map_iter_into))
   (_lisp_Map_keys (as Map_keys))
+  (Map_keys (as Map_keys_into))
   (_lisp_Map_enumerate (as Map_enumerate))
+  (Map_enumerate (as Map_enumerate_into))
   (_lisp_String_iter (as String_iter))
+  (String_iter (as String_iter_into))
   (_lisp_Var_iter (as Var_iter))
+  (Var_iter (as Var_iter_into))
   (_lisp_range (as range))
+  (range (as range_into))
+  (Iter_new)
+  (_lisp_Iter_init (as Iter_init))
   (_lisp_Iter_map (as Iter_map))
+  (_lisp_Iter_map_into (as Iter_map_into))
   (_lisp_Iter_filter (as Iter_filter))
+  (_lisp_Iter_filter_into (as Iter_filter_into))
   (_lisp_Iter_zip (as Iter_zip))
+  (Iter_zip (as Iter_zip_into))
   (_lisp_Iter_zip_with (as Iter_zip_with))
+  (_lisp_Iter_zip_with_into (as Iter_zip_with_into))
   (_lisp_Iter_map2 (as Iter_map2))
+  (_lisp_Iter_map2_into (as Iter_map2_into))
   (_lisp_Iter_chain (as Iter_chain))
+  (Iter_chain (as Iter_chain_into))
   (_lisp_Iter_enumerate (as Iter_enumerate))
+  (Iter_enumerate (as Iter_enumerate_into))
   (_lisp_Iter_repeat (as Iter_repeat))
+  (Iter_repeat (as Iter_repeat_into))
   (_lisp_Iter_head (as Iter_head))
+  (Iter_head (as Iter_head_into))
   (_lisp_Iter_accumulate (as Iter_accumulate))
+  (Iter_accumulate (as Iter_accumulate_into))
   (_lisp_Iter_scan (as Iter_scan))
+  (_lisp_Iter_scan_into (as Iter_scan_into))
   (_lisp_Iter_unique (as Iter_unique))
+  (Iter_unique (as Iter_unique_into))
   (_lisp_Iter_any (as Iter_any))
   (_lisp_Iter_all (as Iter_all))
   (_lisp_Iter_foldl (as Iter_foldl))
   (_lisp_Iter_find (as Iter_find))
+  (Iter_try_next)
   (Iter_next)
   (Iter_min)
   (Iter_max)
@@ -1669,7 +1889,7 @@ $(def lisp.native.target.rows '(
   (Symbol_len)
   (Symbol_str)
   (Symbol_compare)
-))
+) (_x2c.native-meta.targets)))
 
 macro Expression $lisp.native.target.map() =>
   $(lisp.native.targets lisp.native.target.rows);
@@ -1883,7 +2103,6 @@ static void _capture(Lisp lisp, LispEnv *env, List params, Var body,
   }
 }
 
-
 static Var _qq(Lisp lisp, Var expr, LispEnv *env, int list, int depth) {
   if (expr is <list> && !expr.is_nil()) {
     List form = expr;
@@ -1934,6 +2153,7 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
   lambda.body = body;
   lambda.captures = {};
   lambda.macro = macro;
+  lambda.source_function = 0;
   lambda.auto_calls = 0;
   lambda.auto_status = -1;
   lambda.auto_program = NULL;
@@ -1974,6 +2194,19 @@ static Var _call_lambda_slots(
   defer if (trace) trace.calls--;
   Scope frame = $auto(Scope.new_named("Lisp frame")), Map bindings = NULL;
   $scope(&frame) { bindings = {}; }
+  /* A lowered source function owns its automatic storage in this frame. A
+     record it returns is copied into its caller's storage before the frame
+     ends. */
+  Scope *caller_owner = lisp.automatic_owner;
+  Scope *caller_result_owner = lisp.result_owner;
+  if (lambda.source_function) {
+    lisp.result_owner = caller_owner;
+    lisp.automatic_owner = &frame;
+  }
+  defer if (lambda.source_function) {
+    lisp.automatic_owner = caller_owner;
+    lisp.result_owner = caller_result_owner;
+  }
   /* A free name the lambda did not capture is a global. The environment the
      call was written in is not a parameter here, so a caller's binding
      cannot change what the body reads. */
@@ -2553,6 +2786,13 @@ static void _auto_discard(Lisp lisp, Lambda lambda) {
 
 static int _auto_analyze(
   Lisp lisp, Lambda lambda, LispEnv *env, int depth) {
+  if (lambda.source_function) {
+    if (lambda.auto_status < 0) {
+      lambda.auto_status = MACHINE_INELIGIBLE;
+      lisp.auto_stats.ineligible++;
+    }
+    return MACHINE_INELIGIBLE;
+  }
   if (lambda.auto_status >= 0) return lambda.auto_status;
   /* A frozen session's lambda is only compiled by `Lisp.auto_prepare`,
      while the Context that owns the session is still current. Compiling one
@@ -2679,7 +2919,11 @@ static void _machine_slot_release(Lisp lisp, LispMachineSlot slot) {
    other effect performed. */
 static int _auto_apply(
   Lisp lisp, Lambda lambda, List raw, LispEnv *env, Var *out) {
-  if (lisp.auto_disabled || lisp.expansion) return 0;
+  /* A synthetic prepared Lambda borrows the active source owner unchanged.
+     Marked source Lambdas never enter the machine, so their calls still cross
+     through _call_lambda_slots and establish a fresh automatic frame. */
+  if (lisp.auto_disabled || lisp.expansion || lambda.source_function)
+    return 0;
   lisp.auto_stats.invocations++;
   if (lambda.auto_calls < 2) lambda.auto_calls++;
   if (lambda.auto_calls < 2) return 0;

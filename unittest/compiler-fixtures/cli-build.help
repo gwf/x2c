@@ -32,6 +32,7 @@ Translation options:
       --no-cpp                Skip symbol collection and preprocessing
       --live-symbols          Collect symbols through the host preprocessor
       --cpp-symbols           Use CPP collection for this translation
+      --system-headers        Collect declarations from expanded system headers
 
 Package options:
       --index <url-or-path>   Resolve package names through this index

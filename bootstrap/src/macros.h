@@ -41,6 +41,16 @@ List Compiler_parse_source_lisp(Compiler compiler);
 
 void Compiler_evaluate_declaration_effect(Compiler compiler, String form, Token invocation);
 
+void Compiler_install_meta_declaration(Compiler c, List declaration, Token marker);
+
+void Compiler_record_native_meta_effect(Compiler c, List declaration, Token marker);
+
+void Compiler_install_native_meta_effects(Compiler c, Map globs);
+
+int Compiler_bind_native_meta(Compiler c, String name);
+
+void Compiler_install_native_meta_function(Compiler c, List declaration, Token marker);
+
 void Compiler_install_meta_function(Compiler c, List fn, Token marker);
 
 void Compiler_parse_macro_lisp_shallow(Compiler compiler);

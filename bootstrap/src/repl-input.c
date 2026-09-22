@@ -1504,6 +1504,7 @@ return(ReplInputResult){
 ;
 }
 
+int strcmp(const char *, const char *);
 void * Scope_memdup_in(Scope *, const void *, size_t);
 void ReplInput_remember(ReplInput r, String text){
   if(! r || ! r -> open || ! String_truth(text) || ! String_len(text)) return;  if(r -> history_len && ! strcmp(r -> history[r -> history_len - 1], text)) return;  char * copy = Scope_memdup_in(& r -> storage, text, String_len(text) + 1);  if(r -> history_len == REPL_HISTORY_MAX){

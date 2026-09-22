@@ -7,6 +7,20 @@
 
 #include "x2c.h"
 #include "machine.h"
+typedef Var(* NativeScalarLoad)(const void * bytes, Scope * owner);
+
+typedef void(* NativeScalarStore)(void * bytes, Var value);
+
+typedef struct NativeScalarAccess{
+  Symbol tag;
+  size_t size, alignment;
+  NativeScalarLoad load;
+  NativeScalarStore store;
+}
+* NativeScalarAccess;
+
+NativeScalarAccess native_scalar_access(List exact_type);
+
 typedef struct Lisp * Lisp;
 
 typedef struct LispAutoStats{
@@ -132,6 +146,24 @@ Var lisp_address(Var cell, Symbol tag);
 Var lisp_load(Var cell);
 
 Var lisp_store(Var cell, Var value);
+
+Var lisp_bytes(long size);
+
+Var lisp_at(Var base, Var offset, Symbol tag);
+
+Var lisp_zero(Var destination, Var size);
+
+Var lisp_copy(Var destination, Var source, long size);
+
+Var lisp_record_result(Var source, long size);
+
+Var lisp_session_copy(Var source, long size);
+
+Var lisp_peek(Var pointer, Var offset, List layout);
+
+Var lisp_poke(Var pointer, Var offset, List layout, Var value);
+
+Var lisp_source_function(Var callable);
 
 LispAutoStats Lisp_auto_stats(Lisp lisp);
 

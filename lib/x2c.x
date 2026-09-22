@@ -3,6 +3,7 @@
 #include "atom.x"
 #include "block.x"
 #include "buffer.x"
+#include "clibc.x"
 #include "cmath.x"
 #include "common.x"
 #include "context.x"

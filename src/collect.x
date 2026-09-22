@@ -563,7 +563,7 @@ static String _package_key_spelling(List key) {
 static int _package_protocol_row(List key, Var value) {
   if (key.car() != "source-node" || value is not <list>) return 0;
   List row = value;
-  return row && row.car() in %(protocol adopt declaration-source);
+  return row && row.car() in %(protocol adopt declaration-source native-meta);
 }
 
 /* The package's `name__` space is visible in the importing unit, and so does

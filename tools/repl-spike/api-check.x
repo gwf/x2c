@@ -205,6 +205,51 @@ static void _retained_results(ReplSession s) {
   }
 }
 
+static void _meta_records(ReplSession session) {
+  _expect(session, "struct ReplPoint { int x; };", <defined>, void);
+  _expect(session,
+    "int record_alias(void) { struct ReplPoint a={1}, b={2}; "
+    "int *p=&a.x; a=b; return *p*10+a.x; }", <defined>, void);
+  _expect(session, "record_alias();", <value>, 22);
+  _expect(session, "struct ReplPoint kept_point={3};", <executed>, void);
+  _expect(session, "kept_point.x;", <value>, 3);
+  _expect(session, "kept_point.x=8;", <executed>, void);
+  _expect(session, "record_alias();", <value>, 22);
+  _expect(session, "kept_point.x;", <value>, 8);
+  _expect(session, "int *kept_field = &kept_point.x;", <executed>, void);
+  _expect(session, "struct ReplPoint replacement = {12};", <executed>, void);
+  _expect(session, "kept_point = replacement;", <executed>, void);
+  _expect(session, "*kept_field;", <value>, 12);
+  _expect(session, "kept_point.x;", <value>, 12);
+  _expect(session,
+    "int inline_record(void) { struct { int x; } a={6}; return a.x; }",
+    <defined>, void);
+  _expect(session, "inline_record();", <value>, 6);
+  _expect(session, "typedef int ReplCount;", <defined>, void);
+  _expect(session, "ReplCount count=7;", <executed>, void);
+  _expect(session, "count;", <value>, 7);
+  _expect(session, "struct Unfinished { int x;", <incomplete>, void);
+  if (session.inspect("Unfinished")) {
+    fputs("incomplete meta type was published\n", stderr);
+    failures++;
+  }
+  _expect(session, "struct Unfinished { int y; };", <defined>, void);
+  _expect(session,
+    "int recovered_type(void) { struct Unfinished p={9}; return p.y; }",
+    <defined>, void);
+  _expect(session, "recovered_type();", <value>, 9);
+}
+
+static void _completion_does_not_publish_meta(ReplSession session) {
+  Compiler compiler = session.compiler;
+  size_t values = compiler.meta_values.len();
+  (void) session.complete("meta static int completion_value = 41;", 38);
+  if (compiler.meta_values.len() != values) {
+    fputs("completion published a meta declaration effect\n", stderr);
+    failures++;
+  }
+}
+
 int main(int argc, char **argv) {
   (void) argc;
   x2c_initialize_environment(argv[0]);
@@ -223,6 +268,8 @@ int main(int argc, char **argv) {
         ReplSession session = ReplSession.new(unit.compiler);
         _exercise(session);
         _retained_results(session);
+        _meta_records(session);
+        _completion_does_not_publish_meta(session);
       }
       unit.close();
       ScopeStats stats = Scope.stats();

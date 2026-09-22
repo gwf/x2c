@@ -19,6 +19,7 @@ typedef List Type;
 #pragma private
 $(import "../src/ast-rewrite.xmacro")
 $(import "../lib/var-tags.xmacro")
+$(import "../lib/native-scalar-types.xmacro")
 #include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -336,25 +337,8 @@ Type Type.scalar(Type type) {
 /* Process-lifetime scalar table. Its keys are the spellings Type.scalar
    produces, so the lookup needs no separate discriminator; each row carries
    the Var tag, the reader that follows Var.convert, and the helper that
-   performs an atomic native update. */
-static Map scalartypes = %{
-  (char)               : (i8 "Var_char" "x2c_var_update_i8"),
-  (signed char)        : (i8 "Var_char" "x2c_var_update_schar"),
-  (unsigned char)      : (u8 "Var_uchar" "x2c_var_update_u8"),
-  (short)              : (i16 "Var_short" "x2c_var_update_i16"),
-  (unsigned short)     : (u16 "Var_ushort" "x2c_var_update_u16"),
-  (int)                : (i32 "Var_int" "x2c_var_update_i32"),
-  (unsigned)           : (u32 "Var_uint" "x2c_var_update_u32"),
-  (long)               : (long "Var_long" "x2c_var_update_long"),
-  (unsigned long)      : (ulong "Var_ulong" "x2c_var_update_ulong"),
-  (long long)          : (llong "Var_long_long" "x2c_var_update_long_long"),
-  (unsigned long long) : (ullong "Var_ulong_long"
-                         "x2c_var_update_ulong_long"),
-  (float)              : (f32 "Var_float" "x2c_var_update_f32"),
-  (double)             : (f64 "Var_floating" "x2c_var_update_f64"),
-  (long double)        : (ldouble "Var_long_double"
-                         "x2c_var_update_long_double")
-};
+   performs an atomic native update, plus the Func signature spelling. */
+static Map scalartypes = %{ ${$native.scalar.type.rows()} };
 
 static int _scalar_numeric_info(Type type, X2CVarNumericInfo *info) {
   Var row = scalartypes[type];
@@ -391,6 +375,13 @@ String Type.var_numeric_extractor(Type type) {
 String Type.var_numeric_update_helper(Type type) {
   List row = _scalar_row(type);
   return row ? row.caddr() : NULL;
+}
+
+/** Returns the compact scalar Type used by Func's Var calling convention,
+    or `NULL` when `type` is not one of the exact-C scalar families. */
+Type Type.var_signature_type(Type type) {
+  List row = _scalar_row(type);
+  return row ? row[3] : NULL;
 }
 
 static unsigned _literal_digit(int ch) => ch <= '9' ? (unsigned) (ch - '0')

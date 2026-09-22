@@ -31,7 +31,27 @@ meta static int ln_for_nest(int outer, int inner) {
   return hits;
 }
 
+struct LoopRecord { int value; int last; };
+
+/* A marked source function owns this record and addressed field for the
+   whole call.  The prepared loop Lambda must reuse that owner without
+   bypassing the source-function boundary or recursively interpreting every
+   turn. */
+meta static int ln_record_alias(int turns) {
+  struct LoopRecord state = { .value = 1, .last = 0 };
+  int *field = &state.value;
+  for (int i = 0; i < turns; i++) {
+    state.value += 1;
+    *field += 1;
+    state.last = i;
+  }
+  return state.value + *field + state.last;
+}
+
 int main(void) {
-  printf("%d %d\n", ln_foreach_nest(10000, 3), ln_for_nest(50000, 3));
+  int turns = 10000;
+  printf("%d %d %d %d\n",
+         ln_foreach_nest(10000, 3), ln_for_nest(50000, 3),
+         ln_record_alias(10000), ln_record_alias(turns));
   return 0;
 }

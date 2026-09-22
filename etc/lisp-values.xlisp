@@ -179,15 +179,15 @@
 
 // Status/output bindings use evaluator cells for source addresses. Their
 // native shims publish outputs only on success, preserving failed-call cells.
-(def String.try_long (bind "String_try_long" nil))
-(def String.try_double (bind "String_try_double" nil))
-(def String.try_next (bind "String_try_next" nil))
-(def List.try_match (bind "List_try_match" nil))
-(def List.try_match_replace (bind "List_try_match_replace" nil))
-(def List.try_search (bind "List_try_search" nil))
-(def Map.try_get (bind "Map_try_get" nil))
-(def Map.try_del (bind "Map_try_del" nil))
-(def Symbol.try_new (bind "Symbol_try_new" nil))
+(def String.try_long (bind "String_try_long_cell" nil))
+(def String.try_double (bind "String_try_double_cell" nil))
+(def String.try_next (bind "String_try_next_cell" nil))
+(def List.try_match (bind "List_try_match_cell" nil))
+(def List.try_match_replace (bind "List_try_match_replace_cell" nil))
+(def List.try_search (bind "List_try_search_cell" nil))
+(def Map.try_get (bind "Map_try_get_cell" nil))
+(def Map.try_del (bind "Map_try_del_cell" nil))
+(def Symbol.try_new (bind "Symbol_try_new_cell" nil))
 
 // Compound selectors use raw slots so exhaustion keeps `void` distinct from
 // `nil`. The source declarations remain in the optional list-selectors module.

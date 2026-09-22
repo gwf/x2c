@@ -36,24 +36,63 @@
 (defmacro C.or (a b) `(if (C.true? ,a) 1 (if (C.true? ,b) 1 0)))
 (defmacro C.ternary (test a b) `(if (C.true? ,test) ,a ,b))
 
-// A local whose address is taken lives in a raw evaluator cell, so a call can
-// write through it without putting terminal `void` in an ordinary collection.
+// An evaluator cell holds one raw Var, so terminal `void` never enters an
+// ordinary collection.
 (def C.void (bind "lisp_void" nil))
 (def C.cell (bind "lisp_cell" nil))
 (def C.address (bind "lisp_address" nil))
 (def C.load (bind "lisp_load" nil))
 (def C.store (bind "lisp_store" nil))
 
+// A C object whose address matters lives in native bytes, and its slot holds
+// the pointer native code would box. The lowering supplies each layout,
+// offset, and size; see `lisp_peek` in lib/lisp.x. A record reads as its
+// own address, and assigning one copies into the bytes it already has.
+(def C.bytes (bind "lisp_bytes" nil))
+(def C.at (bind "lisp_at" nil))
+(def C.copy (bind "lisp_copy" nil))
+(def C.zero (bind "lisp_zero" nil))
+(def C.peek (bind "lisp_peek" nil))
+(def C.poke (bind "lisp_poke" nil))
+(def C.record.result (bind "lisp_record_result" nil))
+(def C.session-copy (bind "lisp_session_copy" nil))
+(def C.source-function (bind "lisp_source_function" nil))
+
+(defun C.new (size tag layout value)
+  (let ((object (C.at (C.bytes size) 0 tag)))
+    (begin (C.poke object 0 layout value) object)))
+
 // File-scope state, keyed by binding id. A unit-level initializer is not
 // part of the function, so an unwritten global reads as zero. The table
 // belongs to one translation unit, so the session that translates the unit
-// defines it rather than the shared library session.
+// defines it rather than the shared library session. A record the table
+// holds lives in session bytes of its own.
 
 (defun C.gread (id)
   (if (eq? (Map.contains C._globals id) 0) 0
       (Map.getindex C._globals id)))
 
 (defun C.gwrite (id value) (Map.setindex C._globals id value))
+(defun C.grecord.write (id value size)
+  (if (eq? (Map.contains C._globals id) 0)
+      (C.gwrite id (C.session-copy value size))
+      (C.copy (Map.getindex C._globals id) value size)))
+
+// An advertised meta value is an object in session bytes, separate from
+// compiler-only state, so its address is an ordinary typed pointer.
+(defun C.mgdefine (id object) (Map.setindex C._meta_globals id object))
+(defun C.mgaddress (id) (Map.getindex C._meta_globals id))
+
+// An iterator operation takes its destination last. A call whose
+// destination the compiler supplies passes none, and the native binding
+// allocates the Iter in the session; a call with explicit storage passes it.
+(defmacro C.iterator (name operation arity)
+  `(def ,name
+     (let ((allocating (bind ,operation nil))
+           (explicit (bind ,(string-append operation "_into") nil)))
+       (lambda (. arguments)
+         (apply (if (eq? (length arguments) ,arity) allocating explicit)
+                arguments)))))
 
 // The library operations a lowered call resolves against, under the names
 // the typed AST already uses.
@@ -90,35 +129,13 @@
 (def List_zip_with (bind "List_zip_with" nil))
 (def List_foldl (bind "List_foldl" nil))
 (def List_find (bind "List_find" nil))
-(def List_iter (bind "List_iter" nil))
+(C.iterator List_iter "List_iter" 1)
 
-// `foreach` expands to a `try_next` loop over three cells: the container,
-// an integer or List cursor, and one output per name. Each shim below
-// answers the same shape its x2c operation does, and none of them reads
-// past the end, where the container would answer `void`.
-(defun List_try_next (xs cursor out)
-  (let ((rest (C.load cursor)))
-    (if (null? rest) 0
-        (begin (C.store out (car rest)) (C.store cursor (cdr rest)) 1))))
-
-(defun Array_try_next (a cursor out)
-  (let ((i (C.load cursor)))
-    (if (>= i (Array.len a)) 0
-        (begin (C.store out (Array.getindex a i))
-               (C.store cursor (+ i 1))
-               1))))
-
-// A `Map` has no positional cursor, so the entries `Map.list` answers are
-// walked as a List. The x2c cursor starts at the integer zero, which is how
-// the first call tells a fresh walk from a partly consumed one.
-(defun Map_try_next (m cursor key val)
-  (let ((entries (let ((held (C.load cursor)))
-                   (if (number? held) (Map.list m) held))))
-    (if (null? entries) 0
-        (begin (C.store key (car (car entries)))
-               (C.store val (cadr (car entries)))
-               (C.store cursor (cdr entries))
-               1))))
+// `foreach` expands to a `try_next` loop whose cursor and outputs are C
+// objects, so each step is the native operation writing through them.
+(def List_try_next (bind "List_try_next" nil))
+(def Array_try_next (bind "Array_try_next" nil))
+(def Map_try_next (bind "Map_try_next" nil))
 
 (def Array_new Array.new)
 (def Array_len Array.len)
@@ -133,7 +150,7 @@
 (def Array_sort_by (bind "Array_sort_by" nil))
 (def Array_sort_with (bind "Array_sort_with" nil))
 (def Array_foldl (bind "Array_foldl" nil))
-(def Array_iter (bind "Array_iter" nil))
+(C.iterator Array_iter "Array_iter" 1)
 (def Array_join Array.join)
 (def Array_find Array.find)
 (def Array_contains Array.contains)
@@ -169,32 +186,39 @@
 (def Map_list Map.list)
 (def Map_str str)
 (def Map_repr repr)
-(def Map_iter (bind "Map_iter" nil))
-(def Map_keys (bind "Map_keys" nil))
-(def Map_enumerate (bind "Map_enumerate" nil))
+(C.iterator Map_iter "Map_iter" 1)
+(C.iterator Map_keys "Map_keys" 1)
+(C.iterator Map_enumerate "Map_enumerate" 1)
 
 (def String_map (bind "String_map" nil))
 (def String_filter (bind "String_filter" nil))
-(def String_iter (bind "String_iter" nil))
-(def Var_iter (bind "Var_iter" nil))
+(C.iterator String_iter "String_iter" 1)
+(C.iterator Var_iter "Var_iter" 1)
 
-(def range (bind "range" nil))
-(def Iter_map (bind "Iter_map" nil))
-(def Iter_filter (bind "Iter_filter" nil))
-(def Iter_zip (bind "Iter_zip" nil))
-(def Iter_zip_with (bind "Iter_zip_with" nil))
-(def Iter_map2 (bind "Iter_map2" nil))
-(def Iter_chain (bind "Iter_chain" nil))
-(def Iter_enumerate (bind "Iter_enumerate" nil))
-(def Iter_repeat (bind "Iter_repeat" nil))
-(def Iter_head (bind "Iter_head" nil))
-(def Iter_accumulate (bind "Iter_accumulate" nil))
-(def Iter_scan (bind "Iter_scan" nil))
-(def Iter_unique (bind "Iter_unique" nil))
+// Lowered source preserves its caller-owned destination. Ordinary Lisp keeps
+// the shorter aliases installed by etc/lisp-values.xlisp.
+(C.iterator range "range" 3)
+(defun Iter_new () ((bind "Iter_new" nil)))
+(defun Iter_init (destination object callable state)
+  ((bind "Iter_init" nil) destination object callable state))
+(C.iterator Iter_map "Iter_map" 2)
+(C.iterator Iter_filter "Iter_filter" 2)
+(C.iterator Iter_zip "Iter_zip" 2)
+(C.iterator Iter_zip_with "Iter_zip_with" 3)
+(C.iterator Iter_map2 "Iter_map2" 3)
+(C.iterator Iter_chain "Iter_chain" 2)
+(C.iterator Iter_enumerate "Iter_enumerate" 2)
+(C.iterator Iter_repeat "Iter_repeat" 2)
+(C.iterator Iter_head "Iter_head" 2)
+(C.iterator Iter_accumulate "Iter_accumulate" 2)
+(C.iterator Iter_scan "Iter_scan" 3)
+(C.iterator Iter_unique "Iter_unique" 1)
 (def Iter_any (bind "Iter_any" nil))
 (def Iter_all (bind "Iter_all" nil))
 (def Iter_foldl (bind "Iter_foldl" nil))
 (def Iter_find (bind "Iter_find" nil))
+(defun Iter_try_next (iter out)
+  ((bind "Iter_try_next" nil) iter out))
 (def Iter_next (bind "Iter_next" nil))
 (def Iter_min (bind "Iter_min" nil))
 (def Iter_max (bind "Iter_max" nil))
@@ -260,9 +284,9 @@
 (def String_remove_suffix String.remove_suffix)
 (def String_escape String.escape)
 (def String_unescape String.unescape)
-(def String_try_long String.try_long)
-(def String_try_double String.try_double)
-(def String_try_next String.try_next)
+(def String_try_long (bind "String_try_long" nil))
+(def String_try_double (bind "String_try_double" nil))
+(def String_try_next (bind "String_try_next" nil))
 (defun String_new (text) text)
 (defun String_equal (a b) (if (equal? a b) 1 0))
 
@@ -270,7 +294,7 @@
 (def Symbol_compare Symbol.compare)
 (def Symbol_repr repr)
 (def Symbol_str Symbol.str)
-(def Symbol_try_new Symbol.try_new)
+(def Symbol_try_new (bind "Symbol_try_new" nil))
 (def Var_tag Var.tag)
 (def Var_kind Var.kind)
 (def Var_caar List_caar)
@@ -346,9 +370,9 @@
 (def List_compare List.compare)
 (def List_replace List.replace)
 (def List_match_replace List.match_replace)
-(def List_try_match List.try_match)
-(def List_try_match_replace List.try_match_replace)
-(def List_try_search List.try_search)
+(def List_try_match (bind "List_try_match" nil))
+(def List_try_match_replace (bind "List_try_match_replace" nil))
+(def List_try_search (bind "List_try_search" nil))
 (def Array_copy Array.copy)
 (def Array_getslice Array.getslice)
 (def Array_concat Array.concat)
@@ -364,8 +388,8 @@
 (def Map_equal Map.equal)
 (def Map_truth Map.truth)
 (def Map_get_hashed Map.get_hashed)
-(def Map_try_get Map.try_get)
-(def Map_try_del Map.try_del)
+(def Map_try_get (bind "Map_try_get" nil))
+(def Map_try_del (bind "Map_try_del" nil))
 
 (def String_intern String.intern)
 (def String_parse String.parse)

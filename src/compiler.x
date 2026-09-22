@@ -140,6 +140,17 @@ typedef struct Compiler {
      `meta_comptime` names the ones that reach a `Meta` operation and so have
      no runtime form at all: no unit emits one and no call to one folds. */
   Map meta_folds, meta_impure, meta_comptime;
+  /* File-scope values and types explicitly advertised to the compile-time
+     evaluator. `meta_values` is keyed by binding id and stores
+     `(MUTABLE LAYOUT)` for the object. */
+  Map meta_values;
+  /* Canonical struct Type -> its compile-time byte layout, a cache that
+     semantic transactions roll back with the declarations it describes. */
+  Map meta_layouts;
+  /* Native functions that included units advertise with `meta`, by name,
+     holding each declared signature. A function binds into the macro
+     session the first time lowered code calls it. */
+  Map native_meta;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
   /* Whether the body being parsed belongs to a `meta` function, which is
      what lets a call to a compile-time-only one be refused everywhere
@@ -284,6 +295,9 @@ void Compiler.borrow_unit_semantics(Compiler compiler, Compiler owner) {
   compiler.proto_cache = owner.proto_cache;
   compiler.meta_impure = owner.meta_impure;
   compiler.meta_comptime = owner.meta_comptime;
+  compiler.meta_values = owner.meta_values;
+  compiler.meta_layouts = owner.meta_layouts;
+  compiler.native_meta = owner.native_meta;
 }
 
 /** Moves collected child reports into the caller's store without re-emitting.
@@ -327,6 +341,9 @@ static Compiler _new(Compiler owner) {
     _.meta_folds = {};
     _.meta_impure = {};
     _.meta_comptime = {};
+    _.meta_values = {};
+    _.meta_layouts = {};
+    _.native_meta = {};
     if (!owner) _.inherit_shared_meta();
     if (owner) {
       /* A child compiler owns its tokens, symbols, and diagnostics. Package
@@ -999,7 +1016,11 @@ static void _report_script_statement(Compiler c) {
 static void _shallow_finish_declaration(Compiler c) {
   /* Collection records the runtime function a `meta` marker precedes; the
      compile-time form is installed by the full parse. */
-  if (c.meta_form_is_definition()) c.next();
+  Token meta = NULL;
+  if (c.meta_form_is_declaration()) {
+    meta = c.token;
+    c.next();
+  }
   List declaration = _shallow_parse_declaration(c);
   if (c.peek(0) == <"{"> || c.peek(0) == <"%{"> ||
       c._at_function_arrow()) {
@@ -1014,7 +1035,10 @@ static void _shallow_finish_declaration(Compiler c) {
     }
     else _shallow_block(c);
   }
-  else if (c.peek(0) == <;>) c.next();
+  else if (c.peek(0) == <;>) {
+    if (meta) c.record_native_meta_effect(declaration, meta);
+    c.next();
+  }
   else c.next();
 }
 
@@ -1763,6 +1787,9 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   c.meta_folds = {};
   c.meta_impure = {};
   c.meta_comptime = {};
+  c.meta_values = {};
+  c.meta_layouts = {};
+  c.native_meta = {};
   c.inherit_shared_meta();
   c.fixed = {};
   c.init_tokens = {};
@@ -1783,6 +1810,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   c.source_private = 0;
   c.resolve_protocols();
   if (generated_symbols) c.install_generated_protocol_symbols();
+  c.install_native_meta_effects(globs);
   Map saved_holes = c.macro_holes;
   defer c.macro_holes = saved_holes;
   int saved_runtime_literals = c.runtime_literals;
@@ -2066,6 +2094,10 @@ static List _cache_literal_var(Compiler compiler, Var value) {
     List cached = compiler.cache(%(string $literal));
     return compiler.cache(%(var (expr ("String") $cached)));
   }
+  if (value.is_integer()) {
+    List literal = compiler.meta_value_expression(%("Var"), value, 0);
+    return literal ? compiler.cache(%(var $literal)) : NULL;
+  }
   String spelling = value.symbol();
   List literal = %(
     expr ("Symbol") (literal ("Symbol") $spelling $value)
@@ -2087,7 +2119,8 @@ static List _cache_literal_list(Compiler compiler, List values) {
 
 /** Returns a runtime `List` expression for cached compiler-owned syntax.
 
-    `values` may contain nested `List`s, `String`s, and `Symbol`s.
+    `values` may contain nested `List`s, `String`s, integer `Var`s, and
+    `Symbol`s.
 */
 List Compiler.cache_literal_list(Compiler compiler, List values) {
   List cached = _cache_literal_list(compiler, values);
@@ -2309,6 +2342,7 @@ typedef struct SymTxn {
   int local_macro_names;
   SymScope scope;
   Map statics, binding_facts;
+  Map meta_layouts;
   Map source_definitions;
   int source_occurrences;
 } *SymTxn;
@@ -2316,8 +2350,9 @@ typedef struct SymTxn {
 /** Begins a reversible transaction over the current semantic scope.
 
     The transaction stages the current scope maps, file-static and binding
-    facts, binding and generated-name counters, and initializer names. It
-    does not snapshot parser position or other compiler state.
+    facts, compile-time struct layouts, binding and generated-name
+    counters, and initializer names. It does not snapshot parser position or
+    other compiler state.
 */
 SymTxn Compiler.begin_semantic_transaction(Compiler c) {
   SymTxn transaction = Scope.calloc(1, sizeof(struct SymTxn));
@@ -2328,6 +2363,7 @@ SymTxn Compiler.begin_semantic_transaction(Compiler c) {
   transaction.counters = c.names.counters;
   transaction.statics = c.sym.statics;
   transaction.binding_facts = c.semantic_binding_facts();
+  transaction.meta_layouts = c.meta_layouts;
   transaction.next_binding = c.names.next_binding;
   transaction.local_macro_names = c.sym.local_macro_names;
   transaction.initializer_name = c.init_fn;
@@ -2349,6 +2385,7 @@ SymTxn Compiler.begin_semantic_transaction(Compiler c) {
   c.sym.statics = c.sym.statics.copy();
   c.sym.binding_facts = c.semantic_binding_facts().copy();
   c.names.counters = c.names.counters.copy();
+  c.meta_layouts = c.meta_layouts.copy();
   transaction.active = 1;
   return transaction;
 }
@@ -2370,6 +2407,8 @@ void SymTxn.commit(SymTxn s) {
     if ((void *) scope.macros == NULL) scope.macros = {};
     scope.macros.merge(staged.macros);
   }
+  s.meta_layouts.merge(compiler.meta_layouts);
+  compiler.meta_layouts = s.meta_layouts;
   s.active = 0;
 }
 
@@ -2417,6 +2456,7 @@ void SymTxn.rollback(SymTxn transaction) {
     *scope = transaction.scope;
     _.sym.statics = transaction.statics;
     _.sym.binding_facts = transaction.binding_facts;
+    _.meta_layouts = transaction.meta_layouts;
     _.names.next_binding = transaction.next_binding;
     _.sym.local_macro_names = transaction.local_macro_names;
     _.names.counters = transaction.counters;
@@ -3421,9 +3461,16 @@ Type Sym.local_type(Sym sym, Type type) {
 Var Compiler.aggregate_name(
   Compiler compiler, Symbol kind, Var name, int definition) {
   Sym sym = compiler.sym;
-  if (compiler.macro_holes || name is not <string> ||
-      (int) sym.scopes.len() <= sym.base_scopes) return name;
+  if (compiler.macro_holes || name is not <string>) return name;
   Type type = %($kind $name);
+  if ((int) sym.scopes.len() <= sym.base_scopes) {
+    /* The first file-scope use of a named tag declares it in that scope,
+       whether it is a body, a standalone forward, or the base of another
+       declarator. Publishing it here lets later prototypes reuse the tag
+       instead of inventing a prototype-scope binding for the same spelling. */
+    if (!sym.get_exact(type)) sym.declare(NULL, type, type);
+    return name;
+  }
   if (!definition && sym.get_exact(type))
     return sym.local_type(type).cadr();
   if (!definition && compiler.shallow) return name;
@@ -3565,6 +3612,95 @@ void Sym.declare_field_order(Sym sym, Type type, List fields) {
 
 /** Returns recorded fields in source order, or `NULL`. */
 List Sym.field_order(Sym sym, Type type) => sym.get(%(@type "field-order"));
+
+static size_t _meta_align_up(size_t offset, size_t alignment) =>
+  (offset + alignment - 1) / alignment * alignment;
+
+/* Derives one immutable native layout from canonical Sym declarations. Every
+   layout starts `(KIND TYPE SIZE ALIGN ...)`:
+
+     (var TYPE SIZE ALIGN)                  a raw Var
+     (scalar TYPE SIZE ALIGN EXACT TAG)     an exact C scalar row
+     (pointer TYPE SIZE ALIGN TAG)          a data or function pointer
+     (record TYPE SIZE ALIGN (field NAME TYPE OFFSET LAYOUT) ...)
+
+   TYPE is the declared type, so a pointer to the object has the Var tag
+   native code gives it. A scalar's EXACT row owns its bytes and TAG its Var
+   value; Symbol's unsigned-long bytes are the one pairing of the two. A
+   pointer with no Var tag of its own is carried as `<p48>`. */
+static List _meta_type_layout(
+  Sym sym, Type type, Map cache, size_t *size, size_t *alignment) {
+  Type declared = type.declared();
+  if (sym.is_var_type(declared)) {
+    *size = sizeof(Var);
+    *alignment = _Alignof(Var);
+    return %(var $declared ${*size} ${*alignment});
+  }
+  Symbol value_tag = sym.var_tag_for_type(declared, NULL);
+  Type native_type = sym.normalize_declared_type(declared);
+  Type exact_scalar = native_type.scalar();
+  NativeScalarAccess scalar = exact_scalar
+                            ? native_scalar_access(exact_scalar) : NULL;
+  if (scalar) {
+    if (value_tag != scalar.tag &&
+        !(value_tag == <symbol> && scalar.tag == <ulong>)) return NULL;
+    *size = scalar.size;
+    *alignment = scalar.alignment;
+    return %(scalar $declared ${*size} ${*alignment}
+                    $exact_scalar $value_tag);
+  }
+  type = sym.resolve_key(declared);
+  if (type && type.is_pointer()) {
+    /* POSIX gives function and object pointers one representation, whose
+       alignment is its size on every supported host. */
+    *size = *alignment = sizeof(void *);
+    if (!value_tag) value_tag = <p48>;
+    return %(pointer $declared ${*size} ${*alignment} $value_tag);
+  }
+  Var cached;
+  if (cache.try_get(type, &cached)) {
+    List layout = cached;
+    *size = layout[2];
+    *alignment = layout[3];
+    return layout;
+  }
+  if (!type || type.car() != <struct>) return NULL;
+  List order = sym.field_order(type);
+  if (!order) return NULL;
+  Array fields = [];
+  defer fields.free();
+  size_t offset = 0, record_alignment = 1;
+  foreach (List row, order.cdr()) {
+    String name = row.car();
+    Type member = row.cadr();
+    if (!name) return NULL;
+    size_t member_size = 0, member_alignment = 0;
+    List layout = _meta_type_layout(
+      sym, member, cache, &member_size, &member_alignment);
+    if (!layout) return NULL;
+    offset = _meta_align_up(offset, member_alignment);
+    fields.push(%(field $name $member $offset $layout));
+    offset += member_size;
+    if (member_alignment > record_alignment)
+      record_alignment = member_alignment;
+  }
+  size_t record_size = _meta_align_up(offset, record_alignment);
+  *size = record_size;
+  *alignment = record_alignment;
+  List result = %(
+    record $type $record_size $record_alignment @{fields.list()});
+  cache[type] = result;
+  return result;
+}
+
+/** Returns the evaluator's native byte layout for `type`, derived from its
+    canonical Type identity and Sym-owned member order. Meta adoption remains
+    a separate compiler decision and cache presence does not advertise it. */
+List Compiler.meta_type_layout(Compiler c, Type type) {
+  size_t size = 0, alignment = 0;
+  return _meta_type_layout(
+    c.sym, type, c.meta_layouts, &size, &alignment);
+}
 
 /** Marks one named aggregate field as a delegate. */
 void Sym.declare_delegate_field(Sym sym, Type aggregate, String name) {

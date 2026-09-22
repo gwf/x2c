@@ -18,6 +18,7 @@ X2c expression parsing.
 | [`Compiler.convert_expression`](#Compiler.convert_expression) | Adds operations to convert a resolved expression AST to `target`. |
 | [`Compiler.convert_initializer`](#Compiler.convert_initializer) | Converts an initializer using its declared native object for array bounds. |
 | [`Compiler.convert_segment_to_string`](#Compiler.convert_segment_to_string) | Converts a resolved interpolation segment to `String` when available. |
+| [`Compiler.initializer_field_path`](#Compiler.initializer_field_path) | Returns the initializer path selecting one visible aggregate field. |
 | [`Compiler.initializer_native_types`](#Compiler.initializer_native_types) | Returns native definition/reference types for a compound literal. |
 | [`Compiler.initializer_rows`](#Compiler.initializer_rows) | Returns (original cases) rows; each case is (native-condition path destination value). |
 | [`Compiler.initializer_slot`](#Compiler.initializer_slot) | Selects a native subobject without evaluating it when used by sizeof. |
@@ -76,7 +77,7 @@ Source: `src/expressions.x:52`
 
 Keeps a compound literal's native type definition at its original scope.
 
-Source: `src/expressions.x:3875`
+Source: `src/expressions.x:3883`
 
 <a id="Compiler.convert_expression"></a>
 #### Compiler.convert_expression
@@ -90,7 +91,7 @@ performs the conversion implicitly; an unsupported x2c conversion reports
 a type error through `c`. Synthesized operations may add generated
 bindings or immutable literal entries to compiler state.
 
-Source: `src/expressions.x:3919`
+Source: `src/expressions.x:3927`
 
 <a id="Compiler.convert_initializer"></a>
 #### Compiler.convert_initializer
@@ -100,7 +101,7 @@ Source: `src/expressions.x:3919`
 Converts an initializer using its declared native object for array
 bounds.
 
-Source: `src/expressions.x:3870`
+Source: `src/expressions.x:3878`
 
 <a id="Compiler.convert_segment_to_string"></a>
 #### Compiler.convert_segment_to_string
@@ -119,7 +120,18 @@ not equivalent: it
 extracts only a `String` payload and yields empty `String` for every other
 tag.
 
-Source: `src/expressions.x:4210`
+Source: `src/expressions.x:4218`
+
+<a id="Compiler.initializer_field_path"></a>
+#### Compiler.initializer_field_path
+
+`List Compiler.initializer_field_path( Compiler c, Type type, List field)`
+
+Returns the initializer path selecting one visible aggregate field.
+Anonymous aggregate members remain explicit path frames, so consumers
+observe the same member promotion as native initializer conversion.
+
+Source: `src/expressions.x:3258`
 
 <a id="Compiler.initializer_native_types"></a>
 #### Compiler.initializer_native_types
@@ -143,7 +155,7 @@ walk. Scalar runs map their ordinal through the native dimensions; other
 inputs retain possible cursor continuations. A NULL condition is
 unconditional, and a NULL destination is excess.
 
-Source: `src/expressions.x:3462`
+Source: `src/expressions.x:3470`
 
 <a id="Compiler.initializer_slot"></a>
 #### Compiler.initializer_slot

@@ -98,11 +98,15 @@ static int _terminal(void){
 
 int String_is_digit(String);
 
+long atol(const char *);
+
 int report_make_owned(void){
   if(! _init_guard_) _file_init_();
   String level = Env_get(_13);
   return String_is_digit(level) && atol(level) > 0;
 }
+
+int atoi(const char *);
 
 static int _columns(void){
   struct winsize size;
