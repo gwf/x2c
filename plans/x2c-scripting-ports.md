@@ -68,6 +68,11 @@ name the resulting scripts without `.x`, keep an x2c shebang and executable
 bit, update every live caller, and delete the replaced Python file after
 parity is established.
 
+Before removing either Python owner, add its predecessor and replacement
+measurements to `tools/x2c-script-ports.md` while both versions can still run.
+That ledger owns physical line counts, direct modules, host commands, parity,
+port complications and any representative timing worth retaining.
+
 ### 1. Port the llms.txt generator - delivered
 
 `tools/gen-llms-txt` replaces `tools/gen-llms-txt.py` and preserves the
