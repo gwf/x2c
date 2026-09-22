@@ -81,6 +81,17 @@ its opening status and this index distinguish them from current execution.
 An entry here preserves remaining work; it does not dispatch it or add a gate.
 Production promotion remains separately authorized under the release workflow.
 
+### Reference audits
+
+- [Consolidation catalog](consolidation-catalog-f28fc36.md): 13 independent
+  cleanup candidates with paired source ranges and deletion boundaries.
+- [Bug findings](bug-findings-f28fc36.md): eight reproduced baseline defects,
+  with portable probe sources and recorded results, separate from cleanup.
+
+Both reports audit `f28fc36` (2026-09-22), not the later `dev` tree. Recheck
+their findings against current source before implementation; recording them
+does not dispatch fixes or approve every proposed design.
+
 ### Decisions and completed records
 
 - [September 18 decisions](archive/repository-review-2026-09-18.md#group-10-decided-2026-09-18):
