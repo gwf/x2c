@@ -160,6 +160,14 @@ static String _script_text(String text) {
 static void _tokenize_input(
   Frontend frontend, ParsedUnit *unit, String filename) {
   Compiler c = unit.compiler;
+  /* An absolute spelling of a home source resolves its directory as
+     collection resolves an includer's, so the file shares the home-relative
+     identity of the prelude's copy and keeps its own name. */
+  if (filename.startswith("/")) {
+    String canonical = %"${c.canonical_path(Path.dirname(filename))}/${
+      Path.basename(filename)}";
+    if (home_portable_path(canonical) != canonical) filename = canonical;
+  }
   c.filename = filename;
   char source_path[PATH_MAX], runtime_path[PATH_MAX], lib_path[PATH_MAX];
   String lib = %"${x2c_get_root()}/lib", runtime = %"$lib/x2c.x";

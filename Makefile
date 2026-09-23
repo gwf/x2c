@@ -247,10 +247,10 @@ doc-check:						## Check documentation for drift
 	$(STAGE0_X2C) script tools/gen-llms-txt --check
 
 doc-examples: build					## Compile every example in the book
-	python3 tools/check-doc-examples.py
+	$(STAGE0_X2C) script tools/check-doc-examples
 
 doc-outputs: build					## Run book examples that show output
-	python3 tools/check-doc-examples.py --outputs
+	$(STAGE0_X2C) script tools/check-doc-examples --outputs
 
 doc-build: site/node_modules/.package-lock.json		## Render the documentation book
 	@command -v mdbook >/dev/null 2>&1 || { \
