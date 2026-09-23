@@ -1173,16 +1173,18 @@ Captured syntax retains its call-site binding identity. Free identifiers
 written literally in a body resolve where the macro was defined, including
 parameters and preceding declarations captured by a local macro. A declaration
 written in a body receives a fresh binding identity and a private generated C
-spelling for each expansion. A file-scope declaration's spelling also names
-its unit and the outermost invocation, so units that include one another can
-expand the same macro. A field keeps its spelling, because C scopes it to its
+spelling for each expansion. The spelling of a file-scope declaration with
+external or no linkage also names its unit's file name and the outermost
+invocation, so units that include one another can expand the same macro. A field keeps its spelling, because C scopes it to its
 aggregate, and an anonymous aggregate is a distinct type in each expansion. A
 visible body local passed to a nested macro's `Name` hole is that expansion's
 binding, so the nested macro can read and assign it.
 
 A `struct`, `union`, or `enum` tag that a body defines or declares is private
-to each expansion, like a typedef, and so are the enumerators it lists. A tag
-the body only references keeps its outside meaning. To publish a tag, spell it
+to each expansion, like a typedef, and so are the enumerators it lists. Tags
+are a separate namespace, so `struct tm tm;` names the outside tag and a
+private variable. A tag the body only references keeps its outside meaning.
+To publish a tag, spell it
 through a `Name` hole or `x2c.ident`:
 
 ```x2c
