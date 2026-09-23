@@ -1107,9 +1107,9 @@ Var lisp_store(Var cell, Var value) {
    every size, offset, and layout from `Compiler.meta_type_layout`, so these
    operations only move bytes. The per-access operations take their offset
    as a `Var`: a `long` parameter would convert and box each offset, which
-   costs a field access about a tenth of its time. Automatic storage belongs
-   to the frame of the marked source function executing it, or to the session
-   outside one. */
+   adds about 10% to a field access. Automatic storage belongs to the frame
+   of the marked source function executing it, or to the session outside
+   one. */
 static Scope *_lowered_owner(void) =>
   lisp_active.automatic_owner ? lisp_active.automatic_owner
                               : &lisp_active.scope;
