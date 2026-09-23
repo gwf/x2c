@@ -121,11 +121,13 @@ void Compiler.install_builtin_macros(Compiler compiler) {
 }
 
 /* A rejection reports at the active invocation and never returns, so the
-   rejected operation's caller cannot continue with a missing answer. */
-static Var _sdk_reject(String message, List notes) {
+   rejected operation's caller cannot continue with a missing answer. With
+   no active invocation it is a bad state. */
+static void _sdk_reject(String message, List notes) {
   Compiler compiler = macro_import_compiler;
-  if (!compiler) raise %(bad-state (operation $message));
-  compiler.report_error(<macro>, message, macro_import_invocation, notes);
+  if (compiler)
+    compiler.report_error(<macro>, message, macro_import_invocation, notes);
+  raise %(bad-state (operation "x2c SDK rejection") (why $message));
 }
 
 // SDK operations reject use outside an active expansion.
@@ -309,12 +311,12 @@ static Var _sdk_type_fields(List value) {
   type = type.canonicalize();
   Type resolved = macro_sdk_compiler.sym.resolve_key(type);
   if (!resolved || !resolved.is_aggregate_tag())
-    return _sdk_reject(
+    _sdk_reject(
       "x2c.type.fields requires a struct or union Type",
       %("value: ${value.repr()}"));
   List metadata = macro_sdk_compiler.sym.field_order(resolved);
   if (!metadata)
-    return _sdk_reject(
+    _sdk_reject(
       "x2c.type.fields requires a complete struct or union Type",
       %("value: ${value.repr()}"));
   Array named = [];
@@ -328,12 +330,12 @@ static Var _sdk_binding_spelling(Var syntax) {
   if (syntax is <string>) {
     String spelling = syntax;
     if (spelling.is_identifier()) return spelling;
-    return _sdk_reject(
+    _sdk_reject(
       "x2c.binding.spelling requires an identifier spelling",
       %("value: ${syntax.repr()}" ));
   }
   if (syntax is not <list> || syntax.is_nil()) {
-    return _sdk_reject(
+    _sdk_reject(
       "x2c.binding.spelling requires binding syntax",
       %("value: ${syntax.repr()}" ));
   }
@@ -350,17 +352,17 @@ static Var _sdk_binding_spelling(Var syntax) {
   match (value)
     case %(binding ?id (!is ? type string)):
       if (!id.is_integer() || id.integer() > INT_MAX)
-        return _sdk_reject(
+        _sdk_reject(
           "x2c.binding.spelling requires a known binding",
           %("binding: ${value.repr()}"));
   if (!binding_identity_try_parts(value, &identity, &spelling))
-    return _sdk_reject(
+    _sdk_reject(
       "x2c.binding.spelling requires an identifier or binding",
       %("value: ${syntax.repr()}" ));
   Var registered =
     macro_sdk_compiler.semantic_binding_facts()[%(known $identity)];
   if (registered is not <string> || !registered.string().equal(spelling))
-    return _sdk_reject(
+    _sdk_reject(
       "x2c.binding.spelling requires a known binding",
       %("binding: ${value.repr()}" ));
   return spelling;
@@ -372,7 +374,7 @@ static Var _sdk_source_text(Var value) {
   Var key = ((ulong) value.u64);
   if (!macro_sdk_source_captures ||
       !macro_sdk_source_captures.try_get(key, &stored))
-    return _sdk_reject(
+    _sdk_reject(
       "x2c.source.text requires complete captured syntax",
       macro_sdk_has_references ? NULL : %("value: ${value.repr()}"));
   List source = stored;
@@ -384,15 +386,15 @@ static Var _sdk_diagnostic_fail(String message, List notes) {
   _sdk_guard("x2c.diagnostic.fail");
   foreach (Var note, notes)
     if (note is not <string>)
-      return _sdk_reject(
+      _sdk_reject(
         "x2c.diagnostic.fail notes must be Strings",
         %("value: ${note.repr()}" ));
-  return _sdk_reject(message, notes);
+  _sdk_reject(message, notes);
 }
 
 static Var _sdk_ident(String spelling) {
   _sdk_guard("x2c.ident");
-  if (!spelling.is_identifier()) return _sdk_reject(
+  if (!spelling.is_identifier()) _sdk_reject(
     "x2c.ident requires an identifier spelling",
     %("value: ${spelling.repr()}" ));
   return %("x2c.ident" $spelling);
@@ -400,7 +402,7 @@ static Var _sdk_ident(String spelling) {
 
 static Var _sdk_ident_unique(String stem) {
   _sdk_guard("_x2c.name.unique");
-  if (!stem.is_identifier()) return _sdk_reject(
+  if (!stem.is_identifier()) _sdk_reject(
     "_x2c.name.unique requires an identifier stem",
     %("value: ${stem.repr()}" ));
   String spelling = macro_sdk_compiler.fresh_name(%"macro_$stem");
@@ -409,7 +411,7 @@ static Var _sdk_ident_unique(String stem) {
 
 static Var _sdk_invocation_location(void) {
   if (!macro_sdk_compiler || !macro_import_invocation)
-    return _sdk_reject(
+    _sdk_reject(
       "x2c invocation location used outside macro expansion", NULL);
   return macro_sdk_compiler.token_location(macro_import_invocation);
 }
@@ -417,7 +419,7 @@ static Var _sdk_invocation_location(void) {
 static Var _sdk_method_resolve(List type_value, String name) {
   _sdk_guard("x2c.method.resolve");
   if (!name.is_identifier())
-    return _sdk_reject(
+    _sdk_reject(
       "x2c.method.resolve requires an identifier String",
       %("value: ${name.repr()}"));
   Type type = type_value;
@@ -429,7 +431,7 @@ static Var _sdk_method_resolve(List type_value, String name) {
       foreach (String package, packages)
         notes.push(%"package: '$package'");
       String owner = type.base_type().car().str();
-      return _sdk_reject(
+      _sdk_reject(
         %"method '$owner.$name' is provided by multiple imported packages",
         notes.list_free());
     }
@@ -535,7 +537,7 @@ static Var _sdk_function_parameter(List function, String wanted) {
         }
     }
   }
-  return _sdk_reject(
+  _sdk_reject(
     %"x2c.function.parameter cannot find '$wanted'",
     %("function: ${_sdk_function_name(function).repr()}"));
 }
@@ -797,7 +799,7 @@ static int _literal_string(Var syntax, String *value) {
 static Var _sdk_embed_text(Var requested) {
   Compiler compiler = macro_sdk_compiler;
   if (!compiler)
-    return _sdk_reject(
+    _sdk_reject(
       "x2c.embed.text used outside macro expansion", NULL);
   String source_file = macro_sdk_source_file, requested_path = NULL;
   if (requested is <string>) requested_path = requested;
@@ -807,20 +809,20 @@ static Var _sdk_embed_text(Var requested) {
     if (!macro_sdk_source_captures ||
         !macro_sdk_source_captures.try_get(key, &stored) ||
         !_literal_string(requested, &requested_path))
-      return _sdk_reject(
+      _sdk_reject(
         "x2c.embed.text requires a String or captured String literal",
         %("value: ${requested.repr()}"));
     List source = stored;
     source_file = source.cadr();
   }
   if (!requested_path.len())
-    return _sdk_reject(
+    _sdk_reject(
       "x2c.embed.text requires a non-empty path", NULL);
   String path = _embed_path(compiler, source_file, requested_path);
   if (compiler.sources) {
     String text;
     if (!compiler.read_source(path, &text))
-      return _sdk_reject(
+      _sdk_reject(
         "cannot read embedded text",
         %("path: ${compiler.display_path(path)}"));
     compiler.deps.merge_translation_dependency(
@@ -829,7 +831,7 @@ static Var _sdk_embed_text(Var requested) {
   }
   struct stat info;
   if (!stat(path, &info) && !S_ISREG(info.st_mode))
-    return _sdk_reject(
+    _sdk_reject(
       "embedded text is not a regular file",
       %("path: ${compiler.display_path(path)}"));
   File file = NULL, int open_failed = 0;
@@ -837,18 +839,18 @@ static Var _sdk_embed_text(Var requested) {
   catch %(not-found *): open_failed = 1;
   catch %(io-fail *): open_failed = 1;
   if (open_failed)
-    return _sdk_reject(
+    _sdk_reject(
       "cannot open embedded text",
       %("path: ${compiler.display_path(path)}"));
   if (file.stat(&info) || !S_ISREG(info.st_mode)) {
     file.close();
-    return _sdk_reject(
+    _sdk_reject(
       "embedded text is not a regular file",
       %("path: ${compiler.display_path(path)}"));
   }
   if ((uintmax_t) info.st_size >= INT_MAX) {
     file.close();
-    return _sdk_reject(
+    _sdk_reject(
       "embedded text exceeds the String size limit",
       %("path: ${compiler.display_path(path)}"));
   }
@@ -859,15 +861,15 @@ static Var _sdk_embed_text(Var requested) {
   catch %(bad-arg *): embedded_nul = 1;
   catch %(size-limit *): size_overflow = 1;
   if (read_failed)
-    return _sdk_reject(
+    _sdk_reject(
       "cannot read embedded text",
       %("path: ${compiler.display_path(path)}"));
   if (embedded_nul)
-    return _sdk_reject(
+    _sdk_reject(
       "embedded text contains an embedded NUL",
       %("path: ${compiler.display_path(path)}"));
   if (size_overflow)
-    return _sdk_reject(
+    _sdk_reject(
       "embedded text exceeds the String size limit",
       %("path: ${compiler.display_path(path)}"));
   String content_hash = "%08x".printf(result.hash());
@@ -887,7 +889,7 @@ static Var _sdk_literal_string(Var syntax) {
     Symbol found = tag;
     return found;
   }
-  return _sdk_reject(
+  _sdk_reject(
     "x2c.literal.value requires a String, int, or Symbol literal",
     %("value: ${syntax.repr()}"));
 }
@@ -907,7 +909,7 @@ static Var _sdk_cache_value(List node) {
     case %(expr ? (!set ?inner (cache ?))): return _sdk_cache_value(inner);
   }
   if (id < 0 || id >= (long) compiler.id_keys.len())
-    return _sdk_reject(
+    _sdk_reject(
       "x2c.cache.value requires a (cache ID) reference",
       %("value: ${node.repr()}"));
   return compiler.id_keys[(int) id];
@@ -927,7 +929,7 @@ static Var _sdk_diagnostic_warn(String message, List notes) {
   _sdk_guard("x2c.diagnostic.warn");
   foreach (Var note, notes)
     if (note is not <string>)
-      return _sdk_reject(
+      _sdk_reject(
         "x2c.diagnostic.warn notes must be Strings",
         %("value: ${note.repr()}" ));
   macro_sdk_compiler.report_warning(
@@ -1665,14 +1667,14 @@ static Var _sdk_symbol_set(List values) {
   _sdk_guard("_x2c.symbol-set");
   foreach (Var value, values)
     if (value is not <symbol>)
-      return _sdk_reject(
+      _sdk_reject(
         "_x2c.symbol-set requires Symbols",
         %("value:" ${value.repr()}));
   int duplicate = -1;
   List expression = macro_sdk_compiler.symbol_set_expression(
     values, &duplicate);
   if (duplicate >= 0)
-    return _sdk_reject(
+    _sdk_reject(
       "_x2c.symbol-set requires distinct Symbols",
       %("symbol:" ${values.getindex(duplicate).repr()}));
   return expression;
@@ -1878,13 +1880,11 @@ static Var _eval_template_form(
     form = %"(let ((x2c.ident (lambda (name)
       (list $temporary name)))) $form)";
   }
-  Var result = void;
   $let(macro_sdk_has_references, !!references)
   $let(macro_sdk_source_captures, source_captures)
   $let(macro_sdk_source_file, source_file)
   $let(macro_sdk_compiler, compiler)
-    result = _eval_string(compiler, form, invocation);
-  return result;
+    return _eval_string(compiler, form, invocation);
 }
 
 /** Evaluates a declaration recipe after its owning source is collected.

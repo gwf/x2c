@@ -68,7 +68,7 @@ while the parent is still pending raises `<lisp-late>`; its driver must
 catch that, call `Frontend.preload_macro_libraries`, and translate the
 same unit again.
 
-Source: `src/macros.x:1168`
+Source: `src/macros.x:1170`
 
 #### macro_library_pending
 
@@ -76,7 +76,7 @@ Source: `src/macros.x:1168`
 
 Answers whether a unit started now may still raise `<lisp-late>`.
 
-Source: `src/macros.x:1173`
+Source: `src/macros.x:1175`
 
 #### macro_library_reset
 
@@ -85,7 +85,7 @@ Source: `src/macros.x:1173`
 Ends the shared compile-time library before its build-target Context is
 reclaimed. A later target creates a fresh session in its own Context.
 
-Source: `src/macros.x:1000`
+Source: `src/macros.x:1002`
 
 ### `Compiler`
 
@@ -97,7 +97,7 @@ Source: `src/macros.x:1000`
 Binds an included native `meta` function the first time lowered code
 calls `name`. Returns whether the macro session now binds it.
 
-Source: `src/macros.x:1588`
+Source: `src/macros.x:1590`
 
 <a id="Compiler.evaluate_declaration_effect"></a>
 #### Compiler.evaluate_declaration_effect
@@ -106,7 +106,7 @@ Source: `src/macros.x:1588`
 
 Evaluates a queued source Lisp form with its original diagnostic site.
 
-Source: `src/macros.x:1466`
+Source: `src/macros.x:1468`
 
 <a id="Compiler.evaluate_declaration_recipe"></a>
 #### Compiler.evaluate_declaration_recipe
@@ -147,7 +147,7 @@ Source: `src/macros.x:1934`
 
 Executes an explicit meta call and inserts its result at a code boundary.
 
-Source: `src/macros.x:1753`
+Source: `src/macros.x:1755`
 
 <a id="Compiler.expand_macro_invocation_node"></a>
 #### Compiler.expand_macro_invocation_node
@@ -179,7 +179,7 @@ Source: `src/macros.x:115`
 Applies a contextual `meta` marker to one initialized file-static value,
 which is evaluated into the unit-local compile-time globals table.
 
-Source: `src/macros.x:1476`
+Source: `src/macros.x:1478`
 
 <a id="Compiler.install_meta_function"></a>
 #### Compiler.install_meta_function
@@ -192,7 +192,7 @@ operation has no runtime form, and neither do its callers. Only
 explicitly advertised file-scope state can be lowered. Lowering failures
 are reported at the marker.
 
-Source: `src/macros.x:1616`
+Source: `src/macros.x:1618`
 
 <a id="Compiler.install_native_meta_effects"></a>
 #### Compiler.install_native_meta_effects
@@ -202,7 +202,7 @@ Source: `src/macros.x:1616`
 Records the native advertisements retained by included interfaces. Each
 binds on first use, so a unit with no compile-time code pays nothing.
 
-Source: `src/macros.x:1577`
+Source: `src/macros.x:1579`
 
 <a id="Compiler.install_native_meta_function"></a>
 #### Compiler.install_native_meta_function
@@ -213,7 +213,7 @@ Installs a prototype-only `meta` function from the compiler's trusted
 native target registry. The declaration keeps its ordinary runtime form;
 unlike a lowered definition, this opaque native target is never foldable.
 
-Source: `src/macros.x:1599`
+Source: `src/macros.x:1601`
 
 <a id="Compiler.keyword_form_is_definition"></a>
 #### Compiler.keyword_form_is_definition
@@ -223,7 +223,7 @@ Source: `src/macros.x:1599`
 Returns whether the current tokens begin a `keyword NAME $macro` alias.
 This query does not consume tokens.
 
-Source: `src/macros.x:597`
+Source: `src/macros.x:599`
 
 <a id="Compiler.lift_macro_lisp_expression"></a>
 #### Compiler.lift_macro_lisp_expression
@@ -235,7 +235,7 @@ Scalars, immutable values, representable Array/Map roots, compiler-issued
 identifiers, and nonempty code `List`s are accepted; `invocation` locates
 an unsupported result.
 
-Source: `src/macros.x:1686`
+Source: `src/macros.x:1688`
 
 <a id="Compiler.local_macro_form_is_definition"></a>
 #### Compiler.local_macro_form_is_definition
@@ -245,7 +245,7 @@ Source: `src/macros.x:1686`
 Returns whether the current tokens begin a local macro definition.
 This query does not consume tokens.
 
-Source: `src/macros.x:589`
+Source: `src/macros.x:591`
 
 <a id="Compiler.macro_form_is_definition"></a>
 #### Compiler.macro_form_is_definition
@@ -255,7 +255,7 @@ Source: `src/macros.x:589`
 Returns whether the current tokens have macro-definition introducer form.
 This query does not consume tokens.
 
-Source: `src/macros.x:577`
+Source: `src/macros.x:579`
 
 <a id="Compiler.macro_introduced_name"></a>
 #### Compiler.macro_introduced_name
@@ -278,7 +278,7 @@ expansion. Every imported `Unit` macro qualifies. A local `Unit` macro
 qualifies only when its template contains protocol or adoption rows that
 collection must retain.
 
-Source: `src/macros.x:688`
+Source: `src/macros.x:690`
 
 <a id="Compiler.macro_invocation_site"></a>
 #### Compiler.macro_invocation_site
@@ -311,7 +311,7 @@ Returns whether the parser claims the macro invocation at the cursor for
 `position`. A bare keyword alias is claimed only where its result fits.
 This query does not consume tokens.
 
-Source: `src/macros.x:747`
+Source: `src/macros.x:749`
 
 <a id="Compiler.macro_targets_unit"></a>
 #### Compiler.macro_targets_unit
@@ -337,7 +337,7 @@ reports against the unit that needed it.
 The session is not published until `Compiler.publish_macro_library`, so a
 unit opened in between still builds its own.
 
-Source: `src/macros.x:1098`
+Source: `src/macros.x:1100`
 
 <a id="Compiler.parse_keyword_definition"></a>
 #### Compiler.parse_keyword_definition
@@ -370,7 +370,7 @@ Parses a compile-time Lisp form in an expression position.
 Macro-definition parsing records a deferred slot; ordinary parsing
 evaluates the form in the translation unit's Lisp session and lifts it.
 
-Source: `src/macros.x:1703`
+Source: `src/macros.x:1705`
 
 <a id="Compiler.parse_macro_lisp_shallow"></a>
 #### Compiler.parse_macro_lisp_shallow
@@ -381,7 +381,7 @@ Imports immediate dependencies and queues other source Lisp effects.
 Declaration projection forces preceding effects exactly once; otherwise
 full parsing keeps the ordinary source-order evaluation.
 
-Source: `src/macros.x:1647`
+Source: `src/macros.x:1649`
 
 <a id="Compiler.parse_macro_lisp_top_level"></a>
 #### Compiler.parse_macro_lisp_top_level
@@ -397,7 +397,7 @@ The consuming unit retains them and emits the ones it reaches. An import
 whose `meta` functions are all compile-time only answers an empty `seq`,
 because the next pass still has to read it to install them.
 
-Source: `src/macros.x:1444`
+Source: `src/macros.x:1446`
 
 <a id="Compiler.parse_source_lisp"></a>
 #### Compiler.parse_source_lisp
@@ -406,7 +406,7 @@ Source: `src/macros.x:1444`
 
 Retains one source Lisp form as text without evaluating it again.
 
-Source: `src/macros.x:1460`
+Source: `src/macros.x:1462`
 
 <a id="Compiler.peek_macro_hole"></a>
 #### Compiler.peek_macro_hole
@@ -436,7 +436,7 @@ Source: `src/macros.x:2900`
 Prepares and freezes the shared session and makes it every unit's parent.
 `shared` must be the session `Compiler.open_macro_library` returned.
 
-Source: `src/macros.x:1128`
+Source: `src/macros.x:1130`
 
 <a id="Compiler.record_native_meta_effect"></a>
 #### Compiler.record_native_meta_effect
@@ -447,7 +447,7 @@ The shallow interface retains the advertisement separately from the C
 declaration. That lets a client install the trusted evaluator binding
 without repeating the marker in every translation unit.
 
-Source: `src/macros.x:1538`
+Source: `src/macros.x:1540`
 
 <a id="Compiler.shared_definition"></a>
 #### Compiler.shared_definition
@@ -461,7 +461,7 @@ well. A reader that reads the same file again therefore installs nothing,
 whether it is a later unit or the filling itself reaching the file twice:
 the definition it would install is the one it already has.
 
-Source: `src/macros.x:1153`
+Source: `src/macros.x:1155`
 
 <a id="Compiler.shared_definitions"></a>
 #### Compiler.shared_definitions
@@ -471,7 +471,7 @@ Source: `src/macros.x:1153`
 Returns the published definition keys, or null before publication.
 The borrowed map is the shared session's source identity table.
 
-Source: `src/macros.x:1178`
+Source: `src/macros.x:1180`
 
 <a id="Compiler.skip_macro_invocation"></a>
 #### Compiler.skip_macro_invocation
@@ -481,7 +481,7 @@ Source: `src/macros.x:1178`
 Consumes a macro invocation name and its balanced argument list.
 The invocation terminator or following decorator target remains current.
 
-Source: `src/macros.x:663`
+Source: `src/macros.x:665`
 
 <a id="Compiler.skip_named_type_declaration"></a>
 #### Compiler.skip_named_type_declaration
