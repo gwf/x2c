@@ -53,6 +53,7 @@ Compile-time macro definitions and expression expansion.
 | [`Compiler.skip_macro_invocation`](#Compiler.skip_macro_invocation) | Consumes a macro invocation name and its balanced argument list. |
 | [`Compiler.skip_named_type_declaration`](#Compiler.skip_named_type_declaration) | Consumes a NamedType target already projected by owning-source collection. |
 | [`Compiler.try_parse_macro_expression`](#Compiler.try_parse_macro_expression) | Parses and resolves a direct or keyword-alias expression macro. |
+| [`Compiler.try_parse_macro_member`](#Compiler.try_parse_macro_member) | Parses a member name in a template. |
 | [`Compiler.try_parse_macro_slot`](#Compiler.try_parse_macro_slot) | Parses a macro hole or Lisp slot for `role` while reading a template. |
 | [`Compiler.try_parse_macro_target_at`](#Compiler.try_parse_macro_target_at) | Parses a direct or keyword-alias macro at the requested syntax position. |
 
@@ -160,7 +161,7 @@ supplies Lisp bindings, source location, and recursion checks; the
 definition's fresh rows allocate invocation-local names. This method does
 not begin a semantic transaction.
 
-Source: `src/macros.x:3223`
+Source: `src/macros.x:3265`
 
 <a id="Compiler.install_builtin_macros"></a>
 #### Compiler.install_builtin_macros
@@ -290,7 +291,7 @@ Resolves a stored macro invocation marker to its source token.
 Nested template markers use the active expansion's invocation; unresolved
 markers return NULL.
 
-Source: `src/macros.x:3200`
+Source: `src/macros.x:3242`
 
 <a id="Compiler.macro_lisp_starts_declaration"></a>
 #### Compiler.macro_lisp_starts_declaration
@@ -503,7 +504,17 @@ Parses and resolves a direct or keyword-alias expression macro.
 Returns NULL without consuming an identifier that is not an applicable
 alias; a direct `$` invocation must resolve to a visible expression form.
 
-Source: `src/macros.x:3430`
+Source: `src/macros.x:3478`
+
+<a id="Compiler.try_parse_macro_member"></a>
+#### Compiler.try_parse_macro_member
+
+`List Compiler.try_parse_macro_member(Compiler c)`
+
+Parses a member name in a template. A singular `Name` hole there
+supplies its captured spelling rather than a hygienic binding.
+
+Source: `src/macros.x:3210`
 
 <a id="Compiler.try_parse_macro_slot"></a>
 #### Compiler.try_parse_macro_slot
@@ -528,7 +539,7 @@ Returns NULL without consuming a macro hole or an invocation that
 deferred `(seq (macro-invoke ...))`, and ordinary parsing returns the bound
 expansion.
 
-Source: `src/macros.x:3614`
+Source: `src/macros.x:3662`
 
 ## Design notes
 
