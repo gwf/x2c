@@ -1,9 +1,10 @@
 # Porting the repository's tooling to x2c scripts
 
 > Status: active - refreshed against dev at `28c5336c` on 2026-09-22.
-> The extensionless tool rename and llms.txt generator port are delivered.
-> The documentation sample checks are the next independent delivery; later
-> release, gate and compiler-backed ports remain separately sequenced.
+> The extensionless tool rename, the llms.txt generator port and the
+> documentation sample check ports are delivered; `tools/check-docs.py` is
+> next, and later release, gate and compiler-backed ports remain separately
+> sequenced.
 > Continues `plans/archive/x2c-scripting-library.md`, whose four phases shipped the
 > scripting primitives; this plan decides where the remaining effort goes.
 
@@ -87,7 +88,7 @@ with matching status, stdout and stderr in all three modes. The saved Python
 generated files and x2c writer output also matched byte for byte. `make
 doc-check` and `make site-check` cover the live callers after the rename.
 
-### 2. Port the documentation sample checks
+### 2. Port the documentation sample checks - delivered
 
 Replace `tools/check-doc-examples.py` and `tools/check-gallery-examples.py`
 with extensionless x2c scripts. Add one non-executable
@@ -107,6 +108,17 @@ the ordinary and `--update` gallery paths. Exercise `--update` in a temporary
 copy so the repository is not rewritten during parity testing. Finish each
 delivery with `git diff --check` and
 `tools/gate-state.py ensure agent-pr-check` on the exact final tree.
+
+Delivered as `tools/check-doc-examples`, `tools/check-gallery-examples` and
+`tools/doc-samples.x`. On the same tree, the ordinary and `--outputs` example
+checks matched in status, stdout and stderr; the only stderr differences in
+the failing ordinary run were temporary directory names and translation
+times inside compiler diagnostics. The ordinary and `--update` gallery paths
+matched in status, stdout, stderr and rewritten examples in two temporary
+copies, apart from the intended new command name in the `--update` hint.
+Neither version enforces a per-sample run time now; the Python version's
+30-second limit ended the whole check with a traceback, and `Job` has no
+timeout.
 
 `tools/check-docs.py` follows this tranche rather than joining it. Its runtime
 needs are now available, but it owns part of `doc-check`, invokes the catalog
@@ -162,8 +174,6 @@ compare status and output.
 | Tool | Lines | Notes |
 | --- | --- | --- |
 | `examples/programs/check-reference-lisp.py` | 261 | `Args`, job capture, `Path.temp_dir` |
-| `tools/check-gallery-examples.py` | 112 | second documentation-tooling delivery; share the sample parser |
-| `tools/check-doc-examples.py` | 263 | second documentation-tooling delivery; `Job.wait_any` has landed |
 | `unittest/probes/run-artifact-atomicity.sh` | 52 | gate |
 | `unittest/probes/run-scope-shutdown.sh` | 140 | gate |
 | `unittest/probes/run-error-floor.sh` | 100 | gate |

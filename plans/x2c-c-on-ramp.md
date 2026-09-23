@@ -212,7 +212,7 @@ header.
 
 Site code must be byte-identical to a runnable example: `examples/gallery.json`
 maps slide markdown to a standalone example and
-`tools/check-gallery-examples.py` rejects any difference. So each new sample
+`tools/check-gallery-examples` rejects any difference. So each new sample
 lands first as an example under `examples/`, with a row in
 `examples/manifest.txt`, and the page references it.
 

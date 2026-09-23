@@ -210,7 +210,7 @@ supplies additional build options. Runtime fixtures live under
 `data/<name-with-slashes-replaced-by-hyphens>/`.
 
 The slide Markdown owns each synchronized gallery program. After editing it, run
-`python3 tools/check-gallery-examples.py --update` to copy its complete code
+`tools/check-gallery-examples --update` to copy its complete code
 into the standalone example, then run `make examples`. The check rejects a
 missing slide mapping, missing source, or any difference, including hidden
 assertions. The self-hosting guide keeps the same shell recipe but is not
