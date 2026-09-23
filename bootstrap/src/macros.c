@@ -5348,6 +5348,9 @@ static Var _parse_argument(Compiler c, Symbol kind){
       if(Compiler_peek(c, 0) != 19147688) Compiler_report_error(c, 33658058, _965, c -> token, NULL);
       String spelling = c -> token -> text;
       Compiler_next(c);
+      Map locals = Map_truth(c -> macro_holes) ? Compiler_macro_definition_locals(c) : NULL;
+      Var local;
+      if((void *) locals != NULL && Map_try_get(locals, String_var(spelling), & local)) return local;
       return String_var(spelling);
     }
     case 26416091224 : if(Map_truth(c -> macro_holes) && Compiler_peek(c, 0) == 73) return List_var(Compiler_parse_assignment(c));
