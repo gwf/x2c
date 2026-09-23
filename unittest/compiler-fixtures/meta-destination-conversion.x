@@ -30,6 +30,11 @@ meta int empty_symbol(int n) {
   return value.first() == 0;
 }
 
+meta int conditional_symbol(int n) {
+  Symbol value = n ? <word> : 0;
+  return value == <word>;
+}
+
 meta int composed_hash(String value) => value.hash() != 0;
 
 int main(int argc, char **argv) {
@@ -46,6 +51,10 @@ int main(int argc, char **argv) {
     $pointer_tag(1), pointer_tag(1), pointer_tag(one));
   printf("symbol %d %d %d\n",
     $empty_symbol(1), empty_symbol(1), empty_symbol(one));
+  printf("conditional-symbol %d %d %d %d %d %d\n",
+    $conditional_symbol(1), conditional_symbol(1),
+    conditional_symbol(one), $conditional_symbol(0),
+    conditional_symbol(0), conditional_symbol(one - 1));
   printf("hash %d %d %d\n",
     $composed_hash("word"), composed_hash("word"),
     composed_hash(argc ? "word" : ""));

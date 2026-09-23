@@ -9,8 +9,10 @@
 // A value reaching a C scalar type carries that type's `Var` tag, so every
 // later operation applies the usual arithmetic conversions the way C does.
 // `Var.convert` is the conversion: integer narrowing keeps low bits,
-// floating to integer truncates toward zero, and an integer widens.
-(defun C.conv (v tag) (Var.convert v tag))
+// floating to integer truncates toward zero, and an integer widens. A
+// Symbol is stored with its own tag even when C selects an integer arm.
+(defun C.conv (v tag)
+  (Var.convert (if (eq? (Var.tag v) 'symbol) (Var.integer v) v) tag))
 
 // C compares after the usual arithmetic conversions, which `_binary`'s
 // arithmetic already performs, so the tag of a sum names the common type.

@@ -3,4 +3,5 @@ unsigned 0 0 0
 byte 1 1 1
 pointer 1 1 1
 symbol 1 1 1
+conditional-symbol 1 1 1 0 0 0
 hash 1 1 1

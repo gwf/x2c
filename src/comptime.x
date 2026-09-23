@@ -2191,7 +2191,9 @@ static Var _lower_coerce(Lowering l, List want, Var node, Var value) {
       Type target = _lower_numeric_type(l, want);
       Type source = _lower_numeric_type(l, from);
       Symbol tag = target ? target.scalar_tag() : 0;
-      if (tag && source && tag != source.scalar_tag())
+      /* A Symbol resolves to ulong but still arrives with a Symbol tag. */
+      if (tag && source && tag !=
+          (from_tag ? from_tag : source.scalar_tag()))
         return _lower_to_type(l, target, value);
     }
   return value;
