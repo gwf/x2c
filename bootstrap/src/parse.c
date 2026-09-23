@@ -2766,8 +2766,12 @@ static int _script_declaration_stays(Compiler c){
   return 0;
 }
 
+int Compiler_protocol_form_starts(Compiler c){
+  if(! _init_guard_) _file_init_();  int at = Compiler_peek(c, 0) == 19147688 && String_equal(c -> token -> text, _327);  if(Compiler_peek(c, at) == 1317118534) at ++;  return Compiler_peek(c, at) == 1139215899608;
+}
+
 int Compiler_meta_form_is_declaration(Compiler c){
-  if(! _init_guard_) _file_init_();  if(Compiler_peek(c, 0) != 19147688 || ! String_equal(c -> token -> text, _327)) return 0;  Token head = c -> token;  Compiler_next(c);  int marker = Compiler_test_declaration(c);  c -> token = head;  return marker;
+  if(! _init_guard_) _file_init_();  if(Compiler_peek(c, 0) != 19147688 || ! String_equal(c -> token -> text, _327)) return 0;  if(Compiler_protocol_form_starts(c)) return 1;  Token head = c -> token;  Compiler_next(c);  int marker = Compiler_test_declaration(c);  c -> token = head;  return marker;
 }
 
 int Compiler_keyword_form_is_definition(Compiler);
@@ -2818,8 +2822,8 @@ List Compiler_parse_top_level(Compiler c){
   if(Compiler_skip_linkage_brace(c)) return NULL;  if(Compiler_test_static_assert(c)) return Compiler_parse_static_assert(c);  List slot = Compiler_try_parse_macro_slot(c, 1405544);  if(List_truth(slot)) return slot;  if(Compiler_keyword_form_is_definition(c)){
     Compiler_parse_keyword_definition(c);  return NULL;
   }
-  List macro = Compiler_try_parse_macro_target_at(c, AST_UNIT);  if(List_truth(macro)) return macro;  if(Compiler_peek(c, 0) == 1317118534 && Compiler_peek(c, 1) == 1139215899608) return Compiler_parse_protocol_declaration(c);  switch(Compiler_peek(c, 0)){
-    case 632323240 : return Compiler_parse_import_declaration(c);  case 1139215899608 : return Compiler_parse_protocol_declaration(c);  case 9297 :{
+  List macro = Compiler_try_parse_macro_target_at(c, AST_UNIT);  if(List_truth(macro)) return macro;  if(Compiler_protocol_form_starts(c)) return Compiler_parse_protocol_declaration(c);  switch(Compiler_peek(c, 0)){
+    case 632323240 : return Compiler_parse_import_declaration(c);  case 9297 :{
       if(Compiler_parsing_source_syntax(c)) return Compiler_parse_source_lisp(c);  List imported = Compiler_parse_macro_lisp_top_level(c);  if(List_truth(imported)){
         Var definition;  List _x2c_macro_object_17 = List_cdr(imported);  List _x2c_macro_cursor_17 = _x2c_macro_object_17;  Var _x2c_macro_cursor_output_14;  while(List_try_next(_x2c_macro_object_17, & _x2c_macro_cursor_17, & _x2c_macro_cursor_output_14)){
           definition = _x2c_macro_cursor_output_14;  Array_push(c -> meta_defs, definition);
