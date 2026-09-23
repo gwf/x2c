@@ -31,7 +31,7 @@ NULL. Home files mirror their home-relative path under the compiler's
 stage directory when it runs from `<home>/builds/`, otherwise under the
 home. Call it before opening any translation unit's Context.
 
-Source: `src/collect.x:707`
+Source: `src/collect.x:708`
 
 #### interface_prelude
 
@@ -39,7 +39,7 @@ Source: `src/collect.x:707`
 
 Returns the readable prelude interface path, or NULL when none exists.
 
-Source: `src/collect.x:732`
+Source: `src/collect.x:733`
 
 #### interface_text
 
@@ -49,7 +49,7 @@ Returns the compiler's own collected contribution as interface text, or
 NULL when the unit has not collected its symbols. A contribution that
 the interface grammar cannot spell is reported as an `emit` diagnostic.
 
-Source: `src/collect.x:954`
+Source: `src/collect.x:955`
 
 ### `Compiler`
 
@@ -67,7 +67,7 @@ protocol rows enter the current symbol state, and dependencies enter the
 importing compiler. Replay also merges recorded function definitions.
 `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:655`
+Source: `src/collect.x:656`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols

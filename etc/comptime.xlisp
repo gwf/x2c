@@ -99,15 +99,18 @@
 (defun C.mgaddress (id) (Map.getindex C._meta_globals id))
 
 // An iterator operation takes its destination last. A call whose
-// destination the compiler supplies passes none, and the native binding
-// allocates the Iter in the session; a call with explicit storage passes it.
+// destination the compiler supplies passes none, and the call allocates the
+// Iter in the session; a call with explicit storage passes it.
+(defun C.iterator.call (explicit arity)
+  (let ((fresh (bind "Iter_new" nil)))
+    (lambda (. arguments)
+      (apply explicit
+             (if (eq? (length arguments) arity)
+                 (append arguments (list (fresh)))
+                 arguments)))))
 (defmacro C.iterator (name operation arity)
   `(def ,name
-     (let ((allocating (bind ,operation nil))
-           (explicit (bind ,(string-append operation "_into") nil)))
-       (lambda (. arguments)
-         (apply (if (eq? (length arguments) ,arity) allocating explicit)
-                arguments)))))
+     (C.iterator.call (bind ,(string-append operation "_into") nil) ,arity)))
 
 // The library operations a lowered call resolves against, under the names
 // the typed AST already uses.

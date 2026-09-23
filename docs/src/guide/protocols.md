@@ -112,6 +112,11 @@ converters are already private; then it states explicitly what the compiler
 would infer. The resulting linkage is the same. Only an adoption can be
 `static`, not a protocol body.
 
+An adoption marked `meta`, such as `meta protocol Iter(List);`, also makes
+that conformance's witnesses available to compile-time code, as described in
+[native C functions](meta-functions.md#native-c-functions). Only an adoption
+can be `meta`, so availability stays explicit for each conformance.
+
 Three visibility patterns cover most code:
 
 | Protocol | Participant | Typical spelling |

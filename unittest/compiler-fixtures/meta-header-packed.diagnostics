@@ -13,3 +13,28 @@ unittest/compiler-fixtures/meta-header-packed.x:18:1: macro: this function canno
   ^^^^
   note: reason: a compile-time struct with no host layout
 
+unittest/compiler-fixtures/meta-header-packed.x:29:1: macro: this function cannot run at compile time
+  meta int header_small_value(void) {
+  ^^^^
+  note: reason: a compile-time struct with no host layout
+
+unittest/compiler-fixtures/meta-header-packed.x:34:1: macro: this function cannot run at compile time
+  meta int header_lead_value(void) {
+  ^^^^
+  note: reason: a compile-time struct with no host layout
+
+unittest/compiler-fixtures/meta-header-packed.x:41:1: macro: this function cannot run at compile time
+  meta int header_macro_value(void) {
+  ^^^^
+  note: reason: a compile-time struct with no host layout
+
+unittest/compiler-fixtures/meta-header-packed.x:46:1: macro: this function cannot run at compile time
+  meta int header_macro_by_value(void) {
+  ^^^^
+  note: reason: a compile-time struct with no host layout
+
+unittest/compiler-fixtures/meta-header-packed.x:51:1: macro: this function cannot run at compile time
+  meta int header_macro_if_value(void) {
+  ^^^^
+  note: reason: a compile-time struct with no host layout
+

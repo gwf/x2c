@@ -116,6 +116,11 @@ Outcome, 2026-09-22:
     `typedef long aligned_long __attribute__((aligned(16)))`, and a field
     declared `_Alignas`, leave a struct its natural layout; neither mark
     lies in the struct's own definition.
+  - Default collection learns which macros hold a layout attribute from the
+    `#define` lines it has passed. A macro defined through a later one,
+    `#define B A` before `#define A __attribute__((packed))`, is not
+    recognized, so a struct followed by `B` gets its natural layout.
+    `--cpp-symbols` and `--system-headers` see the expansion.
   - `-D_Atomic(T)=T` stays: `_Atomic` scalars have the size and alignment of
     their plain type on the supported hosts, so a struct with such a field
     keeps a correct layout. An `_Atomic` struct type could differ and is not
@@ -129,6 +134,51 @@ Make protocol conformances the source of compile-time bindings, replacing
 hand-listed targets such as the Iter `_into` rows in `lib/lisp.x` and the
 `C.iterator` table in `etc/comptime.xlisp`. See
 [meta authoring and coverage](meta-authoring-and-coverage.md#meta-capable-protocol-opportunity).
+
+Gary decided on 2026-09-22:
+
+1. Availability is marked per conformance, beside the adoption:
+   `meta protocol Iter(List);` adopts and marks. A protocol body cannot be
+   marked, and a conformer whose witness the compiler does not link stays
+   unexposed. There is no public `protocol Meta(T)`.
+2. Iter operations are marked `meta` through the existing prototype path.
+   Their `_into` twins are derived from the rule that an iterator operation
+   takes its destination last, replacing the hand-listed pairs.
+3. The five callback adapters `_lisp_Iter_{map,filter,zip_with,map2,scan}_into`
+   stay; they change representation, and their lifetimes belong to track F.
+4. The first delivery covers Iter only. The phase 7 Buffer, Array, Map and
+   Var candidates follow once Iter proves the mechanism.
+
+Design as built. Delivery 1 is the compiler capability, which must reach the
+checked-in bootstrap before `lib/` or `etc/` uses it:
+
+- The parser accepts a leading `meta` on a bodyless adoption and retains a
+  `(meta-protocol BASE PARTICIPANT)` row beside the adoption row, so it
+  crosses includes and package interfaces the same way. Macro-generated
+  syntax carries the marker as a `(meta-protocol ADOPTION)` node, which
+  publishes like a written marked adoption.
+- One helper turns a symbol row into `(name signature)` native functions: a
+  `meta` prototype gives itself, and a marked adoption gives each implemented
+  witness of its resolved conformance. Both consumers use it: lazy binding
+  for lowered code (`install_native_meta_effects`) and the generated target
+  inventory (`_x2c.native-meta.targets`).
+- A native function whose last parameter and result are `Iter` is an
+  iterator operation. The inventory emits its row as `(NAME (as NAME_into))`,
+  so the native function is the `_into` target. Compile-time code calls
+  `NAME` through `C.iterator.call` in `etc/comptime.xlisp`, which appends a
+  fresh `Iter_new` destination when a call omits it and otherwise passes the
+  call through. No allocating native target is needed, so deleting the
+  allocating static adapters cannot leave a dispatcher without one; a
+  missing `_into` target binds nothing and the call reports the missing
+  binding.
+- A declared `Func` parameter matches any `Var` parameter of the target,
+  since a compile-time callable is a Lisp value; the result must match
+  exactly. Such functions are left out of the generated inventory because an
+  adapter row supplies their target.
+
+Delivery 2 adopts it: mark the Iter conformances and operations, and delete
+the manual Iter target rows, the allocating static adapters, and the
+`C.iterator` rows. The five callback adapters keep their `_into` rows.
 
 ### F. Lifetime certification
 
