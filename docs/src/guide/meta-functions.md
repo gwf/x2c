@@ -305,6 +305,15 @@ sample.x:1:1: type: native meta function declaration does not match its target
   note: name: sin signature: ((func ((double))) float)
 ```
 
+Two kinds of function follow a rule. An iterator operation takes its
+destination last: its last parameter and its result are `Iter`. Compile-time
+code may omit that destination, and the binding allocates the iterator in the
+session `Scope`. A `Func` parameter binds to a compiler target that takes the
+compile-time callable as a `Var` and adapts it.
+
+A `meta` protocol adoption, such as `meta protocol Iter(List);`, declares each
+witness of that conformance the way a bodyless prototype would.
+
 The compiler links every function declared in `lib/cmath.x` and
 `lib/clibc.x`. Both are part of the implicit prelude, so their functions need
 no declaration of your own:

@@ -17,7 +17,7 @@ X2c recursive-descent parser core.
 | [`Compiler.defines_main`](#Compiler.defines_main) | Reports whether the unit's tokens define a function named `main` at file scope. |
 | [`Compiler.finish_foreign_alias`](#Compiler.finish_foreign_alias) | Constructs a foreign alias from one direct function declaration and target. |
 | [`Compiler.finish_managed_declaration`](#Compiler.finish_managed_declaration) | Lowers managed block declarations to declaration/defer pairs in source order, preserving their installed bindings and the enclosing lifetime. |
-| [`Compiler.meta_form_is_declaration`](#Compiler.meta_form_is_declaration) | Reports whether the cursor begins a contextual top-level `meta` declaration: a function or an initialized file-static value. |
+| [`Compiler.meta_form_is_declaration`](#Compiler.meta_form_is_declaration) | Reports whether the cursor begins a contextual top-level `meta` declaration: a function, an initialized file-static value, or a protocol adoption. |
 | [`Compiler.package_alias_spelling`](#Compiler.package_alias_spelling) | Returns the folded package-member spelling at the current token, or NULL. |
 | [`Compiler.parse_basic_identifier`](#Compiler.parse_basic_identifier) | Consumes one `ident` token and returns its spelling as a one-item `List`. |
 | [`Compiler.parse_complex_identifier`](#Compiler.parse_complex_identifier) | Parses the current identifier or dotted owner/member as a one-item name. |
@@ -39,6 +39,7 @@ X2c recursive-descent parser core.
 | [`Compiler.parse_submission`](#Compiler.parse_submission) | Parses one submission from the current token stream. |
 | [`Compiler.parse_top_level`](#Compiler.parse_top_level) | Parses one top-level form and applies its source-ordered compiler effects. |
 | [`Compiler.parse_type_name`](#Compiler.parse_type_name) | Parses a type specifier with qualifiers and pointer/reference modifiers. |
+| [`Compiler.protocol_form_starts`](#Compiler.protocol_form_starts) | Reports whether the cursor begins a protocol declaration or adoption, including its `meta` and `static` markers. |
 | [`Compiler.script_statement_executes`](#Compiler.script_statement_executes) | Reports whether the top-level item at the cursor is a script statement that runs, rather than a declaration: an expression, control flow, a `with` block, or a statement macro. |
 | [`Compiler.script_statement_starts`](#Compiler.script_statement_starts) | Reports whether the top-level item at the cursor is one of a script unit's statements, which become `main`'s body. |
 | [`Compiler.skip_linkage_brace`](#Compiler.skip_linkage_brace) | Consumes one brace of a C linkage specification at file scope and reports whether it did. |
@@ -58,7 +59,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:2164`
+Source: `src/parse.x:2173`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -91,7 +92,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:2098`
+Source: `src/parse.x:2107`
 
 <a id="Compiler.finish_managed_declaration"></a>
 #### Compiler.finish_managed_declaration
@@ -109,9 +110,10 @@ Source: `src/parse.x:1416`
 `int Compiler.meta_form_is_declaration(Compiler c)`
 
 Reports whether the cursor begins a contextual top-level `meta`
-declaration: a function or an initialized file-static value.
+declaration: a function, an initialized file-static value, or a protocol
+adoption.
 
-Source: `src/parse.x:1730`
+Source: `src/parse.x:1740`
 
 <a id="Compiler.package_alias_spelling"></a>
 #### Compiler.package_alias_spelling
@@ -317,7 +319,7 @@ Missing required syntax raises `<incomplete>`; trailing items are rejected.
 Temporary parser scopes and captured parameters are restored on every exit.
 The caller owns the semantic transaction and commits after execution.
 
-Source: `src/parse.x:1883`
+Source: `src/parse.x:1892`
 
 <a id="Compiler.parse_top_level"></a>
 #### Compiler.parse_top_level
@@ -331,7 +333,7 @@ state, with the first following token current. A macro import whose
 `.xmacro` makes `meta` declarations retains their runtime forms, which
 the unit emits where it reaches them.
 
-Source: `src/parse.x:1807`
+Source: `src/parse.x:1818`
 
 <a id="Compiler.parse_type_name"></a>
 #### Compiler.parse_type_name
@@ -343,6 +345,17 @@ Returns its flat `Type` AST and leaves the first following token current.
 
 Source: `src/parse.x:744`
 
+<a id="Compiler.protocol_form_starts"></a>
+#### Compiler.protocol_form_starts
+
+`int Compiler.protocol_form_starts(Compiler c)`
+
+Reports whether the cursor begins a protocol declaration or adoption,
+including its `meta` and `static` markers. This query does not consume
+tokens.
+
+Source: `src/parse.x:1731`
+
 <a id="Compiler.script_statement_executes"></a>
 #### Compiler.script_statement_executes
 
@@ -352,7 +365,7 @@ Reports whether the top-level item at the cursor is a script statement
 that runs, rather than a declaration: an expression, control flow, a
 `with` block, or a statement macro. This query does not consume tokens.
 
-Source: `src/parse.x:1764`
+Source: `src/parse.x:1775`
 
 <a id="Compiler.script_statement_starts"></a>
 #### Compiler.script_statement_starts
@@ -366,7 +379,7 @@ Lisp, file-scope macro invocations, `typedef`, `static`, and `extern`
 declarations, linkage braces, type definitions, and function prototypes
 and definitions stay at file scope. This query does not consume tokens.
 
-Source: `src/parse.x:1746`
+Source: `src/parse.x:1757`
 
 <a id="Compiler.skip_linkage_brace"></a>
 #### Compiler.skip_linkage_brace
@@ -380,7 +393,7 @@ its own braces. The declarations between them stay at file scope. The
 `#ifdef __cplusplus` arm of the usual header guard is skipped, so only an
 unguarded group reaches this operation.
 
-Source: `src/parse.x:1775`
+Source: `src/parse.x:1786`
 
 <a id="Compiler.test_declaration"></a>
 #### Compiler.test_declaration

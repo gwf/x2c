@@ -488,27 +488,6 @@ static Type _lisp_signature_type(Compiler compiler, Type type) {
   return signature ? signature : type;
 }
 
-/* Returns the declared native targets advertised by `meta` interface rows.
-   Sorting makes the generated adapter inventory independent of Map order. */
-static List _sdk_native_meta_targets(void) {
-  Compiler compiler = macro_sdk_compiler
-                    ? macro_sdk_compiler : macro_import_compiler;
-  if (!compiler) return %();
-  Map selected = {};
-  foreach (Var (key, value), compiler.sym.base_symbols()) {
-    (void) key;
-    match (value) case %(native-meta ?(String name) ?): selected[name] = 1;
-  }
-  Array names = [];
-  foreach (Var (name, present), selected) {
-    (void) present;
-    names.push(name);
-  }
-  List rows = %();
-  foreach (String name, names.sort()) rows = cons(%($name), rows);
-  return rows.reverse();
-}
-
 /* Builds the canonical signature stored by `Func` for one declared native
    function. The native Lisp binding macros generate this same shape. */
 static List _native_meta_signature(Compiler c, Type type) {
@@ -519,6 +498,57 @@ static List _native_meta_signature(Compiler c, Type type) {
     parameters.push(_lisp_signature_type(c, parameter));
   Type result = _lisp_signature_type(c, source_result);
   return %((func ${parameters.list_free()}) @result);
+}
+
+/* The native functions one symbol row makes available to compile-time code,
+   as `(name signature)` rows: a bodyless `meta` prototype, or each witness
+   of a `meta protocol` adoption. An adoption that does not resolve makes
+   none available. */
+static List _native_meta_rows(Compiler c, Var row) {
+  match (row) {
+    case %(native-meta ?name ?signature): return %(($name $signature));
+    case %(meta-protocol ?(Type base) ?(Type participant)): {
+      List conformance = c.protocol_members_for(participant, base);
+      List rows = %();
+      if (!conformance) return rows;
+      foreach (List member, conformance.last().list().cdr())
+        match (member)
+          case %(? implmntd ?(String name) *): {
+            List signature = _native_meta_signature(c, c.sym.get(%($name)));
+            rows = cons(%($name $signature), rows);
+          }
+      return rows;
+    }
+  }
+  return %();
+}
+
+/* A Lisp callable reaches native code as a `Var`, so a native function that
+   takes a `Func` binds through an adapter row in `lib/lisp.x`. */
+static int _native_meta_takes_callback(List signature) {
+  match (signature)
+    case %((func ?(List parameters)) *): return %("Func") in parameters;
+  return 0;
+}
+
+/* Returns the declared native targets advertised by `meta` interface rows.
+   Sorting makes the generated adapter inventory independent of Map order. */
+static List _sdk_native_meta_targets(void) {
+  Compiler compiler = macro_sdk_compiler
+                    ? macro_sdk_compiler : macro_import_compiler;
+  if (!compiler) return %();
+  Map selected = {};
+  foreach (Var value, compiler.sym.base_symbols())
+    foreach (List row, _native_meta_rows(compiler, value))
+      if (!_native_meta_takes_callback(row.cadr())) selected[row.car()] = 1;
+  Array names = [];
+  foreach (Var (name, present), selected) {
+    (void) present;
+    names.push(name);
+  }
+  List rows = %();
+  foreach (String name, names.sort()) rows = cons(%($name), rows);
+  return rows.reverse();
 }
 
 static Var _sdk_native_function_type(List syntax) {
@@ -1554,24 +1584,50 @@ void Compiler.record_native_meta_effect(
   }
 }
 
+/* An iterator operation takes its destination last. */
+static int _iterator_operation(List signature) {
+  match (signature)
+    case %((func ?(List parameters)) "Iter"):
+      return parameters && parameters.last().equal(%("Iter"));
+  return 0;
+}
+
+/* The target takes a Lisp callable as `Var` where native code takes `Func`,
+   and adapts it. */
+static int _native_meta_accepts(Var function, List signature) {
+  if (function is not <func>) return 0;
+  List target = ((Func) function.pointer()).signature();
+  return target.equal(signature) ||
+         target.equal(signature.search_replace(%("Func"), %("Var")));
+}
+
 /* Binds a declared native function to the compiler's own linked target of
    the same name. A declaration the running compiler does not link binds
-   nothing, and a meta body that calls it reports the missing binding. */
+   nothing, and a meta body that calls it reports the missing binding. An
+   iterator operation binds its native form as `NAME_into`; `NAME` calls
+   that form when a call passes the destination, and otherwise the target
+   that allocates one in the session. */
 static void _bind_native_meta(
   Compiler c, String name, List signature, Token marker) {
-  Var function;
-  if (!c.macro_lisp.try_get(name, &function)) {
-    Var bound;
-    try bound = c.macro_lisp.eval(%(bind $name (quote $signature)));
+  int iterator = _iterator_operation(signature);
+  String target = iterator ? %"${name}_into" : name;
+  Var bound, function;
+  if (!iterator && c.macro_lisp.try_get(name, &bound)) function = bound;
+  else {
+    try function = c.macro_lisp.eval(%(bind $target (quote $signature)));
     catch %(no-symbol *): return;
-    function = bound;
-    c.macro_lisp.set_global(name, function);
   }
-  if (function is not <func> ||
-      !((Func) function.pointer()).signature().equal(signature))
+  if (!_native_meta_accepts(function, signature))
     c.report_error(
       <type>, "native meta function declaration does not match its target",
       marker, %("name: $name" "signature: ${signature.repr()}"));
+  if (c.macro_lisp.try_get(name, &bound)) return;
+  if (!iterator) {
+    c.macro_lisp.set_global(name, function);
+    return;
+  }
+  int arity = signature.car().list().cadr().list().len() - 1;
+  c.macro_lisp.eval(%(C.iterator ${Atom.intern(name)} $name $arity));
 }
 
 static int _native_meta_effect_is_local(Compiler c, Var key) {
@@ -1586,9 +1642,8 @@ static int _native_meta_effect_is_local(Compiler c, Var key) {
 void Compiler.install_native_meta_effects(Compiler c, Map globs) {
   foreach (Var (key, value), globs) {
     if (_native_meta_effect_is_local(c, key)) continue;
-    match (value)
-      case %(native-meta ?(String name) ?signature):
-        c.native_meta[name] = signature;
+    foreach (List row, _native_meta_rows(c, value))
+      c.native_meta[row.car()] = row.cadr();
   }
 }
 

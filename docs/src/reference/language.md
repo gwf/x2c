@@ -1492,10 +1492,10 @@ int main(void) {
 ```
 
 `meta` is contextual. It marks a function definition, a bodyless function
-prototype, or an initialized file-static value. Everywhere else it is an
-ordinary identifier, including as a file-scope name, an assignment target,
-and a struct field. Types need no marker: compile-time code can use any
-type the compiler sees.
+prototype, an initialized file-static value, or a protocol adoption.
+Everywhere else it is an ordinary identifier, including as a file-scope name,
+an assignment target, and a struct field. Types need no marker: compile-time
+code can use any type the compiler sees.
 
 A bodyless `meta` prototype declares a native function that the compiler
 itself links, such as `meta double sin(double);`. Compile-time code then
@@ -1503,6 +1503,12 @@ calls the compiler's copy. The declared signature must match that function
 exactly. A prototype for a function the compiler does not link is accepted,
 and compile-time code that calls it is diagnosed. See
 [native C functions](../guide/meta-functions.md#native-c-functions).
+
+A `meta` protocol adoption, such as `meta protocol Iter(List);`, adopts the
+protocol and declares each of that conformance's witnesses the way a bodyless
+`meta` prototype would. Availability stays explicit for each conformance: a
+protocol body cannot be marked, and a witness the compiler does not link is
+not available.
 
 Marking a function `meta` has three consequences.
 

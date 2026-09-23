@@ -1725,10 +1725,21 @@ static int _script_declaration_stays(Compiler c) {
   return 0;
 }
 
+/** Reports whether the cursor begins a protocol declaration or adoption,
+    including its `meta` and `static` markers. This query does not consume
+    tokens. */
+int Compiler.protocol_form_starts(Compiler c) {
+  int at = c.peek(0) == <ident> && c.token.text == "meta";
+  if (c.peek(at) == <static>) at++;
+  return c.peek(at) == <protocol>;
+}
+
 /** Reports whether the cursor begins a contextual top-level `meta`
-    declaration: a function or an initialized file-static value. */
+    declaration: a function, an initialized file-static value, or a protocol
+    adoption. */
 int Compiler.meta_form_is_declaration(Compiler c) {
   if (c.peek(0) != <ident> || c.token.text != "meta") return 0;
+  if (c.protocol_form_starts()) return 1;
   Token head = c.token;
   c.next();
   int marker = c.test_declaration();
@@ -1819,11 +1830,9 @@ List Compiler.parse_top_level(Compiler c) {
   }
   List macro = c.try_parse_macro_target_at(AST_UNIT);
   if (macro) return macro;
-  if (c.peek(0) == <static> && c.peek(1) == <protocol>)
-    return c.parse_protocol_declaration();
+  if (c.protocol_form_starts()) return c.parse_protocol_declaration();
   switch (c.peek(0)) {
     case <import>:   return c.parse_import_declaration();
-    case <protocol>: return c.parse_protocol_declaration();
     case <"$(">: {
       if (c.parsing_source_syntax()) return c.parse_source_lisp();
       List imported = c.parse_macro_lisp_top_level();

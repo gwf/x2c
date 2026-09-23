@@ -1649,8 +1649,7 @@ static void _shallow_parse_loop(Compiler c) {
       _debug_tokens(c, start, c.token);
       continue;
     }
-    if (c.peek(0) == <protocol> ||
-        (c.peek(0) == <static> && c.peek(1) == <protocol>)) {
+    if (c.protocol_form_starts()) {
       c.parse_protocol_declaration();
       _debug_tokens(c, start, c.token);
       continue;

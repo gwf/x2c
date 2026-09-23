@@ -130,6 +130,43 @@ hand-listed targets such as the Iter `_into` rows in `lib/lisp.x` and the
 `C.iterator` table in `etc/comptime.xlisp`. See
 [meta authoring and coverage](meta-authoring-and-coverage.md#meta-capable-protocol-opportunity).
 
+Gary decided on 2026-09-22:
+
+1. Availability is marked per conformance, beside the adoption:
+   `meta protocol Iter(List);` adopts and marks. A protocol body cannot be
+   marked, and a conformer whose witness the compiler does not link stays
+   unexposed. There is no public `protocol Meta(T)`.
+2. Iter operations are marked `meta` through the existing prototype path.
+   Their `_into` twins are derived from the rule that an iterator operation
+   takes its destination last, replacing the hand-listed pairs.
+3. The five callback adapters `_lisp_Iter_{map,filter,zip_with,map2,scan}_into`
+   stay; they change representation, and their lifetimes belong to track F.
+4. The first delivery covers Iter only. The phase 7 Buffer, Array, Map and
+   Var candidates follow once Iter proves the mechanism.
+
+Design as built. Delivery 1 is the compiler capability, which must reach the
+checked-in bootstrap before `lib/` or `etc/` uses it:
+
+- The parser accepts a leading `meta` on a bodyless adoption and retains a
+  `(meta-protocol BASE PARTICIPANT)` row beside the adoption row, so it
+  crosses includes and package interfaces the same way.
+- One helper turns a symbol row into `(name signature)` native functions: a
+  `meta` prototype gives itself, and a marked adoption gives each implemented
+  witness of its resolved conformance. Both consumers use it: lazy binding
+  for lowered code (`install_native_meta_effects`) and the generated target
+  inventory (`_x2c.native-meta.targets`).
+- A native function whose last parameter and result are `Iter` binds its
+  native form as `NAME_into`; `NAME` becomes the existing `C.iterator`
+  dispatcher, which calls the allocating target when the destination is
+  omitted.
+- A declared `Func` parameter matches a target that takes `Var`, since a
+  compile-time callable is a Lisp value. Such functions are left out of the
+  generated inventory because an adapter row supplies their target.
+
+Delivery 2 adopts it: mark the Iter conformances and operations, derive both
+target names from one row per operation, and delete the manual Iter target
+rows, the allocating static adapters, and the `C.iterator` rows.
+
 ### F. Lifetime certification
 
 Compile-time code follows C semantics, so a pointer to an expired local is
