@@ -1551,6 +1551,8 @@ Marking a function `meta` has three consequences.
   a representable scalar, String, Symbol, immutable List or boxed result.
   Mutable container, callable and native-address results remain calls.
   This optimization is separate from explicit evaluation and result insertion.
+  Calls that reach native functions, local static storage, or an enum with
+  target-dependent representation also remain calls.
 
 A dollar-prefixed function call requires compile-time evaluation. Arguments
 may compute values from other resolvable values and meta calls; unresolved

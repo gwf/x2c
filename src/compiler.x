@@ -139,7 +139,8 @@ typedef struct Compiler {
      compile-time form. `meta_folds` holds the binding ids this compiler
      declared, so a macro import's own compiler keeps its entries and no unit
      folds a call another unit's emission designates. `meta_impure` names the
-     functions that reach file-scope state, whose two forms disagree; it is
+     functions that reach file-scope or static state, opaque native effects,
+     or enum representation the evaluator cannot prove equal to C; it is
      shared with an import's compiler, which installs into the same session.
      `meta_comptime` names the ones that reach a `Meta` operation and so have
      no runtime form at all: no unit emits one and no call to one folds.

@@ -374,6 +374,7 @@ static void _lower_scan_bind(Lowering l, List form) {
 
 static void _lower_scan_storage_binding(
   Lowering l, Type type, Var declarator) {
+  if (type.contains(<static>)) l.globals = 1;
   List binding = NULL;
   match (declarator) {
     case %(op = ?bound ?): binding = bound;
@@ -381,6 +382,7 @@ static void _lower_scan_storage_binding(
   }
   Type declared = %(declare $type (bindings $binding))
     .type_from_ast().declared();
+  if (declared.is_enum()) l.globals = 1;
   if (declared.is_array() && _lower_record_type(l, declared.dereference())) {
     (void) _lower_decline(l, "an array of structs");
     return;
@@ -540,6 +542,8 @@ static void _lower_scan(Lowering l, Var form) {
     return;
   }
   _lower_scan_storage_declaration(l, items);
+  match (items) case %(expr ?type ?):
+    if (((Type) type).is_enum()) l.globals = 1;
   /* Both of these refuse the function outright, so the scan stops rather
      than reporting what the refused statement happens to call. */
   if (head == <defer>) {

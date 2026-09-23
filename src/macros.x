@@ -1723,6 +1723,9 @@ static void _bind_native_meta(
     c.report_error(
       <type>, "native meta function declaration does not match its target",
       marker, %("name: $name" "signature: ${signature.repr()}"));
+  /* A native target may read or change state the lowering cannot inspect.
+     Its callers remain executable through `$`, but may not be folded. */
+  c.meta_impure[name] = 1;
   if (present) return;
   if (iterator) {
     int arity = signature.car().list().cadr().list().len() - 1;
