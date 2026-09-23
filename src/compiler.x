@@ -2933,15 +2933,17 @@ List Sym.define(Sym sym, List key, List type) {
   return _semantic_scope_binding(sym, scope, key);
 }
 
-/** Defines `key` in the unit's writable base scope and returns its binding.
+/** Defines `key` in the unit's writable base scope.
 
-    The definition survives the expression scope that first resolved it.
+    The definition survives the expression scope that first resolved it. Its
+    binding is issued at the first reference, as for a row an included file
+    contributes, so the unit numbers its bindings the same whether it defined
+    the row here or replayed it from an interface.
 */
-List Sym.define_global(Sym sym, List key, List type) {
+void Sym.define_global(Sym sym, List key, List type) {
   SymScope *scope = _semantic_scope(sym, sym.base_scopes - 1);
   scope.symbols[key] = type;
   _seed_declared_var_tag(key, type);
-  return _semantic_scope_binding(sym, scope, key);
 }
 
 /** Returns `key`'s type without package fallback, or `NULL`. */
