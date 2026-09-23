@@ -138,7 +138,10 @@ static int _init_prelude_position(List source) {
         return depth ? opening : position;
       case %(preproc ?(String content)): {
         Symbol kind = preproc_conditional_kind(content);
-        if (kind == <open> && !depth++) opening = position;
+        if (kind == <open>) {
+          if (!depth) opening = position;
+          depth++;
+        }
         else if (kind == <close> && depth) depth--;
       }
     }
@@ -256,10 +259,11 @@ static List _file_init(Compiler c, List source) {
     result = cons(item, result);
   }
 
-  /* The prelude normally goes before the first function, which calls it. A
-     unit of only declarations has no such function. The constructor is then
-     the only thing that runs the initializers the loop above dropped, so it
-     goes after the declarations it assigns. */
+  /* The prelude normally goes before the first function, or before the
+     outermost conditional group containing it. A unit of only declarations
+     has no such function. The constructor is then the only thing that runs
+     the initializers the loop above dropped, so it goes after the
+     declarations it assigns. */
   if (prelude < 0)
     result = _prepend_init_prelude(result, init_guard, init_func);
 
