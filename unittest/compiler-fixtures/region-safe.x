@@ -137,6 +137,20 @@ static int local_addresses(void) {
          node.value.int();
 }
 
+static Var kept_text = NULL;
+
+static void _keep_text(Var text) { kept_text = text; }
+
+// A Var destination boxes a C string as a fresh String.
+static Var copied_into_var(Array out) {
+  char text[8] = "hi";
+  _keep_text(text);
+  out.push(text);
+  Array fresh = [];
+  fresh.push(text);
+  return text;
+}
+
 // A List parameter copies an $auto Array into fresh List cells.
 static List copied_into_list(void) {
   Array items = $auto([]);
@@ -153,5 +167,6 @@ int main(void) {
          caller_owned() != NULL && auto_local() == 1 &&
          named_close() != NULL && freed_then_cleared() &&
          early_release(0) && !goto_cleanup(0) && reused_slot() == 0 &&
-         local_addresses() == 8 && copied_into_list() != NULL;
+         local_addresses() == 8 && copied_into_list() != NULL &&
+         copied_into_var([]) is not void;
 }

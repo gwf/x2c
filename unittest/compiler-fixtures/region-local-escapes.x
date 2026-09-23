@@ -73,9 +73,17 @@ static int restored_too_late(int stop) {
   return 0;
 }
 
+// A defer inside an unbraced if restores the static only on that path.
+static void restored_on_one_path(int flag) {
+  int value = 1;
+  if (flag) defer last_seen = NULL;
+  last_seen = &value;
+}
+
 int main(void) {
   int *out = NULL;
   stored_static();
+  restored_on_one_path(0);
   stored_static_local();
   stored_through_parameter(&out);
   return returned_address() != NULL && returned_pointer() != NULL &&

@@ -54,11 +54,13 @@ the closure holds that cell rather than the function's storage.
 
 A store into a place that an earlier `defer` in the same block writes
 back, as `$let` does, is undone before the block ends and is not reported.
-A store made before that `defer` is reported, because a `return` between
-them leaves the place holding the value.
+A store made before that `defer`, or after a `defer` that runs on only one
+branch, is reported, because a `return` between them leaves the place
+holding the value.
 
-A parameter that converts its argument by copying, such as a `List`
-parameter given an `Array`, does not store the argument. A local C array
+A destination that converts its value by copying does not keep it: a `List`
+parameter given an `Array`, or a `Var` given a C string, which it boxes as a
+fresh `String`. A local C array
 passed on, returned, or stored counts as the address of its first element.
 
 ## What the warnings do not cover

@@ -172,6 +172,18 @@ static Symbol _class(Walk w, Type type) {
   return tag in %(map array block buffer) ? <container> : 0;
 }
 
+/* Whether a destination of `type` copies `value` rather than keeping it: a
+   canonical destination, or a `Var`, which boxes a C string as a fresh
+   String. */
+static int _copies(Walk w, Type type, Var value) {
+  if (_class(w, type) == <canonical>) return 1;
+  if (!type || !w.compiler.sym.is_var_type(type)) return 0;
+  Type source = _expression_type(value);
+  return source &&
+         (source.match(%((!or (dim *) (!quote *)) char)) ||
+          source.match(%((!or (dim *) (!quote *)) const char)));
+}
+
 // regions and facts
 
 static Region _open(Walk w, Symbol kind, Fact slot) {
@@ -376,7 +388,7 @@ static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
   int born = 0;
   Region region = fact ? fact.region : _birth(w, value, NULL, &born);
   if (!fact && !born) return 0;
-  if (_class(w, type) == <canonical> && (!region || region.kind != <pool>))
+  if (_copies(w, type, value) && (!region || region.kind != <pool>))
     return 0;
   if (fact && fact.param >= 0) {
     Var row = sink;
@@ -637,13 +649,13 @@ static void _assign(Walk w, Fact fact, Var value, Type type, int store) {
   int born = 0;
   Region region = source ? source.region : _birth(w, value, type, &born);
   int kept = source || born;
-  if (kept && _class(w, type) == <canonical>)
+  if (kept && _copies(w, type, value))
     kept = region && region.kind == <pool>;
   if (kept && store && source && region)
     kept = !_flow(w, value, type, <local>, fact);
   fact.dead = 0;
-  fact.points = source ? source.points : NULL;
-  fact.place = source ? source.place : NULL;
+  fact.points = kept && source ? source.points : NULL;
+  fact.place = kept && source ? source.place : NULL;
   /* A Scope local that is assigned again names other storage, whose end has
      not been seen, so the region its previous value formed is not the one
      the next allocation belongs to. */
@@ -848,9 +860,11 @@ static void _walk(Walk w, Var node) {
        nested block: what they free does not end the fall-through. */
     case %((!or if while do for switch try with match foreach finally)
            *children): {
+      Map restored = w.restored;
       w.depth += 1;
       foreach (Var child, children) _walk(w, child);
       w.depth -= 1;
+      w.restored = restored;
     }
     case %(catchcases ?rows): _walk(w, rows);
     case %((!or expr parens case) *): _scan(w, node, 0);

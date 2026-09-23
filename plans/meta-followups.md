@@ -167,9 +167,9 @@ Gary approved the design on 2026-09-22; the first delivery implements it.
   the cell rather than the frame; a store into a place that an earlier
   `defer` in the same block writes back is restored, as `$let` already was;
   a statement expression's declarations are locals rather than stores
-  through an unknown pointer; and an argument a canonical parameter converts
-  by copying, such as an `Array` given to `cons`'s `List` parameter, is not
-  stored. The last one removed the `src/statements.x` false positive, and
+  through an unknown pointer; and a value a destination converts by
+  copying, such as an `Array` given to `cons`'s `List` parameter or a C
+  string boxed as a `Var`, is not stored. The last one removed the `src/statements.x` false positive, and
   `lib/lisp.x` `_call_lambda_slots` now places its restoring `defer` before
   the store it restores.
 
