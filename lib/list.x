@@ -115,7 +115,9 @@ static void _promote_node(Var node) {
     therefore cheap. `Var` kinds other than `String`, `Atom`, and `List` are
     `Scope`-managed and outside pool jurisdiction.
 
-    A null `lst` returns itself unchanged.
+    When another thread's pool promotes an equal cell first, that cell stays
+    canonical; this one still survives, but `Pool.is_permanent` answers 0 for
+    it. A null `lst` returns itself unchanged.
 */
 Self List.promote(Self lst) {
   if (!lst) return lst;
@@ -139,7 +141,9 @@ static int _try_own_node(Var node) {
     promoted to the outermost `List` and `String` pools. Returns 0 when an
     active
     pool does not own part of the value. A zero result may follow successful
-    promotion of an earlier cell or child.
+    promotion of an earlier cell or child. A thread that loses a concurrent
+    promotion of an equal value still gets 1, though `Pool.is_permanent`
+    answers 0 for its surviving copy.
     Raises: `<alloc-fail>` when promotion metadata cannot be allocated.
 */
 int List.try_own(List lst) => !lst || _try_own_node(lst);

@@ -222,7 +222,7 @@ String x2c_get_root(void);
 
 int strcmp(const char *, const char *);
 
-int strncmp(const char *, const char *, unsigned long);
+int strncmp(const char *, const char *, size_t);
 
 int Compiler_read_source(Compiler, String, volatile String *);
 

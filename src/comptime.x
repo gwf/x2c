@@ -73,13 +73,21 @@ static List _lower_storage_layout(Lowering l, int id) {
    gives a pointer to it, or `<p48>` where the pointer has no tag of its own.
    A record's slot is its value, which is always `<p48>`; `&` retags it. */
 static Symbol _lower_pointer_tag(Lowering l, List layout) {
-  Symbol kind = layout.car();
-  if (kind == <record>) return <p48>;
-  Symbol tag = l.compiler.sym.var_tag_for_type(cons(<*>, layout[1]), NULL);
-  if (!tag && kind == <scalar>)
-    tag = l.compiler.sym.var_tag_for_type(cons(<*>, layout[4]), NULL);
-  if (!tag) tag = kind == <pointer> ? <p48*> : <p48>;
-  return tag;
+  Sym sym = l.compiler.sym;
+  Symbol tag = 0, untagged = <p48>;
+  match (layout) {
+    case %(record *): return <p48>;
+    case %(scalar ?type ? ? ?exact ?): {
+      tag = sym.var_tag_for_type(cons(<*>, type), NULL);
+      if (!tag) tag = sym.var_tag_for_type(cons(<*>, exact), NULL);
+    }
+    case %(pointer ?type *): {
+      tag = sym.var_tag_for_type(cons(<*>, type), NULL);
+      untagged = <p48*>;
+    }
+    case %(var ?type *): tag = sym.var_tag_for_type(cons(<*>, type), NULL);
+  }
+  return tag ? tag : untagged;
 }
 
 /* Zeroed automatic storage for one object of `layout`. */
@@ -94,11 +102,13 @@ static Var _lower_new_storage(Lowering l, List layout) {
    unless `fresh` says its initializer just built those bytes. */
 static Var _lower_new_object(
   Lowering l, List layout, Var value, int fresh) {
-  if (fresh && layout.car() == <record>) return value;
-  Var size = layout[2];
-  Symbol tag = _lower_pointer_tag(l, layout);
-  l.automatic = 1;
-  return %(C.new $size (quote $tag) (quote $layout) $value);
+  match (layout) case %(?kind ? ?size *): {
+    if (fresh && kind == <record>) return value;
+    Symbol tag = _lower_pointer_tag(l, layout);
+    l.automatic = 1;
+    return %(C.new $size (quote $tag) (quote $layout) $value);
+  }
+  return void;
 }
 
 /* Only map containers belong here; forms and wide numeric boxes retain the
@@ -844,26 +854,21 @@ static int _lower_object_pointer_type(Lowering l, Type type) {
 static long _lower_field_offset(Lowering l, List path, List *field_layout) {
   long offset = 0;
   foreach (List frame, path.reverse()) {
-    Type owner, selected;
-    Symbol kind;
-    Var selector;
-    List rest;
-    (owner, kind, selector, selected, rest) = frame;
-    (void) selector;
-    (void) selected;
-    if (kind != <field>) {
-      (void) _lower_decline(l, "an array inside a compile-time struct");
-      return -1;
+    match (frame) {
+      case %(? index *): {
+        (void) _lower_decline(l, "an array inside a compile-time struct");
+        return -1;
+      }
+      case %(?owner field ?name *):
+        match (l.compiler.meta_type_layout(owner))
+          case %(record ? ? ? * (field $name ? ?at ?layout) *): {
+            offset += at.long_long();
+            *field_layout = layout;
+            continue;
+          }
     }
-    List layout = l.compiler.meta_type_layout(owner);
-    List order = l.compiler.sym.field_order(owner);
-    if (!layout || !order) {
-      (void) _lower_decline(l, "a compile-time struct with no host layout");
-      return -1;
-    }
-    List row = layout[4 + order.cdr().len() - rest.len() - 1];
-    offset += row[3].long_long();
-    *field_layout = row[4];
+    (void) _lower_decline(l, "a compile-time struct with no host layout");
+    return -1;
   }
   return offset;
 }
@@ -925,8 +930,10 @@ static Var _lower_place(Lowering l, Var target) {
    the conversion itself - integer narrowing keeps low bits, floating to
    integer truncates toward zero, and an integer reaching a floating type
    widens - so this pass names a tag and performs no arithmetic of its own.
-   A type with no scalar tag, a pointer or a library type, keeps its value. */
-static Var _lower_to_type(Type want, Var value) {
+   A type with no scalar tag, a pointer or a library type, keeps its value.
+   A bool is the exception: C converts any nonzero value to 1. */
+static Var _lower_to_type(Lowering l, Type want, Var value) {
+  if (l.compiler.sym.is_bool_type(want)) return %(C.bool $value);
   Symbol tag = want.scalar_tag();
   if (!tag) return value;
   return %(C.conv $value (quote $tag));
@@ -993,22 +1000,45 @@ static int _lower_relation(Var operator) =>
   operator == <==> || operator == <!=> || operator == <"<"> ||
   operator == <"<="> || operator == <">"> || operator == <">=">;
 
+/* The C scalar type a value of `type` has in arithmetic, or NULL. A bool or
+   enum value is the int C promotes it to. */
+static Type _lower_numeric_type(Lowering l, Type type) {
+  Type numeric = type ? l.compiler.sym.resolve_numeric_type(type) : NULL;
+  if (numeric && numeric.scalar_tag()) return numeric;
+  if ((numeric && numeric.is_enum()) ||
+      (type && l.compiler.sym.is_bool_type(type)))
+    return %(int);
+  return NULL;
+}
+
 /* Whether two operands are scalars of different families. An equal pair,
    which is nearly every pair, needs no conversion and is left alone. */
 static int _lower_mixed_scalars(Lowering l, List operands) {
   if (operands.len() != 2) return 0;
-  Type left = l.compiler.sym.resolve_numeric_type(
-    _lower_type_of(operands.car()));
-  Type right = l.compiler.sym.resolve_numeric_type(
-    _lower_type_of(operands.cadr()));
+  Type left = _lower_numeric_type(l, _lower_type_of(operands.car()));
+  Type right = _lower_numeric_type(l, _lower_type_of(operands.cadr()));
   Symbol a = left.scalar_tag(), b = right.scalar_tag();
   return a && b && a != b;
 }
 
+/* `NULL`, which the compiler never declares, or a literal zero. */
+static int _lower_null_constant(Var operand) {
+  match (operand) {
+    case %(expr () (ident (binding ? "NULL"))): return 1;
+    case %(expr ? (literal ? "0")): return 1;
+  }
+  return 0;
+}
+
+/* Two object pointers, or one and a null pointer constant, compare by
+   address as C compares them. */
 static int _lower_object_pointer_operands(Lowering l, List operands) {
-  return operands.len() == 2 &&
-    _lower_object_pointer_type(l, _lower_type_of(operands.car())) &&
-    _lower_object_pointer_type(l, _lower_type_of(operands.cadr()));
+  if (operands.len() != 2) return 0;
+  Var left = operands.car(), right = operands.cadr();
+  int a = _lower_object_pointer_type(l, _lower_type_of(left));
+  int b = _lower_object_pointer_type(l, _lower_type_of(right));
+  return (a && b) || (a && _lower_null_constant(right)) ||
+         (b && _lower_null_constant(left));
 }
 
 static Var _lower_operands(Lowering l, Var operator, List operands) {
@@ -1182,6 +1212,17 @@ static String _lower_indexed(Var receiver, int is_c_array) {
   return NULL;
 }
 
+/* The layout of the object a pointer indexes, or nothing when `receiver` is
+   not a pointer to a type with one. The pointer may hold a local C array's
+   `Array` or native bytes, and only evaluation can tell them apart, so
+   `C.index` decides there. */
+static List _lower_pointee_layout(Lowering l, Var receiver) {
+  Type type = _lower_type_of(receiver);
+  Type pointer = type ? l.compiler.sym.resolve_key(type) : NULL;
+  if (!pointer || !pointer.is_pointer()) return NULL;
+  return l.compiler.meta_type_layout(pointer.dereference());
+}
+
 /* `xs[i]` and `m[k]`. The C-array form is the same read through the cell the
    declaration allocated, which `_lower_expr` already loads. */
 static Var _lower_getindex(
@@ -1192,6 +1233,9 @@ static Var _lower_getindex(
   Var target = _lower_expr(l, receiver);
   Var index = _lower_expr(l, key);
   if (_lower_failed(l, target) || _lower_failed(l, index)) return void;
+  List layout = is_c_array ? _lower_pointee_layout(l, receiver) : NULL;
+  match (layout) case %(? ? ?size *):
+    return %(C.index $target $index $size (quote $layout));
   return %(${Atom.intern(container + "_getindex")} $target $index);
 }
 
@@ -1201,6 +1245,10 @@ static Var _lower_expr(Lowering l, Var form) {
   if (l.declined) return void;
   match (form) {
     case %(at ? ?node):                   return _lower_expr(l, node);
+    /* A tag the compiler supplies to a `Var` conversion, such as the one a
+       typed `foreach` output reads through, is the Symbol's code. */
+    case %(expr ("Symbol") ?(String code)):
+      return %(quote ${(Symbol) strtoul(code, NULL, 10)});
     case %(expr ?type ?content):          return _lower_content(l, type, content);
     /* A literal template builds its List with `cons`, and folding replaced
        only its constant parts, so each part is lowered as an expression. */
@@ -1239,6 +1287,14 @@ static Var _lower_content(Lowering l, List type, Var content) {
       Type named = type;
       if (!l.locals.contains(id) && named.is_enum())
         return _lower_decline(l, "an enum constant has no compile-time value");
+      /* A name with no type has no declaration the compiler read: it is a
+         preprocessor macro. The null pointer constant and `stdbool.h`'s
+         truth values are the ones C code writes as plain names. */
+      if (!type && !l.locals.contains(id)) {
+        if (name == "NULL" || name == "false") return 0;
+        if (name == "true") return 1;
+        return _lower_decline(l, "a name with no declaration: " + name);
+      }
       return _lower_value(l, id);
     }
     case %(parens (block *)):             return _lower_application(l, content);
@@ -1249,7 +1305,8 @@ static Var _lower_content(Lowering l, List type, Var content) {
       Var value = _lower_expr(l, inner);
       if (_lower_failed(l, value)) return void;
       Type target = l.compiler.sym.resolve_numeric_type(type);
-      if (target && target.scalar_tag()) return _lower_to_type(target, value);
+      if (target && target.scalar_tag())
+        return _lower_to_type(l, target, value);
       return _lower_coerce(l, type, inner, value);
     }
     case %(expr ?inner ?within):          return _lower_content(l, inner, within);
@@ -1834,12 +1891,13 @@ static Var _lower_coerce(Lowering l, List want, Var node, Var value);
    the record, which is zeroed in place; otherwise the bytes are new. */
 static Var _lower_record_zero(Lowering l, Type type, Var into) {
   Type record = _lower_record_type(l, type);
-  List layout = record ? l.compiler.meta_type_layout(record) : NULL;
-  if (!layout)
-    return _lower_decline(l, "a compile-time struct with no host layout");
-  l.automatic = 1;
-  if (into is not void) return %(C.zero $into ${layout[2]});
-  return %(C.bytes ${layout[2]});
+  match (record ? l.compiler.meta_type_layout(record) : NULL)
+    case %(? ? ?size *): {
+      l.automatic = 1;
+      if (into is not void) return %(C.zero $into $size);
+      return %(C.bytes $size);
+    }
+  return _lower_decline(l, "a compile-time struct with no host layout");
 }
 
 /* Each initializer row stores one field value at its offset. */
@@ -1894,7 +1952,7 @@ static Var _lower_braced(Lowering l, List type, int id, List items) {
       values[index] = _lower_coerce(l, element, item, values[index]);
       index++;
     }
-    Var zero = _lower_to_type(element, _lower_zero(element));
+    Var zero = _lower_to_type(l, element, _lower_zero(element));
     while (values.len() < size) values.push(zero);
     return %(List_array ${cons(<list>, values.list_free())});
   }
@@ -1928,6 +1986,8 @@ static Var _lower_coerce(Lowering l, List want, Var node, Var value) {
         return value;
       }
       if (want.equal(from)) return value;
+      if (l.compiler.sym.is_bool_type(want))
+        return _lower_to_type(l, want, value);
       if (want.equal(%("List")) && from.equal(%("Array")))
         return %(Array_list $value);
       if (want.equal(%("Array")) && from.equal(%("List")))
@@ -1943,11 +2003,11 @@ static Var _lower_coerce(Lowering l, List want, Var node, Var value) {
           from_pointer && from_pointer.is_pointer() &&
           !l.compiler.sym.var_tag_for_type(from, NULL))
         return %(C.address $value (quote $want_tag));
-      Type target = l.compiler.sym.resolve_numeric_type(want);
-      Type source = l.compiler.sym.resolve_numeric_type(from);
+      Type target = _lower_numeric_type(l, want);
+      Type source = _lower_numeric_type(l, from);
       Symbol tag = target ? target.scalar_tag() : 0;
       if (tag && source && tag != source.scalar_tag())
-        return _lower_to_type(target, value);
+        return _lower_to_type(l, target, value);
     }
   return value;
 }
@@ -2091,9 +2151,11 @@ static Var _lower_setindex(
   if (_lower_failed(l, target) || _lower_failed(l, index) ||
       _lower_failed(l, value))
     return void;
-  return _lower_effect(
-    l, %(${Atom.intern(container + "_setindex")} $target $index $value),
-    rest, k);
+  Var store = %(${Atom.intern(container + "_setindex")} $target $index $value);
+  List layout = is_c_array ? _lower_pointee_layout(l, receiver) : NULL;
+  match (layout) case %(? ? ?size *):
+    store = %(C.index.set $target $index $size (quote $layout) $value);
+  return _lower_effect(l, store, rest, k);
 }
 
 static Var _lower_store(
@@ -2113,11 +2175,11 @@ static Var _lower_store(
     return _lower_effect(l, _lower_poke(l, type, place, value), rest, k);
   if (id < 0) return _lower_decline(l, "assignment to a computed place");
   if (!l.locals.contains(id)) {
-    List layout = l.compiler.meta_type_layout(type);
-    Var effect = layout && layout.car() == <record>
-      ? %(C.grecord.write $id $value ${layout[2]})
-      : %(C.gwrite $id $value);
-    return _lower_effect(l, effect, rest, k);
+    match (l.compiler.meta_type_layout(type))
+      case %(record ? ?size *):
+        return _lower_effect(
+          l, %(C.grecord.write $id $value $size), rest, k);
+    return _lower_effect(l, %(C.gwrite $id $value), rest, k);
   }
   return _lower_bind_value(l, id, value, rest, k);
 }
@@ -2136,7 +2198,7 @@ static Var _lower_update(
   if (l.declined) return void;
   if (place is not void) {
     Var slot = _lower_name(l, "place");
-    Var combined = _lower_to_type(want, %(
+    Var combined = _lower_to_type(l, want, %(
       _binary ${_lower_load(l, want, slot)} (quote $operator) $right));
     return _lower_effect(
       l, %((lambda ($slot) ${_lower_poke(l, want, slot, combined)}) $place),
@@ -2145,13 +2207,13 @@ static Var _lower_update(
   if (id < 0) return _lower_decline(l, "update of a computed place");
   if (!l.locals.contains(id)) {
     Var combined = _lower_to_type(
-      want, %(_binary (C.gread $id) (quote $operator) $right));
+      l, want, %(_binary (C.gread $id) (quote $operator) $right));
     return _lower_effect(l, %(C.gwrite $id $combined), rest, k);
   }
   Var current = _lower_value(l, id);
   if (_lower_failed(l, current)) return void;
   Var combined = _lower_to_type(
-    want, %(_binary $current (quote $operator) $right));
+    l, want, %(_binary $current (quote $operator) $right));
   return _lower_bind_value(l, id, combined, rest, k);
 }
 
@@ -2226,11 +2288,13 @@ static Var _lower_stmnt(Lowering l, Var form, List rest, List k) {
     case %(block *items):  return _lower_block(l, %(@items @rest), k);
     case %(return ?want ?value): {
       Var result = _lower_initializer(l, want, 0, value);
-      List layout = _lower_record_type(l, want)
-                  ? l.compiler.meta_type_layout(want) : NULL;
-      if (_lower_failed(l, result) || !layout) return result;
-      l.automatic = 1;
-      return %(C.record.result $result ${layout[2]});
+      if (_lower_failed(l, result) || !_lower_record_type(l, want))
+        return result;
+      match (l.compiler.meta_type_layout(want)) case %(? ? ?size *): {
+        l.automatic = 1;
+        return %(C.record.result $result $size);
+      }
+      return result;
     }
     case %(return):        return %(C.void);
     case %(repl-init ?type
@@ -2241,11 +2305,12 @@ static Var _lower_stmnt(Lowering l, Var form, List rest, List k) {
       Var value = _lower_initializer(l, declared, id, initializer);
       if (_lower_failed(l, value)) return void;
       l.globals = 1;
-      List layout = _lower_record_type(l, declared)
-                  ? l.compiler.meta_type_layout(declared) : NULL;
-      Var effect = layout ? %(C.grecord.write $id $value ${layout[2]})
-                          : %(C.gwrite $id $value);
-      return _lower_effect(l, effect, rest, k);
+      match (_lower_record_type(l, declared)
+             ? l.compiler.meta_type_layout(declared) : NULL)
+        case %(? ? ?size *):
+          return _lower_effect(
+            l, %(C.grecord.write $id $value $size), rest, k);
+      return _lower_effect(l, %(C.gwrite $id $value), rest, k);
     }
     case %(declare ?type (bindings ?declarator)):
       return _lower_declarator(l, type, declarator, rest, k);

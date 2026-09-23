@@ -136,10 +136,10 @@ Public functions:
 `Sym.resolve_numeric_type`, `Sym.local_type`, `Compiler.aggregate_name`,
 `Sym.normalize_declared_type`, `Sym.var_tag_for_type`, `Sym.is_var_type`,
 `Sym.is_string_type`, `Sym.is_array_type`, `Sym.is_map_type`,
-`Sym.is_named_value_type`, `Sym.lookup_field`, `Sym.declare_field_order`,
-`Sym.field_order`, `Compiler.meta_type_layout`, `Sym.declare_delegate_field`,
-`Sym.delegate_aggregate`, `Compiler.gensym`, `Sym.push_new_scope`,
-`Sym.push_scope`, `Sym.pop_scope`
+`Sym.is_bool_type`, `Sym.is_named_value_type`, `Sym.lookup_field`,
+`Sym.declare_field_order`, `Sym.field_order`, `Compiler.meta_type_layout`,
+`Sym.declare_delegate_field`, `Sym.delegate_aggregate`, `Compiler.gensym`,
+`Sym.push_new_scope`, `Sym.push_scope`, `Sym.pop_scope`
 
 ### [src/comptime.x](../src/comptime.x)
 
@@ -766,15 +766,15 @@ the Lisp runtime: reader, session, and evaluator.
 
 Public functions:
 
-`Lisp.program`, `Lisp.resolve`, `Lisp.enter`, `Lisp.leave`, `Lisp.retarget`,
-`Lisp.step`, `Lisp.reslot`, `Lisp.apply_values`, `Lisp.precall`,
-`Lisp.immediate`, `Lisp.evaluate`, `Lisp.expanded`, `Lisp.kernel`, `Lisp.new`,
-`Lisp.destroy`, `Lisp.adopt`, `Lisp.freeze`, `Lisp.read`, `lisp_truth`,
-`lisp_atom`, `lisp_car`, `lisp_cdr`, `lisp_eq`, `lisp_pair`, `lisp_list`,
-`lisp_number`, `lisp_string`, `lisp_symbol`, `lisp_procedure`, `lisp_compare`,
-`lisp_type`, `lisp_add`, `lisp_plus`, `lisp_minus`, `lisp_times`,
-`lisp_divide`, `lisp_eq_chain`, `lisp_lt_chain`, `lisp_le_chain`,
-`lisp_gt_chain`, `lisp_ge_chain`, `lisp_str`, `lisp_repr`,
+`native_scalar_access`, `Lisp.program`, `Lisp.resolve`, `Lisp.enter`,
+`Lisp.leave`, `Lisp.retarget`, `Lisp.step`, `Lisp.reslot`, `Lisp.apply_values`,
+`Lisp.precall`, `Lisp.immediate`, `Lisp.evaluate`, `Lisp.expanded`,
+`Lisp.kernel`, `Lisp.new`, `Lisp.destroy`, `Lisp.adopt`, `Lisp.freeze`,
+`Lisp.read`, `lisp_truth`, `lisp_atom`, `lisp_car`, `lisp_cdr`, `lisp_eq`,
+`lisp_pair`, `lisp_list`, `lisp_number`, `lisp_string`, `lisp_symbol`,
+`lisp_procedure`, `lisp_compare`, `lisp_type`, `lisp_add`, `lisp_plus`,
+`lisp_minus`, `lisp_times`, `lisp_divide`, `lisp_eq_chain`, `lisp_lt_chain`,
+`lisp_le_chain`, `lisp_gt_chain`, `lisp_ge_chain`, `lisp_str`, `lisp_repr`,
 `lisp_string_append`, `lisp_substring`, `lisp_string_downcase`,
 `lisp_string_strip`, `lisp_string_lstrip`, `lisp_string_rstrip`,
 `lisp_match_replace`, `lisp_read_file`, `lisp_write_file`, `lisp_void`,

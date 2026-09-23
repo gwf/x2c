@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/comptime-declines-meta-macro-name.x:12:1: macro: this function cannot run at compile time
+  meta int dm_limit(void) { return LIMIT; }
+  ^^^^
+  note: reason: a name with no declaration: LIMIT
+
