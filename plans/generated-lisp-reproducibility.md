@@ -1,8 +1,8 @@
 # Reproducible generated Lisp names
 
-> Status: active - repaired on the local bootstrap bridge; final integrated
-> validation and delivery to `dev` remain. The original naming drift did not
-> reproduce at reviewed `0bdc8398`.
+> Status: active - repaired and verified on the local stabilization candidate;
+> delivery to `dev` remains. The original naming drift did not reproduce at
+> reviewed `0bdc8398`.
 
 ## Observed issue
 
@@ -37,8 +37,10 @@ The refreshed bootstrap at local bridge `88d1bd86` (integrated as `6de15600`)
 includes the C3 native bindings needed by the generated Lisp forms. On that
 bridge, fresh source-only homes generated all three Lisp artifacts with both
 the bootstrap and stage-0 compilers; each second pass was byte-identical. This
-resolves the malformed-form failure on the bridge. Repeat on the final
-integrated tree before closing this record.
+resolves the malformed-form failure on the bridge. The existing
+`unittest/probes/run-lisp-init.py` probe passed twice on the final local
+candidate, with byte-identical second-pass artifacts. Delivery to `dev`
+remains the completion boundary.
 
 ## Earlier proposal and current acceptance
 

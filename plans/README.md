@@ -46,11 +46,14 @@ execution.
 ### Current work
 
 - [Post-merge stabilization](post-merge-stabilization-2026-09-23.md): local
-  compiler, runtime, package, and tooling repairs have focused evidence but
-  await final integrated validation and delivery to `dev`. Fresh-home
-  generated Lisp regeneration passed twice on the local bootstrap bridge; the
-  [reproducibility record](generated-lisp-reproducibility.md) retains that
-  bounded result and the final-tree boundary.
+  compiler, runtime, package, and tooling repairs have passed local
+  publication checks but await approval and delivery to `dev`. Fresh-home
+  generated Lisp regeneration passed twice on the final local candidate;
+  the [reproducibility record](generated-lisp-reproducibility.md) retains the
+  earlier failure and the repaired result.
+- [Explicit meta calls, lifetimes, and computed values](explicit-meta-and-lifetime-campaign.md):
+  deferred next-phase plan. Implementation awaits stabilization delivery and
+  Gary's resource/scope decision; packed layouts remain unsupported.
 
 - [Internal adoption campaign](internal-adoption-campaign.md): ready-now
   macro, managed-lifetime and extensionless-script dogfooding, followed by
