@@ -930,8 +930,10 @@ static Var _lower_place(Lowering l, Var target) {
    the conversion itself - integer narrowing keeps low bits, floating to
    integer truncates toward zero, and an integer reaching a floating type
    widens - so this pass names a tag and performs no arithmetic of its own.
-   A type with no scalar tag, a pointer or a library type, keeps its value. */
-static Var _lower_to_type(Type want, Var value) {
+   A type with no scalar tag, a pointer or a library type, keeps its value.
+   A bool is the exception: C converts any nonzero value to 1. */
+static Var _lower_to_type(Lowering l, Type want, Var value) {
+  if (l.compiler.sym.is_bool_type(want)) return %(C.bool $value);
   Symbol tag = want.scalar_tag();
   if (!tag) return value;
   return %(C.conv $value (quote $tag));
@@ -1000,20 +1002,43 @@ static int _lower_relation(Var operator) =>
 
 /* Whether two operands are scalars of different families. An equal pair,
    which is nearly every pair, needs no conversion and is left alone. */
+/* The C scalar type a value of `type` has in arithmetic, or NULL. A bool or
+   enum value is the int C promotes it to. */
+static Type _lower_numeric_type(Lowering l, Type type) {
+  Type numeric = type ? l.compiler.sym.resolve_numeric_type(type) : NULL;
+  if (numeric && numeric.scalar_tag()) return numeric;
+  if ((numeric && numeric.is_enum()) ||
+      (type && l.compiler.sym.is_bool_type(type)))
+    return %(int);
+  return NULL;
+}
+
 static int _lower_mixed_scalars(Lowering l, List operands) {
   if (operands.len() != 2) return 0;
-  Type left = l.compiler.sym.resolve_numeric_type(
-    _lower_type_of(operands.car()));
-  Type right = l.compiler.sym.resolve_numeric_type(
-    _lower_type_of(operands.cadr()));
+  Type left = _lower_numeric_type(l, _lower_type_of(operands.car()));
+  Type right = _lower_numeric_type(l, _lower_type_of(operands.cadr()));
   Symbol a = left.scalar_tag(), b = right.scalar_tag();
   return a && b && a != b;
 }
 
+/* `NULL`, which the compiler never declares, or a literal zero. */
+static int _lower_null_constant(Var operand) {
+  match (operand) {
+    case %(expr () (ident (binding ? "NULL"))): return 1;
+    case %(expr ? (literal ? "0")): return 1;
+  }
+  return 0;
+}
+
+/* Two object pointers, or one and a null pointer constant, compare by
+   address as C compares them. */
 static int _lower_object_pointer_operands(Lowering l, List operands) {
-  return operands.len() == 2 &&
-    _lower_object_pointer_type(l, _lower_type_of(operands.car())) &&
-    _lower_object_pointer_type(l, _lower_type_of(operands.cadr()));
+  if (operands.len() != 2) return 0;
+  Var left = operands.car(), right = operands.cadr();
+  int a = _lower_object_pointer_type(l, _lower_type_of(left));
+  int b = _lower_object_pointer_type(l, _lower_type_of(right));
+  return (a && b) || (a && _lower_null_constant(right)) ||
+         (b && _lower_null_constant(left));
 }
 
 static Var _lower_operands(Lowering l, Var operator, List operands) {
@@ -1187,6 +1212,17 @@ static String _lower_indexed(Var receiver, int is_c_array) {
   return NULL;
 }
 
+/* The layout of the object a pointer indexes, or nothing when `receiver` is
+   not a pointer to a type with one. The pointer may hold a local C array's
+   `Array` or native bytes, and only evaluation can tell them apart, so
+   `C.index` decides there. */
+static List _lower_pointee_layout(Lowering l, Var receiver) {
+  Type type = _lower_type_of(receiver);
+  Type pointer = type ? l.compiler.sym.resolve_key(type) : NULL;
+  if (!pointer || !pointer.is_pointer()) return NULL;
+  return l.compiler.meta_type_layout(pointer.dereference());
+}
+
 /* `xs[i]` and `m[k]`. The C-array form is the same read through the cell the
    declaration allocated, which `_lower_expr` already loads. */
 static Var _lower_getindex(
@@ -1197,6 +1233,9 @@ static Var _lower_getindex(
   Var target = _lower_expr(l, receiver);
   Var index = _lower_expr(l, key);
   if (_lower_failed(l, target) || _lower_failed(l, index)) return void;
+  List layout = is_c_array ? _lower_pointee_layout(l, receiver) : NULL;
+  if (layout)
+    return %(C.index $target $index ${layout[2]} (quote $layout));
   return %(${Atom.intern(container + "_getindex")} $target $index);
 }
 
@@ -1206,6 +1245,10 @@ static Var _lower_expr(Lowering l, Var form) {
   if (l.declined) return void;
   match (form) {
     case %(at ? ?node):                   return _lower_expr(l, node);
+    /* A tag the compiler supplies to a `Var` conversion, such as the one a
+       typed `foreach` output reads through, is the Symbol's code. */
+    case %(expr ("Symbol") ?(String code)):
+      return %(quote ${(Symbol) strtoul(code, NULL, 10)});
     case %(expr ?type ?content):          return _lower_content(l, type, content);
     /* A literal template builds its List with `cons`, and folding replaced
        only its constant parts, so each part is lowered as an expression. */
@@ -1244,6 +1287,14 @@ static Var _lower_content(Lowering l, List type, Var content) {
       Type named = type;
       if (!l.locals.contains(id) && named.is_enum())
         return _lower_decline(l, "an enum constant has no compile-time value");
+      /* A name with no type has no declaration the compiler read: it is a
+         preprocessor macro. The null pointer constant and `stdbool.h`'s
+         truth values are the ones C code writes as plain names. */
+      if (!type && !l.locals.contains(id)) {
+        if (name == "NULL" || name == "false") return 0;
+        if (name == "true") return 1;
+        return _lower_decline(l, "a name with no declaration: " + name);
+      }
       return _lower_value(l, id);
     }
     case %(parens (block *)):             return _lower_application(l, content);
@@ -1254,7 +1305,8 @@ static Var _lower_content(Lowering l, List type, Var content) {
       Var value = _lower_expr(l, inner);
       if (_lower_failed(l, value)) return void;
       Type target = l.compiler.sym.resolve_numeric_type(type);
-      if (target && target.scalar_tag()) return _lower_to_type(target, value);
+      if (target && target.scalar_tag())
+        return _lower_to_type(l, target, value);
       return _lower_coerce(l, type, inner, value);
     }
     case %(expr ?inner ?within):          return _lower_content(l, inner, within);
@@ -1900,7 +1952,7 @@ static Var _lower_braced(Lowering l, List type, int id, List items) {
       values[index] = _lower_coerce(l, element, item, values[index]);
       index++;
     }
-    Var zero = _lower_to_type(element, _lower_zero(element));
+    Var zero = _lower_to_type(l, element, _lower_zero(element));
     while (values.len() < size) values.push(zero);
     return %(List_array ${cons(<list>, values.list_free())});
   }
@@ -1934,6 +1986,8 @@ static Var _lower_coerce(Lowering l, List want, Var node, Var value) {
         return value;
       }
       if (want.equal(from)) return value;
+      if (l.compiler.sym.is_bool_type(want))
+        return _lower_to_type(l, want, value);
       if (want.equal(%("List")) && from.equal(%("Array")))
         return %(Array_list $value);
       if (want.equal(%("Array")) && from.equal(%("List")))
@@ -1949,11 +2003,11 @@ static Var _lower_coerce(Lowering l, List want, Var node, Var value) {
           from_pointer && from_pointer.is_pointer() &&
           !l.compiler.sym.var_tag_for_type(from, NULL))
         return %(C.address $value (quote $want_tag));
-      Type target = l.compiler.sym.resolve_numeric_type(want);
-      Type source = l.compiler.sym.resolve_numeric_type(from);
+      Type target = _lower_numeric_type(l, want);
+      Type source = _lower_numeric_type(l, from);
       Symbol tag = target ? target.scalar_tag() : 0;
       if (tag && source && tag != source.scalar_tag())
-        return _lower_to_type(target, value);
+        return _lower_to_type(l, target, value);
     }
   return value;
 }
@@ -2097,9 +2151,11 @@ static Var _lower_setindex(
   if (_lower_failed(l, target) || _lower_failed(l, index) ||
       _lower_failed(l, value))
     return void;
-  return _lower_effect(
-    l, %(${Atom.intern(container + "_setindex")} $target $index $value),
-    rest, k);
+  List layout = is_c_array ? _lower_pointee_layout(l, receiver) : NULL;
+  Var store = layout
+    ? %(C.index.set $target $index ${layout[2]} (quote $layout) $value)
+    : %(${Atom.intern(container + "_setindex")} $target $index $value);
+  return _lower_effect(l, store, rest, k);
 }
 
 static Var _lower_store(
@@ -2142,7 +2198,7 @@ static Var _lower_update(
   if (l.declined) return void;
   if (place is not void) {
     Var slot = _lower_name(l, "place");
-    Var combined = _lower_to_type(want, %(
+    Var combined = _lower_to_type(l, want, %(
       _binary ${_lower_load(l, want, slot)} (quote $operator) $right));
     return _lower_effect(
       l, %((lambda ($slot) ${_lower_poke(l, want, slot, combined)}) $place),
@@ -2151,13 +2207,13 @@ static Var _lower_update(
   if (id < 0) return _lower_decline(l, "update of a computed place");
   if (!l.locals.contains(id)) {
     Var combined = _lower_to_type(
-      want, %(_binary (C.gread $id) (quote $operator) $right));
+      l, want, %(_binary (C.gread $id) (quote $operator) $right));
     return _lower_effect(l, %(C.gwrite $id $combined), rest, k);
   }
   Var current = _lower_value(l, id);
   if (_lower_failed(l, current)) return void;
   Var combined = _lower_to_type(
-    want, %(_binary $current (quote $operator) $right));
+    l, want, %(_binary $current (quote $operator) $right));
   return _lower_bind_value(l, id, combined, rest, k);
 }
 

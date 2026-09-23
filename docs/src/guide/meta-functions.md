@@ -365,7 +365,14 @@ out a struct in natural C layout, with the field order, sizes and alignment
 from its own type information. The bytes belong to the running function's
 frame and are released when that function returns, normally or by an error.
 
-Field reads and writes, `&x`, `&s.f`, `p->f` and `*p` operate on those bytes.
+Field reads and writes, `&x`, `&s.f`, `p->f`, `*p` and `p[i]` operate on
+those bytes. A `bool` field is one byte, and a value reaching `bool` becomes 0
+or 1; it reads as the int C promotes it to. An enum field is an `int` when
+every enumerator initializer has an integer type no wider than `int`, or
+names the enum itself. Any other enum may be wider in C, so it has no
+compile-time layout. A pointer parameter can also receive a local C array,
+which `p[i]` indexes the same way. A pointer compares with `NULL` by address
+and tests false at the null address.
 Struct assignment copies bytes into the destination's existing storage, so an
 address taken earlier stays valid. Passing a struct by value gives the callee
 its own copy. Returning a struct copies it into the caller's storage before
@@ -439,8 +446,9 @@ struct value as code.
 These C shapes are not available at compile time:
 
 - Unions.
-- Structs with bitfields, array members or anonymous members. A meta function
-  that uses one reports `a compile-time struct with no host layout`.
+- Structs with bitfields, array members, anonymous members, or an enum field
+  whose initializers do not all have `int`-range types. A meta function that
+  uses one reports `a compile-time struct with no host layout`.
 - Structs with alignment attributes.
 - Structs under `#pragma pack`. The compiler does not detect packing and
   would lay such a struct out with natural alignment, so do not pass one to a
@@ -497,7 +505,7 @@ on a listed type works. The operation inventory below further limits calls.
 | `Var` | Boxes represented numbers, strings, symbols, collections and callable values. | Only the exposed operations below. Compile-time `void` and an empty List remain distinct. Lisp conditions treat both as false; x2c runtime `Var.truth` still raises on `void`. |
 | `Func` | Lambdas with typed or bare parameters, captures and references to available functions; parameters and returns between meta functions. | Dynamic calls and storage in collections work. This does not expose arbitrary native function-pointer calls. |
 | C-style array declarations | A literal-sized one-dimensional array, such as `int a[3] = {1, 2};`, has compile-time storage. Omitted elements are filled with zero-like values. | Indexing and simple assignment work; passing the array to an indexed pointer parameter works in the tested case. At compile time the array is a dynamic Array of Var values, not native bytes; the running program uses native C array storage. See element/dimension limits below. |
-| Pointers to locals | `int *p = &n;`, copying that pointer, and passing it to another meta function or a native function work. A local whose address is taken lives in native bytes, and the pointer is its real address. | `*p` reads and `*p = value` writes the local. Pointer arithmetic and the address of an array element are not supported. |
+| Pointers to locals | `int *p = &n;`, copying that pointer, and passing it to another meta function or a native function work. A local whose address is taken lives in native bytes, and the pointer is its real address. | `*p` and `p[i]` read, and `*p = value` and `p[i] = value` write, the bytes as C does. Pointer arithmetic and the address of an array element are not supported. |
 | Structs | Named, inline and nested locals; initialization, assignment, by-value arguments and returns, with C copy behavior. | Fields and addresses refer to native bytes in C layout. Assignment keeps existing field addresses; storage ends when the function returns. See [C objects during compilation](#c-objects-during-compilation). |
 | Native functions | The functions in `lib/cmath.x` and `lib/clibc.x`, which the compiler links. | Explicit dollar evaluation and meta bodies can call them, including through output pointers. Ordinary calls are not folded. See [Native C functions](#native-c-functions). |
 | System-header structs | `--system-headers` supplies the header declarations. A local `struct timespec` can be passed to `timespec_get`. | Unions and structs with bitfields, array members, anonymous members or alignment attributes are not available. |
@@ -520,11 +528,10 @@ initialization also have differential checks. Other element types, array
 decay/alias combinations and every zero-initialization case remain coverage
 gaps.
 
-A null-pointer constant such as `(char *) 0` can supply the default character
-set for `String.strip`. The preprocessor name `NULL` is not resolved by the
-compile-time expression reader; using that name alone still reaches the
-file-scope-state restriction. This does not imply a native pointer dereference
-or arbitrary address support.
+A null-pointer constant such as `NULL` or `(char *) 0` can supply the default
+character set for `String.strip`, and `true` and `false` are 1 and 0. Any
+other preprocessor name has no compile-time value; a meta function that uses
+one reports `a name with no declaration`.
 
 These two functions demonstrate a supported address and a supported chain:
 

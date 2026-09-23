@@ -19,18 +19,23 @@
   (let ((tag (Var.tag (_binary a '+ b))))
     (_binary (C.conv a tag) op (C.conv b tag))))
 
-// x2c truth: nil is false, a number is false at zero, anything else true.
-// The zero reaches the value's own type first: `eq?` compares a `Var` by
-// identity, so a `double` zero is not the `int` zero it was tested against.
+// x2c truth: nil is false, a number is false at zero, a C pointer is false
+// at the null address, and anything else is true. The zero reaches the
+// value's own type first: `eq?` compares a `Var` by identity, so a `double`
+// zero is not the `int` zero it was tested against.
 (defun C.nonzero? (a) (not (eq? (C.compare a '!= 0) 0)))
 
 (defun C.true? (a)
   (cond ((eq? a (C.void)) nil)
         ((null? a) nil)
         ((number? a) (C.nonzero? a))
+        ((eq? (Var.kind a) 'pointer) (not (eq? (Var.truth a) 0)))
         (true true)))
 
 (defun C.not (a) (if (C.true? a) 0 1))
+
+// A value reaching `bool` is 0 or 1, and reads as the int C promotes it to.
+(defun C.bool (a) (if (C.true? a) 1 0))
 
 (defmacro C.and (a b) `(if (C.true? ,a) (if (C.true? ,b) 1 0) 0))
 (defmacro C.or (a b) `(if (C.true? ,a) 1 (if (C.true? ,b) 1 0)))
@@ -61,6 +66,16 @@
 (defun C.new (size tag layout value)
   (let ((object (C.at (C.bytes size) 0 tag)))
     (begin (C.poke object 0 layout value) object)))
+
+// `p[i]` through a pointer. A pointer can hold a local C array, which is an
+// `Array`; any other pointer addresses native bytes, and element `i` is
+// `size` bytes apart from the next, as in C.
+(defun C.index (p i size layout)
+  (if (eq? (type p) 'array) (Array.getindex p i)
+      (C.peek p (* i size) layout)))
+(defun C.index.set (p i size layout value)
+  (if (eq? (type p) 'array) (Array.setindex p i value)
+      (C.poke p (* i size) layout value)))
 
 // File-scope state, keyed by binding id. A unit-level initializer is not
 // part of the function, so an unwritten global reads as zero. The table
@@ -142,6 +157,7 @@
 (def Array_push Array.push)
 (def Array_getindex Array.getindex)
 (def Array_setindex Array.setindex)
+
 (def Array_list Array.list)
 (def Array_str str)
 (def Array_repr repr)

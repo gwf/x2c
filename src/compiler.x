@@ -3559,6 +3559,11 @@ int Sym.is_array_type(Sym sym, Type type) =>
 /** Reports whether `type` reaches the named `Map` value type. */
 int Sym.is_map_type(Sym s, Type type) => s.is_named_value_type(type, "Map");
 
+/** Reports whether `type` reaches C's boolean type, `bool` or `_Bool`. */
+int Sym.is_bool_type(Sym sym, Type type) =>
+  sym.is_named_value_type(type, "bool") ||
+  sym.is_named_value_type(type, "_Bool");
+
 /** Reports whether `type` reaches a named value type before its definition. */
 int Sym.is_named_value_type(Sym sym, Type type, String name) {
   // Stop at the named type instead of resolving through its typedef.
@@ -3623,12 +3628,25 @@ static List _meta_var_layout(Type declared) {
   return %(var $declared $size $alignment);
 }
 
-/* Symbol's unsigned-long bytes are the one scalar whose Var tag differs from
-   its bytes' row. */
+/* A scalar's Var tag may differ from its bytes' row only where the tag is
+   fixed for the type, as Symbol's is for its unsigned-long code. A tag a
+   unit's declared converter supplies may box something other than those
+   bits. */
 static List _meta_scalar_layout(
-  Type declared, Type exact, NativeScalarAccess scalar, Symbol tag) {
-  if (tag != scalar.tag && !(tag == <symbol> && scalar.tag == <ulong>))
+  Type declared, Type exact, NativeScalarAccess scalar, Symbol tag,
+  Type tagged) {
+  if (tag != scalar.tag && (!tag || tag != tagged.fixed_var_tag()))
     return NULL;
+  return %(scalar $declared ${scalar.size} ${scalar.alignment} $exact $tag);
+}
+
+/* C's bool is one byte holding 0 or 1, and an enum whose enumerators fit in
+   int is an int. Neither has a Var tag of its own; each value is the int C
+   promotes it to. The parser records which enums fit, and an enum without
+   that record has no layout. */
+static List _meta_int_layout(Type declared, Type exact) {
+  NativeScalarAccess scalar = native_scalar_access(exact);
+  Symbol tag = <i32>;
   return %(scalar $declared ${scalar.size} ${scalar.alignment} $exact $tag);
 }
 
@@ -3679,10 +3697,18 @@ static List _meta_record_layout(Sym sym, Type record, Map cache) {
 static List _meta_type_layout(Sym sym, Type type, Map cache) {
   Type declared = type.declared();
   if (sym.is_var_type(declared)) return _meta_var_layout(declared);
-  Symbol tag = sym.var_tag_for_type(declared, NULL);
-  Type exact = sym.normalize_declared_type(declared).scalar();
+  Type tagged = NULL;
+  Symbol tag = sym.var_tag_for_type(declared, &tagged);
+  Type native = sym.normalize_declared_type(declared);
+  Type exact = native.scalar();
   NativeScalarAccess scalar = exact ? native_scalar_access(exact) : NULL;
-  if (scalar) return _meta_scalar_layout(declared, exact, scalar, tag);
+  if (scalar)
+    return _meta_scalar_layout(declared, exact, scalar, tag, tagged);
+  if (!tag && sym.is_bool_type(declared))
+    return _meta_int_layout(declared, %(unsigned char));
+  if (!tag && native.is_enum())
+    return sym.get(%(@native "int-range"))
+         ? _meta_int_layout(declared, %(int)) : NULL;
   type = sym.resolve_key(declared);
   if (type && type.is_pointer()) return _meta_pointer_layout(declared, tag);
   if (!type || type.car() != <struct>) return NULL;

@@ -445,6 +445,26 @@ static List _field(Compiler compiler, List context, int delegated) {
   return %(seq @rows);
 }
 
+/* Whether every enumerator of enum `type` fits in int, the width C gives an
+   enum whose values do: each initializer has an integer type no wider than
+   int, or is the enum itself. Implicit values count up from the last. */
+static int _enum_fits_int(List type, List members) {
+  foreach (List member, members) {
+    match (member) {
+      case %(binding *): continue;
+      case %(op = ? (expr ?(Type value) *)): {
+        if (value.equal(type)) continue;
+        X2CVarNumericInfo info;
+        if (Var.numeric_info(value.scalar_tag(), &info) && !info.floating &&
+            (info.bits < 32 || (info.bits == 32 && !info.unsigned_value)))
+          continue;
+      }
+    }
+    return 0;
+  }
+  return 1;
+}
+
 static List _publish_aggregate_type(
   Compiler compiler, Symbol tag, Var name, List members) {
   List type = %($tag $name);
@@ -454,6 +474,8 @@ static List _publish_aggregate_type(
   else
     compiler.sym.declare(NULL, type, tag == <enum> ? %(enum) : %($tag $body));
   if (tag != <enum>) compiler.sym.declare_field_order(type, members);
+  else if (_enum_fits_int(type, members))
+    compiler.sym.set(%(@type "int-range"), %(int));
   return %($tag $name $body);
 }
 
