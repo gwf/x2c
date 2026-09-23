@@ -18,6 +18,7 @@
 #include "compiler.x"
 #pragma private
 #include "type.x"
+#include "cleanup.x"
 #include "var.x"
 #include "string.x"
 #include "lisp.x"
@@ -36,9 +37,11 @@
 typedef struct Lowering {
   Compiler compiler;
   Scope scratch;
-  Map env, locals, cells, arrays, records, callees, cursors;
+  Map env, locals, cells, arrays, records, callees, cursors, statics;
+  Map runtime_statics;
   Array definitions;
   String own;
+  List identity;
   List on_break, on_continue;
   int declined, on_loop, rejected, uncallable, globals, meta_only;
   int session_globals;
@@ -156,7 +159,7 @@ static int lower_repl_counter;
 
 static Var _lower_name(Lowering l, String stem) {
   int count = l.session_globals ? ++lower_repl_counter : ++l.counter;
-  if (stem != "loop" && stem != "after")
+  if (stem != "loop" && stem != "after" && stem != "static")
     return Atom.intern(%"$stem-$count");
   if (!l.own) return Atom.intern(%"$stem$count");
   return Atom.intern(%"$stem$count-${l.own}");
@@ -336,8 +339,10 @@ static void _lower_scan_bind(Lowering l, List form) {
   match (form) {
     /* A local C array's slot holds its native element storage. */
     case %(bind (binding ?(int id) ?) ((dim ?size) *)): {
-      l.locals[id] = 1;
-      l.cells[id] = 1;
+      if (!l.statics.contains(id)) {
+        l.locals[id] = 1;
+        l.cells[id] = 1;
+      }
       l.arrays[id] = size;
       return;
     }
@@ -346,12 +351,14 @@ static void _lower_scan_bind(Lowering l, List form) {
   }
 }
 
+static int _lower_dimension(Lowering l, int id, int *out);
+
 static void _lower_scan_storage_binding(
   Lowering l, Type type, Var declarator) {
   if (type.contains(<static>)) l.globals = 1;
-  List binding = NULL;
+  List binding = NULL, initial = NULL;
   match (declarator) {
-    case %(op = ?bound ?): binding = bound;
+    case %(op = ?bound ?value): { binding = bound; initial = value; }
     default: binding = declarator;
   }
   Type declared = %(declare $type (bindings $binding))
@@ -369,6 +376,34 @@ static void _lower_scan_storage_binding(
       if (record) {
         l.cells[id] = layout ? layout : 1;
         l.records[id] = record;
+      }
+      if (type.is_static()) {
+        Symbol tag = layout ? _lower_pointer_tag(l, layout) : <p48>;
+        if (declared.is_array()) {
+          _lower_scan_bind(l, binding);
+          int count = 0;
+          List element = l.compiler.meta_type_layout(declared.dereference());
+          if (!element || !_lower_dimension(l, id, &count)) {
+            (void) _lower_decline(l, "a static array with no native layout");
+            return;
+          }
+          tag = _lower_pointer_tag(l, element);
+          long size = element[2].long_long() * count;
+          layout = %(record $declared $size ${element[3]} ());
+        }
+        if (!layout) {
+          (void) _lower_decline(l, "a static object with no native layout");
+          return;
+        }
+        List name = binding.cadr();
+        if (initial &&
+            l.compiler.static_value_is_runtime(initial, l.runtime_statics))
+          l.runtime_statics[name] = 1;
+        List key = %(${l.identity} $name);
+        List slot = %($key $layout $tag ${type.is_threaded()});
+        l.statics[id] = slot;
+        l.locals[id] = l.cells[id] = layout;
+        l.env[id] = %(C.saddress (quote $slot));
       }
     }
 }
@@ -2188,6 +2223,20 @@ static Var _lower_declarator(
     case %(op = (!set ?bound (bind (binding ?(int id) ?) *)) ?init): {
       Type declared = %(declare $type (bindings $bound))
         .type_from_ast().declared();
+      if (l.statics.contains(id)) {
+        Var value = _lower_initializer(l, declared, id, init);
+        if (_lower_failed(l, value)) return void;
+        Var initializer = %(lambda () $value);
+        if (!l.runtime_statics.contains(bound.list().cadr())) {
+          /* Native constants need no call-frame capture. Share their thunk;
+             runtime initializers capture this first reach's arguments. */
+          Var name = _lower_name(l, "static");
+          l.definitions.push(%(def $name $initializer));
+          initializer = name;
+        }
+        return _lower_effect(l,
+          %(C.sinit (quote ${l.statics[id]}) $initializer), rest, k);
+      }
       /* A record in a loop's storage is initialized where it is. */
       if (l.records.contains(id) && l.env.contains(id)) {
         Var into = _lower_address(l, id);
@@ -2212,6 +2261,9 @@ static Var _lower_declarator(
     case %(!set ?bound (bind (binding ?(int id) ?) *)): {
       Type declared = %(declare $type (bindings $bound))
         .type_from_ast().declared();
+      if (l.statics.contains(id))
+        return _lower_effect(l,
+          %(C.sinit (quote ${l.statics[id]}) nil), rest, k);
       Var initial;
       int filled = l.cells.contains(id) && l.env.contains(id);
       if (l.arrays.contains(id)) initial = _lower_braced(l, declared, id, %());
@@ -2641,6 +2693,8 @@ static List _lower_function(
     .env = _lower_scratch_map(scratch), .locals = _lower_scratch_map(scratch),
     .cells = _lower_scratch_map(scratch), .arrays = _lower_scratch_map(scratch),
     .records = _lower_scratch_map(scratch),
+    .statics = _lower_scratch_map(scratch),
+    .runtime_statics = _lower_scratch_map(scratch),
     .callees = _lower_scratch_map(scratch), .cursors = _lower_scratch_map(scratch),
     .definitions = [],
     .declined = 0,
@@ -2652,12 +2706,14 @@ static List _lower_function(
   lower_reached_globals = 1;
   lower_reached_meta = 0;
   match (fn) {
-    case %(function ?spec (bind (binding ? ?(String name))
-                            ((fnmod (params *params)) *)) (block *items)): {
+    case %(function ?spec
+           (bind (!set ?identity (binding ? ?(String name)))
+                 ((fnmod (params *params)) *)) (block *items)): {
       (void) spec;
       lower_declined_reason = NULL;
       lower_session_callees = NULL;
       l.own = name;
+      l.identity = identity;
       _lower_scan(l, fn);
       _lower_scan_nested_writes(l, fn, 0);
       /* The scan records its own wording for a construct refused by
@@ -2915,6 +2971,7 @@ Var Compiler.lower_meta_initializer(
   struct Lowering state = {
     .compiler = c, .env = {}, .locals = {}, .cells = {},
     .arrays = {}, .records = {}, .callees = {}, .cursors = {},
+    .statics = {}, .runtime_statics = {},
     .definitions = []
   };
   lower_declined_reason = NULL;
@@ -2935,6 +2992,7 @@ Var Compiler.lower_meta_expression(Compiler c, List expression) {
   struct Lowering state = {
     .compiler = c, .env = {}, .locals = {}, .cells = {},
     .arrays = {}, .records = {}, .callees = {}, .cursors = {},
+    .statics = {}, .runtime_statics = {},
     .definitions = []
   };
   lower_declined_reason = NULL;

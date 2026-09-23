@@ -731,8 +731,15 @@ static void _store(Walk w, Var target, Var value) {
 /* A static or extern local is not the function's storage, so the walk
    treats it as file-scope state. */
 static void _declare(Walk w, Var specifiers, List bindings) {
-  if (<static> in specifiers || <extern> in specifiers) return;
   Map types = w.compiler.semantic_binding_facts();
+  if (<static> in specifiers || <extern> in specifiers) {
+    foreach (List item, bindings)
+      match (item) case %(op = (bind ?name ?) ?value): {
+        _scan(w, value, 0);
+        _flow(w, value, types[%(type $name)], <static>, NULL);
+      }
+    return;
+  }
   foreach (Var item, bindings)
     match (item) {
       case %(op (!quote =) (bind (!set ?name (binding ? ?)) ?) ?value):

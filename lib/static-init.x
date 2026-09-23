@@ -49,7 +49,9 @@ static int _cycle(X2CStatic *guard, StaticThread *self) {
   return 0;
 }
 
-/* Acquires initialization of a compiler-owned zero-initialized guard.
+/* Acquires initialization of a compiler-owned guard whose state starts zero.
+    An owner may supply aligned `payload` bytes, keeping both bytes and guard
+    alive until all calls finish. Borrowed bytes never join a shutdown chain.
     Returns one with zeroed, aligned `payload` for the winning initializer,
     or zero after another invocation has committed. The winner must register
     `x2c_static_abort` as a cleanup before evaluating user code and commit only

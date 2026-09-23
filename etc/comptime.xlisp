@@ -64,6 +64,8 @@
 (def C.record.result (bind "lisp_record_result" nil))
 (def C.session-copy (bind "lisp_session_copy" nil))
 (def C.source-function (bind "lisp_source_function" nil))
+(defun C.saddress (slot) ((bind "lisp_static_address" nil) slot))
+(defun C.sinit (slot init) ((bind "lisp_static_initialize" nil) slot init))
 
 (defun C.new (size tag layout value)
   (let ((object (C.at (C.bytes size) 0 tag)))

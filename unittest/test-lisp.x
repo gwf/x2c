@@ -909,6 +909,60 @@ static void lisp_source_function_reclaims_normal_and_error_frames(void) {
   lisp.destroy();
 }
 
+/* Source statics use these native entries through the evaluator, including
+   inherited callables. Worker calls are deliberately serialized. */
+static int _lisp_static_count(List description) {
+  Var address = lisp_static_initialize(description, %());
+  int *value = address.pointer();
+  return ++*value;
+}
+
+static Var _lisp_static_worker(const void *input, size_t size) {
+  (void) size;
+  Lisp lisp = *(Lisp *) input;
+  int first = lisp.eval(%(count regular));
+  int local = lisp.eval(%(count per-thread));
+  int next = lisp.eval(%(count per-thread));
+  return 100 * first + 10 * local + next;
+}
+
+static void lisp_statics_belong_to_session_and_thread(void) {
+  Lisp parent = Lisp.kernel();
+  $lisp.bind(parent, "count", _lisp_static_count);
+  NativeScalarAccess access = native_scalar_access(%(int));
+  List layout = %(scalar (int) ${access.size} ${access.alignment} (int) i32);
+  parent.set_global("regular", %((function binding) $layout i32* 0));
+  parent.set_global(
+    "per-thread", %((function threaded-binding) $layout i32* 1));
+  parent.freeze();
+  Lisp first = Lisp.kernel(), second = Lisp.kernel();
+  first.adopt(parent);
+  second.adopt(parent);
+  EXPECT_INT_EQ(first.eval(%(count regular)).int(), 1);
+  EXPECT_INT_EQ(first.eval(%(count per-thread)).int(), 1);
+  EXPECT_INT_EQ(second.eval(%(count regular)).int(), 1);
+  for (int i = 0; i < 2; i++) {
+    Thread worker = Thread.start(_lisp_static_worker, &first, sizeof(first));
+    EXPECT_INT_EQ(worker.join().int(), 100 * (i + 2) + 12);
+    worker.free();
+  }
+  EXPECT_INT_EQ(first.eval(%(count regular)).int(), 4);
+  EXPECT_INT_EQ(first.eval(%(count per-thread)).int(), 2);
+  EXPECT_INT_EQ(second.eval(%(count per-thread)).int(), 1);
+  first.destroy();
+  second.destroy();
+  ScopeStats before = Scope.stats();
+  Lisp owned = Lisp.kernel();
+  owned.adopt(parent);
+  EXPECT_INT_EQ(owned.eval(%(count regular)).int(), 1);
+  EXPECT_INT_EQ(owned.eval(%(count per-thread)).int(), 1);
+  owned.destroy();
+  ScopeStats after = Scope.stats();
+  EXPECT_INT_EQ((int) after.live_scopes, (int) before.live_scopes);
+  EXPECT_INT_EQ((int) after.live_allocations, (int) before.live_allocations);
+  parent.destroy();
+}
+
 static void lisp_eval_file_runs_forms(void) {
   Lisp lisp = Lisp.kernel();
   FILE *raw = fopen("/tmp/x2c-lisp-test.xlisp", "w");
@@ -1421,6 +1475,7 @@ void lisp_suite(void) {
   $test.run(lisp_inferred_binding_transfers_native_error);
   $test.run(lisp_binding_storage_belongs_to_session);
   $test.run(lisp_source_function_reclaims_normal_and_error_frames);
+  $test.run(lisp_statics_belong_to_session_and_thread);
   $test.run(lisp_eval_file_runs_forms);
   $test.run(lisp_eval_file_transfers_read_failure);
   $test.run(lisp_eval_file_rejects_embedded_nul);
