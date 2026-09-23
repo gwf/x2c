@@ -63,6 +63,32 @@ under `#pragma pack` are not detected and get natural alignment. Consider
 restricting expansion to headers the source includes directly, and detecting
 packing so such structs have no compile-time layout.
 
+Outcome, 2026-09-22:
+
+- Cost. `builds/0/x2c translate`, best of 3 over 5 runs on an M4 Max,
+  default / `--cpp-symbols` / `--system-headers`: a trivial `main`
+  0.03 / 0.08 / 0.05 s; `meta-system-header-record.x` 0.06 / 0.15 / 0.11 s;
+  a file including `stdio.h`, `stdlib.h`, `string.h`, `time.h` and
+  `pthread.h` 0.03 / 0.08 / 0.08 s. `--system-headers` is not slower than
+  `--cpp-symbols`, so the 3x premise does not reproduce. Expansion stays
+  unrestricted: restricting it to direct includes would lose
+  `struct timespec`, which macOS declares in `sys/_types/_timespec.h`
+  through `_time.h` and glibc in `bits/types/struct_timespec.h`.
+- Packing. Tokenizing records where `#pragma pack` turns packing on or off,
+  outside unreachable conditional arms, and `--system-headers` marks each
+  attribute instead of erasing it in the preprocessor, so a `packed`,
+  `aligned`, `mode` or `vector_size` attribute also leaves a mark. A struct
+  defined under packing or around such a mark has no compile-time layout,
+  and meta code that uses it declines with `a compile-time struct with no
+  host layout`.
+- Remaining. A layout attribute on a typedef, such as
+  `typedef long aligned_long __attribute__((aligned(16)))`, still erases to
+  the natural layout of a struct field of that type; the mark lies outside
+  the struct. `-D_Atomic(T)=T` stays: `_Atomic` scalars have the size and
+  alignment of their plain type on the supported hosts, so a struct with
+  such a field keeps a correct layout. An `_Atomic` struct type could differ
+  and is not handled.
+
 ## Design tracks (decide with Gary first)
 
 ### E. Meta-capable protocols

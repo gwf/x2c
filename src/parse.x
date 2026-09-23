@@ -445,8 +445,22 @@ static List _field(Compiler compiler, List context, int delegated) {
   return %(seq @rows);
 }
 
+/* Reports whether C packs an aggregate whose tokens run from `first` to the
+   current one: packing is on before it, or a mark lies within it. Tokens
+   outside the unit's own, such as a constructed form's, have no marks. */
+static int _packed_since(Compiler c, Token first) {
+  Token base = c.tokenizer.tokens, end = base + c.tokenizer.tokens.len();
+  if (!c.pack_marks || first < base || c.token >= end) return 0;
+  int before = 0, within = 0;
+  foreach (long mark, c.pack_marks) {
+    if (mark < first - base) before++;
+    else if (mark < c.token - base) within++;
+  }
+  return before % 2 || within;
+}
+
 static List _publish_aggregate_type(
-  Compiler compiler, Symbol tag, Var name, List members) {
+  Compiler compiler, Symbol tag, Var name, List members, Token first) {
   List type = %($tag $name);
   List body = tag == <enum> ? members : %(fields @members);
   if (name is <list> && name.car() == <binding>)
@@ -454,6 +468,8 @@ static List _publish_aggregate_type(
   else
     compiler.sym.declare(NULL, type, tag == <enum> ? %(enum) : %($tag $body));
   if (tag != <enum>) compiler.sym.declare_field_order(type, members);
+  if (tag != <enum> && _packed_since(compiler, first))
+    compiler.sym.set(%(@type "packed"), %(packed));
   return %($tag $name $body);
 }
 
@@ -518,6 +534,7 @@ List Compiler.parse_fields(Compiler c, List context) {
 }
 
 static List _struct_or_union(Compiler c) {
+  Token first = c.token;
   Symbol tag = c.peek(0);
   c.next();
   List name = c.parse_optional_identifier();
@@ -530,7 +547,7 @@ static List _struct_or_union(Compiler c) {
     fields = c.parse_fields(type);
     c.expect(<"}">);
     if (!c.macro_holes)
-      return _publish_aggregate_type(c, tag, usedname.car(), fields);
+      return _publish_aggregate_type(c, tag, usedname.car(), fields, first);
     fields = cons(<fields>, fields);
   }
   return fields ? type.append(%($fields)): type;
@@ -654,7 +671,8 @@ static List _enum(Compiler c) {
     enums = c.parse_enumerators(type);
     c.expect(<"}">);
     if (!c.macro_holes)
-      return _publish_aggregate_type(c, <enum>, usedname.car(), enums);
+      return _publish_aggregate_type(
+        c, <enum>, usedname.car(), enums, c.token);
   }
   return enums ? type.append(%($enums)): type;
 }
@@ -966,7 +984,7 @@ List Compiler.parse_named_type(Compiler c) {
                 ? NULL : c.parse_fields(%($tag $name));
     c.expect(<"}">);
     base = c.macro_holes ? %($tag $name (fields @fields))
-                        : _publish_aggregate_type(c, tag, name, fields);
+                        : _publish_aggregate_type(c, tag, name, fields, start);
   }
   else base = _type_specifier(c);
   base = qualifiers.append(base);
@@ -1894,7 +1912,8 @@ static List _finish_aggregate_type(
       }
     }
   }
-  return _publish_aggregate_type(c, tag, name, bound.list_free());
+  return _publish_aggregate_type(
+    c, tag, name, bound.list_free(), c.token);
 }
 
 static Var _finish_type_spec(Compiler compiler, Var value) {
