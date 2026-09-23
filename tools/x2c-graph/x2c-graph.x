@@ -2770,6 +2770,7 @@ int main(int argc, char **argv) {
   request.include_dirs = include_dirs.list_free();
   Frontend frontend = Frontend.new(request);
   frontend.preprocessor_errors = _preprocessor_errors;
+  if (!frontend.preload_macro_libraries()) return 1;
   Context command = Context.open_isolated_named("x2c graph command");
   int status = 0;
   try {
