@@ -2145,13 +2145,22 @@ List Compiler.evaluate_macro_rows(Compiler compiler, Var value) {
 }
 
 /* A declaration with external or no linkage can reach another unit through
-   a header or an interface, so its private spelling names the owning unit's
-   file name and the root invocation's offset. Neither depends on where the
-   unit lives or on the directory a translation starts from, and collection
-   and the full parse expand that invocation alike, so every translation
-   mints the same spelling. */
+   a header or an interface. Its private spelling names the full owning unit
+   and root invocation offset. Home and package paths stay portable; other
+   paths use their canonical absolute identity. Collection and full parsing
+   expand the same invocation to the same spelling. */
 static String _file_scope_name(Compiler c, Token root, String source) {
-  String owner = c.filename ? Path.basename(c.filename) : "";
+  String owner = "";
+  if (c.filename) {
+    String path = c.canonical_path(Path.absolute(c.filename));
+    owner = home_portable_path(path);
+    Var package_root = c.package ? c.package_roots[c.package] : void;
+    if (package_root is <string>) {
+      String prefix = %"${c.canonical_path(Path.absolute(package_root))}/";
+      if (path.startswith(prefix))
+        owner = %"package:${c.package}/${path[prefix.len():]}";
+    }
+  }
   String key = %"macro:$owner:${root.pos}:$source";
   Var stored;
   int count = c.names.counters.try_get(key, &stored) ? stored : 0;
