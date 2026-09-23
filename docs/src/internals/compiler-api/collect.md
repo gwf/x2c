@@ -31,7 +31,7 @@ NULL. Home files mirror their home-relative path under the compiler's
 stage directory when it runs from `<home>/builds/`, otherwise under the
 home. Call it before opening any translation unit's Context.
 
-Source: `src/collect.x:724`
+Source: `src/collect.x:726`
 
 #### interface_prelude
 
@@ -39,7 +39,7 @@ Source: `src/collect.x:724`
 
 Returns the readable prelude interface path, or NULL when none exists.
 
-Source: `src/collect.x:749`
+Source: `src/collect.x:751`
 
 #### interface_text
 
@@ -49,7 +49,7 @@ Returns the compiler's own collected contribution as interface text, or
 NULL when the unit has not collected its symbols. A contribution that
 the interface grammar cannot spell is reported as an `emit` diagnostic.
 
-Source: `src/collect.x:971`
+Source: `src/collect.x:976`
 
 ### `Compiler`
 

@@ -42,11 +42,11 @@ Typed native build request and artifact graph.
 
 Public functions:
 
-`build_hash_bytes`, `build_module_stamp`, `build_check_input`,
-`CliRequest.prepare`, `Build.generated_dir`, `Build.translation_current`,
-`Build.record_translation`, `Build.add_generated`, `Build.module_entry`,
-`Build.begin_translation`, `Build.end_translation`, `compile_commands_write`,
-`Build.finish`, `Build.report_success`, `Build.run_program`, `Build.cleanup`,
+`build_module_stamp`, `build_check_input`, `CliRequest.prepare`,
+`Build.generated_dir`, `Build.translation_current`, `Build.record_translation`,
+`Build.add_generated`, `Build.module_entry`, `Build.begin_translation`,
+`Build.end_translation`, `compile_commands_write`, `Build.finish`,
+`Build.report_success`, `Build.run_program`, `Build.cleanup`,
 `Build.script_helpers`, `Build.publish_script`, `CliRequest.script_current`
 
 ### [src/cache.x](../src/cache.x)
@@ -496,7 +496,8 @@ Public functions:
 `x2c_package_source`, `x2c_default_include_dirs`, `x2c_cpp_include_dirs`,
 `x2c_home`, `x2c_home_packages`, `x2c_stage_dir`, `x2c_find_program`,
 `x2c_driver_error`, `x2c_host_error`, `file_lock`, `file_publish`,
-`worker_fork`, `worker_exit`, `worker_wait_any`, `x2c_filename_hash`
+`x2c_fnv_bytes`, `x2c_fnv_file`, `x2c_compiler_identity`, `worker_fork`,
+`worker_exit`, `worker_wait_any`, `x2c_filename_hash`
 
 ## Runtime modules
 

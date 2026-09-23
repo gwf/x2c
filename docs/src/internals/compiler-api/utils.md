@@ -17,11 +17,14 @@ System utilities for environment discovery and workers.
 | [`worker_exit`](#worker_exit) | Attempts to flush process streams and terminates a worker with `status`. |
 | [`worker_fork`](#worker_fork) | Forks a worker that continues the current program with inherited state. |
 | [`worker_wait_any`](#worker_wait_any) | Waits until one of the `count` workers in `pids` exits and returns its index, storing its shell-style status: the exit status, `128 + signal`, or -1 when it cannot be waited. |
+| [`x2c_compiler_identity`](#x2c_compiler_identity) | Returns the running compiler's identity, the FNV-1a digest of its executable's contents in 16 hexadecimal digits, or NULL when the executable is unknown or unreadable. |
 | [`x2c_cpp_include_dirs`](#x2c_cpp_include_dirs) | Returns the borrowed preprocessor `List` `<root>/src`, then `<root>/lib`. |
 | [`x2c_default_include_dirs`](#x2c_default_include_dirs) | Returns the borrowed default include `List` containing `<root>/include`. |
 | [`x2c_driver_error`](#x2c_driver_error) | Prints `x2c: error: <message>` to stderr and exits with status 2. |
 | [`x2c_filename_hash`](#x2c_filename_hash) | Hashes unit filename spelling for stable generated C identifiers. |
 | [`x2c_find_program`](#x2c_find_program) | Returns the spelling of the first `PATH` candidate for the program `name` that this process may execute, searched as `execvp` searches, or NULL. |
+| [`x2c_fnv_bytes`](#x2c_fnv_bytes) | Returns `hash` extended with `length` `bytes` by 64-bit FNV-1a. |
+| [`x2c_fnv_file`](#x2c_fnv_file) | Returns `hash` extended with the contents of the file at `path`. |
 | [`x2c_get_executable`](#x2c_get_executable) | Returns the borrowed resolved executable path, or NULL when unavailable. |
 | [`x2c_get_root`](#x2c_get_root) | Returns the borrowed repository root, or NULL before it is configured. |
 | [`x2c_home`](#x2c_home) | Returns the discovered or configured home, or NULL when there is none. |
@@ -70,7 +73,7 @@ Flush failure is ignored. This function does not return and does not run
 `atexit` handlers. Those belong to the parent process and would close its
 log and process-lifetime `Scope`s twice.
 
-Source: `src/utils.x:274`
+Source: `src/utils.x:324`
 
 #### worker_fork
 
@@ -82,7 +85,7 @@ The call attempts to flush all process streams before the fork so
 successfully flushed bytes cannot be written by both processes. Flush
 failure is ignored. The child must leave through `worker_exit`.
 
-Source: `src/utils.x:263`
+Source: `src/utils.x:313`
 
 #### worker_wait_any
 
@@ -93,7 +96,18 @@ index, storing its shell-style status: the exit status, `128 + signal`,
 or -1 when it cannot be waited. Other children stay unreaped, so the
 wait polls with a short sleep.
 
-Source: `src/utils.x:284`
+Source: `src/utils.x:334`
+
+#### x2c_compiler_identity
+
+`String x2c_compiler_identity(void)`
+
+Returns the running compiler's identity, the FNV-1a digest of its
+executable's contents in 16 hexadecimal digits, or NULL when the
+executable is unknown or unreadable. Only byte-identical compilers share
+an identity. The executable is read once per process.
+
+Source: `src/utils.x:290`
 
 #### x2c_cpp_include_dirs
 
@@ -131,7 +145,7 @@ Source: `src/utils.x:147`
 
 Hashes unit filename spelling for stable generated C identifiers.
 
-Source: `src/utils.x:299`
+Source: `src/utils.x:349`
 
 #### x2c_find_program
 
@@ -142,6 +156,23 @@ that this process may execute, searched as `execvp` searches, or NULL.
 An empty entry names the current directory.
 
 Source: `src/utils.x:134`
+
+#### x2c_fnv_bytes
+
+`uint64_t x2c_fnv_bytes(uint64_t hash, const void *bytes, size_t length)`
+
+Returns `hash` extended with `length` `bytes` by 64-bit FNV-1a.
+
+Source: `src/utils.x:259`
+
+#### x2c_fnv_file
+
+`uint64_t x2c_fnv_file(uint64_t hash, String path, int *ok)`
+
+Returns `hash` extended with the contents of the file at `path`.
+A missing or unreadable file clears `ok`.
+
+Source: `src/utils.x:271`
 
 #### x2c_get_executable
 
