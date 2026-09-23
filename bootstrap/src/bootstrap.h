@@ -18,6 +18,8 @@ Bootstrap bootstrap_materialize(CliRequest request);
 
 CliRequest bootstrap_build_request(CliRequest command, Bootstrap payload, Symbol component);
 
+void bootstrap_write_interfaces(Bootstrap b);
+
 void bootstrap_record_install(Bootstrap b, String cc, String ar);
 
 

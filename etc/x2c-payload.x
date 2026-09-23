@@ -75,7 +75,6 @@ static void copy_support(Path destination, int sources) {
   List rows = %(
     ("lib" ("*.x" "*.xmacro") ("lib" "include/x2c"))
     ("builds/0/lib" ("*.h") ("include/x2c"))
-    ("builds/0/lib" ("*.xi") ("lib"))
     ("etc" ("*.xlisp" "*.xmacro") ("etc"))
     ("LICENSES" ("*.txt") ("licenses"))
     ("." ("LICENSE") ("licenses")));
@@ -95,6 +94,28 @@ static void copy_support(Path destination, int sources) {
                          .join(source.basename()));
     }
   }
+}
+
+/* An interface replays only for the compiler that wrote it, so the staged
+   compiler writes the runtime interfaces from its own home, as a stage
+   build's library batch does. Sources are named relative to the home, which
+   the compiler resolves through any symbolic link in the stage path. */
+static void write_interfaces(Path stage) {
+  Path out = stage.join(".x2c-interfaces");
+  out.make_dirs();
+  Array sources = [];
+  foreach (Path source, stage.join("lib/*.x").glob())
+    sources.push(%"lib/${source.basename()}");
+  %(${stage.join("bin/x2c")} "translate" "--out-dir" ".x2c-interfaces"
+    @{sources.list()}).job()
+    .options({dir: stage, env: {"X2C_HOME": "."}, stdout: <capture>,
+              stderr: <capture>})
+    .check();
+  foreach (Path source, sources) {
+    String name = %"${source.stem()}.xi";
+    out.join(name).move_to(stage.join("lib").join(name));
+  }
+  out.remove_tree();
 }
 
 static void copy_examples(Path destination) {
@@ -188,6 +209,7 @@ static void install(Path prefix, Path destdir) {
     stage.join("bin").make_dirs();
     copy(root.join("builds/0/x2c"), stage.join("bin/x2c"));
     copy(root.join("builds/0/libx2c.a"), stage.join("lib/libx2c.a"));
+    write_interfaces(stage);
     stage.join("lib/x2c").make_dirs();
     stage.join("lib/x2c/toolchain").write_text("CC=cc\nAR=ar\n");
     identity = write_manifest(stage, INSTALL_MANIFEST, "x2c-native-v1");

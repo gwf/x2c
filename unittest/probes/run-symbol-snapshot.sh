@@ -104,7 +104,16 @@ copy_runtime_sources "$cold_root/lib/"
 "$cold_root/bin/x2c" translate --out-dir "$BUILD/cold" "$ROOT/examples/foreach.x"
 diff -u "$BUILD/cold/foreach.c" "$BUILD/default/foreach.c"
 diff -u "$BUILD/cold/foreach.h" "$BUILD/default/foreach.h"
-[[ -n "$("$X2C" env prelude)" ]]
+# Interfaces its own compiler wrote make the same home replay the prelude
+# and still produce the same C.
+mkdir -p "$BUILD/cold-interfaces" "$BUILD/warm"
+"$cold_root/bin/x2c" translate --out-dir "$BUILD/cold-interfaces" \
+  "$cold_root"/lib/*.x >/dev/null 2>&1
+cp "$BUILD/cold-interfaces/"*.xi "$cold_root/lib/"
+[[ -n "$("$cold_root/bin/x2c" env prelude)" ]]
+"$cold_root/bin/x2c" translate --out-dir "$BUILD/warm" "$ROOT/examples/foreach.x"
+diff -u "$BUILD/warm/foreach.c" "$BUILD/default/foreach.c"
+diff -u "$BUILD/warm/foreach.h" "$BUILD/default/foreach.h"
 
 # Collection must translate every source the fixture suite does not already
 # reach. `make build` covers src/ and lib/, and the compiler fixtures cover

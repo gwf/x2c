@@ -222,8 +222,9 @@ build collected. The prelude is the runtime `x2c.xi` interface from the
 library batch, so a stage build produces the prelude the next batch and the
 next stage replay when the stage compilers are byte-identical, as they are
 once the bootstrap matches the source. No tracked file is both an input and
-an output of a build. `x2c env prelude` prints the interface a compiler
-would replay; an empty value means the compiler walks the source of
+an output of a build. An installation writes its runtime interfaces with
+the compiler it installs. `x2c env prelude` prints the prelude interface
+this compiler wrote; an empty value means the compiler walks the source of
 `lib/x2c.x`, which costs about a quarter of a second per process.
 
 `--cpp-symbols` and `--live-symbols` discover symbols through the host C

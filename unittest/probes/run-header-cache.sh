@@ -1016,14 +1016,15 @@ int main(void) {
   return 0;
 }
 EOF_NATIVE_ALIASES
-cp "$ROOT"/builds/0/lib/*.xi "$FAKE/builds/0/lib/"
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir builds/0/lib lib/*.x) \
+  >/dev/null 2>&1 || fail "the fake stage could not write its interfaces"
 for mode in cached cold live; do
   output="$FAKE/native-$mode"
   mkdir -p "$output"
   flags=()
   if [[ $mode == cached ]]; then
     [[ -n "$(cd "$FAKE" && ./builds/0/x2c env prelude)" ]] ||
-      fail "copied stage interfaces did not resolve as the prelude"
+      fail "the stage interfaces did not resolve as the prelude"
   fi
   if [[ $mode == cold ]]; then rm "$FAKE/builds/0/lib/"*.xi; fi
   if [[ $mode == live ]]; then flags=(--live-symbols); fi

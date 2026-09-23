@@ -293,10 +293,11 @@ static void _keep_published_rows(Map statics, Map overlay) {
    `#pragma private` alike, so its declaration row never crosses an include.
    The published marker names the defining file, which lets an including unit
    report a reference to the name instead of emitting a prototype that no
-   object defines. Only `.x` units publish markers; a C header's static
-   inline functions belong to every file that includes it. */
+   object defines. The file is spelled home-portably, as interfaces spell
+   paths. Only `.x` units publish markers; a C header's static inline
+   functions belong to every file that includes it. */
 static void _publish_unit_statics(Map statics, Map overlay, String path) {
-  List owner = %($path);
+  List owner = %(${home_portable_path(path)});
   foreach (Var key, statics.keys())
     match (%($key)) case %((function ?(String name))): {
       overlay.del(%($name));
@@ -747,11 +748,19 @@ static List _interface_candidates(String canonical) {
   return paths.list_free();
 }
 
-/** Returns the readable prelude interface path, or NULL when none exists. */
+/** Returns the path of the first prelude interface this compiler wrote, or
+    NULL when there is none. Its source hashes are not checked.
+*/
 String interface_prelude(void) {
   String runtime = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
-  foreach (String path, _interface_candidates(runtime))
-    if (!access(path, R_OK)) return path;
+  String header = %"(interface 3 \"${x2c_compiler_identity()}\" ";
+  foreach (String path, _interface_candidates(runtime)) {
+    String text = NULL;
+    try text = Path.read_text(path);
+    catch %(not-found *): continue;
+    catch %(io-fail *): continue;
+    if (text.startswith(header)) return path;
+  }
   return NULL;
 }
 

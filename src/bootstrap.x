@@ -219,6 +219,41 @@ CliRequest bootstrap_build_request(
   return request;
 }
 
+/** Writes the prefix's runtime interfaces with its installed compiler.
+    An interface replays only for the compiler that wrote it, so the native
+    compiler translates the runtime sources as a stage build's library batch
+    does, and each `lib/<stem>.xi` is then replaced atomically. Sources are
+    named relative to the prefix, which the compiler resolves through any
+    symbolic link. A failed translation or write prints a bootstrap
+    diagnostic and exits with status 2.
+*/
+void bootstrap_write_interfaces(Bootstrap b) {
+  String prefix = b.prefix, out = ".x2c-build/interfaces";
+  Path.make_dirs(%"$prefix/$out");
+  Array sources = [];
+  foreach (String source, b.runtime_srcs)
+    sources.push(source.remove_prefix(%"$prefix/"));
+  Job translate =
+    %("$prefix/bin/x2c" "translate" "--out-dir" $out @{sources.list()})
+      .job().options({dir: prefix, env: {"X2C_HOME": "."},
+                      stdout: <capture>, stderr: <capture>});
+  int status = 127;
+  try status = translate.status();
+  catch %(not-found *): {}
+  catch %(io-fail *): {}
+  if (status)
+    _error(%"cannot write runtime interfaces: ${translate.errors_text}");
+  Array outputs = [];
+  foreach (String source, b.runtime_srcs) {
+    String name = %"${Path.stem(source)}.xi";
+    outputs.push(%"$prefix/lib/$name");
+    outputs.push(Path.read_text(%"$prefix/$out/$name"));
+  }
+  try file_publish(outputs.list_free());
+  catch %(not-found *detail): x2c_host_error(detail);
+  catch %(io-fail *detail): x2c_host_error(detail);
+}
+
 /** Records the resolved host tools and then publishes bootstrap completion.
     The completion marker is written only after the toolchain record succeeds.
     The call does not update `payload.complete`. A directory, record, or marker

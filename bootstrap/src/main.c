@@ -972,6 +972,8 @@ CliRequest bootstrap_build_request(CliRequest, Bootstrap, Symbol);
 
 String Symbol_str(Symbol);
 
+void bootstrap_write_interfaces(Bootstrap);
+
 void bootstrap_record_install(Bootstrap, String, String);
 
 void Context_close(Context);
@@ -1006,6 +1008,7 @@ static int _run_bootstrap(CliRequest command){
 
   }
   if(! result){
+    bootstrap_write_interfaces(payload);
     bootstrap_record_install(payload, request -> cc, request -> ar);
     printf("x2c: installed native compiler at %s/bin/x2c\n", payload -> prefix);
   }
