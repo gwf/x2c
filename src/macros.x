@@ -2198,7 +2198,7 @@ static Atom _replacement_binder(Var binder, String projection, int seq) {
 static Atom _local_binder(Var key) {
   match (key) case %(tag ?(String tag)):
     return Atom.intern(%"?__macro_tag_$tag");
-  return Atom.intern(%"?__macro_local_${key.str()}");
+  return Atom.intern(%"?__macro_local_${key}");
 }
 
 static Var _replace_definition_bindings(Var value, Map bindings) {
