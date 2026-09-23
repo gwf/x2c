@@ -1175,7 +1175,7 @@ parameters and preceding declarations captured by a local macro. A declaration
 written in a body receives a fresh binding identity and a private generated C
 spelling for each expansion. A field keeps its spelling, because C scopes it
 to its aggregate, and an anonymous aggregate is a distinct type in each
-expansion. A body local passed to a nested macro's `Name` hole is that
+expansion. A visible body local passed to a nested macro's `Name` hole is that
 expansion's binding, so the nested macro can read and assign it.
 
 Most generated declarations need no directive: writing `int temporary` in a

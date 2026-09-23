@@ -1,6 +1,11 @@
-// A template local passed to a nested macro's Name hole is that
-// expansion's local, so the nested macro can assign it.
+// A visible template local passed to a nested macro's Name hole is that
+// expansion's local, so the nested macro can assign it. An outer name keeps
+// its binding, and a member position receives the written spelling.
 #include "x2c.x"
+
+typedef struct { int value; } Cell;
+Cell cell = {7};
+int counter = 10;
 
 macro Statement $set(Type $type, name $target) {
   typedef $type S;
@@ -13,7 +18,15 @@ macro Decorator $bump(Block $target, name $counter) {
   $counter = $counter + 1;
 }
 
-macro Unit $outer(Type $type, name $get) {
+macro Expression $field(name $object, name $member) => $object.$member;
+
+macro Unit $box(name $member) {
+  struct Box { int $member; };
+}
+
+macro Unit $outer(Type $type, name $get, name $count, name $read) {
+  static int value = 2;
+  $box(value);
   typedef $type S;
   S $get(void) {
     S value = 0;
@@ -21,12 +34,22 @@ macro Unit $outer(Type $type, name $get) {
     $bump(value) { value = value * 2; }
     return value;
   }
+  int $count(void) {
+    int counter = 1;
+    $bump(counter) {}
+    return counter;
+  }
+  int $read(void) {
+    struct Box box = {5};
+    $bump(counter) {}
+    return box.value + value + $field(cell, value) + counter;
+  }
 }
 
-$outer(int, int_get);
-$outer(long, long_get);
+$outer(int, int_get, int_count, int_read);
 
 int main(void) {
-  printf("%d %ld\n", int_get(), long_get());
-  return int_get() == 11 && long_get() == 11 ? 0 : 1;
+  int get = int_get(), count = int_count(), read = int_read();
+  printf("%d %d %d\n", get, count, read);
+  return get == 11 && count == 2 && read == 25 ? 0 : 1;
 }

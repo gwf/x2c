@@ -257,11 +257,12 @@ cmp -s "$FAKE/extout/uses-ext-twice.c" "$FAKE/extwarm/uses-ext-twice.c" ||
 
 # Case 4a: collection records the functions an imported Unit macro
 # generates, so an including unit types their calls from a cold walk and
-# from the owner's interface alike.
+# from the owner's interface alike. A generated static stays in its unit.
 mkdir -p "$FAKE/gencold" "$FAKE/genwarm"
 cat >"$FAKE/src/gen.xmacro" <<'EOF'
 macro Unit $gen(Type $type, name $next) {
-  $type $next($type value) => value + 1;
+  static $type step($type value) => value + 1;
+  $type $next($type value) => step(value);
 }
 EOF
 cat >"$FAKE/src/gen-owner.x" <<'EOF'
@@ -277,6 +278,9 @@ EOF
 grep -q '(("gen_next") ((func ((long))) long))' \
   "$FAKE/genwarm/gen-owner.xi" ||
   fail "interface is missing a macro-generated function"
+grep -q '(("unit-static" "_x2c_macro_step_0")' \
+  "$FAKE/genwarm/gen-owner.xi" ||
+  fail "interface publishes a macro-generated static function"
 (cd "$FAKE" && ./builds/0/x2c translate --out-dir genwarm src/gen-use.x)
 grep -q 'long_var(gen_next(1))' "$FAKE/gencold/gen-use.c" ||
   fail "a macro-generated function call was not typed"

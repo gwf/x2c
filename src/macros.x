@@ -3044,12 +3044,12 @@ static Var _parse_argument(Compiler c, Symbol kind) {
           c.token, NULL);
       String spelling = c.token.text;
       c.next();
-      // A template local passes its identity, which each expansion renames.
+      // A visible template local passes its identity, which each expansion
+      // renames.
       Map locals = c.macro_holes ? c.macro_definition_locals() : NULL;
-      Var local;
-      if ((void *) locals != NULL && locals.try_get(spelling, &local))
-        return local;
-      return spelling;
+      List local = (void *) locals != NULL
+                 ? c.sym.lookup(%($spelling), NULL) : NULL;
+      return local && locals.contains(local) ? local : spelling;
     }
     case <literal>:
       if (c.macro_holes && c.peek(0) == <$>) return c.parse_assignment();
@@ -3116,6 +3116,43 @@ static void _bind_name_arguments(
     parameters = parameters.cdr();
     captures = captures.cdr();
   }
+}
+
+/* A Name hole in a member position supplies the captured spelling, so a
+   template local passed there keeps the spelling its source wrote. */
+static List _member_bindings(Compiler c, List parameters, List input) {
+  List captures = NULL, bindings = NULL;
+  match (input) {
+    case %(args *rows): captures = rows;
+    case %(target (args *rows) ?): captures = rows;
+  }
+  foreach (List parameter, parameters) {
+    List capture = captures.car();
+    captures = captures.cdr();
+    if (parameter.assoc(<kind>) != <name> ||
+        parameter.assoc(<sequence>).int())
+      continue;
+    Var value = capture.assoc(<value>), spelling;
+    if (value is <list> && c.semantic_binding_facts().try_get(
+          %(source-spelling $value), &spelling))
+      value = spelling;
+    Var member = _replacement_binder(parameter.assoc(<binder>), "member", 0);
+    bindings = cons(%($member $value), bindings);
+  }
+  return bindings;
+}
+
+/** Parses a member name in a template. A singular `Name` hole there
+    supplies its captured spelling rather than a hygienic binding.
+*/
+List Compiler.try_parse_macro_member(Compiler c) {
+  List hole = c.peek_macro_hole();
+  List slot = c.try_parse_macro_slot(<name>);
+  if (!slot || !hole || hole.assoc(<kind>) != <name> ||
+      hole.assoc(<sequence>).int())
+    return slot;
+  return %(macro-bind ${_replacement_binder(
+    hole.assoc(<binder>), "member", 0)});
 }
 
 static List _invocation_node(
@@ -3230,8 +3267,14 @@ List Compiler.expand_macro_invocation_node(
             List hole = _hole(binder, <name>, 0);
             fresh_values.push(_capture_row(_, hole, %($binding)));
           }
-          else direct_bindings = cons(%($binder $binding), direct_bindings);
+          else {
+            _.semantic_binding_facts()[%(source-spelling $binding)] =
+              spelling.str();
+            direct_bindings = cons(%($binder $binding), direct_bindings);
+          }
         }
+        direct_bindings = direct_bindings.append(_member_bindings(
+          _, definition.assoc(<parameters>), input));
         List fresh_input = fresh_values.list_free();
         List match_input = fresh_input
           ? input.append(%((fresh @fresh_input))) : input;

@@ -611,7 +611,7 @@ static List _materialize_delegate_receiver(List receiver, List path) {
 
 static List _parse_field_name(Compiler compiler, Symbol op_sym, List lhs_opt) {
   compiler.require_input();
-  List slot = compiler.try_parse_macro_slot(<name>);
+  List slot = compiler.try_parse_macro_member();
   if (slot) return %($slot);
   String field_name = compiler.token.text;
   if (!field_name || !field_name.is_identifier()) {

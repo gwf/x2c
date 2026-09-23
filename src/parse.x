@@ -908,7 +908,7 @@ static List _direct_declarator(
   Compiler c, Type context, List *method_identity, Token *source_first,
   Token *source_after) {
   // A member keeps its spelling in a template: C scopes it to its aggregate.
-  int member = context.is_aggregate_tag();
+  int member = context.is_aggregate();
   // Parenthesized declarator: ( declarator )
   if (c.peek(0) == <(>) {
     c.next();
@@ -978,7 +978,9 @@ static List _direct_declarator(
         List slot = c.try_parse_macro_slot(<name>);
         return %(bind $slot ());
       }
-      case <$>: return %(bind ${c.try_parse_macro_slot(<name>)} ());
+      case <$>:
+        return %(bind ${member ? c.try_parse_macro_member()
+                               : c.try_parse_macro_slot(<name>)} ());
       case <ident>: {
         String spelling = c.token.text;
         int shadows_with = !!c.with_binding();
@@ -2432,7 +2434,11 @@ List Compiler.bind_syntax(
         if (_.shallow) {
           match (declaration)
             case %(declare ?type (bindings (bind ?binding ?))): {
-              _.fn_defs[binding_identity_spelling(binding)] = 1;
+              String name = binding_identity_spelling(binding);
+              // A static definition stays in its unit, as in source.
+              if (type.type().is_static())
+                _.sym.mark_static(%(function $name));
+              else _.fn_defs[name] = 1;
               _.record_declaration_visibility(declaration);
             }
           return %(declaration-function $declaration $body

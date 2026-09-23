@@ -1,6 +1,14 @@
 // An anonymous aggregate in a macro template is a new type in each
-// expansion, and its members keep their spellings for member access.
+// expansion, and its members keep their spellings for member access,
+// including members a Field macro supplies.
 #include "x2c.x"
+
+macro Field $timestamps() {
+  long created_at;
+  long updated_at;
+}
+
+typedef struct { int id; $timestamps(); } Record;
 
 macro Unit $cell(Type $type, name $sum) {
   typedef struct {
@@ -34,7 +42,9 @@ $box(short, box_get);
 int main(void) {
   int one = 1;
   unsigned long two = 2;
-  printf("%d %lu %d\n", int_sum(2, &one), wide_sum(5, &two), box_get());
+  Record record = {1, 2, 3};
+  printf("%d %lu %d %ld\n", int_sum(2, &one), wide_sum(5, &two), box_get(),
+         record.updated_at);
   return int_sum(2, &one) == 3 && wide_sum(5, &two) == 7 &&
-         box_get() == 8 ? 0 : 1;
+         box_get() == 8 && record.updated_at == 3 ? 0 : 1;
 }
