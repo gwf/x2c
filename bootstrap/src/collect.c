@@ -60,8 +60,6 @@ static String _canonical_include(void);
 
 static String _canonical_src(void);
 
-static int _package_keeps_spellings(String path);
-
 static String _canonical_cwd(void);
 
 static String _resolve_include_dirs(SourceView sources, List extra_dirs, String includer_dir, String target, int angle, int * covered);
@@ -91,6 +89,8 @@ static String _include_text(Compiler c, String target, String path);
 static void _walk_apart(Compiler c, String path, String text, Map globs, Map visited);
 
 static List _walk_cold(Compiler c, String target, String canonical, Map globs, Map visited);
+
+static int _package_owns(Compiler c, String path);
 
 static void _parse_segment(Compiler c, String path, String source, String text, int start_line, int start_pos, Map globs, Map overlay, Map definitions, Map dependencies, int private);
 
@@ -382,18 +382,12 @@ static String _canonical_src(void){
   return _cached_canonical(cache, String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_2), NULL))));
 }
 
-int x2c_source_file(String);
-
-int String_startswith(String, String);
-
-static int _package_keeps_spellings(String path){
-  return ! x2c_source_file(path) || String_startswith(path, String_join(NULL, cons(String_var(_canonical_lib()), cons(String_var(_3), NULL)))) || String_startswith(path, String_join(NULL, cons(String_var(_canonical_include()), cons(String_var(_3), NULL))));
-}
-
 static String _canonical_cwd(void){
   static char cache[PATH_MAX];
   return _cached_canonical(cache, _154);
 }
+
+int String_startswith(String, String);
 
 int SourceView_exists(SourceView, String);
 
@@ -626,7 +620,15 @@ static List _walk_cold(Compiler c, String target, String canonical, Map globs, M
   return Var_list(Map_getindex(_process_cache(), String_var(canonical)));
 }
 
+static int _package_owns(Compiler c, String path){
+  if(! String_truth(c -> package)) return 0;
+  Var root = Map_getindex(c -> package_roots, String_var(c -> package));
+  return ! Var_is_void(root) && String_startswith(path, String_join(NULL, cons(String_var(_canonical_path(Var_string(root))), cons(String_var(_3), NULL))));
+}
+
 Compiler Compiler_new_shared(Compiler);
+
+int x2c_source_file(String);
 
 void Compiler_take_unit_state(Compiler, Compiler);
 
@@ -652,7 +654,7 @@ static void _parse_segment(Compiler c, String path, String source, String text, 
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
     int unit = x2c_source_file(path);
-    if(_package_keeps_spellings(path)) shadow -> package = NULL;
+    if(! unit || ! _package_owns(c, path)) shadow -> package = NULL;
     shadow -> filename = path;
     shadow -> source_private = private;
     Compiler_take_unit_state(shadow, c);
@@ -975,7 +977,7 @@ List String_split(String, String);
 
 static void _package_merge(Compiler compiler, String name, String root, String path, Map part, Map merged, Token token){
   String prefix = String_join(NULL, cons(String_var(name), cons(String_var(_67), NULL)));
-  int header = _package_keeps_spellings(path);
+  int header = ! x2c_source_file(path) || String_startswith(path, String_join(NULL, cons(String_var(_canonical_lib()), cons(String_var(_3), NULL)))) || String_startswith(path, String_join(NULL, cons(String_var(_canonical_include()), cons(String_var(_3), NULL))));
   int foreign = ! String_startswith(path, String_join(NULL, cons(String_var(root), cons(String_var(_3), NULL))));
   {
     Var key, value;
@@ -1074,7 +1076,7 @@ Map Sym_base_symbols(Sym);
 void Sym_set(Sym, List, List);
 Map Sym_current_symbols(Sym);
 void Compiler_collect_package(Compiler c, String name, Token token){
-  if(! _init_guard_) _file_init_();  if(Map_contains(c -> package_roots, String_var(name))) return;  String root = NULL, entry = _package_entry(c, name, & root);  if(! String_truth(entry)) Compiler_report_error(c, 306819428, String_join(NULL, cons(String_var(_95), cons(String_var(name), cons(String_var(_72), NULL)))), token, cons(String_var(String_join(NULL, cons(String_var(_96), cons(String_var(name), cons(String_var(_53), cons(String_var(name), cons(String_var(_97), cons(String_var(name), cons(String_var(_3), cons(String_var(name), cons(String_var(_54), NULL))))))))))), NULL));  Compiler package = Compiler_new_shared(c); {
+  if(! _init_guard_) _file_init_();  if(Map_contains(c -> package_roots, String_var(name))) return;  String root = NULL, entry = _package_entry(c, name, & root);  if(! String_truth(entry)) Compiler_report_error(c, 306819428, String_join(NULL, cons(String_var(_95), cons(String_var(name), cons(String_var(_72), NULL)))), token, cons(String_var(String_join(NULL, cons(String_var(_96), cons(String_var(name), cons(String_var(_53), cons(String_var(name), cons(String_var(_97), cons(String_var(name), cons(String_var(_3), cons(String_var(name), cons(String_var(_54), NULL))))))))))), NULL));  Map_setindex(c -> package_roots, String_var(name), String_var(root));  Compiler package = Compiler_new_shared(c); {
   _x2c_defer_env_2 _x2c_defer_env_6 = {._x2c_defer_capture_4 =(const void *) & c, ._x2c_defer_capture_5 =(const void *) & package};
   X2CCleanup _x2c_defer_record_2 = {
     .fn = _x2c_defer_cleanup_2,
@@ -1096,7 +1098,6 @@ void Compiler_collect_package(Compiler c, String name, Token token){
     Map_setindex(walked, String_var(entry), int_var(1));
     Compiler_add_translation_dependency(c, entry);
     _package_contributions(c, name, root, entry, Var_list(Map_getindex(_process_cache(), String_var(entry))), merged, walked, token);
-    Map_setindex(c -> package_roots, String_var(name), String_var(root));
     {
       Var key, value;
       Map _x2c_macro_object_15 = merged;
