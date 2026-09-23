@@ -48,9 +48,9 @@ execution.
 - [Post-merge stabilization](post-merge-stabilization-2026-09-23.md): local
   compiler, runtime, package, and tooling repairs have focused evidence but
   await final integrated validation and delivery to `dev`. Fresh-home
-  generated Lisp regeneration currently fails after its first artifact; the
-  [reproducibility record](generated-lisp-reproducibility.md) has the bounded
-  result.
+  generated Lisp regeneration passed twice on the local bootstrap bridge; the
+  [reproducibility record](generated-lisp-reproducibility.md) retains that
+  bounded result and the final-tree boundary.
 
 - [Internal adoption campaign](internal-adoption-campaign.md): ready-now
   macro, managed-lifetime and extensionless-script dogfooding, followed by

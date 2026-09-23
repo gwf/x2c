@@ -1,9 +1,8 @@
 # Reproducible generated Lisp names
 
-> Status: active - current stabilization artifact refresh is unresolved.
-> Recorded 2026-09-20 at 231550b0. The original naming drift did not reproduce
-> at reviewed `0bdc8398`, but later local compiler changes have not completed
-> a fresh-home generation pass. This is not yet delivered to `dev`.
+> Status: active - repaired on the local bootstrap bridge; final integrated
+> validation and delivery to `dev` remain. The original naming drift did not
+> reproduce at reviewed `0bdc8398`.
 
 ## Observed issue
 
@@ -34,8 +33,12 @@ The next `builtin-macros` generation failed reading that init with
 commit `30c206f2` also rewrote init and failed on the next attempt. This is
 a current generated-artifact/lowering transition, not evidence that
 nondeterministic name allocation returned.
-Refresh and repeat both passes on the final compiler tree before closing this
-record; do not infer completion from the earlier review or from a warm home.
+The refreshed bootstrap at local bridge `88d1bd86` (integrated as `6de15600`)
+includes the C3 native bindings needed by the generated Lisp forms. On that
+bridge, fresh source-only homes generated all three Lisp artifacts with both
+the bootstrap and stage-0 compilers; each second pass was byte-identical. This
+resolves the malformed-form failure on the bridge. Repeat on the final
+integrated tree before closing this record.
 
 ## Earlier proposal and current acceptance
 
@@ -44,7 +47,7 @@ points in `tools/gen-lisp-init.py`. Prefer a deterministic naming scope per
 artifact using existing lowering machinery, if it preserves uniqueness across
 functions, nested helpers, and imported definitions. This is a direction to
 validate, not a settled counter-reset design. The reviewed tree did not need
-that reset; the current malformed generated form needs a separate cause.
+that reset; the malformed generated form came from stale bootstrap bindings.
 Do not rename emitted Lisp text.
 
 Fresh-source, warm-interface, and stage-2 generation should produce identical
