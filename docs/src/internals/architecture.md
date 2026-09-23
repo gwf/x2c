@@ -201,26 +201,30 @@ by real path, so include cycles terminate.
 
 A file's contribution is collected once per process. Translating a unit
 also writes it beside the generated C as a unit interface, `<stem>.xi`: the
-ordered declaration maps, include placeholders, and `private` and `public`
-markers for the visibility pragmas, the source content hash,
-function definitions, and the macro, Lisp, and embedded-text files the walk
-read with their hashes. A declaration map below a `private` marker holds only
-what that region publishes, so an including unit never sees a private type or
-static helper, and a package's surface stops at that marker. The file holds one
-`(interface 2 "path" "hash" (PARTS...) (DEFINITIONS...) (DEPENDENCIES...))`
-form in `%()` List syntax, with bare Atoms for its structural words and
-Strings for identifiers; the reader reads that one form without evaluating
-it. Before walking a file's source, collection looks for
+identity of the compiler that wrote it, the ordered declaration maps,
+include placeholders, and `private` and `public` markers for the visibility
+pragmas, the source content hash, function definitions, and the macro, Lisp,
+and embedded-text files the walk read with their hashes. A declaration map
+below a `private` marker holds only what that region publishes, so an
+including unit never sees a private type or static helper, and a package's
+surface stops at that marker. The file holds one
+`(interface 3 "compiler" "path" "hash" (PARTS...) (DEFINITIONS...)
+(DEPENDENCIES...))` form in `%()` List syntax, with bare Atoms for its
+structural words and Strings for identifiers; the reader reads that one form
+without evaluating it. Before walking a file's source, collection looks for
 its interface in the output directory, then in the directory that mirrors
 the file's home-relative path under the compiler's stage directory (or under
 an installed home), then in a package's `builds/`. An interface is used only
-when its recorded path and every hash still match; otherwise collection
-walks the source. The prelude is the runtime `x2c.xi` interface from the
+when its recorded compiler, path, and every hash still match; otherwise
+collection walks the source. The compiler identity is a digest of the
+executable's contents, so a changed compiler never replays rows an earlier
+build collected. The prelude is the runtime `x2c.xi` interface from the
 library batch, so a stage build produces the prelude the next batch and the
-next stage replay, and no tracked file is both an input and an output of a
-build. `x2c env prelude` prints the interface a compiler would replay; an
-empty value means the compiler walks the source of `lib/x2c.x`, which costs
-about a quarter of a second per process.
+next stage replay when the stage compilers are byte-identical, as they are
+once the bootstrap matches the source. No tracked file is both an input and
+an output of a build. `x2c env prelude` prints the interface a compiler
+would replay; an empty value means the compiler walks the source of
+`lib/x2c.x`, which costs about a quarter of a second per process.
 
 `--cpp-symbols` and `--live-symbols` discover symbols through the host C
 preprocessor: the toolchain force-loads `lib/x2c.x` and runs `cc -E -P` as a

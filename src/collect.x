@@ -693,9 +693,11 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
 // unit interfaces
 
 /* A `.xi` interface is one unit's cache entry written beside its generated
-   C. Missing, stale, or malformed interfaces are cache misses; the caller
-   walks the file cold and installs that result in the process cache. Paths
-   inside an interface use `home_portable_path` spellings. */
+   C. It records the identity of the compiler that wrote it, because a
+   different compiler may collect different rows from the same source.
+   Missing, stale, foreign, or malformed interfaces are cache misses; the
+   caller walks the file cold and installs that result in the process cache.
+   Paths inside an interface use `home_portable_path` spellings. */
 
 static String interface_out_dir = NULL, interface_mirror = NULL;
 
@@ -778,10 +780,10 @@ static int _hash_matches(Compiler compiler, String path, Var expected) {
   return String.equal(hash, expected);
 }
 
-/* Materialize one interface file only after its source path and hash, and
-   the content hashes of the includes, macros, Lisp, and embedded text it
-   depends on, validate. The entry uses process_cache_scope ownership and the
-   same ordered parts representation as a cold walk. */
+/* Materialize one interface file only after its compiler identity, source
+   path and hash, and the content hashes of the includes, macros, Lisp, and
+   embedded text it depends on, validate. The entry uses process_cache_scope
+   ownership and the same ordered parts representation as a cold walk. */
 static List _interface_load(Compiler c, String canonical, String path) {
   String source = NULL;
   File input = fopen(path, "r");
@@ -796,9 +798,12 @@ static List _interface_load(Compiler c, String canonical, String path) {
   catch %(malformed *): return NULL;
   if (status != <value> || record is not <list>) return NULL;
   match (record)
-    case %(interface 2 ?(String owner) ?(String hash) ?(List stored_parts)
-           ?(List definitions) ?(List stored_dependencies)): {
-      if (!home_absolute_path(owner).equal(canonical) ||
+    case %(interface 3 ?(String compiler) ?(String owner) ?(String hash)
+           ?(List stored_parts) ?(List definitions)
+           ?(List stored_dependencies)): {
+      String identity = x2c_compiler_identity();
+      if (!identity || !compiler.equal(identity) ||
+          !home_absolute_path(owner).equal(canonical) ||
           !_hash_matches(c, canonical, hash)) return NULL;
       return _interface_entry(
         c, canonical, hash, stored_parts, definitions, stored_dependencies);
@@ -940,8 +945,8 @@ static int _write_interface_entry(Buffer out, String canonical, List entry) {
   List dependency_list = dependencies.list_free();
   List part_list = parts.list_free();
   List record = %(
-    interface 2 ${home_portable_path(canonical)} $hash
-    $part_list $definitions $dependency_list
+    interface 3 ${x2c_compiler_identity()} ${home_portable_path(canonical)}
+    $hash $part_list $definitions $dependency_list
   );
   if (!_write_datum(out, record)) return 0;
   out.write_char('\n');

@@ -181,17 +181,17 @@ cp "$BUILD/src/bar.x" "$BUILD/src/hdr.x" "$BUILD/src/anon.x" \
 # Case 3: interface replay and staleness.  Headers translated as units
 # leave their .xi in the output directory; a later unit including them must
 # reproduce the cold bytes from those interfaces; tampered interfaces must
-# change the outcome (proving replay is live) until a header's own edit
-# invalidates it through its content hash; an unreadable interface form is
-# ignored.
+# change the outcome (proving replay is live) until another compiler build
+# rejects them by identity or a header's own edit invalidates them through
+# its content hash; an unreadable interface form is ignored.
 mkdir -p "$FAKE/cold" "$FAKE/warm" "$FAKE/tampered" "$FAKE/rejected" \
-  "$FAKE/v1"
+  "$FAKE/v1" "$FAKE/foreign"
 (cd "$FAKE" && ./builds/0/x2c translate --out-dir cold src/unit.x)
 for out in warm tampered rejected v1; do
   (cd "$FAKE" && ./builds/0/x2c translate --out-dir "$out" \
     src/bar.x src/hdr.x)
 done
-grep -q '^(interface 2 "src/hdr.x"' "$FAKE/warm/hdr.xi" ||
+grep -Eq '^\(interface 3 "[0-9a-f]{16}" "src/hdr.x"' "$FAKE/warm/hdr.xi" ||
   fail "interface is missing the scratch header entry"
 grep -q '(self "CacheSelfBase_rest")' "$FAKE/warm/hdr.xi" ||
   fail "interface is missing receiver-relative method metadata"
@@ -217,6 +217,15 @@ sed 's/"Foo"/"Fpo"/g' "$FAKE/warm/bar.xi" >"$FAKE/tampered/bar.xi"
   >/dev/null 2>&1 || true
 cmp -s "$FAKE/cold/unit.c" "$FAKE/tampered/unit.c" &&
   fail "tampered interface rows did not reach replay (test is vacuous)"
+
+# Appended bytes make a different compiler build with the same behavior.
+cp "$FAKE/builds/0/x2c" "$FAKE/builds/0/x2c-other"
+printf 'another compiler build' >>"$FAKE/builds/0/x2c-other"
+cp "$FAKE/tampered/hdr.xi" "$FAKE/tampered/bar.xi" "$FAKE/foreign/"
+(cd "$FAKE" && ./builds/0/x2c-other translate --out-dir foreign src/unit.x) ||
+  fail "another compiler build failed on a foreign interface"
+cmp -s "$FAKE/cold/unit.c" "$FAKE/foreign/unit.c" ||
+  fail "another compiler build replayed a foreign interface"
 
 cp "$FAKE/tampered/hdr.xi" "$FAKE/rejected/hdr.xi"
 printf '// edited after its interface was written\n' >>"$FAKE/src/hdr.x"

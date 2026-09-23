@@ -93,7 +93,7 @@ static void Bootstrap._verify(Bootstrap b, List records, String root) {
       Path.copy_file(%"/zip/x2c/$relative", installed);
     }
     String text = installed.read_text();
-    uint64_t hash = build_hash_bytes(
+    uint64_t hash = x2c_fnv_bytes(
       UINT64_C(1469598103934665603), text, text.len());
     if (text.len() != expected_size || hash != (uint64_t) expected_hash)
       _error_path("source failed verification", installed);

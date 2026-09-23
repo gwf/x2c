@@ -29,7 +29,7 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 STAGE = ROOT / "builds" / "0"
-INTERFACE_VERSION = 2
+INTERFACE_VERSION = 3
 UINT32 = 0xFFFFFFFF
 UINT64 = 0xFFFFFFFFFFFFFFFF
 # String.escape emits these and nothing else; anything outside [32,126] becomes
@@ -251,7 +251,7 @@ class HeaderSymbols:
             if len(tree) != 1 or not isinstance(tree[0], list):
                 raise ValueError("interface is not a single s-expression")
             node = tree[0]
-            if len(node) != 7 or node[0] != "interface":
+            if len(node) != 8 or node[0] != "interface":
                 raise ValueError("file is not an interface form")
             if node[1] != INTERFACE_VERSION:
                 raise ValueError(
@@ -259,14 +259,14 @@ class HeaderSymbols:
                     f"{INTERFACE_VERSION}; src/collect.x:interface_text "
                     "changed shape"
                 )
-            self._entries[str(node[2])] = node
+            self._entries[str(node[3])] = node
         self._cache: dict[str, dict[str, object]] = {}
 
     def paths(self) -> tuple[str, ...]:
         return tuple(sorted(self._entries))
 
     def file_hash(self, path: str) -> str:
-        return str(self._entries[path][3])
+        return str(self._entries[path][4])
 
     def rows(self, path: str) -> dict[str, object]:
         """Every symbol in the entry, unioning all rows tables.
@@ -278,7 +278,7 @@ class HeaderSymbols:
         if path in self._cache:
             return self._cache[path]
         table: dict[str, object] = {}
-        for part in self._entries[path][4]:
+        for part in self._entries[path][5]:
             if not isinstance(part, list):
                 continue
             for row in part:
@@ -319,7 +319,7 @@ class HeaderSymbols:
                 elif isinstance(binding, list) and len(binding) == 1:
                     names.append(str(binding[0]))
 
-        for part in self._entries[path][4]:
+        for part in self._entries[path][5]:
             if not isinstance(part, list):
                 continue
             for row in part:

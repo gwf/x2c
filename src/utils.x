@@ -203,6 +203,7 @@ void file_publish(List outputs) {
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/file.h>
@@ -250,6 +251,55 @@ static void _prepare_repo_defaults(void) {
   x2c_base_include_dirs = cons(include_dir, NULL);
   x2c_repo_cpp_include_dirs = Path.is_dir(src_dir)
     ? %( $src_dir $lib_dir ) : %( $lib_dir );
+}
+
+// content identity
+
+/** Returns `hash` extended with `length` `bytes` by 64-bit FNV-1a. */
+uint64_t x2c_fnv_bytes(uint64_t hash, const void *bytes, size_t length) {
+  const unsigned char *data = bytes;
+  for (size_t i = 0; i < length; i++) {
+    hash ^= data[i];
+    hash *= UINT64_C(1099511628211);
+  }
+  return hash;
+}
+
+/** Returns `hash` extended with the contents of the file at `path`.
+    A missing or unreadable file clears `ok`.
+*/
+uint64_t x2c_fnv_file(uint64_t hash, String path, int *ok) {
+  File input = fopen(path, "rb");
+  if (!input) {
+    *ok = 0;
+    return hash;
+  }
+  unsigned char buffer[16384], size_t length;
+  while ((length = fread(buffer, 1, sizeof(buffer), input)))
+    hash = x2c_fnv_bytes(hash, buffer, length);
+  if (ferror(input)) *ok = 0;
+  input.close();
+  return hash;
+}
+
+/** Returns the running compiler's identity, the FNV-1a digest of its
+    executable's contents in 16 hexadecimal digits, or NULL when the
+    executable is unknown or unreadable. Only byte-identical compilers share
+    an identity. The executable is read once per process.
+*/
+String x2c_compiler_identity(void) {
+  static char digest[17];
+  static int hashed = 0;
+  if (!hashed && x2c_executable_path) {
+    int ok = 1;
+    uint64_t hash = x2c_fnv_file(
+      UINT64_C(1469598103934665603), x2c_executable_path, &ok);
+    if (ok)
+      snprintf(
+        digest, sizeof(digest), "%016llx", (unsigned long long) hash);
+  }
+  hashed = 1;
+  return *digest ? String.new(digest) : NULL;
 }
 
 // workers
