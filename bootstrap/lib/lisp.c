@@ -3862,10 +3862,6 @@ static Var _call_lambda_slots(Lisp lisp, Lambda lambda, const Var * values, int 
         }
         Scope * caller_owner = lisp -> automatic_owner;
         Scope * caller_result_owner = lisp -> result_owner;
-        if(lambda -> source_function){
-          lisp -> result_owner = caller_owner;
-          lisp -> automatic_owner = & frame;
-        }
         {
   _x2c_defer_env_3 _x2c_defer_env_34 = {._x2c_defer_capture_5 =(const void *) & lambda, ._x2c_defer_capture_6 =(const void *) & lisp, ._x2c_defer_capture_7 =(const void *) & caller_owner, ._x2c_defer_capture_8 =(const void *) & caller_result_owner};
 
@@ -3875,6 +3871,10 @@ static Var _call_lambda_slots(Lisp lisp, Lambda lambda, const Var * values, int 
   };
   x2c_cleanup_push(&_x2c_defer_record_13);
   {
+          if(lambda -> source_function){
+            lisp -> result_owner = caller_owner;
+            lisp -> automatic_owner = & frame;
+          }
           LispEnv captured ={
             .bindings = lambda -> captures, .parent = NULL
           }

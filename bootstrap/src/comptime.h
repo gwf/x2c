@@ -15,6 +15,8 @@ String Compiler_lower_declined(Compiler compiler);
 
 void Compiler_inherit_shared_meta(Compiler compiler);
 
+List Compiler_lowered_meta_regions(Compiler compiler, List fn);
+
 int Compiler_install_comptime(Compiler compiler, List fn);
 
 int Compiler_lower_reached_globals(Compiler compiler);
