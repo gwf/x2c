@@ -4057,7 +4057,9 @@ called them and do not repeat the generated guard.
 
 Compiler-owned literal and static-runtime initialization runs after the guard
 is set and before the method body. This makes calls from the initializer back
-into static helpers in the same translation unit safe. Translation units that
+into static helpers in the same translation unit safe. When conditional
+compilation removes the initializer, that initialization still runs at the
+same boundaries. Translation units that
 need only literal caching retain a private synthetic initializer.
 
 Other initialization statements and runtime-valued static assignments belong in
