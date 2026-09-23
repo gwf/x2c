@@ -1101,7 +1101,7 @@ static Var _lower_func_adapter(Lowering l, Type type, Var callable) {
     arguments.push(value);
     index++;
   }
-  Var call = cons(callable, arguments.list());
+  Var call = cons(callable, arguments);
   call = _lower_to_type(l, result, call);
   return %(C.func.new (lambda ($fn $argv) $call) (quote $signature));
 }
