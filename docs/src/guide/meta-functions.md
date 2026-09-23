@@ -692,9 +692,10 @@ These C shapes are not available at compile time:
   where it is used, so `struct S { ... } PACKED;` with `#define PACKED
   __attribute__((packed))` is packed. A macro with no layout attribute leaves
   the struct its natural layout. Default collection carries packing across
-  included files. A pack directive under a raw conditional leaves subsequent
-  layout unavailable when collection cannot prove which arm C selects, so a
-  naturally laid-out struct may also be declined. `--cpp-symbols` and
+  included files. A pack directive or include under a raw conditional, or a
+  repeated include that C may skip with `#pragma once` or an include guard,
+  leaves subsequent layout unavailable if it could change the active pack
+  state. A naturally laid-out struct may then be declined. `--cpp-symbols` and
   `--system-headers` use the preprocessor's selected directive stream and can
   prove the layout when its push and pop balance. A field whose typedef has a
   layout attribute is also declined.

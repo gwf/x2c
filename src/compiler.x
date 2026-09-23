@@ -109,6 +109,8 @@ typedef struct Compiler {
   int pack_include_unknown;
   int pack_state, pack_unknown;
   List pack_saved;
+  /* Include encounters in the current unit's logical pack stream. */
+  Map pack_seen;
   /* The cursor after a governed statement took the directives before it,
      which the following item must not read again. */
   Token directives_taken;
