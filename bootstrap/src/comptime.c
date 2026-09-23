@@ -37,6 +37,7 @@ typedef struct Lowering{
   int declined, on_loop, rejected, uncallable, globals, meta_only;
   int session_globals;
   int automatic;
+  int counter;
 }
 * Lowering;
 
@@ -66,7 +67,7 @@ static int lower_reached_meta;
 
 static List lower_session_callees;
 
-static int lower_counter;
+static int lower_repl_counter;
 
 static Var _lower_name(Lowering l, String stem);
 
@@ -2004,7 +2005,7 @@ Atom Atom_intern(String);
 String int_str(int);
 int String_truth(String);
 static Var _lower_name(Lowering l, String stem){
-  lower_counter ++;  if(! String_equal(stem, _37) && ! String_equal(stem, _38)) return Atom_intern(String_join(NULL, cons(String_var(stem), cons(String_var(_39), cons(String_var(int_str(lower_counter)), NULL)))));  if(! String_truth(l -> own)) return Atom_intern(String_join(NULL, cons(String_var(stem), cons(String_var(int_str(lower_counter)), NULL))));  return Atom_intern(String_join(NULL, cons(String_var(stem), cons(String_var(int_str(lower_counter)), cons(String_var(_39), cons(String_var(l -> own), NULL))))));
+  int count = l -> session_globals ? ++ lower_repl_counter : ++ l -> counter;  if(! String_equal(stem, _37) && ! String_equal(stem, _38)) return Atom_intern(String_join(NULL, cons(String_var(stem), cons(String_var(_39), cons(String_var(int_str(count)), NULL)))));  if(! String_truth(l -> own)) return Atom_intern(String_join(NULL, cons(String_var(stem), cons(String_var(int_str(count)), NULL))));  return Atom_intern(String_join(NULL, cons(String_var(stem), cons(String_var(int_str(count)), cons(String_var(_39), cons(String_var(l -> own), NULL))))));
 }
 
 static Var _lower_func_value(Var boxed){

@@ -26,6 +26,7 @@ typedef struct Bootstrap {
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/utsname.h>
 
 static void _error(const char *message) {
   x2c_driver_error(%"bootstrap: $message");
@@ -164,6 +165,22 @@ Bootstrap bootstrap_materialize(CliRequest request) {
   return b;
 }
 
+/* The runtime objects the compiler links whole, so native modules can call
+   them: those `etc/runtime-objects.txt` names by stem, as the runtime build
+   placed them. A payload without the list links the runtime as an archive
+   only. */
+static List _runtime_objects(String prefix) {
+  String stems = NULL;
+  try stems = Path.read_text(%"$prefix/etc/runtime-objects.txt");
+  catch %(not-found *): return NULL;
+  Array objects = [];
+  foreach (String stem, stems.split_lines(0))
+    foreach (Var object,
+             Path.glob(%"$prefix/.x2c-build/runtime/obj/$stem-????????.o"))
+      objects.push(object);
+  return objects.list_free();
+}
+
 /** Builds an ordinary native request for one materialized bootstrap component.
     `component` must be `<runtime>` or `<compiler>`. The former selects a
     static archive over `runtime_srcs`; the latter selects an executable over
@@ -180,14 +197,20 @@ CliRequest bootstrap_build_request(
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
   request.command = <build>;
   request.kind = component == <runtime> ? <static-lib> : <executable>;
-  request.inputs = component == <runtime> ?
-                   payload.runtime_srcs : payload.compiler_srcs;
+  request.inputs = component == <runtime> ? payload.runtime_srcs :
+    %(@{payload.compiler_srcs} @{_runtime_objects(payload.prefix)});
   String prefix = payload.prefix;
   request.output =
     component == <runtime> ? %"$prefix/lib/libx2c.a" : %"$prefix/bin/x2c";
   request.build_dir = %"$prefix/.x2c-build/$component";
   request.include_dirs = cons(%"$prefix/include/x2c", NULL);
   request.cc_args = command.cc_args;
+  // A native module binds to the compiler's own runtime, which a Linux
+  // executable exports only when asked.
+  struct utsname host;
+  if (component == <compiler> && !uname(&host) &&
+      String.new(host.sysname) == "Linux")
+    request.ld_args = %("-rdynamic");
   request.cc = command.cc;
   request.ar = command.ar;
   request.jobs = command.jobs;

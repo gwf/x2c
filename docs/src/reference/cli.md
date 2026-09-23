@@ -179,6 +179,28 @@ per C source. `--kind static-library` uses the selected archiver:
   --output /tmp/libwidget.a src/widget.x src/helper.c
 ```
 
+`--kind meta-module` builds a native module, whose functions compile-time
+code can call. The module leaves the x2c runtime unresolved and uses the
+loading compiler's copy, and it records that compiler's content hash. On
+macOS the module links against the running compiler, so a call to a runtime
+function the compiler does not link fails the build.
+`--native-module <file>` loads a module for `translate`, `build`, `run`, and
+`repl`, and repeats:
+
+```sh
+./x2c build --kind meta-module --output helpers.so src/helpers.x
+./x2c run --native-module helpers.so src/helpers.x src/main.x
+```
+
+Only the compiler that built a module loads it; any other compiler reports
+that the module was built by another compiler before running any of its
+code. The compiler loads a module only on request and keeps it loaded until
+it exits, and a translation binds only the modules its request names. When
+two of them define one name, the first supplies it and the declaration
+reports a warning. Modules work on macOS, Linux and WSL.
+[Native modules](../guide/meta-functions.md#native-modules) explains what a
+module contains.
+
 `-c`, or `--compile-only`, stops after compilation. One input may name its
 object with `--output`. Multiple compile-only inputs require `--build-dir`, so
 every object has an unambiguous path.
@@ -466,12 +488,16 @@ literal dot. Matches are deduplicated and bytewise sorted. Unmatched patterns,
 unknown targets, and dependency cycles are errors before any action runs.
 
 A target may also set defines, C flags, library directories, libraries, link
-flags, package directories, and an output. Command-line target, profile,
-kind, output, build directory, and tool options override the corresponding
-defaults. `--target <name>` builds the named manifest target and `--profile
-<name>` applies the named manifest build profile; both work with `build` and
-`run`. The selected target must define the named profile; a dependency target
-takes it when it defines one and builds with its own settings otherwise.
+flags, package directories, and an output. `kind = "meta-module"` builds a
+native module, and a target's `native-modules` field lists the module
+targets its translation loads. Those build first, like `dependencies`, and a
+changed module retranslates the targets that load it. Command-line target,
+profile, kind, output, build directory, and tool options override the
+corresponding defaults. `--target <name>` builds the named manifest target
+and `--profile <name>` applies the named manifest build profile; both work
+with `build` and `run`. The selected target must define the named profile; a
+dependency target takes it when it defines one and builds with its own
+settings otherwise.
 `--manifest-path`, `--target`, and `--profile` describe a manifest build, so
 each conflicts with explicit input operands, and `-c` needs operands rather
 than a manifest.
@@ -622,8 +648,10 @@ Six codes are reported as warnings:
   probably meant, and names the unquoted spelling that inserts the value.
 - `macro` carries what a macro reported through `x2c.diagnostic.warn`, at the
   invocation, with the notes the macro supplied.
-- `warning` covers the remaining cases: an unnecessary conversion, and a
-  protocol binder that shadows a visible type name.
+- `warning` covers the remaining cases: an unnecessary conversion, a
+  protocol binder that shadows a visible type name, a native `meta`
+  prototype whose name both the compiler and a native module define, and
+  one that more than one native module defines.
 
 [The Region Model](../guide/regions.md) explains what the first three cover
 and what they cannot see. [Scopes and Lifetime](../guide/memory.md) shows

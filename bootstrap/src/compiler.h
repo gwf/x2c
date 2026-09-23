@@ -287,7 +287,7 @@ void Sym_seed_var_tags(Sym sym, Map symbols);
 
 List Sym_define(Sym sym, List key, List type);
 
-List Sym_define_global(Sym sym, List key, List type);
+void Sym_define_global(Sym sym, List key, List type);
 
 List Sym_get_exact(Sym sym, List key);
 

@@ -16,7 +16,7 @@ BUILD_TARGETS = build-install bootstrap-build bootstrap-refresh \
 	stage-1 stage-2 stage-3 packages
 VERIFY_TARGETS = verify-sanitize verify-fixtures verify-fixtures-update \
 	proof-artifact-atomicity proof-raw-symbols proof-conformance \
-	build-recovery packages-check
+	build-recovery check-native-modules packages-check
 DIFF_TARGETS = stage-diff-0 stage-diff-1 stage-diff-2 stage-diff-3 \
 	stage-diff-all
 DOC_TARGETS = doc-generate doc-check doc-examples doc-outputs doc-build \
@@ -208,6 +208,9 @@ proof-raw-symbols: build				## Check raw symbol collection parity
 
 proof-conformance: build ## Compare owned conformance rows between prelude and live symbol modes
 	./tools/check-conformance-coherence.sh
+
+check-native-modules: build				## Build, load, and reject native modules
+	./unittest/probes/run-native-modules.sh
 
 ##@ Stage comparison
 stage-diff-0:						## Compare bootstrap and stage 0

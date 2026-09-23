@@ -1917,7 +1917,7 @@ static Type _participant_definition(Compiler compiler, Type participant){
   if(! Type_is_bare_typedef_name(participant)) return NULL;  String name = Var_string(List_car(Type_list(participant)));  Var definition = Map_getindex(Sym_global_symbols(compiler -> sym), List_var(cons(_29, cons(String_var(name), NULL))));  return Var_is_row(definition, 9, 7, 4) ? Var_type(definition) : NULL;
 }
 
-List Sym_define_global(Sym, List, List);
+void Sym_define_global(Sym, List, List);
 static void _install_native_bindings(Compiler compiler, Type participant, List rows){
 
   {

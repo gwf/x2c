@@ -27,7 +27,9 @@ only the cached SDK.
 The script first checks that checked-in `bootstrap/` and `builds/0` contain
 the same generated C/H bytes. It builds a fat APE, assembles the matching x2c
 source and header payload, writes a per-file content manifest, includes the
-dependency notices, and appends the payload as an APE ZIP.
+dependency notices, and appends the payload as an APE ZIP. The seed also
+links `libm-compat.c`, a small shim for math functions the pinned SDK
+declares but lacks; remove it when the SDK provides them.
 
 The seed is only a portable first compiler. Running:
 

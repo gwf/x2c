@@ -266,9 +266,108 @@ finalizers.
 
 Build a project's native code with generated typed adapters into a loadable
 module, then load it for translation, build, or REPL use through the same
-binding path as the compiler's linked functions. The command spelling,
-registration compatibility, shared runtime state and module lifetime are
-open.
+binding path as the compiler's linked functions.
+
+Gary decided the four open questions on 2026-09-22, and the first delivery
+implements them; the book documents it under
+[native modules](../docs/src/guide/meta-functions.md#native-modules).
+
+- **Spelling.** `x2c build --kind meta-module` and `kind = "meta-module"`
+  build a module; `--native-module <file>` on `translate`, `build`, `run` and
+  `repl`, or a target's `native-modules` list of module targets, loads one.
+  Module targets build before the targets that load them.
+- **Shared runtime.** A module links without `libx2c.a` and binds to the
+  loading compiler's runtime: `-bundle -bundle_loader <compiler>` on macOS,
+  so a runtime function the compiler lacks fails the module's link and names
+  the symbol, and `-fPIC -shared -Wl,-Bsymbolic-functions` on Linux, where
+  such a function fails at load instead. The compiler links with
+  `-rdynamic` on Linux (`builds/stage.mk`, `bootstrap/src/Makefile`, and the
+  `x2c bootstrap` compiler request). The build writes a generated entry unit
+  that includes the module's x2c sources and defines `x2c_module_targets`,
+  the name-to-`Func` Map that `lisp.native.targets` generates from the
+  prototypes those sources declare (`_x2c.native-meta.declared`), and
+  `x2c_module_stamp`, the content hash of the building compiler. The loader
+  rejects any other hash.
+- **Runtime coverage.** Gary chose on 2026-09-22 to link whole every runtime
+  object that reserves no Var class row. `etc/runtime-objects.sh` derives the
+  set from the objects' symbol tables at each compiler link: an object the
+  compiler's own code does not reach is left out when it calls a
+  row-reserving registration function, or needs a function only a left-out
+  object defines. Today it adds `args`, `diff` and `lib` (`DisjointSet`),
+  and leaves out `autodiff`, `regex`, `typed-array`, `typed-map`, `mutex`,
+  `thread`, `scripting`, `list-selectors` and `match-recursive`. It runs one
+  `nm` over all objects, about 50 ms per compiler link, and a failing `nm`
+  fails the link. The Makefile links run it on macOS and Linux; the APE
+  seed and MSYS2 link the runtime as before. The APE payload records the
+  selection as `etc/runtime-objects.txt`, by object stem, and a compiler
+  that `x2c bootstrap` installs links those runtime objects too, without
+  running `nm` on the installing machine.
+- **Lifetime and trust.** `Frontend.load_support` checks the stamp in the
+  module file's bytes before `dlopen`, so a stale module's code never runs,
+  then loads each requested module once per process and never closes it.
+  Each module's name-to-`Func` Map is kept by path in a process-lifetime
+  Scope, and each request selects the modules it names, in order.
+  `_bind_native_meta` falls back to the selected modules when the compiler
+  links no function of the name; the first selected module that defines a
+  name supplies it, and the existing signature check validates each
+  binding. The prototype reports a warning when a compiler-linked function
+  hides a module's, or when more than one selected module defines the
+  name. Nothing is discovered through includes, interfaces or package
+  roots.
+- **Entry.** The entry includes each module source by its absolute path,
+  through an `x2c-root` link to `/` beside the entry rather than an include
+  directory, so same-named sources stay
+  distinct and generated headers stay in the build directory. A module
+  whose sources declare no `meta` prototype fails to build. On Linux the
+  module links with `-Wl,-Bsymbolic-functions`, so its own functions are not
+  interposed by same-named compiler exports.
+- **Platforms.** macOS, Linux and WSL. The APE seed, MSYS2 and native Windows
+  compile the loader but report that native modules are not supported.
+
+Consumer translations fingerprint each loaded module's contents. A module
+link is cached like a static archive, because macOS signs each link with
+its pid-suffixed staging name, so an unconditional relink would change the
+module's bytes and retranslate every consumer. The REPL accepts a bodyless
+`meta` prototype, so a module function is callable there too.
+`unittest/probes/run-native-modules.sh`, which the optional
+`make check-native-modules` runs outside every gate, covers a module built
+and called from a meta body, a manifest target and the REPL; rejection of a
+stale or twice-stamped module before its code runs, of a non-module file,
+of a signature mismatch and of a module with no `meta` prototype;
+same-named and `..`-spelled sources; the duplicate-name warning; a runtime
+function from a linked object, and on macOS the build failure for one left
+out; no binding without the option or in a target that does not name the
+module; and reuse of an unchanged module and its consumer, with
+retranslation after a module edit.
+
+Measured on macOS arm64 (optimize build), 60 interleaved runs each:
+
+| Compiler | Size | `--version` min | One-line `translate` min | Var tag rows |
+|---|---|---|---|---|
+| Before track G | 2,404,880 B | 3.84 ms | 37.5 ms | 5 |
+| Loader, current link | 2,424,432 B | 3.22 ms | 35.16 ms | 5 |
+| Selected objects linked whole | 2,442,688 B | 3.21 ms | 35.16 ms | 5 |
+| Whole runtime (measured, rejected) | 2,625,512 B | 3.12 ms | 34.50 ms | 18 |
+
+The first row was measured in an earlier session, so compare its times
+only with each other; the last three rows are one interleaved series.
+Startup does not change beyond noise. Linking the whole runtime would spend
+13 more of the 32 rows at startup, which is why it was not chosen. On Linux
+`-rdynamic` adds the roughly 1,500 exported names to the dynamic symbol
+table, an estimated 70 KB; nothing was measured on Linux.
+
+Follow-ups:
+
+- **Lazy class registration.** Registering a class's Var row when a value of
+  it is first boxed, rather than in its file initializer, would make linking
+  the whole runtime free of rows, so a module could call all of it.
+- **Extensions linked into the compiler.** A later route may compile a
+  project's extension into the compiler at compile and link time instead of
+  loading a module. Registration already allows it: targets are Maps keyed
+  by their source, `Compiler.add_native_module` records one, and
+  `_bind_native_meta` binds only through the selected Maps, so a statically
+  linked extension could register its Map at startup the same way. Nothing
+  in the fallback assumes `dlopen` supplied the Map.
 
 ## Unblocked elsewhere
 

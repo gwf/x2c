@@ -34,6 +34,7 @@ required sequence.
 | `make verify-fixtures` | Check exact compiler fixture artifacts without rewriting them. |
 | `make verify-fixtures-update` | Accept an intentional, reviewed fixture-output change. |
 | `make proof-conformance` | Optional prelude/live protocol conformance comparison. |
+| `make check-native-modules` | Optional native module build, load, and rejection checks. |
 | `make examples` | Check the curated executable examples manifest. |
 | `make examples-update` | Accept intentional, reviewed example-output changes. |
 | `make doc-examples` | Compile the book's code examples; optional. |

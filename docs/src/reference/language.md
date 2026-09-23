@@ -1523,8 +1523,10 @@ code can use any type the compiler sees.
 A bodyless `meta` prototype declares a native function that the compiler
 itself links, such as `meta double sin(double);`. Compile-time code then
 calls the compiler's copy. The declared signature must match that function
-exactly. A prototype for a function the compiler does not link is accepted,
-and compile-time code that calls it is diagnosed. See
+exactly. A function the compiler does not link can come from a loaded
+[native module](../guide/meta-functions.md#native-modules). A prototype for
+a function that neither supplies is accepted, and compile-time code that
+calls it is diagnosed. See
 [native C functions](../guide/meta-functions.md#native-c-functions).
 
 A `meta` protocol adoption, such as `meta protocol Iter(List);`, adopts the

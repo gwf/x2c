@@ -9,7 +9,9 @@
     this session are finished. Results borrow that Context's storage. */
 typedef struct ReplSession {
   Compiler compiler;
-  Map names;  // Published name -> (value) or (function (typed ...) (lowered ...)).
+  // Published name -> (value), (native), or
+  // (function (typed ...) (lowered ...)).
+  Map names;
 } *ReplSession;
 
 /** status is incomplete, rejected, defined, executed, value, or failed.
@@ -79,7 +81,8 @@ List ReplSession.symbols(ReplSession session) {
   return entries.list_free();
 }
 
-/** Returns (value), (function (typed AST) (lowered FORMS)), or NULL if absent.
+/** Returns (value), (native), (function (typed AST) (lowered FORMS)), or
+    NULL if absent.
     These are the original canonical Lists, borrowed until unit close. */
 List ReplSession.inspect(ReplSession session, String name) {
   Var entry;
@@ -335,6 +338,17 @@ static List _result_body(List fn, int *prints) {
   return fn;
 }
 
+/* Whether the submission is a bodyless `meta` prototype. It binds a
+   function the compiler links or a loaded native module supplies. A body
+   opens with `{`, or with the `=` of `=>` for an expression body, and a
+   `meta` value has an `=` initializer. */
+static int _native_prototype(Compiler c) {
+  if (!c.meta_form_is_declaration()) return 0;
+  for (Token token = c.token; token.type != <eof>; token++)
+    if (token.type == <"{"> || token.type == <=>) return 0;
+  return 1;
+}
+
 /** Submits one complete candidate without printing or retaining a pending
     prefix. Only successfully initialized declarations publish new bindings;
     evaluation effects on previously published values survive failure. */
@@ -389,14 +403,15 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
       result.status = <executed>;
       return result;
     }
+    int native = _native_prototype(c);
     if (c.peek(0) == <import> || c.protocol_form_starts() ||
-        c.peek(0) == <"$("> || c.meta_form_is_declaration() ||
+        c.peek(0) == <"$("> || (c.meta_form_is_declaration() && !native) ||
         c.macro_form_is_definition() || c.keyword_form_is_definition())
       _refuse("compiler-session definitions are outside the REPL subset");
     if (c.peek(0) == <union> || c.peek(0) == <enum> ||
         c.peek(0) == <extern> || c.peek(0) == <static>)
       _refuse("type and storage declarations are outside the REPL subset");
-    int declaration = c.test_declaration();
+    int declaration = native || c.test_declaration();
     if (!declaration) {
       String prefix = "void __repl_eval(void) {\n";
       end += prefix.len();
@@ -404,6 +419,22 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
       _tokenize(c, result.source, scratch);
     }
     List node = c.parse_submission(end);
+    if (native) {
+      match (node)
+        case %(declare ? (bindings (bind (binding ? ?(String name)) *))): {
+          Var bound;
+          if (names.contains(name))
+            _refuse("function redeclaration is disabled");
+          if (!c.macro_lisp.try_get(name, &bound))
+            _refuse(%"no native function is available for $name");
+          transaction.commit_transient();
+          names[name] = %(native);
+          result.syntax = node;
+          result.name = name;
+          result.status = <defined>;
+          return result;
+        }
+    }
     _require_evaluable(node);
     if (_type_submission_names(node, added)) {
       foreach (String name, added)

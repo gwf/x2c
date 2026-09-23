@@ -33,7 +33,7 @@ their actual canonical pool lifetimes, which may belong to ancestor pools.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the request.
 
-Source: `src/bootstrap.x:178`
+Source: `src/bootstrap.x:195`
 
 #### bootstrap_materialize
 
@@ -53,7 +53,7 @@ status 2.
 or `<alloc-fail>` or `<size-limit>` while reading the manifest or
 constructing the result.
 
-Source: `src/bootstrap.x:146`
+Source: `src/bootstrap.x:147`
 
 #### bootstrap_record_install
 
@@ -67,7 +67,7 @@ failure prints a bootstrap diagnostic and exits with status 2.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing canonical
 paths.
 
-Source: `src/bootstrap.x:207`
+Source: `src/bootstrap.x:230`
 
 ## Public types
 

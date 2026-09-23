@@ -41,8 +41,8 @@ typedef struct ProjectProfile {
 
 typedef struct ProjectTarget {
   String name, Symbol kind, String output, List sources, exclude, dependencies;
-  List include_dirs, package_dirs, defines, c_flags, library_dirs, libraries;
-  List link_flags;
+  List native_modules, include_dirs, package_dirs, defines, c_flags;
+  List library_dirs, libraries, link_flags;
   ProjectProfile profiles;
   Map seen, int declared, visiting, visited, planned;
   struct ProjectTarget *next;
@@ -232,6 +232,7 @@ static void _set_target_field(
     String kind = _string_value(p, line, value);
     if (kind == "executable") target.kind = <executable>;
     else if (kind == "static-library") target.kind = <static-lib>;
+    else if (kind == "meta-module") target.kind = <module>;
     else if (kind == "shared-library")
       _error(p, line, "shared-library is not supported by this compiler");
     else _error_name(p, line, "unknown target kind", kind);
@@ -240,6 +241,8 @@ static void _set_target_field(
   else if (key == "exclude") target.exclude = _string_array(p, line, value);
   else if (key == "dependencies")
     target.dependencies = _string_array(p, line, value);
+  else if (key == "native-modules")
+    target.native_modules = _string_array(p, line, value);
   else if (key == "include-dirs")
     target.include_dirs = _string_array(p, line, value);
   else if (key == "package-dirs")
@@ -487,12 +490,17 @@ static ProjectProfile _selected_profile(
   return profile;
 }
 
+/* The targets built before `target`: the libraries it links and the
+   native modules its translation loads. */
+static List _prerequisites(ProjectTarget target) =>
+  target.dependencies.append(target.native_modules);
+
 static void _validate_target(Project project, ProjectTarget target) {
   if (target.visited) return;
   if (target.visiting)
     _error_name(project, 0, "target dependency cycle reaches", target.name);
   target.visiting = 1;
-  foreach (String name, target.dependencies) {
+  foreach (String name, _prerequisites(target)) {
     ProjectTarget dependency = _target(project, name, 0);
     if (!dependency)
       _error_name(project, 0, "unknown target dependency", name);
@@ -521,6 +529,7 @@ static String _target_output(
   Project project, ProjectTarget target, String build_root, Symbol kind) {
   if (target.output) return Path.join(project.root, target.output);
   if (kind == <static-lib>) return %"$build_root/lib${target.name}.a";
+  if (kind == <module>) return %"$build_root/${target.name}.so";
   return %"$build_root/${target.name}";
 }
 
@@ -560,6 +569,15 @@ static CliRequest _target_request(
     inputs.push(_target_output(p, dependency, build_root, dependency.kind));
   }
   request.inputs = inputs.list_free();
+  Array modules = [];
+  foreach (String name, target.native_modules) {
+    ProjectTarget loaded = _target(p, name, 0);
+    if (loaded.kind != <module>)
+      _error_name(p, 0, "native module target is not a meta-module", name);
+    modules.push(_target_output(p, loaded, build_root, <module>));
+  }
+  request.native_modules =
+    %(@{command.native_modules} @{modules.list_free()});
   request.include_dirs =
     %(@{command.include_dirs} @{_paths(p.root, target.include_dirs)});
   request.package_dirs =
@@ -613,7 +631,7 @@ static void _plan_target(
   Project project, ProjectTarget target, CliRequest command,
   ProjectTarget selected, String build_root) {
   if (target.planned) return;
-  foreach (String dependency, target.dependencies)
+  foreach (String dependency, _prerequisites(target))
     _plan_target(
       project, _target(project, dependency, 0),
       command, selected, build_root);

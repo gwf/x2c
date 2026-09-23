@@ -418,6 +418,10 @@ static int _run_build_request(CliRequest c, Array commands) {
      objects have no other source. */
   if (!result && c.command == <script> && !c.dry_run)
     result = _translate_units(c, state, state.script_helpers());
+  if (!result && c.kind == <module> && !c.dry_run) {
+    CliRequest entry = state.module_entry();
+    result = _translate_units(entry, state, entry.inputs);
+  }
   if (result) {
     state.cleanup(0);
     return 1;

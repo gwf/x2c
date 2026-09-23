@@ -168,6 +168,25 @@ ToolAction Toolchain.link_action(Toolchain t, String output, List inputs) =>
     %(${t.cc} @inputs @{t.ld_args} ${t.runtime_lib} "-lm" "-o" $output),
     t.verbose, t.dry_run);
 
+/** Builds but does not start the link of a native module. The module leaves
+    the x2c runtime unresolved and uses the loading compiler's copy. macOS
+    links a bundle against the running compiler, so a runtime function the
+    compiler lacks fails this link. Other hosts link a shared object whose
+    calls to its own functions never bind to a same-named compiler function;
+    a missing runtime function fails when the compiler loads it.
+
+    Raises: `<alloc-fail>` or `<size-limit>` while constructing the action.
+*/
+ToolAction Toolchain.module_action(Toolchain t, String output, List inputs) {
+  List shape = %("-shared" "-Wl,-Bsymbolic-functions");
+#ifdef __APPLE__
+  shape = %("-bundle" "-bundle_loader" ${x2c_get_executable()});
+#endif
+  return tool_action_new(
+    <link>, %(${t.cc} @inputs @{t.ld_args} @shape "-o" $output),
+    t.verbose, t.dry_run);
+}
+
 /** Creates a `Scope`-owned action that reports nonzero status by default.
     The action retains `arguments` without copying them.
 

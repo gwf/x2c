@@ -36,6 +36,17 @@ CFLAGS           += $(EXTRA_CFLAGS)
 X2C_FLAGS        ?=
 LDFLAGS          += -lx2c
 LDFLAGS          += $(BUILD_LDFLAGS)
+# A native module binds to the compiler's own runtime. The compiler links
+# whole every runtime object etc/runtime-objects.sh selects, and a Linux
+# executable exports its functions only when asked.
+UNAME_S          := $(shell uname -s)
+RUNTIME_SELECT    = :
+ifneq ($(filter Darwin Linux,$(UNAME_S)),)
+RUNTIME_SELECT    = sh $(ROOT)/etc/runtime-objects.sh
+endif
+ifeq ($(UNAME_S),Linux)
+LDFLAGS          += -rdynamic
+endif
 MAKEFLAGS        += -S
 ###############################################################################
 .SUFFIXES: # Disable built-in suffix rules
@@ -160,7 +171,8 @@ $(BIN_BUILD)/%.o: $(BIN_BUILD)/%.c | $(LIB_H_FILES)
 		-MMD -MP -MF $(BIN_BUILD)/$*.c.d -MT $@ -c $< -o $@
 # link binary executable
 $(BINARY): $(BIN_OBJECTS) $(LIBRARY)
-	$(CC) $(BIN_OBJECTS) -L. $(LDFLAGS) -lm -o $(BINARY)
+	whole=$$($(RUNTIME_SELECT) $(BIN_OBJECTS) -- $(LIB_OBJECTS)) && \
+	$(CC) $(BIN_OBJECTS) $$whole -L. $(LDFLAGS) -lm -o $(BINARY)
 ###############################################################################
 # clean build directories
 clean:

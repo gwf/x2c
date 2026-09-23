@@ -188,16 +188,35 @@ static String _include_text(Compiler c, String target, String path) {
   return text;
 }
 
+/* Walk a file other than the unit cold, then restore the unit's binding
+   counter. The unit keeps only the file's entry and replays it as it would
+   the file's interface, so it numbers its own bindings the same either way. */
+static void _walk_apart(
+  Compiler c, String path, String text, Map globs, Map visited) {
+  int next_binding = c.names.next_binding;
+  _file(c, path, text, Path.dirname(path), globs, visited);
+  c.names.next_binding = next_binding;
+}
+
 /* Walk one included file cold and return its entry. The walk reads the
    includer's names through copies, so its private rows and includes stay
    there; the includer replays the entry as any later unit would. */
 static List _walk_cold(
   Compiler c, String target, String canonical, Map globs, Map visited) {
   String text = _include_text(c, target, canonical);
-  _file(
-    c, canonical, text, Path.dirname(canonical), globs.copy(),
-    visited.copy());
+  _walk_apart(c, canonical, text, globs.copy(), visited.copy());
   return _process_cache()[canonical];
+}
+
+/* A package renames what it declares, not what it includes: only x2c source
+   under its root takes its prefix. A C header, a runtime module, or foreign
+   x2c source keeps its own spellings, as including that file directly gives
+   them, so the collected entry is the same whichever unit walks it first. */
+static int _package_owns(Compiler c, String path) {
+  if (!c.package) return 0;
+  Var root = c.package_roots[c.package];
+  return root is not void &&
+    path.startswith(%"${_canonical_path(root)}/");
 }
 
 /* A segment resolves names through cumulative globs but writes declarations
@@ -211,11 +230,8 @@ static void _parse_segment(
   int private) {
   Compiler shadow = Compiler.new_shared(c);
   defer c.close_child(shadow);
-  /* A package renames what it declares, not what it includes. A C header's
-     types and enumerators keep their upstream spelling, so a public method
-     over one of them still names a type the header defines. */
   int unit = x2c_source_file(path);
-  if (!unit) shadow.package = NULL;
+  if (!unit || !_package_owns(c, path)) shadow.package = NULL;
   shadow.filename = path;
   shadow.source_private = private;
   shadow.take_unit_state(c);
@@ -476,9 +492,7 @@ static List _prelude_entry(Compiler c, String runtime, String canonical) {
   if (entry) return entry;
   Map scratch = {}, visited = {};
   visited[canonical] = 1;
-  _file(
-    c, canonical, _runtime_text(c, runtime), Path.dirname(runtime),
-    scratch, visited);
+  _walk_apart(c, canonical, _runtime_text(c, runtime), scratch, visited);
   return _process_cache()[canonical];
 }
 
@@ -660,6 +674,9 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
     c.report_error(
       <driver>, %"unknown package '$name'", token,
       %( "searched: <root>/$name/src/$name.x, <root>/$name/$name.x" ));
+  /* The root is registered before the walk, as a package unit's own is
+     before its parse, so the walk can tell the package's files apart. */
+  c.package_roots[name] = root;
   Compiler package = Compiler.new_shared(c);
   defer c.close_child(package);
   package.package = name;
@@ -674,7 +691,7 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
       c.report_error(
         <driver>, %"cannot read package '$name'", token,
         %( "path: $entry" ));
-    _file(package, entry, text, Path.dirname(entry), globs, visited);
+    _walk_apart(package, entry, text, globs, visited);
   }
   c.fn_defs.merge(package.fn_defs);
   Map merged = {}, walked = {};
@@ -683,7 +700,6 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
   _package_contributions(
     c, name, root, entry, _process_cache()[entry],
     merged, walked, token);
-  c.package_roots[name] = root;
   foreach (Var (key, value), merged) {
     c.sym.set(key, value);
     c.copy_source_declaration(c.sym.current_symbols(), merged, key);

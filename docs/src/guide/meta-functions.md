@@ -360,13 +360,122 @@ sample.x:2:1: macro: this function cannot run at compile time
   note: reason: no binding for rand
 ```
 
-Other native functions will come from native extensions, which are not
-available yet.
+Your own native functions come from a
+[native module](#native-modules).
 
 A native function binds into the compile-time session the first time
 compile-time code calls it. An ordinary call to a native meta function is
 never folded: `sin(1.0)` stays a call in the generated C. Write `$sin(1.0)`
 to compute the value during translation.
+
+## Native modules
+
+A native module lets compile-time code call functions from your own
+project. Declare each function with a bodyless `meta` prototype and define
+it as usual:
+
+```x2c
+meta int triple(int);
+
+#pragma private
+
+int triple(int x) { return 3 * x; }
+```
+
+Save that as `helpers.x` and build it as a module:
+
+```sh
+x2c build --kind meta-module --output helpers.so helpers.x
+```
+
+The module contains every function that a bodyless `meta` prototype in its
+own sources declares. Code that includes the prototype can call the
+function during translation when the compiler loads the module:
+
+<!-- ignore: the sample needs helpers.x and the module built from it -->
+```x2c,ignore
+#include <stdio.h>
+#include "helpers.x"
+
+meta static int nine(void) => triple(3);
+
+int main(void) {
+  printf("%d %d\n", $nine(), triple(5));
+  return 0;
+}
+```
+
+```sh
+x2c run --native-module helpers.so helpers.x main.x
+```
+
+```text
+9 15
+```
+
+`$nine()` runs the module's `triple` during translation. The ordinary call
+`triple(5)` uses the copy linked into the program, so `helpers.x` is also
+one of the program's sources. `--native-module` works with `translate`,
+`build`, `run`, and `repl`, and the REPL accepts the same bodyless
+prototype.
+
+The compiler loads a module only when an option or a manifest names it.
+Without `--native-module`, `nine` reports `no binding for triple`. In a
+manifest, a target lists the module targets its translation loads:
+
+```toml
+[target.helpers]
+kind = "meta-module"
+sources = ["helpers.x"]
+
+[target.app]
+sources = ["helpers.x", "main.x"]
+native-modules = ["helpers"]
+```
+
+A module target builds before the targets that load it, and a changed
+module retranslates them. A target binds only the modules it names, even
+when an earlier target in the same build loaded others.
+
+A module's functions bind like the functions the compiler links. The
+prototype's signature must match the one the module was built from, and a
+mismatch is reported at the declaration. A function the compiler links
+takes precedence, and the prototype reports a warning that the compiler's
+own function hides the module's. When two named modules define the same
+name, the one named first supplies it, and the prototype reports a
+warning.
+
+A module runs inside the compiler and uses the compiler's own runtime, not
+a copy of it. Only the compiler that built a module can load it, so a
+module must be rebuilt after the compiler changes. The compiler checks this
+before it loads any of the module's code:
+
+```text
+x2c: error: native module 'helpers.so' was built by another compiler; rebuild it
+```
+
+Every function the module exports needs a bodyless `meta` prototype in the
+module's sources, and a module whose sources declare none fails to build.
+
+A module can call most of the runtime, because the compiler links every
+runtime module that registers no `Var` class of its own. This holds for a
+compiler built from a checkout and for one `x2c bootstrap` installs. The compiler
+leaves out the modules whose classes would take up rows of the fixed
+32-row class registry at startup: Automatic Differentiation, `Regex`,
+typed Arrays and Maps, `Thread` and `Mutex`, the scripting library, and
+the modules that need them. A module that calls one of their functions
+fails to build on macOS, and the link error names each missing symbol:
+
+```text
+Undefined symbols for architecture arm64:
+  "_Regex_compile", referenced from:
+      _groups in rx-634299d6.o
+```
+
+On Linux the same module builds, and loading it fails with an error that
+names the missing symbol. A loaded module stays loaded until the compiler
+exits. Native modules work on macOS, Linux and WSL. On other platforms,
+loading one reports that native modules are not supported.
 
 ## C objects during compilation
 

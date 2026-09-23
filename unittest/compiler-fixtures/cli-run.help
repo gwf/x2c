@@ -25,6 +25,7 @@ Translation options:
       --c-include-dir <dir>   Add a C-only ordinary include directory
       --c-system-dir <dir>    Add a C-only system include directory
       --package-dir <dir>     Add a directory of x2c packages
+      --native-module <file>  Load a native module for compile-time calls
       --no-cpp                Skip symbol collection and preprocessing
       --live-symbols          Collect symbols through the host preprocessor
       --cpp-symbols           Use CPP collection for this translation

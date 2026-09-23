@@ -43,6 +43,7 @@ typedef struct Lowering {
   int declined, on_loop, rejected, uncallable, globals, meta_only;
   int session_globals;
   int automatic;        // the function keeps C objects in frame storage
+  int counter;          // the generated names this lowering has made
 } *Lowering;
 
 /* The struct a declared spelling names, or NULL when it names none that
@@ -143,21 +144,22 @@ static List lower_session_callees;
 /* `Atom.intern` gives an `lsym` for a spelling too long to pack into a
    Symbol, so a generated name is readable and cannot collide by truncation.
 
-   A loop becomes a session global, and every function shares one session, so
-   a counter that restarted with each function made two functions of the same
-   shape define the same loop and the second silently replaced the first. The
-   counter runs across the session, which makes the name unique on its own;
-   the function it belongs to follows, which makes the lowered Lisp readable
-   when something goes wrong. Lexical slots use shorter names with a hyphen
-   so they cannot shadow an ordinary C identifier. */
-static int lower_counter;
+   A loop becomes a session global, and every function shares one session,
+   so a loop's name carries the function it belongs to. The count restarts
+   with each lowering, so a function lowers to the same forms however much
+   the session lowered before it, whether collection walked a unit cold or
+   read its interface. The REPL lowers every entry under the one name
+   `__repl_eval`, so it keeps one count across its session. Lexical slots use
+   shorter names with a hyphen so they cannot shadow an ordinary C
+   identifier. */
+static int lower_repl_counter;
 
 static Var _lower_name(Lowering l, String stem) {
-  lower_counter++;
+  int count = l.session_globals ? ++lower_repl_counter : ++l.counter;
   if (stem != "loop" && stem != "after")
-    return Atom.intern(%"$stem-${lower_counter}");
-  if (!l.own) return Atom.intern(%"$stem${lower_counter}");
-  return Atom.intern(%"$stem${lower_counter}-${l.own}");
+    return Atom.intern(%"$stem-$count");
+  if (!l.own) return Atom.intern(%"$stem$count");
+  return Atom.intern(%"$stem$count-${l.own}");
 }
 
 /* --- a dynamic Func call ------------------------------------------------ */

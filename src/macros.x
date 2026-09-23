@@ -540,15 +540,26 @@ static int _iterator_operation(List signature) {
   return 0;
 }
 
+/* Whether the symbol row under `key` was declared in one of the absolute
+   source `paths`. */
+static int _declared_in(Var key, List paths) {
+  match (key)
+    case %("source-node" (declaration ?(String path) ?)):
+      return paths.contains(home_absolute_path(path));
+  return 0;
+}
+
 /* Returns the declared native targets advertised by `meta` interface rows,
-   in the row form `lib/lisp.x` generates its target inventory from. Sorting
+   in the row form `lib/lisp.x` generates its target inventory from, or only
+   those declared in the files `paths` names when it is not empty. Sorting
    makes that inventory independent of Map order. */
-static List _sdk_native_meta_targets(void) {
+static List _native_meta_targets(List paths) {
   Compiler compiler = macro_sdk_compiler
                     ? macro_sdk_compiler : macro_import_compiler;
   if (!compiler) return %();
   Map selected = {};
-  foreach (Var value, compiler.sym.base_symbols())
+  foreach (Var (key, value), compiler.sym.base_symbols()) {
+    if (paths && !_declared_in(key, paths)) continue;
     foreach (List row, _native_meta_rows(compiler, value)) {
       (String name, List signature) = row;
       if (_native_meta_takes_callback(signature)) continue;
@@ -556,10 +567,24 @@ static List _sdk_native_meta_targets(void) {
       selected[name] = _iterator_operation(signature)
         ? %($name (as $into)) : %($name);
     }
+  }
   Array names = selected.keys();
   List rows = %();
   foreach (String name, names.sort()) rows = cons(selected[name], rows);
   return rows.reverse();
+}
+
+static List _sdk_native_meta_targets(void) => _native_meta_targets(NULL);
+
+/* A native module's entry exports the prototypes its own sources declare,
+   and a module that declares none is a mistake. */
+static List _sdk_native_meta_declared(List paths) {
+  List rows = _native_meta_targets(paths);
+  if (!rows)
+    _sdk_reject(
+      "native module sources declare no meta function",
+      %("declare each exported function with a bodyless meta prototype"));
+  return rows;
 }
 
 static Var _sdk_native_function_type(List syntax) {
@@ -1097,6 +1122,9 @@ static void _install_native_operations(Compiler compiler) {
     $lisp.bind(
       _.macro_lisp, "_x2c.native-meta.targets", _sdk_native_meta_targets);
     $lisp.bind(
+      _.macro_lisp, "_x2c.native-meta.declared",
+      _sdk_native_meta_declared);
+    $lisp.bind(
       _.macro_lisp, "x2c.function.parameter",
       _sdk_function_parameter);
     $lisp.bind(
@@ -1595,6 +1623,59 @@ void Compiler.record_native_meta_effect(
   }
 }
 
+/* Each loaded native module's name-to-`Func` Map by absolute path, and the
+   paths the current request names, in its order. A module stays loaded for
+   the process, so its Map lives in a Scope that lasts as long, while each
+   request binds only the modules it names. */
+static Map native_modules = NULL;
+static List native_module_order = NULL;
+static Scope native_module_scope = NULL;
+
+static void _native_module_shutdown(void) {
+  native_module_scope.destroy();
+  native_module_scope = NULL;
+  native_modules = NULL;
+  native_module_order = NULL;
+}
+
+/** Reports whether the native module at absolute `path` is loaded. */
+int Compiler.native_module_loaded(String path) =>
+  (void *) native_modules && native_modules.contains(path);
+
+/** Records the name-to-`Func` Map that the entry of the native module loaded
+    from absolute `path` returns. The Funcs, names, signatures, and path last
+    for the process.
+*/
+void Compiler.add_native_module(String path, Map (*entry)(void)) {
+  Scope.push(&native_module_scope);
+  if (!(void *) native_modules) {
+    Scope.shutdown_hook(_native_module_shutdown);
+    native_modules = {};
+  }
+  Map targets = entry();
+  native_modules[path] = targets;
+  Scope.pop();
+  path.try_own();
+  foreach (Var (name, target), targets) {
+    name.string().try_own();
+    ((Func) target.pointer()).signature().try_own();
+  }
+}
+
+/** Selects the loaded native modules, by absolute path, that bodyless `meta`
+    prototypes bind in the current request. The first module in `paths`
+    that defines a name supplies it.
+*/
+void Compiler.select_native_modules(List paths) {
+  paths.try_own();
+  native_module_order = paths;
+}
+
+/* The paths of the selected native modules that define `name`, in order. */
+static List _native_module_suppliers(String name) =>
+  native_module_order.filter(
+    %!(String path) => ((Map) native_modules[path]).contains(name));
+
 /* A declared `Func` parameter matches a target's `Var` parameter, which
    takes the compile-time callable and adapts it. */
 static int _native_meta_accepts(Var function, List signature) {
@@ -1608,9 +1689,9 @@ static int _native_meta_accepts(Var function, List signature) {
 }
 
 /* Binds a declared native function to the compiler's own linked target of
-   the same name, or an iterator operation to its `_into` target. A
-   declaration the running compiler does not link binds nothing, and a meta
-   body that calls it reports the missing binding. */
+   the same name, or an iterator operation to its `_into` target, or else to
+   a selected native module's target. A declaration with neither binds
+   nothing, and a meta body that calls it reports the missing binding. */
 static void _bind_native_meta(
   Compiler c, String name, List signature, Token marker) {
   int iterator = _iterator_operation(signature);
@@ -1619,8 +1700,24 @@ static void _bind_native_meta(
   if (present && !iterator) function = bound;
   else {
     String target = iterator ? %"${name}_into" : name;
-    try function = c.macro_lisp.eval(%(bind $target (quote $signature)));
-    catch %(no-symbol *): return;
+    List suppliers = _native_module_suppliers(target);
+    try {
+      function = c.macro_lisp.eval(%(bind $target (quote $signature)));
+      if (suppliers)
+        c.report_warning(
+          <warning>, "the compiler's own function hides a native module's",
+          marker, %("name: $name"));
+    }
+    catch %(no-symbol *): {
+      if (!suppliers) return;
+      String first = suppliers.car();
+      function = ((Map) native_modules[first])[target];
+      if (suppliers.cdr())
+        c.report_warning(
+          <warning>, "more than one native module defines this function",
+          marker, %("name: $name" "supplied by: $first"
+                    "also defined by: ${", ".join(suppliers.cdr())}"));
+    }
   }
   if (!_native_meta_accepts(function, signature))
     c.report_error(
@@ -2101,7 +2198,7 @@ static Atom _replacement_binder(Var binder, String projection, int seq) {
 static Atom _local_binder(Var key) {
   match (key) case %(tag ?(String tag)):
     return Atom.intern(%"?__macro_tag_$tag");
-  return Atom.intern(%"?__macro_local_${key.str()}");
+  return Atom.intern(%"?__macro_local_${key}");
 }
 
 static Var _replace_definition_bindings(Var value, Map bindings) {

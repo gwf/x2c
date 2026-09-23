@@ -18,6 +18,7 @@ Source options:
   -I <dir>                    Add a shared x2c/C include directory
       --x-include-dir <dir>   Add an x2c-only include directory
       --package-dir <dir>     Add a directory of x2c packages
+      --native-module <file>  Load a native module for compile-time calls
       --no-cpp                Skip symbol collection and preprocessing
       --live-symbols          Collect symbols through the host preprocessor
       --cpp-symbols           Use CPP collection for this translation

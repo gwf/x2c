@@ -108,8 +108,10 @@ static uint64_t _state_tool(uint64_t hash, String tool, int *ok) {
   return _state_text(hash, tool);
 }
 
+static const uint64_t _state_start = UINT64_C(1469598103934665603);
+
 static uint64_t _state_base(CliRequest request, String tool, int *ok) {
-  uint64_t hash = UINT64_C(1469598103934665603);
+  uint64_t hash = _state_start;
   hash = _state_text(hash, "x2c-state-v1");
   hash = _state_text(hash, request.state_seed);
   String compiler = x2c_compiler_identity();
@@ -117,6 +119,18 @@ static uint64_t _state_base(CliRequest request, String tool, int *ok) {
   hash = _state_text(hash, compiler);
   hash = _state_tool(hash, tool, ok);
   return hash;
+}
+
+/** Returns the stamp a native module records: `x2c-module-stamp:` and the
+    content hash of the running compiler as 16 hex digits. Returns NULL when
+    the executable cannot be read. Only the compiler that built a module
+    loads it.
+*/
+String build_module_stamp(void) {
+  String executable = x2c_get_executable(), int ok = executable != NULL;
+  uint64_t hash = ok ? _state_contents(_state_start, executable, &ok) : 0;
+  return ok ? "x2c-module-stamp:%016llx".printf((unsigned long long) hash)
+            : NULL;
 }
 
 static List _state_dep_inputs(String depfile) {
@@ -243,6 +257,9 @@ Build CliRequest.prepare(CliRequest c) {
     c.cc, c.ar, c.cpp_args, c.cc_args,
     c.ld_args, c.verbose, c.dry_run);
   c.cc = state.toolchain.cc; c.ar = state.toolchain.ar;
+  // A module's code is placed wherever the loader maps it.
+  if (c.kind == <module>)
+    state.toolchain.cc_args = %("-fPIC" @{state.toolchain.cc_args});
   state.c_sources = [];
   state.gen_dirs = [];
   state.units = [];
@@ -258,6 +275,8 @@ Build CliRequest.prepare(CliRequest c) {
                   Path.stem(c.inputs.car()) : "target";
     state.output = %"lib$stem.a";
   }
+  else if (c.kind == <module>)
+    state.output = %"${Path.stem(c.inputs.car())}.so";
   else state.output = "a.out";
   state.started_at = report_now_us();
   state.started_wall = _wall_seconds();
@@ -319,6 +338,9 @@ static uint64_t _translation_fingerprint(
     hash, request.system_headers ? "system-headers" : "kept-headers");
   hash = _state_text(
     hash, request.source_map ? "source-map" : "generated-lines");
+  // A loaded module's functions can compute what the translation emits.
+  foreach (String module, request.native_modules)
+    hash = _state_file(hash, module, ok);
   String depfile = %"$directory/${Path.stem(input)}.d";
   return _state_dependencies(hash, depfile, ok);
 }
@@ -417,6 +439,47 @@ void Build.add_generated(Build state, String input, String directory) {
   state.units.push(input);
   if (!state.gen_dirs.contains(directory)) state.gen_dirs.push(directory);
   state._link_packages(input, directory);
+}
+
+/** Writes the entry unit of a native module and returns the request that
+    translates it. The entry defines `x2c_module_targets`, which returns a
+    Map from the name of each native `meta` prototype the module's x2c
+    sources declare to a `Func` that calls it, and `x2c_module_stamp`, which
+    holds the stamp the loading compiler must match. A module whose sources
+    declare no such prototype fails to translate.
+*/
+CliRequest Build.module_entry(Build b) {
+  String stamp = build_module_stamp();
+  if (!stamp) x2c_driver_error("cannot read the running compiler to stamp");
+  /* Each source is included by its absolute path through a link to the
+     filesystem root beside the entry, so distinct sources with one name stay
+     distinct and each unit's generated header is placed inside the entry's
+     own generated directory. No include directory reaches the root. */
+  String includes = "", Array sources = [];
+  foreach (String unit, b.units) {
+    String source = Path.absolute(unit);
+    includes = %"$includes#include \"x2c-root$source\"\n";
+    sources.push(source);
+  }
+  String declared = sources.list_free().repr(), root = x2c_get_root();
+  Path entry = %"${b.work_dir}/module/x2c_module.x";
+  Path link = entry.dirname().join("x2c-root");
+  try {
+    entry.dirname().make_dirs();
+    if (!Path.exists(link)) link.symlink_to("/");
+    entry.write_text(
+      %"$includes\$(import \"$root/etc/lisp-bindings.xlisp\")
+macro Expression \$module.targets() =>
+  \$(lisp.native.targets (_x2c.native-meta.declared '$declared));
+const char x2c_module_stamp[] = \"$stamp\";
+Map x2c_module_targets(void) => \$module.targets();
+");
+  }
+  catch %(io-fail *detail): x2c_host_error(detail);
+  CliRequest request = Scope.memdup(b.request, sizeof(struct CliRequest));
+  request.inputs = %($entry);
+  b.xlat_n++;
+  return request;
 }
 
 /** Starts translation reporting for `input` and initializes timing when unset.
@@ -685,7 +748,8 @@ static void Build._place_unit_headers(Build b) {
 /** Compiles registered C sources and then archives or links the final output.
     Returns zero for success and one when compilation or the final native
     action fails. Compile-only requests stop after objects. Static archives
-    reuse their recorded inputs; executables always link because library
+    and native modules reuse their recorded inputs, so a module's consumers
+    stay current; executables always link because library
     selection and implicit linker inputs are not in the fingerprint. The
     archiver or linker writes a private sibling that replaces the output by
     rename, so a concurrent build in the same project finds the whole
@@ -701,6 +765,8 @@ int Build.finish(Build b) {
   ToolAction action = NULL;
   if (b.request.kind == <static-lib>)
     action = b.toolchain.archive_action(b.output, inputs);
+  else if (b.request.kind == <module>)
+    action = b.toolchain.module_action(b.output, inputs);
   else {
     String output = b.output;
     if (b.request.command == <run> && !output)
@@ -710,8 +776,12 @@ int Build.finish(Build b) {
   }
   b.final_at = report_now_us();
   report_progress(action.phase, 0, 1, b.output);
+  int input_count = inputs.len();
+  String noun = action.phase == <archive> ?
+                (input_count == 1 ? "object" : "objects") :
+                (input_count == 1 ? "input" : "inputs");
   String state_path =
-    b.state_root && b.request.kind == <static-lib> ?
+    b.state_root && b.request.kind != <executable> ?
     %"${b.state_root}/final-${_key(b.output)}" : NULL;
   if (state_path && !b.request.dry_run && !access(b.output, R_OK)) {
     int ok = 1;
@@ -723,8 +793,6 @@ int Build.finish(Build b) {
           action.phase.str(), b.output);
       b.final_cached = 1;
       report_progress(action.phase, 1, 1, b.output);
-      int input_count = inputs.len();
-      String noun = input_count == 1 ? "object" : "objects";
       report_phase(
         action.phase, input_count, noun, input_count,
         report_now_us() - b.final_at);
@@ -737,9 +805,12 @@ int Build.finish(Build b) {
   String staged = NULL;
   if (!b.request.dry_run) {
     staged = %"${b.output}.${_process_suffix()}";
-    publish = b.request.kind == <static-lib> ?
-      b.toolchain.archive_action(staged, inputs) :
-      b.toolchain.link_action(staged, inputs);
+    publish =
+      b.request.kind == <static-lib> ?
+        b.toolchain.archive_action(staged, inputs) :
+      b.request.kind == <module> ?
+        b.toolchain.module_action(staged, inputs) :
+        b.toolchain.link_action(staged, inputs);
   }
   if (publish.run()) {
     if (staged) Path.remove_file(staged);
@@ -760,10 +831,6 @@ int Build.finish(Build b) {
     if (debug.run()) return 1;
   }
   report_progress(action.phase, 1, 1, b.output);
-  int input_count = inputs.len();
-  String noun = action.phase == <archive> ?
-                (input_count == 1 ? "object" : "objects") :
-                (input_count == 1 ? "input" : "inputs");
   report_phase(
     action.phase, input_count, noun, 0,
     report_now_us() - b.final_at);
@@ -801,7 +868,8 @@ void Build.report_success(Build b) {
   }
   else {
     String kind =
-      b.request.kind == <static-lib> ? "static library" : "executable";
+      b.request.kind == <static-lib> ? "static library" :
+      b.request.kind == <module> ? "native module" : "executable";
     result = %"Built$label $kind ${b.output} in $duration$cache";
   }
   report_line(<success>, result);
