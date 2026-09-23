@@ -3707,11 +3707,10 @@ Var Compiler.aggregate_name(
   }
   Type type = %($kind $name);
   if ((int) sym.scopes.len() <= sym.base_scopes) {
-    /* The first file-scope use of a named tag declares it in that scope,
-       whether it is a body, a standalone forward, or the base of another
-       declarator. Publishing it here lets later prototypes reuse the tag
-       instead of inventing a prototype-scope binding for the same spelling. */
-    if (!sym.get_exact(type)) sym.declare(NULL, type, type);
+    /* Only a definition or standalone forward owns this package tag.
+       A field or prototype may merely refer to a tag from a C header. */
+    if (definition && !sym.get_exact(type))
+      sym.declare(NULL, type, type);
     return name;
   }
   if (!definition && sym.get_exact(type))
