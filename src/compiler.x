@@ -99,9 +99,8 @@ typedef struct Compiler {
      index to the groups open after it. */
   List arms;
   Map arm_stacks;
-  /* Token indices where C starts or stops packing, or `NULL` when the unit
-     never packs: each `#pragma pack` that changes whether packing is on, and
-     a pair at each layout attribute that `--system-headers` erases. */
+  /* Token indices where C starts or stops packing: each directive that
+     changes whether packing is on, and a pair at each layout attribute. */
   Array pack_marks;
   /* The cursor after a governed statement took the directives before it,
      which the following item must not read again. */
@@ -608,11 +607,6 @@ static Symbol _never_active_arm(String s) {
     ? <rest> : 0;
 }
 
-static void _mark_packing(Compiler c, size_t index) {
-  if (!c.pack_marks) c.pack_marks = [];
-  c.pack_marks.push((long) index);
-}
-
 /* Follows the `#pragma pack` directive `text` over the `saved` states and
    returns whether packing is on after it, given `packed` before it. `push`
    saves the state under an optional label, `pop` restores the newest state
@@ -647,22 +641,60 @@ static int _pack_after(String text, Array saved, int packed) {
   return value < 0 ? packed : value;
 }
 
-/* A system-header attribute arrives as `__x2c_attribute__ "(...)"` (see
-   Toolchain.preprocess). Both tokens become comments, as though the
-   preprocessor had erased them, and one that can change a layout leaves a
-   pair of packing marks. Returns the index of the string. */
-static size_t _erase_attribute(Compiler c, size_t index) {
-  Token base = c.tokenizer.tokens, marker = base + index;
-  Token text = _skip_forward(marker + 1);
-  if (text.type != <lit-char*>) return index;
-  marker.type = text.type = <comment>;
-  String words = text.text;
-  if (words.contains("packed") || words.contains("aligned") ||
-      words.contains("mode") || words.contains("vector_size")) {
-    _mark_packing(c, index);
-    _mark_packing(c, index + 1);
+/* Joins the packing state that one reachable arm of a conditional group
+   leaves into `joined`, the `(packed saved)` state after the group, or `NULL`
+   before any arm. Packing stays on when any arm leaves it on, and the
+   longest saved stack is kept, so a later pop finds any arm's push. */
+static List _join_packing(List joined, int packed, List saved) {
+  if (!joined) return %($packed $saved);
+  List kept = joined.cadr();
+  List longer = kept.len() < saved.len() ? saved : kept;
+  return %(${joined.car().truth() || packed} $longer);
+}
+
+/* Reports whether the identifiers of an attribute from `first` through
+   `last` name one that can change a struct's layout, with or without their
+   surrounding underscores. */
+static int _layout_attribute(Token first, Token last) {
+  for (Token t = first; t <= last && t.type != <eof>; t++) {
+    if (t.type != <ident>) continue;
+    String word = t.text.strip("_");
+    if (word == "packed" || word == "aligned" || word == "mode" ||
+        word == "vector_size")
+      return 1;
   }
-  return text - base;
+  return 0;
+}
+
+/* Records a pair of packing marks at the attribute starting at token
+   `index` when it can change a struct's layout. A source attribute is
+   `__attribute__ (...)`; the preprocessor turns one into
+   `__x2c_attribute__ "(...)"` (see Toolchain.preprocess), whose two tokens
+   become comments, as though the preprocessor had erased them. Returns the
+   index of the attribute's last token. */
+static size_t _note_attribute(Compiler c, size_t index) {
+  Token base = c.tokenizer.tokens, marker = base + index;
+  Token last = _skip_forward(marker + 1);
+  int layout = 0;
+  if (marker.text == "__attribute__") {
+    if (last.type != <(>) return index;
+    Token open = last;
+    last = open.group_close();
+    layout = _layout_attribute(open, last);
+  }
+  else {
+    if (last.type != <lit-char*>) return index;
+    marker.type = last.type = <comment>;
+    Tokenizer words = Tokenizer.new(String.parse(last.text));
+    words.scan();
+    Token first = words.tokens;
+    layout = _layout_attribute(first, first + words.tokens.len() - 1);
+  }
+  if (layout) {
+    c.pack_marks.push((long) index);
+    c.pack_marks.push((long) index + 1);
+  }
+  return last - base;
 }
 
 /* Records the open conditional groups after each conditional directive as
@@ -671,13 +703,18 @@ static size_t _erase_attribute(Compiler c, size_t index) {
    holds no syntax x2c needs to parse. Its tokens become comments; the
    directives around it stay in place, so emission is unchanged. A group's
    state is 2 while its arm is hidden, 1 when the arms after its first
-   `#else` will be, and 0 otherwise. The same pass records the reachable
-   packing marks, since directives are replayed during parsing. */
+   `#else` will be, and 0 otherwise.
+
+   The same pass records packing marks by token index, because the parser
+   can read one directive more than once. Each arm of a group starts from the
+   packing state at the group's opening, and the state after the group joins
+   what its reachable arms leave, including the path through a group without
+   an `#else`. */
 static void _scan_conditionals(Compiler c) {
-  Array stack = $auto([]), saved_packing = $auto([]);
+  Array stack = $auto([]), entries = $auto([]), saved = [];
   int hidden = 0, serial = 0, packed = 0;
   c.arm_stacks = {};
-  c.pack_marks = NULL;
+  c.pack_marks = [];
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
     Token token = &((struct Token *) c.tokenizer.tokens)[i];
     if (token.type == <eof>) break;
@@ -687,27 +724,46 @@ static void _scan_conditionals(Compiler c) {
          token rather than hiding it. */
       if (hidden && token.type != <space> && token.type != <error>)
         token.type = <comment>;
-      else if (token.type == <ident> && token.text == "__x2c_attribute__")
-        i = _erase_attribute(c, i);
+      else if (token.type == <ident> &&
+               (token.text == "__attribute__" ||
+                token.text == "__x2c_attribute__"))
+        i = _note_attribute(c, i);
       continue;
     }
     Symbol kind = preproc_conditional_kind(token.text);
+    int conditional = kind == <open> || (kind && stack.len()), before = packed;
     if (kind == <open>) {
       Symbol never = _never_active_arm(token.text);
       stack.push(%(${++serial} 0 ${never == <first> ? 2 : never == <rest>}));
+      entries.push(%($packed ${saved.list()} () 0));
     }
-    else if (kind == <branch> && stack.len()) {
-      Var (id, arm, state) = stack[-1];
-      stack[-1] = %($id ${arm.integer() + 1} ${state.integer() == 1 ? 2 : 0});
+    else if (conditional) {
+      Var (entry_packed, entry_saved, prior, has_else) = entries[-1];
+      List joined = prior;
+      if (!hidden) joined = _join_packing(joined, packed, saved);
+      if (kind == <branch>) {
+        Var (id, arm, state) = stack[-1];
+        stack[-1] =
+          %($id ${arm.integer() + 1} ${state.integer() == 1 ? 2 : 0});
+        has_else = has_else.truth() ||
+                   preproc_directive(token.text).startswith("else");
+        entries[-1] = %($entry_packed $entry_saved $joined $has_else);
+        joined = %($entry_packed $entry_saved);
+      }
+      else {
+        stack.take_last();
+        entries.take_last();
+        if (!has_else.truth() || !joined)
+          joined = _join_packing(joined, entry_packed, entry_saved);
+      }
+      Var (next_packed, next_saved) = joined;
+      packed = next_packed.truth();
+      saved.clear();
+      foreach (List entry, next_saved) saved.push(entry);
     }
-    else if (kind == <close> && stack.len()) stack.take_last();
-    else {
-      if (hidden) continue;
-      int before = packed;
-      packed = _pack_after(token.text, saved_packing, packed);
-      if (packed != before) _mark_packing(c, i);
-      continue;
-    }
+    else if (!hidden) packed = _pack_after(token.text, saved, packed);
+    if (packed != before) c.pack_marks.push((long) i);
+    if (!conditional) continue;
     c.arm_stacks[(long) i] = stack.list();
     hidden = 0;
     foreach (List group, stack) if (group.caddr() == 2) hidden = 1;

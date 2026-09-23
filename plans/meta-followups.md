@@ -75,19 +75,30 @@ Outcome, 2026-09-22:
   `struct timespec`, which macOS declares in `sys/_types/_timespec.h`
   through `_time.h` and glibc in `bits/types/struct_timespec.h`.
 - Packing. Tokenizing records where `#pragma pack` turns packing on or off,
-  outside unreachable conditional arms, and `--system-headers` marks each
-  attribute instead of erasing it in the preprocessor, so a `packed`,
-  `aligned`, `mode` or `vector_size` attribute also leaves a mark. A struct
-  defined under packing or around such a mark has no compile-time layout,
-  and meta code that uses it declines with `a compile-time struct with no
-  host layout`.
-- Remaining. A layout attribute on a typedef, such as
-  `typedef long aligned_long __attribute__((aligned(16)))`, still erases to
-  the natural layout of a struct field of that type; the mark lies outside
-  the struct. `-D_Atomic(T)=T` stays: `_Atomic` scalars have the size and
-  alignment of their plain type on the supported hosts, so a struct with
-  such a field keeps a correct layout. An `_Atomic` struct type could differ
-  and is not handled.
+  outside unreachable conditional arms. Each arm of a conditional group
+  starts from the state at its opening, and the state after the group joins
+  what the reachable arms leave. Tokenizing also marks each `packed`,
+  `aligned`, `mode` or `vector_size` attribute. Collection reads a header's
+  attributes directly; a preprocessing mode turns each attribute into a
+  marked string rather than erasing it, and tokenizing erases the string. A
+  struct defined under packing or around such a mark has no compile-time
+  layout, and meta code that uses it declines with `a compile-time struct
+  with no host layout`.
+- Remaining:
+  - Default collection reads each file separately, so it misses packing that
+    one header starts and another ends (Windows `pshpack1.h` and
+    `poppack.h`). `--cpp-symbols` and `--system-headers` read the
+    preprocessed unit and decline such a struct. Closing the gap needs each
+    collected header's net packing effect carried into its includer's scan,
+    including through header caches and `.xi` interfaces.
+  - A layout attribute on a typedef, such as
+    `typedef long aligned_long __attribute__((aligned(16)))`, and a field
+    declared `_Alignas`, leave a struct its natural layout; neither mark
+    lies in the struct's own definition.
+  - `-D_Atomic(T)=T` stays: `_Atomic` scalars have the size and alignment of
+    their plain type on the supported hosts, so a struct with such a field
+    keeps a correct layout. An `_Atomic` struct type could differ and is not
+    handled.
 
 ## Design tracks (decide with Gary first)
 

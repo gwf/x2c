@@ -441,9 +441,19 @@ These C shapes are not available at compile time:
 - Unions.
 - Structs with bitfields, array members or anonymous members. A meta function
   that uses one reports `a compile-time struct with no host layout`.
-- Structs with packing or alignment attributes, and structs under
-  `#pragma pack`, including those from system headers. A meta function that
-  uses one reports `a compile-time struct with no host layout`.
+- Packed structs. A meta function that uses one reports `a compile-time
+  struct with no host layout`. The compiler detects a struct defined while
+  `#pragma pack` is in effect, and a `packed`, `aligned`, `mode` or
+  `vector_size` attribute in the struct's own definition, such as a header
+  struct followed by `__attribute__((packed))`. It follows `#pragma pack`
+  within one file. `--cpp-symbols` and `--system-headers` read the
+  preprocessed unit, so they also detect packing that one header starts and
+  another ends, as Windows `pshpack1.h` and `poppack.h` do; default
+  collection does not.
+- Structs whose layout the compiler cannot see, which it would lay out with
+  natural alignment: a field declared `_Alignas`, or a field whose typedef
+  carries an alignment attribute. Do not pass such a struct to a native
+  function from compile-time code.
 - Arrays of structs, which a meta function reports as `an array of
   structs`, the address of an array element, and pointer arithmetic.
 - `sizeof`, which is not evaluated at compile time. The parser does not
@@ -499,7 +509,7 @@ on a listed type works. The operation inventory below further limits calls.
 | Pointers to locals | `int *p = &n;`, copying that pointer, and passing it to another meta function or a native function work. A local whose address is taken lives in native bytes, and the pointer is its real address. | `*p` reads and `*p = value` writes the local. Pointer arithmetic and the address of an array element are not supported. |
 | Structs | Named, inline and nested locals; initialization, assignment, by-value arguments and returns, with C copy behavior. | Fields and addresses refer to native bytes in C layout. Assignment keeps existing field addresses; storage ends when the function returns. See [C objects during compilation](#c-objects-during-compilation). |
 | Native functions | The functions in `lib/cmath.x` and `lib/clibc.x`, which the compiler links. | Explicit dollar evaluation and meta bodies can call them, including through output pointers. Ordinary calls are not folded. See [Native C functions](#native-c-functions). |
-| System-header structs | `--system-headers` supplies the header declarations. A local `struct timespec` can be passed to `timespec_get`. | Unions and structs with bitfields, array members, anonymous members, packing or alignment attributes, or `#pragma pack` are not available. |
+| System-header structs | `--system-headers` supplies the header declarations. A local `struct timespec` can be passed to `timespec_get`. | Unions, packed structs and structs with bitfields, array members or anonymous members are not available. |
 | `File`, buffers and other resource types | No general compile-time constructor/operation surface is installed for these types. A declaration or opaque type name alone does not make the resource usable. | For example, `File.open` has no binding. Use the compiler's explicit text-embedding operation for source-dependent text. |
 
 Collections hold values, not arbitrary native memory. Nested collections keep

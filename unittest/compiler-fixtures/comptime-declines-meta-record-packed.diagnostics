@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/comptime-declines-meta-record-packed.x:22:1: macro: this function cannot run at compile time
+unittest/compiler-fixtures/comptime-declines-meta-record-packed.x:37:1: macro: this function cannot run at compile time
   meta int meta_packed_value(void) {
   ^^^^
   note: reason: a compile-time struct with no host layout

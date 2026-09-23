@@ -446,19 +446,28 @@ static List _field(Compiler compiler, List context, int delegated) {
 }
 
 /* Reports whether C packs an aggregate whose tokens run from `first` to the
-   current one: packing is on before it, or a mark lies within it. Tokens
-   outside the unit's own, such as a constructed form's, have no marks. */
+   current one and any attribute after it: packing is on before it, or a
+   mark lies within it. Tokens outside the unit's own, such as a constructed
+   form's, have no marks. */
 static int _packed_since(Compiler c, Token first) {
   Token base = c.tokenizer.tokens, end = base + c.tokenizer.tokens.len();
-  if (!c.pack_marks || first < base || c.token >= end) return 0;
-  int before = 0, within = 0;
-  foreach (long mark, c.pack_marks) {
-    if (mark < first - base) before++;
-    else if (mark < c.token - base) within++;
+  if (first < base || c.token >= end) return 0;
+  Token last = _attribute_starts(c)
+             ? c.skip_trivia_from(c.token + 1).group_close() : c.token;
+  // Marks ascend, so the ones before `first` are a prefix.
+  int before = 0, count = c.pack_marks.len();
+  for (int high = count; before < high;) {
+    int middle = (before + high) / 2;
+    if ((long) c.pack_marks[middle] < first - base) before = middle + 1;
+    else high = middle;
   }
-  return before % 2 || within;
+  return before % 2 ||
+         (before < count && (long) c.pack_marks[before] <= last - base);
 }
 
+/* Publishes an aggregate whose tokens start at `first`. A constructed
+   struct passes the current token, so it is packed where its form is; an
+   enum passes `NULL`. */
 static List _publish_aggregate_type(
   Compiler compiler, Symbol tag, Var name, List members, Token first) {
   List type = %($tag $name);
@@ -467,9 +476,11 @@ static List _publish_aggregate_type(
     compiler.sym.bind_identity(%($tag), name, %($tag $body));
   else
     compiler.sym.declare(NULL, type, tag == <enum> ? %(enum) : %($tag $body));
-  if (tag != <enum>) compiler.sym.declare_field_order(type, members);
-  if (tag != <enum> && _packed_since(compiler, first))
-    compiler.sym.set(%(@type "packed"), %(packed));
+  if (tag != <enum>) {
+    compiler.sym.declare_field_order(type, members);
+    if (_packed_since(compiler, first))
+      compiler.sym.set(%(@type "packed"), %(packed));
+  }
   return %($tag $name $body);
 }
 
@@ -672,7 +683,7 @@ static List _enum(Compiler c) {
     c.expect(<"}">);
     if (!c.macro_holes)
       return _publish_aggregate_type(
-        c, <enum>, usedname.car(), enums, c.token);
+        c, <enum>, usedname.car(), enums, NULL);
   }
   return enums ? type.append(%($enums)): type;
 }

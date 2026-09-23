@@ -383,16 +383,12 @@ int Toolchain.preprocess(
   }
   Path scratch = dependencies ? Path.temp_dir() : NULL;
   String depfile = %"$scratch/cpp.d";
-  /* Expanded system headers place attributes where x2c does not parse them,
-     and a packing attribute changes the layout of its struct. Each one
-     becomes a marked string instead of nothing, so tokenizing can erase it
-     and keep that fact. */
+  /* Headers place attributes where x2c does not parse them, and a packing
+     attribute changes the layout of its struct. Each one becomes a marked
+     string, so tokenizing can erase it and keep that fact. */
   List arguments = %(
     ${t.cc} "-E" "-P" "-x" "c"
-    "-D__asm(x)=" "-D__asm__(x)="
-    @{expand_system_headers
-      ? %("-D__attribute__(x)=__x2c_attribute__ #x")
-      : %("-D__attribute__(x)=")}
+    "-D__asm(x)=" "-D__asm__(x)=" "-D__attribute__(x)=__x2c_attribute__ #x"
     "-D__format__(x)=" "-D__printf__(x)=" "-D__inline__="
     "-D__inline=" "-D_Nullable=" "-D_Nonnull=" "-DX2CCPP"
     "-D__restrict=" "-D__extension__=" "-Wno-unicode"

@@ -14,9 +14,24 @@ struct MetaPacked { char tag; short value; };
 #endif
 struct MetaUnpacked { char tag; short value; };
 
+// Either arm's push is undone by the one pop after the group.
+#ifdef __LP64__
+#pragma pack(push, 8)
+#else
+#pragma pack(push, 4)
+#endif
+struct MetaWide { char tag; int value; };
+#pragma pack(pop)
+struct MetaLater { char tag; int value; };
+
 meta int meta_unpacked_value(void) {
   struct MetaUnpacked unpacked = { .tag = 1, .value = 2 };
   return unpacked.value;
+}
+
+meta int meta_later_value(void) {
+  struct MetaLater later = { .tag = 1, .value = 2 };
+  return later.value;
 }
 
 meta int meta_packed_value(void) {
