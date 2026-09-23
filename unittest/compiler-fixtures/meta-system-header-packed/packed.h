@@ -19,3 +19,10 @@ struct HeaderLeadField { enum HeaderLead lead; };
 #define HEADER_PACKED_BY(n) __attribute__((packed))
 struct HeaderMacro { char tag; short value; } HEADER_PACKED;
 struct HeaderMacroBy { char tag; short value; } HEADER_PACKED_BY(1);
+
+#define HEADER_EMPTY
+#define HEADER_MARKED __attribute__((deprecated))
+#define HEADER_EXPORT __attribute__((visibility("default")))
+struct HeaderEmpty { char tag; short value; } HEADER_EMPTY;
+struct HeaderMarked { char tag; short value; } HEADER_MARKED;
+struct HEADER_EXPORT HeaderExport { char tag; short value; };

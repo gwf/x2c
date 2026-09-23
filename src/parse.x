@@ -264,24 +264,19 @@ static String _attribute(Compiler c) {
 }
 
 /* C places an aggregate's own attributes after its keyword and after its
-   closing brace. Collection skips them, since attribute text is no part of
-   a collected type, and reports whether any was a macro. A written
-   attribute that changes layout carries packing marks; a macro's body has
-   none, so an aggregate with an attribute macro is taken as packed. */
-static int _skip_aggregate_attributes(Compiler c) {
-  int macro = 0;
-  if (!c.shallow) return 0;
+   closing brace, written out or through a macro whose body is attributes.
+   Collection skips them: attribute text is no part of a collected type, and
+   the packing marks hold any layout they change (see Compiler.tokenize). */
+static void _skip_aggregate_attributes(Compiler c) {
+  if (!c.shallow) return;
   loop {
     Var definition;
-    int written = c.token.text == "__attribute__";
-    if (_attribute(c)) macro |= !written;
-    else if (c.peek(0) == <ident> &&
-             c.object_macros.try_get(c.token.text, &definition) &&
-             definition.equal(%())) {
-      macro = 1;
-      c.next();
-    }
-    else return macro;
+    if (_attribute(c)) continue;
+    if (c.peek(0) != <ident> ||
+        !c.object_macros.try_get(c.token.text, &definition) ||
+        !definition.equal(%()))
+      return;
+    c.next();
   }
 }
 
@@ -506,10 +501,12 @@ static int _packed_since(Compiler c, Token first) {
          (before < count && (long) c.pack_marks[before] < c.token - base);
 }
 
-/* Publishes an aggregate, which C packs when `packed` is set. A packed
-   enum can be narrower than int, so it has no int layout. */
+/* Publishes an aggregate whose tokens start at `first`. A constructed
+   aggregate passes the current token, so it is packed where its form is. A
+   packed enum can be narrower than int, so it has no int layout. */
 static List _publish_aggregate_type(
-  Compiler compiler, Symbol tag, Var name, List members, int packed) {
+  Compiler compiler, Symbol tag, Var name, List members, Token first) {
+  int packed = _packed_since(compiler, first);
   List type = %($tag $name);
   List body = tag == <enum> ? members : %(fields @members);
   if (name is <list> && name.car() == <binding>)
@@ -589,7 +586,7 @@ static List _struct_or_union(Compiler c) {
   Token first = c.token;
   Symbol tag = c.peek(0);
   c.next();
-  int macro = _skip_aggregate_attributes(c);
+  _skip_aggregate_attributes(c);
   List name = c.parse_optional_identifier();
   if (name && c.package) name = _package_aggregate_name(c, tag, name);
   List usedname = name ? name : c.gensym();
@@ -599,10 +596,9 @@ static List _struct_or_union(Compiler c) {
   if (c.test(<"{">)) {
     fields = c.parse_fields(type);
     c.expect(<"}">);
-    macro |= _skip_aggregate_attributes(c);
+    _skip_aggregate_attributes(c);
     if (!c.macro_holes)
-      return _publish_aggregate_type(
-        c, tag, usedname.car(), fields, macro || _packed_since(c, first));
+      return _publish_aggregate_type(c, tag, usedname.car(), fields, first);
     fields = cons(<fields>, fields);
   }
   return fields ? type.append(%($fields)): type;
@@ -719,7 +715,7 @@ List Compiler.parse_enumerators(Compiler c, List context) {
 static List _enum(Compiler c) {
   Token first = c.token;
   c.expect(<enum>);
-  int macro = _skip_aggregate_attributes(c);
+  _skip_aggregate_attributes(c);
   List name = c.parse_optional_identifier();
   if (name && c.package) name = _package_aggregate_name(c, <enum>, name);
   List usedname = name ? name : c.gensym();
@@ -727,10 +723,9 @@ static List _enum(Compiler c) {
   if (c.test(<"{">)) {
     enums = c.parse_enumerators(type);
     c.expect(<"}">);
-    macro |= _skip_aggregate_attributes(c);
+    _skip_aggregate_attributes(c);
     if (!c.macro_holes)
-      return _publish_aggregate_type(
-        c, <enum>, usedname.car(), enums, macro || _packed_since(c, first));
+      return _publish_aggregate_type(c, <enum>, usedname.car(), enums, first);
   }
   return enums ? type.append(%($enums)): type;
 }
@@ -1042,8 +1037,7 @@ List Compiler.parse_named_type(Compiler c) {
                 ? NULL : c.parse_fields(%($tag $name));
     c.expect(<"}">);
     base = c.macro_holes ? %($tag $name (fields @fields))
-                        : _publish_aggregate_type(
-                            c, tag, name, fields, _packed_since(c, start));
+                        : _publish_aggregate_type(c, tag, name, fields, start);
   }
   else base = _type_specifier(c);
   base = qualifiers.append(base);
@@ -1939,9 +1933,8 @@ static List _finish_aggregate_type(
       }
     }
   }
-  // A constructed aggregate is packed where its form is.
   return _publish_aggregate_type(
-    c, tag, name, bound.list_free(), _packed_since(c, c.token));
+    c, tag, name, bound.list_free(), c.token);
 }
 
 static Var _finish_type_spec(Compiler compiler, Var value) {
