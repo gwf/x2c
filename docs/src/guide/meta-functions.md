@@ -449,9 +449,10 @@ These C shapes are not available at compile time:
   `#pragma pack` within each file. Where `#if` groups guard the directives,
   it reads the file once for each arm position: the first reading takes
   every group's first arm, the second its second arm or its last, and so
-  on. A group without `#else` is always entered, as an include guard is. A
-  struct packed in any reading is declined, even when C lays it out
-  naturally. `--cpp-symbols` and `--system-headers` read the
+  on. A group without `#else` is always entered, as an include guard is, so
+  when C skips a pop in such a group, a later packed struct gets its natural
+  layout. A struct packed in any reading is declined, even when C lays it
+  out naturally. `--cpp-symbols` and `--system-headers` read the
   preprocessed unit, so they also detect packing that one header starts and
   another ends, as Windows `pshpack1.h` and `poppack.h` do, and a push and a
   pop under unrelated conditions, which default collection can miss.
