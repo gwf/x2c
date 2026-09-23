@@ -53,6 +53,31 @@ instructions. The #231 rise of 28 points was not noticed at the time and was
 not investigated here. `e0fe15a68`, a merge of dev into a feature branch
 before #234, scored 267 and is left out as unexplained.
 
+## September replay
+
+Replayed on 2026-09-23 with the method in `tools/build-scaling-replay.sh`,
+in time order, with `b4b64c72` at 100:
+
+| Commit | Date | Lines | Score | Note |
+| --- | --- | ---: | ---: | --- |
+| `4235c383` | 09-05 | 54078 | 127 | first public commit |
+| `92a4c5a4` | 09-10 | 58484 | 89 | speedup, cause not identified |
+| `26192820` | 09-13 | 60597 | 95 | |
+| `1f6e3eaa` | 09-17 | 67498 | 111 | |
+| `fd94c088` | 09-17 | 65741 | 115 | |
+| `6bedf868` | 09-17 | 65569 | 110 | |
+| `057b7648` | 09-17 | 66439 | 237 | Match plan cache broken by `8278d3fe` |
+| `864beef8` | 09-18 | 69247 | 114 | after the `90685897` fix |
+| `be34b485` | 09-20 | 71055 | 83 | speedup, cause not identified |
+| `2d188c42` | 09-22 | 75505 | 88 | |
+| `cdeadd9b` | 09-22 | 75482 | 90 | |
+| `db86d4b7` | 09-22 | 76923 | 94 | meta recovery merge |
+| `4a9096f8` | 09-22 | 77553 | 94 | |
+| `b4b64c72` | 09-23 | 78206 | 100 | |
+
+Total cycles grew 14% while source grew 45%. The rise since 09-20 came in
+several steps of 4 to 7 points during the meta work and was not profiled.
+
 ## Limits
 
 Line counts barely changed across the backtest window, so the assumption

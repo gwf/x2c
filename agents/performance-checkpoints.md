@@ -52,6 +52,9 @@ heavy host load, so smaller changes are noise. Replayed over the August
 fell from 186 to 140 at the #265 fix. Instruction counts are steadier but missed the fix, because
 that slowdown was memory stalls.
 
+To see the score's history, `tools/build-scaling-replay.sh` rebuilds ten
+commits spread across `dev`, or the commits it is given, and prints each
+one's score as CSV with the newest at 100. Ask for a line chart of that CSV.
 The score assumes build cost grows in proportion to source lines. A new C
 compiler changes cycle counts; after a toolchain upgrade, run
 `tools/build-scaling.py --rebaseline` and commit the new baseline.
