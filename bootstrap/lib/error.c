@@ -181,13 +181,17 @@ int x2c_error_catch_site_pending(ErrorCatchSite * site){
   return ! site || __atomic_load_n(& site -> state, __ATOMIC_ACQUIRE) != ERROR_CATCH_STATIC;
 }
 
+int List_try_own(List);
+
+List Var_list(Var);
+
 int x2c_match_pattern_retainable(Var);
 
 MatchPlan x2c_match_site_prepare(MatchCaptureSite *, Var);
 
 static void _catch_site_bind(ErrorCatchSite * site, Var * patterns){
   int retainable = 1;
-  for(int i = 0;  i < site -> arm_count;  i ++) if(i != site -> default_arm && ! x2c_match_pattern_retainable(patterns[i])) retainable = 0;
+  for(int i = 0;  i < site -> arm_count;  i ++) if(i != site -> default_arm && !(List_try_own(Var_list(patterns[i])) && x2c_match_pattern_retainable(patterns[i]))) retainable = 0;
   if(retainable) for(int i = 0;  i < site -> arm_count;  i ++){
     if(i == site -> default_arm) continue;
     MatchPlan plan = x2c_match_site_prepare(& site -> arms[i], patterns[i]);
@@ -254,7 +258,7 @@ ErrorHandler x2c_error_catch_site_push(void * target, ErrorCatchSite * site, Var
     _handler_free(h);
     String fence = String_new(fenced);
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/error.x",.function = "x2c_error_catch_site_push",.line = 162};
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../lib/error.x",.function = "x2c_error_catch_site_push",.line = 164};
       x2c_error_raise_n(& _x2c_error_site_0, 1358596898646632, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("catch")), NULL))), Symbol_var(3226), int_var(fenced_arm), Symbol_var(12939466), String_var(fence));
       __builtin_unreachable();
     }
@@ -567,8 +571,6 @@ String Var_str(Var);
 
 Var Var_new(Symbol, ...);
 
-List Var_list(Var);
-
 Var List_car(List);
 
 Var List_var(List);
@@ -714,8 +716,6 @@ int String_try_own(String);
 
 List cons(Var, List);
 
-int List_try_own(List);
-
 static Var _snapshot_value(Var v){
   if(Var_is_void(v)) _floor(4477479911782, "void is not an admissible error snapshot");
   if(Var_is_null(v) || Var_is_nil(v) || Var_is(v, 1328354264)) return v;
@@ -809,12 +809,12 @@ Var Map_setindex(Map, Var, Var);
 void Error_policy_set(Symbol code, Symbol disposition){
   if(! Error_ready()) return;
   if(disposition != 2260136 && disposition != 25550 && disposition != 7475046632 && disposition != 619609226){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 832};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 834};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(302607262917214), Symbol_var(disposition));
     __builtin_unreachable();
   }
   if(_never_returns(code) && disposition != 2260136){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 835};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/error.x",.function = "Error_policy_set",.line = 837};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 3, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_set")), NULL))), Symbol_var(227594), Symbol_var(code), Symbol_var(302607262917214), Symbol_var(disposition));
     __builtin_unreachable();
   }
@@ -870,7 +870,7 @@ void * Error_policy_capture(void){
   capacity *= 2;
   ErrorPolicyCapture capture = malloc(sizeof(struct ErrorPolicyCapture) +(size_t) capacity * sizeof(Symbol));
   if(! capture){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/error.x",.function = "Error_policy_capture",.line = 909};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/error.x",.function = "Error_policy_capture",.line = 911};
     x2c_error_raise_n(& _x2c_error_site_3, 97614135954008, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Error.policy_capture")), NULL))));
     __builtin_unreachable();
   }
