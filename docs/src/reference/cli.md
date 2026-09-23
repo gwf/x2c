@@ -179,6 +179,23 @@ per C source. `--kind static-library` uses the selected archiver:
   --output /tmp/libwidget.a src/widget.x src/helper.c
 ```
 
+`--kind meta-module` builds a native module, whose functions compile-time
+code can call. The module leaves the x2c runtime unresolved and uses the
+loading compiler's copy, and it records that compiler's content hash.
+`--native-module <file>` loads a module for `translate`, `build`, `run`, and
+`repl`, and repeats:
+
+```sh
+./x2c build --kind meta-module --output helpers.so src/helpers.x
+./x2c run --native-module helpers.so src/helpers.x src/main.x
+```
+
+Only the compiler that built a module loads it; any other compiler reports
+that the module was built by another compiler. The compiler loads a module
+only on request and keeps it loaded until it exits. Modules work on macOS,
+Linux and WSL. [Native modules](../guide/meta-functions.md#native-modules)
+explains what a module contains.
+
 `-c`, or `--compile-only`, stops after compilation. One input may name its
 object with `--output`. Multiple compile-only inputs require `--build-dir`, so
 every object has an unambiguous path.
@@ -466,7 +483,10 @@ literal dot. Matches are deduplicated and bytewise sorted. Unmatched patterns,
 unknown targets, and dependency cycles are errors before any action runs.
 
 A target may also set defines, C flags, library directories, libraries, link
-flags, package directories, and an output. Command-line target, profile,
+flags, package directories, and an output. `kind = "meta-module"` builds a
+native module, and a target's `native-modules` field lists the module
+targets its translation loads. Those build first, like `dependencies`, and a
+changed module retranslates the targets that load it. Command-line target, profile,
 kind, output, build directory, and tool options override the corresponding
 defaults. `--target <name>` builds the named manifest target and `--profile
 <name>` applies the named manifest build profile; both work with `build` and

@@ -17,7 +17,8 @@
 */
 typedef struct CliRequest {
   Symbol command, List inputs, run_args, include_dirs, package_dirs, cpp_args;
-  List cc_args, ld_args, String out_dir, dep_file, dep_target, manifest;
+  List cc_args, ld_args, native_modules, String out_dir, dep_file, dep_target;
+  String manifest;
   String target, profile, output, build_dir, temps_dir, label, state_seed;
   String prefix, cc, ar, compile_commands, sha256, index, Symbol kind;
   String diagnostics_file;
@@ -154,7 +155,7 @@ static CliOption cli_options[] = {
   { <profile>, CLI_BUILD | CLI_RUN, <target>, "--profile", "<name>",
     "Apply the named manifest build profile", 0 },
   { <kind>, CLI_BUILD, <target>, "--kind", "<kind>",
-    "executable or static-library", 0 },
+    "executable, static-library, or meta-module", 0 },
   { <compile>, CLI_BUILD, <target>, "-c",
     NULL, "Produce object files without linking", 0,
     .alias = "--compile-only" },
@@ -194,6 +195,9 @@ static CliOption cli_options[] = {
     "--c-system-dir", "<dir>", "Add a C-only system include directory", 0 },
   { <pkg-dir>, CLI_TRANSLATE | CLI_NATIVE | CLI_ENV, <source>,
     "--package-dir", "<dir>", "Add a directory of x2c packages", 0 },
+  { <native>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN | CLI_REPL, <source>,
+    "--native-module", "<file>",
+    "Load a native module for compile-time calls", 0 },
   { <no-cpp>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
     "--no-cpp", NULL, "Skip symbol collection and preprocessing", 0 },
   { <live-syms>, CLI_TRANSLATE | CLI_BUILD | CLI_RUN, <source>,
@@ -572,7 +576,7 @@ static void _print_repl_help(void) {
   puts(
     $dedent(%"
       Usage:
-        x2c repl [--dump] [--stats] [--verbose-stats]
+        x2c repl [options]
 
       Evaluate a supported x2c subset in an experimental interactive session.
       Read submissions from standard input. Enter :help for session commands."));
@@ -866,6 +870,7 @@ static void _driver_kind(CliRequest request, String value) {
   request.kind_explicit = 1;
   if (value == "executable") request.kind = <executable>;
   else if (value == "static-library") request.kind = <static-lib>;
+  else if (value == "meta-module") request.kind = <module>;
   else if (value == "shared-library")
     x2c_driver_error("shared-library is not supported by this compiler");
   else x2c_driver_error(%"unknown target kind '$value'");
@@ -916,6 +921,7 @@ static void _apply_option(
     case <x-include>: x_paths.push(value);
     case <pkg-dir>:
       c.package_dirs = cons(value, c.package_dirs);
+    case <native>: c.native_modules = cons(value, c.native_modules);
     case <no-cpp>: c.no_cpp = 1;
     case <live-syms>: c.live_symbols = 1;
     case <cpp-syms>: c.cpp_symbols = 1;
@@ -1106,6 +1112,7 @@ static CliRequest _parse_command(Array args, CliCommand *command) {
   request.ld_args = ld_args.list_free();
   if (request.package_dirs)
     request.package_dirs = request.package_dirs.reverse();
+  request.native_modules = request.native_modules.reverse();
   if (mask == CLI_TRANSLATE && !request.inputs)
     x2c_driver_error("translate requires at least one input");
   if (request.inputs.cdr() && (request.dep_file || request.dep_target))

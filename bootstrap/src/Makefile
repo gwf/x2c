@@ -2,6 +2,11 @@
 
 CFLAGS   =	-iquote ../lib $(FLAGS)
 LDFLAGS  =	-L../lib -lx2c -lm
+# A native module binds to the compiler's own runtime, which a Linux
+# executable exports only when asked.
+ifeq ($(shell uname -s),Linux)
+LDFLAGS  +=	-rdynamic
+endif
 SRCS     =  $(wildcard *.c)
 OBJS     =  $(SRCS:%.c=%.o)
 

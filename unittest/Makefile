@@ -24,7 +24,7 @@ SUITE_OBJECTS = $(filter-out $(BUILD)/test-all.o,$(TEST_OBJECTS))
 	cli-probes package-install-probes \
 	symbol-snapshot-probes \
 	header-cache-probes protocol-probes lisp-reader-benchmark clean clobber \
-	expression-bodied-function-probes \
+	expression-bodied-function-probes native-module-probes \
 	FORCE
 
 default: test-all compiler-fixtures scope-probes error-probes \
@@ -80,9 +80,12 @@ protocol-probes:
 expression-bodied-function-probes:
 	./probes/run-expression-bodied-functions.sh
 
+native-module-probes:
+	./probes/run-native-modules.sh
+
 compiler-fixtures: cli-probes package-install-probes preprocessor-probes \
 		symbol-snapshot-probes header-cache-probes protocol-probes \
-		expression-bodied-function-probes
+		expression-bodied-function-probes native-module-probes
 	./compiler-fixtures/run.sh check
 
 update-compiler-fixtures:

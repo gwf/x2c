@@ -36,6 +36,11 @@ CFLAGS           += $(EXTRA_CFLAGS)
 X2C_FLAGS        ?=
 LDFLAGS          += -lx2c
 LDFLAGS          += $(BUILD_LDFLAGS)
+# A native module binds to the compiler's own runtime, which a Linux
+# executable exports only when asked.
+ifeq ($(shell uname -s),Linux)
+LDFLAGS          += -rdynamic
+endif
 MAKEFLAGS        += -S
 ###############################################################################
 .SUFFIXES: # Disable built-in suffix rules

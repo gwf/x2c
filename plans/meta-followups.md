@@ -142,9 +142,58 @@ lifetime-certified tranche of the
 
 Build a project's native code with generated typed adapters into a loadable
 module, then load it for translation, build, or REPL use through the same
-binding path as the compiler's linked functions. The command spelling,
-registration compatibility, shared runtime state and module lifetime are
-open.
+binding path as the compiler's linked functions.
+
+Gary decided the four open questions on 2026-09-22, and the first delivery
+implements them; the book documents it under
+[native modules](../docs/src/guide/meta-functions.md#native-modules).
+
+- **Spelling.** `x2c build --kind meta-module` and `kind = "meta-module"`
+  build a module; `--native-module <file>` on `translate`, `build`, `run` and
+  `repl`, or a target's `native-modules` list of module targets, loads one.
+  Module targets build before the targets that load them.
+- **Shared runtime.** A module links without `libx2c.a` (`-bundle -undefined
+  dynamic_lookup` on macOS, `-fPIC -shared` elsewhere) and binds to the
+  loading compiler's runtime. The compiler links with `-rdynamic` on Linux
+  (`builds/stage.mk`, `bootstrap/src/Makefile`, and the `x2c bootstrap`
+  compiler request). The build writes a generated entry unit that includes
+  the module's x2c sources and defines `x2c_module_targets`, the
+  name-to-`Func` Map that `lisp.native.targets` generates from the
+  prototypes those sources declare (`_x2c.native-meta.declared`), and
+  `x2c_module_stamp`, the content hash of the building compiler. The loader
+  rejects any other hash.
+- **Lifetime and trust.** `Frontend.load_support` loads each requested module
+  once per process and never closes it; the targets live in a
+  process-lifetime Scope with promoted names and signatures.
+  `_bind_native_meta` falls back to them when the compiler links no function
+  of the name, and the existing signature check validates each binding.
+  Nothing is discovered through includes, interfaces or package roots.
+- **Platforms.** macOS, Linux and WSL. The APE seed, MSYS2 and native Windows
+  compile the loader but report that native modules are not supported.
+
+Consumer translations fingerprint each loaded module's contents. A module
+link is cached like a static archive, because macOS signs each link with
+its pid-suffixed staging name, so an unconditional relink would change the
+module's bytes and retranslate every consumer. The REPL accepts a bodyless
+`meta` prototype, so a module function is callable there too.
+`unittest/probes/run-native-modules.sh` covers a module built and called
+from a meta body, a direct build, a manifest target and the REPL; rejection
+of a stamp mismatch and a signature mismatch; no binding without the
+option; and reuse of an unchanged module and its consumer.
+
+Measured on macOS arm64 (debug build): the compiler grew from 2,404,880 to
+2,423,184 bytes (+0.8%, the loader, entry generation and REPL change), and
+startup is unchanged within noise (`--version` 3.84 ms vs 3.74 ms minimum,
+a one-line `translate` 37.5 ms vs 36.4 ms minimum, 60 interleaved runs).
+`-rdynamic` does not apply there. On Linux it adds the roughly 1,500
+exported names to the dynamic symbol table, an estimated 70 KB; it was not
+measured on Linux.
+
+Remaining: the compiler links only the runtime members it uses, so a
+module that calls another runtime function fails to load and names the
+missing symbol (467 runtime symbols today, such as autodiff and `Args`).
+Linking the whole runtime into the compiler would remove that limit for
+about 200 KB (+8.4%) on macOS; that is a separate decision.
 
 ## Unblocked elsewhere
 

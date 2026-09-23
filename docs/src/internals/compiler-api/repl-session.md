@@ -14,7 +14,7 @@ Persistent compiler submissions and inspection.
 | --- | --- |
 | [`ReplSession.complete`](#ReplSession.complete) | Completes the source namespace at byte `cursor` without publishing parse state. |
 | [`ReplSession.complete_functions`](#ReplSession.complete_functions) | Returns sorted published session functions matching `prefix`. |
-| [`ReplSession.inspect`](#ReplSession.inspect) | Returns (value), (function (typed AST) (lowered FORMS)), or NULL if absent. |
+| [`ReplSession.inspect`](#ReplSession.inspect) | Returns (value), (native), (function (typed AST) (lowered FORMS)), or NULL if absent. |
 | [`ReplSession.new`](#ReplSession.new) | Borrows an initialized submission compiler until its unit closes. |
 | [`ReplSession.submit`](#ReplSession.submit) | Submits one complete candidate without printing or retaining a pending prefix. |
 | [`ReplSession.symbols`](#ReplSession.symbols) | Returns an immutable snapshot of (kind "name") entries, sorted by name. |
@@ -29,7 +29,7 @@ Persistent compiler submissions and inspection.
 Completes the source namespace at byte `cursor` without publishing parse
 state. Invalid or non-code prefixes return no candidates.
 
-Source: `src/repl-session.x:148`
+Source: `src/repl-session.x:151`
 
 <a id="ReplSession.complete_functions"></a>
 #### ReplSession.complete_functions
@@ -38,17 +38,18 @@ Source: `src/repl-session.x:148`
 
 Returns sorted published session functions matching `prefix`.
 
-Source: `src/repl-session.x:133`
+Source: `src/repl-session.x:136`
 
 <a id="ReplSession.inspect"></a>
 #### ReplSession.inspect
 
 `List ReplSession.inspect(ReplSession session, String name)`
 
-Returns (value), (function (typed AST) (lowered FORMS)), or NULL if absent.
+Returns (value), (native), (function (typed AST) (lowered FORMS)), or
+NULL if absent.
 These are the original canonical Lists, borrowed until unit close.
 
-Source: `src/repl-session.x:84`
+Source: `src/repl-session.x:87`
 
 <a id="ReplSession.new"></a>
 #### ReplSession.new
@@ -59,7 +60,7 @@ Borrows an initialized submission compiler until its unit closes.
 Source-fact collection must be disabled because submission scratch maps
 are reclaimed after each call.
 
-Source: `src/repl-session.x:58`
+Source: `src/repl-session.x:60`
 
 <a id="ReplSession.submit"></a>
 #### ReplSession.submit
@@ -70,7 +71,7 @@ Submits one complete candidate without printing or retaining a pending
 prefix. Only successfully initialized declarations publish new bindings;
 evaluation effects on previously published values survive failure.
 
-Source: `src/repl-session.x:341`
+Source: `src/repl-session.x:353`
 
 <a id="ReplSession.symbols"></a>
 #### ReplSession.symbols
@@ -80,7 +81,7 @@ Source: `src/repl-session.x:341`
 Returns an immutable snapshot of (kind "name") entries, sorted by name.
 Only session definitions appear; storage is borrowed until unit close.
 
-Source: `src/repl-session.x:72`
+Source: `src/repl-session.x:74`
 
 ## Public types
 
@@ -99,7 +100,7 @@ Byte range and sorted `(kind "spelling")` replacement candidates for one
 completion request. Candidate storage is borrowed until the session unit
 closes.
 
-Source: `src/repl-session.x:29`
+Source: `src/repl-session.x:31`
 
 <a id="ReplResult"></a>
 ### ReplResult
@@ -111,7 +112,7 @@ diagnostics are ordinary compiler reports; message/cause describe the
 adapter or evaluator failure. source retains diagnostic source text;
 syntax and lowered support optional tracing.
 
-Source: `src/repl-session.x:19`
+Source: `src/repl-session.x:21`
 
 <a id="ReplSession"></a>
 ### ReplSession

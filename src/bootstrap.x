@@ -26,6 +26,7 @@ typedef struct Bootstrap {
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/utsname.h>
 
 static void _error(const char *message) {
   x2c_driver_error(%"bootstrap: $message");
@@ -188,6 +189,12 @@ CliRequest bootstrap_build_request(
   request.build_dir = %"$prefix/.x2c-build/$component";
   request.include_dirs = cons(%"$prefix/include/x2c", NULL);
   request.cc_args = command.cc_args;
+  // A native module binds to the compiler's own runtime, which a Linux
+  // executable exports only when asked.
+  struct utsname host;
+  if (component == <compiler> && !uname(&host) &&
+      String.new(host.sysname) == "Linux")
+    request.ld_args = %("-rdynamic");
   request.cc = command.cc;
   request.ar = command.ar;
   request.jobs = command.jobs;

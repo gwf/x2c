@@ -41,10 +41,12 @@ typedef struct ParsedUnit {
 
 #pragma private
 
+#include <dlfcn.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "build.x"
 #include "collect.x"
 #include "deps.x"
 #include "utils.x"
@@ -65,9 +67,46 @@ static Token _first_preprocessor_token(Compiler compiler) {
   return compiler.token;
 }
 
-/** Loads process-owned collection support before units. */
+/* The absolute paths of the loaded native modules. */
+static List native_modules = NULL;
+
+/* Loads the native module at `path` once per process and adds its functions
+   to the targets of native `meta` prototypes. Loading runs the module's
+   code inside the compiler, so it happens only on request. A module is
+   never unloaded, because its Funcs borrow its code. */
+static void _load_native_module(String path) {
+#if defined(__COSMOPOLITAN__) || defined(_WIN32) || defined(__CYGWIN__)
+  x2c_driver_error("native modules are not supported on this platform");
+#endif
+  String absolute = Path.absolute(path);
+  if (native_modules.contains(absolute)) return;
+  void *handle = dlopen(absolute, RTLD_NOW | RTLD_LOCAL);
+  if (!handle)
+    x2c_driver_error(
+      %"cannot load native module '$path': ${String.new(dlerror())}");
+  const char *stamp = dlsym(handle, "x2c_module_stamp");
+  Map (*entry)(void) = (Map (*)(void)) dlsym(handle, "x2c_module_targets");
+  if (!stamp || !entry)
+    x2c_driver_error(%"not an x2c native module: $path");
+  String expected = build_compiler_stamp();
+  if (!expected || strcmp(stamp, expected)) {
+    fprintf(
+      stderr,
+      "x2c: error: native module was built by another compiler: %s\n"
+      "note: rebuild it with this compiler\n", path.str());
+    exit(2);
+  }
+  Compiler.add_native_targets(entry);
+  native_modules = cons(absolute, native_modules);
+  native_modules.try_own();
+}
+
+/** Loads process-owned collection support and the requested native modules
+    before units.
+*/
 void Frontend.load_support(CliRequest request) {
   interface_configure(request.out_dir);
+  foreach (String path, request.native_modules) _load_native_module(path);
 }
 
 /** Borrows a configured request for sequential units. The request and this

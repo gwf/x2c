@@ -488,17 +488,20 @@ static Type _lisp_signature_type(Compiler compiler, Type type) {
   return signature ? signature : type;
 }
 
-/* Returns the declared native targets advertised by `meta` interface rows.
+/* Returns the declared native targets advertised by `meta` interface rows,
+   or only those declared in the files `paths` names when it is not empty.
    Sorting makes the generated adapter inventory independent of Map order. */
-static List _sdk_native_meta_targets(void) {
+static List _native_meta_targets(List paths) {
   Compiler compiler = macro_sdk_compiler
                     ? macro_sdk_compiler : macro_import_compiler;
   if (!compiler) return %();
   Map selected = {};
-  foreach (Var (key, value), compiler.sym.base_symbols()) {
-    (void) key;
-    match (value) case %(native-meta ?(String name) ?): selected[name] = 1;
-  }
+  foreach (Var (key, value), compiler.sym.base_symbols())
+    match (%($key $value))
+      case %(("source-node" (declaration ?(String path) ?))
+             (native-meta ?(String name) ?)):
+        if (!paths || paths.contains(home_absolute_path(path)))
+          selected[name] = 1;
   Array names = [];
   foreach (Var (name, present), selected) {
     (void) present;
@@ -508,6 +511,12 @@ static List _sdk_native_meta_targets(void) {
   foreach (String name, names.sort()) rows = cons(%($name), rows);
   return rows.reverse();
 }
+
+static List _sdk_native_meta_targets(void) => _native_meta_targets(NULL);
+
+/* A native module's entry exports the prototypes its own sources declare. */
+static List _sdk_native_meta_declared(List paths) =>
+  _native_meta_targets(paths);
 
 /* Builds the canonical signature stored by `Func` for one declared native
    function. The native Lisp binding macros generate this same shape. */
@@ -1056,6 +1065,9 @@ static void _install_native_operations(Compiler compiler) {
     $lisp.bind(
       _.macro_lisp, "_x2c.native-meta.targets", _sdk_native_meta_targets);
     $lisp.bind(
+      _.macro_lisp, "_x2c.native-meta.declared",
+      _sdk_native_meta_declared);
+    $lisp.bind(
       _.macro_lisp, "x2c.function.parameter",
       _sdk_function_parameter);
     $lisp.bind(
@@ -1554,16 +1566,52 @@ void Compiler.record_native_meta_effect(
   }
 }
 
+/* The functions of loaded native modules by name. No module is unloaded,
+   so the Map and its Funcs live in a Scope that lasts for the process. */
+static Map native_module_targets = NULL;
+static Scope native_module_scope = NULL;
+
+static void _native_module_shutdown(void) {
+  native_module_scope.destroy();
+  native_module_scope = NULL;
+  native_module_targets = NULL;
+}
+
+/** Adds the name-to-`Func` Map a loaded native module's entry returns to the
+    targets a bodyless `meta` prototype binds when the compiler links no
+    function of its name. A later module's function replaces an earlier one
+    of the same name. The Funcs, names, and signatures last for the process.
+*/
+void Compiler.add_native_targets(Map (*entry)(void)) {
+  Scope.push(&native_module_scope);
+  if (!(void *) native_module_targets) {
+    Scope.shutdown_hook(_native_module_shutdown);
+    native_module_targets = {};
+  }
+  Map targets = entry();
+  native_module_targets.merge(targets);
+  Scope.pop();
+  foreach (Var (name, target), targets) {
+    name.string().try_own();
+    ((Func) target.pointer()).signature().try_own();
+  }
+}
+
 /* Binds a declared native function to the compiler's own linked target of
-   the same name. A declaration the running compiler does not link binds
-   nothing, and a meta body that calls it reports the missing binding. */
+   the same name, or else to a loaded native module's. A declaration with
+   neither binds nothing, and a meta body that calls it reports the missing
+   binding. */
 static void _bind_native_meta(
   Compiler c, String name, List signature, Token marker) {
   Var function;
   if (!c.macro_lisp.try_get(name, &function)) {
     Var bound;
     try bound = c.macro_lisp.eval(%(bind $name (quote $signature)));
-    catch %(no-symbol *): return;
+    catch %(no-symbol *): {
+      if (!(void *) native_module_targets) return;
+      bound = native_module_targets.get(name);
+      if (bound is void) return;
+    }
     function = bound;
     c.macro_lisp.set_global(name, function);
   }

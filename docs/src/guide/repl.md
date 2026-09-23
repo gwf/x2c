@@ -154,7 +154,10 @@ supported. Names beginning `__repl_` are reserved.
 
 Native pointer and ABI operations, arbitrary C libraries, aggregate and type
 definitions, imports, protocols, user macro/meta definitions, preprocessor
-directives, and direct Lisp input are outside this subset. Variables need
+directives, and direct Lisp input are outside this subset. A bodyless `meta`
+prototype is accepted: it makes a function the compiler links, or one from a
+[native module](meta-functions.md#native-modules) loaded with
+`--native-module`, callable in the session. Variables need
 initializers; declarator modifiers, `const`, and `volatile` are rejected.
 Function-local `static`, `extern`, and `threaded` storage are also rejected:
 the evaluator cannot provide their native lifetime or linkage semantics.
