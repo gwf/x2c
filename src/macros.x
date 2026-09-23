@@ -15,6 +15,7 @@ $(import "../src/ast-rewrite.xmacro")
 #include "comptime.x"
 #include "meta.x"
 #include "parse.x"
+#include "regions.x"
 #include "statements.x"
 #include "utils.x"
 #include <limits.h>
@@ -488,27 +489,88 @@ static Type _lisp_signature_type(Compiler compiler, Type type) {
   return signature ? signature : type;
 }
 
+/* Builds the canonical signature stored by `Func` for one declared native
+   function. The native Lisp binding macros generate this same shape. */
+static List _native_meta_signature(Compiler c, Type type) {
+  type = type.canonicalize();
+  List source_parameters = _sdk_function_type_parameters(type);
+  Type source_result = type.apply(), Array parameters = [];
+  foreach (Var parameter, source_parameters)
+    parameters.push(_lisp_signature_type(c, parameter));
+  Type result = _lisp_signature_type(c, source_result);
+  return %((func ${parameters.list_free()}) @result);
+}
+
+/* The native functions one symbol row makes available to compile-time code,
+   as `(name signature)` rows: a bodyless `meta` prototype, or each witness
+   of a `meta protocol` adoption. An adoption that does not resolve makes
+   none available. */
+static List _native_meta_rows(Compiler c, Var row) {
+  match (row) {
+    case %(native-meta ?name ?signature): return %(($name $signature));
+    case %(meta-protocol ?(Type base) ?(Type participant)): {
+      List conformance = c.protocol_members_for(participant, base);
+      List rows = %();
+      if (!conformance) return rows;
+      foreach (List member, conformance.last().list().cdr())
+        match (member)
+          case %(? implmntd ?(String name) ?(Type type) *):
+            rows = cons(%($name ${_native_meta_signature(c, type)}), rows);
+      return rows;
+    }
+  }
+  return %();
+}
+
+/* A Lisp callable reaches native code as a `Var`, so a native function that
+   takes a `Func` binds through an adapter row in `lib/lisp.x`. */
+static int _native_meta_takes_callback(List signature) {
+  match (signature)
+    case %((func ?(List parameters)) *): return %("Func") in parameters;
+  return 0;
+}
+
+/* An iterator operation takes its destination last. Its native target is
+   `NAME_into`, and compile-time code calls it through `NAME`, which
+   allocates the destination when a call omits it. */
+static int _iterator_operation(List signature) {
+  match (signature)
+    case %((func ?(List parameters)) "Iter"):
+      return parameters && parameters.last().equal(%("Iter"));
+  return 0;
+}
+
+/* Whether the symbol row under `key` was declared in one of the absolute
+   source `paths`. */
+static int _declared_in(Var key, List paths) {
+  match (key)
+    case %("source-node" (declaration ?(String path) ?)):
+      return paths.contains(home_absolute_path(path));
+  return 0;
+}
+
 /* Returns the declared native targets advertised by `meta` interface rows,
-   or only those declared in the files `paths` names when it is not empty.
-   Sorting makes the generated adapter inventory independent of Map order. */
+   in the row form `lib/lisp.x` generates its target inventory from, or only
+   those declared in the files `paths` names when it is not empty. Sorting
+   makes that inventory independent of Map order. */
 static List _native_meta_targets(List paths) {
   Compiler compiler = macro_sdk_compiler
                     ? macro_sdk_compiler : macro_import_compiler;
   if (!compiler) return %();
   Map selected = {};
-  foreach (Var (key, value), compiler.sym.base_symbols())
-    match (%($key $value))
-      case %(("source-node" (declaration ?(String path) ?))
-             (native-meta ?(String name) ?)):
-        if (!paths || paths.contains(home_absolute_path(path)))
-          selected[name] = 1;
-  Array names = [];
-  foreach (Var (name, present), selected) {
-    (void) present;
-    names.push(name);
+  foreach (Var (key, value), compiler.sym.base_symbols()) {
+    if (paths && !_declared_in(key, paths)) continue;
+    foreach (List row, _native_meta_rows(compiler, value)) {
+      (String name, List signature) = row;
+      if (_native_meta_takes_callback(signature)) continue;
+      String into = %"${name}_into";
+      selected[name] = _iterator_operation(signature)
+        ? %($name (as $into)) : %($name);
+    }
   }
+  Array names = selected.keys();
   List rows = %();
-  foreach (String name, names.sort()) rows = cons(%($name), rows);
+  foreach (String name, names.sort()) rows = cons(selected[name], rows);
   return rows.reverse();
 }
 
@@ -523,18 +585,6 @@ static List _sdk_native_meta_declared(List paths) {
       "native module sources declare no meta function",
       %("declare each exported function with a bodyless meta prototype"));
   return rows;
-}
-
-/* Builds the canonical signature stored by `Func` for one declared native
-   function. The native Lisp binding macros generate this same shape. */
-static List _native_meta_signature(Compiler c, Type type) {
-  type = type.canonicalize();
-  List source_parameters = _sdk_function_type_parameters(type);
-  Type source_result = type.apply(), Array parameters = [];
-  foreach (Var parameter, source_parameters)
-    parameters.push(_lisp_signature_type(c, parameter));
-  Type result = _lisp_signature_type(c, source_result);
-  return %((func ${parameters.list_free()}) @result);
 }
 
 static Var _sdk_native_function_type(List syntax) {
@@ -1626,41 +1676,60 @@ static List _native_module_suppliers(String name) =>
   native_module_order.filter(
     %!(String path) => ((Map) native_modules[path]).contains(name));
 
+/* A declared `Func` parameter matches a target's `Var` parameter, which
+   takes the compile-time callable and adapts it. */
+static int _native_meta_accepts(Var function, List signature) {
+  if (function is not <func>) return 0;
+  List target = ((Func) function.pointer()).signature();
+  match (signature)
+    case %((func ?(List parameters)) *result):
+      return target.equal(signature) || target.equal(
+        %((func ${parameters.search_replace(%("Func"), %("Var"))}) @result));
+  return 0;
+}
+
 /* Binds a declared native function to the compiler's own linked target of
-   the same name, or else to a loaded native module's. A declaration with
-   neither binds nothing, and a meta body that calls it reports the missing
-   binding. */
+   the same name, or an iterator operation to its `_into` target, or else to
+   a selected native module's target. A declaration with neither binds
+   nothing, and a meta body that calls it reports the missing binding. */
 static void _bind_native_meta(
   Compiler c, String name, List signature, Token marker) {
-  Var function;
-  if (!c.macro_lisp.try_get(name, &function)) {
-    Var bound;
+  int iterator = _iterator_operation(signature);
+  Var bound, function;
+  int present = c.macro_lisp.try_get(name, &bound);
+  if (present && !iterator) function = bound;
+  else {
+    String target = iterator ? %"${name}_into" : name;
+    List suppliers = _native_module_suppliers(target);
     try {
-      bound = c.macro_lisp.eval(%(bind $name (quote $signature)));
-      if (_native_module_suppliers(name))
+      function = c.macro_lisp.eval(%(bind $target (quote $signature)));
+      if (suppliers)
         c.report_warning(
           <warning>, "the compiler's own function hides a native module's",
           marker, %("name: $name"));
     }
     catch %(no-symbol *): {
-      List suppliers = _native_module_suppliers(name);
       if (!suppliers) return;
       String first = suppliers.car();
-      bound = ((Map) native_modules[first])[name];
+      function = ((Map) native_modules[first])[target];
       if (suppliers.cdr())
         c.report_warning(
           <warning>, "more than one native module defines this function",
           marker, %("name: $name" "supplied by: $first"
                     "also defined by: ${", ".join(suppliers.cdr())}"));
     }
-    function = bound;
-    c.macro_lisp.set_global(name, function);
   }
-  if (function is not <func> ||
-      !((Func) function.pointer()).signature().equal(signature))
+  if (!_native_meta_accepts(function, signature))
     c.report_error(
       <type>, "native meta function declaration does not match its target",
       marker, %("name: $name" "signature: ${signature.repr()}"));
+  if (present) return;
+  if (iterator) {
+    int arity = signature.car().list().cadr().list().len() - 1;
+    function = c.macro_lisp.eval(
+      %(C.iterator.call (quote $function) $arity));
+  }
+  c.macro_lisp.set_global(name, function);
 }
 
 static int _native_meta_effect_is_local(Compiler c, Var key) {
@@ -1675,9 +1744,8 @@ static int _native_meta_effect_is_local(Compiler c, Var key) {
 void Compiler.install_native_meta_effects(Compiler c, Map globs) {
   foreach (Var (key, value), globs) {
     if (_native_meta_effect_is_local(c, key)) continue;
-    match (value)
-      case %(native-meta ?(String name) ?signature):
-        c.native_meta[name] = signature;
+    foreach (List row, _native_meta_rows(c, value))
+      c.native_meta[row.car()] = row.cadr();
   }
 }
 
@@ -1708,12 +1776,14 @@ void Compiler.install_native_meta_function(
 /** Installs a `meta` function in the macro session under its own name.
     A function whose two forms agree is foldable. One that reaches a compiler
     operation has no runtime form, and neither do its callers. Only
-    explicitly advertised file-scope state can be lowered. Lowering failures
-    are reported at the marker.
+    explicitly advertised file-scope state can be lowered. A body that lets
+    its own storage outlive a call is rejected where the storage leaves;
+    lowering failures are reported at the marker.
 */
 void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
   if (!c.collect_protocols) c.run_declaration_effects();
   _ensure_lisp(c);
+  c.check_meta_regions(fn);
   int installed = 0;
   /* Installing evaluates the lowered body's definitions, and a session
      refuses to replace a name an ancestor binds. That reaches the developer
@@ -2071,14 +2141,51 @@ List Compiler.evaluate_macro_rows(Compiler compiler, Var value) {
        ? value.list().cdr() : %($value);
 }
 
-static List _introduced_binding(
-  Compiler compiler, Map introduced, String source) {
+/* A declaration with external or no linkage can reach another unit through
+   a header or an interface, so its private spelling names the owning unit's
+   file name and the root invocation's offset. Neither depends on where the
+   unit lives or on the directory a translation starts from, and collection
+   and the full parse expand that invocation alike, so every translation
+   mints the same spelling. */
+static String _file_scope_name(Compiler c, Token root, String source) {
+  String owner = c.filename ? Path.basename(c.filename) : "";
+  String key = %"macro:$owner:${root.pos}:$source";
   Var stored;
-  if (introduced.try_get(source, &stored)) return stored;
-  List binding = compiler.sym.introduce(
-    compiler.fresh_name(%"macro_$source"));
-  introduced[source] = binding;
-  return binding;
+  int count = c.names.counters.try_get(key, &stored) ? stored : 0;
+  c.names.counters[key] = count + 1;
+  String digest = "%08x".printf(%"$key:$count".hash());
+  return %"_x2c_macro_${source}_$digest";
+}
+
+static List _introduced_binding(Compiler compiler, String source, Token root) =>
+  compiler.sym.introduce(
+    root ? _file_scope_name(compiler, root, source)
+         : compiler.fresh_name(%"macro_$source"));
+
+static void _file_scope_declarators(List declarators, Map locals) {
+  foreach (Var declarator, declarators) match (declarator)
+    case %(!or (bind ?binder ?) (op = (bind ?binder ?) ?)):
+      if (binder.is_binder()) locals[binder] = 1;
+}
+
+/* Collects the template locals that a file-scope row declares with external
+   linkage or none: objects, functions, typedefs, tags, and enumerators. */
+static void _file_scope_locals(List rows, Map locals) {
+  foreach (Var row, rows) match (row) {
+    case %((!or at src) ? ?inner): _file_scope_locals(%($inner), locals);
+    case %(seq *inner): _file_scope_locals(inner, locals);
+    case %(function ?type (bind ?binder ?) ?):
+      if (binder.is_binder() && !type.type().is_static())
+        locals[binder] = 1;
+    case %((!set ?kind (!or declare typedef)) ?type (bindings *rows)): {
+      match (type) case %(* (!or struct union enum) ?tag *):
+        if (tag.is_binder()) locals[tag] = 1;
+      match (type) case %(* enum ? (*members) *):
+        _file_scope_declarators(members, locals);
+      if (kind == <typedef> || !type.type().is_static())
+        _file_scope_declarators(rows, locals);
+    }
+  }
 }
 
 static Atom _replacement_binder(Var binder, String projection, int seq) {
@@ -2086,7 +2193,13 @@ static Atom _replacement_binder(Var binder, String projection, int seq) {
   return Atom.intern(%"${prefix}__macro_${projection}_${name[1:]}");
 }
 
-static Atom _local_binder(String name) => Atom.intern(%"?__macro_local_$name");
+/* A tag local is keyed `(tag NAME)`, since C keeps tags in their own
+   namespace. */
+static Atom _local_binder(Var key) {
+  match (key) case %(tag ?(String tag)):
+    return Atom.intern(%"?__macro_tag_$tag");
+  return Atom.intern(%"?__macro_local_${key.str()}");
+}
 
 static Var _replace_definition_bindings(Var value, Map bindings) {
   int candidate = value.is_binder();
@@ -2105,23 +2218,49 @@ static Var _replace_definition_bindings(Var value, Map bindings) {
   return changed ? items.list().var() : value;
 }
 
+/* Returns the definition-local identity stored under `key`, introducing
+   one spelled `spelling` on first use. */
+static List _definition_local(Compiler c, Var key, String spelling) {
+  Map locals = c.macro_definition_locals();
+  Var stored;
+  if (locals.try_get(key, &stored)) return stored;
+  Var order = locals[<order>];
+  int identity = INT_MAX - (order is <list> ? order.list().len() : 0);
+  List introduced = binding_identity_new(identity, spelling);
+  c.semantic_binding_facts()[%(known $identity)] = spelling;
+  locals[<order>] = cons(key, order is <list> ? order : NULL);
+  locals[key] = introduced;
+  locals[introduced] = spelling;
+  return introduced;
+}
+
 /** Returns the definition-local binding identity for `spelling`.
     Repeated uses share one identity while the template is parsed. An active
     macro-definition locals map is required.
 */
 List Compiler.macro_introduced_name(Compiler compiler, String spelling) {
   if (compiler.parsing_source_syntax()) return %($spelling);
-  Map locals = compiler.macro_definition_locals();
-  Var stored;
-  if (locals.try_get(spelling, &stored)) return stored;
-  Var order = locals[<order>];
-  int identity = INT_MAX - (order is <list> ? order.list().len() : 0);
-  List introduced = binding_identity_new(identity, spelling);
-  compiler.semantic_binding_facts()[%(known $identity)] = spelling;
-  locals[<order>] = cons(spelling, order is <list> ? order : NULL);
-  locals[spelling] = introduced;
-  locals[introduced] = spelling;
-  return introduced;
+  return _definition_local(compiler, spelling, spelling);
+}
+
+/** Returns a template's local binding for tag `name` of `kind`, or NULL
+    when it names a visible public tag. A tag the template defines or
+    declares is a template local, apart from ordinary names of the same
+    spelling. A tag it only references keeps its public spelling unless the
+    template later defines or declares it.
+*/
+List Compiler.macro_tag_name(
+  Compiler c, Symbol kind, String name, int definition) {
+  Map locals = c.macro_definition_locals();
+  List key = %(tag $name);
+  Var local;
+  if (locals.try_get(key, &local)) {
+    if (definition) locals.del(%(provisional $key));
+    return local;
+  }
+  if (!definition && c.sym.get_exact(%($kind $name))) return NULL;
+  if (!definition) locals[%(provisional $key)] = 1;
+  return _definition_local(c, key, name);
 }
 
 static void _template_binders(Var value, Map binders) {
@@ -2950,10 +3089,16 @@ List Compiler.parse_macro_definition(Compiler c) {
         definition_bindings[name] = constructed;
       }
   }
+  // A tag the template only references keeps its public spelling.
+  Array fresh_locals = [];
   foreach (Var local, local_names) {
     Var identity = definition_locals[local];
-    Var binder = _local_binder(local.str());
-    definition_bindings[identity] = binder;
+    if (%(provisional $local) in definition_locals) {
+      definition_bindings[identity] = definition_locals[identity];
+      continue;
+    }
+    definition_bindings[identity] = _local_binder(local);
+    fresh_locals.push(local);
   }
   replacement = _replace_definition_bindings(
     replacement, definition_bindings);
@@ -2970,8 +3115,10 @@ List Compiler.parse_macro_definition(Compiler c) {
   Array fresh = [];
   foreach (Var binder, using_holes)
     fresh.push(%($binder ${binder.str()[1:]} 1));
-  foreach (Var local, local_names)
-    fresh.push(%(${_local_binder(local.str())} $local 0));
+  foreach (Var local, fresh_locals) {
+    Var spelling = definition_locals[definition_locals[local]];
+    fresh.push(%(${_local_binder(local)} $spelling 0));
+  }
   List fresh_rows = fresh.list_free();
   Var capture_order = (void *) definition_captures != NULL
     ? definition_captures[<order>] : void;
@@ -3133,7 +3280,12 @@ static Var _parse_argument(Compiler c, Symbol kind) {
           c.token, NULL);
       String spelling = c.token.text;
       c.next();
-      return spelling;
+      // A visible template local passes its identity, which each expansion
+      // renames.
+      Map locals = c.macro_holes ? c.macro_definition_locals() : NULL;
+      List local = (void *) locals != NULL
+                 ? c.sym.lookup(%($spelling), NULL) : NULL;
+      return local && locals.contains(local) ? local : spelling;
     }
     case <literal>:
       if (c.macro_holes && c.peek(0) == <$>) return c.parse_assignment();
@@ -3200,6 +3352,43 @@ static void _bind_name_arguments(
     parameters = parameters.cdr();
     captures = captures.cdr();
   }
+}
+
+/* A Name hole in a member position supplies the captured spelling, so a
+   template local passed there keeps the spelling its source wrote. */
+static List _member_bindings(Compiler c, List parameters, List input) {
+  List captures = NULL, bindings = NULL;
+  match (input) {
+    case %(args *rows): captures = rows;
+    case %(target (args *rows) ?): captures = rows;
+  }
+  foreach (List parameter, parameters) {
+    List capture = captures.car();
+    captures = captures.cdr();
+    if (parameter.assoc(<kind>) != <name> ||
+        parameter.assoc(<sequence>).int())
+      continue;
+    Var value = capture.assoc(<value>), spelling;
+    if (value is <list> && c.semantic_binding_facts().try_get(
+          %(source-spelling $value), &spelling))
+      value = spelling;
+    Var member = _replacement_binder(parameter.assoc(<binder>), "member", 0);
+    bindings = cons(%($member $value), bindings);
+  }
+  return bindings;
+}
+
+/** Parses a member name in a template. A singular `Name` hole there
+    supplies its captured spelling rather than a hygienic binding.
+*/
+List Compiler.try_parse_macro_member(Compiler c) {
+  List hole = c.peek_macro_hole();
+  List slot = c.try_parse_macro_slot(<name>);
+  if (!slot || !hole || hole.assoc(<kind>) != <name> ||
+      hole.assoc(<sequence>).int())
+    return slot;
+  return %(macro-bind ${_replacement_binder(
+    hole.assoc(<binder>), "member", 0)});
 }
 
 static List _invocation_node(
@@ -3303,19 +3492,29 @@ List Compiler.expand_macro_invocation_node(
       $let(_.macro_stack, _.macro_stack) {
         List old_stack = _.macro_stack;
         List template = definition.assoc(<template>);
-        Map introduced = {};
+        Map file_locals = {};
+        // The outermost active row's fourth field is its invocation token.
+        Token root = old_stack ? old_stack.last().list()[3] : invocation;
+        if (_.sym.at_file_scope())
+          _file_scope_locals(%($template), file_locals);
         Array fresh_values = [];
         List direct_bindings = NULL;
         foreach (List fresh, definition.assoc(<fresh>).list()) {
           Var (binder, spelling, lisp) = fresh;
           List binding = _introduced_binding(
-            _, introduced, spelling.str());
+            _, spelling.str(), binder in file_locals ? root : NULL);
           if (lisp.int()) {
             List hole = _hole(binder, <name>, 0);
             fresh_values.push(_capture_row(_, hole, %($binding)));
           }
-          else direct_bindings = cons(%($binder $binding), direct_bindings);
+          else {
+            _.semantic_binding_facts()[%(source-spelling $binding)] =
+              spelling.str();
+            direct_bindings = cons(%($binder $binding), direct_bindings);
+          }
         }
+        direct_bindings = direct_bindings.append(_member_bindings(
+          _, definition.assoc(<parameters>), input));
         List fresh_input = fresh_values.list_free();
         List match_input = fresh_input
           ? input.append(%((fresh @fresh_input))) : input;

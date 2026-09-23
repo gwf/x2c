@@ -10,9 +10,8 @@
 typedef struct CliRequest{
   Symbol command;
   List inputs, run_args, include_dirs, package_dirs, cpp_args;
-  List cc_args, ld_args, native_modules;
-  String out_dir, dep_file, dep_target;
-  String manifest;
+  List cc_args, ld_args;
+  String out_dir, dep_file, dep_target, manifest;
   String target, profile, output, build_dir, temps_dir, label, state_seed;
   String prefix, cc, ar, compile_commands, sha256, index;
   Symbol kind;

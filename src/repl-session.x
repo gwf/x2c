@@ -404,7 +404,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
       return result;
     }
     int native = _native_prototype(c);
-    if (c.peek(0) == <import> || c.peek(0) == <protocol> ||
+    if (c.peek(0) == <import> || c.protocol_form_starts() ||
         c.peek(0) == <"$("> || (c.meta_form_is_declaration() && !native) ||
         c.macro_form_is_definition() || c.keyword_form_is_definition())
       _refuse("compiler-session definitions are outside the REPL subset");

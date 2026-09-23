@@ -39,8 +39,6 @@ ToolAction Toolchain_archive_action(Toolchain t, String output, List objects);
 
 ToolAction Toolchain_link_action(Toolchain t, String output, List inputs);
 
-ToolAction Toolchain_module_action(Toolchain t, String output, List inputs);
-
 ToolAction tool_action_new(Symbol phase, List arguments, int verbose, int dry_run);
 
 void ToolAction_as_program(ToolAction action);

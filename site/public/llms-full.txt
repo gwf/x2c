@@ -2296,7 +2296,30 @@ Captured syntax retains its call-site binding identity. Free identifiers
 written literally in a body resolve where the macro was defined, including
 parameters and preceding declarations captured by a local macro. A declaration
 written in a body receives a fresh binding identity and a private generated C
-spelling for each expansion.
+spelling for each expansion. The spelling of a file-scope declaration with
+external or no linkage also names its unit's file name and the outermost
+invocation, so units that include one another can expand the same macro. A field keeps its spelling, because C scopes it to its
+aggregate, and an anonymous aggregate is a distinct type in each expansion. A
+visible body local passed to a nested macro's `Name` hole is that expansion's
+binding, so the nested macro can read and assign it.
+
+A `struct`, `union`, or `enum` tag that a body defines or declares is private
+to each expansion, like a typedef, and so are the enumerators it lists. Tags
+are a separate namespace, so `struct tm tm;` names the outside tag and a
+private variable. A tag the body only references keeps its outside meaning.
+To publish a tag, spell it
+through a `Name` hole or `x2c.ident`:
+
+```x2c
+macro Unit $handler_type(name $tag) {
+  struct $tag { int depth; };
+  typedef struct $(x2c.ident "Frame") { int line; } $(x2c.ident "Frame");
+}
+
+$handler_type(Handler);
+struct Handler handler = {1};
+struct Frame frame = {2};
+```
 
 Most generated declarations need no directive: writing `int temporary` in a
 body makes both that declaration and its literal references hygienic. When
@@ -2615,10 +2638,10 @@ int main(void) {
 ```
 
 `meta` is contextual. It marks a function definition, a bodyless function
-prototype, or an initialized file-static value. Everywhere else it is an
-ordinary identifier, including as a file-scope name, an assignment target,
-and a struct field. Types need no marker: compile-time code can use any
-type the compiler sees.
+prototype, an initialized file-static value, or a protocol adoption.
+Everywhere else it is an ordinary identifier, including as a file-scope name,
+an assignment target, and a struct field. Types need no marker: compile-time
+code can use any type the compiler sees.
 
 A bodyless `meta` prototype declares a native function that the compiler
 itself links, such as `meta double sin(double);`. Compile-time code then
@@ -2628,6 +2651,12 @@ exactly. A function the compiler does not link can come from a loaded
 a function that neither supplies is accepted, and compile-time code that
 calls it is diagnosed. See
 [native C functions](https://x2c-lang.dev/docs/guide/meta-functions.html#native-c-functions).
+
+A `meta` protocol adoption, such as `meta protocol Iter(List);`, adopts the
+protocol and declares each of that conformance's witnesses the way a bodyless
+`meta` prototype would. Availability stays explicit for each conformance: a
+protocol body cannot be marked, and a witness the compiler does not link is
+not available.
 
 Marking a function `meta` has three consequences.
 
@@ -4062,6 +4091,15 @@ is set and before the method body. This makes calls from the initializer back
 into static helpers in the same translation unit safe. Translation units that
 need only literal caching retain a private synthetic initializer.
 
+When the initializer is defined only inside conditional groups, the non-static
+functions call a private synthetic initializer instead. It repeats the
+conditions around the initializer's definition to call the initializer where
+it is compiled, and otherwise runs the compiler-owned initialization itself.
+It sits before the unit's first function, so a `#define` or `#undef` between
+that function and the initializer's definition that changes those conditions
+makes the two disagree. The initializer's body then never runs, or the
+generated C calls an initializer that was compiled out.
+
 Other initialization statements and runtime-valued static assignments belong in
 the method body. Eligible file-static percent literals use the generated
 sequence described under [Values and literals](https://x2c-lang.dev/docs/reference/language.html#values-and-literals). Top-level
@@ -4266,7 +4304,10 @@ prototype and the definition x2c generates. Attributes are not part of the
 signature compared between a prototype and its definition. A definition
 without `static` after a `static` prototype keeps the prototype's internal
 linkage. `__inline`, `__inline__`, `__restrict`, and `__restrict__` are the
-standard keywords.
+standard keywords. A collected header may also place attributes after
+`struct`, `union`, or `enum` and after an aggregate's closing brace, as in
+`struct S { char c; int i; } __attribute__((packed));`. Collection reads
+past them, and C applies them. A unit does not accept these two positions.
 
 `in` and `match` are keywords only where their x2c forms can occur: `in`
 between two operands, and `match` as `match (...)` followed by `case` or

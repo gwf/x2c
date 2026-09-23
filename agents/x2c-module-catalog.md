@@ -42,12 +42,12 @@ Typed native build request and artifact graph.
 
 Public functions:
 
-`build_hash_bytes`, `build_module_stamp`, `build_check_input`,
-`CliRequest.prepare`, `Build.generated_dir`, `Build.translation_current`,
-`Build.record_translation`, `Build.add_generated`, `Build.module_entry`,
-`Build.begin_translation`, `Build.end_translation`, `compile_commands_write`,
-`Build.finish`, `Build.report_success`, `Build.run_program`, `Build.cleanup`,
-`Build.script_helpers`, `Build.publish_script`, `CliRequest.script_current`
+`build_hash_bytes`, `build_check_input`, `CliRequest.prepare`,
+`Build.generated_dir`, `Build.translation_current`, `Build.record_translation`,
+`Build.add_generated`, `Build.begin_translation`, `Build.end_translation`,
+`compile_commands_write`, `Build.finish`, `Build.report_success`,
+`Build.run_program`, `Build.cleanup`, `Build.script_helpers`,
+`Build.publish_script`, `CliRequest.script_current`
 
 ### [src/cache.x](../src/cache.x)
 
@@ -125,21 +125,22 @@ Public functions:
 `Sym.file_statics`, `Sym.mark_static`, `Sym.current_symbols`,
 `Sym.visible_symbols`, `Sym.current_binding`, `Sym.enumerator_owner`,
 `Sym.declare_enumerator`, `Sym.define_macro`, `Sym.has_local_macros`,
-`Sym.scope_count`, `Sym.lookup_macro`, `Sym.set`, `Sym.seed_var_tags`,
-`Sym.define`, `Sym.define_global`, `Sym.get_exact`, `Sym.get`, `Sym.lookup`,
-`Sym.reference`, `Sym.resolve_global`, `Sym.reference_global`,
-`Sym.binding_is_local`, `Sym.binding_is_local_before`, `Sym.introduce`,
-`Compiler.package_spelling`, `Compiler.register_package_alias`,
-`Compiler.register_package_member`, `Compiler.package_member_spelling`,
-`Compiler.imported_providers`, `Compiler.imported_spelling`, `Sym.declare`,
-`Sym.bind_identity`, `Sym.resolve_key`, `Sym.next_typedef`,
-`Sym.resolve_numeric_type`, `Sym.local_type`, `Compiler.aggregate_name`,
-`Sym.normalize_declared_type`, `Sym.var_tag_for_type`, `Sym.is_var_type`,
-`Sym.is_string_type`, `Sym.is_array_type`, `Sym.is_map_type`,
-`Sym.is_bool_type`, `Sym.is_named_value_type`, `Sym.lookup_field`,
-`Sym.declare_field_order`, `Sym.field_order`, `Compiler.meta_type_layout`,
-`Sym.declare_delegate_field`, `Sym.delegate_aggregate`, `Compiler.gensym`,
-`Sym.push_new_scope`, `Sym.push_scope`, `Sym.pop_scope`
+`Sym.scope_count`, `Sym.at_file_scope`, `Sym.lookup_macro`, `Sym.set`,
+`Sym.seed_var_tags`, `Sym.define`, `Sym.define_global`, `Sym.get_exact`,
+`Sym.get`, `Sym.lookup`, `Sym.reference`, `Sym.resolve_global`,
+`Sym.reference_global`, `Sym.binding_is_local`, `Sym.binding_is_local_before`,
+`Sym.introduce`, `Compiler.package_spelling`,
+`Compiler.register_package_alias`, `Compiler.register_package_member`,
+`Compiler.package_member_spelling`, `Compiler.imported_providers`,
+`Compiler.imported_spelling`, `Sym.declare`, `Sym.bind_identity`,
+`Sym.resolve_key`, `Sym.next_typedef`, `Sym.resolve_numeric_type`,
+`Sym.local_type`, `Compiler.aggregate_name`, `Sym.normalize_declared_type`,
+`Sym.var_tag_for_type`, `Sym.is_var_type`, `Sym.is_string_type`,
+`Sym.is_array_type`, `Sym.is_map_type`, `Sym.is_bool_type`,
+`Sym.is_named_value_type`, `Sym.lookup_field`, `Sym.declare_field_order`,
+`Sym.field_order`, `Compiler.meta_type_layout`, `Sym.declare_delegate_field`,
+`Sym.delegate_aggregate`, `Compiler.gensym`, `Sym.push_new_scope`,
+`Sym.push_scope`, `Sym.pop_scope`
 
 ### [src/comptime.x](../src/comptime.x)
 
@@ -148,11 +149,12 @@ translating a compile-time x2c function into Lisp.
 Public functions:
 
 `Compiler.lower_comptime`, `Compiler.lower_repl`, `Compiler.lower_declined`,
-`Compiler.inherit_shared_meta`, `Compiler.install_comptime`,
-`Compiler.lower_reached_globals`, `Compiler.lower_reached_meta`,
-`Compiler.meta_is_comptime_only`, `Compiler.lower_meta_initializer`,
-`Compiler.lower_meta_expression`, `Compiler.meta_value_expression`,
-`Compiler.check_meta_call`, `Compiler.fold_meta_call`
+`Compiler.inherit_shared_meta`, `Compiler.lowered_meta_regions`,
+`Compiler.install_comptime`, `Compiler.lower_reached_globals`,
+`Compiler.lower_reached_meta`, `Compiler.meta_is_comptime_only`,
+`Compiler.lower_meta_initializer`, `Compiler.lower_meta_expression`,
+`Compiler.meta_value_expression`, `Compiler.check_meta_call`,
+`Compiler.fold_meta_call`
 
 ### [src/deps.x](../src/deps.x)
 
@@ -290,20 +292,19 @@ Public functions:
 `Compiler.shared_definitions`, `Compiler.parse_macro_lisp_top_level`,
 `Compiler.parse_source_lisp`, `Compiler.evaluate_declaration_effect`,
 `Compiler.install_meta_declaration`, `Compiler.record_native_meta_effect`,
-`Compiler.native_module_loaded`, `Compiler.add_native_module`,
-`Compiler.select_native_modules`, `Compiler.install_native_meta_effects`,
-`Compiler.bind_native_meta`, `Compiler.install_native_meta_function`,
-`Compiler.install_meta_function`, `Compiler.parse_macro_lisp_shallow`,
-`Compiler.lift_macro_lisp_expression`, `Compiler.parse_macro_lisp_expression`,
-`Compiler.evaluate_meta_expression`, `Compiler.evaluate_declaration_recipe`,
-`Compiler.evaluate_macro_slot`, `Compiler.evaluate_macro_rows`,
-`Compiler.macro_introduced_name`, `Compiler.peek_macro_hole`,
+`Compiler.install_native_meta_effects`, `Compiler.bind_native_meta`,
+`Compiler.install_native_meta_function`, `Compiler.install_meta_function`,
+`Compiler.parse_macro_lisp_shallow`, `Compiler.lift_macro_lisp_expression`,
+`Compiler.parse_macro_lisp_expression`, `Compiler.evaluate_meta_expression`,
+`Compiler.evaluate_declaration_recipe`, `Compiler.evaluate_macro_slot`,
+`Compiler.evaluate_macro_rows`, `Compiler.macro_introduced_name`,
+`Compiler.macro_tag_name`, `Compiler.peek_macro_hole`,
 `Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_slot`,
 `Compiler.parse_macro_definition`, `Compiler.publish_macro_definition_node`,
 `Compiler.parse_keyword_definition`, `Compiler.macro_targets_unit`,
-`Compiler.skip_named_type_declaration`, `Compiler.macro_invocation_site`,
-`Compiler.expand_macro_invocation_node`, `Compiler.try_parse_macro_expression`,
-`Compiler.try_parse_macro_target_at`
+`Compiler.skip_named_type_declaration`, `Compiler.try_parse_macro_member`,
+`Compiler.macro_invocation_site`, `Compiler.expand_macro_invocation_node`,
+`Compiler.try_parse_macro_expression`, `Compiler.try_parse_macro_target_at`
 
 ### [src/main.x](../src/main.x)
 
@@ -330,11 +331,11 @@ Public functions:
 `Compiler.parse_declaration_row`, `Compiler.finish_managed_declaration`,
 `Compiler.parse_declaration_argument`, `Compiler.parse_function_definition`,
 `Compiler.parse_function_target`, `Compiler.parse_import_declaration`,
-`Compiler.defines_main`, `Compiler.meta_form_is_declaration`,
-`Compiler.script_statement_starts`, `Compiler.script_statement_executes`,
-`Compiler.skip_linkage_brace`, `Compiler.parse_top_level`,
-`Compiler.parse_submission`, `Compiler.finish_foreign_alias`,
-`Compiler.bind_syntax`
+`Compiler.defines_main`, `Compiler.protocol_form_starts`,
+`Compiler.meta_form_is_declaration`, `Compiler.script_statement_starts`,
+`Compiler.script_statement_executes`, `Compiler.skip_linkage_brace`,
+`Compiler.parse_top_level`, `Compiler.parse_submission`,
+`Compiler.finish_foreign_alias`, `Compiler.bind_syntax`
 
 ### [src/project.x](../src/project.x)
 
@@ -366,7 +367,8 @@ values that can outlive the region that allocated them.
 
 Public functions:
 
-`Compiler.check_regions`, `Compiler.region_escapes`
+`Compiler.check_regions`, `Compiler.check_meta_regions`,
+`Compiler.region_escapes`
 
 ### [src/repl-input.x](../src/repl-input.x)
 
@@ -442,10 +444,10 @@ Host preprocessing, compilation, archive, and link actions.
 Public functions:
 
 `toolchain_new`, `Toolchain.compile_action`, `Toolchain.preprocess_action`,
-`Toolchain.archive_action`, `Toolchain.link_action`, `Toolchain.module_action`,
-`tool_action_new`, `ToolAction.as_program`, `tool_capture`,
-`Toolchain.search_directories`, `ToolAction.start`, `ToolRun.ready`,
-`ToolRun.wait`, `ToolAction.run`, `Toolchain.preprocess`
+`Toolchain.archive_action`, `Toolchain.link_action`, `tool_action_new`,
+`ToolAction.as_program`, `tool_capture`, `Toolchain.search_directories`,
+`ToolAction.start`, `ToolRun.ready`, `ToolRun.wait`, `ToolAction.run`,
+`Toolchain.preprocess`
 
 ### [src/transform.x](../src/transform.x)
 

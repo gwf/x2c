@@ -209,7 +209,7 @@ bindings. The restrictions below describe where this stops.
 ## When `meta` is a keyword
 
 `meta` is contextual. Besides functions, it can mark the file-static values
-and type declarations described below. Outside those declaration forms it
+and protocol adoptions described below. Outside those declaration forms it
 remains an ordinary identifier:
 
 ```x2c
@@ -251,9 +251,10 @@ owns, so taking its address and reading or writing through a correctly typed
 pointer has the same aliasing effect as in C. `const` prevents compile-time
 writes.
 
-`meta` marks functions and values, not types. Compile-time code can use any
-type the compiler sees: scalars, typedefs, classes with a `Var`
-representation, and any complete struct, including an anonymous inline
+`meta` marks functions, values and protocol adoptions, not types.
+Compile-time code can use any type the compiler sees: scalars, typedefs,
+classes with a `Var` representation, and any complete struct, including an
+anonymous inline
 `struct { ... } value`. A struct keeps its C layout; see
 [C objects during compilation](#c-objects-during-compilation). Elsewhere
 `meta` remains an ordinary identifier.
@@ -304,6 +305,16 @@ sample.x:1:1: type: native meta function declaration does not match its target
   ^^^^
   note: name: sin signature: ((func ((double))) float)
 ```
+
+Two kinds of function follow a rule. An iterator operation takes its
+destination last: its last parameter and its result are `Iter`. Compile-time
+code may omit that destination; the call then allocates one with `Iter.new`
+before calling the native operation. A declared `Func` parameter matches any
+`Var` parameter of the compiler's target, which receives the compile-time
+callable and adapts it.
+
+A `meta` protocol adoption, such as `meta protocol Iter(List);`, declares each
+witness of that conformance the way a bodyless prototype would.
 
 The compiler links every function declared in `lib/cmath.x` and
 `lib/clibc.x`. Both are part of the implicit prelude, so their functions need
@@ -477,12 +488,13 @@ frame and are released when that function returns, normally or by an error.
 Field reads and writes, `&x`, `&s.f`, `p->f`, `*p` and `p[i]` operate on
 those bytes. A `bool` field is one byte, and a value reaching `bool` becomes 0
 or 1; it reads as the int C promotes it to. An enum field is an `int` when
-every enumerator initializer has an integer type no wider than `int`, or
-names the enum itself. Any other enum may be wider in C, so it has no
-compile-time layout. Compile-time code reads every enum value as a signed
-`int`. Clang and GCC make an enum with no negative enumerator an `unsigned
-int`, so a negative value stored in such an enum compares differently: at
-compile time it stays negative, and at run time it is a large unsigned value.
+the enum is not packed and every enumerator initializer has an integer type
+no wider than `int`, or names the enum itself. Any other enum may be wider
+or narrower in C, so it has no compile-time layout. Compile-time code reads
+every enum value as a signed `int`. Clang and GCC make an enum with no
+negative enumerator an `unsigned int`, so a negative value stored in such an
+enum compares differently: at compile time it stays negative, and at run
+time it is a large unsigned value.
 A pointer parameter can also receive a local C array,
 which `p[i]` indexes the same way. A pointer compares with `NULL` by address
 and tests false at the null address.
@@ -547,10 +559,47 @@ the `--system-headers` option, so that the compiler sees its declaration.
 Without it, the definition reports that a struct or union has no
 compile-time representation.
 
-A pointer into a local whose function has returned is dangling, as in C;
-using it is undefined behavior. A struct inside a `meta static` value, or in
-a value that persists across REPL submissions, lives in storage the
-compile-time session owns.
+A compile-time call frees its locals and parameters when it returns. A
+`meta` function whose body lets the address of one outlive the call is
+rejected where it is defined, with an error at the statement where the
+address leaves: a `return`, a store into a `meta static`, or a store through
+a parameter or through a pointer whose target the compiler cannot identify.
+A local array counts as the address of its first element. The check follows
+the address through pointer locals, either arm of `?:`, and the `meta`
+functions defined before the caller:
+
+<!-- ignore: the definition of leak is rejected on purpose -->
+```x2c,ignore
+struct Box { int value; };
+
+meta static int *field_of(struct Box *box) { return &box->value; }
+
+meta static int *leak(int seed) {
+  struct Box box = { .value = seed };
+  return field_of(&box);
+}
+```
+
+`field_of` is accepted, because the object it borrows from belongs to its
+caller. `leak` is rejected at its `return`, because `field_of` hands back an
+address inside `box`.
+
+The check is the region check of ordinary code, and every finding it makes
+in a `meta` body is an error, including a value from a `Scope` region that
+outlives the region. In ordinary code the same findings are warnings; see
+[The Region Model](regions.md).
+
+The check does not yet follow every path an address can take. These still
+translate, and using the address after the call returns is undefined
+behavior, as in C:
+
+- an address stored in a field of a local struct that is then returned by
+  value or assigned to a `meta static` struct;
+- an address computed with pointer arithmetic or a cast;
+- an address passed to a native function that keeps it.
+
+A struct inside a `meta static` value, or in a value that persists across
+REPL submissions, lives in storage the compile-time session owns.
 
 A struct result stays inside compile-time code. Inserting one into the
 program with `$pair(3)` is diagnosed, because the compiler cannot write a
@@ -562,21 +611,24 @@ These C shapes are not available at compile time:
 - Structs with bitfields, array members, anonymous members, or an enum field
   whose initializers do not all have `int`-range types. A meta function that
   uses one reports `a compile-time struct with no host layout`.
-- Packed structs. A meta function that uses one reports `a compile-time
-  struct with no host layout`. The compiler detects a struct defined while
-  `#pragma pack` is in effect, and a `packed`, `aligned`, `mode` or
-  `vector_size` attribute in the struct's own definition, such as a header
-  struct followed by `__attribute__((packed))`. Default collection follows
-  `#pragma pack` within each file. Where `#if` groups guard the directives,
-  it reads the file once for each arm position: the first reading takes
-  every group's first arm, the second its second arm or its last, and so
-  on. A group without `#else` is always entered, as an include guard is, so
-  when C skips a pop in such a group, a later packed struct gets its natural
-  layout. A struct packed in any reading is declined, even when C lays it
-  out naturally. `--cpp-symbols` and `--system-headers` read the
-  preprocessed unit, so they also detect packing that one header starts and
-  another ends, as Windows `pshpack1.h` and `poppack.h` do, and a push and a
-  pop under unrelated conditions, which default collection can miss.
+- Packed structs. A meta function that uses one reports `a compile-time struct
+  with no host layout`. The compiler detects a struct defined while `#pragma
+  pack` is in effect, and a `packed`, `aligned`, `mode` or `vector_size`
+  attribute in the struct's own definition, such as a header struct followed by
+  `__attribute__((packed))`. A macro whose body holds such an attribute counts
+  where it is used, so `struct S { ... } PACKED;` with `#define PACKED
+  __attribute__((packed))` is packed. A macro with no layout attribute leaves
+  the struct its natural layout. Default collection follows `#pragma pack`
+  within each file. Where `#if` groups guard the directives, it reads the file
+  once for each arm position: the first reading takes every group's first arm,
+  the second its second arm or its last, and so on. A group without `#else` is
+  always entered, as an include guard is, so when C skips a pop in such a
+  group, a later packed struct gets its natural layout. A struct packed in any
+  reading is declined, even when C lays it out naturally. `--cpp-symbols` and
+  `--system-headers` read the preprocessed unit, so they also detect packing
+  that one header starts and another ends, as Windows `pshpack1.h` and
+  `poppack.h` do, and a push and a pop under unrelated conditions, which
+  default collection can miss.
 - Structs whose layout the compiler cannot see, which it would lay out with
   natural alignment: a field declared `_Alignas`, or a field whose typedef
   carries an alignment attribute. Do not pass such a struct to a native
@@ -635,7 +687,7 @@ on a listed type works. The operation inventory below further limits calls.
 | C-style array declarations | A literal-sized one-dimensional array, such as `int a[3] = {1, 2};`, has compile-time storage. Omitted elements are filled with zero-like values. | Indexing and simple assignment work; passing the array to an indexed pointer parameter works in the tested case. At compile time the array is a dynamic Array of Var values, not native bytes; the running program uses native C array storage. See element/dimension limits below. |
 | Pointers to locals | `int *p = &n;`, copying that pointer, and passing it to another meta function or a native function work. A local whose address is taken lives in native bytes, and the pointer is its real address. | `*p` and `p[i]` read, and `*p = value` and `p[i] = value` write, the bytes as C does. Pointer arithmetic and the address of an array element are not supported. |
 | Structs | Named, inline and nested locals; initialization, assignment, by-value arguments and returns, with C copy behavior. | Fields and addresses refer to native bytes in C layout. Assignment keeps existing field addresses; storage ends when the function returns. See [C objects during compilation](#c-objects-during-compilation). |
-| Native functions | The functions in `lib/cmath.x` and `lib/clibc.x`, which the compiler links. | Explicit dollar evaluation and meta bodies can call them, including through output pointers. Ordinary calls are not folded. See [Native C functions](#native-c-functions). |
+| Native functions | The functions in `lib/cmath.x` and `lib/clibc.x`, the iterator producers marked `meta` in `lib/iter.x`, `lib/map.x` and `lib/dispatch.x`, and the witnesses of `meta protocol` adoptions, all of which the compiler links. | Explicit dollar evaluation and meta bodies can call them, including through output pointers. Ordinary calls are not folded. See [Native C functions](#native-c-functions). |
 | System-header structs | `--system-headers` supplies the header declarations. A local `struct timespec` can be passed to `timespec_get`. | Unions, packed structs and structs with bitfields, array members or anonymous members are not available. |
 | `File`, buffers and other resource types | No general compile-time constructor/operation surface is installed for these types. A declaration or opaque type name alone does not make the resource usable. | For example, `File.open` has no binding. Use the compiler's explicit text-embedding operation for source-dependent text. |
 
@@ -708,9 +760,14 @@ reuse those same operations. `String`, `List`, `Array` and `Map` expose their
 implementations rather than a separate formatting or comparison algorithm.
 
 Iterator producers and functional collection operations are also available in
-x2c-style meta functions. Omit the native destination argument when an
-iterator is consumed by the same expression. The compile-time binding allocates
-the iterator in the session `Scope`; it still uses the native lazy producer and
+x2c-style meta functions. `lib/protocols.x` marks the `Array`, `List`, `Map`
+and `String` Iter adoptions `meta protocol`, so their `iter` methods are
+available. `range` and the `Iter` producers are `meta` prototypes in
+`lib/iter.x`; `Map.keys`, `Map.enumerate` and `Var.iter` are marked beside
+their definitions in `lib/map.x` and `lib/dispatch.x`. A `File` is not
+iterable at compile time. Omit the native destination argument when an
+iterator is consumed by the same expression; the call then allocates the
+iterator with `Iter.new`. Either way it uses the native lazy producer and
 borrows its source and any callback.
 
 ```x2c
@@ -732,9 +789,9 @@ nil and `void` as false; callbacks in x2c-style meta functions retain ordinary
 A binding name alone is not proof of runtime-equivalent behavior. A missing
 binding also does not explain why it was omitted. Some operations need only an
 adapter over existing values; others need native pointer arguments or resource
-ownership. Explicit caller-supplied `struct Iter` storage remains a runtime
-contract and has no compile-time representation. Use the destination-free form
-inside a meta function. `List`, `Array` and `Iter` folds preserve a true `void`
+ownership. A local `struct Iter` passed as the destination lives in native
+bytes, as other compile-time C objects do, and ends with its function.
+`List`, `Array` and `Iter` folds preserve a true `void`
 no-seed argument. Empty or exhausted `Iter.next`, `find`, `min` and `max` calls
 return true runtime `void`, distinct from Lisp nil.
 

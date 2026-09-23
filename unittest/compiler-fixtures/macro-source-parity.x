@@ -48,15 +48,15 @@ macro Unit $generated_protocol() {
 macro Unit $generated_units() {
   #define GENERATED_SOURCE_FLAG 1
 
-  typedef enum GeneratedKind {
+  typedef enum $(x2c.ident "GeneratedKind") {
     $(x2c.ident "GENERATED_KIND") = 3
   } $(x2c.ident "GeneratedKind");
 
-  typedef struct GeneratedRecord {
+  typedef struct $(x2c.ident "GeneratedRecord") {
     int $(x2c.ident "value");
   } $(x2c.ident "GeneratedRecord");
 
-  typedef union GeneratedUnion {
+  typedef union $(x2c.ident "GeneratedUnion") {
     int $(x2c.ident "integer");
     float $(x2c.ident "floating");
   } $(x2c.ident "GeneratedUnion");

@@ -70,7 +70,7 @@ typedef struct Compiler{
   Array early_decls;
   int prelude;
   Array meta_defs;
-  Map meta_folds, meta_impure, meta_comptime;
+  Map meta_folds, meta_impure, meta_comptime, meta_regions;
   Map meta_values;
   Map meta_layouts;
   Map native_meta;
@@ -276,6 +276,8 @@ void Sym_define_macro(Sym sym, Atom name, List definition);
 int Sym_has_local_macros(Sym sym);
 
 int Sym_scope_count(Sym sym);
+
+int Sym_at_file_scope(Sym sym);
 
 List Sym_lookup_macro(Sym sym, Atom name);
 

@@ -52,7 +52,7 @@ unittest/compiler-fixtures/region-escapes.x:112:5: region: 'a' can outlive the r
       ^^^^^^
   note: region opened at line 110
 
-unittest/compiler-fixtures/region-escapes.x:120:3: region: a fresh allocation can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-escapes.x:120:3: region: a closure can outlive the region it was allocated in when returned
     return %!() => a.len();
     ^^^^^^
   note: region opened at line 119

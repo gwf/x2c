@@ -1,28 +1,28 @@
 macro Unit $error.private.types() {
-  typedef struct ErrorRegion {
-    Scope $(x2c.ident "values");
-    Pool $(x2c.ident "lists");
-    Pool $(x2c.ident "strings");
+  typedef struct $(x2c.ident "ErrorRegion") {
+    Scope values;
+    Pool lists;
+    Pool strings;
   } $(x2c.ident "ErrorRegion");
 
-  typedef struct ErrorRecord {
-    struct ErrorRegion $(x2c.ident "region");
-    List $(x2c.ident "entry");
+  typedef struct $(x2c.ident "ErrorRecord") {
+    struct ErrorRegion region;
+    List entry;
   } $(x2c.ident "ErrorRecord");
 
-  struct ErrorHandler {
-    struct ErrorHandler *$(x2c.ident "prev");
-    struct ErrorHandler *$(x2c.ident "running");
-    struct ErrorRegion $(x2c.ident "view");
-    ErrorHandlerFn $(x2c.ident "fn");
-    Var $(x2c.ident "data");
-    int $(x2c.ident "watermark");
-    ErrorCatchSite *$(x2c.ident "site");
-    Block $(x2c.ident "plans");
-    void *$(x2c.ident "target");
-    int $(x2c.ident "selected");
-    Block $(x2c.ident "capture_values");
-    Block $(x2c.ident "retained");
-    int $(x2c.ident "detached");
+  struct $(x2c.ident "ErrorHandler") {
+    struct ErrorHandler *prev;
+    struct ErrorHandler *running;
+    struct ErrorRegion view;
+    ErrorHandlerFn fn;
+    Var data;
+    int watermark;
+    ErrorCatchSite *site;
+    Block plans;
+    void *target;
+    int selected;
+    Block capture_values;
+    Block retained;
+    int detached;
   };
 }

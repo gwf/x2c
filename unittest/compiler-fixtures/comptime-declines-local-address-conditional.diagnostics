@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/comptime-declines-local-address-conditional.x:12:3: region: the address of 'value' can outlive the local storage it points into when returned
+    return flag ? other : &value;
+    ^^^^^^
+  note: local storage ends when the function returns
+

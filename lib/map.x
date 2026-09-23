@@ -615,6 +615,8 @@ Iter Map.iter(Map x, Iter dest) {
   return dest.init(x, _next, 0u);
 }
 
+meta Iter Map.keys(Map x, Iter dest);
+
 /** Initializes `dest` as an iterator over `x`, yielding each key. The mirror
     of `Map.iter`, and like it, it allocates nothing.
 
@@ -629,6 +631,8 @@ Iter Map.keys(Map x, Iter dest) {
   if (!dest) return NULL;
   return dest.init(x, _keys_next, 0u);
 }
+
+meta Iter Map.enumerate(Map x, Iter dest);
 
 /** Initializes `dest` as an iterator over `x`, yielding each entry as a
     `(key value)` two-element `List`. Destructure pairs with

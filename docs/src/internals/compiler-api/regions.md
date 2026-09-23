@@ -12,10 +12,28 @@ Values that can outlive the region that allocated them.
 
 | Function | Summary |
 | --- | --- |
+| [`Compiler.check_meta_regions`](#Compiler.check_meta_regions) | Rejects a `meta` function whose body breaks the rule `Compiler.check_regions` warns about. |
 | [`Compiler.check_regions`](#Compiler.check_regions) | Warns about values that can outlive the region that allocated them. |
 | [`Compiler.region_escapes`](#Compiler.region_escapes) | The region summaries the functions in `ast` have and the warnings they produce, read against `seed`: `(NAME FRESH SINKS)` rows for the functions other units define. |
 
 ### `Compiler`
+
+<a id="Compiler.check_meta_regions"></a>
+#### Compiler.check_meta_regions
+
+`void Compiler.check_meta_regions(Compiler c, List fn)`
+
+Rejects a `meta` function whose body breaks the rule
+`Compiler.check_regions` warns about. A compile-time call frees its
+locals when it returns, so an address of one that is returned or stored
+into a static, a parameter's object, or an unknown pointer would read
+freed memory. The first finding is reported as an error. `fn` must be
+the bound and typed definition. The walk reads the summaries of the
+`meta` functions installed before `fn` and records the summary of `fn`
+in `meta_regions`; a definition whose lowering the process already
+cached takes the summary recorded with it.
+
+Source: `src/regions.x:975`
 
 <a id="Compiler.check_regions"></a>
 #### Compiler.check_regions
@@ -27,7 +45,7 @@ Warns about values that can outlive the region that allocated them.
 lowering rewrites its `defer` and region forms. The call adds warnings to
 `c` and does not change `ast`.
 
-Source: `src/regions.x:821`
+Source: `src/regions.x:950`
 
 <a id="Compiler.region_escapes"></a>
 #### Compiler.region_escapes
@@ -43,13 +61,14 @@ last. Returns `(region-unit (summaries ROW...) (warnings WARNING...))`,
 where a warning is
 `(warning (at PATH LINE COLUMN) CODE MESSAGE (notes NOTE...))`.
 
-Source: `src/regions.x:857`
+Source: `src/regions.x:1016`
 
 ## Design notes
 
 A region is a `$scope()` block, a `Scope.retain` and `Scope.release`
 pair, a `$scope(&slot)` push, a `Pool.open` bracket, an `$auto`
-local, or a Scope local that `Scope.destroy` ends. The pass reads the
+local, a Scope local that `Scope.destroy` ends, or the function's own
+storage, which an address taken with `&` borrows. The pass reads the
 typed forms the parser produced, before the transform driver rewrites
 them, so a region is still the call that opens it and the `defer` beside
 it that closes it. It warns when a value born in a region reaches storage
@@ -62,7 +81,10 @@ their summaries. A call into another unit has a summary only through the
 runtime table, so a unit's warnings do not depend on which units were
 translated before it. A tool that holds every unit at once can seed the
 fixpoint with the other units' summaries through
-`Compiler.region_escapes`.
+`Compiler.region_escapes`. A `meta` function is walked when it is
+defined, against the summaries of the `meta` functions before it, and a
+finding there is an error, because a compile-time call frees its locals
+when it returns.
 
 The warnings name departures from the lexical pattern. Raw C stores,
 pointer arithmetic, callbacks, and storage the runtime did not allocate

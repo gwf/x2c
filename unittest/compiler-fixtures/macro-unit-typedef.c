@@ -2,39 +2,39 @@
 
 #include "macro-unit-typedef.h"
 
-static const size_t _x2c_macro_cell_size_0 = sizeof(_x2c_macro_Cell_0);
+static const size_t _x2c_macro_cell_size_0 = sizeof(_x2c_macro_Cell_ecc58320);
 
 typedef struct{
-  _x2c_macro_S_1 _x2c_macro_value_1;
-  const _x2c_macro_S_1 * _x2c_macro_next_1;
+  _x2c_macro_S_bec2c34d value;
+  const _x2c_macro_S_bec2c34d * next;
 }
-_x2c_macro_Cell_1;
+_x2c_macro_Cell_70d7b17b;
 
-static const size_t _x2c_macro_cell_size_1 = sizeof(_x2c_macro_Cell_1);
+static const size_t _x2c_macro_cell_size_1 = sizeof(_x2c_macro_Cell_70d7b17b);
 
 size_t int_width(void){
-  return sizeof(_x2c_macro_S_0) + _x2c_macro_cell_size_0 * 0;
+  return sizeof(_x2c_macro_S_e97e1f7a) + _x2c_macro_cell_size_0 * 0;
 }
 
-_x2c_macro_S_0 int_sum(_x2c_macro_S_0 _x2c_macro_left_0, const _x2c_macro_S_0 * _x2c_macro_right_0){
-  typedef _x2c_macro_S_0 _x2c_local_typedef_0;
-  _x2c_macro_S_0 _x2c_macro_total_0 =(_x2c_macro_S_0) _x2c_macro_left_0 + * _x2c_macro_right_0 +(_x2c_macro_S_0) 0;
-  _x2c_macro_S_0 _x2c_macro_values_0[2] ={
-    _x2c_macro_total_0, (_x2c_macro_S_0) sizeof(_x2c_local_typedef_0)
+_x2c_macro_S_e97e1f7a int_sum(_x2c_macro_S_e97e1f7a _x2c_macro_left_0, const _x2c_macro_S_e97e1f7a * _x2c_macro_right_0){
+  typedef _x2c_macro_S_e97e1f7a _x2c_local_typedef_0;
+  _x2c_macro_S_e97e1f7a _x2c_macro_total_0 =(_x2c_macro_S_e97e1f7a) _x2c_macro_left_0 + * _x2c_macro_right_0 +(_x2c_macro_S_e97e1f7a) 0;
+  _x2c_macro_S_e97e1f7a _x2c_macro_values_0[2] ={
+    _x2c_macro_total_0, (_x2c_macro_S_e97e1f7a) sizeof(_x2c_local_typedef_0)
   }
   ;
   return _x2c_macro_values_0[0] + _x2c_macro_values_0[1] * 0;
 }
 
 size_t wide_width(void){
-  return sizeof(_x2c_macro_S_1) + _x2c_macro_cell_size_1 * 0;
+  return sizeof(_x2c_macro_S_bec2c34d) + _x2c_macro_cell_size_1 * 0;
 }
 
-_x2c_macro_S_1 wide_sum(_x2c_macro_S_1 _x2c_macro_left_1, const _x2c_macro_S_1 * _x2c_macro_right_1){
-  typedef _x2c_macro_S_1 _x2c_local_typedef_1;
-  _x2c_macro_S_1 _x2c_macro_total_1 =(_x2c_macro_S_1) _x2c_macro_left_1 + * _x2c_macro_right_1 +(_x2c_macro_S_1) 0;
-  _x2c_macro_S_1 _x2c_macro_values_1[2] ={
-    _x2c_macro_total_1, (_x2c_macro_S_1) sizeof(_x2c_local_typedef_1)
+_x2c_macro_S_bec2c34d wide_sum(_x2c_macro_S_bec2c34d _x2c_macro_left_1, const _x2c_macro_S_bec2c34d * _x2c_macro_right_1){
+  typedef _x2c_macro_S_bec2c34d _x2c_local_typedef_1;
+  _x2c_macro_S_bec2c34d _x2c_macro_total_1 =(_x2c_macro_S_bec2c34d) _x2c_macro_left_1 + * _x2c_macro_right_1 +(_x2c_macro_S_bec2c34d) 0;
+  _x2c_macro_S_bec2c34d _x2c_macro_values_1[2] ={
+    _x2c_macro_total_1, (_x2c_macro_S_bec2c34d) sizeof(_x2c_local_typedef_1)
   }
   ;
   return _x2c_macro_values_1[0] + _x2c_macro_values_1[1] * 0;
@@ -47,11 +47,11 @@ int main(void){
   int widths = int_width() == sizeof(int) && wide_width() == sizeof(unsigned long);
   int narrow = 0, wide = 0;
   typedef char _x2c_local_typedef_2;
-  char _x2c_macro_value_2 =(char) 4;
-  narrow =(int) _x2c_macro_value_2 +(int)(char) sizeof(_x2c_local_typedef_2);
+  char _x2c_macro_value_0 =(char) 4;
+  narrow =(int) _x2c_macro_value_0 +(int)(char) sizeof(_x2c_local_typedef_2);
   typedef unsigned long long _x2c_local_typedef_3;
-  unsigned long long _x2c_macro_value_3 =(unsigned long long) 4;
-  wide =(int) _x2c_macro_value_3 +(int)(unsigned long long) sizeof(_x2c_local_typedef_3);
+  unsigned long long _x2c_macro_value_1 =(unsigned long long) 4;
+  wide =(int) _x2c_macro_value_1 +(int)(unsigned long long) sizeof(_x2c_local_typedef_3);
   printf("%d %d %lu %d %d\n", widths, int_sum(2, & one), wide_sum(5, & two), narrow, wide);
   return widths && int_sum(2, & one) == 3 && wide_sum(5, & two) == 7 && narrow == 5 && wide == 12 ? 0 : 1;
 }

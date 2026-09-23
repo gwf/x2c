@@ -1,7 +1,7 @@
 #include "x2c.x"
 #include "macro-type-fields-include.h"
 $(import "macro-type-fields-import.xmacro")
-$imported_record();
+$imported_record(ReflectedImported);
 
 macro Field $generated_field() {
   long $(x2c.ident "generated");

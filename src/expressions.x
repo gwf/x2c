@@ -611,7 +611,7 @@ static List _materialize_delegate_receiver(List receiver, List path) {
 
 static List _parse_field_name(Compiler compiler, Symbol op_sym, List lhs_opt) {
   compiler.require_input();
-  List slot = compiler.try_parse_macro_slot(<name>);
+  List slot = compiler.try_parse_macro_member();
   if (slot) return %($slot);
   String field_name = compiler.token.text;
   if (!field_name || !field_name.is_identifier()) {
@@ -905,7 +905,9 @@ static void _warn_unnecessary_cast(
 }
 
 /* A template typedef is named by the binding each expansion supplies, so a
-   cast to it is typed where the template expands. */
+   cast to it, qualified or not, is typed where the template expands. A
+   template keeps aggregate tags as spellings, so only a typedef base ends in
+   a binding. */
 static int _casts_to_template_typedef(Compiler c, List declaration) {
   List base = declaration.cadr();
   return c.macro_holes && !!base.match(%(* (binding ? ?)));

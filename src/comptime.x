@@ -2492,9 +2492,11 @@ String Compiler.lower_declined(Compiler compiler) {
    the same wherever that file is read. They are kept for the process and
    evaluated again in each unit, because a Lisp session belongs to one unit.
 
-   Process cache: "path#name" -> `(forms callees globals meta)`. The two
-   facts travel with the forms because a reused entry installs without
-   lowering, and the caller reads them to decide folding and emission.
+   Process cache: "path#name" -> `(forms callees globals meta regions)`.
+   The facts travel with the forms because a reused entry installs without
+   lowering: the caller reads the first two to decide folding and emission,
+   and `regions` is the summary the definition's lifetime check recorded
+   before it was lowered, so a reused entry carries that check's result.
    Entries outlive the per-unit `Context`, so a retained entry belongs to
    `lowered_scope` and to the outermost value pools. */
 static Map lowered_defs = NULL, static Scope lowered_scope = NULL;
@@ -2524,10 +2526,11 @@ void Compiler.inherit_shared_meta(Compiler compiler) {
   if (!definitions) return;
   foreach (String key, definitions.keys())
     match (lowered_defs[key])
-      case %(? ? ?(int globals) ?(int meta)): {
+      case %(? ? ?(int globals) ?(int meta) ?(List regions)): {
         String name = key.rpartition("#")[2];
         if (globals) compiler.meta_impure[name] = 1;
         if (meta) compiler.meta_comptime[name] = 1;
+        compiler.meta_regions[name] = regions;
       }
 }
 
@@ -2552,9 +2555,11 @@ static int _lowered_callable(Compiler compiler, List callees) {
   return 1;
 }
 
-static void _retain_lowering(String key, List forms, List callees) {
-  List entry =
-    %($forms $callees $lower_reached_globals $lower_reached_meta);
+static void _retain_lowering(
+  String key, List forms, List callees, List regions) {
+  List entry = %(
+    $forms $callees $lower_reached_globals $lower_reached_meta $regions
+  );
   if (!_lowered_portable(entry) || !key.try_own() || !entry.try_own()) return;
   _lowered_defs()[key] = entry;
 }
@@ -2568,25 +2573,40 @@ static int _installed_comptime(Compiler compiler, String name) {
   return 1;
 }
 
+/* The process cache key of a definition, "path#name", or NULL for one
+   without a file. `*name` is the definition's name. */
+static String _lowering_key(Compiler compiler, List fn, String *name) {
+  match (fn)
+    case %(function ? (bind (binding ? ?(String own)) ?) ?): {
+      *name = own;
+      if (compiler.filename)
+        return %"${Path.absolute(compiler.filename)}#$own";
+    }
+  return NULL;
+}
+
+/** Returns the region summary an earlier install of `fn` from the same file
+    recorded with its lowering, or NULL when the process has none. */
+List Compiler.lowered_meta_regions(Compiler compiler, List fn) {
+  String name = NULL, key = _lowering_key(compiler, fn, &name);
+  if (!key || (void *) lowered_defs == NULL) return NULL;
+  match (lowered_defs[key]) case %(? ? ? ? ?(List regions)): return regions;
+  return NULL;
+}
+
 /** Lowers `fn` and evaluates the result in the macro session, so the
     function is callable from compile-time Lisp under its own name.
     Returns whether the lowering succeeded. This method mutates the macro
     session and does not open a semantic transaction.
 */
 int Compiler.install_comptime(Compiler compiler, List fn) {
-  String key = NULL, own = NULL;
-  match (fn)
-    case %(function ? (bind (binding ? ?(String name)) ?) ?): {
-      own = name;
-      if (compiler.filename)
-        key = %"${Path.absolute(compiler.filename)}#$name";
-    }
+  String own = NULL, key = _lowering_key(compiler, fn, &own);
   /* The shared session installed this definition, from this file, before any
      unit opened. Installing it again would only try to replace a name an
      ancestor binds; the unit reads the shared one. */
   if (key && compiler.shared_definition(key))
     match (_lowered_defs()[key])
-      case %(? ? ?(int shared_globals) ?(int shared_meta)): {
+      case %(? ? ?(int shared_globals) ?(int shared_meta) ?): {
         lower_reached_globals = shared_globals;
         lower_reached_meta = shared_meta;
         return _installed_comptime(compiler, own);
@@ -2596,7 +2616,7 @@ int Compiler.install_comptime(Compiler compiler, List fn) {
   if (own) compiler.macro_lisp.eval(%(def ${Atom.intern(own)} (lambda () 0)));
   if (key)
     match (_lowered_defs()[key])
-      case %(?(List forms) ?(List callees) ?(int globals) ?(int meta)):
+      case %(?(List forms) ?(List callees) ?(int globals) ?(int meta) ?):
         if (_lowered_callable(compiler, callees)) {
           foreach (Var form, forms) compiler.macro_lisp.eval(form);
           lower_reached_globals = globals;
@@ -2605,7 +2625,9 @@ int Compiler.install_comptime(Compiler compiler, List fn) {
         }
   List forms = compiler.lower_comptime(fn);
   if (!forms) return 0;
-  if (key) _retain_lowering(key, forms, lower_session_callees);
+  if (key)
+    _retain_lowering(
+      key, forms, lower_session_callees, compiler.meta_regions[own]);
   foreach (Var form, forms) compiler.macro_lisp.eval(form);
   return _installed_comptime(compiler, own);
 }

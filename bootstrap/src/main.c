@@ -763,8 +763,6 @@ Var Context_export(Context, Var);
 
 List Build_script_helpers(Build);
 
-CliRequest Build_module_entry(Build);
-
 void Build_cleanup(Build, int);
 
 int Build_finish(Build);
@@ -803,10 +801,6 @@ static int _run_build_request(CliRequest c, Array commands){
       c -> ar = Var_string(Context_export(target, String_var(c -> ar)));
       int result = _translate_units(c, state, c -> inputs);
       if(! result && c -> command == 1282559016 && ! c -> dry_run) result = _translate_units(c, state, Build_script_helpers(state));
-      if(! result && c -> kind == 904178442 && ! c -> dry_run){
-        CliRequest entry = Build_module_entry(state);
-        result = _translate_units(entry, state, entry -> inputs);
-      }
       if(result){
         Build_cleanup(state, 0);
         {

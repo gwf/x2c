@@ -6,11 +6,11 @@
 
 #include "exception.h"
 
-static List _292, _288, _285, _284, _283, _281, _280, _273, _272, _270, _269, _268, _266, _265, _255, _253, _252, _251, _250, _249, _248, _247, _246, _245, _244, _243, _242, _241, _214, _213, _211, _209, _208, _206, _205, _203, _202, _201, _200, _198, _197, _194, _193, _192, _190, _189, _187, _186, _182, _177, _169, _168, _167, _166, _165, _163, _162, _161, _159, _158, _156, _155, _154, _151, _150, _149, _147, _146, _144, _143, _142, _138, _137, _135, _134, _133, _131, _130, _127, _119, _118, _117, _115, _114, _108, _107, _106, _104, _102, _101, _99, _95, _94, _93, _86, _83, _82, _81, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _14, _12, _10, _9, _7, _4;
+static List _276, _272, _269, _268, _267, _265, _264, _257, _255, _253, _252, _251, _250, _249, _248, _247, _246, _245, _244, _243, _242, _241, _214, _213, _211, _209, _208, _206, _205, _203, _202, _201, _200, _198, _197, _194, _193, _192, _190, _189, _187, _186, _182, _177, _169, _168, _167, _166, _165, _163, _162, _161, _159, _158, _156, _155, _154, _151, _150, _149, _147, _146, _144, _143, _142, _138, _137, _135, _134, _133, _131, _130, _127, _119, _118, _117, _115, _114, _108, _107, _106, _104, _102, _101, _99, _95, _94, _93, _86, _83, _82, _81, _75, _74, _73, _72, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _14, _12, _10, _9, _7, _4;
 
-static String _309, _308, _307, _306, _305, _304, _303, _302, _301, _300, _299, _298, _297, _296, _295, _294, _293, _286, _239, _237, _235, _233, _231, _229, _227, _225, _223, _221, _219, _217, _215, _164, _91, _76, _54, _52, _50, _48, _46, _44, _42, _40, _38, _36, _34, _32, _30, _28, _26, _24, _22, _20, _18, _16;
+static String _293, _292, _291, _290, _289, _288, _287, _286, _285, _284, _283, _282, _281, _280, _279, _278, _277, _270, _239, _237, _235, _233, _231, _229, _227, _225, _223, _221, _219, _217, _215, _164, _91, _76, _54, _52, _50, _48, _46, _44, _42, _40, _38, _36, _34, _32, _30, _28, _26, _24, _22, _20, _18, _16;
 
-static Var _291, _290, _289, _287, _282, _271, _267, _264, _256, _254, _240, _238, _236, _234, _232, _230, _228, _226, _224, _222, _220, _218, _216, _212, _210, _207, _204, _199, _196, _195, _191, _188, _181, _176, _172, _171, _170, _160, _157, _153, _152, _148, _145, _141, _140, _139, _136, _132, _126, _120, _116, _113, _112, _111, _110, _109, _105, _103, _100, _98, _97, _96, _92, _90, _89, _88, _87, _85, _84, _80, _79, _78, _77, _55, _53, _51, _49, _47, _45, _43, _41, _39, _37, _35, _33, _31, _29, _27, _25, _23, _21, _19, _17, _15, _13, _11, _8, _6, _3, _1, _0;
+static Var _275, _274, _273, _271, _266, _256, _254, _240, _238, _236, _234, _232, _230, _228, _226, _224, _222, _220, _218, _216, _212, _210, _207, _204, _199, _196, _195, _191, _188, _181, _176, _172, _171, _170, _160, _157, _153, _152, _148, _145, _141, _140, _139, _136, _132, _126, _120, _116, _113, _112, _111, _110, _109, _105, _103, _100, _98, _97, _96, _92, _90, _89, _88, _87, _85, _84, _80, _79, _78, _77, _55, _53, _51, _49, _47, _45, _43, _41, _39, _37, _35, _33, _31, _29, _27, _25, _23, _21, _19, _17, _15, _13, _11, _8, _6, _3, _1, _0;
 
 #include "comptime.h"
 #include "parse.h"
@@ -46,8 +46,6 @@ static void _require_evaluable(Var syntax);
 static List _initializers(List node, Map names, Array added, Array ids);
 
 static List _result_body(List fn, int * prints);
-
-static int _native_prototype(Compiler c);
 
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
 
@@ -414,46 +412,37 @@ __attribute__((constructor)) static void _file_init_(void){
   _254 = Symbol_var(35407540848);
   _255 = cons(_254, _127);
   _256 = Symbol_var(1219800220);
-  _264 = List_var(_138);
-  _265 = cons(_264, NULL);
-  _266 = cons(_112, _265);
-  _267 = List_var(_266);
-  _268 = cons(_267, NULL);
-  _269 = cons(_79, _268);
-  _270 = cons(_139, _269);
-  _271 = Symbol_var(942951818);
+  _257 = cons(_8, NULL);
+  _264 = cons(_136, _165);
+  _265 = cons(_88, _264);
+  _266 = List_var(_265);
+  _267 = cons(_266, _165);
+  _268 = cons(_79, _267);
+  _269 = cons(_84, _268);
+  _270 = String_new("unsupported: ");
+  _271 = Atom_intern(String_new("__repl_eval"));
   _272 = cons(_271, NULL);
-  _273 = cons(_8, NULL);
-  _280 = cons(_136, _165);
-  _281 = cons(_88, _280);
-  _282 = List_var(_281);
-  _283 = cons(_282, _165);
-  _284 = cons(_79, _283);
-  _285 = cons(_84, _284);
-  _286 = String_new("unsupported: ");
-  _287 = Atom_intern(String_new("__repl_eval"));
-  _288 = cons(_287, NULL);
-  _289 = Symbol_var(43614536);
-  _290 = Symbol_var(26825036104);
-  _291 = Symbol_var(46228810);
-  _292 = cons(_291, NULL);
-  _293 = String_new("String");
-  _294 = String_new("print");
-  _295 = String_new("println");
-  _296 = String_new("__x2c_completion__");
-  _297 = String_new("void __repl_eval(void) {\n");
-  _298 = String_new("static, extern, and threaded storage need native execution");
-  _299 = String_new("__repl_");
-  _300 = String_new("redeclaration is disabled; use assignment");
-  _301 = String_new("top-level values need an initializer and a simple binding");
-  _302 = String_new("this top-level form is outside the REPL subset");
-  _303 = String_new("preprocessor and direct Lisp input are unsupported");
-  _304 = String_new("const and volatile need native checks outside the REPL");
-  _305 = String_new("compiler-session definitions are outside the REPL subset");
-  _306 = String_new("type and storage declarations are outside the REPL subset");
-  _307 = String_new("function redeclaration is disabled");
-  _308 = String_new("a type cannot be redefined; the session keeps its layout");
-  _309 = String_new("C._globals");
+  _273 = Symbol_var(43614536);
+  _274 = Symbol_var(26825036104);
+  _275 = Symbol_var(46228810);
+  _276 = cons(_275, NULL);
+  _277 = String_new("String");
+  _278 = String_new("print");
+  _279 = String_new("println");
+  _280 = String_new("__x2c_completion__");
+  _281 = String_new("void __repl_eval(void) {\n");
+  _282 = String_new("static, extern, and threaded storage need native execution");
+  _283 = String_new("__repl_");
+  _284 = String_new("redeclaration is disabled; use assignment");
+  _285 = String_new("top-level values need an initializer and a simple binding");
+  _286 = String_new("this top-level form is outside the REPL subset");
+  _287 = String_new("preprocessor and direct Lisp input are unsupported");
+  _288 = String_new("const and volatile need native checks outside the REPL");
+  _289 = String_new("compiler-session definitions are outside the REPL subset");
+  _290 = String_new("type and storage declarations are outside the REPL subset");
+  _291 = String_new("a type cannot be redefined; the session keeps its layout");
+  _292 = String_new("function redeclaration is disabled");
+  _293 = String_new("C._globals");
 }
 
 int String_len(String);
@@ -465,7 +454,7 @@ static void _write_stdout(String text, int newline, Symbol operation){
   if((length && fwrite(text, 1, length, stdout) != length) ||(newline && fputc('\n', stdout) == EOF) || ferror(stdout)){
     int error = errno;
     {
-      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/repl-session.x",.function = "_write_stdout",.line = 50};
+      static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/repl-session.x",.function = "_write_stdout",.line = 48};
       x2c_error_raise_n(& _x2c_error_site_0, 20399393368, 2, Symbol_var(34096809266140), Symbol_var(operation), Symbol_var(11703198), int_var(error));
       __builtin_unreachable();
     }
@@ -491,17 +480,17 @@ void Lisp_bind(Lisp, String, Func);
 ReplSession ReplSession_new(Compiler compiler){
   if(! _init_guard_) _file_init_();
   if(compiler -> source_facts){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/repl-session.x",.function = "ReplSession_new",.line = 61};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/repl-session.x",.function = "ReplSession_new",.line = 59};
     x2c_error_raise_n(& _x2c_error_site_1, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("ReplSession.new")), NULL))), Symbol_var(47666), String_var(String_join(NULL, cons(String_var(String_new("source facts retain temporary symbol maps")), NULL))));
     __builtin_unreachable();
   }
   ReplSession session = Scope_calloc(1, sizeof(struct ReplSession));
   session -> compiler = compiler;
   session -> names = Map_new();
-  Func _x2c_macro_callable_0 = Func_new(_x2c_func_adapt_0, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_293), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)));
-  Lisp_bind(compiler -> macro_lisp, _294, _x2c_macro_callable_0);
-  Func _x2c_macro_callable_1 = Func_new(_x2c_func_adapt_1, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_293), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)));
-  Lisp_bind(compiler -> macro_lisp, _295, _x2c_macro_callable_1);
+  Func _x2c_macro_callable_0 = Func_new(_x2c_func_adapt_0, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_277), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)));
+  Lisp_bind(compiler -> macro_lisp, _278, _x2c_macro_callable_0);
+  Func _x2c_macro_callable_1 = Func_new(_x2c_func_adapt_1, cons(List_var(cons(Symbol_var(437126), cons(List_var(cons(List_var(cons(String_var(_277), (List) 0)), (List) 0)), (List) 0))), cons(Symbol_var(1473096), (List) 0)));
+  Lisp_bind(compiler -> macro_lisp, _279, _x2c_macro_callable_1);
   return session;
 }
 
@@ -755,14 +744,14 @@ List Compiler_parse_submission(Compiler, int);
 ReplCompletion ReplSession_complete(ReplSession session, String source, size_t cursor){
   if(! _init_guard_) _file_init_();
   if(! session || cursor > String_len(source)){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/repl-session.x",.function = "ReplSession_complete",.line = 153};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/repl-session.x",.function = "ReplSession_complete",.line = 150};
     x2c_error_raise_n(& _x2c_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("ReplSession.complete")), NULL))));
     __builtin_unreachable();
   }
   size_t start = cursor;
   while(start &&(String_getindex(source, start - 1) == '_' || scan_ascii_alpha((unsigned char) String_getindex(source, start - 1)) || scan_ascii_digit((unsigned char) String_getindex(source, start - 1)))) start --;
   String prefix = String_new_len(source + start, cursor - start);
-  String marker = _296;
+  String marker = _280;
   String volatile marked = String_add(String_new_len(source, start), marker);
   ReplCompletion result ={
     .start = start, .end = cursor, .candidates = NULL
@@ -867,7 +856,7 @@ ReplCompletion ReplSession_complete(ReplSession session, String source, size_t c
 
             }
             Compiler_mark_completion(c, String_len(marked) - String_len(marker));  Compiler___complete_here(c, 1319266920, _75);  int declaration = Compiler_test_declaration(c);  int volatile end = String_len(marked);  if(! declaration){
-              String head = _297;  end += String_len(head);  marked = String_add(String_add(head, marked), _76);  _tokenize(c, marked, scratch);  Compiler_mark_completion(c, String_len(head) + start);
+              String head = _281;  end += String_len(head);  marked = String_add(String_add(head, marked), _76);  _tokenize(c, marked, scratch);  Compiler_mark_completion(c, String_len(head) + start);
             }
             (void) Compiler_parse_submission(c, end);
           }
@@ -988,7 +977,7 @@ static List _thunk(List items){
 
 static void _refuse(String why){
   {
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../src/repl-session.x",.function = "_refuse",.line = 241};  x2c_error_raise_n(& _x2c_error_site_3, 1190936, 1, Symbol_var(47666), String_var(why));
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../src/repl-session.x",.function = "_refuse",.line = 238};  x2c_error_raise_n(& _x2c_error_site_3, 1190936, 1, Symbol_var(47666), String_var(why));
   }
 
 }
@@ -1074,7 +1063,7 @@ static void _require_evaluable(Var syntax){
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 377892: ;  static MatchCaptureSite _x2c_match_site_5;  if (x2c_match_site_try_capture(& _x2c_match_site_5, _x2c_match_expr, List_var(_163), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  _refuse(String_join(NULL, cons(String_var(_164), cons(String_var(Var_str(name)), NULL))));  break;
 }
-case 8932560010: ;  static MatchCaptureSite _x2c_match_site_6;  if (x2c_match_site_try_capture(& _x2c_match_site_6, _x2c_match_expr, List_var(_167), &_x2c_match_capture)) {Var spec = _x2c_match_values[0];  if(Var_contains(spec, Symbol_var(1317118534)) || Var_contains(spec, Symbol_var(387198108)) || Var_contains(spec, Symbol_var(1392787923272))) _refuse(_298);  break;
+case 8932560010: ;  static MatchCaptureSite _x2c_match_site_6;  if (x2c_match_site_try_capture(& _x2c_match_site_6, _x2c_match_expr, List_var(_167), &_x2c_match_capture)) {Var spec = _x2c_match_values[0];  if(Var_contains(spec, Symbol_var(1317118534)) || Var_contains(spec, Symbol_var(387198108)) || Var_contains(spec, Symbol_var(1392787923272))) _refuse(_282);  break;
 }
 default: break;
     }
@@ -1115,7 +1104,7 @@ static List _initializers(List node, Map names, Array added, Array ids){
       case 992: ;  static MatchCaptureSite _x2c_match_site_7;  if (x2c_match_site_try_capture(& _x2c_match_site_7, _x2c_match_expr, List_var(_194), &_x2c_match_capture)) {Var id = _x2c_match_values[0];  Var name = _x2c_match_values[1];  Var mods = _x2c_match_values[2];  Var value = _x2c_match_values[3]; {
               Var _x2c_match_value_2 = name; {
                 String name = Var_string(_x2c_match_value_2); {
-                  if(Map_contains(names, String_var(name)) || Array_contains(added, String_var(name)) || String_startswith(name, _299)) _refuse(_300);  Array_push(added, String_var(name));  Array_push(ids, id);  Array_push(statements, List_var(cons(_195, cons(spec, cons(List_var(cons(_88, cons(List_var(cons(_89, cons(id, cons(String_var(name), NULL)))), cons(mods, NULL)))), cons(value, NULL))))));  continue;
+                  if(Map_contains(names, String_var(name)) || Array_contains(added, String_var(name)) || String_startswith(name, _283)) _refuse(_284);  Array_push(added, String_var(name));  Array_push(ids, id);  Array_push(statements, List_var(cons(_195, cons(spec, cons(List_var(cons(_88, cons(List_var(cons(_89, cons(id, cons(String_var(name), NULL)))), cons(mods, NULL)))), cons(value, NULL))))));  continue;
                 }
 
               }
@@ -1126,7 +1115,7 @@ static List _initializers(List node, Map names, Array added, Array ids){
           default: break;
     }
   }
-_refuse(_301);
+_refuse(_285);
         }
 
       }
@@ -1145,7 +1134,7 @@ _refuse(_301);
 default: break;
     }
   }
-_refuse(_302); {
+_refuse(_286); {
   List _x2c_return_value_8 = NULL; {
     x2c_cleanup_leave(& _x2c_defer_record_8);  return _x2c_return_value_8;
   }
@@ -1230,12 +1219,9 @@ default: break;
 return fn;
 }
 
-static int _native_prototype(Compiler c){
-  if(! Compiler_meta_form_is_declaration(c)) return 0;  for(Token token = c -> token;  token -> type != 11212;  token ++) if(token -> type == 247 || token -> type == 123) return 0;  return 1;
-}
-
 void Diagnostics_reset(Diagnostics);
 Symbol Compiler_peek(Compiler, int);
+int Compiler_protocol_form_starts(Compiler);
 int Compiler_macro_form_is_definition(Compiler);
 int Compiler_keyword_form_is_definition(Compiler);
 void SymTxn_commit_transient(SymTxn);
@@ -1316,7 +1302,7 @@ ReplResult ReplSession_submit(ReplSession session, String source){
 
             }
             for(Token volatile token = c -> tokenizer -> tokens;  token -> type != 11212;  token ++){
-              if(token -> type == 35579270086 || token -> type == 9297) _refuse(_303);  if(token -> type == 7304424 || token -> type == 1544849476362) _refuse(_304);
+              if(token -> type == 35579270086 || token -> type == 9297) _refuse(_287);  if(token -> type == 7304424 || token -> type == 1544849476362) _refuse(_288);
             }
             if(Compiler_peek(c, 0) == 11212){
               result.status = 395480244552; {
@@ -1327,25 +1313,43 @@ ReplResult ReplSession_submit(ReplSession session, String source){
               }
 
             }
-            int native = _native_prototype(c);  if(Compiler_peek(c, 0) == 632323240 || Compiler_peek(c, 0) == 1139215899608 || Compiler_peek(c, 0) == 9297 ||(Compiler_meta_form_is_declaration(c) && ! native) || Compiler_macro_form_is_definition(c) || Compiler_keyword_form_is_definition(c)) _refuse(_305);  if(Compiler_peek(c, 0) == 44977116 || Compiler_peek(c, 0) == 357722 || Compiler_peek(c, 0) == 387198108 || Compiler_peek(c, 0) == 1317118534) _refuse(_306);  int declaration = native || Compiler_test_declaration(c);  if(! declaration){
-              String prefix = _297;  end += String_len(prefix);  result.source = String_add(String_add(prefix, source), _76);  _tokenize(c, result.source, scratch);
+            if(Compiler_peek(c, 0) == 632323240 || Compiler_protocol_form_starts(c) || Compiler_peek(c, 0) == 9297 || Compiler_meta_form_is_declaration(c) || Compiler_macro_form_is_definition(c) || Compiler_keyword_form_is_definition(c)) _refuse(_289);  if(Compiler_peek(c, 0) == 44977116 || Compiler_peek(c, 0) == 357722 || Compiler_peek(c, 0) == 387198108 || Compiler_peek(c, 0) == 1317118534) _refuse(_290);  int declaration = Compiler_test_declaration(c);  if(! declaration){
+              String prefix = _281;  end += String_len(prefix);  result.source = String_add(String_add(prefix, source), _76);  _tokenize(c, result.source, scratch);
             }
-            List node = Compiler_parse_submission(c, end);  if(native){
+            List node = Compiler_parse_submission(c, end);  _require_evaluable(List_var(node));  if(_type_submission_names(node, added)){
+              {
+                String volatile name;  Array _x2c_macro_object_9 = added;  int _x2c_macro_cursor_9 = 0;  Var _x2c_macro_cursor_output_11;  while(Array_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_11)){
+                  name = Var_string(_x2c_macro_cursor_output_11);  if(Map_contains(names, String_var(name))) _refuse(_291);
+                }
+
+              }
+              SymTxn_commit_transient(transaction); {
+                String volatile name;  Array _x2c_macro_object_10 = added;  int _x2c_macro_cursor_10 = 0;  Var _x2c_macro_cursor_output_12;  while(Array_try_next(_x2c_macro_object_10, & _x2c_macro_cursor_10, & _x2c_macro_cursor_output_12)){
+                  name = Var_string(_x2c_macro_cursor_output_12);  Map_setindex(names, String_var(name), List_var(_257));
+                }
+
+              }
+              result.syntax = node;  result.name = Array_len(added) ? Var_str(Array_getindex(added, 0)) : NULL;  result.status = 8938680648; {
+                ReplResult _x2c_return_value_13 = result; {
+                  x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  x2c_cleanup_leave(& _x2c_defer_record_14);  x2c_cleanup_leave(& _x2c_defer_record_13);  x2c_cleanup_leave(& _x2c_defer_record_11);  x2c_cleanup_leave(& _x2c_defer_record_10);  return _x2c_return_value_13;
+                }
+
+              }
+
+            }
+            if(! declaration){
+              fn = _result_body(node, & prints);  execute = 1;
+            }
+            else{
 
   {
     List _x2c_match_expr = node;
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 8932560010: ;  static MatchCaptureSite _x2c_match_site_13;  if (x2c_match_site_try_capture(& _x2c_match_site_13, _x2c_match_expr, List_var(_270), &_x2c_match_capture)) {Var name = _x2c_match_values[0]; {
+      case 458361162716: ;  static MatchCaptureSite _x2c_match_site_13;  if (x2c_match_site_try_capture(& _x2c_match_site_13, _x2c_match_expr, List_var(_269), &_x2c_match_capture)) {Var name = _x2c_match_values[0]; {
                 Var _x2c_match_value_3 = name; {
                   String volatile name = Var_string(_x2c_match_value_3); {
-                    if(Map_contains(names, String_var(name))) _refuse(_307);  SymTxn_commit_transient(transaction);  Map_setindex(names, String_var(name), List_var(_272));  result.syntax = node;  result.name = name;  result.status = 8938680648; {
-                      ReplResult _x2c_return_value_13 = result; {
-                        x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  x2c_cleanup_leave(& _x2c_defer_record_14);  x2c_cleanup_leave(& _x2c_defer_record_13);  x2c_cleanup_leave(& _x2c_defer_record_11);  x2c_cleanup_leave(& _x2c_defer_record_10);  return _x2c_return_value_13;
-                      }
-
-                    }
-
+                    Var existing;  if(Map_contains(names, String_var(name)) || String_startswith(name, _283) || Lisp_try_get(c -> macro_lisp, name, & existing)) _refuse(_292);  Array_push(added, String_var(name));  function_name = name;  fn = node;
                   }
 
                 }
@@ -1356,62 +1360,28 @@ ReplResult ReplSession_submit(ReplSession session, String source){
             default: break;
     }
   }
-          }
-          _require_evaluable(List_var(node));  if(_type_submission_names(node, added)){
-            {
-              String volatile name;  Array _x2c_macro_object_9 = added;  int _x2c_macro_cursor_9 = 0;  Var _x2c_macro_cursor_output_11;  while(Array_try_next(_x2c_macro_object_9, & _x2c_macro_cursor_9, & _x2c_macro_cursor_output_11)){
-                name = Var_string(_x2c_macro_cursor_output_11);  if(Map_contains(names, String_var(name))) _refuse(_308);
-              }
-
-            }
-            SymTxn_commit_transient(transaction); {
-              String volatile name;  Array _x2c_macro_object_10 = added;  int _x2c_macro_cursor_10 = 0;  Var _x2c_macro_cursor_output_12;  while(Array_try_next(_x2c_macro_object_10, & _x2c_macro_cursor_10, & _x2c_macro_cursor_output_12)){
-                name = Var_string(_x2c_macro_cursor_output_12);  Map_setindex(names, String_var(name), List_var(_273));
-              }
-
-            }
-            result.syntax = node;  result.name = Array_len(added) ? Var_str(Array_getindex(added, 0)) : NULL;  result.status = 8938680648; {
-              ReplResult _x2c_return_value_14 = result; {
-                x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  x2c_cleanup_leave(& _x2c_defer_record_14);  x2c_cleanup_leave(& _x2c_defer_record_13);  x2c_cleanup_leave(& _x2c_defer_record_11);  x2c_cleanup_leave(& _x2c_defer_record_10);  return _x2c_return_value_14;
-              }
-
+if(! List_truth(fn)){
+              fn = _initializers(node, names, added, ids);  execute = 1;
             }
 
           }
-          if(! declaration){
-            fn = _result_body(node, & prints);  execute = 1;
-          }
-          else{
-
-  {
-    List _x2c_match_expr = node;
-    Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
-    switch (Var_symbol(car(_x2c_match_expr))) {
-      case 458361162716: ;  static MatchCaptureSite _x2c_match_site_14;  if (x2c_match_site_try_capture(& _x2c_match_site_14, _x2c_match_expr, List_var(_285), &_x2c_match_capture)) {Var name = _x2c_match_values[0]; {
-              Var _x2c_match_value_4 = name; {
-                String volatile name = Var_string(_x2c_match_value_4); {
-                  Var existing;  if(Map_contains(names, String_var(name)) || String_startswith(name, _299) || Lisp_try_get(c -> macro_lisp, name, & existing)) _refuse(_307);  Array_push(added, String_var(name));  function_name = name;  fn = node;
+          result.diagnostics = Compiler_diagnostics(c);
+        }
+        else {x2c_exception_landed(& _x2c_exception_frame_1); {
+          if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
+            int _x2c_catch_selected_1 = x2c_error_catch_selected(_x2c_error_handler_1);  x2c_error_catch_detach(_x2c_error_handler_1);  x2c_exception_mark_handled(&_x2c_exception_frame_1);  if (_x2c_catch_selected_1 == 0) {{
+              result.status = 664344300629258; {
+                ReplResult _x2c_return_value_14 = result; {
+                  x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  x2c_cleanup_leave(& _x2c_defer_record_14);  x2c_cleanup_leave(& _x2c_defer_record_13);  x2c_cleanup_leave(& _x2c_defer_record_11);  x2c_cleanup_leave(& _x2c_defer_record_10);  return _x2c_return_value_14;
                 }
 
               }
 
             }
-            break;
-          }
-          default: break;
-    }
-  }
-if(! List_truth(fn)){
-            fn = _initializers(node, names, added, ids);  execute = 1;
-          }
 
-        }
-        result.diagnostics = Compiler_diagnostics(c);
-      }
-      else {x2c_exception_landed(& _x2c_exception_frame_1); {
-        if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
-          int _x2c_catch_selected_1 = x2c_error_catch_selected(_x2c_error_handler_1);  x2c_error_catch_detach(_x2c_error_handler_1);  x2c_exception_mark_handled(&_x2c_exception_frame_1);  if (_x2c_catch_selected_1 == 0) {{
-            result.status = 664344300629258; {
+          }
+          else if (_x2c_catch_selected_1 == 1) {{
+            result.diagnostics = Compiler_diagnostics(c); {
               ReplResult _x2c_return_value_15 = result; {
                 x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  x2c_cleanup_leave(& _x2c_defer_record_14);  x2c_cleanup_leave(& _x2c_defer_record_13);  x2c_cleanup_leave(& _x2c_defer_record_11);  x2c_cleanup_leave(& _x2c_defer_record_10);  return _x2c_return_value_15;
               }
@@ -1421,8 +1391,8 @@ if(! List_truth(fn)){
           }
 
         }
-        else if (_x2c_catch_selected_1 == 1) {{
-          result.diagnostics = Compiler_diagnostics(c); {
+        else {Var why = x2c_error_catch_capture(_x2c_error_handler_1, 0); {
+          result.diagnostics = Compiler_diagnostics(c);  result.message = Var_string(why); {
             ReplResult _x2c_return_value_16 = result; {
               x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  x2c_cleanup_leave(& _x2c_defer_record_14);  x2c_cleanup_leave(& _x2c_defer_record_13);  x2c_cleanup_leave(& _x2c_defer_record_11);  x2c_cleanup_leave(& _x2c_defer_record_10);  return _x2c_return_value_16;
             }
@@ -1432,31 +1402,21 @@ if(! List_truth(fn)){
         }
 
       }
-      else {Var why = x2c_error_catch_capture(_x2c_error_handler_1, 0); {
-        result.diagnostics = Compiler_diagnostics(c);  result.message = Var_string(why); {
-          ReplResult _x2c_return_value_17 = result; {
-            x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  x2c_cleanup_leave(& _x2c_defer_record_14);  x2c_cleanup_leave(& _x2c_defer_record_13);  x2c_cleanup_leave(& _x2c_defer_record_11);  x2c_cleanup_leave(& _x2c_defer_record_10);  return _x2c_return_value_17;
-          }
 
-        }
-
-      }
-
+    }
+    else{
+      x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  __builtin_unreachable();
     }
 
   }
-  else{
-    x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);  __builtin_unreachable();
-  }
 
-}
 }
 x2c_error_catch_close(_x2c_error_handler_1);  _x2c_error_handler_1 = NULL;  x2c_exception_leave(& _x2c_exception_frame_1);
 }
 result.syntax = fn;  List forms = Compiler_lower_repl(c, fn);  if(! List_truth(forms)){
-  result.message = String_add(_286, Compiler_lower_declined(c)); {
-    ReplResult _x2c_return_value_18 = result; {
-      x2c_cleanup_leave(& _x2c_defer_record_14);  x2c_cleanup_leave(& _x2c_defer_record_13);  x2c_cleanup_leave(& _x2c_defer_record_11);  x2c_cleanup_leave(& _x2c_defer_record_10);  return _x2c_return_value_18;
+  result.message = String_add(_270, Compiler_lower_declined(c)); {
+    ReplResult _x2c_return_value_17 = result; {
+      x2c_cleanup_leave(& _x2c_defer_record_14);  x2c_cleanup_leave(& _x2c_defer_record_13);  x2c_cleanup_leave(& _x2c_defer_record_11);  x2c_cleanup_leave(& _x2c_defer_record_10);  return _x2c_return_value_17;
     }
 
   }
@@ -1472,12 +1432,12 @@ ErrorHandler volatile _x2c_error_handler_2 = x2c_error_catch_site_push(&_x2c_exc
     }
 
   }
-  if(execute) result.value = Lisp_eval(c -> macro_lisp, List_var(_288));
+  if(execute) result.value = Lisp_eval(c -> macro_lisp, List_var(_272));
 }
 else {x2c_exception_landed(& _x2c_exception_frame_2); {
   if (x2c_exception_is_error_target(&_x2c_exception_frame_2)){
     x2c_error_catch_detach(_x2c_error_handler_2);  x2c_exception_mark_handled(&_x2c_exception_frame_2);  {Var cause = x2c_error_catch_capture(_x2c_error_handler_2, 0);  List details = Var_list(x2c_error_catch_capture(_x2c_error_handler_2, 1)); {
-      Var storage;  if(Lisp_try_get(c -> macro_lisp, _309, & storage)){
+      Var storage;  if(Lisp_try_get(c -> macro_lisp, _293, & storage)){
         Map globals = Var_map(storage); {
           Var volatile id;  Array _x2c_macro_object_12 = ids;  int _x2c_macro_cursor_12 = 0;  Var _x2c_macro_cursor_output_14;  while(Array_try_next(_x2c_macro_object_12, & _x2c_macro_cursor_12, & _x2c_macro_cursor_output_14)){
             id = _x2c_macro_cursor_output_14;  Map_del(globals, id);
@@ -1487,8 +1447,8 @@ else {x2c_exception_landed(& _x2c_exception_frame_2); {
 
       }
       result.status = 405365064;  result.cause = cons(cause, details); {
-        ReplResult _x2c_return_value_19 = result; {
-          x2c_error_catch_close(_x2c_error_handler_2);  _x2c_error_handler_2 = NULL;  x2c_exception_leave(& _x2c_exception_frame_2);  x2c_cleanup_leave(& _x2c_defer_record_14);  x2c_cleanup_leave(& _x2c_defer_record_13);  x2c_cleanup_leave(& _x2c_defer_record_11);  x2c_cleanup_leave(& _x2c_defer_record_10);  return _x2c_return_value_19;
+        ReplResult _x2c_return_value_18 = result; {
+          x2c_error_catch_close(_x2c_error_handler_2);  _x2c_error_handler_2 = NULL;  x2c_exception_leave(& _x2c_exception_frame_2);  x2c_cleanup_leave(& _x2c_defer_record_14);  x2c_cleanup_leave(& _x2c_defer_record_13);  x2c_cleanup_leave(& _x2c_defer_record_11);  x2c_cleanup_leave(& _x2c_defer_record_10);  return _x2c_return_value_18;
         }
 
       }
@@ -1508,15 +1468,15 @@ x2c_error_catch_close(_x2c_error_handler_2);  _x2c_error_handler_2 = NULL;  x2c_
 if(String_truth(function_name) || Array_len(added)){
   SymTxn_commit_transient(transaction); {
     String volatile name;  Array _x2c_macro_object_13 = added;  int _x2c_macro_cursor_13 = 0;  Var _x2c_macro_cursor_output_15;  while(Array_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_15)){
-      name = Var_string(_x2c_macro_cursor_output_15);  Map_setindex(names, String_var(name), List_var(String_truth(function_name) ? cons(_84, cons(List_var(cons(_289, cons(List_var(result.syntax), NULL))), cons(List_var(cons(_290, cons(List_var(result.lowered), NULL))), NULL))) : _292));
+      name = Var_string(_x2c_macro_cursor_output_15);  Map_setindex(names, String_var(name), List_var(String_truth(function_name) ? cons(_84, cons(List_var(cons(_273, cons(List_var(result.syntax), NULL))), cons(List_var(cons(_274, cons(List_var(result.lowered), NULL))), NULL))) : _276));
     }
 
   }
 
 }
 result.name = function_name;  result.status = String_truth(function_name) ? 8938680648 : prints ? 46228810 : 395480244552; {
-  ReplResult _x2c_return_value_20 = result; {
-    x2c_cleanup_leave(& _x2c_defer_record_14);  x2c_cleanup_leave(& _x2c_defer_record_13);  x2c_cleanup_leave(& _x2c_defer_record_11);  x2c_cleanup_leave(& _x2c_defer_record_10);  return _x2c_return_value_20;
+  ReplResult _x2c_return_value_19 = result; {
+    x2c_cleanup_leave(& _x2c_defer_record_14);  x2c_cleanup_leave(& _x2c_defer_record_13);  x2c_cleanup_leave(& _x2c_defer_record_11);  x2c_cleanup_leave(& _x2c_defer_record_10);  return _x2c_return_value_19;
   }
 
 }

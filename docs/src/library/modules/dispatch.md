@@ -142,7 +142,7 @@ Returns an iterator over `Var`.
 **Raises:** `<void-op>` for `void`. A null `dest` returns NULL without
 raising.
 
-Source: `lib/dispatch.x:931`
+Source: `lib/dispatch.x:933`
 
 <a id="Var.postfixindex"></a>
 #### Var.postfixindex
@@ -521,7 +521,7 @@ Calls the registered `Context` exporter for `value` when one exists.
 Returns nonzero when the descriptor registers an exporter, and writes its
 result to `out`. `Context` handles built-in value families directly.
 
-Source: `lib/dispatch.x:944`
+Source: `lib/dispatch.x:946`
 
 ## Design notes
 

@@ -255,6 +255,76 @@ grep -Fq "\"$BUILD/outside/ext.x\"" "$FAKE/extwarm/uses-ext.xi" ||
 cmp -s "$FAKE/extout/uses-ext-twice.c" "$FAKE/extwarm/uses-ext-twice.c" ||
   fail "out-of-home interface replay diverged from cold compile"
 
+# Case 4a: collection records the functions an imported Unit macro
+# generates, so an including unit types their calls from a cold walk and
+# from the owner's interface alike. A generated static stays in its unit.
+mkdir -p "$FAKE/gencold" "$FAKE/genwarm"
+cat >"$FAKE/src/gen.xmacro" <<'EOF'
+macro Unit $gen(Type $type, name $next) {
+  static $type step($type value) => value + 1;
+  $type $next($type value) => step(value);
+}
+EOF
+cat >"$FAKE/src/gen-owner.x" <<'EOF'
+$(import "gen.xmacro")
+$gen(long, gen_next);
+EOF
+cat >"$FAKE/src/gen-use.x" <<'EOF'
+#include "gen-owner.x"
+Var gen_boxed(void) { return gen_next(1); }
+EOF
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir gencold src/gen-use.x)
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir genwarm src/gen-owner.x)
+grep -q '(("gen_next") ((func ((long))) long))' \
+  "$FAKE/genwarm/gen-owner.xi" ||
+  fail "interface is missing a macro-generated function"
+grep -q '(("unit-static" "_x2c_macro_step_0")' \
+  "$FAKE/genwarm/gen-owner.xi" ||
+  fail "interface publishes a macro-generated static function"
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir genwarm src/gen-use.x)
+grep -q 'long_var(gen_next(1))' "$FAKE/gencold/gen-use.c" ||
+  fail "a macro-generated function call was not typed"
+cmp -s "$FAKE/gencold/gen-use.c" "$FAKE/genwarm/gen-use.c" ||
+  fail "macro-generated function replay diverged from cold compile"
+
+# Case 4b: a file-scope name a template declares is unique to its unit and
+# invocation, so a unit that includes another and expands the same macro
+# links, and each expansion's typedef keeps its own interface row.
+mkdir -p "$FAKE/cellcold" "$FAKE/cellwarm"
+cat >"$FAKE/src/cell.xmacro" <<'EOF'
+macro Unit $cell(Type $type, name $get) {
+  $type counter = 1;
+  typedef $type S;
+  typedef struct { S a; } Box;
+  S $get(void) { Box box = {counter}; return box.a; }
+}
+EOF
+cat >"$FAKE/src/cell-a.x" <<'EOF'
+$(import "cell.xmacro")
+$cell(int, cell_int);
+$cell(long, cell_long);
+EOF
+cat >"$FAKE/src/cell-b.x" <<'EOF'
+#include "cell-a.x"
+$(import "cell.xmacro")
+$cell(short, cell_short);
+int main(void) { return cell_int() + cell_long() + cell_short() == 3 ? 0 : 1; }
+EOF
+"$X2C" build --output "$FAKE/cellcold/cells" "$FAKE/src/cell-b.x" \
+  "$FAKE/src/cell-a.x" >"$FAKE/cellcold/build.log" 2>&1 ||
+  fail "units that expand one template with file-scope names did not link"
+"$FAKE/cellcold/cells" || fail "units with file-scope template names ran wrong"
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir cellcold src/cell-b.x)
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir cellwarm src/cell-a.x)
+long_typedef=$(sed -n 's/^typedef long \(_x2c_macro_S_[0-9a-f]*\);$/\1/p' \
+  "$FAKE/cellwarm/cell-a.h")
+[[ -n $long_typedef ]] &&
+  grep -Fq "((typedef \"$long_typedef\") (long))" "$FAKE/cellwarm/cell-a.xi" ||
+  fail "interface records a template typedef with another expansion's type"
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir cellwarm src/cell-b.x)
+cmp -s "$FAKE/cellcold/cell-b.c" "$FAKE/cellwarm/cell-b.c" ||
+  fail "file-scope template names differ between collection and replay"
+
 # Case 5: unresolved targets contribute no cached symbols. An explicit
 # host preprocess still rejects directory and unreadable include targets.
 mkdir -p "$FAKE/src/dir-target.h" "$FAKE/dirout"

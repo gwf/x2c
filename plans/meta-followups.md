@@ -3,8 +3,9 @@
 > Status: active
 > Written 2026-09-22 after [meta recovery](archive/meta-recovery.md) landed
 > on `dev` as `db86d4b7`. Tracks A-D are independent implementation work and
-> can run in parallel; E-G need design decisions with Gary first. Each track
-> is a separate session and worktree based on `dev`.
+> can run in parallel; E and G need design decisions with Gary first, and F
+> has an approved design. Each track is a separate session and worktree
+> based on `dev`.
 
 ## Implementation tracks
 
@@ -116,6 +117,11 @@ Outcome, 2026-09-22:
     `typedef long aligned_long __attribute__((aligned(16)))`, and a field
     declared `_Alignas`, leave a struct its natural layout; neither mark
     lies in the struct's own definition.
+  - Default collection learns which macros hold a layout attribute from the
+    `#define` lines it has passed. A macro defined through a later one,
+    `#define B A` before `#define A __attribute__((packed))`, is not
+    recognized, so a struct followed by `B` gets its natural layout.
+    `--cpp-symbols` and `--system-headers` see the expansion.
   - `-D_Atomic(T)=T` stays: `_Atomic` scalars have the size and alignment of
     their plain type on the supported hosts, so a struct with such a field
     keeps a correct layout. An `_Atomic` struct type could differ and is not
@@ -130,13 +136,131 @@ hand-listed targets such as the Iter `_into` rows in `lib/lisp.x` and the
 `C.iterator` table in `etc/comptime.xlisp`. See
 [meta authoring and coverage](meta-authoring-and-coverage.md#meta-capable-protocol-opportunity).
 
+Gary decided on 2026-09-22:
+
+1. Availability is marked per conformance, beside the adoption:
+   `meta protocol Iter(List);` adopts and marks. A protocol body cannot be
+   marked, and a conformer whose witness the compiler does not link stays
+   unexposed. There is no public `protocol Meta(T)`.
+2. Iter operations are marked `meta` through the existing prototype path.
+   Their `_into` twins are derived from the rule that an iterator operation
+   takes its destination last, replacing the hand-listed pairs.
+3. The five callback adapters `_lisp_Iter_{map,filter,zip_with,map2,scan}_into`
+   stay; they change representation, and their lifetimes belong to track F.
+4. The first delivery covers Iter only. The phase 7 Buffer, Array, Map and
+   Var candidates follow once Iter proves the mechanism.
+
+Design as built. Delivery 1 is the compiler capability, which must reach the
+checked-in bootstrap before `lib/` or `etc/` uses it:
+
+- The parser accepts a leading `meta` on a bodyless adoption and retains a
+  `(meta-protocol BASE PARTICIPANT)` row beside the adoption row, so it
+  crosses includes and package interfaces the same way. Macro-generated
+  syntax carries the marker as a `(meta-protocol ADOPTION)` node, which
+  publishes like a written marked adoption.
+- One helper turns a symbol row into `(name signature)` native functions: a
+  `meta` prototype gives itself, and a marked adoption gives each implemented
+  witness of its resolved conformance. Both consumers use it: lazy binding
+  for lowered code (`install_native_meta_effects`) and the generated target
+  inventory (`_x2c.native-meta.targets`).
+- A native function whose last parameter and result are `Iter` is an
+  iterator operation. The inventory emits its row as `(NAME (as NAME_into))`,
+  so the native function is the `_into` target. Compile-time code calls
+  `NAME` through `C.iterator.call` in `etc/lisp-values.xlisp`, which appends a
+  fresh `Iter_new` destination when a call omits it and otherwise passes the
+  call through. No allocating native target is needed, so deleting the
+  allocating static adapters cannot leave a dispatcher without one; a
+  missing `_into` target binds nothing and the call reports the missing
+  binding.
+- A declared `Func` parameter matches any `Var` parameter of the target,
+  since a compile-time callable is a Lisp value; the result must match
+  exactly. Such functions are left out of the generated inventory because an
+  adapter row supplies their target.
+
+Delivery 1 landed on `dev` as `e4aa66bb`.
+
+Delivery 2 adopts it:
+
+- `lib/protocols.x` marks the Array, List, Map and String Iter adoptions
+  `meta protocol`; File stays unmarked. The other 16 producers are `meta`
+  prototypes: `range` and the twelve `Iter` operations in `lib/iter.x`,
+  and `Map.keys`, `Map.enumerate` and `Var.iter` beside their definitions
+  in `lib/map.x` and `lib/dispatch.x`.
+- `lib/lisp.x` keeps only `Iter_new`, `Iter_init` and the five callback
+  adapters' `_into` rows. The 40 pair rows and the 20 allocating static
+  adapters are deleted; the generated inventory supplies the 15
+  `(NAME (as NAME_into))` rows for operations without a callback.
+- `etc/comptime.xlisp` loses the `C.iterator` macro and its 20 rows. Lowered
+  calls bind on first use from the `meta` declarations. `C.iterator.call`
+  moves to `etc/lisp-values.xlisp`, whose 19 Lisp aliases such as `List.iter`
+  and `Iter.head` now wrap the `_into` targets with it directly.
+- A probe of every Lisp alias, each operation's compile-time name with and
+  without a destination, and each lowered call with and without explicit
+  storage gives output identical to the pre-change compiler, and the
+  generated C is identical. The allocating native target names such as
+  `(bind "List_iter" nil)` no longer exist. The underscore names such as
+  `List_iter` are now bound when lowered code first calls them, like the
+  other native `meta` functions, instead of at session start.
+- Translation of the Iter-heavy probe: about 100 ms before and 97 ms after
+  (medians of 61 runs, within noise).
+
 ### F. Lifetime certification
 
-Compile-time code follows C semantics, so a pointer to an expired local is
-undefined, and nothing checks it. The goal is for compile-time code to
-consume the compiler's shared lifetime analysis rather than add its own. The
-lifetime-certified tranche of the
+Compile-time code followed C semantics, so a pointer to an expired local was
+undefined, and nothing checked it. A compile-time call frees its locals when
+it returns (`lib/lisp.x` `_call_lambda_slots`), so `return &local` or
+`&local` stored into a `meta static` read freed memory. The goal is for
+compile-time code to consume the compiler's shared lifetime analysis rather
+than add its own. The lifetime-certified tranche of the
 [internal adoption campaign](internal-adoption-campaign.md) depends on it.
+
+Gary approved the design on 2026-09-22; the first delivery implements it.
+
+- **Function-storage region.** `src/regions.x` treats a function's own
+  locals, parameters, and compound literals as one more region, `frame`. An
+  address taken with `&` belongs to the storage it names; an address reached
+  through a pointer belongs to what that pointer holds, so `&param->field`
+  counts as the parameter in the summary and a callee that returns it hands
+  the caller's borrow back. Returning a frame address, or storing it into a
+  static, a static local, a parameter's object, an unknown pointer, or fresh
+  storage that outlives the call, is an escape. Regions the function opens
+  end first, so storing into them or into another local is not.
+- **Enforcement in meta bodies.** `Compiler.install_meta_function` runs the
+  pass on each definition through `Compiler.check_meta_regions`, seeded with
+  `meta_regions`, the summaries of the `meta` functions installed before
+  it. A finding is an error at the escaping statement. The process lowering
+  cache stores the summary with the lowered forms, so a reused lowering
+  carries its check result and seeds later callers.
+- **Ordinary code** gets the same findings as warnings. Always on; the
+  per-unit cost is within noise.
+- Each arm of `?:` flows separately, and a local C array at a flow site is
+  a frame borrow of its first element.
+- Refinements that keep the rule from reporting safe code: a reference
+  capture (`using &name`) moves the local into a cell, so a closure holds
+  the cell rather than the frame; a store into a place that an earlier
+  `defer` in the same block writes back is restored, as `$let` already was;
+  a statement expression's declarations are locals rather than stores
+  through an unknown pointer; and a value a destination converts by
+  copying, such as an `Array` given to `cons`'s `List` parameter or a C
+  string boxed as a `Var`, is not stored. The last one removed the `src/statements.x` false positive, and
+  `lib/lisp.x` `_call_lambda_slots` now places its restoring `defer` before
+  the store it restores.
+
+Result against `dev` `440c0461`: a full build prints no `region:` warning
+and no other translation warning, and there is no new finding in
+`unittest/`, `examples/`, or `tools/`. Fixtures: `region-local-escapes`
+(ordinary warnings), additions to `region-safe`, and
+`comptime-declines-local-address-{return,static,callee,conditional,array}`.
+Self-translation of `src/` measured 3.97 s user before and 3.99 s after
+(medians of ten alternating runs before the review fixes; noise is about
+1.4%).
+
+Not covered, as the book's meta and region chapters list: an address kept
+in a field of a local struct that is returned by value or assigned to a
+`meta static` struct, pointer arithmetic, and native calls that retain an
+argument. Phase 8 remains: opt-in whole-project certification that treats
+unknown calls as unproved, the effect inventory, and File and Job
+finalizers.
 
 ### G. Native extensions (last stage)
 
