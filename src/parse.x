@@ -406,6 +406,8 @@ static String _package_type_reference(
    the tag, its member keys, and the pointee spellings recorded for it agree
    in the shallow collection an importing unit reads and in the full parse. */
 static List _package_aggregate_name(Compiler compiler, Symbol tag, List name) {
+  // A template's tag slot supplies its exact spelling where it expands.
+  if (name.car() is not <string>) return name;
   String spelling = name.car();
   if (compiler.peek(0) == <"{">)
     return %(${compiler.package_spelling(spelling)});
