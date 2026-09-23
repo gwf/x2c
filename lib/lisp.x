@@ -1106,9 +1106,10 @@ Var lisp_store(Var cell, Var value) {
 /* Lowered source keeps C objects in native bytes. The compiler supplies
    every size, offset, and layout from `Compiler.meta_type_layout`, so these
    operations only move bytes. The per-access operations take their offset
-   as a `Var`: a numeric Func parameter pays a checked conversion on every
-   call, which would dominate a field access. Automatic storage belongs to the frame of the
-   marked source function executing it, or to the session outside one. */
+   as a `Var`: a `long` parameter would convert and box each offset, which
+   costs a field access about a tenth of its time. Automatic storage belongs
+   to the frame of the marked source function executing it, or to the session
+   outside one. */
 static Scope *_lowered_owner(void) =>
   lisp_active.automatic_owner ? lisp_active.automatic_owner
                               : &lisp_active.scope;
