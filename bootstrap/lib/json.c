@@ -290,7 +290,7 @@ static void _JsonReader__expect(_JsonReader j, char byte, const char * why){
   j -> at ++;
 }
 
-int strncmp(const char *, const char *, unsigned long);
+int strncmp(const char *, const char *, size_t);
 
 static void _JsonReader__word(_JsonReader j, const char * word){
   size_t length = strlen(word);

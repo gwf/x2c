@@ -1,7 +1,7 @@
 # Internal adoption campaign
 
-> Status: ready tranche and system-macro follow-up complete and validated;
-> generalized-meta and lifetime-certified tranches remain dependency-gated.
+> Status: ready tranche, system-macro follow-up and phase 5 complete and
+> validated; phases 6-7 and the lifetime-certified tranche remain.
 > Refreshed against dev at `2d188c42` on 2026-09-22. The generalized-meta
 > dependency landed as `db86d4b7`; lifetime-sensitive adoption still depends
 > on the certification work described below.
@@ -187,7 +187,7 @@ any complete struct (types take no `meta` marker), and bodyless native
 prototypes for the functions the compiler links. Ordinary calls to native
 functions do not fold.
 
-### 5. Make Autodiff the first generalized-meta adopter
+### 5. Make Autodiff the first generalized-meta adopter (complete)
 
 First replace the remaining forward/reverse sibling Lisp registries and their
 four wrappers with per-unit `meta static List` state and x2c meta helpers.
@@ -204,6 +204,21 @@ Acceptance covers every Autodiff unit and registered example, generated output
 and result parity, and a before/after translation-time comparison. The typed
 state is successful only if it removes dynamic field spelling without
 replacing it with adapter machinery.
+
+Result: a `.xmacro` now accepts every `meta` declaration, including
+`meta static` values. Each importing unit gets its own compile-time copy and
+emits a runtime declaration only when its run-time code reaches the value.
+`ad_forward_siblings` and `ad_reverse_siblings` are `meta static List`
+values, the decorators call `ad_forward`, `ad_reverse` and `ad_checkpoint`
+directly, and the Lisp registries and their four wrappers are deleted. Forward
+mode then kept no state, so no split was needed. Reverse mode keeps one
+`meta static struct` value, `ad_state`, with typed fields. The string-keyed
+Map, its 36 quoted field accesses and the state parameter on 38 functions are
+gone, and the gradient template no longer carries state. A `.xmacro` cannot
+declare a named type, so the struct is anonymous. Generated C is
+byte-identical for all eleven Autodiff units, examples and the benchmark, and
+translation time is unchanged within noise (`test-autodiff` 0.709 s before
+and 0.698 s after, best of seven).
 
 ### 6. Give native meta targets one owner
 

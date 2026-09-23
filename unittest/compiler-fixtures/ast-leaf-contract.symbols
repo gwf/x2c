@@ -16,6 +16,7 @@
 ( ast_phase1_pointer_to_array ) ==> ( * ( dim ( 3 )) int )
 ( ast_phase1_zero ) ==> (( func (( void ))) int )
 ( enum ast_phase1_Color ) ==> ( enum )
+( enum ast_phase1_Color int-range ) ==> ( int )
 ( struct ast_phase1_Pair ) ==> ( struct    (( int ) ( * int ) (( dim ( 3 )) int ) ( * ( dim ( 3 )) int )     ( * ( func (( int ))) int )))
 ( struct ast_phase1_Pair array ) ==> (( dim ( 3 )) int )
 ( struct ast_phase1_Pair array_pointer ) ==> ( * ( dim ( 3 )) int )

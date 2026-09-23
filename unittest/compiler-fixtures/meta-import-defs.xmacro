@@ -39,6 +39,16 @@ meta static int mi_score(String path) {
   return score;
 }
 
+/* A value is compile-time state of each consuming unit, which starts from
+   the initializer. A unit that reaches it at run time also emits its own
+   runtime copy, as it does for the functions above. */
+meta static int mi_count = 0;
+
+meta static int mi_next(void) {
+  mi_count += 1;
+  return mi_count;
+}
+
 /* Only `$probe.tag` calls this one, and a macro call is a compile-time use,
    so no unit emits a runtime definition for it. */
 meta static String mi_tag(String path) => %"<${path.replace(".", "/")}>";
@@ -57,6 +67,8 @@ macro Expression $probe.score(Expr $path) =>
 
 macro Expression $probe.tag(Expr $path) =>
   $(x2c.literal.string (mi_tag (x2c.source.text $path)));
+
+macro Expression $probe.next() => $mi_next();
 
 /* `mi_dashed` arrives through this file's own import, so the nested
    definition has to reach the consuming unit too. */

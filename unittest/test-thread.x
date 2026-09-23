@@ -613,6 +613,110 @@ static void thread_rendering_paths_are_independent(void) {
   second.free();
 }
 
+typedef struct ThreadRaceInput {
+  atomic_int *arrived;
+  int index;
+  List *promoted;
+  int *proven;
+} ThreadRaceInput;
+
+enum { THREAD_RACERS = 8 };
+
+static void _thread_race_arrive(atomic_int *arrived) {
+  atomic_fetch_add(arrived, 1);
+  while (atomic_load(arrived) < THREAD_RACERS) sched_yield();
+}
+
+/* This site is registered first by the racing workers below. */
+static int _thread_race_classify(int which) {
+  try {
+    if (which == 0) raise %(bad-state (owner "race"));
+    if (which == 1) raise %(conv-range (owner "race"));
+    raise %(void-op (owner "race"));
+  }
+  catch %(bad-state *): return 10;
+  catch %(conv-range *): return 11;
+  catch %(void-op *): return 12;
+  return -1;
+}
+
+static Var _thread_race_catch_worker(const void *input, size_t input_size) {
+  if (input_size != sizeof(ThreadRaceInput)) return -1;
+  const ThreadRaceInput *race = input;
+  int wrong = 0;
+  Pool.open();
+  _thread_race_arrive(race.arrived);
+  for (int i = 0; i < 300; i++) {
+    int which = (i + race.index) % 3;
+    if (_thread_race_classify(which) != 10 + which) wrong++;
+  }
+  Pool.close();
+  return wrong;
+}
+
+/* Every worker builds the site's patterns in its own nested Pool; one binds
+   the site and the rest must see it bound. */
+static void thread_workers_bind_one_catch_site(void) {
+  atomic_int arrived = 0;
+  ThreadRaceInput inputs[THREAD_RACERS];
+  Thread threads[THREAD_RACERS];
+  for (int i = 0; i < THREAD_RACERS; i++) {
+    inputs[i] = (ThreadRaceInput) { &arrived, i, NULL, NULL };
+    threads[i] = Thread.start(
+      _thread_race_catch_worker, &inputs[i], sizeof(inputs[i]));
+  }
+  int wrong = 0;
+  for (int i = 0; i < THREAD_RACERS; i++) {
+    wrong += threads[i].join().integer();
+    threads[i].free();
+  }
+  EXPECT_INT_EQ(wrong, 0);
+  for (int which = 0; which < 3; which++)
+    EXPECT_INT_EQ(_thread_race_classify(which), 10 + which);
+}
+
+static Var _thread_race_promote_worker(const void *input, size_t input_size) {
+  if (input_size != sizeof(ThreadRaceInput)) return -1;
+  const ThreadRaceInput *race = input;
+  Pool.open();
+  Var value = 500681;
+  List list = %($value);
+  _thread_race_arrive(race.arrived);
+  race.proven[race.index] = List.try_own(list) && Pool.is_permanent(list);
+  race.promoted[race.index] = list;
+  Pool.close();
+  return 0;
+}
+
+/* Workers intern equal Lists in their own nested Pools before any promotes
+   one. The first promoted identity stays canonical in the shared root. */
+static void thread_promotions_keep_the_first_canonical_identity(void) {
+  atomic_int arrived = 0;
+  List promoted[THREAD_RACERS];
+  int proven[THREAD_RACERS];
+  ThreadRaceInput inputs[THREAD_RACERS];
+  Thread threads[THREAD_RACERS];
+  for (int i = 0; i < THREAD_RACERS; i++) {
+    inputs[i] = (ThreadRaceInput) { &arrived, i, promoted, proven };
+    threads[i] = Thread.start(
+      _thread_race_promote_worker, &inputs[i], sizeof(inputs[i]));
+  }
+  for (int i = 0; i < THREAD_RACERS; i++) {
+    threads[i].join();
+    threads[i].free();
+  }
+  Var value = 500681;
+  List canonical = %($value);
+  int permanent = 0;
+  for (int i = 0; i < THREAD_RACERS; i++) {
+    if (!proven[i]) continue;
+    permanent++;
+    EXPECT_TRUE(Pool.is_permanent(promoted[i]));
+    EXPECT_PTR_EQ((void *) promoted[i], (void *) canonical);
+  }
+  EXPECT_TRUE(permanent > 0);
+}
+
 typedef struct RegexDepthInput {
   int repetitions;
 } RegexDepthInput;
@@ -666,4 +770,6 @@ void thread_suite(void) {
   $test.run(thread_failed_join_export_releases_storage);
   $test.run(thread_freezes_late_descriptor_registration);
   $test.run(thread_stack_reaches_library_recursion_limits);
+  $test.run(thread_workers_bind_one_catch_site);
+  $test.run(thread_promotions_keep_the_first_canonical_identity);
 }

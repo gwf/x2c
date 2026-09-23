@@ -1106,9 +1106,10 @@ Var lisp_store(Var cell, Var value) {
 /* Lowered source keeps C objects in native bytes. The compiler supplies
    every size, offset, and layout from `Compiler.meta_type_layout`, so these
    operations only move bytes. The per-access operations take their offset
-   as a `Var`: a numeric Func parameter pays a checked conversion on every
-   call, which would dominate a field access. Automatic storage belongs to the frame of the
-   marked source function executing it, or to the session outside one. */
+   as a `Var`: a `long` parameter would convert and box each offset, which
+   adds about 10% to a field access. Automatic storage belongs to the frame
+   of the marked source function executing it, or to the session outside
+   one. */
 static Scope *_lowered_owner(void) =>
   lisp_active.automatic_owner ? lisp_active.automatic_owner
                               : &lisp_active.scope;
@@ -1146,6 +1147,18 @@ Var lisp_session_copy(Var source, long size) =>
   Var.new(<p48>, Scope.memdup_in(
     &lisp_active.scope, source.pointer(), (size_t) size));
 
+/* A scalar layout's TAG can differ from its bytes' row: a bool's byte reads
+   as the int C promotes it to, and a Symbol's unsigned-long bytes hold its
+   code. A numeric value converts, and a Symbol's code is its bits. */
+static Var _lisp_scalar_as(Var value, Symbol tag) {
+  X2CVarNumericInfo info;
+  if (value.tag() == tag) return value;
+  if (!Var.numeric_info(tag, &info)) return Var.new(tag, value.ulong());
+  if (!Var.numeric_info(value.tag(), &info))
+    return Var.integer_box(tag, (unsigned long) value.integer());
+  return value.convert(tag);
+}
+
 /** Reads the object of compiler layout `layout` at `offset` bytes past
     `pointer`. A record reads as its own address, which is how lowered source
     carries record values. */
@@ -1157,7 +1170,7 @@ Var lisp_peek(Var pointer, Var offset, List layout) {
     case %(pointer ? ? ? ?tag): return Var.new(tag, *(void **) at);
     case %(scalar ? ? ? ?exact ?tag): {
       Var value = native_scalar_access(exact).load(at, Scope.top());
-      return tag == <symbol> ? Var.new(<symbol>, value.ulong()) : value;
+      return _lisp_scalar_as(value, tag);
     }
   }
   return void;
@@ -1171,10 +1184,10 @@ Var lisp_poke(Var pointer, Var offset, List layout, Var value) {
     case %(record ? ?size *): memmove(at, value.pointer(), size.long_long());
     case %(var *): *(Var *) at = value;
     case %(pointer *): *(void **) at = value.pointer();
-    case %(scalar ? ? ? ?exact ?tag):
-      native_scalar_access(exact).store(
-        at, tag == <symbol>
-              ? Var.new(<ulong>, (unsigned long) value.integer()) : value);
+    case %(scalar ? ? ? ?exact *): {
+      NativeScalarAccess scalar = native_scalar_access(exact);
+      scalar.store(at, _lisp_scalar_as(value, scalar.tag));
+    }
   }
   return value;
 }

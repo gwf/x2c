@@ -6,13 +6,13 @@
     translation and the second is what the same bodies compute at run time.
 
     The generated C is part of what this fixture owns. This unit reaches
-    `mi_constant`, `mi_accessor`, `mi_depth`, `mi_score` and `mi_dashed` at
-    run time, and `mi_flatten` through the first two, so it emits those six:
-    the five `static` ones as its own copies and public `mi_flatten` as the
-    program's one copy, exported by `meta-import.h`. `mi_tag` runs only during
-    translation, so no definition of it is emitted. `meta-import-second.x`
-    imports the same file and emits a different set. See
-    `plans/meta-functions.md`.
+    `mi_constant`, `mi_accessor`, `mi_depth`, `mi_score`, `mi_next` and
+    `mi_dashed` at run time, `mi_flatten` through the first two and the value
+    `mi_count` through `mi_next`, so it emits those eight: the `static` ones
+    as its own copies and public `mi_flatten` as the program's one copy,
+    exported by `meta-import.h`. `mi_tag` runs only during translation, so
+    no definition of it is emitted. `meta-import-second.x` imports the same
+    file and emits a different set. See `plans/meta-functions.md`.
 */
 
 #include "x2c.x"
@@ -35,6 +35,9 @@ int main(void) {
   /* `mi_dashed` comes from the import's own import. */
   printf("dashed   %s %s\n",
          $probe.dashed(net.http.idle), mi_dashed("net.http.idle"));
+  /* Two compile-time calls advance this unit's `mi_count`; the runtime
+     call starts from the program's own copy. */
+  printf("next     %d %d %d\n", $probe.next(), $probe.next(), mi_next());
   /* `mi_tag` is called here only during translation. */
   printf("tag      %s\n", $probe.tag(net.http.idle));
   return 0;
