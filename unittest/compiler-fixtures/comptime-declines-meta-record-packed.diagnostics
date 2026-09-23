@@ -1,0 +1,15 @@
+unittest/compiler-fixtures/comptime-declines-meta-record-packed.x:76:1: macro: this function cannot run at compile time
+  meta int meta_packed_value(void) {
+  ^^^^
+  note: reason: a compile-time struct with no host layout
+
+unittest/compiler-fixtures/comptime-declines-meta-record-packed.x:81:1: macro: this function cannot run at compile time
+  meta int meta_else_packed_value(void) {
+  ^^^^
+  note: reason: a compile-time struct with no host layout
+
+unittest/compiler-fixtures/comptime-declines-meta-record-packed.x:86:1: macro: this function cannot run at compile time
+  meta int meta_elif_packed_value(void) {
+  ^^^^
+  note: reason: a compile-time struct with no host layout
+

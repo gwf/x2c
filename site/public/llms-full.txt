@@ -2360,7 +2360,7 @@ macro Expression $computed(Expr $value) => $(car (list $value));
 ```
 
 `.xlisp` files execute in the translation unit's Lisp session. `.xmacro`
-files may contain macro definitions, meta functions and top-level Lisp forms. Import paths are
+files may contain macro definitions, `meta` declarations and top-level Lisp forms. Import paths are
 relative to the importing file, canonicalized, loaded once, and checked for
 cycles. Direct Lisp file operations remain available but are not tracked as
 compiler dependencies.
@@ -2689,7 +2689,8 @@ rejection, but use separate per-unit compile-time state, not the program's
 variables.
 
 A `meta` declaration in an imported `.xmacro` installs its compile-time form in
-every consuming unit. The runtime forms are independent: a unit emits a
+every consuming unit; a `meta static` value gives each unit its own
+compile-time copy. The runtime forms are independent: a unit emits a
 definition only for those it reaches, and the storage class written on the
 declaration says what it emits. Importing the same file twice contributes one
 copy of each definition.

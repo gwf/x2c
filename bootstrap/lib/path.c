@@ -397,7 +397,7 @@ static const char * _glob_step(const char * pattern, const char * text){
   return * pattern == * text ? pattern + 1 : NULL;
 }
 
-int strncmp(const char *, const char *, unsigned long);
+int strncmp(const char *, const char *, size_t);
 
 static int _glob_match(const char * pattern, const char * text, const char * origin){
   const char * star = NULL, * resume = NULL, * next;

@@ -3,4 +3,5 @@ accessor get_net_http get_net_http
 depth    3 3
 score    11 11
 dashed   net-http-idle net-http-idle
+next     1 2 1
 tag      <net/http/idle>

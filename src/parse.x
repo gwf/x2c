@@ -445,15 +445,65 @@ static List _field(Compiler compiler, List context, int delegated) {
   return %(seq @rows);
 }
 
+/* Whether every enumerator of enum `type` fits in int, the width C gives an
+   enum whose values do: each initializer has an integer type no wider than
+   int, or is the enum itself. C requires an implicit value, the previous
+   one plus one, to fit in int as well. */
+static int _enum_fits_int(List type, List members) {
+  foreach (List member, members) {
+    match (member) {
+      case %(binding *): continue;
+      case %(op = ? (expr ?(Type value) *)): {
+        if (value.equal(type)) continue;
+        X2CVarNumericInfo info;
+        if (Var.numeric_info(value.scalar_tag(), &info) && !info.floating &&
+            (info.bits < 32 || (info.bits == 32 && !info.unsigned_value)))
+          continue;
+      }
+    }
+    return 0;
+  }
+  return 1;
+}
+
+/* Reports whether C packs an aggregate whose tokens run from `first` to the
+   current one and any attribute after it: packing is on before it, or a
+   mark lies within it. Tokens outside the unit's own, such as a constructed
+   form's, have no marks. */
+static int _packed_since(Compiler c, Token first) {
+  Token base = c.tokenizer.tokens, end = base + c.tokenizer.tokens.len();
+  if (first < base || c.token >= end) return 0;
+  Token last = _attribute_starts(c)
+             ? c.skip_trivia_from(c.token + 1).group_close() : c.token;
+  // Marks ascend, so the ones before `first` are a prefix.
+  int before = 0, count = c.pack_marks.len();
+  for (int high = count; before < high;) {
+    int middle = (before + high) / 2;
+    if ((long) c.pack_marks[middle] < first - base) before = middle + 1;
+    else high = middle;
+  }
+  return before % 2 ||
+         (before < count && (long) c.pack_marks[before] <= last - base);
+}
+
+/* Publishes an aggregate whose tokens start at `first`. A constructed
+   struct passes the current token, so it is packed where its form is; an
+   enum passes `NULL`. */
 static List _publish_aggregate_type(
-  Compiler compiler, Symbol tag, Var name, List members) {
+  Compiler compiler, Symbol tag, Var name, List members, Token first) {
   List type = %($tag $name);
   List body = tag == <enum> ? members : %(fields @members);
   if (name is <list> && name.car() == <binding>)
     compiler.sym.bind_identity(%($tag), name, %($tag $body));
   else
     compiler.sym.declare(NULL, type, tag == <enum> ? %(enum) : %($tag $body));
-  if (tag != <enum>) compiler.sym.declare_field_order(type, members);
+  if (tag != <enum>) {
+    compiler.sym.declare_field_order(type, members);
+    if (_packed_since(compiler, first))
+      compiler.sym.set(%(@type "packed"), %(packed));
+  }
+  else if (_enum_fits_int(type, members))
+    compiler.sym.set(%(@type "int-range"), %(int));
   return %($tag $name $body);
 }
 
@@ -518,6 +568,7 @@ List Compiler.parse_fields(Compiler c, List context) {
 }
 
 static List _struct_or_union(Compiler c) {
+  Token first = c.token;
   Symbol tag = c.peek(0);
   c.next();
   List name = c.parse_optional_identifier();
@@ -530,7 +581,7 @@ static List _struct_or_union(Compiler c) {
     fields = c.parse_fields(type);
     c.expect(<"}">);
     if (!c.macro_holes)
-      return _publish_aggregate_type(c, tag, usedname.car(), fields);
+      return _publish_aggregate_type(c, tag, usedname.car(), fields, first);
     fields = cons(<fields>, fields);
   }
   return fields ? type.append(%($fields)): type;
@@ -654,7 +705,8 @@ static List _enum(Compiler c) {
     enums = c.parse_enumerators(type);
     c.expect(<"}">);
     if (!c.macro_holes)
-      return _publish_aggregate_type(c, <enum>, usedname.car(), enums);
+      return _publish_aggregate_type(
+        c, <enum>, usedname.car(), enums, NULL);
   }
   return enums ? type.append(%($enums)): type;
 }
@@ -966,7 +1018,7 @@ List Compiler.parse_named_type(Compiler c) {
                 ? NULL : c.parse_fields(%($tag $name));
     c.expect(<"}">);
     base = c.macro_holes ? %($tag $name (fields @fields))
-                        : _publish_aggregate_type(c, tag, name, fields);
+                        : _publish_aggregate_type(c, tag, name, fields, start);
   }
   else base = _type_specifier(c);
   base = qualifiers.append(base);
@@ -1674,38 +1726,6 @@ static int _script_declaration_stays(Compiler c) {
   return 0;
 }
 
-/* A declarator declares a function when it ends in a parameter group: the
-   group is the token before the body or the `;` that closes the row. Any
-   other terminator belongs to an object declaration, and an opening brace
-   that no group precedes belongs to an aggregate, which is the case the
-   script test above answers differently. */
-static int _declares_function(Compiler c, Token token) {
-  Symbol previous = 0;
-  for (; token.type != <eof>;
-       previous = token.type, token = token.after_group()) {
-    if (token.type == <;> || token.type == <"{">) return previous == <(>;
-    if (token.type == <=>)
-      return previous == <(> &&
-             c.skip_trivia_from(token + 1).type == <">">;
-  }
-  return 0;
-}
-
-/** Reports whether the current tokens begin a `meta` function declaration.
-    `meta` is contextual: it marks a function the compiler runs at compile
-    time as well as emits, and stays an ordinary identifier wherever the
-    tokens after it do not declare or define a function. This query does not
-    consume tokens.
-*/
-int Compiler.meta_form_is_definition(Compiler c) {
-  if (c.peek(0) != <ident> || c.token.text != "meta") return 0;
-  Token head = c.token;
-  c.next();
-  int marker = c.test_declaration() && _declares_function(c, c.token);
-  c.token = head;
-  return marker;
-}
-
 /** Reports whether the cursor begins a contextual top-level `meta`
     declaration: a function or an initialized file-static value. */
 int Compiler.meta_form_is_declaration(Compiler c) {
@@ -1782,8 +1802,8 @@ static void _track_conditional_arms(Compiler c) {
     Returns its AST, or NULL when a keyword definition, top-level Lisp form,
     linkage brace, or compile-time-only `meta` function only updates compiler
     state, with the first following token current. A macro import whose
-    `.xmacro` declares `meta` functions retains their runtime definitions,
-    which the unit emits where it reaches them.
+    `.xmacro` makes `meta` declarations retains their runtime forms, which
+    the unit emits where it reaches them.
 */
 List Compiler.parse_top_level(Compiler c) {
   if (!c.macro_holes) {
@@ -1895,7 +1915,8 @@ static List _finish_aggregate_type(
       }
     }
   }
-  return _publish_aggregate_type(c, tag, name, bound.list_free());
+  return _publish_aggregate_type(
+    c, tag, name, bound.list_free(), c.token);
 }
 
 static Var _finish_type_spec(Compiler compiler, Var value) {

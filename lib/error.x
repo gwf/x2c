@@ -63,10 +63,45 @@ $error.private.types();
 
 /* A site is bound on its first registration: `static` when `Match` retains a
    plan for every arm, `transient` when some pattern is built at run time and
-   each registration must prepare its own plans. */
+   each registration must prepare its own plans. A pending site's patterns are
+   literals in compiler output, so binding promotes them out of any nested
+   `Pool` first. One thread binds a site; a thread that raced it there finds
+   the site bound and ignores the patterns it built. */
 #define ERROR_CATCH_PENDING 0
 #define ERROR_CATCH_STATIC 1
 #define ERROR_CATCH_TRANSIENT 2
+
+/* The mutex is recursive: an `<alloc-fail>` observer that registers another
+   pending site while a bind holds it must not deadlock. */
+static pthread_mutex_t catch_site_mutex;
+static pthread_once_t catch_site_mutex_once =
+  (pthread_once_t) PTHREAD_ONCE_INIT;
+
+static void _catch_site_mutex_initialize(void) {
+  pthread_mutexattr_t attributes;
+  if (pthread_mutexattr_init(&attributes) ||
+      pthread_mutexattr_settype(&attributes, PTHREAD_MUTEX_RECURSIVE) ||
+      pthread_mutex_init(&catch_site_mutex, &attributes)) {
+    fprintf(stderr, "Error: could not initialize catch site mutex\n");
+    abort();
+  }
+  pthread_mutexattr_destroy(&attributes);
+}
+
+static void _catch_site_lock(void) {
+  if (pthread_once(&catch_site_mutex_once, _catch_site_mutex_initialize) ||
+      pthread_mutex_lock(&catch_site_mutex)) {
+    fprintf(stderr, "Error: could not lock catch site\n");
+    abort();
+  }
+}
+
+static void _catch_site_unlock(void) {
+  if (pthread_mutex_unlock(&catch_site_mutex)) {
+    fprintf(stderr, "Error: could not unlock catch site\n");
+    abort();
+  }
+}
 
 /** Reports whether one catch site still needs its patterns at registration.
     A bound static site answers 0, so its caller can skip constructing them.
@@ -76,11 +111,16 @@ int x2c_error_catch_site_pending(ErrorCatchSite *site) =>
   __atomic_load_n(&site.state, __ATOMIC_ACQUIRE) != ERROR_CATCH_STATIC;
 
 static void _catch_site_bind(ErrorCatchSite *site, Var *patterns) {
+  _catch_site_lock();
+  // promotion and preparation allocate, and a failure never returns here
+  defer _catch_site_unlock();
+  if (__atomic_load_n(&site.state, __ATOMIC_ACQUIRE) != ERROR_CATCH_PENDING)
+    return;
   int retainable = 1;
-  for (int i = 0; i < site.arm_count; i++)
-    if (i != site.default_arm &&
-        !x2c_match_pattern_retainable(patterns[i]))
-      retainable = 0;
+  for (int i = 0; retainable && i < site.arm_count; i++)
+    if (i != site.default_arm)
+      retainable = List.try_own(patterns[i]) &&
+                   x2c_match_pattern_retainable(patterns[i]);
   if (retainable)
     for (int i = 0; i < site.arm_count; i++) {
       if (i == site.default_arm) continue;
@@ -119,9 +159,11 @@ static const char *_catch_prepare_plans(
     afterward and `site` is the static site of this `try`, whose `patterns`
     are read in source order. A pending site reads `patterns`; a bound static
     site ignores them, so a caller may pass anything once
-    `x2c_error_catch_site_pending` answers 0. The site borrows every
-    referenced `List` graph, and those values and the target frame must
-    outlive it.
+    `x2c_error_catch_site_pending` answers 0. The first registration of a
+    pending site promotes its patterns, which are literals in compiler output,
+    to process lifetime and binds them there when it can. A transient
+    registration borrows its patterns, and they and the target frame must
+    outlive the registration.
     A null target or site, a zero arm count, or an unavailable `Error` runtime
     reaches the raw error floor.
     Raises: `<alloc-fail>` when registration or fence-detail storage cannot be

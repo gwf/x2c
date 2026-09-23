@@ -18,7 +18,6 @@ X2c recursive-descent parser core.
 | [`Compiler.finish_foreign_alias`](#Compiler.finish_foreign_alias) | Constructs a foreign alias from one direct function declaration and target. |
 | [`Compiler.finish_managed_declaration`](#Compiler.finish_managed_declaration) | Lowers managed block declarations to declaration/defer pairs in source order, preserving their installed bindings and the enclosing lifetime. |
 | [`Compiler.meta_form_is_declaration`](#Compiler.meta_form_is_declaration) | Reports whether the cursor begins a contextual top-level `meta` declaration: a function or an initialized file-static value. |
-| [`Compiler.meta_form_is_definition`](#Compiler.meta_form_is_definition) | Reports whether the current tokens begin a `meta` function declaration. |
 | [`Compiler.package_alias_spelling`](#Compiler.package_alias_spelling) | Returns the folded package-member spelling at the current token, or NULL. |
 | [`Compiler.parse_basic_identifier`](#Compiler.parse_basic_identifier) | Consumes one `ident` token and returns its spelling as a one-item `List`. |
 | [`Compiler.parse_complex_identifier`](#Compiler.parse_complex_identifier) | Parses the current identifier or dotted owner/member as a one-item name. |
@@ -59,7 +58,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:2146`
+Source: `src/parse.x:2164`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -67,10 +66,8 @@ Source: `src/parse.x:2146`
 `void Compiler.bind_template_local( Compiler c, List key, List type, List context)`
 
 Installs a definition-local template binding or typedef provisionally.
-Later template types name a local typedef by its identity, so each
-expansion refers to that expansion's private typedef.
 
-Source: `src/parse.x:998`
+Source: `src/parse.x:1047`
 
 <a id="Compiler.defines_main"></a>
 #### Compiler.defines_main
@@ -82,7 +79,7 @@ scope. A script unit that does is an ordinary program: its declarations
 stay at file scope and it may not have top-level statements. Both parse
 passes read the same tokens, so they agree before either parses.
 
-Source: `src/parse.x:1646`
+Source: `src/parse.x:1697`
 
 <a id="Compiler.finish_foreign_alias"></a>
 #### Compiler.finish_foreign_alias
@@ -94,7 +91,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:2080`
+Source: `src/parse.x:2098`
 
 <a id="Compiler.finish_managed_declaration"></a>
 #### Compiler.finish_managed_declaration
@@ -104,7 +101,7 @@ Source: `src/parse.x:2080`
 Lowers managed block declarations to declaration/defer pairs in source
 order, preserving their installed bindings and the enclosing lifetime.
 
-Source: `src/parse.x:1365`
+Source: `src/parse.x:1416`
 
 <a id="Compiler.meta_form_is_declaration"></a>
 #### Compiler.meta_form_is_declaration
@@ -114,20 +111,7 @@ Source: `src/parse.x:1365`
 Reports whether the cursor begins a contextual top-level `meta`
 declaration: a function or an initialized file-static value.
 
-Source: `src/parse.x:1711`
-
-<a id="Compiler.meta_form_is_definition"></a>
-#### Compiler.meta_form_is_definition
-
-`int Compiler.meta_form_is_definition(Compiler c)`
-
-Reports whether the current tokens begin a `meta` function declaration.
-`meta` is contextual: it marks a function the compiler runs at compile
-time as well as emits, and stays an ordinary identifier wherever the
-tokens after it do not declare or define a function. This query does not
-consume tokens.
-
-Source: `src/parse.x:1700`
+Source: `src/parse.x:1730`
 
 <a id="Compiler.package_alias_spelling"></a>
 #### Compiler.package_alias_spelling
@@ -169,7 +153,7 @@ Parses one non-function, non-typedef `Decl` macro argument.
 Returns a single declaration without consuming the invocation delimiter;
 flat destructuring may omit an initializer in this position.
 
-Source: `src/parse.x:1530`
+Source: `src/parse.x:1581`
 
 <a id="Compiler.parse_declaration_row"></a>
 #### Compiler.parse_declaration_row
@@ -180,7 +164,7 @@ Parses one x2c declaration row and leaves its terminator current.
 A mixed-type comma row returns a `seq` of declarations in source order;
 a single declaration returns directly.
 
-Source: `src/parse.x:1278`
+Source: `src/parse.x:1329`
 
 <a id="Compiler.parse_enumerator"></a>
 #### Compiler.parse_enumerator
@@ -191,7 +175,7 @@ Parses one enumerator for enum type `context` and returns its AST.
 Outside macro-template parsing, its binding is published immediately so
 later initializers and enumerators can resolve it.
 
-Source: `src/parse.x:582`
+Source: `src/parse.x:633`
 
 <a id="Compiler.parse_enumerators"></a>
 #### Compiler.parse_enumerators
@@ -201,7 +185,7 @@ Source: `src/parse.x:582`
 Parses comma-separated enumerators up to the current closing brace.
 Returns their flat source-order `List` and leaves the brace unconsumed.
 
-Source: `src/parse.x:630`
+Source: `src/parse.x:681`
 
 <a id="Compiler.parse_field"></a>
 #### Compiler.parse_field
@@ -212,7 +196,7 @@ Parses one field for aggregate type `context` and returns its AST.
 Ordinary fields publish their binding in the aggregate's field scope and
 consume their terminating semicolon; macro forms follow their own syntax.
 
-Source: `src/parse.x:487`
+Source: `src/parse.x:537`
 
 <a id="Compiler.parse_fields"></a>
 #### Compiler.parse_fields
@@ -223,7 +207,7 @@ Parses aggregate fields in source order up to the current closing brace.
 Returns a flat field `List`, publishes delegate-field metadata, and leaves
 the closing brace unconsumed.
 
-Source: `src/parse.x:505`
+Source: `src/parse.x:555`
 
 <a id="Compiler.parse_function_definition"></a>
 #### Compiler.parse_function_definition
@@ -234,7 +218,7 @@ Parses one function declaration and its required compound body.
 The parameter bindings are active while the body is parsed, and the first
 token after the closing brace remains current.
 
-Source: `src/parse.x:1553`
+Source: `src/parse.x:1604`
 
 <a id="Compiler.parse_function_target"></a>
 #### Compiler.parse_function_target
@@ -245,7 +229,7 @@ Parses one function decorator target and returns its resulting AST.
 A compatible unit macro at the current token is expanded first; otherwise
 an ordinary function definition is required.
 
-Source: `src/parse.x:1566`
+Source: `src/parse.x:1617`
 
 <a id="Compiler.parse_import_declaration"></a>
 #### Compiler.parse_import_declaration
@@ -257,7 +241,7 @@ The alias defaults to the package name; `with` members add source-ordered
 local spellings. These spellings affect source resolution only; the package
 name in the returned AST drives the generated header include.
 
-Source: `src/parse.x:1611`
+Source: `src/parse.x:1662`
 
 <a id="Compiler.parse_named_type"></a>
 #### Compiler.parse_named_type
@@ -268,7 +252,7 @@ Captures a name followed by an ordinary complete type and semicolon.
 The reserved typedef identity permits fields to refer to their enclosing
 named type before its pointer or value representation is complete.
 
-Source: `src/parse.x:949`
+Source: `src/parse.x:1001`
 
 <a id="Compiler.parse_optional_identifier"></a>
 #### Compiler.parse_optional_identifier
@@ -288,7 +272,7 @@ Parses one parameter and returns `(param TYPE DECLARATOR)` or `(...)`.
 Outside macro-template parsing, a named parameter is installed in the
 current `Sym` scope. The following delimiter remains current.
 
-Source: `src/parse.x:770`
+Source: `src/parse.x:822`
 
 <a id="Compiler.parse_parameter_list"></a>
 #### Compiler.parse_parameter_list
@@ -299,7 +283,7 @@ Parses a nonempty comma-separated parameter `List` in source order.
 The caller owns the parameter scope; the first non-comma delimiter remains
 current.
 
-Source: `src/parse.x:785`
+Source: `src/parse.x:837`
 
 <a id="Compiler.parse_simple_declaration"></a>
 #### Compiler.parse_simple_declaration
@@ -310,7 +294,7 @@ Parses one declaration group and leaves its terminating token current.
 Declared names are installed in `Sym` as their declarators are completed;
 the result is one `declare`, `typedef`, or initialized `dstrdecl` AST.
 
-Source: `src/parse.x:1262`
+Source: `src/parse.x:1313`
 
 <a id="Compiler.parse_static_assert"></a>
 #### Compiler.parse_static_assert
@@ -320,7 +304,7 @@ Source: `src/parse.x:1262`
 Parses a C assertion declaration; native C owns constant-expression
 checks.
 
-Source: `src/parse.x:467`
+Source: `src/parse.x:517`
 
 <a id="Compiler.parse_submission"></a>
 #### Compiler.parse_submission
@@ -333,7 +317,7 @@ Missing required syntax raises `<incomplete>`; trailing items are rejected.
 Temporary parser scopes and captured parameters are restored on every exit.
 The caller owns the semantic transaction and commits after execution.
 
-Source: `src/parse.x:1864`
+Source: `src/parse.x:1883`
 
 <a id="Compiler.parse_top_level"></a>
 #### Compiler.parse_top_level
@@ -344,10 +328,10 @@ Parses one top-level form and applies its source-ordered compiler effects.
 Returns its AST, or NULL when a keyword definition, top-level Lisp form,
 linkage brace, or compile-time-only `meta` function only updates compiler
 state, with the first following token current. A macro import whose
-`.xmacro` declares `meta` functions retains their runtime definitions,
-which the unit emits where it reaches them.
+`.xmacro` makes `meta` declarations retains their runtime forms, which
+the unit emits where it reaches them.
 
-Source: `src/parse.x:1788`
+Source: `src/parse.x:1807`
 
 <a id="Compiler.parse_type_name"></a>
 #### Compiler.parse_type_name
@@ -357,7 +341,7 @@ Source: `src/parse.x:1788`
 Parses a type specifier with qualifiers and pointer/reference modifiers.
 Returns its flat `Type` AST and leaves the first following token current.
 
-Source: `src/parse.x:692`
+Source: `src/parse.x:744`
 
 <a id="Compiler.script_statement_executes"></a>
 #### Compiler.script_statement_executes
@@ -368,7 +352,7 @@ Reports whether the top-level item at the cursor is a script statement
 that runs, rather than a declaration: an expression, control flow, a
 `with` block, or a statement macro. This query does not consume tokens.
 
-Source: `src/parse.x:1745`
+Source: `src/parse.x:1764`
 
 <a id="Compiler.script_statement_starts"></a>
 #### Compiler.script_statement_starts
@@ -382,7 +366,7 @@ Lisp, file-scope macro invocations, `typedef`, `static`, and `extern`
 declarations, linkage braces, type definitions, and function prototypes
 and definitions stay at file scope. This query does not consume tokens.
 
-Source: `src/parse.x:1727`
+Source: `src/parse.x:1746`
 
 <a id="Compiler.skip_linkage_brace"></a>
 #### Compiler.skip_linkage_brace
@@ -396,7 +380,7 @@ its own braces. The declarations between them stay at file scope. The
 `#ifdef __cplusplus` arm of the usual header guard is skipped, so only an
 unguarded group reaches this operation.
 
-Source: `src/parse.x:1756`
+Source: `src/parse.x:1775`
 
 <a id="Compiler.test_declaration"></a>
 #### Compiler.test_declaration
@@ -407,7 +391,7 @@ Tests whether the current token can begin a declaration without consuming.
 Typedefs, package aliases, and macro-hole kinds are resolved through the
 current compiler state.
 
-Source: `src/parse.x:1256`
+Source: `src/parse.x:1307`
 
 <a id="Compiler.test_static_assert"></a>
 #### Compiler.test_static_assert
@@ -416,7 +400,7 @@ Source: `src/parse.x:1256`
 
 Reports whether the current identifier starts a C static assertion.
 
-Source: `src/parse.x:461`
+Source: `src/parse.x:511`
 
 ## Design notes
 

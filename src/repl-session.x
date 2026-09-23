@@ -168,7 +168,7 @@ ReplCompletion ReplSession.complete(
   Token directives = c.directives_taken;
   String text = c.text;
   Map arms = c.arm_stacks;
-  Array braces = c.braces;
+  Array braces = c.braces, pack_marks = c.pack_marks;
   defer {
     c.tokenizer = tokenizer;
     c.token = token;
@@ -176,6 +176,7 @@ ReplCompletion ReplSession.complete(
     c.directives_taken = directives;
     c.text = text;
     c.arm_stacks = arms;
+    c.pack_marks = pack_marks;
     c.braces = braces;
   }
   c.directives_taken = NULL;
@@ -348,7 +349,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
   Token directives = c.directives_taken;
   String text = c.text;
   Map arms = c.arm_stacks;
-  Array braces = c.braces;
+  Array braces = c.braces, pack_marks = c.pack_marks;
   defer {
     c.tokenizer = tokenizer;
     c.token = token;
@@ -356,6 +357,7 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     c.directives_taken = directives;
     c.text = text;
     c.arm_stacks = arms;
+    c.pack_marks = pack_marks;
     c.braces = braces;
   }
   c.directives_taken = NULL;

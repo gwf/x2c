@@ -30,6 +30,7 @@ int main(void){
   printf("depth  %d %d\n", 4, mi_depth(_3));
   printf("dashed %s %s\n", _4, mi_dashed(_5));
   printf("tag    %s\n", _6);
+  printf("next   %d\n", 1);
   return 0;
 }
 
