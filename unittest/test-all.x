@@ -56,6 +56,7 @@ void destructuring_suite(void);
 void ast_suite(void);
 void func_suite(void);
 void lisp_suite(void);
+void lisp_threaded_statics_suite(void);
 void machine_suite(void);
 void lisp_auto_suite(void);
 void match_plan_suite(void);
@@ -125,6 +126,7 @@ int main(int argc, char **argv) {
   $test.suite(ast_suite);
   $test.suite(mutex_suite);
   $test.suite(thread_suite);
+  $test.suite(lisp_threaded_statics_suite);
   $test.suite(static_init_suite);
   return TestHarness_finish();
 }

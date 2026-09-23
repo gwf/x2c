@@ -1475,7 +1475,6 @@ void lisp_suite(void) {
   $test.run(lisp_inferred_binding_transfers_native_error);
   $test.run(lisp_binding_storage_belongs_to_session);
   $test.run(lisp_source_function_reclaims_normal_and_error_frames);
-  $test.run(lisp_statics_belong_to_session_and_thread);
   $test.run(lisp_eval_file_runs_forms);
   $test.run(lisp_eval_file_transfers_read_failure);
   $test.run(lisp_eval_file_rejects_embedded_nul);
@@ -1493,4 +1492,8 @@ void lisp_suite(void) {
   $test.run(lisp_iterator_storage_leaves_with_the_session);
   $test.run(lisp_bootstrap_import_uses_current_session);
   $test.run(lisp_sessions_release_scopes);
+}
+
+void lisp_threaded_statics_suite(void) {
+  $test.run(lisp_statics_belong_to_session_and_thread);
 }
