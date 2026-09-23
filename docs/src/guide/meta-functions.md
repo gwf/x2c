@@ -453,10 +453,25 @@ These C shapes are not available at compile time:
 - Structs with bitfields, array members, anonymous members, or an enum field
   whose initializers do not all have `int`-range types. A meta function that
   uses one reports `a compile-time struct with no host layout`.
-- Structs with alignment attributes.
-- Structs under `#pragma pack`. The compiler does not detect packing and
-  would lay such a struct out with natural alignment, so do not pass one to a
-  native function from compile-time code.
+- Packed structs. A meta function that uses one reports `a compile-time
+  struct with no host layout`. The compiler detects a struct defined while
+  `#pragma pack` is in effect, and a `packed`, `aligned`, `mode` or
+  `vector_size` attribute in the struct's own definition, such as a header
+  struct followed by `__attribute__((packed))`. Default collection follows
+  `#pragma pack` within each file. Where `#if` groups guard the directives,
+  it reads the file once for each arm position: the first reading takes
+  every group's first arm, the second its second arm or its last, and so
+  on. A group without `#else` is always entered, as an include guard is, so
+  when C skips a pop in such a group, a later packed struct gets its natural
+  layout. A struct packed in any reading is declined, even when C lays it
+  out naturally. `--cpp-symbols` and `--system-headers` read the
+  preprocessed unit, so they also detect packing that one header starts and
+  another ends, as Windows `pshpack1.h` and `poppack.h` do, and a push and a
+  pop under unrelated conditions, which default collection can miss.
+- Structs whose layout the compiler cannot see, which it would lay out with
+  natural alignment: a field declared `_Alignas`, or a field whose typedef
+  carries an alignment attribute. Do not pass such a struct to a native
+  function from compile-time code.
 - Arrays of structs, which a meta function reports as `an array of
   structs`, the address of an array element, and pointer arithmetic.
 - `sizeof`, which is not evaluated at compile time. The parser does not
@@ -512,7 +527,7 @@ on a listed type works. The operation inventory below further limits calls.
 | Pointers to locals | `int *p = &n;`, copying that pointer, and passing it to another meta function or a native function work. A local whose address is taken lives in native bytes, and the pointer is its real address. | `*p` and `p[i]` read, and `*p = value` and `p[i] = value` write, the bytes as C does. Pointer arithmetic and the address of an array element are not supported. |
 | Structs | Named, inline and nested locals; initialization, assignment, by-value arguments and returns, with C copy behavior. | Fields and addresses refer to native bytes in C layout. Assignment keeps existing field addresses; storage ends when the function returns. See [C objects during compilation](#c-objects-during-compilation). |
 | Native functions | The functions in `lib/cmath.x` and `lib/clibc.x`, which the compiler links. | Explicit dollar evaluation and meta bodies can call them, including through output pointers. Ordinary calls are not folded. See [Native C functions](#native-c-functions). |
-| System-header structs | `--system-headers` supplies the header declarations. A local `struct timespec` can be passed to `timespec_get`. | Unions and structs with bitfields, array members, anonymous members or alignment attributes are not available. |
+| System-header structs | `--system-headers` supplies the header declarations. A local `struct timespec` can be passed to `timespec_get`. | Unions, packed structs and structs with bitfields, array members or anonymous members are not available. |
 | `File`, buffers and other resource types | No general compile-time constructor/operation surface is installed for these types. A declaration or opaque type name alone does not make the resource usable. | For example, `File.open` has no binding. Use the compiler's explicit text-embedding operation for source-dependent text. |
 
 Collections hold values, not arbitrary native memory. Nested collections keep

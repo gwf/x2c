@@ -99,6 +99,9 @@ typedef struct Compiler {
      index to the groups open after it. */
   List arms;
   Map arm_stacks;
+  /* Token indices where C starts or stops packing: each directive that
+     changes whether packing is on, and a pair at each layout attribute. */
+  Array pack_marks;
   /* The cursor after a governed statement took the directives before it,
      which the following item must not read again. */
   Token directives_taken;
@@ -604,17 +607,152 @@ static Symbol _never_active_arm(String s) {
     ? <rest> : 0;
 }
 
+/* Follows the `#pragma pack` directive `text` over the `saved` states,
+   newest first, and returns whether packing is on after it, given `packed`
+   before it. `push` saves the state under an optional label, `pop` restores
+   the newest state or the one saved under its label, and a number or `()`
+   sets the state. An explicit alignment counts as packing even where it
+   matches the natural one. */
+static int _pack_after(String text, List *saved, int packed) {
+  String directive = preproc_directive(text);
+  if (!directive.startswith("pragma")) return packed;
+  Tokenizer scanned = Tokenizer.new(directive);
+  scanned.scan();
+  Array words = [];
+  int value = -1;
+  for (Token t = _skip_forward(scanned.tokens); t.type != <eof>;
+       t = _skip_forward(t + 1)) {
+    if (t.type == <lit-int>) value = t.text != "0";
+    else if (t.type == <ident>) words.push(t.text);
+  }
+  match (words.list_free()) {
+    case %("pragma" "pack" "push" *label):
+      *saved = cons(%($packed @label), *saved);
+    case %("pragma" "pack" "pop" *label):
+      for (List rest = *saved; rest; rest = rest.cdr()) {
+        List entry = rest.car();
+        if (label && !entry.cdr().equal(label)) continue;
+        packed = entry.car().truth();
+        *saved = rest.cdr();
+        break;
+      }
+    case %("pragma" "pack"): if (value < 0) packed = 0;
+    default: return packed;
+  }
+  return value < 0 ? packed : value;
+}
+
+/* Reports whether the attribute list the group `open` holds names an
+   attribute that can change a struct's layout, spelled with or without its
+   surrounding underscores. Identifiers inside an attribute's own arguments
+   are not names. */
+static int _layout_attribute(Token open) {
+  Token close = open.group_close();
+  int depth = 0;
+  for (Token t = open; t < close; t++) {
+    depth += t.type.group_step();
+    if (depth != 1 || t.type != <ident>) continue;
+    String word = t.text.strip("_");
+    if (word == "packed" || word == "aligned" || word == "mode" ||
+        word == "vector_size")
+      return 1;
+  }
+  return 0;
+}
+
+/* Records a pair of packing marks at the attribute starting at token
+   `index` when it can change a struct's layout. A source attribute is
+   `__attribute__ ((...))`; the preprocessor turns one into
+   `__x2c_attribute__ "(...)"` (see Toolchain.preprocess), whose two tokens
+   become comments, as though the preprocessor had erased them. Returns the
+   index of the attribute's last token. */
+static size_t _note_attribute(Compiler c, size_t index) {
+  Token base = c.tokenizer.tokens, marker = base + index;
+  Token last = _skip_forward(marker + 1);
+  int layout = 0;
+  if (marker.text == "__attribute__") {
+    if (last.type != <(>) return index;
+    Token inner = _skip_forward(last + 1);
+    last = last.group_close();
+    if (last.type == <eof>) return index;
+    layout = inner.type == <(> && _layout_attribute(inner);
+  }
+  else {
+    if (last.type != <lit-char*>) return index;
+    marker.type = last.type = <comment>;
+    Tokenizer words = Tokenizer.new(String.parse(last.text));
+    words.scan();
+    Token open = _skip_forward(words.tokens);
+    layout = open.type == <(> && _layout_attribute(open);
+  }
+  if (layout) {
+    c.pack_marks.push((long) index);
+    c.pack_marks.push((long) index + 1);
+  }
+  return last - base;
+}
+
+/* Counts each conditional group's reachable arms, in opening order. An arm
+   is unreachable where `_never_active_arm` hides it. */
+static Array _reachable_arm_counts(Tokenizer tokenizer) {
+  Array counts = [], groups = $auto([]);
+  for (Token token = tokenizer.tokens; token.type != <eof>; token++) {
+    if (token.type != <preproc>) continue;
+    Symbol kind = preproc_conditional_kind(token.text);
+    if (kind == <open>) {
+      Symbol never = _never_active_arm(token.text);
+      groups.push(%(${counts.len()} ${never != <rest>}));
+      counts.push(never != <first>);
+    }
+    else if (kind == <branch> && groups.len()) {
+      Var (group, later_reachable) = groups[-1];
+      counts[group] = counts[group].integer() + later_reachable.integer();
+    }
+    else if (kind == <close> && groups.len()) groups.take_last();
+  }
+  return counts;
+}
+
+/* Reports whether reading `k` follows the current arm of every open group.
+   A group is `(count seen current)`: its reachable arm count, the reachable
+   arms entered so far, and whether the current one is reachable. Reading
+   `k` takes each group's reachable arm `k`, or its last one when it has
+   fewer. */
+static int _reading_follows(Array groups, int k) {
+  foreach (List group, groups) {
+    Var (count, seen, current) = group;
+    int arm = k < count.integer() ? k : count.integer() - 1;
+    if (!current.integer() || seen.integer() - 1 != arm) return 0;
+  }
+  return 1;
+}
+
 /* Records the open conditional groups after each conditional directive as
    `(id arm state)` entries. x2c output is always compiled as C by a
    GNU-style compiler, so an arm that only C++, MSVC, or `#if 0` reaches
    holds no syntax x2c needs to parse. Its tokens become comments; the
    directives around it stay in place, so emission is unchanged. A group's
    state is 2 while its arm is hidden, 1 when the arms after its first
-   `#else` will be, and 0 otherwise. */
+   `#else` will be, and 0 otherwise.
+
+   The same pass records packing marks by token index, because the parser
+   can read one directive more than once. Packing is followed along several
+   consistent readings of the groups: reading `k` takes each group's
+   reachable arm `k`, or its last one. No reading skips a group without an
+   `#else`, so an include guard's contents are always read. Packing is on
+   where any reading has it on. */
 static void _scan_conditionals(Compiler c) {
-  Array stack = $auto([]);
-  int hidden = 0, serial = 0;
+  Array counts = _reachable_arm_counts(c.tokenizer);
+  Array stack = $auto([]), groups = $auto([]);
+  Array packed = $auto([]), saved = $auto([]);
+  int hidden = 0, serial = 0, readings = 1;
+  foreach (int count, counts) if (count > readings) readings = count;
+  for (int k = 0; k < readings; k++) {
+    packed.push(0);
+    saved.push(%());
+  }
   c.arm_stacks = {};
+  c.pack_marks = [];
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
     Token token = &((struct Token *) c.tokenizer.tokens)[i];
     if (token.type == <eof>) break;
@@ -624,19 +762,42 @@ static void _scan_conditionals(Compiler c) {
          token rather than hiding it. */
       if (hidden && token.type != <space> && token.type != <error>)
         token.type = <comment>;
+      else if (token.type == <ident> &&
+               (token.text == "__attribute__" ||
+                token.text == "__x2c_attribute__"))
+        i = _note_attribute(c, i);
       continue;
     }
     Symbol kind = preproc_conditional_kind(token.text);
+    int conditional = kind == <open> || (kind && stack.len());
+    int before = packed.contains(1);
     if (kind == <open>) {
       Symbol never = _never_active_arm(token.text);
       stack.push(%(${++serial} 0 ${never == <first> ? 2 : never == <rest>}));
+      int reachable = never != <first>;
+      groups.push(%(${counts[serial - 1]} $reachable $reachable));
     }
     else if (kind == <branch> && stack.len()) {
       Var (id, arm, state) = stack[-1];
       stack[-1] = %($id ${arm.integer() + 1} ${state.integer() == 1 ? 2 : 0});
+      Var (count, seen) = groups[-1];
+      int reachable = state.integer() != 1;
+      groups[-1] = %($count ${seen.integer() + reachable} $reachable);
     }
-    else if (kind == <close> && stack.len()) stack.take_last();
-    else continue;
+    else if (kind == <close> && stack.len()) {
+      stack.take_last();
+      groups.take_last();
+    }
+    else {
+      for (int k = 0; k < packed.len(); k++) {
+        if (!_reading_follows(groups, k)) continue;
+        List states = saved[k];
+        packed[k] = _pack_after(token.text, &states, packed[k]);
+        saved[k] = states;
+      }
+    }
+    if (packed.contains(1) != before) c.pack_marks.push((long) i);
+    if (!conditional) continue;
     c.arm_stacks[(long) i] = stack.list();
     hidden = 0;
     foreach (List group, stack) if (group.caddr() == 2) hidden = 1;
@@ -3710,7 +3871,9 @@ static List _meta_type_layout(Sym sym, Type type, Map cache) {
          ? _meta_int_layout(declared, %(int)) : NULL;
   type = sym.resolve_key(declared);
   if (type && type.is_pointer()) return _meta_pointer_layout(declared, tag);
-  if (!type || type.car() != <struct>) return NULL;
+  // A packed struct's layout is the C compiler's.
+  if (!type || type.car() != <struct> || sym.get(%(@type "packed")))
+    return NULL;
   return _meta_record_layout(sym, type, cache);
 }
 

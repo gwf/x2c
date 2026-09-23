@@ -51,6 +51,7 @@ typedef struct Compiler{
   Map object_macros;
   List arms;
   Map arm_stacks;
+  Array pack_marks;
   Token directives_taken;
   Map kw_seen;
   Map fixed;

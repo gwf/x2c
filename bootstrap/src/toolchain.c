@@ -139,7 +139,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _60 = String_var(_59);
   _61 = String_new("-D__asm__(x)=");
   _62 = String_var(_61);
-  _63 = String_new("-D__attribute__(x)=");
+  _63 = String_new("-D__attribute__(x)=__x2c_attribute__ #x");
   _64 = String_var(_63);
   _65 = String_new("-D__format__(x)=");
   _66 = String_var(_65);

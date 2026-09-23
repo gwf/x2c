@@ -73,6 +73,54 @@ under `#pragma pack` are not detected and get natural alignment. Consider
 restricting expansion to headers the source includes directly, and detecting
 packing so such structs have no compile-time layout.
 
+Outcome, 2026-09-22:
+
+- Cost. `builds/0/x2c translate`, best of 3 over 5 runs on an M4 Max,
+  default / `--cpp-symbols` / `--system-headers`: a trivial `main`
+  0.03 / 0.08 / 0.05 s; `meta-system-header-record.x` 0.06 / 0.15 / 0.11 s;
+  a file including `stdio.h`, `stdlib.h`, `string.h`, `time.h` and
+  `pthread.h` 0.03 / 0.08 / 0.08 s. `--system-headers` is not slower than
+  `--cpp-symbols`, so the 3x premise does not reproduce. Expansion stays
+  unrestricted: restricting it to direct includes would lose
+  `struct timespec`, which macOS declares in `sys/_types/_timespec.h`
+  through `_time.h` and glibc in `bits/types/struct_timespec.h`.
+- Packing. Tokenizing records where `#pragma pack` turns packing on or off,
+  outside unreachable conditional arms. It follows the directives along one
+  reading per arm position: reading `k` takes each group's reachable arm
+  `k`, or its last reachable arm when the group has fewer. No reading skips
+  a group without an `#else`, so include guards are always read. Packing is
+  on where any reading has it on, which handles alternative pushes in
+  `#if`/`#elif`/`#else`, a push and pop under the same guard, and packing
+  inside an include guard. Tokenizing also marks each `packed`,
+  `aligned`, `mode` or `vector_size` attribute. Collection reads a header's
+  attributes directly; a preprocessing mode turns each attribute into a
+  marked string rather than erasing it, and tokenizing erases the string. A
+  struct defined under packing or around such a mark has no compile-time
+  layout, and meta code that uses it declines with `a compile-time struct
+  with no host layout`.
+- Remaining:
+  - Default collection reads each file separately, so it misses packing that
+    one header starts and another ends (Windows `pshpack1.h` and
+    `poppack.h`). `--cpp-symbols` and `--system-headers` read the
+    preprocessed unit and decline such a struct. Closing the gap needs each
+    collected header's net packing effect carried into its includer's scan,
+    including through header caches and `.xi` interfaces.
+  - In default collection, a push and a pop under unrelated conditions,
+    such as a push under `A` and a pop under `B`, balance in every reading,
+    so a later struct gets natural layout where C packs it when only `A`
+    holds. A pop in a group without `#else` counts as taken, with the same
+    effect when C skips it. Guarded pushes whose conditions C rejects can
+    decline a struct that C lays out naturally. `--cpp-symbols` and
+    `--system-headers` see the preprocessor's own choice of arms.
+  - A layout attribute on a typedef, such as
+    `typedef long aligned_long __attribute__((aligned(16)))`, and a field
+    declared `_Alignas`, leave a struct its natural layout; neither mark
+    lies in the struct's own definition.
+  - `-D_Atomic(T)=T` stays: `_Atomic` scalars have the size and alignment of
+    their plain type on the supported hosts, so a struct with such a field
+    keeps a correct layout. An `_Atomic` struct type could differ and is not
+    handled.
+
 ## Design tracks (decide with Gary first)
 
 ### E. Meta-capable protocols
