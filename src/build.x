@@ -794,12 +794,17 @@ int Build.finish(Build b) {
       return 0;
     }
   }
-  // The fingerprint and the receipts name the output; the tool writes a
-  // private sibling that rename puts in its place.
+  // The fingerprint and the receipts name the output; the tool writes it in
+  // a private sibling directory, and rename puts it in place. The staged
+  // file keeps the output's basename, which a linker may record in the file
+  // (the macOS ad-hoc signature does), so its bytes do not name this process.
   ToolAction publish = action;
-  String staged = NULL;
+  String staging = NULL, staged = NULL;
   if (!b.request.dry_run) {
-    staged = %"${b.output}.${_process_suffix()}";
+    String name = Path.basename(b.output);
+    staging = %"${Path.dirname(b.output)}/.$name.${_process_suffix()}";
+    Path.make_dirs(staging);
+    staged = %"$staging/$name";
     publish =
       b.request.kind == <static-lib> ?
         b.toolchain.archive_action(staged, inputs) :
@@ -808,16 +813,17 @@ int Build.finish(Build b) {
         b.toolchain.link_action(staged, inputs);
   }
   if (publish.run()) {
-    if (staged) Path.remove_file(staged);
+    if (staging) Path.remove_tree(staging);
     return 1;
   }
   if (staged && rename(staged, b.output)) {
     fprintf(
       stderr, "x2c: error: cannot replace %s: %s\n",
       b.output.str(), strerror(errno));
-    Path.remove_file(staged);
+    Path.remove_tree(staging);
     return 1;
   }
+  if (staging) Path.remove_tree(staging);
   if (_mapped_debug(b)) {
     String output = b.output, symbols = %"$output.dSYM";
     ToolAction debug = tool_action_new(

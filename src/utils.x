@@ -21,11 +21,14 @@ $(import "../lib/private-keywords.xmacro")
     installed prefix alike. The root is kept absolute with symbolic links
     resolved, the one spelling every path below the home is compared in.
     Without a home the root is the current directory and `x2c_home` reports
-    none. An already configured root leaves all state unchanged.
+    none. The compiler identity is taken here, before any later work could
+    observe a replaced executable. An already configured root leaves all
+    state unchanged.
 */
 void x2c_initialize_environment(const char *argv0) {
   if (x2c_root_path) return;
   x2c_executable_path = _executable(argv0);
+  x2c_identity = _identity();
   String home = Env.get("X2C_HOME");
   if (home && !home[0]) home = NULL;
   String root = home ? home.rstrip("/") : _locate_home(x2c_executable_path);
@@ -213,6 +216,7 @@ void file_publish(List outputs) {
 // module state
 
 static String x2c_executable_path = NULL, x2c_root_path = NULL;
+static String x2c_identity = NULL;
 static int x2c_root_found = 0;
 static List x2c_base_include_dirs = NULL, x2c_repo_cpp_include_dirs = NULL;
 
@@ -229,6 +233,17 @@ static String _executable(const char *argv0) {
   // A bare name came from PATH; only a path resolves against the cwd.
   if (name && !name.contains("/")) name = x2c_find_program(name);
   return Path.exists(name) ? Path.absolute(name) : NULL;
+}
+
+/* Linux names the running image itself, which stays the same file even if
+   the executable's path is replaced while the process runs. */
+static String _identity(void) {
+  String path = Path.exists("/proc/self/exe") ? %"/proc/self/exe"
+                                               : x2c_executable_path;
+  int ok = path != NULL;
+  uint64_t hash = UINT64_C(1469598103934665603);
+  if (ok) hash = x2c_fnv_file(hash, path, &ok);
+  return ok ? "%016llx".printf((unsigned long long) hash) : NULL;
 }
 
 static int _is_home(Path p) =>
@@ -285,22 +300,9 @@ uint64_t x2c_fnv_file(uint64_t hash, String path, int *ok) {
 /** Returns the running compiler's identity, the FNV-1a digest of its
     executable's contents in 16 hexadecimal digits, or NULL when the
     executable is unknown or unreadable. Only byte-identical compilers share
-    an identity. The executable is read once per process.
+    an identity. Environment setup reads the executable once.
 */
-String x2c_compiler_identity(void) {
-  static char digest[17];
-  static int hashed = 0;
-  if (!hashed && x2c_executable_path) {
-    int ok = 1;
-    uint64_t hash = x2c_fnv_file(
-      UINT64_C(1469598103934665603), x2c_executable_path, &ok);
-    if (ok)
-      snprintf(
-        digest, sizeof(digest), "%016llx", (unsigned long long) hash);
-  }
-  hashed = 1;
-  return *digest ? String.new(digest) : NULL;
-}
+String x2c_compiler_identity(void) => x2c_identity;
 
 // workers
 

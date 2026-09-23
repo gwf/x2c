@@ -223,9 +223,11 @@ CliRequest bootstrap_build_request(
     An interface replays only for the compiler that wrote it, so the native
     compiler translates the runtime sources as a stage build's library batch
     does, and each `lib/<stem>.xi` is then replaced atomically. Sources are
-    named relative to the prefix, which the compiler resolves through any
-    symbolic link. A failed translation or write prints a bootstrap
-    diagnostic and exits with status 2.
+    named relative to the prefix, so their spelling matches the home the
+    compiler resolves. The scratch translation directory is removed
+    afterward. A translation that fails or cannot start prints a bootstrap
+    diagnostic with any errors the compiler printed; a failed write prints
+    the host error. Either exits with status 2.
 */
 void bootstrap_write_interfaces(Bootstrap b) {
   String prefix = b.prefix, out = ".x2c-build/interfaces";
@@ -252,6 +254,7 @@ void bootstrap_write_interfaces(Bootstrap b) {
   try file_publish(outputs.list_free());
   catch %(not-found *detail): x2c_host_error(detail);
   catch %(io-fail *detail): x2c_host_error(detail);
+  Path.remove_tree(%"$prefix/$out");
 }
 
 /** Records the resolved host tools and then publishes bootstrap completion.

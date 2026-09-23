@@ -749,11 +749,14 @@ static List _interface_candidates(String canonical) {
 }
 
 /** Returns the path of the first prelude interface this compiler wrote, or
-    NULL when there is none. Its source hashes are not checked.
+    NULL when there is none or the compiler's identity is unknown. Its
+    source hashes are not checked.
 */
 String interface_prelude(void) {
+  String identity = x2c_compiler_identity();
+  if (!identity) return NULL;
   String runtime = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
-  String header = %"(interface 3 \"${x2c_compiler_identity()}\" ";
+  String header = %"(interface 3 \"$identity\" ";
   foreach (String path, _interface_candidates(runtime)) {
     String text = NULL;
     try text = Path.read_text(path);
@@ -979,10 +982,13 @@ static int _write_interface_entry(Buffer out, String canonical, List entry) {
 }
 
 /** Returns the compiler's own collected contribution as interface text, or
-    NULL when the unit has not collected its symbols. A contribution that
-    the interface grammar cannot spell is reported as an `emit` diagnostic.
+    NULL when the unit has not collected its symbols or the compiler's
+    identity is unknown, since no compiler could replay that interface. A
+    contribution that the interface grammar cannot spell is reported as an
+    `emit` diagnostic.
 */
 String interface_text(Compiler compiler) {
+  if (!x2c_compiler_identity()) return NULL;
   String canonical = _canonical_path(compiler.filename);
   Var cached = _process_cache()[canonical];
   if (cached is void) return NULL;
