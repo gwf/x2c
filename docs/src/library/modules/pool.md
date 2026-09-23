@@ -135,7 +135,7 @@ Returns this level's canonical counts plus process-wide storage counters.
 A null pool reports depth and per-level counts as zero. The counters are a
 snapshot; nothing in the result stays live with the pool.
 
-Source: `lib/pool.x:934`
+Source: `lib/pool.x:938`
 
 ## Advanced and interop API
 
@@ -325,7 +325,7 @@ levels: an earlier level remains promoted if a later promotion transfers.
 
 **Raises:** `<alloc-fail>` when promotion metadata cannot be allocated.
 
-Source: `lib/pool.x:915`
+Source: `lib/pool.x:919`
 
 <a id="Pool.owns"></a>
 #### Pool.owns
@@ -343,13 +343,15 @@ Source: `lib/pool.x:847`
 `int Pool.promote(Pool inner, Var object, void *alloc)`
 
 Publishes an identity owned by `inner` in its parent.
-`alloc` survives `inner`'s release without changing its address. Returns
-zero for a missing owner, root pool, or null allocation.
+`alloc` survives `inner`'s release without changing its address. When the
+parent already holds an equal identity, that one stays canonical and
+`object` only survives. Returns zero for a missing owner, root pool, or
+null allocation.
 
 **Raises:** `<alloc-fail>`, `<size-limit>`, or `<invariant>` while recording
 the promotion; that transfer may happen before storage is marked or moved.
 
-Source: `lib/pool.x:900`
+Source: `lib/pool.x:904`
 
 <a id="Pool.shutdown"></a>
 #### Pool.shutdown

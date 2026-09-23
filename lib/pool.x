@@ -853,7 +853,9 @@ int Pool.owns(Pool pool, Var key) {
 
 /* Moves `object` from `inner` to `inner.up`. `block` is the region block
    backing `alloc`, or NULL when Scope owns it. The caller supplies the block
-   because a value promoted through several levels stays in the same one. */
+   because a value promoted through several levels stays in the same one.
+   Another thread's pool can promote an equal value first; that identity
+   stays canonical, and `object` survives without replacing it. */
 static int _promote_block(
   Pool inner, Var object, void *alloc, PoolBlock block) {
   _lock(inner);
@@ -871,7 +873,7 @@ static int _promote_block(
   }
   _lock(inner.up);
   defer _unlock(inner.up);
-  _insert_locked(inner.up, object);
+  if (inner.up.table[object] is void) _insert_locked(inner.up, object);
   if (block && block.owner == inner) _mark_slot(block, slot);
   else if (promotion) {
     promotion.next = inner.promotions;
@@ -892,8 +894,10 @@ static PoolBlock _block_of(void *alloc) {
 }
 
 /** Publishes an identity owned by `inner` in its parent.
-    `alloc` survives `inner`'s release without changing its address. Returns
-    zero for a missing owner, root pool, or null allocation.
+    `alloc` survives `inner`'s release without changing its address. When the
+    parent already holds an equal identity, that one stays canonical and
+    `object` only survives. Returns zero for a missing owner, root pool, or
+    null allocation.
     Raises: `<alloc-fail>`, `<size-limit>`, or `<invariant>` while recording
     the promotion; that transfer may happen before storage is marked or moved.
 */
