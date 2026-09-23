@@ -936,7 +936,8 @@ static Var _lower_place(Lowering l, Var target) {
    A bool is the exception: C converts any nonzero value to 1. */
 static Var _lower_to_type(Lowering l, Type want, Var value) {
   if (l.compiler.sym.is_bool_type(want)) return %(C.bool $value);
-  Symbol tag = want.scalar_tag();
+  Type resolved = l.compiler.sym.resolve_numeric_type(want);
+  Symbol tag = resolved ? resolved.scalar_tag() : 0;
   if (!tag) return value;
   return %(C.conv $value (quote $tag));
 }
@@ -1043,7 +1044,8 @@ static int _lower_object_pointer_operands(Lowering l, List operands) {
          (b && _lower_null_constant(left));
 }
 
-static Var _lower_operands(Lowering l, Var operator, List operands) {
+static Var _lower_operands(
+  Lowering l, Type result, Var operator, List operands) {
   Array values = $auto([]);
   foreach (Var operand, operands) {
     Var value = _lower_expr(l, operand);
@@ -1074,6 +1076,8 @@ static Var _lower_operands(Lowering l, Var operator, List operands) {
   }
   if (values.len() == 3) {
     Var test = values[0], a = values[1], b = values[2];
+    a = _lower_coerce(l, result, operands.cadr(), a);
+    b = _lower_coerce(l, result, operands.caddr(), b);
     return %(C.ternary $test $a $b);
   }
   return _lower_decline(l, "unsupported operator arity");
@@ -1331,7 +1335,7 @@ static Var _lower_content(Lowering l, List type, Var content) {
         if (_lower_failed(l, pointer)) return void;
         return _lower_load(l, type, pointer);
       }
-      return _lower_operands(l, operator, %($operand));
+      return _lower_operands(l, type, operator, %($operand));
     }
     case %(call (expr ? (ident (binding ? "Func_apply"))) ?):
       return _lower_application(l, content);
@@ -1350,13 +1354,13 @@ static Var _lower_content(Lowering l, List type, Var content) {
       return _lower_call(l, NULL, name, args);
     case %(op ?access ?receiver ?field): {
       if (access != <.> && access != <"->">)
-        return _lower_operands(l, access, %($receiver $field));
+        return _lower_operands(l, type, access, %($receiver $field));
       Var place = _lower_field_place(l, access, receiver, field);
       if (_lower_failed(l, place)) return void;
       return _lower_load(l, type, place);
     }
     case %(op ?operator *operands):
-      return _lower_operands(l, operator, operands);
+      return _lower_operands(l, type, operator, operands);
     case %(array *items):                 return _lower_array(l, items);
     case %(map *entries):                 return _lower_map(l, entries);
     case %(getindex ?receiver ?key):
@@ -2003,8 +2007,13 @@ static Var _lower_coerce(Lowering l, List want, Var node, Var value) {
       Type from_pointer = l.compiler.sym.resolve_key(from);
       if (want_tag && want_pointer && want_pointer.is_pointer() &&
           from_pointer && from_pointer.is_pointer() &&
-          !l.compiler.sym.var_tag_for_type(from, NULL))
+          _lower_object_pointer_type(l, want) &&
+          _lower_object_pointer_type(l, from) &&
+          want_tag != l.compiler.sym.var_tag_for_type(from, NULL))
         return %(C.address $value (quote $want_tag));
+      if (l.compiler.sym.is_named_value_type(want, "Symbol") &&
+          _lower_numeric_type(l, from))
+        return %(C.address $value (quote <symbol>));
       Type target = _lower_numeric_type(l, want);
       Type source = _lower_numeric_type(l, from);
       Symbol tag = target ? target.scalar_tag() : 0;
@@ -2888,7 +2897,8 @@ List Compiler.fold_meta_call(
     if (value is void) return NULL;
     /* The parameter type belongs to the call site, so apply its conversion
        before passing a constant to the lowered body. */
-    Symbol tag = declared.scalar_tag();
+    Type numeric = c.sym.resolve_numeric_type(declared);
+    Symbol tag = numeric ? numeric.scalar_tag() : 0;
     if (tag) {
       try value = value.convert(tag);
       catch: return NULL;

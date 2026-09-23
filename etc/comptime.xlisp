@@ -45,6 +45,7 @@
 // ordinary collection.
 (def C.void (bind "lisp_void" nil))
 (def C.cell (bind "lisp_cell" nil))
+// The same native retagger boxes a numeric Symbol code at that destination.
 (def C.address (bind "lisp_address" nil))
 (def C.load (bind "lisp_load" nil))
 (def C.store (bind "lisp_store" nil))

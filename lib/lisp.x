@@ -1093,8 +1093,11 @@ Var lisp_cell(Var value) {
   *slot = value;
   return Var.new(<var*>, slot);
 }
-/** Retags a raw evaluator cell as the typed pointer named by `tag`. */
-Var lisp_address(Var cell, Symbol tag) => Var.new(tag, cell.pointer());
+/** Retags an evaluator value at a declared pointer or Symbol crossing. */
+Var lisp_address(Var cell, Symbol tag) {
+  if (tag == <symbol>) return (Symbol) cell.ulong();
+  return Var.new(tag, cell.pointer());
+}
 /** Returns the raw value currently held in an evaluator cell. */
 Var lisp_load(Var cell) => *((Var *) cell.pointer());
 /** Stores `value` in an evaluator cell and returns it. */
