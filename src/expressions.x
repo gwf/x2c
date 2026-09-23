@@ -1028,6 +1028,8 @@ static int _expression_requires_resolution(Compiler compiler, Var value) {
           return 1;
       }
       case %(ident ?): return 1;
+      // A template typedef identity marks a type that is not yet bound.
+      case %(decl (* (binding ? ?)) *): return 1;
     }
     foreach (Var child, syntax)
       if (child is <list>) pending.push(child);
