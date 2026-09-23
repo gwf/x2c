@@ -2831,6 +2831,9 @@ int Sym.has_local_macros(Sym sym) => sym.local_macro_names != 0;
 /** Returns the number of semantic scopes, including base scopes. */
 int Sym.scope_count(Sym sym) => sym.scopes.len();
 
+/** Returns whether declarations currently bind at file scope. */
+int Sym.at_file_scope(Sym sym) => (int) sym.scopes.len() <= sym.base_scopes;
+
 /** Returns the innermost visible local macro named `name`, or `NULL`. */
 List Sym.lookup_macro(Sym sym, Atom name) {
   Var definition;

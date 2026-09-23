@@ -2044,14 +2044,56 @@ List Compiler.evaluate_macro_rows(Compiler compiler, Var value) {
        ? value.list().cdr() : %($value);
 }
 
+/* A file-scope declaration can reach another unit through a header or an
+   interface, so its private spelling names the owning unit and the root
+   invocation. Collection and the full parse expand that invocation alike,
+   so both mint the same spelling. */
+static String _file_scope_name(Compiler c, Token root, String source) {
+  String owner = c.filename
+    ? home_portable_path(c.canonical_path(c.filename)) : "";
+  String key = %"macro:$owner:${root.pos}:$source";
+  Var stored;
+  int count = c.names.counters.try_get(key, &stored) ? stored : 0;
+  c.names.counters[key] = count + 1;
+  String digest = "%08x".printf(%"$key:$count".hash());
+  return %"_x2c_macro_${source}_$digest";
+}
+
 static List _introduced_binding(
-  Compiler compiler, Map introduced, String source) {
+  Compiler compiler, Map introduced, String source, Token root) {
   Var stored;
   if (introduced.try_get(source, &stored)) return stored;
   List binding = compiler.sym.introduce(
-    compiler.fresh_name(%"macro_$source"));
+    root ? _file_scope_name(compiler, root, source)
+         : compiler.fresh_name(%"macro_$source"));
   introduced[source] = binding;
   return binding;
+}
+
+static void _file_scope_declarators(List declarators, Map locals) {
+  foreach (Var declarator, declarators) match (declarator)
+    case %(!or (bind ?binder ?) (op = (bind ?binder ?) ?)):
+      if (binder.is_binder()) locals[binder] = 1;
+}
+
+/* Collects the template locals that a file-scope row declares with external
+   linkage or none: objects, functions, typedefs, tags, and enumerators. */
+static void _file_scope_locals(List rows, Map locals) {
+  foreach (Var row, rows) match (row) {
+    case %((!or at src) ? ?inner): _file_scope_locals(%($inner), locals);
+    case %(seq *inner): _file_scope_locals(inner, locals);
+    case %(function ?type (bind ?binder ?) ?):
+      if (binder.is_binder() && !type.type().is_static())
+        locals[binder] = 1;
+    case %((!set ?kind (!or declare typedef)) ?type (bindings *rows)): {
+      match (type) case %(* (!or struct union enum) ?tag *):
+        if (tag.is_binder()) locals[tag] = 1;
+      match (type) case %(* enum ? (*members) *):
+        _file_scope_declarators(members, locals);
+      if (kind == <typedef> || !type.type().is_static())
+        _file_scope_declarators(rows, locals);
+    }
+  }
 }
 
 static Atom _replacement_binder(Var binder, String projection, int seq) {
@@ -3318,13 +3360,17 @@ List Compiler.expand_macro_invocation_node(
       $let(_.macro_stack, _.macro_stack) {
         List old_stack = _.macro_stack;
         List template = definition.assoc(<template>);
-        Map introduced = {};
+        Map introduced = {}, file_locals = {};
+        Token root = old_stack ? old_stack.last().list()[3] : invocation;
+        if (_.sym.at_file_scope())
+          _file_scope_locals(%($template), file_locals);
         Array fresh_values = [];
         List direct_bindings = NULL;
         foreach (List fresh, definition.assoc(<fresh>).list()) {
           Var (binder, spelling, lisp) = fresh;
           List binding = _introduced_binding(
-            _, introduced, spelling.str());
+            _, introduced, spelling.str(),
+            binder in file_locals ? root : NULL);
           if (lisp.int()) {
             List hole = _hole(binder, <name>, 0);
             fresh_values.push(_capture_row(_, hole, %($binding)));

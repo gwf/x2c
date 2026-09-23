@@ -582,12 +582,18 @@ List Compiler.parse_fields(Compiler c, List context) {
   }
 }
 
+/* A template may spell a tag through a Name hole or compile-time Lisp. */
+static List _tag_name(Compiler c) {
+  List slot = c.try_parse_macro_slot(<name>);
+  return slot ? %($slot) : c.parse_optional_identifier();
+}
+
 static List _struct_or_union(Compiler c) {
   Token first = c.token;
   Symbol tag = c.peek(0);
   c.next();
   _skip_aggregate_attributes(c);
-  List name = c.parse_optional_identifier();
+  List name = _tag_name(c);
   if (name && c.package) name = _package_aggregate_name(c, tag, name);
   List usedname = name ? name : c.gensym();
   usedname = %(${c.aggregate_name(tag, usedname.car(),
@@ -716,7 +722,7 @@ static List _enum(Compiler c) {
   Token first = c.token;
   c.expect(<enum>);
   _skip_aggregate_attributes(c);
-  List name = c.parse_optional_identifier();
+  List name = _tag_name(c);
   if (name && c.package) name = _package_aggregate_name(c, <enum>, name);
   List usedname = name ? name : c.gensym();
   List type = cons(<enum>, usedname), enums = NULL;
@@ -1934,9 +1940,15 @@ List Compiler.parse_submission(Compiler c, int end_position) {
   return result;
 }
 
+static Var _finish_tag_name(Compiler c, Var name) {
+  name = c.evaluate_macro_slot(name);
+  String exact = _syntax_exact_name(name);
+  return exact ? exact : name;
+}
+
 static List _finish_aggregate_type(
   Compiler c, Symbol tag, Var name, List members) {
-  name = c.evaluate_macro_slot(name);
+  name = _finish_tag_name(c, name);
   // Each constructed anonymous body defines a distinct type.
   match (name) case %(gensym ? ?): name = c.gensym().car();
   if (tag != <enum>) name = c.aggregate_name(tag, name, 1);
@@ -1966,11 +1978,11 @@ static Var _finish_type_spec(Compiler compiler, Var value) {
   if (value is not <list>) return value;
   match (value) {
     case %((!set ?tag (!or struct union)) ?name):
-      return %($tag ${compiler.evaluate_macro_slot(name)});
+      return %($tag ${_finish_tag_name(compiler, name)});
     case %((!set ?tag (!or struct union)) ?name (fields *members)):
       return _finish_aggregate_type(compiler, tag, name, members);
     case %(enum ?name):
-      return %(enum ${compiler.evaluate_macro_slot(name)});
+      return %(enum ${_finish_tag_name(compiler, name)});
     case %(enum ?name (*members)):
       return _finish_aggregate_type(compiler, <enum>, name, members);
     // Semantic types name an expanded template typedef by its spelling.

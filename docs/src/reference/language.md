@@ -1173,10 +1173,12 @@ Captured syntax retains its call-site binding identity. Free identifiers
 written literally in a body resolve where the macro was defined, including
 parameters and preceding declarations captured by a local macro. A declaration
 written in a body receives a fresh binding identity and a private generated C
-spelling for each expansion. A field keeps its spelling, because C scopes it
-to its aggregate, and an anonymous aggregate is a distinct type in each
-expansion. A visible body local passed to a nested macro's `Name` hole is that
-expansion's binding, so the nested macro can read and assign it.
+spelling for each expansion. A file-scope declaration's spelling also names
+its unit and the outermost invocation, so units that include one another can
+expand the same macro. A field keeps its spelling, because C scopes it to its
+aggregate, and an anonymous aggregate is a distinct type in each expansion. A
+visible body local passed to a nested macro's `Name` hole is that expansion's
+binding, so the nested macro can read and assign it.
 
 Most generated declarations need no directive: writing `int temporary` in a
 body makes both that declaration and its literal references hygienic. When

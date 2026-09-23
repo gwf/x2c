@@ -20,13 +20,13 @@ macro Decorator $bump(Block $target, name $counter) {
 
 macro Expression $field(name $object, name $member) => $object.$member;
 
-macro Unit $box(name $member) {
-  struct Box { int $member; };
+macro Unit $box(name $tag, name $member) {
+  struct $tag { int $member; };
 }
 
 macro Unit $outer(Type $type, name $get, name $count, name $read) {
   static int value = 2;
-  $box(value);
+  $box(Box, value);
   typedef $type S;
   S $get(void) {
     S value = 0;

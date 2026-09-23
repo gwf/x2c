@@ -287,6 +287,44 @@ grep -q 'long_var(gen_next(1))' "$FAKE/gencold/gen-use.c" ||
 cmp -s "$FAKE/gencold/gen-use.c" "$FAKE/genwarm/gen-use.c" ||
   fail "macro-generated function replay diverged from cold compile"
 
+# Case 4b: a file-scope name a template declares is unique to its unit and
+# invocation, so a unit that includes another and expands the same macro
+# links, and each expansion's typedef keeps its own interface row.
+mkdir -p "$FAKE/cellcold" "$FAKE/cellwarm"
+cat >"$FAKE/src/cell.xmacro" <<'EOF'
+macro Unit $cell(Type $type, name $get) {
+  $type counter = 1;
+  typedef $type S;
+  typedef struct { S a; } Box;
+  S $get(void) { Box box = {counter}; return box.a; }
+}
+EOF
+cat >"$FAKE/src/cell-a.x" <<'EOF'
+$(import "cell.xmacro")
+$cell(int, cell_int);
+$cell(long, cell_long);
+EOF
+cat >"$FAKE/src/cell-b.x" <<'EOF'
+#include "cell-a.x"
+$(import "cell.xmacro")
+$cell(short, cell_short);
+int main(void) { return cell_int() + cell_long() + cell_short() == 3 ? 0 : 1; }
+EOF
+"$X2C" build --output "$FAKE/cellcold/cells" "$FAKE/src/cell-b.x" \
+  "$FAKE/src/cell-a.x" >"$FAKE/cellcold/build.log" 2>&1 ||
+  fail "units that expand one template with file-scope names did not link"
+"$FAKE/cellcold/cells" || fail "units with file-scope template names ran wrong"
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir cellcold src/cell-b.x)
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir cellwarm src/cell-a.x)
+long_typedef=$(sed -n 's/^typedef long \(_x2c_macro_S_[0-9a-f]*\);$/\1/p' \
+  "$FAKE/cellwarm/cell-a.h")
+[[ -n $long_typedef ]] &&
+  grep -Fq "((typedef \"$long_typedef\") (long))" "$FAKE/cellwarm/cell-a.xi" ||
+  fail "interface records a template typedef with another expansion's type"
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir cellwarm src/cell-b.x)
+cmp -s "$FAKE/cellcold/cell-b.c" "$FAKE/cellwarm/cell-b.c" ||
+  fail "file-scope template names differ between collection and replay"
+
 # Case 5: unresolved targets contribute no cached symbols. An explicit
 # host preprocess still rejects directory and unreadable include targets.
 mkdir -p "$FAKE/src/dir-target.h" "$FAKE/dirout"

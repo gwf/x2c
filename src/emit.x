@@ -195,6 +195,7 @@ static int _is_gensym_tag(List tag) {
 static List Emitter._enum(Emitter emitter, List ast) {
   List name = ast.type().tag(), body = ast.type().body().car();
   if (_is_gensym_tag(name) && !ast.type().is_enum_tag()) name = NULL;
+  if (name) name = emitter._emit(name);
   body = emitter._emit(body);
   body = emitter._commas(body);
   if (name) {
