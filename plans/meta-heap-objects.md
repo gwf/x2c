@@ -164,22 +164,30 @@ Heap-based x2c objects come in three tiers:
    process.
 3. **Classes defined in the unit being translated, boxed as `Var` in meta
    code.** Today this is silently wrong. The value boxes as a plain `<p48>`
-   pointer, so `boxed is <vec>` folds to 0 where the program answers 1, and
-   `str()` writes a heap address into the generated C. This tier needs
-   Gary's decision (question 3).
+   pointer, so `boxed is <vec>` answers 0 at compile time where the program
+   answers 1, and `str()` writes a heap address into the generated C. The
+   same holds for a hand-written typedef that adopts `protocol Var`. This
+   tier needs Gary's decision (question 3).
 
 ### 6. Materialization and determinism
 
-No heap address reaches generated code, because addresses change from run
+No native address reaches generated code, because addresses change from run
 to run and the translation cache and self-host comparison depend on
-identical output. At compile time:
+identical output. This covers heap pointers and also the addresses of frame
+bytes and `meta static` bytes. The declines live in the pointer's own Var
+operations (write, `str`, `repr`, hash and ordering compare), not at
+individual operators, so one rule covers every path that reaches them:
+interpolation, `str` of a container holding pointers, `sort`, `min`, `max`,
+`unique`, and Maps with a pointer key. At compile time:
 
-- Converting a heap pointer to text or to a number (`str`, `repr`, `hash`,
-  a cast to an integer type) declines with a plain diagnostic.
-- Ordering comparisons of heap pointers (`<`, `>`) decline. Equality
-  comparisons are deterministic and stay allowed.
-- A heap object cannot be a Map key, since hashing its address declines.
-- Explicit `$` insertion of a heap pointer is diagnosed, as today.
+- Converting an address to text or to a number (`str`, `repr`, hash, a cast
+  to an integer type) declines with a plain diagnostic.
+- Ordering comparisons of addresses decline. Equality comparisons are
+  deterministic and stay allowed.
+- An object cannot be a Map key, since hashing its address declines.
+- Explicit `$` insertion of a pointer, or of a List that contains one, is
+  diagnosed; the List case should get a plainer message than today's
+  "syntax cannot be constructed at this position".
 
 Rebuilding a runtime constructor call from the arguments would repeat the
 construction and could not reproduce object identity, so it is out of scope.
@@ -230,16 +238,18 @@ Each delivery ends with a review and repair of its authored diff, then
    - (b) Also lower the class's `meta` Var methods (`str`, `equal`, `hash`)
      and register a descriptor that calls them. More complete, but a larger
      change to class registration.
-   - (c) Decline boxing a unit-defined class, with a plain diagnostic that
-     points to native modules. This replaces today's silent wrong answers.
+   - (c) Decline boxing a unit-defined class, or a typedef that adopts
+     `protocol Var`, with a plain diagnostic that points to native modules.
+     This replaces today's silent wrong answers.
 
    Recommendation: (c) in delivery 1, and (a) as a later change together
    with a way to release a unit's rows when it finishes; lazy class
    registration alone does not release rows.
 4. **Determinism rules (part 6).** Decline address-to-text and
-   address-to-number conversions, ordering comparisons and hashing of heap
-   pointers at compile time. Recommendation: yes. The alternative is to
-   allow them and accept generated code that differs between runs.
+   address-to-number conversions, ordering comparisons and hashing of any
+   native address at compile time, in the pointer's own Var operations.
+   Recommendation: yes. The alternative is to allow them and accept
+   generated code that differs between runs.
 
 ## Plan review
 
