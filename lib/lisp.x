@@ -1360,7 +1360,7 @@ static Func _lisp_iter_callback(Var callable) {
 
 static int _lisp_iter_next(Iter iter, Var *out) {
   FuncArg arguments[2] = {
-    FuncArg.value(iter.var()), FuncArg.value(Var.new(<var*>, out))
+    FuncArg.value(iter), FuncArg.value(Var.new(<var*>, out))
   };
   return iter.aux.apply(2, arguments).int();
 }

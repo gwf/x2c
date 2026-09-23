@@ -527,7 +527,7 @@ static Var _sdk_native_function_type(List syntax) {
     case %(function ? ? ?): value = _sdk_function_type(syntax);
     default: value = _sdk_syntax_type(syntax);
   }
-  return _native_meta_signature(macro_sdk_compiler, value.type());
+  return _native_meta_signature(macro_sdk_compiler, value);
 }
 
 static Var _sdk_function_parameter(List function, String wanted) {
@@ -1561,8 +1561,10 @@ static void _bind_native_meta(
   Compiler c, String name, List signature, Token marker) {
   Var function;
   if (!c.macro_lisp.try_get(name, &function)) {
-    try function = c.macro_lisp.eval(%(bind $name (quote $signature)));
+    Var bound;
+    try bound = c.macro_lisp.eval(%(bind $name (quote $signature)));
     catch %(no-symbol *): return;
+    function = bound;
     c.macro_lisp.set_global(name, function);
   }
   if (function is not <func> ||
