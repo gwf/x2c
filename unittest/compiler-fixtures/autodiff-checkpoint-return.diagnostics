@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/autodiff-checkpoint-return.x:8:1: macro: ad: a checkpointed loop cannot contain return
+  $ad.checkpoint(2)
+  ^
+  note: (return (double) (expr (double) (literal (double) "1.0")))
+

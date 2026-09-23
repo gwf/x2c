@@ -27,8 +27,7 @@ $(import "../src/ast-rewrite.xmacro")
    relevant frame after nested import evaluation; captured-source entries are
    valid only while their expansion is active. */
 static Compiler macro_sdk_compiler = NULL;
-static String macro_sdk_source_file = NULL, macro_sdk_failure_message = NULL;
-static List macro_sdk_failure_notes = NULL;
+static String macro_sdk_source_file = NULL;
 static Map macro_sdk_source_captures = NULL;
 static int macro_sdk_has_references = 0;
 static Compiler macro_import_compiler = NULL;
@@ -121,22 +120,18 @@ void Compiler.install_builtin_macros(Compiler compiler) {
     builtin_macros_marker, 1);
 }
 
+/* A rejection reports at the active invocation and never returns, so the
+   rejected operation's caller cannot continue with a missing answer. */
 static Var _sdk_reject(String message, List notes) {
-  /* A rejected inner SDK operation answers void so its caller can finish
-     evaluation, but the invocation still belongs to the first rejection.
-     Keep that diagnostic when a typed wrapper subsequently rejects void. */
-  if (!macro_sdk_failure_message) {
-    macro_sdk_failure_message = message;
-    macro_sdk_failure_notes = notes;
-  }
-  return void;
+  Compiler compiler = macro_import_compiler;
+  if (!compiler) raise %(bad-state (operation $message));
+  compiler.report_error(<macro>, message, macro_import_invocation, notes);
 }
 
-/* SDK operations reject use outside an active expansion. The guard returns
-   from its caller. A helper cannot do that, so this is a statement macro. */
-macro Statement $_sdk_guard(Expr $operation) {
+// SDK operations reject use outside an active expansion.
+static void _sdk_guard(String operation) {
   if (!macro_sdk_compiler)
-    return _sdk_reject(%"${$operation} used outside macro expansion", NULL);
+    _sdk_reject(%"$operation used outside macro expansion", NULL);
 }
 
 static List _sdk_binding_type(List binding) =>
@@ -145,7 +140,7 @@ static List _sdk_binding_type(List binding) =>
   ];
 
 static Var _sdk_syntax_type(List value) {
-  $_sdk_guard("x2c.syntax.type");
+  _sdk_guard("x2c.syntax.type");
   match (value) {
     case %(expr ? ?): {
       Type type = value.cadr();
@@ -254,36 +249,36 @@ static Var _sdk_type_return(List value) =>
   value.type().canonicalize().apply().canonicalize();
 
 static Var _sdk_complete_iter_chain(List expression) {
-  $_sdk_guard("private foreach iterator completion");
+  _sdk_guard("private foreach iterator completion");
   return macro_sdk_compiler.complete_iter_chain(expression);
 }
 
 static Var _sdk_string_collection(List expression) {
-  $_sdk_guard("private foreach string conversion");
+  _sdk_guard("private foreach string conversion");
   return macro_sdk_compiler.promote_string_literal(expression);
 }
 
 static Var _sdk_type_parts(List value) => value.type().declaration_parts();
 
 static Var _sdk_type_reverse_name(String base, String participant) {
-  $_sdk_guard("x2c.type.reverse-name");
+  _sdk_guard("x2c.type.reverse-name");
   return macro_sdk_compiler.reverse_converter_spelling(
     base, "", participant);
 }
 
 static Var _sdk_type_resolve(List value) {
-  $_sdk_guard("x2c.type.resolve");
+  _sdk_guard("x2c.type.resolve");
   return macro_sdk_compiler.sym.resolve_key(value).type_from_ast();
 }
 
 static Var _sdk_type_layout(List value) {
-  $_sdk_guard("x2c.type.layout");
+  _sdk_guard("x2c.type.layout");
   Type type = macro_sdk_compiler.sym.resolve_key(value).type_from_ast();
   return macro_sdk_compiler.sym.field_order(type).cdr();
 }
 
 static Var _sdk_type_value(List value) {
-  $_sdk_guard("x2c.type.value?");
+  _sdk_guard("x2c.type.value?");
   Type type = value.type().canonicalize();
   match (type) case %((bitfield ?) *rest): type = rest;
   foreach (String name, %("Symbol" "Var" "Atom" "String" "List"))
@@ -294,7 +289,7 @@ static Var _sdk_type_value(List value) {
 }
 
 static Var _sdk_type_tag_name(String name) {
-  $_sdk_guard("x2c.type.tag-name");
+  _sdk_guard("x2c.type.tag-name");
   String file = _source_file(macro_sdk_compiler, macro_sdk_compiler.filename);
   file = macro_sdk_compiler.display_path(file);
   String identity = %"$file:$name";
@@ -309,7 +304,7 @@ static Var _sdk_type_tag_name(String name) {
 }
 
 static Var _sdk_type_fields(List value) {
-  $_sdk_guard("x2c.type.fields");
+  _sdk_guard("x2c.type.fields");
   Type type = value;
   type = type.canonicalize();
   Type resolved = macro_sdk_compiler.sym.resolve_key(type);
@@ -329,7 +324,7 @@ static Var _sdk_type_fields(List value) {
 }
 
 static Var _sdk_binding_spelling(Var syntax) {
-  $_sdk_guard("x2c.binding.spelling");
+  _sdk_guard("x2c.binding.spelling");
   if (syntax is <string>) {
     String spelling = syntax;
     if (spelling.is_identifier()) return spelling;
@@ -372,7 +367,7 @@ static Var _sdk_binding_spelling(Var syntax) {
 }
 
 static Var _sdk_source_text(Var value) {
-  $_sdk_guard("x2c.source.text");
+  _sdk_guard("x2c.source.text");
   Var stored = void;
   Var key = ((ulong) value.u64);
   if (!macro_sdk_source_captures ||
@@ -386,7 +381,7 @@ static Var _sdk_source_text(Var value) {
 }
 
 static Var _sdk_diagnostic_fail(String message, List notes) {
-  $_sdk_guard("x2c.diagnostic.fail");
+  _sdk_guard("x2c.diagnostic.fail");
   foreach (Var note, notes)
     if (note is not <string>)
       return _sdk_reject(
@@ -396,7 +391,7 @@ static Var _sdk_diagnostic_fail(String message, List notes) {
 }
 
 static Var _sdk_ident(String spelling) {
-  $_sdk_guard("x2c.ident");
+  _sdk_guard("x2c.ident");
   if (!spelling.is_identifier()) return _sdk_reject(
     "x2c.ident requires an identifier spelling",
     %("value: ${spelling.repr()}" ));
@@ -404,7 +399,7 @@ static Var _sdk_ident(String spelling) {
 }
 
 static Var _sdk_ident_unique(String stem) {
-  $_sdk_guard("_x2c.name.unique");
+  _sdk_guard("_x2c.name.unique");
   if (!stem.is_identifier()) return _sdk_reject(
     "_x2c.name.unique requires an identifier stem",
     %("value: ${stem.repr()}" ));
@@ -420,7 +415,7 @@ static Var _sdk_invocation_location(void) {
 }
 
 static Var _sdk_method_resolve(List type_value, String name) {
-  $_sdk_guard("x2c.method.resolve");
+  _sdk_guard("x2c.method.resolve");
   if (!name.is_identifier())
     return _sdk_reject(
       "x2c.method.resolve requires an identifier String",
@@ -545,21 +540,8 @@ static Var _sdk_function_parameter(List function, String wanted) {
     %("function: ${_sdk_function_name(function).repr()}"));
 }
 
-/* Reports and consumes an SDK rejection. A later evaluation must not repeat
-   a stale message. */
-static int _report_sdk_rejection(Compiler compiler, Token invocation) {
-  String message = macro_sdk_failure_message;
-  List notes = macro_sdk_failure_notes;
-  macro_sdk_failure_message = NULL;
-  macro_sdk_failure_notes = NULL;
-  if (!message) return 0;
-  compiler.report_error(<macro>, message, invocation, notes);
-  return 1;
-}
-
 static void _report_lisp_failure(
   Compiler compiler, Token invocation, List error, String source) {
-  _report_sdk_rejection(compiler, invocation);
   String form_note = %"form: $source", error_note = %"error: ${error.repr()}";
   compiler.report_error(
     <macro>, "compile-time Lisp evaluation failed",
@@ -579,7 +561,6 @@ static Var _eval_string(
     catch %(?code *detail):
       _report_lisp_failure(compiler, invocation, cons(code, detail), source);
   }
-  _report_sdk_rejection(compiler, invocation);
   return result;
 }
 
@@ -895,7 +876,7 @@ static Var _sdk_embed_text(Var requested) {
 }
 
 static Var _sdk_literal_string(Var syntax) {
-  $_sdk_guard("x2c.literal.value");
+  _sdk_guard("x2c.literal.value");
   String value = NULL;
   if (_literal_string(syntax, &value)) return value;
   match (syntax) case %(expr ? (literal (int) ?(String digits))): {
@@ -918,7 +899,7 @@ static Var _sdk_literal_string(Var syntax) {
    cached constructor form, so a caller reads a form it was given rather
    than naming a slot by index. */
 static Var _sdk_cache_value(List node) {
-  $_sdk_guard("x2c.cache.value");
+  _sdk_guard("x2c.cache.value");
   Compiler compiler = macro_sdk_compiler;
   long id = -1;
   match (node) {
@@ -934,7 +915,7 @@ static Var _sdk_cache_value(List node) {
 
 /* The forms a compile-time function lowers to, for inspection. */
 static Var _sdk_comptime_lower(List fn) {
-  $_sdk_guard("x2c.comptime.lower");
+  _sdk_guard("x2c.comptime.lower");
   List forms = macro_sdk_compiler.lower_comptime(fn);
   if (forms) return forms;
   return %();
@@ -943,7 +924,7 @@ static Var _sdk_comptime_lower(List fn) {
 /* A warning reports where it is raised and returns, so a macro can keep
    expanding. Failure stays separate because it never returns. */
 static Var _sdk_diagnostic_warn(String message, List notes) {
-  $_sdk_guard("x2c.diagnostic.warn");
+  _sdk_guard("x2c.diagnostic.warn");
   foreach (Var note, notes)
     if (note is not <string>)
       return _sdk_reject(
@@ -1681,7 +1662,7 @@ static Var _sdk_identifier_result(Var value) {
 }
 
 static Var _sdk_symbol_set(List values) {
-  $_sdk_guard("_x2c.symbol-set");
+  _sdk_guard("_x2c.symbol-set");
   foreach (Var value, values)
     if (value is not <symbol>)
       return _sdk_reject(
@@ -1898,18 +1879,11 @@ static Var _eval_template_form(
       (list $temporary name)))) $form)";
   }
   Var result = void;
-  String message = NULL, List notes = NULL;
   $let(macro_sdk_has_references, !!references)
   $let(macro_sdk_source_captures, source_captures)
-  $let(macro_sdk_failure_notes, NULL)
-  $let(macro_sdk_failure_message, NULL)
   $let(macro_sdk_source_file, source_file)
-  $let(macro_sdk_compiler, compiler) {
+  $let(macro_sdk_compiler, compiler)
     result = _eval_string(compiler, form, invocation);
-    message = macro_sdk_failure_message;
-    notes = macro_sdk_failure_notes;
-  }
-  if (message) compiler.report_error(<macro>, message, invocation, notes);
   return result;
 }
 
