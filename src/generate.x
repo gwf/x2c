@@ -126,6 +126,30 @@ static List _prepend_init_prelude(
   return result;
 }
 
+/* The position of the first function definition in `source`, or of the
+   directive opening the outermost conditional group around it, so the
+   prelude is declared whichever arms the C compiler selects. A unit without
+   a function definition gives -1. */
+static int _init_prelude_position(List source) {
+  int position = 0, depth = 0, opening = 0;
+  foreach (List item, source) {
+    match (item) {
+      case %(function (*) (bind (binding ? ?) ?) (block *)):
+        return depth ? opening : position;
+      case %(preproc ?(String content)): {
+        Symbol kind = preproc_conditional_kind(content);
+        if (kind == <open>) {
+          if (!depth) opening = position;
+          depth++;
+        }
+        else if (kind == <close> && depth) depth--;
+      }
+    }
+    position++;
+  }
+  return -1;
+}
+
 static int _is_protocol_bootstrap_function(String spelling) =>
   spelling == "x2c_initialize_protocols" ||
   spelling == "x2c_register_builtin_descriptor" ||
@@ -202,9 +226,12 @@ static List _file_init(Compiler c, List source) {
     !c.init_statements(<mid>) && !c.init_statements(<late>);
   Map cache_reachable_ids = cache_only
                           ? _cache_reachable_function_ids(source) : NULL;
-  int inserted = 0, List result = NULL;
+  int prelude = _init_prelude_position(source), position = 0;
+  List result = NULL;
 
   foreach (List item, source) {
+    if (position++ == prelude)
+      result = _prepend_init_prelude(result, init_guard, init_func);
     match (item) {
       case %((!or initblock initstmt) *): continue;
       case %(!set ?function
@@ -212,10 +239,6 @@ static List _file_init(Compiler c, List source) {
                (!set ?declarator
                (bind (binding ?identity ?spelling) ?))
                (block *statements))): {
-        if (!inserted) {
-          result = _prepend_init_prelude(result, init_guard, init_func);
-          inserted = 1;
-        }
         String name = spelling;
         if (name == "x2c_initialize_protocols")
           function = _wrap_protocol_initializer_function(
@@ -236,11 +259,12 @@ static List _file_init(Compiler c, List source) {
     result = cons(item, result);
   }
 
-  /* The prelude normally goes immediately before the first function, which
-     calls it. A unit of only declarations has no such function. The
-     constructor is then the only thing that runs the initializers the loop
-     above dropped, so it goes after the declarations it assigns. */
-  if (!inserted)
+  /* The prelude normally goes before the first function, or before the
+     outermost conditional group containing it. A unit of only declarations
+     has no such function. The constructor is then the only thing that runs
+     the initializers the loop above dropped, so it goes after the
+     declarations it assigns. */
+  if (prelude < 0)
     result = _prepend_init_prelude(result, init_guard, init_func);
 
   return result.reverse();

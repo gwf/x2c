@@ -1043,7 +1043,10 @@ List Compiler.parse_named_type(Compiler c) {
   return %(named-type $name $type);
 }
 
-/** Installs a definition-local template binding or typedef provisionally. */
+/** Installs a definition-local template binding or typedef provisionally.
+    Later template types name a local typedef by its identity, so each
+    expansion refers to that expansion's private typedef.
+*/
 void Compiler.bind_template_local(
   Compiler c, List key, List type, List context) {
   if (c.parsing_source_syntax()) {
@@ -1058,11 +1061,9 @@ void Compiler.bind_template_local(
   Var local = c.macro_holes && key ? c.macro_definition_locals()[key] : void;
   if (c.macro_holes && local is <string> &&
       (!context || context === %(typedef))) {
-    List local_key = %($local);
-    Type local_type = type.type_from_ast().declared();
     if (context === %(typedef)) {
-      c.sym.set(local_key, %(typedef $local));
-      c.sym.set(%(typedef $local), local_type);
+      c.sym.set(%($local), %(typedef $local));
+      c.sym.set(%(typedef $local), %($key));
     }
     else c.sym.bind_identity(
       NULL, key,
@@ -1936,6 +1937,8 @@ static Var _finish_type_spec(Compiler compiler, Var value) {
       return %(enum ${compiler.evaluate_macro_slot(name)});
     case %(enum ?name (*members)):
       return _finish_aggregate_type(compiler, <enum>, name, members);
+    // Semantic types name an expanded template typedef by its spelling.
+    case %(binding ? ?(String name)): return name;
   }
   return value;
 }
