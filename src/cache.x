@@ -546,8 +546,10 @@ static Array _cache_ids_in(Compiler compiler, List code) {
 static int _needs_runtime_initializer(Var value) {
   if (value is not <list>) return 0;
   List node = value;
-  match (node)
+  match (node) {
+    case %(sizeof *): return 0;
     case %((!or cache call varray vmap cons append) *): return 1;
+  }
   foreach (Var child, node)
     if (_needs_runtime_initializer(child)) return 1;
   return 0;
