@@ -42,6 +42,12 @@ int file_lock(Path p, int wait);
 
 void file_publish(List outputs);
 
+uint64_t x2c_fnv_bytes(uint64_t hash, const void * bytes, size_t length);
+
+uint64_t x2c_fnv_file(uint64_t hash, String path, int * ok);
+
+String x2c_compiler_identity(void);
+
 long worker_fork(void);
 
 _Noreturn void worker_exit(int status);

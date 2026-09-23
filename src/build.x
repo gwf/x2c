@@ -108,10 +108,8 @@ static uint64_t _state_tool(uint64_t hash, String tool, int *ok) {
   return _state_text(hash, tool);
 }
 
-static const uint64_t _state_start = UINT64_C(1469598103934665603);
-
 static uint64_t _state_base(CliRequest request, String tool, int *ok) {
-  uint64_t hash = _state_start;
+  uint64_t hash = UINT64_C(1469598103934665603);
   hash = _state_text(hash, "x2c-state-v1");
   hash = _state_text(hash, request.state_seed);
   String compiler = x2c_compiler_identity();
@@ -122,15 +120,12 @@ static uint64_t _state_base(CliRequest request, String tool, int *ok) {
 }
 
 /** Returns the stamp a native module records: `x2c-module-stamp:` and the
-    content hash of the running compiler as 16 hex digits. Returns NULL when
-    the executable cannot be read. Only the compiler that built a module
-    loads it.
+    running compiler's identity. Returns NULL when the executable cannot be
+    read. Only the compiler that built a module loads it.
 */
 String build_module_stamp(void) {
-  String executable = x2c_get_executable(), int ok = executable != NULL;
-  uint64_t hash = ok ? _state_contents(_state_start, executable, &ok) : 0;
-  return ok ? "x2c-module-stamp:%016llx".printf((unsigned long long) hash)
-            : NULL;
+  String identity = x2c_compiler_identity();
+  return identity ? %"x2c-module-stamp:$identity" : NULL;
 }
 
 static List _state_dep_inputs(String depfile) {
