@@ -1132,12 +1132,12 @@ void Compiler_collect_package(Compiler c, String name, Token token){
 
 String x2c_stage_dir(void);
 
-void interface_configure(String out_dir){
+void interface_configure(String out_dir, int cold){
   if(! _init_guard_) _file_init_();
   _process_cache();
   interface_out_dir = out_dir;
   String stage = x2c_stage_dir();
-  interface_mirror = String_truth(stage) ? stage : x2c_get_root();
+  interface_mirror = cold ? NULL : String_truth(stage) ? stage : x2c_get_root();
 }
 
 String Path_stem(Path);
