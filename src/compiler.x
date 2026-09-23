@@ -39,8 +39,9 @@ typedef struct ScriptUnit {
     shadow, package, and full-parse compilers all draw from it, so a binding
     number names one live declaration across every symbol table in the unit.
     Rows replayed from an interface keep that interface's own numbering,
-    which starts at 1, so their numbers identify declarations only within
-    their own rows.
+    which starts at 1. A file walked cold restores the counter afterwards,
+    so the unit reuses the numbers its rows took. Either way a replayed row's
+    number identifies a declaration only within that file's rows.
 */
 typedef struct GenNames {
   Map counters, adapters;

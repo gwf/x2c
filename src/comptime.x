@@ -148,9 +148,8 @@ static List lower_session_callees;
    so a loop's name carries the function it belongs to. The count restarts
    with each lowering, so a function lowers to the same forms however much
    the session lowered before it, whether collection walked a unit cold or
-   read its interface. The REPL lowers every entry as `__repl_eval`, so its
-   count runs across the session instead: a `Func` one entry stores can
-   still call that entry's loops after the next entry. Lexical slots use
+   read its interface. The REPL lowers every entry under the one name
+   `__repl_eval`, so it keeps one count across its session. Lexical slots use
    shorter names with a hyphen so they cannot shadow an ordinary C
    identifier. */
 static int lower_repl_counter;
