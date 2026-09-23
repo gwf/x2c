@@ -27,15 +27,45 @@ static List _make_init_call(String initializer, List guard) => %(
        (stmnt (expr (void) (call $initializer (args) )))
   );
 
-static List _make_shutdown_registration(Compiler compiler, String shutdown) {
+/* The conditional arms around each definition of the function `name`, in
+   source order, each as `preproc_track_arms` keeps them. A definition
+   outside every conditional group is always compiled, which gives NULL. */
+static List _definition_arms(List source, String name) {
+  List arms = NULL, found = NULL;
+  foreach (List item, source)
+    match (item) {
+      case %(function (*) (bind (binding ? ?(String spelling)) ?) (block *)):
+        if (spelling == name) {
+          if (!arms) return NULL;
+          found = cons(arms, found);
+        }
+      case %(preproc ?(String content)):
+        arms = preproc_track_arms(arms, content);
+    }
+  return found.reverse();
+}
+
+/* `statements` under the arms that compile each definition in `found`, or
+   unconditionally when `found` is NULL. At most one definition compiles. */
+static List _within_definitions(List found, List statements) {
+  if (!found) return statements;
+  Array output = [];
+  foreach (List arms, found)
+    foreach (List item, preproc_within_arms(arms, statements))
+      output.push(item);
+  return output.list_free();
+}
+
+static List _make_shutdown_registration(Compiler compiler, List source) {
+  String shutdown = compiler.fini_fn;
   if (!shutdown) return NULL;
   List binding = compiler.sym.reference(%($shutdown), NULL);
-  return %((
+  return _within_definitions(_definition_arms(source, shutdown), %((
     stmnt
       (expr (void)
         (call "Scope_shutdown_hook"
           (args (expr ((func ((void))) void) (ident $binding)))))
-  ));
+  )));
 }
 
 static List _patch_func_with_init(
@@ -49,9 +79,8 @@ static List _patch_func_with_init(
    are queued late; all other cache and static setup retains its pre-body
    order. */
 static List _wrap_initializer_function(
-  Compiler compiler, List type, List bind, List statements, List guard) {
-  List shutdown = _make_shutdown_registration(compiler, compiler.fini_fn);
-  return %(
+  Compiler compiler, List type, List bind, List statements, List guard,
+  List shutdown) => %(
     function $type $bind
     (block (if (expr (int) (ident $guard)) (return))
       (stmnt(expr (int) (op = (expr (int) (ident $guard))
@@ -63,21 +92,19 @@ static List _wrap_initializer_function(
       @shutdown
     )
   );
-}
 
-// Construct the synthetic file-level init function. The constructor
-// attribute runs it in the root epoch, before main. Literal statics last
-// for the whole process, so they must never be created inside a caller's
-// allocation bracket. The lazy entry guards remain as the portable
-// fallback.
+/* Construct the synthetic file-level init function, which runs `entry`
+   first. As a constructor it runs in the root epoch, before main. Literal
+   statics last for the whole process, so they must never be created inside
+   a caller's allocation bracket. The lazy entry guards remain as the
+   portable fallback. */
 static List _make_file_init_func(
-  Compiler compiler, List guard, List initializer) {
-  List shutdown = _make_shutdown_registration(compiler, compiler.fini_fn);
-  return %(
-    function (("__attribute__((constructor))") static void)
+  Compiler compiler, List type, List entry, List guard, List initializer,
+  List shutdown) => %(
+    function $type
       ( bind $initializer (( fnmod (params (param (void) (bind () ()))))))
       ( block
-        (stmnt (expr (void) (call "x2c_initialize_protocols" (args))))
+        @entry
         ( if (expr (int) (ident $guard)) (return) )
         (stmnt
           ( expr (int) (op = (expr (int) (ident $guard))
@@ -88,7 +115,6 @@ static List _make_file_init_func(
         @shutdown
       )
   );
-}
 
 // Install generated built-in protocol methods before any ordinary file
 // constructor can create a String- or List-backed cache.
@@ -206,7 +232,11 @@ static Map _cache_reachable_function_ids(List source) {
    initializer calls protocol setup before early and middle work. A type-owned
    initializer wraps its own body between early/middle and late work, while the
    protocol initializer prepends its protocol queue. Shutdown registration is
-   last in synthetic and type-owned initializers. initblock and initstmt
+   last in synthetic and type-owned initializers, under the arms that
+   compile the shutdown. A type initializer in conditional groups may be
+   compiled out, so the entries call a lazy synthetic initializer instead.
+   It calls the type initializer under those arms, which sets the guard, and
+   otherwise runs the file's own initialization. initblock and initstmt
    markers do not reach generated output; the compiler's initialization
    queues hold those statements. */
 static List _file_init(Compiler c, List source) {
@@ -215,12 +245,24 @@ static List _file_init(Compiler c, List source) {
   if (!has_init_blocks && !initializer) return source;
 
   List guard = c.sym.reference(%("_init_guard_"), NULL), init_func = NULL;
-  if (!initializer) {
+  List shutdown = _make_shutdown_registration(c, source);
+  List initializer_arms =
+    initializer ? _definition_arms(source, initializer) : NULL;
+  if (!initializer || initializer_arms) {
     List file_init = c.sym.introduce("_file_init_");
-    init_func = _make_file_init_func(c, guard, file_init);
+    init_func = initializer
+      ? _make_file_init_func(
+          c, %(static void),
+          _within_definitions(initializer_arms,
+            %((stmnt (expr (void) (call $initializer (args)))))),
+          guard, file_init, shutdown)
+      : _make_file_init_func(
+          c, %(("__attribute__((constructor))") static void),
+          %((stmnt (expr (void) (call "x2c_initialize_protocols" (args))))),
+          guard, file_init, shutdown);
   }
   List init_guard = _make_init_guard(guard);
-  String initializer_name = initializer ? initializer : "_file_init_";
+  String initializer_name = init_func ? "_file_init_" : initializer;
   int cache_only =
     !initializer && c.init_statements(<early>) &&
     !c.init_statements(<mid>) && !c.init_statements(<late>);
@@ -245,7 +287,7 @@ static List _file_init(Compiler c, List source) {
             c, type, declarator, statements);
         else if (initializer && name == initializer)
           function = _wrap_initializer_function(
-            c, type, declarator, statements, guard);
+            c, type, declarator, statements, guard, shutdown);
         // Non-static entries initialize their static helpers.
         else if (!type.type().is_static() &&
                  !_is_protocol_bootstrap_function(name) &&
