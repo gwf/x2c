@@ -9,8 +9,6 @@
 #include "compiler.h"
 void Compiler_check_regions(Compiler c, List ast);
 
-void Compiler_check_meta_regions(Compiler c, List fn);
-
 List Compiler_region_escapes(Compiler c, List ast, List seed);
 
 

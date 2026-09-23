@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/comptime-declines-meta-protocol-body.x:1:1: protocol: 'meta' applies only to a concrete protocol adoption
+  meta protocol Shape(T) {
+  ^^^^
+  note: mark each adoption: meta protocol BASE(TYPE);
+

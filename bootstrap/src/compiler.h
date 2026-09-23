@@ -70,7 +70,7 @@ typedef struct Compiler{
   Array early_decls;
   int prelude;
   Array meta_defs;
-  Map meta_folds, meta_impure, meta_comptime, meta_regions;
+  Map meta_folds, meta_impure, meta_comptime;
   Map meta_values;
   Map meta_layouts;
   Map native_meta;

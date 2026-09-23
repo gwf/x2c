@@ -31,7 +31,7 @@ replaces none of them. It appends generated bindings and initialization
 work to the compiler and is not idempotent. Failures are reported as
 `emit` diagnostics.
 
-Source: `src/generate.x:997`
+Source: `src/generate.x:1039`
 
 ## Design notes
 

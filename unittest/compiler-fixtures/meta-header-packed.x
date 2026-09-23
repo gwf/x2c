@@ -25,4 +25,47 @@ meta int header_plain_value(void) {
   return value.value;
 }
 
+// A packed enum can be narrower than int.
+meta int header_small_value(void) {
+  struct HeaderSmallField value = { 0 };
+  return (int) value.small;
+}
+
+meta int header_lead_value(void) {
+  struct HeaderLeadField value = { 0 };
+  return (int) value.lead;
+}
+
+/* A macro is read as the attributes its body holds: a layout attribute
+   packs its struct, and any other attribute or none leaves it natural. */
+meta int header_macro_value(void) {
+  struct HeaderMacro value = { .value = 5 };
+  return value.value;
+}
+
+meta int header_macro_by_value(void) {
+  struct HeaderMacroBy value = { .value = 6 };
+  return value.value;
+}
+
+meta int header_macro_if_value(void) {
+  struct HeaderMacroIf value = { .value = 7 };
+  return value.value;
+}
+
+meta int header_empty_value(void) {
+  struct HeaderEmpty value = { .value = 7 };
+  return value.value;
+}
+
+meta int header_marked_value(void) {
+  struct HeaderMarked value = { .value = 8 };
+  return value.value;
+}
+
+meta int header_export_value(void) {
+  struct HeaderExport value = { .value = 9 };
+  return value.value;
+}
+
 int main(void) { return 0; }

@@ -305,6 +305,16 @@ sample.x:1:1: type: native meta function declaration does not match its target
   note: name: sin signature: ((func ((double))) float)
 ```
 
+Two kinds of function follow a rule. An iterator operation takes its
+destination last: its last parameter and its result are `Iter`. Compile-time
+code may omit that destination; the call then allocates one with `Iter.new`
+before calling the native operation. A declared `Func` parameter matches any
+`Var` parameter of the compiler's target, which receives the compile-time
+callable and adapts it.
+
+A `meta` protocol adoption, such as `meta protocol Iter(List);`, declares each
+witness of that conformance the way a bodyless prototype would.
+
 The compiler links every function declared in `lib/cmath.x` and
 `lib/clibc.x`. Both are part of the implicit prelude, so their functions need
 no declaration of your own:
@@ -368,12 +378,13 @@ frame and are released when that function returns, normally or by an error.
 Field reads and writes, `&x`, `&s.f`, `p->f`, `*p` and `p[i]` operate on
 those bytes. A `bool` field is one byte, and a value reaching `bool` becomes 0
 or 1; it reads as the int C promotes it to. An enum field is an `int` when
-every enumerator initializer has an integer type no wider than `int`, or
-names the enum itself. Any other enum may be wider in C, so it has no
-compile-time layout. Compile-time code reads every enum value as a signed
-`int`. Clang and GCC make an enum with no negative enumerator an `unsigned
-int`, so a negative value stored in such an enum compares differently: at
-compile time it stays negative, and at run time it is a large unsigned value.
+the enum is not packed and every enumerator initializer has an integer type
+no wider than `int`, or names the enum itself. Any other enum may be wider
+or narrower in C, so it has no compile-time layout. Compile-time code reads
+every enum value as a signed `int`. Clang and GCC make an enum with no
+negative enumerator an `unsigned int`, so a negative value stored in such an
+enum compares differently: at compile time it stays negative, and at run
+time it is a large unsigned value.
 A pointer parameter can also receive a local C array,
 which `p[i]` indexes the same way. A pointer compares with `NULL` by address
 and tests false at the null address.
@@ -490,21 +501,24 @@ These C shapes are not available at compile time:
 - Structs with bitfields, array members, anonymous members, or an enum field
   whose initializers do not all have `int`-range types. A meta function that
   uses one reports `a compile-time struct with no host layout`.
-- Packed structs. A meta function that uses one reports `a compile-time
-  struct with no host layout`. The compiler detects a struct defined while
-  `#pragma pack` is in effect, and a `packed`, `aligned`, `mode` or
-  `vector_size` attribute in the struct's own definition, such as a header
-  struct followed by `__attribute__((packed))`. Default collection follows
-  `#pragma pack` within each file. Where `#if` groups guard the directives,
-  it reads the file once for each arm position: the first reading takes
-  every group's first arm, the second its second arm or its last, and so
-  on. A group without `#else` is always entered, as an include guard is, so
-  when C skips a pop in such a group, a later packed struct gets its natural
-  layout. A struct packed in any reading is declined, even when C lays it
-  out naturally. `--cpp-symbols` and `--system-headers` read the
-  preprocessed unit, so they also detect packing that one header starts and
-  another ends, as Windows `pshpack1.h` and `poppack.h` do, and a push and a
-  pop under unrelated conditions, which default collection can miss.
+- Packed structs. A meta function that uses one reports `a compile-time struct
+  with no host layout`. The compiler detects a struct defined while `#pragma
+  pack` is in effect, and a `packed`, `aligned`, `mode` or `vector_size`
+  attribute in the struct's own definition, such as a header struct followed by
+  `__attribute__((packed))`. A macro whose body holds such an attribute counts
+  where it is used, so `struct S { ... } PACKED;` with `#define PACKED
+  __attribute__((packed))` is packed. A macro with no layout attribute leaves
+  the struct its natural layout. Default collection follows `#pragma pack`
+  within each file. Where `#if` groups guard the directives, it reads the file
+  once for each arm position: the first reading takes every group's first arm,
+  the second its second arm or its last, and so on. A group without `#else` is
+  always entered, as an include guard is, so when C skips a pop in such a
+  group, a later packed struct gets its natural layout. A struct packed in any
+  reading is declined, even when C lays it out naturally. `--cpp-symbols` and
+  `--system-headers` read the preprocessed unit, so they also detect packing
+  that one header starts and another ends, as Windows `pshpack1.h` and
+  `poppack.h` do, and a push and a pop under unrelated conditions, which
+  default collection can miss.
 - Structs whose layout the compiler cannot see, which it would lay out with
   natural alignment: a field declared `_Alignas`, or a field whose typedef
   carries an alignment attribute. Do not pass such a struct to a native
