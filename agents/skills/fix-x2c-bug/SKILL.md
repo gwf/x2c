@@ -46,7 +46,7 @@ inspect generated C or ABI details when they are the relevant behavior.
 
 Remove temporary instrumentation. Review and fix the completed authored diff,
 then follow root validation and publication instructions. Routine authorized
-repairs deliver to `main`; requested PRs retain review.
+repairs deliver to `dev` under root `AGENTS.md`; requested PRs retain review.
 
 For an investigation, report the reproduced cause, consequence, and proposed
 repair without edits. For a completed fix, report the changed behavior and the
