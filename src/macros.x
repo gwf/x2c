@@ -1339,10 +1339,10 @@ static List _import(
   Map previous_dependencies = c.deps.copy();
   c.import_stack.push(path);
   Map imported_aliases = NULL;
-  /* `meta_installed` records that the file contributed a `meta` function,
-     which is what makes the next pass read it again rather than replay a
-     cached entry. A compile-time-only one installs and contributes no
-     runtime definition, so the two are counted separately. */
+  /* `meta_installed` records that the file contributed a `meta`
+     declaration, which is what makes the next pass read it again rather
+     than replay a cached entry. A compile-time-only function installs and
+     contributes no runtime definition, so the two are counted separately. */
   Array meta_definitions = [], int meta_installed = 0;
   {
     defer c.import_stack.take_last();
@@ -1400,7 +1400,7 @@ static List _import(
           }
           else if (imported.macro_form_is_definition())
             imported.parse_macro_definition();
-          else if (imported.meta_form_is_definition()) {
+          else if (imported.meta_form_is_declaration()) {
             meta_installed = 1;
             List definition = imported.parse_top_level();
             if (definition) meta_definitions.push(definition);
@@ -1454,8 +1454,8 @@ static List _import(
 /** Consumes and evaluates one top-level compile-time Lisp form.
     `$(import ...)` loads a tracked `.xlisp` or `.xmacro` dependency; other
     results are discarded in the translation unit's Lisp session.
-    Returns a `%(seq ...)` of the runtime `meta` definitions a macro import
-    contributed, or NULL when the import declared no `meta` function at all.
+    Returns a `%(seq ...)` of the runtime `meta` declarations a macro import
+    contributed, or NULL when the import declared nothing `meta` at all.
     The consuming unit retains them and emits the ones it reaches. An import
     whose `meta` functions are all compile-time only answers an empty `seq`,
     because the next pass still has to read it to install them.

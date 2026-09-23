@@ -16,8 +16,9 @@
     statements, and `f_grad` records the forward sweep on a typed array tape
     and accumulates adjoints in reverse. Both read the typed AST, so `int`
     control flow is copied and only `double` arithmetic is differentiated.
-    The transformations are meta functions. Lisp entry points retain the
-    unit's sibling registries and pass them into each derivation.
+    The transformations are meta functions. Two per-unit `meta static`
+    registries record the functions each mode has differentiated, so a later
+    function can call their siblings.
 */
 
 /** Generates the dual-number members of `$D` over the scalar type `$S`.
@@ -334,16 +335,32 @@ meta static List ad_partial(String name, int i, List a) {
   return %();
 }
 
+/* The functions each mode has differentiated in this unit, newest first. A
+   later function can call their siblings. */
+meta static List ad_forward_siblings = %();
+meta static List ad_reverse_siblings = %();
+
+/* Adds a decorated function's name to one mode's registry. */
+meta static List ad_register(List registry, List fn) {
+  match (fn) {
+    case %(function (* double) (bind (binding ? ?name) ?) ?):
+      return %($name @registry);
+    case %(function ? (bind (binding ? ?) ?) ?):
+      ad_fail("function must return double", fn);
+  }
+  return registry;
+}
+
 /* The chain rule over a primitive's arguments. */
 meta static List ad_call_tangent(
-  Map state, String name, List ftype, List args, List names) {
+  String name, List ftype, List args, List names) {
   List unbound = ad_unbind(args);
   List partial = ad_partial(name, 0, unbound);
   if (partial) {
     List total = ad_zero();
     int i = 0;
     foreach (List argument, args) {
-      List da = ad_tangent(state, argument, names);
+      List da = ad_tangent(argument, names);
       if (!ad_is_zero(da)) {
         List term = ad_select(%(expr () (op == $da ${ad_zero()})),
           ad_zero(), ad_mul(da, ad_partial(name, i, unbound)));
@@ -353,14 +370,13 @@ meta static List ad_call_tangent(
     }
     return total;
   }
-  List siblings = state["siblings"];
-  if (name in siblings) {
+  if (name in ad_forward_siblings) {
     List ptypes = ((List) ftype[0])[1];
     Array out = [];
     foreach (List argument, args) {
       out.push(ad_unbind(argument));
       if (((List) ptypes.car()).equal(%(double)))
-        out.push(ad_tangent(state, argument, names));
+        out.push(ad_tangent(argument, names));
       ptypes = ptypes.cdr();
     }
     return ad_call(ad_dot(name), out);
@@ -369,7 +385,7 @@ meta static List ad_call_tangent(
 }
 
 /* The tangent of an expression, given the names being differentiated. */
-meta static List ad_tangent(Map state, List e, List names) {
+meta static List ad_tangent(List e, List names) {
   if (!ad_is_double(e)) return ad_zero();
   match (e) {
     case %(expr ? (literal ? ?)): return ad_zero();
@@ -379,20 +395,20 @@ meta static List ad_tangent(Map state, List e, List names) {
         if (n in names) return ad_id(ad_dot(n));
       return ad_zero();
     }
-    case %(expr ? (parens ?a)): return ad_tangent(state, a, names);
-    case %(expr ? (cast ? ?a)): return ad_tangent(state, a, names);
-    case %(expr ? (op - ?a)):   return ad_neg(ad_tangent(state, a, names));
-    case %(expr ? (op + ?a)):   return ad_tangent(state, a, names);
+    case %(expr ? (parens ?a)): return ad_tangent(a, names);
+    case %(expr ? (cast ? ?a)): return ad_tangent(a, names);
+    case %(expr ? (op - ?a)):   return ad_neg(ad_tangent(a, names));
+    case %(expr ? (op + ?a)):   return ad_tangent(a, names);
     case %(expr ? (call (expr ?ft (ident (binding ? ?fname))) (args *cargs))):
-      return ad_call_tangent(state, fname, ft, cargs, names);
+      return ad_call_tangent(fname, ft, cargs, names);
     case %(expr ? (op ?o ?c ?a ?b)): {
       if (o != <"?">) ad_fail("unsupported expression", e);
       return ad_select(ad_unbind(ad_pure(c)),
-        ad_tangent(state, a, names), ad_tangent(state, b, names));
+        ad_tangent(a, names), ad_tangent(b, names));
     }
     case %(expr ? (op ?o ?a ?b)): {
-      List da = ad_tangent(state, a, names);
-      List db = ad_tangent(state, b, names);
+      List da = ad_tangent(a, names);
+      List db = ad_tangent(b, names);
       List ua = ad_unbind(a);
       List ub = ad_unbind(b);
       if (o == <+>) return ad_add(da, db);
@@ -446,12 +462,12 @@ meta static List ad_update(List e) {
   return %();
 }
 
-meta static List ad_fwd_decl(Map state, List declarator, List names) {
+meta static List ad_fwd_decl(List declarator, List names) {
   match (declarator) {
     case %(op = (bind (binding ? ?name) ()) ?init):
       return %(declare (double)
                 (bindings (op = (bind (${ad_dot(name)}) ())
-                           ${ad_tangent(state, ad_pure(init), names)})));
+                           ${ad_tangent(ad_pure(init), names)})));
     case %(bind (binding ? ?name) ()):
       return %(declare (double)
                 (bindings (op = (bind (${ad_dot(name)}) ()) ${ad_zero()})));
@@ -459,60 +475,60 @@ meta static List ad_fwd_decl(Map state, List declarator, List names) {
   ad_fail("unsupported declarator", declarator);
 }
 
-meta static List ad_fwd_update(Map state, List s, List update, List names) {
+meta static List ad_fwd_update(List s, List update, List names) {
   if (!update) return %(${ad_unbind(ad_pure(s))});
   Var n = update[0];
   ad_pure(update[1]);
   if (!names.contains(n)) return %(${ad_unbind(s)});
-  List tangent = ad_assign(ad_dot(n), ad_tangent(state, update[1], names));
+  List tangent = ad_assign(ad_dot(n), ad_tangent(update[1], names));
   return %($tangent ${ad_unbind(s)});
 }
 
 /* One source item can contribute several generated statements. */
-meta static List ad_fwd_items(Map state, List items, List names) {
+meta static List ad_fwd_items(List items, List names) {
   List out = %();
-  foreach (List item, items) out = %(@out @{ad_fwd_item(state, item, names)});
+  foreach (List item, items) out = %(@out @{ad_fwd_item(item, names)});
   return out;
 }
 
-meta static List ad_fwd_body(Map state, List s, List names) {
+meta static List ad_fwd_body(List s, List names) {
   match (s) {
     case %(block *items):
-      return %(block @{ad_fwd_items(state, items, names)});
+      return %(block @{ad_fwd_items(items, names)});
   }
-  return %(block @{ad_fwd_item(state, s, names)});
+  return %(block @{ad_fwd_item(s, names)});
 }
 
-meta static List ad_fwd_item(Map state, List s, List names) {
+meta static List ad_fwd_item(List s, List names) {
   match (s) {
-    case %(at ? ?node): return ad_fwd_item(state, node, names);
+    case %(at ? ?node): return ad_fwd_item(node, names);
     case %(declare ?type (bindings *decls)): {
       List out = %(${ad_unbind(s)});
       if (!ad_is_double_spec(type)) { ad_pure(s); return out; }
       foreach (List d, decls)
-        out = %(@out ${ad_fwd_decl(state, d, names)});
+        out = %(@out ${ad_fwd_decl(d, names)});
       return out;
     }
-    case %(stmnt ?e): return ad_fwd_update(state, s, ad_update(e), names);
+    case %(stmnt ?e): return ad_fwd_update(s, ad_update(e), names);
     case %(if ?c ?then):
       return %((if ${ad_unbind(ad_pure(c))}
-        ${ad_fwd_body(state, then, names)}));
+        ${ad_fwd_body(then, names)}));
     case %(if ?c ?then ?alt):
       return %((if ${ad_unbind(ad_pure(c))}
-        ${ad_fwd_body(state, then, names)}
-        ${ad_fwd_body(state, alt, names)}));
+        ${ad_fwd_body(then, names)}
+        ${ad_fwd_body(alt, names)}));
     case %(while ?c ?body):
       return %((while ${ad_unbind(ad_pure(c))}
-        ${ad_fwd_body(state, body, names)}));
+        ${ad_fwd_body(body, names)}));
     case %(do ?body ?c):
-      return %((do ${ad_fwd_body(state, body, names)}
+      return %((do ${ad_fwd_body(body, names)}
         ${ad_unbind(ad_pure(c))}));
     case %(for ?init ?c ?step ?body):
-      return ad_fwd_for(state, init, c, step, body, names);
+      return ad_fwd_for(init, c, step, body, names);
     case %(block *items):
-      return %((block @{ad_fwd_items(state, items, names)}));
+      return %((block @{ad_fwd_items(items, names)}));
     case %(return (double) ?e):
-      return %((return (double) ${ad_tangent(state, ad_pure(e), names)}));
+      return %((return (double) ${ad_tangent(ad_pure(e), names)}));
     case %(return ? ?): ad_fail("return must produce double", s);
     case %(empty): return %();
     case %(break): return %($s);
@@ -588,20 +604,18 @@ meta static List ad_fwd_params(List params) {
   return out;
 }
 
-meta static List ad_forward(Var form, List siblings) {
-  if (!form.is(<list>)) return %();
-  List fn = form;
+meta static List ad_forward(List fn) {
+  ad_forward_siblings = ad_register(ad_forward_siblings, fn);
   match (fn) {
     case %(function ?spec (bind (binding ? ?name)
                             ((fnmod (params *params)))) ?body): {
-      Map state = {"siblings": siblings};
       List params_doubles = ad_param_doubles(params);
       List body_doubles = ad_declared_doubles(body);
       List names = %(@params_doubles @body_doubles);
       List one = %(function $spec
                     (bind (${ad_dot(name)})
                       ((fnmod (params @{ad_fwd_params(params)}))))
-                    ${ad_fwd_body(state, body, names)});
+                    ${ad_fwd_body(body, names)});
       return %($one);
     }
   }
@@ -747,8 +761,7 @@ meta static List ad_call_adjoint(
     }
     return out;
   }
-  List siblings = state["siblings"];
-  if (name in siblings) {
+  if (name in ad_reverse_siblings) {
     List ptypes = ((List) ftype[0])[1];
     List slots = ad_grad_slots(state, ptypes, args);
     Var value = ad_fresh(state, "_ad_call", %(double));
@@ -1176,13 +1189,12 @@ meta static List ad_reverse_function(
                       params, state, items);
 }
 
-meta static List ad_reverse(Var form, List siblings, String checkpoint) {
-  if (!form.is(<list>)) return %();
-  List fn = form;
+meta static List ad_reverse_with(List fn, String checkpoint) {
+  ad_reverse_siblings = ad_register(ad_reverse_siblings, fn);
   match (fn) {
     case %(function ?spec (bind (binding ? ?name) ((fnmod (params *params))))
                     (block *items)): {
-      Map state = {"siblings": siblings, "checkpoint": checkpoint,
+      Map state = {"checkpoint": checkpoint,
                    "locals": ad_param_locals(params),
                    "counter": 0, "loop_step": %()};
       List one = ad_reverse_function(state, spec, name, params, items);
@@ -1193,16 +1205,16 @@ meta static List ad_reverse(Var form, List siblings, String checkpoint) {
 }
 
 
-meta static List ad_fwd_clause(Map state, List e, List names) {
+meta static List ad_fwd_clause(List e, List names) {
   if (!e) return e;
   match (e) {
     case %(expr ? (commas *items)): {
       Array out = [];
-      foreach (List item, items) out.push(ad_fwd_clause(state, item, names));
+      foreach (List item, items) out.push(ad_fwd_clause(item, names));
       return %(expr () (commas @out));
     }
   }
-  List updates = ad_fwd_update(state, ad_stmnt(e), ad_update(e), names);
+  List updates = ad_fwd_update(ad_stmnt(e), ad_update(e), names);
   if (!updates.cdr()) return ((List) updates.car())[1];
   Array out = [];
   foreach (List update, updates) out.push(update[1]);
@@ -1210,20 +1222,20 @@ meta static List ad_fwd_clause(Map state, List e, List names) {
 }
 
 meta static List ad_fwd_for(
-  Map state, List init, List c, List step, List body, List names) {
+  List init, List c, List step, List body, List names) {
   List condition = ad_unbind(ad_pure(c));
-  List tail = ad_fwd_clause(state, step, names);
-  List inside = ad_fwd_body(state, body, names);
+  List tail = ad_fwd_clause(step, names);
+  List inside = ad_fwd_body(body, names);
   match (init) {
     case %(decl ?type (bindings *decls)): {
       if (ad_is_double_spec(type))
         return %((block
-          @{ad_fwd_item(state, %(declare $type (bindings @decls)), names)}
+          @{ad_fwd_item(%(declare $type (bindings @decls)), names)}
           (for () $condition $tail $inside)));
       return %((for ${ad_unbind(init)} $condition $tail $inside));
     }
   }
-  return %((for ${ad_fwd_clause(state, init, names)}
+  return %((for ${ad_fwd_clause(init, names)}
     $condition $tail $inside));
 }
 
@@ -1341,31 +1353,11 @@ meta static String ad_literal_text(List form) {
   ad_fail("expected an integer literal", form);
 }
 
-/* The registries belong to this unit's Lisp session. Each derivation takes
-   them as arguments and keeps its temporary working state in a local Map. */
-$(def ad._forward-siblings '())
-$(def ad._reverse-siblings '())
-$(defun ad.forward (fn)
-  (begin
-    (match-case fn
-      ((function ?spec (bind (binding ? ?name) ?) ?)
-       (begin
-         (if (eq? (last ?spec) 'double) nil
-             (ad_fail "function must return double" fn))
-         (def ad._forward-siblings (cons ?name ad._forward-siblings)))))
-    (ad_forward fn ad._forward-siblings)))
-$(defun ad._reverse-with (fn checkpoint)
-  (begin
-    (match-case fn
-      ((function ?spec (bind (binding ? ?name) ?) ?)
-       (begin
-         (if (eq? (last ?spec) 'double) nil
-             (ad_fail "function must return double" fn))
-         (def ad._reverse-siblings (cons ?name ad._reverse-siblings)))))
-    (ad_reverse fn ad._reverse-siblings checkpoint)))
-$(defun ad.reverse (fn) (ad._reverse-with fn nil))
-$(defun ad.checkpoint (fn block)
-  (ad._reverse-with fn (if (list? block) (ad_literal_text block) nil)))
+meta static List ad_reverse(List fn) => ad_reverse_with(fn, (String) 0);
+
+meta static List ad_checkpoint(List fn, List block) {
+  return ad_reverse_with(fn, ad_literal_text(block));
+}
 
 /** Emits `NAME_dot` beside a `double` function: every `double` parameter `p`
     is followed by `p_dot`, and the result is the directional derivative.
@@ -1375,7 +1367,7 @@ $(defun ad.checkpoint (fn block)
 */
 macro Decorator $ad.forward(Unit $fn) {
   $fn
-  $(ad.forward $fn)...
+  $ad_forward($fn)...
 }
 
 /** Emits `NAME_grad` beside a `double` function: the original parameters
@@ -1387,7 +1379,7 @@ macro Decorator $ad.forward(Unit $fn) {
 */
 macro Decorator $ad.reverse(Unit $fn) {
   $fn
-  $(ad.reverse $fn)...
+  $ad_reverse($fn)...
 }
 
 /** Like `$ad.reverse()`, but every loop runs without recording and pushes a
@@ -1399,7 +1391,7 @@ macro Decorator $ad.reverse(Unit $fn) {
 */
 macro Decorator $ad.checkpoint(Unit $fn, Literal $block) {
   $fn
-  $(ad.checkpoint $fn $block)...
+  $ad_checkpoint($fn, $block)...
 }
 
 /** Emits both `NAME_dot` and `NAME_grad`. Decorators cannot stack when each
@@ -1408,5 +1400,6 @@ macro Decorator $ad.checkpoint(Unit $fn, Literal $block) {
 */
 macro Decorator $ad.both(Unit $fn) {
   $fn
-  $(append (ad.forward $fn) (ad.reverse $fn))...
+  $ad_forward($fn)...
+  $ad_reverse($fn)...
 }

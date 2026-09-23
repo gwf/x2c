@@ -1741,35 +1741,47 @@ static void _collect_binding_references(Var node, Map referenced) {
   foreach (Var child, syntax) _collect_binding_references(child, referenced);
 }
 
-/* Emits the runtime form of each imported `meta` function this unit reaches,
-   in import order. A `meta` function has two lifetimes: every importing unit
-   installs its compile-time form, and the runtime definition belongs where
-   it is called. A unit that calls one only during translation emits nothing
-   for it, and a definition an emitted one calls comes with it. A
-   compile-time-only one has no runtime form to emit, so a unit that calls it
-   at run time reaches the link error that names it. */
+/* The binding an imported `meta` function or declaration introduces. */
+static Var _meta_identity(List definition) {
+  match (definition) {
+    case %(function ? (bind (binding ?identity ?) *) ?): return identity;
+    case %(declare ? (bindings (op = (bind (binding ?identity ?) *) ?))):
+      return identity;
+    case %(declare ? (bindings (bind (binding ?identity ?) *))):
+      return identity;
+  }
+  return void;
+}
+
+/* Emits the runtime form of each imported `meta` function or value this
+   unit reaches, in import order. A `meta` declaration has two lifetimes:
+   every importing unit installs its compile-time form, and the runtime
+   declaration belongs where it is used. A unit that uses one only during
+   translation emits nothing for it, and a declaration an emitted one uses
+   comes with it. A compile-time-only function has no runtime form to emit,
+   so a unit that calls it at run time reaches the link error that names
+   it. */
 static void _append_meta_definitions(Compiler c, Array nodes) {
   if (!c.meta_defs.len()) return;
   Map referenced = {}, reached = {};
   foreach (List node, nodes) _collect_binding_references(node, referenced);
-  /* The import loop takes a definition and refuses a prototype, so a meta
-     function calls only ones declared before it. One pass from the last
-     definition back therefore reaches every definition an emitted one
+  /* A `meta` declaration uses only ones declared before it, so one pass
+     from the last declaration back reaches every one an emitted one
      needs. */
   for (size_t i = c.meta_defs.len(); i; i--) {
     List definition = c.meta_defs[i - 1];
-    match (definition) case %(function ? (bind (binding ?identity ?) *) ?):
-      if (identity in referenced) {
-        reached[identity] = 1;
-        _collect_binding_references(definition, referenced);
-      }
+    Var identity = _meta_identity(definition);
+    if (identity in referenced) {
+      reached[identity] = 1;
+      _collect_binding_references(definition, referenced);
+    }
   }
   foreach (List definition, c.meta_defs)
-    match (definition) case %(function ? (bind (binding ?identity ?) *) ?):
-      if (identity in reached && !c.meta_is_comptime_only(definition)) {
-        _record_top_level_function_state(c, definition);
-        nodes.push(definition);
-      }
+    if (_meta_identity(definition) in reached &&
+        !c.meta_is_comptime_only(definition)) {
+      _record_top_level_function_state(c, definition);
+      nodes.push(definition);
+    }
 }
 
 /** Parses and types the positioned source against `globs`.
