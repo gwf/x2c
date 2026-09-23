@@ -186,14 +186,68 @@ int main(void) { return $nine() + twelve_value(); }
 EOF
 [[ $("$X2C" run -q) == "9 15" ]] || fail "manifest module result"
 "$X2C" build -v >rebuild.out 2>&1
-grep -Fq "up-to-date link $BUILD/.x2c-build/helpers.so" rebuild.out ||
-  fail "unchanged module relinked"
+grep -Fq "unchanged link $BUILD/.x2c-build/helpers.so" rebuild.out ||
+  fail "unchanged module output replaced"
 grep -Fq "up-to-date translate $BUILD/src/main.x" rebuild.out ||
   fail "consumer retranslated after an unchanged module"
 sed -i.bak 's/3 \* x/4 * x/' src/helpers.x
 [[ $("$X2C" run -q) == "12 20" ]] || fail "consumer after a module edit"
 # `other` names no module, so the one `lib` loaded does not reach it.
 expect_error "no binding for triple" "$X2C" build -q --target other
+
+# A library selected by -L/-l is not part of the explicit operand list.
+# Rebuild it without touching the module source, then confirm the consumer
+# observes the new value. An identical relink preserves the module file.
+mkdir -p link
+cat >link/external.c <<'EOF'
+int external_value(void) { return 2; }
+EOF
+cat >link/helpers.x <<'EOF'
+meta int value(void);
+#pragma private
+int external_value(void);
+int value(void) { return external_value(); }
+EOF
+cat >link/main.x <<'EOF'
+#include <stdio.h>
+meta int value(void);
+meta static int computed(void) => value();
+int main(void) { printf("%d\n", $computed()); return 0; }
+EOF
+cat >link/x2c.toml <<'EOF'
+[project]
+default-target = "app"
+[target.helpers]
+kind = "meta-module"
+sources = ["helpers.x"]
+library-dirs = ["."]
+libraries = ["external"]
+[target.app]
+sources = ["main.x"]
+native-modules = ["helpers"]
+EOF
+(
+  cd link
+  cc -c external.c -o external.o
+  ar rcs libexternal.a external.o
+  [[ $("$X2C" run -q) == 2 ]] || fail "initial linked archive result"
+  sed -i.bak 's/return 2/return 3/' external.c
+  cc -c external.c -o external.o
+  ar rcs libexternal.a external.o
+  [[ $("$X2C" run -q) == 3 ]] || fail "changed linked archive result"
+  cp .x2c-build/helpers.so old.so
+  "$X2C" build -v >relink.out 2>&1
+  grep -Fq "unchanged link $BUILD/link/.x2c-build/helpers.so" relink.out ||
+    fail "identical module output replaced"
+  cmp -s old.so .x2c-build/helpers.so || fail "identical module bytes changed"
+  grep -Fq "up-to-date translate $BUILD/link/main.x" relink.out ||
+    fail "identical module caused consumer translation"
+  sed -i.bak 's/libraries = \["external"\]/libraries = ["missing"]/' x2c.toml
+  if "$X2C" build -q >failed-link.out 2>&1; then
+    fail "missing library linked"
+  fi
+  cmp -s old.so .x2c-build/helpers.so || fail "failed link replaced module"
+)
 
 printf 'meta int triple(int);\nprintln(%%"${triple(4)}");\n' |
   "$X2C" repl --native-module .x2c-build/helpers.so >repl.out 2>&1

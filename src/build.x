@@ -518,6 +518,35 @@ static uint64_t _action_fingerprint(
   return hash;
 }
 
+/* A module relinks even when its named operands are unchanged: -L/-l can
+   select an archive whose bytes changed. Keep the published file when the
+   relink produces the same bytes so consumers can reuse their translations. */
+static int _same_file_bytes(String first, String second) {
+  FILE *left = fopen(first.str(), "rb"), *right = fopen(second.str(), "rb");
+  if (!left || !right) {
+    if (left) fclose(left);
+    if (right) fclose(right);
+    return 0;
+  }
+  unsigned char a[16384], b[16384];
+  int same = 1;
+  for (;;) {
+    size_t na = fread(a, 1, sizeof(a), left);
+    size_t nb = fread(b, 1, sizeof(b), right);
+    if (na != nb || memcmp(a, b, na)) {
+      same = 0;
+      break;
+    }
+    if (na < sizeof(a)) {
+      same = !ferror(left) && !ferror(right);
+      break;
+    }
+  }
+  fclose(left);
+  fclose(right);
+  return same;
+}
+
 /* The preprocessed text is scratch named for this process, so only what it
    says extends the compile fingerprint. */
 static uint64_t _compile_fingerprint(
@@ -743,11 +772,11 @@ static void Build._place_unit_headers(Build b) {
 /** Compiles registered C sources and then archives or links the final output.
     Returns zero for success and one when compilation or the final native
     action fails. Compile-only requests stop after objects. Static archives
-    and native modules reuse their recorded inputs, so a module's consumers
-    stay current; executables always link because library
-    selection and implicit linker inputs are not in the fingerprint. The
-    archiver or linker writes a private sibling that replaces the output by
-    rename, so a concurrent build in the same project finds the whole
+    reuse their recorded inputs. Native modules and executables always link
+    because library selection and implicit linker inputs are not in the
+    fingerprint. An identical relinked module keeps its old file so consumers
+    stay current. The archiver or linker writes a private sibling that
+    replaces the output by rename, so a concurrent build finds the whole
     previous artifact or the whole new one. Mapped
     macOS debug executables also produce a companion dSYM before cleanup;
     failed symbol assembly fails the build and preserves intermediates.
@@ -776,7 +805,7 @@ int Build.finish(Build b) {
                 (input_count == 1 ? "object" : "objects") :
                 (input_count == 1 ? "input" : "inputs");
   String state_path =
-    b.state_root && b.request.kind != <executable> ?
+    b.state_root && b.request.kind == <static-lib> ?
     %"${b.state_root}/final-${_key(b.output)}" : NULL;
   if (state_path && !b.request.dry_run && !access(b.output, R_OK)) {
     int ok = 1;
@@ -815,6 +844,18 @@ int Build.finish(Build b) {
   if (publish.run()) {
     if (staging) Path.remove_tree(staging);
     return 1;
+  }
+  if (staged && b.request.kind == <module> &&
+      _same_file_bytes(staged, b.output)) {
+    Path.remove_tree(staging);
+    if (b.request.verbose)
+      fprintf(stderr, "x2c: unchanged link %s\n", b.output.str());
+    b.final_cached = 1;
+    report_progress(action.phase, 1, 1, b.output);
+    report_phase(
+      action.phase, input_count, noun, input_count,
+      report_now_us() - b.final_at);
+    return 0;
   }
   if (staged && rename(staged, b.output)) {
     fprintf(
