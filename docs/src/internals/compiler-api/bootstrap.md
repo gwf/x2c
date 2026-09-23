@@ -68,7 +68,7 @@ failure prints a bootstrap diagnostic and exits with status 2.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing canonical
 paths.
 
-Source: `src/bootstrap.x:265`
+Source: `src/bootstrap.x:268`
 
 #### bootstrap_write_interfaces
 
@@ -78,11 +78,13 @@ Writes the prefix's runtime interfaces with its installed compiler.
 An interface replays only for the compiler that wrote it, so the native
 compiler translates the runtime sources as a stage build's library batch
 does, and each `lib/<stem>.xi` is then replaced atomically. Sources are
-named relative to the prefix, which the compiler resolves through any
-symbolic link. A failed translation or write prints a bootstrap
-diagnostic and exits with status 2.
+named relative to the prefix, so their spelling matches the home the
+compiler resolves. The scratch translation directory is removed
+afterward. A translation that fails or cannot start prints a bootstrap
+diagnostic with any errors the compiler printed; a failed write prints
+the host error. Either exits with status 2.
 
-Source: `src/bootstrap.x:230`
+Source: `src/bootstrap.x:232`
 
 ## Public types
 

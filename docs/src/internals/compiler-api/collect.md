@@ -13,8 +13,8 @@ Source-ordered shallow symbol collection and replay.
 | Function | Summary |
 | --- | --- |
 | [`interface_configure`](#interface_configure) | Creates the process cache and names the directories searched for `.xi` interfaces. |
-| [`interface_prelude`](#interface_prelude) | Returns the path of the first prelude interface this compiler wrote, or NULL when there is none. |
-| [`interface_text`](#interface_text) | Returns the compiler's own collected contribution as interface text, or NULL when the unit has not collected its symbols. |
+| [`interface_prelude`](#interface_prelude) | Returns the path of the first prelude interface this compiler wrote, or NULL when there is none or the compiler's identity is unknown. |
+| [`interface_text`](#interface_text) | Returns the compiler's own collected contribution as interface text, or NULL when the unit has not collected its symbols or the compiler's identity is unknown, since no compiler could replay that interface. |
 | [`Compiler.collect_package`](#Compiler.collect_package) | Collects a package once and installs its public surface in the current unit. |
 | [`Compiler.collect_symbols`](#Compiler.collect_symbols) | Collects the current translation unit's declarations into `globs`. |
 | [`Compiler.record_generated_symbol`](#Compiler.record_generated_symbol) | Records one generated public callable in the declaration map that the current file's collected entry contributes, which is the map its interface publishes. |
@@ -38,19 +38,22 @@ Source: `src/collect.x:727`
 `String interface_prelude(void)`
 
 Returns the path of the first prelude interface this compiler wrote, or
-NULL when there is none. Its source hashes are not checked.
+NULL when there is none or the compiler's identity is unknown. Its
+source hashes are not checked.
 
-Source: `src/collect.x:754`
+Source: `src/collect.x:755`
 
 #### interface_text
 
 `String interface_text(Compiler compiler)`
 
 Returns the compiler's own collected contribution as interface text, or
-NULL when the unit has not collected its symbols. A contribution that
-the interface grammar cannot spell is reported as an `emit` diagnostic.
+NULL when the unit has not collected its symbols or the compiler's
+identity is unknown, since no compiler could replay that interface. A
+contribution that the interface grammar cannot spell is reported as an
+`emit` diagnostic.
 
-Source: `src/collect.x:985`
+Source: `src/collect.x:990`
 
 ### `Compiler`
 
