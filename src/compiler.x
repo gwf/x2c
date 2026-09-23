@@ -141,8 +141,10 @@ typedef struct Compiler {
      functions that reach file-scope state, whose two forms disagree; it is
      shared with an import's compiler, which installs into the same session.
      `meta_comptime` names the ones that reach a `Meta` operation and so have
-     no runtime form at all: no unit emits one and no call to one folds. */
-  Map meta_folds, meta_impure, meta_comptime;
+     no runtime form at all: no unit emits one and no call to one folds.
+     `meta_regions` maps each installed one to its region summary, which
+     the lifetime check of a later `meta` function reads at its calls. */
+  Map meta_folds, meta_impure, meta_comptime, meta_regions;
   /* File-scope values and types explicitly advertised to the compile-time
      evaluator. `meta_values` is keyed by binding id and stores
      `(MUTABLE LAYOUT)` for the object. */
@@ -298,6 +300,7 @@ void Compiler.borrow_unit_semantics(Compiler compiler, Compiler owner) {
   compiler.proto_cache = owner.proto_cache;
   compiler.meta_impure = owner.meta_impure;
   compiler.meta_comptime = owner.meta_comptime;
+  compiler.meta_regions = owner.meta_regions;
   compiler.meta_values = owner.meta_values;
   compiler.meta_layouts = owner.meta_layouts;
   compiler.native_meta = owner.native_meta;
@@ -344,6 +347,7 @@ static Compiler _new(Compiler owner) {
     _.meta_folds = {};
     _.meta_impure = {};
     _.meta_comptime = {};
+    _.meta_regions = {};
     _.meta_values = {};
     _.meta_layouts = {};
     _.native_meta = {};
@@ -692,6 +696,49 @@ static size_t _note_attribute(Compiler c, size_t index) {
   return last - base;
 }
 
+/* Returns the name token of the `#define` or `#undef` directive `content`,
+   or NULL for any other directive, and sets `*undefined` for `#undef`. The
+   directive is scanned as x2c tokens. */
+static Token _macro_directive(String content, int *undefined) {
+  String directive = preproc_directive(content);
+  *undefined = directive.startswith("undef");
+  if (!*undefined && !directive.startswith("define")) return NULL;
+  Tokenizer scanned = Tokenizer.new(
+    directive.remove_prefix(*undefined ? "undef" : "define"));
+  scanned.scan();
+  Token token = _skip_forward(scanned.tokens);
+  return token.type == <ident> ? token : NULL;
+}
+
+/* Tracks in `layout` the macros whose body holds an attribute that can
+   change a struct's layout, written out or through another such macro. A
+   use of one is marked as the attribute it expands to would be. As with
+   packing, a macro that any arm defines with such an attribute stays in
+   `layout`; only an `#undef` or definition outside every conditional group,
+   `conditional` false, removes it. */
+static void _note_layout_macro(String content, Map layout, int conditional) {
+  int undefined;
+  Token name = _macro_directive(content, &undefined);
+  if (!name) return;
+  if (!conditional) layout.del(name.text);
+  if (undefined) return;
+  Token token = name + 1;
+  if (token.type == <(>) token = token.after_group();
+  for (; token.type != <eof>; token = _skip_forward(token + 1)) {
+    if (token.type != <ident>) continue;
+    int attribute = 0;
+    if (token.text == "__attribute__") {
+      Token open = _skip_forward(token + 1);
+      Token inner = open.type == <(> ? _skip_forward(open + 1) : open;
+      attribute = inner.type == <(> && _layout_attribute(inner);
+    }
+    if (attribute || layout.contains(token.text)) {
+      layout[name.text] = 1;
+      return;
+    }
+  }
+}
+
 /* Counts each conditional group's reachable arms, in opening order. An arm
    is unreachable where `_never_active_arm` hides it. */
 static Array _reachable_arm_counts(Tokenizer tokenizer) {
@@ -740,11 +787,13 @@ static int _reading_follows(Array groups, int k) {
    consistent readings of the groups: reading `k` takes each group's
    reachable arm `k`, or its last one. No reading skips a group without an
    `#else`, so an include guard's contents are always read. Packing is on
-   where any reading has it on. */
+   where any reading has it on. A layout attribute is marked where it is
+   written, and where a macro whose body holds one is used. */
 static void _scan_conditionals(Compiler c) {
   Array counts = _reachable_arm_counts(c.tokenizer);
   Array stack = $auto([]), groups = $auto([]);
   Array packed = $auto([]), saved = $auto([]);
+  Map layout = $auto({});
   int hidden = 0, serial = 0, readings = 1;
   foreach (int count, counts) if (count > readings) readings = count;
   for (int k = 0; k < readings; k++) {
@@ -766,6 +815,10 @@ static void _scan_conditionals(Compiler c) {
                (token.text == "__attribute__" ||
                 token.text == "__x2c_attribute__"))
         i = _note_attribute(c, i);
+      else if (token.type == <ident> && layout.contains(token.text)) {
+        c.pack_marks.push((long) i);
+        c.pack_marks.push((long) i + 1);
+      }
       continue;
     }
     Symbol kind = preproc_conditional_kind(token.text);
@@ -789,6 +842,7 @@ static void _scan_conditionals(Compiler c) {
       groups.take_last();
     }
     else {
+      if (!hidden) _note_layout_macro(token.text, layout, stack.len());
       for (int k = 0; k < packed.len(); k++) {
         if (!_reading_follows(groups, k)) continue;
         List states = saved[k];
@@ -1649,8 +1703,7 @@ static void _shallow_parse_loop(Compiler c) {
       _debug_tokens(c, start, c.token);
       continue;
     }
-    if (c.peek(0) == <protocol> ||
-        (c.peek(0) == <static> && c.peek(1) == <protocol>)) {
+    if (c.protocol_form_starts()) {
       c.parse_protocol_declaration();
       _debug_tokens(c, start, c.token);
       continue;
@@ -1800,14 +1853,9 @@ static int _prefix_rank(Var v) {
    is `<wrapper>`, and any other function-like macro is skipped. An `#undef`
    drops the name, so later source reads it as an ordinary identifier. */
 static void _note_object_macro(Compiler c, String content) {
-  String directive = preproc_directive(content);
-  int undefined = directive.startswith("undef");
-  if (!undefined && !directive.startswith("define")) return;
-  Tokenizer scanned = Tokenizer.new(
-    directive.remove_prefix(undefined ? "undef" : "define"));
-  scanned.scan();
-  Token token = _skip_forward(scanned.tokens);
-  if (token.type != <ident>) return;
+  int undefined;
+  Token token = _macro_directive(content, &undefined);
+  if (!token) return;
   String name = token.text;
   if (undefined) {
     c.object_macros.del(name);
@@ -1960,6 +2008,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   c.meta_folds = {};
   c.meta_impure = {};
   c.meta_comptime = {};
+  c.meta_regions = {};
   c.meta_values = {};
   c.meta_layouts = {};
   c.native_meta = {};

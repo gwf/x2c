@@ -375,6 +375,15 @@ static void Compiler._retain_protocol_source_node(
   if (storage == <static>) compiler.sym.mark_static(key);
 }
 
+/* A `meta` adoption lets compile-time code call the conformance's
+   witnesses. Its row travels beside the adoption row it marks. */
+static void Compiler._retain_meta_protocol(Compiler c, List adoption) {
+  Type (base, participant) = adoption.cdr();
+  c._retain_protocol_source_node(
+    %(meta-protocol $base $participant), _adoption_storage(adoption),
+    %(meta-protocol @{_adoption_location(adoption)}));
+}
+
 static List Compiler._publish_protocol_record(
   Compiler compiler, List record, Type base, List location) {
   Symbol storage = compiler.source_private > 0 ? <static> : <external>;
@@ -496,12 +505,19 @@ static List Compiler._publish_protocol_adoption(
     The node must carry a protocol record or supported adoption shape with its
     storage and source location. Installation invalidates cached protocol
     decisions and returns the canonical published node. Generated contexts may
-    also retain that node in `Sym` for replay.
+    also retain that node in `Sym` for replay. A `(meta-protocol ADOPTION)`
+    node publishes its adoption and marks it for compile-time code.
 */
 List Compiler.publish_protocol_node(
   Compiler c, List node, Token participant_token,
   Token representation_token) {
   match (node) {
+    case %(meta-protocol ?(List adoption)): {
+      List published = c.publish_protocol_node(
+        adoption, participant_token, representation_token);
+      c._retain_meta_protocol(published);
+      return published;
+    }
     case %(protocol
            (!set ?record
              ("protocol-record"
@@ -2388,10 +2404,15 @@ static List _parse_protocol_member(
     The method consumes through the closing brace or semicolon. Full parsing
     publishes the normalized row immediately. Macro-hole parsing returns syntax
     for later binding; shallow parsing publishes only when protocol collection
-    is enabled and otherwise returns the uninstalled node.
+    is enabled and otherwise returns the uninstalled node. A leading `meta`
+    makes an adoption's witnesses available to compile-time code.
 */
 List Compiler.parse_protocol_declaration(Compiler c) {
-  Token start = c.token;
+  Token start = c.token, meta = NULL;
+  if (c.peek(0) == <ident> && c.token.text == "meta") {
+    meta = c.token;
+    c.next();
+  }
   Symbol storage = <external>;
   if (c.test(<static>)) storage = <static>;
   c.expect(<protocol>);
@@ -2436,13 +2457,22 @@ List Compiler.parse_protocol_declaration(Compiler c) {
   if (c.peek(0) == <;>) {
     c.next();
     List location = c.token_location(start);
-    if (c.macro_holes || (c.shallow && !c.collect_protocols))
-      return _adoption_node(
+    if (c.macro_holes || (c.shallow && !c.collect_protocols)) {
+      List adoption = _adoption_node(
         base, participant_type, storage, representation, tag, location);
-    return c._publish_protocol_adoption(
+      return meta ? %(meta-protocol $adoption) : adoption;
+    }
+    List adoption = c._publish_protocol_adoption(
       base, participant_type, storage, representation, tag, location,
       participant_token, modifier_token);
+    if (meta) c._retain_meta_protocol(adoption);
+    return adoption;
   }
+
+  if (meta)
+    c.report_error(
+      <protocol>, "'meta' applies only to a concrete protocol adoption",
+      meta, %("mark each adoption: meta protocol BASE(TYPE);"));
 
   if (representation || tag)
     c.report_error(

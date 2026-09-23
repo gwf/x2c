@@ -60,6 +60,25 @@ struct UnzipShared {
   struct Iter column_iters[2];
 };
 
+/* Compile-time code calls these producers natively. Each takes its
+   destination last, so a compile-time call may omit it and get a fresh
+   `Iter`. The collections' own `iter` methods are available through their
+   `meta protocol Iter` adoptions in protocols.x; `Map.keys`,
+   `Map.enumerate` and `Var.iter` are marked beside their definitions. */
+meta Iter range(int start, int end, int step, Iter dest);
+meta Iter Iter.map(Iter, Func, Iter dest);
+meta Iter Iter.filter(Iter, Func, Iter dest);
+meta Iter Iter.zip(Iter left, Iter right, Iter dest);
+meta Iter Iter.zip_with(Iter left, Iter right, Func, Iter dest);
+meta Iter Iter.map2(Iter left, Iter right, Func, Iter dest);
+meta Iter Iter.chain(Iter first, Iter second, Iter dest);
+meta Iter Iter.enumerate(Iter, int start, Iter dest);
+meta Iter Iter.repeat(Var value, int count, Iter dest);
+meta Iter Iter.head(Iter, int count, Iter dest);
+meta Iter Iter.accumulate(Iter, Var initial, Iter dest);
+meta Iter Iter.scan(Iter, Var seed, Func, Iter dest);
+meta Iter Iter.unique(Iter, Iter dest);
+
 #pragma private
 
 #include "list.x"

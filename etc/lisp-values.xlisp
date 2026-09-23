@@ -11,6 +11,18 @@
 // `car`, `cdr`, `cons`, `length`, `reverse`, `string-append`, `substring`,
 // `lower`, `str`, and `repr` are unchanged and reach the same code.
 
+// An iterator operation takes its destination last. A call that omits it
+// gets a fresh Iter, allocated in the current Scope; a call with explicit
+// storage passes it. The compile-time runtime binds lowered iterator calls
+// the same way.
+(defun C.iterator.call (explicit arity)
+  (let ((fresh (bind "Iter_new" nil)))
+    (lambda (. arguments)
+      (apply explicit
+             (if (eq? (length arguments) arity)
+                 (append arguments (list (fresh)))
+                 arguments)))))
+
 // List
 
 (def List.getindex (bind "List_getindex" nil))
@@ -31,7 +43,7 @@
 (def List.zip_with (bind "List_zip_with" nil))
 (def List.foldl   (bind "List_foldl" nil))
 (def List.find    (bind "Lisp_List_find" nil))
-(def List.iter     (bind "List_iter" nil))
+(def List.iter     (C.iterator.call (bind "List_iter_into" nil) 1))
 
 // Array
 
@@ -55,7 +67,7 @@
 (def Array.sort_by   (bind "Array_sort_by" nil))
 (def Array.sort_with (bind "Array_sort_with" nil))
 (def Array.foldl    (bind "Array_foldl" nil))
-(def Array.iter      (bind "Array_iter" nil))
+(def Array.iter      (C.iterator.call (bind "Array_iter_into" nil) 1))
 
 // Map
 
@@ -69,9 +81,9 @@
 (def Map.getdefault (bind "Map_getdefault" nil))
 (def Map.setdefault (bind "Map_setdefault" nil))
 (def Map.list       (bind "Map_list" nil))
-(def Map.iter       (bind "Map_iter" nil))
-(def Map.keys       (bind "Map_keys" nil))
-(def Map.enumerate  (bind "Map_enumerate" nil))
+(def Map.iter       (C.iterator.call (bind "Map_iter_into" nil) 1))
+(def Map.keys       (C.iterator.call (bind "Map_keys_into" nil) 1))
+(def Map.enumerate  (C.iterator.call (bind "Map_enumerate_into" nil) 1))
 
 // String
 
@@ -134,24 +146,24 @@
 (def String.rstrip (bind "lisp_string_rstrip" nil))
 (def String.map (bind "String_map" nil))
 (def String.filter (bind "Lisp_String_filter" nil))
-(def String.iter (bind "String_iter" nil))
+(def String.iter (C.iterator.call (bind "String_iter_into" nil) 1))
 
 // Iter
 
-(def Var.iter (bind "Var_iter" nil))
-(def range (bind "range" nil))
-(def Iter.map (bind "Iter_map" nil))
+(def Var.iter (C.iterator.call (bind "Var_iter_into" nil) 1))
+(def range (C.iterator.call (bind "range_into" nil) 3))
+(def Iter.map (C.iterator.call (bind "Iter_map_into" nil) 2))
 (def Iter.filter (bind "Lisp_Iter_filter" nil))
-(def Iter.zip (bind "Iter_zip" nil))
-(def Iter.zip_with (bind "Iter_zip_with" nil))
-(def Iter.map2 (bind "Iter_map2" nil))
-(def Iter.chain (bind "Iter_chain" nil))
-(def Iter.enumerate (bind "Iter_enumerate" nil))
-(def Iter.repeat (bind "Iter_repeat" nil))
-(def Iter.head (bind "Iter_head" nil))
-(def Iter.accumulate (bind "Iter_accumulate" nil))
-(def Iter.scan (bind "Iter_scan" nil))
-(def Iter.unique (bind "Iter_unique" nil))
+(def Iter.zip (C.iterator.call (bind "Iter_zip_into" nil) 2))
+(def Iter.zip_with (C.iterator.call (bind "Iter_zip_with_into" nil) 3))
+(def Iter.map2 (C.iterator.call (bind "Iter_map2_into" nil) 3))
+(def Iter.chain (C.iterator.call (bind "Iter_chain_into" nil) 2))
+(def Iter.enumerate (C.iterator.call (bind "Iter_enumerate_into" nil) 2))
+(def Iter.repeat (C.iterator.call (bind "Iter_repeat_into" nil) 2))
+(def Iter.head (C.iterator.call (bind "Iter_head_into" nil) 2))
+(def Iter.accumulate (C.iterator.call (bind "Iter_accumulate_into" nil) 2))
+(def Iter.scan (C.iterator.call (bind "Iter_scan_into" nil) 3))
+(def Iter.unique (C.iterator.call (bind "Iter_unique_into" nil) 1))
 (def Iter.any (bind "Lisp_Iter_any" nil))
 (def Iter.all (bind "Lisp_Iter_all" nil))
 (def Iter.foldl (bind "Iter_foldl" nil))

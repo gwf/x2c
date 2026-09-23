@@ -23,6 +23,7 @@ Translating a compile-time x2c function into Lisp.
 | [`Compiler.lower_reached_globals`](#Compiler.lower_reached_globals) | Returns whether the last `Compiler.install_comptime` reached file-scope state, directly or through a callee already recorded as reaching it. |
 | [`Compiler.lower_reached_meta`](#Compiler.lower_reached_meta) | Returns whether the last `Compiler.install_comptime` reached a `Meta` operation, directly or through a callee already recorded as reaching one. |
 | [`Compiler.lower_repl`](#Compiler.lower_repl) | Lowers a REPL execution wrapper whose unresolved bindings name the session's persistent value table rather than program file-scope state. |
+| [`Compiler.lowered_meta_regions`](#Compiler.lowered_meta_regions) | Returns the region summary an earlier install of `fn` from the same file recorded with its lowering, or NULL when the process has none. |
 | [`Compiler.meta_is_comptime_only`](#Compiler.meta_is_comptime_only) | Returns whether `fn` is a `meta` function this compiler recorded as compile-time only, whose runtime form the unit does not emit. |
 | [`Compiler.meta_value_expression`](#Compiler.meta_value_expression) | Returns literal code preserving `declared` when supplied. |
 
@@ -43,7 +44,7 @@ source. Another `meta` function may call it: calling one is what makes
 the caller compile-time only too, so a body being parsed under the marker
 is left alone.
 
-Source: `src/comptime.x:2821`
+Source: `src/comptime.x:2843`
 
 <a id="Compiler.fold_meta_call"></a>
 #### Compiler.fold_meta_call
@@ -60,7 +61,7 @@ installed folds, so an import's runtime definition keeps the run-time
 call that designates the unit emitting it. Evaluation runs in the macro
 session; a raise there leaves the call.
 
-Source: `src/comptime.x:2843`
+Source: `src/comptime.x:2865`
 
 <a id="Compiler.inherit_shared_meta"></a>
 #### Compiler.inherit_shared_meta
@@ -71,7 +72,7 @@ Restores the shared definitions' derived call restrictions into a fresh
 compiler pass. Reads existing process tables without opening Lisp or
 creating a lowering cache in the unit's Context.
 
-Source: `src/comptime.x:2521`
+Source: `src/comptime.x:2523`
 
 <a id="Compiler.install_comptime"></a>
 #### Compiler.install_comptime
@@ -83,7 +84,7 @@ function is callable from compile-time Lisp under its own name.
 Returns whether the lowering succeeded. This method mutates the macro
 session and does not open a semantic transaction.
 
-Source: `src/comptime.x:2576`
+Source: `src/comptime.x:2602`
 
 <a id="Compiler.lower_comptime"></a>
 #### Compiler.lower_comptime
@@ -114,7 +115,7 @@ Source: `src/comptime.x:2480`
 
 Lowers a closed expression for explicit compile-time evaluation.
 
-Source: `src/comptime.x:2664`
+Source: `src/comptime.x:2686`
 
 <a id="Compiler.lower_meta_initializer"></a>
 #### Compiler.lower_meta_initializer
@@ -126,7 +127,7 @@ value. Evaluated outside any function, the object's bytes belong to the
 macro session. The declaration parser has already installed its binding
 and checked that its type has a native layout.
 
-Source: `src/comptime.x:2643`
+Source: `src/comptime.x:2665`
 
 <a id="Compiler.lower_reached_globals"></a>
 #### Compiler.lower_reached_globals
@@ -136,7 +137,7 @@ Source: `src/comptime.x:2643`
 Returns whether the last `Compiler.install_comptime` reached file-scope
 state, directly or through a callee already recorded as reaching it.
 
-Source: `src/comptime.x:2616`
+Source: `src/comptime.x:2638`
 
 <a id="Compiler.lower_reached_meta"></a>
 #### Compiler.lower_reached_meta
@@ -146,7 +147,7 @@ Source: `src/comptime.x:2616`
 Returns whether the last `Compiler.install_comptime` reached a `Meta`
 operation, directly or through a callee already recorded as reaching one.
 
-Source: `src/comptime.x:2624`
+Source: `src/comptime.x:2646`
 
 <a id="Compiler.lower_repl"></a>
 #### Compiler.lower_repl
@@ -158,6 +159,16 @@ session's persistent value table rather than program file-scope state.
 
 Source: `src/comptime.x:2476`
 
+<a id="Compiler.lowered_meta_regions"></a>
+#### Compiler.lowered_meta_regions
+
+`List Compiler.lowered_meta_regions(Compiler compiler, List fn)`
+
+Returns the region summary an earlier install of `fn` from the same file
+recorded with its lowering, or NULL when the process has none.
+
+Source: `src/comptime.x:2590`
+
 <a id="Compiler.meta_is_comptime_only"></a>
 #### Compiler.meta_is_comptime_only
 
@@ -166,7 +177,7 @@ Source: `src/comptime.x:2476`
 Returns whether `fn` is a `meta` function this compiler recorded as
 compile-time only, whose runtime form the unit does not emit.
 
-Source: `src/comptime.x:2632`
+Source: `src/comptime.x:2654`
 
 <a id="Compiler.meta_value_expression"></a>
 #### Compiler.meta_value_expression
@@ -178,7 +189,7 @@ Returns literal code preserving `declared` when supplied.
 its descendants must be immutable representable values. Returns NULL for
 code Lists or values without the requested literal representation.
 
-Source: `src/comptime.x:2719`
+Source: `src/comptime.x:2741`
 
 ## Design notes
 

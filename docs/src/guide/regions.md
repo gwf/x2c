@@ -10,15 +10,16 @@ pointer whose target the compiler cannot identify, including a pointer that
 a called function stores into for the caller.
 
 A region is a `$scope()` block, a `Scope.retain` and `Scope.release` pair, a
-`$scope(&slot)` push, a `Pool.open` bracket, an `$auto` local, or the
-storage of a `Scope` local that `Scope.destroy` ends.
+`$scope(&slot)` push, a `Pool.open` bracket, an `$auto` local, the
+storage of a `Scope` local that `Scope.destroy` ends, or the function's own
+locals and parameters, whose storage ends when the function returns.
 `src/regions.x` analyzes these forms before the transform driver lowers
 them, so a region is still the call that opens it and the `defer` beside it
 that closes it.
 
 ## Exemptions
 
-The pass exempts four ways of leaving a region.
+The pass exempts these ways of leaving a region.
 
 A `List` pool owns each canonical value, so ending a region never frees it.
 `String`, `List`, and `Symbol` results therefore cross a region boundary
@@ -45,6 +46,23 @@ assignment by the declared type through the compiler's `Var` tag for that
 type, as the converter does. A `String *` or `List *` points at storage and
 gets no exemption.
 
+Every region a function opens ends before the function's own storage. The
+address of a local can therefore be stored into another local, or into an
+object of a region the function opens, without a warning. A reference
+capture, `using &name`, moves the local into a cell of the active region, so
+the closure holds that cell rather than the function's storage.
+
+A store into a place that an earlier `defer` in the same block writes
+back, as `$let` does, is undone before the block ends and is not reported.
+A store made before that `defer`, or after a `defer` that runs on only one
+branch, is reported, because a `return` between them leaves the place
+holding the value.
+
+A destination that converts its value by copying does not keep it: a `List`
+parameter given an `Array`, or a `Var` given a C string, which it boxes as a
+fresh `String`. A local C array
+passed on, returned, or stored counts as the address of its first element.
+
 ## What the warnings do not cover
 
 The check covers lexical regions and the storage it tracks. It does not
@@ -53,7 +71,8 @@ cover:
 - storage from plain `malloc` or a C library;
 - pointer arithmetic and casts through raw C types;
 - values reached through a field of a stack `struct`, which the pass treats
-  as one storage;
+  as one storage, so an address kept in a field of a struct that is copied
+  out is not followed;
 - callbacks and function pointers, including entry points a Lisp binding
   calls;
 - `Scope.free` and `Scope.realloc`, whose effect on other aliases of the
@@ -81,6 +100,19 @@ was taken from, and whether a free has already ended it. The first round
 that changes no summary walked every body against final summaries, so its
 warnings are the ones reported.
 
+An address taken with `&` belongs to the storage it names. The address of a
+local, a parameter, or a compound literal belongs to the function's own
+storage. An address reached through a pointer, such as `&box->value`,
+belongs to whatever that pointer holds, so an address inside a parameter's
+object counts as that parameter in the summary. A caller of a function that
+returns `&box->value` therefore sees its own borrow come back.
+
+A `meta` function is walked the same way when it is defined, against the
+summaries of the `meta` functions defined before it. A compile-time call
+frees its locals when it returns, so a finding in a `meta` body is an error
+that rejects the definition rather than a warning; see
+[Meta Functions](meta-functions.md).
+
 Summaries stay inside the unit. For a call into another unit, the pass uses
 only a fixed table of runtime operations, such as a `Scope` allocator,
 `cons`, `Array.push`, `Scope.move`, and `Array.list_free`. Summaries are not
@@ -106,13 +138,13 @@ lifetimes against them. From the ML Kit, x2c takes the idea that regions are
 the unit of deallocation; from Cyclone, the idea that a C program can be
 checked against them. The regions are the ones the author wrote with
 `$scope` and the retain and release calls. The check adds nothing to the
-program text and produces only warnings.
+program text and produces only warnings, except in compile-time code.
 
 Rust and Swift put ownership and lifetime in the signature. Every call is
 checked locally against a declared contract, and a violation is an error.
 x2c has no lifetime annotations, so the check derives the same information,
 and derived facts are weaker than a declared contract. As a result, existing
-C-shaped code compiles unchanged, and the check can only warn.
+C-shaped code compiles unchanged, and ordinary code gets only warnings.
 
 Go's escape analysis and Infer use the most similar methods. Go computes
 per-function escape facts and uses them to choose between stack and heap

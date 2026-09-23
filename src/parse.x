@@ -263,6 +263,23 @@ static String _attribute(Compiler c) {
   return String.new_len(c.text + first.pos, last.pos + last.len - first.pos);
 }
 
+/* C places an aggregate's own attributes after its keyword and after its
+   closing brace, written out or through a macro whose body is attributes.
+   Collection skips them: attribute text is no part of a collected type, and
+   the packing marks hold any layout they change (see Compiler.tokenize). */
+static void _skip_aggregate_attributes(Compiler c) {
+  if (!c.shallow) return;
+  loop {
+    Var definition;
+    if (_attribute(c)) continue;
+    if (c.peek(0) != <ident> ||
+        !c.object_macros.try_get(c.token.text, &definition) ||
+        !definition.equal(%()))
+      return;
+    c.next();
+  }
+}
+
 /* Source is read before preprocessing, so a macro whose body is declaration
    specifiers and attributes, such as an export annotation, still sits in a
    declaration. A specifier position of `rank`, 0 for storage classes and
@@ -466,15 +483,13 @@ static int _enum_fits_int(List type, List members) {
   return 1;
 }
 
-/* Reports whether C packs an aggregate whose tokens run from `first` to the
-   current one and any attribute after it: packing is on before it, or a
-   mark lies within it. Tokens outside the unit's own, such as a constructed
-   form's, have no marks. */
+/* Reports whether C packs an aggregate whose tokens, with its attributes,
+   run from `first` up to the current one, which is not its own: packing is
+   on before it, or a mark lies within it. Tokens outside the unit's own,
+   such as a constructed form's, have no marks. */
 static int _packed_since(Compiler c, Token first) {
   Token base = c.tokenizer.tokens, end = base + c.tokenizer.tokens.len();
   if (first < base || c.token >= end) return 0;
-  Token last = _attribute_starts(c)
-             ? c.skip_trivia_from(c.token + 1).group_close() : c.token;
   // Marks ascend, so the ones before `first` are a prefix.
   int before = 0, count = c.pack_marks.len();
   for (int high = count; before < high;) {
@@ -483,14 +498,15 @@ static int _packed_since(Compiler c, Token first) {
     else high = middle;
   }
   return before % 2 ||
-         (before < count && (long) c.pack_marks[before] <= last - base);
+         (before < count && (long) c.pack_marks[before] < c.token - base);
 }
 
 /* Publishes an aggregate whose tokens start at `first`. A constructed
-   struct passes the current token, so it is packed where its form is; an
-   enum passes `NULL`. */
+   aggregate passes the current token, so it is packed where its form is. A
+   packed enum can be narrower than int, so it has no int layout. */
 static List _publish_aggregate_type(
   Compiler compiler, Symbol tag, Var name, List members, Token first) {
+  int packed = _packed_since(compiler, first);
   List type = %($tag $name);
   List body = tag == <enum> ? members : %(fields @members);
   if (name is <list> && name.car() == <binding>)
@@ -499,10 +515,9 @@ static List _publish_aggregate_type(
     compiler.sym.declare(NULL, type, tag == <enum> ? %(enum) : %($tag $body));
   if (tag != <enum>) {
     compiler.sym.declare_field_order(type, members);
-    if (_packed_since(compiler, first))
-      compiler.sym.set(%(@type "packed"), %(packed));
+    if (packed) compiler.sym.set(%(@type "packed"), %(packed));
   }
-  else if (_enum_fits_int(type, members))
+  else if (!packed && _enum_fits_int(type, members))
     compiler.sym.set(%(@type "int-range"), %(int));
   return %($tag $name $body);
 }
@@ -571,6 +586,7 @@ static List _struct_or_union(Compiler c) {
   Token first = c.token;
   Symbol tag = c.peek(0);
   c.next();
+  _skip_aggregate_attributes(c);
   List name = c.parse_optional_identifier();
   if (name && c.package) name = _package_aggregate_name(c, tag, name);
   List usedname = name ? name : c.gensym();
@@ -580,6 +596,7 @@ static List _struct_or_union(Compiler c) {
   if (c.test(<"{">)) {
     fields = c.parse_fields(type);
     c.expect(<"}">);
+    _skip_aggregate_attributes(c);
     if (!c.macro_holes)
       return _publish_aggregate_type(c, tag, usedname.car(), fields, first);
     fields = cons(<fields>, fields);
@@ -696,7 +713,9 @@ List Compiler.parse_enumerators(Compiler c, List context) {
 }
 
 static List _enum(Compiler c) {
+  Token first = c.token;
   c.expect(<enum>);
+  _skip_aggregate_attributes(c);
   List name = c.parse_optional_identifier();
   if (name && c.package) name = _package_aggregate_name(c, <enum>, name);
   List usedname = name ? name : c.gensym();
@@ -704,9 +723,9 @@ static List _enum(Compiler c) {
   if (c.test(<"{">)) {
     enums = c.parse_enumerators(type);
     c.expect(<"}">);
+    _skip_aggregate_attributes(c);
     if (!c.macro_holes)
-      return _publish_aggregate_type(
-        c, <enum>, usedname.car(), enums, NULL);
+      return _publish_aggregate_type(c, <enum>, usedname.car(), enums, first);
   }
   return enums ? type.append(%($enums)): type;
 }
@@ -1733,6 +1752,15 @@ static int _script_declaration_stays(Compiler c) {
   return 0;
 }
 
+/** Reports whether the cursor begins a protocol declaration or adoption,
+    including its `meta` and `static` markers. This query does not consume
+    tokens. */
+int Compiler.protocol_form_starts(Compiler c) {
+  int at = c.peek(0) == <ident> && c.token.text == "meta";
+  if (c.peek(at) == <static>) at++;
+  return c.peek(at) == <protocol>;
+}
+
 /** Reports whether the cursor begins a contextual top-level `meta`
     declaration: a function or an initialized file-static value. */
 int Compiler.meta_form_is_declaration(Compiler c) {
@@ -1758,7 +1786,8 @@ int Compiler.script_statement_starts(Compiler c) {
       return 0;
   }
   if (c.test_static_assert() || c.keyword_form_is_definition() ||
-      c.macro_form_is_definition() || c.meta_form_is_declaration())
+      c.macro_form_is_definition() || c.meta_form_is_declaration() ||
+      c.protocol_form_starts())
     return 0;
   if (c.peek(0) == <ident> && c.token.text == "with") return 1;
   if (c.macro_starts_target_at(AST_UNIT)) return !c.macro_targets_unit();
@@ -1827,11 +1856,9 @@ List Compiler.parse_top_level(Compiler c) {
   }
   List macro = c.try_parse_macro_target_at(AST_UNIT);
   if (macro) return macro;
-  if (c.peek(0) == <static> && c.peek(1) == <protocol>)
-    return c.parse_protocol_declaration();
+  if (c.protocol_form_starts()) return c.parse_protocol_declaration();
   switch (c.peek(0)) {
     case <import>:   return c.parse_import_declaration();
-    case <protocol>: return c.parse_protocol_declaration();
     case <"$(">: {
       if (c.parsing_source_syntax()) return c.parse_source_lisp();
       List imported = c.parse_macro_lisp_top_level();
@@ -2446,7 +2473,7 @@ List Compiler.bind_syntax(
         }
         return _finish_function(_, declaration, body);
       }
-      case %(!set ?node ((!or protocol adopt) *)):
+      case %(!set ?node ((!or protocol adopt meta-protocol) *)):
         if (context == AST_UNIT)
           return _.publish_protocol_node(node, _.token, NULL);
       case %(!set ?definition (macrodef *)): {

@@ -1221,6 +1221,7 @@ return fn;
 
 void Diagnostics_reset(Diagnostics);
 Symbol Compiler_peek(Compiler, int);
+int Compiler_protocol_form_starts(Compiler);
 int Compiler_macro_form_is_definition(Compiler);
 int Compiler_keyword_form_is_definition(Compiler);
 void SymTxn_commit_transient(SymTxn);
@@ -1312,7 +1313,7 @@ ReplResult ReplSession_submit(ReplSession session, String source){
               }
 
             }
-            if(Compiler_peek(c, 0) == 632323240 || Compiler_peek(c, 0) == 1139215899608 || Compiler_peek(c, 0) == 9297 || Compiler_meta_form_is_declaration(c) || Compiler_macro_form_is_definition(c) || Compiler_keyword_form_is_definition(c)) _refuse(_289);  if(Compiler_peek(c, 0) == 44977116 || Compiler_peek(c, 0) == 357722 || Compiler_peek(c, 0) == 387198108 || Compiler_peek(c, 0) == 1317118534) _refuse(_290);  int declaration = Compiler_test_declaration(c);  if(! declaration){
+            if(Compiler_peek(c, 0) == 632323240 || Compiler_protocol_form_starts(c) || Compiler_peek(c, 0) == 9297 || Compiler_meta_form_is_declaration(c) || Compiler_macro_form_is_definition(c) || Compiler_keyword_form_is_definition(c)) _refuse(_289);  if(Compiler_peek(c, 0) == 44977116 || Compiler_peek(c, 0) == 357722 || Compiler_peek(c, 0) == 387198108 || Compiler_peek(c, 0) == 1317118534) _refuse(_290);  int declaration = Compiler_test_declaration(c);  if(! declaration){
               String prefix = _281;  end += String_len(prefix);  result.source = String_add(String_add(prefix, source), _76);  _tokenize(c, result.source, scratch);
             }
             List node = Compiler_parse_submission(c, end);  _require_evaluable(List_var(node));  if(_type_submission_names(node, added)){

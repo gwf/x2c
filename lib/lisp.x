@@ -1402,18 +1402,9 @@ static String _lisp_String_map(String value, Var callable) =>
 static String _lisp_String_filter(String value, Var callable) =>
   value.filter(_lisp_callback(callable, 1));
 
-static Iter _lisp_List_iter(List value) => value.iter(Iter.new());
-static Iter _lisp_Array_iter(Array value) => value.iter(Iter.new());
-static Iter _lisp_Map_iter(Map value) => value.iter(Iter.new());
-static Iter _lisp_Map_keys(Map value) => value.keys(Iter.new());
-static Iter _lisp_Map_enumerate(Map value) => value.enumerate(Iter.new());
-static Iter _lisp_String_iter(String value) => value.iter(Iter.new());
-static Iter _lisp_Var_iter(Var value) => value.iter(Iter.new());
-static Iter _lisp_range(int start, int end, int step) =>
-  range(start, end, step, Iter.new());
-/* Lowered source passes its own Iter storage. The `_into` targets below
-   bind the native operations directly; only a callable argument needs this
-   session's Func bridge. */
+/* Lowered source passes its own Iter storage, and a compile-time call that
+   omits it gets a fresh one from `C.iterator.call`. Only a callable
+   argument needs this session's Func bridge. */
 static Iter _lisp_Iter_init(
   Iter destination, Var object, Var callable, Var state
 ) {
@@ -1424,44 +1415,21 @@ static Iter _lisp_Iter_init(
   return destination;
 }
 
-static Iter _lisp_Iter_map(Iter iter, Var callable) =>
-  iter.map(_lisp_callback(callable, 1), Iter.new());
 static Iter _lisp_Iter_map_into(
   Iter iter, Var callable, Iter destination
 ) => iter.map(_lisp_callback(callable, 1), destination);
-static Iter _lisp_Iter_filter(Iter iter, Var callable) =>
-  iter.filter(_lisp_callback(callable, 1), Iter.new());
 static Iter _lisp_Iter_filter_into(
   Iter iter, Var callable, Iter destination
 ) => iter.filter(_lisp_callback(callable, 1), destination);
-static Iter _lisp_Iter_zip(Iter left, Iter right) =>
-  left.zip(right, Iter.new());
-static Iter _lisp_Iter_zip_with(Iter left, Iter right, Var callable) =>
-  left.zip_with(right, _lisp_callback(callable, 2), Iter.new());
 static Iter _lisp_Iter_zip_with_into(
   Iter left, Iter right, Var callable, Iter destination
 ) => left.zip_with(right, _lisp_callback(callable, 2), destination);
-static Iter _lisp_Iter_map2(Iter left, Iter right, Var callable) =>
-  left.map2(right, _lisp_callback(callable, 2), Iter.new());
 static Iter _lisp_Iter_map2_into(
   Iter left, Iter right, Var callable, Iter destination
 ) => left.map2(right, _lisp_callback(callable, 2), destination);
-static Iter _lisp_Iter_chain(Iter first, Iter second) =>
-  first.chain(second, Iter.new());
-static Iter _lisp_Iter_enumerate(Iter iter, int start) =>
-  iter.enumerate(start, Iter.new());
-static Iter _lisp_Iter_repeat(Var value, int count) =>
-  Iter.repeat(value, count, Iter.new());
-static Iter _lisp_Iter_head(Iter iter, int count) =>
-  iter.head(count, Iter.new());
-static Iter _lisp_Iter_accumulate(Iter iter, Var initial) =>
-  iter.accumulate(initial, Iter.new());
-static Iter _lisp_Iter_scan(Iter iter, Var seed, Var callable) =>
-  iter.scan(seed, _lisp_callback(callable, 2), Iter.new());
 static Iter _lisp_Iter_scan_into(
   Iter iter, Var seed, Var callable, Iter destination
 ) => iter.scan(seed, _lisp_callback(callable, 2), destination);
-static Iter _lisp_Iter_unique(Iter iter) => iter.unique(Iter.new());
 static int _lisp_Iter_any(Iter iter, Var callable) =>
   iter.any(_lisp_callback(callable, 1));
 static int _lisp_Iter_all(Iter iter, Var callable) =>
@@ -1576,8 +1544,7 @@ $(def lisp.native.target.rows (append '(
   (lisp_write_file)
   (List_sort)
 
-  // Interpreted callbacks run through a session-bound Func. Iterator
-  // producers allocate their destination in that same session Scope.
+  // Interpreted callbacks run through a session-bound Func.
   (_lisp_List_map (as List_map))
   (_lisp_List_filter (as List_filter))
   (_lisp_List_any (as List_any))
@@ -1595,48 +1562,16 @@ $(def lisp.native.target.rows (append '(
   (_lisp_Array_foldl (as Array_foldl))
   (_lisp_String_map (as String_map))
   (_lisp_String_filter (as String_filter))
-  (_lisp_List_iter (as List_iter))
-  (List_iter (as List_iter_into))
-  (_lisp_Array_iter (as Array_iter))
-  (Array_iter (as Array_iter_into))
-  (_lisp_Map_iter (as Map_iter))
-  (Map_iter (as Map_iter_into))
-  (_lisp_Map_keys (as Map_keys))
-  (Map_keys (as Map_keys_into))
-  (_lisp_Map_enumerate (as Map_enumerate))
-  (Map_enumerate (as Map_enumerate_into))
-  (_lisp_String_iter (as String_iter))
-  (String_iter (as String_iter_into))
-  (_lisp_Var_iter (as Var_iter))
-  (Var_iter (as Var_iter_into))
-  (_lisp_range (as range))
-  (range (as range_into))
+  // Iterator operations are declared `meta` in iter.x and adopted with
+  // `meta protocol` in protocols.x, which generates their `_into` targets.
+  // One that takes a callback binds here through its adapter.
   (Iter_new)
   (_lisp_Iter_init (as Iter_init))
-  (_lisp_Iter_map (as Iter_map))
   (_lisp_Iter_map_into (as Iter_map_into))
-  (_lisp_Iter_filter (as Iter_filter))
   (_lisp_Iter_filter_into (as Iter_filter_into))
-  (_lisp_Iter_zip (as Iter_zip))
-  (Iter_zip (as Iter_zip_into))
-  (_lisp_Iter_zip_with (as Iter_zip_with))
   (_lisp_Iter_zip_with_into (as Iter_zip_with_into))
-  (_lisp_Iter_map2 (as Iter_map2))
   (_lisp_Iter_map2_into (as Iter_map2_into))
-  (_lisp_Iter_chain (as Iter_chain))
-  (Iter_chain (as Iter_chain_into))
-  (_lisp_Iter_enumerate (as Iter_enumerate))
-  (Iter_enumerate (as Iter_enumerate_into))
-  (_lisp_Iter_repeat (as Iter_repeat))
-  (Iter_repeat (as Iter_repeat_into))
-  (_lisp_Iter_head (as Iter_head))
-  (Iter_head (as Iter_head_into))
-  (_lisp_Iter_accumulate (as Iter_accumulate))
-  (Iter_accumulate (as Iter_accumulate_into))
-  (_lisp_Iter_scan (as Iter_scan))
   (_lisp_Iter_scan_into (as Iter_scan_into))
-  (_lisp_Iter_unique (as Iter_unique))
-  (Iter_unique (as Iter_unique_into))
   (_lisp_Iter_any (as Iter_any))
   (_lisp_Iter_all (as Iter_all))
   (_lisp_Iter_foldl (as Iter_foldl))
@@ -2234,13 +2169,13 @@ static Var _call_lambda_slots(
      ends. */
   Scope *caller_owner = lisp.automatic_owner;
   Scope *caller_result_owner = lisp.result_owner;
-  if (lambda.source_function) {
-    lisp.result_owner = caller_owner;
-    lisp.automatic_owner = &frame;
-  }
   defer if (lambda.source_function) {
     lisp.automatic_owner = caller_owner;
     lisp.result_owner = caller_result_owner;
+  }
+  if (lambda.source_function) {
+    lisp.result_owner = caller_owner;
+    lisp.automatic_owner = &frame;
   }
   /* A free name the lambda did not capture is a global. The environment the
      call was written in is not a parameter here, so a caller's binding
