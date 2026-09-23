@@ -205,10 +205,16 @@ link is cached like a static archive, because macOS signs each link with
 its pid-suffixed staging name, so an unconditional relink would change the
 module's bytes and retranslate every consumer. The REPL accepts a bodyless
 `meta` prototype, so a module function is callable there too.
-`unittest/probes/run-native-modules.sh` covers a module built and called
-from a meta body, a direct build, a manifest target and the REPL; rejection
-of a stamp mismatch and a signature mismatch; no binding without the
-option; and reuse of an unchanged module and its consumer.
+`unittest/probes/run-native-modules.sh`, which the optional
+`make check-native-modules` runs outside every gate, covers a module built
+and called from a meta body, a manifest target and the REPL; rejection of a
+stale or twice-stamped module before its code runs, of a non-module file,
+of a signature mismatch and of a module with no `meta` prototype;
+same-named and `..`-spelled sources; the duplicate-name warning; a runtime
+function from a linked object, and on macOS the build failure for one left
+out; no binding without the option or in a target that does not name the
+module; and reuse of an unchanged module and its consumer, with
+retranslation after a module edit.
 
 Measured on macOS arm64 (optimize build), 60 interleaved runs each:
 
