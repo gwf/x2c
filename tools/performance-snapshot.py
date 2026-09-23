@@ -41,9 +41,17 @@ COMMANDS = (
     "make", "stage-diff-0", "stage-diff-1", "stage-diff-2",
     "stage-diff-3",
   ]),
+  ("build-scaling", ["make", "bm-build-scaling"]),
   ("shootout", ["make", "shoot-run"]),
   ("runtime", ["make", "performance-runtime"]),
   ("compiler", ["make", "bm-compiler"]),
+)
+
+# Size-normalized rates first, then the fixed workload and the raw sizes.
+BUILD_SCALING_METRICS = (
+  "translate_seconds_per_kline", "cc_seconds_per_mb", "c_bytes_per_line",
+  "pinned_seconds", "seconds", "cc_seconds", "source_lines",
+  "generated_c_bytes",
 )
 
 
@@ -297,6 +305,7 @@ def compact_history(summary: dict[str, object]) -> dict[str, object]:
     "machine": summary["machine"],
     "stage_3_seconds": summary.get("stage_3_seconds"),
     "compiler_median_seconds": summary.get("compiler_median_seconds"),
+    "build_scaling": summary.get("build_scaling"),
     "runtime_medians": summary.get("runtime_medians"),
     "shootout_median": shootout.get("median"),
     "shootout_arithmetic_mean": shootout.get("arithmetic_mean"),
@@ -322,6 +331,10 @@ def comparable_metrics(row: dict[str, object]) -> dict[str, float]:
   stage = row.get("stage_3_seconds")
   if isinstance(stage, (int, float)):
     metrics["stage-3 seconds"] = float(stage)
+  scaling = row.get("build_scaling") or {}
+  for key in BUILD_SCALING_METRICS:
+    if key in scaling:
+      metrics[f"build {key}"] = float(scaling[key])
   for key, value in (row.get("compiler_median_seconds") or {}).items():
     metrics[f"compiler {key} seconds"] = float(value)
   for key, value in (row.get("shootout_median") or {}).items():
@@ -448,6 +461,11 @@ def run_snapshot_locked(
         )
       if name == "stage-3":
         summary["stage_3_seconds"] = result["elapsed_seconds"]
+      elif name == "build-scaling":
+        log = (run_dir / "build-scaling.log").read_text(encoding="utf-8")
+        summary["build_scaling"] = json.loads(next(
+          line for line in reversed(log.splitlines()) if line.startswith("{")
+        ))
       elif name == "shootout":
         if not SHOOTOUT_LATEST.is_dir():
           raise SnapshotError("shootout did not produce its latest receipt")

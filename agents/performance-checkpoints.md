@@ -17,6 +17,7 @@ make performance-snapshot \
 The command prepares a fresh bootstrap without timing it, then records:
 
 - the clean four-stage build time and all stage comparisons;
+- the size-normalized build cost from `make bm-build-scaling`;
 - the language shootout's structured results and raw samples;
 - every focused runtime observation in `bm-all`; and
 - the representative compiler-translation CSV and medians.
@@ -32,6 +33,30 @@ worktree. Pass `--output-root` when another persistent location is needed.
 Only one snapshot may write that history at a time, and each suite command has
 a two-hour timeout so a hung nightly run records failure and releases the next
 attempt.
+
+## Build cost and code size
+
+The stage 3 time grows when the compiler gets slower and when there is more
+code to compile. `tools/build-scaling.py` separates the two. With the stage 2
+compiler it translates HEAD's `lib/` and `src/` batches, compiles the
+generated C serially, and translates the tree named in
+`unittest/benchmarks/build-scaling-pin`. The report lists these rows:
+
+- `translate_seconds_per_kline`: translation seconds per thousand source
+  lines;
+- `cc_seconds_per_mb`: C compiler seconds per megabyte of generated C, which
+  tracks per-file C cost much better than source lines do;
+- `c_bytes_per_line`: generated C per source line, which rises when
+  translation output grows even though no step got slower;
+- `pinned_seconds`: translation time of the pinned tree, a fixed workload
+  that changes only with compiler speed, including effects that grow faster
+  than code size.
+
+A rise in raw time with steady rates means more code. A rise in a rate or in
+`pinned_seconds` means slower work. Move the pin forward when the language
+changes and the pinned tree no longer translates, or every few weeks. In the
+commit that moves it, record the old and new pinned times from one run so the
+series stays connected.
 
 ## Authored changes
 
