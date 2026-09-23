@@ -127,14 +127,21 @@ static int *_counter(void) {
 static int local_addresses(void) {
   int value = 1, values[4] = {0};
   int *saved = current_value;
-  current_value = &value;
   defer current_value = saved;
+  current_value = &value;
   struct { int *left; } pair = { .left = &value };
   struct Node node = { .next = NULL };
   *_value_of(&node) = 3;
   *_second(values) = 2;
   return *pair.left + values[1] + *_alias_of(value) + *_counter() +
          node.value.int();
+}
+
+// A List parameter copies an $auto Array into fresh List cells.
+static List copied_into_list(void) {
+  Array items = $auto([]);
+  items.push(1);
+  return cons(<items>, items);
 }
 
 int main(void) {
@@ -146,5 +153,5 @@ int main(void) {
          caller_owned() != NULL && auto_local() == 1 &&
          named_close() != NULL && freed_then_cleared() &&
          early_release(0) && !goto_cleanup(0) && reused_slot() == 0 &&
-         local_addresses() == 8;
+         local_addresses() == 8 && copied_into_list() != NULL;
 }

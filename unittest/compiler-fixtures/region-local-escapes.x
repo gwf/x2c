@@ -52,11 +52,34 @@ static Box stored_into_fresh(void) {
   return box;
 }
 
+// Either arm of a conditional can be the one that leaves.
+static int *returned_second_arm(int flag, int *other) {
+  int value = 1;
+  return flag ? other : &value;
+}
+
+// A local array decays to the address of its first element.
+static int *returned_array(void) {
+  int values[4] = {0};
+  return values;
+}
+
+// A defer restores the static only after the early return.
+static int restored_too_late(int stop) {
+  int value = 1;
+  last_seen = &value;
+  if (stop) return 1;
+  defer last_seen = NULL;
+  return 0;
+}
+
 int main(void) {
   int *out = NULL;
   stored_static();
   stored_static_local();
   stored_through_parameter(&out);
   return returned_address() != NULL && returned_pointer() != NULL &&
-         returned_through_callee() != NULL && stored_into_fresh() != NULL;
+         returned_through_callee() != NULL && stored_into_fresh() != NULL &&
+         returned_second_arm(0, out) != NULL && returned_array() != NULL &&
+         !restored_too_late(0);
 }

@@ -254,7 +254,7 @@ static List _summary(Walk w, String callee) {
 
 /* What is known about the local an expression names or the storage an
    address borrows, through the `Var` wrappers that pass their argument
-   through and either arm of `?:`. */
+   through and either arm of `?:`, preferring an arm with a region. */
 static Fact _fact_of(Walk w, Var expression, List *named) {
   Var inner = _unwrap(expression);
   match (inner) {
@@ -265,14 +265,32 @@ static Fact _fact_of(Walk w, Var expression, List *named) {
     }
     case %(op (!quote &) ?place): return _borrow(w, place, named);
     case %(op (!quote ?) ? ?yes ?no): {
-      Fact fact = _fact_of(w, yes, named);
-      return fact ? fact : _fact_of(w, no, named);
+      List yes_name = NULL, no_name = NULL;
+      Fact fact = _fact_of(w, yes, &yes_name);
+      Fact other = _fact_of(w, no, &no_name);
+      if (other && (!fact || (other.region && !fact.region))) {
+        fact = other;
+        yes_name = no_name;
+      }
+      if (named && fact) *named = yes_name;
+      return fact;
     }
   }
   List arguments = NULL;
   String callee = _callee_of(inner, &arguments);
   if (!callee || runtime[callee] != %(wrap)) return NULL;
   return _fact_of(w, arguments.car(), named);
+}
+
+/* What is known about a value that is returned, stored, or passed on. A
+   local C array there decays to the address of its first element, which
+   is the function's own storage. */
+static Fact _value_fact(Walk w, Var value, List *named) {
+  Fact fact = _fact_of(w, value, named);
+  Type type = _expression_type(value);
+  if (!fact || fact.param >= 0 || !type || !type.is_array()) return fact;
+  match (_unwrap(value)) case %(ident *): return _borrow(w, value, named);
+  return fact;
 }
 
 /* The Scope local a slot argument names: `&local`, or a `Scope *` local. */
@@ -349,8 +367,11 @@ static Region _birth(Walk w, Var value, Type type, int *born) {
    any other value reports when its region can end first. Returns whether
    it reported. */
 static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
+  match (_unwrap(value)) case %(op (!quote ?) ? ?yes ?no):
+    return _flow(w, yes, type, sink, target) ||
+           _flow(w, no, type, sink, target);
   List named = NULL;
-  Fact fact = _fact_of(w, value, &named);
+  Fact fact = _value_fact(w, value, &named);
   if (!fact) fact = _returned_argument(w, value, &named);
   int born = 0;
   Region region = fact ? fact.region : _birth(w, value, NULL, &born);
@@ -411,15 +432,18 @@ static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
 }
 
 /* How a warning names the value that leaves: a local by its name, and an
-   address by the local it borrows from. */
+   address by the local it borrows from. A callee may hand back the address
+   it was given or one inside it. */
 static String _subject(Walk w, Var value, List named, Fact fact) {
   match (_unwrap(value)) case %(lambda *): return "a closure";
   if (!named) return "a fresh allocation";
   String name = %"'${binding_identity_spelling(named)}'";
-  match (_unwrap(_address_of(value))) case %(ident *):
-    return %"the address of $name";
   Var own = w.facts[named];
   if (own is not void && own.pointer() == fact) return name;
+  List arguments = NULL;
+  if (_callee_of(value, &arguments)) return %"an address from $name";
+  match (fact ? fact.place : NULL) case %(ident *):
+    return %"the address of $name";
   return %"an address inside $name";
 }
 
@@ -500,15 +524,26 @@ static Symbol _sink_of(Fact base, int through, Fact *target) {
   return !through && own ? <local> : <heap>;
 }
 
+/* The declared parameter types of the function a call names, so an
+   argument that a canonical parameter converts by copying is not stored. */
+static List _parameter_types(Var call) {
+  match (_unwrap(call)) case %(call (expr ((func ?types) *) ?) *):
+    return types;
+  return NULL;
+}
+
 /* A call sinks each argument where the callee's summary says. */
-static void _scan_call(Walk w, String callee, List arguments) {
+static void _scan_call(Walk w, Var call, String callee, List arguments) {
   int count = arguments.len();
+  List types = _parameter_types(call);
   foreach (List row, _summary(w, callee).cadr()) {
     (int index, Var target) = row;
     if (index >= count) continue;
     Var argument = arguments[index];
-    if (target == <static>) _flow(w, argument, NULL, <static>, NULL);
-    else if (target == <unknown>) _flow(w, argument, NULL, <heap>, NULL);
+    Var declared = index < types.len() ? types[index] : void;
+    Type type = declared is <list> ? declared.list() : NULL;
+    if (target == <static>) _flow(w, argument, type, <static>, NULL);
+    else if (target == <unknown>) _flow(w, argument, type, <heap>, NULL);
     else match (target) case %(param ?other): {
       if (other.int() >= count) continue;
       Var holder = arguments[other.int()];
@@ -516,7 +551,7 @@ static void _scan_call(Walk w, String callee, List arguments) {
       Fact base = _base(w, _address_of(holder), &through), object = NULL;
       if (!base) base = _fact_of(w, holder, NULL);
       Symbol sink = _sink_of(base, through, &object);
-      _flow(w, argument, NULL, sink, object);
+      _flow(w, argument, type, sink, object);
     }
   }
 }
@@ -559,7 +594,7 @@ static void _scan(Walk w, Var value, int deferred) {
             Fact fact = _fact_of(w, arguments.car(), NULL);
             if (fact && fact.depth == w.depth) w.freed.push(fact);
           }
-          default: if (callee) _scan_call(w, callee, arguments);
+          default: if (callee) _scan_call(w, node, callee, arguments);
         }
         w.pending.push(args);
       }
@@ -597,7 +632,7 @@ static void _revive(Walk w) {
    once, and the receiving local does not carry the region further. */
 static void _assign(Walk w, Fact fact, Var value, Type type, int store) {
   _scan(w, value, 0);
-  Fact source = _fact_of(w, value, NULL);
+  Fact source = _value_fact(w, value, NULL);
   if (!source) source = _returned_argument(w, value, NULL);
   int born = 0;
   Region region = source ? source.region : _birth(w, value, type, &born);
@@ -647,8 +682,13 @@ static void _store(Walk w, Var target, Var value) {
     return;
   }
   int through = 0;
-  Fact object = NULL;
-  Symbol sink = _sink_of(_base(w, target, &through), through, &object);
+  Fact object = NULL, base = _base(w, target, &through);
+  /* A field or element of file-scope storage is that storage. */
+  if (!base && !through && _root(target)) {
+    _flow(w, value, type, <static>, NULL);
+    return;
+  }
+  Symbol sink = _sink_of(base, through, &object);
   _flow(w, value, type, sink, object);
 }
 
@@ -680,8 +720,8 @@ static int _note_restored(Walk w, Var body) {
   return 0;
 }
 
-/* A place a block's `defer` writes is put back when the block ends, so a
-   store into it anywhere in the block is not an escape. */
+/* A place a `defer` writes is put back when its block ends, so a store
+   into it after the `defer` is not an escape. */
 static void _note_deferred_stores(Walk w, Var node) {
   match (node) {
     case %(op (!quote =) ?target ?): w.restored[_unwrap(target)] = 1;
@@ -720,7 +760,10 @@ static void _walk_defer(Walk w, Var body) {
       return;
     }
   }
-  if (!_note_restored(w, body)) _scan(w, body, 1);
+  if (_note_restored(w, body)) return;
+  w.restored = w.restored.copy();
+  _note_deferred_stores(w, body);
+  _scan(w, body, 1);
 }
 
 /* A region-opening or region-ending call in statement position. Reports
@@ -762,14 +805,6 @@ static void _walk_block(Walk w, List statements) {
   Region outer = w.open;
   Map restored = w.restored;
   w.depth += 1;
-  foreach (Var statement, statements) {
-    match (statement) case %(at ? ?inner): statement = inner;
-    match (statement) case %(defer ?body *): {
-      if ((void *) w.restored == (void *) restored)
-        w.restored = restored.copy();
-      _note_deferred_stores(w, body);
-    }
-  }
   foreach (Var statement, statements) _walk(w, statement);
   _close_to(w, w.open, outer);
   w.open = outer;

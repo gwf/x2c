@@ -443,7 +443,8 @@ A compile-time call frees its locals and parameters when it returns. A
 rejected where it is defined, with an error at the statement where the
 address leaves: a `return`, a store into a `meta static`, or a store through
 a parameter or through a pointer whose target the compiler cannot identify.
-The check follows the address through pointer locals and through the `meta`
+A local array counts as the address of its first element. The check follows
+the address through pointer locals, either arm of `?:`, and the `meta`
 functions defined before the caller:
 
 <!-- ignore: the definition of leak is rejected on purpose -->
@@ -460,10 +461,21 @@ meta static int *leak(int seed) {
 
 `field_of` is accepted, because the object it borrows from belongs to its
 caller. `leak` is rejected at its `return`, because `field_of` hands back an
-address inside `box`. In ordinary code the same check reports a warning; see
-[The Region Model](regions.md). An address the check does not follow, such
-as one computed with pointer arithmetic, is undefined behavior when it
-dangles, as in C.
+address inside `box`.
+
+The check is the region check of ordinary code, and every finding it makes
+in a `meta` body is an error, including a value from a `Scope` region that
+outlives the region. In ordinary code the same findings are warnings; see
+[The Region Model](regions.md).
+
+The check does not yet follow every path an address can take. These still
+translate, and using the address after the call returns is undefined
+behavior, as in C:
+
+- an address stored in a field of a local struct that is then returned by
+  value or assigned to a `meta static` struct;
+- an address computed with pointer arithmetic or a cast;
+- an address passed to a native function that keeps it.
 
 A struct inside a `meta static` value, or in a value that persists across
 REPL submissions, lives in storage the compile-time session owns.

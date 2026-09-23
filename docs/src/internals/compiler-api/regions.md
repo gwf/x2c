@@ -33,7 +33,7 @@ the bound and typed definition. The walk reads the summaries of the
 in `meta_regions`; a definition whose lowering the process already
 cached takes the summary recorded with it.
 
-Source: `src/regions.x:926`
+Source: `src/regions.x:961`
 
 <a id="Compiler.check_regions"></a>
 #### Compiler.check_regions
@@ -45,7 +45,7 @@ Warns about values that can outlive the region that allocated them.
 lowering rewrites its `defer` and region forms. The call adds warnings to
 `c` and does not change `ast`.
 
-Source: `src/regions.x:901`
+Source: `src/regions.x:936`
 
 <a id="Compiler.region_escapes"></a>
 #### Compiler.region_escapes
@@ -61,7 +61,7 @@ last. Returns `(region-unit (summaries ROW...) (warnings WARNING...))`,
 where a warning is
 `(warning (at PATH LINE COLUMN) CODE MESSAGE (notes NOTE...))`.
 
-Source: `src/regions.x:967`
+Source: `src/regions.x:1002`
 
 ## Design notes
 

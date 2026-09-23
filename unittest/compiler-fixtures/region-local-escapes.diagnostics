@@ -23,7 +23,7 @@ unittest/compiler-fixtures/region-local-escapes.x:38:3: region: the address of '
     ^
   note: local storage ends when the function returns
 
-unittest/compiler-fixtures/region-local-escapes.x:44:3: region: an address inside 'box' can outlive the local storage it points into when returned
+unittest/compiler-fixtures/region-local-escapes.x:44:3: region: an address from 'box' can outlive the local storage it points into when returned
     return _field_of(&box);
     ^^^^^^
   note: local storage ends when the function returns
@@ -31,5 +31,20 @@ unittest/compiler-fixtures/region-local-escapes.x:44:3: region: an address insid
 unittest/compiler-fixtures/region-local-escapes.x:51:3: region: the address of 'value' can outlive the local storage it points into when stored into an object of an outer region
     box.borrowed = &value;
     ^^^
+  note: local storage ends when the function returns
+
+unittest/compiler-fixtures/region-local-escapes.x:58:3: region: the address of 'value' can outlive the local storage it points into when returned
+    return flag ? other : &value;
+    ^^^^^^
+  note: local storage ends when the function returns
+
+unittest/compiler-fixtures/region-local-escapes.x:64:3: region: the address of 'values' can outlive the local storage it points into when returned
+    return values;
+    ^^^^^^
+  note: local storage ends when the function returns
+
+unittest/compiler-fixtures/region-local-escapes.x:70:3: region: the address of 'value' can outlive the local storage it points into when stored into a static
+    last_seen = &value;
+    ^^^^^^^^^
   note: local storage ends when the function returns
 

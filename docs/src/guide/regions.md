@@ -52,8 +52,14 @@ object of a region the function opens, without a warning. A reference
 capture, `using &name`, moves the local into a cell of the active region, so
 the closure holds that cell rather than the function's storage.
 
-A store into a place that a `defer` in the same block writes back, as
-`$let` does, is undone before the block ends and is not reported.
+A store into a place that an earlier `defer` in the same block writes
+back, as `$let` does, is undone before the block ends and is not reported.
+A store made before that `defer` is reported, because a `return` between
+them leaves the place holding the value.
+
+A parameter that converts its argument by copying, such as a `List`
+parameter given an `Array`, does not store the argument. A local C array
+passed on, returned, or stored counts as the address of its first element.
 
 ## What the warnings do not cover
 
@@ -61,10 +67,10 @@ The check covers lexical regions and the storage it tracks. It does not
 cover:
 
 - storage from plain `malloc` or a C library;
-- pointer arithmetic and casts through raw C types, and an array local
-  that decays to a pointer rather than having its address taken with `&`;
+- pointer arithmetic and casts through raw C types;
 - values reached through a field of a stack `struct`, which the pass treats
-  as one storage;
+  as one storage, so an address kept in a field of a struct that is copied
+  out is not followed;
 - callbacks and function pointers, including entry points a Lisp binding
   calls;
 - `Scope.free` and `Scope.realloc`, whose effect on other aliases of the

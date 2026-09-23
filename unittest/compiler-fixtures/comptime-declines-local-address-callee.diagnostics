@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/comptime-declines-local-address-callee.x:18:3: region: an address inside 'box' can outlive the local storage it points into when returned
+unittest/compiler-fixtures/comptime-declines-local-address-callee.x:18:3: region: an address from 'box' can outlive the local storage it points into when returned
     return field_of(&box);
     ^^^^^^
   note: local storage ends when the function returns

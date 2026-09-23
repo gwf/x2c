@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/comptime-declines-local-address-array.x:13:3: region: the address of 'values' can outlive the local storage it points into when returned
+    return values;
+    ^^^^^^
+  note: local storage ends when the function returns
+

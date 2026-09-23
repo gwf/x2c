@@ -160,26 +160,33 @@ Gary approved the design on 2026-09-22; the first delivery implements it.
   carries its check result and seeds later callers.
 - **Ordinary code** gets the same findings as warnings. Always on; the
   per-unit cost is within noise.
-- Three refinements keep the rule from reporting safe code: a reference
+- Each arm of `?:` flows separately, and a local C array at a flow site is
+  a frame borrow of its first element.
+- Refinements that keep the rule from reporting safe code: a reference
   capture (`using &name`) moves the local into a cell, so a closure holds
-  the cell rather than the frame; a store into a place that a `defer` in the
-  same block writes back is restored, as `$let` already was; and a
-  statement expression's declarations are locals rather than stores through
-  an unknown pointer.
+  the cell rather than the frame; a store into a place that an earlier
+  `defer` in the same block writes back is restored, as `$let` already was;
+  a statement expression's declarations are locals rather than stores
+  through an unknown pointer; and an argument a canonical parameter converts
+  by copying, such as an `Array` given to `cons`'s `List` parameter, is not
+  stored. The last one removed the `src/statements.x` false positive, and
+  `lib/lisp.x` `_call_lambda_slots` now places its restoring `defer` before
+  the store it restores.
 
-Result against `dev` `7836e03a`: no new warning in `src/`, `lib/`,
-`unittest/`, `examples/`, or `tools/`; the `defer` refinement removes two
-earlier false positives in `src/repl-session.x`. The existing
-`src/statements.x:677` warning is unchanged. Fixtures:
-`region-local-escapes` (ordinary warnings), additions to `region-safe`, and
-`comptime-declines-local-address-{return,static,callee}`. Self-translation
-of `src/` measured 3.97 s user before and 3.99 s after (medians of ten
-alternating runs; noise is about 1.4%).
+Result against `dev` `440c0461`: a full build prints no `region:` warning
+and no other translation warning, and there is no new finding in
+`unittest/`, `examples/`, or `tools/`. Fixtures: `region-local-escapes`
+(ordinary warnings), additions to `region-safe`, and
+`comptime-declines-local-address-{return,static,callee,conditional,array}`.
+Self-translation of `src/` measured 3.97 s user before and 3.99 s after
+(medians of ten alternating runs before the review fixes; noise is about
+1.4%).
 
-Not covered: pointer arithmetic, an array local that decays to a pointer,
-and values reached through a stack struct's fields, as the book's region
-chapter lists. Phase 8 remains: opt-in whole-project certification that
-treats unknown calls as unproved, the effect inventory, and File and Job
+Not covered, as the book's meta and region chapters list: an address kept
+in a field of a local struct that is returned by value or assigned to a
+`meta static` struct, pointer arithmetic, and native calls that retain an
+argument. Phase 8 remains: opt-in whole-project certification that treats
+unknown calls as unproved, the effect inventory, and File and Job
 finalizers.
 
 ### G. Native extensions (last stage)
