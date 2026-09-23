@@ -3625,11 +3625,11 @@ void Lisp_set_global(Lisp, String, Var);
 List Func_signature(Func);
 void * Var_pointer(Var);
 static void _bind_native_meta(Compiler c, String name, List signature, Token marker){
-  Var volatile function;  if(! Lisp_try_get(c -> macro_lisp, name, & function)){
-    {
+  Var function;  if(! Lisp_try_get(c -> macro_lisp, name, & function)){
+    Var volatile bound; {
       ExceptionFrame _x2c_exception_frame_5;  static MatchCaptureSite _x2c_catch_arms_5[1];  static ErrorCatchSite _x2c_catch_site_5 = {  _x2c_catch_arms_5, -1, 1, ERROR_CATCH_PENDING, -1 };  Var _x2c_catch_patterns_5[1];  if (x2c_error_catch_site_pending(&_x2c_catch_site_5)) {List _x2c_catch_pattern_9 = cons(Symbol_var(31885018076120), cons(Symbol_var(54), NULL));  _x2c_catch_patterns_5[0] = List_var(_x2c_catch_pattern_9);
     }
-    ErrorHandler volatile _x2c_error_handler_5 = x2c_error_catch_site_push(&_x2c_exception_frame_5, &_x2c_catch_site_5, _x2c_catch_patterns_5);  x2c_exception_push(& _x2c_exception_frame_5);  if (!sigsetjmp(_x2c_exception_frame_5.env, 0)) function = Lisp_eval(c -> macro_lisp, List_var(cons(_39, cons(String_var(name), cons(List_var(cons(_473, cons(List_var(signature), NULL))), NULL)))));  else {x2c_exception_landed(& _x2c_exception_frame_5); {
+    ErrorHandler volatile _x2c_error_handler_5 = x2c_error_catch_site_push(&_x2c_exception_frame_5, &_x2c_catch_site_5, _x2c_catch_patterns_5);  x2c_exception_push(& _x2c_exception_frame_5);  if (!sigsetjmp(_x2c_exception_frame_5.env, 0)) bound = Lisp_eval(c -> macro_lisp, List_var(cons(_39, cons(String_var(name), cons(List_var(cons(_473, cons(List_var(signature), NULL))), NULL)))));  else {x2c_exception_landed(& _x2c_exception_frame_5); {
       if (x2c_exception_is_error_target(&_x2c_exception_frame_5)){
         x2c_error_catch_detach(_x2c_error_handler_5);  x2c_exception_mark_handled(&_x2c_exception_frame_5);  {{
           x2c_error_catch_close(_x2c_error_handler_5);  _x2c_error_handler_5 = NULL;  x2c_exception_leave(& _x2c_exception_frame_5);  return;
@@ -3647,7 +3647,7 @@ static void _bind_native_meta(Compiler c, String name, List signature, Token mar
 }
 x2c_error_catch_close(_x2c_error_handler_5);  _x2c_error_handler_5 = NULL;  x2c_exception_leave(& _x2c_exception_frame_5);
 }
-Lisp_set_global(c -> macro_lisp, name, function);
+function = bound;  Lisp_set_global(c -> macro_lisp, name, function);
 }
 if(! Var_is_row(function, 9, 7, 1) || ! List_equal(Func_signature(((Func) Var_pointer(function))), signature)) Compiler_report_error(c, 1362954, _926, marker, cons(String_var(String_join(NULL, cons(String_var(_508), cons(String_var(name), NULL)))), cons(String_var(String_join(NULL, cons(String_var(_509), cons(String_var(List_repr(signature)), NULL)))), NULL)));
 }
@@ -3899,7 +3899,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site){
                                 x2c_exception_mark_handled(&_x2c_exception_frame_7);
                                 if (_x2c_catch_selected_7 == 0) {Var category = x2c_error_catch_capture(_x2c_error_handler_7, 0);
                                 {
-                                  static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 1750};
+                                  static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 1752};
                                   x2c_error_raise_n(& _x2c_error_site_5, 28682226919752, 1, Symbol_var(209659067570), category);
                                   __builtin_unreachable();
                                 }
