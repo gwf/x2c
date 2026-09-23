@@ -9,8 +9,8 @@
 typedef int _x2c_macro_S_0;
 
 typedef struct{
-  _x2c_macro_S_0 _x2c_macro_value_0;
-  const _x2c_macro_S_0 * _x2c_macro_next_0;
+  _x2c_macro_S_0 value;
+  const _x2c_macro_S_0 * next;
 }
 _x2c_macro_Cell_0;
 

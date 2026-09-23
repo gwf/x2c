@@ -3044,6 +3044,11 @@ static Var _parse_argument(Compiler c, Symbol kind) {
           c.token, NULL);
       String spelling = c.token.text;
       c.next();
+      // A template local passes its identity, which each expansion renames.
+      Map locals = c.macro_holes ? c.macro_definition_locals() : NULL;
+      Var local;
+      if ((void *) locals != NULL && locals.try_get(spelling, &local))
+        return local;
       return spelling;
     }
     case <literal>:

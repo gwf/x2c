@@ -905,7 +905,9 @@ static void _warn_unnecessary_cast(
 }
 
 /* A template typedef is named by the binding each expansion supplies, so a
-   cast to it is typed where the template expands. */
+   cast to it, qualified or not, is typed where the template expands. A
+   template keeps aggregate tags as spellings, so only a typedef base ends in
+   a binding. */
 static int _casts_to_template_typedef(Compiler c, List declaration) {
   List base = declaration.cadr();
   return c.macro_holes && !!base.match(%(* (binding ? ?)));

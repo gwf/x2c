@@ -905,14 +905,17 @@ static List _declarator_suffix(Compiler compiler) {
 }
 
 static List _direct_declarator(
-  Compiler c, List *method_identity, Token *source_first,
+  Compiler c, Type context, List *method_identity, Token *source_first,
   Token *source_after) {
+  // A member keeps its spelling in a template: C scopes it to its aggregate.
+  int member = context.is_aggregate_tag();
   // Parenthesized declarator: ( declarator )
   if (c.peek(0) == <(>) {
     c.next();
     Token first = c.token;
     List decl = _declarator(
-      c, NULL, NULL, method_identity, source_first, source_after);
+      c, NULL, member ? context : NULL, method_identity, source_first,
+      source_after);
     if (c.peek(0) != <)>) {
       c.require_input();
       /* One identifier followed by another is a parameter list whose type
@@ -980,6 +983,7 @@ static List _direct_declarator(
         String spelling = c.token.text;
         int shadows_with = !!c.with_binding();
         c.next();
+        if (member) return %(bind ($spelling) ());
         if (shadows_with) c.sym.define(%($spelling), NULL);
         return %(bind ${c.macro_introduced_name(spelling)} ());
       }
@@ -1077,7 +1081,8 @@ static List _declarator(
   List ptr = _pointer(compiler), method_identity = NULL;
   List (key, infix) =
     _direct_declarator(
-      compiler, &method_identity, source_first, source_after).cdr();
+      compiler, context, &method_identity, source_first,
+      source_after).cdr();
   List sfx = _declarator_suffix(compiler);
   List modifiers = %( @infix @sfx @ptr );
   List ast = modifiers.append(type);
@@ -1903,6 +1908,8 @@ List Compiler.parse_submission(Compiler c, int end_position) {
 static List _finish_aggregate_type(
   Compiler c, Symbol tag, Var name, List members) {
   name = c.evaluate_macro_slot(name);
+  // Each constructed anonymous body defines a distinct type.
+  match (name) case %(gensym ? ?): name = c.gensym().car();
   if (tag != <enum>) name = c.aggregate_name(tag, name, 1);
   List type = %($tag $name);
   Array bound = [];
@@ -2401,7 +2408,6 @@ List Compiler.bind_syntax(
                  ((fnmod (params *parameter_values)) *return_modifiers))
                ?body)): {
         if (context != AST_UNIT) goto construction_error;
-        if (_.shallow && !_.declaration_projection) return function;
         Array parameters = [];
         _.sym.push_new_scope();
         {

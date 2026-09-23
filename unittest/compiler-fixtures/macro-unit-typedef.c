@@ -5,8 +5,8 @@
 static const size_t _x2c_macro_cell_size_0 = sizeof(_x2c_macro_Cell_0);
 
 typedef struct{
-  _x2c_macro_S_1 _x2c_macro_value_1;
-  const _x2c_macro_S_1 * _x2c_macro_next_1;
+  _x2c_macro_S_1 value;
+  const _x2c_macro_S_1 * next;
 }
 _x2c_macro_Cell_1;
 
@@ -47,11 +47,11 @@ int main(void){
   int widths = int_width() == sizeof(int) && wide_width() == sizeof(unsigned long);
   int narrow = 0, wide = 0;
   typedef char _x2c_local_typedef_2;
-  char _x2c_macro_value_2 =(char) 4;
-  narrow =(int) _x2c_macro_value_2 +(int)(char) sizeof(_x2c_local_typedef_2);
+  char _x2c_macro_value_0 =(char) 4;
+  narrow =(int) _x2c_macro_value_0 +(int)(char) sizeof(_x2c_local_typedef_2);
   typedef unsigned long long _x2c_local_typedef_3;
-  unsigned long long _x2c_macro_value_3 =(unsigned long long) 4;
-  wide =(int) _x2c_macro_value_3 +(int)(unsigned long long) sizeof(_x2c_local_typedef_3);
+  unsigned long long _x2c_macro_value_1 =(unsigned long long) 4;
+  wide =(int) _x2c_macro_value_1 +(int)(unsigned long long) sizeof(_x2c_local_typedef_3);
   printf("%d %d %lu %d %d\n", widths, int_sum(2, & one), wide_sum(5, & two), narrow, wide);
   return widths && int_sum(2, & one) == 3 && wide_sum(5, & two) == 7 && narrow == 5 && wide == 12 ? 0 : 1;
 }

@@ -255,6 +255,34 @@ grep -Fq "\"$BUILD/outside/ext.x\"" "$FAKE/extwarm/uses-ext.xi" ||
 cmp -s "$FAKE/extout/uses-ext-twice.c" "$FAKE/extwarm/uses-ext-twice.c" ||
   fail "out-of-home interface replay diverged from cold compile"
 
+# Case 4a: collection records the functions an imported Unit macro
+# generates, so an including unit types their calls from a cold walk and
+# from the owner's interface alike.
+mkdir -p "$FAKE/gencold" "$FAKE/genwarm"
+cat >"$FAKE/src/gen.xmacro" <<'EOF'
+macro Unit $gen(Type $type, name $next) {
+  $type $next($type value) => value + 1;
+}
+EOF
+cat >"$FAKE/src/gen-owner.x" <<'EOF'
+$(import "gen.xmacro")
+$gen(long, gen_next);
+EOF
+cat >"$FAKE/src/gen-use.x" <<'EOF'
+#include "gen-owner.x"
+Var gen_boxed(void) { return gen_next(1); }
+EOF
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir gencold src/gen-use.x)
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir genwarm src/gen-owner.x)
+grep -q '(("gen_next") ((func ((long))) long))' \
+  "$FAKE/genwarm/gen-owner.xi" ||
+  fail "interface is missing a macro-generated function"
+(cd "$FAKE" && ./builds/0/x2c translate --out-dir genwarm src/gen-use.x)
+grep -q 'long_var(gen_next(1))' "$FAKE/gencold/gen-use.c" ||
+  fail "a macro-generated function call was not typed"
+cmp -s "$FAKE/gencold/gen-use.c" "$FAKE/genwarm/gen-use.c" ||
+  fail "macro-generated function replay diverged from cold compile"
+
 # Case 5: unresolved targets contribute no cached symbols. An explicit
 # host preprocess still rejects directory and unreadable include targets.
 mkdir -p "$FAKE/src/dir-target.h" "$FAKE/dirout"
