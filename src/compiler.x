@@ -103,6 +103,12 @@ typedef struct Compiler {
   /* Token indices where C starts or stops packing: each directive that
      changes whether packing is on, and a pair at each layout attribute. */
   Array pack_marks;
+  /* Raw collection carries pack directives across split header segments.
+     A shadow parser conservatively treats inherited or uncertain packing as
+     unavailable native layout. */
+  int pack_include_unknown;
+  int pack_state, pack_unknown;
+  List pack_saved;
   /* The cursor after a governed statement took the directives before it,
      which the following item must not read again. */
   Token directives_taken;
@@ -375,6 +381,7 @@ static Compiler _new(Compiler owner) {
       _.source_texts = owner.source_texts;
       _.unit_script = owner.unit_script;
       _.include_dirs = owner.include_dirs;
+      _.pack_include_unknown = owner.pack_include_unknown;
     }
     else {
       _.package_roots = {};
@@ -648,6 +655,18 @@ static int _pack_after(String text, List *saved, int packed) {
   return value < 0 ? packed : value;
 }
 
+static int _pack_directive(String text) =>
+  preproc_directive(text).startswith("pragma pack");
+
+/** Follows a raw file's packing directives across included files. A
+    conditional directive has an unknown selected arm until preprocessing;
+    the native layout of subsequent records cannot be proved from it. */
+void Compiler.note_pack_directive(Compiler c, String text, int conditional) {
+  if (!_pack_directive(text)) return;
+  if (conditional) c.pack_unknown = 1;
+  else c.pack_state = _pack_after(text, &c.pack_saved, c.pack_state);
+}
+
 /* Reports whether the attribute list the group `open` holds names an
    attribute that can change a struct's layout, spelled with or without its
    surrounding underscores. Identifiers inside an attribute's own arguments
@@ -787,16 +806,17 @@ static int _reading_follows(Array groups, int k) {
    The same pass records packing marks by token index, because the parser
    can read one directive more than once. Packing is followed along several
    consistent readings of the groups: reading `k` takes each group's
-   reachable arm `k`, or its last one. No reading skips a group without an
-   `#else`, so an include guard's contents are always read. Packing is on
-   where any reading has it on. A layout attribute is marked where it is
-   written, and where a macro whose body holds one is used. */
+   reachable arm `k`, or its last one. A conditional pack directive also
+   marks later layout unknown, because independent groups and groups without
+   `#else` can select paths those readings do not represent. A layout
+   attribute is marked where it is written, and where a macro whose body
+   holds one is used. */
 static void _scan_conditionals(Compiler c) {
   Array counts = _reachable_arm_counts(c.tokenizer);
   Array stack = $auto([]), groups = $auto([]);
   Array packed = $auto([]), saved = $auto([]);
   Map layout = $auto({});
-  int hidden = 0, serial = 0, readings = 1;
+  int hidden = 0, serial = 0, readings = 1, uncertain_pack = 0;
   foreach (int count, counts) if (count > readings) readings = count;
   for (int k = 0; k < readings; k++) {
     packed.push(0);
@@ -825,7 +845,7 @@ static void _scan_conditionals(Compiler c) {
     }
     Symbol kind = preproc_conditional_kind(token.text);
     int conditional = kind == <open> || (kind && stack.len());
-    int before = packed.contains(1);
+    int before = uncertain_pack || packed.contains(1);
     if (kind == <open>) {
       Symbol never = _never_active_arm(token.text);
       stack.push(%(${++serial} 0 ${never == <first> ? 2 : never == <rest>}));
@@ -845,6 +865,13 @@ static void _scan_conditionals(Compiler c) {
     }
     else {
       if (!hidden) _note_layout_macro(token.text, layout, stack.len());
+      /* Raw conditional arms are correlated only within their own group.
+         Independent #if groups can select different arms, including no
+         arm when there is no #else. A pack directive in such a group makes
+         later natural-layout inference unsafe. Preprocessed input has the
+         host's exact selected directive stream and stays precise. */
+      if (!hidden && stack.len() && _pack_directive(token.text))
+        uncertain_pack = 1;
       for (int k = 0; k < packed.len(); k++) {
         if (!_reading_follows(groups, k)) continue;
         List states = saved[k];
@@ -852,7 +879,8 @@ static void _scan_conditionals(Compiler c) {
         saved[k] = states;
       }
     }
-    if (packed.contains(1) != before) c.pack_marks.push((long) i);
+    if ((uncertain_pack || packed.contains(1)) != before)
+      c.pack_marks.push((long) i);
     if (!conditional) continue;
     c.arm_stacks[(long) i] = stack.list();
     hidden = 0;
@@ -3938,6 +3966,12 @@ static List _meta_record_layout(Sym sym, Type record, Map cache) {
    value. A pointer with no Var tag of its own is carried as `<p48>`. */
 static List _meta_type_layout(Sym sym, Type type, Map cache) {
   Type declared = type.declared();
+  Type alias = declared.base_type();
+  int hops = 0;
+  while (alias && (alias.is_typedef_name() || alias.is_typedef())) {
+    if (sym.get(%(@alias "layout-attribute"))) return NULL;
+    alias = sym.next_typedef(alias, &hops).base_type();
+  }
   if (sym.is_var_type(declared)) return _meta_var_layout(declared);
   Type tagged = NULL;
   Symbol tag = sym.var_tag_for_type(declared, &tagged);

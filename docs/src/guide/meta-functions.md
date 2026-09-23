@@ -649,21 +649,16 @@ These C shapes are not available at compile time:
   `__attribute__((packed))`. A macro whose body holds such an attribute counts
   where it is used, so `struct S { ... } PACKED;` with `#define PACKED
   __attribute__((packed))` is packed. A macro with no layout attribute leaves
-  the struct its natural layout. Default collection follows `#pragma pack`
-  within each file. Where `#if` groups guard the directives, it reads the file
-  once for each arm position: the first reading takes every group's first arm,
-  the second its second arm or its last, and so on. A group without `#else` is
-  always entered, as an include guard is, so when C skips a pop in such a
-  group, a later packed struct gets its natural layout. A struct packed in any
-  reading is declined, even when C lays it out naturally. `--cpp-symbols` and
-  `--system-headers` read the preprocessed unit, so they also detect packing
-  that one header starts and another ends, as Windows `pshpack1.h` and
-  `poppack.h` do, and a push and a pop under unrelated conditions, which
-  default collection can miss.
-- Structs whose layout the compiler cannot see, which it would lay out with
-  natural alignment: a field declared `_Alignas`, or a field whose typedef
-  carries an alignment attribute. Do not pass such a struct to a native
-  function from compile-time code.
+  the struct its natural layout. Default collection carries packing across
+  included files. A pack directive under a raw conditional leaves subsequent
+  layout unavailable when collection cannot prove which arm C selects, so a
+  naturally laid-out struct may also be declined. `--cpp-symbols` and
+  `--system-headers` use the preprocessor's selected directive stream and can
+  prove the layout when its push and pop balance. A field whose typedef has a
+  layout attribute is also declined.
+- Structs with field alignment the compiler cannot prove, such as a field
+  declared `_Alignas`, have no compile-time layout. Do not pass one to a
+  native function from compile-time code.
 - Arrays of structs, which a meta function reports as `an array of
   structs`, the address of an array element, and pointer arithmetic.
 - `sizeof`, which is not evaluated at compile time. The parser does not

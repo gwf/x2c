@@ -490,6 +490,7 @@ static int _enum_fits_int(List type, List members) {
    on before it, or a mark lies within it. Tokens outside the unit's own,
    such as a constructed form's, have no marks. */
 static int _packed_since(Compiler c, Token first) {
+  if (c.pack_include_unknown) return 1;
   Token base = c.tokenizer.tokens, end = base + c.tokenizer.tokens.len();
   if (first < base || c.token >= end) return 0;
   // Marks ascend, so the ones before `first` are a prefix.
@@ -1289,12 +1290,19 @@ static List _destructure_declaration(
 // declarations
 
 static List _typedef(Compiler compiler, List context, int row) {
+  Token first = compiler.token;
   // An imported `typedef const char *(*fn)(int)` names a qualified type
   // like an object declaration does, so read the qualifiers first.
   List quals = _type_qualifiers(compiler);
   List spec = quals.append(_type_specifier(compiler));
   spec = compiler.sym.local_type(spec);
   List bindings = _declarator_list(compiler, spec, context, row);
+  /* A typedef's own alignment changes every record field that names it,
+     even when the record declaration has no attribute of its own. */
+  if (_packed_since(compiler, first)) foreach (List declarator, bindings) {
+    String name = binding_identity_spelling(declarator.cadr());
+    if (name) compiler.sym.set(%($name "layout-attribute"), %(unknown));
+  }
   return _finish_declaration(compiler, <typedef>, spec, bindings, 0);
 }
 
