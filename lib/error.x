@@ -71,11 +71,26 @@ $error.private.types();
 #define ERROR_CATCH_STATIC 1
 #define ERROR_CATCH_TRANSIENT 2
 
-static pthread_mutex_t catch_site_mutex =
-  (pthread_mutex_t) PTHREAD_MUTEX_INITIALIZER;
+/* The mutex is recursive: an `<alloc-fail>` observer that registers another
+   pending site while a bind holds it must not deadlock. */
+static pthread_mutex_t catch_site_mutex;
+static pthread_once_t catch_site_mutex_once =
+  (pthread_once_t) PTHREAD_ONCE_INIT;
+
+static void _catch_site_mutex_initialize(void) {
+  pthread_mutexattr_t attributes;
+  if (pthread_mutexattr_init(&attributes) ||
+      pthread_mutexattr_settype(&attributes, PTHREAD_MUTEX_RECURSIVE) ||
+      pthread_mutex_init(&catch_site_mutex, &attributes)) {
+    fprintf(stderr, "Error: could not initialize catch site mutex\n");
+    abort();
+  }
+  pthread_mutexattr_destroy(&attributes);
+}
 
 static void _catch_site_lock(void) {
-  if (pthread_mutex_lock(&catch_site_mutex)) {
+  if (pthread_once(&catch_site_mutex_once, _catch_site_mutex_initialize) ||
+      pthread_mutex_lock(&catch_site_mutex)) {
     fprintf(stderr, "Error: could not lock catch site\n");
     abort();
   }

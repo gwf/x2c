@@ -873,7 +873,9 @@ static int _promote_block(
   }
   _lock(inner.up);
   defer _unlock(inner.up);
-  if (inner.up.table[object] is void) _insert_locked(inner.up, object);
+  unsigned before = inner.up.table.len();
+  inner.up.table.setdefault(object, object);
+  if (inner.up.table.len() != before) inner.up.interned++;
   if (block && block.owner == inner) _mark_slot(block, slot);
   else if (promotion) {
     promotion.next = inner.promotions;
@@ -913,6 +915,8 @@ int Pool.promote(Pool inner, Var object, void *alloc) {
     chain owns it or a promotion fails. A null `inner` reports safe, since no
     pool can then reclaim the value. Promotion is not transactional across
     levels: an earlier level remains promoted if a later promotion transfers.
+    A thread that loses a concurrent promotion of an equal value still gets
+    one, though `Pool.is_permanent` answers zero for its surviving copy.
 
     Raises: `<alloc-fail>` when promotion metadata cannot be allocated.
 */
