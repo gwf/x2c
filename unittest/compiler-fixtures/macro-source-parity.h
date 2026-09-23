@@ -19,11 +19,11 @@ static inline int direct_inline(int value){
 
 int direct_function(int value);
 
-static inline int generated_inline(int _x2c_macro_value_0){
-  return _x2c_macro_value_0 + 1;
+static inline int generated_inline(int _x2c_macro_value_1){
+  return _x2c_macro_value_1 + 1;
 }
 
-int generated_function(int _x2c_macro_value_0);
+int generated_function(int _x2c_macro_value_2);
 
 int main(void);
 

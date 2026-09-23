@@ -1183,7 +1183,9 @@ binding, so the nested macro can read and assign it.
 A `struct`, `union`, or `enum` tag that a body defines or declares is private
 to each expansion, like a typedef, and so are the enumerators it lists. Tags
 are a separate namespace, so `struct tm tm;` names the outside tag and a
-private variable. A tag the body only references keeps its outside meaning.
+private variable. Declarations in nested blocks may shadow same-spelled body
+locals and tags; references use the nearest lexical declaration. A tag the
+body only references keeps its outside meaning.
 To publish a tag, spell it
 through a `Name` hole or `x2c.ident`:
 

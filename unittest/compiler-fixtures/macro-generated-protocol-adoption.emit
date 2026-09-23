@@ -25,13 +25,13 @@ MacroArrayInt MacroArrayInt_new(void){
 int MacroArrayInt_equal(MacroArrayInt _x2c_macro_a_0, MacroArrayInt _x2c_macro_b_0){
   return(void *) _x2c_macro_a_0 ==(void *) _x2c_macro_b_0;
 }
-int MacroArrayInt_contains(MacroArrayInt _x2c_macro_array_0, int _x2c_macro_needle_0){
-  int * _x2c_macro_data_0 =(int *) _x2c_macro_array_0 -> bytes;
-  for(size_t _x2c_macro_i_0 = 0;  _x2c_macro_i_0 < _x2c_macro_array_0 -> length;  _x2c_macro_i_0 ++) if(_x2c_macro_data_0[_x2c_macro_i_0] == _x2c_macro_needle_0) return 1;
+int MacroArrayInt_contains(MacroArrayInt _x2c_macro_array_1, int _x2c_macro_needle_0){
+  int * _x2c_macro_data_0 =(int *) _x2c_macro_array_1 -> bytes;
+  for(size_t _x2c_macro_i_0 = 0;  _x2c_macro_i_0 < _x2c_macro_array_1 -> length;  _x2c_macro_i_0 ++) if(_x2c_macro_data_0[_x2c_macro_i_0] == _x2c_macro_needle_0) return 1;
   return 0;
 }
-int MacroArrayInt_getindex(MacroArrayInt _x2c_macro_array_0, int _x2c_macro_index_0){
-  return((int *) _x2c_macro_array_0 -> bytes)[_x2c_macro_index_0];
+int MacroArrayInt_getindex(MacroArrayInt _x2c_macro_array_2, int _x2c_macro_index_0){
+  return((int *) _x2c_macro_array_2 -> bytes)[_x2c_macro_index_0];
 }
 int main(void){
   MacroArrayInt array = MacroArrayInt_new();

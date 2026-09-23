@@ -2196,12 +2196,13 @@ static Atom _replacement_binder(Var binder, String projection, int seq) {
   return Atom.intern(%"${prefix}__macro_${projection}_${name[1:]}");
 }
 
-/* A tag local is keyed `(tag NAME)`, since C keeps tags in their own
-   namespace. */
-static Atom _local_binder(Var key) {
-  match (key) case %(tag ?(String tag)):
-    return Atom.intern(%"?__macro_tag_$tag");
-  return Atom.intern(%"?__macro_local_${key}");
+/* A template binder names one lexical declaration, including its namespace.
+   Its ordinal keeps same-spelled declarations distinct within a template. */
+static Atom _local_binder(Var identity, int tag) {
+  int number = 0;
+  (void) binding_identity_try_parts(identity, &number, NULL);
+  int ordinal = INT_MAX - number;
+  return Atom.intern(%"?__macro_${tag ? "tag" : "local"}_${ordinal}");
 }
 
 static Var _replace_definition_bindings(Var value, Map bindings) {
@@ -2221,29 +2222,27 @@ static Var _replace_definition_bindings(Var value, Map bindings) {
   return changed ? items.list().var() : value;
 }
 
-/* Returns the definition-local identity stored under `key`, introducing
-   one spelled `spelling` on first use. */
-static List _definition_local(Compiler c, Var key, String spelling) {
+/* Introduces one declaration in the current lexical scope. */
+static List _definition_local(Compiler c, String spelling, int tag) {
   Map locals = c.macro_definition_locals();
-  Var stored;
-  if (locals.try_get(key, &stored)) return stored;
   Var order = locals[<order>];
   int identity = INT_MAX - (order is <list> ? order.list().len() : 0);
   List introduced = binding_identity_new(identity, spelling);
   c.semantic_binding_facts()[%(known $identity)] = spelling;
-  locals[<order>] = cons(key, order is <list> ? order : NULL);
-  locals[key] = introduced;
+  locals[<order>] = cons(introduced, order is <list> ? order : NULL);
   locals[introduced] = spelling;
+  if (tag) locals[%(tag-local $introduced)] = 1;
   return introduced;
 }
 
-/** Returns the definition-local binding identity for `spelling`.
-    Repeated uses share one identity while the template is parsed. An active
-    macro-definition locals map is required.
-*/
+/** Returns the current declaration's definition-local identity. An active
+    macro-definition locals map is required. */
 List Compiler.macro_introduced_name(Compiler compiler, String spelling) {
   if (compiler.parsing_source_syntax()) return %($spelling);
-  return _definition_local(compiler, spelling, spelling);
+  Map locals = compiler.macro_definition_locals();
+  List current = compiler.sym.current_binding(%($spelling));
+  if (current && current in locals) return current;
+  return _definition_local(compiler, spelling, 0);
 }
 
 /** Returns a template's local binding for tag `name` of `kind`, or NULL
@@ -2256,14 +2255,20 @@ List Compiler.macro_tag_name(
   Compiler c, Symbol kind, String name, int definition) {
   Map locals = c.macro_definition_locals();
   List key = %(tag $name);
-  Var local;
-  if (locals.try_get(key, &local)) {
-    if (definition) locals.del(%(provisional $key));
-    return local;
+  List current = c.sym.current_binding(key);
+  if (current && current in locals) {
+    if (definition) locals.del(%(provisional $current));
+    return current;
   }
-  if (!definition && c.sym.get_exact(%($kind $name))) return NULL;
-  if (!definition) locals[%(provisional $key)] = 1;
-  return _definition_local(c, key, name);
+  if (!definition) {
+    List visible = c.sym.lookup(key, NULL);
+    if (visible && visible in locals) return visible;
+    if (c.sym.get_exact(%($kind $name))) return NULL;
+  }
+  List local = _definition_local(c, name, 1);
+  c.sym.bind_identity(%(tag), local, %($kind $local));
+  if (!definition) locals[%(provisional $local)] = 1;
+  return local;
 }
 
 static void _template_binders(Var value, Map binders) {
@@ -3094,14 +3099,14 @@ List Compiler.parse_macro_definition(Compiler c) {
   }
   // A tag the template only references keeps its public spelling.
   Array fresh_locals = [];
-  foreach (Var local, local_names) {
-    Var identity = definition_locals[local];
-    if (%(provisional $local) in definition_locals) {
+  foreach (Var identity, local_names) {
+    if (%(provisional $identity) in definition_locals) {
       definition_bindings[identity] = definition_locals[identity];
       continue;
     }
-    definition_bindings[identity] = _local_binder(local);
-    fresh_locals.push(local);
+    definition_bindings[identity] = _local_binder(
+      identity, %(tag-local $identity) in definition_locals);
+    fresh_locals.push(identity);
   }
   replacement = _replace_definition_bindings(
     replacement, definition_bindings);
@@ -3118,9 +3123,10 @@ List Compiler.parse_macro_definition(Compiler c) {
   Array fresh = [];
   foreach (Var binder, using_holes)
     fresh.push(%($binder ${binder.str()[1:]} 1));
-  foreach (Var local, fresh_locals) {
-    Var spelling = definition_locals[definition_locals[local]];
-    fresh.push(%(${_local_binder(local)} $spelling 0));
+  foreach (Var identity, fresh_locals) {
+    Var spelling = definition_locals[identity];
+    fresh.push(%(${_local_binder(
+      identity, %(tag-local $identity) in definition_locals)} $spelling 0));
   }
   List fresh_rows = fresh.list_free();
   Var capture_order = (void *) definition_captures != NULL
