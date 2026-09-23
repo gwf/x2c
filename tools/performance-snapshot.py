@@ -46,13 +46,9 @@ COMMANDS = (
   ("runtime", ["make", "performance-runtime"]),
   ("compiler", ["make", "bm-compiler"]),
 )
-
-# Size-normalized rates first, then the fixed workload and the raw sizes.
-BUILD_SCALING_METRICS = (
-  "translate_seconds_per_kline", "cc_seconds_per_mb", "c_bytes_per_line",
-  "pinned_seconds", "seconds", "cc_seconds", "source_lines",
-  "generated_c_bytes",
-)
+# Build cost score change, in points, that counts as a real change. Repeat
+# runs of one tree agree within 0.2 points.
+BUILD_SCORE_ALERT = 2.0
 
 
 class SnapshotError(RuntimeError):
@@ -331,10 +327,9 @@ def comparable_metrics(row: dict[str, object]) -> dict[str, float]:
   stage = row.get("stage_3_seconds")
   if isinstance(stage, (int, float)):
     metrics["stage-3 seconds"] = float(stage)
-  scaling = row.get("build_scaling") or {}
-  for key in BUILD_SCALING_METRICS:
-    if key in scaling:
-      metrics[f"build {key}"] = float(scaling[key])
+  score = (row.get("build_scaling") or {}).get("score")
+  if isinstance(score, (int, float)):
+    metrics["build cost score"] = float(score)
   for key, value in (row.get("compiler_median_seconds") or {}).items():
     metrics[f"compiler {key} seconds"] = float(value)
   for key, value in (row.get("shootout_median") or {}).items():
@@ -345,6 +340,19 @@ def comparable_metrics(row: dict[str, object]) -> dict[str, float]:
     key = f"runtime {item['target']}{mode}/{item['metric']}"
     metrics[key] = float(item["median"])
   return metrics
+
+
+def build_verdict(score: float, previous: dict[str, float]) -> str:
+  """Reads a build cost score change; repeat runs agree within 0.2."""
+  before = previous.get("build cost score")
+  if before is None:
+    return "(no previous score)"
+  change = score - before
+  if change >= BUILD_SCORE_ALERT:
+    return f"(+{change:.1f}: regression, find the commit that caused it)"
+  if change <= -BUILD_SCORE_ALERT:
+    return f"({change:.1f}: improvement)"
+  return f"({change:+.1f}: no change)"
 
 
 def render_report(
@@ -360,6 +368,10 @@ def render_report(
   if current["status"] != "success":
     lines.extend(["", f"Failure: {current.get('failure', 'unknown failure')}"])
     return "\n".join(lines) + "\n"
+  score = comparable_metrics(current).get("build cost score")
+  if score is not None:
+    verdict = build_verdict(score, comparable_metrics(previous or {}))
+    lines.append(f"- Build cost score: {score:.1f} {verdict}")
   if previous is None:
     lines.extend(["", "This is the first successful retained snapshot."])
     return "\n".join(lines) + "\n"

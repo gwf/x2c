@@ -105,7 +105,7 @@ class PerformanceSnapshotTests(unittest.TestCase):
     previous = {
       "run_id": "old", "commit": "a", "status": "success",
       "stage_3_seconds": 10.0,
-      "build_scaling": {"cc_seconds_per_mb": 2.0, "pinned_seconds": 8.0},
+      "build_scaling": {"score": 100.0},
       "compiler_median_seconds": {"stage-0/default": 2.0},
       "runtime_medians": [{
         "target": "bm-list", "mode": None, "metric": "get",
@@ -115,7 +115,7 @@ class PerformanceSnapshotTests(unittest.TestCase):
     current = {
       "run_id": "new", "commit": "b", "status": "success",
       "stage_3_seconds": 11.0,
-      "build_scaling": {"cc_seconds_per_mb": 2.5, "pinned_seconds": 8.0},
+      "build_scaling": {"score": 104.0},
       "compiler_median_seconds": {"stage-0/default": 1.0},
       "runtime_medians": [{
         "target": "bm-list", "mode": None, "metric": "get",
@@ -124,8 +124,10 @@ class PerformanceSnapshotTests(unittest.TestCase):
     }
     report = snapshot.render_report(current, previous)
     self.assertIn("stage-3 seconds | 10 | 11 | +10.00%", report)
-    self.assertIn("build cc_seconds_per_mb | 2 | 2.5 | +25.00%", report)
-    self.assertIn("build pinned_seconds | 8 | 8 | +0.00%", report)
+    self.assertIn("build cost score | 100 | 104 | +4.00%", report)
+    self.assertIn(
+      "Build cost score: 104.0 (+4.0: regression, find the commit", report,
+    )
     self.assertIn("compiler stage-0/default seconds | 2 | 1 | -50.00%", report)
     self.assertIn("runtime bm-list/get | 4 | 5 | +25.00%", report)
 
