@@ -228,17 +228,17 @@ static Map _cache_reachable_function_ids(List source) {
   return reachable;
 }
 
-/* Consume the initialization state completed by cache setup. A synthetic file
-   initializer calls protocol setup before early and middle work. A type-owned
-   initializer wraps its own body between early/middle and late work, while the
-   protocol initializer prepends its protocol queue. Shutdown registration is
-   last in synthetic and type-owned initializers, under the arms that
-   compile the shutdown. A type initializer in conditional groups may be
-   compiled out, so the entries call a lazy synthetic initializer instead.
-   It calls the type initializer under those arms, which sets the guard, and
-   otherwise runs the file's own initialization. initblock and initstmt
-   markers do not reach generated output; the compiler's initialization
-   queues hold those statements. */
+/* Consume the initialization state completed by cache setup. The constructor
+   form of the synthetic file initializer calls protocol setup before early and
+   middle work. A type-owned initializer wraps its own body between
+   early/middle and late work, while the protocol initializer prepends its
+   protocol queue. Shutdown registration is last in synthetic and type-owned
+   initializers, under the arms that compile the shutdown. A type initializer
+   in conditional groups may be compiled out, so the entries call a lazy
+   synthetic initializer instead. It calls the type initializer under those
+   arms, which sets the guard, and otherwise runs the file's own
+   initialization. initblock and initstmt markers do not reach generated
+   output; the compiler's initialization queues hold those statements. */
 static List _file_init(Compiler c, List source) {
   int has_init_blocks = _has_file_init_blocks(c);
   String initializer = c.init_fn;
@@ -250,16 +250,16 @@ static List _file_init(Compiler c, List source) {
     initializer ? _definition_arms(source, initializer) : NULL;
   if (!initializer || initializer_arms) {
     List file_init = c.sym.introduce("_file_init_");
-    init_func = initializer
-      ? _make_file_init_func(
-          c, %(static void),
-          _within_definitions(initializer_arms,
-            %((stmnt (expr (void) (call $initializer (args)))))),
-          guard, file_init, shutdown)
-      : _make_file_init_func(
-          c, %(("__attribute__((constructor))") static void),
-          %((stmnt (expr (void) (call "x2c_initialize_protocols" (args))))),
-          guard, file_init, shutdown);
+    List type = %(("__attribute__((constructor))") static void);
+    String entry = "x2c_initialize_protocols";
+    if (initializer) {
+      type = %(static void);
+      entry = initializer;
+    }
+    List call = %((stmnt (expr (void) (call $entry (args)))));
+    init_func = _make_file_init_func(
+      c, type, _within_definitions(initializer_arms, call), guard,
+      file_init, shutdown);
   }
   List init_guard = _make_init_guard(guard);
   String initializer_name = init_func ? "_file_init_" : initializer;
