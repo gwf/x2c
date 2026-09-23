@@ -66,7 +66,7 @@ Source: `lib/regex.x:635`
 <a id="Regex.cleanup"></a>
 #### Regex.cleanup
 
-`void Regex.cleanup(Regex)`
+`void Regex.cleanup(Regex value)`
 
 Provides the class default for `Regex.cleanup`.
 
@@ -89,7 +89,7 @@ Source: `lib/regex.x:624`
 <a id="Regex.equal"></a>
 #### Regex.equal
 
-`int Regex.equal(Regex, Regex)`
+`int Regex.equal(Regex left, Regex right)`
 
 Provides the class default for `Regex.equal`.
 
@@ -120,7 +120,7 @@ Source: `lib/regex.x:663`
 <a id="Regex.free"></a>
 #### Regex.free
 
-`void Regex.free(Regex)`
+`void Regex.free(Regex value)`
 
 Provides the class default for `Regex.free`.
 
@@ -131,7 +131,7 @@ Source: `lib/regex.x:27`
 <a id="Regex.hash"></a>
 #### Regex.hash
 
-`unsigned Regex.hash(Regex)`
+`unsigned Regex.hash(Regex value)`
 
 Provides the class default for `Regex.hash`.
 
@@ -203,7 +203,7 @@ Source: `lib/regex.x:702`
 <a id="Regex.repr"></a>
 #### Regex.repr
 
-`String Regex.repr(Regex)`
+`String Regex.repr(Regex value)`
 
 Provides the class default for `Regex.repr`.
 
@@ -224,7 +224,7 @@ Source: `lib/regex.x:674`
 <a id="Regex.str"></a>
 #### Regex.str
 
-`String Regex.str(Regex)`
+`String Regex.str(Regex value)`
 
 Provides the class default for `Regex.str`.
 
@@ -235,7 +235,7 @@ Source: `lib/regex.x:27`
 <a id="Regex.var"></a>
 #### Regex.var
 
-`Var Regex.var(Regex)`
+`Var Regex.var(Regex value)`
 
 Provides the class default for `Regex.var`.
 
@@ -246,7 +246,7 @@ Source: `lib/regex.x:27`
 <a id="Regex.write_repr"></a>
 #### Regex.write_repr
 
-`Buffer Regex.write_repr(Regex, Buffer)`
+`Buffer Regex.write_repr(Regex value, Buffer out)`
 
 Provides the class default for `Regex.write_repr`.
 
@@ -257,7 +257,7 @@ Source: `lib/regex.x:27`
 <a id="Regex.write_str"></a>
 #### Regex.write_str
 
-`Buffer Regex.write_str(Regex, Buffer)`
+`Buffer Regex.write_str(Regex value, Buffer out)`
 
 Provides the class default for `Regex.write_str`.
 
@@ -348,7 +348,7 @@ Source: `lib/regex.x:721`
 <a id="Var.regex"></a>
 #### Var.regex
 
-`Regex Var.regex(Var)`
+`Regex Var.regex(Var value)`
 
 Provides the class default for `Var.regex`.
 

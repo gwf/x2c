@@ -29,7 +29,7 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 STAGE = ROOT / "builds" / "0"
-INTERFACE_VERSION = 3
+INTERFACE_VERSION = 4
 UINT32 = 0xFFFFFFFF
 UINT64 = 0xFFFFFFFFFFFFFFFF
 # String.escape emits these and nothing else; anything outside [32,126] becomes
@@ -251,7 +251,7 @@ class HeaderSymbols:
             if len(tree) != 1 or not isinstance(tree[0], list):
                 raise ValueError("interface is not a single s-expression")
             node = tree[0]
-            if len(node) != 8 or node[0] != "interface":
+            if len(node) != 9 or node[0] != "interface":
                 raise ValueError("file is not an interface form")
             if node[1] != INTERFACE_VERSION:
                 raise ValueError(
@@ -292,47 +292,13 @@ class HeaderSymbols:
         self._cache[path] = table
         return table
 
-    def declaration_functions(self, path: str) -> tuple[str, ...]:
-        """Selected callable recipes retained by declaration projection.
-
-        Follow only declaration ownership rows. Function bodies and captured
-        macro environments are unrelated syntax, even if they contain a
-        matching-looking List.
-        """
-        names: list[str] = []
-
-        def visit(node):
-            if not isinstance(node, list) or not node:
-                return
-            if node[0] == "declaration-source":
-                visit(node[2])
-            elif node[0] == "declaration-origin":
-                visit(node[2])
-            elif node[0] in ("declaration-bundle", "rows", "seq"):
-                for child in node[1:]:
-                    visit(child)
-            elif node[0] == "declaration-function":
-                declaration = node[1]
-                binding = declaration[2][1][1]
-                if isinstance(binding, list) and binding[0] == "binding":
-                    names.append(str(binding[2]))
-                elif isinstance(binding, list) and len(binding) == 1:
-                    names.append(str(binding[0]))
-
-        for part in self._entries[path][5]:
-            if not isinstance(part, list):
-                continue
-            for row in part:
-                if isinstance(row, list) and len(row) == 2:
-                    key, value = row
-                    if isinstance(key, list) and key and key[0] == "source-node":
-                        visit(value)
-        return tuple(dict.fromkeys(names))
-
     def functions(self, path: str) -> dict[str, FuncType]:
-        """Only the func-typed rows, rendered for comparison."""
+        """Func-typed declarations and selected definitions."""
         out: dict[str, FuncType] = {}
-        for name, value in self.rows(path).items():
+        values = dict(self.rows(path))
+        for name, _, value, _, _, _ in self.selected_definitions(path):
+            values.setdefault(name, value)
+        for name, value in values.items():
             if not (isinstance(value, list) and len(value) >= 2):
                 continue
             head = value[0]
@@ -352,48 +318,88 @@ class HeaderSymbols:
             out[name] = FuncType(render_abstract(tail), tuple(rendered))
         return out
 
+    def selected_definitions(self, path: str) -> tuple[tuple, ...]:
+        """Public bodies selected by this unit's compiler translation."""
+        rows = self._entries[path][7]
+        for row in rows:
+            if not (isinstance(row, list) and len(row) == 6 and
+                    all(isinstance(row[index], str) and
+                        not isinstance(row[index], Symbol)
+                        for index in (0, 1, 5)) and
+                    isinstance(row[2], list) and
+                    isinstance(row[3], list) and
+                    isinstance(row[4], int) and row[4] > 0):
+                raise ValueError(f"{path}: malformed selected definition")
+        return tuple(tuple(row) for row in rows)
+
 
 def definitions_with_symbols(path: pathlib.Path, symbols: HeaderSymbols,
                              include_static: bool = False, root=ROOT):
-    """Join authored documentation to compiler-selected declaration output."""
+    """Enumerate selected bodies and join source-owned signatures and prose."""
     from x2c_source import (
-        Definition, definitions_for_path, public_declarations_for_path,
+        Definition, definitions, normalize_doc, public_declarations_for_path,
     )
-
-    authored = list(definitions_for_path(path, include_static))
-    classes = [item for item in public_declarations_for_path(path)
-               if item.kind == "class"]
-    if not classes:
-        return tuple(authored)
+    text = path.read_text(encoding="utf-8")
+    authored = {
+        item.name.replace(".", "_"): item
+        for item in definitions(text, include_static,
+                                include_macro_templates=False)
+    }
     relative = path.resolve().relative_to(root).as_posix()
     if relative not in symbols.paths():
-        return tuple(authored)
-    known = {item.name.replace(".", "_") for item in authored}
+        raise KeyError(relative)
+    declared = public_declarations_for_path(path)
+    classes = [item for item in declared if item.kind == "class"]
     table = symbols.functions(relative)
-    for native in symbols.declaration_functions(relative):
-        if native in known or native not in table:
+    selected = symbols.selected_definitions(relative)
+    found = []
+    defaults: set[str] = set()
+    for native, display, type_node, names, line, raw_doc in selected:
+        if native in authored:
+            found.append(authored[native])
             continue
-        owner = next((item for item in sorted(classes,
-                     key=lambda item: -len(item.name))
-                     if native.startswith(item.name + "_")), None)
-        if owner is None:
-            owner = next((item for item in classes
-                          if native == "Var_" + item.name.lower()), None)
-            if owner is None:
-                continue
-            name = "Var." + owner.name.lower()
-        else:
-            name = owner.name + "." + native[len(owner.name) + 1:]
         entry = table[native]
-        parameters = ", ".join(entry.params) or "void"
-        doc = (f"Provides the class default for `{name}`.\n\n"
-               "See [Classes and system macros]"
-               "(../../guide/system-macros.md) for the default behavior.")
-        authored.append(Definition(name,
-            f"{entry.returns} {name}({parameters})", owner.line, doc))
-        known.add(native)
-    authored.sort(key=lambda item: item.line)
-    return tuple(authored)
+        parameters = ", ".join(
+            _render(parameter, name)
+            for parameter, name in zip(type_node[0][1], names)
+            if parameter != [Symbol("void")]
+        ) or ", ".join(entry.params) or "void"
+        doc = normalize_doc(raw_doc) if raw_doc else None
+        generated = False
+        if doc is None and line == 1 and display == native:
+            owner = next((item for item in sorted(classes,
+                         key=lambda item: -len(item.name))
+                         if native.startswith(item.name + "_")), None)
+            if owner is not None:
+                display = owner.name + "." + native[len(owner.name) + 1:]
+                line = owner.line
+                defaults.add(native)
+            else:
+                owner = next((item for item in classes
+                              if native == "Var_" + item.name.lower()), None)
+                if owner is not None:
+                    display = "Var." + owner.name.lower()
+                    line = owner.line
+                    defaults.add(native)
+        if doc is None and native in defaults:
+            doc = (f"Provides the class default for `{display}`.\n\n"
+                   "See [Classes and system macros]"
+                   "(../../guide/system-macros.md) for the default behavior.")
+        elif doc is None and line == 1 and display == native:
+            owner = next((item for item in sorted(
+                declared, key=lambda item: -len(item.name))
+                if native.startswith(item.name + "_")), None)
+            if owner is not None:
+                display = owner.name + "." + native[len(owner.name) + 1:]
+                line = owner.line
+            doc = (f"Provides the generated protocol operation "
+                   f"`{display}`.")
+            generated = True
+        found.append(Definition(display,
+            f"{entry.returns} {display}({parameters})", line, doc,
+            generated))
+    found.sort(key=lambda item: item.line)
+    return tuple(found)
 
 
 def load(stage: pathlib.Path = STAGE) -> HeaderSymbols:

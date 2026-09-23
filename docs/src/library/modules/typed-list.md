@@ -164,7 +164,7 @@ Source: `lib/typed-list.x:121`
 <a id="ListChar.car"></a>
 #### ListChar.car
 
-`inline char ListChar.car(ListChar xs)`
+`char ListChar.car(ListChar xs)`
 
 Returns the first `char` in `xs`, or `0` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListChar` element-tag invariant.
@@ -174,7 +174,7 @@ Source: `lib/typed-list.x:97`
 <a id="ListChar.cons"></a>
 #### ListChar.cons
 
-`inline ListChar ListChar.cons(char value, ListChar tail)`
+`ListChar ListChar.cons(char value, ListChar tail)`
 
 Returns the canonical `ListChar` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
@@ -211,7 +211,7 @@ Source: `lib/typed-list.x:97`
 <a id="ListDbl.car"></a>
 #### ListDbl.car
 
-`inline double ListDbl.car(ListDbl xs)`
+`double ListDbl.car(ListDbl xs)`
 
 Returns the first `double` in `xs`, or `0.0` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListDbl` element-tag invariant.
@@ -221,7 +221,7 @@ Source: `lib/typed-list.x:113`
 <a id="ListDbl.cons"></a>
 #### ListDbl.cons
 
-`inline ListDbl ListDbl.cons(double value, ListDbl tail)`
+`ListDbl ListDbl.cons(double value, ListDbl tail)`
 
 Returns the canonical `ListDbl` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
@@ -258,7 +258,7 @@ Source: `lib/typed-list.x:113`
 <a id="ListFloat.car"></a>
 #### ListFloat.car
 
-`inline float ListFloat.car(ListFloat xs)`
+`float ListFloat.car(ListFloat xs)`
 
 Returns the first `float` in `xs`, or `0.0f` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListFloat` element-tag invariant.
@@ -268,7 +268,7 @@ Source: `lib/typed-list.x:109`
 <a id="ListFloat.cons"></a>
 #### ListFloat.cons
 
-`inline ListFloat ListFloat.cons(float value, ListFloat tail)`
+`ListFloat ListFloat.cons(float value, ListFloat tail)`
 
 Returns the canonical `ListFloat` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
@@ -305,7 +305,7 @@ Source: `lib/typed-list.x:109`
 <a id="ListInt.car"></a>
 #### ListInt.car
 
-`inline int ListInt.car(ListInt xs)`
+`int ListInt.car(ListInt xs)`
 
 Returns the first `int` in `xs`, or `0` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListInt` element-tag invariant.
@@ -315,7 +315,7 @@ Source: `lib/typed-list.x:105`
 <a id="ListInt.cons"></a>
 #### ListInt.cons
 
-`inline ListInt ListInt.cons(int value, ListInt tail)`
+`ListInt ListInt.cons(int value, ListInt tail)`
 
 Returns the canonical `ListInt` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
@@ -352,7 +352,7 @@ Source: `lib/typed-list.x:105`
 <a id="ListShort.car"></a>
 #### ListShort.car
 
-`inline short ListShort.car(ListShort xs)`
+`short ListShort.car(ListShort xs)`
 
 Returns the first `short` in `xs`, or `0` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListShort` element-tag invariant.
@@ -362,7 +362,7 @@ Source: `lib/typed-list.x:101`
 <a id="ListShort.cons"></a>
 #### ListShort.cons
 
-`inline ListShort ListShort.cons(short value, ListShort tail)`
+`ListShort ListShort.cons(short value, ListShort tail)`
 
 Returns the canonical `ListShort` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
@@ -399,7 +399,7 @@ Source: `lib/typed-list.x:101`
 <a id="ListString.car"></a>
 #### ListString.car
 
-`inline String ListString.car(ListString xs)`
+`String ListString.car(ListString xs)`
 
 Returns the first `String` in `xs`, or `NULL` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListString` element-tag invariant.
@@ -409,7 +409,7 @@ Source: `lib/typed-list.x:117`
 <a id="ListString.cons"></a>
 #### ListString.cons
 
-`inline ListString ListString.cons(String value, ListString tail)`
+`ListString ListString.cons(String value, ListString tail)`
 
 Returns the canonical `ListString` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its
@@ -446,7 +446,7 @@ Source: `lib/typed-list.x:117`
 <a id="ListSymbol.car"></a>
 #### ListSymbol.car
 
-`inline Symbol ListSymbol.car(ListSymbol xs)`
+`Symbol ListSymbol.car(ListSymbol xs)`
 
 Returns the first `Symbol` in `xs`, or `0` when `xs` is `nil`.
 A nonempty `xs` must retain the `ListSymbol` element-tag invariant.
@@ -456,7 +456,7 @@ Source: `lib/typed-list.x:121`
 <a id="ListSymbol.cons"></a>
 #### ListSymbol.cons
 
-`inline ListSymbol ListSymbol.cons(Symbol value, ListSymbol tail)`
+`ListSymbol ListSymbol.cons(Symbol value, ListSymbol tail)`
 
 Returns the canonical `ListSymbol` formed by prepending `value` to `tail`.
 The immutable tail is shared. The result follows the lifetime of its

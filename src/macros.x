@@ -2185,6 +2185,7 @@ static void _file_scope_declarators(List declarators, Map locals) {
 static void _file_scope_locals(List rows, Map locals) {
   foreach (Var row, rows) match (row) {
     case %((!or at src) ? ?inner): _file_scope_locals(%($inner), locals);
+    case %(api-source ? ? ?inner): _file_scope_locals(%($inner), locals);
     case %(seq *inner): _file_scope_locals(inner, locals);
     case %(function ?type (bind ?binder ?) ?):
       if (binder.is_binder() && !type.type().is_static())

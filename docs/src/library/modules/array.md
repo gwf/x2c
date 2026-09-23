@@ -619,19 +619,35 @@ Source: `lib/array.x:816`
 
 | Function | Summary |
 | --- | --- |
+| [`Array.capacity`](#Array.capacity) | Provides the generated protocol operation `Array.capacity`. |
 | [`Array.cleanup`](#Array.cleanup) | Ends the owned lifetime when a managed local leaves its block. |
+| [`Array.clear`](#Array.clear) | Provides the generated protocol operation `Array.clear`. |
 | [`Array.compare`](#Array.compare) | Compares `Array`s lexicographically with `Var.compare`. |
 | [`Array.equal`](#Array.equal) | Returns nonzero when two `Array`s have structurally equal elements. |
+| [`Array.free`](#Array.free) | Provides the generated protocol operation `Array.free`. |
 | [`Array.heap_pop`](#Array.heap_pop) | Removes and returns the smallest element of `heap`, or `void` when it is empty. |
 | [`Array.heap_push`](#Array.heap_push) | Adds `val` to `heap`, an `Array` maintained as a binary min-heap. |
 | [`Array.heapify`](#Array.heapify) | Rearranges `heap` in place so that it satisfies the min-heap invariant. |
+| [`Array.len`](#Array.len) | Provides the generated protocol operation `Array.len`. |
+| [`Array.pop`](#Array.pop) | Provides the generated protocol operation `Array.pop`. |
 | [`Array.remslice`](#Array.remslice) | Removes the region `array[start:end]` and returns a fresh `Array`. |
 | [`Array.repr`](#Array.repr) | Returns the readable `[ a, b, c ]` representation of `array`. |
 | [`Array.str`](#Array.str) | Returns an `Array` display `String` using each element's `str`. |
+| [`Array.truncate`](#Array.truncate) | Provides the generated protocol operation `Array.truncate`. |
+| [`Array.truth`](#Array.truth) | Provides the generated protocol operation `Array.truth`. |
 | [`Array.update_n`](#Array.update_n) | Appends exactly `element_count` variadic values to `array`. |
 | [`Array.write_repr`](#Array.write_repr) | Appends the readable `Array` representation to `out`. |
 
 ### `Array`
+
+<a id="Array.capacity"></a>
+#### Array.capacity
+
+`size_t Array.capacity(Array a0)`
+
+Provides the generated protocol operation `Array.capacity`.
+
+Source: `lib/array.x:35`
 
 <a id="Array.cleanup"></a>
 #### Array.cleanup
@@ -641,6 +657,15 @@ Source: `lib/array.x:816`
 Ends the owned lifetime when a managed local leaves its block.
 
 Source: `lib/array.x:824`
+
+<a id="Array.clear"></a>
+#### Array.clear
+
+`void Array.clear(Array a0)`
+
+Provides the generated protocol operation `Array.clear`.
+
+Source: `lib/array.x:35`
 
 <a id="Array.compare"></a>
 #### Array.compare
@@ -659,6 +684,15 @@ Source: `lib/array.x:518`
 Returns nonzero when two `Array`s have structurally equal elements.
 
 Source: `lib/array.x:732`
+
+<a id="Array.free"></a>
+#### Array.free
+
+`void Array.free(Array a0)`
+
+Provides the generated protocol operation `Array.free`.
+
+Source: `lib/array.x:35`
 
 <a id="Array.heap_pop"></a>
 #### Array.heap_pop
@@ -726,6 +760,24 @@ failure may leave a partially rearranged `Array`.
 
 Source: `lib/array.x:704`
 
+<a id="Array.len"></a>
+#### Array.len
+
+`size_t Array.len(Array a0)`
+
+Provides the generated protocol operation `Array.len`.
+
+Source: `lib/array.x:35`
+
+<a id="Array.pop"></a>
+#### Array.pop
+
+`void Array.pop(Array a0)`
+
+Provides the generated protocol operation `Array.pop`.
+
+Source: `lib/array.x:35`
+
 <a id="Array.remslice"></a>
 #### Array.remslice
 
@@ -765,6 +817,24 @@ Source: `lib/array.x:761`
 Returns an `Array` display `String` using each element's `str`.
 
 Source: `lib/array.x:744`
+
+<a id="Array.truncate"></a>
+#### Array.truncate
+
+`void Array.truncate(Array a0, size_t a1)`
+
+Provides the generated protocol operation `Array.truncate`.
+
+Source: `lib/array.x:35`
+
+<a id="Array.truth"></a>
+#### Array.truth
+
+`int Array.truth(Array a0)`
+
+Provides the generated protocol operation `Array.truth`.
+
+Source: `lib/array.x:35`
 
 <a id="Array.update_n"></a>
 #### Array.update_n

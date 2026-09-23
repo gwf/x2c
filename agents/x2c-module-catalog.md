@@ -516,12 +516,13 @@ dynamic contiguous arrays of `Var` elements.
 
 Public functions:
 
-`Array.block`, `Block.array`, `Array.new`, `Array.resize`, `Array.update_n`,
-`Array.getindex`, `Array.setindex`, `Array.updateindex`, `Array.postfixindex`,
-`Array.push`, `Array.take_last`, `Array.shift`, `Array.unshift`,
-`Array.insert`, `Array.remove`, `Array.copy`, `Array.getslice`,
-`Array.setslice`, `Array.remslice`, `Array.splice`, `Array.find`,
-`Array.contains`, `Array.count`, `Array.indexof`, `Array.concat`,
+`Array.clear`, `Array.len`, `Array.capacity`, `Array.truth`, `Array.pop`,
+`Array.free`, `Array.truncate`, `Array.block`, `Block.array`, `Array.new`,
+`Array.resize`, `Array.update_n`, `Array.getindex`, `Array.setindex`,
+`Array.updateindex`, `Array.postfixindex`, `Array.push`, `Array.take_last`,
+`Array.shift`, `Array.unshift`, `Array.insert`, `Array.remove`, `Array.copy`,
+`Array.getslice`, `Array.setslice`, `Array.remslice`, `Array.splice`,
+`Array.find`, `Array.contains`, `Array.count`, `Array.indexof`, `Array.concat`,
 `Array.reverse`, `Array.map`, `Array.map2`, `Array.foldl`, `Array.compare`,
 `Array.sort`, `Array.sort_with`, `Array.sort_by`, `Array.heap_push`,
 `Array.heap_pop`, `Array.heapify`, `Array.join`, `Array.equal`,
@@ -554,11 +555,13 @@ checked dynamic storage for fixed-width elements.
 
 Public functions:
 
-`Block.new`, `Bytes.new`, `Bytes.block`, `Block.reserve`, `Bytes.reserve`,
-`Block.truncate`, `Block.clear`, `Block.append`, `Bytes.append`,
-`Block.append_fill`, `Bytes.append_fill`, `Block.try_pop`, `Bytes.try_pop`,
-`Block.push`, `Bytes.push`, `Block.pop`, `Block.free`, `Block.move_to`,
-`Block.len`, `Block.truth`, `Block.capacity`, `Block.cleanup`, `Bytes.cleanup`
+`Bytes_clear`, `Bytes_len`, `Bytes_capacity`, `Bytes_truth`, `Bytes_pop`,
+`Bytes_free`, `Bytes_truncate`, `Block.new`, `Bytes.new`, `Bytes.block`,
+`Block.reserve`, `Bytes.reserve`, `Block.truncate`, `Block.clear`,
+`Block.append`, `Bytes.append`, `Block.append_fill`, `Bytes.append_fill`,
+`Block.try_pop`, `Bytes.try_pop`, `Block.push`, `Bytes.push`, `Block.pop`,
+`Block.free`, `Block.move_to`, `Block.len`, `Block.truth`, `Block.capacity`,
+`Block.cleanup`, `Bytes.cleanup`
 
 ### [lib/buffer.x](../lib/buffer.x)
 
@@ -932,8 +935,7 @@ Public functions:
 `x2c_expr_ident`, `x2c_expr_index`, `x2c_expr_field`, `x2c_expr_call`,
 `x2c_expr_composite`, `x2c_expr_cast`, `x2c_stmnt_make`, `x2c_stmnt_return`,
 `x2c_block_make`, `x2c_decl_make`, `x2c_param_make`, `x2c_function_body`,
-`x2c_parameters_arguments`, `_meta_initializer`, `_meta_fail`, `_meta_member`,
-`x2c_type_members`
+`x2c_parameters_arguments`, `x2c_type_members`
 
 ### [lib/mutex.x](../lib/mutex.x)
 
@@ -1157,18 +1159,30 @@ packed typed `Array`s generated from shared methods.
 
 Public functions:
 
-`ArrayChar.new`, `ArrayChar.try_get`, `ArrayChar.try_next`,
-`ArrayChar.getindex`, `ArrayChar.setindex`, `ArrayChar.push`,
-`ArrayChar.try_take_last`, `ArrayChar.take_last`, `ArrayChar.shift`,
-`ArrayChar.unshift`, `ArrayChar.insert`, `ArrayChar.remove`, `ArrayChar.copy`,
-`ArrayChar.getslice`, `ArrayChar.setslice`, `ArrayChar.remslice`,
-`ArrayChar.splice`, `ArrayChar.find`, `ArrayChar.contains`, `ArrayChar.count`,
-`ArrayChar.indexof`, `ArrayChar.concat`, `ArrayChar.reverse`,
-`ArrayChar.equal`, `ArrayChar.array`, `ArrayChar.compare`,
-`ArrayChar.write_repr`, `ArrayChar.write_str`, `ArrayChar.str`,
-`ArrayChar.repr`, `ArrayChar.updateindex`, `ArrayChar.postfixindex`,
-`ArrayChar.var`, `ArrayChar.block`, `Var.arraychar`, `Array.arraychar`,
-`ArrayChar.iter`, `ArrayShort.new`, `ArrayShort.try_get`,
+`ArrayChar.clear`, `ArrayChar.len`, `ArrayChar.capacity`, `ArrayChar.truth`,
+`ArrayChar.pop`, `ArrayChar.free`, `ArrayChar.truncate`, `ArrayShort.clear`,
+`ArrayShort.len`, `ArrayShort.capacity`, `ArrayShort.truth`, `ArrayShort.pop`,
+`ArrayShort.free`, `ArrayShort.truncate`, `ArrayInt.clear`, `ArrayInt.len`,
+`ArrayInt.capacity`, `ArrayInt.truth`, `ArrayInt.pop`, `ArrayInt.free`,
+`ArrayInt.truncate`, `ArrayLong.clear`, `ArrayLong.len`, `ArrayLong.capacity`,
+`ArrayLong.truth`, `ArrayLong.pop`, `ArrayLong.free`, `ArrayLong.truncate`,
+`ArrayFloat.clear`, `ArrayFloat.len`, `ArrayFloat.capacity`,
+`ArrayFloat.truth`, `ArrayFloat.pop`, `ArrayFloat.free`, `ArrayFloat.truncate`,
+`ArrayDbl.clear`, `ArrayDbl.len`, `ArrayDbl.capacity`, `ArrayDbl.truth`,
+`ArrayDbl.pop`, `ArrayDbl.free`, `ArrayDbl.truncate`, `ArrayString.clear`,
+`ArrayString.len`, `ArrayString.capacity`, `ArrayString.truth`,
+`ArrayString.pop`, `ArrayString.free`, `ArrayString.truncate`, `ArrayChar.new`,
+`ArrayChar.try_get`, `ArrayChar.try_next`, `ArrayChar.getindex`,
+`ArrayChar.setindex`, `ArrayChar.push`, `ArrayChar.try_take_last`,
+`ArrayChar.take_last`, `ArrayChar.shift`, `ArrayChar.unshift`,
+`ArrayChar.insert`, `ArrayChar.remove`, `ArrayChar.copy`, `ArrayChar.getslice`,
+`ArrayChar.setslice`, `ArrayChar.remslice`, `ArrayChar.splice`,
+`ArrayChar.find`, `ArrayChar.contains`, `ArrayChar.count`, `ArrayChar.indexof`,
+`ArrayChar.concat`, `ArrayChar.reverse`, `ArrayChar.equal`, `ArrayChar.array`,
+`ArrayChar.compare`, `ArrayChar.write_repr`, `ArrayChar.write_str`,
+`ArrayChar.str`, `ArrayChar.repr`, `ArrayChar.updateindex`,
+`ArrayChar.postfixindex`, `ArrayChar.var`, `ArrayChar.block`, `Var.arraychar`,
+`Array.arraychar`, `ArrayChar.iter`, `ArrayShort.new`, `ArrayShort.try_get`,
 `ArrayShort.try_next`, `ArrayShort.getindex`, `ArrayShort.setindex`,
 `ArrayShort.push`, `ArrayShort.try_take_last`, `ArrayShort.take_last`,
 `ArrayShort.shift`, `ArrayShort.unshift`, `ArrayShort.insert`,

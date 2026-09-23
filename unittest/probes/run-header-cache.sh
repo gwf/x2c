@@ -191,7 +191,7 @@ for out in warm tampered rejected v1; do
   (cd "$FAKE" && ./builds/0/x2c translate --out-dir "$out" \
     src/bar.x src/hdr.x)
 done
-grep -Eq '^\(interface 3 "[0-9a-f]{16}" "src/hdr.x"' "$FAKE/warm/hdr.xi" ||
+grep -Eq '^\(interface 4 "[0-9a-f]{16}" "src/hdr.x"' "$FAKE/warm/hdr.xi" ||
   fail "interface is missing the scratch header entry"
 grep -q '(self "CacheSelfBase_rest")' "$FAKE/warm/hdr.xi" ||
   fail "interface is missing receiver-relative method metadata"

@@ -689,6 +689,52 @@ static List _header_and_source(Compiler compiler, List ast) {
   return %( $header_list $source_list );
 }
 
+/* Project definitions that survived expansion and binding. Prototypes and
+   imported units have no local function node; file-static bodies are private. */
+static List _public_parameter_names(Compiler c, List modifiers) {
+  Array names = [];
+  match (modifiers)
+    case %((fnmod (params *parameters)) *):
+      foreach (List parameter, parameters) match (parameter)
+        case %(param ? (bind ?binding ?)): {
+          String name = binding_identity_spelling(binding);
+          Var spelling;
+          if (c.semantic_binding_facts().try_get(
+                %(source-spelling $binding), &spelling))
+            name = spelling;
+          names.push(name ? name : "");
+        }
+  return names.list_free();
+}
+
+static List _public_definition_rows(Compiler c, List ast) {
+  Array rows = [];
+  Var comptime = c.semantic_binding_facts()[%(api-comptime-definitions)];
+  List selected = comptime is <list> ? ast.append(comptime) : ast;
+  foreach (List node, selected) match (node)
+    case %(function ?type (bind ?binding ?modifiers) ?): {
+      String name = binding_identity_spelling(binding);
+      if (!name || type.type().is_static())
+        continue;
+      Type signature = %(declare $type
+        (bindings (bind $binding $modifiers))).type_from_ast();
+      List parameter_names = _public_parameter_names(c, modifiers);
+      Var source = c.semantic_binding_facts()[%(api-definition $binding)];
+      int line = 1;
+      Var doc = "";
+      String display = name;
+      match (c.semantic_binding_facts()[%(method $binding)])
+        case %(?(String owner) ?(String member)):
+          display = %"$owner.$member";
+      match (source) case %(?(int recorded) ?text): {
+        line = recorded;
+        doc = text;
+      }
+      rows.push(%($name $display $signature $parameter_names $line $doc));
+    }
+  return rows.list_free();
+}
+
 static List _declaration_binding(List declarator) {
   match (declarator) {
     case %(bind (!set ?binding (binding ? ?)) ?): return binding;
@@ -1040,6 +1086,7 @@ void generate_code(Compiler c, List ast, String dir) {
   ast = ast.filter(
     %!(unit) => !unit.list().match(%((!or space comment empty) *)));
 
+  List public_definitions = _public_definition_rows(c, ast);
   List (header, source) = _header_and_source(c, ast);
   String hash = x2c_filename_hash(c.filename);
   (header, source) = c.setup_cache_init(
@@ -1066,7 +1113,8 @@ void generate_code(Compiler c, List ast, String dir) {
     $hfile ${c.code_pretty_string(header, hfile)}
     $cfile ${c.code_pretty_string(source, cfile)}
   );
-  String interface = c.source_facts ? NULL : interface_text(c);
+  String interface = c.source_facts
+                   ? NULL : interface_text(c, public_definitions);
   if (interface) outputs = outputs.append(%("$basename.xi" $interface));
   List failure = NULL;
   try file_publish(outputs);

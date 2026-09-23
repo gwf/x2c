@@ -452,7 +452,9 @@ def collect() -> tuple[Module, ...]:
             )
             for definition in audit.callables:
                 key = (path, definition.name)
-                tier = remaining_tiers.pop(key, "primary")
+                tier = remaining_tiers.pop(
+                    key, "advanced" if definition.generated else "primary"
+                )
                 items.append(Item(
                     definition.name, definition.signature, definition.line,
                     definition.doc, tier
@@ -1018,7 +1020,9 @@ def render_x2c_api(modules: tuple[Module, ...]) -> str:
         for item in module.items:
             if item.name.startswith("x2c_"):
                 rows.append((module.path, module.stem, item))
-    for definition in definitions_for_path(COMPILER_X2C_SOURCE):
+    for definition in definitions_with_symbols(
+        COMPILER_X2C_SOURCE, load_symbols()
+    ):
         if not definition.name.startswith("x2c_"):
             continue
         if not definition.doc:

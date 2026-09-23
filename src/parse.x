@@ -1846,6 +1846,59 @@ static void _track_conditional_arms(Compiler c) {
     }
 }
 
+/* Keep authored prose beside a definition without making comment text part
+   of the semantic AST. Macro templates carry it until their selected body
+   binds at the invocation. */
+static String _definition_doc(Compiler c, Token start) {
+  Token first = c.tokenizer.tokens;
+  if (start <= first) return NULL;
+  Token token = start - 1;
+  while (token > first && token.type == <space>) token--;
+  if (token.type != <comment> || token.len < 5 ||
+      !token.text.startswith("/**")) return NULL;
+  int lines = 0;
+  for (int position = token.pos + token.len; position < start.pos;
+       position++)
+    if (c.text[position] == '\n' && ++lines > 1) return NULL;
+  return String.new_len(token.text + 3, token.len - 5);
+}
+
+/* A template's comment is prose, but its holes still refer to the same
+   captured source arguments as its syntax. Render those captures at the
+   chosen expansion, without treating the comment as compiler syntax. */
+static String _expanded_definition_doc(Compiler c, String doc) {
+  if (!doc || !c.macro_stack) return doc;
+  foreach (List frame, c.macro_stack) {
+    List bindings = frame[2];
+    foreach (List pair, bindings) {
+      Var binder = pair.car();
+      if (!binder.is_binder()) continue;
+      String name = binder.str();
+      if (!name.startswith("?") || name.len() < 2) continue;
+      String spelling = NULL;
+      Var captured = pair.cadr();
+      if (captured is <string>) spelling = captured;
+      else if (captured is <symbol>) spelling = captured.symbol();
+      else match (captured)
+        case %(src (source ?(String path) ?(int first) ?(int last)) ?): {
+          String source = path.equal(c.filename)
+                        ? c.text : Path.read_text(path);
+          spelling = source[first:last];
+        }
+      if (spelling) doc = doc.replace("$" + name[1:], spelling);
+    }
+  }
+  return doc;
+}
+
+static void _definition_source(
+  Compiler c, List function, int line, String doc) {
+  match (function)
+    case %(function ? (bind ?binding ?) ?):
+      c.semantic_binding_facts()[%(api-definition $binding)] =
+        %($line $doc);
+}
+
 /** Parses one top-level form and applies its source-ordered compiler effects.
     Returns its AST, or NULL when a keyword definition, top-level Lisp form,
     linkage brace, or compile-time-only `meta` function only updates compiler
@@ -1889,6 +1942,8 @@ List Compiler.parse_top_level(Compiler c) {
     meta = c.token;
     c.next();
   }
+  Token definition_start = c.token;
+  String definition_doc = _definition_doc(c, definition_start);
   List decl = c.parse_declaration_row();
   if (c.test(<;>)) {
     if (meta && decl.type_from_ast().is_function())
@@ -1910,7 +1965,18 @@ List Compiler.parse_top_level(Compiler c) {
     c.record_declaration_visibility(function);
     /* A `meta` function that reaches a `Meta` operation exists only inside
        the compiler, so there is no runtime form to emit. */
-    if (meta && c.meta_is_comptime_only(function)) return NULL;
+    if (meta && c.meta_is_comptime_only(function)) {
+      _definition_source(
+        c, function, definition_start.line, definition_doc);
+      Map facts = c.semantic_binding_facts();
+      Var prior = facts[%(api-comptime-definitions)];
+      List rows = prior is <list> ? prior.list() : %();
+      facts[%(api-comptime-definitions)] = rows.append(%($function));
+      return NULL;
+    }
+    if (c.macro_holes)
+      return %(api-source ${definition_start.line} $definition_doc $function);
+    _definition_source(c, function, definition_start.line, definition_doc);
     return function;
   }
   c.require_input();
@@ -2268,6 +2334,19 @@ List Compiler.bind_syntax(
         if (_.macro_holes) return input;
       case %(src ? ?syntax): {
         return _.bind_syntax(syntax, context, _.return_type);
+      }
+      case %(api-source ?line ?doc ?syntax): {
+        if (context != AST_UNIT) goto construction_error;
+        List bound = _.bind_syntax(syntax, context, _.return_type);
+        Token invocation = _.macro_stack
+                         ? _.macro_stack.last().list()[3] : NULL;
+        String invocation_doc = invocation
+                              ? _definition_doc(_, invocation) : NULL;
+        _definition_source(
+          _, bound, invocation ? invocation.line : line,
+          invocation_doc ? invocation_doc
+                         : _expanded_definition_doc(_, doc));
+        return bound;
       }
       case %(named-type ?(String name) ?type): {
         if (context != AST_UNIT) goto construction_error;

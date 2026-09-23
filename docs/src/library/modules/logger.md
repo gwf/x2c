@@ -244,7 +244,7 @@ Source: `lib/logger.x:308`
 <a id="Logger.debug"></a>
 #### Logger.debug
 
-`void Logger.debug( Logger logger, Symbol category, List fields)`
+`void Logger.debug(Logger logger, Symbol category, List fields)`
 
 Logs borrowed `fields` synchronously at debug level under `category`.
 Delivery and failure behavior follow `Logger.log`.
@@ -254,7 +254,7 @@ Source: `lib/logger.x:734`
 <a id="Logger.error"></a>
 #### Logger.error
 
-`void Logger.error( Logger logger, Symbol category, List fields)`
+`void Logger.error(Logger logger, Symbol category, List fields)`
 
 Logs borrowed `fields` synchronously at error level under `category`.
 Delivery and failure behavior follow `Logger.log`.
@@ -264,7 +264,7 @@ Source: `lib/logger.x:737`
 <a id="Logger.fatal"></a>
 #### Logger.fatal
 
-`void Logger.fatal( Logger logger, Symbol category, List fields)`
+`void Logger.fatal(Logger logger, Symbol category, List fields)`
 
 Logs borrowed `fields` synchronously at fatal level under `category`.
 Delivery and failure behavior follow `Logger.log`.
@@ -302,7 +302,7 @@ Source: `lib/logger.x:665`
 <a id="Logger.info"></a>
 #### Logger.info
 
-`void Logger.info( Logger logger, Symbol category, List fields)`
+`void Logger.info(Logger logger, Symbol category, List fields)`
 
 Logs borrowed `fields` synchronously at info level under `category`.
 Delivery and failure behavior follow `Logger.log`.
@@ -427,7 +427,7 @@ Source: `lib/logger.x:193`
 <a id="Logger.trace"></a>
 #### Logger.trace
 
-`void Logger.trace( Logger logger, Symbol category, List fields)`
+`void Logger.trace(Logger logger, Symbol category, List fields)`
 
 Logs borrowed `fields` synchronously at trace level under `category`.
 Delivery and failure behavior follow `Logger.log`.
@@ -437,7 +437,7 @@ Source: `lib/logger.x:733`
 <a id="Logger.warn"></a>
 #### Logger.warn
 
-`void Logger.warn( Logger logger, Symbol category, List fields)`
+`void Logger.warn(Logger logger, Symbol category, List fields)`
 
 Logs borrowed `fields` synchronously at warn level under `category`.
 Delivery and failure behavior follow `Logger.log`.

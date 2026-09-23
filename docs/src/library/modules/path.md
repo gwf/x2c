@@ -233,7 +233,7 @@ Source: `lib/path.x:502`
 <a id="Path.new"></a>
 #### Path.new
 
-`Path Path.new(const char *)`
+`Path Path.new(const char *argument0)`
 
 Provides the class default for `Path.new`.
 

@@ -208,11 +208,16 @@ and embedded-text files the walk read with their hashes. A declaration map
 below a `private` marker holds only what that region publishes, so an
 including unit never sees a private type or static helper, and a package's
 surface stops at that marker. The file holds one
-`(interface 3 "compiler" "path" "hash" (PARTS...) (DEFINITIONS...)
-(DEPENDENCIES...))` form in `%()` List syntax, with bare Atoms for its
-structural words and Strings for identifiers; the reader reads that one form
-without evaluating it. Before walking a file's source, collection looks for
-its interface in the output directory, then in the directory that mirrors
+`(interface 4 "compiler" "path" "hash" (PARTS...) (DEFINITIONS...)
+(SELECTED-DEFINITIONS...) (DEPENDENCIES...))` form in `%()` List syntax,
+with bare Atoms for its structural words and Strings for identifiers; the
+reader reads that one form without evaluating it. Selected definitions carry
+the local function's native and source names, canonical type, parameter
+spellings, source line, and documentation. They include macro output and
+compiler-only `meta` definitions, while prototypes and imported functions
+do not become local definitions. The API reference enumerates these rows and
+joins authored prose to them. Before walking a file's source, collection looks
+for its interface in the output directory, then in the directory that mirrors
 the file's home-relative path under the compiler's stage directory (or under
 an installed home), then in a package's `builds/`. An interface is used only
 when its recorded compiler, path, and every hash still match; otherwise

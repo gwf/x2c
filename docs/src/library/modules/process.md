@@ -75,7 +75,7 @@ Source: `lib/process.x:517`
 <a id="Job.equal"></a>
 #### Job.equal
 
-`int Job.equal(Job, Job)`
+`int Job.equal(Job left, Job right)`
 
 Provides the class default for `Job.equal`.
 
@@ -99,7 +99,7 @@ Source: `lib/process.x:487`
 <a id="Job.free"></a>
 #### Job.free
 
-`void Job.free(Job)`
+`void Job.free(Job value)`
 
 Provides the class default for `Job.free`.
 
@@ -110,7 +110,7 @@ Source: `lib/process.x:28`
 <a id="Job.hash"></a>
 #### Job.hash
 
-`unsigned Job.hash(Job)`
+`unsigned Job.hash(Job value)`
 
 Provides the class default for `Job.hash`.
 
@@ -215,7 +215,7 @@ Source: `lib/process.x:495`
 <a id="Job.repr"></a>
 #### Job.repr
 
-`String Job.repr(Job)`
+`String Job.repr(Job value)`
 
 Provides the class default for `Job.repr`.
 
@@ -265,7 +265,7 @@ Source: `lib/process.x:428`
 <a id="Job.str"></a>
 #### Job.str
 
-`String Job.str(Job)`
+`String Job.str(Job value)`
 
 Provides the class default for `Job.str`.
 
@@ -276,7 +276,7 @@ Source: `lib/process.x:28`
 <a id="Job.var"></a>
 #### Job.var
 
-`Var Job.var(Job)`
+`Var Job.var(Job value)`
 
 Provides the class default for `Job.var`.
 
@@ -299,7 +299,7 @@ Source: `lib/process.x:529`
 <a id="Job.write_repr"></a>
 #### Job.write_repr
 
-`Buffer Job.write_repr(Job, Buffer)`
+`Buffer Job.write_repr(Job value, Buffer out)`
 
 Provides the class default for `Job.write_repr`.
 
@@ -310,7 +310,7 @@ Source: `lib/process.x:28`
 <a id="Job.write_str"></a>
 #### Job.write_str
 
-`Buffer Job.write_str(Job, Buffer)`
+`Buffer Job.write_str(Job value, Buffer out)`
 
 Provides the class default for `Job.write_str`.
 
@@ -345,7 +345,7 @@ Source: `lib/process.x:338`
 <a id="Var.job"></a>
 #### Var.job
 
-`Job Var.job(Var)`
+`Job Var.job(Var value)`
 
 Provides the class default for `Var.job`.
 

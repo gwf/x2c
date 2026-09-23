@@ -103,19 +103,19 @@ prefix.
 | [`x2c_type_members`](meta.md#x2c_type_members) | `lib/meta.x` | `meta List x2c_type_members(List type)` |
 | [`x2c_var_descriptor_index`](var.md#x2c_var_descriptor_index) | `lib/var.x` | `int x2c_var_descriptor_index(Var value)` |
 | [`x2c_var_tag_descriptor_index`](var.md#x2c_var_tag_descriptor_index) | `lib/var.x` | `int x2c_var_tag_descriptor_index(Symbol tag)` |
-| [`x2c_var_update_f32`](varops.md#x2c_var_update_f32) | `lib/varops.x` | `float x2c_var_update_f32( volatile float *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_f64`](varops.md#x2c_var_update_f64) | `lib/varops.x` | `double x2c_var_update_f64( volatile double *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_i16`](varops.md#x2c_var_update_i16) | `lib/varops.x` | `short x2c_var_update_i16( volatile short *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_i32`](varops.md#x2c_var_update_i32) | `lib/varops.x` | `int x2c_var_update_i32( volatile int *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_i8`](varops.md#x2c_var_update_i8) | `lib/varops.x` | `char x2c_var_update_i8( volatile char *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_long`](varops.md#x2c_var_update_long) | `lib/varops.x` | `long x2c_var_update_long( volatile long *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_long_double`](varops.md#x2c_var_update_long_double) | `lib/varops.x` | `long double x2c_var_update_long_double( volatile long double *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_long_long`](varops.md#x2c_var_update_long_long) | `lib/varops.x` | `long long x2c_var_update_long_long( volatile long long *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_schar`](varops.md#x2c_var_update_schar) | `lib/varops.x` | `signed char x2c_var_update_schar( volatile signed char *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_u16`](varops.md#x2c_var_update_u16) | `lib/varops.x` | `ushort x2c_var_update_u16( volatile ushort *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_u32`](varops.md#x2c_var_update_u32) | `lib/varops.x` | `uint x2c_var_update_u32( volatile uint *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_u8`](varops.md#x2c_var_update_u8) | `lib/varops.x` | `uchar x2c_var_update_u8( volatile uchar *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_ulong`](varops.md#x2c_var_update_ulong) | `lib/varops.x` | `ulong x2c_var_update_ulong( volatile ulong *lhs, Symbol op, Var rhs)` |
-| [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long( volatile unsigned long long *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_f32`](varops.md#x2c_var_update_f32) | `lib/varops.x` | `float x2c_var_update_f32(volatile float *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_f64`](varops.md#x2c_var_update_f64) | `lib/varops.x` | `double x2c_var_update_f64(volatile double *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_i16`](varops.md#x2c_var_update_i16) | `lib/varops.x` | `short x2c_var_update_i16(volatile short *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_i32`](varops.md#x2c_var_update_i32) | `lib/varops.x` | `int x2c_var_update_i32(volatile int *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_i8`](varops.md#x2c_var_update_i8) | `lib/varops.x` | `char x2c_var_update_i8(volatile char *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_long`](varops.md#x2c_var_update_long) | `lib/varops.x` | `long x2c_var_update_long(volatile long *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_long_double`](varops.md#x2c_var_update_long_double) | `lib/varops.x` | `long double x2c_var_update_long_double(volatile long double *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_long_long`](varops.md#x2c_var_update_long_long) | `lib/varops.x` | `long long x2c_var_update_long_long(volatile long long *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_schar`](varops.md#x2c_var_update_schar) | `lib/varops.x` | `signed char x2c_var_update_schar(volatile signed char *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_u16`](varops.md#x2c_var_update_u16) | `lib/varops.x` | `ushort x2c_var_update_u16(volatile ushort *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_u32`](varops.md#x2c_var_update_u32) | `lib/varops.x` | `uint x2c_var_update_u32(volatile uint *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_u8`](varops.md#x2c_var_update_u8) | `lib/varops.x` | `uchar x2c_var_update_u8(volatile uchar *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_ulong`](varops.md#x2c_var_update_ulong) | `lib/varops.x` | `ulong x2c_var_update_ulong(volatile ulong *lhs, Symbol op, Var rhs)` |
+| [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 
 Total: 106 functions.

@@ -34,7 +34,7 @@ Request-owned source overlays.
 <a id="SourceView.cleanup"></a>
 #### SourceView.cleanup
 
-`void SourceView.cleanup(SourceView)`
+`void SourceView.cleanup(SourceView value)`
 
 Provides the class default for `SourceView.cleanup`.
 
@@ -45,7 +45,7 @@ Source: `src/sourceview.x:17`
 <a id="SourceView.equal"></a>
 #### SourceView.equal
 
-`int SourceView.equal(SourceView, SourceView)`
+`int SourceView.equal(SourceView left, SourceView right)`
 
 Provides the class default for `SourceView.equal`.
 
@@ -65,7 +65,7 @@ Source: `src/sourceview.x:48`
 <a id="SourceView.free"></a>
 #### SourceView.free
 
-`void SourceView.free(SourceView)`
+`void SourceView.free(SourceView value)`
 
 Provides the class default for `SourceView.free`.
 
@@ -76,7 +76,7 @@ Source: `src/sourceview.x:17`
 <a id="SourceView.hash"></a>
 #### SourceView.hash
 
-`unsigned SourceView.hash(SourceView)`
+`unsigned SourceView.hash(SourceView value)`
 
 Provides the class default for `SourceView.hash`.
 
@@ -127,7 +127,7 @@ Source: `src/sourceview.x:59`
 <a id="SourceView.repr"></a>
 #### SourceView.repr
 
-`String SourceView.repr(SourceView)`
+`String SourceView.repr(SourceView value)`
 
 Provides the class default for `SourceView.repr`.
 
@@ -148,7 +148,7 @@ Source: `src/sourceview.x:38`
 <a id="SourceView.str"></a>
 #### SourceView.str
 
-`String SourceView.str(SourceView)`
+`String SourceView.str(SourceView value)`
 
 Provides the class default for `SourceView.str`.
 
@@ -159,7 +159,7 @@ Source: `src/sourceview.x:17`
 <a id="SourceView.var"></a>
 #### SourceView.var
 
-`Var SourceView.var(SourceView)`
+`Var SourceView.var(SourceView value)`
 
 Provides the class default for `SourceView.var`.
 
@@ -170,7 +170,7 @@ Source: `src/sourceview.x:17`
 <a id="SourceView.write_repr"></a>
 #### SourceView.write_repr
 
-`Buffer SourceView.write_repr(SourceView, Buffer)`
+`Buffer SourceView.write_repr(SourceView value, Buffer out)`
 
 Provides the class default for `SourceView.write_repr`.
 
@@ -181,7 +181,7 @@ Source: `src/sourceview.x:17`
 <a id="SourceView.write_str"></a>
 #### SourceView.write_str
 
-`Buffer SourceView.write_str(SourceView, Buffer)`
+`Buffer SourceView.write_str(SourceView value, Buffer out)`
 
 Provides the class default for `SourceView.write_str`.
 
@@ -194,7 +194,7 @@ Source: `src/sourceview.x:17`
 <a id="Var.sourceview"></a>
 #### Var.sourceview
 
-`SourceView Var.sourceview(Var)`
+`SourceView Var.sourceview(Var value)`
 
 Provides the class default for `Var.sourceview`.
 

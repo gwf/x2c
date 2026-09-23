@@ -272,7 +272,7 @@ Source: `lib/common.x:545`
 <a id="Var.array"></a>
 #### Var.array
 
-`inline Array Var.array(Var value)`
+`Array Var.array(Var value)`
 
 Extracts the `Array` payload of `value`, or NULL for another tag.
 
@@ -281,7 +281,7 @@ Source: `lib/common.x:616`
 <a id="Var.as_iter"></a>
 #### Var.as_iter
 
-`inline Iter Var.as_iter(Var value)`
+`Iter Var.as_iter(Var value)`
 
 Extracts the `Iter` payload of `value`, or NULL for another tag.
 
@@ -290,7 +290,7 @@ Source: `lib/common.x:621`
 <a id="Var.block"></a>
 #### Var.block
 
-`inline Block Var.block(Var value)`
+`Block Var.block(Var value)`
 
 Extracts the `Block` payload of `value`, or NULL for another tag.
 
@@ -317,7 +317,7 @@ Source: `lib/common.x:516`
 <a id="Var.box_i16"></a>
 #### Var.box_i16
 
-`inline Var Var.box_i16(short value)`
+`Var Var.box_i16(short value)`
 
 Boxes a native `short` as an immediate `<i16>` `Var`.
 
@@ -326,7 +326,7 @@ Source: `lib/common.x:500`
 <a id="Var.box_i32_bits"></a>
 #### Var.box_i32_bits
 
-`inline Var Var.box_i32_bits(unsigned value)`
+`Var Var.box_i32_bits(unsigned value)`
 
 Boxes an unsigned 32-bit pattern as an immediate `<i32>` `Var`.
 
@@ -335,7 +335,7 @@ Source: `lib/common.x:504`
 <a id="Var.box_i8"></a>
 #### Var.box_i8
 
-`inline Var Var.box_i8(char value)`
+`Var Var.box_i8(char value)`
 
 Boxes a native `char` as an immediate `<i8>` `Var`.
 
@@ -344,7 +344,7 @@ Source: `lib/common.x:496`
 <a id="Var.box_u16"></a>
 #### Var.box_u16
 
-`inline Var Var.box_u16(ushort value)`
+`Var Var.box_u16(ushort value)`
 
 Boxes a native `ushort` as an immediate `<u16>` `Var`.
 
@@ -353,7 +353,7 @@ Source: `lib/common.x:502`
 <a id="Var.box_u32"></a>
 #### Var.box_u32
 
-`inline Var Var.box_u32(unsigned value)`
+`Var Var.box_u32(unsigned value)`
 
 Boxes a native `uint` as an immediate `<u32>` `Var`.
 
@@ -362,7 +362,7 @@ Source: `lib/common.x:506`
 <a id="Var.box_u8"></a>
 #### Var.box_u8
 
-`inline Var Var.box_u8(uchar value)`
+`Var Var.box_u8(uchar value)`
 
 Boxes a native `uchar` as an immediate `<u8>` `Var`.
 
@@ -371,7 +371,7 @@ Source: `lib/common.x:498`
 <a id="Var.buffer"></a>
 #### Var.buffer
 
-`inline Buffer Var.buffer(Var value)`
+`Buffer Var.buffer(Var value)`
 
 Extracts the `Buffer` payload of `value`, or NULL for another tag.
 
@@ -380,7 +380,7 @@ Source: `lib/common.x:618`
 <a id="Var.bytes"></a>
 #### Var.bytes
 
-`inline Bytes Var.bytes(Var value)`
+`Bytes Var.bytes(Var value)`
 
 Extracts the `Bytes` payload of `value`, or NULL for another tag.
 
@@ -431,7 +431,7 @@ Source: `lib/common.x:772`
 <a id="Var.file"></a>
 #### Var.file
 
-`inline File Var.file(Var value)`
+`File Var.file(Var value)`
 
 Extracts the `File` payload of `value`, or NULL for another tag.
 
@@ -487,7 +487,7 @@ Source: `lib/common.x:454`
 <a id="Var.list"></a>
 #### Var.list
 
-`inline List Var.list(Var value)`
+`List Var.list(Var value)`
 
 Extracts the `List` payload of `value`, or NULL for another tag.
 
@@ -532,7 +532,7 @@ Source: `lib/common.x:729`
 <a id="Var.map"></a>
 #### Var.map
 
-`inline Map Var.map(Var value)`
+`Map Var.map(Var value)`
 
 Extracts the `Map` payload of `value`, or NULL for another tag.
 
@@ -562,7 +562,7 @@ Source: `lib/common.x:661`
 <a id="Var.string"></a>
 #### Var.string
 
-`inline String Var.string(Var value)`
+`String Var.string(Var value)`
 
 Extracts the `String` payload of `value`, or NULL for another tag.
 
@@ -656,7 +656,7 @@ Source: `lib/common.x:670`
 <a id="char.repr"></a>
 #### char.repr
 
-`inline String char.repr(char x)`
+`String char.repr(char x)`
 
 Returns the readable representation of `char`.
 
@@ -665,7 +665,7 @@ Source: `lib/common.x:582`
 <a id="char.str"></a>
 #### char.str
 
-`inline String char.str(char x)`
+`String char.str(char x)`
 
 Returns the display `String` of `char`.
 
@@ -674,7 +674,7 @@ Source: `lib/common.x:582`
 <a id="char.var"></a>
 #### char.var
 
-`inline Var char.var(char x)`
+`Var char.var(char x)`
 
 Boxes a native `char` value as `Var`.
 
@@ -685,7 +685,7 @@ Source: `lib/common.x:582`
 <a id="double.repr"></a>
 #### double.repr
 
-`inline String double.repr(double x)`
+`String double.repr(double x)`
 
 Returns the readable representation of `double`.
 
@@ -694,7 +694,7 @@ Source: `lib/common.x:590`
 <a id="double.str"></a>
 #### double.str
 
-`inline String double.str(double x)`
+`String double.str(double x)`
 
 Returns the display `String` of `double`.
 
@@ -703,7 +703,7 @@ Source: `lib/common.x:590`
 <a id="double.var"></a>
 #### double.var
 
-`inline Var double.var(double x)`
+`Var double.var(double x)`
 
 Boxes a native `double` value as `Var`.
 
@@ -714,7 +714,7 @@ Source: `lib/common.x:590`
 <a id="float.repr"></a>
 #### float.repr
 
-`inline String float.repr(float x)`
+`String float.repr(float x)`
 
 Returns the readable representation of `float`.
 
@@ -723,7 +723,7 @@ Source: `lib/common.x:589`
 <a id="float.str"></a>
 #### float.str
 
-`inline String float.str(float x)`
+`String float.str(float x)`
 
 Returns the display `String` of `float`.
 
@@ -732,7 +732,7 @@ Source: `lib/common.x:589`
 <a id="float.var"></a>
 #### float.var
 
-`inline Var float.var(float x)`
+`Var float.var(float x)`
 
 Boxes a native `float` value as `Var`.
 
@@ -743,7 +743,7 @@ Source: `lib/common.x:589`
 <a id="int.repr"></a>
 #### int.repr
 
-`inline String int.repr(int x)`
+`String int.repr(int x)`
 
 Returns the readable representation of `int`.
 
@@ -752,7 +752,7 @@ Source: `lib/common.x:586`
 <a id="int.str"></a>
 #### int.str
 
-`inline String int.str(int x)`
+`String int.str(int x)`
 
 Returns the display `String` of `int`.
 
@@ -761,7 +761,7 @@ Source: `lib/common.x:586`
 <a id="int.var"></a>
 #### int.var
 
-`inline Var int.var(int x)`
+`Var int.var(int x)`
 
 Boxes a native `int` value as `Var`.
 
@@ -801,7 +801,7 @@ Source: `lib/common.x:595`
 <a id="short.repr"></a>
 #### short.repr
 
-`inline String short.repr(short x)`
+`String short.repr(short x)`
 
 Returns the readable representation of `short`.
 
@@ -810,7 +810,7 @@ Source: `lib/common.x:584`
 <a id="short.str"></a>
 #### short.str
 
-`inline String short.str(short x)`
+`String short.str(short x)`
 
 Returns the display `String` of `short`.
 
@@ -819,7 +819,7 @@ Source: `lib/common.x:584`
 <a id="short.var"></a>
 #### short.var
 
-`inline Var short.var(short x)`
+`Var short.var(short x)`
 
 Boxes a native `short` value as `Var`.
 
@@ -830,7 +830,7 @@ Source: `lib/common.x:584`
 <a id="uchar.repr"></a>
 #### uchar.repr
 
-`inline String uchar.repr(uchar x)`
+`String uchar.repr(uchar x)`
 
 Returns the readable representation of `uchar`.
 
@@ -839,7 +839,7 @@ Source: `lib/common.x:583`
 <a id="uchar.str"></a>
 #### uchar.str
 
-`inline String uchar.str(uchar x)`
+`String uchar.str(uchar x)`
 
 Returns the display `String` of `uchar`.
 
@@ -848,7 +848,7 @@ Source: `lib/common.x:583`
 <a id="uchar.var"></a>
 #### uchar.var
 
-`inline Var uchar.var(uchar x)`
+`Var uchar.var(uchar x)`
 
 Boxes a native `uchar` value as `Var`.
 
@@ -859,7 +859,7 @@ Source: `lib/common.x:583`
 <a id="uint.repr"></a>
 #### uint.repr
 
-`inline String uint.repr(uint x)`
+`String uint.repr(uint x)`
 
 Returns the readable representation of `uint`.
 
@@ -868,7 +868,7 @@ Source: `lib/common.x:587`
 <a id="uint.str"></a>
 #### uint.str
 
-`inline String uint.str(uint x)`
+`String uint.str(uint x)`
 
 Returns the display `String` of `uint`.
 
@@ -877,7 +877,7 @@ Source: `lib/common.x:587`
 <a id="uint.var"></a>
 #### uint.var
 
-`inline Var uint.var(uint x)`
+`Var uint.var(uint x)`
 
 Boxes a native `uint` value as `Var`.
 
@@ -899,7 +899,7 @@ Source: `lib/common.x:597`
 <a id="unsigned.repr"></a>
 #### unsigned.repr
 
-`inline String unsigned.repr(unsigned x)`
+`String unsigned.repr(unsigned x)`
 
 Returns the readable representation of `unsigned`.
 
@@ -908,7 +908,7 @@ Source: `lib/common.x:588`
 <a id="unsigned.str"></a>
 #### unsigned.str
 
-`inline String unsigned.str(unsigned x)`
+`String unsigned.str(unsigned x)`
 
 Returns the display `String` of `unsigned`.
 
@@ -917,7 +917,7 @@ Source: `lib/common.x:588`
 <a id="unsigned.var"></a>
 #### unsigned.var
 
-`inline Var unsigned.var(unsigned x)`
+`Var unsigned.var(unsigned x)`
 
 Boxes a native `unsigned` value as `Var`.
 
@@ -928,7 +928,7 @@ Source: `lib/common.x:588`
 <a id="ushort.repr"></a>
 #### ushort.repr
 
-`inline String ushort.repr(ushort x)`
+`String ushort.repr(ushort x)`
 
 Returns the readable representation of `ushort`.
 
@@ -937,7 +937,7 @@ Source: `lib/common.x:585`
 <a id="ushort.str"></a>
 #### ushort.str
 
-`inline String ushort.str(ushort x)`
+`String ushort.str(ushort x)`
 
 Returns the display `String` of `ushort`.
 
@@ -946,7 +946,7 @@ Source: `lib/common.x:585`
 <a id="ushort.var"></a>
 #### ushort.var
 
-`inline Var ushort.var(ushort x)`
+`Var ushort.var(ushort x)`
 
 Boxes a native `ushort` value as `Var`.
 
