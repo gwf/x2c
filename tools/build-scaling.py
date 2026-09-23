@@ -40,11 +40,9 @@ exec /usr/bin/time -l "$@" 2>"$(mktemp "$COUNT_DIR/count.XXXXXX")"
 """
 
 
-def extract(work: Path) -> Path:
+def extract(work: Path, commit: str = "HEAD") -> Path:
   archive = subprocess.run(
-    ["git", "archive", "HEAD", "src", "lib", "etc", "include",
-     "builds/stage.mk"],
-    cwd=ROOT, check=True, stdout=subprocess.PIPE,
+    ["git", "archive", commit], cwd=ROOT, check=True, stdout=subprocess.PIPE,
   ).stdout
   subprocess.run(["tar", "-x", "-C", str(work)], input=archive, check=True)
   return work
@@ -85,6 +83,14 @@ def build_cycles(tree: Path, compiler: Path, sample: int) -> int:
   )
 
 
+def measure(tree: Path, compiler: Path) -> tuple[int, float]:
+  """Returns the tree's source lines and median cycles of three builds."""
+  cycles = statistics.median(
+    build_cycles(tree, compiler, sample) for sample in range(3)
+  )
+  return source_lines(tree), cycles
+
+
 def main() -> int:
   parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
   parser.add_argument(
@@ -101,11 +107,7 @@ def main() -> int:
   # Outside the checkout, the compiler cannot find this repository's
   # runtime in place of the tree's own.
   with tempfile.TemporaryDirectory(prefix="x2c-build-scaling-") as work:
-    tree = extract(Path(work))
-    lines = source_lines(tree)
-    cycles = statistics.median(
-      build_cycles(tree, compiler, sample) for sample in range(3)
-    )
+    lines, cycles = measure(extract(Path(work)), compiler)
   per_line = cycles / lines
   commit = subprocess.run(
     ["git", "rev-parse", "HEAD"], cwd=ROOT, check=True,
