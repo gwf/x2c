@@ -98,6 +98,24 @@ done
 
 (
   cd "$unittest_dir"
+  # Instrumented evaluator frames need more stack than the ordinary suite.
+  # Change only this test process's inherited soft limit, and keep a larger
+  # limit (or unlimited) when the caller already supplied one.
+  minimum_stack_kb=32768
+  soft_stack_kb=$(ulimit -Ss)
+  hard_stack_kb=$(ulimit -Hs)
+  if [[ "$soft_stack_kb" != unlimited &&
+        "$soft_stack_kb" -lt "$minimum_stack_kb" ]]; then
+    if [[ "$hard_stack_kb" != unlimited &&
+          "$hard_stack_kb" -lt "$minimum_stack_kb" ]]; then
+      echo "sanitizer needs at least ${minimum_stack_kb} KiB stack; hard limit is ${hard_stack_kb} KiB" >&2
+      exit 1
+    fi
+    if ! ulimit -Ss "$minimum_stack_kb"; then
+      echo "sanitizer could not raise its stack limit to ${minimum_stack_kb} KiB" >&2
+      exit 1
+    fi
+  fi
   ASAN_OPTIONS="detect_leaks=$detect_leaks:halt_on_error=1:abort_on_error=1" \
   UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 \
     "$test_program"
