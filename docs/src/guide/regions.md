@@ -21,13 +21,13 @@ that closes it.
 
 The pass exempts these ways of leaving a region.
 
-A `List` pool owns each canonical value, so ending a region never frees it.
-`String`, `List`, and `Symbol` results therefore cross a region boundary
-without a warning. A value consed inside a `Pool.open` bracket is the
-exception: that bracket's pool frees it, so the pass tracks pool-born values
-the same way it tracks scope-born ones. The exemption covers the List cells
-alone. `cons(a, rest)` and `%($a)` store `a` in a cell that outlives every
-region, so the pass reports a region-born `a` at that store.
+A `List` pool owns each canonical value, so ending a Scope region does not
+free it. A value made inside a `Pool.open` bracket belongs to that bracket's
+pool and is tracked like scope-born storage. This includes `String.new`,
+`String.malloc`, and List cells returned by a helper. `cons(a, rest)` and
+`%($a)` retain their arguments in the cell's pool: a value from that same
+pool stays there, while a value from a shorter-lived region reports at the
+store.
 
 `Scope.move` and `Context.export` change the storage's owner. After the
 move, the region the pass was tracking no longer holds the allocation, so
@@ -90,10 +90,11 @@ shown to be memory safe.
 ## How the check works
 
 Each function gets one summary of two facts: whether its result is fresh
-storage, and, for each parameter, where that parameter is sunk (returned,
-into another parameter's object, into a static, or through an unknown
-pointer). The summaries of a unit's functions are computed to a fixpoint,
-because a caller's facts depend on its callees' facts. Each round walks every
+Scope or Pool storage, and, for each parameter, where that parameter is sunk
+(returned by identity, retained in the fresh result, placed into another
+parameter's object or a static, or stored through an unknown pointer). The
+summaries of a unit's functions are computed to a fixpoint because a caller's
+facts depend on its callees' facts. Each round walks every
 body with a stack of open regions and a map from each binding to its known
 facts: its parameter index, the region it was born in, the local a pointer
 was taken from, and whether a free has already ended it. The first round

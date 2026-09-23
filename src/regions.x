@@ -12,12 +12,12 @@
     that outlives the region, when a region is opened without its close in
     the same block, and when a local is read after it was freed.
 
-    A function's summary is two facts: whether it returns fresh storage, and
-    where each parameter is sunk. The unit's functions reach a fixpoint over
-    their summaries. A call into another unit has a summary only through the
-    runtime table, so a unit's warnings do not depend on which units were
-    translated before it. A tool that holds every unit at once can seed the
-    fixpoint with the other units' summaries through
+    A function's summary is two facts: which owner supplies fresh returned
+    storage, and where each parameter is sunk. The unit's functions reach a
+    fixpoint over their summaries. A call into another unit has a summary
+    only through the runtime table, so warnings do not depend on which units
+    were translated before it. A tool that holds every unit at once can seed
+    the fixpoint with the other units' summaries through
     `Compiler.region_escapes`. A `meta` function is walked when it is
     defined, against the summaries of the `meta` functions before it, and a
     finding there is an error, because a compile-time call frees its locals
@@ -54,7 +54,8 @@ typedef struct Region {
    declares it, its parameter index or -1, whether it holds storage born in
    this function, whether a free ended it, the region its value belongs to,
    the region a Scope local's own storage forms, and for a pointer taken
-   with `&`, the local and place it names. */
+   with `&`, the local and place it names. `born` records a scoped or pooled
+   result, including when the allocation has no local region. */
 typedef struct Fact {
   int depth, origin, param, born, dead;
   struct Region *region, *owner;
@@ -90,7 +91,9 @@ typedef struct Walk {
 static Map runtime = %{
   "Scope_malloc": (alloc),           "Scope_calloc": (alloc),
   "Scope_memdup": (alloc),           "Scope_malloc_finalized": (alloc),
-  "Scope_realloc": (alloc),          "String_malloc": (alloc),
+  "Scope_realloc": (alloc),          "String_malloc": (alloc pool),
+  "String_new": (alloc pool),        "String_new_len": (alloc pool),
+  "String_new_fill": (alloc pool),
   "Block_new": (alloc),              "Bytes_new": (alloc),
   "Array_new": (alloc),              "Map_new": (alloc),
   "Buffer_new": (alloc),
@@ -250,14 +253,16 @@ static List _opened(Walk w, Region region) {
 
 // summaries
 
-/* A summary is `(FRESH SINKS)`, where SINKS is a sorted List of
-   `(INDEX TARGET)` pairs and a target is <return>, <static>, <unknown>, or
-   `(param INDEX)`. An unchanged summary is the identical List. */
+/* A summary is `(OWNER SINKS)`, where OWNER is a bit set of scoped (1) and
+   pooled (2) returned storage. SINKS is a sorted List of `(INDEX TARGET)`
+   pairs and a target is <return>, <result>, <static>, <unknown>, or
+   `(param INDEX)`. <result> retains an argument in fresh result storage;
+   <return> aliases an argument as the result. */
 static List _summary(Walk w, String callee) {
   match (runtime[callee]) {
+    case %(alloc pool): return %(2 ());
     case %(alloc *): return %(1 ());
-    /* A cons cell holds both arguments in storage no region owns. */
-    case %(pool): return %(0 ((0 unknown) (1 unknown)));
+    case %(pool): return %(2 ((0 result) (1 result)));
     case %(store): return %(0 ((1 (param 0)) (2 (param 0))));
   }
   Var local = w.summaries[callee];
@@ -326,11 +331,11 @@ static Fact _returned_argument(Walk w, Var value, List *named) {
   return NULL;
 }
 
-/* A pool cell is fresh inside a pool bracket, which frees it; outside one
-   it belongs to no region. */
+/* A pool value remains pooled even without a local bracket: a caller may
+   open one around a helper call. */
 static Region _pooled(Walk w, int *born) {
   Region pool = _innermost(w, <pool>);
-  *born = pool != NULL;
+  *born = 2;
   return pool;
 }
 
@@ -343,6 +348,7 @@ static Region _birth(Walk w, Var value, Type type, int *born) {
   *born = 1;
   match (callee ? runtime[callee] : void) {
     case %(alloc slot): return _owner(w, _slot(w, arguments.car()));
+    case %(alloc pool): return _pooled(w, born);
     case %(alloc): return _active(w);
     case %(pool): return _pooled(w, born);
   }
@@ -365,7 +371,11 @@ static Region _birth(Walk w, Var value, Type type, int *born) {
       if (_class(w, type ? type : _expression_type(value)) == <container>):
       return _active(w);
   }
-  if (callee && _summary(w, callee).car().int()) return _active(w);
+  if (callee) {
+    int owner = _summary(w, callee).car().int();
+    if (owner & 2) return _pooled(w, born);
+    if (owner & 1) return _active(w);
+  }
   *born = 0;
   return NULL;
 }
@@ -388,21 +398,24 @@ static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
   int born = 0;
   Region region = fact ? fact.region : _birth(w, value, NULL, &born);
   if (!fact && !born) return 0;
-  if (_copies(w, type, value) && (!region || region.kind != <pool>))
+  if (_copies(w, type, value) &&
+      !((fact ? fact.born : born) & 2) &&
+      (!region || region.kind != <pool>))
     return 0;
   if (fact && fact.param >= 0) {
     Var row = sink;
     if (sink == <heap>) {
       if (!target) row = <unknown>;
       else if (target.param >= 0) row = %(param ${target.param});
-      else row = target.region ? void : <return>;
+      else row = target.born ? <result>
+             : target.region ? void : <return>;
     }
     if (sink != <local> && row is not void)
       w.sinks[%(${fact.param} $row)] = 1;
     return 0;
   }
   if (!region) {
-    if (sink == <return> && (fact ? fact.born : born)) w.fresh = 1;
+    if (sink == <return>) w.fresh |= fact ? fact.born : born;
     return 0;
   }
   String subject = _subject(w, value, named, fact);
@@ -556,6 +569,12 @@ static void _scan_call(Walk w, Var call, String callee, List arguments) {
     Type type = declared is <list> ? declared.list() : NULL;
     if (target == <static>) _flow(w, argument, type, <static>, NULL);
     else if (target == <unknown>) _flow(w, argument, type, <heap>, NULL);
+    else if (target == <result>) {
+      int born = 0;
+      Region region = _birth(w, call, NULL, &born);
+      struct Fact result = {.param = -1, .born = born, .region = region};
+      _flow(w, argument, type, <heap>, &result);
+    }
     else match (target) case %(param ?other): {
       if (other.int() >= count) continue;
       Var holder = arguments[other.int()];
@@ -613,9 +632,13 @@ static void _scan(Walk w, Var value, int deferred) {
       /* A statement expression declares locals of its own. */
       case %((!or declare decl) ?specifiers (bindings *bindings)):
         _declare(w, specifiers, bindings);
-      /* A List literal's cells outlive every region. */
+      /* A List literal retains its values in the active Pool. */
       case %(cons ?head ?tail): {
-        _flow(w, head, NULL, <heap>, NULL);
+        int born = 0;
+        Region region = _birth(w, node, NULL, &born);
+        struct Fact result = {.param = -1, .born = born, .region = region};
+        _flow(w, head, NULL, <heap>, &result);
+        _flow(w, tail, NULL, <heap>, &result);
         w.pending.push(tail);
         w.pending.push(head);
       }
@@ -650,7 +673,8 @@ static void _assign(Walk w, Fact fact, Var value, Type type, int store) {
   Region region = source ? source.region : _birth(w, value, type, &born);
   int kept = source || born;
   if (kept && _copies(w, type, value))
-    kept = region && region.kind == <pool>;
+    kept = ((source ? source.born : born) & 2) ||
+           (region && region.kind == <pool>);
   if (kept && store && source && region)
     kept = !_flow(w, value, type, <local>, fact);
   fact.dead = 0;
@@ -1005,9 +1029,10 @@ static List _located(Compiler c, int origin) {
 }
 
 /** The region summaries the functions in `ast` have and the warnings they
-    produce, read against `seed`: `(NAME FRESH SINKS)` rows for the
+    produce, read against `seed`: `(NAME OWNER SINKS)` rows for the
     functions other units define. `ast` must be what
-    `Compiler.check_regions` takes. The call reports nothing, so a caller
+    `Compiler.check_regions` takes. The OWNER integer identifies scoped and
+    pooled result storage. The call reports nothing, so a caller
     that walks a whole project can run it once a pass and report only the
     last. Returns `(region-unit (summaries ROW...) (warnings WARNING...))`,
     where a warning is

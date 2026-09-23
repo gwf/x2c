@@ -371,9 +371,10 @@ one that reports. The result carries the same warnings a translation prints,
 each with its path, line, and column.
 
 A summary is what the pass already computes for a call within one file:
-whether the function returns fresh storage, and where each parameter is
-sunk. Two units that define the same emitted name keep their own summaries
-and report in `ambiguous`, because neither describes the other's callers.
+whether the function returns fresh Scope or Pool storage, and where each
+parameter is sunk. Two units that define the same emitted name keep their
+own summaries and report in `ambiguous`, because neither describes the
+other's callers.
 `settled` is 0 when the walk reached its pass limit with a summary still
 growing, which makes the warnings a lower bound rather than the project's.
 
