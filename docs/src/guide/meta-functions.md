@@ -1116,12 +1116,13 @@ Importing the same file twice contributes one copy of each definition. A
 `.xmacro` may import another `.xmacro`, and a `meta` function two levels
 down reaches the consuming unit the same way.
 
-A `.xmacro` may also hold `meta static` values and bodyless `meta`
-prototypes. Each importing unit gets its own compile-time copy of a value,
-initialized from the declaration, so state that helpers keep there never
-carries from one unit to the next. Automatic Differentiation keeps its
-registries of differentiated functions and its reverse-mode working state
-this way.
+Besides `meta` functions and bodyless `meta` prototypes, a `.xmacro` may
+hold `meta static` values. Each importing unit gets its own compile-time
+copy of a value, initialized from the declaration, so state that helpers
+keep there never carries from one unit to the next. A unit that defines a
+variable of the same name reports a redefinition. Automatic
+Differentiation keeps its registries of differentiated functions and its
+reverse-mode working state this way.
 
 The run-time forms are separate from this. A unit emits a definition only
 for the `meta` functions it calls at run time, and a declaration only for

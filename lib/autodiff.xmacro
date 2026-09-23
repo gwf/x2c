@@ -626,9 +626,9 @@ meta static List ad_forward(List fn) {
 
 /* --- reverse mode ------------------------------------------------------- */
 
-/* The reverse derivation in progress. `ad_reverse_with` starts it for each
-   function, and the helpers in the gradient template finish it after that
-   function returns. */
+/* The reverse derivation in progress. The gradient template's helpers
+   expand after `ad_reverse_with` returns, so `ad_reverse_prepare` starts
+   each derivation and `ad_reverse_finish` completes it. */
 meta static struct {
   List checkpoint;  /* the checkpoint block size, or empty */
   List locals;      /* `(name type)` for each local, newest first */
@@ -1138,8 +1138,13 @@ meta static List ad_write_slots(List inputs) {
 }
 
 meta static List ad_reverse_prepare(
-  List params, List items, Var tape, Var result, Var seed, Var code,
-  Var reverse) {
+  List params, List items, List checkpoint, Var name, Var tape, Var result,
+  Var seed, Var code, Var reverse) {
+  ad_state.checkpoint = checkpoint;
+  ad_state.locals = ad_param_locals(params);
+  ad_state.counter = 0;
+  ad_state.loop_step = %();
+  ad_state.function = name;
   ad_state.tape = tape;
   ad_state.result = result;
   ad_state.seed = seed;
@@ -1170,13 +1175,13 @@ meta static List ad_reverse_finish(void) {
 
 macro Unit $ad.gradient(
   Type $spec, Name $name, Type $tape_type, Name $tape_new,
-  Expr $params, Expr $items
+  Expr $params, Expr $items, Expr $checkpoint, Expr $function
 ) {
   using $tape, $result, $seed, $code, $reverse;
   $spec $name($ad_grad_params($params)...) {
     $tape_type $tape = $tape_new();
     double $result = 0.0, $seed = 0.0, $code = 0.0;
-    $ad_reverse_prepare($params, $items,
+    $ad_reverse_prepare($params, $items, $checkpoint, $function,
                         $tape, $result, $seed, $code, $reverse)...
     $reverse:
     $code = $tape.take_last();
@@ -1191,13 +1196,9 @@ meta static List ad_reverse_with(List fn, List checkpoint) {
   match (fn) {
     case %(function ?spec (bind (binding ? ?name) ((fnmod (params *params))))
                     (block *items)): {
-      ad_state.checkpoint = checkpoint;
-      ad_state.locals = ad_param_locals(params);
-      ad_state.counter = 0;
-      ad_state.loop_step = %();
-      ad_state.function = name;
       List one = $ad.gradient(spec, ad_grad(name), %("ArrayDbl"),
-                              "ArrayDbl_new", params, items);
+                              "ArrayDbl_new", params, items, checkpoint,
+                              name);
       return %($one);
     }
   }

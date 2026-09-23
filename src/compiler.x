@@ -3185,6 +3185,14 @@ static int _alternative_arms(Compiler c, List binding) {
   return 0;
 }
 
+/* A second definition of one file-scope name, which C rejects. */
+static void _report_redefinition(Compiler c, String kind, List binding) {
+  String spelling = binding_identity_spelling(binding);
+  c.report_error(
+    <type>, %"$kind '$spelling' is already defined in this scope",
+    c.token, %("prior definition: '$spelling'"));
+}
+
 static void _record_function_definition(
   Compiler c, Type type, List binding) {
   List contract = _function_completion_contract(
@@ -3219,9 +3227,7 @@ static void _record_function_definition(
     }
     if ((state_kind == <definition> || state_kind == <completed>) &&
         !_alternative_arms(c, binding))
-      c.report_error(
-        <type>, %"function '$spelling' is already defined in this scope",
-        c.token, %("prior definition: '$spelling'"));
+      _report_redefinition(c, "function", binding);
   }
   c.semantic_binding_facts()[%(completion $binding)] =
     %(definition $contract);
@@ -3303,10 +3309,25 @@ static void _validate_static_object_initializers(Compiler compiler) {
   }
 }
 
+/* An initializer makes a file-scope declaration a definition; a tentative
+   one may be repeated, and so may one in another arm of a conditional. */
+static void _record_object_definitions(Compiler c, List bindings) {
+  foreach (List row, bindings)
+    match (row) case %(op = (bind (!set ?binding (binding ? ?)) ?) ?): {
+      List key = %(defined $binding);
+      if (c.semantic_binding_facts().contains(key) &&
+          !_alternative_arms(c, binding))
+        _report_redefinition(c, "variable", binding);
+      c.semantic_binding_facts()[key] = 1;
+      c.semantic_binding_facts()[%(arms $binding)] = c.arms;
+    }
+}
+
 static void _record_top_level_function_state(Compiler compiler, List node) {
   match (node) {
     case %(declare (!set ?declared (*)) (bindings *bindings)): {
       Type type = declared;
+      _record_object_definitions(compiler, bindings);
       _record_static_object(compiler, type, bindings);
       _record_function_prototypes(compiler, type, bindings);
     }

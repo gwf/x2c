@@ -1749,8 +1749,8 @@ static void _track_conditional_arms(Compiler c) {
     Returns its AST, or NULL when a keyword definition, top-level Lisp form,
     linkage brace, or compile-time-only `meta` function only updates compiler
     state, with the first following token current. A macro import whose
-    `.xmacro` declares `meta` functions retains their runtime definitions,
-    which the unit emits where it reaches them.
+    `.xmacro` makes `meta` declarations retains their runtime forms, which
+    the unit emits where it reaches them.
 */
 List Compiler.parse_top_level(Compiler c) {
   if (!c.macro_holes) {

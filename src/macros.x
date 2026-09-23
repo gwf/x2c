@@ -1765,6 +1765,9 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site) {
     catch %(?code *detail):
       _report_lisp_failure(c, site, cons(code, detail), form.repr());
   }
+  /* A helper that called `x2c_diagnostic_fail` and then returned still
+     owes its report to this call site. */
+  _report_sdk_rejection(c, site);
   return value;
 }
 
