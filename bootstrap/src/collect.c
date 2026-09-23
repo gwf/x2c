@@ -1163,8 +1163,10 @@ String Path_read_text(Path);
 
 String interface_prelude(void){
   if(! _init_guard_) _file_init_();
+  String identity = x2c_compiler_identity();
+  if(! String_truth(identity)) return NULL;
   String runtime = _canonical_path(String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_52), NULL))));
-  String header = String_join(NULL, cons(String_var(_103), cons(String_var(x2c_compiler_identity()), cons(String_var(_104), NULL))));
+  String header = String_join(NULL, cons(String_var(_103), cons(String_var(identity), cons(String_var(_104), NULL))));
   {
     String path;
     List _x2c_macro_object_16 = _interface_candidates(runtime);
@@ -1685,6 +1687,7 @@ String Buffer_str(Buffer);
 
 String interface_text(Compiler compiler){
   if(! _init_guard_) _file_init_();
+  if(! String_truth(x2c_compiler_identity())) return NULL;
   String canonical = _canonical_path(compiler -> filename);
   Var cached = Map_getindex(_process_cache(), String_var(canonical));
   if(Var_is_void(cached)) return NULL;

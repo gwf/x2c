@@ -614,6 +614,7 @@ x2c_error_catch_close(_x2c_error_handler_5);
 _x2c_error_handler_5 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_5);
 }
+Path_remove_tree(String_join(NULL, cons(String_var(prefix), cons(String_var(_5), cons(String_var(out), NULL)))));
 }
 
 void bootstrap_record_install(Bootstrap b, String cc, String ar){
