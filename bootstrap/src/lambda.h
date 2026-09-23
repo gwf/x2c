@@ -9,6 +9,8 @@
 #include "compiler.h"
 List Compiler_lower_typed_adapter_expr(Compiler c, List expression);
 
+List Compiler_func_signature(Compiler compiler, Type type);
+
 List Compiler_maybe_adapt_func_arg(Compiler c, List argument, List expected_type);
 
 List Compiler_lift_func_expression(Compiler c, List expression);

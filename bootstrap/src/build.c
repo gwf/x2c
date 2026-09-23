@@ -72,6 +72,8 @@ CcJob;
 
 static uint64_t _action_fingerprint(Build state, ToolAction action, List inputs, int * ok);
 
+static int _same_file_bytes(String first, String second);
+
 static uint64_t _compile_fingerprint(Build state, ToolAction action, String preprocessed, int * ok);
 
 static int _finish_compile(Build state, CcJob * pending);
@@ -1078,6 +1080,35 @@ static uint64_t _action_fingerprint(Build state, ToolAction action, List inputs,
   return hash;
 }
 
+String String_str(String);
+
+static int _same_file_bytes(String first, String second){
+  FILE * left = fopen(String_str(first), "rb"), * right = fopen(String_str(second), "rb");
+  if(! left || ! right){
+    if(left) fclose(left);
+    if(right) fclose(right);
+    return 0;
+  }
+  unsigned char a[16384], b[16384];
+  int same = 1;
+  for(; ; ){
+    size_t na = fread(a, 1, sizeof(a), left);
+    size_t nb = fread(b, 1, sizeof(b), right);
+    if(na != nb || memcmp(a, b, na)){
+      same = 0;
+      break;
+    }
+    if(na < sizeof(a)){
+      same = ! ferror(left) && ! ferror(right);
+      break;
+    }
+
+  }
+  fclose(left);
+  fclose(right);
+  return same;
+}
+
 static uint64_t _compile_fingerprint(Build state, ToolAction action, String preprocessed, int * ok){
   return x2c_fnv_file(_action_fingerprint(state, action, NULL, ok), preprocessed, ok);
 }
@@ -1451,8 +1482,6 @@ int ToolAction_run(ToolAction);
 
 void Path_remove_tree(Path);
 
-String String_str(String);
-
 ToolAction tool_action_new(Symbol, List, int, int);
 
 int Build_finish(Build b){
@@ -1474,7 +1503,7 @@ int Build_finish(Build b){
   report_progress(action -> phase, 0, 1, b -> output);
   int input_count = List_len(inputs);
   String noun = action -> phase == 3362278794 ?(input_count == 1 ? _160 : _161) :(input_count == 1 ? _162 : _163);
-  String state_path = String_truth(b -> state_root) && b -> request -> kind != 404971770155786 ? String_join(NULL, cons(String_var(b -> state_root), cons(String_var(_71), cons(String_var(_key(b -> output)), NULL)))) : NULL;
+  String state_path = String_truth(b -> state_root) && b -> request -> kind == 1381098885964356 ? String_join(NULL, cons(String_var(b -> state_root), cons(String_var(_71), cons(String_var(_key(b -> output)), NULL)))) : NULL;
   if(String_truth(state_path) && ! b -> request -> dry_run && ! access(b -> output, R_OK)){
     int ok = 1;
     uint64_t hash = _action_fingerprint(b, action, inputs, & ok);
@@ -1499,6 +1528,14 @@ int Build_finish(Build b){
   if(ToolAction_run(publish)){
     if(String_truth(staging)) Path_remove_tree(staging);
     return 1;
+  }
+  if(String_truth(staged) && b -> request -> kind == 904178442 && _same_file_bytes(staged, b -> output)){
+    Path_remove_tree(staging);
+    if(b -> request -> verbose) fprintf(stderr, "x2c: unchanged link %s\n", String_str(b -> output));
+    b -> final_cached = 1;
+    report_progress(action -> phase, 1, 1, b -> output);
+    report_phase(action -> phase, input_count, noun, input_count, report_now_us() - b -> final_at);
+    return 0;
   }
   if(String_truth(staged) && rename(staged, b -> output)){
     fprintf(stderr, "x2c: error: cannot replace %s: %s\n", String_str(b -> output), strerror(errno));

@@ -20,11 +20,11 @@ typedef UnzipShared * UnzipSharedRef;
 
 static inline Var UnzipColumnRef_var(UnzipColumnRef _x2c_macro_pointer_0);
 
-static inline UnzipColumnRef Var_unzipcolumnref(Var _x2c_macro_value_0);
+static inline UnzipColumnRef Var_unzipcolumnref(Var _x2c_macro_value_1);
 
 static inline Var UnzipSharedRef_var(UnzipSharedRef _x2c_macro_pointer_1);
 
-static inline UnzipSharedRef Var_unzipsharedref(Var _x2c_macro_value_1);
+static inline UnzipSharedRef Var_unzipsharedref(Var _x2c_macro_value_3);
 
 static void _unzip_buffer_push(UnzipShared * shared, Var pair);
 
@@ -84,18 +84,18 @@ static inline Var UnzipColumnRef_var(UnzipColumnRef _x2c_macro_pointer_0){
   return _x2c_macro_value_0;
 }
 
-static inline UnzipColumnRef Var_unzipcolumnref(Var _x2c_macro_value_0){
-  return _x2c_macro_value_0.p64;
+static inline UnzipColumnRef Var_unzipcolumnref(Var _x2c_macro_value_1){
+  return _x2c_macro_value_1.p64;
 }
 
 static inline Var UnzipSharedRef_var(UnzipSharedRef _x2c_macro_pointer_1){
-  Var _x2c_macro_value_1;
-  _x2c_macro_value_1.p64 = _x2c_macro_pointer_1;
-  return _x2c_macro_value_1;
+  Var _x2c_macro_value_2;
+  _x2c_macro_value_2.p64 = _x2c_macro_pointer_1;
+  return _x2c_macro_value_2;
 }
 
-static inline UnzipSharedRef Var_unzipsharedref(Var _x2c_macro_value_1){
-  return _x2c_macro_value_1.p64;
+static inline UnzipSharedRef Var_unzipsharedref(Var _x2c_macro_value_3){
+  return _x2c_macro_value_3.p64;
 }
 
 int Iter_truth(Iter);

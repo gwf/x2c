@@ -1158,8 +1158,8 @@ static List _type_literal(Compiler compiler, Type type){
 }
 
 Type Type_declared(Type);
-static List _func_signature_literal(Compiler compiler, Type type){
-  List params = NULL;  Type result = NULL;  _typed_function_parts(type, & params, & result);  Array normalized = Array_new(); {
+List Compiler_func_signature(Compiler compiler, Type type){
+  if(! _init_guard_) _file_init_();  List params = NULL;  Type result = NULL;  _typed_function_parts(type, & params, & result);  Array normalized = Array_new(); {
     List parameter;  List _x2c_macro_object_3 = params;  List _x2c_macro_cursor_3 = _x2c_macro_object_3;  Var _x2c_macro_cursor_output_3;  while(List_try_next(_x2c_macro_object_3, & _x2c_macro_cursor_3, & _x2c_macro_cursor_output_3)){
       parameter = Var_list(_x2c_macro_cursor_output_3); {
         Type ptype = Type_declared(List_type(parameter));  if(Var_equal(List_car(Type_list(ptype)), Symbol_var(77))) ptype = List_type(cons(Symbol_var(77), Type_list(Sym_normalize_declared_type(compiler -> sym, List_cdr(ptype)))));  Array_push(normalized, List_var(ptype));
@@ -1168,7 +1168,11 @@ static List _func_signature_literal(Compiler compiler, Type type){
     }
 
   }
-  List parameter_types = List_truth(params) ? Array_list_free(normalized) : _133;  Type declared_result = Type_declared(result);  List signature = cons(List_var(cons(_34, cons(List_var(parameter_types), NULL))), List_append(Type_list(declared_result), NULL));  return Compiler_cache_literal_list(compiler, signature);
+  List parameter_types = List_truth(params) ? Array_list_free(normalized) : _133;  Type declared_result = Type_declared(result);  List signature = cons(List_var(cons(_34, cons(List_var(parameter_types), NULL))), List_append(Type_list(declared_result), NULL));  return signature;
+}
+
+static List _func_signature_literal(Compiler compiler, Type type){
+  return Compiler_cache_literal_list(compiler, Compiler_func_signature(compiler, type));
 }
 
 Type Type_reference(Type);
