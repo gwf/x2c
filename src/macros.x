@@ -472,7 +472,12 @@ static Type _lisp_resolve_type(Compiler compiler, Type type) {
     if (!type.is_bare_typedef_name() && !type.is_typedef()) return type;
     Type next = NULL;
     compiler.sym.resolve_global(type, &next);
-    if (!next || next == type) return type;
+    /* A system typedef such as `size_t` has no collected declaration and
+       reaches its scalar the way the compiler's numeric conversions do. */
+    if (!next || next == type) {
+      Type numeric = compiler.sym.resolve_numeric_type(type);
+      return numeric ? numeric : type;
+    }
     type = next.canonicalize();
   }
   return type;
