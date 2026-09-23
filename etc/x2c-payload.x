@@ -73,7 +73,7 @@ static void copy(Path source, Path target) {
 
 static void copy_support(Path destination, int sources) {
   List rows = %(
-    ("lib" ("*.x" "*.xmacro" "*.xlisp") ("lib" "include/x2c"))
+    ("lib" ("*.x" "*.xmacro") ("lib" "include/x2c"))
     ("builds/0/lib" ("*.h") ("include/x2c"))
     ("builds/0/lib" ("*.xi") ("lib"))
     ("etc" ("*.xlisp" "*.xmacro") ("etc"))
