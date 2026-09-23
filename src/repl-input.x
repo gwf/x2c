@@ -525,7 +525,7 @@ static void _enable_raw(ReplInput input) {
 /* Cleanup stays best effort so an earlier failure remains the reported one. */
 static void _restore(ReplInput input) {
   if (!input || !input.raw) return;
-  write(input.ofd, "\x1b[?2004l", 8);
+  if (write(input.ofd, "\x1b[?2004l", 8) < 0) {}
   tcsetattr(input.ifd, TCSAFLUSH, &input.original);
   input.raw = 0;
 }
@@ -573,11 +573,11 @@ static int _terminal_columns(int ifd, int ofd) {
     cols = _cursor_column(ifd,ofd);
     if (cols == -1) goto failed;
 
-    /* Restore position. */
+    /* Restore position. A failed restore leaves the width known. */
     if (cols > start) {
       char seq[32];
       snprintf(seq,32,"\x1b[%dD",cols-start);
-      write(ofd,seq,strlen(seq));
+      if (write(ofd,seq,strlen(seq)) < 0) {}
     }
     return cols;
   }
