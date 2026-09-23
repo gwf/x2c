@@ -1,8 +1,7 @@
 /*  A variable and a function each defined in two separate conditional
-    groups. x2c does not evaluate the conditions, so it cannot tell whether
-    both definitions survive; it reports a redefinition only when both sit
-    under the same conditional arms, and leaves this case to the C
-    compiler. */
+    groups. x2c does not evaluate the conditions, so it reports a
+    redefinition only when both definitions sit under the same conditional
+    arms; these two translate. */
 
 #include "x2c.x"
 

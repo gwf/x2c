@@ -3169,8 +3169,9 @@ static void _record_function_prototypes(
 
 /* Reports a second definition of one file-scope name, which C rejects,
    when both sit under the same conditional arms. Definitions under
-   different conditions cannot be judged without evaluating them, so the
-   native compiler decides those. */
+   different arms are not compared. For a variable, whose initializer moves
+   into the generated init function, a duplicate under two true conditions
+   is therefore not detected, and the later initializer wins. */
 static void _report_redefinition(Compiler c, String kind, List binding) {
   Var arms;
   if (!c.semantic_binding_facts().try_get(%(arms $binding), &arms) ||
