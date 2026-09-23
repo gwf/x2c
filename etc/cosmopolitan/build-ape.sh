@@ -47,7 +47,9 @@ for source in "$REPO_ROOT"/bootstrap/src/*.c; do
     -iquote "$REPO_ROOT/bootstrap/src" -c "$source" -o "$object"
   set -- "$@" "$object"
 done
-"$COSMOCC" -Os -o "$WORK/x2c.com" "$@" "$WORK/libx2c.a" -lm
+"$COSMOCC" -Os -c "$SCRIPT_DIR/libm-compat.c" -o "$WORK/libm-compat.o"
+"$COSMOCC" -Os -o "$WORK/x2c.com" "$@" "$WORK/libx2c.a" \
+  "$WORK/libm-compat.o" -lm
 
 identity=$("$REPO_ROOT/builds/0/x2c" script \
   "$REPO_ROOT/etc/x2c-payload.x" support \
