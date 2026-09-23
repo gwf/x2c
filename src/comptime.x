@@ -804,6 +804,11 @@ static Var _lower_quoted(Lowering l, Var node) {
 
 static Var _lower_expr(Lowering l, Var form);
 static Var _lower_coerce(Lowering l, List want, Var node, Var value);
+static Var _lower_assign_expr(Lowering l, Var target, Var rhs);
+static Var _lower_update_expr(
+  Lowering l, Var target, Symbol operator, Var right, int postfix);
+static Symbol _lower_compound(Var operator);
+static Var _lower_step_of(Var target);
 static Var _lower_initializer(Lowering l, List type, int id, Var init);
 
 /* Reads the `type` object a place addresses. An object with a native layout
@@ -1331,6 +1336,20 @@ static Var _lower_content(Lowering l, List type, Var content) {
       Symbol tag = l.compiler.sym.var_tag_for_type(type, NULL);
       return tag ? %(C.address $place (quote $tag)) : place;
     }
+    case %(op = ?target ?rhs):
+      return _lower_assign_expr(l, target, rhs);
+    case %(op ?operator ?target ?rhs): {
+      if (operator == <.> || operator == <"->">) {
+        Var place = _lower_field_place(l, operator, target, rhs);
+        if (_lower_failed(l, place)) return void;
+        return _lower_load(l, type, place);
+      }
+      Symbol applied = _lower_compound(operator);
+      if (applied)
+        return _lower_update_expr(
+          l, target, applied, _lower_expr(l, rhs), 0);
+      return _lower_operands(l, type, operator, %($target $rhs));
+    }
     /* `*` is a sequence binder in a pattern, so a unary deref is matched by
        arity and then by its operator. */
     case %(op ?operator ?operand): {
@@ -1339,6 +1358,10 @@ static Var _lower_content(Lowering l, List type, Var content) {
         if (_lower_failed(l, pointer)) return void;
         return _lower_load(l, type, pointer);
       }
+      if (operator == <++> || operator == <"--">)
+        return _lower_update_expr(
+          l, operand, operator == <++> ? <+> : <->,
+          _lower_step_of(operand), 0);
       return _lower_operands(l, type, operator, %($operand));
     }
     case %(call (expr ? (ident (binding ? "Func_apply"))) ?):
@@ -1356,13 +1379,6 @@ static Var _lower_content(Lowering l, List type, Var content) {
       return _lower_call(l, callee, name, args);
     case %(call ?(String name) (args *args)):
       return _lower_call(l, NULL, name, args);
-    case %(op ?access ?receiver ?field): {
-      if (access != <.> && access != <"->">)
-        return _lower_operands(l, type, access, %($receiver $field));
-      Var place = _lower_field_place(l, access, receiver, field);
-      if (_lower_failed(l, place)) return void;
-      return _lower_load(l, type, place);
-    }
     case %(op ?operator *operands):
       return _lower_operands(l, type, operator, operands);
     case %(array *items):                 return _lower_array(l, items);
@@ -1371,7 +1387,13 @@ static Var _lower_content(Lowering l, List type, Var content) {
       return _lower_getindex(l, receiver, key, 0);
     case %(index ?receiver ?key):
       return _lower_getindex(l, receiver, key, 1);
-    case %(postfix ? ?): return _lower_decline(l, "postfix in an expression");
+    case %(postfix ?operator ?operand): {
+      if (operator == <++> || operator == <"--">)
+        return _lower_update_expr(
+          l, operand, operator == <++> ? <+> : <->,
+          _lower_step_of(operand), 1);
+      return _lower_decline(l, "unsupported postfix operator");
+    }
     case %(lambda (params *params) (captures *held) ?body):
       return _lower_lambda(l, params, held, body);
     case %(lambda (params *params) ?body):
@@ -2153,9 +2175,8 @@ static int _lower_target(Var form) {
 
 /* `m[k] = v` and `a[i] = v`. A `List` has no indexed write, so a store
    through one declines rather than silently dropping. */
-static Var _lower_setindex(
-  Lowering l, Var receiver, Var key, int is_c_array, Var value, List rest,
-  List k) {
+static Var _lower_setindex_value(
+  Lowering l, Var receiver, Var key, int is_c_array, Var value) {
   String container = _lower_indexed(receiver, is_c_array);
   if (!container)
     return _lower_decline(l, "indexing a type with no compile-time meaning");
@@ -2170,7 +2191,59 @@ static Var _lower_setindex(
   List layout = is_c_array ? _lower_pointee_layout(l, receiver) : NULL;
   match (layout) case %(? ? ?size *):
     store = %(C.index.set $target $index $size (quote $layout) $value);
-  return _lower_effect(l, store, rest, k);
+  return store;
+}
+
+static Var _lower_setindex(
+  Lowering l, Var receiver, Var key, int is_c_array, Var value, List rest,
+  List k) {
+  return _lower_effect(
+    l, _lower_setindex_value(l, receiver, key, is_c_array, value), rest, k);
+}
+
+/* An assignment used as a value writes its actual place. Locals used this
+   way were given cells by the scan, so a selected branch or short-circuit
+   operand performs the write exactly when it runs. */
+static Var _lower_assign_expr(Lowering l, Var target, Var rhs) {
+  Var value = _lower_expr(l, rhs);
+  if (_lower_failed(l, value)) return void;
+  Type type = _lower_type_of(target);
+  value = _lower_coerce(l, type, rhs, value);
+  match (target) {
+    case %(expr ? (getindex ?receiver ?key)):
+      return _lower_setindex_value(l, receiver, key, 0, value);
+    case %(expr ? (index ?receiver ?key)):
+      return _lower_setindex_value(l, receiver, key, 1, value);
+  }
+  int id = _lower_target(target);
+  if (id >= 0 && !_lower_writable(l, id)) return void;
+  Var place = _lower_place(l, target);
+  if (l.declined || _lower_failed(l, value)) return void;
+  if (place is not void) return _lower_poke(l, type, place, value);
+  if (id >= 0 && !l.locals.contains(id)) return %(C.gwrite $id $value);
+  return _lower_decline(l, "assignment expression without storage");
+}
+
+/* The place is evaluated once; postfix returns its old value after writing
+   the new one. The store itself returns the new value for prefix and
+   compound updates. */
+static Var _lower_update_expr(
+  Lowering l, Var target, Symbol operator, Var right, int postfix) {
+  if (_lower_failed(l, right)) return void;
+  int id = _lower_target(target);
+  if (id >= 0 && !_lower_writable(l, id)) return void;
+  Var place = _lower_place(l, target);
+  if (l.declined || place is void)
+    return _lower_decline(l, "update expression without storage");
+  Type want = _lower_type_of(target);
+  Var slot = _lower_name(l, "place");
+  Var old = _lower_name(l, "old");
+  Var loaded = _lower_load(l, want, slot);
+  Var combined = _lower_to_type(
+    l, want, %(_binary $old (quote $operator) $right));
+  Var store = _lower_poke(l, want, slot, combined);
+  Var answer = postfix ? %(begin $store $old) : store;
+  return %((lambda ($slot) ((lambda ($old) $answer) $loaded)) $place);
 }
 
 static Var _lower_store(
@@ -2254,6 +2327,52 @@ static Var _lower_step_of(Var target) {
   match (target)
     case %(expr (!or (double) (float)) ?): return 1.0;
   return 1;
+}
+
+/* Only writes embedded in expressions need addressable locals. An ordinary
+   assignment statement keeps its existing substitution path. This runs
+   after the normal scan has collected every local and its layout. */
+static void _lower_scan_nested_writes(
+  Lowering l, Var form, int direct_statement) {
+  if (form is not <list>) return;
+  List items = form;
+  match (items) {
+    case %(stmnt ?expression): {
+      _lower_scan_nested_writes(l, expression, 1);
+      return;
+    }
+    case %(for ?initial ?condition ?step ?body): {
+      _lower_scan_nested_writes(l, initial, 1);
+      _lower_scan_nested_writes(l, condition, 0);
+      _lower_scan_nested_writes(l, step, 1);
+      _lower_scan_nested_writes(l, body, 0);
+      return;
+    }
+    case %(expr ? ?content): {
+      _lower_scan_nested_writes(l, content, direct_statement);
+      return;
+    }
+  }
+  Var target = void;
+  match (items) {
+    case %(op ?operator ?operand ?): {
+      if (operator == <=> || _lower_compound(operator))
+        target = operand;
+    }
+    case %(op ?operator ?operand): {
+      if (operator == <++> || operator == <"--">) target = operand;
+    }
+    case %(postfix ?operator ?operand): {
+      if (operator == <++> || operator == <"--">) target = operand;
+    }
+  }
+  if (target is not void && !direct_statement) {
+    int id = _lower_target(target);
+    if (id >= 0 && l.locals.contains(id) && !l.cells.contains(id))
+      l.cells[id] = l.locals[id];
+  }
+  foreach (Var child, items)
+    _lower_scan_nested_writes(l, child, 0);
 }
 
 static Var _lower_expression_stmnt(
@@ -2427,6 +2546,7 @@ static List _lower_function(
       lower_session_callees = NULL;
       l.own = name;
       _lower_scan(l, fn);
+      _lower_scan_nested_writes(l, fn, 0);
       /* The scan records its own wording for a construct refused by
          decision; `rejected` now means only `goto`. */
       if (!l.declined) {
