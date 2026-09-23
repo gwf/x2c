@@ -2137,16 +2137,18 @@ static Var _lower_coerce(Lowering l, List want, Var node, Var value) {
         return %(List_array $value);
       if (want.equal(%("String")) && from.equal(%("Symbol")))
         return %(Symbol_str $value);
-      /* A C pointer with no Var tag of its own, such as `&storage` for a
-         `struct Iter`, takes the tag native code gives its destination. */
+      /* A raw object pointer, including `&storage` for a `struct Iter`,
+         takes the tag native code gives its pointer destination. A source
+         semantic handle keeps its own representation. */
       Symbol want_tag = l.compiler.sym.var_tag_for_type(want, NULL);
+      Symbol from_tag = l.compiler.sym.var_tag_for_type(from, NULL);
+      if (want_tag && want_tag == from_tag) return value;
       Type want_pointer = l.compiler.sym.resolve_key(want);
       Type from_pointer = l.compiler.sym.resolve_key(from);
       if (want_tag && want_pointer && want_pointer.is_pointer() &&
           from_pointer && from_pointer.is_pointer() &&
-          _lower_object_pointer_type(l, want) &&
           _lower_object_pointer_type(l, from) &&
-          want_tag != l.compiler.sym.var_tag_for_type(from, NULL))
+          want_tag != from_tag)
         return %(C.address $value (quote $want_tag));
       if (l.compiler.sym.is_named_value_type(want, "Symbol") &&
           _lower_numeric_type(l, from))
