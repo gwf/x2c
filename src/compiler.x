@@ -607,13 +607,13 @@ static Symbol _never_active_arm(String s) {
     ? <rest> : 0;
 }
 
-/* Follows the `#pragma pack` directive `text` over the `saved` states and
-   returns whether packing is on after it, given `packed` before it. `push`
-   saves the state under an optional label, `pop` restores the newest state
-   or the one saved under its label, and a number or `()` sets the state.
-   An explicit alignment counts as packing even where it matches the
-   natural one. */
-static int _pack_after(String text, Array saved, int packed) {
+/* Follows the `#pragma pack` directive `text` over the `saved` states,
+   newest first, and returns whether packing is on after it, given `packed`
+   before it. `push` saves the state under an optional label, `pop` restores
+   the newest state or the one saved under its label, and a number or `()`
+   sets the state. An explicit alignment counts as packing even where it
+   matches the natural one. */
+static int _pack_after(String text, List *saved, int packed) {
   String directive = preproc_directive(text);
   if (!directive.startswith("pragma")) return packed;
   Tokenizer scanned = Tokenizer.new(directive);
@@ -626,13 +626,14 @@ static int _pack_after(String text, Array saved, int packed) {
     else if (t.type == <ident>) words.push(t.text);
   }
   match (words.list_free()) {
-    case %("pragma" "pack" "push" *label): saved.push(%($packed @label));
+    case %("pragma" "pack" "push" *label):
+      *saved = cons(%($packed @label), *saved);
     case %("pragma" "pack" "pop" *label):
-      for (int i = saved.len() - 1; i >= 0; i--) {
-        List entry = saved[i];
+      for (List rest = *saved; rest; rest = rest.cdr()) {
+        List entry = rest.car();
         if (label && !entry.cdr().equal(label)) continue;
         packed = entry.car().truth();
-        saved.resize(i);
+        *saved = rest.cdr();
         break;
       }
     case %("pragma" "pack"): if (value < 0) packed = 0;
@@ -641,23 +642,16 @@ static int _pack_after(String text, Array saved, int packed) {
   return value < 0 ? packed : value;
 }
 
-/* Joins the packing state that one reachable arm of a conditional group
-   leaves into `joined`, the `(packed saved)` state after the group, or `NULL`
-   before any arm. Packing stays on when any arm leaves it on, and the
-   longest saved stack is kept, so a later pop finds any arm's push. */
-static List _join_packing(List joined, int packed, List saved) {
-  if (!joined) return %($packed $saved);
-  List kept = joined.cadr();
-  List longer = kept.len() < saved.len() ? saved : kept;
-  return %(${joined.car().truth() || packed} $longer);
-}
-
-/* Reports whether the identifiers of an attribute from `first` through
-   `last` name one that can change a struct's layout, with or without their
-   surrounding underscores. */
-static int _layout_attribute(Token first, Token last) {
-  for (Token t = first; t <= last && t.type != <eof>; t++) {
-    if (t.type != <ident>) continue;
+/* Reports whether the attribute list the group `open` holds names an
+   attribute that can change a struct's layout, spelled with or without its
+   surrounding underscores. Identifiers inside an attribute's own arguments
+   are not names. */
+static int _layout_attribute(Token open) {
+  Token close = open.group_close();
+  int depth = 0;
+  for (Token t = open; t < close; t++) {
+    depth += t.type.group_step();
+    if (depth != 1 || t.type != <ident>) continue;
     String word = t.text.strip("_");
     if (word == "packed" || word == "aligned" || word == "mode" ||
         word == "vector_size")
@@ -668,7 +662,7 @@ static int _layout_attribute(Token first, Token last) {
 
 /* Records a pair of packing marks at the attribute starting at token
    `index` when it can change a struct's layout. A source attribute is
-   `__attribute__ (...)`; the preprocessor turns one into
+   `__attribute__ ((...))`; the preprocessor turns one into
    `__x2c_attribute__ "(...)"` (see Toolchain.preprocess), whose two tokens
    become comments, as though the preprocessor had erased them. Returns the
    index of the attribute's last token. */
@@ -678,23 +672,30 @@ static size_t _note_attribute(Compiler c, size_t index) {
   int layout = 0;
   if (marker.text == "__attribute__") {
     if (last.type != <(>) return index;
-    Token open = last;
-    last = open.group_close();
-    layout = _layout_attribute(open, last);
+    Token inner = _skip_forward(last + 1);
+    last = last.group_close();
+    if (last.type == <eof>) return index;
+    layout = inner.type == <(> && _layout_attribute(inner);
   }
   else {
     if (last.type != <lit-char*>) return index;
     marker.type = last.type = <comment>;
     Tokenizer words = Tokenizer.new(String.parse(last.text));
     words.scan();
-    Token first = words.tokens;
-    layout = _layout_attribute(first, first + words.tokens.len() - 1);
+    Token open = _skip_forward(words.tokens);
+    layout = open.type == <(> && _layout_attribute(open);
   }
   if (layout) {
     c.pack_marks.push((long) index);
     c.pack_marks.push((long) index + 1);
   }
   return last - base;
+}
+
+/* Reports whether `path` follows the current arm of every open group. */
+static int _path_follows(Array path) {
+  foreach (int arm, path) if (arm != 1) return 0;
+  return 1;
 }
 
 /* Records the open conditional groups after each conditional directive as
@@ -706,13 +707,17 @@ static size_t _note_attribute(Compiler c, size_t index) {
    `#else` will be, and 0 otherwise.
 
    The same pass records packing marks by token index, because the parser
-   can read one directive more than once. Each arm of a group starts from the
-   packing state at the group's opening, and the state after the group joins
-   what its reachable arms leave, including the path through a group without
-   an `#else`. */
+   can read one directive more than once. Packing is followed along two
+   consistent readings of the groups: one takes each group's first reachable
+   arm, as though every condition held, and the other takes a reachable
+   `#else` or no arm, as though none did. Each reading keeps, per open group,
+   0 before it takes an arm, 1 in the arm it takes, and 2 after it. Packing
+   is on where either reading has it on. */
 static void _scan_conditionals(Compiler c) {
-  Array stack = $auto([]), entries = $auto([]), saved = [];
-  int hidden = 0, serial = 0, packed = 0;
+  Array stack = $auto([]), first_arms = $auto([]), else_arms = $auto([]);
+  Array paths[2] = { first_arms, else_arms };
+  int hidden = 0, serial = 0, packed[2] = { 0, 0 };
+  List saved[2] = { NULL, NULL };
   c.arm_stacks = {};
   c.pack_marks = [];
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
@@ -731,38 +736,34 @@ static void _scan_conditionals(Compiler c) {
       continue;
     }
     Symbol kind = preproc_conditional_kind(token.text);
-    int conditional = kind == <open> || (kind && stack.len()), before = packed;
+    int conditional = kind == <open> || (kind && stack.len());
+    int before = packed[0] || packed[1];
     if (kind == <open>) {
       Symbol never = _never_active_arm(token.text);
       stack.push(%(${++serial} 0 ${never == <first> ? 2 : never == <rest>}));
-      entries.push(%($packed ${saved.list()} () 0));
+      first_arms.push(never != <first>);
+      else_arms.push(never == <rest>);
     }
-    else if (conditional) {
-      Var (entry_packed, entry_saved, prior, has_else) = entries[-1];
-      List joined = prior;
-      if (!hidden) joined = _join_packing(joined, packed, saved);
-      if (kind == <branch>) {
-        Var (id, arm, state) = stack[-1];
-        stack[-1] =
-          %($id ${arm.integer() + 1} ${state.integer() == 1 ? 2 : 0});
-        has_else = has_else.truth() ||
-                   preproc_directive(token.text).startswith("else");
-        entries[-1] = %($entry_packed $entry_saved $joined $has_else);
-        joined = %($entry_packed $entry_saved);
-      }
-      else {
-        stack.take_last();
-        entries.take_last();
-        if (!has_else.truth() || !joined)
-          joined = _join_packing(joined, entry_packed, entry_saved);
-      }
-      Var (next_packed, next_saved) = joined;
-      packed = next_packed.truth();
-      saved.clear();
-      foreach (List entry, next_saved) saved.push(entry);
+    else if (kind == <branch> && stack.len()) {
+      Var (id, arm, state) = stack[-1];
+      stack[-1] = %($id ${arm.integer() + 1} ${state.integer() == 1 ? 2 : 0});
+      int reachable = state.integer() != 1;
+      int takes_else =
+        reachable && preproc_directive(token.text).startswith("else");
+      first_arms[-1] = first_arms[-1].integer() ? 2 : reachable;
+      else_arms[-1] = else_arms[-1].integer() ? 2 : takes_else;
     }
-    else if (!hidden) packed = _pack_after(token.text, saved, packed);
-    if (packed != before) c.pack_marks.push((long) i);
+    else if (kind == <close> && stack.len()) {
+      stack.take_last();
+      first_arms.take_last();
+      else_arms.take_last();
+    }
+    else {
+      for (int path = 0; path < 2; path++)
+        if (_path_follows(paths[path]))
+          packed[path] = _pack_after(token.text, &saved[path], packed[path]);
+    }
+    if ((packed[0] || packed[1]) != before) c.pack_marks.push((long) i);
     if (!conditional) continue;
     c.arm_stacks[(long) i] = stack.list();
     hidden = 0;

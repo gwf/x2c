@@ -445,11 +445,14 @@ These C shapes are not available at compile time:
   struct with no host layout`. The compiler detects a struct defined while
   `#pragma pack` is in effect, and a `packed`, `aligned`, `mode` or
   `vector_size` attribute in the struct's own definition, such as a header
-  struct followed by `__attribute__((packed))`. It follows `#pragma pack`
-  within one file. `--cpp-symbols` and `--system-headers` read the
+  struct followed by `__attribute__((packed))`. Default collection follows
+  `#pragma pack` within each file. Where `#if` groups guard the directives,
+  it reads the file twice: once as though every condition held and once as
+  though none did. A struct packed in either reading is declined, even when
+  C lays it out naturally. `--cpp-symbols` and `--system-headers` read the
   preprocessed unit, so they also detect packing that one header starts and
-  another ends, as Windows `pshpack1.h` and `poppack.h` do; default
-  collection does not.
+  another ends, as Windows `pshpack1.h` and `poppack.h` do, and a push and a
+  pop under unrelated conditions, which default collection can miss.
 - Structs whose layout the compiler cannot see, which it would lay out with
   natural alignment: a field declared `_Alignas`, or a field whose typedef
   carries an alignment attribute. Do not pass such a struct to a native

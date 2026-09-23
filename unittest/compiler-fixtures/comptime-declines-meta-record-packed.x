@@ -24,6 +24,16 @@ struct MetaWide { char tag; int value; };
 #pragma pack(pop)
 struct MetaLater { char tag; int value; };
 
+// A pop under the same guard as its push ends the packing.
+#ifdef META_PACK_GUARD
+#pragma pack(push, 1)
+#endif
+struct MetaGuarded { char tag; int value; };
+#ifdef META_PACK_GUARD
+#pragma pack(pop)
+#endif
+struct MetaAfterGuard { char tag; int value; };
+
 meta int meta_unpacked_value(void) {
   struct MetaUnpacked unpacked = { .tag = 1, .value = 2 };
   return unpacked.value;
@@ -32,6 +42,11 @@ meta int meta_unpacked_value(void) {
 meta int meta_later_value(void) {
   struct MetaLater later = { .tag = 1, .value = 2 };
   return later.value;
+}
+
+meta int meta_after_guard_value(void) {
+  struct MetaAfterGuard after = { .tag = 1, .value = 2 };
+  return after.value;
 }
 
 meta int meta_packed_value(void) {
