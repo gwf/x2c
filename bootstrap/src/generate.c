@@ -840,7 +840,10 @@ static int _init_prelude_position(List source){
       case 35579270086: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497972340888518ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && Var_is(_x2c_match_cursor->car, 1318210446) && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var content = _x2c_match_values[0]; {
         Var _x2c_match_value_0 = content; {
           String content = Var_string(_x2c_match_value_0); {
-            Symbol kind = preproc_conditional_kind(content);  if(kind == 1016156 && ! depth ++) opening = position;  else if(kind == 7109834 && depth) depth --;
+            Symbol kind = preproc_conditional_kind(content);  if(kind == 1016156){
+              if(! depth) opening = position;  depth ++;
+            }
+            else if(kind == 7109834 && depth) depth --;
           }
 
         }
