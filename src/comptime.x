@@ -1000,8 +1000,6 @@ static int _lower_relation(Var operator) =>
   operator == <==> || operator == <!=> || operator == <"<"> ||
   operator == <"<="> || operator == <">"> || operator == <">=">;
 
-/* Whether two operands are scalars of different families. An equal pair,
-   which is nearly every pair, needs no conversion and is left alone. */
 /* The C scalar type a value of `type` has in arithmetic, or NULL. A bool or
    enum value is the int C promotes it to. */
 static Type _lower_numeric_type(Lowering l, Type type) {
@@ -1013,6 +1011,8 @@ static Type _lower_numeric_type(Lowering l, Type type) {
   return NULL;
 }
 
+/* Whether two operands are scalars of different families. An equal pair,
+   which is nearly every pair, needs no conversion and is left alone. */
 static int _lower_mixed_scalars(Lowering l, List operands) {
   if (operands.len() != 2) return 0;
   Type left = _lower_numeric_type(l, _lower_type_of(operands.car()));
@@ -1234,8 +1234,8 @@ static Var _lower_getindex(
   Var index = _lower_expr(l, key);
   if (_lower_failed(l, target) || _lower_failed(l, index)) return void;
   List layout = is_c_array ? _lower_pointee_layout(l, receiver) : NULL;
-  if (layout)
-    return %(C.index $target $index ${layout[2]} (quote $layout));
+  match (layout) case %(? ? ?size *):
+    return %(C.index $target $index $size (quote $layout));
   return %(${Atom.intern(container + "_getindex")} $target $index);
 }
 
@@ -2151,10 +2151,10 @@ static Var _lower_setindex(
   if (_lower_failed(l, target) || _lower_failed(l, index) ||
       _lower_failed(l, value))
     return void;
+  Var store = %(${Atom.intern(container + "_setindex")} $target $index $value);
   List layout = is_c_array ? _lower_pointee_layout(l, receiver) : NULL;
-  Var store = layout
-    ? %(C.index.set $target $index ${layout[2]} (quote $layout) $value)
-    : %(${Atom.intern(container + "_setindex")} $target $index $value);
+  match (layout) case %(? ? ?size *):
+    store = %(C.index.set $target $index $size (quote $layout) $value);
   return _lower_effect(l, store, rest, k);
 }
 

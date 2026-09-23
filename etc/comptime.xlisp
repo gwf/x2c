@@ -157,7 +157,6 @@
 (def Array_push Array.push)
 (def Array_getindex Array.getindex)
 (def Array_setindex Array.setindex)
-
 (def Array_list Array.list)
 (def Array_str str)
 (def Array_repr repr)

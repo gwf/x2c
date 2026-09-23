@@ -447,7 +447,8 @@ static List _field(Compiler compiler, List context, int delegated) {
 
 /* Whether every enumerator of enum `type` fits in int, the width C gives an
    enum whose values do: each initializer has an integer type no wider than
-   int, or is the enum itself. Implicit values count up from the last. */
+   int, or is the enum itself. C requires an implicit value, the previous
+   one plus one, to fit in int as well. */
 static int _enum_fits_int(List type, List members) {
   foreach (List member, members) {
     match (member) {

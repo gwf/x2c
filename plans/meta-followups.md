@@ -55,6 +55,16 @@ Each should decline with a plain reason or work as C does:
   `lisp_peek` and `lisp_poke`; a generic retag by the layout's TAG would
   remove it.
 
+Status: done on `gwf/meta-c-small-defects`. Pointer indexing, `NULL`,
+`true`, `false`, typed `foreach` outputs, `bool` and int-range enum layouts,
+C `bool` conversion and `strncmp`'s `size_t` now behave as C does, and
+`lisp_peek` and `lisp_poke` retag by the layout's TAG. The layout accepts a
+TAG that differs from its bytes' row only when the tag is fixed for the type;
+a declared converter's tag may box something other than the bits. Remaining:
+the compile-time view of `size_t` is `unsigned long` on every host, which is
+32 bits too wide on LLP64, and enum constants still have no compile-time
+value.
+
 ### D. `--system-headers` cost and packing
 
 `--system-headers` reads every expanded system header, about 3x slower than
