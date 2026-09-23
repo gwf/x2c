@@ -122,6 +122,7 @@
 (def lower string-downcase)
 
 // Shared operations used by generated standard algorithms and meta functions.
+(def init_apply apply)
 (def Var_cons cons)
 (def List_car car)
 (def List_cdr cdr)

@@ -88,6 +88,7 @@
 (def add _add)
 (def len length)
 (def lower string-downcase)
+(def init_apply apply)
 (def Var_cons cons)
 (def List_car car)
 (def List_cdr cdr)
@@ -114,18 +115,22 @@
  (lambda (arg-1 arg-2)
   (cond ((eq? arg-2 (quote ())) arg-2)
    (true ((lambda (hold-3)
-           (cond ((eq? (arg-1 hold-3) (quote ()))
-                  (filter arg-1 (List_cdr arg-2)))
+           (cond ((eq? (init_apply arg-1 (Var_cons hold-3 (quote ())))
+                   (quote ())) (filter arg-1 (List_cdr arg-2)))
             (true (Var_cons hold-3 (filter arg-1 (List_cdr arg-2))))))
           (List_car arg-2))))))
 (def map
  (lambda (arg-1 arg-2)
   (cond ((eq? arg-2 (quote ())) arg-2)
-   (true (Var_cons (arg-1 (List_car arg-2)) (map arg-1 (List_cdr arg-2)))))))
+   (true (Var_cons (init_apply arg-1 (Var_cons (List_car arg-2) (quote ())))
+          (map arg-1 (List_cdr arg-2)))))))
 (def foldl
  (lambda (arg-1 arg-2 arg-3)
   (cond ((eq? arg-3 (quote ())) arg-2)
-   (true (foldl arg-1 (arg-1 arg-2 (List_car arg-3)) (List_cdr arg-3))))))
+   (true (foldl arg-1
+          (init_apply arg-1
+           (Var_cons arg-2 (Var_cons (List_car arg-3) (quote ()))))
+          (List_cdr arg-3))))))
 (def _last
  (lambda (arg-1)
   (cond ((eq? arg-1 (quote ())) (quote ()))

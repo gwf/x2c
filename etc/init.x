@@ -12,24 +12,31 @@ macro Decorator $init.emit(Unit $fn) {
   $(init.emit $fn)...
 }
 
+/* The initial environment calls Lisp procedures before the C runtime layer
+   loads. Its callbacks are evaluator values accepted by the kernel apply. */
+Var init_apply(Var procedure, List arguments);
+
 $init.emit()
-List filter(Func keep, List values) {
+List filter(Var keep, List values) {
   if (values.equal(%())) return values;
   Var value = values.car();
-  if (keep(value).equal(%())) return filter(keep, values.cdr());
+  if (init_apply(keep, value.cons(%())).equal(%()))
+    return filter(keep, values.cdr());
   return value.cons(filter(keep, values.cdr()));
 }
 
 $init.emit()
-List map(Func procedure, List values) {
+List map(Var procedure, List values) {
   if (values.equal(%())) return values;
-  return procedure(values.car()).cons(map(procedure, values.cdr()));
+  return init_apply(procedure, values.car().cons(%()))
+    .cons(map(procedure, values.cdr()));
 }
 
 $init.emit()
-Var foldl(Func procedure, Var initial, List values) {
+Var foldl(Var procedure, Var initial, List values) {
   if (values.equal(%())) return initial;
-  return foldl(procedure, procedure(initial, values.car()), values.cdr());
+  return foldl(procedure,
+    init_apply(procedure, initial.cons(values.car().cons(%()))), values.cdr());
 }
 
 $init.emit()
