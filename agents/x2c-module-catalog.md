@@ -300,8 +300,9 @@ Public functions:
 `Compiler.try_parse_macro_slot`, `Compiler.parse_macro_definition`,
 `Compiler.publish_macro_definition_node`, `Compiler.parse_keyword_definition`,
 `Compiler.macro_targets_unit`, `Compiler.skip_named_type_declaration`,
-`Compiler.macro_invocation_site`, `Compiler.expand_macro_invocation_node`,
-`Compiler.try_parse_macro_expression`, `Compiler.try_parse_macro_target_at`
+`Compiler.try_parse_macro_member`, `Compiler.macro_invocation_site`,
+`Compiler.expand_macro_invocation_node`, `Compiler.try_parse_macro_expression`,
+`Compiler.try_parse_macro_target_at`
 
 ### [src/main.x](../src/main.x)
 
