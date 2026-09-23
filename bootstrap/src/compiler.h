@@ -342,6 +342,8 @@ int Sym_is_array_type(Sym sym, Type type);
 
 int Sym_is_map_type(Sym s, Type type);
 
+int Sym_is_bool_type(Sym sym, Type type);
+
 int Sym_is_named_value_type(Sym sym, Type type, String name);
 
 Type Sym_lookup_field(Sym sym, Type type, List field);

@@ -2296,9 +2296,13 @@ int Type_is_bare_typedef_name(Type);
 int Type_is_typedef(Type);
 List Sym_resolve_global(Sym, List, List *);
 int List_equal(List, List);
+Type Sym_resolve_numeric_type(Sym, Type);
 static Type _lisp_resolve_type(Compiler compiler, Type type){
   type = Type_canonicalize(type);  for(int hops = 0;  hops < 128;  hops ++){
-    if(_lisp_value_type(type)) return type;  if(! Type_is_bare_typedef_name(type) && ! Type_is_typedef(type)) return type;  Type next = NULL;  Sym_resolve_global(compiler -> sym, Type_list(type), & next);  if(! List_truth(Type_list(next)) || List_equal(Type_list(next), Type_list(type))) return type;  type = Type_canonicalize(next);
+    if(_lisp_value_type(type)) return type;  if(! Type_is_bare_typedef_name(type) && ! Type_is_typedef(type)) return type;  Type next = NULL;  Sym_resolve_global(compiler -> sym, Type_list(type), & next);  if(! List_truth(Type_list(next)) || List_equal(Type_list(next), Type_list(type))){
+      Type numeric = Sym_resolve_numeric_type(compiler -> sym, type);  return List_truth(Type_list(numeric)) ? numeric : type;
+    }
+    type = Type_canonicalize(next);
   }
   return type;
 }
@@ -2457,7 +2461,7 @@ static Var _eval_string(Compiler compiler, String source, Token invocation){
                 x2c_exception_mark_handled(&_x2c_exception_frame_0);
                 if (_x2c_catch_selected_0 == 0) {Var category = x2c_error_catch_capture(_x2c_error_handler_0, 0);
                 {
-                  static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_eval_string",.line = 576};
+                  static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/macros.x",.function = "_eval_string",.line = 581};
                   x2c_error_raise_n(& _x2c_error_site_1, 28682226919752, 1, Symbol_var(209659067570), category);
                   __builtin_unreachable();
                 }
@@ -2503,7 +2507,7 @@ return result;
 static Var _lisp_import_hook(String path){
   Compiler compiler = macro_import_compiler;
   if(! compiler){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 588};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/macros.x",.function = "_lisp_import_hook",.line = 593};
     x2c_error_raise_n(& _x2c_error_site_2, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("compile-time import")), NULL))));
     __builtin_unreachable();
   }
@@ -3255,7 +3259,7 @@ void Lisp_adopt(Lisp, Lisp);
 
 static void _ensure_lisp(Compiler compiler){
   if(macro_library_pending() && ! library_filling){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../src/macros.x",.function = "_ensure_lisp",.line = 1209};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../src/macros.x",.function = "_ensure_lisp",.line = 1214};
     x2c_error_raise_n(& _x2c_error_site_3, 27048696089866, 0);
   }
   {
@@ -4043,7 +4047,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site){
                                 x2c_exception_mark_handled(&_x2c_exception_frame_7);
                                 if (_x2c_catch_selected_7 == 0) {Var category = x2c_error_catch_capture(_x2c_error_handler_7, 0);
                                 {
-                                  static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 1762};
+                                  static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 1767};
                                   x2c_error_raise_n(& _x2c_error_site_4, 28682226919752, 1, Symbol_var(209659067570), category);
                                   __builtin_unreachable();
                                 }
