@@ -263,6 +263,13 @@ static String _attribute(Compiler c) {
   return String.new_len(c.text + first.pos, last.pos + last.len - first.pos);
 }
 
+/* C places an aggregate's own attributes after its keyword and after its
+   closing brace. Collection skips them: attribute text is no part of a
+   collected type, and the packing marks hold any layout they change. */
+static void _skip_aggregate_attributes(Compiler c) {
+  if (c.shallow) while (_attribute(c)) continue;
+}
+
 /* Source is read before preprocessing, so a macro whose body is declaration
    specifiers and attributes, such as an export annotation, still sits in a
    declaration. A specifier position of `rank`, 0 for storage classes and
@@ -466,15 +473,13 @@ static int _enum_fits_int(List type, List members) {
   return 1;
 }
 
-/* Reports whether C packs an aggregate whose tokens run from `first` to the
-   current one and any attribute after it: packing is on before it, or a
-   mark lies within it. Tokens outside the unit's own, such as a constructed
+/* Reports whether C packs an aggregate whose tokens, with its attributes,
+   run from `first` to the current one: packing is on before it, or a mark
+   lies within it. Tokens outside the unit's own, such as a constructed
    form's, have no marks. */
 static int _packed_since(Compiler c, Token first) {
   Token base = c.tokenizer.tokens, end = base + c.tokenizer.tokens.len();
   if (first < base || c.token >= end) return 0;
-  Token last = _attribute_starts(c)
-             ? c.skip_trivia_from(c.token + 1).group_close() : c.token;
   // Marks ascend, so the ones before `first` are a prefix.
   int before = 0, count = c.pack_marks.len();
   for (int high = count; before < high;) {
@@ -483,7 +488,7 @@ static int _packed_since(Compiler c, Token first) {
     else high = middle;
   }
   return before % 2 ||
-         (before < count && (long) c.pack_marks[before] <= last - base);
+         (before < count && (long) c.pack_marks[before] < c.token - base);
 }
 
 /* Publishes an aggregate whose tokens start at `first`. A constructed
@@ -571,6 +576,7 @@ static List _struct_or_union(Compiler c) {
   Token first = c.token;
   Symbol tag = c.peek(0);
   c.next();
+  _skip_aggregate_attributes(c);
   List name = c.parse_optional_identifier();
   if (name && c.package) name = _package_aggregate_name(c, tag, name);
   List usedname = name ? name : c.gensym();
@@ -580,6 +586,7 @@ static List _struct_or_union(Compiler c) {
   if (c.test(<"{">)) {
     fields = c.parse_fields(type);
     c.expect(<"}">);
+    _skip_aggregate_attributes(c);
     if (!c.macro_holes)
       return _publish_aggregate_type(c, tag, usedname.car(), fields, first);
     fields = cons(<fields>, fields);
@@ -697,6 +704,7 @@ List Compiler.parse_enumerators(Compiler c, List context) {
 
 static List _enum(Compiler c) {
   c.expect(<enum>);
+  _skip_aggregate_attributes(c);
   List name = c.parse_optional_identifier();
   if (name && c.package) name = _package_aggregate_name(c, <enum>, name);
   List usedname = name ? name : c.gensym();
@@ -704,6 +712,7 @@ static List _enum(Compiler c) {
   if (c.test(<"{">)) {
     enums = c.parse_enumerators(type);
     c.expect(<"}">);
+    _skip_aggregate_attributes(c);
     if (!c.macro_holes)
       return _publish_aggregate_type(
         c, <enum>, usedname.car(), enums, NULL);
