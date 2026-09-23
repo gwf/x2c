@@ -473,20 +473,22 @@ void Build.add_generated(Build state, String input, String directory) {
 CliRequest Build.module_entry(Build b) {
   String stamp = build_module_stamp();
   if (!stamp) x2c_driver_error("cannot read the running compiler to stamp");
-  /* Each source is included by its absolute path without the leading slash
-     and found through the root include directory. Distinct sources with
-     one name stay distinct, and each unit's generated header is placed
-     inside the entry's own generated directory. */
+  /* Each source is included by its absolute path through a link to the
+     filesystem root beside the entry, so distinct sources with one name stay
+     distinct and each unit's generated header is placed inside the entry's
+     own generated directory. No include directory reaches the root. */
   String includes = "", Array sources = [];
   foreach (String unit, b.units) {
     String source = Path.absolute(unit);
-    includes = %"$includes#include \"${source[1:]}\"\n";
+    includes = %"$includes#include \"x2c-root$source\"\n";
     sources.push(source);
   }
   String declared = sources.list_free().repr(), root = x2c_get_root();
   Path entry = %"${b.work_dir}/module/x2c_module.x";
+  Path link = entry.dirname().join("x2c-root");
   try {
     entry.dirname().make_dirs();
+    if (!Path.exists(link)) link.symlink_to("/");
     entry.write_text(
       %"$includes\$(import \"$root/etc/lisp-bindings.xlisp\")
 macro Expression \$module.targets() =>
@@ -498,7 +500,6 @@ Map x2c_module_targets(void) => \$module.targets();
   catch %(io-fail *detail): x2c_host_error(detail);
   CliRequest request = Scope.memdup(b.request, sizeof(struct CliRequest));
   request.inputs = %($entry);
-  request.include_dirs = %(@{b.request.include_dirs} "/");
   b.xlat_n++;
   return request;
 }
@@ -743,10 +744,7 @@ static void Build._place_unit_headers(Build b) {
   foreach (String unit, b.units) {
     String directory = %"${b.gen_root}/${_key(unit)}";
     String stem = Path.stem(unit);
-    // A native module's entry names its sources from the root.
-    List searched = %(
-      ${Path.dirname(unit)} @{b.request.include_dirs}
-      @{b.request.kind == <module> ? %("/") : NULL});
+    List searched = %(${Path.dirname(unit)} @{b.request.include_dirs});
     List outputs = %("$directory/$stem.h" "$directory/$stem.c");
     foreach (String generated, outputs)
       foreach (String line, Path.read_text(generated).split_lines(0)) {

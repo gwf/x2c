@@ -429,9 +429,10 @@ when an earlier target in the same build loaded others.
 A module's functions bind like the functions the compiler links. The
 prototype's signature must match the one the module was built from, and a
 mismatch is reported at the declaration. A function the compiler links
-takes precedence, and the prototype reports a warning that the module's
-function is shadowed. When two named modules define the same name, the one
-named first supplies it, and the compiler warns when it loads them.
+takes precedence, and the prototype reports a warning that the compiler's
+own function hides the module's. When two named modules define the same
+name, the one named first supplies it, and the prototype reports a
+warning.
 
 A module runs inside the compiler and uses the compiler's own runtime, not
 a copy of it. Only the compiler that built a module can load it, so a
@@ -446,7 +447,8 @@ Every function the module exports needs a bodyless `meta` prototype in the
 module's sources, and a module whose sources declare none fails to build.
 
 A module can call most of the runtime, because the compiler links every
-runtime module that registers no `Var` class of its own. The compiler
+runtime module that registers no `Var` class of its own. This holds for a
+compiler built from a checkout and for one `x2c bootstrap` installs. The compiler
 leaves out the modules whose classes would take up rows of the fixed
 32-row class registry at startup: Automatic Differentiation, `Regex`,
 typed Arrays and Maps, `Thread` and `Mutex`, the scripting library, and

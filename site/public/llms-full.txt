@@ -4528,9 +4528,10 @@ Only the compiler that built a module loads it; any other compiler reports
 that the module was built by another compiler before running any of its
 code. The compiler loads a module only on request and keeps it loaded until
 it exits, and a translation binds only the modules its request names. When
-two of them define one name, the first supplies it and the compiler warns. Modules work on macOS,
-Linux and WSL. [Native modules](https://x2c-lang.dev/docs/guide/meta-functions.html#native-modules)
-explains what a module contains.
+two of them define one name, the first supplies it and the declaration
+reports a warning. Modules work on macOS, Linux and WSL.
+[Native modules](https://x2c-lang.dev/docs/guide/meta-functions.html#native-modules) explains what a
+module contains.
 
 `-c`, or `--compile-only`, stops after compilation. One input may name its
 object with `--output`. Multiple compile-only inputs require `--build-dir`, so
@@ -4824,10 +4825,11 @@ native module, and a target's `native-modules` field lists the module
 targets its translation loads. Those build first, like `dependencies`, and a
 changed module retranslates the targets that load it. Command-line target,
 profile, kind, output, build directory, and tool options override the
-corresponding defaults. `--target <name>` builds the named manifest target and `--profile
-<name>` applies the named manifest build profile; both work with `build` and
-`run`. The selected target must define the named profile; a dependency target
-takes it when it defines one and builds with its own settings otherwise.
+corresponding defaults. `--target <name>` builds the named manifest target
+and `--profile <name>` applies the named manifest build profile; both work
+with `build` and `run`. The selected target must define the named profile; a
+dependency target takes it when it defines one and builds with its own
+settings otherwise.
 `--manifest-path`, `--target`, and `--profile` describe a manifest build, so
 each conflicts with explicit input operands, and `-c` needs operands rather
 than a manifest.
@@ -4979,8 +4981,9 @@ Six codes are reported as warnings:
 - `macro` carries what a macro reported through `x2c.diagnostic.warn`, at the
   invocation, with the notes the macro supplied.
 - `warning` covers the remaining cases: an unnecessary conversion, a
-  protocol binder that shadows a visible type name, and a native module
-  function that a function the compiler links shadows.
+  protocol binder that shadows a visible type name, a native `meta`
+  prototype whose name both the compiler and a native module define, and
+  one that more than one native module defines.
 
 [The Region Model](https://x2c-lang.dev/docs/guide/regions.html) explains what the first three cover
 and what they cannot see. [Scopes and Lifetime](https://x2c-lang.dev/docs/guide/memory.html) shows

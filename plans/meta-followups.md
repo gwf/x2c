@@ -171,10 +171,13 @@ implements them; the book documents it under
   row-reserving registration function, or needs a function only a left-out
   object defines. Today it adds `args`, `diff` and `lib` (`DisjointSet`),
   and leaves out `autodiff`, `regex`, `typed-array`, `typed-map`, `mutex`,
-  `thread`, `scripting`, `list-selectors` and `match-recursive`. The
-  Makefile links run it on macOS and Linux only; the APE seed, MSYS2 and a
-  compiler installed by `x2c bootstrap` link the runtime as before, so a
-  module there can call only what the compiler uses.
+  `thread`, `scripting`, `list-selectors` and `match-recursive`. It runs one
+  `nm` over all objects, about 50 ms per compiler link, and a failing `nm`
+  fails the link. The Makefile links run it on macOS and Linux; the APE
+  seed and MSYS2 link the runtime as before. The APE payload records the
+  selection as `etc/runtime-objects.txt`, by object stem, and a compiler
+  that `x2c bootstrap` installs links those runtime objects too, without
+  running `nm` on the installing machine.
 - **Lifetime and trust.** `Frontend.load_support` checks the stamp in the
   module file's bytes before `dlopen`, so a stale module's code never runs,
   then loads each requested module once per process and never closes it.
@@ -183,11 +186,13 @@ implements them; the book documents it under
   `_bind_native_meta` falls back to the selected modules when the compiler
   links no function of the name; the first selected module that defines a
   name supplies it, and the existing signature check validates each
-  binding. A module function that a compiler-linked name shadows, and a name
-  two selected modules define, are reported as warnings. Nothing is
-  discovered through includes, interfaces or package roots.
+  binding. The prototype reports a warning when a compiler-linked function
+  hides a module's, or when more than one selected module defines the
+  name. Nothing is discovered through includes, interfaces or package
+  roots.
 - **Entry.** The entry includes each module source by its absolute path,
-  found through the root include directory, so same-named sources stay
+  through an `x2c-root` link to `/` beside the entry rather than an include
+  directory, so same-named sources stay
   distinct and generated headers stay in the build directory. A module
   whose sources declare no `meta` prototype fails to build. On Linux the
   module links with `-Wl,-Bsymbolic-functions`, so its own functions are not

@@ -5,48 +5,43 @@
 #
 # Prints, one per line and in argument order, the runtime objects the
 # compiler links whole, so that a native module can call their functions.
-# The objects the compiler's own code reaches are linked from the archive
-# regardless and are not printed. Of the rest, an object is left out when it
-# calls a function that reserves a Var class row, or needs a function that
-# only a left-out object defines: linking it could spend rows of the 32-row
-# budget at startup.
+# The runtime objects the compiler's own code reaches are linked from the
+# archive regardless and are not printed. A class that boxes as a Var
+# reserves one of the 32 Var class rows in its object's file initializer,
+# through x2c_register_descriptor or x2c_register_tagged_descriptor. Of the
+# other runtime objects, one that makes such a call is left out, and so is
+# one that needs a function only a left-out object defines, so linking the
+# rest reserves no row the compiler did not already reserve. Exits nonzero
+# when nm fails; NM names another nm. Object paths must not contain spaces.
 set -eu
 
-{
-  role=compiler
-  for object in "$@"; do
-    if [ "$object" = -- ]; then
-      role=runtime
-      continue
-    fi
-    "${NM:-nm}" -P -g "$object" | sed "s|^|$role $object |"
-  done
-} | awk '
+compiler=
+for object in "$@"; do
+  shift
+  [ "$object" = -- ] && break
+  compiler="$compiler $object"
+done
+symbols=$("${NM:-nm}" -A -P -g $compiler "$@")
+printf '%s\n' "$symbols" | awk -v compiler="$compiler" '
 BEGIN {
-  split("x2c_try_register_descriptor x2c_register_descriptor " \
-        "x2c_register_type Var_register_object_tag " \
-        "x2c_register_tagged_descriptor x2c_try_register_tagged_descriptor",
-        names, " ")
-  for (i in names) {
-    reserves[names[i]] = 1
-    reserves["_" names[i]] = 1
-  }
+  n = split(compiler, list, " ")
+  for (i = 1; i <= n; i++) linked[list[i]] = 1
 }
 {
-  role = $1; object = $2; name = $3; type = $4
+  object = $1; sub(/:$/, "", object)
+  name = $2; type = $3
   if (!(object in seen)) {
     seen[object] = 1
-    if (role == "runtime") order[++count] = object
-    else linked[object] = 1
+    if (!(object in linked)) order[++count] = object
   }
   if (type == "U") {
     uses[object] = uses[object] " " name
-    if (name in reserves) reserving[object] = 1
+    if (name ~ /^_?x2c_register_(tagged_)?descriptor$/) reserving[object] = 1
   }
-  else if (role == "runtime") definers[name] = definers[name] " " object
+  else if (!(object in linked)) definers[name] = definers[name] " " object
 }
 END {
-  # The archive members the compiler links today.
+  # The runtime objects the compiler links from the archive today.
   do {
     changed = 0
     for (object in linked) {

@@ -1614,37 +1614,17 @@ void Compiler.add_native_module(String path, Map (*entry)(void)) {
 
 /** Selects the loaded native modules, by absolute path, that bodyless `meta`
     prototypes bind in the current request. The first module in `paths`
-    that defines a name supplies it, and a name that more than one defines
-    is reported once when the selection changes.
+    that defines a name supplies it.
 */
 void Compiler.select_native_modules(List paths) {
-  if (paths.equal(native_module_order)) return;
   paths.try_own();
   native_module_order = paths;
-  Map suppliers = $auto({});
-  foreach (String path, paths)
-    foreach (Var (name, target), (Map) native_modules[path]) {
-      (void) target;
-      Var first = suppliers.get(name);
-      if (first is void) suppliers[name] = path;
-      else
-        fprintf(
-          stderr,
-          "x2c: warning: native modules %s and %s both define '%s'; "
-          "%s supplies it\n",
-          first.string().str(), path.str(), name.string().str(),
-          first.string().str());
-    }
 }
 
-/* The requested native module function named `name`, or `void`. */
-static Var _native_module_function(String name) {
-  foreach (String path, native_module_order) {
-    Var found = ((Map) native_modules[path]).get(name);
-    if (found is not void) return found;
-  }
-  return void;
-}
+/* The paths of the selected native modules that define `name`, in order. */
+static List _native_module_suppliers(String name) =>
+  native_module_order.filter(
+    %!(String path) => ((Map) native_modules[path]).contains(name));
 
 /* Binds a declared native function to the compiler's own linked target of
    the same name, or else to a loaded native module's. A declaration with
@@ -1657,14 +1637,21 @@ static void _bind_native_meta(
     Var bound;
     try {
       bound = c.macro_lisp.eval(%(bind $name (quote $signature)));
-      if (_native_module_function(name) is not void)
+      if (_native_module_suppliers(name))
         c.report_warning(
-          <warning>, "a native module function is shadowed by the "
-          "compiler's own", marker, %("name: $name"));
+          <warning>, "the compiler's own function hides a native module's",
+          marker, %("name: $name"));
     }
     catch %(no-symbol *): {
-      bound = _native_module_function(name);
-      if (bound is void) return;
+      List suppliers = _native_module_suppliers(name);
+      if (!suppliers) return;
+      String first = suppliers.car();
+      bound = ((Map) native_modules[first])[name];
+      if (suppliers.cdr())
+        c.report_warning(
+          <warning>, "more than one native module defines this function",
+          marker, %("name: $name" "supplied by: $first"
+                    "also defined by: ${", ".join(suppliers.cdr())}"));
     }
     function = bound;
     c.macro_lisp.set_global(name, function);

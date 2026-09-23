@@ -40,9 +40,9 @@ LDFLAGS          += $(BUILD_LDFLAGS)
 # whole every runtime object etc/runtime-objects.sh selects, and a Linux
 # executable exports its functions only when asked.
 UNAME_S          := $(shell uname -s)
+RUNTIME_SELECT    = :
 ifneq ($(filter Darwin Linux,$(UNAME_S)),)
-RUNTIME_WHOLE     = $$(sh $(ROOT)/etc/runtime-objects.sh \
-                      $(BIN_OBJECTS) -- $(LIB_OBJECTS))
+RUNTIME_SELECT    = sh $(ROOT)/etc/runtime-objects.sh
 endif
 ifeq ($(UNAME_S),Linux)
 LDFLAGS          += -rdynamic
@@ -171,7 +171,8 @@ $(BIN_BUILD)/%.o: $(BIN_BUILD)/%.c | $(LIB_H_FILES)
 		-MMD -MP -MF $(BIN_BUILD)/$*.c.d -MT $@ -c $< -o $@
 # link binary executable
 $(BINARY): $(BIN_OBJECTS) $(LIBRARY)
-	$(CC) $(BIN_OBJECTS) $(RUNTIME_WHOLE) -L. $(LDFLAGS) -lm -o $(BINARY)
+	whole=$$($(RUNTIME_SELECT) $(BIN_OBJECTS) -- $(LIB_OBJECTS)) && \
+	$(CC) $(BIN_OBJECTS) $$whole -L. $(LDFLAGS) -lm -o $(BINARY)
 ###############################################################################
 # clean build directories
 clean:

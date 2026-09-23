@@ -68,9 +68,9 @@ case $(uname -s) in
 esac
 
 "$X2C" build -q --kind meta-module src/helpers.x --output helpers.so
-"$X2C" build -q --native-module helpers.so src/helpers.x src/main.x \
-  --output app
-[[ $(./app) == "9 15" ]] || fail "module result"
+"$X2C" translate -q --native-module helpers.so --out-dir out -I src \
+  src/main.x
+grep -Fq '9, triple(5)' out/main.c || fail "module result"
 
 expect_error "no binding for triple" \
   "$X2C" translate -q --out-dir out -I src src/main.x
@@ -94,53 +94,49 @@ bundle stale.c stale.so
 expect_error "native module 'stale.so' was built by another compiler" \
   "$X2C" translate -q --native-module stale.so --out-dir out src/main.x
 expect_error "not an x2c native module" \
-  "$X2C" translate -q --native-module app --out-dir out src/main.x
+  "$X2C" translate -q --native-module wrong.x --out-dir out src/main.x
 
-# Sources with one name stay distinct, however they are spelled.
-printf 'meta int fa(int);\n#pragma private\nint fa(int x) { return x + 1; }\n' \
-  >a/util.x
-printf 'meta int fb(int);\n#pragma private\nint fb(int x) { return x + 2; }\n' \
-  >b/util.x
-printf 'meta int fa(int);\n#pragma private\nint fa(int x) { return 100; }\n' \
-  >c/fa.x
-cat >both.x <<'EOF'
+# Sources with one name stay distinct, however they are spelled. The
+# compiler links the runtime modules that register no Var class, such as
+# DisjointSet.
+cat >a/util.x <<'EOF'
 meta int fa(int);
+#pragma private
+int fa(int x) { return x + 1; }
+EOF
+cat >b/util.x <<'EOF'
 meta int fb(int);
-meta static int v(void) => fa(1) * 10 + fb(1);
-int main(void) { return $v(); }
+#pragma private
+int fb(int x) { return x + 2; }
 EOF
-"$X2C" build -q --kind meta-module a/util.x b/util.x --output ab.so
-"$X2C" translate -q --native-module ab.so --out-dir out both.x
-grep -Fq "return 23;" out/both.c || fail "module with same-named sources"
-[[ ! -e a/util.h && ! -e b/util.h ]] || fail "header written beside a source"
-(cd c && "$X2C" build -q --kind meta-module ../a/util.x --output ../dots.so)
-"$X2C" build -q --kind meta-module c/fa.x --output fa.so
-cat >first.x <<'EOF'
+cat >c/fa.x <<'EOF'
 meta int fa(int);
-meta static int v(void) => fa(1);
-int main(void) { return $v(); }
+#pragma private
+int fa(int x) { return 100; }
 EOF
-"$X2C" translate -q --native-module dots.so --native-module fa.so \
-  --out-dir out first.x 2>warn.out
-grep -Fq "return 2;" out/first.c || fail "first named module supplies"
-grep -Fq "both define 'fa'" warn.out || fail "duplicate module warning"
-
-# The compiler links the runtime modules that register no Var class, such
-# as DisjointSet; on macOS, a call into one it leaves out fails the link.
 cat >sets.x <<'EOF'
 #include "lib.x"
 meta int components(int);
 #pragma private
 int components(int n) { return DisjointSet.new(n).num_components(); }
 EOF
-cat >use-sets.x <<'EOF'
+cat >both.x <<'EOF'
+meta int fa(int);
+meta int fb(int);
 meta int components(int);
-meta static int v(void) => components(4);
+meta static int v(void) => fa(1) * 100 + fb(1) * 10 + components(4);
 int main(void) { return $v(); }
 EOF
-"$X2C" build -q --kind meta-module sets.x --output sets.so
-"$X2C" translate -q --native-module sets.so --out-dir out use-sets.x
-grep -Fq "return 4;" out/use-sets.c || fail "runtime function in a module"
+"$X2C" build -q --kind meta-module a/util.x b/util.x sets.x --output ab.so
+(cd a && "$X2C" build -q --kind meta-module ../c/fa.x --output ../fa.so)
+"$X2C" translate -q --native-module ab.so --native-module fa.so \
+  --out-dir out both.x 2>warn.out
+grep -Fq "return 234;" out/both.c || fail "module with same-named sources"
+[[ ! -e a/util.h && ! -e b/util.h && ! -e c/fa.h ]] ||
+  fail "header written beside a source"
+grep -Fq "more than one native module defines" warn.out ||
+  fail "duplicate module warning"
+
 if [[ $(uname -s) == Darwin ]]; then
   cat >rx.x <<'EOF'
 #include "regex.x"

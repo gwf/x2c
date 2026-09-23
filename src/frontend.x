@@ -68,13 +68,6 @@ static Token _first_preprocessor_token(Compiler compiler) {
   return compiler.token;
 }
 
-static int _bytes_contain(const char *bytes, size_t length, String text) {
-  size_t size = text.len();
-  for (size_t i = 0; i + size <= length; i++)
-    if (!memcmp(bytes + i, text, size)) return 1;
-  return 0;
-}
-
 /* Checks the stamp in the bytes of the module at `path` against the running
    compiler. Loading runs a module's code, so a module from another compiler
    is rejected before it is loaded. */
@@ -93,11 +86,18 @@ static void _check_module_stamp(String path) {
   char *data = Scope.malloc(end > 0 ? (size_t) end : 1);
   size_t size = end > 0 ? fread(data, 1, (size_t) end, input) : 0;
   input.close();
-  int current = _bytes_contain(data, size, expected);
-  int stamped = _bytes_contain(data, size, "x2c-module-stamp:");
+  /* The entry writes exactly one stamp; a file with any other count, or
+     whose one stamp differs, was not built by this compiler. */
+  String marker = "x2c-module-stamp:";
+  int stamps = 0, current = 0, width = expected.len();
+  for (size_t i = 0; i + marker.len() <= size; i++)
+    if (!memcmp(data + i, marker, marker.len())) {
+      stamps++;
+      current = i + width <= size && !memcmp(data + i, expected, width);
+    }
   Scope.free(data);
-  if (current) return;
-  if (!stamped) x2c_driver_error(%"not an x2c native module: $path");
+  if (stamps == 1 && current) return;
+  if (!stamps) x2c_driver_error(%"not an x2c native module: $path");
   x2c_driver_error(
     %"native module '$path' was built by another compiler; rebuild it");
 }

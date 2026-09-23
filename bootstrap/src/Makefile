@@ -8,8 +8,9 @@ OBJS     =  $(SRCS:%.c=%.o)
 # whole every runtime object etc/runtime-objects.sh selects, and a Linux
 # executable exports its functions only when asked.
 UNAME_S  := $(shell uname -s)
+SELECT   =	:
 ifneq ($(filter Darwin Linux,$(UNAME_S)),)
-WHOLE    =	$$(sh ../../etc/runtime-objects.sh $(OBJS) -- ../lib/*.o)
+SELECT   =	sh ../../etc/runtime-objects.sh
 endif
 ifeq ($(UNAME_S),Linux)
 LDFLAGS  +=	-rdynamic
@@ -20,7 +21,8 @@ endif
 ../../bin/x2c: x2c install
 
 x2c: $(OBJS) ../lib/libx2c.a
-	$(CC) -o $@ $(OBJS) $(WHOLE) $(LDFLAGS)
+	whole=$$($(SELECT) $(OBJS) -- ../lib/*.o) && \
+	$(CC) -o $@ $(OBJS) $$whole $(LDFLAGS)
 	rm -f ../../bin/x2c-bootstrap
 	cp x2c ../../bin/x2c-bootstrap
 
