@@ -208,7 +208,7 @@ build-recovery: build					## Check incremental build recovery
 proof-raw-symbols: build				## Check raw symbol collection parity
 	./unittest/probes/run-raw-symbol-sweep.sh
 
-proof-cold-collection:					## Check stage 2 against a cold translation
+proof-cold-collection: stage-2				## Check stage 2 against a cold translation
 	./tools/check-cold-collection.sh
 
 proof-conformance: build ## Compare owned conformance rows between prelude and live symbol modes

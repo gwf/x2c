@@ -623,9 +623,11 @@ C it was built from; the rest ask whether each stage emits what the stage
 before it emitted. Once two adjacent stages agree, the chain has reached a
 fixed point.
 
-Every stage build also fails on a diagnostic. The stage Makefile passes the
-hidden `--fatal-warnings` option, which fails a unit that reports any
-warning or region finding, and compiles the generated C with `-Werror`.
+From stage 1 on, a stage build also fails on a diagnostic. The stage
+Makefile passes the hidden `--fatal-warnings` option, which fails a unit that
+reports any warning or region finding, and compiles the generated C with
+`-Werror`. Stage 0 stays lenient, because the checked-in bootstrap compiler
+translates it and a source install compiles it with the host C compiler.
 
 A byte comparison can catch problems that behavioral tests miss. An iteration
 order that depends on addresses, or a generated-name counter that carries

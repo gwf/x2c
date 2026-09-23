@@ -59,9 +59,11 @@ job limit. On the measured 16-core host this reduced clean-stage wall time
 unchanged. The B4/B5 section of
 `plans/archive/x2c-correctness-performance-tooling.md` records the full comparison.
 
-Every stage build translates `lib/` and `src/` with the hidden
-`--fatal-warnings` option and compiles the generated C with `-Werror`, so an
-x2c warning, a region finding, or a C compiler warning fails `make build`.
+Stages 1 and up translate `lib/` and `src/` with the hidden
+`--fatal-warnings` option and compile the generated C with `-Werror`, so an
+x2c warning, a region finding, or a C compiler warning fails `make stage-2`
+and the gates built on it. Stage 0 stays lenient: the checked-in bootstrap
+translates it, and source installs compile it with the host C compiler.
 The option stays out of user builds and `unittest/`, whose suites provoke
 region warnings on purpose.
 

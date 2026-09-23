@@ -31,12 +31,19 @@ BINARY           = x2c
 CC               ?= cc
 AR               ?= ar
 ARFLAGS          ?= rv
-# The compiler's own sources build clean: an x2c warning or region finding
-# fails translation, and a C compiler warning fails compilation.
-CFLAGS           += $(BUILD_CFLAGS) -Werror
+# From stage 1 the compiler's own sources build clean: an x2c warning or
+# region finding fails translation, and a C compiler warning fails
+# compilation. Stage 0 stays lenient because the checked-in bootstrap
+# translates it, possibly warning about what the new source fixed, and
+# because source installs build it with whatever host C compiler they have.
+ifneq ($(DIRECTORY),0)
+STRICT_CFLAGS    = -Werror
+STRICT_X2C_FLAGS = --fatal-warnings
+endif
+CFLAGS           += $(BUILD_CFLAGS) $(STRICT_CFLAGS)
 CFLAGS           += $(EXTRA_CFLAGS)
 X2C_FLAGS        ?=
-X2C_TRANSLATE    = $(X2C_COMPILER) translate --fatal-warnings $(X2C_FLAGS)
+X2C_TRANSLATE    = $(X2C_COMPILER) translate $(STRICT_X2C_FLAGS) $(X2C_FLAGS)
 LDFLAGS          += -lx2c
 LDFLAGS          += $(BUILD_LDFLAGS)
 # A native module binds to the compiler's own runtime. The compiler links
