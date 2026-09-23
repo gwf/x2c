@@ -55,7 +55,8 @@ before #234, scored 267 and is left out as unexplained.
 
 ## September replay
 
-Replayed on 2026-09-23 with the method in `tools/build-scaling-replay.sh`,
+Replayed on 2026-09-23; these rows seed `replay.csv` for
+`tools/build-scaling-history.py`,
 in time order, with `b4b64c72` at 100:
 
 | Commit | Date | Lines | Score | Note |
