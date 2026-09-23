@@ -41,11 +41,12 @@ protocol Contains(T) {
 /* Participation is explicit. The Var forward converters, Iter methods, and
    Block storage-view converters below are declared in common.x and resolve
    within this unit. Adoptions whose converters are defined elsewhere remain
-   beside those converters in tokenizer.x, file.x, and string.x. */
+   beside those converters in tokenizer.x, file.x, and string.x. A `meta`
+   Iter adoption also lets compile-time code iterate the type. */
 
 protocol Block(Array);  protocol Block(Bytes);
-protocol Iter(Array);  protocol Iter(File);  protocol Iter(List);
-protocol Iter(Map);    protocol Iter(String);
+meta protocol Iter(Array);  protocol Iter(File);  meta protocol Iter(List);
+meta protocol Iter(Map);    meta protocol Iter(String);
 
 protocol Var(Array);   protocol Var(Block);  protocol Var(Buffer);
 protocol Var(Bytes);   protocol Var(File);   protocol Var(Iter);

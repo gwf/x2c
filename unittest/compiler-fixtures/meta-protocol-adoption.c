@@ -16,12 +16,6 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-Iter Iter_head(Iter iter, int count, Iter dest);
-
-Iter Iter_map(Iter iter, Func fn, Iter dest);
-
-double fabs(double);
-
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
 
 static Func _x2c_func_handle_0;
@@ -78,6 +72,10 @@ int Var_int(Var);
 
 Var Iter_sum(Iter);
 
+Iter Iter_head(Iter, int, Iter);
+
+Iter Iter_map(Iter, Func, Iter);
+
 Iter range(int, int, int, Iter);
 
 int Iter_count(Iter);
@@ -101,7 +99,7 @@ int main(int argc, char * * argv){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   (void) argv;
-  printf("%s\n%s\n%s\n%s\n%s\n", "(\"Bag_iter\" (as \"Bag_iter_into\"))", "(\"Box_iter\" (as \"Box_iter_into\"))", "(\"Iter_head\" (as \"Iter_head_into\"))", "()", "(\"fabs\")");
+  printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n", "(\"Bag_iter\" (as \"Bag_iter_into\"))", "(\"Box_iter\" (as \"Box_iter_into\"))", "(\"List_iter\" (as \"List_iter_into\"))", "()", "(\"Iter_head\" (as \"Iter_head_into\"))", "()", "(\"fabs\")");
   printf("%d %d\n", 63, heads(argc - 1));
   return 0;
 }

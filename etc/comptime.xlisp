@@ -98,20 +98,6 @@
 (defun C.mgdefine (id object) (Map.setindex C._meta_globals id object))
 (defun C.mgaddress (id) (Map.getindex C._meta_globals id))
 
-// An iterator operation takes its destination last. A call whose
-// destination the compiler supplies passes none, and the call allocates the
-// Iter in the session; a call with explicit storage passes it.
-(defun C.iterator.call (explicit arity)
-  (let ((fresh (bind "Iter_new" nil)))
-    (lambda (. arguments)
-      (apply explicit
-             (if (eq? (length arguments) arity)
-                 (append arguments (list (fresh)))
-                 arguments)))))
-(defmacro C.iterator (name operation arity)
-  `(def ,name
-     (C.iterator.call (bind ,(string-append operation "_into") nil) ,arity)))
-
 // The library operations a lowered call resolves against, under the names
 // the typed AST already uses.
 (def List_cons cons)
@@ -147,7 +133,6 @@
 (def List_zip_with (bind "List_zip_with" nil))
 (def List_foldl (bind "List_foldl" nil))
 (def List_find (bind "List_find" nil))
-(C.iterator List_iter "List_iter" 1)
 
 // `foreach` expands to a `try_next` loop whose cursor and outputs are C
 // objects, so each step is the native operation writing through them.
@@ -168,7 +153,6 @@
 (def Array_sort_by (bind "Array_sort_by" nil))
 (def Array_sort_with (bind "Array_sort_with" nil))
 (def Array_foldl (bind "Array_foldl" nil))
-(C.iterator Array_iter "Array_iter" 1)
 (def Array_join Array.join)
 (def Array_find Array.find)
 (def Array_contains Array.contains)
@@ -204,33 +188,15 @@
 (def Map_list Map.list)
 (def Map_str str)
 (def Map_repr repr)
-(C.iterator Map_iter "Map_iter" 1)
-(C.iterator Map_keys "Map_keys" 1)
-(C.iterator Map_enumerate "Map_enumerate" 1)
 
 (def String_map (bind "String_map" nil))
 (def String_filter (bind "String_filter" nil))
-(C.iterator String_iter "String_iter" 1)
-(C.iterator Var_iter "Var_iter" 1)
 
-// Lowered source preserves its caller-owned destination. Ordinary Lisp keeps
-// the shorter aliases installed by etc/lisp-values.xlisp.
-(C.iterator range "range" 3)
+// A lowered iterator call binds on first use from its `meta` declaration in
+// lib/iter.x or lib/protocols.x, through `C.iterator.call`.
 (defun Iter_new () ((bind "Iter_new" nil)))
 (defun Iter_init (destination object callable state)
   ((bind "Iter_init" nil) destination object callable state))
-(C.iterator Iter_map "Iter_map" 2)
-(C.iterator Iter_filter "Iter_filter" 2)
-(C.iterator Iter_zip "Iter_zip" 2)
-(C.iterator Iter_zip_with "Iter_zip_with" 3)
-(C.iterator Iter_map2 "Iter_map2" 3)
-(C.iterator Iter_chain "Iter_chain" 2)
-(C.iterator Iter_enumerate "Iter_enumerate" 2)
-(C.iterator Iter_repeat "Iter_repeat" 2)
-(C.iterator Iter_head "Iter_head" 2)
-(C.iterator Iter_accumulate "Iter_accumulate" 2)
-(C.iterator Iter_scan "Iter_scan" 3)
-(C.iterator Iter_unique "Iter_unique" 1)
 (def Iter_any (bind "Iter_any" nil))
 (def Iter_all (bind "Iter_all" nil))
 (def Iter_foldl (bind "Iter_foldl" nil))

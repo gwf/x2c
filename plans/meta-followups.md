@@ -176,9 +176,30 @@ checked-in bootstrap before `lib/` or `etc/` uses it:
   exactly. Such functions are left out of the generated inventory because an
   adapter row supplies their target.
 
-Delivery 2 adopts it: mark the Iter conformances and operations, and delete
-the manual Iter target rows, the allocating static adapters, and the
-`C.iterator` rows. The five callback adapters keep their `_into` rows.
+Delivery 1 landed on `dev` as `e4aa66bb`.
+
+Delivery 2 adopts it:
+
+- `lib/protocols.x` marks the Array, List, Map and String Iter adoptions
+  `meta protocol`; File stays unmarked. `lib/iter.x` declares the other 16
+  producers as `meta` prototypes, beside the Iter type.
+- `lib/lisp.x` keeps only `Iter_new`, `Iter_init` and the five callback
+  adapters' `_into` rows. The 40 pair rows and the 20 allocating static
+  adapters are deleted; the generated inventory supplies the 15
+  `(NAME (as NAME_into))` rows for operations without a callback.
+- `etc/comptime.xlisp` loses the `C.iterator` macro and its 20 rows. Lowered
+  calls bind on first use from the `meta` declarations. `C.iterator.call`
+  moves to `etc/lisp-values.xlisp`, whose 19 Lisp aliases such as `List.iter`
+  and `Iter.head` now use it with the `_into` targets.
+- A probe of every Lisp alias, each operation's compile-time name with and
+  without a destination, and each lowered call with and without explicit
+  storage gives output identical to the pre-change compiler, and the
+  generated C is identical. The allocating native target names such as
+  `(bind "List_iter" nil)` no longer exist. The underscore names such as
+  `List_iter` are now bound when lowered code first calls them, like the
+  other native `meta` functions, instead of at session start.
+- Translation of the Iter-heavy probe: about 100 ms before and 97 ms after
+  (medians of 61 runs, within noise).
 
 ### F. Lifetime certification
 

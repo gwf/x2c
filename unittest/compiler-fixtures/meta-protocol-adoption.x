@@ -16,10 +16,6 @@ macro Unit $mark(Type $t) {
 }
 $mark(Box);
 
-meta Iter Iter.head(Iter iter, int count, Iter dest);
-meta Iter Iter.map(Iter iter, Func fn, Iter dest);
-meta double fabs(double);
-
 $(defun probe.row (name rows)
    (cond ((null? rows) nil)
          ((equal? (car (car rows)) name) (car rows))
@@ -38,7 +34,8 @@ meta int heads(int offset) {
 
 int main(int argc, char **argv) {
   (void) argv;
-  printf("%s\n%s\n%s\n%s\n%s\n", $target("Bag_iter"), $target("Box_iter"),
+  printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n", $target("Bag_iter"),
+         $target("Box_iter"), $target("List_iter"), $target("File_iter"),
          $target("Iter_head"), $target("Iter_map"), $target("fabs"));
   printf("%d %d\n", $heads(0), heads(argc - 1));
   return 0;
