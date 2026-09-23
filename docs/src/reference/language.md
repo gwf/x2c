@@ -3147,7 +3147,10 @@ prototype and the definition x2c generates. Attributes are not part of the
 signature compared between a prototype and its definition. A definition
 without `static` after a `static` prototype keeps the prototype's internal
 linkage. `__inline`, `__inline__`, `__restrict`, and `__restrict__` are the
-standard keywords.
+standard keywords. A collected header may also place attributes after
+`struct`, `union`, or `enum` and after an aggregate's closing brace, as in
+`struct S { char c; int i; } __attribute__((packed));`. Collection reads
+past them, and C applies them. A unit does not accept these two positions.
 
 `in` and `match` are keywords only where their x2c forms can occur: `in`
 between two operands, and `match` as `match (...)` followed by `case` or
