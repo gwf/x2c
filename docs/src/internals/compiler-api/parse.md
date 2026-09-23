@@ -328,8 +328,8 @@ Parses one top-level form and applies its source-ordered compiler effects.
 Returns its AST, or NULL when a keyword definition, top-level Lisp form,
 linkage brace, or compile-time-only `meta` function only updates compiler
 state, with the first following token current. A macro import whose
-`.xmacro` declares `meta` functions retains their runtime definitions,
-which the unit emits where it reaches them.
+`.xmacro` makes `meta` declarations retains their runtime forms, which
+the unit emits where it reaches them.
 
 Source: `src/parse.x:1755`
 

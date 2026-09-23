@@ -4106,6 +4106,7 @@ x2c_cleanup_leave(& _x2c_defer_record_10);
 
 }
 }
+_report_sdk_rejection(c, site);
 return value;
 }
 
