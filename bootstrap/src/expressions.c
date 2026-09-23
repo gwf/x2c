@@ -2521,12 +2521,13 @@ static List _materialize_delegate_receiver(List receiver, List path){
 }
 
 void Compiler_require_input(Compiler);
+List Compiler_try_parse_macro_member(Compiler);
 int String_is_identifier(String);
 String List_str(List);
 String Symbol_str(Symbol);
 void Compiler_next(Compiler);
 static List _parse_field_name(Compiler compiler, Symbol op_sym, List lhs_opt){
-  Compiler_require_input(compiler);  List slot = Compiler_try_parse_macro_slot(compiler, 920394);  if(List_truth(slot)) return cons(List_var(slot), NULL);  String field_name = compiler -> token -> text;  if(! String_truth(field_name) || ! String_is_identifier(field_name)){
+  Compiler_require_input(compiler);  List slot = Compiler_try_parse_macro_member(compiler);  if(List_truth(slot)) return cons(List_var(slot), NULL);  String field_name = compiler -> token -> text;  if(! String_truth(field_name) || ! String_is_identifier(field_name)){
     List notes = cons(_277, cons(String_var(compiler -> token -> text), NULL));  if(List_truth(lhs_opt)) notes = cons(List_var(cons(_279, cons(String_var(List_str(lhs_opt)), NULL))), notes);  String msg = String_join(NULL, cons(String_var(_280), cons(String_var(Symbol_str(op_sym)), cons(String_var(_263), NULL))));  Compiler_report_error(compiler, 33658058, msg, compiler -> token, notes);
   }
   List field = cons(String_var(field_name), NULL);  Compiler_next(compiler);  return field;

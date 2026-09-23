@@ -85,6 +85,8 @@ int Compiler_macro_targets_unit(Compiler c);
 
 int Compiler_skip_named_type_declaration(Compiler c);
 
+List Compiler_try_parse_macro_member(Compiler c);
+
 Token Compiler_macro_invocation_site(Compiler compiler, Var site);
 
 List Compiler_expand_macro_invocation_node(Compiler c, Var stored, List arguments, Token invocation, AstPos position);
