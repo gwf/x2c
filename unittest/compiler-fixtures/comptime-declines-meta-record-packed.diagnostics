@@ -1,4 +1,0 @@
-unittest/compiler-fixtures/comptime-declines-meta-record-packed.x:2:1: parse: #pragma pack is unsupported
-  #pragma pack(push, 1)
-  ^^^^^^^^^^^^^^^^^^^^^
-

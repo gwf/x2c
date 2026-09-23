@@ -101,7 +101,7 @@ typedef struct Compiler {
   List arms;
   Map arm_stacks;
   /* Token indices around attributes that can change native record layout. */
-  Array layout_marks;
+  Array layout_marks, packed_marks;
   /* The cursor after a governed statement took the directives before it,
      which the following item must not read again. */
   Token directives_taken;
@@ -612,17 +612,6 @@ static Symbol _never_active_arm(String s) {
     ? <rest> : 0;
 }
 
-int _pack_directive(String text) {
-  String directive = preproc_directive(text);
-  if (!directive.startswith("pragma")) return 0;
-  Tokenizer scanned = Tokenizer.new(directive);
-  scanned.scan();
-  Token pragma = _skip_forward(scanned.tokens);
-  Token name = _skip_forward(pragma + 1);
-  return pragma.text == "pragma" &&
-         name.type == <ident> && name.text == "pack";
-}
-
 /* Reports whether the attribute list the group `open` holds names an
    attribute that can change a struct's layout, spelled with or without its
    surrounding underscores. Identifiers inside an attribute's own arguments
@@ -669,8 +658,10 @@ static size_t _note_attribute(Compiler c, size_t index) {
     Token open = _skip_forward(words.tokens);
     layout = open.type == <(> && _layout_attribute(open, &packed);
   }
-  if (packed)
-    c.report_error(<parse>, "packed attributes are unsupported", marker, NULL);
+  if (packed) {
+    c.packed_marks.push((long) index);
+    c.packed_marks.push((long) index + 1);
+  }
   if (layout) {
     c.layout_marks.push((long) index);
     c.layout_marks.push((long) index + 1);
@@ -699,7 +690,7 @@ static Token _macro_directive(String content, int *undefined) {
    `layout`; only an `#undef` or definition outside every conditional group,
    `conditional` false, removes it. */
 static void _note_layout_macro(
-  Compiler c, String content, Map layout, int conditional, Token directive) {
+  String content, Map layout, int conditional) {
   int undefined;
   Token name = _macro_directive(content, &undefined);
   if (!name) return;
@@ -707,24 +698,23 @@ static void _note_layout_macro(
   if (undefined) return;
   Token token = name + 1;
   if (token.type == <(>) token = token.after_group();
+  int value = 0;
   for (; token.type != <eof>; token = _skip_forward(token + 1)) {
     if (token.type != <ident>) continue;
-    int attribute = 0;
     if (token.text == "__attribute__") {
       Token open = _skip_forward(token + 1);
       Token inner = open.type == <(> ? _skip_forward(open + 1) : open;
       int packed = 0;
-      attribute = inner.type == <(> &&
-        _layout_attribute(inner, &packed);
-      if (packed)
-        c.report_error(
-          <parse>, "packed attributes are unsupported", directive, NULL);
+      if (inner.type == <(> && _layout_attribute(inner, &packed))
+        value = packed ? 2 : value ? value : 1;
     }
-    if (attribute || layout.contains(token.text)) {
-      layout[name.text] = 1;
-      return;
+    else if (layout.contains(token.text)) {
+      int inherited = layout[token.text];
+      if (inherited > value) value = inherited;
     }
   }
+  if (value && (!layout.contains(name.text) || layout[name.text] < value))
+    layout[name.text] = value;
 }
 
 /* Records the open conditional groups after each conditional directive as
@@ -743,6 +733,7 @@ static void _scan_conditionals(Compiler c) {
   int hidden = 0, serial = 0;
   c.arm_stacks = {};
   c.layout_marks = [];
+  c.packed_marks = [];
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
     Token token = &((struct Token *) c.tokenizer.tokens)[i];
     if (token.type == <eof>) break;
@@ -759,13 +750,15 @@ static void _scan_conditionals(Compiler c) {
       else if (token.type == <ident> && layout.contains(token.text)) {
         c.layout_marks.push((long) i);
         c.layout_marks.push((long) i + 1);
+        if (layout[token.text] == 2) {
+          c.packed_marks.push((long) i);
+          c.packed_marks.push((long) i + 1);
+        }
       }
       continue;
     }
     Symbol kind = preproc_conditional_kind(token.text);
     int conditional = kind == <open> || (kind && stack.len());
-    if (_pack_directive(token.text))
-      c.report_error(<parse>, "#pragma pack is unsupported", token, NULL);
     if (kind == <open>) {
       Symbol never = _never_active_arm(token.text);
       stack.push(%(${++serial} 0 ${never == <first> ? 2 : never == <rest>}));
@@ -777,7 +770,7 @@ static void _scan_conditionals(Compiler c) {
     else if (kind == <close> && stack.len()) stack.take_last();
     else {
       if (!hidden)
-        _note_layout_macro(c, token.text, layout, stack.len(), token);
+        _note_layout_macro(token.text, layout, stack.len());
     }
     if (!conditional) continue;
     c.arm_stacks[(long) i] = stack.list();
@@ -3885,8 +3878,9 @@ static List _meta_type_layout(Sym sym, Type type, Map cache) {
          ? _meta_int_layout(declared, %(int)) : NULL;
   type = sym.resolve_key(declared);
   if (type && type.is_pointer()) return _meta_pointer_layout(declared, tag);
-  // A packed struct's layout is the C compiler's.
-  if (!type || type.car() != <struct> || sym.get(%(@type "packed")))
+  // A struct with a layout attribute has a C-owned native layout.
+  if (!type || type.car() != <struct> ||
+      sym.get(%(@type "layout-attribute")))
     return NULL;
   return _meta_record_layout(sym, type, cache);
 }

@@ -51,7 +51,7 @@ typedef struct Compiler{
   Map object_macros;
   List arms;
   Map arm_stacks;
-  Array layout_marks;
+  Array layout_marks, packed_marks;
   Token directives_taken;
   Map kw_seen;
   Map fixed;
@@ -156,8 +156,6 @@ Map Compiler_macro_definition_locals(Compiler compiler);
 String Compiler_fresh_name(Compiler compiler, String stem);
 
 String Compiler_emitted_binding_name(Compiler compiler, List binding);
-
-int _pack_directive(String text);
 
 void Compiler_tokenize(Compiler c, char * text);
 

@@ -1,4 +1,0 @@
-unittest/compiler-fixtures/meta-system-header-packed.x:2:1: parse: #pragma pack is unsupported
-  #include "meta-system-header-packed/packed.h"
-  ^^^^^^^^^^^^^^^^^^^^^
-

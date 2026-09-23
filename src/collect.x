@@ -412,8 +412,6 @@ static void _file(
     int segment_line = 1, segment_position = 0;
     for (Token token = first; token.type != <eof>; token++) {
       if (token.type != <preproc> || !_starts_line(first, token)) continue;
-      if (_pack_directive(token.text)) $let(c.filename, path)
-        c.report_error(<parse>, "#pragma pack is unsupported", token, NULL);
       int angle = 0, visibility = _visibility_pragma(token.text);
       String target = preproc_include_target(token.text, &angle);
       if (!target && visibility < 0) continue;

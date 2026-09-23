@@ -266,7 +266,7 @@ static String _attribute(Compiler c) {
 /* C places an aggregate's own attributes after its keyword and after its
    closing brace, written out or through a macro whose body is attributes.
    Collection skips them: attribute text is no part of a collected type, and
-   the packing marks hold any layout they change (see Compiler.tokenize). */
+   the layout marks hold any layout they change (see Compiler.tokenize). */
 static void _skip_aggregate_attributes(Compiler c) {
   if (!c.shallow) return;
   loop {
@@ -487,27 +487,34 @@ static int _enum_fits_int(List type, List members) {
 
 /* Reports a layout attribute between `first` and the current token. Tokens
    outside this unit's input, such as a constructed form's, have no marks. */
-static int _layout_attribute_since(Compiler c, Token first) {
+static int _attribute_since(Compiler c, Token first, Array marks) {
   Token base = c.tokenizer.tokens, end = base + c.tokenizer.tokens.len();
   if (first < base || c.token >= end) return 0;
   // Marks ascend, so the ones before `first` are a prefix.
-  int before = 0, count = c.layout_marks.len();
+  int before = 0, count = marks.len();
   for (int high = count; before < high;) {
     int middle = (before + high) / 2;
-    if ((long) c.layout_marks[middle] < first - base) before = middle + 1;
+    if ((long) marks[middle] < first - base) before = middle + 1;
     else high = middle;
   }
   return before % 2 ||
-         (before < count && (long) c.layout_marks[before] < c.token - base);
+         (before < count && (long) marks[before] < c.token - base);
 }
 
+static int _layout_attribute_since(Compiler c, Token first) =>
+  _attribute_since(c, first, c.layout_marks);
+
 /* Publishes an aggregate whose tokens start at `first`. A constructed
-   aggregate passes the current token, so it is packed where its form is. A
+   aggregate passes the current token, so its attributes are in its form. An
    enum with a layout attribute can be narrower than int, so it has no int
    layout. */
 static List _publish_aggregate_type(
   Compiler compiler, Symbol tag, Var name, List members, Token first) {
-  int packed = _layout_attribute_since(compiler, first);
+  int layout = _layout_attribute_since(compiler, first);
+  int packed = _attribute_since(compiler, first, compiler.packed_marks);
+  if (tag == <struct> && packed)
+    compiler.report_error(
+      <parse>, "packed attributes are unsupported", first, NULL);
   List type = %($tag $name);
   List body = tag == <enum> ? members : %(fields @members);
   if (name is <list> && name.car() == <binding>)
@@ -516,9 +523,9 @@ static List _publish_aggregate_type(
     compiler.sym.declare(NULL, type, tag == <enum> ? %(enum) : %($tag $body));
   if (tag != <enum>) {
     compiler.sym.declare_field_order(type, members);
-    if (packed) compiler.sym.set(%(@type "packed"), %(packed));
+    if (layout) compiler.sym.set(%(@type "layout-attribute"), %(unknown));
   }
-  else if (!packed && _enum_fits_int(type, members))
+  else if (!layout && _enum_fits_int(type, members))
     compiler.sym.set(%(@type "int-range"), %(int));
   return %($tag $name $body);
 }
