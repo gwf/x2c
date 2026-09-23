@@ -73,13 +73,21 @@ static List _lower_storage_layout(Lowering l, int id) {
    gives a pointer to it, or `<p48>` where the pointer has no tag of its own.
    A record's slot is its value, which is always `<p48>`; `&` retags it. */
 static Symbol _lower_pointer_tag(Lowering l, List layout) {
-  Symbol kind = layout.car();
-  if (kind == <record>) return <p48>;
-  Symbol tag = l.compiler.sym.var_tag_for_type(cons(<*>, layout[1]), NULL);
-  if (!tag && kind == <scalar>)
-    tag = l.compiler.sym.var_tag_for_type(cons(<*>, layout[4]), NULL);
-  if (!tag) tag = kind == <pointer> ? <p48*> : <p48>;
-  return tag;
+  Sym sym = l.compiler.sym;
+  Symbol tag = 0, untagged = <p48>;
+  match (layout) {
+    case %(record *): return <p48>;
+    case %(scalar ?type ? ? ?exact ?): {
+      tag = sym.var_tag_for_type(cons(<*>, type), NULL);
+      if (!tag) tag = sym.var_tag_for_type(cons(<*>, exact), NULL);
+    }
+    case %(pointer ?type *): {
+      tag = sym.var_tag_for_type(cons(<*>, type), NULL);
+      untagged = <p48*>;
+    }
+    case %(var ?type *): tag = sym.var_tag_for_type(cons(<*>, type), NULL);
+  }
+  return tag ? tag : untagged;
 }
 
 /* Zeroed automatic storage for one object of `layout`. */
@@ -94,11 +102,13 @@ static Var _lower_new_storage(Lowering l, List layout) {
    unless `fresh` says its initializer just built those bytes. */
 static Var _lower_new_object(
   Lowering l, List layout, Var value, int fresh) {
-  if (fresh && layout.car() == <record>) return value;
-  Var size = layout[2];
-  Symbol tag = _lower_pointer_tag(l, layout);
-  l.automatic = 1;
-  return %(C.new $size (quote $tag) (quote $layout) $value);
+  match (layout) case %(?kind ? ?size *): {
+    if (fresh && kind == <record>) return value;
+    Symbol tag = _lower_pointer_tag(l, layout);
+    l.automatic = 1;
+    return %(C.new $size (quote $tag) (quote $layout) $value);
+  }
+  return void;
 }
 
 /* Only map containers belong here; forms and wide numeric boxes retain the
@@ -844,26 +854,21 @@ static int _lower_object_pointer_type(Lowering l, Type type) {
 static long _lower_field_offset(Lowering l, List path, List *field_layout) {
   long offset = 0;
   foreach (List frame, path.reverse()) {
-    Type owner, selected;
-    Symbol kind;
-    Var selector;
-    List rest;
-    (owner, kind, selector, selected, rest) = frame;
-    (void) selector;
-    (void) selected;
-    if (kind != <field>) {
-      (void) _lower_decline(l, "an array inside a compile-time struct");
-      return -1;
+    match (frame) {
+      case %(? index *): {
+        (void) _lower_decline(l, "an array inside a compile-time struct");
+        return -1;
+      }
+      case %(?owner field ?name *):
+        match (l.compiler.meta_type_layout(owner))
+          case %(record ? ? ? * (field $name ? ?at ?layout) *): {
+            offset += at.long_long();
+            *field_layout = layout;
+            continue;
+          }
     }
-    List layout = l.compiler.meta_type_layout(owner);
-    List order = l.compiler.sym.field_order(owner);
-    if (!layout || !order) {
-      (void) _lower_decline(l, "a compile-time struct with no host layout");
-      return -1;
-    }
-    List row = layout[4 + order.cdr().len() - rest.len() - 1];
-    offset += row[3].long_long();
-    *field_layout = row[4];
+    (void) _lower_decline(l, "a compile-time struct with no host layout");
+    return -1;
   }
   return offset;
 }
@@ -1834,12 +1839,13 @@ static Var _lower_coerce(Lowering l, List want, Var node, Var value);
    the record, which is zeroed in place; otherwise the bytes are new. */
 static Var _lower_record_zero(Lowering l, Type type, Var into) {
   Type record = _lower_record_type(l, type);
-  List layout = record ? l.compiler.meta_type_layout(record) : NULL;
-  if (!layout)
-    return _lower_decline(l, "a compile-time struct with no host layout");
-  l.automatic = 1;
-  if (into is not void) return %(C.zero $into ${layout[2]});
-  return %(C.bytes ${layout[2]});
+  match (record ? l.compiler.meta_type_layout(record) : NULL)
+    case %(? ? ?size *): {
+      l.automatic = 1;
+      if (into is not void) return %(C.zero $into $size);
+      return %(C.bytes $size);
+    }
+  return _lower_decline(l, "a compile-time struct with no host layout");
 }
 
 /* Each initializer row stores one field value at its offset. */
@@ -2113,11 +2119,11 @@ static Var _lower_store(
     return _lower_effect(l, _lower_poke(l, type, place, value), rest, k);
   if (id < 0) return _lower_decline(l, "assignment to a computed place");
   if (!l.locals.contains(id)) {
-    List layout = l.compiler.meta_type_layout(type);
-    Var effect = layout && layout.car() == <record>
-      ? %(C.grecord.write $id $value ${layout[2]})
-      : %(C.gwrite $id $value);
-    return _lower_effect(l, effect, rest, k);
+    match (l.compiler.meta_type_layout(type))
+      case %(record ? ?size *):
+        return _lower_effect(
+          l, %(C.grecord.write $id $value $size), rest, k);
+    return _lower_effect(l, %(C.gwrite $id $value), rest, k);
   }
   return _lower_bind_value(l, id, value, rest, k);
 }
@@ -2226,11 +2232,13 @@ static Var _lower_stmnt(Lowering l, Var form, List rest, List k) {
     case %(block *items):  return _lower_block(l, %(@items @rest), k);
     case %(return ?want ?value): {
       Var result = _lower_initializer(l, want, 0, value);
-      List layout = _lower_record_type(l, want)
-                  ? l.compiler.meta_type_layout(want) : NULL;
-      if (_lower_failed(l, result) || !layout) return result;
-      l.automatic = 1;
-      return %(C.record.result $result ${layout[2]});
+      if (_lower_failed(l, result) || !_lower_record_type(l, want))
+        return result;
+      match (l.compiler.meta_type_layout(want)) case %(? ? ?size *): {
+        l.automatic = 1;
+        return %(C.record.result $result $size);
+      }
+      return result;
     }
     case %(return):        return %(C.void);
     case %(repl-init ?type
@@ -2241,11 +2249,12 @@ static Var _lower_stmnt(Lowering l, Var form, List rest, List k) {
       Var value = _lower_initializer(l, declared, id, initializer);
       if (_lower_failed(l, value)) return void;
       l.globals = 1;
-      List layout = _lower_record_type(l, declared)
-                  ? l.compiler.meta_type_layout(declared) : NULL;
-      Var effect = layout ? %(C.grecord.write $id $value ${layout[2]})
-                          : %(C.gwrite $id $value);
-      return _lower_effect(l, effect, rest, k);
+      match (_lower_record_type(l, declared)
+             ? l.compiler.meta_type_layout(declared) : NULL)
+        case %(? ? ?size *):
+          return _lower_effect(
+            l, %(C.grecord.write $id $value $size), rest, k);
+      return _lower_effect(l, %(C.gwrite $id $value), rest, k);
     }
     case %(declare ?type (bindings ?declarator)):
       return _lower_declarator(l, type, declarator, rest, k);
