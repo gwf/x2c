@@ -3167,26 +3167,15 @@ static void _record_function_prototypes(
       }
 }
 
-/* Reports whether the definition of `binding` recorded earlier and the one
-   at the current form sit in different arms of one conditional, which C
-   reads as one definition. The stacks are compared from the outermost
-   group inward; the first shared group with different arms decides. */
-static int _alternative_arms(Compiler c, List binding) {
-  Var stored;
-  if (!c.semantic_binding_facts().try_get(%(arms $binding), &stored))
-    return 0;
-  List prior = stored, current = c.arms;
-  for (; prior && current; prior = prior.cdr(), current = current.cdr()) {
-    Var (prior_id, prior_arm) = prior.car();
-    Var (id, arm) = current.car();
-    if (!prior_id.equal(id)) return 0;
-    if (!prior_arm.equal(arm)) return 1;
-  }
-  return 0;
-}
-
-/* A second definition of one file-scope name, which C rejects. */
+/* Reports a second definition of one file-scope name, which C rejects,
+   when both sit under the same conditional arms. Definitions under
+   different conditions cannot be judged without evaluating them, so the
+   native compiler decides those. */
 static void _report_redefinition(Compiler c, String kind, List binding) {
+  Var arms;
+  if (!c.semantic_binding_facts().try_get(%(arms $binding), &arms) ||
+      !List.equal(arms, c.arms))
+    return;
   String spelling = binding_identity_spelling(binding);
   c.report_error(
     <type>, %"$kind '$spelling' is already defined in this scope",
@@ -3213,6 +3202,7 @@ static void _record_function_definition(
       if (List.equal(prior_contract, contract)) {
         c.semantic_binding_facts()[%(completion $binding)] =
           %(completed $contract);
+        c.semantic_binding_facts()[%(arms $binding)] = c.arms;
         return;
       }
       c.report_error(
@@ -3225,8 +3215,7 @@ static void _record_function_definition(
         )
       );
     }
-    if ((state_kind == <definition> || state_kind == <completed>) &&
-        !_alternative_arms(c, binding))
+    if (state_kind == <definition> || state_kind == <completed>)
       _report_redefinition(c, "function", binding);
   }
   c.semantic_binding_facts()[%(completion $binding)] =
@@ -3310,13 +3299,12 @@ static void _validate_static_object_initializers(Compiler compiler) {
 }
 
 /* An initializer makes a file-scope declaration a definition; a tentative
-   one may be repeated, and so may one in another arm of a conditional. */
+   one may be repeated. */
 static void _record_object_definitions(Compiler c, List bindings) {
   foreach (List row, bindings)
     match (row) case %(op = (bind (!set ?binding (binding ? ?)) ?) ?): {
       List key = %(defined $binding);
-      if (c.semantic_binding_facts().contains(key) &&
-          !_alternative_arms(c, binding))
+      if (c.semantic_binding_facts().contains(key))
         _report_redefinition(c, "variable", binding);
       c.semantic_binding_facts()[key] = 1;
       c.semantic_binding_facts()[%(arms $binding)] = c.arms;

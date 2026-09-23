@@ -1175,7 +1175,7 @@ meta static List ad_reverse_finish(void) {
 
 macro Unit $ad.gradient(
   Type $spec, Name $name, Type $tape_type, Name $tape_new,
-  Expr $params, Expr $items, Expr $checkpoint, Expr $function
+  Expr $params, Expr $items, Expr $checkpoint, Name $function
 ) {
   using $tape, $result, $seed, $code, $reverse;
   $spec $name($ad_grad_params($params)...) {
