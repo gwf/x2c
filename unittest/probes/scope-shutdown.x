@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 static int hook_order[2], hook_count;
 
@@ -191,8 +192,14 @@ int main(int argc, char **argv) {
       completed_worker, &input, sizeof(input)
     );
     while (!atomic_load(&ready)) sched_yield();
-    while (Scope.stats().live_scopes != before.live_scopes + 2)
+    time_t deadline = time(NULL) + 10;
+    while (Scope.stats().live_scopes != before.live_scopes + 2) {
+      if (time(NULL) > deadline) {
+        fprintf(stderr, "completed worker scopes never settled\n");
+        return 3;
+      }
       sched_yield();
+    }
     (void) thread;
     Scope_shutdown();
     return 1;
