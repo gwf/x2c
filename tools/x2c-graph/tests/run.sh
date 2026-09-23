@@ -497,6 +497,18 @@ if grep -q '(binding \|(cache \|(origin ' "$tmp/loop-allocations-line"; then
   exit 1
 fi
 
+$tool loop-allocations "$fixtures/loop-direct-allocations.x" \
+  >"$tmp/loop-direct-allocations"
+tr '\n' ' ' <"$tmp/loop-direct-allocations" | sed 's/  */ /g' \
+  >"$tmp/loop-direct-allocations-line"
+grep -q '(direct (pooled 1) (scoped 1)) (helper-calls (pooled 0) (scoped 1))' \
+  "$tmp/loop-direct-allocations-line"
+for name in Scope_malloc String_new_len; do
+  grep -q "(direct \"$name\" 1)" "$tmp/loop-direct-allocations-line"
+done
+grep -q '(helper "allocate" scoped 1)' \
+  "$tmp/loop-direct-allocations-line"
+
 $tool loop-allocations "$fixtures/lifetime-summaries.x" \
   "$fixtures/lifetime-summary-public.x" \
   "$fixtures/lifetime-summary-ambiguous.x" >"$tmp/loop-summaries"
