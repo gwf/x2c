@@ -735,7 +735,7 @@ static Var _lower_constant_leaf(Lowering l, List value) {
             (args ?left ?right))): {
       Var a = _lower_constant(l, left), b = _lower_constant(l, right);
       if (a is void || b is void) return void;
-      return a.string().add(b.string());
+      return a.string().add(b);
     }
     /* Canonical type literals can contain a struct's binding id. */
     case %(expr ("Var")
