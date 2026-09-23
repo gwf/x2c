@@ -2,7 +2,7 @@
 
 > Status: done 2026-09-23. `tools/build-scaling.py` and
 > `make bm-build-scaling` run in the nightly performance snapshot, whose
-> report opens with the score and a verdict. Guidance is in
+> report opens with the score and its change. Guidance is in
 > `agents/performance-checkpoints.md`.
 
 ## Goal
@@ -13,8 +13,8 @@ much code there is to build.
 ## Design
 
 The score is the median CPU cycles per source line of three stage builds of
-HEAD, as a percentage of a committed baseline. The report calls a change of
-5 points since the previous snapshot a regression or an improvement.
+HEAD, as a percentage of a committed baseline. The report shows the score
+and its change since the previous snapshot, without an alert threshold.
 
 ## Measurement choice
 

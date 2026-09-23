@@ -46,9 +46,6 @@ COMMANDS = (
   ("runtime", ["make", "performance-runtime"]),
   ("compiler", ["make", "bm-compiler"]),
 )
-# Build cost score change, in points, that counts as a real change. Repeat
-# scores of one tree span about 4 points under heavy host load.
-BUILD_SCORE_ALERT = 5.0
 
 
 class SnapshotError(RuntimeError):
@@ -342,19 +339,6 @@ def comparable_metrics(row: dict[str, object]) -> dict[str, float]:
   return metrics
 
 
-def build_verdict(score: float, previous: dict[str, float]) -> str:
-  """Reads a build cost score change against BUILD_SCORE_ALERT."""
-  before = previous.get("build cost score")
-  if before is None:
-    return "(no previous score)"
-  change = score - before
-  if change >= BUILD_SCORE_ALERT:
-    return f"(+{change:.1f}: regression, find the commit that caused it)"
-  if change <= -BUILD_SCORE_ALERT:
-    return f"({change:.1f}: improvement)"
-  return f"({change:+.1f}: no change)"
-
-
 def render_report(
   current: dict[str, object], previous: dict[str, object] | None,
 ) -> str:
@@ -370,8 +354,9 @@ def render_report(
     return "\n".join(lines) + "\n"
   score = comparable_metrics(current).get("build cost score")
   if score is not None:
-    verdict = build_verdict(score, comparable_metrics(previous or {}))
-    lines.append(f"- Build cost score: {score:.1f} {verdict}")
+    before = comparable_metrics(previous or {}).get("build cost score")
+    change = "" if before is None else f" ({score - before:+.1f})"
+    lines.append(f"- Build cost score: {score:.1f}{change}")
   if previous is None:
     lines.extend(["", "This is the first successful retained snapshot."])
     return "\n".join(lines) + "\n"

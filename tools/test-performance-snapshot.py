@@ -126,7 +126,7 @@ class PerformanceSnapshotTests(unittest.TestCase):
     self.assertIn("stage-3 seconds | 10 | 11 | +10.00%", report)
     self.assertIn("build cost score | 100 | 106 | +6.00%", report)
     self.assertIn(
-      "Build cost score: 106.0 (+6.0: regression, find the commit", report,
+      "- Build cost score: 106.0 (+6.0)\n", report,
     )
     self.assertIn("compiler stage-0/default seconds | 2 | 1 | -50.00%", report)
     self.assertIn("runtime bm-list/get | 4 | 5 | +25.00%", report)
