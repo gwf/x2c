@@ -75,12 +75,13 @@ Outcome, 2026-09-22:
   `struct timespec`, which macOS declares in `sys/_types/_timespec.h`
   through `_time.h` and glibc in `bits/types/struct_timespec.h`.
 - Packing. Tokenizing records where `#pragma pack` turns packing on or off,
-  outside unreachable conditional arms. It follows the directives along two
-  readings of the conditional groups: each group's first reachable arm, as
-  though every condition held, and its reachable `#else` or no arm, as
-  though none did. Packing is on where either reading has it on, which
-  handles alternative pushes in `#if`/`#else` and a push and pop under the
-  same guard. Tokenizing also marks each `packed`,
+  outside unreachable conditional arms. It follows the directives along one
+  reading per arm position: reading `k` takes each group's reachable arm
+  `k`, or its last reachable arm when the group has fewer. No reading skips
+  a group without an `#else`, so include guards are always read. Packing is
+  on where any reading has it on, which handles alternative pushes in
+  `#if`/`#elif`/`#else`, a push and pop under the same guard, and packing
+  inside an include guard. Tokenizing also marks each `packed`,
   `aligned`, `mode` or `vector_size` attribute. Collection reads a header's
   attributes directly; a preprocessing mode turns each attribute into a
   marked string rather than erasing it, and tokenizing erases the string. A
@@ -95,11 +96,12 @@ Outcome, 2026-09-22:
     collected header's net packing effect carried into its includer's scan,
     including through header caches and `.xi` interfaces.
   - In default collection, a push and a pop under unrelated conditions,
-    such as a push under `A` and a pop under `B`, balance in both readings,
+    such as a push under `A` and a pop under `B`, balance in every reading,
     so a later struct gets natural layout where C packs it when only `A`
-    holds. Guarded pushes whose conditions C rejects can also decline a
-    struct that C lays out naturally. `--cpp-symbols` and `--system-headers`
-    see the preprocessor's own choice of arms.
+    holds. A pop in a group without `#else` counts as taken, with the same
+    effect when C skips it. Guarded pushes whose conditions C rejects can
+    decline a struct that C lays out naturally. `--cpp-symbols` and
+    `--system-headers` see the preprocessor's own choice of arms.
   - A layout attribute on a typedef, such as
     `typedef long aligned_long __attribute__((aligned(16)))`, and a field
     declared `_Alignas`, leave a struct its natural layout; neither mark

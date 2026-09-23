@@ -34,6 +34,30 @@ struct MetaGuarded { char tag; int value; };
 #endif
 struct MetaAfterGuard { char tag; int value; };
 
+// An include guard is always read, and each arm is one reading's choice.
+#ifndef META_PACK_INCLUDE_GUARD
+#define META_PACK_INCLUDE_GUARD
+#ifdef META_PACK_GUARD
+#else
+#pragma pack(push, 1)
+#endif
+struct MetaElsePacked { char tag; int value; };
+#ifdef META_PACK_GUARD
+#else
+#pragma pack(pop)
+#endif
+#endif
+
+#if defined(META_PACK_GUARD)
+#elif defined(META_PACK_OTHER)
+#pragma pack(push, 1)
+#endif
+struct MetaElifPacked { char tag; int value; };
+#if defined(META_PACK_GUARD)
+#elif defined(META_PACK_OTHER)
+#pragma pack(pop)
+#endif
+
 meta int meta_unpacked_value(void) {
   struct MetaUnpacked unpacked = { .tag = 1, .value = 2 };
   return unpacked.value;
@@ -51,6 +75,16 @@ meta int meta_after_guard_value(void) {
 
 meta int meta_packed_value(void) {
   struct MetaPacked packed = { .tag = 1, .value = 2 };
+  return packed.value;
+}
+
+meta int meta_else_packed_value(void) {
+  struct MetaElsePacked packed = { .tag = 1, .value = 2 };
+  return packed.value;
+}
+
+meta int meta_elif_packed_value(void) {
+  struct MetaElifPacked packed = { .tag = 1, .value = 2 };
   return packed.value;
 }
 

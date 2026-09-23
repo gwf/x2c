@@ -692,9 +692,38 @@ static size_t _note_attribute(Compiler c, size_t index) {
   return last - base;
 }
 
-/* Reports whether `path` follows the current arm of every open group. */
-static int _path_follows(Array path) {
-  foreach (int arm, path) if (arm != 1) return 0;
+/* Counts each conditional group's reachable arms, in opening order. An arm
+   is unreachable where `_never_active_arm` hides it. */
+static Array _reachable_arm_counts(Tokenizer tokenizer) {
+  Array counts = [], groups = $auto([]);
+  for (Token token = tokenizer.tokens; token.type != <eof>; token++) {
+    if (token.type != <preproc>) continue;
+    Symbol kind = preproc_conditional_kind(token.text);
+    if (kind == <open>) {
+      Symbol never = _never_active_arm(token.text);
+      groups.push(%(${counts.len()} ${never != <rest>}));
+      counts.push(never != <first>);
+    }
+    else if (kind == <branch> && groups.len()) {
+      Var (group, later_reachable) = groups[-1];
+      counts[group] = counts[group].integer() + later_reachable.integer();
+    }
+    else if (kind == <close> && groups.len()) groups.take_last();
+  }
+  return counts;
+}
+
+/* Reports whether reading `k` follows the current arm of every open group.
+   A group is `(count seen current)`: its reachable arm count, the reachable
+   arms entered so far, and whether the current one is reachable. Reading
+   `k` takes each group's reachable arm `k`, or its last one when it has
+   fewer. */
+static int _reading_follows(Array groups, int k) {
+  foreach (List group, groups) {
+    Var (count, seen, current) = group;
+    int arm = k < count.integer() ? k : count.integer() - 1;
+    if (!current.integer() || seen.integer() - 1 != arm) return 0;
+  }
   return 1;
 }
 
@@ -707,17 +736,21 @@ static int _path_follows(Array path) {
    `#else` will be, and 0 otherwise.
 
    The same pass records packing marks by token index, because the parser
-   can read one directive more than once. Packing is followed along two
-   consistent readings of the groups: one takes each group's first reachable
-   arm, as though every condition held, and the other takes a reachable
-   `#else` or no arm, as though none did. Each reading keeps, per open group,
-   0 before it takes an arm, 1 in the arm it takes, and 2 after it. Packing
-   is on where either reading has it on. */
+   can read one directive more than once. Packing is followed along several
+   consistent readings of the groups: reading `k` takes each group's
+   reachable arm `k`, or its last one. No reading skips a group without an
+   `#else`, so an include guard's contents are always read. Packing is on
+   where any reading has it on. */
 static void _scan_conditionals(Compiler c) {
-  Array stack = $auto([]), first_arms = $auto([]), else_arms = $auto([]);
-  Array paths[2] = { first_arms, else_arms };
-  int hidden = 0, serial = 0, packed[2] = { 0, 0 };
-  List saved[2] = { NULL, NULL };
+  Array counts = _reachable_arm_counts(c.tokenizer);
+  Array stack = $auto([]), groups = $auto([]);
+  Array packed = $auto([]), saved = $auto([]);
+  int hidden = 0, serial = 0, readings = 1;
+  foreach (int count, counts) if (count > readings) readings = count;
+  for (int k = 0; k < readings; k++) {
+    packed.push(0);
+    saved.push(%());
+  }
   c.arm_stacks = {};
   c.pack_marks = [];
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
@@ -737,33 +770,33 @@ static void _scan_conditionals(Compiler c) {
     }
     Symbol kind = preproc_conditional_kind(token.text);
     int conditional = kind == <open> || (kind && stack.len());
-    int before = packed[0] || packed[1];
+    int before = packed.contains(1);
     if (kind == <open>) {
       Symbol never = _never_active_arm(token.text);
       stack.push(%(${++serial} 0 ${never == <first> ? 2 : never == <rest>}));
-      first_arms.push(never != <first>);
-      else_arms.push(never == <rest>);
+      int reachable = never != <first>;
+      groups.push(%(${counts[serial - 1]} $reachable $reachable));
     }
     else if (kind == <branch> && stack.len()) {
       Var (id, arm, state) = stack[-1];
       stack[-1] = %($id ${arm.integer() + 1} ${state.integer() == 1 ? 2 : 0});
+      Var (count, seen) = groups[-1];
       int reachable = state.integer() != 1;
-      int takes_else =
-        reachable && preproc_directive(token.text).startswith("else");
-      first_arms[-1] = first_arms[-1].integer() ? 2 : reachable;
-      else_arms[-1] = else_arms[-1].integer() ? 2 : takes_else;
+      groups[-1] = %($count ${seen.integer() + reachable} $reachable);
     }
     else if (kind == <close> && stack.len()) {
       stack.take_last();
-      first_arms.take_last();
-      else_arms.take_last();
+      groups.take_last();
     }
     else {
-      for (int path = 0; path < 2; path++)
-        if (_path_follows(paths[path]))
-          packed[path] = _pack_after(token.text, &saved[path], packed[path]);
+      for (int k = 0; k < packed.len(); k++) {
+        if (!_reading_follows(groups, k)) continue;
+        List states = saved[k];
+        packed[k] = _pack_after(token.text, &states, packed[k]);
+        saved[k] = states;
+      }
     }
-    if ((packed[0] || packed[1]) != before) c.pack_marks.push((long) i);
+    if (packed.contains(1) != before) c.pack_marks.push((long) i);
     if (!conditional) continue;
     c.arm_stacks[(long) i] = stack.list();
     hidden = 0;
