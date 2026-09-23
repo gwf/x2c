@@ -7,8 +7,8 @@
 */
 #include <math.h>
 
-float erfcf(float x) { return erfc(x); }
+__attribute__((weak)) float erfcf(float x) { return erfc(x); }
 
-long long llround(double x) { return lround(x); }
+__attribute__((weak)) long long llround(double x) { return lround(x); }
 
-long long llroundf(float x) { return lroundf(x); }
+__attribute__((weak)) long long llroundf(float x) { return lroundf(x); }
