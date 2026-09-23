@@ -25,4 +25,26 @@ meta int header_plain_value(void) {
   return value.value;
 }
 
+/* A packed enum can be narrower than int. An attribute macro's body holds
+   no packing marks, so its aggregate is taken as packed. */
+meta int header_small_value(void) {
+  struct HeaderSmallField value = { 0 };
+  return (int) value.small;
+}
+
+meta int header_lead_value(void) {
+  struct HeaderLeadField value = { 0 };
+  return (int) value.lead;
+}
+
+meta int header_macro_value(void) {
+  struct HeaderMacro value = { .value = 5 };
+  return value.value;
+}
+
+meta int header_macro_by_value(void) {
+  struct HeaderMacroBy value = { .value = 6 };
+  return value.value;
+}
+
 int main(void) { return 0; }

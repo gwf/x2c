@@ -368,12 +368,13 @@ frame and are released when that function returns, normally or by an error.
 Field reads and writes, `&x`, `&s.f`, `p->f`, `*p` and `p[i]` operate on
 those bytes. A `bool` field is one byte, and a value reaching `bool` becomes 0
 or 1; it reads as the int C promotes it to. An enum field is an `int` when
-every enumerator initializer has an integer type no wider than `int`, or
-names the enum itself. Any other enum may be wider in C, so it has no
-compile-time layout. Compile-time code reads every enum value as a signed
-`int`. Clang and GCC make an enum with no negative enumerator an `unsigned
-int`, so a negative value stored in such an enum compares differently: at
-compile time it stays negative, and at run time it is a large unsigned value.
+the enum is not packed and every enumerator initializer has an integer type
+no wider than `int`, or names the enum itself. Any other enum may be wider
+or narrower in C, so it has no compile-time layout. Compile-time code reads
+every enum value as a signed `int`. Clang and GCC make an enum with no
+negative enumerator an `unsigned int`, so a negative value stored in such an
+enum compares differently: at compile time it stays negative, and at run
+time it is a large unsigned value.
 A pointer parameter can also receive a local C array,
 which `p[i]` indexes the same way. A pointer compares with `NULL` by address
 and tests false at the null address.
@@ -457,7 +458,10 @@ These C shapes are not available at compile time:
   struct with no host layout`. The compiler detects a struct defined while
   `#pragma pack` is in effect, and a `packed`, `aligned`, `mode` or
   `vector_size` attribute in the struct's own definition, such as a header
-  struct followed by `__attribute__((packed))`. Default collection follows
+  struct followed by `__attribute__((packed))`. A header aggregate with an
+  attribute macro after its keyword or closing brace, such as
+  `struct S { ... } PACKED;`, is taken as packed, because the compiler does
+  not read what the macro holds. Default collection follows
   `#pragma pack` within each file. Where `#if` groups guard the directives,
   it reads the file once for each arm position: the first reading takes
   every group's first arm, the second its second arm or its last, and so
