@@ -85,9 +85,14 @@ def disposition(row):
         action = f"Bind {name}; retain separate success, absence and empty-value probes."
     elif receiver == "Var" and method in {"is_pointer", "is_reference"}:
         group = "source address tags"
-        kind = "needs representation decision"
-        reason = "The native predicate reads its argument tag correctly, but meta local addresses currently use evaluator cells instead of their declared native pointer/reference tag."
-        action = "Preserve the declared pointee tag when representing addresses; compare int and String local addresses with native execution."
+        kind = "needs bounded probe"
+        reason = ("Direct local addresses preserve their native pointer/reference "
+                  "tags in meta evaluation; the predicates match native execution "
+                  "for those cases. Aggregate-contained pointers and borrowed "
+                  "pointee lifetimes remain outside that proof.")
+        action = ("Keep direct local-address parity; probe aggregate-contained "
+                  "and borrowed pointers separately without inferring native "
+                  "address identity.")
     elif "..." in signature:
         group = "native variadic calls"
         kind = "needs bounded probe"
@@ -141,7 +146,10 @@ def disposition(row):
             action = "Verify fresh identity, equal payload and session-owned lifetime for wide inputs."
         elif method == "pointer_string":
             kind = "needs representation decision"
-            reason = "The result formats a raw address; meta locals and native pointer/reference values do not yet share their declared tags or address identity."
+            reason = ("The result formats a raw address. Direct meta locals "
+                      "preserve pointer tags, but separate compile-time and "
+                      "native executions do not share address identity or "
+                      "prove borrowed pointee lifetime.")
             action = "Specify which native-address observations are supported; do not claim numerical address parity across separate executions."
         else:
             reason = "The existing native owner consumes represented scalar/Var values. Numeric encoders retain exact tags; wide boxes belong to the active evaluator Scope."

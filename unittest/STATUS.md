@@ -161,25 +161,30 @@
 
 ## Outstanding Items
 
-Compile-time lowering drops an assignment nested in a discarded expression:
-`meta int f(int n) { (void) (n = n + 2); return n; }` answers 1 for `f(1)`
-at compile time and 3 at run time. Reproduced on `b395865e` during the
-`meta` fixture migration; a focused lowering repair remains outstanding.
-
-The optional meta API inventory records two named-value conversion gaps:
-`Symbol empty = 0` retains an integer tag, so a native `Symbol` method
-rejects it; addresses of meta locals use evaluator cells, so native pointer
-and reference predicates do not receive their native tags. The source cases
-and diagnostics are retained by `tools/meta-api-coverage.py`. These are
-representation gaps, not evidence that installing the method name is enough.
-
-No outstanding static-initialization defects are recorded. Bare unknown native
-macro names retain native C initializer rules; tags hidden inside an opaque
-native macro retain native scope. Pass lowered local objects explicitly to
-native macros. The language reference describes these native boundaries.
+Aggregate-contained local pointers, native callees that retain an address,
+and exact-once resource finalization remain outside the current meta
+ownership proof. Direct local-pointer tag parity does not establish those
+larger shapes. Bare unknown native macro names retain native C initializer
+rules; tags hidden inside an opaque native macro retain native scope. Pass
+lowered local objects explicitly to native macros. The language reference
+describes these native boundaries.
 
 ## Retired maintenance notes
 
+- Local stabilization commit `0c747a85` preserves discarded assignments,
+  selected conditional arms, short-circuit branches and updates. The
+  `meta-expression-effects` fixture prints matching explicit, folded and
+  native results, including `discarded 3 3 3`.
+- Local C1 commits `a1779f0a` and `310399be` convert `Symbol empty = 0`
+  to the declared tag before native methods. The same destination fixture
+  checks composed String hash and pointer conversion. Direct local-address
+  `Var.is_pointer`/`Var.is_reference` parity was verified in the post-merge
+  review; aggregate and borrowed-pointer work remains open above.
+- Local static-initializer commit `fb1009c8` fixes baseline B01-B03. The
+  `static-initializer-classification` fixture builds and prints
+  `4 4 0 0 0 12 12`; it covers fixed-size `sizeof`, VLA-dependent local
+  static initialization, and empty Array/Map statics. These local campaign
+  commits have not yet been delivered to `dev`.
 - Meta numeric comparisons resolve builtin typedefs before choosing C
   arithmetic conversion. The former `Array.len()` versus integer mismatch
   is covered by `meta-collection-operations`. `meta-core-operations` also

@@ -5,12 +5,14 @@
 > The initial implementation shipped in 8ebb323d. Value aliases and further
 > AD source templates shipped through 8c2a8054; x2c-first examples followed in
 > 95e73d18. Capture-call repairs and remaining API/representation work extend
-> that baseline. The exhaustive value-operation continuation now accounts for
-> all 483 signatures. The current tree has 385 rows with bindings and behavioral
-> evidence for every bound row. Implemented behavior and open follow-ons are
+> that baseline. The exhaustive value-operation continuation accounted for
+> all 483 signatures at that time, with 385 bound rows and behavioral evidence
+> for every bound row. Implemented behavior and open follow-ons are
 > recorded below. The 2026-09-21 addendum separates excluded native contracts,
 > adapter work and defects from work delegated to generalized `meta`
 > declarations and lifetime certification.
+> September 23 local stabilization repairs composed String hash and
+> zero-valued Symbol parity; those commits are not yet on `dev`.
 
 
 ## Outcome and priorities
@@ -403,9 +405,9 @@ rationale is invented for an unbound operation.
 
 ## Post-campaign disposition
 
-The completed inventory leaves 104 distinct methods with a limitation: 98
-without bindings and six bound methods with a reproduced semantic gap. The
-generalized `meta` declaration and the model in
+The completed inventory at the original campaign close left 104 distinct
+methods with a limitation: 98 without bindings and six bound methods with a
+reproduced semantic gap. The generalized `meta` declaration and the model in
 [Meta-function Lifetime Equivalence](../docs/src/internals/meta-lifetime-equivalence.md)
 change how that remainder should be assigned. They do not reopen the methods
 whose exact native contracts are unsuitable for compile-time execution.
@@ -419,6 +421,15 @@ whose exact native contracts are unsuitable for compile-time execution.
 | explicit signature adapter required | 13 |
 | another represented abstraction required | 2 |
 | bound behavior defect | 6 |
+
+These counts preserve the original inventory, not a fresh count for the
+stabilization branch. At reviewed `0bdc8398`, the fresh probe inventory no
+longer failed `String.lstrip`, `String.rstrip` or `String.strip`. Local C1
+commits `a1779f0a` and `310399be` make composed `String.hash` and
+`Symbol.first`/`Symbol.last` with `Symbol empty = 0` match runtime; the
+`meta-destination-conversion` fixture checks their explicit, folded and
+native results. The generated API report still records its earlier six
+failures and needs a final-tree refresh before it can report current totals.
 
 The 29 excluded methods are not ordinary binding debt:
 
@@ -461,9 +472,11 @@ Thirteen methods still need deliberate adapters: `String.c_compare`,
 `List.unpack_n`, `List.unpack_vars_n`, `Array.update_n`, `Map.update_n`,
 `Symbol.decode`, `Symbol.new` and `Var.new`. `Var.bytes` still needs a safe
 owner-relative view instead of a possibly stale raw pointer, and `Var.matmul`
-needs a represented matrix type and protocol. The six bound defects remain
-ordinary parity repairs: `String.hash`, `String.lstrip`, `String.rstrip`,
-`String.strip`, `Symbol.first` and `Symbol.last`.
+needs a represented matrix type and protocol. The six originally bound
+defects were ordinary parity repairs: `String.hash`, `String.lstrip`,
+`String.rstrip`, `String.strip`, `Symbol.first` and `Symbol.last`. The current
+local evidence above supersedes their failure labels without changing their
+native contracts.
 
 The lifetime claim is an ownership-effect simulation, not merely matching
 call names. A proof-bearing `meta` surface must derive or record allocation

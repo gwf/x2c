@@ -31,14 +31,14 @@ No behavior change; the fixtures and unit suites are the check.
 
 ### B. Numeric Func argument cost
 
-`x2c_func_value_argument` (`lib/func.x`) wraps every numeric conversion in a
-five-clause `try`/`catch` and prepares those catch plans on every call. It
-made compile-time field access 7x slower until the byte operations took
-their offsets as `Var`. Every other numeric native call from compile-time
-code still pays it. Make the conversion prepare its catch plans once, or
-avoid the catch on the common success path; then consider returning the byte
-operations in `lib/lisp.x` to `long` offsets. Measure with a
-200,000-iteration `$` loop before and after.
+`x2c_func_value_argument` (`lib/func.x`) wraps numeric conversion in a
+five-clause `try`/`catch`. The original field-access measurement was 7x
+slower until byte operations took their offsets as `Var`. Current
+`lib/error.x` caches retainable catch plans at each static catch site, so
+the old claim that every call reconstructs five plans is stale. A call still
+creates an ErrorHandler and exception frame in `func.x`/`error.x`.
+Profile that remaining cost with the 200,000-iteration `$` loop before
+changing conversion or returning the `lib/lisp.x` byte offsets to `long`.
 
 ### C. Smaller defects from the final review
 
@@ -126,6 +126,12 @@ Outcome, 2026-09-22:
     their plain type on the supported hosts, so a struct with such a field
     keeps a correct layout. An `_Atomic` struct type could differ and is not
     handled.
+
+Those remaining bullets record the September 22 state. Local stabilization
+commits `b5f3d5ba` and `30c206f2` now carry pack effects through raw includes
+and warm replay, decline ambiguous conditional/repeated includes, and retain
+typedef layout attributes. The later-defined attribute macro and `_Atomic`
+limits above are not closed by those repairs; `dev` delivery remains pending.
 
 ## Design tracks (decide with Gary first)
 
