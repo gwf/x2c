@@ -370,7 +370,11 @@ those bytes. A `bool` field is one byte, and a value reaching `bool` becomes 0
 or 1; it reads as the int C promotes it to. An enum field is an `int` when
 every enumerator initializer has an integer type no wider than `int`, or
 names the enum itself. Any other enum may be wider in C, so it has no
-compile-time layout. A pointer parameter can also receive a local C array,
+compile-time layout. Compile-time code reads every enum value as a signed
+`int`. Clang and GCC make an enum with no negative enumerator an `unsigned
+int`, so a negative value stored in such an enum compares differently: at
+compile time it stays negative, and at run time it is a large unsigned value.
+A pointer parameter can also receive a local C array,
 which `p[i]` indexes the same way. A pointer compares with `NULL` by address
 and tests false at the null address.
 Struct assignment copies bytes into the destination's existing storage, so an

@@ -3646,8 +3646,7 @@ static List _meta_scalar_layout(
    that record has no layout. */
 static List _meta_int_layout(Type declared, Type exact) {
   NativeScalarAccess scalar = native_scalar_access(exact);
-  Symbol tag = <i32>;
-  return %(scalar $declared ${scalar.size} ${scalar.alignment} $exact $tag);
+  return %(scalar $declared ${scalar.size} ${scalar.alignment} $exact i32);
 }
 
 /* POSIX gives function and object pointers one representation, whose
