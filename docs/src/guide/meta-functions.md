@@ -307,9 +307,10 @@ sample.x:1:1: type: native meta function declaration does not match its target
 
 Two kinds of function follow a rule. An iterator operation takes its
 destination last: its last parameter and its result are `Iter`. Compile-time
-code may omit that destination, and the binding allocates the iterator in the
-session `Scope`. A `Func` parameter binds to a compiler target that takes the
-compile-time callable as a `Var` and adapts it.
+code may omit that destination; the call then allocates one with `Iter.new`
+before calling the native operation. A declared `Func` parameter matches any
+`Var` parameter of the compiler's target, which receives the compile-time
+callable and adapts it.
 
 A `meta` protocol adoption, such as `meta protocol Iter(List);`, declares each
 witness of that conformance the way a bodyless prototype would.

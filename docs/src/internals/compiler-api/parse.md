@@ -17,7 +17,7 @@ X2c recursive-descent parser core.
 | [`Compiler.defines_main`](#Compiler.defines_main) | Reports whether the unit's tokens define a function named `main` at file scope. |
 | [`Compiler.finish_foreign_alias`](#Compiler.finish_foreign_alias) | Constructs a foreign alias from one direct function declaration and target. |
 | [`Compiler.finish_managed_declaration`](#Compiler.finish_managed_declaration) | Lowers managed block declarations to declaration/defer pairs in source order, preserving their installed bindings and the enclosing lifetime. |
-| [`Compiler.meta_form_is_declaration`](#Compiler.meta_form_is_declaration) | Reports whether the cursor begins a contextual top-level `meta` declaration: a function, an initialized file-static value, or a protocol adoption. |
+| [`Compiler.meta_form_is_declaration`](#Compiler.meta_form_is_declaration) | Reports whether the cursor begins a contextual top-level `meta` declaration: a function or an initialized file-static value. |
 | [`Compiler.package_alias_spelling`](#Compiler.package_alias_spelling) | Returns the folded package-member spelling at the current token, or NULL. |
 | [`Compiler.parse_basic_identifier`](#Compiler.parse_basic_identifier) | Consumes one `ident` token and returns its spelling as a one-item `List`. |
 | [`Compiler.parse_complex_identifier`](#Compiler.parse_complex_identifier) | Parses the current identifier or dotted owner/member as a one-item name. |
@@ -59,7 +59,7 @@ The input must evaluate to a nonempty AST `List` valid for the requested
 order; `return_type` applies only while descendants are bound. This method
 mutates `Sym` and does not open a semantic transaction.
 
-Source: `src/parse.x:2173`
+Source: `src/parse.x:2172`
 
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
@@ -92,7 +92,7 @@ Constructs a foreign alias from one direct function declaration and target.
 typed, a function. Storage is limited to `static` or `inline`, when
 present, and variadic parameters are rejected.
 
-Source: `src/parse.x:2107`
+Source: `src/parse.x:2106`
 
 <a id="Compiler.finish_managed_declaration"></a>
 #### Compiler.finish_managed_declaration
@@ -110,10 +110,9 @@ Source: `src/parse.x:1416`
 `int Compiler.meta_form_is_declaration(Compiler c)`
 
 Reports whether the cursor begins a contextual top-level `meta`
-declaration: a function, an initialized file-static value, or a protocol
-adoption.
+declaration: a function or an initialized file-static value.
 
-Source: `src/parse.x:1740`
+Source: `src/parse.x:1739`
 
 <a id="Compiler.package_alias_spelling"></a>
 #### Compiler.package_alias_spelling
@@ -319,7 +318,7 @@ Missing required syntax raises `<incomplete>`; trailing items are rejected.
 Temporary parser scopes and captured parameters are restored on every exit.
 The caller owns the semantic transaction and commits after execution.
 
-Source: `src/parse.x:1892`
+Source: `src/parse.x:1891`
 
 <a id="Compiler.parse_top_level"></a>
 #### Compiler.parse_top_level
@@ -333,7 +332,7 @@ state, with the first following token current. A macro import whose
 `.xmacro` makes `meta` declarations retains their runtime forms, which
 the unit emits where it reaches them.
 
-Source: `src/parse.x:1818`
+Source: `src/parse.x:1817`
 
 <a id="Compiler.parse_type_name"></a>
 #### Compiler.parse_type_name
@@ -365,7 +364,7 @@ Reports whether the top-level item at the cursor is a script statement
 that runs, rather than a declaration: an expression, control flow, a
 `with` block, or a statement macro. This query does not consume tokens.
 
-Source: `src/parse.x:1775`
+Source: `src/parse.x:1774`
 
 <a id="Compiler.script_statement_starts"></a>
 #### Compiler.script_statement_starts
@@ -379,7 +378,7 @@ Lisp, file-scope macro invocations, `typedef`, `static`, and `extern`
 declarations, linkage braces, type definitions, and function prototypes
 and definitions stay at file scope. This query does not consume tokens.
 
-Source: `src/parse.x:1757`
+Source: `src/parse.x:1755`
 
 <a id="Compiler.skip_linkage_brace"></a>
 #### Compiler.skip_linkage_brace
@@ -393,7 +392,7 @@ its own braces. The declarations between them stay at file scope. The
 `#ifdef __cplusplus` arm of the usual header guard is skipped, so only an
 unguarded group reaches this operation.
 
-Source: `src/parse.x:1786`
+Source: `src/parse.x:1785`
 
 <a id="Compiler.test_declaration"></a>
 #### Compiler.test_declaration

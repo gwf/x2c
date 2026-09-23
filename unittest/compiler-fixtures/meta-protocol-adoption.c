@@ -20,6 +20,8 @@ Iter Iter_head(Iter iter, int count, Iter dest);
 
 Iter Iter_map(Iter iter, Func fn, Iter dest);
 
+double fabs(double);
+
 static Var _x2c_func_adapt_0(Func _x2c_func_binding_0, const FuncArg * _x2c_func_argv_0);
 
 static Func _x2c_func_handle_0;
@@ -60,6 +62,11 @@ Iter Bag_iter(Bag bag, Iter dest){
   return List_iter(bag -> items, dest);
 }
 
+Iter Box_iter(Box box, Iter dest){
+  if(! _init_guard_) _file_init_();
+  return List_iter(box -> items, dest);
+}
+
 Var int_var(int);
 
 Var twice(Var value){
@@ -94,7 +101,7 @@ int main(int argc, char * * argv){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   (void) argv;
-  printf("%d %d %d\n", 1, 1, 0);
+  printf("%s\n%s\n%s\n%s\n%s\n", "(\"Bag_iter\" (as \"Bag_iter_into\"))", "(\"Box_iter\" (as \"Box_iter_into\"))", "(\"Iter_head\" (as \"Iter_head_into\"))", "()", "(\"fabs\")");
   printf("%d %d\n", 63, heads(argc - 1));
   return 0;
 }

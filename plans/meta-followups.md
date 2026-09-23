@@ -149,23 +149,31 @@ checked-in bootstrap before `lib/` or `etc/` uses it:
 
 - The parser accepts a leading `meta` on a bodyless adoption and retains a
   `(meta-protocol BASE PARTICIPANT)` row beside the adoption row, so it
-  crosses includes and package interfaces the same way.
+  crosses includes and package interfaces the same way. Macro-generated
+  syntax carries the marker as a `(meta-protocol ADOPTION)` node, which
+  publishes like a written marked adoption.
 - One helper turns a symbol row into `(name signature)` native functions: a
   `meta` prototype gives itself, and a marked adoption gives each implemented
   witness of its resolved conformance. Both consumers use it: lazy binding
   for lowered code (`install_native_meta_effects`) and the generated target
   inventory (`_x2c.native-meta.targets`).
-- A native function whose last parameter and result are `Iter` binds its
-  native form as `NAME_into`; `NAME` becomes the existing `C.iterator`
-  dispatcher, which calls the allocating target when the destination is
-  omitted.
-- A declared `Func` parameter matches a target that takes `Var`, since a
-  compile-time callable is a Lisp value. Such functions are left out of the
-  generated inventory because an adapter row supplies their target.
+- A native function whose last parameter and result are `Iter` is an
+  iterator operation. The inventory emits its row as `(NAME (as NAME_into))`,
+  so the native function is the `_into` target. Compile-time code calls
+  `NAME` through `C.iterator.call` in `etc/comptime.xlisp`, which appends a
+  fresh `Iter_new` destination when a call omits it and otherwise passes the
+  call through. No allocating native target is needed, so deleting the
+  allocating static adapters cannot leave a dispatcher without one; a
+  missing `_into` target binds nothing and the call reports the missing
+  binding.
+- A declared `Func` parameter matches any `Var` parameter of the target,
+  since a compile-time callable is a Lisp value; the result must match
+  exactly. Such functions are left out of the generated inventory because an
+  adapter row supplies their target.
 
-Delivery 2 adopts it: mark the Iter conformances and operations, derive both
-target names from one row per operation, and delete the manual Iter target
-rows, the allocating static adapters, and the `C.iterator` rows.
+Delivery 2 adopts it: mark the Iter conformances and operations, and delete
+the manual Iter target rows, the allocating static adapters, and the
+`C.iterator` rows. The five callback adapters keep their `_into` rows.
 
 ### F. Lifetime certification
 

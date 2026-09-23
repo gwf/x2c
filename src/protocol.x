@@ -505,12 +505,19 @@ static List Compiler._publish_protocol_adoption(
     The node must carry a protocol record or supported adoption shape with its
     storage and source location. Installation invalidates cached protocol
     decisions and returns the canonical published node. Generated contexts may
-    also retain that node in `Sym` for replay.
+    also retain that node in `Sym` for replay. A `(meta-protocol ADOPTION)`
+    node publishes its adoption and marks it for compile-time code.
 */
 List Compiler.publish_protocol_node(
   Compiler c, List node, Token participant_token,
   Token representation_token) {
   match (node) {
+    case %(meta-protocol ?(List adoption)): {
+      List published = c.publish_protocol_node(
+        adoption, participant_token, representation_token);
+      c._retain_meta_protocol(published);
+      return published;
+    }
     case %(protocol
            (!set ?record
              ("protocol-record"
@@ -2450,9 +2457,11 @@ List Compiler.parse_protocol_declaration(Compiler c) {
   if (c.peek(0) == <;>) {
     c.next();
     List location = c.token_location(start);
-    if (c.macro_holes || (c.shallow && !c.collect_protocols))
-      return _adoption_node(
+    if (c.macro_holes || (c.shallow && !c.collect_protocols)) {
+      List adoption = _adoption_node(
         base, participant_type, storage, representation, tag, location);
+      return meta ? %(meta-protocol $adoption) : adoption;
+    }
     List adoption = c._publish_protocol_adoption(
       base, participant_type, storage, representation, tag, location,
       participant_token, modifier_token);

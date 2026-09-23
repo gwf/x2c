@@ -513,10 +513,8 @@ static List _native_meta_rows(Compiler c, Var row) {
       if (!conformance) return rows;
       foreach (List member, conformance.last().list().cdr())
         match (member)
-          case %(? implmntd ?(String name) *): {
-            List signature = _native_meta_signature(c, c.sym.get(%($name)));
-            rows = cons(%($name $signature), rows);
-          }
+          case %(? implmntd ?(String name) ?(Type type) *):
+            rows = cons(%($name ${_native_meta_signature(c, type)}), rows);
       return rows;
     }
   }
@@ -531,23 +529,35 @@ static int _native_meta_takes_callback(List signature) {
   return 0;
 }
 
-/* Returns the declared native targets advertised by `meta` interface rows.
-   Sorting makes the generated adapter inventory independent of Map order. */
+/* An iterator operation takes its destination last. Its native target is
+   `NAME_into`, and compile-time code calls it through `NAME`, which
+   allocates the destination when a call omits it. */
+static int _iterator_operation(List signature) {
+  match (signature)
+    case %((func ?(List parameters)) "Iter"):
+      return parameters && parameters.last().equal(%("Iter"));
+  return 0;
+}
+
+/* Returns the declared native targets advertised by `meta` interface rows,
+   in the row form `lib/lisp.x` generates its target inventory from. Sorting
+   makes that inventory independent of Map order. */
 static List _sdk_native_meta_targets(void) {
   Compiler compiler = macro_sdk_compiler
                     ? macro_sdk_compiler : macro_import_compiler;
   if (!compiler) return %();
   Map selected = {};
   foreach (Var value, compiler.sym.base_symbols())
-    foreach (List row, _native_meta_rows(compiler, value))
-      if (!_native_meta_takes_callback(row.cadr())) selected[row.car()] = 1;
-  Array names = [];
-  foreach (Var (name, present), selected) {
-    (void) present;
-    names.push(name);
-  }
+    foreach (List row, _native_meta_rows(compiler, value)) {
+      (String name, List signature) = row;
+      if (_native_meta_takes_callback(signature)) continue;
+      String into = %"${name}_into";
+      selected[name] = _iterator_operation(signature)
+        ? %($name (as $into)) : %($name);
+    }
+  Array names = selected.keys();
   List rows = %();
-  foreach (String name, names.sort()) rows = cons(%($name), rows);
+  foreach (String name, names.sort()) rows = cons(selected[name], rows);
   return rows.reverse();
 }
 
@@ -1584,36 +1594,30 @@ void Compiler.record_native_meta_effect(
   }
 }
 
-/* An iterator operation takes its destination last. */
-static int _iterator_operation(List signature) {
-  match (signature)
-    case %((func ?(List parameters)) "Iter"):
-      return parameters && parameters.last().equal(%("Iter"));
-  return 0;
-}
-
-/* The target takes a Lisp callable as `Var` where native code takes `Func`,
-   and adapts it. */
+/* A declared `Func` parameter matches a target's `Var` parameter, which
+   takes the compile-time callable and adapts it. */
 static int _native_meta_accepts(Var function, List signature) {
   if (function is not <func>) return 0;
   List target = ((Func) function.pointer()).signature();
-  return target.equal(signature) ||
-         target.equal(signature.search_replace(%("Func"), %("Var")));
+  match (signature)
+    case %((func ?(List parameters)) *result):
+      return target.equal(signature) || target.equal(
+        %((func ${parameters.search_replace(%("Func"), %("Var"))}) @result));
+  return 0;
 }
 
 /* Binds a declared native function to the compiler's own linked target of
-   the same name. A declaration the running compiler does not link binds
-   nothing, and a meta body that calls it reports the missing binding. An
-   iterator operation binds its native form as `NAME_into`; `NAME` calls
-   that form when a call passes the destination, and otherwise the target
-   that allocates one in the session. */
+   the same name, or an iterator operation to its `_into` target. A
+   declaration the running compiler does not link binds nothing, and a meta
+   body that calls it reports the missing binding. */
 static void _bind_native_meta(
   Compiler c, String name, List signature, Token marker) {
   int iterator = _iterator_operation(signature);
-  String target = iterator ? %"${name}_into" : name;
   Var bound, function;
-  if (!iterator && c.macro_lisp.try_get(name, &bound)) function = bound;
+  int present = c.macro_lisp.try_get(name, &bound);
+  if (present && !iterator) function = bound;
   else {
+    String target = iterator ? %"${name}_into" : name;
     try function = c.macro_lisp.eval(%(bind $target (quote $signature)));
     catch %(no-symbol *): return;
   }
@@ -1621,13 +1625,13 @@ static void _bind_native_meta(
     c.report_error(
       <type>, "native meta function declaration does not match its target",
       marker, %("name: $name" "signature: ${signature.repr()}"));
-  if (c.macro_lisp.try_get(name, &bound)) return;
-  if (!iterator) {
-    c.macro_lisp.set_global(name, function);
-    return;
+  if (present) return;
+  if (iterator) {
+    int arity = signature.car().list().cadr().list().len() - 1;
+    function = c.macro_lisp.eval(
+      %(C.iterator.call (quote $function) $arity));
   }
-  int arity = signature.car().list().cadr().list().len() - 1;
-  c.macro_lisp.eval(%(C.iterator ${Atom.intern(name)} $name $arity));
+  c.macro_lisp.set_global(name, function);
 }
 
 static int _native_meta_effect_is_local(Compiler c, Var key) {

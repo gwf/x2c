@@ -1735,11 +1735,9 @@ int Compiler.protocol_form_starts(Compiler c) {
 }
 
 /** Reports whether the cursor begins a contextual top-level `meta`
-    declaration: a function, an initialized file-static value, or a protocol
-    adoption. */
+    declaration: a function or an initialized file-static value. */
 int Compiler.meta_form_is_declaration(Compiler c) {
   if (c.peek(0) != <ident> || c.token.text != "meta") return 0;
-  if (c.protocol_form_starts()) return 1;
   Token head = c.token;
   c.next();
   int marker = c.test_declaration();
@@ -1761,7 +1759,8 @@ int Compiler.script_statement_starts(Compiler c) {
       return 0;
   }
   if (c.test_static_assert() || c.keyword_form_is_definition() ||
-      c.macro_form_is_definition() || c.meta_form_is_declaration())
+      c.macro_form_is_definition() || c.meta_form_is_declaration() ||
+      c.protocol_form_starts())
     return 0;
   if (c.peek(0) == <ident> && c.token.text == "with") return 1;
   if (c.macro_starts_target_at(AST_UNIT)) return !c.macro_targets_unit();
@@ -2440,7 +2439,7 @@ List Compiler.bind_syntax(
         }
         return _finish_function(_, declaration, body);
       }
-      case %(!set ?node ((!or protocol adopt) *)):
+      case %(!set ?node ((!or protocol adopt meta-protocol) *)):
         if (context == AST_UNIT)
           return _.publish_protocol_node(node, _.token, NULL);
       case %(!set ?definition (macrodef *)): {
