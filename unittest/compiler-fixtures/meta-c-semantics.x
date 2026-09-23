@@ -6,8 +6,9 @@
     with `NULL` and tests false at the null address. A typed `foreach`
     output converts each element. `bool` and int-sized enum objects have
     native layouts, so their fields and addresses work. A value reaching
-    `bool` becomes 0 or 1 and compares as the int it holds. Each probe
-    prints its compile-time and run-time answers.
+    `bool` becomes 0 or 1 and compares as the int it holds. `strncmp` takes
+    its length as `size_t`. Each probe prints its compile-time and run-time
+    answers.
 */
 
 #include "x2c.x"
@@ -109,6 +110,10 @@ meta int native_fields(int offset) {
          (flags.tail == 'x') * 10000;
 }
 
+meta int string_prefix(int offset) {
+  return strncmp("abcd", "abzz", 2 + offset) == 0;
+}
+
 int main(int argc, char **argv) {
   (void) argv;
   int offset = argc - 1;
@@ -120,5 +125,6 @@ int main(int argc, char **argv) {
   printf("%d %d\n", $bool_compare(0), bool_compare(offset));
   printf("%d %d\n", $null_pointers(0), null_pointers(offset));
   printf("%d %d\n", $signed_enum(0), signed_enum(offset));
+  printf("%d %d\n", $string_prefix(0), string_prefix(offset));
   return 0;
 }

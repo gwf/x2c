@@ -25,7 +25,7 @@ meta long long atoll(const char *);
 meta double atof(const char *);
 
 meta int strcmp(const char *, const char *);
-meta int strncmp(const char *, const char *, unsigned long);
+meta int strncmp(const char *, const char *, size_t);
 
 struct timespec;
 meta int timespec_get(struct timespec *, int);
