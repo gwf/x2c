@@ -27,8 +27,6 @@ typedef struct Build{
 }
 * Build;
 
-uint64_t build_hash_bytes(uint64_t hash, const void * bytes, size_t length);
-
 void build_check_input(String input);
 
 Build CliRequest_prepare(CliRequest c);

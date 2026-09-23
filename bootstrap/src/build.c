@@ -37,8 +37,6 @@ static uint64_t _state_text(uint64_t hash, String text);
 
 static uint64_t _state_list(uint64_t hash, List values);
 
-static uint64_t _state_contents(uint64_t hash, String path, int * ok);
-
 static uint64_t _state_file(uint64_t hash, String path, int * ok);
 
 static uint64_t _state_tool(uint64_t hash, String tool, int * ok);
@@ -329,22 +327,14 @@ static String _process_suffix(void){
   return String_printf(_2, (long) getpid());
 }
 
-uint64_t build_hash_bytes(uint64_t hash, const void * bytes, size_t length){
-  if(! _init_guard_) _file_init_();
-  const unsigned char * data = bytes;
-  for(size_t i = 0;  i < length;  i ++){
-    hash ^= data[i];
-    hash *= UINT64_C(1099511628211);
-  }
-  return hash;
-}
-
 int String_truth(String);
 
+uint64_t x2c_fnv_bytes(uint64_t, const void *, size_t);
+
 static uint64_t _state_text(uint64_t hash, String text){
-  if(! String_truth(text)) return build_hash_bytes(hash, "\xff", 1);
-  hash = build_hash_bytes(hash, text, strlen(text));
-  return build_hash_bytes(hash, "\0", 1);
+  if(! String_truth(text)) return x2c_fnv_bytes(hash, "\xff", 1);
+  hash = x2c_fnv_bytes(hash, text, strlen(text));
+  return x2c_fnv_bytes(hash, "\0", 1);
 }
 
 int List_try_next(List, List *, Var *);
@@ -363,25 +353,13 @@ static uint64_t _state_list(uint64_t hash, List values){
     }
 
   }
-  return build_hash_bytes(hash, "\xfe", 1);
+  return x2c_fnv_bytes(hash, "\xfe", 1);
 }
 
-static uint64_t _state_contents(uint64_t hash, String path, int * ok){
-  File input = fopen(path, "rb");
-  if(! input){
-    * ok = 0;
-    return hash;
-  }
-  unsigned char buffer[16384];
-  size_t length;
-  while((length = fread(buffer, 1, sizeof(buffer), input))) hash = build_hash_bytes(hash, buffer, length);
-  if(ferror(input)) * ok = 0;
-  File_close(input);
-  return hash;
-}
+uint64_t x2c_fnv_file(uint64_t, String, int *);
 
 static uint64_t _state_file(uint64_t hash, String path, int * ok){
-  return _state_contents(_state_text(hash, path), path, ok);
+  return x2c_fnv_file(_state_text(hash, path), path, ok);
 }
 
 int String_contains(String, String);
@@ -399,13 +377,15 @@ static uint64_t _state_tool(uint64_t hash, String tool, int * ok){
   return _state_text(hash, tool);
 }
 
-String x2c_get_executable(void);
+String x2c_compiler_identity(void);
 
 static uint64_t _state_base(CliRequest request, String tool, int * ok){
   uint64_t hash = UINT64_C(1469598103934665603);
   hash = _state_text(hash, _123);
   hash = _state_text(hash, request -> state_seed);
-  hash = _state_tool(hash, x2c_get_executable(), ok);
+  String compiler = x2c_compiler_identity();
+  if(! String_truth(compiler)) * ok = 0;
+  hash = _state_text(hash, compiler);
   hash = _state_tool(hash, tool, ok);
   return hash;
 }
@@ -983,7 +963,7 @@ static uint64_t _action_fingerprint(Build state, ToolAction action, List inputs,
 }
 
 static uint64_t _compile_fingerprint(Build state, ToolAction action, String preprocessed, int * ok){
-  return _state_contents(_action_fingerprint(state, action, NULL, ok), preprocessed, ok);
+  return x2c_fnv_file(_action_fingerprint(state, action, NULL, ok), preprocessed, ok);
 }
 
 int ToolRun_wait(ToolRun);

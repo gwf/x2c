@@ -251,7 +251,7 @@ void Path_make_dirs(Path);
 
 void Path_copy_file(Path, Path);
 
-uint64_t build_hash_bytes(uint64_t, const void *, size_t);
+uint64_t x2c_fnv_bytes(uint64_t, const void *, size_t);
 
 int String_len(String);
 
@@ -282,7 +282,7 @@ static void Bootstrap__verify(Bootstrap b, List records, String root){
           Path_copy_file(String_join(NULL, cons(String_var(_6), cons(String_var(relative), NULL))), installed);
         }
         String text = Path_read_text(installed);
-        uint64_t hash = build_hash_bytes(UINT64_C(1469598103934665603), text, String_len(text));
+        uint64_t hash = x2c_fnv_bytes(UINT64_C(1469598103934665603), text, String_len(text));
         if(String_len(text) != expected_size || hash !=(uint64_t) expected_hash) _error_path("source failed verification", installed);
         String source = String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_5), cons(String_var(relative), NULL))));
         if(String_endswith(relative, _40) && String_startswith(relative, _41)) Array_push(runtime, String_var(source));
