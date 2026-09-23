@@ -50,6 +50,8 @@ static int _attribute_starts(Compiler c);
 
 static String _attribute(Compiler c);
 
+static void _skip_aggregate_attributes(Compiler c);
+
 static int _prefix_macro_words(Compiler c, int rank, Array words);
 
 static List _storage_class(Compiler c);
@@ -1552,6 +1554,13 @@ static String _attribute(Compiler c){
   if(! _attribute_starts(c)) return NULL;  Token first = c -> token, last = Token_group_close(Compiler_skip_trivia_from(c, first + 1));  c -> token = Token_after_group(last);  return String_new_len(c -> text + first -> pos, last -> pos + last -> len - first -> pos);
 }
 
+static void _skip_aggregate_attributes(Compiler c){
+  if(! c -> shallow) return;  while(1){
+    Var definition;  if(String_truth(_attribute(c))) continue;  if(Compiler_peek(c, 0) != 19147688 || ! Map_try_get(c -> object_macros, String_var(c -> token -> text), & definition) || ! Var_equal(definition, List_var(NULL))) return;  Compiler_next(c);
+  }
+
+}
+
 Iter Var_iter(Var, Iter);
 int Symbol_is_type_qualifier(Symbol);
 static int _prefix_macro_words(Compiler c, int rank, Array words){
@@ -1828,10 +1837,10 @@ return 1;
 
 Var Array_getindex(Array, int);
 static int _packed_since(Compiler c, Token first){
-  Token base = c -> tokenizer -> tokens, end = base + Bytes_len(c -> tokenizer -> tokens);  if(first < base || c -> token >= end) return 0;  Token last = _attribute_starts(c) ? Token_group_close(Compiler_skip_trivia_from(c, c -> token + 1)) : c -> token;  int before = 0, count = Array_len(c -> pack_marks);  for(int high = count;  before < high; ){
+  Token base = c -> tokenizer -> tokens, end = base + Bytes_len(c -> tokenizer -> tokens);  if(first < base || c -> token >= end) return 0;  int before = 0, count = Array_len(c -> pack_marks);  for(int high = count;  before < high; ){
     int middle =(before + high) / 2;  if(Var_long(Var_convert(Array_getindex(c -> pack_marks, middle), 818062)) < first - base) before = middle + 1;  else high = middle;
   }
-  return before % 2 ||(before < count && Var_long(Var_convert(Array_getindex(c -> pack_marks, before), 818062)) <= last - base);
+  return before % 2 ||(before < count && Var_long(Var_convert(Array_getindex(c -> pack_marks, before), 818062)) < c -> token - base);
 }
 
 Var Var_car(Var);
@@ -1839,10 +1848,10 @@ List Sym_bind_identity(Sym, List, List, List);
 List Sym_declare(Sym, List, List, List);
 void Sym_declare_field_order(Sym, Type, List);
 static List _publish_aggregate_type(Compiler compiler, Symbol tag, Var name, List members, Token first){
-  List type = cons(Symbol_var(tag), cons(name, NULL));  List body = tag == 357722 ? members : cons(_135, List_append(members, NULL));  if(Var_is_row(name, 9, 7, 4) && Var_equal(Var_car(name), Symbol_var(4928588686))) Sym_bind_identity(compiler -> sym, cons(Symbol_var(tag), NULL), Var_list(name), cons(Symbol_var(tag), cons(List_var(body), NULL)));  else Sym_declare(compiler -> sym, NULL, type, tag == 357722 ? _137 : cons(Symbol_var(tag), cons(List_var(body), NULL)));  if(tag != 357722){
-    Sym_declare_field_order(compiler -> sym, List_type(type), members);  if(_packed_since(compiler, first)) Sym_set(compiler -> sym, List_append(type, _140), _142);
+  int packed = _packed_since(compiler, first);  List type = cons(Symbol_var(tag), cons(name, NULL));  List body = tag == 357722 ? members : cons(_135, List_append(members, NULL));  if(Var_is_row(name, 9, 7, 4) && Var_equal(Var_car(name), Symbol_var(4928588686))) Sym_bind_identity(compiler -> sym, cons(Symbol_var(tag), NULL), Var_list(name), cons(Symbol_var(tag), cons(List_var(body), NULL)));  else Sym_declare(compiler -> sym, NULL, type, tag == 357722 ? _137 : cons(Symbol_var(tag), cons(List_var(body), NULL)));  if(tag != 357722){
+    Sym_declare_field_order(compiler -> sym, List_type(type), members);  if(packed) Sym_set(compiler -> sym, List_append(type, _140), _142);
   }
-  else if(_enum_fits_int(type, members)) Sym_set(compiler -> sym, List_append(type, _145), _147);  return cons(Symbol_var(tag), cons(name, cons(List_var(body), NULL)));
+  else if(! packed && _enum_fits_int(type, members)) Sym_set(compiler -> sym, List_append(type, _145), _147);  return cons(Symbol_var(tag), cons(name, cons(List_var(body), NULL)));
 }
 
 int Compiler_test_static_assert(Compiler compiler){
@@ -1910,8 +1919,8 @@ List Compiler_gensym(Compiler);
 Var Compiler_aggregate_name(Compiler, Symbol, Var, int);
 List List_append(List, List);
 static List _struct_or_union(Compiler c){
-  Token first = c -> token;  Symbol tag = Compiler_peek(c, 0);  Compiler_next(c);  List name = Compiler_parse_optional_identifier(c);  if(List_truth(name) && String_truth(c -> package)) name = _package_aggregate_name(c, tag, name);  List usedname = List_truth(name) ? name : Compiler_gensym(c);  usedname = cons(Compiler_aggregate_name(c, tag, List_car(usedname), Compiler_peek(c, 0) == 247 || Compiler_peek(c, 0) == 119), NULL);  List type = cons(Symbol_var(tag), usedname), fields = NULL;  if(Compiler_test(c, 247)){
-    fields = Compiler_parse_fields(c, type);  Compiler_expect(c, 251);  if(! Map_truth(c -> macro_holes)) return _publish_aggregate_type(c, tag, List_car(usedname), fields, first);  fields = cons(Symbol_var(421880102), fields);
+  Token first = c -> token;  Symbol tag = Compiler_peek(c, 0);  Compiler_next(c);  _skip_aggregate_attributes(c);  List name = Compiler_parse_optional_identifier(c);  if(List_truth(name) && String_truth(c -> package)) name = _package_aggregate_name(c, tag, name);  List usedname = List_truth(name) ? name : Compiler_gensym(c);  usedname = cons(Compiler_aggregate_name(c, tag, List_car(usedname), Compiler_peek(c, 0) == 247 || Compiler_peek(c, 0) == 119), NULL);  List type = cons(Symbol_var(tag), usedname), fields = NULL;  if(Compiler_test(c, 247)){
+    fields = Compiler_parse_fields(c, type);  Compiler_expect(c, 251);  _skip_aggregate_attributes(c);  if(! Map_truth(c -> macro_holes)) return _publish_aggregate_type(c, tag, List_car(usedname), fields, first);  fields = cons(Symbol_var(421880102), fields);
   }
   return List_truth(fields) ? List_append(type, cons(List_var(fields), NULL)) : type;
 }
@@ -2009,8 +2018,8 @@ List Compiler_parse_enumerators(Compiler c, List context){
 }
 
 static List _enum(Compiler c){
-  Compiler_expect(c, 357722);  List name = Compiler_parse_optional_identifier(c);  if(List_truth(name) && String_truth(c -> package)) name = _package_aggregate_name(c, 357722, name);  List usedname = List_truth(name) ? name : Compiler_gensym(c);  List type = cons(Symbol_var(357722), usedname), enums = NULL;  if(Compiler_test(c, 247)){
-    enums = Compiler_parse_enumerators(c, type);  Compiler_expect(c, 251);  if(! Map_truth(c -> macro_holes)) return _publish_aggregate_type(c, 357722, List_car(usedname), enums, NULL);
+  Token first = c -> token;  Compiler_expect(c, 357722);  _skip_aggregate_attributes(c);  List name = Compiler_parse_optional_identifier(c);  if(List_truth(name) && String_truth(c -> package)) name = _package_aggregate_name(c, 357722, name);  List usedname = List_truth(name) ? name : Compiler_gensym(c);  List type = cons(Symbol_var(357722), usedname), enums = NULL;  if(Compiler_test(c, 247)){
+    enums = Compiler_parse_enumerators(c, type);  Compiler_expect(c, 251);  _skip_aggregate_attributes(c);  if(! Map_truth(c -> macro_holes)) return _publish_aggregate_type(c, 357722, List_car(usedname), enums, first);
   }
   return List_truth(enums) ? List_append(type, cons(List_var(enums), NULL)) : type;
 }
