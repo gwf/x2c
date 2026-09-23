@@ -445,8 +445,21 @@ x2c: error: native module 'helpers.so' was built by another compiler; rebuild it
 Every function the module exports needs a bodyless `meta` prototype in the
 module's sources, and a module whose sources declare none fails to build.
 
-A module can call the runtime functions the compiler itself uses. A
-module that calls any other runtime function fails to load, and the error
+A module can call most of the runtime, because the compiler links every
+runtime module that registers no `Var` class of its own. The compiler
+leaves out the modules whose classes would take up rows of the fixed
+32-row class registry at startup: Automatic Differentiation, `Regex`,
+typed Arrays and Maps, `Thread` and `Mutex`, the scripting library, and
+the modules that need them. A module that calls one of their functions
+fails to build on macOS, and the link error names each missing symbol:
+
+```text
+Undefined symbols for architecture arm64:
+  "_Regex_compile", referenced from:
+      _groups in rx-634299d6.o
+```
+
+On Linux the same module builds, and loading it fails with an error that
 names the missing symbol. A loaded module stays loaded until the compiler
 exits. Native modules work on macOS, Linux and WSL. On other platforms,
 loading one reports that native modules are not supported.

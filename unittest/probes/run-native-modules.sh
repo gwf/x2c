@@ -125,6 +125,33 @@ EOF
 grep -Fq "return 2;" out/first.c || fail "first named module supplies"
 grep -Fq "both define 'fa'" warn.out || fail "duplicate module warning"
 
+# The compiler links the runtime modules that register no Var class, such
+# as DisjointSet; on macOS, a call into one it leaves out fails the link.
+cat >sets.x <<'EOF'
+#include "lib.x"
+meta int components(int);
+#pragma private
+int components(int n) { return DisjointSet.new(n).num_components(); }
+EOF
+cat >use-sets.x <<'EOF'
+meta int components(int);
+meta static int v(void) => components(4);
+int main(void) { return $v(); }
+EOF
+"$X2C" build -q --kind meta-module sets.x --output sets.so
+"$X2C" translate -q --native-module sets.so --out-dir out use-sets.x
+grep -Fq "return 4;" out/use-sets.c || fail "runtime function in a module"
+if [[ $(uname -s) == Darwin ]]; then
+  cat >rx.x <<'EOF'
+#include "regex.x"
+meta int groups(int);
+#pragma private
+int groups(int n) { return Regex.compile("(a)").capture_count() + n; }
+EOF
+  expect_error "_Regex_compile" \
+    "$X2C" build -q --kind meta-module rx.x --output rx.so
+fi
+
 printf 'int unrelated;\n' >empty.x
 expect_error "native module sources declare no meta function" \
   "$X2C" build -q --kind meta-module empty.x --output empty.so

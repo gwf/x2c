@@ -152,16 +152,29 @@ implements them; the book documents it under
   build a module; `--native-module <file>` on `translate`, `build`, `run` and
   `repl`, or a target's `native-modules` list of module targets, loads one.
   Module targets build before the targets that load them.
-- **Shared runtime.** A module links without `libx2c.a` (`-bundle -undefined
-  dynamic_lookup` on macOS, `-fPIC -shared` elsewhere) and binds to the
-  loading compiler's runtime. The compiler links with `-rdynamic` on Linux
-  (`builds/stage.mk`, `bootstrap/src/Makefile`, and the `x2c bootstrap`
-  compiler request). The build writes a generated entry unit that includes
-  the module's x2c sources and defines `x2c_module_targets`, the
-  name-to-`Func` Map that `lisp.native.targets` generates from the
+- **Shared runtime.** A module links without `libx2c.a` and binds to the
+  loading compiler's runtime: `-bundle -bundle_loader <compiler>` on macOS,
+  so a runtime function the compiler lacks fails the module's link and names
+  the symbol, and `-fPIC -shared -Wl,-Bsymbolic-functions` on Linux, where
+  such a function fails at load instead. The compiler links with
+  `-rdynamic` on Linux (`builds/stage.mk`, `bootstrap/src/Makefile`, and the
+  `x2c bootstrap` compiler request). The build writes a generated entry unit
+  that includes the module's x2c sources and defines `x2c_module_targets`,
+  the name-to-`Func` Map that `lisp.native.targets` generates from the
   prototypes those sources declare (`_x2c.native-meta.declared`), and
   `x2c_module_stamp`, the content hash of the building compiler. The loader
   rejects any other hash.
+- **Runtime coverage.** Gary chose on 2026-09-22 to link whole every runtime
+  object that reserves no Var class row. `etc/runtime-objects.sh` derives the
+  set from the objects' symbol tables at each compiler link: an object the
+  compiler's own code does not reach is left out when it calls a
+  row-reserving registration function, or needs a function only a left-out
+  object defines. Today it adds `args`, `diff` and `lib` (`DisjointSet`),
+  and leaves out `autodiff`, `regex`, `typed-array`, `typed-map`, `mutex`,
+  `thread`, `scripting`, `list-selectors` and `match-recursive`. The
+  Makefile links run it on macOS and Linux only; the APE seed, MSYS2 and a
+  compiler installed by `x2c bootstrap` link the runtime as before, so a
+  module there can call only what the compiler uses.
 - **Lifetime and trust.** `Frontend.load_support` checks the stamp in the
   module file's bytes before `dlopen`, so a stale module's code never runs,
   then loads each requested module once per process and never closes it.
@@ -192,19 +205,34 @@ from a meta body, a direct build, a manifest target and the REPL; rejection
 of a stamp mismatch and a signature mismatch; no binding without the
 option; and reuse of an unchanged module and its consumer.
 
-Measured on macOS arm64 (debug build): the compiler grew from 2,404,880 to
-2,423,184 bytes (+0.8%, the loader, entry generation and REPL change), and
-startup is unchanged within noise (`--version` 3.84 ms vs 3.74 ms minimum,
-a one-line `translate` 37.5 ms vs 36.4 ms minimum, 60 interleaved runs).
-`-rdynamic` does not apply there. On Linux it adds the roughly 1,500
-exported names to the dynamic symbol table, an estimated 70 KB; it was not
-measured on Linux.
+Measured on macOS arm64 (optimize build), 60 interleaved runs each:
 
-Remaining: the compiler links only the runtime members it uses, so a
-module that calls another runtime function fails to load and names the
-missing symbol (467 runtime symbols today, such as autodiff and `Args`).
-Linking the whole runtime into the compiler would remove that limit for
-about 200 KB (+8.4%) on macOS; that is a separate decision.
+| Compiler | Size | `--version` min | One-line `translate` min | Var tag rows |
+|---|---|---|---|---|
+| Before track G | 2,404,880 B | 3.84 ms | 37.5 ms | 5 |
+| Loader, current link | 2,424,432 B | 3.22 ms | 35.16 ms | 5 |
+| Selected objects linked whole | 2,442,688 B | 3.21 ms | 35.16 ms | 5 |
+| Whole runtime (measured, rejected) | 2,625,512 B | 3.12 ms | 34.50 ms | 18 |
+
+The first row was measured in an earlier session, so compare its times
+only with each other; the last three rows are one interleaved series.
+Startup does not change beyond noise. Linking the whole runtime would spend
+13 more of the 32 rows at startup, which is why it was not chosen. On Linux
+`-rdynamic` adds the roughly 1,500 exported names to the dynamic symbol
+table, an estimated 70 KB; nothing was measured on Linux.
+
+Follow-ups:
+
+- **Lazy class registration.** Registering a class's Var row when a value of
+  it is first boxed, rather than in its file initializer, would make linking
+  the whole runtime free of rows, so a module could call all of it.
+- **Extensions linked into the compiler.** A later route may compile a
+  project's extension into the compiler at compile and link time instead of
+  loading a module. Registration already allows it: targets are Maps keyed
+  by their source, `Compiler.add_native_module` records one, and
+  `_bind_native_meta` binds only through the selected Maps, so a statically
+  linked extension could register its Map at startup the same way. Nothing
+  in the fallback assumes `dlopen` supplied the Map.
 
 ## Unblocked elsewhere
 
