@@ -33,11 +33,18 @@ attached to that ownership. Together, the two conditions make native region
 analysis reusable as a proof about interpreted execution rather than requiring
 a second borrow checker for the interpreter.
 
-The guarantee is not established today. Region findings are warnings,
-unresolved callees currently receive an empty effect summary, compile-time
-adapters do not carry checked ownership summaries, and compile-time-only meta
-functions have no native form to compare. These are finite proof obligations,
-not evidence against the model.
+The guarantee is not established today. Unresolved callees currently receive
+an empty effect summary, compile-time adapters do not carry checked ownership
+summaries, and compile-time-only meta functions have no native form to
+compare. These are finite proof obligations, not evidence against the model.
+
+One obligation is met. The region pass treats a function's own locals and
+parameters as a region, so it follows addresses taken with `&`, and it runs
+on each `meta` function when that function is defined. A finding there is an
+error, so an installed meta body cannot return or store the address of its
+own expired storage. Ordinary code keeps warnings. The check reads the
+summaries of the meta functions defined before the one it walks; it does not
+yet treat an unknown call as unproved.
 
 ## Scope of the claim
 

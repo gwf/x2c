@@ -4,7 +4,8 @@
 
     A region is a `$scope()` block, a `Scope.retain` and `Scope.release`
     pair, a `$scope(&slot)` push, a `Pool.open` bracket, an `$auto`
-    local, or a Scope local that `Scope.destroy` ends. The pass reads the
+    local, a Scope local that `Scope.destroy` ends, or the function's own
+    storage, which an address taken with `&` borrows. The pass reads the
     typed forms the parser produced, before the transform driver rewrites
     them, so a region is still the call that opens it and the `defer` beside
     it that closes it. It warns when a value born in a region reaches storage
@@ -17,7 +18,10 @@
     runtime table, so a unit's warnings do not depend on which units were
     translated before it. A tool that holds every unit at once can seed the
     fixpoint with the other units' summaries through
-    `Compiler.region_escapes`.
+    `Compiler.region_escapes`. A `meta` function is walked when it is
+    defined, against the summaries of the `meta` functions before it, and a
+    finding there is an error, because a compile-time call frees its locals
+    when it returns.
 
     The warnings name departures from the lexical pattern. Raw C stores,
     pointer arithmetic, callbacks, and storage the runtime did not allocate
@@ -30,10 +34,12 @@
 #pragma private
 
 #include "ast.x"
+#include "comptime.x"
 #include "type.x"
 
-/* An open or closed region. `kind` is scope, pool, slot, auto, or local:
-   the storage of a Scope local whose end has not been seen. `depth` is the
+/* An open or closed region. `kind` is scope, pool, slot, auto, local: the
+   storage of a Scope local whose end has not been seen, or frame: the
+   storage of the function's locals and parameters. `depth` is the
    block depth it belongs to, `origin` the statement that opened it, `slot`
    the Scope local a pushed slot names, and `outer` the next open region.
    `lexical` records a close in the block that opened it. */
@@ -61,7 +67,8 @@ static Fact Var.fact(Var value) => value.pointer();
 protocol Var(Fact);
 
 /* The walk state for one unit. `facts` maps a binding to its Fact, `open`
-   is the innermost open region, and `restored` holds the places a `$let`
+   is the innermost open region, `frame` is the region of the function's
+   own storage, and `restored` holds the places a `$let` or another `defer`
    puts back before its block ends. `fresh` and `sinks` accumulate the
    current function's summary, `warnings` holds the current round's, and
    `pending` and `freed` are the expression walk's stacks. */
@@ -69,7 +76,7 @@ typedef struct Walk {
   Compiler compiler;
   Map summaries, facts, sinks, restored;
   Array warnings, pending, freed;
-  Region open;
+  Region open, frame;
   int depth, origin, fresh, changed;
 } *Walk;
 
@@ -245,8 +252,9 @@ static List _summary(Walk w, String callee) {
   return local is void ? %(0 ()) : local;
 }
 
-/* What is known about the local an expression names, through the `Var`
-   wrappers that pass their argument through and either arm of `?:`. */
+/* What is known about the local an expression names or the storage an
+   address borrows, through the `Var` wrappers that pass their argument
+   through and either arm of `?:`. */
 static Fact _fact_of(Walk w, Var expression, List *named) {
   Var inner = _unwrap(expression);
   match (inner) {
@@ -255,6 +263,7 @@ static Fact _fact_of(Walk w, Var expression, List *named) {
       Var found = w.facts[binding];
       return found is void ? NULL : found;
     }
+    case %(op (!quote &) ?place): return _borrow(w, place, named);
     case %(op (!quote ?) ? ?yes ?no): {
       Fact fact = _fact_of(w, yes, named);
       return fact ? fact : _fact_of(w, no, named);
@@ -309,11 +318,14 @@ static Region _birth(Walk w, Var value, Type type, int *born) {
   }
   match (_unwrap(value)) {
     case %(cons *): return _pooled(w, born);
-    /* A closure holds what it captures, so it lives no longer than they. */
+    /* A closure holds what it captures, so it lives no longer than they. A
+       reference capture moves its local into a cell of the active region,
+       so the closure holds the local's value, not its address. */
     case %(lambda ? (captures *captures) *): {
       foreach (Var capture, captures)
         match (capture) case %(capture ? ? ?captured): {
-          Fact fact = _fact_of(w, captured, NULL);
+          Var place = _address_of(captured);
+          Fact fact = _fact_of(w, place is void ? captured : place, NULL);
           if (fact && fact.region) return fact.region;
         }
       return _active(w);
@@ -360,8 +372,7 @@ static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
     if (sink == <return> && (fact ? fact.born : born)) w.fresh = 1;
     return 0;
   }
-  String subject = named ? %"'${binding_identity_spelling(named)}'"
-                         : "a fresh allocation";
+  String subject = _subject(w, value, named, fact);
   if (region.closed) {
     _warn(w, <region>, w.origin,
           %"$subject is used after the region that allocated it ended",
@@ -381,14 +392,35 @@ static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
       if (!target) exit = "stored through an unknown pointer";
       else if (target.param >= 0) exit = "stored through a parameter";
       else if (target.region == region) exit = NULL;
-      else if (target.region) exit = "stored into an object of another region";
+      /* Every region a function opens ends before its own storage. */
+      else if (target.region)
+        exit = region == w.frame ? NULL
+                                 : "stored into an object of another region";
       else exit = "stored into an object of an outer region";
   }
   if (!exit) return 0;
-  _warn(w, <region>, w.origin,
-        %"$subject can outlive the region it was allocated in when $exit",
-        _opened(w, region));
+  if (region == w.frame)
+    _warn(w, <region>, w.origin,
+          %"$subject can outlive the local storage it points into when $exit",
+          %("local storage ends when the function returns"));
+  else
+    _warn(w, <region>, w.origin,
+          %"$subject can outlive the region it was allocated in when $exit",
+          _opened(w, region));
   return 1;
+}
+
+/* How a warning names the value that leaves: a local by its name, and an
+   address by the local it borrows from. */
+static String _subject(Walk w, Var value, List named, Fact fact) {
+  match (_unwrap(value)) case %(lambda *): return "a closure";
+  if (!named) return "a fresh allocation";
+  String name = %"'${binding_identity_spelling(named)}'";
+  match (_unwrap(_address_of(value))) case %(ident *):
+    return %"the address of $name";
+  Var own = w.facts[named];
+  if (own is not void && own.pointer() == fact) return name;
+  return %"an address inside $name";
 }
 
 /* The local a store target's storage belongs to. `*through` is zero when
@@ -408,9 +440,9 @@ static Fact _base(Walk w, Var place, int *through) {
     case %((!or getindex index) (!set ?base (expr ?type ?)) ?): {
       Fact fact = _fact_of(w, base, NULL);
       if (!fact) return _base(w, base, through);
-      /* A C array local owns its elements. */
+      /* A C array local owns its elements; a parameter is a pointer. */
       Type declared = type;
-      *through = !declared.is_array();
+      *through = !declared.is_array() || fact.param >= 0;
       return fact;
     }
     case %(ident ?): {
@@ -424,6 +456,35 @@ static Fact _base(Walk w, Var place, int *through) {
     }
   }
   return NULL;
+}
+
+/* The storage `&place` borrows. A local, a parameter, or a compound
+   literal is this function's own storage; a place reached through a
+   pointer is storage that pointer holds. `*named` is the local the place
+   is part of. */
+static Fact _borrow(Walk w, Var place, List *named) {
+  int through = 0;
+  Fact base = _fact_of(w, place, named);
+  if (!base) base = _base(w, place, &through);
+  if (!base) return NULL;
+  if (named && !*named) *named = _root(place);
+  Fact borrow = _fact(w, NULL, -1);
+  borrow.points = base;
+  borrow.place = _unwrap(place);
+  borrow.region = through ? base.region : w.frame;
+  if (through) borrow.param = base.param;
+  return borrow;
+}
+
+/* The local a place is part of, or NULL. */
+static List _root(Var place) {
+  while (1)
+    match (_unwrap(place)) {
+      case %(ident (!set ?binding (binding ? ?))): return binding;
+      case %(op ? ?base *): place = base;
+      case %((!or getindex index) ?base ?): place = base;
+      default: return NULL;
+    }
 }
 
 /* The sink a store through `base` reaches. A struct local is its own
@@ -502,6 +563,9 @@ static void _scan(Walk w, Var value, int deferred) {
         }
         w.pending.push(args);
       }
+      /* A statement expression declares locals of its own. */
+      case %((!or declare decl) ?specifiers (bindings *bindings)):
+        _declare(w, specifiers, bindings);
       /* A List literal's cells outlive every region. */
       case %(cons ?head ?tail): {
         _flow(w, head, NULL, <heap>, NULL);
@@ -533,7 +597,6 @@ static void _revive(Walk w) {
    once, and the receiving local does not carry the region further. */
 static void _assign(Walk w, Fact fact, Var value, Type type, int store) {
   _scan(w, value, 0);
-  Var place = _address_of(value);
   Fact source = _fact_of(w, value, NULL);
   if (!source) source = _returned_argument(w, value, NULL);
   int born = 0;
@@ -544,19 +607,12 @@ static void _assign(Walk w, Fact fact, Var value, Type type, int store) {
   if (kept && store && source && region)
     kept = !_flow(w, value, type, <local>, fact);
   fact.dead = 0;
-  fact.points = NULL;
-  fact.place = NULL;
+  fact.points = source ? source.points : NULL;
+  fact.place = source ? source.place : NULL;
   /* A Scope local that is assigned again names other storage, whose end has
      not been seen, so the region its previous value formed is not the one
      the next allocation belongs to. */
   fact.owner = NULL;
-  if (place is not void) {
-    int through = 0;
-    fact.points = _fact_of(w, place, NULL);
-    if (!fact.points) fact.points = _base(w, place, &through);
-    fact.place = _unwrap(place);
-    kept = 0;
-  }
   fact.region = kept ? region : NULL;
   fact.born = kept && (source ? source.born : born);
   fact.param = kept && source ? source.param : -1;
@@ -596,7 +652,10 @@ static void _store(Walk w, Var target, Var value) {
   _flow(w, value, type, sink, object);
 }
 
-static void _declare(Walk w, List bindings) {
+/* A static or extern local is not the function's storage, so the walk
+   treats it as file-scope state. */
+static void _declare(Walk w, Var specifiers, List bindings) {
+  if (<static> in specifiers || <extern> in specifiers) return;
   Map types = w.compiler.semantic_binding_facts();
   foreach (Var item, bindings)
     match (item) {
@@ -619,6 +678,16 @@ static int _note_restored(Walk w, Var body) {
       return 1;
     }
   return 0;
+}
+
+/* A place a block's `defer` writes is put back when the block ends, so a
+   store into it anywhere in the block is not an escape. */
+static void _note_deferred_stores(Walk w, Var node) {
+  match (node) {
+    case %(op (!quote =) ?target ?): w.restored[_unwrap(target)] = 1;
+    case %(*children):
+      foreach (Var child, children) _note_deferred_stores(w, child);
+  }
 }
 
 /* A `defer` beside a region closes it at block exit, a deferred free or
@@ -693,6 +762,14 @@ static void _walk_block(Walk w, List statements) {
   Region outer = w.open;
   Map restored = w.restored;
   w.depth += 1;
+  foreach (Var statement, statements) {
+    match (statement) case %(at ? ?inner): statement = inner;
+    match (statement) case %(defer ?body *): {
+      if ((void *) w.restored == (void *) restored)
+        w.restored = restored.copy();
+      _note_deferred_stores(w, body);
+    }
+  }
   foreach (Var statement, statements) _walk(w, statement);
   _close_to(w, w.open, outer);
   w.open = outer;
@@ -712,7 +789,8 @@ static void _walk(Walk w, Var node) {
     case %(seq *statements):
       foreach (Var statement, statements) _walk(w, statement);
     case %(defer ?body *): _walk_defer(w, body);
-    case %((!or declare decl) ? (bindings *bindings)): _declare(w, bindings);
+    case %((!or declare decl) ?specifiers (bindings *bindings)):
+      _declare(w, specifiers, bindings);
     case %(return ?type ?result): {
       _scan(w, result, 0);
       _flow(w, result, type, <return>, NULL);
@@ -797,6 +875,8 @@ static void _analyze(Walk w, List function) {
    rows for names another unit defines. A seeded name the unit defines
    itself only starts the walk higher, because summaries grow. */
 static void _fixpoint(Walk w, List ast, List seed, Array functions) {
+  w.frame = Scope.calloc(1, sizeof(struct Region));
+  w.frame.kind = <frame>;
   _collect_functions(ast, functions);
   foreach (List row, seed)
     match (row) case %(?name ?fresh ?sinks):
@@ -831,6 +911,36 @@ void Compiler.check_regions(Compiler c, List ast) {
     c.report_warning(code, message, NULL, notes);
   }
   c.origin = origin;
+}
+
+/** Rejects a `meta` function whose body breaks the rule
+    `Compiler.check_regions` warns about. A compile-time call frees its
+    locals when it returns, so an address of one that is returned or stored
+    into a static, a parameter's object, or an unknown pointer would read
+    freed memory. The first finding is reported as an error. `fn` must be
+    the bound and typed definition. The walk reads the summaries of the
+    `meta` functions installed before `fn` and records the summary of `fn`
+    in `meta_regions`; a definition whose lowering the process already
+    cached takes the summary recorded with it.
+*/
+void Compiler.check_meta_regions(Compiler c, List fn) {
+  match (fn) case %(function ? (bind (binding ? ?(String name)) *) ?): {
+    List checked = c.lowered_meta_regions(fn);
+    if (checked) {
+      c.meta_regions[name] = checked;
+      return;
+    }
+    /* A replaced definition starts again from an empty summary. */
+    c.meta_regions[name] = %(0 ());
+  }
+  struct Walk walk = {
+    .compiler = c, .summaries = c.meta_regions, .pending = [], .freed = []};
+  Walk w = &walk;
+  Array functions = $auto([]);
+  _fixpoint(w, fn, NULL, functions);
+  if (!w.warnings.len()) return;
+  (Symbol code, int at, String message, List notes) = w.warnings[0];
+  $let(c.origin, at) { c.report_error(code, message, NULL, notes); }
 }
 
 /* Where an origin points, named as the caller's reports name it. */

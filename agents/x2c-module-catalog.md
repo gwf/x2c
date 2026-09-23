@@ -148,11 +148,12 @@ translating a compile-time x2c function into Lisp.
 Public functions:
 
 `Compiler.lower_comptime`, `Compiler.lower_repl`, `Compiler.lower_declined`,
-`Compiler.inherit_shared_meta`, `Compiler.install_comptime`,
-`Compiler.lower_reached_globals`, `Compiler.lower_reached_meta`,
-`Compiler.meta_is_comptime_only`, `Compiler.lower_meta_initializer`,
-`Compiler.lower_meta_expression`, `Compiler.meta_value_expression`,
-`Compiler.check_meta_call`, `Compiler.fold_meta_call`
+`Compiler.inherit_shared_meta`, `Compiler.lowered_meta_regions`,
+`Compiler.install_comptime`, `Compiler.lower_reached_globals`,
+`Compiler.lower_reached_meta`, `Compiler.meta_is_comptime_only`,
+`Compiler.lower_meta_initializer`, `Compiler.lower_meta_expression`,
+`Compiler.meta_value_expression`, `Compiler.check_meta_call`,
+`Compiler.fold_meta_call`
 
 ### [src/deps.x](../src/deps.x)
 
@@ -364,7 +365,8 @@ values that can outlive the region that allocated them.
 
 Public functions:
 
-`Compiler.check_regions`, `Compiler.region_escapes`
+`Compiler.check_regions`, `Compiler.check_meta_regions`,
+`Compiler.region_escapes`
 
 ### [src/repl-input.x](../src/repl-input.x)
 

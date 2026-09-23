@@ -3,8 +3,9 @@
 > Status: active
 > Written 2026-09-22 after [meta recovery](archive/meta-recovery.md) landed
 > on `dev` as `db86d4b7`. Tracks A-D are independent implementation work and
-> can run in parallel; E-G need design decisions with Gary first. Each track
-> is a separate session and worktree based on `dev`.
+> can run in parallel; E and G need design decisions with Gary first, and F
+> has an approved design. Each track is a separate session and worktree
+> based on `dev`.
 
 ## Implementation tracks
 
@@ -132,11 +133,54 @@ hand-listed targets such as the Iter `_into` rows in `lib/lisp.x` and the
 
 ### F. Lifetime certification
 
-Compile-time code follows C semantics, so a pointer to an expired local is
-undefined, and nothing checks it. The goal is for compile-time code to
-consume the compiler's shared lifetime analysis rather than add its own. The
-lifetime-certified tranche of the
+Compile-time code followed C semantics, so a pointer to an expired local was
+undefined, and nothing checked it. A compile-time call frees its locals when
+it returns (`lib/lisp.x` `_call_lambda_slots`), so `return &local` or
+`&local` stored into a `meta static` read freed memory. The goal is for
+compile-time code to consume the compiler's shared lifetime analysis rather
+than add its own. The lifetime-certified tranche of the
 [internal adoption campaign](internal-adoption-campaign.md) depends on it.
+
+Gary approved the design on 2026-09-22; the first delivery implements it.
+
+- **Function-storage region.** `src/regions.x` treats a function's own
+  locals, parameters, and compound literals as one more region, `frame`. An
+  address taken with `&` belongs to the storage it names; an address reached
+  through a pointer belongs to what that pointer holds, so `&param->field`
+  counts as the parameter in the summary and a callee that returns it hands
+  the caller's borrow back. Returning a frame address, or storing it into a
+  static, a static local, a parameter's object, an unknown pointer, or fresh
+  storage that outlives the call, is an escape. Regions the function opens
+  end first, so storing into them or into another local is not.
+- **Enforcement in meta bodies.** `Compiler.install_meta_function` runs the
+  pass on each definition through `Compiler.check_meta_regions`, seeded with
+  `meta_regions`, the summaries of the `meta` functions installed before
+  it. A finding is an error at the escaping statement. The process lowering
+  cache stores the summary with the lowered forms, so a reused lowering
+  carries its check result and seeds later callers.
+- **Ordinary code** gets the same findings as warnings. Always on; the
+  per-unit cost is within noise.
+- Three refinements keep the rule from reporting safe code: a reference
+  capture (`using &name`) moves the local into a cell, so a closure holds
+  the cell rather than the frame; a store into a place that a `defer` in the
+  same block writes back is restored, as `$let` already was; and a
+  statement expression's declarations are locals rather than stores through
+  an unknown pointer.
+
+Result against `dev` `7836e03a`: no new warning in `src/`, `lib/`,
+`unittest/`, `examples/`, or `tools/`; the `defer` refinement removes two
+earlier false positives in `src/repl-session.x`. The existing
+`src/statements.x:677` warning is unchanged. Fixtures:
+`region-local-escapes` (ordinary warnings), additions to `region-safe`, and
+`comptime-declines-local-address-{return,static,callee}`. Self-translation
+of `src/` measured 3.97 s user before and 3.99 s after (medians of ten
+alternating runs; noise is about 1.4%).
+
+Not covered: pointer arithmetic, an array local that decays to a pointer,
+and values reached through a stack struct's fields, as the book's region
+chapter lists. Phase 8 remains: opt-in whole-project certification that
+treats unknown calls as unproved, the effect inventory, and File and Job
+finalizers.
 
 ### G. Native extensions (last stage)
 

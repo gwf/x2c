@@ -111,6 +111,32 @@ static int reused_slot(void) {
   return size;
 }
 
+static int *current_value = NULL;
+
+static Var *_value_of(Node node) => &node.value;
+static int *_second(int values[4]) => &values[1];
+static int *_alias_of(int &value) => &value;
+
+static int *_counter(void) {
+  static int count = 0;
+  count++;
+  return &count;
+}
+
+// Addresses of locals that stay inside the call, and a static local's.
+static int local_addresses(void) {
+  int value = 1, values[4] = {0};
+  int *saved = current_value;
+  current_value = &value;
+  defer current_value = saved;
+  struct { int *left; } pair = { .left = &value };
+  struct Node node = { .next = NULL };
+  *_value_of(&node) = 3;
+  *_second(values) = 2;
+  return *pair.left + values[1] + *_alias_of(value) + *_counter() +
+         node.value.int();
+}
+
 int main(void) {
   Scope keep = NULL;
   Scope.push(&keep);
@@ -119,5 +145,6 @@ int main(void) {
   return moved_out(&keep) != NULL && canonical_result() != NULL &&
          caller_owned() != NULL && auto_local() == 1 &&
          named_close() != NULL && freed_then_cleared() &&
-         early_release(0) && !goto_cleanup(0) && reused_slot() == 0;
+         early_release(0) && !goto_cleanup(0) && reused_slot() == 0 &&
+         local_addresses() == 8;
 }

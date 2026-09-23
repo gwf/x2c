@@ -438,10 +438,35 @@ the `--system-headers` option, so that the compiler sees its declaration.
 Without it, the definition reports that a struct or union has no
 compile-time representation.
 
-A pointer into a local whose function has returned is dangling, as in C;
-using it is undefined behavior. A struct inside a `meta static` value, or in
-a value that persists across REPL submissions, lives in storage the
-compile-time session owns.
+A compile-time call frees its locals and parameters when it returns. A
+`meta` function whose body lets the address of one outlive the call is
+rejected where it is defined, with an error at the statement where the
+address leaves: a `return`, a store into a `meta static`, or a store through
+a parameter or through a pointer whose target the compiler cannot identify.
+The check follows the address through pointer locals and through the `meta`
+functions defined before the caller:
+
+<!-- ignore: the definition of leak is rejected on purpose -->
+```x2c,ignore
+struct Box { int value; };
+
+meta static int *field_of(struct Box *box) { return &box->value; }
+
+meta static int *leak(int seed) {
+  struct Box box = { .value = seed };
+  return field_of(&box);
+}
+```
+
+`field_of` is accepted, because the object it borrows from belongs to its
+caller. `leak` is rejected at its `return`, because `field_of` hands back an
+address inside `box`. In ordinary code the same check reports a warning; see
+[The Region Model](regions.md). An address the check does not follow, such
+as one computed with pointer arithmetic, is undefined behavior when it
+dangles, as in C.
+
+A struct inside a `meta static` value, or in a value that persists across
+REPL submissions, lives in storage the compile-time session owns.
 
 A struct result stays inside compile-time code. Inserting one into the
 program with `$pair(3)` is diagnosed, because the compiler cannot write a
