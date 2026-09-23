@@ -928,6 +928,7 @@ Iter Var.fallback_iter(Var x, Iter dest) {
     Raises: `<void-op>` for `void`. A null `dest` returns NULL without
     raising.
 */
+meta Iter Var.iter(Var x, Iter dest);
 Iter Var.iter(Var x, Iter dest) {
   if (x.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.iter"));
   if (!dest) return NULL;

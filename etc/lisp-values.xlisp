@@ -22,8 +22,6 @@
              (if (eq? (length arguments) arity)
                  (append arguments (list (fresh)))
                  arguments)))))
-(defun C.iterator (operation arity)
-  (C.iterator.call (bind (string-append operation "_into") nil) arity))
 
 // List
 
@@ -45,7 +43,7 @@
 (def List.zip_with (bind "List_zip_with" nil))
 (def List.foldl   (bind "List_foldl" nil))
 (def List.find    (bind "Lisp_List_find" nil))
-(def List.iter     (C.iterator "List_iter" 1))
+(def List.iter     (C.iterator.call (bind "List_iter_into" nil) 1))
 
 // Array
 
@@ -69,7 +67,7 @@
 (def Array.sort_by   (bind "Array_sort_by" nil))
 (def Array.sort_with (bind "Array_sort_with" nil))
 (def Array.foldl    (bind "Array_foldl" nil))
-(def Array.iter      (C.iterator "Array_iter" 1))
+(def Array.iter      (C.iterator.call (bind "Array_iter_into" nil) 1))
 
 // Map
 
@@ -83,9 +81,9 @@
 (def Map.getdefault (bind "Map_getdefault" nil))
 (def Map.setdefault (bind "Map_setdefault" nil))
 (def Map.list       (bind "Map_list" nil))
-(def Map.iter       (C.iterator "Map_iter" 1))
-(def Map.keys       (C.iterator "Map_keys" 1))
-(def Map.enumerate  (C.iterator "Map_enumerate" 1))
+(def Map.iter       (C.iterator.call (bind "Map_iter_into" nil) 1))
+(def Map.keys       (C.iterator.call (bind "Map_keys_into" nil) 1))
+(def Map.enumerate  (C.iterator.call (bind "Map_enumerate_into" nil) 1))
 
 // String
 
@@ -148,24 +146,24 @@
 (def String.rstrip (bind "lisp_string_rstrip" nil))
 (def String.map (bind "String_map" nil))
 (def String.filter (bind "Lisp_String_filter" nil))
-(def String.iter (C.iterator "String_iter" 1))
+(def String.iter (C.iterator.call (bind "String_iter_into" nil) 1))
 
 // Iter
 
-(def Var.iter (C.iterator "Var_iter" 1))
-(def range (C.iterator "range" 3))
-(def Iter.map (C.iterator "Iter_map" 2))
+(def Var.iter (C.iterator.call (bind "Var_iter_into" nil) 1))
+(def range (C.iterator.call (bind "range_into" nil) 3))
+(def Iter.map (C.iterator.call (bind "Iter_map_into" nil) 2))
 (def Iter.filter (bind "Lisp_Iter_filter" nil))
-(def Iter.zip (C.iterator "Iter_zip" 2))
-(def Iter.zip_with (C.iterator "Iter_zip_with" 3))
-(def Iter.map2 (C.iterator "Iter_map2" 3))
-(def Iter.chain (C.iterator "Iter_chain" 2))
-(def Iter.enumerate (C.iterator "Iter_enumerate" 2))
-(def Iter.repeat (C.iterator "Iter_repeat" 2))
-(def Iter.head (C.iterator "Iter_head" 2))
-(def Iter.accumulate (C.iterator "Iter_accumulate" 2))
-(def Iter.scan (C.iterator "Iter_scan" 3))
-(def Iter.unique (C.iterator "Iter_unique" 1))
+(def Iter.zip (C.iterator.call (bind "Iter_zip_into" nil) 2))
+(def Iter.zip_with (C.iterator.call (bind "Iter_zip_with_into" nil) 3))
+(def Iter.map2 (C.iterator.call (bind "Iter_map2_into" nil) 3))
+(def Iter.chain (C.iterator.call (bind "Iter_chain_into" nil) 2))
+(def Iter.enumerate (C.iterator.call (bind "Iter_enumerate_into" nil) 2))
+(def Iter.repeat (C.iterator.call (bind "Iter_repeat_into" nil) 2))
+(def Iter.head (C.iterator.call (bind "Iter_head_into" nil) 2))
+(def Iter.accumulate (C.iterator.call (bind "Iter_accumulate_into" nil) 2))
+(def Iter.scan (C.iterator.call (bind "Iter_scan_into" nil) 3))
+(def Iter.unique (C.iterator.call (bind "Iter_unique_into" nil) 1))
 (def Iter.any (bind "Lisp_Iter_any" nil))
 (def Iter.all (bind "Lisp_Iter_all" nil))
 (def Iter.foldl (bind "Iter_foldl" nil))

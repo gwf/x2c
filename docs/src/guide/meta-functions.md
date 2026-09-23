@@ -541,7 +541,7 @@ on a listed type works. The operation inventory below further limits calls.
 | C-style array declarations | A literal-sized one-dimensional array, such as `int a[3] = {1, 2};`, has compile-time storage. Omitted elements are filled with zero-like values. | Indexing and simple assignment work; passing the array to an indexed pointer parameter works in the tested case. At compile time the array is a dynamic Array of Var values, not native bytes; the running program uses native C array storage. See element/dimension limits below. |
 | Pointers to locals | `int *p = &n;`, copying that pointer, and passing it to another meta function or a native function work. A local whose address is taken lives in native bytes, and the pointer is its real address. | `*p` and `p[i]` read, and `*p = value` and `p[i] = value` write, the bytes as C does. Pointer arithmetic and the address of an array element are not supported. |
 | Structs | Named, inline and nested locals; initialization, assignment, by-value arguments and returns, with C copy behavior. | Fields and addresses refer to native bytes in C layout. Assignment keeps existing field addresses; storage ends when the function returns. See [C objects during compilation](#c-objects-during-compilation). |
-| Native functions | The functions in `lib/cmath.x` and `lib/clibc.x`, the iterator producers in `lib/iter.x`, and the witnesses of `meta protocol` adoptions, all of which the compiler links. | Explicit dollar evaluation and meta bodies can call them, including through output pointers. Ordinary calls are not folded. See [Native C functions](#native-c-functions). |
+| Native functions | The functions in `lib/cmath.x` and `lib/clibc.x`, the iterator producers marked `meta` in `lib/iter.x`, `lib/map.x` and `lib/dispatch.x`, and the witnesses of `meta protocol` adoptions, all of which the compiler links. | Explicit dollar evaluation and meta bodies can call them, including through output pointers. Ordinary calls are not folded. See [Native C functions](#native-c-functions). |
 | System-header structs | `--system-headers` supplies the header declarations. A local `struct timespec` can be passed to `timespec_get`. | Unions, packed structs and structs with bitfields, array members or anonymous members are not available. |
 | `File`, buffers and other resource types | No general compile-time constructor/operation surface is installed for these types. A declaration or opaque type name alone does not make the resource usable. | For example, `File.open` has no binding. Use the compiler's explicit text-embedding operation for source-dependent text. |
 
@@ -614,12 +614,15 @@ reuse those same operations. `String`, `List`, `Array` and `Map` expose their
 implementations rather than a separate formatting or comparison algorithm.
 
 Iterator producers and functional collection operations are also available in
-x2c-style meta functions. `lib/iter.x` declares the producers `meta`, and
-`lib/protocols.x` marks the `Array`, `List`, `Map` and `String` Iter
-adoptions `meta protocol`. A `File` is not iterable at compile time. Omit the
-native destination argument when an iterator is consumed by the same
-expression; the call then allocates the iterator with `Iter.new`. Either way
-it uses the native lazy producer and borrows its source and any callback.
+x2c-style meta functions. `lib/protocols.x` marks the `Array`, `List`, `Map`
+and `String` Iter adoptions `meta protocol`, so their `iter` methods are
+available. `range` and the `Iter` producers are `meta` prototypes in
+`lib/iter.x`; `Map.keys`, `Map.enumerate` and `Var.iter` are marked beside
+their definitions in `lib/map.x` and `lib/dispatch.x`. A `File` is not
+iterable at compile time. Omit the native destination argument when an
+iterator is consumed by the same expression; the call then allocates the
+iterator with `Iter.new`. Either way it uses the native lazy producer and
+borrows its source and any callback.
 
 ```x2c
 meta int key_count(Map values) => values.keys().count();

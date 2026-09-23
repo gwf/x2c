@@ -63,10 +63,8 @@ struct UnzipShared {
 /* Compile-time code calls these producers natively. Each takes its
    destination last, so a compile-time call may omit it and get a fresh
    `Iter`. The collections' own `iter` methods are available through their
-   `meta protocol Iter` adoptions in protocols.x. */
-meta Iter Map.keys(Map, Iter dest);
-meta Iter Map.enumerate(Map, Iter dest);
-meta Iter Var.iter(Var, Iter dest);
+   `meta protocol Iter` adoptions in protocols.x; `Map.keys`,
+   `Map.enumerate` and `Var.iter` are marked beside their definitions. */
 meta Iter range(int start, int end, int step, Iter dest);
 meta Iter Iter.map(Iter, Func, Iter dest);
 meta Iter Iter.filter(Iter, Func, Iter dest);

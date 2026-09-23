@@ -165,7 +165,7 @@ checked-in bootstrap before `lib/` or `etc/` uses it:
 - A native function whose last parameter and result are `Iter` is an
   iterator operation. The inventory emits its row as `(NAME (as NAME_into))`,
   so the native function is the `_into` target. Compile-time code calls
-  `NAME` through `C.iterator.call` in `etc/comptime.xlisp`, which appends a
+  `NAME` through `C.iterator.call` in `etc/lisp-values.xlisp`, which appends a
   fresh `Iter_new` destination when a call omits it and otherwise passes the
   call through. No allocating native target is needed, so deleting the
   allocating static adapters cannot leave a dispatcher without one; a
@@ -181,8 +181,10 @@ Delivery 1 landed on `dev` as `e4aa66bb`.
 Delivery 2 adopts it:
 
 - `lib/protocols.x` marks the Array, List, Map and String Iter adoptions
-  `meta protocol`; File stays unmarked. `lib/iter.x` declares the other 16
-  producers as `meta` prototypes, beside the Iter type.
+  `meta protocol`; File stays unmarked. The other 16 producers are `meta`
+  prototypes: `range` and the twelve `Iter` operations in `lib/iter.x`,
+  and `Map.keys`, `Map.enumerate` and `Var.iter` beside their definitions
+  in `lib/map.x` and `lib/dispatch.x`.
 - `lib/lisp.x` keeps only `Iter_new`, `Iter_init` and the five callback
   adapters' `_into` rows. The 40 pair rows and the 20 allocating static
   adapters are deleted; the generated inventory supplies the 15
@@ -190,7 +192,7 @@ Delivery 2 adopts it:
 - `etc/comptime.xlisp` loses the `C.iterator` macro and its 20 rows. Lowered
   calls bind on first use from the `meta` declarations. `C.iterator.call`
   moves to `etc/lisp-values.xlisp`, whose 19 Lisp aliases such as `List.iter`
-  and `Iter.head` now use it with the `_into` targets.
+  and `Iter.head` now wrap the `_into` targets with it directly.
 - A probe of every Lisp alias, each operation's compile-time name with and
   without a destination, and each lowered call with and without explicit
   storage gives output identical to the pre-change compiler, and the
