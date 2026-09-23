@@ -251,6 +251,7 @@ char * Compiler_code_pretty_string(Compiler, List, String);
 List Compiler_emit(Compiler, List);
 void generate_code(Compiler, List, String);
 int translation_depfile_write(CliRequest, Compiler, String, String);
+int List_truth(List);
 static void _translate_unit(Frontend frontend, String filename, String output_dir){
   CliRequest request = frontend -> request;  ParsedUnit unit;  int ok = Frontend_start(frontend, filename, & unit); {
   _x2c_defer_env_0 _x2c_defer_env_2 = {._x2c_defer_capture_0 =(const void *) & unit};
@@ -384,6 +385,7 @@ static void _translate_unit(Frontend frontend, String filename, String output_di
     generate_code(compiler, ast, output_dir);
     if(! translation_depfile_write(request, compiler, filename, output_dir)) exit(1);
     if(deferred) _report_diagnostics(compiler);
+    if(request -> fatal_warnings && List_truth(Compiler_diagnostics(compiler))) exit(1);
   }
   x2c_cleanup_leave(& _x2c_defer_record_0);
 
@@ -567,8 +569,6 @@ static int _translate_workers(Frontend frontend, Array chunks, Map unit_dirs, in
   Scope_free(running);
   return failed;
 }
-
-int List_truth(List);
 
 List List_cdr(List);
 
@@ -914,7 +914,7 @@ String String_join(String, List);
 
 List CliRequest_package_roots(CliRequest);
 
-void interface_configure(String);
+void interface_configure(String, int);
 
 String interface_prelude(void);
 
@@ -932,7 +932,7 @@ static int _run_env(CliRequest request){
   Toolchain toolchain = toolchain_new(request -> cc, request -> ar, request -> cpp_args, request -> cc_args, request -> ld_args, request -> verbose, request -> dry_run);
   String executable = x2c_get_executable();
   String roots = String_join(_30, CliRequest_package_roots(request));
-  interface_configure(request -> out_dir);
+  interface_configure(request -> out_dir, 0);
   String prelude = interface_prelude();
   List rows = cons(List_var(cons(_32, cons(String_var(x2c_get_root()), NULL))), cons(List_var(cons(_34, cons(String_var(String_truth(executable) ? executable : 0), NULL))), cons(List_var(cons(_36, cons(String_var(toolchain -> include_dir), NULL))), cons(List_var(cons(_38, cons(String_var(toolchain -> runtime_lib), NULL))), cons(List_var(cons(_40, cons(String_var(String_truth(prelude) ? prelude : 0), NULL))), cons(List_var(cons(_42, cons(String_var(String_truth(roots) ? roots : 0), NULL))), cons(List_var(cons(_44, cons(String_var(toolchain -> cc), NULL))), cons(List_var(cons(_46, cons(String_var(toolchain -> ar), NULL))), cons(List_var(cons(_48, cons(String_var(script_cache_root()), NULL))), NULL)))))))));
   String wanted = NULL;

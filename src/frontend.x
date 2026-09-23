@@ -128,7 +128,7 @@ static String _load_native_module(String path) {
     compile-time calls.
 */
 void Frontend.load_support(CliRequest request) {
-  interface_configure(request.out_dir);
+  interface_configure(request.out_dir, request.no_interfaces);
   Compiler.select_native_modules(
     request.native_modules.map(%!(String path) => _load_native_module(path)));
 }

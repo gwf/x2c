@@ -719,13 +719,14 @@ static String interface_out_dir = NULL, interface_mirror = NULL;
     interfaces. `out_dir` is the current translation output directory, or
     NULL. Home files mirror their home-relative path under the compiler's
     stage directory when it runs from `<home>/builds/`, otherwise under the
-    home. Call it before opening any translation unit's Context.
+    home. A `cold` process reads no interface and still writes its own. Call
+    it before opening any translation unit's Context.
 */
-void interface_configure(String out_dir) {
+void interface_configure(String out_dir, int cold) {
   _process_cache();
   interface_out_dir = out_dir;
   String stage = x2c_stage_dir();
-  interface_mirror = stage ? stage : x2c_get_root();
+  interface_mirror = cold ? NULL : stage ? stage : x2c_get_root();
 }
 
 /* Candidate interface paths for one canonical source path: the output

@@ -23,15 +23,16 @@ Source-ordered shallow symbol collection and replay.
 
 #### interface_configure
 
-`void interface_configure(String out_dir)`
+`void interface_configure(String out_dir, int cold)`
 
 Creates the process cache and names the directories searched for `.xi`
 interfaces. `out_dir` is the current translation output directory, or
 NULL. Home files mirror their home-relative path under the compiler's
 stage directory when it runs from `<home>/builds/`, otherwise under the
-home. Call it before opening any translation unit's Context.
+home. A `cold` process reads no interface and still writes its own. Call
+it before opening any translation unit's Context.
 
-Source: `src/collect.x:724`
+Source: `src/collect.x:725`
 
 #### interface_prelude
 
@@ -39,7 +40,7 @@ Source: `src/collect.x:724`
 
 Returns the readable prelude interface path, or NULL when none exists.
 
-Source: `src/collect.x:749`
+Source: `src/collect.x:750`
 
 #### interface_text
 
@@ -49,7 +50,7 @@ Returns the compiler's own collected contribution as interface text, or
 NULL when the unit has not collected its symbols. A contribution that
 the interface grammar cannot spell is reported as an `emit` diagnostic.
 
-Source: `src/collect.x:971`
+Source: `src/collect.x:972`
 
 ### `Compiler`
 

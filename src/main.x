@@ -161,6 +161,8 @@ static void _translate_unit(
   if (!translation_depfile_write(request, compiler, filename, output_dir))
     exit(1);
   if (deferred) _report_diagnostics(compiler);
+  // A unit that reaches here has no errors, so any diagnostic is a warning.
+  if (request.fatal_warnings && compiler.diagnostics()) exit(1);
 }
 
 /* Translates one unit, building the shared compile-time parent between
@@ -485,7 +487,7 @@ static int _run_env(CliRequest request) {
     request.ld_args, request.verbose, request.dry_run);
   String executable = x2c_get_executable();
   String roots = ":".join(request.package_roots());
-  interface_configure(request.out_dir);
+  interface_configure(request.out_dir, 0);
   String prelude = interface_prelude();
   List rows = %(
     ("home" ${x2c_get_root()})

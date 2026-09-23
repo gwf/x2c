@@ -13,7 +13,7 @@ Map Compiler_collect_symbols(Compiler c, Map globs);
 
 void Compiler_collect_package(Compiler c, String name, Token token);
 
-void interface_configure(String out_dir);
+void interface_configure(String out_dir, int cold);
 
 String interface_prelude(void);
 

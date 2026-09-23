@@ -32,6 +32,8 @@ typedef struct CliRequest {
   int max_errors;
   int source_map, source_facts, live_symbols, cpp_symbols, system_headers;
   int force, rebuild, clean;
+  // Repository build controls: a warning fails its unit; no .xi is read.
+  int fatal_warnings, no_interfaces;
   SourceView sources;
 } *CliRequest;
 
@@ -130,6 +132,10 @@ static CliOption cli_options[] = {
   { <diag-file>, CLI_TRANSLATE | CLI_NATIVE, <general>,
     "--diagnostics-file", "<file>",
     "Write compiler diagnostics to <file> as JSON Lines", 0 },
+  { <fatal-warn>, CLI_TRANSLATE, <general>, "--fatal-warnings", NULL,
+    "Fail a unit that reports a warning", 1 },
+  { <no-iface>, CLI_TRANSLATE, <source>, "--no-interfaces", NULL,
+    "Collect every unit cold without reading .xi interfaces", 1 },
   { <repl-dump>, CLI_REPL, <inspection>, "--dump", NULL,
     "Print typed syntax and lowered Lisp for each submission", 0 },
   { <repl-stats>, CLI_REPL, <inspection>, "--stats", NULL,
@@ -943,6 +949,8 @@ static void _apply_option(
     case <max-errors>:
       c.max_errors = _driver_count(value, 0, "error limit");
     case <diag-file>: c.diagnostics_file = value;
+    case <fatal-warn>: c.fatal_warnings = 1;
+    case <no-iface>: c.no_interfaces = 1;
     case <output>: c.output = value;
     case <build-dir>: c.build_dir = value;
     case <cc-db>:
