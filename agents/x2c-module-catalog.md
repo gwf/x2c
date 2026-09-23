@@ -136,10 +136,10 @@ Public functions:
 `Sym.resolve_numeric_type`, `Sym.local_type`, `Compiler.aggregate_name`,
 `Sym.normalize_declared_type`, `Sym.var_tag_for_type`, `Sym.is_var_type`,
 `Sym.is_string_type`, `Sym.is_array_type`, `Sym.is_map_type`,
-`Sym.is_named_value_type`, `Sym.lookup_field`, `Sym.declare_field_order`,
-`Sym.field_order`, `Compiler.meta_type_layout`, `Sym.declare_delegate_field`,
-`Sym.delegate_aggregate`, `Compiler.gensym`, `Sym.push_new_scope`,
-`Sym.push_scope`, `Sym.pop_scope`
+`Sym.is_bool_type`, `Sym.is_named_value_type`, `Sym.lookup_field`,
+`Sym.declare_field_order`, `Sym.field_order`, `Compiler.meta_type_layout`,
+`Sym.declare_delegate_field`, `Sym.delegate_aggregate`, `Compiler.gensym`,
+`Sym.push_new_scope`, `Sym.push_scope`, `Sym.pop_scope`
 
 ### [src/comptime.x](../src/comptime.x)
 

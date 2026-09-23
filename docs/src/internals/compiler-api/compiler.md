@@ -108,6 +108,7 @@ Core x2c compiler state and operations.
 | [`Sym.has_local_macros`](#Sym.has_local_macros) | Returns whether any lexical scope contains a local macro definition. |
 | [`Sym.introduce`](#Sym.introduce) | Allocates a fresh binding identity for a compiler-introduced spelling. |
 | [`Sym.is_array_type`](#Sym.is_array_type) | Reports whether `type` reaches the named `Array` value type. |
+| [`Sym.is_bool_type`](#Sym.is_bool_type) | Reports whether `type` reaches C's boolean type, `bool` or `_Bool`. |
 | [`Sym.is_map_type`](#Sym.is_map_type) | Reports whether `type` reaches the named `Map` value type. |
 | [`Sym.is_named_value_type`](#Sym.is_named_value_type) | Reports whether `type` reaches a named value type before its definition. |
 | [`Sym.is_string_type`](#Sym.is_string_type) | Reports whether `type` reaches the named `String` value type. |
@@ -446,7 +447,7 @@ Identities are scoped to the compiler's current file and numbered per
 file, so every process mints the same sequence for one file and two
 files never share an identity. No emission path prints one.
 
-Source: `src/compiler.x:3722`
+Source: `src/compiler.x:3748`
 
 <a id="Compiler.imported_providers"></a>
 #### Compiler.imported_providers
@@ -590,7 +591,7 @@ Returns the evaluator's native byte layout for `type`, derived from its
 canonical Type identity and Sym-owned member order. Meta adoption remains
 a separate compiler decision and cache presence does not advertise it.
 
-Source: `src/compiler.x:3695`
+Source: `src/compiler.x:3721`
 
 <a id="Compiler.new"></a>
 #### Compiler.new
@@ -1018,7 +1019,7 @@ Source: `src/compiler.x:2994`
 
 Marks one named aggregate field as a delegate.
 
-Source: `src/compiler.x:3699`
+Source: `src/compiler.x:3725`
 
 <a id="Sym.declare_enumerator"></a>
 #### Sym.declare_enumerator
@@ -1039,7 +1040,7 @@ Records declaration AST fields in source order after binding finishes.
 `Field` types already use member keys. Unnamed rows retain their type
 and an empty name so initializer traversal preserves anonymous subobjects.
 
-Source: `src/compiler.x:3596`
+Source: `src/compiler.x:3601`
 
 <a id="Sym.define"></a>
 #### Sym.define
@@ -1081,7 +1082,7 @@ Source: `src/compiler.x:2595`
 
 Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`.
 
-Source: `src/compiler.x:3704`
+Source: `src/compiler.x:3730`
 
 <a id="Sym.enumerator_owner"></a>
 #### Sym.enumerator_owner
@@ -1099,7 +1100,7 @@ Source: `src/compiler.x:2576`
 
 Returns recorded fields in source order, or `NULL`.
 
-Source: `src/compiler.x:3614`
+Source: `src/compiler.x:3619`
 
 <a id="Sym.file_statics"></a>
 #### Sym.file_statics
@@ -1166,6 +1167,15 @@ Reports whether `type` reaches the named `Array` value type.
 
 Source: `src/compiler.x:3556`
 
+<a id="Sym.is_bool_type"></a>
+#### Sym.is_bool_type
+
+`int Sym.is_bool_type(Sym sym, Type type)`
+
+Reports whether `type` reaches C's boolean type, `bool` or `_Bool`.
+
+Source: `src/compiler.x:3563`
+
 <a id="Sym.is_map_type"></a>
 #### Sym.is_map_type
 
@@ -1182,7 +1192,7 @@ Source: `src/compiler.x:3560`
 
 Reports whether `type` reaches a named value type before its definition.
 
-Source: `src/compiler.x:3563`
+Source: `src/compiler.x:3568`
 
 <a id="Sym.is_string_type"></a>
 #### Sym.is_string_type
@@ -1236,7 +1246,7 @@ A member of an anonymous struct or union belongs to its enclosing
 aggregate in C, so unnamed rows are searched the way a designated
 initializer already reaches them.
 
-Source: `src/compiler.x:3576`
+Source: `src/compiler.x:3581`
 
 <a id="Sym.lookup_macro"></a>
 #### Sym.lookup_macro
@@ -1285,7 +1295,7 @@ Source: `src/compiler.x:3508`
 
 Pops the innermost scope, or returns an empty scope when none exists.
 
-Source: `src/compiler.x:3748`
+Source: `src/compiler.x:3774`
 
 <a id="Sym.push_new_scope"></a>
 #### Sym.push_new_scope
@@ -1294,7 +1304,7 @@ Source: `src/compiler.x:3748`
 
 Pushes a new empty lexical scope.
 
-Source: `src/compiler.x:3733`
+Source: `src/compiler.x:3759`
 
 <a id="Sym.push_scope"></a>
 #### Sym.push_scope
@@ -1303,7 +1313,7 @@ Source: `src/compiler.x:3733`
 
 Pushes a caller-supplied lexical scope while retaining its map objects.
 
-Source: `src/compiler.x:3743`
+Source: `src/compiler.x:3769`
 
 <a id="Sym.reference"></a>
 #### Sym.reference
