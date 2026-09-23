@@ -3345,7 +3345,7 @@ int String_endswith(String, String);
 void Compiler_queue_declaration_effect(Compiler, String, Token, Token);
 void Compiler_borrow_diagnostics(Compiler, Compiler);
 void Compiler_borrow_unit_semantics(Compiler, Compiler);
-int Compiler_meta_form_is_definition(Compiler);
+int Compiler_meta_form_is_declaration(Compiler);
 List Compiler_parse_top_level(Compiler);
 int Var_equal(Var, Var);
 static List _import(Compiler c, String requested, Token invocation){
@@ -3502,7 +3502,7 @@ if(! replay) return NULL;
                     Map_setindex(imported_aliases, alias, Map_getindex(imported -> kw_aliases, alias));
                   }
                   else if(Compiler_macro_form_is_definition(imported)) Compiler_parse_macro_definition(imported);
-                  else if(Compiler_meta_form_is_definition(imported)){
+                  else if(Compiler_meta_form_is_declaration(imported)){
                     meta_installed = 1;
                     List definition = Compiler_parse_top_level(imported);
                     if(List_truth(definition)) Array_push(meta_definitions, List_var(definition));
@@ -4110,6 +4110,7 @@ x2c_cleanup_leave(& _x2c_defer_record_10);
 
 }
 }
+_report_sdk_rejection(c, site);
 return value;
 }
 
