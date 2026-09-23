@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/meta-func-error-change-pointee.x:10:10: macro: compile-time Lisp evaluation failed
+    (void) $change_pointee(1);
+           ^
+  note: form: (change_pointee 1) error: (bad-types (sig ((func ((& * const int))) "Var")) 
+ (index 0u) (source (* int)) (want (* const int)))
+

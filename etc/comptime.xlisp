@@ -55,6 +55,7 @@
 // offset, and size; see `lisp_peek` in lib/lisp.x. A record reads as its
 // own address, and assigning one copies into the bytes it already has.
 (def C.bytes (bind "lisp_bytes" nil))
+(defun C.array (layout values) ((bind "lisp_array" nil) layout values))
 (def C.at (bind "lisp_at" nil))
 (def C.copy (bind "lisp_copy" nil))
 (def C.zero (bind "lisp_zero" nil))
@@ -68,9 +69,8 @@
   (let ((object (C.at (C.bytes size) 0 tag)))
     (begin (C.poke object 0 layout value) object)))
 
-// `p[i]` through a pointer. A pointer can hold a local C array, which is an
-// `Array`; any other pointer addresses native bytes, and element `i` is
-// `size` bytes apart from the next, as in C.
+// Current lowering gives C arrays native element storage. The checked-in
+// bootstrap can still supply its former Array representation while rebuilding.
 (defun C.index (p i size layout)
   (if (eq? (type p) 'array) (Array.getindex p i)
       (C.peek p (* i size) layout)))
@@ -312,9 +312,29 @@
 (defun Array_var (v) v)
 (defun Map_var (v) v)
 
-// A compile-time `Func` is the Lisp lambda the lowering produced, which
-// already is a value, so boxing it and reading it back are both the
-// identity. `src/comptime.x` collapses the call itself.
+// Source Func values retain the native signature and carrier contract.
+(defun C.func.new (adapter signature)
+  ((bind "lisp_func_new" nil) adapter signature))
+(defun C.func.arguments (count)
+  ((bind "lisp_func_arguments" nil) count))
+(defun C.func.value (argv index value)
+  ((bind "lisp_func_value" nil) argv index value))
+(defun C.func.reference (argv index address source)
+  ((bind "lisp_func_reference" nil) argv index address source))
+(defun C.func.invalid (fn index source)
+  ((bind "lisp_func_invalid" nil) fn index source))
+(defun C.func.reference-type (fn count index)
+  ((bind "x2c_func_reference_type" nil) fn count index))
+(defun C.func.reference-argument (fn argv index type)
+  ((bind "x2c_func_reference_argument" nil) fn argv index type))
+(defun C.func.value-argument (fn argv index tag)
+  ((bind "x2c_func_value_argument" nil) fn argv index tag))
+(defun C.func.pointer-argument (fn argv index)
+  ((bind "x2c_func_pointer_argument" nil) fn argv index))
+(defun C.func.apply (fn count argv)
+  ((bind "Func_apply" nil) fn count argv))
+(defun Func_signature (fn) ((bind "Func_signature" nil) fn))
+(defun Var_new (tag value) ((bind "lisp_box" nil) tag value))
 (defun Func_var (v) v)
 (defun Var_func (v) v)
 

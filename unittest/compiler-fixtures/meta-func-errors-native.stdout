@@ -1,0 +1,9 @@
+invalid_lvalue bad-types
+null_reference bad-types
+discard_qualifier bad-types
+change_pointee bad-types
+wrong_reference_type bad-types
+wrong_value_type bad-types
+concrete_void void-op
+wrong_arity bad-arity
+empty_arity bad-arity

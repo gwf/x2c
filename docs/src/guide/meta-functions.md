@@ -141,6 +141,36 @@ interpreted body used during compilation. An embedding program can apply an
 interpreted callable through the Lisp evaluator API, but converting a meta
 function to `Func` does not export that interpreted callable automatically.
 
+## Typed Func calls during compilation
+
+Inside a meta body, a `Func` retains its callable signature through parameters,
+returns and collection storage. Lambdas and available named functions use the
+same argument checks as native calls. For example, an `unsigned char`
+parameter receives 1 from 257, and a `float` parameter rounds 16777217 to
+16777216. A typed result converts before it is boxed as `Var`.
+
+The callee is evaluated once. Arity is checked before argument evaluation;
+arguments are prepared once from left to right, then the adapter checks and
+converts them in that order. A reference parameter takes the live address of
+the caller's object without reading it, including an output-only local:
+
+```x2c
+meta int write_answer(int n) {
+  int output;
+  Func write = %!(int &value) => value = 41;
+  (void) write(output);
+  return output + n;
+}
+```
+
+`$write_answer(1)`, `write_answer(1)` and a runtime call with argument 1 all
+produce 42. References to locals, fields, dereferenced pointers and C-array
+elements share the original storage. Passing one object twice or forwarding a
+reference preserves immediate aliasing. Leading qualifiers may be strengthened;
+the remaining source type must match exactly. An invalid lvalue, null address,
+different underlying type or discarded qualifier raises `bad-types`. A
+concrete typed value parameter refuses `void`; a `Var` parameter transports it.
+
 ## Constant calls are folded
 
 An ordinary call with literal arguments can also be calculated during
@@ -480,7 +510,8 @@ loading one reports that native modules are not supported.
 ## C objects during compilation
 
 Compile-time code keeps C objects the way C does. Every struct local, and
-every local whose address is taken, lives in native bytes. The compiler lays
+every local whose address is taken, lives in native bytes. C arrays use
+contiguous native element storage as well. The compiler lays
 out a struct in natural C layout, with the field order, sizes and alignment
 from its own type information. The bytes belong to the running function's
 frame and are released when that function returns, normally or by an error.
@@ -683,9 +714,9 @@ on a listed type works. The operation inventory below further limits calls.
 | `Array` | `[]`, `[a, b]`, `Array.new()`, conversion from `List`; parameters and returns. | Indexed reads/writes and the bound mutating methods. Contents can mix represented values and nest collections. |
 | `Map` | `{}`, keyed literals, `Map.new()`; parameters and returns. | Keyed reads/writes and bound methods; represented collections and callable values can be stored inside it. |
 | `Var` | Boxes represented numbers, strings, symbols, collections and callable values. | Only the exposed operations below. Compile-time `void` and an empty List remain distinct. Lisp conditions treat both as false; x2c runtime `Var.truth` still raises on `void`. |
-| `Func` | Lambdas with typed or bare parameters, captures and references to available functions; parameters and returns between meta functions. | Dynamic calls and storage in collections work. This does not expose arbitrary native function-pointer calls. |
-| C-style array declarations | A literal-sized one-dimensional array, such as `int a[3] = {1, 2};`, has compile-time storage. Omitted elements are filled with zero-like values. | Indexing and simple assignment work; passing the array to an indexed pointer parameter works in the tested case. At compile time the array is a dynamic Array of Var values, not native bytes; the running program uses native C array storage. See element/dimension limits below. |
-| Pointers to locals | `int *p = &n;`, copying that pointer, and passing it to another meta function or a native function work. A local whose address is taken lives in native bytes, and the pointer is its real address. | `*p` and `p[i]` read, and `*p = value` and `p[i] = value` write, the bytes as C does. Pointer arithmetic and the address of an array element are not supported. |
+| `Func` | Lambdas with typed or bare parameters, captures and references to available functions; parameters and returns between meta functions. | Dynamic calls retain the typed signature, convert value parameters and results, and alias reference arguments in place. Storage in collections works. This does not expose arbitrary native function-pointer calls. |
+| C-style array declarations | A literal-sized one-dimensional array, such as `int a[3] = {1, 2};`, has compile-time storage. Omitted elements are filled with zero-like values. | Indexing, assignment, addresses of elements and reference arguments share contiguous native storage. Passing the array to a pointer parameter preserves that storage. See element/dimension limits below. |
+| Pointers to locals | `int *p = &n;`, copying that pointer, and passing it to another meta function or a native function work. A local whose address is taken lives in native bytes, and the pointer is its real address. | `*p` and `p[i]` read, and `*p = value` and `p[i] = value` write, the bytes as C does. Addresses such as `&a[i]` work. General pointer arithmetic is not supported. |
 | Structs | Named, inline and nested locals; initialization, assignment, by-value arguments and returns, with C copy behavior. | Fields and addresses refer to native bytes in C layout. Assignment keeps existing field addresses; storage ends when the function returns. See [C objects during compilation](#c-objects-during-compilation). |
 | Native functions | The functions in `lib/cmath.x` and `lib/clibc.x`, the iterator producers marked `meta` in `lib/iter.x`, `lib/map.x` and `lib/dispatch.x`, and the witnesses of `meta protocol` adoptions, all of which the compiler links. | Explicit dollar evaluation and meta bodies can call them, including through output pointers. Ordinary calls are not folded. See [Native C functions](#native-c-functions). |
 | System-header structs | `--system-headers` supplies the header declarations. A local `struct timespec` can be passed to `timespec_get`. | Unions, packed structs and structs with bitfields, array members or anonymous members are not available. |

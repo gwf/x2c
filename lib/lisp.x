@@ -1162,6 +1162,14 @@ static Var _lisp_scalar_as(Var value, Symbol tag) {
   return value.convert(tag);
 }
 
+/** Boxes a source value at the compiler-selected native Var tag. */
+Var lisp_box(Symbol tag, Var value) {
+  if (tag == value.tag()) return value;
+  X2CVarNumericInfo info;
+  if (Var.numeric_info(tag, &info)) return value.convert(tag);
+  return lisp_address(value, tag);
+}
+
 /** Reads the object of compiler layout `layout` at `offset` bytes past
     `pointer`. A record reads as its own address, which is how lowered source
     carries record values. */
@@ -1193,6 +1201,18 @@ Var lisp_poke(Var pointer, Var offset, List layout, Var value) {
     }
   }
   return value;
+}
+
+/** Builds a local C array in live native storage, shared by indexing and
+    references to its elements. Initializer values already have element type. */
+Var lisp_array(List layout, List values) {
+  long size = layout[2].long_long(), offset = 0;
+  Var storage = lisp_bytes(size * values.len());
+  foreach (Var value, values) {
+    lisp_poke(storage, offset, layout, value);
+    offset += size;
+  }
+  return storage;
 }
 
 /** Marks the actual Lambda installed for one lowered source function. */
@@ -1283,6 +1303,51 @@ typedef struct LispCallbackContext {
   Lisp lisp;
   Var callable;
 } LispCallbackContext;
+
+/* A source Func keeps its canonical signature while its adapter executes in
+   the owning Lisp session. The lowered adapter reads the borrowed carriers
+   with the ordinary native Func argument readers. */
+static Var _lisp_func_adapter(Func function, const FuncArg *arguments) {
+  LispCallbackContext *context = (void *) function.context();
+  if (!lisp_active || lisp_active != context.lisp)
+    raise %(bad-state (operation "Lisp callback") (why "wrong session"));
+  Var argv = Var.new(<p48>, arguments);
+  return _apply_values(
+    context.lisp, context.callable, %($function $argv), NULL);
+}
+
+/** Constructs a signature-bearing Func for one lowered source callable. */
+Func lisp_func_new(Var adapter, List signature) {
+  LispCallbackContext context = { lisp_active, adapter };
+  return Func.new_context(
+    _lisp_func_adapter, signature, &context, sizeof context);
+}
+
+/** Allocates the borrowed carriers for one lowered dynamic call. */
+void *lisp_func_arguments(unsigned count) =>
+  Scope.calloc_in(_lowered_owner(), count + 1, sizeof(FuncArg));
+
+/** Prepares one value without excluding the terminal void value. */
+void *lisp_func_value(FuncArg *argv, unsigned index, Var value) {
+  argv[index] = FuncArg.value(value);
+  return argv;
+}
+
+/** Prepares an address without loading the caller's object. A non-lvalue
+    supplies zero, which the ordinary reference reader rejects. */
+void *lisp_func_reference(
+  FuncArg *argv, unsigned index, Var address, List source) {
+  void *pointer = address.is_integer() && !address.integer()
+                ? NULL : address.pointer();
+  argv[index] = FuncArg.reference(pointer, source);
+  return argv;
+}
+
+/** Uses the native rejection for an unrepresentable value argument. */
+Var lisp_func_invalid(Func fn, unsigned index, List source) {
+  (void) x2c_func_unrepresentable_argument(fn, index, source);
+  return void;
+}
 
 static Var _lisp_callback_one(Func function, const FuncArg *arguments) {
   LispCallbackContext *context = (void *) function.context();
@@ -1474,10 +1539,23 @@ $(def lisp.native.target.rows (append '(
   (Var_is_void)
   (lisp_cell)
   (lisp_source_function)
+  (lisp_func_new)
+  (lisp_func_arguments)
+  (lisp_func_value)
+  (lisp_func_reference)
+  (lisp_func_invalid)
+  (x2c_func_reference_type)
+  (x2c_func_reference_argument)
+  (x2c_func_value_argument)
+  (x2c_func_pointer_argument)
+  (Func_apply)
+  (Func_signature)
   (lisp_address)
+  (lisp_box)
   (lisp_load)
   (lisp_store)
   (lisp_bytes)
+  (lisp_array)
   (lisp_at)
   (lisp_copy)
   (lisp_zero)

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/meta-func-error-concrete-void.x:9:10: macro: compile-time Lisp evaluation failed
+    (void) $concrete_void(1);
+           ^
+  note: form: (concrete_void 1) error: (void-op (sig ((func ((int))) "Var")) (index 0u))
+

@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/meta-func-error-invalid-lvalue.x:9:10: macro: compile-time Lisp evaluation failed
+    (void) $invalid_lvalue(1);
+           ^
+  note: form: (invalid_lvalue 1) error: (bad-types (sig ((func ((& int))) "Var")) 
+ (index 0u) (source (int)) (want (int)))
+

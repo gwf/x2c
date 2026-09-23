@@ -166,36 +166,9 @@ static Var _lower_name(Lowering l, String stem) {
 
 static Var _lower_decline(Lowering l, String why);
 
-/* `f(x)` is not a call in the AST. `_resolve_func_call` in
-   `src/expressions.x` expands it into a statement expression that stores the
-   callee once, queries a reference carrier per argument through
-   `x2c_func_reference_type`, boxes each argument into a `FuncArg`, and
-   reaches `Func_apply` last. None of that has a compile-time meaning: a
-   `Func` here is the Lisp lambda this pass lowered, and a Lisp lambda takes
-   its arguments by value, so the expansion collapses back to the application
-   it stands for. Only the callee and each argument's value form survive.
-
-   The reference branch is dropped rather than lowered. A `Func` whose
-   signature declares a reference parameter would take that branch at run
-   time and its value branch at compile time, so the two forms of a `meta`
-   function disagree there; every `Func` a compile-time session can produce
-   is a lowered lambda over values, where they agree.
-
-   One recognition serves the scan as well, which needs it: scanning the
-   expansion would read the reference branch's `&argument` as an
-   address-taken local and put an ordinary parameter in a cell, and would
-   refuse the function over the four callees the expansion names. The
-   argument count `Func_apply` receives cross-checks the groups this found,
-   so a block of another shape answers nothing rather than a truncated call.
-
-   An argument whose type has no `Var` tag is boxed by
-   `x2c_func_unrepresentable_argument` instead, and cannot cross to the
-   compile-time form at all. That is refused here, where the reason is still
-   plain: the scan runs first, and reading the expansion instead would report
-   whichever of its callees the session happens not to bind. */
-
-/* The argument one group boxes by value, or nothing where that stand-in
-   took its place. */
+/* Recover both branches of native argument preparation. The signature query
+   selects value boxing or the caller's live address before either is read.
+   Keep the canonical source type emitted by the native call owner. */
 static Var _lower_func_value(Var boxed) {
   match (boxed)
     case %(expr ("FuncArg")
@@ -204,7 +177,7 @@ static Var _lower_func_value(Var boxed) {
   return void;
 }
 
-static List _lower_func_block(Lowering l, List body) {
+static List _lower_func_block(List body) {
   Array parts = $auto([]);
   if (!body) return NULL;
   match (body.car())
@@ -214,16 +187,14 @@ static List _lower_func_block(Lowering l, List body) {
   List rest = body.cdr();
   for (; rest && rest.cdr(); rest = rest.cdr())
     match (rest.car())
-      case %(if ? ? (stmnt (expr ("FuncArg") (op = ? ?boxed)))): {
-        Var value = _lower_func_value(boxed);
-        if (value is void) {
-          (void) _lower_decline(
-            l, "a dynamic Func call whose argument has a type with no "
-               "compile-time representation");
-          return NULL;
-        }
-        parts.push(value);
-      }
+      case %(if ?
+        (stmnt (expr ("FuncArg") (op = ?
+          (expr ("FuncArg")
+            (call (expr ? (ident (binding ? "FuncArg_reference")))
+                  (args ?address ?source))))))
+        (stmnt (expr ("FuncArg") (op = ? ?boxed)))):
+        parts.push(%(func-arg $boxed $address $source));
+
   if (!rest) return NULL;
   match (rest.car())
     case %(stmnt (expr ?
@@ -236,12 +207,12 @@ static List _lower_func_block(Lowering l, List body) {
   return NULL;
 }
 
-/* The callee followed by the argument values, or nothing where this is not a
+/* The callee and each argument's two carrier branches, or nothing outside a
    dynamic `Func` call. A call with no arguments needs no locals, so
    `_resolve_func_call` returns the bare `Func_apply` for it. */
-static List _lower_func_parts(Lowering l, Var content) {
+static List _lower_func_parts(Var content) {
   match (content) {
-    case %(parens (block *body)): return _lower_func_block(l, body);
+    case %(parens (block *body)): return _lower_func_block(body);
     case %(call (expr ? (ident (binding ? "Func_apply")))
                 (args ?callee (expr ? (literal ? "0"))
                       (expr ? (ident (binding ? "NULL"))))):
@@ -346,6 +317,10 @@ static void _lower_scan_cursor_block(Lowering l, List parts) {
    in the frame's own slots. */
 static void _lower_scan_op(Lowering l, List form) {
   match (form) {
+    case %(op & (parens ?inner)):
+      _lower_scan_op(l, %(op & $inner));
+    case %(op & (expr ? (parens ?inner))):
+      _lower_scan_op(l, %(op & $inner));
     case %(op & (expr ? (ident (binding ?(int id) ?)))): {
       if (l.compiler.meta_values.contains(id)) return;
       if (!l.cursors.contains(id)) {
@@ -359,8 +334,7 @@ static void _lower_scan_op(Lowering l, List form) {
 
 static void _lower_scan_bind(Lowering l, List form) {
   match (form) {
-    /* A local C array is a mutable buffer, so it lives in a cell the way an
-       address-taken local does, holding an `Array` of its declared size. */
+    /* A local C array's slot holds its native element storage. */
     case %(bind (binding ?(int id) ?) ((dim ?size) *)): {
       l.locals[id] = 1;
       l.cells[id] = 1;
@@ -495,7 +469,16 @@ static void _lower_scan_function_value(Lowering l, List form) {
     }
 }
 
+static List _lower_param_type(List params);
+
 static void _lower_scan_call(Lowering l, List form) {
+  match (form)
+    case %(call (expr ((func ?params) *) ?) (args *args)):
+      for (List p = params, a = args; p && a; p = p.cdr(), a = a.cdr()) {
+        Type type = _lower_param_type(p);
+        if (type.car() == <&>)
+          _lower_scan_op(l, %(op & ${a.car()}));
+      }
   match (form) {
     case %(call (expr ? (ident (binding ? ?(String name)))) ?): {
       _lower_scan_callee(l, name);
@@ -531,9 +514,14 @@ static void _lower_scan(Lowering l, Var form) {
   if (!items) return;
   /* A dynamic `Func` call is scanned as the application it stands for, so
      the machinery its expansion names is never read. */
-  List application = _lower_func_parts(l, items);
+  List application = _lower_func_parts(items);
   if (application) {
-    _lower_scan_each(l, application);
+    _lower_scan(l, application.car());
+    foreach (List argument, application.cdr())
+      match (argument) case %(func-arg ?boxed ?address ?): {
+        _lower_scan(l, _lower_func_value(boxed));
+        _lower_scan(l, address);
+      }
     return;
   }
   Var head = items.car();
@@ -706,6 +694,10 @@ static Var _lower_constant_leaf(Lowering l, List value) {
     case %(expr ? (literal ? ? ?symbol)): return symbol;
     case %(expr ("String") (call ? (args ?inner))):
       return _lower_constant_leaf(l, inner);
+    /* Canonical type literals can contain a struct's binding id. */
+    case %(expr ("Var")
+      (call (expr ? (ident (binding ? "int_var"))) (args ?inner))):
+      return _lower_constant_leaf(l, inner);
     case %(expr ("String") (literal ? ?(String text))): return text;
     case %(expr (* char) (literal ? ?(String text))): return _lower_text(text);
     case %(expr ?type (literal ? ?(String text))):
@@ -769,6 +761,7 @@ static Var _lower_typed_address(Lowering l, List type, int id) {
     slot = %(C.gread $id);
     layout = l.compiler.meta_type_layout(record);
   }
+  if (l.arrays.contains(id)) return _lower_value(l, id);
   if (slot is void) slot = _lower_address(l, id);
   if (_lower_failed(l, slot)) return void;
   if (layout && (layout.car() != <record> || !tag)) return slot;
@@ -915,12 +908,23 @@ static Var _lower_initializer(Lowering l, List type, int id, Var init);
    void and continues through the existing SSA-style local path. */
 static Var _lower_place(Lowering l, Var target) {
   match (target) {
+    case %(parens ?inner): return _lower_place(l, inner);
+    case %(expr ? (parens ?inner)): return _lower_place(l, inner);
     case %(expr ? (ident (binding ?(int id) ?))):
       if (l.compiler.meta_values.contains(id) ||
           (l.locals.contains(id) && l.cells.contains(id)))
         return _lower_address(l, id);
     case %(expr ? (op ?operator ?operand)):
       if (operator == <"*">) return _lower_expr(l, operand);
+    case %(expr ?type (index ?receiver ?key)): {
+      List layout = l.compiler.meta_type_layout(type);
+      if (!layout) return _lower_decline(l, "an indexed object with no layout");
+      Var base = _lower_expr(l, receiver), index = _lower_expr(l, key);
+      if (l.declined) return void;
+      Symbol tag = _lower_pointer_tag(l, layout);
+      return %(C.at $base (_binary $index (quote <*>) ${layout[2]})
+                   (quote $tag));
+    }
     /* A struct compound literal is a fresh object, such as the Iter storage
        a `foreach` expansion supplies. */
     case %(expr ?type (cast ? ?literal)):
@@ -966,9 +970,20 @@ static List _lower_args(Lowering l, List params, List args) {
   for (List p = params, a = args; a; p = p.cdr(), a = a.cdr()) {
     List argument = a.car();
     match (argument) case %(expr (void) ()): continue;
-    Var value = _lower_expr(l, argument);
-    if (_lower_failed(l, value)) return NULL;
-    values.push(_lower_coerce(l, _lower_param_type(p), argument, value));
+    Type parameter = _lower_param_type(p);
+    if (parameter.car() == <&>) {
+      Var place = _lower_place(l, argument);
+      if (place is void) {
+        (void) _lower_decline(l, "a reference argument with no storage");
+        return NULL;
+      }
+      values.push(place);
+    }
+    else {
+      Var value = _lower_expr(l, argument);
+      if (_lower_failed(l, value)) return NULL;
+      values.push(_lower_coerce(l, parameter, argument, value));
+    }
   }
   return values;
 }
@@ -985,21 +1000,75 @@ static Var _lower_call(Lowering l, List callee, String name, List args) {
   return cons(Atom.intern(_lower_callee_name(l, name)), values);
 }
 
-/* The application a dynamic `Func` call stands for. The callee is an
-   expression rather than a name, which the evaluator applies the way it
-   applies a lambda this pass already puts in head position. The scan reached
-   this form first and kept whatever reason it refused for; the decline here
-   only answers a statement expression no producer writes today. */
+/* Prepare native carriers in source order, then dispatch through Func.apply.
+   Each branch evaluates just the value or just the address. */
 static Var _lower_application(Lowering l, Var content) {
-  List parts = _lower_func_parts(l, content);
+  List parts = _lower_func_parts(content);
   if (!parts) return _lower_decline(l, "not a dynamic Func call");
-  Array values = $auto([]);
-  foreach (List part, parts) {
-    Var value = _lower_expr(l, part);
-    if (_lower_failed(l, value)) return void;
-    values.push(value);
+  Var callee = _lower_expr(l, parts.car());
+  if (_lower_failed(l, callee)) return void;
+  Var fn = _lower_name(l, "func"), argv = _lower_name(l, "argv");
+  int count = parts.len() - 1, index = 0;
+  Array prepare = $auto([]);
+  foreach (List part, parts.cdr())
+    match (part) case %(func-arg ?boxed ?address ?source): {
+      Var value = _lower_func_value(boxed);
+      Var type = _lower_expr(l, source);
+      Var pointer = _lower_expr(l, address);
+      if (l.declined) return void;
+      Var by_value = %(C.func.invalid $fn $index $type);
+      if (value is not void) {
+        value = _lower_expr(l, value);
+        if (_lower_failed(l, value)) return void;
+        by_value = %(C.func.value $argv $index $value);
+      }
+      prepare.push(%(if (C.func.reference-type $fn $count $index)
+        (C.func.reference $argv $index $pointer $type) $by_value));
+      index++;
+    }
+  l.automatic = 1;
+  Var apply = %(C.func.apply $fn $count $argv);
+  if (prepare.len()) {
+    Var ready = _lower_name(l, "ready");
+    apply = %((lambda ($ready) $apply) (begin @{prepare.list()}));
   }
-  return values.list();
+  return %((lambda ($fn)
+    ((lambda ($argv) $apply) (C.func.arguments $count))) $callee);
+}
+
+/* The compiler-generated adapter calls the same readers as its native peer.
+   Its two arguments are the Func and the borrowed FuncArg array. */
+static Var _lower_func_adapter(Lowering l, Type type, Var callable) {
+  List signature = l.compiler.func_signature(type), params = NULL;
+  Type result = NULL;
+  match (signature) case %((func ?parameters) *returned): {
+    params = parameters;
+    result = returned;
+  }
+  Var fn = _lower_name(l, "func"), argv = _lower_name(l, "argv");
+  Array arguments = $auto([]);
+  int index = 0;
+  foreach (Type parameter, params) {
+    if (parameter.equal(%(void))) continue;
+    Var value;
+    if (parameter.car() == <&>) {
+      Type target = parameter.cdr();
+      value = %(C.func.reference-argument $fn $argv $index (quote $target));
+    }
+    else {
+      Symbol tag = l.compiler.sym.var_tag_for_type(parameter, NULL);
+      if (tag) {
+        value = %(C.func.value-argument $fn $argv $index (quote $tag));
+        if (l.compiler.sym.is_bool_type(parameter)) value = %(C.bool $value);
+      }
+      else value = %(C.func.pointer-argument $fn $argv $index);
+    }
+    arguments.push(value);
+    index++;
+  }
+  Var call = cons(callable, arguments.list());
+  call = _lower_to_type(l, result, call);
+  return %(C.func.new (lambda ($fn $argv) $call) (quote $signature));
 }
 
 /* `Var.binary` applies the usual arithmetic conversions itself for the
@@ -1092,17 +1161,39 @@ static Var _lower_operands(
   return _lower_decline(l, "unsupported operator arity");
 }
 
-/* A lambda's free locals are substituted, which is the by-value snapshot
-   x2c gives a captured scalar. Its parameters get fresh slots. */
+static Var _lower_boxed(Lowering l, int id, Var value, int fresh);
+static Var _lower_block(Lowering l, List items, List k);
+static Map _lower_env_copy(Lowering l);
+
+/* Capture expressions run at construction, including loads from addressed
+   locals. The body has its own locals, control flow and automatic storage. */
 static Var _lower_lambda(Lowering l, List params, List held, Var body) {
-  Array names = $auto([]);
+  int automatic = l.automatic, on_loop = l.on_loop;
+  List on_break = l.on_break, on_continue = l.on_continue;
+  Map previous = l.env;
+  l.env = _lower_env_copy(l);
+  l.automatic = l.on_loop = 0;
+  l.on_break = l.on_continue = NULL;
+  defer {
+    l.env = previous;
+    l.automatic = automatic;
+    l.on_loop = on_loop;
+    l.on_break = on_break;
+    l.on_continue = on_continue;
+  }
+  Array names = $auto([]), types = $auto([]);
+  Array boxes = $auto([]), values = $auto([]);
+  Array captures = $auto([]), captured = $auto([]);
   Array saved = $auto([]);
   foreach (List capture, held) {
     match (capture)
       case %(capture (binding ?(int id) ?) ? ?source): {
         Var value = _lower_expr(l, source);
         if (_lower_failed(l, value)) return void;
-        saved.push(%($id $value));
+        Var slot = _lower_name(l, "capture");
+        captures.push(slot);
+        captured.push(value);
+        saved.push(%($id $slot));
       }
   }
   /* A declared parameter carries its type; a bare one is the binding
@@ -1122,25 +1213,40 @@ static Var _lower_lambda(Lowering l, List params, List held, Var body) {
     if (!named) continue;
     Var slot = _lower_name(l, "arg");
     names.push(slot);
+    Type type = parameter.car() == <param>
+      ? parameter.type_from_ast().declared() : %("Var");
+    types.push(type);
+    if (l.cells.contains(id)) {
+      Var box = _lower_name(l, "box");
+      boxes.push(box);
+      values.push(_lower_boxed(l, id, slot, 0));
+      slot = box;
+    }
     saved.push(%($id $slot));
   }
-  Array shadowed = $auto([]);
-  Map previous = $auto({});
   foreach (List pair, saved) {
     Var (id, value) = pair;
-    Var was;
-    if (l.env.try_get(id, &was)) previous[id] = was;
-    shadowed.push(id);
     l.env[id] = value;
   }
-  Var lowered = _lower_expr(l, body);
-  foreach (Var id, shadowed) {
-    Var was;
-    if (previous.try_get(id, &was)) l.env[id] = was;
-    else l.env.del(id);
+  Var lowered;
+  match (body) {
+    case %(block *items): lowered = _lower_block(l, items, %(end));
+    default: {
+      lowered = _lower_expr(l, body);
+      if (!_lower_failed(l, lowered))
+        lowered = _lower_to_type(l, _lower_type_of(body), lowered);
+    }
   }
   if (_lower_failed(l, lowered)) return void;
-  return %(lambda ${names.list()} $lowered);
+  if (boxes.len())
+    lowered = %((lambda ${boxes.list()} $lowered) @{values.list()});
+  Type signature = %((func ${types.list()}) "Var");
+  Var callable = %(lambda ${names.list()} $lowered);
+  if (l.automatic) callable = %(C.source-function $callable);
+  Var function = _lower_func_adapter(l, signature, callable);
+  if (captures.len())
+    function = %((lambda ${captures.list()} $function) @{captured.list()});
+  return function;
 }
 
 /* --- collections -------------------------------------------------------- */
@@ -1218,28 +1324,24 @@ static Var _lower_map(Lowering l, List entries) {
   return %(Map_of ${cons(<list>, flat.list_free())});
 }
 
-/* The container a bracket names. A local C array is always an `Array`,
-   because its declaration allocated one; every other receiver carries its
-   own type. */
+/* Library brackets use their container operation. C indexes use the native
+   element layout before reaching this fallback name. */
 static String _lower_indexed(Var receiver, int is_c_array) {
   if (is_c_array) return "Array";
   match (receiver) case %(expr ?type ?): return _lower_container(type);
   return NULL;
 }
 
-/* The layout of the object a pointer indexes, or nothing when `receiver` is
-   not a pointer to a type with one. The pointer may hold a local C array's
-   `Array` or native bytes, and only evaluation can tell them apart, so
-   `C.index` decides there. */
+/* The layout shared by C indexing and indexed reference arguments. */
 static List _lower_pointee_layout(Lowering l, Var receiver) {
   Type type = _lower_type_of(receiver);
   Type pointer = type ? l.compiler.sym.resolve_key(type) : NULL;
-  if (!pointer || !pointer.is_pointer()) return NULL;
+  if (!pointer || (!pointer.is_pointer() && !pointer.is_array())) return NULL;
   return l.compiler.meta_type_layout(pointer.dereference());
 }
 
-/* `xs[i]` and `m[k]`. The C-array form is the same read through the cell the
-   declaration allocated, which `_lower_expr` already loads. */
+/* C arrays and pointers read native bytes; library collections call their
+   ordinary indexing operation. */
 static Var _lower_getindex(
   Lowering l, Var receiver, Var key, int is_c_array) {
   String container = _lower_indexed(receiver, is_c_array);
@@ -1294,7 +1396,7 @@ static Var _lower_content(Lowering l, List type, Var content) {
        the session binds it. */
     case %(ident (binding ?(int id) ?(String name))): {
       if (!l.locals.contains(id) && type.match(%((func *) *)))
-        return Atom.intern(name);
+        return _lower_func_adapter(l, type, Atom.intern(name));
       /* An enumerator's value lives only in the enum declaration it was
          written in: the symbol table records the enum type and that the name
          is an enumerator, never the number. Reading it as file-scope state
@@ -1986,7 +2088,16 @@ static Var _lower_braced(Lowering l, List type, int id, List items) {
     }
     Var zero = _lower_to_type(l, element, _lower_zero(element));
     while (values.len() < size) values.push(zero);
-    return %(List_array ${cons(<list>, values.list_free())});
+    List layout = l.compiler.meta_type_layout(element);
+    if (!layout) {
+      values.free();
+      return _lower_decline(l, "an array element with no compile-time layout");
+    }
+    l.automatic = 1;
+    Symbol tag = _lower_pointer_tag(l, layout);
+    return %(C.address
+      (C.array (quote $layout) ${cons(<list>, values.list_free())})
+      (quote $tag));
   }
   if (type.equal(%("Map"))) {
     if (items) return _lower_decline(l, "a braced Map initializer needs keys");

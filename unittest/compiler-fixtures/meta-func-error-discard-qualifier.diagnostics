@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/meta-func-error-discard-qualifier.x:10:10: macro: compile-time Lisp evaluation failed
+    (void) $discard_qualifier(1);
+           ^
+  note: form: (discard_qualifier 1) error: (bad-types (sig ((func ((& int))) "Var")) 
+ (index 0u) (source (const int)) (want (int)))
+
