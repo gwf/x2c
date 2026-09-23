@@ -69,6 +69,8 @@ List Compiler_evaluate_macro_rows(Compiler compiler, Var value);
 
 List Compiler_macro_introduced_name(Compiler compiler, String spelling);
 
+List Compiler_macro_tag_name(Compiler c, Symbol kind, String name, int definition);
+
 List Compiler_peek_macro_hole(Compiler compiler);
 
 int Compiler_macro_lisp_starts_declaration(Compiler compiler);

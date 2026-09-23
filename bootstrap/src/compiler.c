@@ -4680,8 +4680,12 @@ Type Sym_local_type(Sym sym, Type type){
   return type;
 }
 
+List Compiler_macro_tag_name(Compiler, Symbol, String, int);
 Var Compiler_aggregate_name(Compiler compiler, Symbol kind, Var name, int definition){
-  if(! _init_guard_) _file_init_();  Sym sym = compiler -> sym;  if(Map_truth(compiler -> macro_holes) || ! Var_is_row(name, 11, 7, 1)) return name;  Type type = List_type(cons(Symbol_var(kind), cons(name, NULL)));  if((int) Block_len(sym -> scopes) <= sym -> base_scopes){
+  if(! _init_guard_) _file_init_();  Sym sym = compiler -> sym;  if(! Var_is_row(name, 11, 7, 1) || Compiler_parsing_source_syntax(compiler)) return name;  if(Map_truth(compiler -> macro_holes)){
+    List local = Compiler_macro_tag_name(compiler, kind, Var_string(name), definition);  return List_truth(local) ? List_var(local) : name;
+  }
+  Type type = List_type(cons(Symbol_var(kind), cons(name, NULL)));  if((int) Block_len(sym -> scopes) <= sym -> base_scopes){
     if(! List_truth(Sym_get_exact(sym, Type_list(type)))) Sym_declare(sym, NULL, Type_list(type), Type_list(type));  return name;
   }
   if(! definition && List_truth(Sym_get_exact(sym, Type_list(type)))) return List_cadr(Type_list(Sym_local_type(sym, type)));  if(! definition && compiler -> shallow) return name;  List binding = Sym_current_binding(sym, Type_list(type));  if(! List_truth(binding)) binding = Sym_declare(sym, NULL, Type_list(type), Type_list(type));  return List_var(binding);
