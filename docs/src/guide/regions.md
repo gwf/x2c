@@ -89,8 +89,8 @@ shown to be memory safe.
 
 ## How the check works
 
-Each function gets one summary of two facts: whether its result is fresh
-Scope or Pool storage, and, for each parameter, where that parameter is sunk
+Each function gets one summary of two facts: which of Scope and Pool storage
+its result may use (possibly both), and where each parameter is sunk
 (returned by identity, retained in the fresh result, placed into another
 parameter's object or a static, or stored through an unknown pointer). The
 summaries of a unit's functions are computed to a fixpoint because a caller's

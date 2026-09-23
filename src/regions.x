@@ -52,13 +52,14 @@ typedef struct Region {
 
 /* What the walk knows about one local or parameter: the block depth that
    declares it, its parameter index or -1, whether it holds storage born in
-   this function, whether a free ended it, the region its value belongs to,
-   the region a Scope local's own storage forms, and for a pointer taken
+   this function, whether a free ended it, the region its value belongs to
+   (and the Pool alternative of a mixed result), the region a Scope local's
+   own storage forms, and for a pointer taken
    with `&`, the local and place it names. `born` records a scoped or pooled
    result, including when the allocation has no local region. */
 typedef struct Fact {
   int depth, origin, param, born, dead;
-  struct Region *region, *owner;
+  struct Region *region, *other, *owner;
   struct Fact *points;
   List place;
 } *Fact;
@@ -237,6 +238,7 @@ static Region _active(Walk w) {
 /* `fact` now belongs to `region`, or to an owner outside this function. */
 static void _move(Fact fact, Region region) {
   fact.region = region;
+  fact.other = NULL;
   fact.born = 0;
   fact.param = -1;
 }
@@ -285,7 +287,8 @@ static Fact _fact_of(Walk w, Var expression, List *named) {
       List yes_name = NULL, no_name = NULL;
       Fact fact = _fact_of(w, yes, &yes_name);
       Fact other = _fact_of(w, no, &no_name);
-      if (other && (!fact || (other.region && !fact.region))) {
+      if (other && (!fact || ((other.region || other.other) &&
+                             !fact.region && !fact.other))) {
         fact = other;
         yes_name = no_name;
       }
@@ -326,7 +329,8 @@ static Fact _returned_argument(Walk w, Var value, List *named) {
     (int index, Var target) = row;
     if (target != <return> || index >= arguments.len()) continue;
     Fact fact = _fact_of(w, arguments[index], named);
-    if (fact && (fact.param >= 0 || fact.region)) return fact;
+    if (fact && (fact.param >= 0 || fact.born || fact.region || fact.other))
+      return fact;
   }
   return NULL;
 }
@@ -340,12 +344,15 @@ static Region _pooled(Walk w, int *born) {
 }
 
 /* The region fresh storage an expression makes is born in, with `*born`
-   set; NULL with `*born` set is the caller's active region. `type` is the
+   set; NULL with `*born` set is the caller's active region. A mixed
+   Scope/Pool result keeps its Pool region in `*other`. `type` is the
    declared type a compound literal initializes, or NULL for its own. */
-static Region _birth(Walk w, Var value, Type type, int *born) {
+static Region _birth(Walk w, Var value, Type type, int *born,
+                     Region *other) {
   List arguments = NULL;
   String callee = _callee_of(value, &arguments);
   *born = 1;
+  *other = NULL;
   match (callee ? runtime[callee] : void) {
     case %(alloc slot): return _owner(w, _slot(w, arguments.car()));
     case %(alloc pool): return _pooled(w, born);
@@ -362,7 +369,11 @@ static Region _birth(Walk w, Var value, Type type, int *born) {
         match (capture) case %(capture ? ? ?captured): {
           Var place = _address_of(captured);
           Fact fact = _fact_of(w, place is void ? captured : place, NULL);
-          if (fact && fact.region) return fact.region;
+          if (fact && (fact.born || fact.region || fact.other)) {
+            if (fact.born) *born = fact.born;
+            *other = fact.other;
+            return fact.region;
+          }
         }
       return _active(w);
     }
@@ -373,6 +384,11 @@ static Region _birth(Walk w, Var value, Type type, int *born) {
   }
   if (callee) {
     int owner = _summary(w, callee).car().int();
+    if (owner == 3) {
+      *born = owner;
+      *other = _innermost(w, <pool>);
+      return _active(w);
+    }
     if (owner & 2) return _pooled(w, born);
     if (owner & 1) return _active(w);
   }
@@ -386,43 +402,24 @@ static Region _birth(Walk w, Var value, Type type, int *born) {
    <static>, <local> for the local `target`, or <heap> for the storage
    `target` reaches, or an unknown pointer when `target` is NULL. A canonical
    destination copies. A parameter adds the sink to this function's summary;
-   any other value reports when its region can end first. Returns whether
-   it reported. */
-static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
-  match (_unwrap(value)) case %(op (!quote ?) ? ?yes ?no):
-    return _flow(w, yes, type, sink, target) ||
-           _flow(w, no, type, sink, target);
-  List named = NULL;
-  Fact fact = _value_fact(w, value, &named);
-  if (!fact) fact = _returned_argument(w, value, &named);
-  int born = 0;
-  Region region = fact ? fact.region : _birth(w, value, NULL, &born);
-  if (!fact && !born) return 0;
-  if (_copies(w, type, value) &&
-      !((fact ? fact.born : born) & 2) &&
+   any other value reports when either possible owner can end first.
+   Returns whether it reported. */
+static int _flow_region(Walk w, Var value, Type type, Symbol sink,
+                        Fact target, Fact fact, List named, Region region,
+                        int born, int report) {
+  if (_copies(w, type, value) && !(born & 2) &&
       (!region || region.kind != <pool>))
     return 0;
-  if (fact && fact.param >= 0) {
-    Var row = sink;
-    if (sink == <heap>) {
-      if (!target) row = <unknown>;
-      else if (target.param >= 0) row = %(param ${target.param});
-      else row = target.born ? <result>
-             : target.region ? void : <return>;
-    }
-    if (sink != <local> && row is not void)
-      w.sinks[%(${fact.param} $row)] = 1;
-    return 0;
-  }
   if (!region) {
-    if (sink == <return>) w.fresh |= fact ? fact.born : born;
+    if (sink == <return>) w.fresh |= born;
     return 0;
   }
   String subject = _subject(w, value, named, fact);
   if (region.closed) {
-    _warn(w, <region>, w.origin,
-          %"$subject is used after the region that allocated it ended",
-          _opened(w, region));
+    if (report)
+      _warn(w, <region>, w.origin,
+            %"$subject is used after the region that allocated it ended",
+            _opened(w, region));
     return 1;
   }
   if (region.kind == <local>) return 0;
@@ -445,15 +442,69 @@ static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
       else exit = "stored into an object of an outer region";
   }
   if (!exit) return 0;
-  if (region == w.frame)
-    _warn(w, <region>, w.origin,
-          %"$subject can outlive the local storage it points into when $exit",
-          %("local storage ends when the function returns"));
-  else
-    _warn(w, <region>, w.origin,
-          %"$subject can outlive the region it was allocated in when $exit",
-          _opened(w, region));
+  if (report) {
+    if (region == w.frame) {
+      String message =
+        %"$subject can outlive the local storage it points into when $exit";
+      _warn(w, <region>, w.origin,
+            message,
+            %("local storage ends when the function returns"));
+    }
+    else
+      _warn(w, <region>, w.origin,
+            %"$subject can outlive the region it was allocated in when $exit",
+            _opened(w, region));
+  }
   return 1;
+}
+
+static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
+  match (_unwrap(value)) case %(op (!quote ?) ? ?yes ?no):
+    return _flow(w, yes, type, sink, target) ||
+           _flow(w, no, type, sink, target);
+  List named = NULL;
+  Fact fact = _value_fact(w, value, &named);
+  if (!fact) fact = _returned_argument(w, value, &named);
+  int born = 0;
+  Region other = NULL;
+  Region region = fact ? fact.region
+                       : _birth(w, value, NULL, &born, &other);
+  if (!fact && !born) return 0;
+  if (fact && fact.param >= 0) {
+    Var row = sink;
+    if (sink == <heap>) {
+      if (!target) row = <unknown>;
+      else if (target.param >= 0) row = %(param ${target.param});
+      else row = target.born ? <result>
+             : (target.region || target.other) ? void : <return>;
+    }
+    if (sink != <local> && row is not void)
+      w.sinks[%(${fact.param} $row)] = 1;
+    return 0;
+  }
+  if (fact) {
+    born = fact.born;
+    other = fact.other;
+  }
+  int reported = 0;
+  for (int choice = 0; choice < (born == 3 ? 2 : 1); choice++) {
+    Region owner = choice ? other : region;
+    int kind = born;
+    if (born == 3) kind = choice ? 2 : 1;
+    if (owner && target && target.born == 3 && sink == <heap>) {
+      struct Fact pooled = *target;
+      pooled.region = target.other;
+      pooled.born = 2;
+      reported |= _flow_region(w, value, type, sink, target, fact,
+                               named, owner, kind, !reported);
+      reported |= _flow_region(w, value, type, sink, &pooled, fact,
+                               named, owner, kind, !reported);
+    }
+    else
+      reported |= _flow_region(w, value, type, sink, target, fact,
+                               named, owner, kind, !reported);
+  }
+  return reported;
 }
 
 /* How a warning names the value that leaves: a local by its name, and an
@@ -521,6 +572,8 @@ static Fact _borrow(Walk w, Var place, List *named) {
   borrow.points = base;
   borrow.place = _unwrap(place);
   borrow.region = through ? base.region : w.frame;
+  borrow.other = through ? base.other : NULL;
+  borrow.born = through ? base.born : 0;
   if (through) borrow.param = base.param;
   return borrow;
 }
@@ -571,8 +624,10 @@ static void _scan_call(Walk w, Var call, String callee, List arguments) {
     else if (target == <unknown>) _flow(w, argument, type, <heap>, NULL);
     else if (target == <result>) {
       int born = 0;
-      Region region = _birth(w, call, NULL, &born);
-      struct Fact result = {.param = -1, .born = born, .region = region};
+      Region other = NULL;
+      Region region = _birth(w, call, NULL, &born, &other);
+      struct Fact result = {
+        .param = -1, .born = born, .region = region, .other = other};
       _flow(w, argument, type, <heap>, &result);
     }
     else match (target) case %(param ?other): {
@@ -635,7 +690,8 @@ static void _scan(Walk w, Var value, int deferred) {
       /* A List literal retains its values in the active Pool. */
       case %(cons ?head ?tail): {
         int born = 0;
-        Region region = _birth(w, node, NULL, &born);
+        Region other = NULL;
+        Region region = _birth(w, node, NULL, &born, &other);
         struct Fact result = {.param = -1, .born = born, .region = region};
         _flow(w, head, NULL, <heap>, &result);
         _flow(w, tail, NULL, <heap>, &result);
@@ -670,12 +726,20 @@ static void _assign(Walk w, Fact fact, Var value, Type type, int store) {
   Fact source = _value_fact(w, value, NULL);
   if (!source) source = _returned_argument(w, value, NULL);
   int born = 0;
-  Region region = source ? source.region : _birth(w, value, type, &born);
+  Region other = source ? source.other : NULL;
+  Region region = source ? source.region
+                         : _birth(w, value, type, &born, &other);
+  int owners = source ? source.born : born;
   int kept = source || born;
-  if (kept && _copies(w, type, value))
-    kept = ((source ? source.born : born) & 2) ||
-           (region && region.kind == <pool>);
-  if (kept && store && source && region)
+  if (kept && _copies(w, type, value)) {
+    if (owners == 3) {
+      region = other;
+      other = NULL;
+      owners = 2;
+    }
+    else kept = (owners & 2) || (region && region.kind == <pool>);
+  }
+  if (kept && store && source && (region || other))
     kept = !_flow(w, value, type, <local>, fact);
   fact.dead = 0;
   fact.points = kept && source ? source.points : NULL;
@@ -685,7 +749,8 @@ static void _assign(Walk w, Fact fact, Var value, Type type, int store) {
      the next allocation belongs to. */
   fact.owner = NULL;
   fact.region = kept ? region : NULL;
-  fact.born = kept && (source ? source.born : born);
+  fact.other = kept ? other : NULL;
+  fact.born = kept ? owners : 0;
   fact.param = kept && source ? source.param : -1;
 }
 
