@@ -4032,8 +4032,8 @@ List Sym_define(Sym sym, List key, List type){
   if(! _init_guard_) _file_init_();  SymScope * scope = _semantic_scope(sym, - 1);  Sym_set(sym, key, type);  _seed_declared_var_tag(key, type);  return _semantic_scope_binding(sym, scope, key);
 }
 
-List Sym_define_global(Sym sym, List key, List type){
-  if(! _init_guard_) _file_init_();  SymScope * scope = _semantic_scope(sym, sym -> base_scopes - 1);  Map_setindex(scope -> symbols, List_var(key), List_var(type));  _seed_declared_var_tag(key, type);  return _semantic_scope_binding(sym, scope, key);
+void Sym_define_global(Sym sym, List key, List type){
+  if(! _init_guard_) _file_init_();  SymScope * scope = _semantic_scope(sym, sym -> base_scopes - 1);  Map_setindex(scope -> symbols, List_var(key), List_var(type));  _seed_declared_var_tag(key, type);
 }
 
 List Sym_get_exact(Sym sym, List key){

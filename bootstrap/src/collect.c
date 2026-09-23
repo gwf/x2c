@@ -60,6 +60,8 @@ static String _canonical_include(void);
 
 static String _canonical_src(void);
 
+static int _package_keeps_spellings(String path);
+
 static String _canonical_cwd(void);
 
 static String _resolve_include_dirs(SourceView sources, List extra_dirs, String includer_dir, String target, int angle, int * covered);
@@ -85,6 +87,8 @@ static void _cache_dependencies(Map dependencies, Map additions);
 static void _replay_cached(Compiler compiler, List entry, Map globs, Map visited);
 
 static String _include_text(Compiler c, String target, String path);
+
+static void _walk_apart(Compiler c, String path, String text, Map globs, Map visited);
 
 static List _walk_cold(Compiler c, String target, String canonical, Map globs, Map visited);
 
@@ -378,12 +382,18 @@ static String _canonical_src(void){
   return _cached_canonical(cache, String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_2), NULL))));
 }
 
+int x2c_source_file(String);
+
+int String_startswith(String, String);
+
+static int _package_keeps_spellings(String path){
+  return ! x2c_source_file(path) || String_startswith(path, String_join(NULL, cons(String_var(_canonical_lib()), cons(String_var(_3), NULL)))) || String_startswith(path, String_join(NULL, cons(String_var(_canonical_include()), cons(String_var(_3), NULL))));
+}
+
 static String _canonical_cwd(void){
   static char cache[PATH_MAX];
   return _cached_canonical(cache, _154);
 }
-
-int String_startswith(String, String);
 
 int SourceView_exists(SourceView, String);
 
@@ -602,17 +612,21 @@ static String _include_text(Compiler c, String target, String path){
 
 Path Path_dirname(Path);
 
+static void _walk_apart(Compiler c, String path, String text, Map globs, Map visited){
+  int next_binding = c -> names -> next_binding;
+  _file(c, path, text, Path_dirname(path), globs, visited);
+  c -> names -> next_binding = next_binding;
+}
+
 Map Map_copy(Map);
 
 static List _walk_cold(Compiler c, String target, String canonical, Map globs, Map visited){
   String text = _include_text(c, target, canonical);
-  _file(c, canonical, text, Path_dirname(canonical), Map_copy(globs), Map_copy(visited));
+  _walk_apart(c, canonical, text, Map_copy(globs), Map_copy(visited));
   return Var_list(Map_getindex(_process_cache(), String_var(canonical)));
 }
 
 Compiler Compiler_new_shared(Compiler);
-
-int x2c_source_file(String);
 
 void Compiler_take_unit_state(Compiler, Compiler);
 
@@ -638,7 +652,7 @@ static void _parse_segment(Compiler c, String path, String source, String text, 
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
     int unit = x2c_source_file(path);
-    if(! unit) shadow -> package = NULL;
+    if(_package_keeps_spellings(path)) shadow -> package = NULL;
     shadow -> filename = path;
     shadow -> source_private = private;
     Compiler_take_unit_state(shadow, c);
@@ -875,7 +889,7 @@ static List _prelude_entry(Compiler c, String runtime, String canonical){
   if(List_truth(entry)) return entry;
   Map scratch = Map_new(), visited = Map_new();
   Map_setindex(visited, String_var(canonical), int_var(1));
-  _file(c, canonical, _runtime_text(c, runtime), Path_dirname(runtime), scratch, visited);
+  _walk_apart(c, canonical, _runtime_text(c, runtime), scratch, visited);
   return Var_list(Map_getindex(_process_cache(), String_var(canonical)));
 }
 
@@ -961,7 +975,7 @@ List String_split(String, String);
 
 static void _package_merge(Compiler compiler, String name, String root, String path, Map part, Map merged, Token token){
   String prefix = String_join(NULL, cons(String_var(name), cons(String_var(_67), NULL)));
-  int header = ! x2c_source_file(path) || String_startswith(path, String_join(NULL, cons(String_var(_canonical_lib()), cons(String_var(_3), NULL)))) || String_startswith(path, String_join(NULL, cons(String_var(_canonical_include()), cons(String_var(_3), NULL))));
+  int header = _package_keeps_spellings(path);
   int foreign = ! String_startswith(path, String_join(NULL, cons(String_var(root), cons(String_var(_3), NULL))));
   {
     Var key, value;
@@ -1075,7 +1089,7 @@ void Compiler_collect_package(Compiler c, String name, Token token){
     else{
       String text = NULL;
       if(! Compiler_read_source(package, entry, & text)) Compiler_report_error(c, 306819428, String_join(NULL, cons(String_var(_98), cons(String_var(name), cons(String_var(_72), NULL)))), token, cons(String_var(String_join(NULL, cons(String_var(_7), cons(String_var(entry), NULL)))), NULL));
-      _file(package, entry, text, Path_dirname(entry), globs, visited);
+      _walk_apart(package, entry, text, globs, visited);
     }
     Map_merge(c -> fn_defs, package -> fn_defs);
     Map merged = Map_new(), walked = Map_new();
