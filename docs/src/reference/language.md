@@ -2943,6 +2943,15 @@ is set and before the method body. This makes calls from the initializer back
 into static helpers in the same translation unit safe. Translation units that
 need only literal caching retain a private synthetic initializer.
 
+When the initializer is defined only inside conditional groups, the non-static
+functions call a private synthetic initializer instead. It repeats the
+conditions around the initializer's definition to call the initializer where
+it is compiled, and otherwise runs the compiler-owned initialization itself.
+It sits before the unit's first function, so a `#define` or `#undef` between
+that function and the initializer's definition that changes those conditions
+makes the two disagree. The initializer's body then never runs, or the
+generated C calls an initializer that was compiled out.
+
 Other initialization statements and runtime-valued static assignments belong in
 the method body. Eligible file-static percent literals use the generated
 sequence described under [Values and literals](#values-and-literals). Top-level
