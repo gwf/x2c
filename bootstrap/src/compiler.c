@@ -2919,6 +2919,7 @@ int Compiler_test_static_assert(Compiler);
 List Compiler_parse_static_assert(Compiler);
 void Compiler_parse_macro_lisp_shallow(Compiler);
 List Compiler_parse_import_declaration(Compiler);
+int Compiler_protocol_form_starts(Compiler);
 List Compiler_parse_protocol_declaration(Compiler);
 int Compiler_keyword_form_is_definition(Compiler);
 int Compiler_macro_form_is_definition(Compiler);
@@ -2940,7 +2941,7 @@ static void _shallow_parse_loop(Compiler c){
     if(Compiler_peek(c, 0) == 632323240){
       Compiler_parse_import_declaration(c);  _debug_tokens(c, start, c -> token);  continue;
     }
-    if(Compiler_peek(c, 0) == 1139215899608 ||(Compiler_peek(c, 0) == 1317118534 && Compiler_peek(c, 1) == 1139215899608)){
+    if(Compiler_protocol_form_starts(c)){
       Compiler_parse_protocol_declaration(c);  _debug_tokens(c, start, c -> token);  continue;
     }
     if(Compiler_keyword_form_is_definition(c)){
