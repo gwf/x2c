@@ -3938,6 +3938,10 @@ int Sym_scope_count(Sym sym){
   return Block_len(sym -> scopes);
 }
 
+int Sym_at_file_scope(Sym sym){
+  return(int) Block_len(sym -> scopes) <= sym -> base_scopes;
+}
+
 List Sym_lookup_macro(Sym sym, Atom name){
   Var definition;  for(int i =(int) Block_len(sym -> scopes) - 1;  i >= sym -> base_scopes;  i --){
     SymScope * scope = _semantic_scope(sym, i);  if((void *) scope -> macros != NULL && Map_try_get(scope -> macros, name, & definition)) return Var_list(definition);

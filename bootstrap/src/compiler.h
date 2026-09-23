@@ -277,6 +277,8 @@ int Sym_has_local_macros(Sym sym);
 
 int Sym_scope_count(Sym sym);
 
+int Sym_at_file_scope(Sym sym);
+
 List Sym_lookup_macro(Sym sym, Atom name);
 
 void Sym_set(Sym s, List key, List type);

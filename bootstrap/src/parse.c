@@ -80,6 +80,8 @@ static int _packed_since(Compiler c, Token first);
 
 static List _publish_aggregate_type(Compiler compiler, Symbol tag, Var name, List members, Token first);
 
+static List _tag_name(Compiler c);
+
 static List _struct_or_union(Compiler c);
 
 static List _publish_enumerator(Compiler compiler, List input, Type context, Token origin);
@@ -155,6 +157,8 @@ static void _import_members(Compiler c, String name);
 static int _script_declaration_stays(Compiler c);
 
 static void _track_conditional_arms(Compiler c);
+
+static Var _finish_tag_name(Compiler c, Var name);
 
 static List _finish_aggregate_type(Compiler c, Symbol tag, Var name, List members);
 
@@ -1919,11 +1923,15 @@ if(Compiler_peek(c, 0) == 251) return Array_list_free(fields);
 }
 }
 
+static List _tag_name(Compiler c){
+  List slot = Compiler_try_parse_macro_slot(c, 920394);  return List_truth(slot) ? cons(List_var(slot), NULL) : Compiler_parse_optional_identifier(c);
+}
+
 List Compiler_gensym(Compiler);
 Var Compiler_aggregate_name(Compiler, Symbol, Var, int);
 List List_append(List, List);
 static List _struct_or_union(Compiler c){
-  Token first = c -> token;  Symbol tag = Compiler_peek(c, 0);  Compiler_next(c);  _skip_aggregate_attributes(c);  List name = Compiler_parse_optional_identifier(c);  if(List_truth(name) && String_truth(c -> package)) name = _package_aggregate_name(c, tag, name);  List usedname = List_truth(name) ? name : Compiler_gensym(c);  usedname = cons(Compiler_aggregate_name(c, tag, List_car(usedname), Compiler_peek(c, 0) == 247 || Compiler_peek(c, 0) == 119), NULL);  List type = cons(Symbol_var(tag), usedname), fields = NULL;  if(Compiler_test(c, 247)){
+  Token first = c -> token;  Symbol tag = Compiler_peek(c, 0);  Compiler_next(c);  _skip_aggregate_attributes(c);  List name = _tag_name(c);  if(List_truth(name) && String_truth(c -> package)) name = _package_aggregate_name(c, tag, name);  List usedname = List_truth(name) ? name : Compiler_gensym(c);  usedname = cons(Compiler_aggregate_name(c, tag, List_car(usedname), Compiler_peek(c, 0) == 247 || Compiler_peek(c, 0) == 119), NULL);  List type = cons(Symbol_var(tag), usedname), fields = NULL;  if(Compiler_test(c, 247)){
     fields = Compiler_parse_fields(c, type);  Compiler_expect(c, 251);  _skip_aggregate_attributes(c);  if(! Map_truth(c -> macro_holes)) return _publish_aggregate_type(c, tag, List_car(usedname), fields, first);  fields = cons(Symbol_var(421880102), fields);
   }
   return List_truth(fields) ? List_append(type, cons(List_var(fields), NULL)) : type;
@@ -2022,7 +2030,7 @@ List Compiler_parse_enumerators(Compiler c, List context){
 }
 
 static List _enum(Compiler c){
-  Token first = c -> token;  Compiler_expect(c, 357722);  _skip_aggregate_attributes(c);  List name = Compiler_parse_optional_identifier(c);  if(List_truth(name) && String_truth(c -> package)) name = _package_aggregate_name(c, 357722, name);  List usedname = List_truth(name) ? name : Compiler_gensym(c);  List type = cons(Symbol_var(357722), usedname), enums = NULL;  if(Compiler_test(c, 247)){
+  Token first = c -> token;  Compiler_expect(c, 357722);  _skip_aggregate_attributes(c);  List name = _tag_name(c);  if(List_truth(name) && String_truth(c -> package)) name = _package_aggregate_name(c, 357722, name);  List usedname = List_truth(name) ? name : Compiler_gensym(c);  List type = cons(Symbol_var(357722), usedname), enums = NULL;  if(Compiler_test(c, 247)){
     enums = Compiler_parse_enumerators(c, type);  Compiler_expect(c, 251);  _skip_aggregate_attributes(c);  if(! Map_truth(c -> macro_holes)) return _publish_aggregate_type(c, 357722, List_car(usedname), enums, first);
   }
   return List_truth(enums) ? List_append(type, cons(List_var(enums), NULL)) : type;
@@ -2912,9 +2920,13 @@ List Compiler_parse_submission(Compiler c, int end_position){
 }
 }
 
+static Var _finish_tag_name(Compiler c, Var name){
+  name = Compiler_evaluate_macro_slot(c, name);  String exact = _syntax_exact_name(name);  return String_truth(exact) ? String_var(exact) : name;
+}
+
 List Compiler_evaluate_macro_rows(Compiler, Var);
 static List _finish_aggregate_type(Compiler c, Symbol tag, Var name, List members){
-  name = Compiler_evaluate_macro_slot(c, name);
+  name = _finish_tag_name(c, name);
   {
     List _x2c_match_expr = Var_list(name);
     MatchCaptureBuffer _x2c_match_capture = { 0 };
@@ -2973,11 +2985,11 @@ static Var _finish_type_spec(Compiler compiler, Var value){
     List _x2c_match_expr = Var_list(value);
     Var _x2c_match_values[3];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 3 };
     switch (0) {
-      default: ;  static MatchCaptureSite _x2c_match_site_31;  if (x2c_match_site_try_capture(& _x2c_match_site_31, _x2c_match_expr, List_var(_347), &_x2c_match_capture)) {Var tag = _x2c_match_values[0];  Var name = _x2c_match_values[1];  return List_var(cons(tag, cons(Compiler_evaluate_macro_slot(compiler, name), NULL)));  break;
+      default: ;  static MatchCaptureSite _x2c_match_site_31;  if (x2c_match_site_try_capture(& _x2c_match_site_31, _x2c_match_expr, List_var(_347), &_x2c_match_capture)) {Var tag = _x2c_match_values[0];  Var name = _x2c_match_values[1];  return List_var(cons(tag, cons(_finish_tag_name(compiler, name), NULL)));  break;
 }
 static MatchCaptureSite _x2c_match_site_32;  if (x2c_match_site_try_capture(& _x2c_match_site_32, _x2c_match_expr, List_var(_354), &_x2c_match_capture)) {Var tag = _x2c_match_values[0];  Var name = _x2c_match_values[1];  List members = Var_list(_x2c_match_values[2]);  return List_var(_finish_aggregate_type(compiler, Var_symbol(tag), name, members));  break;
 }
-{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761976154ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var name = _x2c_match_values[0];  return List_var(cons(_136, cons(Compiler_evaluate_macro_slot(compiler, name), NULL)));  break; } } static MatchCaptureSite _x2c_match_site_33;  if (x2c_match_site_try_capture(& _x2c_match_site_33, _x2c_match_expr, List_var(_359), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  List members = Var_list(_x2c_match_values[1]);  return List_var(_finish_aggregate_type(compiler, 357722, name, members));  break;
+{ List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761976154ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var name = _x2c_match_values[0];  return List_var(cons(_136, cons(_finish_tag_name(compiler, name), NULL)));  break; } } static MatchCaptureSite _x2c_match_site_33;  if (x2c_match_site_try_capture(& _x2c_match_site_33, _x2c_match_expr, List_var(_359), &_x2c_match_capture)) {Var name = _x2c_match_values[0];  List members = Var_list(_x2c_match_values[1]);  return List_var(_finish_aggregate_type(compiler, 357722, name, members));  break;
 }
 static MatchCaptureSite _x2c_match_site_34;  if (x2c_match_site_try_capture(& _x2c_match_site_34, _x2c_match_expr, List_var(_363), &_x2c_match_capture)) {Var name = _x2c_match_values[0]; {
   Var _x2c_match_value_4 = name; {

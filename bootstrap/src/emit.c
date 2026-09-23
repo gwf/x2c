@@ -1298,6 +1298,7 @@ int Type_is_enum_tag(Type);
 static List Emitter__enum(Emitter emitter, List ast){
   List name = Type_tag(List_type(ast)), body = Var_list(List_car(Type_body(List_type(ast))));
   if(_is_gensym_tag(name) && ! Type_is_enum_tag(List_type(ast))) name = NULL;
+  if(List_truth(name)) name = Emitter__emit(emitter, name);
   body = Emitter__emit(emitter, body);
   body = Emitter__commas(emitter, body);
   if(List_truth(name)){
