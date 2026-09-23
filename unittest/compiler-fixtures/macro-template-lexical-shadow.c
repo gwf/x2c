@@ -8,17 +8,17 @@ static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
 
-struct _x2c_macro_Node_6c8eac1c{
+struct _x2c_macro_Node_4f65fd50{
   int value;
 }
 ;
 
-enum _x2c_macro_Choice_67a35c70{
-  _x2c_macro_Option_c098aa9e = 1
+enum _x2c_macro_Choice_b798c844{
+  _x2c_macro_Option_1555b65d = 1
 }
 ;
 
-typedef int _x2c_macro_Scalar_3a56df43;
+typedef int _x2c_macro_Scalar_0e265834;
 
 __attribute__((constructor)) static void _file_init_(void){
   x2c_initialize_protocols();
@@ -31,7 +31,7 @@ int String_len(String);
 
 int first(void){
   if(! _init_guard_) _file_init_();
-  struct _x2c_macro_Node_08578ddb _x2c_macro_outside_0 ={
+  struct _x2c_macro_Node_0c4b38f1 _x2c_macro_outside_0 ={
     3
   }
   ;
@@ -63,12 +63,12 @@ int first(void){
     ;
     _x2c_macro_total_0 +=(int) _x2c_macro_value_2 + _x2c_macro_Option_0;
   }
-  return _x2c_macro_total_0 + _x2c_macro_outside_0.value + _x2c_macro_retained_0.value + _x2c_macro_Node_0 + _x2c_macro_value_0 + _x2c_macro_Option_73a106af;
+  return _x2c_macro_total_0 + _x2c_macro_outside_0.value + _x2c_macro_retained_0.value + _x2c_macro_Node_0 + _x2c_macro_value_0 + _x2c_macro_Option_2b696d32;
 }
 
 int second(void){
   if(! _init_guard_) _file_init_();
-  struct _x2c_macro_Node_6c8eac1c _x2c_macro_outside_1 ={
+  struct _x2c_macro_Node_4f65fd50 _x2c_macro_outside_1 ={
     3
   }
   ;
@@ -100,7 +100,7 @@ int second(void){
     ;
     _x2c_macro_total_1 +=(int) _x2c_macro_value_5 + _x2c_macro_Option_1;
   }
-  return _x2c_macro_total_1 + _x2c_macro_outside_1.value + _x2c_macro_retained_1.value + _x2c_macro_Node_2 + _x2c_macro_value_3 + _x2c_macro_Option_c098aa9e;
+  return _x2c_macro_total_1 + _x2c_macro_outside_1.value + _x2c_macro_retained_1.value + _x2c_macro_Node_2 + _x2c_macro_value_3 + _x2c_macro_Option_1555b65d;
 }
 
 int main(void){
