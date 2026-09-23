@@ -47,8 +47,8 @@ COMMANDS = (
   ("compiler", ["make", "bm-compiler"]),
 )
 # Build cost score change, in points, that counts as a real change. Repeat
-# runs of one tree agree within 0.2 points.
-BUILD_SCORE_ALERT = 2.0
+# scores of one tree span about 4 points under heavy host load.
+BUILD_SCORE_ALERT = 5.0
 
 
 class SnapshotError(RuntimeError):
@@ -343,7 +343,7 @@ def comparable_metrics(row: dict[str, object]) -> dict[str, float]:
 
 
 def build_verdict(score: float, previous: dict[str, float]) -> str:
-  """Reads a build cost score change; repeat runs agree within 0.2."""
+  """Reads a build cost score change against BUILD_SCORE_ALERT."""
   before = previous.get("build cost score")
   if before is None:
     return "(no previous score)"

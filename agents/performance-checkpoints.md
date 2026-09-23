@@ -38,20 +38,22 @@ attempt.
 
 The stage 3 time grows when the compiler gets slower and when there is more
 code to compile. The build cost score removes the second cause. Each snapshot
-builds one stage from HEAD with `make bm-build-scaling`, counts the
-instructions its translator and C compiler processes retire, and divides by
-the source lines in `src/` and `lib/`. The score is that cost per line as a
-percentage of the baseline in
+builds one stage from HEAD three times with `make bm-build-scaling`, takes
+the median CPU cycles of its translator and C compiler processes, and
+divides by the source lines in `src/` and `lib/`. The score is that cost per
+line as a percentage of the baseline in
 `unittest/benchmarks/build-scaling-baseline.json`.
 
-Read the first lines of `latest.md`. A score that rose 2 or more points since
+Read the first lines of `latest.md`. A score that rose 5 or more points since
 the previous snapshot means the commits in between made each line more
-expensive to build; find the commit that caused it. Repeat runs of one tree
-agree within 0.2 points, even under heavy host load. The score assumes build
-cost grows in proportion to source lines.
+expensive to build; find the commit that caused it. Repeat scores of one
+tree span about 4 points under heavy host load. Replayed over the August
+2026 Pool.promote regression, the score rose 38 points at #230 and fell 25%
+at the #265 fix. Instruction counts are steadier but missed the fix, because
+that slowdown was memory stalls.
 
-The instruction count does not see cache or memory stalls, and a new C
-compiler changes it. After a toolchain upgrade, run
+The score assumes build cost grows in proportion to source lines. A new C
+compiler changes cycle counts; after a toolchain upgrade, run
 `tools/build-scaling.py --rebaseline` and commit the new baseline.
 
 ## Authored changes

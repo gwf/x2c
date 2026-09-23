@@ -2,8 +2,8 @@
 """Score the stage build's cost per line of source against a baseline.
 
 One stage build translates lib/ and src/ and compiles the generated C. The
-tool counts the instructions that work retires in a copy of HEAD, divides
-by the number of source lines, and reports a score: 100 is the recorded baseline, and 110
+tool counts the CPU cycles that work takes in a copy of HEAD, divides by
+the number of source lines, and reports a score: 100 is the recorded baseline, and 110
 means each line of x2c costs 10% more to build. A larger code base leaves
 the score unchanged; a slower translator, a slower C compile, or more
 generated C per line raises it.
@@ -11,10 +11,11 @@ generated C per line raises it.
   tools/build-scaling.py                # score HEAD
   tools/build-scaling.py --rebaseline   # make HEAD's cost the new 100
 
-Instructions retired, from macOS `/usr/bin/time -l`, repeat within 0.2%
-under heavy host load, where wall and CPU time vary by 25% or more. They do
-not see cache or memory stalls, and a new C compiler changes them, so
-rebaseline after a toolchain upgrade. The last output line is one JSON object for tools/performance-snapshot.py.
+Cycles, from macOS `/usr/bin/time -l`, include memory stalls and ignore
+time spent waiting for other work on the host. The median of three builds
+varies by about 4% under heavy load, where wall time varies by 20%. A new C
+compiler changes the count, so rebaseline after a toolchain upgrade.
+The last output line is one JSON object for tools/performance-snapshot.py.
 """
 
 from __future__ import annotations
@@ -23,6 +24,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+import statistics
 import subprocess
 import tempfile
 
@@ -57,8 +59,8 @@ def source_lines(tree: Path) -> int:
   )
 
 
-def build_instructions(tree: Path, compiler: Path) -> int:
-  stage = tree / "builds/10"
+def build_cycles(tree: Path, compiler: Path, sample: int) -> int:
+  stage = tree / "builds" / str(10 + sample)
   counts = stage / "counts"
   counts.mkdir(parents=True)
   wrapper = tree / "counted"
@@ -79,7 +81,7 @@ def build_instructions(tree: Path, compiler: Path) -> int:
     int(line.split()[0])
     for path in counts.iterdir()
     for line in path.read_text(encoding="utf-8").splitlines()
-    if line.endswith("instructions retired")
+    if line.endswith("cycles elapsed")
   )
 
 
@@ -101,21 +103,23 @@ def main() -> int:
   with tempfile.TemporaryDirectory(prefix="x2c-build-scaling-") as work:
     tree = extract(Path(work))
     lines = source_lines(tree)
-    instructions = build_instructions(tree, compiler)
-  per_line = instructions / lines
+    cycles = statistics.median(
+      build_cycles(tree, compiler, sample) for sample in range(3)
+    )
+  per_line = cycles / lines
   commit = subprocess.run(
     ["git", "rev-parse", "HEAD"], cwd=ROOT, check=True,
     stdout=subprocess.PIPE, text=True,
   ).stdout.strip()
   if args.rebaseline:
     BASELINE.write_text(json.dumps(
-      {"commit": commit, "instructions_per_line": per_line}, indent=2,
+      {"commit": commit, "cycles_per_line": per_line}, indent=2,
     ) + "\n", encoding="utf-8")
   baseline = json.loads(BASELINE.read_text(encoding="utf-8"))
   record = {
-    "score": 100 * per_line / baseline["instructions_per_line"],
-    "instructions_per_line": per_line,
-    "instructions": instructions,
+    "score": 100 * per_line / baseline["cycles_per_line"],
+    "cycles_per_line": per_line,
+    "cycles": cycles,
     "source_lines": lines,
     "baseline_commit": baseline["commit"],
   }
