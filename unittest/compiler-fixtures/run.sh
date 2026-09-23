@@ -314,9 +314,18 @@ run_fixture() {
   return 0
 }
 
+# A single fixture reports its own result unless the full run below, which
+# reads every tally and prints each failing log, started it.
 if [[ ${2:-} == --fixture ]]; then
+  exec 3>&2
   run_fixture "$3"
   printf '%d %d\n' "$failures" "$artifact_count" >"$build/$3/tally"
+  [[ -n ${FIXTURE_TALLY_ONLY:-} ]] && exit 0
+  if ((failures)); then
+    cat "$build/$3/log" >&3
+    exit 1
+  fi
+  echo "Compiler fixture $3 passed" >&3
   exit 0
 fi
 
@@ -328,7 +337,7 @@ done
 fixture_count=${#names[@]}
 
 if ((fixture_count)); then
-  printf '%s\n' "${names[@]}" | \
+  printf '%s\n' "${names[@]}" | FIXTURE_TALLY_ONLY=1 \
     xargs -P "${JOBS:-$(getconf _NPROCESSORS_ONLN)}" -n 1 \
       "$fixture_dir/run.sh" "$mode" --fixture || true
 fi
