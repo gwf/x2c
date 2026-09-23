@@ -70,13 +70,6 @@ static String _canonical_src(void) {
   return _cached_canonical(cache, %"${x2c_get_root()}/src");
 }
 
-/* A package renames what it declares, not what it includes. A C header or a
-   runtime module keeps its own spellings, as including it directly gives
-   them, so a public method over one of its types names a type it defines. */
-static int _package_keeps_spellings(String path) =>
-  !x2c_source_file(path) || path.startswith(%"${_canonical_lib()}/") ||
-  path.startswith(%"${_canonical_include()}/");
-
 static String _canonical_cwd(void) {
   static char cache[PATH_MAX];
   return _cached_canonical(cache, ".");
@@ -195,11 +188,9 @@ static String _include_text(Compiler c, String target, String path) {
   return text;
 }
 
-/* Walk a file other than the unit cold. The unit keeps only the file's
-   entry, which it replays as it would an interface whose rows carry their own
-   numbering, so the bindings the walk declares give their numbers back: the
-   unit numbers its own bindings the same whether it walked the file or read
-   the file's interface. */
+/* Walk a file other than the unit cold, then restore the unit's binding
+   counter. The unit keeps only the file's entry and replays it as it would
+   the file's interface, so it numbers its own bindings the same either way. */
 static void _walk_apart(
   Compiler c, String path, String text, Map globs, Map visited) {
   int next_binding = c.names.next_binding;
@@ -217,6 +208,17 @@ static List _walk_cold(
   return _process_cache()[canonical];
 }
 
+/* A package renames what it declares, not what it includes: only x2c source
+   under its root takes its prefix. A C header, a runtime module, or foreign
+   x2c source keeps its own spellings, as including that file directly gives
+   them, so the collected entry is the same whichever unit walks it first. */
+static int _package_owns(Compiler c, String path) {
+  if (!c.package) return 0;
+  Var root = c.package_roots[c.package];
+  return root is not void &&
+    path.startswith(%"${_canonical_path(root)}/");
+}
+
 /* A segment resolves names through cumulative globs but writes declarations
    only to overlay. shallow_parse_overlay expands applicable unit macros under
    semantic transactions, so their committed declarations and protocol rows
@@ -229,7 +231,7 @@ static void _parse_segment(
   Compiler shadow = Compiler.new_shared(c);
   defer c.close_child(shadow);
   int unit = x2c_source_file(path);
-  if (_package_keeps_spellings(path)) shadow.package = NULL;
+  if (!unit || !_package_owns(c, path)) shadow.package = NULL;
   shadow.filename = path;
   shadow.source_private = private;
   shadow.take_unit_state(c);
@@ -590,7 +592,9 @@ static void _package_merge(
   Compiler compiler, String name, String root, String path, Map part,
   Map merged, Token token) {
   String prefix = %"${name}__";
-  int header = _package_keeps_spellings(path);
+  int header = !x2c_source_file(path) ||
+               path.startswith(%"${_canonical_lib()}/") ||
+               path.startswith(%"${_canonical_include()}/");
   int foreign = !path.startswith(%"$root/");
   foreach (Var (key, value), part) {
     if (key is not <list> || key.is_nil()) continue;
@@ -670,6 +674,9 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
     c.report_error(
       <driver>, %"unknown package '$name'", token,
       %( "searched: <root>/$name/src/$name.x, <root>/$name/$name.x" ));
+  /* The root is registered before the walk, as a package unit's own is
+     before its parse, so the walk can tell the package's files apart. */
+  c.package_roots[name] = root;
   Compiler package = Compiler.new_shared(c);
   defer c.close_child(package);
   package.package = name;
@@ -693,7 +700,6 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
   _package_contributions(
     c, name, root, entry, _process_cache()[entry],
     merged, walked, token);
-  c.package_roots[name] = root;
   foreach (Var (key, value), merged) {
     c.sym.set(key, value);
     c.copy_source_declaration(c.sym.current_symbols(), merged, key);
