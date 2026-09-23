@@ -20,6 +20,13 @@ struct HeaderLeadField { enum HeaderLead lead; };
 struct HeaderMacro { char tag; short value; } HEADER_PACKED;
 struct HeaderMacroBy { char tag; short value; } HEADER_PACKED_BY(1);
 
+#if defined(__GNUC__)
+#define HEADER_PACKED_IF __attribute__((packed))
+#else
+#define HEADER_PACKED_IF
+#endif
+struct HeaderMacroIf { char tag; short value; } HEADER_PACKED_IF;
+
 #define HEADER_EMPTY
 #define HEADER_MARKED __attribute__((deprecated))
 #define HEADER_EXPORT __attribute__((visibility("default")))

@@ -708,12 +708,15 @@ static Token _macro_directive(String content, int *undefined) {
 
 /* Tracks in `layout` the macros whose body holds an attribute that can
    change a struct's layout, written out or through another such macro. A
-   use of one is marked as the attribute it expands to would be. */
-static void _note_layout_macro(String content, Map layout) {
+   use of one is marked as the attribute it expands to would be. As with
+   packing, a macro that any arm defines with such an attribute stays in
+   `layout`; only an `#undef` or definition outside every conditional group,
+   `conditional` false, removes it. */
+static void _note_layout_macro(String content, Map layout, int conditional) {
   int undefined;
   Token name = _macro_directive(content, &undefined);
   if (!name) return;
-  layout.del(name.text);
+  if (!conditional) layout.del(name.text);
   if (undefined) return;
   Token token = name + 1;
   if (token.type == <(>) token = token.after_group();
@@ -835,7 +838,7 @@ static void _scan_conditionals(Compiler c) {
       groups.take_last();
     }
     else {
-      if (!hidden) _note_layout_macro(token.text, layout);
+      if (!hidden) _note_layout_macro(token.text, layout, stack.len());
       for (int k = 0; k < packed.len(); k++) {
         if (!_reading_follows(groups, k)) continue;
         List states = saved[k];

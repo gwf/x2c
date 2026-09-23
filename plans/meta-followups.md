@@ -116,6 +116,11 @@ Outcome, 2026-09-22:
     `typedef long aligned_long __attribute__((aligned(16)))`, and a field
     declared `_Alignas`, leave a struct its natural layout; neither mark
     lies in the struct's own definition.
+  - Default collection learns which macros hold a layout attribute from the
+    `#define` lines it has passed. A macro defined through a later one,
+    `#define B A` before `#define A __attribute__((packed))`, is not
+    recognized, so a struct followed by `B` gets its natural layout.
+    `--cpp-symbols` and `--system-headers` see the expansion.
   - `-D_Atomic(T)=T` stays: `_Atomic` scalars have the size and alignment of
     their plain type on the supported hosts, so a struct with such a field
     keeps a correct layout. An `_Atomic` struct type could differ and is not

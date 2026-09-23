@@ -48,6 +48,11 @@ meta int header_macro_by_value(void) {
   return value.value;
 }
 
+meta int header_macro_if_value(void) {
+  struct HeaderMacroIf value = { .value = 7 };
+  return value.value;
+}
+
 meta int header_empty_value(void) {
   struct HeaderEmpty value = { .value = 7 };
   return value.value;

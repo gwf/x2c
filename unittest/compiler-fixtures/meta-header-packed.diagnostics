@@ -33,3 +33,8 @@ unittest/compiler-fixtures/meta-header-packed.x:46:1: macro: this function canno
   ^^^^
   note: reason: a compile-time struct with no host layout
 
+unittest/compiler-fixtures/meta-header-packed.x:51:1: macro: this function cannot run at compile time
+  meta int header_macro_if_value(void) {
+  ^^^^
+  note: reason: a compile-time struct with no host layout
+
