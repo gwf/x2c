@@ -729,6 +729,14 @@ static Var _lower_constant_leaf(Lowering l, List value) {
     case %(expr ? (literal ? ? ?symbol)): return symbol;
     case %(expr ("String") (call ? (args ?inner))):
       return _lower_constant_leaf(l, inner);
+    /* A constant String addition is cached as its resolved protocol call. */
+    case %(expr ("String")
+      (call (expr ? (ident (binding ? "String_add")))
+            (args ?left ?right))): {
+      Var a = _lower_constant(l, left), b = _lower_constant(l, right);
+      if (a is void || b is void) return void;
+      return a.string().add(b.string());
+    }
     /* Canonical type literals can contain a struct's binding id. */
     case %(expr ("Var")
       (call (expr ? (ident (binding ? "int_var"))) (args ?inner))):

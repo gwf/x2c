@@ -36,6 +36,8 @@ meta int conditional_symbol(int n) {
 }
 
 meta int composed_hash(String value) => value.hash() != 0;
+meta int constant_string_hash(void) =>
+  "abc".hash() == ("a" + "bc").hash();
 
 int main(int argc, char **argv) {
   (void) argv;
@@ -58,5 +60,8 @@ int main(int argc, char **argv) {
   printf("hash %d %d %d\n",
     $composed_hash("word"), composed_hash("word"),
     composed_hash(argc ? "word" : ""));
+  printf("hash-constant-string %d %d %d\n",
+    $constant_string_hash(), constant_string_hash(),
+    "abc".hash() == ("a" + "bc").hash());
   return 0;
 }
