@@ -2,19 +2,19 @@
 
     These are the native C scalar spellings the compiler can carry through a
     Var.  The compiler projects its Type lookup from these rows, and
-    `lib/lisp.x` projects each type's native size, alignment, load, and store
-    for compile-time code that keeps C objects in bytes.  Var's i48/u48
-    numeric payload families are deliberately absent: neither is an exact C
-    type.
+    `lib/lisp.x` invokes `$native.scalar.access` for each row's type to get
+    its native size, alignment, load, and store for compile-time code that
+    keeps C objects in bytes.  Var's i48/u48 numeric payload families are
+    deliberately absent: neither is an exact C type.
 
     A row is:
 
       (TYPE NAME TAG C-EXTRACTOR C-UPDATE SIGNATURE-TYPE)
 
-    TYPE is Type.scalar's canonical spelling. NAME only names generated
-    functions. C-EXTRACTOR and C-UPDATE retain the existing compiler emission
-    spellings. SIGNATURE-TYPE is the compact Type spelling used by Func's Var
-    calling convention.
+    TYPE is Type.scalar's canonical spelling. NAME only names the generated
+    access record. C-EXTRACTOR and C-UPDATE retain the existing compiler
+    emission spellings. SIGNATURE-TYPE is the compact Type spelling used by
+    Func's Var calling convention.
 */
 
 $(def native.scalar.rows '(
@@ -80,131 +80,48 @@ macro Entry $native.scalar.type.rows() {
   $(map native.scalar.type-entry native.scalar.rows)...
 }
 
-$(defun native.scalar.ident (prefix row)
-  (string-append prefix (str (native.scalar.name row))))
+/* The access record for TYPE's row is `_native_scalar_access_NAME`. */
+$(defun native.scalar.access-name (type)
+  (string-append "_native_scalar_access_"
+    (str (native.scalar.name (assoc type native.scalar.rows)))))
 
-$(defun native.scalar.expr-ident (name)
-  `(expr () (ident ,name)))
+/* x2c has no `_Alignof(type-name)` syntax, so a Type hole cannot be its
+   argument. */
+$(defun native.scalar.alignment (type)
+  `(expr (unsigned long)
+    (call "_Alignof" (args (decl ,type (bindings (bind () ())))))))
 
-$(defun native.scalar.member-call (receiver member arguments)
-  `(expr () (call
-    (expr () (op . ,receiver (,(str member))))
-    (args ,@arguments))))
+/* Native size, alignment, load, and store for one row's type. The
+   importing unit declares NativeScalarAccess first. */
+macro Unit $native.scalar.access(Type $type) {
+  static Var load(const void *bytes, Scope *owner) {
+    $type native;
+    memcpy(&native, bytes, sizeof native);
+    Var value = native;
+    return value.move_wide_to(owner);
+  }
 
-$(defun native.scalar.param (type name modifiers)
-  `(param ,type (bind (,name) ,modifiers)))
+  static void store(void *bytes, Var value) {
+    $type native = value;
+    memcpy(bytes, &native, sizeof native);
+  }
 
-$(defun native.scalar.function (result name parameters body)
-  `(function ,result
-    (bind (,name) ((fnmod (params ,@parameters))))
-    (block ,@body)))
+  static struct NativeScalarAccess
+    $(x2c.ident (native.scalar.access-name $type)) = {
+      $(x2c.literal.symbol
+        (native.scalar.tag (assoc $type native.scalar.rows))),
+      sizeof($type), $(native.scalar.alignment $type), load, store
+    };
+}
 
-$(defun native.scalar.prototype (result name parameters)
-  `(declare ,result
-    (bindings (bind (,name) ((fnmod (params ,@parameters)))))))
+$(defun native.scalar.access-entry (row)
+  `(map-entry ,(native.scalar.type-value row)
+    ,(x2c.expr.cast '(* void) `(expr () (op &
+      ,(x2c.expr.ident
+        (x2c.ident (native.scalar.access-name (native.scalar.type row)))))))))
 
-$(defun native.scalar.load-parameters ()
-  (list
-    (native.scalar.param '(const void) "bytes" '(*))
-    (native.scalar.param '("Scope") "owner" '(*))))
-
-$(defun native.scalar.store-parameters ()
-  (list
-    (native.scalar.param '(void) "bytes" '(*))
-    (native.scalar.param '("Var") "value" '())))
-
-$(defun native.scalar.prototypes (row)
-  (list
-    (native.scalar.prototype '(static "Var")
-      (native.scalar.ident "_native_scalar_load_" row)
-      (native.scalar.load-parameters))
-    (native.scalar.prototype '(static void)
-      (native.scalar.ident "_native_scalar_store_" row)
-      (native.scalar.store-parameters))))
-
-$(defun native.scalar.load (row)
-  (let* ((type (native.scalar.type row))
-         (load (native.scalar.ident "_native_scalar_load_" row))
-         (bytes "bytes")
-         (owner "owner")
-         (native "native")
-         (value "value")
-         (native-expr (native.scalar.expr-ident native))
-         (value-expr (native.scalar.expr-ident value)))
-    (native.scalar.function '(static "Var") load
-      (native.scalar.load-parameters)
-      (list
-        `(declare ,type (bindings (bind (,native) ())))
-        `(stmnt (expr () (call "memcpy" (args
-          (expr () (op & ,native-expr))
-          ,(native.scalar.expr-ident bytes)
-          (expr (unsigned long) (sizeof ,native-expr))))))
-        `(declare ("Var") (bindings
-          (op = (bind (,value) ()) ,native-expr)))
-        `(return () ,(native.scalar.member-call
-          value-expr 'move_wide_to
-          (list (native.scalar.expr-ident owner))))))))
-
-$(defun native.scalar.store (row)
-  (let* ((type (native.scalar.type row))
-         (store (native.scalar.ident "_native_scalar_store_" row))
-         (bytes "bytes")
-         (native "native")
-         (value "value")
-         (value-expr (native.scalar.expr-ident value))
-         (native-expr (native.scalar.expr-ident native)))
-    (native.scalar.function '(static void) store
-      (native.scalar.store-parameters)
-      (list
-        `(declare ,type (bindings (op = (bind (,native) ()) ,value-expr)))
-        `(stmnt (expr () (call "memcpy" (args
-          ,(native.scalar.expr-ident bytes)
-          (expr () (op & ,native-expr))
-          (expr (unsigned long) (sizeof ,native-expr))))))))))
-
-$(defun native.scalar.access-record (row)
-  (let ((record (native.scalar.ident "_native_scalar_access_" row))
-        (load (native.scalar.ident "_native_scalar_load_" row))
-        (store (native.scalar.ident "_native_scalar_store_" row))
-        (decl `(decl ,(native.scalar.type row)
-                (bindings (bind () ())))))
-    `(declare (static struct "NativeScalarAccess")
-      (bindings (op = (bind (,record) ())
-        (expr () (composite (commas
-          ,(x2c.literal.symbol (native.scalar.tag row))
-          (expr (unsigned long) (sizeof (parens ,decl)))
-          (expr (unsigned long) (call "_Alignof" (args ,decl)))
-          ,(native.scalar.expr-ident load)
-          ,(native.scalar.expr-ident store)))))))))
-
-$(defun native.scalar.access-definitions (row)
-  (list (native.scalar.load row)
-        (native.scalar.store row)
-        (native.scalar.access-record row)))
-
-$(defun native.scalar.access-case (row)
-  (let ((type (native.scalar.type-value row))
-        (record (native.scalar.ident "_native_scalar_access_" row))
-        (exact (native.scalar.expr-ident "exact_type")))
-    `(if ,(native.scalar.member-call exact 'equal (list type))
-      (return () (expr ()
-        (op & ,(native.scalar.expr-ident record)))))))
-
-$(defun native.scalar.access-lookup (rows)
-  (native.scalar.function '("NativeScalarAccess")
-    "native_scalar_access"
-    (list (native.scalar.param '("List") "exact_type" '()))
-    `(,@(map native.scalar.access-case rows)
-      (return () ,(x2c.literal.int 0)))))
-
-$(defun native.scalar.access-projection (rows)
-  (append (apply append (map native.scalar.prototypes rows))
-          (apply append (map native.scalar.access-definitions rows))
-          (list (native.scalar.access-lookup rows))))
-
-/* Native size, alignment, load, and store for each row, and the
-   `native_scalar_access` lookup. The importing unit declares
-   NativeScalarAccess and the lookup's prototype first. */
-macro Unit $native.scalar.access.rows() {
-  $(native.scalar.access-projection native.scalar.rows)...
+/* `native_scalar_access`'s lookup: each row's type to its access record,
+   which the row's `$native.scalar.access` invocation defines first. */
+macro Entry $native.scalar.access.entries() {
+  $(map native.scalar.access-entry native.scalar.rows)...
 }

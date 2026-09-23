@@ -1048,7 +1048,9 @@ static int _promote_block(Pool inner, Var object, void * alloc, PoolBlock block)
   };
   x2c_cleanup_push(&_x2c_defer_record_12);
   {
-      _insert_locked(inner -> up, object);
+      unsigned before = Map_len(inner -> up -> table);
+      Map_setdefault(inner -> up -> table, object, object);
+      if(Map_len(inner -> up -> table) != before) inner -> up -> interned ++;
       if(block && block -> owner == inner) _mark_slot(block, slot);
       else if(promotion){
         promotion -> next = inner -> promotions;

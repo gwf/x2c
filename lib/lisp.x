@@ -50,12 +50,28 @@ typedef struct NativeScalarAccess {
   NativeScalarStore store;
 } *NativeScalarAccess;
 
-/** Returns the row for an exact C scalar type such as `(unsigned long)`, or
-    NULL for any other type. */
-NativeScalarAccess native_scalar_access(List exact_type);
-
 $(import "native-scalar-types.xmacro")
-$native.scalar.access.rows();
+$native.scalar.access(char);
+$native.scalar.access(signed char);
+$native.scalar.access(unsigned char);
+$native.scalar.access(short);
+$native.scalar.access(unsigned short);
+$native.scalar.access(int);
+$native.scalar.access(unsigned);
+$native.scalar.access(long);
+$native.scalar.access(unsigned long);
+$native.scalar.access(long long);
+$native.scalar.access(unsigned long long);
+$native.scalar.access(float);
+$native.scalar.access(double);
+$native.scalar.access(long double);
+
+static Map native_scalars = %{ ${$native.scalar.access.entries()} };
+
+/** Returns the access record for an exact C scalar type such as
+    `(unsigned long)`, or NULL for any other type. */
+NativeScalarAccess native_scalar_access(List exact_type) =>
+  native_scalars.getdefault(exact_type, NULL).pointer();
 
 /** Represents one isolated embedded `Lisp` session.
     Create it with `Lisp.new` or `Lisp.kernel` and end it with
@@ -1090,9 +1106,10 @@ Var lisp_store(Var cell, Var value) {
 /* Lowered source keeps C objects in native bytes. The compiler supplies
    every size, offset, and layout from `Compiler.meta_type_layout`, so these
    operations only move bytes. The per-access operations take their offset
-   as a `Var`: a numeric Func parameter pays a checked conversion on every
-   call, which would dominate a field access. Automatic storage belongs to the frame of the
-   marked source function executing it, or to the session outside one. */
+   as a `Var`: a `long` parameter would convert and box each offset, which
+   adds about 10% to a field access. Automatic storage belongs to the frame
+   of the marked source function executing it, or to the session outside
+   one. */
 static Scope *_lowered_owner(void) =>
   lisp_active.automatic_owner ? lisp_active.automatic_owner
                               : &lisp_active.scope;
@@ -1135,25 +1152,31 @@ Var lisp_session_copy(Var source, long size) =>
     carries record values. */
 Var lisp_peek(Var pointer, Var offset, List layout) {
   void *at = (char *) pointer.pointer() + offset.long_long();
-  Symbol kind = layout.car();
-  if (kind == <record>) return Var.new(<p48>, at);
-  if (kind == <var>) return *(Var *) at;
-  if (kind == <pointer>) return Var.new(layout[4], *(void **) at);
-  Var value = native_scalar_access(layout[4]).load(at, Scope.top());
-  return layout[5] == <symbol> ? Var.new(<symbol>, value.ulong()) : value;
+  match (layout) {
+    case %(record *): return Var.new(<p48>, at);
+    case %(var *): return *(Var *) at;
+    case %(pointer ? ? ? ?tag): return Var.new(tag, *(void **) at);
+    case %(scalar ? ? ? ?exact ?tag): {
+      Var value = native_scalar_access(exact).load(at, Scope.top());
+      return tag == <symbol> ? Var.new(<symbol>, value.ulong()) : value;
+    }
+  }
+  return void;
 }
 
 /** Writes `value`, already converted to the layout's type, at `offset`
     bytes past `pointer`. */
 Var lisp_poke(Var pointer, Var offset, List layout, Var value) {
   void *at = (char *) pointer.pointer() + offset.long_long();
-  Symbol kind = layout.car();
-  if (kind == <record>) memmove(at, value.pointer(), layout[2].long_long());
-  else if (kind == <var>) *(Var *) at = value;
-  else if (kind == <pointer>) *(void **) at = value.pointer();
-  else native_scalar_access(layout[4]).store(
-    at, layout[5] == <symbol>
-          ? Var.new(<ulong>, (unsigned long) value.integer()) : value);
+  match (layout) {
+    case %(record ? ?size *): memmove(at, value.pointer(), size.long_long());
+    case %(var *): *(Var *) at = value;
+    case %(pointer *): *(void **) at = value.pointer();
+    case %(scalar ? ? ? ?exact ?tag):
+      native_scalar_access(exact).store(
+        at, tag == <symbol>
+              ? Var.new(<ulong>, (unsigned long) value.integer()) : value);
+  }
   return value;
 }
 

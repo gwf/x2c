@@ -6,11 +6,11 @@
 
 #include "exception.h"
 
-static List _693, _689, _683, _680, _679, _677, _675, _674, _673, _672, _670, _668, _667, _666, _664, _662, _661, _658, _657, _655, _654, _652, _651, _650, _647, _646, _645, _643, _642, _641, _639, _638, _637, _636, _634, _633, _629, _628, _627, _626, _624, _623, _622, _619, _618, _615, _614, _613, _612, _611, _609, _608, _606, _605, _604, _602, _601, _600, _597, _596, _595, _592, _591, _578, _577, _576, _575, _574, _568, _564, _563, _557, _544, _542, _541, _537, _535, _534, _532, _530, _528, _527, _510, _509, _506, _505, _504, _502, _501, _500, _498, _495, _494, _492, _491, _490, _486, _485, _481, _480, _479, _477, _476, _474, _469, _465, _463, _462, _461, _460, _459, _457, _456, _455, _453, _450, _449, _447, _446, _444, _440, _439, _438, _436, _435, _433, _427, _426, _422, _421, _415, _414, _413, _409, _408, _407, _405, _404, _402, _401, _400, _398, _397, _385, _384, _383, _381, _380, _379, _377, _376, _374, _373, _372, _370, _369, _351, _350, _349, _347, _346, _345, _343, _342, _340, _339, _338, _337, _335, _334, _331, _330, _328, _327, _326, _323, _322, _321, _319, _318, _317, _316, _314, _313, _310, _309, _306, _305, _303, _302, _299, _296, _295, _294, _293, _292, _290, _289, _287, _286, _285, _283, _282, _281, _280, _279, _278, _277, _276, _262, _258, _255, _253, _252, _249, _248, _247, _244, _243, _239, _237, _236, _235, _234, _229, _228, _227, _225, _224, _223, _219, _218, _215, _214, _212, _211, _210, _208, _207, _206, _205, _204, _197, _196, _195, _194, _191, _190, _188, _187, _186, _183, _181, _180, _178, _174, _173, _171, _170, _166, _165, _164, _163, _162, _161, _160, _159, _158, _152, _151, _149, _148, _146, _145, _144, _143, _142, _141, _140, _136, _135, _133, _131, _130, _128, _122, _121, _120, _117, _116, _115, _114, _110, _109, _105, _103, _100, _99, _96, _95, _92, _91, _90, _88, _87, _85, _84, _83, _81, _77, _76, _75, _73, _72, _70, _69, _68, _66, _64, _63, _52, _49, _37, _36, _35, _34, _33, _30, _29, _28, _27, _5, _3;
+static List _693, _691, _683, _680, _679, _677, _675, _674, _673, _672, _670, _668, _667, _666, _664, _662, _661, _658, _657, _655, _654, _652, _651, _650, _647, _646, _645, _643, _642, _641, _639, _638, _637, _636, _634, _633, _629, _628, _627, _626, _624, _623, _622, _619, _618, _615, _614, _613, _612, _611, _609, _608, _606, _605, _604, _602, _601, _600, _597, _596, _595, _592, _591, _578, _577, _576, _575, _574, _568, _564, _563, _557, _544, _542, _541, _537, _535, _534, _532, _530, _528, _527, _510, _509, _506, _505, _504, _502, _501, _500, _498, _495, _494, _492, _491, _490, _486, _485, _481, _480, _479, _477, _476, _474, _469, _465, _463, _462, _461, _460, _459, _457, _456, _455, _453, _450, _449, _447, _446, _444, _440, _439, _438, _436, _435, _433, _427, _426, _422, _421, _415, _414, _413, _409, _408, _407, _405, _404, _402, _401, _400, _398, _397, _385, _384, _383, _381, _380, _379, _377, _376, _374, _373, _372, _370, _369, _351, _350, _349, _347, _346, _345, _343, _342, _340, _339, _338, _337, _335, _334, _331, _330, _328, _327, _326, _323, _322, _321, _319, _318, _317, _316, _314, _313, _310, _309, _306, _305, _303, _302, _299, _296, _295, _294, _293, _292, _290, _289, _287, _286, _285, _283, _282, _281, _280, _279, _278, _277, _276, _262, _258, _255, _253, _252, _249, _248, _247, _244, _243, _239, _237, _236, _235, _234, _229, _228, _227, _225, _224, _223, _219, _218, _215, _214, _212, _211, _210, _208, _207, _206, _205, _204, _197, _196, _195, _194, _191, _190, _188, _187, _186, _183, _181, _180, _178, _174, _173, _171, _170, _166, _165, _164, _163, _162, _161, _160, _159, _158, _152, _151, _149, _148, _146, _145, _144, _143, _142, _141, _140, _136, _135, _133, _131, _130, _128, _122, _121, _120, _117, _116, _115, _114, _110, _109, _105, _103, _100, _99, _96, _95, _92, _91, _90, _88, _87, _85, _84, _83, _81, _77, _76, _75, _73, _72, _70, _69, _68, _66, _64, _63, _52, _49, _37, _36, _35, _34, _33, _30, _29, _28, _27, _5, _3;
 
-static String _725, _724, _723, _722, _721, _720, _719, _718, _717, _716, _715, _714, _713, _712, _711, _710, _709, _708, _707, _706, _705, _704, _703, _702, _701, _700, _699, _698, _697, _696, _695, _694, _687, _681, _648, _631, _630, _587, _586, _585, _584, _583, _582, _581, _559, _558, _555, _554, _553, _552, _551, _550, _549, _548, _547, _546, _545, _538, _507, _483, _482, _472, _467, _451, _442, _424, _423, _419, _417, _416, _411, _410, _324, _308, _259, _256, _240, _167, _79, _50, _47, _46, _45, _43, _42, _41, _40, _39, _38, _31, _24, _22, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _8, _7, _6, _0;
+static String _725, _724, _723, _722, _721, _720, _719, _718, _717, _716, _715, _714, _713, _712, _711, _710, _709, _708, _707, _706, _705, _704, _703, _702, _701, _700, _699, _698, _697, _696, _695, _694, _689, _681, _648, _631, _630, _587, _586, _585, _584, _583, _582, _581, _559, _558, _555, _554, _553, _552, _551, _550, _549, _548, _547, _546, _545, _538, _507, _483, _482, _472, _467, _451, _442, _424, _423, _419, _417, _416, _411, _410, _324, _308, _259, _256, _240, _167, _79, _50, _47, _46, _45, _43, _42, _41, _40, _39, _38, _31, _24, _22, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _8, _7, _6, _0;
 
-static Var _692, _691, _690, _688, _686, _685, _684, _682, _678, _676, _671, _669, _665, _663, _660, _659, _656, _653, _649, _644, _640, _635, _632, _625, _621, _620, _617, _616, _610, _607, _603, _599, _598, _594, _593, _590, _589, _588, _580, _579, _573, _572, _571, _570, _569, _567, _566, _565, _562, _561, _560, _556, _543, _536, _533, _531, _529, _517, _516, _515, _514, _513, _512, _511, _508, _503, _499, _497, _496, _493, _489, _488, _487, _484, _478, _475, _473, _471, _470, _468, _466, _464, _458, _454, _452, _448, _445, _443, _441, _437, _434, _432, _431, _430, _429, _428, _425, _420, _418, _412, _406, _403, _399, _382, _378, _375, _371, _361, _360, _348, _344, _341, _336, _333, _332, _329, _325, _320, _315, _312, _311, _307, _304, _298, _291, _288, _284, _275, _274, _273, _272, _271, _270, _269, _268, _267, _266, _265, _264, _263, _261, _260, _257, _254, _251, _250, _246, _245, _241, _238, _233, _230, _226, _222, _221, _220, _217, _216, _213, _209, _203, _202, _201, _200, _199, _198, _193, _192, _189, _185, _184, _182, _179, _177, _176, _175, _172, _169, _168, _157, _156, _155, _154, _153, _150, _147, _139, _138, _137, _134, _132, _129, _127, _123, _119, _118, _113, _112, _111, _108, _107, _106, _104, _102, _101, _98, _97, _94, _93, _89, _86, _82, _80, _78, _74, _71, _67, _65, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _51, _48, _44, _32, _26, _25, _23, _21, _9, _4, _2, _1;
+static Var _692, _690, _688, _687, _686, _685, _684, _682, _678, _676, _671, _669, _665, _663, _660, _659, _656, _653, _649, _644, _640, _635, _632, _625, _621, _620, _617, _616, _610, _607, _603, _599, _598, _594, _593, _590, _589, _588, _580, _579, _573, _572, _571, _570, _569, _567, _566, _565, _562, _561, _560, _556, _543, _536, _533, _531, _529, _517, _516, _515, _514, _513, _512, _511, _508, _503, _499, _497, _496, _493, _489, _488, _487, _484, _478, _475, _473, _471, _470, _468, _466, _464, _458, _454, _452, _448, _445, _443, _441, _437, _434, _432, _431, _430, _429, _428, _425, _420, _418, _412, _406, _403, _399, _382, _378, _375, _371, _361, _360, _348, _344, _341, _336, _333, _332, _329, _325, _320, _315, _312, _311, _307, _304, _298, _291, _288, _284, _275, _274, _273, _272, _271, _270, _269, _268, _267, _266, _265, _264, _263, _261, _260, _257, _254, _251, _250, _246, _245, _241, _238, _233, _230, _226, _222, _221, _220, _217, _216, _213, _209, _203, _202, _201, _200, _199, _198, _193, _192, _189, _185, _184, _182, _179, _177, _176, _175, _172, _169, _168, _157, _156, _155, _154, _153, _150, _147, _139, _138, _137, _134, _132, _129, _127, _123, _119, _118, _113, _112, _111, _108, _107, _106, _104, _102, _101, _98, _97, _94, _93, _89, _86, _82, _80, _78, _74, _71, _67, _65, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _51, _48, _44, _32, _26, _25, _23, _21, _9, _4, _2, _1;
 
 static int _init_guard_ = 0;
 
@@ -234,7 +234,15 @@ static Symbol _var_tag_for_type_helper(Sym sym, Type type, Type origin, Type * r
 
 static size_t _meta_align_up(size_t offset, size_t alignment);
 
-static List _meta_type_layout(Sym sym, Type type, Map cache, size_t * size, size_t * alignment);
+static List _meta_var_layout(Type declared);
+
+static List _meta_scalar_layout(Type declared, Type exact, NativeScalarAccess scalar, Symbol tag);
+
+static List _meta_pointer_layout(Type declared, Symbol tag);
+
+static List _meta_record_layout(Sym sym, Type record, Map cache);
+
+static List _meta_type_layout(Sym sym, Type type, Map cache);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -1059,11 +1067,11 @@ __attribute__((constructor)) static void _file_init_(void){
   _684 = Symbol_var(421880102);
   _685 = Symbol_var(1281450084);
   _686 = Symbol_var(35386204516);
-  _687 = String_new("packed");
-  _688 = String_var(_687);
-  _689 = cons(_688, NULL);
-  _690 = Symbol_var(13183752);
-  _691 = Symbol_var(1218673800);
+  _687 = Symbol_var(13183752);
+  _688 = Symbol_var(1218673800);
+  _689 = String_new("packed");
+  _690 = String_var(_689);
+  _691 = cons(_690, NULL);
   _692 = Symbol_var(286431579402);
   _693 = cons(_692, NULL);
   _694 = String_new("gensym:");
@@ -4686,22 +4694,20 @@ static size_t _meta_align_up(size_t offset, size_t alignment){
   return(offset + alignment - 1) / alignment * alignment;
 }
 
-NativeScalarAccess native_scalar_access(List);
-int Type_is_pointer(Type);
-static List _meta_type_layout(Sym sym, Type type, Map cache, size_t * size, size_t * alignment){
-  Type declared = Type_declared(type);  if(Sym_is_var_type(sym, declared)){
-    * size = sizeof(Var);  * alignment = _Alignof(Var);  return cons(_441, cons(List_var(declared), cons(Var_box_ulong(* size), cons(Var_box_ulong(* alignment), NULL))));
-  }
-  Symbol value_tag = Sym_var_tag_for_type(sym, declared, NULL);  Type native_type = Sym_normalize_declared_type(sym, declared);  Type exact_scalar = Type_scalar(native_type);  NativeScalarAccess scalar = List_truth(Type_list(exact_scalar)) ? native_scalar_access(Type_list(exact_scalar)) : NULL;  if(scalar){
-    if(value_tag != scalar -> tag && !(value_tag == 1328354264 && scalar -> tag == 44858254)) return NULL;  * size = scalar -> size;  * alignment = scalar -> alignment;  return cons(_685, cons(List_var(declared), cons(Var_box_ulong(* size), cons(Var_box_ulong(* alignment), cons(List_var(exact_scalar), cons(Symbol_var(value_tag), NULL))))));
-  }
-  type = Sym_resolve_key(sym, declared);  if(List_truth(Type_list(type)) && Type_is_pointer(type)){
-    * size = * alignment = sizeof(void *);  if(! value_tag) value_tag = 3683441;  return cons(_686, cons(List_var(declared), cons(Var_box_ulong(* size), cons(Var_box_ulong(* alignment), cons(Symbol_var(value_tag), NULL)))));
-  }
-  Var cached;  if(Map_try_get(cache, List_var(type), & cached)){
-    List layout = Var_list(cached);  * size = Var_ulong(Var_convert(List_getindex(layout, 2), 44858254));  * alignment = Var_ulong(Var_convert(List_getindex(layout, 3), 44858254));  return layout;
-  }
-  if(! List_truth(Type_list(type)) || ! Var_equal(List_car(Type_list(type)), Symbol_var(1318234344)) || List_truth(Sym_get(sym, List_append(Type_list(type), _689)))) return NULL;  List order = Sym_field_order(sym, type);  if(! List_truth(order)) return NULL;  Array fields = Array_new(); {
+static List _meta_var_layout(Type declared){
+  size_t size = sizeof(Var), alignment = _Alignof(Var);  return cons(_441, cons(List_var(declared), cons(Var_box_ulong(size), cons(Var_box_ulong(alignment), NULL))));
+}
+
+static List _meta_scalar_layout(Type declared, Type exact, NativeScalarAccess scalar, Symbol tag){
+  if(tag != scalar -> tag && !(tag == 1328354264 && scalar -> tag == 44858254)) return NULL;  return cons(_685, cons(List_var(declared), cons(Var_box_ulong(scalar -> size), cons(Var_box_ulong(scalar -> alignment), cons(List_var(exact), cons(Symbol_var(tag), NULL))))));
+}
+
+static List _meta_pointer_layout(Type declared, Symbol tag){
+  size_t size = sizeof(void *);  if(! tag) tag = 3683441;  return cons(_686, cons(List_var(declared), cons(Var_box_ulong(size), cons(Var_box_ulong(size), cons(Symbol_var(tag), NULL)))));
+}
+
+static List _meta_record_layout(Sym sym, Type record, Map cache){
+  Var cached;  if(Map_try_get(cache, List_var(record), & cached)) return Var_list(cached);  List order = Sym_field_order(sym, record);  if(! List_truth(order)) return NULL;  Array fields = Array_new(); {
   _x2c_defer_env_14 _x2c_defer_env_43 = {._x2c_defer_capture_28 =(const void *) & fields};
   X2CCleanup _x2c_defer_record_21 = {
     .fn = _x2c_defer_cleanup_14,
@@ -4712,27 +4718,21 @@ static List _meta_type_layout(Sym sym, Type type, Map cache, size_t * size, size
     size_t offset = 0, record_alignment = 1; {
       List row;  List _x2c_macro_object_63 = List_cdr(order);  List _x2c_macro_cursor_63 = _x2c_macro_object_63;  Var _x2c_macro_cursor_output_66;  while(List_try_next(_x2c_macro_object_63, & _x2c_macro_cursor_63, & _x2c_macro_cursor_output_66)){
         row = Var_list(_x2c_macro_cursor_output_66); {
-          String name = Var_string(List_car(row));  Type member = Var_type(List_cadr(row));  if(! String_truth(name)){
+          List _x2c_destructure_21 = row;  String name = Var_string(List_getindex(_x2c_destructure_21, 0));  Type member = Var_type(List_getindex(_x2c_destructure_21, 1));  List layout = String_truth(name) ? _meta_type_layout(sym, member, cache) : NULL;  if(! List_truth(layout)){
             List _x2c_return_value_4 = NULL; {
               x2c_cleanup_leave(& _x2c_defer_record_21);  return _x2c_return_value_4;
             }
 
           }
-          size_t member_size = 0, member_alignment = 0;  List layout = _meta_type_layout(sym, member, cache, & member_size, & member_alignment);  if(! List_truth(layout)){
-            List _x2c_return_value_5 = NULL; {
-              x2c_cleanup_leave(& _x2c_defer_record_21);  return _x2c_return_value_5;
-            }
-
-          }
-          offset = _meta_align_up(offset, member_alignment);  Array_push(fields, List_var(cons(_690, cons(String_var(name), cons(List_var(member), cons(Var_box_ulong(offset), cons(List_var(layout), NULL)))))));  offset += member_size;  if(member_alignment > record_alignment) record_alignment = member_alignment;
+          List _x2c_destructure_22 = List_cddr(layout);  size_t size = Var_ulong(Var_convert(List_getindex(_x2c_destructure_22, 0), 44858254));  size_t alignment = Var_ulong(Var_convert(List_getindex(_x2c_destructure_22, 1), 44858254));  offset = _meta_align_up(offset, alignment);  Array_push(fields, List_var(cons(_687, cons(String_var(name), cons(List_var(member), cons(Var_box_ulong(offset), cons(List_var(layout), NULL)))))));  offset += size;  if(alignment > record_alignment) record_alignment = alignment;
         }
 
       }
 
     }
-    size_t record_size = _meta_align_up(offset, record_alignment);  * size = record_size;  * alignment = record_alignment;  List result = cons(_691, cons(List_var(type), cons(Var_box_ulong(record_size), cons(Var_box_ulong(record_alignment), List_append(Array_list(fields), NULL)))));  Map_setindex(cache, List_var(type), List_var(result)); {
-      List _x2c_return_value_6 = result; {
-        x2c_cleanup_leave(& _x2c_defer_record_21);  return _x2c_return_value_6;
+    size_t record_size = _meta_align_up(offset, record_alignment);  List result = cons(_688, cons(List_var(record), cons(Var_box_ulong(record_size), cons(Var_box_ulong(record_alignment), List_append(Array_list(fields), NULL)))));  Map_setindex(cache, List_var(record), List_var(result)); {
+      List _x2c_return_value_5 = result; {
+        x2c_cleanup_leave(& _x2c_defer_record_21);  return _x2c_return_value_5;
       }
 
     }
@@ -4742,8 +4742,14 @@ static List _meta_type_layout(Sym sym, Type type, Map cache, size_t * size, size
 }
 }
 
+NativeScalarAccess native_scalar_access(List);
+int Type_is_pointer(Type);
+static List _meta_type_layout(Sym sym, Type type, Map cache){
+  Type declared = Type_declared(type);  if(Sym_is_var_type(sym, declared)) return _meta_var_layout(declared);  Symbol tag = Sym_var_tag_for_type(sym, declared, NULL);  Type exact = Type_scalar(Sym_normalize_declared_type(sym, declared));  NativeScalarAccess scalar = List_truth(Type_list(exact)) ? native_scalar_access(Type_list(exact)) : NULL;  if(scalar) return _meta_scalar_layout(declared, exact, scalar, tag);  type = Sym_resolve_key(sym, declared);  if(List_truth(Type_list(type)) && Type_is_pointer(type)) return _meta_pointer_layout(declared, tag);  if(! List_truth(Type_list(type)) || ! Var_equal(List_car(Type_list(type)), Symbol_var(1318234344)) || List_truth(Sym_get(sym, List_append(Type_list(type), _691)))) return NULL;  return _meta_record_layout(sym, type, cache);
+}
+
 List Compiler_meta_type_layout(Compiler c, Type type){
-  if(! _init_guard_) _file_init_();  size_t size = 0, alignment = 0;  return _meta_type_layout(c -> sym, type, c -> meta_layouts, & size, & alignment);
+  if(! _init_guard_) _file_init_();  return _meta_type_layout(c -> sym, type, c -> meta_layouts);
 }
 
 void Sym_declare_delegate_field(Sym sym, Type aggregate, String name){
