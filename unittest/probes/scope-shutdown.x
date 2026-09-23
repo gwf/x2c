@@ -180,9 +180,13 @@ int main(int argc, char **argv) {
   }
 
   if (!strcmp(argv[1], "completed-thread")) {
-    ScopeStats before = Scope.stats();
     atomic_int ready = 0;
     LiveThreadInput input = { &ready };
+    /* The first worker also creates the process-lifetime Scope for the
+       worker's static catch plans; count only what the second one keeps. */
+    Thread.join(Thread.start(completed_worker, &input, sizeof(input)));
+    atomic_store(&ready, 0);
+    ScopeStats before = Scope.stats();
     Thread thread = Thread.start(
       completed_worker, &input, sizeof(input)
     );
