@@ -14,6 +14,7 @@ Lambda transformation helpers for the x2c compiler.
 | --- | --- |
 | [`Compiler.adapt_lambda_arg`](#Compiler.adapt_lambda_arg) | Adapts a lowered noncapturing lambda helper to a typed callback. |
 | [`Compiler.check_lambda_captures`](#Compiler.check_lambda_captures) | Rejects writes and reference access to read-only snapshot bindings. |
+| [`Compiler.func_signature`](#Compiler.func_signature) | Returns the canonical signature shared by native and meta Func adapters. |
 | [`Compiler.lift_func_expression`](#Compiler.lift_func_expression) | Converts a resolved function-like expression to `Func` when supported. |
 | [`Compiler.lower_lambda_expr`](#Compiler.lower_lambda_expr) | Lowers a resolved lambda expression to emitter-ready helper references. |
 | [`Compiler.lower_typed_adapter_expr`](#Compiler.lower_typed_adapter_expr) | Lowers a resolved `tadapt` expression to a typed callback helper. |
@@ -37,7 +38,7 @@ original parameter types before calling it, then converts its `Var` result
 to the expected return type. Already compatible or unsupported shapes pass
 through unchanged.
 
-Source: `src/lambda.x:907`
+Source: `src/lambda.x:911`
 
 <a id="Compiler.check_lambda_captures"></a>
 #### Compiler.check_lambda_captures
@@ -48,7 +49,16 @@ Rejects writes and reference access to read-only snapshot bindings.
 The body has already resolved identifiers and call arguments. Templates
 defer this check until expansion; nested lambdas check their own bodies.
 
-Source: `src/lambda.x:1084`
+Source: `src/lambda.x:1088`
+
+<a id="Compiler.func_signature"></a>
+#### Compiler.func_signature
+
+`List Compiler.func_signature(Compiler compiler, Type type)`
+
+Returns the canonical signature shared by native and meta Func adapters.
+
+Source: `src/lambda.x:314`
 
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
@@ -63,7 +73,7 @@ pointers producing null `Func`. Lambda expressions are lowered first, and
 unrelated expressions pass through unchanged. Public inline functions
 reach the queued helpers through generated bridge functions.
 
-Source: `src/lambda.x:857`
+Source: `src/lambda.x:861`
 
 <a id="Compiler.lower_lambda_expr"></a>
 #### Compiler.lower_lambda_expr
@@ -80,7 +90,7 @@ Nested lambdas lower inside out, block fallthrough and bare returns produce
 no value, and synthesized declarations enter the early queue. Parentheses
 remain around lowered helpers; other non-lambda expressions pass through.
 
-Source: `src/lambda.x:1633`
+Source: `src/lambda.x:1637`
 
 <a id="Compiler.lower_typed_adapter_expr"></a>
 #### Compiler.lower_typed_adapter_expr
@@ -108,7 +118,7 @@ cast, or addressed; an indirect function-pointer value is rejected.
 A function already having the adapter's pointee type passes through,
 and new helpers are cached and queued with `Compiler.add_early`.
 
-Source: `src/lambda.x:533`
+Source: `src/lambda.x:537`
 
 <a id="Compiler.prepare_lambda_cells"></a>
 #### Compiler.prepare_lambda_cells
@@ -123,7 +133,7 @@ parameters and locals to `Scope`-owned cells, prepares nested bodies,
 and returns the rewritten body with declaration and initializer order
 preserved.
 
-Source: `src/lambda.x:1354`
+Source: `src/lambda.x:1358`
 
 ## Design notes
 

@@ -103,8 +103,8 @@ Public functions:
 `Compiler.merge_source_declarations`, `Compiler.record_source_declaration`,
 `Compiler.record_source_reference`, `Compiler.semantic_binding_facts`,
 `Compiler.parsing_source_syntax`, `Compiler.macro_definition_locals`,
-`Compiler.fresh_name`, `Compiler.emitted_binding_name`, `Compiler.tokenize`,
-`Compiler.mark_completion`, `Compiler.at_completion`,
+`Compiler.fresh_name`, `Compiler.emitted_binding_name`, `_pack_directive`,
+`Compiler.tokenize`, `Compiler.mark_completion`, `Compiler.at_completion`,
 `Compiler.__complete_here`, `Compiler.skip_trivia_from`, `Symbol.group_step`,
 `Token.group_close`, `Token.after_group`, `Compiler.peek`,
 `Compiler.require_input`, `Compiler.expect`, `Compiler.next`, `Compiler.test`,
@@ -256,10 +256,10 @@ lambda transformation helpers for the x2c compiler.
 
 Public functions:
 
-`Compiler.lower_typed_adapter_expr`, `Compiler.maybe_adapt_func_arg`,
-`Compiler.lift_func_expression`, `Compiler.adapt_lambda_arg`,
-`Compiler.check_lambda_captures`, `Compiler.prepare_lambda_cells`,
-`Compiler.lower_lambda_expr`
+`Compiler.lower_typed_adapter_expr`, `Compiler.func_signature`,
+`Compiler.maybe_adapt_func_arg`, `Compiler.lift_func_expression`,
+`Compiler.adapt_lambda_arg`, `Compiler.check_lambda_captures`,
+`Compiler.prepare_lambda_cells`, `Compiler.lower_lambda_expr`
 
 ### [src/literals.x](../src/literals.x)
 
@@ -791,11 +791,13 @@ Public functions:
 `lisp_match_replace`, `lisp_read_file`, `lisp_write_file`, `lisp_void`,
 `lisp_cell`, `lisp_address`, `lisp_load`, `lisp_store`, `lisp_bytes`,
 `lisp_at`, `lisp_zero`, `lisp_copy`, `lisp_record_result`, `lisp_session_copy`,
-`lisp_peek`, `lisp_poke`, `lisp_source_function`, `Lisp.auto_stats`,
-`Lisp.auto_instrument`, `Lisp.call_budget`, `Lisp.auto_disable`,
-`Lisp.auto_prepare`, `Lisp.eval`, `Lisp.apply`, `Lisp.eval_string`,
-`Lisp.eval_file`, `Lisp.try_get`, `Lisp.set_global`, `Lisp.bind`,
-`Lisp.cleanup`
+`lisp_box`, `lisp_peek`, `lisp_poke`, `lisp_array`, `lisp_source_function`,
+`lisp_static_address`, `lisp_static_initialize`, `lisp_func_new`,
+`lisp_func_arguments`, `lisp_func_value`, `lisp_func_reference`,
+`lisp_func_invalid`, `Lisp.auto_stats`, `Lisp.auto_instrument`,
+`Lisp.call_budget`, `Lisp.auto_disable`, `Lisp.auto_prepare`, `Lisp.eval`,
+`Lisp.apply`, `Lisp.eval_string`, `Lisp.eval_file`, `Lisp.try_get`,
+`Lisp.set_global`, `Lisp.bind`, `Lisp.cleanup`
 
 ### [lib/list-selectors.x](../lib/list-selectors.x)
 

@@ -2306,7 +2306,9 @@ binding, so the nested macro can read and assign it.
 A `struct`, `union`, or `enum` tag that a body defines or declares is private
 to each expansion, like a typedef, and so are the enumerators it lists. Tags
 are a separate namespace, so `struct tm tm;` names the outside tag and a
-private variable. A tag the body only references keeps its outside meaning.
+private variable. Declarations in nested blocks may shadow same-spelled body
+locals and tags; references use the nearest lexical declaration. A tag the
+body only references keeps its outside meaning.
 To publish a tag, spell it
 through a `Name` hole or `x2c.ident`:
 
@@ -2674,6 +2676,8 @@ Marking a function `meta` has three consequences.
   a representable scalar, String, Symbol, immutable List or boxed result.
   Mutable container, callable and native-address results remain calls.
   This optimization is separate from explicit evaluation and result insertion.
+  Calls that reach native functions, local static storage, or an enum with
+  target-dependent representation also remain calls.
 
 A dollar-prefixed function call requires compile-time evaluation. Arguments
 may compute values from other resolvable values and meta calls; unresolved
@@ -3269,6 +3273,16 @@ Use an owner that outlives every use of the stored value. Failed initialization
 retains the reserved address; the next attempt starts with zeroed storage.
 Only successful initialization publishes the value, and retry does not change
 referent ownership.
+
+During explicit compile-time evaluation, function-local statics follow the
+same first-use and retry rules in session-owned native bytes. Identity is the
+function and local binding within the consuming translation session; neither
+an automatic call frame nor a cached function lowering owns the object.
+Loops, recursive calls and wrappers share it. Each consuming unit and the
+emitted program have independent storage. `static threaded` separates
+threads within a session, whose evaluator calls must be serialized. A
+function that reaches local static storage, even `const` storage, and its
+transitive callers are not automatically folded.
 
 A `goto` or switch dispatch cannot bypass a runtime static declaration and
 enter its remaining block. Put the declaration before the switch, or put it
