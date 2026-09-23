@@ -148,8 +148,6 @@ static void _import_members(Compiler c, String name);
 
 static int _script_declaration_stays(Compiler c);
 
-static int _declares_function(Compiler c, Token token);
-
 static void _track_conditional_arms(Compiler c);
 
 static List _finish_aggregate_type(Compiler c, Symbol tag, Var name, List members);
@@ -2802,17 +2800,6 @@ static int _script_declaration_stays(Compiler c){
     if(token -> type == 119) return previous == 81;  if(token -> type == 247) return 1;  if(token -> type == 123) return Compiler_skip_trivia_from(c, token + 1) -> type == 125;
   }
   return 0;
-}
-
-static int _declares_function(Compiler c, Token token){
-  Symbol previous = 0;  for(;  token -> type != 11212;  previous = token -> type, token = Token_after_group(token)){
-    if(token -> type == 119 || token -> type == 247) return previous == 81;  if(token -> type == 123) return previous == 81 && Compiler_skip_trivia_from(c, token + 1) -> type == 125;
-  }
-  return 0;
-}
-
-int Compiler_meta_form_is_definition(Compiler c){
-  if(! _init_guard_) _file_init_();  if(Compiler_peek(c, 0) != 19147688 || ! String_equal(c -> token -> text, _294)) return 0;  Token head = c -> token;  Compiler_next(c);  int marker = Compiler_test_declaration(c) && _declares_function(c, c -> token);  c -> token = head;  return marker;
 }
 
 int Compiler_meta_form_is_declaration(Compiler c){
