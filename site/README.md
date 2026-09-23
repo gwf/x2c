@@ -116,7 +116,7 @@ the VS Code extension uses (`etc/vsc-extension/syntaxes/`), coloured by the
 site palette in `shiki-x2c.mjs`. Do not hand-write `<span>` markup for code.
 
 Every ```` ```x2c ```` block on the site is compiled by
-`tools/check-doc-examples.py`, which runs in `make doc-examples`. A line
+`tools/check-doc-examples`, which runs in `make doc-examples`. A line
 starting with `~` is compiled but not shown, which is how a nine-line sample
 can still be a complete program. A sample that genuinely cannot compile must
 be tagged ```` ```x2c,ignore ```` with an `<!-- ignore: reason -->` comment

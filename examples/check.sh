@@ -151,7 +151,7 @@ if [[ ${2:-} == --one ]]; then
   exit 0
 fi
 
-python3 "$root/tools/check-gallery-examples.py"
+"$x2c" script "$root/tools/check-gallery-examples"
 
 # The Greet example links the teaching package. Third-party applications
 # and shortcuts under packages/ belong to the optional package checks.

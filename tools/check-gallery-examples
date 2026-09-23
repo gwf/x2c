@@ -1,0 +1,134 @@
+#!/usr/bin/env -S x2c script
+/*  check-gallery-examples -- check gallery slides against their examples
+
+    Each slide in examples/gallery.json maps to a standalone example, whose
+    source must equal the slide's one runnable sample, or to independently
+    maintained `source`, which the slide must link. `--update` rewrites the
+    standalone examples from their slides after a slide is edited; `source`
+    programs are never overwritten. Execution and expected output remain
+    owned by examples/check.sh and the package checks.
+*/
+#include "doc-samples.x"
+#include "json.x"
+
+static Path root;
+
+/* The bodies of the `sh` fences in `text`, in order. */
+static List _shell_blocks(String text) {
+  Array blocks = [];
+  foreach (List fence, Sample.fences(text)) {
+    (String indent, String info, String body) = fence;
+    if (info == "sh") blocks.push(body);
+  }
+  return blocks.list_free();
+}
+
+static void _check_slide(Map entry, Path slide, int update, Array errors) {
+  String name = entry["slide"];
+  if (entry.contains("source")) {
+    String source = entry["source"];
+    if (!root.join(source).is_file())
+      errors.push(%"$name: missing source $source");
+    String link = "https://github.com/gwf/x2c/blob/main/" + source;
+    if (!slide.read_text().contains(link))
+      errors.push(%"$name: missing source link to $source");
+    Sample.collect(root, slide, errors);
+    return;
+  }
+  String example = entry["example"];
+  if (entry.contains("language") && entry["language"].str() == "sh") {
+    Path target = root.join("examples").join(example);
+    List blocks = _shell_blocks(slide.read_text());
+    List actual = _shell_blocks(target.exists() ? target.read_text() : NULL);
+    if (!blocks.len() || blocks != actual)
+      errors.push(%"examples/$example: shell recipe differs from $name");
+    return;
+  }
+  List samples = Sample.collect(root, slide, errors);
+  if (samples.len() != 1) {
+    errors.push(%"$name: expected one runnable x2c sample");
+    return;
+  }
+  Path target = root.join("examples").join(example + ".x");
+  String expected = samples.car().list().cadr();
+  if (update) {
+    target.dirname().make_dirs();
+    target.write_text(expected);
+  }
+  else if (!target.exists() || target.read_text() != expected)
+    errors.push(%"examples/$example.x: missing or differs from $name; " +
+                "run tools/check-gallery-examples --update");
+}
+
+/* Each gallery example needs a manifest row that runs it, or one marked
+   `none` when the example is optional. */
+static void _check_manifest(Array entries, Array errors) {
+  Map rows = {};
+  foreach (String line, root.join("examples/manifest.txt").read_text()
+                          .split_lines(0))
+    if (line && !line.startswith("#")) rows[line.partition("|").car()] =
+      line.split("|");
+  foreach (Map entry, entries) {
+    if (entry.contains("language") && entry["language"].str() == "sh")
+      continue;
+    String example = entry["example"];
+    if (entry.contains("source")) {
+      String source = entry["source"];
+      if (!source.startswith("examples/")) continue;
+      example = source["examples/".len():];
+      String extension = Path.extension(example);
+      if (extension) example = example[:example.len() - extension.len()];
+    }
+    String wanted = entry.contains("optional") && entry["optional"] ?
+      "none" : "run";
+    List row = rows.contains(example) ? rows[example] : NULL;
+    if (!row || row.caddr().str() != wanted)
+      errors.push(%"$example: missing $wanted manifest coverage");
+  }
+}
+
+Path self = String.new(argv[0]);
+root = self.absolute().dirname().dirname();
+String usage = %"usage: ${self.basename()} [-h] [--update]\n";
+if (args.contains("-h") || args.contains("--help")) {
+  printf("%s\noptions:\n"
+         "  -h, --help  show this help message and exit\n"
+         "  --update\n", usage);
+  return 0;
+}
+Map options = NULL;
+try options = Args.parse(args, %((--update)));
+catch %(bad-arg *detail): {
+  Stderr.printf("%s%s: error: %s\n", usage, self.basename(),
+                detail.assoc(<why>));
+  return 2;
+}
+
+Path slides = root.join("site/src/content/slides");
+Array entries = Json.read_file(root.join("examples/gallery.json"));
+Array errors = [];
+Map seen = {}, owners = {};
+foreach (Map entry, entries) {
+  String name = entry["slide"];
+  if (seen.contains(name)) errors.push(%"$name: duplicate gallery entry");
+  seen[name] = 1;
+  String owner = entry.contains("source") && entry["source"] ?
+    entry["source"] : entry["example"];
+  if (owners.contains(owner))
+    errors.push(%"$name: duplicate standalone example");
+  owners[owner] = 1;
+  Path slide = slides.join(name);
+  if (!slide.is_file()) errors.push(%"$name: gallery source is missing");
+  else _check_slide(entry, slide, options["update"].integer(), errors);
+}
+foreach (String name, slides.list_dir())
+  if (name.endswith(".md") && !seen.contains(name))
+    errors.push(%"$name: no standalone example declared");
+_check_manifest(entries, errors);
+
+if (errors.len()) {
+  Stderr.printf("%s\n", String.join("\n", errors.list_free()));
+  return 1;
+}
+printf("Gallery: %d slides have checked example mappings\n",
+       (int) entries.len());
