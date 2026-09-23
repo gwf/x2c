@@ -1128,6 +1128,8 @@ def markdown(report: dict) -> str:
         "and explicit x2c meta-call syntax, not hand-written Lisp calls.",
         "Each case below uses the `x2c.x` prelude; optional module includes are",
         "shown where needed. Invoke its displayed helper with `$audit_probe()`.", "",
+        "A failing compilation remains visible with its diagnostic and an",
+        "explained ignored fence; that source is evidence, not a checked example.", "",
         "## What the states establish", "",
         "A **verified example** establishes only its listed case. A **reproduced",
         "failure** records that case's compilation or execution failure, which",
@@ -1232,8 +1234,16 @@ def markdown(report: dict) -> str:
                         notes = [line.strip() for line in result.splitlines()
                                  if "reason:" in line or ": error:" in line]
                         result = "; ".join(notes) or result.splitlines()[0]
+                    result = result.replace("<probe>", "&lt;probe&gt;")
+                    compile_failed = (evidence.get("compile_status") not in (None, 0)
+                                      or evidence.get("native_compile_status")
+                                      not in (None, 0))
                     lines += [f"- `{row['name']}`: {evidence['case']}; {result}.",
-                              "", "```x2c"]
+                              ""]
+                    if compile_failed:
+                        lines += ["<!-- ignore: probe compilation failed as "
+                                  "recorded above -->"]
+                    lines += ["```x2c,ignore" if compile_failed else "```x2c"]
                     lines += [f'#include "{path}"'
                               for path in evidence.get("includes", ())]
                     lines += [f"meta int audit_probe(void) {{ {evidence['body']} }}",
