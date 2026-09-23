@@ -16,9 +16,10 @@
     statements, and `f_grad` records the forward sweep on a typed array tape
     and accumulates adjoints in reverse. Both read the typed AST, so `int`
     control flow is copied and only `double` arithmetic is differentiated.
-    The transformations are meta functions. Two per-unit `meta static`
-    registries record the functions each mode has differentiated, so a later
-    function can call their siblings.
+    The transformations are meta functions. Their per-unit state is
+    `meta static`: one registry per mode records the functions differentiated
+    so far, so a later function can call their siblings, and a struct holds
+    the reverse derivation in progress.
 */
 
 /** Generates the dual-number members of `$D` over the scalar type `$S`.
@@ -625,9 +626,9 @@ meta static List ad_forward(List fn) {
 
 /* --- reverse mode ------------------------------------------------------- */
 
-/* The reverse derivation in progress. `ad_reverse_with` resets it for each
-   function, and the gradient template's helpers read it after that function
-   returns. */
+/* The reverse derivation in progress. `ad_reverse_with` starts it for each
+   function, and the helpers in the gradient template finish it after that
+   function returns. */
 meta static struct {
   List checkpoint;  /* the checkpoint block size, or empty */
   List locals;      /* `(name type)` for each local, newest first */
@@ -1351,9 +1352,8 @@ meta static String ad_literal_text(List form) {
 
 meta static List ad_reverse(List fn) => ad_reverse_with(fn, %());
 
-meta static List ad_checkpoint(List fn, List block) {
-  return ad_reverse_with(fn, ad_int(ad_literal_text(block)));
-}
+meta static List ad_checkpoint(List fn, List block) =>
+  ad_reverse_with(fn, ad_int(ad_literal_text(block)));
 
 /** Emits `NAME_dot` beside a `double` function: every `double` parameter `p`
     is followed by `p_dot`, and the result is the directional derivative.

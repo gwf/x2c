@@ -391,8 +391,8 @@ Source: `src/macros.x:1666`
 Consumes and evaluates one top-level compile-time Lisp form.
 `$(import ...)` loads a tracked `.xlisp` or `.xmacro` dependency; other
 results are discarded in the translation unit's Lisp session.
-Returns a `%(seq ...)` of the runtime `meta` definitions a macro import
-contributed, or NULL when the import declared no `meta` function at all.
+Returns a `%(seq ...)` of the runtime `meta` declarations a macro import
+contributed, or NULL when the import declared nothing `meta` at all.
 The consuming unit retains them and emits the ones it reaches. An import
 whose `meta` functions are all compile-time only answers an empty `seq`,
 because the next pass still has to read it to install them.
