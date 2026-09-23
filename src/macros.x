@@ -2127,6 +2127,7 @@ static Var _replace_definition_bindings(Var value, Map bindings) {
 List Compiler.macro_introduced_name(Compiler compiler, String spelling) {
   if (compiler.parsing_source_syntax()) return %($spelling);
   Map locals = compiler.macro_definition_locals();
+  locals.del(%(provisional $spelling));
   Var stored;
   if (locals.try_get(spelling, &stored)) return stored;
   Var order = locals[<order>];
@@ -2137,6 +2138,25 @@ List Compiler.macro_introduced_name(Compiler compiler, String spelling) {
   locals[spelling] = introduced;
   locals[introduced] = spelling;
   return introduced;
+}
+
+/** Returns a template's local binding for tag `name` of `kind`, or NULL
+    when it names a visible public tag. A tag the template defines or
+    declares is a template local. A tag it only references keeps its public
+    spelling unless a declaration in the template introduces that spelling.
+*/
+List Compiler.macro_tag_name(
+  Compiler c, Symbol kind, String name, int definition) {
+  Map locals = c.macro_definition_locals();
+  Var local;
+  if (locals.try_get(name, &local)) {
+    if (definition) locals.del(%(provisional $name));
+    return local;
+  }
+  if (!definition && c.sym.get_exact(%($kind $name))) return NULL;
+  List binding = c.macro_introduced_name(name);
+  if (!definition) locals[%(provisional $name)] = 1;
+  return binding;
 }
 
 static void _template_binders(Var value, Map binders) {
@@ -2965,10 +2985,16 @@ List Compiler.parse_macro_definition(Compiler c) {
         definition_bindings[name] = constructed;
       }
   }
+  // A tag the template only references keeps its public spelling.
+  Array fresh_locals = [];
   foreach (Var local, local_names) {
     Var identity = definition_locals[local];
-    Var binder = _local_binder(local.str());
-    definition_bindings[identity] = binder;
+    if (%(provisional $local) in definition_locals) {
+      definition_bindings[identity] = local;
+      continue;
+    }
+    definition_bindings[identity] = _local_binder(local.str());
+    fresh_locals.push(local);
   }
   replacement = _replace_definition_bindings(
     replacement, definition_bindings);
@@ -2985,7 +3011,7 @@ List Compiler.parse_macro_definition(Compiler c) {
   Array fresh = [];
   foreach (Var binder, using_holes)
     fresh.push(%($binder ${binder.str()[1:]} 1));
-  foreach (Var local, local_names)
+  foreach (Var local, fresh_locals)
     fresh.push(%(${_local_binder(local.str())} $local 0));
   List fresh_rows = fresh.list_free();
   Var capture_order = (void *) definition_captures != NULL

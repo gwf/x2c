@@ -1180,6 +1180,22 @@ aggregate, and an anonymous aggregate is a distinct type in each expansion. A
 visible body local passed to a nested macro's `Name` hole is that expansion's
 binding, so the nested macro can read and assign it.
 
+A `struct`, `union`, or `enum` tag that a body defines or declares is private
+to each expansion, like a typedef, and so are the enumerators it lists. A tag
+the body only references keeps its outside meaning. To publish a tag, spell it
+through a `Name` hole or `x2c.ident`:
+
+```x2c
+macro Unit $handler_type(name $tag) {
+  struct $tag { int depth; };
+  typedef struct $(x2c.ident "Frame") { int line; } $(x2c.ident "Frame");
+}
+
+$handler_type(Handler);
+struct Handler handler = {1};
+struct Frame frame = {2};
+```
+
 Most generated declarations need no directive: writing `int temporary` in a
 body makes both that declaration and its literal references hygienic. When
 compile-time Lisp or a nested macro needs a private name before an ordinary

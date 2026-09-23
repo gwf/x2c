@@ -3691,12 +3691,17 @@ Type Sym.local_type(Sym sym, Type type) {
 
 /** Binds a local aggregate tag before its fields, preserving native spelling.
     A reference reuses the nearest visible tag; a definition or standalone
-    forward declaration introduces the tag in the current lexical scope.
+    forward declaration introduces the tag in the current lexical scope. A
+    macro template names its tags as template locals.
 */
 Var Compiler.aggregate_name(
   Compiler compiler, Symbol kind, Var name, int definition) {
   Sym sym = compiler.sym;
-  if (compiler.macro_holes || name is not <string>) return name;
+  if (name is not <string> || compiler.parsing_source_syntax()) return name;
+  if (compiler.macro_holes) {
+    List local = compiler.macro_tag_name(kind, name, definition);
+    return local ? local : name;
+  }
   Type type = %($kind $name);
   if ((int) sym.scopes.len() <= sym.base_scopes) {
     /* The first file-scope use of a named tag declares it in that scope,

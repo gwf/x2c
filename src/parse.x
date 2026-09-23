@@ -582,7 +582,8 @@ List Compiler.parse_fields(Compiler c, List context) {
   }
 }
 
-/* A template may spell a tag through a Name hole or compile-time Lisp. */
+/* A template may spell a tag through a Name hole or compile-time Lisp,
+   which publishes it; a literal tag there is a template local. */
 static List _tag_name(Compiler c) {
   List slot = c.try_parse_macro_slot(<name>);
   return slot ? %($slot) : c.parse_optional_identifier();
@@ -724,6 +725,9 @@ static List _enum(Compiler c) {
   _skip_aggregate_attributes(c);
   List name = _tag_name(c);
   if (name && c.package) name = _package_aggregate_name(c, <enum>, name);
+  if (name && c.macro_holes)
+    name = %(${c.aggregate_name(<enum>, name.car(),
+      c.peek(0) == <"{"> || c.peek(0) == <;>)});
   List usedname = name ? name : c.gensym();
   List type = cons(<enum>, usedname), enums = NULL;
   if (c.test(<"{">)) {
