@@ -446,7 +446,7 @@ Identities are scoped to the compiler's current file and numbered per
 file, so every process mints the same sequence for one file and two
 files never share an identity. No emission path prints one.
 
-Source: `src/compiler.x:3729`
+Source: `src/compiler.x:3722`
 
 <a id="Compiler.imported_providers"></a>
 #### Compiler.imported_providers
@@ -590,7 +590,7 @@ Returns the evaluator's native byte layout for `type`, derived from its
 canonical Type identity and Sym-owned member order. Meta adoption remains
 a separate compiler decision and cache presence does not advertise it.
 
-Source: `src/compiler.x:3699`
+Source: `src/compiler.x:3695`
 
 <a id="Compiler.new"></a>
 #### Compiler.new
@@ -1018,7 +1018,7 @@ Source: `src/compiler.x:2994`
 
 Marks one named aggregate field as a delegate.
 
-Source: `src/compiler.x:3706`
+Source: `src/compiler.x:3699`
 
 <a id="Sym.declare_enumerator"></a>
 #### Sym.declare_enumerator
@@ -1081,7 +1081,7 @@ Source: `src/compiler.x:2595`
 
 Resolves typedefs or one pointer layer to an aggregate tag, or `NULL`.
 
-Source: `src/compiler.x:3711`
+Source: `src/compiler.x:3704`
 
 <a id="Sym.enumerator_owner"></a>
 #### Sym.enumerator_owner
@@ -1285,7 +1285,7 @@ Source: `src/compiler.x:3508`
 
 Pops the innermost scope, or returns an empty scope when none exists.
 
-Source: `src/compiler.x:3755`
+Source: `src/compiler.x:3748`
 
 <a id="Sym.push_new_scope"></a>
 #### Sym.push_new_scope
@@ -1294,7 +1294,7 @@ Source: `src/compiler.x:3755`
 
 Pushes a new empty lexical scope.
 
-Source: `src/compiler.x:3740`
+Source: `src/compiler.x:3733`
 
 <a id="Sym.push_scope"></a>
 #### Sym.push_scope
@@ -1303,7 +1303,7 @@ Source: `src/compiler.x:3740`
 
 Pushes a caller-supplied lexical scope while retaining its map objects.
 
-Source: `src/compiler.x:3750`
+Source: `src/compiler.x:3743`
 
 <a id="Sym.reference"></a>
 #### Sym.reference
