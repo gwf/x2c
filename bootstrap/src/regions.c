@@ -19,7 +19,7 @@ static Var _529, _528, _527, _526, _525, _521, _518, _514, _512, _494, _493, _48
 #include "type.h"
 typedef struct Fact{
   int depth, origin, param, born, dead;
-  struct Region * region, * owner;
+  struct Region * region, * other, * owner;
   struct Fact * points;
   List place;
 }
@@ -99,7 +99,9 @@ static Fact _returned_argument(Walk w, Var value, List * named);
 
 static Region _pooled(Walk w, int * born);
 
-static Region _birth(Walk w, Var value, Type type, int * born);
+static Region _birth(Walk w, Var value, Type type, int * born, Region * other);
+
+static int _flow_region(Walk w, Var value, Type type, Symbol sink, Fact target, Fact fact, List named, Region region, int born, int report);
 
 static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target);
 
@@ -869,7 +871,7 @@ static Region _active(Walk w){
 }
 
 static void _move(Fact fact, Region region){
-  fact -> region = region;  fact -> born = 0;  fact -> param = - 1;
+  fact -> region = region;  fact -> other = NULL;  fact -> born = 0;  fact -> param = - 1;
 }
 
 Var Array_push(Array, Var);
@@ -919,7 +921,7 @@ static Fact _fact_of(Walk w, Var expression, List * named){
 case 992: ;  static MatchCaptureSite _x2c_match_site_11;  if (x2c_match_site_try_capture(& _x2c_match_site_11, _x2c_match_expr, List_var(_136), &_x2c_match_capture)) {Var place = _x2c_match_values[0];  return _borrow(w, place, named);  break;
 }
 static MatchCaptureSite _x2c_match_site_12;  if (x2c_match_site_try_capture(& _x2c_match_site_12, _x2c_match_expr, List_var(_225), &_x2c_match_capture)) {Var yes = _x2c_match_values[0];  Var no = _x2c_match_values[1]; {
-  List yes_name = NULL, no_name = NULL;  Fact fact = _fact_of(w, yes, & yes_name);  Fact other = _fact_of(w, no, & no_name);  if(other &&(! fact ||(other -> region && ! fact -> region))){
+  List yes_name = NULL, no_name = NULL;  Fact fact = _fact_of(w, yes, & yes_name);  Fact other = _fact_of(w, no, & no_name);  if(other &&(! fact ||((other -> region || other -> other) && ! fact -> region && ! fact -> other))){
     fact = other;  yes_name = no_name;
   }
   if(named && fact) * named = yes_name;  return fact;
@@ -963,7 +965,7 @@ static Fact _returned_argument(Walk w, Var value, List * named){
     }
     );  Var _x2c_macro_item_0;  while(Iter_try_next(_x2c_macro_iterator_0, & _x2c_macro_item_0)){
       row = Var_list(_x2c_macro_item_0); {
-        List _x2c_destructure_0 = row;  int index = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 0), 3453797));  Var target = List_getindex(_x2c_destructure_0, 1);  if(! Var_equal(target, Symbol_var(1219800220)) || index >= List_len(arguments)) continue;  Fact fact = _fact_of(w, List_getindex(arguments, index), named);  if(fact &&(fact -> param >= 0 || fact -> region)) return fact;
+        List _x2c_destructure_0 = row;  int index = Var_int(Var_convert(List_getindex(_x2c_destructure_0, 0), 3453797));  Var target = List_getindex(_x2c_destructure_0, 1);  if(! Var_equal(target, Symbol_var(1219800220)) || index >= List_len(arguments)) continue;  Fact fact = _fact_of(w, List_getindex(arguments, index), named);  if(fact &&(fact -> param >= 0 || fact -> born || fact -> region || fact -> other)) return fact;
       }
 
     }
@@ -977,8 +979,8 @@ static Region _pooled(Walk w, int * born){
 }
 
 int List_try_next(List, List *, Var *);
-static Region _birth(Walk w, Var value, Type type, int * born){
-  List arguments = NULL;  String callee = _callee_of(value, & arguments);  * born = 1;
+static Region _birth(Walk w, Var value, Type type, int * born, Region * other){
+  List arguments = NULL;  String callee = _callee_of(value, & arguments);  * born = 1;  * other = NULL;
   {
     List _x2c_match_expr = Var_list(String_truth(callee) ? Map_getindex(runtime, String_var(callee)) :((void) 0, Void));
     MatchCaptureBuffer _x2c_match_capture = { 0 };
@@ -1006,7 +1008,10 @@ case 808259842: ;  static MatchCaptureSite _x2c_match_site_18;  if (x2c_match_si
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
       case 6544469130: ;  static MatchCaptureSite _x2c_match_site_17;  if (x2c_match_site_try_capture(& _x2c_match_site_17, _x2c_match_expr, List_var(_243), &_x2c_match_capture)) {Var captured = _x2c_match_values[0]; {
-        Var place = _address_of(captured);  Fact fact = _fact_of(w, Var_is_void(place) ? captured : place, NULL);  if(fact && fact -> region) return fact -> region;
+        Var place = _address_of(captured);  Fact fact = _fact_of(w, Var_is_void(place) ? captured : place, NULL);  if(fact &&(fact -> born || fact -> region || fact -> other)){
+          if(fact -> born) * born = fact -> born;  * other = fact -> other;  return fact -> region;
+        }
+
       }
       break;
     }
@@ -1030,9 +1035,31 @@ static MatchCaptureSite _x2c_match_site_20;  if (x2c_match_site_try_capture(& _x
     }
   }
 if(String_truth(callee)){
-  int owner = Var_int(List_car(_summary(w, callee)));  if(owner & 2) return _pooled(w, born);  if(owner & 1) return _active(w);
+  int owner = Var_int(List_car(_summary(w, callee)));  if(owner == 3){
+    * born = owner;  * other = _innermost(w, 1080280);  return _active(w);
+  }
+  if(owner & 2) return _pooled(w, born);  if(owner & 1) return _active(w);
 }
 * born = 0;  return NULL;
+}
+
+static int _flow_region(Walk w, Var value, Type type, Symbol sink, Fact target, Fact fact, List named, Region region, int born, int report){
+  if(_copies(w, type, value) && !(born & 2) &&(! region || region -> kind != 1080280)) return 0;  if(! region){
+    if(sink == 1219800220) w -> fresh |= born;  return 0;
+  }
+  String subject = _subject(w, value, named, fact);  if(region -> closed){
+    if(report) _warn(w, 1218923484, w -> origin, String_join(NULL, cons(String_var(subject), cons(String_var(_251), NULL))), _opened(w, region));  return 1;
+  }
+  if(region -> kind == 26155096) return 0;  String exit = NULL;  switch(sink){
+    case 1219800220 : exit = _252;  break;  case 1317118534 : exit = _253;  break;  case 26155096 : if(target -> depth < region -> depth) exit = _254;  break;  default: if(! target) exit = _255;  else if(target -> param >= 0) exit = _256;  else if(target -> region == region) exit = NULL;  else if(target -> region) exit = region == w -> frame ? NULL : _257;  else exit = _258;
+  }
+  if(! String_truth(exit)) return 0;  if(report){
+    if(region == w -> frame){
+      String message = String_join(NULL, cons(String_var(subject), cons(String_var(_259), cons(String_var(exit), NULL))));  _warn(w, 1218923484, w -> origin, message, _262);
+    }
+    else _warn(w, 1218923484, w -> origin, String_join(NULL, cons(String_var(subject), cons(String_var(_263), cons(String_var(exit), NULL)))), _opened(w, region));
+  }
+  return 1;
 }
 
 static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target){
@@ -1046,22 +1073,22 @@ static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target){
 default: break;
     }
   }
-List named = NULL;  Fact fact = _value_fact(w, value, & named);  if(! fact) fact = _returned_argument(w, value, & named);  int born = 0;  Region region = fact ? fact -> region : _birth(w, value, NULL, & born);  if(! fact && ! born) return 0;  if(_copies(w, type, value) && !((fact ? fact -> born : born) & 2) &&(! region || region -> kind != 1080280)) return 0;  if(fact && fact -> param >= 0){
+List named = NULL;  Fact fact = _value_fact(w, value, & named);  if(! fact) fact = _returned_argument(w, value, & named);  int born = 0;  Region other = NULL;  Region region = fact ? fact -> region : _birth(w, value, NULL, & born, & other);  if(! fact && ! born) return 0;  if(fact && fact -> param >= 0){
   Var row = Symbol_var(sink);  if(sink == 534624){
-    if(! target) row = Symbol_var(46060699100);  else if(target -> param >= 0) row = List_var(cons(_202, cons(int_var(target -> param), NULL)));  else row = target -> born ? Symbol_var(1219734312) : target -> region ?((void) 0, Void) : Symbol_var(1219800220);
+    if(! target) row = Symbol_var(46060699100);  else if(target -> param >= 0) row = List_var(cons(_202, cons(int_var(target -> param), NULL)));  else row = target -> born ? Symbol_var(1219734312) :(target -> region || target -> other) ?((void) 0, Void) : Symbol_var(1219800220);
   }
   if(sink != 26155096 && ! Var_is_void(row)) Map_setindex(w -> sinks, List_var(cons(int_var(fact -> param), cons(row, NULL))), int_var(1));  return 0;
 }
-if(! region){
-  if(sink == 1219800220) w -> fresh |= fact ? fact -> born : born;  return 0;
+if(fact){
+  born = fact -> born;  other = fact -> other;
 }
-String subject = _subject(w, value, named, fact);  if(region -> closed){
-  _warn(w, 1218923484, w -> origin, String_join(NULL, cons(String_var(subject), cons(String_var(_251), NULL))), _opened(w, region));  return 1;
+int reported = 0;  for(int choice = 0;  choice <(born == 3 ? 2 : 1);  choice ++){
+  Region owner = choice ? other : region;  int kind = born;  if(born == 3) kind = choice ? 2 : 1;  if(owner && target && target -> born == 3 && sink == 534624){
+    struct Fact pooled = * target;  pooled.region = target -> other;  pooled.born = 2;  reported |= _flow_region(w, value, type, sink, target, fact, named, owner, kind, ! reported);  reported |= _flow_region(w, value, type, sink, & pooled, fact, named, owner, kind, ! reported);
+  }
+  else reported |= _flow_region(w, value, type, sink, target, fact, named, owner, kind, ! reported);
 }
-if(region -> kind == 26155096) return 0;  String exit = NULL;  switch(sink){
-  case 1219800220 : exit = _252;  break;  case 1317118534 : exit = _253;  break;  case 26155096 : if(target -> depth < region -> depth) exit = _254;  break;  default: if(! target) exit = _255;  else if(target -> param >= 0) exit = _256;  else if(target -> region == region) exit = NULL;  else if(target -> region) exit = region == w -> frame ? NULL : _257;  else exit = _258;
-}
-if(! String_truth(exit)) return 0;  if(region == w -> frame) _warn(w, 1218923484, w -> origin, String_join(NULL, cons(String_var(subject), cons(String_var(_259), cons(String_var(exit), NULL)))), _262);  else _warn(w, 1218923484, w -> origin, String_join(NULL, cons(String_var(subject), cons(String_var(_263), cons(String_var(exit), NULL)))), _opened(w, region));  return 1;
+return reported;
 }
 
 static String _subject(Walk w, Var value, List named, Fact fact){
@@ -1126,7 +1153,7 @@ return NULL;
 }
 
 static Fact _borrow(Walk w, Var place, List * named){
-  int through = 0;  Fact base = _fact_of(w, place, named);  if(! base) base = _base(w, place, & through);  if(! base) return NULL;  if(named && ! List_truth(* named)) * named = _root(place);  Fact borrow = _fact(w, NULL, - 1);  borrow -> points = base;  borrow -> place = Var_list(_unwrap(place));  borrow -> region = through ? base -> region : w -> frame;  if(through) borrow -> param = base -> param;  return borrow;
+  int through = 0;  Fact base = _fact_of(w, place, named);  if(! base) base = _base(w, place, & through);  if(! base) return NULL;  if(named && ! List_truth(* named)) * named = _root(place);  Fact borrow = _fact(w, NULL, - 1);  borrow -> points = base;  borrow -> place = Var_list(_unwrap(place));  borrow -> region = through ? base -> region : w -> frame;  borrow -> other = through ? base -> other : NULL;  borrow -> born = through ? base -> born : 0;  if(through) borrow -> param = base -> param;  return borrow;
 }
 
 static List _root(Var place){
@@ -1176,8 +1203,8 @@ static void _scan_call(Walk w, Var call, String callee, List arguments){
     );  Var _x2c_macro_item_2;  while(Iter_try_next(_x2c_macro_iterator_2, & _x2c_macro_item_2)){
       row = Var_list(_x2c_macro_item_2); {
         List _x2c_destructure_1 = row;  int index = Var_int(Var_convert(List_getindex(_x2c_destructure_1, 0), 3453797));  Var target = List_getindex(_x2c_destructure_1, 1);  if(index >= count) continue;  Var argument = List_getindex(arguments, index);  Var declared = index < List_len(types) ? List_getindex(types, index) :((void) 0, Void);  Type type = Var_is_row(declared, 9, 7, 4) ? List_type(Var_list(declared)) : NULL;  if(Var_equal(target, Symbol_var(1317118534))) _flow(w, argument, type, 1317118534, NULL);  else if(Var_equal(target, Symbol_var(46060699100))) _flow(w, argument, type, 534624, NULL);  else if(Var_equal(target, Symbol_var(1219734312))){
-          int born = 0;  Region region = _birth(w, call, NULL, & born);  struct Fact result ={
-            .param = - 1, .born = born, .region = region
+          int born = 0;  Region other = NULL;  Region region = _birth(w, call, NULL, & born, & other);  struct Fact result ={
+            .param = - 1, .born = born, .region = region, .other = other
           }
           ;  _flow(w, argument, type, 534624, & result);
         }
@@ -1244,7 +1271,7 @@ break;
 default: ;  static MatchCaptureSite _x2c_match_site_39;  if (x2c_match_site_try_capture(& _x2c_match_site_39, _x2c_match_expr, List_var(_353), &_x2c_match_capture)) {Var specifiers = _x2c_match_values[0];  List bindings = Var_list(_x2c_match_values[1]);  _declare(w, specifiers, bindings);  break;
 }
 { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936761846694ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[1] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var head = _x2c_match_values[0];  Var tail = _x2c_match_values[1]; {
-  int born = 0;  Region region = _birth(w, node, NULL, & born);  struct Fact result ={
+  int born = 0;  Region other = NULL;  Region region = _birth(w, node, NULL, & born, & other);  struct Fact result ={
     .param = - 1, .born = born, .region = region
   }
   ;  _flow(w, head, NULL, 534624, & result);  _flow(w, tail, NULL, 534624, & result);  Array_push(w -> pending, tail);  Array_push(w -> pending, head);
@@ -1278,7 +1305,13 @@ static void _revive(Walk w){
 }
 
 static void _assign(Walk w, Fact fact, Var value, Type type, int store){
-  _scan(w, value, 0);  Fact source = _value_fact(w, value, NULL);  if(! source) source = _returned_argument(w, value, NULL);  int born = 0;  Region region = source ? source -> region : _birth(w, value, type, & born);  int kept = source || born;  if(kept && _copies(w, type, value)) kept =((source ? source -> born : born) & 2) ||(region && region -> kind == 1080280);  if(kept && store && source && region) kept = ! _flow(w, value, type, 26155096, fact);  fact -> dead = 0;  fact -> points = kept && source ? source -> points : NULL;  fact -> place = kept && source ? source -> place : NULL;  fact -> owner = NULL;  fact -> region = kept ? region : NULL;  fact -> born = kept &&(source ? source -> born : born);  fact -> param = kept && source ? source -> param : - 1;
+  _scan(w, value, 0);  Fact source = _value_fact(w, value, NULL);  if(! source) source = _returned_argument(w, value, NULL);  int born = 0;  Region other = source ? source -> other : NULL;  Region region = source ? source -> region : _birth(w, value, type, & born, & other);  int owners = source ? source -> born : born;  int kept = source || born;  if(kept && _copies(w, type, value)){
+    if(owners == 3){
+      region = other;  other = NULL;  owners = 2;
+    }
+    else kept =(owners & 2) ||(region && region -> kind == 1080280);
+  }
+  if(kept && store && source &&(region || other)) kept = ! _flow(w, value, type, 26155096, fact);  fact -> dead = 0;  fact -> points = kept && source ? source -> points : NULL;  fact -> place = kept && source ? source -> place : NULL;  fact -> owner = NULL;  fact -> region = kept ? region : NULL;  fact -> other = kept ? other : NULL;  fact -> born = kept ? owners : 0;  fact -> param = kept && source ? source -> param : - 1;
 }
 
 static Var _target_place(Walk w, Var target){

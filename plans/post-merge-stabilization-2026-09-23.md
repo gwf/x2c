@@ -42,8 +42,9 @@ sequenced. The campaign checkout alone publishes to `dev`.
    evaluator translation session, with first-reach, retry, recursive-init,
    and stable-address behavior.
 2. After F1/F2, distinguish same-basename source units (F3) and conservatively
-   prove or decline native record layouts (F4). F2 also unblocks complete
-   compiler-selected public-definition enumeration (M2).
+   prove or decline native record layouts (F4). F4 excludes packed layouts:
+   packing is unsupported and produces a direct compile error. F2 also
+   unblocks complete compiler-selected public-definition enumeration (M2).
 3. Repair pooled ownership summaries (S2), native-module link freshness
    (S3), graph preload and allocation reporting (M1), docs generation and
    fresh API inventory (M3), the default full sanitizer invocation (M4),

@@ -795,9 +795,9 @@ ReplCompletion ReplSession_complete(ReplSession session, String source, size_t c
       Token directives = c -> directives_taken;
       String text = c -> text;
       Map arms = c -> arm_stacks;
-      Array braces = c -> braces, pack_marks = c -> pack_marks;
+      Array braces = c -> braces, layout_marks = c -> layout_marks;
       {
-  _x2c_defer_env_1 _x2c_defer_env_16 = {._x2c_defer_capture_1 =(const void *) & c, ._x2c_defer_capture_2 =(const void *) & tokenizer, ._x2c_defer_capture_3 =(const void *) & token, ._x2c_defer_capture_4 =(const void *) & boundary, ._x2c_defer_capture_5 =(const void *) & directives, ._x2c_defer_capture_6 =(const void *) & text, ._x2c_defer_capture_7 =(const void *) & arms, ._x2c_defer_capture_8 =(const void *) & pack_marks, ._x2c_defer_capture_9 =(const void *) & braces};
+  _x2c_defer_env_1 _x2c_defer_env_16 = {._x2c_defer_capture_1 =(const void *) & c, ._x2c_defer_capture_2 =(const void *) & tokenizer, ._x2c_defer_capture_3 =(const void *) & token, ._x2c_defer_capture_4 =(const void *) & boundary, ._x2c_defer_capture_5 =(const void *) & directives, ._x2c_defer_capture_6 =(const void *) & text, ._x2c_defer_capture_7 =(const void *) & arms, ._x2c_defer_capture_8 =(const void *) & layout_marks, ._x2c_defer_capture_9 =(const void *) & braces};
 
   X2CCleanup _x2c_defer_record_4 = {
     .fn = _x2c_defer_cleanup_1,
@@ -1260,8 +1260,8 @@ ReplResult ReplSession_submit(ReplSession session, String source){
   };
   x2c_cleanup_push(&_x2c_defer_record_10);
   {
-    Tokenizer tokenizer = c -> tokenizer;  Token volatile token = c -> token;  Token boundary = c -> input_boundary;  Token directives = c -> directives_taken;  String text = c -> text;  Map arms = c -> arm_stacks;  Array braces = c -> braces, pack_marks = c -> pack_marks; {
-  _x2c_defer_env_5 _x2c_defer_env_21 = {._x2c_defer_capture_15 =(const void *) & c, ._x2c_defer_capture_16 =(const void *) & tokenizer, ._x2c_defer_capture_17 =(const void *) & token, ._x2c_defer_capture_18 =(const void *) & boundary, ._x2c_defer_capture_19 =(const void *) & directives, ._x2c_defer_capture_20 =(const void *) & text, ._x2c_defer_capture_21 =(const void *) & arms, ._x2c_defer_capture_22 =(const void *) & pack_marks, ._x2c_defer_capture_23 =(const void *) & braces};
+    Tokenizer tokenizer = c -> tokenizer;  Token volatile token = c -> token;  Token boundary = c -> input_boundary;  Token directives = c -> directives_taken;  String text = c -> text;  Map arms = c -> arm_stacks;  Array braces = c -> braces, layout_marks = c -> layout_marks; {
+  _x2c_defer_env_5 _x2c_defer_env_21 = {._x2c_defer_capture_15 =(const void *) & c, ._x2c_defer_capture_16 =(const void *) & tokenizer, ._x2c_defer_capture_17 =(const void *) & token, ._x2c_defer_capture_18 =(const void *) & boundary, ._x2c_defer_capture_19 =(const void *) & directives, ._x2c_defer_capture_20 =(const void *) & text, ._x2c_defer_capture_21 =(const void *) & arms, ._x2c_defer_capture_22 =(const void *) & layout_marks, ._x2c_defer_capture_23 =(const void *) & braces};
   X2CCleanup _x2c_defer_record_11 = {
     .fn = _x2c_defer_cleanup_7,
     .env = & _x2c_defer_env_21
@@ -1552,7 +1552,7 @@ static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
 
 static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
   _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1; {
-    (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> tokenizer =(*(Tokenizer *) _x2c_defer_data_1->_x2c_defer_capture_2); (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> token =(*(Token *) _x2c_defer_data_1->_x2c_defer_capture_3); (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> input_boundary =(*(Token *) _x2c_defer_data_1->_x2c_defer_capture_4); (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> directives_taken =(*(Token *) _x2c_defer_data_1->_x2c_defer_capture_5); (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> text =(*(String *) _x2c_defer_data_1->_x2c_defer_capture_6); (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> arm_stacks =(*(Map *) _x2c_defer_data_1->_x2c_defer_capture_7); (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> pack_marks =(*(Array *) _x2c_defer_data_1->_x2c_defer_capture_8); (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> braces =(*(Array *) _x2c_defer_data_1->_x2c_defer_capture_9);
+    (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> tokenizer =(*(Tokenizer *) _x2c_defer_data_1->_x2c_defer_capture_2); (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> token =(*(Token *) _x2c_defer_data_1->_x2c_defer_capture_3); (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> input_boundary =(*(Token *) _x2c_defer_data_1->_x2c_defer_capture_4); (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> directives_taken =(*(Token *) _x2c_defer_data_1->_x2c_defer_capture_5); (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> text =(*(String *) _x2c_defer_data_1->_x2c_defer_capture_6); (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> arm_stacks =(*(Map *) _x2c_defer_data_1->_x2c_defer_capture_7); (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> layout_marks =(*(Array *) _x2c_defer_data_1->_x2c_defer_capture_8); (*(Compiler *) _x2c_defer_data_1->_x2c_defer_capture_1) -> braces =(*(Array *) _x2c_defer_data_1->_x2c_defer_capture_9);
   }
 
 }
@@ -1584,7 +1584,7 @@ static void _x2c_defer_cleanup_6(void * _x2c_defer_opaque_6){
 
 static void _x2c_defer_cleanup_7(void * _x2c_defer_opaque_7){
   _x2c_defer_env_5 * _x2c_defer_data_5 =(_x2c_defer_env_5 *) _x2c_defer_opaque_7; {
-    (*(Compiler *) _x2c_defer_data_5->_x2c_defer_capture_15) -> tokenizer =(*(Tokenizer *) _x2c_defer_data_5->_x2c_defer_capture_16); (*(Compiler *) _x2c_defer_data_5->_x2c_defer_capture_15) -> token =(*(Token *) _x2c_defer_data_5->_x2c_defer_capture_17); (*(Compiler *) _x2c_defer_data_5->_x2c_defer_capture_15) -> input_boundary =(*(Token *) _x2c_defer_data_5->_x2c_defer_capture_18); (*(Compiler *) _x2c_defer_data_5->_x2c_defer_capture_15) -> directives_taken =(*(Token *) _x2c_defer_data_5->_x2c_defer_capture_19); (*(Compiler *) _x2c_defer_data_5->_x2c_defer_capture_15) -> text =(*(String *) _x2c_defer_data_5->_x2c_defer_capture_20); (*(Compiler *) _x2c_defer_data_5->_x2c_defer_capture_15) -> arm_stacks =(*(Map *) _x2c_defer_data_5->_x2c_defer_capture_21); (*(Compiler *) _x2c_defer_data_5->_x2c_defer_capture_15) -> pack_marks =(*(Array *) _x2c_defer_data_5->_x2c_defer_capture_22); (*(Compiler *) _x2c_defer_data_5->_x2c_defer_capture_15) -> braces =(*(Array *) _x2c_defer_data_5->_x2c_defer_capture_23);
+    (*(Compiler *) _x2c_defer_data_5->_x2c_defer_capture_15) -> tokenizer =(*(Tokenizer *) _x2c_defer_data_5->_x2c_defer_capture_16); (*(Compiler *) _x2c_defer_data_5->_x2c_defer_capture_15) -> token =(*(Token *) _x2c_defer_data_5->_x2c_defer_capture_17); (*(Compiler *) _x2c_defer_data_5->_x2c_defer_capture_15) -> input_boundary =(*(Token *) _x2c_defer_data_5->_x2c_defer_capture_18); (*(Compiler *) _x2c_defer_data_5->_x2c_defer_capture_15) -> directives_taken =(*(Token *) _x2c_defer_data_5->_x2c_defer_capture_19); (*(Compiler *) _x2c_defer_data_5->_x2c_defer_capture_15) -> text =(*(String *) _x2c_defer_data_5->_x2c_defer_capture_20); (*(Compiler *) _x2c_defer_data_5->_x2c_defer_capture_15) -> arm_stacks =(*(Map *) _x2c_defer_data_5->_x2c_defer_capture_21); (*(Compiler *) _x2c_defer_data_5->_x2c_defer_capture_15) -> layout_marks =(*(Array *) _x2c_defer_data_5->_x2c_defer_capture_22); (*(Compiler *) _x2c_defer_data_5->_x2c_defer_capture_15) -> braces =(*(Array *) _x2c_defer_data_5->_x2c_defer_capture_23);
   }
 
 }

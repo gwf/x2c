@@ -485,31 +485,29 @@ static int _enum_fits_int(List type, List members) {
   return 1;
 }
 
-/* Reports whether C packs an aggregate whose tokens, with its attributes,
-   run from `first` up to the current one, which is not its own: packing is
-   on before it, or a mark lies within it. Tokens outside the unit's own,
-   such as a constructed form's, have no marks. */
-static int _packed_since(Compiler c, Token first) {
-  if (c.pack_include_unknown) return 1;
+/* Reports a layout attribute between `first` and the current token. Tokens
+   outside this unit's input, such as a constructed form's, have no marks. */
+static int _layout_attribute_since(Compiler c, Token first) {
   Token base = c.tokenizer.tokens, end = base + c.tokenizer.tokens.len();
   if (first < base || c.token >= end) return 0;
   // Marks ascend, so the ones before `first` are a prefix.
-  int before = 0, count = c.pack_marks.len();
+  int before = 0, count = c.layout_marks.len();
   for (int high = count; before < high;) {
     int middle = (before + high) / 2;
-    if ((long) c.pack_marks[middle] < first - base) before = middle + 1;
+    if ((long) c.layout_marks[middle] < first - base) before = middle + 1;
     else high = middle;
   }
   return before % 2 ||
-         (before < count && (long) c.pack_marks[before] < c.token - base);
+         (before < count && (long) c.layout_marks[before] < c.token - base);
 }
 
 /* Publishes an aggregate whose tokens start at `first`. A constructed
    aggregate passes the current token, so it is packed where its form is. A
-   packed enum can be narrower than int, so it has no int layout. */
+   enum with a layout attribute can be narrower than int, so it has no int
+   layout. */
 static List _publish_aggregate_type(
   Compiler compiler, Symbol tag, Var name, List members, Token first) {
-  int packed = _packed_since(compiler, first);
+  int packed = _layout_attribute_since(compiler, first);
   List type = %($tag $name);
   List body = tag == <enum> ? members : %(fields @members);
   if (name is <list> && name.car() == <binding>)
@@ -1299,10 +1297,11 @@ static List _typedef(Compiler compiler, List context, int row) {
   List bindings = _declarator_list(compiler, spec, context, row);
   /* A typedef's own alignment changes every record field that names it,
      even when the record declaration has no attribute of its own. */
-  if (_packed_since(compiler, first)) foreach (List declarator, bindings) {
-    String name = binding_identity_spelling(declarator.cadr());
-    if (name) compiler.sym.set(%($name "layout-attribute"), %(unknown));
-  }
+  if (_layout_attribute_since(compiler, first))
+    foreach (List declarator, bindings) {
+      String name = binding_identity_spelling(declarator.cadr());
+      if (name) compiler.sym.set(%($name "layout-attribute"), %(unknown));
+    }
   return _finish_declaration(compiler, <typedef>, spec, bindings, 0);
 }
 

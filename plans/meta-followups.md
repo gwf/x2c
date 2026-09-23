@@ -127,11 +127,12 @@ Outcome, 2026-09-22:
     keeps a correct layout. An `_Atomic` struct type could differ and is not
     handled.
 
-Those remaining bullets record the September 22 state. Local stabilization
-commits `b5f3d5ba` and `30c206f2` now carry pack effects through raw includes
-and warm replay, decline ambiguous conditional/repeated includes, and retain
-typedef layout attributes. The later-defined attribute macro and `_Atomic`
-limits above are not closed by those repairs; `dev` delivery remains pending.
+Those bullets record the September 22 state. The pack replay in local
+stabilization commits `b5f3d5ba` and `30c206f2` was too expensive and is
+withdrawn. Gary decided on September 23 that packing is unsupported: any
+`#pragma pack` directive or `packed` attribute now causes a compile error.
+The compiler still declines meta use of other layout attributes it cannot
+prove. The `_Atomic` limit above remains separate.
 
 ## Design tracks (decide with Gary first)
 

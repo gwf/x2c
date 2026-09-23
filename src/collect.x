@@ -227,9 +227,8 @@ static int _package_owns(Compiler c, String path) {
 static void _parse_segment(
   Compiler c, String path, String source, String text, int start_line,
   int start_pos, Map globs, Map overlay, Map definitions, Map dependencies,
-  int private, int inherited_pack) {
+  int private) {
   Compiler shadow = Compiler.new_shared(c);
-  shadow.pack_include_unknown = inherited_pack;
   defer c.close_child(shadow);
   int unit = x2c_source_file(path);
   if (!unit || !_package_owns(c, path)) shadow.package = NULL;
@@ -312,60 +311,17 @@ static void _publish_unit_statics(Map statics, Map overlay, String path) {
 static void _flush_segment(
   Compiler compiler, String path, String source, String text, int start_line,
   int start_pos, Map globs, Array parts, Map definitions, Map dependencies,
-  int private, int inherited_pack) {
+  int private) {
   if (!text || !*text) return;
   Scope.push(&process_cache_scope);
   Map overlay = {};
   Scope.pop();
   _parse_segment(
     compiler, path, source, text, start_line, start_pos,
-    globs, overlay, definitions, dependencies, private, inherited_pack);
+    globs, overlay, definitions, dependencies, private);
   if (!overlay.len()) return;
   Var overlay_var = overlay;
   parts.push(overlay_var);
-}
-
-/* C may skip a conditional or repeated include. Only an unchanged exit
-   state lets later layout use the same pack proof either way. */
-static int _pack_changed(Compiler c, int state, List saved) =>
-  c.pack_state != state || !List.equal(c.pack_saved, saved);
-
-/* A warm interface supplies declarations but not the preprocessor's
-   stateful pack stream. Replay that stream from source in include order.
-   This reads only source directives; declaration semantics still come from
-   the same cached entry as every other include. */
-static void _replay_pack_stream(Compiler c, String path, Map visited) {
-  if (path in visited) return;
-  visited[path] = 1;
-  c.pack_seen[path] = 1;
-  String source = _include_text(c, path, path);
-  Tokenizer tokenizer = Tokenizer.new(source);
-  tokenizer.scan();
-  int depth = 0;
-  for (Token token = tokenizer.tokens;
-       token.type != <eof>; token++) {
-    if (token.type != <preproc>) continue;
-    Symbol kind = preproc_conditional_kind(token.text);
-    if (kind == <open>) depth++;
-    else if (kind == <close>) depth--;
-    c.note_pack_directive(token.text, depth > 0);
-    int angle = 0, covered = 0;
-    String target = preproc_include_target(token.text, &angle);
-    if (!target) continue;
-    String included = _resolve_include_dirs(
-      c.sources, c.include_dirs, Path.dirname(path), target, angle,
-      &covered);
-    if (included && !covered) {
-      String canonical = _canonical_path(included);
-      int state = c.pack_state, optional = depth > 0 ||
-        c.pack_seen.contains(canonical);
-      List saved = c.pack_saved;
-      _replay_pack_stream(c, canonical, visited);
-      if (optional && _pack_changed(c, state, saved))
-        c.pack_unknown = 1;
-    }
-  }
-  visited.del(path);
 }
 
 /* Resolve and splice one include during a file walk, returning its canonical
@@ -374,38 +330,19 @@ static void _replay_pack_stream(Compiler c, String path, Map visited) {
    rejected when any file it spliced has changed. */
 static String _include(
   Compiler c, String target, int angle, String dir, Map globs,
-  Map visited, Map dependencies, int conditional) {
+  Map visited, Map dependencies) {
   int covered = 0;
   String path = _resolve_include(c, dir, target, angle, &covered);
   if (!path) return NULL;
   if (covered && !x2c_source_file(path)) return NULL;
   String canonical = _canonical_path(path);
-  int state = c.pack_state, optional = conditional ||
-    c.pack_seen.contains(canonical);
-  List saved = c.pack_saved;
   List entry = _entry(c, canonical);
-  int cached = !!entry;
   c.add_translation_dependency(canonical);
   if (!visited.contains(canonical)) {
     visited[canonical] = 1;
     if (!entry) entry = _walk_cold(c, target, canonical, globs, visited);
-    int prior_pack = c.pack_state, prior_unknown = c.pack_unknown;
-    List prior_saved = c.pack_saved;
-    /* Declaration replay may cold-walk dependencies before their directives
-       are reached in the logical include stream. */
-    Map prior_seen = c.pack_seen.copy();
     _replay_cached(c, entry, globs, visited);
-    c.pack_seen = prior_seen;
-    if (cached) {
-      c.pack_state = prior_pack;
-      c.pack_unknown = prior_unknown;
-      c.pack_saved = prior_saved;
-      _replay_pack_stream(c, canonical, {});
-    }
   }
-  else _replay_pack_stream(c, canonical, {});
-  if (optional && _pack_changed(c, state, saved))
-    c.pack_unknown = 1;
   /* A file still being walked, as in an include cycle, has no entry yet. */
   Var walked = _process_cache()[canonical];
   String content_hash = walked is void
@@ -456,7 +393,6 @@ void Compiler.record_generated_symbol(
 static void _file(
   Compiler c, String path, String text, String dir, Map globs,
   Map visited) {
-  c.pack_seen[path] = 1;
   Map enclosing_aliases = c.kw_aliases, enclosing_alias_imports = c.kw_seen;
   $let(c.declaration_effects, NULL) {
     c.kw_aliases = {};
@@ -466,7 +402,6 @@ static void _file(
     Map dependencies = {};
     Scope.pop();
     Map definitions = {}, int private = 0;
-    int segment_pack = c.pack_state || c.pack_unknown, depth = 0;
     String content_hash = "%08x".printf(text.hash());
     /* Scanned tokens place directives outside strings and comments. A
        segment ends before an include or a visibility pragma, and the next
@@ -477,23 +412,19 @@ static void _file(
     int segment_line = 1, segment_position = 0;
     for (Token token = first; token.type != <eof>; token++) {
       if (token.type != <preproc> || !_starts_line(first, token)) continue;
-      Symbol kind = preproc_conditional_kind(token.text);
-      if (kind == <open>) depth++;
-      else if (kind == <close>) depth--;
-      c.note_pack_directive(token.text, depth > 0);
+      if (_pack_directive(token.text)) $let(c.filename, path)
+        c.report_error(<parse>, "#pragma pack is unsupported", token, NULL);
       int angle = 0, visibility = _visibility_pragma(token.text);
       String target = preproc_include_target(token.text, &angle);
       if (!target && visibility < 0) continue;
       _flush_segment(
         c, path, text, text[segment_position:token.pos], segment_line,
-        segment_position, globs, parts, definitions, dependencies, private,
-        segment_pack);
+        segment_position, globs, parts, definitions, dependencies, private);
       if (target) {
         /* The entry records every include, so it does not depend on what
            the unit that first walked this file had already seen. */
         String canonical =
-          _include(c, target, angle, dir, globs, visited, dependencies,
-                   depth > 0);
+          _include(c, target, angle, dir, globs, visited, dependencies);
         if (canonical) parts.push(canonical);
       }
       else {
@@ -504,11 +435,10 @@ static void _file(
       Token next = token + 1;
       segment_line = next.line;
       segment_position = next.pos;
-      segment_pack = c.pack_state || c.pack_unknown;
     }
     _flush_segment(
       c, path, text, text[segment_position:], segment_line, segment_position,
-      globs, parts, definitions, dependencies, private, segment_pack);
+      globs, parts, definitions, dependencies, private);
     Map generated =
       c.select_declaration_defaults(path, globs, parts, definitions);
     if (generated && generated.len()) {
@@ -581,7 +511,6 @@ static List _prelude_entry(Compiler c, String runtime, String canonical) {
 */
 Map Compiler.collect_symbols(Compiler c, Map globs) {
   if ((void *) globs == NULL) globs = {};
-  c.pack_seen = {};
   c.kw_aliases = NULL;
   c.kw_seen = NULL;
   Map visited = {}, String canonical = _canonical_path(c.filename);

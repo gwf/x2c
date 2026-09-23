@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/meta-header-packed-macro.x:2:1: parse: packed attributes are unsupported
+  #define PACKED __attribute__((packed))
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+

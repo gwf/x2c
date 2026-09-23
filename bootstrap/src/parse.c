@@ -76,7 +76,7 @@ static List _field(Compiler compiler, List context, int delegated);
 
 static int _enum_fits_int(List type, List members);
 
-static int _packed_since(Compiler c, Token first);
+static int _layout_attribute_since(Compiler c, Token first);
 
 static List _publish_aggregate_type(Compiler compiler, Symbol tag, Var name, List members, Token first);
 
@@ -1893,11 +1893,11 @@ return 1;
 }
 
 Var Array_getindex(Array, int);
-static int _packed_since(Compiler c, Token first){
-  if(c -> pack_include_unknown) return 1;  Token base = c -> tokenizer -> tokens, end = base + Bytes_len(c -> tokenizer -> tokens);  if(first < base || c -> token >= end) return 0;  int before = 0, count = Array_len(c -> pack_marks);  for(int high = count;  before < high; ){
-    int middle =(before + high) / 2;  if(Var_long(Var_convert(Array_getindex(c -> pack_marks, middle), 818062)) < first - base) before = middle + 1;  else high = middle;
+static int _layout_attribute_since(Compiler c, Token first){
+  Token base = c -> tokenizer -> tokens, end = base + Bytes_len(c -> tokenizer -> tokens);  if(first < base || c -> token >= end) return 0;  int before = 0, count = Array_len(c -> layout_marks);  for(int high = count;  before < high; ){
+    int middle =(before + high) / 2;  if(Var_long(Var_convert(Array_getindex(c -> layout_marks, middle), 818062)) < first - base) before = middle + 1;  else high = middle;
   }
-  return before % 2 ||(before < count && Var_long(Var_convert(Array_getindex(c -> pack_marks, before), 818062)) < c -> token - base);
+  return before % 2 ||(before < count && Var_long(Var_convert(Array_getindex(c -> layout_marks, before), 818062)) < c -> token - base);
 }
 
 Var Var_car(Var);
@@ -1905,7 +1905,7 @@ List Sym_bind_identity(Sym, List, List, List);
 List Sym_declare(Sym, List, List, List);
 void Sym_declare_field_order(Sym, Type, List);
 static List _publish_aggregate_type(Compiler compiler, Symbol tag, Var name, List members, Token first){
-  int packed = _packed_since(compiler, first);  List type = cons(Symbol_var(tag), cons(name, NULL));  List body = tag == 357722 ? members : cons(_135, List_append(members, NULL));  if(Var_is_row(name, 9, 7, 4) && Var_equal(Var_car(name), Symbol_var(4928588686))) Sym_bind_identity(compiler -> sym, cons(Symbol_var(tag), NULL), Var_list(name), cons(Symbol_var(tag), cons(List_var(body), NULL)));  else Sym_declare(compiler -> sym, NULL, type, tag == 357722 ? _137 : cons(Symbol_var(tag), cons(List_var(body), NULL)));  if(tag != 357722){
+  int packed = _layout_attribute_since(compiler, first);  List type = cons(Symbol_var(tag), cons(name, NULL));  List body = tag == 357722 ? members : cons(_135, List_append(members, NULL));  if(Var_is_row(name, 9, 7, 4) && Var_equal(Var_car(name), Symbol_var(4928588686))) Sym_bind_identity(compiler -> sym, cons(Symbol_var(tag), NULL), Var_list(name), cons(Symbol_var(tag), cons(List_var(body), NULL)));  else Sym_declare(compiler -> sym, NULL, type, tag == 357722 ? _137 : cons(Symbol_var(tag), cons(List_var(body), NULL)));  if(tag != 357722){
     Sym_declare_field_order(compiler -> sym, List_type(type), members);  if(packed) Sym_set(compiler -> sym, List_append(type, _140), _142);
   }
   else if(! packed && _enum_fits_int(type, members)) Sym_set(compiler -> sym, List_append(type, _145), _147);  return cons(Symbol_var(tag), cons(name, cons(List_var(body), NULL)));
@@ -2407,7 +2407,7 @@ static List _destructure_declaration(Compiler c, List type, List binding_type, i
 }
 
 static List _typedef(Compiler compiler, List context, int row){
-  Token first = compiler -> token;  List quals = _type_qualifiers(compiler);  List spec = List_append(quals, _type_specifier(compiler));  spec = Type_list(Sym_local_type(compiler -> sym, List_type(spec)));  List bindings = _declarator_list(compiler, spec, context, row);  if(_packed_since(compiler, first)){
+  Token first = compiler -> token;  List quals = _type_qualifiers(compiler);  List spec = List_append(quals, _type_specifier(compiler));  spec = Type_list(Sym_local_type(compiler -> sym, List_type(spec)));  List bindings = _declarator_list(compiler, spec, context, row);  if(_layout_attribute_since(compiler, first)){
     List declarator;  List _x2c_macro_object_13 = bindings;  List _x2c_macro_cursor_13 = _x2c_macro_object_13;  Var _x2c_macro_cursor_output_10;  while(List_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_10)){
       declarator = Var_list(_x2c_macro_cursor_output_10); {
         String name = binding_identity_spelling(Var_list(List_cadr(declarator)));  if(String_truth(name)) Sym_set(compiler -> sym, cons(String_var(name), _217), _219);

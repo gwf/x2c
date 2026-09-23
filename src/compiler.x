@@ -100,17 +100,8 @@ typedef struct Compiler {
      index to the groups open after it. */
   List arms;
   Map arm_stacks;
-  /* Token indices where C starts or stops packing: each directive that
-     changes whether packing is on, and a pair at each layout attribute. */
-  Array pack_marks;
-  /* Raw collection carries pack directives across split header segments.
-     A shadow parser conservatively treats inherited or uncertain packing as
-     unavailable native layout. */
-  int pack_include_unknown;
-  int pack_state, pack_unknown;
-  List pack_saved;
-  /* Include encounters in the current unit's logical pack stream. */
-  Map pack_seen;
+  /* Token indices around attributes that can change native record layout. */
+  Array layout_marks;
   /* The cursor after a governed statement took the directives before it,
      which the following item must not read again. */
   Token directives_taken;
@@ -383,7 +374,6 @@ static Compiler _new(Compiler owner) {
       _.source_texts = owner.source_texts;
       _.unit_script = owner.unit_script;
       _.include_dirs = owner.include_dirs;
-      _.pack_include_unknown = owner.pack_include_unknown;
     }
     else {
       _.package_roots = {};
@@ -622,72 +612,39 @@ static Symbol _never_active_arm(String s) {
     ? <rest> : 0;
 }
 
-/* Follows the `#pragma pack` directive `text` over the `saved` states,
-   newest first, and returns whether packing is on after it, given `packed`
-   before it. `push` saves the state under an optional label, `pop` restores
-   the newest state or the one saved under its label, and a number or `()`
-   sets the state. An explicit alignment counts as packing even where it
-   matches the natural one. */
-static int _pack_after(String text, List *saved, int packed) {
+int _pack_directive(String text) {
   String directive = preproc_directive(text);
-  if (!directive.startswith("pragma")) return packed;
+  if (!directive.startswith("pragma")) return 0;
   Tokenizer scanned = Tokenizer.new(directive);
   scanned.scan();
-  Array words = [];
-  int value = -1;
-  for (Token t = _skip_forward(scanned.tokens); t.type != <eof>;
-       t = _skip_forward(t + 1)) {
-    if (t.type == <lit-int>) value = t.text != "0";
-    else if (t.type == <ident>) words.push(t.text);
-  }
-  match (words.list_free()) {
-    case %("pragma" "pack" "push" *label):
-      *saved = cons(%($packed @label), *saved);
-    case %("pragma" "pack" "pop" *label):
-      for (List rest = *saved; rest; rest = rest.cdr()) {
-        List entry = rest.car();
-        if (label && !entry.cdr().equal(label)) continue;
-        packed = entry.car().truth();
-        *saved = rest.cdr();
-        break;
-      }
-    case %("pragma" "pack"): if (value < 0) packed = 0;
-    default: return packed;
-  }
-  return value < 0 ? packed : value;
-}
-
-static int _pack_directive(String text) =>
-  preproc_directive(text).startswith("pragma pack");
-
-/** Follows a raw file's packing directives across included files. A
-    conditional directive has an unknown selected arm until preprocessing;
-    the native layout of subsequent records cannot be proved from it. */
-void Compiler.note_pack_directive(Compiler c, String text, int conditional) {
-  if (!_pack_directive(text)) return;
-  if (conditional) c.pack_unknown = 1;
-  else c.pack_state = _pack_after(text, &c.pack_saved, c.pack_state);
+  Token pragma = _skip_forward(scanned.tokens);
+  Token name = _skip_forward(pragma + 1);
+  return pragma.text == "pragma" &&
+         name.type == <ident> && name.text == "pack";
 }
 
 /* Reports whether the attribute list the group `open` holds names an
    attribute that can change a struct's layout, spelled with or without its
    surrounding underscores. Identifiers inside an attribute's own arguments
    are not names. */
-static int _layout_attribute(Token open) {
+static int _layout_attribute(Token open, int *packed) {
   Token close = open.group_close();
-  int depth = 0;
+  int depth = 0, layout = 0;
   for (Token t = open; t < close; t++) {
     depth += t.type.group_step();
     if (depth != 1 || t.type != <ident>) continue;
     String word = t.text.strip("_");
-    if (word == "packed" || word == "aligned" || word == "mode" ||
-        word == "vector_size")
-      return 1;
+    if (word == "packed") {
+      layout = 1;
+      *packed = 1;
+    }
+    else if (word == "aligned" || word == "mode" ||
+             word == "vector_size") layout = 1;
   }
-  return 0;
+  return layout;
 }
 
-/* Records a pair of packing marks at the attribute starting at token
+/* Records a pair of layout marks at the attribute starting at token
    `index` when it can change a struct's layout. A source attribute is
    `__attribute__ ((...))`; the preprocessor turns one into
    `__x2c_attribute__ "(...)"` (see Toolchain.preprocess), whose two tokens
@@ -696,13 +653,13 @@ static int _layout_attribute(Token open) {
 static size_t _note_attribute(Compiler c, size_t index) {
   Token base = c.tokenizer.tokens, marker = base + index;
   Token last = _skip_forward(marker + 1);
-  int layout = 0;
+  int layout = 0, packed = 0;
   if (marker.text == "__attribute__") {
     if (last.type != <(>) return index;
     Token inner = _skip_forward(last + 1);
     last = last.group_close();
     if (last.type == <eof>) return index;
-    layout = inner.type == <(> && _layout_attribute(inner);
+    layout = inner.type == <(> && _layout_attribute(inner, &packed);
   }
   else {
     if (last.type != <lit-char*>) return index;
@@ -710,11 +667,13 @@ static size_t _note_attribute(Compiler c, size_t index) {
     Tokenizer words = Tokenizer.new(String.parse(last.text));
     words.scan();
     Token open = _skip_forward(words.tokens);
-    layout = open.type == <(> && _layout_attribute(open);
+    layout = open.type == <(> && _layout_attribute(open, &packed);
   }
+  if (packed)
+    c.report_error(<parse>, "packed attributes are unsupported", marker, NULL);
   if (layout) {
-    c.pack_marks.push((long) index);
-    c.pack_marks.push((long) index + 1);
+    c.layout_marks.push((long) index);
+    c.layout_marks.push((long) index + 1);
   }
   return last - base;
 }
@@ -736,10 +695,11 @@ static Token _macro_directive(String content, int *undefined) {
 /* Tracks in `layout` the macros whose body holds an attribute that can
    change a struct's layout, written out or through another such macro. A
    use of one is marked as the attribute it expands to would be. As with
-   packing, a macro that any arm defines with such an attribute stays in
+   layout, a macro that any arm defines with such an attribute stays in
    `layout`; only an `#undef` or definition outside every conditional group,
    `conditional` false, removes it. */
-static void _note_layout_macro(String content, Map layout, int conditional) {
+static void _note_layout_macro(
+  Compiler c, String content, Map layout, int conditional, Token directive) {
   int undefined;
   Token name = _macro_directive(content, &undefined);
   if (!name) return;
@@ -753,48 +713,18 @@ static void _note_layout_macro(String content, Map layout, int conditional) {
     if (token.text == "__attribute__") {
       Token open = _skip_forward(token + 1);
       Token inner = open.type == <(> ? _skip_forward(open + 1) : open;
-      attribute = inner.type == <(> && _layout_attribute(inner);
+      int packed = 0;
+      attribute = inner.type == <(> &&
+        _layout_attribute(inner, &packed);
+      if (packed)
+        c.report_error(
+          <parse>, "packed attributes are unsupported", directive, NULL);
     }
     if (attribute || layout.contains(token.text)) {
       layout[name.text] = 1;
       return;
     }
   }
-}
-
-/* Counts each conditional group's reachable arms, in opening order. An arm
-   is unreachable where `_never_active_arm` hides it. */
-static Array _reachable_arm_counts(Tokenizer tokenizer) {
-  Array counts = [], groups = $auto([]);
-  for (Token token = tokenizer.tokens; token.type != <eof>; token++) {
-    if (token.type != <preproc>) continue;
-    Symbol kind = preproc_conditional_kind(token.text);
-    if (kind == <open>) {
-      Symbol never = _never_active_arm(token.text);
-      groups.push(%(${counts.len()} ${never != <rest>}));
-      counts.push(never != <first>);
-    }
-    else if (kind == <branch> && groups.len()) {
-      Var (group, later_reachable) = groups[-1];
-      counts[group] = counts[group].integer() + later_reachable.integer();
-    }
-    else if (kind == <close> && groups.len()) groups.take_last();
-  }
-  return counts;
-}
-
-/* Reports whether reading `k` follows the current arm of every open group.
-   A group is `(count seen current)`: its reachable arm count, the reachable
-   arms entered so far, and whether the current one is reachable. Reading
-   `k` takes each group's reachable arm `k`, or its last one when it has
-   fewer. */
-static int _reading_follows(Array groups, int k) {
-  foreach (List group, groups) {
-    Var (count, seen, current) = group;
-    int arm = k < count.integer() ? k : count.integer() - 1;
-    if (!current.integer() || seen.integer() - 1 != arm) return 0;
-  }
-  return 1;
 }
 
 /* Records the open conditional groups after each conditional directive as
@@ -805,27 +735,14 @@ static int _reading_follows(Array groups, int k) {
    state is 2 while its arm is hidden, 1 when the arms after its first
    `#else` will be, and 0 otherwise.
 
-   The same pass records packing marks by token index, because the parser
-   can read one directive more than once. Packing is followed along several
-   consistent readings of the groups: reading `k` takes each group's
-   reachable arm `k`, or its last one. A conditional pack directive also
-   marks later layout unknown, because independent groups and groups without
-   `#else` can select paths those readings do not represent. A layout
-   attribute is marked where it is written, and where a macro whose body
-   holds one is used. */
+   The same pass marks layout attributes where written or where a macro
+   expands to one. */
 static void _scan_conditionals(Compiler c) {
-  Array counts = _reachable_arm_counts(c.tokenizer);
-  Array stack = $auto([]), groups = $auto([]);
-  Array packed = $auto([]), saved = $auto([]);
+  Array stack = $auto([]);
   Map layout = $auto({});
-  int hidden = 0, serial = 0, readings = 1, uncertain_pack = 0;
-  foreach (int count, counts) if (count > readings) readings = count;
-  for (int k = 0; k < readings; k++) {
-    packed.push(0);
-    saved.push(%());
-  }
+  int hidden = 0, serial = 0;
   c.arm_stacks = {};
-  c.pack_marks = [];
+  c.layout_marks = [];
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
     Token token = &((struct Token *) c.tokenizer.tokens)[i];
     if (token.type == <eof>) break;
@@ -840,49 +757,28 @@ static void _scan_conditionals(Compiler c) {
                 token.text == "__x2c_attribute__"))
         i = _note_attribute(c, i);
       else if (token.type == <ident> && layout.contains(token.text)) {
-        c.pack_marks.push((long) i);
-        c.pack_marks.push((long) i + 1);
+        c.layout_marks.push((long) i);
+        c.layout_marks.push((long) i + 1);
       }
       continue;
     }
     Symbol kind = preproc_conditional_kind(token.text);
     int conditional = kind == <open> || (kind && stack.len());
-    int before = uncertain_pack || packed.contains(1);
+    if (_pack_directive(token.text))
+      c.report_error(<parse>, "#pragma pack is unsupported", token, NULL);
     if (kind == <open>) {
       Symbol never = _never_active_arm(token.text);
       stack.push(%(${++serial} 0 ${never == <first> ? 2 : never == <rest>}));
-      int reachable = never != <first>;
-      groups.push(%(${counts[serial - 1]} $reachable $reachable));
     }
     else if (kind == <branch> && stack.len()) {
       Var (id, arm, state) = stack[-1];
       stack[-1] = %($id ${arm.integer() + 1} ${state.integer() == 1 ? 2 : 0});
-      Var (count, seen) = groups[-1];
-      int reachable = state.integer() != 1;
-      groups[-1] = %($count ${seen.integer() + reachable} $reachable);
     }
-    else if (kind == <close> && stack.len()) {
-      stack.take_last();
-      groups.take_last();
-    }
+    else if (kind == <close> && stack.len()) stack.take_last();
     else {
-      if (!hidden) _note_layout_macro(token.text, layout, stack.len());
-      /* Raw conditional arms are correlated only within their own group.
-         Independent #if groups can select different arms, including no
-         arm when there is no #else. A pack directive in such a group makes
-         later natural-layout inference unsafe. Preprocessed input has the
-         host's exact selected directive stream and stays precise. */
-      if (!hidden && stack.len() && _pack_directive(token.text))
-        uncertain_pack = 1;
-      for (int k = 0; k < packed.len(); k++) {
-        if (!_reading_follows(groups, k)) continue;
-        List states = saved[k];
-        packed[k] = _pack_after(token.text, &states, packed[k]);
-        saved[k] = states;
-      }
+      if (!hidden)
+        _note_layout_macro(c, token.text, layout, stack.len(), token);
     }
-    if ((uncertain_pack || packed.contains(1)) != before)
-      c.pack_marks.push((long) i);
     if (!conditional) continue;
     c.arm_stacks[(long) i] = stack.list();
     hidden = 0;

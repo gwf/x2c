@@ -1,15 +1,4 @@
-unittest/compiler-fixtures/meta-system-header-packed.x:8:1: macro: this function cannot run at compile time
-  meta int header_pragma_value(void) {
-  ^^^^
-  note: reason: a compile-time struct with no host layout
-
-unittest/compiler-fixtures/meta-system-header-packed.x:13:1: macro: this function cannot run at compile time
-  meta int header_packed_value(void) {
-  ^^^^
-  note: reason: a compile-time struct with no host layout
-
-unittest/compiler-fixtures/meta-system-header-packed.x:18:1: macro: this function cannot run at compile time
-  meta int header_aligned_value(void) {
-  ^^^^
-  note: reason: a compile-time struct with no host layout
+unittest/compiler-fixtures/meta-system-header-packed.x:2:1: parse: #pragma pack is unsupported
+  #include "meta-system-header-packed/packed.h"
+  ^^^^^^^^^^^^^^^^^^^^^
 

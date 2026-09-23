@@ -684,21 +684,13 @@ These C shapes are not available at compile time:
 - Structs with bitfields, array members, anonymous members, or an enum field
   whose initializers do not all have `int`-range types. A meta function that
   uses one reports `a compile-time struct with no host layout`.
-- Packed structs. A meta function that uses one reports `a compile-time struct
-  with no host layout`. The compiler detects a struct defined while `#pragma
-  pack` is in effect, and a `packed`, `aligned`, `mode` or `vector_size`
-  attribute in the struct's own definition, such as a header struct followed by
-  `__attribute__((packed))`. A macro whose body holds such an attribute counts
-  where it is used, so `struct S { ... } PACKED;` with `#define PACKED
-  __attribute__((packed))` is packed. A macro with no layout attribute leaves
-  the struct its natural layout. Default collection carries packing across
-  included files. A pack directive or include under a raw conditional, or a
-  repeated include that C may skip with `#pragma once` or an include guard,
-  leaves subsequent layout unavailable if it could change the active pack
-  state. A naturally laid-out struct may then be declined. `--cpp-symbols` and
-  `--system-headers` use the preprocessor's selected directive stream and can
-  prove the layout when its push and pop balance. A field whose typedef has a
-  layout attribute is also declined.
+- Packing is unsupported. Any `#pragma pack` directive or `packed` attribute,
+  including one in an included header or macro definition, is a compile error.
+  This also applies with `--cpp-symbols` and `--system-headers`. Other layout
+  attributes, including `aligned`, `mode` and `vector_size`, still leave a
+  struct without a provable compile-time layout. A meta function that uses
+  such a struct reports `a compile-time struct with no host layout`. A field
+  whose typedef has a layout attribute is also declined.
 - Structs with field alignment the compiler cannot prove, such as a field
   declared `_Alignas`, have no compile-time layout. Do not pass one to a
   native function from compile-time code.
@@ -757,7 +749,7 @@ on a listed type works. The operation inventory below further limits calls.
 | Pointers to locals | `int *p = &n;`, copying that pointer, and passing it to another meta function or a native function work. A local whose address is taken lives in native bytes, and the pointer is its real address. | `*p` and `p[i]` read, and `*p = value` and `p[i] = value` write, the bytes as C does. Addresses such as `&a[i]` work. General pointer arithmetic is not supported. |
 | Structs | Named, inline and nested locals; initialization, assignment, by-value arguments and returns, with C copy behavior. | Fields and addresses refer to native bytes in C layout. Assignment keeps existing field addresses; storage ends when the function returns. See [C objects during compilation](#c-objects-during-compilation). |
 | Native functions | The functions in `lib/cmath.x` and `lib/clibc.x`, the iterator producers marked `meta` in `lib/iter.x`, `lib/map.x` and `lib/dispatch.x`, and the witnesses of `meta protocol` adoptions, all of which the compiler links. | Explicit dollar evaluation and meta bodies can call them, including through output pointers. Ordinary calls are not folded. See [Native C functions](#native-c-functions). |
-| System-header structs | `--system-headers` supplies the header declarations. A local `struct timespec` can be passed to `timespec_get`. | Unions, packed structs and structs with bitfields, array members or anonymous members are not available. |
+| System-header structs | `--system-headers` supplies the header declarations. A local `struct timespec` can be passed to `timespec_get`. | Packing is a compile error. Unions and structs with bitfields, array members or anonymous members are not available. |
 | `File`, buffers and other resource types | No general compile-time constructor/operation surface is installed for these types. A declaration or opaque type name alone does not make the resource usable. | For example, `File.open` has no binding. Use the compiler's explicit text-embedding operation for source-dependent text. |
 
 Collections hold values, not arbitrary native memory. Nested collections keep
@@ -925,7 +917,7 @@ means feasible in principle, not scheduled or promised support.
 | `goto`, switch fallthrough | **Gap:** control-flow lowering that preserves the transfer. |
 | Postfix expression values, compound updates to indexed/dereferenced places | **Gap:** preserve the old result and evaluate the destination once. |
 | Computed native-array dimensions, general multidimensional arrays and missing element conversions | **Gap:** extend the represented array shape and typed operations. |
-| Structs with bitfields, array members, anonymous members or layout attributes; arrays of structs | **Gap:** compute a layout for these shapes. Other structs use native bytes in C layout. |
+| Structs with bitfields, array members, anonymous members or layout attributes other than `packed`; arrays of structs | **Gap:** compute a layout for these shapes. Packing is unsupported and causes a compile error. Other structs use native bytes in C layout. |
 | Unions, pointer arithmetic and addresses of array elements | **Gap:** model overlapping storage and arrays in native bytes. A pointer to an actual future runtime object cannot be dereferenced during compilation; that is a **phase boundary**. |
 | `defer` | **Gap** for deferred execution in general. Explicitly freeing evaluator-owned objects conflicts with the **current ownership model**; it is not an argument that all deferred actions are impossible. |
 | `try`, `catch`, `finally`, `raise` in a meta body | **Gap:** exception transfer and cleanup need compile-time modeling. Evaluation failures can still become compiler diagnostics. |
