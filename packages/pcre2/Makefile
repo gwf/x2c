@@ -16,7 +16,7 @@ lisp-example: builds/inline-lisp
 run: builds/parse-log builds/request-report builds/gallery-imports
 	./builds/parse-log
 	./builds/request-report
-	python3 ../../tools/check-gallery-examples.py
+	$(X2C) script ../../tools/check-gallery-examples
 	./builds/gallery-imports > builds/gallery-imports.stdout
 	diff -u ../../examples/expected/power-imports.stdout builds/gallery-imports.stdout
 
