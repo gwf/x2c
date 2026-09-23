@@ -904,6 +904,13 @@ static void _warn_unnecessary_cast(
     origin, %("remove the cast"));
 }
 
+/* A template typedef is named by the binding each expansion supplies, so a
+   cast to it is typed where the template expands. */
+static int _casts_to_template_typedef(Compiler c, List declaration) {
+  List base = declaration.cadr();
+  return c.macro_holes && !!base.match(%(* (binding ? ?)));
+}
+
 static List _parse_cast(Compiler c) {
   Token head = c.token;
   if (_parenthesized_cast_operand_follows(c) && c.test(<(>)) {
@@ -912,7 +919,9 @@ static List _parse_cast(Compiler c) {
       decl = %(decl @{decl.cdr()});
       c.expect(<)>);
       List expr = _parse_cast(c);
-      if (expr.cadr() === %(<macro-expr>)) type = %(<macro-expr>);
+      if (expr.cadr() === %(<macro-expr>) ||
+          _casts_to_template_typedef(c, decl))
+        type = %(<macro-expr>);
       _warn_unnecessary_cast(c, expr, type, head);
       return %(expr $type (cast $decl $expr));
     }
@@ -1028,8 +1037,6 @@ static int _expression_requires_resolution(Compiler compiler, Var value) {
           return 1;
       }
       case %(ident ?): return 1;
-      // A template typedef identity marks a type that is not yet bound.
-      case %(decl (* (binding ? ?)) *): return 1;
     }
     foreach (Var child, syntax)
       if (child is <list>) pending.push(child);
@@ -2130,7 +2137,8 @@ static List _resolve_content(
       operand = c.resolve_expression(operand, origin);
       declaration = c.bind_syntax(declaration, AST_BLOCK, c.return_type);
       List typed = %(declare @{declaration.cdr()});
-      Type type = operand.cadr() === %(<macro-expr>)
+      Type type = operand.cadr() === %(<macro-expr>) ||
+                  _casts_to_template_typedef(c, declaration)
                 ? %(<macro-expr>) : typed.type_from_ast();
       return %(expr $type (cast $declaration $operand));
     }

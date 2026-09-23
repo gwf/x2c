@@ -1009,7 +1009,7 @@ void Compiler.bind_template_local(
   Var local = c.macro_holes && key ? c.macro_definition_locals()[key] : void;
   if (c.macro_holes && local is <string> &&
       (!context || context === %(typedef))) {
-    if (context) {
+    if (context === %(typedef)) {
       c.sym.set(%($local), %(typedef $local));
       c.sym.set(%(typedef $local), %($key));
     }
