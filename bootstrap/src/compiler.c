@@ -224,7 +224,15 @@ static Symbol _var_tag_for_type_helper(Sym sym, Type type, Type origin, Type * r
 
 static size_t _meta_align_up(size_t offset, size_t alignment);
 
-static List _meta_type_layout(Sym sym, Type type, Map cache, size_t * size, size_t * alignment);
+static List _meta_var_layout(Type declared);
+
+static List _meta_scalar_layout(Type declared, Type exact, NativeScalarAccess scalar, Symbol tag);
+
+static List _meta_pointer_layout(Type declared, Symbol tag);
+
+static List _meta_record_layout(Sym sym, Type record, Map cache);
+
+static List _meta_type_layout(Sym sym, Type type, Map cache);
 
 typedef struct _x2c_defer_env_0{
   const void * _x2c_defer_capture_0;
@@ -4448,22 +4456,20 @@ static size_t _meta_align_up(size_t offset, size_t alignment){
   return(offset + alignment - 1) / alignment * alignment;
 }
 
-NativeScalarAccess native_scalar_access(List);
-int Type_is_pointer(Type);
-static List _meta_type_layout(Sym sym, Type type, Map cache, size_t * size, size_t * alignment){
-  Type declared = Type_declared(type);  if(Sym_is_var_type(sym, declared)){
-    * size = sizeof(Var);  * alignment = _Alignof(Var);  return cons(_417, cons(List_var(declared), cons(Var_box_ulong(* size), cons(Var_box_ulong(* alignment), NULL))));
-  }
-  Symbol value_tag = Sym_var_tag_for_type(sym, declared, NULL);  Type native_type = Sym_normalize_declared_type(sym, declared);  Type exact_scalar = Type_scalar(native_type);  NativeScalarAccess scalar = List_truth(Type_list(exact_scalar)) ? native_scalar_access(Type_list(exact_scalar)) : NULL;  if(scalar){
-    if(value_tag != scalar -> tag && !(value_tag == 1328354264 && scalar -> tag == 44858254)) return NULL;  * size = scalar -> size;  * alignment = scalar -> alignment;  return cons(_661, cons(List_var(declared), cons(Var_box_ulong(* size), cons(Var_box_ulong(* alignment), cons(List_var(exact_scalar), cons(Symbol_var(value_tag), NULL))))));
-  }
-  type = Sym_resolve_key(sym, declared);  if(List_truth(Type_list(type)) && Type_is_pointer(type)){
-    * size = * alignment = sizeof(void *);  if(! value_tag) value_tag = 3683441;  return cons(_662, cons(List_var(declared), cons(Var_box_ulong(* size), cons(Var_box_ulong(* alignment), cons(Symbol_var(value_tag), NULL)))));
-  }
-  Var cached;  if(Map_try_get(cache, List_var(type), & cached)){
-    List layout = Var_list(cached);  * size = Var_ulong(Var_convert(List_getindex(layout, 2), 44858254));  * alignment = Var_ulong(Var_convert(List_getindex(layout, 3), 44858254));  return layout;
-  }
-  if(! List_truth(Type_list(type)) || ! Var_equal(List_car(Type_list(type)), Symbol_var(1318234344))) return NULL;  List order = Sym_field_order(sym, type);  if(! List_truth(order)) return NULL;  Array fields = Array_new(); {
+static List _meta_var_layout(Type declared){
+  size_t size = sizeof(Var), alignment = _Alignof(Var);  return cons(_417, cons(List_var(declared), cons(Var_box_ulong(size), cons(Var_box_ulong(alignment), NULL))));
+}
+
+static List _meta_scalar_layout(Type declared, Type exact, NativeScalarAccess scalar, Symbol tag){
+  if(tag != scalar -> tag && !(tag == 1328354264 && scalar -> tag == 44858254)) return NULL;  return cons(_661, cons(List_var(declared), cons(Var_box_ulong(scalar -> size), cons(Var_box_ulong(scalar -> alignment), cons(List_var(exact), cons(Symbol_var(tag), NULL))))));
+}
+
+static List _meta_pointer_layout(Type declared, Symbol tag){
+  size_t size = sizeof(void *);  if(! tag) tag = 3683441;  return cons(_662, cons(List_var(declared), cons(Var_box_ulong(size), cons(Var_box_ulong(size), cons(Symbol_var(tag), NULL)))));
+}
+
+static List _meta_record_layout(Sym sym, Type record, Map cache){
+  Var cached;  if(Map_try_get(cache, List_var(record), & cached)) return Var_list(cached);  List order = Sym_field_order(sym, record);  if(! List_truth(order)) return NULL;  Array fields = Array_new(); {
   _x2c_defer_env_14 _x2c_defer_env_35 = {._x2c_defer_capture_28 =(const void *) & fields};
   X2CCleanup _x2c_defer_record_17 = {
     .fn = _x2c_defer_cleanup_14,
@@ -4474,27 +4480,21 @@ static List _meta_type_layout(Sym sym, Type type, Map cache, size_t * size, size
     size_t offset = 0, record_alignment = 1; {
       List row;  List _x2c_macro_object_61 = List_cdr(order);  List _x2c_macro_cursor_61 = _x2c_macro_object_61;  Var _x2c_macro_cursor_output_64;  while(List_try_next(_x2c_macro_object_61, & _x2c_macro_cursor_61, & _x2c_macro_cursor_output_64)){
         row = Var_list(_x2c_macro_cursor_output_64); {
-          String name = Var_string(List_car(row));  Type member = Var_type(List_cadr(row));  if(! String_truth(name)){
+          List _x2c_destructure_18 = row;  String name = Var_string(List_getindex(_x2c_destructure_18, 0));  Type member = Var_type(List_getindex(_x2c_destructure_18, 1));  List layout = String_truth(name) ? _meta_type_layout(sym, member, cache) : NULL;  if(! List_truth(layout)){
             List _x2c_return_value_3 = NULL; {
               x2c_cleanup_leave(& _x2c_defer_record_17);  return _x2c_return_value_3;
             }
 
           }
-          size_t member_size = 0, member_alignment = 0;  List layout = _meta_type_layout(sym, member, cache, & member_size, & member_alignment);  if(! List_truth(layout)){
-            List _x2c_return_value_4 = NULL; {
-              x2c_cleanup_leave(& _x2c_defer_record_17);  return _x2c_return_value_4;
-            }
-
-          }
-          offset = _meta_align_up(offset, member_alignment);  Array_push(fields, List_var(cons(_663, cons(String_var(name), cons(List_var(member), cons(Var_box_ulong(offset), cons(List_var(layout), NULL)))))));  offset += member_size;  if(member_alignment > record_alignment) record_alignment = member_alignment;
+          List _x2c_destructure_19 = List_cddr(layout);  size_t size = Var_ulong(Var_convert(List_getindex(_x2c_destructure_19, 0), 44858254));  size_t alignment = Var_ulong(Var_convert(List_getindex(_x2c_destructure_19, 1), 44858254));  offset = _meta_align_up(offset, alignment);  Array_push(fields, List_var(cons(_663, cons(String_var(name), cons(List_var(member), cons(Var_box_ulong(offset), cons(List_var(layout), NULL)))))));  offset += size;  if(alignment > record_alignment) record_alignment = alignment;
         }
 
       }
 
     }
-    size_t record_size = _meta_align_up(offset, record_alignment);  * size = record_size;  * alignment = record_alignment;  List result = cons(_664, cons(List_var(type), cons(Var_box_ulong(record_size), cons(Var_box_ulong(record_alignment), List_append(Array_list(fields), NULL)))));  Map_setindex(cache, List_var(type), List_var(result)); {
-      List _x2c_return_value_5 = result; {
-        x2c_cleanup_leave(& _x2c_defer_record_17);  return _x2c_return_value_5;
+    size_t record_size = _meta_align_up(offset, record_alignment);  List result = cons(_664, cons(List_var(record), cons(Var_box_ulong(record_size), cons(Var_box_ulong(record_alignment), List_append(Array_list(fields), NULL)))));  Map_setindex(cache, List_var(record), List_var(result)); {
+      List _x2c_return_value_4 = result; {
+        x2c_cleanup_leave(& _x2c_defer_record_17);  return _x2c_return_value_4;
       }
 
     }
@@ -4504,8 +4504,14 @@ static List _meta_type_layout(Sym sym, Type type, Map cache, size_t * size, size
 }
 }
 
+NativeScalarAccess native_scalar_access(List);
+int Type_is_pointer(Type);
+static List _meta_type_layout(Sym sym, Type type, Map cache){
+  Type declared = Type_declared(type);  if(Sym_is_var_type(sym, declared)) return _meta_var_layout(declared);  Symbol tag = Sym_var_tag_for_type(sym, declared, NULL);  Type exact = Type_scalar(Sym_normalize_declared_type(sym, declared));  NativeScalarAccess scalar = List_truth(Type_list(exact)) ? native_scalar_access(Type_list(exact)) : NULL;  if(scalar) return _meta_scalar_layout(declared, exact, scalar, tag);  type = Sym_resolve_key(sym, declared);  if(List_truth(Type_list(type)) && Type_is_pointer(type)) return _meta_pointer_layout(declared, tag);  if(! List_truth(Type_list(type)) || ! Var_equal(List_car(Type_list(type)), Symbol_var(1318234344))) return NULL;  return _meta_record_layout(sym, type, cache);
+}
+
 List Compiler_meta_type_layout(Compiler c, Type type){
-  if(! _init_guard_) _file_init_();  size_t size = 0, alignment = 0;  return _meta_type_layout(c -> sym, type, c -> meta_layouts, & size, & alignment);
+  if(! _init_guard_) _file_init_();  return _meta_type_layout(c -> sym, type, c -> meta_layouts);
 }
 
 void Sym_declare_delegate_field(Sym sym, Type aggregate, String name){
