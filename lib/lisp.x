@@ -2169,13 +2169,13 @@ static Var _call_lambda_slots(
      ends. */
   Scope *caller_owner = lisp.automatic_owner;
   Scope *caller_result_owner = lisp.result_owner;
-  if (lambda.source_function) {
-    lisp.result_owner = caller_owner;
-    lisp.automatic_owner = &frame;
-  }
   defer if (lambda.source_function) {
     lisp.automatic_owner = caller_owner;
     lisp.result_owner = caller_result_owner;
+  }
+  if (lambda.source_function) {
+    lisp.result_owner = caller_owner;
+    lisp.automatic_owner = &frame;
   }
   /* A free name the lambda did not capture is a global. The environment the
      call was written in is not a parameter here, so a caller's binding

@@ -400,6 +400,13 @@ value leaves, and its note gives the line that opened the region:
 - handed to a function in the same unit, or to a runtime operation such as
   `Array.push`, that stores it in one of those places.
 
+A function's own locals and parameters form a region that ends when the
+function returns. The address of one, or a pointer that holds it, is
+reported when it is returned, stored into a static, or stored through a
+parameter, through an unknown pointer, or into an object that outlives the
+function. A `meta` function with such an escape is rejected instead; see
+[Meta Functions](meta-functions.md).
+
 Two more warnings come from the same pass. `unbalanced` reports a region with
 no matching release in the block that opened it, a shape the other warnings
 cannot track. `after-free` reports a local read after `Scope.free` or

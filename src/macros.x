@@ -15,6 +15,7 @@ $(import "../src/ast-rewrite.xmacro")
 #include "comptime.x"
 #include "meta.x"
 #include "parse.x"
+#include "regions.x"
 #include "statements.x"
 #include "utils.x"
 #include <limits.h>
@@ -1678,12 +1679,14 @@ void Compiler.install_native_meta_function(
 /** Installs a `meta` function in the macro session under its own name.
     A function whose two forms agree is foldable. One that reaches a compiler
     operation has no runtime form, and neither do its callers. Only
-    explicitly advertised file-scope state can be lowered. Lowering failures
-    are reported at the marker.
+    explicitly advertised file-scope state can be lowered. A body that lets
+    its own storage outlive a call is rejected where the storage leaves;
+    lowering failures are reported at the marker.
 */
 void Compiler.install_meta_function(Compiler c, List fn, Token marker) {
   if (!c.collect_protocols) c.run_declaration_effects();
   _ensure_lisp(c);
+  c.check_meta_regions(fn);
   int installed = 0;
   /* Installing evaluates the lowered body's definitions, and a session
      refuses to replace a name an ancestor binds. That reaches the developer

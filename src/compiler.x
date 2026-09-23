@@ -141,8 +141,10 @@ typedef struct Compiler {
      functions that reach file-scope state, whose two forms disagree; it is
      shared with an import's compiler, which installs into the same session.
      `meta_comptime` names the ones that reach a `Meta` operation and so have
-     no runtime form at all: no unit emits one and no call to one folds. */
-  Map meta_folds, meta_impure, meta_comptime;
+     no runtime form at all: no unit emits one and no call to one folds.
+     `meta_regions` maps each installed one to its region summary, which
+     the lifetime check of a later `meta` function reads at its calls. */
+  Map meta_folds, meta_impure, meta_comptime, meta_regions;
   /* File-scope values and types explicitly advertised to the compile-time
      evaluator. `meta_values` is keyed by binding id and stores
      `(MUTABLE LAYOUT)` for the object. */
@@ -298,6 +300,7 @@ void Compiler.borrow_unit_semantics(Compiler compiler, Compiler owner) {
   compiler.proto_cache = owner.proto_cache;
   compiler.meta_impure = owner.meta_impure;
   compiler.meta_comptime = owner.meta_comptime;
+  compiler.meta_regions = owner.meta_regions;
   compiler.meta_values = owner.meta_values;
   compiler.meta_layouts = owner.meta_layouts;
   compiler.native_meta = owner.native_meta;
@@ -344,6 +347,7 @@ static Compiler _new(Compiler owner) {
     _.meta_folds = {};
     _.meta_impure = {};
     _.meta_comptime = {};
+    _.meta_regions = {};
     _.meta_values = {};
     _.meta_layouts = {};
     _.native_meta = {};
@@ -2004,6 +2008,7 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
   c.meta_folds = {};
   c.meta_impure = {};
   c.meta_comptime = {};
+  c.meta_regions = {};
   c.meta_values = {};
   c.meta_layouts = {};
   c.native_meta = {};

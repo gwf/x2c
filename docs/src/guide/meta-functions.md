@@ -450,10 +450,47 @@ the `--system-headers` option, so that the compiler sees its declaration.
 Without it, the definition reports that a struct or union has no
 compile-time representation.
 
-A pointer into a local whose function has returned is dangling, as in C;
-using it is undefined behavior. A struct inside a `meta static` value, or in
-a value that persists across REPL submissions, lives in storage the
-compile-time session owns.
+A compile-time call frees its locals and parameters when it returns. A
+`meta` function whose body lets the address of one outlive the call is
+rejected where it is defined, with an error at the statement where the
+address leaves: a `return`, a store into a `meta static`, or a store through
+a parameter or through a pointer whose target the compiler cannot identify.
+A local array counts as the address of its first element. The check follows
+the address through pointer locals, either arm of `?:`, and the `meta`
+functions defined before the caller:
+
+<!-- ignore: the definition of leak is rejected on purpose -->
+```x2c,ignore
+struct Box { int value; };
+
+meta static int *field_of(struct Box *box) { return &box->value; }
+
+meta static int *leak(int seed) {
+  struct Box box = { .value = seed };
+  return field_of(&box);
+}
+```
+
+`field_of` is accepted, because the object it borrows from belongs to its
+caller. `leak` is rejected at its `return`, because `field_of` hands back an
+address inside `box`.
+
+The check is the region check of ordinary code, and every finding it makes
+in a `meta` body is an error, including a value from a `Scope` region that
+outlives the region. In ordinary code the same findings are warnings; see
+[The Region Model](regions.md).
+
+The check does not yet follow every path an address can take. These still
+translate, and using the address after the call returns is undefined
+behavior, as in C:
+
+- an address stored in a field of a local struct that is then returned by
+  value or assigned to a `meta static` struct;
+- an address computed with pointer arithmetic or a cast;
+- an address passed to a native function that keeps it.
+
+A struct inside a `meta static` value, or in a value that persists across
+REPL submissions, lives in storage the compile-time session owns.
 
 A struct result stays inside compile-time code. Inserting one into the
 program with `$pair(3)` is diagnosed, because the compiler cannot write a
