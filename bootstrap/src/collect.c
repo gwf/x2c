@@ -755,9 +755,10 @@ if(! crosses) Array_push(dropped, key);
 Array_free(dropped);
 }
 
+String home_portable_path(String);
 Iter Map_keys(Map, Iter);
 static void _publish_unit_statics(Map statics, Map overlay, String path){
-  List owner = cons(String_var(path), NULL); {
+  List owner = cons(String_var(home_portable_path(path)), NULL); {
     Var key;  Iter _x2c_macro_iterator_7 = Map_keys(statics, &(struct Iter){
       int_var(0)
     }
@@ -1140,8 +1141,6 @@ void interface_configure(String out_dir){
 }
 
 String Path_stem(Path);
-
-String home_portable_path(String);
 
 static List _interface_candidates(String canonical){
   String stem = Path_stem(canonical), relative = home_portable_path(canonical);

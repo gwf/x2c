@@ -3018,8 +3018,9 @@ static List Compiler__binary_op_type(Compiler compiler, Symbol op, List lhs, Lis
 
 int x2c_source_file(String);
 String Compiler_display_path(Compiler, String);
+String home_absolute_path(String);
 static void _check_unit_static(Compiler c, String spelling, Token origin){
-  if(! x2c_source_file(c -> filename)) return;  List owner = Sym_get(c -> sym, cons(_467, cons(String_var(spelling), NULL)));  if(! List_truth(owner)) return;  String path = Var_string(List_car(owner)), file = Compiler_display_path(c, path);  Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(_263), cons(String_var(spelling), cons(String_var(_468), NULL)))), origin, cons(String_var(String_join(NULL, cons(String_var(_469), cons(String_var(file), cons(String_var(_470), NULL))))), _473));
+  if(! x2c_source_file(c -> filename)) return;  List owner = Sym_get(c -> sym, cons(_467, cons(String_var(spelling), NULL)));  if(! List_truth(owner)) return;  String file = Compiler_display_path(c, home_absolute_path(Var_string(List_car(owner))));  Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(_263), cons(String_var(spelling), cons(String_var(_468), NULL)))), origin, cons(String_var(String_join(NULL, cons(String_var(_469), cons(String_var(file), cons(String_var(_470), NULL))))), _473));
 }
 
 int binding_identity_try_parts(List, int *, String *);
