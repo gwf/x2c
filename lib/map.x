@@ -615,6 +615,8 @@ Iter Map.iter(Map x, Iter dest) {
   return dest.init(x, _next, 0u);
 }
 
+meta Iter Map.keys(Map x, Iter dest);
+
 /** Initializes `dest` as an iterator over `x`, yielding each key. The mirror
     of `Map.iter`, and like it, it allocates nothing.
 
@@ -625,11 +627,12 @@ Iter Map.iter(Map x, Iter dest) {
 
     Neither constructing the iterator nor pulling from it raises.
 */
-meta Iter Map.keys(Map x, Iter dest);
 Iter Map.keys(Map x, Iter dest) {
   if (!dest) return NULL;
   return dest.init(x, _keys_next, 0u);
 }
+
+meta Iter Map.enumerate(Map x, Iter dest);
 
 /** Initializes `dest` as an iterator over `x`, yielding each entry as a
     `(key value)` two-element `List`. Destructure pairs with
@@ -646,7 +649,6 @@ Iter Map.keys(Map x, Iter dest) {
     Constructing the iterator does not raise. Pulling may raise
     `<alloc-fail>` or `<size-limit>` while interning a pair.
 */
-meta Iter Map.enumerate(Map x, Iter dest);
 Iter Map.enumerate(Map x, Iter dest) {
   if (!dest) return NULL;
   return dest.init(x, _enumerate_next, 0u);

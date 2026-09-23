@@ -924,11 +924,12 @@ Iter Var.fallback_iter(Var x, Iter dest) {
   return dest.init((Var) {0}, NULL, (Var) { .u64 = 0 });
 }
 
+meta Iter Var.iter(Var x, Iter dest);
+
 /** Returns an iterator over `Var`.
     Raises: `<void-op>` for `void`. A null `dest` returns NULL without
     raising.
 */
-meta Iter Var.iter(Var x, Iter dest);
 Iter Var.iter(Var x, Iter dest) {
   if (x.u64 == VAR_VOID_BITS) raise %(void-op (owner "Var.iter"));
   if (!dest) return NULL;
