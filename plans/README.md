@@ -89,7 +89,6 @@ execution.
 | [Lint and format](x2c-lint-and-format.md) | Needs author scoping; includes opportunistic declaration grouping from the completed dogfooding campaign. |
 | [Header collection gaps](x2c-header-collection-gaps.md) | Needs author scoping; retained unresolved cases were last reproduced September 17. This cleanup does not claim a new compiler probe. |
 | [Meta heap objects](meta-heap-objects.md) | Needs author scoping; bind the Scope allocator for meta bodies, extend the region pass for `free` and `realloc`, and support heap classes at compile time. |
-| [Symlinked home spellings](symlinked-home-spellings.md) | Needs author scoping; a source operand spelled through a symlink collides with the prelude's copy of the same runtime file. |
 | [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator port and the documentation sample checks are delivered; `check-docs.py` is next, followed by separately sequenced release, gate and compiler-backed ports. |
 | [C on-ramp](x2c-c-on-ramp.md) | Landing-page adoption examples; the parser/corpus work already shipped. |
 | [Var-tags experiment](archive/meta-functions.md#parked) | Parked until a measured approach meets the recorded translation-cost condition. |
@@ -115,6 +114,8 @@ local campaign outcomes; the original observations do not describe later
   rejected local implementation; session-owned records and a hardcoded native
   bridge failed the requested storage and lifetime contract.
 - [Meta recovery](archive/meta-recovery.md): done; delivered as `db86d4b7`.
+- [Symlinked home spellings](archive/symlinked-home-spellings.md): done;
+  delivered as `610c52f5`.
 - [Meta recovery checkpoints](archive/meta-recovery-checkpoints.md),
   [design](archive/meta-recovery-design.md) and
   [review](archive/meta-recovery-review.md): obsolete; their record wrapper

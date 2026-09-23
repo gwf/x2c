@@ -1073,4 +1073,15 @@ if grep -q 'late-parent.x:' "$LATE/alone.log"; then
   fail "a restarted unit reported something an eager one does not"
 fi
 
+# A runtime operand spelled through a symlinked home is the prelude's copy of
+# that file, even where the working directory holds another lib/array.x.
+ln -s "$FAKE" "$BUILD/fake-link"
+mkdir -p "$BUILD/elsewhere/lib" "$BUILD/linked-out"
+cp "$FAKE/lib/array.x" "$BUILD/elsewhere/lib/"
+(cd "$BUILD/elsewhere" && X2C_HOME="$BUILD/fake-link" \
+  "$BUILD/fake-link/builds/0/x2c" translate \
+  --out-dir "$BUILD/linked-out" "$BUILD/fake-link/lib/array.x" \
+  "$BUILD/fake-link/lib/x2c.x") >"$BUILD/linked.log" 2>&1 ||
+  fail "a runtime operand spelled through a symlinked home did not translate"
+
 echo "header cache probes passed"
