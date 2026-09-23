@@ -31,9 +31,12 @@ BINARY           = x2c
 CC               ?= cc
 AR               ?= ar
 ARFLAGS          ?= rv
-CFLAGS           += $(BUILD_CFLAGS)
+# The compiler's own sources build clean: an x2c warning or region finding
+# fails translation, and a C compiler warning fails compilation.
+CFLAGS           += $(BUILD_CFLAGS) -Werror
 CFLAGS           += $(EXTRA_CFLAGS)
 X2C_FLAGS        ?=
+X2C_TRANSLATE    = $(X2C_COMPILER) translate --fatal-warnings $(X2C_FLAGS)
 LDFLAGS          += -lx2c
 LDFLAGS          += $(BUILD_LDFLAGS)
 # A native module binds to the compiler's own runtime. The compiler links
@@ -109,7 +112,7 @@ LIB_MISSING_X = $(sort $(patsubst $(LIB_BUILD)/%,$(LIB_SOURCE)/%.x, \
 	$(basename $(LIB_MISSING_GENERATED))))
 
 $(LIB_BUILD)/.translated: $(X2C_TRANSLATE_DEPS) | $(LIB_BUILD)
-	$(X2C_COMPILER) translate $(X2C_FLAGS) --out-dir $(LIB_BUILD) \
+	$(X2C_TRANSLATE) --out-dir $(LIB_BUILD) \
 		$(LIB_X_FILES)
 	@touch $@
 $(LIB_C_FILES) $(LIB_H_FILES): $(LIB_BUILD)/.translated
@@ -149,7 +152,7 @@ BIN_MISSING_X = $(sort $(patsubst $(BIN_BUILD)/%,$(BIN_SOURCE)/%.x, \
 
 $(BIN_BUILD)/.translated: $(BIN_X_FILES) $(X2C_TRANSLATE_DEPS) \
 		| $(BIN_BUILD)
-	$(X2C_COMPILER) translate $(X2C_FLAGS) --out-dir $(BIN_BUILD) \
+	$(X2C_TRANSLATE) --out-dir $(BIN_BUILD) \
 		$(BIN_X_FILES)
 	@touch $@
 $(BIN_C_FILES) $(BIN_H_FILES): $(BIN_BUILD)/.translated

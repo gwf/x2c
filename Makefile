@@ -16,6 +16,7 @@ BUILD_TARGETS = build-install bootstrap-build bootstrap-refresh \
 	stage-1 stage-2 stage-3 packages
 VERIFY_TARGETS = verify-sanitize verify-fixtures verify-fixtures-update \
 	proof-artifact-atomicity proof-raw-symbols proof-conformance \
+	proof-cold-collection \
 	build-recovery check-native-modules packages-check
 DIFF_TARGETS = stage-diff-0 stage-diff-1 stage-diff-2 stage-diff-3 \
 	stage-diff-all
@@ -142,6 +143,7 @@ precommit: build					## Prepare the final tree for commit
 
 agent-pr-check:					## Run complete agent PR proof once
 	$(MAKE) precommit
+	$(MAKE) proof-cold-collection
 	$(MAKE) check-after-precommit
 
 sanity-check: bootstrap-refresh			## Prove bootstrap recovery and self-hosting
@@ -205,6 +207,9 @@ build-recovery: build					## Check incremental build recovery
 
 proof-raw-symbols: build				## Check raw symbol collection parity
 	./unittest/probes/run-raw-symbol-sweep.sh
+
+proof-cold-collection:					## Check stage 2 against a cold translation
+	./tools/check-cold-collection.sh
 
 proof-conformance: build ## Compare owned conformance rows between prelude and live symbol modes
 	./tools/check-conformance-coherence.sh

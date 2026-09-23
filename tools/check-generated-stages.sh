@@ -1,8 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# --interfaces also compares .xi unit interfaces, for two outputs of one
+# compiler.
+kinds=(-name '*.c' -o -name '*.h')
+label=C/H
+if [[ ${1-} == --interfaces ]]; then
+  kinds+=(-o -name '*.xi')
+  label=C/H/.xi
+  shift
+fi
 if [[ $# -ne 2 ]]; then
-  echo "usage: $0 LEFT_STAGE RIGHT_STAGE" >&2
+  echo "usage: $0 [--interfaces] LEFT_STAGE RIGHT_STAGE" >&2
   exit 2
 fi
 
@@ -23,7 +32,7 @@ fi
 list_generated() {
   local root=$1
   find "$root/lib" "$root/src" -type f \
-    \( -name '*.c' -o -name '*.h' \) -print |
+    \( "${kinds[@]}" \) -print |
     sed "s#^$root/##" |
     LC_ALL=C sort
 }
@@ -31,7 +40,7 @@ list_generated() {
 list_generated "$left" >"$scratch/left.files"
 list_generated "$right" >"$scratch/right.files"
 if [[ ! -s "$scratch/left.files" ]]; then
-  echo "generated-stage comparison: no C/H files under $left" >&2
+  echo "generated-stage comparison: no $label files under $left" >&2
   exit 1
 fi
 if ! diff -u "$scratch/left.files" "$scratch/right.files"; then
@@ -48,4 +57,4 @@ while IFS= read -r relative; do
   count=$((count + 1))
 done <"$scratch/left.files"
 
-echo "generated-stage comparison: $left == $right ($count C/H files)"
+echo "generated-stage comparison: $left == $right ($count $label files)"

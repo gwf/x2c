@@ -30,6 +30,7 @@ required sequence.
 | `make verify` | Unit suites, compiler fixtures, and focused probes. |
 | `make stage-3` | Build through the third self-hosted stage. |
 | `make stage-diff-all` | Compare generated C/H file sets and bytes across stages. |
+| `make proof-cold-collection` | Compare stage 2 with a translation that reads no `.xi` interfaces. |
 | `make check` | Standalone extended non-mutating checks. |
 | `make verify-fixtures` | Check exact compiler fixture artifacts without rewriting them. |
 | `make verify-fixtures-update` | Accept an intentional, reviewed fixture-output change. |
@@ -58,10 +59,20 @@ job limit. On the measured 16-core host this reduced clean-stage wall time
 unchanged. The B4/B5 section of
 `plans/archive/x2c-correctness-performance-tooling.md` records the full comparison.
 
+Every stage build translates `lib/` and `src/` with the hidden
+`--fatal-warnings` option and compiles the generated C with `-Werror`, so an
+x2c warning, a region finding, or a C compiler warning fails `make build`.
+The option stays out of user builds and `unittest/`, whose suites provoke
+region warnings on purpose.
+
 `make precommit` refreshes bootstrap, rebuilds stage 0 safely, builds through
-stage 2, and compares stages 0, 1, and 2. `agent-pr-check` runs it and the
-remaining extended checks. Stage 2 establishes self-host convergence; the
-fourth build is available on demand.
+stage 2, and compares stages 0, 1, and 2. `agent-pr-check` runs it,
+`proof-cold-collection`, and the remaining extended checks. Stage 2
+establishes self-host convergence; the fourth build is available on demand.
+`proof-cold-collection` retranslates `lib/` and `src/` with stage 1 and the
+hidden `--no-interfaces` option, then requires stage 2's C, headers, and
+interfaces byte for byte, so warm interface replay cannot drift from a cold
+walk.
 
 Performance evidence is separate from these correctness gates. Use
 [`performance-snapshot`](performance-checkpoints.md) for the nightly `dev`
