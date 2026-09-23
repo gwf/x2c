@@ -8,16 +8,17 @@
 
 #include "exception.h"
 
-static List _36, _35, _31, _30, _28, _26;
+static List _40, _39, _35, _34, _32, _30, _22;
 
-static String _42, _41, _40, _39, _38, _37, _33, _24, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _46, _45, _44, _43, _42, _41, _37, _28, _26, _25, _24, _23, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _34, _32, _29, _27, _25, _23;
+static Var _38, _36, _33, _31, _29, _27, _21;
 
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/utsname.h>
 static int _init_guard_ = 0;
 
 __attribute__((constructor)) static void _file_init_(void);
@@ -46,12 +47,12 @@ static Func _x2c_func_handle_0;
 
 Func Func_new(FuncAdapter, List);
 
-_x2c_initializer_choice_4EE62BAD_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _36)))
-Var Symbol_var(Symbol);
-
+_x2c_initializer_choice_4EE62BAD_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _40)))
 Var String_var(String);
 
 List cons(Var, List);
+
+Var Symbol_var(Symbol);
 
 Var List_var(List);
 
@@ -78,30 +79,34 @@ __attribute__((constructor)) static void _file_init_(void){
   _16 = String_new("/lib");
   _17 = String_new("/.x2c-build/");
   _18 = String_new("/include/x2c");
-  _19 = String_new("/lib/x2c");
-  _20 = String_new("/toolchain");
-  _21 = String_new("CC=");
-  _22 = String_new("\nAR=");
-  _23 = Symbol_var(437126);
-  _24 = String_new("String");
-  _25 = String_var(_24);
-  _26 = cons(_25, NULL);
-  _27 = List_var(_26);
-  _28 = cons(_27, NULL);
-  _29 = List_var(_28);
+  _19 = String_new("Linux");
+  _20 = String_new("-rdynamic");
+  _21 = String_var(_20);
+  _22 = cons(_21, NULL);
+  _23 = String_new("/lib/x2c");
+  _24 = String_new("/toolchain");
+  _25 = String_new("CC=");
+  _26 = String_new("\nAR=");
+  _27 = Symbol_var(437126);
+  _28 = String_new("String");
+  _29 = String_var(_28);
   _30 = cons(_29, NULL);
-  _31 = cons(_23, _30);
-  _32 = List_var(_31);
-  _33 = String_new("Var");
-  _34 = String_var(_33);
-  _35 = cons(_34, NULL);
-  _36 = cons(_32, _35);
-  _37 = String_new("/zip/x2c/.x2c-bootstrap-manifest");
-  _38 = String_new("\n");
-  _39 = String_new("x2c-bootstrap-v1 ");
-  _40 = String_new(".x");
-  _41 = String_new("lib/");
-  _42 = String_new("src/");
+  _31 = List_var(_30);
+  _32 = cons(_31, NULL);
+  _33 = List_var(_32);
+  _34 = cons(_33, NULL);
+  _35 = cons(_27, _34);
+  _36 = List_var(_35);
+  _37 = String_new("Var");
+  _38 = String_var(_37);
+  _39 = cons(_38, NULL);
+  _40 = cons(_36, _39);
+  _41 = String_new("/zip/x2c/.x2c-bootstrap-manifest");
+  _42 = String_new("\n");
+  _43 = String_new("x2c-bootstrap-v1 ");
+  _44 = String_new(".x");
+  _45 = String_new("lib/");
+  _46 = String_new("src/");
   _x2c_static_initialize_0();
 }
 
@@ -214,7 +219,7 @@ static List Bootstrap__manifest(Bootstrap b){
     if (x2c_error_catch_site_pending(&_x2c_catch_site_1)) {List _x2c_catch_pattern_1 = cons(Symbol_var(31862161386376), cons(Symbol_var(54), NULL));
     _x2c_catch_patterns_1[0] = List_var(_x2c_catch_pattern_1);
   }
-  ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) text = Path_read_text(_37);  else {x2c_exception_landed(& _x2c_exception_frame_1); {
+  ErrorHandler volatile _x2c_error_handler_1 = x2c_error_catch_site_push(&_x2c_exception_frame_1, &_x2c_catch_site_1, _x2c_catch_patterns_1);  x2c_exception_push(& _x2c_exception_frame_1);  if (!sigsetjmp(_x2c_exception_frame_1.env, 0)) text = Path_read_text(_41);  else {x2c_exception_landed(& _x2c_exception_frame_1); {
     if (x2c_exception_is_error_target(&_x2c_exception_frame_1)){
       x2c_error_catch_detach(_x2c_error_handler_1);
       x2c_exception_mark_handled(&_x2c_exception_frame_1);
@@ -235,11 +240,11 @@ x2c_error_catch_close(_x2c_error_handler_1);
 _x2c_error_handler_1 = NULL;
 x2c_exception_leave(& _x2c_exception_frame_1);
 }
-if(! String_contains(text, _38)) _error("malformed embedded source manifest");
+if(! String_contains(text, _42)) _error("malformed embedded source manifest");
 List lines = String_split_lines(text, 0);
 String header = Var_string(List_car(lines));
-b -> identity = String_remove_prefix(header, _39);
-if(! String_startswith(header, _39) || ! String_truth(b -> identity)) _error("unsupported embedded source manifest");
+b -> identity = String_remove_prefix(header, _43);
+if(! String_startswith(header, _43) || ! String_truth(b -> identity)) _error("unsupported embedded source manifest");
 return List_cdr(lines);
 }
 
@@ -285,8 +290,8 @@ static void Bootstrap__verify(Bootstrap b, List records, String root){
         uint64_t hash = build_hash_bytes(UINT64_C(1469598103934665603), text, String_len(text));
         if(String_len(text) != expected_size || hash !=(uint64_t) expected_hash) _error_path("source failed verification", installed);
         String source = String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_5), cons(String_var(relative), NULL))));
-        if(String_endswith(relative, _40) && String_startswith(relative, _41)) Array_push(runtime, String_var(source));
-        else if(String_endswith(relative, _40) && String_startswith(relative, _42)) Array_push(compiler, String_var(source));
+        if(String_endswith(relative, _44) && String_startswith(relative, _45)) Array_push(runtime, String_var(source));
+        else if(String_endswith(relative, _44) && String_startswith(relative, _46)) Array_push(compiler, String_var(source));
       }
 
     }
@@ -391,6 +396,8 @@ CliRequest bootstrap_build_request(CliRequest command, Bootstrap payload, Symbol
   request -> build_dir = String_join(NULL, cons(String_var(prefix), cons(String_var(_17), cons(String_var(Symbol_str(component)), NULL))));
   request -> include_dirs = cons(String_var(String_join(NULL, cons(String_var(prefix), cons(String_var(_18), NULL)))), NULL);
   request -> cc_args = command -> cc_args;
+  struct utsname host;
+  if(component == 239277269348 && ! uname(& host) && String_equal(String_new(host.sysname), _19)) request -> ld_args = _22;
   request -> cc = command -> cc;
   request -> ar = command -> ar;
   request -> jobs = command -> jobs;
@@ -401,9 +408,9 @@ CliRequest bootstrap_build_request(CliRequest command, Bootstrap payload, Symbol
 
 void bootstrap_record_install(Bootstrap b, String cc, String ar){
   if(! _init_guard_) _file_init_();
-  Path directory = String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_19), NULL)));
+  Path directory = String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_23), NULL)));
   Path_make_dirs(directory);
-  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_20), NULL))), String_join(NULL, cons(String_var(_21), cons(String_var(cc), cons(String_var(_22), cons(String_var(ar), cons(String_var(_10), NULL)))))));
+  Path_write_text(String_join(NULL, cons(String_var(directory), cons(String_var(_24), NULL))), String_join(NULL, cons(String_var(_25), cons(String_var(cc), cons(String_var(_26), cons(String_var(ar), cons(String_var(_10), NULL)))))));
   Path_write_text(String_join(NULL, cons(String_var(b -> prefix), cons(String_var(_12), NULL))), String_join(NULL, cons(String_var(b -> identity), cons(String_var(_10), NULL))));
 }
 

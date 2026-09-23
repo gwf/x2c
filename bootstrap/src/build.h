@@ -29,6 +29,8 @@ typedef struct Build{
 
 uint64_t build_hash_bytes(uint64_t hash, const void * bytes, size_t length);
 
+String build_compiler_stamp(void);
+
 void build_check_input(String input);
 
 Build CliRequest_prepare(CliRequest c);
@@ -40,6 +42,8 @@ int Build_translation_current(Build state, String input, String directory);
 void Build_record_translation(Build state, String input, String directory);
 
 void Build_add_generated(Build state, String input, String directory);
+
+CliRequest Build_module_entry(Build b);
 
 void Build_begin_translation(Build state, String input);
 

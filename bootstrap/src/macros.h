@@ -45,6 +45,8 @@ void Compiler_install_meta_declaration(Compiler c, List declaration, Token marke
 
 void Compiler_record_native_meta_effect(Compiler c, List declaration, Token marker);
 
+void Compiler_add_native_targets(Map(* entry)(void));
+
 void Compiler_install_native_meta_effects(Compiler c, Map globs);
 
 int Compiler_bind_native_meta(Compiler c, String name);
