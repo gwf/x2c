@@ -1713,6 +1713,7 @@ static String _package_type_reference(Compiler compiler, Symbol tag, String name
 }
 
 static List _package_aggregate_name(Compiler compiler, Symbol tag, List name){
+  if(! Var_is_row(List_car(name), 11, 7, 1)) return name;
   String spelling = Var_string(List_car(name));
   if(Compiler_peek(compiler, 0) == 247) return cons(String_var(Compiler_package_spelling(compiler, spelling)), NULL);
   return cons(String_var(_package_type_reference(compiler, tag, spelling)), NULL);
