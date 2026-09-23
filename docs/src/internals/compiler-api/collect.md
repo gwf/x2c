@@ -13,7 +13,7 @@ Source-ordered shallow symbol collection and replay.
 | Function | Summary |
 | --- | --- |
 | [`interface_configure`](#interface_configure) | Creates the process cache and names the directories searched for `.xi` interfaces. |
-| [`interface_prelude`](#interface_prelude) | Returns the readable prelude interface path, or NULL when none exists. |
+| [`interface_prelude`](#interface_prelude) | Returns the path of the first prelude interface this compiler wrote, or NULL when there is none. |
 | [`interface_text`](#interface_text) | Returns the compiler's own collected contribution as interface text, or NULL when the unit has not collected its symbols. |
 | [`Compiler.collect_package`](#Compiler.collect_package) | Collects a package once and installs its public surface in the current unit. |
 | [`Compiler.collect_symbols`](#Compiler.collect_symbols) | Collects the current translation unit's declarations into `globs`. |
@@ -31,15 +31,16 @@ NULL. Home files mirror their home-relative path under the compiler's
 stage directory when it runs from `<home>/builds/`, otherwise under the
 home. Call it before opening any translation unit's Context.
 
-Source: `src/collect.x:726`
+Source: `src/collect.x:727`
 
 #### interface_prelude
 
 `String interface_prelude(void)`
 
-Returns the readable prelude interface path, or NULL when none exists.
+Returns the path of the first prelude interface this compiler wrote, or
+NULL when there is none. Its source hashes are not checked.
 
-Source: `src/collect.x:751`
+Source: `src/collect.x:754`
 
 #### interface_text
 
@@ -49,7 +50,7 @@ Returns the compiler's own collected contribution as interface text, or
 NULL when the unit has not collected its symbols. A contribution that
 the interface grammar cannot spell is reported as an `emit` diagnostic.
 
-Source: `src/collect.x:976`
+Source: `src/collect.x:985`
 
 ### `Compiler`
 
@@ -67,7 +68,7 @@ protocol rows enter the current symbol state, and dependencies enter the
 importing compiler. Replay also merges recorded function definitions.
 `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:670`
+Source: `src/collect.x:671`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -84,7 +85,7 @@ is `globs`. Collection also updates dependencies, function definitions,
 and macro state. Keyword alias maps and seen-name state are file-local
 and restored when each file walk ends.
 
-Source: `src/collect.x:509`
+Source: `src/collect.x:510`
 
 <a id="Compiler.record_generated_symbol"></a>
 #### Compiler.record_generated_symbol
@@ -96,7 +97,7 @@ current file's collected entry contributes, which is the map its
 interface publishes. A file without a collected declaration map records
 nothing. The cache retains `signature`.
 
-Source: `src/collect.x:365`
+Source: `src/collect.x:366`
 
 ## Design notes
 

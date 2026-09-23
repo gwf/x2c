@@ -4665,8 +4665,9 @@ To try the experiment:
 
 The command verifies and extracts the source distribution stored in the APE
 ZIP, builds a native runtime archive first, then builds and installs the
-matching native compiler. The result includes the compiler, its runtime
-archive, headers, sources, unit interfaces, licenses, and a toolchain record.
+matching native compiler, which then writes the runtime unit interfaces. The
+result includes the compiler, its runtime archive, headers, sources, unit
+interfaces, licenses, and a toolchain record.
 A running bootstrap locks `<prefix>/.x2c-bootstrap.lock`, and a second
 bootstrap into the same prefix stops with an error. The operating system
 releases the lock when the process exits, and the empty file stays in the
@@ -4952,8 +4953,9 @@ A project manifest can pin packages instead of installing them by hand; see
 `x2c env` prints the resolved home, executable, include directory, runtime
 archive, prelude interface, package roots, C compiler, archiver, and script
 cache root as `name = value` lines. The prelude is the runtime `x2c.xi`
-interface the compiler replays for the runtime declarations; an empty value
-means the compiler reads `lib/x2c.x` from source once per process.
+interface the compiler replays for the runtime declarations. Only an
+interface the same compiler wrote qualifies; an empty value means the
+compiler reads `lib/x2c.x` from source once per process.
 `x2c env <name>` prints one value; `--package-dir`, `--cc`, and `--ar` show
 their effect on the report.
 

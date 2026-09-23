@@ -15,6 +15,7 @@ Source-bearing APE to native x2c transition.
 | [`bootstrap_build_request`](#bootstrap_build_request) | Builds an ordinary native request for one materialized bootstrap component. |
 | [`bootstrap_materialize`](#bootstrap_materialize) | Verifies and materializes the APE source payload at `request.prefix`. |
 | [`bootstrap_record_install`](#bootstrap_record_install) | Records the resolved host tools and then publishes bootstrap completion. |
+| [`bootstrap_write_interfaces`](#bootstrap_write_interfaces) | Writes the prefix's runtime interfaces with its installed compiler. |
 
 ### Functions
 
@@ -66,6 +67,20 @@ failure prints a bootstrap diagnostic and exits with status 2.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing canonical
 paths.
+
+Source: `src/bootstrap.x:265`
+
+#### bootstrap_write_interfaces
+
+`void bootstrap_write_interfaces(Bootstrap b)`
+
+Writes the prefix's runtime interfaces with its installed compiler.
+An interface replays only for the compiler that wrote it, so the native
+compiler translates the runtime sources as a stage build's library batch
+does, and each `lib/<stem>.xi` is then replaced atomically. Sources are
+named relative to the prefix, which the compiler resolves through any
+symbolic link. A failed translation or write prints a bootstrap
+diagnostic and exits with status 2.
 
 Source: `src/bootstrap.x:230`
 
