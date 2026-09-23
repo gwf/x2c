@@ -35,12 +35,6 @@ struct UnzipShared{
 }
 ;
 
-Iter Map_keys(Map, Iter dest);
-
-Iter Map_enumerate(Map, Iter dest);
-
-Iter Var_iter(Var, Iter dest);
-
 Iter Iter_init(Iter iter, Var obj, IterNextFn next, Var state);
 
 Iter Iter_new(void);
