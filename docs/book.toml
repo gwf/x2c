@@ -25,7 +25,7 @@ enable = true
 level = 1
 
 # A line prefixed with "~" is hidden behind the code block's expander but is
-# still compiled by tools/check-doc-examples.py. Use it for the surrounding
+# still compiled by tools/check-doc-examples. Use it for the surrounding
 # declarations a fragment needs, so samples stay short and still translate.
 [output.html.code.hidelines]
 x2c = "~"

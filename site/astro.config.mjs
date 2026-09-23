@@ -11,7 +11,7 @@ import {
 import { wordmark } from "./wordmark.mjs";
 
 // docs/book.toml hides "~" lines from the reader while
-// tools/check-doc-examples.py still compiles them. Markdown pages moved from
+// tools/check-doc-examples still compiles them. Markdown pages moved from
 // the book carry those lines, so drop them here for the same reason. No
 // hand-written C on this site starts a line with "~".
 const hiddenLines = {
