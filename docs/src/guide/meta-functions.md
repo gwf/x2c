@@ -423,22 +423,27 @@ native-modules = ["helpers"]
 ```
 
 A module target builds before the targets that load it, and a changed
-module retranslates them.
+module retranslates them. A target binds only the modules it names, even
+when an earlier target in the same build loaded others.
 
-A module's functions bind like the functions the compiler links, and one
-the compiler links takes precedence. The prototype's signature must match
-the one the module was built from, and a mismatch is reported at the
-declaration. When two loaded modules define the same name, the module
-loaded later supplies it.
+A module's functions bind like the functions the compiler links. The
+prototype's signature must match the one the module was built from, and a
+mismatch is reported at the declaration. A function the compiler links
+takes precedence, and the prototype reports a warning that the module's
+function is shadowed. When two named modules define the same name, the one
+named first supplies it, and the compiler warns when it loads them.
 
 A module runs inside the compiler and uses the compiler's own runtime, not
 a copy of it. Only the compiler that built a module can load it, so a
-module must be rebuilt after the compiler changes:
+module must be rebuilt after the compiler changes. The compiler checks this
+before it loads any of the module's code:
 
 ```text
-x2c: error: native module was built by another compiler: helpers.so
-note: rebuild it with this compiler
+x2c: error: native module 'helpers.so' was built by another compiler; rebuild it
 ```
+
+Every function the module exports needs a bodyless `meta` prototype in the
+module's sources, and a module whose sources declare none fails to build.
 
 A module can call the runtime functions the compiler itself uses. A
 module that calls any other runtime function fails to load, and the error

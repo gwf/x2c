@@ -143,14 +143,16 @@ static uint64_t _state_base(CliRequest request, String tool, int *ok) {
   return hash;
 }
 
-/** Returns the content hash of the running compiler as 16 hex digits, or
-    NULL when its executable cannot be read. A native module records the hash
-    of the compiler that built it, and only that compiler loads it.
+/** Returns the stamp a native module records: `x2c-module-stamp:` and the
+    content hash of the running compiler as 16 hex digits. Returns NULL when
+    the executable cannot be read. Only the compiler that built a module
+    loads it.
 */
-String build_compiler_stamp(void) {
+String build_module_stamp(void) {
   String executable = x2c_get_executable(), int ok = executable != NULL;
   uint64_t hash = ok ? _state_contents(_state_start, executable, &ok) : 0;
-  return ok ? "%016llx".printf((unsigned long long) hash) : NULL;
+  return ok ? "x2c-module-stamp:%016llx".printf((unsigned long long) hash)
+            : NULL;
 }
 
 static List _state_dep_inputs(String depfile) {
@@ -462,18 +464,24 @@ void Build.add_generated(Build state, String input, String directory) {
 }
 
 /** Writes the entry unit of a native module and returns the request that
-    translates it. The entry includes each x2c source of the module by name,
-    so the request adds their directories to the include path. It defines
-    `x2c_module_targets`, which returns a Map from the name of each native
-    `meta` prototype those sources declare to a `Func` that calls it, and
-    `x2c_module_stamp`, the content hash the loading compiler must have.
+    translates it. The entry defines `x2c_module_targets`, which returns a
+    Map from the name of each native `meta` prototype the module's x2c
+    sources declare to a `Func` that calls it, and `x2c_module_stamp`, which
+    holds the stamp the loading compiler must match. A module whose sources
+    declare no such prototype fails to translate.
 */
 CliRequest Build.module_entry(Build b) {
-  String includes = "", Array directories = [], sources = [];
+  String stamp = build_module_stamp();
+  if (!stamp) x2c_driver_error("cannot read the running compiler to stamp");
+  /* Each source is included by its absolute path without the leading slash
+     and found through the root include directory. Distinct sources with
+     one name stay distinct, and each unit's generated header is placed
+     inside the entry's own generated directory. */
+  String includes = "", Array sources = [];
   foreach (String unit, b.units) {
-    includes = %"$includes#include \"${Path.basename(unit)}\"\n";
-    directories.push(Path.dirname(unit));
-    sources.push(Path.absolute(unit));
+    String source = Path.absolute(unit);
+    includes = %"$includes#include \"${source[1:]}\"\n";
+    sources.push(source);
   }
   String declared = sources.list_free().repr(), root = x2c_get_root();
   Path entry = %"${b.work_dir}/module/x2c_module.x";
@@ -483,15 +491,14 @@ CliRequest Build.module_entry(Build b) {
       %"$includes\$(import \"$root/etc/lisp-bindings.xlisp\")
 macro Expression \$module.targets() =>
   \$(lisp.native.targets (_x2c.native-meta.declared '$declared));
-const char x2c_module_stamp[] = \"${build_compiler_stamp()}\";
+const char x2c_module_stamp[] = \"$stamp\";
 Map x2c_module_targets(void) => \$module.targets();
 ");
   }
   catch %(io-fail *detail): x2c_host_error(detail);
   CliRequest request = Scope.memdup(b.request, sizeof(struct CliRequest));
   request.inputs = %($entry);
-  request.include_dirs =
-    %(@{b.request.include_dirs} @{directories.list_free()});
+  request.include_dirs = %(@{b.request.include_dirs} "/");
   b.xlat_n++;
   return request;
 }
@@ -736,7 +743,10 @@ static void Build._place_unit_headers(Build b) {
   foreach (String unit, b.units) {
     String directory = %"${b.gen_root}/${_key(unit)}";
     String stem = Path.stem(unit);
-    List searched = %(${Path.dirname(unit)} @{b.request.include_dirs});
+    // A native module's entry names its sources from the root.
+    List searched = %(
+      ${Path.dirname(unit)} @{b.request.include_dirs}
+      @{b.request.kind == <module> ? %("/") : NULL});
     List outputs = %("$directory/$stem.h" "$directory/$stem.c");
     foreach (String generated, outputs)
       foreach (String line, Path.read_text(generated).split_lines(0)) {

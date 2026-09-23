@@ -42,7 +42,7 @@ Typed native build request and artifact graph.
 
 Public functions:
 
-`build_hash_bytes`, `build_compiler_stamp`, `build_check_input`,
+`build_hash_bytes`, `build_module_stamp`, `build_check_input`,
 `CliRequest.prepare`, `Build.generated_dir`, `Build.translation_current`,
 `Build.record_translation`, `Build.add_generated`, `Build.module_entry`,
 `Build.begin_translation`, `Build.end_translation`, `compile_commands_write`,
@@ -290,7 +290,8 @@ Public functions:
 `Compiler.shared_definitions`, `Compiler.parse_macro_lisp_top_level`,
 `Compiler.parse_source_lisp`, `Compiler.evaluate_declaration_effect`,
 `Compiler.install_meta_declaration`, `Compiler.record_native_meta_effect`,
-`Compiler.add_native_targets`, `Compiler.install_native_meta_effects`,
+`Compiler.native_module_loaded`, `Compiler.add_native_module`,
+`Compiler.select_native_modules`, `Compiler.install_native_meta_effects`,
 `Compiler.bind_native_meta`, `Compiler.install_native_meta_function`,
 `Compiler.install_meta_function`, `Compiler.parse_macro_lisp_shallow`,
 `Compiler.lift_macro_lisp_expression`, `Compiler.parse_macro_lisp_expression`,

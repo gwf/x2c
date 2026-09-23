@@ -162,12 +162,23 @@ implements them; the book documents it under
   prototypes those sources declare (`_x2c.native-meta.declared`), and
   `x2c_module_stamp`, the content hash of the building compiler. The loader
   rejects any other hash.
-- **Lifetime and trust.** `Frontend.load_support` loads each requested module
-  once per process and never closes it; the targets live in a
-  process-lifetime Scope with promoted names and signatures.
-  `_bind_native_meta` falls back to them when the compiler links no function
-  of the name, and the existing signature check validates each binding.
-  Nothing is discovered through includes, interfaces or package roots.
+- **Lifetime and trust.** `Frontend.load_support` checks the stamp in the
+  module file's bytes before `dlopen`, so a stale module's code never runs,
+  then loads each requested module once per process and never closes it.
+  Each module's name-to-`Func` Map is kept by path in a process-lifetime
+  Scope, and each request selects the modules it names, in order.
+  `_bind_native_meta` falls back to the selected modules when the compiler
+  links no function of the name; the first selected module that defines a
+  name supplies it, and the existing signature check validates each
+  binding. A module function that a compiler-linked name shadows, and a name
+  two selected modules define, are reported as warnings. Nothing is
+  discovered through includes, interfaces or package roots.
+- **Entry.** The entry includes each module source by its absolute path,
+  found through the root include directory, so same-named sources stay
+  distinct and generated headers stay in the build directory. A module
+  whose sources declare no `meta` prototype fails to build. On Linux the
+  module links with `-Wl,-Bsymbolic-functions`, so its own functions are not
+  interposed by same-named compiler exports.
 - **Platforms.** macOS, Linux and WSL. The APE seed, MSYS2 and native Windows
   compile the loader but report that native modules are not supported.
 

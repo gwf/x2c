@@ -514,9 +514,16 @@ static List _native_meta_targets(List paths) {
 
 static List _sdk_native_meta_targets(void) => _native_meta_targets(NULL);
 
-/* A native module's entry exports the prototypes its own sources declare. */
-static List _sdk_native_meta_declared(List paths) =>
-  _native_meta_targets(paths);
+/* A native module's entry exports the prototypes its own sources declare,
+   and a module that declares none is a mistake. */
+static List _sdk_native_meta_declared(List paths) {
+  List rows = _native_meta_targets(paths);
+  if (!rows)
+    _sdk_reject(
+      "native module sources declare no meta function",
+      %("declare each exported function with a bodyless meta prototype"));
+  return rows;
+}
 
 /* Builds the canonical signature stored by `Func` for one declared native
    function. The native Lisp binding macros generate this same shape. */
@@ -1566,35 +1573,77 @@ void Compiler.record_native_meta_effect(
   }
 }
 
-/* The functions of loaded native modules by name. No module is unloaded,
-   so the Map and its Funcs live in a Scope that lasts for the process. */
-static Map native_module_targets = NULL;
+/* Each loaded native module's name-to-`Func` Map by absolute path, and the
+   paths the current request names, in its order. A module stays loaded for
+   the process, so its Map lives in a Scope that lasts as long, while each
+   request binds only the modules it names. */
+static Map native_modules = NULL;
+static List native_module_order = NULL;
 static Scope native_module_scope = NULL;
 
 static void _native_module_shutdown(void) {
   native_module_scope.destroy();
   native_module_scope = NULL;
-  native_module_targets = NULL;
+  native_modules = NULL;
+  native_module_order = NULL;
 }
 
-/** Adds the name-to-`Func` Map a loaded native module's entry returns to the
-    targets a bodyless `meta` prototype binds when the compiler links no
-    function of its name. A later module's function replaces an earlier one
-    of the same name. The Funcs, names, and signatures last for the process.
+/** Reports whether the native module at absolute `path` is loaded. */
+int Compiler.native_module_loaded(String path) =>
+  (void *) native_modules && native_modules.contains(path);
+
+/** Records the name-to-`Func` Map that the entry of the native module loaded
+    from absolute `path` returns. The Funcs, names, signatures, and path last
+    for the process.
 */
-void Compiler.add_native_targets(Map (*entry)(void)) {
+void Compiler.add_native_module(String path, Map (*entry)(void)) {
   Scope.push(&native_module_scope);
-  if (!(void *) native_module_targets) {
+  if (!(void *) native_modules) {
     Scope.shutdown_hook(_native_module_shutdown);
-    native_module_targets = {};
+    native_modules = {};
   }
   Map targets = entry();
-  native_module_targets.merge(targets);
+  native_modules[path] = targets;
   Scope.pop();
+  path.try_own();
   foreach (Var (name, target), targets) {
     name.string().try_own();
     ((Func) target.pointer()).signature().try_own();
   }
+}
+
+/** Selects the loaded native modules, by absolute path, that bodyless `meta`
+    prototypes bind in the current request. The first module in `paths`
+    that defines a name supplies it, and a name that more than one defines
+    is reported once when the selection changes.
+*/
+void Compiler.select_native_modules(List paths) {
+  if (paths.equal(native_module_order)) return;
+  paths.try_own();
+  native_module_order = paths;
+  Map suppliers = $auto({});
+  foreach (String path, paths)
+    foreach (Var (name, target), (Map) native_modules[path]) {
+      (void) target;
+      Var first = suppliers.get(name);
+      if (first is void) suppliers[name] = path;
+      else
+        fprintf(
+          stderr,
+          "x2c: warning: native modules %s and %s both define '%s'; "
+          "%s supplies it\n",
+          first.string().str(), path.str(), name.string().str(),
+          first.string().str());
+    }
+}
+
+/* The requested native module function named `name`, or `void`. */
+static Var _native_module_function(String name) {
+  foreach (String path, native_module_order) {
+    Var found = ((Map) native_modules[path]).get(name);
+    if (found is not void) return found;
+  }
+  return void;
 }
 
 /* Binds a declared native function to the compiler's own linked target of
@@ -1606,10 +1655,15 @@ static void _bind_native_meta(
   Var function;
   if (!c.macro_lisp.try_get(name, &function)) {
     Var bound;
-    try bound = c.macro_lisp.eval(%(bind $name (quote $signature)));
+    try {
+      bound = c.macro_lisp.eval(%(bind $name (quote $signature)));
+      if (_native_module_function(name) is not void)
+        c.report_warning(
+          <warning>, "a native module function is shadowed by the "
+          "compiler's own", marker, %("name: $name"));
+    }
     catch %(no-symbol *): {
-      if (!(void *) native_module_targets) return;
-      bound = native_module_targets.get(name);
+      bound = _native_module_function(name);
       if (bound is void) return;
     }
     function = bound;

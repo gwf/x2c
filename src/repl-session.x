@@ -339,7 +339,9 @@ static List _result_body(List fn, int *prints) {
 }
 
 /* Whether the submission is a bodyless `meta` prototype. It binds a
-   function the compiler links or a loaded native module supplies. */
+   function the compiler links or a loaded native module supplies. A body
+   opens with `{`, or with the `=` of `=>` for an expression body, and a
+   `meta` value has an `=` initializer. */
 static int _native_prototype(Compiler c) {
   if (!c.meta_form_is_declaration()) return 0;
   for (Token token = c.token; token.type != <eof>; token++)
@@ -420,8 +422,11 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
     if (native) {
       match (node)
         case %(declare ? (bindings (bind (binding ? ?(String name)) *))): {
+          Var bound;
           if (names.contains(name))
             _refuse("function redeclaration is disabled");
+          if (!c.macro_lisp.try_get(name, &bound))
+            _refuse(%"no native function is available for $name");
           transaction.commit_transient();
           names[name] = %(native);
           result.syntax = node;

@@ -42,6 +42,7 @@ typedef struct ParsedUnit {
 #pragma private
 
 #include <dlfcn.h>
+#include <errno.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -67,46 +68,69 @@ static Token _first_preprocessor_token(Compiler compiler) {
   return compiler.token;
 }
 
-/* The absolute paths of the loaded native modules. */
-static List native_modules = NULL;
+static int _bytes_contain(const char *bytes, size_t length, String text) {
+  size_t size = text.len();
+  for (size_t i = 0; i + size <= length; i++)
+    if (!memcmp(bytes + i, text, size)) return 1;
+  return 0;
+}
 
-/* Loads the native module at `path` once per process and adds its functions
-   to the targets of native `meta` prototypes. Loading runs the module's
-   code inside the compiler, so it happens only on request. A module is
-   never unloaded, because its Funcs borrow its code. */
-static void _load_native_module(String path) {
+/* Checks the stamp in the bytes of the module at `path` against the running
+   compiler. Loading runs a module's code, so a module from another compiler
+   is rejected before it is loaded. */
+static void _check_module_stamp(String path) {
+  String expected = build_module_stamp();
+  if (!expected)
+    x2c_driver_error(
+      %"cannot read the running compiler to check native module '$path'");
+  File input = fopen(path, "rb");
+  if (!input)
+    x2c_driver_error(
+      %"cannot read native module '$path': ${String.new(strerror(errno))}");
+  fseek(input, 0, SEEK_END);
+  long end = ftell(input);
+  rewind(input);
+  char *data = Scope.malloc(end > 0 ? (size_t) end : 1);
+  size_t size = end > 0 ? fread(data, 1, (size_t) end, input) : 0;
+  input.close();
+  int current = _bytes_contain(data, size, expected);
+  int stamped = _bytes_contain(data, size, "x2c-module-stamp:");
+  Scope.free(data);
+  if (current) return;
+  if (!stamped) x2c_driver_error(%"not an x2c native module: $path");
+  x2c_driver_error(
+    %"native module '$path' was built by another compiler; rebuild it");
+}
+
+/* Loads the native module at `path` once per process and returns its
+   absolute path. Loading runs the module's code inside the compiler, so it
+   happens only on request. A module is never unloaded, because its Funcs
+   borrow its code. */
+static String _load_native_module(String path) {
 #if defined(__COSMOPOLITAN__) || defined(_WIN32) || defined(__CYGWIN__)
   x2c_driver_error("native modules are not supported on this platform");
 #endif
   String absolute = Path.absolute(path);
-  if (native_modules.contains(absolute)) return;
+  if (Compiler.native_module_loaded(absolute)) return absolute;
+  _check_module_stamp(path);
   void *handle = dlopen(absolute, RTLD_NOW | RTLD_LOCAL);
   if (!handle)
     x2c_driver_error(
       %"cannot load native module '$path': ${String.new(dlerror())}");
-  const char *stamp = dlsym(handle, "x2c_module_stamp");
   Map (*entry)(void) = (Map (*)(void)) dlsym(handle, "x2c_module_targets");
-  if (!stamp || !entry)
-    x2c_driver_error(%"not an x2c native module: $path");
-  String expected = build_compiler_stamp();
-  if (!expected || strcmp(stamp, expected)) {
-    fprintf(
-      stderr,
-      "x2c: error: native module was built by another compiler: %s\n"
-      "note: rebuild it with this compiler\n", path.str());
-    exit(2);
-  }
-  Compiler.add_native_targets(entry);
-  native_modules = cons(absolute, native_modules);
-  native_modules.try_own();
+  if (!entry) x2c_driver_error(%"not an x2c native module: $path");
+  Compiler.add_native_module(absolute, entry);
+  return absolute;
 }
 
-/** Loads process-owned collection support and the requested native modules
-    before units.
+/** Loads process-owned collection support and the native modules `request`
+    names before units, and selects those modules, in order, for its
+    compile-time calls.
 */
 void Frontend.load_support(CliRequest request) {
   interface_configure(request.out_dir);
-  foreach (String path, request.native_modules) _load_native_module(path);
+  Compiler.select_native_modules(
+    request.native_modules.map(%!(String path) => _load_native_module(path)));
 }
 
 /** Borrows a configured request for sequential units. The request and this

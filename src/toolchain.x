@@ -170,12 +170,13 @@ ToolAction Toolchain.link_action(Toolchain t, String output, List inputs) =>
 
 /** Builds but does not start the link of a native module. The module leaves
     the x2c runtime unresolved, so a loading compiler supplies its own copy.
-    macOS links a bundle and other hosts a shared object.
+    macOS links a bundle and other hosts a shared object whose calls to its
+    own functions never bind to a same-named function of the compiler.
 
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the action.
 */
 ToolAction Toolchain.module_action(Toolchain t, String output, List inputs) {
-  List shape = %("-shared");
+  List shape = %("-shared" "-Wl,-Bsymbolic-functions");
 #ifdef __APPLE__
   shape = %("-bundle" "-undefined" "dynamic_lookup");
 #endif

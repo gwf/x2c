@@ -39,7 +39,7 @@ The action retains `arguments` without copying them.
 
 **Raises:** `<alloc-fail>` when the action cannot be allocated.
 
-Source: `src/toolchain.x:192`
+Source: `src/toolchain.x:193`
 
 #### tool_capture
 
@@ -49,7 +49,7 @@ Runs the host tool `arguments` without a shell, captures both streams,
 and returns its shell-style status. A tool that cannot start returns 127
 and leaves the reason in `errors`.
 
-Source: `src/toolchain.x:259`
+Source: `src/toolchain.x:260`
 
 #### toolchain_new
 
@@ -74,7 +74,7 @@ Source: `src/toolchain.x:100`
 
 Inherits the standard streams and suppresses the failure summary.
 
-Source: `src/toolchain.x:203`
+Source: `src/toolchain.x:204`
 
 <a id="ToolAction.run"></a>
 #### ToolAction.run
@@ -86,7 +86,7 @@ Starts and waits for the action, returning its final status.
 **Raises:** the same construction and capture-reading causes as
 `ToolAction.start` and `ToolRun.wait`.
 
-Source: `src/toolchain.x:364`
+Source: `src/toolchain.x:365`
 
 <a id="ToolAction.start"></a>
 #### ToolAction.start
@@ -100,7 +100,7 @@ starts no child.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the execution
 or argv.
 
-Source: `src/toolchain.x:314`
+Source: `src/toolchain.x:315`
 
 ### `ToolRun`
 
@@ -112,7 +112,7 @@ Source: `src/toolchain.x:314`
 Checks whether an execution can be waited without blocking. A dry run
 and a tool that could not start are ready immediately.
 
-Source: `src/toolchain.x:332`
+Source: `src/toolchain.x:333`
 
 <a id="ToolRun.wait"></a>
 #### ToolRun.wait
@@ -127,7 +127,7 @@ stderr; program actions inherit standard streams.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 reading either capture as a `String`.
 
-Source: `src/toolchain.x:342`
+Source: `src/toolchain.x:343`
 
 ### `Toolchain`
 
@@ -178,11 +178,12 @@ Source: `src/toolchain.x:165`
 
 Builds but does not start the link of a native module. The module leaves
 the x2c runtime unresolved, so a loading compiler supplies its own copy.
-macOS links a bundle and other hosts a shared object.
+macOS links a bundle and other hosts a shared object whose calls to its
+own functions never bind to a same-named function of the compiler.
 
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the action.
 
-Source: `src/toolchain.x:177`
+Source: `src/toolchain.x:178`
 
 <a id="Toolchain.preprocess"></a>
 #### Toolchain.preprocess
@@ -205,7 +206,7 @@ does not consult `dry_run`.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 constructing arguments or reading captured text.
 
-Source: `src/toolchain.x:385`
+Source: `src/toolchain.x:386`
 
 <a id="Toolchain.preprocess_action"></a>
 #### Toolchain.preprocess_action
@@ -230,7 +231,7 @@ without explicit options, as it reports them, plus the `lib` directory
 beside each reported `include` directory. A compiler that reports none
 contributes none.
 
-Source: `src/toolchain.x:275`
+Source: `src/toolchain.x:276`
 
 ## Public types
 
