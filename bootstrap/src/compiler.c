@@ -1227,6 +1227,7 @@ void Compiler_borrow_unit_semantics(Compiler compiler, Compiler owner){
   compiler -> proto_cache = owner -> proto_cache;
   compiler -> meta_impure = owner -> meta_impure;
   compiler -> meta_comptime = owner -> meta_comptime;
+  compiler -> meta_regions = owner -> meta_regions;
   compiler -> meta_values = owner -> meta_values;
   compiler -> meta_layouts = owner -> meta_layouts;
   compiler -> native_meta = owner -> native_meta;
@@ -1295,6 +1296,7 @@ static Compiler _new(Compiler owner){
     (compiler) -> meta_folds = Map_new();
     (compiler) -> meta_impure = Map_new();
     (compiler) -> meta_comptime = Map_new();
+    (compiler) -> meta_regions = Map_new();
     (compiler) -> meta_values = Map_new();
     (compiler) -> meta_layouts = Map_new();
     (compiler) -> native_meta = Map_new();
@@ -1913,7 +1915,7 @@ void Compiler___complete_here(Compiler compiler, Symbol role, List keywords){
   if(! Compiler_at_completion(compiler)) return;
   List rows = Sym_visible_symbols(compiler -> sym);
   {
-    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 927};
+    static const X2CErrorSite _x2c_error_site_0 = {.file = "../../src/compiler.x",.function = "Compiler___complete_here",.line = 931};
     x2c_error_raise_n(& _x2c_error_site_0, 1248787135328, 3, Symbol_var(740232), Symbol_var(role), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(keywords));
   }
 
@@ -1947,7 +1949,7 @@ Symbol Compiler_peek(Compiler compiler, int steps){
   if(! steps && Compiler_at_completion(compiler)){
     List rows = Sym_visible_symbols(compiler -> sym);
     {
-      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 977};
+      static const X2CErrorSite _x2c_error_site_1 = {.file = "../../src/compiler.x",.function = "Compiler_peek",.line = 981};
       x2c_error_raise_n(& _x2c_error_site_1, 1248787135328, 3, Symbol_var(740232), Symbol_var(29452646), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL));
     }
 
@@ -1965,7 +1967,7 @@ Symbol Compiler_peek(Compiler compiler, int steps){
 
 void Compiler_require_input(Compiler c){
   if(c -> input_boundary && c -> token >= c -> input_boundary){
-    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 995};
+    static const X2CErrorSite _x2c_error_site_2 = {.file = "../../src/compiler.x",.function = "Compiler_require_input",.line = 999};
     x2c_error_raise_n(& _x2c_error_site_2, 664344300629258, 0);
     __builtin_unreachable();
   }
@@ -3114,7 +3116,7 @@ Iter List_iter(List, Iter);
 int Diagnostics_reached_limit(Diagnostics);
 int Compiler_error_count(Compiler);
 List Compiler_full_parse(Compiler c, Map globs, int generated_symbols){
-  if(! _init_guard_) _file_init_();  Array nodes = Array_new();  Array_clear(c -> origins);  Array_clear(c -> meta_defs);  c -> meta_folds = Map_new();  c -> meta_impure = Map_new();  c -> meta_comptime = Map_new();  c -> meta_values = Map_new();  c -> meta_layouts = Map_new();  c -> native_meta = Map_new();  Compiler_inherit_shared_meta(c);  c -> fixed = Map_new();  c -> init_tokens = Map_new();  c -> static_init_deps = Map_new();  c -> origin = 0;  Array_clear(c -> braces);  c -> arms = NULL;  Sym_reset(c -> sym, globs);  Compiler_rebuild_protocols(c, globs);  c -> macros = Map_new();  c -> kw_aliases = Map_new();  c -> kw_seen = Map_new();  Compiler_install_builtin_macros(c);  if(! c -> declaration_produced) c -> imports = Map_new();  Array_clear(c -> import_stack);  c -> macro_count = 0;  c -> macro_stack = NULL;  c -> source_private = 0;  Compiler_resolve_protocols(c);  if(generated_symbols) Compiler_install_generated_protocol_symbols(c);  Compiler_install_native_meta_effects(c, globs);  Map saved_holes = c -> macro_holes; {
+  if(! _init_guard_) _file_init_();  Array nodes = Array_new();  Array_clear(c -> origins);  Array_clear(c -> meta_defs);  c -> meta_folds = Map_new();  c -> meta_impure = Map_new();  c -> meta_comptime = Map_new();  c -> meta_regions = Map_new();  c -> meta_values = Map_new();  c -> meta_layouts = Map_new();  c -> native_meta = Map_new();  Compiler_inherit_shared_meta(c);  c -> fixed = Map_new();  c -> init_tokens = Map_new();  c -> static_init_deps = Map_new();  c -> origin = 0;  Array_clear(c -> braces);  c -> arms = NULL;  Sym_reset(c -> sym, globs);  Compiler_rebuild_protocols(c, globs);  c -> macros = Map_new();  c -> kw_aliases = Map_new();  c -> kw_seen = Map_new();  Compiler_install_builtin_macros(c);  if(! c -> declaration_produced) c -> imports = Map_new();  Array_clear(c -> import_stack);  c -> macro_count = 0;  c -> macro_stack = NULL;  c -> source_private = 0;  Compiler_resolve_protocols(c);  if(generated_symbols) Compiler_install_generated_protocol_symbols(c);  Compiler_install_native_meta_effects(c, globs);  Map saved_holes = c -> macro_holes; {
   _x2c_defer_env_9 _x2c_defer_env_35 = {._x2c_defer_capture_18 =(const void *) & c, ._x2c_defer_capture_19 =(const void *) & saved_holes};
   X2CCleanup _x2c_defer_record_13 = {
     .fn = _x2c_defer_cleanup_9,
@@ -3136,14 +3138,17 @@ List Compiler_full_parse(Compiler c, Map globs, int generated_symbols){
       Token conflict = NULL; {
         int * _x2c_macro_address_9 = & c -> recovery_depth;  int _x2c_macro_previous_9 = * _x2c_macro_address_9; {
   _x2c_defer_env_10 _x2c_defer_env_37 = {._x2c_defer_capture_20 =(const void *) & _x2c_macro_address_9, ._x2c_defer_capture_21 =(const void *) & _x2c_macro_previous_9};
+
   X2CCleanup _x2c_defer_record_15 = {
     .fn = _x2c_defer_cleanup_10,
     .env = & _x2c_defer_env_37
   };
   x2c_cleanup_push(&_x2c_defer_record_15);
   {
-          * _x2c_macro_address_9 = c -> recovery_depth + 1; {
-            _append_preproc(c, nodes);  Array statements = Array_new();
+          * _x2c_macro_address_9 = c -> recovery_depth + 1;
+          {
+            _append_preproc(c, nodes);
+            Array statements = Array_new();
             int hoisting = c -> script && ! c -> script -> defines_main;
             int volatile gap = 0;
             int volatile runs = 0;
