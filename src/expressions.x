@@ -1312,7 +1312,7 @@ static void _check_unit_static(Compiler c, String spelling, Token origin) {
   if (!x2c_source_file(c.filename)) return;
   List owner = c.sym.get(%("unit-static" $spelling));
   if (!owner) return;
-  String path = owner.car(), file = c.display_path(path);
+  String file = c.display_path(home_absolute_path(owner.car()));
   c.report_error(
     <type>, %"'$spelling' is a static function private to its unit", origin,
     %("it is defined in '$file';"

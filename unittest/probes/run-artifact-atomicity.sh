@@ -25,7 +25,7 @@ EOF
 [[ -s "$BUILD/first/probe.xi" ]] || fail "unit interface was not written"
 cmp -s "$BUILD/first/probe.xi" "$BUILD/second/probe.xi" ||
   fail "repeated translations wrote different interfaces"
-grep -q '^(interface 2 ' "$BUILD/first/probe.xi" ||
+grep -q '^(interface 3 ' "$BUILD/first/probe.xi" ||
   fail "interface lacks its version header"
 grep -Fq '"ProbeRow"' "$BUILD/first/probe.xi" ||
   fail "interface omits the unit's declarations"

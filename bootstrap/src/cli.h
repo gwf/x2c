@@ -25,7 +25,6 @@ typedef struct CliRequest{
   int max_errors;
   int source_map, source_facts, live_symbols, cpp_symbols, system_headers;
   int force, rebuild, clean;
-  int fatal_warnings, no_interfaces;
   SourceView sources;
 }
 * CliRequest;

@@ -537,6 +537,7 @@ static int _run_bootstrap(CliRequest command) {
     if (result) break;
   }
   if (!result) {
+    bootstrap_write_interfaces(payload);
     bootstrap_record_install(payload, request.cc, request.ar);
     printf("x2c: installed native compiler at %s/bin/x2c\n", payload.prefix);
   }

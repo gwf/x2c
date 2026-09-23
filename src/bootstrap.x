@@ -94,7 +94,7 @@ static void Bootstrap._verify(Bootstrap b, List records, String root) {
       Path.copy_file(%"/zip/x2c/$relative", installed);
     }
     String text = installed.read_text();
-    uint64_t hash = build_hash_bytes(
+    uint64_t hash = x2c_fnv_bytes(
       UINT64_C(1469598103934665603), text, text.len());
     if (text.len() != expected_size || hash != (uint64_t) expected_hash)
       _error_path("source failed verification", installed);
@@ -217,6 +217,44 @@ CliRequest bootstrap_build_request(
   request.max_errors = command.max_errors;
   request.verbose = command.verbose;
   return request;
+}
+
+/** Writes the prefix's runtime interfaces with its installed compiler.
+    An interface replays only for the compiler that wrote it, so the native
+    compiler translates the runtime sources as a stage build's library batch
+    does, and each `lib/<stem>.xi` is then replaced atomically. Sources are
+    named relative to the prefix, so their spelling matches the home the
+    compiler resolves. The scratch translation directory is removed
+    afterward. A translation that fails or cannot start prints a bootstrap
+    diagnostic with any errors the compiler printed; a failed write prints
+    the host error. Either exits with status 2.
+*/
+void bootstrap_write_interfaces(Bootstrap b) {
+  String prefix = b.prefix, out = ".x2c-build/interfaces";
+  Path.make_dirs(%"$prefix/$out");
+  Array sources = [];
+  foreach (String source, b.runtime_srcs)
+    sources.push(source.remove_prefix(%"$prefix/"));
+  Job translate =
+    %("$prefix/bin/x2c" "translate" "--out-dir" $out @{sources.list()})
+      .job().options({dir: prefix, env: {"X2C_HOME": "."},
+                      stdout: <capture>, stderr: <capture>});
+  int status = 127;
+  try status = translate.status();
+  catch %(not-found *): {}
+  catch %(io-fail *): {}
+  if (status)
+    _error(%"cannot write runtime interfaces: ${translate.errors_text}");
+  Array outputs = [];
+  foreach (String source, b.runtime_srcs) {
+    String name = %"${Path.stem(source)}.xi";
+    outputs.push(%"$prefix/lib/$name");
+    outputs.push(Path.read_text(%"$prefix/$out/$name"));
+  }
+  try file_publish(outputs.list_free());
+  catch %(not-found *detail): x2c_host_error(detail);
+  catch %(io-fail *detail): x2c_host_error(detail);
+  Path.remove_tree(%"$prefix/$out");
 }
 
 /** Records the resolved host tools and then publishes bootstrap completion.

@@ -13,8 +13,8 @@ Source-ordered shallow symbol collection and replay.
 | Function | Summary |
 | --- | --- |
 | [`interface_configure`](#interface_configure) | Creates the process cache and names the directories searched for `.xi` interfaces. |
-| [`interface_prelude`](#interface_prelude) | Returns the readable prelude interface path, or NULL when none exists. |
-| [`interface_text`](#interface_text) | Returns the compiler's own collected contribution as interface text, or NULL when the unit has not collected its symbols. |
+| [`interface_prelude`](#interface_prelude) | Returns the path of the first prelude interface this compiler wrote, or NULL when there is none or the compiler's identity is unknown. |
+| [`interface_text`](#interface_text) | Returns the compiler's own collected contribution as interface text, or NULL when the unit has not collected its symbols or the compiler's identity is unknown, since no compiler could replay that interface. |
 | [`Compiler.collect_package`](#Compiler.collect_package) | Collects a package once and installs its public surface in the current unit. |
 | [`Compiler.collect_symbols`](#Compiler.collect_symbols) | Collects the current translation unit's declarations into `globs`. |
 | [`Compiler.record_generated_symbol`](#Compiler.record_generated_symbol) | Records one generated public callable in the declaration map that the current file's collected entry contributes, which is the map its interface publishes. |
@@ -23,34 +23,37 @@ Source-ordered shallow symbol collection and replay.
 
 #### interface_configure
 
-`void interface_configure(String out_dir, int cold)`
+`void interface_configure(String out_dir)`
 
 Creates the process cache and names the directories searched for `.xi`
 interfaces. `out_dir` is the current translation output directory, or
 NULL. Home files mirror their home-relative path under the compiler's
 stage directory when it runs from `<home>/builds/`, otherwise under the
-home. A `cold` process reads no interface and still writes its own. Call
-it before opening any translation unit's Context.
+home. Call it before opening any translation unit's Context.
 
-Source: `src/collect.x:725`
+Source: `src/collect.x:727`
 
 #### interface_prelude
 
 `String interface_prelude(void)`
 
-Returns the readable prelude interface path, or NULL when none exists.
+Returns the path of the first prelude interface this compiler wrote, or
+NULL when there is none or the compiler's identity is unknown. Its
+source hashes are not checked.
 
-Source: `src/collect.x:750`
+Source: `src/collect.x:755`
 
 #### interface_text
 
 `String interface_text(Compiler compiler)`
 
 Returns the compiler's own collected contribution as interface text, or
-NULL when the unit has not collected its symbols. A contribution that
-the interface grammar cannot spell is reported as an `emit` diagnostic.
+NULL when the unit has not collected its symbols or the compiler's
+identity is unknown, since no compiler could replay that interface. A
+contribution that the interface grammar cannot spell is reported as an
+`emit` diagnostic.
 
-Source: `src/collect.x:972`
+Source: `src/collect.x:990`
 
 ### `Compiler`
 
@@ -68,7 +71,7 @@ protocol rows enter the current symbol state, and dependencies enter the
 importing compiler. Replay also merges recorded function definitions.
 `token` locates lookup and public-surface errors.
 
-Source: `src/collect.x:670`
+Source: `src/collect.x:671`
 
 <a id="Compiler.collect_symbols"></a>
 #### Compiler.collect_symbols
@@ -85,7 +88,7 @@ is `globs`. Collection also updates dependencies, function definitions,
 and macro state. Keyword alias maps and seen-name state are file-local
 and restored when each file walk ends.
 
-Source: `src/collect.x:509`
+Source: `src/collect.x:510`
 
 <a id="Compiler.record_generated_symbol"></a>
 #### Compiler.record_generated_symbol
@@ -97,7 +100,7 @@ current file's collected entry contributes, which is the map its
 interface publishes. A file without a collected declaration map records
 nothing. The cache retains `signature`.
 
-Source: `src/collect.x:365`
+Source: `src/collect.x:366`
 
 ## Design notes
 

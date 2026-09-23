@@ -557,9 +557,7 @@ static void _enable_raw(ReplInput input){
 
 static void _restore(ReplInput input){
   if(! input || ! input -> raw) return;
-  if(write(input -> ofd, "\x1b[?2004l", 8) < 0){
-
-  }
+  write(input -> ofd, "\x1b[?2004l", 8);
   tcsetattr(input -> ifd, TCSAFLUSH, & input -> original);
   input -> raw = 0;
 }
@@ -592,10 +590,7 @@ static int _terminal_columns(int ifd, int ofd){
     if(cols > start){
       char seq[32];
       snprintf(seq, 32, "\x1b[%dD", cols - start);
-      if(write(ofd, seq, strlen(seq)) < 0){
-
-      }
-
+      write(ofd, seq, strlen(seq));
     }
     return cols;
   }

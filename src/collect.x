@@ -293,10 +293,11 @@ static void _keep_published_rows(Map statics, Map overlay) {
    `#pragma private` alike, so its declaration row never crosses an include.
    The published marker names the defining file, which lets an including unit
    report a reference to the name instead of emitting a prototype that no
-   object defines. Only `.x` units publish markers; a C header's static
-   inline functions belong to every file that includes it. */
+   object defines. The file is spelled home-portably, as interfaces spell
+   paths. Only `.x` units publish markers; a C header's static inline
+   functions belong to every file that includes it. */
 static void _publish_unit_statics(Map statics, Map overlay, String path) {
-  List owner = %($path);
+  List owner = %(${home_portable_path(path)});
   foreach (Var key, statics.keys())
     match (%($key)) case %((function ?(String name))): {
       overlay.del(%($name));
@@ -709,9 +710,11 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
 // unit interfaces
 
 /* A `.xi` interface is one unit's cache entry written beside its generated
-   C. Missing, stale, or malformed interfaces are cache misses; the caller
-   walks the file cold and installs that result in the process cache. Paths
-   inside an interface use `home_portable_path` spellings. */
+   C. It records the identity of the compiler that wrote it, because a
+   different compiler may collect different rows from the same source.
+   Missing, stale, foreign, or malformed interfaces are cache misses; the
+   caller walks the file cold and installs that result in the process cache.
+   Paths inside an interface use `home_portable_path` spellings. */
 
 static String interface_out_dir = NULL, interface_mirror = NULL;
 
@@ -746,11 +749,22 @@ static List _interface_candidates(String canonical) {
   return paths.list_free();
 }
 
-/** Returns the readable prelude interface path, or NULL when none exists. */
+/** Returns the path of the first prelude interface this compiler wrote, or
+    NULL when there is none or the compiler's identity is unknown. Its
+    source hashes are not checked.
+*/
 String interface_prelude(void) {
+  String identity = x2c_compiler_identity();
+  if (!identity) return NULL;
   String runtime = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
-  foreach (String path, _interface_candidates(runtime))
-    if (!access(path, R_OK)) return path;
+  String header = %"(interface 3 \"$identity\" ";
+  foreach (String path, _interface_candidates(runtime)) {
+    String text = NULL;
+    try text = Path.read_text(path);
+    catch %(not-found *): continue;
+    catch %(io-fail *): continue;
+    if (text.startswith(header)) return path;
+  }
   return NULL;
 }
 
@@ -795,10 +809,10 @@ static int _hash_matches(Compiler compiler, String path, Var expected) {
   return String.equal(hash, expected);
 }
 
-/* Materialize one interface file only after its source path and hash, and
-   the content hashes of the includes, macros, Lisp, and embedded text it
-   depends on, validate. The entry uses process_cache_scope ownership and the
-   same ordered parts representation as a cold walk. */
+/* Materialize one interface file only after its compiler identity, source
+   path and hash, and the content hashes of the includes, macros, Lisp, and
+   embedded text it depends on, validate. The entry uses process_cache_scope
+   ownership and the same ordered parts representation as a cold walk. */
 static List _interface_load(Compiler c, String canonical, String path) {
   String source = NULL;
   File input = fopen(path, "r");
@@ -813,9 +827,12 @@ static List _interface_load(Compiler c, String canonical, String path) {
   catch %(malformed *): return NULL;
   if (status != <value> || record is not <list>) return NULL;
   match (record)
-    case %(interface 2 ?(String owner) ?(String hash) ?(List stored_parts)
-           ?(List definitions) ?(List stored_dependencies)): {
-      if (!home_absolute_path(owner).equal(canonical) ||
+    case %(interface 3 ?(String compiler) ?(String owner) ?(String hash)
+           ?(List stored_parts) ?(List definitions)
+           ?(List stored_dependencies)): {
+      String identity = x2c_compiler_identity();
+      if (!identity || !compiler.equal(identity) ||
+          !home_absolute_path(owner).equal(canonical) ||
           !_hash_matches(c, canonical, hash)) return NULL;
       return _interface_entry(
         c, canonical, hash, stored_parts, definitions, stored_dependencies);
@@ -957,8 +974,8 @@ static int _write_interface_entry(Buffer out, String canonical, List entry) {
   List dependency_list = dependencies.list_free();
   List part_list = parts.list_free();
   List record = %(
-    interface 2 ${home_portable_path(canonical)} $hash
-    $part_list $definitions $dependency_list
+    interface 3 ${x2c_compiler_identity()} ${home_portable_path(canonical)}
+    $hash $part_list $definitions $dependency_list
   );
   if (!_write_datum(out, record)) return 0;
   out.write_char('\n');
@@ -966,10 +983,13 @@ static int _write_interface_entry(Buffer out, String canonical, List entry) {
 }
 
 /** Returns the compiler's own collected contribution as interface text, or
-    NULL when the unit has not collected its symbols. A contribution that
-    the interface grammar cannot spell is reported as an `emit` diagnostic.
+    NULL when the unit has not collected its symbols or the compiler's
+    identity is unknown, since no compiler could replay that interface. A
+    contribution that the interface grammar cannot spell is reported as an
+    `emit` diagnostic.
 */
 String interface_text(Compiler compiler) {
+  if (!x2c_compiler_identity()) return NULL;
   String canonical = _canonical_path(compiler.filename);
   Var cached = _process_cache()[canonical];
   if (cached is void) return NULL;

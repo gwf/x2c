@@ -80,45 +80,21 @@ static String _process_suffix(void) => "tmp.%ld".printf((long) getpid());
    A missing or unreadable input clears `ok`; state writes are best effort and
    use a temporary followed by rename. */
 
-/** Returns `hash` extended with `length` `bytes` by 64-bit FNV-1a. */
-uint64_t build_hash_bytes(uint64_t hash, const void *bytes, size_t length) {
-  const unsigned char *data = bytes;
-  for (size_t i = 0; i < length; i++) {
-    hash ^= data[i];
-    hash *= UINT64_C(1099511628211);
-  }
-  return hash;
-}
-
 /* Null text uses 0xff, present text ends with NUL, and each List ends with
    0xfe. These separators distinguish adjacent ordered fingerprint fields. */
 static uint64_t _state_text(uint64_t hash, String text) {
-  if (!text) return build_hash_bytes(hash, "\xff", 1);
-  hash = build_hash_bytes(hash, text, strlen(text));
-  return build_hash_bytes(hash, "\0", 1);
+  if (!text) return x2c_fnv_bytes(hash, "\xff", 1);
+  hash = x2c_fnv_bytes(hash, text, strlen(text));
+  return x2c_fnv_bytes(hash, "\0", 1);
 }
 
 static uint64_t _state_list(uint64_t hash, List values) {
   foreach (String value, values) hash = _state_text(hash, value);
-  return build_hash_bytes(hash, "\xfe", 1);
-}
-
-static uint64_t _state_contents(uint64_t hash, String path, int *ok) {
-  File input = fopen(path, "rb");
-  if (!input) {
-    *ok = 0;
-    return hash;
-  }
-  unsigned char buffer[16384], size_t length;
-  while ((length = fread(buffer, 1, sizeof(buffer), input)))
-    hash = build_hash_bytes(hash, buffer, length);
-  if (ferror(input)) *ok = 0;
-  input.close();
-  return hash;
+  return x2c_fnv_bytes(hash, "\xfe", 1);
 }
 
 static uint64_t _state_file(uint64_t hash, String path, int *ok) {
-  return _state_contents(_state_text(hash, path), path, ok);
+  return x2c_fnv_file(_state_text(hash, path), path, ok);
 }
 
 static uint64_t _state_tool(uint64_t hash, String tool, int *ok) {
@@ -132,27 +108,24 @@ static uint64_t _state_tool(uint64_t hash, String tool, int *ok) {
   return _state_text(hash, tool);
 }
 
-static const uint64_t _state_start = UINT64_C(1469598103934665603);
-
 static uint64_t _state_base(CliRequest request, String tool, int *ok) {
-  uint64_t hash = _state_start;
+  uint64_t hash = UINT64_C(1469598103934665603);
   hash = _state_text(hash, "x2c-state-v1");
   hash = _state_text(hash, request.state_seed);
-  hash = _state_tool(hash, x2c_get_executable(), ok);
+  String compiler = x2c_compiler_identity();
+  if (!compiler) *ok = 0;
+  hash = _state_text(hash, compiler);
   hash = _state_tool(hash, tool, ok);
   return hash;
 }
 
 /** Returns the stamp a native module records: `x2c-module-stamp:` and the
-    content hash of the running compiler as 16 hex digits. Returns NULL when
-    the executable cannot be read. Only the compiler that built a module
-    loads it.
+    running compiler's identity. Returns NULL when the executable cannot be
+    read. Only the compiler that built a module loads it.
 */
 String build_module_stamp(void) {
-  String executable = x2c_get_executable(), int ok = executable != NULL;
-  uint64_t hash = ok ? _state_contents(_state_start, executable, &ok) : 0;
-  return ok ? "x2c-module-stamp:%016llx".printf((unsigned long long) hash)
-            : NULL;
+  String identity = x2c_compiler_identity();
+  return identity ? %"x2c-module-stamp:$identity" : NULL;
 }
 
 static List _state_dep_inputs(String depfile) {
@@ -549,7 +522,7 @@ static uint64_t _action_fingerprint(
    says extends the compile fingerprint. */
 static uint64_t _compile_fingerprint(
   Build state, ToolAction action, String preprocessed, int *ok) {
-  return _state_contents(
+  return x2c_fnv_file(
     _action_fingerprint(state, action, NULL, ok), preprocessed, ok);
 }
 
@@ -821,12 +794,17 @@ int Build.finish(Build b) {
       return 0;
     }
   }
-  // The fingerprint and the receipts name the output; the tool writes a
-  // private sibling that rename puts in its place.
+  // The fingerprint and the receipts name the output; the tool writes it in
+  // a private sibling directory, and rename puts it in place. The staged
+  // file keeps the output's basename, which a linker may record in the file
+  // (the macOS ad-hoc signature does), so its bytes do not name this process.
   ToolAction publish = action;
-  String staged = NULL;
+  String staging = NULL, staged = NULL;
   if (!b.request.dry_run) {
-    staged = %"${b.output}.${_process_suffix()}";
+    String name = Path.basename(b.output);
+    staging = %"${Path.dirname(b.output)}/.$name.${_process_suffix()}";
+    Path.make_dirs(staging);
+    staged = %"$staging/$name";
     publish =
       b.request.kind == <static-lib> ?
         b.toolchain.archive_action(staged, inputs) :
@@ -835,16 +813,17 @@ int Build.finish(Build b) {
         b.toolchain.link_action(staged, inputs);
   }
   if (publish.run()) {
-    if (staged) Path.remove_file(staged);
+    if (staging) Path.remove_tree(staging);
     return 1;
   }
   if (staged && rename(staged, b.output)) {
     fprintf(
       stderr, "x2c: error: cannot replace %s: %s\n",
       b.output.str(), strerror(errno));
-    Path.remove_file(staged);
+    Path.remove_tree(staging);
     return 1;
   }
+  if (staging) Path.remove_tree(staging);
   if (_mapped_debug(b)) {
     String output = b.output, symbols = %"$output.dSYM";
     ToolAction debug = tool_action_new(

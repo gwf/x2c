@@ -14,6 +14,7 @@ prefix.
 | [`x2c_block_make`](meta.md#x2c_block_make) | `lib/meta.x` | `meta List x2c_block_make(List items)` |
 | [`x2c_cleanup_leave`](exception.md#x2c_cleanup_leave) | `lib/exception.x` | `void x2c_cleanup_leave(X2CCleanup *record)` |
 | [`x2c_cleanup_push`](exception.md#x2c_cleanup_push) | `lib/exception.x` | `void x2c_cleanup_push(X2CCleanup *record)` |
+| `x2c_compiler_identity` | `src/utils.x` | `String x2c_compiler_identity(void)` |
 | `x2c_cpp_include_dirs` | `src/utils.x` | `List x2c_cpp_include_dirs(void)` |
 | [`x2c_decl_make`](meta.md#x2c_decl_make) | `lib/meta.x` | `meta List x2c_decl_make(List type, Var name, List initializer)` |
 | `x2c_default_include_dirs` | `src/utils.x` | `List x2c_default_include_dirs(void)` |
@@ -45,6 +46,8 @@ prefix.
 | [`x2c_expr_index`](meta.md#x2c_expr_index) | `lib/meta.x` | `meta List x2c_expr_index(List base, List subscript)` |
 | `x2c_filename_hash` | `src/utils.x` | `String x2c_filename_hash(String filename)` |
 | `x2c_find_program` | `src/utils.x` | `String x2c_find_program(String name)` |
+| `x2c_fnv_bytes` | `src/utils.x` | `uint64_t x2c_fnv_bytes(uint64_t hash, const void *bytes, size_t length)` |
+| `x2c_fnv_file` | `src/utils.x` | `uint64_t x2c_fnv_file(uint64_t hash, String path, int *ok)` |
 | [`x2c_func_pointer_argument`](func.md#x2c_func_pointer_argument) | `lib/func.x` | `void *x2c_func_pointer_argument(Func fn, const FuncArg *argv, unsigned i)` |
 | [`x2c_func_record_result`](func.md#x2c_func_record_result) | `lib/func.x` | `Var x2c_func_record_result(const void *bytes, size_t size)` |
 | [`x2c_func_reference_argument`](func.md#x2c_func_reference_argument) | `lib/func.x` | `void *x2c_func_reference_argument( Func fn, const FuncArg *argv, unsigned i, List want)` |
@@ -115,4 +118,4 @@ prefix.
 | [`x2c_var_update_ulong`](varops.md#x2c_var_update_ulong) | `lib/varops.x` | `ulong x2c_var_update_ulong( volatile ulong *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long( volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 
-Total: 103 functions.
+Total: 106 functions.

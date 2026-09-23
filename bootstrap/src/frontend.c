@@ -288,7 +288,7 @@ static String _load_native_module(String path){
   return absolute;
 }
 
-void interface_configure(String, int);
+void interface_configure(String);
 
 void Compiler_select_native_modules(List);
 
@@ -296,7 +296,7 @@ List List_map(List, Func);
 
 void Frontend_load_support(CliRequest request){
   if(! _init_guard_) _file_init_();
-  interface_configure(request -> out_dir, request -> no_interfaces);
+  interface_configure(request -> out_dir);
   Compiler_select_native_modules(List_map(request -> native_modules, _x2c_func_handle_0));
 }
 
