@@ -1,0 +1,110 @@
+#!/usr/bin/env -S x2c script
+/*  run-scope-shutdown -- Scope and Thread lifecycle at process shutdown
+
+    Builds `scope-shutdown.x` against the stage runtime and `scope-preinit.c`
+    against the Scope objects alone, then runs each mode and checks its
+    status, standard output, and standard error.
+*/
+#include "probe.x"
+
+static String _stdout(Job job) {
+  String output = NULL;
+  try output = job.output();
+  catch %(cmd-fail *failure): output = failure.assoc(<output>);
+  return output;
+}
+
+/* Runs a mode that must exit zero with `output` on standard output, and
+   returns its standard error. */
+static String _passes(Path program, String mode, String output) {
+  Job job = %($program $mode).job().options({stderr: <capture>});
+  if (job.status())
+    probe_fail(%"$mode: exited with status ${job.status()}");
+  if (_stdout(job).rstrip("\n") != output)
+    probe_fail(%"$mode: unexpected standard output");
+  return job.errors();
+}
+
+/* Runs a mode that must end in a terminal failure with nothing on standard
+   output, reporting `message` when it succeeds, and returns the first line
+   of its standard error. */
+static String _fails(Path program, String mode, String message) {
+  Job job = %($program $mode).job().options({stderr: <capture>});
+  if (!job.status()) probe_fail(message);
+  if (_stdout(job)) probe_fail(%"$mode: unexpected standard output");
+  List lines = job.errors().split_lines(0);
+  return lines ? lines.car() : NULL;
+}
+
+static void _quiet(Path program, String mode) {
+  if (_passes(program, mode, NULL))
+    probe_fail(%"$mode: unexpected standard error");
+}
+
+static void _stderr(String mode, String actual, String expected) {
+  if (actual != expected)
+    probe_fail(%"$mode: standard error is not '$expected'");
+}
+
+Path root = probe_root(argv[0]);
+Path build = root.join("unittest/build/scope-probes");
+Path program = build.join("scope-shutdown");
+Path preinit = build.join("scope-preinit");
+Path stage = root.join("builds/0");
+build.make_dirs();
+
+Path x2c = stage.join("x2c");
+Path source = root.join("unittest/probes/scope-shutdown.x");
+%($x2c translate --out-dir $build $source).job().run();
+Path include = root.join("include/x2c"), stage_src = stage.join("src");
+Path generated = build.join("scope-shutdown.c");
+String library = %"-L$stage";
+%(cc -g -iquote $include -iquote $stage_src $generated $library -lx2c -lm
+  -o $program).job().run();
+Path stage_lib = stage.join("lib");
+Path preinit_c = root.join("unittest/probes/scope-preinit.c");
+Path scope_o = stage_lib.join("scope.o");
+Path thread_o = stage_lib.join("thread-state.o");
+%(cc -g -iquote $stage_lib $preinit_c $scope_o $thread_o -pthread -lm
+  -o $preinit).job().run();
+
+foreach (String mode, %("allocate" "shutdown")) _quiet(preinit, mode);
+_stderr("malloc-overflow",
+        _fails(preinit, "malloc-overflow",
+               "malloc-overflow: expected terminal failure"),
+        "Scope: allocation size overflow");
+_stderr("calloc-overflow",
+        _fails(preinit, "calloc-overflow",
+               "calloc-overflow: expected terminal failure"),
+        "Scope: calloc size overflow");
+_stderr("reinitialize",
+        _fails(preinit, "reinitialize",
+               "post-shutdown initialization restarted Scope"),
+        "Scope: operation attempted after shutdown");
+
+_quiet(program, "clean");
+_stderr("leak", _passes(program, "leak", NULL).rstrip("\n"),
+        "Scope leak detected:\n\tlive_scopes: 1\n\tlive_allocations: 1\n"
+        "\tscope \"probe leak\": 1 allocations\n"
+        "\tlive_backing_allocations: 2");
+foreach (String mode, %("repeat" "thread-state" "hooks" "overflow"))
+  _quiet(program, mode);
+_stderr("after",
+        _fails(program, "after",
+               "post-shutdown allocation unexpectedly succeeded"),
+        "Scope: operation attempted after shutdown");
+foreach (String mode, %("finalizer-shutdown" "finalizer-thread"))
+  if (_passes(program, mode, "drop"))
+    probe_fail(%"$mode: unexpected standard error");
+foreach (String mode, %("push-null" "slot-null" "hook-null"))
+  _quiet(program, mode);
+_stderr("live-thread-match",
+        _fails(program, "live-thread-match",
+               "live worker unexpectedly survived shutdown"),
+        "Thread: 1 worker(s) still live at shutdown");
+_stderr("completed-thread",
+        _fails(program, "completed-thread",
+               "completed unjoined worker unexpectedly survived shutdown"),
+        "Thread: 1 worker(s) still live at shutdown");
+
+printf("Scope lifecycle probes passed\n");
