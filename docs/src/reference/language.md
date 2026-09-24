@@ -1897,11 +1897,14 @@ An explicit `new` suppresses its generated constructor and init requirement.
 Derived classes forward the nearest applicable constructor; variadic forwarding
 requires an explicit constructor.
 
-Flat value fields produce positional constructors in declaration order, with
-unnamed bitfield padding omitted. Non-flat or resource-containing aggregates
-require `void T.init(T *)` for a value or `void T.init(T)` for a heap pointer,
-called on zero-initialized storage. Heap defaults allocate through Scope and
-provide early `free`; they do not recursively own fields. Scalar and derived
+An aggregate class that defines `void T.init(T *, ...)` for a value or
+`void T.init(T, ...)` for a heap pointer gets a `new` taking the parameters
+after the receiver; it calls `init` on zero-initialized storage. Otherwise
+flat value fields produce positional constructors in declaration order, with
+unnamed bitfield padding omitted, and non-flat or resource-containing
+aggregates require `init`. Heap defaults allocate through Scope and provide
+early `free`, which accepts NULL and calls `void T.drop(T)` first when the
+class defines it; they do not otherwise own fields. Scalar and derived
 aliases retain their ordinary Var representation. Heap classes box identity;
 aggregate values box a Scope-owned copy and require compatible equal/hash
 operations, generated for supported value fields.
