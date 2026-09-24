@@ -28,6 +28,17 @@ Resolve consequential choices with Gary when the request leaves them open,
 especially changes to public semantics, compatibility, or caller obligations.
 Complete routine missing plan details and its design review within an
 already authorized implementation; a missing heading is not a reason to stop.
+Follow Gary's explicit direction using the smallest proportionate action.
+Repository process is a default, not an excuse to enlarge, delay, or redirect
+the task; deviate only for a concrete safety or correctness risk, and state
+that risk plainly.
+Do not materially enlarge the requirement a change serves. If a repair would
+roughly double its code, concepts, validation, or cost, choose a simpler
+boundary or ask Gary before implementing it.
+
+When Gary says current work looks wrong, slow, wasteful, or off-scope, stop
+that work and verify the specific concern against a known baseline before
+offering reassurance or continuing.
 
 Use subagents for independent discovery or bounded work. Verify a reported
 finding against current source and reproduce claimed behavior before acting
