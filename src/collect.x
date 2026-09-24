@@ -227,13 +227,14 @@ static int _package_owns(Compiler c, String path) {
 static void _parse_segment(
   Compiler c, String path, String source, String text, int start_line,
   int start_pos, Map globs, Map overlay, Map definitions, Map dependencies,
-  int private) {
+  int private, int *linkage) {
   Compiler shadow = Compiler.new_shared(c);
   defer c.close_child(shadow);
   int unit = x2c_source_file(path);
   if (!unit || !_package_owns(c, path)) shadow.package = NULL;
   shadow.filename = path;
   shadow.source_private = private;
+  shadow.open_linkage = *linkage;
   shadow.take_unit_state(c);
   shadow.tokenize(text);
   shadow.text = source;
@@ -244,6 +245,7 @@ static void _parse_segment(
     token.pos += start_pos;
   }
   shadow.shallow_parse_overlay(globs, overlay);
+  *linkage = shadow.open_linkage;
   shadow.return_unit_state(c);
   if (unit) {
     c.fn_defs.merge(shadow.fn_defs);
@@ -311,14 +313,14 @@ static void _publish_unit_statics(Map statics, Map overlay, String path) {
 static void _flush_segment(
   Compiler compiler, String path, String source, String text, int start_line,
   int start_pos, Map globs, Array parts, Map definitions, Map dependencies,
-  int private) {
+  int private, int *linkage) {
   if (!text || !*text) return;
   Scope.push(&process_cache_scope);
   Map overlay = {};
   Scope.pop();
   _parse_segment(
     compiler, path, source, text, start_line, start_pos,
-    globs, overlay, definitions, dependencies, private);
+    globs, overlay, definitions, dependencies, private, linkage);
   if (!overlay.len()) return;
   Var overlay_var = overlay;
   parts.push(overlay_var);
@@ -401,7 +403,7 @@ static void _file(
     Scope.push(&process_cache_scope);
     Map dependencies = {};
     Scope.pop();
-    Map definitions = {}, int private = 0;
+    Map definitions = {}, int private = 0, linkage = 0;
     String content_hash = "%08x".printf(text.hash());
     /* Scanned tokens place directives outside strings and comments. A
        segment ends before an include or a visibility pragma, and the next
@@ -417,7 +419,8 @@ static void _file(
       if (!target && visibility < 0) continue;
       _flush_segment(
         c, path, text, text[segment_position:token.pos], segment_line,
-        segment_position, globs, parts, definitions, dependencies, private);
+        segment_position, globs, parts, definitions, dependencies, private,
+        &linkage);
       if (target) {
         /* The entry records every include, so it does not depend on what
            the unit that first walked this file had already seen. */
@@ -436,7 +439,7 @@ static void _file(
     }
     _flush_segment(
       c, path, text, text[segment_position:], segment_line, segment_position,
-      globs, parts, definitions, dependencies, private);
+      globs, parts, definitions, dependencies, private, &linkage);
     Map generated =
       c.select_declaration_defaults(path, globs, parts, definitions);
     if (generated && generated.len()) {

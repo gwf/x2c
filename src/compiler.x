@@ -164,6 +164,8 @@ typedef struct Compiler {
   // Set when a cleanup region needs the exception runtime declarations.
   int needs_exception;
   int local_macro_capture_scopes;
+  // Linkage groups that earlier segments of the collected file left open.
+  int open_linkage;
   String fn_name, Diagnostics diagnostics, Array braces, import_stack;
   // The unit's script record, and the same record on the compiler whose own
   // file is that script; both NULL for an ordinary unit.
@@ -1640,7 +1642,6 @@ static void _shallow_parse_loop(Compiler c) {
      define macros for the segments that follow. */
   foreach (List directive, c.leading_preproc())
     _note_object_macro(c, directive.cadr());
-  _check_unmatched_braces(c);
   c.shallow = 0;
 }
 
@@ -1653,6 +1654,7 @@ void Compiler.shallow_parse(Compiler c, Map globals) {
   c.sym.reset(globals);
   c.install_builtin_macros();
   _shallow_parse_loop(c);
+  _check_unmatched_braces(c);
 }
 
 /** Collects declarations with reads over `base` then `overlay`.
@@ -1672,6 +1674,8 @@ void Compiler.shallow_parse_overlay(Compiler c, Map base, Map overlay) {
   c.sym._reset_overlay(base, overlay);
   c.install_builtin_macros();
   _shallow_parse_loop(c);
+  // Only linkage groups remain open; a later segment of the file closes them.
+  c.open_linkage += c.braces.len();
 }
 
 /** Returns source-ordered preprocessor nodes in the preceding trivia.

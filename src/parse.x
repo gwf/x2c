@@ -1859,7 +1859,14 @@ int Compiler.skip_linkage_brace(Compiler c) {
     c.next();
     c.next();
   }
-  else if (c.peek(0) != <"}"> || !c.braces.len()) return 0;
+  else if (c.peek(0) != <"}">) return 0;
+  else if (!c.braces.len()) {
+    // The group opened before an include, in an earlier segment.
+    if (!c.open_linkage) return 0;
+    c.open_linkage--;
+    c.token = c.skip_trivia_from(c.token + 1);
+    return 1;
+  }
   c.next();
   return 1;
 }
