@@ -181,8 +181,9 @@ static int _is_protocol_bootstrap_function(String spelling) =>
   spelling == "x2c_register_builtin_descriptor" ||
   spelling == "x2c_try_register_tagged_descriptor";
 
-/* Functions are keyed by binding number, which names one live declaration
-   in the unit. */
+/* Functions are keyed by spelling, which names one file-scope function in
+   the unit. Binding numbers do not: class defaults selected during
+   macro-library preload are numbered apart from the unit's own walk. */
 static void _collect_cache_function_refs(
   Var value, Var caller, Map callers, int *uses_cache) {
   if (value is not <list>) return;
@@ -192,7 +193,7 @@ static void _collect_cache_function_refs(
       *uses_cache = 1;
       return;
     }
-    case %(ident (binding ?callee ?)): {
+    case %(ident (binding ? ?callee)): {
       List found = callee in callers ? callers[callee] : NULL;
       callers[callee] = cons(caller, found);
       return;
@@ -206,16 +207,16 @@ static void _collect_cache_function_refs(
    A cache-only file patches only these entries. Its eager constructor
    already runs the initializers, and unrelated foundational calls then
    cannot recursively materialize literals during String/List pool setup. */
-static Map _cache_reachable_function_ids(List source) {
+static Map _cache_reachable_functions(List source) {
   Map callers = {}, reachable = {}, Array queue = [];
   foreach (List func, source)
     match (func)
       case %(!set ?definition
-             (function ? (bind (binding ?identity ?) ?) ?)): {
+             (function ? (bind (binding ? ?spelling) ?) ?)): {
         int uses_cache = 0;
         _collect_cache_function_refs(
-          definition, identity, callers, &uses_cache);
-        if (uses_cache) queue.push(identity);
+          definition, spelling, callers, &uses_cache);
+        if (uses_cache) queue.push(spelling);
       }
   for (int i = 0; i < queue.len(); i++) {
     Var key = queue[i];
@@ -266,8 +267,8 @@ static List _file_init(Compiler c, List source) {
   int cache_only =
     !initializer && c.init_statements(<early>) &&
     !c.init_statements(<mid>) && !c.init_statements(<late>);
-  Map cache_reachable_ids = cache_only
-                          ? _cache_reachable_function_ids(source) : NULL;
+  Map cache_reachable =
+    cache_only ? _cache_reachable_functions(source) : NULL;
   int prelude = _init_prelude_position(source), position = 0;
   List result = NULL;
 
@@ -279,7 +280,7 @@ static List _file_init(Compiler c, List source) {
       case %(!set ?function
              (function (!set ?type (*))
                (!set ?declarator
-               (bind (binding ?identity ?spelling) ?))
+               (bind (binding ? ?spelling) ?))
                (block *statements))): {
         String name = spelling;
         if (name == "x2c_initialize_protocols")
@@ -292,7 +293,7 @@ static List _file_init(Compiler c, List source) {
         else if (!type.type().is_static() &&
                  !_is_protocol_bootstrap_function(name) &&
                  (!cache_only ||
-                  identity in cache_reachable_ids))
+                  spelling in cache_reachable))
           function = _patch_func_with_init(
             type, declarator, statements, initializer_name, guard);
         item = function;
