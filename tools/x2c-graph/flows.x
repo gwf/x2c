@@ -22,18 +22,6 @@ static List _flow_producer_target;
 static Map _flow_public_index, _flow_tainted_parameters;
 static Map _flow_tainted_returns;
 
-static List _flow_location(Compiler compiler, String path, int origin) {
-  List location = compiler.origin_location(origin);
-  if (!location) return %(location $path 0 0);
-  Var file = location.assoc(<file>);
-  String source = file is <string>
-                ? compiler.display_path(file.str()) : path;
-  return %(
-    location $source ${location.assoc(<line>).integer()}
-    ${location.assoc(<column>).integer()}
-  );
-}
-
 static List _flow_summary(
   Compiler compiler, Var value, Map parameters, Map locals) {
   if (value is not <list>) return %(value);
@@ -94,7 +82,7 @@ static List _flow_source(
   Map parameters, Map locals) {
   if (value is not <list>)
     return %(
-      unknown "value" ${_flow_location(compiler, path, origin)}
+      unknown "value" ${project_location(compiler, path, origin)}
     );
   List node = value;
   match (node) {
@@ -132,7 +120,7 @@ static List _flow_source(
       );
       if (name && name == "List_var" && arguments && !arguments.cdr())
         return %(
-          wrapper $name ${_flow_location(compiler, path, origin)}
+          wrapper $name ${project_location(compiler, path, origin)}
           ${_flow_source(
             compiler, arguments.car(), path, origin, definitions,
             parameters, locals
@@ -141,7 +129,7 @@ static List _flow_source(
       return %(
         call ${target ? target : %(computed)}
         ${name ? name : %"computed"}
-        ${_flow_location(compiler, path, origin)}
+        ${project_location(compiler, path, origin)}
         (arguments
           @{_flow_arguments(
             compiler, arguments, path, origin, definitions,
@@ -151,7 +139,7 @@ static List _flow_source(
     }
     case %(op ? ? ?ontrue ?onfalse):
       return %(
-        choice ${_flow_location(compiler, path, origin)}
+        choice ${project_location(compiler, path, origin)}
         ${_flow_source(
           compiler, ontrue, path, origin, definitions, parameters, locals
         )}
@@ -160,9 +148,13 @@ static List _flow_source(
         )}
       );
     case %(op . ? (?)):
-      return %(unknown "field-read" ${_flow_location(compiler, path, origin)});
+      return %(
+        unknown "field-read" ${project_location(compiler, path, origin)}
+      );
     case %(op (!quote ->) ? (?)):
-      return %(unknown "field-read" ${_flow_location(compiler, path, origin)});
+      return %(
+        unknown "field-read" ${project_location(compiler, path, origin)}
+      );
   }
   return %(
     value ${_flow_summary(compiler, node, parameters, locals)}
@@ -248,7 +240,7 @@ static void _flow_invalidate_addressed(
         List prior = locals[binding];
         locals[binding] = %(
           unknown "address-mutation"
-          ${_flow_location(compiler, path, origin)} $prior
+          ${project_location(compiler, path, origin)} $prior
         );
       }
       return;
@@ -280,7 +272,7 @@ static void _flow_merge_locals(
       continue;
     }
     locals[binding] = %(
-      unknown "alias-merge" ${_flow_location(compiler, path, origin)}
+      unknown "alias-merge" ${project_location(compiler, path, origin)}
       $first_source $second_source
     );
   }
@@ -290,7 +282,7 @@ static void _flow_set_local(
   Compiler compiler, List binding, String spelling, Var value, Symbol kind,
   String path, int origin, Map definitions, Map parameters, Map locals) {
   locals[binding] = %(
-    $kind $spelling ${_flow_location(compiler, path, origin)}
+    $kind $spelling ${project_location(compiler, path, origin)}
     ${_flow_source(
       compiler, value, path, origin, definitions, parameters, locals
     )}
@@ -334,7 +326,7 @@ static void _flow_statement(
           default:
             locals[binding] = %(
               unknown "uninitialized"
-              ${_flow_location(compiler, path, origin)}
+              ${project_location(compiler, path, origin)}
             );
         }
       }
@@ -357,7 +349,7 @@ static void _flow_statement(
       else
         unresolved.push(%(
           unresolved "field-storage"
-          ${_flow_location(compiler, path, origin)}
+          ${project_location(compiler, path, origin)}
           ${_flow_source(
             compiler, right, path, origin, definitions, parameters,
             locals
@@ -378,10 +370,10 @@ static void _flow_statement(
                    ? locals[binding].list()
                    : %(
                        unknown "prior"
-                       ${_flow_location(compiler, path, origin)}
+                       ${project_location(compiler, path, origin)}
                      );
         locals[binding] = %(
-          unknown "mutation" ${_flow_location(compiler, path, origin)}
+          unknown "mutation" ${project_location(compiler, path, origin)}
           $prior
         );
       }
@@ -393,7 +385,7 @@ static void _flow_statement(
     }
     case %(return ? ?expression): {
       returns.push(%(
-        return ${_flow_location(compiler, path, origin)}
+        return ${project_location(compiler, path, origin)}
         ${_flow_source(
           compiler, expression, path, origin, definitions, parameters,
           locals
