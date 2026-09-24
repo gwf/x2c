@@ -785,7 +785,7 @@ Public functions:
 `lisp_cell`, `lisp_address`, `lisp_load`, `lisp_store`, `lisp_bytes`,
 `lisp_at`, `lisp_zero`, `lisp_copy`, `lisp_record_result`, `lisp_session_copy`,
 `lisp_box`, `lisp_peek`, `lisp_poke`, `lisp_array`, `lisp_source_function`,
-`lisp_func_new`, `lisp_func_arguments`, `lisp_func_value`,
+`lisp_unwind`, `lisp_func_new`, `lisp_func_arguments`, `lisp_func_value`,
 `lisp_func_reference`, `lisp_func_invalid`, `Lisp.auto_stats`,
 `Lisp.auto_instrument`, `Lisp.call_budget`, `Lisp.auto_disable`,
 `Lisp.auto_prepare`, `Lisp.eval`, `Lisp.apply`, `Lisp.eval_string`,
