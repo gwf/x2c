@@ -83,7 +83,6 @@ execution.
 | --- | --- |
 | [SDK and system macros](macro-sdk-and-system-macros.md) | Captured-code diagnostic locations and enum consumers; the removed varops Lisp file is no longer work. |
 | [Lint and format](x2c-lint-and-format.md) | Needs author scoping; includes opportunistic declaration grouping from the completed dogfooding campaign. |
-| [yyjson header wiring](archive/x2c-header-collection-gaps.md#yyjson-follow-up) | Needs author scoping; reading the pinned `yyjson.h` records `#define bool unsigned char` from an `#elif` arm C never takes, so emitted prototypes conflict. |
 | [Meta heap objects](meta-heap-objects.md) | Needs author scoping; bind the Scope allocator for meta bodies, extend the region pass for `free` and `realloc`, and support heap classes at compile time. |
 | [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator, the documentation sample checks and `tools/check-docs` are delivered; release, gate and compiler-backed ports are separately sequenced. |
 | [C on-ramp](x2c-c-on-ramp.md) | Landing-page adoption examples; the parser/corpus work already shipped. |
