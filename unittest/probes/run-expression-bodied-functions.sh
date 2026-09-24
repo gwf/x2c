@@ -16,37 +16,8 @@ fail() {
 }
 
 compare_ast() {
-  python3 - "$ROOT" "$1" "$2" <<'PY'
-import pathlib
-import sys
-
-root = pathlib.Path(sys.argv[1])
-sys.path.insert(0, str(root / "tools"))
-from x2c_symbols import Symbol, read_sexp
-
-
-def without_origins(value):
-    if isinstance(value, list):
-        if len(value) == 3 and value[0] == Symbol("at"):
-            return without_origins(value[2])
-        return [without_origins(item) for item in value]
-    return value
-
-
-def origin_count(value):
-    if not isinstance(value, list):
-        return 0
-    current = int(len(value) == 3 and value[0] == Symbol("at"))
-    return current + sum(origin_count(item) for item in value)
-
-
-braced = read_sexp(pathlib.Path(sys.argv[2]).read_text(encoding="utf-8"))
-arrow = read_sexp(pathlib.Path(sys.argv[3]).read_text(encoding="utf-8"))
-if without_origins(braced) != without_origins(arrow):
-    raise SystemExit("canonical AST differs after removing origins")
-if origin_count(braced) != origin_count(arrow):
-    raise SystemExit("source-origin wrapper count differs")
-PY
+  "$X2C" script "$SOURCE/compare-ast" "$1" "$2" ||
+    fail "canonical AST parity failed"
 }
 
 for mode in snapshot cpp live; do

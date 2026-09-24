@@ -1,8 +1,8 @@
 # x2c lint, format, and compiler-backed source tools
 
 > Status: active - Gary accepted all six decisions on 2026-09-24. Re-evaluated 2026-09-24 against `dev` at
-> `29326dbd`; lint placement measured on `76cead06`. Phases 0 and 1 are
-> implemented; see [Progress](#progress).
+> `29326dbd`; lint placement measured on `76cead06`. Phases 0, 1, and 2
+> are implemented; see [Progress](#progress).
 > This plan now also owns the compiler-backed rewrite from
 > [x2c-scripting-ports](x2c-scripting-ports.md) ("Rewrite on the compiler
 > instead of translating"), including catalog item
@@ -328,6 +328,31 @@ public types agree. The rest are known differences, none a projection gap:
   `_stat` in `lib/path.x` and the typed-array `_core_*` helpers.
 - `MatchCache` and `MatchLease` in `lib/match.x` follow `#pragma public`;
   the regex stopped at the first `#pragma private`.
+
+**Phase 2, 2026-09-24. C09 is complete.** `tools/gen-api-reference`,
+`tools/gen-module-catalog`, and `tools/repo-metrics` are indentation-syntax
+x2c scripts. The two generators share `tools/definitions.x`, which runs
+`--dump-definitions` over every unit in one batch per processor; each dump
+now starts with `(unit PATH)` so a batch can be split. `x2c_symbols.py`,
+the three Python generators, `test-x2c-source.py`, and the documentation
+half of `x2c_source.py` are deleted: 3,088 lines of Python. The remaining
+397 lines of `x2c_source.py` serve `audit-source-bloat.py` and the
+redundant-validation and overengineering analyzers until Phase 6. The
+expression-bodied probe's Python AST reader became
+`unittest/probes/expression-bodied-functions/compare-ast`. Scripts added:
+1,606 lines.
+
+With the generator banner changed to `make doc-generate`, the 86 pages,
+`SUMMARY.md`, and the module catalog were byte-identical to the Python
+output on the same tree. Two behaviors are kept for that parity and are
+worth revisiting: public types still stop at the first `#pragma private`,
+which hides the documented-in-prose but `/*`-commented `MatchCache` and
+`MatchLease`; and a Unit-macro product's signature is still spelled from its
+type. The stale-interface and signature cross-checks against `.xi` files
+are gone, because pages and compiler now read the same walk. Each
+generator's check went from about 3.1-3.6 s on one core to about 2 s, using
+about 15 s of processor time across cores. The Pages workflow builds the
+compiler, because the landing page runs `tools/repo-metrics`.
 
 ## Process ceiling
 

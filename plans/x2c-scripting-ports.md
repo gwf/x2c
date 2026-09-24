@@ -168,8 +168,8 @@ appears.
    locking, signals and timeouts.
 2. **`String.wrap(width)` and a median: deferred.** `wrap` is about 15 lines
    of `.x`. Its consumers are the 16-line `textwrap` block in `etc/help.mk`
-   and `gen-api-reference.py` and `gen-module-catalog.py`, which wait for
-   the compiler-backed `x2c_source.py` rewrite. A median is about 8 lines;
+   and the two doc generators, whose ports put it in `tools/definitions.x`
+   as `Prose.wrap` on 2026-09-24. A median is about 8 lines;
    its consumers are the awk `median` functions in
    `run-lisp-auto-benchmark.sh` and `run-match-cache-benchmark.sh`, about 15
    lines each. Write either inside the port that uses it.
@@ -210,11 +210,11 @@ probes still copy their prelude by hand.
 
 | Tool | Lines | Needs |
 | --- | --- | --- |
-| `tools/gen-module-catalog.py` | 134 | wrap and the compiler-backed source rewrite |
+| `tools/gen-module-catalog.py` | 134 | delivered 2026-09-24 with `gen-api-reference.py`; see `tools/x2c-script-ports.md` |
 | `tools/gate-state.py` | 390 | mode bits, uuid; see the ruling |
-| `tools/repo-metrics.py` | 373 | column formatting |
+| `tools/repo-metrics.py` | 373 | delivered 2026-09-24; see `tools/x2c-script-ports.md` |
 | `unittest/compiler-fixtures/run.sh`, `examples/check.sh` | 314, 257 | `Diff.unified`; the awk manifest parsing is `String.split` |
-| `run-package-install.sh`, `run-preprocessor-boundary.sh`, `run-symbol-snapshot.sh`, `run-raw-symbol-sweep.sh`, `run-varops-fatal.sh`, `run-expression-bodied-functions.sh` | 87-237 | the probe module; `wait_any` replaces `xargs -P` |
+| `run-package-install.sh`, `run-preprocessor-boundary.sh`, `run-symbol-snapshot.sh`, `run-raw-symbol-sweep.sh`, `run-varops-fatal.sh`, `run-expression-bodied-functions.sh` | 87-237 | the probe module; `wait_any` replaces `xargs -P`; the last one's Python AST comparison is already `compare-ast` |
 | `run-protocol-boundaries.sh`, `run-header-cache.sh`, `run-cli-boundary.sh` | 536-1344 | the probe module; volume, and nine inline Python snippets in the CLI probe |
 | `unittest/benchmarks/run-*.sh` (8) | 28-122 | clock, median |
 | `tools/harness-metrics.py`, `tools/agent-failure.py` | 509, 503 | date formatting |

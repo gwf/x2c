@@ -44,9 +44,11 @@ CDN delivery after deployment.
 then mdBook into `site/dist/docs/`.
 
 Landing-page repository counts are recomputed from the current source tree
-when Astro renders the page, using `tools/repo-metrics.py --summary-json`.
-Python 3 and `cloc` must be available on `PATH`, including for direct Astro
-builds and development previews. The Pages workflow installs both. The
+when Astro renders the page, using `tools/repo-metrics --summary-json`, an
+x2c script the stage compiler runs. `builds/0/x2c` must exist (`make build`)
+and `cloc` must be on `PATH`, including for direct Astro builds and
+development previews. The Pages workflow installs `cloc` and builds the
+compiler. The
 compiler and library cards count top-level `.x` files in `src/` and `lib/`.
 The compiler card also counts `etc/init.x`, `etc/builtin-macros.x`, and
 `etc/lisp-bindings.x`, the x2c sources of the compiler's Lisp environment.
@@ -59,7 +61,7 @@ and macros remain part of their containing file's count.
 Like `make stats`, these figures separate nonblank code lines from
 comment-only lines using x2c's C-style comment syntax, including in Lisp
 files. A line with both code and a comment counts as code. The detailed
-`tools/repo-metrics.py --json` inventory instead reports physical lines,
+`tools/repo-metrics --json` inventory instead reports physical lines,
 including comments and blanks, from tracked files.
 
 ## Optional measurement

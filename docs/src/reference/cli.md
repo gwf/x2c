@@ -121,11 +121,13 @@ Inspection modes print an intermediate result and stop translation:
 
 `--dump-definitions` prints what the unit defines after translation has
 selected, expanded, and bound it, one Lisp form per line. Documentation
-generators and repository tools read it instead of scanning source text. A
-file that opens with a block comment, after any directives, first prints
-`(module TEXT)` with the comment as written. Each function, including static
-functions, foreign aliases, and functions a Unit macro or `class` produced,
-prints a `function` row, and each `typedef` or `class` prints a `type` row:
+generators and repository tools read it instead of scanning source text.
+Each unit starts with `(unit PATH)`, so one command can inspect several
+files. A file that opens with a block comment, after any directives, then
+prints `(module TEXT)` with the comment as written. Each function, including
+static functions, foreign aliases, and functions a Unit macro or `class`
+produced, prints a `function` row, and each `typedef` or `class` prints a
+`type` row:
 
 ```text
 (function (name "Point_add") (display "Point.add") (line 11)

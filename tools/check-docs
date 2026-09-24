@@ -346,7 +346,7 @@ static void _check_ledger_placement(void):
                   "under 'Verified contracts' or name its open ledger row")
 
 static Job _generator(String script) =>
-  %(python3 $script --check).job()
+  %(${root.join("builds/0/x2c")} script $script --check).job()
     .options({dir: root, stderr: <capture>}).start()
 
 static void _check_generator(Job job, String what):
@@ -391,10 +391,11 @@ static void _check_summary(void):
       errors.push(%"$page: page is not reachable from docs/src/SUMMARY.md")
 
 root = Path.new(argv[0]).absolute().dirname().dirname()
-/* The generated references are rendered from the stage's unit interfaces. */
-if !root.join("builds/0/*/*.xi").glob().len():
-  Stderr.printf("documentation audit needs the unit interfaces under "
-                "builds/0; run 'make build'\n")
+/* The generated references are rendered from the stage compiler's
+   definitions. */
+if !root.join("builds/0/x2c").exists():
+  Stderr.printf("documentation audit needs the stage compiler "
+                "builds/0/x2c; run 'make build'\n")
   return 1
 link = Regex.compile("!?\\[[^]]*\\]\\(([^)]+)\\)")
 flag = Regex.compile("--[a-zA-Z][a-zA-Z0-9-]*")
@@ -409,8 +410,8 @@ foreach String directory in %("agents/skills" "packages" "plans"):
   _markdown_below(directory, 1, link_docs)
 errors = []
 
-Job catalog = _generator("tools/gen-module-catalog.py")
-Job reference = _generator("tools/gen-api-reference.py")
+Job catalog = _generator("tools/gen-module-catalog")
+Job reference = _generator("tools/gen-api-reference")
 _check_generator(catalog, "module catalog")
 _check_generator(reference, "library reference")
 _check_summary()

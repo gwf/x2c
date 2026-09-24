@@ -160,7 +160,7 @@ help:							## Show grouped Make targets
 	@python3 -c "$$PRINT_HELP_PYSCRIPT" < $(firstword $(MAKEFILE_LIST))
 
 stats:							## Show repository statistics
-	@python3 tools/repo-metrics.py --summary --color="$(STATS_COLOR)"
+	@$(STAGE0_X2C) script tools/repo-metrics --summary --color="$(STATS_COLOR)"
 
 ##@ Build and stages
 build-install: build					## Install this compiler in bin
@@ -238,8 +238,8 @@ stage-diff-all: stage-3				## Compare every generated stage
 
 ##@ Documentation and examples
 doc-generate:						## Regenerate derived documentation
-	python3 tools/gen-module-catalog.py --write
-	python3 tools/gen-api-reference.py --write
+	$(STAGE0_X2C) script tools/gen-module-catalog --write
+	$(STAGE0_X2C) script tools/gen-api-reference --write
 	$(STAGE0_X2C) script tools/gen-llms-txt --write
 
 doc-check:						## Check documentation for drift

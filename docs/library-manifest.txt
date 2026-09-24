@@ -9,7 +9,7 @@
 #             that says how to include it.
 #   internal  runtime-internal; listed with its reason and nothing else.
 #
-# Every lib/*.x file needs exactly one row. tools/gen-api-reference.py fails
+# Every lib/*.x file needs exactly one row. tools/gen-api-reference fails
 # rather than guessing, so a new module cannot be silently dropped from the
 # reference. lib/x2c.x is excluded: lib/Makefile generates it.
 lib/array.x|api|

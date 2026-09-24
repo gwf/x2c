@@ -1,0 +1,45 @@
+#!/usr/bin/env -S x2c script
+#pragma indent
+/*  compare-ast -- compare two AST dumps without their source origins
+
+    Usage: compare-ast BRACED ARROW
+
+    Each `(at N node)` origin row stands for its node, so the canonical ASTs
+    must be equal once the rows are removed, and the dumps must hold the same
+    number of origin rows.
+*/
+static int origins
+
+static Var _plain(Var value):
+  if value is not <list>: return value
+  List node = value
+  match (node) case %(at ? ?inner):
+    origins++
+    return _plain(inner)
+  return node.map(%!(Var item) => _plain(item))
+
+/* The forms of the dump at `path`, read as one list. The dump summarizes a
+   macro definition as `(macrodef <macro NAME>)`, which is not Lisp, so the
+   name alone stands for it. */
+static List _forms(String path):
+  Regex macrodef = Regex.compile("\\(macrodef <macro ([^>]*)>\\)")
+  String dump = macrodef.replace_fn(Path.new(path).read_text(),
+    %!(RegexMatch found) => %"(macrodef \"${found[1]}\")")
+  Lisp lisp = Lisp.new()
+  defer Lisp.destroy(lisp)
+  unsigned cursor = 0
+  Var forms = void
+  Lisp.read(lisp, %"($dump)", &cursor, &forms)
+  return forms
+
+origins = 0
+List braced = _plain(_forms(args.car()))
+int braced_origins = origins
+origins = 0
+List arrow = _plain(_forms(args.cadr()))
+if !List.equal(braced, arrow):
+  Stderr.printf("canonical AST differs after removing origins\n")
+  return 1
+if braced_origins != origins:
+  Stderr.printf("source-origin wrapper count differs\n")
+  return 1

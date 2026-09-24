@@ -50,7 +50,15 @@ jobs:
         run: npm ci --prefix site
 
       - name: Install repository statistics dependencies
-        run: sudo apt-get update && sudo apt-get install -y python3 cloc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang make cloc
+          mkdir -p "$RUNNER_TEMP/x2c-clang"
+          ln -s "$(command -v clang)" "$RUNNER_TEMP/x2c-clang/cc"
+          echo "$RUNNER_TEMP/x2c-clang" >> "$GITHUB_PATH"
+
+      - name: Build the compiler that runs tools/repo-metrics
+        run: make build-safe
 
       - name: Build public site and book
         run: npm --prefix site run build

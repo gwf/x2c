@@ -25,7 +25,7 @@ current guidance with the intended workflow and representative tasks.
 
 Use measurements when they answer that question. `tools/harness-metrics.py`
 summarizes local Claude and Codex transcripts; compare agents separately
-because their interfaces expose different actions. `tools/repo-metrics.py`
+because their interfaces expose different actions. `tools/repo-metrics`
 measures repository and agent-facing text size. Record a relevant baseline.
 
 When Gary's reported incidents are relevant, `tools/agent-failure.py list`

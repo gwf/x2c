@@ -827,11 +827,12 @@ static List _location(Token tokens, List range) {
 }
 
 /** Prints the `--dump-definitions` projection of the lowered unit `ast`:
-    the module comment as `(module TEXT)` when the file opens with one, then
-    one row per `Compiler.definition_rows` entry. The command-line reference
-    in the book describes the fields.
+    `(unit PATH)`, the module comment as `(module TEXT)` when the file opens
+    with one, then one row per `Compiler.definition_rows` entry. The
+    command-line reference in the book describes the fields.
 */
 void Compiler.dump_definitions(Compiler c, List ast) {
+  printf("%s\n", %(unit ${c.filename}).repr());
   Token tokens = c.tokenizer.tokens, first = tokens;
   while (first.type == <space> || first.type == <preproc>) first++;
   if (first.type == <comment>)

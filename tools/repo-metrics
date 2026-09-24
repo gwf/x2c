@@ -1,0 +1,351 @@
+#!/usr/bin/env -S x2c script
+#pragma indent
+/*  repo-metrics -- static, build-free metrics for the current tree
+
+    The record describes size and shape only. Compare records to track
+    changes; the website also reads the concise summary when it builds.
+
+    The detailed record comes from tracked files alone, so one commit always
+    produces the same record on any machine. The concise summary measures
+    the current src/, lib/, etc/, unittest/, and examples/ files with `cloc`.
+
+        tools/repo-metrics                 # human-readable table
+        tools/repo-metrics --json          # one JSON object
+        tools/repo-metrics --summary       # concise source/test summary
+        tools/repo-metrics --summary-json  # the same summary for the website
+*/
+#include "json.x"
+#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+static Path root
+static Map tracked
+static const String cyan = "\033[36m", bold = "\033[1m", reset = "\033[0m"
+
+/* Metric groups: name, then glob patterns. */
+static List _source_groups(void) => %(
+  (compiler "src/*.x") (runtime "lib/*.x")
+  (macros "src/*.xmacro" "lib/*.xmacro" "etc/*.xmacro")
+  (lisp "src/*.xlisp" "lib/*.xlisp" "etc/*.xlisp")
+  (tests "unittest/test-*.x") (examples "examples/**/*.x")
+  (probes "unittest/probes/*.sh") (benchmarks "unittest/benchmarks/*.x")
+  (tools "tools/*.py"))
+
+/* The agent-facing instruction surface. Growth here adds reading for every
+   session, so it is tracked next to the code it describes. */
+static List _harness_groups(void) => %(
+  (instructions "**/AGENTS.md") (skills "agents/skills/*/SKILL.md")
+  (guides "agents/*.md") (plans_active "plans/*.md")
+  (plans_archived "plans/archive/*.md"))
+
+/* The summary's source groups. tools/gen-lisp-init.py builds the compiler's
+   Lisp environment from three x2c sources, which count as compiler code. */
+static List _summary_groups(void) => %(
+  (src "src/*.x" "etc/init.x" "etc/builtin-macros.x" "etc/lisp-bindings.x")
+  (lib "lib/*.x") (xlisp "**/*.xlisp") (xmacro "**/*.xmacro"))
+
+static String _git(List arguments):
+  String output = %(git @arguments).job().options({dir: root}).output()
+  return output ? output.strip(NULL) : ""
+
+static String _relative(Path path):
+  String text = path
+  return text[root.len() + 1:]
+
+/* Tracked files matching any of `patterns`, sorted. */
+static List _paths(List patterns):
+  Map found = {}
+  foreach String pattern in patterns:
+    foreach Path path in root.join(pattern).glob():
+      String relative = _relative(path)
+      if tracked.contains(relative) && path.is_file(): found[relative] = 1
+  return found.keys().list().sort()
+
+static long _lines(String path):
+  String text = root.join(path).read_text()
+  if !text: return 0
+  long count = text.count("\n")
+  return text.endswith("\n") ? count : count + 1
+
+static Map _measure_paths(List paths):
+  long lines = 0
+  foreach String path in paths: lines += _lines(path)
+  Map value = {}
+  value["files"] = paths.len()
+  value["lines"] = lines
+  return value
+
+static Map _measure(List groups):
+  Map result = {}
+  foreach List group in groups:
+    result[group.car().str()] = _measure_paths(_paths(group.cdr()))
+  return result
+
+/* Compiler fixtures split by what they pin. Golden generated-C and phase
+   artifacts must be rebaselined by unrelated changes, so their weight is
+   watched apart from the inputs and observable-output expectations. */
+static Map _fixtures(void):
+  Array inputs = [], golden = [], observable = []
+  foreach String path in tracked.keys().list().sort():
+    if !path.startswith("unittest/compiler-fixtures/"): continue
+    if !root.join(path).is_file(): continue
+    Path file = path
+    String extension = file.extension()
+    if extension == ".x": inputs.push(path)
+    else if %(".c" ".h" ".ast" ".transform" ".tokens").contains(extension):
+      golden.push(path)
+    else: observable.push(path)
+  Map result = {}
+  result["inputs"] = _measure_paths(inputs)
+  result["golden"] = _measure_paths(golden)
+  result["observable"] = _measure_paths(observable)
+  return result
+
+static int _make_targets(void):
+  int count = 0
+  foreach String line in root.join("Makefile").read_text().split("\n"):
+    if !line || isspace(line[0]) || line[0] == '.' || line[0] == '#':
+      continue
+    if line.partition("=").car().str().contains(":"): count++
+  return count
+
+static Map _commit(void):
+  Map head = {}
+  head["sha"] = _git(%(rev-parse HEAD))
+  head["branch"] = _git(%(rev-parse --abbrev-ref HEAD))
+  head["date"] = _git(%(log -1 --format=%ad --date=short))
+  String status = _git(%(status --porcelain))
+  head["dirty_files"] = status ? status.split("\n").len() : 0
+  return head
+
+static long _total(Map groups):
+  long total = 0
+  foreach String name in groups.keys(): total += groups[name].map()["lines"]
+  return total
+
+static Map _collect(void):
+  Map source = _measure(_source_groups())
+  Map harness = _measure(_harness_groups())
+  Map totals = {}
+  totals["tracked_files"] = tracked.len()
+  totals["make_targets"] = _make_targets()
+  totals["source_lines"] = _total(source)
+  totals["harness_lines"] = _total(harness)
+  Map record = {}
+  record["commit"] = _commit()
+  record["source"] = source
+  record["fixtures"] = _fixtures()
+  record["harness"] = harness
+  record["totals"] = totals
+  return record
+
+// Summary
+
+static void _fatal(String why):
+  raise %(stats-fail (why $why))
+
+/* Code and comment-only line counts from `cloc` with C comment syntax.
+   x2c Lisp shares `//` and block comments with x2c; Lisp rules would treat
+   semicolons as comments and miss them. A line with both counts as code. */
+static Map _cloc(List paths):
+  Map counts = {}
+  counts["code"] = 0
+  counts["comments"] = 0
+  if !paths: return counts
+  Job job = %(cloc --force-lang=C --csv --quiet @paths)
+  job.options({dir: root, stderr: <capture>})
+  String output = NULL
+  try output = job.output()
+  catch %(not-found *): _fatal("cloc is required for repository statistics")
+  catch %(cmd-fail *detail):
+    String why = %"${detail.assoc(<output>)}".strip(NULL)
+    if !why: why = %"exit ${detail.assoc(<status>)}"
+    _fatal(%"cloc failed: $why")
+  foreach String line in output.split("\n"):
+    List fields = line.split(",")
+    if fields.len() < 5 || fields.cadr() != "SUM": continue
+    counts["code"] = atol(fields[4].str())
+    counts["comments"] = atol(fields[3].str())
+    return counts
+  _fatal("cloc returned no summary row")
+  return counts
+
+static int _generated(String path) =>
+  root.join(path).read_text().startswith("// Generated by ")
+
+/* The text of `source` with comments and literals blanked, newlines kept,
+   as the compiler's tokenizer divides it. */
+static String _code(String source):
+  Tokenizer tokenizer = Tokenizer.new(source)
+  tokenizer.scan()
+  struct Token *tokens = (struct Token *) tokenizer.tokens
+  char *code = strdup(source)
+  defer free(code)
+  for (int at = 0; at < tokenizer.tokens.len(); at++):
+    Token token = &tokens[at]
+    if token.type != <comment> && token.type != <lit-char*> &&
+       token.type != <lit-char>:
+      continue
+    for (int byte = token.pos; byte < token.pos + token.len; byte++):
+      if code[byte] != '\n': code[byte] = ' '
+  return String.new(code)
+
+/* Registered runnable and deliberately skipped unit tests. */
+static int _unit_tests(void):
+  Regex registration = Regex.compile(
+    "^\\s*(\\$test\\.run|TestHarness_(run|skip))\\s*\\(")
+  int count = 0
+  foreach Path path in root.join("unittest/test-*.x").glob():
+    String name = path.basename()
+    if name == "test-all.x" || name == "test-support.x": continue
+    foreach String line in _code(path.read_text()).split("\n"):
+      if registration.match(line): count++
+  return count
+
+static int _showcase_examples(void):
+  int count = 0
+  foreach String line in
+      root.join("examples/manifest.txt").read_text().split("\n"):
+    if !line || line.startswith("#"): continue
+    List fields = line.split("|")
+    if fields.len() > 1 && fields.cadr() == "showcase": count++
+  return count
+
+static Map _collect_summary(void):
+  Map source = {}
+  foreach List group in _summary_groups():
+    List paths = _paths(group.cdr()).filter(%!(String path) => !_generated(path))
+    source[group.car().str()] = _cloc(paths)
+  Map tests = {}
+  tests["unit_tests"] = _unit_tests()
+  tests["compiler_fixtures"] =
+    root.join("unittest/compiler-fixtures/*.phases").glob().len()
+  tests["showcase_examples"] = _showcase_examples()
+  Map record = {}
+  record["source"] = source
+  record["tests"] = tests
+  return record
+
+// Rendering
+
+/* `value` with thousands separators, right-aligned in `width`. */
+static String _count(long value, int width):
+  String digits = %"$value", grouped = ""
+  int length = digits.len()
+  for (int at = 0; at < length; at++):
+    if at && (length - at) % 3 == 0: grouped = grouped + ","
+    grouped = grouped + digits[at:at + 1]
+  return grouped.pad_left(width, ' ')
+
+static String _paint(String text, String tone, int color) =>
+  color ? tone + text + reset : text
+
+static String _render_summary(Map record, int color):
+  Map source = record["source"], tests = record["tests"]
+  long code = 0, comments = 0
+  Array lines = [_paint("Source        ", cyan, color) + "  Code  Comments"]
+  foreach List group in %((src "src/") (lib "lib/") (xlisp "X Lisp")
+                          (xmacro "X macros")):
+    Map counts = source[group.car().str()]
+    code += counts["code"]
+    comments += counts["comments"]
+    lines.push(_paint(group.cadr().str().pad_right(14, ' '), cyan, color) +
+               _count(counts["code"], 8) + _count(counts["comments"], 10))
+  lines.push(_paint("total".pad_right(14, ' '), bold, color) +
+             _count(code, 8) + _count(comments, 10))
+  lines.push("")
+  lines.push(_paint("Tests and examples", cyan, color))
+  foreach List row in %(("unit tests" unit_tests)
+                        ("compiler fixtures" compiler_fixtures)
+                        ("showcase examples" showcase_examples)):
+    lines.push(row.car().str().pad_right(20, ' ') +
+               _count(tests[row.cadr().str()], 6))
+  return String.join("\n", lines)
+
+static String _render(Map record):
+  Map head = record["commit"]
+  String sha = head["sha"]
+  String first = %"${sha[:8]} on ${head["branch"]} (${head["date"]})"
+  if head["dirty_files"].integer():
+    first = first + %" +${head["dirty_files"]} dirty"
+  Array lines = [first]
+  foreach List section in %((source ${_source_groups()})
+                            (fixtures ((inputs) (golden) (observable)))
+                            (harness ${_harness_groups()})):
+    String name = section.car().str()
+    lines.push(%"\n$name")
+    Map groups = record[name]
+    foreach List group in section.cadr():
+      String label = group.car().str()
+      Map value = groups[label]
+      lines.push(%"  ${label.pad_right(16, ' ')} " +
+                 %"${%"${value["files"]}".pad_left(5, ' ')} files " +
+                 %"${%"${value["lines"]}".pad_left(8, ' ')} lines")
+  lines.push("\ntotals")
+  Map totals = record["totals"]
+  foreach String label in
+      %("tracked_files" "make_targets" "source_lines" "harness_lines"):
+    lines.push(%"  ${label.pad_right(16, ' ')} " +
+               %"${%"${totals[label]}".pad_left(8, ' ')}")
+  return String.join("\n", lines)
+
+static int _color(String mode):
+  if mode == "always": return 1
+  if mode == "never": return 0
+  String term = Env.get("TERM")
+  return isatty(1) && term != "dumb" && !Env.get("NO_COLOR")
+
+Path self = String.new(argv[0])
+root = self.absolute().dirname().dirname()
+String usage = %"usage: ${self.basename()} [-h] " +
+               "[--json | --summary | --summary-json] " +
+               "[--color {auto,always,never}]\n"
+if args.contains("-h") || args.contains("--help"):
+  printf("%s\noptions:\n"
+         "  -h, --help            show this help message and exit\n"
+         "  --json                emit one detailed JSON object\n"
+         "  --summary             emit the concise summary\n"
+         "  --summary-json        emit the concise summary as JSON\n"
+         "  --color {auto,always,never}\n"
+         "                        control summary colour (default: auto)\n",
+         usage)
+  return 0
+String mode = NULL, color = "auto"
+for (List rest = args; rest; rest = rest.cdr()):
+  String argument = rest.car()
+  if argument.startswith("--color="): color = argument[8:]
+  else if argument == "--color" && rest.cdr():
+    rest = rest.cdr()
+    color = rest.car()
+  else if %("--json" "--summary" "--summary-json").contains(argument):
+    if mode && mode != argument:
+      Stderr.printf("%s%s: error: argument %s: not allowed with argument "
+                    "%s\n", usage, self.basename(), argument, mode)
+      return 2
+    mode = argument
+  else:
+    Stderr.printf("%s%s: error: unrecognized arguments: %s\n", usage,
+                  self.basename(), argument)
+    return 2
+if !%("auto" "always" "never").contains(color):
+  Stderr.printf("%s%s: error: argument --color: invalid choice: '%s' "
+                "(choose from auto, always, never)\n", usage,
+                self.basename(), color)
+  return 2
+
+tracked = {}
+foreach String path in _git(%(ls-files)).split("\n"): tracked[path] = 1
+if mode == "--summary" || mode == "--summary-json":
+  Map record = NULL
+  try record = _collect_summary()
+  catch %(stats-fail *detail):
+    Stderr.printf("repository statistics: %s\n", detail.assoc(<why>))
+    return 1
+  if mode == "--summary-json": printf("%s\n", Var.pretty_json(record))
+  else: printf("%s\n", _render_summary(record, _color(color)))
+  return 0
+Map record = _collect()
+if mode == "--json": printf("%s\n", Var.pretty_json(record))
+else: printf("%s\n", _render(record))
