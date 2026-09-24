@@ -1,0 +1,43 @@
+/*  indentation.xp -- x2c in the indentation syntax
+
+    A `.xp` file groups statements by indentation and ends them at line
+    breaks. It means exactly what the same program with braces and
+    semicolons means. */
+
+typedef enum Shape:
+  CIRCLE,
+  SQUARE
+Shape
+
+struct Item:
+  Shape shape
+  double size
+
+double area(struct Item item):
+  switch item.shape:
+    case CIRCLE:
+      return 3.14159 * item.size * item.size
+    default:
+      return item.size * item.size
+
+String describe(double total) =>
+  total > 100 ? "large" : "small"
+
+int main(void):
+  struct Item items[] = {
+    {.shape = CIRCLE, .size = 2},
+    {.shape = SQUARE, .size = 3}
+  }
+  double total = 0
+  for int i = 0; i < 2; i++:
+    if items[i].size <= 0: continue
+    total += area(items[i])
+  Map names = {"circle": 1, "square": 2}
+  List words = %("indentation" "groups" "blocks")
+  foreach String word, words:
+    printf("<%s>", word)
+  printf("\n%.2f %s %d\n", total, describe(total), (int) names["square"])
+  List sizes = words
+    .map(%!(Var w) => w.str().len())
+  printf("%s\n", sizes.str())
+  return 0

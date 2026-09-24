@@ -181,9 +181,11 @@ static void _check_bundle(CliRequest request, String package, String name) {
    same pair of commands `packages/package.mk` runs. */
 static void _build_source(String package, String name, String spec) {
   List units = NULL;
-  try units = _files_with(%"$package/src", ".x");
+  try units = _files_with(%"$package/src", ".x")
+    .append(_files_with(%"$package/src", ".xp"));
   catch %(not-found *): {}
-  if (!units.contains(%"$package/src/$name.x"))
+  if (!units.contains(%"$package/src/$name.x") &&
+      !units.contains(%"$package/src/$name.xp"))
     _error(%"$spec has no src/$name.x entry unit");
   foreach (String manifest, _files_with(package, ".json"))
     if (manifest.endswith("dependency.json") ||

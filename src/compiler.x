@@ -151,6 +151,9 @@ typedef struct Compiler {
      session the first time lowered code calls it. */
   Map native_meta;
   int runtime_inc, runtime_hdrs, collect_protocols, shallow, source_private;
+  /* Whether the source is in the indentation syntax whatever its name, as
+     when collection parses a segment of a file whose pragma it saw. */
+  int layout;
   /* Whether the body being parsed belongs to a `meta` function, which is
      what lets a call to a compile-time-only one be refused everywhere
      else. */
@@ -811,11 +814,14 @@ static void _retag_contextual_keywords(Tokenizer tokenizer) {
    instead. An `<incomplete>` token really did run out of source, so it keeps
    the end-of-file diagnostic that describes it. */
 static void _report_malformed_token(Compiler c) {
-  if (c.tokenizer.status() != <malformed>) return;
+  Symbol status = c.tokenizer.status();
+  if (status != <malformed> && status != <indent>) return;
   for (size_t i = 0; i < c.tokenizer.tokens.len(); i++) {
     Token token = &((struct Token *) c.tokenizer.tokens)[i];
     if (token.type == <error>)
-      c.report_error(<parse>, "invalid token", token, NULL);
+      c.report_error(
+        <parse>, status == <indent> ? "inconsistent indentation"
+                                    : "invalid token", token, NULL);
   }
 }
 
@@ -834,7 +840,9 @@ void Compiler.tokenize(Compiler c, char *text) {
   c.input_boundary = NULL;
   c.text = text;
   c.tokenizer = Tokenizer.new(c.text);
+  c.tokenizer.layout = c.layout || x2c_layout_file(c.filename);
   c.tokenizer.scan();
+  c.layout = c.tokenizer.layout;
   _report_malformed_token(c);
   _scan_conditionals(c);
   _retag_contextual_keywords(c.tokenizer);

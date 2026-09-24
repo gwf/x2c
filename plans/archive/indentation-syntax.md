@@ -1,9 +1,14 @@
 # Indentation syntax
 
-> Status: active.
-> A spike on 2026-09-24 showed the design works without parser changes.
-> Gary chose both triggers, a pragma and the `.xp` and `.xpmacro`
-> extensions, on 2026-09-24. Nothing is implemented.
+> Status: done 2026-09-24, delivered on `dev` by the commit that archived
+> this plan. The pass is `Tokenizer._layout` in `lib/tokenizer.x`; the
+> `indent-*` compiler fixtures and `examples/tours/indentation.xp` cover
+> it, and the book documents it in the language reference and the
+> Indentation Syntax guide page. Differences from the plan: the pragma may
+> follow other directives, not only a shebang; the tokenizer also treats a
+> line start as a statement start when it decides whether `%` and `<` are
+> operators; and the `.xp` unit extension is covered by the example,
+> because a compiler fixture translates a single file.
 
 ## Goal
 
@@ -33,8 +38,8 @@ int sum_positive(int *xs, int n):
 
 A file uses the indented form when either trigger is present.
 
-- **Pragma.** `#pragma indent` as the first line of the file. A shebang
-  line may come before it, and so may comments. It works with any file
+- **Pragma.** `#pragma indent` before the first line of code. Comments
+  and other directives, including a shebang, may come before it. It works with any file
   name, including `.x`, `.xmacro`, and extensionless scripts. The layout
   pass removes the pragma token, so no pragma reaches the emitted C.
 - **Extension.** `.xp` marks a source unit and `.xpmacro` a macro file.

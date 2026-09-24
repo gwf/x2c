@@ -76,11 +76,11 @@ String x2c_package_directory(List roots, String path) {
   return NULL;
 }
 
-/** Reports whether `path` is x2c source: a `.x` file, or a file of any
-    other name whose first line is a shebang, which is a script.
+/** Reports whether `path` is x2c source: a `.x` or `.xp` file, or a file
+    of any other name whose first line is a shebang, which is a script.
 */
 int x2c_source_file(String path) {
-  if (path.endswith(".x")) return 1;
+  if (path.endswith(".x") || path.endswith(".xp")) return 1;
   if (path.endswith(".c") || path.endswith(".h") || path.endswith(".o") ||
       path.endswith(".a")) return 0;
   FILE *file = fopen(path, "r");
@@ -91,6 +91,10 @@ int x2c_source_file(String path) {
   fclose(file);
   return shebang;
 }
+
+/** Reports whether `path` names a file in the indentation syntax. */
+int x2c_layout_file(String path) =>
+  path && (path.endswith(".xp") || path.endswith(".xpmacro"));
 
 /** Recognizes a package's `src/` files or its package-named legacy entry.
     Other files under the package directory are consumers.

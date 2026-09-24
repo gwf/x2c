@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/indent-dedent.x:6:4: parse: inconsistent indentation
+     return 2
+     ^
+

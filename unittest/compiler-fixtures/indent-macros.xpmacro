@@ -1,0 +1,25 @@
+// Macros in the indentation syntax, selected by the .xpmacro extension.
+$(defun indent-offset () 2)
+
+macro Expression $indent.answer(Expr $base) =>
+  $base + $(indent-offset)
+
+macro Decorator $indent.range(
+  Block $body,
+  Name $index,
+  Expr $start,
+  Expr $stop
+):
+  do:
+    int begin = $start, end = $stop
+    for int $index = begin; $index < end; $index++: $body
+
+macro Statement $indent.swap(Expr $left, Expr $right):
+  $(x2c.syntax.type $left) temporary = $left
+  $left = $right
+  $right = temporary
+
+macro Decorator $indent.fallback(Statement $target, Expr $fallback):
+  do:
+    $target
+    return $fallback

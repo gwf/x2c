@@ -89,7 +89,6 @@ execution.
 | [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator, the documentation sample checks and `tools/check-docs` are delivered; release, gate and compiler-backed ports are separately sequenced. |
 | [C on-ramp](x2c-c-on-ramp.md) | Landing-page adoption examples; the parser/corpus work already shipped. |
 | [Explicit meta campaign](archive/explicit-meta-and-lifetime-campaign.md#backlog) | Parked compound-selector owner, direct function-handle assignment in meta bodies, a REPL test for wide scalar globals, destructuring beside a cleanup, and three small heap limits. |
-| [Indentation syntax](indentation-syntax.md) | Active and unimplemented; Python-style blocks and line-ending statements through a tokenizer layout pass, triggered by `#pragma indent` or the `.xp` and `.xpmacro` extensions. |
 | [Var-tags experiment](archive/meta-functions.md#parked) | Parked until a measured approach meets the recorded translation-cost condition. |
 
 An entry here preserves remaining work; it does not dispatch it or add a gate.
@@ -109,6 +108,8 @@ campaign outcomes; the original observations do not describe later
 
 ### Decisions and completed records
 
+- [Indentation syntax](archive/indentation-syntax.md): done; `.xp`,
+  `.xpmacro`, and `#pragma indent` select a tokenizer layout pass.
 - [Explicit meta calls, lifetimes, and computed values](archive/explicit-meta-and-lifetime-campaign.md):
   done; pieces 0-5 delivered through `49a239ec`.
 - [Meta values, types, and native records](archive/meta-values-types.md):

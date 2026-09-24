@@ -55,6 +55,7 @@ scripts/parallel-jobs|showcase|run||expected/parallel-jobs.stdout|Bounded job co
 programs/lisp|showcase|run|--init ../../../etc/init.xlisp --selftest|expected/lisp.stdout|Bootstrapped Lisp command-line shell.
 programs/mandelbrot|showcase|run||expected/parallel-mandelbrot.stdout|Deep Mandelbrot zoom rendered on native threads.
 tours/hello-worlds|showcase|run||expected/hello-worlds.stdout|Twelve idiomatic paths to Hello, World.
+tours/indentation|showcase|run||expected/indentation.stdout|The indentation syntax in a .xp source.
 tours/language|showcase|run||expected/docs-tour.stdout|Executable fifteen-minute language tour.
 programs/literate-lisp|showcase|run|../../../examples/data/reference-lisp/showcase.xlisp|expected/reference-lisp.stdout|Independent recursive Lisp with symbolic differentiation.
 programs/tiny-lisp|external-input|build||-|Eight-form independent Lisp; unary arithmetic with decimal input/output in data/tiny-lisp.slp.
