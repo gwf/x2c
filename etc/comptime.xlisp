@@ -140,10 +140,15 @@
 (def List_find (bind "List_find" nil))
 
 // `foreach` expands to a `try_next` loop whose cursor and outputs are C
-// objects, so each step is the native operation writing through them.
+// objects, so each step is the native operation writing through them. The
+// expansion reaches meta code in any unit, so these bind here rather than
+// from a prototype the unit may not include.
 (def List_try_next (bind "List_try_next" nil))
 (def Array_try_next (bind "Array_try_next" nil))
 (def Map_try_next (bind "Map_try_next" nil))
+(def String_try_next (bind "String_try_next" nil))
+(defun Iter_try_next (iter out)
+  ((bind "Iter_try_next" nil) iter out))
 
 (def Array_new Array.new)
 (def Array_len Array.len)
@@ -194,51 +199,22 @@
 (def Map_str str)
 (def Map_repr repr)
 
-// The Array, Map, Scope and Context operations a lifetime in meta code calls.
-// Scope operations act on the session user slot, never on evaluator storage.
+// `Array.free` is generated from the `Block` protocol, which leaves no
+// declaration for a `meta` prototype to join.
 (defun Array_free (array) ((bind "Array_free" nil) array))
-(defun Array_cleanup (array) ((bind "Array_cleanup" nil) array))
-(defun Map_cleanup (map) ((bind "Map_cleanup" nil) map))
-(defun String_free (string) ((bind "String_free" nil) string))
-(defun List_promote (list) ((bind "List_promote" nil) list))
-(defun Scope_new_named (name) ((bind "Scope_new_named" nil) name))
-(defun Scope_cleanup (scope) ((bind "Scope_cleanup" nil) scope))
-(defun Scope_new () ((bind "Scope_new" nil)))
-(defun Scope_retain () ((bind "Scope_retain" nil)))
-(defun Scope_release () ((bind "Scope_release" nil)))
-(defun Scope_push (slot) ((bind "Scope_push" nil) slot))
-(defun Scope_pop () ((bind "Scope_pop" nil)))
-(defun Scope_destroy (scope) ((bind "Scope_destroy" nil) scope))
-(defun Scope_move (pointer slot) ((bind "Scope_move" nil) pointer slot))
-(defun Context_open () ((bind "Context_open" nil)))
-(defun Context_current () ((bind "Context_current" nil)))
-(defun Context_close (context) ((bind "Context_close" nil) context))
-(defun Context_cleanup (context) ((bind "Context_cleanup" nil) context))
-(defun Context_export (context value)
-  ((bind "Context_export" nil) context value))
 
 (def String_map (bind "String_map" nil))
 (def String_filter (bind "String_filter" nil))
 
 // A lowered iterator call binds on first use from its `meta` declaration in
-// lib/iter.x or lib/protocols.x, through `C.iterator.call`.
-(defun Iter_new () ((bind "Iter_new" nil)))
+// lib/iter.x or lib/protocols.x, through `C.iterator.call`. These rows bind
+// through their adapters in lib/lisp.x.
 (defun Iter_init (destination object callable state)
   ((bind "Iter_init" nil) destination object callable state))
 (def Iter_any (bind "Iter_any" nil))
 (def Iter_all (bind "Iter_all" nil))
 (def Iter_foldl (bind "Iter_foldl" nil))
 (def Iter_find (bind "Iter_find" nil))
-(defun Iter_try_next (iter out)
-  ((bind "Iter_try_next" nil) iter out))
-(def Iter_next (bind "Iter_next" nil))
-(def Iter_min (bind "Iter_min" nil))
-(def Iter_max (bind "Iter_max" nil))
-(def Iter_list (bind "Iter_list" nil))
-(def Iter_array (bind "Iter_array" nil))
-(def Iter_count (bind "Iter_count" nil))
-(def Iter_sum (bind "Iter_sum" nil))
-(def Iter_product (bind "Iter_product" nil))
 
 (def String_contains_digit String.contains_digit)
 (def String_is_alpha String.is_alpha)
@@ -296,9 +272,6 @@
 (def String_remove_suffix String.remove_suffix)
 (def String_escape String.escape)
 (def String_unescape String.unescape)
-(def String_try_long (bind "String_try_long" nil))
-(def String_try_double (bind "String_try_double" nil))
-(def String_try_next (bind "String_try_next" nil))
 (defun String_new (text) text)
 (defun String_equal (a b) (if (equal? a b) 1 0))
 
@@ -306,7 +279,6 @@
 (def Symbol_compare Symbol.compare)
 (def Symbol_repr repr)
 (def Symbol_str Symbol.str)
-(def Symbol_try_new (bind "Symbol_try_new" nil))
 (def Var_tag Var.tag)
 (def Var_kind Var.kind)
 (def Var_caar List_caar)

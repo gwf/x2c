@@ -722,5 +722,7 @@ String Map.repr(Map map) {
   return buf;
 }
 
+meta void Map.cleanup(Map value);
+
 /** Releases this Map and both backing Blocks without freeing stored values. */
 void Map.cleanup(Map value) { value._core_free(); }

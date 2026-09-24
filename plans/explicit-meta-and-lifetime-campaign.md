@@ -148,9 +148,10 @@ to `$f(...)`. Generated C changes; regenerate `bootstrap/` through the gate.
 
 ## 2. Temporary lifetimes in meta code
 
-Meta bodies lower to compile-time Lisp. Today `defer`, `$scope`, `$let`, and
-`$auto` decline at `_lower_scan` (`src/comptime.x` ~572), and `try`/`raise`
-are unsupported statements.
+Meta bodies lower to compile-time Lisp. Before this piece, `defer`,
+`$scope`, `$let`, and `$auto` declined at `_lower_scan` (`src/comptime.x`
+~572). Piece 2 delivered those four forms; `try`/`raise` remain
+unsupported statements, though a cleanup still runs when an error passes.
 
 - **Evaluator storage.** `$lisp.entry` (`lib/lisp.x` ~681-697) pushes a
   separate user Scope slot, which is the session default for user
@@ -207,10 +208,14 @@ context decide.
    `memdup`, `realloc`, and `free` in `lib/scope.x`. They reach the evaluator
    through `record_native_meta_effect` and `bind_native_meta`. Land them and
    the bootstrap refresh before any in-repository meta code calls them.
-2. **One declaration per operation.** Today each bound operation is declared
-   in `lib/lisp.x`, `etc/lisp-values.xlisp`, and `etc/comptime.xlisp`.
-   Generate the two Lisp tables from `meta` marks before adding the heap
-   operations, so each new operation has one declaration.
+2. **One declaration per operation.** The bodyless `meta` prototype is the
+   operation's only declaration: its target row is generated and it binds on
+   first use, with no row in `etc/comptime.xlisp` or `lib/lisp.x`. Existing
+   pure rows moved to prototypes. Three kinds keep hand rows: operations
+   taking a `Func` (their adapter), the `try_next` functions `foreach`
+   expands to (they must bind in units that do not include the prototype),
+   and `Array_free` (a prototype suppresses the protocol-generated
+   definition).
 3. **`sizeof`.** Add a `_lower_content` case that answers from the existing
    scalar and record layout facts.
 4. **Typed heap objects.** Construct and use structs defined in x2c units

@@ -445,6 +445,8 @@ void Scope.initialize(void) {
   _initialize();
 }
 
+meta Scope Scope.new(void);
+
 /** Creates a detached, unnamed scope and returns it.
     A detached scope sits in no slot and is not active, so nothing is charged
     to it until you allocate through `Scope.malloc_in` and friends or make it
@@ -458,6 +460,8 @@ Scope Scope.new(void) {
   _require_running();
   return _new_scope(NULL);
 }
+
+meta Scope Scope.new_named(const char *name);
 
 /** Creates a detached scope carrying a copy of `name` for diagnostics.
     The name is copied, so a temporary buffer is fine. `Scope.name` reports
@@ -540,6 +544,8 @@ ScopeStats Scope.stats(void) {
   return result;
 }
 
+meta void Scope.destroy(Scope scope);
+
 /** Destroys a detached scope and frees every allocation it owns.
     This ends a scope you hold in a variable, and is the counterpart to
     `Scope.new` and `Scope.new_named`. It frees the scope's allocations and
@@ -584,6 +590,8 @@ void Scope.shutdown_hook(void (*hook)(void)) {
   hooks = _raw_grow(hooks, hook_count, &hook_capacity, sizeof(*hooks));
   hooks[hook_count++] = hook;
 }
+
+meta void Scope.push(Scope *scope);
 
 /** Makes the scope in `scope` active until a matching `Scope.pop`.
     `scope` is the address of a caller-owned `Scope` variable, and it may hold
@@ -635,6 +643,8 @@ Scope *Scope.top(void) {
   return _thread().active;
 }
 
+meta void Scope.pop(void);
+
 /** Restores the slot that was active before the matching `Scope.push`.
     Popping frees nothing. The popped slot keeps its scope and every
     allocation in it, so you can destroy that scope later or pass it
@@ -653,6 +663,8 @@ void Scope.pop(void) {
   state.active = state.stack_size ? state.stack[state.stack_size - 1]
                                  : &state.root;
 }
+
+meta void Scope.retain(void);
 
 /** Opens a new scope in the active slot and makes it the current one.
     Allocations that follow are charged to the new scope. The scope that was
@@ -698,6 +710,8 @@ void Scope.retain(void) {
   }
   *state.active = scope;
 }
+
+meta void Scope.release(void);
 
 /** Destroys the scope in the active slot and frees everything it owns.
     Every allocation charged to that scope is freed: `Scope.malloc`,
@@ -905,6 +919,8 @@ Scope Scope.owner(void *ptr) {
   return alloc ? UNTAG_POINTER(alloc.prev) : NULL;
 }
 
+meta void Scope.move(void *ptr, Scope *slot);
+
 /** Relinks one allocation onto the scope held by `slot`.
     The bytes are not copied and the pointer does not change; only ownership
     moves, so a temporary region can compute one result that outlives it. If
@@ -1022,6 +1038,8 @@ void Scope_shutdown(void) {
   scope_state = <shutdown>;
   x2c_thread_state_release();
 }
+
+meta void Scope.cleanup(Scope value);
 
 /** Ends the owned lifetime when a managed local leaves its block. */
 void Scope.cleanup(Scope value) { value.destroy(); }

@@ -812,6 +812,8 @@ Iter Array.iter(Array x, Iter dest) {
   return dest.init(x, _next, 0);
 }
 
+meta Array Iter.array(Iter iter);
+
 /** Drains `iter` into a fresh `Array`. */
 Array Iter.array(Iter iter) {
   Array output = [], result = NULL;
@@ -819,6 +821,8 @@ Array Iter.array(Iter iter) {
   foreach (Var item, iter) output.push(item);
   return result = output;
 }
+
+meta void Array.cleanup(Array value);
 
 /** Ends the owned lifetime when a managed local leaves its block. */
 void Array.cleanup(Array value) { value.free(); }
