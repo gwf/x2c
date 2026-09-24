@@ -67,11 +67,16 @@ __attribute__((constructor)) static void _file_init_(void){
   _5 = String_new(" }");
 }
 
+SourceView SourceView_new(){
+  SourceView value = SourceView_alloc();
+  SourceView_init(value);
+  return value;
+}
+
 void * Scope_calloc(size_t, size_t);
 
-SourceView SourceView_new(){
+SourceView SourceView_alloc(){
   SourceView value = Scope_calloc(1, sizeof(* value));
-  SourceView_init(value);
   return value;
 }
 
