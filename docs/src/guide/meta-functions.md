@@ -453,8 +453,10 @@ helpers.x:3:1: type: unproved native meta lifetime
   note: name: widget_wrap signature: ((func ((* struct "Widget"))) * struct "Widget") it might return or keep its argument; ownership cannot be inferred
 ```
 
-The compiler loads a module only when an option or a manifest names it.
-Without `--native-module`, `nine` reports `no binding for triple`. In a
+The compiler loads a module only when an option, a manifest or an import
+names it. Without `--native-module`, `nine` reports `no binding for triple`.
+A [package with a compile-time part](packages.md#packages-with-compile-time-parts)
+builds its module with the package, and importing the package loads it. In a
 manifest, a target lists the module targets its translation loads:
 
 ```toml
@@ -477,7 +479,8 @@ mismatch is reported at the declaration. A function the compiler links
 takes precedence, and the prototype reports a warning that the compiler's
 own function hides the module's. When two named modules define the same
 name, the one named first supplies it, and the prototype reports a
-warning.
+warning. Modules named by an option or a manifest come before the modules
+of imported packages.
 
 A module runs inside the compiler and uses the compiler's own runtime, not
 a copy of it. Only the compiler that built a module can load it, so a
@@ -491,23 +494,9 @@ x2c: error: native module 'helpers.so' was built by another compiler; rebuild it
 Every function the module exports needs a bodyless `meta` prototype in the
 module's sources, and a module whose sources declare none fails to build.
 
-A module can call most of the runtime, because the compiler links every
-runtime module that registers no `Var` class of its own. This holds for a
-compiler built from a checkout and for one `x2c bootstrap` installs. The compiler
-leaves out the modules whose classes would take up rows of the fixed
-32-row class registry at startup: Automatic Differentiation, `Regex`,
-typed Arrays and Maps, `Thread` and `Mutex`, the scripting library, and
-the modules that need them. A module that calls one of their functions
-fails to build on macOS, and the link error names each missing symbol:
-
-```text
-Undefined symbols for architecture arm64:
-  "_Regex_compile", referenced from:
-      _groups in rx-634299d6.o
-```
-
-On Linux the same module builds, and loading it fails with an error that
-names the missing symbol. A loaded module stays loaded until the compiler
+A module can call any runtime function, because the compiler links the
+whole runtime. This holds for a compiler built from a checkout and for one
+`x2c bootstrap` installs. A loaded module stays loaded until the compiler
 exits. Native modules work on macOS, Linux and WSL. On other platforms,
 loading one reports that native modules are not supported.
 

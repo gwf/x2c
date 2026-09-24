@@ -747,6 +747,7 @@ void Compiler.collect_package(Compiler c, String name, Token token) {
   /* The root is registered before the walk, as a package unit's own is
      before its parse, so the walk can tell the package's files apart. */
   c.package_roots[name] = root;
+  c.select_package_module(name, root, token);
   Compiler package = Compiler.new_shared(c);
   defer c.close_child(package);
   package.package = name;

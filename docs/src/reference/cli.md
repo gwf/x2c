@@ -203,9 +203,8 @@ per C source. `--kind static-library` uses the selected archiver:
 
 `--kind meta-module` builds a native module, whose functions compile-time
 code can call. The module leaves the x2c runtime unresolved and uses the
-loading compiler's copy, and it records that compiler's content hash. On
-macOS the module links against the running compiler, so a call to a runtime
-function the compiler does not link fails the build.
+loading compiler's copy, which is the whole runtime, and it records that
+compiler's content hash.
 `--native-module <file>` loads a module for `translate`, `build`, `run`, and
 `repl`, and repeats:
 

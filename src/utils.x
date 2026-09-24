@@ -334,6 +334,15 @@ uint64_t x2c_fnv_file(uint64_t hash, String path, int *ok) {
 */
 String x2c_compiler_identity(void) => x2c_identity;
 
+/** Returns the stamp a native module records: `x2c-module-stamp:` and the
+    running compiler's identity. Returns NULL when the executable cannot be
+    read. Only the compiler that built a module loads it.
+*/
+String build_module_stamp(void) {
+  String identity = x2c_compiler_identity();
+  return identity ? %"x2c-module-stamp:$identity" : NULL;
+}
+
 // workers
 
 /** Forks a worker that continues the current program with inherited state.

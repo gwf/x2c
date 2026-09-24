@@ -96,9 +96,7 @@ expect_error "native module 'stale.so' was built by another compiler" \
 expect_error "not an x2c native module" \
   "$X2C" translate -q --native-module wrong.x --out-dir out src/main.x
 
-# Sources with one name stay distinct, however they are spelled. The
-# compiler links the runtime modules that register no Var class, such as
-# DisjointSet.
+# Sources with one name stay distinct, however they are spelled.
 cat >a/util.x <<'EOF'
 meta int fa(int);
 #pragma private
@@ -137,16 +135,22 @@ grep -Fq "return 234;" out/both.c || fail "module with same-named sources"
 grep -Fq "native: more than one native module defines" warn.out ||
   fail "duplicate module warning"
 
-if [[ $(uname -s) == Darwin ]]; then
-  cat >rx.x <<'EOF'
+# The compiler links the whole runtime, including modules whose classes
+# box as a Var, such as Regex.
+cat >rx.x <<'EOF'
 #include "regex.x"
 meta int groups(int);
 #pragma private
 int groups(int n) { return Regex.compile("(a)").capture_count() + n; }
 EOF
-  expect_error "_Regex_compile" \
-    "$X2C" build -q --kind meta-module rx.x --output rx.so
-fi
+cat >rx-main.x <<'EOF'
+meta int groups(int);
+meta static int g(void) => groups(40);
+int main(void) { return $g(); }
+EOF
+"$X2C" build -q --kind meta-module rx.x --output rx.so
+"$X2C" translate -q --native-module rx.so --out-dir out rx-main.x
+grep -Fq "return 41;" out/rx-main.c || fail "module calling Regex"
 
 printf 'int unrelated;\n' >empty.x
 expect_error "native module sources declare no meta function" \
@@ -255,5 +259,82 @@ grep -qx "16" repl.out || {
   cat repl.out >&2
   fail "REPL module call"
 }
+
+# A package whose sources declare a bodyless `meta` prototype builds a
+# module beside its archive, and `import` alone loads it.
+mkdir -p packages app
+cp -R "$ROOT/unittest/probes/packages/tally" packages/
+build_package() {
+  make -s -C packages/tally build ROOT="$ROOT" X2C="$X2C" >make.out 2>&1 || {
+    cat make.out >&2
+    fail "package build"
+  }
+}
+build_package
+[[ -f packages/tally/builds/tally.module ]] || fail "package module built"
+cat >app/main.x <<'EOF'
+#include <stdio.h>
+import "tally";
+meta static int ten(void) => tally.tally_sum(4);
+int main(void) { printf("%d\n", $ten()); return 0; }
+EOF
+[[ $("$X2C" run -q --package-dir packages --build-dir app/build \
+  app/main.x) == 10 ]] || fail "package module through import"
+grep -Fq "packages/tally/builds/tally.module" app/build/gen/*/main.d ||
+  fail "package module in the depfile"
+
+# A rebuilt module retranslates its consumers.
+sed -i.bak 's|n \* (n + 1) / 2|n * (n + 1)|' packages/tally/src/tally.x
+build_package
+"$X2C" build -v --package-dir packages --build-dir app/build \
+  --output app/main app/main.x >rebuilt.out 2>&1
+grep -Fq "up-to-date translate" rebuilt.out &&
+  fail "consumer reused after a module rebuild"
+[[ $(app/main) == 20 ]] || fail "consumer after a module rebuild"
+
+# --native-module is selected before a package's module.
+cat >first.x <<'EOF'
+meta int tally__tally_sum(int);
+#pragma private
+int tally__tally_sum(int n) { return -n; }
+EOF
+"$X2C" build -q --kind meta-module first.x --output first.so
+"$X2C" translate -q --package-dir packages --native-module first.so \
+  --out-dir out app/main.x 2>warn.out
+grep -Fq 'printf("%d\n", (-4))' out/main.c || fail "option module precedence"
+grep -Fq "supplied by: $BUILD/first.so" warn.out ||
+  fail "option module precedence warning"
+
+# An import in an included file reaches a unit that the parent's scan does
+# not see on a first translation, so the worker loads the module itself;
+# the next one finds the package in the depfile. In a build the included
+# file is a unit, and its interface replays the import.
+mkdir -p viaheader/out
+printf 'import "tally";\n' >viaheader/hdr.x
+printf 'int extra(void) { return 1; }\n' >viaheader/extra.x
+cat >viaheader/app.x <<'EOF'
+#include <stdio.h>
+#include "hdr.x"
+meta static int ten(void) => tally.tally_sum(4);
+int main(void) { printf("%d\n", $ten()); return 0; }
+EOF
+for pass in first depfile; do
+  "$X2C" translate -q -j 2 --package-dir packages --out-dir viaheader/out \
+    viaheader/app.x viaheader/extra.x
+  grep -Fq 'printf("%d\n", 20)' viaheader/out/app.c ||
+    fail "package module through an included file ($pass)"
+  rm viaheader/out/app.c
+done
+for pass in first replay; do
+  [[ $("$X2C" run -q -j 2 --package-dir packages \
+    --build-dir viaheader/build viaheader/app.x viaheader/hdr.x) == 20 ]] ||
+    fail "package module through an included unit ($pass)"
+  printf '/* edited */\n' >>viaheader/app.x
+done
+
+# A module another compiler built is an error at the import.
+cp stale.so packages/tally/builds/tally.module
+expect_error "package 'tally' was built by another compiler; rebuild it" \
+  "$X2C" translate -q --package-dir packages --out-dir out app/main.x
 
 echo "native module probes passed"

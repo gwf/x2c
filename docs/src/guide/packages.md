@@ -68,6 +68,8 @@ builds/greet.h           the generated public header
 builds/libgreet.a        the archive a consumer links
 builds/greet.native.rsp  the native arguments a consumer needs, one per
                          line, empty when none
+builds/greet.module      the compile-time part, only for a package that
+                         has one
 ```
 
 `make test` builds and runs `tests/test-*.x`, and `make clean` removes
@@ -147,6 +149,49 @@ crosses the import under its own name. raylib's `Image` and `Vector2` are
 raylib's, so a consumer writes `Image.new(...)`, reads `image.width`, and uses
 `a + b` with no `with` entry for either type. The types come from the header
 and the methods from `raylib__`.
+
+## Packages with compile-time parts
+
+A package has a compile-time part when its sources declare a bodyless
+`meta` prototype. Building the package then also builds a
+[native module](meta-functions.md#native-modules) from the package's
+sources, `builds/<name>.module`, and importing the package loads it:
+
+<!-- ignore: the sample is the source of a package. -->
+```x2c,ignore
+meta int tally_sum(int n);
+
+#pragma private
+
+int tally_sum(int n) => n * (n + 1) / 2;
+```
+
+<!-- ignore: an import needs a registered --package-dir root. -->
+```x2c,ignore
+import "tally";
+
+meta static int ten(void) => tally.tally_sum(4);
+```
+
+`$ten()` runs the package's `tally_sum` during translation. The import
+alone loads the module; no `--native-module` option or `native-modules`
+entry is needed. A module named by either one is still consulted first. A
+package whose sources declare no bodyless `meta` prototype builds no module
+and is only linked. `x2c install` builds the module of a source package, and
+`make bundle` carries it in the bundle.
+
+The consumer's translation records the module as a prerequisite, so
+rebuilding the package retranslates the units that import it. The import
+never builds the package. Only the compiler that built a module loads it,
+so a package with a compile-time part must be rebuilt after the compiler
+changes; until then the import reports:
+
+```text
+main.x:1:1: driver: package 'tally' was built by another compiler; rebuild it
+```
+
+Modules load on macOS, Linux and WSL. On other platforms, importing a
+package that has a module reports that native modules are not supported.
 
 ## Packages that wrap a C library
 

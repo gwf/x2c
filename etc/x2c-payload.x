@@ -295,23 +295,9 @@ static void uninstall(Path prefix) {
   else printf("x2c: removed the compiler; %s keeps unowned files\n", prefix);
 }
 
-/* Names, one stem per line, the runtime objects builds/0/x2c links whole,
-   so the compiler `x2c bootstrap` builds from this payload links the same
-   ones without running nm on the installing machine. */
-static void write_runtime_objects(Path destination) {
-  List command = %("sh" ${root.join("etc/runtime-objects.sh")}
-    @{root.join("builds/0/src/*.o").glob()} "--"
-    @{root.join("builds/0/lib/*.o").glob()});
-  String stems = "";
-  foreach (String object, command.job().lines())
-    stems = %"$stems${Path.stem(object)}\n";
-  destination.join("etc/runtime-objects.txt").write_text(stems);
-}
-
 static void support(Path destination, Path licenses) {
   copy_support(destination, 1);
   copy_command_sources(destination);
-  write_runtime_objects(destination);
   if (licenses)
     foreach (Path source, licenses.join("LICENSE.*").glob())
       copy(source, destination.join("licenses")

@@ -1,8 +1,9 @@
 # Packages with compile-time parts
 
 > Status: active - designed 2026-09-24 as step 2 of
-> [meta sequencing](meta-sequencing.md). Not started; it follows
-> [class registration](class-registration.md), which must land first.
+> [meta sequencing](meta-sequencing.md). Delivery 1 implemented
+> 2026-09-24 (see [Delivery 1 result](#delivery-1-result)); Delivery 2,
+> static extensions, has not started.
 
 ## Result
 
@@ -153,6 +154,51 @@ Delivery 1:
 5. Book pages above.
 6. Review the completed authored diff and fix what it finds, then
    `tools/gate-state.py ensure agent-pr-check`.
+
+## Delivery 1 result
+
+- The compiler, the bootstrap compiler, the compiler `x2c bootstrap`
+  installs, and the external commands link the whole runtime archive
+  (`-Wl,-force_load` on macOS, `--whole-archive` with `--export-dynamic`
+  on Linux). `etc/runtime-objects.sh` and the payload's
+  `etc/runtime-objects.txt` are gone. The commands link it whole too,
+  because the REPL loads modules into its own process.
+- The loader moved from `src/frontend.x` to `src/macros.x`, beside the
+  module registry: `Compiler.load_native_module` for options,
+  `Compiler.preload_native_module` for the parent, and
+  `Compiler.select_package_module`, which `Compiler.collect_package` calls
+  on both its cold and replay paths. `build_module_stamp` moved to
+  `src/utils.x` so the loader can reach it.
+- The package build decides whether a package has a compile-time part
+  from the interfaces translation wrote: a `native-meta "<name>__` row
+  names one of the package's own prototypes. `packages/package.mk` and
+  `x2c install` build `builds/<name>.module` only then, and
+  `packages/tools/bundle` copies it.
+- A module build from a package's own sources links no archive of that
+  package: `Build._link_packages` now skips a package when any request
+  input is one of its sources, not only the unit being linked.
+- A package's module joins the process's selection after the request's
+  modules and stays selected for later units in the same process. Its
+  targets are the package's prefixed names, which only that package's
+  prototypes declare.
+- Not covered by a test: the REPL import. REPL imports resolve only
+  `<home>/packages`, and the REPL has no `--package-dir`, so the probe
+  cannot place a package there. The import runs the same
+  `Compiler.collect_package`.
+
+Rows after startup (lldb, `row_count` at `exit`): `--version` 1 and a
+one-line `translate` 2, the same for the current `dev` compiler and the
+whole-runtime compiler, so linking the whole runtime spends no row.
+
+Measured on macOS arm64 (optimize build), 60 interleaved runs each, both
+compilers copied outside `builds/` so neither replays the prelude
+interface. The host load average was about 60 during the runs, so the
+times carry more noise than track G's table.
+
+| Compiler | Size | `--version` min | One-line `translate` min |
+|---|---|---|---|
+| `dev` at 7fd8c5dd (selected objects) | 2,496,768 B | 6.58 ms | 343.8 ms |
+| Whole runtime | 2,678,816 B | 6.66 ms | 353.0 ms |
 
 Delivery 2: static extensions, with `x2c bootstrap` building a compiler
 that links a named package's compile-time part, and a probe that calls it

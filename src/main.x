@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 #include <unistd.h>
 
 #include "report.x"
@@ -270,6 +271,61 @@ static int _translate_workers(
   return failed;
 }
 
+/* The packages the top-level `import` declarations of the file at `path`
+   name. A token scan suffices: an import is legal only at file scope. */
+static List _imported_packages(String path) {
+  String text = NULL;
+  try text = Path.read_text(path);
+  catch %(not-found *): return NULL;
+  catch %(io-fail *): return NULL;
+  Tokenizer tokens = Tokenizer.new(text);
+  tokens.scan();
+  Array names = [];
+  int depth = 0;
+  for (Token token = tokens.next(); token.type != <eof>;
+       token = tokens.next()) {
+    if (token.text == "{") depth++;
+    else if (token.text == "}") depth--;
+    else if (!depth && token.text == "import") {
+      token = tokens.next();
+      if (token.type == <lit-char*>) names.push(token.text[1:-1]);
+    }
+  }
+  return names.list_free();
+}
+
+/* Loads the native modules of the packages the inputs import before the
+   workers fork, so each worker inherits them: the packages a unit's own
+   imports name, and those its previous depfile records, which include
+   imports reached through a header. A worker loads a module this misses
+   itself when its import needs it. */
+static void _preload_package_modules(CliRequest c, Map unit_dirs) {
+  List roots = c.package_roots();
+  if (!roots) return;
+  Map names = {};
+  foreach (String input, c.inputs) {
+    foreach (String name, _imported_packages(input)) names[name] = 1;
+    String directory = _unit_output_dir(c, unit_dirs, input);
+    String depfile = %"$directory/${Path.stem(input)}.d", text = NULL;
+    try text = Path.read_text(depfile);
+    catch %(not-found *): continue;
+    catch %(io-fail *): continue;
+    foreach (String dependency, translation_depfile_parse(text)) {
+      String package = x2c_package_directory(roots, dependency);
+      if (package) names[Path.basename(package)] = 1;
+    }
+  }
+  char root[PATH_MAX];
+  foreach (String name, names.keys())
+    foreach (String package_dir, roots) {
+      if (!realpath(package_dir, root)) continue;
+      String module = %"$root/$name/builds/$name.module";
+      if (!Path.is_file(module)) continue;
+      Compiler.preload_native_module(module);
+      break;
+    }
+}
+
 /* One slice per worker. Fewer, larger slices measured better than more,
    smaller ones. The fork and the copy-on-write faults behind it cost more
    than the imbalance a long unit at the tail of a slice can cause.
@@ -326,6 +382,7 @@ static int _run_translation(CliRequest c, Map unit_dirs, Build build) {
   }
   else macro_library_defer();
   if (parallel) {
+    _preload_package_modules(c, unit_dirs);
     Array chunks =
       _translation_chunks(c.inputs, total, unit_dirs ? total : c.jobs);
     int failed = _translate_workers(frontend, chunks, unit_dirs, total, build);

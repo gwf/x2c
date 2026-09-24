@@ -99,7 +99,7 @@ Path stage = work.join(name);
 stage.make_dirs();
 
 copy(package.join("src"), stage.join("src"));
-foreach (String pattern, %("*.h" "*.xi"))
+foreach (String pattern, %("*.h" "*.xi" "*.module"))
   foreach (Path generated, Path.glob(package.join("builds").join(pattern)))
     copy(generated, stage.join("builds").join(generated.basename()));
 String archive = %"lib$name.a";

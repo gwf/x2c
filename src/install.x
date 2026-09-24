@@ -177,8 +177,10 @@ static void _check_bundle(CliRequest request, String package, String name) {
 }
 
 /* A source package translates in package mode under its staged parent, so
-   its public names carry the `<name>__` prefix, then archives. It is the
-   same pair of commands `packages/package.mk` runs. */
+   its public names carry the `<name>__` prefix, then archives. When the
+   interfaces translation wrote record a native `meta` prototype of its own,
+   it also builds the module an import loads. These are the commands
+   `packages/package.mk` runs. */
 static void _build_source(String package, String name, String spec) {
   List units = NULL;
   try units = _files_with(%"$package/src", ".x")
@@ -206,6 +208,16 @@ static void _build_source(String package, String name, String spec) {
   _run(%( $x2c "build" "--kind" "static-library"
           "--output" "$builds/lib$name.a"
           "--build-dir" "$builds/cc" ).append(inputs), "build");
+  String row = %"native-meta \"${name}__";
+  if (_files_with(builds, ".xi").any(
+        %!(String path) => Path.read_text(path).contains(row)))
+    _run(%( $x2c "build" "--kind" "meta-module"
+            "--output" "$builds/$name.module"
+            "--build-dir" "$builds/module"
+            "--x-include-dir" "$package/src"
+            "--package-dir" ${Path.dirname(package)} )
+           .append(units)
+           .append(_files_with(%"$package/src", ".c")), "module build");
   Path.write_text(%"$builds/$name.native.rsp", NULL);
 }
 
