@@ -162,7 +162,7 @@ decorators, bare blocks, and continuation.
 ## Follow-ups outside this plan
 
 - A converter between the two forms, as a mode of the formatter in
-  [lint and format](x2c-lint-and-format.md).
+  [lint and format](../x2c-lint-and-format.md).
 - REPL input in the indented form.
 
 ## Plan review

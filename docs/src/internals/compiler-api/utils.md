@@ -31,10 +31,11 @@ System utilities for environment discovery and workers.
 | [`x2c_home_packages`](#x2c_home_packages) | Returns `<home>/packages`, which may not exist, or NULL without a home. |
 | [`x2c_host_error`](#x2c_host_error) | Reports a caught `<not-found>` or `<io-fail>` through `x2c_driver_error` as its operation, path or program, and system reason. |
 | [`x2c_initialize_environment`](#x2c_initialize_environment) | Initializes compiler paths and default include `List`s once. |
+| [`x2c_layout_file`](#x2c_layout_file) | Reports whether `path` names a file in the indentation syntax. |
 | [`x2c_package_directory`](#x2c_package_directory) | Returns the package directory that holds `path` below one of `roots`: the root's child on the way to `path`, compared by canonical path, when that child's name is an identifier. |
 | [`x2c_package_source`](#x2c_package_source) | Recognizes a package's `src/` files or its package-named legacy entry. |
 | [`x2c_set_root`](#x2c_set_root) | Overrides the repository root and rebuilds its default include `List`s. |
-| [`x2c_source_file`](#x2c_source_file) | Reports whether `path` is x2c source: a `.x` file, or a file of any other name whose first line is a shebang, which is a script. |
+| [`x2c_source_file`](#x2c_source_file) | Reports whether `path` is x2c source: a `.x` or `.xp` file, or a file of any other name whose first line is a shebang, which is a script. |
 | [`x2c_stage_dir`](#x2c_stage_dir) | Returns the directory of a compiler staged at `<home>/builds/<stage>/`, or NULL for any other compiler. |
 
 ### Functions
@@ -47,7 +48,7 @@ Locks the file `p`, creating it, and returns a descriptor that holds the
 lock until it is closed or the process exits. Returns -1 when `wait` is
 zero and another process holds the lock.
 
-Source: `src/utils.x:171`
+Source: `src/utils.x:175`
 
 #### file_publish
 
@@ -62,7 +63,7 @@ destinations replaced.
 
 **Raises:** `<not-found>` or `<io-fail>`, after removing the siblings.
 
-Source: `src/utils.x:191`
+Source: `src/utils.x:195`
 
 #### worker_exit
 
@@ -73,7 +74,7 @@ Flush failure is ignored. This function does not return and does not run
 `atexit` handlers. Those belong to the parent process and would close its
 log and process-lifetime `Scope`s twice.
 
-Source: `src/utils.x:326`
+Source: `src/utils.x:330`
 
 #### worker_fork
 
@@ -85,7 +86,7 @@ The call attempts to flush all process streams before the fork so
 successfully flushed bytes cannot be written by both processes. Flush
 failure is ignored. The child must leave through `worker_exit`.
 
-Source: `src/utils.x:315`
+Source: `src/utils.x:319`
 
 #### worker_wait_any
 
@@ -96,7 +97,7 @@ index, storing its shell-style status: the exit status, `128 + signal`,
 or -1 when it cannot be waited. Other children stay unreaped, so the
 wait polls with a short sleep.
 
-Source: `src/utils.x:336`
+Source: `src/utils.x:340`
 
 #### x2c_compiler_identity
 
@@ -107,7 +108,7 @@ executable's contents in 16 hexadecimal digits, or NULL when the
 executable is unknown or unreadable. Only byte-identical compilers share
 an identity. Environment setup reads the executable once.
 
-Source: `src/utils.x:305`
+Source: `src/utils.x:309`
 
 #### x2c_cpp_include_dirs
 
@@ -117,7 +118,7 @@ Returns the borrowed preprocessor `List` `<root>/src`, then `<root>/lib`.
 `<root>/src` is present only when the home has that directory. Returns
 NULL before environment setup.
 
-Source: `src/utils.x:113`
+Source: `src/utils.x:117`
 
 #### x2c_default_include_dirs
 
@@ -126,7 +127,7 @@ Source: `src/utils.x:113`
 Returns the borrowed default include `List` containing `<root>/include`.
 Returns NULL before environment setup.
 
-Source: `src/utils.x:107`
+Source: `src/utils.x:111`
 
 #### x2c_driver_error
 
@@ -137,7 +138,7 @@ The streams are flushed and `atexit` handlers do not run, so the call is
 safe inside a `try` body or a catch arm, whose records those handlers
 would otherwise find still live.
 
-Source: `src/utils.x:150`
+Source: `src/utils.x:154`
 
 #### x2c_filename_hash
 
@@ -145,7 +146,7 @@ Source: `src/utils.x:150`
 
 Hashes unit filename spelling for stable generated C identifiers.
 
-Source: `src/utils.x:351`
+Source: `src/utils.x:355`
 
 #### x2c_find_program
 
@@ -155,7 +156,7 @@ Returns the spelling of the first `PATH` candidate for the program `name`
 that this process may execute, searched as `execvp` searches, or NULL.
 An empty entry names the current directory.
 
-Source: `src/utils.x:137`
+Source: `src/utils.x:141`
 
 #### x2c_fnv_bytes
 
@@ -163,7 +164,7 @@ Source: `src/utils.x:137`
 
 Returns `hash` extended with `length` `bytes` by 64-bit FNV-1a.
 
-Source: `src/utils.x:274`
+Source: `src/utils.x:278`
 
 #### x2c_fnv_file
 
@@ -172,7 +173,7 @@ Source: `src/utils.x:274`
 Returns `hash` extended with the contents of the file at `path`.
 A missing or unreadable file clears `ok`.
 
-Source: `src/utils.x:286`
+Source: `src/utils.x:290`
 
 #### x2c_get_executable
 
@@ -198,7 +199,7 @@ Source: `src/utils.x:58`
 
 Returns the discovered or configured home, or NULL when there is none.
 
-Source: `src/utils.x:116`
+Source: `src/utils.x:120`
 
 #### x2c_home_packages
 
@@ -206,7 +207,7 @@ Source: `src/utils.x:116`
 
 Returns `<home>/packages`, which may not exist, or NULL without a home.
 
-Source: `src/utils.x:119`
+Source: `src/utils.x:123`
 
 #### x2c_host_error
 
@@ -215,7 +216,7 @@ Source: `src/utils.x:119`
 Reports a caught `<not-found>` or `<io-fail>` through `x2c_driver_error`
 as its operation, path or program, and system reason.
 
-Source: `src/utils.x:159`
+Source: `src/utils.x:163`
 
 #### x2c_initialize_environment
 
@@ -235,6 +236,14 @@ state unchanged.
 
 Source: `src/utils.x:28`
 
+#### x2c_layout_file
+
+`int x2c_layout_file(String path)`
+
+Reports whether `path` names a file in the indentation syntax.
+
+Source: `src/utils.x:96`
+
 #### x2c_package_directory
 
 `String x2c_package_directory(List roots, String path)`
@@ -252,7 +261,7 @@ Source: `src/utils.x:67`
 Recognizes a package's `src/` files or its package-named legacy entry.
 Other files under the package directory are consumers.
 
-Source: `src/utils.x:98`
+Source: `src/utils.x:102`
 
 #### x2c_set_root
 
@@ -269,8 +278,8 @@ Source: `src/utils.x:46`
 
 `int x2c_source_file(String path)`
 
-Reports whether `path` is x2c source: a `.x` file, or a file of any
-other name whose first line is a shebang, which is a script.
+Reports whether `path` is x2c source: a `.x` or `.xp` file, or a file
+of any other name whose first line is a shebang, which is a script.
 
 Source: `src/utils.x:82`
 
@@ -281,7 +290,7 @@ Source: `src/utils.x:82`
 Returns the directory of a compiler staged at `<home>/builds/<stage>/`,
 or NULL for any other compiler.
 
-Source: `src/utils.x:127`
+Source: `src/utils.x:131`
 
 ## Design notes
 

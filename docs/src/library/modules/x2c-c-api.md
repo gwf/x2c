@@ -62,6 +62,7 @@ prefix.
 | [`x2c_initialize`](common.md#x2c_initialize) | `lib/common.x` | `void x2c_initialize(void)` |
 | `x2c_initialize_environment` | `src/utils.x` | `void x2c_initialize_environment(const char *argv0)` |
 | [`x2c_initialize_protocols`](common.md#x2c_initialize_protocols) | `lib/common.x` | `void x2c_initialize_protocols(void)` |
+| `x2c_layout_file` | `src/utils.x` | `int x2c_layout_file(String path)` |
 | [`x2c_literal_int`](meta.md#x2c_literal_int) | `lib/meta.x` | `meta List x2c_literal_int(int value)` |
 | [`x2c_literal_string`](meta.md#x2c_literal_string) | `lib/meta.x` | `meta List x2c_literal_string(String value)` |
 | [`x2c_literal_symbol`](meta.md#x2c_literal_symbol) | `lib/meta.x` | `meta List x2c_literal_symbol(Symbol value)` |
@@ -113,4 +114,4 @@ prefix.
 | [`x2c_var_update_ulong`](varops.md#x2c_var_update_ulong) | `lib/varops.x` | `ulong x2c_var_update_ulong(volatile ulong *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_ulong_long`](varops.md#x2c_var_update_ulong_long) | `lib/varops.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 
-Total: 101 functions.
+Total: 102 functions.
