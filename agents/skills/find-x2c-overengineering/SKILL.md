@@ -43,6 +43,13 @@ file, function or type, exact lines, machinery, actual consumers, smallest
 removal hypothesis, strongest keep case, provenance, confidence, and one next
 proof. Do not put a mechanical hit in the ledger before reading its source.
 
+Before presenting a candidate to Gary, lead with the user-visible or developer-
+visible capability that removal would lose and show one small concrete example.
+Then give the removable machinery and size. If removal intentionally drops a
+working capability and Gary has not said that capability is unwanted, the
+candidate is `open` pending that product decision, never `confirmed` merely
+because it has no current in-tree adopter.
+
 Use these statuses only: `open`, `confirmed`, `rejected`, `superseded`, and
 `removed`. Deleted historical examples are calibration, never live candidates.
 Mark a row stale when its recorded source digest differs from the current
@@ -53,6 +60,8 @@ region; do not preserve an old verdict across changed code without review.
 - Inspect only `src/**/*.x` and hand-authored `lib/**/*.x`; exclude
   `lib/x2c.x`, examples, packages, tools, tests, generated files, and modules.
 - Do not penalize a public API for having no repository consumer.
+- Do not treat an intentionally open or documented capability as waste because
+  current `src/` and `lib/` do not exercise it.
 - A test written for machinery is evidence of its behavior, not an independent
   production requirement.
 - Prefer private duplicate facts, replay/reconciliation, registries, ledgers,

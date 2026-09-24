@@ -19,6 +19,11 @@ side effects, generated output, tests, documentation, and history. When commit
 provenance points to an agent session, inspect the raw session and distinguish
 what it states from what the code history merely suggests.
 
+Present the result capability-first. State plainly what a user or developer can
+do today, include the smallest representative example, and say whether removal
+preserves or deliberately drops that behavior. Only then report line counts,
+internal architecture, and the removal hypothesis.
+
 Choose exactly one disposition:
 
 - `confirmed`: an existing path preserves the required behavior and a
@@ -27,6 +32,11 @@ Choose exactly one disposition:
 - `superseded`: current source no longer matches the recorded candidate;
 - `removed`: the region is absent from the current tree; or
 - `open`: one named, bounded proof is still missing.
+
+Use `open`, not `confirmed`, when deletion would intentionally remove a working
+documented capability and Gary has not decided that the capability is unwanted.
+No in-tree adopter is evidence about adoption, not evidence that the behavior
+has no value.
 
 Update the candidate row with exact current lines, evidence, the strongest
 counterargument, confidence, and next proof. Add the investigation to the
