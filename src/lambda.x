@@ -248,6 +248,7 @@ List Compiler.lower_typed_adapter_expr(Compiler c, List expression) {
       c, adapter_binding, target_params, target_return,
       source_binding, source_type, source_params);
     c.names.adapters[key] = adapter_binding;
+    c.semantic_binding_facts()[%(function $adapter_binding)] = 1;
     c.add_early(function);
     return %(expr $target_spelling (ident $adapter_binding));
   }

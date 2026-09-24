@@ -1016,6 +1016,8 @@ String String_printf(String, ...);
 int Map_try_get(Map, Var, Var *);
 String Compiler_fresh_name(Compiler, String);
 Var Map_setindex(Map, Var, Var);
+Map Compiler_semantic_binding_facts(Compiler);
+Var int_var(int);
 void Compiler_add_early(Compiler, List);
 List Compiler_lower_typed_adapter_expr(Compiler c, List expression){
   if(! _init_guard_) _file_init_();  Type target_spelling = NULL, source_type = NULL;  List source_binding = NULL;  int origin = 0;
@@ -1096,7 +1098,7 @@ default: ;  return expression;  break;
         }
 
       }
-      String adapter_name = Compiler_fresh_name(c, _512);  List adapter_binding = Sym_introduce(c -> sym, adapter_name);  List function = _callback_function(c, adapter_binding, target_params, target_return, source_binding, source_type, source_params);  Map_setindex(c -> names -> adapters, List_var(key), List_var(adapter_binding));  Compiler_add_early(c, function); {
+      String adapter_name = Compiler_fresh_name(c, _512);  List adapter_binding = Sym_introduce(c -> sym, adapter_name);  List function = _callback_function(c, adapter_binding, target_params, target_return, source_binding, source_type, source_params);  Map_setindex(c -> names -> adapters, List_var(key), List_var(adapter_binding));  Map_setindex(Compiler_semantic_binding_facts(c), List_var(cons(_67, cons(List_var(adapter_binding), NULL))), int_var(1));  Compiler_add_early(c, function); {
         List _x2c_return_value_1 = cons(_62, cons(List_var(target_spelling), cons(List_var(cons(_63, cons(List_var(adapter_binding), NULL))), NULL))); {
           x2c_cleanup_leave(& _x2c_defer_record_1);  return _x2c_return_value_1;
         }
@@ -1513,7 +1515,6 @@ return 0;
 }
 
 int Map_contains(Map, Var);
-Map Compiler_semantic_binding_facts(Compiler);
 int Type_is_static(Type);
 static void _record_region_binding(Compiler compiler, List binding, Map owned, Array order){
   if(! List_truth(binding) || Map_contains(owned, List_var(binding))) return;  Var automatic, stored_type;  Map facts = Compiler_semantic_binding_facts(compiler);  if(! Map_try_get(facts, List_var(cons(_270, cons(List_var(binding), NULL))), & automatic) || ! Map_try_get(facts, List_var(cons(_51, cons(List_var(binding), NULL))), & stored_type)) return;  Type type = Var_type(stored_type);  if(! List_truth(Type_list(type)) || Type_is_static(type)) return;  Map_setindex(owned, List_var(binding), List_var(type));  Array_push(order, List_var(binding));
@@ -1858,7 +1859,6 @@ return body;
 int ast_contains_head(Var, Symbol);
 unsigned Map_len(Map);
 int Array_try_next(Array, int *, Var *);
-Var int_var(int);
 static List _prepare_lambda_region(Compiler compiler, List entries, List body){
   if(! ast_contains_head(List_var(body), 808259842)) return body;  body = _prepare_nested_lambda_regions(compiler, body);  Map owned = Map_new();  Array order = Array_new(); {
     List entry;  List _x2c_macro_object_13 = entries;  List _x2c_macro_cursor_13 = _x2c_macro_object_13;  Var _x2c_macro_cursor_output_13;  while(List_try_next(_x2c_macro_object_13, & _x2c_macro_cursor_13, & _x2c_macro_cursor_output_13)){
