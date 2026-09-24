@@ -4,7 +4,7 @@
 
 #include "exception.h"
 
-static String _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 #include "exception.h"
 #include <string.h>
@@ -87,6 +87,8 @@ static inline int _closes(Token t);
 
 static inline int _conditional(Token t);
 
+static int _layout_condition(Token * sig, int * depths, _LayoutEdit * edits, struct Token * all, int first, int colon, String body);
+
 static Bytes _layout_insert(Bytes out, char * chars, Token at, int end);
 
 static void Tokenizer__layout(Tokenizer t);
@@ -117,6 +119,7 @@ typedef struct _x2c_defer_env_1{
   const void * _x2c_defer_capture_6;
   const void * _x2c_defer_capture_7;
   const void * _x2c_defer_capture_8;
+  const void * _x2c_defer_capture_9;
 }
 _x2c_defer_env_1;
 
@@ -152,21 +155,22 @@ __attribute__((constructor)) static void _file_init_(void){
   _16 = String_new("switch");
   _17 = String_new("match");
   _18 = String_new(".");
-  _19 = String_new(":");
-  _20 = String_new("else");
-  _21 = String_new("struct");
-  _22 = String_new("union");
-  _23 = String_new("enum");
-  _24 = String_new("case");
-  _25 = String_new("default");
-  _26 = String_new("{");
-  _27 = String_new("(");
-  _28 = String_new("do");
-  _29 = String_new("typedef");
-  _30 = String_new("};");
-  _31 = String_new("}");
-  _32 = String_new("?");
-  _33 = String_new(";");
+  _19 = String_new("(");
+  _20 = String_new(":");
+  _21 = String_new("?");
+  _22 = String_new("struct");
+  _23 = String_new("union");
+  _24 = String_new("enum");
+  _25 = String_new("case");
+  _26 = String_new("default");
+  _27 = String_new("catch");
+  _28 = String_new("{");
+  _29 = String_new("do");
+  _30 = String_new("typedef");
+  _31 = String_new("};");
+  _32 = String_new("}");
+  _33 = String_new("else");
+  _34 = String_new(";");
 }
 
 unsigned x2c_hash_bytes(unsigned long, const void *, size_t);
@@ -715,6 +719,24 @@ static inline int _conditional(Token t){
   return String_equal(t -> text, _12) || String_equal(t -> text, _13) || String_equal(t -> text, _14) || String_equal(t -> text, _15) || String_equal(t -> text, _16) || String_equal(t -> text, _17);
 }
 
+int String_truth(String);
+
+static int _layout_condition(Token * sig, int * depths, _LayoutEdit * edits, struct Token * all, int first, int colon, String body){
+  int key = - 1;
+  for(int m = first;  m < colon;  m ++) if(! depths[m] && _conditional(sig[m]) &&(m == first || ! String_equal(sig[m - 1] -> text, _18))) key = m;
+  if(key < 0) return 0;
+  int wrapped = sig[key + 1] -> type == 81 && sig[colon - 1] -> type == 83;
+  for(int m = key + 2;  wrapped && m < colon - 1;  m ++) wrapped = depths[m] > 0;
+  _LayoutEdit * tail = & edits[sig[colon] - all];
+  if(wrapped) tail -> type = String_truth(body) ? 247 : 40896714;
+  else{
+    edits[sig[key + 1] - all].before = _19;
+    tail -> type = 83;
+    tail -> after = body;
+  }
+  return 1;
+}
+
 static Bytes _layout_insert(Bytes out, char * chars, Token at, int end){
   for(;  chars && * chars;  chars ++){
     struct Token tok ={
@@ -726,8 +748,6 @@ static Bytes _layout_insert(Bytes out, char * chars, Token at, int end){
   return out;
 }
 
-int String_truth(String);
-
 static void Tokenizer__layout(Tokenizer t){
   struct Token * all =(struct Token *) t -> tokens;
   int count = Bytes_len(t -> tokens) - 1, nsig = 0, nlines = 0, depth = 0;
@@ -737,9 +757,9 @@ static void Tokenizer__layout(Tokenizer t){
   _LayoutEdit * edits = calloc(count + 1, sizeof(_LayoutEdit));
   int * indents = calloc(count + 2, sizeof(int));
   String * closers = calloc(count + 2, sizeof(String));
-  char * enums = calloc(count + 2, 1);
+  char * enums = calloc(count + 2, 1), * ternary = calloc(count + 1, 1);
   {
-  _x2c_defer_env_1 _x2c_defer_env_3 = {._x2c_defer_capture_2 =(const void *) & sig, ._x2c_defer_capture_3 =(const void *) & depths, ._x2c_defer_capture_4 =(const void *) & lines, ._x2c_defer_capture_5 =(const void *) & edits, ._x2c_defer_capture_6 =(const void *) & indents, ._x2c_defer_capture_7 =(const void *) & closers, ._x2c_defer_capture_8 =(const void *) & enums};
+  _x2c_defer_env_1 _x2c_defer_env_3 = {._x2c_defer_capture_2 =(const void *) & sig, ._x2c_defer_capture_3 =(const void *) & depths, ._x2c_defer_capture_4 =(const void *) & lines, ._x2c_defer_capture_5 =(const void *) & edits, ._x2c_defer_capture_6 =(const void *) & indents, ._x2c_defer_capture_7 =(const void *) & closers, ._x2c_defer_capture_8 =(const void *) & enums, ._x2c_defer_capture_9 =(const void *) & ternary};
 
   X2CCleanup _x2c_defer_record_1 = {
     .fn = _x2c_defer_cleanup_1,
@@ -749,11 +769,11 @@ static void Tokenizer__layout(Tokenizer t){
   {
     Token error_at = NULL;
     for(int i = 0;  i < count;  i ++) if(all[i].type != 40896714 && all[i].type != 7477210024) sig[nsig ++] = & all[i];
-    int end_line = 0;
+    int end_line = 0, pending = 0;
     for(int k = 0;  k < nsig;  k ++){
       Token tok = sig[k];
       int directive = tok -> type == 35579270086;
-      if(directive || ! nlines || lines[nlines - 1].directive ||(depth == 0 && tok -> line > end_line && ! String_equal(tok -> text, _18) &&(tok -> col <= lines[nlines - 1].indent || String_equal(sig[k - 1] -> text, _19)))){
+      if(directive || ! nlines || lines[nlines - 1].directive ||(depth == 0 && tok -> line > end_line && ! String_equal(tok -> text, _18) &&(tok -> col <= lines[nlines - 1].indent ||(String_equal(sig[k - 1] -> text, _20) && ! ternary[k - 1])))){
         Token space = tok > all ? tok - 1 : NULL;
         char * newline = space && space -> type == 40896714 ? strrchr(space -> text, '\n') : NULL;
         if(! directive && newline && strchr(newline, '\t') && ! error_at) error_at = tok;
@@ -761,10 +781,16 @@ static void Tokenizer__layout(Tokenizer t){
           k, k, tok -> col, directive
         }
         ;
+        pending = 0;
       }
       lines[nlines - 1].last = k;
       if(_closes(tok)) depth --;
       depths[k] = depth;
+      if(! depth && String_equal(tok -> text, _21)) pending ++;
+      else if(! depth && String_equal(tok -> text, _20) && pending){
+        ternary[k] = 1;
+        pending --;
+      }
       if(_opens(tok)) depth ++;
       end_line = tok -> line;
       for(char * c = tok -> text;  c && * c;  c ++) end_line += * c == '\n';
@@ -781,62 +807,44 @@ static void Tokenizer__layout(Tokenizer t){
       int j = i + 1;
       while(j < nlines && lines[j].directive) j ++;
       int next = j < nlines ? lines[j].indent : indents[0];
-      int key = line.first +(String_equal(first -> text, _20) && line.first < line.last && String_equal(sig[line.first + 1] -> text, _12));
-      Token keyword = sig[key];
       _LayoutEdit * tail = & edits[sig[line.last] - all];
       String suffix = NULL;
-      if(String_equal(last -> text, _19) && next > line.indent){
-        int aggregate = 0, enumeration = 0, parameters = 0;
+      if(String_equal(last -> text, _20) && ! ternary[line.last] && next > line.indent){
+        int aggregate = 0, enumeration = 0, parameters = 0, labeled = 0;
         for(int m = line.first;  m < line.last;  m ++){
           String word = sig[m] -> text;
-          aggregate |= String_equal(word, _21) || String_equal(word, _22) || String_equal(word, _23);
-          enumeration |= String_equal(word, _23);
+          aggregate |= String_equal(word, _22) || String_equal(word, _23) || String_equal(word, _24);
+          enumeration |= String_equal(word, _24);
           parameters |= sig[m] -> type == 81;
+          labeled |= ! depths[m] &&(String_equal(word, _25) || String_equal(word, _26) || String_equal(word, _27));
         }
         aggregate &= ! parameters;
         enumeration &= ! parameters;
-        if(String_equal(first -> text, _24) || String_equal(first -> text, _25)) tail -> after = _26;
-        else if(_conditional(keyword) && sig[key + 1] -> type != 81){
-          edits[sig[key + 1] - all].before = _27;
-          tail -> type = 83;
-          tail -> after = _26;
-        }
-        else tail -> type = 247;
-        if(String_equal(first -> text, _28) && line.last == line.first + 1){
+        if(labeled) tail -> after = _28;
+        else if(! _layout_condition(sig, depths, edits, all, line.first, line.last, _28)) tail -> type = 247;
+        if(String_equal(first -> text, _29) && line.last == line.first + 1){
           int k = j;
           while(k < nlines &&(lines[k].directive || lines[k].indent > line.indent)) k ++;
-          if(k == nlines || lines[k].indent != line.indent || ! String_equal(sig[lines[k].first] -> text, _13) || String_equal(sig[lines[k].last] -> text, _19)) edits[sig[line.first] - all].type = 40896714;
+          if(k == nlines || lines[k].indent != line.indent || ! String_equal(sig[lines[k].first] -> text, _13) || String_equal(sig[lines[k].last] -> text, _20)) edits[sig[line.first] - all].type = 40896714;
         }
         indents[++ top] = next;
         enums[top] = enumeration;
-        closers[top] = aggregate && ! String_equal(first -> text, _29) ? _30 : _31;
+        closers[top] = aggregate && ! String_equal(first -> text, _30) ? _31 : _32;
       }
       else{
-        if(_conditional(keyword) || String_equal(keyword -> text, _20)){
-          int pending = 0;
-          for(int m = key + 1;  m < line.last;  m ++){
-            Token tok = sig[m];
-            if(depths[m]) continue;
-            if(String_equal(tok -> text, _32)) pending ++;
-            else if(String_equal(tok -> text, _19) && pending) pending --;
-            else if(String_equal(tok -> text, _19)){
-              if(String_equal(keyword -> text, _20)) edits[sig[m] - all].type = 40896714;
-              else if(sig[key + 1] -> type != 81){
-                edits[sig[key + 1] - all].before = _27;
-                edits[sig[m] - all].type = 83;
-              }
-              else edits[sig[m] - all].type = 40896714;
-              break;
-            }
-
-          }
-
+        for(int m = line.first + 1;  m < line.last;  m ++){
+          String word = sig[m] -> text;
+          if(depths[m]) continue;
+          if(String_equal(word, _25) || String_equal(word, _26) || String_equal(word, _27)) break;
+          if(! String_equal(word, _20) || ternary[m]) continue;
+          if(! _layout_condition(sig, depths, edits, all, line.first, m, NULL) && String_equal(sig[m - 1] -> text, _33)) edits[sig[m] - all].type = 40896714;
+          break;
         }
         int lisp = first -> type == 9297;
         for(int m = line.first + 1;  lisp && m < line.last;  m ++) lisp = depths[m] > 0;
         int hole = last -> type == 19147688 && line.last > line.first && sig[line.last - 1] -> type == 73 &&(line.last - 1 == line.first || sig[line.last - 2] -> type == 83);
         if(first -> type == 129) edits[sig[line.first] - all].type = 40896714;
-        else if(last -> type != 119 && ! enums[top] && ! lisp && ! hole) suffix = _33;
+        else if(last -> type != 119 && ! enums[top] && ! lisp && ! hole) suffix = _34;
       }
       while(next < indents[top]){
         suffix = String_join(NULL, cons(String_var(suffix), cons(String_var(closers[top --]), NULL)));
@@ -949,6 +957,7 @@ static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
     free((*(int * *) _x2c_defer_data_1->_x2c_defer_capture_6));
     free((*(String * *) _x2c_defer_data_1->_x2c_defer_capture_7));
     free((*(char * *) _x2c_defer_data_1->_x2c_defer_capture_8));
+    free((*(char * *) _x2c_defer_data_1->_x2c_defer_capture_9));
   }
 
 }

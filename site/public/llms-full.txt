@@ -1268,13 +1268,16 @@ int main(void):
 ```
 
 - **Lines.** A logical line ends at a line break outside brackets. A
-  deeper line continues the previous one unless that line ends in `:`, and
-  a line that starts with `.` continues a method chain.
+  deeper line continues the previous one unless that line ends in a `:`
+  that opens a block, and a line that starts with `.` continues a method
+  chain. The `:` of a `?:` expression never opens a block.
 - **Blocks.** A line that ends in `:` before a deeper line opens a block,
   and each return to an outer indentation closes one. `if`, `else if`,
   `while`, `for`, `foreach`, `switch`, and `match` take their condition with
-  or without parentheses. `case X:` and `default:` open a block of their
-  own. A `struct`, `union`, or `enum` body closes with `};`, unless its
+  or without parentheses; the condition belongs to the last of them on the
+  line, so an unbraced `foreach (...)` can continue into an `if x:` block.
+  A `case`, `default`, or `catch` label keeps its colon and opens a block
+  of its own. A `struct`, `union`, or `enum` body closes with `};`, unless its
   header starts with `typedef`, and enumerators keep their commas.
 - **One-line bodies.** `if cond: statement` puts the body after the first
   colon outside brackets that does not belong to a `?:`.
