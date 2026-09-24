@@ -10,7 +10,7 @@
 static String _stdout(Job job) {
   String output = NULL;
   try output = job.output();
-  catch %(cmd-fail *failure): output = failure.assoc(<output>);
+  catch %(cmd-fail *failure): output = %"${failure.assoc(<output>)}";
   return output;
 }
 

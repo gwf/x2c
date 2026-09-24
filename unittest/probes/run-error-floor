@@ -14,7 +14,7 @@ static Job _run(String name) {
   Job job = command.job().options({stderr: <capture>});
   String output = NULL;
   try output = job.output();
-  catch %(cmd-fail *failure): output = failure.assoc(<output>);
+  catch %(cmd-fail *failure): output = %"${failure.assoc(<output>)}";
   if (output) probe_fail(%"$name: unexpected standard output");
   return job;
 }
