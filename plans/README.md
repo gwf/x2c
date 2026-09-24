@@ -88,6 +88,7 @@ execution.
 | [Tooling ports](x2c-scripting-ports.md) | Extensionless tool names, the llms.txt generator, the documentation sample checks and `tools/check-docs` are delivered; release, gate and compiler-backed ports are separately sequenced. |
 | [C on-ramp](x2c-c-on-ramp.md) | Landing-page adoption examples; the parser/corpus work already shipped. |
 | [Explicit meta campaign](archive/explicit-meta-and-lifetime-campaign.md#backlog) | Parked compound-selector owner, direct function-handle assignment in meta bodies, a REPL test for wide scalar globals, destructuring beside a cleanup, and three small heap limits. |
+| [Indentation dogfooding](indentation-dogfooding.md) | Active; convert the seven script tools and `tools/doc-samples.x` to `#pragma indent` with a new `tools/indent-convert` that proves each conversion by token comparison. |
 | [Var-tags experiment](archive/meta-functions.md#parked) | Parked until a measured approach meets the recorded translation-cost condition. |
 
 An entry here preserves remaining work; it does not dispatch it or add a gate.
