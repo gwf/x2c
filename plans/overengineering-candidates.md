@@ -12,6 +12,7 @@
 
 | Candidate | Location | Machinery | Claimed purpose | Production consumers | Overreach evidence | Removal hypothesis | Strongest keep case | Provenance | Status / confidence | Next proof |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `src/comptime.x:_lower_content` | `src/comptime.x:1500-1506`, repeating `_lower_expr` at 1370-1375; region 1380-1510 digest `2960adebdb77` | Second copy of the `cons`, `append`, `nil`, and `cache` productions | Lower a literal template that sits inside a typed `expr` node | `_lower_expr` for every `(expr T content)`; `(expr ? (cache ?id))` comes from `src/compiler.x:2210` | Both copies landed with the pass in `075ed2fc`/`77e9481a`; the content copy adds no typing or policy | Replace the six lines and the final decline with `return _lower_expr(l, content);`; net -5 lines. Only the decline text changes, and no test or doc pins it | A separate "unsupported expression" message distinguishes an unhandled content form from a non-expression | `075ed2fc`, `77e9481a` | open / medium | Build with the fallback and show meta and comptime tests pass and self-translated C is byte-identical |
 
 ## Calibration cases
 
