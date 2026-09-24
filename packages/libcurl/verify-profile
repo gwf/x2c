@@ -1,0 +1,43 @@
+#!/usr/bin/env -S x2c script
+/*  verify-profile -- the pinned libcurl and OpenSSL prefixes are the
+    admitted build
+
+      verify-profile <curl prefix> <openssl prefix> <ca bundle>
+
+    The Makefile calls this rather than spelling the comparisons out in a
+    recipe: a long continued recipe line is where Apple's make 3.81 on x86_64
+    loses bytes.
+*/
+static void _fail(String message) {
+  Stderr.printf("libcurl profile: %s\n", message);
+  exit(1);
+}
+
+if (args.len() < 3) {
+  Stderr.printf("usage: verify-profile <curl> <openssl> <ca bundle>\n");
+  return 1;
+}
+(String curl_prefix, String openssl_prefix, String ca_bundle) = args;
+Path curl_config = Path.join(curl_prefix, "bin/curl-config");
+Path openssl = Path.join(openssl_prefix, "bin/openssl");
+
+String version = %($curl_config --version).job().output().rstrip("\n");
+if (version != "libcurl 8.22.0") _fail(%"curl is $version");
+
+String line = %($openssl version).job().output().rstrip("\n");
+(String name, String space, String rest) = line.partition(" ");
+String openssl_version = name + space + rest.partition(" ").car();
+if (openssl_version != "OpenSSL 3.6.4") _fail(%"openssl is $openssl_version");
+
+String configure = %($curl_config --configure).job().output();
+if (!configure.contains(%"--with-ca-bundle=$ca_bundle"))
+  _fail(%"not built against $ca_bundle");
+foreach (String option,
+         %("without-zlib" "without-brotli" "without-zstd" "without-libpsl"
+           "without-libidn2" "without-nghttp2" "without-ngtcp2"
+           "without-nghttp3" "without-libssh2" "disable-threaded-resolver"
+           "disable-ftp" "disable-file" "disable-ldap" "disable-ldaps"
+           "disable-rtsp" "disable-dict" "disable-telnet" "disable-tftp"
+           "disable-pop3" "disable-imap" "disable-smb" "disable-smtp"
+           "disable-gopher" "disable-mqtt"))
+  if (!configure.contains(%"--$option")) _fail(%"built without --$option");
