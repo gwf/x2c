@@ -1,0 +1,133 @@
+#!/usr/bin/env -S x2c script
+/*  run-error-floor -- the error floor and shutdown under terminal failures
+
+    Builds `error-fatal.x` and `error-fatal-preinit.c` in the stage's build
+    mode, then runs each mode and checks its status, standard output, and
+    standard error.
+*/
+#include "probe.x"
+
+static Path program, preinit;
+
+static Job _run(String name) {
+  List command = name == "preinit" ? %($preinit) : %($program $name);
+  Job job = command.job().options({stderr: <capture>});
+  String output = NULL;
+  try output = job.output();
+  catch %(cmd-fail *failure): output = failure.assoc(<output>);
+  if (output) probe_fail(%"$name: unexpected standard output");
+  return job;
+}
+
+static List _stderr(Job job) => job.errors().split_lines(0);
+
+static String _last(List lines) => lines ? lines[lines.len() - 1] : NULL;
+
+/* The floor decodes the raising cause, so match the fixed prefix and the
+   reason suffix; the preinit probe raises a synthetic code whose spelling
+   is not part of the vocabulary. */
+static void _check_case(String name, String reason) {
+  Job job = _run(name);
+  if (!job.status()) probe_fail(%"$name: expected terminal failure");
+  String output = _last(_stderr(job));
+  if (!output.startswith("x2c error floor: <"))
+    probe_fail(%"$name: final stderr line lacks the floor prefix: $output");
+  if (!output.endswith(%": $reason"))
+    probe_fail(%"$name: stderr lacks reason '$reason': $output");
+}
+
+static Job _passes(String name) {
+  Job job = _run(name);
+  if (job.status())
+    probe_fail(%"$name: exited with status ${job.status()}");
+  return job;
+}
+
+static void _quiet(String name) {
+  if (_passes(name).errors())
+    probe_fail(%"$name: unexpected standard error");
+}
+
+static void _expect(String name, String actual, String expected) {
+  if (actual != expected)
+    probe_fail(%"$name: expected '$expected', found '$actual'");
+}
+
+Path root = probe_root(argv[0]);
+Path build = root.join("unittest/build/error-probes");
+Path stage = root.join("builds/0");
+program = build.join("error-fatal");
+preinit = build.join("error-fatal-preinit");
+List flags = probe_mode_flags(root);
+build.make_dirs();
+
+Path x2c = stage.join("x2c");
+Path source = root.join("unittest/probes/error-fatal.x");
+%($x2c translate --live-symbols --out-dir $build $source).job().run();
+String cc = probe_env("CC", "cc"), library = %"-L$stage";
+Path include = root.join("include/x2c");
+Path generated = build.join("error-fatal.c");
+%($cc @flags -iquote $include $generated $library -lx2c -lm -o $program)
+  .job().run();
+Path stage_lib = stage.join("lib");
+Path preinit_c = root.join("unittest/probes/error-fatal-preinit.c");
+%($cc @flags -iquote $stage_lib $preinit_c $library -lx2c -lm -o $preinit)
+  .job().run();
+
+_check_case("preinit", "raise before initialization");
+_check_case("abort-policy", "unhandled and policy is abort");
+foreach (String name, %("uncaught-invariant" "uncaught-format"
+                        "uncaught-not-found" "uncaught-malformed"))
+  _check_case(name, "non-returning error was not caught");
+_check_case("after-shutdown", "raise re-entered or after shutdown");
+_check_case("dynamic-invalid",
+            "error detail contains an identity-bearing value");
+_check_case("context-bound", "error stack exceeded its bound");
+foreach (String name, %("handled-alloc" "handled-size" "handled-format"
+                        "handled-io-fail" "handled-bad-arity"
+                        "handled-invariant"))
+  _check_case(name, "non-returning error was not caught");
+
+_quiet("pool-isolation");
+
+List order = _stderr(_passes("shutdown-order"));
+foreach (String line, %("code=<hook-probe>" "code=<late-probe>"
+                        "shutdown-hook: before raise"
+                        "shutdown-hook: after raise")) {
+  int count = 0;
+  foreach (String row, order) if (row.contains(line)) count++;
+  if (count != 1)
+    probe_fail(%"shutdown-order: '$line' appears $count times, not once");
+}
+_expect("shutdown-order", _last(order), "shutdown-complete: error-ready=0");
+
+_quiet("pop-outer-in-catch");
+
+/* exit() runs shutdown while a catch is registered or its arm holds the
+   selected Error; both must reclaim quietly and keep the exit status. exit()
+   from a handler callback, a Context body holding its own pushed slot, or a
+   Logger sink keeps its status and reclaims what the abandoned frame owned.
+   Rendered output is expected for the last three; a leak report or the error
+   floor is not. */
+foreach (List exit_case, %(("exit-in-try" 3 1) ("exit-in-catch" 4 1)
+                           ("exit-in-observer" 6 0) ("exit-in-context" 5 0)
+                           ("exit-in-sink" 8 0))) {
+  (String name, int status, int quiet) = exit_case;
+  Job job = _run(name);
+  if (job.status() != status)
+    probe_fail(%"$name: exited with status ${job.status()}, not $status");
+  String errors = job.errors();
+  if (quiet && errors) probe_fail(%"$name: unexpected standard error");
+  foreach (String pattern, %("Scope leak detected" "x2c error floor"))
+    if (errors.contains(pattern))
+      probe_fail(%"$name: stderr reports '$pattern'");
+}
+
+/* A shutdown hook registered by a running hook still runs, newest first. */
+List nested = _stderr(_passes("nested-shutdown-hook"));
+_expect("nested-shutdown-hook", nested ? nested.car() : NULL,
+        "shutdown-hook: outer");
+_expect("nested-shutdown-hook", nested.len() > 1 ? nested[1] : NULL,
+        "shutdown-hook: inner");
+
+printf("error floor and shutdown probes passed\n");
