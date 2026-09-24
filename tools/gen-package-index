@@ -118,6 +118,6 @@ try:
   printf("x2c: wrote %s (%d rows)\n", index, (int) rows.len())
 catch %(?code *detail):
   Var why = detail.assoc(<why>)
-  if why is void: Stderr.printf("x2c: %s %s\n", code.str(), detail.repr())
-  else: Stderr.printf("x2c: %s\n", why.str())
+  if why is void: Stderr.printf("x2c: %s %s\n", code, detail.repr())
+  else: Stderr.printf("x2c: %s\n", why)
   return 1
