@@ -366,57 +366,55 @@ static List Emitter._local_static(Emitter e, List ast) {
     String cleanup = e.fresh_name("static_cleanup");
     String temporary = e.fresh_name("static_initial");
     int inferred = type.car() == <dim> || type.match(%((dim) *));
+    List prefix, initial_copy = NULL, source;
+    String slot = pointer, object = temporary, formal = NULL;
     if (inferred) {
-      String probe = e.fresh_name("static_incomplete");
-      String formal = e.fresh_name("static_input");
-      List probe_decl = e._semantic_name(type.reference(), probe);
+      slot = e.fresh_name("static_incomplete");
+      formal = e.fresh_name("static_input");
+      List probe_decl = e._semantic_name(type.reference(), slot);
       output.push(%(@probe_decl ";"));
-      e.static_objects[name] = probe;
-      List operand = %(expr $type (cast $type $initial));
-      List captured = %(
-        "typedef __typeof__(" $formal ")" $alias ";"
-        $storage "X2CStatic" $guard "= {0};"
-        $alias "*" $pointer ";"
-        "if (x2c_static_acquire(&" $guard ", sizeof(" $alias "),"
-            "_Alignof(" $alias "),"
-            ${declared_base.is_threaded() ? "1" : "0"} ")) {"
-          $probe "=" $guard ".payload;"
-          "X2CCleanup" $cleanup "= { .fn = x2c_static_abort,"
-                                   ".env = &" $guard "};"
-          "x2c_cleanup_push(&" $cleanup ");"
-          @{e._static_copy(alias, guard, %("&" $formal), alias)}
-          "x2c_static_commit(&" $guard ");"
-          "x2c_cleanup_leave(&" $cleanup ");"
-        "}"
-        $pointer "=" $guard ".payload;"
-      );
-      output.push(e._initializer_macro(%(input ($formal $operand)), captured));
-      e.static_objects[name] = pointer;
-      continue;
+      e.static_objects[name] = slot;
+      prefix = %("typedef __typeof__(" $formal ")" $alias ";");
+      source = %("&" $formal);
+      object = alias;
     }
-    List alias_decl = e._semantic_name(type, alias);
-    e.static_objects[name] = pointer;
-    List value = e._emit(initial);
-    output.push(%(
-      "typedef" @alias_decl ";"
-      "_Static_assert(__builtin_constant_p(sizeof(" $alias ")),"
-        "\"static object size must be constant\");"
+    else {
+      List alias_decl = e._semantic_name(type, alias);
+      e.static_objects[name] = pointer;
+      List value = e._emit(initial);
+      prefix = %(
+        "typedef" @alias_decl ";"
+        "_Static_assert(__builtin_constant_p(sizeof(" $alias ")),"
+          "\"static object size must be constant\");"
+      );
+      initial_copy = %($alias $temporary "=" @value ";");
+      source = %("&" $temporary);
+    }
+    List acquisition = %(
+      @prefix
       $storage "X2CStatic" $guard "= {0};"
       $alias "*" $pointer ";"
       "if (x2c_static_acquire(&" $guard ", sizeof(" $alias "),"
           "_Alignof(" $alias "),"
           ${declared_base.is_threaded() ? "1" : "0"} ")) {"
-        $pointer "=" $guard ".payload;"
+        $slot "=" $guard ".payload;"
         "X2CCleanup" $cleanup "= { .fn = x2c_static_abort,"
                                  ".env = &" $guard "};"
         "x2c_cleanup_push(&" $cleanup ");"
-        $alias $temporary "=" @value ";"
-        @{e._static_copy(alias, guard, %("&" $temporary), temporary)}
+        @initial_copy
+        @{e._static_copy(alias, guard, source, object)}
         "x2c_static_commit(&" $guard ");"
         "x2c_cleanup_leave(&" $cleanup ");"
       "}"
       $pointer "=" $guard ".payload;"
-    ));
+    );
+    if (inferred) {
+      List operand = %(expr $type (cast $type $initial));
+      acquisition = e._initializer_macro(%(input ($formal $operand)),
+                                        acquisition);
+    }
+    output.push(acquisition);
+    e.static_objects[name] = pointer;
   }
   output.push(e._emit(body));
   return output.list_free();
