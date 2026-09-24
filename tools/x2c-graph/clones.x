@@ -2,6 +2,7 @@
 
 #pragma once
 #include "frontend.x"
+#include "targets.x"
 List graph_clones(Frontend frontend, Array inputs, int minimum);
 
 #pragma private
@@ -139,17 +140,6 @@ static int _clone_origin(Var value) {
   return 0;
 }
 
-static List _clone_location(CloneIndex *index, int origin) {
-  Compiler compiler = index.parsed.compiler;
-  List location = compiler.origin_location(origin);
-  if (!location) return %(location ${index.path} 0 0);
-  Var file = location.assoc(<file>);
-  String path = file is <string> ? compiler.display_path(file.str())
-                                : index.path;
-  return %(location $path ${location.assoc(<line>)}
-             ${location.assoc(<column>)});
-}
-
 static int _clone_root(List node) {
   Var tag = node.car();
   return tag is <symbol> &&
@@ -199,9 +189,12 @@ static uint64_t _clone_value(CloneIndex *index, Var value, int origin) {
     Array stream = [];
     _clone_bindings(index, node, {}, stream);
     List key = %(${(int) id} @{stream.list_free()});
-    List site = %(site ${index.function} ${_clone_location(index, origin)}
+    List site = %(
+      site ${index.function}
+      ${project_location(index.parsed.compiler, index.path, origin)}
       (kind ${node.car()}) (span $start ${index.sequence})
-      (unit ${index.path}));
+      (unit ${index.path})
+    );
     key = index.parsed.context.export(key);
     site = index.parsed.context.export(site);
     List prior = index.sites.contains(key) ? index.sites[key].list() : NULL;

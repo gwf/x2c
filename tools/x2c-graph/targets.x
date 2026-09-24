@@ -9,6 +9,7 @@ List project_call_target(
   Compiler compiler, Map definitions, Var value, String *name,
   List *arguments);
 List resolve_project_target(List target, Map publics);
+List project_location(Compiler compiler, String path, int origin);
 
 #pragma private
 
@@ -79,4 +80,15 @@ List resolve_project_target(List target, Map publics) {
     }
   }
   return NULL;
+}
+
+List project_location(Compiler compiler, String path, int origin) {
+  List location = compiler.origin_location(origin);
+  if (!location) return %(location $path 0 0);
+  Var file = location.assoc(<file>);
+  String source = file is <string>
+                ? compiler.display_path(file.str()) : path;
+  int line = location.assoc(<line>).integer();
+  int column = location.assoc(<column>).integer();
+  return %(location $source $line $column);
 }

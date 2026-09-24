@@ -81,18 +81,6 @@ static int _lifetime_candidate_type(Type type) {
   return type.is_pointer() || type.is_bare_typedef_name();
 }
 
-static List _lifetime_location(Lifetime lifetime) {
-  List location = lifetime.compiler.origin_location(lifetime.origin);
-  if (!location) return %(location ${lifetime.path} 0 0);
-  Var file = location.assoc(<file>);
-  String source = file is <string>
-                ? lifetime.compiler.display_path(file.str())
-                : lifetime.path;
-  int line = location.assoc(<line>).integer();
-  int column = location.assoc(<column>).integer();
-  return %(location $source $line $column);
-}
-
 static Symbol _lifetime_named_allocation_kind(String name);
 
 Symbol Lifetime.loop_allocation_kind(
@@ -222,7 +210,9 @@ static void _lifetime_end_region(Lifetime lifetime, int id, int deferred) {
       if (alive.integer())
         lifetime.regions[id] = %(
           region $identity $kind $isolated ${deferred ? 1 : 0}
-          $deferred $owner ${_lifetime_location(lifetime)}
+          $deferred $owner ${project_location(
+            lifetime.compiler, lifetime.path, lifetime.origin
+          )}
         );
 }
 
@@ -425,7 +415,9 @@ static void _lifetime_scan_calls(Lifetime lifetime, Var value) {
         int id = _lifetime_wrapped_allocation(lifetime, argument);
         List cause = %(
           call ${lifetime.path} ${lifetime.function}
-          ${name ? name : %"computed"} ${_lifetime_location(lifetime)}
+          ${name ? name : %"computed"} ${project_location(
+            lifetime.compiler, lifetime.path, lifetime.origin
+          )}
         );
         if (id) {
           _lifetime_unresolve(lifetime, id, cause);
@@ -454,7 +446,7 @@ static int _lifetime_expression(Lifetime lifetime, Var value) {
     lifetime.direct_allocations++;
     lifetime.allocations[id] = %(
       allocation $id $region $operation known
-      ${_lifetime_location(lifetime)}
+      ${project_location(lifetime.compiler, lifetime.path, lifetime.origin)}
     );
     return id;
   }
@@ -475,7 +467,9 @@ static int _lifetime_expression(Lifetime lifetime, Var value) {
       id = ++lifetime.next_allocation;
       lifetime.allocations[id] = %(
         pending-allocation $id $target $name
-        $scope_region $pool_region known ${_lifetime_location(lifetime)}
+        $scope_region $pool_region known ${project_location(
+          lifetime.compiler, lifetime.path, lifetime.origin
+        )}
       );
       lifetime.pending_allocations.push(%(
         pending-allocation $target $scope_region $pool_region
@@ -564,7 +558,7 @@ static void _lifetime_return(Lifetime lifetime, Type target, Var expression) {
   if (direct)
     lifetime.allocation_returns.push(%(
       return ${lifetime.path} ${lifetime.function} $direct $operation
-      ${_lifetime_location(lifetime)}
+      ${project_location(lifetime.compiler, lifetime.path, lifetime.origin)}
     ));
   Type source = _lifetime_expression_type(expression);
   if (!_lifetime_preserves_value(lifetime, source, target)) return;
@@ -586,7 +580,9 @@ static void _lifetime_return(Lifetime lifetime, Type target, Var expression) {
             finding dangling-return ${lifetime.path}
             ${lifetime.function} $kind $operation
             (allocated $allocated) (ended $ended)
-            (returned ${_lifetime_location(lifetime)})
+            (returned ${project_location(
+              lifetime.compiler, lifetime.path, lifetime.origin
+            )})
           ));
         }
       }
@@ -612,7 +608,9 @@ static void _lifetime_return(Lifetime lifetime, Type target, Var expression) {
         (scope ${_lifetime_owner(lifetime, scope.integer())})
         (pool ${_lifetime_owner(lifetime, pool.integer())})
         (allocated $allocated)
-        (returned ${_lifetime_location(lifetime)})
+        (returned ${project_location(
+          lifetime.compiler, lifetime.path, lifetime.origin
+        )})
         (causes @causes)
       ));
       return;
