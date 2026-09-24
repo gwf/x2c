@@ -1109,6 +1109,9 @@ List parts = String.split(clean, "/");
 String stem = parts.last().string();
 ```
 
+Write a membership test as `key in values` rather than
+`values.contains(key)`.
+
 Use `value.method()` instead of `Type.method(value)` whenever the receiver's
 static type selects the same callable. Use `.car()` and `.cdr()` rather than
 free `car(value)` and `cdr(value)`. The ordinary free-function exception is
@@ -1328,7 +1331,8 @@ native handle whose lifetime belongs to its library. See
 Run [`x2c lint --all`](../commands/lint/x2c-lint.x) for width,
 whitespace, wrapping, braces, deferred initialization, forward declarations,
 negated `is` tests, narration, stock prose, and receiver subject names whose
-length wraps lines. Then check what it cannot:
+length wraps lines; `--fix` applies its idiom respellings that leave the
+generated C unchanged. Then check what it cannot:
 
 - Did the current language or an existing owner make a whole wrapper, route,
   check, protocol, alias, or representation unnecessary?

@@ -41,7 +41,10 @@ one-statement braces, negated `is` tests, and receiver methods where renaming
 the subject parameter to the first letter of its type would save wrapped
 lines. Candidates need source review: width exceptions, runtime
 declarations, horizontal compaction, short control flow, repeated accessors,
-adjacent static output, narration, rulers, and stock prose. Method-match
+adjacent static output, narration, rulers, and stock prose. The idiom
+candidates, `member-arrow`, `contains-in`, `plain-string`, and
+`expression-body`, each propose a respelling; `--fix` writes the ones that
+leave the file's generated C and header byte-identical. Method-match
 bindings read through `assoc` are candidates for source `match`; keep method
 matching when bindings escape the local branch.
 

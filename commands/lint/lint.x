@@ -31,7 +31,8 @@ Rule
     `@{...}` return to code, 0; and `first` maps each line to its first
     non-space token, or -1. `layout` is set for a unit in the indentation
     syntax, where rules about braces, semicolons, and wrapped statements do
-    not apply.
+    not apply. `edits` holds the replacements that fixable findings
+    propose, as `(START END TEXT)` byte ranges of `text`.
 */
 typedef struct Lint:
   String path, text
@@ -40,7 +41,7 @@ typedef struct Lint:
   int *partner, *first
   char *quoted
   Map selected
-  Array findings
+  Array findings, edits
 *Lint
 
 #pragma private
@@ -76,6 +77,10 @@ static const Rule rules[] = {
   {"prohibited-prose", <style>, <candidate>, "prose"},
   {"constant-output-run", <style>, <candidate>,
    "literals-strings-and-formatting"},
+  {"member-arrow", <style>, <candidate>, "reach-members-with-"},
+  {"contains-in", <style>, <candidate>, "let-x2c-carry-the-syntax"},
+  {"expression-body", <style>, <candidate>, "let-x2c-carry-the-syntax"},
+  {"plain-string", <style>, <candidate>, "trust-supported-conversions"},
 }
 
 static const int rule_count = sizeof(rules) / sizeof(rules[0])
@@ -145,7 +150,8 @@ Lint Lint.new(String path, String text, Map selected):
   struct Token *all = (struct Token *) scanner.tokens
   int total = scanner.tokens.len() - 1
   Lint l = Scope.calloc(1, sizeof(struct Lint))
-  l.path = path, l.text = text, l.selected = selected, l.findings = []
+  l.path = path, l.text = text, l.selected = selected
+  l.findings = [], l.edits = []
   l.layout = scanner.layout || path.endswith(".xp")
   l.tokens = Scope.calloc(total + 1, sizeof(struct Token))
   for (int at = 0; at < total; at++):
@@ -215,6 +221,23 @@ int Lint.indent(Lint l, int line) =>
 /** Reports a finding of `code` at `line` when the rule is selected. */
 void Lint.add(Lint l, String code, int line, String message):
   if l.selected.contains(code): l.findings.push(%($line $code $message))
+
+/** Reports a finding of `code` at `line` whose fix replaces the text from
+    the start of the token at `from` to the end of the token at `to` with
+    `replacement`. `from` past `to` inserts before `from`. */
+void Lint.fix(Lint l, String code, int line, String message, int from,
+              int to, String replacement):
+  if !l.selected.contains(code): return
+  l.add(code, line, message)
+  int start = l.tokens[from].pos
+  int end = to < from ? start : l.tokens[to].pos + l.tokens[to].len
+  l.edits.push(%($start $end $replacement))
+
+/** Returns the text from the start of the token at `from` to the end of
+    the token at `to`. */
+String Lint.source(Lint l, int from, int to) =>
+  String.new_len(l.text + l.tokens[from].pos,
+                 l.tokens[to].pos + l.tokens[to].len - l.tokens[from].pos)
 
 /** Prints the findings in line order. */
 void Lint.print(Lint l):

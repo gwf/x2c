@@ -47,3 +47,13 @@ exit 1
 # non-ASCII text
 ascii.x:1: violation non-ascii: non-ASCII character
 exit 0
+# idiom fixes proven by the generated C
+idioms.x:10: candidate member-arrow: reach the member with `.`
+idioms.x:14: candidate contains-in: write the membership test with `in`
+idioms.x:19: candidate contains-in: write the membership test with `in`
+idioms.x:22: candidate plain-string: a plain literal needs no interpolation
+idioms.x:24: candidate plain-string: a plain literal needs no interpolation
+idioms.x:27: candidate expression-body: write the one returned value with `=>`
+idioms.x:37: violation negated-is: spell the test `is not`
+idioms.x: fixed 5 of 6
+exit 0

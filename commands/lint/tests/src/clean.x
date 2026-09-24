@@ -8,7 +8,7 @@ static const char *table[][3] = {
 };
 
 // int fake(int value);
-static String text = %"int fake(int value);";
+static String text = "int fake(int value);";
 
 static int _call(int one, int two) => one + two;
 
@@ -19,6 +19,7 @@ int Compiler.parse_expression(Compiler c, int token, int depth, int more) =>
 
 /* A rename that saves no line, and a subject already short. */
 int Compiler.parse(Compiler compiler, int depth) {
+  depth++;
   return compiler.parse_expression(compiler.token, depth, 0);
 }
 

@@ -31,8 +31,12 @@ run() {
   run --all "$tests/broken.x"
   echo "# non-ASCII text"
   (cd "$work" && run --rule non-ascii ascii.x)
+  echo "# idiom fixes proven by the generated C"
+  cp "$tests/src/idioms.x" "$work/idioms.x"
+  (cd "$work" && run --all --fix idioms.x)
 } >"$out"
 diff -u "$tests/expected.txt" "$out"
+diff -u "$tests/fixed/idioms.x" "$work/idioms.x"
 
 # The driver must run the same executable with unchanged arguments.
 builds/0/x2c lint --all "$tests/src/style.x" >"$work/dispatched"
