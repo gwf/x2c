@@ -57,60 +57,59 @@
  (lambda (live-4 live-5 live-6 live-7 live-8)
   (cond ((C.true? live-8)
          ((lambda (hold-9)
-           (cond ((eq? (List_car hold-9) live-6)
+           (cond ((eq? (List_car hold-9) live-4)
                   ((lambda (hold-10)
-                    (loop3-binding_rows_for hold-10 live-5 live-6
-                     hold-9 (cdr live-8))) (cons hold-9 live-4)))
+                    (loop3-binding_rows_for live-4 hold-10 hold-9
+                     live-7 (cdr live-8))) (cons hold-9 live-5)))
             (true (loop3-binding_rows_for live-4 live-5
-                   live-6 hold-9 (cdr live-8))))) (Var_list (car live-8))))
-   (true (List_reverse live-4)))))
+                   hold-9 live-7 (cdr live-8))))) (Var_list (car live-8))))
+   (true (List_reverse live-5)))))
 (def binding_rows_for
- (lambda (arg-1 arg-2) (loop3-binding_rows_for (quote ()) arg-2 arg-1 0 arg-2)))
+ (lambda (arg-1 arg-2) (loop3-binding_rows_for arg-1 (quote ()) 0 arg-2 arg-2)))
 (def loop23-binding_record
  (lambda (live-24 live-25 live-26 live-27 live-28 live-29 live-30 live-31)
-  (cond ((C.true? live-28)
+  (cond ((C.true? live-31)
          ((lambda (hold-32)
-           (cond ((eq? (List_getindex hold-32 1) live-24)
+           (cond ((eq? (List_getindex hold-32 1) live-26)
                   ((lambda (discard-33)
-                    (loop23-binding_record live-24 live-25 hold-32
-                     live-27 (cdr live-28) live-29 live-30 live-31))
+                    (loop23-binding_record live-24 live-25 live-26
+                     live-27 live-28 hold-32 live-30 (cdr live-31)))
                    (x2c.diagnostic.fail
                     (C.address "duplicate native Lisp binding name"
                      (quote string))
-                    (cons (String_var (string-append (quote "group: ") live-31))
-                     (cons (String_var (string-append (quote "name: ") live-24))
+                    (cons (String_var (string-append (quote "group: ") live-25))
+                     (cons (String_var (string-append (quote "name: ") live-26))
                       (quote ()))))))
             (true (loop23-binding_record live-24 live-25
-                   hold-32 live-27 (cdr live-28) live-29 live-30
-                   live-31)))) (Var_list (car live-28))))
+                   live-26 live-27 live-28 hold-32 live-30 (cdr live-31)))))
+          (Var_list (car live-31))))
    (true (cons (List_var
-                (cons (String_var live-31)
-                 (cons (String_var live-24)
+                (cons (String_var live-25)
+                 (cons (String_var live-26)
                   (cons (String_var live-27)
-                   (cons (List_var live-29) (quote ()))))))
-          (append live-30 (quote ())))))))
+                   (cons (List_var live-28) (quote ()))))))
+          (append live-24 (quote ())))))))
 (def loop11-binding_record
  (lambda
   (live-12 live-13 live-14 live-15 live-16
    live-17 live-18 live-19 live-20)
-  (cond ((C.true? live-16)
+  (cond ((C.true? live-20)
          ((lambda (hold-21)
-           (cond ((eq? hold-21 live-20)
+           (cond ((eq? hold-21 live-13)
                   ((lambda (discard-22)
                     (loop11-binding_record live-12 live-13 live-14
-                     hold-21 (cdr live-16) live-17 live-18 live-19
-                     live-20))
+                     live-15 live-16 live-17 hold-21 live-19 (cdr live-20)))
                    (x2c.diagnostic.fail
                     (C.address
                      "native Lisp binding appears after its group was installed"
                      (quote string))
-                    (cons (String_var (string-append (quote "group: ") live-20))
+                    (cons (String_var (string-append (quote "group: ") live-13))
                      (quote ())))))
             (true (loop11-binding_record live-12 live-13
-                   live-14 hold-21 (cdr live-16) live-17 live-18
-                   live-19 live-20)))) (car live-16)))
-   (true (loop23-binding_record live-13 live-14
-          0 live-17 live-14 live-18 live-19 live-20)))))
+                   live-14 live-15 live-16 live-17 hold-21 live-19
+                   (cdr live-20))))) (car live-20)))
+   (true (loop23-binding_record live-12 live-13
+          live-14 live-15 live-16 0 live-17 live-17)))))
 (def binding_record
  (lambda (arg-1 arg-2 arg-3 arg-4 arg-5)
   ((lambda (hold-6)
@@ -118,8 +117,8 @@
       ((lambda (hold-8)
         ((lambda (hold-9)
           ((lambda (hold-10)
-            (loop11-binding_record arg-5 hold-7 hold-10
-             0 arg-5 hold-8 hold-9 arg-4 hold-6))
+            (loop11-binding_record arg-4 hold-6 hold-7
+             hold-8 hold-9 hold-10 0 arg-5 arg-5))
            (binding_rows_for hold-6 arg-4))) (binding_native_type arg-3)))
        (x2c.function.name arg-3))) (binding_name arg-2)))
    (x2c.binding.spelling arg-1))))
@@ -164,15 +163,15 @@
    (List_reverse (binding_rows_for arg-1 arg-2)))))
 (def loop3-binding_statements
  (lambda (live-4 live-5 live-6 live-7 live-8)
-  (cond ((C.true? live-4)
+  (cond ((C.true? live-8)
          ((lambda (hold-9)
            ((lambda (hold-10)
-             (loop3-binding_statements (cdr live-4) live-5
-              hold-9 hold-10 live-8))
-            (cons (binding_statement live-5 hold-9) live-7)))
-          (Var_list (car live-4)))) (true (List_reverse live-7)))))
+             (loop3-binding_statements live-4 hold-10
+              hold-9 live-7 (cdr live-8)))
+            (cons (binding_statement live-4 hold-9) live-5)))
+          (Var_list (car live-8)))) (true (List_reverse live-5)))))
 (def binding_statements
- (lambda (arg-1 arg-2) (loop3-binding_statements arg-2 arg-1 0 (quote ()) arg-2)))
+ (lambda (arg-1 arg-2) (loop3-binding_statements arg-1 (quote ()) 0 arg-2 arg-2)))
 (def binding_target
  (lambda (arg-1 arg-2 arg-3)
   (cons (List_var
@@ -213,29 +212,29 @@
                  (true (quote ())))))))))
 (def loop10-binding_targets
  (lambda (live-11 live-12 live-13 live-14 live-15 live-16 live-17 live-18)
-  (cond ((C.true? live-11)
+  (cond ((C.true? live-16)
          ((lambda (hold-19)
            ((lambda (hold-20)
-             (loop10-binding_targets (cdr live-11) live-12
-              live-13 hold-20 hold-19 live-16 live-17 live-18))
-            (cons hold-19 live-14))) (car live-11)))
-   (true (loop2-binding_targets live-13 live-17 live-14 live-16 live-18)))))
+             (loop10-binding_targets live-11 hold-20 live-13
+              hold-19 live-15 (cdr live-16) live-17 live-18))
+            (cons hold-19 live-12))) (car live-16)))
+   (true (loop2-binding_targets live-11 live-12 live-13 live-17 live-18)))))
 (def loop2-binding_targets
  (lambda (live-3 live-4 live-5 live-6 live-7)
   (cond ((C.true? live-7)
          ((lambda (hold-8)
            ((lambda (hold-9)
-             (loop10-binding_targets hold-9 hold-9 live-3
-              live-5 0 hold-8 live-4 (cdr live-7))) (binding_target_row hold-8)))
+             (loop10-binding_targets live-3 live-4 hold-8
+              0 hold-9 hold-9 live-6 (cdr live-7))) (binding_target_row hold-8)))
           (Var_list (car live-7))))
    (true (binding_call (C.address "Map_update_n" (quote string))
           (cons (List_var
                  (binding_call (C.address "Map_new" (quote string))
                   (quote ())))
            (cons (List_var (x2c_literal_int (List_len live-3)))
-            (append (List_reverse live-5) (quote ())))))))))
+            (append (List_reverse live-4) (quote ())))))))))
 (def binding_targets
- (lambda (arg-1) (loop2-binding_targets arg-1 arg-1 (quote ()) 0 arg-1)))
+ (lambda (arg-1) (loop2-binding_targets arg-1 (quote ()) 0 arg-1 arg-1)))
 
 (defun lisp.native.call (name . arguments)
   (binding_call name arguments))
