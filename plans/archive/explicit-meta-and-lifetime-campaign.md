@@ -1,7 +1,8 @@
-> Status: active
-> Updated September 23, 2026. Scope decided by Gary on September 23,
-> including the piece 0 deletions below. Stabilization and its scope strip
-> reached `dev` as `9b71607f`; this campaign starts from that commit.
+> Status: done
+> Delivered to `dev` September 23-24, 2026: piece 0 through `d21c1502`
+> (item 3 parked), piece 1 `6e22b802`, pieces 2-3 `5050675c` and
+> `ba2521da`, piece 4 `d0476fe1` and `a9e9ba5d`, piece 5 `49a239ec`.
+> Remaining items are in the Backlog section below.
 
 # Next phase: explicit meta calls, lifetimes, and computed values
 
@@ -13,14 +14,14 @@ established, so the new capabilities build on a smaller evaluator.
 ## Baseline
 
 Start from `9b71607f`, the `dev` commit that delivered the
-[stabilization plan](post-merge-stabilization-2026-09-23.md) and its scope
+[stabilization plan](../post-merge-stabilization-2026-09-23.md) and its scope
 strip. Line references below were read at `3962fb35`, before the strip;
 recheck each against the current tree. Survey notes
 with more detail are in the handoff session's
 `.context/next-phase-survey-2026-09-23.md`; copy that file into the new
 worktree's `.context/`.
 
-The earlier [heap-object investigation](meta-heap-objects.md) is background.
+The earlier [heap-object investigation](../meta-heap-objects.md) is background.
 Its speculative folding rules and blanket deferral of Scope cleanup are
 superseded by this plan.
 
@@ -300,6 +301,22 @@ A meta body that assigns a function name or a `%!` lambda directly, such as
 conversion in `src/lambda.x` replaces the right-hand side with the hidden
 global `_x2c_func_handle_N` before lowering sees it. Binding a local first,
 as in `Func f = twice; chosen = f;`, works.
+
+Also open after delivery:
+
+- Piece 0 item 3, the compound selector owner, is parked with its findings
+  above.
+- `C.gwrite` copies wide scalar globals into session storage; only a REPL
+  probe shows it, because no gated REPL test exists.
+- A destructured local in a function that holds a cleanup declines ("a
+  destructured local that needs a cell"); `ad_rev_checkpoint` in
+  `lib/autodiff.xmacro` keeps two plain Arrays for this reason.
+- `defer Scope.free(...)` of storage no Scope allocator returned is not
+  checked for `bad-free`; local arrays of structs decline in meta code; a
+  string literal passed to a `void *` parameter in meta code is not
+  retagged.
+- Emission from `Map.list` must be sorted; hash order reached `lib/lisp.c`
+  once and was fixed in `57095793`.
 
 ## Plan review
 
