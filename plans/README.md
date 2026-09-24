@@ -57,6 +57,8 @@ execution.
 - [Package meta modules](package-meta-modules.md): active. Importing a
   package loads its compile-time part; the compiler links the whole
   runtime.
+- [Meta protocols beyond Iter](meta-protocols-beyond-iter.md): active.
+  Array, Map, Buffer and typed conversions reach compile-time code.
 - [Meta sequencing](meta-sequencing.md): active. The order of class
   registration and capacity, native extensions and packages, protocols
   beyond Iter, and whole-project lifetime certification.

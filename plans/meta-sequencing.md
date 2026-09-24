@@ -60,6 +60,10 @@ which today costs 13 more rows at startup.
 
 ### 3. Meta-capable protocols beyond Iter
 
+Designed in [meta protocols beyond Iter](meta-protocols-beyond-iter.md).
+Only its fourth delivery, the typed containers, depends on step 1;
+deliveries 1-3 can start earlier.
+
 Track E delivered marked adoptions for Iter. Buffer, Array, Map and Var
 follow. Exposing them may require helper types visible to meta code, and
 each boxed helper type takes a class row, so this follows step 1. Packages
