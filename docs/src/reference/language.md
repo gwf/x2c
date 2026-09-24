@@ -1898,8 +1898,11 @@ Derived classes forward the nearest applicable constructor; variadic forwarding
 requires an explicit constructor.
 
 An aggregate class that defines `void T.init(T *, ...)` for a value or
-`void T.init(T, ...)` for a heap pointer gets a `new` taking the parameters
-after the receiver; it calls `init` on zero-initialized storage. Otherwise
+`void T.init(T, ...)` or `int T.init(T, ...)` for a heap pointer gets a `new`
+taking the parameters after the receiver; it calls `init` on zero-initialized
+storage, which a heap class obtains from its replaceable `T.alloc`. A zero
+result from an `int` initializer releases that storage and makes `new`
+return NULL. Otherwise
 flat value fields produce positional constructors in declaration order, with
 unnamed bitfield padding omitted, and non-flat or resource-containing
 aggregates require `init`. Heap defaults allocate through Scope and provide

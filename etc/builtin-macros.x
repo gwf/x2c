@@ -303,13 +303,20 @@ List builtin_class_initializer(String owner, Var heap_value) {
     List function = x2c_syntax_type(method).car();
     List declared = function[1];
     List parameters = cons(receiver, declared.cdr());
-    if (x2c_syntax_type(method).equal(%((func $parameters) void))) {
+    int refusable = heap &&
+      x2c_syntax_type(method).equal(%((func $parameters) int));
+    if (refusable ||
+        x2c_syntax_type(method).equal(%((func $parameters) void))) {
       List arguments = %(${heap ? value : builtin_class_op(<&>, %($value))});
       foreach (List parameter, parameters.cdr())
         arguments = cons(builtin_class_ref(
           %"argument_${arguments.len() - 1}"), arguments);
-      return x2c_stmnt_make(builtin_class_call(
-        x2c_binding_spelling(method), arguments.reverse()));
+      List call = builtin_class_call(x2c_binding_spelling(method),
+                                     arguments.reverse());
+      if (!refusable) return x2c_stmnt_make(call);
+      return %(if ${builtin_class_op(<!>, %($call))} (block
+        ${x2c_stmnt_make(builtin_class_call("Scope_free", %($value)))}
+        ${x2c_stmnt_return(x2c_literal_int(0))}));
     }
   }
   String suffix = heap ? ")" : " *)";
@@ -353,9 +360,7 @@ List builtin_class_new(String owner, List representation, int heap,
   List declared = representation;
   if (heap && !positional && aggregate) {
     declared = type;
-    initializer = builtin_class_call("Scope_calloc",
-      %(${x2c_literal_int(1)}
-        ${builtin_class_size(builtin_class_op(<"*">, %($value)))}));
+    initializer = builtin_class_call(%"${owner}_alloc", %());
   }
   List body = %(${builtin_class_declaration(declared, "value", initializer)});
   if (aggregate && !positional) {
@@ -619,6 +624,14 @@ List builtin_class_defaults(String owner, List type, List location) {
   if (drop)
     release = cons(%(if $value ${x2c_stmnt_make(builtin_class_call(
       x2c_binding_spelling(drop), %($value)))}), release);
+  if (heap && aggregate) {
+    List allocated = builtin_class_call("Scope_calloc",
+      %(${x2c_literal_int(1)}
+        ${builtin_class_size(builtin_class_op(<"*">, %($value)))}));
+    body = body.append(%(${builtin_class_default(owner, "alloc", %($owner),
+      %(), %(${builtin_class_declaration(%($owner), "value", allocated)}
+             ${x2c_stmnt_return(value)}))}));
+  }
   if (heap)
     body = body.append(%(
       ${builtin_class_default(owner, "free", %(void), %($parameter),
