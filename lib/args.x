@@ -137,13 +137,13 @@ static void _store(_Option *option, Map result, Var value) {
   option.given++;
 }
 
-static String _next_value(List *rest, String spelling) {
-  if (!(*rest).cdr()) _bad_option("missing value", spelling);
-  *rest = (*rest).cdr();
-  return (*rest).car().str();
+static String _next_value(List &rest, String spelling) {
+  if (!rest.cdr()) _bad_option("missing value", spelling);
+  rest = rest.cdr();
+  return rest.car().str();
 }
 
-static void _parse_long(_Spec *spec, Map result, List *rest, String word) {
+static void _parse_long(_Spec *spec, Map result, List &rest, String word) {
   int equals = word.find("=");
   String spelling = equals < 0 ? word : word[:equals];
   _Option *option = _find(spec, spelling);
@@ -157,7 +157,7 @@ static void _parse_long(_Spec *spec, Map result, List *rest, String word) {
 
 /* Short flags may share one word, as in `-vq`; the first short option that
    takes a value consumes the rest of the word, or else the next word. */
-static void _parse_short(_Spec *spec, Map result, List *rest, String word) {
+static void _parse_short(_Spec *spec, Map result, List &rest, String word) {
   for (int at = 1; at < word.len(); at++) {
     String spelling = %"-${word[at:at + 1]}";
     _Option *option = _find(spec, spelling);
@@ -241,8 +241,8 @@ Map Args.parse(List args, List spec) {
     if (options_ended || word.len() < 2 || word[0] != '-')
       operands.push(word);
     else if (word == "--") options_ended = 1;
-    else if (word[1] == '-') _parse_long(&parsed, result, &rest, word);
-    else _parse_short(&parsed, result, &rest, word);
+    else if (word[1] == '-') _parse_long(&parsed, result, rest, word);
+    else _parse_short(&parsed, result, rest, word);
   }
   _assign_operands(&parsed, result, operands.list_free());
   for (int i = 0; i < parsed.count; i++) {

@@ -283,7 +283,7 @@ List List_cdr(List);
 
 static String _next_value(List * rest, String spelling){
   if(! List_truth(List_cdr((* rest)))) _bad_option(_16, spelling);
-  * rest = List_cdr((* rest));
+  (* rest) = List_cdr((* rest));
   return Var_str(List_car((* rest)));
 }
 
@@ -298,7 +298,7 @@ static void _parse_long(_Spec * spec, Map result, List * rest, String word){
     _store(option, result, int_var(1));
   }
   else if(equals >= 0) _store(option, result, String_var(String_getslice(word, equals + 1, -2147483648, 1)));
-  else _store(option, result, String_var(_next_value(rest, spelling)));
+  else _store(option, result, String_var(_next_value(&((* rest)), spelling)));
 }
 
 int String_len(String);
@@ -311,7 +311,7 @@ static void _parse_short(_Spec * spec, Map result, List * rest, String word){
       _store(option, result, int_var(1));
       continue;
     }
-    String value = at + 1 < String_len(word) ? String_getslice(word, at + 1, -2147483648, 1) : _next_value(rest, spelling);
+    String value = at + 1 < String_len(word) ? String_getslice(word, at + 1, -2147483648, 1) : _next_value(&((* rest)), spelling);
     _store(option, result, String_var(value));
     return;
   }
@@ -349,8 +349,8 @@ Map Args_parse(List args, List spec){
     String word = Var_str(List_car(rest));
     if(options_ended || String_len(word) < 2 || String_getindex(word, 0) != '-') Array_push(operands, String_var(word));
     else if(String_equal(word, _4)) options_ended = 1;
-    else if(String_getindex(word, 1) == '-') _parse_long(& parsed, result, & rest, word);
-    else _parse_short(& parsed, result, & rest, word);
+    else if(String_getindex(word, 1) == '-') _parse_long(& parsed, result, &(rest), word);
+    else _parse_short(& parsed, result, &(rest), word);
   }
   _assign_operands(& parsed, result, Array_list_free(operands));
   for(int i = 0;  i < parsed.count;  i ++){
