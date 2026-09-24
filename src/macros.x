@@ -530,8 +530,9 @@ static List _native_meta_signature(Compiler c, Type type) {
 
 /* The native functions one symbol row makes available to compile-time code,
    as `(name signature)` rows: a bodyless `meta` prototype, or each witness
-   of a `meta protocol` adoption. An adoption that does not resolve makes
-   none available. */
+   of a `meta protocol` adoption, including the forwarding function the
+   conformance generates for a base default. An adoption that does not
+   resolve makes none available. */
 static List _native_meta_rows(Compiler c, Var row) {
   match (row) {
     case %(native-meta ?name ?signature): return %(($name $signature));
@@ -540,9 +541,14 @@ static List _native_meta_rows(Compiler c, Var row) {
       List rows = %();
       if (!conformance) return rows;
       foreach (List member, conformance.last().list().cdr())
-        match (member)
+        match (member) {
           case %(? implmntd ?(String name) ?(Type type) *):
             rows = cons(%($name ${_native_meta_signature(c, type)}), rows);
+          case %(?(String name) base-dflt ? ?(Type type) ordinary ?): {
+            String forward = %"${participant.car()}_$name";
+            rows = cons(%($forward ${_native_meta_signature(c, type)}), rows);
+          }
+        }
       return rows;
     }
   }
