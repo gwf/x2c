@@ -725,7 +725,7 @@ static int _layout_condition(Token * sig, int * depths, _LayoutEdit * edits, str
   int key = - 1;
   for(int m = first;  m < colon;  m ++) if(! depths[m] && _conditional(sig[m]) &&(m == first || ! String_equal(sig[m - 1] -> text, _18))) key = m;
   if(key < 0) return 0;
-  int wrapped = sig[key + 1] -> type == 81 && sig[colon - 1] -> type == 83;
+  int wrapped = String_equal(sig[key] -> text, _14) || sig[key + 1] -> type == 81 && sig[colon - 1] -> type == 83;
   for(int m = key + 2;  wrapped && m < colon - 1;  m ++) wrapped = depths[m] > 0;
   _LayoutEdit * tail = & edits[sig[colon] - all];
   if(wrapped) tail -> type = String_truth(body) ? 247 : 40896714;
