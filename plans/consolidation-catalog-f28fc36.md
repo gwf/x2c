@@ -31,12 +31,12 @@ remains. "Design" means a missing representation prevents immediate deletion.
 | --- | --- | --- | --- |
 | C01 | One builtin type/tag inventory | Done (02fa85d6) | 56 handwritten entries replaced by a projection of the existing ledger |
 | C02 | One static signature-graph serializer | Done 2026-09-24: `$lisp.bind`, grouped installs, and native targets call `_x2c.literal.list` | Two Lisp serializer functions removed; all three consumer families use compiler literal caching |
-| C03 | One native function-signature projection | Decision | Independent alias traversal/spelling/projection removed after compatibility policy is explicit |
+| C03 | One native function-signature projection | Done (2026-09-24) | Stored signatures retain aliases; native checks resolve types where needed |
 | C04 | One runtime allocation/wrapper fact owner | Done 2026-09-24: graph reads `Compiler.region_result` and `Compiler.region_wrapper`; `loop-allocations` now also counts `List_job` and reports `List_cons` directly | Both graph classifiers and wrapper predicate consume existing compiler-owned facts |
 | C05 | One graph direct/computed call recognizer | Done (70b23d6d) | Lifetime recognizer and flow forwarding wrapper removed |
 | C06 | One graph source-location formatter | Done (c6ac7841 + flows follow-up) | Five implementations reduced to one owner and calls |
 | C07 | One static-storage acquisition template | Done (14843fc5) | Inferred and known-size branches emit the common protocol only once |
-| C08 | One initializer evaluation policy, without recomputation | Shared policy bounded; metadata follow-up | File/local callers share expression classification; separately assess carrying per-binding decisions to emission |
+| C08 | One initializer evaluation policy, without recomputation | Done first slice (2026-09-24); no metadata follow-up | File/local callers share expression classification; emitter retains its later check |
 | C09 | Docs consume compiler-selected definitions | Done 2026-09-24 in [x2c-lint-and-format](x2c-lint-and-format.md) Phase 2: the doc generators read `--dump-definitions` | Docs no longer re-expand source macros or independently recognize declaration families |
 | C10 | One primitive display-format policy | Declined by Gary 2026-09-24: saves ~15 lines but adds an allocation to primitive String rendering and changes NULL to a raise | One of the two tag-to-format switches removed without an unaccepted cost/behavior change |
 | C11 | Recover each Match arm's pattern value once | Done (8fd9c740) | The arm pipeline stops recovering the same graph up to four times |
@@ -76,6 +76,9 @@ membership edit in type.x. No runtime framework or runtime traversal is needed.
 
 ## C02. Delete the private Lisp signature serializer
 
+> Delivered 2026-09-24: direct, grouped, and builtin bindings use the
+> compiler literal cache; the private recursive Lisp serializer is removed.
+
 | Duplicate implementation | File | Lines | Existing owner doing the same work |
 | --- | --- | --- | --- |
 | `lisp.native.list-item` | [etc/lisp-bindings.xlisp](https://github.com/gwf/x2c/blob/f28fc36fd11116666cf21962c66c5b27dda66d0b/etc/lisp-bindings.xlisp#L6) | 6-12 | `_cache_literal_var`, src/compiler.x:1905-1920 |
@@ -112,6 +115,10 @@ data, initialization order, and signature/session storage lifetime. This is
 removal of an entire duplicate operation even if no bug is found.
 
 ## C03. Consolidate signature policy separately from serialization
+
+> Delivered 2026-09-24: native and ordinary Func signatures retain declared
+> aliases; native lifetime and reference checks resolve the type they need.
+> The runtime type-map spike below remains separate.
 
 | Implementation | File | Lines | Repeated responsibility |
 | --- | --- | --- | --- |
@@ -268,6 +275,10 @@ template, with inferred/known-size behavior and existing once/retry/threaded
 fixtures preserved. This does not require a full cleanup-AST redesign.
 
 ## C08. One initializer-expression classifier; preserve its decisions
+
+> First slice delivered 2026-09-24: file and local static placement share the
+> expression walker. Gary chose to keep the emitter's later check and not add
+> per-binding `localinit` metadata.
 
 | Similar implementation | File | Lines | Consumers |
 | --- | --- | --- | --- |
