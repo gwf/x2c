@@ -36,7 +36,9 @@
     8002:0000:0000:0000 - 8002:FFFF:FFFF:FFFF  32+16 32-bit vals, 16-bit tag
     8003:0000:0000:0000 - 8003:FFFF:FFFF:FFFF  32+16 Special values
     8004:0000:0000:0000 - 800B:FFFF:FFFF:FFFF  50+1  `Symbol`s
-    800C:0000:0000:0000 - 800F:FFFF:FFFF:FFFF  45+3  user (Class)* 32
+    800C:0000:0000:0000 - 800F:FFFF:FFFF:FFFF  45+3  user (Class)* 30,
+                                                      overflow cell,
+                                                      overflow record
     8010:0000:0000:0000 - FFFF:FFFF:FFFF:FFFF  64+0  f64 < 0 + (52<<1)
     -------------------   -------------------  ----  -------------------------
 
@@ -57,9 +59,9 @@ $(import "error-macros.xmacro")
 #include <assert.h>
 #include <limits.h>
 
-/** Reports whether `tag` has a built-in encoding or registered custom row. */
+/** Reports whether `tag` has a built-in encoding or declared custom class. */
 int Var.known_tag(Symbol tag) =>
-  _tag2id(tag) != _invalid_ || _custom_tag_id(tag) >= 0;
+  _tag2id(tag) != _invalid_ || _declared(tag) != NULL;
 
 #pragma private
 #include <string.h>
@@ -114,6 +116,11 @@ static inline unsigned _bottom_bits(Var v) {
 
 #define VAR_CUSTOM_TAG_TOP     0x800C
 #define VAR_CUSTOM_TAG_COUNT   32
+#define VAR_DIRECT_ROWS        30
+#define VAR_CELL_ROW           30
+#define VAR_RECORD_ROW         31
+#define VAR_CELL_MASK          0xFFFF000000000007ul
+#define VAR_CELL_BITS          0x800F000000000006ul
 
 typedef union VarWideValue {
   long long_value;
@@ -133,22 +140,56 @@ typedef struct VarWideBox {
   VarWideValue value;
 } *VarWideBox;
 
-/* Custom IDs are the matching indices into dispatch.x's descriptor table.
-   Registration is serialized with worker creation and becomes permanently
-   read-only after the first successful worker start, so decoding can read
-   these process-lifetime rows without a lock. IDs are never reused. */
-static Symbol custom_tags[32];
-static unsigned custom_tag_count;
+/* Declaring a custom class adds its descriptor to `declared` under the
+   descriptor mutex; declaration freezes at the first successful worker
+   start, so later lookups read the Map without a lock. The first box of a
+   class assigns the next direct row under the same mutex. Rows are
+   append-only: a slot is written before `row_count` is published with a
+   release store, and every reader loads the count with acquire. Classes past
+   the direct rows box through a cell (heap classes) or a descriptor prefix
+   (records), and both carry their descriptor. */
+static Scope class_scope;
+static Map declared;
+static VarDescriptor *rows[VAR_DIRECT_ROWS];
+static unsigned row_count;
+
+/* An overflow heap class boxes the one process-lifetime cell for its class
+   and address, so boxing an object twice gives identical bits. `cells` maps
+   an address to its cells, one per class, chained through `next`. */
+typedef struct VarCell {
+  VarDescriptor *descriptor;
+  void *pointer;
+  struct VarCell *next;
+} VarCell;
+
+static Map cells;
+
+/* An overflow record keeps its descriptor in one aligned slot in front of
+   the boxed copy, as Scope keeps its metadata in front of each payload. */
+#define RECORD_PREFIX sizeof(max_align_t)
 
 static VarWideBox _wide_box(Var v) {
   uintptr_t raw = v.u64 & (_bitmask(48) - 0x7);
   return (VarWideBox) raw;
 }
 
-static int _custom_tag_id(Symbol tag) {
-  for (unsigned i = 0; i < custom_tag_count; i++)
-    if (custom_tags[i] == tag) return i;
-  return -1;
+static VarDescriptor *_declared(Symbol tag) {
+  if ((void *) declared == NULL) return NULL;
+  Var found = declared[tag];
+  return found is void ? NULL : found.pointer();
+}
+
+static unsigned _row_count(void) =>
+  __atomic_load_n(&row_count, __ATOMIC_ACQUIRE);
+
+static void *_address(Var value) =>
+  (void *) (value.u64 & (_bitmask(48) - 0x7));
+
+static VarDescriptor *_row_descriptor(int id, Var value) {
+  if (id == VAR_CELL_ROW) return ((VarCell *) _address(value)).descriptor;
+  if (id == VAR_RECORD_ROW)
+    return *(VarDescriptor **) ((char *) _address(value) - RECORD_PREFIX);
+  return rows[id];
 }
 
 static int _wide_encoding_valid(Var value, Symbol tag) {
@@ -194,7 +235,9 @@ static VarDecoded _decode(Var value) {
   if (top >= VAR_CUSTOM_TAG_TOP &&
       top < VAR_CUSTOM_TAG_TOP + VAR_CUSTOM_TAG_COUNT / 8) {
     int id = (int) ((top - VAR_CUSTOM_TAG_TOP) * 8 + btm);
-    return (VarDecoded) { _invalid_, id, id < (int) custom_tag_count };
+    int valid = id < VAR_DIRECT_ROWS ? id < (int) _row_count()
+              : _address(value) != NULL;
+    return (VarDecoded) { _invalid_, id, valid };
   }
   if ((top >= 0x0010 && top <= 0x7FFF) || top >= 0x8010)
     return (VarDecoded) { _f64_, -1, 1 };
@@ -212,10 +255,52 @@ int x2c_var_descriptor_index(Var value) {
   return decoded.id - _array_;
 }
 
-/** Returns a registered custom object's row, or `-1` for another value. */
+/** Returns a boxed custom object's row, or `-1` for another value.
+    Rows below 30 belong to one class each; row 30 holds every overflow heap
+    class and row 31 every overflow record.
+*/
 int Var.custom_descriptor_index(Var value) {
   VarDecoded decoded = _decode(value);
   return decoded.valid ? decoded.custom_id : -1;
+}
+
+/** Returns a boxed custom object's descriptor, or NULL for another value. */
+VarDescriptor *x2c_var_custom_descriptor(Var value) {
+  unsigned top = _top_bits(value);
+  if (top < VAR_CUSTOM_TAG_TOP ||
+      top >= VAR_CUSTOM_TAG_TOP + VAR_CUSTOM_TAG_COUNT / 8)
+    return NULL;
+  int id = (int) ((top - VAR_CUSTOM_TAG_TOP) * 8 + _bottom_bits(value));
+  if (id < VAR_DIRECT_ROWS) return id < (int) _row_count() ? rows[id] : NULL;
+  return _address(value) ? _row_descriptor(id, value) : NULL;
+}
+
+static void _classes_shutdown(void) {
+  class_scope.destroy();
+  class_scope = NULL;
+  declared = cells = NULL;
+  row_count = 0;
+}
+
+/** Returns the process-lifetime descriptor declared for custom `tag`,
+    declaring it on first use. The caller holds the descriptor lock and has
+    checked that registration is open and `tag` is not built in.
+*/
+VarDescriptor *x2c_var_declare(Symbol tag) {
+  VarDescriptor *descriptor = _declared(tag);
+  if (descriptor) return descriptor;
+  if (!class_scope) {
+    class_scope = Scope.new_named("Var classes");
+    Scope.shutdown_hook(_classes_shutdown);
+  }
+  $scope(&class_scope) {
+    if ((void *) declared == NULL) declared = {};
+    descriptor = Scope.calloc(1, sizeof(VarDescriptor));
+    descriptor.tag = tag;
+    descriptor.row = -1;
+    declared[tag] = (void *) descriptor;
+  }
+  return descriptor;
 }
 
 /** Returns a built-in object or `Symbol` tag's descriptor row, or `-1`. */
@@ -230,10 +315,10 @@ int x2c_var_tag_descriptor_index(Symbol tag) {
 */
 int Var.encoding_valid(Var value) => _decode(value).valid;
 
-/** Reserves or returns a process-lifetime row for custom boxed-object `tag`.
-    Before registration freezes, a repeated custom tag returns its existing
-    row; NULL, a built-in tag, or a full 32-row registry returns -1 without
-    changing the registry. Registration must finish before the first successful
+/** Declares custom boxed-object `tag` and returns 0.
+    Declaring spends no `Var` row; the first box of a value assigns one.
+    Declaring a tag again returns 0; NULL or a built-in tag returns -1 without
+    changing the registry. Declaration must finish before the first successful
     `Thread.start`; afterward it raises `<bad-state>`. Native registry-mutex
     failure aborts.
 */
@@ -244,23 +329,59 @@ int Var.register_object_tag(Symbol tag) {
     raise %(bad-state (owner "Var.register_object_tag"));
   if (!tag) return -1;
   if (_tag2id(tag) != _invalid_) return -1;
-  int id = _custom_tag_id(tag);
-  if (id >= 0) return id;
-  /* Exhaustion is the one -1 a caller cannot act on, and registration runs
-     before Error exists, so the status surfaces as a floor naming whichever
-     type asked next. Name the budget here, where it is known. */
-  if (custom_tag_count == VAR_CUSTOM_TAG_COUNT) {
-    char spelling[SYMBOL_MAX_5BIT + 1] = { 0 };
-    tag.decode(spelling);
-    fprintf(
-      stderr,
-      "Var registry: all %d custom object tag rows are in use; "
-      "<%s> was not registered\n", VAR_CUSTOM_TAG_COUNT, spelling);
-    fflush(stderr);
-    return -1;
+  x2c_var_declare(tag);
+  return 0;
+}
+
+/* Assigns `descriptor` its row on first box: the next direct row while one
+   is free, otherwise the overflow rows. */
+static int _assign_row(VarDescriptor *descriptor) {
+  int row = __atomic_load_n(&descriptor.row, __ATOMIC_ACQUIRE);
+  if (row >= 0) return row;
+  x2c_descriptor_thread_start_begin();
+  defer x2c_descriptor_thread_start_end(0);
+  row = descriptor.row;
+  if (row >= 0) return row;
+  unsigned count = row_count;
+  row = count < VAR_DIRECT_ROWS ? (int) count : VAR_CELL_ROW;
+  if (count < VAR_DIRECT_ROWS) {
+    rows[count] = descriptor;
+    __atomic_store_n(&row_count, count + 1, __ATOMIC_RELEASE);
   }
-  custom_tags[custom_tag_count] = tag;
-  return custom_tag_count++;
+  __atomic_store_n(&descriptor.row, row, __ATOMIC_RELEASE);
+  return row;
+}
+
+/* Returns the interned cell for `pointer` boxed as `descriptor`'s class. */
+static VarCell *_cell(VarDescriptor *descriptor, void *pointer) {
+  x2c_descriptor_thread_start_begin();
+  defer x2c_descriptor_thread_start_end(0);
+  Var key = { .p64 = pointer };
+  VarCell *cell = NULL;
+  $scope(&class_scope) {
+    if ((void *) cells == NULL) cells = {};
+    Var head = cells[key];
+    cell = head is void ? NULL : head.pointer();
+    while (cell && cell.descriptor != descriptor) cell = cell.next;
+    if (!cell) {
+      cell = Scope.malloc(sizeof(VarCell));
+      *cell = (VarCell) { descriptor, pointer, head is void ? NULL
+                                                          : head.pointer() };
+      cells[key] = (void *) cell;
+    }
+  }
+  return cell;
+}
+
+/* Returns custom `tag`'s row, assigning it on first box, or -1 when `tag`
+   names no declared class. Sets `descriptor` for a declared class that has
+   no direct row. */
+static int _custom_row(Symbol tag, VarDescriptor **descriptor) {
+  unsigned count = _row_count();
+  for (unsigned i = 0; i < count; i++)
+    if (rows[i].tag == tag) return (int) i;
+  *descriptor = _declared(tag);
+  return *descriptor ? _assign_row(*descriptor) : -1;
 }
 
 meta Symbol Var.tag(Var v);
@@ -284,7 +405,7 @@ meta Symbol Var.tag(Var v);
 Symbol Var.tag(Var v) {
   VarDecoded decoded = _decode(v);
   if (decoded.valid && decoded.custom_id >= 0)
-    return custom_tags[decoded.custom_id];
+    return _row_descriptor(decoded.custom_id, v).tag;
   return taginfo[decoded.valid ? decoded.id : _f64_].tag;
 }
 
@@ -596,10 +717,6 @@ Scope Var.wide_owner(Var v) => v.is_wide() ? Scope.owner(_wide_box(v)) : NULL;
 
 static Var _new_custom_pointer(int id, void *ptr) {
   uintptr_t raw = (uintptr_t) ptr;
-  if (raw & 0x7) {
-    Symbol target = custom_tags[id];
-    raise %(bad-enc (owner "Var.new") (target $target));
-  }
   Var v = { .u64 = raw & _bitmask(48) };
   v.u64 |= (unsigned long) (VAR_CUSTOM_TAG_TOP + id / 8) << 48;
   v.u64 |= id % 8;
@@ -657,9 +774,11 @@ static Var _new_symbol(TagId id, unsigned long u) {
     Immediate values are stored inline. Wide numeric tags allocate a box in the
     active `Scope`. Pointer, reference, and object tags borrow the address and
     encode only its low 48 bits; they do not take ownership, and the address
-    must satisfy the alignment implied by the tag. A tag previously registered
-    with `Var.register_object_tag` is accepted too and requires an 8-byte-
-    aligned pointer.
+    must satisfy the alignment implied by the tag. A declared custom tag is
+    accepted too and requires an 8-byte-aligned pointer. Once the direct
+    custom rows are taken, a custom object boxes through a process-lifetime
+    cell, one per class and address, so boxing one object twice gives
+    identical bits.
     Raises: `<bad-target>` when `tag` is neither known nor registered,
     `<conv-range>` when a scalar does not fit the tag's payload width,
     `<bad-arg>` when an `<array>` or `<map>` pointer is null, `<alloc-fail>`
@@ -669,14 +788,18 @@ static Var _new_symbol(TagId id, unsigned long u) {
 */
 Var Var.new(Symbol tag, ...) {
   va_list ap, TagId id = _tag2id(tag);
-  int custom_id = id == _invalid_ ? _custom_tag_id(tag) : -1;
-  if (id == _invalid_ && custom_id < 0)
+  VarDescriptor *descriptor = NULL;
+  int row = id == _invalid_ ? _custom_row(tag, &descriptor) : -1;
+  if (id == _invalid_ && row < 0)
     raise %(bad-target (owner "Var.new") (target $tag));
   va_start(ap, tag);
-  if (custom_id >= 0) {
-    Var custom = _new_custom_pointer(custom_id, va_arg(ap, void *));
+  if (row >= 0) {
+    void *pointer = va_arg(ap, void *);
     va_end(ap);
-    return custom;
+    if ((uintptr_t) pointer & 0x7)
+      raise %(bad-enc (owner "Var.new") (target $tag));
+    if (row < VAR_DIRECT_ROWS) return _new_custom_pointer(row, pointer);
+    return _new_custom_pointer(VAR_CELL_ROW, _cell(descriptor, pointer));
   }
   Var v;
   switch (taginfo[id].kind) {
@@ -716,6 +839,24 @@ Var Var.new(Symbol tag, ...) {
   }
   va_end(ap);
   return v;
+}
+
+/** Boxes a copy of the `size`-byte record at `record` as custom `tag`.
+    The copy is allocated in the active `Scope`. Once the direct custom rows
+    are taken, the copy carries its descriptor in front of it.
+    Raises: `<bad-target>` when `tag` names no declared class, or
+    `<alloc-fail>` when the copy cannot be allocated.
+*/
+Var Var.box_record(Symbol tag, const void *record, size_t size) {
+  VarDescriptor *descriptor = NULL;
+  int row = _custom_row(tag, &descriptor);
+  if (row < 0) raise %(bad-target (owner "Var.box_record") (target $tag));
+  if (row < VAR_DIRECT_ROWS)
+    return _new_custom_pointer(row, Scope.memdup(record, size));
+  char *copy = Scope.malloc(RECORD_PREFIX + size);
+  *(VarDescriptor **) copy = descriptor;
+  memcpy(copy + RECORD_PREFIX, record, size);
+  return _new_custom_pointer(VAR_RECORD_ROW, copy + RECORD_PREFIX);
 }
 
 meta double Var.floating(Var v);
@@ -1066,9 +1207,11 @@ void *Var.pointer(Var v) {
   if (top == 0x000F && btm > 0x6) return NULL;
   if (top >= 0x0005 && top <= 0x000F)
     return (void *) (v.u64 & (_bitmask(48) - 0x7));
+  if ((v.u64 & VAR_CELL_MASK) == VAR_CELL_BITS)
+    return ((VarCell *) _address(v)).pointer;
   if (top >= VAR_CUSTOM_TAG_TOP &&
       top < VAR_CUSTOM_TAG_TOP + VAR_CUSTOM_TAG_COUNT / 8)
-    return (void *) (v.u64 & (_bitmask(48) - 0x7));
+    return _address(v);
   return NULL;
 }
 

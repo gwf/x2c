@@ -7,11 +7,11 @@
 # compiler links whole, so that a native module can call their functions.
 # The runtime objects the compiler's own code reaches are linked from the
 # archive regardless and are not printed. A class that boxes as a Var
-# reserves one of the 32 Var class rows in its object's file initializer,
-# through x2c_register_descriptor or x2c_register_tagged_descriptor. Of the
-# other runtime objects, one that makes such a call is left out, and so is
-# one that needs a function only a left-out object defines, so linking the
-# rest reserves no row the compiler did not already reserve. Exits nonzero
+# declares its descriptor in its object's file initializer, through
+# x2c_register_descriptor or x2c_register_tagged_descriptor. Of the other
+# runtime objects, one that makes such a call is left out, and so is one
+# that needs a function only a left-out object defines, so linking the rest
+# declares no class the compiler did not already declare. Exits nonzero
 # when nm fails; NM names another nm. Object paths must not contain spaces.
 set -eu
 

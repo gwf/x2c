@@ -368,8 +368,10 @@ List builtin_class_pointer_output(String owner, List value, List out) =>
 $builtin.emit()
 List builtin_class_box(Symbol tag, int heap) {
   List value = builtin_class_ref("value");
-  if (!heap) value = builtin_class_allocate_copy(value);
-  return builtin_class_call("Var_new", %(${x2c_literal_symbol(tag)} $value));
+  if (heap)
+    return builtin_class_call("Var_new", %(${x2c_literal_symbol(tag)} $value));
+  return builtin_class_call("Var_box_record", %(${x2c_literal_symbol(tag)}
+    ${builtin_class_op(<&>, %($value))} ${builtin_class_size(value)}));
 }
 
 $builtin.emit()

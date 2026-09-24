@@ -177,6 +177,18 @@ typedef struct VarMethods {
   VarPostfixIndexFn postfixindex, VarExportContextFn export_context;
 } VarMethods;
 
+/** Process-global dispatch row for one `Var` tag, never freed.
+    It borrows native function pointers and the canonical `name`: callback
+    code must remain loaded, and the name's owning pool must outlive every
+    later use of the row. A custom descriptor's `row` is -1 until its first
+    box assigns one.
+*/
+typedef struct VarDescriptor {
+  Symbol tag, int row, value_dispatch;
+  VarMethods methods;
+  String name;
+} VarDescriptor;
+
 #include "protocols.x"
 
 /* Compiler-emitted raises cross every runtime unit through this ABI. */

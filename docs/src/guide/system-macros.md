@@ -197,18 +197,18 @@ outside the active path prints fully again. Custom printers that recurse
 outside these operations must manage their own recursion. Readable output
 containing addresses is not a serialization format.
 
-Class boxing uses the existing Var descriptor registry: it has 32 custom rows
-and freezes when worker startup freezes registration. Every record and heap
-class reserves one row for the life of the program, boxed or not, so the 32
-rows are a budget shared with hand-written tagged `protocol Var(T)` adoptions
-and the typed container families; a program that declares more classes than
-remaining rows fails during startup registration. Scalar and alias classes
-reserve nothing. Class tags derive from
+Class boxing uses the existing Var descriptor registry. Every record and heap
+class declares its descriptor at startup, and declaration freezes when worker
+startup freezes registration. A class takes a `Var` row only when a value of
+it is first boxed, which may happen on any thread. The first 30 classes boxed
+get direct rows; later heap classes box through a small process-lifetime
+cell, one per class and address, and later records carry their descriptor
+in front of the boxed copy, so a program can box any number of classes. Scalar and alias classes declare
+nothing. Class tags derive from
 the canonical source file and full name, keeping private classes in different
 files distinct. Tags use deterministic compact spellings, while diagnostics
 retain the full name.
-Registration failure and tag collisions are errors; classes do not remove
-these runtime limits.
+Tag collisions are errors.
 
 ## Retain or select a Scope
 

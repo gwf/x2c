@@ -475,7 +475,7 @@ methods only forwarded to `List.iter`, and typedef protocol inheritance makes
 their exact adoptions unnecessary.
 Limits or counterexample: the family does not adopt `protocol Var`. A typed
 list already boxes as `<list>` through the typedef chain, so adopting would
-spend one of the 32 custom tag slots per family to gain only bracket indexing,
+declare one custom tag per family to gain only bracket indexing,
 which is a linear walk on a cons chain. There is no `long` family, and
 `lib/typed-list.x:16-20` says why: `Var.box_i64` allocates a Scope-owned box,
 so a cell outliving that scope would hold a dangling car, and `List.equal`

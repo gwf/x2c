@@ -1312,14 +1312,6 @@ Do not repeat an invariant downstream after a constructor, canonicalizer, or
 typed boundary has established it. If readers need the same explanation in
 many places, the invariant probably lacks one clear owner.
 
-Treat `class` as a budgeted choice, not a better `typedef`. A record or heap
-class reserves one of 32 `Var` descriptor rows in the linked program, whether
-or not a value is ever boxed, and the program that exhausts them aborts during
-startup. Scalar and alias classes, such as `class Count int;` and
-`class Path String;`, cost no row. A hand-written tagged `protocol Var(T);`
-spends one too, so `protocol Var(T) as void *;` is the spelling for a pointer
-that crosses as raw bits. Rows are shared with the typed Array and Map
-families, and a class in `lib/` taxes every program, including the compiler.
 Write `class` when the type needs the whole generated bundle - construction,
 boxing, equality and hashing for a Map key, and cleanup - and `typedef` for a
 type that is never boxed, for function pointers, enums, and unions, and for a

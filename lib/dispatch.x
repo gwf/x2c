@@ -94,10 +94,11 @@ int Var.try_dispatch_unary(Var value, Symbol member, Var *result) {
 }
 
 /** Attempts to make lowercase `name` available as a process-global `Var` tag.
-    This no-result form silently ignores invalid names and unavailable custom
-    rows. An active built-in name selects its existing row. The canonical name
-    is borrowed for process-wide collision diagnostics, so its owning pool
-    must outlive later descriptor use.
+    This no-result form silently ignores invalid names. A custom tag spends a
+    `Var` row only when a value is first boxed. An active built-in name
+    selects its existing row. The canonical name is borrowed for process-wide
+    collision diagnostics, so its owning pool must outlive later descriptor
+    use.
 
     Raises: `<bad-state>` after descriptor registration is frozen, or
     `<alloc-fail>` while checking lowercase spelling.
@@ -133,14 +134,13 @@ int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods) {
   return 1;
 }
 
-/** Reserves a custom `Var` tag and merges its descriptor callbacks.
-    Returns zero for a null or non-lowercase name, an unavailable tag, or
-    exhausted custom capacity, and one otherwise. An already active built-in
-    name selects its existing row. Non-NULL fields replace process-global
-    slots; NULL fields preserve installed callbacks. The canonical name and
-    function pointers are borrowed process-wide: the name's owning pool and
-    callback code must outlive later descriptor use. Registration invokes no
-    callback.
+/** Declares a custom `Var` tag and merges its descriptor callbacks.
+    Returns zero for a null or non-lowercase name, and one otherwise. An
+    already active built-in name selects its existing row. Non-NULL fields
+    replace process-global slots; NULL fields preserve installed callbacks.
+    The canonical name and function pointers are borrowed process-wide: the
+    name's owning pool and callback code must outlive later descriptor use.
+    Registration invokes no callback.
 
     Raises: `<bad-state>` after descriptor registration is frozen, or
     `<alloc-fail>` while checking lowercase spelling.
@@ -173,14 +173,14 @@ void x2c_register_descriptor(String name, VarMethods methods) {
   x2c_try_register_descriptor(name, methods);
 }
 
-/** Reserves custom `tag` under full type `name` and merges descriptor
+/** Declares custom `tag` under full type `name` and merges descriptor
     callbacks. Unlike `x2c_try_register_descriptor`, the tag need not be the
     restricted-Symbol encoding of the name. A built-in tag is rejected so an
     explicit custom type cannot replace built-in behavior. The name and
     callbacks have the same process-wide lifetime as ordinary descriptors.
 
-    Returns zero for an invalid name, built-in or unavailable tag, or exhausted
-    custom capacity, and one otherwise. Distinct names for one tag abort.
+    Returns zero for a null tag or name, and one otherwise. A built-in tag or
+    distinct names for one tag abort.
     Explicit names retain case; ordinary inferred-tag registration still
     requires lowercase names. Raises: `<bad-state>` after registration freezes.
 */
@@ -196,9 +196,9 @@ int x2c_try_register_tagged_descriptor(
   return 1;
 }
 
-/** Registers an explicitly tagged type or raises `<bad-state>` if no custom
-    row can be reserved. Tag/name collisions follow the existing fatal
-    descriptor diagnostic; registration still freezes at worker startup.
+/** Registers an explicitly tagged type or raises `<bad-state>` for a null tag
+    or name. Tag/name collisions follow the existing fatal descriptor
+    diagnostic; registration still freezes at worker startup.
 */
 void x2c_register_tagged_descriptor(
   Symbol tag, String name, VarMethods methods) {
@@ -241,28 +241,16 @@ Buffer Var.write_pointer_repr(Var v, Buffer out) {
 #include <stdlib.h>
 #include <string.h>
 
-/* Descriptors are process-global and never freed. They borrow native function
-   pointers and the canonical `name`: callback code must remain loaded, and
-   the name's owning pool must outlive every later use of the row. */
-typedef struct VarDescriptor {
-  int value_dispatch;
-  VarMethods methods;
-  String name;
-} VarDescriptor;
-
 /* One row per boxed ledger tag, in ledger order, so a decoded value indexes
    the table without another tag search. */
 static VarDescriptor
   builtin_descriptors[$var.tag.descriptor.count()] = {0};
 
 int x2c_var_descriptor_index(Var value);
-int Var.custom_descriptor_index(Var value);
+VarDescriptor *x2c_var_custom_descriptor(Var value);
+VarDescriptor *x2c_var_declare(Symbol tag);
 int x2c_var_tag_descriptor_index(Symbol tag);
 
-/* Custom tag rows and descriptor rows share the same dense index. Successful
-   native worker startup freezes both tables so lock-free dispatch can read
-   them without racing registration. */
-static VarDescriptor custom_descriptors[32] = {0};
 static threaded RenderPath *render_path;
 static pthread_mutex_t descriptor_mutex;
 static pthread_once_t descriptor_mutex_once =
@@ -337,11 +325,8 @@ static VarDescriptor *_descriptor_for_value(Var value) {
   int index = x2c_var_descriptor_index(value);
   VarDescriptor *builtin = index >= 0 && index < count
                          ? &builtin_descriptors[index] : NULL;
-  VarDescriptor *descriptor = builtin;
-  if (!descriptor) {
-    int custom = value.custom_descriptor_index();
-    if (custom >= 0) descriptor = &custom_descriptors[custom];
-  }
+  VarDescriptor *descriptor = builtin ? builtin
+                           : x2c_var_custom_descriptor(value);
   if (!descriptor || !descriptor.value_dispatch) return NULL;
   return descriptor;
 }
@@ -461,9 +446,7 @@ static VarDescriptor *_reserve_tagged_descriptor(
     abort();
   }
   if (!descriptor) {
-    int id = Var.register_object_tag(tag);
-    if (id < 0) return 0;
-    descriptor = &custom_descriptors[id];
+    descriptor = x2c_var_declare(tag);
     descriptor.value_dispatch = 1;
   }
   /* Restricted Symbols fold `_` and `-` and truncate after ten characters;

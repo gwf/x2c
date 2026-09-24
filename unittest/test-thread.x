@@ -592,6 +592,53 @@ static void thread_freezes_late_descriptor_registration(void) {
   EXPECT_TRUE(tag_caught);
 }
 
+/* Neither class is boxed before its worker boxes it. */
+class ThreadBoxLeft struct { int x; } *;
+class ThreadBoxRight struct { int x; } *;
+
+typedef struct ThreadFirstBox {
+  atomic_int *arrived;
+  void *object;
+  Var *mine, *other;
+  int left;
+} ThreadFirstBox;
+
+static void _thread_first_box_arrive(atomic_int *arrived, int count) {
+  atomic_fetch_add(arrived, 1);
+  while (atomic_load(arrived) < count) sched_yield();
+}
+
+static Var _thread_first_box(const void *input, size_t input_size) {
+  if (input_size != sizeof(ThreadFirstBox)) return 0;
+  const ThreadFirstBox *box = input;
+  if (box.left) *box.mine = (ThreadBoxLeft) box.object;
+  else *box.mine = (ThreadBoxRight) box.object;
+  _thread_first_box_arrive(box.arrived, 2);
+  Var other = *box.other;
+  int ok = box.left ? other is ThreadBoxRight && other.repr().len() > 0
+                    : other is ThreadBoxLeft && other.repr().len() > 0;
+  _thread_first_box_arrive(box.arrived, 4);
+  return ok;
+}
+
+static void thread_workers_first_box_classes(void) {
+  atomic_int arrived = 0;
+  Var left = void, right = void;
+  ThreadFirstBox inputs[] = {
+    { &arrived, ThreadBoxLeft.new(1), &left, &right, 1 },
+    { &arrived, ThreadBoxRight.new(2), &right, &left, 0 }
+  };
+  Thread first = Thread.start(_thread_first_box, &inputs[0],
+                              sizeof(inputs[0]));
+  Thread second = Thread.start(_thread_first_box, &inputs[1],
+                               sizeof(inputs[1]));
+  EXPECT_INT_EQ(first.join().integer(), 1);
+  EXPECT_INT_EQ(second.join().integer(), 1);
+  EXPECT_TRUE(left is ThreadBoxLeft && right is ThreadBoxRight);
+  first.free();
+  second.free();
+}
+
 static Var _thread_render_shared(const void *input, size_t input_size) {
   if (input_size != sizeof(Array)) return 0;
   Array shared = *(Array *) input;
@@ -769,6 +816,7 @@ void thread_suite(void) {
   $test.run(thread_error_wide_values_survive_until_join);
   $test.run(thread_failed_join_export_releases_storage);
   $test.run(thread_freezes_late_descriptor_registration);
+  $test.run(thread_workers_first_box_classes);
   $test.run(thread_stack_reaches_library_recursion_limits);
   $test.run(thread_workers_bind_one_catch_site);
   $test.run(thread_promotions_keep_the_first_canonical_identity);

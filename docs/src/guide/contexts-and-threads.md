@@ -172,8 +172,9 @@ The more complete `examples/power/threads.x` uses two workers, parent
 by a `Mutex`, joined `Map` results, and a global memory `Logger` sink.
 
 All type and protocol registration must finish before the first successful
-`Thread.start`. Starting native execution freezes descriptor registration. A
-worker cannot observe a partially changed dispatch table.
+`Thread.start`. Starting native execution freezes descriptor declaration.
+Boxing is not frozen: a worker may box the first value of a declared class,
+and every thread then sees that class's row fully written.
 
 `Thread.start` also turns on locking for the `String` and `List` interning
 pools. A process that has never started a worker needs no locks for those

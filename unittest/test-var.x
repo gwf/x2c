@@ -158,7 +158,7 @@ static void var_construction_and_void_dispatch_transfer(void) {
   try Var.new(<array>, NULL);
   catch %(bad-arg *): caught++;
   Symbol custom = <misaligned>;
-  EXPECT_TRUE(Var.register_object_tag(custom) >= 0);
+  EXPECT_INT_EQ(Var.register_object_tag(custom), 0);
   VarMethods methods = {0};
   EXPECT_TRUE(x2c_try_register_tagged_descriptor(
     custom, "Example.FullQualifiedClass", methods));
@@ -1220,28 +1220,22 @@ static void var_clone_wide_returns_void_for_narrow_values(void) {
 }
 
 
-static void var_dense_dispatch_capacity(void) {
+static void var_dense_dispatch_past_direct_rows(void) {
   VarMethods methods = {0};
   EXPECT_FALSE(x2c_try_register_descriptor(NULL, methods));
   x2c_register_type("token");
   long token_value = 1;
   EXPECT_TRUE(Var.new(<token>, &token_value).truth());
   EXPECT_FALSE(Var.new(<token>, NULL).truth());
-  // Fill whatever slots remain: runtime modules (the Lisp lsym tag) and
-  // earlier suites own an unknown share of the 32.
-  int filled = 0;
-  for (int i = 0; i < 32; i++) {
+  // Declaring and boxing more classes than there are direct rows works.
+  long values[40];
+  for (int i = 0; i < 40; i++) {
     String name = "dense%02d".printf(i);
-    if (!x2c_try_register_descriptor(name, methods)) break;
-    filled++;
+    EXPECT_TRUE(x2c_try_register_descriptor(name, methods));
+    Var boxed = Var.new(Symbol.new(name), &values[i]);
+    EXPECT_TRUE(boxed.tag() == Symbol.new(name));
+    EXPECT_TRUE(boxed.pointer() == &values[i]);
   }
-  EXPECT_TRUE(filled < 32);
-  EXPECT_FALSE(x2c_try_register_descriptor("overflow", methods));
-  int caught = 0;
-  try x2c_register_tagged_descriptor(<overflow>, "Overflow", methods);
-  catch %(bad-state *): caught = 1;
-  EXPECT_INT_EQ(caught, 1);
-  // Tags registered before capacity keep working.
   EXPECT_TRUE(Var.new(<token>, &token_value).truth());
 }
 
@@ -1464,6 +1458,6 @@ void var_suite(void) {
   $test.run(var_dense_custom_dispatch);
   $test.run(var_rendering_restores_after_error);
   $test.run(var_protocol_builtin_dispatch_is_reachable);
-  $test.run(var_dense_dispatch_capacity);
+  $test.run(var_dense_dispatch_past_direct_rows);
   $test.run(var_builtin_dispatch_tags_match_registration);
 }
