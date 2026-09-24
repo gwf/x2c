@@ -117,10 +117,22 @@ static String _resolve_include(
    scopes, so every retained key and value belongs to process_cache_scope. */
 static Map process_cache = NULL, static Scope process_cache_scope = NULL;
 
+/* Paths whose entries were collected without their declaration defaults
+   while the shared compile-time session was being filled. */
+static List preload_deferred = NULL;
+
 static void _cache_shutdown(void) {
   process_cache_scope.destroy();
   process_cache_scope = NULL;
   process_cache = NULL;
+  preload_deferred = NULL;
+}
+
+/** Drops the entries collected without declaration defaults while the shared
+    compile-time session was filled. Call once that session is published. */
+void collect_forget_preload_entries(void) {
+  foreach (String path, preload_deferred) (void) _process_cache().del(path);
+  preload_deferred = NULL;
 }
 
 static Map _process_cache(void) {
@@ -464,8 +476,21 @@ static void _file(
     _flush_segment(
       c, path, text, text[segment_position:], segment_line, segment_position,
       globs, parts, definitions, dependencies, private, &linkage);
-    Map generated =
-      c.select_declaration_defaults(path, globs, parts, definitions);
+    /* Declaration producers run the syntax builders, which the shared
+       session lacks while `lib/meta.x` is preloading. That walk's entry for a
+       producing file is dropped afterwards, so a later unit walks the file
+       again with the builders. */
+    Map generated = NULL;
+    int producers = 0;
+    foreach (Var part, parts) {
+      if (part is not <map>) continue;
+      foreach (Var value, part.map())
+        match (value) case %(declaration-source *): producers = 1;
+    }
+    int deferred = producers && macro_library_filling();
+    if (producers && !deferred)
+      generated =
+        c.select_declaration_defaults(path, globs, parts, definitions);
     if (generated && generated.len()) {
       Scope.push(&process_cache_scope);
       Map retained = generated.copy();
@@ -498,7 +523,14 @@ static void _file(
     /* The first walk of a file fixes its contribution. A later walk of the
        same file, such as a unit whose text the prelude already covered,
        does not replace an entry that other units may already have replayed. */
-    if (!_process_cache().contains(path)) _process_cache()[path] = entry;
+    if (!_process_cache().contains(path)) {
+      _process_cache()[path] = entry;
+      if (deferred) {
+        Scope.push(&process_cache_scope);
+        preload_deferred = cons(path, preload_deferred);
+        Scope.pop();
+      }
+    }
     c.kw_aliases = enclosing_aliases;
     c.kw_seen = enclosing_alias_imports;
   }
@@ -554,10 +586,20 @@ Map Compiler.collect_symbols(Compiler c, Map globs) {
       _replay_cached(
         c, _prelude_entry(c, runtime, runtime_canonical), globs, visited);
   }
+  int covered = canonical in visited;
   visited[canonical] = 1;
   _file(
     c, canonical, c.text,
     Path.dirname(c.filename), globs, visited);
+  /* The prelude's replay already declared this unit's defaults, so its own
+     walk selects none of them. The first walk's declarations stay in force,
+     as they are for every other unit that reaches this file. */
+  if (covered)
+    foreach (Var part, _entry(c, canonical).car())
+      if (part is <map>) {
+        globs.merge(part);
+        c.merge_source_declarations(globs, part);
+      }
   return globs;
 }
 

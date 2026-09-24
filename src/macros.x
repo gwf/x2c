@@ -1242,6 +1242,10 @@ int Compiler.shared_definition(Compiler compiler, String key) {
   return known;
 }
 
+/** Answers whether the shared compile-time session is still being filled,
+    before `lib/meta.x` has defined the syntax builders. */
+int macro_library_filling(void) => library_filling;
+
 /** Records that this target builds the shared compile-time parent between
     units rather than before the first one. A unit that needs a session
     while the parent is still pending raises `<lisp-late>`; its driver must

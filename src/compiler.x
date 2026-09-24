@@ -1495,13 +1495,6 @@ static List _select_declaration_forwards(
 Map Compiler.select_declaration_defaults(
   Compiler compiler, String path, Map symbols, Array parts,
   Map definitions) {
-  int present = 0;
-  foreach (Var part, parts) {
-    if (part is not <map>) continue;
-    foreach (Var value, part.map())
-      match (value) case %(declaration-source *): present = 1;
-  }
-  if (!present) return NULL;
   Compiler shadow = Compiler.new_shared(compiler);
   defer compiler.close_child(shadow);
   shadow.filename = path;
