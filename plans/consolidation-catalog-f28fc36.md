@@ -37,10 +37,10 @@ remains. "Design" means a missing representation prevents immediate deletion.
 | C06 | One graph source-location formatter | Done (c6ac7841 + flows follow-up) | Five implementations reduced to one owner and calls |
 | C07 | One static-storage acquisition template | Done (14843fc5) | Inferred and known-size branches emit the common protocol only once |
 | C08 | One initializer evaluation policy, without recomputation | Shared policy bounded; metadata follow-up | File/local callers share expression classification; separately assess carrying per-binding decisions to emission |
-| C09 | Docs consume compiler-selected definitions | Design | Docs no longer re-expand source macros or independently recognize declaration families |
+| C09 | Docs consume compiler-selected definitions | Moved 2026-09-24 into the compiler-backed tool rewrite in [x2c-scripting-ports](x2c-scripting-ports.md#rewrite-on-the-compiler-instead-of-translating) | Docs no longer re-expand source macros or independently recognize declaration families |
 | C10 | One primitive display-format policy | Declined by Gary 2026-09-24: saves ~15 lines but adds an allocation to primitive String rendering and changes NULL to a raise | One of the two tag-to-format switches removed without an unaccepted cost/behavior change |
 | C11 | Recover each Match arm's pattern value once | Done (8fd9c740) | The arm pipeline stops recovering the same graph up to four times |
-| C12 | One owner for typed Match guard interpretation | Design | Compiler consumes normalized predicate facts instead of decoding guard sugar independently |
+| C12 | One owner for typed Match guard interpretation | Declined by Gary 2026-09-24: removes ~10 compiler lines, open design, Match hot path; the alias difference only skips a specialization | Compiler consumes normalized predicate facts instead of decoding guard sugar independently |
 | C13 | Shared lifetime summary/flow production | Design/measurement | Any larger rewrite demonstrably removes duplicate analysis or discarded production while retaining distinct outputs |
 
 Suggested independent first slices: **C01, C02, C05, C06, C07, C11**.
