@@ -370,7 +370,7 @@ void Block_truncate(Block, size_t);
 
 void Array_resize(Array arr, size_t size){
   if(size > INT_MAX){
-    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/array.x",.function = "Array_resize",.line = 72};
+    static const X2CErrorSite _x2c_error_site_1 = {.file = "../../lib/array.x",.function = "Array_resize",.line = 74};
     x2c_error_raise_n(& _x2c_error_site_1, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(size));
     __builtin_unreachable();
   }
@@ -382,7 +382,7 @@ static int _int_length(Array array){
   if(array -> length > INT_MAX){
     size_t size = array -> length;
     {
-      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/array.x",.function = "_int_length",.line = 80};
+      static const X2CErrorSite _x2c_error_site_2 = {.file = "../../lib/array.x",.function = "_int_length",.line = 82};
       x2c_error_raise_n(& _x2c_error_site_2, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(size));
       __builtin_unreachable();
     }
@@ -395,7 +395,7 @@ int Var_is_void(Var);
 
 static inline void _require_array_value(Var value){
   if(Var_is_void(value)){
-    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/array.x",.function = "_require_array_value",.line = 87};
+    static const X2CErrorSite _x2c_error_site_3 = {.file = "../../lib/array.x",.function = "_require_array_value",.line = 89};
     x2c_error_raise_n(& _x2c_error_site_3, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -439,19 +439,19 @@ Var Var_update(Var *, Symbol, Var);
 
 Var Array_updateindex(Array array, int index, Symbol op, Var rhs){
   if((void *) array == NULL){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 169};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 173};
     x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array.updateindex")), NULL))));
     __builtin_unreachable();
   }
   int requested = index, length = _int_length(array);
   index = x2c_normalize_index(index, length);
   if(index < 0){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 172};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 176};
     x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array.updateindex")), NULL))), Symbol_var(19800432), int_var(requested));
     __builtin_unreachable();
   }
   if(Var_is_void(rhs)){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 174};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/array.x",.function = "Array_updateindex",.line = 178};
     x2c_error_raise_n(& _x2c_error_site_6, 48270474208, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array.updateindex")), NULL))), Symbol_var(19800432), int_var(requested));
     __builtin_unreachable();
   }
@@ -463,14 +463,14 @@ Var Var_postfix(Var *, Symbol);
 
 Var Array_postfixindex(Array array, int index, Symbol op){
   if((void *) array == NULL){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/array.x",.function = "Array_postfixindex",.line = 189};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/array.x",.function = "Array_postfixindex",.line = 195};
     x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 1, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array.postfixindex")), NULL))));
     __builtin_unreachable();
   }
   int requested = index, length = _int_length(array);
   index = x2c_normalize_index(index, length);
   if(index < 0){
-    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/array.x",.function = "Array_postfixindex",.line = 192};
+    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/array.x",.function = "Array_postfixindex",.line = 198};
     x2c_error_raise_n(& _x2c_error_site_8, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array.postfixindex")), NULL))), Symbol_var(19800432), int_var(requested));
     __builtin_unreachable();
   }
@@ -483,7 +483,7 @@ Var Array_push(Array array, Var elem){
   if(array -> length >= INT_MAX){
     size_t size = array -> length;
     {
-      static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/array.x",.function = "Array_push",.line = 217};
+      static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/array.x",.function = "Array_push",.line = 223};
       x2c_error_raise_n(& _x2c_error_site_9, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(size));
       __builtin_unreachable();
     }
@@ -510,7 +510,7 @@ Var Array_unshift(Array array, Var elem){
   _require_array_value(elem);
   size_t n = Array_len(array);
   if(n >= INT_MAX){
-    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/array.x",.function = "Array_unshift",.line = 259};
+    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/array.x",.function = "Array_unshift",.line = 267};
     x2c_error_raise_n(& _x2c_error_site_10, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(n));
     __builtin_unreachable();
   }
@@ -523,7 +523,7 @@ Var Array_insert(Array array, int index, Var elem){
   if(index < 0) index += n + 1;
   if(index < 0 || index > n) return((void) 0, Void);
   if(n == INT_MAX){
-    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/array.x",.function = "Array_insert",.line = 282};
+    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/array.x",.function = "Array_insert",.line = 290};
     x2c_error_raise_n(& _x2c_error_site_11, 1358596898646632, 1, Symbol_var(1265290), int_var(n));
     __builtin_unreachable();
   }
@@ -545,7 +545,7 @@ Array Array_copy(Array array){
 
 Array Array_getslice(Array array, int start, int end, int step){
   if(! step){
-    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/array.x",.function = "Array_getslice",.line = 337};
+    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/array.x",.function = "Array_getslice",.line = 349};
     x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Array.getslice")), NULL))), Symbol_var(1286496), int_var(step));
     __builtin_unreachable();
   }
@@ -599,7 +599,7 @@ Array Array_concat(Array a, Array b){
     if(b -> length > INT_MAX - a -> length){
       size_t size = b -> length;
       {
-        static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/array.x",.function = "Array_concat",.line = 438};
+        static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/array.x",.function = "Array_concat",.line = 466};
         x2c_error_raise_n(& _x2c_error_site_13, 1358596898646632, 1, Symbol_var(1265290), Var_box_ulong(size));
         __builtin_unreachable();
       }
