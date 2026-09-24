@@ -152,21 +152,31 @@ not a routine port.
 
 ## Library work, in the order of ports unblocked
 
-1. **Clock and time.** `Clock.monotonic()` for timing and a `strftime`
-   wrapper for dates. `lib/logger.x` has both privately in `_capture_time`
-   and `_write_absolute_time`; the module lifts them. Consumers: the eight
-   `unittest/benchmarks/run-*.sh` drivers, `tools/harness-metrics.py`,
-   `tools/agent-failure.py`, `tools/performance-snapshot.py`, and the
-   timestamped result directories in
-   `unittest/benchmarks/hash-table/direct/run.sh`. Ship it with the first
-   ordinary consumer; the performance collector also needs host locking,
-   signals and timeout behavior and is not that first port.
-2. **`String.wrap(width)` and a median.** Consumers: `gen-api-reference.py`,
-   `gen-module-catalog.py`, the `make help` Python in `etc/help.mk`, and the
-   benchmark drivers' awk statistics.
-3. **Byte reads on `Path`.** `Path.read_text` refuses binary files.
-   Consumers: `packages/raylib/verify-renders.sh` and the mode bits in
-   `tools/gate-state.py`.
+Rechecked against dev 29326dbd on 2026-09-24. None of the three is worth a
+library addition now; each is added with its first real consumer, if one
+appears.
+
+1. **Clock and time: declined.** A script includes `<time.h>` and calls
+   `clock_gettime` and `strftime` directly, as `src/report.x`,
+   `src/build.x` and `lib/logger.x` do, and `$time` in
+   `lib/system-macros.xmacro` already times a statement. The listed
+   consumers mostly do not need it: the seven `run-*.sh` drivers take
+   timings from the benchmark binaries, `tools/harness-metrics.py` reads
+   timestamps from its records, `tools/agent-failure.py` needs one ISO date,
+   and `hash-table/direct/run.sh` makes one `date -u` stamp. Only
+   `tools/performance-snapshot.py` needs both, and it also needs host
+   locking, signals and timeouts.
+2. **`String.wrap(width)` and a median: deferred.** `wrap` is about 15 lines
+   of `.x`. Its consumers are the 16-line `textwrap` block in `etc/help.mk`
+   and `gen-api-reference.py` and `gen-module-catalog.py`, which wait for
+   the compiler-backed `x2c_source.py` rewrite. A median is about 8 lines;
+   its consumers are the awk `median` functions in
+   `run-lisp-auto-benchmark.sh` and `run-match-cache-benchmark.sh`, about 15
+   lines each. Write either inside the port that uses it.
+3. **Byte reads on `Path`: declined.** The only byte consumer is one `od`
+   line reading a 24-byte PNG header in the 19-line
+   `packages/raylib/verify-renders.sh`; `fopen` and `fread` cover it. The
+   mode bits in `tools/gate-state.py` come from `lstat`, not file bytes.
 
 Not worth building, because every consumer is off the table: an HTTP server,
 sockets, a pty, YAML, zip, statistics beyond a median, plotting.
