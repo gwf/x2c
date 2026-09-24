@@ -3053,8 +3053,8 @@ operations, generated for supported value fields.
 
 `str` and `repr` are independently replaceable. Aggregate value str delegates
 to repr; heap str prints identity. Generated repr traverses printable fields
-and uses addresses for opaque pointers. Repeated identities on the active
-rendering path print their pointer form. Descriptor registration retains the
+and uses addresses for opaque pointers and fixed arrays. Repeated identities
+on the active rendering path print their pointer form. Descriptor registration retains the
 runtime's fixed capacity and worker-start freeze rules.
 
 ### Managed-initializer syntax

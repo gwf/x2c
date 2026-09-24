@@ -11,9 +11,33 @@ typedef struct DisjointSet{
 }
 * DisjointSet;
 
-DisjointSet DisjointSet_new(int n);
+DisjointSet DisjointSet_new(int argument_0);
 
-void DisjointSet_free(DisjointSet set);
+DisjointSet DisjointSet_alloc();
+
+void DisjointSet_free(DisjointSet value);
+
+void DisjointSet_cleanup(DisjointSet value);
+
+Var DisjointSet_var(DisjointSet value);
+
+DisjointSet Var_disjointset(Var value);
+
+int DisjointSet_equal(DisjointSet left, DisjointSet right);
+
+unsigned DisjointSet_hash(DisjointSet value);
+
+Buffer DisjointSet_write_str(DisjointSet value, Buffer out);
+
+String DisjointSet_str(DisjointSet value);
+
+Buffer DisjointSet_write_repr(DisjointSet value, Buffer out);
+
+String DisjointSet_repr(DisjointSet value);
+
+void DisjointSet_init(DisjointSet set, int n);
+
+void DisjointSet_drop(DisjointSet set);
 
 int DisjointSet_find(DisjointSet set, int x);
 

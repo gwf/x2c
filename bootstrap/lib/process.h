@@ -17,6 +17,8 @@ typedef struct Job{
 }
 * Job;
 
+Job Job_alloc();
+
 void Job_free(Job value);
 
 Var Job_var(Job value);

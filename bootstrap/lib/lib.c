@@ -2,10 +2,234 @@
 
 #include "lib.h"
 
+#include "exception.h"
+
+static String _8, _7, _6, _5, _4, _3, _2, _1, _0;
+
+static int _init_guard_ = 0;
+
+__attribute__((constructor)) static void _file_init_(void);
+
+static inline String _x2c_proto_disjointset_str_0(Var a0);
+
+static inline String _x2c_proto_disjointset_repr_0(Var a0);
+
+static inline Buffer _x2c_proto_disjointset_write_str_0(Var a0, Buffer a1);
+
+static inline Buffer _x2c_proto_disjointset_write_repr_0(Var a0, Buffer a1);
+
+static inline unsigned _x2c_proto_disjointset_hash_0(Var a0);
+
+static inline int _x2c_proto_disjointset_equal_0(Var a0, Var a1);
+
+static VarMethods _x2c__x2c_protocol_methods_0;
+
+typedef struct _x2c_defer_env_0{
+  const void * _x2c_defer_capture_0;
+}
+_x2c_defer_env_0;
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0);
+
+typedef struct _x2c_defer_env_1{
+  const void * _x2c_defer_capture_1;
+}
+_x2c_defer_env_1;
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1);
+
+typedef struct _x2c_defer_env_2{
+  const void * _x2c_defer_capture_2;
+}
+_x2c_defer_env_2;
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2);
+
+__attribute__((constructor)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _x2c__x2c_protocol_methods_0 =(VarMethods){
+    .str = _x2c_proto_disjointset_str_0, .repr = _x2c_proto_disjointset_repr_0, .write_str = _x2c_proto_disjointset_write_str_0, .write_repr = _x2c_proto_disjointset_write_repr_0, .hash = _x2c_proto_disjointset_hash_0, .equal = _x2c_proto_disjointset_equal_0
+  }
+  ;
+  x2c_register_tagged_descriptor(222658595144, String_new("DisjointSet"), _x2c__x2c_protocol_methods_0);
+  _0 = String_new("<DisjointSet: 0x%012lX>");
+  _1 = String_new("DisjointSet { ");
+  _2 = String_new("parent: ");
+  _3 = String_new("<opaque: 0x%012lX>");
+  _4 = String_new(", ");
+  _5 = String_new("size: ");
+  _6 = String_new("length: ");
+  _7 = String_new("ncmpnts: ");
+  _8 = String_new(" }");
+}
+
+DisjointSet DisjointSet_new(int argument_0){
+  DisjointSet value = DisjointSet_alloc();
+  DisjointSet_init(value, argument_0);
+  return value;
+}
+
+void * Scope_calloc(size_t, size_t);
+
+DisjointSet DisjointSet_alloc(){
+  DisjointSet value = Scope_calloc(1, sizeof(* value));
+  return value;
+}
+
+void Scope_free(void *);
+
+void DisjointSet_free(DisjointSet value){
+  if(value) DisjointSet_drop(value);
+  Scope_free(value);
+}
+
+void DisjointSet_cleanup(DisjointSet value){
+  DisjointSet_free(value);
+}
+
+Var Var_new(Symbol, ...);
+
+Var DisjointSet_var(DisjointSet value){
+  return Var_new(222658595144, value);
+}
+
+void * Var_pointer(Var);
+
+DisjointSet Var_disjointset(Var value){
+  return(DisjointSet) Var_pointer(value);
+}
+
+int DisjointSet_equal(DisjointSet left, DisjointSet right){
+  return(void *) left ==(void *) right;
+}
+
+unsigned x2c_hash_word(unsigned long);
+
+unsigned DisjointSet_hash(DisjointSet value){
+  return x2c_hash_word((unsigned long) value);
+}
+
+Buffer Buffer_printf(Buffer, const char *, ...);
+
+Buffer DisjointSet_write_str(DisjointSet value, Buffer out){
+  if(! _init_guard_) _file_init_();
+  return Buffer_printf(out, _0, (long) value);
+}
+
+Buffer Buffer_new(size_t);
+
+String Buffer_str(Buffer);
+
+String DisjointSet_str(DisjointSet value){
+  if(! _init_guard_) _file_init_();
+  Buffer out = Buffer_new(0);
+  {
+  _x2c_defer_env_0 _x2c_defer_env_3 = {._x2c_defer_capture_0 =(const void *) & out};
+
+  X2CCleanup _x2c_defer_record_0 = {
+    .fn = _x2c_defer_cleanup_0,
+    .env = & _x2c_defer_env_3
+  };
+  x2c_cleanup_push(&_x2c_defer_record_0);
+  {
+    DisjointSet_write_str(value, out);
+    {
+      String _x2c_return_value_0 = Buffer_str(out);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_0);
+        return _x2c_return_value_0;
+      }
+
+    }
+
+  }
+  x2c_cleanup_leave(& _x2c_defer_record_0);
+
+}
+}
+
+int RenderPath_enter(RenderPath *, const void *);
+
+Buffer Buffer_write(Buffer, const char *);
+
+Buffer Var_write_repr(Var, Buffer);
+
+Var int_var(int);
+
+Buffer DisjointSet_write_repr(DisjointSet value, Buffer out){
+  if(! _init_guard_) _file_init_();
+  if((void *) value ==(void *) 0) return Buffer_printf(out, _0, (long) value);
+  RenderPath path;
+  if(! RenderPath_enter(&(path), value)) return Buffer_printf(out, _0, (long) value);
+  {
+  _x2c_defer_env_1 _x2c_defer_env_4 = {._x2c_defer_capture_1 =(const void *) & path};
+
+  X2CCleanup _x2c_defer_record_1 = {
+    .fn = _x2c_defer_cleanup_1,
+    .env = & _x2c_defer_env_4
+  };
+  x2c_cleanup_push(&_x2c_defer_record_1);
+  {
+    Buffer_write(out, _1);
+    Buffer_write(out, _2);
+    Buffer_printf(out, _3, (long) value -> parent);
+    Buffer_write(out, _4);
+    Buffer_write(out, _5);
+    Buffer_printf(out, _3, (long) value -> size);
+    Buffer_write(out, _4);
+    Buffer_write(out, _6);
+    Var_write_repr(int_var(value -> length), out);
+    Buffer_write(out, _4);
+    Buffer_write(out, _7);
+    Var_write_repr(int_var(value -> ncmpnts), out);
+    {
+      Buffer _x2c_return_value_1 = Buffer_write(out, _8);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_1);
+        return _x2c_return_value_1;
+      }
+
+    }
+
+  }
+  x2c_cleanup_leave(& _x2c_defer_record_1);
+
+}
+}
+
+String DisjointSet_repr(DisjointSet value){
+  if(! _init_guard_) _file_init_();
+  Buffer out = Buffer_new(0);
+  {
+  _x2c_defer_env_2 _x2c_defer_env_5 = {._x2c_defer_capture_2 =(const void *) & out};
+
+  X2CCleanup _x2c_defer_record_2 = {
+    .fn = _x2c_defer_cleanup_2,
+    .env = & _x2c_defer_env_5
+  };
+  x2c_cleanup_push(&_x2c_defer_record_2);
+  {
+    DisjointSet_write_repr(value, out);
+    {
+      String _x2c_return_value_2 = Buffer_str(out);
+      {
+        x2c_cleanup_leave(& _x2c_defer_record_2);
+        return _x2c_return_value_2;
+      }
+
+    }
+
+  }
+  x2c_cleanup_leave(& _x2c_defer_record_2);
+
+}
+}
+
 void * Scope_malloc(size_t);
 
-DisjointSet DisjointSet_new(int n){
-  DisjointSet set = Scope_malloc(sizeof(struct DisjointSet));
+void DisjointSet_init(DisjointSet set, int n){
   set -> parent = Scope_malloc(sizeof(int) * n);
   set -> size = Scope_malloc(sizeof(int) * n);
   set -> length = n;
@@ -14,15 +238,12 @@ DisjointSet DisjointSet_new(int n){
     set -> parent[i] = i;
     set -> size[i] = 1;
   }
-  return set;
+
 }
 
-void Scope_free(void *);
-
-void DisjointSet_free(DisjointSet set){
+void DisjointSet_drop(DisjointSet set){
   Scope_free(set -> parent);
   Scope_free(set -> size);
-  Scope_free(set);
 }
 
 int DisjointSet_find(DisjointSet set, int x){
@@ -53,8 +274,6 @@ Var Array_push(Array, Var);
 
 Var List_var(List);
 
-Var int_var(int);
-
 List Array_list_free(Array);
 
 Array Array_sort(Array);
@@ -67,5 +286,48 @@ List DisjointSet_sizes(DisjointSet set){
 
 int DisjointSet_num_components(DisjointSet set){
   return set -> ncmpnts;
+}
+
+static inline String _x2c_proto_disjointset_str_0(Var a0){
+  return DisjointSet_str(Var_disjointset(a0));
+}
+
+static inline String _x2c_proto_disjointset_repr_0(Var a0){
+  return DisjointSet_repr(Var_disjointset(a0));
+}
+
+static inline Buffer _x2c_proto_disjointset_write_str_0(Var a0, Buffer a1){
+  return DisjointSet_write_str(Var_disjointset(a0), a1);
+}
+
+static inline Buffer _x2c_proto_disjointset_write_repr_0(Var a0, Buffer a1){
+  return DisjointSet_write_repr(Var_disjointset(a0), a1);
+}
+
+static inline unsigned _x2c_proto_disjointset_hash_0(Var a0){
+  return DisjointSet_hash(Var_disjointset(a0));
+}
+
+static inline int _x2c_proto_disjointset_equal_0(Var a0, Var a1){
+  return DisjointSet_equal(Var_disjointset(a0), Var_disjointset(a1));
+}
+
+void Buffer_free(Buffer);
+
+static void _x2c_defer_cleanup_0(void * _x2c_defer_opaque_0){
+  _x2c_defer_env_0 * _x2c_defer_data_0 =(_x2c_defer_env_0 *) _x2c_defer_opaque_0;
+  Buffer_free((*(Buffer *) _x2c_defer_data_0->_x2c_defer_capture_0));
+}
+
+void RenderPath_leave(RenderPath *);
+
+static void _x2c_defer_cleanup_1(void * _x2c_defer_opaque_1){
+  _x2c_defer_env_1 * _x2c_defer_data_1 =(_x2c_defer_env_1 *) _x2c_defer_opaque_1;
+  RenderPath_leave(&((*(RenderPath *) _x2c_defer_data_1->_x2c_defer_capture_1)));
+}
+
+static void _x2c_defer_cleanup_2(void * _x2c_defer_opaque_2){
+  _x2c_defer_env_2 * _x2c_defer_data_2 =(_x2c_defer_env_2 *) _x2c_defer_opaque_2;
+  Buffer_free((*(Buffer *) _x2c_defer_data_2->_x2c_defer_capture_2));
 }
 
