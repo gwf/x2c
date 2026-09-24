@@ -108,7 +108,7 @@ static List _make_local_binders(List binders, String values_name);
 
 static List _make_catch_binders(List binders, String handle_name);
 
-static List _match_arm_label(Emitter emitter, List pattern_ast, Array heads, int * labelling);
+static List _match_arm_label(Symbol head, Array heads, int * labelling);
 
 static List _flat_match_condition(Symbol head, List tags);
 
@@ -1766,13 +1766,10 @@ static List _make_catch_binders(List binders, String handle_name){
   return Array_list_free(values);
 }
 
-Symbol Compiler_match_pattern_head_symbol(Compiler, List);
-
 int Array_contains(Array, Var);
 
-static List _match_arm_label(Emitter emitter, List pattern_ast, Array heads, int * labelling){
+static List _match_arm_label(Symbol head, Array heads, int * labelling){
   if(! * labelling) return NULL;
-  Symbol head = Compiler_match_pattern_head_symbol(emitter -> compiler, pattern_ast);
   if(! head){
     * labelling = 0;
     return _332;
@@ -1814,9 +1811,15 @@ static List _flat_match_condition(Symbol head, List tags){
 
 List preproc_track_arms(List, String);
 
-Symbol Compiler_match_pattern_flat_head(Compiler, List, List, List *);
+Var Compiler_match_pattern_value(Compiler, Var);
+
+Symbol match_value_flat_head(Var, List, List *);
+
+Symbol match_value_head(Var);
 
 Var Array_insert(Array, int, Var);
+
+int match_value_is_static(Var);
 
 static List Emitter__match_if(Emitter e, List ast, int * dispatched){
   Array values = Array_new(), heads = Array_new();
@@ -1860,12 +1863,12 @@ static List Emitter__match_if(Emitter e, List ast, int * dispatched){
 
     }
   }
-List flat_tags = NULL;
-        Symbol flat_head = Compiler_match_pattern_flat_head(e -> compiler, pattern_ast, binders, & flat_tags);
-        int static_pattern = Compiler_match_pattern_is_static(e -> compiler, pattern_ast);
+Var value = Compiler_match_pattern_value(e -> compiler, List_var(pattern_ast));
+        List flat_tags = NULL;
+        Symbol flat_head = match_value_flat_head(value, binders, & flat_tags);
         List pattern = Emitter__emit(e, pattern_ast);
         List body = Emitter__emit(e, body_ast);
-        List label = _match_arm_label(e, pattern_ast, heads, & labelling);
+        List label = _match_arm_label(match_value_head(value), heads, & labelling);
         if(List_truth(label)) Array_insert(values, List_truth(arms) ? opening ++ : Array_len(values), List_var(label));
         if(pattern == _19) Array_push(values, List_var(cons(List_var(body), List_append(implicit_break, NULL))));
         else if(flat_head){
@@ -1875,6 +1878,7 @@ List flat_tags = NULL;
           Array_push(values, List_var(cons(_352, cons(_353, List_append(condition, cons(_355, List_append(declarations, List_append(body, cons(String_var(closing), NULL)))))))));
         }
         else{
+          int static_pattern = match_value_is_static(value);
           String site_name = static_pattern ? Compiler_fresh_name(e -> compiler, _812) : NULL;
           List site_declaration = static_pattern ? cons(String_var(String_join(NULL, cons(String_var(_294), cons(String_var(site_name), cons(String_var(_51), NULL))))), NULL) : NULL;
           List entry = static_pattern ? cons(_357, cons(String_var(site_name), _358)) : _361;
