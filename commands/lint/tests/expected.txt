@@ -66,11 +66,28 @@ commands/lint/tests/src/comments.x:42: violation doc-on-static: doc comment on a
 commands/lint/tests/src/comments.x:45: candidate repeated-prose: repeats prose elsewhere in the file
 commands/lint/tests/src/comments.x:48: candidate repeated-prose: repeats prose elsewhere in the file
 exit 0
+# structure and validation rules
+commands/lint/tests/src/review.x:4: candidate internal-type: struct Checker has 1 members and no use outside its file
+commands/lint/tests/src/review.x:6: candidate internal-type: struct Pair has 1 members and no use outside its file
+commands/lint/tests/src/review.x:8: candidate internal-type: enum Color has 2 members and no use outside its file
+commands/lint/tests/src/review.x:20: violation return-after-report-error: return follows non-returning report_error in Checker.check_pair
+commands/lint/tests/src/review.x:20: candidate shape-diagnostics: diagnostics are built around manual List or AST shape checks in Checker.check_pair
+commands/lint/tests/src/review.x:20: candidate validator-diagnostics: validator-like helper emits diagnostics in Checker.check_pair
+commands/lint/tests/src/review.x:25: candidate silent-shape-guard: impossible shape can silently return fallback in Checker.check_pair
+commands/lint/tests/src/review.x:33: violation return-after-raise: return follows a non-returning shared Error cause in raise_then_return
+commands/lint/tests/src/review.x:41: candidate struct-copy: 1 field transfers and 1 whole copies in copy_pair
+commands/lint/tests/src/review.x:46: candidate manual-bookkeeping: 5 statistics sites and 0 cleanup calls in count_everything
+commands/lint/tests/src/review.x:54: candidate lifecycle-pair: paired acquire/release functions acquire_slot and release_slot
+commands/lint/tests/src/review.x:62: candidate repeated-accessor: node.car() repeats three times; cache only if pure and stable
+commands/lint/tests/src/review.x:68: candidate repeated-routes: 3 functions share at least 80% of control and call tokens: route_one, route_two, route_three
+commands/lint/tests/src/review.x:89: candidate silent-shape-guard: impossible shape can silently continue in skip_other
+exit 0
 # reference parameters
 commands/lint/tests/src/references.x:10: candidate reference-parameter: `count` aliases one caller variable; declare it as a `&` reference parameter
 commands/lint/tests/src/references.x:10: candidate reference-parameter: `pair` aliases one caller variable; declare it as a `&` reference parameter
 exit 0
 # idiom fixes proven by the generated C
+idioms.x:4: candidate internal-type: struct Point has 1 members and no use outside its file
 idioms.x:10: candidate member-arrow: reach the member with `.`
 idioms.x:14: candidate contains-in: write the membership test with `in`
 idioms.x:19: candidate contains-in: write the membership test with `in`
@@ -78,5 +95,6 @@ idioms.x:22: candidate plain-string: a plain literal needs no interpolation
 idioms.x:24: candidate plain-string: a plain literal needs no interpolation
 idioms.x:27: candidate expression-body: write the one returned value with `=>`
 idioms.x:37: violation negated-is: spell the test `is not`
+idioms.x:37: candidate silent-shape-guard: impossible shape can silently return 0 in negated
 idioms.x: fixed 5 of 6
 exit 0

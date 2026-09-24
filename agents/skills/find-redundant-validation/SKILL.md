@@ -12,43 +12,38 @@ description: >-
 
 # Find redundant validation
 
-Use the finder to make a review queue, then prove each candidate from source,
-history, and behavior. A score is the strongest individual mechanical signal;
-independent weak signs are not added together. It does not mean the check is
-wrong or estimate how many lines can be deleted.
+Use the validation rules of `x2c lint` to make a review queue, then prove
+each candidate from source, history, and behavior. A finding does not mean
+the check is wrong or estimate how many lines can be deleted. Build the
+command once with `make commands`.
 
 For a broad compiler audit, start with values produced by one stage and
 silently rejected by a later consumer:
 
 ```sh
-python3 agents/skills/find-redundant-validation/scripts/redundant_validation.py \
-  --producer-consumers --details src lib
+builds/0/x2c lint --rule silent-shape-guard src/*.x lib/*.x lib/*.xmacro
 ```
 
-This groups structural guards under their direct callers, the `try_*parts`
-helper they re-run, or the exact private map they read. It shows where the
-value entered the consumer and whether an impossible branch continues,
-returns null or the original value, applies a default, or retains a partial
-result. These are candidates, not conclusions: read the reported producer and
-consumer before deleting anything. A direct caller is only a producer
-candidate until source establishes that it constructed or normalized the
-value.
+Each finding is a structural guard whose failure continues, returns null or
+a fallback, applies a default, or keeps a partial result. Read the function's
+callers, the `try_*parts` helper it re-runs, or the private map it reads to
+find the producer; a direct caller is only a producer candidate until source
+establishes that it constructed or normalized the value. The rule skips the
+trust boundaries listed in the calibration reference.
 
 Source `match` does not make a function trustworthy. It may be the clearest
 recognition code in the function while adjacent `is <list>`, tag, arity, or
 `try_*parts` guards still distrust the same compiler-produced value.
 
-Use `--frameworks` when the specific question is whether a
-connected validator-named diagnostic subsystem exists. It groups those
-functions by authored lines; it is not the starting point for producer-side
-trust work.
+Use `--rule validation-framework` when the specific question is whether a
+connected validator-named diagnostic subsystem exists; it reports each group
+of calling validators with its authored lines.
 
 For a parser, AST, or source-quality audit, list static method matches that
 construct a binding List only to read it locally with `assoc`:
 
 ```sh
-python3 agents/skills/find-redundant-validation/scripts/redundant_validation.py \
-  --static-match-captures --details src lib
+builds/0/x2c lint --rule static-match-capture src/*.x lib/*.x
 ```
 
 These are candidates for source `match`, not automatic rewrites. Keep method
@@ -57,28 +52,19 @@ binding List crosses the local branch.
 
 ## Review exact mechanical findings
 
-From the repository root:
-
 ```sh
-python3 agents/skills/find-redundant-validation/scripts/redundant_validation.py \
-  --details src lib
+builds/0/x2c lint --rule return-after-report-error --rule return-after-raise \
+  --rule fallback-shared-cause --rule fresh-literal-null-guard \
+  --rule growth-check --rule shape-diagnostics --rule recursive-validator \
+  --rule validator-diagnostics src/*.x lib/*.x lib/*.xmacro
 ```
 
-Use `--min-score 1` to include weak candidates in ordinary mode, `--limit 0`
-to show all results, `--json` for analysis, and `--rev REV` for a historical
-tree. Generated `lib/x2c.x` and untracked files are excluded.
-
-Compare a deletion with its parent or a reduced revision:
-
-```sh
-python3 agents/skills/find-redundant-validation/scripts/redundant_validation.py \
-  --compare OLD..NEW --details src lib
-```
-
-Comparison mode reports candidate functions and diagnostic fixture families
-that disappeared. Read
-[`references/calibration.md`](references/calibration.md) when changing the
-finder or deciding whether it recognizes the intended pattern.
+A function's reasons are reported when its strongest reason is a
+non-returning-failure rule or diagnostics built on shape checks; weaker
+reasons appear only beside a stronger one. To compare two revisions, run the
+same command in a checkout of each (`git worktree add`) and compare the
+output. Read [`references/calibration.md`](references/calibration.md) when
+changing the rules or deciding whether they recognize the intended pattern.
 
 ## Decide whether a candidate is redundant
 

@@ -19,10 +19,12 @@ mechanical scores as a queue, not a verdict.
 From the repository root, run:
 
 ```sh
-python3 agents/skills/find-x2c-overengineering/scripts/overengineering.py scan
+make commands
+agents/skills/find-x2c-overengineering/scripts/overengineering scan
 ```
 
-The command inventories current `src/` and hand-authored `lib/`, selects at
+The script reads the compiler's definitions of current `src/` and
+hand-authored `lib/` and the structure rules of `x2c lint`, selects at
 most five promising regions not already attempted at the same source digest,
 and creates an immutable run beneath
 `~/.codex/x2c-overengineering/<repository-id>/runs/`. It prints the run path.
@@ -85,7 +87,7 @@ region; do not preserve an old verdict across changed code without review.
 ## Trace a known deletion for calibration
 
 ```sh
-python3 agents/skills/find-x2c-overengineering/scripts/overengineering.py \
+agents/skills/find-x2c-overengineering/scripts/overengineering \
   trace-deletion COMMIT
 ```
 

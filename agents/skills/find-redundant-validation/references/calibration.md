@@ -1,15 +1,18 @@
 # Calibration cases
 
-These revisions show the patterns the finder is intended to surface. They do
-not make a current finding removable; inspect current behavior before editing.
+These revisions show the patterns the lint rules are intended to surface.
+They do not make a current finding removable; inspect current behavior before
+editing. To check a revision, add a worktree for it and run the current
+`builds/0/x2c lint` over that worktree's files; a unit whose old syntax the
+current compiler no longer parses gets its token rules only.
 
 ## Static match capture extraction
 
 Revision `e3a2b51a` is the required static-match calibration. Run:
 
 ```sh
-python3 agents/skills/find-redundant-validation/scripts/redundant_validation.py \
-  --rev e3a2b51a --static-match-captures --details src/parse.x
+git worktree add /tmp/x2c-e3a2b51a e3a2b51a
+builds/0/x2c lint --rule static-match-capture /tmp/x2c-e3a2b51a/src/parse.x
 ```
 
 The report must include `_install_declarator`, where a static `List.match`
@@ -22,18 +25,18 @@ leave the local branch are negative controls.
 Revision `2f9e05b9` is the required producer/consumer calibration. Run:
 
 ```sh
-python3 agents/skills/find-redundant-validation/scripts/redundant_validation.py \
-  --rev 2f9e05b9 --producer-consumers --details --limit 0 src lib
+git worktree add /tmp/x2c-2f9e05b9 2f9e05b9
+builds/0/x2c lint --rule silent-shape-guard /tmp/x2c-2f9e05b9/src/*.x
 ```
 
-The report must connect
-`SemanticEnvironment.declare_field_order` to `_parse_struct_or_union` and
-`_bind_syntax_declaration`. Those parser paths pass complete aggregate field
-declarations, while the consumer silently skips values that are not Lists,
+The report must include `SemanticEnvironment.declare_field_order`, whose
+producers are `_parse_struct_or_union` and `_bind_syntax_declaration`. Those
+parser paths pass complete aggregate field declarations, while the consumer
+silently skips values that are not Lists,
 declarations, binding lists, or binds. It must also report
 `Emitter.emit_bind`, `_macro_collect_unit_bindings`, and
-`Compiler.resolve_protocols`. The protocol result must connect the
-`protocol_adoptions` reader to `_install_protocol_adoption`, its exact writer.
+`Compiler.resolve_protocols`, which reads the `protocol_adoptions` map that
+`_install_protocol_adoption` writes.
 
 The same run must not report the following as consumers:
 
@@ -63,14 +66,17 @@ negative fixture families disappeared.
 Run:
 
 ```sh
-python3 agents/skills/find-redundant-validation/scripts/redundant_validation.py \
-  --compare bba961dc..414a15ed --details src lib
+builds/0/x2c lint --rule shape-diagnostics --rule recursive-validator \
+  --rule validator-diagnostics OLD/src/*.x NEW/src/*.x
 ```
 
-The comparison must include `_finish_self_declaration`, the recursive binding
-walk, and the `self-annotation-mismatch`, `self-incompatible-receiver`, and
-`self-outside-method` diagnostic fixture families. The lesson is not that
-invalid `Self` must be accepted. It is that a new feature does not need a
+with `OLD` and `NEW` worktrees of the two revisions.
+
+The old tree's findings must include `_finish_self_declaration` and the
+recursive binding walk, and `git diff --name-status bba961dc 414a15ed --
+unittest/compiler-fixtures` shows the `self-annotation-mismatch`,
+`self-incompatible-receiver`, and `self-outside-method` fixture families
+removed. The lesson is not that invalid `Self` must be accepted. It is that a new feature does not need a
 second implementation whose only product effect is an earlier custom error.
 
 ## Private AST validator
@@ -83,19 +89,20 @@ shapes.
 Run:
 
 ```sh
-python3 agents/skills/find-redundant-validation/scripts/redundant_validation.py \
-  --compare 52bb9891^..52bb9891 --details src lib
+builds/0/x2c lint --rule recursive-validator --rule shape-diagnostics \
+  OLD/src/ast.x
 ```
 
-The comparison must find the removed `_ast_validate_*` family. This case
-calibrates recursive validators and manual structural checks, not ordinary
+with `OLD` a worktree of `52bb9891^`.
+
+The parent's findings must include the removed `_ast_validate_*` family.
+This case calibrates recursive validators and manual structural checks, not ordinary
 local pattern selection.
 
 The historical parent must also surface that family as connected machinery:
 
 ```sh
-python3 agents/skills/find-redundant-validation/scripts/redundant_validation.py \
-  --rev 52bb9891^ --frameworks --details src lib
+builds/0/x2c lint --rule validation-framework OLD/src/*.x
 ```
 
 Ordinary recursive parser, transform, binder, and emitter functions are
@@ -113,10 +120,12 @@ source and test lines in `lib`, `src`, and `unittest`.
 Run:
 
 ```sh
-python3 agents/skills/find-redundant-validation/scripts/redundant_validation.py \
-  --compare 97c2a9e1^..c4fee817 --details src lib
+builds/0/x2c lint --rule return-after-raise --rule fallback-shared-cause \
+  --rule fresh-literal-null-guard --rule growth-check OLD/src/*.x OLD/lib/*.x
 ```
 
-This comparison calibrates impossible result checks. It must not flag a
+with `OLD` a worktree of `97c2a9e1^`, and again at `c4fee817`.
+
+The pair calibrates impossible result checks. It must not flag a
 user-defined resumable cause or a documented absent result merely because
 both are spelled with a return value.

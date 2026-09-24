@@ -32,7 +32,10 @@ Rule
     non-space token, or -1. `layout` is set for a unit in the indentation
     syntax, where rules about braces, semicolons, and wrapped statements do
     not apply. `edits` holds the replacements that fixable findings
-    propose, as `(START END TEXT)` byte ranges of `text`.
+    propose, as `(START END TEXT)` byte ranges of `text`, and `functions`
+    the authored functions the compiler parsed, as `(NAME START BODY END)`
+    token indexes, for a unit in brace syntax, whose compiler tokens are
+    the tokens `Lint` scanned.
 */
 typedef struct Lint:
   String path, text
@@ -41,7 +44,7 @@ typedef struct Lint:
   int *partner, *first
   char *quoted
   Map selected
-  Array findings, edits
+  Array findings, edits, functions
 *Lint
 
 #pragma private
@@ -82,6 +85,27 @@ static const Rule rules[] = {
   {"contains-in", <style>, <candidate>, "let-x2c-carry-the-syntax"},
   {"expression-body", <style>, <candidate>, "let-x2c-carry-the-syntax"},
   {"plain-string", <style>, <candidate>, "trust-supported-conversions"},
+  {"return-after-report-error", <style>, <violation>, "status-results"},
+  {"return-after-raise", <style>, <violation>, "status-results"},
+  {"fallback-shared-cause", <style>, <violation>, "status-results"},
+  {"fresh-literal-null-guard", <style>, <violation>, "status-results"},
+  {"growth-check", <style>, <violation>, "status-results"},
+  {"shape-diagnostics", <style>, <candidate>, "pattern-matching"},
+  {"manual-shape-checks", <style>, <candidate>, "pattern-matching"},
+  {"validator-diagnostics", <style>, <candidate>, "pattern-matching"},
+  {"validator-shape", <style>, <candidate>, "pattern-matching"},
+  {"recursive-validator", <style>, <candidate>, "pattern-matching"},
+  {"validation-framework", <style>, <candidate>, "pattern-matching"},
+  {"silent-shape-guard", <style>, <candidate>, "pattern-matching"},
+  {"static-match-capture", <style>, <candidate>, "pattern-matching"},
+  {"struct-copy", <style>, <candidate>, "delete-before-rearranging"},
+  {"manual-bookkeeping", <style>, <candidate>, "delete-before-rearranging"},
+  {"repeated-routes", <style>, <candidate>, "delete-before-rearranging"},
+  {"lifecycle-pair", <style>, <candidate>, "delete-before-rearranging"},
+  {"enum-table-switch", <style>, <candidate>, "closed-identities"},
+  {"internal-type", <style>, <candidate>, "delete-before-rearranging"},
+  {"duplicate-function-body", <style>, <candidate>,
+   "delete-before-rearranging"},
   {"comment-history", <style>, <violation>, "comments-describe-the-present"},
   {"comment-null-guard", <style>, <violation>,
    "local-comments-explain-decisions"},
@@ -179,7 +203,7 @@ Lint Lint.new(String path, String text, Map selected):
   int total = scanner.tokens.len() - 1
   Lint l = Scope.calloc(1, sizeof(struct Lint))
   l.path = path, l.text = text, l.selected = selected
-  l.findings = [], l.edits = []
+  l.findings = [], l.edits = [], l.functions = []
   l.layout = scanner.layout || path.endswith(".xp")
   l.tokens = Scope.calloc(total + 1, sizeof(struct Token))
   for (int at = 0; at < total; at++):
@@ -248,7 +272,7 @@ int Lint.indent(Lint l, int line) =>
 
 /** Reports a finding of `code` at `line` when the rule is selected. */
 void Lint.add(Lint l, String code, int line, String message):
-  if l.selected.contains(code): l.findings.push(%($line $code $message))
+  if code in l.selected: l.findings.push(%($line $code $message))
 
 /** Reports a finding of `code` at `line` whose fix replaces the text from
     the start of the token at `from` to the end of the token at `to` with
@@ -266,6 +290,9 @@ void Lint.fix(Lint l, String code, int line, String message, int from,
 String Lint.source(Lint l, int from, int to) =>
   String.new_len(l.text + l.tokens[from].pos,
                  l.tokens[to].pos + l.tokens[to].len - l.tokens[from].pos)
+
+/** Returns the name of a `Lint.functions` row. */
+String lint_name(List function) => function.car()
 
 /** Prints the findings in line order. */
 void Lint.print(Lint l):

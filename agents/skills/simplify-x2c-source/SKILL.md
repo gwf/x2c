@@ -24,9 +24,9 @@ unnecessary, and the production callers whose behavior must remain.
 
 Optional tools can extend a source-backed investigation:
 
-- `find-redundant-validation --frameworks` groups validator families; ordinary
-  mode finds local checks, and `--producer-consumers` traces repeated guards.
-- `tools/audit-source-bloat.py` finds related source patterns.
+- `find-redundant-validation` lists validator families, local checks, and
+  silent guards with the validation rules of `x2c lint`.
+- The structure rules of `x2c lint --all` find related source patterns.
 - `x2c lint --all` reports comment cleanup candidates.
 
 The finder skills document their runnable commands. Scores measure detector

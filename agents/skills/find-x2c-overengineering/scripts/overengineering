@@ -1,0 +1,483 @@
+#!/usr/bin/env -S x2c script
+#pragma indent
+/*  overengineering -- a bounded forensic queue for possible overengineering
+
+    Usage: overengineering scan [--budget N] [--state-root DIR]
+           overengineering trace-deletion COMMIT
+
+    `scan` scores every function and private struct or enum the compiler
+    says `src/*.x` and `lib/*.x` define, reads history for a short list, and
+    records a run of at most `--budget` regions not yet attempted at the same
+    source digest. Scores select source for human review; they are not
+    findings. `trace-deletion` attributes the parent-side lines a commit
+    deleted from `src/` and `lib/` to their last commits.
+*/
+#include "json.x"
+#include "../../../../tools/definitions.x"
+#include <ctype.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+static Path root
+static const List machinery_words = %(
+  "cache" "ledger" "registry" "replay" "reconcile" "snapshot" "index" "table"
+  "state" "phase" "validator" "validate" "analysis" "analyze" "tracking"
+  "bookkeep" "pending" "seen" "visited" "generation" "epoch" "fallback"
+)
+static const List counter_words = %(
+  "count" "depth" "generation" "epoch" "state"
+)
+
+static int _word_char(int ch) => isalnum(ch) || ch == '_'
+
+/* The output of `command`, run from the repository root. */
+static String _run(List command) =>
+  command.job().options({dir: root, stderr: <capture>}).output()
+
+/* The output of `command`, or NULL when it fails. */
+static String _try_run(List command):
+  String text = NULL
+  try text = _run(command)
+  catch %(cmd-fail *detail): text = NULL
+  return text
+
+/* The number of whole-word occurrences of `word` in `text`, ignoring
+   case. */
+static int _words(String text, String word):
+  int count = 0, n = word.len()
+  for (char *at = text; at && *at; at++):
+    if strncasecmp(at, word, n) || at > (char *) text &&
+       _word_char((unsigned char) at[-1]) || _word_char((unsigned char) at[n]):
+      continue
+    count++
+  return count
+
+/* Bookkeeping writes: `[...] =`, `.set(`, `.remove(`, `.append(`, and a
+   counter word followed by `++`, `--`, `=`, `+=`, or `-=`. */
+static int _bookkeeping(String text):
+  int count = 0
+  for (char *at = text; at && *at; at++):
+    if *at == ']' && at > (char *) text && at[-1] != '[':
+      char *next = at + 1
+      while *next == ' ' || *next == '\t': next++
+      if *next == '=' && next[1] != '=': count++
+    foreach String call in %(".set" ".remove" ".append"):
+      int n = call.len()
+      if strncmp(at, call, n): continue
+      char *next = at + n
+      while isspace((unsigned char) *next): next++
+      if *next == '(': count++
+    foreach String word in counter_words:
+      int n = word.len()
+      if strncmp(at, word, n) || at > (char *) text &&
+         _word_char((unsigned char) at[-1]) ||
+         _word_char((unsigned char) at[n]):
+        continue
+      char *next = at + n
+      while isspace((unsigned char) *next): next++
+      if !strncmp(next, "++", 2) || !strncmp(next, "--", 2) ||
+         *next == '=' && next[1] != '=' ||
+         (*next == '+' || *next == '-') && next[1] == '=':
+        count++
+  return count
+
+/* The number of calls `symbol(` in `texts` not preceded by a word
+   character, less one for the definition. */
+static int _references(String symbol, Map texts):
+  int count = 0, n = symbol.len()
+  foreach Var (path, text) in texts:
+    String source = text
+    for (char *at = strstr(source, symbol); at; at = strstr(at + 1, symbol)):
+      if at > (char *) source && _word_char((unsigned char) at[-1]): continue
+      char *next = at + n
+      while isspace((unsigned char) *next): next++
+      if *next == '(': count++
+  return count > 0 ? count - 1 : 0
+
+/* The line of byte `offset` in `text`. */
+static int _line_at(String text, int offset):
+  int line = 1
+  for (int at = 0; at < offset && text[at]; at++):
+    if text[at] == '\n': line++
+  return line
+
+/* Whether the last code line before byte `start` is `#pragma public`. */
+static int _after_public(String text, int start):
+  String before = String.new_len(text, start)
+  List lines = before.split("\n")
+  int seen = 0
+  foreach String line in lines.reverse():
+    String stripped = line.strip(NULL)
+    if !stripped || stripped.startswith("/*") || stripped.startswith("*"):
+      continue
+    return stripped == "#pragma public"
+  return seen
+
+/* The first integer in `text` after `word`, or 0. */
+static int _number_after(String text, String word):
+  int at = text.find(word)
+  return at < 0 ? 0 : atoi((char *) text + at + word.len())
+
+/* Points for each function the structure rules of `x2c lint` name, keyed
+   `path:name`: half the rule's weight for its finding, at most 15, and the
+   largest when several findings name one function. Field transfers weigh
+   2 and whole copies 5, each five counter or cleanup sites 1, and a
+   repeated route or body 3 for each other function that shares it. */
+static Map _structure_points(Path x2c, List paths):
+  Map points = {}
+  List command = %($x2c lint --rule struct-copy --rule manual-bookkeeping
+                   --rule repeated-routes --rule duplicate-function-body
+                   @paths)
+  foreach String line in _run(command).split("\n"):
+    List fields = line.split(": ")
+    if fields.len() < 3: continue
+    String path = fields.car().string().split(":").car()
+    String kind = fields.cadr(), message = String.join(": ", fields.cddr())
+    Array names = []
+    int weight = 0
+    if kind.endswith("struct-copy"):
+      weight = 2 * atoi(message) + 5 * _number_after(message, "and ")
+      names.push(message.split(" in ").last())
+    else if kind.endswith("manual-bookkeeping"):
+      weight = atoi(message) / 5 + _number_after(message, "and ") / 5
+      names.push(message.split(" in ").last())
+    else if kind.endswith("repeated-routes"):
+      weight = 3 * (atoi(message) - 1)
+      String group = message.split("tokens: ").last()
+      foreach String name in group.split(", "): names.push(name)
+    else if kind.endswith("duplicate-function-body"):
+      weight = 3 * (atoi(message) - 1)
+      names.push(message.split("same body as ").last())
+    int award = weight / 2 < 15 ? weight / 2 : 15
+    foreach String name in names:
+      String key = %"$path:$name"
+      if !(key in points) || points[key].integer() < award:
+        points[key] = award
+  return points
+
+/* History of lines `start` to `end` of `path`: the four largest last
+   commits, lines last touched by repair-like commits, the share of the most
+   common commit, and whether three or more commits landed within a week. */
+static Map _history(String path, int start, int end):
+  String blame = _try_run(%(git blame --line-porcelain "-L$start,$end" HEAD --
+                        $path))
+  Array commits = []
+  Map subjects = {}, times = {}, counts = {}
+  String current = NULL
+  foreach String line in blame.split("\n"):
+    List words = line.split(" ")
+    String head = words.car()
+    if head && head.len() >= 8 && head.len() <= 41 &&
+       strspn(head, "0123456789abcdef^") == head.len() && words.len() >= 3:
+      current = head.lstrip("^")
+      commits.push(current)
+      counts[current] = (current in counts ? counts[current].integer() : 0) + 1
+    else if current && line.startswith("summary "):
+      subjects[current] = String.new(line + 8)
+    else if current && line.startswith("author-time "):
+      times[current] = atoi(line + 12)
+  Array top = [], order = []
+  foreach Var (sha, count) in counts: order.push(%($count $sha))
+  List sorted = order.list_free().sort_by(%!(List item) => -item.car().int())
+  int repair = 0, most = 0, newest = 0, oldest = 0
+  foreach List item in sorted:
+    Var (count, sha) = item
+    String subject = subjects.get(sha)
+    if top.len() < 4:
+      top.push({"commit": sha, "lines": count,
+                "subject": subject ? subject : ""})
+    String lower = subject ? subject.lower() : ""
+    foreach String word in %("fix" "repair" "restore" "revert" "correct"
+                             "follow"):
+      if lower.startswith(word) || lower.contains(%" $word"):
+        repair += count.int()
+        break
+    if count.int() > most: most = count.int()
+    if sha in times:
+      int time = times[sha].integer()
+      if !newest || time > newest: newest = time
+      if !oldest || time < oldest: oldest = time
+  int total = commits.len() ? commits.len() : 1
+  int rapid = counts.len() >= 3 && newest - oldest <= 7 * 24 * 60 * 60
+  return {"top_commits": top, "repair_lines": repair,
+          "commit_count": counts.len(), "concentration": (double) most / total,
+          "rapid_churn": Json.bool(rapid)}
+
+static Map _region(String path, String symbol, String kind, int start,
+                   int end, int public, String body, int score, Array signals):
+  return {"candidate_id": %"$path:$symbol", "path": path, "symbol": symbol,
+          "kind": kind, "start": start, "end": end, "lines": end - start + 1,
+          "public": Json.bool(public), "production_call_sites": NULL,
+          "test_name_references": NULL, "source_digest": body.sha256(),
+          "score": score, "signals": signals}
+
+/* Every region of `units`, scored. */
+static Array _regions(List units, Map texts, Map structure):
+  Array regions = []
+  foreach Unit unit in units:
+    String path = unit["path"], raw = texts[path]
+    foreach Map row in unit["functions"].array():
+      if row["origin"] != <source>: continue
+      List span = row["span"]
+      int from = span.car().int(), to = span.cadr().int()
+      String name = row["display"]
+      String body = String.new_len(raw + from, to - from)
+      int start = row["line"].integer(), end = _line_at(raw, to - 1)
+      int lines = end - start + 1, score = 0
+      Array signals = []
+      int terms = 0
+      foreach String word in machinery_words: terms += _words(body, word)
+      if terms:
+        score += terms + 2 < 12 ? terms + 2 : 12
+        signals.push(%"$terms machinery terms")
+      int writes = _bookkeeping(body)
+      if writes >= 2:
+        score += writes < 10 ? writes : 10
+        signals.push(%"$writes bookkeeping operations")
+      if name.startswith("_") && lines >= 30:
+        score += 3 + lines / 40 < 9 ? 3 + lines / 40 : 9
+        signals.push(%"private $lines-line function")
+      String key = %"$path:$name"
+      int overlap = key in structure ? structure[key].integer() : 0
+      if overlap:
+        score += overlap
+        signals.push(%"structure-rule overlap +$overlap")
+      if !signals.len(): signals.push("no mechanical signal")
+      int public = _after_public(raw, from) || !name.startswith("_")
+      regions.push(_region(path, name, "function", start, end, public, body,
+                           score, signals))
+    foreach Map row in unit["types"].array():
+      String text = row["text"], kind = row["kind"].str()
+      if !text || !text.startswith("static ") ||
+         kind != "struct" && kind != "enum":
+        continue
+      List span = row["span"]
+      int from = span.car().int(), to = span.cadr().int()
+      String name = row["name"], body = String.new_len(raw + from, to - from)
+      int fields = kind == "struct" ? body.count(";") : body.count(",") + 1
+      if fields < 5: continue
+      int start = _line_at(raw, from), end = _line_at(raw, to - 1)
+      Map region = _region(path, name, kind, start, end, 0, body,
+                           5 + fields < 15 ? 5 + fields : 15,
+                           [%"private $kind with $fields members"])
+      region["production_call_sites"] = _words(raw, name) - 1
+      regions.push(region)
+  return regions
+
+static List _by_score(Array regions) =>
+  regions.list().sort_by(%!(Map item) => -item["score"].integer())
+
+/* Adds references and history to the twelve highest-scoring regions. */
+static void _enrich(Array regions, Map texts):
+  int shortlist = 0
+  foreach Map region in _by_score(regions):
+    if shortlist++ == 12: break
+    String symbol = region["symbol"], path = region["path"]
+    Array signals = region["signals"]
+    int refs = _references(symbol, texts)
+    region["production_call_sites"] = refs
+    if region["kind"].str() == "function" && refs <= 2:
+      int points = (2 - refs) * 2 + 2
+      region["score"] = region["score"].integer() + (points < 6 ? points : 6)
+      signals.push(%"$refs production call sites")
+    Map history = _history(path, region["start"].integer(),
+                           region["end"].integer())
+    region["history"] = history
+    String tests = _try_run(%(git grep -l -F $symbol -- unittest))
+    region["test_name_references"] = tests.split("\n").filter(%!(Var line) =>
+      line.string() != NULL).len()
+    int repair = history["repair_lines"].integer()
+    if repair:
+      region["score"] = region["score"].integer() +
+        (1 + repair / 10 < 8 ? 1 + repair / 10 : 8)
+      signals.push(%"$repair lines last touched by repair-like commits")
+    if history["concentration"].double() >= 0.70 &&
+       region["lines"].integer() >= 40:
+      region["score"] = region["score"].integer() + 4
+      signals.push("at least 70% of lines share one origin commit")
+    if history["rapid_churn"].truth():
+      region["score"] = region["score"].integer() + 4
+      signals.push("three or more line origins landed within seven days")
+
+/* The regions already attempted, as `candidate_id:digest` keys. */
+static Map _attempted(Path base):
+  Map attempted = {}
+  foreach Path selection in base.join("runs/*/selection.json").glob():
+    Var data = Json.read_file(selection)
+    foreach Map item in data.map()["selected"].array():
+      attempted[%"${item["candidate_id"]}:${item["source_digest"]}"] = 1
+  return attempted
+
+/* At most `budget` private regions not yet attempted, each more than 80
+   lines from the others in its file. */
+static Array _select(List regions, Map attempted, int budget):
+  Array selected = []
+  foreach Map item in regions:
+    String key = %"${item["candidate_id"]}:${item["source_digest"]}"
+    if item["public"].truth() || key in attempted: continue
+    int near = 0
+    foreach Map prior in selected:
+      if prior["path"].str() == item["path"].str() &&
+         item["start"].integer() <= prior["end"].integer() + 80 &&
+         prior["start"].integer() <= item["end"].integer() + 80:
+        near = 1
+    if near: continue
+    selected.push(item)
+    if selected.len() == budget: break
+  return selected
+
+static int _scan(Path x2c, int budget, Path base):
+  Array paths = []
+  foreach String pattern in %("src/*.x" "lib/*.x"):
+    foreach Path source in root.join(pattern).glob():
+      String path = source
+      path = path[root.len() + 1:]
+      if path != "lib/x2c.x": paths.push(path)
+  List sources = paths
+  Map texts = {}
+  foreach String path in sources: texts[path] = root.join(path).read_text()
+  Array regions = _regions(Unit.load(x2c, root, sources), texts,
+                           _structure_points(x2c, sources))
+  _enrich(regions, texts)
+  List ranked = regions.list().sort_by(%!(Map item) =>
+    %(${-item["score"].integer()} ${item["candidate_id"]}))
+  String digests = ""
+  foreach String path in sources:
+    String text = texts[path]
+    digests += %"$path\0${text.sha256()}"
+  String head = _run(%(git rev-parse HEAD)).strip(NULL)
+  Map inventory = {"format_version": 1, "head": head,
+                   "source_digest": digests.sha256(), "paths": sources,
+                   "regions": ranked}
+  Map attempted = _attempted(base)
+  int eligible = 0
+  foreach Map item in ranked:
+    String key = %"${item["candidate_id"]}:${item["source_digest"]}"
+    if !item["public"].truth() && !(key in attempted): eligible++
+  Array selected = _select(ranked, attempted, budget)
+  String stamp = _run(%(date -u +%Y%m%dT%H%M%SZ)).strip(NULL)
+  Path run = base.join(%"runs/$stamp-${head[:12]}")
+  for (int suffix = 2; run.exists(); suffix++):
+    run = base.join(%"runs/$stamp-${head[:12]}-$suffix")
+  run.make_dirs()
+  run.join("inventory.json").write_text(inventory.var().pretty_json() + "\n")
+  Map selection = {"format_version": 1, "budget": budget, "selected": selected,
+                   "eligible_count": eligible}
+  run.join("selection.json").write_text(selection.var().pretty_json() + "\n")
+  run.join("attempts.jsonl").write_text("")
+  run.join("commands.txt").write_text(
+    %"agents/skills/find-x2c-overengineering/scripts/overengineering scan " +
+    %"--budget $budget --state-root $base\n")
+  Array rows = ["# Overengineering forensic run", "", %"Head: `$head`",
+                %"Source digest: `${inventory["source_digest"]}`", "",
+                "## Selected regions", ""]
+  foreach Map item in selected:
+    String signals = String.join("; ", item["signals"].array())
+    rows.push(%"- `${item["candidate_id"]}` " +
+              %"`${item["path"]}:${item["start"]}-${item["end"]}` " +
+              %"score ${item["score"]}: $signals")
+  rows.push("")
+  rows.push("## Reviewed attempts")
+  rows.push("")
+  rows.push("Record each candidate, empty search, or refutation here.")
+  rows.push("")
+  run.join("report.md").write_text(String.join("\n", rows))
+  printf("%s\n%s\n", run.str(), selection.var().pretty_json().str())
+  return 0
+
+/* The parent-side ranges `commit` changed in `src/` and `lib/`, as
+   `(path start count)`. */
+static List _deleted_ranges(String commit):
+  Array ranges = []
+  String old = NULL
+  String diff = _run(%(git diff --find-renames --unified=0 "$commit^" $commit
+                       -- src lib))
+  foreach String line in diff.split("\n"):
+    if line.startswith("--- a/"): old = String.new(line + 6)
+    else if line.startswith("--- /dev/null"): old = NULL
+    else if line.startswith("@@ -") && old && old != "lib/x2c.x":
+      String range = line.split(" ").cadr()
+      List parts = String.new(range + 1).split(",")
+      int start = atoi(parts.car().string())
+      int count = parts.cdr() ? atoi(parts.cadr().string()) : 1
+      if count: ranges.push(%($old $start $count))
+  return ranges.list_free()
+
+static int _trace(String commit):
+  Map counts = {}, subjects = {}
+  Array order = [], listed = []
+  int total = 0
+  foreach List range in _deleted_ranges(commit):
+    Var (path, start, count) = range
+    listed.push({"path": path, "start": start, "count": count})
+    String blame = _try_run(%(git blame --line-porcelain
+                          "-L$start,+$count" "$commit^" -- $path))
+    String current = NULL
+    foreach String line in blame.split("\n"):
+      List words = line.split(" ")
+      String head = words.car()
+      if head && head.len() >= 8 && words.len() >= 3 &&
+         strspn(head, "0123456789abcdef^") == head.len():
+        current = head.lstrip("^")
+      else if current && line.startswith("summary "):
+        subjects[current] = String.new(line + 8)
+      else if current && line.startswith("\t"):
+        if !(current in counts):
+          counts[current] = 0
+          order.push(current)
+        counts[current] = counts[current].integer() + 1
+        total++
+  List ranked = order.list_free().sort_by(%!(String sha) =>
+    -counts[sha].integer())
+  Array origins = []
+  foreach String sha in ranked:
+    List parents = _run(%(git rev-list --parents -n 1 $sha)).split(" ")
+    origins.push({"commit": sha, "subject": subjects.get(sha),
+                  "lines": counts[sha],
+                  "provenance_wall": Json.bool(parents.len() == 1)})
+  Map report = {"format_version": 1, "deletion_commit": commit,
+                "removed_parent_lines": total, "ranges": listed,
+                "origins": origins}
+  printf("%s\n", report.var().pretty_json().str())
+  return 0
+
+Path self = String.new(argv[0])
+root = self.absolute().dirname().dirname().dirname().dirname().dirname()
+Path x2c = root.join("builds/0/x2c")
+String usage =
+  "usage: overengineering scan [--budget N] [--state-root DIR]\n" +
+  "       overengineering trace-deletion COMMIT\n"
+Array words = []
+foreach Var arg in args: words.push(arg)
+if !words.len() || words[0].string() == "-h" || words[0].string() == "--help":
+  fputs(usage, words.len() ? stdout : stderr)
+  return words.len() ? 0 : 2
+String command = words[0]
+if command == "trace-deletion" && words.len() == 2: return _trace(words[1])
+if command != "scan":
+  fputs(usage, stderr)
+  return 2
+int budget = 5
+Path base = NULL
+for (int at = 1; at < words.len(); at++):
+  String word = words[at]
+  if word == "--budget" && at + 1 < words.len():
+    budget = atoi(words[++at].string())
+  else if word == "--state-root" && at + 1 < words.len():
+    base = words[++at]
+  else:
+    fputs(usage, stderr)
+    return 2
+if budget < 1:
+  fputs("--budget must be positive\n", stderr)
+  return 2
+if !x2c.exists():
+  fputs("builds/0/x2c is missing; run 'make build' first\n", stderr)
+  return 1
+if !base:
+  String common = _run(%(git rev-parse --git-common-dir)).strip(NULL)
+  Path shared = common.startswith("/") ? common : root.join(common)
+  String id = shared.absolute().str().sha256()
+  Path home = getenv("HOME")
+  base = home.join(%".codex/x2c-overengineering/${id[:12]}")
+return _scan(x2c, budget, base)

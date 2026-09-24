@@ -29,8 +29,6 @@ Optional discovery commands, from the repository root:
 ```sh
 make commands
 builds/0/x2c lint --all path/to/file.x
-python3 agents/skills/find-redundant-validation/scripts/redundant_validation.py \
-  --static-match-captures --details path/to/file.x
 ```
 
 `x2c-lint` reads the compiler's tokens and its parse of the unit; `--rules`
