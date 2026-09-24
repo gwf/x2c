@@ -52,6 +52,8 @@ execution.
   and system-header investigations record their outcomes. Meta-capable
   protocols and native extensions retain their separate design and
   implementation status.
+- [Class registration](class-registration.md): active. Rows assigned on
+  first box and an overflow cell for classes past the direct rows.
 - [Meta sequencing](meta-sequencing.md): active. The order of class
   registration and capacity, native extensions and packages, protocols
   beyond Iter, and whole-project lifetime certification.

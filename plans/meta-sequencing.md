@@ -20,6 +20,8 @@ replaces.
 
 ### 1. Class registration and capacity
 
+Designed in [class registration](class-registration.md).
+
 Two separate problems, designed together:
 
 - **Lazy registration.** Today each class reserves its Var row in its file
