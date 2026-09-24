@@ -44,6 +44,10 @@ execution.
 
 ### Current work
 
+- [External commands](external-commands.md): active. The single source of
+  truth for `x2c-<name>` programs that `x2c <name>` runs: layout, dispatch,
+  `libx2c-dev`, maturity, gating, and packaging. `graph`, `repl`, and `lint`
+  move in by phase.
 - [Meta lifetime certification](meta-lifetime-certification.md): active.
   Replaces adoption phase 8; certifies ten methods for meta code through
   the region table, decided September 24, 2026.
