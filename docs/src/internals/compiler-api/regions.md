@@ -14,7 +14,6 @@ Values that can outlive the region that allocated them.
 | --- | --- |
 | [`Compiler.check_meta_regions`](#Compiler.check_meta_regions) | Rejects a `meta` function whose body breaks the rule `Compiler.check_regions` warns about. |
 | [`Compiler.check_regions`](#Compiler.check_regions) | Warns about values that can outlive the region that allocated them. |
-| [`Compiler.region_escapes`](#Compiler.region_escapes) | The region summaries the functions in `ast` have and the warnings they produce, read against `seed`: `(NAME OWNER SINKS)` rows for the functions other units define. |
 
 ### `Compiler`
 
@@ -33,7 +32,7 @@ the bound and typed definition. The walk reads the summaries of the
 in `meta_regions`; a definition whose lowering the process already
 cached takes the summary recorded with it.
 
-Source: `src/regions.x:1071`
+Source: `src/regions.x:1064`
 
 <a id="Compiler.check_regions"></a>
 #### Compiler.check_regions
@@ -45,24 +44,7 @@ Warns about values that can outlive the region that allocated them.
 lowering rewrites its `defer` and region forms. The call adds warnings to
 `c` and does not change `ast`.
 
-Source: `src/regions.x:1046`
-
-<a id="Compiler.region_escapes"></a>
-#### Compiler.region_escapes
-
-`List Compiler.region_escapes(Compiler c, List ast, List seed)`
-
-The region summaries the functions in `ast` have and the warnings they
-produce, read against `seed`: `(NAME OWNER SINKS)` rows for the
-functions other units define. `ast` must be what
-`Compiler.check_regions` takes. The OWNER integer identifies scoped and
-pooled result storage. The call reports nothing, so a caller
-that walks a whole project can run it once a pass and report only the
-last. Returns `(region-unit (summaries ROW...) (warnings WARNING...))`,
-where a warning is
-`(warning (at PATH LINE COLUMN) CODE MESSAGE (notes NOTE...))`.
-
-Source: `src/regions.x:1113`
+Source: `src/regions.x:1039`
 
 ## Design notes
 
@@ -80,9 +62,7 @@ A function's summary is two facts: which owner supplies fresh returned
 storage, and where each parameter is sunk. The unit's functions reach a
 fixpoint over their summaries. A call into another unit has a summary
 only through the runtime table, so warnings do not depend on which units
-were translated before it. A tool that holds every unit at once can seed
-the fixpoint with the other units' summaries through
-`Compiler.region_escapes`. A `meta` function is walked when it is
+were translated before it. A `meta` function is walked when it is
 defined, against the summaries of the `meta` functions before it, and a
 finding there is an error, because a compile-time call frees its locals
 when it returns.

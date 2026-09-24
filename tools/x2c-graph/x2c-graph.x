@@ -5,7 +5,6 @@
 */
 
 #include "frontend.x"
-#include "regions.x"
 #include "flows.x"
 #include "lifetime.x"
 #include "loop-allocations.x"
@@ -1457,103 +1456,6 @@ static List _parse_lifetime_units(
        : Lifetime.finish(records);
 }
 
-/* Rounds the project summaries take before the walk gives up. Summaries
-   only grow and a sink row is one of four targets per parameter, so a
-   project settles in a few. */
-enum { REGION_PASS_LIMIT = 8 };
-
-/* The seed one pass hands every unit: one row per name, less the names more
-   than one unit defines, which each keep their own. */
-static List _region_seed(Map summaries, Map ambiguous) {
-  Array rows = [];
-  foreach (Var (name, summary), summaries)
-    if (!ambiguous.contains(name))
-      rows.push(%($name @{summary.list()}));
-  rows.sort();
-  return rows.list_free();
-}
-
-/* Walks every unit against `seed` and folds what it learns into
-   `summaries`. Returns whether a summary changed, or -1 when a unit will
-   not open. `report` collects the pass's warnings into `warnings`. */
-static int _region_pass(
-  Frontend frontend, Array inputs, List seed, Map summaries,
-  Map owners, Map ambiguous, int report, Array warnings) {
-  int changed = 0;
-  foreach (String input, inputs) {
-    ParsedUnit parsed;
-    if (!_open_input(frontend, input, &parsed)) return -1;
-    String path = parsed.compiler.display_path(input);
-    List escapes = Compiler.region_escapes(
-      parsed.compiler, parsed.ast, seed
-    );
-    List record = parsed.context.export(%(unit $path @escapes)).list();
-    parsed.close();
-    match (record)
-      case %(unit ?unit_path region-unit
-             (summaries *rows) (warnings *unit_warnings)): {
-        foreach (List row, rows)
-          match (row) case %(?name ?fresh ?sinks): {
-            if (owners.contains(name) && owners[name].str() != unit_path) {
-              /* Two units name the same function, so neither summary
-                 describes the other's callers and both stay local. */
-              ambiguous[name] = 1;
-              summaries.del(name);
-              continue;
-            }
-            owners[name] = unit_path;
-            if (ambiguous.contains(name)) continue;
-            List summary = %($fresh $sinks);
-            if (!summaries.contains(name) ||
-                !List.equal(summaries[name].list(), summary))
-              changed = 1;
-            summaries[name] = summary;
-          }
-        if (report)
-          foreach (List warning, unit_warnings) warnings.push(warning);
-      }
-  }
-  return changed;
-}
-
-/* Project-wide region warnings. Every unit is walked against the summaries
-   the other units produced until none grows, and the round after that is
-   the one that reports: by then a call into another unit reads the summary
-   that unit's own body proved, which a single translation only has for the
-   runtime. */
-static List _parse_region_units(Frontend frontend, Array inputs) {
-  Map summaries = {}, owners = {}, ambiguous = {};
-  Array warnings = [];
-  int passes = 0, settled = 0;
-  while (passes < REGION_PASS_LIMIT) {
-    int changed = _region_pass(
-      frontend, inputs, _region_seed(summaries, ambiguous),
-      summaries, owners, ambiguous, 0, NULL
-    );
-    if (changed < 0) return NULL;
-    passes++;
-    if (!changed) {
-      settled = 1;
-      break;
-    }
-  }
-  if (_region_pass(
-        frontend, inputs, _region_seed(summaries, ambiguous),
-        summaries, owners, ambiguous, 1, warnings
-      ) < 0)
-    return NULL;
-  warnings.sort();
-  int unit_count = inputs.len(), function_count = summaries.len();
-  int ambiguous_count = ambiguous.len(), warning_count = warnings.len();
-  return %(
-    region-escapes
-    (summary (units $unit_count) (passes $passes) (settled $settled)
-             (functions $function_count) (ambiguous $ambiguous_count)
-             (warnings $warning_count))
-    (warnings @{warnings.list_free()})
-  );
-}
-
 static void _index_public_functions(List units, Map public_functions) {
   foreach (List unit, units) {
     match (unit)
@@ -2617,7 +2519,6 @@ static void _usage(String program) {
     "       %s loop-allocations [--all] [-I DIR] FILE...\n", program
   );
   Stderr.printf("       %s lifetime-escapes [-I DIR] FILE...\n", program);
-  Stderr.printf("       %s region-escapes [-I DIR] FILE...\n", program);
   Stderr.printf(
     "       %s allocation-returns NAME [-I DIR] FILE...\n", program
   );
@@ -2648,8 +2549,6 @@ int main(int argc, char **argv) {
   int loop_limit = LOOP_ALLOCATION_LIMIT;
   int lifetime_escapes =
     argc > 1 && !strcmp(argv[1], "lifetime-escapes");
-  int region_escapes =
-    argc > 1 && !strcmp(argv[1], "region-escapes");
   int allocation_returns =
     argc > 1 && !strcmp(argv[1], "allocation-returns");
   int flows = argc > 1 && !strcmp(argv[1], "flows");
@@ -2680,7 +2579,6 @@ int main(int argc, char **argv) {
        !focus && !field &&
        !field_sites && !sites && !walks &&
        !tail_calls && !loop_allocations && !lifetime_escapes &&
-       !region_escapes &&
        !allocation_returns && !flows && !compare)) {
     _usage(argv[0]);
     return 2;
@@ -2795,8 +2693,6 @@ int main(int argc, char **argv) {
       result = _parse_loop_allocation_units(
         frontend, inputs, loop_limit
       );
-    else if (region_escapes)
-      result = _parse_region_units(frontend, inputs);
     else if (lifetime_escapes || allocation_returns)
       result = _parse_lifetime_units(
         frontend, inputs, allocation_returns ? wanted : NULL

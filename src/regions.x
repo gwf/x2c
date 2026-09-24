@@ -16,9 +16,7 @@
     storage, and where each parameter is sunk. The unit's functions reach a
     fixpoint over their summaries. A call into another unit has a summary
     only through the runtime table, so warnings do not depend on which units
-    were translated before it. A tool that holds every unit at once can seed
-    the fixpoint with the other units' summaries through
-    `Compiler.region_escapes`. A `meta` function is walked when it is
+    were translated before it. A `meta` function is walked when it is
     defined, against the summaries of the `meta` functions before it, and a
     finding there is an error, because a compile-time call frees its locals
     when it returns.
@@ -1016,16 +1014,11 @@ static void _analyze(Walk w, List function) {
   w.changed = 1;
 }
 
-/* The functions `ast` defines, walked against `seed`: `(NAME FRESH SINKS)`
-   rows for names another unit defines. A seeded name the unit defines
-   itself only starts the walk higher, because summaries grow. */
-static void _fixpoint(Walk w, List ast, List seed, Array functions) {
+/* The functions `ast` defines, walked to their final summaries. */
+static void _fixpoint(Walk w, List ast, Array functions) {
   w.frame = Scope.calloc(1, sizeof(struct Region));
   w.frame.kind = <frame>;
   _collect_functions(ast, functions);
-  foreach (List row, seed)
-    match (row) case %(?name ?fresh ?sinks):
-      w.summaries[name] = %($fresh $sinks);
   foreach (List function, functions)
     if (w.summaries[function.car()] is void)
       w.summaries[function.car()] = %(0 ());
@@ -1048,7 +1041,7 @@ void Compiler.check_regions(Compiler c, List ast) {
     .compiler = c, .summaries = {}, .pending = [], .freed = []};
   Walk w = &walk;
   Array functions = $auto([]);
-  _fixpoint(w, ast, NULL, functions);
+  _fixpoint(w, ast, functions);
   int origin = c.origin;
   foreach (List warning, w.warnings) {
     (Symbol code, int at, String message, List notes) = warning;
@@ -1082,56 +1075,8 @@ void Compiler.check_meta_regions(Compiler c, List fn) {
     .compiler = c, .summaries = c.meta_regions, .pending = [], .freed = []};
   Walk w = &walk;
   Array functions = $auto([]);
-  _fixpoint(w, fn, NULL, functions);
+  _fixpoint(w, fn, functions);
   if (!w.warnings.len()) return;
   (Symbol code, int at, String message, List notes) = w.warnings[0];
   $let(c.origin, at) { c.report_error(code, message, NULL, notes); }
-}
-
-/* Where an origin points, named as the caller's reports name it. */
-static List _located(Compiler c, int origin) {
-  List location = c.origin_location(origin);
-  Var file = location ? location.assoc(<file>) : void;
-  String path = file is <string>
-              ? c.display_path(file.str()) : String.new("");
-  return %(
-    at $path ${location ? location.assoc(<line>).int() : 0}
-    ${location ? location.assoc(<column>).int() : 0}
-  );
-}
-
-/** The region summaries the functions in `ast` have and the warnings they
-    produce, read against `seed`: `(NAME OWNER SINKS)` rows for the
-    functions other units define. `ast` must be what
-    `Compiler.check_regions` takes. The OWNER integer identifies scoped and
-    pooled result storage. The call reports nothing, so a caller
-    that walks a whole project can run it once a pass and report only the
-    last. Returns `(region-unit (summaries ROW...) (warnings WARNING...))`,
-    where a warning is
-    `(warning (at PATH LINE COLUMN) CODE MESSAGE (notes NOTE...))`.
-*/
-List Compiler.region_escapes(Compiler c, List ast, List seed) {
-  struct Walk walk = {
-    .compiler = c, .summaries = {}, .pending = [], .freed = []};
-  Walk w = &walk;
-  Array functions = $auto([]);
-  _fixpoint(w, ast, seed, functions);
-  Array summaries = [], warnings = [];
-  foreach (List function, functions) {
-    String name = function.car();
-    (Var fresh, List sinks) = w.summaries[name];
-    summaries.push(%($name $fresh $sinks));
-  }
-  foreach (List warning, w.warnings) {
-    (Symbol code, int at, String message, List notes) = warning;
-    warnings.push(%(
-      warning ${_located(c, at)} $code $message (notes @notes)
-    ));
-  }
-  summaries.sort();
-  warnings.sort();
-  return %(
-    region-unit (summaries @{summaries.list_free()})
-    (warnings @{warnings.list_free()})
-  );
 }
