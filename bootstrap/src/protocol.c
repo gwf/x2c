@@ -116,6 +116,8 @@ static String _representation_error(Type representation);
 
 static Type _declared(Compiler compiler, String name);
 
+static int _default_completes(Compiler compiler, String name, Type declared, String forward);
+
 static List _inherited_parameters(List parameters, Type owner, Type participant);
 
 static Type _receiver_relative_signature(Compiler compiler, List binding, Type signature, Type receiver);
@@ -1853,6 +1855,11 @@ static Type _declared(Compiler compiler, String name){
   if(List_truth(Sym_get(compiler -> sym, cons(_323, cons(String_var(name), NULL))))) return NULL;  return List_type(Sym_get(compiler -> sym, cons(String_var(name), NULL)));
 }
 
+int Type_is_function(Type);
+static int _default_completes(Compiler compiler, String name, Type declared, String forward){
+  return String_truth(forward) && Type_is_function(declared) && Map_contains(compiler -> fn_defs, String_var(forward)) && ! Map_contains(compiler -> fn_defs, String_var(name)) && ! Map_contains(Sym_file_statics(compiler -> sym), List_var(cons(_21, cons(String_var(name), NULL))));
+}
+
 static List _inherited_parameters(List parameters, Type owner, Type participant){
   if(! List_truth(parameters)) return NULL;  Var parameter = List_car(parameters);  return cons(Var_equal(parameter, List_var(owner)) ? List_var(participant) : parameter, _inherited_parameters(List_cdr(parameters), owner, participant));
 }
@@ -2001,7 +2008,7 @@ static String _forward_binding(Compiler compiler, Type base, Type participant){
 Var Map_setdefault(Map, Var, Var);
 int Array_try_next(Array, int *, Var *);
 static List _resolve_members(Compiler compiler, Type base, String binder, List associations, List templates, Type participant, Map * variables_out, Map * bindings_out){
-  Type representation = base == _271 ? _adoption_representation(_visible_adoption_row(compiler, base, participant)) : NULL;  Map variables = Map_new(), defaults = Map_new(), bindings = Map_new();  Map_setindex(variables, String_var(binder), int_var(1));  Map_setindex(bindings, String_var(binder), List_var(participant)); {
+  Type representation = base == _271 ? _adoption_representation(_visible_adoption_row(compiler, base, participant)) : NULL;  String forward = base != _271 ? _forward_binding(compiler, base, participant) : NULL;  Map variables = Map_new(), defaults = Map_new(), bindings = Map_new();  Map_setindex(variables, String_var(binder), int_var(1));  Map_setindex(bindings, String_var(binder), List_var(participant)); {
     List association;  List _x2c_macro_object_10 = associations;  List _x2c_macro_cursor_10 = _x2c_macro_object_10;  Var _x2c_macro_cursor_output_11;  while(List_try_next(_x2c_macro_object_10, & _x2c_macro_cursor_10, & _x2c_macro_cursor_output_11)){
       association = Var_list(_x2c_macro_cursor_output_11); {
         List _x2c_destructure_3 = association;  String association_name = Var_string(List_getindex(_x2c_destructure_3, 0));  Type value = Var_type(List_getindex(_x2c_destructure_3, 1));  Map_setindex(variables, String_var(association_name), int_var(1));  Map_setindex(defaults, String_var(association_name), List_var(value));
@@ -2020,7 +2027,7 @@ static List _resolve_members(Compiler compiler, Type base, String binder, List a
       default: ;  static MatchCaptureSite _x2c_match_site_23;  if (x2c_match_site_try_capture(& _x2c_match_site_23, _x2c_match_expr, List_var(_385), &_x2c_match_capture)) {Var member_name = _x2c_match_values[0];  Var template_type = _x2c_match_values[1]; {
         Var _x2c_match_value_19 = member_name;  Var _x2c_match_value_20 = template_type; {
           String member_name = Var_string(_x2c_match_value_19);  Type template_type = Var_type(_x2c_match_value_20); {
-            Type actual = NULL;  Symbol status = 31884573479268;  String selected = NULL;  String binding = _member_spelling(participant, member_name);  actual = _declared(compiler, binding);  if(! List_truth(Type_list(actual))){
+            Type actual = NULL;  Symbol status = 31884573479268;  String selected = NULL;  String binding = _member_spelling(participant, member_name);  actual = _declared(compiler, binding);  if(List_truth(Type_list(actual)) && _default_completes(compiler, binding, actual, forward)) actual = NULL;  if(! List_truth(Type_list(actual))){
               String imported = Compiler_imported_spelling(compiler, binding);  if(String_truth(imported)){
                 actual = _declared(compiler, imported);  if(List_truth(Type_list(actual))) binding = imported;
               }
@@ -3137,7 +3144,6 @@ List Compiler_parse_simple_declaration(Compiler);
 int String_startswith(String, String);
 int String_len(String);
 Type List_type_from_ast(List);
-int Type_is_function(Type);
 int Compiler_test(Compiler, Symbol);
 static List _parse_protocol_member(Compiler c, String participant, Map members){
   List declaration = NULL; {
