@@ -15,6 +15,7 @@ Lambda transformation helpers for the x2c compiler.
 | [`Compiler.adapt_lambda_arg`](#Compiler.adapt_lambda_arg) | Adapts a lowered noncapturing lambda helper to a typed callback. |
 | [`Compiler.check_lambda_captures`](#Compiler.check_lambda_captures) | Rejects writes and reference access to read-only snapshot bindings. |
 | [`Compiler.func_signature`](#Compiler.func_signature) | Returns the canonical signature shared by native and meta Func adapters. |
+| [`Compiler.lambda_param_types`](#Compiler.lambda_param_types) | The parameter types of a lambda's function signature, keeping typed declarators; a bare parameter is a `Var`. |
 | [`Compiler.lift_func_expression`](#Compiler.lift_func_expression) | Converts a resolved function-like expression to `Func` when supported. |
 | [`Compiler.lower_lambda_expr`](#Compiler.lower_lambda_expr) | Lowers a resolved lambda expression to emitter-ready helper references. |
 | [`Compiler.lower_typed_adapter_expr`](#Compiler.lower_typed_adapter_expr) | Lowers a resolved `tadapt` expression to a typed callback helper. |
@@ -60,6 +61,16 @@ Returns the canonical signature shared by native and meta Func adapters.
 
 Source: `src/lambda.x:314`
 
+<a id="Compiler.lambda_param_types"></a>
+#### Compiler.lambda_param_types
+
+`List Compiler.lambda_param_types(Compiler compiler, List entries)`
+
+The parameter types of a lambda's function signature, keeping typed
+declarators; a bare parameter is a `Var`.
+
+Source: `src/lambda.x:1629`
+
 <a id="Compiler.lift_func_expression"></a>
 #### Compiler.lift_func_expression
 
@@ -90,7 +101,7 @@ Nested lambdas lower inside out, block fallthrough and bare returns produce
 no value, and synthesized declarations enter the early queue. Parentheses
 remain around lowered helpers; other non-lambda expressions pass through.
 
-Source: `src/lambda.x:1637`
+Source: `src/lambda.x:1656`
 
 <a id="Compiler.lower_typed_adapter_expr"></a>
 #### Compiler.lower_typed_adapter_expr

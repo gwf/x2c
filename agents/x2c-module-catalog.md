@@ -260,7 +260,8 @@ Public functions:
 `Compiler.lower_typed_adapter_expr`, `Compiler.func_signature`,
 `Compiler.maybe_adapt_func_arg`, `Compiler.lift_func_expression`,
 `Compiler.adapt_lambda_arg`, `Compiler.check_lambda_captures`,
-`Compiler.prepare_lambda_cells`, `Compiler.lower_lambda_expr`
+`Compiler.prepare_lambda_cells`, `Compiler.lambda_param_types`,
+`Compiler.lower_lambda_expr`
 
 ### [src/literals.x](../src/literals.x)
 

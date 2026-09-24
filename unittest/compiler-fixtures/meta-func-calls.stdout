@@ -22,3 +22,11 @@ array-address 44 44 44
 signature 2 2 2
 prepared-values 122 122 122
 prepared-ref 63 63 63
+assigned-named 1 1 1
+assigned-lambda 3 3 3
+argument-lambda 0 0 0
+built-init 43 43 43
+built-assigned 43 43 43
+built-argument 43 43 43
+built-returned 43 43 43
+built-var 43 43 43

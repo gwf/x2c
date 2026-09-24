@@ -886,24 +886,6 @@ static List _lambda_parse_bare_params(Compiler compiler) {
   return names.list_free();
 }
 
-// Build the function parameter types while retaining typed declarators.
-static List _signature_param_types(Compiler compiler, List entries) {
-  if (!entries) return %((void));
-  Array types = [];
-  foreach (List entry, entries)
-    match (entry) {
-      case %(binding ? ?): types.push(%("Var"));
-      case %(param ? ?): {
-        Type type = entry.type_from_ast().declared();
-        if (type.car() == <&>)
-          type = cons(
-            <&>, compiler.sym.normalize_declared_type(type.cdr()));
-        types.push(type);
-      }
-    }
-  return types.list_free();
-}
-
 static List _lambda_params_node(
   List names, List typed_params, int used_typed) =>
     used_typed ? %( params @typed_params ) : %( params @names );
@@ -1102,9 +1084,11 @@ List Compiler.bind_lambda_expression(
   if (captures)
     return %(expr ("Func")
              (lambda $parameters (captures @captures) $body));
-  if (type === %("Func")) {
+  /* A meta body keeps the lambda for meta lowering to adapt; the transform
+     lifts it for native code. */
+  if (type === %("Func") && !c.meta_body) {
     Type signature = %(
-      (func ${_signature_param_types(c, parameters.cdr())}) "Var");
+      (func ${c.lambda_param_types(parameters.cdr())}) "Var");
     return c.lift_func_expression(
       %(expr $signature (lambda $parameters $body)));
   }
@@ -1188,7 +1172,7 @@ List Compiler.parse_lambda_literal(Compiler c) {
   else body = c.parse_assignment();
   List rtype = %("Var");
   List params_node = _lambda_params_node(names, typed_params, used_typed);
-  List param_types = _signature_param_types(c, params_node.cdr());
+  List param_types = c.lambda_param_types(params_node.cdr());
   List ftype = %((func $param_types) @rtype);
   List captures = NULL;
   if (!c.parsing_source_syntax()) {

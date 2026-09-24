@@ -1624,6 +1624,25 @@ static List _lower_captured_lambda(
   );
 }
 
+/** The parameter types of a lambda's function signature, keeping typed
+    declarators; a bare parameter is a `Var`. */
+List Compiler.lambda_param_types(Compiler compiler, List entries) {
+  if (!entries) return %((void));
+  Array types = [];
+  foreach (List entry, entries)
+    match (entry) {
+      case %(binding ? ?): types.push(%("Var"));
+      case %(param ? ?): {
+        Type type = entry.type_from_ast().declared();
+        if (type.car() == <&>)
+          type = cons(
+            <&>, compiler.sym.normalize_declared_type(type.cdr()));
+        types.push(type);
+      }
+    }
+  return types.list_free();
+}
+
 /** Lowers a resolved lambda expression to emitter-ready helper references.
     `expression` must retain the resolved `expr`, `lambda`, `params`, and
     optional `captures` rows. A noncapturing lambda becomes a static
@@ -1644,6 +1663,13 @@ List Compiler.lower_lambda_expr(Compiler compiler, List expression) {
     case %(expr ("Func")
            (lambda (params *entries) (captures *captures) ?body)):
       return _lower_captured_lambda(compiler, entries, captures, body);
+    /* Only a meta body leaves a noncapturing `Func` lambda unlifted. */
+    case %(expr ("Func") (lambda (params *entries) ?body)): {
+      Type signature = %(
+        (func ${compiler.lambda_param_types(entries)}) "Var");
+      return compiler.lift_func_expression(
+        %(expr $signature (lambda (params @entries) $body)));
+    }
     case %(expr ?type (lambda (params *entries) ?body)): {
       String lname = compiler.fresh_name("lambda");
       List lambda_binding = compiler.sym.introduce(lname);

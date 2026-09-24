@@ -2153,8 +2153,11 @@ static Var _lower_braced(Lowering l, List type, int id, List items) {
    `Array` is not a `List`. Without the argument case an `Array` reached a
    `List` parameter and the native adapter refused it. */
 static Var _lower_coerce(Lowering l, List want, Var node, Var value) {
+  /* A lambda typed `Func`, as constructed syntax may be, is one wherever
+     it goes, a `Var` included. */
+  Type type = _lower_type_of(node);
   Var signature;
-  if (want.equal(%("Func")) &&
+  if ((want.equal(%("Func")) || (type && type.equal(%("Func")))) &&
       l.lambda_signatures.try_get(value, &signature))
     return _lower_func_adapter(l, signature, value);
   match (node)

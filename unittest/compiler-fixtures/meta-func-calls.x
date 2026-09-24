@@ -139,6 +139,43 @@ meta int prepared_reference(int n) {
   return result * 10 + n;
 }
 
+/* Assignment reaches a Func the way an initializer does, and a lambda
+   constructed as `Func`-typed syntax reaches every destination. */
+macro Expression $constructed() =>
+  $(quote (expr ("Func")
+    (lambda (params) (expr (int) (literal (int) "42")))));
+meta Func constructed_result(void) => $constructed();
+meta int assigned_named(int n) {
+  Func f;
+  f = narrow;
+  return f(n);
+}
+meta int assigned_lambda(int n) {
+  Func f;
+  f = %!(int a) => a * 3;
+  return f(n);
+}
+meta int argument_lambda(int n) => forward(%!(int a) => a - 1, n);
+meta int built_init(int n) {
+  Func f = $constructed();
+  return f().int() + n;
+}
+meta int built_assigned(int n) {
+  Func f;
+  f = $constructed();
+  return f().int() + n;
+}
+meta int built_argument(int n) {
+  Func f = %!(Func g, int a) => g().int() + a;
+  return f($constructed(), n);
+}
+meta int built_returned(int n) => constructed_result()().int() + n;
+meta int built_var(int n) {
+  Var v = $constructed();
+  Func f = v;
+  return f().int() + n;
+}
+
 int main(int argc, char **argv) {
   (void) argv;
   int one = argc;
@@ -189,5 +226,20 @@ int main(int argc, char **argv) {
     prepared_values(257), prepared_values(one + 256));
   printf("prepared-ref %d %d %d\n", $prepared_reference(1),
     prepared_reference(1), prepared_reference(one));
+  printf("assigned-named %d %d %d\n", $assigned_named(257),
+    assigned_named(257), assigned_named(one + 256));
+  printf("assigned-lambda %d %d %d\n", $assigned_lambda(1),
+    assigned_lambda(1), assigned_lambda(one));
+  printf("argument-lambda %d %d %d\n", $argument_lambda(1),
+    argument_lambda(1), argument_lambda(one));
+  printf("built-init %d %d %d\n", $built_init(1), built_init(1),
+    built_init(one));
+  printf("built-assigned %d %d %d\n", $built_assigned(1), built_assigned(1),
+    built_assigned(one));
+  printf("built-argument %d %d %d\n", $built_argument(1), built_argument(1),
+    built_argument(one));
+  printf("built-returned %d %d %d\n", $built_returned(1), built_returned(1),
+    built_returned(one));
+  printf("built-var %d %d %d\n", $built_var(1), built_var(1), built_var(one));
   return 0;
 }
