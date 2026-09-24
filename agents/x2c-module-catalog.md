@@ -238,7 +238,8 @@ generate C headers and source files.
 
 Public functions:
 
-`generate_code`, `Compiler.init_statements`
+`Compiler.definition_rows`, `Compiler.dump_definitions`, `generate_code`,
+`Compiler.init_statements`
 
 ### [src/install.x](../src/install.x)
 
@@ -346,8 +347,9 @@ Public functions:
 `Compiler.defines_main`, `Compiler.protocol_form_starts`,
 `Compiler.meta_form_is_declaration`, `Compiler.script_statement_starts`,
 `Compiler.script_statement_executes`, `Compiler.skip_linkage_brace`,
-`Compiler.parse_top_level`, `Compiler.parse_submission`,
-`Compiler.finish_foreign_alias`, `Compiler.bind_syntax`
+`Compiler.definition_doc`, `Compiler.parse_top_level`,
+`Compiler.parse_submission`, `Compiler.finish_foreign_alias`,
+`Compiler.bind_syntax`
 
 ### [src/project.x](../src/project.x)
 

@@ -13,6 +13,8 @@ Generate C headers and source files.
 | Function | Summary |
 | --- | --- |
 | [`generate_code`](#generate_code) | Writes the generated C header and source for one lowered translation unit. |
+| [`Compiler.definition_rows`](#Compiler.definition_rows) | Returns one row for each function, foreign alias, and typedef that the lowered unit `ast` defines, in source order: `(function NAME DISPLAY TYPE PARAMETERS LINE DOC STATIC ORIGIN DECLARATOR SPAN)` or `(typedef NAME BASE MODIFIERS SPAN)`. |
+| [`Compiler.dump_definitions`](#Compiler.dump_definitions) | Prints the `--dump-definitions` projection of the lowered unit `ast`: the module comment as `(module TEXT)` when the file opens with one, then one row per `Compiler.definition_rows` entry. |
 | [`Compiler.init_statements`](#Compiler.init_statements) | Returns the statements queued for `phase`, in the order they were added. |
 
 ### Functions
@@ -32,9 +34,38 @@ replaces none of them. It appends generated bindings and initialization
 work to the compiler and is not idempotent. Failures are reported as
 `emit` diagnostics.
 
-Source: `src/generate.x:1084`
+Source: `src/generate.x:1218`
 
 ### `Compiler`
+
+<a id="Compiler.definition_rows"></a>
+#### Compiler.definition_rows
+
+`List Compiler.definition_rows(Compiler c, List ast)`
+
+Returns one row for each function, foreign alias, and typedef that the
+lowered unit `ast` defines, in source order:
+`(function NAME DISPLAY TYPE PARAMETERS LINE DOC STATIC ORIGIN DECLARATOR
+SPAN)` or `(typedef NAME BASE MODIFIERS SPAN)`. `ORIGIN` is `<source>`,
+`<macro>` for a Unit macro or generated body, or `<alias>`. `DECLARATOR`
+is the token range of an authored function's declarator, and `SPAN` the
+token range and privacy of the top-level form that produced the
+definition; either is empty when the compiler made the definition.
+`LINE` is 1 and `DOC` empty for a definition without authored source.
+
+Source: `src/generate.x:761`
+
+<a id="Compiler.dump_definitions"></a>
+#### Compiler.dump_definitions
+
+`void Compiler.dump_definitions(Compiler c, List ast)`
+
+Prints the `--dump-definitions` projection of the lowered unit `ast`:
+the module comment as `(module TEXT)` when the file opens with one, then
+one row per `Compiler.definition_rows` entry. The command-line reference
+in the book describes the fields.
+
+Source: `src/generate.x:834`
 
 <a id="Compiler.init_statements"></a>
 #### Compiler.init_statements
@@ -43,7 +74,7 @@ Source: `src/generate.x:1084`
 
 Returns the statements queued for `phase`, in the order they were added.
 
-Source: `src/generate.x:1130`
+Source: `src/generate.x:1265`
 
 ## Design notes
 

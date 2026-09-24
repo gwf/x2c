@@ -2014,14 +2014,17 @@ List Compiler.full_parse(Compiler c, Map globs, int generated_symbols) {
             }
             else node = _replay_declaration_bundle(c);
             if (!node) node = c.parse_top_level();
+            int end = _skip_backward(c.token - 1, tokens) + 1 - tokens;
             if (node && node.car() == <seq>) {
               foreach (List item, node.cdr()) {
                 _record_top_level_function_state(c, item);
+                _record_definition_span(c, item, start - tokens, end);
                 nodes.push(item);
               }
             }
             else if (node) {
               _record_top_level_function_state(c, node);
+              _record_definition_span(c, node, start - tokens, end);
               nodes.push(node);
             }
           }
@@ -3450,6 +3453,22 @@ static void _record_object_definitions(Compiler c, List bindings) {
       c.semantic_binding_facts()[key] = 1;
       c.semantic_binding_facts()[%(arms $binding)] = c.arms;
     }
+}
+
+/* A definition remembers the token range of the top-level form that
+   produced it, and whether that form is private, for the definition walk.
+   A typedef may repeat its name, so each statement keys its own range. */
+static void _record_definition_span(
+  Compiler c, List node, int start, int end) {
+  List key = NULL;
+  match (node) {
+    case %(function ? (bind ?binding ?) ?): key = binding;
+    case %(falias (declare ? (bindings (bind ?binding ?))) ?): key = binding;
+    case %(typedef *): key = node;
+  }
+  if (key)
+    c.semantic_binding_facts()[%(definition-span $key)] =
+      %($start $end ${c.source_private > 0});
 }
 
 static void _record_top_level_function_state(Compiler compiler, List node) {

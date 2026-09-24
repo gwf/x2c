@@ -295,8 +295,8 @@ static int _start(
   Frontend frontend, String filename, ParsedUnit *unit, int shared_values,
   String session_source) {
   *unit = (ParsedUnit) { 0 };
-  unit.generated_symbols =
-    !frontend.request.no_cpp && !frontend.request.dump;
+  unit.generated_symbols = !frontend.request.no_cpp &&
+    (!frontend.request.dump || frontend.request.dump == <dump-defs>);
   unit.context = shared_values
     ? Context.open_named("shared translation unit")
     : Context.open_isolated_named("translation unit");
@@ -307,7 +307,6 @@ static int _start(
   compiler.source_map = frontend.request.source_map;
   compiler.sources = frontend.request.sources;
   compiler.source_facts = frontend.request.source_facts;
-  compiler.source_syntax = frontend.request.dump == <source-ast>;
   compiler.source_primary = 1;
   if (compiler.source_facts) {
     compiler.source_occurrences = [];

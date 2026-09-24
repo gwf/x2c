@@ -135,9 +135,6 @@ static void _translate_unit(
     case <symbols>:
       compiler.dump_symbol_table(compiler.sym.current_symbols());
       return;
-    case <source-ast>:
-      foreach (List node, ast) printf("\n%s\n", node.repr());
-      return;
     case <dump-ast>:
       foreach (List node, ast) printf("\n%s\n", _ast_inspection_repr(node));
       return;
@@ -152,6 +149,9 @@ static void _translate_unit(
   switch (request.dump) {
     case <transforms>:
       foreach (List node, ast) printf("\n%s\n", _ast_inspection_repr(node));
+      return;
+    case <dump-defs>:
+      compiler.dump_definitions(ast);
       return;
     case <dump-code>:
       puts(compiler.code_pretty_string(compiler.emit(ast), NULL));

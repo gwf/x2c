@@ -1,7 +1,8 @@
 # x2c lint, format, and compiler-backed source tools
 
 > Status: active - Gary accepted all six decisions on 2026-09-24. Re-evaluated 2026-09-24 against `dev` at
-> `29326dbd`; lint placement measured on `76cead06`; no phase implemented.
+> `29326dbd`; lint placement measured on `76cead06`. Phases 0 and 1 are
+> implemented; see [Progress](#progress).
 > This plan now also owns the compiler-backed rewrite from
 > [x2c-scripting-ports](x2c-scripting-ports.md) ("Rewrite on the compiler
 > instead of translating"), including catalog item
@@ -294,6 +295,39 @@ remain compiler bugs for `fix-x2c-bug`, not rules.
 
 Phases 1 and 2 are worth shipping alone: they end C09 and remove about
 2,500 lines of Python. Phase 3 needs its own approval under decision 1.
+
+## Progress
+
+**Phase 0, 2026-09-24.** The unnecessary-cast and unnecessary-converter
+warnings report `conversion`, and the protocol-binder warning reports
+`shadow`. The two native-module `meta` warnings in `src/macros.x` still
+report `warning`; that file was reserved by another session, so they wait.
+
+**Phase 1, 2026-09-24.** `Compiler.definition_rows` in `src/generate.x` is
+the one definition walk. The `.xi` writer filters its rows to public
+functions, and `x2c translate --dump-definitions` prints every row with its
+span, static flag, origin, doc, source text, and the module comment. The
+parser records each authored declarator's token range, decorator targets
+included, and the top-level parse loop records each form's span. The option
+replaced `--dump-source-ast`; the source-syntax parse mode behind the old
+option is now unreachable and is removed in a follow-up, because part of it
+is in `src/macros.x`. Source delta: 210 lines added, 50 removed.
+
+Probe against `x2c_source.py` on `src/` and `lib/`, as name and line sets
+with static functions included: 4,784 of its 4,816 functions and all 171
+public types agree. The rest are known differences, none a projection gap:
+
+- 17 foreign aliases in `lib/lisp.x` report the `$x2c.foreign.alias` line,
+  one above the declarator the regex found.
+- 8 static helpers inside Unit macros (`load`, `store`, `next`,
+  `record_compare` and relatives) carry hygienic `_x2c_macro_*` names, one
+  per expansion, where the regex reported the template's name once.
+- 7 compile-time-only `meta` functions in `lib/meta.x` are not part of the
+  translated unit.
+- The projection also lists 15 static definitions the regex missed:
+  `_stat` in `lib/path.x` and the typed-array `_core_*` helpers.
+- `MatchCache` and `MatchLease` in `lib/match.x` follow `#pragma public`;
+  the regex stopped at the first `#pragma private`.
 
 ## Process ceiling
 

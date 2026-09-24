@@ -254,10 +254,10 @@ static CliOption cli_options[] = {
     "--dump-cpp-tokens", NULL, "Print host-preprocessed tokens and stop", 0 },
   { <dump-ast>, CLI_TRANSLATE, <inspection>, "--dump-ast", NULL,
     "Print the parsed AST and stop", 0 },
-  { <source-ast>, CLI_TRANSLATE, <inspection>, "--dump-source-ast", NULL,
-    "Print experimental source syntax with macro calls retained and stop", 0 },
   { <transforms>, CLI_TRANSLATE, <inspection>,
     "--dump-transforms", NULL, "Print the transformed AST and stop", 0 },
+  { <dump-defs>, CLI_TRANSLATE, <inspection>, "--dump-definitions", NULL,
+    "Print each definition's location and documentation and stop", 0 },
   { <dump-code>, CLI_TRANSLATE, <inspection>, "--dump-code", NULL,
     "Print unformatted generated code and stop", 0 },
   { <symbols>, CLI_TRANSLATE, <inspection>, "--dump-symbols",
@@ -930,7 +930,7 @@ static void _apply_option(
     case <cpp-syms>: c.cpp_symbols = 1;
     case <tokens>: case <dump-cpp>: case <cpp-tokens>: case <dump-ast>:
     case <transforms>: case <dump-code>: case <symbols>: case <dump-csym>:
-    case <dump-cache>: case <conform>: case <source-ast>:
+    case <dump-cache>: case <conform>: case <dump-defs>:
       c.dump = option.id;
     case <prefix>: c.prefix = value;
     case <sha256>: c.sha256 = value;

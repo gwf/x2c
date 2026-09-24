@@ -690,9 +690,9 @@ static List _header_and_source(Compiler compiler, List ast) {
   return %( $header_list $source_list );
 }
 
-/* Project definitions that survived expansion and binding. Prototypes and
-   imported units have no local function node; file-static bodies are private. */
-static List _public_parameter_names(Compiler c, List modifiers) {
+/* Definitions that survived expansion and binding. Prototypes and imported
+   units have no local function node. */
+static List _parameter_names(Compiler c, List modifiers) {
   Array names = [];
   match (modifiers)
     case %((fnmod (params *parameters)) *):
@@ -708,30 +708,164 @@ static List _public_parameter_names(Compiler c, List modifiers) {
   return names.list_free();
 }
 
-static List _public_definition_rows(Compiler c, List ast) {
-  Array rows = [];
-  foreach (List node, ast) match (node)
-    case %(function ?type (bind ?binding ?modifiers) ?): {
-      String name = binding_identity_spelling(binding);
-      if (!name || type.type().is_static())
-        continue;
-      Type signature = %(declare $type
-        (bindings (bind $binding $modifiers))).type_from_ast();
-      List parameter_names = _public_parameter_names(c, modifiers);
-      Var source = c.semantic_binding_facts()[%(api-definition $binding)];
-      int line = 1;
-      Var doc = "";
-      String display = name;
-      match (c.semantic_binding_facts()[%(method $binding)])
-        case %(?(String owner) ?(String member)):
-          display = %"$owner.$member";
-      match (source) case %(?(int recorded) ?text): {
-        line = recorded;
-        doc = text;
-      }
-      rows.push(%($name $display $signature $parameter_names $line $doc));
+static List _span(Compiler c, List key) {
+  Var span = NULL;
+  c.semantic_binding_facts().try_get(%(definition-span $key), &span);
+  return span;
+}
+
+static List _function_row(
+  Compiler c, List type, List binding, List modifiers, int alias) {
+  String name = binding_identity_spelling(binding);
+  if (!name) return NULL;
+  Type signature = %(declare $type
+    (bindings (bind $binding $modifiers))).type_from_ast();
+  String display = name;
+  match (c.semantic_binding_facts()[%(method $binding)])
+    case %(?(String owner) ?(String member)):
+      display = %"$owner.$member";
+  int line = 1;
+  Var doc = "";
+  List declarator = NULL, span = _span(c, binding);
+  match (c.semantic_binding_facts()[%(api-definition $binding)])
+    case %(?(int recorded) ?text ?range): {
+      line = recorded;
+      if (text is <string>) doc = text;
+      declarator = range;
     }
+  /* Authored prose precedes the whole form, before any decorator. */
+  match (span)
+    case %(?(int start) *): if (declarator || alias) {
+      Token first = c.tokenizer.tokens;
+      first += start;
+      if (alias) line = first.line;
+      String written = c.definition_doc(first);
+      doc = written ? written : "";
+    }
+  Symbol origin = alias ? <alias> : declarator ? <source> : <macro>;
+  return %(function $name $display $signature
+           ${_parameter_names(c, modifiers)} $line $doc
+           ${type.type().is_static()} $origin $declarator $span);
+}
+
+/** Returns one row for each function, foreign alias, and typedef that the
+    lowered unit `ast` defines, in source order:
+    `(function NAME DISPLAY TYPE PARAMETERS LINE DOC STATIC ORIGIN DECLARATOR
+    SPAN)` or `(typedef NAME BASE MODIFIERS SPAN)`. `ORIGIN` is `<source>`,
+    `<macro>` for a Unit macro or generated body, or `<alias>`. `DECLARATOR`
+    is the token range of an authored function's declarator, and `SPAN` the
+    token range and privacy of the top-level form that produced the
+    definition; either is empty when the compiler made the definition.
+    `LINE` is 1 and `DOC` empty for a definition without authored source.
+*/
+List Compiler.definition_rows(Compiler c, List ast) {
+  Array rows = [];
+  foreach (List node, ast) match (node) {
+    case %(function ?type (bind ?binding ?modifiers) ?): {
+      List row = _function_row(c, type, binding, modifiers, 0);
+      if (row) rows.push(row);
+    }
+    case %(falias
+           (declare ?type (bindings (bind ?binding ?modifiers))) ?): {
+      List row = _function_row(c, type, binding, modifiers, 1);
+      if (row) rows.push(row);
+    }
+    case %(typedef ?base (bindings *declarators)):
+      foreach (List declarator, declarators) match (declarator)
+        case %(bind ?binding ?modifiers):
+          rows.push(%(typedef ${binding_identity_spelling(binding)}
+                      $base $modifiers ${_span(c, node)}));
+  }
   return rows.list_free();
+}
+
+/* A unit interface lists the public functions only. */
+static List _public_definition_rows(List definitions) {
+  Array rows = [];
+  foreach (List row, definitions) match (row)
+    case %(function ?name ?display ?type ?names ?line ?doc
+           ?(int is_static) *):
+      if (!is_static) rows.push(%($name $display $type $names $line $doc));
+  return rows.list_free();
+}
+
+/* Source text between two tokens with comments removed and each run of
+   whitespace written as one space. */
+static String _source_text(Token first, Token last) {
+  Array parts = [];
+  int gap = 0;
+  for (Token token = first; token < last; token++) {
+    if (token.type == <space> || token.type == <comment>) gap = 1;
+    else if (token.len) {
+      if (gap && parts.len()) parts.push(" ");
+      parts.push(token.text);
+      gap = 0;
+    }
+  }
+  return "".join(parts.list_free());
+}
+
+static Symbol _type_kind(Token first, List base, List modifiers) {
+  if (first.text == "class") return <class>;
+  match (modifiers)
+    case %(?pointer (fnmod *) *):
+      if (pointer == <*>) return <callback>;
+  match (base)
+    case %((!set ?kind (!or struct union enum)) *): return kind;
+  return <alias>;
+}
+
+/* The one-based line and byte range of a token range. */
+static List _location(Token tokens, List range) {
+  match (range)
+    case %(?(int start) ?(int end) *): {
+      Token last = tokens + end - 1;
+      return %((line ${tokens[start].line})
+               (span ${tokens[start].pos} ${last.pos + last.len}));
+    }
+  return %((line 0) (span));
+}
+
+/** Prints the `--dump-definitions` projection of the lowered unit `ast`:
+    the module comment as `(module TEXT)` when the file opens with one, then
+    one row per `Compiler.definition_rows` entry. The command-line reference
+    in the book describes the fields.
+*/
+void Compiler.dump_definitions(Compiler c, List ast) {
+  Token tokens = c.tokenizer.tokens, first = tokens;
+  while (first.type == <space> || first.type == <preproc>) first++;
+  if (first.type == <comment>)
+    printf("%s\n", %(module ${first.text}).repr());
+  foreach (List row, c.definition_rows(ast)) match (row) {
+    case %(function ?name ?display ?type ?names ?line ?doc ?is_static
+           ?origin ?declarator ?span): {
+      String text = "";
+      match (declarator)
+        case %(?(int start) ?(int body)):
+          text = _source_text(tokens + start, tokens + body);
+      List location = _location(tokens, span);
+      printf("%s\n", %(function (name $name) (display $display)
+                       (line $line) ${location.cadr()} (static $is_static)
+                       (origin $origin) (doc $doc) (text $text)
+                       (type $type) (params $names)).repr());
+    }
+    case %(typedef ?name ?base ?modifiers ?span): {
+      Var doc = "", text = "", kind = <alias>;
+      List location = _location(tokens, span), privacy = NULL;
+      match (span)
+        case %(?(int start) ?(int end) ?private): {
+          Token last = tokens + end;
+          if (last[-1].type == <;>) last--;
+          text = _source_text(tokens + start, last);
+          kind = _type_kind(tokens + start, base, modifiers);
+          String written = c.definition_doc(tokens + start);
+          if (written) doc = written;
+          privacy = %((private $private));
+        }
+      printf("%s\n", %(type (name $name) (kind $kind) @location
+                       @privacy (doc $doc) (text $text)).repr());
+    }
+  }
 }
 
 static List _declaration_binding(List declarator) {
@@ -1112,7 +1246,8 @@ void generate_code(Compiler c, List ast, String dir) {
     $cfile ${c.code_pretty_string(source, cfile)}
   );
   String interface = c.source_facts
-                   ? NULL : interface_text(c, _public_definition_rows(c, ast));
+                   ? NULL : interface_text(
+                       c, _public_definition_rows(c.definition_rows(ast)));
   if (interface) outputs = outputs.append(%("$basename.xi" $interface));
   List failure = NULL;
   try file_publish(outputs);

@@ -1673,12 +1673,17 @@ List Compiler.parse_declaration_argument(Compiler c) {
     token after the closing brace remains current.
 */
 List Compiler.parse_function_definition(Compiler compiler) {
+  Token tokens = compiler.tokenizer.tokens, start = compiler.token;
   List declaration = compiler.parse_simple_declaration();
   if (compiler.peek(0) != <"{"> && !compiler._at_function_arrow())
     compiler.report_error(
       <parse>, "Function macro argument requires a function body",
       compiler.token, NULL);
-  return _finish_function_definition(compiler, declaration);
+  int first = start - tokens, body = compiler.token - tokens;
+  List function = _finish_function_definition(compiler, declaration);
+  if (!compiler.macro_holes)
+    _definition_source(compiler, function, start.line, NULL, %($first $body));
+  return function;
 }
 
 /** Parses one function decorator target and returns its resulting AST.
@@ -1885,10 +1890,12 @@ static void _track_conditional_arms(Compiler c) {
     }
 }
 
-/* Keep authored prose beside a definition without making comment text part
-   of the semantic AST. Macro templates carry it until their selected body
-   binds at the invocation. */
-static String _definition_doc(Compiler c, Token start) {
+/** Returns the body of the doc comment that documents the definition
+    starting at `start`, or NULL. A doc comment opens with two asterisks and
+    ends on the line before `start` or on its line. Macro templates carry the
+    text until their selected body binds at the invocation.
+*/
+String Compiler.definition_doc(Compiler c, Token start) {
   Token first = c.tokenizer.tokens;
   if (start <= first) return NULL;
   Token token = start - 1;
@@ -1905,15 +1912,15 @@ static String _definition_doc(Compiler c, Token start) {
 /* A generated default that completes a documented `meta` prototype
    publishes the prototype's prose. */
 static void _definition_source(
-  Compiler c, List function, int line, String doc) {
+  Compiler c, List function, int line, String doc, List declarator) {
   match (function) {
     case %(function ? (bind ?binding ?) ?):
       c.semantic_binding_facts()[%(api-definition $binding)] =
-        %($line $doc);
+        %($line $doc $declarator);
     case %(declare ? (bindings (bind ?binding ?))):
       if (doc && function.type_from_ast().is_function())
         c.semantic_binding_facts()[%(api-definition $binding)] =
-          %($line $doc);
+          %($line $doc $declarator);
   }
 }
 
@@ -1961,7 +1968,6 @@ List Compiler.parse_top_level(Compiler c) {
     c.next();
   }
   Token definition_start = c.token;
-  String definition_doc = _definition_doc(c, definition_start);
   List decl = c.parse_declaration_row();
   if (c.test(<;>)) {
     if (meta && decl.type_from_ast().is_function())
@@ -1969,7 +1975,7 @@ List Compiler.parse_top_level(Compiler c) {
     else if (meta) c.install_meta_declaration(decl, meta);
     c.record_declaration_visibility(decl);
     if (meta)
-      _definition_source(c, decl, meta.line, _definition_doc(c, meta));
+      _definition_source(c, decl, meta.line, c.definition_doc(meta), NULL);
     return decl;
   }
   if (c.peek(0) == <"{"> || c._at_function_arrow()) {
@@ -1978,6 +1984,9 @@ List Compiler.parse_top_level(Compiler c) {
         <parse>, "a function definition cannot share a declaration row",
         c.token, NULL);
     List function;
+    Token tokens = c.tokenizer.tokens;
+    int start = (meta ? meta : definition_start) - tokens;
+    int body = c.token - tokens;
     $let(c.meta_body, meta != NULL) {
       function = _finish_function_definition(c, decl);
     }
@@ -1985,14 +1994,12 @@ List Compiler.parse_top_level(Compiler c) {
     c.record_declaration_visibility(function);
     /* A `meta` function that reaches a `Meta` operation exists only inside
        the compiler, so there is no runtime form to emit. */
-    if (meta && c.meta_is_comptime_only(function)) {
-      _definition_source(
-        c, function, definition_start.line, definition_doc);
-      return NULL;
-    }
+    if (meta && c.meta_is_comptime_only(function)) return NULL;
     if (c.macro_holes)
-      return %(api-source ${definition_start.line} $definition_doc $function);
-    _definition_source(c, function, definition_start.line, definition_doc);
+      return %(api-source ${definition_start.line}
+               ${c.definition_doc(definition_start)} $function);
+    _definition_source(
+      c, function, definition_start.line, NULL, %($start $body));
     return function;
   }
   c.require_input();
@@ -2357,10 +2364,10 @@ List Compiler.bind_syntax(
         Token invocation = _.macro_stack
                          ? _.macro_stack.last().list()[3] : NULL;
         String invocation_doc = invocation
-                              ? _definition_doc(_, invocation) : NULL;
+                              ? _.definition_doc(invocation) : NULL;
         _definition_source(
           _, bound, invocation ? invocation.line : line,
-          invocation_doc ? invocation_doc : doc);
+          invocation_doc ? invocation_doc : doc, NULL);
         return bound;
       }
       case %(named-type ?(String name) ?type): {

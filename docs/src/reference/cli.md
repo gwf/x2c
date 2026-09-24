@@ -106,9 +106,10 @@ Inspection modes print an intermediate result and stop translation:
 ```
 
 - `--dump-tokens` prints source tokens and stops.
-- `--dump-source-ast` prints experimental deferred source syntax and stops.
 - `--dump-ast` prints the parsed, bound AST after macro expansion and stops.
 - `--dump-transforms` prints the transformed AST and stops.
+- `--dump-definitions` prints each definition's location and documentation
+  and stops.
 - `--dump-code` prints unformatted generated code and stops.
 - `--dump-symbols` prints the source symbol table and stops.
 - `--dump-cpp` prints host-preprocessed text and stops.
@@ -118,22 +119,48 @@ Inspection modes print an intermediate result and stop translation:
 - `--dump-cache` prints the compiler cache and stops.
 - `--dump-conformance` prints protocol conformance and stops.
 
-`--dump-source-ast` retains macro invocations, method spelling, literal
-construction, and source identifier spelling instead of expanding or resolving
-them in the inspected tree. It reuses the compiler's deferred template parser;
-it is an experimental analysis representation, not a lossless concrete syntax
-tree or an input format accepted by another compiler stage. Comments and
-whitespace are omitted. Identifier spellings do not establish binding identity,
-and expression types may be absent. Match arms and typed captures retain source
-forms instead of their ordinary binding operations.
+`--dump-definitions` prints what the unit defines after translation has
+selected, expanded, and bound it, one Lisp form per line. Documentation
+generators and repository tools read it instead of scanning source text. A
+file that opens with a block comment, after any directives, first prints
+`(module TEXT)` with the comment as written. Each function, including static
+functions, foreign aliases, and functions a Unit macro or `class` produced,
+prints a `function` row, and each `typedef` or `class` prints a `type` row:
 
-Collection, imports, and file-scope declaration producers still run to
-establish the grammar and visible types. Their generated trees are omitted
-from the inspected output, but they may execute compile-time Lisp or macros
-and report semantic errors. This option does not disable compile-time
-execution. The source tree retains top-level Lisp text and does not proceed
-to protocol adapters, transforms, or C emission. Use `--dump-ast` when the
-analysis needs resolved bindings and typed, expanded syntax.
+```text
+(function (name "Point_add") (display "Point.add") (line 11)
+ (span 193 242) (static 0) (origin source) (doc " Adds. ")
+ (text "int Point.add(Point p, int k)")
+ (type ((func (("Point") (int))) int)) (params ("p" "k")))
+(type (name "Point") (kind struct) (line 6) (span 68 113) (private 0)
+ (doc " A point. ") (text "typedef struct Point { int x; int y; } Point"))
+```
+
+- `name` is the C name and `display` the source spelling, such as
+  `Point.add`.
+- `line` is the one-based line of a function's declarator or a type's
+  statement. A decorated function reports its declarator, and a function a
+  macro produced reports the invocation.
+- `span` holds the byte offsets that start and end the top-level form that
+  produced the definition, including decorators and a `meta` keyword. It is
+  empty for a definition the compiler made itself, such as a protocol
+  adapter, whose `line` is 1.
+- `origin` is `source` for a function written in the file, `macro` for one a
+  Unit macro, `class`, or the compiler produced, and `alias` for a foreign
+  alias, whose `line` is that of its alias application.
+- `doc` is the body of the `/**` comment that ends on the line before the
+  form or on its first line, without its delimiters; it is empty when there
+  is none.
+- `text` is a written function's declarator, or a type's statement without
+  its `;`, with comments removed and each run of whitespace written as one
+  space. It is empty for a function the file does not spell.
+- `type` and `params` give a function's canonical type and parameter names,
+  as its unit interface records them.
+- `kind` is `alias`, `struct`, `union`, `enum`, `callback`, or `class`, and
+  `private` is 1 for a type declared in a `#pragma private` region.
+
+Compile-time-only `meta` functions are not part of the translated unit and
+are not listed.
 
 An inspection that does not write generated files does not need `--out-dir`.
 Only one inspection mode runs; the last option given wins.
