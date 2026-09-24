@@ -12,9 +12,8 @@
     standard error; a file that does not parse gets the token rules only and
     makes the exit status 1. Findings alone leave the exit status 0.
 
-    The tool links the compiler's objects as the external commands do and
-    is built by `make -C tools/x2c-lint`; `make -C tools/x2c-lint test`
-    checks its findings on `tests/`.
+    The command links the compiler's objects through `make commands`.
+    `make commands-check` checks its findings on `tests/`.
 */
 #include "frontend.x"
 #include "lint.x"

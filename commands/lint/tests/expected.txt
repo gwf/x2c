@@ -1,0 +1,49 @@
+# language rules
+commands/lint/tests/src/style.x:7: violation forward-declaration: the unit defines this function and x2c collects the whole unit
+commands/lint/tests/src/style.x:35: violation negated-is: spell the test `is not`
+commands/lint/tests/src/indent.x:5: violation forward-declaration: the unit defines this function and x2c collects the whole unit
+commands/lint/tests/src/indent.x:11: violation negated-is: spell the test `is not`
+commands/lint/tests/lib/runtime.x:5: candidate same-file-forward-declaration: retain only for genuine co-recursion or literal shallow collection
+exit 0
+# all rules
+commands/lint/tests/src/style.x:2: candidate prohibited-prose: stock phrase
+commands/lint/tests/src/style.x:7: violation forward-declaration: the unit defines this function and x2c collects the whole unit
+commands/lint/tests/src/style.x:8: violation src-forward-declaration: user-space src code must rely on complete-unit collection
+commands/lint/tests/src/style.x:15: candidate over-width-table-row: verify that indivisible literal fields require this stable row
+commands/lint/tests/src/style.x:18: candidate decorated-ruler: decorated ruler
+commands/lint/tests/src/style.x:19: candidate narration: narrates the code; state a decision
+commands/lint/tests/src/style.x:20: violation operator-spacing: doubled operator spacing
+commands/lint/tests/src/style.x:27: violation subject-parameter-name: name the Compiler subject c to save 1 line (found compiler)
+commands/lint/tests/src/style.x:35: violation negated-is: spell the test `is not`
+commands/lint/tests/src/style.x:38: violation deferred-initialization: initialize value where it becomes meaningful
+commands/lint/tests/src/style.x:39: candidate horizontal-form: complete call or signature appears to fit horizontally
+commands/lint/tests/src/style.x:39: violation wrapped-opening-line: move all arguments or parameters to the continuation line
+commands/lint/tests/src/style.x:41: candidate horizontal-form: complete call or signature appears to fit horizontally
+commands/lint/tests/src/style.x:42: violation continuation-indent: arguments or parameters use a two-space continuation
+commands/lint/tests/src/style.x:43: candidate horizontal-form: complete call or signature appears to fit horizontally
+commands/lint/tests/src/style.x:46: violation standalone-closer: keep the close and trailer with the final argument or parameter
+commands/lint/tests/src/style.x:47: violation one-statement-braces: omit braces around one executable statement
+commands/lint/tests/src/style.x:50: candidate short-control-flow: the header and its one statement fit on one line
+commands/lint/tests/src/style.x:52: candidate repeated-accessor: c.size() repeats three times; cache only if pure and stable
+commands/lint/tests/src/style.x:53: violation tab: tab character
+commands/lint/tests/src/style.x:54: violation trailing-whitespace: trailing whitespace
+commands/lint/tests/src/style.x:56: violation blank-line-stack: consecutive blank line
+commands/lint/tests/src/style.x:57: candidate constant-output-run: 2 adjacent static output calls; preserve emitted bytes
+commands/lint/tests/src/style.x:59: violation over-width: 80 columns
+commands/lint/tests/src/style.x:60: candidate over-width-literal: verify that preserving observable literal text requires this width
+commands/lint/tests/src/indent.x:5: violation forward-declaration: the unit defines this function and x2c collects the whole unit
+commands/lint/tests/src/indent.x:11: violation negated-is: spell the test `is not`
+commands/lint/tests/src/indent.x:19: violation over-width: 80 columns
+commands/lint/tests/lib/runtime.x:5: candidate same-file-forward-declaration: retain only for genuine co-recursion or literal shallow collection
+commands/lint/tests/lib/runtime.x:6: candidate runtime-forward-declaration: retain only for cross-unit co-recursion or literal shallow collection
+exit 0
+# selected rules
+commands/lint/tests/src/style.x:35: violation negated-is: spell the test `is not`
+commands/lint/tests/src/style.x:53: violation tab: tab character
+exit 0
+# a unit that does not parse
+commands/lint/tests/broken.x:3: violation negated-is: spell the test `is not`
+exit 1
+# non-ASCII text
+ascii.x:1: violation non-ascii: non-ASCII character
+exit 0

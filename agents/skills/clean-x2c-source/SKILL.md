@@ -26,8 +26,8 @@ unclear. Structural redesign belongs in `simplify-x2c-source` when authorized.
 Optional discovery commands, from the repository root:
 
 ```sh
-make -C tools/x2c-lint
-builds/0/lint/x2c-lint --all path/to/file.x
+make commands
+builds/0/x2c lint --all path/to/file.x
 python3 agents/skills/find-redundant-validation/scripts/redundant_validation.py \
   --static-match-captures --details path/to/file.x
 ```
@@ -72,7 +72,7 @@ when the edits can affect behavior, then follow root publication validation
 and delivery instructions. Refresh affected generated files only through
 repository targets and inspect their changes.
 
-If changing the linter itself, run `make -C tools/x2c-lint test`.
+If changing the linter itself, run `make commands-check`.
 
 The result is clearer source with preserved behavior and technical knowledge.
 Report meaningful changes and verification; scanner counts are supporting

@@ -59,7 +59,7 @@ Give agency only to actors: a type, table, or check does not "name", "know",
 or "refuse" anything. Avoid negative-then-reversal constructions, "rather
 than" and ", not X" closers, and the words "deliberately", "honest", and "on
 purpose".
-[`x2c-lint`](../tools/x2c-lint/x2c-lint.x) reports common stock phrases in
+[`x2c lint`](../commands/lint/x2c-lint.x) reports common stock phrases in
 comments and literals as `prohibited-prose` candidates.
 
 Write the language name `x2c`: lowercase `x`, digit `2`, lowercase `c`.
@@ -1325,7 +1325,7 @@ native handle whose lifetime belongs to its library. See
 
 ## Review checklist
 
-Run [`x2c-lint --all`](../tools/x2c-lint/x2c-lint.x) for width,
+Run [`x2c lint --all`](../commands/lint/x2c-lint.x) for width,
 whitespace, wrapping, braces, deferred initialization, forward declarations,
 negated `is` tests, narration, stock prose, and receiver subject names whose
 length wraps lines. Then check what it cannot:

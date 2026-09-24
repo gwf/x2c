@@ -1,2 +1,3 @@
 graph|experimental|Inspect x2c source graphs
+lint|experimental|Inspect x2c source style and idioms
 repl|shipped|Evaluate a supported x2c subset (experimental)

@@ -4,8 +4,8 @@
 set -eu
 
 cd "$(dirname "$0")/../../.."
-tool=$PWD/builds/0/lint/x2c-lint
-tests=tools/x2c-lint/tests
+tool=$PWD/builds/0/libexec/x2c-lint
+tests=commands/lint/tests
 work=${TMPDIR:-/tmp}/x2c-lint-tests.$$
 out=$work/findings
 trap 'rm -rf "$work"' EXIT HUP INT TERM
@@ -33,3 +33,11 @@ run() {
   (cd "$work" && run --rule non-ascii ascii.x)
 } >"$out"
 diff -u "$tests/expected.txt" "$out"
+
+# The driver must run the same executable with unchanged arguments.
+builds/0/x2c lint --all "$tests/src/style.x" >"$work/dispatched"
+"$tool" --all "$tests/src/style.x" >"$work/direct"
+cmp "$work/direct" "$work/dispatched"
+
+builds/0/x2c help lint >"$work/help" 2>&1
+grep -q '^usage: x2c-lint ' "$work/help"
