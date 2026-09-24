@@ -203,7 +203,7 @@ proof-artifact-atomicity:				## Prove artifact updates are atomic
 	$(STAGE0_X2C) script unittest/probes/run-artifact-atomicity
 
 build-recovery: build					## Check incremental build recovery
-	./unittest/probes/run-build-recovery.sh
+	$(STAGE0_X2C) script unittest/probes/run-build-recovery
 
 proof-raw-symbols: build				## Check raw symbol collection parity
 	./unittest/probes/run-raw-symbol-sweep.sh

@@ -1,0 +1,82 @@
+#!/usr/bin/env -S x2c script
+/*  run-build-recovery -- an interrupted stage build leaves no partial output
+
+    A failed compile removes its partial object, and an archive rebuild drops
+    a member that is no longer an input.
+*/
+#include "probe.x"
+
+static void _fail(String message) =>
+  probe_fail(%"build recovery failure: $message");
+
+Path root = probe_root(argv[0]);
+String ar = probe_env("AR", "ar");
+Path build = probe_scratch(root, "build-recovery");
+
+/* Fault-inject against a scratch copy of builds/0, not the real one: a
+   mid-probe failure or a concurrent build must not corrupt the tracked
+   archive that other targets depend on. stage.mk resolves the compiler and
+   sources relative to the stage directory (../../bin/x2c, ../../etc,
+   ../../src, ../../lib), so the scratch tree mirrors that shape and points
+   back at the real, read-only source and compiler. */
+Path scratch = build.join("scratch");
+scratch.join("builds").make_dirs();
+foreach (String name, %("bin" "etc" "src" "lib"))
+  scratch.join(name).symlink_to(root.join(name));
+Path stage = root.join("builds/0"), copy = scratch.join("builds/0");
+%(cp -Rp $stage $copy).job().run();
+
+Path object = copy.join("lib/string.o");
+Path archive = copy.join("libx2c.a");
+Path makefile = root.join("builds/stage.mk");
+
+Path failing_cc = build.join("failing-cc.sh");
+failing_cc.write_text(
+  "#!/usr/bin/env bash\n"
+  "set -euo pipefail\n"
+  "output=\n"
+  "previous=\n"
+  "for argument in \"$@\"; do\n"
+  "  if [[ \"$previous\" == -o ]]; then\n"
+  "    output=$argument\n"
+  "    break\n"
+  "  fi\n"
+  "  previous=$argument\n"
+  "done\n"
+  "[[ -n \"$output\" ]] || exit 2\n"
+  "printf 'partial compiler output\\n' >\"$output\"\n"
+  "exit 1\n");
+%(chmod +x $failing_cc).job().run();
+
+Path source = copy.join("lib/string.c");
+%(touch $source).job().run();
+String compiler = %"CC=$failing_cc";
+Path failure_out = build.join("failure.stdout");
+Path failure_err = build.join("failure.stderr");
+if (!%(make -s -f $makefile -C $copy lib/string.o $compiler).job()
+      .options({stdout: failure_out, stderr: failure_err}).status())
+  _fail("fault-injected compiler unexpectedly succeeded");
+if (object.exists()) _fail(".DELETE_ON_ERROR preserved a partial object");
+
+Path recovery = build.join("recovery.log");
+%(make -s -f $makefile -C $copy lib/string.o).job()
+  .options({stdout: recovery, stderr: <stdout>}).check();
+if (!object.exists() || !object.size())
+  _fail("normal build did not recover the deleted object");
+Path rebuild = build.join("rebuild.log");
+%(make -s -W lib/string.o -f $makefile -C $copy libx2c.a).job()
+  .options({stdout: rebuild, stderr: <stdout>}).check();
+
+Path stale = build.join("stale-member.o");
+object.copy_file(stale);
+%($ar r $archive $stale).job().run();
+if (!%($ar t $archive).job().lines().contains("stale-member.o"))
+  _fail("probe did not inject a stale archive member");
+Path archive_log = build.join("archive.log");
+%(make -s -W lib/string.o -f $makefile -C $copy libx2c.a).job()
+  .options({stdout: archive_log, stderr: <stdout>}).check();
+if (%($ar t $archive).job().lines().contains("stale-member.o"))
+  _fail("archive rebuild retained a removed member");
+
+printf("build recovery: partial objects are removed and archives are "
+       "replaced\n");
