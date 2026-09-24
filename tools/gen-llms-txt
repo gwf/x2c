@@ -1,266 +1,234 @@
 #!/usr/bin/env -S x2c script
+#pragma indent
 /*  gen-llms-txt -- generate the site's agent-readable documentation
 
     llms.txt indexes the published book, while llms-full.txt concatenates the
     core language chapters. Relative links become published URLs and hidden
     sample lines are revealed because their leading `~` is book markup.
 */
-static Path root, book, summary, public_dir, index_path, full_path;
-static const String site = "https://x2c-lang.dev";
-static const String docs = "https://x2c-lang.dev/docs/";
-static Regex entry, fence, link, scheme, whitespace;
+static Path root, book, summary, public_dir, index_path, full_path
+static const String site = "https://x2c-lang.dev"
+static const String docs = "https://x2c-lang.dev/docs/"
+static Regex entry, fence, link, scheme, whitespace
 
 static List _full_text(void) => %(
   "guide/from-c.md"
   "guide/system-macros.md"
   "guide/idioms.md"
   "reference/language.md"
-  "reference/cli.md");
+  "reference/cli.md")
 
 static int _optional_section(String heading) =>
   heading == "Compiler API (provisional)" ||
-  heading == "Compiler and contributor internals";
+  heading == "Compiler and contributor internals"
 
 /* Each section is `(heading rows)`, where rows is an Array of
    `(depth title path)` forms. */
-static Array _summary_sections(void) {
-  Array sections = [];
-  foreach (String line, summary.read_text().lines()) {
+static Array _summary_sections(void):
+  Array sections = []
+  foreach String line, summary.read_text().lines():
     if (line.startswith("# ") && line != "# Summary")
-      sections.push(%(${line[2:].strip(NULL)} ${[]}));
-    else {
-      RegexMatch found = entry.match(line);
-      if (found && sections.len()) {
-        List section = sections[-1];
+      sections.push(%(${line[2:].strip(NULL)} ${[]}))
+    else:
+      RegexMatch found = entry.match(line)
+      if found && sections.len():
+        List section = sections[-1]
         section.cadr().array().push(
           %(${found["indent"].len() / 2} ${found["title"]}
-            ${found["path"]}));
-      }
-    }
-  }
-  return sections;
-}
+            ${found["path"]}))
+  return sections
 
-static String _page_url(String path) {
-  if (path.endswith(".md")) path = path.remove_suffix(".md") + ".html";
-  return docs + path;
-}
+static String _page_url(String path):
+  if (path.endswith(".md")) path = path.remove_suffix(".md") + ".html"
+  return docs + path
 
-static String _normalized_path(String path) {
-  int absolute = path.startswith("/");
-  Array parts = [];
-  foreach (String part, path.split("/")) {
-    if (!part || part == ".") continue;
+static String _normalized_path(String path):
+  int absolute = path.startswith("/")
+  Array parts = []
+  foreach String part, path.split("/"):
+    if (!part || part == ".") continue
     if (part == ".." && parts.len() && parts[-1].string() != "..")
-      parts.pop();
-    else parts.push(part);
-  }
-  String normalized = String.join("/", parts.list_free());
-  if (!normalized) normalized = absolute ? "/" : ".";
-  else if (absolute) normalized = "/" + normalized;
-  return normalized;
-}
+      parts.pop()
+    else parts.push(part)
+  String normalized = String.join("/", parts.list_free())
+  if (!normalized) normalized = absolute ? "/" : "."
+  else if (absolute) normalized = "/" + normalized
+  return normalized
 
-static String _link_url(String page, String target) {
-  if (scheme.match(target)) return target;
-  if (target.startswith("#")) return _page_url(page) + target;
-  (String path, String mark, String fragment) = target.partition("#");
-  String directory = page.rpartition("/").car();
+static String _link_url(String page, String target):
+  if (scheme.match(target)) return target
+  if (target.startswith("#")) return _page_url(page) + target
+  (String path, String mark, String fragment) = target.partition("#")
+  String directory = page.rpartition("/").car()
   String joined = path.startswith("/") ? path :
-                  directory ? directory + "/" + path : path;
-  return _page_url(_normalized_path(joined)) + mark + fragment;
-}
+                  directory ? directory + "/" + path : path
+  return _page_url(_normalized_path(joined)) + mark + fragment
 
-static String _absolute_links(String page, String line_text) {
-  Array parts = line_text.split("`");
-  for (int at = 0; at < parts.len(); at += 2) {
-    String piece = parts[at];
+static String _absolute_links(String page, String line_text):
+  Array parts = line_text.split("`")
+  for int at = 0; at < parts.len(); at += 2:
+    String piece = parts[at]
     parts[at] = link.replace_fn(piece, %!(RegexMatch found) =>
-      found[1] + _link_url(page, found["target"]));
-  }
-  return String.join("`", parts.list_free());
-}
+      found[1] + _link_url(page, found["target"]))
+  return String.join("`", parts.list_free())
 
-static String _publish_page(String page) {
-  Array lines = [];
-  String language = NULL;
-  foreach (String line_text, book.join(page).read_text().lines()) {
-    RegexMatch found = fence.match(line_text);
-    if (found) {
+static String _publish_page(String page):
+  Array lines = []
+  String language = NULL
+  foreach String line_text, book.join(page).read_text().lines():
+    RegexMatch found = fence.match(line_text)
+    if found:
       if (!language)
-        language = found["info"].partition(",").car().str().strip(NULL);
-      else if (!found["info"].strip(NULL)) language = NULL;
-      lines.push(line_text);
-    }
-    else if (language == "x2c" && line_text.lstrip(NULL).startswith("~")) {
-      String stripped = line_text.lstrip(NULL);
-      lines.push(line_text[:line_text.len() - stripped.len()] + stripped[1:]);
-    }
-    else if (!language) lines.push(_absolute_links(page, line_text));
-    else lines.push(line_text);
-  }
+        language = found["info"].partition(",").car().str().strip(NULL)
+      else if (!found["info"].strip(NULL)) language = NULL
+      lines.push(line_text)
+    else if language == "x2c" && line_text.lstrip(NULL).startswith("~"):
+      String stripped = line_text.lstrip(NULL)
+      lines.push(line_text[:line_text.len() - stripped.len()] + stripped[1:])
+    else if (!language) lines.push(_absolute_links(page, line_text))
+    else lines.push(line_text)
   if (language)
     raise %(llms-fatal
-            (why ${%"docs/src/$page: unterminated code fence"}));
-  return String.join("\n", lines.list_free()).strip(NULL) + "\n";
-}
+            (why ${%"docs/src/$page: unterminated code fence"}))
+  return String.join("\n", lines.list_free()).strip(NULL) + "\n"
 
-static List _book_summary(void) {
-  String text = book.join("index.md").read_text();
-  List divided = text.partition("\n");
-  String title = divided.car(), rest = divided.caddr();
-  String paragraph = rest.strip(NULL).partition("\n\n").car();
-  paragraph = whitespace.replace_all(paragraph, " ").strip(NULL);
-  return %(${title.remove_prefix("# ").strip(NULL)} $paragraph);
-}
+static List _book_summary(void):
+  String text = book.join("index.md").read_text()
+  List divided = text.partition("\n")
+  String title = divided.car(), rest = divided.caddr()
+  String paragraph = rest.strip(NULL).partition("\n\n").car()
+  paragraph = whitespace.replace_all(paragraph, " ").strip(NULL)
+  return %(${title.remove_prefix("# ").strip(NULL)} $paragraph)
 
 /* Return `((path text) ...)` in the stable order used for writing and
    checking the two generated files. */
-static List _render(void) {
-  Array sections = _summary_sections();
-  Map entries = {};
-  Array ordered = [];
-  foreach (List section, sections) {
-    foreach (List row, section.cadr().array()) {
-      String title = row.cadr(), path = row.caddr();
-      entries[path] = title;
-      ordered.push(path);
-    }
-  }
+static List _render(void):
+  Array sections = _summary_sections()
+  Map entries = {}
+  Array ordered = []
+  foreach List section, sections:
+    foreach List row, section.cadr().array():
+      String title = row.cadr(), path = row.caddr()
+      entries[path] = title
+      ordered.push(path)
 
-  Array missing = [];
+  Array missing = []
   foreach (String page, _full_text())
-    if (!entries.contains(page)) missing.push(page);
+    if (!entries.contains(page)) missing.push(page)
   if (missing.len())
     raise %(llms-fatal
             (why ${%"docs/src/SUMMARY.md has no entry for " +
-                    String.join(", ", missing.list_free())}));
+                    String.join(", ", missing.list_free())}))
 
-  Array chapters = [];
+  Array chapters = []
   foreach (String page, ordered)
-    if (_full_text().contains(page)) chapters.push(page);
+    if (_full_text().contains(page)) chapters.push(page)
 
-  (String title, String paragraph) = _book_summary();
+  (String title, String paragraph) = _book_summary()
   Array index_lines = [
     "# x2c", "", %"> $paragraph", "",
     %"[$title]($docs) contains every chapter.", "",
     "## Single-file reference", "",
     %"- [x2c language reference]($site/llms-full.txt): " +
       String.join(", ", chapters.map(%!(String page) => entries[page].str())),
-    ""];
-  Array optional = [];
-  foreach (List section, sections) {
-    String heading = section.car();
-    Array listed = [];
-    foreach (List row, section.cadr().array()) {
-      (int depth, String name, String path) = row;
-      String item = %"- [$name](${_page_url(path)})";
-      if (_optional_section(heading) || depth >= 2) optional.push(item);
-      else listed.push(item);
-    }
-    if (listed.len()) {
-      index_lines.push(%"## $heading");
-      index_lines.push("");
-      foreach (String item, listed) index_lines.push(item);
-      index_lines.push("");
-    }
-  }
-  index_lines.push("## Optional");
-  index_lines.push("");
-  foreach (String item, optional) index_lines.push(item);
-  index_lines.push("");
+    ""]
+  Array optional = []
+  foreach List section, sections:
+    String heading = section.car()
+    Array listed = []
+    foreach List row, section.cadr().array():
+      (int depth, String name, String path) = row
+      String item = %"- [$name](${_page_url(path)})"
+      if (_optional_section(heading) || depth >= 2) optional.push(item)
+      else listed.push(item)
+    if listed.len():
+      index_lines.push(%"## $heading")
+      index_lines.push("")
+      foreach (String item, listed) index_lines.push(item)
+      index_lines.push("")
+  index_lines.push("## Optional")
+  index_lines.push("")
+  foreach (String item, optional) index_lines.push(item)
+  index_lines.push("")
 
   Array full_lines = [
     "# x2c language reference", "", %"> $paragraph", "",
     %"These chapters come from [$title]($docs).",
     "Each chapter follows a comment naming its published URL. Samples",
-    "include the lines the book hides behind an expander."];
-  foreach (String page, chapters) {
-    full_lines.push("");
-    full_lines.push(%"<!-- ${_page_url(page)} -->");
-    full_lines.push("");
-    full_lines.push(_publish_page(page).rstrip(NULL));
-  }
+    "include the lines the book hides behind an expander."]
+  foreach String page, chapters:
+    full_lines.push("")
+    full_lines.push(%"<!-- ${_page_url(page)} -->")
+    full_lines.push("")
+    full_lines.push(_publish_page(page).rstrip(NULL))
   String index_text = String.join("\n", index_lines.list_free()).rstrip(NULL)
-                      + "\n";
-  String full = String.join("\n", full_lines.list_free()) + "\n";
-  return %(( $index_path $index_text ) ( $full_path $full ));
-}
+                      + "\n"
+  String full = String.join("\n", full_lines.list_free()) + "\n"
+  return %(( $index_path $index_text ) ( $full_path $full ))
 
-static int _write_outputs(List outputs) {
-  foreach (List output, outputs) {
-    (Path path, String text) = output;
-    path.write_text(text);
-    String relative = path;
-    printf("wrote %s (%d bytes)\n", relative[root.len() + 1:], text.len());
-  }
-  return 0;
-}
+static int _write_outputs(List outputs):
+  foreach List output, outputs:
+    (Path path, String text) = output
+    path.write_text(text)
+    String relative = path
+    printf("wrote %s (%d bytes)\n", relative[root.len() + 1:], text.len())
+  return 0
 
-static int _check_outputs(List outputs) {
-  int problems = 0;
-  foreach (List output, outputs) {
-    (Path path, String expected) = output;
-    String actual = path.exists() ? path.read_text() : "";
-    String relative = path;
+static int _check_outputs(List outputs):
+  int problems = 0
+  foreach List output, outputs:
+    (Path path, String expected) = output
+    String actual = path.exists() ? path.read_text() : ""
+    String relative = path
     String difference = Diff.unified(
-      actual, expected, relative[root.len() + 1:], "generated");
-    if (difference) {
-      problems++;
-      Stderr.printf("%s", difference);
-    }
-  }
-  if (problems) {
-    Stderr.printf("run 'make doc-generate' and review the llms.txt diff\n");
-    return 1;
-  }
-  printf("llms.txt and llms-full.txt are current\n");
-  return 0;
-}
+      actual, expected, relative[root.len() + 1:], "generated")
+    if difference:
+      problems++
+      Stderr.printf("%s", difference)
+  if problems:
+    Stderr.printf("run 'make doc-generate' and review the llms.txt diff\n")
+    return 1
+  printf("llms.txt and llms-full.txt are current\n")
+  return 0
 
-Path self = String.new(argv[0]);
-root = self.absolute().dirname().dirname();
-book = root.join("docs/src");
-summary = book.join("SUMMARY.md");
-public_dir = root.join("site/public");
-index_path = public_dir.join("llms.txt");
-full_path = public_dir.join("llms-full.txt");
+Path self = String.new(argv[0])
+root = self.absolute().dirname().dirname()
+book = root.join("docs/src")
+summary = book.join("SUMMARY.md")
+public_dir = root.join("site/public")
+index_path = public_dir.join("llms.txt")
+full_path = public_dir.join("llms-full.txt")
 entry = Regex.compile(
-  "^(?<indent> *)- \\[(?<title>[^]]+)\\]\\((?<path>[^)]+)\\)");
-fence = Regex.compile("^\\s*```(?<info>[^`]*)$");
-link = Regex.compile("(\\]\\(|^\\[[^]]+\\]:\\s*)(?<target>[^)\\s]+)");
-scheme = Regex.compile("(?i)^[a-z][a-z0-9+.-]*:");
-whitespace = Regex.compile("\\s+");
+  "^(?<indent> *)- \\[(?<title>[^]]+)\\]\\((?<path>[^)]+)\\)")
+fence = Regex.compile("^\\s*```(?<info>[^`]*)$")
+link = Regex.compile("(\\]\\(|^\\[[^]]+\\]:\\s*)(?<target>[^)\\s]+)")
+scheme = Regex.compile("(?i)^[a-z][a-z0-9+.-]*:")
+whitespace = Regex.compile("\\s+")
 
-String usage = %"usage: ${self.basename()} [-h] [--write | --check]\n";
-if (args.contains("-h") || args.contains("--help")) {
+String usage = %"usage: ${self.basename()} [-h] [--write | --check]\n"
+if args.contains("-h") || args.contains("--help"):
   printf("%s\noptions:\n"
          "  -h, --help  show this help message and exit\n"
          "  --write\n"
-         "  --check\n", usage);
-  return 0;
-}
-List spec = %((--write) (--check));
-Map options = NULL;
-try options = Args.parse(args, spec);
-catch %(bad-arg *detail): {
+         "  --check\n", usage)
+  return 0
+List spec = %((--write) (--check))
+Map options = NULL
+try options = Args.parse(args, spec)
+catch %(bad-arg *detail):
   Stderr.printf("%s%s: error: %s\n", usage, self.basename(),
-                detail.assoc(<why>));
-  return 2;
-}
-if (options["write"].integer() && options["check"].integer()) {
+                detail.assoc(<why>))
+  return 2
+if options["write"].integer() && options["check"].integer():
   Stderr.printf("%s%s: error: argument --check: not allowed with argument "
-                "--write\n", usage, self.basename());
-  return 2;
-}
+                "--write\n", usage, self.basename())
+  return 2
 
-try {
-  List outputs = _render();
-  if (options["write"].integer()) return _write_outputs(outputs);
-  if (options["check"].integer()) return _check_outputs(outputs);
-  printf("%s", outputs.car().list().cadr());
-}
-catch %(llms-fatal *detail): {
-  Stderr.printf("llms.txt: %s\n", detail.assoc(<why>));
-  return 1;
-}
+try:
+  List outputs = _render()
+  if (options["write"].integer()) return _write_outputs(outputs)
+  if (options["check"].integer()) return _check_outputs(outputs)
+  printf("%s", outputs.car().list().cadr())
+catch %(llms-fatal *detail):
+  Stderr.printf("llms.txt: %s\n", detail.assoc(<why>))
+  return 1

@@ -1,4 +1,5 @@
 #!/usr/bin/env -S x2c script
+#pragma indent
 /*  gen-package-index -- write the index `x2c install <name>` resolves
 
     Each row is `name version kind platform url sha256`. Source rows come from
@@ -10,76 +11,69 @@
 */
 #include "json.x"
 
-static Path root;
+static Path root
 
-static String digest(String path) {
-  File file = $auto(File.open(path, "rb"));
-  return file.sha256();
-}
+static String digest(String path):
+  File file = $auto(File.open(path, "rb"))
+  return file.sha256()
 
 /* The walk visits parents first and siblings in sorted order, and each member
    is archived without recursion, so the archive lists exactly this walk less
    build products and prepared dependencies at any depth. */
-static Path source_archive(Path package, Path output) {
-  String name = package.basename();
-  Path archive = output.absolute().join(%"$name-source.tar.gz");
-  Array members = [];
-  foreach (String path, package.walk()) {
-    String relative = path[package.len() + 1:];
-    List parts = relative.split("/");
+static Path source_archive(Path package, Path output):
+  String name = package.basename()
+  Path archive = output.absolute().join(%"$name-source.tar.gz")
+  Array members = []
+  foreach String path, package.walk():
+    String relative = path[package.len() + 1:]
+    List parts = relative.split("/")
     if (!parts.contains("builds") && !parts.contains("deps"))
-      members.push(%"$name/$relative");
-  }
+      members.push(%"$name/$relative")
   // COPYFILE_DISABLE keeps macOS tar from adding AppleDouble members.
   %(tar -czf $archive -C ${package.dirname()} --no-recursion
     @{members.list_free()}).job()
-    .options({env: {COPYFILE_DISABLE: 1}}).run();
-  return archive;
-}
+    .options({env: {COPYFILE_DISABLE: 1}}).run()
+  return archive
 
 static void source_rows(
-  Path directory, Path output, String base, Array rows) {
-  foreach (String name, directory.list_dir()) {
-    Path package = directory.join(name);
+  Path directory, Path output, String base, Array rows):
+  foreach String name, directory.list_dir():
+    Path package = directory.join(name)
     if (!package.is_dir() || package.join("dependency*.json").glob() ||
         !package.join(%"src/$name.x").is_file())
-      continue;
-    Path archive = source_archive(package, output);
-    String url = %"$base/${archive.basename()}";
-    rows.push(%"$name 0 source - $url ${digest(archive)}");
-  }
-}
+      continue
+    Path archive = source_archive(package, output)
+    String url = %"$base/${archive.basename()}"
+    rows.push(%"$name 0 source - $url ${digest(archive)}")
 
-static String field(Map identity, String name) {
-  Var value;
+static String field(Map identity, String name):
+  Var value
   if (!identity.try_get(name, &value))
-    raise %(bad-arg (why "BUNDLE.json has no $name"));
-  return value.str();
-}
+    raise %(bad-arg (why "BUNDLE.json has no $name"))
+  return value.str()
 
-static String bundle_row(Path tarball, Path output, String base) {
-  String member = NULL;
+static String bundle_row(Path tarball, Path output, String base):
+  String member = NULL
   foreach (String entry, %(tar -tzf $tarball).job().lines())
-    if (!member && entry.endswith("/BUNDLE.json")) member = entry;
-  if (!member) raise %(bad-arg (why "$tarball has no BUNDLE.json"));
-  Map identity = Json.parse(%(tar -xOzf $tarball $member).job().output());
-  String package = field(identity, "package");
+    if (!member && entry.endswith("/BUNDLE.json")) member = entry
+  if (!member) raise %(bad-arg (why "$tarball has no BUNDLE.json"))
+  Map identity = Json.parse(%(tar -xOzf $tarball $member).job().output())
+  String package = field(identity, "package")
   String platform =
-    %"${field(identity, "platform")}-${field(identity, "machine")}";
-  Var dependency = identity.getdefault("dependency_version", NULL);
-  String version = dependency ? dependency.str() : "0";
+    %"${field(identity, "platform")}-${field(identity, "machine")}"
+  Var dependency = identity.getdefault("dependency_version", NULL)
+  String version = dependency ? dependency.str() : "0"
   // Every platform's bundle is named <name>-native.tar.gz by its producer,
   // so the published copy carries the platform to keep them apart.
-  Path published = output.join(%"$package-$platform-native.tar.gz");
+  Path published = output.join(%"$package-$platform-native.tar.gz")
   if (tarball.absolute() != published.absolute())
-    tarball.copy_file(published);
-  String url = %"$base/${published.basename()}";
-  return %"$package $version bundle $platform $url ${digest(published)}";
-}
+    tarball.copy_file(published)
+  String url = %"$base/${published.basename()}"
+  return %"$package $version bundle $platform $url ${digest(published)}"
 
-Path self = String.new(argv[0]);
-root = self.absolute().dirname().dirname();
-String program = self.basename();
+Path self = String.new(argv[0])
+root = self.absolute().dirname().dirname()
+String program = self.basename()
 List spec = %(
   (--base (value url) required
    (help "URL prefix under which the files are published"))
@@ -89,45 +83,41 @@ List spec = %(
    (help "directory of source packages; defaults to packages"))
   (--x2c-version (value line)
    (help "index header version; defaults to builds/0/x2c --version"))
-  (bundles repeated (help "<name>-native.tar.gz bundles to list")));
-if (args.contains("-h") || args.contains("--help")) {
-  printf("%s", Args.usage(program, spec));
-  return 0;
-}
+  (bundles repeated (help "<name>-native.tar.gz bundles to list")))
+if args.contains("-h") || args.contains("--help"):
+  printf("%s", Args.usage(program, spec))
+  return 0
 
-Map options = NULL;
-try options = Args.parse(args, spec);
-catch %(bad-arg *detail): {
-  String why = detail.assoc(<why>), subject = detail[2].cadr();
-  Stderr.printf("%sx2c: %s: %s\n", Args.usage(program, spec), why, subject);
-  return 2;
-}
+Map options = NULL
+try options = Args.parse(args, spec)
+catch %(bad-arg *detail):
+  String why = detail.assoc(<why>), subject = detail[2].cadr()
+  Stderr.printf("%sx2c: %s: %s\n", Args.usage(program, spec), why, subject)
+  return 2
 
-try {
-  Path output = options["output"];
-  String base = options["base"];
-  output.make_dirs();
-  Array rows = [];
-  List directories = options["package-dir"];
-  if (!directories) directories = %(${root.join("packages")});
+try:
+  Path output = options["output"]
+  String base = options["base"]
+  output.make_dirs()
+  Array rows = []
+  List directories = options["package-dir"]
+  if (!directories) directories = %(${root.join("packages")})
   foreach (Var directory, directories)
-    source_rows(directory, output, base, rows);
+    source_rows(directory, output, base, rows)
   foreach (Var tarball, options["bundles"])
-    rows.push(bundle_row(tarball, output, base));
-  String version = options["x2c-version"];
+    rows.push(bundle_row(tarball, output, base))
+  String version = options["x2c-version"]
   if (!version)
     version = %(${root.join("builds/0/x2c")} --version).job().output()
-                .strip(NULL);
+                .strip(NULL)
   Array lines = [%"# x2c package index for $version",
-                  "# name version kind platform url sha256"];
-  foreach (Var row, rows.sort()) lines.push(row);
-  Path index = output.join("index.txt");
-  index.write_text(%"${lines.join("\n")}\n");
-  printf("x2c: wrote %s (%d rows)\n", index, (int) rows.len());
-}
-catch %(?code *detail): {
-  Var why = detail.assoc(<why>);
-  if (why is void) Stderr.printf("x2c: %s %s\n", code.str(), detail.repr());
-  else Stderr.printf("x2c: %s\n", why.str());
-  return 1;
-}
+                  "# name version kind platform url sha256"]
+  foreach (Var row, rows.sort()) lines.push(row)
+  Path index = output.join("index.txt")
+  index.write_text(%"${lines.join("\n")}\n")
+  printf("x2c: wrote %s (%d rows)\n", index, (int) rows.len())
+catch %(?code *detail):
+  Var why = detail.assoc(<why>)
+  if (why is void) Stderr.printf("x2c: %s %s\n", code.str(), detail.repr())
+  else Stderr.printf("x2c: %s\n", why.str())
+  return 1

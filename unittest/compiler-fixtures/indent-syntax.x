@@ -33,6 +33,21 @@ const char *name(Color c):
     default:
       return "blue"
 
+// A trailing `?:` colon continues; the last keyword owns the condition;
+// a `catch` label keeps its colon.
+int count_positive(int *xs, int n, int strict):
+  int threshold = strict ? 1 :
+    0
+  int total = 0
+  for (int i = 0; i < n; i++)
+    if xs[i] >= threshold:
+      total++
+  try:
+    if total > 2: raise %(bad-arg (operation "count"))
+  catch %(bad-arg *):
+    total = -total
+  return total
+
 int main(void):
   int xs[] = {3, -1, 4,
               -1, 5}
@@ -44,4 +59,5 @@ int main(void):
   Map m = {"a": 1, "b": 2}
   printf("%d %d %d %s %d\n", sum_positive(xs, 5), p.y, i, name(GREEN),
          (int) m["b"])
+  printf("%d %d\n", count_positive(xs, 5, 1), count_positive(xs, 2, 0))
   return 0

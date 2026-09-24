@@ -1,4 +1,5 @@
 #!/usr/bin/env -S x2c script
+#pragma indent
 /*  check-release -- check a published release the way a user meets it
 
     The site names the version, the site's installer installs that compiler,
@@ -12,64 +13,61 @@
     this checks the live installation routes. Nothing outside a scratch
     prefix is touched, and the prefix is removed on exit.
 */
-static int fail(String message) {
-  Stderr.printf("check-release: %s\n", message);
-  return 1;
-}
+static int fail(String message):
+  Stderr.printf("check-release: %s\n", message)
+  return 1
 
-if (!args) return fail("usage: tools/check-release <version> [package]");
-String version = args.car().str().remove_prefix("v");
-String package = args.cdr() ? args.cadr().str() : "pcre2";
-String site = Env.get("X2C_SITE");
-if (!site) site = "https://x2c-lang.dev";
-String releases = Env.get("X2C_RELEASES");
-String release_tag = Env.get("X2C_RELEASE_TAG");
+if (!args) return fail("usage: tools/check-release <version> [package]")
+String version = args.car().str().remove_prefix("v")
+String package = args.cdr() ? args.cadr().str() : "pcre2"
+String site = Env.get("X2C_SITE")
+if (!site) site = "https://x2c-lang.dev"
+String releases = Env.get("X2C_RELEASES")
+String release_tag = Env.get("X2C_RELEASE_TAG")
 if (site != "https://x2c-lang.dev" && (!releases || !release_tag))
-  return fail("a custom X2C_SITE requires X2C_RELEASES and X2C_RELEASE_TAG");
-if (!releases) releases = "https://github.com/gwf/x2c/releases/download";
-if (!release_tag) release_tag = %"v$version";
-String version_url = %"$site/x2c-version.txt";
+  return fail("a custom X2C_SITE requires X2C_RELEASES and X2C_RELEASE_TAG")
+if (!releases) releases = "https://github.com/gwf/x2c/releases/download"
+if (!release_tag) release_tag = %"v$version"
+String version_url = %"$site/x2c-version.txt"
 
-Path work = Path.temp_dir();
-defer work.remove_tree();
+Path work = Path.temp_dir()
+defer work.remove_tree()
 
 String published =
-  %(curl -fsSL "$site/x2c-version.txt").job().output().strip("\n");
+  %(curl -fsSL "$site/x2c-version.txt").job().output().strip("\n")
 if (published != version)
-  return fail(%"the site names $published, not $version");
+  return fail(%"the site names $published, not $version")
 
 String heading =
-  %(curl -fsSL "$site/packages/index.txt").job().lines().car();
+  %(curl -fsSL "$site/packages/index.txt").job().lines().car()
 if (heading != %"# x2c package index for x2c $version")
-  return fail(%"the site's package index is not for x2c $version");
+  return fail(%"the site's package index is not for x2c $version")
 
-Path installer = work.join("install.sh");
-%(curl -fsSL -o $installer "$site/install.sh").job().check();
-Path prefix = work.join("x2c");
-foreach (String requested, ["latest", version]) {
-  List options = requested == "latest" ? nil : %("--version" $version);
+Path installer = work.join("install.sh")
+%(curl -fsSL -o $installer "$site/install.sh").job().check()
+Path prefix = work.join("x2c")
+foreach String requested, ["latest", version]:
+  List options = requested == "latest" ? nil : %("--version" $version)
   %(sh $installer @options).job()
     .options({env: {X2C_PREFIX: prefix, X2C_VERSION: "latest",
                    X2C_RELEASES: releases,
                    X2C_VERSION_URL: version_url, X2C_RELEASE_TAG: release_tag},
               stdout: work.join(%"install-$requested.log")})
-    .check();
-  Path installed_x2c = prefix.join("bin/x2c");
-  String reported = %($installed_x2c --version).job().output().strip("\n");
+    .check()
+  Path installed_x2c = prefix.join("bin/x2c")
+  String reported = %($installed_x2c --version).job().output().strip("\n")
   if (reported != %"x2c $version")
-    return fail(%"install.sh installed $reported, not x2c $version");
-}
+    return fail(%"install.sh installed $reported, not x2c $version")
 
-Path x2c = prefix.join("bin/x2c");
-%($x2c install -q --index "$site/packages/index.txt" $package).job().check();
-List listed = %($x2c list).job().lines();
-int installed = 0;
+Path x2c = prefix.join("bin/x2c")
+%($x2c install -q --index "$site/packages/index.txt" $package).job().check()
+List listed = %($x2c list).job().lines()
+int installed = 0
 foreach (String row, listed)
-  if (row.startswith(%"$package ") && row.endswith(" bundle")) installed = 1;
-if (!installed) {
-  String rows = String.join(" / ", listed);
-  return fail(%"x2c install $package did not install a bundle: $rows");
-}
+  if (row.startswith(%"$package ") && row.endswith(" bundle")) installed = 1
+if !installed:
+  String rows = String.join(" / ", listed)
+  return fail(%"x2c install $package did not install a bundle: $rows")
 
 printf("release %s: site, installer, and %s bundle check out\n",
-       version, package);
+       version, package)

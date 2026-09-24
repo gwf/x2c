@@ -1,9 +1,10 @@
 # Indentation dogfooding
 
-> Status: active.
-> Gary decided the scope, the converter, and the handling of unconvertible
-> forms on 2026-09-24. Nothing is implemented. It follows the delivered
-> [indentation syntax](archive/indentation-syntax.md).
+> Status: done 2026-09-24, delivered on `dev` by the commit that archived
+> this plan. All eight files converted and passed the token proof; none was
+> rejected. The conversion found three layout gaps, fixed in the same
+> change and recorded under "Results". It follows the delivered
+> [indentation syntax](indentation-syntax.md).
 
 ## Goal
 
@@ -82,7 +83,38 @@ case is recorded here with the file and line, and Gary decides on a
 syntax change, a converter change, or leaving it. No file is edited by hand
 to make it convert.
 
-Recorded cases: none yet.
+Recorded cases: none. Every file in scope converted.
+
+## Results
+
+`tools/indent-convert --check` reported all eight files as converting, and
+the conversion wrote them. Line counts fell by 147 in total, almost all
+closing braces; `tools/x2c-script-ports.md` records the new counts.
+
+The first proof run failed on three files. Each failure was a layout pass
+gap, not a converter defect, and each is fixed in `lib/tokenizer.x` with
+coverage in the `indent-syntax` fixture:
+
+- a line ending in the `:` of a `?:` expression was read as a block
+  header; a colon that closes a pending `?` now continues the line
+  (`tools/check-doc-examples`, `tools/gen-llms-txt`);
+- in an unbraced `foreach (...)` whose body is a braced `if (...) {`, the
+  converted `if x:` continues the `foreach` line, and only the first
+  keyword of a line got parentheses; the condition now belongs to the last
+  control keyword before the colon (`tools/check-docs`);
+- `catch pattern: {` and `match (x) case pattern: {` lost their label
+  colon; a `case`, `default`, or `catch` anywhere in a header now keeps it.
+
+Behavior: the gated tools ran in `agent-pr-check`.
+`tools/check-gallery-examples` printed the same output and status before
+and after. `tools/gen-package-index`, run on a temporary one-package
+directory, wrote the same index row and archive members; the archive hash
+differs, as expected. `tools/check-release` relies on the proof alone.
+
+A statement body written without braces keeps its C form after
+conversion, as in `foreach (String line, lines)` followed by an indented
+`if (line) count++`. Rewriting it to the colon form would add a block, so
+the token proof would not hold.
 
 ## Validation
 

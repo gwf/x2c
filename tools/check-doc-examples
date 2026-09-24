@@ -1,4 +1,5 @@
 #!/usr/bin/env -S x2c script
+#pragma indent
 /*  check-doc-examples -- compile every x2c sample in the book and the site
 
     A fence tagged `x2c` must build with the stage-0 compiler. A sample that
@@ -15,196 +16,172 @@
 #include "doc-samples.x"
 #include <unistd.h>
 
-static Path root, compiler;
-static List build_flags;
-static Array samples, results, failures, running, attempts;
+static Path root, compiler
+static List build_flags
+static Array samples, results, failures, running, attempts
 
 /* The site's prose and carousel slides live under src/content so that Astro
    does not route each one as a page; they carry samples like the book. */
 static List _sources(int outputs_only) => outputs_only ? %("docs/src") :
-  %("docs/src" "site/src/pages" "site/src/content");
+  %("docs/src" "site/src/pages" "site/src/content")
 
 /* Sorted names, parents before their contents, as Python's sorted rglob. */
-static void _pages(Path directory, Array pages) {
-  foreach (String name, directory.list_dir()) {
-    Path child = directory.join(name);
-    if (child.is_dir()) _pages(child, pages);
-    else if (name.endswith(".md")) pages.push(child);
-  }
-}
+static void _pages(Path directory, Array pages):
+  foreach String name, directory.list_dir():
+    Path child = directory.join(name)
+    if (child.is_dir()) _pages(child, pages)
+    else if (name.endswith(".md")) pages.push(child)
 
-static String _wrapped_in_main(String code) {
-  Array lines = [];
+static String _wrapped_in_main(String code):
+  Array lines = []
   foreach (String line, code.split_lines(0))
-    lines.push(line.strip(NULL) ? "  " + line : line);
+    lines.push(line.strip(NULL) ? "  " + line : line)
   return "int main(int argc, char **argv) {\n" +
-         String.join("\n", lines.list_free()) + "\n  return 0;\n}\n";
-}
+         String.join("\n", lines.list_free()) + "\n  return 0;\n}\n"
 
 /* Returns `((label source) ...)` in the order they are tried. Without
    `main`, the sample as written links nothing it could run. */
-static List _candidates(Sample sample) {
-  (String where, String code, String expected, int runs) = sample;
+static List _candidates(Sample sample):
+  (String where, String code, String expected, int runs) = sample
   if (Regex.compile("\\bmain\\s*\\(").match(code))
-    return %(("as written" $code));
-  List wrapped = %("wrapped in main" ${_wrapped_in_main(code)});
-  return runs ? %($wrapped) : %(("as written" $code) $wrapped);
-}
+    return %(("as written" $code))
+  List wrapped = %("wrapped in main" ${_wrapped_in_main(code)})
+  return runs ? %($wrapped) : %(("as written" $code) $wrapped)
 
 /* Python's repr of a str, for the ASCII the samples print. */
-static String _repr(String text) {
-  int single = text.contains("'") && !text.contains("\"");
-  Array pieces = [single ? "\"" : "'"];
-  for (int at = 0; at < text.len(); at++) {
-    unsigned char ch = text[at];
-    char escaped[8];
-    if (ch == '\\') pieces.push("\\\\");
-    else if (ch == '\n') pieces.push("\\n");
-    else if (ch == '\r') pieces.push("\\r");
-    else if (ch == '\t') pieces.push("\\t");
-    else if (ch == '\'' && !single) pieces.push("\\'");
-    else if (ch < 0x20 || ch == 0x7f) {
-      snprintf(escaped, sizeof escaped, "\\x%02x", ch);
-      pieces.push(String.new(escaped));
-    }
-    else pieces.push(String.new_len((const char *) &ch, 1));
-  }
-  pieces.push(single ? "\"" : "'");
-  return String.join(NULL, pieces.list_free());
-}
+static String _repr(String text):
+  int single = text.contains("'") && !text.contains("\"")
+  Array pieces = [single ? "\"" : "'"]
+  for int at = 0; at < text.len(); at++:
+    unsigned char ch = text[at]
+    char escaped[8]
+    if (ch == '\\') pieces.push("\\\\")
+    else if (ch == '\n') pieces.push("\\n")
+    else if (ch == '\r') pieces.push("\\r")
+    else if (ch == '\t') pieces.push("\\t")
+    else if (ch == '\'' && !single) pieces.push("\\'")
+    else if ch < 0x20 || ch == 0x7f:
+      snprintf(escaped, sizeof escaped, "\\x%02x", ch)
+      pieces.push(String.new(escaped))
+    else pieces.push(String.new_len((const char *) &ch, 1))
+  pieces.push(single ? "\"" : "'")
+  return String.join(NULL, pieces.list_free())
 
-static String _stdout(Job job) {
-  try return job.output();
-  catch %(cmd-fail *detail): return %"${detail.assoc(<output>)}";
-}
+static String _stdout(Job job):
+  try return job.output()
+  catch %(cmd-fail *detail): return %"${detail.assoc(<output>)}"
 
-static void _launch(Job job, List attempt) {
-  running.push(job.start());
-  attempts.push(%($job @attempt));
-}
+static void _launch(Job job, List attempt):
+  running.push(job.start())
+  attempts.push(%($job @attempt))
 
 /* Builds candidate `candidate` of sample `index` in a fresh directory.
    A sample without expected output is compiled without linking. */
-static void _begin(int index, int candidate) {
-  Sample sample = samples[index];
-  (String label, String source) = _candidates(sample)[candidate].list();
-  Path work = Path.temp_dir(), program = work.join("sample");
-  work.join("sample.x").write_text(source);
-  List mode = sample.runs() ? %() : %(--compile-only);
+static void _begin(int index, int candidate):
+  Sample sample = samples[index]
+  (String label, String source) = _candidates(sample)[candidate].list()
+  Path work = Path.temp_dir(), program = work.join("sample")
+  work.join("sample.x").write_text(source)
+  List mode = sample.runs() ? %() : %(--compile-only)
   Job job = %($compiler build @mode @build_flags
               --build-dir ${work.join("build")} --output $program
-              ${work.join("sample.x")});
+              ${work.join("sample.x")})
   _launch(job.options({dir: root, stderr: <capture>}),
-          %($index $candidate $work <build>));
-}
+          %($index $candidate $work <build>))
 
-static void _failed(int index, int candidate, String detail) {
-  List candidates = _candidates(samples[index]);
-  String label = candidates[candidate].list().car();
-  Array reasons = failures[index];
-  reasons.push(%"    $label: $detail");
-  if (candidate + 1 < candidates.len()) {
-    _begin(index, candidate + 1);
-    return;
-  }
-  Array tried = [];
-  foreach (List entry, candidates) tried.push(entry.car());
+static void _failed(int index, int candidate, String detail):
+  List candidates = _candidates(samples[index])
+  String label = candidates[candidate].list().car()
+  Array reasons = failures[index]
+  reasons.push(%"    $label: $detail")
+  if candidate + 1 < candidates.len():
+    _begin(index, candidate + 1)
+    return
+  Array tried = []
+  foreach (List entry, candidates) tried.push(entry.car())
   results[index] = %"${samples[index].list().car()}: x2c sample fails " +
     %"(tried ${String.join(" and ", tried.list_free())}); fix it, or tag " +
     "it `x2c,ignore` with an <!-- ignore: reason --> comment above the " +
-    "fence\n" + String.join("\n", reasons);
-}
+    "fence\n" + String.join("\n", reasons)
 
 /* Advances the attempt whose job finished. */
-static void _advance(List attempt) {
-  (Job job, int index, int candidate, Path work, Symbol phase) = attempt;
+static void _advance(List attempt):
+  (Job job, int index, int candidate, Path work, Symbol phase) = attempt
   (String where, String code, String expected, int runs, int status) =
-    samples[index].list();
-  int exit = job.status();
-  String output = _stdout(job), errors = job.errors();
-  if (phase == <build> && !exit && runs) {
+    samples[index].list()
+  int exit = job.status()
+  String output = _stdout(job), errors = job.errors()
+  if phase == <build> && !exit && runs:
     _launch(%(${work.join("sample")}).job()
               .options({dir: work, stderr: <capture>}),
-            %($index $candidate $work <run>));
-    return;
-  }
-  work.remove_tree();
-  if (phase == <build> && exit) {
-    String detail = errors ? errors.strip(NULL) : NULL;
-    if (!detail) detail = output ? output.strip(NULL) : NULL;
-    _failed(index, candidate, %"x2c: ${detail ? detail : ""}");
-  }
+            %($index $candidate $work <run>))
+    return
+  work.remove_tree()
+  if phase == <build> && exit:
+    String detail = errors ? errors.strip(NULL) : NULL
+    if (!detail) detail = output ? output.strip(NULL) : NULL
+    _failed(index, candidate, %"x2c: ${detail ? detail : ""}")
   else if (phase == <run> &&
            (exit != status || (expected != output && expected != errors)))
     _failed(index, candidate,
             %"output differs (status $exit, expected $status)\n" +
             %"      expected: ${_repr(expected)}\n" +
             %"      stdout:   ${_repr(output)}\n" +
-            %"      stderr:   ${_repr(errors)}");
-}
+            %"      stderr:   ${_repr(errors)}")
 
-root = Path.new(argv[0]).absolute().dirname().dirname();
-compiler = root.join("builds/0/x2c");
-if (!compiler.exists()) {
-  Stderr.printf("builds/0/x2c is missing; run 'make build' first\n");
-  return 1;
-}
-String cc = Env.get("CC"), job_limit = Env.get("JOBS");
+root = Path.new(argv[0]).absolute().dirname().dirname()
+compiler = root.join("builds/0/x2c")
+if !compiler.exists():
+  Stderr.printf("builds/0/x2c is missing; run 'make build' first\n")
+  return 1
+String cc = Env.get("CC"), job_limit = Env.get("JOBS")
 Array flags = ["--cc", cc ? cc : "cc", "--package-dir",
-                root.join("packages")];
-foreach (Path include, root.join("packages/*/deps/include").glob()) {
-  flags.push("--c-system-dir");
-  flags.push(include);
-}
-build_flags = flags.list_free();
-int limit = job_limit ? atoi(job_limit) : (int) sysconf(_SC_NPROCESSORS_ONLN);
-if (limit < 1) limit = 1;
+                root.join("packages")]
+foreach Path include, root.join("packages/*/deps/include").glob():
+  flags.push("--c-system-dir")
+  flags.push(include)
+build_flags = flags.list_free()
+int limit = job_limit ? atoi(job_limit) : (int) sysconf(_SC_NPROCESSORS_ONLN)
+if (limit < 1) limit = 1
 
-int outputs_only = args.len() == 1 && args.car().str() == "--outputs";
-Array errors = [];
-samples = [];
-foreach (String source, _sources(outputs_only)) {
-  Array pages = [];
-  _pages(root.join(source), pages);
+int outputs_only = args.len() == 1 && args.car().str() == "--outputs"
+Array errors = []
+samples = []
+foreach String source, _sources(outputs_only):
+  Array pages = []
+  _pages(root.join(source), pages)
   foreach (Path page, pages)
     foreach (Sample sample, Sample.collect(root, page, errors))
-      if (!outputs_only || sample.runs()) samples.push(sample);
-}
+      if (!outputs_only || sample.runs()) samples.push(sample)
 
-results = [];
-failures = [];
-running = [];
-attempts = [];
-for (int index = 0; index < samples.len(); index++) {
-  results.push(NULL);
-  failures.push([]);
-}
-int next = 0;
-while (next < samples.len() || running.len()) {
-  if (next < samples.len() && running.len() < limit) {
-    _begin(next++, 0);
-    continue;
-  }
-  Job done = Job.wait_any(running);
-  for (int at = 0; at < attempts.len(); at++) {
-    List attempt = attempts[at];
-    Job owner = attempt.car();
-    if (owner == done) {
-      attempts.remove(at);
-      _advance(attempt);
-      break;
-    }
-  }
-}
+results = []
+failures = []
+running = []
+attempts = []
+for int index = 0; index < samples.len(); index++:
+  results.push(NULL)
+  failures.push([])
+int next = 0
+while next < samples.len() || running.len():
+  if next < samples.len() && running.len() < limit:
+    _begin(next++, 0)
+    continue
+  Job done = Job.wait_any(running)
+  for int at = 0; at < attempts.len(); at++:
+    List attempt = attempts[at]
+    Job owner = attempt.car()
+    if owner == done:
+      attempts.remove(at)
+      _advance(attempt)
+      break
 
 foreach (Var result, results)
-  if (result) errors.push(result);
-if (errors.len()) {
-  Stderr.printf("doc example check failed:\n");
-  foreach (String error, errors) Stderr.printf("- %s\n", error);
-  return 1;
-}
-int shown = 0;
-foreach (Sample sample, samples) shown += sample.runs();
+  if (result) errors.push(result)
+if errors.len():
+  Stderr.printf("doc example check failed:\n")
+  foreach (String error, errors) Stderr.printf("- %s\n", error)
+  return 1
+int shown = 0
+foreach (Sample sample, samples) shown += sample.runs()
 printf("doc example check passed: %d x2c samples compiled, %d with matching "
-       "output\n", (int) samples.len(), shown);
+       "output\n", (int) samples.len(), shown)

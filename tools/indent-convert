@@ -1,0 +1,305 @@
+#!/usr/bin/env -S x2c script
+/*  indent-convert -- rewrite brace-form x2c in the indentation syntax
+
+    Usage: tools/indent-convert [--check] FILE...
+
+    Adds `#pragma indent`, turns each block `{` that ends its line into `:`,
+    removes the matching `}` and the parentheses around a control condition,
+    and drops each `;` that ends a logical line. A block brace in the middle
+    of a line stays as written. The file's own indentation groups the result,
+    so it must agree with the braces.
+
+    Each conversion is proved: scanning the output in the indentation syntax
+    must give back the original tokens, apart from empty statements and the
+    block an indented `case` body opens. A file that fails is reported and
+    left unchanged. `--check` reports without writing.
+*/
+#include <stdlib.h>
+#include <string.h>
+
+/* One replacement of source bytes [start, end); a NULL text deletes. */
+typedef struct Edit { int start, end; String text; } Edit;
+
+static struct Token *tokens;
+static int count, *partner;
+static Edit *edits;
+static int nedits;
+
+static inline int _trivia(Token t) =>
+  t.type == <space> || t.type == <comment>;
+
+static int _before(int i) {
+  while (--i >= 0 && _trivia(&tokens[i])) { }
+  return i;
+}
+
+static int _after(int i) {
+  while (++i < count && _trivia(&tokens[i])) { }
+  return i;
+}
+
+static inline int _end(int i) => tokens[i].pos + tokens[i].len;
+
+static inline int _opens(Token t) {
+  int n = t.len;
+  return n && t.type != <lit-char*> && t.type != <lit-char> &&
+         t.type != <segment> && t.type != <preproc> &&
+         strchr("([{", t.text[n - 1]);
+}
+
+static inline int _closes(Token t) =>
+  t.type == <")"> || t.type == <"]"> || t.type == <"}">;
+
+static inline int _control(Token t) =>
+  t.text == "if" || t.text == "while" || t.text == "for" ||
+  t.text == "foreach" || t.text == "switch" || t.text == "match";
+
+static void _edit(int start, int end, String text) {
+  edits[nedits++] = (Edit) {start, end, text};
+}
+
+static int _by_start(const void *a, const void *b) =>
+  ((Edit *) a).start - ((Edit *) b).start;
+
+/* A `{` opens a block after a statement boundary, a header word, or the `)`
+   of a header group that follows a name or a control keyword. */
+static int _block_brace(int i) {
+  int b = _before(i);
+  if (b < 0) return 1;
+  Token prev = &tokens[b];
+  switch (prev.type) {
+    case <;>: case <:>: case <"{">: case <"}">: case <"]">: case <ident>:
+      return 1;
+    case <")">: {
+      int head = _before(partner[b]);
+      return head >= 0 && (tokens[head].type == <ident> ||
+                           _control(&tokens[head]));
+    }
+  }
+  String word = prev.text;
+  return word == "else" || word == "do" || word == "try" ||
+         word == "finally" || word == "defer" || word == "struct" ||
+         word == "union" || word == "enum";
+}
+
+static inline int _same_line(int a, int b) =>
+  b >= 0 && b < count && tokens[a].line == tokens[b].line;
+
+/* Scans `text` and returns its significant tokens as `type text` lines,
+   without empty statements or the braces of a `case` body. */
+static String _normal(String text, int layout) {
+  Tokenizer t = Tokenizer.new(text);
+  t.layout = layout;
+  t.scan();
+  if (t.status() != <ok>) return %"scan failed: ${t.status()}";
+  struct Token *all = (struct Token *) t.tokens;
+  int n = t.tokens.len() - 1;
+  Array lines = [], labels = [];
+  String previous = NULL;
+  for (int i = 0; i < n; i++) {
+    Token tok = &all[i];
+    if (_trivia(tok)) continue;
+    if (tok.type == <"{">) {
+      int j = i, label = 0;
+      while (--j >= 0 && _trivia(&all[j])) { }
+      for (int k = j; j >= 0 && all[j].type == <:> && k >= 0 &&
+                      all[k].line == all[j].line; k--)
+        label |= all[k].text == "case" || all[k].text == "default";
+      labels.push(label);
+      if (label) continue;
+    }
+    if (tok.type == <"}"> && labels.len() && (int) labels.take_last())
+      continue;
+    String line = %"${tok.type} ${tok.text}";
+    if (tok.type == <;> && previous &&
+        (previous == "; ;" || previous == "{ {" || previous == "} }"))
+      continue;
+    lines.push(line);
+    previous = line;
+  }
+  return String.join("\n", lines.list_free());
+}
+
+/* Marks brace and parenthesis edits for the block `{` at `i`. */
+static void _open_block(int i, char *removed) {
+  int b = _before(i), start = b >= 0 ? _end(b) : 0;
+  if (!_same_line(i, b) && (b < 0 || tokens[b].type == <;> ||
+                            tokens[b].type == <"{"> ||
+                            tokens[b].type == <"}">)) {
+    _edit(tokens[i].pos, _end(i), "do:");
+    return;
+  }
+  String colon = tokens[b].type == <:> ? NULL : ":";
+  if (tokens[b].type == <")">) {
+    int o = partner[b], head = _before(o);
+    int keyword = head >= 0 && _control(&tokens[head]) &&
+                  tokens[_after(o)].type != <;>;
+    if (keyword) {
+      _edit(tokens[o].pos, _end(o), NULL);
+      removed[o] = removed[b] = 1;
+      start = tokens[b].pos;
+    }
+  }
+  _edit(start, _end(i), colon);
+}
+
+/* Marks the deletion of the block `}` at `i`, or returns 0 when the line
+   cannot be written in the indentation syntax. */
+static int _close_block(String source, int i) {
+  int n = _after(i), b = _before(i);
+  int rest = _same_line(i, n) && !(tokens[n].type == <;> &&
+                                  !_same_line(i, _after(n)));
+  int last = rest ? i : _same_line(i, n) ? n : i;
+  if (_same_line(i, b)) {
+    if (rest) return 0;
+    _edit(_end(b), _end(last), NULL);
+    return 1;
+  }
+  if (rest) {
+    _edit(tokens[i].pos, tokens[n].pos, NULL);
+    return 1;
+  }
+  char *text = source;
+  int start = tokens[i].pos, end = _end(last);
+  while (start > 0 && text[start - 1] != '\n') start--;
+  while (text[end] == ' ' || text[end] == '\t') end++;
+  if (text[end] && text[end] != '\n') {
+    _edit(tokens[i].pos, _end(last), NULL);
+    return 1;
+  }
+  _edit(start, text[end] ? end + 1 : end, NULL);
+  return 1;
+}
+
+/* Returns the converted text of `source`, or NULL with `*why` set. */
+static String _convert(String source, String *why) {
+  Tokenizer t = Tokenizer.new(source);
+  t.scan();
+  if (t.status() != <ok>) {
+    *why = "the file does not scan";
+    return NULL;
+  }
+  tokens = (struct Token *) t.tokens;
+  count = t.tokens.len() - 1;
+  partner = calloc(count + 1, sizeof(int));
+  edits = calloc(4 * count + 8, sizeof(Edit));
+  char *block = calloc(count + 1, 1), *removed = calloc(count + 1, 1);
+  defer {
+    free(partner); free(edits); free(block); free(removed);
+  }
+  nedits = 0;
+
+  Array open = [];
+  for (int i = 0; i < count; i++) {
+    if (_trivia(&tokens[i])) continue;
+    if (_opens(&tokens[i])) open.push(i);
+    else if (_closes(&tokens[i]) && open.len()) {
+      int o = open.take_last();
+      partner[o] = i;
+      partner[i] = o;
+    }
+  }
+
+  /* A block brace that ends its line becomes a colon; one in the middle of
+     a line stays, with its body, as written. */
+  for (int i = 0; i < count; i++) {
+    if (tokens[i].type != <"{"> || !_block_brace(i) ||
+        _same_line(i, _after(i)))
+      continue;
+    block[i] = block[partner[i]] = removed[partner[i]] = 1;
+    _open_block(i, removed);
+    if (!_close_block(source, partner[i])) {
+      *why = %"line ${tokens[partner[i]].line}: code follows a closing brace";
+      return NULL;
+    }
+  }
+
+  /* A `;` that ends a logical line of the output goes. Lines group as the
+     layout pass groups them: a deeper line continues its statement unless
+     the line before it opens a block. A colon that closes a `?` opens
+     none. */
+  int depth = 0, indent = 0, previous = -1, colon = 0, pending = 0;
+  for (int i = 0; i <= count; i++) {
+    if (i < count && (_trivia(&tokens[i]) || removed[i])) continue;
+    Token tok = i < count ? &tokens[i] : NULL;
+    int line_start = !tok || tok.type == <preproc> || previous < 0 ||
+      depth == 0 && tok.line > tokens[previous].line && tok.text != "." &&
+      (tok.col <= indent || colon);
+    if (line_start && previous >= 0 && tokens[previous].type == <;> &&
+        !block[previous])
+      _edit(tokens[previous].pos, _end(previous), NULL);
+    if (!tok) break;
+    if (line_start) {
+      indent = tok.col;
+      pending = 0;
+    }
+    if (!block[i] && _closes(tok)) depth--;
+    colon = block[i];
+    if (!depth && tok.text == "?") pending++;
+    else if (!depth && tok.type == <:>) {
+      colon = !pending;
+      if (pending) pending--;
+    }
+    if (!block[i] && _opens(tok)) depth++;
+    previous = i;
+  }
+
+  /* The pragma goes after a shebang line, which must stay first. */
+  int at = source.startswith("#!") ? source.find("\n") + 1 : 0;
+  _edit(at, at, "#pragma indent\n");
+
+  qsort(edits, nedits, sizeof(Edit), _by_start);
+  Array pieces = [];
+  int from = 0;
+  for (int k = 0; k < nedits; k++) {
+    if (edits[k].start < from) {
+      *why = %"overlapping edits at byte ${edits[k].start}";
+      return NULL;
+    }
+    pieces.push(source[from:edits[k].start]);
+    if (edits[k].text) pieces.push(edits[k].text);
+    from = edits[k].end;
+  }
+  pieces.push(source[from:]);
+  String output = String.join("", pieces.list_free());
+
+  String expected = _normal(source, 0), actual = _normal(output, 1);
+  if (expected != actual) {
+    List want = expected.split("\n"), got = actual.split("\n");
+    int index = 0;
+    while (want && got && want.car().str() == got.car().str()) {
+      want = want.cdr();
+      got = got.cdr();
+      index++;
+    }
+    String wanted = want ? want.car().str() : "end";
+    String found = got ? got.car().str() : "end";
+    *why = %"token $index differs after conversion: expected $wanted, " +
+           %"got $found";
+    return NULL;
+  }
+  return output;
+}
+
+int check = 0, failed = 0;
+foreach (String arg, args) {
+  if (arg == "--check") {
+    check = 1;
+    continue;
+  }
+  Path path = Path.new(arg);
+  String source = path.read_text(), why = NULL;
+  if (source.contains("#pragma indent")) {
+    printf("%s: already indented\n", arg);
+    continue;
+  }
+  String output = _convert(source, &why);
+  if (!output) {
+    Stderr.printf("%s: %s\n", arg, why);
+    failed = 1;
+    continue;
+  }
+  if (!check) path.write_text(output);
+  printf("%s: %s\n", arg, check ? "converts" : "converted");
+}
+return failed;

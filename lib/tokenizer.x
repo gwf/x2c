@@ -589,6 +589,33 @@ static inline int _conditional(Token t) =>
   t.text == "if" || t.text == "while" || t.text == "for" ||
   t.text == "foreach" || t.text == "switch" || t.text == "match";
 
+/* Makes the colon at `colon` end the condition of the last control keyword
+   at depth zero before it, adding parentheses unless one group already
+   spans the condition. The colon then becomes `body`, or goes when `body`
+   is NULL. Returns 0 when no control keyword precedes the colon. */
+static int _layout_condition(
+  Token *sig, int *depths, _LayoutEdit *edits, struct Token *all, int first,
+  int colon, String body) {
+  int key = -1;
+  for (int m = first; m < colon; m++)
+    if (!depths[m] && _conditional(sig[m]) &&
+        (m == first || sig[m - 1].text != "."))
+      key = m;
+  if (key < 0) return 0;
+  int wrapped = sig[key + 1].type == <"("> && sig[colon - 1].type == <")">;
+  for (int m = key + 2; wrapped && m < colon - 1; m++)
+    wrapped = depths[m] > 0;
+  _LayoutEdit *tail = &edits[sig[colon] - all];
+  if (wrapped)
+    tail.type = body ? <"{"> : <space>;
+  else {
+    edits[sig[key + 1] - all].before = "(";
+    tail.type = <")">;
+    tail.after = body;
+  }
+  return 1;
+}
+
 /* Appends zero-width punctuation tokens at `at`'s start or end. */
 static Bytes _layout_insert(Bytes out, char *chars, Token at, int end) {
   for (; chars && *chars; chars++) {
@@ -618,10 +645,10 @@ static void Tokenizer._layout(Tokenizer t) {
   _LayoutEdit *edits = calloc(count + 1, sizeof(_LayoutEdit));
   int *indents = calloc(count + 2, sizeof(int));
   String *closers = calloc(count + 2, sizeof(String));
-  char *enums = calloc(count + 2, 1);
+  char *enums = calloc(count + 2, 1), *ternary = calloc(count + 1, 1);
   defer {
     free(sig); free(depths); free(lines); free(edits); free(indents);
-    free(closers); free(enums);
+    free(closers); free(enums); free(ternary);
   }
   Token error_at = NULL;
 
@@ -630,24 +657,32 @@ static void Tokenizer._layout(Tokenizer t) {
       sig[nsig++] = &all[i];
 
   /* Logical lines run to a line break at bracket depth zero, except that a
-     deeper line or one starting with `.` continues them. */
-  int end_line = 0;
+     deeper line or one starting with `.` continues them. A colon that
+     closes a `?` opens no block, so the line after it continues too. */
+  int end_line = 0, pending = 0;
   for (int k = 0; k < nsig; k++) {
     Token tok = sig[k];
     int directive = tok.type == <preproc>;
     if (directive || !nlines || lines[nlines - 1].directive ||
         (depth == 0 && tok.line > end_line && tok.text != "." &&
-         (tok.col <= lines[nlines - 1].indent || sig[k - 1].text == ":"))) {
+         (tok.col <= lines[nlines - 1].indent ||
+          (sig[k - 1].text == ":" && !ternary[k - 1])))) {
       Token space = tok > all ? tok - 1 : NULL;
       char *newline = space && space.type == <space> ?
                       strrchr(space.text, '\n') : NULL;
       if (!directive && newline && strchr(newline, '\t') && !error_at)
         error_at = tok;
       lines[nlines++] = (_LayoutLine) {k, k, tok.col, directive};
+      pending = 0;
     }
     lines[nlines - 1].last = k;
     if (_closes(tok)) depth--;
     depths[k] = depth;
+    if (!depth && tok.text == "?") pending++;
+    else if (!depth && tok.text == ":" && pending) {
+      ternary[k] = 1;
+      pending--;
+    }
     if (_opens(tok)) depth++;
     end_line = tok.line;
     for (char *c = tok.text; c && *c; c++) end_line += *c == '\n';
@@ -666,30 +701,26 @@ static void Tokenizer._layout(Tokenizer t) {
     int j = i + 1;
     while (j < nlines && lines[j].directive) j++;
     int next = j < nlines ? lines[j].indent : indents[0];
-    int key = line.first + (first.text == "else" && line.first < line.last &&
-                            sig[line.first + 1].text == "if");
-    Token keyword = sig[key];
     _LayoutEdit *tail = &edits[sig[line.last] - all];
     String suffix = NULL;
-    if (last.text == ":" && next > line.indent) {
-      /* An aggregate header names no parameters, unlike a function's. */
-      int aggregate = 0, enumeration = 0, parameters = 0;
+    if (last.text == ":" && !ternary[line.last] && next > line.indent) {
+      /* An aggregate header names no parameters, unlike a function's. A
+         `case`, `default`, or `catch` label keeps its colon. */
+      int aggregate = 0, enumeration = 0, parameters = 0, labeled = 0;
       for (int m = line.first; m < line.last; m++) {
         String word = sig[m].text;
         aggregate |= word == "struct" || word == "union" || word == "enum";
         enumeration |= word == "enum";
         parameters |= sig[m].type == <"(">;
+        labeled |= !depths[m] && (word == "case" || word == "default" ||
+                                  word == "catch");
       }
       aggregate &= !parameters;
       enumeration &= !parameters;
-      if (first.text == "case" || first.text == "default")
+      if (labeled)
         tail.after = "{";
-      else if (_conditional(keyword) && sig[key + 1].type != <"(">) {
-        edits[sig[key + 1] - all].before = "(";
-        tail.type = <")">;
-        tail.after = "{";
-      }
-      else
+      else if (!_layout_condition(sig, depths, edits, all, line.first,
+                                  line.last, "{"))
         tail.type = <"{">;
       /* `do:` without a `while` trailer is a bare block. */
       if (first.text == "do" && line.last == line.first + 1) {
@@ -708,26 +739,16 @@ static void Tokenizer._layout(Tokenizer t) {
     }
     else {
       /* A one-line body follows the first colon at depth zero that closes
-         no `?`. */
-      if (_conditional(keyword) || keyword.text == "else") {
-        int pending = 0;
-        for (int m = key + 1; m < line.last; m++) {
-          Token tok = sig[m];
-          if (depths[m]) continue;
-          if (tok.text == "?") pending++;
-          else if (tok.text == ":" && pending) pending--;
-          else if (tok.text == ":") {
-            if (keyword.text == "else")
-              edits[sig[m] - all].type = <space>;
-            else if (sig[key + 1].type != <"(">) {
-              edits[sig[key + 1] - all].before = "(";
-              edits[sig[m] - all].type = <")">;
-            }
-            else
-              edits[sig[m] - all].type = <space>;
-            break;
-          }
-        }
+         no `?`, unless a label owns that colon. */
+      for (int m = line.first + 1; m < line.last; m++) {
+        String word = sig[m].text;
+        if (depths[m]) continue;
+        if (word == "case" || word == "default" || word == "catch") break;
+        if (word != ":" || ternary[m]) continue;
+        if (!_layout_condition(sig, depths, edits, all, line.first, m, NULL)
+            && sig[m - 1].text == "else")
+          edits[sig[m] - all].type = <space>;
+        break;
       }
       int lisp = first.type == <"$(">;
       for (int m = line.first + 1; lisp && m < line.last; m++)

@@ -115,6 +115,15 @@ int main(void):
   return 0
 ```
 
+## Converting a file
+
+`tools/indent-convert FILE...` rewrites brace-form files in place, adding
+`#pragma indent` so each keeps its name. It proves every conversion by
+scanning the result in the indentation syntax and comparing the tokens with
+the original's, and it leaves a file unchanged when they differ.
+`--check` reports without writing. A statement body written without braces
+keeps its form, so it still reads as C.
+
 A `.xpmacro` file writes macros the same way. The
 [language reference](../reference/language.md#indentation-syntax) lists
 every layout rule. `examples/tours/indentation.xp` is a complete program.
