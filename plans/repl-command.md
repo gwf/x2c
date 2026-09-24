@@ -85,8 +85,8 @@ runtime serves builds and logging and stays: progress and receipts in
    `src/cli.x`. It returns the defaults `_parse_command` sets today,
    `_parse_command` uses it, and the REPL command calls it with `<repl>`,
    then adds its native modules. This is the one addition to the compiler.
-4. **Startup.** `main` installs the embedded compiler identity (external
-   commands, decision 7), initializes the environment, calls
+4. **Startup.** `main` supplies the embedded compiler identity during
+   environment initialization (external commands, decision 7), calls
    `Frontend.load_support`, and then calls `repl_run`, which is the same
    order `src/main.x` uses today.
 5. **Native modules.** A module built by `x2c build --kind meta-module`
