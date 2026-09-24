@@ -8,7 +8,8 @@
     `x2c.type.fields`, which made Lisp the authoring language for any macro
     whose implementation needed them. The declarations below name the same
     operations from x2c, so a macro's implementation is x2c. Each x2c name is
-    its Lisp name with `_` for `.`, and the lowering maps one to the other.
+    its Lisp name with `_` for `.` and `-`, and a predicate `x2c.type.X?` is
+    `x2c_type_is_X`.
 
     Syntax builders have `meta` bodies shared by compile time and runtime.
     A declaration with no body names a compiler operation. A `meta` function
@@ -23,7 +24,7 @@
     The declarations below are the signatures. Each operation's semantics are
     those of the compile-time Lisp operation of the same name, specified under
     "Compile-time Lisp and imports" in the language reference, which also gives
-    the naming rule and the two answers whose shape differs.
+    the naming rule and the answers whose shape differs.
     See `plans/archive/meta-functions.md`.
 */
 
@@ -124,11 +125,10 @@ meta List x2c_param_make(List type, Var name) {
 }
 
 /* --- reading what the macro captured ------------------------------------
-   A macro receives bound syntax, and these are the four questions about it
-   a body cannot answer by walking the List: the source the developer wrote,
-   a binding's spelling, an expression's type, and the value behind an
-   interned constant. Each reaches compiler state the syntax only refers
-   to. */
+   A macro receives bound syntax, and these are the questions about it a
+   body cannot answer by walking the List: the source the developer wrote,
+   a binding's spelling, an expression's type, and a literal's value. Each
+   reaches compiler state the syntax only refers to. */
 
 /** Returns the source text the developer wrote for `syntax`, exactly as it
     appears in the file. Fails the expansion when the captured syntax is
@@ -143,10 +143,9 @@ String x2c_binding_spelling(Var syntax);
     or binding `value`. */
 List x2c_syntax_type(List value);
 
-/** Returns the interned value behind a `(cache ID)` reference, so a
-    composite literal a macro received reads as a value. Fails the expansion
-    when `node` holds no such reference. */
-Var x2c_cache_value(List node);
+/** Returns the `String`, `int`, or `Symbol` a literal expression holds.
+    Fails the expansion when `syntax` is not such a literal. */
+Var x2c_literal_value(Var syntax);
 
 /* --- reading a captured function ----------------------------------------
    A decorator receives a whole function, and these four take it apart: its
@@ -239,7 +238,23 @@ meta List x2c_type_members(List type) {
 }
 
 /** Returns whether a value of the `Type` `value` can be held in a `Var`. */
-int x2c_type_value(List value);
+int x2c_type_is_value(List value);
+
+/** Returns whether the `Type` `value` is an integral type. */
+int x2c_type_is_integral(List value);
+
+/** Returns whether the `Type` `value` is a pointer type. */
+int x2c_type_is_pointer(List value);
+
+/** Returns the `Type` the pointer or array `Type` `value` refers to. */
+List x2c_type_element(List value);
+
+/** Returns the parameter `Type`s of the function `Type` `value`, or of the
+    function a pointer or array `Type` refers to. */
+List x2c_type_parameters(List value);
+
+/** Returns the result `Type` of the function `Type` `value`. */
+List x2c_type_return(List value);
 
 /** Returns the generated tag name for `name`, unique to this source file. */
 Symbol x2c_type_tag_name(String name);
@@ -252,6 +267,11 @@ String x2c_type_reverse_name(String base, String participant);
     `Type` `type` selects, or nothing when there is none. Fails the
     expansion when imported packages provide it ambiguously. */
 List x2c_method_resolve(List type, String name);
+
+/** Returns the expression naming the function that implements `member` in
+    the conformance of `participant` to the protocol `base`, or nothing when
+    there is none. */
+List x2c_protocol_member(List participant, List base, String member);
 
 /* --- the invocation site ------------------------------------------------
    Where the macro was written and what is beside it. A macro that reports
@@ -279,6 +299,10 @@ String x2c_embed_text(String path);
 /** Reports `message` with `notes` at the macro invocation and fails the
     expansion. This does not return. */
 void x2c_diagnostic_fail(String message, List notes);
+
+/** Reports `message` with `notes` as a warning where it is raised, and
+    returns so the expansion continues. */
+void x2c_diagnostic_warn(String message, List notes);
 
 /* --- lowering -----------------------------------------------------------
    The generators under `etc/` record the Lisp a function lowers to. */

@@ -142,7 +142,8 @@ static List _sdk_binding_type(List binding) =>
     %(type $binding)
   ];
 
-static Var _sdk_syntax_type(List value) {
+/** Answers `x2c.syntax.type`, declared in `lib/meta.x`. */
+List x2c_syntax_type(List value) {
   _sdk_guard("x2c.syntax.type");
   match (value) {
     case %(expr ? ?): {
@@ -210,7 +211,8 @@ static Var _sdk_function_reference(String name) {
   return %(expr $type (ident $binding));
 }
 
-static Var _sdk_protocol_member(
+/** Answers `x2c.protocol.member`, declared in `lib/meta.x`. */
+List x2c_protocol_member(
   List participant, List base, String member) {
   List conformance =
     macro_sdk_compiler.protocol_members_for(participant, base);
@@ -227,17 +229,15 @@ static Var _sdk_protocol_member(
   return %();
 }
 
-static Var _sdk_type_integral(List value) {
-  if (value.type().is_integral()) return <true>;
-  return %();
-}
+/** Answers `x2c.type.integral?`, declared in `lib/meta.x`. */
+int x2c_type_is_integral(List value) => value.type().is_integral();
 
-static Var _sdk_type_pointer(List value) {
-  if (value.type().canonicalize().is_pointer()) return <true>;
-  return %();
-}
+/** Answers `x2c.type.pointer?`, declared in `lib/meta.x`. */
+int x2c_type_is_pointer(List value) =>
+  value.type().canonicalize().is_pointer();
 
-static Var _sdk_type_element(List value) =>
+/** Answers `x2c.type.element`, declared in `lib/meta.x`. */
+List x2c_type_element(List value) =>
   value.type().canonicalize().dereference().canonicalize();
 
 static List _sdk_function_type_parameters(Type type) {
@@ -245,10 +245,12 @@ static List _sdk_function_type_parameters(Type type) {
   return type.match_replace(%((func ?params) *), <?params>);
 }
 
-static Var _sdk_type_parameters(List value) => _sdk_function_type_parameters(
+/** Answers `x2c.type.parameters`, declared in `lib/meta.x`. */
+List x2c_type_parameters(List value) => _sdk_function_type_parameters(
     value.type().canonicalize());
 
-static Var _sdk_type_return(List value) =>
+/** Answers `x2c.type.return`, declared in `lib/meta.x`. */
+List x2c_type_return(List value) =>
   value.type().canonicalize().apply().canonicalize();
 
 static Var _sdk_complete_iter_chain(List expression) {
@@ -261,37 +263,41 @@ static Var _sdk_string_collection(List expression) {
   return macro_sdk_compiler.promote_string_literal(expression);
 }
 
-static Var _sdk_type_parts(List value) => value.type().declaration_parts();
+/** Answers `x2c.type.parts`, declared in `lib/meta.x`. */
+List x2c_type_parts(List value) => value.type().declaration_parts();
 
-static Var _sdk_type_reverse_name(String base, String participant) {
+/** Answers `x2c.type.reverse-name`, declared in `lib/meta.x`. */
+String x2c_type_reverse_name(String base, String participant) {
   _sdk_guard("x2c.type.reverse-name");
   return macro_sdk_compiler.reverse_converter_spelling(
     base, "", participant);
 }
 
-static Var _sdk_type_resolve(List value) {
+/** Answers `x2c.type.resolve`, declared in `lib/meta.x`. */
+List x2c_type_resolve(List value) {
   _sdk_guard("x2c.type.resolve");
   return macro_sdk_compiler.sym.resolve_key(value).type_from_ast();
 }
 
-static Var _sdk_type_layout(List value) {
+/** Answers `x2c.type.layout`, declared in `lib/meta.x`. */
+List x2c_type_layout(List value) {
   _sdk_guard("x2c.type.layout");
   Type type = macro_sdk_compiler.sym.resolve_key(value).type_from_ast();
   return macro_sdk_compiler.sym.field_order(type).cdr();
 }
 
-static Var _sdk_type_value(List value) {
+/** Answers `x2c.type.value?`, declared in `lib/meta.x`. */
+int x2c_type_is_value(List value) {
   _sdk_guard("x2c.type.value?");
   Type type = value.type().canonicalize();
   match (type) case %((bitfield ?) *rest): type = rest;
   foreach (String name, %("Symbol" "Var" "Atom" "String" "List"))
-    if (macro_sdk_compiler.sym.is_named_value_type(type, name)) return <true>;
-  type = macro_sdk_compiler.sym.resolve_key(type);
-  if (type.is_number()) return <true>;
-  return %();
+    if (macro_sdk_compiler.sym.is_named_value_type(type, name)) return 1;
+  return macro_sdk_compiler.sym.resolve_key(type).is_number();
 }
 
-static Var _sdk_type_tag_name(String name) {
+/** Answers `x2c.type.tag-name`, declared in `lib/meta.x`. */
+Symbol x2c_type_tag_name(String name) {
   _sdk_guard("x2c.type.tag-name");
   String file = _source_file(macro_sdk_compiler, macro_sdk_compiler.filename);
   file = macro_sdk_compiler.display_path(file);
@@ -306,7 +312,8 @@ static Var _sdk_type_tag_name(String name) {
   return Symbol.new(encoded);
 }
 
-static Var _sdk_type_fields(List value) {
+/** Answers `x2c.type.fields`, declared in `lib/meta.x`. */
+List x2c_type_fields(List value) {
   _sdk_guard("x2c.type.fields");
   Type type = value;
   type = type.canonicalize();
@@ -326,7 +333,8 @@ static Var _sdk_type_fields(List value) {
   return named.list_free();
 }
 
-static Var _sdk_binding_spelling(Var syntax) {
+/** Answers `x2c.binding.spelling`, declared in `lib/meta.x`. */
+String x2c_binding_spelling(Var syntax) {
   _sdk_guard("x2c.binding.spelling");
   if (syntax is <string>) {
     String spelling = syntax;
@@ -383,7 +391,8 @@ static Var _sdk_source_text(Var value) {
   return String.new_len(macro_sdk_compiler.text + begin, end - begin);
 }
 
-static Var _sdk_diagnostic_fail(String message, List notes) {
+/** Answers `x2c.diagnostic.fail`, declared in `lib/meta.x`. */
+void x2c_diagnostic_fail(String message, List notes) {
   _sdk_guard("x2c.diagnostic.fail");
   foreach (Var note, notes)
     if (note is not <string>)
@@ -393,7 +402,8 @@ static Var _sdk_diagnostic_fail(String message, List notes) {
   _sdk_reject(message, notes);
 }
 
-static Var _sdk_ident(String spelling) {
+/** Answers `x2c.ident`, declared in `lib/meta.x`. */
+List x2c_ident(String spelling) {
   _sdk_guard("x2c.ident");
   if (!spelling.is_identifier()) _sdk_reject(
     "x2c.ident requires an identifier spelling",
@@ -417,7 +427,8 @@ static Var _sdk_invocation_location(void) {
   return macro_sdk_compiler.token_location(macro_import_invocation);
 }
 
-static Var _sdk_method_resolve(List type_value, String name) {
+/** Answers `x2c.method.resolve`, declared in `lib/meta.x`. */
+List x2c_method_resolve(List type_value, String name) {
   _sdk_guard("x2c.method.resolve");
   if (!name.is_identifier())
     _sdk_reject(
@@ -442,10 +453,11 @@ static Var _sdk_method_resolve(List type_value, String name) {
   return %();
 }
 
-static Var _sdk_function_name(List function) {
+/** Answers `x2c.function.name`, declared in `lib/meta.x`. */
+String x2c_function_name(List function) {
   List identity = function.match_replace(
     %(function ? (bind ?binding ?) ?), <?binding>);
-  return _sdk_binding_spelling(identity);
+  return x2c_binding_spelling(identity);
 }
 
 static Var _sdk_function_type(List function) {
@@ -591,18 +603,19 @@ static Var _sdk_native_function_type(List syntax) {
   Var value = void;
   match (syntax) {
     case %(function ? ? ?): value = _sdk_function_type(syntax);
-    default: value = _sdk_syntax_type(syntax);
+    default: value = x2c_syntax_type(syntax);
   }
   return _native_meta_signature(macro_sdk_compiler, value);
 }
 
-static Var _sdk_function_parameter(List function, String wanted) {
+/** Answers `x2c.function.parameter`, declared in `lib/meta.x`. */
+List x2c_function_parameter(List function, String wanted) {
   List parameters = function.match_replace(
     %(function ? (bind ? ((fnmod (params *bound)) *)) ?), %(*bound));
   foreach (List parameter, parameters) {
     match (parameter) {
       case %(param ? (bind ?identity *)):
-        if (_sdk_binding_spelling(identity) == wanted) {
+        if (x2c_binding_spelling(identity) == wanted) {
           Type type = parameter.type_from_ast().canonicalize();
           return %(expr $type (ident $identity));
         }
@@ -610,7 +623,7 @@ static Var _sdk_function_parameter(List function, String wanted) {
   }
   _sdk_reject(
     %"x2c.function.parameter cannot find '$wanted'",
-    %("function: ${_sdk_function_name(function).repr()}"));
+    %("function: ${x2c_function_name(function).repr()}"));
 }
 
 static void _report_lisp_failure(
@@ -948,7 +961,8 @@ static Var _sdk_embed_text(Var requested) {
   return result;
 }
 
-static Var _sdk_literal_string(Var syntax) {
+/** Answers `x2c.literal.value`, declared in `lib/meta.x`. */
+Var x2c_literal_value(Var syntax) {
   _sdk_guard("x2c.literal.value");
   String value = NULL;
   if (_literal_string(syntax, &value)) return value;
@@ -965,38 +979,17 @@ static Var _sdk_literal_string(Var syntax) {
     %("value: ${syntax.repr()}"));
 }
 
-/* Literal folding hoists a constant `List`, `String`, or `Var` into the
-   compiler cache and leaves a `(cache ID)` reference behind, so a `match`
-   pattern and a template's constant head are not visible in the syntax a
-   macro receives. This takes the reference node itself and returns the
-   cached constructor form, so a caller reads a form it was given rather
-   than naming a slot by index. */
-static Var _sdk_cache_value(List node) {
-  _sdk_guard("x2c.cache.value");
-  Compiler compiler = macro_sdk_compiler;
-  long id = -1;
-  match (node) {
-    case %(cache ?(int found)): id = found;
-    case %(expr ? (!set ?inner (cache ?))): return _sdk_cache_value(inner);
-  }
-  if (id < 0 || id >= (long) compiler.id_keys.len())
-    _sdk_reject(
-      "x2c.cache.value requires a (cache ID) reference",
-      %("value: ${node.repr()}"));
-  return compiler.id_keys[(int) id];
-}
-
-/* The forms a compile-time function lowers to, for inspection. */
-static Var _sdk_comptime_lower(List fn) {
+/** The forms a compile-time function lowers to, for inspection. */
+List x2c_comptime_lower(List fn) {
   _sdk_guard("x2c.comptime.lower");
   List forms = macro_sdk_compiler.lower_comptime(fn);
   if (forms) return forms;
   return %();
 }
 
-/* A warning reports where it is raised and returns, so a macro can keep
+/** A warning reports where it is raised and returns, so a macro can keep
    expanding. Failure stays separate because it never returns. */
-static Var _sdk_diagnostic_warn(String message, List notes) {
+void x2c_diagnostic_warn(String message, List notes) {
   _sdk_guard("x2c.diagnostic.warn");
   foreach (Var note, notes)
     if (note is not <string>)
@@ -1005,7 +998,6 @@ static Var _sdk_diagnostic_warn(String message, List notes) {
         %("value: ${note.repr()}" ));
   macro_sdk_compiler.report_warning(
     <macro>, message, macro_sdk_compiler.token, notes);
-  return void;
 }
 
 /* An unreadable compile-time source is a located diagnostic. */
@@ -1094,6 +1086,22 @@ static List _library_files(void) => %(
   ("etc/compiler-sdk.xlisp" "cannot open the compile-time Lisp SDK")
   ("etc/builtin-macros.xlisp" "cannot open the built-in macro support"));
 
+/* A Lisp predicate answers a truth value, where the x2c spelling answers
+   `int` and Lisp reads 0 as true. */
+static Var _truth(int answer) {
+  if (answer) return <true>;
+  return %();
+}
+
+static Var _type_value_truth(List value) =>
+  _truth(x2c_type_is_value(value));
+
+static Var _type_integral_truth(List value) =>
+  _truth(x2c_type_is_integral(value));
+
+static Var _type_pointer_truth(List value) =>
+  _truth(x2c_type_is_pointer(value));
+
 /* Native operations use the active expansion context, not the session
    that owns their callable. The shared parent therefore owns them once. */
 static void _install_native_operations(Compiler compiler) {
@@ -1105,15 +1113,14 @@ static void _install_native_operations(Compiler compiler) {
     $lisp.bind(_.macro_lisp, "x2c_literal_int", x2c_literal_int);
     $lisp.bind(_.macro_lisp, "x2c_literal_symbol", x2c_literal_symbol);
     $lisp.bind(_.macro_lisp, "_x2c.import-hook", _lisp_import_hook);
-    $lisp.bind(_.macro_lisp, "x2c.syntax.type", _sdk_syntax_type);
-    $lisp.bind(_.macro_lisp, "x2c.binding.spelling", _sdk_binding_spelling);
-    $lisp.bind(_.macro_lisp, "x2c.diagnostic.fail", _sdk_diagnostic_fail);
-    $lisp.bind(_.macro_lisp, "x2c.ident", _sdk_ident);
-    $lisp.bind(_.macro_lisp, "x2c.method.resolve", _sdk_method_resolve);
-    $lisp.bind(_.macro_lisp, "x2c.cache.value", _sdk_cache_value);
+    $lisp.bind(_.macro_lisp, "x2c.syntax.type", x2c_syntax_type);
+    $lisp.bind(_.macro_lisp, "x2c.binding.spelling", x2c_binding_spelling);
+    $lisp.bind(_.macro_lisp, "x2c.diagnostic.fail", x2c_diagnostic_fail);
+    $lisp.bind(_.macro_lisp, "x2c.ident", x2c_ident);
+    $lisp.bind(_.macro_lisp, "x2c.method.resolve", x2c_method_resolve);
     $lisp.bind(
-      _.macro_lisp, "x2c.comptime.lower", _sdk_comptime_lower);
-    $lisp.bind(_.macro_lisp, "x2c.function.name", _sdk_function_name);
+      _.macro_lisp, "x2c.comptime.lower", x2c_comptime_lower);
+    $lisp.bind(_.macro_lisp, "x2c.function.name", x2c_function_name);
     $lisp.bind(
       _.macro_lisp, "_x2c.function.reference", _sdk_function_reference);
     $lisp.bind(
@@ -1126,20 +1133,20 @@ static void _install_native_operations(Compiler compiler) {
       _sdk_native_meta_declared);
     $lisp.bind(
       _.macro_lisp, "x2c.function.parameter",
-      _sdk_function_parameter);
+      x2c_function_parameter);
     $lisp.bind(
       _.macro_lisp, "_x2c.foreach.complete-iter-chain",
       _sdk_complete_iter_chain);
     $lisp.bind(
       _.macro_lisp, "_x2c.foreach.string-collection",
       _sdk_string_collection);
-    $lisp.bind(_.macro_lisp, "x2c.type.fields", _sdk_type_fields);
-    $lisp.bind(_.macro_lisp, "x2c.type.parts", _sdk_type_parts);
-    $lisp.bind(_.macro_lisp, "x2c.type.reverse-name", _sdk_type_reverse_name);
-    $lisp.bind(_.macro_lisp, "x2c.type.resolve", _sdk_type_resolve);
-    $lisp.bind(_.macro_lisp, "x2c.type.layout", _sdk_type_layout);
-    $lisp.bind(_.macro_lisp, "x2c.type.value?", _sdk_type_value);
-    $lisp.bind(_.macro_lisp, "x2c.type.tag-name", _sdk_type_tag_name);
+    $lisp.bind(_.macro_lisp, "x2c.type.fields", x2c_type_fields);
+    $lisp.bind(_.macro_lisp, "x2c.type.parts", x2c_type_parts);
+    $lisp.bind(_.macro_lisp, "x2c.type.reverse-name", x2c_type_reverse_name);
+    $lisp.bind(_.macro_lisp, "x2c.type.resolve", x2c_type_resolve);
+    $lisp.bind(_.macro_lisp, "x2c.type.layout", x2c_type_layout);
+    $lisp.bind(_.macro_lisp, "x2c.type.value?", _type_value_truth);
+    $lisp.bind(_.macro_lisp, "x2c.type.tag-name", x2c_type_tag_name);
     /* One naming rule: a supported operation is `x2c.<noun>.<verb>` and an
        internal primitive carries the `_x2c.` prefix instead of an infix
        underscore. */
@@ -1152,14 +1159,14 @@ static void _install_native_operations(Compiler compiler) {
     $lisp.bind(_.macro_lisp, "_x2c.name.unique", _sdk_ident_unique);
     $lisp.bind(
       _.macro_lisp, "_x2c.declaration.bindings", _sdk_declaration_bindings);
-    $lisp.bind(_.macro_lisp, "x2c.literal.value", _sdk_literal_string);
-    $lisp.bind(_.macro_lisp, "x2c.diagnostic.warn", _sdk_diagnostic_warn);
-    $lisp.bind(_.macro_lisp, "x2c.protocol.member", _sdk_protocol_member);
-    $lisp.bind(_.macro_lisp, "x2c.type.integral?", _sdk_type_integral);
-    $lisp.bind(_.macro_lisp, "x2c.type.pointer?", _sdk_type_pointer);
-    $lisp.bind(_.macro_lisp, "x2c.type.element", _sdk_type_element);
-    $lisp.bind(_.macro_lisp, "x2c.type.parameters", _sdk_type_parameters);
-    $lisp.bind(_.macro_lisp, "x2c.type.return", _sdk_type_return);
+    $lisp.bind(_.macro_lisp, "x2c.literal.value", x2c_literal_value);
+    $lisp.bind(_.macro_lisp, "x2c.diagnostic.warn", x2c_diagnostic_warn);
+    $lisp.bind(_.macro_lisp, "x2c.protocol.member", x2c_protocol_member);
+    $lisp.bind(_.macro_lisp, "x2c.type.integral?", _type_integral_truth);
+    $lisp.bind(_.macro_lisp, "x2c.type.pointer?", _type_pointer_truth);
+    $lisp.bind(_.macro_lisp, "x2c.type.element", x2c_type_element);
+    $lisp.bind(_.macro_lisp, "x2c.type.parameters", x2c_type_parameters);
+    $lisp.bind(_.macro_lisp, "x2c.type.return", x2c_type_return);
   }
 }
 
@@ -1638,6 +1645,24 @@ static void _native_module_shutdown(void) {
   native_module_order = NULL;
 }
 
+/* The compiler supplies the operations `lib/meta.x` declares without a body
+   as the native module `compiler_supplier`, which every request selects
+   first. */
+$(import "../etc/lisp-bindings.xlisp")
+macro Expression $compiler.targets() => $(lisp.native.targets '(
+  ("x2c_binding_spelling") ("x2c_comptime_lower") ("x2c_diagnostic_fail")
+  ("x2c_diagnostic_warn") ("x2c_function_name") ("x2c_function_parameter")
+  ("x2c_ident") ("x2c_literal_value") ("x2c_method_resolve")
+  ("x2c_protocol_member") ("x2c_syntax_type") ("x2c_type_element")
+  ("x2c_type_fields") ("x2c_type_is_integral") ("x2c_type_is_pointer")
+  ("x2c_type_is_value") ("x2c_type_layout") ("x2c_type_parameters")
+  ("x2c_type_parts") ("x2c_type_resolve") ("x2c_type_return")
+  ("x2c_type_reverse_name") ("x2c_type_tag_name")));
+
+static String compiler_supplier = "<compiler>";
+
+static Map _compiler_targets(void) => $compiler.targets();
+
 /** Reports whether the native module at absolute `path` is loaded. */
 int Compiler.native_module_loaded(String path) =>
   (void *) native_modules && native_modules.contains(path);
@@ -1667,8 +1692,22 @@ void Compiler.add_native_module(String path, Map (*entry)(void)) {
     that defines a name supplies it.
 */
 void Compiler.select_native_modules(List paths) {
+  if (!Compiler.native_module_loaded(compiler_supplier))
+    Compiler.add_native_module(compiler_supplier, _compiler_targets);
+  paths = %($compiler_supplier @paths);
   paths.try_own();
   native_module_order = paths;
+}
+
+/** Reports whether the compiler itself supplies the native function `name`.
+    Such a function exists only inside a compiler, so a `meta` function that
+    reaches it has no runtime form.
+*/
+int Compiler.supplies_native_meta(String name) {
+  Var targets;
+  return (void *) native_modules &&
+         native_modules.try_get(compiler_supplier, &targets) &&
+         ((Map) targets).contains(name);
 }
 
 /* The paths of the selected native modules that define `name`, in order. */

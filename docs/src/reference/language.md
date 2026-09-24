@@ -1682,13 +1682,13 @@ declarations are the signatures; the semantics are the ones described above.
 
 The name is mechanical: each `.` becomes `_`. `x2c.type.fields` is
 `x2c_type_fields`, `x2c.invocation.line` is `x2c_invocation_line`, `x2c.ident`
-is `x2c_ident`. Two answers differ in shape because x2c has no spelling for
-the Lisp one:
-
-- `x2c_expr_call(List callee, List arguments)` takes its arguments as one
-  `List` rather than as a rest parameter.
-- `x2c_type_value(List value)` returns `int`, 1 or 0, rather than a Lisp
-  truth value.
+is `x2c_ident`. A predicate `x2c.type.X?` is `x2c_type_is_X`, so
+`x2c.type.value?` is `x2c_type_is_value`, and it returns `int`, 1 or 0,
+rather than a Lisp truth value. A hyphen becomes `_` too:
+`x2c.type.tag-name` is `x2c_type_tag_name`. One answer differs in shape
+because x2c has no spelling for the Lisp one:
+`x2c_expr_call(List callee, List arguments)` takes its arguments as one
+`List` rather than as a rest parameter.
 
 `x2c_comptime_lower(List fn)` returns the Lisp forms a function definition
 lowers to, or an empty `List` when it cannot be lowered. The generators

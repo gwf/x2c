@@ -388,7 +388,7 @@ List builtin_class_field_write(List field) {
   List out = builtin_class_ref("out");
   List expression;
   if (writer) expression = builtin_class_method(value, "write_repr", %($out));
-  else if (x2c_type_value(type))
+  else if (x2c_type_is_value(type))
     expression = builtin_class_method(builtin_class_cast(%("Var"), value),
                                       "write_repr", %($out));
   else {
@@ -555,7 +555,7 @@ $builtin.emit()
 int builtin_class_positional(List fields) {
   int positional = 1;
   foreach (List field, fields)
-    if (!x2c_type_value(field[1])) positional = 0;
+    if (!x2c_type_is_value(field[1])) positional = 0;
   return positional;
 }
 
@@ -564,7 +564,7 @@ List builtin_class_constructor(String owner, List type, List pointee,
   List representation, int heap, int aggregate, int alias, List named,
   int positional) {
   if (builtin_class_own_method(owner, "new")) return %();
-  if (heap && !aggregate && !x2c_type_value(pointee))
+  if (heap && !aggregate && !x2c_type_is_value(pointee))
     x2c_diagnostic_fail(%"class ${owner} requires an explicit constructor",
                         %());
   List constructor = builtin_class_new(owner, representation, heap,
@@ -579,7 +579,7 @@ List builtin_class_defaults(String owner, List type, List location) {
   int heap = !builtin_class_pointer(type).equal(%());
   int alias = type.len() == 1 && !lisp_string(type.car()).equal(%());
   List pointee = heap ? builtin_class_element(type) : type;
-  List representation = x2c_type_value(pointee) ? pointee :
+  List representation = x2c_type_is_value(pointee) ? pointee :
                         x2c_type_resolve(pointee);
   int aggregate = representation.car() == <struct> ||
                   representation.car() == <union>;

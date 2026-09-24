@@ -370,7 +370,7 @@ static int _lower_known(Lowering l, String name) {
    answer an `int` where Lisp answers a truth value. */
 static String _lower_operation_name(String name) {
   if (name == "x2c_expr_call")         return "_x2c.expr.call-list";
-  if (name == "x2c_type_value")        return "_x2c.type.value-int";
+  if (name == "x2c_type_is_value")     return "_x2c.type.value-int";
   if (name == "x2c_type_tag_name")     return "x2c.type.tag-name";
   if (name == "x2c_type_reverse_name") return "x2c.type.reverse-name";
   return name.replace("_", ".");
@@ -411,7 +411,8 @@ static void _lower_scan_callee(Lowering l, String name) {
     lower_missing_callee = name;
     return;
   }
-  if (l.compiler.meta_comptime.contains(name)) l.meta_only = 1;
+  if (l.compiler.meta_comptime.contains(name) ||
+      Compiler.supplies_native_meta(name)) l.meta_only = 1;
 }
 
 /* A function named where a value is wanted rather than called: `Func f = g;`

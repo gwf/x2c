@@ -44,7 +44,7 @@ source. Another `meta` function may call it: calling one is what makes
 the caller compile-time only too, so a body being parsed under the marker
 is left alone.
 
-Source: `src/comptime.x:3291`
+Source: `src/comptime.x:3292`
 
 <a id="Compiler.inherit_shared_meta"></a>
 #### Compiler.inherit_shared_meta
@@ -55,7 +55,7 @@ Restores the shared definitions' derived call restrictions into a fresh
 compiler pass. Reads existing process tables without opening Lisp or
 creating a lowering cache in the unit's Context.
 
-Source: `src/comptime.x:2944`
+Source: `src/comptime.x:2945`
 
 <a id="Compiler.install_comptime"></a>
 #### Compiler.install_comptime
@@ -67,7 +67,7 @@ function is callable from compile-time Lisp under its own name.
 Returns whether the lowering succeeded. This method mutates the macro
 session and does not open a semantic transaction.
 
-Source: `src/comptime.x:3022`
+Source: `src/comptime.x:3023`
 
 <a id="Compiler.lower_comptime"></a>
 #### Compiler.lower_comptime
@@ -80,7 +80,7 @@ The result is the loop definitions the body needed followed by the
 function's own, in evaluation order. This method does not open a
 semantic transaction.
 
-Source: `src/comptime.x:2892`
+Source: `src/comptime.x:2893`
 
 <a id="Compiler.lower_declined"></a>
 #### Compiler.lower_declined
@@ -89,7 +89,7 @@ Source: `src/comptime.x:2892`
 
 Returns why the last `Compiler.lower_comptime` declined, or `NULL`.
 
-Source: `src/comptime.x:2901`
+Source: `src/comptime.x:2902`
 
 <a id="Compiler.lower_meta_expression"></a>
 #### Compiler.lower_meta_expression
@@ -98,7 +98,7 @@ Source: `src/comptime.x:2901`
 
 Lowers a closed expression for explicit compile-time evaluation.
 
-Source: `src/comptime.x:3094`
+Source: `src/comptime.x:3095`
 
 <a id="Compiler.lower_meta_initializer"></a>
 #### Compiler.lower_meta_initializer
@@ -110,7 +110,7 @@ value. Evaluated outside any function, the object's bytes belong to the
 macro session. The declaration parser has already installed its binding
 and checked that its type has a native layout.
 
-Source: `src/comptime.x:3072`
+Source: `src/comptime.x:3073`
 
 <a id="Compiler.lower_reached_meta"></a>
 #### Compiler.lower_reached_meta
@@ -120,7 +120,7 @@ Source: `src/comptime.x:3072`
 Returns whether the last `Compiler.install_comptime` reached a `Meta`
 operation, directly or through a callee already recorded as reaching one.
 
-Source: `src/comptime.x:3053`
+Source: `src/comptime.x:3054`
 
 <a id="Compiler.lower_repl"></a>
 #### Compiler.lower_repl
@@ -130,7 +130,7 @@ Source: `src/comptime.x:3053`
 Lowers a REPL execution wrapper whose unresolved bindings name the
 session's persistent value table rather than program file-scope state.
 
-Source: `src/comptime.x:2897`
+Source: `src/comptime.x:2898`
 
 <a id="Compiler.lowered_meta_regions"></a>
 #### Compiler.lowered_meta_regions
@@ -140,7 +140,7 @@ Source: `src/comptime.x:2897`
 Returns the region summary an earlier install of `fn` from the same file
 recorded with its lowering, or NULL when the process has none.
 
-Source: `src/comptime.x:3001`
+Source: `src/comptime.x:3002`
 
 <a id="Compiler.meta_is_comptime_only"></a>
 #### Compiler.meta_is_comptime_only
@@ -150,7 +150,7 @@ Source: `src/comptime.x:3001`
 Returns whether `fn` is a `meta` function this compiler recorded as
 compile-time only, whose runtime form the unit does not emit.
 
-Source: `src/comptime.x:3061`
+Source: `src/comptime.x:3062`
 
 <a id="Compiler.meta_type_layout"></a>
 #### Compiler.meta_type_layout
@@ -161,7 +161,7 @@ Returns the evaluator's native byte layout for `type`, derived from its
 canonical Type identity and Sym-owned member order. Meta adoption remains
 a separate compiler decision and cache presence does not advertise it.
 
-Source: `src/comptime.x:3415`
+Source: `src/comptime.x:3416`
 
 <a id="Compiler.meta_value_expression"></a>
 #### Compiler.meta_value_expression
@@ -174,7 +174,7 @@ builds a fresh collection on every execution; other data comes from the
 literal cache. A cycle or a collection held twice is reported at `site`.
 Returns NULL for code Lists or values without a literal representation.
 
-Source: `src/comptime.x:3217`
+Source: `src/comptime.x:3218`
 
 ### `Sym`
 
@@ -185,7 +185,7 @@ Source: `src/comptime.x:3217`
 
 Reports whether `type` reaches C's boolean type, `bool` or `_Bool`.
 
-Source: `src/comptime.x:3304`
+Source: `src/comptime.x:3305`
 
 ## Design notes
 
