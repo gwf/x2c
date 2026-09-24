@@ -75,8 +75,9 @@ static void map_bare_literal_quotes_only_identifier_keys(void) {
   EXPECT_FALSE(first === second);
   first[<a>] = 1;
   EXPECT_INT_EQ(second.len(), 0);
-  Var zero = {};
-  EXPECT_TRUE(zero.u64 == 0);
+  Var fresh = {};
+  EXPECT_TRUE(fresh is <map>);
+  EXPECT_INT_EQ(((Map) fresh).len(), 0);
   Var boxed = {k: 1};
   EXPECT_STR_EQ(boxed.str(), "{ k: 1 }");
 
@@ -87,8 +88,8 @@ static void map_bare_literal_quotes_only_identifier_keys(void) {
   EXPECT_NOT_NULL(items);
   chosen = !ada ? NULL : {};
   EXPECT_NOT_NULL(chosen);
-  Var zero_arm = ada ? {} : NULL;
-  EXPECT_TRUE(zero_arm.u64 == 0);
+  Var map_arm = ada ? {} : NULL;
+  EXPECT_TRUE(map_arm is <map>);
   MapTestPair pair = ada ? {1, 2} : {3, 4};
   EXPECT_INT_EQ(pair.right, 2);
 }

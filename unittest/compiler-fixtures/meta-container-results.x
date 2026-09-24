@@ -30,7 +30,7 @@ meta static Map meta_nested(void) {
   values["blank"] = (Map) {};
   return values;
 }
-meta static Map meta_null_entry(void) {
+meta static Map meta_brace_entry(void) {
   Map values = {};
   values["k"] = {};
   return values;
@@ -83,8 +83,8 @@ int main(void) {
   printf("scalar-tags %s %s %s %s\n", t["scalars"][0].tag().str(),
     t["scalars"][1].tag().str(), t["rows"][1][0].tag().str(),
     t["rows"][1][1].tag().str());
-  Map native_null = meta_null_entry(), meta_null = $meta_null_entry();
-  printf("null %s %s\n", native_null.repr(), meta_null.repr());
+  Map native_brace = meta_brace_entry(), meta_brace = $meta_brace_entry();
+  printf("brace %s %s\n", native_brace.repr(), meta_brace.repr());
   Values values = $meta_values(); Text text = $meta_text();
   Key key = $meta_key();
   printf("aliases %d %s %d %s\n", values.len(), text,

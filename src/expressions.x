@@ -3754,9 +3754,10 @@ static List _initializer_adapters(
 }
 
 /* An empty initializer for a Map or Array, or for a type that converts from
-   one, is a fresh empty collection. A Var keeps the native zero value. */
+   one, is a fresh empty collection. A Var holds a fresh empty Map. */
 static List _empty_collection(Compiler c, Type target) {
-  if (c.sym.is_var_type(target)) return NULL;
+  if (c.sym.is_var_type(target))
+    return c.convert_expression(%(expr ("Map") (map)), target);
   foreach (List literal, %((expr ("Map") (map)) (expr ("Array") (array)))) {
     Type source = literal.cadr();
     if (c.sym.resolve_key(target).equal(c.sym.resolve_key(source)))

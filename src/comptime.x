@@ -2090,11 +2090,10 @@ static Var _lower_braced(Lowering l, List type, int id, List items) {
       (C.array (quote $layout) ${cons(<list>, values.list_free())})
       (quote $tag));
   }
-  if (type.equal(%("Map"))) {
+  if (type.equal(%("Map")) || l.compiler.sym.is_var_type(type)) {
     if (items) return _lower_decline(l, "a braced Map initializer needs keys");
     return %(Map_new);
   }
-  if (!items && l.compiler.sym.is_var_type(type)) return %(Var.null);
   if (type.equal(%("Array"))) return _lower_array(l, items);
   if (type.equal(%("List")))  return _lower_sequence(l, items);
   return _lower_decline(l, "a braced initializer for this type");
@@ -3087,8 +3086,6 @@ static List _meta_data(Compiler c, Var value, Map marks, Token site) {
     }
     return result;
   }
-  if (value.is_null())
-    return %(expr ("Var") (cast ("Var") (expr ("Var") (composite (commas)))));
   if (value is not <array> && value is not <map>) return NULL;
   ulong address = (ulong) value.u64;
   if (marks.contains(address))

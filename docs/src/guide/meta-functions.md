@@ -932,7 +932,7 @@ requirement: the compiler must construct code representing that value.
 | `Symbol` | Inserts a Symbol literal. |
 | Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing. A data List is not automatically an expression. |
 | Boxed `Var` | Insertion follows the contained value. |
-| Null `Var` | Inserts Null. In a meta body, `{}` with a `Var` destination is Null, as in compiled code. |
+| `{}` stored in a `Var` | A fresh empty Map, as in compiled code; inserted like any other Map. |
 | `Array` or `Map`, nested at any depth | Constructs fresh collections through the ordinary literal constructors. |
 | Struct value | Diagnosed; the compiler cannot write a struct value as code. |
 | `Func` or arbitrary native address | No direct materialization of the evaluator object. |
