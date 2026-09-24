@@ -71,6 +71,19 @@ estimates from reading source.
    all three settings, including on `nil` and on exhausted (`void`) input.
    If one declaration cannot serve compile-time Lisp directly, generate the
    Lisp names from it; do not keep a second hand-written table.
+
+   **Parked by Gary on September 23.** Marking the selectors `meta inline`
+   does not work: an included `.x` unit passes only its native `meta`
+   prototypes to the includer, so a probe's meta call reported "no binding
+   for List_cadar". Only three kinds of meta body are installed: a unit's
+   own, one from a `.xmacro` import, and `lib/meta.x`, which
+   `_preload_meta_surface` in `src/frontend.x` loads. Preloading
+   `lib/list-selectors.x` the same way is about 5-10 lines. It would give
+   compiled and meta code one owner and remove the `lisp-values` and
+   `comptime` tables. What remains open is the bare Lisp spellings in
+   `etc/init.x` (`caaar`..`cdddr`). Runtime Lisp and compile-time Lisp share
+   them, they raise on exhausted input, and their only depth-3 user in the
+   repository is `cdddr` in `lib/native-scalar-types.xmacro`.
 4. **Cross-unit region tool (~260).** Delete `Compiler.region_escapes`,
    `_located`, and the `seed` parameter of `_fixpoint` in `src/regions.x`;
    `_region_seed`, `_region_pass`, `_parse_region_units`, and the CLI flag in
