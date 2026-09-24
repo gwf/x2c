@@ -27,14 +27,14 @@ static List _sources(int outputs_only) => outputs_only ? %("docs/src") :
 
 /* Sorted names, parents before their contents, as Python's sorted rglob. */
 static void _pages(Path directory, Array pages):
-  foreach String name, directory.list_dir():
+  foreach String name in directory.list_dir():
     Path child = directory.join(name)
     if child.is_dir(): _pages(child, pages)
     else if name.endswith(".md"): pages.push(child)
 
 static String _wrapped_in_main(String code):
   Array lines = []
-  foreach String line, code.split_lines(0):
+  foreach String line in code.split_lines(0):
     lines.push(line.strip(NULL) ? "  " + line : line)
   return "int main(int argc, char **argv) {\n" +
          String.join("\n", lines.list_free()) + "\n  return 0;\n}\n"
@@ -52,7 +52,7 @@ static List _candidates(Sample sample):
 static String _repr(String text):
   int single = text.contains("'") && !text.contains("\"")
   Array pieces = [single ? "\"" : "'"]
-  for int at = 0; at < text.len(); at++:
+  for (int at = 0; at < text.len(); at++):
     unsigned char ch = text[at]
     char escaped[8]
     if ch == '\\': pieces.push("\\\\")
@@ -98,7 +98,7 @@ static void _failed(int index, int candidate, String detail):
     _begin(index, candidate + 1)
     return
   Array tried = []
-  foreach List entry, candidates: tried.push(entry.car())
+  foreach List entry in candidates: tried.push(entry.car())
   results[index] = %"${samples[index].list().car()}: x2c sample fails " +
     %"(tried ${String.join(" and ", tried.list_free())}); fix it, or tag " +
     "it `x2c,ignore` with an <!-- ignore: reason --> comment above the " +
@@ -137,7 +137,7 @@ if !compiler.exists():
 String cc = Env.get("CC"), job_limit = Env.get("JOBS")
 Array flags = ["--cc", cc ? cc : "cc", "--package-dir",
                 root.join("packages")]
-foreach Path include, root.join("packages/*/deps/include").glob():
+foreach Path include in root.join("packages/*/deps/include").glob():
   flags.push("--c-system-dir")
   flags.push(include)
 build_flags = flags.list_free()
@@ -147,18 +147,18 @@ if limit < 1: limit = 1
 int outputs_only = args.len() == 1 && args.car().str() == "--outputs"
 Array errors = []
 samples = []
-foreach String source, _sources(outputs_only):
+foreach String source in _sources(outputs_only):
   Array pages = []
   _pages(root.join(source), pages)
-  foreach Path page, pages:
-    foreach Sample sample, Sample.collect(root, page, errors):
+  foreach Path page in pages:
+    foreach Sample sample in Sample.collect(root, page, errors):
       if !outputs_only || sample.runs(): samples.push(sample)
 
 results = []
 failures = []
 running = []
 attempts = []
-for int index = 0; index < samples.len(); index++:
+for (int index = 0; index < samples.len(); index++):
   results.push(NULL)
   failures.push([])
 int next = 0
@@ -167,7 +167,7 @@ while next < samples.len() || running.len():
     _begin(next++, 0)
     continue
   Job done = Job.wait_any(running)
-  for int at = 0; at < attempts.len(); at++:
+  for (int at = 0; at < attempts.len(); at++):
     List attempt = attempts[at]
     Job owner = attempt.car()
     if owner == done:
@@ -175,13 +175,13 @@ while next < samples.len() || running.len():
       _advance(attempt)
       break
 
-foreach Var result, results:
+foreach Var result in results:
   if result: errors.push(result)
 if errors.len():
   Stderr.printf("doc example check failed:\n")
-  foreach String error, errors: Stderr.printf("- %s\n", error)
+  foreach String error in errors: Stderr.printf("- %s\n", error)
   return 1
 int shown = 0
-foreach Sample sample, samples: shown += sample.runs()
+foreach Sample sample in samples: shown += sample.runs()
 printf("doc example check passed: %d x2c samples compiled, %d with matching "
        "output\n", (int) samples.len(), shown)

@@ -24,7 +24,7 @@ static Path source_archive(Path package, Path output):
   String name = package.basename()
   Path archive = output.absolute().join(%"$name-source.tar.gz")
   Array members = []
-  foreach String path, package.walk():
+  foreach String path in package.walk():
     String relative = path[package.len() + 1:]
     List parts = relative.split("/")
     if !parts.contains("builds") && !parts.contains("deps"):
@@ -37,7 +37,7 @@ static Path source_archive(Path package, Path output):
 
 static void source_rows(
   Path directory, Path output, String base, Array rows):
-  foreach String name, directory.list_dir():
+  foreach String name in directory.list_dir():
     Path package = directory.join(name)
     if !package.is_dir() || package.join("dependency*.json").glob() ||
         !package.join(%"src/$name.x").is_file():
@@ -54,7 +54,7 @@ static String field(Map identity, String name):
 
 static String bundle_row(Path tarball, Path output, String base):
   String member = NULL
-  foreach String entry, %(tar -tzf $tarball).job().lines():
+  foreach String entry in %(tar -tzf $tarball).job().lines():
     if !member && entry.endswith("/BUNDLE.json"): member = entry
   if !member: raise %(bad-arg (why "$tarball has no BUNDLE.json"))
   Map identity = Json.parse(%(tar -xOzf $tarball $member).job().output())
@@ -102,9 +102,9 @@ try:
   Array rows = []
   List directories = options["package-dir"]
   if !directories: directories = %(${root.join("packages")})
-  foreach Var directory, directories:
+  foreach Var directory in directories:
     source_rows(directory, output, base, rows)
-  foreach Var tarball, options["bundles"]:
+  foreach Var tarball in options["bundles"]:
     rows.push(bundle_row(tarball, output, base))
   String version = options["x2c-version"]
   if !version:
@@ -112,7 +112,7 @@ try:
                 .strip(NULL)
   Array lines = [%"# x2c package index for $version",
                   "# name version kind platform url sha256"]
-  foreach Var row, rows.sort(): lines.push(row)
+  foreach Var row in rows.sort(): lines.push(row)
   Path index = output.join("index.txt")
   index.write_text(%"${lines.join("\n")}\n")
   printf("x2c: wrote %s (%d rows)\n", index, (int) rows.len())

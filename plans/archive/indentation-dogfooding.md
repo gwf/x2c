@@ -119,7 +119,12 @@ after dropping statement numbers, reading a one-statement block as its
 statement, and splicing a block that follows a `case` label. It rejects a
 dangling `else` or an unbraced body whose indentation misstates its
 extent. All eight files reconverted from their brace form and passed; no
-C-style header remains. The tools keep their extensionless names, so they
+C-style header remains. Gary then decided that `foreach` takes `in` in
+place of its comma in both forms, with the comma still accepted, and that
+a `for` header keeps its parentheses and takes the colon after them. The
+macro argument parser accepts `in` after a `Decl` argument, the layout
+pass stops adding parentheses to `for`, the converter writes both forms,
+and the tools were converted again. The tools keep their extensionless names, so they
 run by name from a shell when executable.
 
 ## Validation

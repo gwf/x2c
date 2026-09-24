@@ -13,7 +13,7 @@ struct Point:
 /* Sums the positive entries. */
 int sum_positive(int *xs, int n):
   int total = 0
-  for int i = 0; i < n; i++:
+  for (int i = 0; i < n; i++):
     if xs[i] > 0:
       total += xs[i]
     else if xs[i] == -99:
@@ -60,4 +60,6 @@ int main(void):
   printf("%d %d %d %s %d\n", sum_positive(xs, 5), p.y, i, name(GREEN),
          (int) m["b"])
   printf("%d %d\n", count_positive(xs, 5, 1), count_positive(xs, 2, 0))
+  foreach String word in %("in" "separates"): printf("<%s>", word)
+  puts("")
   return 0

@@ -591,7 +591,7 @@ static inline int _conditional(Token t) =>
 
 /* Makes the colon at `colon` end the condition of the last control keyword
    at depth zero before it, adding parentheses unless one group already
-   spans the condition. The colon then becomes `body`, or goes when `body`
+   spans the condition. A `for` header keeps the parentheses it must have. The colon then becomes `body`, or goes when `body`
    is NULL. Returns 0 when no control keyword precedes the colon. */
 static int _layout_condition(
   Token *sig, int *depths, _LayoutEdit *edits, struct Token *all, int first,
@@ -602,7 +602,8 @@ static int _layout_condition(
         (m == first || sig[m - 1].text != "."))
       key = m;
   if (key < 0) return 0;
-  int wrapped = sig[key + 1].type == <"("> && sig[colon - 1].type == <")">;
+  int wrapped = sig[key].text == "for" ||
+                sig[key + 1].type == <"("> && sig[colon - 1].type == <")">;
   for (int m = key + 2; wrapped && m < colon - 1; m++)
     wrapped = depths[m] > 0;
   _LayoutEdit *tail = &edits[sig[colon] - all];

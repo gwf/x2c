@@ -50,7 +50,7 @@ double area(Shape shape, double size):
 
 int main(void):
   double total = 0
-  for int i = 1; i <= 3; i++:
+  for (int i = 1; i <= 3; i++):
     if i == 2: continue
     total += area(i == 1 ? CIRCLE : SQUARE, i)
   printf("%.2f\n", total)
@@ -61,8 +61,9 @@ int main(void):
 12.14
 ```
 
-Conditions need no parentheses, and a short body can follow its colon on
-the same line. The enum keeps its commas, and its name after the dedent
+Conditions need no parentheses, except that a `for` header keeps its
+three clauses in them, and a short body can follow its colon on the same
+line. `foreach` separates its declaration from the collection with `in`. The enum keeps its commas, and its name after the dedent
 completes the `typedef`.
 
 ## Long lines
@@ -77,7 +78,7 @@ continues that line. A line that starts with `.` continues a method chain:
 int main(void):
   List words = %("indentation" "groups" "blocks")
   int letters = 0
-  foreach String word, words:
+  foreach String word in words:
     letters += word.len()
   String report = %"${words.len()} words, " +
     %"$letters letters"
@@ -109,7 +110,7 @@ int main(void):
     int step = 2
     total += step
   @$time("sum")
-  for int i = 0; i < 1000; i++:
+  for (int i = 0; i < 1000; i++):
     total += i
   printf("%d\n", total)
   return 0

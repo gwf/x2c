@@ -26,7 +26,7 @@ static int _optional_section(String heading) =>
    `(depth title path)` forms. */
 static Array _summary_sections(void):
   Array sections = []
-  foreach String line, summary.read_text().lines():
+  foreach String line in summary.read_text().lines():
     if line.startswith("# ") && line != "# Summary":
       sections.push(%(${line[2:].strip(NULL)} ${[]}))
     else:
@@ -45,7 +45,7 @@ static String _page_url(String path):
 static String _normalized_path(String path):
   int absolute = path.startswith("/")
   Array parts = []
-  foreach String part, path.split("/"):
+  foreach String part in path.split("/"):
     if !part || part == ".": continue
     if part == ".." && parts.len() && parts[-1].string() != "..":
       parts.pop()
@@ -66,7 +66,7 @@ static String _link_url(String page, String target):
 
 static String _absolute_links(String page, String line_text):
   Array parts = line_text.split("`")
-  for int at = 0; at < parts.len(); at += 2:
+  for (int at = 0; at < parts.len(); at += 2):
     String piece = parts[at]
     parts[at] = link.replace_fn(piece, %!(RegexMatch found) =>
       found[1] + _link_url(page, found["target"]))
@@ -75,7 +75,7 @@ static String _absolute_links(String page, String line_text):
 static String _publish_page(String page):
   Array lines = []
   String language = NULL
-  foreach String line_text, book.join(page).read_text().lines():
+  foreach String line_text in book.join(page).read_text().lines():
     RegexMatch found = fence.match(line_text)
     if found:
       if !language:
@@ -106,14 +106,14 @@ static List _render(void):
   Array sections = _summary_sections()
   Map entries = {}
   Array ordered = []
-  foreach List section, sections:
-    foreach List row, section.cadr().array():
+  foreach List section in sections:
+    foreach List row in section.cadr().array():
       String title = row.cadr(), path = row.caddr()
       entries[path] = title
       ordered.push(path)
 
   Array missing = []
-  foreach String page, _full_text():
+  foreach String page in _full_text():
     if !entries.contains(page): missing.push(page)
   if missing.len():
     raise %(llms-fatal
@@ -121,7 +121,7 @@ static List _render(void):
                     String.join(", ", missing.list_free())}))
 
   Array chapters = []
-  foreach String page, ordered:
+  foreach String page in ordered:
     if _full_text().contains(page): chapters.push(page)
 
   (String title, String paragraph) = _book_summary()
@@ -133,10 +133,10 @@ static List _render(void):
       String.join(", ", chapters.map(%!(String page) => entries[page].str())),
     ""]
   Array optional = []
-  foreach List section, sections:
+  foreach List section in sections:
     String heading = section.car()
     Array listed = []
-    foreach List row, section.cadr().array():
+    foreach List row in section.cadr().array():
       (int depth, String name, String path) = row
       String item = %"- [$name](${_page_url(path)})"
       if _optional_section(heading) || depth >= 2: optional.push(item)
@@ -144,11 +144,11 @@ static List _render(void):
     if listed.len():
       index_lines.push(%"## $heading")
       index_lines.push("")
-      foreach String item, listed: index_lines.push(item)
+      foreach String item in listed: index_lines.push(item)
       index_lines.push("")
   index_lines.push("## Optional")
   index_lines.push("")
-  foreach String item, optional: index_lines.push(item)
+  foreach String item in optional: index_lines.push(item)
   index_lines.push("")
 
   Array full_lines = [
@@ -156,7 +156,7 @@ static List _render(void):
     %"These chapters come from [$title]($docs).",
     "Each chapter follows a comment naming its published URL. Samples",
     "include the lines the book hides behind an expander."]
-  foreach String page, chapters:
+  foreach String page in chapters:
     full_lines.push("")
     full_lines.push(%"<!-- ${_page_url(page)} -->")
     full_lines.push("")
@@ -167,7 +167,7 @@ static List _render(void):
   return %(( $index_path $index_text ) ( $full_path $full ))
 
 static int _write_outputs(List outputs):
-  foreach List output, outputs:
+  foreach List output in outputs:
     (Path path, String text) = output
     path.write_text(text)
     String relative = path
@@ -176,7 +176,7 @@ static int _write_outputs(List outputs):
 
 static int _check_outputs(List outputs):
   int problems = 0
-  foreach List output, outputs:
+  foreach List output in outputs:
     (Path path, String expected) = output
     String actual = path.exists() ? path.read_text() : ""
     String relative = path

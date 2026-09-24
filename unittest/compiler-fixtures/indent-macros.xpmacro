@@ -12,7 +12,7 @@ macro Decorator $indent.range(
 ):
   do:
     int begin = $start, end = $stop
-    for int $index = begin; $index < end; $index++: $body
+    for (int $index = begin; $index < end; $index++): $body
 
 macro Statement $indent.swap(Expr $left, Expr $right):
   $(x2c.syntax.type $left) temporary = $left

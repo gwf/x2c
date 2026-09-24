@@ -46,7 +46,7 @@ if heading != %"# x2c package index for x2c $version":
 Path installer = work.join("install.sh")
 %(curl -fsSL -o $installer "$site/install.sh").job().check()
 Path prefix = work.join("x2c")
-foreach String requested, ["latest", version]:
+foreach String requested in ["latest", version]:
   List options = requested == "latest" ? nil : %("--version" $version)
   %(sh $installer @options).job()
     .options({env: {X2C_PREFIX: prefix, X2C_VERSION: "latest",
@@ -63,7 +63,7 @@ Path x2c = prefix.join("bin/x2c")
 %($x2c install -q --index "$site/packages/index.txt" $package).job().check()
 List listed = %($x2c list).job().lines()
 int installed = 0
-foreach String row, listed:
+foreach String row in listed:
   if row.startswith(%"$package ") && row.endswith(" bundle"): installed = 1
 if !installed:
   String rows = String.join(" / ", listed)

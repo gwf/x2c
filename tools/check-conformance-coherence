@@ -17,7 +17,7 @@ static String x2c
 /* Captures whole dumps first, so a compiler failure stops the check. */
 static String _dump(List mode):
   String dump = ""
-  foreach String units, %("lib/*.x" "src/*.x"):
+  foreach String units in %("lib/*.x" "src/*.x"):
     List sources = Path.glob(units)
     dump += %($x2c translate @mode --dump-conformance @sources).job().output()
   return dump
@@ -25,7 +25,7 @@ static String _dump(List mode):
 static String _owned(String dump):
   Regex owned = Regex.compile("^\\((unit|conformance owned)")
   Array rows = []
-  foreach String line, dump.split_lines(0):
+  foreach String line in dump.split_lines(0):
     if owned.match(line): rows.push(line + "\n")
   return String.join("", rows.list_free())
 
@@ -39,7 +39,7 @@ chdir(root)
 
 String snap = _dump(NULL), live = _dump(%("--live-symbols"))
 int units = 0
-foreach String line, snap.split_lines(0):
+foreach String line in snap.split_lines(0):
   if line.startswith("(unit "): units++
 if !units:
   Stderr.printf("conformance coherence failure: %s dumped no units\n", x2c)

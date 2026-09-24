@@ -4,8 +4,9 @@
     Usage: tools/indent-convert [--check] FILE...
 
     Adds `#pragma indent`, turns each block `{` that ends its line into `:`,
-    removes the matching `}` and the parentheses around a control condition,
-    and drops each `;` that ends a logical line. A control header whose body
+    removes the matching `}` and the parentheses around a control condition
+    other than a `for` header's, writes `in` in a `foreach` header, and
+    drops each `;` that ends a logical line. A control header whose body
     has no braces gets a colon too, which gives its body a block. A block
     brace in the middle of a line stays as written. The file's own
     indentation groups the result, so it must agree with the braces.
@@ -118,7 +119,7 @@ static Var _plain(Var form) {
    not translate. */
 static List _ast(String path) {
   String dump = NULL;
-  Job job = %($x2c translate --dump-ast $path).job();
+  Job job = %($x2c translate --dump-ast $path);
   try dump = job.options({stderr: <capture>}).output();
   catch %(cmd-fail *): return NULL;
   Lisp lisp = Lisp.new();
@@ -153,7 +154,7 @@ static void _open_block(int i, char *removed) {
   if (tokens[b].type == <")">) {
     int o = partner[b], head = _before(o);
     int keyword = head >= 0 && _control(&tokens[head]) &&
-                  tokens[_after(o)].type != <;>;
+                  tokens[head].text != "for";
     if (keyword) {
       _edit(tokens[o].pos, _end(o), NULL);
       removed[o] = removed[b] = 1;
@@ -249,9 +250,14 @@ static String _convert(String path, String source, String *why) {
           tokens[body].type == <;> ||
           _same_line(c, body) && !_plain_body(body))
         continue;
+      opener[c] = 1;
+      if (tok.text == "for") {
+        _edit(_end(c), _end(c), ":");
+        continue;
+      }
       _edit(tokens[o].pos, _end(o), NULL);
       _edit(tokens[c].pos, _end(c), ":");
-      removed[o] = opener[c] = 1;
+      removed[o] = 1;
     }
     else if (tok.text == "else") {
       int body = _after(i);
@@ -261,6 +267,20 @@ static String _convert(String path, String source, String *why) {
         continue;
       _edit(_end(i), _end(i), ":");
       opener[i] = 1;
+    }
+  }
+
+  /* A `foreach` header separates its declaration with `in`. */
+  for (int i = 0; i < count; i++) {
+    if (tokens[i].text != "foreach") continue;
+    int o = _after(i);
+    if (o >= count || tokens[o].type != <"(">) continue;
+    for (int k = _after(o); k < partner[o]; k = _after(k)) {
+      if (_opens(&tokens[k])) k = partner[k];
+      else if (tokens[k].type == <",">) {
+        _edit(tokens[k].pos, _end(k), " in");
+        break;
+      }
     }
   }
 
@@ -283,7 +303,7 @@ static String _convert(String path, String source, String *why) {
       indent = tok.col;
       pending = 0;
     }
-    if (!block[i] && !opener[i] && _closes(tok)) depth--;
+    if (!block[i] && _closes(tok) && !removed[partner[i]]) depth--;
     colon = block[i] || opener[i];
     if (!depth && tok.text == "?") pending++;
     else if (!depth && tok.type == <:>) {

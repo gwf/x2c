@@ -17,7 +17,7 @@ static Path root
 /* The bodies of the `sh` fences in `text`, in order. */
 static List _shell_blocks(String text):
   Array blocks = []
-  foreach List fence, Sample.fences(text):
+  foreach List fence in Sample.fences(text):
     (String indent, String info, String body) = fence
     if info == "sh": blocks.push(body)
   return blocks.list_free()
@@ -58,11 +58,11 @@ static void _check_slide(Map entry, Path slide, int update, Array errors):
    `none` when the example is optional. */
 static void _check_manifest(Array entries, Array errors):
   Map rows = {}
-  foreach String line, root.join("examples/manifest.txt").read_text()
+  foreach String line in root.join("examples/manifest.txt").read_text()
                           .split_lines(0):
     if line && !line.startswith("#"): rows[line.partition("|").car()] =
       line.split("|")
-  foreach Map entry, entries:
+  foreach Map entry in entries:
     if entry.contains("language") && entry["language"].str() == "sh":
       continue
     String example = entry["example"]
@@ -97,7 +97,7 @@ Path slides = root.join("site/src/content/slides")
 Array entries = Json.read_file(root.join("examples/gallery.json"))
 Array errors = []
 Map seen = {}, owners = {}
-foreach Map entry, entries:
+foreach Map entry in entries:
   String name = entry["slide"]
   if seen.contains(name): errors.push(%"$name: duplicate gallery entry")
   seen[name] = 1
@@ -109,7 +109,7 @@ foreach Map entry, entries:
   Path slide = slides.join(name)
   if !slide.is_file(): errors.push(%"$name: gallery source is missing")
   else: _check_slide(entry, slide, options["update"].integer(), errors)
-foreach String name, slides.list_dir():
+foreach String name in slides.list_dir():
   if name.endswith(".md") && !seen.contains(name):
     errors.push(%"$name: no standalone example declared")
 _check_manifest(entries, errors)

@@ -31,19 +31,19 @@ List Sample.fences(String text):
   Regex opening = Regex.compile("^(?<indent>[ \\t]*)```(?<info>.*)$")
   Array lines = text.split("\n"), offsets = [], fences = []
   int offset = 0
-  foreach String line, lines:
+  foreach String line in lines:
     offsets.push(offset)
     offset += line.len() + 1
-  for int at = 0; at + 1 < lines.len(); at++:
+  for (int at = 0; at + 1 < lines.len(); at++):
     RegexMatch found = opening.match(lines[at])
     if !found: continue
     String indent = found["indent"], close = %"$indent```"
-    for int end = at + 1; end < lines.len(); end++:
+    for (int end = at + 1; end < lines.len(); end++):
       String line = lines[end]
       if !line.startswith(close) || line[close.len():].strip(" \t"):
         continue
       Array body = []
-      for int inner = at + 1; inner < end; inner++: body.push(lines[inner])
+      for (int inner = at + 1; inner < end; inner++): body.push(lines[inner])
       String text_body = body.len() ?
         String.join("\n", body.list_free()) + "\n" : NULL
       int stop = offsets[end].integer() + line.len()
@@ -60,14 +60,14 @@ String Sample.language(String info) =>
 static String _dedent(String body, String indent):
   if !indent: return body
   Array lines = []
-  foreach String line, body.split_lines(0):
+  foreach String line in body.split_lines(0):
     lines.push(line.startswith(indent) ? line[indent.len():] : line)
   return String.join("\n", lines.list_free()) + "\n"
 
 /* Drops the `~` prefix that book.toml hides from readers. */
 static String _reveal_hidden(String code):
   Array lines = []
-  foreach String line, code.split_lines(0):
+  foreach String line in code.split_lines(0):
     String stripped = line.lstrip(NULL)
     if stripped.startswith("~"):
       lines.push(line[:line.len() - stripped.len()] + stripped[1:])
@@ -84,7 +84,7 @@ List Sample.collect(Path root, Path path, Array errors):
   Regex output_info = Regex.compile("^text(,status=(?<status>\\d+))?$")
   Regex reason = Regex.compile("(?s)<!--\\s*ignore:\\s*\\S+.*?-->")
   Array fences = Sample.fences(text), samples = []
-  for int at = 0; at < fences.len(); at++:
+  for (int at = 0; at < fences.len(); at++):
     (String indent, String raw, String body, int line, int start, int stop) =
       fences[at].list()
     String info = raw.strip(NULL)

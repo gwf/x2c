@@ -90,26 +90,26 @@ static int _start(RegexMatch found) => found.capture(0).start()
 /* Fetched, installed, or rendered trees grow inside the link-checked
    directories and carry Markdown that is not ours to repair. */
 static int _untracked(String relative):
-  foreach String part, relative.split("/"):
+  foreach String part in relative.split("/"):
     if %("build" "builds" "deps" "dist" "node_modules").contains(part):
       return 1
   return 0
 
 /* Appends the Markdown files below `directory` in path-component order. */
 static void _markdown_below(String directory, int tracked, Array into):
-  foreach Path path, root.join(directory).walk():
+  foreach Path path in root.join(directory).walk():
     String relative = _relative(path)
     if relative.endswith(".md") && !(tracked && _untracked(relative)):
       into.push(relative)
 
 static void _markdown_in(String directory, Array into):
-  foreach String name, root.join(directory).list_dir():
+  foreach String name in root.join(directory).list_dir():
     if name.endswith(".md"): into.push(%"$directory/$name")
 
 /* Collapses `.` and `..` the way resolving the path would. */
 static String _normalized(String path):
   Array parts = []
-  foreach String part, path.split("/"):
+  foreach String part in path.split("/"):
     if !part || part == ".": continue
     if part == ".." && parts.len(): parts.pop()
     else: parts.push(part)
@@ -119,10 +119,10 @@ static int _line_count(Path path) => path.read_text().split_lines(0).len()
 
 static void _check_links(void):
   Regex word = Regex.compile("\\S+")
-  foreach String relative, link_docs:
+  foreach String relative in link_docs:
     String text = _read(relative)
     String directory = relative.rpartition("/").car()
-    foreach RegexMatch found, link.find_all(text):
+    foreach RegexMatch found in link.find_all(text):
       RegexMatch first = word.match(found[1].strip(NULL).strip("<>"))
       String target = first ? first[0] : ""
       if target.startswith("#") || target.startswith("http://") ||
@@ -137,10 +137,10 @@ static void _check_links(void):
 /* Paths below generated trees may be cited before they exist. */
 static int _generated(String path):
   Array parts = []
-  foreach String part, path.split("/"):
+  foreach String part in path.split("/"):
     if part && part != ".": parts.push(part)
   String clean = String.join("/", parts.list_free())
-  foreach String tree, %("unittest/build" "docs/book" "site/dist"):
+  foreach String tree in %("unittest/build" "docs/book" "site/dist"):
     if clean == tree || clean.startswith(tree + "/"): return 1
   return 0
 
@@ -151,14 +151,14 @@ static void _check_paths(void):
   Regex cited_lines = Regex.compile(":(\\d+(?:\\s*[-,]\\s*\\d+)*)$")
   Regex digits = Regex.compile("\\d+")
   Map counts = {}
-  foreach String relative, _path_audit():
+  foreach String relative in _path_audit():
     String text = _read(relative)
-    foreach RegexMatch found, cited_path.find_all(text):
+    foreach RegexMatch found in cited_path.find_all(text):
       String raw = found[1].rstrip(".,;:)")
       int cited = 0
       RegexMatch lines = cited_lines.match(raw)
       if lines:
-        foreach RegexMatch number, digits.find_all(lines[1]):
+        foreach RegexMatch number in digits.find_all(lines[1]):
           cited = atoi(number[0])
         raw = raw[:_start(lines)]
       if strpbrk(raw, "*?[<"): continue
@@ -177,7 +177,7 @@ static void _check_paths(void):
 /* The `--flags` of `text`, excluding those glued to a preceding word. */
 static List _flags(String text):
   Array flags = []
-  foreach RegexMatch found, flag.find_all(text):
+  foreach RegexMatch found in flag.find_all(text):
     int start = _start(found)
     int before = start ? text[start - 1] : 0
     if !scan_ascii_alpha(before) && !scan_ascii_digit(before) &&
@@ -191,16 +191,16 @@ static void _check_flags(void):
                    .caddr()
   table = table.partition("\n};").car()
   Map valid = {}
-  foreach RegexMatch found, _flags(table): valid[found[0]] = 1
+  foreach RegexMatch found in _flags(table): valid[found[0]] = 1
   List pages = _flag_audit().append(_line_flag_audit())
-  foreach String relative, pages:
+  foreach String relative in pages:
     String text = _read(relative)
     int every_line = _flag_audit().contains(relative), offset = 0
-    foreach String line, text.split_lines(1):
+    foreach String line in text.split_lines(1):
       /* Words after a lone `--` belong to the program being run. */
       String options = line.partition(" -- ").car()
       if every_line || options.contains("x2c"):
-        foreach RegexMatch found, _flags(options):
+        foreach RegexMatch found in _flags(options):
           if !valid.contains(found[0]):
             errors.push(%"${_where(relative, text, offset + _start(found))}" +
                         %": unknown flag ${found[0]}")
@@ -209,7 +209,7 @@ static void _check_flags(void):
 static void _check_workflows(void):
   Regex verbose = Regex.compile("make build-safe[^\\n]*\\bV=1\\b")
   Regex include = Regex.compile("\\bcc\\s+-I\\s+include\\b")
-  foreach String relative, _workflow_audit():
+  foreach String relative in _workflow_audit():
     String text = _read(relative)
     int offset = text.find("OVERVIEW.md")
     if offset >= 0:
@@ -224,13 +224,13 @@ static void _check_workflows(void):
       errors.push(%"${_where(relative, text, _start(found))}: use -iquote " +
                   "include so runtime headers do not shadow system headers")
     Array lines = text.split_lines(0)
-    for int index = 0; index < lines.len(); index++:
+    for (int index = 0; index < lines.len(); index++):
       String line = lines[index]
       if !line.contains("make build-safe") || !line.contains("debug/") ||
           !line.contains(">") || line.contains("mkdir -p debug"):
         continue
       int prior = 0
-      for int at = index < 3 ? 0 : index - 3; at < index; at++:
+      for (int at = index < 3 ? 0 : index - 3; at < index; at++):
         if lines[at].str().contains("mkdir -p debug"): prior = 1
       if !prior:
         errors.push(%"$relative:${index + 1}: create debug/ before " +
@@ -238,14 +238,14 @@ static void _check_workflows(void):
 
 static void _check_example_claims(void):
   Map manifest = {}
-  foreach String line, _read("examples/manifest.txt").split_lines(0):
+  foreach String line in _read("examples/manifest.txt").split_lines(0):
     if line && !line.startswith("#"):
       List fields = line.split("|")
       manifest[fields.car()] = fields.cdr()
   Regex example = Regex.compile("`(examples/([a-zA-Z0-9_/-]+)\\.x)`")
-  foreach String relative, _example_audit():
+  foreach String relative in _example_audit():
     String text = _read(relative)
-    foreach RegexMatch found, example.find_all(text):
+    foreach RegexMatch found in example.find_all(text):
       String raw = found[1], where = _where(relative, text, _start(found))
       if !manifest.contains(found[2]):
         errors.push(%"$where: unclassified example $raw")
@@ -262,21 +262,21 @@ static void _check_example_claims(void):
 /* Python's spelling of a list of names, as the old checker printed it. */
 static String _name_list(Array names):
   Array quoted = []
-  foreach String name, names.sort(): quoted.push(%"'$name'")
+  foreach String name in names.sort(): quoted.push(%"'$name'")
   return "[" + String.join(", ", quoted.list_free()) + "]"
 
 static void _check_module_counts(void):
   Array sources = []
-  foreach String name, root.join("src").list_dir():
+  foreach String name in root.join("src").list_dir():
     if name.endswith(".x"): sources.push(name.remove_suffix(".x"))
   int src_count = sources.len(), lib_count = 0
-  foreach String name, root.join("lib").list_dir():
+  foreach String name in root.join("lib").list_dir():
     if name.endswith(".x") && name != "x2c.x": lib_count++
   Regex counted = Regex.compile(
     "\\b(\\d+|sixteen|eighteen|twenty)([ -]\\w+)*[ -]modules\\b")
-  foreach String relative, docs:
+  foreach String relative in docs:
     String text = _read(relative)
-    foreach RegexMatch found, counted.find_all(text):
+    foreach RegexMatch found in counted.find_all(text):
       int start = _start(found)
       String word = found[1]
       int count = word == "sixteen" ? 16 : word == "eighteen" ? 18 :
@@ -288,7 +288,7 @@ static void _check_module_counts(void):
                     %"$count but expected $expected")
   Regex quoted = Regex.compile("`([^`]+)`")
   Regex module = Regex.compile("^(?:src/)?([a-z][a-z0-9-]*)(?:\\.x)?$")
-  foreach List entry, _src_module_lists():
+  foreach List entry in _src_module_lists():
     (String relative, String start_marker, String end_marker) = entry
     String text = _read(relative)
     int start = text.find(start_marker)
@@ -297,13 +297,13 @@ static void _check_module_counts(void):
       errors.push(%"$relative: missing the src module list markers")
       continue
     Map listed = {}
-    foreach RegexMatch found, quoted.find_all(text[start:end]):
+    foreach RegexMatch found in quoted.find_all(text[start:end]):
       RegexMatch name = module.match(found[1])
       if name: listed[name[1]] = 1
     Array missing = [], extra = []
-    foreach String name, sources:
+    foreach String name in sources:
       if !listed.contains(name): missing.push(name)
-    foreach String name, listed.keys():
+    foreach String name in listed.keys():
       if name != "src" && !sources.contains(name): extra.push(name)
     if missing.len() || extra.len():
       errors.push(%"${_where(relative, text, start)}: src module list " +
@@ -320,7 +320,7 @@ static List _ledger_rows(String text):
   int start = text.find("## Contract ledger")
   int stop = text.find("## Verified contracts")
   Array rows = []
-  foreach RegexMatch found, row.find_all(text[start:stop]):
+  foreach RegexMatch found in row.find_all(text[start:stop]):
     String name = found[1]
     if name == "Contract" || name == "---": continue
     rows.push(%(${_collapsed(name.replace("`", ""))} ${found[2]}))
@@ -332,12 +332,12 @@ static void _check_ledger_placement(void):
   int start = text.find("## Partial contracts and open decisions")
   int stop = text.find("## Working rules")
   List sections = Regex.compile("(?m)^### ").split(text[start:stop]).cdr()
-  foreach String section, sections:
+  foreach String section in sections:
     (String heading, String mark, String body) = section.partition("\n")
     heading = heading.strip(NULL)
     String full = _collapsed(heading + " " + body).replace("**", "")
     int open = 0
-    foreach List entry, rows:
+    foreach List entry in rows:
       (String name, String status) = entry
       if full.contains(name) && status != "verified": open = 1
     if !open:
@@ -363,9 +363,9 @@ static void _check_banned_name(void):
      and voice-to-text keeps introducing that spelling; it must never reach
      the tree. */
   Regex banned = Regex.compile("(?i)\\becstas(?:y|ies)\\b")
-  foreach String relative, docs:
+  foreach String relative in docs:
     String text = _read(relative)
-    foreach RegexMatch found, banned.find_all(text):
+    foreach RegexMatch found in banned.find_all(text):
       errors.push(%"${_where(relative, text, _start(found))}: the project " +
                   "is named x2c; do not spell out the word it is pronounced " +
                   "like")
@@ -374,7 +374,7 @@ static void _check_banned_name(void):
 static void _check_summary(void):
   String relative = "docs/src/SUMMARY.md", text = _read(relative)
   Map listed = {}
-  foreach RegexMatch found, link.find_all(text):
+  foreach RegexMatch found in link.find_all(text):
     String target = found[1].strip(NULL).partition("#").car()
     if !target || target.startswith("http://") ||
         target.startswith("https://"):
@@ -386,7 +386,7 @@ static void _check_summary(void):
                   %"entry has no file $target")
   Array pages = []
   _markdown_below("docs/src", 0, pages)
-  foreach String page, pages:
+  foreach String page in pages:
     if page != relative && !listed.contains(page):
       errors.push(%"$page: page is not reachable from docs/src/SUMMARY.md")
 
@@ -404,8 +404,8 @@ _markdown_in("agents", docs)
 _markdown_in("docs", docs)
 _markdown_below("docs/src", 0, docs)
 link_docs = []
-foreach String relative, docs: link_docs.push(relative)
-foreach String directory, %("agents/skills" "packages" "plans"):
+foreach String relative in docs: link_docs.push(relative)
+foreach String directory in %("agents/skills" "packages" "plans"):
   _markdown_below(directory, 1, link_docs)
 errors = []
 
@@ -424,7 +424,7 @@ _check_module_counts()
 _check_ledger_placement()
 if errors.len():
   Stderr.printf("documentation audit failed:\n")
-  foreach String error, errors: Stderr.printf("- %s\n", error)
+  foreach String error in errors: Stderr.printf("- %s\n", error)
   return 1
 printf("documentation audit passed: %d files, %d link-checked files, "
        "%d path-audited entry points\n", (int) docs.len(),

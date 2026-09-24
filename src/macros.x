@@ -3465,8 +3465,15 @@ static List _invocation_arguments(
     }
     List capture = _capture_row(c, hole, captured.list_free());
     arguments.push(capture);
-    if (nodes.cdr() && c.peek(0) != <)>)
-      c.expect(<,>);
+    /* `in` may separate a declaration from what follows, as in
+       `foreach (String line in lines)`. Before a literal it scans as a
+       name, which cannot follow a declaration either. */
+    if (nodes.cdr() && c.peek(0) != <)>) {
+      if (kind == <decl> && (c.peek(0) == <in> || c.token.text == "in"))
+        c.next();
+      else
+        c.expect(<,>);
+    }
   }
   if (c.peek(0) != <)>) {
     if (c.peek(0) == <,>) c.next();
