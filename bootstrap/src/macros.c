@@ -3871,8 +3871,12 @@ void Compiler_install_native_meta_effects(Compiler c, Map globs){
 
 }
 
+Map Sym_current_symbols(Sym);
 int Compiler_bind_native_meta(Compiler c, String name){
-  if(! _init_guard_) _file_init_();  Var signature, bound;  if(! Map_try_get(c -> native_meta, String_var(name), & signature)) return 0;  _bind_native_meta(c, name, Var_list(signature), NULL);  return Lisp_try_get(c -> macro_lisp, name, & bound);
+  if(! _init_guard_) _file_init_();  Var signature, bound;  if(! Map_len(c -> native_meta)){
+    Map symbols = Sym_base_symbols(c -> sym);  Map current = Sym_current_symbols(c -> sym);  if(Map_truth(current)) Map_merge(symbols, current);  Compiler_install_native_meta_effects(c, symbols);
+  }
+  if(! Map_try_get(c -> native_meta, String_var(name), & signature)) return 0;  _bind_native_meta(c, name, Var_list(signature), NULL);  return Lisp_try_get(c -> macro_lisp, name, & bound);
 }
 
 void Compiler_install_native_meta_function(Compiler c, List declaration, Token marker){
@@ -4079,7 +4083,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site){
                                 x2c_exception_mark_handled(&_x2c_exception_frame_7);
                                 if (_x2c_catch_selected_7 == 0) {Var category = x2c_error_catch_capture(_x2c_error_handler_7, 0);
                                 {
-                                  static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 1909};
+                                  static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 1918};
                                   x2c_error_raise_n(& _x2c_error_site_5, 28682226919752, 1, Symbol_var(209659067570), category);
                                   __builtin_unreachable();
                                 }
