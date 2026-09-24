@@ -2584,19 +2584,16 @@ static Var _lower_defer(Lowering l, Var cleanup, List rest, List k) {
     .depth = _lower_depth(l) + 1, .returns = 0, .outer = l.pending
   };
   Map outer = l.env;
-  List saved_break = l.on_break, saved_continue = l.on_continue;
-  LowerCleanup saved_pending = l.pending;
-  l.on_break = l.on_continue = NULL;
-  l.pending = NULL;
-  l.env = _lower_scratch_map(l.scratch);
-  foreach (Var (id, form), inside) l.env[id] = form;
-  Var undo = _lower_block(l, %($cleanup), %(end));
-  l.on_break = saved_break;
-  l.on_continue = saved_continue;
-  l.pending = &frame;
-  l.env = inside;
-  Var body = _lower_block(l, rest, %(at-depth ${frame.depth - 1} $k));
-  l.pending = saved_pending;
+  Var undo = void, body = void;
+  $let(l.on_break, NULL) $let(l.on_continue, NULL) $let(l.pending, NULL) {
+    l.env = _lower_scratch_map(l.scratch);
+    foreach (Var (id, form), inside) l.env[id] = form;
+    undo = _lower_block(l, %($cleanup), %(end));
+  }
+  $let(l.pending, &frame) {
+    l.env = inside;
+    body = _lower_block(l, rest, %(at-depth ${frame.depth - 1} $k));
+  }
   l.env = outer;
   if (_lower_failed(l, undo) || _lower_failed(l, body)) {
     entry.free();
