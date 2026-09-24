@@ -637,15 +637,13 @@ and there is no option to suppress or escalate one. A warning describes
 something the compiler can see and you may have arranged deliberately, so
 code that means what it says can be left as written.
 
-Six codes are reported as warnings:
+Five codes are reported as warnings:
 
 - `region` says a value allocated inside a region can still be reached after
   the region ends, and names how it leaves. Its note gives the line that
   opened the region.
 - `after-free` says a local was read after `Scope.free` or
   `Array.list_free` consumed it.
-- `unbalanced` says a region has no matching release in the block that
-  opened it, a shape the `region` check cannot follow.
 - `literal` says a bare word inside a macro is a `Symbol` where a value was
   probably meant, and names the unquoted spelling that inserts the value.
 - `macro` carries what a macro reported through `x2c.diagnostic.warn`, at the

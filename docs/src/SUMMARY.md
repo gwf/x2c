@@ -134,4 +134,3 @@
 - [Implementation Map](internals/implementation-map.md)
 - [Building the Compiler](internals/building.md)
 - [A Recursive Lisp in x2c](internals/reference-lisp.md)
-- [Meta-function Lifetime Equivalence](internals/meta-lifetime-equivalence.md)

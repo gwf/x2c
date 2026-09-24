@@ -3242,14 +3242,13 @@ the caret width.
 
 ### Region warnings
 
-Three codes come from the region check described in
+Two codes come from the region check described in
 [Scopes and Lifetime](../guide/memory.md#warnings-when-a-value-outlives-its-region).
 Each is a warning: translation continues and the program still compiles.
 
 | Code | Reported for |
 | --- | --- |
 | `region` | A value allocated inside a region is reachable after the region ends. The message gives the way the value leaves, and the note gives the line that opened the region. |
-| `unbalanced` | A region has no matching release in the block that opened it. |
 | `after-free` | A local is read after `Scope.free` or `Array.list_free` consumed it. |
 
 The check analyzes regions lexically and summarizes each function within its

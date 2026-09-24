@@ -32,7 +32,7 @@ the bound and typed definition. The walk reads the summaries of the
 in `meta_regions`; a definition whose lowering the process already
 cached takes the summary recorded with it.
 
-Source: `src/regions.x:1064`
+Source: `src/regions.x:1049`
 
 <a id="Compiler.check_regions"></a>
 #### Compiler.check_regions
@@ -44,7 +44,7 @@ Warns about values that can outlive the region that allocated them.
 lowering rewrites its `defer` and region forms. The call adds warnings to
 `c` and does not change `ast`.
 
-Source: `src/regions.x:1039`
+Source: `src/regions.x:1024`
 
 ## Design notes
 
@@ -55,8 +55,7 @@ storage, which an address taken with `&` borrows. The pass reads the
 typed forms the parser produced, before the transform driver rewrites
 them, so a region is still the call that opens it and the `defer` beside
 it that closes it. It warns when a value born in a region reaches storage
-that outlives the region, when a region is opened without its close in
-the same block, and when a local is read after it was freed.
+that outlives the region and when a local is read after it was freed.
 
 A function's summary is two facts: which owner supplies fresh returned
 storage, and where each parameter is sunk. The unit's functions reach a

@@ -408,7 +408,7 @@ rationale is invented for an unbound operation.
 The completed inventory at the original campaign close left 104 distinct
 methods with a limitation: 98 without bindings and six bound methods with a
 reproduced semantic gap. The generalized `meta` declaration and the model in
-[Meta-function Lifetime Equivalence](../docs/src/internals/meta-lifetime-equivalence.md)
+Meta-function Lifetime Equivalence page (since deleted)
 change how that remainder should be assigned. They do not reopen the methods
 whose exact native contracts are unsuitable for compile-time execution.
 

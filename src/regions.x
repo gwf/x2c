@@ -9,8 +9,7 @@
     typed forms the parser produced, before the transform driver rewrites
     them, so a region is still the call that opens it and the `defer` beside
     it that closes it. It warns when a value born in a region reaches storage
-    that outlives the region, when a region is opened without its close in
-    the same block, and when a local is read after it was freed.
+    that outlives the region and when a local is read after it was freed.
 
     A function's summary is two facts: which owner supplies fresh returned
     storage, and where each parameter is sunk. The unit's functions reach a
@@ -39,11 +38,10 @@
    storage of a Scope local whose end has not been seen, or frame: the
    storage of the function's locals and parameters. `depth` is the
    block depth it belongs to, `origin` the statement that opened it, `slot`
-   the Scope local a pushed slot names, and `outer` the next open region.
-   `lexical` records a close in the block that opened it. */
+   the Scope local a pushed slot names, and `outer` the next open region. */
 typedef struct Region {
   Symbol kind;
-  int depth, origin, closed, lexical;
+  int depth, origin, closed;
   struct Fact *slot;
   struct Region *outer;
 } *Region;
@@ -190,7 +188,7 @@ static int _copies(Walk w, Type type, Var value) {
 
 static Region _open(Walk w, Symbol kind, Fact slot) {
   Region region = Scope.calloc(1, sizeof(struct Region));
-  *region = (struct Region) {kind, w.depth, w.origin, 0, 0, slot, w.open};
+  *region = (struct Region) {kind, w.depth, w.origin, 0, slot, w.open};
   return w.open = region;
 }
 
@@ -846,21 +844,15 @@ static void _walk_defer(Walk w, Var body) {
     callee = _callee_of(expression, &arguments);
   Fact fact = _fact_of(w, arguments.car(), NULL);
   match (callee ? runtime[callee] : void) {
-    case %(close ?kind): {
-      Region region = _innermost(w, kind);
-      if (region) region.lexical = 1;
-      return;
-    }
+    case %(close ?): return;
     case %(free) if (fact && fact.param < 0): {
       fact.region = _open(w, <auto>, NULL);
-      fact.region.lexical = 1;
       return;
     }
     case %(destroy): {
       Region owner = _owner(w, fact);
       if (!owner || owner.kind != <local>) return;
       owner.kind = <auto>;
-      owner.lexical = 1;
       owner.outer = w.open;
       w.open = owner;
       return;
@@ -880,11 +872,9 @@ static int _walk_region_call(Walk w, String callee, List arguments) {
     case %(open ?kind): _open(w, kind, _slot(w, arguments.car()));
     case %(close ?kind): {
       Region region = _innermost(w, kind);
-      if (!region) break;
       /* A close in a nested block runs on some paths, so the region stays
          open for the statements after that block. */
-      region.lexical = 1;
-      region.closed = region.depth == w.depth;
+      if (region) region.closed = region.depth == w.depth;
     }
     case %(destroy): if (fact && fact.depth == w.depth && fact.owner)
       fact.owner.closed = 1;
@@ -899,11 +889,6 @@ static int _walk_region_call(Walk w, String callee, List arguments) {
 static void _close_to(Walk w, Region region, Region outer) {
   if (region == outer) return;
   _close_to(w, region.outer, outer);
-  if (!region.closed && !region.lexical &&
-      (region.kind == <scope> || region.kind == <pool>))
-    _warn(w, <unbalanced>, region.origin,
-          "this region has no matching release in the block that opens it",
-          %("a region opens and closes in one block"));
   region.closed = 1;
 }
 
