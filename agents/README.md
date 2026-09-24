@@ -41,6 +41,12 @@ are needed rather than maintaining another copy.
   comment cleanup candidates without editing.
 - [find-redundant-validation](skills/find-redundant-validation/SKILL.md) -
   discover and rank redundant checks without editing.
+- [find-x2c-overengineering](skills/find-x2c-overengineering/SKILL.md) - run
+  a bounded, cumulative audit for live internal machinery worth deletion
+  review.
+- [investigate-x2c-overengineering](skills/investigate-x2c-overengineering/SKILL.md)
+  - prove or reject one specific overengineering candidate without editing
+  production source.
 - [release-x2c](skills/release-x2c/SKILL.md) - prepare, dry-run, and verify
   a release, or recover from a failed one.
 - [typesafe-ai](skills/typesafe-ai/SKILL.md) - design and build workflows with

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Investigate x2c Overengineering"
+  short_description: "Adjudicate one suspected overengineering candidate"
+  default_prompt: "Use $investigate-x2c-overengineering to prove or reject one current-tree removal candidate without editing production source."
