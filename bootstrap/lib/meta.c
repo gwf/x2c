@@ -60,7 +60,7 @@ int x2c_invocation_line(void);
 
 int x2c_invocation_column(void);
 
-String x2c_embed_text(String path);
+String x2c_embed_text(Var path);
 
 void x2c_diagnostic_fail(String message, List notes);
 
