@@ -165,6 +165,17 @@ meta String text_empty(int unused) {
   (void) unused;
   return %"";
 }
+meta String text_scalars(char c, unsigned char uc, short h,
+                         unsigned short uh, unsigned u) {
+  return %"$c $uc $h $uh $u";
+}
+meta String text_wide_scalars(unsigned long ul, long long ll,
+                              unsigned long long ull) {
+  return %"$ul $ll $ull";
+}
+meta String text_floats(float f, long double ld) {
+  return %"$f $ld";
+}
 int main(int argc, char **argv) {
   (void) argv;
   printf("%d %d\n", $text_contains_digit(0), text_contains_digit(argc - 1));
@@ -200,5 +211,11 @@ int main(int argc, char **argv) {
   printf("[%s] [%s]\n", $text_expressions("ab"), text_expressions("ab"));
   printf("[%s] [%s]\n", $text_nested("ab"), text_nested("ab"));
   printf("%d %d\n", $text_empty(0).len(), text_empty(argc - 1).len());
+  printf("[%s] [%s]\n", $text_scalars('x', 'y', -3, 4, 5),
+    text_scalars('x', 'y', -3, 4, argc + 4));
+  printf("[%s] [%s]\n", $text_wide_scalars(6, -7, 8),
+    text_wide_scalars(6, -7, argc + 7));
+  printf("[%s] [%s]\n", $text_floats(1.5, 2.5),
+    text_floats(1.5, argc + 1.5));
   return 0;
 }
