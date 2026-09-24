@@ -54,6 +54,9 @@ execution.
   implementation status.
 - [Class registration](class-registration.md): active. Rows assigned on
   first box and an overflow cell for classes past the direct rows.
+- [Package meta modules](package-meta-modules.md): active. Importing a
+  package loads its compile-time part; the compiler links the whole
+  runtime.
 - [Meta sequencing](meta-sequencing.md): active. The order of class
   registration and capacity, native extensions and packages, protocols
   beyond Iter, and whole-project lifetime certification.

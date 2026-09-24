@@ -43,6 +43,8 @@ design should list them.
 
 ### 2. Native extensions and packages
 
+Designed in [package meta modules](package-meta-modules.md).
+
 Track G delivered loadable meta modules with a hash stamp and a
 name-to-`Func` target Map. Extend it so a package declares its role:
 
