@@ -12,7 +12,7 @@ typedef struct Tokenizer{
   Array modes;
   struct Token * cursor;
   Symbol scan_status;
-  int line, col, pos;
+  int line, col, pos, layout;
 }
 * Tokenizer;
 
