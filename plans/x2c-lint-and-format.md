@@ -317,7 +317,10 @@ Gary accepted all six recommendations below on 2026-09-24.
 1. **Lint placement.** Recommend a separate `tools/x2c-lint` executable
    linking the compiler objects, as `x2c-graph` does. This replaces the
    2026-09-17 `x2c lint` subcommand decision. It keeps about 1,800 lines out
-   of `src/` and keeps rule edits out of bootstrap refresh.
+   of `src/` and keeps rule edits out of bootstrap refresh. The later
+   [external commands](external-commands.md) plan moves the standalone tool
+   to `commands/lint` as an experimental command after dispatch exists;
+   it remains optional and is not installed.
 2. **Projection form.** Recommend a documented `--dump-definitions`
    translate option that replaces the experimental `--dump-source-ast`,
    rather than enlarging `.xi` files, which every build writes. It stays in
