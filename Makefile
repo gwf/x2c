@@ -200,7 +200,7 @@ verify-fixtures-update: build				## Rewrite compiler fixture output
 	$(MAKE) -C unittest update-compiler-fixtures
 
 proof-artifact-atomicity:				## Prove artifact updates are atomic
-	./unittest/probes/run-artifact-atomicity.sh
+	$(STAGE0_X2C) script unittest/probes/run-artifact-atomicity
 
 build-recovery: build					## Check incremental build recovery
 	./unittest/probes/run-build-recovery.sh
