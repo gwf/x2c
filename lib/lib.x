@@ -16,9 +16,9 @@
     arrays are `Scope`-owned; `DisjointSet.free` releases them early and
     invalidates every alias.
 */
-typedef struct DisjointSet {
+class DisjointSet struct {
   int *parent, *size, length, ncmpnts;
-} *DisjointSet;
+} *;
 
 /** Creates a union-find over elements `0` through `n - 1`.
     `n` must be nonnegative. The result belongs to the active `Scope` and
@@ -28,8 +28,7 @@ typedef struct DisjointSet {
     Raises: `<size-limit>` or `<alloc-fail>` while allocating the structure or
     its arrays.
 */
-DisjointSet DisjointSet.new(int n) {
-  DisjointSet set = Scope.malloc(sizeof(struct DisjointSet));
+void DisjointSet.init(DisjointSet set, int n) {
   set.parent = Scope.malloc(sizeof(int) * n);
   set.size = Scope.malloc(sizeof(int) * n);
   set.length = n;
@@ -38,14 +37,12 @@ DisjointSet DisjointSet.new(int n) {
     set.parent[i] = i;
     set.size[i] = 1;
   }
-  return set;
 }
 
-/** Releases a live set and its arrays, invalidating every alias. */
-void DisjointSet.free(DisjointSet set) {
+/** Releases the set's arrays when `DisjointSet.free` releases the set. */
+void DisjointSet.drop(DisjointSet set) {
   Scope.free(set.parent);
   Scope.free(set.size);
-  Scope.free(set);
 }
 
 /** Returns the representative of `x` and compresses its traversed path.

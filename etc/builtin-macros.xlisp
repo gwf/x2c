@@ -1398,65 +1398,154 @@
  (lambda (arg-1)
   ((lambda (hold-2)
     ((lambda (hold-3)
-      (cond ((eq? (builtin_class_pointer hold-3) (quote ()))
-             ((lambda (hold-4)
-               ((lambda (hold-5)
-                 (cond ((C.true? hold-4)
-                        ((lambda (hold-6) (x2c_stmnt_make hold-6))
-                         (builtin_class_method hold-2
-                          (C.address "write_repr" (quote string))
-                          (cons (List_var hold-5) (quote ())))))
-                  (true (cond ((C.true? (x2c_type_is_value hold-3))
-                               ((lambda (hold-7) (x2c_stmnt_make hold-7))
-                                (builtin_class_method
-                                 (builtin_class_cast (quote ("Var")) hold-2)
+      ((lambda (hold-4)
+        (cond ((match hold-3 (quote ((dim *) *)))
+               (cond ((C.true?
+                       (C.and (C.not 1)
+                        (Var_equal (builtin_class_pointer hold-3)
+                         (quote ()))))
+                      ((lambda (hold-5)
+                        (cond ((C.true? hold-5)
+                               ((lambda (hold-6) (x2c_stmnt_make hold-6))
+                                (builtin_class_method hold-2
                                  (C.address "write_repr" (quote string))
-                                 (cons (List_var hold-5) (quote ())))))
-                         (true (cond ((eq? (builtin_class_pointer
-                                            (x2c_type_resolve hold-3))
-                                       (quote ()))
-                                      ((lambda (hold-8)
-                                        ((lambda (hold-9)
-                                          (x2c_stmnt_make hold-9))
-                                         (builtin_class_pointer_output
-                                          (C.address "opaque" (quote string))
-                                          hold-8 hold-5)))
-                                       (builtin_class_op (quote &)
-                                        (cons (List_var hold-2) (quote ())))))
-                                (true ((lambda (hold-10)
-                                        (x2c_stmnt_make hold-10))
-                                       (builtin_class_pointer_output
-                                        (C.address "opaque" (quote string))
-                                        hold-2 hold-5)))))))))
-                (builtin_class_ref (C.address "out" (quote string)))))
-              (x2c_method_resolve hold-3 (C.address "write_repr" (quote string)))))
-       (true ((lambda (hold-11)
-               (cond ((C.true? (quote ()))
-                      ((lambda (hold-12) (x2c_stmnt_make hold-12))
-                       (builtin_class_method hold-2
-                        (C.address "write_repr" (quote string))
-                        (cons (List_var hold-11) (quote ())))))
-                (true (cond ((C.true? (x2c_type_is_value hold-3))
-                             ((lambda (hold-13) (x2c_stmnt_make hold-13))
-                              (builtin_class_method
-                               (builtin_class_cast (quote ("Var")) hold-2)
+                                 (cons (List_var hold-4) (quote ())))))
+                         (true (cond ((C.true?
+                                       (C.and (C.not 1)
+                                        (x2c_type_is_value hold-3)))
+                                      ((lambda (hold-7) (x2c_stmnt_make hold-7))
+                                       (builtin_class_method
+                                        (builtin_class_cast (quote ("Var"))
+                                         hold-2)
+                                        (C.address "write_repr" (quote string))
+                                        (cons (List_var hold-4) (quote ())))))
+                                (true (cond ((C.true?
+                                              (C.and (C.not 1)
+                                               (Var_equal
+                                                (builtin_class_pointer
+                                                 (x2c_type_resolve hold-3))
+                                                (quote ()))))
+                                             ((lambda (hold-8)
+                                               ((lambda (hold-9)
+                                                 (x2c_stmnt_make hold-9))
+                                                (builtin_class_pointer_output
+                                                 (C.address "opaque"
+                                                  (quote string)) hold-8 hold-4)))
+                                              (builtin_class_op (quote &)
+                                               (cons (List_var hold-2)
+                                                (quote ())))))
+                                       (true ((lambda (hold-10)
+                                               (x2c_stmnt_make hold-10))
+                                              (builtin_class_pointer_output
+                                               (C.address "opaque"
+                                                (quote string)) hold-2 hold-4)))))))))
+                       (x2c_method_resolve hold-3
+                        (C.address "write_repr" (quote string)))))
+                (true (cond ((C.true? (quote ()))
+                             ((lambda (hold-11) (x2c_stmnt_make hold-11))
+                              (builtin_class_method hold-2
                                (C.address "write_repr" (quote string))
-                               (cons (List_var hold-11) (quote ())))))
-                       (true (cond ((eq? (builtin_class_pointer
-                                          (x2c_type_resolve hold-3)) (quote ()))
-                                    ((lambda (hold-14)
-                                      ((lambda (hold-15)
-                                        (x2c_stmnt_make hold-15))
-                                       (builtin_class_pointer_output
-                                        (C.address "opaque" (quote string))
-                                        hold-14 hold-11)))
-                                     (builtin_class_op (quote &)
-                                      (cons (List_var hold-2) (quote ())))))
-                              (true ((lambda (hold-16) (x2c_stmnt_make hold-16))
-                                     (builtin_class_pointer_output
-                                      (C.address "opaque" (quote string)) hold-2
-                                      hold-11)))))))))
-              (builtin_class_ref (C.address "out" (quote string)))))))
+                               (cons (List_var hold-4) (quote ())))))
+                       (true (cond ((C.true?
+                                     (C.and (C.not 1) (x2c_type_is_value hold-3)))
+                                    ((lambda (hold-12) (x2c_stmnt_make hold-12))
+                                     (builtin_class_method
+                                      (builtin_class_cast (quote ("Var")) hold-2)
+                                      (C.address "write_repr" (quote string))
+                                      (cons (List_var hold-4) (quote ())))))
+                              (true (cond ((C.true?
+                                            (C.and (C.not 1)
+                                             (Var_equal
+                                              (builtin_class_pointer
+                                               (x2c_type_resolve hold-3))
+                                              (quote ()))))
+                                           ((lambda (hold-13)
+                                             ((lambda (hold-14)
+                                               (x2c_stmnt_make hold-14))
+                                              (builtin_class_pointer_output
+                                               (C.address "opaque"
+                                                (quote string)) hold-13 hold-4)))
+                                            (builtin_class_op (quote &)
+                                             (cons (List_var hold-2) (quote ())))))
+                                     (true ((lambda (hold-15)
+                                             (x2c_stmnt_make hold-15))
+                                            (builtin_class_pointer_output
+                                             (C.address "opaque" (quote string))
+                                             hold-2 hold-4)))))))))))
+         (true (cond ((C.true?
+                       (C.and (C.not 0)
+                        (Var_equal (builtin_class_pointer hold-3)
+                         (quote ()))))
+                      ((lambda (hold-16)
+                        (cond ((C.true? hold-16)
+                               ((lambda (hold-17) (x2c_stmnt_make hold-17))
+                                (builtin_class_method hold-2
+                                 (C.address "write_repr" (quote string))
+                                 (cons (List_var hold-4) (quote ())))))
+                         (true (cond ((C.true?
+                                       (C.and (C.not 0)
+                                        (x2c_type_is_value hold-3)))
+                                      ((lambda (hold-18)
+                                        (x2c_stmnt_make hold-18))
+                                       (builtin_class_method
+                                        (builtin_class_cast (quote ("Var"))
+                                         hold-2)
+                                        (C.address "write_repr" (quote string))
+                                        (cons (List_var hold-4) (quote ())))))
+                                (true (cond ((C.true?
+                                              (C.and (C.not 0)
+                                               (Var_equal
+                                                (builtin_class_pointer
+                                                 (x2c_type_resolve hold-3))
+                                                (quote ()))))
+                                             ((lambda (hold-19)
+                                               ((lambda (hold-20)
+                                                 (x2c_stmnt_make hold-20))
+                                                (builtin_class_pointer_output
+                                                 (C.address "opaque"
+                                                  (quote string)) hold-19 hold-4)))
+                                              (builtin_class_op (quote &)
+                                               (cons (List_var hold-2)
+                                                (quote ())))))
+                                       (true ((lambda (hold-21)
+                                               (x2c_stmnt_make hold-21))
+                                              (builtin_class_pointer_output
+                                               (C.address "opaque"
+                                                (quote string)) hold-2 hold-4)))))))))
+                       (x2c_method_resolve hold-3
+                        (C.address "write_repr" (quote string)))))
+                (true (cond ((C.true? (quote ()))
+                             ((lambda (hold-22) (x2c_stmnt_make hold-22))
+                              (builtin_class_method hold-2
+                               (C.address "write_repr" (quote string))
+                               (cons (List_var hold-4) (quote ())))))
+                       (true (cond ((C.true?
+                                     (C.and (C.not 0) (x2c_type_is_value hold-3)))
+                                    ((lambda (hold-23) (x2c_stmnt_make hold-23))
+                                     (builtin_class_method
+                                      (builtin_class_cast (quote ("Var")) hold-2)
+                                      (C.address "write_repr" (quote string))
+                                      (cons (List_var hold-4) (quote ())))))
+                              (true (cond ((C.true?
+                                            (C.and (C.not 0)
+                                             (Var_equal
+                                              (builtin_class_pointer
+                                               (x2c_type_resolve hold-3))
+                                              (quote ()))))
+                                           ((lambda (hold-24)
+                                             ((lambda (hold-25)
+                                               (x2c_stmnt_make hold-25))
+                                              (builtin_class_pointer_output
+                                               (C.address "opaque"
+                                                (quote string)) hold-24 hold-4)))
+                                            (builtin_class_op (quote &)
+                                             (cons (List_var hold-2) (quote ())))))
+                                     (true ((lambda (hold-26)
+                                             (x2c_stmnt_make hold-26))
+                                            (builtin_class_pointer_output
+                                             (C.address "opaque" (quote string))
+                                             hold-2 hold-4)))))))))))))
+       (builtin_class_ref (C.address "out" (quote string)))))
      (List_getindex arg-1 1))) (builtin_class_field_value arg-1))))
 (def loop6-builtin_class_write_fields
  (lambda (live-7 live-8 live-9 live-10 live-11 live-12)

@@ -400,17 +400,19 @@ $builtin.emit()
 List builtin_class_field_write(List field) {
   List value = builtin_class_field_value(field);
   List type = field[1];
-  List writer = %();
-  if (builtin_class_pointer(type).equal(%()))
-    writer = x2c_method_resolve(type, "write_repr");
   List out = builtin_class_ref("out");
+  int array = 0;
+  match (type) case %((dim *) *): array = 1;
+  List writer = %();
+  if (!array && builtin_class_pointer(type).equal(%()))
+    writer = x2c_method_resolve(type, "write_repr");
   List expression;
   if (writer) expression = builtin_class_method(value, "write_repr", %($out));
-  else if (x2c_type_is_value(type))
+  else if (!array && x2c_type_is_value(type))
     expression = builtin_class_method(builtin_class_cast(%("Var"), value),
                                       "write_repr", %($out));
   else {
-    if (builtin_class_pointer(x2c_type_resolve(type)).equal(%()))
+    if (!array && builtin_class_pointer(x2c_type_resolve(type)).equal(%()))
       value = builtin_class_op(<&>, %($value));
     expression = builtin_class_pointer_output("opaque", value, out);
   }
