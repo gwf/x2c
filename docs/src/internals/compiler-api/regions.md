@@ -14,6 +14,7 @@ Values that can outlive the region that allocated them.
 | --- | --- |
 | [`Compiler.check_meta_regions`](#Compiler.check_meta_regions) | Rejects a `meta` function whose body breaks the rule `Compiler.check_regions` warns about. |
 | [`Compiler.check_regions`](#Compiler.check_regions) | Warns about values that can outlive the region that allocated them. |
+| [`Compiler.has_region_row`](#Compiler.has_region_row) | Reports whether the runtime table proves the lifetime effects of the native function `name`. |
 
 ### `Compiler`
 
@@ -32,7 +33,7 @@ the bound and typed definition. The walk reads the summaries of the
 in `meta_regions`; a definition whose lowering the process already
 cached takes the summary recorded with it.
 
-Source: `src/regions.x:1082`
+Source: `src/regions.x:1128`
 
 <a id="Compiler.check_regions"></a>
 #### Compiler.check_regions
@@ -44,7 +45,17 @@ Warns about values that can outlive the region that allocated them.
 lowering rewrites its `defer` and region forms. The call adds warnings to
 `c` and does not change `ast`.
 
-Source: `src/regions.x:1057`
+Source: `src/regions.x:1103`
+
+<a id="Compiler.has_region_row"></a>
+#### Compiler.has_region_row
+
+`int Compiler.has_region_row(String name)`
+
+Reports whether the runtime table proves the lifetime effects of the
+native function `name`.
+
+Source: `src/regions.x:1151`
 
 ## Design notes
 

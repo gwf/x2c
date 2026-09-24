@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/meta-native-handle-result.x:14:14: region: a fresh allocation can outlive the region it was allocated in when returned
+    $scope() { return widget_new(3); }
+               ^^^^^^
+  note: region opened at line 14
+

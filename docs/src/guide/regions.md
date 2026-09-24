@@ -114,7 +114,9 @@ A `meta` function is walked the same way when it is defined, against the
 summaries of the `meta` functions defined before it. A compile-time call
 frees its locals when it returns, so a finding in a `meta` body is an error
 that rejects the definition rather than a warning; see
-[Meta Functions](meta-functions.md).
+[Meta Functions](meta-functions.md). A native function outside the runtime table
+described below takes a summary its signature implies; see
+[Native modules](meta-functions.md#native-modules).
 
 Summaries stay inside the unit. For a call into another unit, the pass uses
 only a fixed table of runtime operations, such as a `Scope` allocator,

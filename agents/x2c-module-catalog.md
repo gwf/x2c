@@ -371,7 +371,8 @@ values that can outlive the region that allocated them.
 
 Public functions:
 
-`Compiler.check_regions`, `Compiler.check_meta_regions`
+`Compiler.check_regions`, `Compiler.check_meta_regions`,
+`Compiler.has_region_row`
 
 ### [src/repl-input.x](../src/repl-input.x)
 

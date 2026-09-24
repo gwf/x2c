@@ -71,24 +71,28 @@ protocol Var(Fact);
    own storage, and `restored` holds the places a `$let` or another `defer`
    puts back before its block ends. `fresh` and `sinks` accumulate the
    current function's summary, `warnings` holds the current round's, and
-   `pending` and `freed` are the expression walk's stacks. */
+   `pending` and `freed` are the expression walk's stacks. `meta` is set
+   while a `meta` definition is walked. */
 typedef struct Walk {
   Compiler compiler;
   Map summaries, facts, sinks, restored;
   Array warnings, pending, freed;
   Region open, frame;
-  int depth, origin, fresh, changed;
+  int depth, origin, fresh, changed, meta;
 } *Walk;
 
 /* The runtime operations the pass reads by C name. (alloc) returns storage
    born in the active region and (alloc slot) in the Scope its first
-   argument names; (pool) conses both arguments into pool cells; (store)
+   argument names; (alloc final) is an (alloc) whose result a `meta` body
+   owns in its own frame, because a finalizer ends it when the lowered call
+   returns; (pool) conses both arguments into pool cells; (store)
    puts its later arguments into its receiver; (wrap) boxes its argument
    unchanged; (free) ends its argument, or owns it from a `defer`, and
    (free scope) also requires Scope storage; (alloc moved) is a Scope
    allocation that ends its first argument; (destroy) ends a Scope local's
    storage; (open KIND) and (close KIND) bracket a region; (move) and
-   (exit) hand their argument to another owner. */
+   (exit) hand their argument to another owner; (summary OWNER SINKS) is a
+   literal summary. */
 static Map runtime = %{
   "Scope_malloc": (alloc),           "Scope_calloc": (alloc),
   "Scope_memdup": (alloc),           "Scope_malloc_finalized": (alloc),
@@ -124,7 +128,47 @@ static Map runtime = %{
   "Scope_push": (open slot),         "Scope_pop": (close slot),
   "Scope_move": (move),              "Context_export": (exit),
   "List_promote": (exit),            "String_promote": (exit),
-  "Atom_promote": (exit)
+  "Atom_promote": (exit),
+  "Var_as_iter": (wrap),             "Iter_var": (wrap),
+  "Var_adnode": (wrap),              "AdNode_var": (wrap),
+  "Var_token": (wrap),               "Token_var": (wrap),
+  "Var_file": (wrap),                "File_var": (wrap),
+  "Var_job": (wrap),                 "Job_var": (wrap),
+  "List_job": (alloc final),
+  "String_lines": (summary 1 ((0 result))),
+  "String_words": (summary 1 ((0 result))),
+  "String_splits": (summary 1 ((0 result) (1 result))),
+  "Var_fallback_iter": (summary 0 ((1 return))),
+  "Scope_new": (summary 0 ()),       "Scope_new_named": (summary 0 ()),
+  "Context_open": (summary 0 ()),    "Context_current": (summary 0 ()),
+  "Iter_new": (alloc),               "Iter_array": (alloc),
+  "Iter_list": (alloc pool),
+  "Iter_next": (summary 0 ()),       "Iter_count": (summary 0 ()),
+  "Iter_sum": (summary 0 ()),        "Iter_product": (summary 0 ()),
+  "Iter_max": (summary 0 ()),        "Iter_min": (summary 0 ()),
+  "Array_iter": (summary 0 ((0 (param 1)) (1 return))),
+  "List_iter": (summary 0 ((0 (param 1)) (1 return))),
+  "Map_iter": (summary 0 ((0 (param 1)) (1 return))),
+  "Map_keys": (summary 0 ((0 (param 1)) (1 return))),
+  "Map_enumerate": (summary 0 ((0 (param 1)) (1 return))),
+  "String_iter": (summary 0 ((0 (param 1)) (1 return))),
+  "Var_iter": (summary 0 ((0 (param 1)) (1 return))),
+  "range": (summary 0 ((3 return))),
+  "Iter_map": (summary 0 ((0 (param 2)) (1 (param 2)) (2 return))),
+  "Iter_filter": (summary 0 ((0 (param 2)) (1 (param 2)) (2 return))),
+  "Iter_zip": (summary 0 ((0 (param 2)) (1 (param 2)) (2 return))),
+  "Iter_chain": (summary 0 ((0 (param 2)) (1 (param 2)) (2 return))),
+  "Iter_accumulate": (summary 0 ((0 (param 2)) (1 (param 2)) (2 return))),
+  "Iter_enumerate": (summary 0 ((0 (param 2)) (2 return))),
+  "Iter_repeat": (summary 0 ((0 (param 2)) (2 return))),
+  "Iter_head": (summary 0 ((0 (param 2)) (2 return))),
+  "Iter_unique": (summary 1 ((0 (param 1)) (1 return))),
+  "Iter_zip_with":
+    (summary 0 ((0 (param 3)) (1 (param 3)) (2 (param 3)) (3 return))),
+  "Iter_map2":
+    (summary 0 ((0 (param 3)) (1 (param 3)) (2 (param 3)) (3 return))),
+  "Iter_scan":
+    (summary 0 ((0 (param 3)) (1 (param 3)) (2 (param 3)) (3 return)))
 };
 
 // canonical forms the pass reads
@@ -266,6 +310,7 @@ static List _summary(Walk w, String callee) {
     case %(alloc *): return %(1 ());
     case %(pool): return %(2 ((0 result) (1 result)));
     case %(store): return %(0 ((1 (param 0)) (2 (param 0))));
+    case %(summary ?owner ?sinks): return %($owner $sinks);
   }
   Var local = w.summaries[callee];
   return local is void ? %(0 ()) : local;
@@ -356,6 +401,7 @@ static Region _birth(Walk w, Var value, Type type, int *born,
   match (callee ? runtime[callee] : void) {
     case %(alloc slot): return _owner(w, _slot(w, arguments.car()));
     case %(alloc pool): return _pooled(w, born);
+    case %(alloc final) if (w.meta): return w.frame;
     case %(alloc *): return _active(w);
     case %(pool): return _pooled(w, born);
   }
@@ -1090,7 +1136,8 @@ void Compiler.check_meta_regions(Compiler c, List fn) {
     c.meta_regions[name] = %(0 ());
   }
   struct Walk walk = {
-    .compiler = c, .summaries = c.meta_regions, .pending = [], .freed = []};
+    .compiler = c, .summaries = c.meta_regions, .pending = [], .freed = [],
+    .meta = 1};
   Walk w = &walk;
   Array functions = $auto([]);
   _fixpoint(w, fn, functions);
@@ -1098,3 +1145,7 @@ void Compiler.check_meta_regions(Compiler c, List fn) {
   (Symbol code, int at, String message, List notes) = w.warnings[0];
   $let(c.origin, at) { c.report_error(code, message, NULL, notes); }
 }
+
+/** Reports whether the runtime table proves the lifetime effects of the
+    native function `name`. */
+int Compiler.has_region_row(String name) => runtime.contains(name);
