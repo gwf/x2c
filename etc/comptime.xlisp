@@ -66,6 +66,10 @@
 (def C.record.result (bind "lisp_record_result" nil))
 (def C.session-copy (bind "lisp_session_copy" nil))
 (def C.source-function (bind "lisp_source_function" nil))
+// A block that holds a cleanup runs its body through this, so the cleanup
+// runs on every exit, including a raise.
+(defun C.unwind (body cleanup arguments)
+  ((bind "lisp_unwind" nil) body cleanup arguments))
 
 (defun C.new (size tag layout value)
   (let ((object (C.at (C.bytes size) 0 tag)))
@@ -86,7 +90,9 @@
   (if (eq? (Map.contains C._globals id) 0) 0
       (Map.getindex C._globals id)))
 
-(defun C.gwrite (id value) (Map.setindex C._globals id value))
+(defun C.gwrite (id value)
+  (Map.setindex C._globals id
+    (if (eq? (Var_is_wide value) 0) value (C.session-copy value 0))))
 (defun C.grecord.write (id value size)
   (if (eq? (Map.contains C._globals id) 0)
       (C.gwrite id (C.session-copy value size))
@@ -187,6 +193,29 @@
 (def Map_list Map.list)
 (def Map_str str)
 (def Map_repr repr)
+
+// The Array, Map, Scope and Context operations a lifetime in meta code calls.
+// Scope operations act on the session user slot, never on evaluator storage.
+(defun Array_free (array) ((bind "Array_free" nil) array))
+(defun Array_cleanup (array) ((bind "Array_cleanup" nil) array))
+(defun Map_cleanup (map) ((bind "Map_cleanup" nil) map))
+(defun String_free (string) ((bind "String_free" nil) string))
+(defun List_promote (list) ((bind "List_promote" nil) list))
+(defun Scope_new_named (name) ((bind "Scope_new_named" nil) name))
+(defun Scope_cleanup (scope) ((bind "Scope_cleanup" nil) scope))
+(defun Scope_new () ((bind "Scope_new" nil)))
+(defun Scope_retain () ((bind "Scope_retain" nil)))
+(defun Scope_release () ((bind "Scope_release" nil)))
+(defun Scope_push (slot) ((bind "Scope_push" nil) slot))
+(defun Scope_pop () ((bind "Scope_pop" nil)))
+(defun Scope_destroy (scope) ((bind "Scope_destroy" nil) scope))
+(defun Scope_move (pointer slot) ((bind "Scope_move" nil) pointer slot))
+(defun Context_open () ((bind "Context_open" nil)))
+(defun Context_current () ((bind "Context_current" nil)))
+(defun Context_close (context) ((bind "Context_close" nil) context))
+(defun Context_cleanup (context) ((bind "Context_cleanup" nil) context))
+(defun Context_export (context value)
+  ((bind "Context_export" nil) context value))
 
 (def String_map (bind "String_map" nil))
 (def String_filter (bind "String_filter" nil))

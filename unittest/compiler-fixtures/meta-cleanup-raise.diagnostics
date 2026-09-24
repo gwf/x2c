@@ -1,0 +1,8 @@
+unittest/compiler-fixtures/meta-cleanup-raise.x:24:20: macro: failed inside the cleanup block
+  void first(void) { $fails(); }
+                     ^
+
+unittest/compiler-fixtures/meta-cleanup-raise.x:25:21: macro: depth was restored
+  void second(void) { $report(); }
+                      ^
+

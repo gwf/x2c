@@ -135,8 +135,6 @@ static void _debug_tokens(Compiler compiler, Token start, Token end);
 
 static List _cache_alias(List key);
 
-static List _cache_literal_var(Compiler compiler, Var value);
-
 static List _cache_literal_list(Compiler compiler, List values);
 
 static String _match_pattern_converter_name(Var node);
@@ -3412,19 +3410,21 @@ List Compiler_cache_cons_cell(Compiler compiler, List head, List tail){
 }
 
 int Var_is_integer(Var);
-List Compiler_meta_value_expression(Compiler, Type, Var, int);
+int Var_is_floating(Var);
+List Compiler_meta_value_expression(Compiler, Type, Var, Token);
+List Compiler_convert_expression(Compiler, List, Type);
 Type List_type(List);
-static List _cache_literal_var(Compiler compiler, Var value){
-  if(Var_is_row(value, 9, 7, 4)){
+List Compiler_cache_literal_var(Compiler compiler, Var value){
+  if(! _init_guard_) _file_init_();  if(Var_is_row(value, 9, 7, 4)){
     List cached = _cache_literal_list(compiler, Var_list(value));  return Compiler_cache(compiler, cons(_436, cons(List_var(cons(_243, cons(_449, cons(List_var(cons(_243, cons(_449, cons(List_var(cached), NULL)))), NULL)))), NULL)));
   }
   if(Var_is_row(value, 11, 7, 1)){
     List literal = cons(_243, cons(_465, cons(List_var(cons(_466, cons(_465, cons(value, NULL)))), NULL)));  List cached = Compiler_cache(compiler, cons(_213, cons(List_var(literal), NULL)));  return Compiler_cache(compiler, cons(_436, cons(List_var(cons(_243, cons(_465, cons(List_var(cached), NULL)))), NULL)));
   }
-  if(Var_is_integer(value)){
-    List literal = Compiler_meta_value_expression(compiler, List_type(_439), value, 0);  return List_truth(literal) ? Compiler_cache(compiler, cons(_436, cons(List_var(literal), NULL))) : NULL;
+  if(Var_is_integer(value) || Var_is_floating(value)){
+    List literal = Compiler_meta_value_expression(compiler, NULL, value, NULL);  literal = Compiler_convert_expression(compiler, literal, List_type(_439));  return Compiler_cache(compiler, cons(_436, cons(List_var(literal), NULL)));
   }
-  String spelling = Symbol_str(Var_symbol(value));  List literal = cons(_243, cons(_470, cons(List_var(cons(_466, cons(_470, cons(String_var(spelling), cons(value, NULL))))), NULL)));  return Compiler_cache(compiler, cons(_436, cons(List_var(literal), NULL)));
+  if(! Var_is(value, 1328354264)) return NULL;  String spelling = Symbol_str(Var_symbol(value));  List literal = cons(_243, cons(_470, cons(List_var(cons(_466, cons(_470, cons(String_var(spelling), cons(value, NULL))))), NULL)));  return Compiler_cache(compiler, cons(_436, cons(List_var(literal), NULL)));
 }
 
 static List _cache_literal_list(Compiler compiler, List values){
@@ -3438,7 +3438,7 @@ static List _cache_literal_list(Compiler compiler, List values){
   {
     {
       Var value;  List _x2c_macro_object_37 = values;  List _x2c_macro_cursor_37 = _x2c_macro_object_37;  Var _x2c_macro_cursor_output_35;  while(List_try_next(_x2c_macro_object_37, & _x2c_macro_cursor_37, & _x2c_macro_cursor_output_35)){
-        value = _x2c_macro_cursor_output_35;  Array_push(heads, List_var(_cache_literal_var(compiler, value)));
+        value = _x2c_macro_cursor_output_35;  Array_push(heads, List_var(Compiler_cache_literal_var(compiler, value)));
       }
 
     }

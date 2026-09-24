@@ -1851,7 +1851,7 @@ static Var _sdk_symbol_set(List values) {
 */
 List Compiler.lift_macro_lisp_expression(
   Compiler compiler, Var value, Token invocation) {
-  List literal = compiler.meta_value_expression(NULL, value, 1);
+  List literal = compiler.meta_value_expression(NULL, value, invocation);
   if (literal) return literal;
   Var identifier = _sdk_identifier_result(value);
   if (identifier is not void) return %(expr () (ident $identifier));
@@ -1931,7 +1931,7 @@ List Compiler.evaluate_meta_expression(Compiler c, List expression, Token site) 
     return %(expr (void) (cast (void) (expr (int) (literal (int) "0"))));
   if (c.macro_stack && value is <list>)
     return c.lift_macro_lisp_expression(value, site);
-  List result = c.meta_value_expression(declared, value, 1);
+  List result = c.meta_value_expression(declared, value, site);
   return result ? result : c.lift_macro_lisp_expression(value, site);
 }
 

@@ -221,6 +221,8 @@ List Compiler_cache(Compiler c, List key);
 
 List Compiler_cache_cons_cell(Compiler compiler, List head, List tail);
 
+List Compiler_cache_literal_var(Compiler compiler, Var value);
+
 List Compiler_cache_literal_list(Compiler compiler, List values);
 
 Var Compiler_match_pattern_value(Compiler c, Var node);

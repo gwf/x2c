@@ -3960,10 +3960,10 @@ static Var _sdk_symbol_set(List values){
   int duplicate = - 1;  List expression = Compiler_symbol_set_expression(macro_sdk_compiler, values, & duplicate);  if(duplicate >= 0) _sdk_reject(_1087, cons(_609, cons(String_var(Var_repr(List_getindex(values, duplicate))), NULL)));  return List_var(expression);
 }
 
-List Compiler_meta_value_expression(Compiler, Type, Var, int);
+List Compiler_meta_value_expression(Compiler, Type, Var, Token);
 List Compiler_bind_syntax(Compiler, Var, AstPos, Type);
 List Compiler_lift_macro_lisp_expression(Compiler compiler, Var value, Token invocation){
-  if(! _init_guard_) _file_init_();  List literal = Compiler_meta_value_expression(compiler, NULL, value, 1);  if(List_truth(literal)) return literal;  Var identifier = _sdk_identifier_result(value);  if(! Var_is_void(identifier)) return cons(_19, cons(_4, cons(List_var(cons(_38, cons(identifier, NULL))), NULL)));  if(Var_is_row(value, 9, 7, 4) && ! Var_is_nil(value)) return Compiler_bind_syntax(compiler, value, AST_EXPRESSION, NULL);  Compiler_report_error(compiler, 27335838, _1088, invocation, cons(_607, cons(String_var(Var_repr(value)), NULL)));
+  if(! _init_guard_) _file_init_();  List literal = Compiler_meta_value_expression(compiler, NULL, value, invocation);  if(List_truth(literal)) return literal;  Var identifier = _sdk_identifier_result(value);  if(! Var_is_void(identifier)) return cons(_19, cons(_4, cons(List_var(cons(_38, cons(identifier, NULL))), NULL)));  if(Var_is_row(value, 9, 7, 4) && ! Var_is_nil(value)) return Compiler_bind_syntax(compiler, value, AST_EXPRESSION, NULL);  Compiler_report_error(compiler, 27335838, _1088, invocation, cons(_607, cons(String_var(Var_repr(value)), NULL)));
 }
 
 List Compiler_parse_macro_lisp_expression(Compiler compiler){
@@ -4168,7 +4168,7 @@ List Compiler_evaluate_meta_expression(Compiler c, List expression, Token site){
 default: break;
     }
   }
-if(declared == _632) return _651;  if(List_truth(c -> macro_stack) && Var_is_row(value, 9, 7, 4)) return Compiler_lift_macro_lisp_expression(c, value, site);  List result = Compiler_meta_value_expression(c, declared, value, 1);  return List_truth(result) ? result : Compiler_lift_macro_lisp_expression(c, value, site);
+if(declared == _632) return _651;  if(List_truth(c -> macro_stack) && Var_is_row(value, 9, 7, 4)) return Compiler_lift_macro_lisp_expression(c, value, site);  List result = Compiler_meta_value_expression(c, declared, value, site);  return List_truth(result) ? result : Compiler_lift_macro_lisp_expression(c, value, site);
 }
 
 Tokenizer Tokenizer_new_mode(char *, Symbol);

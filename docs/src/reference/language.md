@@ -1910,14 +1910,14 @@ representation. Nested `[...]` and `{...}` are evaluated literals of the same
 kinds; nested `List` data is written `%(...)`.
 
 `[]` is a fresh empty `Array`. The empty brace `{}` is a fresh empty `Map`
-when its destination is a `Map`, an alias of `Map`, or a type that converts
-from `Map`, and likewise for `Array`; for any other destination, including
-`Var`, it is the native zero initializer. An element or value of a bare
+when its destination is a `Map`, a `Var`, an alias of either, or a type that
+converts from `Map`, and likewise for `Array`; for any other destination it
+is the native zero initializer. An element or value of a bare
 `[...]` or `{...}` literal is the exception: there `{}` is an empty `Map`, so
 `[{}]` holds one Map. Outside a declaration initializer, a brace that remains
 an initializer becomes a compound literal of its destination, as an argument,
 a `return` value, an assignment, or a `?:` arm: `Map m = ready ? {} : NULL;`
-builds a Map, `Var v = ready ? {} : NULL;` is Null either way, and
+builds a Map, `Var v = ready ? {} : NULL;` holds a Map when `ready`, and
 `return {3, 4};` in a function returning a struct builds that struct. An
 anonymous struct or union destination has no compound-literal spelling and is
 rejected.

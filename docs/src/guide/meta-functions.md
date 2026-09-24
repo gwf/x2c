@@ -802,14 +802,13 @@ means feasible in principle, not scheduled or promised support.
 | Static arrays, computed native-array dimensions, general multidimensional arrays and missing element conversions | **Gap:** extend the represented array shape and typed operations. |
 | Structs with bitfields, array members, anonymous members or layout attributes other than `packed`; arrays of structs | **Gap:** compute a layout for these shapes. Packing is unsupported and causes a compile error. Other structs use native bytes in C layout. |
 | Unions and pointer arithmetic | **Gap:** model overlapping storage and pointer offsets in native bytes. A pointer to an actual future runtime object cannot be dereferenced during compilation; that is a **phase boundary**. |
-| `defer` | **Gap** for deferred execution in general. Explicitly freeing evaluator-owned objects conflicts with the **current ownership model**; it is not an argument that all deferred actions are impossible. |
-| `try`, `catch`, `finally`, `raise` in a meta body | **Gap:** exception transfer and cleanup need compile-time modeling. Evaluation failures can still become compiler diagnostics. |
+| `try`, `catch`, `finally`, `raise` in a meta body | **Gap:** exception transfer needs compile-time modeling. An error raised by a called operation still runs pending cleanups and becomes a compiler diagnostic. |
 | Missing library/resource operations, including `File.open` | **API gap:** implement bindings and appropriate resource lifetimes. Compile-time file I/O is possible in principle; it is not prohibited by the phase boundary. |
 | Loop-path temporary bindings, address-taken destructured locals, nonfolded match patterns | **Gap:** preserve required bindings and support pattern evaluation at the appropriate time. |
 | Native `sizeof` expressions | **Gap:** provide the compile-time value of the queried layout; `sizeof(int)` currently declines as an unsupported expression. |
 | Named enum values | **Gap:** make the enumerator's numeric value available to the lowerer. |
 | Reading future runtime mutable state | **Fundamental phase boundary:** that program state does not exist yet. Separate compile-time state is possible but is not the same state. |
-| Mutable container and callable result insertion | **Gap:** preserve ownership, mutability and identity when constructing a runtime value. See the next section. |
+| Callable result insertion | **Gap:** preserve identity when constructing a runtime value. See the next section. |
 
 For example, these are rejected definitions:
 
@@ -839,15 +838,75 @@ unused function or an untaken branch does not hide an unsupported construct.
 
 ### Lifetime and state
 
-Compile-time allocations belong to the evaluator session. Do not free,
-close, or otherwise take over evaluator-owned objects: the ordinary resource
-cleanup API is not available, and `defer` is rejected. A returned collection
-can be consumed by another meta function while the session is alive; it does
-not become a pointer to the eventual program's heap. Struct locals and
-address-taken locals are released when their function returns, as described
-in [C objects during compilation](#c-objects-during-compilation). A local
-address is useful within the calculation, not a portable constant address to
-embed in C.
+A block that holds a cleanup keeps its C meaning in a meta body. `defer`,
+`$scope`, and `$let` run their cleanup when the block ends and on every
+exit through it:
+
+- A `return` computes its value first, then runs every pending cleanup,
+  innermost first, then returns.
+- A `break` or `continue` runs the cleanups between it and its loop.
+- An error raised inside the block, such as a failed compiler query, runs
+  the cleanup before it becomes the diagnostic for the explicit call.
+
+```x2c
+meta static int closed = 0;
+
+meta int exits(int n) {
+  int total = 0;
+  for (int i = 0; i < n; i++) {
+    defer closed += 1;
+    if (i == 1) continue;
+    if (i == 3) break;
+    total += 10;
+  }
+  {
+    defer total += 1;
+    if (n > 5) return total * 100;
+  }
+  $let(total, 0) total = 7;
+  $scope() {
+    Array scratch = [total];
+    total += (int) scratch.len();
+  }
+  return total;
+}
+
+meta int closed_count(void) => closed;
+
+int main(void) {
+  printf("%d %d %d\n", $exits(2), $exits(9), $closed_count());
+  return 0;
+}
+```
+
+```text
+12 2000 6
+```
+
+`$exits(2)` runs both turns, adds 1 as its block ends, restores `total` after
+`$let`, and adds the one element counted in `$scope`. `$exits(9)` leaves the
+loop at the `break` after four cleanups. Its `return` computes 2,000 before
+the block's cleanup adds 1 to `total`. A loop with a cleanup on its
+iteration path still runs each turn in constant space.
+
+Meta code manages lifetimes with the same operations as native code.
+`$auto` works on an `Array`, a `Map`, or a `Scope`, and `Array.free`,
+`String.free`, `Scope.new`, `Scope.new_named`, `Scope.destroy`,
+`Context.open`, `Context.export`, `Context.close`, and `List.promote` are
+bound for compile-time calls. `Scope.retain`, `Scope.release`, `Scope.push`,
+`Scope.pop`, `Scope.move`, and `Context.export` act on the session's user
+allocations. Compile-time
+allocations belong to the evaluator session. The evaluator keeps its own
+bindings, automatic storage, and session state in a separate Scope, so a
+release in meta code frees only what meta code allocated. A returned
+collection can be consumed by another meta function while the session is
+alive; it does not become a pointer to the eventual program's heap. Struct
+locals and address-taken locals are released when their function returns,
+as described in [C objects during compilation](#c-objects-during-compilation).
+A local address is useful within the calculation, not a portable constant
+address to embed in C.
+As in C, a value built inside a region must not be kept, in a meta global
+or a Lisp definition, after that region is released.
 
 The emitted runtime function still follows the runtime's ownership rules.
 Evaluator cleanup does not add cleanup to that function. In particular,
@@ -873,21 +932,27 @@ requirement: the compiler must construct code representing that value.
 | `Symbol` | Inserts a Symbol literal. |
 | Identifier or nonempty code `List` | Binds the returned code through normal compiler binding and typing. A data List is not automatically an expression. |
 | Boxed `Var` | Insertion follows the contained value. |
-| `Array` or `Map` with immutable representable descendants | Constructs a fresh mutable root through the ordinary literal constructors. |
+| `{}` stored in a `Var` | A fresh empty Map, as in compiled code; inserted like any other Map. |
+| `Array` or `Map`, nested at any depth | Constructs fresh collections through the ordinary literal constructors. |
 | Struct value | Diagnosed; the compiler cannot write a struct value as code. |
-| Nested mutable collections, `Func` or arbitrary native address | No direct materialization of the evaluator object. |
+| `Func` or arbitrary native address | No direct materialization of the evaluator object. |
 
-An inserted Array or Map is a snapshot of the compile-time result. Each runtime
-execution of that expression allocates a fresh root in the current Scope, just
-like `[]` or `{}`; assigning it to another variable still aliases that root.
-Array order and element types are preserved. Map keys use their ordinary runtime
-key semantics, but reconstruction does not promise the same traversal order.
-A boxed Var may contain the resulting root.
+An inserted Array or Map is a snapshot of the compile-time result. It becomes
+an ordinary `[...]` or `{...}` literal, so each runtime execution of the
+expression allocates fresh collections in the current Scope, at every depth;
+assigning the result to another variable still aliases it. Array order and
+element types are preserved. Map keys use their ordinary runtime key
+semantics, but reconstruction does not promise the same traversal order.
+A boxed Var may contain the result.
 
-Elements, keys and values may contain scalars, Strings, Symbols, or immutable
-Lists of those values. Nested mutable objects, including mutable objects hidden
-inside Lists, remain unsupported. That restriction prevents silently copying
-shared objects or cyclic graphs.
+Scalars, Strings, Symbols, and Lists that hold no Array or Map are immutable
+and are emitted once as constants, as the same values written in source
+would be. A List inside a result is data. A List that holds an Array or Map
+is built at runtime like one written in source.
+
+Each Array and Map in a result must appear once. A result that contains
+itself, or holds the same collection in two places, is diagnosed rather than
+copied, because the inserted code would build separate collections.
 
 The same functions can be called during compilation or with ordinary C-style
 calls at runtime:

@@ -2197,7 +2197,11 @@ List Compiler.cache_cons_cell(Compiler compiler, List head, List tail) {
   return %(expr ("List") $cached);
 }
 
-static List _cache_literal_var(Compiler compiler, Var value) {
+/** Interns an immutable value and returns its `(cache id)` reference.
+    `value` is a `List` of such values, a `String`, a number with its tag, or
+    a `Symbol`; any other value returns NULL.
+*/
+List Compiler.cache_literal_var(Compiler compiler, Var value) {
   if (value is <list>) {
     List cached = _cache_literal_list(compiler, value);
     return compiler.cache(%( var (expr ("List") (expr ("List") $cached)) ));
@@ -2207,10 +2211,12 @@ static List _cache_literal_var(Compiler compiler, Var value) {
     List cached = compiler.cache(%(string $literal));
     return compiler.cache(%(var (expr ("String") $cached)));
   }
-  if (value.is_integer()) {
-    List literal = compiler.meta_value_expression(%("Var"), value, 0);
-    return literal ? compiler.cache(%(var $literal)) : NULL;
+  if (value.is_integer() || value.is_floating()) {
+    List literal = compiler.meta_value_expression(NULL, value, NULL);
+    literal = compiler.convert_expression(literal, %("Var"));
+    return compiler.cache(%(var $literal));
   }
+  if (value is not <symbol>) return NULL;
   String spelling = value.symbol();
   List literal = %(
     expr ("Symbol") (literal ("Symbol") $spelling $value)
@@ -2221,7 +2227,7 @@ static List _cache_literal_var(Compiler compiler, Var value) {
 static List _cache_literal_list(Compiler compiler, List values) {
   Array heads = $auto([]);
   foreach (Var value, values)
-    heads.push(_cache_literal_var(compiler, value));
+    heads.push(compiler.cache_literal_var(value));
   List result = %(nil);
   for (int i = (int) heads.len() - 1; i >= 0; i--) {
     List head = heads[i];

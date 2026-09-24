@@ -33,7 +33,8 @@
    file-scope state. `on_loop` records whether the current point is on a
    loop's iteration path, where a binding form would cost frame reuse.
    `on_break` and `on_continue` are the continuations the nearest enclosing
-   loop or `switch` gave, or nothing outside one. */
+   loop or `switch` gave, or nothing outside one. `pending` is the innermost
+   block cleanup the current point runs inside, or NULL. */
 typedef struct Lowering {
   Compiler compiler;
   Scope scratch;
@@ -42,11 +43,26 @@ typedef struct Lowering {
   Array definitions;
   String own;
   List on_break, on_continue;
+  struct LowerCleanup *pending;
   int declined, on_loop, rejected, uncallable, meta_only;
   int session_globals;
   int automatic;        // the function keeps C objects in frame storage
   int counter;          // the generated names this lowering has made
 } *Lowering;
+
+/* A block's statements after a `defer` run as a function inside
+   `C.unwind`, which runs the cleanup on every exit. The body returns the
+   tag of the exit it took, and the code after the wrapper continues there.
+   `env` is the environment where the cleanup was declared, which each exit
+   continues in; `exits` holds each exit's code by tag; `returns` records a
+   `return` inside, whose value leaves in a cell; `depth` counts the
+   wrappers down to the function. */
+typedef struct LowerCleanup {
+  Map env;
+  Array exits;
+  int depth, returns;
+  struct LowerCleanup *outer;
+} *LowerCleanup;
 
 /* The struct a declared spelling names, or NULL when it names none that
    compile-time code can lay out: any complete struct the compiler sees,
@@ -151,7 +167,8 @@ static int lower_repl_counter;
 
 static Var _lower_name(Lowering l, String stem) {
   int count = l.session_globals ? ++lower_repl_counter : ++l.counter;
-  if (stem != "loop" && stem != "after" && stem != "static")
+  if (stem != "loop" && stem != "after" && stem != "static" &&
+      stem != "body" && stem != "undo")
     return Atom.intern(%"$stem-$count");
   if (!l.own) return Atom.intern(%"$stem$count");
   return Atom.intern(%"$stem$count-${l.own}");
@@ -470,14 +487,8 @@ static void _lower_scan(Lowering l, Var form) {
     return;
   }
   _lower_scan_storage_declaration(l, items);
-  /* Both of these refuse the function outright, so the scan stops rather
-     than reporting what the refused statement happens to call. */
-  if (head == <defer>) {
-    (void) _lower_decline(
-      l, "defer, because a compile-time function does not free its "
-         "values: the evaluator owns them");
-    return;
-  }
+  /* This refuses the function outright, so the scan stops rather than
+     reporting what the refused statement happens to call. */
   if (_lower_scan_aggregate(l, items)) {
     (void) _lower_decline(
       l, "a struct or union, which has no compile-time representation");
@@ -1357,6 +1368,11 @@ static Var _lower_content(Lowering l, List type, Var content) {
     }
     case %(parens (block *)):             return _lower_application(l, content);
     case %(parens ?inner):                return _lower_expr(l, inner);
+    /* A braced value takes its type from the destination, as in C. */
+    case %(cast ? (expr ? (composite (commas *items)))):
+      return _lower_braced(l, type, -1, items);
+    case %(cast ? (expr ? (composite))):
+      return _lower_braced(l, type, -1, %());
     /* A cast is a conversion the author wrote, and the type it names is the
        one the surrounding `expr` node already carries. */
     case %(cast ? ?inner): {
@@ -1462,9 +1478,40 @@ static void _lower_env_restore(Lowering l, Map saved) {
   l.env = saved;
 }
 
+static int _lower_depth(Lowering l) => l.pending ? l.pending.depth : 0;
+
+/* A continuation that must run with the wrappers its point of creation
+   had, however many cleanups hold the point that reaches it. */
+static List _lower_here(Lowering l, List k) =>
+  %(at-depth ${_lower_depth(l)} $k);
+
+static Var _lower_apply_k(Lowering l, List k);
+
+/* Leaves the innermost cleanup's body for a continuation outside it. The
+   body answers the exit's tag, and the exit's code runs after the cleanup,
+   in the environment the `defer` saw: everything the body wrote that the
+   code reads is in a cell. */
+static Var _lower_leave(Lowering l, int target, List k) {
+  LowerCleanup here = l.pending;
+  Map inner = l.env;
+  l.env = _lower_scratch_map(l.scratch);
+  foreach (Var (id, form), here.env) l.env[id] = form;
+  l.pending = here.outer;
+  Var code = _lower_apply_k(l, %(at-depth $target $k));
+  l.pending = here;
+  l.env = inner;
+  if (_lower_failed(l, code)) return void;
+  int tag = (int) here.exits.len();
+  here.exits.push(code);
+  return tag;
+}
+
 static Var _lower_apply_k(Lowering l, List k) {
   match (k) {
     case %(end): return %(C.void);
+    case %(at-depth ?(int target) ?(List next)):
+      return target < _lower_depth(l) ? _lower_leave(l, target, next)
+                                      : _lower_apply_k(l, next);
     /* Statements to run before the continuation they were given: a loop's
        step, or the block a `switch` exits into. Inlining them keeps the
        `again` that may follow a direct self call. They carry the `break`
@@ -1553,6 +1600,14 @@ static Var _lower_effect(Lowering l, Var effect, List rest, List k) {
 }
 
 static Var _lower_stmnt(Lowering l, Var form, List rest, List k);
+
+/* Inside a cleanup, a return's value is computed first and leaves in a
+   cell, which every wrapper passes out after running its cleanup. */
+static Var _lower_returned(Lowering l, Var value) {
+  if (_lower_failed(l, value) || !l.pending) return value;
+  for (LowerCleanup c = l.pending; c; c = c.outer) c.returns = 1;
+  return %(C.cell $value);
+}
 
 /* --- match -------------------------------------------------------------- */
 
@@ -1764,8 +1819,8 @@ static Var _lower_loop(
   List turn = %(again $name ${ids.list()});
   if (step) turn = %(then ${step} ${turn} ${breaking});
   List saved_break = l.on_break, saved_continue = l.on_continue;
-  l.on_break = breaking;
-  l.on_continue = turn;
+  l.on_break = breaking ? _lower_here(l, breaking) : NULL;
+  l.on_continue = _lower_here(l, turn);
   int was_on_loop = l.on_loop;
   l.on_loop = 1;
   Map before = _lower_env_copy(l);
@@ -1881,7 +1936,7 @@ static Var _lower_switch(
   }
   List exit = %(then ${rest} ${k} ${l.on_break});
   List saved_break = l.on_break;
-  l.on_break = exit;
+  l.on_break = _lower_here(l, exit);
   Array clauses = $auto([]);
   Var otherwise = void;
   int count = (int) arms.len();
@@ -2035,7 +2090,7 @@ static Var _lower_braced(Lowering l, List type, int id, List items) {
       (C.array (quote $layout) ${cons(<list>, values.list_free())})
       (quote $tag));
   }
-  if (type.equal(%("Map"))) {
+  if (type.equal(%("Map")) || l.compiler.sym.is_var_type(type)) {
     if (items) return _lower_decline(l, "a braced Map initializer needs keys");
     return %(Map_new);
   }
@@ -2429,6 +2484,42 @@ static void _lower_scan_nested_writes(
     _lower_scan_nested_writes(l, child, 0);
 }
 
+/* The ids `form` reads or writes, and the ids it declares. */
+static void _lower_scan_names(Var form, Map named, Map declared) {
+  if (form is not <list>) return;
+  List items = form;
+  match (items) {
+    case %(ident (binding ?(int id) ?)): named[id] = 1;
+    case %(bind (binding ?(int id) ?) *): declared[id] = 1;
+  }
+  foreach (Var part, items) _lower_scan_names(part, named, declared);
+}
+
+/* The cleanup of a block and the statements after its `defer` run in
+   functions of their own, so a local either of them names lives in a cell
+   that both sides of the wrapper share, unless it is declared after the
+   `defer`, where it ends with the block. */
+static void _lower_scan_cleanups(Lowering l, Var form) {
+  if (form is not <list>) return;
+  List items = form;
+  foreach (Var part, items) _lower_scan_cleanups(l, part);
+  if (!items || items.car() != <block>) return;
+  for (List rest = items.cdr(); rest; rest = rest.cdr()) {
+    Var item = _lower_bare(rest.car());
+    match (item) case %(seq *parts): item = _lower_bare(parts.last());
+    match (item) case %(defer ?): {
+      Map named = $auto({}), declared = $auto({});
+      _lower_scan_names(item, named, declared);
+      _lower_scan_names(rest.cdr(), named, declared);
+      foreach (Var id, named.keys())
+        if (l.locals.contains(id) && !declared.contains(id) &&
+            !l.cursors.contains(id) && !l.cells.contains(id))
+          l.cells[id] = l.locals[id];
+      return;
+    }
+  }
+}
+
 static Var _lower_expression_stmnt(
   Lowering l, Var e, List rest, List k) {
   match (e) {
@@ -2468,23 +2559,84 @@ static Var _lower_expression_stmnt(
   return _lower_decline(l, "statement with no effect on a local");
 }
 
+/* A `defer` runs the rest of its block through `C.unwind`, and the
+   cleanup runs on every exit from it, including a raise. The body and the
+   cleanup are functions over the live locals, as a loop is, and the code
+   after the wrapper selects the exit the body took, so a loop continuing
+   from inside the block calls its next turn from here, in tail position. */
+static Var _lower_defer(Lowering l, Var cleanup, List rest, List k) {
+  Map used = $auto({});
+  _lower_referenced(cleanup, used);
+  _lower_referenced(rest, used);
+  Array entry = [];
+  Array slots = $auto([]);
+  Map inside = _lower_scratch_map(l.scratch);
+  foreach (Var (id, form), l.env) {
+    if (!used.contains(id)) continue;
+    Var slot = _lower_name(l, "live");
+    slots.push(slot);
+    inside[id] = slot;
+    entry.push(form);
+  }
+  Array exits = $auto([]);
+  struct LowerCleanup frame = {
+    .env = _lower_env_copy(l), .exits = exits,
+    .depth = _lower_depth(l) + 1, .returns = 0, .outer = l.pending
+  };
+  Map outer = l.env;
+  Var undo = void, body = void;
+  $let(l.on_break, NULL) $let(l.on_continue, NULL) $let(l.pending, NULL) {
+    l.env = _lower_scratch_map(l.scratch);
+    foreach (Var (id, form), inside) l.env[id] = form;
+    undo = _lower_block(l, %($cleanup), %(end));
+  }
+  $let(l.pending, &frame) {
+    l.env = inside;
+    body = _lower_block(l, rest, %(at-depth ${frame.depth - 1} $k));
+  }
+  l.env = outer;
+  if (_lower_failed(l, undo) || _lower_failed(l, body)) {
+    entry.free();
+    return void;
+  }
+  List live = slots;
+  Var body_name = _lower_name(l, "body"), undo_name = _lower_name(l, "undo");
+  l.definitions.push(%(def $undo_name (lambda $live $undo)));
+  l.definitions.push(%(def $body_name (lambda $live $body)));
+  Var packet = _lower_name(l, "packet");
+  Array clauses = $auto([]);
+  int count = (int) frame.exits.len();
+  for (int i = 0; i < count; i++) {
+    Var code = frame.exits[i];
+    if (i + 1 == count && !frame.returns) clauses.push(%(true $code));
+    else clauses.push(%((eq? $packet $i) $code));
+  }
+  if (frame.returns)
+    clauses.push(%(true ${frame.outer ? packet : %(C.load $packet)}));
+  return %((lambda ($packet) (cond @{clauses.list()}))
+           (C.unwind $body_name $undo_name (list @{entry.list_free()})));
+}
+
 static Var _lower_stmnt(Lowering l, Var form, List rest, List k) {
   if (l.declined) return void;
   match (form) {
     case %(at ? ?node):    return _lower_stmnt(l, node, rest, k);
     case %(empty):         return _lower_block(l, rest, k);
-    case %(block *items):  return _lower_block(l, %(@items @rest), k);
+    /* A block keeps its boundary, so a `defer` inside it ends there. */
+    case %(block *items):
+      return _lower_block(l, items, %(then $rest $k ${l.on_break}));
+    case %(seq *items):    return _lower_block(l, %(@items @rest), k);
+    case %(defer ?cleanup): return _lower_defer(l, cleanup, rest, k);
     case %(return ?want ?value): {
       Var result = _lower_initializer(l, want, 0, value);
-      if (_lower_failed(l, result) || !_lower_record_type(l, want))
-        return result;
-      match (l.compiler.meta_type_layout(want)) case %(? ? ?size *): {
-        l.automatic = 1;
-        return %(C.record.result $result $size);
-      }
-      return result;
+      if (!_lower_failed(l, result) && _lower_record_type(l, want))
+        match (l.compiler.meta_type_layout(want)) case %(? ? ?size *): {
+          l.automatic = 1;
+          result = %(C.record.result $result $size);
+        }
+      return _lower_returned(l, result);
     }
-    case %(return):        return %(C.void);
+    case %(return):        return _lower_returned(l, %(C.void));
     case %(repl-init ?type
                      (bind (binding ?(int id) ?name) ?mods) ?initializer): {
       List bound = %(bind (binding $id $name) $mods);
@@ -2601,6 +2753,7 @@ static List _lower_function(
       l.own = name;
       _lower_scan(l, fn);
       _lower_scan_nested_writes(l, fn, 0);
+      _lower_scan_cleanups(l, fn);
       /* The scan records its own wording for a construct refused by
          decision; `rejected` now means only `goto`. */
       if (!l.declined) {
@@ -2900,13 +3053,80 @@ static Type _meta_value_type(Var value) {
   return NULL;
 }
 
-/** Returns literal code preserving `declared` when supplied.
-    `mutable_root` permits a fresh Array or Map at an explicit code boundary;
-    its descendants must be immutable representable values. Returns NULL for
-    code Lists or values without the requested literal representation.
+/* Whether a value and everything it holds is immutable data. */
+static int _meta_immutable(Var value) {
+  if (value is <list>) {
+    foreach (Var item, value.list())
+      if (!_meta_immutable(item)) return 0;
+    return 1;
+  }
+  return value is <string> || value is <symbol> ||
+    value.is_integer() || value.is_floating();
+}
+
+/* Builds the parser's form of one data value. Immutable values come from
+   the literal cache; each Array or Map becomes a literal that builds a fresh
+   collection every time it runs. `marks` holds 1 for a collection being
+   built and 2 for one already built, so a cycle or a shared collection is
+   reported at `site`. */
+static List _meta_data(Compiler c, Var value, Map marks, Token site) {
+  if (_meta_immutable(value)) {
+    if (value is <list>) return c.cache_literal_list(value);
+    return %(expr ("Var") ${c.cache_literal_var(value)});
+  }
+  if (value is <list>) {
+    List result = %(nil);
+    foreach (Var item, value.list().reverse()) {
+      List head = _meta_data(c, item, marks, site);
+      if (!head) return NULL;
+      result = %(expr ("List") (cons $head $result));
+    }
+    return result;
+  }
+  if (value is not <array> && value is not <map>) return NULL;
+  ulong address = (ulong) value.u64;
+  if (marks.contains(address))
+    c.report_error(<macro>, marks[address] == 1
+        ? "compile-time result contains itself"
+        : "compile-time result holds one collection twice",
+      site, %("each Array and Map in a result is built separately"));
+  marks[address] = 1;
+  List result = NULL;
+  if (value is <array>) {
+    Array items = $auto([]);
+    foreach (Var item, value.array()) {
+      List code = _meta_data(c, item, marks, site);
+      if (!code) return NULL;
+      items.push(code);
+    }
+    result = %(expr ("Array") (array @{items.list()}));
+  }
+  else {
+    Map map = value;
+    Array keys = $auto([]), entries = $auto([]);
+    foreach (Var (key, item), map) keys.push(key);
+    // Cache ids and emission must not depend on bucket layout.
+    foreach (Var key, keys.sort()) {
+      List key_code = _meta_data(c, key, marks, site);
+      List value_code =
+        key_code ? _meta_data(c, map[key], marks, site) : NULL;
+      if (!value_code) return NULL;
+      entries.push(%(map-entry $key_code $value_code));
+    }
+    result = %(expr ("Map") (map @{entries.sort().list()}));
+  }
+  marks[address] = 2;
+  return result;
+}
+
+/** Returns literal code for a compile-time `value`, preserving `declared`
+    when supplied. An Array or Map, at any depth, becomes a literal that
+    builds a fresh collection on every execution; other data comes from the
+    literal cache. A cycle or a collection held twice is reported at `site`.
+    Returns NULL for code Lists or values without a literal representation.
 */
 List Compiler.meta_value_expression(
-  Compiler c, Type declared, Var value, int mutable_root) {
+  Compiler c, Type declared, Var value, Token site) {
   Type type = declared ? declared : _meta_value_type(value);
   if (c.sym.is_var_type(type)) type = %("Var");
   else c.sym.var_tag_for_type(type, &type);
@@ -2944,52 +3164,23 @@ List Compiler.meta_value_expression(
     Type result = declared ? declared : type;
     return %(expr $result (parens (expr $result (cast $type $literal))));
   }
-  if (declared && type === %("Var")) {
-    Type inner = value is <string> ? %("String")
-      : value is <symbol> ? %("Symbol")
-      : value is <list> ? %("List")
-      : value is <array> ? %("Array")
-      : value is <map> ? %("Map") : _meta_value_type(value);
-    if (!inner) return NULL;
-    List expression = c.meta_value_expression(inner, value, mutable_root);
-    return expression ? c.convert_expression(expression, declared) : NULL;
-  }
-  if (declared && type === %("List") && value is <list>) {
-    List result = %(expr ("List") (nil));
-    foreach (Var item, value.list().reverse()) {
-      List head = c.meta_value_expression(%("Var"), item, 0);
-      if (!head) return NULL;
-      result = %(expr ("List") (cons $head $result));
-    }
-    return result;
-  }
-  if (mutable_root && value is <array> &&
-      (!declared || type === %("Array"))) {
-    Array items = [];
-    foreach (Var item, value.array()) {
-      List expression = c.meta_value_expression(%("Var"), item, 0);
-      if (!expression) { items.free(); return NULL; }
-      items.push(expression);
-    }
-    return %(expr ("Array") (array @{items.list_free()}));
-  }
-  if (mutable_root && value is <map> &&
-      (!declared || type === %("Map"))) {
-    Array entries = [];
-    foreach (Var (key, item), value.map()) {
-      List key_code = c.meta_value_expression(%("Var"), key, 0);
-      List value_code = c.meta_value_expression(%("Var"), item, 0);
-      if (!key_code || !value_code) { entries.free(); return NULL; }
-      entries.push(%(map-entry $key_code $value_code));
-    }
-    // Bucket layout must not change the emitted code.
-    return %(expr ("Map") (map @{entries.sort().list_free()}));
+  Type kind = value is <array> ? %("Array") : value is <map> ? %("Map")
+    : value is <list> ? %("List") : NULL;
+  // Without a declared type, a List result is code rather than data.
+  if (declared ? type === %("Var") || type === kind
+      : kind && kind !== %("List")) {
+    Map marks = $auto({});
+    List expression = _meta_data(c, value, marks, site);
+    return expression && declared
+      ? c.convert_expression(expression, declared) : expression;
   }
   if (value is <string>) {
     if (!declared || type === %(* char))
       return %(expr (* char) (literal (* char) ${value.repr()}));
-    if (type === %("String"))
-      return %(expr $declared (literal ("String") $value));
+    if (type === %("String")) {
+      List literal = %(expr ("String") (literal ("String") $value));
+      return %(expr $declared ${c.cache(%(string $literal))});
+    }
   }
   if (value is <symbol> && (!declared || type === %("Symbol")))
     return %(expr ("Symbol") (literal ("Symbol")

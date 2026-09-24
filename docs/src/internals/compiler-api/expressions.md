@@ -78,7 +78,7 @@ Source: `src/expressions.x:52`
 
 Keeps a compound literal's native type definition at its original scope.
 
-Source: `src/expressions.x:3942`
+Source: `src/expressions.x:3943`
 
 <a id="Compiler.convert_expression"></a>
 #### Compiler.convert_expression
@@ -92,7 +92,7 @@ performs the conversion implicitly; an unsupported x2c conversion reports
 a type error through `c`. Synthesized operations may add generated
 bindings or immutable literal entries to compiler state.
 
-Source: `src/expressions.x:3986`
+Source: `src/expressions.x:3987`
 
 <a id="Compiler.convert_initializer"></a>
 #### Compiler.convert_initializer
@@ -102,7 +102,7 @@ Source: `src/expressions.x:3986`
 Converts an initializer using its declared native object for array
 bounds.
 
-Source: `src/expressions.x:3937`
+Source: `src/expressions.x:3938`
 
 <a id="Compiler.convert_segment_to_string"></a>
 #### Compiler.convert_segment_to_string
@@ -121,7 +121,7 @@ not equivalent: it
 extracts only a `String` payload and yields empty `String` for every other
 tag.
 
-Source: `src/expressions.x:4277`
+Source: `src/expressions.x:4278`
 
 <a id="Compiler.func_call_parts"></a>
 #### Compiler.func_call_parts

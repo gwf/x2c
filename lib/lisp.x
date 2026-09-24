@@ -218,7 +218,8 @@ Var Lisp.apply_values(
     return _call_lambda_slots(context.lisp, callable, values, count);
   if (callable is <func> &&
       _special_id(context.lisp, (Func) callable.pointer()) < 0) {
-    FuncArg *args = Scope.malloc((count + 1) * sizeof(FuncArg));
+    FuncArg *args = Scope.malloc_in(
+      &context.lisp.scope, (count + 1) * sizeof(FuncArg));
     defer Scope.free(args);
     for (int i = 0; i < count; i++) args[i] = FuncArg.value(values[i]);
     return ((Func) callable.pointer()).apply(count, args);
@@ -414,6 +415,11 @@ typedef struct LispMachineSlot {
 
 struct Lisp {
   Scope scope;          // semantic session scope
+  /* The slot user code allocates in while the session evaluates. Code that
+     retains, releases, pushes, or pops a Scope acts on this slot, so it
+     never frees evaluator bindings, automatic storage, or session state,
+     which name `scope` explicitly. */
+  Scope user;
   /* A session may read a parent's globals, reserved names and special
      forms. The parent holds definitions built once, before any child
      exists, and a child holds only its own, so a name the child defines
@@ -681,7 +687,7 @@ macro Decorator $lisp.entry(Function $function, Expr $operation) {
   if (!$(x2c.function.parameter $function "lisp"))
     return _bad_session($operation);
 
-  Scope.push(&$(x2c.function.parameter $function "lisp").scope);
+  Scope.push(&$(x2c.function.parameter $function "lisp").user);
   defer Scope.pop();
   Lisp prior_lisp = lisp_active;
   lisp_active = $(x2c.function.parameter $function "lisp");
@@ -708,11 +714,13 @@ Lisp Lisp.kernel(void) {
   Scope session = Scope.new_named("Lisp session"), Lisp result = NULL;
   defer if (!result) Scope.destroy(session);
   Lisp lisp = NULL;
+  defer if (!result && lisp) Scope.destroy(lisp.user);
   $scope(&session) {
     lisp = Scope.calloc(1, sizeof(struct Lisp));
   }
   if (!lisp._initialize()) return NULL;
   lisp.scope = session;
+  lisp.user = Scope.new_named("Lisp user");
   lisp.auto_stats = (LispAutoStats) {0};
   lisp.auto_machine_stats = NULL;
   lisp.auto_disabled = 0;
@@ -746,7 +754,11 @@ Lisp Lisp.new(void) {
     null session does nothing; no evaluation or machine call may remain active.
     Destroying its still-active `Scope` raises `<bad-state>`.
 */
-void Lisp.destroy(Lisp lisp) { if (lisp) Scope.destroy(lisp.scope); }
+void Lisp.destroy(Lisp lisp) {
+  if (!lisp) return;
+  Scope.destroy(lisp.user);
+  Scope.destroy(lisp.scope);
+}
 
 /** Makes `lisp` read `parent`'s definitions for names it does not bind.
 
@@ -1087,12 +1099,14 @@ static Symbol _lisp_symbol_new_len(String text, int length) =>
 /** Returns the `void` sentinel to the evaluator. */
 Var lisp_void(void) => void;
 
-/** Allocates one evaluator-owned raw `Var` slot initialized to `value`. */
-Var lisp_cell(Var value) {
-  Var *slot = Scope.malloc(sizeof(Var));
+static Var _cell(Lisp lisp, Var value) {
+  Var *slot = Scope.malloc_in(&lisp.scope, sizeof(Var));
   *slot = value;
   return Var.new(<var*>, slot);
 }
+
+/** Allocates one evaluator-owned raw `Var` slot initialized to `value`. */
+Var lisp_cell(Var value) => _cell(lisp_active, value);
 /** Retags an evaluator value at a declared pointer or Symbol crossing. */
 Var lisp_address(Var cell, Symbol tag) {
   if (tag == <symbol>) return (Symbol) cell.ulong();
@@ -1145,10 +1159,14 @@ Var lisp_record_result(Var source, long size) =>
                              : &lisp_active.scope,
     source.pointer(), (size_t) size));
 
-/** Copies a record into bytes the session owns, for file-scope state. */
-Var lisp_session_copy(Var source, long size) =>
-  Var.new(<p48>, Scope.memdup_in(
+/** Copies a record, or a wide scalar's box, into storage the session owns,
+    for file-scope state. `size` is the record's size. */
+Var lisp_session_copy(Var source, long size) {
+  if (source.is_wide())
+    return Var.clone_wide(source).move_wide_to(&lisp_active.scope);
+  return Var.new(<p48>, Scope.memdup_in(
     &lisp_active.scope, source.pointer(), (size_t) size));
+}
 
 /* A scalar layout's TAG can differ from its bytes' row: a bool's byte reads
    as the int C promotes it to, and a Symbol's unsigned-long bytes hold its
@@ -1222,6 +1240,18 @@ Var lisp_source_function(Var callable) {
                      (want "Lambda") (actual ${callable.kind()}));
   ((Lambda) callable).source_function = 1;
   return callable;
+}
+
+/** Applies `body` to `arguments`, then `cleanup` to the same arguments on
+    every exit, including a raise out of `body`, and returns what `body`
+    returned. A lowered block that holds a cleanup runs through this. */
+Var lisp_unwind(Var body, Var cleanup, List arguments) {
+  /* Quoted arguments go through `_apply`, so both functions run on the
+     machine once prepared rather than interpreting each call. */
+  List raw = NULL;
+  foreach (Var value, arguments.reverse()) raw = cons(%(quote $value), raw);
+  defer _apply(lisp_active, cleanup, raw, NULL);
+  return _apply(lisp_active, body, raw, NULL);
 }
 
 /* Plain Lisp passes each output as an evaluator cell, so these status
@@ -1304,6 +1334,17 @@ typedef struct LispCallbackContext {
   Var callable;
 } LispCallbackContext;
 
+/* A Func that meta code can keep, as a value or inside a lazy Iter, lives as
+   long as the session that runs it, whatever region is active when it is
+   made. A callback used only during one call stays in the active region. */
+static Func _lisp_session_func(
+  FuncAdapter adapter, List signature, LispCallbackContext *context) {
+  Func function = Func.new_context(
+    adapter, signature, context, sizeof *context);
+  Scope.move(function, &lisp_active.scope);
+  return function;
+}
+
 /* A source Func keeps its canonical signature while its adapter executes in
    the owning Lisp session. The lowered adapter reads the borrowed carriers
    with the ordinary native Func argument readers. */
@@ -1319,8 +1360,7 @@ static Var _lisp_func_adapter(Func function, const FuncArg *arguments) {
 /** Constructs a signature-bearing Func for one lowered source callable. */
 Func lisp_func_new(Var adapter, List signature) {
   LispCallbackContext context = { lisp_active, adapter };
-  return Func.new_context(
-    _lisp_func_adapter, signature, &context, sizeof context);
+  return _lisp_session_func(_lisp_func_adapter, signature, &context);
 }
 
 /** Allocates the borrowed carriers for one lowered dynamic call. */
@@ -1421,9 +1461,8 @@ static Func _lisp_iter_callback(Var callable) {
     raise %(bad-state (operation "Lisp iterator callback")
                      (why "no session"));
   LispCallbackContext context = { lisp_active, callable };
-  return Func.new_context(
-    _lisp_iter_next_callback, %((func (("Var") ("Var"))) "Var"),
-    &context, sizeof context);
+  return _lisp_session_func(
+    _lisp_iter_next_callback, %((func (("Var") ("Var"))) "Var"), &context);
 }
 
 static int _lisp_iter_next(Iter iter, Var *out) {
@@ -1539,6 +1578,7 @@ $(def lisp.native.target.rows (append '(
   (Var_is_void)
   (lisp_cell)
   (lisp_source_function)
+  (lisp_unwind)
   (lisp_func_new)
   (lisp_func_arguments)
   (lisp_func_value)
@@ -1561,6 +1601,25 @@ $(def lisp.native.target.rows (append '(
   (lisp_zero)
   (lisp_record_result)
   (lisp_session_copy)
+  (Array_free)
+  (Array_cleanup)
+  (Map_cleanup)
+  (String_free)
+  (List_promote)
+  (Scope_new_named)
+  (Scope_cleanup)
+  (Scope_new)
+  (Scope_retain)
+  (Scope_release)
+  (Scope_push)
+  (Scope_pop)
+  (Scope_destroy)
+  (Scope_move)
+  (Context_open)
+  (Context_current)
+  (Context_close)
+  (Context_cleanup)
+  (Context_export)
   (lisp_peek)
   (lisp_poke)
   (_lisp_String_try_long (as String_try_long_cell))
@@ -1936,10 +1995,10 @@ static int _binding_get(Map bindings, Var name, Var *out) {
   return 1;
 }
 
-static void _binding_set(Map bindings, Var name, Var value) {
+static void _binding_set(Lisp lisp, Map bindings, Var name, Var value) {
   Var slot;
   if (bindings.try_get(name, &slot)) lisp_store(slot, value);
-  else bindings[name] = lisp_cell(value);
+  else bindings[name] = _cell(lisp, value);
 }
 
 static int _local_lookup(LispEnv *env, Var name, Var *out) {
@@ -2115,7 +2174,8 @@ static void _capture(Lisp lisp, LispEnv *env, List params, Var body,
   foreach (Var name, names) {
     Var value;
     if (name in captures) continue;
-    if (_env_lookup(env, name, &value)) _binding_set(captures, name, value);
+    if (_env_lookup(env, name, &value))
+      _binding_set(lisp, captures, name, value);
   }
 }
 
@@ -2159,7 +2219,7 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
     Symbol operation = macro ? <macro> : <lambda>;
     raise %(bad-sig (operation $operation) (value $args));
   }
-  Lambda lambda = Scope.malloc(sizeof(struct Lambda));
+  Lambda lambda = Scope.malloc_in(&lisp.scope, sizeof(struct Lambda));
   Var result = void;
   lambda.captures = NULL;
   defer if (result is void) Scope.free(lambda);
@@ -2167,7 +2227,7 @@ static Var _make_lambda(Lisp lisp, List args, LispEnv *env, int macro) {
   (List params, Var body) = args;
   lambda.params = params;
   lambda.body = body;
-  lambda.captures = {};
+  $scope(&lisp.scope) lambda.captures = {};
   lambda.macro = macro;
   lambda.source_function = 0;
   lambda.auto_calls = 0;
@@ -2184,11 +2244,11 @@ static void _bind_params(Lambda lambda, List args, Map bindings) {
       if (!p.cdr())
         raise %(bad-sig (operation "apply") (value ${lambda.body}));
       Var rest = args;
-      _binding_set(bindings, rest_name, rest);
+      _binding_set(lambda.owner, bindings, rest_name, rest);
       return;
     }
     if (!args) raise %(bad-arity (operation "apply") (value ${lambda.body}));
-    _binding_set(bindings, name, args.car());
+    _binding_set(lambda.owner, bindings, name, args.car());
     args = args.cdr();
   }
   if (args) raise %(bad-arity (operation "apply") (value ${lambda.body}));
@@ -2255,7 +2315,7 @@ static Var _call_lambda_slots(
 
 static Var _call_lambda(Lisp lisp, Lambda lambda, List args) {
   int count = args.len(), index = 0;
-  Var *values = Scope.malloc((count + 1) * sizeof(Var));
+  Var *values = Scope.malloc_in(&lisp.scope, (count + 1) * sizeof(Var));
   defer Scope.free(values);
   foreach (Var value, args) values[index++] = value;
   return _call_lambda_slots(lisp, lambda, values, count);
@@ -2263,7 +2323,7 @@ static Var _call_lambda(Lisp lisp, Lambda lambda, List args) {
 
 static Var _apply_lambda(Lisp lisp, Lambda lambda, List raw, LispEnv *env) {
   int count = raw.len(), index = 0;
-  Var *values = Scope.malloc((count + 1) * sizeof(Var));
+  Var *values = Scope.malloc_in(&lisp.scope, (count + 1) * sizeof(Var));
   defer Scope.free(values);
   foreach (Var form, raw)
     values[index++] = lambda.macro ? form : _eval(lisp, form, env);
@@ -2307,7 +2367,7 @@ static Var _apply_special(Lisp lisp, int id, List args, LispEnv *env) {
       if (lisp.frozen)
         raise %(bad-state (operation "def") (why "frozen") (name $name));
       Var value = _eval(lisp, expression, env);
-      _binding_set(lisp.globals, name, value);
+      _binding_set(lisp, lisp.globals, name, value);
       return value;
     }
     case LISP_COND: {
@@ -3070,7 +3130,7 @@ static Var _apply(Lisp lisp, Var callable, List raw, LispEnv *env) {
   int count = raw.len();
   FuncArg narrow[LISP_NATIVE_ARG_MAX];
   FuncArg *argv = count <= LISP_NATIVE_ARG_MAX ? narrow
-                  : Scope.malloc(count * sizeof(FuncArg));
+                  : Scope.malloc_in(&lisp.scope, count * sizeof(FuncArg));
   defer if (argv != narrow) Scope.free(argv);
   unsigned argc = 0;
   foreach (Var arg, raw) {
@@ -3108,7 +3168,8 @@ static Var _apply_values(Lisp lisp, Var callable, List values, LispEnv *env) {
   int count = values.len();
   FuncArg narrow[LISP_NATIVE_ARG_MAX];
   FuncArg *argv = count <= LISP_NATIVE_ARG_MAX
-                ? narrow : Scope.malloc(count * sizeof(FuncArg));
+                ? narrow
+                : Scope.malloc_in(&lisp.scope, count * sizeof(FuncArg));
   unsigned argc = 0;
   foreach (Var value, values) {
     _expansion_argument(lisp, value);
@@ -3264,7 +3325,7 @@ void Lisp.set_global(Lisp lisp, String name, Var value) {
     if (_inherited(lisp, interned))
       raise %(bad-state (operation "Lisp.set_global") (why "inherited")
                         (name $interned));
-    _binding_set(lisp.globals, interned, value);
+    _binding_set(lisp, lisp.globals, interned, value);
     if (name.startswith("x2c.")) lisp.protect_x2c = 1;
   }
 }
