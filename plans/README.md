@@ -37,11 +37,20 @@ as `do not reopen` or `no other candidate` as historical unless current
 
 ## Current work and backlog
 
-Reviewed against dev through `b988a85b` on 2026-09-22. A historical plan's
-original branch, baseline and authorization notes are evidence for that work;
-its opening status and this index distinguish them from current execution.
+Reviewed against the stabilization candidate on 2026-09-23. A historical
+plan's original branch, baseline and authorization notes are evidence for
+that work; its opening status and this index distinguish them from current
+execution.
 
 ### Current work
+
+- [Explicit meta calls, lifetimes, and computed values](explicit-meta-and-lifetime-campaign.md):
+  active. Piece 0 deletes unrequested machinery, then explicit `$` calls,
+  meta lifetimes, computed collections, heap objects, and adoption.
+- [Post-merge stabilization](post-merge-stabilization-2026-09-23.md): done;
+  delivered as `9b71607f`. The
+  [reproducibility record](generated-lisp-reproducibility.md) retains the
+  earlier Lisp regeneration failure and the repaired result.
 
 - [Internal adoption campaign](internal-adoption-campaign.md): ready-now
   macro, managed-lifetime and extensionless-script dogfooding, followed by
@@ -61,10 +70,11 @@ its opening status and this index distinguish them from current execution.
   work. Generalized `meta` declarations landed as `db86d4b7` through the
   [meta recovery](archive/meta-recovery.md). The older
   [meta milestones](archive/meta-functions.md) record the preceding baseline.
-- [Meta follow-ups](meta-followups.md): four parallel implementation tracks
-  (scalar ledger and layout cleanup, numeric Func argument cost, small
-  defects, `--system-headers` cost) and three design tracks for Gary
-  (meta-capable protocols, lifetime certification, native extensions last).
+- [Meta follow-ups](meta-followups.md): scalar-ledger cleanup and measurement
+  of numeric Func's remaining per-call frame cost are open; the small-defect
+  and system-header investigations record their outcomes. Meta-capable
+  protocols, lifetime certification and native extensions retain their
+  separate design and implementation status.
 - [REPL fit, status, and runtime surface](repl-fit-and-runtime-surface.md):
   terminal UX, live statistics, and REPL-only output are implemented;
   standard-library and host exposure remain undispatched recommendations. The
@@ -74,7 +84,6 @@ its opening status and this index distinguish them from current execution.
 
 | Record | What remains |
 | --- | --- |
-| [Generated Lisp reproducibility](generated-lisp-reproducibility.md) | Low-priority investigation of fresh-home generated names; no demonstrated semantic failure. |
 | [SDK and system macros](macro-sdk-and-system-macros.md) | Captured-code diagnostic locations and enum consumers; the removed varops Lisp file is no longer work. |
 | [Cleanup lowering](emit-cleanup-lowering.md) | Optional, unscheduled phases 2-3; phase 1 already shipped. |
 | [Lint and format](x2c-lint-and-format.md) | Needs author scoping; includes opportunistic declaration grouping from the completed dogfooding campaign. |
@@ -92,11 +101,12 @@ Production promotion remains separately authorized under the release workflow.
 - [Consolidation catalog](consolidation-catalog-f28fc36.md): 13 independent
   cleanup candidates with paired source ranges and deletion boundaries.
 - [Bug findings](bug-findings-f28fc36.md): eight reproduced baseline defects,
-  with portable probe sources and recorded results, separate from cleanup.
+  with portable probe sources, historical results and later repair
+  dispositions, separate from cleanup.
 
-Both reports audit `f28fc36` (2026-09-22), not the later `dev` tree. Recheck
-their findings against current source before implementation; recording them
-does not dispatch fixes or approve every proposed design.
+Both reports audit `f28fc36` (2026-09-22). The bug report now also links
+campaign outcomes; the original observations do not describe later
+`dev` by themselves or approve every proposed design.
 
 ### Decisions and completed records
 

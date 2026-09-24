@@ -1,0 +1,10 @@
+unittest/compiler-fixtures/comptime-declines-static-array.x:3:1: macro: this function cannot run at compile time
+  meta int array_value(void) {
+  ^^^^
+  note: reason: a local static
+
+unittest/compiler-fixtures/comptime-declines-static-array.x:8:25: macro: explicit meta call cannot be resolved
+  int main(void) { return $array_value(); }
+                          ^
+  note: no binding for array_value
+

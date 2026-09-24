@@ -2,39 +2,39 @@
 
 #include "macro-unit-typedef.h"
 
-static const size_t _x2c_macro_cell_size_0 = sizeof(_x2c_macro_Cell_ecc58320);
+static const size_t _x2c_macro_cell_size_0 = sizeof(_x2c_macro_Cell_b2ede5d0);
 
 typedef struct{
-  _x2c_macro_S_bec2c34d value;
-  const _x2c_macro_S_bec2c34d * next;
+  _x2c_macro_S_6dbbaa67 value;
+  const _x2c_macro_S_6dbbaa67 * next;
 }
-_x2c_macro_Cell_70d7b17b;
+_x2c_macro_Cell_4929cc16;
 
-static const size_t _x2c_macro_cell_size_1 = sizeof(_x2c_macro_Cell_70d7b17b);
+static const size_t _x2c_macro_cell_size_1 = sizeof(_x2c_macro_Cell_4929cc16);
 
 size_t int_width(void){
-  return sizeof(_x2c_macro_S_e97e1f7a) + _x2c_macro_cell_size_0 * 0;
+  return sizeof(_x2c_macro_S_f80d9d65) + _x2c_macro_cell_size_0 * 0;
 }
 
-_x2c_macro_S_e97e1f7a int_sum(_x2c_macro_S_e97e1f7a _x2c_macro_left_0, const _x2c_macro_S_e97e1f7a * _x2c_macro_right_0){
-  typedef _x2c_macro_S_e97e1f7a _x2c_local_typedef_0;
-  _x2c_macro_S_e97e1f7a _x2c_macro_total_0 =(_x2c_macro_S_e97e1f7a) _x2c_macro_left_0 + * _x2c_macro_right_0 +(_x2c_macro_S_e97e1f7a) 0;
-  _x2c_macro_S_e97e1f7a _x2c_macro_values_0[2] ={
-    _x2c_macro_total_0, (_x2c_macro_S_e97e1f7a) sizeof(_x2c_local_typedef_0)
+_x2c_macro_S_f80d9d65 int_sum(_x2c_macro_S_f80d9d65 _x2c_macro_left_0, const _x2c_macro_S_f80d9d65 * _x2c_macro_right_0){
+  typedef _x2c_macro_S_f80d9d65 _x2c_local_typedef_0;
+  _x2c_macro_S_f80d9d65 _x2c_macro_total_0 =(_x2c_macro_S_f80d9d65) _x2c_macro_left_0 + * _x2c_macro_right_0 +(_x2c_macro_S_f80d9d65) 0;
+  _x2c_macro_S_f80d9d65 _x2c_macro_values_0[2] ={
+    _x2c_macro_total_0, (_x2c_macro_S_f80d9d65) sizeof(_x2c_local_typedef_0)
   }
   ;
   return _x2c_macro_values_0[0] + _x2c_macro_values_0[1] * 0;
 }
 
 size_t wide_width(void){
-  return sizeof(_x2c_macro_S_bec2c34d) + _x2c_macro_cell_size_1 * 0;
+  return sizeof(_x2c_macro_S_6dbbaa67) + _x2c_macro_cell_size_1 * 0;
 }
 
-_x2c_macro_S_bec2c34d wide_sum(_x2c_macro_S_bec2c34d _x2c_macro_left_1, const _x2c_macro_S_bec2c34d * _x2c_macro_right_1){
-  typedef _x2c_macro_S_bec2c34d _x2c_local_typedef_1;
-  _x2c_macro_S_bec2c34d _x2c_macro_total_1 =(_x2c_macro_S_bec2c34d) _x2c_macro_left_1 + * _x2c_macro_right_1 +(_x2c_macro_S_bec2c34d) 0;
-  _x2c_macro_S_bec2c34d _x2c_macro_values_1[2] ={
-    _x2c_macro_total_1, (_x2c_macro_S_bec2c34d) sizeof(_x2c_local_typedef_1)
+_x2c_macro_S_6dbbaa67 wide_sum(_x2c_macro_S_6dbbaa67 _x2c_macro_left_1, const _x2c_macro_S_6dbbaa67 * _x2c_macro_right_1){
+  typedef _x2c_macro_S_6dbbaa67 _x2c_local_typedef_1;
+  _x2c_macro_S_6dbbaa67 _x2c_macro_total_1 =(_x2c_macro_S_6dbbaa67) _x2c_macro_left_1 + * _x2c_macro_right_1 +(_x2c_macro_S_6dbbaa67) 0;
+  _x2c_macro_S_6dbbaa67 _x2c_macro_values_1[2] ={
+    _x2c_macro_total_1, (_x2c_macro_S_6dbbaa67) sizeof(_x2c_local_typedef_1)
   }
   ;
   return _x2c_macro_values_1[0] + _x2c_macro_values_1[1] * 0;

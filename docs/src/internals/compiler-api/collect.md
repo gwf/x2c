@@ -46,7 +46,7 @@ Source: `src/collect.x:756`
 
 #### interface_text
 
-`String interface_text(Compiler compiler)`
+`String interface_text(Compiler compiler, List selected)`
 
 Returns the compiler's own collected contribution as interface text, or
 NULL when the unit has not collected its symbols or the compiler's
@@ -54,7 +54,7 @@ identity is unknown, since no compiler could replay that interface. A
 contribution that the interface grammar cannot spell is reported as an
 `emit` diagnostic.
 
-Source: `src/collect.x:991`
+Source: `src/collect.x:994`
 
 ### `Compiler`
 

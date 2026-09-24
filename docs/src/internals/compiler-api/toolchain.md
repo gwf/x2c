@@ -190,13 +190,12 @@ Source: `src/toolchain.x:180`
 <a id="Toolchain.preprocess"></a>
 #### Toolchain.preprocess
 
-`int Toolchain.preprocess( Toolchain t, const char *fname, List include_dirs, const char *imacros, int expand_system_headers, String *output, String *errors, String *dependencies)`
+`int Toolchain.preprocess( Toolchain t, const char *fname, List include_dirs, const char *imacros, String *output, String *errors, String *dependencies)`
 
 Runs the configured C preprocessor without a shell.
-`expand_system_headers` requests declarations from system headers rather
-than retaining their include directives when the host supports that mode.
-`fname`, `output`, and `errors` are required; output pointers are cleared
-before use. Source and include paths remain distinct argv elements, and
+System headers keep their include directives when the host supports
+that mode. `fname`, `output`, and `errors` are required; output pointers
+are cleared before use. Source and include paths remain distinct argv elements, and
 stdout and stderr are captured separately. When `dependencies` is present,
 its temporary depfile is read when possible and removed on returning paths,
 including a handled `<io-fail>` while reading it. A non-returning
@@ -208,7 +207,7 @@ does not consult `dry_run`.
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 constructing arguments or reading captured text.
 
-Source: `src/toolchain.x:388`
+Source: `src/toolchain.x:387`
 
 <a id="Toolchain.preprocess_action"></a>
 #### Toolchain.preprocess_action

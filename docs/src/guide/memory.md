@@ -407,10 +407,8 @@ parameter, through an unknown pointer, or into an object that outlives the
 function. A `meta` function with such an escape is rejected instead; see
 [Meta Functions](meta-functions.md).
 
-Two more warnings come from the same pass. `unbalanced` reports a region with
-no matching release in the block that opened it, a shape the other warnings
-cannot track. `after-free` reports a local read after `Scope.free` or
-`Array.list_free` consumed it.
+One more warning comes from the same pass. `after-free` reports a local read
+after `Scope.free` or `Array.list_free` consumed it.
 
 Code that follows the patterns in this chapter compiles without warnings:
 

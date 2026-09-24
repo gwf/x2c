@@ -261,6 +261,25 @@ static int _automatic_static_input(Compiler c, List binding) {
   return !type.is_static() && !type.is_extern() && !type.is_threaded();
 }
 
+/* The operand of sizeof is unevaluated except for VLA dimensions. Inspect
+   those dimensions through the same static-input classifier as an ordinary
+   initializer, without evaluating calls in a fixed-size operand. */
+static int _runtime_sizeof_dimensions(Compiler c, List operand, Map runtime) {
+  Array pending = $auto([operand]);
+  while (pending.len()) {
+    List node = pending.take_last();
+    match (node)
+      case %(dim ?dimension): {
+        if (dimension && c.static_value_is_runtime(dimension, runtime))
+          return 1;
+        continue;
+      }
+    foreach (Var child, node)
+      if (child is <list>) pending.push(child);
+  }
+  return 0;
+}
+
 /** Reports whether the static local initializer `value` has to run at
     runtime, because it reads an automatic object or another static this
     function initializes. `runtime` holds the statics already known to run
@@ -302,7 +321,7 @@ int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime) {
       return 1;
     }
     match (node) {
-      case %((!or cache call var array map initval) *): return 1;
+      case %((!or cache call var array map varray vmap initval) *): return 1;
       case %(expr ?type (ident ?binding)): {
         if (binding in runtime ||
             _automatic_static_input(c, binding)) return 1;
@@ -326,7 +345,10 @@ int Compiler.static_value_is_runtime(Compiler c, List value, Map runtime) {
         }
         if (native.is_pointer() || !native.contains(<const>)) return 1;
       }
-      case %(expr ? (sizeof ?)): continue;
+      case %(expr ? (sizeof ?operand)): {
+        if (_runtime_sizeof_dimensions(c, operand, runtime)) return 1;
+        continue;
+      }
     }
     foreach (Var child, node)
       if (child is <list>) {

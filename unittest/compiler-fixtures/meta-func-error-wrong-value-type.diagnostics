@@ -1,0 +1,6 @@
+unittest/compiler-fixtures/meta-func-error-wrong-value-type.x:9:10: macro: compile-time Lisp evaluation failed
+    (void) $wrong_value_type(1);
+           ^
+  note: form: (wrong_value_type 1) error: (bad-types (sig ((func (("Array"))) "Var")) 
+ (index 0u) (actual i32) (want array))
+

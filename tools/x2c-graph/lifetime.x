@@ -127,6 +127,8 @@ static List _lifetime_location(Lifetime lifetime) {
   return %(location $source $line $column);
 }
 
+static Symbol _lifetime_named_allocation_kind(String name);
+
 Symbol Lifetime.loop_allocation_kind(
   Compiler compiler, List node, String *operation) {
   match (node) {
@@ -151,15 +153,10 @@ Symbol Lifetime.loop_allocation_kind(
              (ident (!set ?callee (binding ? ?))))
            (args *)): {
       String name = compiler.emitted_binding_name(callee);
-      if (name == "Array_new" || name == "Map_new") {
+      Symbol kind = _lifetime_named_allocation_kind(name);
+      if (kind) {
         *operation = name;
-        return <scoped>;
-      }
-      if (name == "cons" || name == "List_append" ||
-          name == "String_concat" || name == "String_join" ||
-          name == "String_new") {
-        *operation = name;
-        return <pooled>;
+        return kind;
       }
     }
   }
@@ -175,6 +172,7 @@ static Symbol _lifetime_named_allocation_kind(String name) {
   if (name == "cons" || name == "List_append" ||
       name == "String_concat" || name == "String_join" ||
       name == "String_new" || name == "String_new_len" ||
+      name == "String_malloc" ||
       name == "String_new_fill" || name == "Atom_intern" ||
       name == "Array_list_free")
     return <pooled>;

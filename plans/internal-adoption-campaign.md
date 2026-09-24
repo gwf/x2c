@@ -62,8 +62,7 @@ with, but does not absorb, these existing efforts:
 - `codex/meta-values-types` owns its current generalized-meta implementation.
   Its rebase, design review and exact-tree proof precede adoption that relies
   on it.
-- [Meta-function Lifetime
-  Equivalence](../docs/src/internals/meta-lifetime-equivalence.md) owns the
+- The Meta-function Lifetime Equivalence page (since deleted) owned the
   safety model. This campaign will consume a proved effect inventory; it will
   not weaken the model to make more methods eligible.
 

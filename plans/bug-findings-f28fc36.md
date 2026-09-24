@@ -2,9 +2,8 @@
 
 > Status: reference
 > Eight defects reproduced at `f28fc36`, recorded 2026-09-22. No fixes were
-> made during the audit. Later `dev` changes have not been revalidated against
-> these probes; reproduce each finding there before treating it as current
-> repair work.
+> made during the audit. Later dispositions do not rewrite those baseline
+> observations.
 
 Baseline: `f28fc36fd11116666cf21962c66c5b27dda66d0b`, 2026-09-22.
 All eight findings were open at the reviewed baseline. Source links are
@@ -32,6 +31,18 @@ Priorities are relative to this review, not a claim that every failure affects
 ordinary applications. Compiler-output findings are translation success followed
 by native compilation failure; lifetime findings are diagnostic defects, not
 executed use-after-free demonstrations.
+
+## Later disposition
+
+The stabilization candidate addresses all eight rows with focused tests.
+The baseline probes and recorded failures below remain historical.
+
+| Finding | Repair | Focused evidence |
+| --- | --- | --- |
+| B01-B03 | Static initializer classification | `static-initializer-classification` builds and prints `4 4 0 0 0 12 12`. |
+| B04-B06 | Pooled ownership summary | `region-pooled-ownership` expects Pool String/helper-return warnings and no same-Pool warning. |
+| B07 | Graph allocation accounting | Graph tests include direct-allocation and wrapper cases. |
+| B08 | Public definition selection | Compiler interfaces and generated API references select public definitions. |
 
 ## B01. File-scope constant sizeof emits conflicting C types
 

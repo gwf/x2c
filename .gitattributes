@@ -1,6 +1,7 @@
 unittest/compiler-fixtures/*.ast whitespace=-trailing-space
 unittest/compiler-fixtures/*.transform whitespace=-trailing-space
 unittest/compiler-fixtures/*.diagnostics whitespace=-blank-at-eof
+unittest/compiler-fixtures/meta-func-error-*.diagnostics whitespace=-trailing-space
 unittest/compiler-fixtures/*.c whitespace=-blank-at-eof
 unittest/compiler-fixtures/*.emit whitespace=-blank-at-eof
 unittest/compiler-fixtures/**/*.c whitespace=-blank-at-eof

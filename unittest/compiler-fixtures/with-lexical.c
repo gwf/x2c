@@ -129,11 +129,11 @@ int main(void){
   {
     (box.points[1]).x += 1;
     {
-      Point _x2c_macro___0 ={
+      Point _x2c_macro___1 ={
         0
       }
       ;
-      _x2c_macro___0.x = 2;
+      _x2c_macro___1.x = 2;
     }
     (box.points[1]).y += 1;
   }

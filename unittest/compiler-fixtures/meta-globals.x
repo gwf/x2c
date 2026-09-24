@@ -1,6 +1,6 @@
 /* Advertised file-static values have separate compile-time and runtime
-   instances. Calls that reach either const or mutable state stay unfolded;
-   an explicit meta call may read or mutate the compile-time instance. */
+   instances. An explicit meta call reads or mutates the compile-time
+   instance; an ordinary call uses the runtime one. */
 
 #include "x2c.x"
 

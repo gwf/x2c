@@ -501,8 +501,8 @@
                      (C.ternary (quote ()) (quote ()) arg-9) arg-2)
                     arg-2)))) (builtin_foreach_expr (quote ("Var")) arg-7)))
               (builtin_foreach_expr (quote ("Iter")) arg-6)))))
-     (C.ternary hold-10 (Var_str (List_car arg-5)) "")))
-   (builtin_foreach_atom_type arg-5))))
+     (C.ternary hold-10 (Var_str (List_car arg-5))
+      (C.address "" (quote string))))) (builtin_foreach_atom_type arg-5))))
 (def builtin_foreach_expand
  (lambda (arg-1 arg-2 arg-3 arg-4 arg-5 arg-6 arg-7 arg-8)
   ((lambda (hold-9)

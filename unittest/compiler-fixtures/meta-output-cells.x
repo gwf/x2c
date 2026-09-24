@@ -81,7 +81,7 @@ meta int represented_results(int unused) {
       map.get_hashed("missing", ((Var) "missing").hash()) is not void)
     return 0;
 
-  Var source = Var.box_long(7), clone = source.clone_wide(), values = %(7 8);
+  Var source = (long) 7, clone = source.clone_wide(), values = %(7 8);
   return clone.compare(source) == 0 && !clone.same(source) &&
     ((Var) 7).clone_wide() is void && values.getindex(1) == 8 &&
     values.getindex(9) is void && Var.null().is_null() &&

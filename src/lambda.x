@@ -310,7 +310,8 @@ static List _type_literal(Compiler compiler, Type type) =>
   compiler.cache_literal_list(
     compiler.sym.normalize_declared_type(type));
 
-static List _func_signature_literal(Compiler compiler, Type type) {
+/** Returns the canonical signature shared by native and meta Func adapters. */
+List Compiler.func_signature(Compiler compiler, Type type) {
   List params = NULL;
   Type result = NULL;
   _typed_function_parts(type, &params, &result);
@@ -325,8 +326,11 @@ static List _func_signature_literal(Compiler compiler, Type type) {
   List parameter_types = params ? normalized.list_free() : %((void));
   Type declared_result = result.declared();
   List signature = %((func $parameter_types) @declared_result);
-  return compiler.cache_literal_list(signature);
+  return signature;
 }
+
+static List _func_signature_literal(Compiler compiler, Type type) =>
+  compiler.cache_literal_list(compiler.func_signature(type));
 
 static List _checked_func_argument(
   Compiler compiler, List adapter_type, Type parameter_type,

@@ -17,7 +17,7 @@ void interface_configure(String out_dir, int cold);
 
 String interface_prelude(void);
 
-String interface_text(Compiler compiler);
+String interface_text(Compiler compiler, List selected);
 
 
 #endif /* __GUARD_0xAB8728A9__ */

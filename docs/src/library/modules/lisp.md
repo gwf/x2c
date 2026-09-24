@@ -9,13 +9,20 @@ The Lisp runtime: reader, session, and evaluator.
 
 | Function | Summary |
 | --- | --- |
-| [`lisp_address`](#lisp_address) | Retags a raw evaluator cell as the typed pointer named by `tag`. |
+| [`lisp_address`](#lisp_address) | Retags an evaluator value at a declared pointer or Symbol crossing. |
+| [`lisp_array`](#lisp_array) | Builds a local C array in live native storage, shared by indexing and references to its elements. |
 | [`lisp_at`](#lisp_at) | Returns `base` advanced by `offset` bytes, tagged as `tag`. |
+| [`lisp_box`](#lisp_box) | Boxes a source value at the compiler-selected native Var tag. |
 | [`lisp_bytes`](#lisp_bytes) | Allocates `size` zeroed bytes of lowered automatic storage. |
 | [`lisp_car`](#lisp_car) | Returns the first element of `value`, or `void` when it is `nil`. |
 | [`lisp_cdr`](#lisp_cdr) | Returns the tail of `value`, or `nil` when it is `nil`. |
 | [`lisp_cell`](#lisp_cell) | Allocates one evaluator-owned raw `Var` slot initialized to `value`. |
 | [`lisp_copy`](#lisp_copy) | Copies `size` bytes from `source` to `destination`; returns the latter. |
+| [`lisp_func_arguments`](#lisp_func_arguments) | Allocates the borrowed carriers for one lowered dynamic call. |
+| [`lisp_func_invalid`](#lisp_func_invalid) | Uses the native rejection for an unrepresentable value argument. |
+| [`lisp_func_new`](#lisp_func_new) | Constructs a signature-bearing Func for one lowered source callable. |
+| [`lisp_func_reference`](#lisp_func_reference) | Prepares an address without loading the caller's object. |
+| [`lisp_func_value`](#lisp_func_value) | Prepares one value without excluding the terminal void value. |
 | [`lisp_load`](#lisp_load) | Returns the raw value currently held in an evaluator cell. |
 | [`lisp_match_replace`](#lisp_match_replace) | Returns the instantiated `template` when `input` matches `pat`. |
 | [`lisp_peek`](#lisp_peek) | Reads the object of compiler layout `layout` at `offset` bytes past `pointer`. |
@@ -52,9 +59,18 @@ The Lisp runtime: reader, session, and evaluator.
 
 `Var lisp_address(Var cell, Symbol tag)`
 
-Retags a raw evaluator cell as the typed pointer named by `tag`.
+Retags an evaluator value at a declared pointer or Symbol crossing.
 
 Source: `lib/lisp.x:1097`
+
+#### lisp_array
+
+`Var lisp_array(List layout, List values)`
+
+Builds a local C array in live native storage, shared by indexing and
+references to its elements. Initializer values already have element type.
+
+Source: `lib/lisp.x:1208`
 
 #### lisp_at
 
@@ -62,7 +78,15 @@ Source: `lib/lisp.x:1097`
 
 Returns `base` advanced by `offset` bytes, tagged as `tag`.
 
-Source: `lib/lisp.x:1122`
+Source: `lib/lisp.x:1125`
+
+#### lisp_box
+
+`Var lisp_box(Symbol tag, Var value)`
+
+Boxes a source value at the compiler-selected native Var tag.
+
+Source: `lib/lisp.x:1166`
 
 #### lisp_bytes
 
@@ -70,7 +94,7 @@ Source: `lib/lisp.x:1122`
 
 Allocates `size` zeroed bytes of lowered automatic storage.
 
-Source: `lib/lisp.x:1118`
+Source: `lib/lisp.x:1121`
 
 #### lisp_car
 
@@ -104,7 +128,48 @@ Source: `lib/lisp.x:1091`
 
 Copies `size` bytes from `source` to `destination`; returns the latter.
 
-Source: `lib/lisp.x:1132`
+Source: `lib/lisp.x:1135`
+
+#### lisp_func_arguments
+
+`void *lisp_func_arguments(unsigned count)`
+
+Allocates the borrowed carriers for one lowered dynamic call.
+
+Source: `lib/lisp.x:1327`
+
+#### lisp_func_invalid
+
+`Var lisp_func_invalid(Func fn, unsigned index, List source)`
+
+Uses the native rejection for an unrepresentable value argument.
+
+Source: `lib/lisp.x:1347`
+
+#### lisp_func_new
+
+`Func lisp_func_new(Var adapter, List signature)`
+
+Constructs a signature-bearing Func for one lowered source callable.
+
+Source: `lib/lisp.x:1320`
+
+#### lisp_func_reference
+
+`void *lisp_func_reference( FuncArg *argv, unsigned index, Var address, List source)`
+
+Prepares an address without loading the caller's object. A non-lvalue
+supplies zero, which the ordinary reference reader rejects.
+
+Source: `lib/lisp.x:1338`
+
+#### lisp_func_value
+
+`void *lisp_func_value(FuncArg *argv, unsigned index, Var value)`
+
+Prepares one value without excluding the terminal void value.
+
+Source: `lib/lisp.x:1331`
 
 #### lisp_load
 
@@ -112,7 +177,7 @@ Source: `lib/lisp.x:1132`
 
 Returns the raw value currently held in an evaluator cell.
 
-Source: `lib/lisp.x:1099`
+Source: `lib/lisp.x:1102`
 
 #### lisp_match_replace
 
@@ -133,7 +198,7 @@ Reads the object of compiler layout `layout` at `offset` bytes past
 `pointer`. A record reads as its own address, which is how lowered source
 carries record values.
 
-Source: `lib/lisp.x:1165`
+Source: `lib/lisp.x:1176`
 
 #### lisp_poke
 
@@ -142,7 +207,7 @@ Source: `lib/lisp.x:1165`
 Writes `value`, already converted to the layout's type, at `offset`
 bytes past `pointer`.
 
-Source: `lib/lisp.x:1181`
+Source: `lib/lisp.x:1192`
 
 #### lisp_record_result
 
@@ -151,7 +216,7 @@ Source: `lib/lisp.x:1181`
 Copies a returned record into its caller's automatic storage before the
 returning frame ends.
 
-Source: `lib/lisp.x:1139`
+Source: `lib/lisp.x:1142`
 
 #### lisp_session_copy
 
@@ -159,7 +224,7 @@ Source: `lib/lisp.x:1139`
 
 Copies a record into bytes the session owns, for file-scope state.
 
-Source: `lib/lisp.x:1146`
+Source: `lib/lisp.x:1149`
 
 #### lisp_source_function
 
@@ -167,7 +232,7 @@ Source: `lib/lisp.x:1146`
 
 Marks the actual Lambda installed for one lowered source function.
 
-Source: `lib/lisp.x:1196`
+Source: `lib/lisp.x:1219`
 
 #### lisp_store
 
@@ -175,7 +240,7 @@ Source: `lib/lisp.x:1196`
 
 Stores `value` in an evaluator cell and returns it.
 
-Source: `lib/lisp.x:1101`
+Source: `lib/lisp.x:1104`
 
 #### lisp_string_lstrip
 
@@ -223,7 +288,7 @@ Source: `lib/lisp.x:1088`
 
 Zeroes `size` bytes at `destination` and returns it.
 
-Source: `lib/lisp.x:1126`
+Source: `lib/lisp.x:1129`
 
 #### native_scalar_access
 
@@ -274,7 +339,7 @@ values keep their existing owners. The caller retains responsibility for
 evaluator-only callable, `<bad-arity>` or `<bad-types>` at the call
 boundary, or a cause raised by the called procedure.
 
-Source: `lib/lisp.x:3135`
+Source: `lib/lisp.x:3181`
 
 <a id="Lisp.auto_prepare"></a>
 #### Lisp.auto_prepare
@@ -291,7 +356,7 @@ A lambda a global holds indirectly, inside a `List` or a `Map` value, is
 not reached: the globals a library defines are the callables a child
 resolves by name, and those are what a shared program guards against.
 
-Source: `lib/lisp.x:2998`
+Source: `lib/lisp.x:3044`
 
 <a id="Lisp.bind"></a>
 #### Lisp.bind
@@ -307,7 +372,7 @@ the pointer while the session lives. Values inside the `Func`, including
 its
 signature graph, retain their existing owners.
 
-Source: `lib/lisp.x:3235`
+Source: `lib/lisp.x:3281`
 
 <a id="Lisp.call_budget"></a>
 #### Lisp.call_budget
@@ -324,7 +389,7 @@ The budget belongs to the public entry. `Lisp.eval`, `Lisp.apply`, and
 `Lisp.eval_string` each open one, and a call that runs it out does not
 renew it, so one entry reports a runaway once however many calls follow.
 
-Source: `lib/lisp.x:2973`
+Source: `lib/lisp.x:3019`
 
 <a id="Lisp.eval"></a>
 #### Lisp.eval
@@ -338,7 +403,7 @@ ownership rule. Effects completed before a later failure are not rolled
 back. Raises: `<bad-arg>` for a null session, or any evaluator, imported
 operation, or called-procedure cause.
 
-Source: `lib/lisp.x:3117`
+Source: `lib/lisp.x:3163`
 
 <a id="Lisp.eval_file"></a>
 #### Lisp.eval_file
@@ -357,7 +422,7 @@ has been consumed.
 `<size-limit>`, or `<alloc-fail>` while reading, or any cause from
 `Lisp.eval_string`.
 
-Source: `lib/lisp.x:3175`
+Source: `lib/lisp.x:3221`
 
 <a id="Lisp.eval_string"></a>
 #### Lisp.eval_string
@@ -372,7 +437,7 @@ completed before a later reader or evaluator failure remain installed.
 **Raises:** `<bad-arg>` for a null session, `<incomplete>` or `<malformed>`
 while reading, or any cause from `Lisp.eval`.
 
-Source: `lib/lisp.x:3148`
+Source: `lib/lisp.x:3194`
 
 <a id="Lisp.freeze"></a>
 #### Lisp.freeze
@@ -454,7 +519,7 @@ output, or an absent name returns 0 and leaves `out` unchanged. Raises
 `<alloc-fail>` or `<bad-enc>` when a nonempty lookup name cannot be
 canonicalized.
 
-Source: `lib/lisp.x:3197`
+Source: `lib/lisp.x:3243`
 
 ## Advanced and interop API
 
@@ -502,7 +567,7 @@ Forces calls through the recursive evaluator when `disabled` is nonzero.
 Re-enabling AUTO preserves published programs, thresholds, statistics, and
 the instrumentation pointer.
 
-Source: `lib/lisp.x:2984`
+Source: `lib/lisp.x:3030`
 
 <a id="Lisp.auto_instrument"></a>
 #### Lisp.auto_instrument
@@ -514,7 +579,7 @@ Selects optional detailed machine statistics for later AUTO executions.
 `stats` is borrowed, retained without initialization, and updated in place;
 it must outlive every evaluation until replaced or cleared with NULL.
 
-Source: `lib/lisp.x:2959`
+Source: `lib/lisp.x:3005`
 
 <a id="Lisp.auto_stats"></a>
 #### Lisp.auto_stats
@@ -525,7 +590,7 @@ Returns the current cumulative automatic-evaluator statistics for `lisp`.
 `lisp` must be a live session. The returned structure is a value snapshot
 and does not reset any counter.
 
-Source: `lib/lisp.x:2952`
+Source: `lib/lisp.x:2998`
 
 <a id="Lisp.cleanup"></a>
 #### Lisp.cleanup
@@ -534,7 +599,7 @@ Source: `lib/lisp.x:2952`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/lisp.x:3243`
+Source: `lib/lisp.x:3289`
 
 <a id="Lisp.destroy"></a>
 #### Lisp.destroy
@@ -668,7 +733,7 @@ may replace such a binding.
 **Raises:** `<bad-arg>` for a null session or name, or `<alloc-fail>`,
 `<size-limit>`, or `<bad-enc>` while canonicalizing or storing the binding.
 
-Source: `lib/lisp.x:3210`
+Source: `lib/lisp.x:3256`
 
 ## Runtime-internal callables
 

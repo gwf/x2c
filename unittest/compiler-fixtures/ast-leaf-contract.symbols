@@ -24,6 +24,7 @@
 ( struct ast_phase1_Pair field-order ) ==> ( fields ( value ( int )) ( pointer ( * int ))    ( array (( dim ( 3 )) int )) ( array_pointer ( * ( dim ( 3 )) int ))    ( callback ( * ( func (( int ))) int )))
 ( struct ast_phase1_Pair pointer ) ==> ( * int )
 ( struct ast_phase1_Pair value ) ==> ( int )
+( struct ast_phase1_Pair x2c-record ) ==> ( x2c )
 ( typedef ast_phase1_Consumer ) ==> ( * ( func (( * const char ))) void )
 ( typedef ast_phase1_Count ) ==> ( ast_phase1_Size )
 ( typedef ast_phase1_Pair ) ==> ( struct ast_phase1_Pair )
@@ -34,3 +35,4 @@
 ( union ast_phase1_Number field-order ) ==> ( fields ( integer ( long )) ( floating ( double )))
 ( union ast_phase1_Number floating ) ==> ( double )
 ( union ast_phase1_Number integer ) ==> ( long )
+( union ast_phase1_Number x2c-record ) ==> ( x2c )

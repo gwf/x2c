@@ -10,22 +10,17 @@ The compiler surface a `meta` function calls.
 | Function | Summary |
 | --- | --- |
 | [`x2c_block_make`](#x2c_block_make) | Returns a block containing `items` in order. |
-| [`x2c_decl_make`](#x2c_decl_make) | Declares `name` with `type` and an optional initializer. |
 | [`x2c_expr_call`](#x2c_expr_call) | Returns the expression calling `callee` with `arguments`, a `List` of expressions. |
-| [`x2c_expr_cast`](#x2c_expr_cast) | Returns `expression` cast to `type`, which is a declared type rather than syntax. |
 | [`x2c_expr_composite`](#x2c_expr_composite) | Returns the comma-separated composite initializer holding `items`, a `List` of expressions. |
-| [`x2c_expr_field`](#x2c_expr_field) | Returns the expression `receiver.name`. |
 | [`x2c_expr_ident`](#x2c_expr_ident) | Returns an expression reading the identifier `name`, which is the syntax `x2c_ident` returned or a binding the compiler resolved. |
 | [`x2c_expr_index`](#x2c_expr_index) | Returns the expression `base[subscript]`. |
 | [`x2c_function_body`](#x2c_function_body) | Returns the statements in the body of `function`. |
 | [`x2c_literal_int`](#x2c_literal_int) | Returns an `int` expression holding `value`. |
 | [`x2c_literal_string`](#x2c_literal_string) | Returns a `String` expression holding `value`. |
 | [`x2c_literal_symbol`](#x2c_literal_symbol) | Returns a `Symbol` expression holding `value`. |
-| [`x2c_param_make`](#x2c_param_make) | Returns a parameter named `name` with `type`. |
 | [`x2c_parameters_arguments`](#x2c_parameters_arguments) | Returns the argument expressions that forward a parameter list, which is a `params` form or the parameters themselves. |
 | [`x2c_stmnt_make`](#x2c_stmnt_make) | Returns an expression statement. |
 | [`x2c_stmnt_return`](#x2c_stmnt_return) | Returns a return statement carrying `expression`. |
-| [`x2c_type_members`](#x2c_type_members) | Returns enum members as `(name value)` rows in declaration order. |
 
 ### Functions
 
@@ -37,14 +32,6 @@ Returns a block containing `items` in order.
 
 Source: `lib/meta.x:110`
 
-#### x2c_decl_make
-
-`meta List x2c_decl_make(List type, Var name, List initializer)`
-
-Declares `name` with `type` and an optional initializer.
-
-Source: `lib/meta.x:113`
-
 #### x2c_expr_call
 
 `meta List x2c_expr_call(List callee, List arguments)`
@@ -54,16 +41,6 @@ expressions.
 
 Source: `lib/meta.x:84`
 
-#### x2c_expr_cast
-
-`meta List x2c_expr_cast(List type, List expression)`
-
-Returns `expression` cast to `type`, which is a declared type rather
-than syntax. A generator needs it where the value it holds and the
-parameter it reaches differ in width or sign.
-
-Source: `lib/meta.x:95`
-
 #### x2c_expr_composite
 
 `meta List x2c_expr_composite(List items)`
@@ -72,14 +49,6 @@ Returns the comma-separated composite initializer holding `items`, a
 `List` of expressions.
 
 Source: `lib/meta.x:89`
-
-#### x2c_expr_field
-
-`meta List x2c_expr_field(List receiver, String name)`
-
-Returns the expression `receiver.name`.
-
-Source: `lib/meta.x:77`
 
 #### x2c_expr_ident
 
@@ -130,14 +99,6 @@ Returns a `Symbol` expression holding `value`.
 
 Source: `lib/meta.x:59`
 
-#### x2c_param_make
-
-`meta List x2c_param_make(List type, Var name)`
-
-Returns a parameter named `name` with `type`.
-
-Source: `lib/meta.x:121`
-
 #### x2c_parameters_arguments
 
 `meta List x2c_parameters_arguments(List value)`
@@ -163,15 +124,6 @@ Source: `lib/meta.x:104`
 Returns a return statement carrying `expression`.
 
 Source: `lib/meta.x:107`
-
-#### x2c_type_members
-
-`meta List x2c_type_members(List type)`
-
-Returns enum members as `(name value)` rows in declaration order.
-An implicit value is nil; a literal value retains its spelling.
-
-Source: `lib/meta.x:231`
 
 ## Design notes
 

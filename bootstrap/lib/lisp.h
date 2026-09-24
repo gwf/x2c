@@ -159,11 +159,25 @@ Var lisp_record_result(Var source, long size);
 
 Var lisp_session_copy(Var source, long size);
 
+Var lisp_box(Symbol tag, Var value);
+
 Var lisp_peek(Var pointer, Var offset, List layout);
 
 Var lisp_poke(Var pointer, Var offset, List layout, Var value);
 
+Var lisp_array(List layout, List values);
+
 Var lisp_source_function(Var callable);
+
+Func lisp_func_new(Var adapter, List signature);
+
+void * lisp_func_arguments(unsigned count);
+
+void * lisp_func_value(FuncArg * argv, unsigned index, Var value);
+
+void * lisp_func_reference(FuncArg * argv, unsigned index, Var address, List source);
+
+Var lisp_func_invalid(Func fn, unsigned index, List source);
 
 LispAutoStats Lisp_auto_stats(Lisp lisp);
 

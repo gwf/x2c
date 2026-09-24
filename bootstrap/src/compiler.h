@@ -20,7 +20,7 @@ typedef struct ScriptUnit{
 * ScriptUnit;
 
 typedef struct GenNames{
-  Map counters, adapters;
+  Map counters, adapters, file_scope_owners;
   int next_binding;
 }
 * GenNames;
@@ -51,7 +51,7 @@ typedef struct Compiler{
   Map object_macros;
   List arms;
   Map arm_stacks;
-  Array pack_marks;
+  Array layout_marks, packed_marks;
   Token directives_taken;
   Map kw_seen;
   Map fixed;
@@ -70,7 +70,7 @@ typedef struct Compiler{
   Array early_decls;
   int prelude;
   Array meta_defs;
-  Map meta_folds, meta_impure, meta_comptime, meta_regions;
+  Map meta_comptime, meta_regions;
   Map meta_values;
   Map meta_layouts;
   Map native_meta;

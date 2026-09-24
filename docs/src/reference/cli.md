@@ -69,14 +69,7 @@ Symbol collection options apply to `translate`, `build`, and `run`:
 --no-cpp                Skip symbol collection and preprocessing
 --live-symbols          Collect symbols through the host preprocessor
 --cpp-symbols           Use CPP collection for this translation
---system-headers        Collect declarations from expanded system headers
 ```
-
-`--system-headers` expands system headers in the preprocessor and collects
-their declarations, so compile-time code can use a struct such as
-`struct timespec`. Translation is slower, because the compiler reads every
-expanded header. The other modes keep system `#include` lines for the C
-compiler.
 
 `--source-map` adds source locations to generated C for `translate`, `build`,
 and `run`. It is off by default. Combine it with native debug information to
@@ -637,15 +630,13 @@ and there is no option to suppress or escalate one. A warning describes
 something the compiler can see and you may have arranged deliberately, so
 code that means what it says can be left as written.
 
-Six codes are reported as warnings:
+Five codes are reported as warnings:
 
 - `region` says a value allocated inside a region can still be reached after
   the region ends, and names how it leaves. Its note gives the line that
   opened the region.
 - `after-free` says a local was read after `Scope.free` or
   `Array.list_free` consumed it.
-- `unbalanced` says a region has no matching release in the block that
-  opened it, a shape the `region` check cannot follow.
 - `literal` says a bare word inside a macro is a `Symbol` where a value was
   probably meant, and names the unquoted spelling that inserts the value.
 - `macro` carries what a macro reported through `x2c.diagnostic.warn`, at the

@@ -151,11 +151,10 @@ Public functions:
 
 `Compiler.lower_comptime`, `Compiler.lower_repl`, `Compiler.lower_declined`,
 `Compiler.inherit_shared_meta`, `Compiler.lowered_meta_regions`,
-`Compiler.install_comptime`, `Compiler.lower_reached_globals`,
-`Compiler.lower_reached_meta`, `Compiler.meta_is_comptime_only`,
-`Compiler.lower_meta_initializer`, `Compiler.lower_meta_expression`,
-`Compiler.meta_value_expression`, `Compiler.check_meta_call`,
-`Compiler.fold_meta_call`
+`Compiler.install_comptime`, `Compiler.lower_reached_meta`,
+`Compiler.meta_is_comptime_only`, `Compiler.lower_meta_initializer`,
+`Compiler.lower_meta_expression`, `Compiler.meta_value_expression`,
+`Compiler.check_meta_call`
 
 ### [src/deps.x](../src/deps.x)
 
@@ -204,16 +203,17 @@ Public functions:
 `Compiler.complete_iter_chain`, `List.printf_family`,
 `Compiler.printf_static_format`, `Compiler.resolve_postfix_member`,
 `Compiler.postfix_completions`, `Compiler.parse_macro_expression_target`,
-`Compiler.promote_string_literal`, `Compiler.check_explicit_converter`,
-`Compiler.require_var_tag`, `Compiler.var_tag_expression`,
-`Compiler.resolve_map_entry`, `Compiler.resolve_expression`,
-`Compiler.parse_variable`, `Compiler.parse_conditional`,
-`Compiler.parse_assignment`, `Compiler.parse_primary`,
-`Compiler.parse_expression`, `Compiler.parse_parenthesized_statement`,
-`Compiler.initializer_native_types`, `Compiler.initializer_slot`,
-`Compiler.initializer_field_path`, `Compiler.initializer_rows`,
-`Compiler.convert_initializer`, `Compiler.convert_compound_literal`,
-`Compiler.convert_expression`, `Compiler.convert_segment_to_string`
+`Compiler.promote_string_literal`, `Compiler.func_call_parts`,
+`Compiler.check_explicit_converter`, `Compiler.require_var_tag`,
+`Compiler.var_tag_expression`, `Compiler.resolve_map_entry`,
+`Compiler.resolve_expression`, `Compiler.parse_variable`,
+`Compiler.parse_conditional`, `Compiler.parse_assignment`,
+`Compiler.parse_primary`, `Compiler.parse_expression`,
+`Compiler.parse_parenthesized_statement`, `Compiler.initializer_native_types`,
+`Compiler.initializer_slot`, `Compiler.initializer_field_path`,
+`Compiler.initializer_rows`, `Compiler.convert_initializer`,
+`Compiler.convert_compound_literal`, `Compiler.convert_expression`,
+`Compiler.convert_segment_to_string`
 
 ### [src/format.x](../src/format.x)
 
@@ -256,10 +256,10 @@ lambda transformation helpers for the x2c compiler.
 
 Public functions:
 
-`Compiler.lower_typed_adapter_expr`, `Compiler.maybe_adapt_func_arg`,
-`Compiler.lift_func_expression`, `Compiler.adapt_lambda_arg`,
-`Compiler.check_lambda_captures`, `Compiler.prepare_lambda_cells`,
-`Compiler.lower_lambda_expr`
+`Compiler.lower_typed_adapter_expr`, `Compiler.func_signature`,
+`Compiler.maybe_adapt_func_arg`, `Compiler.lift_func_expression`,
+`Compiler.adapt_lambda_arg`, `Compiler.check_lambda_captures`,
+`Compiler.prepare_lambda_cells`, `Compiler.lower_lambda_expr`
 
 ### [src/literals.x](../src/literals.x)
 
@@ -370,8 +370,7 @@ values that can outlive the region that allocated them.
 
 Public functions:
 
-`Compiler.check_regions`, `Compiler.check_meta_regions`,
-`Compiler.region_escapes`
+`Compiler.check_regions`, `Compiler.check_meta_regions`
 
 ### [src/repl-input.x](../src/repl-input.x)
 
@@ -422,11 +421,8 @@ request-owned source overlays.
 
 Public functions:
 
-`SourceView.new`, `SourceView.free`, `SourceView.cleanup`, `SourceView.var`,
-`Var.sourceview`, `SourceView.equal`, `SourceView.hash`,
-`SourceView.write_str`, `SourceView.str`, `SourceView.write_repr`,
-`SourceView.repr`, `SourceView.init`, `SourceView.set`,
-`SourceView.is_changed`, `SourceView.exists`, `SourceView.read`
+`SourceView.init`, `SourceView.set`, `SourceView.is_changed`,
+`SourceView.exists`, `SourceView.read`
 
 ### [src/statements.x](../src/statements.x)
 
@@ -788,7 +784,9 @@ Public functions:
 `lisp_match_replace`, `lisp_read_file`, `lisp_write_file`, `lisp_void`,
 `lisp_cell`, `lisp_address`, `lisp_load`, `lisp_store`, `lisp_bytes`,
 `lisp_at`, `lisp_zero`, `lisp_copy`, `lisp_record_result`, `lisp_session_copy`,
-`lisp_peek`, `lisp_poke`, `lisp_source_function`, `Lisp.auto_stats`,
+`lisp_box`, `lisp_peek`, `lisp_poke`, `lisp_array`, `lisp_source_function`,
+`lisp_func_new`, `lisp_func_arguments`, `lisp_func_value`,
+`lisp_func_reference`, `lisp_func_invalid`, `Lisp.auto_stats`,
 `Lisp.auto_instrument`, `Lisp.call_budget`, `Lisp.auto_disable`,
 `Lisp.auto_prepare`, `Lisp.eval`, `Lisp.apply`, `Lisp.eval_string`,
 `Lisp.eval_file`, `Lisp.try_get`, `Lisp.set_global`, `Lisp.bind`,
@@ -929,11 +927,9 @@ the compiler surface a `meta` function calls.
 Public functions:
 
 `x2c_literal_string`, `x2c_literal_int`, `x2c_literal_symbol`,
-`x2c_expr_ident`, `x2c_expr_index`, `x2c_expr_field`, `x2c_expr_call`,
-`x2c_expr_composite`, `x2c_expr_cast`, `x2c_stmnt_make`, `x2c_stmnt_return`,
-`x2c_block_make`, `x2c_decl_make`, `x2c_param_make`, `x2c_function_body`,
-`x2c_parameters_arguments`, `_meta_initializer`, `_meta_fail`, `_meta_member`,
-`x2c_type_members`
+`x2c_expr_ident`, `x2c_expr_index`, `x2c_expr_call`, `x2c_expr_composite`,
+`x2c_stmnt_make`, `x2c_stmnt_return`, `x2c_block_make`, `x2c_function_body`,
+`x2c_parameters_arguments`
 
 ### [lib/mutex.x](../lib/mutex.x)
 
@@ -950,8 +946,8 @@ filesystem locations and the operations on them.
 
 Public functions:
 
-`Path.new`, `Path.join`, `Path.dirname`, `Path.basename`, `Path.extension`,
-`Path.stem`, `Path.absolute`, `Path.exists`, `Path.is_dir`, `Path.is_file`,
+`Path.join`, `Path.dirname`, `Path.basename`, `Path.extension`, `Path.stem`,
+`Path.absolute`, `Path.exists`, `Path.is_dir`, `Path.is_file`,
 `Path.is_executable`, `Path.size`, `Path.modified_time`, `Path.list_dir`,
 `Path.walk`, `Path.glob_match`, `Path.glob`, `Path.make_dirs`,
 `Path.remove_file`, `Path.remove_tree`, `Path.copy_file`, `Path.copy_tree`,
@@ -977,11 +973,9 @@ run commands and pipelines without a shell.
 
 Public functions:
 
-`Job.free`, `Job.var`, `Var.job`, `Job.equal`, `Job.hash`, `Job.write_str`,
-`Job.str`, `Job.write_repr`, `Job.repr`, `List.job`, `Job.options`, `Job.live`,
-`Job.pipe`, `Job.start`, `Job.status`, `Job.check`, `Job.run`, `Job.output`,
-`Job.lines`, `Job.errors`, `Job.ready`, `Job.kill`, `Job.cleanup`,
-`Job.wait_any`, `Env.get`
+`List.job`, `Job.options`, `Job.live`, `Job.pipe`, `Job.start`, `Job.status`,
+`Job.check`, `Job.run`, `Job.output`, `Job.lines`, `Job.errors`, `Job.ready`,
+`Job.kill`, `Job.cleanup`, `Job.wait_any`, `Env.get`
 
 ### [lib/protocols.x](../lib/protocols.x)
 
@@ -997,8 +991,6 @@ regular expressions over the bytes of a String.
 
 Public functions:
 
-`Regex.free`, `Regex.cleanup`, `Regex.var`, `Var.regex`, `Regex.equal`,
-`Regex.hash`, `Regex.write_str`, `Regex.str`, `Regex.write_repr`, `Regex.repr`,
 `Regex.compile`, `Regex.pattern`, `Regex.capture_count`, `Regex.capture_names`,
 `Regex.escape`, `Regex.match_from`, `Regex.match`, `Regex.find_all`,
 `Regex.split`, `Regex.replace`, `Regex.replace_all`, `Regex.replace_fn`,

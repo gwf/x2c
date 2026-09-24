@@ -13,26 +13,6 @@ macro Decorator $init.emit(Unit $fn) {
 }
 
 $init.emit()
-List filter(Func keep, List values) {
-  if (values.equal(%())) return values;
-  Var value = values.car();
-  if (keep(value).equal(%())) return filter(keep, values.cdr());
-  return value.cons(filter(keep, values.cdr()));
-}
-
-$init.emit()
-List map(Func procedure, List values) {
-  if (values.equal(%())) return values;
-  return procedure(values.car()).cons(map(procedure, values.cdr()));
-}
-
-$init.emit()
-Var foldl(Func procedure, Var initial, List values) {
-  if (values.equal(%())) return initial;
-  return foldl(procedure, procedure(initial, values.car()), values.cdr());
-}
-
-$init.emit()
 Var _last(List values) {
   if (values.equal(%())) return %();
   if (values.cdr().equal(%())) return values.car();

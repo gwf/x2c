@@ -12,11 +12,11 @@
 
 #include "exception.h"
 
-static List _126, _124, _123, _121, _119, _110, _109, _102, _99, _65, _64, _63, _62, _57, _54, _53, _52, _51, _50, _34, _33;
+static List _123, _121, _120, _118, _116, _107, _106, _99, _65, _64, _63, _62, _57, _54, _53, _52, _51, _50, _34, _33;
 
-static String _134, _133, _132, _131, _130, _129, _128, _127, _117, _115, _114, _113, _112, _111, _107, _105, _103, _100, _97, _95, _93, _91, _89, _87, _85, _83, _81, _79, _77, _75, _73, _71, _69, _67, _66, _60, _58, _55, _48, _46, _44, _42, _41, _40, _39, _37, _35, _31, _29, _27, _25, _23, _21, _19, _17, _15, _13, _11, _9, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _131, _130, _129, _128, _127, _126, _125, _124, _114, _112, _111, _110, _109, _108, _104, _102, _100, _97, _95, _93, _91, _89, _87, _85, _83, _81, _79, _77, _75, _73, _71, _69, _67, _66, _60, _58, _55, _48, _46, _44, _42, _41, _40, _39, _37, _35, _31, _29, _27, _25, _23, _21, _19, _17, _15, _13, _11, _9, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _125, _122, _120, _118, _116, _108, _106, _104, _101, _98, _96, _94, _92, _90, _88, _86, _84, _82, _80, _78, _76, _74, _72, _70, _68, _61, _59, _56, _49, _47, _45, _43, _38, _36, _32, _30, _28, _26, _24, _22, _20, _18, _16, _14, _12, _10, _8;
+static Var _122, _119, _117, _115, _113, _105, _103, _101, _98, _96, _94, _92, _90, _88, _86, _84, _82, _80, _78, _76, _74, _72, _70, _68, _61, _59, _56, _49, _47, _45, _43, _38, _36, _32, _30, _28, _26, _24, _22, _20, _18, _16, _14, _12, _10, _8;
 
 #include <ctype.h>
 #include <errno.h>
@@ -56,14 +56,14 @@ static Func _x2c_func_handle_0;
 
 Func Func_new(FuncAdapter, List);
 
-_x2c_initializer_choice_242786A8_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _126)))
+_x2c_initializer_choice_242786A8_0((_x2c_func_handle_0 = Func_new(_x2c_func_adapt_0, _123)))
 static Var _x2c_lambda_1(Var directory);
 
 static Var _x2c_func_adapt_1(Func _x2c_func_binding_1, const FuncArg * _x2c_func_argv_1);
 
 static Func _x2c_func_handle_1;
 
-_x2c_initializer_choice_242786A8_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _126)))
+_x2c_initializer_choice_242786A8_1((_x2c_func_handle_1 = Func_new(_x2c_func_adapt_1, _123)))
 Var String_var(String);
 
 List cons(Var, List);
@@ -149,7 +149,7 @@ __attribute__((constructor)) static void _file_init_(void){
   _70 = String_var(_69);
   _71 = String_new("-D__asm__(x)=");
   _72 = String_var(_71);
-  _73 = String_new("-D__attribute__(x)=__x2c_attribute__ #x");
+  _73 = String_new("-D__attribute__(x)=");
   _74 = String_var(_73);
   _75 = String_new("-D__format__(x)=");
   _76 = String_var(_75);
@@ -176,41 +176,38 @@ __attribute__((constructor)) static void _file_init_(void){
   _97 = String_new("-Wno-pragma-once-outside-header");
   _98 = String_var(_97);
   _99 = cons(_61, NULL);
-  _100 = String_new("-D_Atomic(T)=T");
+  _100 = String_new(".");
   _101 = String_var(_100);
-  _102 = cons(_101, NULL);
-  _103 = String_new(".");
-  _104 = String_var(_103);
-  _105 = String_new("-imacros");
-  _106 = String_var(_105);
-  _107 = String_new("x2c-dependencies");
-  _108 = String_var(_107);
-  _109 = cons(_108, NULL);
-  _110 = cons(_18, _109);
-  _111 = String_new(".");
-  _112 = String_new("CC");
-  _113 = String_new("cc");
-  _114 = String_new("AR");
-  _115 = String_new("ar");
-  _116 = Symbol_var(437126);
-  _117 = String_new("Var");
-  _118 = String_var(_117);
-  _119 = cons(_118, NULL);
-  _120 = List_var(_119);
-  _121 = cons(_120, NULL);
+  _102 = String_new("-imacros");
+  _103 = String_var(_102);
+  _104 = String_new("x2c-dependencies");
+  _105 = String_var(_104);
+  _106 = cons(_105, NULL);
+  _107 = cons(_18, _106);
+  _108 = String_new(".");
+  _109 = String_new("CC");
+  _110 = String_new("cc");
+  _111 = String_new("AR");
+  _112 = String_new("ar");
+  _113 = Symbol_var(437126);
+  _114 = String_new("Var");
+  _115 = String_var(_114);
+  _116 = cons(_115, NULL);
+  _117 = List_var(_116);
+  _118 = cons(_117, NULL);
+  _119 = List_var(_118);
+  _120 = cons(_119, NULL);
+  _121 = cons(_113, _120);
   _122 = List_var(_121);
-  _123 = cons(_122, NULL);
-  _124 = cons(_116, _123);
-  _125 = List_var(_124);
-  _126 = cons(_125, _119);
-  _127 = String_new("End of search list");
-  _128 = String_new("search starts here");
-  _129 = String_new(" (");
-  _130 = String_new("/include");
-  _131 = String_new("lib");
-  _132 = String_new("libraries: ");
-  _133 = String_new("=");
-  _134 = String_new(":");
+  _123 = cons(_122, _116);
+  _124 = String_new("End of search list");
+  _125 = String_new("search starts here");
+  _126 = String_new(" (");
+  _127 = String_new("/include");
+  _128 = String_new("lib");
+  _129 = String_new("libraries: ");
+  _130 = String_new("=");
+  _131 = String_new(":");
   _x2c_static_initialize_0();
   _x2c_static_initialize_1();
 }
@@ -305,7 +302,7 @@ int Path_is_file(Path);
 static void Toolchain__layout(Toolchain t){
   String home = x2c_home(), stage = x2c_stage_dir();
   String executable = x2c_get_executable(), prefix = home;
-  if(! String_truth(prefix)) prefix = Path_dirname(String_truth(executable) ? Path_dirname(executable) : _111);
+  if(! String_truth(prefix)) prefix = Path_dirname(String_truth(executable) ? Path_dirname(executable) : _108);
   t -> include_dir = String_join(NULL, cons(String_var(prefix), cons(String_var(_3), NULL)));
   t -> runtime_lib = String_join(NULL, cons(String_var(prefix), cons(String_var(_4), NULL)));
   if(String_truth(stage)) t -> runtime_lib = String_join(NULL, cons(String_var(stage), cons(String_var(_5), NULL)));
@@ -317,8 +314,8 @@ void * Scope_calloc(size_t, size_t);
 Toolchain toolchain_new(String cc, String ar, List cpp_args, List cc_args, List ld_args, int verbose, int dry_run){
   if(! _init_guard_) _file_init_();
   Toolchain t = Scope_calloc(1, sizeof(struct Toolchain));
-  t -> cc = _tool(cc, _112, _113);
-  t -> ar = _tool(ar, _114, _115);
+  t -> cc = _tool(cc, _109, _110);
+  t -> ar = _tool(ar, _111, _112);
   t -> cpp_args = cpp_args;
   t -> cc_args = cc_args;
   t -> ld_args = ld_args;
@@ -553,17 +550,17 @@ List Toolchain_search_directories(Toolchain t){
       while(List_try_next(_x2c_macro_object_4, & _x2c_macro_cursor_4, & _x2c_macro_cursor_output_4)){
         line = Var_string(_x2c_macro_cursor_output_4);
         {
-          if(String_startswith(line, _127)) break;
-          if(String_contains(line, _128)){
+          if(String_startswith(line, _124)) break;
+          if(String_contains(line, _125)){
             listing = 1;
             continue;
           }
           if(! listing) continue;
           String directory = String_strip(line, " ");
-          int note = String_find(directory, _129);
+          int note = String_find(directory, _126);
           if(note >= 0) directory = String_getslice(directory, -2147483648, note, 1);
           Array_push(directories, String_var(directory));
-          if(String_endswith(directory, _130)) Array_push(directories, String_var(Path_join(Path_dirname(directory), _131)));
+          if(String_endswith(directory, _127)) Array_push(directories, String_var(Path_join(Path_dirname(directory), _128)));
         }
 
       }
@@ -579,11 +576,11 @@ List Toolchain_search_directories(Toolchain t){
     while(List_try_next(_x2c_macro_object_6, & _x2c_macro_cursor_6, & _x2c_macro_cursor_output_6)){
       line = Var_string(_x2c_macro_cursor_output_6);
       {
-        if(! String_startswith(line, _132)) continue;
-        String list = String_remove_prefix(String_remove_prefix(line, _132), _133);
+        if(! String_startswith(line, _129)) continue;
+        String list = String_remove_prefix(String_remove_prefix(line, _129), _130);
         {
           String directory;
-          List _x2c_macro_object_5 = String_split(list, _134);
+          List _x2c_macro_object_5 = String_split(list, _131);
           List _x2c_macro_cursor_5 = _x2c_macro_object_5;
           Var _x2c_macro_cursor_output_5;
           while(List_try_next(_x2c_macro_object_5, & _x2c_macro_cursor_5, & _x2c_macro_cursor_output_5)){
@@ -656,20 +653,20 @@ List x2c_cpp_include_dirs(void);
 
 void Path_remove_tree(Path);
 
-int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, const char * imacros, int expand_system_headers, String * output, String * errors, String * dependencies){
+int Toolchain_preprocess(Toolchain t, const char * fname, List include_dirs, const char * imacros, String * output, String * errors, String * dependencies){
   if(! _init_guard_) _file_init_();
   if(output) * output = NULL;
   if(errors) * errors = NULL;
   if(dependencies) * dependencies = NULL;
   if(! fname || ! output || ! errors) return - 1;
   String source = String_new(fname), macros = String_new(imacros);
-  if(! expand_system_headers && ! t -> keep_system_includes){
+  if(! t -> keep_system_includes){
     String probe_output = NULL, probe_errors = NULL;
     t -> keep_system_includes = tool_capture(cons(String_var(t -> cc), _65), & probe_output, & probe_errors) == 0 ? 1 : - 1;
   }
   Path scratch = dependencies ? Path_temp_dir() : NULL;
   String depfile = String_join(NULL, cons(String_var(scratch), cons(String_var(_66), NULL)));
-  List arguments = cons(String_var(t -> cc), cons(_24, cons(_68, cons(_45, cons(_47, cons(_70, cons(_72, cons(_74, cons(_76, cons(_78, cons(_80, cons(_82, cons(_84, cons(_86, cons(_88, cons(_90, cons(_92, cons(_94, cons(_96, cons(_98, List_append(! expand_system_headers && t -> keep_system_includes > 0 ? _99 : NULL, List_append(expand_system_headers ? _102 : NULL, cons(_59, cons(_104, List_append(_includes(x2c_cpp_include_dirs()), List_append(_includes(include_dirs), List_append(t -> cpp_args, List_append(String_truth(macros) ? cons(_106, cons(String_var(macros), NULL)) : NULL, List_append(String_truth(scratch) ? cons(_12, cons(_16, cons(String_var(depfile), _110))) : NULL, cons(String_var(source), NULL))))))))))))))))))))))))))))));
+  List arguments = cons(String_var(t -> cc), cons(_24, cons(_68, cons(_45, cons(_47, cons(_70, cons(_72, cons(_74, cons(_76, cons(_78, cons(_80, cons(_82, cons(_84, cons(_86, cons(_88, cons(_90, cons(_92, cons(_94, cons(_96, cons(_98, List_append(t -> keep_system_includes > 0 ? _99 : NULL, cons(_59, cons(_101, List_append(_includes(x2c_cpp_include_dirs()), List_append(_includes(include_dirs), List_append(t -> cpp_args, List_append(String_truth(macros) ? cons(_103, cons(String_var(macros), NULL)) : NULL, List_append(String_truth(scratch) ? cons(_12, cons(_16, cons(String_var(depfile), _107))) : NULL, cons(String_var(source), NULL)))))))))))))))))))))))))))));
   if(t -> verbose) _print_action(1165861522189542, arguments);
   int result = tool_capture(arguments, output, errors);
   if(String_truth(scratch)){

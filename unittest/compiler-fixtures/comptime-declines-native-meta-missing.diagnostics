@@ -3,3 +3,8 @@ unittest/compiler-fixtures/comptime-declines-native-meta-missing.x:2:1: macro: t
   ^^^^
   note: reason: no binding for not_compiler_target
 
+unittest/compiler-fixtures/comptime-declines-native-meta-missing.x:4:25: macro: compile-time Lisp evaluation failed
+  int main(void) { return $(calls_missing_target) == 1.0; }
+                          ^^
+  note: form: (calls_missing_target) error: (unbound (name calls_missing_target))
+

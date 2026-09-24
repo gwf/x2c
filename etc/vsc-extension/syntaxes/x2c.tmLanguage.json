@@ -39,6 +39,9 @@
 			"include": "#x2c_protocol_header"
 		},
 		{
+			"include": "#x2c_meta_declaration"
+		},
+		{
 			"include": "#x2c_foreach_statement"
 		},
 		{
@@ -3646,10 +3649,11 @@
 		},
 		"x2c_protocol_header": {
 			"name": "meta.declaration.protocol.x2c",
-			"begin": "^\\s*(?:(static)\\s+)?(protocol)\\b",
+			"begin": "^\\s*(?:(meta)\\s+)?(?:(static)\\s+)?(protocol)\\b",
 			"beginCaptures": {
-				"1": { "name": "storage.modifier.x2c" },
-				"2": { "name": "keyword.declaration.protocol.x2c" }
+				"1": { "name": "storage.modifier.meta.x2c" },
+				"2": { "name": "storage.modifier.x2c" },
+				"3": { "name": "keyword.declaration.protocol.x2c" }
 			},
 			"end": "(?=[{;])",
 			"patterns": [
@@ -3673,6 +3677,12 @@
 				{ "include": "#comments" },
 				{ "include": "#operators" }
 			]
+		},
+		"x2c_meta_declaration": {
+			"match": "^\\s*(meta)\\b(?=\\s+(?!protocol\\b)(?:(?:static|const|inline|extern|volatile|unsigned|signed|long|short)\\s+)*[A-Za-z_]\\w*(?:\\s*[*&]+)?\\s+[A-Za-z_]\\w*(?:\\.[A-Za-z_]\\w*)?\\s*(?:\\(|=|;|\\[))",
+			"captures": {
+				"1": { "name": "storage.modifier.meta.x2c" }
+			}
 		},
 		"x2c_foreach_statement": {
 			"name": "meta.block.foreach.x2c",

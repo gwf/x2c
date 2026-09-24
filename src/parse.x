@@ -266,7 +266,7 @@ static String _attribute(Compiler c) {
 /* C places an aggregate's own attributes after its keyword and after its
    closing brace, written out or through a macro whose body is attributes.
    Collection skips them: attribute text is no part of a collected type, and
-   the packing marks hold any layout they change (see Compiler.tokenize). */
+   the layout marks hold any layout they change (see Compiler.tokenize). */
 static void _skip_aggregate_attributes(Compiler c) {
   if (!c.shallow) return;
   loop {
@@ -485,30 +485,36 @@ static int _enum_fits_int(List type, List members) {
   return 1;
 }
 
-/* Reports whether C packs an aggregate whose tokens, with its attributes,
-   run from `first` up to the current one, which is not its own: packing is
-   on before it, or a mark lies within it. Tokens outside the unit's own,
-   such as a constructed form's, have no marks. */
-static int _packed_since(Compiler c, Token first) {
+/* Reports a layout attribute between `first` and the current token. Tokens
+   outside this unit's input, such as a constructed form's, have no marks. */
+static int _attribute_since(Compiler c, Token first, Array marks) {
   Token base = c.tokenizer.tokens, end = base + c.tokenizer.tokens.len();
   if (first < base || c.token >= end) return 0;
   // Marks ascend, so the ones before `first` are a prefix.
-  int before = 0, count = c.pack_marks.len();
+  int before = 0, count = marks.len();
   for (int high = count; before < high;) {
     int middle = (before + high) / 2;
-    if ((long) c.pack_marks[middle] < first - base) before = middle + 1;
+    if ((long) marks[middle] < first - base) before = middle + 1;
     else high = middle;
   }
   return before % 2 ||
-         (before < count && (long) c.pack_marks[before] < c.token - base);
+         (before < count && (long) marks[before] < c.token - base);
 }
 
+static int _layout_attribute_since(Compiler c, Token first) =>
+  _attribute_since(c, first, c.layout_marks);
+
 /* Publishes an aggregate whose tokens start at `first`. A constructed
-   aggregate passes the current token, so it is packed where its form is. A
-   packed enum can be narrower than int, so it has no int layout. */
+   aggregate passes the current token, so its attributes are in its form. An
+   enum with a layout attribute can be narrower than int, so it has no int
+   layout. */
 static List _publish_aggregate_type(
   Compiler compiler, Symbol tag, Var name, List members, Token first) {
-  int packed = _packed_since(compiler, first);
+  int layout = _layout_attribute_since(compiler, first);
+  int packed = _attribute_since(compiler, first, compiler.packed_marks);
+  if (tag == <struct> && packed && compiler.source_private >= 0)
+    compiler.report_error(
+      <parse>, "packed attributes are unsupported", first, NULL);
   List type = %($tag $name);
   List body = tag == <enum> ? members : %(fields @members);
   if (name is <list> && name.car() == <binding>)
@@ -517,9 +523,12 @@ static List _publish_aggregate_type(
     compiler.sym.declare(NULL, type, tag == <enum> ? %(enum) : %($tag $body));
   if (tag != <enum>) {
     compiler.sym.declare_field_order(type, members);
-    if (packed) compiler.sym.set(%(@type "packed"), %(packed));
+    if (layout) compiler.sym.set(%(@type "layout-attribute"), %(unknown));
+    // Meta code lays out only the records x2c units define.
+    if (compiler.source_private >= 0 && !compiler.filename.endswith(".h"))
+      compiler.sym.set(%(@type "x2c-record"), %(x2c));
   }
-  else if (!packed && _enum_fits_int(type, members))
+  else if (!layout && _enum_fits_int(type, members))
     compiler.sym.set(%(@type "int-range"), %(int));
   return %($tag $name $body);
 }
@@ -1289,12 +1298,20 @@ static List _destructure_declaration(
 // declarations
 
 static List _typedef(Compiler compiler, List context, int row) {
+  Token first = compiler.token;
   // An imported `typedef const char *(*fn)(int)` names a qualified type
   // like an object declaration does, so read the qualifiers first.
   List quals = _type_qualifiers(compiler);
   List spec = quals.append(_type_specifier(compiler));
   spec = compiler.sym.local_type(spec);
   List bindings = _declarator_list(compiler, spec, context, row);
+  /* A typedef's own alignment changes every record field that names it,
+     even when the record declaration has no attribute of its own. */
+  if (_layout_attribute_since(compiler, first))
+    foreach (List declarator, bindings) {
+      String name = binding_identity_spelling(declarator.cadr());
+      if (name) compiler.sym.set(%($name "layout-attribute"), %(unknown));
+    }
   return _finish_declaration(compiler, <typedef>, spec, bindings, 0);
 }
 
@@ -1846,6 +1863,31 @@ static void _track_conditional_arms(Compiler c) {
     }
 }
 
+/* Keep authored prose beside a definition without making comment text part
+   of the semantic AST. Macro templates carry it until their selected body
+   binds at the invocation. */
+static String _definition_doc(Compiler c, Token start) {
+  Token first = c.tokenizer.tokens;
+  if (start <= first) return NULL;
+  Token token = start - 1;
+  while (token > first && token.type == <space>) token--;
+  if (token.type != <comment> || token.len < 5 ||
+      !token.text.startswith("/**")) return NULL;
+  int lines = 0;
+  for (int position = token.pos + token.len; position < start.pos;
+       position++)
+    if (c.text[position] == '\n' && ++lines > 1) return NULL;
+  return String.new_len(token.text + 3, token.len - 5);
+}
+
+static void _definition_source(
+  Compiler c, List function, int line, String doc) {
+  match (function)
+    case %(function ? (bind ?binding ?) ?):
+      c.semantic_binding_facts()[%(api-definition $binding)] =
+        %($line $doc);
+}
+
 /** Parses one top-level form and applies its source-ordered compiler effects.
     Returns its AST, or NULL when a keyword definition, top-level Lisp form,
     linkage brace, or compile-time-only `meta` function only updates compiler
@@ -1889,6 +1931,8 @@ List Compiler.parse_top_level(Compiler c) {
     meta = c.token;
     c.next();
   }
+  Token definition_start = c.token;
+  String definition_doc = _definition_doc(c, definition_start);
   List decl = c.parse_declaration_row();
   if (c.test(<;>)) {
     if (meta && decl.type_from_ast().is_function())
@@ -1910,7 +1954,14 @@ List Compiler.parse_top_level(Compiler c) {
     c.record_declaration_visibility(function);
     /* A `meta` function that reaches a `Meta` operation exists only inside
        the compiler, so there is no runtime form to emit. */
-    if (meta && c.meta_is_comptime_only(function)) return NULL;
+    if (meta && c.meta_is_comptime_only(function)) {
+      _definition_source(
+        c, function, definition_start.line, definition_doc);
+      return NULL;
+    }
+    if (c.macro_holes)
+      return %(api-source ${definition_start.line} $definition_doc $function);
+    _definition_source(c, function, definition_start.line, definition_doc);
     return function;
   }
   c.require_input();
@@ -2268,6 +2319,18 @@ List Compiler.bind_syntax(
         if (_.macro_holes) return input;
       case %(src ? ?syntax): {
         return _.bind_syntax(syntax, context, _.return_type);
+      }
+      case %(api-source ?line ?doc ?syntax): {
+        if (context != AST_UNIT) goto construction_error;
+        List bound = _.bind_syntax(syntax, context, _.return_type);
+        Token invocation = _.macro_stack
+                         ? _.macro_stack.last().list()[3] : NULL;
+        String invocation_doc = invocation
+                              ? _definition_doc(_, invocation) : NULL;
+        _definition_source(
+          _, bound, invocation ? invocation.line : line,
+          invocation_doc ? invocation_doc : doc);
+        return bound;
       }
       case %(named-type ?(String name) ?type): {
         if (context != AST_UNIT) goto construction_error;

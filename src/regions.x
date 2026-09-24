@@ -9,16 +9,13 @@
     typed forms the parser produced, before the transform driver rewrites
     them, so a region is still the call that opens it and the `defer` beside
     it that closes it. It warns when a value born in a region reaches storage
-    that outlives the region, when a region is opened without its close in
-    the same block, and when a local is read after it was freed.
+    that outlives the region and when a local is read after it was freed.
 
-    A function's summary is two facts: whether it returns fresh storage, and
-    where each parameter is sunk. The unit's functions reach a fixpoint over
-    their summaries. A call into another unit has a summary only through the
-    runtime table, so a unit's warnings do not depend on which units were
-    translated before it. A tool that holds every unit at once can seed the
-    fixpoint with the other units' summaries through
-    `Compiler.region_escapes`. A `meta` function is walked when it is
+    A function's summary is two facts: which owner supplies fresh returned
+    storage, and where each parameter is sunk. The unit's functions reach a
+    fixpoint over their summaries. A call into another unit has a summary
+    only through the runtime table, so warnings do not depend on which units
+    were translated before it. A `meta` function is walked when it is
     defined, against the summaries of the `meta` functions before it, and a
     finding there is an error, because a compile-time call frees its locals
     when it returns.
@@ -41,23 +38,24 @@
    storage of a Scope local whose end has not been seen, or frame: the
    storage of the function's locals and parameters. `depth` is the
    block depth it belongs to, `origin` the statement that opened it, `slot`
-   the Scope local a pushed slot names, and `outer` the next open region.
-   `lexical` records a close in the block that opened it. */
+   the Scope local a pushed slot names, and `outer` the next open region. */
 typedef struct Region {
   Symbol kind;
-  int depth, origin, closed, lexical;
+  int depth, origin, closed;
   struct Fact *slot;
   struct Region *outer;
 } *Region;
 
 /* What the walk knows about one local or parameter: the block depth that
    declares it, its parameter index or -1, whether it holds storage born in
-   this function, whether a free ended it, the region its value belongs to,
-   the region a Scope local's own storage forms, and for a pointer taken
-   with `&`, the local and place it names. */
+   this function, whether a free ended it, the region its value belongs to
+   (and the Pool alternative of a mixed result), the region a Scope local's
+   own storage forms, and for a pointer taken
+   with `&`, the local and place it names. `born` records a scoped or pooled
+   result, including when the allocation has no local region. */
 typedef struct Fact {
   int depth, origin, param, born, dead;
-  struct Region *region, *owner;
+  struct Region *region, *other, *owner;
   struct Fact *points;
   List place;
 } *Fact;
@@ -90,7 +88,9 @@ typedef struct Walk {
 static Map runtime = %{
   "Scope_malloc": (alloc),           "Scope_calloc": (alloc),
   "Scope_memdup": (alloc),           "Scope_malloc_finalized": (alloc),
-  "Scope_realloc": (alloc),          "String_malloc": (alloc),
+  "Scope_realloc": (alloc),          "String_malloc": (alloc pool),
+  "String_new": (alloc pool),        "String_new_len": (alloc pool),
+  "String_new_fill": (alloc pool),
   "Block_new": (alloc),              "Bytes_new": (alloc),
   "Array_new": (alloc),              "Map_new": (alloc),
   "Buffer_new": (alloc),
@@ -188,7 +188,7 @@ static int _copies(Walk w, Type type, Var value) {
 
 static Region _open(Walk w, Symbol kind, Fact slot) {
   Region region = Scope.calloc(1, sizeof(struct Region));
-  *region = (struct Region) {kind, w.depth, w.origin, 0, 0, slot, w.open};
+  *region = (struct Region) {kind, w.depth, w.origin, 0, slot, w.open};
   return w.open = region;
 }
 
@@ -234,6 +234,7 @@ static Region _active(Walk w) {
 /* `fact` now belongs to `region`, or to an owner outside this function. */
 static void _move(Fact fact, Region region) {
   fact.region = region;
+  fact.other = NULL;
   fact.born = 0;
   fact.param = -1;
 }
@@ -250,14 +251,16 @@ static List _opened(Walk w, Region region) {
 
 // summaries
 
-/* A summary is `(FRESH SINKS)`, where SINKS is a sorted List of
-   `(INDEX TARGET)` pairs and a target is <return>, <static>, <unknown>, or
-   `(param INDEX)`. An unchanged summary is the identical List. */
+/* A summary is `(OWNER SINKS)`, where OWNER is a bit set of scoped (1) and
+   pooled (2) returned storage. SINKS is a sorted List of `(INDEX TARGET)`
+   pairs and a target is <return>, <result>, <static>, <unknown>, or
+   `(param INDEX)`. <result> retains an argument in fresh result storage;
+   <return> aliases an argument as the result. */
 static List _summary(Walk w, String callee) {
   match (runtime[callee]) {
+    case %(alloc pool): return %(2 ());
     case %(alloc *): return %(1 ());
-    /* A cons cell holds both arguments in storage no region owns. */
-    case %(pool): return %(0 ((0 unknown) (1 unknown)));
+    case %(pool): return %(2 ((0 result) (1 result)));
     case %(store): return %(0 ((1 (param 0)) (2 (param 0))));
   }
   Var local = w.summaries[callee];
@@ -280,7 +283,8 @@ static Fact _fact_of(Walk w, Var expression, List *named) {
       List yes_name = NULL, no_name = NULL;
       Fact fact = _fact_of(w, yes, &yes_name);
       Fact other = _fact_of(w, no, &no_name);
-      if (other && (!fact || (other.region && !fact.region))) {
+      if (other && (!fact || ((other.region || other.other) &&
+                             !fact.region && !fact.other))) {
         fact = other;
         yes_name = no_name;
       }
@@ -321,28 +325,33 @@ static Fact _returned_argument(Walk w, Var value, List *named) {
     (int index, Var target) = row;
     if (target != <return> || index >= arguments.len()) continue;
     Fact fact = _fact_of(w, arguments[index], named);
-    if (fact && (fact.param >= 0 || fact.region)) return fact;
+    if (fact && (fact.param >= 0 || fact.born || fact.region || fact.other))
+      return fact;
   }
   return NULL;
 }
 
-/* A pool cell is fresh inside a pool bracket, which frees it; outside one
-   it belongs to no region. */
+/* A pool value remains pooled even without a local bracket: a caller may
+   open one around a helper call. */
 static Region _pooled(Walk w, int *born) {
   Region pool = _innermost(w, <pool>);
-  *born = pool != NULL;
+  *born = 2;
   return pool;
 }
 
 /* The region fresh storage an expression makes is born in, with `*born`
-   set; NULL with `*born` set is the caller's active region. `type` is the
+   set; NULL with `*born` set is the caller's active region. A mixed
+   Scope/Pool result keeps its Pool region in `*other`. `type` is the
    declared type a compound literal initializes, or NULL for its own. */
-static Region _birth(Walk w, Var value, Type type, int *born) {
+static Region _birth(Walk w, Var value, Type type, int *born,
+                     Region *other) {
   List arguments = NULL;
   String callee = _callee_of(value, &arguments);
   *born = 1;
+  *other = NULL;
   match (callee ? runtime[callee] : void) {
     case %(alloc slot): return _owner(w, _slot(w, arguments.car()));
+    case %(alloc pool): return _pooled(w, born);
     case %(alloc): return _active(w);
     case %(pool): return _pooled(w, born);
   }
@@ -356,7 +365,11 @@ static Region _birth(Walk w, Var value, Type type, int *born) {
         match (capture) case %(capture ? ? ?captured): {
           Var place = _address_of(captured);
           Fact fact = _fact_of(w, place is void ? captured : place, NULL);
-          if (fact && fact.region) return fact.region;
+          if (fact && (fact.born || fact.region || fact.other)) {
+            if (fact.born) *born = fact.born;
+            *other = fact.other;
+            return fact.region;
+          }
         }
       return _active(w);
     }
@@ -365,7 +378,16 @@ static Region _birth(Walk w, Var value, Type type, int *born) {
       if (_class(w, type ? type : _expression_type(value)) == <container>):
       return _active(w);
   }
-  if (callee && _summary(w, callee).car().int()) return _active(w);
+  if (callee) {
+    int owner = _summary(w, callee).car().int();
+    if (owner == 3) {
+      *born = owner;
+      *other = _innermost(w, <pool>);
+      return _active(w);
+    }
+    if (owner & 2) return _pooled(w, born);
+    if (owner & 1) return _active(w);
+  }
   *born = 0;
   return NULL;
 }
@@ -376,40 +398,24 @@ static Region _birth(Walk w, Var value, Type type, int *born) {
    <static>, <local> for the local `target`, or <heap> for the storage
    `target` reaches, or an unknown pointer when `target` is NULL. A canonical
    destination copies. A parameter adds the sink to this function's summary;
-   any other value reports when its region can end first. Returns whether
-   it reported. */
-static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
-  match (_unwrap(value)) case %(op (!quote ?) ? ?yes ?no):
-    return _flow(w, yes, type, sink, target) ||
-           _flow(w, no, type, sink, target);
-  List named = NULL;
-  Fact fact = _value_fact(w, value, &named);
-  if (!fact) fact = _returned_argument(w, value, &named);
-  int born = 0;
-  Region region = fact ? fact.region : _birth(w, value, NULL, &born);
-  if (!fact && !born) return 0;
-  if (_copies(w, type, value) && (!region || region.kind != <pool>))
+   any other value reports when either possible owner can end first.
+   Returns whether it reported. */
+static int _flow_region(Walk w, Var value, Type type, Symbol sink,
+                        Fact target, Fact fact, List named, Region region,
+                        int born, int report) {
+  if (_copies(w, type, value) && !(born & 2) &&
+      (!region || region.kind != <pool>))
     return 0;
-  if (fact && fact.param >= 0) {
-    Var row = sink;
-    if (sink == <heap>) {
-      if (!target) row = <unknown>;
-      else if (target.param >= 0) row = %(param ${target.param});
-      else row = target.region ? void : <return>;
-    }
-    if (sink != <local> && row is not void)
-      w.sinks[%(${fact.param} $row)] = 1;
-    return 0;
-  }
   if (!region) {
-    if (sink == <return> && (fact ? fact.born : born)) w.fresh = 1;
+    if (sink == <return>) w.fresh |= born;
     return 0;
   }
   String subject = _subject(w, value, named, fact);
   if (region.closed) {
-    _warn(w, <region>, w.origin,
-          %"$subject is used after the region that allocated it ended",
-          _opened(w, region));
+    if (report)
+      _warn(w, <region>, w.origin,
+            %"$subject is used after the region that allocated it ended",
+            _opened(w, region));
     return 1;
   }
   if (region.kind == <local>) return 0;
@@ -432,15 +438,69 @@ static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
       else exit = "stored into an object of an outer region";
   }
   if (!exit) return 0;
-  if (region == w.frame)
-    _warn(w, <region>, w.origin,
-          %"$subject can outlive the local storage it points into when $exit",
-          %("local storage ends when the function returns"));
-  else
-    _warn(w, <region>, w.origin,
-          %"$subject can outlive the region it was allocated in when $exit",
-          _opened(w, region));
+  if (report) {
+    if (region == w.frame) {
+      String message =
+        %"$subject can outlive the local storage it points into when $exit";
+      _warn(w, <region>, w.origin,
+            message,
+            %("local storage ends when the function returns"));
+    }
+    else
+      _warn(w, <region>, w.origin,
+            %"$subject can outlive the region it was allocated in when $exit",
+            _opened(w, region));
+  }
   return 1;
+}
+
+static int _flow(Walk w, Var value, Type type, Symbol sink, Fact target) {
+  match (_unwrap(value)) case %(op (!quote ?) ? ?yes ?no):
+    return _flow(w, yes, type, sink, target) ||
+           _flow(w, no, type, sink, target);
+  List named = NULL;
+  Fact fact = _value_fact(w, value, &named);
+  if (!fact) fact = _returned_argument(w, value, &named);
+  int born = 0;
+  Region other = NULL;
+  Region region = fact ? fact.region
+                       : _birth(w, value, NULL, &born, &other);
+  if (!fact && !born) return 0;
+  if (fact && fact.param >= 0) {
+    Var row = sink;
+    if (sink == <heap>) {
+      if (!target) row = <unknown>;
+      else if (target.param >= 0) row = %(param ${target.param});
+      else row = target.born ? <result>
+             : (target.region || target.other) ? void : <return>;
+    }
+    if (sink != <local> && row is not void)
+      w.sinks[%(${fact.param} $row)] = 1;
+    return 0;
+  }
+  if (fact) {
+    born = fact.born;
+    other = fact.other;
+  }
+  int reported = 0;
+  for (int choice = 0; choice < (born == 3 ? 2 : 1); choice++) {
+    Region owner = choice ? other : region;
+    int kind = born;
+    if (born == 3) kind = choice ? 2 : 1;
+    if (owner && target && target.born == 3 && sink == <heap>) {
+      struct Fact pooled = *target;
+      pooled.region = target.other;
+      pooled.born = 2;
+      reported |= _flow_region(w, value, type, sink, target, fact,
+                               named, owner, kind, !reported);
+      reported |= _flow_region(w, value, type, sink, &pooled, fact,
+                               named, owner, kind, !reported);
+    }
+    else
+      reported |= _flow_region(w, value, type, sink, target, fact,
+                               named, owner, kind, !reported);
+  }
+  return reported;
 }
 
 /* How a warning names the value that leaves: a local by its name, and an
@@ -508,6 +568,8 @@ static Fact _borrow(Walk w, Var place, List *named) {
   borrow.points = base;
   borrow.place = _unwrap(place);
   borrow.region = through ? base.region : w.frame;
+  borrow.other = through ? base.other : NULL;
+  borrow.born = through ? base.born : 0;
   if (through) borrow.param = base.param;
   return borrow;
 }
@@ -556,6 +618,14 @@ static void _scan_call(Walk w, Var call, String callee, List arguments) {
     Type type = declared is <list> ? declared.list() : NULL;
     if (target == <static>) _flow(w, argument, type, <static>, NULL);
     else if (target == <unknown>) _flow(w, argument, type, <heap>, NULL);
+    else if (target == <result>) {
+      int born = 0;
+      Region other = NULL;
+      Region region = _birth(w, call, NULL, &born, &other);
+      struct Fact result = {
+        .param = -1, .born = born, .region = region, .other = other};
+      _flow(w, argument, type, <heap>, &result);
+    }
     else match (target) case %(param ?other): {
       if (other.int() >= count) continue;
       Var holder = arguments[other.int()];
@@ -613,9 +683,14 @@ static void _scan(Walk w, Var value, int deferred) {
       /* A statement expression declares locals of its own. */
       case %((!or declare decl) ?specifiers (bindings *bindings)):
         _declare(w, specifiers, bindings);
-      /* A List literal's cells outlive every region. */
+      /* A List literal retains its values in the active Pool. */
       case %(cons ?head ?tail): {
-        _flow(w, head, NULL, <heap>, NULL);
+        int born = 0;
+        Region other = NULL;
+        Region region = _birth(w, node, NULL, &born, &other);
+        struct Fact result = {.param = -1, .born = born, .region = region};
+        _flow(w, head, NULL, <heap>, &result);
+        _flow(w, tail, NULL, <heap>, &result);
         w.pending.push(tail);
         w.pending.push(head);
       }
@@ -647,11 +722,20 @@ static void _assign(Walk w, Fact fact, Var value, Type type, int store) {
   Fact source = _value_fact(w, value, NULL);
   if (!source) source = _returned_argument(w, value, NULL);
   int born = 0;
-  Region region = source ? source.region : _birth(w, value, type, &born);
+  Region other = source ? source.other : NULL;
+  Region region = source ? source.region
+                         : _birth(w, value, type, &born, &other);
+  int owners = source ? source.born : born;
   int kept = source || born;
-  if (kept && _copies(w, type, value))
-    kept = region && region.kind == <pool>;
-  if (kept && store && source && region)
+  if (kept && _copies(w, type, value)) {
+    if (owners == 3) {
+      region = other;
+      other = NULL;
+      owners = 2;
+    }
+    else kept = (owners & 2) || (region && region.kind == <pool>);
+  }
+  if (kept && store && source && (region || other))
     kept = !_flow(w, value, type, <local>, fact);
   fact.dead = 0;
   fact.points = kept && source ? source.points : NULL;
@@ -661,7 +745,8 @@ static void _assign(Walk w, Fact fact, Var value, Type type, int store) {
      the next allocation belongs to. */
   fact.owner = NULL;
   fact.region = kept ? region : NULL;
-  fact.born = kept && (source ? source.born : born);
+  fact.other = kept ? other : NULL;
+  fact.born = kept ? owners : 0;
   fact.param = kept && source ? source.param : -1;
 }
 
@@ -707,8 +792,15 @@ static void _store(Walk w, Var target, Var value) {
 /* A static or extern local is not the function's storage, so the walk
    treats it as file-scope state. */
 static void _declare(Walk w, Var specifiers, List bindings) {
-  if (<static> in specifiers || <extern> in specifiers) return;
   Map types = w.compiler.semantic_binding_facts();
+  if (<static> in specifiers || <extern> in specifiers) {
+    foreach (List item, bindings)
+      match (item) case %(op = (bind ?name ?) ?value): {
+        _scan(w, value, 0);
+        _flow(w, value, types[%(type $name)], <static>, NULL);
+      }
+    return;
+  }
   foreach (Var item, bindings)
     match (item) {
       case %(op (!quote =) (bind (!set ?name (binding ? ?)) ?) ?value):
@@ -752,21 +844,15 @@ static void _walk_defer(Walk w, Var body) {
     callee = _callee_of(expression, &arguments);
   Fact fact = _fact_of(w, arguments.car(), NULL);
   match (callee ? runtime[callee] : void) {
-    case %(close ?kind): {
-      Region region = _innermost(w, kind);
-      if (region) region.lexical = 1;
-      return;
-    }
+    case %(close ?): return;
     case %(free) if (fact && fact.param < 0): {
       fact.region = _open(w, <auto>, NULL);
-      fact.region.lexical = 1;
       return;
     }
     case %(destroy): {
       Region owner = _owner(w, fact);
       if (!owner || owner.kind != <local>) return;
       owner.kind = <auto>;
-      owner.lexical = 1;
       owner.outer = w.open;
       w.open = owner;
       return;
@@ -786,11 +872,9 @@ static int _walk_region_call(Walk w, String callee, List arguments) {
     case %(open ?kind): _open(w, kind, _slot(w, arguments.car()));
     case %(close ?kind): {
       Region region = _innermost(w, kind);
-      if (!region) break;
       /* A close in a nested block runs on some paths, so the region stays
          open for the statements after that block. */
-      region.lexical = 1;
-      region.closed = region.depth == w.depth;
+      if (region) region.closed = region.depth == w.depth;
     }
     case %(destroy): if (fact && fact.depth == w.depth && fact.owner)
       fact.owner.closed = 1;
@@ -805,11 +889,6 @@ static int _walk_region_call(Walk w, String callee, List arguments) {
 static void _close_to(Walk w, Region region, Region outer) {
   if (region == outer) return;
   _close_to(w, region.outer, outer);
-  if (!region.closed && !region.lexical &&
-      (region.kind == <scope> || region.kind == <pool>))
-    _warn(w, <unbalanced>, region.origin,
-          "this region has no matching release in the block that opens it",
-          %("a region opens and closes in one block"));
   region.closed = 1;
 }
 
@@ -920,16 +999,11 @@ static void _analyze(Walk w, List function) {
   w.changed = 1;
 }
 
-/* The functions `ast` defines, walked against `seed`: `(NAME FRESH SINKS)`
-   rows for names another unit defines. A seeded name the unit defines
-   itself only starts the walk higher, because summaries grow. */
-static void _fixpoint(Walk w, List ast, List seed, Array functions) {
+/* The functions `ast` defines, walked to their final summaries. */
+static void _fixpoint(Walk w, List ast, Array functions) {
   w.frame = Scope.calloc(1, sizeof(struct Region));
   w.frame.kind = <frame>;
   _collect_functions(ast, functions);
-  foreach (List row, seed)
-    match (row) case %(?name ?fresh ?sinks):
-      w.summaries[name] = %($fresh $sinks);
   foreach (List function, functions)
     if (w.summaries[function.car()] is void)
       w.summaries[function.car()] = %(0 ());
@@ -952,7 +1026,7 @@ void Compiler.check_regions(Compiler c, List ast) {
     .compiler = c, .summaries = {}, .pending = [], .freed = []};
   Walk w = &walk;
   Array functions = $auto([]);
-  _fixpoint(w, ast, NULL, functions);
+  _fixpoint(w, ast, functions);
   int origin = c.origin;
   foreach (List warning, w.warnings) {
     (Symbol code, int at, String message, List notes) = warning;
@@ -986,55 +1060,8 @@ void Compiler.check_meta_regions(Compiler c, List fn) {
     .compiler = c, .summaries = c.meta_regions, .pending = [], .freed = []};
   Walk w = &walk;
   Array functions = $auto([]);
-  _fixpoint(w, fn, NULL, functions);
+  _fixpoint(w, fn, functions);
   if (!w.warnings.len()) return;
   (Symbol code, int at, String message, List notes) = w.warnings[0];
   $let(c.origin, at) { c.report_error(code, message, NULL, notes); }
-}
-
-/* Where an origin points, named as the caller's reports name it. */
-static List _located(Compiler c, int origin) {
-  List location = c.origin_location(origin);
-  Var file = location ? location.assoc(<file>) : void;
-  String path = file is <string>
-              ? c.display_path(file.str()) : String.new("");
-  return %(
-    at $path ${location ? location.assoc(<line>).int() : 0}
-    ${location ? location.assoc(<column>).int() : 0}
-  );
-}
-
-/** The region summaries the functions in `ast` have and the warnings they
-    produce, read against `seed`: `(NAME FRESH SINKS)` rows for the
-    functions other units define. `ast` must be what
-    `Compiler.check_regions` takes. The call reports nothing, so a caller
-    that walks a whole project can run it once a pass and report only the
-    last. Returns `(region-unit (summaries ROW...) (warnings WARNING...))`,
-    where a warning is
-    `(warning (at PATH LINE COLUMN) CODE MESSAGE (notes NOTE...))`.
-*/
-List Compiler.region_escapes(Compiler c, List ast, List seed) {
-  struct Walk walk = {
-    .compiler = c, .summaries = {}, .pending = [], .freed = []};
-  Walk w = &walk;
-  Array functions = $auto([]);
-  _fixpoint(w, ast, seed, functions);
-  Array summaries = [], warnings = [];
-  foreach (List function, functions) {
-    String name = function.car();
-    (Var fresh, List sinks) = w.summaries[name];
-    summaries.push(%($name $fresh $sinks));
-  }
-  foreach (List warning, w.warnings) {
-    (Symbol code, int at, String message, List notes) = warning;
-    warnings.push(%(
-      warning ${_located(c, at)} $code $message (notes @notes)
-    ));
-  }
-  summaries.sort();
-  warnings.sort();
-  return %(
-    region-unit (summaries @{summaries.list_free()})
-    (warnings @{warnings.list_free()})
-  );
 }

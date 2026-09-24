@@ -34,8 +34,7 @@ macro Expression $shape.names(Expr $value) => $(field_names $value);
 macro Expression $shape.reads(Expr $value) => $(field_reads $value);
 
 // A `meta` function that reaches no compiler operation keeps both of its
-// forms, so the program below calls it at run time and the compiler may
-// answer a constant call from the compile-time form.
+// forms: `$(tag ...)` runs during translation and `tag(...)` at run time.
 meta static String tag(String name, int n) => %"$name-$n";
 
 int main(void) {

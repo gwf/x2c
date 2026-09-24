@@ -9,8 +9,10 @@
 // A value reaching a C scalar type carries that type's `Var` tag, so every
 // later operation applies the usual arithmetic conversions the way C does.
 // `Var.convert` is the conversion: integer narrowing keeps low bits,
-// floating to integer truncates toward zero, and an integer widens.
-(defun C.conv (v tag) (Var.convert v tag))
+// floating to integer truncates toward zero, and an integer widens. A
+// Symbol is stored with its own tag even when C selects an integer arm.
+(defun C.conv (v tag)
+  (Var.convert (if (eq? (Var.tag v) 'symbol) (Var.integer v) v) tag))
 
 // C compares after the usual arithmetic conversions, which `_binary`'s
 // arithmetic already performs, so the tag of a sum names the common type.
@@ -45,6 +47,7 @@
 // ordinary collection.
 (def C.void (bind "lisp_void" nil))
 (def C.cell (bind "lisp_cell" nil))
+// The same native retagger boxes a numeric Symbol code at that destination.
 (def C.address (bind "lisp_address" nil))
 (def C.load (bind "lisp_load" nil))
 (def C.store (bind "lisp_store" nil))
@@ -54,6 +57,7 @@
 // offset, and size; see `lisp_peek` in lib/lisp.x. A record reads as its
 // own address, and assigning one copies into the bytes it already has.
 (def C.bytes (bind "lisp_bytes" nil))
+(defun C.array (layout values) ((bind "lisp_array" nil) layout values))
 (def C.at (bind "lisp_at" nil))
 (def C.copy (bind "lisp_copy" nil))
 (def C.zero (bind "lisp_zero" nil))
@@ -67,15 +71,10 @@
   (let ((object (C.at (C.bytes size) 0 tag)))
     (begin (C.poke object 0 layout value) object)))
 
-// `p[i]` through a pointer. A pointer can hold a local C array, which is an
-// `Array`; any other pointer addresses native bytes, and element `i` is
-// `size` bytes apart from the next, as in C.
 (defun C.index (p i size layout)
-  (if (eq? (type p) 'array) (Array.getindex p i)
-      (C.peek p (* i size) layout)))
+  (C.peek p (* i size) layout))
 (defun C.index.set (p i size layout value)
-  (if (eq? (type p) 'array) (Array.setindex p i value)
-      (C.poke p (* i size) layout value)))
+  (C.poke p (* i size) layout value))
 
 // File-scope state, keyed by binding id. A unit-level initializer is not
 // part of the function, so an unwritten global reads as zero. The table
@@ -311,9 +310,29 @@
 (defun Array_var (v) v)
 (defun Map_var (v) v)
 
-// A compile-time `Func` is the Lisp lambda the lowering produced, which
-// already is a value, so boxing it and reading it back are both the
-// identity. `src/comptime.x` collapses the call itself.
+// Source Func values retain the native signature and carrier contract.
+(defun C.func.new (adapter signature)
+  ((bind "lisp_func_new" nil) adapter signature))
+(defun C.func.arguments (count)
+  ((bind "lisp_func_arguments" nil) count))
+(defun C.func.value (argv index value)
+  ((bind "lisp_func_value" nil) argv index value))
+(defun C.func.reference (argv index address source)
+  ((bind "lisp_func_reference" nil) argv index address source))
+(defun C.func.invalid (fn index source)
+  ((bind "lisp_func_invalid" nil) fn index source))
+(defun C.func.reference-type (fn count index)
+  ((bind "x2c_func_reference_type" nil) fn count index))
+(defun C.func.reference-argument (fn argv index type)
+  ((bind "x2c_func_reference_argument" nil) fn argv index type))
+(defun C.func.value-argument (fn argv index tag)
+  ((bind "x2c_func_value_argument" nil) fn argv index tag))
+(defun C.func.pointer-argument (fn argv index)
+  ((bind "x2c_func_pointer_argument" nil) fn argv index))
+(defun C.func.apply (fn count argv)
+  ((bind "Func_apply" nil) fn count argv))
+(defun Func_signature (fn) ((bind "Func_signature" nil) fn))
+(defun Var_new (tag value) ((bind "lisp_box" nil) tag value))
 (defun Func_var (v) v)
 (defun Var_func (v) v)
 
@@ -521,41 +540,6 @@
 (def Symbol_new_len Symbol.new_len)
 (def Symbol_parse Symbol.parse)
 
-(def Var_box_f32 Var.box_f32)
-(def Var_box_f64 Var.box_f64)
-(def Var_box_i16 Var.box_i16)
-(def Var_box_i32_bits Var.box_i32_bits)
-(def Var_box_i8 Var.box_i8)
-(def Var_box_long Var.box_long)
-(def Var_box_long_double Var.box_long_double)
-(def Var_box_long_long Var.box_long_long)
-(def Var_box_u16 Var.box_u16)
-(def Var_box_u32 Var.box_u32)
-(def Var_box_u8 Var.box_u8)
-(def Var_box_ulong Var.box_ulong)
-(def Var_box_ulong_long Var.box_ulong_long)
-(def Var_custom_descriptor_index Var.custom_descriptor_index)
-(def Var_decode_f32 Var.decode_f32)
-(def Var_decode_f64 Var.decode_f64)
-(def Var_encoding_valid Var.encoding_valid)
-(def Var_fallback_compare Var.fallback_compare)
-(def Var_fallback_equal Var.fallback_equal)
-(def Var_fallback_hash Var.fallback_hash)
-(def Var_fallback_repr Var.fallback_repr)
-(def Var_fallback_str Var.fallback_str)
-(def Var_fallback_truth Var.fallback_truth)
-(def Var_integer_box Var.integer_box)
-(def Var_integer_compare Var.integer_compare)
-(def Var_integer_floating_compare Var.integer_floating_compare)
-(def Var_integer_tag Var.integer_tag)
-(def Var_is_row Var.is_row)
-(def Var_known_tag Var.known_tag)
-(def Var_payload32 Var.payload32)
-(def Var_signed_from_bits Var.signed_from_bits)
-(def Var_wide_compare Var.wide_compare)
-(def Var_wide_equal Var.wide_equal)
-(def Var_wide_hash Var.wide_hash)
-(def Var_width_mask Var.width_mask)
 (def Var_clone_wide Var.clone_wide)
 (def Var_getindex Var.getindex)
 (def Var_null Var.null)

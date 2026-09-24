@@ -90,7 +90,6 @@ map-del      4
 map-default  5
 meta-poly    71 71
 meta-static  slot:4 slot:4
-meta-fold    19 19
 join-array   x/y x/y
 cell-update  7 7
 loop-update  5 5

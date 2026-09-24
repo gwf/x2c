@@ -54,6 +54,7 @@ class Definition:
     signature: str       # whitespace-normalized declarator text
     line: int            # 1-indexed line of the declarator
     doc: str | None      # normalized doc-comment body, or None
+    generated: bool = False  # compiler-synthesized protocol operation
 
 
 @dataclass(frozen=True)
@@ -846,7 +847,8 @@ def function_spans(masked: str, include_static: bool = False
     return tuple(found)
 
 
-def definitions(text: str, include_static: bool = False
+def definitions(text: str, include_static: bool = False,
+                include_macro_templates: bool = True
                 ) -> tuple[Definition, ...]:
     """Every function definition, with its doc comment.
 
@@ -875,13 +877,14 @@ def definitions(text: str, include_static: bool = False
     found.extend(_foreign_alias_definitions(
         text, masked, include_static
     ))
-    for definition in _unit_macro_definitions(
-        text, masked, include_static
-    ):
-        if definition.name in seen:
-            continue
-        seen.add(definition.name)
-        found.append(definition)
+    if include_macro_templates:
+        for definition in _unit_macro_definitions(
+            text, masked, include_static
+        ):
+            if definition.name in seen:
+                continue
+            seen.add(definition.name)
+            found.append(definition)
     found.sort(key=lambda definition: definition.line)
     return tuple(found)
 

@@ -26,7 +26,6 @@ Filesystem locations and the operations on them.
 | [`Path.make_dirs`](#Path.make_dirs) | Creates the directory `p` and any missing parents. |
 | [`Path.modified_time`](#Path.modified_time) | Returns the modification time of `path` in seconds since the epoch, with the fraction the filesystem records. |
 | [`Path.move_to`](#Path.move_to) | Moves `source` to `target`, copying and removing when they are on different filesystems. |
-| [`Path.new`](#Path.new) | Provides the class default for `Path.new`. |
 | [`Path.read_text`](#Path.read_text) | Returns the contents of the file at `path`, or NULL when it is empty. |
 | [`Path.remove_file`](#Path.remove_file) | Removes the file or symbolic link `path` when it exists. |
 | [`Path.remove_tree`](#Path.remove_tree) | Removes `path` and everything below it when it exists. |
@@ -229,17 +228,6 @@ different filesystems.
 **Raises:** `<not-found>` or `<io-fail>`.
 
 Source: `lib/path.x:502`
-
-<a id="Path.new"></a>
-#### Path.new
-
-`Path Path.new(const char *)`
-
-Provides the class default for `Path.new`.
-
-See [Classes and system macros](../../guide/system-macros.md) for the default behavior.
-
-Source: `lib/path.x:25`
 
 <a id="Path.read_text"></a>
 #### Path.read_text

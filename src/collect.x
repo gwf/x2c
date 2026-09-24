@@ -757,7 +757,7 @@ String interface_prelude(void) {
   String identity = x2c_compiler_identity();
   if (!identity) return NULL;
   String runtime = _canonical_path(%"${x2c_get_root()}/lib/x2c.x");
-  String header = %"(interface 3 \"$identity\" ";
+  String header = %"(interface 4 \"$identity\" ";
   foreach (String path, _interface_candidates(runtime)) {
     String text = NULL;
     try text = Path.read_text(path);
@@ -827,15 +827,16 @@ static List _interface_load(Compiler c, String canonical, String path) {
   catch %(malformed *): return NULL;
   if (status != <value> || record is not <list>) return NULL;
   match (record)
-    case %(interface 3 ?(String compiler) ?(String owner) ?(String hash)
-           ?(List stored_parts) ?(List definitions)
+    case %(interface 4 ?(String compiler) ?(String owner) ?(String hash)
+           ?(List stored_parts) ?(List definitions) ?(List selected)
            ?(List stored_dependencies)): {
       String identity = x2c_compiler_identity();
       if (!identity || !compiler.equal(identity) ||
           !home_absolute_path(owner).equal(canonical) ||
           !_hash_matches(c, canonical, hash)) return NULL;
       return _interface_entry(
-        c, canonical, hash, stored_parts, definitions, stored_dependencies);
+        c, canonical, hash, stored_parts, definitions, selected,
+        stored_dependencies);
     }
   return NULL;
 }
@@ -844,7 +845,7 @@ static List _interface_load(Compiler c, String canonical, String path) {
    NULL when a row is malformed or a dependency has changed. */
 static List _interface_entry(
   Compiler c, String canonical, String hash, List stored_parts,
-  List definitions, List stored_dependencies) {
+  List definitions, List selected, List stored_dependencies) {
   Array parts = [];
   foreach (Var part, stored_parts) {
     if (part is <string>) {
@@ -949,7 +950,8 @@ static int _write_datum(Buffer out, Var value) {
   return 1;
 }
 
-static int _write_interface_entry(Buffer out, String canonical, List entry) {
+static int _write_interface_entry(
+  Buffer out, String canonical, List entry, List selected) {
   (List cached_parts, Var hash, List definitions, Map cached_dependencies) =
     entry;
   Array parts = [];
@@ -973,9 +975,10 @@ static int _write_interface_entry(Buffer out, String canonical, List entry) {
   dependencies.sort();
   List dependency_list = dependencies.list_free();
   List part_list = parts.list_free();
+  List selected_rows = _renumber_bindings(selected, identities);
   List record = %(
-    interface 3 ${x2c_compiler_identity()} ${home_portable_path(canonical)}
-    $hash $part_list $definitions $dependency_list
+    interface 4 ${x2c_compiler_identity()} ${home_portable_path(canonical)}
+    $hash $part_list $definitions $selected_rows $dependency_list
   );
   if (!_write_datum(out, record)) return 0;
   out.write_char('\n');
@@ -988,13 +991,13 @@ static int _write_interface_entry(Buffer out, String canonical, List entry) {
     contribution that the interface grammar cannot spell is reported as an
     `emit` diagnostic.
 */
-String interface_text(Compiler compiler) {
+String interface_text(Compiler compiler, List selected) {
   if (!x2c_compiler_identity()) return NULL;
   String canonical = _canonical_path(compiler.filename);
   Var cached = _process_cache()[canonical];
   if (cached is void) return NULL;
   Buffer out = $auto(Buffer.new(0));
-  if (!_write_interface_entry(out, canonical, cached))
+  if (!_write_interface_entry(out, canonical, cached, selected))
     compiler.report_error(
       <emit>, "failed to write interface file", NULL, NULL);
   return out;

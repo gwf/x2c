@@ -1183,7 +1183,9 @@ binding, so the nested macro can read and assign it.
 A `struct`, `union`, or `enum` tag that a body defines or declares is private
 to each expansion, like a typedef, and so are the enumerators it lists. Tags
 are a separate namespace, so `struct tm tm;` names the outside tag and a
-private variable. A tag the body only references keeps its outside meaning.
+private variable. Declarations in nested blocks may shadow same-spelled body
+locals and tags; references use the nearest lexical declaration. A tag the
+body only references keeps its outside meaning.
 To publish a tag, spell it
 through a `Name` hole or `x2c.ident`:
 
@@ -1546,11 +1548,8 @@ Marking a function `meta` has three consequences.
   time, unless it reaches a compiler query, an explicit dollar-prefixed meta
   call or a source-template constructor, directly or through another meta
   function. Such a function has no runtime form and none is emitted for it.
-- An ordinary call may be folded only for a locally installed eligible
-  definition, available constant arguments matching the parameter types, and
-  a representable scalar, String, Symbol, immutable List or boxed result.
-  Mutable container, callable and native-address results remain calls.
-  This optimization is separate from explicit evaluation and result insertion.
+- A call without `$` always calls the emitted function, even with constant
+  arguments.
 
 A dollar-prefixed function call requires compile-time evaluation. Arguments
 may compute values from other resolvable values and meta calls; unresolved
@@ -1586,7 +1585,7 @@ string literals, Symbols, identifiers
 and nonempty expression-code Lists. It does not directly materialize mutable
 collections, callable values or evaluator addresses. This boundary does not limit internal
 returns to `int`; see
-[results](../guide/meta-functions.md#results-compute-insert-or-fold).
+[results](../guide/meta-functions.md#results-compute-or-insert).
 
 Compile-time objects belong to the evaluator. Ordinary dual-form meta
 functions reject file-scope state because the program's initializers and
@@ -2146,6 +2145,9 @@ Use an owner that outlives every use of the stored value. Failed initialization
 retains the reserved address; the next attempt starts with zeroed storage.
 Only successful initialization publishes the value, and retry does not change
 referent ownership.
+
+A function-local static has no compile-time lowering; a meta function that
+declares one declines.
 
 A `goto` or switch dispatch cannot bypass a runtime static declaration and
 enter its remaining block. Put the declaration before the switch, or put it
@@ -3229,14 +3231,13 @@ the caret width.
 
 ### Region warnings
 
-Three codes come from the region check described in
+Two codes come from the region check described in
 [Scopes and Lifetime](../guide/memory.md#warnings-when-a-value-outlives-its-region).
 Each is a warning: translation continues and the program still compiles.
 
 | Code | Reported for |
 | --- | --- |
 | `region` | A value allocated inside a region is reachable after the region ends. The message gives the way the value leaves, and the note gives the line that opened the region. |
-| `unbalanced` | A region has no matching release in the block that opened it. |
 | `after-free` | A local is read after `Scope.free` or `Array.list_free` consumed it. |
 
 The check analyzes regions lexically and summarizes each function within its

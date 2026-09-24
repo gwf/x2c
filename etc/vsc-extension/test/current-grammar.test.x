@@ -52,6 +52,23 @@ protocol Var(ArrayString) tag <arraystr>;
 //                        ^^^ keyword.declaration.protocol.x2c
 static protocol Prepared(LocalPlan);
 //     ^^^^^^^^ keyword.declaration.protocol.x2c
+meta protocol Iter(List);
+// <- storage.modifier.meta.x2c
+//   ^^^^^^^^ keyword.declaration.protocol.x2c
+meta static protocol Prepared(Plan);
+// <- storage.modifier.meta.x2c
+//          ^^^^^^^^ keyword.declaration.protocol.x2c
+meta static int compile_only(void);
+// <- storage.modifier.meta.x2c
+int meta = 0;
+//  ^^^^ - storage.modifier.meta.x2c
+typedef int meta;
+meta value;
+// <- - storage.modifier.meta.x2c
+meta();
+// <- - storage.modifier.meta.x2c
+meta = 1;
+// <- - storage.modifier.meta.x2c
 
   delegate Reader reader;
 //^^^^^^^^ storage.modifier.x2c

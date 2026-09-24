@@ -88,7 +88,7 @@ static int _init_guard_ = 0;
 
 static inline Var LogTextSink_var(LogTextSink _x2c_macro_value_0);
 
-static inline LogTextSink Var_logtextsink(Var _x2c_macro_value_0);
+static inline LogTextSink Var_logtextsink(Var _x2c_macro_value_1);
 
 static Logger global_logger, default_logger;
 
@@ -285,8 +285,8 @@ static inline Var LogTextSink_var(LogTextSink _x2c_macro_value_0){
 
 void * Var_pointer(Var);
 
-static inline LogTextSink Var_logtextsink(Var _x2c_macro_value_0){
-  return Var_pointer(_x2c_macro_value_0);
+static inline LogTextSink Var_logtextsink(Var _x2c_macro_value_1){
+  return Var_pointer(_x2c_macro_value_1);
 }
 
 static void _mutex_initialize(void){

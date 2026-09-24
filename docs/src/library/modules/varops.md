@@ -202,28 +202,28 @@ Source: `lib/varops.x:528`
 
 | Function | Summary |
 | --- | --- |
-| [`x2c_var_update_f32`](#x2c_var_update_f32) | Applies a dynamic compound `op` to a native `float` lvalue. |
-| [`x2c_var_update_f64`](#x2c_var_update_f64) | Applies a dynamic compound `op` to a native `double` lvalue. |
-| [`x2c_var_update_i16`](#x2c_var_update_i16) | Applies a dynamic compound `op` to a native `short` lvalue. |
-| [`x2c_var_update_i32`](#x2c_var_update_i32) | Applies a dynamic compound `op` to a native `int` lvalue. |
-| [`x2c_var_update_i8`](#x2c_var_update_i8) | Applies a dynamic compound `op` to a native `char` lvalue. |
-| [`x2c_var_update_long`](#x2c_var_update_long) | Applies a dynamic compound `op` to a native `long` lvalue. |
-| [`x2c_var_update_long_double`](#x2c_var_update_long_double) | Applies a dynamic compound `op` to a native `long double` lvalue. |
-| [`x2c_var_update_long_long`](#x2c_var_update_long_long) | Applies a dynamic compound `op` to a native `long long` lvalue. |
-| [`x2c_var_update_schar`](#x2c_var_update_schar) | Applies a dynamic compound `op` to a native `signed char` lvalue. |
-| [`x2c_var_update_u16`](#x2c_var_update_u16) | Applies a dynamic compound `op` to a native `ushort` lvalue. |
-| [`x2c_var_update_u32`](#x2c_var_update_u32) | Applies a dynamic compound `op` to a native `uint` lvalue. |
-| [`x2c_var_update_u8`](#x2c_var_update_u8) | Applies a dynamic compound `op` to a native `uchar` lvalue. |
-| [`x2c_var_update_ulong`](#x2c_var_update_ulong) | Applies a dynamic compound `op` to a native `ulong` lvalue. |
-| [`x2c_var_update_ulong_long`](#x2c_var_update_ulong_long) | Applies a dynamic compound `op` to a native `unsigned long long` lvalue. |
+| [`x2c_var_update_f32`](#x2c_var_update_f32) | Applies a dynamic compound `op` to a native `$type` lvalue. |
+| [`x2c_var_update_f64`](#x2c_var_update_f64) | Applies a dynamic compound `op` to a native `$type` lvalue. |
+| [`x2c_var_update_i16`](#x2c_var_update_i16) | Applies a dynamic compound `op` to a native `$type` lvalue. |
+| [`x2c_var_update_i32`](#x2c_var_update_i32) | Applies a dynamic compound `op` to a native `$type` lvalue. |
+| [`x2c_var_update_i8`](#x2c_var_update_i8) | Applies a dynamic compound `op` to a native `$type` lvalue. |
+| [`x2c_var_update_long`](#x2c_var_update_long) | Applies a dynamic compound `op` to a native `$type` lvalue. |
+| [`x2c_var_update_long_double`](#x2c_var_update_long_double) | Applies a dynamic compound `op` to a native `$type` lvalue. |
+| [`x2c_var_update_long_long`](#x2c_var_update_long_long) | Applies a dynamic compound `op` to a native `$type` lvalue. |
+| [`x2c_var_update_schar`](#x2c_var_update_schar) | Applies a dynamic compound `op` to a native `$type` lvalue. |
+| [`x2c_var_update_u16`](#x2c_var_update_u16) | Applies a dynamic compound `op` to a native `$type` lvalue. |
+| [`x2c_var_update_u32`](#x2c_var_update_u32) | Applies a dynamic compound `op` to a native `$type` lvalue. |
+| [`x2c_var_update_u8`](#x2c_var_update_u8) | Applies a dynamic compound `op` to a native `$type` lvalue. |
+| [`x2c_var_update_ulong`](#x2c_var_update_ulong) | Applies a dynamic compound `op` to a native `$type` lvalue. |
+| [`x2c_var_update_ulong_long`](#x2c_var_update_ulong_long) | Applies a dynamic compound `op` to a native `$type` lvalue. |
 
 ### Functions
 
 #### x2c_var_update_f32
 
-`float x2c_var_update_f32( volatile float *lhs, Symbol op, Var rhs)`
+`float x2c_var_update_f32(volatile float *lhs, Symbol op, Var rhs)`
 
-Applies a dynamic compound `op` to a native `float` lvalue.
+Applies a dynamic compound `op` to a native `$type` lvalue.
 The current value is boxed in its declared family, combined with `rhs`,
 converted back to that family, and stored only after all steps succeed.
 Returns the stored native value. This is failure-atomic but provides no
@@ -232,15 +232,15 @@ thread synchronization despite accepting a volatile pointer.
 **Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
 `Var.convert`, or wide boxing. A transferring failure leaves the lvalue
 unchanged. If a delegated protocol operation returns `void`, the helper
-also leaves it unchanged and returns the native zero for `float`.
+also leaves it unchanged and returns the native zero for `$type`.
 
 Source: `lib/varops.x:87`
 
 #### x2c_var_update_f64
 
-`double x2c_var_update_f64( volatile double *lhs, Symbol op, Var rhs)`
+`double x2c_var_update_f64(volatile double *lhs, Symbol op, Var rhs)`
 
-Applies a dynamic compound `op` to a native `double` lvalue.
+Applies a dynamic compound `op` to a native `$type` lvalue.
 The current value is boxed in its declared family, combined with `rhs`,
 converted back to that family, and stored only after all steps succeed.
 Returns the stored native value. This is failure-atomic but provides no
@@ -249,15 +249,15 @@ thread synchronization despite accepting a volatile pointer.
 **Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
 `Var.convert`, or wide boxing. A transferring failure leaves the lvalue
 unchanged. If a delegated protocol operation returns `void`, the helper
-also leaves it unchanged and returns the native zero for `double`.
+also leaves it unchanged and returns the native zero for `$type`.
 
 Source: `lib/varops.x:88`
 
 #### x2c_var_update_i16
 
-`short x2c_var_update_i16( volatile short *lhs, Symbol op, Var rhs)`
+`short x2c_var_update_i16(volatile short *lhs, Symbol op, Var rhs)`
 
-Applies a dynamic compound `op` to a native `short` lvalue.
+Applies a dynamic compound `op` to a native `$type` lvalue.
 The current value is boxed in its declared family, combined with `rhs`,
 converted back to that family, and stored only after all steps succeed.
 Returns the stored native value. This is failure-atomic but provides no
@@ -266,15 +266,15 @@ thread synchronization despite accepting a volatile pointer.
 **Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
 `Var.convert`, or wide boxing. A transferring failure leaves the lvalue
 unchanged. If a delegated protocol operation returns `void`, the helper
-also leaves it unchanged and returns the native zero for `short`.
+also leaves it unchanged and returns the native zero for `$type`.
 
 Source: `lib/varops.x:79`
 
 #### x2c_var_update_i32
 
-`int x2c_var_update_i32( volatile int *lhs, Symbol op, Var rhs)`
+`int x2c_var_update_i32(volatile int *lhs, Symbol op, Var rhs)`
 
-Applies a dynamic compound `op` to a native `int` lvalue.
+Applies a dynamic compound `op` to a native `$type` lvalue.
 The current value is boxed in its declared family, combined with `rhs`,
 converted back to that family, and stored only after all steps succeed.
 Returns the stored native value. This is failure-atomic but provides no
@@ -283,15 +283,15 @@ thread synchronization despite accepting a volatile pointer.
 **Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
 `Var.convert`, or wide boxing. A transferring failure leaves the lvalue
 unchanged. If a delegated protocol operation returns `void`, the helper
-also leaves it unchanged and returns the native zero for `int`.
+also leaves it unchanged and returns the native zero for `$type`.
 
 Source: `lib/varops.x:81`
 
 #### x2c_var_update_i8
 
-`char x2c_var_update_i8( volatile char *lhs, Symbol op, Var rhs)`
+`char x2c_var_update_i8(volatile char *lhs, Symbol op, Var rhs)`
 
-Applies a dynamic compound `op` to a native `char` lvalue.
+Applies a dynamic compound `op` to a native `$type` lvalue.
 The current value is boxed in its declared family, combined with `rhs`,
 converted back to that family, and stored only after all steps succeed.
 Returns the stored native value. This is failure-atomic but provides no
@@ -300,15 +300,15 @@ thread synchronization despite accepting a volatile pointer.
 **Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
 `Var.convert`, or wide boxing. A transferring failure leaves the lvalue
 unchanged. If a delegated protocol operation returns `void`, the helper
-also leaves it unchanged and returns the native zero for `char`.
+also leaves it unchanged and returns the native zero for `$type`.
 
 Source: `lib/varops.x:76`
 
 #### x2c_var_update_long
 
-`long x2c_var_update_long( volatile long *lhs, Symbol op, Var rhs)`
+`long x2c_var_update_long(volatile long *lhs, Symbol op, Var rhs)`
 
-Applies a dynamic compound `op` to a native `long` lvalue.
+Applies a dynamic compound `op` to a native `$type` lvalue.
 The current value is boxed in its declared family, combined with `rhs`,
 converted back to that family, and stored only after all steps succeed.
 Returns the stored native value. This is failure-atomic but provides no
@@ -317,15 +317,15 @@ thread synchronization despite accepting a volatile pointer.
 **Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
 `Var.convert`, or wide boxing. A transferring failure leaves the lvalue
 unchanged. If a delegated protocol operation returns `void`, the helper
-also leaves it unchanged and returns the native zero for `long`.
+also leaves it unchanged and returns the native zero for `$type`.
 
 Source: `lib/varops.x:83`
 
 #### x2c_var_update_long_double
 
-`long double x2c_var_update_long_double( volatile long double *lhs, Symbol op, Var rhs)`
+`long double x2c_var_update_long_double(volatile long double *lhs, Symbol op, Var rhs)`
 
-Applies a dynamic compound `op` to a native `long double` lvalue.
+Applies a dynamic compound `op` to a native `$type` lvalue.
 The current value is boxed in its declared family, combined with `rhs`,
 converted back to that family, and stored only after all steps succeed.
 Returns the stored native value. This is failure-atomic but provides no
@@ -334,15 +334,15 @@ thread synchronization despite accepting a volatile pointer.
 **Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
 `Var.convert`, or wide boxing. A transferring failure leaves the lvalue
 unchanged. If a delegated protocol operation returns `void`, the helper
-also leaves it unchanged and returns the native zero for `long double`.
+also leaves it unchanged and returns the native zero for `$type`.
 
 Source: `lib/varops.x:89`
 
 #### x2c_var_update_long_long
 
-`long long x2c_var_update_long_long( volatile long long *lhs, Symbol op, Var rhs)`
+`long long x2c_var_update_long_long(volatile long long *lhs, Symbol op, Var rhs)`
 
-Applies a dynamic compound `op` to a native `long long` lvalue.
+Applies a dynamic compound `op` to a native `$type` lvalue.
 The current value is boxed in its declared family, combined with `rhs`,
 converted back to that family, and stored only after all steps succeed.
 Returns the stored native value. This is failure-atomic but provides no
@@ -351,15 +351,15 @@ thread synchronization despite accepting a volatile pointer.
 **Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
 `Var.convert`, or wide boxing. A transferring failure leaves the lvalue
 unchanged. If a delegated protocol operation returns `void`, the helper
-also leaves it unchanged and returns the native zero for `long long`.
+also leaves it unchanged and returns the native zero for `$type`.
 
 Source: `lib/varops.x:85`
 
 #### x2c_var_update_schar
 
-`signed char x2c_var_update_schar( volatile signed char *lhs, Symbol op, Var rhs)`
+`signed char x2c_var_update_schar(volatile signed char *lhs, Symbol op, Var rhs)`
 
-Applies a dynamic compound `op` to a native `signed char` lvalue.
+Applies a dynamic compound `op` to a native `$type` lvalue.
 The current value is boxed in its declared family, combined with `rhs`,
 converted back to that family, and stored only after all steps succeed.
 Returns the stored native value. This is failure-atomic but provides no
@@ -368,15 +368,15 @@ thread synchronization despite accepting a volatile pointer.
 **Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
 `Var.convert`, or wide boxing. A transferring failure leaves the lvalue
 unchanged. If a delegated protocol operation returns `void`, the helper
-also leaves it unchanged and returns the native zero for `signed char`.
+also leaves it unchanged and returns the native zero for `$type`.
 
 Source: `lib/varops.x:77`
 
 #### x2c_var_update_u16
 
-`ushort x2c_var_update_u16( volatile ushort *lhs, Symbol op, Var rhs)`
+`ushort x2c_var_update_u16(volatile ushort *lhs, Symbol op, Var rhs)`
 
-Applies a dynamic compound `op` to a native `ushort` lvalue.
+Applies a dynamic compound `op` to a native `$type` lvalue.
 The current value is boxed in its declared family, combined with `rhs`,
 converted back to that family, and stored only after all steps succeed.
 Returns the stored native value. This is failure-atomic but provides no
@@ -385,15 +385,15 @@ thread synchronization despite accepting a volatile pointer.
 **Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
 `Var.convert`, or wide boxing. A transferring failure leaves the lvalue
 unchanged. If a delegated protocol operation returns `void`, the helper
-also leaves it unchanged and returns the native zero for `ushort`.
+also leaves it unchanged and returns the native zero for `$type`.
 
 Source: `lib/varops.x:80`
 
 #### x2c_var_update_u32
 
-`uint x2c_var_update_u32( volatile uint *lhs, Symbol op, Var rhs)`
+`uint x2c_var_update_u32(volatile uint *lhs, Symbol op, Var rhs)`
 
-Applies a dynamic compound `op` to a native `uint` lvalue.
+Applies a dynamic compound `op` to a native `$type` lvalue.
 The current value is boxed in its declared family, combined with `rhs`,
 converted back to that family, and stored only after all steps succeed.
 Returns the stored native value. This is failure-atomic but provides no
@@ -402,15 +402,15 @@ thread synchronization despite accepting a volatile pointer.
 **Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
 `Var.convert`, or wide boxing. A transferring failure leaves the lvalue
 unchanged. If a delegated protocol operation returns `void`, the helper
-also leaves it unchanged and returns the native zero for `uint`.
+also leaves it unchanged and returns the native zero for `$type`.
 
 Source: `lib/varops.x:82`
 
 #### x2c_var_update_u8
 
-`uchar x2c_var_update_u8( volatile uchar *lhs, Symbol op, Var rhs)`
+`uchar x2c_var_update_u8(volatile uchar *lhs, Symbol op, Var rhs)`
 
-Applies a dynamic compound `op` to a native `uchar` lvalue.
+Applies a dynamic compound `op` to a native `$type` lvalue.
 The current value is boxed in its declared family, combined with `rhs`,
 converted back to that family, and stored only after all steps succeed.
 Returns the stored native value. This is failure-atomic but provides no
@@ -419,15 +419,15 @@ thread synchronization despite accepting a volatile pointer.
 **Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
 `Var.convert`, or wide boxing. A transferring failure leaves the lvalue
 unchanged. If a delegated protocol operation returns `void`, the helper
-also leaves it unchanged and returns the native zero for `uchar`.
+also leaves it unchanged and returns the native zero for `$type`.
 
 Source: `lib/varops.x:78`
 
 #### x2c_var_update_ulong
 
-`ulong x2c_var_update_ulong( volatile ulong *lhs, Symbol op, Var rhs)`
+`ulong x2c_var_update_ulong(volatile ulong *lhs, Symbol op, Var rhs)`
 
-Applies a dynamic compound `op` to a native `ulong` lvalue.
+Applies a dynamic compound `op` to a native `$type` lvalue.
 The current value is boxed in its declared family, combined with `rhs`,
 converted back to that family, and stored only after all steps succeed.
 Returns the stored native value. This is failure-atomic but provides no
@@ -436,15 +436,15 @@ thread synchronization despite accepting a volatile pointer.
 **Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
 `Var.convert`, or wide boxing. A transferring failure leaves the lvalue
 unchanged. If a delegated protocol operation returns `void`, the helper
-also leaves it unchanged and returns the native zero for `ulong`.
+also leaves it unchanged and returns the native zero for `$type`.
 
 Source: `lib/varops.x:84`
 
 #### x2c_var_update_ulong_long
 
-`unsigned long long x2c_var_update_ulong_long( volatile unsigned long long *lhs, Symbol op, Var rhs)`
+`unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)`
 
-Applies a dynamic compound `op` to a native `unsigned long long` lvalue.
+Applies a dynamic compound `op` to a native `$type` lvalue.
 The current value is boxed in its declared family, combined with `rhs`,
 converted back to that family, and stored only after all steps succeed.
 Returns the stored native value. This is failure-atomic but provides no
@@ -453,7 +453,7 @@ thread synchronization despite accepting a volatile pointer.
 **Raises:** `<bad-arg>` for a null lvalue, or any cause from `Var.binary`,
 `Var.convert`, or wide boxing. A transferring failure leaves the lvalue
 unchanged. If a delegated protocol operation returns `void`, the helper
-also leaves it unchanged and returns the native zero for `unsigned long long`.
+also leaves it unchanged and returns the native zero for `$type`.
 
 Source: `lib/varops.x:86`
 

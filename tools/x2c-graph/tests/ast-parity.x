@@ -8,6 +8,7 @@ int main(int argc, char **argv) {
   CliRequest request = Scope.calloc(1, sizeof(struct CliRequest));
   request.command = <translate>;
   Frontend frontend = Frontend.new(request);
+  if (!frontend.preload_macro_libraries()) return 1;
   Context command = Context.open_isolated_named("AST parity command");
   ParsedUnit parsed;
   if (!frontend.open(String.new(argv[1]), &parsed)) {

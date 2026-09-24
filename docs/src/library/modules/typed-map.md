@@ -321,7 +321,7 @@ Source: `lib/typed-map.x:280`
 `int MapIntInt.getindex(MapIntInt map, int key)`
 
 Returns the value selected by bracket indexing.
-This is the bracket-facing form of `MapIntInt.get`, with the same failure
+This is the bracket-facing form of `$map.get`, with the same failure
 behavior.
 
 Source: `lib/typed-map.x:280`
@@ -480,7 +480,7 @@ Source: `lib/typed-map.x:280`
 `int MapIntInt.setindex(MapIntInt map, int key, int val)`
 
 Stores `val` under `key` and returns `val`.
-This is the bracket-facing form of `MapIntInt.set`, with the same cursor
+This is the bracket-facing form of `$map.set`, with the same cursor
 invalidation and failure behavior.
 
 Source: `lib/typed-map.x:280`
@@ -698,7 +698,7 @@ Source: `lib/typed-map.x:300`
 `double MapLongDouble.getindex(MapLongDouble map, long key)`
 
 Returns the value selected by bracket indexing.
-This is the bracket-facing form of `MapLongDouble.get`, with the same failure
+This is the bracket-facing form of `$map.get`, with the same failure
 behavior.
 
 Source: `lib/typed-map.x:300`
@@ -857,7 +857,7 @@ Source: `lib/typed-map.x:300`
 `double MapLongDouble.setindex(MapLongDouble map, long key, double val)`
 
 Stores `val` under `key` and returns `val`.
-This is the bracket-facing form of `MapLongDouble.set`, with the same cursor
+This is the bracket-facing form of `$map.set`, with the same cursor
 invalidation and failure behavior.
 
 Source: `lib/typed-map.x:300`
@@ -1075,7 +1075,7 @@ Source: `lib/typed-map.x:358`
 `int MapStringInt.getindex(MapStringInt map, String key)`
 
 Returns the value selected by bracket indexing.
-This is the bracket-facing form of `MapStringInt.get`, with the same failure
+This is the bracket-facing form of `$map.get`, with the same failure
 behavior.
 
 Source: `lib/typed-map.x:358`
@@ -1234,7 +1234,7 @@ Source: `lib/typed-map.x:358`
 `int MapStringInt.setindex(MapStringInt map, String key, int val)`
 
 Stores `val` under `key` and returns `val`.
-This is the bracket-facing form of `MapStringInt.set`, with the same cursor
+This is the bracket-facing form of `$map.set`, with the same cursor
 invalidation and failure behavior.
 
 Source: `lib/typed-map.x:358`
@@ -1452,7 +1452,7 @@ Source: `lib/typed-map.x:321`
 `String MapStringString.getindex(MapStringString map, String key)`
 
 Returns the value selected by bracket indexing.
-This is the bracket-facing form of `MapStringString.get`, with the same failure
+This is the bracket-facing form of `$map.get`, with the same failure
 behavior.
 
 Source: `lib/typed-map.x:321`
@@ -1611,7 +1611,7 @@ Source: `lib/typed-map.x:321`
 `String MapStringString.setindex(MapStringString map, String key, String val)`
 
 Stores `val` under `key` and returns `val`.
-This is the bracket-facing form of `MapStringString.set`, with the same cursor
+This is the bracket-facing form of `$map.set`, with the same cursor
 invalidation and failure behavior.
 
 Source: `lib/typed-map.x:321`

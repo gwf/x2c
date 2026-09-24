@@ -63,9 +63,9 @@ int direct_function(int value){
   return value + DIRECT_KIND;
 }
 
-int generated_function(int _x2c_macro_value_0){
+int generated_function(int _x2c_macro_value_2){
   if(! _init_guard_) _file_init_();
-  return _x2c_macro_value_0 + 3;
+  return _x2c_macro_value_2 + 3;
 }
 
 int main(void){

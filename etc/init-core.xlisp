@@ -144,6 +144,23 @@
 (def Var_str str)
 (defun List_var (v) v)
 
+// These callbacks run before the Func runtime is installed.
+(defun filter (keep values)
+  (if (equal? values nil) values
+      ((lambda (value)
+         (if (equal? (keep value) nil)
+             (filter keep (List_cdr values))
+             (Var_cons value (filter keep (List_cdr values)))))
+       (List_car values))))
+(defun map (procedure values)
+  (if (equal? values nil) values
+      (Var_cons (procedure (List_car values))
+                (map procedure (List_cdr values)))))
+(defun foldl (procedure initial values)
+  (if (equal? values nil) initial
+      (foldl procedure (procedure initial (List_car values))
+             (List_cdr values))))
+
 // Generated algorithms belong here.
 
 (def not init_not)

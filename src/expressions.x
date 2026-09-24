@@ -1537,9 +1537,6 @@ static List _finish_call(
     }
   if (!result_type) result_type = applied;
   compiler.check_meta_call(callee, origin);
-  List folded = compiler.fold_meta_call(
-    callee, callee_type, result_type, arguments);
-  if (folded) return folded;
   callee = _discarding_callee(compiler, callee, callee_type, arguments);
   return %(expr $result_type
            (call $callee (args @arguments)));
@@ -1661,6 +1658,56 @@ static List _resolve_func_call(
     expr ("Var")
       (parens (block @{locals.list_free()} (stmnt $call)))
   );
+}
+
+static List _func_call_arguments(List body) {
+  Array parts = $auto([]);
+  match (body.car())
+    case %(declare ("Func") (bindings (op = (bind ? ()) ?callee))):
+      parts.push(callee);
+  if (!parts.len()) return NULL;
+  List rest = body.cdr();
+  for (; rest && rest.cdr(); rest = rest.cdr())
+    match (rest.car())
+      case %(if ?
+        (stmnt (expr ("FuncArg") (op = ?
+          (expr ("FuncArg")
+            (call (expr ? (ident (binding ? "FuncArg_reference")))
+                  (args ?address ?source))))))
+        (stmnt (expr ("FuncArg") (op = ? ?boxed)))): {
+        Var value = void;
+        match (boxed)
+          case %(expr ("FuncArg")
+                 (call (expr ? (ident (binding ? "FuncArg_value")))
+                       (args ?boxed_value))):
+            value = boxed_value;
+        parts.push(%(func-arg $value $address $source));
+      }
+  if (!rest) return NULL;
+  match (rest.car())
+    case %(stmnt (expr ?
+                  (call (expr ? (ident (binding ? "Func_apply")))
+                        (args ? (expr ? (literal ? ?(String count))) ?)))): {
+      long arity;
+      if (!count.try_long(&arity) || arity != parts.len() - 1) return NULL;
+      return parts;
+    }
+  return NULL;
+}
+
+/** Returns the callee and arguments of a typed `Func` call, or NULL for any
+    other expression. Each argument is `(func-arg value address source)`: the
+    argument boxed as a Var, or void when it has no Var form; its address or
+    NULL; and its type. */
+List Compiler.func_call_parts(Compiler compiler, Var content) {
+  match (content) {
+    case %(parens (block *body)): return _func_call_arguments(body);
+    case %(call (expr ? (ident (binding ? "Func_apply")))
+                (args ?callee (expr ? (literal ? "0"))
+                      (expr ? (ident (binding ? "NULL"))))):
+      return %($callee);
+  }
+  return NULL;
 }
 
 /* The function being defined may be the implicit crossing itself, as a

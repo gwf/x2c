@@ -27,7 +27,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayChar.find`](#ArrayChar.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayChar.getindex`](#ArrayChar.getindex) | Returns the element at raw `index` with no bounds or null check. |
 | [`ArrayChar.getslice`](#ArrayChar.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayChar.indexof`](#ArrayChar.indexof) | Returns the same first-match index as `ArrayChar.find`. |
+| [`ArrayChar.indexof`](#ArrayChar.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayChar.insert`](#ArrayChar.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayChar.iter`](#ArrayChar.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayChar.new`](#ArrayChar.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -62,7 +62,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayDbl.find`](#ArrayDbl.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayDbl.getindex`](#ArrayDbl.getindex) | Returns the element at raw `index` with no bounds or null check. |
 | [`ArrayDbl.getslice`](#ArrayDbl.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayDbl.indexof`](#ArrayDbl.indexof) | Returns the same first-match index as `ArrayDbl.find`. |
+| [`ArrayDbl.indexof`](#ArrayDbl.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayDbl.insert`](#ArrayDbl.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayDbl.iter`](#ArrayDbl.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayDbl.new`](#ArrayDbl.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -97,7 +97,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayFloat.find`](#ArrayFloat.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayFloat.getindex`](#ArrayFloat.getindex) | Returns the element at raw `index` with no bounds or null check. |
 | [`ArrayFloat.getslice`](#ArrayFloat.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayFloat.indexof`](#ArrayFloat.indexof) | Returns the same first-match index as `ArrayFloat.find`. |
+| [`ArrayFloat.indexof`](#ArrayFloat.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayFloat.insert`](#ArrayFloat.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayFloat.iter`](#ArrayFloat.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayFloat.new`](#ArrayFloat.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -132,7 +132,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayInt.find`](#ArrayInt.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayInt.getindex`](#ArrayInt.getindex) | Returns the element at raw `index` with no bounds or null check. |
 | [`ArrayInt.getslice`](#ArrayInt.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayInt.indexof`](#ArrayInt.indexof) | Returns the same first-match index as `ArrayInt.find`. |
+| [`ArrayInt.indexof`](#ArrayInt.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayInt.insert`](#ArrayInt.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayInt.iter`](#ArrayInt.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayInt.new`](#ArrayInt.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -167,7 +167,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayLong.find`](#ArrayLong.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayLong.getindex`](#ArrayLong.getindex) | Returns the element at raw `index` with no bounds or null check. |
 | [`ArrayLong.getslice`](#ArrayLong.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayLong.indexof`](#ArrayLong.indexof) | Returns the same first-match index as `ArrayLong.find`. |
+| [`ArrayLong.indexof`](#ArrayLong.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayLong.insert`](#ArrayLong.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayLong.iter`](#ArrayLong.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayLong.new`](#ArrayLong.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -202,7 +202,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayShort.find`](#ArrayShort.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayShort.getindex`](#ArrayShort.getindex) | Returns the element at raw `index` with no bounds or null check. |
 | [`ArrayShort.getslice`](#ArrayShort.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayShort.indexof`](#ArrayShort.indexof) | Returns the same first-match index as `ArrayShort.find`. |
+| [`ArrayShort.indexof`](#ArrayShort.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayShort.insert`](#ArrayShort.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayShort.iter`](#ArrayShort.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayShort.new`](#ArrayShort.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -237,7 +237,7 @@ Packed typed `Array`s generated from shared methods.
 | [`ArrayString.find`](#ArrayString.find) | Returns the first index whose native element equals `value`, or -1. |
 | [`ArrayString.getindex`](#ArrayString.getindex) | Returns the element at raw `index` with no bounds or null check. |
 | [`ArrayString.getslice`](#ArrayString.getslice) | Returns a fresh packed array for normalized `[start:end:step]`. |
-| [`ArrayString.indexof`](#ArrayString.indexof) | Returns the same first-match index as `ArrayString.find`. |
+| [`ArrayString.indexof`](#ArrayString.indexof) | Returns the same first-match index as `$array.find`. |
 | [`ArrayString.insert`](#ArrayString.insert) | Inserts `value` at normalized `index` and returns it. |
 | [`ArrayString.iter`](#ArrayString.iter) | Initializes `dest` to lazily yield boxed elements in index order. |
 | [`ArrayString.new`](#ArrayString.new) | Returns a fresh empty packed array owned by the current `Scope`. |
@@ -372,7 +372,7 @@ Source: `lib/typed-array.x:107`
 <a id="ArrayChar.block"></a>
 #### ArrayChar.block
 
-`inline Block ArrayChar.block(ArrayChar array)`
+`Block ArrayChar.block(ArrayChar array)`
 
 Views `array` as the same underlying `Block` storage.
 
@@ -391,7 +391,7 @@ Source: `lib/typed-array.x:107`
 <a id="ArrayChar.concat"></a>
 #### ArrayChar.concat
 
-`Self ArrayChar.concat(Self a, Self b)`
+`ArrayChar ArrayChar.concat(ArrayChar a, ArrayChar b)`
 
 Returns a fresh array holding `a` followed by `b`.
 Neither input is modified. A null `a` returns NULL, while a null `b`
@@ -416,7 +416,7 @@ Source: `lib/typed-array.x:106`
 <a id="ArrayChar.copy"></a>
 #### ArrayChar.copy
 
-`Self ArrayChar.copy(Self array)`
+`ArrayChar ArrayChar.copy(ArrayChar array)`
 
 Returns a fresh packed copy, or NULL for a null array.
 The result has independent mutable storage containing the same stored
@@ -465,7 +465,7 @@ Source: `lib/typed-array.x:106`
 <a id="ArrayChar.getindex"></a>
 #### ArrayChar.getindex
 
-`inline char ArrayChar.getindex(ArrayChar array, int index)`
+`char ArrayChar.getindex(ArrayChar array, int index)`
 
 Returns the element at raw `index` with no bounds or null check.
 Negative indices are not normalized, and an invalid index has the same
@@ -476,7 +476,7 @@ Source: `lib/typed-array.x:106`
 <a id="ArrayChar.getslice"></a>
 #### ArrayChar.getslice
 
-`Self ArrayChar.getslice(Self array, int start, int end, int step)`
+`ArrayChar ArrayChar.getslice(ArrayChar array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
 Negative bounds count from the end and a negative step walks backward.
@@ -491,7 +491,7 @@ Source: `lib/typed-array.x:106`
 
 `int ArrayChar.indexof(ArrayChar array, char value)`
 
-Returns the same first-match index as `ArrayChar.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:106`
 
@@ -542,7 +542,7 @@ Source: `lib/typed-array.x:106`
 <a id="ArrayChar.postfixindex"></a>
 #### ArrayChar.postfixindex
 
-`inline char ArrayChar.postfixindex(ArrayChar array, int index, Symbol op)`
+`char ArrayChar.postfixindex(ArrayChar array, int index, Symbol op)`
 
 Applies `++` or `--` at raw `index` and returns the previous value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -579,7 +579,7 @@ Source: `lib/typed-array.x:106`
 <a id="ArrayChar.remslice"></a>
 #### ArrayChar.remslice
 
-`Self ArrayChar.remslice(Self array, int start, int end)`
+`ArrayChar ArrayChar.remslice(ArrayChar array, int start, int end)`
 
 Removes the region `array[start:end]` and returns a fresh packed array.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -602,7 +602,7 @@ Source: `lib/typed-array.x:107`
 <a id="ArrayChar.reverse"></a>
 #### ArrayChar.reverse
 
-`Self ArrayChar.reverse(Self array)`
+`ArrayChar ArrayChar.reverse(ArrayChar array)`
 
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
@@ -612,7 +612,7 @@ Source: `lib/typed-array.x:106`
 <a id="ArrayChar.setindex"></a>
 #### ArrayChar.setindex
 
-`inline char ArrayChar.setindex(ArrayChar array, int index, char value)`
+`char ArrayChar.setindex(ArrayChar array, int index, char value)`
 
 Stores and returns `value` at raw `index` with no bounds or null check.
 Negative indices are not normalized, and an invalid index has the same
@@ -623,7 +623,7 @@ Source: `lib/typed-array.x:106`
 <a id="ArrayChar.setslice"></a>
 #### ArrayChar.setslice
 
-`Self ArrayChar.setslice(Self array, int start, int end, Self values)`
+`ArrayChar ArrayChar.setslice(ArrayChar array, int start, int end, ArrayChar values)`
 
 Replaces the region `array[start:end]` and returns `array`.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -653,7 +653,7 @@ Source: `lib/typed-array.x:106`
 <a id="ArrayChar.splice"></a>
 #### ArrayChar.splice
 
-`Self ArrayChar.splice(Self array, int index, int remove_count, Self values)`
+`ArrayChar ArrayChar.splice(ArrayChar array, int index, int remove_count, ArrayChar values)`
 
 Replaces `remove_count` values at normalized `index` and returns them.
 The result is a fresh packed array. A nonpositive count removes nothing;
@@ -737,7 +737,7 @@ Source: `lib/typed-array.x:106`
 <a id="ArrayChar.updateindex"></a>
 #### ArrayChar.updateindex
 
-`inline char ArrayChar.updateindex( ArrayChar array, int index, Symbol op, char rhs)`
+`char ArrayChar.updateindex(ArrayChar array, int index, Symbol op, char rhs)`
 
 Applies integer `op` to raw element `index` and returns the stored value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -752,7 +752,7 @@ Source: `lib/typed-array.x:110`
 <a id="ArrayChar.var"></a>
 #### ArrayChar.var
 
-`inline Var ArrayChar.var(ArrayChar array)`
+`Var ArrayChar.var(ArrayChar array)`
 
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
@@ -794,7 +794,7 @@ Source: `lib/typed-array.x:152`
 <a id="ArrayDbl.block"></a>
 #### ArrayDbl.block
 
-`inline Block ArrayDbl.block(ArrayDbl array)`
+`Block ArrayDbl.block(ArrayDbl array)`
 
 Views `array` as the same underlying `Block` storage.
 
@@ -813,7 +813,7 @@ Source: `lib/typed-array.x:152`
 <a id="ArrayDbl.concat"></a>
 #### ArrayDbl.concat
 
-`Self ArrayDbl.concat(Self a, Self b)`
+`ArrayDbl ArrayDbl.concat(ArrayDbl a, ArrayDbl b)`
 
 Returns a fresh array holding `a` followed by `b`.
 Neither input is modified. A null `a` returns NULL, while a null `b`
@@ -838,7 +838,7 @@ Source: `lib/typed-array.x:151`
 <a id="ArrayDbl.copy"></a>
 #### ArrayDbl.copy
 
-`Self ArrayDbl.copy(Self array)`
+`ArrayDbl ArrayDbl.copy(ArrayDbl array)`
 
 Returns a fresh packed copy, or NULL for a null array.
 The result has independent mutable storage containing the same stored
@@ -887,7 +887,7 @@ Source: `lib/typed-array.x:151`
 <a id="ArrayDbl.getindex"></a>
 #### ArrayDbl.getindex
 
-`inline double ArrayDbl.getindex(ArrayDbl array, int index)`
+`double ArrayDbl.getindex(ArrayDbl array, int index)`
 
 Returns the element at raw `index` with no bounds or null check.
 Negative indices are not normalized, and an invalid index has the same
@@ -898,7 +898,7 @@ Source: `lib/typed-array.x:151`
 <a id="ArrayDbl.getslice"></a>
 #### ArrayDbl.getslice
 
-`Self ArrayDbl.getslice(Self array, int start, int end, int step)`
+`ArrayDbl ArrayDbl.getslice(ArrayDbl array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
 Negative bounds count from the end and a negative step walks backward.
@@ -913,7 +913,7 @@ Source: `lib/typed-array.x:151`
 
 `int ArrayDbl.indexof(ArrayDbl array, double value)`
 
-Returns the same first-match index as `ArrayDbl.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:151`
 
@@ -964,7 +964,7 @@ Source: `lib/typed-array.x:151`
 <a id="ArrayDbl.postfixindex"></a>
 #### ArrayDbl.postfixindex
 
-`inline double ArrayDbl.postfixindex(ArrayDbl array, int index, Symbol op)`
+`double ArrayDbl.postfixindex(ArrayDbl array, int index, Symbol op)`
 
 Applies `++` or `--` at raw `index` and returns the previous value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -1001,7 +1001,7 @@ Source: `lib/typed-array.x:151`
 <a id="ArrayDbl.remslice"></a>
 #### ArrayDbl.remslice
 
-`Self ArrayDbl.remslice(Self array, int start, int end)`
+`ArrayDbl ArrayDbl.remslice(ArrayDbl array, int start, int end)`
 
 Removes the region `array[start:end]` and returns a fresh packed array.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -1024,7 +1024,7 @@ Source: `lib/typed-array.x:152`
 <a id="ArrayDbl.reverse"></a>
 #### ArrayDbl.reverse
 
-`Self ArrayDbl.reverse(Self array)`
+`ArrayDbl ArrayDbl.reverse(ArrayDbl array)`
 
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
@@ -1034,7 +1034,7 @@ Source: `lib/typed-array.x:151`
 <a id="ArrayDbl.setindex"></a>
 #### ArrayDbl.setindex
 
-`inline double ArrayDbl.setindex(ArrayDbl array, int index, double value)`
+`double ArrayDbl.setindex(ArrayDbl array, int index, double value)`
 
 Stores and returns `value` at raw `index` with no bounds or null check.
 Negative indices are not normalized, and an invalid index has the same
@@ -1045,7 +1045,7 @@ Source: `lib/typed-array.x:151`
 <a id="ArrayDbl.setslice"></a>
 #### ArrayDbl.setslice
 
-`Self ArrayDbl.setslice(Self array, int start, int end, Self values)`
+`ArrayDbl ArrayDbl.setslice(ArrayDbl array, int start, int end, ArrayDbl values)`
 
 Replaces the region `array[start:end]` and returns `array`.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -1075,7 +1075,7 @@ Source: `lib/typed-array.x:151`
 <a id="ArrayDbl.splice"></a>
 #### ArrayDbl.splice
 
-`Self ArrayDbl.splice(Self array, int index, int remove_count, Self values)`
+`ArrayDbl ArrayDbl.splice(ArrayDbl array, int index, int remove_count, ArrayDbl values)`
 
 Replaces `remove_count` values at normalized `index` and returns them.
 The result is a fresh packed array. A nonpositive count removes nothing;
@@ -1159,7 +1159,7 @@ Source: `lib/typed-array.x:151`
 <a id="ArrayDbl.updateindex"></a>
 #### ArrayDbl.updateindex
 
-`inline double ArrayDbl.updateindex( ArrayDbl array, int index, Symbol op, double rhs)`
+`double ArrayDbl.updateindex(ArrayDbl array, int index, Symbol op, double rhs)`
 
 Applies a floating arithmetic `op` and returns the stored value.
 The supported operators are `+`, `-`, `*`, and `/`; the raw index has
@@ -1172,7 +1172,7 @@ Source: `lib/typed-array.x:155`
 <a id="ArrayDbl.var"></a>
 #### ArrayDbl.var
 
-`inline Var ArrayDbl.var(ArrayDbl array)`
+`Var ArrayDbl.var(ArrayDbl array)`
 
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
@@ -1214,7 +1214,7 @@ Source: `lib/typed-array.x:143`
 <a id="ArrayFloat.block"></a>
 #### ArrayFloat.block
 
-`inline Block ArrayFloat.block(ArrayFloat array)`
+`Block ArrayFloat.block(ArrayFloat array)`
 
 Views `array` as the same underlying `Block` storage.
 
@@ -1233,7 +1233,7 @@ Source: `lib/typed-array.x:143`
 <a id="ArrayFloat.concat"></a>
 #### ArrayFloat.concat
 
-`Self ArrayFloat.concat(Self a, Self b)`
+`ArrayFloat ArrayFloat.concat(ArrayFloat a, ArrayFloat b)`
 
 Returns a fresh array holding `a` followed by `b`.
 Neither input is modified. A null `a` returns NULL, while a null `b`
@@ -1258,7 +1258,7 @@ Source: `lib/typed-array.x:142`
 <a id="ArrayFloat.copy"></a>
 #### ArrayFloat.copy
 
-`Self ArrayFloat.copy(Self array)`
+`ArrayFloat ArrayFloat.copy(ArrayFloat array)`
 
 Returns a fresh packed copy, or NULL for a null array.
 The result has independent mutable storage containing the same stored
@@ -1307,7 +1307,7 @@ Source: `lib/typed-array.x:142`
 <a id="ArrayFloat.getindex"></a>
 #### ArrayFloat.getindex
 
-`inline float ArrayFloat.getindex(ArrayFloat array, int index)`
+`float ArrayFloat.getindex(ArrayFloat array, int index)`
 
 Returns the element at raw `index` with no bounds or null check.
 Negative indices are not normalized, and an invalid index has the same
@@ -1318,7 +1318,7 @@ Source: `lib/typed-array.x:142`
 <a id="ArrayFloat.getslice"></a>
 #### ArrayFloat.getslice
 
-`Self ArrayFloat.getslice(Self array, int start, int end, int step)`
+`ArrayFloat ArrayFloat.getslice(ArrayFloat array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
 Negative bounds count from the end and a negative step walks backward.
@@ -1333,7 +1333,7 @@ Source: `lib/typed-array.x:142`
 
 `int ArrayFloat.indexof(ArrayFloat array, float value)`
 
-Returns the same first-match index as `ArrayFloat.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:142`
 
@@ -1384,7 +1384,7 @@ Source: `lib/typed-array.x:142`
 <a id="ArrayFloat.postfixindex"></a>
 #### ArrayFloat.postfixindex
 
-`inline float ArrayFloat.postfixindex(ArrayFloat array, int index, Symbol op)`
+`float ArrayFloat.postfixindex(ArrayFloat array, int index, Symbol op)`
 
 Applies `++` or `--` at raw `index` and returns the previous value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -1421,7 +1421,7 @@ Source: `lib/typed-array.x:142`
 <a id="ArrayFloat.remslice"></a>
 #### ArrayFloat.remslice
 
-`Self ArrayFloat.remslice(Self array, int start, int end)`
+`ArrayFloat ArrayFloat.remslice(ArrayFloat array, int start, int end)`
 
 Removes the region `array[start:end]` and returns a fresh packed array.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -1444,7 +1444,7 @@ Source: `lib/typed-array.x:143`
 <a id="ArrayFloat.reverse"></a>
 #### ArrayFloat.reverse
 
-`Self ArrayFloat.reverse(Self array)`
+`ArrayFloat ArrayFloat.reverse(ArrayFloat array)`
 
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
@@ -1454,7 +1454,7 @@ Source: `lib/typed-array.x:142`
 <a id="ArrayFloat.setindex"></a>
 #### ArrayFloat.setindex
 
-`inline float ArrayFloat.setindex(ArrayFloat array, int index, float value)`
+`float ArrayFloat.setindex(ArrayFloat array, int index, float value)`
 
 Stores and returns `value` at raw `index` with no bounds or null check.
 Negative indices are not normalized, and an invalid index has the same
@@ -1465,7 +1465,7 @@ Source: `lib/typed-array.x:142`
 <a id="ArrayFloat.setslice"></a>
 #### ArrayFloat.setslice
 
-`Self ArrayFloat.setslice(Self array, int start, int end, Self values)`
+`ArrayFloat ArrayFloat.setslice(ArrayFloat array, int start, int end, ArrayFloat values)`
 
 Replaces the region `array[start:end]` and returns `array`.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -1495,7 +1495,7 @@ Source: `lib/typed-array.x:142`
 <a id="ArrayFloat.splice"></a>
 #### ArrayFloat.splice
 
-`Self ArrayFloat.splice(Self array, int index, int remove_count, Self values)`
+`ArrayFloat ArrayFloat.splice(ArrayFloat array, int index, int remove_count, ArrayFloat values)`
 
 Replaces `remove_count` values at normalized `index` and returns them.
 The result is a fresh packed array. A nonpositive count removes nothing;
@@ -1579,7 +1579,7 @@ Source: `lib/typed-array.x:142`
 <a id="ArrayFloat.updateindex"></a>
 #### ArrayFloat.updateindex
 
-`inline float ArrayFloat.updateindex( ArrayFloat array, int index, Symbol op, float rhs)`
+`float ArrayFloat.updateindex(ArrayFloat array, int index, Symbol op, float rhs)`
 
 Applies a floating arithmetic `op` and returns the stored value.
 The supported operators are `+`, `-`, `*`, and `/`; the raw index has
@@ -1592,7 +1592,7 @@ Source: `lib/typed-array.x:146`
 <a id="ArrayFloat.var"></a>
 #### ArrayFloat.var
 
-`inline Var ArrayFloat.var(ArrayFloat array)`
+`Var ArrayFloat.var(ArrayFloat array)`
 
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
@@ -1634,7 +1634,7 @@ Source: `lib/typed-array.x:125`
 <a id="ArrayInt.block"></a>
 #### ArrayInt.block
 
-`inline Block ArrayInt.block(ArrayInt array)`
+`Block ArrayInt.block(ArrayInt array)`
 
 Views `array` as the same underlying `Block` storage.
 
@@ -1653,7 +1653,7 @@ Source: `lib/typed-array.x:125`
 <a id="ArrayInt.concat"></a>
 #### ArrayInt.concat
 
-`Self ArrayInt.concat(Self a, Self b)`
+`ArrayInt ArrayInt.concat(ArrayInt a, ArrayInt b)`
 
 Returns a fresh array holding `a` followed by `b`.
 Neither input is modified. A null `a` returns NULL, while a null `b`
@@ -1678,7 +1678,7 @@ Source: `lib/typed-array.x:124`
 <a id="ArrayInt.copy"></a>
 #### ArrayInt.copy
 
-`Self ArrayInt.copy(Self array)`
+`ArrayInt ArrayInt.copy(ArrayInt array)`
 
 Returns a fresh packed copy, or NULL for a null array.
 The result has independent mutable storage containing the same stored
@@ -1727,7 +1727,7 @@ Source: `lib/typed-array.x:124`
 <a id="ArrayInt.getindex"></a>
 #### ArrayInt.getindex
 
-`inline int ArrayInt.getindex(ArrayInt array, int index)`
+`int ArrayInt.getindex(ArrayInt array, int index)`
 
 Returns the element at raw `index` with no bounds or null check.
 Negative indices are not normalized, and an invalid index has the same
@@ -1738,7 +1738,7 @@ Source: `lib/typed-array.x:124`
 <a id="ArrayInt.getslice"></a>
 #### ArrayInt.getslice
 
-`Self ArrayInt.getslice(Self array, int start, int end, int step)`
+`ArrayInt ArrayInt.getslice(ArrayInt array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
 Negative bounds count from the end and a negative step walks backward.
@@ -1753,7 +1753,7 @@ Source: `lib/typed-array.x:124`
 
 `int ArrayInt.indexof(ArrayInt array, int value)`
 
-Returns the same first-match index as `ArrayInt.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:124`
 
@@ -1804,7 +1804,7 @@ Source: `lib/typed-array.x:124`
 <a id="ArrayInt.postfixindex"></a>
 #### ArrayInt.postfixindex
 
-`inline int ArrayInt.postfixindex(ArrayInt array, int index, Symbol op)`
+`int ArrayInt.postfixindex(ArrayInt array, int index, Symbol op)`
 
 Applies `++` or `--` at raw `index` and returns the previous value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -1841,7 +1841,7 @@ Source: `lib/typed-array.x:124`
 <a id="ArrayInt.remslice"></a>
 #### ArrayInt.remslice
 
-`Self ArrayInt.remslice(Self array, int start, int end)`
+`ArrayInt ArrayInt.remslice(ArrayInt array, int start, int end)`
 
 Removes the region `array[start:end]` and returns a fresh packed array.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -1864,7 +1864,7 @@ Source: `lib/typed-array.x:125`
 <a id="ArrayInt.reverse"></a>
 #### ArrayInt.reverse
 
-`Self ArrayInt.reverse(Self array)`
+`ArrayInt ArrayInt.reverse(ArrayInt array)`
 
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
@@ -1874,7 +1874,7 @@ Source: `lib/typed-array.x:124`
 <a id="ArrayInt.setindex"></a>
 #### ArrayInt.setindex
 
-`inline int ArrayInt.setindex(ArrayInt array, int index, int value)`
+`int ArrayInt.setindex(ArrayInt array, int index, int value)`
 
 Stores and returns `value` at raw `index` with no bounds or null check.
 Negative indices are not normalized, and an invalid index has the same
@@ -1885,7 +1885,7 @@ Source: `lib/typed-array.x:124`
 <a id="ArrayInt.setslice"></a>
 #### ArrayInt.setslice
 
-`Self ArrayInt.setslice(Self array, int start, int end, Self values)`
+`ArrayInt ArrayInt.setslice(ArrayInt array, int start, int end, ArrayInt values)`
 
 Replaces the region `array[start:end]` and returns `array`.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -1915,7 +1915,7 @@ Source: `lib/typed-array.x:124`
 <a id="ArrayInt.splice"></a>
 #### ArrayInt.splice
 
-`Self ArrayInt.splice(Self array, int index, int remove_count, Self values)`
+`ArrayInt ArrayInt.splice(ArrayInt array, int index, int remove_count, ArrayInt values)`
 
 Replaces `remove_count` values at normalized `index` and returns them.
 The result is a fresh packed array. A nonpositive count removes nothing;
@@ -1999,7 +1999,7 @@ Source: `lib/typed-array.x:124`
 <a id="ArrayInt.updateindex"></a>
 #### ArrayInt.updateindex
 
-`inline int ArrayInt.updateindex( ArrayInt array, int index, Symbol op, int rhs)`
+`int ArrayInt.updateindex(ArrayInt array, int index, Symbol op, int rhs)`
 
 Applies integer `op` to raw element `index` and returns the stored value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -2014,7 +2014,7 @@ Source: `lib/typed-array.x:128`
 <a id="ArrayInt.var"></a>
 #### ArrayInt.var
 
-`inline Var ArrayInt.var(ArrayInt array)`
+`Var ArrayInt.var(ArrayInt array)`
 
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
@@ -2056,7 +2056,7 @@ Source: `lib/typed-array.x:134`
 <a id="ArrayLong.block"></a>
 #### ArrayLong.block
 
-`inline Block ArrayLong.block(ArrayLong array)`
+`Block ArrayLong.block(ArrayLong array)`
 
 Views `array` as the same underlying `Block` storage.
 
@@ -2075,7 +2075,7 @@ Source: `lib/typed-array.x:134`
 <a id="ArrayLong.concat"></a>
 #### ArrayLong.concat
 
-`Self ArrayLong.concat(Self a, Self b)`
+`ArrayLong ArrayLong.concat(ArrayLong a, ArrayLong b)`
 
 Returns a fresh array holding `a` followed by `b`.
 Neither input is modified. A null `a` returns NULL, while a null `b`
@@ -2100,7 +2100,7 @@ Source: `lib/typed-array.x:133`
 <a id="ArrayLong.copy"></a>
 #### ArrayLong.copy
 
-`Self ArrayLong.copy(Self array)`
+`ArrayLong ArrayLong.copy(ArrayLong array)`
 
 Returns a fresh packed copy, or NULL for a null array.
 The result has independent mutable storage containing the same stored
@@ -2149,7 +2149,7 @@ Source: `lib/typed-array.x:133`
 <a id="ArrayLong.getindex"></a>
 #### ArrayLong.getindex
 
-`inline long ArrayLong.getindex(ArrayLong array, int index)`
+`long ArrayLong.getindex(ArrayLong array, int index)`
 
 Returns the element at raw `index` with no bounds or null check.
 Negative indices are not normalized, and an invalid index has the same
@@ -2160,7 +2160,7 @@ Source: `lib/typed-array.x:133`
 <a id="ArrayLong.getslice"></a>
 #### ArrayLong.getslice
 
-`Self ArrayLong.getslice(Self array, int start, int end, int step)`
+`ArrayLong ArrayLong.getslice(ArrayLong array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
 Negative bounds count from the end and a negative step walks backward.
@@ -2175,7 +2175,7 @@ Source: `lib/typed-array.x:133`
 
 `int ArrayLong.indexof(ArrayLong array, long value)`
 
-Returns the same first-match index as `ArrayLong.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:133`
 
@@ -2226,7 +2226,7 @@ Source: `lib/typed-array.x:133`
 <a id="ArrayLong.postfixindex"></a>
 #### ArrayLong.postfixindex
 
-`inline long ArrayLong.postfixindex(ArrayLong array, int index, Symbol op)`
+`long ArrayLong.postfixindex(ArrayLong array, int index, Symbol op)`
 
 Applies `++` or `--` at raw `index` and returns the previous value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -2263,7 +2263,7 @@ Source: `lib/typed-array.x:133`
 <a id="ArrayLong.remslice"></a>
 #### ArrayLong.remslice
 
-`Self ArrayLong.remslice(Self array, int start, int end)`
+`ArrayLong ArrayLong.remslice(ArrayLong array, int start, int end)`
 
 Removes the region `array[start:end]` and returns a fresh packed array.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -2286,7 +2286,7 @@ Source: `lib/typed-array.x:134`
 <a id="ArrayLong.reverse"></a>
 #### ArrayLong.reverse
 
-`Self ArrayLong.reverse(Self array)`
+`ArrayLong ArrayLong.reverse(ArrayLong array)`
 
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
@@ -2296,7 +2296,7 @@ Source: `lib/typed-array.x:133`
 <a id="ArrayLong.setindex"></a>
 #### ArrayLong.setindex
 
-`inline long ArrayLong.setindex(ArrayLong array, int index, long value)`
+`long ArrayLong.setindex(ArrayLong array, int index, long value)`
 
 Stores and returns `value` at raw `index` with no bounds or null check.
 Negative indices are not normalized, and an invalid index has the same
@@ -2307,7 +2307,7 @@ Source: `lib/typed-array.x:133`
 <a id="ArrayLong.setslice"></a>
 #### ArrayLong.setslice
 
-`Self ArrayLong.setslice(Self array, int start, int end, Self values)`
+`ArrayLong ArrayLong.setslice(ArrayLong array, int start, int end, ArrayLong values)`
 
 Replaces the region `array[start:end]` and returns `array`.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -2337,7 +2337,7 @@ Source: `lib/typed-array.x:133`
 <a id="ArrayLong.splice"></a>
 #### ArrayLong.splice
 
-`Self ArrayLong.splice(Self array, int index, int remove_count, Self values)`
+`ArrayLong ArrayLong.splice(ArrayLong array, int index, int remove_count, ArrayLong values)`
 
 Replaces `remove_count` values at normalized `index` and returns them.
 The result is a fresh packed array. A nonpositive count removes nothing;
@@ -2421,7 +2421,7 @@ Source: `lib/typed-array.x:133`
 <a id="ArrayLong.updateindex"></a>
 #### ArrayLong.updateindex
 
-`inline long ArrayLong.updateindex( ArrayLong array, int index, Symbol op, long rhs)`
+`long ArrayLong.updateindex(ArrayLong array, int index, Symbol op, long rhs)`
 
 Applies integer `op` to raw element `index` and returns the stored value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -2436,7 +2436,7 @@ Source: `lib/typed-array.x:137`
 <a id="ArrayLong.var"></a>
 #### ArrayLong.var
 
-`inline Var ArrayLong.var(ArrayLong array)`
+`Var ArrayLong.var(ArrayLong array)`
 
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
@@ -2478,7 +2478,7 @@ Source: `lib/typed-array.x:116`
 <a id="ArrayShort.block"></a>
 #### ArrayShort.block
 
-`inline Block ArrayShort.block(ArrayShort array)`
+`Block ArrayShort.block(ArrayShort array)`
 
 Views `array` as the same underlying `Block` storage.
 
@@ -2497,7 +2497,7 @@ Source: `lib/typed-array.x:116`
 <a id="ArrayShort.concat"></a>
 #### ArrayShort.concat
 
-`Self ArrayShort.concat(Self a, Self b)`
+`ArrayShort ArrayShort.concat(ArrayShort a, ArrayShort b)`
 
 Returns a fresh array holding `a` followed by `b`.
 Neither input is modified. A null `a` returns NULL, while a null `b`
@@ -2522,7 +2522,7 @@ Source: `lib/typed-array.x:115`
 <a id="ArrayShort.copy"></a>
 #### ArrayShort.copy
 
-`Self ArrayShort.copy(Self array)`
+`ArrayShort ArrayShort.copy(ArrayShort array)`
 
 Returns a fresh packed copy, or NULL for a null array.
 The result has independent mutable storage containing the same stored
@@ -2571,7 +2571,7 @@ Source: `lib/typed-array.x:115`
 <a id="ArrayShort.getindex"></a>
 #### ArrayShort.getindex
 
-`inline short ArrayShort.getindex(ArrayShort array, int index)`
+`short ArrayShort.getindex(ArrayShort array, int index)`
 
 Returns the element at raw `index` with no bounds or null check.
 Negative indices are not normalized, and an invalid index has the same
@@ -2582,7 +2582,7 @@ Source: `lib/typed-array.x:115`
 <a id="ArrayShort.getslice"></a>
 #### ArrayShort.getslice
 
-`Self ArrayShort.getslice(Self array, int start, int end, int step)`
+`ArrayShort ArrayShort.getslice(ArrayShort array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
 Negative bounds count from the end and a negative step walks backward.
@@ -2597,7 +2597,7 @@ Source: `lib/typed-array.x:115`
 
 `int ArrayShort.indexof(ArrayShort array, short value)`
 
-Returns the same first-match index as `ArrayShort.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:115`
 
@@ -2648,7 +2648,7 @@ Source: `lib/typed-array.x:115`
 <a id="ArrayShort.postfixindex"></a>
 #### ArrayShort.postfixindex
 
-`inline short ArrayShort.postfixindex(ArrayShort array, int index, Symbol op)`
+`short ArrayShort.postfixindex(ArrayShort array, int index, Symbol op)`
 
 Applies `++` or `--` at raw `index` and returns the previous value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -2685,7 +2685,7 @@ Source: `lib/typed-array.x:115`
 <a id="ArrayShort.remslice"></a>
 #### ArrayShort.remslice
 
-`Self ArrayShort.remslice(Self array, int start, int end)`
+`ArrayShort ArrayShort.remslice(ArrayShort array, int start, int end)`
 
 Removes the region `array[start:end]` and returns a fresh packed array.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -2708,7 +2708,7 @@ Source: `lib/typed-array.x:116`
 <a id="ArrayShort.reverse"></a>
 #### ArrayShort.reverse
 
-`Self ArrayShort.reverse(Self array)`
+`ArrayShort ArrayShort.reverse(ArrayShort array)`
 
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
@@ -2718,7 +2718,7 @@ Source: `lib/typed-array.x:115`
 <a id="ArrayShort.setindex"></a>
 #### ArrayShort.setindex
 
-`inline short ArrayShort.setindex(ArrayShort array, int index, short value)`
+`short ArrayShort.setindex(ArrayShort array, int index, short value)`
 
 Stores and returns `value` at raw `index` with no bounds or null check.
 Negative indices are not normalized, and an invalid index has the same
@@ -2729,7 +2729,7 @@ Source: `lib/typed-array.x:115`
 <a id="ArrayShort.setslice"></a>
 #### ArrayShort.setslice
 
-`Self ArrayShort.setslice(Self array, int start, int end, Self values)`
+`ArrayShort ArrayShort.setslice(ArrayShort array, int start, int end, ArrayShort values)`
 
 Replaces the region `array[start:end]` and returns `array`.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -2759,7 +2759,7 @@ Source: `lib/typed-array.x:115`
 <a id="ArrayShort.splice"></a>
 #### ArrayShort.splice
 
-`Self ArrayShort.splice(Self array, int index, int remove_count, Self values)`
+`ArrayShort ArrayShort.splice(ArrayShort array, int index, int remove_count, ArrayShort values)`
 
 Replaces `remove_count` values at normalized `index` and returns them.
 The result is a fresh packed array. A nonpositive count removes nothing;
@@ -2843,7 +2843,7 @@ Source: `lib/typed-array.x:115`
 <a id="ArrayShort.updateindex"></a>
 #### ArrayShort.updateindex
 
-`inline short ArrayShort.updateindex( ArrayShort array, int index, Symbol op, short rhs)`
+`short ArrayShort.updateindex(ArrayShort array, int index, Symbol op, short rhs)`
 
 Applies integer `op` to raw element `index` and returns the stored value.
 The index has the unchecked C-pointer preconditions of bracket access.
@@ -2858,7 +2858,7 @@ Source: `lib/typed-array.x:119`
 <a id="ArrayShort.var"></a>
 #### ArrayShort.var
 
-`inline Var ArrayShort.var(ArrayShort array)`
+`Var ArrayShort.var(ArrayShort array)`
 
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
@@ -2900,7 +2900,7 @@ Source: `lib/typed-array.x:161`
 <a id="ArrayString.block"></a>
 #### ArrayString.block
 
-`inline Block ArrayString.block(ArrayString array)`
+`Block ArrayString.block(ArrayString array)`
 
 Views `array` as the same underlying `Block` storage.
 
@@ -2919,7 +2919,7 @@ Source: `lib/typed-array.x:161`
 <a id="ArrayString.concat"></a>
 #### ArrayString.concat
 
-`Self ArrayString.concat(Self a, Self b)`
+`ArrayString ArrayString.concat(ArrayString a, ArrayString b)`
 
 Returns a fresh array holding `a` followed by `b`.
 Neither input is modified. A null `a` returns NULL, while a null `b`
@@ -2944,7 +2944,7 @@ Source: `lib/typed-array.x:160`
 <a id="ArrayString.copy"></a>
 #### ArrayString.copy
 
-`Self ArrayString.copy(Self array)`
+`ArrayString ArrayString.copy(ArrayString array)`
 
 Returns a fresh packed copy, or NULL for a null array.
 The result has independent mutable storage containing the same stored
@@ -2993,7 +2993,7 @@ Source: `lib/typed-array.x:160`
 <a id="ArrayString.getindex"></a>
 #### ArrayString.getindex
 
-`inline String ArrayString.getindex(ArrayString array, int index)`
+`String ArrayString.getindex(ArrayString array, int index)`
 
 Returns the element at raw `index` with no bounds or null check.
 Negative indices are not normalized, and an invalid index has the same
@@ -3004,7 +3004,7 @@ Source: `lib/typed-array.x:160`
 <a id="ArrayString.getslice"></a>
 #### ArrayString.getslice
 
-`Self ArrayString.getslice(Self array, int start, int end, int step)`
+`ArrayString ArrayString.getslice(ArrayString array, int start, int end, int step)`
 
 Returns a fresh packed array for normalized `[start:end:step]`.
 Negative bounds count from the end and a negative step walks backward.
@@ -3019,7 +3019,7 @@ Source: `lib/typed-array.x:160`
 
 `int ArrayString.indexof(ArrayString array, String value)`
 
-Returns the same first-match index as `ArrayString.find`.
+Returns the same first-match index as `$array.find`.
 
 Source: `lib/typed-array.x:160`
 
@@ -3070,7 +3070,7 @@ Source: `lib/typed-array.x:160`
 <a id="ArrayString.postfixindex"></a>
 #### ArrayString.postfixindex
 
-`inline String ArrayString.postfixindex( ArrayString array, int index, Symbol op)`
+`String ArrayString.postfixindex(ArrayString array, int index, Symbol op)`
 
 Raises `<bad-op>` because String elements have no postfix operation.
 
@@ -3104,7 +3104,7 @@ Source: `lib/typed-array.x:160`
 <a id="ArrayString.remslice"></a>
 #### ArrayString.remslice
 
-`Self ArrayString.remslice(Self array, int start, int end)`
+`ArrayString ArrayString.remslice(ArrayString array, int start, int end)`
 
 Removes the region `array[start:end]` and returns a fresh packed array.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -3127,7 +3127,7 @@ Source: `lib/typed-array.x:161`
 <a id="ArrayString.reverse"></a>
 #### ArrayString.reverse
 
-`Self ArrayString.reverse(Self array)`
+`ArrayString ArrayString.reverse(ArrayString array)`
 
 Reverses `array` in place and returns that same array.
 A null or one-element array is returned unchanged.
@@ -3137,7 +3137,7 @@ Source: `lib/typed-array.x:160`
 <a id="ArrayString.setindex"></a>
 #### ArrayString.setindex
 
-`inline String ArrayString.setindex(ArrayString array, int index, String value)`
+`String ArrayString.setindex(ArrayString array, int index, String value)`
 
 Stores and returns `value` at raw `index` with no bounds or null check.
 Negative indices are not normalized, and an invalid index has the same
@@ -3148,7 +3148,7 @@ Source: `lib/typed-array.x:160`
 <a id="ArrayString.setslice"></a>
 #### ArrayString.setslice
 
-`Self ArrayString.setslice(Self array, int start, int end, Self values)`
+`ArrayString ArrayString.setslice(ArrayString array, int start, int end, ArrayString values)`
 
 Replaces the region `array[start:end]` and returns `array`.
 Bounds normalize as slice bounds, so a negative `end` is a stop.
@@ -3178,7 +3178,7 @@ Source: `lib/typed-array.x:160`
 <a id="ArrayString.splice"></a>
 #### ArrayString.splice
 
-`Self ArrayString.splice(Self array, int index, int remove_count, Self values)`
+`ArrayString ArrayString.splice(ArrayString array, int index, int remove_count, ArrayString values)`
 
 Replaces `remove_count` values at normalized `index` and returns them.
 The result is a fresh packed array. A nonpositive count removes nothing;
@@ -3262,7 +3262,7 @@ Source: `lib/typed-array.x:160`
 <a id="ArrayString.updateindex"></a>
 #### ArrayString.updateindex
 
-`inline String ArrayString.updateindex( ArrayString array, int index, Symbol op, String rhs)`
+`String ArrayString.updateindex(ArrayString array, int index, Symbol op, String rhs)`
 
 Concatenates `rhs` onto the String at raw `index` and returns the stored
 canonical String. The index has the unchecked C-pointer preconditions of
@@ -3274,7 +3274,7 @@ Source: `lib/typed-array.x:164`
 <a id="ArrayString.var"></a>
 #### ArrayString.var
 
-`inline Var ArrayString.var(ArrayString array)`
+`Var ArrayString.var(ArrayString array)`
 
 Boxes `array` with its registered packed-array tag without copying.
 The boxed and typed values share the same mutable object identity.
@@ -3304,7 +3304,7 @@ Source: `lib/typed-array.x:161`
 <a id="Var.arraychar"></a>
 #### Var.arraychar
 
-`inline ArrayChar Var.arraychar(Var value)`
+`ArrayChar Var.arraychar(Var value)`
 
 Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter
@@ -3315,7 +3315,7 @@ Source: `lib/typed-array.x:111`
 <a id="Var.arraydbl"></a>
 #### Var.arraydbl
 
-`inline ArrayDbl Var.arraydbl(Var value)`
+`ArrayDbl Var.arraydbl(Var value)`
 
 Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter
@@ -3326,7 +3326,7 @@ Source: `lib/typed-array.x:156`
 <a id="Var.arrayfloat"></a>
 #### Var.arrayfloat
 
-`inline ArrayFloat Var.arrayfloat(Var value)`
+`ArrayFloat Var.arrayfloat(Var value)`
 
 Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter
@@ -3337,7 +3337,7 @@ Source: `lib/typed-array.x:147`
 <a id="Var.arrayint"></a>
 #### Var.arrayint
 
-`inline ArrayInt Var.arrayint(Var value)`
+`ArrayInt Var.arrayint(Var value)`
 
 Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter
@@ -3348,7 +3348,7 @@ Source: `lib/typed-array.x:129`
 <a id="Var.arraylong"></a>
 #### Var.arraylong
 
-`inline ArrayLong Var.arraylong(Var value)`
+`ArrayLong Var.arraylong(Var value)`
 
 Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter
@@ -3359,7 +3359,7 @@ Source: `lib/typed-array.x:138`
 <a id="Var.arrayshort"></a>
 #### Var.arrayshort
 
-`inline ArrayShort Var.arrayshort(Var value)`
+`ArrayShort Var.arrayshort(Var value)`
 
 Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter
@@ -3370,7 +3370,7 @@ Source: `lib/typed-array.x:120`
 <a id="Var.arraystring"></a>
 #### Var.arraystring
 
-`inline ArrayString Var.arraystring(Var value)`
+`ArrayString Var.arraystring(Var value)`
 
 Returns the packed-array pointer carried by `value`.
 `value` must carry this array family's registered tag; the converter

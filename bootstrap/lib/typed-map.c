@@ -104,189 +104,189 @@ static void MapIntInt__core_free(MapIntInt _x2c_macro_map_0);
 
 static MapIntInt MapIntInt__core_new_capacity(MapIntInt _x2c_macro_unused_0, unsigned _x2c_macro_capacity_0);
 
-static long MapIntInt__core_find_hashed(MapIntInt _x2c_macro_map_0, int * _x2c_macro_key_0, unsigned _x2c_macro_key_hash_0);
+static long MapIntInt__core_find_hashed(MapIntInt _x2c_macro_map_2, int * _x2c_macro_key_0, unsigned _x2c_macro_key_hash_0);
 
-static long MapIntInt__core_find_index(MapIntInt _x2c_macro_map_0, int * _x2c_macro_key_0);
+static long MapIntInt__core_find_index(MapIntInt _x2c_macro_map_3, int * _x2c_macro_key_1);
 
-static int MapIntInt__core_try_get(MapIntInt _x2c_macro_map_0, int * _x2c_macro_key_0, int * _x2c_macro_out_0);
+static int MapIntInt__core_try_get(MapIntInt _x2c_macro_map_4, int * _x2c_macro_key_2, int * _x2c_macro_out_0);
 
-static void MapIntInt__core_reinsert(MapIntInt _x2c_macro_map_0, unsigned _x2c_macro_todo_hash_0, struct MapIntIntRecord _x2c_macro_todo_0, int _x2c_macro_psl_0);
+static void MapIntInt__core_reinsert(MapIntInt _x2c_macro_map_5, unsigned _x2c_macro_todo_hash_0, struct MapIntIntRecord _x2c_macro_todo_0, int _x2c_macro_psl_0);
 
-static void MapIntInt__core_expand(MapIntInt _x2c_macro_map_0);
+static void MapIntInt__core_expand(MapIntInt _x2c_macro_map_6);
 
-static int * MapIntInt__core_get_or_insert(MapIntInt _x2c_macro_map_0, int * _x2c_macro_key_0, int * _x2c_macro_val_0, int * _x2c_macro_inserted_0);
+static int * MapIntInt__core_get_or_insert(MapIntInt _x2c_macro_map_7, int * _x2c_macro_key_3, int * _x2c_macro_val_0, int * _x2c_macro_inserted_0);
 
-static void MapIntInt__core_set(MapIntInt _x2c_macro_map_0, int * _x2c_macro_key_0, int * _x2c_macro_val_0);
+static void MapIntInt__core_set(MapIntInt _x2c_macro_map_8, int * _x2c_macro_key_4, int * _x2c_macro_val_1);
 
-static int MapIntInt__core_try_del(MapIntInt _x2c_macro_map_0, int * _x2c_macro_key_0, int * _x2c_macro_out_0);
+static int MapIntInt__core_try_del(MapIntInt _x2c_macro_map_9, int * _x2c_macro_key_5, int * _x2c_macro_out_1);
 
-static int MapIntInt__core_try_next(MapIntInt _x2c_macro_map_0, unsigned * _x2c_macro_cursor_0, int * _x2c_macro_key_0, int * _x2c_macro_val_0);
+static int MapIntInt__core_try_next(MapIntInt _x2c_macro_map_10, unsigned * _x2c_macro_cursor_0, int * _x2c_macro_key_6, int * _x2c_macro_val_2);
 
-static void MapIntInt__core_insert_all(MapIntInt _x2c_macro_map_0, MapIntInt _x2c_macro_other_0);
+static void MapIntInt__core_insert_all(MapIntInt _x2c_macro_map_11, MapIntInt _x2c_macro_other_0);
 
-static MapIntInt MapIntInt__core_copy(MapIntInt _x2c_macro_map_0);
+static MapIntInt MapIntInt__core_copy(MapIntInt _x2c_macro_map_12);
 
-static MapIntInt MapIntInt__core_merge(MapIntInt _x2c_macro_map_0, MapIntInt _x2c_macro_other_0);
+static MapIntInt MapIntInt__core_merge(MapIntInt _x2c_macro_map_13, MapIntInt _x2c_macro_other_1);
 
-static int MapIntInt__core_truth(MapIntInt _x2c_macro_map_0);
+static int MapIntInt__core_truth(MapIntInt _x2c_macro_map_14);
 
 static int MapIntInt__core_equal(MapIntInt _x2c_macro_a_1, MapIntInt _x2c_macro_b_1);
 
 static int _x2c_macro_record_compare_0(const void * _x2c_macro_ap_0, const void * _x2c_macro_bp_0);
 
-static int MapIntInt__core_compare(MapIntInt _x2c_macro_a_3, MapIntInt _x2c_macro_b_3);
+static int MapIntInt__core_compare(MapIntInt _x2c_macro_a_4, MapIntInt _x2c_macro_b_4);
 
-static Buffer MapIntInt__core_write(MapIntInt _x2c_macro_map_2, Buffer _x2c_macro_out_2, Symbol _x2c_macro_mode_0);
+static Buffer MapIntInt__core_write(MapIntInt _x2c_macro_map_34, Buffer _x2c_macro_out_7, Symbol _x2c_macro_mode_0);
 
-static int _x2c_macro_next_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_out_4);
+static int _x2c_macro_next_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_out_12);
 
-static int _x2c_macro_keys_next_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_out_4);
+static int _x2c_macro_keys_next_0(Iter _x2c_macro_iter_1, Var * _x2c_macro_out_13);
 
-static int _x2c_macro_enumerate_next_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_out_4);
+static int _x2c_macro_enumerate_next_0(Iter _x2c_macro_iter_2, Var * _x2c_macro_out_14);
 
-static MapIntInt MapIntInt_export_context(MapIntInt _x2c_macro_map_4, Context _x2c_macro_source_0);
+static MapIntInt MapIntInt_export_context(MapIntInt _x2c_macro_map_47, Context _x2c_macro_source_0);
 
-static void MapLongDouble__core_free(MapLongDouble _x2c_macro_map_5);
+static void MapLongDouble__core_free(MapLongDouble _x2c_macro_map_49);
 
-static MapLongDouble MapLongDouble__core_new_capacity(MapLongDouble _x2c_macro_unused_1, unsigned _x2c_macro_capacity_2);
+static MapLongDouble MapLongDouble__core_new_capacity(MapLongDouble _x2c_macro_unused_1, unsigned _x2c_macro_capacity_3);
 
-static long MapLongDouble__core_find_hashed(MapLongDouble _x2c_macro_map_5, long * _x2c_macro_key_5, unsigned _x2c_macro_key_hash_1);
+static long MapLongDouble__core_find_hashed(MapLongDouble _x2c_macro_map_51, long * _x2c_macro_key_29, unsigned _x2c_macro_key_hash_2);
 
-static long MapLongDouble__core_find_index(MapLongDouble _x2c_macro_map_5, long * _x2c_macro_key_5);
+static long MapLongDouble__core_find_index(MapLongDouble _x2c_macro_map_52, long * _x2c_macro_key_30);
 
-static int MapLongDouble__core_try_get(MapLongDouble _x2c_macro_map_5, long * _x2c_macro_key_5, double * _x2c_macro_out_5);
+static int MapLongDouble__core_try_get(MapLongDouble _x2c_macro_map_53, long * _x2c_macro_key_31, double * _x2c_macro_out_15);
 
-static void MapLongDouble__core_reinsert(MapLongDouble _x2c_macro_map_5, unsigned _x2c_macro_todo_hash_1, struct MapLongDoubleRecord _x2c_macro_todo_1, int _x2c_macro_psl_1);
+static void MapLongDouble__core_reinsert(MapLongDouble _x2c_macro_map_54, unsigned _x2c_macro_todo_hash_1, struct MapLongDoubleRecord _x2c_macro_todo_1, int _x2c_macro_psl_1);
 
-static void MapLongDouble__core_expand(MapLongDouble _x2c_macro_map_5);
+static void MapLongDouble__core_expand(MapLongDouble _x2c_macro_map_55);
 
-static double * MapLongDouble__core_get_or_insert(MapLongDouble _x2c_macro_map_5, long * _x2c_macro_key_5, double * _x2c_macro_val_3, int * _x2c_macro_inserted_2);
+static double * MapLongDouble__core_get_or_insert(MapLongDouble _x2c_macro_map_56, long * _x2c_macro_key_32, double * _x2c_macro_val_11, int * _x2c_macro_inserted_4);
 
-static void MapLongDouble__core_set(MapLongDouble _x2c_macro_map_5, long * _x2c_macro_key_5, double * _x2c_macro_val_3);
+static void MapLongDouble__core_set(MapLongDouble _x2c_macro_map_57, long * _x2c_macro_key_33, double * _x2c_macro_val_12);
 
-static int MapLongDouble__core_try_del(MapLongDouble _x2c_macro_map_5, long * _x2c_macro_key_5, double * _x2c_macro_out_5);
+static int MapLongDouble__core_try_del(MapLongDouble _x2c_macro_map_58, long * _x2c_macro_key_34, double * _x2c_macro_out_16);
 
-static int MapLongDouble__core_try_next(MapLongDouble _x2c_macro_map_5, unsigned * _x2c_macro_cursor_5, long * _x2c_macro_key_5, double * _x2c_macro_val_3);
+static int MapLongDouble__core_try_next(MapLongDouble _x2c_macro_map_59, unsigned * _x2c_macro_cursor_11, long * _x2c_macro_key_35, double * _x2c_macro_val_13);
 
-static void MapLongDouble__core_insert_all(MapLongDouble _x2c_macro_map_5, MapLongDouble _x2c_macro_other_2);
+static void MapLongDouble__core_insert_all(MapLongDouble _x2c_macro_map_60, MapLongDouble _x2c_macro_other_3);
 
-static MapLongDouble MapLongDouble__core_copy(MapLongDouble _x2c_macro_map_5);
+static MapLongDouble MapLongDouble__core_copy(MapLongDouble _x2c_macro_map_61);
 
-static MapLongDouble MapLongDouble__core_merge(MapLongDouble _x2c_macro_map_5, MapLongDouble _x2c_macro_other_2);
+static MapLongDouble MapLongDouble__core_merge(MapLongDouble _x2c_macro_map_62, MapLongDouble _x2c_macro_other_4);
 
-static int MapLongDouble__core_truth(MapLongDouble _x2c_macro_map_5);
+static int MapLongDouble__core_truth(MapLongDouble _x2c_macro_map_63);
 
-static int MapLongDouble__core_equal(MapLongDouble _x2c_macro_a_5, MapLongDouble _x2c_macro_b_5);
+static int MapLongDouble__core_equal(MapLongDouble _x2c_macro_a_6, MapLongDouble _x2c_macro_b_6);
 
 static int _x2c_macro_record_compare_1(const void * _x2c_macro_ap_1, const void * _x2c_macro_bp_1);
 
-static int MapLongDouble__core_compare(MapLongDouble _x2c_macro_a_7, MapLongDouble _x2c_macro_b_7);
+static int MapLongDouble__core_compare(MapLongDouble _x2c_macro_a_9, MapLongDouble _x2c_macro_b_9);
 
-static Buffer MapLongDouble__core_write(MapLongDouble _x2c_macro_map_7, Buffer _x2c_macro_out_7, Symbol _x2c_macro_mode_1);
+static Buffer MapLongDouble__core_write(MapLongDouble _x2c_macro_map_83, Buffer _x2c_macro_out_22, Symbol _x2c_macro_mode_1);
 
-static int _x2c_macro_next_1(Iter _x2c_macro_iter_1, Var * _x2c_macro_out_9);
+static int _x2c_macro_next_1(Iter _x2c_macro_iter_3, Var * _x2c_macro_out_27);
 
-static int _x2c_macro_keys_next_1(Iter _x2c_macro_iter_1, Var * _x2c_macro_out_9);
+static int _x2c_macro_keys_next_1(Iter _x2c_macro_iter_4, Var * _x2c_macro_out_28);
 
-static int _x2c_macro_enumerate_next_1(Iter _x2c_macro_iter_1, Var * _x2c_macro_out_9);
+static int _x2c_macro_enumerate_next_1(Iter _x2c_macro_iter_5, Var * _x2c_macro_out_29);
 
-static MapLongDouble MapLongDouble_export_context(MapLongDouble _x2c_macro_map_9, Context _x2c_macro_source_1);
+static MapLongDouble MapLongDouble_export_context(MapLongDouble _x2c_macro_map_96, Context _x2c_macro_source_1);
 
-static void MapStringString__core_free(MapStringString _x2c_macro_map_10);
+static void MapStringString__core_free(MapStringString _x2c_macro_map_98);
 
-static MapStringString MapStringString__core_new_capacity(MapStringString _x2c_macro_unused_2, unsigned _x2c_macro_capacity_4);
+static MapStringString MapStringString__core_new_capacity(MapStringString _x2c_macro_unused_2, unsigned _x2c_macro_capacity_6);
 
-static long MapStringString__core_find_hashed(MapStringString _x2c_macro_map_10, String * _x2c_macro_key_10, unsigned _x2c_macro_key_hash_2);
+static long MapStringString__core_find_hashed(MapStringString _x2c_macro_map_100, String * _x2c_macro_key_58, unsigned _x2c_macro_key_hash_4);
 
-static long MapStringString__core_find_index(MapStringString _x2c_macro_map_10, String * _x2c_macro_key_10);
+static long MapStringString__core_find_index(MapStringString _x2c_macro_map_101, String * _x2c_macro_key_59);
 
-static int MapStringString__core_try_get(MapStringString _x2c_macro_map_10, String * _x2c_macro_key_10, String * _x2c_macro_out_10);
+static int MapStringString__core_try_get(MapStringString _x2c_macro_map_102, String * _x2c_macro_key_60, String * _x2c_macro_out_30);
 
-static void MapStringString__core_reinsert(MapStringString _x2c_macro_map_10, unsigned _x2c_macro_todo_hash_2, struct MapStringStringRecord _x2c_macro_todo_2, int _x2c_macro_psl_2);
+static void MapStringString__core_reinsert(MapStringString _x2c_macro_map_103, unsigned _x2c_macro_todo_hash_2, struct MapStringStringRecord _x2c_macro_todo_2, int _x2c_macro_psl_2);
 
-static void MapStringString__core_expand(MapStringString _x2c_macro_map_10);
+static void MapStringString__core_expand(MapStringString _x2c_macro_map_104);
 
-static String * MapStringString__core_get_or_insert(MapStringString _x2c_macro_map_10, String * _x2c_macro_key_10, String * _x2c_macro_val_6, int * _x2c_macro_inserted_4);
+static String * MapStringString__core_get_or_insert(MapStringString _x2c_macro_map_105, String * _x2c_macro_key_61, String * _x2c_macro_val_22, int * _x2c_macro_inserted_8);
 
-static void MapStringString__core_set(MapStringString _x2c_macro_map_10, String * _x2c_macro_key_10, String * _x2c_macro_val_6);
+static void MapStringString__core_set(MapStringString _x2c_macro_map_106, String * _x2c_macro_key_62, String * _x2c_macro_val_23);
 
-static int MapStringString__core_try_del(MapStringString _x2c_macro_map_10, String * _x2c_macro_key_10, String * _x2c_macro_out_10);
+static int MapStringString__core_try_del(MapStringString _x2c_macro_map_107, String * _x2c_macro_key_63, String * _x2c_macro_out_31);
 
-static int MapStringString__core_try_next(MapStringString _x2c_macro_map_10, unsigned * _x2c_macro_cursor_10, String * _x2c_macro_key_10, String * _x2c_macro_val_6);
+static int MapStringString__core_try_next(MapStringString _x2c_macro_map_108, unsigned * _x2c_macro_cursor_22, String * _x2c_macro_key_64, String * _x2c_macro_val_24);
 
-static void MapStringString__core_insert_all(MapStringString _x2c_macro_map_10, MapStringString _x2c_macro_other_4);
+static void MapStringString__core_insert_all(MapStringString _x2c_macro_map_109, MapStringString _x2c_macro_other_6);
 
-static MapStringString MapStringString__core_copy(MapStringString _x2c_macro_map_10);
+static MapStringString MapStringString__core_copy(MapStringString _x2c_macro_map_110);
 
-static MapStringString MapStringString__core_merge(MapStringString _x2c_macro_map_10, MapStringString _x2c_macro_other_4);
+static MapStringString MapStringString__core_merge(MapStringString _x2c_macro_map_111, MapStringString _x2c_macro_other_7);
 
-static int MapStringString__core_truth(MapStringString _x2c_macro_map_10);
+static int MapStringString__core_truth(MapStringString _x2c_macro_map_112);
 
-static int MapStringString__core_equal(MapStringString _x2c_macro_a_9, MapStringString _x2c_macro_b_9);
+static int MapStringString__core_equal(MapStringString _x2c_macro_a_11, MapStringString _x2c_macro_b_11);
 
 static int _x2c_macro_record_compare_2(const void * _x2c_macro_ap_2, const void * _x2c_macro_bp_2);
 
-static int MapStringString__core_compare(MapStringString _x2c_macro_a_11, MapStringString _x2c_macro_b_11);
+static int MapStringString__core_compare(MapStringString _x2c_macro_a_14, MapStringString _x2c_macro_b_14);
 
-static Buffer MapStringString__core_write(MapStringString _x2c_macro_map_12, Buffer _x2c_macro_out_12, Symbol _x2c_macro_mode_2);
+static Buffer MapStringString__core_write(MapStringString _x2c_macro_map_132, Buffer _x2c_macro_out_37, Symbol _x2c_macro_mode_2);
 
 static MapStringString _prepare_string_export(MapStringString map, Context source);
 
-static int _x2c_macro_next_2(Iter _x2c_macro_iter_2, Var * _x2c_macro_out_14);
+static int _x2c_macro_next_2(Iter _x2c_macro_iter_6, Var * _x2c_macro_out_42);
 
-static int _x2c_macro_keys_next_2(Iter _x2c_macro_iter_2, Var * _x2c_macro_out_14);
+static int _x2c_macro_keys_next_2(Iter _x2c_macro_iter_7, Var * _x2c_macro_out_43);
 
-static int _x2c_macro_enumerate_next_2(Iter _x2c_macro_iter_2, Var * _x2c_macro_out_14);
+static int _x2c_macro_enumerate_next_2(Iter _x2c_macro_iter_8, Var * _x2c_macro_out_44);
 
-static MapStringString MapStringString_export_context(MapStringString _x2c_macro_map_14, Context _x2c_macro_source_2);
+static MapStringString MapStringString_export_context(MapStringString _x2c_macro_map_145, Context _x2c_macro_source_2);
 
-static void MapStringInt__core_free(MapStringInt _x2c_macro_map_15);
+static void MapStringInt__core_free(MapStringInt _x2c_macro_map_147);
 
-static MapStringInt MapStringInt__core_new_capacity(MapStringInt _x2c_macro_unused_3, unsigned _x2c_macro_capacity_6);
+static MapStringInt MapStringInt__core_new_capacity(MapStringInt _x2c_macro_unused_3, unsigned _x2c_macro_capacity_9);
 
-static long MapStringInt__core_find_hashed(MapStringInt _x2c_macro_map_15, String * _x2c_macro_key_15, unsigned _x2c_macro_key_hash_3);
+static long MapStringInt__core_find_hashed(MapStringInt _x2c_macro_map_149, String * _x2c_macro_key_87, unsigned _x2c_macro_key_hash_6);
 
-static long MapStringInt__core_find_index(MapStringInt _x2c_macro_map_15, String * _x2c_macro_key_15);
+static long MapStringInt__core_find_index(MapStringInt _x2c_macro_map_150, String * _x2c_macro_key_88);
 
-static int MapStringInt__core_try_get(MapStringInt _x2c_macro_map_15, String * _x2c_macro_key_15, int * _x2c_macro_out_15);
+static int MapStringInt__core_try_get(MapStringInt _x2c_macro_map_151, String * _x2c_macro_key_89, int * _x2c_macro_out_45);
 
-static void MapStringInt__core_reinsert(MapStringInt _x2c_macro_map_15, unsigned _x2c_macro_todo_hash_3, struct MapStringIntRecord _x2c_macro_todo_3, int _x2c_macro_psl_3);
+static void MapStringInt__core_reinsert(MapStringInt _x2c_macro_map_152, unsigned _x2c_macro_todo_hash_3, struct MapStringIntRecord _x2c_macro_todo_3, int _x2c_macro_psl_3);
 
-static void MapStringInt__core_expand(MapStringInt _x2c_macro_map_15);
+static void MapStringInt__core_expand(MapStringInt _x2c_macro_map_153);
 
-static int * MapStringInt__core_get_or_insert(MapStringInt _x2c_macro_map_15, String * _x2c_macro_key_15, int * _x2c_macro_val_9, int * _x2c_macro_inserted_6);
+static int * MapStringInt__core_get_or_insert(MapStringInt _x2c_macro_map_154, String * _x2c_macro_key_90, int * _x2c_macro_val_33, int * _x2c_macro_inserted_12);
 
-static void MapStringInt__core_set(MapStringInt _x2c_macro_map_15, String * _x2c_macro_key_15, int * _x2c_macro_val_9);
+static void MapStringInt__core_set(MapStringInt _x2c_macro_map_155, String * _x2c_macro_key_91, int * _x2c_macro_val_34);
 
-static int MapStringInt__core_try_del(MapStringInt _x2c_macro_map_15, String * _x2c_macro_key_15, int * _x2c_macro_out_15);
+static int MapStringInt__core_try_del(MapStringInt _x2c_macro_map_156, String * _x2c_macro_key_92, int * _x2c_macro_out_46);
 
-static int MapStringInt__core_try_next(MapStringInt _x2c_macro_map_15, unsigned * _x2c_macro_cursor_16, String * _x2c_macro_key_15, int * _x2c_macro_val_9);
+static int MapStringInt__core_try_next(MapStringInt _x2c_macro_map_157, unsigned * _x2c_macro_cursor_34, String * _x2c_macro_key_93, int * _x2c_macro_val_35);
 
-static void MapStringInt__core_insert_all(MapStringInt _x2c_macro_map_15, MapStringInt _x2c_macro_other_6);
+static void MapStringInt__core_insert_all(MapStringInt _x2c_macro_map_158, MapStringInt _x2c_macro_other_9);
 
-static MapStringInt MapStringInt__core_copy(MapStringInt _x2c_macro_map_15);
+static MapStringInt MapStringInt__core_copy(MapStringInt _x2c_macro_map_159);
 
-static MapStringInt MapStringInt__core_merge(MapStringInt _x2c_macro_map_15, MapStringInt _x2c_macro_other_6);
+static MapStringInt MapStringInt__core_merge(MapStringInt _x2c_macro_map_160, MapStringInt _x2c_macro_other_10);
 
-static int MapStringInt__core_truth(MapStringInt _x2c_macro_map_15);
+static int MapStringInt__core_truth(MapStringInt _x2c_macro_map_161);
 
-static int MapStringInt__core_equal(MapStringInt _x2c_macro_a_13, MapStringInt _x2c_macro_b_13);
+static int MapStringInt__core_equal(MapStringInt _x2c_macro_a_16, MapStringInt _x2c_macro_b_16);
 
 static int _x2c_macro_record_compare_3(const void * _x2c_macro_ap_3, const void * _x2c_macro_bp_3);
 
-static int MapStringInt__core_compare(MapStringInt _x2c_macro_a_15, MapStringInt _x2c_macro_b_15);
+static int MapStringInt__core_compare(MapStringInt _x2c_macro_a_19, MapStringInt _x2c_macro_b_19);
 
-static Buffer MapStringInt__core_write(MapStringInt _x2c_macro_map_17, Buffer _x2c_macro_out_17, Symbol _x2c_macro_mode_3);
+static Buffer MapStringInt__core_write(MapStringInt _x2c_macro_map_181, Buffer _x2c_macro_out_52, Symbol _x2c_macro_mode_3);
 
 static MapStringInt _prepare_string_int_export(MapStringInt map, Context source);
 
-static int _x2c_macro_next_3(Iter _x2c_macro_iter_3, Var * _x2c_macro_out_19);
+static int _x2c_macro_next_3(Iter _x2c_macro_iter_9, Var * _x2c_macro_out_57);
 
-static int _x2c_macro_keys_next_3(Iter _x2c_macro_iter_3, Var * _x2c_macro_out_19);
+static int _x2c_macro_keys_next_3(Iter _x2c_macro_iter_10, Var * _x2c_macro_out_58);
 
-static int _x2c_macro_enumerate_next_3(Iter _x2c_macro_iter_3, Var * _x2c_macro_out_19);
+static int _x2c_macro_enumerate_next_3(Iter _x2c_macro_iter_11, Var * _x2c_macro_out_59);
 
-static MapStringInt MapStringInt_export_context(MapStringInt _x2c_macro_map_19, Context _x2c_macro_source_3);
+static MapStringInt MapStringInt_export_context(MapStringInt _x2c_macro_map_194, Context _x2c_macro_source_3);
 
 static inline String _x2c_proto_mapintint_str_0(Var a0);
 
@@ -1023,27 +1023,27 @@ Bytes Bytes_append(Bytes, const void *, size_t);
 
 static MapIntInt MapIntInt__core_new_capacity(MapIntInt _x2c_macro_unused_0, unsigned _x2c_macro_capacity_0){
   (void) _x2c_macro_unused_0;
-  MapIntInt _x2c_macro_map_0 = Scope_malloc(sizeof(struct MapIntInt));
-  _x2c_macro_map_0 -> scope = * Scope_top();
-  _x2c_macro_map_0 -> hashes = Bytes_new(sizeof(unsigned));
-  _x2c_macro_map_0 -> hashes = Bytes_append(_x2c_macro_map_0 -> hashes, 0, _x2c_macro_capacity_0);
-  _x2c_macro_map_0 -> entries = Bytes_new(sizeof(struct MapIntIntRecord));
-  _x2c_macro_map_0 -> entries = Bytes_append(_x2c_macro_map_0 -> entries, 0, _x2c_macro_capacity_0);
-  _x2c_macro_map_0 -> capacity = _x2c_macro_capacity_0;
-  _x2c_macro_map_0 -> mask = _x2c_macro_capacity_0 - 1;
-  _x2c_macro_map_0 -> used = 0;
-  return _x2c_macro_map_0;
+  MapIntInt _x2c_macro_map_1 = Scope_malloc(sizeof(struct MapIntInt));
+  _x2c_macro_map_1 -> scope = * Scope_top();
+  _x2c_macro_map_1 -> hashes = Bytes_new(sizeof(unsigned));
+  _x2c_macro_map_1 -> hashes = Bytes_append(_x2c_macro_map_1 -> hashes, 0, _x2c_macro_capacity_0);
+  _x2c_macro_map_1 -> entries = Bytes_new(sizeof(struct MapIntIntRecord));
+  _x2c_macro_map_1 -> entries = Bytes_append(_x2c_macro_map_1 -> entries, 0, _x2c_macro_capacity_0);
+  _x2c_macro_map_1 -> capacity = _x2c_macro_capacity_0;
+  _x2c_macro_map_1 -> mask = _x2c_macro_capacity_0 - 1;
+  _x2c_macro_map_1 -> used = 0;
+  return _x2c_macro_map_1;
 }
 
-static long MapIntInt__core_find_hashed(MapIntInt _x2c_macro_map_0, int * _x2c_macro_key_0, unsigned _x2c_macro_key_hash_0){
-  unsigned * _x2c_macro_hashes_0 = _x2c_macro_map_0 -> hashes;
-  unsigned _x2c_macro_mask_1 = _x2c_macro_map_0 -> mask, _x2c_macro_todo_start_0 = _x2c_macro_key_hash_0 & _x2c_macro_mask_1;
-  unsigned _x2c_macro_cap_0 = _x2c_macro_map_0 -> capacity;
+static long MapIntInt__core_find_hashed(MapIntInt _x2c_macro_map_2, int * _x2c_macro_key_0, unsigned _x2c_macro_key_hash_0){
+  unsigned * _x2c_macro_hashes_0 = _x2c_macro_map_2 -> hashes;
+  unsigned _x2c_macro_mask_1 = _x2c_macro_map_2 -> mask, _x2c_macro_todo_start_0 = _x2c_macro_key_hash_0 & _x2c_macro_mask_1;
+  unsigned _x2c_macro_cap_0 = _x2c_macro_map_2 -> capacity;
   for(int _x2c_macro_todo_psl_0 = 0;  _x2c_macro_todo_psl_0 <(int) _x2c_macro_cap_0;  _x2c_macro_todo_psl_0 ++){
     unsigned _x2c_macro_index_0 =(_x2c_macro_todo_start_0 + _x2c_macro_todo_psl_0) & _x2c_macro_mask_1;
     unsigned _x2c_macro_stored_0 = _x2c_macro_hashes_0[_x2c_macro_index_0];
     if(_x2c_macro_stored_0 == 0) break;
-    if(_x2c_macro_stored_0 == _x2c_macro_key_hash_0 && _equal_int(_int_key(_x2c_macro_map_0, _x2c_macro_index_0), _x2c_macro_key_0)) return(long) _x2c_macro_index_0;
+    if(_x2c_macro_stored_0 == _x2c_macro_key_hash_0 && _equal_int(_int_key(_x2c_macro_map_2, _x2c_macro_index_0), _x2c_macro_key_0)) return(long) _x2c_macro_index_0;
     unsigned _x2c_macro_stored_start_0 = _x2c_macro_stored_0 & _x2c_macro_mask_1;
     int _x2c_macro_stored_psl_0 =(_x2c_macro_cap_0 + _x2c_macro_index_0 - _x2c_macro_stored_start_0) & _x2c_macro_mask_1;
     if(_x2c_macro_stored_psl_0 < _x2c_macro_todo_psl_0) break;
@@ -1051,61 +1051,61 @@ static long MapIntInt__core_find_hashed(MapIntInt _x2c_macro_map_0, int * _x2c_m
   return - 1;
 }
 
-static long MapIntInt__core_find_index(MapIntInt _x2c_macro_map_0, int * _x2c_macro_key_0){
-  return MapIntInt__core_find_hashed(_x2c_macro_map_0, _x2c_macro_key_0, _hash_int(_x2c_macro_key_0));
+static long MapIntInt__core_find_index(MapIntInt _x2c_macro_map_3, int * _x2c_macro_key_1){
+  return MapIntInt__core_find_hashed(_x2c_macro_map_3, _x2c_macro_key_1, _hash_int(_x2c_macro_key_1));
 }
 
-static int MapIntInt__core_try_get(MapIntInt _x2c_macro_map_0, int * _x2c_macro_key_0, int * _x2c_macro_out_0){
-  if((void *) _x2c_macro_map_0 == 0 || ! _x2c_macro_out_0) return 0;
-  long _x2c_macro_index_0 = MapIntInt__core_find_index(_x2c_macro_map_0, _x2c_macro_key_0);
-  if(_x2c_macro_index_0 < 0) return 0;
-  * _x2c_macro_out_0 =(int) * _int_value(_x2c_macro_map_0, (unsigned) _x2c_macro_index_0);
+static int MapIntInt__core_try_get(MapIntInt _x2c_macro_map_4, int * _x2c_macro_key_2, int * _x2c_macro_out_0){
+  if((void *) _x2c_macro_map_4 == 0 || ! _x2c_macro_out_0) return 0;
+  long _x2c_macro_index_1 = MapIntInt__core_find_index(_x2c_macro_map_4, _x2c_macro_key_2);
+  if(_x2c_macro_index_1 < 0) return 0;
+  * _x2c_macro_out_0 =(int) * _int_value(_x2c_macro_map_4, (unsigned) _x2c_macro_index_1);
   return 1;
 }
 
-static void MapIntInt__core_reinsert(MapIntInt _x2c_macro_map_0, unsigned _x2c_macro_todo_hash_0, struct MapIntIntRecord _x2c_macro_todo_0, int _x2c_macro_psl_0){
-  unsigned * _x2c_macro_hashes_0 = _x2c_macro_map_0 -> hashes;
-  struct MapIntIntRecord * _x2c_macro_entries_0 = _x2c_macro_map_0 -> entries;
-  unsigned _x2c_macro_mask_1 = _x2c_macro_map_0 -> mask, _x2c_macro_todo_start_0 = _x2c_macro_todo_hash_0 & _x2c_macro_mask_1;
-  unsigned _x2c_macro_cap_0 = _x2c_macro_map_0 -> capacity;
-  for(int _x2c_macro_todo_psl_0 = _x2c_macro_psl_0;  _x2c_macro_todo_psl_0 <(int) _x2c_macro_cap_0;  _x2c_macro_todo_psl_0 ++){
-    unsigned _x2c_macro_index_0 =(_x2c_macro_todo_start_0 + _x2c_macro_todo_psl_0) & _x2c_macro_mask_1;
-    unsigned _x2c_macro_stored_0 = _x2c_macro_hashes_0[_x2c_macro_index_0];
-    if(_x2c_macro_stored_0 == 0){
-      _x2c_macro_hashes_0[_x2c_macro_index_0] = _x2c_macro_todo_hash_0;
-      _x2c_macro_entries_0[_x2c_macro_index_0] = _x2c_macro_todo_0;
+static void MapIntInt__core_reinsert(MapIntInt _x2c_macro_map_5, unsigned _x2c_macro_todo_hash_0, struct MapIntIntRecord _x2c_macro_todo_0, int _x2c_macro_psl_0){
+  unsigned * _x2c_macro_hashes_1 = _x2c_macro_map_5 -> hashes;
+  struct MapIntIntRecord * _x2c_macro_entries_0 = _x2c_macro_map_5 -> entries;
+  unsigned _x2c_macro_mask_2 = _x2c_macro_map_5 -> mask, _x2c_macro_todo_start_1 = _x2c_macro_todo_hash_0 & _x2c_macro_mask_2;
+  unsigned _x2c_macro_cap_1 = _x2c_macro_map_5 -> capacity;
+  for(int _x2c_macro_todo_psl_1 = _x2c_macro_psl_0;  _x2c_macro_todo_psl_1 <(int) _x2c_macro_cap_1;  _x2c_macro_todo_psl_1 ++){
+    unsigned _x2c_macro_index_2 =(_x2c_macro_todo_start_1 + _x2c_macro_todo_psl_1) & _x2c_macro_mask_2;
+    unsigned _x2c_macro_stored_1 = _x2c_macro_hashes_1[_x2c_macro_index_2];
+    if(_x2c_macro_stored_1 == 0){
+      _x2c_macro_hashes_1[_x2c_macro_index_2] = _x2c_macro_todo_hash_0;
+      _x2c_macro_entries_0[_x2c_macro_index_2] = _x2c_macro_todo_0;
       return;
     }
-    unsigned _x2c_macro_stored_start_0 = _x2c_macro_stored_0 & _x2c_macro_mask_1;
-    int _x2c_macro_stored_psl_0 =(_x2c_macro_cap_0 + _x2c_macro_index_0 - _x2c_macro_stored_start_0) & _x2c_macro_mask_1;
-    if(_x2c_macro_stored_psl_0 < _x2c_macro_todo_psl_0){
-      struct MapIntIntRecord _x2c_macro_swap_0 = _x2c_macro_entries_0[_x2c_macro_index_0];
-      _x2c_macro_hashes_0[_x2c_macro_index_0] = _x2c_macro_todo_hash_0;
-      _x2c_macro_entries_0[_x2c_macro_index_0] = _x2c_macro_todo_0;
-      _x2c_macro_todo_hash_0 = _x2c_macro_stored_0;
+    unsigned _x2c_macro_stored_start_1 = _x2c_macro_stored_1 & _x2c_macro_mask_2;
+    int _x2c_macro_stored_psl_1 =(_x2c_macro_cap_1 + _x2c_macro_index_2 - _x2c_macro_stored_start_1) & _x2c_macro_mask_2;
+    if(_x2c_macro_stored_psl_1 < _x2c_macro_todo_psl_1){
+      struct MapIntIntRecord _x2c_macro_swap_0 = _x2c_macro_entries_0[_x2c_macro_index_2];
+      _x2c_macro_hashes_1[_x2c_macro_index_2] = _x2c_macro_todo_hash_0;
+      _x2c_macro_entries_0[_x2c_macro_index_2] = _x2c_macro_todo_0;
+      _x2c_macro_todo_hash_0 = _x2c_macro_stored_1;
       _x2c_macro_todo_0 = _x2c_macro_swap_0;
-      _x2c_macro_todo_start_0 = _x2c_macro_stored_start_0;
-      _x2c_macro_todo_psl_0 = _x2c_macro_stored_psl_0;
+      _x2c_macro_todo_start_1 = _x2c_macro_stored_start_1;
+      _x2c_macro_todo_psl_1 = _x2c_macro_stored_psl_1;
     }
 
   }
-  (void) _int_reinsert_error(_x2c_macro_cap_0, _x2c_macro_psl_0);
+  (void) _int_reinsert_error(_x2c_macro_cap_1, _x2c_macro_psl_0);
 }
 
 void Scope_move(void *, Scope *);
 
 Block Bytes_block(Bytes);
 
-static void MapIntInt__core_expand(MapIntInt _x2c_macro_map_0){
-  unsigned * _x2c_macro_hashes_0 = _x2c_macro_map_0 -> hashes;
-  struct MapIntIntRecord * _x2c_macro_entries_0 = _x2c_macro_map_0 -> entries;
-  unsigned _x2c_macro_cap_0 = _x2c_macro_map_0 -> capacity;
-  if(_x2c_macro_cap_0 > ~ 0u / 2){
+static void MapIntInt__core_expand(MapIntInt _x2c_macro_map_6){
+  unsigned * _x2c_macro_hashes_2 = _x2c_macro_map_6 -> hashes;
+  struct MapIntIntRecord * _x2c_macro_entries_1 = _x2c_macro_map_6 -> entries;
+  unsigned _x2c_macro_cap_2 = _x2c_macro_map_6 -> capacity;
+  if(_x2c_macro_cap_2 > ~ 0u / 2){
     static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/typed-map.x",.function = "MapIntInt__core_expand",.line = 273};
-    x2c_error_raise_n(& _x2c_error_site_13, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_macro_cap_0));
+    x2c_error_raise_n(& _x2c_error_site_13, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_macro_cap_2));
     __builtin_unreachable();
   }
-  unsigned _x2c_macro_capacity_0 = _x2c_macro_cap_0 * 2;
+  unsigned _x2c_macro_capacity_1 = _x2c_macro_cap_2 * 2;
   Bytes _x2c_macro_staged_hashes_0 = Bytes_new(sizeof(unsigned));
   {
   _x2c_defer_env_19 _x2c_defer_env_30 = {._x2c_defer_capture_37 =(const void *) & _x2c_macro_staged_hashes_0};
@@ -1116,7 +1116,7 @@ static void MapIntInt__core_expand(MapIntInt _x2c_macro_map_0){
   };
   x2c_cleanup_push(&_x2c_defer_record_0);
   {
-    _x2c_macro_staged_hashes_0 = Bytes_append(_x2c_macro_staged_hashes_0, 0, _x2c_macro_capacity_0);
+    _x2c_macro_staged_hashes_0 = Bytes_append(_x2c_macro_staged_hashes_0, 0, _x2c_macro_capacity_1);
     Bytes _x2c_macro_staged_entries_0 = Bytes_new(sizeof(struct MapIntIntRecord));
     {
   _x2c_defer_env_18 _x2c_defer_env_31 = {._x2c_defer_capture_36 =(const void *) & _x2c_macro_staged_entries_0};
@@ -1127,26 +1127,26 @@ static void MapIntInt__core_expand(MapIntInt _x2c_macro_map_0){
   };
   x2c_cleanup_push(&_x2c_defer_record_1);
   {
-      _x2c_macro_staged_entries_0 = Bytes_append(_x2c_macro_staged_entries_0, 0, _x2c_macro_capacity_0);
-      struct MapIntInt _x2c_macro_expanded_0 = * _x2c_macro_map_0;
+      _x2c_macro_staged_entries_0 = Bytes_append(_x2c_macro_staged_entries_0, 0, _x2c_macro_capacity_1);
+      struct MapIntInt _x2c_macro_expanded_0 = * _x2c_macro_map_6;
       _x2c_macro_expanded_0.hashes = _x2c_macro_staged_hashes_0;
       _x2c_macro_expanded_0.entries = _x2c_macro_staged_entries_0;
-      _x2c_macro_expanded_0.capacity = _x2c_macro_capacity_0;
-      _x2c_macro_expanded_0.mask = _x2c_macro_capacity_0 - 1;
+      _x2c_macro_expanded_0.capacity = _x2c_macro_capacity_1;
+      _x2c_macro_expanded_0.mask = _x2c_macro_capacity_1 - 1;
       MapIntInt _x2c_macro_expanded_map_0 =(MapIntInt) & _x2c_macro_expanded_0;
-      for(unsigned _x2c_macro_i_0 = 0;  _x2c_macro_i_0 < _x2c_macro_cap_0;  _x2c_macro_i_0 ++) if(_x2c_macro_hashes_0[_x2c_macro_i_0]) MapIntInt__core_reinsert(_x2c_macro_expanded_map_0, _x2c_macro_hashes_0[_x2c_macro_i_0], _x2c_macro_entries_0[_x2c_macro_i_0], 0);
-      Scope_move(Bytes_block(_x2c_macro_staged_hashes_0), & _x2c_macro_map_0 -> scope);
-      Scope_move((unsigned char *) _x2c_macro_staged_hashes_0 - sizeof(Block), & _x2c_macro_map_0 -> scope);
-      Scope_move(Bytes_block(_x2c_macro_staged_entries_0), & _x2c_macro_map_0 -> scope);
-      Scope_move((unsigned char *) _x2c_macro_staged_entries_0 - sizeof(Block), & _x2c_macro_map_0 -> scope);
-      _x2c_macro_map_0 -> hashes = _x2c_macro_expanded_0.hashes;
-      _x2c_macro_map_0 -> entries = _x2c_macro_expanded_0.entries;
-      _x2c_macro_map_0 -> capacity = _x2c_macro_expanded_0.capacity;
-      _x2c_macro_map_0 -> mask = _x2c_macro_expanded_0.mask;
+      for(unsigned _x2c_macro_i_0 = 0;  _x2c_macro_i_0 < _x2c_macro_cap_2;  _x2c_macro_i_0 ++) if(_x2c_macro_hashes_2[_x2c_macro_i_0]) MapIntInt__core_reinsert(_x2c_macro_expanded_map_0, _x2c_macro_hashes_2[_x2c_macro_i_0], _x2c_macro_entries_1[_x2c_macro_i_0], 0);
+      Scope_move(Bytes_block(_x2c_macro_staged_hashes_0), & _x2c_macro_map_6 -> scope);
+      Scope_move((unsigned char *) _x2c_macro_staged_hashes_0 - sizeof(Block), & _x2c_macro_map_6 -> scope);
+      Scope_move(Bytes_block(_x2c_macro_staged_entries_0), & _x2c_macro_map_6 -> scope);
+      Scope_move((unsigned char *) _x2c_macro_staged_entries_0 - sizeof(Block), & _x2c_macro_map_6 -> scope);
+      _x2c_macro_map_6 -> hashes = _x2c_macro_expanded_0.hashes;
+      _x2c_macro_map_6 -> entries = _x2c_macro_expanded_0.entries;
+      _x2c_macro_map_6 -> capacity = _x2c_macro_expanded_0.capacity;
+      _x2c_macro_map_6 -> mask = _x2c_macro_expanded_0.mask;
       _x2c_macro_staged_hashes_0 = 0;
       _x2c_macro_staged_entries_0 = 0;
-      Bytes_free((Bytes) _x2c_macro_hashes_0);
-      Bytes_free((Bytes) _x2c_macro_entries_0);
+      Bytes_free((Bytes) _x2c_macro_hashes_2);
+      Bytes_free((Bytes) _x2c_macro_entries_1);
     }
     x2c_cleanup_leave(& _x2c_defer_record_1);
 
@@ -1157,96 +1157,96 @@ static void MapIntInt__core_expand(MapIntInt _x2c_macro_map_0){
 }
 }
 
-static int * MapIntInt__core_get_or_insert(MapIntInt _x2c_macro_map_0, int * _x2c_macro_key_0, int * _x2c_macro_val_0, int * _x2c_macro_inserted_0){
+static int * MapIntInt__core_get_or_insert(MapIntInt _x2c_macro_map_7, int * _x2c_macro_key_3, int * _x2c_macro_val_0, int * _x2c_macro_inserted_0){
   * _x2c_macro_inserted_0 = 0;
   retry :;
-  unsigned _x2c_macro_key_hash_0 = _hash_int(_x2c_macro_key_0), _x2c_macro_mask_1 = _x2c_macro_map_0 -> mask;
-  unsigned _x2c_macro_todo_start_0 = _x2c_macro_key_hash_0 & _x2c_macro_mask_1;
-  unsigned * _x2c_macro_hashes_0 = _x2c_macro_map_0 -> hashes;
-  struct MapIntIntRecord * _x2c_macro_entries_0 = _x2c_macro_map_0 -> entries;
-  unsigned _x2c_macro_cap_0 = _x2c_macro_map_0 -> capacity;
-  for(int _x2c_macro_todo_psl_0 = 0;  _x2c_macro_todo_psl_0 <(int) _x2c_macro_cap_0;  _x2c_macro_todo_psl_0 ++){
-    unsigned _x2c_macro_index_0 =(_x2c_macro_todo_start_0 + _x2c_macro_todo_psl_0) & _x2c_macro_mask_1;
-    unsigned _x2c_macro_stored_0 = _x2c_macro_hashes_0[_x2c_macro_index_0];
-    if(_x2c_macro_stored_0 == _x2c_macro_key_hash_0 && _equal_int(_int_key(_x2c_macro_map_0, _x2c_macro_index_0), _x2c_macro_key_0)) return _int_value(_x2c_macro_map_0, _x2c_macro_index_0);
-    if(_x2c_macro_stored_0 == 0){
+  unsigned _x2c_macro_key_hash_1 = _hash_int(_x2c_macro_key_3), _x2c_macro_mask_3 = _x2c_macro_map_7 -> mask;
+  unsigned _x2c_macro_todo_start_2 = _x2c_macro_key_hash_1 & _x2c_macro_mask_3;
+  unsigned * _x2c_macro_hashes_3 = _x2c_macro_map_7 -> hashes;
+  struct MapIntIntRecord * _x2c_macro_entries_2 = _x2c_macro_map_7 -> entries;
+  unsigned _x2c_macro_cap_3 = _x2c_macro_map_7 -> capacity;
+  for(int _x2c_macro_todo_psl_2 = 0;  _x2c_macro_todo_psl_2 <(int) _x2c_macro_cap_3;  _x2c_macro_todo_psl_2 ++){
+    unsigned _x2c_macro_index_3 =(_x2c_macro_todo_start_2 + _x2c_macro_todo_psl_2) & _x2c_macro_mask_3;
+    unsigned _x2c_macro_stored_2 = _x2c_macro_hashes_3[_x2c_macro_index_3];
+    if(_x2c_macro_stored_2 == _x2c_macro_key_hash_1 && _equal_int(_int_key(_x2c_macro_map_7, _x2c_macro_index_3), _x2c_macro_key_3)) return _int_value(_x2c_macro_map_7, _x2c_macro_index_3);
+    if(_x2c_macro_stored_2 == 0){
       (void) _valid_int(_x2c_macro_val_0);
-      if(_x2c_macro_map_0 -> used >=(unsigned long) _x2c_macro_map_0 -> capacity * 3 / 4){
-        MapIntInt__core_expand(_x2c_macro_map_0);
+      if(_x2c_macro_map_7 -> used >=(unsigned long) _x2c_macro_map_7 -> capacity * 3 / 4){
+        MapIntInt__core_expand(_x2c_macro_map_7);
         goto retry;
       }
-      _x2c_macro_hashes_0[_x2c_macro_index_0] = _x2c_macro_key_hash_0;
-      _x2c_macro_entries_0[_x2c_macro_index_0].key = * _x2c_macro_key_0;
-      _x2c_macro_entries_0[_x2c_macro_index_0].val = * _x2c_macro_val_0;
-      _x2c_macro_map_0 -> used += 1;
+      _x2c_macro_hashes_3[_x2c_macro_index_3] = _x2c_macro_key_hash_1;
+      _x2c_macro_entries_2[_x2c_macro_index_3].key = * _x2c_macro_key_3;
+      _x2c_macro_entries_2[_x2c_macro_index_3].val = * _x2c_macro_val_0;
+      _x2c_macro_map_7 -> used += 1;
       * _x2c_macro_inserted_0 = 1;
-      return _int_value(_x2c_macro_map_0, _x2c_macro_index_0);
+      return _int_value(_x2c_macro_map_7, _x2c_macro_index_3);
     }
-    unsigned _x2c_macro_stored_start_0 = _x2c_macro_stored_0 & _x2c_macro_mask_1;
-    int _x2c_macro_stored_psl_0 =(_x2c_macro_cap_0 + _x2c_macro_index_0 - _x2c_macro_stored_start_0) & _x2c_macro_mask_1;
-    if(_x2c_macro_stored_psl_0 < _x2c_macro_todo_psl_0){
+    unsigned _x2c_macro_stored_start_2 = _x2c_macro_stored_2 & _x2c_macro_mask_3;
+    int _x2c_macro_stored_psl_2 =(_x2c_macro_cap_3 + _x2c_macro_index_3 - _x2c_macro_stored_start_2) & _x2c_macro_mask_3;
+    if(_x2c_macro_stored_psl_2 < _x2c_macro_todo_psl_2){
       (void) _valid_int(_x2c_macro_val_0);
-      if(_x2c_macro_map_0 -> used >=(unsigned long) _x2c_macro_map_0 -> capacity * 3 / 4){
-        MapIntInt__core_expand(_x2c_macro_map_0);
+      if(_x2c_macro_map_7 -> used >=(unsigned long) _x2c_macro_map_7 -> capacity * 3 / 4){
+        MapIntInt__core_expand(_x2c_macro_map_7);
         goto retry;
       }
-      struct MapIntIntRecord _x2c_macro_displaced_0 = _x2c_macro_entries_0[_x2c_macro_index_0];
-      _x2c_macro_hashes_0[_x2c_macro_index_0] = _x2c_macro_key_hash_0;
-      _x2c_macro_entries_0[_x2c_macro_index_0].key = * _x2c_macro_key_0;
-      _x2c_macro_entries_0[_x2c_macro_index_0].val = * _x2c_macro_val_0;
-      _x2c_macro_map_0 -> used += 1;
+      struct MapIntIntRecord _x2c_macro_displaced_0 = _x2c_macro_entries_2[_x2c_macro_index_3];
+      _x2c_macro_hashes_3[_x2c_macro_index_3] = _x2c_macro_key_hash_1;
+      _x2c_macro_entries_2[_x2c_macro_index_3].key = * _x2c_macro_key_3;
+      _x2c_macro_entries_2[_x2c_macro_index_3].val = * _x2c_macro_val_0;
+      _x2c_macro_map_7 -> used += 1;
       * _x2c_macro_inserted_0 = 1;
-      MapIntInt__core_reinsert(_x2c_macro_map_0, _x2c_macro_stored_0, _x2c_macro_displaced_0, _x2c_macro_stored_psl_0 + 1);
-      return _int_value(_x2c_macro_map_0, _x2c_macro_index_0);
+      MapIntInt__core_reinsert(_x2c_macro_map_7, _x2c_macro_stored_2, _x2c_macro_displaced_0, _x2c_macro_stored_psl_2 + 1);
+      return _int_value(_x2c_macro_map_7, _x2c_macro_index_3);
     }
 
   }
-  (void) _int_insert_error(_x2c_macro_cap_0);
+  (void) _int_insert_error(_x2c_macro_cap_3);
 }
 
-static void MapIntInt__core_set(MapIntInt _x2c_macro_map_0, int * _x2c_macro_key_0, int * _x2c_macro_val_0){
-  int _x2c_macro_inserted_0;
-  int * _x2c_macro_stored_0 = MapIntInt__core_get_or_insert(_x2c_macro_map_0, _x2c_macro_key_0, _x2c_macro_val_0, & _x2c_macro_inserted_0);
-  if(! _x2c_macro_inserted_0) _x2c_macro_stored_0[0] = _x2c_macro_val_0[0];
+static void MapIntInt__core_set(MapIntInt _x2c_macro_map_8, int * _x2c_macro_key_4, int * _x2c_macro_val_1){
+  int _x2c_macro_inserted_1;
+  int * _x2c_macro_stored_3 = MapIntInt__core_get_or_insert(_x2c_macro_map_8, _x2c_macro_key_4, _x2c_macro_val_1, & _x2c_macro_inserted_1);
+  if(! _x2c_macro_inserted_1) _x2c_macro_stored_3[0] = _x2c_macro_val_1[0];
 }
 
-static int MapIntInt__core_try_del(MapIntInt _x2c_macro_map_0, int * _x2c_macro_key_0, int * _x2c_macro_out_0){
-  if((void *) _x2c_macro_map_0 == 0 || ! _x2c_macro_out_0) return 0;
-  long _x2c_macro_found_0 = MapIntInt__core_find_index(_x2c_macro_map_0, _x2c_macro_key_0);
+static int MapIntInt__core_try_del(MapIntInt _x2c_macro_map_9, int * _x2c_macro_key_5, int * _x2c_macro_out_1){
+  if((void *) _x2c_macro_map_9 == 0 || ! _x2c_macro_out_1) return 0;
+  long _x2c_macro_found_0 = MapIntInt__core_find_index(_x2c_macro_map_9, _x2c_macro_key_5);
   if(_x2c_macro_found_0 < 0) return 0;
-  unsigned * _x2c_macro_hashes_0 = _x2c_macro_map_0 -> hashes;
-  struct MapIntIntRecord * _x2c_macro_entries_0 = _x2c_macro_map_0 -> entries;
-  unsigned _x2c_macro_mask_1 = _x2c_macro_map_0 -> mask, _x2c_macro_index_0 =(unsigned) _x2c_macro_found_0, _x2c_macro_empty_0;
-  * _x2c_macro_out_0 =(int) * _int_value(_x2c_macro_map_0, _x2c_macro_index_0);
-  _x2c_macro_hashes_0[_x2c_macro_index_0] = 0;
-  _x2c_macro_map_0 -> used --;
+  unsigned * _x2c_macro_hashes_4 = _x2c_macro_map_9 -> hashes;
+  struct MapIntIntRecord * _x2c_macro_entries_3 = _x2c_macro_map_9 -> entries;
+  unsigned _x2c_macro_mask_4 = _x2c_macro_map_9 -> mask, _x2c_macro_index_4 =(unsigned) _x2c_macro_found_0, _x2c_macro_empty_0;
+  * _x2c_macro_out_1 =(int) * _int_value(_x2c_macro_map_9, _x2c_macro_index_4);
+  _x2c_macro_hashes_4[_x2c_macro_index_4] = 0;
+  _x2c_macro_map_9 -> used --;
   while(1){
-    _x2c_macro_empty_0 = _x2c_macro_index_0;
-    _x2c_macro_index_0 =(_x2c_macro_index_0 + 1) & _x2c_macro_mask_1;
-    if(_x2c_macro_hashes_0[_x2c_macro_index_0] == 0 ||(_x2c_macro_hashes_0[_x2c_macro_index_0] & _x2c_macro_mask_1) == _x2c_macro_index_0) break;
-    unsigned _x2c_macro_swap_hash_0 = _x2c_macro_hashes_0[_x2c_macro_empty_0];
-    struct MapIntIntRecord _x2c_macro_swap_entry_0 = _x2c_macro_entries_0[_x2c_macro_empty_0];
-    _x2c_macro_hashes_0[_x2c_macro_empty_0] = _x2c_macro_hashes_0[_x2c_macro_index_0];
-    _x2c_macro_entries_0[_x2c_macro_empty_0] = _x2c_macro_entries_0[_x2c_macro_index_0];
-    _x2c_macro_hashes_0[_x2c_macro_index_0] = _x2c_macro_swap_hash_0;
-    _x2c_macro_entries_0[_x2c_macro_index_0] = _x2c_macro_swap_entry_0;
+    _x2c_macro_empty_0 = _x2c_macro_index_4;
+    _x2c_macro_index_4 =(_x2c_macro_index_4 + 1) & _x2c_macro_mask_4;
+    if(_x2c_macro_hashes_4[_x2c_macro_index_4] == 0 ||(_x2c_macro_hashes_4[_x2c_macro_index_4] & _x2c_macro_mask_4) == _x2c_macro_index_4) break;
+    unsigned _x2c_macro_swap_hash_0 = _x2c_macro_hashes_4[_x2c_macro_empty_0];
+    struct MapIntIntRecord _x2c_macro_swap_entry_0 = _x2c_macro_entries_3[_x2c_macro_empty_0];
+    _x2c_macro_hashes_4[_x2c_macro_empty_0] = _x2c_macro_hashes_4[_x2c_macro_index_4];
+    _x2c_macro_entries_3[_x2c_macro_empty_0] = _x2c_macro_entries_3[_x2c_macro_index_4];
+    _x2c_macro_hashes_4[_x2c_macro_index_4] = _x2c_macro_swap_hash_0;
+    _x2c_macro_entries_3[_x2c_macro_index_4] = _x2c_macro_swap_entry_0;
   }
-  _x2c_macro_entries_0[_x2c_macro_empty_0] =(struct MapIntIntRecord){
+  _x2c_macro_entries_3[_x2c_macro_empty_0] =(struct MapIntIntRecord){
     0
   }
   ;
   return 1;
 }
 
-static int MapIntInt__core_try_next(MapIntInt _x2c_macro_map_0, unsigned * _x2c_macro_cursor_0, int * _x2c_macro_key_0, int * _x2c_macro_val_0){
-  if((void *) _x2c_macro_map_0 == 0 || ! _x2c_macro_cursor_0 || ! _x2c_macro_key_0 || ! _x2c_macro_val_0) return 0;
-  unsigned * _x2c_macro_hashes_0 = _x2c_macro_map_0 -> hashes;
-  while(* _x2c_macro_cursor_0 < _x2c_macro_map_0 -> capacity){
-    unsigned _x2c_macro_index_0 = * _x2c_macro_cursor_0;
+static int MapIntInt__core_try_next(MapIntInt _x2c_macro_map_10, unsigned * _x2c_macro_cursor_0, int * _x2c_macro_key_6, int * _x2c_macro_val_2){
+  if((void *) _x2c_macro_map_10 == 0 || ! _x2c_macro_cursor_0 || ! _x2c_macro_key_6 || ! _x2c_macro_val_2) return 0;
+  unsigned * _x2c_macro_hashes_5 = _x2c_macro_map_10 -> hashes;
+  while(* _x2c_macro_cursor_0 < _x2c_macro_map_10 -> capacity){
+    unsigned _x2c_macro_index_5 = * _x2c_macro_cursor_0;
     * _x2c_macro_cursor_0 += 1;
-    if(_x2c_macro_hashes_0[_x2c_macro_index_0] != 0){
-      * _x2c_macro_key_0 =(int) * _int_key(_x2c_macro_map_0, _x2c_macro_index_0);
-      * _x2c_macro_val_0 =(int) * _int_value(_x2c_macro_map_0, _x2c_macro_index_0);
+    if(_x2c_macro_hashes_5[_x2c_macro_index_5] != 0){
+      * _x2c_macro_key_6 =(int) * _int_key(_x2c_macro_map_10, _x2c_macro_index_5);
+      * _x2c_macro_val_2 =(int) * _int_value(_x2c_macro_map_10, _x2c_macro_index_5);
       return 1;
     }
 
@@ -1254,15 +1254,15 @@ static int MapIntInt__core_try_next(MapIntInt _x2c_macro_map_0, unsigned * _x2c_
   return 0;
 }
 
-static void MapIntInt__core_insert_all(MapIntInt _x2c_macro_map_0, MapIntInt _x2c_macro_other_0){
-  unsigned _x2c_macro_cursor_0 = 0;
-  int _x2c_macro_key_0;
-  int _x2c_macro_val_0;
-  while(MapIntInt__core_try_next(_x2c_macro_other_0, & _x2c_macro_cursor_0, & _x2c_macro_key_0, & _x2c_macro_val_0)) MapIntInt__core_set(_x2c_macro_map_0, & _x2c_macro_key_0, & _x2c_macro_val_0);
+static void MapIntInt__core_insert_all(MapIntInt _x2c_macro_map_11, MapIntInt _x2c_macro_other_0){
+  unsigned _x2c_macro_cursor_1 = 0;
+  int _x2c_macro_key_7;
+  int _x2c_macro_val_3;
+  while(MapIntInt__core_try_next(_x2c_macro_other_0, & _x2c_macro_cursor_1, & _x2c_macro_key_7, & _x2c_macro_val_3)) MapIntInt__core_set(_x2c_macro_map_11, & _x2c_macro_key_7, & _x2c_macro_val_3);
 }
 
-static MapIntInt MapIntInt__core_copy(MapIntInt _x2c_macro_map_0){
-  MapIntInt _x2c_macro_copy_0 = MapIntInt__core_new_capacity(_x2c_macro_map_0, 2), _x2c_macro_result_0 = 0;
+static MapIntInt MapIntInt__core_copy(MapIntInt _x2c_macro_map_12){
+  MapIntInt _x2c_macro_copy_0 = MapIntInt__core_new_capacity(_x2c_macro_map_12, 2), _x2c_macro_result_0 = 0;
   {
   _x2c_defer_env_0 _x2c_defer_env_32 = {._x2c_defer_capture_0 =(const void *) & _x2c_macro_result_0, ._x2c_defer_capture_1 =(const void *) & _x2c_macro_copy_0};
 
@@ -1272,7 +1272,7 @@ static MapIntInt MapIntInt__core_copy(MapIntInt _x2c_macro_map_0){
   };
   x2c_cleanup_push(&_x2c_defer_record_2);
   {
-    MapIntInt__core_insert_all(_x2c_macro_copy_0, _x2c_macro_map_0);
+    MapIntInt__core_insert_all(_x2c_macro_copy_0, _x2c_macro_map_12);
     {
       MapIntInt _x2c_return_value_0 = _x2c_macro_result_0 = _x2c_macro_copy_0;
       {
@@ -1288,16 +1288,16 @@ static MapIntInt MapIntInt__core_copy(MapIntInt _x2c_macro_map_0){
 }
 }
 
-static MapIntInt MapIntInt__core_merge(MapIntInt _x2c_macro_map_0, MapIntInt _x2c_macro_other_0){
-  if(! MapIntInt_truth(_x2c_macro_other_0)) return _x2c_macro_map_0;
+static MapIntInt MapIntInt__core_merge(MapIntInt _x2c_macro_map_13, MapIntInt _x2c_macro_other_1){
+  if(! MapIntInt_truth(_x2c_macro_other_1)) return _x2c_macro_map_13;
   int _x2c_macro_created_0 = 0;
-  if((void *) _x2c_macro_map_0 == 0){
-    _x2c_macro_map_0 = MapIntInt__core_new_capacity(_x2c_macro_map_0, 2);
+  if((void *) _x2c_macro_map_13 == 0){
+    _x2c_macro_map_13 = MapIntInt__core_new_capacity(_x2c_macro_map_13, 2);
     _x2c_macro_created_0 = 1;
   }
-  MapIntInt _x2c_macro_result_0 = 0;
+  MapIntInt _x2c_macro_result_1 = 0;
   {
-  _x2c_defer_env_1 _x2c_defer_env_33 = {._x2c_defer_capture_2 =(const void *) & _x2c_macro_created_0, ._x2c_defer_capture_3 =(const void *) & _x2c_macro_result_0, ._x2c_defer_capture_4 =(const void *) & _x2c_macro_map_0};
+  _x2c_defer_env_1 _x2c_defer_env_33 = {._x2c_defer_capture_2 =(const void *) & _x2c_macro_created_0, ._x2c_defer_capture_3 =(const void *) & _x2c_macro_result_1, ._x2c_defer_capture_4 =(const void *) & _x2c_macro_map_13};
 
   X2CCleanup _x2c_defer_record_3 = {
     .fn = _x2c_defer_cleanup_1,
@@ -1305,9 +1305,9 @@ static MapIntInt MapIntInt__core_merge(MapIntInt _x2c_macro_map_0, MapIntInt _x2
   };
   x2c_cleanup_push(&_x2c_defer_record_3);
   {
-    MapIntInt__core_insert_all(_x2c_macro_map_0, _x2c_macro_other_0);
+    MapIntInt__core_insert_all(_x2c_macro_map_13, _x2c_macro_other_1);
     {
-      MapIntInt _x2c_return_value_1 = _x2c_macro_result_0 = _x2c_macro_map_0;
+      MapIntInt _x2c_return_value_1 = _x2c_macro_result_1 = _x2c_macro_map_13;
       {
         x2c_cleanup_leave(& _x2c_defer_record_3);
         return _x2c_return_value_1;
@@ -1321,152 +1321,152 @@ static MapIntInt MapIntInt__core_merge(MapIntInt _x2c_macro_map_0, MapIntInt _x2
 }
 }
 
-static int MapIntInt__core_truth(MapIntInt _x2c_macro_map_0){
-  return(void *) _x2c_macro_map_0 != 0 && _x2c_macro_map_0 -> used != 0;
+static int MapIntInt__core_truth(MapIntInt _x2c_macro_map_14){
+  return(void *) _x2c_macro_map_14 != 0 && _x2c_macro_map_14 -> used != 0;
 }
 
 static int MapIntInt__core_equal(MapIntInt _x2c_macro_a_1, MapIntInt _x2c_macro_b_1){
   if((void *) _x2c_macro_a_1 ==(void *) _x2c_macro_b_1) return 1;
   if((void *) _x2c_macro_a_1 == 0 ||(void *) _x2c_macro_b_1 == 0) return 0;
   if(_x2c_macro_a_1 -> used != _x2c_macro_b_1 -> used) return 0;
-  unsigned _x2c_macro_cursor_0 = 0;
-  int _x2c_macro_key_0;
+  unsigned _x2c_macro_cursor_2 = 0;
+  int _x2c_macro_key_8;
   int _x2c_macro_avalue_0, _x2c_macro_bvalue_0;
-  while(MapIntInt__core_try_next(_x2c_macro_a_1, & _x2c_macro_cursor_0, & _x2c_macro_key_0, & _x2c_macro_avalue_0)){
-    if(! MapIntInt__core_try_get(_x2c_macro_b_1, & _x2c_macro_key_0, & _x2c_macro_bvalue_0) || ! _equal_int(& _x2c_macro_avalue_0, & _x2c_macro_bvalue_0)) return 0;
+  while(MapIntInt__core_try_next(_x2c_macro_a_1, & _x2c_macro_cursor_2, & _x2c_macro_key_8, & _x2c_macro_avalue_0)){
+    if(! MapIntInt__core_try_get(_x2c_macro_b_1, & _x2c_macro_key_8, & _x2c_macro_bvalue_0) || ! _equal_int(& _x2c_macro_avalue_0, & _x2c_macro_bvalue_0)) return 0;
   }
   return 1;
 }
 
-MapIntInt MapIntInt_new_capacity(unsigned _x2c_macro_capacity_1){
+MapIntInt MapIntInt_new_capacity(unsigned _x2c_macro_capacity_2){
   if(! _init_guard_) _file_init_();
-  if(! _capacity_valid(_x2c_macro_capacity_1))(void) _bad_arg(_0);
-  MapIntInt _x2c_macro_map_1 = 0;
-  return MapIntInt__core_new_capacity(_x2c_macro_map_1, _x2c_macro_capacity_1);
+  if(! _capacity_valid(_x2c_macro_capacity_2))(void) _bad_arg(_0);
+  MapIntInt _x2c_macro_map_15 = 0;
+  return MapIntInt__core_new_capacity(_x2c_macro_map_15, _x2c_macro_capacity_2);
 }
 
 MapIntInt MapIntInt_new(void){
-  MapIntInt _x2c_macro_map_1 = 0;
-  return MapIntInt__core_new_capacity(_x2c_macro_map_1, 2);
+  MapIntInt _x2c_macro_map_16 = 0;
+  return MapIntInt__core_new_capacity(_x2c_macro_map_16, 2);
 }
 
 int Map_try_next(Map, unsigned *, Var *, Var *);
 
-MapIntInt Map_mapintint(Map _x2c_macro_entries_1){
+MapIntInt Map_mapintint(Map _x2c_macro_entries_4){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_entries_1 == 0) return 0;
+  if((void *) _x2c_macro_entries_4 == 0) return 0;
   MapIntInt _x2c_macro_packed_0 = 0;
   _x2c_macro_packed_0 = MapIntInt__core_new_capacity(_x2c_macro_packed_0, 2);
-  unsigned _x2c_macro_cursor_1 = 0;
-  Var _x2c_macro_key_1, _x2c_macro_val_1;
-  while(Map_try_next(_x2c_macro_entries_1, & _x2c_macro_cursor_1, & _x2c_macro_key_1, & _x2c_macro_val_1)) MapIntInt_set(_x2c_macro_packed_0, Var_int(Var_convert(_x2c_macro_key_1, 3453797)), Var_int(Var_convert(_x2c_macro_val_1, 3453797)));
+  unsigned _x2c_macro_cursor_3 = 0;
+  Var _x2c_macro_key_9, _x2c_macro_val_4;
+  while(Map_try_next(_x2c_macro_entries_4, & _x2c_macro_cursor_3, & _x2c_macro_key_9, & _x2c_macro_val_4)) MapIntInt_set(_x2c_macro_packed_0, Var_int(Var_convert(_x2c_macro_key_9, 3453797)), Var_int(Var_convert(_x2c_macro_val_4, 3453797)));
   return _x2c_macro_packed_0;
 }
 
-unsigned MapIntInt_len(MapIntInt _x2c_macro_map_1){
-  return MapIntInt_truth(_x2c_macro_map_1) ? _x2c_macro_map_1 -> used : 0;
+unsigned MapIntInt_len(MapIntInt _x2c_macro_map_17){
+  return MapIntInt_truth(_x2c_macro_map_17) ? _x2c_macro_map_17 -> used : 0;
 }
 
-int MapIntInt_try_get(MapIntInt _x2c_macro_map_1, int _x2c_macro_key_1, int * _x2c_macro_out_1){
-  return MapIntInt__core_try_get(_x2c_macro_map_1, & _x2c_macro_key_1, _x2c_macro_out_1);
+int MapIntInt_try_get(MapIntInt _x2c_macro_map_18, int _x2c_macro_key_10, int * _x2c_macro_out_2){
+  return MapIntInt__core_try_get(_x2c_macro_map_18, & _x2c_macro_key_10, _x2c_macro_out_2);
 }
 
-int MapIntInt_get(MapIntInt _x2c_macro_map_1, int _x2c_macro_key_1){
+int MapIntInt_get(MapIntInt _x2c_macro_map_19, int _x2c_macro_key_11){
   if(! _init_guard_) _file_init_();
-  int _x2c_macro_out_1 = 0;
-  if(MapIntInt_try_get(_x2c_macro_map_1, _x2c_macro_key_1, & _x2c_macro_out_1)) return _x2c_macro_out_1;
+  int _x2c_macro_out_3 = 0;
+  if(MapIntInt_try_get(_x2c_macro_map_19, _x2c_macro_key_11, & _x2c_macro_out_3)) return _x2c_macro_out_3;
   (void) _bad_arg(_0);
   return 0;
 }
 
-int MapIntInt_getindex(MapIntInt _x2c_macro_map_1, int _x2c_macro_key_1){
+int MapIntInt_getindex(MapIntInt _x2c_macro_map_20, int _x2c_macro_key_12){
   if(! _init_guard_) _file_init_();
-  return MapIntInt_get(_x2c_macro_map_1, _x2c_macro_key_1);
+  return MapIntInt_get(_x2c_macro_map_20, _x2c_macro_key_12);
 }
 
-int MapIntInt_getdefault(MapIntInt _x2c_macro_map_1, int _x2c_macro_key_1, int _x2c_macro_defval_0){
-  int _x2c_macro_out_1;
-  return MapIntInt_try_get(_x2c_macro_map_1, _x2c_macro_key_1, & _x2c_macro_out_1) ? _x2c_macro_out_1 : _x2c_macro_defval_0;
+int MapIntInt_getdefault(MapIntInt _x2c_macro_map_21, int _x2c_macro_key_13, int _x2c_macro_defval_0){
+  int _x2c_macro_out_4;
+  return MapIntInt_try_get(_x2c_macro_map_21, _x2c_macro_key_13, & _x2c_macro_out_4) ? _x2c_macro_out_4 : _x2c_macro_defval_0;
 }
 
-int MapIntInt_setdefault(MapIntInt _x2c_macro_map_1, int _x2c_macro_key_1, int _x2c_macro_defval_0){
+int MapIntInt_setdefault(MapIntInt _x2c_macro_map_22, int _x2c_macro_key_14, int _x2c_macro_defval_1){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_1 == 0)(void) _bad_arg(_0);
-  int _x2c_macro_inserted_1;
-  int * _x2c_macro_stored_1 = MapIntInt__core_get_or_insert(_x2c_macro_map_1, & _x2c_macro_key_1, & _x2c_macro_defval_0, & _x2c_macro_inserted_1);
-  return _x2c_macro_stored_1[0];
+  if((void *) _x2c_macro_map_22 == 0)(void) _bad_arg(_0);
+  int _x2c_macro_inserted_2;
+  int * _x2c_macro_stored_4 = MapIntInt__core_get_or_insert(_x2c_macro_map_22, & _x2c_macro_key_14, & _x2c_macro_defval_1, & _x2c_macro_inserted_2);
+  return _x2c_macro_stored_4[0];
 }
 
-int MapIntInt_contains(MapIntInt _x2c_macro_map_1, int _x2c_macro_key_1){
-  return MapIntInt_truth(_x2c_macro_map_1) && MapIntInt__core_find_index(_x2c_macro_map_1, & _x2c_macro_key_1) >= 0;
+int MapIntInt_contains(MapIntInt _x2c_macro_map_23, int _x2c_macro_key_15){
+  return MapIntInt_truth(_x2c_macro_map_23) && MapIntInt__core_find_index(_x2c_macro_map_23, & _x2c_macro_key_15) >= 0;
 }
 
-void MapIntInt_set(MapIntInt _x2c_macro_map_1, int _x2c_macro_key_1, int _x2c_macro_val_1){
+void MapIntInt_set(MapIntInt _x2c_macro_map_24, int _x2c_macro_key_16, int _x2c_macro_val_5){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_1 == 0)(void) _bad_arg(_0);
-  MapIntInt__core_set(_x2c_macro_map_1, & _x2c_macro_key_1, & _x2c_macro_val_1);
+  if((void *) _x2c_macro_map_24 == 0)(void) _bad_arg(_0);
+  MapIntInt__core_set(_x2c_macro_map_24, & _x2c_macro_key_16, & _x2c_macro_val_5);
 }
 
-int MapIntInt_setindex(MapIntInt _x2c_macro_map_1, int _x2c_macro_key_1, int _x2c_macro_val_1){
+int MapIntInt_setindex(MapIntInt _x2c_macro_map_25, int _x2c_macro_key_17, int _x2c_macro_val_6){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_1 == 0)(void) _bad_arg(_0);
-  MapIntInt__core_set(_x2c_macro_map_1, & _x2c_macro_key_1, & _x2c_macro_val_1);
-  return _x2c_macro_val_1;
+  if((void *) _x2c_macro_map_25 == 0)(void) _bad_arg(_0);
+  MapIntInt__core_set(_x2c_macro_map_25, & _x2c_macro_key_17, & _x2c_macro_val_6);
+  return _x2c_macro_val_6;
 }
 
-int MapIntInt_updateindex(MapIntInt _x2c_macro_map_1, int _x2c_macro_key_1, Symbol _x2c_macro_op_1, int _x2c_macro_rhs_0){
+int MapIntInt_updateindex(MapIntInt _x2c_macro_map_26, int _x2c_macro_key_18, Symbol _x2c_macro_op_1, int _x2c_macro_rhs_0){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_1 == 0)(void) _bad_arg(_0);
+  if((void *) _x2c_macro_map_26 == 0)(void) _bad_arg(_0);
   if(_x2c_macro_op_1 == 56){
-    int _x2c_macro_inserted_1;
-    int * _x2c_macro_stored_1 = MapIntInt__core_get_or_insert(_x2c_macro_map_1, & _x2c_macro_key_1, & _x2c_macro_rhs_0, & _x2c_macro_inserted_1);
-    if(_x2c_macro_inserted_1) return _x2c_macro_rhs_0;
-    return _update_int(_x2c_macro_stored_1, _x2c_macro_op_1, _x2c_macro_rhs_0);
+    int _x2c_macro_inserted_3;
+    int * _x2c_macro_stored_5 = MapIntInt__core_get_or_insert(_x2c_macro_map_26, & _x2c_macro_key_18, & _x2c_macro_rhs_0, & _x2c_macro_inserted_3);
+    if(_x2c_macro_inserted_3) return _x2c_macro_rhs_0;
+    return _update_int(_x2c_macro_stored_5, _x2c_macro_op_1, _x2c_macro_rhs_0);
   }
-  long _x2c_macro_index_1 = MapIntInt__core_find_index(_x2c_macro_map_1, & _x2c_macro_key_1);
-  if(_x2c_macro_index_1 < 0)(void) _bad_arg(_0);
-  return _update_int(_int_value(_x2c_macro_map_1, (unsigned) _x2c_macro_index_1), _x2c_macro_op_1, _x2c_macro_rhs_0);
+  long _x2c_macro_index_6 = MapIntInt__core_find_index(_x2c_macro_map_26, & _x2c_macro_key_18);
+  if(_x2c_macro_index_6 < 0)(void) _bad_arg(_0);
+  return _update_int(_int_value(_x2c_macro_map_26, (unsigned) _x2c_macro_index_6), _x2c_macro_op_1, _x2c_macro_rhs_0);
 }
 
-int MapIntInt_postfixindex(MapIntInt _x2c_macro_map_1, int _x2c_macro_key_1, Symbol _x2c_macro_op_1){
+int MapIntInt_postfixindex(MapIntInt _x2c_macro_map_27, int _x2c_macro_key_19, Symbol _x2c_macro_op_2){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_1 == 0)(void) _bad_arg(_0);
-  long _x2c_macro_index_1 = MapIntInt__core_find_index(_x2c_macro_map_1, & _x2c_macro_key_1);
-  if(_x2c_macro_index_1 < 0)(void) _bad_arg(_0);
-  int * _x2c_macro_stored_1 = _int_value(_x2c_macro_map_1, (unsigned) _x2c_macro_index_1);
-  int _x2c_macro_old_0 = _x2c_macro_stored_1[0];
-  if(! 1)(void) _bad_op(_x2c_macro_op_1);
-  if(_x2c_macro_op_1 == 1848) _update_int(_x2c_macro_stored_1, 56, 1);
-  else if(_x2c_macro_op_1 == 2046) _update_int(_x2c_macro_stored_1, 62, 1);
-  else(void) _bad_op(_x2c_macro_op_1);
+  if((void *) _x2c_macro_map_27 == 0)(void) _bad_arg(_0);
+  long _x2c_macro_index_7 = MapIntInt__core_find_index(_x2c_macro_map_27, & _x2c_macro_key_19);
+  if(_x2c_macro_index_7 < 0)(void) _bad_arg(_0);
+  int * _x2c_macro_stored_6 = _int_value(_x2c_macro_map_27, (unsigned) _x2c_macro_index_7);
+  int _x2c_macro_old_0 = _x2c_macro_stored_6[0];
+  if(! 1)(void) _bad_op(_x2c_macro_op_2);
+  if(_x2c_macro_op_2 == 1848) _update_int(_x2c_macro_stored_6, 56, 1);
+  else if(_x2c_macro_op_2 == 2046) _update_int(_x2c_macro_stored_6, 62, 1);
+  else(void) _bad_op(_x2c_macro_op_2);
   return _x2c_macro_old_0;
 }
 
-int MapIntInt_try_del(MapIntInt _x2c_macro_map_1, int _x2c_macro_key_1, int * _x2c_macro_out_1){
-  return MapIntInt__core_try_del(_x2c_macro_map_1, & _x2c_macro_key_1, _x2c_macro_out_1);
+int MapIntInt_try_del(MapIntInt _x2c_macro_map_28, int _x2c_macro_key_20, int * _x2c_macro_out_5){
+  return MapIntInt__core_try_del(_x2c_macro_map_28, & _x2c_macro_key_20, _x2c_macro_out_5);
 }
 
-int MapIntInt_del(MapIntInt _x2c_macro_map_1, int _x2c_macro_key_1){
+int MapIntInt_del(MapIntInt _x2c_macro_map_29, int _x2c_macro_key_21){
   if(! _init_guard_) _file_init_();
-  int _x2c_macro_out_1 = 0;
-  if(MapIntInt_try_del(_x2c_macro_map_1, _x2c_macro_key_1, & _x2c_macro_out_1)) return _x2c_macro_out_1;
+  int _x2c_macro_out_6 = 0;
+  if(MapIntInt_try_del(_x2c_macro_map_29, _x2c_macro_key_21, & _x2c_macro_out_6)) return _x2c_macro_out_6;
   (void) _bad_arg(_0);
 }
 
-MapIntInt MapIntInt_copy(MapIntInt _x2c_macro_map_1){
-  return MapIntInt__core_copy(_x2c_macro_map_1);
+MapIntInt MapIntInt_copy(MapIntInt _x2c_macro_map_30){
+  return MapIntInt__core_copy(_x2c_macro_map_30);
 }
 
-MapIntInt MapIntInt_merge(MapIntInt _x2c_macro_map_1, MapIntInt _x2c_macro_other_1){
-  return MapIntInt__core_merge(_x2c_macro_map_1, _x2c_macro_other_1);
+MapIntInt MapIntInt_merge(MapIntInt _x2c_macro_map_31, MapIntInt _x2c_macro_other_2){
+  return MapIntInt__core_merge(_x2c_macro_map_31, _x2c_macro_other_2);
 }
 
-int MapIntInt_try_next(MapIntInt _x2c_macro_map_1, unsigned * _x2c_macro_cursor_1, int * _x2c_macro_key_1, int * _x2c_macro_val_1){
-  return MapIntInt__core_try_next(_x2c_macro_map_1, _x2c_macro_cursor_1, _x2c_macro_key_1, _x2c_macro_val_1);
+int MapIntInt_try_next(MapIntInt _x2c_macro_map_32, unsigned * _x2c_macro_cursor_4, int * _x2c_macro_key_22, int * _x2c_macro_val_7){
+  return MapIntInt__core_try_next(_x2c_macro_map_32, _x2c_macro_cursor_4, _x2c_macro_key_22, _x2c_macro_val_7);
 }
 
-int MapIntInt_truth(MapIntInt _x2c_macro_map_1){
-  return MapIntInt__core_truth(_x2c_macro_map_1);
+int MapIntInt_truth(MapIntInt _x2c_macro_map_33){
+  return MapIntInt__core_truth(_x2c_macro_map_33);
 }
 
 int MapIntInt_equal(MapIntInt _x2c_macro_a_2, MapIntInt _x2c_macro_b_2){
@@ -1483,11 +1483,11 @@ Scope Scope_new(void);
 
 void * Scope_malloc_in(Scope *, size_t);
 
-static int MapIntInt__core_compare(MapIntInt _x2c_macro_a_3, MapIntInt _x2c_macro_b_3){
-  if((void *) _x2c_macro_a_3 ==(void *) _x2c_macro_b_3) return 0;
-  if((void *) _x2c_macro_a_3 == NULL) return - 1;
-  if((void *) _x2c_macro_b_3 == NULL) return 1;
-  unsigned _x2c_macro_asz_0 = _x2c_macro_a_3 -> used, _x2c_macro_bsz_0 = _x2c_macro_b_3 -> used;
+static int MapIntInt__core_compare(MapIntInt _x2c_macro_a_4, MapIntInt _x2c_macro_b_4){
+  if((void *) _x2c_macro_a_4 ==(void *) _x2c_macro_b_4) return 0;
+  if((void *) _x2c_macro_a_4 == NULL) return - 1;
+  if((void *) _x2c_macro_b_4 == NULL) return 1;
+  unsigned _x2c_macro_asz_0 = _x2c_macro_a_4 -> used, _x2c_macro_bsz_0 = _x2c_macro_b_4 -> used;
   if(_x2c_macro_asz_0 != _x2c_macro_bsz_0) return _x2c_macro_asz_0 < _x2c_macro_bsz_0 ? - 1 : 1;
   if(! _x2c_macro_asz_0) return 0;
   Scope _x2c_macro_scratch_0 = Scope_new();
@@ -1502,25 +1502,25 @@ static int MapIntInt__core_compare(MapIntInt _x2c_macro_a_3, MapIntInt _x2c_macr
   {
     struct MapIntIntRecord * _x2c_macro_arecs_0 = Scope_malloc_in(& _x2c_macro_scratch_0, _x2c_macro_asz_0 * sizeof(struct MapIntIntRecord));
     struct MapIntIntRecord * _x2c_macro_brecs_0 = Scope_malloc_in(& _x2c_macro_scratch_0, _x2c_macro_bsz_0 * sizeof(struct MapIntIntRecord));
-    unsigned _x2c_macro_cursor_2 = 0, _x2c_macro_index_2 = 0;
-    int _x2c_macro_key_2;
+    unsigned _x2c_macro_cursor_5 = 0, _x2c_macro_index_8 = 0;
+    int _x2c_macro_key_23;
     int _x2c_macro_value_0;
-    while(MapIntInt_try_next(_x2c_macro_a_3, & _x2c_macro_cursor_2, & _x2c_macro_key_2, & _x2c_macro_value_0)) _x2c_macro_arecs_0[_x2c_macro_index_2 ++] =(struct MapIntIntRecord){
-      .key = _x2c_macro_key_2, .val = _x2c_macro_value_0
+    while(MapIntInt_try_next(_x2c_macro_a_4, & _x2c_macro_cursor_5, & _x2c_macro_key_23, & _x2c_macro_value_0)) _x2c_macro_arecs_0[_x2c_macro_index_8 ++] =(struct MapIntIntRecord){
+      .key = _x2c_macro_key_23, .val = _x2c_macro_value_0
     }
     ;
-    _x2c_macro_cursor_2 = 0;
-    _x2c_macro_index_2 = 0;
-    while(MapIntInt_try_next(_x2c_macro_b_3, & _x2c_macro_cursor_2, & _x2c_macro_key_2, & _x2c_macro_value_0)) _x2c_macro_brecs_0[_x2c_macro_index_2 ++] =(struct MapIntIntRecord){
-      .key = _x2c_macro_key_2, .val = _x2c_macro_value_0
+    _x2c_macro_cursor_5 = 0;
+    _x2c_macro_index_8 = 0;
+    while(MapIntInt_try_next(_x2c_macro_b_4, & _x2c_macro_cursor_5, & _x2c_macro_key_23, & _x2c_macro_value_0)) _x2c_macro_brecs_0[_x2c_macro_index_8 ++] =(struct MapIntIntRecord){
+      .key = _x2c_macro_key_23, .val = _x2c_macro_value_0
     }
     ;
     qsort(_x2c_macro_arecs_0, _x2c_macro_asz_0, sizeof(struct MapIntIntRecord), _x2c_macro_record_compare_0);
     qsort(_x2c_macro_brecs_0, _x2c_macro_bsz_0, sizeof(struct MapIntIntRecord), _x2c_macro_record_compare_0);
     for(unsigned _x2c_macro_i_1 = 0;  _x2c_macro_i_1 < _x2c_macro_asz_0;  _x2c_macro_i_1 ++){
-      int _x2c_macro_comparison_0 = _x2c_macro_record_compare_0(_x2c_macro_arecs_0 + _x2c_macro_i_1, _x2c_macro_brecs_0 + _x2c_macro_i_1);
-      if(_x2c_macro_comparison_0){
-        int _x2c_return_value_2 = _x2c_macro_comparison_0;
+      int _x2c_macro_comparison_1 = _x2c_macro_record_compare_0(_x2c_macro_arecs_0 + _x2c_macro_i_1, _x2c_macro_brecs_0 + _x2c_macro_i_1);
+      if(_x2c_macro_comparison_1){
+        int _x2c_return_value_2 = _x2c_macro_comparison_1;
         {
           x2c_cleanup_leave(& _x2c_defer_record_4);
           return _x2c_return_value_2;
@@ -1554,9 +1554,9 @@ Buffer Var_write_str(Var, Buffer);
 
 Buffer Var_write_repr(Var, Buffer);
 
-static Buffer MapIntInt__core_write(MapIntInt _x2c_macro_map_2, Buffer _x2c_macro_out_2, Symbol _x2c_macro_mode_0){
+static Buffer MapIntInt__core_write(MapIntInt _x2c_macro_map_34, Buffer _x2c_macro_out_7, Symbol _x2c_macro_mode_0){
   RenderPath _x2c_macro_path_0;
-  if(! RenderPath_enter(&(_x2c_macro_path_0), _x2c_macro_map_2)) return Buffer_printf(_x2c_macro_out_2, "<map: 0x%012lX>", (long) _x2c_macro_map_2);
+  if(! RenderPath_enter(&(_x2c_macro_path_0), _x2c_macro_map_34)) return Buffer_printf(_x2c_macro_out_7, "<map: 0x%012lX>", (long) _x2c_macro_map_34);
   {
   _x2c_defer_env_2 _x2c_defer_env_35 = {._x2c_defer_capture_5 =(const void *) & _x2c_macro_path_0};
 
@@ -1566,28 +1566,28 @@ static Buffer MapIntInt__core_write(MapIntInt _x2c_macro_map_2, Buffer _x2c_macr
   };
   x2c_cleanup_push(&_x2c_defer_record_5);
   {
-    Buffer_write(_x2c_macro_out_2, "{ ");
-    unsigned _x2c_macro_cursor_2 = 0;
-    int _x2c_macro_key_2;
-    int _x2c_macro_value_0;
+    Buffer_write(_x2c_macro_out_7, "{ ");
+    unsigned _x2c_macro_cursor_6 = 0;
+    int _x2c_macro_key_24;
+    int _x2c_macro_value_1;
     int _x2c_macro_first_0 = 1;
-    while(MapIntInt_try_next(_x2c_macro_map_2, & _x2c_macro_cursor_2, & _x2c_macro_key_2, & _x2c_macro_value_0)){
-      if(! _x2c_macro_first_0) Buffer_write(_x2c_macro_out_2, ", ");
-      Var _x2c_macro_boxed_key_0 = _box_int(_x2c_macro_key_2), _x2c_macro_boxed_value_0 = _box_int(_x2c_macro_value_0);
+    while(MapIntInt_try_next(_x2c_macro_map_34, & _x2c_macro_cursor_6, & _x2c_macro_key_24, & _x2c_macro_value_1)){
+      if(! _x2c_macro_first_0) Buffer_write(_x2c_macro_out_7, ", ");
+      Var _x2c_macro_boxed_key_0 = _box_int(_x2c_macro_key_24), _x2c_macro_boxed_value_0 = _box_int(_x2c_macro_value_1);
       if(_x2c_macro_mode_0 == 40228){
-        Var_write_str(_x2c_macro_boxed_key_0, _x2c_macro_out_2);
-        Buffer_write(_x2c_macro_out_2, ": ");
-        Var_write_str(_x2c_macro_boxed_value_0, _x2c_macro_out_2);
+        Var_write_str(_x2c_macro_boxed_key_0, _x2c_macro_out_7);
+        Buffer_write(_x2c_macro_out_7, ": ");
+        Var_write_str(_x2c_macro_boxed_value_0, _x2c_macro_out_7);
       }
       else{
-        Var_write_repr(_x2c_macro_boxed_key_0, _x2c_macro_out_2);
-        Buffer_write(_x2c_macro_out_2, ": ");
-        Var_write_repr(_x2c_macro_boxed_value_0, _x2c_macro_out_2);
+        Var_write_repr(_x2c_macro_boxed_key_0, _x2c_macro_out_7);
+        Buffer_write(_x2c_macro_out_7, ": ");
+        Var_write_repr(_x2c_macro_boxed_value_0, _x2c_macro_out_7);
       }
       _x2c_macro_first_0 = 0;
     }
     {
-      Buffer _x2c_return_value_4 = Buffer_write(_x2c_macro_out_2, " }");
+      Buffer _x2c_return_value_4 = Buffer_write(_x2c_macro_out_7, " }");
       {
         x2c_cleanup_leave(& _x2c_defer_record_5);
         return _x2c_return_value_4;
@@ -1603,78 +1603,78 @@ static Buffer MapIntInt__core_write(MapIntInt _x2c_macro_map_2, Buffer _x2c_macr
 
 Var Map_setindex(Map, Var, Var);
 
-Map MapIntInt_map(MapIntInt _x2c_macro_map_3){
-  if((void *) _x2c_macro_map_3 == NULL) return NULL;
+Map MapIntInt_map(MapIntInt _x2c_macro_map_35){
+  if((void *) _x2c_macro_map_35 == NULL) return NULL;
   Map _x2c_macro_boxed_0 = Map_new();
-  unsigned _x2c_macro_cursor_3 = 0;
-  int _x2c_macro_key_3;
-  int _x2c_macro_value_1;
-  while(MapIntInt_try_next(_x2c_macro_map_3, & _x2c_macro_cursor_3, & _x2c_macro_key_3, & _x2c_macro_value_1)) Map_setindex(_x2c_macro_boxed_0, _box_int(_x2c_macro_key_3), _box_int(_x2c_macro_value_1));
+  unsigned _x2c_macro_cursor_7 = 0;
+  int _x2c_macro_key_25;
+  int _x2c_macro_value_2;
+  while(MapIntInt_try_next(_x2c_macro_map_35, & _x2c_macro_cursor_7, & _x2c_macro_key_25, & _x2c_macro_value_2)) Map_setindex(_x2c_macro_boxed_0, _box_int(_x2c_macro_key_25), _box_int(_x2c_macro_value_2));
   return _x2c_macro_boxed_0;
 }
 
-int MapIntInt_compare(MapIntInt _x2c_macro_a_4, MapIntInt _x2c_macro_b_4){
-  return MapIntInt__core_compare(_x2c_macro_a_4, _x2c_macro_b_4);
+int MapIntInt_compare(MapIntInt _x2c_macro_a_5, MapIntInt _x2c_macro_b_5){
+  return MapIntInt__core_compare(_x2c_macro_a_5, _x2c_macro_b_5);
 }
 
-Buffer MapIntInt_write_repr(MapIntInt _x2c_macro_map_3, Buffer _x2c_macro_out_3){
-  return MapIntInt__core_write(_x2c_macro_map_3, _x2c_macro_out_3, 1190948);
+Buffer MapIntInt_write_repr(MapIntInt _x2c_macro_map_36, Buffer _x2c_macro_out_8){
+  return MapIntInt__core_write(_x2c_macro_map_36, _x2c_macro_out_8, 1190948);
 }
 
-Buffer MapIntInt_write_str(MapIntInt _x2c_macro_map_3, Buffer _x2c_macro_out_3){
-  if(! MapIntInt_truth(_x2c_macro_map_3)) return Buffer_write(_x2c_macro_out_3, "{ }");
-  return MapIntInt__core_write(_x2c_macro_map_3, _x2c_macro_out_3, 40228);
+Buffer MapIntInt_write_str(MapIntInt _x2c_macro_map_37, Buffer _x2c_macro_out_9){
+  if(! MapIntInt_truth(_x2c_macro_map_37)) return Buffer_write(_x2c_macro_out_9, "{ }");
+  return MapIntInt__core_write(_x2c_macro_map_37, _x2c_macro_out_9, 40228);
 }
 
 Buffer Buffer_new(size_t);
 
 String Buffer_str_free(Buffer);
 
-String MapIntInt_str(MapIntInt _x2c_macro_map_3){
-  Buffer _x2c_macro_out_3 = Buffer_new(0);
-  MapIntInt_write_str(_x2c_macro_map_3, _x2c_macro_out_3);
-  return Buffer_str_free(_x2c_macro_out_3);
+String MapIntInt_str(MapIntInt _x2c_macro_map_38){
+  Buffer _x2c_macro_out_10 = Buffer_new(0);
+  MapIntInt_write_str(_x2c_macro_map_38, _x2c_macro_out_10);
+  return Buffer_str_free(_x2c_macro_out_10);
 }
 
-String MapIntInt_repr(MapIntInt _x2c_macro_map_3){
-  Buffer _x2c_macro_out_3 = Buffer_new(0);
-  MapIntInt_write_repr(_x2c_macro_map_3, _x2c_macro_out_3);
-  return Buffer_str_free(_x2c_macro_out_3);
+String MapIntInt_repr(MapIntInt _x2c_macro_map_39){
+  Buffer _x2c_macro_out_11 = Buffer_new(0);
+  MapIntInt_write_repr(_x2c_macro_map_39, _x2c_macro_out_11);
+  return Buffer_str_free(_x2c_macro_out_11);
 }
 
 Var Var_new(Symbol, ...);
 
-Var MapIntInt_var(MapIntInt _x2c_macro_map_4){
-  return Var_new(28691016207272, _x2c_macro_map_4);
+Var MapIntInt_var(MapIntInt _x2c_macro_map_40){
+  return Var_new(28691016207272, _x2c_macro_map_40);
 }
 
 void * Var_pointer(Var);
 
-MapIntInt Var_mapintint(Var _x2c_macro_value_2){
-  return(MapIntInt) Var_pointer(_x2c_macro_value_2);
+MapIntInt Var_mapintint(Var _x2c_macro_value_3){
+  return(MapIntInt) Var_pointer(_x2c_macro_value_3);
 }
 
-static int _x2c_macro_next_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_out_4){
-  MapIntInt _x2c_macro_map_4 = Var_mapintint(_x2c_macro_iter_0 -> obj);
-  if((void *) _x2c_macro_map_4 == 0 || ! _x2c_macro_out_4) return 0;
-  unsigned _x2c_macro_cursor_4 = Var_uint(Var_convert(_x2c_macro_iter_0 -> state, 3847013));
-  int _x2c_macro_key_4;
-  int _x2c_macro_val_2;
-  if(! MapIntInt_try_next(_x2c_macro_map_4, & _x2c_macro_cursor_4, & _x2c_macro_key_4, & _x2c_macro_val_2)) return 0;
-  _x2c_macro_iter_0 -> state = unsigned_var(_x2c_macro_cursor_4);
-  * _x2c_macro_out_4 = _box_int(_x2c_macro_val_2);
+static int _x2c_macro_next_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_out_12){
+  MapIntInt _x2c_macro_map_41 = Var_mapintint(_x2c_macro_iter_0 -> obj);
+  if((void *) _x2c_macro_map_41 == 0 || ! _x2c_macro_out_12) return 0;
+  unsigned _x2c_macro_cursor_8 = Var_uint(Var_convert(_x2c_macro_iter_0 -> state, 3847013));
+  int _x2c_macro_key_26;
+  int _x2c_macro_val_8;
+  if(! MapIntInt_try_next(_x2c_macro_map_41, & _x2c_macro_cursor_8, & _x2c_macro_key_26, & _x2c_macro_val_8)) return 0;
+  _x2c_macro_iter_0 -> state = unsigned_var(_x2c_macro_cursor_8);
+  * _x2c_macro_out_12 = _box_int(_x2c_macro_val_8);
   return 1;
 }
 
-static int _x2c_macro_keys_next_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_out_4){
-  MapIntInt _x2c_macro_map_4 = Var_mapintint(_x2c_macro_iter_0 -> obj);
-  if((void *) _x2c_macro_map_4 == 0 || ! _x2c_macro_out_4) return 0;
-  unsigned _x2c_macro_cursor_4 = Var_uint(Var_convert(_x2c_macro_iter_0 -> state, 3847013));
-  int _x2c_macro_key_4;
-  int _x2c_macro_val_2;
-  if(! MapIntInt_try_next(_x2c_macro_map_4, & _x2c_macro_cursor_4, & _x2c_macro_key_4, & _x2c_macro_val_2)) return 0;
-  _x2c_macro_iter_0 -> state = unsigned_var(_x2c_macro_cursor_4);
-  * _x2c_macro_out_4 = _box_int(_x2c_macro_key_4);
+static int _x2c_macro_keys_next_0(Iter _x2c_macro_iter_1, Var * _x2c_macro_out_13){
+  MapIntInt _x2c_macro_map_42 = Var_mapintint(_x2c_macro_iter_1 -> obj);
+  if((void *) _x2c_macro_map_42 == 0 || ! _x2c_macro_out_13) return 0;
+  unsigned _x2c_macro_cursor_9 = Var_uint(Var_convert(_x2c_macro_iter_1 -> state, 3847013));
+  int _x2c_macro_key_27;
+  int _x2c_macro_val_9;
+  if(! MapIntInt_try_next(_x2c_macro_map_42, & _x2c_macro_cursor_9, & _x2c_macro_key_27, & _x2c_macro_val_9)) return 0;
+  _x2c_macro_iter_1 -> state = unsigned_var(_x2c_macro_cursor_9);
+  * _x2c_macro_out_13 = _box_int(_x2c_macro_key_27);
   return 1;
 }
 
@@ -1682,34 +1682,34 @@ Var List_var(List);
 
 List cons(Var, List);
 
-static int _x2c_macro_enumerate_next_0(Iter _x2c_macro_iter_0, Var * _x2c_macro_out_4){
-  MapIntInt _x2c_macro_map_4 = Var_mapintint(_x2c_macro_iter_0 -> obj);
-  if((void *) _x2c_macro_map_4 == 0 || ! _x2c_macro_out_4) return 0;
-  unsigned _x2c_macro_cursor_4 = Var_uint(Var_convert(_x2c_macro_iter_0 -> state, 3847013));
-  int _x2c_macro_key_4;
-  int _x2c_macro_val_2;
-  if(! MapIntInt_try_next(_x2c_macro_map_4, & _x2c_macro_cursor_4, & _x2c_macro_key_4, & _x2c_macro_val_2)) return 0;
-  _x2c_macro_iter_0 -> state = unsigned_var(_x2c_macro_cursor_4);
-  Var _x2c_macro_boxed_key_1 = _box_int(_x2c_macro_key_4), _x2c_macro_boxed_value_1 = _box_int(_x2c_macro_val_2);
-  * _x2c_macro_out_4 = List_var(cons(_x2c_macro_boxed_key_1, cons(_x2c_macro_boxed_value_1, NULL)));
+static int _x2c_macro_enumerate_next_0(Iter _x2c_macro_iter_2, Var * _x2c_macro_out_14){
+  MapIntInt _x2c_macro_map_43 = Var_mapintint(_x2c_macro_iter_2 -> obj);
+  if((void *) _x2c_macro_map_43 == 0 || ! _x2c_macro_out_14) return 0;
+  unsigned _x2c_macro_cursor_10 = Var_uint(Var_convert(_x2c_macro_iter_2 -> state, 3847013));
+  int _x2c_macro_key_28;
+  int _x2c_macro_val_10;
+  if(! MapIntInt_try_next(_x2c_macro_map_43, & _x2c_macro_cursor_10, & _x2c_macro_key_28, & _x2c_macro_val_10)) return 0;
+  _x2c_macro_iter_2 -> state = unsigned_var(_x2c_macro_cursor_10);
+  Var _x2c_macro_boxed_key_1 = _box_int(_x2c_macro_key_28), _x2c_macro_boxed_value_1 = _box_int(_x2c_macro_val_10);
+  * _x2c_macro_out_14 = List_var(cons(_x2c_macro_boxed_key_1, cons(_x2c_macro_boxed_value_1, NULL)));
   return 1;
 }
 
 Iter Iter_init(Iter, Var, IterNextFn, Var);
 
-Iter MapIntInt_iter(MapIntInt _x2c_macro_map_4, Iter _x2c_macro_dest_0){
+Iter MapIntInt_iter(MapIntInt _x2c_macro_map_44, Iter _x2c_macro_dest_0){
   if((void *) _x2c_macro_dest_0 == 0) return 0;
-  return Iter_init(_x2c_macro_dest_0, MapIntInt_var(_x2c_macro_map_4), _x2c_macro_next_0, int_var(0));
+  return Iter_init(_x2c_macro_dest_0, MapIntInt_var(_x2c_macro_map_44), _x2c_macro_next_0, int_var(0));
 }
 
-Iter MapIntInt_keys(MapIntInt _x2c_macro_map_4, Iter _x2c_macro_dest_0){
-  if((void *) _x2c_macro_dest_0 == 0) return 0;
-  return Iter_init(_x2c_macro_dest_0, MapIntInt_var(_x2c_macro_map_4), _x2c_macro_keys_next_0, int_var(0));
+Iter MapIntInt_keys(MapIntInt _x2c_macro_map_45, Iter _x2c_macro_dest_1){
+  if((void *) _x2c_macro_dest_1 == 0) return 0;
+  return Iter_init(_x2c_macro_dest_1, MapIntInt_var(_x2c_macro_map_45), _x2c_macro_keys_next_0, int_var(0));
 }
 
-Iter MapIntInt_enumerate(MapIntInt _x2c_macro_map_4, Iter _x2c_macro_dest_0){
-  if((void *) _x2c_macro_dest_0 == 0) return 0;
-  return Iter_init(_x2c_macro_dest_0, MapIntInt_var(_x2c_macro_map_4), _x2c_macro_enumerate_next_0, int_var(0));
+Iter MapIntInt_enumerate(MapIntInt _x2c_macro_map_46, Iter _x2c_macro_dest_2){
+  if((void *) _x2c_macro_dest_2 == 0) return 0;
+  return Iter_init(_x2c_macro_dest_2, MapIntInt_var(_x2c_macro_map_46), _x2c_macro_enumerate_next_0, int_var(0));
 }
 
 int Context_owns(Context, void *);
@@ -1718,9 +1718,9 @@ Scope * Context_export_destination(Context);
 
 void Block_move_to(Block, Scope *);
 
-static MapIntInt MapIntInt_export_context(MapIntInt _x2c_macro_map_4, Context _x2c_macro_source_0){
-  if((void *) _x2c_macro_map_4 == 0 || ! Context_owns(_x2c_macro_source_0, _x2c_macro_map_4)) return _x2c_macro_map_4;
-  MapIntInt _x2c_macro_staged_0 = _prepare_int_export(_x2c_macro_map_4, _x2c_macro_source_0), _x2c_macro_committed_0 = NULL;
+static MapIntInt MapIntInt_export_context(MapIntInt _x2c_macro_map_47, Context _x2c_macro_source_0){
+  if((void *) _x2c_macro_map_47 == 0 || ! Context_owns(_x2c_macro_source_0, _x2c_macro_map_47)) return _x2c_macro_map_47;
+  MapIntInt _x2c_macro_staged_0 = _prepare_int_export(_x2c_macro_map_47, _x2c_macro_source_0), _x2c_macro_committed_0 = NULL;
   {
   _x2c_defer_env_3 _x2c_defer_env_36 = {._x2c_defer_capture_6 =(const void *) & _x2c_macro_staged_0, ._x2c_defer_capture_7 =(const void *) & _x2c_macro_committed_0};
 
@@ -1731,28 +1731,28 @@ static MapIntInt MapIntInt_export_context(MapIntInt _x2c_macro_map_4, Context _x
   x2c_cleanup_push(&_x2c_defer_record_6);
   {
     Scope * _x2c_macro_destination_0 = Context_export_destination(_x2c_macro_source_0);
-    Scope_move(_x2c_macro_map_4, _x2c_macro_destination_0);
+    Scope_move(_x2c_macro_map_47, _x2c_macro_destination_0);
     if((void *) _x2c_macro_staged_0 == 0){
-      Block_move_to(Bytes_block(_x2c_macro_map_4 -> hashes), _x2c_macro_destination_0);
-      Block_move_to(Bytes_block(_x2c_macro_map_4 -> entries), _x2c_macro_destination_0);
+      Block_move_to(Bytes_block(_x2c_macro_map_47 -> hashes), _x2c_macro_destination_0);
+      Block_move_to(Bytes_block(_x2c_macro_map_47 -> entries), _x2c_macro_destination_0);
     }
     else{
-      Bytes _x2c_macro_old_hashes_0 = _x2c_macro_map_4 -> hashes, _x2c_macro_old_entries_0 = _x2c_macro_map_4 -> entries;
+      Bytes _x2c_macro_old_hashes_0 = _x2c_macro_map_47 -> hashes, _x2c_macro_old_entries_0 = _x2c_macro_map_47 -> entries;
       Block_move_to(Bytes_block(_x2c_macro_staged_0 -> hashes), _x2c_macro_destination_0);
       Block_move_to(Bytes_block(_x2c_macro_staged_0 -> entries), _x2c_macro_destination_0);
-      _x2c_macro_map_4 -> hashes = _x2c_macro_staged_0 -> hashes;
-      _x2c_macro_map_4 -> entries = _x2c_macro_staged_0 -> entries;
-      _x2c_macro_map_4 -> used = _x2c_macro_staged_0 -> used;
-      _x2c_macro_map_4 -> capacity = _x2c_macro_staged_0 -> capacity;
-      _x2c_macro_map_4 -> mask = _x2c_macro_staged_0 -> mask;
+      _x2c_macro_map_47 -> hashes = _x2c_macro_staged_0 -> hashes;
+      _x2c_macro_map_47 -> entries = _x2c_macro_staged_0 -> entries;
+      _x2c_macro_map_47 -> used = _x2c_macro_staged_0 -> used;
+      _x2c_macro_map_47 -> capacity = _x2c_macro_staged_0 -> capacity;
+      _x2c_macro_map_47 -> mask = _x2c_macro_staged_0 -> mask;
       _x2c_macro_staged_0 -> hashes = _x2c_macro_old_hashes_0;
       _x2c_macro_staged_0 -> entries = _x2c_macro_old_entries_0;
       MapIntInt__core_free(_x2c_macro_staged_0);
     }
-    _x2c_macro_map_4 -> scope = * _x2c_macro_destination_0;
-    _x2c_macro_committed_0 = _x2c_macro_map_4;
+    _x2c_macro_map_47 -> scope = * _x2c_macro_destination_0;
+    _x2c_macro_committed_0 = _x2c_macro_map_47;
     {
-      MapIntInt _x2c_return_value_5 = _x2c_macro_map_4;
+      MapIntInt _x2c_return_value_5 = _x2c_macro_map_47;
       {
         x2c_cleanup_leave(& _x2c_defer_record_6);
         return _x2c_return_value_5;
@@ -1766,98 +1766,98 @@ static MapIntInt MapIntInt_export_context(MapIntInt _x2c_macro_map_4, Context _x
 }
 }
 
-void MapIntInt_cleanup(MapIntInt _x2c_macro_map_4){
-  MapIntInt__core_free(_x2c_macro_map_4);
+void MapIntInt_cleanup(MapIntInt _x2c_macro_map_48){
+  MapIntInt__core_free(_x2c_macro_map_48);
 }
 
-static void MapLongDouble__core_free(MapLongDouble _x2c_macro_map_5){
-  if((void *) _x2c_macro_map_5 == 0) return;
-  Bytes_free(_x2c_macro_map_5 -> hashes);
-  Bytes_free(_x2c_macro_map_5 -> entries);
-  Scope_free(_x2c_macro_map_5);
+static void MapLongDouble__core_free(MapLongDouble _x2c_macro_map_49){
+  if((void *) _x2c_macro_map_49 == 0) return;
+  Bytes_free(_x2c_macro_map_49 -> hashes);
+  Bytes_free(_x2c_macro_map_49 -> entries);
+  Scope_free(_x2c_macro_map_49);
 }
 
-static MapLongDouble MapLongDouble__core_new_capacity(MapLongDouble _x2c_macro_unused_1, unsigned _x2c_macro_capacity_2){
+static MapLongDouble MapLongDouble__core_new_capacity(MapLongDouble _x2c_macro_unused_1, unsigned _x2c_macro_capacity_3){
   (void) _x2c_macro_unused_1;
-  MapLongDouble _x2c_macro_map_5 = Scope_malloc(sizeof(struct MapLongDouble));
-  _x2c_macro_map_5 -> scope = * Scope_top();
-  _x2c_macro_map_5 -> hashes = Bytes_new(sizeof(unsigned));
-  _x2c_macro_map_5 -> hashes = Bytes_append(_x2c_macro_map_5 -> hashes, 0, _x2c_macro_capacity_2);
-  _x2c_macro_map_5 -> entries = Bytes_new(sizeof(struct MapLongDoubleRecord));
-  _x2c_macro_map_5 -> entries = Bytes_append(_x2c_macro_map_5 -> entries, 0, _x2c_macro_capacity_2);
-  _x2c_macro_map_5 -> capacity = _x2c_macro_capacity_2;
-  _x2c_macro_map_5 -> mask = _x2c_macro_capacity_2 - 1;
-  _x2c_macro_map_5 -> used = 0;
-  return _x2c_macro_map_5;
+  MapLongDouble _x2c_macro_map_50 = Scope_malloc(sizeof(struct MapLongDouble));
+  _x2c_macro_map_50 -> scope = * Scope_top();
+  _x2c_macro_map_50 -> hashes = Bytes_new(sizeof(unsigned));
+  _x2c_macro_map_50 -> hashes = Bytes_append(_x2c_macro_map_50 -> hashes, 0, _x2c_macro_capacity_3);
+  _x2c_macro_map_50 -> entries = Bytes_new(sizeof(struct MapLongDoubleRecord));
+  _x2c_macro_map_50 -> entries = Bytes_append(_x2c_macro_map_50 -> entries, 0, _x2c_macro_capacity_3);
+  _x2c_macro_map_50 -> capacity = _x2c_macro_capacity_3;
+  _x2c_macro_map_50 -> mask = _x2c_macro_capacity_3 - 1;
+  _x2c_macro_map_50 -> used = 0;
+  return _x2c_macro_map_50;
 }
 
-static long MapLongDouble__core_find_hashed(MapLongDouble _x2c_macro_map_5, long * _x2c_macro_key_5, unsigned _x2c_macro_key_hash_1){
-  unsigned * _x2c_macro_hashes_1 = _x2c_macro_map_5 -> hashes;
-  unsigned _x2c_macro_mask_2 = _x2c_macro_map_5 -> mask, _x2c_macro_todo_start_1 = _x2c_macro_key_hash_1 & _x2c_macro_mask_2;
-  unsigned _x2c_macro_cap_1 = _x2c_macro_map_5 -> capacity;
-  for(int _x2c_macro_todo_psl_1 = 0;  _x2c_macro_todo_psl_1 <(int) _x2c_macro_cap_1;  _x2c_macro_todo_psl_1 ++){
-    unsigned _x2c_macro_index_3 =(_x2c_macro_todo_start_1 + _x2c_macro_todo_psl_1) & _x2c_macro_mask_2;
-    unsigned _x2c_macro_stored_2 = _x2c_macro_hashes_1[_x2c_macro_index_3];
-    if(_x2c_macro_stored_2 == 0) break;
-    if(_x2c_macro_stored_2 == _x2c_macro_key_hash_1 && _equal_long(_long_key(_x2c_macro_map_5, _x2c_macro_index_3), _x2c_macro_key_5)) return(long) _x2c_macro_index_3;
-    unsigned _x2c_macro_stored_start_1 = _x2c_macro_stored_2 & _x2c_macro_mask_2;
-    int _x2c_macro_stored_psl_1 =(_x2c_macro_cap_1 + _x2c_macro_index_3 - _x2c_macro_stored_start_1) & _x2c_macro_mask_2;
-    if(_x2c_macro_stored_psl_1 < _x2c_macro_todo_psl_1) break;
+static long MapLongDouble__core_find_hashed(MapLongDouble _x2c_macro_map_51, long * _x2c_macro_key_29, unsigned _x2c_macro_key_hash_2){
+  unsigned * _x2c_macro_hashes_6 = _x2c_macro_map_51 -> hashes;
+  unsigned _x2c_macro_mask_5 = _x2c_macro_map_51 -> mask, _x2c_macro_todo_start_3 = _x2c_macro_key_hash_2 & _x2c_macro_mask_5;
+  unsigned _x2c_macro_cap_4 = _x2c_macro_map_51 -> capacity;
+  for(int _x2c_macro_todo_psl_3 = 0;  _x2c_macro_todo_psl_3 <(int) _x2c_macro_cap_4;  _x2c_macro_todo_psl_3 ++){
+    unsigned _x2c_macro_index_9 =(_x2c_macro_todo_start_3 + _x2c_macro_todo_psl_3) & _x2c_macro_mask_5;
+    unsigned _x2c_macro_stored_7 = _x2c_macro_hashes_6[_x2c_macro_index_9];
+    if(_x2c_macro_stored_7 == 0) break;
+    if(_x2c_macro_stored_7 == _x2c_macro_key_hash_2 && _equal_long(_long_key(_x2c_macro_map_51, _x2c_macro_index_9), _x2c_macro_key_29)) return(long) _x2c_macro_index_9;
+    unsigned _x2c_macro_stored_start_3 = _x2c_macro_stored_7 & _x2c_macro_mask_5;
+    int _x2c_macro_stored_psl_3 =(_x2c_macro_cap_4 + _x2c_macro_index_9 - _x2c_macro_stored_start_3) & _x2c_macro_mask_5;
+    if(_x2c_macro_stored_psl_3 < _x2c_macro_todo_psl_3) break;
   }
   return - 1;
 }
 
-static long MapLongDouble__core_find_index(MapLongDouble _x2c_macro_map_5, long * _x2c_macro_key_5){
-  return MapLongDouble__core_find_hashed(_x2c_macro_map_5, _x2c_macro_key_5, _hash_long(_x2c_macro_key_5));
+static long MapLongDouble__core_find_index(MapLongDouble _x2c_macro_map_52, long * _x2c_macro_key_30){
+  return MapLongDouble__core_find_hashed(_x2c_macro_map_52, _x2c_macro_key_30, _hash_long(_x2c_macro_key_30));
 }
 
-static int MapLongDouble__core_try_get(MapLongDouble _x2c_macro_map_5, long * _x2c_macro_key_5, double * _x2c_macro_out_5){
-  if((void *) _x2c_macro_map_5 == 0 || ! _x2c_macro_out_5) return 0;
-  long _x2c_macro_index_3 = MapLongDouble__core_find_index(_x2c_macro_map_5, _x2c_macro_key_5);
-  if(_x2c_macro_index_3 < 0) return 0;
-  * _x2c_macro_out_5 =(double) * _double_value(_x2c_macro_map_5, (unsigned) _x2c_macro_index_3);
+static int MapLongDouble__core_try_get(MapLongDouble _x2c_macro_map_53, long * _x2c_macro_key_31, double * _x2c_macro_out_15){
+  if((void *) _x2c_macro_map_53 == 0 || ! _x2c_macro_out_15) return 0;
+  long _x2c_macro_index_10 = MapLongDouble__core_find_index(_x2c_macro_map_53, _x2c_macro_key_31);
+  if(_x2c_macro_index_10 < 0) return 0;
+  * _x2c_macro_out_15 =(double) * _double_value(_x2c_macro_map_53, (unsigned) _x2c_macro_index_10);
   return 1;
 }
 
-static void MapLongDouble__core_reinsert(MapLongDouble _x2c_macro_map_5, unsigned _x2c_macro_todo_hash_1, struct MapLongDoubleRecord _x2c_macro_todo_1, int _x2c_macro_psl_1){
-  unsigned * _x2c_macro_hashes_1 = _x2c_macro_map_5 -> hashes;
-  struct MapLongDoubleRecord * _x2c_macro_entries_2 = _x2c_macro_map_5 -> entries;
-  unsigned _x2c_macro_mask_2 = _x2c_macro_map_5 -> mask, _x2c_macro_todo_start_1 = _x2c_macro_todo_hash_1 & _x2c_macro_mask_2;
-  unsigned _x2c_macro_cap_1 = _x2c_macro_map_5 -> capacity;
-  for(int _x2c_macro_todo_psl_1 = _x2c_macro_psl_1;  _x2c_macro_todo_psl_1 <(int) _x2c_macro_cap_1;  _x2c_macro_todo_psl_1 ++){
-    unsigned _x2c_macro_index_3 =(_x2c_macro_todo_start_1 + _x2c_macro_todo_psl_1) & _x2c_macro_mask_2;
-    unsigned _x2c_macro_stored_2 = _x2c_macro_hashes_1[_x2c_macro_index_3];
-    if(_x2c_macro_stored_2 == 0){
-      _x2c_macro_hashes_1[_x2c_macro_index_3] = _x2c_macro_todo_hash_1;
-      _x2c_macro_entries_2[_x2c_macro_index_3] = _x2c_macro_todo_1;
+static void MapLongDouble__core_reinsert(MapLongDouble _x2c_macro_map_54, unsigned _x2c_macro_todo_hash_1, struct MapLongDoubleRecord _x2c_macro_todo_1, int _x2c_macro_psl_1){
+  unsigned * _x2c_macro_hashes_7 = _x2c_macro_map_54 -> hashes;
+  struct MapLongDoubleRecord * _x2c_macro_entries_5 = _x2c_macro_map_54 -> entries;
+  unsigned _x2c_macro_mask_6 = _x2c_macro_map_54 -> mask, _x2c_macro_todo_start_4 = _x2c_macro_todo_hash_1 & _x2c_macro_mask_6;
+  unsigned _x2c_macro_cap_5 = _x2c_macro_map_54 -> capacity;
+  for(int _x2c_macro_todo_psl_4 = _x2c_macro_psl_1;  _x2c_macro_todo_psl_4 <(int) _x2c_macro_cap_5;  _x2c_macro_todo_psl_4 ++){
+    unsigned _x2c_macro_index_11 =(_x2c_macro_todo_start_4 + _x2c_macro_todo_psl_4) & _x2c_macro_mask_6;
+    unsigned _x2c_macro_stored_8 = _x2c_macro_hashes_7[_x2c_macro_index_11];
+    if(_x2c_macro_stored_8 == 0){
+      _x2c_macro_hashes_7[_x2c_macro_index_11] = _x2c_macro_todo_hash_1;
+      _x2c_macro_entries_5[_x2c_macro_index_11] = _x2c_macro_todo_1;
       return;
     }
-    unsigned _x2c_macro_stored_start_1 = _x2c_macro_stored_2 & _x2c_macro_mask_2;
-    int _x2c_macro_stored_psl_1 =(_x2c_macro_cap_1 + _x2c_macro_index_3 - _x2c_macro_stored_start_1) & _x2c_macro_mask_2;
-    if(_x2c_macro_stored_psl_1 < _x2c_macro_todo_psl_1){
-      struct MapLongDoubleRecord _x2c_macro_swap_1 = _x2c_macro_entries_2[_x2c_macro_index_3];
-      _x2c_macro_hashes_1[_x2c_macro_index_3] = _x2c_macro_todo_hash_1;
-      _x2c_macro_entries_2[_x2c_macro_index_3] = _x2c_macro_todo_1;
-      _x2c_macro_todo_hash_1 = _x2c_macro_stored_2;
+    unsigned _x2c_macro_stored_start_4 = _x2c_macro_stored_8 & _x2c_macro_mask_6;
+    int _x2c_macro_stored_psl_4 =(_x2c_macro_cap_5 + _x2c_macro_index_11 - _x2c_macro_stored_start_4) & _x2c_macro_mask_6;
+    if(_x2c_macro_stored_psl_4 < _x2c_macro_todo_psl_4){
+      struct MapLongDoubleRecord _x2c_macro_swap_1 = _x2c_macro_entries_5[_x2c_macro_index_11];
+      _x2c_macro_hashes_7[_x2c_macro_index_11] = _x2c_macro_todo_hash_1;
+      _x2c_macro_entries_5[_x2c_macro_index_11] = _x2c_macro_todo_1;
+      _x2c_macro_todo_hash_1 = _x2c_macro_stored_8;
       _x2c_macro_todo_1 = _x2c_macro_swap_1;
-      _x2c_macro_todo_start_1 = _x2c_macro_stored_start_1;
-      _x2c_macro_todo_psl_1 = _x2c_macro_stored_psl_1;
+      _x2c_macro_todo_start_4 = _x2c_macro_stored_start_4;
+      _x2c_macro_todo_psl_4 = _x2c_macro_stored_psl_4;
     }
 
   }
-  (void) _long_reinsert_error(_x2c_macro_cap_1, _x2c_macro_psl_1);
+  (void) _long_reinsert_error(_x2c_macro_cap_5, _x2c_macro_psl_1);
 }
 
-static void MapLongDouble__core_expand(MapLongDouble _x2c_macro_map_5){
-  unsigned * _x2c_macro_hashes_1 = _x2c_macro_map_5 -> hashes;
-  struct MapLongDoubleRecord * _x2c_macro_entries_2 = _x2c_macro_map_5 -> entries;
-  unsigned _x2c_macro_cap_1 = _x2c_macro_map_5 -> capacity;
-  if(_x2c_macro_cap_1 > ~ 0u / 2){
+static void MapLongDouble__core_expand(MapLongDouble _x2c_macro_map_55){
+  unsigned * _x2c_macro_hashes_8 = _x2c_macro_map_55 -> hashes;
+  struct MapLongDoubleRecord * _x2c_macro_entries_6 = _x2c_macro_map_55 -> entries;
+  unsigned _x2c_macro_cap_6 = _x2c_macro_map_55 -> capacity;
+  if(_x2c_macro_cap_6 > ~ 0u / 2){
     static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/typed-map.x",.function = "MapLongDouble__core_expand",.line = 293};
-    x2c_error_raise_n(& _x2c_error_site_14, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_macro_cap_1));
+    x2c_error_raise_n(& _x2c_error_site_14, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_macro_cap_6));
     __builtin_unreachable();
   }
-  unsigned _x2c_macro_capacity_2 = _x2c_macro_cap_1 * 2;
+  unsigned _x2c_macro_capacity_4 = _x2c_macro_cap_6 * 2;
   Bytes _x2c_macro_staged_hashes_1 = Bytes_new(sizeof(unsigned));
   {
   _x2c_defer_env_22 _x2c_defer_env_37 = {._x2c_defer_capture_40 =(const void *) & _x2c_macro_staged_hashes_1};
@@ -1868,7 +1868,7 @@ static void MapLongDouble__core_expand(MapLongDouble _x2c_macro_map_5){
   };
   x2c_cleanup_push(&_x2c_defer_record_7);
   {
-    _x2c_macro_staged_hashes_1 = Bytes_append(_x2c_macro_staged_hashes_1, 0, _x2c_macro_capacity_2);
+    _x2c_macro_staged_hashes_1 = Bytes_append(_x2c_macro_staged_hashes_1, 0, _x2c_macro_capacity_4);
     Bytes _x2c_macro_staged_entries_1 = Bytes_new(sizeof(struct MapLongDoubleRecord));
     {
   _x2c_defer_env_21 _x2c_defer_env_38 = {._x2c_defer_capture_39 =(const void *) & _x2c_macro_staged_entries_1};
@@ -1879,26 +1879,26 @@ static void MapLongDouble__core_expand(MapLongDouble _x2c_macro_map_5){
   };
   x2c_cleanup_push(&_x2c_defer_record_8);
   {
-      _x2c_macro_staged_entries_1 = Bytes_append(_x2c_macro_staged_entries_1, 0, _x2c_macro_capacity_2);
-      struct MapLongDouble _x2c_macro_expanded_1 = * _x2c_macro_map_5;
+      _x2c_macro_staged_entries_1 = Bytes_append(_x2c_macro_staged_entries_1, 0, _x2c_macro_capacity_4);
+      struct MapLongDouble _x2c_macro_expanded_1 = * _x2c_macro_map_55;
       _x2c_macro_expanded_1.hashes = _x2c_macro_staged_hashes_1;
       _x2c_macro_expanded_1.entries = _x2c_macro_staged_entries_1;
-      _x2c_macro_expanded_1.capacity = _x2c_macro_capacity_2;
-      _x2c_macro_expanded_1.mask = _x2c_macro_capacity_2 - 1;
+      _x2c_macro_expanded_1.capacity = _x2c_macro_capacity_4;
+      _x2c_macro_expanded_1.mask = _x2c_macro_capacity_4 - 1;
       MapLongDouble _x2c_macro_expanded_map_1 =(MapLongDouble) & _x2c_macro_expanded_1;
-      for(unsigned _x2c_macro_i_2 = 0;  _x2c_macro_i_2 < _x2c_macro_cap_1;  _x2c_macro_i_2 ++) if(_x2c_macro_hashes_1[_x2c_macro_i_2]) MapLongDouble__core_reinsert(_x2c_macro_expanded_map_1, _x2c_macro_hashes_1[_x2c_macro_i_2], _x2c_macro_entries_2[_x2c_macro_i_2], 0);
-      Scope_move(Bytes_block(_x2c_macro_staged_hashes_1), & _x2c_macro_map_5 -> scope);
-      Scope_move((unsigned char *) _x2c_macro_staged_hashes_1 - sizeof(Block), & _x2c_macro_map_5 -> scope);
-      Scope_move(Bytes_block(_x2c_macro_staged_entries_1), & _x2c_macro_map_5 -> scope);
-      Scope_move((unsigned char *) _x2c_macro_staged_entries_1 - sizeof(Block), & _x2c_macro_map_5 -> scope);
-      _x2c_macro_map_5 -> hashes = _x2c_macro_expanded_1.hashes;
-      _x2c_macro_map_5 -> entries = _x2c_macro_expanded_1.entries;
-      _x2c_macro_map_5 -> capacity = _x2c_macro_expanded_1.capacity;
-      _x2c_macro_map_5 -> mask = _x2c_macro_expanded_1.mask;
+      for(unsigned _x2c_macro_i_2 = 0;  _x2c_macro_i_2 < _x2c_macro_cap_6;  _x2c_macro_i_2 ++) if(_x2c_macro_hashes_8[_x2c_macro_i_2]) MapLongDouble__core_reinsert(_x2c_macro_expanded_map_1, _x2c_macro_hashes_8[_x2c_macro_i_2], _x2c_macro_entries_6[_x2c_macro_i_2], 0);
+      Scope_move(Bytes_block(_x2c_macro_staged_hashes_1), & _x2c_macro_map_55 -> scope);
+      Scope_move((unsigned char *) _x2c_macro_staged_hashes_1 - sizeof(Block), & _x2c_macro_map_55 -> scope);
+      Scope_move(Bytes_block(_x2c_macro_staged_entries_1), & _x2c_macro_map_55 -> scope);
+      Scope_move((unsigned char *) _x2c_macro_staged_entries_1 - sizeof(Block), & _x2c_macro_map_55 -> scope);
+      _x2c_macro_map_55 -> hashes = _x2c_macro_expanded_1.hashes;
+      _x2c_macro_map_55 -> entries = _x2c_macro_expanded_1.entries;
+      _x2c_macro_map_55 -> capacity = _x2c_macro_expanded_1.capacity;
+      _x2c_macro_map_55 -> mask = _x2c_macro_expanded_1.mask;
       _x2c_macro_staged_hashes_1 = 0;
       _x2c_macro_staged_entries_1 = 0;
-      Bytes_free((Bytes) _x2c_macro_hashes_1);
-      Bytes_free((Bytes) _x2c_macro_entries_2);
+      Bytes_free((Bytes) _x2c_macro_hashes_8);
+      Bytes_free((Bytes) _x2c_macro_entries_6);
     }
     x2c_cleanup_leave(& _x2c_defer_record_8);
 
@@ -1909,96 +1909,96 @@ static void MapLongDouble__core_expand(MapLongDouble _x2c_macro_map_5){
 }
 }
 
-static double * MapLongDouble__core_get_or_insert(MapLongDouble _x2c_macro_map_5, long * _x2c_macro_key_5, double * _x2c_macro_val_3, int * _x2c_macro_inserted_2){
-  * _x2c_macro_inserted_2 = 0;
+static double * MapLongDouble__core_get_or_insert(MapLongDouble _x2c_macro_map_56, long * _x2c_macro_key_32, double * _x2c_macro_val_11, int * _x2c_macro_inserted_4){
+  * _x2c_macro_inserted_4 = 0;
   retry :;
-  unsigned _x2c_macro_key_hash_1 = _hash_long(_x2c_macro_key_5), _x2c_macro_mask_2 = _x2c_macro_map_5 -> mask;
-  unsigned _x2c_macro_todo_start_1 = _x2c_macro_key_hash_1 & _x2c_macro_mask_2;
-  unsigned * _x2c_macro_hashes_1 = _x2c_macro_map_5 -> hashes;
-  struct MapLongDoubleRecord * _x2c_macro_entries_2 = _x2c_macro_map_5 -> entries;
-  unsigned _x2c_macro_cap_1 = _x2c_macro_map_5 -> capacity;
-  for(int _x2c_macro_todo_psl_1 = 0;  _x2c_macro_todo_psl_1 <(int) _x2c_macro_cap_1;  _x2c_macro_todo_psl_1 ++){
-    unsigned _x2c_macro_index_3 =(_x2c_macro_todo_start_1 + _x2c_macro_todo_psl_1) & _x2c_macro_mask_2;
-    unsigned _x2c_macro_stored_2 = _x2c_macro_hashes_1[_x2c_macro_index_3];
-    if(_x2c_macro_stored_2 == _x2c_macro_key_hash_1 && _equal_long(_long_key(_x2c_macro_map_5, _x2c_macro_index_3), _x2c_macro_key_5)) return _double_value(_x2c_macro_map_5, _x2c_macro_index_3);
-    if(_x2c_macro_stored_2 == 0){
-      (void) _valid_double(_x2c_macro_val_3);
-      if(_x2c_macro_map_5 -> used >=(unsigned long) _x2c_macro_map_5 -> capacity * 3 / 4){
-        MapLongDouble__core_expand(_x2c_macro_map_5);
+  unsigned _x2c_macro_key_hash_3 = _hash_long(_x2c_macro_key_32), _x2c_macro_mask_7 = _x2c_macro_map_56 -> mask;
+  unsigned _x2c_macro_todo_start_5 = _x2c_macro_key_hash_3 & _x2c_macro_mask_7;
+  unsigned * _x2c_macro_hashes_9 = _x2c_macro_map_56 -> hashes;
+  struct MapLongDoubleRecord * _x2c_macro_entries_7 = _x2c_macro_map_56 -> entries;
+  unsigned _x2c_macro_cap_7 = _x2c_macro_map_56 -> capacity;
+  for(int _x2c_macro_todo_psl_5 = 0;  _x2c_macro_todo_psl_5 <(int) _x2c_macro_cap_7;  _x2c_macro_todo_psl_5 ++){
+    unsigned _x2c_macro_index_12 =(_x2c_macro_todo_start_5 + _x2c_macro_todo_psl_5) & _x2c_macro_mask_7;
+    unsigned _x2c_macro_stored_9 = _x2c_macro_hashes_9[_x2c_macro_index_12];
+    if(_x2c_macro_stored_9 == _x2c_macro_key_hash_3 && _equal_long(_long_key(_x2c_macro_map_56, _x2c_macro_index_12), _x2c_macro_key_32)) return _double_value(_x2c_macro_map_56, _x2c_macro_index_12);
+    if(_x2c_macro_stored_9 == 0){
+      (void) _valid_double(_x2c_macro_val_11);
+      if(_x2c_macro_map_56 -> used >=(unsigned long) _x2c_macro_map_56 -> capacity * 3 / 4){
+        MapLongDouble__core_expand(_x2c_macro_map_56);
         goto retry;
       }
-      _x2c_macro_hashes_1[_x2c_macro_index_3] = _x2c_macro_key_hash_1;
-      _x2c_macro_entries_2[_x2c_macro_index_3].key = * _x2c_macro_key_5;
-      _x2c_macro_entries_2[_x2c_macro_index_3].val = * _x2c_macro_val_3;
-      _x2c_macro_map_5 -> used += 1;
-      * _x2c_macro_inserted_2 = 1;
-      return _double_value(_x2c_macro_map_5, _x2c_macro_index_3);
+      _x2c_macro_hashes_9[_x2c_macro_index_12] = _x2c_macro_key_hash_3;
+      _x2c_macro_entries_7[_x2c_macro_index_12].key = * _x2c_macro_key_32;
+      _x2c_macro_entries_7[_x2c_macro_index_12].val = * _x2c_macro_val_11;
+      _x2c_macro_map_56 -> used += 1;
+      * _x2c_macro_inserted_4 = 1;
+      return _double_value(_x2c_macro_map_56, _x2c_macro_index_12);
     }
-    unsigned _x2c_macro_stored_start_1 = _x2c_macro_stored_2 & _x2c_macro_mask_2;
-    int _x2c_macro_stored_psl_1 =(_x2c_macro_cap_1 + _x2c_macro_index_3 - _x2c_macro_stored_start_1) & _x2c_macro_mask_2;
-    if(_x2c_macro_stored_psl_1 < _x2c_macro_todo_psl_1){
-      (void) _valid_double(_x2c_macro_val_3);
-      if(_x2c_macro_map_5 -> used >=(unsigned long) _x2c_macro_map_5 -> capacity * 3 / 4){
-        MapLongDouble__core_expand(_x2c_macro_map_5);
+    unsigned _x2c_macro_stored_start_5 = _x2c_macro_stored_9 & _x2c_macro_mask_7;
+    int _x2c_macro_stored_psl_5 =(_x2c_macro_cap_7 + _x2c_macro_index_12 - _x2c_macro_stored_start_5) & _x2c_macro_mask_7;
+    if(_x2c_macro_stored_psl_5 < _x2c_macro_todo_psl_5){
+      (void) _valid_double(_x2c_macro_val_11);
+      if(_x2c_macro_map_56 -> used >=(unsigned long) _x2c_macro_map_56 -> capacity * 3 / 4){
+        MapLongDouble__core_expand(_x2c_macro_map_56);
         goto retry;
       }
-      struct MapLongDoubleRecord _x2c_macro_displaced_1 = _x2c_macro_entries_2[_x2c_macro_index_3];
-      _x2c_macro_hashes_1[_x2c_macro_index_3] = _x2c_macro_key_hash_1;
-      _x2c_macro_entries_2[_x2c_macro_index_3].key = * _x2c_macro_key_5;
-      _x2c_macro_entries_2[_x2c_macro_index_3].val = * _x2c_macro_val_3;
-      _x2c_macro_map_5 -> used += 1;
-      * _x2c_macro_inserted_2 = 1;
-      MapLongDouble__core_reinsert(_x2c_macro_map_5, _x2c_macro_stored_2, _x2c_macro_displaced_1, _x2c_macro_stored_psl_1 + 1);
-      return _double_value(_x2c_macro_map_5, _x2c_macro_index_3);
+      struct MapLongDoubleRecord _x2c_macro_displaced_1 = _x2c_macro_entries_7[_x2c_macro_index_12];
+      _x2c_macro_hashes_9[_x2c_macro_index_12] = _x2c_macro_key_hash_3;
+      _x2c_macro_entries_7[_x2c_macro_index_12].key = * _x2c_macro_key_32;
+      _x2c_macro_entries_7[_x2c_macro_index_12].val = * _x2c_macro_val_11;
+      _x2c_macro_map_56 -> used += 1;
+      * _x2c_macro_inserted_4 = 1;
+      MapLongDouble__core_reinsert(_x2c_macro_map_56, _x2c_macro_stored_9, _x2c_macro_displaced_1, _x2c_macro_stored_psl_5 + 1);
+      return _double_value(_x2c_macro_map_56, _x2c_macro_index_12);
     }
 
   }
-  (void) _long_insert_error(_x2c_macro_cap_1);
+  (void) _long_insert_error(_x2c_macro_cap_7);
 }
 
-static void MapLongDouble__core_set(MapLongDouble _x2c_macro_map_5, long * _x2c_macro_key_5, double * _x2c_macro_val_3){
-  int _x2c_macro_inserted_2;
-  double * _x2c_macro_stored_2 = MapLongDouble__core_get_or_insert(_x2c_macro_map_5, _x2c_macro_key_5, _x2c_macro_val_3, & _x2c_macro_inserted_2);
-  if(! _x2c_macro_inserted_2) _x2c_macro_stored_2[0] = _x2c_macro_val_3[0];
+static void MapLongDouble__core_set(MapLongDouble _x2c_macro_map_57, long * _x2c_macro_key_33, double * _x2c_macro_val_12){
+  int _x2c_macro_inserted_5;
+  double * _x2c_macro_stored_10 = MapLongDouble__core_get_or_insert(_x2c_macro_map_57, _x2c_macro_key_33, _x2c_macro_val_12, & _x2c_macro_inserted_5);
+  if(! _x2c_macro_inserted_5) _x2c_macro_stored_10[0] = _x2c_macro_val_12[0];
 }
 
-static int MapLongDouble__core_try_del(MapLongDouble _x2c_macro_map_5, long * _x2c_macro_key_5, double * _x2c_macro_out_5){
-  if((void *) _x2c_macro_map_5 == 0 || ! _x2c_macro_out_5) return 0;
-  long _x2c_macro_found_1 = MapLongDouble__core_find_index(_x2c_macro_map_5, _x2c_macro_key_5);
+static int MapLongDouble__core_try_del(MapLongDouble _x2c_macro_map_58, long * _x2c_macro_key_34, double * _x2c_macro_out_16){
+  if((void *) _x2c_macro_map_58 == 0 || ! _x2c_macro_out_16) return 0;
+  long _x2c_macro_found_1 = MapLongDouble__core_find_index(_x2c_macro_map_58, _x2c_macro_key_34);
   if(_x2c_macro_found_1 < 0) return 0;
-  unsigned * _x2c_macro_hashes_1 = _x2c_macro_map_5 -> hashes;
-  struct MapLongDoubleRecord * _x2c_macro_entries_2 = _x2c_macro_map_5 -> entries;
-  unsigned _x2c_macro_mask_2 = _x2c_macro_map_5 -> mask, _x2c_macro_index_3 =(unsigned) _x2c_macro_found_1, _x2c_macro_empty_1;
-  * _x2c_macro_out_5 =(double) * _double_value(_x2c_macro_map_5, _x2c_macro_index_3);
-  _x2c_macro_hashes_1[_x2c_macro_index_3] = 0;
-  _x2c_macro_map_5 -> used --;
+  unsigned * _x2c_macro_hashes_10 = _x2c_macro_map_58 -> hashes;
+  struct MapLongDoubleRecord * _x2c_macro_entries_8 = _x2c_macro_map_58 -> entries;
+  unsigned _x2c_macro_mask_8 = _x2c_macro_map_58 -> mask, _x2c_macro_index_13 =(unsigned) _x2c_macro_found_1, _x2c_macro_empty_1;
+  * _x2c_macro_out_16 =(double) * _double_value(_x2c_macro_map_58, _x2c_macro_index_13);
+  _x2c_macro_hashes_10[_x2c_macro_index_13] = 0;
+  _x2c_macro_map_58 -> used --;
   while(1){
-    _x2c_macro_empty_1 = _x2c_macro_index_3;
-    _x2c_macro_index_3 =(_x2c_macro_index_3 + 1) & _x2c_macro_mask_2;
-    if(_x2c_macro_hashes_1[_x2c_macro_index_3] == 0 ||(_x2c_macro_hashes_1[_x2c_macro_index_3] & _x2c_macro_mask_2) == _x2c_macro_index_3) break;
-    unsigned _x2c_macro_swap_hash_1 = _x2c_macro_hashes_1[_x2c_macro_empty_1];
-    struct MapLongDoubleRecord _x2c_macro_swap_entry_1 = _x2c_macro_entries_2[_x2c_macro_empty_1];
-    _x2c_macro_hashes_1[_x2c_macro_empty_1] = _x2c_macro_hashes_1[_x2c_macro_index_3];
-    _x2c_macro_entries_2[_x2c_macro_empty_1] = _x2c_macro_entries_2[_x2c_macro_index_3];
-    _x2c_macro_hashes_1[_x2c_macro_index_3] = _x2c_macro_swap_hash_1;
-    _x2c_macro_entries_2[_x2c_macro_index_3] = _x2c_macro_swap_entry_1;
+    _x2c_macro_empty_1 = _x2c_macro_index_13;
+    _x2c_macro_index_13 =(_x2c_macro_index_13 + 1) & _x2c_macro_mask_8;
+    if(_x2c_macro_hashes_10[_x2c_macro_index_13] == 0 ||(_x2c_macro_hashes_10[_x2c_macro_index_13] & _x2c_macro_mask_8) == _x2c_macro_index_13) break;
+    unsigned _x2c_macro_swap_hash_1 = _x2c_macro_hashes_10[_x2c_macro_empty_1];
+    struct MapLongDoubleRecord _x2c_macro_swap_entry_1 = _x2c_macro_entries_8[_x2c_macro_empty_1];
+    _x2c_macro_hashes_10[_x2c_macro_empty_1] = _x2c_macro_hashes_10[_x2c_macro_index_13];
+    _x2c_macro_entries_8[_x2c_macro_empty_1] = _x2c_macro_entries_8[_x2c_macro_index_13];
+    _x2c_macro_hashes_10[_x2c_macro_index_13] = _x2c_macro_swap_hash_1;
+    _x2c_macro_entries_8[_x2c_macro_index_13] = _x2c_macro_swap_entry_1;
   }
-  _x2c_macro_entries_2[_x2c_macro_empty_1] =(struct MapLongDoubleRecord){
+  _x2c_macro_entries_8[_x2c_macro_empty_1] =(struct MapLongDoubleRecord){
     0
   }
   ;
   return 1;
 }
 
-static int MapLongDouble__core_try_next(MapLongDouble _x2c_macro_map_5, unsigned * _x2c_macro_cursor_5, long * _x2c_macro_key_5, double * _x2c_macro_val_3){
-  if((void *) _x2c_macro_map_5 == 0 || ! _x2c_macro_cursor_5 || ! _x2c_macro_key_5 || ! _x2c_macro_val_3) return 0;
-  unsigned * _x2c_macro_hashes_1 = _x2c_macro_map_5 -> hashes;
-  while(* _x2c_macro_cursor_5 < _x2c_macro_map_5 -> capacity){
-    unsigned _x2c_macro_index_3 = * _x2c_macro_cursor_5;
-    * _x2c_macro_cursor_5 += 1;
-    if(_x2c_macro_hashes_1[_x2c_macro_index_3] != 0){
-      * _x2c_macro_key_5 =(long) * _long_key(_x2c_macro_map_5, _x2c_macro_index_3);
-      * _x2c_macro_val_3 =(double) * _double_value(_x2c_macro_map_5, _x2c_macro_index_3);
+static int MapLongDouble__core_try_next(MapLongDouble _x2c_macro_map_59, unsigned * _x2c_macro_cursor_11, long * _x2c_macro_key_35, double * _x2c_macro_val_13){
+  if((void *) _x2c_macro_map_59 == 0 || ! _x2c_macro_cursor_11 || ! _x2c_macro_key_35 || ! _x2c_macro_val_13) return 0;
+  unsigned * _x2c_macro_hashes_11 = _x2c_macro_map_59 -> hashes;
+  while(* _x2c_macro_cursor_11 < _x2c_macro_map_59 -> capacity){
+    unsigned _x2c_macro_index_14 = * _x2c_macro_cursor_11;
+    * _x2c_macro_cursor_11 += 1;
+    if(_x2c_macro_hashes_11[_x2c_macro_index_14] != 0){
+      * _x2c_macro_key_35 =(long) * _long_key(_x2c_macro_map_59, _x2c_macro_index_14);
+      * _x2c_macro_val_13 =(double) * _double_value(_x2c_macro_map_59, _x2c_macro_index_14);
       return 1;
     }
 
@@ -2006,17 +2006,17 @@ static int MapLongDouble__core_try_next(MapLongDouble _x2c_macro_map_5, unsigned
   return 0;
 }
 
-static void MapLongDouble__core_insert_all(MapLongDouble _x2c_macro_map_5, MapLongDouble _x2c_macro_other_2){
-  unsigned _x2c_macro_cursor_5 = 0;
-  long _x2c_macro_key_5;
-  double _x2c_macro_val_3;
-  while(MapLongDouble__core_try_next(_x2c_macro_other_2, & _x2c_macro_cursor_5, & _x2c_macro_key_5, & _x2c_macro_val_3)) MapLongDouble__core_set(_x2c_macro_map_5, & _x2c_macro_key_5, & _x2c_macro_val_3);
+static void MapLongDouble__core_insert_all(MapLongDouble _x2c_macro_map_60, MapLongDouble _x2c_macro_other_3){
+  unsigned _x2c_macro_cursor_12 = 0;
+  long _x2c_macro_key_36;
+  double _x2c_macro_val_14;
+  while(MapLongDouble__core_try_next(_x2c_macro_other_3, & _x2c_macro_cursor_12, & _x2c_macro_key_36, & _x2c_macro_val_14)) MapLongDouble__core_set(_x2c_macro_map_60, & _x2c_macro_key_36, & _x2c_macro_val_14);
 }
 
-static MapLongDouble MapLongDouble__core_copy(MapLongDouble _x2c_macro_map_5){
-  MapLongDouble _x2c_macro_copy_1 = MapLongDouble__core_new_capacity(_x2c_macro_map_5, 2), _x2c_macro_result_1 = 0;
+static MapLongDouble MapLongDouble__core_copy(MapLongDouble _x2c_macro_map_61){
+  MapLongDouble _x2c_macro_copy_1 = MapLongDouble__core_new_capacity(_x2c_macro_map_61, 2), _x2c_macro_result_2 = 0;
   {
-  _x2c_defer_env_4 _x2c_defer_env_39 = {._x2c_defer_capture_8 =(const void *) & _x2c_macro_result_1, ._x2c_defer_capture_9 =(const void *) & _x2c_macro_copy_1};
+  _x2c_defer_env_4 _x2c_defer_env_39 = {._x2c_defer_capture_8 =(const void *) & _x2c_macro_result_2, ._x2c_defer_capture_9 =(const void *) & _x2c_macro_copy_1};
 
   X2CCleanup _x2c_defer_record_9 = {
     .fn = _x2c_defer_cleanup_4,
@@ -2024,9 +2024,9 @@ static MapLongDouble MapLongDouble__core_copy(MapLongDouble _x2c_macro_map_5){
   };
   x2c_cleanup_push(&_x2c_defer_record_9);
   {
-    MapLongDouble__core_insert_all(_x2c_macro_copy_1, _x2c_macro_map_5);
+    MapLongDouble__core_insert_all(_x2c_macro_copy_1, _x2c_macro_map_61);
     {
-      MapLongDouble _x2c_return_value_6 = _x2c_macro_result_1 = _x2c_macro_copy_1;
+      MapLongDouble _x2c_return_value_6 = _x2c_macro_result_2 = _x2c_macro_copy_1;
       {
         x2c_cleanup_leave(& _x2c_defer_record_9);
         return _x2c_return_value_6;
@@ -2040,16 +2040,16 @@ static MapLongDouble MapLongDouble__core_copy(MapLongDouble _x2c_macro_map_5){
 }
 }
 
-static MapLongDouble MapLongDouble__core_merge(MapLongDouble _x2c_macro_map_5, MapLongDouble _x2c_macro_other_2){
-  if(! MapLongDouble_truth(_x2c_macro_other_2)) return _x2c_macro_map_5;
+static MapLongDouble MapLongDouble__core_merge(MapLongDouble _x2c_macro_map_62, MapLongDouble _x2c_macro_other_4){
+  if(! MapLongDouble_truth(_x2c_macro_other_4)) return _x2c_macro_map_62;
   int _x2c_macro_created_1 = 0;
-  if((void *) _x2c_macro_map_5 == 0){
-    _x2c_macro_map_5 = MapLongDouble__core_new_capacity(_x2c_macro_map_5, 2);
+  if((void *) _x2c_macro_map_62 == 0){
+    _x2c_macro_map_62 = MapLongDouble__core_new_capacity(_x2c_macro_map_62, 2);
     _x2c_macro_created_1 = 1;
   }
-  MapLongDouble _x2c_macro_result_1 = 0;
+  MapLongDouble _x2c_macro_result_3 = 0;
   {
-  _x2c_defer_env_5 _x2c_defer_env_40 = {._x2c_defer_capture_10 =(const void *) & _x2c_macro_created_1, ._x2c_defer_capture_11 =(const void *) & _x2c_macro_result_1, ._x2c_defer_capture_12 =(const void *) & _x2c_macro_map_5};
+  _x2c_defer_env_5 _x2c_defer_env_40 = {._x2c_defer_capture_10 =(const void *) & _x2c_macro_created_1, ._x2c_defer_capture_11 =(const void *) & _x2c_macro_result_3, ._x2c_defer_capture_12 =(const void *) & _x2c_macro_map_62};
 
   X2CCleanup _x2c_defer_record_10 = {
     .fn = _x2c_defer_cleanup_5,
@@ -2057,9 +2057,9 @@ static MapLongDouble MapLongDouble__core_merge(MapLongDouble _x2c_macro_map_5, M
   };
   x2c_cleanup_push(&_x2c_defer_record_10);
   {
-    MapLongDouble__core_insert_all(_x2c_macro_map_5, _x2c_macro_other_2);
+    MapLongDouble__core_insert_all(_x2c_macro_map_62, _x2c_macro_other_4);
     {
-      MapLongDouble _x2c_return_value_7 = _x2c_macro_result_1 = _x2c_macro_map_5;
+      MapLongDouble _x2c_return_value_7 = _x2c_macro_result_3 = _x2c_macro_map_62;
       {
         x2c_cleanup_leave(& _x2c_defer_record_10);
         return _x2c_return_value_7;
@@ -2073,167 +2073,167 @@ static MapLongDouble MapLongDouble__core_merge(MapLongDouble _x2c_macro_map_5, M
 }
 }
 
-static int MapLongDouble__core_truth(MapLongDouble _x2c_macro_map_5){
-  return(void *) _x2c_macro_map_5 != 0 && _x2c_macro_map_5 -> used != 0;
+static int MapLongDouble__core_truth(MapLongDouble _x2c_macro_map_63){
+  return(void *) _x2c_macro_map_63 != 0 && _x2c_macro_map_63 -> used != 0;
 }
 
-static int MapLongDouble__core_equal(MapLongDouble _x2c_macro_a_5, MapLongDouble _x2c_macro_b_5){
-  if((void *) _x2c_macro_a_5 ==(void *) _x2c_macro_b_5) return 1;
-  if((void *) _x2c_macro_a_5 == 0 ||(void *) _x2c_macro_b_5 == 0) return 0;
-  if(_x2c_macro_a_5 -> used != _x2c_macro_b_5 -> used) return 0;
-  unsigned _x2c_macro_cursor_5 = 0;
-  long _x2c_macro_key_5;
+static int MapLongDouble__core_equal(MapLongDouble _x2c_macro_a_6, MapLongDouble _x2c_macro_b_6){
+  if((void *) _x2c_macro_a_6 ==(void *) _x2c_macro_b_6) return 1;
+  if((void *) _x2c_macro_a_6 == 0 ||(void *) _x2c_macro_b_6 == 0) return 0;
+  if(_x2c_macro_a_6 -> used != _x2c_macro_b_6 -> used) return 0;
+  unsigned _x2c_macro_cursor_13 = 0;
+  long _x2c_macro_key_37;
   double _x2c_macro_avalue_1, _x2c_macro_bvalue_1;
-  while(MapLongDouble__core_try_next(_x2c_macro_a_5, & _x2c_macro_cursor_5, & _x2c_macro_key_5, & _x2c_macro_avalue_1)){
-    if(! MapLongDouble__core_try_get(_x2c_macro_b_5, & _x2c_macro_key_5, & _x2c_macro_bvalue_1) || ! _equal_double(& _x2c_macro_avalue_1, & _x2c_macro_bvalue_1)) return 0;
+  while(MapLongDouble__core_try_next(_x2c_macro_a_6, & _x2c_macro_cursor_13, & _x2c_macro_key_37, & _x2c_macro_avalue_1)){
+    if(! MapLongDouble__core_try_get(_x2c_macro_b_6, & _x2c_macro_key_37, & _x2c_macro_bvalue_1) || ! _equal_double(& _x2c_macro_avalue_1, & _x2c_macro_bvalue_1)) return 0;
   }
   return 1;
 }
 
-MapLongDouble MapLongDouble_new_capacity(unsigned _x2c_macro_capacity_3){
+MapLongDouble MapLongDouble_new_capacity(unsigned _x2c_macro_capacity_5){
   if(! _init_guard_) _file_init_();
-  if(! _capacity_valid(_x2c_macro_capacity_3))(void) _bad_arg(_1);
-  MapLongDouble _x2c_macro_map_6 = 0;
-  return MapLongDouble__core_new_capacity(_x2c_macro_map_6, _x2c_macro_capacity_3);
+  if(! _capacity_valid(_x2c_macro_capacity_5))(void) _bad_arg(_1);
+  MapLongDouble _x2c_macro_map_64 = 0;
+  return MapLongDouble__core_new_capacity(_x2c_macro_map_64, _x2c_macro_capacity_5);
 }
 
 MapLongDouble MapLongDouble_new(void){
-  MapLongDouble _x2c_macro_map_6 = 0;
-  return MapLongDouble__core_new_capacity(_x2c_macro_map_6, 2);
+  MapLongDouble _x2c_macro_map_65 = 0;
+  return MapLongDouble__core_new_capacity(_x2c_macro_map_65, 2);
 }
 
-MapLongDouble Map_maplongdouble(Map _x2c_macro_entries_3){
+MapLongDouble Map_maplongdouble(Map _x2c_macro_entries_9){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_entries_3 == 0) return 0;
+  if((void *) _x2c_macro_entries_9 == 0) return 0;
   MapLongDouble _x2c_macro_packed_1 = 0;
   _x2c_macro_packed_1 = MapLongDouble__core_new_capacity(_x2c_macro_packed_1, 2);
-  unsigned _x2c_macro_cursor_6 = 0;
-  Var _x2c_macro_key_6, _x2c_macro_val_4;
-  while(Map_try_next(_x2c_macro_entries_3, & _x2c_macro_cursor_6, & _x2c_macro_key_6, & _x2c_macro_val_4)) MapLongDouble_set(_x2c_macro_packed_1, Var_long(Var_convert(_x2c_macro_key_6, 818062)), Var_floating(Var_convert(_x2c_macro_val_4, 3356265)));
+  unsigned _x2c_macro_cursor_14 = 0;
+  Var _x2c_macro_key_38, _x2c_macro_val_15;
+  while(Map_try_next(_x2c_macro_entries_9, & _x2c_macro_cursor_14, & _x2c_macro_key_38, & _x2c_macro_val_15)) MapLongDouble_set(_x2c_macro_packed_1, Var_long(Var_convert(_x2c_macro_key_38, 818062)), Var_floating(Var_convert(_x2c_macro_val_15, 3356265)));
   return _x2c_macro_packed_1;
 }
 
-unsigned MapLongDouble_len(MapLongDouble _x2c_macro_map_6){
-  return MapLongDouble_truth(_x2c_macro_map_6) ? _x2c_macro_map_6 -> used : 0;
+unsigned MapLongDouble_len(MapLongDouble _x2c_macro_map_66){
+  return MapLongDouble_truth(_x2c_macro_map_66) ? _x2c_macro_map_66 -> used : 0;
 }
 
-int MapLongDouble_try_get(MapLongDouble _x2c_macro_map_6, long _x2c_macro_key_6, double * _x2c_macro_out_6){
-  return MapLongDouble__core_try_get(_x2c_macro_map_6, & _x2c_macro_key_6, _x2c_macro_out_6);
+int MapLongDouble_try_get(MapLongDouble _x2c_macro_map_67, long _x2c_macro_key_39, double * _x2c_macro_out_17){
+  return MapLongDouble__core_try_get(_x2c_macro_map_67, & _x2c_macro_key_39, _x2c_macro_out_17);
 }
 
-double MapLongDouble_get(MapLongDouble _x2c_macro_map_6, long _x2c_macro_key_6){
+double MapLongDouble_get(MapLongDouble _x2c_macro_map_68, long _x2c_macro_key_40){
   if(! _init_guard_) _file_init_();
-  double _x2c_macro_out_6 = 0.0;
-  if(MapLongDouble_try_get(_x2c_macro_map_6, _x2c_macro_key_6, & _x2c_macro_out_6)) return _x2c_macro_out_6;
+  double _x2c_macro_out_18 = 0.0;
+  if(MapLongDouble_try_get(_x2c_macro_map_68, _x2c_macro_key_40, & _x2c_macro_out_18)) return _x2c_macro_out_18;
   (void) _bad_arg(_1);
   return 0.0;
 }
 
-double MapLongDouble_getindex(MapLongDouble _x2c_macro_map_6, long _x2c_macro_key_6){
+double MapLongDouble_getindex(MapLongDouble _x2c_macro_map_69, long _x2c_macro_key_41){
   if(! _init_guard_) _file_init_();
-  return MapLongDouble_get(_x2c_macro_map_6, _x2c_macro_key_6);
+  return MapLongDouble_get(_x2c_macro_map_69, _x2c_macro_key_41);
 }
 
-double MapLongDouble_getdefault(MapLongDouble _x2c_macro_map_6, long _x2c_macro_key_6, double _x2c_macro_defval_1){
-  double _x2c_macro_out_6;
-  return MapLongDouble_try_get(_x2c_macro_map_6, _x2c_macro_key_6, & _x2c_macro_out_6) ? _x2c_macro_out_6 : _x2c_macro_defval_1;
+double MapLongDouble_getdefault(MapLongDouble _x2c_macro_map_70, long _x2c_macro_key_42, double _x2c_macro_defval_2){
+  double _x2c_macro_out_19;
+  return MapLongDouble_try_get(_x2c_macro_map_70, _x2c_macro_key_42, & _x2c_macro_out_19) ? _x2c_macro_out_19 : _x2c_macro_defval_2;
 }
 
-double MapLongDouble_setdefault(MapLongDouble _x2c_macro_map_6, long _x2c_macro_key_6, double _x2c_macro_defval_1){
+double MapLongDouble_setdefault(MapLongDouble _x2c_macro_map_71, long _x2c_macro_key_43, double _x2c_macro_defval_3){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_6 == 0)(void) _bad_arg(_1);
-  int _x2c_macro_inserted_3;
-  double * _x2c_macro_stored_3 = MapLongDouble__core_get_or_insert(_x2c_macro_map_6, & _x2c_macro_key_6, & _x2c_macro_defval_1, & _x2c_macro_inserted_3);
-  return _x2c_macro_stored_3[0];
+  if((void *) _x2c_macro_map_71 == 0)(void) _bad_arg(_1);
+  int _x2c_macro_inserted_6;
+  double * _x2c_macro_stored_11 = MapLongDouble__core_get_or_insert(_x2c_macro_map_71, & _x2c_macro_key_43, & _x2c_macro_defval_3, & _x2c_macro_inserted_6);
+  return _x2c_macro_stored_11[0];
 }
 
-int MapLongDouble_contains(MapLongDouble _x2c_macro_map_6, long _x2c_macro_key_6){
-  return MapLongDouble_truth(_x2c_macro_map_6) && MapLongDouble__core_find_index(_x2c_macro_map_6, & _x2c_macro_key_6) >= 0;
+int MapLongDouble_contains(MapLongDouble _x2c_macro_map_72, long _x2c_macro_key_44){
+  return MapLongDouble_truth(_x2c_macro_map_72) && MapLongDouble__core_find_index(_x2c_macro_map_72, & _x2c_macro_key_44) >= 0;
 }
 
-void MapLongDouble_set(MapLongDouble _x2c_macro_map_6, long _x2c_macro_key_6, double _x2c_macro_val_4){
+void MapLongDouble_set(MapLongDouble _x2c_macro_map_73, long _x2c_macro_key_45, double _x2c_macro_val_16){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_6 == 0)(void) _bad_arg(_1);
-  MapLongDouble__core_set(_x2c_macro_map_6, & _x2c_macro_key_6, & _x2c_macro_val_4);
+  if((void *) _x2c_macro_map_73 == 0)(void) _bad_arg(_1);
+  MapLongDouble__core_set(_x2c_macro_map_73, & _x2c_macro_key_45, & _x2c_macro_val_16);
 }
 
-double MapLongDouble_setindex(MapLongDouble _x2c_macro_map_6, long _x2c_macro_key_6, double _x2c_macro_val_4){
+double MapLongDouble_setindex(MapLongDouble _x2c_macro_map_74, long _x2c_macro_key_46, double _x2c_macro_val_17){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_6 == 0)(void) _bad_arg(_1);
-  MapLongDouble__core_set(_x2c_macro_map_6, & _x2c_macro_key_6, & _x2c_macro_val_4);
-  return _x2c_macro_val_4;
+  if((void *) _x2c_macro_map_74 == 0)(void) _bad_arg(_1);
+  MapLongDouble__core_set(_x2c_macro_map_74, & _x2c_macro_key_46, & _x2c_macro_val_17);
+  return _x2c_macro_val_17;
 }
 
-double MapLongDouble_updateindex(MapLongDouble _x2c_macro_map_6, long _x2c_macro_key_6, Symbol _x2c_macro_op_2, double _x2c_macro_rhs_1){
+double MapLongDouble_updateindex(MapLongDouble _x2c_macro_map_75, long _x2c_macro_key_47, Symbol _x2c_macro_op_3, double _x2c_macro_rhs_1){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_6 == 0)(void) _bad_arg(_1);
-  if(_x2c_macro_op_2 == 56){
-    int _x2c_macro_inserted_3;
-    double * _x2c_macro_stored_3 = MapLongDouble__core_get_or_insert(_x2c_macro_map_6, & _x2c_macro_key_6, & _x2c_macro_rhs_1, & _x2c_macro_inserted_3);
-    if(_x2c_macro_inserted_3) return _x2c_macro_rhs_1;
-    return _update_double(_x2c_macro_stored_3, _x2c_macro_op_2, _x2c_macro_rhs_1);
+  if((void *) _x2c_macro_map_75 == 0)(void) _bad_arg(_1);
+  if(_x2c_macro_op_3 == 56){
+    int _x2c_macro_inserted_7;
+    double * _x2c_macro_stored_12 = MapLongDouble__core_get_or_insert(_x2c_macro_map_75, & _x2c_macro_key_47, & _x2c_macro_rhs_1, & _x2c_macro_inserted_7);
+    if(_x2c_macro_inserted_7) return _x2c_macro_rhs_1;
+    return _update_double(_x2c_macro_stored_12, _x2c_macro_op_3, _x2c_macro_rhs_1);
   }
-  long _x2c_macro_index_4 = MapLongDouble__core_find_index(_x2c_macro_map_6, & _x2c_macro_key_6);
-  if(_x2c_macro_index_4 < 0)(void) _bad_arg(_1);
-  return _update_double(_double_value(_x2c_macro_map_6, (unsigned) _x2c_macro_index_4), _x2c_macro_op_2, _x2c_macro_rhs_1);
+  long _x2c_macro_index_15 = MapLongDouble__core_find_index(_x2c_macro_map_75, & _x2c_macro_key_47);
+  if(_x2c_macro_index_15 < 0)(void) _bad_arg(_1);
+  return _update_double(_double_value(_x2c_macro_map_75, (unsigned) _x2c_macro_index_15), _x2c_macro_op_3, _x2c_macro_rhs_1);
 }
 
-double MapLongDouble_postfixindex(MapLongDouble _x2c_macro_map_6, long _x2c_macro_key_6, Symbol _x2c_macro_op_2){
+double MapLongDouble_postfixindex(MapLongDouble _x2c_macro_map_76, long _x2c_macro_key_48, Symbol _x2c_macro_op_4){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_6 == 0)(void) _bad_arg(_1);
-  long _x2c_macro_index_4 = MapLongDouble__core_find_index(_x2c_macro_map_6, & _x2c_macro_key_6);
-  if(_x2c_macro_index_4 < 0)(void) _bad_arg(_1);
-  double * _x2c_macro_stored_3 = _double_value(_x2c_macro_map_6, (unsigned) _x2c_macro_index_4);
-  double _x2c_macro_old_1 = _x2c_macro_stored_3[0];
-  if(! 1)(void) _bad_op(_x2c_macro_op_2);
-  if(_x2c_macro_op_2 == 1848) _update_double(_x2c_macro_stored_3, 56, 1.0);
-  else if(_x2c_macro_op_2 == 2046) _update_double(_x2c_macro_stored_3, 62, 1.0);
-  else(void) _bad_op(_x2c_macro_op_2);
+  if((void *) _x2c_macro_map_76 == 0)(void) _bad_arg(_1);
+  long _x2c_macro_index_16 = MapLongDouble__core_find_index(_x2c_macro_map_76, & _x2c_macro_key_48);
+  if(_x2c_macro_index_16 < 0)(void) _bad_arg(_1);
+  double * _x2c_macro_stored_13 = _double_value(_x2c_macro_map_76, (unsigned) _x2c_macro_index_16);
+  double _x2c_macro_old_1 = _x2c_macro_stored_13[0];
+  if(! 1)(void) _bad_op(_x2c_macro_op_4);
+  if(_x2c_macro_op_4 == 1848) _update_double(_x2c_macro_stored_13, 56, 1.0);
+  else if(_x2c_macro_op_4 == 2046) _update_double(_x2c_macro_stored_13, 62, 1.0);
+  else(void) _bad_op(_x2c_macro_op_4);
   return _x2c_macro_old_1;
 }
 
-int MapLongDouble_try_del(MapLongDouble _x2c_macro_map_6, long _x2c_macro_key_6, double * _x2c_macro_out_6){
-  return MapLongDouble__core_try_del(_x2c_macro_map_6, & _x2c_macro_key_6, _x2c_macro_out_6);
+int MapLongDouble_try_del(MapLongDouble _x2c_macro_map_77, long _x2c_macro_key_49, double * _x2c_macro_out_20){
+  return MapLongDouble__core_try_del(_x2c_macro_map_77, & _x2c_macro_key_49, _x2c_macro_out_20);
 }
 
-double MapLongDouble_del(MapLongDouble _x2c_macro_map_6, long _x2c_macro_key_6){
+double MapLongDouble_del(MapLongDouble _x2c_macro_map_78, long _x2c_macro_key_50){
   if(! _init_guard_) _file_init_();
-  double _x2c_macro_out_6 = 0.0;
-  if(MapLongDouble_try_del(_x2c_macro_map_6, _x2c_macro_key_6, & _x2c_macro_out_6)) return _x2c_macro_out_6;
+  double _x2c_macro_out_21 = 0.0;
+  if(MapLongDouble_try_del(_x2c_macro_map_78, _x2c_macro_key_50, & _x2c_macro_out_21)) return _x2c_macro_out_21;
   (void) _bad_arg(_1);
 }
 
-MapLongDouble MapLongDouble_copy(MapLongDouble _x2c_macro_map_6){
-  return MapLongDouble__core_copy(_x2c_macro_map_6);
+MapLongDouble MapLongDouble_copy(MapLongDouble _x2c_macro_map_79){
+  return MapLongDouble__core_copy(_x2c_macro_map_79);
 }
 
-MapLongDouble MapLongDouble_merge(MapLongDouble _x2c_macro_map_6, MapLongDouble _x2c_macro_other_3){
-  return MapLongDouble__core_merge(_x2c_macro_map_6, _x2c_macro_other_3);
+MapLongDouble MapLongDouble_merge(MapLongDouble _x2c_macro_map_80, MapLongDouble _x2c_macro_other_5){
+  return MapLongDouble__core_merge(_x2c_macro_map_80, _x2c_macro_other_5);
 }
 
-int MapLongDouble_try_next(MapLongDouble _x2c_macro_map_6, unsigned * _x2c_macro_cursor_6, long * _x2c_macro_key_6, double * _x2c_macro_val_4){
-  return MapLongDouble__core_try_next(_x2c_macro_map_6, _x2c_macro_cursor_6, _x2c_macro_key_6, _x2c_macro_val_4);
+int MapLongDouble_try_next(MapLongDouble _x2c_macro_map_81, unsigned * _x2c_macro_cursor_15, long * _x2c_macro_key_51, double * _x2c_macro_val_18){
+  return MapLongDouble__core_try_next(_x2c_macro_map_81, _x2c_macro_cursor_15, _x2c_macro_key_51, _x2c_macro_val_18);
 }
 
-int MapLongDouble_truth(MapLongDouble _x2c_macro_map_6){
-  return MapLongDouble__core_truth(_x2c_macro_map_6);
+int MapLongDouble_truth(MapLongDouble _x2c_macro_map_82){
+  return MapLongDouble__core_truth(_x2c_macro_map_82);
 }
 
-int MapLongDouble_equal(MapLongDouble _x2c_macro_a_6, MapLongDouble _x2c_macro_b_6){
-  return MapLongDouble__core_equal(_x2c_macro_a_6, _x2c_macro_b_6);
+int MapLongDouble_equal(MapLongDouble _x2c_macro_a_7, MapLongDouble _x2c_macro_b_7){
+  return MapLongDouble__core_equal(_x2c_macro_a_7, _x2c_macro_b_7);
 }
 
 static int _x2c_macro_record_compare_1(const void * _x2c_macro_ap_1, const void * _x2c_macro_bp_1){
-  const struct MapLongDoubleRecord * _x2c_macro_a_7 = _x2c_macro_ap_1, * _x2c_macro_b_7 = _x2c_macro_bp_1;
-  int _x2c_macro_comparison_1 = _map_compare_long(_x2c_macro_a_7 -> key, _x2c_macro_b_7 -> key);
-  return _x2c_macro_comparison_1 ? _x2c_macro_comparison_1 : _map_compare_double(_x2c_macro_a_7 -> val, _x2c_macro_b_7 -> val);
+  const struct MapLongDoubleRecord * _x2c_macro_a_8 = _x2c_macro_ap_1, * _x2c_macro_b_8 = _x2c_macro_bp_1;
+  int _x2c_macro_comparison_2 = _map_compare_long(_x2c_macro_a_8 -> key, _x2c_macro_b_8 -> key);
+  return _x2c_macro_comparison_2 ? _x2c_macro_comparison_2 : _map_compare_double(_x2c_macro_a_8 -> val, _x2c_macro_b_8 -> val);
 }
 
-static int MapLongDouble__core_compare(MapLongDouble _x2c_macro_a_7, MapLongDouble _x2c_macro_b_7){
-  if((void *) _x2c_macro_a_7 ==(void *) _x2c_macro_b_7) return 0;
-  if((void *) _x2c_macro_a_7 == NULL) return - 1;
-  if((void *) _x2c_macro_b_7 == NULL) return 1;
-  unsigned _x2c_macro_asz_1 = _x2c_macro_a_7 -> used, _x2c_macro_bsz_1 = _x2c_macro_b_7 -> used;
+static int MapLongDouble__core_compare(MapLongDouble _x2c_macro_a_9, MapLongDouble _x2c_macro_b_9){
+  if((void *) _x2c_macro_a_9 ==(void *) _x2c_macro_b_9) return 0;
+  if((void *) _x2c_macro_a_9 == NULL) return - 1;
+  if((void *) _x2c_macro_b_9 == NULL) return 1;
+  unsigned _x2c_macro_asz_1 = _x2c_macro_a_9 -> used, _x2c_macro_bsz_1 = _x2c_macro_b_9 -> used;
   if(_x2c_macro_asz_1 != _x2c_macro_bsz_1) return _x2c_macro_asz_1 < _x2c_macro_bsz_1 ? - 1 : 1;
   if(! _x2c_macro_asz_1) return 0;
   Scope _x2c_macro_scratch_1 = Scope_new();
@@ -2248,25 +2248,25 @@ static int MapLongDouble__core_compare(MapLongDouble _x2c_macro_a_7, MapLongDoub
   {
     struct MapLongDoubleRecord * _x2c_macro_arecs_1 = Scope_malloc_in(& _x2c_macro_scratch_1, _x2c_macro_asz_1 * sizeof(struct MapLongDoubleRecord));
     struct MapLongDoubleRecord * _x2c_macro_brecs_1 = Scope_malloc_in(& _x2c_macro_scratch_1, _x2c_macro_bsz_1 * sizeof(struct MapLongDoubleRecord));
-    unsigned _x2c_macro_cursor_7 = 0, _x2c_macro_index_5 = 0;
-    long _x2c_macro_key_7;
-    double _x2c_macro_value_3;
-    while(MapLongDouble_try_next(_x2c_macro_a_7, & _x2c_macro_cursor_7, & _x2c_macro_key_7, & _x2c_macro_value_3)) _x2c_macro_arecs_1[_x2c_macro_index_5 ++] =(struct MapLongDoubleRecord){
-      .key = _x2c_macro_key_7, .val = _x2c_macro_value_3
+    unsigned _x2c_macro_cursor_16 = 0, _x2c_macro_index_17 = 0;
+    long _x2c_macro_key_52;
+    double _x2c_macro_value_4;
+    while(MapLongDouble_try_next(_x2c_macro_a_9, & _x2c_macro_cursor_16, & _x2c_macro_key_52, & _x2c_macro_value_4)) _x2c_macro_arecs_1[_x2c_macro_index_17 ++] =(struct MapLongDoubleRecord){
+      .key = _x2c_macro_key_52, .val = _x2c_macro_value_4
     }
     ;
-    _x2c_macro_cursor_7 = 0;
-    _x2c_macro_index_5 = 0;
-    while(MapLongDouble_try_next(_x2c_macro_b_7, & _x2c_macro_cursor_7, & _x2c_macro_key_7, & _x2c_macro_value_3)) _x2c_macro_brecs_1[_x2c_macro_index_5 ++] =(struct MapLongDoubleRecord){
-      .key = _x2c_macro_key_7, .val = _x2c_macro_value_3
+    _x2c_macro_cursor_16 = 0;
+    _x2c_macro_index_17 = 0;
+    while(MapLongDouble_try_next(_x2c_macro_b_9, & _x2c_macro_cursor_16, & _x2c_macro_key_52, & _x2c_macro_value_4)) _x2c_macro_brecs_1[_x2c_macro_index_17 ++] =(struct MapLongDoubleRecord){
+      .key = _x2c_macro_key_52, .val = _x2c_macro_value_4
     }
     ;
     qsort(_x2c_macro_arecs_1, _x2c_macro_asz_1, sizeof(struct MapLongDoubleRecord), _x2c_macro_record_compare_1);
     qsort(_x2c_macro_brecs_1, _x2c_macro_bsz_1, sizeof(struct MapLongDoubleRecord), _x2c_macro_record_compare_1);
     for(unsigned _x2c_macro_i_3 = 0;  _x2c_macro_i_3 < _x2c_macro_asz_1;  _x2c_macro_i_3 ++){
-      int _x2c_macro_comparison_1 = _x2c_macro_record_compare_1(_x2c_macro_arecs_1 + _x2c_macro_i_3, _x2c_macro_brecs_1 + _x2c_macro_i_3);
-      if(_x2c_macro_comparison_1){
-        int _x2c_return_value_8 = _x2c_macro_comparison_1;
+      int _x2c_macro_comparison_3 = _x2c_macro_record_compare_1(_x2c_macro_arecs_1 + _x2c_macro_i_3, _x2c_macro_brecs_1 + _x2c_macro_i_3);
+      if(_x2c_macro_comparison_3){
+        int _x2c_return_value_8 = _x2c_macro_comparison_3;
         {
           x2c_cleanup_leave(& _x2c_defer_record_11);
           return _x2c_return_value_8;
@@ -2290,9 +2290,9 @@ static int MapLongDouble__core_compare(MapLongDouble _x2c_macro_a_7, MapLongDoub
 }
 }
 
-static Buffer MapLongDouble__core_write(MapLongDouble _x2c_macro_map_7, Buffer _x2c_macro_out_7, Symbol _x2c_macro_mode_1){
+static Buffer MapLongDouble__core_write(MapLongDouble _x2c_macro_map_83, Buffer _x2c_macro_out_22, Symbol _x2c_macro_mode_1){
   RenderPath _x2c_macro_path_1;
-  if(! RenderPath_enter(&(_x2c_macro_path_1), _x2c_macro_map_7)) return Buffer_printf(_x2c_macro_out_7, "<map: 0x%012lX>", (long) _x2c_macro_map_7);
+  if(! RenderPath_enter(&(_x2c_macro_path_1), _x2c_macro_map_83)) return Buffer_printf(_x2c_macro_out_22, "<map: 0x%012lX>", (long) _x2c_macro_map_83);
   {
   _x2c_defer_env_6 _x2c_defer_env_42 = {._x2c_defer_capture_13 =(const void *) & _x2c_macro_path_1};
 
@@ -2302,28 +2302,28 @@ static Buffer MapLongDouble__core_write(MapLongDouble _x2c_macro_map_7, Buffer _
   };
   x2c_cleanup_push(&_x2c_defer_record_12);
   {
-    Buffer_write(_x2c_macro_out_7, "{ ");
-    unsigned _x2c_macro_cursor_7 = 0;
-    long _x2c_macro_key_7;
-    double _x2c_macro_value_3;
+    Buffer_write(_x2c_macro_out_22, "{ ");
+    unsigned _x2c_macro_cursor_17 = 0;
+    long _x2c_macro_key_53;
+    double _x2c_macro_value_5;
     int _x2c_macro_first_1 = 1;
-    while(MapLongDouble_try_next(_x2c_macro_map_7, & _x2c_macro_cursor_7, & _x2c_macro_key_7, & _x2c_macro_value_3)){
-      if(! _x2c_macro_first_1) Buffer_write(_x2c_macro_out_7, ", ");
-      Var _x2c_macro_boxed_key_2 = _box_long(_x2c_macro_key_7), _x2c_macro_boxed_value_2 = _box_double(_x2c_macro_value_3);
+    while(MapLongDouble_try_next(_x2c_macro_map_83, & _x2c_macro_cursor_17, & _x2c_macro_key_53, & _x2c_macro_value_5)){
+      if(! _x2c_macro_first_1) Buffer_write(_x2c_macro_out_22, ", ");
+      Var _x2c_macro_boxed_key_2 = _box_long(_x2c_macro_key_53), _x2c_macro_boxed_value_2 = _box_double(_x2c_macro_value_5);
       if(_x2c_macro_mode_1 == 40228){
-        Var_write_str(_x2c_macro_boxed_key_2, _x2c_macro_out_7);
-        Buffer_write(_x2c_macro_out_7, ": ");
-        Var_write_str(_x2c_macro_boxed_value_2, _x2c_macro_out_7);
+        Var_write_str(_x2c_macro_boxed_key_2, _x2c_macro_out_22);
+        Buffer_write(_x2c_macro_out_22, ": ");
+        Var_write_str(_x2c_macro_boxed_value_2, _x2c_macro_out_22);
       }
       else{
-        Var_write_repr(_x2c_macro_boxed_key_2, _x2c_macro_out_7);
-        Buffer_write(_x2c_macro_out_7, ": ");
-        Var_write_repr(_x2c_macro_boxed_value_2, _x2c_macro_out_7);
+        Var_write_repr(_x2c_macro_boxed_key_2, _x2c_macro_out_22);
+        Buffer_write(_x2c_macro_out_22, ": ");
+        Var_write_repr(_x2c_macro_boxed_value_2, _x2c_macro_out_22);
       }
       _x2c_macro_first_1 = 0;
     }
     {
-      Buffer _x2c_return_value_10 = Buffer_write(_x2c_macro_out_7, " }");
+      Buffer _x2c_return_value_10 = Buffer_write(_x2c_macro_out_22, " }");
       {
         x2c_cleanup_leave(& _x2c_defer_record_12);
         return _x2c_return_value_10;
@@ -2337,104 +2337,104 @@ static Buffer MapLongDouble__core_write(MapLongDouble _x2c_macro_map_7, Buffer _
 }
 }
 
-Map MapLongDouble_map(MapLongDouble _x2c_macro_map_8){
-  if((void *) _x2c_macro_map_8 == NULL) return NULL;
+Map MapLongDouble_map(MapLongDouble _x2c_macro_map_84){
+  if((void *) _x2c_macro_map_84 == NULL) return NULL;
   Map _x2c_macro_boxed_1 = Map_new();
-  unsigned _x2c_macro_cursor_8 = 0;
-  long _x2c_macro_key_8;
-  double _x2c_macro_value_4;
-  while(MapLongDouble_try_next(_x2c_macro_map_8, & _x2c_macro_cursor_8, & _x2c_macro_key_8, & _x2c_macro_value_4)) Map_setindex(_x2c_macro_boxed_1, _box_long(_x2c_macro_key_8), _box_double(_x2c_macro_value_4));
+  unsigned _x2c_macro_cursor_18 = 0;
+  long _x2c_macro_key_54;
+  double _x2c_macro_value_6;
+  while(MapLongDouble_try_next(_x2c_macro_map_84, & _x2c_macro_cursor_18, & _x2c_macro_key_54, & _x2c_macro_value_6)) Map_setindex(_x2c_macro_boxed_1, _box_long(_x2c_macro_key_54), _box_double(_x2c_macro_value_6));
   return _x2c_macro_boxed_1;
 }
 
-int MapLongDouble_compare(MapLongDouble _x2c_macro_a_8, MapLongDouble _x2c_macro_b_8){
-  return MapLongDouble__core_compare(_x2c_macro_a_8, _x2c_macro_b_8);
+int MapLongDouble_compare(MapLongDouble _x2c_macro_a_10, MapLongDouble _x2c_macro_b_10){
+  return MapLongDouble__core_compare(_x2c_macro_a_10, _x2c_macro_b_10);
 }
 
-Buffer MapLongDouble_write_repr(MapLongDouble _x2c_macro_map_8, Buffer _x2c_macro_out_8){
-  return MapLongDouble__core_write(_x2c_macro_map_8, _x2c_macro_out_8, 1190948);
+Buffer MapLongDouble_write_repr(MapLongDouble _x2c_macro_map_85, Buffer _x2c_macro_out_23){
+  return MapLongDouble__core_write(_x2c_macro_map_85, _x2c_macro_out_23, 1190948);
 }
 
-Buffer MapLongDouble_write_str(MapLongDouble _x2c_macro_map_8, Buffer _x2c_macro_out_8){
-  if(! MapLongDouble_truth(_x2c_macro_map_8)) return Buffer_write(_x2c_macro_out_8, "{ }");
-  return MapLongDouble__core_write(_x2c_macro_map_8, _x2c_macro_out_8, 40228);
+Buffer MapLongDouble_write_str(MapLongDouble _x2c_macro_map_86, Buffer _x2c_macro_out_24){
+  if(! MapLongDouble_truth(_x2c_macro_map_86)) return Buffer_write(_x2c_macro_out_24, "{ }");
+  return MapLongDouble__core_write(_x2c_macro_map_86, _x2c_macro_out_24, 40228);
 }
 
-String MapLongDouble_str(MapLongDouble _x2c_macro_map_8){
-  Buffer _x2c_macro_out_8 = Buffer_new(0);
-  MapLongDouble_write_str(_x2c_macro_map_8, _x2c_macro_out_8);
-  return Buffer_str_free(_x2c_macro_out_8);
+String MapLongDouble_str(MapLongDouble _x2c_macro_map_87){
+  Buffer _x2c_macro_out_25 = Buffer_new(0);
+  MapLongDouble_write_str(_x2c_macro_map_87, _x2c_macro_out_25);
+  return Buffer_str_free(_x2c_macro_out_25);
 }
 
-String MapLongDouble_repr(MapLongDouble _x2c_macro_map_8){
-  Buffer _x2c_macro_out_8 = Buffer_new(0);
-  MapLongDouble_write_repr(_x2c_macro_map_8, _x2c_macro_out_8);
-  return Buffer_str_free(_x2c_macro_out_8);
+String MapLongDouble_repr(MapLongDouble _x2c_macro_map_88){
+  Buffer _x2c_macro_out_26 = Buffer_new(0);
+  MapLongDouble_write_repr(_x2c_macro_map_88, _x2c_macro_out_26);
+  return Buffer_str_free(_x2c_macro_out_26);
 }
 
-Var MapLongDouble_var(MapLongDouble _x2c_macro_map_9){
-  return Var_new(918119015457770, _x2c_macro_map_9);
+Var MapLongDouble_var(MapLongDouble _x2c_macro_map_89){
+  return Var_new(918119015457770, _x2c_macro_map_89);
 }
 
-MapLongDouble Var_maplongdouble(Var _x2c_macro_value_5){
-  return(MapLongDouble) Var_pointer(_x2c_macro_value_5);
+MapLongDouble Var_maplongdouble(Var _x2c_macro_value_7){
+  return(MapLongDouble) Var_pointer(_x2c_macro_value_7);
 }
 
-static int _x2c_macro_next_1(Iter _x2c_macro_iter_1, Var * _x2c_macro_out_9){
-  MapLongDouble _x2c_macro_map_9 = Var_maplongdouble(_x2c_macro_iter_1 -> obj);
-  if((void *) _x2c_macro_map_9 == 0 || ! _x2c_macro_out_9) return 0;
-  unsigned _x2c_macro_cursor_9 = Var_uint(Var_convert(_x2c_macro_iter_1 -> state, 3847013));
-  long _x2c_macro_key_9;
-  double _x2c_macro_val_5;
-  if(! MapLongDouble_try_next(_x2c_macro_map_9, & _x2c_macro_cursor_9, & _x2c_macro_key_9, & _x2c_macro_val_5)) return 0;
-  _x2c_macro_iter_1 -> state = unsigned_var(_x2c_macro_cursor_9);
-  * _x2c_macro_out_9 = _box_double(_x2c_macro_val_5);
+static int _x2c_macro_next_1(Iter _x2c_macro_iter_3, Var * _x2c_macro_out_27){
+  MapLongDouble _x2c_macro_map_90 = Var_maplongdouble(_x2c_macro_iter_3 -> obj);
+  if((void *) _x2c_macro_map_90 == 0 || ! _x2c_macro_out_27) return 0;
+  unsigned _x2c_macro_cursor_19 = Var_uint(Var_convert(_x2c_macro_iter_3 -> state, 3847013));
+  long _x2c_macro_key_55;
+  double _x2c_macro_val_19;
+  if(! MapLongDouble_try_next(_x2c_macro_map_90, & _x2c_macro_cursor_19, & _x2c_macro_key_55, & _x2c_macro_val_19)) return 0;
+  _x2c_macro_iter_3 -> state = unsigned_var(_x2c_macro_cursor_19);
+  * _x2c_macro_out_27 = _box_double(_x2c_macro_val_19);
   return 1;
 }
 
-static int _x2c_macro_keys_next_1(Iter _x2c_macro_iter_1, Var * _x2c_macro_out_9){
-  MapLongDouble _x2c_macro_map_9 = Var_maplongdouble(_x2c_macro_iter_1 -> obj);
-  if((void *) _x2c_macro_map_9 == 0 || ! _x2c_macro_out_9) return 0;
-  unsigned _x2c_macro_cursor_9 = Var_uint(Var_convert(_x2c_macro_iter_1 -> state, 3847013));
-  long _x2c_macro_key_9;
-  double _x2c_macro_val_5;
-  if(! MapLongDouble_try_next(_x2c_macro_map_9, & _x2c_macro_cursor_9, & _x2c_macro_key_9, & _x2c_macro_val_5)) return 0;
-  _x2c_macro_iter_1 -> state = unsigned_var(_x2c_macro_cursor_9);
-  * _x2c_macro_out_9 = _box_long(_x2c_macro_key_9);
+static int _x2c_macro_keys_next_1(Iter _x2c_macro_iter_4, Var * _x2c_macro_out_28){
+  MapLongDouble _x2c_macro_map_91 = Var_maplongdouble(_x2c_macro_iter_4 -> obj);
+  if((void *) _x2c_macro_map_91 == 0 || ! _x2c_macro_out_28) return 0;
+  unsigned _x2c_macro_cursor_20 = Var_uint(Var_convert(_x2c_macro_iter_4 -> state, 3847013));
+  long _x2c_macro_key_56;
+  double _x2c_macro_val_20;
+  if(! MapLongDouble_try_next(_x2c_macro_map_91, & _x2c_macro_cursor_20, & _x2c_macro_key_56, & _x2c_macro_val_20)) return 0;
+  _x2c_macro_iter_4 -> state = unsigned_var(_x2c_macro_cursor_20);
+  * _x2c_macro_out_28 = _box_long(_x2c_macro_key_56);
   return 1;
 }
 
-static int _x2c_macro_enumerate_next_1(Iter _x2c_macro_iter_1, Var * _x2c_macro_out_9){
-  MapLongDouble _x2c_macro_map_9 = Var_maplongdouble(_x2c_macro_iter_1 -> obj);
-  if((void *) _x2c_macro_map_9 == 0 || ! _x2c_macro_out_9) return 0;
-  unsigned _x2c_macro_cursor_9 = Var_uint(Var_convert(_x2c_macro_iter_1 -> state, 3847013));
-  long _x2c_macro_key_9;
-  double _x2c_macro_val_5;
-  if(! MapLongDouble_try_next(_x2c_macro_map_9, & _x2c_macro_cursor_9, & _x2c_macro_key_9, & _x2c_macro_val_5)) return 0;
-  _x2c_macro_iter_1 -> state = unsigned_var(_x2c_macro_cursor_9);
-  Var _x2c_macro_boxed_key_3 = _box_long(_x2c_macro_key_9), _x2c_macro_boxed_value_3 = _box_double(_x2c_macro_val_5);
-  * _x2c_macro_out_9 = List_var(cons(_x2c_macro_boxed_key_3, cons(_x2c_macro_boxed_value_3, NULL)));
+static int _x2c_macro_enumerate_next_1(Iter _x2c_macro_iter_5, Var * _x2c_macro_out_29){
+  MapLongDouble _x2c_macro_map_92 = Var_maplongdouble(_x2c_macro_iter_5 -> obj);
+  if((void *) _x2c_macro_map_92 == 0 || ! _x2c_macro_out_29) return 0;
+  unsigned _x2c_macro_cursor_21 = Var_uint(Var_convert(_x2c_macro_iter_5 -> state, 3847013));
+  long _x2c_macro_key_57;
+  double _x2c_macro_val_21;
+  if(! MapLongDouble_try_next(_x2c_macro_map_92, & _x2c_macro_cursor_21, & _x2c_macro_key_57, & _x2c_macro_val_21)) return 0;
+  _x2c_macro_iter_5 -> state = unsigned_var(_x2c_macro_cursor_21);
+  Var _x2c_macro_boxed_key_3 = _box_long(_x2c_macro_key_57), _x2c_macro_boxed_value_3 = _box_double(_x2c_macro_val_21);
+  * _x2c_macro_out_29 = List_var(cons(_x2c_macro_boxed_key_3, cons(_x2c_macro_boxed_value_3, NULL)));
   return 1;
 }
 
-Iter MapLongDouble_iter(MapLongDouble _x2c_macro_map_9, Iter _x2c_macro_dest_1){
-  if((void *) _x2c_macro_dest_1 == 0) return 0;
-  return Iter_init(_x2c_macro_dest_1, MapLongDouble_var(_x2c_macro_map_9), _x2c_macro_next_1, int_var(0));
+Iter MapLongDouble_iter(MapLongDouble _x2c_macro_map_93, Iter _x2c_macro_dest_3){
+  if((void *) _x2c_macro_dest_3 == 0) return 0;
+  return Iter_init(_x2c_macro_dest_3, MapLongDouble_var(_x2c_macro_map_93), _x2c_macro_next_1, int_var(0));
 }
 
-Iter MapLongDouble_keys(MapLongDouble _x2c_macro_map_9, Iter _x2c_macro_dest_1){
-  if((void *) _x2c_macro_dest_1 == 0) return 0;
-  return Iter_init(_x2c_macro_dest_1, MapLongDouble_var(_x2c_macro_map_9), _x2c_macro_keys_next_1, int_var(0));
+Iter MapLongDouble_keys(MapLongDouble _x2c_macro_map_94, Iter _x2c_macro_dest_4){
+  if((void *) _x2c_macro_dest_4 == 0) return 0;
+  return Iter_init(_x2c_macro_dest_4, MapLongDouble_var(_x2c_macro_map_94), _x2c_macro_keys_next_1, int_var(0));
 }
 
-Iter MapLongDouble_enumerate(MapLongDouble _x2c_macro_map_9, Iter _x2c_macro_dest_1){
-  if((void *) _x2c_macro_dest_1 == 0) return 0;
-  return Iter_init(_x2c_macro_dest_1, MapLongDouble_var(_x2c_macro_map_9), _x2c_macro_enumerate_next_1, int_var(0));
+Iter MapLongDouble_enumerate(MapLongDouble _x2c_macro_map_95, Iter _x2c_macro_dest_5){
+  if((void *) _x2c_macro_dest_5 == 0) return 0;
+  return Iter_init(_x2c_macro_dest_5, MapLongDouble_var(_x2c_macro_map_95), _x2c_macro_enumerate_next_1, int_var(0));
 }
 
-static MapLongDouble MapLongDouble_export_context(MapLongDouble _x2c_macro_map_9, Context _x2c_macro_source_1){
-  if((void *) _x2c_macro_map_9 == 0 || ! Context_owns(_x2c_macro_source_1, _x2c_macro_map_9)) return _x2c_macro_map_9;
-  MapLongDouble _x2c_macro_staged_1 = _prepare_long_export(_x2c_macro_map_9, _x2c_macro_source_1), _x2c_macro_committed_1 = NULL;
+static MapLongDouble MapLongDouble_export_context(MapLongDouble _x2c_macro_map_96, Context _x2c_macro_source_1){
+  if((void *) _x2c_macro_map_96 == 0 || ! Context_owns(_x2c_macro_source_1, _x2c_macro_map_96)) return _x2c_macro_map_96;
+  MapLongDouble _x2c_macro_staged_1 = _prepare_long_export(_x2c_macro_map_96, _x2c_macro_source_1), _x2c_macro_committed_1 = NULL;
   {
   _x2c_defer_env_7 _x2c_defer_env_43 = {._x2c_defer_capture_14 =(const void *) & _x2c_macro_staged_1, ._x2c_defer_capture_15 =(const void *) & _x2c_macro_committed_1};
 
@@ -2445,28 +2445,28 @@ static MapLongDouble MapLongDouble_export_context(MapLongDouble _x2c_macro_map_9
   x2c_cleanup_push(&_x2c_defer_record_13);
   {
     Scope * _x2c_macro_destination_1 = Context_export_destination(_x2c_macro_source_1);
-    Scope_move(_x2c_macro_map_9, _x2c_macro_destination_1);
+    Scope_move(_x2c_macro_map_96, _x2c_macro_destination_1);
     if((void *) _x2c_macro_staged_1 == 0){
-      Block_move_to(Bytes_block(_x2c_macro_map_9 -> hashes), _x2c_macro_destination_1);
-      Block_move_to(Bytes_block(_x2c_macro_map_9 -> entries), _x2c_macro_destination_1);
+      Block_move_to(Bytes_block(_x2c_macro_map_96 -> hashes), _x2c_macro_destination_1);
+      Block_move_to(Bytes_block(_x2c_macro_map_96 -> entries), _x2c_macro_destination_1);
     }
     else{
-      Bytes _x2c_macro_old_hashes_1 = _x2c_macro_map_9 -> hashes, _x2c_macro_old_entries_1 = _x2c_macro_map_9 -> entries;
+      Bytes _x2c_macro_old_hashes_1 = _x2c_macro_map_96 -> hashes, _x2c_macro_old_entries_1 = _x2c_macro_map_96 -> entries;
       Block_move_to(Bytes_block(_x2c_macro_staged_1 -> hashes), _x2c_macro_destination_1);
       Block_move_to(Bytes_block(_x2c_macro_staged_1 -> entries), _x2c_macro_destination_1);
-      _x2c_macro_map_9 -> hashes = _x2c_macro_staged_1 -> hashes;
-      _x2c_macro_map_9 -> entries = _x2c_macro_staged_1 -> entries;
-      _x2c_macro_map_9 -> used = _x2c_macro_staged_1 -> used;
-      _x2c_macro_map_9 -> capacity = _x2c_macro_staged_1 -> capacity;
-      _x2c_macro_map_9 -> mask = _x2c_macro_staged_1 -> mask;
+      _x2c_macro_map_96 -> hashes = _x2c_macro_staged_1 -> hashes;
+      _x2c_macro_map_96 -> entries = _x2c_macro_staged_1 -> entries;
+      _x2c_macro_map_96 -> used = _x2c_macro_staged_1 -> used;
+      _x2c_macro_map_96 -> capacity = _x2c_macro_staged_1 -> capacity;
+      _x2c_macro_map_96 -> mask = _x2c_macro_staged_1 -> mask;
       _x2c_macro_staged_1 -> hashes = _x2c_macro_old_hashes_1;
       _x2c_macro_staged_1 -> entries = _x2c_macro_old_entries_1;
       MapLongDouble__core_free(_x2c_macro_staged_1);
     }
-    _x2c_macro_map_9 -> scope = * _x2c_macro_destination_1;
-    _x2c_macro_committed_1 = _x2c_macro_map_9;
+    _x2c_macro_map_96 -> scope = * _x2c_macro_destination_1;
+    _x2c_macro_committed_1 = _x2c_macro_map_96;
     {
-      MapLongDouble _x2c_return_value_11 = _x2c_macro_map_9;
+      MapLongDouble _x2c_return_value_11 = _x2c_macro_map_96;
       {
         x2c_cleanup_leave(& _x2c_defer_record_13);
         return _x2c_return_value_11;
@@ -2480,98 +2480,98 @@ static MapLongDouble MapLongDouble_export_context(MapLongDouble _x2c_macro_map_9
 }
 }
 
-void MapLongDouble_cleanup(MapLongDouble _x2c_macro_map_9){
-  MapLongDouble__core_free(_x2c_macro_map_9);
+void MapLongDouble_cleanup(MapLongDouble _x2c_macro_map_97){
+  MapLongDouble__core_free(_x2c_macro_map_97);
 }
 
-static void MapStringString__core_free(MapStringString _x2c_macro_map_10){
-  if((void *) _x2c_macro_map_10 == 0) return;
-  Bytes_free(_x2c_macro_map_10 -> hashes);
-  Bytes_free(_x2c_macro_map_10 -> entries);
-  Scope_free(_x2c_macro_map_10);
+static void MapStringString__core_free(MapStringString _x2c_macro_map_98){
+  if((void *) _x2c_macro_map_98 == 0) return;
+  Bytes_free(_x2c_macro_map_98 -> hashes);
+  Bytes_free(_x2c_macro_map_98 -> entries);
+  Scope_free(_x2c_macro_map_98);
 }
 
-static MapStringString MapStringString__core_new_capacity(MapStringString _x2c_macro_unused_2, unsigned _x2c_macro_capacity_4){
+static MapStringString MapStringString__core_new_capacity(MapStringString _x2c_macro_unused_2, unsigned _x2c_macro_capacity_6){
   (void) _x2c_macro_unused_2;
-  MapStringString _x2c_macro_map_10 = Scope_malloc(sizeof(struct MapStringString));
-  _x2c_macro_map_10 -> scope = * Scope_top();
-  _x2c_macro_map_10 -> hashes = Bytes_new(sizeof(unsigned));
-  _x2c_macro_map_10 -> hashes = Bytes_append(_x2c_macro_map_10 -> hashes, 0, _x2c_macro_capacity_4);
-  _x2c_macro_map_10 -> entries = Bytes_new(sizeof(struct MapStringStringRecord));
-  _x2c_macro_map_10 -> entries = Bytes_append(_x2c_macro_map_10 -> entries, 0, _x2c_macro_capacity_4);
-  _x2c_macro_map_10 -> capacity = _x2c_macro_capacity_4;
-  _x2c_macro_map_10 -> mask = _x2c_macro_capacity_4 - 1;
-  _x2c_macro_map_10 -> used = 0;
-  return _x2c_macro_map_10;
+  MapStringString _x2c_macro_map_99 = Scope_malloc(sizeof(struct MapStringString));
+  _x2c_macro_map_99 -> scope = * Scope_top();
+  _x2c_macro_map_99 -> hashes = Bytes_new(sizeof(unsigned));
+  _x2c_macro_map_99 -> hashes = Bytes_append(_x2c_macro_map_99 -> hashes, 0, _x2c_macro_capacity_6);
+  _x2c_macro_map_99 -> entries = Bytes_new(sizeof(struct MapStringStringRecord));
+  _x2c_macro_map_99 -> entries = Bytes_append(_x2c_macro_map_99 -> entries, 0, _x2c_macro_capacity_6);
+  _x2c_macro_map_99 -> capacity = _x2c_macro_capacity_6;
+  _x2c_macro_map_99 -> mask = _x2c_macro_capacity_6 - 1;
+  _x2c_macro_map_99 -> used = 0;
+  return _x2c_macro_map_99;
 }
 
-static long MapStringString__core_find_hashed(MapStringString _x2c_macro_map_10, String * _x2c_macro_key_10, unsigned _x2c_macro_key_hash_2){
-  unsigned * _x2c_macro_hashes_2 = _x2c_macro_map_10 -> hashes;
-  unsigned _x2c_macro_mask_3 = _x2c_macro_map_10 -> mask, _x2c_macro_todo_start_2 = _x2c_macro_key_hash_2 & _x2c_macro_mask_3;
-  unsigned _x2c_macro_cap_2 = _x2c_macro_map_10 -> capacity;
-  for(int _x2c_macro_todo_psl_2 = 0;  _x2c_macro_todo_psl_2 <(int) _x2c_macro_cap_2;  _x2c_macro_todo_psl_2 ++){
-    unsigned _x2c_macro_index_6 =(_x2c_macro_todo_start_2 + _x2c_macro_todo_psl_2) & _x2c_macro_mask_3;
-    unsigned _x2c_macro_stored_4 = _x2c_macro_hashes_2[_x2c_macro_index_6];
-    if(_x2c_macro_stored_4 == 0) break;
-    if(_x2c_macro_stored_4 == _x2c_macro_key_hash_2 && _equal_string(_string_key(_x2c_macro_map_10, _x2c_macro_index_6), _x2c_macro_key_10)) return(long) _x2c_macro_index_6;
-    unsigned _x2c_macro_stored_start_2 = _x2c_macro_stored_4 & _x2c_macro_mask_3;
-    int _x2c_macro_stored_psl_2 =(_x2c_macro_cap_2 + _x2c_macro_index_6 - _x2c_macro_stored_start_2) & _x2c_macro_mask_3;
-    if(_x2c_macro_stored_psl_2 < _x2c_macro_todo_psl_2) break;
+static long MapStringString__core_find_hashed(MapStringString _x2c_macro_map_100, String * _x2c_macro_key_58, unsigned _x2c_macro_key_hash_4){
+  unsigned * _x2c_macro_hashes_12 = _x2c_macro_map_100 -> hashes;
+  unsigned _x2c_macro_mask_9 = _x2c_macro_map_100 -> mask, _x2c_macro_todo_start_6 = _x2c_macro_key_hash_4 & _x2c_macro_mask_9;
+  unsigned _x2c_macro_cap_8 = _x2c_macro_map_100 -> capacity;
+  for(int _x2c_macro_todo_psl_6 = 0;  _x2c_macro_todo_psl_6 <(int) _x2c_macro_cap_8;  _x2c_macro_todo_psl_6 ++){
+    unsigned _x2c_macro_index_18 =(_x2c_macro_todo_start_6 + _x2c_macro_todo_psl_6) & _x2c_macro_mask_9;
+    unsigned _x2c_macro_stored_14 = _x2c_macro_hashes_12[_x2c_macro_index_18];
+    if(_x2c_macro_stored_14 == 0) break;
+    if(_x2c_macro_stored_14 == _x2c_macro_key_hash_4 && _equal_string(_string_key(_x2c_macro_map_100, _x2c_macro_index_18), _x2c_macro_key_58)) return(long) _x2c_macro_index_18;
+    unsigned _x2c_macro_stored_start_6 = _x2c_macro_stored_14 & _x2c_macro_mask_9;
+    int _x2c_macro_stored_psl_6 =(_x2c_macro_cap_8 + _x2c_macro_index_18 - _x2c_macro_stored_start_6) & _x2c_macro_mask_9;
+    if(_x2c_macro_stored_psl_6 < _x2c_macro_todo_psl_6) break;
   }
   return - 1;
 }
 
-static long MapStringString__core_find_index(MapStringString _x2c_macro_map_10, String * _x2c_macro_key_10){
-  return MapStringString__core_find_hashed(_x2c_macro_map_10, _x2c_macro_key_10, _hash_string(_x2c_macro_key_10));
+static long MapStringString__core_find_index(MapStringString _x2c_macro_map_101, String * _x2c_macro_key_59){
+  return MapStringString__core_find_hashed(_x2c_macro_map_101, _x2c_macro_key_59, _hash_string(_x2c_macro_key_59));
 }
 
-static int MapStringString__core_try_get(MapStringString _x2c_macro_map_10, String * _x2c_macro_key_10, String * _x2c_macro_out_10){
-  if((void *) _x2c_macro_map_10 == 0 || ! _x2c_macro_out_10) return 0;
-  long _x2c_macro_index_6 = MapStringString__core_find_index(_x2c_macro_map_10, _x2c_macro_key_10);
-  if(_x2c_macro_index_6 < 0) return 0;
-  * _x2c_macro_out_10 =(String) * _string_value(_x2c_macro_map_10, (unsigned) _x2c_macro_index_6);
+static int MapStringString__core_try_get(MapStringString _x2c_macro_map_102, String * _x2c_macro_key_60, String * _x2c_macro_out_30){
+  if((void *) _x2c_macro_map_102 == 0 || ! _x2c_macro_out_30) return 0;
+  long _x2c_macro_index_19 = MapStringString__core_find_index(_x2c_macro_map_102, _x2c_macro_key_60);
+  if(_x2c_macro_index_19 < 0) return 0;
+  * _x2c_macro_out_30 =(String) * _string_value(_x2c_macro_map_102, (unsigned) _x2c_macro_index_19);
   return 1;
 }
 
-static void MapStringString__core_reinsert(MapStringString _x2c_macro_map_10, unsigned _x2c_macro_todo_hash_2, struct MapStringStringRecord _x2c_macro_todo_2, int _x2c_macro_psl_2){
-  unsigned * _x2c_macro_hashes_2 = _x2c_macro_map_10 -> hashes;
-  struct MapStringStringRecord * _x2c_macro_entries_4 = _x2c_macro_map_10 -> entries;
-  unsigned _x2c_macro_mask_3 = _x2c_macro_map_10 -> mask, _x2c_macro_todo_start_2 = _x2c_macro_todo_hash_2 & _x2c_macro_mask_3;
-  unsigned _x2c_macro_cap_2 = _x2c_macro_map_10 -> capacity;
-  for(int _x2c_macro_todo_psl_2 = _x2c_macro_psl_2;  _x2c_macro_todo_psl_2 <(int) _x2c_macro_cap_2;  _x2c_macro_todo_psl_2 ++){
-    unsigned _x2c_macro_index_6 =(_x2c_macro_todo_start_2 + _x2c_macro_todo_psl_2) & _x2c_macro_mask_3;
-    unsigned _x2c_macro_stored_4 = _x2c_macro_hashes_2[_x2c_macro_index_6];
-    if(_x2c_macro_stored_4 == 0){
-      _x2c_macro_hashes_2[_x2c_macro_index_6] = _x2c_macro_todo_hash_2;
-      _x2c_macro_entries_4[_x2c_macro_index_6] = _x2c_macro_todo_2;
+static void MapStringString__core_reinsert(MapStringString _x2c_macro_map_103, unsigned _x2c_macro_todo_hash_2, struct MapStringStringRecord _x2c_macro_todo_2, int _x2c_macro_psl_2){
+  unsigned * _x2c_macro_hashes_13 = _x2c_macro_map_103 -> hashes;
+  struct MapStringStringRecord * _x2c_macro_entries_10 = _x2c_macro_map_103 -> entries;
+  unsigned _x2c_macro_mask_10 = _x2c_macro_map_103 -> mask, _x2c_macro_todo_start_7 = _x2c_macro_todo_hash_2 & _x2c_macro_mask_10;
+  unsigned _x2c_macro_cap_9 = _x2c_macro_map_103 -> capacity;
+  for(int _x2c_macro_todo_psl_7 = _x2c_macro_psl_2;  _x2c_macro_todo_psl_7 <(int) _x2c_macro_cap_9;  _x2c_macro_todo_psl_7 ++){
+    unsigned _x2c_macro_index_20 =(_x2c_macro_todo_start_7 + _x2c_macro_todo_psl_7) & _x2c_macro_mask_10;
+    unsigned _x2c_macro_stored_15 = _x2c_macro_hashes_13[_x2c_macro_index_20];
+    if(_x2c_macro_stored_15 == 0){
+      _x2c_macro_hashes_13[_x2c_macro_index_20] = _x2c_macro_todo_hash_2;
+      _x2c_macro_entries_10[_x2c_macro_index_20] = _x2c_macro_todo_2;
       return;
     }
-    unsigned _x2c_macro_stored_start_2 = _x2c_macro_stored_4 & _x2c_macro_mask_3;
-    int _x2c_macro_stored_psl_2 =(_x2c_macro_cap_2 + _x2c_macro_index_6 - _x2c_macro_stored_start_2) & _x2c_macro_mask_3;
-    if(_x2c_macro_stored_psl_2 < _x2c_macro_todo_psl_2){
-      struct MapStringStringRecord _x2c_macro_swap_2 = _x2c_macro_entries_4[_x2c_macro_index_6];
-      _x2c_macro_hashes_2[_x2c_macro_index_6] = _x2c_macro_todo_hash_2;
-      _x2c_macro_entries_4[_x2c_macro_index_6] = _x2c_macro_todo_2;
-      _x2c_macro_todo_hash_2 = _x2c_macro_stored_4;
+    unsigned _x2c_macro_stored_start_7 = _x2c_macro_stored_15 & _x2c_macro_mask_10;
+    int _x2c_macro_stored_psl_7 =(_x2c_macro_cap_9 + _x2c_macro_index_20 - _x2c_macro_stored_start_7) & _x2c_macro_mask_10;
+    if(_x2c_macro_stored_psl_7 < _x2c_macro_todo_psl_7){
+      struct MapStringStringRecord _x2c_macro_swap_2 = _x2c_macro_entries_10[_x2c_macro_index_20];
+      _x2c_macro_hashes_13[_x2c_macro_index_20] = _x2c_macro_todo_hash_2;
+      _x2c_macro_entries_10[_x2c_macro_index_20] = _x2c_macro_todo_2;
+      _x2c_macro_todo_hash_2 = _x2c_macro_stored_15;
       _x2c_macro_todo_2 = _x2c_macro_swap_2;
-      _x2c_macro_todo_start_2 = _x2c_macro_stored_start_2;
-      _x2c_macro_todo_psl_2 = _x2c_macro_stored_psl_2;
+      _x2c_macro_todo_start_7 = _x2c_macro_stored_start_7;
+      _x2c_macro_todo_psl_7 = _x2c_macro_stored_psl_7;
     }
 
   }
-  (void) _string_reinsert_error(_x2c_macro_cap_2, _x2c_macro_psl_2);
+  (void) _string_reinsert_error(_x2c_macro_cap_9, _x2c_macro_psl_2);
 }
 
-static void MapStringString__core_expand(MapStringString _x2c_macro_map_10){
-  unsigned * _x2c_macro_hashes_2 = _x2c_macro_map_10 -> hashes;
-  struct MapStringStringRecord * _x2c_macro_entries_4 = _x2c_macro_map_10 -> entries;
-  unsigned _x2c_macro_cap_2 = _x2c_macro_map_10 -> capacity;
-  if(_x2c_macro_cap_2 > ~ 0u / 2){
+static void MapStringString__core_expand(MapStringString _x2c_macro_map_104){
+  unsigned * _x2c_macro_hashes_14 = _x2c_macro_map_104 -> hashes;
+  struct MapStringStringRecord * _x2c_macro_entries_11 = _x2c_macro_map_104 -> entries;
+  unsigned _x2c_macro_cap_10 = _x2c_macro_map_104 -> capacity;
+  if(_x2c_macro_cap_10 > ~ 0u / 2){
     static const X2CErrorSite _x2c_error_site_15 = {.file = "../../lib/typed-map.x",.function = "MapStringString__core_expand",.line = 314};
-    x2c_error_raise_n(& _x2c_error_site_15, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_macro_cap_2));
+    x2c_error_raise_n(& _x2c_error_site_15, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_macro_cap_10));
     __builtin_unreachable();
   }
-  unsigned _x2c_macro_capacity_4 = _x2c_macro_cap_2 * 2;
+  unsigned _x2c_macro_capacity_7 = _x2c_macro_cap_10 * 2;
   Bytes _x2c_macro_staged_hashes_2 = Bytes_new(sizeof(unsigned));
   {
   _x2c_defer_env_25 _x2c_defer_env_44 = {._x2c_defer_capture_43 =(const void *) & _x2c_macro_staged_hashes_2};
@@ -2582,7 +2582,7 @@ static void MapStringString__core_expand(MapStringString _x2c_macro_map_10){
   };
   x2c_cleanup_push(&_x2c_defer_record_14);
   {
-    _x2c_macro_staged_hashes_2 = Bytes_append(_x2c_macro_staged_hashes_2, 0, _x2c_macro_capacity_4);
+    _x2c_macro_staged_hashes_2 = Bytes_append(_x2c_macro_staged_hashes_2, 0, _x2c_macro_capacity_7);
     Bytes _x2c_macro_staged_entries_2 = Bytes_new(sizeof(struct MapStringStringRecord));
     {
   _x2c_defer_env_24 _x2c_defer_env_45 = {._x2c_defer_capture_42 =(const void *) & _x2c_macro_staged_entries_2};
@@ -2593,26 +2593,26 @@ static void MapStringString__core_expand(MapStringString _x2c_macro_map_10){
   };
   x2c_cleanup_push(&_x2c_defer_record_15);
   {
-      _x2c_macro_staged_entries_2 = Bytes_append(_x2c_macro_staged_entries_2, 0, _x2c_macro_capacity_4);
-      struct MapStringString _x2c_macro_expanded_2 = * _x2c_macro_map_10;
+      _x2c_macro_staged_entries_2 = Bytes_append(_x2c_macro_staged_entries_2, 0, _x2c_macro_capacity_7);
+      struct MapStringString _x2c_macro_expanded_2 = * _x2c_macro_map_104;
       _x2c_macro_expanded_2.hashes = _x2c_macro_staged_hashes_2;
       _x2c_macro_expanded_2.entries = _x2c_macro_staged_entries_2;
-      _x2c_macro_expanded_2.capacity = _x2c_macro_capacity_4;
-      _x2c_macro_expanded_2.mask = _x2c_macro_capacity_4 - 1;
+      _x2c_macro_expanded_2.capacity = _x2c_macro_capacity_7;
+      _x2c_macro_expanded_2.mask = _x2c_macro_capacity_7 - 1;
       MapStringString _x2c_macro_expanded_map_2 =(MapStringString) & _x2c_macro_expanded_2;
-      for(unsigned _x2c_macro_i_4 = 0;  _x2c_macro_i_4 < _x2c_macro_cap_2;  _x2c_macro_i_4 ++) if(_x2c_macro_hashes_2[_x2c_macro_i_4]) MapStringString__core_reinsert(_x2c_macro_expanded_map_2, _x2c_macro_hashes_2[_x2c_macro_i_4], _x2c_macro_entries_4[_x2c_macro_i_4], 0);
-      Scope_move(Bytes_block(_x2c_macro_staged_hashes_2), & _x2c_macro_map_10 -> scope);
-      Scope_move((unsigned char *) _x2c_macro_staged_hashes_2 - sizeof(Block), & _x2c_macro_map_10 -> scope);
-      Scope_move(Bytes_block(_x2c_macro_staged_entries_2), & _x2c_macro_map_10 -> scope);
-      Scope_move((unsigned char *) _x2c_macro_staged_entries_2 - sizeof(Block), & _x2c_macro_map_10 -> scope);
-      _x2c_macro_map_10 -> hashes = _x2c_macro_expanded_2.hashes;
-      _x2c_macro_map_10 -> entries = _x2c_macro_expanded_2.entries;
-      _x2c_macro_map_10 -> capacity = _x2c_macro_expanded_2.capacity;
-      _x2c_macro_map_10 -> mask = _x2c_macro_expanded_2.mask;
+      for(unsigned _x2c_macro_i_4 = 0;  _x2c_macro_i_4 < _x2c_macro_cap_10;  _x2c_macro_i_4 ++) if(_x2c_macro_hashes_14[_x2c_macro_i_4]) MapStringString__core_reinsert(_x2c_macro_expanded_map_2, _x2c_macro_hashes_14[_x2c_macro_i_4], _x2c_macro_entries_11[_x2c_macro_i_4], 0);
+      Scope_move(Bytes_block(_x2c_macro_staged_hashes_2), & _x2c_macro_map_104 -> scope);
+      Scope_move((unsigned char *) _x2c_macro_staged_hashes_2 - sizeof(Block), & _x2c_macro_map_104 -> scope);
+      Scope_move(Bytes_block(_x2c_macro_staged_entries_2), & _x2c_macro_map_104 -> scope);
+      Scope_move((unsigned char *) _x2c_macro_staged_entries_2 - sizeof(Block), & _x2c_macro_map_104 -> scope);
+      _x2c_macro_map_104 -> hashes = _x2c_macro_expanded_2.hashes;
+      _x2c_macro_map_104 -> entries = _x2c_macro_expanded_2.entries;
+      _x2c_macro_map_104 -> capacity = _x2c_macro_expanded_2.capacity;
+      _x2c_macro_map_104 -> mask = _x2c_macro_expanded_2.mask;
       _x2c_macro_staged_hashes_2 = 0;
       _x2c_macro_staged_entries_2 = 0;
-      Bytes_free((Bytes) _x2c_macro_hashes_2);
-      Bytes_free((Bytes) _x2c_macro_entries_4);
+      Bytes_free((Bytes) _x2c_macro_hashes_14);
+      Bytes_free((Bytes) _x2c_macro_entries_11);
     }
     x2c_cleanup_leave(& _x2c_defer_record_15);
 
@@ -2623,96 +2623,96 @@ static void MapStringString__core_expand(MapStringString _x2c_macro_map_10){
 }
 }
 
-static String * MapStringString__core_get_or_insert(MapStringString _x2c_macro_map_10, String * _x2c_macro_key_10, String * _x2c_macro_val_6, int * _x2c_macro_inserted_4){
-  * _x2c_macro_inserted_4 = 0;
+static String * MapStringString__core_get_or_insert(MapStringString _x2c_macro_map_105, String * _x2c_macro_key_61, String * _x2c_macro_val_22, int * _x2c_macro_inserted_8){
+  * _x2c_macro_inserted_8 = 0;
   retry :;
-  unsigned _x2c_macro_key_hash_2 = _hash_string(_x2c_macro_key_10), _x2c_macro_mask_3 = _x2c_macro_map_10 -> mask;
-  unsigned _x2c_macro_todo_start_2 = _x2c_macro_key_hash_2 & _x2c_macro_mask_3;
-  unsigned * _x2c_macro_hashes_2 = _x2c_macro_map_10 -> hashes;
-  struct MapStringStringRecord * _x2c_macro_entries_4 = _x2c_macro_map_10 -> entries;
-  unsigned _x2c_macro_cap_2 = _x2c_macro_map_10 -> capacity;
-  for(int _x2c_macro_todo_psl_2 = 0;  _x2c_macro_todo_psl_2 <(int) _x2c_macro_cap_2;  _x2c_macro_todo_psl_2 ++){
-    unsigned _x2c_macro_index_6 =(_x2c_macro_todo_start_2 + _x2c_macro_todo_psl_2) & _x2c_macro_mask_3;
-    unsigned _x2c_macro_stored_4 = _x2c_macro_hashes_2[_x2c_macro_index_6];
-    if(_x2c_macro_stored_4 == _x2c_macro_key_hash_2 && _equal_string(_string_key(_x2c_macro_map_10, _x2c_macro_index_6), _x2c_macro_key_10)) return _string_value(_x2c_macro_map_10, _x2c_macro_index_6);
-    if(_x2c_macro_stored_4 == 0){
-      (void) _valid_string(_x2c_macro_val_6);
-      if(_x2c_macro_map_10 -> used >=(unsigned long) _x2c_macro_map_10 -> capacity * 3 / 4){
-        MapStringString__core_expand(_x2c_macro_map_10);
+  unsigned _x2c_macro_key_hash_5 = _hash_string(_x2c_macro_key_61), _x2c_macro_mask_11 = _x2c_macro_map_105 -> mask;
+  unsigned _x2c_macro_todo_start_8 = _x2c_macro_key_hash_5 & _x2c_macro_mask_11;
+  unsigned * _x2c_macro_hashes_15 = _x2c_macro_map_105 -> hashes;
+  struct MapStringStringRecord * _x2c_macro_entries_12 = _x2c_macro_map_105 -> entries;
+  unsigned _x2c_macro_cap_11 = _x2c_macro_map_105 -> capacity;
+  for(int _x2c_macro_todo_psl_8 = 0;  _x2c_macro_todo_psl_8 <(int) _x2c_macro_cap_11;  _x2c_macro_todo_psl_8 ++){
+    unsigned _x2c_macro_index_21 =(_x2c_macro_todo_start_8 + _x2c_macro_todo_psl_8) & _x2c_macro_mask_11;
+    unsigned _x2c_macro_stored_16 = _x2c_macro_hashes_15[_x2c_macro_index_21];
+    if(_x2c_macro_stored_16 == _x2c_macro_key_hash_5 && _equal_string(_string_key(_x2c_macro_map_105, _x2c_macro_index_21), _x2c_macro_key_61)) return _string_value(_x2c_macro_map_105, _x2c_macro_index_21);
+    if(_x2c_macro_stored_16 == 0){
+      (void) _valid_string(_x2c_macro_val_22);
+      if(_x2c_macro_map_105 -> used >=(unsigned long) _x2c_macro_map_105 -> capacity * 3 / 4){
+        MapStringString__core_expand(_x2c_macro_map_105);
         goto retry;
       }
-      _x2c_macro_hashes_2[_x2c_macro_index_6] = _x2c_macro_key_hash_2;
-      _x2c_macro_entries_4[_x2c_macro_index_6].key = * _x2c_macro_key_10;
-      _x2c_macro_entries_4[_x2c_macro_index_6].val = * _x2c_macro_val_6;
-      _x2c_macro_map_10 -> used += 1;
-      * _x2c_macro_inserted_4 = 1;
-      return _string_value(_x2c_macro_map_10, _x2c_macro_index_6);
+      _x2c_macro_hashes_15[_x2c_macro_index_21] = _x2c_macro_key_hash_5;
+      _x2c_macro_entries_12[_x2c_macro_index_21].key = * _x2c_macro_key_61;
+      _x2c_macro_entries_12[_x2c_macro_index_21].val = * _x2c_macro_val_22;
+      _x2c_macro_map_105 -> used += 1;
+      * _x2c_macro_inserted_8 = 1;
+      return _string_value(_x2c_macro_map_105, _x2c_macro_index_21);
     }
-    unsigned _x2c_macro_stored_start_2 = _x2c_macro_stored_4 & _x2c_macro_mask_3;
-    int _x2c_macro_stored_psl_2 =(_x2c_macro_cap_2 + _x2c_macro_index_6 - _x2c_macro_stored_start_2) & _x2c_macro_mask_3;
-    if(_x2c_macro_stored_psl_2 < _x2c_macro_todo_psl_2){
-      (void) _valid_string(_x2c_macro_val_6);
-      if(_x2c_macro_map_10 -> used >=(unsigned long) _x2c_macro_map_10 -> capacity * 3 / 4){
-        MapStringString__core_expand(_x2c_macro_map_10);
+    unsigned _x2c_macro_stored_start_8 = _x2c_macro_stored_16 & _x2c_macro_mask_11;
+    int _x2c_macro_stored_psl_8 =(_x2c_macro_cap_11 + _x2c_macro_index_21 - _x2c_macro_stored_start_8) & _x2c_macro_mask_11;
+    if(_x2c_macro_stored_psl_8 < _x2c_macro_todo_psl_8){
+      (void) _valid_string(_x2c_macro_val_22);
+      if(_x2c_macro_map_105 -> used >=(unsigned long) _x2c_macro_map_105 -> capacity * 3 / 4){
+        MapStringString__core_expand(_x2c_macro_map_105);
         goto retry;
       }
-      struct MapStringStringRecord _x2c_macro_displaced_2 = _x2c_macro_entries_4[_x2c_macro_index_6];
-      _x2c_macro_hashes_2[_x2c_macro_index_6] = _x2c_macro_key_hash_2;
-      _x2c_macro_entries_4[_x2c_macro_index_6].key = * _x2c_macro_key_10;
-      _x2c_macro_entries_4[_x2c_macro_index_6].val = * _x2c_macro_val_6;
-      _x2c_macro_map_10 -> used += 1;
-      * _x2c_macro_inserted_4 = 1;
-      MapStringString__core_reinsert(_x2c_macro_map_10, _x2c_macro_stored_4, _x2c_macro_displaced_2, _x2c_macro_stored_psl_2 + 1);
-      return _string_value(_x2c_macro_map_10, _x2c_macro_index_6);
+      struct MapStringStringRecord _x2c_macro_displaced_2 = _x2c_macro_entries_12[_x2c_macro_index_21];
+      _x2c_macro_hashes_15[_x2c_macro_index_21] = _x2c_macro_key_hash_5;
+      _x2c_macro_entries_12[_x2c_macro_index_21].key = * _x2c_macro_key_61;
+      _x2c_macro_entries_12[_x2c_macro_index_21].val = * _x2c_macro_val_22;
+      _x2c_macro_map_105 -> used += 1;
+      * _x2c_macro_inserted_8 = 1;
+      MapStringString__core_reinsert(_x2c_macro_map_105, _x2c_macro_stored_16, _x2c_macro_displaced_2, _x2c_macro_stored_psl_8 + 1);
+      return _string_value(_x2c_macro_map_105, _x2c_macro_index_21);
     }
 
   }
-  (void) _string_insert_error(_x2c_macro_cap_2);
+  (void) _string_insert_error(_x2c_macro_cap_11);
 }
 
-static void MapStringString__core_set(MapStringString _x2c_macro_map_10, String * _x2c_macro_key_10, String * _x2c_macro_val_6){
-  int _x2c_macro_inserted_4;
-  String * _x2c_macro_stored_4 = MapStringString__core_get_or_insert(_x2c_macro_map_10, _x2c_macro_key_10, _x2c_macro_val_6, & _x2c_macro_inserted_4);
-  if(! _x2c_macro_inserted_4) _x2c_macro_stored_4[0] = _x2c_macro_val_6[0];
+static void MapStringString__core_set(MapStringString _x2c_macro_map_106, String * _x2c_macro_key_62, String * _x2c_macro_val_23){
+  int _x2c_macro_inserted_9;
+  String * _x2c_macro_stored_17 = MapStringString__core_get_or_insert(_x2c_macro_map_106, _x2c_macro_key_62, _x2c_macro_val_23, & _x2c_macro_inserted_9);
+  if(! _x2c_macro_inserted_9) _x2c_macro_stored_17[0] = _x2c_macro_val_23[0];
 }
 
-static int MapStringString__core_try_del(MapStringString _x2c_macro_map_10, String * _x2c_macro_key_10, String * _x2c_macro_out_10){
-  if((void *) _x2c_macro_map_10 == 0 || ! _x2c_macro_out_10) return 0;
-  long _x2c_macro_found_2 = MapStringString__core_find_index(_x2c_macro_map_10, _x2c_macro_key_10);
+static int MapStringString__core_try_del(MapStringString _x2c_macro_map_107, String * _x2c_macro_key_63, String * _x2c_macro_out_31){
+  if((void *) _x2c_macro_map_107 == 0 || ! _x2c_macro_out_31) return 0;
+  long _x2c_macro_found_2 = MapStringString__core_find_index(_x2c_macro_map_107, _x2c_macro_key_63);
   if(_x2c_macro_found_2 < 0) return 0;
-  unsigned * _x2c_macro_hashes_2 = _x2c_macro_map_10 -> hashes;
-  struct MapStringStringRecord * _x2c_macro_entries_4 = _x2c_macro_map_10 -> entries;
-  unsigned _x2c_macro_mask_3 = _x2c_macro_map_10 -> mask, _x2c_macro_index_6 =(unsigned) _x2c_macro_found_2, _x2c_macro_empty_2;
-  * _x2c_macro_out_10 =(String) * _string_value(_x2c_macro_map_10, _x2c_macro_index_6);
-  _x2c_macro_hashes_2[_x2c_macro_index_6] = 0;
-  _x2c_macro_map_10 -> used --;
+  unsigned * _x2c_macro_hashes_16 = _x2c_macro_map_107 -> hashes;
+  struct MapStringStringRecord * _x2c_macro_entries_13 = _x2c_macro_map_107 -> entries;
+  unsigned _x2c_macro_mask_12 = _x2c_macro_map_107 -> mask, _x2c_macro_index_22 =(unsigned) _x2c_macro_found_2, _x2c_macro_empty_2;
+  * _x2c_macro_out_31 =(String) * _string_value(_x2c_macro_map_107, _x2c_macro_index_22);
+  _x2c_macro_hashes_16[_x2c_macro_index_22] = 0;
+  _x2c_macro_map_107 -> used --;
   while(1){
-    _x2c_macro_empty_2 = _x2c_macro_index_6;
-    _x2c_macro_index_6 =(_x2c_macro_index_6 + 1) & _x2c_macro_mask_3;
-    if(_x2c_macro_hashes_2[_x2c_macro_index_6] == 0 ||(_x2c_macro_hashes_2[_x2c_macro_index_6] & _x2c_macro_mask_3) == _x2c_macro_index_6) break;
-    unsigned _x2c_macro_swap_hash_2 = _x2c_macro_hashes_2[_x2c_macro_empty_2];
-    struct MapStringStringRecord _x2c_macro_swap_entry_2 = _x2c_macro_entries_4[_x2c_macro_empty_2];
-    _x2c_macro_hashes_2[_x2c_macro_empty_2] = _x2c_macro_hashes_2[_x2c_macro_index_6];
-    _x2c_macro_entries_4[_x2c_macro_empty_2] = _x2c_macro_entries_4[_x2c_macro_index_6];
-    _x2c_macro_hashes_2[_x2c_macro_index_6] = _x2c_macro_swap_hash_2;
-    _x2c_macro_entries_4[_x2c_macro_index_6] = _x2c_macro_swap_entry_2;
+    _x2c_macro_empty_2 = _x2c_macro_index_22;
+    _x2c_macro_index_22 =(_x2c_macro_index_22 + 1) & _x2c_macro_mask_12;
+    if(_x2c_macro_hashes_16[_x2c_macro_index_22] == 0 ||(_x2c_macro_hashes_16[_x2c_macro_index_22] & _x2c_macro_mask_12) == _x2c_macro_index_22) break;
+    unsigned _x2c_macro_swap_hash_2 = _x2c_macro_hashes_16[_x2c_macro_empty_2];
+    struct MapStringStringRecord _x2c_macro_swap_entry_2 = _x2c_macro_entries_13[_x2c_macro_empty_2];
+    _x2c_macro_hashes_16[_x2c_macro_empty_2] = _x2c_macro_hashes_16[_x2c_macro_index_22];
+    _x2c_macro_entries_13[_x2c_macro_empty_2] = _x2c_macro_entries_13[_x2c_macro_index_22];
+    _x2c_macro_hashes_16[_x2c_macro_index_22] = _x2c_macro_swap_hash_2;
+    _x2c_macro_entries_13[_x2c_macro_index_22] = _x2c_macro_swap_entry_2;
   }
-  _x2c_macro_entries_4[_x2c_macro_empty_2] =(struct MapStringStringRecord){
+  _x2c_macro_entries_13[_x2c_macro_empty_2] =(struct MapStringStringRecord){
     0
   }
   ;
   return 1;
 }
 
-static int MapStringString__core_try_next(MapStringString _x2c_macro_map_10, unsigned * _x2c_macro_cursor_10, String * _x2c_macro_key_10, String * _x2c_macro_val_6){
-  if((void *) _x2c_macro_map_10 == 0 || ! _x2c_macro_cursor_10 || ! _x2c_macro_key_10 || ! _x2c_macro_val_6) return 0;
-  unsigned * _x2c_macro_hashes_2 = _x2c_macro_map_10 -> hashes;
-  while(* _x2c_macro_cursor_10 < _x2c_macro_map_10 -> capacity){
-    unsigned _x2c_macro_index_6 = * _x2c_macro_cursor_10;
-    * _x2c_macro_cursor_10 += 1;
-    if(_x2c_macro_hashes_2[_x2c_macro_index_6] != 0){
-      * _x2c_macro_key_10 =(String) * _string_key(_x2c_macro_map_10, _x2c_macro_index_6);
-      * _x2c_macro_val_6 =(String) * _string_value(_x2c_macro_map_10, _x2c_macro_index_6);
+static int MapStringString__core_try_next(MapStringString _x2c_macro_map_108, unsigned * _x2c_macro_cursor_22, String * _x2c_macro_key_64, String * _x2c_macro_val_24){
+  if((void *) _x2c_macro_map_108 == 0 || ! _x2c_macro_cursor_22 || ! _x2c_macro_key_64 || ! _x2c_macro_val_24) return 0;
+  unsigned * _x2c_macro_hashes_17 = _x2c_macro_map_108 -> hashes;
+  while(* _x2c_macro_cursor_22 < _x2c_macro_map_108 -> capacity){
+    unsigned _x2c_macro_index_23 = * _x2c_macro_cursor_22;
+    * _x2c_macro_cursor_22 += 1;
+    if(_x2c_macro_hashes_17[_x2c_macro_index_23] != 0){
+      * _x2c_macro_key_64 =(String) * _string_key(_x2c_macro_map_108, _x2c_macro_index_23);
+      * _x2c_macro_val_24 =(String) * _string_value(_x2c_macro_map_108, _x2c_macro_index_23);
       return 1;
     }
 
@@ -2720,17 +2720,17 @@ static int MapStringString__core_try_next(MapStringString _x2c_macro_map_10, uns
   return 0;
 }
 
-static void MapStringString__core_insert_all(MapStringString _x2c_macro_map_10, MapStringString _x2c_macro_other_4){
-  unsigned _x2c_macro_cursor_10 = 0;
-  String _x2c_macro_key_10;
-  String _x2c_macro_val_6;
-  while(MapStringString__core_try_next(_x2c_macro_other_4, & _x2c_macro_cursor_10, & _x2c_macro_key_10, & _x2c_macro_val_6)) MapStringString__core_set(_x2c_macro_map_10, & _x2c_macro_key_10, & _x2c_macro_val_6);
+static void MapStringString__core_insert_all(MapStringString _x2c_macro_map_109, MapStringString _x2c_macro_other_6){
+  unsigned _x2c_macro_cursor_23 = 0;
+  String _x2c_macro_key_65;
+  String _x2c_macro_val_25;
+  while(MapStringString__core_try_next(_x2c_macro_other_6, & _x2c_macro_cursor_23, & _x2c_macro_key_65, & _x2c_macro_val_25)) MapStringString__core_set(_x2c_macro_map_109, & _x2c_macro_key_65, & _x2c_macro_val_25);
 }
 
-static MapStringString MapStringString__core_copy(MapStringString _x2c_macro_map_10){
-  MapStringString _x2c_macro_copy_2 = MapStringString__core_new_capacity(_x2c_macro_map_10, 2), _x2c_macro_result_2 = 0;
+static MapStringString MapStringString__core_copy(MapStringString _x2c_macro_map_110){
+  MapStringString _x2c_macro_copy_2 = MapStringString__core_new_capacity(_x2c_macro_map_110, 2), _x2c_macro_result_4 = 0;
   {
-  _x2c_defer_env_8 _x2c_defer_env_46 = {._x2c_defer_capture_16 =(const void *) & _x2c_macro_result_2, ._x2c_defer_capture_17 =(const void *) & _x2c_macro_copy_2};
+  _x2c_defer_env_8 _x2c_defer_env_46 = {._x2c_defer_capture_16 =(const void *) & _x2c_macro_result_4, ._x2c_defer_capture_17 =(const void *) & _x2c_macro_copy_2};
 
   X2CCleanup _x2c_defer_record_16 = {
     .fn = _x2c_defer_cleanup_8,
@@ -2738,9 +2738,9 @@ static MapStringString MapStringString__core_copy(MapStringString _x2c_macro_map
   };
   x2c_cleanup_push(&_x2c_defer_record_16);
   {
-    MapStringString__core_insert_all(_x2c_macro_copy_2, _x2c_macro_map_10);
+    MapStringString__core_insert_all(_x2c_macro_copy_2, _x2c_macro_map_110);
     {
-      MapStringString _x2c_return_value_12 = _x2c_macro_result_2 = _x2c_macro_copy_2;
+      MapStringString _x2c_return_value_12 = _x2c_macro_result_4 = _x2c_macro_copy_2;
       {
         x2c_cleanup_leave(& _x2c_defer_record_16);
         return _x2c_return_value_12;
@@ -2754,16 +2754,16 @@ static MapStringString MapStringString__core_copy(MapStringString _x2c_macro_map
 }
 }
 
-static MapStringString MapStringString__core_merge(MapStringString _x2c_macro_map_10, MapStringString _x2c_macro_other_4){
-  if(! MapStringString_truth(_x2c_macro_other_4)) return _x2c_macro_map_10;
+static MapStringString MapStringString__core_merge(MapStringString _x2c_macro_map_111, MapStringString _x2c_macro_other_7){
+  if(! MapStringString_truth(_x2c_macro_other_7)) return _x2c_macro_map_111;
   int _x2c_macro_created_2 = 0;
-  if((void *) _x2c_macro_map_10 == 0){
-    _x2c_macro_map_10 = MapStringString__core_new_capacity(_x2c_macro_map_10, 2);
+  if((void *) _x2c_macro_map_111 == 0){
+    _x2c_macro_map_111 = MapStringString__core_new_capacity(_x2c_macro_map_111, 2);
     _x2c_macro_created_2 = 1;
   }
-  MapStringString _x2c_macro_result_2 = 0;
+  MapStringString _x2c_macro_result_5 = 0;
   {
-  _x2c_defer_env_9 _x2c_defer_env_47 = {._x2c_defer_capture_18 =(const void *) & _x2c_macro_created_2, ._x2c_defer_capture_19 =(const void *) & _x2c_macro_result_2, ._x2c_defer_capture_20 =(const void *) & _x2c_macro_map_10};
+  _x2c_defer_env_9 _x2c_defer_env_47 = {._x2c_defer_capture_18 =(const void *) & _x2c_macro_created_2, ._x2c_defer_capture_19 =(const void *) & _x2c_macro_result_5, ._x2c_defer_capture_20 =(const void *) & _x2c_macro_map_111};
 
   X2CCleanup _x2c_defer_record_17 = {
     .fn = _x2c_defer_cleanup_9,
@@ -2771,9 +2771,9 @@ static MapStringString MapStringString__core_merge(MapStringString _x2c_macro_ma
   };
   x2c_cleanup_push(&_x2c_defer_record_17);
   {
-    MapStringString__core_insert_all(_x2c_macro_map_10, _x2c_macro_other_4);
+    MapStringString__core_insert_all(_x2c_macro_map_111, _x2c_macro_other_7);
     {
-      MapStringString _x2c_return_value_13 = _x2c_macro_result_2 = _x2c_macro_map_10;
+      MapStringString _x2c_return_value_13 = _x2c_macro_result_5 = _x2c_macro_map_111;
       {
         x2c_cleanup_leave(& _x2c_defer_record_17);
         return _x2c_return_value_13;
@@ -2787,169 +2787,169 @@ static MapStringString MapStringString__core_merge(MapStringString _x2c_macro_ma
 }
 }
 
-static int MapStringString__core_truth(MapStringString _x2c_macro_map_10){
-  return(void *) _x2c_macro_map_10 != 0 && _x2c_macro_map_10 -> used != 0;
+static int MapStringString__core_truth(MapStringString _x2c_macro_map_112){
+  return(void *) _x2c_macro_map_112 != 0 && _x2c_macro_map_112 -> used != 0;
 }
 
-static int MapStringString__core_equal(MapStringString _x2c_macro_a_9, MapStringString _x2c_macro_b_9){
-  if((void *) _x2c_macro_a_9 ==(void *) _x2c_macro_b_9) return 1;
-  if((void *) _x2c_macro_a_9 == 0 ||(void *) _x2c_macro_b_9 == 0) return 0;
-  if(_x2c_macro_a_9 -> used != _x2c_macro_b_9 -> used) return 0;
-  unsigned _x2c_macro_cursor_10 = 0;
-  String _x2c_macro_key_10;
+static int MapStringString__core_equal(MapStringString _x2c_macro_a_11, MapStringString _x2c_macro_b_11){
+  if((void *) _x2c_macro_a_11 ==(void *) _x2c_macro_b_11) return 1;
+  if((void *) _x2c_macro_a_11 == 0 ||(void *) _x2c_macro_b_11 == 0) return 0;
+  if(_x2c_macro_a_11 -> used != _x2c_macro_b_11 -> used) return 0;
+  unsigned _x2c_macro_cursor_24 = 0;
+  String _x2c_macro_key_66;
   String _x2c_macro_avalue_2, _x2c_macro_bvalue_2;
-  while(MapStringString__core_try_next(_x2c_macro_a_9, & _x2c_macro_cursor_10, & _x2c_macro_key_10, & _x2c_macro_avalue_2)){
-    if(! MapStringString__core_try_get(_x2c_macro_b_9, & _x2c_macro_key_10, & _x2c_macro_bvalue_2) || ! _equal_string(& _x2c_macro_avalue_2, & _x2c_macro_bvalue_2)) return 0;
+  while(MapStringString__core_try_next(_x2c_macro_a_11, & _x2c_macro_cursor_24, & _x2c_macro_key_66, & _x2c_macro_avalue_2)){
+    if(! MapStringString__core_try_get(_x2c_macro_b_11, & _x2c_macro_key_66, & _x2c_macro_bvalue_2) || ! _equal_string(& _x2c_macro_avalue_2, & _x2c_macro_bvalue_2)) return 0;
   }
   return 1;
 }
 
-MapStringString MapStringString_new_capacity(unsigned _x2c_macro_capacity_5){
+MapStringString MapStringString_new_capacity(unsigned _x2c_macro_capacity_8){
   if(! _init_guard_) _file_init_();
-  if(! _capacity_valid(_x2c_macro_capacity_5))(void) _bad_arg(_2);
-  MapStringString _x2c_macro_map_11 = 0;
-  return MapStringString__core_new_capacity(_x2c_macro_map_11, _x2c_macro_capacity_5);
+  if(! _capacity_valid(_x2c_macro_capacity_8))(void) _bad_arg(_2);
+  MapStringString _x2c_macro_map_113 = 0;
+  return MapStringString__core_new_capacity(_x2c_macro_map_113, _x2c_macro_capacity_8);
 }
 
 MapStringString MapStringString_new(void){
-  MapStringString _x2c_macro_map_11 = 0;
-  return MapStringString__core_new_capacity(_x2c_macro_map_11, 2);
+  MapStringString _x2c_macro_map_114 = 0;
+  return MapStringString__core_new_capacity(_x2c_macro_map_114, 2);
 }
 
 String Var_string(Var);
 
-MapStringString Map_mapstringstring(Map _x2c_macro_entries_5){
+MapStringString Map_mapstringstring(Map _x2c_macro_entries_14){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_entries_5 == 0) return 0;
+  if((void *) _x2c_macro_entries_14 == 0) return 0;
   MapStringString _x2c_macro_packed_2 = 0;
   _x2c_macro_packed_2 = MapStringString__core_new_capacity(_x2c_macro_packed_2, 2);
-  unsigned _x2c_macro_cursor_11 = 0;
-  Var _x2c_macro_key_11, _x2c_macro_val_7;
-  while(Map_try_next(_x2c_macro_entries_5, & _x2c_macro_cursor_11, & _x2c_macro_key_11, & _x2c_macro_val_7)) MapStringString_set(_x2c_macro_packed_2, Var_string(_x2c_macro_key_11), Var_string(_x2c_macro_val_7));
+  unsigned _x2c_macro_cursor_25 = 0;
+  Var _x2c_macro_key_67, _x2c_macro_val_26;
+  while(Map_try_next(_x2c_macro_entries_14, & _x2c_macro_cursor_25, & _x2c_macro_key_67, & _x2c_macro_val_26)) MapStringString_set(_x2c_macro_packed_2, Var_string(_x2c_macro_key_67), Var_string(_x2c_macro_val_26));
   return _x2c_macro_packed_2;
 }
 
-unsigned MapStringString_len(MapStringString _x2c_macro_map_11){
-  return MapStringString_truth(_x2c_macro_map_11) ? _x2c_macro_map_11 -> used : 0;
+unsigned MapStringString_len(MapStringString _x2c_macro_map_115){
+  return MapStringString_truth(_x2c_macro_map_115) ? _x2c_macro_map_115 -> used : 0;
 }
 
-int MapStringString_try_get(MapStringString _x2c_macro_map_11, String _x2c_macro_key_11, String * _x2c_macro_out_11){
-  return MapStringString__core_try_get(_x2c_macro_map_11, & _x2c_macro_key_11, _x2c_macro_out_11);
+int MapStringString_try_get(MapStringString _x2c_macro_map_116, String _x2c_macro_key_68, String * _x2c_macro_out_32){
+  return MapStringString__core_try_get(_x2c_macro_map_116, & _x2c_macro_key_68, _x2c_macro_out_32);
 }
 
-String MapStringString_get(MapStringString _x2c_macro_map_11, String _x2c_macro_key_11){
+String MapStringString_get(MapStringString _x2c_macro_map_117, String _x2c_macro_key_69){
   if(! _init_guard_) _file_init_();
-  String _x2c_macro_out_11 = 0;
-  if(MapStringString_try_get(_x2c_macro_map_11, _x2c_macro_key_11, & _x2c_macro_out_11)) return _x2c_macro_out_11;
+  String _x2c_macro_out_33 = 0;
+  if(MapStringString_try_get(_x2c_macro_map_117, _x2c_macro_key_69, & _x2c_macro_out_33)) return _x2c_macro_out_33;
   (void) _bad_arg(_2);
   return 0;
 }
 
-String MapStringString_getindex(MapStringString _x2c_macro_map_11, String _x2c_macro_key_11){
+String MapStringString_getindex(MapStringString _x2c_macro_map_118, String _x2c_macro_key_70){
   if(! _init_guard_) _file_init_();
-  return MapStringString_get(_x2c_macro_map_11, _x2c_macro_key_11);
+  return MapStringString_get(_x2c_macro_map_118, _x2c_macro_key_70);
 }
 
-String MapStringString_getdefault(MapStringString _x2c_macro_map_11, String _x2c_macro_key_11, String _x2c_macro_defval_2){
-  String _x2c_macro_out_11;
-  return MapStringString_try_get(_x2c_macro_map_11, _x2c_macro_key_11, & _x2c_macro_out_11) ? _x2c_macro_out_11 : _x2c_macro_defval_2;
+String MapStringString_getdefault(MapStringString _x2c_macro_map_119, String _x2c_macro_key_71, String _x2c_macro_defval_4){
+  String _x2c_macro_out_34;
+  return MapStringString_try_get(_x2c_macro_map_119, _x2c_macro_key_71, & _x2c_macro_out_34) ? _x2c_macro_out_34 : _x2c_macro_defval_4;
 }
 
-String MapStringString_setdefault(MapStringString _x2c_macro_map_11, String _x2c_macro_key_11, String _x2c_macro_defval_2){
+String MapStringString_setdefault(MapStringString _x2c_macro_map_120, String _x2c_macro_key_72, String _x2c_macro_defval_5){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_11 == 0)(void) _bad_arg(_2);
-  int _x2c_macro_inserted_5;
-  String * _x2c_macro_stored_5 = MapStringString__core_get_or_insert(_x2c_macro_map_11, & _x2c_macro_key_11, & _x2c_macro_defval_2, & _x2c_macro_inserted_5);
-  return _x2c_macro_stored_5[0];
+  if((void *) _x2c_macro_map_120 == 0)(void) _bad_arg(_2);
+  int _x2c_macro_inserted_10;
+  String * _x2c_macro_stored_18 = MapStringString__core_get_or_insert(_x2c_macro_map_120, & _x2c_macro_key_72, & _x2c_macro_defval_5, & _x2c_macro_inserted_10);
+  return _x2c_macro_stored_18[0];
 }
 
-int MapStringString_contains(MapStringString _x2c_macro_map_11, String _x2c_macro_key_11){
-  return MapStringString_truth(_x2c_macro_map_11) && MapStringString__core_find_index(_x2c_macro_map_11, & _x2c_macro_key_11) >= 0;
+int MapStringString_contains(MapStringString _x2c_macro_map_121, String _x2c_macro_key_73){
+  return MapStringString_truth(_x2c_macro_map_121) && MapStringString__core_find_index(_x2c_macro_map_121, & _x2c_macro_key_73) >= 0;
 }
 
-void MapStringString_set(MapStringString _x2c_macro_map_11, String _x2c_macro_key_11, String _x2c_macro_val_7){
+void MapStringString_set(MapStringString _x2c_macro_map_122, String _x2c_macro_key_74, String _x2c_macro_val_27){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_11 == 0)(void) _bad_arg(_2);
-  MapStringString__core_set(_x2c_macro_map_11, & _x2c_macro_key_11, & _x2c_macro_val_7);
+  if((void *) _x2c_macro_map_122 == 0)(void) _bad_arg(_2);
+  MapStringString__core_set(_x2c_macro_map_122, & _x2c_macro_key_74, & _x2c_macro_val_27);
 }
 
-String MapStringString_setindex(MapStringString _x2c_macro_map_11, String _x2c_macro_key_11, String _x2c_macro_val_7){
+String MapStringString_setindex(MapStringString _x2c_macro_map_123, String _x2c_macro_key_75, String _x2c_macro_val_28){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_11 == 0)(void) _bad_arg(_2);
-  MapStringString__core_set(_x2c_macro_map_11, & _x2c_macro_key_11, & _x2c_macro_val_7);
-  return _x2c_macro_val_7;
+  if((void *) _x2c_macro_map_123 == 0)(void) _bad_arg(_2);
+  MapStringString__core_set(_x2c_macro_map_123, & _x2c_macro_key_75, & _x2c_macro_val_28);
+  return _x2c_macro_val_28;
 }
 
-String MapStringString_updateindex(MapStringString _x2c_macro_map_11, String _x2c_macro_key_11, Symbol _x2c_macro_op_3, String _x2c_macro_rhs_2){
+String MapStringString_updateindex(MapStringString _x2c_macro_map_124, String _x2c_macro_key_76, Symbol _x2c_macro_op_5, String _x2c_macro_rhs_2){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_11 == 0)(void) _bad_arg(_2);
-  if(_x2c_macro_op_3 == 56){
-    int _x2c_macro_inserted_5;
-    String * _x2c_macro_stored_5 = MapStringString__core_get_or_insert(_x2c_macro_map_11, & _x2c_macro_key_11, & _x2c_macro_rhs_2, & _x2c_macro_inserted_5);
-    if(_x2c_macro_inserted_5) return _x2c_macro_rhs_2;
-    return _update_string(_x2c_macro_stored_5, _x2c_macro_op_3, _x2c_macro_rhs_2);
+  if((void *) _x2c_macro_map_124 == 0)(void) _bad_arg(_2);
+  if(_x2c_macro_op_5 == 56){
+    int _x2c_macro_inserted_11;
+    String * _x2c_macro_stored_19 = MapStringString__core_get_or_insert(_x2c_macro_map_124, & _x2c_macro_key_76, & _x2c_macro_rhs_2, & _x2c_macro_inserted_11);
+    if(_x2c_macro_inserted_11) return _x2c_macro_rhs_2;
+    return _update_string(_x2c_macro_stored_19, _x2c_macro_op_5, _x2c_macro_rhs_2);
   }
-  long _x2c_macro_index_7 = MapStringString__core_find_index(_x2c_macro_map_11, & _x2c_macro_key_11);
-  if(_x2c_macro_index_7 < 0)(void) _bad_arg(_2);
-  return _update_string(_string_value(_x2c_macro_map_11, (unsigned) _x2c_macro_index_7), _x2c_macro_op_3, _x2c_macro_rhs_2);
+  long _x2c_macro_index_24 = MapStringString__core_find_index(_x2c_macro_map_124, & _x2c_macro_key_76);
+  if(_x2c_macro_index_24 < 0)(void) _bad_arg(_2);
+  return _update_string(_string_value(_x2c_macro_map_124, (unsigned) _x2c_macro_index_24), _x2c_macro_op_5, _x2c_macro_rhs_2);
 }
 
-String MapStringString_postfixindex(MapStringString _x2c_macro_map_11, String _x2c_macro_key_11, Symbol _x2c_macro_op_3){
+String MapStringString_postfixindex(MapStringString _x2c_macro_map_125, String _x2c_macro_key_77, Symbol _x2c_macro_op_6){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_11 == 0)(void) _bad_arg(_2);
-  long _x2c_macro_index_7 = MapStringString__core_find_index(_x2c_macro_map_11, & _x2c_macro_key_11);
-  if(_x2c_macro_index_7 < 0)(void) _bad_arg(_2);
-  String * _x2c_macro_stored_5 = _string_value(_x2c_macro_map_11, (unsigned) _x2c_macro_index_7);
-  String _x2c_macro_old_2 = _x2c_macro_stored_5[0];
-  if(! 0)(void) _bad_op(_x2c_macro_op_3);
-  if(_x2c_macro_op_3 == 1848) _update_string(_x2c_macro_stored_5, 56, _3);
-  else if(_x2c_macro_op_3 == 2046) _update_string(_x2c_macro_stored_5, 62, _3);
-  else(void) _bad_op(_x2c_macro_op_3);
+  if((void *) _x2c_macro_map_125 == 0)(void) _bad_arg(_2);
+  long _x2c_macro_index_25 = MapStringString__core_find_index(_x2c_macro_map_125, & _x2c_macro_key_77);
+  if(_x2c_macro_index_25 < 0)(void) _bad_arg(_2);
+  String * _x2c_macro_stored_20 = _string_value(_x2c_macro_map_125, (unsigned) _x2c_macro_index_25);
+  String _x2c_macro_old_2 = _x2c_macro_stored_20[0];
+  if(! 0)(void) _bad_op(_x2c_macro_op_6);
+  if(_x2c_macro_op_6 == 1848) _update_string(_x2c_macro_stored_20, 56, _3);
+  else if(_x2c_macro_op_6 == 2046) _update_string(_x2c_macro_stored_20, 62, _3);
+  else(void) _bad_op(_x2c_macro_op_6);
   return _x2c_macro_old_2;
 }
 
-int MapStringString_try_del(MapStringString _x2c_macro_map_11, String _x2c_macro_key_11, String * _x2c_macro_out_11){
-  return MapStringString__core_try_del(_x2c_macro_map_11, & _x2c_macro_key_11, _x2c_macro_out_11);
+int MapStringString_try_del(MapStringString _x2c_macro_map_126, String _x2c_macro_key_78, String * _x2c_macro_out_35){
+  return MapStringString__core_try_del(_x2c_macro_map_126, & _x2c_macro_key_78, _x2c_macro_out_35);
 }
 
-String MapStringString_del(MapStringString _x2c_macro_map_11, String _x2c_macro_key_11){
+String MapStringString_del(MapStringString _x2c_macro_map_127, String _x2c_macro_key_79){
   if(! _init_guard_) _file_init_();
-  String _x2c_macro_out_11 = 0;
-  if(MapStringString_try_del(_x2c_macro_map_11, _x2c_macro_key_11, & _x2c_macro_out_11)) return _x2c_macro_out_11;
+  String _x2c_macro_out_36 = 0;
+  if(MapStringString_try_del(_x2c_macro_map_127, _x2c_macro_key_79, & _x2c_macro_out_36)) return _x2c_macro_out_36;
   (void) _bad_arg(_2);
 }
 
-MapStringString MapStringString_copy(MapStringString _x2c_macro_map_11){
-  return MapStringString__core_copy(_x2c_macro_map_11);
+MapStringString MapStringString_copy(MapStringString _x2c_macro_map_128){
+  return MapStringString__core_copy(_x2c_macro_map_128);
 }
 
-MapStringString MapStringString_merge(MapStringString _x2c_macro_map_11, MapStringString _x2c_macro_other_5){
-  return MapStringString__core_merge(_x2c_macro_map_11, _x2c_macro_other_5);
+MapStringString MapStringString_merge(MapStringString _x2c_macro_map_129, MapStringString _x2c_macro_other_8){
+  return MapStringString__core_merge(_x2c_macro_map_129, _x2c_macro_other_8);
 }
 
-int MapStringString_try_next(MapStringString _x2c_macro_map_11, unsigned * _x2c_macro_cursor_11, String * _x2c_macro_key_11, String * _x2c_macro_val_7){
-  return MapStringString__core_try_next(_x2c_macro_map_11, _x2c_macro_cursor_11, _x2c_macro_key_11, _x2c_macro_val_7);
+int MapStringString_try_next(MapStringString _x2c_macro_map_130, unsigned * _x2c_macro_cursor_26, String * _x2c_macro_key_80, String * _x2c_macro_val_29){
+  return MapStringString__core_try_next(_x2c_macro_map_130, _x2c_macro_cursor_26, _x2c_macro_key_80, _x2c_macro_val_29);
 }
 
-int MapStringString_truth(MapStringString _x2c_macro_map_11){
-  return MapStringString__core_truth(_x2c_macro_map_11);
+int MapStringString_truth(MapStringString _x2c_macro_map_131){
+  return MapStringString__core_truth(_x2c_macro_map_131);
 }
 
-int MapStringString_equal(MapStringString _x2c_macro_a_10, MapStringString _x2c_macro_b_10){
-  return MapStringString__core_equal(_x2c_macro_a_10, _x2c_macro_b_10);
+int MapStringString_equal(MapStringString _x2c_macro_a_12, MapStringString _x2c_macro_b_12){
+  return MapStringString__core_equal(_x2c_macro_a_12, _x2c_macro_b_12);
 }
 
 static int _x2c_macro_record_compare_2(const void * _x2c_macro_ap_2, const void * _x2c_macro_bp_2){
-  const struct MapStringStringRecord * _x2c_macro_a_11 = _x2c_macro_ap_2, * _x2c_macro_b_11 = _x2c_macro_bp_2;
-  int _x2c_macro_comparison_2 = _map_compare_string(_x2c_macro_a_11 -> key, _x2c_macro_b_11 -> key);
-  return _x2c_macro_comparison_2 ? _x2c_macro_comparison_2 : _map_compare_string(_x2c_macro_a_11 -> val, _x2c_macro_b_11 -> val);
+  const struct MapStringStringRecord * _x2c_macro_a_13 = _x2c_macro_ap_2, * _x2c_macro_b_13 = _x2c_macro_bp_2;
+  int _x2c_macro_comparison_4 = _map_compare_string(_x2c_macro_a_13 -> key, _x2c_macro_b_13 -> key);
+  return _x2c_macro_comparison_4 ? _x2c_macro_comparison_4 : _map_compare_string(_x2c_macro_a_13 -> val, _x2c_macro_b_13 -> val);
 }
 
-static int MapStringString__core_compare(MapStringString _x2c_macro_a_11, MapStringString _x2c_macro_b_11){
-  if((void *) _x2c_macro_a_11 ==(void *) _x2c_macro_b_11) return 0;
-  if((void *) _x2c_macro_a_11 == NULL) return - 1;
-  if((void *) _x2c_macro_b_11 == NULL) return 1;
-  unsigned _x2c_macro_asz_2 = _x2c_macro_a_11 -> used, _x2c_macro_bsz_2 = _x2c_macro_b_11 -> used;
+static int MapStringString__core_compare(MapStringString _x2c_macro_a_14, MapStringString _x2c_macro_b_14){
+  if((void *) _x2c_macro_a_14 ==(void *) _x2c_macro_b_14) return 0;
+  if((void *) _x2c_macro_a_14 == NULL) return - 1;
+  if((void *) _x2c_macro_b_14 == NULL) return 1;
+  unsigned _x2c_macro_asz_2 = _x2c_macro_a_14 -> used, _x2c_macro_bsz_2 = _x2c_macro_b_14 -> used;
   if(_x2c_macro_asz_2 != _x2c_macro_bsz_2) return _x2c_macro_asz_2 < _x2c_macro_bsz_2 ? - 1 : 1;
   if(! _x2c_macro_asz_2) return 0;
   Scope _x2c_macro_scratch_2 = Scope_new();
@@ -2964,25 +2964,25 @@ static int MapStringString__core_compare(MapStringString _x2c_macro_a_11, MapStr
   {
     struct MapStringStringRecord * _x2c_macro_arecs_2 = Scope_malloc_in(& _x2c_macro_scratch_2, _x2c_macro_asz_2 * sizeof(struct MapStringStringRecord));
     struct MapStringStringRecord * _x2c_macro_brecs_2 = Scope_malloc_in(& _x2c_macro_scratch_2, _x2c_macro_bsz_2 * sizeof(struct MapStringStringRecord));
-    unsigned _x2c_macro_cursor_12 = 0, _x2c_macro_index_8 = 0;
-    String _x2c_macro_key_12;
-    String _x2c_macro_value_6;
-    while(MapStringString_try_next(_x2c_macro_a_11, & _x2c_macro_cursor_12, & _x2c_macro_key_12, & _x2c_macro_value_6)) _x2c_macro_arecs_2[_x2c_macro_index_8 ++] =(struct MapStringStringRecord){
-      .key = _x2c_macro_key_12, .val = _x2c_macro_value_6
+    unsigned _x2c_macro_cursor_27 = 0, _x2c_macro_index_26 = 0;
+    String _x2c_macro_key_81;
+    String _x2c_macro_value_8;
+    while(MapStringString_try_next(_x2c_macro_a_14, & _x2c_macro_cursor_27, & _x2c_macro_key_81, & _x2c_macro_value_8)) _x2c_macro_arecs_2[_x2c_macro_index_26 ++] =(struct MapStringStringRecord){
+      .key = _x2c_macro_key_81, .val = _x2c_macro_value_8
     }
     ;
-    _x2c_macro_cursor_12 = 0;
-    _x2c_macro_index_8 = 0;
-    while(MapStringString_try_next(_x2c_macro_b_11, & _x2c_macro_cursor_12, & _x2c_macro_key_12, & _x2c_macro_value_6)) _x2c_macro_brecs_2[_x2c_macro_index_8 ++] =(struct MapStringStringRecord){
-      .key = _x2c_macro_key_12, .val = _x2c_macro_value_6
+    _x2c_macro_cursor_27 = 0;
+    _x2c_macro_index_26 = 0;
+    while(MapStringString_try_next(_x2c_macro_b_14, & _x2c_macro_cursor_27, & _x2c_macro_key_81, & _x2c_macro_value_8)) _x2c_macro_brecs_2[_x2c_macro_index_26 ++] =(struct MapStringStringRecord){
+      .key = _x2c_macro_key_81, .val = _x2c_macro_value_8
     }
     ;
     qsort(_x2c_macro_arecs_2, _x2c_macro_asz_2, sizeof(struct MapStringStringRecord), _x2c_macro_record_compare_2);
     qsort(_x2c_macro_brecs_2, _x2c_macro_bsz_2, sizeof(struct MapStringStringRecord), _x2c_macro_record_compare_2);
     for(unsigned _x2c_macro_i_5 = 0;  _x2c_macro_i_5 < _x2c_macro_asz_2;  _x2c_macro_i_5 ++){
-      int _x2c_macro_comparison_2 = _x2c_macro_record_compare_2(_x2c_macro_arecs_2 + _x2c_macro_i_5, _x2c_macro_brecs_2 + _x2c_macro_i_5);
-      if(_x2c_macro_comparison_2){
-        int _x2c_return_value_14 = _x2c_macro_comparison_2;
+      int _x2c_macro_comparison_5 = _x2c_macro_record_compare_2(_x2c_macro_arecs_2 + _x2c_macro_i_5, _x2c_macro_brecs_2 + _x2c_macro_i_5);
+      if(_x2c_macro_comparison_5){
+        int _x2c_return_value_14 = _x2c_macro_comparison_5;
         {
           x2c_cleanup_leave(& _x2c_defer_record_18);
           return _x2c_return_value_14;
@@ -3006,9 +3006,9 @@ static int MapStringString__core_compare(MapStringString _x2c_macro_a_11, MapStr
 }
 }
 
-static Buffer MapStringString__core_write(MapStringString _x2c_macro_map_12, Buffer _x2c_macro_out_12, Symbol _x2c_macro_mode_2){
+static Buffer MapStringString__core_write(MapStringString _x2c_macro_map_132, Buffer _x2c_macro_out_37, Symbol _x2c_macro_mode_2){
   RenderPath _x2c_macro_path_2;
-  if(! RenderPath_enter(&(_x2c_macro_path_2), _x2c_macro_map_12)) return Buffer_printf(_x2c_macro_out_12, "<map: 0x%012lX>", (long) _x2c_macro_map_12);
+  if(! RenderPath_enter(&(_x2c_macro_path_2), _x2c_macro_map_132)) return Buffer_printf(_x2c_macro_out_37, "<map: 0x%012lX>", (long) _x2c_macro_map_132);
   {
   _x2c_defer_env_10 _x2c_defer_env_49 = {._x2c_defer_capture_21 =(const void *) & _x2c_macro_path_2};
 
@@ -3018,28 +3018,28 @@ static Buffer MapStringString__core_write(MapStringString _x2c_macro_map_12, Buf
   };
   x2c_cleanup_push(&_x2c_defer_record_19);
   {
-    Buffer_write(_x2c_macro_out_12, "{ ");
-    unsigned _x2c_macro_cursor_12 = 0;
-    String _x2c_macro_key_12;
-    String _x2c_macro_value_6;
+    Buffer_write(_x2c_macro_out_37, "{ ");
+    unsigned _x2c_macro_cursor_28 = 0;
+    String _x2c_macro_key_82;
+    String _x2c_macro_value_9;
     int _x2c_macro_first_2 = 1;
-    while(MapStringString_try_next(_x2c_macro_map_12, & _x2c_macro_cursor_12, & _x2c_macro_key_12, & _x2c_macro_value_6)){
-      if(! _x2c_macro_first_2) Buffer_write(_x2c_macro_out_12, ", ");
-      Var _x2c_macro_boxed_key_4 = _box_string(_x2c_macro_key_12), _x2c_macro_boxed_value_4 = _box_string(_x2c_macro_value_6);
+    while(MapStringString_try_next(_x2c_macro_map_132, & _x2c_macro_cursor_28, & _x2c_macro_key_82, & _x2c_macro_value_9)){
+      if(! _x2c_macro_first_2) Buffer_write(_x2c_macro_out_37, ", ");
+      Var _x2c_macro_boxed_key_4 = _box_string(_x2c_macro_key_82), _x2c_macro_boxed_value_4 = _box_string(_x2c_macro_value_9);
       if(_x2c_macro_mode_2 == 40228){
-        Var_write_str(_x2c_macro_boxed_key_4, _x2c_macro_out_12);
-        Buffer_write(_x2c_macro_out_12, ": ");
-        Var_write_str(_x2c_macro_boxed_value_4, _x2c_macro_out_12);
+        Var_write_str(_x2c_macro_boxed_key_4, _x2c_macro_out_37);
+        Buffer_write(_x2c_macro_out_37, ": ");
+        Var_write_str(_x2c_macro_boxed_value_4, _x2c_macro_out_37);
       }
       else{
-        Var_write_repr(_x2c_macro_boxed_key_4, _x2c_macro_out_12);
-        Buffer_write(_x2c_macro_out_12, ": ");
-        Var_write_repr(_x2c_macro_boxed_value_4, _x2c_macro_out_12);
+        Var_write_repr(_x2c_macro_boxed_key_4, _x2c_macro_out_37);
+        Buffer_write(_x2c_macro_out_37, ": ");
+        Var_write_repr(_x2c_macro_boxed_value_4, _x2c_macro_out_37);
       }
       _x2c_macro_first_2 = 0;
     }
     {
-      Buffer _x2c_return_value_16 = Buffer_write(_x2c_macro_out_12, " }");
+      Buffer _x2c_return_value_16 = Buffer_write(_x2c_macro_out_37, " }");
       {
         x2c_cleanup_leave(& _x2c_defer_record_19);
         return _x2c_return_value_16;
@@ -3053,39 +3053,39 @@ static Buffer MapStringString__core_write(MapStringString _x2c_macro_map_12, Buf
 }
 }
 
-Map MapStringString_map(MapStringString _x2c_macro_map_13){
-  if((void *) _x2c_macro_map_13 == NULL) return NULL;
+Map MapStringString_map(MapStringString _x2c_macro_map_133){
+  if((void *) _x2c_macro_map_133 == NULL) return NULL;
   Map _x2c_macro_boxed_2 = Map_new();
-  unsigned _x2c_macro_cursor_13 = 0;
-  String _x2c_macro_key_13;
-  String _x2c_macro_value_7;
-  while(MapStringString_try_next(_x2c_macro_map_13, & _x2c_macro_cursor_13, & _x2c_macro_key_13, & _x2c_macro_value_7)) Map_setindex(_x2c_macro_boxed_2, _box_string(_x2c_macro_key_13), _box_string(_x2c_macro_value_7));
+  unsigned _x2c_macro_cursor_29 = 0;
+  String _x2c_macro_key_83;
+  String _x2c_macro_value_10;
+  while(MapStringString_try_next(_x2c_macro_map_133, & _x2c_macro_cursor_29, & _x2c_macro_key_83, & _x2c_macro_value_10)) Map_setindex(_x2c_macro_boxed_2, _box_string(_x2c_macro_key_83), _box_string(_x2c_macro_value_10));
   return _x2c_macro_boxed_2;
 }
 
-int MapStringString_compare(MapStringString _x2c_macro_a_12, MapStringString _x2c_macro_b_12){
-  return MapStringString__core_compare(_x2c_macro_a_12, _x2c_macro_b_12);
+int MapStringString_compare(MapStringString _x2c_macro_a_15, MapStringString _x2c_macro_b_15){
+  return MapStringString__core_compare(_x2c_macro_a_15, _x2c_macro_b_15);
 }
 
-Buffer MapStringString_write_repr(MapStringString _x2c_macro_map_13, Buffer _x2c_macro_out_13){
-  return MapStringString__core_write(_x2c_macro_map_13, _x2c_macro_out_13, 1190948);
+Buffer MapStringString_write_repr(MapStringString _x2c_macro_map_134, Buffer _x2c_macro_out_38){
+  return MapStringString__core_write(_x2c_macro_map_134, _x2c_macro_out_38, 1190948);
 }
 
-Buffer MapStringString_write_str(MapStringString _x2c_macro_map_13, Buffer _x2c_macro_out_13){
-  if(! MapStringString_truth(_x2c_macro_map_13)) return Buffer_write(_x2c_macro_out_13, "{ }");
-  return MapStringString__core_write(_x2c_macro_map_13, _x2c_macro_out_13, 40228);
+Buffer MapStringString_write_str(MapStringString _x2c_macro_map_135, Buffer _x2c_macro_out_39){
+  if(! MapStringString_truth(_x2c_macro_map_135)) return Buffer_write(_x2c_macro_out_39, "{ }");
+  return MapStringString__core_write(_x2c_macro_map_135, _x2c_macro_out_39, 40228);
 }
 
-String MapStringString_str(MapStringString _x2c_macro_map_13){
-  Buffer _x2c_macro_out_13 = Buffer_new(0);
-  MapStringString_write_str(_x2c_macro_map_13, _x2c_macro_out_13);
-  return Buffer_str_free(_x2c_macro_out_13);
+String MapStringString_str(MapStringString _x2c_macro_map_136){
+  Buffer _x2c_macro_out_40 = Buffer_new(0);
+  MapStringString_write_str(_x2c_macro_map_136, _x2c_macro_out_40);
+  return Buffer_str_free(_x2c_macro_out_40);
 }
 
-String MapStringString_repr(MapStringString _x2c_macro_map_13){
-  Buffer _x2c_macro_out_13 = Buffer_new(0);
-  MapStringString_write_repr(_x2c_macro_map_13, _x2c_macro_out_13);
-  return Buffer_str_free(_x2c_macro_out_13);
+String MapStringString_repr(MapStringString _x2c_macro_map_137){
+  Buffer _x2c_macro_out_41 = Buffer_new(0);
+  MapStringString_write_repr(_x2c_macro_map_137, _x2c_macro_out_41);
+  return Buffer_str_free(_x2c_macro_out_41);
 }
 
 Var Context_export_nested(Context, Var);
@@ -3105,10 +3105,10 @@ static MapStringString _prepare_string_export(MapStringString map, Context sourc
     {
       String key, value;
       MapStringString _x2c_macro_object_0 = map;
-      unsigned _x2c_macro_cursor_14 = 0;
+      unsigned _x2c_macro_cursor_30 = 0;
       String _x2c_macro_cursor_output_0;
       String _x2c_macro_cursor_output_1;
-      while(MapStringString_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_14, & _x2c_macro_cursor_output_0, & _x2c_macro_cursor_output_1)){
+      while(MapStringString_try_next(_x2c_macro_object_0, & _x2c_macro_cursor_30, & _x2c_macro_cursor_output_0, & _x2c_macro_cursor_output_1)){
         key = _x2c_macro_cursor_output_0;
         value = _x2c_macro_cursor_output_1;
         {
@@ -3135,69 +3135,69 @@ static MapStringString _prepare_string_export(MapStringString map, Context sourc
 }
 }
 
-Var MapStringString_var(MapStringString _x2c_macro_map_14){
-  return Var_new(918134391927270, _x2c_macro_map_14);
+Var MapStringString_var(MapStringString _x2c_macro_map_138){
+  return Var_new(918134391927270, _x2c_macro_map_138);
 }
 
-MapStringString Var_mapstringstring(Var _x2c_macro_value_8){
-  return(MapStringString) Var_pointer(_x2c_macro_value_8);
+MapStringString Var_mapstringstring(Var _x2c_macro_value_11){
+  return(MapStringString) Var_pointer(_x2c_macro_value_11);
 }
 
-static int _x2c_macro_next_2(Iter _x2c_macro_iter_2, Var * _x2c_macro_out_14){
-  MapStringString _x2c_macro_map_14 = Var_mapstringstring(_x2c_macro_iter_2 -> obj);
-  if((void *) _x2c_macro_map_14 == 0 || ! _x2c_macro_out_14) return 0;
-  unsigned _x2c_macro_cursor_15 = Var_uint(Var_convert(_x2c_macro_iter_2 -> state, 3847013));
-  String _x2c_macro_key_14;
-  String _x2c_macro_val_8;
-  if(! MapStringString_try_next(_x2c_macro_map_14, & _x2c_macro_cursor_15, & _x2c_macro_key_14, & _x2c_macro_val_8)) return 0;
-  _x2c_macro_iter_2 -> state = unsigned_var(_x2c_macro_cursor_15);
-  * _x2c_macro_out_14 = _box_string(_x2c_macro_val_8);
+static int _x2c_macro_next_2(Iter _x2c_macro_iter_6, Var * _x2c_macro_out_42){
+  MapStringString _x2c_macro_map_139 = Var_mapstringstring(_x2c_macro_iter_6 -> obj);
+  if((void *) _x2c_macro_map_139 == 0 || ! _x2c_macro_out_42) return 0;
+  unsigned _x2c_macro_cursor_31 = Var_uint(Var_convert(_x2c_macro_iter_6 -> state, 3847013));
+  String _x2c_macro_key_84;
+  String _x2c_macro_val_30;
+  if(! MapStringString_try_next(_x2c_macro_map_139, & _x2c_macro_cursor_31, & _x2c_macro_key_84, & _x2c_macro_val_30)) return 0;
+  _x2c_macro_iter_6 -> state = unsigned_var(_x2c_macro_cursor_31);
+  * _x2c_macro_out_42 = _box_string(_x2c_macro_val_30);
   return 1;
 }
 
-static int _x2c_macro_keys_next_2(Iter _x2c_macro_iter_2, Var * _x2c_macro_out_14){
-  MapStringString _x2c_macro_map_14 = Var_mapstringstring(_x2c_macro_iter_2 -> obj);
-  if((void *) _x2c_macro_map_14 == 0 || ! _x2c_macro_out_14) return 0;
-  unsigned _x2c_macro_cursor_15 = Var_uint(Var_convert(_x2c_macro_iter_2 -> state, 3847013));
-  String _x2c_macro_key_14;
-  String _x2c_macro_val_8;
-  if(! MapStringString_try_next(_x2c_macro_map_14, & _x2c_macro_cursor_15, & _x2c_macro_key_14, & _x2c_macro_val_8)) return 0;
-  _x2c_macro_iter_2 -> state = unsigned_var(_x2c_macro_cursor_15);
-  * _x2c_macro_out_14 = _box_string(_x2c_macro_key_14);
+static int _x2c_macro_keys_next_2(Iter _x2c_macro_iter_7, Var * _x2c_macro_out_43){
+  MapStringString _x2c_macro_map_140 = Var_mapstringstring(_x2c_macro_iter_7 -> obj);
+  if((void *) _x2c_macro_map_140 == 0 || ! _x2c_macro_out_43) return 0;
+  unsigned _x2c_macro_cursor_32 = Var_uint(Var_convert(_x2c_macro_iter_7 -> state, 3847013));
+  String _x2c_macro_key_85;
+  String _x2c_macro_val_31;
+  if(! MapStringString_try_next(_x2c_macro_map_140, & _x2c_macro_cursor_32, & _x2c_macro_key_85, & _x2c_macro_val_31)) return 0;
+  _x2c_macro_iter_7 -> state = unsigned_var(_x2c_macro_cursor_32);
+  * _x2c_macro_out_43 = _box_string(_x2c_macro_key_85);
   return 1;
 }
 
-static int _x2c_macro_enumerate_next_2(Iter _x2c_macro_iter_2, Var * _x2c_macro_out_14){
-  MapStringString _x2c_macro_map_14 = Var_mapstringstring(_x2c_macro_iter_2 -> obj);
-  if((void *) _x2c_macro_map_14 == 0 || ! _x2c_macro_out_14) return 0;
-  unsigned _x2c_macro_cursor_15 = Var_uint(Var_convert(_x2c_macro_iter_2 -> state, 3847013));
-  String _x2c_macro_key_14;
-  String _x2c_macro_val_8;
-  if(! MapStringString_try_next(_x2c_macro_map_14, & _x2c_macro_cursor_15, & _x2c_macro_key_14, & _x2c_macro_val_8)) return 0;
-  _x2c_macro_iter_2 -> state = unsigned_var(_x2c_macro_cursor_15);
-  Var _x2c_macro_boxed_key_5 = _box_string(_x2c_macro_key_14), _x2c_macro_boxed_value_5 = _box_string(_x2c_macro_val_8);
-  * _x2c_macro_out_14 = List_var(cons(_x2c_macro_boxed_key_5, cons(_x2c_macro_boxed_value_5, NULL)));
+static int _x2c_macro_enumerate_next_2(Iter _x2c_macro_iter_8, Var * _x2c_macro_out_44){
+  MapStringString _x2c_macro_map_141 = Var_mapstringstring(_x2c_macro_iter_8 -> obj);
+  if((void *) _x2c_macro_map_141 == 0 || ! _x2c_macro_out_44) return 0;
+  unsigned _x2c_macro_cursor_33 = Var_uint(Var_convert(_x2c_macro_iter_8 -> state, 3847013));
+  String _x2c_macro_key_86;
+  String _x2c_macro_val_32;
+  if(! MapStringString_try_next(_x2c_macro_map_141, & _x2c_macro_cursor_33, & _x2c_macro_key_86, & _x2c_macro_val_32)) return 0;
+  _x2c_macro_iter_8 -> state = unsigned_var(_x2c_macro_cursor_33);
+  Var _x2c_macro_boxed_key_5 = _box_string(_x2c_macro_key_86), _x2c_macro_boxed_value_5 = _box_string(_x2c_macro_val_32);
+  * _x2c_macro_out_44 = List_var(cons(_x2c_macro_boxed_key_5, cons(_x2c_macro_boxed_value_5, NULL)));
   return 1;
 }
 
-Iter MapStringString_iter(MapStringString _x2c_macro_map_14, Iter _x2c_macro_dest_2){
-  if((void *) _x2c_macro_dest_2 == 0) return 0;
-  return Iter_init(_x2c_macro_dest_2, MapStringString_var(_x2c_macro_map_14), _x2c_macro_next_2, int_var(0));
+Iter MapStringString_iter(MapStringString _x2c_macro_map_142, Iter _x2c_macro_dest_6){
+  if((void *) _x2c_macro_dest_6 == 0) return 0;
+  return Iter_init(_x2c_macro_dest_6, MapStringString_var(_x2c_macro_map_142), _x2c_macro_next_2, int_var(0));
 }
 
-Iter MapStringString_keys(MapStringString _x2c_macro_map_14, Iter _x2c_macro_dest_2){
-  if((void *) _x2c_macro_dest_2 == 0) return 0;
-  return Iter_init(_x2c_macro_dest_2, MapStringString_var(_x2c_macro_map_14), _x2c_macro_keys_next_2, int_var(0));
+Iter MapStringString_keys(MapStringString _x2c_macro_map_143, Iter _x2c_macro_dest_7){
+  if((void *) _x2c_macro_dest_7 == 0) return 0;
+  return Iter_init(_x2c_macro_dest_7, MapStringString_var(_x2c_macro_map_143), _x2c_macro_keys_next_2, int_var(0));
 }
 
-Iter MapStringString_enumerate(MapStringString _x2c_macro_map_14, Iter _x2c_macro_dest_2){
-  if((void *) _x2c_macro_dest_2 == 0) return 0;
-  return Iter_init(_x2c_macro_dest_2, MapStringString_var(_x2c_macro_map_14), _x2c_macro_enumerate_next_2, int_var(0));
+Iter MapStringString_enumerate(MapStringString _x2c_macro_map_144, Iter _x2c_macro_dest_8){
+  if((void *) _x2c_macro_dest_8 == 0) return 0;
+  return Iter_init(_x2c_macro_dest_8, MapStringString_var(_x2c_macro_map_144), _x2c_macro_enumerate_next_2, int_var(0));
 }
 
-static MapStringString MapStringString_export_context(MapStringString _x2c_macro_map_14, Context _x2c_macro_source_2){
-  if((void *) _x2c_macro_map_14 == 0 || ! Context_owns(_x2c_macro_source_2, _x2c_macro_map_14)) return _x2c_macro_map_14;
-  MapStringString _x2c_macro_staged_2 = _prepare_string_export(_x2c_macro_map_14, _x2c_macro_source_2), _x2c_macro_committed_2 = NULL;
+static MapStringString MapStringString_export_context(MapStringString _x2c_macro_map_145, Context _x2c_macro_source_2){
+  if((void *) _x2c_macro_map_145 == 0 || ! Context_owns(_x2c_macro_source_2, _x2c_macro_map_145)) return _x2c_macro_map_145;
+  MapStringString _x2c_macro_staged_2 = _prepare_string_export(_x2c_macro_map_145, _x2c_macro_source_2), _x2c_macro_committed_2 = NULL;
   {
   _x2c_defer_env_12 _x2c_defer_env_51 = {._x2c_defer_capture_24 =(const void *) & _x2c_macro_staged_2, ._x2c_defer_capture_25 =(const void *) & _x2c_macro_committed_2};
 
@@ -3208,28 +3208,28 @@ static MapStringString MapStringString_export_context(MapStringString _x2c_macro
   x2c_cleanup_push(&_x2c_defer_record_21);
   {
     Scope * _x2c_macro_destination_2 = Context_export_destination(_x2c_macro_source_2);
-    Scope_move(_x2c_macro_map_14, _x2c_macro_destination_2);
+    Scope_move(_x2c_macro_map_145, _x2c_macro_destination_2);
     if((void *) _x2c_macro_staged_2 == 0){
-      Block_move_to(Bytes_block(_x2c_macro_map_14 -> hashes), _x2c_macro_destination_2);
-      Block_move_to(Bytes_block(_x2c_macro_map_14 -> entries), _x2c_macro_destination_2);
+      Block_move_to(Bytes_block(_x2c_macro_map_145 -> hashes), _x2c_macro_destination_2);
+      Block_move_to(Bytes_block(_x2c_macro_map_145 -> entries), _x2c_macro_destination_2);
     }
     else{
-      Bytes _x2c_macro_old_hashes_2 = _x2c_macro_map_14 -> hashes, _x2c_macro_old_entries_2 = _x2c_macro_map_14 -> entries;
+      Bytes _x2c_macro_old_hashes_2 = _x2c_macro_map_145 -> hashes, _x2c_macro_old_entries_2 = _x2c_macro_map_145 -> entries;
       Block_move_to(Bytes_block(_x2c_macro_staged_2 -> hashes), _x2c_macro_destination_2);
       Block_move_to(Bytes_block(_x2c_macro_staged_2 -> entries), _x2c_macro_destination_2);
-      _x2c_macro_map_14 -> hashes = _x2c_macro_staged_2 -> hashes;
-      _x2c_macro_map_14 -> entries = _x2c_macro_staged_2 -> entries;
-      _x2c_macro_map_14 -> used = _x2c_macro_staged_2 -> used;
-      _x2c_macro_map_14 -> capacity = _x2c_macro_staged_2 -> capacity;
-      _x2c_macro_map_14 -> mask = _x2c_macro_staged_2 -> mask;
+      _x2c_macro_map_145 -> hashes = _x2c_macro_staged_2 -> hashes;
+      _x2c_macro_map_145 -> entries = _x2c_macro_staged_2 -> entries;
+      _x2c_macro_map_145 -> used = _x2c_macro_staged_2 -> used;
+      _x2c_macro_map_145 -> capacity = _x2c_macro_staged_2 -> capacity;
+      _x2c_macro_map_145 -> mask = _x2c_macro_staged_2 -> mask;
       _x2c_macro_staged_2 -> hashes = _x2c_macro_old_hashes_2;
       _x2c_macro_staged_2 -> entries = _x2c_macro_old_entries_2;
       MapStringString__core_free(_x2c_macro_staged_2);
     }
-    _x2c_macro_map_14 -> scope = * _x2c_macro_destination_2;
-    _x2c_macro_committed_2 = _x2c_macro_map_14;
+    _x2c_macro_map_145 -> scope = * _x2c_macro_destination_2;
+    _x2c_macro_committed_2 = _x2c_macro_map_145;
     {
-      MapStringString _x2c_return_value_18 = _x2c_macro_map_14;
+      MapStringString _x2c_return_value_18 = _x2c_macro_map_145;
       {
         x2c_cleanup_leave(& _x2c_defer_record_21);
         return _x2c_return_value_18;
@@ -3243,98 +3243,98 @@ static MapStringString MapStringString_export_context(MapStringString _x2c_macro
 }
 }
 
-void MapStringString_cleanup(MapStringString _x2c_macro_map_14){
-  MapStringString__core_free(_x2c_macro_map_14);
+void MapStringString_cleanup(MapStringString _x2c_macro_map_146){
+  MapStringString__core_free(_x2c_macro_map_146);
 }
 
-static void MapStringInt__core_free(MapStringInt _x2c_macro_map_15){
-  if((void *) _x2c_macro_map_15 == 0) return;
-  Bytes_free(_x2c_macro_map_15 -> hashes);
-  Bytes_free(_x2c_macro_map_15 -> entries);
-  Scope_free(_x2c_macro_map_15);
+static void MapStringInt__core_free(MapStringInt _x2c_macro_map_147){
+  if((void *) _x2c_macro_map_147 == 0) return;
+  Bytes_free(_x2c_macro_map_147 -> hashes);
+  Bytes_free(_x2c_macro_map_147 -> entries);
+  Scope_free(_x2c_macro_map_147);
 }
 
-static MapStringInt MapStringInt__core_new_capacity(MapStringInt _x2c_macro_unused_3, unsigned _x2c_macro_capacity_6){
+static MapStringInt MapStringInt__core_new_capacity(MapStringInt _x2c_macro_unused_3, unsigned _x2c_macro_capacity_9){
   (void) _x2c_macro_unused_3;
-  MapStringInt _x2c_macro_map_15 = Scope_malloc(sizeof(struct MapStringInt));
-  _x2c_macro_map_15 -> scope = * Scope_top();
-  _x2c_macro_map_15 -> hashes = Bytes_new(sizeof(unsigned));
-  _x2c_macro_map_15 -> hashes = Bytes_append(_x2c_macro_map_15 -> hashes, 0, _x2c_macro_capacity_6);
-  _x2c_macro_map_15 -> entries = Bytes_new(sizeof(struct MapStringIntRecord));
-  _x2c_macro_map_15 -> entries = Bytes_append(_x2c_macro_map_15 -> entries, 0, _x2c_macro_capacity_6);
-  _x2c_macro_map_15 -> capacity = _x2c_macro_capacity_6;
-  _x2c_macro_map_15 -> mask = _x2c_macro_capacity_6 - 1;
-  _x2c_macro_map_15 -> used = 0;
-  return _x2c_macro_map_15;
+  MapStringInt _x2c_macro_map_148 = Scope_malloc(sizeof(struct MapStringInt));
+  _x2c_macro_map_148 -> scope = * Scope_top();
+  _x2c_macro_map_148 -> hashes = Bytes_new(sizeof(unsigned));
+  _x2c_macro_map_148 -> hashes = Bytes_append(_x2c_macro_map_148 -> hashes, 0, _x2c_macro_capacity_9);
+  _x2c_macro_map_148 -> entries = Bytes_new(sizeof(struct MapStringIntRecord));
+  _x2c_macro_map_148 -> entries = Bytes_append(_x2c_macro_map_148 -> entries, 0, _x2c_macro_capacity_9);
+  _x2c_macro_map_148 -> capacity = _x2c_macro_capacity_9;
+  _x2c_macro_map_148 -> mask = _x2c_macro_capacity_9 - 1;
+  _x2c_macro_map_148 -> used = 0;
+  return _x2c_macro_map_148;
 }
 
-static long MapStringInt__core_find_hashed(MapStringInt _x2c_macro_map_15, String * _x2c_macro_key_15, unsigned _x2c_macro_key_hash_3){
-  unsigned * _x2c_macro_hashes_3 = _x2c_macro_map_15 -> hashes;
-  unsigned _x2c_macro_mask_4 = _x2c_macro_map_15 -> mask, _x2c_macro_todo_start_3 = _x2c_macro_key_hash_3 & _x2c_macro_mask_4;
-  unsigned _x2c_macro_cap_3 = _x2c_macro_map_15 -> capacity;
-  for(int _x2c_macro_todo_psl_3 = 0;  _x2c_macro_todo_psl_3 <(int) _x2c_macro_cap_3;  _x2c_macro_todo_psl_3 ++){
-    unsigned _x2c_macro_index_9 =(_x2c_macro_todo_start_3 + _x2c_macro_todo_psl_3) & _x2c_macro_mask_4;
-    unsigned _x2c_macro_stored_6 = _x2c_macro_hashes_3[_x2c_macro_index_9];
-    if(_x2c_macro_stored_6 == 0) break;
-    if(_x2c_macro_stored_6 == _x2c_macro_key_hash_3 && _equal_string(_string_int_key(_x2c_macro_map_15, _x2c_macro_index_9), _x2c_macro_key_15)) return(long) _x2c_macro_index_9;
-    unsigned _x2c_macro_stored_start_3 = _x2c_macro_stored_6 & _x2c_macro_mask_4;
-    int _x2c_macro_stored_psl_3 =(_x2c_macro_cap_3 + _x2c_macro_index_9 - _x2c_macro_stored_start_3) & _x2c_macro_mask_4;
-    if(_x2c_macro_stored_psl_3 < _x2c_macro_todo_psl_3) break;
+static long MapStringInt__core_find_hashed(MapStringInt _x2c_macro_map_149, String * _x2c_macro_key_87, unsigned _x2c_macro_key_hash_6){
+  unsigned * _x2c_macro_hashes_18 = _x2c_macro_map_149 -> hashes;
+  unsigned _x2c_macro_mask_13 = _x2c_macro_map_149 -> mask, _x2c_macro_todo_start_9 = _x2c_macro_key_hash_6 & _x2c_macro_mask_13;
+  unsigned _x2c_macro_cap_12 = _x2c_macro_map_149 -> capacity;
+  for(int _x2c_macro_todo_psl_9 = 0;  _x2c_macro_todo_psl_9 <(int) _x2c_macro_cap_12;  _x2c_macro_todo_psl_9 ++){
+    unsigned _x2c_macro_index_27 =(_x2c_macro_todo_start_9 + _x2c_macro_todo_psl_9) & _x2c_macro_mask_13;
+    unsigned _x2c_macro_stored_21 = _x2c_macro_hashes_18[_x2c_macro_index_27];
+    if(_x2c_macro_stored_21 == 0) break;
+    if(_x2c_macro_stored_21 == _x2c_macro_key_hash_6 && _equal_string(_string_int_key(_x2c_macro_map_149, _x2c_macro_index_27), _x2c_macro_key_87)) return(long) _x2c_macro_index_27;
+    unsigned _x2c_macro_stored_start_9 = _x2c_macro_stored_21 & _x2c_macro_mask_13;
+    int _x2c_macro_stored_psl_9 =(_x2c_macro_cap_12 + _x2c_macro_index_27 - _x2c_macro_stored_start_9) & _x2c_macro_mask_13;
+    if(_x2c_macro_stored_psl_9 < _x2c_macro_todo_psl_9) break;
   }
   return - 1;
 }
 
-static long MapStringInt__core_find_index(MapStringInt _x2c_macro_map_15, String * _x2c_macro_key_15){
-  return MapStringInt__core_find_hashed(_x2c_macro_map_15, _x2c_macro_key_15, _hash_string(_x2c_macro_key_15));
+static long MapStringInt__core_find_index(MapStringInt _x2c_macro_map_150, String * _x2c_macro_key_88){
+  return MapStringInt__core_find_hashed(_x2c_macro_map_150, _x2c_macro_key_88, _hash_string(_x2c_macro_key_88));
 }
 
-static int MapStringInt__core_try_get(MapStringInt _x2c_macro_map_15, String * _x2c_macro_key_15, int * _x2c_macro_out_15){
-  if((void *) _x2c_macro_map_15 == 0 || ! _x2c_macro_out_15) return 0;
-  long _x2c_macro_index_9 = MapStringInt__core_find_index(_x2c_macro_map_15, _x2c_macro_key_15);
-  if(_x2c_macro_index_9 < 0) return 0;
-  * _x2c_macro_out_15 =(int) * _string_int_value(_x2c_macro_map_15, (unsigned) _x2c_macro_index_9);
+static int MapStringInt__core_try_get(MapStringInt _x2c_macro_map_151, String * _x2c_macro_key_89, int * _x2c_macro_out_45){
+  if((void *) _x2c_macro_map_151 == 0 || ! _x2c_macro_out_45) return 0;
+  long _x2c_macro_index_28 = MapStringInt__core_find_index(_x2c_macro_map_151, _x2c_macro_key_89);
+  if(_x2c_macro_index_28 < 0) return 0;
+  * _x2c_macro_out_45 =(int) * _string_int_value(_x2c_macro_map_151, (unsigned) _x2c_macro_index_28);
   return 1;
 }
 
-static void MapStringInt__core_reinsert(MapStringInt _x2c_macro_map_15, unsigned _x2c_macro_todo_hash_3, struct MapStringIntRecord _x2c_macro_todo_3, int _x2c_macro_psl_3){
-  unsigned * _x2c_macro_hashes_3 = _x2c_macro_map_15 -> hashes;
-  struct MapStringIntRecord * _x2c_macro_entries_6 = _x2c_macro_map_15 -> entries;
-  unsigned _x2c_macro_mask_4 = _x2c_macro_map_15 -> mask, _x2c_macro_todo_start_3 = _x2c_macro_todo_hash_3 & _x2c_macro_mask_4;
-  unsigned _x2c_macro_cap_3 = _x2c_macro_map_15 -> capacity;
-  for(int _x2c_macro_todo_psl_3 = _x2c_macro_psl_3;  _x2c_macro_todo_psl_3 <(int) _x2c_macro_cap_3;  _x2c_macro_todo_psl_3 ++){
-    unsigned _x2c_macro_index_9 =(_x2c_macro_todo_start_3 + _x2c_macro_todo_psl_3) & _x2c_macro_mask_4;
-    unsigned _x2c_macro_stored_6 = _x2c_macro_hashes_3[_x2c_macro_index_9];
-    if(_x2c_macro_stored_6 == 0){
-      _x2c_macro_hashes_3[_x2c_macro_index_9] = _x2c_macro_todo_hash_3;
-      _x2c_macro_entries_6[_x2c_macro_index_9] = _x2c_macro_todo_3;
+static void MapStringInt__core_reinsert(MapStringInt _x2c_macro_map_152, unsigned _x2c_macro_todo_hash_3, struct MapStringIntRecord _x2c_macro_todo_3, int _x2c_macro_psl_3){
+  unsigned * _x2c_macro_hashes_19 = _x2c_macro_map_152 -> hashes;
+  struct MapStringIntRecord * _x2c_macro_entries_15 = _x2c_macro_map_152 -> entries;
+  unsigned _x2c_macro_mask_14 = _x2c_macro_map_152 -> mask, _x2c_macro_todo_start_10 = _x2c_macro_todo_hash_3 & _x2c_macro_mask_14;
+  unsigned _x2c_macro_cap_13 = _x2c_macro_map_152 -> capacity;
+  for(int _x2c_macro_todo_psl_10 = _x2c_macro_psl_3;  _x2c_macro_todo_psl_10 <(int) _x2c_macro_cap_13;  _x2c_macro_todo_psl_10 ++){
+    unsigned _x2c_macro_index_29 =(_x2c_macro_todo_start_10 + _x2c_macro_todo_psl_10) & _x2c_macro_mask_14;
+    unsigned _x2c_macro_stored_22 = _x2c_macro_hashes_19[_x2c_macro_index_29];
+    if(_x2c_macro_stored_22 == 0){
+      _x2c_macro_hashes_19[_x2c_macro_index_29] = _x2c_macro_todo_hash_3;
+      _x2c_macro_entries_15[_x2c_macro_index_29] = _x2c_macro_todo_3;
       return;
     }
-    unsigned _x2c_macro_stored_start_3 = _x2c_macro_stored_6 & _x2c_macro_mask_4;
-    int _x2c_macro_stored_psl_3 =(_x2c_macro_cap_3 + _x2c_macro_index_9 - _x2c_macro_stored_start_3) & _x2c_macro_mask_4;
-    if(_x2c_macro_stored_psl_3 < _x2c_macro_todo_psl_3){
-      struct MapStringIntRecord _x2c_macro_swap_3 = _x2c_macro_entries_6[_x2c_macro_index_9];
-      _x2c_macro_hashes_3[_x2c_macro_index_9] = _x2c_macro_todo_hash_3;
-      _x2c_macro_entries_6[_x2c_macro_index_9] = _x2c_macro_todo_3;
-      _x2c_macro_todo_hash_3 = _x2c_macro_stored_6;
+    unsigned _x2c_macro_stored_start_10 = _x2c_macro_stored_22 & _x2c_macro_mask_14;
+    int _x2c_macro_stored_psl_10 =(_x2c_macro_cap_13 + _x2c_macro_index_29 - _x2c_macro_stored_start_10) & _x2c_macro_mask_14;
+    if(_x2c_macro_stored_psl_10 < _x2c_macro_todo_psl_10){
+      struct MapStringIntRecord _x2c_macro_swap_3 = _x2c_macro_entries_15[_x2c_macro_index_29];
+      _x2c_macro_hashes_19[_x2c_macro_index_29] = _x2c_macro_todo_hash_3;
+      _x2c_macro_entries_15[_x2c_macro_index_29] = _x2c_macro_todo_3;
+      _x2c_macro_todo_hash_3 = _x2c_macro_stored_22;
       _x2c_macro_todo_3 = _x2c_macro_swap_3;
-      _x2c_macro_todo_start_3 = _x2c_macro_stored_start_3;
-      _x2c_macro_todo_psl_3 = _x2c_macro_stored_psl_3;
+      _x2c_macro_todo_start_10 = _x2c_macro_stored_start_10;
+      _x2c_macro_todo_psl_10 = _x2c_macro_stored_psl_10;
     }
 
   }
-  (void) _string_int_reinsert_error(_x2c_macro_cap_3, _x2c_macro_psl_3);
+  (void) _string_int_reinsert_error(_x2c_macro_cap_13, _x2c_macro_psl_3);
 }
 
-static void MapStringInt__core_expand(MapStringInt _x2c_macro_map_15){
-  unsigned * _x2c_macro_hashes_3 = _x2c_macro_map_15 -> hashes;
-  struct MapStringIntRecord * _x2c_macro_entries_6 = _x2c_macro_map_15 -> entries;
-  unsigned _x2c_macro_cap_3 = _x2c_macro_map_15 -> capacity;
-  if(_x2c_macro_cap_3 > ~ 0u / 2){
+static void MapStringInt__core_expand(MapStringInt _x2c_macro_map_153){
+  unsigned * _x2c_macro_hashes_20 = _x2c_macro_map_153 -> hashes;
+  struct MapStringIntRecord * _x2c_macro_entries_16 = _x2c_macro_map_153 -> entries;
+  unsigned _x2c_macro_cap_14 = _x2c_macro_map_153 -> capacity;
+  if(_x2c_macro_cap_14 > ~ 0u / 2){
     static const X2CErrorSite _x2c_error_site_16 = {.file = "../../lib/typed-map.x",.function = "MapStringInt__core_expand",.line = 351};
-    x2c_error_raise_n(& _x2c_error_site_16, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_macro_cap_3));
+    x2c_error_raise_n(& _x2c_error_site_16, 1358596898646632, 1, Symbol_var(1265290), unsigned_var(_x2c_macro_cap_14));
     __builtin_unreachable();
   }
-  unsigned _x2c_macro_capacity_6 = _x2c_macro_cap_3 * 2;
+  unsigned _x2c_macro_capacity_10 = _x2c_macro_cap_14 * 2;
   Bytes _x2c_macro_staged_hashes_3 = Bytes_new(sizeof(unsigned));
   {
   _x2c_defer_env_28 _x2c_defer_env_52 = {._x2c_defer_capture_46 =(const void *) & _x2c_macro_staged_hashes_3};
@@ -3345,7 +3345,7 @@ static void MapStringInt__core_expand(MapStringInt _x2c_macro_map_15){
   };
   x2c_cleanup_push(&_x2c_defer_record_22);
   {
-    _x2c_macro_staged_hashes_3 = Bytes_append(_x2c_macro_staged_hashes_3, 0, _x2c_macro_capacity_6);
+    _x2c_macro_staged_hashes_3 = Bytes_append(_x2c_macro_staged_hashes_3, 0, _x2c_macro_capacity_10);
     Bytes _x2c_macro_staged_entries_3 = Bytes_new(sizeof(struct MapStringIntRecord));
     {
   _x2c_defer_env_27 _x2c_defer_env_53 = {._x2c_defer_capture_45 =(const void *) & _x2c_macro_staged_entries_3};
@@ -3356,26 +3356,26 @@ static void MapStringInt__core_expand(MapStringInt _x2c_macro_map_15){
   };
   x2c_cleanup_push(&_x2c_defer_record_23);
   {
-      _x2c_macro_staged_entries_3 = Bytes_append(_x2c_macro_staged_entries_3, 0, _x2c_macro_capacity_6);
-      struct MapStringInt _x2c_macro_expanded_3 = * _x2c_macro_map_15;
+      _x2c_macro_staged_entries_3 = Bytes_append(_x2c_macro_staged_entries_3, 0, _x2c_macro_capacity_10);
+      struct MapStringInt _x2c_macro_expanded_3 = * _x2c_macro_map_153;
       _x2c_macro_expanded_3.hashes = _x2c_macro_staged_hashes_3;
       _x2c_macro_expanded_3.entries = _x2c_macro_staged_entries_3;
-      _x2c_macro_expanded_3.capacity = _x2c_macro_capacity_6;
-      _x2c_macro_expanded_3.mask = _x2c_macro_capacity_6 - 1;
+      _x2c_macro_expanded_3.capacity = _x2c_macro_capacity_10;
+      _x2c_macro_expanded_3.mask = _x2c_macro_capacity_10 - 1;
       MapStringInt _x2c_macro_expanded_map_3 =(MapStringInt) & _x2c_macro_expanded_3;
-      for(unsigned _x2c_macro_i_6 = 0;  _x2c_macro_i_6 < _x2c_macro_cap_3;  _x2c_macro_i_6 ++) if(_x2c_macro_hashes_3[_x2c_macro_i_6]) MapStringInt__core_reinsert(_x2c_macro_expanded_map_3, _x2c_macro_hashes_3[_x2c_macro_i_6], _x2c_macro_entries_6[_x2c_macro_i_6], 0);
-      Scope_move(Bytes_block(_x2c_macro_staged_hashes_3), & _x2c_macro_map_15 -> scope);
-      Scope_move((unsigned char *) _x2c_macro_staged_hashes_3 - sizeof(Block), & _x2c_macro_map_15 -> scope);
-      Scope_move(Bytes_block(_x2c_macro_staged_entries_3), & _x2c_macro_map_15 -> scope);
-      Scope_move((unsigned char *) _x2c_macro_staged_entries_3 - sizeof(Block), & _x2c_macro_map_15 -> scope);
-      _x2c_macro_map_15 -> hashes = _x2c_macro_expanded_3.hashes;
-      _x2c_macro_map_15 -> entries = _x2c_macro_expanded_3.entries;
-      _x2c_macro_map_15 -> capacity = _x2c_macro_expanded_3.capacity;
-      _x2c_macro_map_15 -> mask = _x2c_macro_expanded_3.mask;
+      for(unsigned _x2c_macro_i_6 = 0;  _x2c_macro_i_6 < _x2c_macro_cap_14;  _x2c_macro_i_6 ++) if(_x2c_macro_hashes_20[_x2c_macro_i_6]) MapStringInt__core_reinsert(_x2c_macro_expanded_map_3, _x2c_macro_hashes_20[_x2c_macro_i_6], _x2c_macro_entries_16[_x2c_macro_i_6], 0);
+      Scope_move(Bytes_block(_x2c_macro_staged_hashes_3), & _x2c_macro_map_153 -> scope);
+      Scope_move((unsigned char *) _x2c_macro_staged_hashes_3 - sizeof(Block), & _x2c_macro_map_153 -> scope);
+      Scope_move(Bytes_block(_x2c_macro_staged_entries_3), & _x2c_macro_map_153 -> scope);
+      Scope_move((unsigned char *) _x2c_macro_staged_entries_3 - sizeof(Block), & _x2c_macro_map_153 -> scope);
+      _x2c_macro_map_153 -> hashes = _x2c_macro_expanded_3.hashes;
+      _x2c_macro_map_153 -> entries = _x2c_macro_expanded_3.entries;
+      _x2c_macro_map_153 -> capacity = _x2c_macro_expanded_3.capacity;
+      _x2c_macro_map_153 -> mask = _x2c_macro_expanded_3.mask;
       _x2c_macro_staged_hashes_3 = 0;
       _x2c_macro_staged_entries_3 = 0;
-      Bytes_free((Bytes) _x2c_macro_hashes_3);
-      Bytes_free((Bytes) _x2c_macro_entries_6);
+      Bytes_free((Bytes) _x2c_macro_hashes_20);
+      Bytes_free((Bytes) _x2c_macro_entries_16);
     }
     x2c_cleanup_leave(& _x2c_defer_record_23);
 
@@ -3386,96 +3386,96 @@ static void MapStringInt__core_expand(MapStringInt _x2c_macro_map_15){
 }
 }
 
-static int * MapStringInt__core_get_or_insert(MapStringInt _x2c_macro_map_15, String * _x2c_macro_key_15, int * _x2c_macro_val_9, int * _x2c_macro_inserted_6){
-  * _x2c_macro_inserted_6 = 0;
+static int * MapStringInt__core_get_or_insert(MapStringInt _x2c_macro_map_154, String * _x2c_macro_key_90, int * _x2c_macro_val_33, int * _x2c_macro_inserted_12){
+  * _x2c_macro_inserted_12 = 0;
   retry :;
-  unsigned _x2c_macro_key_hash_3 = _hash_string(_x2c_macro_key_15), _x2c_macro_mask_4 = _x2c_macro_map_15 -> mask;
-  unsigned _x2c_macro_todo_start_3 = _x2c_macro_key_hash_3 & _x2c_macro_mask_4;
-  unsigned * _x2c_macro_hashes_3 = _x2c_macro_map_15 -> hashes;
-  struct MapStringIntRecord * _x2c_macro_entries_6 = _x2c_macro_map_15 -> entries;
-  unsigned _x2c_macro_cap_3 = _x2c_macro_map_15 -> capacity;
-  for(int _x2c_macro_todo_psl_3 = 0;  _x2c_macro_todo_psl_3 <(int) _x2c_macro_cap_3;  _x2c_macro_todo_psl_3 ++){
-    unsigned _x2c_macro_index_9 =(_x2c_macro_todo_start_3 + _x2c_macro_todo_psl_3) & _x2c_macro_mask_4;
-    unsigned _x2c_macro_stored_6 = _x2c_macro_hashes_3[_x2c_macro_index_9];
-    if(_x2c_macro_stored_6 == _x2c_macro_key_hash_3 && _equal_string(_string_int_key(_x2c_macro_map_15, _x2c_macro_index_9), _x2c_macro_key_15)) return _string_int_value(_x2c_macro_map_15, _x2c_macro_index_9);
-    if(_x2c_macro_stored_6 == 0){
-      (void) _valid_int(_x2c_macro_val_9);
-      if(_x2c_macro_map_15 -> used >=(unsigned long) _x2c_macro_map_15 -> capacity * 3 / 4){
-        MapStringInt__core_expand(_x2c_macro_map_15);
+  unsigned _x2c_macro_key_hash_7 = _hash_string(_x2c_macro_key_90), _x2c_macro_mask_15 = _x2c_macro_map_154 -> mask;
+  unsigned _x2c_macro_todo_start_11 = _x2c_macro_key_hash_7 & _x2c_macro_mask_15;
+  unsigned * _x2c_macro_hashes_21 = _x2c_macro_map_154 -> hashes;
+  struct MapStringIntRecord * _x2c_macro_entries_17 = _x2c_macro_map_154 -> entries;
+  unsigned _x2c_macro_cap_15 = _x2c_macro_map_154 -> capacity;
+  for(int _x2c_macro_todo_psl_11 = 0;  _x2c_macro_todo_psl_11 <(int) _x2c_macro_cap_15;  _x2c_macro_todo_psl_11 ++){
+    unsigned _x2c_macro_index_30 =(_x2c_macro_todo_start_11 + _x2c_macro_todo_psl_11) & _x2c_macro_mask_15;
+    unsigned _x2c_macro_stored_23 = _x2c_macro_hashes_21[_x2c_macro_index_30];
+    if(_x2c_macro_stored_23 == _x2c_macro_key_hash_7 && _equal_string(_string_int_key(_x2c_macro_map_154, _x2c_macro_index_30), _x2c_macro_key_90)) return _string_int_value(_x2c_macro_map_154, _x2c_macro_index_30);
+    if(_x2c_macro_stored_23 == 0){
+      (void) _valid_int(_x2c_macro_val_33);
+      if(_x2c_macro_map_154 -> used >=(unsigned long) _x2c_macro_map_154 -> capacity * 3 / 4){
+        MapStringInt__core_expand(_x2c_macro_map_154);
         goto retry;
       }
-      _x2c_macro_hashes_3[_x2c_macro_index_9] = _x2c_macro_key_hash_3;
-      _x2c_macro_entries_6[_x2c_macro_index_9].key = * _x2c_macro_key_15;
-      _x2c_macro_entries_6[_x2c_macro_index_9].val = * _x2c_macro_val_9;
-      _x2c_macro_map_15 -> used += 1;
-      * _x2c_macro_inserted_6 = 1;
-      return _string_int_value(_x2c_macro_map_15, _x2c_macro_index_9);
+      _x2c_macro_hashes_21[_x2c_macro_index_30] = _x2c_macro_key_hash_7;
+      _x2c_macro_entries_17[_x2c_macro_index_30].key = * _x2c_macro_key_90;
+      _x2c_macro_entries_17[_x2c_macro_index_30].val = * _x2c_macro_val_33;
+      _x2c_macro_map_154 -> used += 1;
+      * _x2c_macro_inserted_12 = 1;
+      return _string_int_value(_x2c_macro_map_154, _x2c_macro_index_30);
     }
-    unsigned _x2c_macro_stored_start_3 = _x2c_macro_stored_6 & _x2c_macro_mask_4;
-    int _x2c_macro_stored_psl_3 =(_x2c_macro_cap_3 + _x2c_macro_index_9 - _x2c_macro_stored_start_3) & _x2c_macro_mask_4;
-    if(_x2c_macro_stored_psl_3 < _x2c_macro_todo_psl_3){
-      (void) _valid_int(_x2c_macro_val_9);
-      if(_x2c_macro_map_15 -> used >=(unsigned long) _x2c_macro_map_15 -> capacity * 3 / 4){
-        MapStringInt__core_expand(_x2c_macro_map_15);
+    unsigned _x2c_macro_stored_start_11 = _x2c_macro_stored_23 & _x2c_macro_mask_15;
+    int _x2c_macro_stored_psl_11 =(_x2c_macro_cap_15 + _x2c_macro_index_30 - _x2c_macro_stored_start_11) & _x2c_macro_mask_15;
+    if(_x2c_macro_stored_psl_11 < _x2c_macro_todo_psl_11){
+      (void) _valid_int(_x2c_macro_val_33);
+      if(_x2c_macro_map_154 -> used >=(unsigned long) _x2c_macro_map_154 -> capacity * 3 / 4){
+        MapStringInt__core_expand(_x2c_macro_map_154);
         goto retry;
       }
-      struct MapStringIntRecord _x2c_macro_displaced_3 = _x2c_macro_entries_6[_x2c_macro_index_9];
-      _x2c_macro_hashes_3[_x2c_macro_index_9] = _x2c_macro_key_hash_3;
-      _x2c_macro_entries_6[_x2c_macro_index_9].key = * _x2c_macro_key_15;
-      _x2c_macro_entries_6[_x2c_macro_index_9].val = * _x2c_macro_val_9;
-      _x2c_macro_map_15 -> used += 1;
-      * _x2c_macro_inserted_6 = 1;
-      MapStringInt__core_reinsert(_x2c_macro_map_15, _x2c_macro_stored_6, _x2c_macro_displaced_3, _x2c_macro_stored_psl_3 + 1);
-      return _string_int_value(_x2c_macro_map_15, _x2c_macro_index_9);
+      struct MapStringIntRecord _x2c_macro_displaced_3 = _x2c_macro_entries_17[_x2c_macro_index_30];
+      _x2c_macro_hashes_21[_x2c_macro_index_30] = _x2c_macro_key_hash_7;
+      _x2c_macro_entries_17[_x2c_macro_index_30].key = * _x2c_macro_key_90;
+      _x2c_macro_entries_17[_x2c_macro_index_30].val = * _x2c_macro_val_33;
+      _x2c_macro_map_154 -> used += 1;
+      * _x2c_macro_inserted_12 = 1;
+      MapStringInt__core_reinsert(_x2c_macro_map_154, _x2c_macro_stored_23, _x2c_macro_displaced_3, _x2c_macro_stored_psl_11 + 1);
+      return _string_int_value(_x2c_macro_map_154, _x2c_macro_index_30);
     }
 
   }
-  (void) _string_int_insert_error(_x2c_macro_cap_3);
+  (void) _string_int_insert_error(_x2c_macro_cap_15);
 }
 
-static void MapStringInt__core_set(MapStringInt _x2c_macro_map_15, String * _x2c_macro_key_15, int * _x2c_macro_val_9){
-  int _x2c_macro_inserted_6;
-  int * _x2c_macro_stored_6 = MapStringInt__core_get_or_insert(_x2c_macro_map_15, _x2c_macro_key_15, _x2c_macro_val_9, & _x2c_macro_inserted_6);
-  if(! _x2c_macro_inserted_6) _x2c_macro_stored_6[0] = _x2c_macro_val_9[0];
+static void MapStringInt__core_set(MapStringInt _x2c_macro_map_155, String * _x2c_macro_key_91, int * _x2c_macro_val_34){
+  int _x2c_macro_inserted_13;
+  int * _x2c_macro_stored_24 = MapStringInt__core_get_or_insert(_x2c_macro_map_155, _x2c_macro_key_91, _x2c_macro_val_34, & _x2c_macro_inserted_13);
+  if(! _x2c_macro_inserted_13) _x2c_macro_stored_24[0] = _x2c_macro_val_34[0];
 }
 
-static int MapStringInt__core_try_del(MapStringInt _x2c_macro_map_15, String * _x2c_macro_key_15, int * _x2c_macro_out_15){
-  if((void *) _x2c_macro_map_15 == 0 || ! _x2c_macro_out_15) return 0;
-  long _x2c_macro_found_3 = MapStringInt__core_find_index(_x2c_macro_map_15, _x2c_macro_key_15);
+static int MapStringInt__core_try_del(MapStringInt _x2c_macro_map_156, String * _x2c_macro_key_92, int * _x2c_macro_out_46){
+  if((void *) _x2c_macro_map_156 == 0 || ! _x2c_macro_out_46) return 0;
+  long _x2c_macro_found_3 = MapStringInt__core_find_index(_x2c_macro_map_156, _x2c_macro_key_92);
   if(_x2c_macro_found_3 < 0) return 0;
-  unsigned * _x2c_macro_hashes_3 = _x2c_macro_map_15 -> hashes;
-  struct MapStringIntRecord * _x2c_macro_entries_6 = _x2c_macro_map_15 -> entries;
-  unsigned _x2c_macro_mask_4 = _x2c_macro_map_15 -> mask, _x2c_macro_index_9 =(unsigned) _x2c_macro_found_3, _x2c_macro_empty_3;
-  * _x2c_macro_out_15 =(int) * _string_int_value(_x2c_macro_map_15, _x2c_macro_index_9);
-  _x2c_macro_hashes_3[_x2c_macro_index_9] = 0;
-  _x2c_macro_map_15 -> used --;
+  unsigned * _x2c_macro_hashes_22 = _x2c_macro_map_156 -> hashes;
+  struct MapStringIntRecord * _x2c_macro_entries_18 = _x2c_macro_map_156 -> entries;
+  unsigned _x2c_macro_mask_16 = _x2c_macro_map_156 -> mask, _x2c_macro_index_31 =(unsigned) _x2c_macro_found_3, _x2c_macro_empty_3;
+  * _x2c_macro_out_46 =(int) * _string_int_value(_x2c_macro_map_156, _x2c_macro_index_31);
+  _x2c_macro_hashes_22[_x2c_macro_index_31] = 0;
+  _x2c_macro_map_156 -> used --;
   while(1){
-    _x2c_macro_empty_3 = _x2c_macro_index_9;
-    _x2c_macro_index_9 =(_x2c_macro_index_9 + 1) & _x2c_macro_mask_4;
-    if(_x2c_macro_hashes_3[_x2c_macro_index_9] == 0 ||(_x2c_macro_hashes_3[_x2c_macro_index_9] & _x2c_macro_mask_4) == _x2c_macro_index_9) break;
-    unsigned _x2c_macro_swap_hash_3 = _x2c_macro_hashes_3[_x2c_macro_empty_3];
-    struct MapStringIntRecord _x2c_macro_swap_entry_3 = _x2c_macro_entries_6[_x2c_macro_empty_3];
-    _x2c_macro_hashes_3[_x2c_macro_empty_3] = _x2c_macro_hashes_3[_x2c_macro_index_9];
-    _x2c_macro_entries_6[_x2c_macro_empty_3] = _x2c_macro_entries_6[_x2c_macro_index_9];
-    _x2c_macro_hashes_3[_x2c_macro_index_9] = _x2c_macro_swap_hash_3;
-    _x2c_macro_entries_6[_x2c_macro_index_9] = _x2c_macro_swap_entry_3;
+    _x2c_macro_empty_3 = _x2c_macro_index_31;
+    _x2c_macro_index_31 =(_x2c_macro_index_31 + 1) & _x2c_macro_mask_16;
+    if(_x2c_macro_hashes_22[_x2c_macro_index_31] == 0 ||(_x2c_macro_hashes_22[_x2c_macro_index_31] & _x2c_macro_mask_16) == _x2c_macro_index_31) break;
+    unsigned _x2c_macro_swap_hash_3 = _x2c_macro_hashes_22[_x2c_macro_empty_3];
+    struct MapStringIntRecord _x2c_macro_swap_entry_3 = _x2c_macro_entries_18[_x2c_macro_empty_3];
+    _x2c_macro_hashes_22[_x2c_macro_empty_3] = _x2c_macro_hashes_22[_x2c_macro_index_31];
+    _x2c_macro_entries_18[_x2c_macro_empty_3] = _x2c_macro_entries_18[_x2c_macro_index_31];
+    _x2c_macro_hashes_22[_x2c_macro_index_31] = _x2c_macro_swap_hash_3;
+    _x2c_macro_entries_18[_x2c_macro_index_31] = _x2c_macro_swap_entry_3;
   }
-  _x2c_macro_entries_6[_x2c_macro_empty_3] =(struct MapStringIntRecord){
+  _x2c_macro_entries_18[_x2c_macro_empty_3] =(struct MapStringIntRecord){
     0
   }
   ;
   return 1;
 }
 
-static int MapStringInt__core_try_next(MapStringInt _x2c_macro_map_15, unsigned * _x2c_macro_cursor_16, String * _x2c_macro_key_15, int * _x2c_macro_val_9){
-  if((void *) _x2c_macro_map_15 == 0 || ! _x2c_macro_cursor_16 || ! _x2c_macro_key_15 || ! _x2c_macro_val_9) return 0;
-  unsigned * _x2c_macro_hashes_3 = _x2c_macro_map_15 -> hashes;
-  while(* _x2c_macro_cursor_16 < _x2c_macro_map_15 -> capacity){
-    unsigned _x2c_macro_index_9 = * _x2c_macro_cursor_16;
-    * _x2c_macro_cursor_16 += 1;
-    if(_x2c_macro_hashes_3[_x2c_macro_index_9] != 0){
-      * _x2c_macro_key_15 =(String) * _string_int_key(_x2c_macro_map_15, _x2c_macro_index_9);
-      * _x2c_macro_val_9 =(int) * _string_int_value(_x2c_macro_map_15, _x2c_macro_index_9);
+static int MapStringInt__core_try_next(MapStringInt _x2c_macro_map_157, unsigned * _x2c_macro_cursor_34, String * _x2c_macro_key_93, int * _x2c_macro_val_35){
+  if((void *) _x2c_macro_map_157 == 0 || ! _x2c_macro_cursor_34 || ! _x2c_macro_key_93 || ! _x2c_macro_val_35) return 0;
+  unsigned * _x2c_macro_hashes_23 = _x2c_macro_map_157 -> hashes;
+  while(* _x2c_macro_cursor_34 < _x2c_macro_map_157 -> capacity){
+    unsigned _x2c_macro_index_32 = * _x2c_macro_cursor_34;
+    * _x2c_macro_cursor_34 += 1;
+    if(_x2c_macro_hashes_23[_x2c_macro_index_32] != 0){
+      * _x2c_macro_key_93 =(String) * _string_int_key(_x2c_macro_map_157, _x2c_macro_index_32);
+      * _x2c_macro_val_35 =(int) * _string_int_value(_x2c_macro_map_157, _x2c_macro_index_32);
       return 1;
     }
 
@@ -3483,17 +3483,17 @@ static int MapStringInt__core_try_next(MapStringInt _x2c_macro_map_15, unsigned 
   return 0;
 }
 
-static void MapStringInt__core_insert_all(MapStringInt _x2c_macro_map_15, MapStringInt _x2c_macro_other_6){
-  unsigned _x2c_macro_cursor_16 = 0;
-  String _x2c_macro_key_15;
-  int _x2c_macro_val_9;
-  while(MapStringInt__core_try_next(_x2c_macro_other_6, & _x2c_macro_cursor_16, & _x2c_macro_key_15, & _x2c_macro_val_9)) MapStringInt__core_set(_x2c_macro_map_15, & _x2c_macro_key_15, & _x2c_macro_val_9);
+static void MapStringInt__core_insert_all(MapStringInt _x2c_macro_map_158, MapStringInt _x2c_macro_other_9){
+  unsigned _x2c_macro_cursor_35 = 0;
+  String _x2c_macro_key_94;
+  int _x2c_macro_val_36;
+  while(MapStringInt__core_try_next(_x2c_macro_other_9, & _x2c_macro_cursor_35, & _x2c_macro_key_94, & _x2c_macro_val_36)) MapStringInt__core_set(_x2c_macro_map_158, & _x2c_macro_key_94, & _x2c_macro_val_36);
 }
 
-static MapStringInt MapStringInt__core_copy(MapStringInt _x2c_macro_map_15){
-  MapStringInt _x2c_macro_copy_3 = MapStringInt__core_new_capacity(_x2c_macro_map_15, 2), _x2c_macro_result_3 = 0;
+static MapStringInt MapStringInt__core_copy(MapStringInt _x2c_macro_map_159){
+  MapStringInt _x2c_macro_copy_3 = MapStringInt__core_new_capacity(_x2c_macro_map_159, 2), _x2c_macro_result_6 = 0;
   {
-  _x2c_defer_env_13 _x2c_defer_env_54 = {._x2c_defer_capture_26 =(const void *) & _x2c_macro_result_3, ._x2c_defer_capture_27 =(const void *) & _x2c_macro_copy_3};
+  _x2c_defer_env_13 _x2c_defer_env_54 = {._x2c_defer_capture_26 =(const void *) & _x2c_macro_result_6, ._x2c_defer_capture_27 =(const void *) & _x2c_macro_copy_3};
 
   X2CCleanup _x2c_defer_record_24 = {
     .fn = _x2c_defer_cleanup_13,
@@ -3501,9 +3501,9 @@ static MapStringInt MapStringInt__core_copy(MapStringInt _x2c_macro_map_15){
   };
   x2c_cleanup_push(&_x2c_defer_record_24);
   {
-    MapStringInt__core_insert_all(_x2c_macro_copy_3, _x2c_macro_map_15);
+    MapStringInt__core_insert_all(_x2c_macro_copy_3, _x2c_macro_map_159);
     {
-      MapStringInt _x2c_return_value_19 = _x2c_macro_result_3 = _x2c_macro_copy_3;
+      MapStringInt _x2c_return_value_19 = _x2c_macro_result_6 = _x2c_macro_copy_3;
       {
         x2c_cleanup_leave(& _x2c_defer_record_24);
         return _x2c_return_value_19;
@@ -3517,16 +3517,16 @@ static MapStringInt MapStringInt__core_copy(MapStringInt _x2c_macro_map_15){
 }
 }
 
-static MapStringInt MapStringInt__core_merge(MapStringInt _x2c_macro_map_15, MapStringInt _x2c_macro_other_6){
-  if(! MapStringInt_truth(_x2c_macro_other_6)) return _x2c_macro_map_15;
+static MapStringInt MapStringInt__core_merge(MapStringInt _x2c_macro_map_160, MapStringInt _x2c_macro_other_10){
+  if(! MapStringInt_truth(_x2c_macro_other_10)) return _x2c_macro_map_160;
   int _x2c_macro_created_3 = 0;
-  if((void *) _x2c_macro_map_15 == 0){
-    _x2c_macro_map_15 = MapStringInt__core_new_capacity(_x2c_macro_map_15, 2);
+  if((void *) _x2c_macro_map_160 == 0){
+    _x2c_macro_map_160 = MapStringInt__core_new_capacity(_x2c_macro_map_160, 2);
     _x2c_macro_created_3 = 1;
   }
-  MapStringInt _x2c_macro_result_3 = 0;
+  MapStringInt _x2c_macro_result_7 = 0;
   {
-  _x2c_defer_env_14 _x2c_defer_env_55 = {._x2c_defer_capture_28 =(const void *) & _x2c_macro_created_3, ._x2c_defer_capture_29 =(const void *) & _x2c_macro_result_3, ._x2c_defer_capture_30 =(const void *) & _x2c_macro_map_15};
+  _x2c_defer_env_14 _x2c_defer_env_55 = {._x2c_defer_capture_28 =(const void *) & _x2c_macro_created_3, ._x2c_defer_capture_29 =(const void *) & _x2c_macro_result_7, ._x2c_defer_capture_30 =(const void *) & _x2c_macro_map_160};
 
   X2CCleanup _x2c_defer_record_25 = {
     .fn = _x2c_defer_cleanup_14,
@@ -3534,9 +3534,9 @@ static MapStringInt MapStringInt__core_merge(MapStringInt _x2c_macro_map_15, Map
   };
   x2c_cleanup_push(&_x2c_defer_record_25);
   {
-    MapStringInt__core_insert_all(_x2c_macro_map_15, _x2c_macro_other_6);
+    MapStringInt__core_insert_all(_x2c_macro_map_160, _x2c_macro_other_10);
     {
-      MapStringInt _x2c_return_value_20 = _x2c_macro_result_3 = _x2c_macro_map_15;
+      MapStringInt _x2c_return_value_20 = _x2c_macro_result_7 = _x2c_macro_map_160;
       {
         x2c_cleanup_leave(& _x2c_defer_record_25);
         return _x2c_return_value_20;
@@ -3550,167 +3550,167 @@ static MapStringInt MapStringInt__core_merge(MapStringInt _x2c_macro_map_15, Map
 }
 }
 
-static int MapStringInt__core_truth(MapStringInt _x2c_macro_map_15){
-  return(void *) _x2c_macro_map_15 != 0 && _x2c_macro_map_15 -> used != 0;
+static int MapStringInt__core_truth(MapStringInt _x2c_macro_map_161){
+  return(void *) _x2c_macro_map_161 != 0 && _x2c_macro_map_161 -> used != 0;
 }
 
-static int MapStringInt__core_equal(MapStringInt _x2c_macro_a_13, MapStringInt _x2c_macro_b_13){
-  if((void *) _x2c_macro_a_13 ==(void *) _x2c_macro_b_13) return 1;
-  if((void *) _x2c_macro_a_13 == 0 ||(void *) _x2c_macro_b_13 == 0) return 0;
-  if(_x2c_macro_a_13 -> used != _x2c_macro_b_13 -> used) return 0;
-  unsigned _x2c_macro_cursor_16 = 0;
-  String _x2c_macro_key_15;
+static int MapStringInt__core_equal(MapStringInt _x2c_macro_a_16, MapStringInt _x2c_macro_b_16){
+  if((void *) _x2c_macro_a_16 ==(void *) _x2c_macro_b_16) return 1;
+  if((void *) _x2c_macro_a_16 == 0 ||(void *) _x2c_macro_b_16 == 0) return 0;
+  if(_x2c_macro_a_16 -> used != _x2c_macro_b_16 -> used) return 0;
+  unsigned _x2c_macro_cursor_36 = 0;
+  String _x2c_macro_key_95;
   int _x2c_macro_avalue_3, _x2c_macro_bvalue_3;
-  while(MapStringInt__core_try_next(_x2c_macro_a_13, & _x2c_macro_cursor_16, & _x2c_macro_key_15, & _x2c_macro_avalue_3)){
-    if(! MapStringInt__core_try_get(_x2c_macro_b_13, & _x2c_macro_key_15, & _x2c_macro_bvalue_3) || ! _equal_int(& _x2c_macro_avalue_3, & _x2c_macro_bvalue_3)) return 0;
+  while(MapStringInt__core_try_next(_x2c_macro_a_16, & _x2c_macro_cursor_36, & _x2c_macro_key_95, & _x2c_macro_avalue_3)){
+    if(! MapStringInt__core_try_get(_x2c_macro_b_16, & _x2c_macro_key_95, & _x2c_macro_bvalue_3) || ! _equal_int(& _x2c_macro_avalue_3, & _x2c_macro_bvalue_3)) return 0;
   }
   return 1;
 }
 
-MapStringInt MapStringInt_new_capacity(unsigned _x2c_macro_capacity_7){
+MapStringInt MapStringInt_new_capacity(unsigned _x2c_macro_capacity_11){
   if(! _init_guard_) _file_init_();
-  if(! _capacity_valid(_x2c_macro_capacity_7))(void) _bad_arg(_4);
-  MapStringInt _x2c_macro_map_16 = 0;
-  return MapStringInt__core_new_capacity(_x2c_macro_map_16, _x2c_macro_capacity_7);
+  if(! _capacity_valid(_x2c_macro_capacity_11))(void) _bad_arg(_4);
+  MapStringInt _x2c_macro_map_162 = 0;
+  return MapStringInt__core_new_capacity(_x2c_macro_map_162, _x2c_macro_capacity_11);
 }
 
 MapStringInt MapStringInt_new(void){
-  MapStringInt _x2c_macro_map_16 = 0;
-  return MapStringInt__core_new_capacity(_x2c_macro_map_16, 2);
+  MapStringInt _x2c_macro_map_163 = 0;
+  return MapStringInt__core_new_capacity(_x2c_macro_map_163, 2);
 }
 
-MapStringInt Map_mapstringint(Map _x2c_macro_entries_7){
+MapStringInt Map_mapstringint(Map _x2c_macro_entries_19){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_entries_7 == 0) return 0;
+  if((void *) _x2c_macro_entries_19 == 0) return 0;
   MapStringInt _x2c_macro_packed_3 = 0;
   _x2c_macro_packed_3 = MapStringInt__core_new_capacity(_x2c_macro_packed_3, 2);
-  unsigned _x2c_macro_cursor_17 = 0;
-  Var _x2c_macro_key_16, _x2c_macro_val_10;
-  while(Map_try_next(_x2c_macro_entries_7, & _x2c_macro_cursor_17, & _x2c_macro_key_16, & _x2c_macro_val_10)) MapStringInt_set(_x2c_macro_packed_3, Var_string(_x2c_macro_key_16), Var_int(Var_convert(_x2c_macro_val_10, 3453797)));
+  unsigned _x2c_macro_cursor_37 = 0;
+  Var _x2c_macro_key_96, _x2c_macro_val_37;
+  while(Map_try_next(_x2c_macro_entries_19, & _x2c_macro_cursor_37, & _x2c_macro_key_96, & _x2c_macro_val_37)) MapStringInt_set(_x2c_macro_packed_3, Var_string(_x2c_macro_key_96), Var_int(Var_convert(_x2c_macro_val_37, 3453797)));
   return _x2c_macro_packed_3;
 }
 
-unsigned MapStringInt_len(MapStringInt _x2c_macro_map_16){
-  return MapStringInt_truth(_x2c_macro_map_16) ? _x2c_macro_map_16 -> used : 0;
+unsigned MapStringInt_len(MapStringInt _x2c_macro_map_164){
+  return MapStringInt_truth(_x2c_macro_map_164) ? _x2c_macro_map_164 -> used : 0;
 }
 
-int MapStringInt_try_get(MapStringInt _x2c_macro_map_16, String _x2c_macro_key_16, int * _x2c_macro_out_16){
-  return MapStringInt__core_try_get(_x2c_macro_map_16, & _x2c_macro_key_16, _x2c_macro_out_16);
+int MapStringInt_try_get(MapStringInt _x2c_macro_map_165, String _x2c_macro_key_97, int * _x2c_macro_out_47){
+  return MapStringInt__core_try_get(_x2c_macro_map_165, & _x2c_macro_key_97, _x2c_macro_out_47);
 }
 
-int MapStringInt_get(MapStringInt _x2c_macro_map_16, String _x2c_macro_key_16){
+int MapStringInt_get(MapStringInt _x2c_macro_map_166, String _x2c_macro_key_98){
   if(! _init_guard_) _file_init_();
-  int _x2c_macro_out_16 = 0;
-  if(MapStringInt_try_get(_x2c_macro_map_16, _x2c_macro_key_16, & _x2c_macro_out_16)) return _x2c_macro_out_16;
+  int _x2c_macro_out_48 = 0;
+  if(MapStringInt_try_get(_x2c_macro_map_166, _x2c_macro_key_98, & _x2c_macro_out_48)) return _x2c_macro_out_48;
   (void) _bad_arg(_4);
   return 0;
 }
 
-int MapStringInt_getindex(MapStringInt _x2c_macro_map_16, String _x2c_macro_key_16){
+int MapStringInt_getindex(MapStringInt _x2c_macro_map_167, String _x2c_macro_key_99){
   if(! _init_guard_) _file_init_();
-  return MapStringInt_get(_x2c_macro_map_16, _x2c_macro_key_16);
+  return MapStringInt_get(_x2c_macro_map_167, _x2c_macro_key_99);
 }
 
-int MapStringInt_getdefault(MapStringInt _x2c_macro_map_16, String _x2c_macro_key_16, int _x2c_macro_defval_3){
-  int _x2c_macro_out_16;
-  return MapStringInt_try_get(_x2c_macro_map_16, _x2c_macro_key_16, & _x2c_macro_out_16) ? _x2c_macro_out_16 : _x2c_macro_defval_3;
+int MapStringInt_getdefault(MapStringInt _x2c_macro_map_168, String _x2c_macro_key_100, int _x2c_macro_defval_6){
+  int _x2c_macro_out_49;
+  return MapStringInt_try_get(_x2c_macro_map_168, _x2c_macro_key_100, & _x2c_macro_out_49) ? _x2c_macro_out_49 : _x2c_macro_defval_6;
 }
 
-int MapStringInt_setdefault(MapStringInt _x2c_macro_map_16, String _x2c_macro_key_16, int _x2c_macro_defval_3){
+int MapStringInt_setdefault(MapStringInt _x2c_macro_map_169, String _x2c_macro_key_101, int _x2c_macro_defval_7){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_16 == 0)(void) _bad_arg(_4);
-  int _x2c_macro_inserted_7;
-  int * _x2c_macro_stored_7 = MapStringInt__core_get_or_insert(_x2c_macro_map_16, & _x2c_macro_key_16, & _x2c_macro_defval_3, & _x2c_macro_inserted_7);
-  return _x2c_macro_stored_7[0];
+  if((void *) _x2c_macro_map_169 == 0)(void) _bad_arg(_4);
+  int _x2c_macro_inserted_14;
+  int * _x2c_macro_stored_25 = MapStringInt__core_get_or_insert(_x2c_macro_map_169, & _x2c_macro_key_101, & _x2c_macro_defval_7, & _x2c_macro_inserted_14);
+  return _x2c_macro_stored_25[0];
 }
 
-int MapStringInt_contains(MapStringInt _x2c_macro_map_16, String _x2c_macro_key_16){
-  return MapStringInt_truth(_x2c_macro_map_16) && MapStringInt__core_find_index(_x2c_macro_map_16, & _x2c_macro_key_16) >= 0;
+int MapStringInt_contains(MapStringInt _x2c_macro_map_170, String _x2c_macro_key_102){
+  return MapStringInt_truth(_x2c_macro_map_170) && MapStringInt__core_find_index(_x2c_macro_map_170, & _x2c_macro_key_102) >= 0;
 }
 
-void MapStringInt_set(MapStringInt _x2c_macro_map_16, String _x2c_macro_key_16, int _x2c_macro_val_10){
+void MapStringInt_set(MapStringInt _x2c_macro_map_171, String _x2c_macro_key_103, int _x2c_macro_val_38){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_16 == 0)(void) _bad_arg(_4);
-  MapStringInt__core_set(_x2c_macro_map_16, & _x2c_macro_key_16, & _x2c_macro_val_10);
+  if((void *) _x2c_macro_map_171 == 0)(void) _bad_arg(_4);
+  MapStringInt__core_set(_x2c_macro_map_171, & _x2c_macro_key_103, & _x2c_macro_val_38);
 }
 
-int MapStringInt_setindex(MapStringInt _x2c_macro_map_16, String _x2c_macro_key_16, int _x2c_macro_val_10){
+int MapStringInt_setindex(MapStringInt _x2c_macro_map_172, String _x2c_macro_key_104, int _x2c_macro_val_39){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_16 == 0)(void) _bad_arg(_4);
-  MapStringInt__core_set(_x2c_macro_map_16, & _x2c_macro_key_16, & _x2c_macro_val_10);
-  return _x2c_macro_val_10;
+  if((void *) _x2c_macro_map_172 == 0)(void) _bad_arg(_4);
+  MapStringInt__core_set(_x2c_macro_map_172, & _x2c_macro_key_104, & _x2c_macro_val_39);
+  return _x2c_macro_val_39;
 }
 
-int MapStringInt_updateindex(MapStringInt _x2c_macro_map_16, String _x2c_macro_key_16, Symbol _x2c_macro_op_4, int _x2c_macro_rhs_3){
+int MapStringInt_updateindex(MapStringInt _x2c_macro_map_173, String _x2c_macro_key_105, Symbol _x2c_macro_op_7, int _x2c_macro_rhs_3){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_16 == 0)(void) _bad_arg(_4);
-  if(_x2c_macro_op_4 == 56){
-    int _x2c_macro_inserted_7;
-    int * _x2c_macro_stored_7 = MapStringInt__core_get_or_insert(_x2c_macro_map_16, & _x2c_macro_key_16, & _x2c_macro_rhs_3, & _x2c_macro_inserted_7);
-    if(_x2c_macro_inserted_7) return _x2c_macro_rhs_3;
-    return _update_int(_x2c_macro_stored_7, _x2c_macro_op_4, _x2c_macro_rhs_3);
+  if((void *) _x2c_macro_map_173 == 0)(void) _bad_arg(_4);
+  if(_x2c_macro_op_7 == 56){
+    int _x2c_macro_inserted_15;
+    int * _x2c_macro_stored_26 = MapStringInt__core_get_or_insert(_x2c_macro_map_173, & _x2c_macro_key_105, & _x2c_macro_rhs_3, & _x2c_macro_inserted_15);
+    if(_x2c_macro_inserted_15) return _x2c_macro_rhs_3;
+    return _update_int(_x2c_macro_stored_26, _x2c_macro_op_7, _x2c_macro_rhs_3);
   }
-  long _x2c_macro_index_10 = MapStringInt__core_find_index(_x2c_macro_map_16, & _x2c_macro_key_16);
-  if(_x2c_macro_index_10 < 0)(void) _bad_arg(_4);
-  return _update_int(_string_int_value(_x2c_macro_map_16, (unsigned) _x2c_macro_index_10), _x2c_macro_op_4, _x2c_macro_rhs_3);
+  long _x2c_macro_index_33 = MapStringInt__core_find_index(_x2c_macro_map_173, & _x2c_macro_key_105);
+  if(_x2c_macro_index_33 < 0)(void) _bad_arg(_4);
+  return _update_int(_string_int_value(_x2c_macro_map_173, (unsigned) _x2c_macro_index_33), _x2c_macro_op_7, _x2c_macro_rhs_3);
 }
 
-int MapStringInt_postfixindex(MapStringInt _x2c_macro_map_16, String _x2c_macro_key_16, Symbol _x2c_macro_op_4){
+int MapStringInt_postfixindex(MapStringInt _x2c_macro_map_174, String _x2c_macro_key_106, Symbol _x2c_macro_op_8){
   if(! _init_guard_) _file_init_();
-  if((void *) _x2c_macro_map_16 == 0)(void) _bad_arg(_4);
-  long _x2c_macro_index_10 = MapStringInt__core_find_index(_x2c_macro_map_16, & _x2c_macro_key_16);
-  if(_x2c_macro_index_10 < 0)(void) _bad_arg(_4);
-  int * _x2c_macro_stored_7 = _string_int_value(_x2c_macro_map_16, (unsigned) _x2c_macro_index_10);
-  int _x2c_macro_old_3 = _x2c_macro_stored_7[0];
-  if(! 1)(void) _bad_op(_x2c_macro_op_4);
-  if(_x2c_macro_op_4 == 1848) _update_int(_x2c_macro_stored_7, 56, 1);
-  else if(_x2c_macro_op_4 == 2046) _update_int(_x2c_macro_stored_7, 62, 1);
-  else(void) _bad_op(_x2c_macro_op_4);
+  if((void *) _x2c_macro_map_174 == 0)(void) _bad_arg(_4);
+  long _x2c_macro_index_34 = MapStringInt__core_find_index(_x2c_macro_map_174, & _x2c_macro_key_106);
+  if(_x2c_macro_index_34 < 0)(void) _bad_arg(_4);
+  int * _x2c_macro_stored_27 = _string_int_value(_x2c_macro_map_174, (unsigned) _x2c_macro_index_34);
+  int _x2c_macro_old_3 = _x2c_macro_stored_27[0];
+  if(! 1)(void) _bad_op(_x2c_macro_op_8);
+  if(_x2c_macro_op_8 == 1848) _update_int(_x2c_macro_stored_27, 56, 1);
+  else if(_x2c_macro_op_8 == 2046) _update_int(_x2c_macro_stored_27, 62, 1);
+  else(void) _bad_op(_x2c_macro_op_8);
   return _x2c_macro_old_3;
 }
 
-int MapStringInt_try_del(MapStringInt _x2c_macro_map_16, String _x2c_macro_key_16, int * _x2c_macro_out_16){
-  return MapStringInt__core_try_del(_x2c_macro_map_16, & _x2c_macro_key_16, _x2c_macro_out_16);
+int MapStringInt_try_del(MapStringInt _x2c_macro_map_175, String _x2c_macro_key_107, int * _x2c_macro_out_50){
+  return MapStringInt__core_try_del(_x2c_macro_map_175, & _x2c_macro_key_107, _x2c_macro_out_50);
 }
 
-int MapStringInt_del(MapStringInt _x2c_macro_map_16, String _x2c_macro_key_16){
+int MapStringInt_del(MapStringInt _x2c_macro_map_176, String _x2c_macro_key_108){
   if(! _init_guard_) _file_init_();
-  int _x2c_macro_out_16 = 0;
-  if(MapStringInt_try_del(_x2c_macro_map_16, _x2c_macro_key_16, & _x2c_macro_out_16)) return _x2c_macro_out_16;
+  int _x2c_macro_out_51 = 0;
+  if(MapStringInt_try_del(_x2c_macro_map_176, _x2c_macro_key_108, & _x2c_macro_out_51)) return _x2c_macro_out_51;
   (void) _bad_arg(_4);
 }
 
-MapStringInt MapStringInt_copy(MapStringInt _x2c_macro_map_16){
-  return MapStringInt__core_copy(_x2c_macro_map_16);
+MapStringInt MapStringInt_copy(MapStringInt _x2c_macro_map_177){
+  return MapStringInt__core_copy(_x2c_macro_map_177);
 }
 
-MapStringInt MapStringInt_merge(MapStringInt _x2c_macro_map_16, MapStringInt _x2c_macro_other_7){
-  return MapStringInt__core_merge(_x2c_macro_map_16, _x2c_macro_other_7);
+MapStringInt MapStringInt_merge(MapStringInt _x2c_macro_map_178, MapStringInt _x2c_macro_other_11){
+  return MapStringInt__core_merge(_x2c_macro_map_178, _x2c_macro_other_11);
 }
 
-int MapStringInt_try_next(MapStringInt _x2c_macro_map_16, unsigned * _x2c_macro_cursor_17, String * _x2c_macro_key_16, int * _x2c_macro_val_10){
-  return MapStringInt__core_try_next(_x2c_macro_map_16, _x2c_macro_cursor_17, _x2c_macro_key_16, _x2c_macro_val_10);
+int MapStringInt_try_next(MapStringInt _x2c_macro_map_179, unsigned * _x2c_macro_cursor_38, String * _x2c_macro_key_109, int * _x2c_macro_val_40){
+  return MapStringInt__core_try_next(_x2c_macro_map_179, _x2c_macro_cursor_38, _x2c_macro_key_109, _x2c_macro_val_40);
 }
 
-int MapStringInt_truth(MapStringInt _x2c_macro_map_16){
-  return MapStringInt__core_truth(_x2c_macro_map_16);
+int MapStringInt_truth(MapStringInt _x2c_macro_map_180){
+  return MapStringInt__core_truth(_x2c_macro_map_180);
 }
 
-int MapStringInt_equal(MapStringInt _x2c_macro_a_14, MapStringInt _x2c_macro_b_14){
-  return MapStringInt__core_equal(_x2c_macro_a_14, _x2c_macro_b_14);
+int MapStringInt_equal(MapStringInt _x2c_macro_a_17, MapStringInt _x2c_macro_b_17){
+  return MapStringInt__core_equal(_x2c_macro_a_17, _x2c_macro_b_17);
 }
 
 static int _x2c_macro_record_compare_3(const void * _x2c_macro_ap_3, const void * _x2c_macro_bp_3){
-  const struct MapStringIntRecord * _x2c_macro_a_15 = _x2c_macro_ap_3, * _x2c_macro_b_15 = _x2c_macro_bp_3;
-  int _x2c_macro_comparison_3 = _map_compare_string(_x2c_macro_a_15 -> key, _x2c_macro_b_15 -> key);
-  return _x2c_macro_comparison_3 ? _x2c_macro_comparison_3 : _map_compare_int(_x2c_macro_a_15 -> val, _x2c_macro_b_15 -> val);
+  const struct MapStringIntRecord * _x2c_macro_a_18 = _x2c_macro_ap_3, * _x2c_macro_b_18 = _x2c_macro_bp_3;
+  int _x2c_macro_comparison_6 = _map_compare_string(_x2c_macro_a_18 -> key, _x2c_macro_b_18 -> key);
+  return _x2c_macro_comparison_6 ? _x2c_macro_comparison_6 : _map_compare_int(_x2c_macro_a_18 -> val, _x2c_macro_b_18 -> val);
 }
 
-static int MapStringInt__core_compare(MapStringInt _x2c_macro_a_15, MapStringInt _x2c_macro_b_15){
-  if((void *) _x2c_macro_a_15 ==(void *) _x2c_macro_b_15) return 0;
-  if((void *) _x2c_macro_a_15 == NULL) return - 1;
-  if((void *) _x2c_macro_b_15 == NULL) return 1;
-  unsigned _x2c_macro_asz_3 = _x2c_macro_a_15 -> used, _x2c_macro_bsz_3 = _x2c_macro_b_15 -> used;
+static int MapStringInt__core_compare(MapStringInt _x2c_macro_a_19, MapStringInt _x2c_macro_b_19){
+  if((void *) _x2c_macro_a_19 ==(void *) _x2c_macro_b_19) return 0;
+  if((void *) _x2c_macro_a_19 == NULL) return - 1;
+  if((void *) _x2c_macro_b_19 == NULL) return 1;
+  unsigned _x2c_macro_asz_3 = _x2c_macro_a_19 -> used, _x2c_macro_bsz_3 = _x2c_macro_b_19 -> used;
   if(_x2c_macro_asz_3 != _x2c_macro_bsz_3) return _x2c_macro_asz_3 < _x2c_macro_bsz_3 ? - 1 : 1;
   if(! _x2c_macro_asz_3) return 0;
   Scope _x2c_macro_scratch_3 = Scope_new();
@@ -3725,25 +3725,25 @@ static int MapStringInt__core_compare(MapStringInt _x2c_macro_a_15, MapStringInt
   {
     struct MapStringIntRecord * _x2c_macro_arecs_3 = Scope_malloc_in(& _x2c_macro_scratch_3, _x2c_macro_asz_3 * sizeof(struct MapStringIntRecord));
     struct MapStringIntRecord * _x2c_macro_brecs_3 = Scope_malloc_in(& _x2c_macro_scratch_3, _x2c_macro_bsz_3 * sizeof(struct MapStringIntRecord));
-    unsigned _x2c_macro_cursor_18 = 0, _x2c_macro_index_11 = 0;
-    String _x2c_macro_key_17;
-    int _x2c_macro_value_9;
-    while(MapStringInt_try_next(_x2c_macro_a_15, & _x2c_macro_cursor_18, & _x2c_macro_key_17, & _x2c_macro_value_9)) _x2c_macro_arecs_3[_x2c_macro_index_11 ++] =(struct MapStringIntRecord){
-      .key = _x2c_macro_key_17, .val = _x2c_macro_value_9
+    unsigned _x2c_macro_cursor_39 = 0, _x2c_macro_index_35 = 0;
+    String _x2c_macro_key_110;
+    int _x2c_macro_value_12;
+    while(MapStringInt_try_next(_x2c_macro_a_19, & _x2c_macro_cursor_39, & _x2c_macro_key_110, & _x2c_macro_value_12)) _x2c_macro_arecs_3[_x2c_macro_index_35 ++] =(struct MapStringIntRecord){
+      .key = _x2c_macro_key_110, .val = _x2c_macro_value_12
     }
     ;
-    _x2c_macro_cursor_18 = 0;
-    _x2c_macro_index_11 = 0;
-    while(MapStringInt_try_next(_x2c_macro_b_15, & _x2c_macro_cursor_18, & _x2c_macro_key_17, & _x2c_macro_value_9)) _x2c_macro_brecs_3[_x2c_macro_index_11 ++] =(struct MapStringIntRecord){
-      .key = _x2c_macro_key_17, .val = _x2c_macro_value_9
+    _x2c_macro_cursor_39 = 0;
+    _x2c_macro_index_35 = 0;
+    while(MapStringInt_try_next(_x2c_macro_b_19, & _x2c_macro_cursor_39, & _x2c_macro_key_110, & _x2c_macro_value_12)) _x2c_macro_brecs_3[_x2c_macro_index_35 ++] =(struct MapStringIntRecord){
+      .key = _x2c_macro_key_110, .val = _x2c_macro_value_12
     }
     ;
     qsort(_x2c_macro_arecs_3, _x2c_macro_asz_3, sizeof(struct MapStringIntRecord), _x2c_macro_record_compare_3);
     qsort(_x2c_macro_brecs_3, _x2c_macro_bsz_3, sizeof(struct MapStringIntRecord), _x2c_macro_record_compare_3);
     for(unsigned _x2c_macro_i_7 = 0;  _x2c_macro_i_7 < _x2c_macro_asz_3;  _x2c_macro_i_7 ++){
-      int _x2c_macro_comparison_3 = _x2c_macro_record_compare_3(_x2c_macro_arecs_3 + _x2c_macro_i_7, _x2c_macro_brecs_3 + _x2c_macro_i_7);
-      if(_x2c_macro_comparison_3){
-        int _x2c_return_value_21 = _x2c_macro_comparison_3;
+      int _x2c_macro_comparison_7 = _x2c_macro_record_compare_3(_x2c_macro_arecs_3 + _x2c_macro_i_7, _x2c_macro_brecs_3 + _x2c_macro_i_7);
+      if(_x2c_macro_comparison_7){
+        int _x2c_return_value_21 = _x2c_macro_comparison_7;
         {
           x2c_cleanup_leave(& _x2c_defer_record_26);
           return _x2c_return_value_21;
@@ -3767,9 +3767,9 @@ static int MapStringInt__core_compare(MapStringInt _x2c_macro_a_15, MapStringInt
 }
 }
 
-static Buffer MapStringInt__core_write(MapStringInt _x2c_macro_map_17, Buffer _x2c_macro_out_17, Symbol _x2c_macro_mode_3){
+static Buffer MapStringInt__core_write(MapStringInt _x2c_macro_map_181, Buffer _x2c_macro_out_52, Symbol _x2c_macro_mode_3){
   RenderPath _x2c_macro_path_3;
-  if(! RenderPath_enter(&(_x2c_macro_path_3), _x2c_macro_map_17)) return Buffer_printf(_x2c_macro_out_17, "<map: 0x%012lX>", (long) _x2c_macro_map_17);
+  if(! RenderPath_enter(&(_x2c_macro_path_3), _x2c_macro_map_181)) return Buffer_printf(_x2c_macro_out_52, "<map: 0x%012lX>", (long) _x2c_macro_map_181);
   {
   _x2c_defer_env_15 _x2c_defer_env_57 = {._x2c_defer_capture_31 =(const void *) & _x2c_macro_path_3};
 
@@ -3779,28 +3779,28 @@ static Buffer MapStringInt__core_write(MapStringInt _x2c_macro_map_17, Buffer _x
   };
   x2c_cleanup_push(&_x2c_defer_record_27);
   {
-    Buffer_write(_x2c_macro_out_17, "{ ");
-    unsigned _x2c_macro_cursor_18 = 0;
-    String _x2c_macro_key_17;
-    int _x2c_macro_value_9;
+    Buffer_write(_x2c_macro_out_52, "{ ");
+    unsigned _x2c_macro_cursor_40 = 0;
+    String _x2c_macro_key_111;
+    int _x2c_macro_value_13;
     int _x2c_macro_first_3 = 1;
-    while(MapStringInt_try_next(_x2c_macro_map_17, & _x2c_macro_cursor_18, & _x2c_macro_key_17, & _x2c_macro_value_9)){
-      if(! _x2c_macro_first_3) Buffer_write(_x2c_macro_out_17, ", ");
-      Var _x2c_macro_boxed_key_6 = _box_string(_x2c_macro_key_17), _x2c_macro_boxed_value_6 = _box_int(_x2c_macro_value_9);
+    while(MapStringInt_try_next(_x2c_macro_map_181, & _x2c_macro_cursor_40, & _x2c_macro_key_111, & _x2c_macro_value_13)){
+      if(! _x2c_macro_first_3) Buffer_write(_x2c_macro_out_52, ", ");
+      Var _x2c_macro_boxed_key_6 = _box_string(_x2c_macro_key_111), _x2c_macro_boxed_value_6 = _box_int(_x2c_macro_value_13);
       if(_x2c_macro_mode_3 == 40228){
-        Var_write_str(_x2c_macro_boxed_key_6, _x2c_macro_out_17);
-        Buffer_write(_x2c_macro_out_17, ": ");
-        Var_write_str(_x2c_macro_boxed_value_6, _x2c_macro_out_17);
+        Var_write_str(_x2c_macro_boxed_key_6, _x2c_macro_out_52);
+        Buffer_write(_x2c_macro_out_52, ": ");
+        Var_write_str(_x2c_macro_boxed_value_6, _x2c_macro_out_52);
       }
       else{
-        Var_write_repr(_x2c_macro_boxed_key_6, _x2c_macro_out_17);
-        Buffer_write(_x2c_macro_out_17, ": ");
-        Var_write_repr(_x2c_macro_boxed_value_6, _x2c_macro_out_17);
+        Var_write_repr(_x2c_macro_boxed_key_6, _x2c_macro_out_52);
+        Buffer_write(_x2c_macro_out_52, ": ");
+        Var_write_repr(_x2c_macro_boxed_value_6, _x2c_macro_out_52);
       }
       _x2c_macro_first_3 = 0;
     }
     {
-      Buffer _x2c_return_value_23 = Buffer_write(_x2c_macro_out_17, " }");
+      Buffer _x2c_return_value_23 = Buffer_write(_x2c_macro_out_52, " }");
       {
         x2c_cleanup_leave(& _x2c_defer_record_27);
         return _x2c_return_value_23;
@@ -3814,39 +3814,39 @@ static Buffer MapStringInt__core_write(MapStringInt _x2c_macro_map_17, Buffer _x
 }
 }
 
-Map MapStringInt_map(MapStringInt _x2c_macro_map_18){
-  if((void *) _x2c_macro_map_18 == NULL) return NULL;
+Map MapStringInt_map(MapStringInt _x2c_macro_map_182){
+  if((void *) _x2c_macro_map_182 == NULL) return NULL;
   Map _x2c_macro_boxed_3 = Map_new();
-  unsigned _x2c_macro_cursor_19 = 0;
-  String _x2c_macro_key_18;
-  int _x2c_macro_value_10;
-  while(MapStringInt_try_next(_x2c_macro_map_18, & _x2c_macro_cursor_19, & _x2c_macro_key_18, & _x2c_macro_value_10)) Map_setindex(_x2c_macro_boxed_3, _box_string(_x2c_macro_key_18), _box_int(_x2c_macro_value_10));
+  unsigned _x2c_macro_cursor_41 = 0;
+  String _x2c_macro_key_112;
+  int _x2c_macro_value_14;
+  while(MapStringInt_try_next(_x2c_macro_map_182, & _x2c_macro_cursor_41, & _x2c_macro_key_112, & _x2c_macro_value_14)) Map_setindex(_x2c_macro_boxed_3, _box_string(_x2c_macro_key_112), _box_int(_x2c_macro_value_14));
   return _x2c_macro_boxed_3;
 }
 
-int MapStringInt_compare(MapStringInt _x2c_macro_a_16, MapStringInt _x2c_macro_b_16){
-  return MapStringInt__core_compare(_x2c_macro_a_16, _x2c_macro_b_16);
+int MapStringInt_compare(MapStringInt _x2c_macro_a_20, MapStringInt _x2c_macro_b_20){
+  return MapStringInt__core_compare(_x2c_macro_a_20, _x2c_macro_b_20);
 }
 
-Buffer MapStringInt_write_repr(MapStringInt _x2c_macro_map_18, Buffer _x2c_macro_out_18){
-  return MapStringInt__core_write(_x2c_macro_map_18, _x2c_macro_out_18, 1190948);
+Buffer MapStringInt_write_repr(MapStringInt _x2c_macro_map_183, Buffer _x2c_macro_out_53){
+  return MapStringInt__core_write(_x2c_macro_map_183, _x2c_macro_out_53, 1190948);
 }
 
-Buffer MapStringInt_write_str(MapStringInt _x2c_macro_map_18, Buffer _x2c_macro_out_18){
-  if(! MapStringInt_truth(_x2c_macro_map_18)) return Buffer_write(_x2c_macro_out_18, "{ }");
-  return MapStringInt__core_write(_x2c_macro_map_18, _x2c_macro_out_18, 40228);
+Buffer MapStringInt_write_str(MapStringInt _x2c_macro_map_184, Buffer _x2c_macro_out_54){
+  if(! MapStringInt_truth(_x2c_macro_map_184)) return Buffer_write(_x2c_macro_out_54, "{ }");
+  return MapStringInt__core_write(_x2c_macro_map_184, _x2c_macro_out_54, 40228);
 }
 
-String MapStringInt_str(MapStringInt _x2c_macro_map_18){
-  Buffer _x2c_macro_out_18 = Buffer_new(0);
-  MapStringInt_write_str(_x2c_macro_map_18, _x2c_macro_out_18);
-  return Buffer_str_free(_x2c_macro_out_18);
+String MapStringInt_str(MapStringInt _x2c_macro_map_185){
+  Buffer _x2c_macro_out_55 = Buffer_new(0);
+  MapStringInt_write_str(_x2c_macro_map_185, _x2c_macro_out_55);
+  return Buffer_str_free(_x2c_macro_out_55);
 }
 
-String MapStringInt_repr(MapStringInt _x2c_macro_map_18){
-  Buffer _x2c_macro_out_18 = Buffer_new(0);
-  MapStringInt_write_repr(_x2c_macro_map_18, _x2c_macro_out_18);
-  return Buffer_str_free(_x2c_macro_out_18);
+String MapStringInt_repr(MapStringInt _x2c_macro_map_186){
+  Buffer _x2c_macro_out_56 = Buffer_new(0);
+  MapStringInt_write_repr(_x2c_macro_map_186, _x2c_macro_out_56);
+  return Buffer_str_free(_x2c_macro_out_56);
 }
 
 static MapStringInt _prepare_string_int_export(MapStringInt map, Context source){
@@ -3883,69 +3883,69 @@ static MapStringInt _prepare_string_int_export(MapStringInt map, Context source)
 }
 }
 
-Var MapStringInt_var(MapStringInt _x2c_macro_map_19){
-  return Var_new(28691699747752, _x2c_macro_map_19);
+Var MapStringInt_var(MapStringInt _x2c_macro_map_187){
+  return Var_new(28691699747752, _x2c_macro_map_187);
 }
 
-MapStringInt Var_mapstringint(Var _x2c_macro_value_11){
-  return(MapStringInt) Var_pointer(_x2c_macro_value_11);
+MapStringInt Var_mapstringint(Var _x2c_macro_value_15){
+  return(MapStringInt) Var_pointer(_x2c_macro_value_15);
 }
 
-static int _x2c_macro_next_3(Iter _x2c_macro_iter_3, Var * _x2c_macro_out_19){
-  MapStringInt _x2c_macro_map_19 = Var_mapstringint(_x2c_macro_iter_3 -> obj);
-  if((void *) _x2c_macro_map_19 == 0 || ! _x2c_macro_out_19) return 0;
-  unsigned _x2c_macro_cursor_20 = Var_uint(Var_convert(_x2c_macro_iter_3 -> state, 3847013));
-  String _x2c_macro_key_19;
-  int _x2c_macro_val_11;
-  if(! MapStringInt_try_next(_x2c_macro_map_19, & _x2c_macro_cursor_20, & _x2c_macro_key_19, & _x2c_macro_val_11)) return 0;
-  _x2c_macro_iter_3 -> state = unsigned_var(_x2c_macro_cursor_20);
-  * _x2c_macro_out_19 = _box_int(_x2c_macro_val_11);
+static int _x2c_macro_next_3(Iter _x2c_macro_iter_9, Var * _x2c_macro_out_57){
+  MapStringInt _x2c_macro_map_188 = Var_mapstringint(_x2c_macro_iter_9 -> obj);
+  if((void *) _x2c_macro_map_188 == 0 || ! _x2c_macro_out_57) return 0;
+  unsigned _x2c_macro_cursor_42 = Var_uint(Var_convert(_x2c_macro_iter_9 -> state, 3847013));
+  String _x2c_macro_key_113;
+  int _x2c_macro_val_41;
+  if(! MapStringInt_try_next(_x2c_macro_map_188, & _x2c_macro_cursor_42, & _x2c_macro_key_113, & _x2c_macro_val_41)) return 0;
+  _x2c_macro_iter_9 -> state = unsigned_var(_x2c_macro_cursor_42);
+  * _x2c_macro_out_57 = _box_int(_x2c_macro_val_41);
   return 1;
 }
 
-static int _x2c_macro_keys_next_3(Iter _x2c_macro_iter_3, Var * _x2c_macro_out_19){
-  MapStringInt _x2c_macro_map_19 = Var_mapstringint(_x2c_macro_iter_3 -> obj);
-  if((void *) _x2c_macro_map_19 == 0 || ! _x2c_macro_out_19) return 0;
-  unsigned _x2c_macro_cursor_20 = Var_uint(Var_convert(_x2c_macro_iter_3 -> state, 3847013));
-  String _x2c_macro_key_19;
-  int _x2c_macro_val_11;
-  if(! MapStringInt_try_next(_x2c_macro_map_19, & _x2c_macro_cursor_20, & _x2c_macro_key_19, & _x2c_macro_val_11)) return 0;
-  _x2c_macro_iter_3 -> state = unsigned_var(_x2c_macro_cursor_20);
-  * _x2c_macro_out_19 = _box_string(_x2c_macro_key_19);
+static int _x2c_macro_keys_next_3(Iter _x2c_macro_iter_10, Var * _x2c_macro_out_58){
+  MapStringInt _x2c_macro_map_189 = Var_mapstringint(_x2c_macro_iter_10 -> obj);
+  if((void *) _x2c_macro_map_189 == 0 || ! _x2c_macro_out_58) return 0;
+  unsigned _x2c_macro_cursor_43 = Var_uint(Var_convert(_x2c_macro_iter_10 -> state, 3847013));
+  String _x2c_macro_key_114;
+  int _x2c_macro_val_42;
+  if(! MapStringInt_try_next(_x2c_macro_map_189, & _x2c_macro_cursor_43, & _x2c_macro_key_114, & _x2c_macro_val_42)) return 0;
+  _x2c_macro_iter_10 -> state = unsigned_var(_x2c_macro_cursor_43);
+  * _x2c_macro_out_58 = _box_string(_x2c_macro_key_114);
   return 1;
 }
 
-static int _x2c_macro_enumerate_next_3(Iter _x2c_macro_iter_3, Var * _x2c_macro_out_19){
-  MapStringInt _x2c_macro_map_19 = Var_mapstringint(_x2c_macro_iter_3 -> obj);
-  if((void *) _x2c_macro_map_19 == 0 || ! _x2c_macro_out_19) return 0;
-  unsigned _x2c_macro_cursor_20 = Var_uint(Var_convert(_x2c_macro_iter_3 -> state, 3847013));
-  String _x2c_macro_key_19;
-  int _x2c_macro_val_11;
-  if(! MapStringInt_try_next(_x2c_macro_map_19, & _x2c_macro_cursor_20, & _x2c_macro_key_19, & _x2c_macro_val_11)) return 0;
-  _x2c_macro_iter_3 -> state = unsigned_var(_x2c_macro_cursor_20);
-  Var _x2c_macro_boxed_key_7 = _box_string(_x2c_macro_key_19), _x2c_macro_boxed_value_7 = _box_int(_x2c_macro_val_11);
-  * _x2c_macro_out_19 = List_var(cons(_x2c_macro_boxed_key_7, cons(_x2c_macro_boxed_value_7, NULL)));
+static int _x2c_macro_enumerate_next_3(Iter _x2c_macro_iter_11, Var * _x2c_macro_out_59){
+  MapStringInt _x2c_macro_map_190 = Var_mapstringint(_x2c_macro_iter_11 -> obj);
+  if((void *) _x2c_macro_map_190 == 0 || ! _x2c_macro_out_59) return 0;
+  unsigned _x2c_macro_cursor_44 = Var_uint(Var_convert(_x2c_macro_iter_11 -> state, 3847013));
+  String _x2c_macro_key_115;
+  int _x2c_macro_val_43;
+  if(! MapStringInt_try_next(_x2c_macro_map_190, & _x2c_macro_cursor_44, & _x2c_macro_key_115, & _x2c_macro_val_43)) return 0;
+  _x2c_macro_iter_11 -> state = unsigned_var(_x2c_macro_cursor_44);
+  Var _x2c_macro_boxed_key_7 = _box_string(_x2c_macro_key_115), _x2c_macro_boxed_value_7 = _box_int(_x2c_macro_val_43);
+  * _x2c_macro_out_59 = List_var(cons(_x2c_macro_boxed_key_7, cons(_x2c_macro_boxed_value_7, NULL)));
   return 1;
 }
 
-Iter MapStringInt_iter(MapStringInt _x2c_macro_map_19, Iter _x2c_macro_dest_3){
-  if((void *) _x2c_macro_dest_3 == 0) return 0;
-  return Iter_init(_x2c_macro_dest_3, MapStringInt_var(_x2c_macro_map_19), _x2c_macro_next_3, int_var(0));
+Iter MapStringInt_iter(MapStringInt _x2c_macro_map_191, Iter _x2c_macro_dest_9){
+  if((void *) _x2c_macro_dest_9 == 0) return 0;
+  return Iter_init(_x2c_macro_dest_9, MapStringInt_var(_x2c_macro_map_191), _x2c_macro_next_3, int_var(0));
 }
 
-Iter MapStringInt_keys(MapStringInt _x2c_macro_map_19, Iter _x2c_macro_dest_3){
-  if((void *) _x2c_macro_dest_3 == 0) return 0;
-  return Iter_init(_x2c_macro_dest_3, MapStringInt_var(_x2c_macro_map_19), _x2c_macro_keys_next_3, int_var(0));
+Iter MapStringInt_keys(MapStringInt _x2c_macro_map_192, Iter _x2c_macro_dest_10){
+  if((void *) _x2c_macro_dest_10 == 0) return 0;
+  return Iter_init(_x2c_macro_dest_10, MapStringInt_var(_x2c_macro_map_192), _x2c_macro_keys_next_3, int_var(0));
 }
 
-Iter MapStringInt_enumerate(MapStringInt _x2c_macro_map_19, Iter _x2c_macro_dest_3){
-  if((void *) _x2c_macro_dest_3 == 0) return 0;
-  return Iter_init(_x2c_macro_dest_3, MapStringInt_var(_x2c_macro_map_19), _x2c_macro_enumerate_next_3, int_var(0));
+Iter MapStringInt_enumerate(MapStringInt _x2c_macro_map_193, Iter _x2c_macro_dest_11){
+  if((void *) _x2c_macro_dest_11 == 0) return 0;
+  return Iter_init(_x2c_macro_dest_11, MapStringInt_var(_x2c_macro_map_193), _x2c_macro_enumerate_next_3, int_var(0));
 }
 
-static MapStringInt MapStringInt_export_context(MapStringInt _x2c_macro_map_19, Context _x2c_macro_source_3){
-  if((void *) _x2c_macro_map_19 == 0 || ! Context_owns(_x2c_macro_source_3, _x2c_macro_map_19)) return _x2c_macro_map_19;
-  MapStringInt _x2c_macro_staged_3 = _prepare_string_int_export(_x2c_macro_map_19, _x2c_macro_source_3), _x2c_macro_committed_3 = NULL;
+static MapStringInt MapStringInt_export_context(MapStringInt _x2c_macro_map_194, Context _x2c_macro_source_3){
+  if((void *) _x2c_macro_map_194 == 0 || ! Context_owns(_x2c_macro_source_3, _x2c_macro_map_194)) return _x2c_macro_map_194;
+  MapStringInt _x2c_macro_staged_3 = _prepare_string_int_export(_x2c_macro_map_194, _x2c_macro_source_3), _x2c_macro_committed_3 = NULL;
   {
   _x2c_defer_env_17 _x2c_defer_env_59 = {._x2c_defer_capture_34 =(const void *) & _x2c_macro_staged_3, ._x2c_defer_capture_35 =(const void *) & _x2c_macro_committed_3};
 
@@ -3956,28 +3956,28 @@ static MapStringInt MapStringInt_export_context(MapStringInt _x2c_macro_map_19, 
   x2c_cleanup_push(&_x2c_defer_record_29);
   {
     Scope * _x2c_macro_destination_3 = Context_export_destination(_x2c_macro_source_3);
-    Scope_move(_x2c_macro_map_19, _x2c_macro_destination_3);
+    Scope_move(_x2c_macro_map_194, _x2c_macro_destination_3);
     if((void *) _x2c_macro_staged_3 == 0){
-      Block_move_to(Bytes_block(_x2c_macro_map_19 -> hashes), _x2c_macro_destination_3);
-      Block_move_to(Bytes_block(_x2c_macro_map_19 -> entries), _x2c_macro_destination_3);
+      Block_move_to(Bytes_block(_x2c_macro_map_194 -> hashes), _x2c_macro_destination_3);
+      Block_move_to(Bytes_block(_x2c_macro_map_194 -> entries), _x2c_macro_destination_3);
     }
     else{
-      Bytes _x2c_macro_old_hashes_3 = _x2c_macro_map_19 -> hashes, _x2c_macro_old_entries_3 = _x2c_macro_map_19 -> entries;
+      Bytes _x2c_macro_old_hashes_3 = _x2c_macro_map_194 -> hashes, _x2c_macro_old_entries_3 = _x2c_macro_map_194 -> entries;
       Block_move_to(Bytes_block(_x2c_macro_staged_3 -> hashes), _x2c_macro_destination_3);
       Block_move_to(Bytes_block(_x2c_macro_staged_3 -> entries), _x2c_macro_destination_3);
-      _x2c_macro_map_19 -> hashes = _x2c_macro_staged_3 -> hashes;
-      _x2c_macro_map_19 -> entries = _x2c_macro_staged_3 -> entries;
-      _x2c_macro_map_19 -> used = _x2c_macro_staged_3 -> used;
-      _x2c_macro_map_19 -> capacity = _x2c_macro_staged_3 -> capacity;
-      _x2c_macro_map_19 -> mask = _x2c_macro_staged_3 -> mask;
+      _x2c_macro_map_194 -> hashes = _x2c_macro_staged_3 -> hashes;
+      _x2c_macro_map_194 -> entries = _x2c_macro_staged_3 -> entries;
+      _x2c_macro_map_194 -> used = _x2c_macro_staged_3 -> used;
+      _x2c_macro_map_194 -> capacity = _x2c_macro_staged_3 -> capacity;
+      _x2c_macro_map_194 -> mask = _x2c_macro_staged_3 -> mask;
       _x2c_macro_staged_3 -> hashes = _x2c_macro_old_hashes_3;
       _x2c_macro_staged_3 -> entries = _x2c_macro_old_entries_3;
       MapStringInt__core_free(_x2c_macro_staged_3);
     }
-    _x2c_macro_map_19 -> scope = * _x2c_macro_destination_3;
-    _x2c_macro_committed_3 = _x2c_macro_map_19;
+    _x2c_macro_map_194 -> scope = * _x2c_macro_destination_3;
+    _x2c_macro_committed_3 = _x2c_macro_map_194;
     {
-      MapStringInt _x2c_return_value_25 = _x2c_macro_map_19;
+      MapStringInt _x2c_return_value_25 = _x2c_macro_map_194;
       {
         x2c_cleanup_leave(& _x2c_defer_record_29);
         return _x2c_return_value_25;
@@ -3991,8 +3991,8 @@ static MapStringInt MapStringInt_export_context(MapStringInt _x2c_macro_map_19, 
 }
 }
 
-void MapStringInt_cleanup(MapStringInt _x2c_macro_map_19){
-  MapStringInt__core_free(_x2c_macro_map_19);
+void MapStringInt_cleanup(MapStringInt _x2c_macro_map_195){
+  MapStringInt__core_free(_x2c_macro_map_195);
 }
 
 static inline String _x2c_proto_mapintint_str_0(Var a0){
