@@ -90,7 +90,9 @@
   (if (eq? (Map.contains C._globals id) 0) 0
       (Map.getindex C._globals id)))
 
-(defun C.gwrite (id value) (Map.setindex C._globals id value))
+(defun C.gwrite (id value)
+  (Map.setindex C._globals id
+    (if (eq? (Var_is_wide value) 0) value (C.session-copy value 0))))
 (defun C.grecord.write (id value size)
   (if (eq? (Map.contains C._globals id) 0)
       (C.gwrite id (C.session-copy value size))

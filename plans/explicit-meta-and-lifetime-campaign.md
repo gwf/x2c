@@ -254,6 +254,12 @@ protocols for unit-defined classes, and wider effect inference. Separate
 read-only audits of the macro implementations, experimental tools, and the
 REPL follow delivery of piece 0.
 
+A meta body that assigns a function name or a `%!` lambda directly, such as
+`f = twice;`, declines as "file-scope state not declared meta". The Func
+conversion in `src/lambda.x` replaces the right-hand side with the hidden
+global `_x2c_func_handle_N` before lowering sees it. Binding a local first,
+as in `Func f = twice; chosen = f;`, works.
+
 ## Plan review
 
 - **Trusted facts.** The parser, type, layout, region, and literal-cache

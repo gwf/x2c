@@ -1159,10 +1159,14 @@ Var lisp_record_result(Var source, long size) =>
                              : &lisp_active.scope,
     source.pointer(), (size_t) size));
 
-/** Copies a record into bytes the session owns, for file-scope state. */
-Var lisp_session_copy(Var source, long size) =>
-  Var.new(<p48>, Scope.memdup_in(
+/** Copies a record, or a wide scalar's box, into storage the session owns,
+    for file-scope state. `size` is the record's size. */
+Var lisp_session_copy(Var source, long size) {
+  if (source.is_wide())
+    return Var.clone_wide(source).move_wide_to(&lisp_active.scope);
+  return Var.new(<p48>, Scope.memdup_in(
     &lisp_active.scope, source.pointer(), (size_t) size));
+}
 
 /* A scalar layout's TAG can differ from its bytes' row: a bool's byte reads
    as the int C promotes it to, and a Symbol's unsigned-long bytes hold its
@@ -1330,6 +1334,17 @@ typedef struct LispCallbackContext {
   Var callable;
 } LispCallbackContext;
 
+/* A Func that meta code can keep, as a value or inside a lazy Iter, lives as
+   long as the session that runs it, whatever region is active when it is
+   made. A callback used only during one call stays in the active region. */
+static Func _lisp_session_func(
+  FuncAdapter adapter, List signature, LispCallbackContext *context) {
+  Func function = Func.new_context(
+    adapter, signature, context, sizeof *context);
+  Scope.move(function, &lisp_active.scope);
+  return function;
+}
+
 /* A source Func keeps its canonical signature while its adapter executes in
    the owning Lisp session. The lowered adapter reads the borrowed carriers
    with the ordinary native Func argument readers. */
@@ -1345,8 +1360,7 @@ static Var _lisp_func_adapter(Func function, const FuncArg *arguments) {
 /** Constructs a signature-bearing Func for one lowered source callable. */
 Func lisp_func_new(Var adapter, List signature) {
   LispCallbackContext context = { lisp_active, adapter };
-  return Func.new_context(
-    _lisp_func_adapter, signature, &context, sizeof context);
+  return _lisp_session_func(_lisp_func_adapter, signature, &context);
 }
 
 /** Allocates the borrowed carriers for one lowered dynamic call. */
@@ -1447,9 +1461,8 @@ static Func _lisp_iter_callback(Var callable) {
     raise %(bad-state (operation "Lisp iterator callback")
                      (why "no session"));
   LispCallbackContext context = { lisp_active, callable };
-  return Func.new_context(
-    _lisp_iter_next_callback, %((func (("Var") ("Var"))) "Var"),
-    &context, sizeof context);
+  return _lisp_session_func(
+    _lisp_iter_next_callback, %((func (("Var") ("Var"))) "Var"), &context);
 }
 
 static int _lisp_iter_next(Iter iter, Var *out) {
