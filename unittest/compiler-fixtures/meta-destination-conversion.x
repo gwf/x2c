@@ -54,6 +54,21 @@ meta int adnode_round_trip(int n) {
   return (int) (boxed.adnode().value * 2) + n;
 }
 
+/* A declared converter applies wherever the compiled code converts. */
+typedef String Label;
+meta Label List.label(List items) => %"n${items.len()}";
+meta int label_len(Label value) => value.len();
+meta int label_init(List items) {
+  Label value = items;
+  return value.len();
+}
+meta int label_assign(List items) {
+  Label value = "";
+  value = items;
+  return value.len();
+}
+meta int label_argument(List items) => label_len(items);
+
 int main(int argc, char **argv) {
   (void) argv;
   int one = argc;
@@ -81,5 +96,10 @@ int main(int argc, char **argv) {
   printf("file %d\n", file_round_trip(File.var(stdout)));
   printf("adnode %d %d %d\n",
     $adnode_round_trip(0), adnode_round_trip(0), adnode_round_trip(one - 1));
+  List items = %(a b c d e f g h i j);
+  printf("converter %d %d %d %d %d %d\n",
+    $label_init(%(a b c d e f g h i j)), label_init(items),
+    $label_assign(%(a b c d e f g h i j)), label_assign(items),
+    $label_argument(%(a b c d e f g h i j)), label_argument(items));
   return 0;
 }

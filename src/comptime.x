@@ -2184,6 +2184,21 @@ static Var _lower_coerce(Lowering l, List want, Var node, Var value) {
       if (tag && source && tag !=
           (from_tag ? from_tag : source.scalar_tag()))
         return _lower_to_type(l, target, value);
+      /* A declared converter, `Job List.job(List)`, is the call the
+         compiled path inserts; a `Var` boxes and unboxes as it is, and
+         captured syntax stays syntax, as the parser leaves it. */
+      if (l.compiler.sym.is_var_type(want) ||
+          l.compiler.sym.is_var_type(from))
+        return value;
+      match (node) case %(expr ? (meta-cap ?)): return value;
+      List call = l.compiler.converter_call(node, from, want);
+      match (call)
+        case %(expr ? (call (expr ? (ident (binding ? ?(String name)))) ?)): {
+        _lower_scan_callee(l, name);
+        if (l.uncallable)
+          return _lower_decline(l, "no binding for " + name);
+        return %(${Atom.intern(_lower_callee_name(l, name))} $value);
+      }
     }
   return value;
 }
