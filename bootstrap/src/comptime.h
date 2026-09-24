@@ -19,8 +19,6 @@ List Compiler_lowered_meta_regions(Compiler compiler, List fn);
 
 int Compiler_install_comptime(Compiler compiler, List fn);
 
-int Compiler_lower_reached_globals(Compiler compiler);
-
 int Compiler_lower_reached_meta(Compiler compiler);
 
 int Compiler_meta_is_comptime_only(Compiler c, List fn);
@@ -32,8 +30,6 @@ Var Compiler_lower_meta_expression(Compiler c, List expression);
 List Compiler_meta_value_expression(Compiler c, Type declared, Var value, int mutable_root);
 
 void Compiler_check_meta_call(Compiler c, List callee, Token origin);
-
-List Compiler_fold_meta_call(Compiler c, List callee, Type signature, Type result, List arguments);
 
 
 #endif /* __GUARD_0x1AC2DC11__ */
