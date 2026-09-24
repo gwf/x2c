@@ -12,7 +12,6 @@
 
 | Candidate | Location | Machinery | Claimed purpose | Production consumers | Overreach evidence | Removal hypothesis | Strongest keep case | Provenance | Status / confidence | Next proof |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `match-admission-memos` | `lib/match.x:2017,2032,2043-2048,2067-2081` within `_cache_admitted`; digest `6a331819` | Two 256-entry admitted/refused memo arrays and slot folding | Avoid recursively rechecking whether repeated patterns may be borrowed by the plan cache | `_cache_admitted`, called by `MatchCache.acquire`; the admission gate itself is required | Small derived cache inside a larger cache; mechanical scan cannot establish whether its saved work earns its state | Retain epoch resync and admission correctness, but call `_cache_keyable` directly instead of memoizing admission | `90685897` attributes material translation regression partly to repeated rewalk/refusal; removing the memos may restore that cost | Cache restoration `712bcb73`; epoch/admission repair `90685897` | `open` / medium-low | Isolated A/B benchmark of source translation and repeated dynamic-pattern workloads with only the admission memos removed |
 
 ## Calibration cases
 
@@ -31,6 +30,7 @@ the live queue.
 | Source-map and dependency options | compiler and CLI paths removed by `1592f244` | Negative/mixed; partly restored by `08e03ca7` | Low use and recent origin were insufficient evidence that the surface was unnecessary. |
 | Open public APIs | Any current non-static library operation with no in-tree caller | Negative by rule | Future external use is legitimate; absence of repository consumers cannot make a public API a candidate. |
 | Dynamic typed `Func` calls during compilation | `src/comptime.x:_lower_application` and its carrier bridge | Negative by rule and explicit decision | This is wanted higher-order compile-time behavior. Its implementation size and lack of an in-tree adopter do not make it a candidate. |
+| Match admission memos | `lib/match.x:2017,2032,2043-2048,2059-2061,2072-2079` | Negative; rejected after isolated A/B | The 4 KiB derived memo state owns no semantics, but bypassing only its lookup and writes made literal matches 2.35x slower, star misses 1.63x, guards 1.61x, cache hits 1.41x, and nested matches 1.29x over 21 paired processes. `_cache_keyable` preserves correctness, but the memos earn their small complexity by avoiding a recursive lifetime walk on the hot path. Artifacts: `/tmp/x2c-match-memo-ab.8di4Ks/`. |
 
 ## Ledger rules
 
