@@ -164,6 +164,8 @@ typedef struct Compiler {
   // Set when a cleanup region needs the exception runtime declarations.
   int needs_exception;
   int local_macro_capture_scopes;
+  // Linkage groups that earlier segments of the collected file left open.
+  int open_linkage;
   String fn_name, Diagnostics diagnostics, Array braces, import_stack;
   // The unit's script record, and the same record on the compiler whose own
   // file is that script; both NULL for an ordinary unit.
@@ -579,19 +581,29 @@ String Compiler.emitted_binding_name(Compiler compiler, List binding) {
   return binding_identity_spelling(binding);
 }
 
-/* Classifies an opening conditional directive by which of its arms C can
-   never reach: `<first>` when the condition requires a never-defined name
-   or is `0`, `<rest>` when it is exactly `!defined(NAME)`, else 0. x2c output
-   is compiled as C by a GNU-style compiler, so `__cplusplus` and `_MSC_VER`
-   are never defined; each reads as `<never>`, which no C token spells. */
-static Symbol _never_active_arm(String s) {
+/* x2c output is compiled as C by a GNU-style compiler, so `__cplusplus` and
+   `_MSC_VER` are never defined, and a compiler built for a host other than
+   Windows never targets it. */
+static int _never_defined(String name) {
+  if (name == "__cplusplus" || name == "_MSC_VER") return 1;
+#if defined(__COSMOPOLITAN__) || defined(_WIN32) || defined(__CYGWIN__)
+  return 0;
+#else
+  return name == "_WIN32" || name == "_WIN64" || name == "__CYGWIN__";
+#endif
+}
+
+/** Classifies an opening conditional directive by which of its arms C can
+    never reach: `<first>` when the condition requires a never-defined name
+    or is `0`, `<rest>` when it is exactly `!defined(NAME)`, else 0. Each
+    never-defined name reads as `<never>`, which no C token spells. */
+Symbol preproc_never_active_arm(String s) {
   Tokenizer scanned = Tokenizer.new(preproc_directive(s));
   scanned.scan();
   Array words = [];
   for (Token t = _skip_forward(scanned.tokens); t.type != <eof>;
        t = _skip_forward(t + 1))
-    words.push(t.text == "__cplusplus" || t.text == "_MSC_VER"
-               ? "<never>" : t.text);
+    words.push(_never_defined(t.text) ? "<never>" : t.text);
   String line = " ".join(words.list_free()).replace(
     "defined ( <never> )", "defined <never>");
   // A `||` gives the condition another way to hold, so the arm can be taken.
@@ -734,7 +746,7 @@ static void _scan_conditionals(Compiler c) {
     Symbol kind = preproc_conditional_kind(token.text);
     int conditional = kind == <open> || (kind && stack.len());
     if (kind == <open>) {
-      Symbol never = _never_active_arm(token.text);
+      Symbol never = preproc_never_active_arm(token.text);
       stack.push(%(${++serial} 0 ${never == <first> ? 2 : never == <rest>}));
     }
     else if (kind == <branch> && stack.len()) {
@@ -1640,7 +1652,6 @@ static void _shallow_parse_loop(Compiler c) {
      define macros for the segments that follow. */
   foreach (List directive, c.leading_preproc())
     _note_object_macro(c, directive.cadr());
-  _check_unmatched_braces(c);
   c.shallow = 0;
 }
 
@@ -1653,6 +1664,7 @@ void Compiler.shallow_parse(Compiler c, Map globals) {
   c.sym.reset(globals);
   c.install_builtin_macros();
   _shallow_parse_loop(c);
+  _check_unmatched_braces(c);
 }
 
 /** Collects declarations with reads over `base` then `overlay`.
@@ -1672,6 +1684,8 @@ void Compiler.shallow_parse_overlay(Compiler c, Map base, Map overlay) {
   c.sym._reset_overlay(base, overlay);
   c.install_builtin_macros();
   _shallow_parse_loop(c);
+  // Only linkage groups remain open; a later segment of the file closes them.
+  c.open_linkage += c.braces.len();
 }
 
 /** Returns source-ordered preprocessor nodes in the preceding trivia.

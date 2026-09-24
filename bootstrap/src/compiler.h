@@ -82,6 +82,7 @@ typedef struct Compiler{
   int declaration_projection, declaration_produced;
   int needs_exception;
   int local_macro_capture_scopes;
+  int open_linkage;
   String fn_name;
   Diagnostics diagnostics;
   Array braces, import_stack;
@@ -156,6 +157,8 @@ Map Compiler_macro_definition_locals(Compiler compiler);
 String Compiler_fresh_name(Compiler compiler, String stem);
 
 String Compiler_emitted_binding_name(Compiler compiler, List binding);
+
+Symbol preproc_never_active_arm(String s);
 
 void Compiler_tokenize(Compiler c, char * text);
 
