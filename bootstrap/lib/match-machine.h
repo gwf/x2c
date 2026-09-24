@@ -6,8 +6,6 @@
 #define __GUARD_0x491AB95F__
 
 #include "machine.h"
-void MatchMachine_open(MatchMachine m);
-
 void MatchMachine_begin(MatchMachine m, MachineView program, Var input);
 
 int MatchMachine_step(MatchMachine m);
@@ -19,8 +17,6 @@ List MatchMachine_materialize_span(MatchMachine m, MachineSpan span);
 void MatchMachine_finish(MatchMachine m);
 
 int MatchMachine_clean(MatchMachine m);
-
-void MatchMachine_dispose(MatchMachine m);
 
 
 #endif /* __GUARD_0x491AB95F__ */

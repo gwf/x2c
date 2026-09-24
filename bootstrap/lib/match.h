@@ -157,5 +157,9 @@ void MatchCache_flush_default(void);
 
 void x2c_match_initialize(void);
 
+void MatchMachine_open(MatchMachine m);
+
+void MatchMachine_dispose(MatchMachine m);
+
 
 #endif /* __GUARD_0x6A4A1365__ */

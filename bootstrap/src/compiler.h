@@ -246,8 +246,6 @@ void Compiler_add_early(Compiler compiler, List decl);
 
 void Compiler_add_init(Compiler compiler, Symbol phase, List stmt);
 
-List Compiler_init_statements(Compiler compiler, Symbol phase);
-
 SymTxn Compiler_begin_semantic_transaction(Compiler c);
 
 void SymTxn_commit(SymTxn s);
@@ -352,8 +350,6 @@ int Sym_is_array_type(Sym sym, Type type);
 
 int Sym_is_map_type(Sym s, Type type);
 
-int Sym_is_bool_type(Sym sym, Type type);
-
 int Sym_is_named_value_type(Sym sym, Type type, String name);
 
 Type Sym_lookup_field(Sym sym, Type type, List field);
@@ -361,8 +357,6 @@ Type Sym_lookup_field(Sym sym, Type type, List field);
 void Sym_declare_field_order(Sym sym, Type type, List fields);
 
 List Sym_field_order(Sym sym, Type type);
-
-List Compiler_meta_type_layout(Compiler c, Type type);
 
 void Sym_declare_delegate_field(Sym sym, Type aggregate, String name);
 
