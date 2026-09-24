@@ -1615,7 +1615,7 @@ static List _lambda_parse_typed_params(Compiler compiler, List * out_names){
   }
 
 }
-List result = Array_list_free(names);  if(out_names) * out_names = result;  return typed_params;
+List result = Array_list_free(names); (* out_names) = result;  return typed_params;
 }
 
 List Sym_define(Sym, List, List);
@@ -1958,7 +1958,7 @@ List Compiler_parse_compound_statement(Compiler);
 List Compiler_parse_lambda_literal(Compiler c){
   if(! _init_guard_) _file_init_();  Compiler_expect(c, 9539);  Compiler_expect(c, 81);  Sym_push_new_scope(c -> sym);  List names = NULL, typed_params = NULL;  int used_typed = 0;  if(Compiler_peek(c, 0) != 83){
     if(_lambda_looks_typed(c)){
-      used_typed = 1;  typed_params = _lambda_parse_typed_params(c, & names);
+      used_typed = 1;  typed_params = _lambda_parse_typed_params(c, &(names));
     }
     else names = _lambda_parse_bare_params(c);
   }

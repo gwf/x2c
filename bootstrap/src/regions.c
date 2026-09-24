@@ -953,7 +953,7 @@ static String _callee_of(Var value, List * arguments){
 
     }
   }
-* arguments = rows;  return binding_identity_spelling(name);
+(* arguments) = rows;  return binding_identity_spelling(name);
 }
 break;
 }
@@ -1073,7 +1073,7 @@ break;
 default: break;
     }
   }
-List arguments = NULL;  String callee = _callee_of(inner, & arguments);  if(! String_truth(callee) || ! Var_equal(Map_getindex(runtime, String_var(callee)), List_var(_44))) return NULL;  return _fact_of(w, List_car(arguments), named);
+List arguments = NULL;  String callee = _callee_of(inner, &(arguments));  if(! String_truth(callee) || ! Var_equal(Map_getindex(runtime, String_var(callee)), List_var(_44))) return NULL;  return _fact_of(w, List_car(arguments), named);
 }
 
 int Type_is_array(Type);
@@ -1101,7 +1101,7 @@ int Iter_try_next(Iter, Var *);
 Var List_getindex(List, int);
 int List_len(List);
 static Fact _returned_argument(Walk w, Var value, List * named){
-  List arguments = NULL;  String callee = _callee_of(value, & arguments);  if(! String_truth(callee)) return NULL; {
+  List arguments = NULL;  String callee = _callee_of(value, &(arguments));  if(! String_truth(callee)) return NULL; {
     List row;  Iter _x2c_macro_iterator_0 = Var_iter(List_cadr(_summary(w, callee)), &(struct Iter){
       int_var(0)
     }
@@ -1122,7 +1122,7 @@ static Region _pooled(Walk w, int * born){
 
 int List_try_next(List, List *, Var *);
 static Region _birth(Walk w, Var value, Type type, int * born, Region * other){
-  List arguments = NULL;  String callee = _callee_of(value, & arguments);  * born = 1;  * other = NULL;
+  List arguments = NULL;  String callee = _callee_of(value, &(arguments));  * born = 1;  * other = NULL;
   {
     List _x2c_match_expr = Var_list(String_truth(callee) ? Map_getindex(runtime, String_var(callee)) :((void) 0, Void));
     MatchCaptureBuffer _x2c_match_capture = { 0 };
@@ -1250,7 +1250,7 @@ static String _subject(Walk w, Var value, List named, Fact fact){
 default: break;
     }
   }
-if(! List_truth(named)) return _675;  String name = String_join(NULL, cons(String_var(_411), cons(String_var(binding_identity_spelling(named)), cons(String_var(_411), NULL))));  Var own = Map_getindex(w -> facts, List_var(named));  if(! Var_is_void(own) && Var_pointer(own) == fact) return name;  List arguments = NULL;  if(String_truth(_callee_of(value, & arguments))) return String_join(NULL, cons(String_var(_412), cons(String_var(name), NULL)));
+if(! List_truth(named)) return _675;  String name = String_join(NULL, cons(String_var(_411), cons(String_var(binding_identity_spelling(named)), cons(String_var(_411), NULL))));  Var own = Map_getindex(w -> facts, List_var(named));  if(! Var_is_void(own) && Var_pointer(own) == fact) return name;  List arguments = NULL;  if(String_truth(_callee_of(value, &(arguments)))) return String_join(NULL, cons(String_var(_412), cons(String_var(name), NULL)));
   {
     List _x2c_match_expr = fact ? fact -> place : NULL;
     MatchCaptureBuffer _x2c_match_capture = { 0 };
@@ -1416,7 +1416,7 @@ case 992: ;  static MatchCaptureSite _x2c_match_site_39;  if (x2c_match_site_try
 }
 }
 case 199448: ;  static MatchCaptureSite _x2c_match_site_43;  if (x2c_match_site_try_capture(& _x2c_match_site_43, _x2c_match_expr, List_var(_490), &_x2c_match_capture)) {Var args = _x2c_match_values[0]; {
-  List arguments = NULL;  String callee = _callee_of(node, & arguments);
+  List arguments = NULL;  String callee = _callee_of(node, &(arguments));
   {
     List _x2c_match_expr = Var_list(String_truth(callee) ? Map_getindex(runtime, String_var(callee)) :((void) 0, Void));
     MatchCaptureBuffer _x2c_match_capture = { 0 };
@@ -1609,7 +1609,7 @@ static void _walk_defer(Walk w, Var body){
     List _x2c_match_expr = Var_list(body);
     Var _x2c_match_values[1];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 1 };
     switch (Var_symbol(car(_x2c_match_expr))) {
-      case 41184168: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936802802600ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var expression = _x2c_match_values[0];  callee = _callee_of(expression, & arguments);  break; } } default: break;
+      case 41184168: ; { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936802802600ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var expression = _x2c_match_values[0];  callee = _callee_of(expression, &(arguments));  break; } } default: break;
     }
   }
 Fact fact = _fact_of(w, List_car(arguments), NULL);
@@ -1694,7 +1694,7 @@ default: ;  static MatchCaptureSite _x2c_match_site_58;  if (x2c_match_site_try_
 break; } } static MatchCaptureSite _x2c_match_site_59;  if (x2c_match_site_try_capture(& _x2c_match_site_59, _x2c_match_expr, List_var(_577), &_x2c_match_capture)) {_revive(w);  break;
 }
 { List _x2c_match_cursor;  if (_x2c_match_expr && _x2c_match_expr->car.u64 == 9224497936802802600ULL && (_x2c_match_cursor = _x2c_match_expr->cdr, 1) && _x2c_match_cursor && (_x2c_match_values[0] = _x2c_match_cursor->car, _x2c_match_cursor = _x2c_match_cursor->cdr, 1) && !_x2c_match_cursor) {Var expression = _x2c_match_values[0]; {
-  List arguments = NULL;  String callee = _callee_of(expression, & arguments);  if(String_truth(callee) && _walk_region_call(w, callee, arguments)) break;
+  List arguments = NULL;  String callee = _callee_of(expression, &(arguments));  if(String_truth(callee) && _walk_region_call(w, callee, arguments)) break;
   {
     List _x2c_match_expr = Var_list(_unwrap(expression));
     Var _x2c_match_values[2];  MatchCaptureBuffer _x2c_match_capture = { .values = _x2c_match_values, .capacity = 2 };

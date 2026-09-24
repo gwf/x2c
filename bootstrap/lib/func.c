@@ -158,7 +158,7 @@ int Var_is(Var, Symbol);
 
 static unsigned _type_qualifiers(List * cursor){
   unsigned qualifiers = 0;
-  while(List_truth(* cursor) && Var_is(List_car((* cursor)), 1328354264)){
+  while(List_truth((* cursor)) && Var_is(List_car((* cursor)), 1328354264)){
     Symbol head = Var_symbol(List_car((* cursor)));
     switch(head){
       case 7304424 : qualifiers |= 1;
@@ -169,7 +169,7 @@ static unsigned _type_qualifiers(List * cursor){
       break;
       default: return qualifiers;
     }
-    * cursor = List_cdr((* cursor));
+    (* cursor) = List_cdr((* cursor));
   }
   return qualifiers;
 }
@@ -177,8 +177,8 @@ static unsigned _type_qualifiers(List * cursor){
 int List_equal(List, List);
 
 static int _reference_type_accepts(List target, List source){
-  unsigned target_qualifiers = _type_qualifiers(& target);
-  unsigned source_qualifiers = _type_qualifiers(& source);
+  unsigned target_qualifiers = _type_qualifiers(&(target));
+  unsigned source_qualifiers = _type_qualifiers(&(source));
   return !(source_qualifiers & ~ target_qualifiers) && List_equal(target, source);
 }
 

@@ -1291,8 +1291,8 @@ int ToolRun_ready(ToolRun);
 static int _finish_compiles(Build state, CcJob * running, int * count, int wait){
   int failed = 0;
   for(; ; ){
-    for(int i = 0;  i < * count; ){
-      if((wait && * count == 1) || ToolRun_ready(running[i].execution)){
+    for(int i = 0;  i <(* count); ){
+      if((wait &&(* count) == 1) || ToolRun_ready(running[i].execution)){
         int status = _finish_compile(state, running + i);
         if(status < 0){
           i ++;
@@ -1300,7 +1300,7 @@ static int _finish_compiles(Build state, CcJob * running, int * count, int wait)
         }
         if(status) failed = 1;
         (* count) --;
-        memmove(running + i, running + i + 1, (* count - i) * sizeof(CcJob));
+        memmove(running + i, running + i + 1, ((* count) - i) * sizeof(CcJob));
         wait = 0;
       }
       else i ++;
@@ -1353,7 +1353,7 @@ static int _compile_sources(Build b){
         Array_push(b -> objects, String_var(object));
         if((void *) b -> compile_commands != NULL) Array_push(b -> compile_commands, String_var(_compile_command(b, action, source, object)));
         String state_path = String_truth(b -> state_root) ? String_join(NULL, cons(String_var(b -> state_root), cons(String_var(_54), cons(String_var(_key(source)), NULL)))) : NULL;
-        if(_finish_compiles(b, running, & running_count, 0)){
+        if(_finish_compiles(b, running, &(running_count), 0)){
           failed = 1;
           break;
         }
@@ -1367,7 +1367,7 @@ static int _compile_sources(Build b){
         }
         else pending.execution = ToolAction_start(action);
         running[running_count ++] = pending;
-        if(running_count >= b -> request -> jobs && _finish_compiles(b, running, & running_count, 1)){
+        if(running_count >= b -> request -> jobs && _finish_compiles(b, running, &(running_count), 1)){
           failed = 1;
           break;
         }
@@ -1377,7 +1377,7 @@ static int _compile_sources(Build b){
     }
 
   }
-  while(running_count) if(_finish_compiles(b, running, & running_count, 1)) failed = 1;
+  while(running_count) if(_finish_compiles(b, running, &(running_count), 1)) failed = 1;
   Scope_free(running);
   if(! failed && b -> cc_n){
     unsigned long elapsed = report_now_us() - b -> cc_start;
