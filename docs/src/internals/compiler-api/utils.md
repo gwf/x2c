@@ -12,6 +12,7 @@ System utilities for environment discovery and workers.
 
 | Function | Summary |
 | --- | --- |
+| [`build_module_stamp`](#build_module_stamp) | Returns the stamp a native module records: `x2c-module-stamp:` and the running compiler's identity. |
 | [`file_lock`](#file_lock) | Locks the file `p`, creating it, and returns a descriptor that holds the lock until it is closed or the process exits. |
 | [`file_publish`](#file_publish) | Replaces each file named in `outputs`, a List of alternating paths and texts. |
 | [`worker_exit`](#worker_exit) | Attempts to flush process streams and terminates a worker with `status`. |
@@ -41,6 +42,16 @@ System utilities for environment discovery and workers.
 | [`x2c_stage_dir`](#x2c_stage_dir) | Returns the directory of a compiler staged at `<home>/builds/<stage>/`, or NULL for any other compiler. |
 
 ### Functions
+
+#### build_module_stamp
+
+`String build_module_stamp(void)`
+
+Returns the stamp a native module records: `x2c-module-stamp:` and the
+running compiler's identity. Returns NULL when the executable cannot be
+read. Only the compiler that built a module loads it.
+
+Source: `src/utils.x:341`
 
 #### file_lock
 
@@ -76,7 +87,7 @@ Flush failure is ignored. This function does not return and does not run
 `atexit` handlers. Those belong to the parent process and would close its
 log and process-lifetime `Scope`s twice.
 
-Source: `src/utils.x:356`
+Source: `src/utils.x:365`
 
 #### worker_fork
 
@@ -88,7 +99,7 @@ The call attempts to flush all process streams before the fork so
 successfully flushed bytes cannot be written by both processes. Flush
 failure is ignored. The child must leave through `worker_exit`.
 
-Source: `src/utils.x:345`
+Source: `src/utils.x:354`
 
 #### worker_wait_any
 
@@ -99,7 +110,7 @@ index, storing its shell-style status: the exit status, `128 + signal`,
 or -1 when it cannot be waited. Other children stay unreaped, so the
 wait polls with a short sleep.
 
-Source: `src/utils.x:366`
+Source: `src/utils.x:375`
 
 #### x2c_compiler_identity
 
@@ -148,7 +159,7 @@ Source: `src/utils.x:180`
 
 Hashes unit filename spelling for stable generated C identifiers.
 
-Source: `src/utils.x:381`
+Source: `src/utils.x:390`
 
 #### x2c_find_program
 

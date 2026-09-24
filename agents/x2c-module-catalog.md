@@ -44,12 +44,12 @@ Typed native build request and artifact graph.
 
 Public functions:
 
-`build_module_stamp`, `build_check_input`, `CliRequest.prepare`,
-`Build.generated_dir`, `Build.translation_current`, `Build.record_translation`,
-`Build.add_generated`, `Build.module_entry`, `Build.begin_translation`,
-`Build.end_translation`, `compile_commands_write`, `Build.finish`,
-`Build.report_success`, `Build.run_program`, `Build.cleanup`,
-`Build.script_helpers`, `Build.publish_script`, `CliRequest.script_current`
+`build_check_input`, `CliRequest.prepare`, `Build.generated_dir`,
+`Build.translation_current`, `Build.record_translation`, `Build.add_generated`,
+`Build.module_entry`, `Build.begin_translation`, `Build.end_translation`,
+`compile_commands_write`, `Build.finish`, `Build.report_success`,
+`Build.run_program`, `Build.cleanup`, `Build.script_helpers`,
+`Build.publish_script`, `CliRequest.script_current`
 
 ### [src/cache.x](../src/cache.x)
 
@@ -305,21 +305,22 @@ Public functions:
 `Compiler.shared_definitions`, `Compiler.parse_macro_lisp_top_level`,
 `Compiler.evaluate_declaration_effect`, `Compiler.install_meta_declaration`,
 `Compiler.record_native_meta_effect`, `Compiler.native_module_loaded`,
-`Compiler.add_native_module`, `Compiler.select_native_modules`,
-`Compiler.supplies_native_meta`, `Compiler.install_native_meta_effects`,
-`Compiler.bind_native_meta`, `Compiler.install_native_meta_function`,
-`Compiler.install_meta_function`, `Compiler.parse_macro_lisp_shallow`,
-`Compiler.lift_macro_lisp_expression`, `Compiler.parse_macro_lisp_expression`,
-`Compiler.evaluate_meta_expression`, `Compiler.evaluate_declaration_recipe`,
-`Compiler.evaluate_macro_slot`, `Compiler.evaluate_macro_rows`,
-`Compiler.macro_introduced_name`, `Compiler.macro_tag_name`,
-`Compiler.peek_macro_hole`, `Compiler.macro_lisp_starts_declaration`,
-`Compiler.try_parse_macro_slot`, `Compiler.parse_macro_definition`,
-`Compiler.publish_macro_definition_node`, `Compiler.parse_keyword_definition`,
-`Compiler.macro_targets_unit`, `Compiler.skip_named_type_declaration`,
-`Compiler.try_parse_macro_member`, `Compiler.macro_invocation_site`,
-`Compiler.expand_macro_invocation_node`, `Compiler.try_parse_macro_expression`,
-`Compiler.try_parse_macro_target_at`
+`Compiler.add_native_module`, `Compiler.load_native_module`,
+`Compiler.preload_native_module`, `Compiler.select_package_module`,
+`Compiler.select_native_modules`, `Compiler.supplies_native_meta`,
+`Compiler.install_native_meta_effects`, `Compiler.bind_native_meta`,
+`Compiler.install_native_meta_function`, `Compiler.install_meta_function`,
+`Compiler.parse_macro_lisp_shallow`, `Compiler.lift_macro_lisp_expression`,
+`Compiler.parse_macro_lisp_expression`, `Compiler.evaluate_meta_expression`,
+`Compiler.evaluate_declaration_recipe`, `Compiler.evaluate_macro_slot`,
+`Compiler.evaluate_macro_rows`, `Compiler.macro_introduced_name`,
+`Compiler.macro_tag_name`, `Compiler.peek_macro_hole`,
+`Compiler.macro_lisp_starts_declaration`, `Compiler.try_parse_macro_slot`,
+`Compiler.parse_macro_definition`, `Compiler.publish_macro_definition_node`,
+`Compiler.parse_keyword_definition`, `Compiler.macro_targets_unit`,
+`Compiler.skip_named_type_declaration`, `Compiler.try_parse_macro_member`,
+`Compiler.macro_invocation_site`, `Compiler.expand_macro_invocation_node`,
+`Compiler.try_parse_macro_expression`, `Compiler.try_parse_macro_target_at`
 
 ### [src/main.x](../src/main.x)
 
@@ -483,8 +484,8 @@ Public functions:
 `x2c_default_include_dirs`, `x2c_cpp_include_dirs`, `x2c_home`,
 `x2c_home_packages`, `x2c_home_libexec`, `x2c_stage_dir`, `x2c_find_program`,
 `x2c_driver_error`, `x2c_host_error`, `file_lock`, `file_publish`,
-`x2c_fnv_bytes`, `x2c_fnv_file`, `x2c_compiler_identity`, `worker_fork`,
-`worker_exit`, `worker_wait_any`, `x2c_filename_hash`
+`x2c_fnv_bytes`, `x2c_fnv_file`, `x2c_compiler_identity`, `build_module_stamp`,
+`worker_fork`, `worker_exit`, `worker_wait_any`, `x2c_filename_hash`
 
 ## Runtime modules
 
