@@ -119,6 +119,8 @@ int Symbol.try_new(String spelling, Symbol *out) {
   return 1;
 }
 
+meta int Symbol.len(Symbol symbol);
+
 /** Returns the number of decoded bytes in `symbol`. */
 int Symbol.len(Symbol symbol) {
   int len = 0, bits = (symbol & 1) ? 7 : 5;
@@ -167,6 +169,8 @@ String Symbol.str(Symbol symbol) {
   symbol.decode(text);
   return String.new_len(text, strlen(text));
 }
+
+meta int Symbol.compare(Symbol a, Symbol b);
 
 /** Compares decoded `Symbol` spellings bytewise.
     Zero sorts before nonzero values. Equal decoded lengths and bytes are
@@ -233,6 +237,8 @@ Buffer Symbol.write_repr(Symbol symbol, Buffer out) {
   return out.write_char('>');
 }
 
+meta char Symbol.first(Symbol symbol);
+
 /** Returns the first decoded byte of `symbol`, or NUL for zero. */
 char Symbol.first(Symbol symbol) {
   if (!symbol) return '\0';
@@ -243,6 +249,8 @@ char Symbol.first(Symbol symbol) {
   if (bits == 5) return _symbol_alphabet[value & 0x1F];
   return value & 0x7F;
 }
+
+meta char Symbol.last(Symbol symbol);
 
 /** Returns the final decoded byte of `symbol`, or NUL for zero. */
 char Symbol.last(Symbol symbol) {

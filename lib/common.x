@@ -636,6 +636,8 @@ inline Symbol Var.symbol(Var x) {
    converting. The fallback converts to the named target and reads the raw
    payload; a scalar reader after conversion would recurse. */
 
+meta char Var.char(Var x);
+
 /** Returns `x` as a native `char` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
     of floating range, or invalidly encoded.
@@ -644,6 +646,8 @@ char Var.char(Var x) {
   if (x is <i8> || x is <u8>) return (char) x.integer();
   return (char) x.convert(<i8>).integer();
 }
+
+meta uchar Var.uchar(Var x);
 
 /** Returns `x` as a native `uchar` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
@@ -654,6 +658,8 @@ uchar Var.uchar(Var x) {
   return (uchar) x.convert(<u8>).integer();
 }
 
+meta short Var.short(Var x);
+
 /** Returns `x` as a native `short` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
     of floating range, or invalidly encoded.
@@ -662,6 +668,8 @@ short Var.short(Var x) {
   if (x is <i16>) return (short) x.integer();
   return (short) x.convert(<i16>).integer();
 }
+
+meta ushort Var.ushort(Var x);
 
 /** Returns `x` as a native `ushort` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
@@ -681,6 +689,8 @@ int Var.int(Var x) {
   return (int) x.convert(<i32>).integer();
 }
 
+meta uint Var.uint(Var x);
+
 /** Returns `x` as a native `uint` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
     of floating range, or invalidly encoded.
@@ -690,6 +700,8 @@ uint Var.uint(Var x) {
   return (uint) x.convert(<u32>).integer();
 }
 
+meta unsigned Var.unsigned(Var x);
+
 /** Returns `x` as a native `unsigned` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
     of floating range, or invalidly encoded.
@@ -698,6 +710,8 @@ unsigned Var.unsigned(Var x) {
   if (x is <u32>) return (unsigned) x.integer();
   return (unsigned) x.convert(<u32>).integer();
 }
+
+meta long Var.long(Var x);
 
 /** Returns `x` as a native `long` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
@@ -711,6 +725,8 @@ long Var.long(Var x) {
   return x.convert(<long>).long_value();
 }
 
+meta ulong Var.ulong(Var x);
+
 /** Returns `x` as a native `ulong` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
     of floating range, or invalidly encoded.
@@ -722,6 +738,8 @@ ulong Var.ulong(Var x) {
   return x.convert(<ulong>).ulong_value();
 }
 
+meta long long Var.long_long(Var x);
+
 /** Returns `x` as a native `long long` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, out
     of floating range, or invalidly encoded.
@@ -732,6 +750,8 @@ long long Var.long_long(Var x) {
   if (x.kind() == <integer>) return (long long) x.integer();
   return x.convert(<llong>).long_long_value();
 }
+
+meta unsigned long long Var.ulong_long(Var x);
 
 /** Returns `x` as a native `unsigned long long` under the `Var.convert`
     rules.
@@ -746,6 +766,8 @@ unsigned long long Var.ulong_long(Var x) {
   return x.convert(<ullong>).ulong_long_value();
 }
 
+meta long double Var.long_double(Var x);
+
 /** Returns `x` as a native `long double` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, or
     invalidly encoded.
@@ -756,6 +778,8 @@ long double Var.long_double(Var x) {
   return x.convert(<ldouble>).long_double_value();
 }
 
+meta float Var.float(Var x);
+
 /** Returns `x` as a native `float` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, or
     invalidly encoded.
@@ -764,6 +788,8 @@ float Var.float(Var x) {
   if (x is <f32>) return (float) x.floating();
   return (float) x.convert(<f32>).floating();
 }
+
+meta double Var.double(Var x);
 
 /** Returns `x` as a native `double` under the `Var.convert` rules.
     Raises: `Var.convert`'s causes when the source is nonnumeric, `void`, or

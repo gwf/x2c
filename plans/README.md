@@ -44,18 +44,18 @@ execution.
 
 ### Current work
 
+- [Meta lifetime certification](meta-lifetime-certification.md): active.
+  Replaces adoption phase 8; certifies ten methods for meta code through
+  the region table, decided September 24, 2026.
 - [Post-merge stabilization](post-merge-stabilization-2026-09-23.md): done;
   delivered as `9b71607f`. The
   [reproducibility record](generated-lisp-reproducibility.md) retains the
   earlier Lisp regeneration failure and the repaired result.
 
-- [Internal adoption campaign](internal-adoption-campaign.md): ready-now
-  macro, managed-lifetime and extensionless-script dogfooding, followed by
-  dependency-gated generalized-meta and lifetime-certified adoption. Phases
-  1-4, system-macro Lisp deletion, command-help `$dedent`, managed lifetimes,
-  extensionless tool names, CLI `$switch` dispatches and temporary-state
-  `$let` regions are complete and validated. Generalized-meta and
-  lifetime-certified adoption remain dependency-gated.
+- [Internal adoption campaign](internal-adoption-campaign.md): phases 1-6
+  are complete, and phase 7 moved the value operations to `meta`
+  prototypes. Its compiler-binding half needs a design; phase 8 continues as
+  meta lifetime certification.
 - [Public release workflow](public-release-workflow.md): active in the Dev
   Staging Workflow task. Account activation and production decisions remain;
   source files alone do not establish that deployment is complete.

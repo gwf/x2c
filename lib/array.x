@@ -63,6 +63,8 @@ inline Array Block.array(Block x)         => (Array) x;
 */
 Array Array.new(void) => Block.new(sizeof(Var));
 
+meta void Array.resize(Array arr, size_t size);
+
 /** Resizes `arr`, truncating or appending `Null` elements as needed.
     Raises: `<size-limit>` when `size` exceeds the `Array` index domain, plus
     any cause from `Block` growth. Allocation and size failure do not return
@@ -155,6 +157,8 @@ Var Array.setindex(Array array, int index, Var elem) {
   return elem;
 }
 
+meta Var Array.updateindex(Array array, int index, Symbol op, Var rhs);
+
 /** Updates one `Array` element in place.
     The index is normalized once, including negative indexing, and the
     element slot is delegated to `Var.update`. The stored `Var` tag is
@@ -176,6 +180,8 @@ Var Array.updateindex(Array array, int index, Symbol op, Var rhs) {
   Var *arr = (Var *) array.bytes;
   return Var.update(arr + index, op, rhs);
 }
+
+meta Var Array.postfixindex(Array array, int index, Symbol op);
 
 /** Applies postfix `Array` element increment or decrement.
     The returned value is the original element. The slot remains unchanged if
@@ -245,6 +251,8 @@ Var Array.shift(Array array) {
   return array._core_shift(&elem) ? elem : void;
 }
 
+meta Var Array.unshift(Array array, Var elem);
+
 /** Inserts `elem` at the front of `array` and returns it.
     Existing elements move up one position, so this is O(n); `Array.push` is
     the amortized O(1) end of the array. Returning `elem` lets an unshift
@@ -299,6 +307,8 @@ Var Array.remove(Array array, int index) {
   return array._core_remove(index, &elem) ? elem : void;
 }
 
+meta Self Array.copy(Self array);
+
 /** Returns a new `Array` holding the same elements as `array`.
     The copy is shallow and independent: pushing to one does not affect the
     other, but the two share whatever objects their elements point at.
@@ -312,6 +322,8 @@ Self Array.copy(Self array) {
   _int_length(array);
   return array._core_copy();
 }
+
+meta Self Array.getslice(Self array, int start, int end, int step);
 
 /** Returns a new `Array` holding the elements `array[start:end:step]`.
     This is what `array[start:end:step]` lowers to; a part omitted from that
@@ -345,6 +357,8 @@ static void _setslice(Array array, int start, int end, Array values) {
   array._core_setslice(start, end, values);
 }
 
+meta Self Array.setslice(Self array, int start, int end, Self values);
+
 /** Replaces the region `array[start:end]` with the elements of `values` and
     returns `array`.
     The replacement need not match the length of the region it replaces.
@@ -367,6 +381,8 @@ Self Array.setslice(Self array, int start, int end, Self values) {
   return array;
 }
 
+meta Self Array.remslice(Self array, int start, int end);
+
 /** Removes the region `array[start:end]` and returns a fresh `Array`.
     Bounds are normalized the way that slice normalizes them, so a negative
     `end` is a stop. A reversed pair is swapped. Allocation or size failure
@@ -376,6 +392,8 @@ Self Array.remslice(Self array, int start, int end) {
   _int_length(array);
   return array._core_remslice(start, end);
 }
+
+meta Self Array.splice(Self array, int index, int remove_count, Self values);
 
 /** Replaces `remove_count` elements at `index` with `values` and returns
     what was removed.
@@ -394,6 +412,8 @@ Self Array.splice(Self array, int index, int remove_count, Self values) {
   return array._core_splice(index, remove_count, values);
 }
 
+meta int Array.find(Array array, Var value);
+
 /** Returns the index of the first element equal to `value`, or -1.
     The scan is linear and compares with `Var` equality, the same rule `==`
     applies to boxed values. `Array`s and `Map`s participate
@@ -407,6 +427,8 @@ int Array.find(Array array, Var value) {
   return array._core_find(value);
 }
 
+meta int Array.contains(Array array, Var value);
+
 /** Returns nonzero when some element of `array` equals `value`.
     Uses the same linear search and structural `Var` equality as `Array.find`.
     Use a `Map` for frequent membership tests.
@@ -415,14 +437,20 @@ int Array.find(Array array, Var value) {
 */
 int Array.contains(Array array, Var value) => array.find(value) != -1;
 
+meta int Array.count(Array array, Var value);
+
 /** Returns how many elements compare equal to `value`. */
 int Array.count(Array array, Var value) {
   _int_length(array);
   return array._core_count(value);
 }
 
+meta int Array.indexof(Array array, Var value);
+
 /** Returns `Array.find(array, value)`. */
 int Array.indexof(Array array, Var value) => array.find(value);
+
+meta Self Array.concat(Self a, Self b);
 
 /** Returns a new `Array` holding the elements of `a` followed by those of `b`.
     Neither input is modified and the result is a fresh object. A null or
@@ -440,6 +468,8 @@ Self Array.concat(Self a, Self b) {
   }
   return a._core_concat(b);
 }
+
+meta Self Array.reverse(Self array);
 
 /** Reverses `array` in place and returns that same `Array`.
     To preserve the original order, slice with a negative step
@@ -514,6 +544,8 @@ Var Array.foldl(Array array, Var seed, Func fn) {
 static int _compare_var(Var a, Var b) => a.compare(b);
 $array.core.observe(Array, Var, _compare_var);
 
+meta int Array.compare(Array a, Array b);
+
 /** Compares `Array`s lexicographically with `Var.compare`. */
 int Array.compare(Array a, Array b) => a._core_compare(b);
 
@@ -521,6 +553,8 @@ static int _sort_compare(const void *ap, const void *bp) {
   Var a = *(const Var *) ap, b = *(const Var *) bp;
   return a.compare(b);
 }
+
+meta Self Array.sort(Self array);
 
 /** Sorts `array` in place in ascending order and returns that same `Array`.
     Call `Array.copy` first to preserve the original order. Ordering is
@@ -644,6 +678,8 @@ static void _heap_shift_down(Array heap, int i) {
   }
 }
 
+meta void Array.heap_push(Array heap, Var val);
+
 /** Adds `val` to `heap`, an `Array` maintained as a binary min-heap.
     The heap operations arrange an `Array` as a priority queue in place, with
     no second data structure and no extra allocation. The elements stay in
@@ -673,6 +709,9 @@ void Array.heap_push(Array heap, Var val) {
   int n = _int_length(heap);
   _heap_shift_up(heap, n - 1);
 }
+
+meta Var Array.heap_pop(Array heap);
+
 /** Removes and returns the smallest element of `heap`, or `void` when it is
     empty. The remaining elements are re-heaped in O(log n), so repeated calls
     yield ascending order and draining a heap is a sort. An `Array` that never
@@ -692,6 +731,8 @@ Var Array.heap_pop(Array heap) {
   return root;
 }
 
+meta void Array.heapify(Array heap);
+
 /** Rearranges `heap` in place so that it satisfies the min-heap invariant.
     Use this before the first `Array.heap_pop` on an `Array` that was built by
     `Array.push`, read in from somewhere else, or disturbed by a positional
@@ -705,6 +746,8 @@ void Array.heapify(Array heap) {
   int n = _int_length(heap);
   for (int i = (n / 2) - 1; i >= 0; i--) _heap_shift_down(heap, i);
 }
+
+meta String Array.join(Array array, String separator);
 
 /** Joins the elements of `array` into one `String` separated by `separator`.
     Elements are converted with their `str` form, so a `String` element
@@ -727,6 +770,8 @@ String Array.join(Array array, String separator) {
   }
   return buf.str_free();
 }
+
+meta int Array.equal(Array a, Array b);
 
 /** Returns nonzero when two `Array`s have structurally equal elements. */
 int Array.equal(Array a, Array b) => a._core_equal(b);

@@ -271,6 +271,8 @@ static String _intern_owned(String string) {
   return string;
 }
 
+meta Self String.intern(Self string);
+
 /** Returns the canonical `String` for the borrowed bytes of `string`.
     This is `String.new` under another name. The bytes are copied into
     canonical storage and the caller keeps ownership of whatever buffer it
@@ -401,6 +403,8 @@ String String.new_len(const char *str, int len) {
   return _from_bytes(str, (int) length);
 }
 
+meta String String.new_fill(char fill, int count);
+
 /** Returns the canonical `String` containing `count` copies of `fill`.
     Raises: `<bad-arg>` when `fill` is NUL, `<size-limit>` when `count` is
     `INT_MAX`, because the allocation includes one trailing NUL byte, or
@@ -416,6 +420,8 @@ String String.new_fill(char fill, int count) {
   memset(string, fill, count);
   return _finish(string, count);
 }
+
+meta int String.find_within(String str, String sub, int start, int end);
 
 /** Returns the first index of `sub` within `str[start:end]`, or -1.
     The returned index is absolute, measured from the start of `str` rather
@@ -448,6 +454,8 @@ int String.find_within(String str, String sub, int start, int end) {
   return (int) (p - str);
 }
 
+meta int String.find(String str, String sub);
+
 /** Returns the index of the first occurrence of `sub` in `str`, or -1.
     The search is byte-oriented rather than character-oriented, so an index
     may land inside a multibyte sequence. An empty `sub` matches at index
@@ -455,6 +463,8 @@ int String.find_within(String str, String sub, int start, int end) {
     `String.rfind` to scan from the end.
 */
 int String.find(String str, String sub) => str.find_within(sub, 0, -1);
+
+meta int String.rfind(String str, String sub);
 
 /** Returns the index of the last occurrence of `sub` in `str`, or -1.
     Scanning runs backwards from the end, and the returned index still
@@ -469,6 +479,8 @@ int String.rfind(String str, String sub) {
   for (int i = n - m; i >= 0; i--) if (memcmp(str + i, sub, m) == 0) return i;
   return -1;
 }
+
+meta List String.find_all(String str, String sub, int start, int end);
 
 /** Returns each non-overlapping starting index at which `sub` occurs.
     The search begins at `start` and uses the same normalized exclusive `end`
@@ -501,6 +513,8 @@ static int _count_matches(String str, String sub, int limit) {
   return count;
 }
 
+meta int String.count(String str, String sub);
+
 /** Returns the non-overlapping count of `sub` in `str`.
     A null or empty `str` or `sub` returns zero.
 */
@@ -524,6 +538,8 @@ int String.getindex(String str, int index) {
   return (unsigned char) *(str + index);
 }
 
+meta int String.contains(String str, String sub);
+
 /** Reports whether the bytes of `sub` occur anywhere in `str`.
     An empty `sub` is contained in every `String`, including the empty one,
     so a truth test on user-supplied text should check for emptiness
@@ -536,6 +552,8 @@ int String.contains(String str, String sub) {
   return str.find(sub) != -1;
 }
 
+meta int String.startswith(String str, String prefix);
+
 /** Reports whether `str` starts with `prefix`.
     An empty `prefix` is a prefix of every `String`. `String.remove_prefix`
     performs the same test and returns the remainder, so there is rarely a
@@ -546,6 +564,8 @@ int String.startswith(String str, String prefix) {
   if (prefix_len == 0) return 1;
   return str && prefix_len <= str_len && memcmp(str, prefix, prefix_len) == 0;
 }
+
+meta int String.endswith(String str, String suffix);
 
 /** Reports whether `str` ends with `suffix`.
     An empty `suffix` is a suffix of every `String`. The comparison is
@@ -592,6 +612,8 @@ String String.add(String str, String other) {
   return _finish(string, (int) length);
 }
 
+meta String String.repeat(String str, int count);
+
 /** Returns a canonical `String` containing `count` copies of `str`.
     `Null` or empty input, a nonpositive count, or an oversized result returns
     NULL. A count of one returns `str` when it is already visible in the active
@@ -611,6 +633,8 @@ String String.repeat(String str, int count) {
   }
   return _finish(string, (int) length);
 }
+
+meta String String.withindex(String str, int index, char value);
 
 /** Returns a canonical copy of `str` with the byte at `index` set.
     Canonical `String`s are immutable, so `str` is not modified. When the byte
@@ -643,6 +667,8 @@ String String.withindex(String str, int index, char value) {
   out[index] = value;
   return _finish(string, n);
 }
+
+meta String String.getslice(String s, int start, int stop, int step);
 
 /** Returns the canonical `String` `s[start:stop:step]`.
     This is what slice syntax lowers to. `stop` is exclusive, negative
@@ -690,6 +716,8 @@ macro Statement $string.remap(
   return _finish(string, length);
 }
 
+meta String String.lower(String str);
+
 /** Returns `str` with every upper-case byte lowered.
     Case mapping runs byte by byte through C's `tolower`, so it covers
     ASCII in the default locale and leaves multibyte text alone rather than
@@ -701,6 +729,8 @@ String String.lower(String str) {
   $string.remap(str, i, ch, tolower(ch));
 }
 
+meta String String.upper(String str);
+
 /** Returns `str` with every lower-case byte raised.
     Like `String.lower`, mapping runs byte by byte through C's `toupper` and
     covers ASCII in the default locale. `str` itself is returned when nothing
@@ -710,6 +740,8 @@ String String.lower(String str) {
 String String.upper(String str) {
   $string.remap(str, i, ch, toupper(ch));
 }
+
+meta String String.capitalize(String str);
 
 /** Upper-cases the first byte of `str` and lower-cases the remainder.
     Mapping is bytewise through C's `toupper` and `tolower`. `Null`, empty, and
@@ -764,6 +796,8 @@ String String.strip(String str, char *negChars) {
   if (start == 0 && end == str.len()) return str;
   return String.new_len(str + start, end - start);
 }
+
+meta String String.dedent(String str);
 
 /** Removes the indentation the text was written with.
     The prefix is the run of spaces and tabs that opens the first content
@@ -856,6 +890,8 @@ String String.map(String str, Func fn) {
   return result;
 }
 
+meta String String.keep(String str, String chars);
+
 /** Returns a canonical `String` containing only bytes found in `chars`.
     `Null` `str` returns NULL; null `chars` returns NULL for any nonnull input.
     Raises: `<alloc-fail>` while constructing the result.
@@ -867,6 +903,8 @@ String String.keep(String str, String chars) {
   $string.select(str, i, strchr(chars, str[i]));
 }
 
+meta String String.reject(String str, String chars);
+
 /** Returns a canonical `String` after removing bytes found in `chars`.
     `Null` or empty `str`, or null `chars`, returns `str` unchanged.
     Raises: `<alloc-fail>` while constructing a changed result.
@@ -875,6 +913,8 @@ String String.reject(String str, String chars) {
   if (!str || !chars || !*str) return str;
   $string.select(str, i, !strchr(chars, str[i]));
 }
+
+meta String String.squeeze(String str, String chars);
 
 /** Collapses adjacent runs of each byte listed in `chars`.
     `Bytes` outside `chars` are preserved even when repeated. `Null` or empty
@@ -902,6 +942,8 @@ static String _pad(String str, int width, char fill, int left_padding) {
   return _finish(string, width);
 }
 
+meta String String.pad_left(String str, int width, char fill);
+
 /** Pads the left side of `str` to the requested width.
     Raises: `<bad-arg>` when `fill` is NUL, `<size-limit>` when `width`
     cannot be represented, or `<alloc-fail>` when result storage cannot be
@@ -910,17 +952,23 @@ static String _pad(String str, int width, char fill, int left_padding) {
 String String.pad_left(String str, int width, char fill) =>
   _pad(str, width, fill, 1);
 
+meta String String.pad_right(String str, int width, char fill);
+
 /** Pads the right side of `str` to the requested width.
     Raises: the same causes as `String.pad_left`.
 */
 String String.pad_right(String str, int width, char fill) =>
   _pad(str, width, fill, 0);
 
+meta String String.pad_center(String str, int width, char fill);
+
 /** Pads both sides of `str` to the requested width.
     Raises: the same causes as `String.pad_left`.
 */
 String String.pad_center(String str, int width, char fill) =>
   _pad(str, width, fill, -1);
+
+meta String String.remove_prefix(String str, String prefix);
 
 /** Removes `prefix` when `str` starts with it and returns a canonical
     `String`.
@@ -933,6 +981,8 @@ String String.remove_prefix(String str, String prefix) {
   return String.new_len(str + prefix.len(), str.len() - prefix.len());
 }
 
+meta String String.remove_suffix(String str, String suffix);
+
 /** Removes `suffix` when `str` ends with it and returns a canonical `String`.
     A null or absent suffix returns `str` unchanged; removing the complete
     `String` returns NULL.
@@ -942,6 +992,8 @@ String String.remove_suffix(String str, String suffix) {
   if (!suffix || !str.endswith(suffix)) return str;
   return String.new_len(str, str.len() - suffix.len());
 }
+
+meta List String.partition(String str, String sep);
 
 /** Splits `str` at the first `sep` into a three-element `List`.
     The elements are the text before the separator, the separator itself,
@@ -967,6 +1019,8 @@ List String.partition(String str, String sep) {
   return %( $before $sep $after );
 }
 
+meta List String.rpartition(String str, String sep);
+
 /** Splits `str` around its final occurrence of `sep`.
     The three elements are the text before the separator, the separator itself,
     and the text after it. When `sep` is null or absent, two empty `String`s
@@ -986,6 +1040,8 @@ List String.rpartition(String str, String sep) {
     str + found + sep.len(), str.len() - found - sep.len());
   return %( $before $sep $after );
 }
+
+meta String String.join(String sep, List strings);
 
 /** Joins `strings` into one canonical `String` with `sep` between elements.
     The receiver is the separator, not the sequence, so this reads
@@ -1034,6 +1090,9 @@ String String.join(String sep, List strings) {
   return _from_bytes(stack_bytes, (int) total);
 }
 
+meta String String.replace_n(
+  String str, String old, String replacement, int max_replacements);
+
 /** Replaces at most `max_replacements` non-overlapping occurrences of `old`.
     Scanning proceeds left to right and does not rescan replacement text. A
     negative limit replaces all matches; zero, null or empty `old`, null input,
@@ -1077,6 +1136,8 @@ String String.replace_n(
   memcpy(dst, str + copied, str_len - copied);
   return _finish(string, (int) output_len);
 }
+
+meta String String.replace(String str, String old, String replacement);
 
 /** Returns `str` with every occurrence of `old` replaced by `replacement`.
     Scanning runs left to right and matches do not overlap: each one
@@ -1545,6 +1606,8 @@ static inline int _escape_byte(unsigned char ch, char *out) {
   return 4;
 }
 
+meta String String.unescape(String str);
+
 /** Decodes supported backslash escapes in `str` into a canonical `String`.
     Standard single-byte escapes, up to two hexadecimal digits after `x`, `u`,
     or `U`, and up to three octal digits are consumed. A backslash-newline is
@@ -1578,6 +1641,8 @@ String String.unescape(String str) {
   }
   return _finish(string, (int) (dst - string));
 }
+
+meta String String.escape(String str);
 
 /** Returns a canonical escaped representation of the bytes in `str`.
     Common control and delimiter bytes use named escapes, printable ASCII is
@@ -1638,6 +1703,8 @@ Buffer String.write_repr(String str, Buffer out) {
   return out.write_char('"');
 }
 
+meta int String.parse_char(String str);
+
 /** Parses one leading single-quoted escaped or literal byte, or returns -1.
     The opening quote, one decoded byte, and a closing quote are required.
     Text after that closing quote is ignored. A decoded NUL is returned as
@@ -1662,6 +1729,8 @@ int String.parse_char(String str) {
   return (*s == '\'') ? value : -1;
 }
 
+meta Symbol String.symbol(String str);
+
 /** Returns the compact `Symbol` encoded from `str`, or zero for empty input.
     `Symbol`'s restricted spelling folds case and `_` with `-`; other spellings
     use seven-bit bytes, and input beyond the selected encoding's capacity is
@@ -1671,6 +1740,8 @@ Symbol String.symbol(String str) {
   if (!str || !*str) return 0;
   return Symbol.new(str);
 }
+
+meta String String.parse(String str);
 
 /** Returns the canonical unescaped contents of `str`.
     Matching outer `%"..."` or `"..."` delimiters are removed; unquoted input
@@ -1688,6 +1759,8 @@ String String.parse(String str) {
     return String.new_len(str + 1, n - 2).unescape();
   return str.unescape();
 }
+
+meta unsigned String.hash(String str);
 
 /** Returns the content hash of `str`, or zero for the empty `String`.
     Canonical `String`s use the cached hash; transient buffers are hashed from
@@ -1711,6 +1784,8 @@ int String.equal(String x, String y) {
   if (!x || !y) return 0;
   return strcmp(x, y) == 0;
 }
+
+meta int String.compare(String x, String y);
 
 /** Compares `x` and `y` bytewise, returning negative, zero, or positive.
     The ordering is C's `strcmp` on the raw bytes, so it is neither

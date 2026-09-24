@@ -579,7 +579,7 @@ static int Map__core_equal(Map _x2c_macro_a_2, Map _x2c_macro_b_2){
 
 Map Map_new_capacity(unsigned capacity){
   if(capacity < 2 ||(capacity &(capacity - 1))){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/map.x",.function = "Map_new_capacity",.line = 115};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../lib/map.x",.function = "Map_new_capacity",.line = 117};
     x2c_error_raise_n(& _x2c_error_site_4, 4372499598, 2, Symbol_var(32993636), String_var(String_join(NULL, cons(String_var(String_new("Map.new_capacity")), NULL))), Symbol_var(209381969202), unsigned_var(capacity));
     __builtin_unreachable();
   }
@@ -621,12 +621,12 @@ Var Map_getdefault(Map map, Var key, Var defval){
 
 Var Map_setdefault(Map map, Var key, Var defval){
   if((void *) map == NULL){
-    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/map.x",.function = "Map_setdefault",.line = 269};
+    static const X2CErrorSite _x2c_error_site_5 = {.file = "../../lib/map.x",.function = "Map_setdefault",.line = 279};
     x2c_error_raise_n(& _x2c_error_site_5, 4372499598, 0);
     __builtin_unreachable();
   }
   if(Var_is_void(key)){
-    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/map.x",.function = "Map_setdefault",.line = 270};
+    static const X2CErrorSite _x2c_error_site_6 = {.file = "../../lib/map.x",.function = "Map_setdefault",.line = 280};
     x2c_error_raise_n(& _x2c_error_site_6, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -641,12 +641,12 @@ int Map_contains(Map m, Var key){
 
 static void _set(Map map, Var key, Var val){
   if((void *) map == NULL){
-    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/map.x",.function = "_set",.line = 287};
+    static const X2CErrorSite _x2c_error_site_7 = {.file = "../../lib/map.x",.function = "_set",.line = 299};
     x2c_error_raise_n(& _x2c_error_site_7, 4372499598, 0);
     __builtin_unreachable();
   }
   if(Var_is_void(key) || Var_is_void(val)){
-    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/map.x",.function = "_set",.line = 288};
+    static const X2CErrorSite _x2c_error_site_8 = {.file = "../../lib/map.x",.function = "_set",.line = 300};
     x2c_error_raise_n(& _x2c_error_site_8, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -672,12 +672,12 @@ Var Var_update(Var *, Symbol, Var);
 
 Var Map_updateindex(Map map, Var key, Symbol op, Var rhs){
   if((void *) map == NULL){
-    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 352};
+    static const X2CErrorSite _x2c_error_site_9 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 368};
     x2c_error_raise_n(& _x2c_error_site_9, 4372499598, 0);
     __builtin_unreachable();
   }
   if(Var_is_void(key) || Var_is_void(rhs)){
-    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 353};
+    static const X2CErrorSite _x2c_error_site_10 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 369};
     x2c_error_raise_n(& _x2c_error_site_10, 48270474208, 0);
     __builtin_unreachable();
   }
@@ -691,7 +691,7 @@ Var Map_updateindex(Map map, Var key, Symbol op, Var rhs){
   }
   long index = Map__core_find_index(map, & key);
   if(index < 0){
-    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 363};
+    static const X2CErrorSite _x2c_error_site_11 = {.file = "../../lib/map.x",.function = "Map_updateindex",.line = 379};
     x2c_error_raise_n(& _x2c_error_site_11, 4372499598, 1, Symbol_var(22898), key);
     __builtin_unreachable();
   }
@@ -703,18 +703,18 @@ Var Var_postfix(Var *, Symbol);
 
 Var Map_postfixindex(Map map, Var key, Symbol op){
   if((void *) map == NULL){
-    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 376};
+    static const X2CErrorSite _x2c_error_site_12 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 394};
     x2c_error_raise_n(& _x2c_error_site_12, 4372499598, 0);
     __builtin_unreachable();
   }
   if(Var_is_void(key)){
-    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 377};
+    static const X2CErrorSite _x2c_error_site_13 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 395};
     x2c_error_raise_n(& _x2c_error_site_13, 48270474208, 0);
     __builtin_unreachable();
   }
   long index = Map__core_find_index(map, & key);
   if(index < 0){
-    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 379};
+    static const X2CErrorSite _x2c_error_site_14 = {.file = "../../lib/map.x",.function = "Map_postfixindex",.line = 397};
     x2c_error_raise_n(& _x2c_error_site_14, 4372499598, 1, Symbol_var(22898), key);
     __builtin_unreachable();
   }

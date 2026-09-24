@@ -38,7 +38,7 @@ Source: `lib/atom.x:52`
 
 Reports whether `value` is an exact-spelling `Atom`.
 
-Source: `lib/atom.x:92`
+Source: `lib/atom.x:94`
 
 ## Advanced and interop API
 
@@ -72,7 +72,7 @@ Returns the first byte of `atom`'s exact spelling, or NUL when invalid.
 
 **Raises:** the same causes as `Atom.str`.
 
-Source: `lib/atom.x:110`
+Source: `lib/atom.x:112`
 
 <a id="Atom.initialize"></a>
 #### Atom.initialize
@@ -86,7 +86,7 @@ Repeated calls after successful registration have no effect.
 `<alloc-fail>` while lower-casing the descriptor name, or `<init-fail>`
 when registration returns zero.
 
-Source: `lib/atom.x:167`
+Source: `lib/atom.x:169`
 
 <a id="Atom.intern"></a>
 #### Atom.intern
@@ -107,7 +107,7 @@ its canonical `String` cannot be allocated, or `<bad-enc>` if the
 long-`Atom`
 pointer cannot be boxed.
 
-Source: `lib/atom.x:220`
+Source: `lib/atom.x:222`
 
 <a id="Atom.promote"></a>
 #### Atom.promote
@@ -136,7 +136,7 @@ lifetime rule above. An invalid `Atom` returns NULL.
 
 **Raises:** `<alloc-fail>` while canonicalizing a compact spelling.
 
-Source: `lib/atom.x:101`
+Source: `lib/atom.x:103`
 
 <a id="Atom.write_repr"></a>
 #### Atom.write_repr

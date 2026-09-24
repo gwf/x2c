@@ -40,7 +40,7 @@ Hash table mapping `Var` keys to `Var` values.
 
 Releases this Map and both backing Blocks without freeing stored values.
 
-Source: `lib/map.x:728`
+Source: `lib/map.x:756`
 
 <a id="Map.contains"></a>
 #### Map.contains
@@ -56,7 +56,7 @@ same-object lookup is reliable.
 **Raises:** `<void-op>` when `key` is `void`, or a cause raised by custom key
 hashing or equality.
 
-Source: `lib/map.x:284`
+Source: `lib/map.x:296`
 
 <a id="Map.copy"></a>
 #### Map.copy
@@ -79,7 +79,7 @@ order may differ.
 constructing the result, or a cause raised by custom key hashing or
 equality.
 
-Source: `lib/map.x:445`
+Source: `lib/map.x:465`
 
 <a id="Map.enumerate"></a>
 #### Map.enumerate
@@ -101,7 +101,7 @@ must outlive every pull. A null `Map` produces an exhausted iterator.
 Constructing the iterator does not raise. Pulling may raise
 `<alloc-fail>` or `<size-limit>` while interning a pair.
 
-Source: `lib/map.x:652`
+Source: `lib/map.x:678`
 
 <a id="Map.get_hashed"></a>
 #### Map.get_hashed
@@ -118,7 +118,7 @@ respect. A null `Map` reports absence.
 **Raises:** a cause raised by custom key equality. Hashing happens in the
 caller, so a `void` key raises there instead.
 
-Source: `lib/map.x:234`
+Source: `lib/map.x:240`
 
 <a id="Map.getdefault"></a>
 #### Map.getdefault
@@ -133,7 +133,7 @@ For counting, numeric `map[k] += amount` initializes an absent key from
 **Raises:** `<void-op>` when `key` is `void`, or a cause raised by custom key
 hashing or equality.
 
-Source: `lib/map.x:247`
+Source: `lib/map.x:255`
 
 <a id="Map.iter"></a>
 #### Map.iter
@@ -153,7 +153,7 @@ any structural mutation.
 
 Neither constructing the iterator nor pulling from it raises.
 
-Source: `lib/map.x:613`
+Source: `lib/map.x:639`
 
 <a id="Map.keys"></a>
 #### Map.keys
@@ -170,7 +170,7 @@ single-pass, and any structural mutation of `x` invalidates it, as for
 
 Neither constructing the iterator nor pulling from it raises.
 
-Source: `lib/map.x:630`
+Source: `lib/map.x:656`
 
 <a id="Map.len"></a>
 #### Map.len
@@ -184,7 +184,7 @@ object. This counts live entries. The table keeps more slots than
 entries to hold its load factor, so `Map.len` is not the allocation
 size. `map` must be nonnull.
 
-Source: `lib/map.x:148`
+Source: `lib/map.x:152`
 
 <a id="Map.merge"></a>
 #### Map.merge
@@ -203,7 +203,7 @@ invalidates its active cursors; replacing only existing values does not.
 or a cause raised by custom key hashing or equality. A supplied destination
 is not rolled back; a newly created destination is discarded.
 
-Source: `lib/map.x:512`
+Source: `lib/map.x:534`
 
 <a id="Map.new"></a>
 #### Map.new
@@ -230,7 +230,7 @@ far as its elements do, which `Map.try_get` describes.
 **Raises:** `<alloc-fail>` or `<size-limit>` when initial
 storage cannot be allocated.
 
-Source: `lib/map.x:139`
+Source: `lib/map.x:141`
 
 <a id="Map.postfixindex"></a>
 #### Map.postfixindex
@@ -245,7 +245,7 @@ key is not inserted.
 `void` key, a custom key callback cause, or any cause from `Var.postfix`.
 These failures leave the existing value unchanged.
 
-Source: `lib/map.x:375`
+Source: `lib/map.x:393`
 
 <a id="Map.set"></a>
 #### Map.set
@@ -277,7 +277,7 @@ not promise rollback. Raises: `<bad-arg>` for a null `Map`,
 `key` or `val` is `void`; `<size-limit>`, `<alloc-fail>`, or `<invariant>`
 while inserting; or a cause raised by custom key hashing or equality.
 
-Source: `lib/map.x:316`
+Source: `lib/map.x:330`
 
 <a id="Map.setdefault"></a>
 #### Map.setdefault
@@ -301,7 +301,7 @@ Hood displacement begins does not promise rollback.
 `<alloc-fail>`, or `<invariant>` while inserting; or a cause raised by
 custom key hashing or equality.
 
-Source: `lib/map.x:268`
+Source: `lib/map.x:278`
 
 <a id="Map.setindex"></a>
 #### Map.setindex
@@ -317,7 +317,7 @@ outstanding cursors whenever a new key is inserted.
 `void`; `<size-limit>`, `<alloc-fail>`, or `<invariant>` while inserting;
 or a cause raised by custom key hashing or equality.
 
-Source: `lib/map.x:328`
+Source: `lib/map.x:342`
 
 <a id="Map.truth"></a>
 #### Map.truth
@@ -327,7 +327,7 @@ Source: `lib/map.x:328`
 Returns nonzero when `map` contains at least one entry.
 A null or empty `Map` returns zero.
 
-Source: `lib/map.x:550`
+Source: `lib/map.x:574`
 
 <a id="Map.try_del"></a>
 #### Map.try_del
@@ -346,7 +346,7 @@ table, so it invalidates any outstanding `Map.try_next` cursor. `Map.len`
 drops but the allocation does not shrink. Raises: `<void-op>` when `key` is
 `void`, or a cause raised by custom key hashing or equality.
 
-Source: `lib/map.x:395`
+Source: `lib/map.x:413`
 
 <a id="Map.try_get"></a>
 #### Map.try_get
@@ -383,7 +383,7 @@ if (!ages.try_get("nobody", &found)) printf("absent\n");
 **Raises:** `<void-op>` when `key` is `void`, or a cause raised by custom key
 hashing or equality.
 
-Source: `lib/map.x:178`
+Source: `lib/map.x:182`
 
 <a id="Map.try_next"></a>
 #### Map.try_next
@@ -420,7 +420,7 @@ while (ages.try_next(&cursor, &key, &val))
   printf("%s -> %s\n", key, val.repr());
 ```
 
-Source: `lib/map.x:544`
+Source: `lib/map.x:566`
 
 <a id="Map.updateindex"></a>
 #### Map.updateindex
@@ -446,7 +446,7 @@ for a `void` key or right operand, `<size-limit>`, `<alloc-fail>`, or
 `<invariant>` while inserting for numeric `+`, a custom key callback
 cause, or any cause from `Var.update`.
 
-Source: `lib/map.x:351`
+Source: `lib/map.x:367`
 
 <a id="Map.write_str"></a>
 #### Map.write_str
@@ -462,7 +462,7 @@ bucket order. `out` must be nonnull.
 raised while rendering an entry. A failure leaves any prefix already
 appended.
 
-Source: `lib/map.x:686`
+Source: `lib/map.x:714`
 
 ## Advanced and interop API
 
@@ -491,7 +491,7 @@ arrays are compared lexicographically. Key and value comparisons use
 **Raises:** `<alloc-fail>` while creating temporary storage, or any cause from
 key or value comparison.
 
-Source: `lib/map.x:565`
+Source: `lib/map.x:591`
 
 <a id="Map.equal"></a>
 #### Map.equal
@@ -509,7 +509,7 @@ compare structurally. Two null handles compare equal; exactly one null
 handle compares unequal. Raises: a cause raised by key hashing, key
 equality, or value equality.
 
-Source: `lib/map.x:667`
+Source: `lib/map.x:695`
 
 <a id="Map.repr"></a>
 #### Map.repr
@@ -531,7 +531,7 @@ allocating a `String`, and are what the two `String` forms materialize.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result, or a cause
 raised while rendering an entry.
 
-Source: `lib/map.x:719`
+Source: `lib/map.x:747`
 
 <a id="Map.str"></a>
 #### Map.str
@@ -547,7 +547,7 @@ bucket order and use their display forms.
 **Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result, or
 a cause raised while rendering an entry.
 
-Source: `lib/map.x:699`
+Source: `lib/map.x:727`
 
 <a id="Map.update_n"></a>
 #### Map.update_n
@@ -563,7 +563,7 @@ not.
 
 **Raises:** the same causes as `Map.set`.
 
-Source: `lib/map.x:418`
+Source: `lib/map.x:436`
 
 <a id="Map.write_repr"></a>
 #### Map.write_repr
@@ -578,7 +578,7 @@ Keys and values use `write_repr`; a null or empty `Map` appends `{  }`.
 raised while rendering an entry. A failure leaves any prefix already
 appended.
 
-Source: `lib/map.x:676`
+Source: `lib/map.x:704`
 
 ## Convenience API
 
@@ -604,7 +604,7 @@ status should be explicit or the output must remain unchanged on absence.
 
 **Raises:** the same causes as `Map.try_del`.
 
-Source: `lib/map.x:405`
+Source: `lib/map.x:423`
 
 <a id="Map.get"></a>
 #### Map.get
@@ -637,7 +637,7 @@ That prints `"found"` for the `List` key and `void` for the `Array` key. An
 **Raises:** `<void-op>` when `key` is `void`, or a cause raised by custom key
 hashing or equality.
 
-Source: `lib/map.x:204`
+Source: `lib/map.x:208`
 
 <a id="Map.getindex"></a>
 #### Map.getindex
@@ -659,7 +659,7 @@ synchronization.
 
 **Raises:** the same causes as `Map.get`.
 
-Source: `lib/map.x:223`
+Source: `lib/map.x:227`
 
 ## Runtime-internal callables
 
@@ -696,7 +696,7 @@ rebuilt `Block`s occurs after the table has replaced the original. A null
 `<size-limit>`, or `<invariant>` while rebuilding, or any cause from
 export, key hashing, or moving the rebuilt `Block`s.
 
-Source: `lib/map.x:464`
+Source: `lib/map.x:484`
 
 <a id="Map.new_capacity"></a>
 #### Map.new_capacity
@@ -711,7 +711,7 @@ two. The public constructor is `Map.new`.
 **Raises:** `<bad-arg>` when `capacity` is not a valid table capacity, or
 `<alloc-fail>` / `<size-limit>` when initial storage cannot be allocated.
 
-Source: `lib/map.x:114`
+Source: `lib/map.x:116`
 
 ## Public types
 
