@@ -1677,7 +1677,7 @@ static List Compiler__publish_protocol_adoption(Compiler c, Type base, Type part
   c -> proto_cache = Map_new();
   if(! c -> shallow) _resolve_declared_adoption(c, base, participant, resolved ? NULL : location);
   List published = _adoption_node(base, participant, storage, representation, tag_expression, location);
-  Compiler__retain_protocol_source_node(c, published, storage, location);
+  Compiler__retain_protocol_source_node(c, published, storage, cons(_45, cons(List_var(base), List_append(location, NULL))));
   return published;
 }
 

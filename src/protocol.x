@@ -497,7 +497,9 @@ static List Compiler._publish_protocol_adoption(
       c, base, participant, resolved ? NULL : location);
   List published = _adoption_node(
     base, participant, storage, representation, tag_expression, location);
-  c._retain_protocol_source_node(published, storage, location);
+  // A generated class declares several adoptions at one location.
+  c._retain_protocol_source_node(
+    published, storage, %(adopt $base @location));
   return published;
 }
 
