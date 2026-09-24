@@ -73,8 +73,9 @@ execution.
   protocols, lifetime certification and native extensions retain their
   separate design and implementation status.
 - [REPL fit, status, and runtime surface](repl-fit-and-runtime-surface.md):
-  terminal UX, live statistics, and REPL-only output are implemented;
-  standard-library and host exposure remain undispatched recommendations. The
+  terminal UX, live statistics, and REPL-only output are implemented, and
+  scalar math is already callable; exposing Json, Diff, and Path text
+  operations (about 20 `.x` lines) awaits Gary's decisions. The
   lexical-scope repair to the literate example shipped in `144a833d`.
 
 ### Open backlog and scoped follow-ups
