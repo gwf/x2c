@@ -1,7 +1,8 @@
-> Status: active
-> Approved September 23, 2026. The retained read-only review is in
+> Status: done
+> Approved and delivered September 23, 2026 as `9b71607f` on `dev`,
+> including the scope strip `30615669`. The retained read-only review is in
 > `.context/post-merge-integration-review-2026-09-23.md` in the campaign
-> workspace. Gary approves publication separately.
+> workspace.
 
 # Post-merge stabilization
 

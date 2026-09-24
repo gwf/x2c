@@ -44,14 +44,13 @@ execution.
 
 ### Current work
 
-- [Post-merge stabilization](post-merge-stabilization-2026-09-23.md):
-  compiler, runtime, package, and tooling repairs are under final review.
-  Fresh-home generated Lisp regeneration passed twice;
-  the [reproducibility record](generated-lisp-reproducibility.md) retains the
-  earlier failure and the repaired result.
 - [Explicit meta calls, lifetimes, and computed values](explicit-meta-and-lifetime-campaign.md):
-  deferred next-phase plan. Implementation awaits stabilization delivery and
-  Gary's resource/scope decision; packed layouts remain unsupported.
+  active. Piece 0 deletes unrequested machinery, then explicit `$` calls,
+  meta lifetimes, computed collections, heap objects, and adoption.
+- [Post-merge stabilization](post-merge-stabilization-2026-09-23.md): done;
+  delivered as `9b71607f`. The
+  [reproducibility record](generated-lisp-reproducibility.md) retains the
+  earlier Lisp regeneration failure and the repaired result.
 
 - [Internal adoption campaign](internal-adoption-campaign.md): ready-now
   macro, managed-lifetime and extensionless-script dogfooding, followed by
