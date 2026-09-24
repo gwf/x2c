@@ -20,8 +20,7 @@
           (call (expr ((func (("Symbol") (...))) "Var") 
                  (ident (binding 4 "Var_new"))) 
            (args (expr ("Symbol") (literal ("Symbol") "<i32>" i32)) 
-            (expr ("MacroDynamicOwner") 
-             (ident (binding 3 "_x2c_macro_value_0"))))))))))
+            (expr ("MacroDynamicOwner") (ident (binding 3 "_x2c_macro_value_0"))))))))))
 
 (function (inline "Var") 
  (bind (binding 5 "MacroDynamicOwner_box") 

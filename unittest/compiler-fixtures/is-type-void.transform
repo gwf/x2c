@@ -95,8 +95,7 @@
                                                       (ident 
                                                        (binding 10 "Var_is_void"))) 
                                                 (args (expr ("Var") 
-                                                       (ident 
-                                                        (binding 4 "bare")))))) 
+                                                       (ident (binding 4 "bare")))))) 
                                               (expr (int) 
                                                (call (expr ((func (("Var"))) int) 
                                                       (ident 

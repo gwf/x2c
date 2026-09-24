@@ -290,8 +290,7 @@
     (bindings 
      (op = (bind (binding 39 "empty") ()) 
       (expr ("Var") 
-       (call (expr ((func (("String"))) "Var") 
-              (ident (binding 40 "String_var"))) 
+       (call (expr ((func (("String"))) "Var") (ident (binding 40 "String_var"))) 
         (args (expr ("String") 
                (cast ("String") (expr () (ident (binding 41 "NULL")))))))))))) 
   (at 111 
