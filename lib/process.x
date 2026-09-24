@@ -22,8 +22,8 @@
 #include "x2c.x"
 
 /** A command or pipeline and the record of its one run.
-    A `$auto` job that is still running when its block exits is terminated
-    and reaped.
+    A job that is still running when its Scope ends, or when its `$auto`
+    block exits, is terminated and reaped.
 */
 class Job struct {
   List stages;
@@ -218,9 +218,13 @@ static void Job._spawn(
 static void Job._start(Job job) {
   _Launch *launch = job.launch;
   job.started = 1;
-  job.count = job.stages.len();
-  job.pids = Scope.calloc(job.count, sizeof(long));
-  job.statuses = Scope.calloc(job.count, sizeof(int));
+  int count = job.stages.len();
+  /* The finalizer reaps through `pids`, and newer blocks in the job's Scope
+     are reclaimed before it runs, so the table lives outside the Scope. */
+  job.pids = calloc(count + 1, sizeof(long) + sizeof(int));
+  if (!job.pids) raise %(alloc-fail);
+  job.statuses = (int *) (job.pids + count + 1);
+  job.count = count;
   // A stage the launch never reaches reports 127.
   for (int i = 0; i < job.count; i++) job.statuses[i] = 127;
   int previous = -1, output = -1, errors = -1, launched = 0;
@@ -292,6 +296,15 @@ static String _captured(File file, int *nul) {
   return text;
 }
 
+static int Job._running(Job job) {
+  int running = 0;
+  for (int i = 0; i < job.count; i++) {
+    if (job.pids[i]) job._reap(i, WNOHANG);
+    if (job.pids[i]) running = 1;
+  }
+  return running;
+}
+
 static void Job._finish(Job job) {
   if (job.finished) return;
   job.finished = 1;
@@ -308,8 +321,26 @@ static String _text(String text, int nul, String operation) {
   return text;
 }
 
+/* Terminates and reaps every running stage without touching capture files,
+   which may already be reclaimed when a finalizer calls this. */
+static void Job._terminate(Job job) {
+  job.kill(SIGTERM);
+  for (int waited = 0; waited < 1000 && job._running(); waited++)
+    usleep(1000);
+  job.kill(SIGKILL);
+  for (int i = 0; i < job.count; i++)
+    if (job.pids[i]) job._reap(i, 0);
+}
+
+static void _drop_job(void *ptr) {
+  Job job = ptr;
+  if (job.started && !job.finished) job._terminate();
+  free(job.pids);
+}
+
 static Job Job.new(List command) {
-  Job job = Scope.calloc(1, sizeof(struct Job));
+  Job job = Scope.malloc_finalized(sizeof(struct Job), _drop_job);
+  memset(job, 0, sizeof(struct Job));
   job.stages = _stages(command);
   job.launch = Scope.calloc(1, sizeof(_Launch));
   job.launch.capture_output = 1;
@@ -495,12 +526,7 @@ String Job.errors(Job job) {
 int Job.ready(Job job) {
   if (!job.started) return 0;
   if (job.finished) return 1;
-  int running = 0;
-  for (int i = 0; i < job.count; i++) {
-    if (job.pids[i]) job._reap(i, WNOHANG);
-    if (job.pids[i]) running = 1;
-  }
-  if (running) return 0;
+  if (job._running()) return 0;
   job._finish();
   return 1;
 }
@@ -516,10 +542,8 @@ void Job.kill(Job job, int signal) {
 */
 void Job.cleanup(Job job) {
   if (!job || !job.started || job.finished) return;
-  job.kill(SIGTERM);
-  for (int waited = 0; waited < 1000 && !job.ready(); waited++) usleep(1000);
-  job.kill(SIGKILL);
-  job.status();
+  job._terminate();
+  job._finish();
 }
 
 /** Removes and returns the first job in `jobs` that has finished, waiting

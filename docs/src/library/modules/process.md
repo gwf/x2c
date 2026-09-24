@@ -37,7 +37,7 @@ Returns the value of this process's environment variable `name`, or
 NULL when it is unset. The `env` option sets variables for a child
 instead.
 
-Source: `lib/process.x:548`
+Source: `lib/process.x:572`
 
 ### `Job`
 
@@ -51,7 +51,7 @@ Returns `job` once its status is zero, starting it and waiting as needed.
 **Raises:** `<cmd-fail>` with `command` and `status` details, plus `output`
 and `errors` when they were captured, or the start causes of `Job.start`.
 
-Source: `lib/process.x:440`
+Source: `lib/process.x:471`
 
 <a id="Job.cleanup"></a>
 #### Job.cleanup
@@ -61,7 +61,7 @@ Source: `lib/process.x:440`
 Terminates and reaps a job that is still running: `SIGTERM`, then
 `SIGKILL` to any stage still running a second later.
 
-Source: `lib/process.x:517`
+Source: `lib/process.x:543`
 
 <a id="Job.errors"></a>
 #### Job.errors
@@ -74,7 +74,7 @@ needed, or NULL when standard error was not captured or was empty.
 **Raises:** the start causes of `Job.start`, or `<bad-arg>` when the captured
 text contains a NUL byte.
 
-Source: `lib/process.x:487`
+Source: `lib/process.x:518`
 
 <a id="Job.kill"></a>
 #### Job.kill
@@ -83,7 +83,7 @@ Source: `lib/process.x:487`
 
 Sends `signal` to every stage of `job` that is still running.
 
-Source: `lib/process.x:509`
+Source: `lib/process.x:535`
 
 <a id="Job.lines"></a>
 #### Job.lines
@@ -95,7 +95,7 @@ endings.
 
 **Raises:** the causes of `Job.output`.
 
-Source: `lib/process.x:480`
+Source: `lib/process.x:511`
 
 <a id="Job.live"></a>
 #### Job.live
@@ -107,7 +107,7 @@ same as `options({stdout: <inherit>})`, and returns it.
 
 **Raises:** `<bad-arg>` for a job that has started.
 
-Source: `lib/process.x:399`
+Source: `lib/process.x:430`
 
 <a id="Job.options"></a>
 #### Job.options
@@ -132,7 +132,7 @@ String root = %(pwd).job().options({dir: "/"}).output();
 
 **Raises:** `<bad-arg>` for an unknown key or a job that has started.
 
-Source: `lib/process.x:358`
+Source: `lib/process.x:389`
 
 <a id="Job.output"></a>
 #### Job.output
@@ -145,7 +145,7 @@ as needed. A live job, or one whose output was empty, returns NULL.
 **Raises:** the causes of `Job.check`, or `<bad-arg>` when the output
 contains a NUL byte.
 
-Source: `lib/process.x:471`
+Source: `lib/process.x:502`
 
 <a id="Job.pipe"></a>
 #### Job.pipe
@@ -158,7 +158,7 @@ stages.
 
 **Raises:** `<bad-arg>` for a job that has started.
 
-Source: `lib/process.x:406`
+Source: `lib/process.x:437`
 
 <a id="Job.ready"></a>
 #### Job.ready
@@ -168,7 +168,7 @@ Source: `lib/process.x:406`
 Reports whether every stage of `job` has exited, without blocking. A job
 that has not started reports 0.
 
-Source: `lib/process.x:495`
+Source: `lib/process.x:526`
 
 <a id="Job.run"></a>
 #### Job.run
@@ -180,7 +180,7 @@ status is not zero: `live()` followed by `check()`.
 
 **Raises:** the causes of `Job.live` and `Job.check`.
 
-Source: `lib/process.x:462`
+Source: `lib/process.x:493`
 
 <a id="Job.start"></a>
 #### Job.start
@@ -194,7 +194,7 @@ returned unchanged.
 `<io-fail>` when a pipe, fork, output file, or other start step fails, or
 `<bad-arg>` for an empty command.
 
-Source: `lib/process.x:418`
+Source: `lib/process.x:449`
 
 <a id="Job.status"></a>
 #### Job.status
@@ -207,7 +207,7 @@ raised reports 127. A status that is not zero is an ordinary result here.
 
 **Raises:** the start causes of `Job.start`.
 
-Source: `lib/process.x:428`
+Source: `lib/process.x:459`
 
 <a id="Job.wait_any"></a>
 #### Job.wait_any
@@ -219,7 +219,7 @@ until one does. An empty `jobs` returns NULL.
 
 **Raises:** `<bad-arg>` when a job in `jobs` has not started.
 
-Source: `lib/process.x:529`
+Source: `lib/process.x:553`
 
 ### `List`
 
@@ -241,7 +241,7 @@ Job job = %(printf "a\nb\n");
 ~}
 ```
 
-Source: `lib/process.x:338`
+Source: `lib/process.x:369`
 
 ## Public types
 
@@ -265,8 +265,8 @@ Source: `lib/process.x:41`
 `class Job struct { List stages; struct _Launch *launch; long *pids; int *statuses; int count, started, finished, status, nul_output, nul_errors; File output_file, errors_file; String output_text, errors_text; } *`
 
 A command or pipeline and the record of its one run.
-A `$auto` job that is still running when its block exits is terminated
-and reaped.
+A job that is still running when its Scope ends, or when its `$auto`
+block exits, is terminated and reaped.
 
 Source: `lib/process.x:28`
 
