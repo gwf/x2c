@@ -43,12 +43,13 @@ file, function or type, exact lines, machinery, actual consumers, smallest
 removal hypothesis, strongest keep case, provenance, confidence, and one next
 proof. Do not put a mechanical hit in the ledger before reading its source.
 
-Before presenting a candidate to Gary, lead with the user-visible or developer-
-visible capability that removal would lose and show one small concrete example.
-Then give the removable machinery and size. If removal intentionally drops a
-working capability and Gary has not said that capability is unwanted, the
-candidate is `open` pending that product decision, never `confirmed` merely
-because it has no current in-tree adopter.
+Admit a live candidate only when it is an inward-facing abstraction without an
+independent current purpose: a mirror, ledger, registry, replay layer,
+reconciliation path, adapter round-trip, or derived state that callers can
+bypass in favor of the real owner while preserving intended behavior. Before
+presenting it, state the behavior that remains and the existing path that will
+provide it. If removal disables a working capability, reject the hit before it
+enters the live table. Low adoption never turns a feature into a candidate.
 
 Use these statuses only: `open`, `confirmed`, `rejected`, `superseded`, and
 `removed`. Deleted historical examples are calibration, never live candidates.
@@ -62,11 +63,18 @@ region; do not preserve an old verdict across changed code without review.
 - Do not penalize a public API for having no repository consumer.
 - Do not treat an intentionally open or documented capability as waste because
   current `src/` and `lib/` do not exercise it.
+- Reject an abstraction that owns a real semantic decision, even when it is
+  large, private, complicated, or reached through only one caller.
 - A test written for machinery is evidence of its behavior, not an independent
   production requirement.
 - Prefer private duplicate facts, replay/reconciliation, registries, ledgers,
   derived state, parallel analysis, and bookkeeping whose deletion removes a
   connected mechanism.
+- Look specifically for layers of delegation: wrappers, routers, dispatchers,
+  adapters, callbacks, or coordinators that only pass the same values to the
+  next layer and own no policy, transformation, lifetime, failure handling, or
+  representation boundary. Count the whole forwarding chain, not each helper
+  as a separate candidate.
 - Separate direct session evidence from inference. Flag review becoming
   implementation, post-hoc plan expansion, and an edge case becoming an
   unbounded completeness obligation.
