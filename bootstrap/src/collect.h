@@ -7,6 +7,8 @@
 
 #include "x2c.h"
 #include "compiler.h"
+void collect_forget_preload_entries(void);
+
 void Compiler_record_generated_symbol(Compiler c, String name, Type signature);
 
 Map Compiler_collect_symbols(Compiler c, Map globs);

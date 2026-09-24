@@ -75,6 +75,8 @@ void Compiler_publish_macro_library(Compiler compiler, Lisp shared);
 
 int Compiler_shared_definition(Compiler compiler, String key);
 
+int macro_library_filling(void);
+
 void macro_library_defer(void);
 
 int macro_library_pending(void);
