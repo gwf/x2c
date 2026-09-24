@@ -1458,8 +1458,11 @@ static List _cast(Compiler compiler, List ast) {
     int unresolved = 0;
     match (expression)
       case %(expr () (ident ?)): unresolved = 1;
+    int target_func = source_type &&
+      compiler.sym.resolve_key(type) === compiler.sym.resolve_key(%("Func"));
     if (type !== %(void) &&
-        (source_var || (target_var && (source_type || unresolved))))
+        (source_var || target_func ||
+         (target_var && (source_type || unresolved))))
       return compiler.convert_expression(expression, type);
     return %(cast $type $expression);
   }
