@@ -45,7 +45,7 @@ check-profile:
 	    exit 1; }
 
 verify-profile: verify-dependency check-profile verify-pins
-	@./verify-archive.sh $(BLIS_PROFILE) "$(BLIS_PREFIX)"
+	@"$(X2C)" script verify-archive $(BLIS_PROFILE) "$(BLIS_PREFIX)"
 
 verify-provenance: verify-profile
 
