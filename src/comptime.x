@@ -2197,7 +2197,7 @@ static Var _lower_coerce(Lowering l, List want, Var node, Var value) {
         _lower_scan_callee(l, name);
         if (l.uncallable)
           return _lower_decline(l, "no binding for " + name);
-        return %(${Atom.intern(_lower_callee_name(l, name))} $value);
+        return %(${Atom.intern(name)} $value);
       }
     }
   return value;
