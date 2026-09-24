@@ -112,7 +112,7 @@ Delete automatic folding:
   shape; update it in the same commit.
 - The `meta_folds` and `meta_impure` maps, their resets and sharing, and the
   `meta_impure` write in `_bind_native_meta`.
-- Fixtures `meta-folding`, `meta-fold-effects`, and the `mt_fold` block in
+- Fixtures `meta-folding` (piece 0 deleted `meta-fold-effects`) and the `mt_fold` block in
   `comptime-lowering`; the fold text in `docs/src/reference/language.md` and
   `docs/src/guide/meta-functions.md`.
 

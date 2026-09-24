@@ -281,46 +281,8 @@ owns, so taking its address and reading or writing through a correctly typed
 pointer has the same aliasing effect as in C. `const` prevents compile-time
 writes.
 
-A function-local `static` also has separate compile-time and program storage:
-
-```x2c
-meta int next(void) {
-  static int value;
-  value += 1;
-  return value;
-}
-
-int main(void) {
-  int first = next(), second = next();
-  printf("compile %d %d; program %d %d\n",
-         $next(), $next(), first, second);
-  return 0;
-}
-```
-
-```text
-compile 1 2; program 1 2
-```
-
-Each consuming translation session owns one typed object per function and
-local binding. The first reach reserves its address and initializes it;
-subsequent calls, loop iterations, recursive calls and forwarding functions
-share it. An untaken branch does not run its initializer. Same-named locals
-in different scopes remain separate. Importing a function into another unit
-starts another compile-time copy, even when the compiler reuses its lowering.
-
-Initialization follows the [local-static rules](../reference/language.md#percent-literals-quote-and-unquote):
-a failed initializer retains its address and external effects, retries with
-zeroed storage, and publishes the whole object only after success. Recursive
-initialization raises `bad-state`. Static storage lasts for the evaluator
-session and does not extend the lifetime of referenced values. `static
-threaded` has no compile-time lowering. Source `try`/`catch` is not yet
-lowered, but a native caller can catch an initializer's Error and retry.
-
-Functions using local statics, including `const` statics, and their callers
-are never automatically folded. Ordinary calls use program storage; explicit
-calls use evaluator storage. The usual compile-time type and operation
-limits still apply to the initializer and the stored object.
+A function-local `static` has no compile-time lowering, so a meta function
+that declares one declines like any other unsupported form.
 
 `meta` marks functions, values and protocol adoptions, not types.
 Compile-time code can use any type the compiler sees: scalars, typedefs,

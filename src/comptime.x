@@ -37,11 +37,10 @@
 typedef struct Lowering {
   Compiler compiler;
   Scope scratch;
-  Map env, locals, cells, arrays, records, callees, cursors, statics;
+  Map env, locals, cells, arrays, records, callees, cursors;
   Map lambda_signatures;
   Array definitions;
   String own;
-  List identity;
   List on_break, on_continue;
   int declined, on_loop, rejected, uncallable, globals, meta_only;
   int session_globals;
@@ -284,10 +283,8 @@ static void _lower_scan_bind(Lowering l, List form) {
   match (form) {
     /* A local C array's slot holds its native element storage. */
     case %(bind (binding ?(int id) ?) ((dim ?size) *)): {
-      if (!l.statics.contains(id)) {
-        l.locals[id] = 1;
-        l.cells[id] = 1;
-      }
+      l.locals[id] = 1;
+      l.cells[id] = 1;
       l.arrays[id] = size;
       return;
     }
@@ -322,27 +319,7 @@ static void _lower_scan_storage_binding(
         l.cells[id] = layout ? layout : 1;
         l.records[id] = record;
       }
-      if (type.is_static()) {
-        if (type.is_threaded()) {
-          (void) _lower_decline(l, "a threaded local static");
-          return;
-        }
-        if (declared.is_array()) {
-          (void) _lower_decline(l, "a static array");
-          return;
-        }
-        Symbol tag = layout ? _lower_pointer_tag(l, layout) : <p48>;
-        if (!layout) {
-          (void) _lower_decline(l, "a static object with no native layout");
-          return;
-        }
-        List name = binding.cadr();
-        Var key = Atom.intern(%"static:${l.identity.repr()}:${name.repr()}");
-        List slot = %($key $layout $tag);
-        l.statics[id] = slot;
-        l.locals[id] = l.cells[id] = layout;
-        l.env[id] = %(C.saddress (quote $slot));
-      }
+      if (type.is_static()) (void) _lower_decline(l, "a local static");
     }
 }
 
@@ -2176,12 +2153,6 @@ static Var _lower_declarator(
     case %(op = (!set ?bound (bind (binding ?(int id) ?) *)) ?init): {
       Type declared = %(declare $type (bindings $bound))
         .type_from_ast().declared();
-      if (l.statics.contains(id)) {
-        Var value = _lower_initializer(l, declared, id, init);
-        if (_lower_failed(l, value)) return void;
-        return _lower_effect(l,
-          %(C.sinit (quote ${l.statics[id]}) (lambda () $value)), rest, k);
-      }
       /* A record in a loop's storage is initialized where it is. */
       if (l.records.contains(id) && l.env.contains(id)) {
         Var into = _lower_address(l, id);
@@ -2206,9 +2177,6 @@ static Var _lower_declarator(
     case %(!set ?bound (bind (binding ?(int id) ?) *)): {
       Type declared = %(declare $type (bindings $bound))
         .type_from_ast().declared();
-      if (l.statics.contains(id))
-        return _lower_effect(l,
-          %(C.sinit (quote ${l.statics[id]}) nil), rest, k);
       Var initial;
       int filled = l.cells.contains(id) && l.env.contains(id);
       if (l.arrays.contains(id)) initial = _lower_braced(l, declared, id, %());
@@ -2632,7 +2600,6 @@ static List _lower_function(
     .env = _lower_scratch_map(scratch), .locals = _lower_scratch_map(scratch),
     .cells = _lower_scratch_map(scratch), .arrays = _lower_scratch_map(scratch),
     .records = _lower_scratch_map(scratch),
-    .statics = _lower_scratch_map(scratch),
     .lambda_signatures = _lower_scratch_map(scratch),
     .callees = _lower_scratch_map(scratch), .cursors = _lower_scratch_map(scratch),
     .definitions = [],
@@ -2646,13 +2613,12 @@ static List _lower_function(
   lower_reached_meta = 0;
   match (fn) {
     case %(function ?spec
-           (bind (!set ?identity (binding ? ?(String name)))
+           (bind (binding ? ?(String name))
                  ((fnmod (params *params)) *)) (block *items)): {
       (void) spec;
       lower_declined_reason = NULL;
       lower_session_callees = NULL;
       l.own = name;
-      l.identity = identity;
       _lower_scan(l, fn);
       _lower_scan_nested_writes(l, fn, 0);
       /* The scan records its own wording for a construct refused by
@@ -2910,7 +2876,7 @@ Var Compiler.lower_meta_initializer(
   struct Lowering state = {
     .compiler = c, .env = {}, .locals = {}, .cells = {},
     .arrays = {}, .records = {}, .callees = {}, .cursors = {},
-    .statics = {}, .lambda_signatures = {},
+    .lambda_signatures = {},
     .definitions = []
   };
   lower_declined_reason = NULL;
@@ -2931,7 +2897,7 @@ Var Compiler.lower_meta_expression(Compiler c, List expression) {
   struct Lowering state = {
     .compiler = c, .env = {}, .locals = {}, .cells = {},
     .arrays = {}, .records = {}, .callees = {}, .cursors = {},
-    .statics = {}, .lambda_signatures = {},
+    .lambda_signatures = {},
     .definitions = []
   };
   lower_declined_reason = NULL;

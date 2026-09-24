@@ -424,7 +424,6 @@ struct Lisp {
      value the parent reaches, because a child's values belong to a
      narrower Context than the parent's. */
   int frozen;
-  Map statics;          // function and binding identity -> native static slot
   Map globals;          // global bindings, Lisp name -> value
   Map reserved;         // reserved special forms, Lisp name -> <func> Var
   Func specials[LISP_SPECIAL_COUNT];
@@ -722,7 +721,6 @@ Lisp Lisp.kernel(void) {
   lisp.frozen = 0;
   lisp.call_step_max = LISP_CALL_STEP_MAX;
   $scope(&lisp.scope) {
-    lisp.statics = {};
     lisp.globals = {};
     lisp.reserved = {};
     _install_specials(lisp);
@@ -1226,48 +1224,6 @@ Var lisp_source_function(Var callable) {
   return callable;
 }
 
-/* Static bytes belong to the consuming session, even when a callable comes
-   from its frozen parent. Evaluation is serialized by the Lisp contract. */
-
-static X2CStatic *_lisp_static_slot(List description) {
-  Var (key, layout, ignored_tag) = description;
-  (void) ignored_tag;
-  Map slots = lisp_active.statics;
-  Var found;
-  if (slots.try_get(key, &found)) return found.pointer();
-  X2CStatic *slot = Scope.calloc_in(
-    &lisp_active.scope, 1, sizeof(X2CStatic));
-  /* Supplying session-owned bytes keeps this guard off the native process
-     and thread shutdown chains. Supported layouts fit Scope alignment. */
-  slot.payload = Scope.calloc_in(
-    &lisp_active.scope, 1, layout.list()[2].long_long());
-  slots[key] = Var.new(<p48>, slot);
-  return slot;
-}
-
-/** Reserves the stable, zeroed native address of a session-local static. */
-Var lisp_static_address(List description) =>
-  Var.new(description[2], _lisp_static_slot(description).payload);
-
-/** Initializes a session-local static once. A failed attempt keeps its
-    address and external effects; the next attempt starts with zero bytes.
-    Recursive initialization raises `bad-state`. */
-Var lisp_static_initialize(List description, Var initializer) {
-  X2CStatic *slot = _lisp_static_slot(description);
-  List layout = description[1];
-  Var address = Var.new(description[2], slot.payload);
-  if (x2c_static_acquire(
-    slot, layout[2].ulong(), layout[3].ulong(), 0)) {
-    defer x2c_static_abort(slot);
-    if (!initializer.is_nil()) {
-      Var value = _apply_values(lisp_active, initializer, NULL, NULL);
-      lisp_poke(address, 0, layout, value);
-    }
-    x2c_static_commit(slot);
-  }
-  return address;
-}
-
 /* Plain Lisp passes each output as an evaluator cell, so these status
    bindings publish a native output into the cell only after the operation
    succeeds. Lowered source passes C objects and calls the natives directly. */
@@ -1583,8 +1539,6 @@ $(def lisp.native.target.rows (append '(
   (Var_is_void)
   (lisp_cell)
   (lisp_source_function)
-  (lisp_static_address)
-  (lisp_static_initialize)
   (lisp_func_new)
   (lisp_func_arguments)
   (lisp_func_value)

@@ -30,8 +30,6 @@ The Lisp runtime: reader, session, and evaluator.
 | [`lisp_record_result`](#lisp_record_result) | Copies a returned record into its caller's automatic storage before the returning frame ends. |
 | [`lisp_session_copy`](#lisp_session_copy) | Copies a record into bytes the session owns, for file-scope state. |
 | [`lisp_source_function`](#lisp_source_function) | Marks the actual Lambda installed for one lowered source function. |
-| [`lisp_static_address`](#lisp_static_address) | Reserves the stable, zeroed native address of a session-local static. |
-| [`lisp_static_initialize`](#lisp_static_initialize) | Initializes a session-local static once. |
 | [`lisp_store`](#lisp_store) | Stores `value` in an evaluator cell and returns it. |
 | [`lisp_string_lstrip`](#lisp_string_lstrip) | Trims leading bytes, accepting the same charset values as `strip`. |
 | [`lisp_string_rstrip`](#lisp_string_rstrip) | Trims trailing bytes, accepting the same charset values as `strip`. |
@@ -63,7 +61,7 @@ The Lisp runtime: reader, session, and evaluator.
 
 Retags an evaluator value at a declared pointer or Symbol crossing.
 
-Source: `lib/lisp.x:1099`
+Source: `lib/lisp.x:1097`
 
 #### lisp_array
 
@@ -72,7 +70,7 @@ Source: `lib/lisp.x:1099`
 Builds a local C array in live native storage, shared by indexing and
 references to its elements. Initializer values already have element type.
 
-Source: `lib/lisp.x:1210`
+Source: `lib/lisp.x:1208`
 
 #### lisp_at
 
@@ -80,7 +78,7 @@ Source: `lib/lisp.x:1210`
 
 Returns `base` advanced by `offset` bytes, tagged as `tag`.
 
-Source: `lib/lisp.x:1127`
+Source: `lib/lisp.x:1125`
 
 #### lisp_box
 
@@ -88,7 +86,7 @@ Source: `lib/lisp.x:1127`
 
 Boxes a source value at the compiler-selected native Var tag.
 
-Source: `lib/lisp.x:1168`
+Source: `lib/lisp.x:1166`
 
 #### lisp_bytes
 
@@ -96,7 +94,7 @@ Source: `lib/lisp.x:1168`
 
 Allocates `size` zeroed bytes of lowered automatic storage.
 
-Source: `lib/lisp.x:1123`
+Source: `lib/lisp.x:1121`
 
 #### lisp_car
 
@@ -105,7 +103,7 @@ Source: `lib/lisp.x:1123`
 Returns the first element of `value`, or `void` when it is `nil`.
 A nonlist operand raises `<bad-types>`.
 
-Source: `lib/lisp.x:832`
+Source: `lib/lisp.x:830`
 
 #### lisp_cdr
 
@@ -114,7 +112,7 @@ Source: `lib/lisp.x:832`
 Returns the tail of `value`, or `nil` when it is `nil`.
 A nonlist operand raises `<bad-types>`.
 
-Source: `lib/lisp.x:841`
+Source: `lib/lisp.x:839`
 
 #### lisp_cell
 
@@ -122,7 +120,7 @@ Source: `lib/lisp.x:841`
 
 Allocates one evaluator-owned raw `Var` slot initialized to `value`.
 
-Source: `lib/lisp.x:1093`
+Source: `lib/lisp.x:1091`
 
 #### lisp_copy
 
@@ -130,7 +128,7 @@ Source: `lib/lisp.x:1093`
 
 Copies `size` bytes from `source` to `destination`; returns the latter.
 
-Source: `lib/lisp.x:1137`
+Source: `lib/lisp.x:1135`
 
 #### lisp_func_arguments
 
@@ -138,7 +136,7 @@ Source: `lib/lisp.x:1137`
 
 Allocates the borrowed carriers for one lowered dynamic call.
 
-Source: `lib/lisp.x:1371`
+Source: `lib/lisp.x:1327`
 
 #### lisp_func_invalid
 
@@ -146,7 +144,7 @@ Source: `lib/lisp.x:1371`
 
 Uses the native rejection for an unrepresentable value argument.
 
-Source: `lib/lisp.x:1391`
+Source: `lib/lisp.x:1347`
 
 #### lisp_func_new
 
@@ -154,7 +152,7 @@ Source: `lib/lisp.x:1391`
 
 Constructs a signature-bearing Func for one lowered source callable.
 
-Source: `lib/lisp.x:1364`
+Source: `lib/lisp.x:1320`
 
 #### lisp_func_reference
 
@@ -163,7 +161,7 @@ Source: `lib/lisp.x:1364`
 Prepares an address without loading the caller's object. A non-lvalue
 supplies zero, which the ordinary reference reader rejects.
 
-Source: `lib/lisp.x:1382`
+Source: `lib/lisp.x:1338`
 
 #### lisp_func_value
 
@@ -171,7 +169,7 @@ Source: `lib/lisp.x:1382`
 
 Prepares one value without excluding the terminal void value.
 
-Source: `lib/lisp.x:1375`
+Source: `lib/lisp.x:1331`
 
 #### lisp_load
 
@@ -179,7 +177,7 @@ Source: `lib/lisp.x:1375`
 
 Returns the raw value currently held in an evaluator cell.
 
-Source: `lib/lisp.x:1104`
+Source: `lib/lisp.x:1102`
 
 #### lisp_match_replace
 
@@ -190,7 +188,7 @@ Returns the instantiated `template` when `input` matches `pat`.
 loses a scalar result. Lisp sees the replacement itself. A miss, malformed
 pattern, cache pressure, or machine error returns `input` unchanged.
 
-Source: `lib/lisp.x:1053`
+Source: `lib/lisp.x:1051`
 
 #### lisp_peek
 
@@ -200,7 +198,7 @@ Reads the object of compiler layout `layout` at `offset` bytes past
 `pointer`. A record reads as its own address, which is how lowered source
 carries record values.
 
-Source: `lib/lisp.x:1178`
+Source: `lib/lisp.x:1176`
 
 #### lisp_poke
 
@@ -209,7 +207,7 @@ Source: `lib/lisp.x:1178`
 Writes `value`, already converted to the layout's type, at `offset`
 bytes past `pointer`.
 
-Source: `lib/lisp.x:1194`
+Source: `lib/lisp.x:1192`
 
 #### lisp_record_result
 
@@ -218,7 +216,7 @@ Source: `lib/lisp.x:1194`
 Copies a returned record into its caller's automatic storage before the
 returning frame ends.
 
-Source: `lib/lisp.x:1144`
+Source: `lib/lisp.x:1142`
 
 #### lisp_session_copy
 
@@ -226,7 +224,7 @@ Source: `lib/lisp.x:1144`
 
 Copies a record into bytes the session owns, for file-scope state.
 
-Source: `lib/lisp.x:1151`
+Source: `lib/lisp.x:1149`
 
 #### lisp_source_function
 
@@ -234,25 +232,7 @@ Source: `lib/lisp.x:1151`
 
 Marks the actual Lambda installed for one lowered source function.
 
-Source: `lib/lisp.x:1221`
-
-#### lisp_static_address
-
-`Var lisp_static_address(List description)`
-
-Reserves the stable, zeroed native address of a session-local static.
-
-Source: `lib/lisp.x:1249`
-
-#### lisp_static_initialize
-
-`Var lisp_static_initialize(List description, Var initializer)`
-
-Initializes a session-local static once. A failed attempt keeps its
-address and external effects; the next attempt starts with zero bytes.
-Recursive initialization raises `bad-state`.
-
-Source: `lib/lisp.x:1255`
+Source: `lib/lisp.x:1219`
 
 #### lisp_store
 
@@ -260,7 +240,7 @@ Source: `lib/lisp.x:1255`
 
 Stores `value` in an evaluator cell and returns it.
 
-Source: `lib/lisp.x:1106`
+Source: `lib/lisp.x:1104`
 
 #### lisp_string_lstrip
 
@@ -268,7 +248,7 @@ Source: `lib/lisp.x:1106`
 
 Trims leading bytes, accepting the same charset values as `strip`.
 
-Source: `lib/lisp.x:1041`
+Source: `lib/lisp.x:1039`
 
 #### lisp_string_rstrip
 
@@ -276,7 +256,7 @@ Source: `lib/lisp.x:1041`
 
 Trims trailing bytes, accepting the same charset values as `strip`.
 
-Source: `lib/lisp.x:1045`
+Source: `lib/lisp.x:1043`
 
 #### lisp_string_strip
 
@@ -284,7 +264,7 @@ Source: `lib/lisp.x:1045`
 
 Trims the bytes in `chars`, using whitespace for an empty String.
 
-Source: `lib/lisp.x:1037`
+Source: `lib/lisp.x:1035`
 
 #### lisp_truth
 
@@ -292,7 +272,7 @@ Source: `lib/lisp.x:1037`
 
 Returns Lisp true for every value except nil and `void`.
 
-Source: `lib/lisp.x:818`
+Source: `lib/lisp.x:816`
 
 #### lisp_void
 
@@ -300,7 +280,7 @@ Source: `lib/lisp.x:818`
 
 Returns the `void` sentinel to the evaluator.
 
-Source: `lib/lisp.x:1090`
+Source: `lib/lisp.x:1088`
 
 #### lisp_zero
 
@@ -308,7 +288,7 @@ Source: `lib/lisp.x:1090`
 
 Zeroes `size` bytes at `destination` and returns it.
 
-Source: `lib/lisp.x:1131`
+Source: `lib/lisp.x:1129`
 
 #### native_scalar_access
 
@@ -339,7 +319,7 @@ freezes it with `Lisp.freeze` before the first child runs: a child's
 values belong to a narrower `Context` than the parent's, so nothing a
 child produces may become reachable from the parent.
 
-Source: `lib/lisp.x:766`
+Source: `lib/lisp.x:764`
 
 <a id="Lisp.apply"></a>
 #### Lisp.apply
@@ -359,7 +339,7 @@ values keep their existing owners. The caller retains responsibility for
 evaluator-only callable, `<bad-arity>` or `<bad-types>` at the call
 boundary, or a cause raised by the called procedure.
 
-Source: `lib/lisp.x:3227`
+Source: `lib/lisp.x:3181`
 
 <a id="Lisp.auto_prepare"></a>
 #### Lisp.auto_prepare
@@ -376,7 +356,7 @@ A lambda a global holds indirectly, inside a `List` or a `Map` value, is
 not reached: the globals a library defines are the callables a child
 resolves by name, and those are what a shared program guards against.
 
-Source: `lib/lisp.x:3090`
+Source: `lib/lisp.x:3044`
 
 <a id="Lisp.bind"></a>
 #### Lisp.bind
@@ -392,7 +372,7 @@ the pointer while the session lives. Values inside the `Func`, including
 its
 signature graph, retain their existing owners.
 
-Source: `lib/lisp.x:3327`
+Source: `lib/lisp.x:3281`
 
 <a id="Lisp.call_budget"></a>
 #### Lisp.call_budget
@@ -409,7 +389,7 @@ The budget belongs to the public entry. `Lisp.eval`, `Lisp.apply`, and
 `Lisp.eval_string` each open one, and a call that runs it out does not
 renew it, so one entry reports a runaway once however many calls follow.
 
-Source: `lib/lisp.x:3065`
+Source: `lib/lisp.x:3019`
 
 <a id="Lisp.eval"></a>
 #### Lisp.eval
@@ -423,7 +403,7 @@ ownership rule. Effects completed before a later failure are not rolled
 back. Raises: `<bad-arg>` for a null session, or any evaluator, imported
 operation, or called-procedure cause.
 
-Source: `lib/lisp.x:3209`
+Source: `lib/lisp.x:3163`
 
 <a id="Lisp.eval_file"></a>
 #### Lisp.eval_file
@@ -442,7 +422,7 @@ has been consumed.
 `<size-limit>`, or `<alloc-fail>` while reading, or any cause from
 `Lisp.eval_string`.
 
-Source: `lib/lisp.x:3267`
+Source: `lib/lisp.x:3221`
 
 <a id="Lisp.eval_string"></a>
 #### Lisp.eval_string
@@ -457,7 +437,7 @@ completed before a later reader or evaluator failure remain installed.
 **Raises:** `<bad-arg>` for a null session, `<incomplete>` or `<malformed>`
 while reading, or any cause from `Lisp.eval`.
 
-Source: `lib/lisp.x:3240`
+Source: `lib/lisp.x:3194`
 
 <a id="Lisp.freeze"></a>
 #### Lisp.freeze
@@ -472,7 +452,7 @@ current would leave a frozen session holding values that die with that
 unit. After this, `Lisp.auto_prepare` is the only way a lambda this
 session owns gains a program.
 
-Source: `lib/lisp.x:782`
+Source: `lib/lisp.x:780`
 
 <a id="Lisp.kernel"></a>
 #### Lisp.kernel
@@ -488,7 +468,7 @@ aborts the process.
 **Raises:** `<alloc-fail>` or `<size-limit>` while creating session storage, or
 `<bad-enc>` while interning shared or special-form names.
 
-Source: `lib/lisp.x:708`
+Source: `lib/lisp.x:707`
 
 <a id="Lisp.new"></a>
 #### Lisp.new
@@ -501,7 +481,7 @@ If standard-source evaluation transfers, no handle is returned and the
 constructed session remains allocated.
 Raises any cause from `Lisp.kernel` or `Lisp.eval_string`.
 
-Source: `lib/lisp.x:739`
+Source: `lib/lisp.x:737`
 
 <a id="Lisp.reslot"></a>
 #### Lisp.reslot
@@ -539,7 +519,7 @@ output, or an absent name returns 0 and leaves `out` unchanged. Raises
 `<alloc-fail>` or `<bad-enc>` when a nonempty lookup name cannot be
 canonicalized.
 
-Source: `lib/lisp.x:3289`
+Source: `lib/lisp.x:3243`
 
 ## Advanced and interop API
 
@@ -587,7 +567,7 @@ Forces calls through the recursive evaluator when `disabled` is nonzero.
 Re-enabling AUTO preserves published programs, thresholds, statistics, and
 the instrumentation pointer.
 
-Source: `lib/lisp.x:3076`
+Source: `lib/lisp.x:3030`
 
 <a id="Lisp.auto_instrument"></a>
 #### Lisp.auto_instrument
@@ -599,7 +579,7 @@ Selects optional detailed machine statistics for later AUTO executions.
 `stats` is borrowed, retained without initialization, and updated in place;
 it must outlive every evaluation until replaced or cleared with NULL.
 
-Source: `lib/lisp.x:3051`
+Source: `lib/lisp.x:3005`
 
 <a id="Lisp.auto_stats"></a>
 #### Lisp.auto_stats
@@ -610,7 +590,7 @@ Returns the current cumulative automatic-evaluator statistics for `lisp`.
 `lisp` must be a live session. The returned structure is a value snapshot
 and does not reset any counter.
 
-Source: `lib/lisp.x:3044`
+Source: `lib/lisp.x:2998`
 
 <a id="Lisp.cleanup"></a>
 #### Lisp.cleanup
@@ -619,7 +599,7 @@ Source: `lib/lisp.x:3044`
 
 Ends the owned lifetime when a managed local leaves its block.
 
-Source: `lib/lisp.x:3335`
+Source: `lib/lisp.x:3289`
 
 <a id="Lisp.destroy"></a>
 #### Lisp.destroy
@@ -632,7 +612,7 @@ prepared programs, and machine slots. Borrowed values are not released. A
 null session does nothing; no evaluation or machine call may remain active.
 Destroying its still-active `Scope` raises `<bad-state>`.
 
-Source: `lib/lisp.x:751`
+Source: `lib/lisp.x:749`
 
 <a id="Lisp.enter"></a>
 #### Lisp.enter
@@ -704,7 +684,7 @@ reader names; afterward `lisp` is not consulted and may be null.
 reader syntax, or `<alloc-fail>`, `<size-limit>`, or `<bad-enc>` while
 tokenizing, constructing, interning, or boxing the form.
 
-Source: `lib/lisp.x:800`
+Source: `lib/lisp.x:798`
 
 <a id="Lisp.resolve"></a>
 #### Lisp.resolve
@@ -753,7 +733,7 @@ may replace such a binding.
 **Raises:** `<bad-arg>` for a null session or name, or `<alloc-fail>`,
 `<size-limit>`, or `<bad-enc>` while canonicalizing or storing the binding.
 
-Source: `lib/lisp.x:3302`
+Source: `lib/lisp.x:3256`
 
 ## Runtime-internal callables
 
@@ -801,7 +781,7 @@ for source readers but are not supported as user API.
 
 Concatenates when either operand is `String`, otherwise adds dynamically.
 
-Source: `lib/lisp.x:918`
+Source: `lib/lisp.x:916`
 
 #### lisp_atom
 
@@ -809,7 +789,7 @@ Source: `lib/lisp.x:918`
 
 Returns Lisp true unless `value` is a nonempty `List`.
 
-Source: `lib/lisp.x:823`
+Source: `lib/lisp.x:821`
 
 #### lisp_compare
 
@@ -819,7 +799,7 @@ Compares Lisp numbers by value and returns a boxed negative, zero, or
 positive. Integer and floating encodings of one number compare equal.
 A nonnumeric operand raises `<bad-types>`.
 
-Source: `lib/lisp.x:906`
+Source: `lib/lisp.x:904`
 
 #### lisp_divide
 
@@ -828,7 +808,7 @@ Source: `lib/lisp.x:906`
 Divides the first value by each later one; one value reciprocates it.
 An empty input raises `<bad-arity>`.
 
-Source: `lib/lisp.x:960`
+Source: `lib/lisp.x:958`
 
 #### lisp_eq
 
@@ -836,7 +816,7 @@ Source: `lib/lisp.x:960`
 
 Returns Lisp true when `a` and `b` are equal by `Var.equal`.
 
-Source: `lib/lisp.x:848`
+Source: `lib/lisp.x:846`
 
 #### lisp_eq_chain
 
@@ -846,7 +826,7 @@ Reports whether every neighbouring pair of numbers compares equal.
 Fewer than two values raise `<bad-arity>`; a nonnumber raises
 `<bad-types>`.
 
-Source: `lib/lisp.x:990`
+Source: `lib/lisp.x:988`
 
 #### lisp_ge_chain
 
@@ -856,7 +836,7 @@ Reports whether two or more numbers never increase.
 Fewer than two values raise `<bad-arity>`; a nonnumber raises
 `<bad-types>`.
 
-Source: `lib/lisp.x:1014`
+Source: `lib/lisp.x:1012`
 
 #### lisp_gt_chain
 
@@ -866,7 +846,7 @@ Reports whether two or more numbers strictly decrease.
 Fewer than two values raise `<bad-arity>`; a nonnumber raises
 `<bad-types>`.
 
-Source: `lib/lisp.x:1008`
+Source: `lib/lisp.x:1006`
 
 #### lisp_le_chain
 
@@ -876,7 +856,7 @@ Reports whether two or more numbers never decrease.
 Fewer than two values raise `<bad-arity>`; a nonnumber raises
 `<bad-types>`.
 
-Source: `lib/lisp.x:1002`
+Source: `lib/lisp.x:1000`
 
 #### lisp_list
 
@@ -884,7 +864,7 @@ Source: `lib/lisp.x:1002`
 
 Returns Lisp true when `value` is `List`-typed, including `nil`.
 
-Source: `lib/lisp.x:854`
+Source: `lib/lisp.x:852`
 
 #### lisp_lt_chain
 
@@ -894,7 +874,7 @@ Reports whether two or more numbers strictly increase.
 Fewer than two values raise `<bad-arity>`; a nonnumber raises
 `<bad-types>`.
 
-Source: `lib/lisp.x:996`
+Source: `lib/lisp.x:994`
 
 #### lisp_minus
 
@@ -903,7 +883,7 @@ Source: `lib/lisp.x:996`
 Subtracts each later value from the first; one value negates it.
 An empty input raises `<bad-arity>`.
 
-Source: `lib/lisp.x:939`
+Source: `lib/lisp.x:937`
 
 #### lisp_number
 
@@ -911,7 +891,7 @@ Source: `lib/lisp.x:939`
 
 Returns Lisp true when `value` has an integer or floating kind.
 
-Source: `lib/lisp.x:862`
+Source: `lib/lisp.x:860`
 
 #### lisp_pair
 
@@ -919,7 +899,7 @@ Source: `lib/lisp.x:862`
 
 Returns Lisp true when `value` is a nonempty `List`.
 
-Source: `lib/lisp.x:851`
+Source: `lib/lisp.x:849`
 
 #### lisp_plus
 
@@ -927,7 +907,7 @@ Source: `lib/lisp.x:851`
 
 Adds or concatenates every value left to right; no values gives 0.
 
-Source: `lib/lisp.x:929`
+Source: `lib/lisp.x:927`
 
 #### lisp_procedure
 
@@ -935,7 +915,7 @@ Source: `lib/lisp.x:929`
 
 Returns Lisp true when `value` is a native function or Lambda.
 
-Source: `lib/lisp.x:871`
+Source: `lib/lisp.x:869`
 
 #### lisp_read_file
 
@@ -946,7 +926,7 @@ contents.
 Raises the open, read, size, or allocation cause reported by `File`. An
 opened stream is still closed on transfer.
 
-Source: `lib/lisp.x:1064`
+Source: `lib/lisp.x:1062`
 
 #### lisp_repr
 
@@ -954,7 +934,7 @@ Source: `lib/lisp.x:1064`
 
 Boxes the readable representation of `value`.
 
-Source: `lib/lisp.x:1020`
+Source: `lib/lisp.x:1018`
 
 #### lisp_str
 
@@ -962,7 +942,7 @@ Source: `lib/lisp.x:1020`
 
 Boxes the display `String` of `value`.
 
-Source: `lib/lisp.x:1017`
+Source: `lib/lisp.x:1015`
 
 #### lisp_string
 
@@ -970,7 +950,7 @@ Source: `lib/lisp.x:1017`
 
 Returns Lisp true when `value` is a `String`.
 
-Source: `lib/lisp.x:865`
+Source: `lib/lisp.x:863`
 
 #### lisp_string_append
 
@@ -978,7 +958,7 @@ Source: `lib/lisp.x:865`
 
 Returns the boxed concatenation of `left` and `right`.
 
-Source: `lib/lisp.x:1023`
+Source: `lib/lisp.x:1021`
 
 #### lisp_string_downcase
 
@@ -986,7 +966,7 @@ Source: `lib/lisp.x:1023`
 
 Returns a boxed lower-case copy of `string`.
 
-Source: `lib/lisp.x:1030`
+Source: `lib/lisp.x:1028`
 
 #### lisp_substring
 
@@ -994,7 +974,7 @@ Source: `lib/lisp.x:1030`
 
 Returns the boxed unit-step slice `string[start:stop]`.
 
-Source: `lib/lisp.x:1026`
+Source: `lib/lisp.x:1024`
 
 #### lisp_symbol
 
@@ -1002,7 +982,7 @@ Source: `lib/lisp.x:1026`
 
 Returns Lisp true when `value` has `Symbol` kind.
 
-Source: `lib/lisp.x:868`
+Source: `lib/lisp.x:866`
 
 #### lisp_times
 
@@ -1010,7 +990,7 @@ Source: `lib/lisp.x:868`
 
 Multiplies every value; no values gives 1.
 
-Source: `lib/lisp.x:951`
+Source: `lib/lisp.x:949`
 
 #### lisp_type
 
@@ -1018,7 +998,7 @@ Source: `lib/lisp.x:951`
 
 Returns the runtime tag of `value`.
 
-Source: `lib/lisp.x:914`
+Source: `lib/lisp.x:912`
 
 #### lisp_write_file
 
@@ -1031,7 +1011,7 @@ atomic.
 An open failure transfers its `File` cause. `Null` text writes an empty
 file.
 
-Source: `lib/lisp.x:1073`
+Source: `lib/lisp.x:1071`
 
 ### `Lisp`
 
