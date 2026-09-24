@@ -212,7 +212,7 @@ probes still copy their prelude by hand.
 | --- | --- | --- |
 | `tools/gen-module-catalog.py` | 134 | delivered 2026-09-24 with `gen-api-reference.py`; see `tools/x2c-script-ports.md` |
 | `tools/gate-state.py` | 390 | mode bits, uuid; see the ruling |
-| `tools/repo-metrics.py` | 373 | delivered 2026-09-24; see `tools/x2c-script-ports.md` |
+| `tools/repo-metrics.py` | 373 | not ported: it stays in Python so the Pages site build does not need to build the compiler (Gary, 2026-09-24). The 2026-09-24 port was reverted. |
 | `unittest/compiler-fixtures/run.sh`, `examples/check.sh` | 314, 257 | `Diff.unified`; the awk manifest parsing is `String.split` |
 | `run-package-install.sh`, `run-preprocessor-boundary.sh`, `run-symbol-snapshot.sh`, `run-raw-symbol-sweep.sh`, `run-varops-fatal.sh`, `run-expression-bodied-functions.sh` | 87-237 | the probe module; `wait_any` replaces `xargs -P`; the last one's Python AST comparison is already `compare-ast` |
 | `run-protocol-boundaries.sh`, `run-header-cache.sh`, `run-cli-boundary.sh` | 536-1344 | the probe module; volume, and nine inline Python snippets in the CLI probe |

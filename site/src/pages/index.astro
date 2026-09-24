@@ -37,7 +37,7 @@ import {
 const base = import.meta.env.BASE_URL;
 const local = (path: string) => `${base}${path.replace(/^\/+/, "")}`;
 const statistics = JSON.parse(execFileSync(
-  "builds/0/x2c", ["script", "tools/repo-metrics", "--summary-json"],
+  "python3", ["tools/repo-metrics.py", "--summary-json"],
   { cwd: import.meta.env.X2C_REPOSITORY_ROOT, encoding: "utf8" }
 ));
 const number = (value: number) => value.toLocaleString("en-US");

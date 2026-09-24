@@ -36,7 +36,7 @@ consumers share one compiler surface:
 | `tools/x2c_symbols.py` | 538 | `.xi` rows / projection |
 | `tools/gen-api-reference.py` | 1,251 | script |
 | `tools/gen-module-catalog.py` | 134 | script |
-| `tools/repo-metrics.py` | 387 | script |
+| `tools/repo-metrics.py` | 387 | kept in Python; see Progress |
 | `tools/audit-source-bloat.py` | 860 | lint structural rules |
 | `clean-x2c-source/scripts/` (`source_style.py`, test, `audit-source.sh`) | ~790 | lint token rules |
 | `find-comment-slop/scripts/` (analyzer + test) | 767 | lint comment rules |
@@ -269,8 +269,8 @@ remain compiler bugs for `fix-x2c-bug`, not rules.
    definitions, and module prose. The `.xi` writer calls the same walk.
    Probe: the new output lists every definition `x2c_source.py` finds on
    `src/` and `lib/`, diffed as name and line sets.
-2. Port `gen-api-reference`, `gen-module-catalog`, and `repo-metrics` to
-   scripts over the projection. Generated docs must be byte-identical.
+2. Port `gen-api-reference` and `gen-module-catalog` to scripts over the
+   projection. `repo-metrics.py` stays in Python; see Progress. Generated docs must be byte-identical.
    Delete `x2c_source.py`'s doc paths and `x2c_symbols.py`. This completes
    C09.
 3. `tools/x2c-lint` engine and token rules, built from the compiler
@@ -355,6 +355,13 @@ are gone, because pages and compiler now read the same walk. Each
 generator's check went from about 3.1-3.6 s on one core to about 2 s, using
 about 15 s of processor time across cores. The Pages workflow builds the
 compiler, because the landing page runs `tools/repo-metrics`.
+
+**Decision, 2026-09-24: `repo-metrics` stays in Python.** Gary judged the
+port a mistake: it made the Pages workflow build the compiler only to count
+lines for the landing page. `tools/repo-metrics.py` is restored, every
+caller runs it again, the Pages workflow no longer builds the compiler, and
+the x2c script is deleted. Its six output modes matched the script byte for
+byte on the same tree. Do not port it again.
 
 **Phase 3, 2026-09-24.** `tools/x2c-lint` is an indentation-syntax tool of
 1,017 lines that links `builds/0/libx2c-dev.a` and the embedded identity

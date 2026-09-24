@@ -201,7 +201,7 @@ help:							## Show grouped Make targets
 	@python3 -c "$$PRINT_HELP_PYSCRIPT" < $(firstword $(MAKEFILE_LIST))
 
 stats:							## Show repository statistics
-	@$(STAGE0_X2C) script tools/repo-metrics --summary --color="$(STATS_COLOR)"
+	@python3 tools/repo-metrics.py --summary --color="$(STATS_COLOR)"
 
 ##@ Build and stages
 build-install: build					## Install this compiler in bin
