@@ -707,6 +707,8 @@ void Lisp_destroy(Lisp);
 
 void Compiler_publish_macro_library(Compiler, Lisp);
 
+void collect_forget_preload_entries(void);
+
 int Frontend_preload_macro_libraries(Frontend frontend){
   if(! _init_guard_) _file_init_();
   Compiler compiler = Compiler_new();
@@ -714,9 +716,11 @@ int Frontend_preload_macro_libraries(Frontend frontend){
   if(shared && ! _preload_meta_surface(frontend, shared)){
     Lisp_destroy(shared);
     Compiler_publish_macro_library(compiler, NULL);
+    collect_forget_preload_entries();
     return 0;
   }
   Compiler_publish_macro_library(compiler, shared);
+  collect_forget_preload_entries();
   return 1;
 }
 

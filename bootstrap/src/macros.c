@@ -3210,6 +3210,11 @@ int Compiler_shared_definition(Compiler compiler, String key){
   return known;
 }
 
+int macro_library_filling(void){
+  if(! _init_guard_) _file_init_();
+  return library_filling;
+}
+
 void macro_library_defer(void){
   if(! _init_guard_) _file_init_();
   library_restartable = 1;
@@ -3230,7 +3235,7 @@ void Lisp_adopt(Lisp, Lisp);
 
 static void _ensure_lisp(Compiler compiler){
   if(macro_library_pending() && ! library_filling){
-    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_ensure_lisp",.line = 1273};
+    static const X2CErrorSite _x2c_error_site_4 = {.file = "../../src/macros.x",.function = "_ensure_lisp",.line = 1277};
     x2c_error_raise_n(& _x2c_error_site_4, 27048696089866, 0);
   }
   {
@@ -4173,7 +4178,7 @@ static Var _evaluate_meta_value(Compiler c, List expression, Token site){
                                 x2c_exception_mark_handled(&_x2c_exception_frame_7);
                                 if (_x2c_catch_selected_7 == 0) {Var category = x2c_error_catch_capture(_x2c_error_handler_7, 0);
                                 {
-                                  static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2020};
+                                  static const X2CErrorSite _x2c_error_site_5 = {.file = "../../src/macros.x",.function = "_evaluate_meta_value",.line = 2024};
                                   x2c_error_raise_n(& _x2c_error_site_5, 28682226919752, 1, Symbol_var(209659067570), category);
                                   __builtin_unreachable();
                                 }
